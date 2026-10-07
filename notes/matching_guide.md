@@ -46,3 +46,8 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
   ensambla con ASPSX 2.86 (`/opt/psyq/46/BIN/ASPSX.EXE`, via wine) que si emite `addiu`; cc1/cpp siguen siendo los de 2.7.2.
   `ASPSX_WINE=0` vuelve al ensamblador DOS. Los .C se compilan con el mismo cc1, solo cambia el ensamblado.
 - Muchos "FUN_" pequeños en Ghidra son fragmentos (epilogos `lw $ra; addiu $sp; jr $ra`) o `j` a otra funcion: no hay C que los genere.
+- Algunas funciones solo coinciden con `// FLAGS -O1 -G0` (p.ej. ObjListPush_1F800228: con -O2 el scheduler sube los lhu/lw).
+  Si ves loads de globales (lui+lw) tras los stores en el original, prueba -O1.
+- Para elegir el sentido de un `beqz` prueba a invertir `if/else` (el bloque fallthrough es el del `if`).
+- Funciones sin frame que acaban con `jr $ra; addiu $sp` (delay slot relleno) tras varios `lw`: no he conseguido reproducirlo
+  (el epilogo sale `addu sp; j; nop`); ejemplo en src/wip/FUN_80069410.c.

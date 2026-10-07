@@ -81,6 +81,7 @@ def obj_text(path):
 def mask(code, relocs):
     c = bytearray(code)
     for off, ty in relocs:
+        if off + 4 > len(c): continue
         w = struct.unpack("<I", c[off:off + 4])[0]
         w &= 0xFC000000 if ty == 0x4A else 0xFFFF0000
         c[off:off + 4] = struct.pack("<I", w)
