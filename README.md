@@ -8,7 +8,7 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 - Tu propia copia del juego (no se incluye en el repo).
 
 ## Flujo de trabajo
-1. Extrae el ejecutable principal del disco (raíz, p. ej. `SCUS_944.37`) a `game/`.
+1. Extrae el ejecutable principal del disco (raíz; en la versión PAL española es `SCES_013.31`, ver `notes/disc_layout.md`) a `game/`.
 2. Crea un proyecto Ghidra en `ghidra/project/` e importa el PS-X EXE
    (loader *Sony PlayStation PS-X Executable*, MIPS R3000 LE).
 3. Ejecuta el análisis automático y guarda tus hallazgos en `notes/`.
@@ -21,3 +21,8 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 - `notes/` – mapas de memoria, nombres de funciones, estructuras
 - `docs/` – documentación
 - `tools/` – utilidades auxiliares
+
+## Herramientas
+- `tools/psxexe_info.py <exe>` – muestra PC, GP, dirección de carga y tamaño de la cabecera PS-X EXE.
+- `ghidra/scripts/ExportFunctions.py` – exporta las funciones a CSV (menú *Tools → Tombi*).
+- `ghidra/scripts/ImportNames.py` – aplica nombres de funciones desde un CSV `address,name`.
