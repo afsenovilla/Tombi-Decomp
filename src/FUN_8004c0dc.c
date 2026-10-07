@@ -1,4 +1,5 @@
 // FUNC 8004c0dc 148 MAIN0
+// MATCHING 8004c0dc 148
 extern int DAT_1f800198;
 extern unsigned char DAT_800a6268[];
 extern void (*PTR_8007bf34[])(unsigned char *);
