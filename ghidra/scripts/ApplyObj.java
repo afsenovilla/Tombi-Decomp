@@ -7,7 +7,10 @@ import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileResults;
 import ghidra.program.model.data.*;
 import ghidra.program.model.listing.Function;
-import ghidra.program.model.listing.Parameter;
+import ghidra.program.model.pcode.HighFunction;
+import ghidra.program.model.pcode.HighFunctionDBUtil;
+import ghidra.program.model.pcode.HighSymbol;
+import ghidra.program.model.pcode.LocalSymbolMap;
 import ghidra.program.model.symbol.SourceType;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,18 +71,22 @@ public class ApplyObj extends GhidraScript {
 
         Set<Integer> known = new HashSet<Integer>();
         for (int k : KNOWN) known.add(k);
-        Pattern pAdd = Pattern.compile("param_1 \\+ (0x[0-9a-f]+|\\d+)\\)");
-        Pattern pIdx = Pattern.compile("param_1\\[(0x[0-9a-f]+|\\d+)\\]");
 
         DecompInterface di = new DecompInterface();
         di.openProgram(currentProgram);
         int done = 0, tried = 0;
         for (Function fn : currentProgram.getFunctionManager().getFunctions(true)) {
             monitor.checkCancelled();
-            if (fn.getParameterCount() < 1) continue;
-            Parameter p = fn.getParameter(0);
-            DataType dt = p.getDataType();
-            if (dt.getLength() != 4 || "TObj *".equals(dt.getName())) continue;
+            DecompileResults r = di.decompileFunction(fn, 30, monitor);
+            if (r == null || !r.decompileCompleted()) continue;
+            HighFunction hf = r.getHighFunction();
+            if (hf == null) continue;
+            LocalSymbolMap lsm = hf.getLocalSymbolMap();
+            if (lsm.getNumParams() < 1) continue;
+            HighSymbol ps = lsm.getParamSymbol(0);
+            if (ps == null) continue;
+            DataType dt = ps.getDataType();
+            if (dt == null || dt.getLength() != 4 || "TObj *".equals(dt.getName())) continue;
             int unit = 1;
             if (dt instanceof Pointer) {
                 DataType base = ((Pointer) dt).getDataType();
@@ -87,11 +94,10 @@ public class ApplyObj extends GhidraScript {
                 unit = base.getLength();
             }
             tried++;
-            DecompileResults r = di.decompileFunction(fn, 30, monitor);
-            if (r == null || !r.decompileCompleted()) continue;
             String c = r.getDecompiledFunction().getC();
-            if (tried <= 3) println("DEBUG " + fn.getName() + " tipo=" + dt.getName() + " len=" + c.length()
-                + " :: " + c.substring(0, Math.min(300, c.length())).replace("\n", " "));
+            String pn = Pattern.quote(ps.getName());
+            Pattern pAdd = Pattern.compile(pn + " \\+ (0x[0-9a-f]+|\\d+)\\)");
+            Pattern pIdx = Pattern.compile(pn + "\\[(0x[0-9a-f]+|\\d+)\\]");
             Set<Integer> hits = new HashSet<Integer>();
             Matcher m = pAdd.matcher(c);
             while (m.find()) {
@@ -103,10 +109,9 @@ public class ApplyObj extends GhidraScript {
                 int off = Integer.decode(m.group(1)) * unit;
                 if (known.contains(off)) hits.add(off);
             }
-            if (hits.size() > 0) println("HIT " + fn.getName() + " " + hits.size());
             if (hits.size() >= 3) {
                 try {
-                    p.setDataType(objPtr, SourceType.USER_DEFINED);
+                    HighFunctionDBUtil.updateDBVariable(ps, null, objPtr, SourceType.USER_DEFINED);
                     done++;
                 } catch (Exception e) {
                     println("No se pudo en " + fn.getName() + ": " + e.getMessage());
