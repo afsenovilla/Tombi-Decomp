@@ -235,7 +235,7 @@ def main():
     w("## Como se mide\n")
     w("- Unidad: bytes de codigo por funcion (el tamano que da Ghidra).")
     w("- *Nombrada*: esta en `notes/names_*.csv` y no es de libreria. *Tipada*: su primer parametro es `TObj *`.")
-    w("- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; hoy `src/` no existe,")
+    w("- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; verificado con `tools/matchcheck.py`,")
     w("  asi que es 0 %. Todavia no hay toolchain para recompilar y comparar con el original.")
     w("- Las cifras de tipado salen del ultimo export de Ghidra (`notes/functions_*.csv`) y pueden ir por detras.")
     open(N("docs", "PROGRESS.md"), "w").write("\n".join(out) + "\n")

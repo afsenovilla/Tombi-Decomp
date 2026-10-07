@@ -4,6 +4,7 @@
 <text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Actualizado 2026-10-07 &#183; unidad: bytes de c&#243;digo de juego (sin librer&#237;a Psy-Q)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Matching (C que recompila igual)</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
+<rect x="330" y="98" width="4.0" height="18" rx="9" fill="#16a34a"/>
 <text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">0.0 %</text>
 <text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Funciones con nombre propio</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
@@ -27,8 +28,9 @@
 <rect x="849.9" y="302" width="0.1" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 40 bytes</title></rect>
 <text x="858" y="317" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">291 KB</text>
 <text x="28" y="350" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">TOTAL</text>
-<rect x="330.0" y="336" width="7.6" height="22" fill="#22c55e"><title>Nombrada por nosotros: 9172 bytes</title></rect>
-<rect x="337.6" y="336" width="330.9" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 397860 bytes</title></rect>
+<rect x="330.0" y="336" width="0.1" height="22" fill="#16a34a"><title>Matching en C: 144 bytes</title></rect>
+<rect x="330.1" y="336" width="7.6" height="22" fill="#22c55e"><title>Nombrada por nosotros: 9172 bytes</title></rect>
+<rect x="337.7" y="336" width="330.8" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 397860 bytes</title></rect>
 <rect x="668.5" y="336" width="99.2" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 119252 bytes</title></rect>
 <rect x="767.7" y="336" width="82.3" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 98992 bytes</title></rect>
 <text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">610 KB</text>

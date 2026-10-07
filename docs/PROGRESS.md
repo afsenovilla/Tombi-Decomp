@@ -6,7 +6,7 @@ _Generado con `python tools/progress.py` (2026-10-07). No editar a mano._
 
 | Nivel | Progreso | Bytes | Funciones |
 |---|---|---|---|
-| **C que coincide byte a byte (matching)** | **0.0 %** `[........................]` | 0 / 526284 | 0 |
+| **C que coincide byte a byte (matching)** | **0.0 %** `[........................]` | 144 / 526284 | 0 |
 | Nombradas por nosotros | 1.7 % `[........................]` | 9172 / 526284 | 57 / 1044 |
 | Con la estructura TObj aplicada (cobertura, no es avance de C) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
 
@@ -53,6 +53,6 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 
 - Unidad: bytes de codigo por funcion (el tamano que da Ghidra).
 - *Nombrada*: esta en `notes/names_*.csv` y no es de libreria. *Tipada*: su primer parametro es `TObj *`.
-- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; hoy `src/` no existe,
+- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; verificado con `tools/matchcheck.py`,
   asi que es 0 %. Todavia no hay toolchain para recompilar y comparar con el original.
 - Las cifras de tipado salen del ultimo export de Ghidra (`notes/functions_*.csv`) y pueden ir por detras.
