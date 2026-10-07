@@ -24,5 +24,5 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 
 ## Herramientas
 - `tools/psxexe_info.py <exe>` – muestra PC, GP, dirección de carga y tamaño de la cabecera PS-X EXE.
-- `ghidra/scripts/ExportFunctions.py` – exporta las funciones a CSV (menú *Tools → Tombi*).
-- `ghidra/scripts/ImportNames.py` – aplica nombres de funciones desde un CSV `address,name`.
+- `ghidra/scripts/ExportC.java` – exporta el decompilado de las funciones `FUN_` a un `.c` (Script Manager, Java).
+- `ghidra/scripts/ImportNames.java` – aplica nombres desde `notes/names_main0.csv`.

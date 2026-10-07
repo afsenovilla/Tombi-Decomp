@@ -1,0 +1,22 @@
+address,name,confidence,comment
+80016a44,GsSetOrign,alta,Psy-Q (sugerido por Ghidra)
+8005b9c4,EnterCriticalSection,alta,Psy-Q
+8005b9d4,ExitCriticalSection,alta,Psy-Q
+8005ba64,GetGp,alta,Psy-Q
+8005d274,InitCARD,alta,Psy-Q
+8005d2c8,StartCARD,alta,Psy-Q
+80063fdc,SetGeomOffset,alta,Psy-Q
+80063ffc,SetGeomScreen,alta,Psy-Q
+800672d0,StUnSetRing,alta,Psy-Q
+80067658,StSetMask,alta,Psy-Q
+80068f7c,SetVideoMode,alta,Psy-Q
+80071738,_SsVmDamperOff,alta,Psy-Q
+80071748,_SsVmDamperOn,alta,Psy-Q
+800745a8,SsSetAutoKeyOffMode,alta,Psy-Q
+800758d0,SpuQuit,alta,Psy-Q
+800773c0,_spu_setInTransfer,alta,Psy-Q
+800773ec,_spu_getInTransfer,alta,Psy-Q
+8001fdac,MulSinScaled,alta,tabla 8007A1F0 = -2867*sin(2*pi*i/256); resultado = tabla[i]*v*16>>16
+8001fddc,MulCos,alta,tabla 8007A5F0 = 4096*cos(2*pi*i/256); resultado = tabla[i]*v*16>>16
+8001fe6c,AnimLoadDuration,media,param+0x2c = duracion del fotograma actual (&0x3fff)
+8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
