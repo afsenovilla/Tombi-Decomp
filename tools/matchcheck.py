@@ -17,6 +17,8 @@ import os, re, shutil, struct, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PSYQ = os.environ.get("PSYQ_DIR", "/opt/psyq/new")
 WORK = os.environ.get("WORK", "/opt/psyq/w")
+_aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
+ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
 WINE_AS = os.environ.get("ASPSX_WINE")  # p.ej. /opt/psyq/46/BIN/ASPSX.EXE
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
@@ -121,6 +123,11 @@ def main():
         for n, f, h in jobs:
             subprocess.run(["wine", WINE_AS, "-q", "F%d.S" % n, "-o", "F%d.OBJ" % n], cwd=WORK,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+    if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emite addiu para `li` (la 2.34 emite ori)
+        wenv = dict(os.environ, WINEDEBUG="-all")
+        for n, f, h in jobs:
+            subprocess.run(["wine", ASPSX_WINE, "-q", "F%d.S" % n, "-o", "F%d.OBJ" % n], cwd=WORK, env=wenv,
+                           timeout=300, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     ok = bad = 0
     for n, f, (addr, size, prog, _) in jobs:
         name = os.path.basename(f)

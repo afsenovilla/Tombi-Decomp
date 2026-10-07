@@ -40,3 +40,9 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
   Con esto coinciden ademas MulCos/MulNegSin/ObjApplyVelocity. Usalo SIEMPRE.
 - Llamadas con `extern void f();` sin prototipo o con prototipo dan el mismo codigo; declara los argumentos reales si hay >4 (los extra van a `0x10($sp)`).
 - Funciones "FUN_" que empiezan sin prologo y usan `$s0` sin cargarlo son fragmentos mal cortados por Ghidra: no son matcheables, saltalas.
+
+## Aprendido
+- `li` con constante positiva: ASPSX 2.34 (DOSBox) emite `ori`, pero el juego tiene `addiu $x,$zero,N`. matchcheck.py ahora
+  ensambla con ASPSX 2.86 (`/opt/psyq/46/BIN/ASPSX.EXE`, via wine) que si emite `addiu`; cc1/cpp siguen siendo los de 2.7.2.
+  `ASPSX_WINE=0` vuelve al ensamblador DOS. Los .C se compilan con el mismo cc1, solo cambia el ensamblado.
+- Muchos "FUN_" pequeños en Ghidra son fragmentos (epilogos `lw $ra; addiu $sp; jr $ra`) o `j` a otra funcion: no hay C que los genere.
