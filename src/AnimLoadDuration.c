@@ -1,4 +1,5 @@
 // FUNC 8001fe6c 28 MAIN0
+// MATCHING 8001fe6c 28
 typedef struct { char p0[6]; unsigned short v; } AnimHdr;
 typedef struct { char p0[0x24]; AnimHdr *a; char p1[4]; short dur; } TAnim;
 

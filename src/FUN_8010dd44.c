@@ -1,4 +1,5 @@
 // FUNC 8010dd44 72 X000
+// MATCHING 8010dd44 72
 typedef struct { char p0[5]; char b5; char b6; char p1[0x69-7]; char b69; char p2[0x9c-0x6a]; char b9c; char p3[0xac-0x9d]; char bac; } TO;
 extern void fa(TO *o, int a, int b);
 
