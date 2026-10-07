@@ -6,5 +6,5 @@ extern E *DAT_80077b7c[];
 typedef struct S { char pad[0x32]; unsigned short v; } S;
 void FUN_80021aec(S *o)
 {
-    o->v = DAT_80077b7c[DAT_80099960][DAT_80099962].v;
+unsigned a = DAT_80099960, b = DAT_80099962; o->v = DAT_80077b7c[a][b].v;
 }

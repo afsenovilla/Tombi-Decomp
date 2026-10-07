@@ -1,18 +1,14 @@
 // FUNC 80018ca4 76 MAIN0
-extern struct {
-    char p0[0x220];
-    int *list;
-    char p1[0x24a - 0x224];
-    short cnt;
-} SCR;
+extern int *SCR_220;
+extern short SCR_24A;
 
 void ObjListPush_1F800220(int a)
 {
-    int n = SCR.cnt;
+    int n = SCR_24A;
     if (n < 0x56) {
-        int *p = SCR.list;
-        SCR.list = p - 1;
+        int *p = SCR_220;
+        SCR_220 = p - 1;
         p[-1] = a;
-        SCR.cnt = n + 1;
+        SCR_24A = n + 1;
     }
 }

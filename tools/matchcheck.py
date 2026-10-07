@@ -19,7 +19,6 @@ PSYQ = os.environ.get("PSYQ_DIR", "/opt/psyq/new")
 WORK = os.environ.get("WORK", "/opt/psyq/w")
 _aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
 ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
-WINE_AS = os.environ.get("ASPSX_WINE")  # p.ej. /opt/psyq/46/BIN/ASPSX.EXE
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
 RAW_BASE = {"X000": 0x800E8028}
@@ -114,15 +113,11 @@ def main():
         flags = h[3]
         bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
                 r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n),
-                ] + ([] if WINE_AS else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
+                ] + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
     open(WORK + "/run.conf", "w").write("[sdl]\nfullscreen=false\n[cpu]\ncycles=max\n[autoexec]\n" + "\n".join(bat) + "\nexit\n")
     env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
     subprocess.run(["dosbox", "-conf", WORK + "/run.conf", "-noconsole"], env=env, timeout=600,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    if WINE_AS:  # ensamblador alternativo (ASPSX 2.86 de Psy-Q 4.6 via wine): usa addiu para li
-        for n, f, h in jobs:
-            subprocess.run(["wine", WINE_AS, "-q", "F%d.S" % n, "-o", "F%d.OBJ" % n], cwd=WORK,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
     if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emite addiu para `li` (la 2.34 emite ori)
         wenv = dict(os.environ, WINEDEBUG="-all")
         for n, f, h in jobs:
