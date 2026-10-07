@@ -23,3 +23,6 @@ ghidra/project/*
 # Varios
 .DS_Store
 __pycache__/
+
+# Decompilado crudo de Ghidra (derivado del juego): se queda local
+*_decomp.c
