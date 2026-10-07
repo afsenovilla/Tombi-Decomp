@@ -29,3 +29,10 @@ Las funciones reciben un puntero `obj` y acceden por desplazamiento. Campos vist
 variable de scratchpad `1F8001C8`. Es decir, el juego (2.5D) puede intercambiar el eje X y el Z
 de todos los objetos con un solo bit. Por eso 1F8001C8 es una orientacion de camara/nivel y
 no un contador de frames como supuse al principio.
+
+## Puntero global del jugador (8009C330) y 8009C338
+Varias funciones de X000 y de las 3 maquinas de estados grandes de MAIN0
+(800317C0, 8003566C, 80033B44) leen `_DAT_8009C330` y `_DAT_8009C338`. En
+`PlayerSetAnimIfChanged` (800EEB5C) usan +0x2C/+0x2E de ese objeto como "id de animacion
+actual / anterior", **distinto** del uso de +0x2C/+0x2E en TObj (temporizador/fotograma). Es probable
+que sea otra estructura (estado del jugador) y no un TObj.

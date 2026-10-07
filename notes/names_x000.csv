@@ -1,0 +1,6 @@
+address,name,confidence,comment
+800eeb5c,PlayerSetAnimIfChanged,media,usa el objeto global 8009C330 (jugador?): si cambia el id (+2C) recarga el script de animacion
+800efc04,ObjSetAnimFromTable,media,copia una tabla de 90 punteros (800E8404) y pone obj+0x24 = tabla[id de anim del jugador]
+80127214,AnimAdvanceWithBox,media,como AnimAdvance pero ademas carga la caja de colision (box0..) desde una tabla
+8010f0f4,ObjGravityStep,media,velY += valor de tabla (80115468, 10 shorts por modo) y limita al maximo
+800ee680,ObjMotionStep,media,llama a las rutinas de fisica, suma velX a la posicion horizontal y aplica ObjAddVelY7E
