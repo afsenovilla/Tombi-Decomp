@@ -1,0 +1,25 @@
+# Material con copyright: aporta tu propia copia, no se sube al repo
+game/*
+!game/.gitkeep
+*.iso
+*.bin
+*.cue
+*.img
+*.exe
+*.EXE
+SCUS_*
+SCPS_*
+SLUS_*
+SLPS_*
+
+# Proyectos de Ghidra (se regeneran; exporta lo importante a notes/)
+ghidra/project/*
+!ghidra/project/.gitkeep
+*.gpr
+*.rep/
+*.lock
+*.lock~
+
+# Varios
+.DS_Store
+__pycache__/
