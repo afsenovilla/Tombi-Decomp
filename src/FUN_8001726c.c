@@ -1,4 +1,5 @@
 // FUNC 8001726c 80 MAIN0
+// MATCHING 8001726c 80
 extern void EnterCriticalSection(void);
 extern void CloseTh(int);
 extern void ExitCriticalSection(void);

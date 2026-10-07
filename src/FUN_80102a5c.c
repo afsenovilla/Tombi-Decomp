@@ -1,4 +1,5 @@
 // FUNC 80102a5c 100 X000
+// MATCHING 80102a5c 100
 typedef struct O { char p0[0x12]; short x; char p1[2]; short y; char p2[2]; short z; char p3[4]; short t; } O;
 extern char *DAT_8009d2e8;
 extern void FUN_800eeb5c(O *, int);

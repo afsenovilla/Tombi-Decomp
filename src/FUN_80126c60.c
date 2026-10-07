@@ -1,4 +1,5 @@
 // FUNC 80126c60 68 X000
+// MATCHING 80126c60 68
 extern short FUN_800482ec(void);
 void FUN_80126c60(int a, char *p)
 {
