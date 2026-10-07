@@ -7,9 +7,7 @@ char *FUN_800184d8(void)
 {
     char *o;
     char st = 4;
-    if (SCR_238 < 1) {
-        o = 0;
-    } else {
+    if (SCR_238 > 0) {
         SCR_238--;
         o = (char *)*SCR_208++;
         o[0x1c] = st;
@@ -20,6 +18,8 @@ char *FUN_800184d8(void)
             *(char **)(o + 0x44) = o + 0x10;
             *(char **)(o + 0x40) = o + 0x18;
         }
+    } else {
+        o = 0;
     }
     return o;
 }

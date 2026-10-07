@@ -34,7 +34,7 @@ void FUN_80102eb4(O *o)
     p = DAT_8009d2e8;
     o->velX = 0;
     o->velY = 0;
-    p->animFrame = o->animFrame & 1;
+    *(unsigned short *)((char *)p + 0x2e) = o->animFrame & 1;
     o->h->w = p->h->w;
     p->y = o->y + o->wba;
     FUN_800ee4e0(o, 0);

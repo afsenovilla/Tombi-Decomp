@@ -1,4 +1,5 @@
 // FUNC 801031fc 148 X000
+// MATCHING 801031fc 148
 typedef struct H { short pad; unsigned short w; } H;
 typedef struct O {
     char pad0[6];
