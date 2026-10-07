@@ -1,4 +1,5 @@
 // FUNC 800212b4 140 MAIN0
+// MATCHING 800212b4 140
 extern int GetGraphType(void);
 extern void g(int a, int b, int c, int d, int e);
 
