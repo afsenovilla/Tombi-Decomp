@@ -1,4 +1,5 @@
 // FUNC 8001fd48 48 MAIN0
+// MATCHING 8001fd48 48
 typedef struct TObj {
     char pad0[0x14];
     int y;

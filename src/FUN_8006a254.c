@@ -1,4 +1,5 @@
 // FUNC 8006a254 12 MAIN0
+// MATCHING 8006a254 12
 void FUN_8006a254(char *p, int a, char b)
 {
     *(int *)(p + 0x28) = a;
