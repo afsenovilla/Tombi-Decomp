@@ -1,4 +1,5 @@
 // FUNC 8002b8cc 84 MAIN0
+// MATCHING 8002b8cc 84
 extern int DAT_8009c954;
 extern char *ObjAlloc(void);
 
