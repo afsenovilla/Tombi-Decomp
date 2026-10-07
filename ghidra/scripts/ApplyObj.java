@@ -90,6 +90,8 @@ public class ApplyObj extends GhidraScript {
             DecompileResults r = di.decompileFunction(fn, 30, monitor);
             if (r == null || !r.decompileCompleted()) continue;
             String c = r.getDecompiledFunction().getC();
+            if (tried <= 3) println("DEBUG " + fn.getName() + " tipo=" + dt.getName() + " len=" + c.length()
+                + " :: " + c.substring(0, Math.min(300, c.length())).replace("\n", " "));
             Set<Integer> hits = new HashSet<Integer>();
             Matcher m = pAdd.matcher(c);
             while (m.find()) {
@@ -101,6 +103,7 @@ public class ApplyObj extends GhidraScript {
                 int off = Integer.decode(m.group(1)) * unit;
                 if (known.contains(off)) hits.add(off);
             }
+            if (hits.size() > 0) println("HIT " + fn.getName() + " " + hits.size());
             if (hits.size() >= 3) {
                 try {
                     p.setDataType(objPtr, SourceType.USER_DEFINED);
