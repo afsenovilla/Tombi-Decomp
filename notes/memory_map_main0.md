@@ -15,8 +15,10 @@ bloques de hardware (1F800000+) y `GTEMAC` (20000000, macros GTE).
 ## Funciones (notes/functions_main0.csv)
 - 1.822 en total. 153 son macros GTE en `20000000-20000263` (no son codigo del juego).
 - 1.343 estan dentro de `.text`: 881 con nombre (librerias Psy-Q) y 462 `FUN_` sin nombre.
-- 326 `FUN_` estan en `800E8214-80134E60`: RAM sin contenido, fuera del EXE.
-  Son falsos positivos de Ghidra; ignorarlos (ni siquiera tienen bytes).
+- 326 `FUN_` estan en `800E8214-80134E60`: RAM sin contenido en el EXE. **No son falsos
+  positivos**: son codigo de **overlay** que el juego carga de disco en tiempo de ejecucion.
+  43 funciones de MAIN0 llaman a 218 destinos distintos de esa zona. Habra que identificar
+  que archivo del disco se carga ahi (candidatos: `X000.BIN`... en `AREAxx`).
 - El codigo del juego por descompilar son esas 462 funciones (~208 KB).
 
 ## Relacion con la comparacion entre MAINx

@@ -20,3 +20,17 @@ address,name,confidence,comment
 8001fddc,MulCos,alta,tabla 8007A5F0 = 4096*cos(2*pi*i/256); resultado = tabla[i]*v*16>>16
 8001fe6c,AnimLoadDuration,media,param+0x2c = duracion del fotograma actual (&0x3fff)
 8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
+80016984,FlipFrame,alta,doble buffer: PutDispEnv/PutDrawEnv/DrawOTag/ClearOTagR
+80018448,ObjAlloc,alta,saca un objeto del pool (lista en scratchpad 1F800208; contador 1F800238)
+80017088,ThreadTableRun,media,recorre tabla de hilos en 801FD800 (0x38 bytes c/u): estado 2/3 -> OpenTh/ChangeTh
+800171b8,ThreadCreate,media,ThreadCreate(slot; funcion) rellena la tabla de hilos y hace OpenTh
+8001d4b0,MovieDecodeFrame,alta,StGetNext + DecDCTvlc + StFreeRing (video FMV)
+8001dbdc,SoundUpdate,alta,por frame: cola de comandos de sonido + fundidos de musica
+8001e430,SoundFindFreeVoice,media,busca voz libre entre las 16..23 del SPU
+8001e4f0,SfxPlay,media,reserva voz y lanza efecto de sonido (id&0x3ff); devuelve voz o -1
+8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
+8001f4bc,SoundStopAll,alta,para secuencias y apaga todas las voces
+8001f6b4,SoundInit,alta,SsStart + SpuSetCommonAttr + reserva de voces
+80019084,MemCardInit,alta,OpenEvent/EnableEvent de tarjeta + _bu_init
+80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
+800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
