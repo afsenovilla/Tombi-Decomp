@@ -51,3 +51,7 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
 - Para elegir el sentido de un `beqz` prueba a invertir `if/else` (el bloque fallthrough es el del `if`).
 - Funciones sin frame que acaban con `jr $ra; addiu $sp` (delay slot relleno) tras varios `lw`: no he conseguido reproducirlo
   (el epilogo sale `addu sp; j; nop`); ejemplo en src/wip/FUN_80069410.c.
+- El orden de las sentencias en C cambia la asignacion de registros s0..s3 (prioridad por orden de uso), aunque el scheduler luego
+  reordene los stores: si los s-regs salen permutados, mueve el store del parametro "perdido" al principio (FUN_80020d20).
+- Constantes `char` negativas (p.ej. `li $v0,-30` para un `sb`): escribe `*(signed char *)&o->campo = -30;` (con campo unsigned sale `li 0xe2`).
+- Cuando el original lee `byte b = TABLA[idx]` ANTES de `o->state++`, escribelo asi (variable temporal) para que no cambie el orden de loads.
