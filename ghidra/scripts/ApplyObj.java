@@ -1,6 +1,5 @@
-// Define la estructura TObj (objeto del juego) y la aplica como tipo del primer parametro
-// de las funciones cuyo decompilado accede a >=3 campos conocidos de objeto.
-// Ejecutar una vez en MAIN0.EXE y otra en X000.BIN.
+// Aplica la estructura TObj (definida con DefineObj) como tipo del primer parametro de las
+// funciones cuyo decompilado accede a >=3 campos conocidos. Ejecutar en MAIN0.EXE y X000.BIN.
 // @category Tombi
 import ghidra.app.script.GhidraScript;
 import ghidra.app.decompiler.DecompInterface;
@@ -27,51 +26,15 @@ public class ApplyObj extends GhidraScript {
         0xa0, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xaa, 0xac, 0xae, 0xb0, 0xb2, 0xb4, 0xb6, 0xb8,
         0xba, 0xbc, 0xbe, 0xbf};
 
-    private void put(StructureDataType s, int off, DataType dt, String name) {
-        s.replaceAtOffset(off, dt, dt.getLength(), name, null);
-    }
-
     @Override
     protected void run() throws Exception {
         println("Programa: " + currentProgram.getName());
         DataTypeManager dtm = currentProgram.getDataTypeManager();
-
-        StructureDataType parts = new StructureDataType("FixParts", 0);
-        parts.add(UnsignedShortDataType.dataType, "frac", null);
-        parts.add(ShortDataType.dataType, "whole", null);
-        UnionDataType fix = new UnionDataType("Fix16");
-        fix.add(IntegerDataType.dataType, "raw", null);
-        fix.add(parts, "p", null);
-        DataType fixDt = dtm.resolve(fix, DataTypeConflictHandler.REPLACE_HANDLER);
-        DataType fixPtr = new PointerDataType(fixDt, dtm);
-
-        StructureDataType o = new StructureDataType("TObj", 0xC0);
-        DataType u8 = UnsignedCharDataType.dataType;
-        DataType u16 = UnsignedShortDataType.dataType;
-        DataType s16 = ShortDataType.dataType;
-        put(o, 0x00, u8, "active");
-        put(o, 0x01, u8, "visible");
-        put(o, 0x02, u8, "type");
-        put(o, 0x03, u8, "subtype");
-        put(o, 0x06, u8, "state");
-        put(o, 0x10, fixDt, "a");
-        put(o, 0x14, fixDt, "y");
-        put(o, 0x18, fixDt, "b");
-        put(o, 0x1c, u8, "category");
-        put(o, 0x24, new PointerDataType(DataType.DEFAULT, dtm), "anim");
-        put(o, 0x28, new PointerDataType(DataType.DEFAULT, dtm), "movetab");
-        put(o, 0x2c, u16, "animTimer");
-        put(o, 0x2e, u16, "animFrame");
-        put(o, 0x40, fixPtr, "h");
-        put(o, 0x44, fixPtr, "d");
-        put(o, 0x6c, s16, "box0");
-        put(o, 0x6e, s16, "box1");
-        put(o, 0x70, s16, "box2");
-        put(o, 0x72, s16, "box3");
-        put(o, 0x7e, s16, "velY");
-        put(o, 0x80, s16, "velH");
-        put(o, 0x82, s16, "velV");
-        DataType objDt = dtm.resolve(o, DataTypeConflictHandler.REPLACE_HANDLER);
+        DataType objDt = dtm.getDataType("/TObj");
+        if (objDt == null) {
+            println("No existe TObj: ejecuta antes DefineObj en este programa");
+            return;
+        }
         DataType objPtr = new PointerDataType(objDt, dtm);
 
         Set<Integer> known = new HashSet<Integer>();
