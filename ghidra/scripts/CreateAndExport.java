@@ -27,6 +27,7 @@ public class CreateAndExport extends GhidraScript {
             0x8004fba8L, 0x8004fcc0L, 0x8004fd6cL, 0x8004fdc8L, 0x8004fe1cL
         };
         File f = new File(System.getProperty("user.home") + "\\Desktop\\main0_missing.c");
+        println("Programa: " + currentProgram.getName());
         DecompInterface di = new DecompInterface();
         di.openProgram(currentProgram);
         PrintWriter out = new PrintWriter(f, "UTF-8");
@@ -35,11 +36,14 @@ public class CreateAndExport extends GhidraScript {
             Address a = toAddr(x);
             Function fn = getFunctionAt(a);
             if (fn == null) {
+                clearListing(a, a.add(3));
                 disassemble(a);
                 fn = createFunction(a, null);
             }
             if (fn == null) {
-                out.println("// ==== NO_FUNC @ " + a);
+                out.println("// ==== NO_FUNC @ " + a + " prog=" + currentProgram.getName()
+                    + " instr=" + getInstructionAt(a) + " data=" + getDataAt(a)
+                    + " mem=" + currentProgram.getMemory().contains(a));
                 continue;
             }
             monitor.checkCancelled();
