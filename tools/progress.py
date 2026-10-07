@@ -113,7 +113,7 @@ def main():
             k, r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]), r["lib"]))
     w("")
     w("## Que NO esta contado (el denominador real es mayor)\n")
-    w("- `MAIN1..8.EXE`: comparten ~98 %% del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.")
+    w("- `MAIN1..8.EXE`: comparten ~98 % del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.")
     w("- `SCES_013.31` (cargador, 651 KB): casi todo es libreria Psy-Q; sin analizar.")
     w("- Resto de overlays `X*.BIN` de las 20 areas (solo se ha analizado `AREA00/X000.BIN`).")
     w("- Funciones que solo llama un overlay y que Ghidra no reconoce, y overlays aun sin identificar")
@@ -142,6 +142,13 @@ def main():
                "matching_bytes": matching,
                "programs": {k: {x: y for x, y in r.items() if x != "unnamed_list"} for k, r in res.items()}},
               open(N("docs", "progress.json"), "w"), indent=2)
+    rd = N("README.md")
+    if os.path.exists(rd):
+        t = open(rd).read()
+        t = re.sub(r"!\[matching\]\([^)]*\) !\[nombrado\]\([^)]*\)",
+                   "![matching](https://img.shields.io/badge/matching-%.1f%%25-red) ![nombrado](https://img.shields.io/badge/nombrado-%.1f%%25-orange)"
+                   % (pct(matching, tot["game"]), pct(tot["named"], tot["game"])), t)
+        open(rd, "w").write(t)
     print("\n".join(out[:16]))
 
 

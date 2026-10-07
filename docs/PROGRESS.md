@@ -22,7 +22,7 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 
 ## Que NO esta contado (el denominador real es mayor)
 
-- `MAIN1..8.EXE`: comparten ~98 %% del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.
+- `MAIN1..8.EXE`: comparten ~98 % del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.
 - `SCES_013.31` (cargador, 651 KB): casi todo es libreria Psy-Q; sin analizar.
 - Resto de overlays `X*.BIN` de las 20 areas (solo se ha analizado `AREA00/X000.BIN`).
 - Funciones que solo llama un overlay y que Ghidra no reconoce, y overlays aun sin identificar
