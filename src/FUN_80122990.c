@@ -1,4 +1,5 @@
 // FUNC 80122990 72 X000
+// MATCHING 80122990 72
 extern unsigned short DAT_8009c962;
 extern unsigned char DAT_8009cda5;
 extern unsigned short DAT_8009c982;
