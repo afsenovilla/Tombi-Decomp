@@ -15,7 +15,7 @@ Detalle en [docs/PROGRESS.md](docs/PROGRESS.md). Se regenera con `python tools/p
 Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usando Ghidra.
 
 ## Requisitos
-- Ghidra (11.x recomendado) y JDK 17+.
+- Ghidra 12.1.4 y JDK 21 (el pipeline y el plugin están probados con esa versión).
 - Plugin [ghidra_psx_ldr](https://github.com/lab313ru/ghidra_psx_ldr) instalado.
 - Tu propia copia del juego (no se incluye en el repo).
 
@@ -41,3 +41,4 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 - `tools/export_functions.py` – convierte un export de Ghidra en `notes/functions_*.csv` (solo metadatos).
 - `tools/progress.py` – recalcula `docs/PROGRESS.md` (progreso de la descompilación).
 - `tools/ghidra_pipeline.sh` – ejecuta Ghidra sin interfaz: importa, aplica nombres/estructuras y exporta el decompilado (`import`, `apply`, `all`).
+- `tools/setup_ghidra.sh` – instala Ghidra 12.1.4 y el plugin PSX (para usar el pipeline en un entorno nuevo).
