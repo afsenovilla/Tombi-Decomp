@@ -16,7 +16,7 @@ address,name,confidence,comment
 800758d0,SpuQuit,alta,Psy-Q
 800773c0,_spu_setInTransfer,alta,Psy-Q
 800773ec,_spu_getInTransfer,alta,Psy-Q
-8001fdac,MulSinScaled,alta,tabla 8007A1F0 = -2867*sin(2*pi*i/256); resultado = tabla[i]*v*16>>16
+8001fdac,MulNegSinScaled,alta,tabla 8007A1F0 = -2867*sin(2*pi*i/256); resultado = tabla[i]*v*16>>16
 8001fddc,MulCos,alta,tabla 8007A5F0 = 4096*cos(2*pi*i/256); resultado = tabla[i]*v*16>>16
 8001fe6c,AnimLoadDuration,media,param+0x2c = duracion del fotograma actual (&0x3fff)
 8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
@@ -34,3 +34,26 @@ address,name,confidence,comment
 80019084,MemCardInit,alta,OpenEvent/EnableEvent de tarjeta + _bu_init
 80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
 800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
+8001fe0c,MulNegSin,alta,tabla 8007A3F0 = -4096*sin(2*pi*i/256)
+8001fe3c,MulCosDup,media,igual que MulCos (misma tabla 8007A5F0)
+8001f9e0,Rand,alta,LCG 0x41C64E6D+0x3039; semilla en scratchpad 1F800200
+8001fe94,AnimJump,media,salta el script de animacion un desplazamiento relativo y recarga la duracion
+8001fce4,ObjApplyVelocity,media,suma +0x80/+0x82 (x256) a la posicion X y a +0x14
+80017238,ThreadWaitFrames,media,estado de hilo=1 con contador y ChangeTh al hilo principal
+8001f620,MusicMute,alta,flag + SsSeqSetVol a 0
+8001f658,MusicUnmute,alta,restaura volumen guardado
+8001f690,SfxStopAll,alta,SpuSetKey(0 apagar 0xFF0000) = voces 16..23
+8001f820,SoundShutdown,alta,SsEnd
+80068f94,GetVideoMode,alta,devuelve la variable que escribe SetVideoMode
+8003e4ec,ObjSpawn,media,crea objeto: tipo=param1 subtipo=param2 posicion desde struct param4
+8003e300,ObjSpawnType0,media,ObjSpawn(0..)
+8003e33c,ObjSpawnType1,media,ObjSpawn(1..)
+8003e474,ObjSpawnType5,media,ObjSpawn(5..)
+8003e4b0,ObjSpawnType8,media,ObjSpawn(8..)
+80018980,PoolFree_1F800210,media,devuelve objeto a una pila de libres (7 pilas en scratchpad)
+80018c2c,PoolFree_1F800218,media,idem
+80018c68,PoolFree_1F80021C,media,idem
+80018cf0,PoolFree_1F800224,media,idem
+80018d2c,PoolFree_1F800230,media,idem
+80018d68,PoolFree_1F800228,media,idem
+80018da4,PoolFree_1F80022C,media,idem
