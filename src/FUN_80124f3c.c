@@ -1,4 +1,5 @@
 // FUNC 80124f3c 104 X000
+// MATCHING 80124f3c 104
 extern short FUN_800439f4(void);
 void FUN_80124f3c(int a, char *o)
 {

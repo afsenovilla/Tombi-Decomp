@@ -1,4 +1,5 @@
 // FUNC 800264d0 116 MAIN0
+// MATCHING 800264d0 116
 extern struct { unsigned char on; char p[7]; short cnt; } DAT_800b1410;
 extern int DAT_8009c960;
 extern void FUN_80026544(void *);

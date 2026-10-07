@@ -1,4 +1,5 @@
 // FUNC 8010b3b8 140 X000
+// FLAGS -O3 -G0
 #include "TOBJ.H"
 extern TObj *DAT_8009c330;
 extern unsigned char DAT_801152e8[];
