@@ -1,4 +1,5 @@
 // FUNC 8006a270 132 MAIN0
+// MATCHING 8006a270 132
 extern void FUN_8006adc8(char *);
 extern void FUN_8006addc(char *, int);
 extern void FUN_8006ae1c(char *, int);
