@@ -13,7 +13,8 @@ import java.io.FileReader;
 public class ImportNames extends GhidraScript {
     @Override
     protected void run() throws Exception {
-        File f = askFile("CSV address,name,...", "Importar");
+        String[] args = getScriptArgs();
+        File f = args.length > 0 ? new File(args[0]) : askFile("CSV address,name,...", "Importar");
         BufferedReader in = new BufferedReader(new FileReader(f));
         in.readLine(); // cabecera
         String line;

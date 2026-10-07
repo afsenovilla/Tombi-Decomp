@@ -40,3 +40,4 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 - `ghidra/scripts/ImportNames.java` – aplica nombres desde `notes/names_main0.csv`.
 - `tools/export_functions.py` – convierte un export de Ghidra en `notes/functions_*.csv` (solo metadatos).
 - `tools/progress.py` – recalcula `docs/PROGRESS.md` (progreso de la descompilación).
+- `tools/ghidra_pipeline.sh` – ejecuta Ghidra sin interfaz: importa, aplica nombres/estructuras y exporta el decompilado (`import`, `apply`, `all`).

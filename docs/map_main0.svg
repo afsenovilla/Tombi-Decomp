@@ -71,13 +71,13 @@
 <rect x="477.7" y="66" width="6.9" height="13" fill="#f59e0b"><title>0x800185F8 128 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="484.6" y="66" width="6.9" height="13" fill="#f59e0b"><title>0x80018678 128 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="491.5" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x800186F8 76 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="495.5" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x80018744 76 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="499.6" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x80018790 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="495.5" y="66" width="4.1" height="13" fill="#38bdf8"><title>0x80018744 76 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="499.6" y="66" width="4.5" height="13" fill="#38bdf8"><title>0x80018790 84 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="504.1" y="66" width="4.5" height="13" fill="#22c55e"><title>0x800187E4 84 B &#183; Nombrada por nosotros</title></rect>
 <rect x="508.7" y="66" width="4.5" height="13" fill="#22c55e"><title>0x80018838 84 B &#183; Nombrada por nosotros</title></rect>
-<rect x="513.2" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x8001888C 84 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="517.7" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x800188E0 84 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="522.2" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x80018934 76 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="513.2" y="66" width="4.5" height="13" fill="#38bdf8"><title>0x8001888C 84 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="517.7" y="66" width="4.5" height="13" fill="#38bdf8"><title>0x800188E0 84 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="522.2" y="66" width="4.1" height="13" fill="#38bdf8"><title>0x80018934 76 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="526.3" y="66" width="3.0" height="13" fill="#22c55e"><title>0x80018980 56 B &#183; Nombrada por nosotros</title></rect>
 <rect x="563.0" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018C2C 60 B &#183; Nombrada por nosotros</title></rect>
 <rect x="566.2" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018C68 60 B &#183; Nombrada por nosotros</title></rect>
@@ -180,8 +180,8 @@
 <rect x="373.9" y="98" width="1.5" height="13" fill="#22c55e"><title>0x8001FE6C 28 B &#183; Nombrada por nosotros</title></rect>
 <rect x="376.1" y="98" width="2.4" height="13" fill="#22c55e"><title>0x8001FE94 44 B &#183; Nombrada por nosotros</title></rect>
 <rect x="378.5" y="98" width="12.2" height="13" fill="#22c55e"><title>0x8001FEC0 228 B &#183; Nombrada por nosotros</title></rect>
-<rect x="402.1" y="98" width="16.5" height="13" fill="#38bdf8"><title>0x80020078 308 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="418.6" y="98" width="14.2" height="13" fill="#38bdf8"><title>0x800201AC 264 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="402.1" y="98" width="11.0" height="13" fill="#38bdf8"><title>0x80020078 204 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="418.6" y="98" width="8.6" height="13" fill="#38bdf8"><title>0x800201AC 160 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="432.8" y="98" width="15.9" height="13" fill="#22c55e"><title>0x800202B4 296 B &#183; Nombrada por nosotros</title></rect>
 <rect x="448.7" y="98" width="5.8" height="13" fill="#f59e0b"><title>0x800203DC 108 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="458.4" y="98" width="8.4" height="13" fill="#38bdf8"><title>0x80020490 156 B &#183; Sin nombre, con TObj</title></rect>
@@ -189,7 +189,6 @@
 <rect x="499.4" y="98" width="5.2" height="13" fill="#f59e0b"><title>0x8002078C 96 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="539.6" y="98" width="6.2" height="13" fill="#f59e0b"><title>0x80020A78 116 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="545.8" y="98" width="6.4" height="13" fill="#f59e0b"><title>0x80020AEC 120 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="552.3" y="98" width="8.6" height="13" fill="#f59e0b"><title>0x80020B64 160 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="560.9" y="98" width="9.2" height="13" fill="#f59e0b"><title>0x80020C04 172 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="576.1" y="98" width="6.4" height="13" fill="#f59e0b"><title>0x80020D20 120 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="597.4" y="98" width="5.6" height="13" fill="#f59e0b"><title>0x80020EAC 104 B &#183; Sin nombre, sin tipos</title></rect>
@@ -202,10 +201,10 @@
 <rect x="713.4" y="98" width="17.0" height="13" fill="#f59e0b"><title>0x8002171C 316 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="730.4" y="98" width="30.7" height="13" fill="#f59e0b"><title>0x80021858 572 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="765.8" y="98" width="2.8" height="13" fill="#f59e0b"><title>0x80021AEC 52 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="768.6" y="98" width="54.6" height="13" fill="#f59e0b"><title>0x80021B20 1016 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="768.6" y="98" width="54.6" height="13" fill="#38bdf8"><title>0x80021B20 1016 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="826.8" y="98" width="4.3" height="13" fill="#38bdf8"><title>0x80021F5C 80 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="831.1" y="98" width="8.2" height="13" fill="#38bdf8"><title>0x80021FAC 152 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="839.3" y="98" width="14.6" height="13" fill="#f59e0b"><title>0x80022044 272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="839.3" y="98" width="14.6" height="13" fill="#38bdf8"><title>0x80022044 272 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="855.2" y="98" width="26.6" height="13" fill="#f59e0b"><title>0x8002216C 496 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="881.8" y="98" width="8.2" height="13" fill="#38bdf8"><title>0x8002235C 724 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="10.0" y="114" width="30.7" height="13" fill="#38bdf8"><title>0x8002235C 572 B &#183; Sin nombre, con TObj</title></rect>
@@ -230,23 +229,23 @@
 <rect x="866.4" y="114" width="20.6" height="13" fill="#f59e0b"><title>0x8002623C 384 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="887.0" y="114" width="3.0" height="13" fill="#f59e0b"><title>0x800263BC 276 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="10.0" y="130" width="11.8" height="13" fill="#f59e0b"><title>0x800263BC 220 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="21.8" y="130" width="6.2" height="13" fill="#f59e0b"><title>0x800264D0 116 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="28.0" y="130" width="66.0" height="13" fill="#f59e0b"><title>0x80026544 1228 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="21.8" y="130" width="6.2" height="13" fill="#38bdf8"><title>0x800264D0 116 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="28.0" y="130" width="66.0" height="13" fill="#38bdf8"><title>0x80026544 1228 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="94.0" y="130" width="26.4" height="13" fill="#f59e0b"><title>0x80026A10 492 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="120.4" y="130" width="4.5" height="13" fill="#f59e0b"><title>0x80026BFC 84 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="124.9" y="130" width="23.8" height="13" fill="#f59e0b"><title>0x80026C50 444 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="148.8" y="130" width="17.2" height="13" fill="#f59e0b"><title>0x80026E0C 320 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="166.0" y="130" width="8.4" height="13" fill="#f59e0b"><title>0x80026F4C 156 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="184.2" y="130" width="7.1" height="13" fill="#f59e0b"><title>0x800270A0 132 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="191.3" y="130" width="3.0" height="13" fill="#38bdf8"><title>0x80027124 56 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="191.3" y="130" width="3.0" height="13" fill="#f59e0b"><title>0x80027124 56 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="194.3" y="130" width="4.9" height="13" fill="#f59e0b"><title>0x8002715C 92 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="199.3" y="130" width="43.6" height="13" fill="#f59e0b"><title>0x800271B8 812 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="199.3" y="130" width="43.6" height="13" fill="#38bdf8"><title>0x800271B8 812 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="251.1" y="130" width="22.3" height="13" fill="#38bdf8"><title>0x8002757C 416 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="285.2" y="130" width="1.3" height="13" fill="#f59e0b"><title>0x800277F8 24 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="304.3" y="130" width="42.5" height="13" fill="#f59e0b"><title>0x8002795C 792 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="304.3" y="130" width="42.5" height="13" fill="#38bdf8"><title>0x8002795C 792 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="346.9" y="130" width="32.9" height="13" fill="#38bdf8"><title>0x80027C74 612 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="379.7" y="130" width="24.3" height="13" fill="#38bdf8"><title>0x80027ED8 452 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="404.0" y="130" width="23.4" height="13" fill="#f59e0b"><title>0x8002809C 436 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="404.0" y="130" width="23.4" height="13" fill="#38bdf8"><title>0x8002809C 436 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="427.4" y="130" width="24.9" height="13" fill="#38bdf8"><title>0x80028250 464 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="452.4" y="130" width="3.9" height="13" fill="#f59e0b"><title>0x80028420 72 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="462.2" y="130" width="6.0" height="13" fill="#f59e0b"><title>0x800284D8 112 B &#183; Sin nombre, sin tipos</title></rect>
@@ -256,7 +255,7 @@
 <rect x="550.3" y="130" width="3.7" height="13" fill="#f59e0b"><title>0x80028B40 68 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="558.9" y="130" width="50.9" height="13" fill="#38bdf8"><title>0x80028BE0 948 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="609.8" y="130" width="12.2" height="13" fill="#f59e0b"><title>0x80028F94 228 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="622.1" y="130" width="168.2" height="13" fill="#f59e0b"><title>0x80029078 3132 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="622.1" y="130" width="168.2" height="13" fill="#38bdf8"><title>0x80029078 3132 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="790.3" y="130" width="33.1" height="13" fill="#38bdf8"><title>0x80029CB4 616 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="888.3" y="130" width="1.7" height="13" fill="#38bdf8"><title>0x8002A3D4 252 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="10.0" y="146" width="11.8" height="13" fill="#38bdf8"><title>0x8002A3D4 220 B &#183; Sin nombre, con TObj</title></rect>
@@ -304,7 +303,7 @@
 <rect x="255.8" y="178" width="5.4" height="13" fill="#f59e0b"><title>0x800335D4 100 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="261.2" y="178" width="21.1" height="13" fill="#38bdf8"><title>0x80033638 392 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="288.4" y="178" width="15.9" height="13" fill="#38bdf8"><title>0x80033834 296 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="308.2" y="178" width="22.3" height="13" fill="#f59e0b"><title>0x800339A4 416 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="308.2" y="178" width="22.3" height="13" fill="#38bdf8"><title>0x800339A4 416 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="330.5" y="178" width="271.6" height="13" fill="#38bdf8"><title>0x80033B44 5056 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="624.0" y="178" width="6.9" height="13" fill="#38bdf8"><title>0x8003509C 128 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="637.6" y="178" width="18.7" height="13" fill="#38bdf8"><title>0x80035198 348 B &#183; Sin nombre, con TObj</title></rect>
@@ -317,7 +316,7 @@
 <rect x="199.7" y="194" width="35.4" height="13" fill="#f59e0b"><title>0x800371C0 660 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="235.2" y="194" width="112.4" height="13" fill="#f59e0b"><title>0x80037454 2092 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="347.5" y="194" width="17.2" height="13" fill="#f59e0b"><title>0x80037C80 320 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="369.4" y="194" width="4.9" height="13" fill="#f59e0b"><title>0x80037E18 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.4" y="194" width="4.9" height="13" fill="#38bdf8"><title>0x80037E18 92 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="374.4" y="194" width="17.6" height="13" fill="#f59e0b"><title>0x80037E74 328 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="392.0" y="194" width="5.6" height="13" fill="#f59e0b"><title>0x80037FBC 104 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="397.6" y="194" width="2.1" height="13" fill="#f59e0b"><title>0x80038024 40 B &#183; Sin nombre, sin tipos</title></rect>
@@ -333,11 +332,11 @@
 <rect x="812.7" y="194" width="45.5" height="13" fill="#f59e0b"><title>0x80039E54 848 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="74.0" y="210" width="22.3" height="13" fill="#f59e0b"><title>0x8003A89C 416 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="171.6" y="210" width="155.1" height="13" fill="#38bdf8"><title>0x8003AFB4 2888 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="326.7" y="210" width="21.3" height="13" fill="#f59e0b"><title>0x8003BAFC 396 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="326.7" y="210" width="21.3" height="13" fill="#38bdf8"><title>0x8003BAFC 396 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="361.3" y="210" width="7.9" height="13" fill="#f59e0b"><title>0x8003BD80 148 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="369.2" y="210" width="19.6" height="13" fill="#38bdf8"><title>0x8003BE14 364 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="439.9" y="210" width="28.8" height="13" fill="#38bdf8"><title>0x8003C338 536 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="502.4" y="210" width="23.8" height="13" fill="#38bdf8"><title>0x8003C7C4 444 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="502.4" y="210" width="10.1" height="13" fill="#38bdf8"><title>0x8003C7C4 188 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="526.3" y="210" width="37.4" height="13" fill="#38bdf8"><title>0x8003C980 696 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="876.9" y="210" width="3.2" height="13" fill="#22c55e"><title>0x8003E300 60 B &#183; Nombrada por nosotros</title></rect>
 <rect x="880.1" y="210" width="3.2" height="13" fill="#22c55e"><title>0x8003E33C 60 B &#183; Nombrada por nosotros</title></rect>
@@ -351,16 +350,15 @@
 <rect x="80.7" y="226" width="3.9" height="13" fill="#f59e0b"><title>0x8003E918 72 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="130.1" y="226" width="13.8" height="13" fill="#f59e0b"><title>0x8003ECB0 256 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="203.1" y="226" width="43.2" height="13" fill="#f59e0b"><title>0x8003F200 804 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="252.6" y="226" width="30.3" height="13" fill="#38bdf8"><title>0x8003F598 564 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="252.6" y="226" width="30.3" height="13" fill="#f59e0b"><title>0x8003F598 564 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="282.9" y="226" width="41.2" height="13" fill="#38bdf8"><title>0x8003F7CC 768 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="324.1" y="226" width="10.5" height="13" fill="#22c55e"><title>0x8003FACC 196 B &#183; Nombrada por nosotros</title></rect>
-<rect x="334.6" y="226" width="26.2" height="13" fill="#f59e0b"><title>0x8003FB90 488 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="334.6" y="226" width="26.2" height="13" fill="#38bdf8"><title>0x8003FB90 488 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="360.8" y="226" width="24.9" height="13" fill="#22c55e"><title>0x8003FD78 464 B &#183; Nombrada por nosotros</title></rect>
 <rect x="385.8" y="226" width="43.8" height="13" fill="#f59e0b"><title>0x8003FF48 816 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="429.6" y="226" width="6.2" height="13" fill="#22c55e"><title>0x80040278 116 B &#183; Nombrada por nosotros</title></rect>
 <rect x="435.8" y="226" width="47.3" height="13" fill="#f59e0b"><title>0x800402EC 880 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="483.1" y="226" width="7.5" height="13" fill="#f59e0b"><title>0x8004065C 140 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="490.6" y="226" width="26.6" height="13" fill="#f59e0b"><title>0x800406E8 496 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="517.2" y="226" width="6.2" height="13" fill="#f59e0b"><title>0x800408D8 116 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="523.5" y="226" width="20.0" height="13" fill="#f59e0b"><title>0x8004094C 372 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="543.5" y="226" width="17.0" height="13" fill="#f59e0b"><title>0x80040AC0 316 B &#183; Sin nombre, sin tipos</title></rect>
@@ -369,15 +367,14 @@
 <rect x="608.3" y="226" width="32.0" height="13" fill="#f59e0b"><title>0x80040F78 596 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="640.4" y="226" width="6.2" height="13" fill="#f59e0b"><title>0x800411CC 116 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="646.6" y="226" width="30.9" height="13" fill="#f59e0b"><title>0x80041240 576 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="708.0" y="226" width="81.6" height="13" fill="#38bdf8"><title>0x800416B8 1520 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="789.7" y="226" width="6.4" height="13" fill="#38bdf8"><title>0x80041CA8 120 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="789.7" y="226" width="6.4" height="13" fill="#f59e0b"><title>0x80041CA8 120 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="818.2" y="226" width="32.7" height="13" fill="#f59e0b"><title>0x80041EBC 608 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="879.3" y="226" width="10.7" height="13" fill="#f59e0b"><title>0x8004232C 304 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="10.0" y="242" width="5.6" height="13" fill="#f59e0b"><title>0x8004232C 104 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="15.6" y="242" width="16.3" height="13" fill="#f59e0b"><title>0x8004245C 304 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="31.9" y="242" width="3.0" height="13" fill="#f59e0b"><title>0x8004258C 56 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="34.9" y="242" width="41.0" height="13" fill="#38bdf8"><title>0x800425C4 764 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="76.0" y="242" width="14.6" height="13" fill="#38bdf8"><title>0x800428C0 272 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="76.0" y="242" width="10.1" height="13" fill="#38bdf8"><title>0x800428C0 188 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="115.1" y="242" width="11.6" height="13" fill="#38bdf8"><title>0x80042B98 216 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="126.7" y="242" width="12.7" height="13" fill="#38bdf8"><title>0x80042C70 236 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="172.0" y="242" width="9.5" height="13" fill="#38bdf8"><title>0x80042FBC 176 B &#183; Sin nombre, con TObj</title></rect>
@@ -460,10 +457,10 @@
 <rect x="351.0" y="290" width="9.2" height="13" fill="#38bdf8"><title>0x8004FCC0 172 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="360.2" y="290" width="4.9" height="13" fill="#f59e0b"><title>0x8004FD6C 92 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="365.1" y="290" width="4.5" height="13" fill="#f59e0b"><title>0x8004FDC8 84 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="369.6" y="290" width="9.9" height="13" fill="#f59e0b"><title>0x8004FE1C 184 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.6" y="290" width="9.9" height="13" fill="#38bdf8"><title>0x8004FE1C 184 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="379.5" y="290" width="26.6" height="13" fill="#f59e0b"><title>0x8004FED4 496 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="406.2" y="290" width="46.8" height="13" fill="#38bdf8"><title>0x800500C4 872 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="453.0" y="290" width="15.0" height="13" fill="#f59e0b"><title>0x8005042C 280 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="453.0" y="290" width="15.0" height="13" fill="#38bdf8"><title>0x8005042C 280 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="468.0" y="290" width="9.2" height="13" fill="#38bdf8"><title>0x80050544 172 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="477.3" y="290" width="119.7" height="13" fill="#38bdf8"><title>0x800505F0 2228 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="597.0" y="290" width="26.0" height="13" fill="#38bdf8"><title>0x80050EA4 484 B &#183; Sin nombre, con TObj</title></rect>
@@ -481,10 +478,10 @@
 <rect x="635.6" y="306" width="63.8" height="13" fill="#38bdf8"><title>0x80055174 1188 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="699.4" y="306" width="91.1" height="13" fill="#38bdf8"><title>0x80055618 1696 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="790.5" y="306" width="40.6" height="13" fill="#38bdf8"><title>0x80055CB8 756 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="831.1" y="306" width="55.0" height="13" fill="#f59e0b"><title>0x80055FAC 1024 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="886.1" y="306" width="3.9" height="13" fill="#f59e0b"><title>0x800563AC 116 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="10.0" y="322" width="2.4" height="13" fill="#f59e0b"><title>0x800563AC 44 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="12.4" y="322" width="139.9" height="13" fill="#f59e0b"><title>0x80056420 2604 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="831.1" y="306" width="55.0" height="13" fill="#38bdf8"><title>0x80055FAC 1024 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="886.1" y="306" width="3.9" height="13" fill="#38bdf8"><title>0x800563AC 116 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="322" width="2.4" height="13" fill="#38bdf8"><title>0x800563AC 44 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="12.4" y="322" width="139.9" height="13" fill="#38bdf8"><title>0x80056420 2604 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="152.2" y="322" width="46.2" height="13" fill="#38bdf8"><title>0x80056E4C 860 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="198.4" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x800571A8 224 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="210.4" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x80057288 224 B &#183; Sin nombre, con TObj</title></rect>
@@ -495,23 +492,23 @@
 <rect x="308.4" y="322" width="17.0" height="13" fill="#38bdf8"><title>0x800579A8 316 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="325.4" y="322" width="14.4" height="13" fill="#38bdf8"><title>0x80057AE4 268 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="339.8" y="322" width="14.8" height="13" fill="#38bdf8"><title>0x80057BF0 276 B &#183; Sin nombre, con TObj</title></rect>
-<rect x="354.6" y="322" width="13.3" height="13" fill="#f59e0b"><title>0x80057D04 248 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="354.6" y="322" width="13.3" height="13" fill="#38bdf8"><title>0x80057D04 248 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="367.9" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x80057DFC 224 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="380.0" y="322" width="35.0" height="13" fill="#38bdf8"><title>0x80057EDC 652 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="415.0" y="322" width="36.3" height="13" fill="#38bdf8"><title>0x80058168 676 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="451.3" y="322" width="27.1" height="13" fill="#38bdf8"><title>0x8005840C 504 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="478.4" y="322" width="6.7" height="13" fill="#f59e0b"><title>0x80058604 124 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="485.0" y="322" width="15.9" height="13" fill="#f59e0b"><title>0x80058680 296 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="485.0" y="322" width="15.9" height="13" fill="#38bdf8"><title>0x80058680 296 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="500.9" y="322" width="20.8" height="13" fill="#f59e0b"><title>0x800587A8 388 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="521.8" y="322" width="26.4" height="13" fill="#f59e0b"><title>0x8005892C 492 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="521.8" y="322" width="26.4" height="13" fill="#38bdf8"><title>0x8005892C 492 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="548.2" y="322" width="28.4" height="13" fill="#f59e0b"><title>0x80058B18 528 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="576.5" y="322" width="33.5" height="13" fill="#f59e0b"><title>0x80058D28 624 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="576.5" y="322" width="33.5" height="13" fill="#38bdf8"><title>0x80058D28 624 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="610.1" y="322" width="29.6" height="13" fill="#f59e0b"><title>0x80058F98 552 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="639.7" y="322" width="36.3" height="13" fill="#f59e0b"><title>0x800591C0 676 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="676.0" y="322" width="6.9" height="13" fill="#22c55e"><title>0x80059464 128 B &#183; Nombrada por nosotros</title></rect>
 <rect x="682.9" y="322" width="14.6" height="13" fill="#f59e0b"><title>0x800594E4 272 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="697.5" y="322" width="16.5" height="13" fill="#f59e0b"><title>0x800595F4 308 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="714.0" y="322" width="7.9" height="13" fill="#f59e0b"><title>0x80059728 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="714.0" y="322" width="7.9" height="13" fill="#38bdf8"><title>0x80059728 148 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="722.0" y="322" width="76.1" height="13" fill="#f59e0b"><title>0x800597BC 1416 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="798.0" y="322" width="25.1" height="13" fill="#f59e0b"><title>0x80059D44 468 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="836.7" y="322" width="53.3" height="13" fill="#f59e0b"><title>0x8005A014 1932 B &#183; Sin nombre, sin tipos</title></rect>
@@ -1073,14 +1070,14 @@
 <rect x="612.4" y="386" width="1.7" height="13" fill="#f59e0b"><title>0x80068FC4 32 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="619.9" y="386" width="11.0" height="13" fill="#f59e0b"><title>0x80069050 204 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="630.9" y="386" width="13.3" height="13" fill="#f59e0b"><title>0x8006911C 248 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="664.6" y="386" width="3.0" height="13" fill="#f59e0b"><title>0x80069390 56 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="667.6" y="386" width="3.9" height="13" fill="#f59e0b"><title>0x800693C8 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="664.6" y="386" width="3.0" height="13" fill="#38bdf8"><title>0x80069390 56 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="667.6" y="386" width="3.9" height="13" fill="#38bdf8"><title>0x800693C8 72 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="671.5" y="386" width="3.9" height="13" fill="#f59e0b"><title>0x80069410 72 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="691.1" y="386" width="2.4" height="13" fill="#f59e0b"><title>0x8006957C 44 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="721.6" y="386" width="11.0" height="13" fill="#f59e0b"><title>0x800697B4 204 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="736.2" y="386" width="44.0" height="13" fill="#f59e0b"><title>0x800698C4 820 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="780.2" y="386" width="12.9" height="13" fill="#f59e0b"><title>0x80069BF8 240 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="793.1" y="386" width="28.4" height="13" fill="#f59e0b"><title>0x80069CE8 528 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="793.1" y="386" width="28.4" height="13" fill="#38bdf8"><title>0x80069CE8 528 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="821.5" y="386" width="33.9" height="13" fill="#f59e0b"><title>0x80069EF8 632 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="855.4" y="386" width="7.7" height="13" fill="#f59e0b"><title>0x8006A170 144 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="863.1" y="386" width="2.1" height="13" fill="#f59e0b"><title>0x8006A200 40 B &#183; Sin nombre, sin tipos</title></rect>
@@ -1088,12 +1085,12 @@
 <rect x="866.8" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x8006A244 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
 <rect x="867.7" y="386" width="1.0" height="13" fill="#f59e0b"><title>0x8006A254 12 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="869.2" y="386" width="7.1" height="13" fill="#f59e0b"><title>0x8006A270 132 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="876.2" y="386" width="13.8" height="13" fill="#f59e0b"><title>0x8006A2F4 624 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="10.0" y="402" width="19.8" height="13" fill="#f59e0b"><title>0x8006A2F4 368 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="876.2" y="386" width="13.8" height="13" fill="#38bdf8"><title>0x8006A2F4 624 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="402" width="19.8" height="13" fill="#38bdf8"><title>0x8006A2F4 368 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="29.8" y="402" width="3.0" height="13" fill="#f59e0b"><title>0x8006A564 56 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="32.8" y="402" width="11.4" height="13" fill="#f59e0b"><title>0x8006A59C 212 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="107.8" y="402" width="5.6" height="13" fill="#f59e0b"><title>0x8006AB10 104 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="125.6" y="402" width="8.2" height="13" fill="#f59e0b"><title>0x8006AC5C 152 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="32.8" y="402" width="11.4" height="13" fill="#38bdf8"><title>0x8006A59C 212 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="107.8" y="402" width="5.6" height="13" fill="#38bdf8"><title>0x8006AB10 104 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="125.6" y="402" width="8.2" height="13" fill="#38bdf8"><title>0x8006AC5C 152 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="143.4" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006ADA8 32 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="145.1" y="402" width="1.1" height="13" fill="#f59e0b"><title>0x8006ADC8 20 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="146.2" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006ADDC 32 B &#183; Sin nombre, sin tipos</title></rect>
@@ -1103,7 +1100,7 @@
 <rect x="236.0" y="402" width="18.9" height="13" fill="#f59e0b"><title>0x8006B464 352 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="273.6" y="402" width="1.0" height="13" fill="#f59e0b"><title>0x8006B720 16 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="323.7" y="402" width="2.8" height="13" fill="#f59e0b"><title>0x8006BAC4 52 B &#183; Sin nombre, sin tipos</title></rect>
-<rect x="373.9" y="402" width="12.0" height="13" fill="#f59e0b"><title>0x8006BE6C 224 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="373.9" y="402" width="12.0" height="13" fill="#38bdf8"><title>0x8006BE6C 224 B &#183; Sin nombre, con TObj</title></rect>
 <rect x="389.0" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006BF84 32 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="390.7" y="402" width="8.6" height="13" fill="#f59e0b"><title>0x8006BFA4 160 B &#183; Sin nombre, sin tipos</title></rect>
 <rect x="399.3" y="402" width="9.0" height="13" fill="#94a3b8"><title>0x8006C044 168 B &#183; Libreria Sony (Psy-Q)</title></rect>

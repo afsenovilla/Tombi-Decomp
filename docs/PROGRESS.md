@@ -6,9 +6,9 @@ _Generado con `python tools/progress.py` (2026-10-07). No editar a mano._
 
 | Nivel | Progreso | Bytes | Funciones |
 |---|---|---|---|
-| **C que coincide byte a byte (matching)** | **0.0 %** `[........................]` | 0 / 529048 | 0 |
-| Nombradas por nosotros | 1.7 % `[........................]` | 9172 / 529048 | 57 / 1047 |
-| Con la estructura TObj aplicada (cobertura, no es avance de C) | 66.1 % `[################........]` | 349920 / 529048 | 450 / 1047 |
+| **C que coincide byte a byte (matching)** | **0.0 %** `[........................]` | 0 / 526284 | 0 |
+| Nombradas por nosotros | 1.7 % `[........................]` | 9172 / 526284 | 57 / 1044 |
+| Con la estructura TObj aplicada (cobertura, no es avance de C) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
 
 "Codigo de juego" = funciones dentro del codigo de los programas analizados, **sin** contar las de la
 libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 funciones) aparte.
@@ -17,8 +17,8 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 
 | Programa | Codigo de juego | Nombrado | Tipado (TObj) | Matching | Libreria Psy-Q |
 |---|---|---|---|---|---|
-| MAIN0.EXE (nucleo del juego) | 231052 B (519 f) | 3.5 % | 49.3 % | 0.0 % | 98952 B |
-| X000.BIN (overlay AREA00) | 297996 B (528 f) | 0.3 % | 79.2 % | 0.0 % | 40 B |
+| MAIN0.EXE (nucleo del juego) | 228328 B (516 f) | 3.6 % | 56.6 % | 0.0 % | 98952 B |
+| X000.BIN (overlay AREA00) | 297956 B (528 f) | 0.3 % | 90.7 % | 0.0 % | 40 B |
 
 ## Que NO esta contado (el denominador real es mayor)
 
@@ -27,7 +27,7 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 - Resto de overlays `X*.BIN` de las 20 areas (solo se ha analizado `AREA00/X000.BIN`).
 - Funciones que solo llama un overlay y que Ghidra no reconoce, y overlays aun sin identificar
   (172 destinos de MAIN0 en `0x800E8000+` no caen en X000).
-- Funciones fuera del codigo (`482` bytes de falsos positivos de Ghidra en RAM sin contenido).
+- Funciones fuera del codigo (`479` bytes de falsos positivos de Ghidra en RAM sin contenido).
 
 ## Funciones sin nombrar mas grandes (siguientes objetivos)
 
