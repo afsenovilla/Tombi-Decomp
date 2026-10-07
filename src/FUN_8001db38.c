@@ -1,4 +1,5 @@
 // FUNC 8001db38 164 MAIN0
+// MATCHING 8001db38 164
 extern void g1(int a);
 extern void g2(void *a);
 extern void g3(void *a);
@@ -10,10 +11,13 @@ extern char F2[], F3[], F4[];
 
 void FUN_8001db38(int a)
 {
+    int n = 0x1c0;
     g1(0);
     g2(F2);
     g3(F3);
     g4(F4, 0x20);
     g5(0, 1, -1, 0, 0);
-    while (!g6(2, a, 0) || !g7(0x1c0)) ;
+    do {
+        while (!g6(2, a, 0)) ;
+    } while (!g7(n));
 }
