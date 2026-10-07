@@ -1,0 +1,1470 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="490" viewBox="0 0 900 490" role="img" aria-label="Mapa de MAIN0.EXE (nucleo del juego)">
+<rect width="900" height="490" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
+<text x="28" y="36" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="18" font-weight="700" fill="#0f172a">Mapa de funciones &#8212; MAIN0.EXE (nucleo del juego)</text>
+<text x="28" y="54" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b">Cada fila = 16 KB desde 0x800163F4. Cada bloque = una funci&#243;n, color seg&#250;n su estado. Gris claro = datos o hueco.</text>
+<rect x="10" y="66" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="82" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="98" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="114" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="130" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="146" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="162" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="178" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="194" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="210" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="226" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="242" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="258" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="274" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="290" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="306" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="322" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="338" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="354" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="370" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="386" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="402" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="418" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="434" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10" y="450" width="880.0" height="13" fill="#f1f5f9"/>
+<rect x="10.0" y="66" width="75.0" height="13" fill="#94a3b8"><title>0x800163F4 1396 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="86.5" y="66" width="10.3" height="13" fill="#22c55e"><title>0x80016984 192 B &#183; Nombrada por nosotros</title></rect>
+<rect x="96.8" y="66" width="1.3" height="13" fill="#94a3b8"><title>0x80016A44 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="98.1" y="66" width="13.1" height="13" fill="#f59e0b"><title>0x80016A5C 244 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="111.2" y="66" width="18.5" height="13" fill="#38bdf8"><title>0x80016B50 344 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="129.7" y="66" width="21.3" height="13" fill="#f59e0b"><title>0x80016CA8 396 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="150.9" y="66" width="21.3" height="13" fill="#f59e0b"><title>0x80016E34 396 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="172.2" y="66" width="6.7" height="13" fill="#f59e0b"><title>0x80016FC0 124 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="178.9" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x8001703C 76 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="182.9" y="66" width="11.4" height="13" fill="#22c55e"><title>0x80017088 212 B &#183; Nombrada por nosotros</title></rect>
+<rect x="194.3" y="66" width="4.9" height="13" fill="#f59e0b"><title>0x8001715C 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="199.3" y="66" width="6.9" height="13" fill="#22c55e"><title>0x800171B8 128 B &#183; Nombrada por nosotros</title></rect>
+<rect x="206.2" y="66" width="2.8" height="13" fill="#22c55e"><title>0x80017238 52 B &#183; Nombrada por nosotros</title></rect>
+<rect x="208.9" y="66" width="4.3" height="13" fill="#f59e0b"><title>0x8001726C 80 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="219.0" y="66" width="4.7" height="13" fill="#f59e0b"><title>0x80017328 88 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="231.7" y="66" width="5.6" height="13" fill="#f59e0b"><title>0x80017414 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="237.3" y="66" width="3.7" height="13" fill="#f59e0b"><title>0x8001747C 68 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="244.2" y="66" width="13.1" height="13" fill="#f59e0b"><title>0x800174FC 244 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="257.3" y="66" width="7.3" height="13" fill="#22c55e"><title>0x800175F0 136 B &#183; Nombrada por nosotros</title></rect>
+<rect x="264.6" y="66" width="15.5" height="13" fill="#f59e0b"><title>0x80017678 288 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="288.9" y="66" width="41.7" height="13" fill="#38bdf8"><title>0x8001783C 776 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="330.5" y="66" width="24.1" height="13" fill="#f59e0b"><title>0x80017B44 448 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="354.6" y="66" width="2.4" height="13" fill="#f59e0b"><title>0x80017D04 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="357.0" y="66" width="8.8" height="13" fill="#f59e0b"><title>0x80017D30 164 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="365.8" y="66" width="11.4" height="13" fill="#f59e0b"><title>0x80017DD4 212 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="377.2" y="66" width="9.0" height="13" fill="#f59e0b"><title>0x80017EA8 168 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="386.2" y="66" width="2.6" height="13" fill="#f59e0b"><title>0x80017F50 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="388.8" y="66" width="5.8" height="13" fill="#f59e0b"><title>0x80017F80 108 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="394.6" y="66" width="2.6" height="13" fill="#f59e0b"><title>0x80017FEC 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="397.1" y="66" width="11.8" height="13" fill="#f59e0b"><title>0x8001801C 220 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="409.0" y="66" width="2.6" height="13" fill="#f59e0b"><title>0x800180F8 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="411.5" y="66" width="2.4" height="13" fill="#f59e0b"><title>0x80018128 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="413.9" y="66" width="2.4" height="13" fill="#f59e0b"><title>0x80018154 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="416.3" y="66" width="11.4" height="13" fill="#f59e0b"><title>0x80018180 212 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="427.7" y="66" width="2.4" height="13" fill="#f59e0b"><title>0x80018254 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="430.0" y="66" width="2.4" height="13" fill="#f59e0b"><title>0x80018280 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="432.4" y="66" width="6.9" height="13" fill="#f59e0b"><title>0x800182AC 128 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="446.8" y="66" width="7.7" height="13" fill="#f59e0b"><title>0x800183B8 144 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="454.5" y="66" width="7.7" height="13" fill="#22c55e"><title>0x80018448 144 B &#183; Nombrada por nosotros</title></rect>
+<rect x="462.2" y="66" width="7.7" height="13" fill="#f59e0b"><title>0x800184D8 144 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="470.0" y="66" width="7.7" height="13" fill="#f59e0b"><title>0x80018568 144 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="477.7" y="66" width="6.9" height="13" fill="#f59e0b"><title>0x800185F8 128 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="484.6" y="66" width="6.9" height="13" fill="#f59e0b"><title>0x80018678 128 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="491.5" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x800186F8 76 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="495.5" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x80018744 76 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="499.6" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x80018790 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="504.1" y="66" width="4.5" height="13" fill="#22c55e"><title>0x800187E4 84 B &#183; Nombrada por nosotros</title></rect>
+<rect x="508.7" y="66" width="4.5" height="13" fill="#22c55e"><title>0x80018838 84 B &#183; Nombrada por nosotros</title></rect>
+<rect x="513.2" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x8001888C 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="517.7" y="66" width="4.5" height="13" fill="#f59e0b"><title>0x800188E0 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="522.2" y="66" width="4.1" height="13" fill="#f59e0b"><title>0x80018934 76 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="526.3" y="66" width="3.0" height="13" fill="#22c55e"><title>0x80018980 56 B &#183; Nombrada por nosotros</title></rect>
+<rect x="563.0" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018C2C 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="566.2" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018C68 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="569.5" y="66" width="4.1" height="13" fill="#22c55e"><title>0x80018CA4 76 B &#183; Nombrada por nosotros</title></rect>
+<rect x="573.5" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018CF0 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="576.8" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018D2C 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="580.0" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018D68 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="583.2" y="66" width="3.2" height="13" fill="#22c55e"><title>0x80018DA4 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="586.4" y="66" width="11.8" height="13" fill="#f59e0b"><title>0x80018DE0 220 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="598.2" y="66" width="9.2" height="13" fill="#f59e0b"><title>0x80018EBC 172 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="607.5" y="66" width="15.3" height="13" fill="#f59e0b"><title>0x80018F68 284 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="622.7" y="66" width="24.1" height="13" fill="#22c55e"><title>0x80019084 448 B &#183; Nombrada por nosotros</title></rect>
+<rect x="708.2" y="66" width="27.1" height="13" fill="#f59e0b"><title>0x800196BC 504 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="753.6" y="66" width="14.0" height="13" fill="#f59e0b"><title>0x80019A08 260 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="767.5" y="66" width="25.8" height="13" fill="#f59e0b"><title>0x80019B0C 480 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="793.3" y="66" width="8.4" height="13" fill="#f59e0b"><title>0x80019CEC 156 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="801.7" y="66" width="28.4" height="13" fill="#f59e0b"><title>0x80019D88 528 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="830.1" y="66" width="15.3" height="13" fill="#f59e0b"><title>0x80019F98 284 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="848.5" y="66" width="41.5" height="13" fill="#f59e0b"><title>0x8001A0F0 844 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="82" width="3.9" height="13" fill="#f59e0b"><title>0x8001A0F0 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="13.9" y="82" width="28.4" height="13" fill="#f59e0b"><title>0x8001A43C 528 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="42.2" y="82" width="40.6" height="13" fill="#f59e0b"><title>0x8001A64C 756 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="82.8" y="82" width="25.4" height="13" fill="#f59e0b"><title>0x8001A940 472 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="108.2" y="82" width="24.3" height="13" fill="#f59e0b"><title>0x8001AB18 452 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="132.5" y="82" width="25.4" height="13" fill="#f59e0b"><title>0x8001ACDC 472 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="157.8" y="82" width="61.2" height="13" fill="#f59e0b"><title>0x8001AEB4 1140 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="219.0" y="82" width="20.0" height="13" fill="#f59e0b"><title>0x8001B328 372 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="239.0" y="82" width="26.0" height="13" fill="#f59e0b"><title>0x8001B49C 484 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="265.0" y="82" width="17.8" height="13" fill="#f59e0b"><title>0x8001B680 332 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="282.9" y="82" width="26.0" height="13" fill="#f59e0b"><title>0x8001B7CC 484 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="308.8" y="82" width="17.4" height="13" fill="#f59e0b"><title>0x8001B9B0 324 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="326.2" y="82" width="26.0" height="13" fill="#f59e0b"><title>0x8001BAF4 484 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="352.2" y="82" width="17.4" height="13" fill="#f59e0b"><title>0x8001BCD8 324 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.6" y="82" width="11.2" height="13" fill="#f59e0b"><title>0x8001BE1C 208 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="380.8" y="82" width="43.6" height="13" fill="#f59e0b"><title>0x8001BEEC 812 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="424.4" y="82" width="13.5" height="13" fill="#f59e0b"><title>0x8001C218 252 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="438.0" y="82" width="4.3" height="13" fill="#f59e0b"><title>0x8001C314 80 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="442.3" y="82" width="38.7" height="13" fill="#f59e0b"><title>0x8001C364 720 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="480.9" y="82" width="4.5" height="13" fill="#f59e0b"><title>0x8001C634 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="485.4" y="82" width="21.5" height="13" fill="#f59e0b"><title>0x8001C688 400 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="506.9" y="82" width="21.5" height="13" fill="#f59e0b"><title>0x8001C818 400 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="528.4" y="82" width="4.7" height="13" fill="#f59e0b"><title>0x8001C9A8 88 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="537.9" y="82" width="101.6" height="13" fill="#f59e0b"><title>0x8001CA58 1892 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="639.5" y="82" width="23.2" height="13" fill="#f59e0b"><title>0x8001D1BC 432 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="662.7" y="82" width="17.4" height="13" fill="#f59e0b"><title>0x8001D36C 324 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="680.1" y="82" width="21.3" height="13" fill="#22c55e"><title>0x8001D4B0 396 B &#183; Nombrada por nosotros</title></rect>
+<rect x="701.4" y="82" width="5.6" height="13" fill="#f59e0b"><title>0x8001D63C 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="764.5" y="82" width="5.4" height="13" fill="#38bdf8"><title>0x8001DAD4 100 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="769.9" y="82" width="8.8" height="13" fill="#f59e0b"><title>0x8001DB38 164 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="778.7" y="82" width="55.9" height="13" fill="#22c55e"><title>0x8001DBDC 1040 B &#183; Nombrada por nosotros</title></rect>
+<rect x="834.6" y="82" width="27.5" height="13" fill="#f59e0b"><title>0x8001DFEC 512 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="862.1" y="82" width="3.2" height="13" fill="#f59e0b"><title>0x8001E1EC 60 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="865.3" y="82" width="5.2" height="13" fill="#f59e0b"><title>0x8001E228 96 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="870.4" y="82" width="3.7" height="13" fill="#f59e0b"><title>0x8001E288 68 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="874.1" y="82" width="8.4" height="13" fill="#f59e0b"><title>0x8001E2CC 156 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="882.5" y="82" width="7.5" height="13" fill="#f59e0b"><title>0x8001E368 200 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="98" width="3.2" height="13" fill="#f59e0b"><title>0x8001E368 60 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="13.2" y="98" width="10.3" height="13" fill="#22c55e"><title>0x8001E430 192 B &#183; Nombrada por nosotros</title></rect>
+<rect x="23.5" y="98" width="6.0" height="13" fill="#22c55e"><title>0x8001E4F0 112 B &#183; Nombrada por nosotros</title></rect>
+<rect x="29.6" y="98" width="7.9" height="13" fill="#22c55e"><title>0x8001E560 148 B &#183; Nombrada por nosotros</title></rect>
+<rect x="37.5" y="98" width="7.9" height="13" fill="#22c55e"><title>0x8001E5F4 148 B &#183; Nombrada por nosotros</title></rect>
+<rect x="45.4" y="98" width="12.2" height="13" fill="#f59e0b"><title>0x8001E688 228 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="57.7" y="98" width="24.9" height="13" fill="#f59e0b"><title>0x8001E76C 464 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="91.9" y="98" width="10.1" height="13" fill="#f59e0b"><title>0x8001E9E8 188 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="102.0" y="98" width="2.1" height="13" fill="#f59e0b"><title>0x8001EAA4 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="104.1" y="98" width="8.2" height="13" fill="#f59e0b"><title>0x8001EACC 152 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="112.3" y="98" width="1.7" height="13" fill="#f59e0b"><title>0x8001EB64 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="114.0" y="98" width="1.9" height="13" fill="#94a3b8"><title>0x8001EB84 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="127.5" y="98" width="47.7" height="13" fill="#f59e0b"><title>0x8001EC80 888 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="175.2" y="98" width="15.0" height="13" fill="#f59e0b"><title>0x8001EFF8 280 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="190.3" y="98" width="9.5" height="13" fill="#22c55e"><title>0x8001F110 176 B &#183; Nombrada por nosotros</title></rect>
+<rect x="199.7" y="98" width="16.1" height="13" fill="#f59e0b"><title>0x8001F1C0 300 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="215.8" y="98" width="14.6" height="13" fill="#f59e0b"><title>0x8001F2EC 272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="230.4" y="98" width="10.3" height="13" fill="#f59e0b"><title>0x8001F3FC 192 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="240.7" y="98" width="13.5" height="13" fill="#22c55e"><title>0x8001F4BC 252 B &#183; Nombrada por nosotros</title></rect>
+<rect x="254.3" y="98" width="5.6" height="13" fill="#f59e0b"><title>0x8001F5B8 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="259.9" y="98" width="3.0" height="13" fill="#22c55e"><title>0x8001F620 56 B &#183; Nombrada por nosotros</title></rect>
+<rect x="262.9" y="98" width="3.0" height="13" fill="#22c55e"><title>0x8001F658 56 B &#183; Nombrada por nosotros</title></rect>
+<rect x="265.9" y="98" width="1.9" height="13" fill="#22c55e"><title>0x8001F690 36 B &#183; Nombrada por nosotros</title></rect>
+<rect x="267.8" y="98" width="19.6" height="13" fill="#22c55e"><title>0x8001F6B4 364 B &#183; Nombrada por nosotros</title></rect>
+<rect x="287.4" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001F820 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="289.9" y="98" width="7.9" height="13" fill="#f59e0b"><title>0x8001F850 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="297.9" y="98" width="3.2" height="13" fill="#22c55e"><title>0x8001F8E4 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="305.2" y="98" width="6.2" height="13" fill="#f59e0b"><title>0x8001F96C 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="311.4" y="98" width="3.4" height="13" fill="#22c55e"><title>0x8001F9E0 64 B &#183; Nombrada por nosotros</title></rect>
+<rect x="314.9" y="98" width="3.4" height="13" fill="#38bdf8"><title>0x8001FA20 64 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="318.3" y="98" width="2.1" height="13" fill="#f59e0b"><title>0x8001FA60 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="320.4" y="98" width="2.4" height="13" fill="#f59e0b"><title>0x8001FA88 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="322.8" y="98" width="3.4" height="13" fill="#38bdf8"><title>0x8001FAB4 64 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="326.2" y="98" width="2.4" height="13" fill="#38bdf8"><title>0x8001FAF4 44 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="328.6" y="98" width="2.1" height="13" fill="#38bdf8"><title>0x8001FB20 40 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="341.7" y="98" width="5.6" height="13" fill="#f59e0b"><title>0x8001FC14 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="352.9" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001FCE4 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="358.3" y="98" width="2.6" height="13" fill="#38bdf8"><title>0x8001FD48 48 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="362.3" y="98" width="1.3" height="13" fill="#22c55e"><title>0x8001FD94 24 B &#183; Nombrada por nosotros</title></rect>
+<rect x="363.6" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001FDAC 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="366.2" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001FDDC 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="368.8" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001FE0C 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="371.4" y="98" width="2.6" height="13" fill="#22c55e"><title>0x8001FE3C 48 B &#183; Nombrada por nosotros</title></rect>
+<rect x="373.9" y="98" width="1.5" height="13" fill="#22c55e"><title>0x8001FE6C 28 B &#183; Nombrada por nosotros</title></rect>
+<rect x="376.1" y="98" width="2.4" height="13" fill="#22c55e"><title>0x8001FE94 44 B &#183; Nombrada por nosotros</title></rect>
+<rect x="378.5" y="98" width="12.2" height="13" fill="#22c55e"><title>0x8001FEC0 228 B &#183; Nombrada por nosotros</title></rect>
+<rect x="402.1" y="98" width="16.5" height="13" fill="#38bdf8"><title>0x80020078 308 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="418.6" y="98" width="14.2" height="13" fill="#38bdf8"><title>0x800201AC 264 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="432.8" y="98" width="15.9" height="13" fill="#22c55e"><title>0x800202B4 296 B &#183; Nombrada por nosotros</title></rect>
+<rect x="448.7" y="98" width="5.8" height="13" fill="#f59e0b"><title>0x800203DC 108 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="458.4" y="98" width="8.4" height="13" fill="#38bdf8"><title>0x80020490 156 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="476.0" y="98" width="23.4" height="13" fill="#f59e0b"><title>0x800205D8 436 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="499.4" y="98" width="5.2" height="13" fill="#f59e0b"><title>0x8002078C 96 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="539.6" y="98" width="6.2" height="13" fill="#f59e0b"><title>0x80020A78 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="545.8" y="98" width="6.4" height="13" fill="#f59e0b"><title>0x80020AEC 120 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="552.3" y="98" width="8.6" height="13" fill="#f59e0b"><title>0x80020B64 160 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="560.9" y="98" width="9.2" height="13" fill="#f59e0b"><title>0x80020C04 172 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="576.1" y="98" width="6.4" height="13" fill="#f59e0b"><title>0x80020D20 120 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="597.4" y="98" width="5.6" height="13" fill="#f59e0b"><title>0x80020EAC 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="603.0" y="98" width="30.7" height="13" fill="#f59e0b"><title>0x80020F14 572 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="633.7" y="98" width="19.1" height="13" fill="#f59e0b"><title>0x80021150 356 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="652.8" y="98" width="7.5" height="13" fill="#f59e0b"><title>0x800212B4 140 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="660.3" y="98" width="16.8" height="13" fill="#f59e0b"><title>0x80021340 312 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="677.1" y="98" width="31.6" height="13" fill="#f59e0b"><title>0x80021478 588 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="708.7" y="98" width="4.7" height="13" fill="#f59e0b"><title>0x800216C4 88 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="713.4" y="98" width="17.0" height="13" fill="#f59e0b"><title>0x8002171C 316 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="730.4" y="98" width="30.7" height="13" fill="#f59e0b"><title>0x80021858 572 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="765.8" y="98" width="2.8" height="13" fill="#f59e0b"><title>0x80021AEC 52 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="768.6" y="98" width="54.6" height="13" fill="#f59e0b"><title>0x80021B20 1016 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="826.8" y="98" width="4.3" height="13" fill="#38bdf8"><title>0x80021F5C 80 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="831.1" y="98" width="8.2" height="13" fill="#38bdf8"><title>0x80021FAC 152 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="839.3" y="98" width="14.6" height="13" fill="#f59e0b"><title>0x80022044 272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="855.2" y="98" width="26.6" height="13" fill="#f59e0b"><title>0x8002216C 496 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="881.8" y="98" width="8.2" height="13" fill="#38bdf8"><title>0x8002235C 724 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="114" width="30.7" height="13" fill="#38bdf8"><title>0x8002235C 572 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="40.7" y="114" width="27.9" height="13" fill="#f59e0b"><title>0x80022630 520 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="68.7" y="114" width="34.6" height="13" fill="#f59e0b"><title>0x80022838 644 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="127.5" y="114" width="29.6" height="13" fill="#f59e0b"><title>0x80022C80 552 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="182.7" y="114" width="32.7" height="13" fill="#f59e0b"><title>0x80023084 608 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="238.2" y="114" width="28.1" height="13" fill="#f59e0b"><title>0x8002348C 524 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="290.8" y="114" width="36.3" height="13" fill="#f59e0b"><title>0x80023860 676 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="327.1" y="114" width="105.9" height="13" fill="#f59e0b"><title>0x80023B04 1972 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="433.0" y="114" width="106.1" height="13" fill="#f59e0b"><title>0x800242B8 1976 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="539.2" y="114" width="53.7" height="13" fill="#38bdf8"><title>0x80024A70 1000 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="592.9" y="114" width="3.9" height="13" fill="#f59e0b"><title>0x80024E58 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="596.7" y="114" width="165.4" height="13" fill="#38bdf8"><title>0x80024EA0 3080 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="762.2" y="114" width="12.9" height="13" fill="#f59e0b"><title>0x80025AA8 240 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="775.1" y="114" width="4.9" height="13" fill="#f59e0b"><title>0x80025B98 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="780.0" y="114" width="5.8" height="13" fill="#f59e0b"><title>0x80025BF4 108 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="802.1" y="114" width="23.2" height="13" fill="#f59e0b"><title>0x80025D90 432 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="825.3" y="114" width="10.3" height="13" fill="#f59e0b"><title>0x80025F40 192 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="835.6" y="114" width="23.2" height="13" fill="#f59e0b"><title>0x80026000 432 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="858.8" y="114" width="7.5" height="13" fill="#f59e0b"><title>0x800261B0 140 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="866.4" y="114" width="20.6" height="13" fill="#f59e0b"><title>0x8002623C 384 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="887.0" y="114" width="3.0" height="13" fill="#f59e0b"><title>0x800263BC 276 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="130" width="11.8" height="13" fill="#f59e0b"><title>0x800263BC 220 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="21.8" y="130" width="6.2" height="13" fill="#f59e0b"><title>0x800264D0 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="28.0" y="130" width="66.0" height="13" fill="#f59e0b"><title>0x80026544 1228 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="94.0" y="130" width="26.4" height="13" fill="#f59e0b"><title>0x80026A10 492 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="120.4" y="130" width="4.5" height="13" fill="#f59e0b"><title>0x80026BFC 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="124.9" y="130" width="23.8" height="13" fill="#f59e0b"><title>0x80026C50 444 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="148.8" y="130" width="17.2" height="13" fill="#f59e0b"><title>0x80026E0C 320 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="166.0" y="130" width="8.4" height="13" fill="#f59e0b"><title>0x80026F4C 156 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="184.2" y="130" width="7.1" height="13" fill="#f59e0b"><title>0x800270A0 132 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="191.3" y="130" width="3.0" height="13" fill="#38bdf8"><title>0x80027124 56 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="194.3" y="130" width="4.9" height="13" fill="#f59e0b"><title>0x8002715C 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="199.3" y="130" width="43.6" height="13" fill="#f59e0b"><title>0x800271B8 812 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="251.1" y="130" width="22.3" height="13" fill="#38bdf8"><title>0x8002757C 416 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="285.2" y="130" width="1.3" height="13" fill="#f59e0b"><title>0x800277F8 24 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="304.3" y="130" width="42.5" height="13" fill="#f59e0b"><title>0x8002795C 792 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="346.9" y="130" width="32.9" height="13" fill="#38bdf8"><title>0x80027C74 612 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="379.7" y="130" width="24.3" height="13" fill="#38bdf8"><title>0x80027ED8 452 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="404.0" y="130" width="23.4" height="13" fill="#f59e0b"><title>0x8002809C 436 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="427.4" y="130" width="24.9" height="13" fill="#38bdf8"><title>0x80028250 464 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="452.4" y="130" width="3.9" height="13" fill="#f59e0b"><title>0x80028420 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="462.2" y="130" width="6.0" height="13" fill="#f59e0b"><title>0x800284D8 112 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="477.1" y="130" width="19.3" height="13" fill="#f59e0b"><title>0x800285EC 360 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="496.4" y="130" width="19.8" height="13" fill="#f59e0b"><title>0x80028754 368 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="516.2" y="130" width="23.8" height="13" fill="#f59e0b"><title>0x800288C4 444 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="550.3" y="130" width="3.7" height="13" fill="#f59e0b"><title>0x80028B40 68 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="558.9" y="130" width="50.9" height="13" fill="#38bdf8"><title>0x80028BE0 948 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="609.8" y="130" width="12.2" height="13" fill="#f59e0b"><title>0x80028F94 228 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="622.1" y="130" width="168.2" height="13" fill="#f59e0b"><title>0x80029078 3132 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="790.3" y="130" width="33.1" height="13" fill="#38bdf8"><title>0x80029CB4 616 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="888.3" y="130" width="1.7" height="13" fill="#38bdf8"><title>0x8002A3D4 252 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="146" width="11.8" height="13" fill="#38bdf8"><title>0x8002A3D4 220 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="21.8" y="146" width="66.8" height="13" fill="#38bdf8"><title>0x8002A4D0 1244 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="126.2" y="146" width="25.8" height="13" fill="#38bdf8"><title>0x8002AC68 480 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="162.8" y="146" width="14.2" height="13" fill="#f59e0b"><title>0x8002AF10 264 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="177.4" y="146" width="7.9" height="13" fill="#f59e0b"><title>0x8002B020 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="227.6" y="146" width="68.5" height="13" fill="#38bdf8"><title>0x8002B3C8 1276 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="296.6" y="146" width="4.5" height="13" fill="#f59e0b"><title>0x8002B8CC 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="301.1" y="146" width="7.7" height="13" fill="#38bdf8"><title>0x8002B920 144 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="407.7" y="146" width="18.5" height="13" fill="#38bdf8"><title>0x8002C0E0 344 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="426.2" y="146" width="27.7" height="13" fill="#38bdf8"><title>0x8002C238 516 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="470.8" y="146" width="11.8" height="13" fill="#f59e0b"><title>0x8002C578 220 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="482.7" y="146" width="12.5" height="13" fill="#f59e0b"><title>0x8002C654 232 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="576.1" y="146" width="17.4" height="13" fill="#38bdf8"><title>0x8002CD20 324 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="784.9" y="146" width="3.0" height="13" fill="#f59e0b"><title>0x8002DC50 56 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="791.4" y="146" width="2.1" height="13" fill="#f59e0b"><title>0x8002DCC8 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="793.5" y="146" width="2.4" height="13" fill="#f59e0b"><title>0x8002DCF0 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="795.9" y="146" width="32.0" height="13" fill="#f59e0b"><title>0x8002DD1C 596 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="827.9" y="146" width="53.1" height="13" fill="#f59e0b"><title>0x8002DF70 988 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="881.0" y="146" width="9.0" height="13" fill="#f59e0b"><title>0x8002E34C 200 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="162" width="1.7" height="13" fill="#f59e0b"><title>0x8002E34C 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="146.2" y="162" width="6.2" height="13" fill="#38bdf8"><title>0x8002EDDC 116 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="152.4" y="162" width="11.2" height="13" fill="#f59e0b"><title>0x8002EE50 208 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="163.6" y="162" width="17.2" height="13" fill="#38bdf8"><title>0x8002EF20 320 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="195.2" y="162" width="28.8" height="13" fill="#38bdf8"><title>0x8002F16C 536 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="224.0" y="162" width="18.7" height="13" fill="#38bdf8"><title>0x8002F384 348 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="242.7" y="162" width="61.9" height="13" fill="#38bdf8"><title>0x8002F4E0 1152 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="304.6" y="162" width="33.1" height="13" fill="#38bdf8"><title>0x8002F960 616 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="348.8" y="162" width="25.8" height="13" fill="#38bdf8"><title>0x8002FC98 480 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="383.6" y="162" width="7.7" height="13" fill="#f59e0b"><title>0x8002FF20 144 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="398.4" y="162" width="52.4" height="13" fill="#f59e0b"><title>0x80030034 976 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="555.3" y="162" width="14.4" height="13" fill="#f59e0b"><title>0x80030B9C 268 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="604.9" y="162" width="7.9" height="13" fill="#f59e0b"><title>0x80030F38 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="626.8" y="162" width="20.8" height="13" fill="#f59e0b"><title>0x800310D0 388 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="647.7" y="162" width="7.9" height="13" fill="#f59e0b"><title>0x80031254 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="655.6" y="162" width="12.0" height="13" fill="#f59e0b"><title>0x800312E8 224 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="667.6" y="162" width="12.0" height="13" fill="#f59e0b"><title>0x800313C8 224 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="679.7" y="162" width="12.0" height="13" fill="#f59e0b"><title>0x800314A8 224 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="691.7" y="162" width="11.8" height="13" fill="#f59e0b"><title>0x80031588 220 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="703.5" y="162" width="18.7" height="13" fill="#38bdf8"><title>0x80031664 348 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="722.2" y="162" width="167.8" height="13" fill="#38bdf8"><title>0x800317C0 6188 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="178" width="164.6" height="13" fill="#38bdf8"><title>0x800317C0 3064 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="199.9" y="178" width="50.1" height="13" fill="#38bdf8"><title>0x800331C4 932 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="255.8" y="178" width="5.4" height="13" fill="#f59e0b"><title>0x800335D4 100 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="261.2" y="178" width="21.1" height="13" fill="#38bdf8"><title>0x80033638 392 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="288.4" y="178" width="15.9" height="13" fill="#38bdf8"><title>0x80033834 296 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="308.2" y="178" width="22.3" height="13" fill="#f59e0b"><title>0x800339A4 416 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="330.5" y="178" width="271.6" height="13" fill="#38bdf8"><title>0x80033B44 5056 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="624.0" y="178" width="6.9" height="13" fill="#38bdf8"><title>0x8003509C 128 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="637.6" y="178" width="18.7" height="13" fill="#38bdf8"><title>0x80035198 348 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="656.2" y="178" width="16.5" height="13" fill="#38bdf8"><title>0x800352F4 308 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="672.8" y="178" width="31.2" height="13" fill="#38bdf8"><title>0x80035428 580 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="703.9" y="178" width="186.1" height="13" fill="#38bdf8"><title>0x8003566C 5708 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="194" width="120.5" height="13" fill="#38bdf8"><title>0x8003566C 2244 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="130.5" y="194" width="27.7" height="13" fill="#38bdf8"><title>0x80036CB8 516 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="164.5" y="194" width="20.0" height="13" fill="#38bdf8"><title>0x80036F30 372 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="199.7" y="194" width="35.4" height="13" fill="#f59e0b"><title>0x800371C0 660 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="235.2" y="194" width="112.4" height="13" fill="#f59e0b"><title>0x80037454 2092 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="347.5" y="194" width="17.2" height="13" fill="#f59e0b"><title>0x80037C80 320 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.4" y="194" width="4.9" height="13" fill="#f59e0b"><title>0x80037E18 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="374.4" y="194" width="17.6" height="13" fill="#f59e0b"><title>0x80037E74 328 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="392.0" y="194" width="5.6" height="13" fill="#f59e0b"><title>0x80037FBC 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="397.6" y="194" width="2.1" height="13" fill="#f59e0b"><title>0x80038024 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="436.7" y="194" width="14.6" height="13" fill="#f59e0b"><title>0x800382FC 272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="451.3" y="194" width="14.2" height="13" fill="#f59e0b"><title>0x8003840C 264 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="491.2" y="194" width="12.7" height="13" fill="#f59e0b"><title>0x800386F4 236 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="503.9" y="194" width="13.1" height="13" fill="#f59e0b"><title>0x800387E0 244 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="517.0" y="194" width="26.6" height="13" fill="#f59e0b"><title>0x800388D4 496 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="571.8" y="194" width="61.9" height="13" fill="#f59e0b"><title>0x80038CD0 1152 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="659.9" y="194" width="31.4" height="13" fill="#f59e0b"><title>0x80039338 584 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="691.3" y="194" width="58.7" height="13" fill="#f59e0b"><title>0x80039580 1092 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="749.9" y="194" width="38.5" height="13" fill="#f59e0b"><title>0x800399C4 716 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="812.7" y="194" width="45.5" height="13" fill="#f59e0b"><title>0x80039E54 848 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="74.0" y="210" width="22.3" height="13" fill="#f59e0b"><title>0x8003A89C 416 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="171.6" y="210" width="155.1" height="13" fill="#38bdf8"><title>0x8003AFB4 2888 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="326.7" y="210" width="21.3" height="13" fill="#f59e0b"><title>0x8003BAFC 396 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="361.3" y="210" width="7.9" height="13" fill="#f59e0b"><title>0x8003BD80 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.2" y="210" width="19.6" height="13" fill="#38bdf8"><title>0x8003BE14 364 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="439.9" y="210" width="28.8" height="13" fill="#38bdf8"><title>0x8003C338 536 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="502.4" y="210" width="23.8" height="13" fill="#38bdf8"><title>0x8003C7C4 444 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="526.3" y="210" width="37.4" height="13" fill="#38bdf8"><title>0x8003C980 696 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="876.9" y="210" width="3.2" height="13" fill="#22c55e"><title>0x8003E300 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="880.1" y="210" width="3.2" height="13" fill="#22c55e"><title>0x8003E33C 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="883.3" y="210" width="4.5" height="13" fill="#f59e0b"><title>0x8003E378 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="887.9" y="210" width="2.1" height="13" fill="#f59e0b"><title>0x8003E3CC 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="226" width="2.4" height="13" fill="#f59e0b"><title>0x8003E3CC 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="12.4" y="226" width="4.5" height="13" fill="#f59e0b"><title>0x8003E420 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="16.9" y="226" width="3.2" height="13" fill="#22c55e"><title>0x8003E474 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="20.1" y="226" width="3.2" height="13" fill="#22c55e"><title>0x8003E4B0 60 B &#183; Nombrada por nosotros</title></rect>
+<rect x="23.3" y="226" width="53.5" height="13" fill="#22c55e"><title>0x8003E4EC 996 B &#183; Nombrada por nosotros</title></rect>
+<rect x="80.7" y="226" width="3.9" height="13" fill="#f59e0b"><title>0x8003E918 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="130.1" y="226" width="13.8" height="13" fill="#f59e0b"><title>0x8003ECB0 256 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="203.1" y="226" width="43.2" height="13" fill="#f59e0b"><title>0x8003F200 804 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="252.6" y="226" width="30.3" height="13" fill="#38bdf8"><title>0x8003F598 564 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="282.9" y="226" width="41.2" height="13" fill="#38bdf8"><title>0x8003F7CC 768 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="324.1" y="226" width="10.5" height="13" fill="#22c55e"><title>0x8003FACC 196 B &#183; Nombrada por nosotros</title></rect>
+<rect x="334.6" y="226" width="26.2" height="13" fill="#f59e0b"><title>0x8003FB90 488 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="360.8" y="226" width="24.9" height="13" fill="#22c55e"><title>0x8003FD78 464 B &#183; Nombrada por nosotros</title></rect>
+<rect x="385.8" y="226" width="43.8" height="13" fill="#f59e0b"><title>0x8003FF48 816 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="429.6" y="226" width="6.2" height="13" fill="#22c55e"><title>0x80040278 116 B &#183; Nombrada por nosotros</title></rect>
+<rect x="435.8" y="226" width="47.3" height="13" fill="#f59e0b"><title>0x800402EC 880 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="483.1" y="226" width="7.5" height="13" fill="#f59e0b"><title>0x8004065C 140 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="490.6" y="226" width="26.6" height="13" fill="#f59e0b"><title>0x800406E8 496 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="517.2" y="226" width="6.2" height="13" fill="#f59e0b"><title>0x800408D8 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="523.5" y="226" width="20.0" height="13" fill="#f59e0b"><title>0x8004094C 372 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="543.5" y="226" width="17.0" height="13" fill="#f59e0b"><title>0x80040AC0 316 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="560.4" y="226" width="16.5" height="13" fill="#f59e0b"><title>0x80040BFC 308 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="577.0" y="226" width="20.2" height="13" fill="#f59e0b"><title>0x80040D30 376 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="608.3" y="226" width="32.0" height="13" fill="#f59e0b"><title>0x80040F78 596 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="640.4" y="226" width="6.2" height="13" fill="#f59e0b"><title>0x800411CC 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="646.6" y="226" width="30.9" height="13" fill="#f59e0b"><title>0x80041240 576 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="708.0" y="226" width="81.6" height="13" fill="#38bdf8"><title>0x800416B8 1520 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="789.7" y="226" width="6.4" height="13" fill="#38bdf8"><title>0x80041CA8 120 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="818.2" y="226" width="32.7" height="13" fill="#f59e0b"><title>0x80041EBC 608 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="879.3" y="226" width="10.7" height="13" fill="#f59e0b"><title>0x8004232C 304 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="242" width="5.6" height="13" fill="#f59e0b"><title>0x8004232C 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="15.6" y="242" width="16.3" height="13" fill="#f59e0b"><title>0x8004245C 304 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="31.9" y="242" width="3.0" height="13" fill="#f59e0b"><title>0x8004258C 56 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="34.9" y="242" width="41.0" height="13" fill="#38bdf8"><title>0x800425C4 764 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="76.0" y="242" width="14.6" height="13" fill="#38bdf8"><title>0x800428C0 272 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="115.1" y="242" width="11.6" height="13" fill="#38bdf8"><title>0x80042B98 216 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="126.7" y="242" width="12.7" height="13" fill="#38bdf8"><title>0x80042C70 236 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="172.0" y="242" width="9.5" height="13" fill="#38bdf8"><title>0x80042FBC 176 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="181.4" y="242" width="26.9" height="13" fill="#38bdf8"><title>0x8004306C 500 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="208.3" y="242" width="27.7" height="13" fill="#38bdf8"><title>0x80043260 516 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="236.0" y="242" width="20.4" height="13" fill="#38bdf8"><title>0x80043464 380 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="256.4" y="242" width="27.5" height="13" fill="#38bdf8"><title>0x800435E0 512 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="283.9" y="242" width="28.6" height="13" fill="#38bdf8"><title>0x800437E0 532 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="312.5" y="242" width="34.4" height="13" fill="#38bdf8"><title>0x800439F4 640 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="346.9" y="242" width="14.4" height="13" fill="#38bdf8"><title>0x80043C74 268 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="361.3" y="242" width="17.0" height="13" fill="#38bdf8"><title>0x80043D80 316 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="378.2" y="242" width="29.2" height="13" fill="#38bdf8"><title>0x80043EBC 544 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="439.3" y="242" width="13.3" height="13" fill="#38bdf8"><title>0x8004432C 248 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="452.6" y="242" width="16.1" height="13" fill="#38bdf8"><title>0x80044424 300 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="479.6" y="242" width="10.3" height="13" fill="#38bdf8"><title>0x8004461C 192 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="502.2" y="242" width="25.8" height="13" fill="#38bdf8"><title>0x800447C0 480 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="528.0" y="242" width="25.8" height="13" fill="#38bdf8"><title>0x800449A0 480 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="553.8" y="242" width="25.1" height="13" fill="#38bdf8"><title>0x80044B80 468 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="578.9" y="242" width="24.3" height="13" fill="#38bdf8"><title>0x80044D54 452 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="603.2" y="242" width="24.9" height="13" fill="#38bdf8"><title>0x80044F18 464 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="628.1" y="242" width="24.3" height="13" fill="#38bdf8"><title>0x800450E8 452 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="660.5" y="242" width="30.7" height="13" fill="#38bdf8"><title>0x80045344 572 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="705.2" y="242" width="20.4" height="13" fill="#38bdf8"><title>0x80045684 380 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="725.6" y="242" width="25.4" height="13" fill="#38bdf8"><title>0x80045800 472 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="776.1" y="242" width="18.9" height="13" fill="#38bdf8"><title>0x80045BAC 352 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="802.6" y="242" width="19.3" height="13" fill="#38bdf8"><title>0x80045D98 360 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="821.9" y="242" width="68.1" height="13" fill="#38bdf8"><title>0x80045F00 1808 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="258" width="29.0" height="13" fill="#38bdf8"><title>0x80045F00 540 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="39.0" y="258" width="100.1" height="13" fill="#38bdf8"><title>0x80046610 1864 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="139.1" y="258" width="98.6" height="13" fill="#38bdf8"><title>0x80046D58 1836 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="237.7" y="258" width="78.6" height="13" fill="#38bdf8"><title>0x80047484 1464 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="326.0" y="258" width="48.3" height="13" fill="#38bdf8"><title>0x80047AF0 900 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="385.1" y="258" width="21.9" height="13" fill="#38bdf8"><title>0x80047F3C 408 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="435.8" y="258" width="28.6" height="13" fill="#38bdf8"><title>0x800482EC 532 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="464.4" y="258" width="31.6" height="13" fill="#38bdf8"><title>0x80048500 588 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="496.0" y="258" width="15.5" height="13" fill="#38bdf8"><title>0x8004874C 288 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="511.4" y="258" width="19.6" height="13" fill="#38bdf8"><title>0x8004886C 364 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="531.0" y="258" width="31.6" height="13" fill="#38bdf8"><title>0x800489D8 588 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="593.7" y="258" width="21.7" height="13" fill="#38bdf8"><title>0x80048E68 404 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="615.4" y="258" width="9.5" height="13" fill="#38bdf8"><title>0x80048FFC 176 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="624.9" y="258" width="17.4" height="13" fill="#f59e0b"><title>0x800490AC 324 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="642.3" y="258" width="44.0" height="13" fill="#38bdf8"><title>0x800491F0 820 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="686.3" y="258" width="44.3" height="13" fill="#38bdf8"><title>0x80049524 824 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="792.5" y="258" width="58.9" height="13" fill="#38bdf8"><title>0x80049CDC 1096 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="851.3" y="258" width="38.7" height="13" fill="#38bdf8"><title>0x8004A124 936 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="274" width="11.6" height="13" fill="#38bdf8"><title>0x8004A124 216 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="21.6" y="274" width="68.5" height="13" fill="#38bdf8"><title>0x8004A4CC 1276 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="90.1" y="274" width="64.7" height="13" fill="#38bdf8"><title>0x8004A9C8 1204 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="235.2" y="274" width="15.9" height="13" fill="#38bdf8"><title>0x8004B454 296 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="251.1" y="274" width="15.7" height="13" fill="#38bdf8"><title>0x8004B57C 292 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="266.7" y="274" width="15.7" height="13" fill="#38bdf8"><title>0x8004B6A0 292 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="282.4" y="274" width="39.7" height="13" fill="#38bdf8"><title>0x8004B7C4 740 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="322.2" y="274" width="11.4" height="13" fill="#38bdf8"><title>0x8004BAA8 212 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="337.2" y="274" width="56.9" height="13" fill="#38bdf8"><title>0x8004BBC0 1060 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="394.1" y="274" width="13.3" height="13" fill="#f59e0b"><title>0x8004BFE4 248 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="407.5" y="274" width="7.9" height="13" fill="#f59e0b"><title>0x8004C0DC 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="451.9" y="274" width="18.5" height="13" fill="#f59e0b"><title>0x8004C418 344 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="470.4" y="274" width="18.5" height="13" fill="#38bdf8"><title>0x8004C570 344 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="488.9" y="274" width="20.6" height="13" fill="#38bdf8"><title>0x8004C6C8 384 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="509.5" y="274" width="37.4" height="13" fill="#38bdf8"><title>0x8004C848 696 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="546.9" y="274" width="66.6" height="13" fill="#38bdf8"><title>0x8004CB00 1240 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="648.3" y="274" width="18.5" height="13" fill="#38bdf8"><title>0x8004D260 344 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="699.9" y="274" width="71.1" height="13" fill="#f59e0b"><title>0x8004D620 1324 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="771.0" y="274" width="10.5" height="13" fill="#f59e0b"><title>0x8004DB4C 196 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="781.5" y="274" width="20.4" height="13" fill="#f59e0b"><title>0x8004DC10 380 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="821.9" y="274" width="41.2" height="13" fill="#f59e0b"><title>0x8004DF00 768 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="863.1" y="274" width="11.4" height="13" fill="#f59e0b"><title>0x8004E200 212 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="874.5" y="274" width="15.5" height="13" fill="#f59e0b"><title>0x8004E2D4 328 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="290" width="2.1" height="13" fill="#f59e0b"><title>0x8004E2D4 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="12.1" y="290" width="68.3" height="13" fill="#f59e0b"><title>0x8004E41C 1272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="80.5" y="290" width="26.9" height="13" fill="#f59e0b"><title>0x8004E914 500 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="224.4" y="290" width="2.6" height="13" fill="#f59e0b"><title>0x8004F38C 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="227.0" y="290" width="2.6" height="13" fill="#f59e0b"><title>0x8004F3BC 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="229.6" y="290" width="8.8" height="13" fill="#f59e0b"><title>0x8004F3EC 164 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="238.4" y="290" width="9.0" height="13" fill="#f59e0b"><title>0x8004F490 168 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="247.4" y="290" width="72.6" height="13" fill="#f59e0b"><title>0x8004F538 1352 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="320.0" y="290" width="12.5" height="13" fill="#f59e0b"><title>0x8004FA80 232 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="332.5" y="290" width="3.4" height="13" fill="#f59e0b"><title>0x8004FB68 64 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="335.9" y="290" width="15.0" height="13" fill="#38bdf8"><title>0x8004FBA8 280 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="351.0" y="290" width="9.2" height="13" fill="#38bdf8"><title>0x8004FCC0 172 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="360.2" y="290" width="4.9" height="13" fill="#f59e0b"><title>0x8004FD6C 92 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="365.1" y="290" width="4.5" height="13" fill="#f59e0b"><title>0x8004FDC8 84 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="369.6" y="290" width="9.9" height="13" fill="#f59e0b"><title>0x8004FE1C 184 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="379.5" y="290" width="26.6" height="13" fill="#f59e0b"><title>0x8004FED4 496 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="406.2" y="290" width="46.8" height="13" fill="#38bdf8"><title>0x800500C4 872 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="453.0" y="290" width="15.0" height="13" fill="#f59e0b"><title>0x8005042C 280 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="468.0" y="290" width="9.2" height="13" fill="#38bdf8"><title>0x80050544 172 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="477.3" y="290" width="119.7" height="13" fill="#38bdf8"><title>0x800505F0 2228 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="597.0" y="290" width="26.0" height="13" fill="#38bdf8"><title>0x80050EA4 484 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="622.9" y="290" width="234.2" height="13" fill="#38bdf8"><title>0x80051088 4360 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="857.1" y="290" width="32.9" height="13" fill="#38bdf8"><title>0x80052190 2012 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="10.0" y="306" width="75.2" height="13" fill="#38bdf8"><title>0x80052190 1400 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="85.2" y="306" width="59.1" height="13" fill="#38bdf8"><title>0x8005296C 1100 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="144.3" y="306" width="72.4" height="13" fill="#38bdf8"><title>0x80052DB8 1348 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="216.7" y="306" width="115.2" height="13" fill="#38bdf8"><title>0x800532FC 2144 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="331.8" y="306" width="129.6" height="13" fill="#38bdf8"><title>0x80053B5C 2412 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="461.4" y="306" width="49.8" height="13" fill="#38bdf8"><title>0x800544C8 928 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="511.2" y="306" width="52.4" height="13" fill="#38bdf8"><title>0x80054868 976 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="563.7" y="306" width="42.8" height="13" fill="#38bdf8"><title>0x80054C38 796 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="606.4" y="306" width="29.2" height="13" fill="#38bdf8"><title>0x80054F54 544 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="635.6" y="306" width="63.8" height="13" fill="#38bdf8"><title>0x80055174 1188 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="699.4" y="306" width="91.1" height="13" fill="#38bdf8"><title>0x80055618 1696 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="790.5" y="306" width="40.6" height="13" fill="#38bdf8"><title>0x80055CB8 756 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="831.1" y="306" width="55.0" height="13" fill="#f59e0b"><title>0x80055FAC 1024 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="886.1" y="306" width="3.9" height="13" fill="#f59e0b"><title>0x800563AC 116 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="322" width="2.4" height="13" fill="#f59e0b"><title>0x800563AC 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="12.4" y="322" width="139.9" height="13" fill="#f59e0b"><title>0x80056420 2604 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="152.2" y="322" width="46.2" height="13" fill="#38bdf8"><title>0x80056E4C 860 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="198.4" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x800571A8 224 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="210.4" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x80057288 224 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="222.5" y="322" width="14.2" height="13" fill="#38bdf8"><title>0x80057368 264 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="236.7" y="322" width="22.3" height="13" fill="#38bdf8"><title>0x80057470 416 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="259.0" y="322" width="22.8" height="13" fill="#38bdf8"><title>0x80057610 424 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="281.8" y="322" width="26.6" height="13" fill="#38bdf8"><title>0x800577B8 496 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="308.4" y="322" width="17.0" height="13" fill="#38bdf8"><title>0x800579A8 316 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="325.4" y="322" width="14.4" height="13" fill="#38bdf8"><title>0x80057AE4 268 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="339.8" y="322" width="14.8" height="13" fill="#38bdf8"><title>0x80057BF0 276 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="354.6" y="322" width="13.3" height="13" fill="#f59e0b"><title>0x80057D04 248 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="367.9" y="322" width="12.0" height="13" fill="#38bdf8"><title>0x80057DFC 224 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="380.0" y="322" width="35.0" height="13" fill="#38bdf8"><title>0x80057EDC 652 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="415.0" y="322" width="36.3" height="13" fill="#38bdf8"><title>0x80058168 676 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="451.3" y="322" width="27.1" height="13" fill="#38bdf8"><title>0x8005840C 504 B &#183; Sin nombre, con TObj</title></rect>
+<rect x="478.4" y="322" width="6.7" height="13" fill="#f59e0b"><title>0x80058604 124 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="485.0" y="322" width="15.9" height="13" fill="#f59e0b"><title>0x80058680 296 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="500.9" y="322" width="20.8" height="13" fill="#f59e0b"><title>0x800587A8 388 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="521.8" y="322" width="26.4" height="13" fill="#f59e0b"><title>0x8005892C 492 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="548.2" y="322" width="28.4" height="13" fill="#f59e0b"><title>0x80058B18 528 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="576.5" y="322" width="33.5" height="13" fill="#f59e0b"><title>0x80058D28 624 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="610.1" y="322" width="29.6" height="13" fill="#f59e0b"><title>0x80058F98 552 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="639.7" y="322" width="36.3" height="13" fill="#f59e0b"><title>0x800591C0 676 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="676.0" y="322" width="6.9" height="13" fill="#22c55e"><title>0x80059464 128 B &#183; Nombrada por nosotros</title></rect>
+<rect x="682.9" y="322" width="14.6" height="13" fill="#f59e0b"><title>0x800594E4 272 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="697.5" y="322" width="16.5" height="13" fill="#f59e0b"><title>0x800595F4 308 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="714.0" y="322" width="7.9" height="13" fill="#f59e0b"><title>0x80059728 148 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="722.0" y="322" width="76.1" height="13" fill="#f59e0b"><title>0x800597BC 1416 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="798.0" y="322" width="25.1" height="13" fill="#f59e0b"><title>0x80059D44 468 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="836.7" y="322" width="53.3" height="13" fill="#f59e0b"><title>0x8005A014 1932 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="338" width="50.5" height="13" fill="#f59e0b"><title>0x8005A014 940 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="60.5" y="338" width="14.2" height="13" fill="#f59e0b"><title>0x8005A7A0 264 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="74.7" y="338" width="13.5" height="13" fill="#f59e0b"><title>0x8005A8A8 252 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="88.2" y="338" width="10.1" height="13" fill="#f59e0b"><title>0x8005A9A4 188 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="99.4" y="338" width="125.0" height="13" fill="#f59e0b"><title>0x8005AA74 2328 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="224.4" y="338" width="35.7" height="13" fill="#f59e0b"><title>0x8005B38C 664 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="260.1" y="338" width="42.1" height="13" fill="#f59e0b"><title>0x8005B624 784 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="302.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B934 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="303.0" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B944 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="303.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B954 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="304.8" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B964 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="305.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B974 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="306.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B984 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="307.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B994 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="308.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9A4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="309.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9B4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="309.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9C4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="310.8" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9D4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="311.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9E4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="312.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005B9F4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="313.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA04 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="314.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA14 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="315.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA24 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="315.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA34 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="316.8" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA44 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="317.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA54 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="318.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BA64 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="355.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BD14 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="356.3" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005BD24 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="359.1" y="338" width="2.1" height="13" fill="#94a3b8"><title>0x8005BD58 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="361.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BD80 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="361.7" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005BD88 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="364.5" y="338" width="2.1" height="13" fill="#94a3b8"><title>0x8005BDBC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="366.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BDE4 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="367.1" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005BDEC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="369.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BE1C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="370.5" y="338" width="7.5" height="13" fill="#94a3b8"><title>0x8005BE2C 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="378.0" y="338" width="1.5" height="13" fill="#94a3b8"><title>0x8005BEB8 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="379.5" y="338" width="4.9" height="13" fill="#94a3b8"><title>0x8005BED4 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="384.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BF30 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="384.9" y="338" width="3.7" height="13" fill="#94a3b8"><title>0x8005BF38 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="388.6" y="338" width="2.1" height="13" fill="#94a3b8"><title>0x8005BF7C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="390.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005BFA4 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="391.1" y="338" width="4.5" height="13" fill="#94a3b8"><title>0x8005BFAC 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="395.6" y="338" width="1.1" height="13" fill="#94a3b8"><title>0x8005C000 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="396.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C014 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="396.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C018 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="397.4" y="338" width="3.7" height="13" fill="#94a3b8"><title>0x8005C020 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="401.0" y="338" width="1.1" height="13" fill="#94a3b8"><title>0x8005C064 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="403.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C08C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="403.8" y="338" width="4.5" height="13" fill="#94a3b8"><title>0x8005C098 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="408.3" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005C0EC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="410.0" y="338" width="3.2" height="13" fill="#94a3b8"><title>0x8005C10C 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="413.3" y="338" width="4.3" height="13" fill="#94a3b8"><title>0x8005C148 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="417.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C198 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="418.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C1A8 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="420.6" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005C1D0 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="423.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C200 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="424.0" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C210 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="424.4" y="338" width="1.5" height="13" fill="#94a3b8"><title>0x8005C218 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="425.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C234 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="426.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C23C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="426.8" y="338" width="6.7" height="13" fill="#94a3b8"><title>0x8005C244 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="433.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C2C0 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="434.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C2D0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="434.7" y="338" width="4.7" height="13" fill="#94a3b8"><title>0x8005C2D8 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="439.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C330 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="439.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C338 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="440.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C340 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="440.8" y="338" width="1.5" height="13" fill="#94a3b8"><title>0x8005C348 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="442.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C364 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="442.5" y="338" width="2.4" height="13" fill="#94a3b8"><title>0x8005C368 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="444.8" y="338" width="1.3" height="13" fill="#94a3b8"><title>0x8005C394 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="446.1" y="338" width="3.2" height="13" fill="#94a3b8"><title>0x8005C3AC 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="449.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C3E8 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="449.6" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005C3EC 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="452.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C420 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="453.2" y="338" width="4.7" height="13" fill="#94a3b8"><title>0x8005C430 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="457.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C488 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="458.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C490 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="458.6" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005C494 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="461.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C4C8 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="462.0" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005C4D4 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="464.6" y="338" width="1.1" height="13" fill="#94a3b8"><title>0x8005C504 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="465.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C518 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="465.9" y="338" width="8.4" height="13" fill="#94a3b8"><title>0x8005C51C 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="474.3" y="338" width="15.5" height="13" fill="#94a3b8"><title>0x8005C5B8 288 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="489.7" y="338" width="8.8" height="13" fill="#94a3b8"><title>0x8005C6D8 164 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="498.6" y="338" width="1.3" height="13" fill="#94a3b8"><title>0x8005C77C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="499.8" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C794 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="500.3" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005C79C 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="503.1" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005C7D0 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="505.6" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005C800 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="508.2" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005C830 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="509.9" y="338" width="2.1" height="13" fill="#94a3b8"><title>0x8005C850 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="512.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005C878 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="512.5" y="338" width="3.2" height="13" fill="#94a3b8"><title>0x8005C880 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="515.7" y="338" width="2.1" height="13" fill="#94a3b8"><title>0x8005C8BC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="520.7" y="338" width="1.5" height="13" fill="#94a3b8"><title>0x8005C918 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="522.2" y="338" width="7.7" height="13" fill="#94a3b8"><title>0x8005C934 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="529.9" y="338" width="16.3" height="13" fill="#94a3b8"><title>0x8005C9C4 304 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="546.2" y="338" width="8.6" height="13" fill="#94a3b8"><title>0x8005CAF4 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="554.8" y="338" width="3.7" height="13" fill="#94a3b8"><title>0x8005CB94 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="558.5" y="338" width="1.9" height="13" fill="#94a3b8"><title>0x8005CBD8 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="560.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005CBFC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="561.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005CC08 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="561.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005CC14 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="562.4" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005CC20 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="564.1" y="338" width="4.3" height="13" fill="#94a3b8"><title>0x8005CC40 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="568.4" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005CC90 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="571.0" y="338" width="12.5" height="13" fill="#94a3b8"><title>0x8005CCC0 232 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="583.4" y="338" width="12.9" height="13" fill="#94a3b8"><title>0x8005CDA8 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="596.3" y="338" width="1.1" height="13" fill="#94a3b8"><title>0x8005CE98 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="597.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005CEAC 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="598.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005CEBC 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="598.7" y="338" width="12.9" height="13" fill="#94a3b8"><title>0x8005CEC4 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="611.6" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005CFB4 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="613.3" y="338" width="7.1" height="13" fill="#94a3b8"><title>0x8005CFD4 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="620.4" y="338" width="2.8" height="13" fill="#94a3b8"><title>0x8005D058 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="623.2" y="338" width="1.3" height="13" fill="#94a3b8"><title>0x8005D08C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="624.5" y="338" width="7.9" height="13" fill="#94a3b8"><title>0x8005D0A4 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="632.4" y="338" width="4.7" height="13" fill="#94a3b8"><title>0x8005D138 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="637.1" y="338" width="5.4" height="13" fill="#94a3b8"><title>0x8005D190 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="642.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D1F4 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="642.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D1FC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="643.8" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D20C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="644.6" y="338" width="3.0" height="13" fill="#94a3b8"><title>0x8005D21C 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="647.7" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D254 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="648.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D264 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="649.4" y="338" width="4.5" height="13" fill="#94a3b8"><title>0x8005D274 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="653.9" y="338" width="3.0" height="13" fill="#94a3b8"><title>0x8005D2C8 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="659.5" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D330 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="660.3" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D340 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="661.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D350 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="662.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D360 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="664.0" y="338" width="3.7" height="13" fill="#94a3b8"><title>0x8005D384 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="667.6" y="338" width="7.3" height="13" fill="#94a3b8"><title>0x8005D3C8 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="676.0" y="338" width="1.5" height="13" fill="#94a3b8"><title>0x8005D464 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="677.5" y="338" width="5.8" height="13" fill="#94a3b8"><title>0x8005D480 108 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="692.1" y="338" width="3.0" height="13" fill="#94a3b8"><title>0x8005D590 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="695.1" y="338" width="7.5" height="13" fill="#94a3b8"><title>0x8005D5C8 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="702.7" y="338" width="8.4" height="13" fill="#94a3b8"><title>0x8005D654 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="711.0" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D6F0 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="711.7" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005D6FC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="714.3" y="338" width="2.4" height="13" fill="#94a3b8"><title>0x8005D72C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="716.6" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005D758 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="718.3" y="338" width="1.7" height="13" fill="#94a3b8"><title>0x8005D778 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="720.1" y="338" width="2.4" height="13" fill="#94a3b8"><title>0x8005D798 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="722.4" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D7C4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="723.3" y="338" width="2.4" height="13" fill="#94a3b8"><title>0x8005D7D4 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="725.6" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D800 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="726.5" y="338" width="1.9" height="13" fill="#94a3b8"><title>0x8005D810 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="728.4" y="338" width="1.9" height="13" fill="#94a3b8"><title>0x8005D834 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="730.4" y="338" width="11.8" height="13" fill="#94a3b8"><title>0x8005D858 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="742.2" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D934 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="743.0" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005D944 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="743.9" y="338" width="7.9" height="13" fill="#94a3b8"><title>0x8005D954 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="751.9" y="338" width="7.7" height="13" fill="#94a3b8"><title>0x8005D9E8 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="759.6" y="338" width="7.3" height="13" fill="#94a3b8"><title>0x8005DA78 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="766.9" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005DB00 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="767.8" y="338" width="7.3" height="13" fill="#94a3b8"><title>0x8005DB10 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="775.1" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005DB98 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="775.9" y="338" width="1.3" height="13" fill="#94a3b8"><title>0x8005DBA8 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="777.2" y="338" width="16.3" height="13" fill="#94a3b8"><title>0x8005DBC0 304 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="793.8" y="338" width="2.6" height="13" fill="#94a3b8"><title>0x8005DCF4 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="796.3" y="338" width="44.7" height="13" fill="#94a3b8"><title>0x8005DD24 832 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="842.9" y="338" width="9.0" height="13" fill="#94a3b8"><title>0x8005E088 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="852.0" y="338" width="1.0" height="13" fill="#94a3b8"><title>0x8005E130 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="852.2" y="338" width="3.4" height="13" fill="#94a3b8"><title>0x8005E134 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="855.6" y="338" width="5.6" height="13" fill="#94a3b8"><title>0x8005E174 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="861.2" y="338" width="5.6" height="13" fill="#94a3b8"><title>0x8005E1DC 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="866.8" y="338" width="6.4" height="13" fill="#94a3b8"><title>0x8005E244 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="873.2" y="338" width="4.7" height="13" fill="#94a3b8"><title>0x8005E2BC 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="878.0" y="338" width="3.2" height="13" fill="#94a3b8"><title>0x8005E314 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="881.2" y="338" width="8.8" height="13" fill="#94a3b8"><title>0x8005E350 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005E350 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.6" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E400 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="12.4" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x8005E420 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="13.7" y="354" width="10.1" height="13" fill="#94a3b8"><title>0x8005E438 188 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="23.8" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E4F4 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="24.8" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x8005E508 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="28.3" y="354" width="1.5" height="13" fill="#94a3b8"><title>0x8005E548 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="29.8" y="354" width="1.5" height="13" fill="#94a3b8"><title>0x8005E564 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="31.3" y="354" width="3.2" height="13" fill="#94a3b8"><title>0x8005E580 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="34.5" y="354" width="3.2" height="13" fill="#94a3b8"><title>0x8005E5BC 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="37.7" y="354" width="1.9" height="13" fill="#94a3b8"><title>0x8005E5F8 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="39.6" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x8005E61C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="40.9" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E634 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="42.7" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005E654 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="43.1" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E65C 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="44.8" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005E67C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="45.2" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E684 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="46.3" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E698 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="47.4" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E6AC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="48.5" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E6C0 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="49.5" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E6D4 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="50.6" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E6E8 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="51.7" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E6FC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="52.8" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E710 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="53.8" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E724 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="54.9" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E738 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="56.0" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E74C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="57.1" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E760 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="58.1" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E774 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="59.2" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E788 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="60.3" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E79C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="61.3" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E7B0 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="62.4" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005E7C4 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="63.5" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E7D8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="65.2" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E7F8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="66.9" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E818 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="68.7" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x8005E838 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="70.4" y="354" width="7.7" height="13" fill="#94a3b8"><title>0x8005E858 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="78.1" y="354" width="1.9" height="13" fill="#94a3b8"><title>0x8005E8E8 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="80.0" y="354" width="5.2" height="13" fill="#94a3b8"><title>0x8005E90C 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="85.2" y="354" width="5.8" height="13" fill="#94a3b8"><title>0x8005E96C 108 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="91.0" y="354" width="2.6" height="13" fill="#94a3b8"><title>0x8005E9D8 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="93.6" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005EA08 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="94.0" y="354" width="19.6" height="13" fill="#94a3b8"><title>0x8005EA10 364 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="113.6" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005EB7C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="114.6" y="354" width="9.2" height="13" fill="#94a3b8"><title>0x8005EB90 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="123.9" y="354" width="15.3" height="13" fill="#94a3b8"><title>0x8005EC3C 284 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="139.1" y="354" width="4.3" height="13" fill="#94a3b8"><title>0x8005ED58 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="143.4" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x8005EDA8 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="144.7" y="354" width="7.5" height="13" fill="#94a3b8"><title>0x8005EDC0 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="152.2" y="354" width="7.3" height="13" fill="#94a3b8"><title>0x8005EE4C 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="159.5" y="354" width="5.4" height="13" fill="#94a3b8"><title>0x8005EED4 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="164.9" y="354" width="9.2" height="13" fill="#94a3b8"><title>0x8005EF38 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="174.1" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005EFE4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="175.0" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8005EFF4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="175.9" y="354" width="4.9" height="13" fill="#94a3b8"><title>0x8005F004 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="180.8" y="354" width="8.4" height="13" fill="#94a3b8"><title>0x8005F060 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="189.2" y="354" width="5.8" height="13" fill="#94a3b8"><title>0x8005F0FC 108 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="195.0" y="354" width="11.6" height="13" fill="#94a3b8"><title>0x8005F168 216 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="206.6" y="354" width="3.2" height="13" fill="#94a3b8"><title>0x8005F240 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="209.8" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x8005F27C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="210.9" y="354" width="7.9" height="13" fill="#94a3b8"><title>0x8005F290 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="218.8" y="354" width="8.4" height="13" fill="#94a3b8"><title>0x8005F324 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="227.2" y="354" width="5.4" height="13" fill="#94a3b8"><title>0x8005F3C0 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="232.6" y="354" width="5.4" height="13" fill="#94a3b8"><title>0x8005F424 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="237.9" y="354" width="9.0" height="13" fill="#94a3b8"><title>0x8005F488 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="247.0" y="354" width="1.5" height="13" fill="#94a3b8"><title>0x8005F530 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="248.5" y="354" width="9.9" height="13" fill="#94a3b8"><title>0x8005F54C 184 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="258.4" y="354" width="8.2" height="13" fill="#94a3b8"><title>0x8005F604 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="266.5" y="354" width="5.2" height="13" fill="#94a3b8"><title>0x8005F69C 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="271.7" y="354" width="6.2" height="13" fill="#94a3b8"><title>0x8005F6FC 116 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="277.9" y="354" width="14.0" height="13" fill="#94a3b8"><title>0x8005F770 260 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="291.9" y="354" width="15.3" height="13" fill="#94a3b8"><title>0x8005F874 284 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="307.1" y="354" width="3.0" height="13" fill="#94a3b8"><title>0x8005F990 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="310.1" y="354" width="9.0" height="13" fill="#94a3b8"><title>0x8005F9C8 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="319.2" y="354" width="11.0" height="13" fill="#94a3b8"><title>0x8005FA70 204 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="330.1" y="354" width="1.9" height="13" fill="#94a3b8"><title>0x8005FB3C 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="332.1" y="354" width="2.8" height="13" fill="#94a3b8"><title>0x8005FB60 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="334.8" y="354" width="6.9" height="13" fill="#94a3b8"><title>0x8005FB94 128 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="341.7" y="354" width="4.9" height="13" fill="#94a3b8"><title>0x8005FC14 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="346.7" y="354" width="21.3" height="13" fill="#94a3b8"><title>0x8005FC70 396 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="367.9" y="354" width="6.2" height="13" fill="#94a3b8"><title>0x8005FDFC 116 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="374.2" y="354" width="3.0" height="13" fill="#94a3b8"><title>0x8005FE70 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="377.2" y="354" width="2.6" height="13" fill="#94a3b8"><title>0x8005FEA8 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="379.7" y="354" width="3.2" height="13" fill="#94a3b8"><title>0x8005FED8 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="383.0" y="354" width="7.1" height="13" fill="#94a3b8"><title>0x8005FF14 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="390.1" y="354" width="3.7" height="13" fill="#94a3b8"><title>0x8005FF98 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="393.7" y="354" width="2.4" height="13" fill="#94a3b8"><title>0x8005FFDC 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="396.1" y="354" width="4.7" height="13" fill="#94a3b8"><title>0x80060008 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="400.8" y="354" width="18.3" height="13" fill="#94a3b8"><title>0x80060060 340 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="419.1" y="354" width="10.5" height="13" fill="#94a3b8"><title>0x800601B4 196 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="429.6" y="354" width="18.3" height="13" fill="#94a3b8"><title>0x80060278 340 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="447.9" y="354" width="15.3" height="13" fill="#94a3b8"><title>0x800603CC 284 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="463.1" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x800604E8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="464.8" y="354" width="4.3" height="13" fill="#94a3b8"><title>0x80060508 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="469.1" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80060558 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="469.6" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x80060560 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="473.0" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x800605A0 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="476.4" y="354" width="2.8" height="13" fill="#94a3b8"><title>0x800605E0 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="479.2" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x80060614 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="480.5" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x8006062C 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="483.9" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x8006066C 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="487.4" y="354" width="2.8" height="13" fill="#94a3b8"><title>0x800606AC 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="490.2" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x800606E0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="491.5" y="354" width="2.8" height="13" fill="#94a3b8"><title>0x800606F8 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="494.3" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x8006072C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="495.1" y="354" width="6.4" height="13" fill="#94a3b8"><title>0x8006073C 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="501.6" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x800607B4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="502.2" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x800607C0 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="505.6" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80060800 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="511.0" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80060864 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="511.2" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80060868 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="511.7" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x80060870 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="512.9" y="354" width="12.5" height="13" fill="#94a3b8"><title>0x80060888 232 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="525.4" y="354" width="4.3" height="13" fill="#94a3b8"><title>0x80060970 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="529.7" y="354" width="3.2" height="13" fill="#94a3b8"><title>0x800609C0 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="532.9" y="354" width="22.6" height="13" fill="#94a3b8"><title>0x800609FC 420 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="555.5" y="354" width="2.4" height="13" fill="#94a3b8"><title>0x80060BA0 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="557.9" y="354" width="5.4" height="13" fill="#94a3b8"><title>0x80060BCC 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="563.2" y="354" width="3.0" height="13" fill="#94a3b8"><title>0x80060C30 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="566.2" y="354" width="20.2" height="13" fill="#94a3b8"><title>0x80060C68 376 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="586.4" y="354" width="2.1" height="13" fill="#94a3b8"><title>0x80060DE0 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="588.6" y="354" width="5.2" height="13" fill="#94a3b8"><title>0x80060E08 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="593.7" y="354" width="3.0" height="13" fill="#94a3b8"><title>0x80060E68 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="596.7" y="354" width="24.5" height="13" fill="#94a3b8"><title>0x80060EA0 456 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="621.2" y="354" width="1.9" height="13" fill="#94a3b8"><title>0x80061068 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="623.2" y="354" width="2.1" height="13" fill="#94a3b8"><title>0x8006108C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="625.3" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x800610B4 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="626.4" y="354" width="4.3" height="13" fill="#94a3b8"><title>0x800610C8 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="630.7" y="354" width="4.1" height="13" fill="#94a3b8"><title>0x80061118 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="634.8" y="354" width="2.6" height="13" fill="#94a3b8"><title>0x80061164 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="637.3" y="354" width="1.9" height="13" fill="#94a3b8"><title>0x80061194 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="639.3" y="354" width="4.1" height="13" fill="#94a3b8"><title>0x800611B8 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="643.4" y="354" width="15.7" height="13" fill="#94a3b8"><title>0x80061204 292 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="659.0" y="354" width="8.2" height="13" fill="#94a3b8"><title>0x80061328 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="669.1" y="354" width="7.9" height="13" fill="#94a3b8"><title>0x800613E4 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="677.1" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x80061478 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="678.8" y="354" width="40.2" height="13" fill="#94a3b8"><title>0x80061498 748 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="719.0" y="354" width="15.7" height="13" fill="#94a3b8"><title>0x80061784 292 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="734.7" y="354" width="3.0" height="13" fill="#94a3b8"><title>0x800618A8 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="737.7" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x800618E0 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="739.4" y="354" width="1.3" height="13" fill="#94a3b8"><title>0x80061900 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="740.7" y="354" width="6.7" height="13" fill="#94a3b8"><title>0x80061918 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="754.2" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x80061A14 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="755.3" y="354" width="2.8" height="13" fill="#94a3b8"><title>0x80061A28 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="758.1" y="354" width="18.7" height="13" fill="#94a3b8"><title>0x80061A5C 348 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="776.8" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80061BB8 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="777.6" y="354" width="11.4" height="13" fill="#94a3b8"><title>0x80061BC8 212 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="789.0" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80061C9C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="789.5" y="354" width="2.4" height="13" fill="#94a3b8"><title>0x80061CA4 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="791.8" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80061CD0 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="792.7" y="354" width="1.0" height="13" fill="#94a3b8"><title>0x80061CE0 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="793.5" y="354" width="4.5" height="13" fill="#94a3b8"><title>0x80061CF0 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="798.0" y="354" width="1.1" height="13" fill="#94a3b8"><title>0x80061D44 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="799.1" y="354" width="3.4" height="13" fill="#94a3b8"><title>0x80061D58 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="802.6" y="354" width="36.7" height="13" fill="#94a3b8"><title>0x80061D98 684 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="839.3" y="354" width="12.2" height="13" fill="#94a3b8"><title>0x80062044 228 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="851.5" y="354" width="1.7" height="13" fill="#94a3b8"><title>0x80062128 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="853.3" y="354" width="1.5" height="13" fill="#94a3b8"><title>0x80062148 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="854.8" y="354" width="21.9" height="13" fill="#94a3b8"><title>0x80062164 408 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="876.7" y="354" width="13.3" height="13" fill="#94a3b8"><title>0x800622FC 4428 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="370" width="224.5" height="13" fill="#94a3b8"><title>0x800622FC 4180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="234.5" y="370" width="1.5" height="13" fill="#94a3b8"><title>0x80063448 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="236.0" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80063464 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="237.3" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x8006347C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="239.7" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x800634A8 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="240.5" y="370" width="7.3" height="13" fill="#94a3b8"><title>0x800634B8 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="247.8" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063540 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="248.3" y="370" width="8.2" height="13" fill="#94a3b8"><title>0x80063548 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="256.4" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x800635E0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="256.9" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x800635E8 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="262.2" y="370" width="16.3" height="13" fill="#94a3b8"><title>0x8006364C 304 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="278.6" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x8006377C 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="278.8" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80063780 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="280.5" y="370" width="4.7" height="13" fill="#94a3b8"><title>0x800637A0 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="285.2" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x800637F8 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="287.6" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80063824 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="289.3" y="370" width="6.9" height="13" fill="#f59e0b"><title>0x80063844 128 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="296.6" y="370" width="6.7" height="13" fill="#94a3b8"><title>0x800638CC 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="304.3" y="370" width="14.4" height="13" fill="#94a3b8"><title>0x8006395C 268 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="318.9" y="370" width="18.3" height="13" fill="#94a3b8"><title>0x80063A6C 340 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="337.9" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80063BCC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="340.4" y="370" width="4.3" height="13" fill="#94a3b8"><title>0x80063BFC 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="344.7" y="370" width="4.9" height="13" fill="#94a3b8"><title>0x80063C4C 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="349.9" y="370" width="15.7" height="13" fill="#94a3b8"><title>0x80063CAC 292 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="366.2" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80063DDC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="368.8" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80063E0C 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="371.4" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80063E3C 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="373.9" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80063E6C 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="375.7" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063E8C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="376.5" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063E9C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="377.4" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063EAC 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="378.2" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80063EBC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="380.0" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063EDC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="381.0" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063EF0 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="382.1" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063F04 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="382.8" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063F10 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="383.8" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80063F24 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="385.1" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063F3C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="386.2" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063F50 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="387.3" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80063F64 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="388.3" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063F78 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="389.0" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063F84 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="389.6" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063F90 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="390.3" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80063F9C 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="392.0" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80063FBC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="393.7" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80063FDC 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="395.4" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80063FFC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="396.3" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x8006400C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="398.4" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x80064034 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="400.6" y="370" width="3.2" height="13" fill="#94a3b8"><title>0x8006405C 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="403.8" y="370" width="1.9" height="13" fill="#94a3b8"><title>0x80064098 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="405.7" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x800640BC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="407.9" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x800640E4 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="410.0" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x8006410C 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="411.8" y="370" width="1.9" height="13" fill="#94a3b8"><title>0x8006412C 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="413.7" y="370" width="4.7" height="13" fill="#94a3b8"><title>0x80064150 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="418.4" y="370" width="4.7" height="13" fill="#94a3b8"><title>0x800641A8 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="423.1" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80064200 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="424.6" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x8006421C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="427.2" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x8006424C 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="432.6" y="370" width="5.6" height="13" fill="#94a3b8"><title>0x800642B0 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="438.2" y="370" width="7.9" height="13" fill="#94a3b8"><title>0x80064318 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="446.1" y="370" width="16.1" height="13" fill="#94a3b8"><title>0x800643AC 300 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="462.5" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x800644DC 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="467.8" y="370" width="16.5" height="13" fill="#94a3b8"><title>0x80064540 308 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="484.8" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x8006467C 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="490.2" y="370" width="16.5" height="13" fill="#94a3b8"><title>0x800646E0 308 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="507.1" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x8006481C 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="512.5" y="370" width="16.5" height="13" fill="#94a3b8"><title>0x80064880 308 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="529.5" y="370" width="10.1" height="13" fill="#94a3b8"><title>0x800649BC 188 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="539.6" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80064A78 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="547.1" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80064B04 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="548.2" y="370" width="1.5" height="13" fill="#94a3b8"><title>0x80064B18 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="549.7" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064B34 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="550.1" y="370" width="5.6" height="13" fill="#94a3b8"><title>0x80064B3C 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="558.7" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80064BDC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="561.3" y="370" width="6.7" height="13" fill="#94a3b8"><title>0x80064C0C 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="567.9" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80064C88 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="569.0" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x80064C9C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="571.2" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x80064CC4 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="573.3" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x80064CEC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="575.5" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064D14 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="576.3" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064D24 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="577.2" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064D34 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="578.0" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064D44 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="578.9" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064D54 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="579.8" y="370" width="4.7" height="13" fill="#94a3b8"><title>0x80064D64 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="584.5" y="370" width="1.1" height="13" fill="#94a3b8"><title>0x80064DBC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="585.6" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80064DD0 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="587.3" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80064DF0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="588.6" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x80064E08 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="590.9" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064E34 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="591.4" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x80064E3C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="593.7" y="370" width="1.0" height="13" fill="#94a3b8"><title>0x80064E68 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="594.2" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80064E70 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="595.9" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80064E90 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="597.6" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80064EB0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="598.9" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80064EC8 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="600.2" y="370" width="16.8" height="13" fill="#94a3b8"><title>0x80064EE0 312 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="616.9" y="370" width="16.1" height="13" fill="#94a3b8"><title>0x80065018 300 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="633.0" y="370" width="15.0" height="13" fill="#94a3b8"><title>0x80065144 280 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="648.1" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x8006525C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="650.4" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x80065288 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="652.2" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x800652A8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="653.9" y="370" width="1.9" height="13" fill="#94a3b8"><title>0x800652C8 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="655.8" y="370" width="1.7" height="13" fill="#94a3b8"><title>0x800652EC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="657.5" y="370" width="14.0" height="13" fill="#94a3b8"><title>0x8006530C 260 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="671.5" y="370" width="6.9" height="13" fill="#94a3b8"><title>0x80065410 128 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="678.4" y="370" width="5.4" height="13" fill="#94a3b8"><title>0x80065490 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="683.8" y="370" width="27.9" height="13" fill="#94a3b8"><title>0x800654F4 520 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="711.7" y="370" width="13.8" height="13" fill="#94a3b8"><title>0x800656FC 256 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="725.4" y="370" width="4.1" height="13" fill="#94a3b8"><title>0x800657FC 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="729.5" y="370" width="7.1" height="13" fill="#94a3b8"><title>0x80065848 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="736.6" y="370" width="7.1" height="13" fill="#94a3b8"><title>0x800658CC 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="743.7" y="370" width="7.3" height="13" fill="#94a3b8"><title>0x80065950 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="753.1" y="370" width="1.3" height="13" fill="#94a3b8"><title>0x80065A00 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="754.4" y="370" width="16.1" height="13" fill="#94a3b8"><title>0x80065A18 300 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="770.5" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80065B44 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="773.1" y="370" width="13.3" height="13" fill="#94a3b8"><title>0x80065B74 248 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="786.4" y="370" width="2.4" height="13" fill="#94a3b8"><title>0x80065C6C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="788.8" y="370" width="16.5" height="13" fill="#94a3b8"><title>0x80065C98 308 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="805.4" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80065DCC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="807.9" y="370" width="16.8" height="13" fill="#94a3b8"><title>0x80065DFC 312 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="824.7" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x80065F34 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="827.3" y="370" width="39.1" height="13" fill="#94a3b8"><title>0x80065F64 728 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="866.4" y="370" width="2.6" height="13" fill="#94a3b8"><title>0x8006623C 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="868.9" y="370" width="12.7" height="13" fill="#94a3b8"><title>0x8006626C 236 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="881.6" y="370" width="2.1" height="13" fill="#94a3b8"><title>0x80066358 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="883.8" y="370" width="6.2" height="13" fill="#94a3b8"><title>0x80066380 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="386" width="1.1" height="13" fill="#94a3b8"><title>0x80066380 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="11.1" y="386" width="12.0" height="13" fill="#94a3b8"><title>0x80066408 224 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="23.1" y="386" width="13.1" height="13" fill="#94a3b8"><title>0x800664E8 244 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="36.2" y="386" width="4.3" height="13" fill="#94a3b8"><title>0x800665DC 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="40.5" y="386" width="26.4" height="13" fill="#94a3b8"><title>0x8006662C 492 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="66.9" y="386" width="15.3" height="13" fill="#94a3b8"><title>0x80066818 284 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="82.2" y="386" width="4.3" height="13" fill="#94a3b8"><title>0x80066934 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="86.5" y="386" width="13.8" height="13" fill="#94a3b8"><title>0x80066984 256 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="100.2" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80066A84 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="101.1" y="386" width="2.8" height="13" fill="#94a3b8"><title>0x80066A94 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="103.9" y="386" width="9.5" height="13" fill="#94a3b8"><title>0x80066AC8 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="113.3" y="386" width="2.4" height="13" fill="#94a3b8"><title>0x80066B78 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="115.7" y="386" width="1.9" height="13" fill="#94a3b8"><title>0x80066BA4 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="117.6" y="386" width="14.2" height="13" fill="#94a3b8"><title>0x80066BC8 264 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="131.8" y="386" width="14.4" height="13" fill="#94a3b8"><title>0x80066CD0 268 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="146.2" y="386" width="23.0" height="13" fill="#94a3b8"><title>0x80066DDC 428 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="169.2" y="386" width="1.7" height="13" fill="#94a3b8"><title>0x80066F88 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="170.9" y="386" width="4.3" height="13" fill="#94a3b8"><title>0x80066FA8 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="175.2" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x80066FF8 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="178.4" y="386" width="8.8" height="13" fill="#94a3b8"><title>0x80067034 164 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="187.2" y="386" width="7.7" height="13" fill="#94a3b8"><title>0x800670D8 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="195.0" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x80067168 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="198.2" y="386" width="1.3" height="13" fill="#94a3b8"><title>0x800671A4 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="199.5" y="386" width="4.3" height="13" fill="#94a3b8"><title>0x800671BC 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="203.8" y="386" width="3.7" height="13" fill="#94a3b8"><title>0x8006720C 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="207.4" y="386" width="1.7" height="13" fill="#94a3b8"><title>0x80067250 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="209.2" y="386" width="5.2" height="13" fill="#94a3b8"><title>0x80067270 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="214.3" y="386" width="4.7" height="13" fill="#94a3b8"><title>0x800672D0 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="219.0" y="386" width="7.7" height="13" fill="#94a3b8"><title>0x80067328 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="226.8" y="386" width="4.1" height="13" fill="#94a3b8"><title>0x800673B8 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="230.9" y="386" width="1.1" height="13" fill="#94a3b8"><title>0x80067404 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="231.9" y="386" width="7.3" height="13" fill="#94a3b8"><title>0x80067418 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="239.2" y="386" width="9.2" height="13" fill="#94a3b8"><title>0x800674A0 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="248.5" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x8006754C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="249.1" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x80067558 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="252.3" y="386" width="10.5" height="13" fill="#94a3b8"><title>0x80067594 196 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="262.9" y="386" width="1.7" height="13" fill="#94a3b8"><title>0x80067658 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="264.6" y="386" width="33.5" height="13" fill="#94a3b8"><title>0x80067678 624 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="298.1" y="386" width="18.9" height="13" fill="#94a3b8"><title>0x800678E8 352 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="317.0" y="386" width="1.7" height="13" fill="#94a3b8"><title>0x80067A48 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="370.9" y="386" width="8.6" height="13" fill="#94a3b8"><title>0x80067E34 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="379.5" y="386" width="2.1" height="13" fill="#94a3b8"><title>0x80067ED4 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="388.3" y="386" width="5.2" height="13" fill="#94a3b8"><title>0x80067F78 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="393.5" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80067FD8 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="394.4" y="386" width="2.8" height="13" fill="#94a3b8"><title>0x80067FE8 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="397.1" y="386" width="7.5" height="13" fill="#94a3b8"><title>0x8006801C 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="404.7" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x800680A8 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="409.8" y="386" width="11.2" height="13" fill="#94a3b8"><title>0x80068108 208 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="421.0" y="386" width="7.1" height="13" fill="#94a3b8"><title>0x800681D8 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="428.1" y="386" width="9.2" height="13" fill="#94a3b8"><title>0x8006825C 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="437.3" y="386" width="1.3" height="13" fill="#94a3b8"><title>0x80068308 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="438.6" y="386" width="7.5" height="13" fill="#94a3b8"><title>0x80068320 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="446.1" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x800683AC 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="447.0" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x800683BC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="447.9" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x800683CC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="450.4" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x800683FC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="453.0" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x8006842C 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="455.6" y="386" width="2.8" height="13" fill="#94a3b8"><title>0x8006845C 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="458.4" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x80068490 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="461.0" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x800684C0 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="463.5" y="386" width="2.6" height="13" fill="#94a3b8"><title>0x800684F0 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="466.1" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80068520 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="467.0" y="386" width="1.3" height="13" fill="#94a3b8"><title>0x80068530 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="468.3" y="386" width="1.5" height="13" fill="#94a3b8"><title>0x80068548 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="469.8" y="386" width="11.8" height="13" fill="#94a3b8"><title>0x80068564 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="481.6" y="386" width="23.4" height="13" fill="#94a3b8"><title>0x80068640 436 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="505.0" y="386" width="2.8" height="13" fill="#94a3b8"><title>0x800687F4 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="507.8" y="386" width="9.9" height="13" fill="#94a3b8"><title>0x80068828 184 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="517.7" y="386" width="8.4" height="13" fill="#94a3b8"><title>0x800688E0 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="526.1" y="386" width="9.2" height="13" fill="#94a3b8"><title>0x8006897C 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="535.3" y="386" width="6.2" height="13" fill="#94a3b8"><title>0x80068A28 116 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="541.5" y="386" width="1.1" height="13" fill="#94a3b8"><title>0x80068A9C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="542.6" y="386" width="2.4" height="13" fill="#94a3b8"><title>0x80068AB0 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="545.4" y="386" width="1.0" height="13" fill="#f59e0b"><title>0x80068AE4 12 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="546.7" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80068AFC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="547.5" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80068B0C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="548.4" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80068B1C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="549.3" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x80068B2C 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="552.5" y="386" width="3.2" height="13" fill="#94a3b8"><title>0x80068B68 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="556.1" y="386" width="4.7" height="13" fill="#94a3b8"><title>0x80068BAC 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="560.9" y="386" width="6.4" height="13" fill="#94a3b8"><title>0x80068C04 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="567.3" y="386" width="2.4" height="13" fill="#94a3b8"><title>0x80068C7C 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="569.7" y="386" width="2.4" height="13" fill="#94a3b8"><title>0x80068CA8 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="572.0" y="386" width="4.3" height="13" fill="#94a3b8"><title>0x80068CD4 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="576.3" y="386" width="20.8" height="13" fill="#94a3b8"><title>0x80068D24 388 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="597.2" y="386" width="8.6" height="13" fill="#94a3b8"><title>0x80068EA8 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="605.8" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x80068F48 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="606.2" y="386" width="2.4" height="13" fill="#94a3b8"><title>0x80068F50 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="608.6" y="386" width="1.3" height="13" fill="#94a3b8"><title>0x80068F7C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="609.8" y="386" width="1.0" height="13" fill="#22c55e"><title>0x80068F94 16 B &#183; Nombrada por nosotros</title></rect>
+<rect x="612.4" y="386" width="1.7" height="13" fill="#f59e0b"><title>0x80068FC4 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="619.9" y="386" width="11.0" height="13" fill="#f59e0b"><title>0x80069050 204 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="630.9" y="386" width="13.3" height="13" fill="#f59e0b"><title>0x8006911C 248 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="664.6" y="386" width="3.0" height="13" fill="#f59e0b"><title>0x80069390 56 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="667.6" y="386" width="3.9" height="13" fill="#f59e0b"><title>0x800693C8 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="671.5" y="386" width="3.9" height="13" fill="#f59e0b"><title>0x80069410 72 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="691.1" y="386" width="2.4" height="13" fill="#f59e0b"><title>0x8006957C 44 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="721.6" y="386" width="11.0" height="13" fill="#f59e0b"><title>0x800697B4 204 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="736.2" y="386" width="44.0" height="13" fill="#f59e0b"><title>0x800698C4 820 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="780.2" y="386" width="12.9" height="13" fill="#f59e0b"><title>0x80069BF8 240 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="793.1" y="386" width="28.4" height="13" fill="#f59e0b"><title>0x80069CE8 528 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="821.5" y="386" width="33.9" height="13" fill="#f59e0b"><title>0x80069EF8 632 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="855.4" y="386" width="7.7" height="13" fill="#f59e0b"><title>0x8006A170 144 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="863.1" y="386" width="2.1" height="13" fill="#f59e0b"><title>0x8006A200 40 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="865.9" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x8006A234 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="866.8" y="386" width="1.0" height="13" fill="#94a3b8"><title>0x8006A244 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="867.7" y="386" width="1.0" height="13" fill="#f59e0b"><title>0x8006A254 12 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="869.2" y="386" width="7.1" height="13" fill="#f59e0b"><title>0x8006A270 132 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="876.2" y="386" width="13.8" height="13" fill="#f59e0b"><title>0x8006A2F4 624 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="10.0" y="402" width="19.8" height="13" fill="#f59e0b"><title>0x8006A2F4 368 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="29.8" y="402" width="3.0" height="13" fill="#f59e0b"><title>0x8006A564 56 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="32.8" y="402" width="11.4" height="13" fill="#f59e0b"><title>0x8006A59C 212 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="107.8" y="402" width="5.6" height="13" fill="#f59e0b"><title>0x8006AB10 104 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="125.6" y="402" width="8.2" height="13" fill="#f59e0b"><title>0x8006AC5C 152 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="143.4" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006ADA8 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="145.1" y="402" width="1.1" height="13" fill="#f59e0b"><title>0x8006ADC8 20 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="146.2" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006ADDC 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="147.9" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006ADFC 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="149.6" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006AE1C 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="151.4" y="402" width="1.1" height="13" fill="#f59e0b"><title>0x8006AE3C 20 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="236.0" y="402" width="18.9" height="13" fill="#f59e0b"><title>0x8006B464 352 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="273.6" y="402" width="1.0" height="13" fill="#f59e0b"><title>0x8006B720 16 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="323.7" y="402" width="2.8" height="13" fill="#f59e0b"><title>0x8006BAC4 52 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="373.9" y="402" width="12.0" height="13" fill="#f59e0b"><title>0x8006BE6C 224 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="389.0" y="402" width="1.7" height="13" fill="#f59e0b"><title>0x8006BF84 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="390.7" y="402" width="8.6" height="13" fill="#f59e0b"><title>0x8006BFA4 160 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="399.3" y="402" width="9.0" height="13" fill="#94a3b8"><title>0x8006C044 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="408.3" y="402" width="6.0" height="13" fill="#94a3b8"><title>0x8006C0EC 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="414.3" y="402" width="5.6" height="13" fill="#94a3b8"><title>0x8006C15C 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="419.9" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006C1C4 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="420.8" y="402" width="20.4" height="13" fill="#94a3b8"><title>0x8006C1D4 380 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="441.2" y="402" width="1.9" height="13" fill="#94a3b8"><title>0x8006C350 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="443.1" y="402" width="1.9" height="13" fill="#94a3b8"><title>0x8006C374 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="445.1" y="402" width="8.6" height="13" fill="#94a3b8"><title>0x8006C398 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="453.7" y="402" width="1.9" height="13" fill="#94a3b8"><title>0x8006C438 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="455.6" y="402" width="12.5" height="13" fill="#94a3b8"><title>0x8006C45C 232 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="468.0" y="402" width="2.6" height="13" fill="#f59e0b"><title>0x8006C544 48 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="470.6" y="402" width="3.9" height="13" fill="#94a3b8"><title>0x8006C574 72 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="474.5" y="402" width="3.9" height="13" fill="#94a3b8"><title>0x8006C5BC 72 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="478.4" y="402" width="41.0" height="13" fill="#94a3b8"><title>0x8006C604 764 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="519.4" y="402" width="1.1" height="13" fill="#94a3b8"><title>0x8006C900 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="520.5" y="402" width="6.9" height="13" fill="#94a3b8"><title>0x8006C914 128 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="527.3" y="402" width="23.0" height="13" fill="#94a3b8"><title>0x8006C994 428 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="550.3" y="402" width="1.3" height="13" fill="#94a3b8"><title>0x8006CB40 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="551.6" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006CB58 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="551.8" y="402" width="4.1" height="13" fill="#94a3b8"><title>0x8006CB5C 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="579.3" y="402" width="1.5" height="13" fill="#94a3b8"><title>0x8006CD5C 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="581.5" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006CD84 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="582.1" y="402" width="2.8" height="13" fill="#94a3b8"><title>0x8006CD90 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="584.9" y="402" width="11.6" height="13" fill="#94a3b8"><title>0x8006CDC4 216 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="596.5" y="402" width="11.2" height="13" fill="#94a3b8"><title>0x8006CE9C 208 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="607.7" y="402" width="6.9" height="13" fill="#94a3b8"><title>0x8006CF6C 128 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="614.6" y="402" width="2.6" height="13" fill="#94a3b8"><title>0x8006CFEC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="617.1" y="402" width="7.7" height="13" fill="#94a3b8"><title>0x8006D01C 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="624.9" y="402" width="9.7" height="13" fill="#94a3b8"><title>0x8006D0AC 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="634.6" y="402" width="7.1" height="13" fill="#94a3b8"><title>0x8006D160 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="641.6" y="402" width="13.8" height="13" fill="#94a3b8"><title>0x8006D1E4 256 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="655.4" y="402" width="1.5" height="13" fill="#94a3b8"><title>0x8006D2E4 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="656.9" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006D300 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="657.5" y="402" width="1.1" height="13" fill="#94a3b8"><title>0x8006D30C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="658.6" y="402" width="6.4" height="13" fill="#94a3b8"><title>0x8006D320 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="665.1" y="402" width="6.4" height="13" fill="#94a3b8"><title>0x8006D398 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="671.5" y="402" width="10.5" height="13" fill="#94a3b8"><title>0x8006D410 196 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="682.0" y="402" width="7.7" height="13" fill="#94a3b8"><title>0x8006D4D4 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="689.8" y="402" width="8.2" height="13" fill="#94a3b8"><title>0x8006D564 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="697.9" y="402" width="1.9" height="13" fill="#94a3b8"><title>0x8006D5FC 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="699.9" y="402" width="7.7" height="13" fill="#94a3b8"><title>0x8006D620 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="707.6" y="402" width="7.7" height="13" fill="#94a3b8"><title>0x8006D6B0 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="715.3" y="402" width="9.7" height="13" fill="#94a3b8"><title>0x8006D740 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="725.0" y="402" width="4.9" height="13" fill="#94a3b8"><title>0x8006D7F4 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="729.9" y="402" width="7.5" height="13" fill="#94a3b8"><title>0x8006D850 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="737.5" y="402" width="9.9" height="13" fill="#94a3b8"><title>0x8006D8DC 184 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="747.3" y="402" width="9.5" height="13" fill="#94a3b8"><title>0x8006D994 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="756.8" y="402" width="9.5" height="13" fill="#94a3b8"><title>0x8006DA44 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="766.2" y="402" width="9.7" height="13" fill="#94a3b8"><title>0x8006DAF4 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="775.9" y="402" width="9.9" height="13" fill="#94a3b8"><title>0x8006DBA8 184 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="785.8" y="402" width="9.7" height="13" fill="#94a3b8"><title>0x8006DC60 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="795.5" y="402" width="9.0" height="13" fill="#94a3b8"><title>0x8006DD14 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="804.5" y="402" width="7.3" height="13" fill="#94a3b8"><title>0x8006DDBC 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="811.8" y="402" width="4.5" height="13" fill="#94a3b8"><title>0x8006DE44 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="816.3" y="402" width="8.6" height="13" fill="#94a3b8"><title>0x8006DE98 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="824.9" y="402" width="8.6" height="13" fill="#94a3b8"><title>0x8006DF38 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="833.5" y="402" width="1.9" height="13" fill="#94a3b8"><title>0x8006DFD8 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="835.4" y="402" width="2.1" height="13" fill="#94a3b8"><title>0x8006DFFC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="843.4" y="402" width="9.9" height="13" fill="#94a3b8"><title>0x8006E090 184 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="853.3" y="402" width="25.8" height="13" fill="#94a3b8"><title>0x8006E148 480 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="879.0" y="402" width="1.1" height="13" fill="#94a3b8"><title>0x8006E328 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="881.8" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006E35C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="882.5" y="402" width="1.0" height="13" fill="#94a3b8"><title>0x8006E368 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="883.1" y="402" width="1.1" height="13" fill="#94a3b8"><title>0x8006E374 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="884.2" y="402" width="5.8" height="13" fill="#94a3b8"><title>0x8006E388 424 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="418" width="17.0" height="13" fill="#94a3b8"><title>0x8006E388 316 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="27.0" y="418" width="2.6" height="13" fill="#94a3b8"><title>0x8006E530 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="29.6" y="418" width="11.6" height="13" fill="#94a3b8"><title>0x8006E560 216 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="41.2" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006E638 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="42.0" y="418" width="6.4" height="13" fill="#94a3b8"><title>0x8006E648 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="48.5" y="418" width="9.5" height="13" fill="#94a3b8"><title>0x8006E6C0 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="57.9" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006E770 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="58.3" y="418" width="24.5" height="13" fill="#94a3b8"><title>0x8006E778 456 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="82.8" y="418" width="16.1" height="13" fill="#94a3b8"><title>0x8006E940 300 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="98.9" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006EA6C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="99.8" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x8006EA7C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="100.9" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x8006EA90 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="103.9" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x8006EAC8 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="106.9" y="418" width="1.7" height="13" fill="#f59e0b"><title>0x8006EB00 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="108.6" y="418" width="12.9" height="13" fill="#94a3b8"><title>0x8006EB20 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="121.5" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006EC10 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="122.4" y="418" width="4.3" height="13" fill="#94a3b8"><title>0x8006EC20 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="126.7" y="418" width="11.8" height="13" fill="#94a3b8"><title>0x8006EC70 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="138.5" y="418" width="9.5" height="13" fill="#94a3b8"><title>0x8006ED4C 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="147.9" y="418" width="9.7" height="13" fill="#94a3b8"><title>0x8006EDFC 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="157.6" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006EEB0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="158.0" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006EEB8 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="158.5" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x8006EEC0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="159.7" y="418" width="1.7" height="13" fill="#94a3b8"><title>0x8006EED8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="161.5" y="418" width="1.7" height="13" fill="#94a3b8"><title>0x8006EEF8 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="163.2" y="418" width="3.4" height="13" fill="#94a3b8"><title>0x8006EF18 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="166.6" y="418" width="3.4" height="13" fill="#94a3b8"><title>0x8006EF58 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="170.1" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006EF98 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="170.9" y="418" width="8.4" height="13" fill="#f59e0b"><title>0x8006EFA8 156 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="187.7" y="418" width="2.8" height="13" fill="#f59e0b"><title>0x8006F0E0 52 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="190.7" y="418" width="33.7" height="13" fill="#94a3b8"><title>0x8006F118 628 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="224.4" y="418" width="26.2" height="13" fill="#94a3b8"><title>0x8006F38C 488 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="250.6" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006F574 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="254.7" y="418" width="9.2" height="13" fill="#94a3b8"><title>0x8006F5C0 172 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="263.9" y="418" width="24.7" height="13" fill="#94a3b8"><title>0x8006F66C 460 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="288.7" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006F838 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="291.0" y="418" width="9.0" height="13" fill="#94a3b8"><title>0x8006F864 168 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="300.0" y="418" width="8.8" height="13" fill="#94a3b8"><title>0x8006F90C 164 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="308.8" y="418" width="2.4" height="13" fill="#94a3b8"><title>0x8006F9B0 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="311.2" y="418" width="12.7" height="13" fill="#94a3b8"><title>0x8006F9DC 236 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="323.9" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006FAC8 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="324.1" y="418" width="1.7" height="13" fill="#94a3b8"><title>0x8006FACC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="325.8" y="418" width="22.8" height="13" fill="#94a3b8"><title>0x8006FAEC 424 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="348.6" y="418" width="1.5" height="13" fill="#94a3b8"><title>0x8006FC94 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="350.1" y="418" width="29.9" height="13" fill="#94a3b8"><title>0x8006FCB0 556 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="380.0" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x8006FEDC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="383.6" y="418" width="1.5" height="13" fill="#94a3b8"><title>0x8006FF20 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="386.8" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006FF5C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="387.3" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006FF64 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="387.5" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x8006FF68 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="387.9" y="418" width="1.9" height="13" fill="#94a3b8"><title>0x8006FF70 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="389.8" y="418" width="14.2" height="13" fill="#94a3b8"><title>0x8006FF94 264 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="404.0" y="418" width="5.6" height="13" fill="#94a3b8"><title>0x8007009C 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="409.6" y="418" width="19.3" height="13" fill="#94a3b8"><title>0x80070104 360 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="428.9" y="418" width="2.1" height="13" fill="#94a3b8"><title>0x8007026C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="431.1" y="418" width="2.4" height="13" fill="#94a3b8"><title>0x80070294 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="433.5" y="418" width="25.8" height="13" fill="#94a3b8"><title>0x800702C0 480 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="459.2" y="418" width="4.3" height="13" fill="#94a3b8"><title>0x800704A0 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="463.5" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x800704F0 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="466.5" y="418" width="2.1" height="13" fill="#94a3b8"><title>0x80070528 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="468.7" y="418" width="2.1" height="13" fill="#94a3b8"><title>0x80070550 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="470.8" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x80070578 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="471.9" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x8007058C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="473.0" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x800705A0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="474.3" y="418" width="2.1" height="13" fill="#94a3b8"><title>0x800705B8 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="476.4" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x800705E0 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="477.7" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x800705F8 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="478.8" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x8007060C 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="481.8" y="418" width="2.6" height="13" fill="#94a3b8"><title>0x80070644 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="484.4" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x80070674 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="487.4" y="418" width="2.8" height="13" fill="#94a3b8"><title>0x800706AC 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="490.2" y="418" width="11.8" height="13" fill="#94a3b8"><title>0x800706E0 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="502.0" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x800707BC 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="502.6" y="418" width="13.3" height="13" fill="#94a3b8"><title>0x800707C8 248 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="516.0" y="418" width="15.3" height="13" fill="#94a3b8"><title>0x800708C0 284 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="531.2" y="418" width="1.9" height="13" fill="#94a3b8"><title>0x800709DC 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="533.1" y="418" width="12.9" height="13" fill="#94a3b8"><title>0x80070A00 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="546.0" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x80070AF0 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="547.3" y="418" width="29.4" height="13" fill="#94a3b8"><title>0x80070B08 548 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="576.8" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x80070D2C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="578.0" y="418" width="20.0" height="13" fill="#94a3b8"><title>0x80070D44 372 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="598.0" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x80070EB8 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="598.7" y="418" width="24.9" height="13" fill="#94a3b8"><title>0x80070EC4 464 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="623.6" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x80071094 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="624.5" y="418" width="2.8" height="13" fill="#94a3b8"><title>0x800710A4 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="627.2" y="418" width="5.6" height="13" fill="#94a3b8"><title>0x800710D8 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="632.8" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x80071140 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="633.7" y="418" width="3.4" height="13" fill="#94a3b8"><title>0x80071150 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="637.1" y="418" width="8.2" height="13" fill="#94a3b8"><title>0x80071190 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="645.3" y="418" width="4.3" height="13" fill="#94a3b8"><title>0x80071228 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="649.6" y="418" width="3.2" height="13" fill="#94a3b8"><title>0x80071278 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="653.0" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x800712B8 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="654.1" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x800712CC 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="655.0" y="418" width="3.4" height="13" fill="#94a3b8"><title>0x800712DC 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="658.4" y="418" width="1.7" height="13" fill="#f59e0b"><title>0x8007131C 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="660.1" y="418" width="1.7" height="13" fill="#f59e0b"><title>0x8007133C 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="661.8" y="418" width="23.2" height="13" fill="#94a3b8"><title>0x8007135C 432 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="685.0" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x8007150C 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="686.3" y="418" width="15.5" height="13" fill="#94a3b8"><title>0x80071524 288 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="701.8" y="418" width="13.1" height="13" fill="#94a3b8"><title>0x80071644 244 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="714.9" y="418" width="1.0" height="13" fill="#94a3b8"><title>0x80071738 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="715.8" y="418" width="1.1" height="13" fill="#94a3b8"><title>0x80071748 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="716.8" y="418" width="50.9" height="13" fill="#94a3b8"><title>0x8007175C 948 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="767.8" y="418" width="12.2" height="13" fill="#94a3b8"><title>0x80071B10 228 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="780.0" y="418" width="29.9" height="13" fill="#94a3b8"><title>0x80071BF4 556 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="809.9" y="418" width="15.9" height="13" fill="#94a3b8"><title>0x80071E20 296 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="825.8" y="418" width="51.3" height="13" fill="#94a3b8"><title>0x80071F48 956 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="877.1" y="418" width="1.5" height="13" fill="#94a3b8"><title>0x80072304 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="878.6" y="418" width="1.3" height="13" fill="#94a3b8"><title>0x80072320 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="879.9" y="418" width="3.0" height="13" fill="#94a3b8"><title>0x80072338 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="882.9" y="418" width="7.1" height="13" fill="#94a3b8"><title>0x80072370 264 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="434" width="7.1" height="13" fill="#94a3b8"><title>0x80072370 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="17.1" y="434" width="3.7" height="13" fill="#94a3b8"><title>0x80072478 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="20.7" y="434" width="9.5" height="13" fill="#94a3b8"><title>0x800724BC 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="30.2" y="434" width="3.2" height="13" fill="#94a3b8"><title>0x8007256C 60 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="33.4" y="434" width="2.8" height="13" fill="#94a3b8"><title>0x800725A8 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="36.2" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800725DC 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="36.6" y="434" width="17.8" height="13" fill="#94a3b8"><title>0x800725E4 332 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="54.5" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80072730 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="54.7" y="434" width="1.1" height="13" fill="#94a3b8"><title>0x80072734 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="55.8" y="434" width="14.2" height="13" fill="#94a3b8"><title>0x80072748 264 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="69.9" y="434" width="10.1" height="13" fill="#94a3b8"><title>0x80072850 188 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="80.0" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x8007290C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="80.5" y="434" width="13.1" height="13" fill="#94a3b8"><title>0x80072914 244 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="93.6" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80072A08 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="94.0" y="434" width="21.3" height="13" fill="#94a3b8"><title>0x80072A10 396 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="115.3" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x80072B9C 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="121.3" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x80072C0C 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="127.3" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x80072C7C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="129.5" y="434" width="7.7" height="13" fill="#94a3b8"><title>0x80072CA4 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="137.2" y="434" width="21.1" height="13" fill="#94a3b8"><title>0x80072D34 392 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="158.2" y="434" width="1.7" height="13" fill="#94a3b8"><title>0x80072EBC 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="160.0" y="434" width="3.7" height="13" fill="#94a3b8"><title>0x80072EDC 68 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="163.6" y="434" width="3.0" height="13" fill="#94a3b8"><title>0x80072F20 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="166.6" y="434" width="8.2" height="13" fill="#94a3b8"><title>0x80072F58 152 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="174.8" y="434" width="24.5" height="13" fill="#94a3b8"><title>0x80072FF0 456 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="199.3" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x800731B8 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="205.3" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x80073228 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="211.3" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x80073298 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="213.5" y="434" width="16.8" height="13" fill="#94a3b8"><title>0x800732C0 312 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="230.2" y="434" width="6.4" height="13" fill="#94a3b8"><title>0x800733F8 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="236.7" y="434" width="5.4" height="13" fill="#94a3b8"><title>0x80073470 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="242.0" y="434" width="20.0" height="13" fill="#94a3b8"><title>0x800734D4 372 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="262.0" y="434" width="7.5" height="13" fill="#94a3b8"><title>0x80073648 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="269.5" y="434" width="12.9" height="13" fill="#94a3b8"><title>0x800736D4 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="282.4" y="434" width="41.9" height="13" fill="#94a3b8"><title>0x800737C4 780 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="324.3" y="434" width="8.6" height="13" fill="#94a3b8"><title>0x80073AD0 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="332.9" y="434" width="7.5" height="13" fill="#94a3b8"><title>0x80073B70 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="340.4" y="434" width="2.6" height="13" fill="#94a3b8"><title>0x80073BFC 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="343.0" y="434" width="11.6" height="13" fill="#94a3b8"><title>0x80073C2C 216 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="354.6" y="434" width="5.8" height="13" fill="#94a3b8"><title>0x80073D04 108 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="360.4" y="434" width="4.3" height="13" fill="#94a3b8"><title>0x80073D70 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="364.7" y="434" width="4.3" height="13" fill="#94a3b8"><title>0x80073DC0 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="369.0" y="434" width="8.4" height="13" fill="#94a3b8"><title>0x80073E10 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="377.4" y="434" width="9.7" height="13" fill="#94a3b8"><title>0x80073EAC 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="387.1" y="434" width="47.3" height="13" fill="#94a3b8"><title>0x80073F60 880 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="434.3" y="434" width="8.6" height="13" fill="#94a3b8"><title>0x800742D0 160 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="442.9" y="434" width="5.4" height="13" fill="#94a3b8"><title>0x80074370 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="448.3" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x800743D4 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="450.4" y="434" width="12.5" height="13" fill="#94a3b8"><title>0x800743FC 232 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="462.9" y="434" width="10.1" height="13" fill="#94a3b8"><title>0x800744E4 188 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="473.0" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800745A0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="473.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800745A8 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="476.2" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x800745DC 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="478.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80074604 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="478.8" y="434" width="7.1" height="13" fill="#94a3b8"><title>0x8007460C 132 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="485.9" y="434" width="4.9" height="13" fill="#94a3b8"><title>0x80074690 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="490.8" y="434" width="1.1" height="13" fill="#94a3b8"><title>0x800746EC 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="491.9" y="434" width="2.6" height="13" fill="#94a3b8"><title>0x80074700 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="494.5" y="434" width="2.6" height="13" fill="#94a3b8"><title>0x80074730 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="497.1" y="434" width="2.6" height="13" fill="#94a3b8"><title>0x80074760 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="499.6" y="434" width="12.9" height="13" fill="#94a3b8"><title>0x80074790 240 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="512.5" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80074880 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="513.4" y="434" width="24.1" height="13" fill="#94a3b8"><title>0x80074890 448 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="537.4" y="434" width="1.1" height="13" fill="#94a3b8"><title>0x80074A50 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="538.5" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x80074A64 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="547.5" y="434" width="7.5" height="13" fill="#94a3b8"><title>0x80074B0C 140 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="550.5" y="434" width="2.1" height="13" fill="#94a3b8"><title>0x80074B44 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="552.7" y="434" width="1.7" height="13" fill="#f59e0b"><title>0x80074B6C 32 B &#183; Sin nombre, sin tipos</title></rect>
+<rect x="554.4" y="434" width="13.3" height="13" fill="#94a3b8"><title>0x80074B8C 248 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="567.7" y="434" width="6.7" height="13" fill="#94a3b8"><title>0x80074C84 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="574.4" y="434" width="11.8" height="13" fill="#94a3b8"><title>0x80074D00 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="586.2" y="434" width="23.6" height="13" fill="#94a3b8"><title>0x80074DDC 440 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="609.8" y="434" width="15.0" height="13" fill="#94a3b8"><title>0x80074F94 280 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="624.9" y="434" width="7.9" height="13" fill="#94a3b8"><title>0x800750AC 148 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="632.8" y="434" width="1.7" height="13" fill="#94a3b8"><title>0x80075140 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="634.6" y="434" width="10.3" height="13" fill="#94a3b8"><title>0x80075160 192 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="644.9" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80075220 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="645.7" y="434" width="10.1" height="13" fill="#94a3b8"><title>0x80075230 188 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="655.8" y="434" width="26.9" height="13" fill="#94a3b8"><title>0x800752EC 500 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="682.7" y="434" width="7.3" height="13" fill="#94a3b8"><title>0x800754E0 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="690.0" y="434" width="1.1" height="13" fill="#94a3b8"><title>0x80075568 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="691.1" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x8007557C 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="697.1" y="434" width="1.3" height="13" fill="#94a3b8"><title>0x800755EC 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="698.4" y="434" width="5.6" height="13" fill="#94a3b8"><title>0x80075604 104 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="703.9" y="434" width="3.4" height="13" fill="#94a3b8"><title>0x8007566C 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="707.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800756AC 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="707.8" y="434" width="8.4" height="13" fill="#94a3b8"><title>0x800756B4 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="716.2" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80075750 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="716.6" y="434" width="2.8" height="13" fill="#94a3b8"><title>0x80075758 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="719.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x8007578C 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="719.8" y="434" width="4.3" height="13" fill="#94a3b8"><title>0x80075794 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="724.1" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800757E4 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="725.0" y="434" width="2.4" height="13" fill="#94a3b8"><title>0x800757F4 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="727.4" y="434" width="2.4" height="13" fill="#94a3b8"><title>0x80075820 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="729.7" y="434" width="3.4" height="13" fill="#94a3b8"><title>0x8007584C 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="733.2" y="434" width="1.7" height="13" fill="#94a3b8"><title>0x8007588C 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="734.9" y="434" width="1.9" height="13" fill="#94a3b8"><title>0x800758AC 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="736.8" y="434" width="6.7" height="13" fill="#94a3b8"><title>0x800758D0 124 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="743.5" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x8007594C 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="744.3" y="434" width="4.1" height="13" fill="#94a3b8"><title>0x8007595C 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="748.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800759A8 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="748.8" y="434" width="4.5" height="13" fill="#94a3b8"><title>0x800759B0 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="753.4" y="434" width="11.6" height="13" fill="#94a3b8"><title>0x80075A04 216 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="765.0" y="434" width="20.4" height="13" fill="#94a3b8"><title>0x80075ADC 380 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="785.4" y="434" width="1.7" height="13" fill="#94a3b8"><title>0x80075C58 32 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="787.1" y="434" width="4.3" height="13" fill="#94a3b8"><title>0x80075C78 80 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="791.4" y="434" width="6.0" height="13" fill="#94a3b8"><title>0x80075CC8 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="797.4" y="434" width="23.6" height="13" fill="#94a3b8"><title>0x80075D38 440 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="821.0" y="434" width="7.7" height="13" fill="#94a3b8"><title>0x80075EF0 144 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="828.8" y="434" width="5.4" height="13" fill="#94a3b8"><title>0x80075F80 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="834.1" y="434" width="1.3" height="13" fill="#94a3b8"><title>0x80075FE4 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="835.4" y="434" width="1.9" height="13" fill="#94a3b8"><title>0x80075FFC 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="837.4" y="434" width="3.0" height="13" fill="#94a3b8"><title>0x80076020 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="840.4" y="434" width="11.8" height="13" fill="#94a3b8"><title>0x80076058 220 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="852.2" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80076134 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="863.6" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80076208 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="864.4" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80076218 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="865.3" y="434" width="9.5" height="13" fill="#94a3b8"><title>0x80076228 176 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="874.7" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x800762D8 4 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="875.0" y="434" width="1.5" height="13" fill="#94a3b8"><title>0x800762DC 28 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="876.5" y="434" width="2.4" height="13" fill="#94a3b8"><title>0x800762F8 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="878.8" y="434" width="4.1" height="13" fill="#94a3b8"><title>0x80076324 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="882.9" y="434" width="1.0" height="13" fill="#94a3b8"><title>0x80076370 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="883.3" y="434" width="3.0" height="13" fill="#94a3b8"><title>0x80076378 56 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="886.3" y="434" width="3.7" height="13" fill="#94a3b8"><title>0x800763B0 76 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.0" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x800763B0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.4" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x800763FC 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="10.9" y="450" width="19.8" height="13" fill="#94a3b8"><title>0x80076404 368 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="30.6" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80076574 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="31.5" y="450" width="23.4" height="13" fill="#94a3b8"><title>0x80076584 436 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="54.9" y="450" width="12.7" height="13" fill="#94a3b8"><title>0x80076738 236 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="67.6" y="450" width="1.9" height="13" fill="#94a3b8"><title>0x80076824 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="69.5" y="450" width="6.9" height="13" fill="#94a3b8"><title>0x80076848 128 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="76.4" y="450" width="2.8" height="13" fill="#94a3b8"><title>0x800768C8 52 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="79.2" y="450" width="66.2" height="13" fill="#94a3b8"><title>0x800768FC 1232 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="145.4" y="450" width="3.4" height="13" fill="#94a3b8"><title>0x80076DCC 64 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="148.8" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80076E0C 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="149.6" y="450" width="6.4" height="13" fill="#94a3b8"><title>0x80076E1C 120 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="156.1" y="450" width="1.9" height="13" fill="#94a3b8"><title>0x80076E94 36 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="158.0" y="450" width="8.4" height="13" fill="#94a3b8"><title>0x80076EB8 156 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="166.4" y="450" width="5.4" height="13" fill="#94a3b8"><title>0x80076F54 100 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="171.8" y="450" width="6.2" height="13" fill="#94a3b8"><title>0x80076FB8 116 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="178.0" y="450" width="2.1" height="13" fill="#94a3b8"><title>0x8007702C 40 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="180.2" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077054 12 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="181.0" y="450" width="26.4" height="13" fill="#94a3b8"><title>0x80077064 492 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="207.4" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077250 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="207.9" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077258 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="208.3" y="450" width="5.2" height="13" fill="#94a3b8"><title>0x80077260 96 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="213.5" y="450" width="3.9" height="13" fill="#94a3b8"><title>0x800772C0 72 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="217.3" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077308 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="218.2" y="450" width="7.3" height="13" fill="#94a3b8"><title>0x80077318 136 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="225.5" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x800773A0 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="225.9" y="450" width="1.3" height="13" fill="#94a3b8"><title>0x800773A8 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="227.2" y="450" width="2.4" height="13" fill="#94a3b8"><title>0x800773C0 44 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="229.6" y="450" width="1.3" height="13" fill="#94a3b8"><title>0x800773EC 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="230.9" y="450" width="4.9" height="13" fill="#94a3b8"><title>0x80077404 92 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="235.8" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077460 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="236.2" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077468 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="236.7" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077470 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="237.1" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077478 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="237.5" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077480 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="237.9" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077488 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="238.4" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077490 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="238.8" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077498 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="239.2" y="450" width="2.6" height="13" fill="#94a3b8"><title>0x800774A0 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="241.8" y="450" width="4.7" height="13" fill="#94a3b8"><title>0x800774D0 88 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="246.5" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077528 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="247.0" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077530 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="247.4" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077538 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="247.8" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077540 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="248.3" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077548 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="248.7" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077550 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="249.1" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077558 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="249.6" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077560 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="250.0" y="450" width="2.6" height="13" fill="#94a3b8"><title>0x80077568 48 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="252.6" y="450" width="13.1" height="13" fill="#94a3b8"><title>0x80077598 244 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="265.7" y="450" width="4.5" height="13" fill="#94a3b8"><title>0x8007768C 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="270.2" y="450" width="4.5" height="13" fill="#94a3b8"><title>0x800776E0 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="274.7" y="450" width="4.5" height="13" fill="#94a3b8"><title>0x80077734 84 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="279.2" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077788 16 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="280.1" y="450" width="9.7" height="13" fill="#94a3b8"><title>0x80077798 180 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="289.7" y="450" width="1.1" height="13" fill="#94a3b8"><title>0x8007784C 20 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="290.8" y="450" width="1.0" height="13" fill="#94a3b8"><title>0x80077860 8 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="291.2" y="450" width="6.0" height="13" fill="#94a3b8"><title>0x80077868 112 B &#183; Libreria Sony (Psy-Q)</title></rect>
+<rect x="297.2" y="450" width="1.3" height="13" fill="#94a3b8"><title>0x800778D8 24 B &#183; Libreria Sony (Psy-Q)</title></rect>
+</svg>

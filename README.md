@@ -1,6 +1,16 @@
 # Tombi! (Tomba!) – descompilación PSX con Ghidra
 
-![matching](https://img.shields.io/badge/matching-0.0%25-red) ![nombrado](https://img.shields.io/badge/nombrado-1.7%25-orange) — ver [docs/PROGRESS.md](docs/PROGRESS.md)
+## Progreso
+
+![Progreso](docs/progress.svg)
+
+Mapas de funciones por programa (cada bloque es una función, coloreada por estado):
+
+![MAIN0](docs/map_main0.svg)
+
+![X000](docs/map_x000.svg)
+
+Detalle en [docs/PROGRESS.md](docs/PROGRESS.md). Se regenera con `python tools/progress.py`.
 
 Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usando Ghidra.
 

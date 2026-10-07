@@ -11,7 +11,8 @@
     "n_unnamed": 990,
     "n_typed": 450,
     "n_lib": 901,
-    "excluded": 482
+    "excluded": 482,
+    "unnamed_typed": 348748
   },
   "matching_bytes": 0,
   "programs": {
@@ -26,6 +27,11 @@
       "n_typed": 154,
       "excluded": 482,
       "n_excluded": 482,
+      "unnamed_typed": 113140,
+      "range": [
+        2147574772,
+        2147973359
+      ],
       "game": 231052,
       "n_game": 519
     },
@@ -40,6 +46,11 @@
       "n_typed": 296,
       "excluded": 0,
       "n_excluded": 0,
+      "unnamed_typed": 235608,
+      "range": [
+        2148433960,
+        2148778232
+      ],
       "game": 297996,
       "n_game": 528
     }
