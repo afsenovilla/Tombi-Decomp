@@ -33,3 +33,10 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
 - Cuando un match sea verificado: `git add src/<Nombre>.c; git commit; git pull --rebase origin master; git push origin master`
   (solo `master`, sin ramas ni PRs). Haz commits pequeños y frecuentes.
 - Nunca subas el SDK, los binarios del juego ni decompilados crudos.
+
+## Aprendido
+- **`li` con constante pequena (`addiu $a2,$zero,N`)**: el ASPSX 2.34 de DOS genera `ori`, el juego usa `addiu`.
+  Solucion: `export ASPSX_WINE=/opt/psyq/46/BIN/ASPSX.EXE` (ASPSX 2.86 via wine; matchcheck lo usa en vez del 2.34).
+  Con esto coinciden ademas MulCos/MulNegSin/ObjApplyVelocity. Usalo SIEMPRE.
+- Llamadas con `extern void f();` sin prototipo o con prototipo dan el mismo codigo; declara los argumentos reales si hay >4 (los extra van a `0x10($sp)`).
+- Funciones "FUN_" que empiezan sin prologo y usan `$s0` sin cargarlo son fragmentos mal cortados por Ghidra: no son matcheables, saltalas.
