@@ -50,10 +50,15 @@ address,name,confidence,comment
 8003e33c,ObjSpawnType1,media,ObjSpawn(1..)
 8003e474,ObjSpawnType5,media,ObjSpawn(5..)
 8003e4b0,ObjSpawnType8,media,ObjSpawn(8..)
-80018980,PoolFree_1F800210,media,devuelve objeto a una pila de libres (7 pilas en scratchpad)
-80018c2c,PoolFree_1F800218,media,idem
-80018c68,PoolFree_1F80021C,media,idem
-80018cf0,PoolFree_1F800224,media,idem
-80018d2c,PoolFree_1F800230,media,idem
-80018d68,PoolFree_1F800228,media,idem
-80018da4,PoolFree_1F80022C,media,idem
+80018980,PoolFree_1F800210,media,pone a 0 el objeto y lo devuelve a otra reserva de libres (contador 1F80023E)
+80018c2c,ObjListPush_1F800218,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018c68,ObjListPush_1F80021C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018cf0,ObjListPush_1F800224,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018d2c,ObjListPush_1F800230,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018d68,ObjListPush_1F800228,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018da4,ObjListPush_1F80022C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018ca4,ObjListPush_1F800220,media,igual que las ObjListPush pero con tope de 0x56 objetos
+800187e4,ObjFree,alta,pone a cero campos del objeto y lo devuelve al pool de ObjAlloc (1F800208)
+80018838,ObjFreeDup,alta,copia identica de ObjFree
+800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
+8001e560,SfxPlay2,media,como SfxPlay pero carga ademas un segundo sonido (param2&0xFF|0x8000)
