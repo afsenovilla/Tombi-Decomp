@@ -1,4 +1,5 @@
 // FUNC 8001e288 68 MAIN0
+// MATCHING 8001e288 68
 extern unsigned short DAT_800a34b0;
 extern unsigned short DAT_8009d690;
 int FUN_8001e288(unsigned short a)
