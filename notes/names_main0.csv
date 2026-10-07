@@ -62,3 +62,9 @@ address,name,confidence,comment
 80018838,ObjFreeDup,alta,copia identica de ObjFree
 800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
 8001e560,SfxPlay2,media,como SfxPlay pero carga ademas un segundo sonido (param2&0xFF|0x8000)
+8001e5f4,SfxPlay3,media,variante de SfxPlay con ids 0x8100/0x800
+8001f8e4,ObjSetFacingToPlayer,media,compara X del objeto con scratchpad 1F80016A y pone +0x2E a 1 o 0
+8001fd94,ObjAddVelY7E,media,Y(+0x14) += short(+0x7E)*0x100
+8003fd78,ObjTileCollide,media,carga hitbox (+0x6C..+0x72) de tabla segun anim y prueba colision con el mapa
+80040278,TileCollideAt,media,prepara 1F800278 y llama a la comprobacion de colision en (x y)
+8003facc,ObjCheckHeadCollision,media,limita Y al techo (DAT_800A4580-0x90) y prueba colision a x+-4 / y-0x15

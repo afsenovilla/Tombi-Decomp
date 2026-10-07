@@ -4,7 +4,7 @@ El juego guarda aqui sus globales mas calientes (Ghidra las llama `DAT_1f8001xx`
 | Direccion | Uso (por confirmar) |
 |---|---|
 | 1F800164 | puntero a la siguiente primitiva libre |
-| 1F8001C8 | contador de frames (bit 0 se usa para alternar buffers) |
+| 1F8001C8 | bit 0 = orientacion del eje horizontal (intercambia X/Z de los objetos); ver object_layout.md |
 | 1F8001D4 | puntero a la entrada actual de la tabla de hilos |
 | 1F8001E0 | tabla de ordenacion (OT) del buffer actual |
 | 1F8001E4 | OT del buffer anterior |
