@@ -1,5 +1,7 @@
 # Tombi! (Tomba!) – descompilación PSX con Ghidra
 
+![matching](https://img.shields.io/badge/matching-0.0%25-red) ![nombrado](https://img.shields.io/badge/nombrado-1.7%25-orange) — ver [docs/PROGRESS.md](docs/PROGRESS.md)
+
 Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usando Ghidra.
 
 ## Requisitos
@@ -26,3 +28,5 @@ Proyecto de ingeniería inversa del juego *Tombi!* / *Tomba!* (PlayStation) usan
 - `tools/psxexe_info.py <exe>` – muestra PC, GP, dirección de carga y tamaño de la cabecera PS-X EXE.
 - `ghidra/scripts/ExportC.java` – exporta el decompilado de las funciones `FUN_` a un `.c` (Script Manager, Java).
 - `ghidra/scripts/ImportNames.java` – aplica nombres desde `notes/names_main0.csv`.
+- `tools/export_functions.py` – convierte un export de Ghidra en `notes/functions_*.csv` (solo metadatos).
+- `tools/progress.py` – recalcula `docs/PROGRESS.md` (progreso de la descompilación).
