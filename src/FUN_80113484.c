@@ -1,10 +1,5 @@
 // FUNC 80113484 720 X000
-/* score 6: only the DAT_80115a18 index block: game loads o->b0c (lbu) before DAT_8009c960 (lhu); ours the reverse.
-   Tried operand order, temps (all int/short/uchar combos, both orders), 2D array, scalar/[0]/volatile alias, ternary.
-   b23: sched order follows RTL luid (and-insn before sll-insn => lbu first) and `S*4 + idx` gives the game's ORDER
-   but then the lbu chain gets $2 (score 14); `int k = S*4+idx` / `<< 2` give the game's REGS but lhu first (6).
-   The same pattern on the anim table (pointer table, sum shifted again) matches. Also tried static __inline__
-   get(s,i) with all param/return types, bitfield b0c, casts on every operand: none gives both. */
+// MATCHING 80113484 720
 #include "TOBJ.H"
 typedef void (*ObjFn)(TObj *);
 typedef union { int w; struct { unsigned short a, b; } h; } Stage;
@@ -46,7 +41,12 @@ void FUN_80113484(TObj *o)
             if (DAT_8009c960.h.a == 1 && DAT_8009c960.h.b < 2)
                 o->w1e = DAT_80115a54[o->b0c & 0x7f];
             else
-                o->w1e = DAT_80115a18[(DAT_8009c960c.h.a << 2) + (o->b0c & 0x7f)];
+                {
+                /* debt: register asm; local-alloc otherwise gives the earlier-born index $2 */
+                register int i asm("$3");
+                i = o->b0c & 0x7f;
+                o->w1e = DAT_80115a18[DAT_8009c960c.h.a * 4 + i];
+            }
             o->d3c = DAT_1f8002d4[0];
         }
         o->b04++;
