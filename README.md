@@ -12,16 +12,32 @@ function in `src/` is verified to produce exactly the same instructions as the r
 
 ## Progress
 
+<!-- progress:start -->
+**Whole game: 41.4 % of the game's code matches byte for byte** (526112 of 1272064 bytes).
+
+| Part | Code | Matching bytes | Matching |
+|---|---:|---:|---|
+| MAIN0.EXE: engine, shared by every area | 228328 B | 197996 B | 86.7 % `[#####################...]` |
+| X000.BIN: AREA00 + object code reused by all areas | 297956 B | 294564 B | 98.9 % `[########################]` |
+| X001..X019.BIN: code specific to the other areas | 745780 B | 33552 B | 4.5 % `[#.......................]` |
+| **Whole game** | **1272064 B** | **526112 B** | **41.4 %** `[##########..............]` |
+
+- Bytes of machine code in game functions; Sony's Psy-Q library (98992 B) is not counted.
+- Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
+  other; those copies match automatically and are not added again (counting every copy separately gives 81.1 %).
+- Also tracked for MAIN0 + X000: 6.5 % of the code named by us, 75.9 % typed with the TObj structure.
+<!-- progress:end -->
+
 ![Progress](docs/progress.svg)
 
-Function maps (one block per function, coloured by status):
+Function maps of MAIN0 and X000 (one block per function, coloured by status):
 
 ![MAIN0](docs/map_main0.svg)
 
 ![X000](docs/map_x000.svg)
 
-Full breakdown in [docs/PROGRESS.md](docs/PROGRESS.md), regenerated with `python3 tools/progress.py`.
-Progress is measured in bytes of **game code**; the Sony PSY-Q library code is reported separately.
+Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
+Everything in this section is regenerated with `python3 tools/progress.py`.
 
 ## Target
 

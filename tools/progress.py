@@ -135,26 +135,29 @@ def esc(t):
     return t.replace("&", "&amp;").replace("<", "&lt;")
 
 
-def write_svgs(res, tot, matching):
+def write_svgs(res, tot, matching, whole=(0, 1), areas=(0, 1)):
     hist_path = N("docs", "history.json")
     hist = json.load(open(hist_path)) if os.path.exists(hist_path) else []
     today = datetime.date.today().isoformat()
     point = {"date": today, "named": round(pct(tot["named"], tot["game"]), 2),
-             "typed": round(pct(tot["typed"], tot["game"]), 2), "matching": round(pct(matching, tot["game"]), 2)}
+             "typed": round(pct(tot["typed"], tot["game"]), 2), "matching": round(pct(matching, tot["game"]), 2),
+             "whole": round(pct(*whole), 2)}
     hist = [h for h in hist if h["date"] != today] + [point]
     json.dump(hist, open(hist_path, "w"), indent=1)
 
     W = 900
-    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="440" viewBox="0 0 %d 440" role="img" aria-label="Decompilation progress">' % (W, W),
-         '<rect width="%d" height="440" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % W,
+    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="476" viewBox="0 0 %d 476" role="img" aria-label="Decompilation progress">' % (W, W),
+         '<rect width="%d" height="476" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % W,
          '<text x="28" y="44" %s font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>' % FONT,
          '<text x="28" y="66" %s font-size="12.5" fill="#64748b">Updated %s &#183; unit: bytes of game code (excluding the Psy-Q library)</text>' % (FONT, today)]
     # levels
-    levels = [("Matching (C that recompiles identically)", matching, "match"), ("Functions with our own names", tot["named"], "named"),
-              ("With the TObj structure applied (coverage)", tot["typed"], "typed")]
+    levels = [("Whole game: matching C", whole[0], whole[1], "match"),
+              ("MAIN0 + X000: matching C", matching, tot["game"], "match"),
+              ("Other areas (X001..X019): matching C", areas[0], areas[1], "match"),
+              ("MAIN0 + X000: named by us", tot["named"], tot["game"], "named")]
     y = 108
-    for lab, val, key in levels:
-        p = pct(val, tot["game"])
+    for lab, val, den, key in levels:
+        p = pct(val, den)
         o.append('<text x="28" y="%d" %s font-size="14" fill="#1e293b">%s</text>' % (y + 4, FONT, esc(lab)))
         o.append('<rect x="330" y="%d" width="450" height="18" rx="9" fill="#e2e8f0"/>' % (y - 10))
         wbar = max(0 if p == 0 else 4, 450 * p / 100.0)
@@ -162,7 +165,7 @@ def write_svgs(res, tot, matching):
         o.append('<text x="796" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">%.1f %%</text>' % (y + 5, FONT, p))
         y += 36
     # composition
-    o.append('<text x="28" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">Composition of the analyzed code</text>' % (y + 26, FONT))
+    o.append('<text x="28" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">Composition of MAIN0 + X000</text>' % (y + 26, FONT))
     y += 52
     rows = [(k, r) for k, r in res.items()] + [("TOTAL", None)]
     for k, r in rows:
@@ -245,12 +248,16 @@ def overlays():
     out, todo = {}, []
     for p in OVERLAYS:
         rows = read_csv(N("notes", "functions_%s.csv" % p.lower()))
-        d = dict(game=0, n=len(rows), matched=0, n_matched=0, piece=0, x000=0, dup=0, new=0, n_new=0)
+        d = dict(game=0, n=len(rows), matched=0, n_matched=0, piece=0, x000=0, dup=0, new=0, n_new=0,
+                 uniq=0, uniq_matched=0, n_uniq=0, n_uniq_matched=0)
         for r in rows:
             a, size = int(r["address"], 16), int(r["size"])
             d["game"] += size
             cov = sum(max(0, min(a + size, s + n) - max(a, s)) for s, n in src_ranges().get(p, []))
             d["matched"] += min(cov, size)
+            if not r.get("twin"):  # first copy of this code anywhere in the game
+                d["uniq"] += size; d["n_uniq"] += 1
+                d["uniq_matched"] += min(cov, size); d["n_uniq_matched"] += cov >= size
             if cov >= size: d["n_matched"] += 1; continue
             tw = r.get("twin") or ""
             if tw[:5] in ("MAIN0", "X000:") and is_matched(tw.split(":")[0], int(tw.split(":")[1], 16), size): st = "piece"
@@ -266,6 +273,41 @@ def overlays():
         for size, p, a, name, st, tw in todo:
             f.write("%s,%s,%d,%s,%s,%s\n" % (p, a, size, name, st, tw))
     return out
+
+
+def summary_lines(res, cov, ovl, tot, matching):
+    """The headline figures, shared by docs/PROGRESS.md and README.md. Every function is counted once: the area
+    overlays repeat a lot of MAIN0/X000 code (and each other's), so only their first copy enters the total."""
+    md = matching_detail()
+    m0, x0 = (next(r for k, r in res.items() if k.startswith(p)) for p in ("MAIN0", "X000"))
+    ou, om, onu, onm = (sum(d[k] for d in ovl.values()) for k in ("uniq", "uniq_matched", "n_uniq", "n_uniq_matched"))
+    rows = [("MAIN0.EXE: engine, shared by every area", m0["game"], m0["n_game"], cov["MAIN0"], md.get("MAIN0", [0, 0])[1]),
+            ("X000.BIN: AREA00 + object code reused by all areas", x0["game"], x0["n_game"], cov["X000"], md.get("X000", [0, 0])[1]),
+            ("X001..X019.BIN: code specific to the other areas", ou, onu, om, onm)]
+    T = sum(r[1] for r in rows); M = sum(r[3] for r in rows); F = sum(r[2] for r in rows); FM = sum(r[4] for r in rows)
+    summary_lines.whole, summary_lines.areas = (M, T), (om, ou)
+    L = ["**Whole game: %.1f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
+         "| Part | Code | Matching bytes | Matching |", "|---|---:|---:|---|"]
+    for name, g, n, m, nm in rows:
+        L.append("| %s | %d B | %d B | %.1f %% `%s` |" % (name, g, m, pct(m, g), bar(pct(m, g))))
+    L.append("| **Whole game** | **%d B** | **%d B** | **%.1f %%** `%s` |" % (T, M, pct(M, T), bar(pct(M, T))))
+    L += ["",
+          "- Bytes of machine code in game functions; Sony's Psy-Q library (%d B) is not counted." % tot["lib"],
+          "- Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each",
+          "  other; those copies match automatically and are not added again (counting every copy separately gives %.1f %%)." % (
+              pct(matching + sum(d["matched"] for d in ovl.values()), tot["game"] + sum(d["game"] for d in ovl.values()))),
+          "- Also tracked for MAIN0 + X000: %.1f %% of the code named by us, %.1f %% typed with the TObj structure." % (
+              pct(tot["named"], tot["game"]), pct(tot["typed"], tot["game"]))]
+    return L
+
+
+def update_readme(summary):
+    path = N("README.md")
+    a, b = "<!-- progress:start -->", "<!-- progress:end -->"
+    t = open(path).read()
+    if a not in t: return
+    i, j = t.index(a) + len(a), t.index(b)
+    open(path, "w").write(t[:i] + "\n" + "\n".join(summary) + "\n" + t[j:])
 
 
 def main():
@@ -284,17 +326,12 @@ def main():
     w = out.append
     w("# Tombi! decompilation progress (PAL Spanish, SCES_013.31)\n")
     w("_Generated with `python tools/progress.py` (%s). Do not edit by hand._\n" % datetime.date.today().isoformat())
+    og, om, on = (sum(d[k] for d in ovl.values()) for k in ("game", "matched", "n_matched"))
+    summary = summary_lines(res, cov, ovl, tot, matching)
     w("## Summary\n")
-    w("| Level | Progress | Bytes | Functions |")
-    w("|---|---|---|---|")
-    w("| **C that matches byte for byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(matching_detail()[k][1] for k in ("MAIN0", "X000"))))
-    w("| Named by us | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["named"], tot["game"]), bar(pct(tot["named"], tot["game"])), tot["named"], tot["game"], tot["n_named"], tot["n_game"]))
-    w("| With the TObj structure applied (coverage, not C progress) | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["typed"], tot["game"]), bar(pct(tot["typed"], tot["game"])), tot["typed"], tot["game"], tot["n_typed"], tot["n_game"]))
-    og, om, on = sum(d["game"] for d in ovl.values()), sum(d["matched"] for d in ovl.values()), sum(d["n_matched"] for d in ovl.values())
-    w("| Matching, all 18 programs (MAIN0 + X000 + the 16 other area overlays) | %.1f %% `%s` | %d / %d | %d |" % (
-        pct(matching + om, tot["game"] + og), bar(pct(matching + om, tot["game"] + og)), matching + om, tot["game"] + og,
-        sum(matching_detail()[k][1] for k in ("MAIN0", "X000")) + on))
+    out.extend(summary)
     w("")
+    update_readme(summary)
     w("\"Game code\" = functions inside the code of the analyzed programs, **excluding** those from")
     w("Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra %d bytes (%d functions).\n" % (tot["lib"], tot["n_lib"]))
     w("## Breakdown by program\n")
@@ -324,13 +361,12 @@ def main():
         og, sum(d["n"] for d in ovl.values()), pct(om, og), on, sum(d["x000"] for d in ovl.values()),
         sum(d["dup"] for d in ovl.values()), sum(d["piece"] for d in ovl.values()), sum(d["new"] for d in ovl.values()), sum(d["n_new"] for d in ovl.values())))
     w("")
-    w("Grand total, all programs: **%d / %d B matching (%.1f %%)**; core (MAIN0 + X000) %.1f %%, area overlays %.1f %%.\n" % (
-        matching + om, tot["game"] + og, pct(matching + om, tot["game"] + og), pct(matching, tot["game"]), pct(om, og)))
+    w("The *Matching* column counts every copy, including the shared code matched through twins; the whole-game")
+    w("figure in the summary counts each function once.\n")
     w("## What is NOT counted (the real denominator is larger)\n")
     w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
     w("- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.")
-    w("- The overlays are only counted in the \"area overlays\" section and the all-programs row: the summary above is MAIN0 + X000.")
-    w("  AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages.")
+    w("- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages.")
     w("- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified")
     w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
     w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])
@@ -358,7 +394,7 @@ def main():
                "programs": {k: {x: y for x, y in r.items() if x not in ("unnamed_list", "items")} for k, r in res.items()},
                "overlays": ovl},
               open(N("docs", "progress.json"), "w"), indent=2)
-    write_svgs(res, tot, matching)
+    write_svgs(res, tot, matching, summary_lines.whole, summary_lines.areas)
     print("\n".join(out[:16]))
 
 
