@@ -1,5 +1,5 @@
 // FUNC 8004b454 296 MAIN0
-/* score 39 (ncheck, era 50): falla lbu b->bc antes del subu de d (juego: despues), t1/t2 intercambiados y orden addu h40->s2+t2. */
+/* score 33 (ncheck): falla orden lbu b->bc tras subu de d, t1/t2 intercambiados y operandos addu (h40->s2 + t2). El 2o test reutiliza una variable (juego: e en a3). */
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0xc]; unsigned char bc;
@@ -35,8 +35,9 @@ static __inline__ void f(TO *a, TO *b)
             v = b->s6c + e + w;
         else
             v = b->s6c + w;
-        if ((unsigned short)v <= b->s6e + (short)e
-            && (unsigned short)(b->s70 + (a->sea - (b->s16 + t1))) <= b->s72) {
+        if ((unsigned short)v > b->s6e + (short)e) return;
+        d = b->s70 + (a->sea - (b->s16 + t1));
+        if ((unsigned short)d <= b->s72) {
             a->b9e = 3;
             a->s7e = 0;
             a->sb8 = t2;
