@@ -1,6 +1,5 @@
 // FUNC 800ebd40 552 X000
-// score 16: left: game sign-extends dx (sll/sra in beqz delay slot) before w -/+ dx; tried short dx, inline, ternary
-// w1: the sh store makes gcc drop the (short)dx sign-extension; game keeps sll/sra, so the value probably feeds a non-truncating use. Params/default case/types worse.
+// MATCHING 800ebd40 552
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 DAT_80114c24[];
@@ -19,6 +18,7 @@ void FUN_800ebd40(TObj *o)
     int dx;
     short dy;
     int w;
+    Fix16 *hp;
     TObj *q;
     switch (o->state) {
     case 0:
@@ -51,7 +51,8 @@ void FUN_800ebd40(TObj *o)
         FUN_8001fec0(o);
         o->animFrame = DAT_800a6066[0] & 1;
         w = DAT_800a6078->p.whole;
-        if (DAT_800a6066[0] & 1) o->h->p.whole = w - (short)dx; else o->h->p.whole = w + (short)dx;
+        hp = o->h;
+        if (DAT_800a6066[0] & 1) hp->p.whole = w - (dx << 16 >> 16); else hp->p.whole = w + (dx << 16 >> 16);
         o->y.p.whole = DAT_800a604e[0] + dy;
         o->d->p.whole = DAT_800a607c->p.whole;
         switch (o->subtype) {
