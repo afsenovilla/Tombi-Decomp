@@ -1,4 +1,5 @@
 // FUNC 8003a6b0 108 MAIN0
+// r9: only a1/a2 swap for p/q (game p=a2,q=a1); reading D_8009F0F0 directly fixes regs but reloads it at the end. Tried decl order, register, goto, temps.
 typedef struct {
     char pad[0x8a];
     unsigned short w8a;
