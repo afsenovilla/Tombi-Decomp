@@ -1,5 +1,5 @@
 // FUNC 8003f200 804 MAIN0
-/* score 129: game does not cross-jump the first branch (t = D_8007B460[M960] + M962 with regs v0/v1 swapped vs the final else); r (division result) lives in a0 in the game but in a1 (y) here */
+// MATCHING 8003f200 804
 typedef struct { short x, y; } XY;
 extern short D_800A457C, D_800A457E;
 extern int D_8009C960;
@@ -33,7 +33,8 @@ char *func_8003F200(short x, short y)
         } else {
             b = D_1F80030C;
         }
-        t = D_8007B460[M960] + D_8009C962;
+        t = D_8007B460[M960];
+        t += D_8009C962;
     } else if ((M960 == 4 || M960 == 12) && D_8009C962 < 4) {
         t = &D_8007B450[D_8009C962];
         b = D_1F800308[D_1F8001C8 & 1];
@@ -43,22 +44,24 @@ char *func_8003F200(short x, short y)
             t = D_8007B44C;
             y += 0x5a;
         } else {
-            t = D_8007B46C + D_8009C962;
+            t = D_8007B46C;
             b = D_1F800308[0];
+            t += D_8009C962;
         }
     } else {
+        t = D_8007B460[M960];
         b = D_1F800308[0];
-        t = D_8007B460[M960] + D_8009C962;
+        t += D_8009C962;
     }
     if (D_1F8001C8 & 1)
         r = (t->y - y) / 90;
     else
         r = (y - t->y) / 90;
-    lim = D_8007B55C[M960][D_8009C962];
+    { unsigned char *q = D_8007B55C[M960]; lim = q[D_8009C962]; }
     if (lim < r) r = lim;
     if (r < 0) r = 0;
     b += *(unsigned short *)(b + 8 + r * 2);
     c = (x - t->x) / 8;
     if (c < 0) c = 0;
-    return b + *(unsigned short *)(b + c * 2);
+    return b + *(unsigned short *)(b + (c << 1));
 }
