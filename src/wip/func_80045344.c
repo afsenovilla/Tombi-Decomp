@@ -3,7 +3,11 @@
    (o 22 refs/84 insns now outranks p for s0; with the inline, o had 15/90 < p 20/115 and o/p were swapped).
    Left: (1) jump.c turns `res = 1; if (dx < 0) res = 0;` into a store-flag (nor; srl) where the game keeps
    bgez + move s3,zero; an inline sgn() helper gives the branch but moves the zero block out of line (77);
-   (2) box0/box1 test: lhu order of b->box0/a->box0 and v0/v1 in the box1 sum. */
+   (2) box0/box1 test: lhu order of b->box0/a->box0 and v0/v1 in the box1 sum.
+   b46: `(b->box0 + a->box0)` gives the game's lhu order (24, regs still swapped: -dl shows qty {p-box0,sum,total,andi}
+   (16 refs over 9 insns) loses to qty {p-box1,sum,slt} (12 refs/4 insns); game must have the box1 loads earlier in
+   sched1). Store-flag not avoided by: res=1 before the sh, else-forms, res--, goto form, int dx with (short)/<<16 tests,
+   sgn() inline with r var (all converted); sgn() with direct returns gives the branch but out-of-line zero block (79). */
 #include "TOBJ.H"
 extern int func_800425C4(TObj *a, TObj *b);
 extern void FUN_8001f96c(int a, int b, int c, int d);
