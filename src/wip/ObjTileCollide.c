@@ -1,5 +1,8 @@
 // FUNC 8003fd78 464 MAIN0
-/* falta: el juego deja sh box3 justo antes del beqz (delay slot) y lee b9c en v1 antes de los sb 0; probado: -fno-schedule-insns, b9c en local, box3 = *p al final, store por cast, box3 en ambas ramas, v unsigned */
+/* score 10 (b23, was 33): box2 = p[0]; v = p[1]; with o->b69 = 0 between them. Left: the game loads b9c (lbu v1)
+   before the zero stores and leaves sh box3 in the beqz delay slot; ours reads b9c into v0 after sh box3 (sched1 keeps
+   the load next to the branch, priority 1). Tried: b9c in a local (all types, 3 positions: always folded back),
+   in-struct byte store for da0, hill-climb of the store order. Older notes: -fno-schedule-insns, box3 in both branches. */
 #include "TOBJ.H"
 extern short DAT_80115320[];
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -16,9 +19,9 @@ int ObjTileCollide(TObj *o, short dy, int noMove)
     p = &DAT_80115320[((short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
-    o->box2 = *p++;
-    v = *p;
+    o->box2 = p[0];
     o->b69 = 0;
+    v = p[1];
     o->wb0 = 0;
     *(unsigned char *)&o->da0 = 0;
     o->bbe = 0;
