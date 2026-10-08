@@ -1,6 +1,9 @@
 /* wip: ncheck score 68 but fewer differing instructions than the old 59 version (38 vs 55 diff lines):
    int r, callees return int, s = a + b computed before the compares (fixes base reg a1 for DAT_1f800278).
-   Left: hi in a3 (game a2), r in a2 (game a0), inr() result comes out as xori instead of bnez/move/j/li. */
+   Left: hi in a3 (game a2), r in a2 (game a0), inr() result comes out as xori instead of bnez/move/j/li.
+   b16: inr returning short gives the bnez/j/li shape (67) but its result lands in v0 and is copied to r; game threads m<lo to the
+   shared r=0 block (800410ec) and computes the result straight into a0. Tried: types brute force (r/lo/hi/a/b/c/s/w),
+   5 inr bodies x int/short, && chains, whole test as a short inline chk(w,x,y) (90), open-coded compares (69: r in a0, hi in a2). */
 // FUNC 80040f78 596 MAIN0
 extern unsigned short *DAT_1f800278;
 extern unsigned short DAT_1f800282, DAT_1f800284;
@@ -9,7 +12,7 @@ extern int FUN_80040d30(int, int);
 extern int func_80040AC0(int, int);
 extern int func_80040BFC(int, int);
 
-static __inline__ int inr(short m, short lo, short hi)
+static __inline__ short inr(short m, short lo, short hi)
 {
     if (m < lo) return 0;
     if (lo + hi < m) return 0;
