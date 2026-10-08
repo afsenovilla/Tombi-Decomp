@@ -1,5 +1,5 @@
 // FUNC 8004cb00 1240 MAIN0
-/* score 20: only t/b register choice in the link code differs (game t=a0, b reuses the pointer reg v1; idx a2 in case 4). Tried: LINK macro forms, decl orders, types, q reuse as b (38), non-volatile t. */
+/* score 14: only the addu operand order (game t+i, ours i+t) in the link code and the early sll/q register in case 4 differ. Block-local link vars (one copy in case 4, one at link: for case 2/8) and `int i1 = e->be;` read first fixed most. Tried: x<<2 forms (breaks regs), i*4 computed first in case 4 (breaks cross-jump), decl orders/types. */
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5;
@@ -26,7 +26,6 @@ void FUN_8004cb00(Ent *e, int z)
     unsigned char ty;
     unsigned char idx;
     volatile int *q;
-    int t, b, i4;
 
     kind = e->b1 & 0x7f;
     switch (kind) {
@@ -55,11 +54,12 @@ void FUN_8004cb00(Ent *e, int z)
             break;
         }
         if (e->bc & 0x10) {
-            q = &DAT_1f800334;
-            t = *q;
-            b = *q;
-            i4 = idx * 4;
-            goto link2;
+            volatile int *q4 = &DAT_1f800334;
+            int t4 = *q4;
+            int b4 = *q4;
+            b4 += *(int *)(t4 + idx * 4 + 4);
+            p->ba4 = 1;
+            p->da0 = b4;
         }
         break;
     case 5:
@@ -73,13 +73,14 @@ void FUN_8004cb00(Ent *e, int z)
             return;
         q = &DAT_1f800338;
     link:
-        t = *q;
-        b = *q;
-        i4 = e->be * 4;
-    link2:
-        b += *(int *)(t + i4 + 4);
-        p->ba4 = 1;
-        p->da0 = b;
+        {
+            int i1 = e->be;
+            int t1 = *q;
+            int b1 = *q;
+            b1 += *(int *)(t1 + i1 * 4 + 4);
+            p->ba4 = 1;
+            p->da0 = b1;
+        }
         break;
     case 7:
         if ((DAT_8009bd98 = allocObjectLayer()) == 0)
