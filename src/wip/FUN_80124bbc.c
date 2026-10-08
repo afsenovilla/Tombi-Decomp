@@ -7,17 +7,18 @@ int FUN_80124bbc(TObj *o, TObj *p)
     short dx;
     short s;
     short h;
-    unsigned short ux;
     unsigned short uy;
+    int lim;
 
     uy = o->h->p.whole - p->h->p.whole + 6;
     dy = p->h->p.whole - p->box0;
     uy += dy + o->box0;
-    if (uy > dy + o->box1 + 0xe)
+    lim = o->box1 + 0xe;
+    if (uy > dy + lim)
         return 0;
-    ux = o->box2 + (o->y.p.whole - p->y.p.whole);
+    uy = o->box2 + (o->y.p.whole - p->y.p.whole);
     dx = p->box2 - p->y.p.whole;
-    if (ux > dx + o->box3)
+    if (uy > dx + o->box3)
         return 0;
     s = o->y.p.whole + o->box2 - p->y.p.whole;
     if (s <= 0)
