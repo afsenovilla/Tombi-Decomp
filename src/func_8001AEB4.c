@@ -1,5 +1,5 @@
 // FUNC 8001aeb4 1140 MAIN0
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 8001aeb4 1140
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
     RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
@@ -61,15 +61,15 @@ void func_8001AEB4(void)
         r.h = 1;
         StoreImage(&r, (unsigned long *)0x801FBBA0);
         GetDrawEnv(&env);
-        D_8009F085[0] = 0xf8;
+        D_8009E375[0] = 0xf8;
         D_8009E376[0] = 200;
-        D_8009F087[0] = 0xc0;
         D_8009E377[0] = 0xc0;
+        D_8009F087[0] = 0xc0;
         D_8009F086[0] = 200;
         D_8009BC98 = env.r0;
         D_8009BC9C = env.g0;
         D_8009BCA0 = env.b0;
-        D_8009E375[0] = 0xf8;
+        D_8009F085[0] = 0xf8;
         D_1F8001D4->w4e++;
         break;
     case 1:
