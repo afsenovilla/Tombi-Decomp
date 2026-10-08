@@ -1,3 +1,4 @@
+// r9 wip: score 26. Remaining: game copies DAT_1f800176 (lh v0; move v1,v0) and uses srl for (t&0xfff)>>3; unsigned cast makes it worse.
 // FUNC 80122724 408 X000
 #include "TOBJ.H"
 extern void *DAT_8013b20c[];
@@ -7,7 +8,7 @@ extern unsigned short DAT_1f800186;
 extern void FUN_80018da4(TObj *, int);
 extern void FUN_80018934(TObj *);
 
-void FUN_80122724(TObj *o)
+void func_80122724(TObj *o)
 {
     int v, t;
     short r;
@@ -28,21 +29,20 @@ void FUN_80122724(TObj *o)
         v = DAT_1f800176;
         if (v >= 0x719) {
             if (o->b0c) {
-                r = (short)(o->d30 - v) >> 3;
+                v = (short)(o->d30 - v) >> 3;
             } else {
                 t = o->d30 - v;
                 if ((short)t < -0x200)
-                    r = (t & 0xfff) >> 3;
+                    v = (t & 0xfff) >> 3;
                 else
-                    r = (short)t >> 3;
-                if (r >= 0x180)
+                    v = (short)t >> 3;
+                if ((short)v >= 0x180)
                     break;
             }
-            o->a.p.whole = r;
+            o->a.p.whole = v;
             o->b.p.whole = 0;
-            o->visible = 1;
-            o->y.p.whole = ((o->d34 - DAT_1f800186) & 0xfff) >> 4;
-            FUN_80018da4(o, 1);
+            o->y.p.whole = ((unsigned)(o->d34 - DAT_1f800186) & 0xfff) >> 4;
+            FUN_80018da4(o, o->visible = 1);
         }
         break;
     case 2:
