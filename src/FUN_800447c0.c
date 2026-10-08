@@ -1,4 +1,5 @@
 // FUNC 800447c0 480 MAIN0
+// MATCHING 800447c0 480
 #include "TOBJ.H"
 typedef struct { unsigned short x, y; } P2;
 extern P2 DAT_8007b610[];
@@ -17,10 +18,10 @@ void FUN_800447c0(TObj *o, TObj *q)
     unsigned short b0;
 
     if ((unsigned short)(o->d->p.whole - q->d->p.whole + 0x2d) > 0x5a) return;
-    t = &DAT_8007b610[q->b0c];
+    { unsigned short *u = &DAT_8007b610[q->b0c].x;
     b0 = o->box0;
-    tx = t->x;
-    ty = t->y;
+    tx = *u++;
+    ty = *u; }
     if ((unsigned short)(o->h->p.whole - (q->h->p.whole + tx) + (q->box0 + b0)) > q->box1 + o->box1) return;
     n = 1;
     if ((unsigned short)(o->y.p.whole - (q->y.p.whole + ty) - 4 + (q->box2 + o->box2)) > o->box3 + q->box3 - 4) return;
