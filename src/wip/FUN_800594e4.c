@@ -13,13 +13,14 @@ extern void SetSprt(void *);
 extern void SetSemiTrans(void *, int);
 extern void AddPrim(void *, void *);
 
-void FUN_800594e4(int obj, short x, short y, unsigned idx)
+void FUN_800594e4(int obj, short x, short y, unsigned short idx)
 {
     SPRT *p;
     unsigned char *s;
     int t;
-    s = (unsigned char *)(*(int *)(obj + 0x18) + *(short *)(*(int *)(obj + 0x18) + (idx & 0xffff) * 4 + 2));
+    int tb;
     p = DAT_1f800164;
+    s = (unsigned char *)(*(volatile int *)(obj + 0x18) + *(short *)(*(volatile int *)(obj + 0x18) + idx * 4 + 2));
     SetSprt(p);
     p->code = p->code | 1;
     SetSemiTrans(p, 0);
