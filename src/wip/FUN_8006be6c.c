@@ -1,7 +1,8 @@
 // FUNC 8006be6c 224 MAIN0
 /* score 3: epilogue only (game: addiu sp in the jr delay slot with s0 saved; ours addiu sp; jr; nop). Body matches with CC1PSX 4.3 / ncheck.
    CC1PSX 4.4 and gcc 2.8.x fill the epilogue slot but also fill the bnez slot with the 0x49 load (game keeps lbu; nop; beqz), so
-   neither reproduces it: library-range code (looks like an assembler that fills jr slots with the previous insn, cf. FUN_8006bac4). */
+   neither reproduces it (b55: with // CC gcc-2.8.1 score 7, epilogue ok, only the beqz-0x49 delay slot differs: ours
+   steals the lui of DAT_800981b0, game nop; tried volatile pointer/flag, [0]/struct forms, local f, goto forms, do-while(0)): library-range code (looks like an assembler that fills jr slots with the previous insn, cf. FUN_8006bac4). */
 extern void (*DAT_800981b0)(unsigned char *);
 
 void FUN_8006be6c(unsigned char *o)
