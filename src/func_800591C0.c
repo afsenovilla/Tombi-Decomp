@@ -17,6 +17,7 @@ extern GE D_800A4DE0[][128];
 extern GT D_800A5DE4[];
 extern SPRT *DAT_1f800164;
 /* do/while(0) macro: its loop note doubles the ref weight of p, flipping the p/index global-alloc priority (s0/s1) */
+/* Tried (debt2): plain stores give p 28 refs/60 insns vs index offset 18/38 (needs one more p ref or index live >=39); comma macros, if/else inversions, block-local p/q copies, continue->if/else/goto, local types all leave the counts unchanged (score 44). */
 #define SETUV0(p, u, v) do { (p)->u0 = (u); (p)->v0 = (v); } while (0)
 extern char *DAT_1f8001e0;
 typedef struct { short clip[4]; short ofs[2]; short tw[4]; unsigned short tpage; char rest[0x68 - 0x16]; } DRAWENV;
