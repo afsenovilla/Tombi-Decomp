@@ -3,7 +3,10 @@
    (game c1=a3, g=t0, a=a0, b=a1; ours c1=a1, g=a3, a=v1, b=a0). b17: extern volatile DAT_8009d674 (reloaded
    in the tail), unsigned short a = c with the final test on c (fresh andi at the label), first load + clear
    hoisted with a volatile second name for the clear (debt). Tried type brute force of c/a/m, a precomputed
-   at several points, inline function instead of the macro. */
+   at several points, inline function instead of the macro.
+   b46: -dl/-dg: a (75) gets v1 because the local temp a-0x50 (86) takes v0; in the game that temp is v1, so the raw
+   pad lhu (v0) must still be live there, i.e. sched1 placed `& 0xff0f` after `a - 0x50`. Permutations of the 5 init
+   statements, m = (pad & 0xff0f) | AXIS(..), block temps for the pad value / AXIS result: no gain (36-94). */
 typedef struct { char p0[9]; unsigned char b9; } G;
 extern unsigned char DAT_8009d618;
 extern volatile unsigned char DAT_8009d618v;
