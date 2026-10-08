@@ -2,20 +2,20 @@
 // MATCHING 80133474 3152
 /* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
  * call;call;j blocks that cross-jumping merged).
- * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038. */
+ * D_8013B18C, D_800A607C, D_800A60C4 now use only their [0] array names.
+ * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038.
+ * Tried (debt2): D_8009C984s as [0]/pointer/temp forms keeps la+lw 0(reg) (score 8), all-scalar D_8009C984 465. */
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
 extern TObj D_800A6038;
 extern unsigned char D_800A6039, D_800A6047, D_800A603C, D_800A603D, D_800A60DA;
 extern unsigned short D_800A6066;
-extern short D_800A604E;
 extern unsigned short *D_800A605C[];
-extern Fix16 *D_800A6078, *D_800A607C;
-extern int D_800A60C4, D_800A609C;
+extern Fix16 *D_800A6078;
+extern int D_800A609C;
 extern Fix16 *D_800A607Ca[];
 extern int D_800A60C4a[];
-extern unsigned char D_800A6047a[];
 extern int D_8009C984A[];
 #define D_8009C984 D_8009C984A[0]
 extern int D_8009C984s;
@@ -23,7 +23,7 @@ extern unsigned char D_8009C942, D_8009C93F, D_8009CDA7[];
 extern unsigned short D_8009C960, D_8009C962;
 extern int D_1F8002D4[];
 extern void *D_8013B17C[];
-extern void *D_8013B184, *D_8013B188, *D_8013B18C;
+extern void *D_8013B188;
 extern void *D_8013B184a[];
 extern void *D_8013B18Ca[];
 extern signed char D_80011EB4[];
@@ -147,10 +147,10 @@ void func_80133474(TObj *o)
             e = &D_80011DAC[D_80011EB4[*D_800A605C[0]]];
             o->anim = D_8013B17C[e->anim];
             if (o->animFrame & 1) {
-                u = D_800A60C4 + 0x80 - e->ang;
+                u = D_800A60C4a[0] + 0x80 - e->ang;
                 t = u; t &= 0xff;
             } else {
-                u = e->ang + D_800A60C4;
+                u = e->ang + D_800A60C4a[0];
                 t = u; t &= 0xff;
             }
             ang = (short)t;
@@ -166,7 +166,7 @@ void func_80133474(TObj *o)
                 o->state = 0;
             }
             if (D_8009C960 != 0) break;
-            if (D_8009C962 == 0 && D_800A603D == 0x20 && D_800A607C->p.whole > 0 &&
+            if (D_8009C962 == 0 && D_800A603D == 0x20 && D_800A607Ca[0]->p.whole > 0 &&
                 D_800A6038.y.p.whole >= -0x2f && (unsigned short)(D_800A6078->p.whole - 0x400) < 0x18) {
                 D_8009C984s &= ~2;
                 o->b04 = 2;
@@ -204,7 +204,7 @@ void func_80133474(TObj *o)
                 o->animFrame = 0;
                 o->d8c = 0;
                 removeItemFromInventory(1, 1);
-                o->anim = D_8013B18C;
+                o->anim = D_8013B18Ca[0];
                 AnimLoadDuration(o);
                 o->movetab = D_80077D30;
                 o->velY = -0x280;
