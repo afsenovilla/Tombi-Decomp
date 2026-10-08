@@ -1,11 +1,10 @@
 // FUNC 8005aa74 2328 MAIN0
-/* score 136 (ncheck): structure, switch, loop hoisting and caller-saves all match. Left:
- * (1) p4 and flag f2 swap registers (game: p4=$fp, f2=$a2 caller-saved); type brute force and
- *     declaration order did not fix it (int f1 gives 190 without the andi but same swap);
- * (2) id==1 block: game stores a,y then lh G before sw d30 (perms of the 6 stores tried; the
- *     natural a,y,b,d30,d34,d38 order makes loop.c hoist dy<<16);
- * (3) loop 2: wc0/wc8/wca load order (reordering flips the global register allocation).
- * Tried: explicit pointer locals (worse), volatile dx/dy (worse), register asm (worse). */
+/* score 76 (ncheck). b33: p4/f2 register swap fixed by merging duplicate inner cases (case 0: case 2: / case 1: case 3:)
+ * in cases 5 and 8: fewer RTL insns before the loop shorten p4's live length, so gcc's global-alloc priority
+ * (floor_log2(refs)*refs/live_length, see cc1 -dg) puts p4 before f2. Loop 2 field order brute-forced (5040 perms).
+ * Left: id==1 POS block: game stores a,y then lh G then d30,d34,b,d38 (natural order) with dy<<16 NOT hoisted;
+ * natural source order makes loop.c hoist dy<<16 (life 11 in -dL dump) -> 208. Tried: all 720 orders x 3 forms,
+ * dx/dy as arrays/volatile/address-taken, POS as static inline (all worse). */
 typedef struct { unsigned short frac; short whole; } FixParts;
 typedef union { int raw; FixParts p; } Fix16;
 
@@ -257,12 +256,12 @@ void FUN_8005aa74(int id, int kind, int w, int p4)
                 q->b0c = cnt;
                 e = n & 0xf;
                 q->wc4 = 0;
-                q->wc6 = 0;
                 q->wc0 = D_800804E0[e];
-                q->wc8 = D_800804EC[e].a;
-                q->wcc = n | 0x80;
+                q->wc6 = 0;
                 q->wce = 0;
+                q->wc8 = D_800804EC[e].a;
                 q->wca = D_800804EC[e].b;
+                q->wcc = n | 0x80;
                 cnt++;
                 FLAGS();
             }
