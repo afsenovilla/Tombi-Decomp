@@ -1,4 +1,5 @@
 // FUNC 800fadec 680 X000
+// w1: score 24; st lives in v1 (game v0, li 2 in bnez delay slot), w/c regs swapped later. Tried st types, if/else forms, o->step per branch (57), reusing f/n/d: no gain.
 #include "TOBJ.H"
 typedef struct {
     TObj t;

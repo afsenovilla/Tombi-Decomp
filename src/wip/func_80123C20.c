@@ -1,5 +1,6 @@
 /* wip: score 8 (ncheck). Falla solo asignacion v0/v1 de las constantes 8 y 1 en case 0 (el juego: li v1,8 ... li v1,1).
-   Orden original y permutaciones (script) no lo resuelven; tamano real 484 (splat corta en 80123D18). */
+   Orden original y permutaciones (script) no lo resuelven; tamano real 484 (splat corta en 80123D18). 
+   w1: also tried 7-stmt permutations, 0x7e==x, volatile stores, scalar/array of 4 globals. */
 // FUNC 80123c20 484 X000
 #include "TOBJ.H"
 extern unsigned char DAT_8009c940[];

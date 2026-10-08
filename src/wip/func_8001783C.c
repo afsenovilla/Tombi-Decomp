@@ -1,5 +1,6 @@
 // FUNC 8001783c 776 MAIN0
 // wip score 34 (was 70): statement order found by random permutation; game loads 0xff/3 constants earlier. Declaring all globals as X[] keeps store order (score 40) but constants still late.
+// w1: writing stores in exact game order with all globals as X[] gives 40 (scalars 70); greedy scalar toggles and early locals for F3DC/1B3 do not help.
 extern unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];

@@ -1,4 +1,5 @@
 // FUNC 8004b6a0 292 MAIN0
+// w1: score 18; regs only (s6e lh into v0 + move t0, d in a2). Brute int/short/ushort of d,ad,v,w,e, reversed compares, local h=s6e: no gain.
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0x16]; unsigned short s16;

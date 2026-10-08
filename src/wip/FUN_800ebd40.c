@@ -1,5 +1,6 @@
 // FUNC 800ebd40 552 X000
 // score 16: left: game sign-extends dx (sll/sra in beqz delay slot) before w -/+ dx; tried short dx, inline, ternary
+// w1: the sh store makes gcc drop the (short)dx sign-extension; game keeps sll/sra, so the value probably feeds a non-truncating use. Params/default case/types worse.
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 DAT_80114c24[];

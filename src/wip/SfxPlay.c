@@ -1,4 +1,5 @@
 // FUNC 8001e4f0 112 MAIN0
+// w1: score 20; only s0/s1 swap (game id in s0, r in s1). Tried copies of id, unsigned short/short id, register, goto forms, != vs == forms: no change.
 extern int FUN_8001e430(void);
 extern int FUN_8001f3fc(int, int);
 extern unsigned short DAT_800a3cc8[];
