@@ -1,11 +1,12 @@
 // FUNC 8011899c 548 X000
+// MATCHING 8011899c 548
 #include "TOBJ.H"
 extern unsigned char DAT_8009c966;
 extern unsigned char DAT_8009cda6;
 extern void FUN_8011880c(TObj *);
 extern void FUN_80018ca4(TObj *);
 
-void FUN_8011899c(TObj *o)
+void func_8011899C(TObj *o)
 {
     switch (o->step) {
     case 0:
@@ -27,7 +28,7 @@ void FUN_8011899c(TObj *o)
             o->step = 2;
             break;
         case 2:
-            o->step = 2;
+            o->step = 3;
             break;
         case 3:
             o->b04 = 3;

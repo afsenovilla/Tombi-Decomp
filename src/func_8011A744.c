@@ -1,5 +1,5 @@
 // FUNC 8011a744 748 X000
-/* score 43 (ncheck): frame 0x38 vs 0x28 - the velX bounce block (case 1) adds 16 B of stack vars in gcc; also anim/d3c order and extra reg copies there */
+// MATCHING 8011a744 748
 #include "TOBJ.H"
 extern void *D_8013B244[];
 extern int Rand(void);
@@ -9,6 +9,7 @@ extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 void func_8011A744(TObj *o)
 {
+    short f;
     switch (o->b04) {
     case 0:
         if (o->timer == 0) {
@@ -64,20 +65,25 @@ void func_8011A744(TObj *o)
         o->y.raw += o->velV << 8;
         o->h->raw += o->velH << 8;
         o->velH += o->velX;
-        if (o->velX < 0 && o->velH < -0xff)
-            o->velX = -o->velX;
-        else if (o->velX > 0 && o->velH > 0xff)
-            o->velX = -o->velX;
+        {
+            int vx = o->velX;
+            if (vx < 0 && o->velH < -0xff)
+                o->velX = -vx;
+            else {
+                int w = o->velX;
+                if (w > 0 && o->velH > 0xff)
+                    o->velX = -w;
+            }
+        }
         o->d8c += o->d84;
         switch (o->subtype) {
-        case 0:
-        case 1:
-            if ((unsigned)(o->d8c + 0x3f) >= 0x7f)
-                o->d84 = -o->d84;
-            break;
-        case 2:
-        case 3:
-            if ((unsigned)(o->d8c + 0x5f) >= 0xbf)
+        case 0 ... 1:
+            f = (unsigned)(o->d8c + 0x3f) < 0x7f;
+            goto tail;
+        case 2 ... 3:
+            f = (unsigned)(o->d8c + 0x5f) < 0xbf;
+        tail:
+            if (!f)
                 o->d84 = -o->d84;
             break;
         }
