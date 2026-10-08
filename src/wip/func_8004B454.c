@@ -1,4 +1,5 @@
 // FUNC 8004b454 296 MAIN0
+/* score 50 (ncheck): x debe ir en t0 y d en a0 separado de e (a3); orden lbu/tabla tras subu. */
 #define H(p, o) (*(unsigned short *)((char *)(p) + (o)))
 #define SH(p, o) (*(short *)((char *)(p) + (o)))
 #define W(p, o) (*(int *)((char *)(p) + (o)))
@@ -7,21 +8,20 @@ extern E DAT_8007b5e4[];
 extern short DAT_1f80019e;
 extern int DAT_1f8003c0;
 
-void FUN_8004b454(char *a, char *b)
+void func_8004B454(char *a, char *b)
 {
     unsigned short t1, t2;
     int d, e, w;
     unsigned v;
-    char pad;
+    int pad[2];
     unsigned short x;
 
     if ((unsigned short)(H(W(a, 0x44), 2) - H(W(b, 0x44), 2) + 0x2d) < 0x5b) {
-        x = H(a, 0xe8);
-        d = x - H(W(a, 0x40), 2);
+        d = H(a, 0xe8) - H(W(a, 0x40), 2);
         t2 = DAT_8007b5e4[*(unsigned char *)(b + 0xc)].a;
         t1 = DAT_8007b5e4[*(unsigned char *)(b + 0xc)].b;
-        e = (d << 16 < 0) ? -d : d;
-        w = x - (H(W(b, 0x40), 2) + t2);
+        if ((short)d < 0) e = -d; else e = d;
+        w = H(a, 0xe8) - (H(W(b, 0x40), 2) + t2);
         if (H(a, 0x2e) & 1)
             v = H(b, 0x6c) + e;
         else
