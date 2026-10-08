@@ -1,5 +1,5 @@
 // FUNC 800eddfc 408 X000
-/* score 10 (ncheck): inner case 0 - game loads o->b6 before o->y (lbu 6; lhu 0x16; addiu; sh 0x80; sb 6; sh 0x7e) */
+// MATCHING 800eddfc 408
 typedef struct O {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
     char p0[0x16 - 8]; unsigned short y;
@@ -40,10 +40,10 @@ void func_800EDDFC(O *o)
         case 0:
             v = o->h[1];
             o->s80 = 0;
-            o->b6++;
             w = o->y;
             o->s7e = w;
             o->d8c = 0x1000;
+            o->b6++;
             o->s7c = v;
         case 1:
             if (D_800A6066 & 1) o->s7a = 1;

@@ -1,4 +1,5 @@
 // FUNC 80108168 464 X000
+/* score 2: only diff is the sb 0xf(-20) store, which the game sinks after the b69 store while keeping li -20 early; moving the statement moves the li too */
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern TObj *DAT_8009c330;
@@ -7,19 +8,21 @@ extern unsigned char DAT_8009cda2, DAT_8009c93a;
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
-void FUN_80108168(TObj *o)
+void func_80108168(TObj *o)
 {
     unsigned char t;
     unsigned short u;
     switch (o->state) {
     case 0:
         B(DAT_8009c330, 8) = o->active;
+//PS
         u = o->animFrame;
         o->velX = 0x5a;
-        *(signed char *)&o->b0f = -0x14;
         o->active = 2;
+        *(signed char *)((char*)o+0xf) = -20;
         B(o, 0xa2) = 2;
         o->d8c = 0;
+//PE
         o->velY = 0;
         o->b9c = 0;
         o->b9d = 0;
