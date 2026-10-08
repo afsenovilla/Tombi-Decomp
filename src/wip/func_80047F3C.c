@@ -1,42 +1,42 @@
 // FUNC 80047f3c 408 MAIN0
-// wip r8: score 84. Logic/scheduling now right; fails register allocation: game a=t0, b=a2, p=a3 (ours a=a2, b=a3, p=t0). Decl permutations do not help.
+/* score 74: rewritten in func_800482EC style (TObj fields, short temps); code identical except register rotation: game o=t0, p=a2, px=a3 (ours o=a2, p=a3, px=t0). Local copies of o and decl orders do not change it. */
 #include "TOBJ.H"
-#define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
-#define S16(o, k) (*(short *)((char *)(o) + (k)))
-#define PTR(o, k) (*(char **)((char *)(o) + (k)))
-int func_80047F3C(TObj *a, TObj *b)
+
+int func_80047F3C(TObj *o, TObj *p)
 {
-    int w; short p; int d; short q; short sx;
-    if ((unsigned short)(U16(PTR(a, 0x44), 2) - U16(PTR(b, 0x44), 2) + 0x2d) >= 0x5b)
+    char pad;
+    short dx, wx, px;
+    short cx;
+
+    if ((unsigned short)(o->d->p.whole - p->d->p.whole + 0x2d) >= 0x5b)
         return 0;
-    w = U16(b, 0x6c) + (U16(a, 0x6e) - U16(a, 0x6c));
-    p = w;
-    d = U16(PTR(a, 0x40), 2) - U16(PTR(b, 0x40), 2);
-    if ((unsigned short)(d + w) > S16(b, 0x6e) + (short)U16(a, 0x6e))
+    wx = p->box0 + (o->box1 - o->box0);
+    px = wx;
+    dx = o->h->p.whole - p->h->p.whole;
+    if ((unsigned short)(dx + wx) > p->box1 + o->box1)
         return 0;
-    q = d;
-    if ((unsigned short)((U16(a, 0x16) - U16(b, 0x16)) + (U16(b, 0x70) + (U16(a, 0x72) - U16(a, 0x70)))) > (short)U16(a, 0x72) + S16(b, 0x72))
+    if ((unsigned short)((o->y.p.whole - p->y.p.whole) + (p->box2 + (o->box3 - o->box2))) > o->box3 + p->box3)
         return 0;
-    sx = p;
-    if ((short)d < 0) {
-        q = -d;
-        p = -w;
+    cx = px;
+    if (dx < 0) {
+        dx = -dx;
+        px = -px;
     } else {
-        p = U16(a, 0x6c) + (S16(b, 0x6e) - U16(b, 0x6c));
-        sx = p;
+        px = o->box0 + (p->box1 - p->box0);
+        cx = px;
     }
-    if ((unsigned short)(sx - q) < 4) {
-        S16(PTR(a, 0x40), 2) = U16(PTR(b, 0x40), 2) + p;
-        if ((short)p < 0)
-            a->b9d = 2;
+    if ((unsigned short)(cx - dx) < 4) {
+        o->h->p.whole = p->h->p.whole + px;
+        if (px < 0)
+            o->b9d = 2;
         else
-            a->b9d = 3;
+            o->b9d = 3;
         return 2;
     }
-    if (a->b9c & 1)
+    if (o->b9c & 1)
         return 0;
-    a->y.p.frac = 0;
-    a->b69 = 1;
-    a->y.p.whole = U16(b, 0x16) - (U16(b, 0x70) + (U16(a, 0x72) - U16(a, 0x70)));
+    o->y.p.frac = 0;
+    o->b69 = 1;
+    o->y.p.whole = p->y.p.whole - (p->box2 + (o->box3 - o->box2));
     return 1;
 }
