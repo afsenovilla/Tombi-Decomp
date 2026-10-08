@@ -1,5 +1,5 @@
 // FUNC 80130314 988 X000
-/* score 10: solo case 0: registros de state (v1) y b6b recargado (a0) intercambiados. */
+/* score 2 (ncheck, era 10): solo falla la posicion de addiu v1,v1,1 (state+1) respecto al subu del timer en case 0. */
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
 extern unsigned char D_8009D07B;
@@ -11,6 +11,7 @@ void func_80130314(TObj *o)
 {
     Fix16 v[3];
     short d;
+    int s;
     switch (o->state) {
     case 0:
         switch (o->subtype) {
@@ -26,6 +27,7 @@ void func_80130314(TObj *o)
             o->d88 = 0;
             break;
         }
+        s = *(volatile unsigned char *)&o->state;
         o->b6b = 0;
         o->velH = 0x400;
         o->velX = 0x40;
@@ -33,8 +35,8 @@ void func_80130314(TObj *o)
         o->b69 = 0;
         o->w22 = 0;
         o->velY = 0;
-        o->timer = 1 - o->b6b;
-        o->state++;
+        o->timer = 1 - *(volatile unsigned char *)&o->b6b;
+        o->state = s + 1;
         break;
     case 1:
         o->velH = d = o->velH - o->velX;
