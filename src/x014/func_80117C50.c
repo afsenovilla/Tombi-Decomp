@@ -1,18 +1,15 @@
 // FUNC 80117c50 324 X014
 // MATCHING 80117c50 324
 #include "TOBJ.H"
-
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 
 void func_80117C50(short sub, short x, short y, short z)
 {
-    TObj *o;
     int i;
-    int a;
-    int b;
+    TObj *o;
 
-    for (i = 0; i < 0x18; i++) {
+    for (i = 0; i < 24; i++) {
         o = ObjAlloc();
         if (o != 0) {
             o->active = 1;
@@ -26,11 +23,8 @@ void func_80117C50(short sub, short x, short y, short z)
             o->d34 = y;
             o->d->p.whole = z;
             o->d38 = z;
-            if (i < 12) {
-                o->animFrame = (i * 30) & 0xff;
-            } else {
-                o->animFrame = (i * 30 - 345) & 0xff;
-            }
+            if (i < 12) o->animFrame = (unsigned char)(i * 30);
+            else o->animFrame = (i * 30 - 0x159) & 0xff;
             o->d84 = 0;
             o->d88 = 0;
             o->d8c = (unsigned char)o->animFrame << 4;
