@@ -1,4 +1,5 @@
 // FUNC 8010ca18 912 X000
+// MATCHING 8010ca18 912
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];
@@ -17,7 +18,6 @@ typedef struct {
     unsigned short w2e;
 } G330;
 #define OB(o, n) (((unsigned char *)(o))[n])
-#define OW(o, n) (*(short *)((char *)(o) + (n)))
 extern G330 *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned short DAT_8009d670;
@@ -36,14 +36,17 @@ extern void FUN_8010c8d4(TObj *);
 void FUN_8010ca18(TObj *o)
 {
     volatile unsigned short *pad;
+    int t;
+    Fix16 *h;
+    int v;
     DAT_8009c330->b7 = o->animFrame;
     switch (o->state) {
     case 0:
         o->wb6 = -0x420;
         DAT_8009c330->w0e = 0;
         DAT_8009c330->w02 = 0x10;
-        OB(o, 0xa9) = 1;
         o->wb2 = DAT_8009f0ec->box1;
+        OB(o, 0xa9) = 1;
         o->animFrame &= 1;
         DAT_8009c330->b8 = 0;
         DAT_8009c330->b9 = 0;
@@ -51,16 +54,16 @@ void FUN_8010ca18(TObj *o)
         DAT_8009c330->w2e = 0xffff;
         DAT_8009c330->w28 = 0xffff;
         DAT_8009c330->w2a = 0xffff;
-        OW(o, 0x80) = DAT_8009f0ec->h->p.whole - o->h->p.whole;
+        o->velH = DAT_8009f0ec->h->p.whole - o->h->p.whole;
+        o->velV = DAT_8009f0ec->y.p.whole - o->y.p.whole;
         o->wb0 = 0;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->velV = DAT_8009f0ec->y.p.whole - o->y.p.whole;
         o->velX = o->wb8;
         o->h->p.whole = DAT_8009f0ec->h->p.whole + o->wb8;
-        o->anim = DAT_80011148;
         o->y.p.whole = DAT_8009f0ec->y.p.whole + o->wba + 8;
+        o->anim = DAT_80011148;
         FUN_8001fe94(o, 0);
         o->timer = 10;
         o->state++;
@@ -91,7 +94,11 @@ void FUN_8010ca18(TObj *o)
         FUN_8010c7b0(o);
         if (DAT_8009c960 == 0x30000)
             break;
-        if ((o->animFrame & 1) ? (DAT_1f8001fc & 0x80) : (DAT_1f8001fc & 0x20)) {
+        if (o->animFrame & 1)
+            t = DAT_1f8001fc & 0x80;
+        else
+            t = DAT_1f8001fc & 0x20;
+        if (t) {
             FUN_8001e560(0x1e, 8);
             DAT_8009c330->w2e = 0xff;
             FUN_800eeb5c(o, 0x38);
@@ -100,10 +107,13 @@ void FUN_8010ca18(TObj *o)
         break;
     case 3:
         if (FUN_8001fec0(o)) {
+            h = o->h;
+            v = h->p.whole;
             if (o->animFrame & 1)
-                o->h->p.whole -= 0xc;
+                t = v - 0xc;
             else
-                o->h->p.whole += 0xc;
+                t = v + 0xc;
+            h->p.whole = t;
             o->anim = DAT_80011148;
             o->animFrame ^= 1;
             FUN_8001fe94(o, 0);
