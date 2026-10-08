@@ -114,6 +114,11 @@ game/           your own game files (ignored by git)
   (`SCUS_942.36`) with a full splat/objdiff build. Its headers, names and some functions are reused here
   and re-verified against the PAL executable; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## License
+
+Source code and documentation are released under the [MIT License](LICENSE).
+Third-party material is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Legal
 
 This project contains only original source code written to reproduce the behaviour of the game, plus
