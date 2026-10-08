@@ -1,5 +1,5 @@
 // FUNC 8003fb90 488 MAIN0
-// wip score 36 (was 73): DAT_1f800282 as array. Left: game loads wae (0x284) early, loads w before the wb0 store, computes hi (srl t0) then stores wae after wb0; statement/temps permutations did not beat 36.
+// MATCHING 8003fb90 488
 #include "TOBJ.H"
 extern short DAT_1f80027e;
 extern unsigned char DAT_1f8001d2;
@@ -12,8 +12,10 @@ void FUN_8003fb90(TObj *o)
     char pad[4];
     short a;
     unsigned int w;
-    unsigned int hi;
-    int n, m;
+    short hi;
+    short e;
+    short n;
+    short m;
     a = DAT_1f80027e;
     if (a < 0)
         a = -a;
@@ -22,13 +24,14 @@ void FUN_8003fb90(TObj *o)
     if (DAT_1f80027e < 0)
         a = -a;
     o->b69 = 1;
-    o->wae = DAT_1f800284[0];
+    e = DAT_1f800284[0];
     DAT_1f8001d2 = 1;
     BA0(o) = 0;
     o->bbe = 0;
-    o->wb0 = a;
     w = DAT_1f800282[0];
+    o->wb0 = a;
     hi = w >> 15;
+    o->wae = e;
     m = (w >> 5) & 0xf;
     n = m;
     if (!(w & 0x3000)) {
@@ -46,8 +49,7 @@ void FUN_8003fb90(TObj *o)
         switch (n) {
         case 0: BA0(o) = 2; break;
         case 1: BA0(o) = 1; break;
-        case 2: BA0(o) = 2; break;
-        case 3: break;
+        case 2: BA0(o) = 3; break;
         }
     }
     if (DAT_1f800282[0] & 0x1000) {
