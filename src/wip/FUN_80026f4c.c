@@ -8,8 +8,8 @@ extern unsigned short DAT_800a60d2;
 
 void FUN_80026f4c(void)
 {
-    unsigned int c;
-    unsigned int d;
+    unsigned char c;
+    unsigned char d;
     if (DAT_8009d07f == 0) {
         c = DAT_8009c971;
         if (c >= 8) {
@@ -18,9 +18,7 @@ void FUN_80026f4c(void)
         }
     } else {
         c = DAT_8009c971;
-        if (c >= 16) {
-            goto done;
-        }
+        if (c >= 16) goto done;
     }
     DAT_8009c971 = c + 1;
 done:
