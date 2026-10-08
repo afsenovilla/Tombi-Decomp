@@ -1,22 +1,22 @@
 // FUNC 800386f4 236 MAIN0
-typedef struct { char c[4]; } B4;
 typedef struct { char p[0x89]; unsigned char r; unsigned short i; char q[0x1090 - 0x8c]; int t[1]; } O;
-extern O *DAT_8009f0f0;
-extern unsigned char *DAT_8009d60c;
+extern O *D_8009F0F0;
+extern unsigned char *D_8009D60C;
 
-void FUN_800386f4(unsigned char m)
+void func_800386F4(unsigned char m)
 {
-    O *o = DAT_8009f0f0;
+    O *o = D_8009F0F0;
     int a, b;
     unsigned char *p;
-    B4 s;
-    a = o->t[DAT_8009d60c[o->i + 1]];
-    p = DAT_8009d60c + o->i + 2;
+    int s;
+    int k;
+    a = o->t[D_8009D60C[o->i + 1]];
+    p = D_8009D60C + *(volatile unsigned short *)&o->i + 2;
     if (m == 0) {
-        b = DAT_8009f0f0->t[*p];
+        b = D_8009F0F0->t[*p];
     } else {
-        s = *(B4 *)p;
-        b = *(int *)&s;
+        for (k = 0; k < 4; k++) ((char *)&s)[k] = *p++;
+        b = s;
     }
     if (a == b)
         o->r = 0;

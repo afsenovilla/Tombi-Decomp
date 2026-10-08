@@ -1,19 +1,18 @@
 // FUNC 800428c0 272 MAIN0
+// MATCHING 800428c0 272
 // tamano real 272 (Ghidra corta en 188). Con register asm("$17") da MATCH; sin el, r/o intercambian s0/s1.
 #include "TOBJ.H"
-extern int FUN_800425c4(TObj *a, char *b, int c);
+extern int func_800425C4(TObj *a, char *b);
 extern void FUN_8001f96c(int a, int b, int c, int d);
-extern void SfxPlay(int a);
+extern void playSFX(int a);
 
-int FUN_800428c0(TObj *o, char *p, int c)
+int func_800428C0(TObj *o, char *p)
 {
-    int k;
     register int r asm("$17");
     r = 1;
     p[0x68] = 1;
     p[0x9e] = 0;
-    k = FUN_800425c4(o, p, c);
-    switch (k) {
+    switch (func_800425C4(o, p)) {
     case 1: case 7:
         r = 1;
         break;
@@ -47,7 +46,7 @@ int FUN_800428c0(TObj *o, char *p, int c)
         FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         s = 7;
         if ((p[0x1c] & 0x7f) == 4) s = 6;
-        SfxPlay(s);
+        playSFX(s);
     }
     return r;
 }
