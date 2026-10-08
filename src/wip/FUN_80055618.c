@@ -1,5 +1,5 @@
 // FUNC 80055618 1696 MAIN0
-/* score 28: (1) game loads o->d3c (first, for e) at the top of the if block, ours right before use (volatile/nonvolatile/inline/order variants all tried); (2) addu u+w scheduled before sb u0 in ours. */
+/* score 4: only addu u+w is scheduled before sb u0 (game: after); store/load order hill-climb, u/v/w/h types, a=u+w temps tried. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -97,9 +97,10 @@ void FUN_80055618(TObj *o)
     tbl = D_800a3fe0;
     for (i = 0; i < 6; i++) {
         if ((&tbl[WC6(o)].e[i])->n > 0) {
-            e = (short *)(*(volatile int *)&o->d3c + *D_800a4468[((unsigned short *)&o->wb4)[i]] * 4);
+            d = o->d3c;
+            d += *D_800a4468[((unsigned short *)&o->wb4)[i]] * 4;
             p = DAT_1f800164;
-            q = (unsigned char *)(*(volatile int *)&o->d3c + e[1]);
+            q = (unsigned char *)(o->d3c + ((short *)d)[1]);
             p->code = 0x2d;
             SetSemiTrans(p, 0);
             u = q[0];
@@ -128,9 +129,10 @@ void FUN_80055618(TObj *o)
                 DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
         }
     }
-    e = (short *)(*(volatile int *)&o->d3c + *D_800b0bb0 * 4);
-    q = (unsigned char *)(*(volatile int *)&o->d3c + e[1]);
+    d = o->d3c;
+    d += *D_800b0bb0 * 4;
     p = DAT_1f800164;
+    q = (unsigned char *)(o->d3c + ((short *)d)[1]);
     p->code = 0x2d;
     SetSemiTrans(p, 0);
     u = q[0];
