@@ -1,8 +1,9 @@
 // FUNC 801224c0 612 X000
-/* score 16 (b36, was 62): short n + fin(o, short m) + `short k = o->w08 & 0x803f; o->w08 = k | m;` fixed m/n copies
-   and the tail; locals pa/py for the a/y header. Left: case-1 header schedule: game loads d30, D186, d34, stores b=0 first,
-   and loads o->step (lbu a1) late after lhu w08, so x sits in a1; ours hoists lbu step to the top (x in a0).
-   Tried: all dependency-valid orders of the 8 header statements (+ st = o->step local), raw-offset stores, volatile step (81). */
+/* score 9 (b42, was 16): py reused as holder of D_1F800186 (`py = D_1F800186; ... py = (short)(o->d34 - py) >> 1;`):
+   a pseudo set twice is global-allocated and its load stays early, so x lands in a1 like the game.
+   Left: game keeps D186 holder (a0) separate from py result (v0) - holder is likely m (game m=a0) but `m = D_1F800186`
+   makes global-alloc give m a1 / x a0 (m loses its a0 preference); sh b=0 early and sh a before sh y in game.
+   Earlier (b36): all dependency-valid orders of the 8 header statements, raw-offset stores, volatile step. */
 #include "TOBJ.H"
 
 extern void *D_8013B208[];
@@ -49,8 +50,9 @@ void func_801224C0(TObj *o)
     case 1:
         x = D_1F800176[0];
         if (x >= 0x35d) break;
+        py = D_1F800186;
         pa = (short)(o->d30 - x) >> 1;
-        py = (short)(o->d34 - D_1F800186) >> 1;
+        py = (short)(o->d34 - py) >> 1;
         o->y.p.whole = py;
         o->a.p.whole = pa;
         m = o->w08 & 0x7fc0;
