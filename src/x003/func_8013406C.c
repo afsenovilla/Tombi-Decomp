@@ -1,0 +1,4 @@
+// FUNC 8013406c 8 X003
+// MATCHING 8013406c 8
+void func_8013406C(void) {
+}
