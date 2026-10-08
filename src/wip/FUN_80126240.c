@@ -1,11 +1,21 @@
 // FUNC 80126240 548 X000
+// w1: score 100 (was 124) via short/ushort locals; game has a 0x10 frame without saves (probably an inline) that ours lacks.
 #define U(p, o) (*(unsigned short *)((p) + (o)))
 #define S(p, o) (*(short *)((p) + (o)))
 #define P(p, o) (*(unsigned char **)((p) + (o)))
 
 void FUN_80126240(unsigned char *a, unsigned char *b)
 {
-    int dx, dy, w, h, px, py, ex, ey, ax, ay;
+    short dx;
+    unsigned short dy;
+    short w;
+    unsigned short h;
+    int px;
+    int py;
+    int ex;
+    int ey;
+    int ax;
+    short ay;
     if (a[0x9e] == 5)
         return;
     if ((unsigned short)(U(P(a, 0x44), 2) - U(P(b, 0x44), 2) + 0x2d) >= 0x5b)
