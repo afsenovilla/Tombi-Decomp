@@ -1,5 +1,5 @@
 // FUNC 8011f1d0 184 X000
-// wip: only the final addu differs (game addu v1,v1,v0 -> sw v1; ours addu v0,v0,v1)
+// MATCHING 8011f1d0 184
 #include "TOBJ.H"
 extern int D_1F800334;
 extern unsigned char D_8009CDAC;
@@ -13,7 +13,9 @@ void func_8011F1D0(TObj *o)
         o->b04++;
         o->active = 2;
         if (D_8009CDAC == 0xff) {
-            int *volatile *pg = (int *volatile *)&D_1F800334; o->da0 = (*pg)[12] + (unsigned int)*pg;
+            int *pp = &D_1F800334;
+            pp = (int *)(*pp + ((int *)*(int *volatile *)pp)[12]);
+            o->da0 = (int)pp;
         }
         break;
     case 1:
