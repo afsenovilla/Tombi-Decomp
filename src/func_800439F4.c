@@ -1,23 +1,21 @@
 // FUNC 800439f4 640 MAIN0
-/* wip: score 16 (was 20). Left: game computes d = a.y-b.y into v1 and copies it (move a1,v1) right after the
-   test's addu, and keeps ax = dx as move $10,$9 before the first test; here gcc ties d/dy (no copy) and ax goes
-   through a1. Tried: d/dy/sy type combos, dy = d before/after test, inline wrapper (like FUN_80043c74), inline
-   test helper, statement hill-climb (this order). */
+// MATCHING 800439f4 640
 #include "TOBJ.H"
 
 int func_800439F4(TObj *a, TObj *b)
 {
     short s, dx, ax, w, off, d0, sy;
-    int dy, d;
+    int dy, d; unsigned short t;
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) > 0x5a) return 0;
     s = b->box0 + a->box0;
     dx = a->h->p.whole - b->h->p.whole;
-    if ((unsigned short)(dx + s) > b->box1 + a->box1) return 0;
-    ax = dx;
     off = s;
+    ax = dx;
+    if ((unsigned short)(dx + s) > b->box1 + a->box1) return 0;
     d = (unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole;
-    if ((unsigned short)(d + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
+    t = d + (b->box2 + a->box2);
     dy = d;
+    if ((unsigned short)t > a->box3 + b->box3) return 0;
     w = off;
     d0 = ax;
     if (dx < 0) {
