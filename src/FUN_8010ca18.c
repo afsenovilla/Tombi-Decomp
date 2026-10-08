@@ -1,5 +1,5 @@
 // FUNC 8010ca18 912 X000
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 8010ca18 912
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];
@@ -124,7 +124,7 @@ void FUN_8010ca18(TObj *o)
     default:
         return;
     }
-    if (DAT_1f8003c6 & DAT_1f8001fc) {
+    if (DAT_1f8001fc & DAT_1f8003c6) {
         DAT_8009d2b0 = 0;
         FUN_8010c8d4(o);
     }
