@@ -1,4 +1,5 @@
 // FUNC 800f4ed0 324 X000
+// MATCHING 800f4ed0 324
 typedef struct G { char p0[1]; unsigned char b1; short w2; char p1[4]; unsigned char b8; char p2[5]; short we; } G;
 typedef struct H { char p0[2]; short w2; } H;
 typedef struct O {
@@ -18,6 +19,7 @@ void FUN_800f4ed0(O *o, short a, int b)
     int d;
     int v;
     int s;
+    int t;
     G *g;
     if (o->af & 1) {
         s = 0x1bf;
@@ -40,8 +42,11 @@ void FUN_800f4ed0(O *o, short a, int b)
     o->y = v;
     g = DAT_80096330b[0];
     d = g->we;
-    if (g->b8)
-        g->we = d - g->w2;
-    else
-        g->we = g->w2 + d;
+    if (g->b8) {
+        t = g->w2;
+        g->we = d - t;
+    } else {
+        t = g->w2;
+        g->we = d + t;
+    }
 }
