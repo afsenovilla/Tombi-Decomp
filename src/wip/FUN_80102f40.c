@@ -1,4 +1,5 @@
 // FUNC 80102f40 700 X000
+/* score 50 (was 99): h snap/+-8 layout per game (goto snap, +8 out of line), short flag, o->h->whole = P->h->whole fix, byte wac store, buf[16] for the 0x40 frame. Left: hw read twice (lh+lhu) where game copies (move a2,v1), P pointer reg in the type test, load order of o->h vs P->h. */
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
@@ -12,8 +13,12 @@ extern void FUN_800ee4e0(TObj *, int);
 
 void FUN_80102f40(TObj *o)
 {
-    int flag;
+    short flag;
+    TObj *p;
+    Fix16 *h;
+    int t; short hw; char buf[16];
     volatile unsigned short *pad;
+
     switch (o->state) {
     case 1:
         o->timer++;
@@ -28,31 +33,36 @@ void FUN_80102f40(TObj *o)
             o->y.p.whole += 8;
         }
         if (o->velX < 0) {
-            if (DAT_8009d2e8->h->p.whole < o->h->p.whole) {
-                o->h->p.whole -= 8;
-            } else {
-                o->h->p.whole = DAT_8009d2e8->h->p.whole;
-                if (flag)
-                    FUN_800eeb5c(o, 0x23);
-            }
+            h = o->h;
+            t = DAT_8009d2e8->h->p.whole;
+            hw = h->p.whole;
+            if (t < hw)
+                h->p.whole = hw - 8;
+            else
+                goto snap;
         } else {
-            if (o->h->p.whole < DAT_8009d2e8->h->p.whole) {
-                o->h->p.whole += 8;
-            } else {
-                o->h->p.whole = DAT_8009d2e8->h->p.whole;
+            h = o->h;
+            t = DAT_8009d2e8->h->p.whole;
+            hw = h->p.whole;
+            if (t <= hw) {
+            snap:
+                h->p.whole = t;
                 if (flag)
                     FUN_800eeb5c(o, 0x23);
+            } else {
+                h->p.whole = hw + 8;
             }
         }
-        if (DAT_8009d2e8->b69 || o->b69 || FUN_8003fd78(o, 0, 1) || o->timer >= 0x15) {
+    next:
+        if (DAT_8009d2e8->b69 || o->b69 || FUN_8003fd78(o, 0, 1) || o->timer > 0x14) {
             o->timer = 0;
             FUN_800eeb5c(o, 0x23);
-            o->wac = 3;
+            *(unsigned char *)&o->wac = 3;
             o->b9c = 0;
             o->velX = 0;
             o->velY = 0;
             DAT_8009d2e8->animFrame = o->animFrame & 1;
-            DAT_8009d2e8->h->p.whole = o->h->p.whole;
+            o->h->p.whole = DAT_8009d2e8->h->p.whole;
             DAT_8009d2e8->y.p.whole = o->y.p.whole + o->wba;
             FUN_800ee4e0(o, 0);
             o->state = 2;
