@@ -1,10 +1,12 @@
 // FUNC 80051088 4360 MAIN0
-/* score 12: only two register choices differ: k (switch selector, short) gets v0 instead of a0
-   (sra a0,v0,0x18 / lhu a0,D_800A6066 / sll v0,a0,16), and the u0 product mflo lands in t8 instead of a0
-   (global pseudo, pref LO_REG, conflicts only v0 v1 a1 yet global alloc picks $24). Tried: k as
-   int/ushort/schar/char, ternary forms, reusing k in the inner block; u0 expression forms (operand order,
-   +0x80, casts, %4). Key fixes from b49: angle inlines quadA/quadB with short a0/a1 params (gives the
-   move copies), a0 = t & 0xff with t from if/else on a hoisted g, clut stored raw at the end of the uv block. */
+/* score 4: only the u0 product register differs (game mflo a0; addiu v0,a0,-128, ours mflo t8).
+   Ours: the product pseudo is local to the block, pref LO_REG, gets LO, and reload copies it into
+   spill reg t8 (t8 is the reload reg for the gte asm operands too). The game's product must have
+   been allocated a GR (a0 = first free after v0 v1 a1), i.e. LO unavailable or GR preferred.
+   Tried: operand order, +0x80, casts (short/uchar/int), %4, temps of int/short/uchar, reusing
+   r/c/sn/ang for the product, register asm (worse). b49 fixes: angle inlines quadA/quadB with
+   short a0/a1 params (move copies), a0 = t & 0xff from if/else on hoisted g, clut stored raw
+   after the uv block, outer k reused for tbl[idx + 1] (switch selector gets a0). */
 #include "TOBJ.H"
 
 typedef struct {
@@ -263,29 +265,30 @@ void func_80051088(TObj *o)
             c = MulCosDup((D_800A60C4 + 0x40) & 0xff, 0x18);
             sn = MulNegSin((D_800A60C4 + 0x40) & 0xff, 0x18);
         } else {
-            short t0 = (signed char)tbl[idx];
-            short t1 = (signed char)tbl[idx + 1];
-            short k;
+            short t0;
+            short kk;
             short an;
+            t0 = (signed char)tbl[idx];
+            k = (signed char)tbl[idx + 1];
             if (o->animFrame & 1) {
                 if (D_800A60E8 <= 0) {
-                    k = t1;
+                    kk = k;
                     an = D_800A60C4 + 0x180;
                     an -= t0;
-                    c = MulCosDup(an & 0xff, k);
-                    sn = MulNegSin(an & 0xff, k);
+                    c = MulCosDup(an & 0xff, kk);
+                    sn = MulNegSin(an & 0xff, kk);
                 } else {
-                    k = t1;
+                    kk = k;
                     an = D_800A60C4 + 0x180;
                     an -= t0;
-                    c = MulCosDup(an & 0xff, k);
-                    sn = MulNegSin(an & 0xff, k);
+                    c = MulCosDup(an & 0xff, kk);
+                    sn = MulNegSin(an & 0xff, kk);
                 }
             } else {
-                k = t1;
+                kk = k;
                 an = t0 + D_800A60C4;
-                c = MulCosDup(an & 0xff, k);
-                sn = MulNegSin(an & 0xff, k);
+                c = MulCosDup(an & 0xff, kk);
+                sn = MulNegSin(an & 0xff, kk);
             }
         }
         t.x = D_8009C330->w18 + c;
