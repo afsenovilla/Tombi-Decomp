@@ -1,4 +1,6 @@
 // FUNC 80113484 720 X000
+/* score 6: only the DAT_80115a18 index block: game loads o->b0c (lbu) before DAT_8009c960 (lhu); ours the reverse.
+   Tried operand order, temps (all int/short/uchar combos, both orders), 2D array, scalar/[0]/volatile alias, ternary. */
 #include "TOBJ.H"
 typedef void (*ObjFn)(TObj *);
 typedef union { int w; struct { unsigned short a, b; } h; } Stage;
