@@ -1,5 +1,5 @@
 // FUNC 8012555c 664 X000
-// WIP score 47: computing dy after the y test gives the game copy in a1, but a second copy (move a0,a1) remains; with dy before the test the copy lands in t5
+// WIP score 40: dy assigned inside the y test (box3 sum < expr form); game evaluates the dy expression first and copies it to a1 after the adds; here box3 sum is evaluated first. Tried: (u16)expr > sum (58, right order but dy in t5), dy after test (47, extra move), int dy, e temp, e0/e1 locals.
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
@@ -21,9 +21,8 @@ void func_8012555C(TObj *o, TObj *p)
     dx = o->h->p.whole - p->h->p.whole;
     if ((unsigned short)(dx + wx) > p->box1 + o->box1)
         return;
-    if ((unsigned short)((o->y.p.whole - p->y.p.whole) + (p->box2 + o->box2)) > o->box3 + p->box3)
+    if (o->box3 + p->box3 < (unsigned short)((dy = o->y.p.whole - p->y.p.whole) + (p->box2 + o->box2)))
         return;
-    dy = o->y.p.whole - p->y.p.whole;
     sx = dx;
     cx = px;
     if (dx < 0) {
