@@ -1,9 +1,10 @@
 // FUNC 8011ab10 328 X000
+// MATCHING 8011ab10 328
 extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_800187e4(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char *PTR_8013b118;
 extern int DAT_1f8002d4;
-extern unsigned char **DAT_8009c330;
+extern unsigned char *DAT_8009c330;
 
 void FUN_8011ab10(unsigned char *o)
 {
@@ -27,17 +28,18 @@ void FUN_8011ab10(unsigned char *o)
         break;
     case 1:
         FUN_800202b4(o);
-        if (o[5] != 0) {
-            if (o[5] == 1) {
-                if (FUN_8001fec0(o) != 0)
-                    o[5] = 0;
-            }
-        } else {
-            if ((*DAT_8009c330)[10] == o[0xc]) {
+        switch (o[5]) {
+        case 0:
+            if (DAT_8009c330[10] == o[0xc]) {
                 *(unsigned char **)(o + 0x24) = PTR_8013b118;
                 FUN_8001fe6c(o);
-                o[5] = o[5] + 1;
+                o[5]++;
             }
+            break;
+        case 1:
+            if (FUN_8001fec0(o) != 0)
+                o[5] = 0;
+            break;
         }
         break;
     case 2:
