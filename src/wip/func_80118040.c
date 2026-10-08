@@ -1,8 +1,9 @@
 // FUNC 80118040 1016 X000
-/* score 78 (b35: o->d3c = D_1F8002D8 moved right after o->type = 0, found by line hill-climb; raw-offset stores did not help; t as ushort/int/char worse): whole range 80118040+801180ac+8011832c (splat split it). Remaining: prologue save order of s2,
-   scheduling of the early field stores vs the division mults, subtype chain value in v1 instead of v0,
-   and loop hoisting (game hoists 800 and keeps a zero var in $11 but re-materializes the table base
-   and the constant 1 every iteration). Tried: store placement, statement perms, e/offset/digit-pointer forms. */
+/* score 24 (b30, was 84): loop as `loop: ... goto loop` with manual dp/off pointers (stops hoisting of the table
+   base and the constant 1), subtype chain as if/else-if stores, raw S16 stores for 0x2c/0x20/0xc6 (sink them past the
+   division mults), statement order from hill-climbing (wb4 = h % 10 first, d3c after b0a). Left: prologue (game saves s2
+   and does move s2,a0 before sw s6/lhu s6) and the loop address order: game (off + table) + wc6*140 with wc6 in v0,
+   ours (wc6*140 + table) + off; separate q/k temps get folded back. */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -34,6 +35,8 @@ void func_80118040(int n, int x, int y, int z, short t)
     E118 *e;
     unsigned char c;
     int h;
+    unsigned short *dp;
+    int off;
 
     FUN_80026a10();
     for (i = 7; i >= 0; i--) {
@@ -46,24 +49,24 @@ void func_80118040(int n, int x, int y, int z, short t)
     if (o == 0)
         return;
     h = n / 100000;
+    o->wb4 = h % 10;
     o->type = 0;
     o->active = 1;
-    o->d3c = D_1F8002D8;
     o->b0a = 4;
+    o->d3c = D_1F8002D8;
     o->w1e = 0x15;
     o->b0f = 5;
     o->a.raw = x << 16;
     o->y.raw = y << 16;
     o->b.raw = z << 16;
-    o->animTimer = 0;
-    o->timer = t;
-    X(o)->wc6 = i;
+    S16(o, 0x2c) = 0;
+    S16(o, 0x20) = t;
+    S16(o, 0xc6) = i;
     o->wb6 = n / 10000 - h * 10;
     o->wb8 = n / 1000 - n / 10000 * 10;
     o->wba = n / 100 - n / 1000 * 10;
     o->wbc = n / 10 - n / 100 * 10;
     S16(o, 0xbe) = n - n / 10 * 10;
-    o->wb4 = h % 10;
     if (t == 1)
         X(o)->wc8 = 0;
     else
@@ -71,43 +74,43 @@ void func_80118040(int n, int x, int y, int z, short t)
     if (n < 1000) {
         o->subtype = 0;
     } else {
-        c = 1;
-        if (n >= 10000) {
-            c = 2;
-            if (n >= 20000) {
-                c = 4;
-                if (n < 50000)
-                    c = 3;
-            }
-        }
-        o->subtype = c;
+        if (n < 10000) o->subtype = 1;
+        else if (n < 20000) o->subtype = 2;
+        else if (n > 49999) o->subtype = 4;
+        else o->subtype = 3;
     }
     X(o)->wc2 = GetClut(0x210, 0x1e1);
     X(o)->wc4 = GetClut(0x210, o->subtype + 0x1e1);
     cnt = 0;
     px = 0;
-    py = 1;
     zero = 0;
     w800 = 800;
-    for (i = 0; i < 6; i++) {
-        e = (E118 *)(X(o)->wc6 * 140 + (i * 20 + (int)D_800A3FE0));
+    dp = (unsigned short *)o;
+    off = 0;
+    py = 1;
+    i = 0;
+loop:
+        e = (E118 *)(X(o)->wc6 * 140 + (off + (int)D_800A3FE0));
         e->a = 0;
-        if (((unsigned short *)&o->wb4)[i] != 0 || cnt != 0) {
+        if (dp[0x5a] != 0 || cnt != 0) {
             e->b = py;
-            py += 4;
-            cnt++;
             e->a = 1;
             e->c = px * 100;
             e->d = zero;
             e->e = (px + 8) * 100;
-            e->f = 800;
+            e->f = w800;
             e->g = 0;
             e->h = 0;
             e->i = 0;
             e->j = 0;
             px += 8;
+            py += 4;
+            cnt++;
         }
-    }
+            dp++;
+        i++;
+        off += 20;
+    if (i < 6) goto loop;
     D_800A4468 = D_80012100;
     D_800B0BB0 = D_800122A0;
     e = &D_800A3FE0[X(o)->wc6][6];
