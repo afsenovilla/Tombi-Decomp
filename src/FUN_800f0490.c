@@ -1,5 +1,5 @@
 // FUNC 800f0490 1740 X000
-/* score 110 (ncheck): left: 0x2000e block store order, case1 c compares (game copies c with move before each compare group), inner step==2 block store order (game keeps source order), outer case 2 sched. Tried: switch for compares, c types, perms. */
+// MATCHING 800f0490 1740
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0;
@@ -62,7 +62,7 @@ extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982;
 extern signed char DAT_8009d2b0;
 extern E **DAT_80115190[];
-extern unsigned char DAT_8009c93a;
+extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 
 #define LOADP() p = (unsigned char *)DAT_80115190[DAT_8009c960]; p = ((unsigned char **)p)[DAT_8009c962]; p += DAT_8009c982 * 4
@@ -71,7 +71,7 @@ void FUN_800f0490(TObj *o)
 {
     PL *pl;
     unsigned char *p;
-    int c;
+    short c;
     unsigned short t;
     Fix16 *d;
     int a;
@@ -154,13 +154,13 @@ void FUN_800f0490(TObj *o)
             break;
         }
         if (DAT_8009c960i == 0x2000e) {
-            o->animFrame = 0;
+            o->b04 = 1;
             o->state = 0;
-            o->active = 1;
             o->step = 0x3e;
+            o->active = 1;
+            o->animFrame = 0;
             o->w22 = 0;
             o->w56 = -2000;
-            o->b04 = 1;
             DAT_8009c93a = 1;
         }
         break;
@@ -185,7 +185,7 @@ void FUN_800f0490(TObj *o)
         if (o->animFrame & 0x80) FUN_8002cd20(o, 0, 0);
         if (o->animFrame & 0x40) {
             o->w22 = 0x3c;
-            if (c == 7 || c == 9) o->w22 = 1;
+            if ((c & 0xff) == 7 || (c & 0xff) == 9) o->w22 = 1;
         }
         o->b04 = 5;
         o->animFrame &= 0xf;
@@ -201,15 +201,15 @@ void FUN_800f0490(TObj *o)
         case 2:
             { unsigned short t2 = o->h->p.whole;
             X(o)->wf2 = o->y.p.whole;
-            o->w22 = 0x3c;
             X(o)->wf6 = 0;
             o->active = 3;
             o->b04 = 0;
+            o->w22 = 0x3c;
             o->step = 3;
             o->state = 0;
             o->substep = 0;
             X(o)->wee = t2; }
-            DAT_8009c93a = 1;
+            DAT_8009c93aA[0] = 1;
             break;
         case 3:
             FUN_80118910();
@@ -234,10 +234,11 @@ void FUN_800f0490(TObj *o)
         LOADP();
         c = p[0];
         o->w22 = 0x3c;
+        { unsigned char t5 = p[2];
         o->b04 = 1;
         o->state = 0;
         o->substep = 0;
-        o->animFrame = p[2] & 0xf;
+        o->animFrame = t5 & 0xf; }
         o->step = c;
         DAT_8009c93a = 1;
         break;
