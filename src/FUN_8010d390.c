@@ -1,5 +1,5 @@
 // FUNC 8010d390 1120 X000
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 8010d390 1120
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -99,7 +99,7 @@ void FUN_8010d390(TObj *o)
         o->wb2 += 8;
     else
         o->wb2 -= 8;
-    if (D_1f8003c4 & D_1f8001fc) {
+    if (D_1f8001fc & D_1f8003c4) {
         DAT_8009c330->w2c = 0x43;
         if (DAT_8009c330->w2e != 0x43) {
             FUN_800eeb5c(o, 0x43);
@@ -126,7 +126,7 @@ void FUN_8010d390(TObj *o)
             o->y.p.whole = w + 0x10;
         }
     }
-    if (D_1f8003c6 & D_1f8001fc) {
+    if (D_1f8001fc & D_1f8003c6) {
         U8(o, 0xca) = 0;
         flag = 0;
         if ((*(volatile unsigned short *)&DAT_8009d670 & 0x10) && DAT_8009c960 == 10
