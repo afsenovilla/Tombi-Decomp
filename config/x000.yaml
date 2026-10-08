@@ -20,6 +20,7 @@ options:
   asm_function_macro: glabel
   asm_jtbl_label_macro: jlabel
   asm_data_macro: dlabel
+  generate_asm_macros_files: False
   section_order: [".rodata", ".text", ".data", ".bss"]
   subalign: 4
   string_encoding: ASCII
