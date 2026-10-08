@@ -1,9 +1,10 @@
-/* wip: ncheck score 68 but fewer differing instructions than the old 59 version (38 vs 55 diff lines):
-   int r, callees return int, s = a + b computed before the compares (fixes base reg a1 for DAT_1f800278).
-   Left: hi in a3 (game a2), r in a2 (game a0), inr() result comes out as xori instead of bnez/move/j/li.
-   b16: inr returning short gives the bnez/j/li shape (67) but its result lands in v0 and is copied to r; game threads m<lo to the
-   shared r=0 block (800410ec) and computes the result straight into a0. Tried: types brute force (r/lo/hi/a/b/c/s/w),
-   5 inr bodies x int/short, && chains, whole test as a short inline chk(w,x,y) (90), open-coded compares (69: r in a0, hi in a2). */
+/* score 42 (b30, was 68): r = 0 moved from before `if (w & 0x10)` to just before the switch (game re-sets r=0 in the
+   failure block, so the initial r=0 must not reach it or CSE deletes it); now r=a0, m=a0, lo copy v1, hi a2 like the game.
+   Left: (1) short inr result in v0 copied to r (`move a0,v0` cross-jumped with the call-result copy); an int inline puts
+   it straight in r but becomes slt/xori; (2) game has `move a0,zero` in the beqz (w&0x10) delay slot and slti in the
+   switch beq slot, ours steals andi / puts r=0 in the beq slot. Tried (b30): int/long/char inline returns x 6 bodies
+   (goto no, &&, nested), r short, r=0 at the else start / default case / before the if, open-coded tests (90).
+   Earlier (b16): type brute force, chk() whole-test inline (90). */
 // FUNC 80040f78 596 MAIN0
 extern unsigned short *DAT_1f800278;
 extern unsigned short DAT_1f800282, DAT_1f800284;
@@ -35,7 +36,6 @@ int func_80040F78(void *o, int x, int y)
             DAT_1f800278 += 3;
             continue;
         }
-        r = 0;
         if (w & 0x10) {
             DAT_1f800284 = (w & 0xe00) >> 9;
             a = *DAT_1f800278++;
@@ -50,6 +50,7 @@ int func_80040F78(void *o, int x, int y)
                 r = inr((short)x % 8, lo, hi);
         } else {
             DAT_1f800284 = (w & 0xe00) >> 9;
+            r = 0;
             switch (w & 0xf) {
             case 1: r = FUN_8004094c((short)x, (short)y); break;
             case 2: r = FUN_80040d30((short)x, (short)y); break;
