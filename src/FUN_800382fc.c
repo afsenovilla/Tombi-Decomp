@@ -1,4 +1,5 @@
 // FUNC 800382fc 272 MAIN0
+// MATCHING 800382fc 272
 extern unsigned char *DAT_8009f0f0;
 extern unsigned char *DAT_8009d60c;
 
@@ -30,8 +31,8 @@ void FUN_800382fc(void)
     q = buf;
     for (i = 0; i < n; i++) {
         s = code + (*(unsigned short *)(o + 0x8a) + pc);
-        c = *s;
-        buf[i] = rd(DAT_8009f0f0, c, s + 1);
+        c = *s++;
+        buf[i] = rd(DAT_8009f0f0, c, s);
         if (c == 0)
             pc += 2;
         else
