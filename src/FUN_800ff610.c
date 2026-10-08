@@ -1,5 +1,5 @@
 // FUNC 800ff610 2228 X000
-/* score 6: only the beqz arg delay slot differs (game: beqz s2 with li a1,0x81 stolen from the target thread, a0 set in jal slot; ours steals move a0,s0 from the fallthrough). Tried: K&R/prototyped func_800FF404, inline wrappers, nested ifs/gotos, duplicated FUN_80025f40 call, arg types, -fno-schedule-insns(2). */
+// MATCHING 800ff610 2228
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short w2c; } G330;
@@ -199,7 +199,7 @@ void FUN_800ff610(TObj *o, int arg)
         return;
     }
     if (o->active == 1 && arg != 0) {
-        FUN_8004258c(o, func_800FF404(o, 0x81));
+        FUN_8004258c(o, func_800FF404(o));
         if (D_1F8001A4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
