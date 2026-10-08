@@ -1,26 +1,24 @@
 // FUNC 80045344 572 MAIN0
-// wip: only o/p swap s0<->s1 left (r forced to s2 with register asm)
+/* score 22 (b39, no register asm any more): side() written as a macro so its 7 field reads count as refs of o
+   (o 22 refs/84 insns now outranks p for s0; with the inline, o had 15/90 < p 20/115 and o/p were swapped).
+   Left: (1) jump.c turns `res = 1; if (dx < 0) res = 0;` into a store-flag (nor; srl) where the game keeps
+   bgez + move s3,zero; an inline sgn() helper gives the branch but moves the zero block out of line (77);
+   (2) box0/box1 test: lhu order of b->box0/a->box0 and v0/v1 in the box1 sum. */
 #include "TOBJ.H"
 extern int func_800425C4(TObj *a, TObj *b);
 extern void FUN_8001f96c(int a, int b, int c, int d);
 extern void playSFX(int a);
 extern short D_1F80019E;
 
-static __inline__ short side(TObj *a, TObj *b)
-{
-    short dx;
-    if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return -1;
-    dx = a->h->p.whole - b->h->p.whole;
-    if ((unsigned short)(dx + (b->box0 + a->box0)) > b->box1 + a->box1) return -1;
-    if ((unsigned short)(a->y.p.whole - b->y.p.whole + (a->box2 + b->box2)) > a->box3 + b->box3) return -1;
-    D_1F80019E = 0;
-    if (dx < 0) return 0;
-    return 1;
-}
-
+#define SIDE(a, b, res) do { short dx; res = -1; \
+    if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) break; \
+    dx = a->h->p.whole - b->h->p.whole; \
+    if ((unsigned short)(dx + (a->box0 + b->box0)) > b->box1 + a->box1) break; \
+    if ((unsigned short)(a->y.p.whole - b->y.p.whole + (a->box2 + b->box2)) > a->box3 + b->box3) break; \
+    D_1F80019E = 0; res = 1; if (dx < 0) res = 0; } while (0)
 static __inline__ int touch(TObj *o, TObj *p)
 {
-    register int r asm("$18");
+    int r;
     r = 1;
     p->b68 = 1;
     p->b9e = 0;
@@ -68,7 +66,7 @@ void func_80045344(TObj *o, TObj *p)
     short s;
     TObj *q, *q2;
     unsigned char v;
-    s = side(o, p);
+    SIDE(o, p, s);
     if (s < 0) return;
     if (touch(o, p) == 0) return;
     switch (p->subtype) {
