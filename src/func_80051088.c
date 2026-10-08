@@ -1,12 +1,5 @@
 // FUNC 80051088 4360 MAIN0
-/* score 4: only the u0 product register differs (game mflo a0; addiu v0,a0,-128, ours mflo t8).
-   Ours: the product pseudo is local to the block, pref LO_REG, gets LO, and reload copies it into
-   spill reg t8 (t8 is the reload reg for the gte asm operands too). The game's product must have
-   been allocated a GR (a0 = first free after v0 v1 a1), i.e. LO unavailable or GR preferred.
-   Tried: operand order, +0x80, casts (short/uchar/int), %4, temps of int/short/uchar, reusing
-   r/c/sn/ang for the product, register asm (worse). b49 fixes: angle inlines quadA/quadB with
-   short a0/a1 params (move copies), a0 = t & 0xff from if/else on hoisted g, clut stored raw
-   after the uv block, outer k reused for tbl[idx + 1] (switch selector gets a0). */
+// MATCHING 80051088 4360
 #include "TOBJ.H"
 
 typedef struct {
@@ -317,7 +310,8 @@ void func_80051088(TObj *o)
     unsigned short cl;
     p->tpage = D_8009C338->w4;
     cl = D_8009C338->w6;
-    p->u0 = (D_1F8001F8 & 3) * D_800801E8 - 0x80;
+    k = (D_1F8001F8 & 3) * D_800801E8;
+    p->u0 = k - 0x80;
     p->v0 = 0;
     p->u1 = p->u0 + (unsigned char)D_800801E8 - 1;
     p->v1 = p->v0;
