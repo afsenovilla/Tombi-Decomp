@@ -1,5 +1,5 @@
 // FUNC 8003566c 5708 MAIN0
-/* score 492 (only ~36 asm lines differ): case 5 "waa = TB(2)+0x80; if (odd) waa = (waa+-0x40)&0xff" needs waa reloaded in both branches (volatile read is a placeholder and blocks the D6078 load scheduling); case 5 end: waa+-0x40 lands in a0 and is stored after li 6. */
+/* score 96 (same size, ~20 instrs differ): case 5 after "o->waa = TB(2) + 0x80" the game reloads waa (lhu) in both odd/even arms and schedules the D_800A6078 load before the waa store; ours reuses the register (tried volatile/raw/unsigned reads and stores, switch, goto, split ifs, -fno-cse-* flags). Case 5 end: waa+-0x40 result lands in a0 instead of v0 (li 6 scheduled first). D_800A6078 must stay a scalar extern (not PL.h). */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -24,6 +24,7 @@ typedef struct {
 extern G330 *D_8009C330;
 extern G338 *D_8009C338;
 extern TObj D_800A6038;
+extern Fix16 *D_800A6078;
 extern short D_8007A070[];
 extern short D_8007A04C[];
 extern short D_8009D600[];
@@ -102,11 +103,11 @@ void func_8003566C(TObj *o)
         xb = D_8007A04C[n + 1];
         if (o->animFrame >= 6) {
             s = MulCos((unsigned char)xa, xb);
-            t = PL.h->p.whole + s;
+            t = D_800A6078->p.whole + s;
             o->velX = (o->animFrame & 1) ? t - 4 : t + 4;
             o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         } else {
-            o->velX = PL.h->p.whole + MulCos((unsigned char)xa, xb);
+            o->velX = D_800A6078->p.whole + MulCos((unsigned char)xa, xb);
             o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         }
         o->h->p.whole = o->velX + MulCos((unsigned short)o->waa + 0x80 & 0xff, 0x10);
@@ -158,11 +159,11 @@ void func_8003566C(TObj *o)
         xb = D_8007A04C[n + 1];
         if (o->animFrame >= 6) {
             s = MulCos((unsigned char)xa, xb);
-            t = PL.h->p.whole + s;
+            t = D_800A6078->p.whole + s;
             o->velX = (o->animFrame & 1) ? t - 4 : t + 4;
             o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         } else {
-            o->velX = PL.h->p.whole + MulCos((unsigned char)xa, xb);
+            o->velX = D_800A6078->p.whole + MulCos((unsigned char)xa, xb);
             o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         }
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 0x10);
@@ -293,9 +294,9 @@ void func_8003566C(TObj *o)
                     g->w32 = 0;
             }
             if (o->animFrame & 1)
-                o->velX = PL.h->p.whole + 0x10;
+                o->velX = D_800A6078->p.whole + 0x10;
             else
-                o->velX = PL.h->p.whole - 0x10;
+                o->velX = D_800A6078->p.whole - 0x10;
             o->velY = PL.y.p.whole - 0x10;
             tgt.x = o->velX + MulCos(D_8009C338->we, 0xc);
             tgt.y = o->velY + MulNegSinScaled(D_8009C338->we, 0xc);
@@ -312,11 +313,11 @@ void func_8003566C(TObj *o)
                     *(unsigned char *)o->d94 = D_8009C330->b6;
                 o->waa = TB(2) + 0x80;
                 if (o->animFrame & 1) {
-                    o->waa = (*(volatile short *)&o->waa + 0x40) & 0xff;
-                    o->velX = PL.h->p.whole + 0x10;
+                    o->waa = (o->waa + 0x40) & 0xff;
+                    o->velX = D_800A6078->p.whole + 0x10;
                 } else {
-                    o->waa = (*(volatile short *)&o->waa - 0x40) & 0xff;
-                    o->velX = PL.h->p.whole - 0x10;
+                    o->waa = (o->waa - 0x40) & 0xff;
+                    o->velX = D_800A6078->p.whole - 0x10;
                 }
                 o->velY = PL.y.p.whole - 0x10;
                 o->h->p.whole = o->velX + MulCos(o->waa, 0xc);
@@ -373,7 +374,7 @@ void func_8003566C(TObj *o)
         else
             xa = D_8007A04C[n];
         xb = D_8007A04C[n + 1];
-        o->velX = PL.h->p.whole + MulCos((unsigned char)xa, xb);
+        o->velX = D_800A6078->p.whole + MulCos((unsigned char)xa, xb);
         o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         FUN_80031588(D_8009D600, o->waa, &xa, &xb);
         o->h->p.whole = o->velX + xa;
@@ -421,7 +422,7 @@ void func_8003566C(TObj *o)
         else
             xa = D_8007A04C[n];
         xb = D_8007A04C[n + 1];
-        o->velX = PL.h->p.whole + MulCos((unsigned char)xa, xb);
+        o->velX = D_800A6078->p.whole + MulCos((unsigned char)xa, xb);
         o->velY = PL.y.p.whole + MulNegSinScaled((unsigned char)xa, xb);
         FUN_80031588(D_8009D600, o->waa, &xa, &xb);
         o->h->p.whole = o->velX + xa;
