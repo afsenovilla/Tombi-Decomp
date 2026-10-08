@@ -1,5 +1,5 @@
-/* wip: score 61. Falla: el juego calcula dy en v1 y lo copia a a1 (addu a1,v1,zero) antes del test de box2/box3,
-   y carga b->box2 antes que a->box2; copiar dy a otra variable o pasarlo a un inline no lo reproduce. */
+/* wip: score 36 (dy test re-reads a->y - b->y instead of using dy). Left: game computes it once and copies to a1
+   (addu a1,v1,zero) - same pattern as func_80044424; plus later reg/order diffs. */
 // FUNC 800439f4 640 MAIN0
 #include "TOBJ.H"
 
@@ -14,7 +14,7 @@ int func_800439F4(TObj *a, TObj *b)
     ax = dx;
     if ((unsigned short)(dx + s) > b->box1 + a->box1) return 0;
     dy = (unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole;
-    if ((unsigned short)(dy + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
+    if ((unsigned short)((a->y.p.whole - b->y.p.whole) + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
     w = off;
     d0 = ax;
     if (dx < 0) {

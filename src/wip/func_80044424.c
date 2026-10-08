@@ -1,5 +1,5 @@
 // FUNC 80044424 300 MAIN0
-// wip r8: score 24. Remaining: test 3 (dy) load order/regs (game: o16,e16,e70,o70 then dy copy in t4) and an extra dx copy (a1) in the 2nd test delay slot.
+// score 14: dy test written with the full expression (no CSE with dy). Left: game CSEs it (subu v1 then move t4,v1) while ours computes dy twice; tried temps/types/order
 #include "TOBJ.H"
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
@@ -16,7 +16,7 @@ int func_80044424(TObj *a, TObj *b)
         return -1;
     dx = d;
     dy = U16(a, 0x16) - U16(b, 0x16);
-    if ((unsigned short)(dy + (U16(b, 0x70) + U16(a, 0x70))) > S16(a, 0x72) + S16(b, 0x72))
+    if ((unsigned short)((U16(a, 0x16) - U16(b, 0x16)) + (U16(b, 0x70) + U16(a, 0x70))) > S16(a, 0x72) + S16(b, 0x72))
         return -1;
     DAT_1f80019e = 0;
     ad = dx;
