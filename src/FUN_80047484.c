@@ -1,7 +1,8 @@
 // FUNC 80047484 1464 MAIN0
 // MATCHING 80047484 1464
 /* Debt: register asm("$20") on r (s3/s4 priority: hoisted const 2 has its live length doubled as a REG_EQUIV constant, so it loses to r).
-   The two block-local `p` copies add block notes (luids) so the constant 2's lifetime passes loop.c's move threshold and it gets hoisted like in the game. */
+   The two block-local `p` copies add block notes (luids) so the constant 2's lifetime passes loop.c's move threshold and it gets hoisted like in the game.
+   Debt pass: tried `two` var with one/two sets, goto/do/for loops, r[i] indexing, orders; -dg: r 7 refs/267 vs const 2 7 refs/524 (doubled), needs ~3 more weighted refs on 2. */
 #include "TOBJ.H"
 extern unsigned char D_8009C93A;
 extern unsigned short D_8009C960;
@@ -66,7 +67,6 @@ void FUN_80047484(TObj *o)
     register unsigned char **r asm("$20");
     unsigned char *q;
     short v;
-    int two;
 
     if (D_8009C93A == 0) return;
     r = D_1F80021C;
