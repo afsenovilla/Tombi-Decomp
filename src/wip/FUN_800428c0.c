@@ -1,5 +1,5 @@
-// FUNC 800428c0 188 MAIN0
-// code identico salvo tabla de saltos (.text de ours > size): matchcheck no lo acepta
+// FUNC 800428c0 272 MAIN0
+// tamano real 272 (Ghidra corta en 188). Con register asm("$17") da MATCH; sin el, r/o intercambian s0/s1.
 #include "TOBJ.H"
 extern int FUN_800425c4(TObj *a, char *b, int c);
 extern void FUN_8001f96c(int a, int b, int c, int d);
