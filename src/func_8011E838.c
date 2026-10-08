@@ -1,8 +1,5 @@
-/* wip: score 70 (ncheck), was 272. Full function = 688 + 384 B (splat cuts at 8011EAE8, a fragment of this).
-   Fixed: frame, prev/cur pointer pair (p reused for o->parent), while-loop search, hoisted 0x1000 local.
-   Left: s-reg order of x/y/z/k (game k=s2 y=s3 x=s4 z=s5, ours y=s2 x=s3 z=s4 k=s5; types/decl order brute-forced),
-   an extra "beqz s1" before the search loop (game has no top test), and two sh 0x1000 scheduled early in loop0. */
 // FUNC 8011e838 1072 X000
+// MATCHING 8011e838 1072
 typedef struct { unsigned short frac; short whole; } FP;
 typedef union { int raw; FP p; } FX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -65,9 +62,9 @@ void func_8011E838(E *o)
         loop0:
             s->wb4 = 0;
             s->wb6 = 0;
+            s->wb8 = *tab++;
             s->wbc = c;
             s->wbe = c;
-            s->wb8 = *tab++;
             s->c0 = s->a.p.whole;
             s->c2 = s->y.p.whole;
             if (s->next == 0) goto done0;
@@ -97,7 +94,7 @@ void func_8011E838(E *o)
             s = o;
             o->wb4 = 0;
             i = 0;
-            while (s != 0) {
+            while (1) {
                 if (s->b69 != 0) {
                     o->wb4 = i;
                     s->b69 = 0;
@@ -110,6 +107,7 @@ void func_8011E838(E *o)
                 }
                 s = s->next;
                 i++;
+                if (!s) break;
             }
             dy = o->y.p.whole - (unsigned short)o->c2;
             if ((unsigned short)o->wb4 != (unsigned short)o->wb6) {
@@ -133,7 +131,7 @@ void func_8011E838(E *o)
             o->a.raw = x;
             o->b.raw = z;
             o->y.raw = y;
-        loop1:
+            while (1) {
                 v.vx = 0;
                 v.vy = 0;
                 v.vz = k / 4 + (o->wbc - 0x1000) / s->wb8;
@@ -148,7 +146,7 @@ void func_8011E838(E *o)
                 x += out.vx;
                 y += out.vy;
                 z += out.vz;
-                if (s->next == 0) goto done1;
+                if (s->next == 0) break;
                 p = s;
                 s = s->next;
                 s->a.raw = x;
@@ -157,8 +155,7 @@ void func_8011E838(E *o)
                 p->box0 = s->a.p.whole;
                 k += dy;
                 p->box2 = s->y.p.whole;
-                goto loop1;
-        done1:
+            }
             s->box0 = x >> 16;
             s->box2 = y >> 16;
         }
