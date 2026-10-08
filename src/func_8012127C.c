@@ -1,5 +1,5 @@
 // FUNC 8012127c 912 X000
-// wip r8: score 4, covers whole function (splat split it into func_8012127C/func_801212A0/func_801213D0, 36+304+572 B). Only diff: game does sll v1,n,16; sra v1,v1,16 for g (ours sll v0 / sra v1).
+// MATCHING 8012127c 912
 #include "TOBJ.H"
 typedef struct {
     unsigned char c[0x36];
@@ -21,8 +21,6 @@ void func_8012127C(TObj *o)
     short n;
     E *e;
     int ph, g;
-    unsigned short *p;
-    H *h;
 
     e = (E *)o->da0;
     e = (E *)((char *)e + 0x1c);
@@ -35,7 +33,8 @@ void func_8012127C(TObj *o)
         o->ba4 = 0;
         o->timer = 0;
         do {
-            g = n;
+            g = n << 16;
+            g >>= 16;
             g = 0x20 - g;
             ph = (unsigned short)(0x20 - n) & 7;
             e->z50 = 0;
