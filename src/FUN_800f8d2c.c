@@ -1,5 +1,6 @@
 // FUNC 800f8d2c 2076 X000
-/* score 2: case 2 only: game loads animFrame (lhu 0x2e) before "sw a0,0x88"; ours after "lw a0,0x40". Tried store permutations, f temps, if/else forms. Key fixes: nextspd inline, v reused for o->h. */
+// MATCHING 800f8d2c 2076
+/* Debt: volatile animFrame read + volatile d88 store in case 2 pin the lhu above "sw a0,0x88" (scheduler). */
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -175,13 +176,14 @@ void FUN_800f8d2c(TObj *o)
             o->d84 = 0;
             if (o->animFrame & 1)
                 v = 0xf0;
-            o->d88 = v;
-            o->d8c = 0;
             {
-                int w;
+                int w; int f;
+                f = *(volatile unsigned short *)&o->animFrame;
+                *(volatile int *)&o->d88 = v;
+                o->d8c = 0;
                 v = (int)o->h;
                 w = ((Fix16 *)v)->p.whole;
-                if (o->animFrame & 1)
+                if (f & 1)
                     ((Fix16 *)v)->p.whole = w + 10;
                 else
                     ((Fix16 *)v)->p.whole = w - 10;
