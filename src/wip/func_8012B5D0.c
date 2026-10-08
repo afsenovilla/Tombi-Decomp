@@ -50,9 +50,10 @@ void func_8012B5D0(TObj *o)
         AnimAdvanceWithBox(o);
         FUN_8001fb20(o);
         if (FUN_801274cc(o)) {
+            r = (unsigned short)q[1];
             o->timer = 0;
             o->state++;
-            o->d8c = (unsigned short)q[1];
+            o->d8c = r;
         }
         break;
     case 2:
@@ -93,8 +94,8 @@ void func_8012B5D0(TObj *o)
                 o->timer = 0x78;
                 o->state++;
                 ObjSetFacingToPlayer(o);
-                o->movetab = D_80077CDC;
-                o->wac = 0x2f;
+                *(char **)((char *)o + 0x28) = D_80077CDC;
+                *(short *)((char *)o + 0xac) = 0x2f;
                 o->anim = D_8013A21C;
                 SetBox(o);
             }
@@ -107,8 +108,8 @@ void func_8012B5D0(TObj *o)
             o->timer = 0;
         FUN_801274cc(o);
         if (--o->timer == -1) {
-            o->timer = 0x3c;
-            o->wac = 0x30;
+            *(short *)((char *)o + 0x20) = 0x3c;
+            *(short *)((char *)o + 0xac) = 0x30;
             o->state++;
             o->anim = D_8013A220;
             SetBox(o);
@@ -123,7 +124,7 @@ void func_8012B5D0(TObj *o)
                 o->anim = D_8013A160[o->wac];
                 SetBox(o);
             } else {
-                o->wac = 0x42;
+                *(short *)((char *)o + 0xac) = 0x42;
                 o->state++;
                 o->anim = D_8013A268;
                 SetBox(o);
