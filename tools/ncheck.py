@@ -141,7 +141,9 @@ def main():
         if "--score" in opts:
             A = [a[k:k + 4] for k in range(0, len(a), 4)]; B = [b[k:k + 4] for k in range(0, len(b), 4)]
             same = sum(x.size for x in difflib.SequenceMatcher(None, A, B, autojunk=False).get_matching_blocks())
-            print("SCORE %s %d" % (name, (len(A) - same) + (len(B) - same)))
+            extra = len(bad_jumps(code, ref, addr)) + len(bad_symbols(code, ref, addr, open(f, errors="replace").read())) \
+                if len(code) == len(ref) else 0  # wrong j targets / symbol addresses are masked in the word diff
+            print("SCORE %s %d" % (name, (len(A) - same) + (len(B) - same) + extra))
             continue
         bj = bad_jumps(code, ref, addr)
         bs = bad_symbols(code, ref, addr, open(f, errors="replace").read()) if a == b else []
