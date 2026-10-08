@@ -1,5 +1,5 @@
 // FUNC 8010e114 532 X000
-/* score 24 (ncheck, era 128): solo falta intercambiar registros de r (juego a3) y la copia de d (juego t0). */
+/* score 24 (ncheck): only r (game a3) and the copy of d (game t0) are swapped. b20: -dg shows both are global-alloc pseudos and d (6 refs/19 insns, HImode) outranks r (12 refs/90 insns), so r must gain priority (more refs or shorter life) or d lose it. Tried: per-local type brute force, declaration order, short/ushort d copies, inline range helpers, reusing dead vars for d, r=?5:4 forms, b68 store forms, while-loop forms, r init placement. */
 typedef struct P { short x; short y; } P;
 typedef struct S {
     unsigned char b0; char p0; unsigned char type; char p1[0x16 - 3];
