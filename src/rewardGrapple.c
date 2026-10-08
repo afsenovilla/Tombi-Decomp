@@ -401,7 +401,7 @@ void rewardGrapple(unkstruct_800A6D50* arg0)
     addItemToInventory(ITEM_GRAPPLE, 1, true);
     setEventComplete(EVENT_APRECIOUSTREASURECHEST, 0);
     if (!(arg0->unkC & 0x80)) {
-        func_8002367C(arg0->objectIndex);
+        func_80020AEC(arg0->objectIndex);
     }
     arg0->state++;
 }

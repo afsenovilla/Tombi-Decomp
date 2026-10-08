@@ -400,7 +400,7 @@ void rewardFlowerSeeds(unkstruct_800A6D50* arg0)
 {
     setEventStarted(EVENT_FLOWERSEEDS, 0, 0);
     if (!(arg0->unkC & 0x80)) {
-        func_8002367C(arg0->objectIndex);
+        func_80020AEC(arg0->objectIndex);
     }
     addItemToInventory(arg0->item_id, 1, true);
     arg0->state++;

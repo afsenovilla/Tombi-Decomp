@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
-extern unsigned short D_1F8001FC, D_1F8003C6;
+extern unsigned short D_1F8003C6, D_1F8001FC;
 extern unsigned char D_8009D2B0;
 extern void ObjMotionStep(TObj *);
 extern void FUN_8001f96c(int, int, int, int);
@@ -87,7 +87,7 @@ void func_80102AC0(TObj *o)
         o->h->p.whole = D_8009D2E8->h->p.whole;
         o->y.p.whole = D_8009D2E8->y.p.whole - D_8009D2E8->box2;
         o->d8c = D_8009D2E8->d8c;
-        if (D_1F8003C6 & D_1F8001FC) {
+        if (D_1F8001FC & D_1F8003C6) {
             D_8009D2B0 = 0;
             o->b9c = 1;
             o->b69 = 0;

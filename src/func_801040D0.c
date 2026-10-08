@@ -4,8 +4,8 @@
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670[];
-extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
+extern unsigned short DAT_1f8001fc;
 extern void func_8010EAF8(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -73,7 +73,7 @@ void func_801040D0(TObj *o)
             o->animFrame = 0;
         D_8009D2E8->h->p.whole = o->h->p.whole;
         D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;
-        if (DAT_1f8003c6 & DAT_1f8001fc) {
+        if (DAT_1f8001fc & DAT_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

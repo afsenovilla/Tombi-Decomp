@@ -1,5 +1,5 @@
 // FUNC 800f2b98 2632 X000
-// MATCHING 800f2b98 2632
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0;

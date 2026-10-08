@@ -10,8 +10,8 @@ typedef struct {
     signed char be3;
 } S;
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } P;
-extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c8;
+extern unsigned short DAT_1f8001fc;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009C990;
 extern unsigned char D_8009D2B1;
@@ -28,7 +28,7 @@ void func_8010E328(S *s, short mode)
     P *q;
     short v, t;
 
-    if ((DAT_1f8003c8 & DAT_1f8001fc) == 0) return;
+    if ((DAT_1f8001fc & DAT_1f8003c8) == 0) return;
     D_8009D2B0 = 0;
     s->bcd = 0;
     s->bce = 0;

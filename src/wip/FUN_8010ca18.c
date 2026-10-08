@@ -1,5 +1,5 @@
 // FUNC 8010ca18 912 X000
-// MATCHING 8010ca18 912
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];

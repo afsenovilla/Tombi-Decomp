@@ -10,16 +10,16 @@ void dispatchSectionInit(void)
 {
     switch (GAME.selectedSection) {
         case 0:
-            func_800E7574();
+            func_800E8214();
             return;
         case 3:
-            func_800E79F8();
+            func_800E86AC();
             return;
         case 1:
         case 2:
         case 4:
         case 5:
-            func_801156A8();
+            func_80116358();
             // fallthrough
         default:
             return;

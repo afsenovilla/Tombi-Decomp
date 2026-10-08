@@ -401,7 +401,7 @@ void rewardSafeMushroom(unkstruct_800A6D50* arg0)
     setEventComplete(EVENT_ASAFEMUSHROOM, 0);
     addItemToInventory(arg0->item_id, 1, true);
     if (!(arg0->unkC & 0x80)) {
-        func_8002367C(arg0->objectIndex);
+        func_80020AEC(arg0->objectIndex);
     }
     arg0->state++;
 }

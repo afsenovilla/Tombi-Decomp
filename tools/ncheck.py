@@ -41,7 +41,56 @@ def build(src, flags, d, inc):
             rel.append((int(m.group(1), 16), 0x4A if m.group(2) == "R_MIPS_26" else 0x52))
             if m.group(2) == "R_MIPS_26" and m.group(3) == ".text":
                 LOCAL_J.append(int(m.group(1), 16))
+            RELS.append((int(m.group(1), 16), m.group(2), m.group(3)))
     return open(d + "/t.bin", "rb").read(), rel
+
+
+RELS = []     # (offset, type, symbol) of every .text relocation
+_SYMS = {}
+_NAMES = {}
+
+
+def sym_addr(name):
+    """Address of a symbol: config/symbol_addrs_*.txt and notes/names_*.csv, else the hex in its name
+    (D_8009C984, DAT_8009c984A, PTR_DAT_8013a1d4_b, ...). None if unknown."""
+    if not _SYMS:
+        for f in ("main0", "x000"):
+            for l in open(os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)):
+                m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
+                if m: _SYMS[m.group(1)] = int(m.group(2), 16)
+            for l in open(os.path.join(ROOT, "notes", "names_%s.csv" % f)):
+                m = re.match(r"([0-9a-fA-F]{8}),(\w+)", l)
+                if m:
+                    a = int(m.group(1), 16)
+                    if _NAMES.setdefault(m.group(2), a) != a: _NAMES[m.group(2)] = None  # ambiguous
+        for k, a in _NAMES.items(): _SYMS.setdefault(k, a)
+    if name in _SYMS: return _SYMS[name]
+    m = re.match(r"(?:PTR_)?(?:D|DAT|FUN|func|LAB|PTR)_([0-9a-fA-F]{8})", name)
+    return int(m.group(1), 16) if m else None
+
+
+def bad_symbols(code, ref, addr, text=""):
+    """Relocated fields whose resolved address differs from the game's (masked by the byte compare)."""
+    W = lambda b, o: struct.unpack("<I", b[o:o + 4])[0]
+    out, hi = [], {}
+    for off, ty, sym in RELS:
+        if off + 4 > min(len(code), len(ref)) or sym.startswith("."): continue
+        S = sym_addr(sym)
+        if S is None: continue
+        if sym not in _SYMS and not re.search(r"extern[^;(]*\b%s\b" % re.escape(sym), text):
+            continue  # hex-named global declared in a shared header (psx_tomba uses NTSC addresses)
+        c, g = W(code, off), W(ref, off)
+        if ty == "R_MIPS_26":
+            if S + ((c & 0x3FFFFFF) << 2) != (((g & 0x3FFFFFF) << 2) | (addr & 0xF0000000)): out.append((off, sym))
+        elif ty == "R_MIPS_HI16":
+            hi[sym] = (off, c, g)
+        elif ty == "R_MIPS_LO16" and sym in hi:
+            ho, hc, hg = hi[sym]
+            lo = lambda x: (x & 0xFFFF) - 0x10000 if x & 0x8000 else x & 0xFFFF
+            ours = (S + ((hc & 0xFFFF) << 16) + lo(c)) & 0xFFFFFFFF
+            game = (((hg & 0xFFFF) << 16) + lo(g)) & 0xFFFFFFFF
+            if ours != game: out.append((off, sym))
+    return out
 
 
 LOCAL_J = []  # offsets of `j` to labels inside the function: masked by the relocation, so checked separately
@@ -76,7 +125,7 @@ def main():
             print("SKIP (no // FUNC):", f); continue
         addr, size, prog, flags = h
         d = tempfile.mkdtemp()
-        del LOCAL_J[:]
+        del LOCAL_J[:]; del RELS[:]
         try:
             code, rel = build(f, flags, d, inc)
             if "--asm" in opts:
@@ -95,7 +144,8 @@ def main():
             print("SCORE %s %d" % (name, (len(A) - same) + (len(B) - same)))
             continue
         bj = bad_jumps(code, ref, addr)
-        if a == b and len(code) == size and not bj:
+        bs = bad_symbols(code, ref, addr, open(f, errors="replace").read()) if a == b else []
+        if a == b and len(code) == size and not bj and not bs:
             ok += 1; print("MATCH   %s  %08x %d" % (name, addr, size))
             if "--mark" in opts and "// MATCHING" not in open(f).read():
                 t = open(f).read().splitlines(); t.insert(1, "// MATCHING %08x %d" % (addr, size))
@@ -103,6 +153,7 @@ def main():
         else:
             bad += 1; print("DIFF    %s  %08x  (ours %d B, game %d B)" % (name, addr, len(code), size))
             for k in bj: print("   +%04x local j target differs" % k)
+            for k, sy in bs: print("   +%04x address of %s differs" % (k, sy))
             for k in range(0, max(len(a), len(b)), 4):
                 if a[k:k + 4] != b[k:k + 4]:
                     print("   +%04x ours=%s game=%s" % (k, a[k:k + 4].hex(), b[k:k + 4].hex()))

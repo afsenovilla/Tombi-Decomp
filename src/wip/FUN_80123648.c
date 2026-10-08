@@ -1,5 +1,5 @@
 // FUNC 80123648 168 X000
-// MATCHING 80123648 168
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 #include "raw7.h"
 extern char *ObjAlloc();
 void FUN_80123648(char *p, char *q, int c)

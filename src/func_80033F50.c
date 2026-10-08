@@ -2898,11 +2898,11 @@ const u32 D_80012DE0[] = {
 void func_80033F50(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-        func_80120054();
+        func_80120d04();
     } else if (GAME.selectedArea == AREA06_DIRTMOTOCROSS) {
-        func_80119BCC();
+        func_8011A87C();
     } else if (GAME.selectedArea == AREA11_VILLAGEOFCIVILIZATION){
-        func_80115724();
+        func_801163d4();
     }
     return;
 }

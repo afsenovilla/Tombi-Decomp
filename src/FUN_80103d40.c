@@ -11,7 +11,7 @@ typedef struct O {
 extern O *DAT_8009d2e8;
 extern O *DAT_8009c330;
 extern unsigned short DAT_8009d670;
-extern unsigned short D_1f8001fc, D_1f8003c6;
+extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_800eeb5c(O *, int);
@@ -78,7 +78,7 @@ void FUN_80103d40(O *o)
         p = DAT_8009d2e8;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
-        if (D_1f8003c6 & D_1f8001fc) {
+        if (D_1f8001fc & D_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

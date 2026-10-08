@@ -9,12 +9,12 @@
 void dispatchAreaItemDraw(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-        func_80122F64();
+        func_80123C20();
     } else if (GAME.selectedArea == AREA04_HAUNTEDMANSION) {
-        func_8011D844();
+        func_8011E594();
     } else if (GAME.selectedArea == AREA10_DEEPJUNGLE) {
-        func_8011CD70();
+        func_8011DA50();
     } else if (GAME.selectedArea == AREA13_PIGISLAND) {
-        func_8011602C();
+        func_80116CDC();
     }
 }

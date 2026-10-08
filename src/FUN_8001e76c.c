@@ -7,7 +7,7 @@ extern short DAT_8009c8c0[];
 extern unsigned char DAT_800780c4[];
 extern unsigned char *PTR_DAT_800782cc[];
 extern unsigned short DAT_1f8003a8[];
-extern short DAT_8009bd44, DAT_8009bd48, DAT_8009bd58, DAT_8009bd50, DAT_8009bd4c, DAT_8009bd54;
+extern short DAT_8009bd44, DAT_8009bd48, DAT_8009bd58, DAT_8009bd50, DAT_8009bd54, DAT_8009bd4c;
 extern short DAT_800a3cc8[];
 extern void SsUtKeyOffV(int);
 extern int SoundFindFreeVoice(unsigned);
@@ -38,8 +38,8 @@ int FUN_8001e76c(unsigned p1, unsigned p2, unsigned p3, unsigned p4)
     t = q[3];
     DAT_8009bd58 = 0;
     DAT_8009bd50 = 0;
-    DAT_8009bd4c = t;
     DAT_8009bd54 = t;
+    DAT_8009bd4c = t;
     r = SoundFindFreeVoice(p1);
     if (r == -1) return -1;
     if (FUN_8001f3fc(p1 & 0x3ff, r) == -1) return -1;

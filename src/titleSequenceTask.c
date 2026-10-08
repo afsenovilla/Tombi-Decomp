@@ -42,7 +42,7 @@ void titleSequenceTask(void)
     while(true) {
         *(u16* )0x1F8001F8 = *(u16* )(D_1F8000F8+0x100) + 1;
         asm("");
-        func_800223E0();
+        func_8001F850();
         task = CURRENT_TASK;
         state = task->state0;
         if ((state >= 3U) && (JOYPAD_STATE & (JOY_CROSS | JOY_START)) && (state != 4)) {
@@ -57,13 +57,13 @@ void titleSequenceTask(void)
         }
         switch ((u16)(CURRENT_TASK)->state0) {
             case 0:
-                func_800199B8(sp10);
+                func_8004DF00(sp10);
                 break;
             case 1:
                 bootLoadMovieResources();
                 break;
             case 2:
-                func_8001A328();
+                func_8004E914();
                 break;
             case 3:
                 bootPlayIntroMovie();

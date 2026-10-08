@@ -10,11 +10,11 @@ void dispatchSectionConfirm(void)
 {
     switch (GAME.selectedSection) {                     // irregular
         case 1:
-            func_801151F8();
+            func_80115EA8();
             return;
         case 2:
         case 0:
-            func_800E84BC();
+            func_800E9174();
             return;
     }
 }

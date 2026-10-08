@@ -10,13 +10,13 @@ void dispatchAreaActorUpdate(void)
 {
     switch (GAME.selectedArea) {
     case AREA00_VILLAGEOFALLBEGINNINGS:
-        func_801248A0();
+        func_8012555C();
         break;
     case AREA04_HAUNTEDMANSION:
-        func_8011E3E4();
+        func_8011F134();
         break;
     case AREA10_DEEPJUNGLE:
-        func_8011FC7C();
+        func_8012095C();
         break;
     }
 }

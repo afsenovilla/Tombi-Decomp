@@ -1,5 +1,5 @@
 // FUNC 8002171c 316 MAIN0
-// MATCHING 8002171c 316
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 // Portado de psx_tomba (camera.c, func_800242AC); licencia MIT del proyecto original.
 #define SKIP_ASM
 #include "common.h"

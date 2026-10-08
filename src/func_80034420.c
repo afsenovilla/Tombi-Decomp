@@ -348,7 +348,7 @@ const u32 D_80010814[] = {
 };
 
 
-extern u8 D_8009C3F0;
+extern u8 D_8009D088;
 extern u8 D_8009BCA6;
 
 
@@ -2909,7 +2909,7 @@ void func_80034420(u8* self)
         self[4]++;
         break;
     case 1:
-        if (self[3] == 0x1B && D_8009C3F0 == 0xFF) {
+        if (self[3] == 0x1B && D_8009D088 == 0xFF) {
             break;
         }
         self[1] = 1;

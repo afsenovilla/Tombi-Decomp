@@ -11,14 +11,14 @@ void dispatchAreaItemHandler(s32 arg0)
     loadSectionHeight();
     switch (GAME.selectedArea) {                    // irregular
         case AREA00_VILLAGEOFALLBEGINNINGS:
-            func_80115AA8(arg0);
+            func_80116758(arg0);
             return;
         case AREA01_DWARFFOREST:
         case AREA07_DWARFFORESTPURIFIED:
-            func_80115910(arg0);
+            func_801165c0(arg0);
             return;
         case AREA03_PHOENIXMOUNTAIN:
-            func_801162C4(arg0);
+            func_80116F74(arg0);
             return;
     }
 }

@@ -51,22 +51,22 @@ void dispatchAreaDialogInit(void)
 {
     switch (GAME.selectedArea) {
         case AREA05_BACCUSVILLAGE:
-            func_800EF7C0();
+            func_800F07C0();
             return;
         case AREA11_VILLAGEOFCIVILIZATION:
-            func_800F5D5C();
+            func_800F6D5C();
             return;
         case AREA16_VILLAGEOFCIVILIZATIONCLOCKTOWER:
-            func_800EFC0C();
+            func_800F0C0C();
             return;
         case AREA17_VILLAGEOFCIVILIZATIONIRONTOWER:
-            func_800F026C();
+            func_800F126C();
             return;
         case AREA08_BACCUSLAKE:
-            func_800F0A60();
+            func_800F1A60();
             return;
         case AREA19_VILLAGEOFCIVILIZATIONPURIFIED:
-            func_800F0590();
+            func_800F1590();
         default:
             return;
     }

@@ -9,8 +9,8 @@ typedef struct O {
     char p3[0x40 - 0x38]; H *h;
     char p4[0x84 - 0x44]; int d84; int d88; int d8c;
 } O;
-extern G *DAT_80096330;
-extern G *DAT_80096330b[];
+extern G *DAT_8009c330;
+extern G *DAT_8009c330b[];
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 
@@ -25,22 +25,22 @@ void FUN_800f4ed0(O *o, short a, int b)
         s = 0x1bf;
         s -= b;
         s &= 0xff;
-        o->h->w2 = FUN_8001fddc(s, DAT_80096330->b1) + o->d30;
-        v = FUN_8001fdac(s, DAT_80096330->b1);
+        o->h->w2 = FUN_8001fddc(s, DAT_8009c330->b1) + o->d30;
+        v = FUN_8001fdac(s, DAT_8009c330->b1);
         o->d84 = 0;
         o->d8c = 0x100 - (a << 2);
         v += o->d34;
     } else {
         s = b + 0xc0;
         s &= 0xff;
-        o->h->w2 = FUN_8001fddc(s, DAT_80096330->b1) + o->d30;
-        v = FUN_8001fdac(s, DAT_80096330->b1);
+        o->h->w2 = FUN_8001fddc(s, DAT_8009c330->b1) + o->d30;
+        v = FUN_8001fdac(s, DAT_8009c330->b1);
         o->d84 = 0;
         o->d8c = a << 2;
         v += o->d34;
     }
     o->y = v;
-    g = DAT_80096330b[0];
+    g = DAT_8009c330b[0];
     d = g->we;
     if (g->b8) {
         t = g->w2;

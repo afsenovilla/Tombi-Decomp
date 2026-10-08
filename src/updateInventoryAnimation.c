@@ -38,6 +38,6 @@ void updateInventoryAnimation(u8* self)
         self[0x72] = 0;
         self[0x73] = 0;
     }
-    func_8002A9FC(self);
-    func_8002AD74(self);
+    func_80027ED8(self);
+    func_80028250(self);
 }

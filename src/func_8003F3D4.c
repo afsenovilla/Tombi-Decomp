@@ -14,8 +14,8 @@ extern int D_8013A44C;
 extern int D_80134018;
 extern u8 D_8009C263;
 extern u8 D_8009C616;
-extern int D_80131D84[];
-extern int D_8007728C;
+extern int D_80132A00[];
+extern int D_80077D6C;
 
 typedef struct {
     int x;
@@ -34,9 +34,9 @@ typedef struct {
     int* unk8;
 } unk_8007D6E0;
 
-extern unk_8007D6E0 D_8007D6E0[];
+extern unk_8007D6E0 D_8007A148[];
 
-unk_8007D6E0 D_8007D6E0[14] = {
+unk_8007D6E0 D_8007A148[14] = {
     { 0xA, 0x14, 0x10, 0x20, 1, 0, 2, (int*)0x80014CCC },
     { 0x10, 0x20, 8, 0x18, 0x13, 0x24, 5, (int*)0x8013A078 },
     { 0x10, 0x20, 0xA, 0x14, 8, 0, 3, (int*)0x8013D954 },
@@ -404,17 +404,17 @@ void func_8003F3D4(u8* self)
     switch (state) {
     case 0:
         self[4] = state + 1;
-        *(s16*)(self + 0x6C) = D_8007D6E0[self[3]].unk0;
-        *(s16*)(self + 0x6E) = D_8007D6E0[self[3]].unk1;
-        *(s16*)(self + 0x70) = D_8007D6E0[self[3]].unk2;
-        *(s16*)(self + 0x72) = D_8007D6E0[self[3]].unk3;
-        *(s16*)(self + 0x1E) = D_8007D6E0[self[3]].unk4;
-        *(int*)(self + 0x3C) = D_1F8002C8[D_8007D6E0[self[3]].unk6];
-        *(s16*)(self + 0xA6) = D_8007D6E0[self[3]].unk5;
-        *(int*)(self + 0x24) = D_8007D6E0[self[3]].unk8[*(s16*)(self + 0xA6)];
+        *(s16*)(self + 0x6C) = D_8007A148[self[3]].unk0;
+        *(s16*)(self + 0x6E) = D_8007A148[self[3]].unk1;
+        *(s16*)(self + 0x70) = D_8007A148[self[3]].unk2;
+        *(s16*)(self + 0x72) = D_8007A148[self[3]].unk3;
+        *(s16*)(self + 0x1E) = D_8007A148[self[3]].unk4;
+        *(int*)(self + 0x3C) = D_1F8002C8[D_8007A148[self[3]].unk6];
+        *(s16*)(self + 0xA6) = D_8007A148[self[3]].unk5;
+        *(int*)(self + 0x24) = D_8007A148[self[3]].unk8[*(s16*)(self + 0xA6)];
         switch (self[3]) {
         case 1:
-            func_8012FA34(0xE, 0);
+            func_801306F0(0xE, 0);
             self[0xD] = 1;
             *(s16*)(self + 8) = GetClut(0xE0, 0x1F0);
             *(s16*)(self + 0x1E) = GetTPage(0, 0, 0x1C0, 0);
@@ -429,12 +429,12 @@ void func_8003F3D4(u8* self)
             *(s16*)(self + 8) = GetClut(0xE0, 0x1F0);
             break;
         case 0xD:
-            *(int*)(self + 0x24) = D_80131D84[self[0xC]];
+            *(int*)(self + 0x24) = D_80132A00[self[0xC]];
             readAnimFrameCount(self);
             break;
         }
         *(s16*)(self + 0x98) = 3;
-        *(int*)(self + 0x28) = (int)&D_8007728C;
+        *(int*)(self + 0x28) = (int)&D_80077D6C;
         self[0xA5] = 1;
         self[0xA] = 2;
         *(int*)(self + 0x8C) = 0;
@@ -459,7 +459,7 @@ void func_8003F3D4(u8* self)
         } else {
             applyFrameVelocityX(self);
         }
-        if ((s16)func_80044620(self, *(s16*)(*(int*)(self + 0x40) + 2), *(s16*)(self + 0x16)) != 0) {
+        if ((s16)func_800411cc(self, *(s16*)(*(int*)(self + 0x40) + 2), *(s16*)(self + 0x16)) != 0) {
             self[0] = 2;
             self[0xA5] = 0;
             *(int*)(self + 0x8C) = (-*(s16*)0x1F80027E << 2) & 0xFF;
@@ -467,13 +467,13 @@ void func_8003F3D4(u8* self)
             self[5] = 0;
             self[6] = 0;
         }
-        if (func_80022E44(self) == 0) {
+        if (func_800202B4(self) == 0) {
             self[4] = 3;
         }
         break;
     case 2:
         updateItemPickupAnim((unkstruct_800A6D50*)self);
-        if (func_80022E44(self) == 0) {
+        if (func_800202B4(self) == 0) {
             self[4] = 3;
         }
         break;

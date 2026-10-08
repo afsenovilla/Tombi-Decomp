@@ -403,7 +403,7 @@ void rewardBakedYam(unkstruct_800A6D50* arg0)
         GAME.event[EVENT_SOMETHINGCOOKIN] += 1;
     }
     if (!(arg0->unkC & 0x80)) {
-        func_8002367C(arg0->objectIndex, &GAME.event[EVENT_SOMETHINGCOOKIN]);
+        func_80020AEC(arg0->objectIndex, &GAME.event[EVENT_SOMETHINGCOOKIN]);
     }
     arg0->state++;
 }

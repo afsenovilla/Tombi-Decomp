@@ -405,7 +405,7 @@ void rewardItem(unkstruct_800A6D50* arg0)
 
     addItemToInventory(arg0->item_id, 1, true);
     if (!(arg0->unkC & 0x80)) {
-        func_8002367C(arg0->objectIndex);
+        func_80020AEC(arg0->objectIndex);
     }
     current_item = arg0->item_id;
     switch (current_item) {

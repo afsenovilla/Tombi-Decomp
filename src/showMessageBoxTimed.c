@@ -54,5 +54,5 @@ void showMessageBoxTimed(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4)
     box.unk2 = arg2;
     box.unk6 = arg3;
     box.unkA = 0;
-    func_80030800(arg0, arg1, &box, 0, arg4);
+    func_8002dd1c(arg0, arg1, &box, 0, arg4);
 }

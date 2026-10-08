@@ -1,5 +1,5 @@
 // FUNC 8003c550 628 MAIN0
-// MATCHING 8003c550 628
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 // Ported from psx_tomba (reward.c, func_8003F9A4); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"

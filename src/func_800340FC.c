@@ -2899,25 +2899,25 @@ void func_800340FC(void)
 {
     switch (GAME.selectedArea) {
         case AREA01_DWARFFOREST:
-            func_8011FD7C();
+            func_80120A2C();
             return;
         case AREA02_DWARFVILLAGE:
-            func_80116C44();
+            func_801178F4();
             return;
         case AREA03_PHOENIXMOUNTAIN:
-            func_8011CB9C();
+            func_8011D84C();
             return;
         case AREA04_HAUNTEDMANSION:
-            func_8011C210();
+            func_8011CEC0();
             return;
         case AREA09_MUSHROOMVILLAGE:
-            func_8011C0D4();
+            func_8011CD84();
             return;
         case AREA10_DEEPJUNGLE:
-            func_80119AC8();
+            func_8011A778();
             return;
         case AREA16_VILLAGEOFCIVILIZATIONCLOCKTOWER:
-            func_80115DB0();
+            func_80116A60();
             // fallthrough
         default:
             return;

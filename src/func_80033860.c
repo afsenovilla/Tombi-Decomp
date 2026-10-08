@@ -9,9 +9,9 @@
 void func_80033860(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-            func_8011BB54();
+            func_8011C804();
     } else if (GAME.selectedArea == AREA03_PHOENIXMOUNTAIN) {
-            func_80119894();
+            func_8011a544();
     }
     return;
 }

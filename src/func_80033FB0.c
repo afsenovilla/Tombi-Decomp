@@ -2898,8 +2898,8 @@ const u32 D_80012DE0[] = {
 void func_80033FB0(unkstruct_80033FB0* arg0)
 {
     if (arg0->unk3 == 0) {
-        func_8011AA0C();
+        func_8011B6BC();
         return;
     }
-    func_8011EE60();
+    func_8011FB10();
 }

@@ -1,5 +1,5 @@
 // FUNC 80016e34 396 MAIN0
-// MATCHING 80016e34 396
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { RECT disp; RECT screen; unsigned char isinter, isrgb24, pad0, pad1; } DISPENV;
 typedef struct {

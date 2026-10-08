@@ -21,7 +21,7 @@ extern void *D_1F8002D4;
 extern char D_80077CDC[];
 extern short *D_801396A0[];
 extern Fix16 *D_800A6078;
-extern unsigned short D_1F8001FC, D_1F8003C4;
+extern unsigned short D_1F8003C4, D_1F8001FC;
 extern unsigned char D_800A60A1;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
@@ -154,7 +154,7 @@ void func_80134E5C(TObj *o)
             case 1:
                 if (D_8009D2B0 == 3) break;
                 if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 32) >= 64) break;
-                if (!(D_1F8003C4 & D_1F8001FC)) break;
+                if (!(D_1F8001FC & D_1F8003C4)) break;
                 if (D_800A60A1 == 0) break;
                 if (D_800A603C != 1) break;
                 if (D_800A6078->p.whole - o->h->p.whole > 0) o->animFrame = 0;
@@ -177,7 +177,7 @@ void func_80134E5C(TObj *o)
         case 3:
             if (D_8009D2B0 == 3) break;
             if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 32) >= 64) break;
-            if (!(D_1F8003C4 & D_1F8001FC)) break;
+            if (!(D_1F8001FC & D_1F8003C4)) break;
             if (D_800A60A1 == 0) break;
             if (D_800A603C != 1) break;
             if (D_800A6078->p.whole - o->h->p.whole > 0) o->animFrame = 0;

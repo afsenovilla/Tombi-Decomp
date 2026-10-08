@@ -1,5 +1,5 @@
 // FUNC 800fa01c 832 X000
-// MATCHING 800fa01c 832
+/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;

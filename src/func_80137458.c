@@ -8,8 +8,8 @@ extern unsigned char D_800A60A1;
 extern unsigned short *D_800A6078;
 extern short *D_800A6078s;
 extern signed char D_8009D2B0;
-extern unsigned short D_1F8001FC;
 extern unsigned short D_1F8003C4;
+extern unsigned short D_1F8001FC;
 extern unsigned char D_8009C940;
 extern unsigned char D_8009C941;
 extern unsigned char D_8009C942[];
@@ -30,7 +30,7 @@ short func_80137458(TObj *o)
     if (D_8009C962 == 0) {
         if (D_8009CE4A != 0xff) {
             if (D_800A604E < -0x122 && D_800A60A1 != 0 && (unsigned short)(D_800A6078[1] - 0x148) < 0x10 &&
-                D_8009D2B0 == 1 && (D_1F8003C4 & D_1F8001FC) != 0 && D_8009C940 == 0) {
+                D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4) != 0 && D_8009C940 == 0) {
                 D_800A60F8 = 1;
                 D_8009C942[0] = 0;
                 *(short *)&o->anim = 1;

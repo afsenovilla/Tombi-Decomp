@@ -10,7 +10,7 @@ typedef struct O {
 } O;
 extern O *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
-extern unsigned short D_1f8001fc, D_1f8003c6;
+extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103628(O *);
@@ -93,7 +93,7 @@ void FUN_801037d8(O *o)
             }
             break;
         }
-        if (D_1f8003c6 & D_1f8001fc) {
+        if (D_1f8001fc & D_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

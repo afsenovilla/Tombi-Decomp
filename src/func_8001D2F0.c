@@ -24,7 +24,7 @@ void func_8001D2F0(void)
         task->unk4E.value = 0;
         *(u8*)0x1F8001CE = 0;
         task->state2++;
-        func_800222B8(0x5D, 1);
+        func_8004FA80(0x5D, 1);
         break;
     case 1:
         if (*(u8*)0x1F8001CE == 0) break;
@@ -34,7 +34,7 @@ void func_8001D2F0(void)
     {
         unkstruct_1F8001D4* t2;
         s16 val;
-        func_800E7E68();
+        func_800E8B08();
         t2 = (*(unkstruct_1F8001D4**)(&SCRATCHPAD + 0x1D4));
         val = --t2->unk5C;
         if (val == -1) {
@@ -46,16 +46,16 @@ void func_8001D2F0(void)
                 }
             }
             if ((s16)CURRENT_TASK->unk5C == 0x3C) {
-                func_80020C00(1);
+                func_8001F110(1);
             }
         }
-        func_8001F6D4();
+        func_8001DBDC();
         break;
     }
     case 3:
     {
         unkstruct_1F8001D4* t;
-        func_80020FAC();
+        func_8001F4BC();
         t = TASK_C;
         *(char*)0x1F8001D0 = 0;
         t->state0 = 1;

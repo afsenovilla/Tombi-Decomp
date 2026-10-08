@@ -9,7 +9,7 @@
 s32 func_80036C14(u8* self)
 {
     s32 r = 0;
-    s16 v = func_80036618(self);
+    s16 v = func_800331c4(self);
 
     switch (v) {
     case 0:

@@ -33,7 +33,7 @@ u16 D_8007D5D0[10] = { 1, 0, 0, 0, 0, 1, 2, 3, 1, 1 };
 
 
 
-extern u8 D_8009C1C0;
+extern u8 D_8009CE58;
 
 
 extern const u32 D_800108AC[];
@@ -2951,14 +2951,14 @@ void func_800341AC(u8* self)
             pushDrawListLayer4(self);
             break;
         case 2:
-            if (D_8009C1C0 != 0) {
+            if (D_8009CE58 != 0) {
                 self[4] = 3;
                 break;
             }
         case 1:
         case 3:
         case 4:
-            func_80022E44(self);
+            func_800202B4(self);
             break;
         }
         break;

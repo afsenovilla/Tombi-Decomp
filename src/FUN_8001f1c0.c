@@ -4,7 +4,7 @@ extern short DAT_800a3428;
 extern unsigned short DAT_8009c960;
 extern unsigned short DAT_8009c960b;
 extern unsigned short DAT_8009c962;
-extern short DAT_80078334[];
+extern short DAT_8007833c[];
 extern short DAT_8009bd0c;
 extern void SsSeqSetVol(short, short, short);
 
@@ -16,7 +16,7 @@ void FUN_8001f1c0(void)
 
     if (DAT_800a3428 == -1)
         return;
-    v = DAT_80078334[DAT_8009c960];
+    v = DAT_8007833c[DAT_8009c960];
     switch (DAT_8009c960b) {
     case 0:
     case 2:

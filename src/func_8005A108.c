@@ -13,6 +13,6 @@ void func_8005A108(u8 arg0)
     if (p != NULL) {
         p[0] = 1;
         p[2] = arg0;
-        func_8005A184(p);
+        func_8004C1EC(p);
     }
 }
