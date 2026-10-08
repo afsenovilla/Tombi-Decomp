@@ -1,9 +1,11 @@
 // FUNC 800285ec 360 MAIN0
+/* score 39 (ncheck): only missing `move a2,v0` (calc result copied into s) after the E address load */
 typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
 extern unsigned short F2u;
 extern short F2;
+extern struct { short v; } F2s;
 extern unsigned short DAT_1f80016e;
 extern short E[];
 extern short E2;
@@ -18,15 +20,17 @@ static __inline__ int calc(void)
     return F2u - DAT_1f80016e;
 }
 
-static __inline__ void adj(TObj *o, int s)
+void func_800285EC(TObj *o)
 {
+    char pad;
     short n;
-    n = s + E[0];
+    int s = calc();
+    n = E[0] + s;
     if (n != -0x50) {
         if (n > -0x50) {
             if (n >= -0x33) {
                 F2 -= 2;
-                if (F2 < o->y) F2 = o->y;
+                if (F2 < *(short *)((char *)o + 0x30)) F2 = *(short *)((char *)o + 0x30);
                 else s -= 2;
             } else {
                 E[0] -= 2;
@@ -43,8 +47,3 @@ static __inline__ void adj(TObj *o, int s)
         E2 = o->y - F2;
 }
 
-void FUN_800285ec(TObj *o)
-{
-    char pad;
-    adj(o, calc());
-}
