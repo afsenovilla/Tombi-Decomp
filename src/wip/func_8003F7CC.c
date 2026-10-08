@@ -1,17 +1,22 @@
 // FUNC 8003f7cc 768 MAIN0
-/* score 84 (dir set as t in branches, dir = t before first call): short k = h copy (game: lh $4 then move $3,$4) fixed the box2 clamp. Still: dir lives in a3 then
-   copied to s1 (try a separate branch var passed to the first call), lo/hi/dir2 register numbers, and the
-   layout of the 2nd/3rd probe blocks. */
+/* score 34: type search (hi int, t unsigned short) from 84. Left: s-reg numbering (game dir2=s4, lo=s5, hi=s7), k copy (move v1,a0) in the box2 clamp, dir = t copy (game passes a3=t to the first call, no andi). */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
 
 short func_8003F7CC(TObj *o)
 {
-    short d, dx, dx2, lo, hi, r;
+    short d;
+    short dx;
+    short dx2;
+    short lo;
+    int hi;
+    short r;
     int h;
     short k;
-    int dir, dir2, t;
+    int dir;
+    int dir2;
+    unsigned short t;
     char pad[8];
     if (*(unsigned char *)&o->waa != 0) return 0;
     if (o->active == 5) return 0;
