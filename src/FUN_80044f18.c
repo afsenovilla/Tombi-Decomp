@@ -1,4 +1,5 @@
 // FUNC 80044f18 464 MAIN0
+// MATCHING 80044f18 464
 typedef struct FP { unsigned short frac; short whole; } FP;
 typedef struct O { unsigned char b0; char p0[0x10-1]; FP a; FP y; FP b; unsigned char b1c; char p1[0x40-0x1d];
   FP *h; FP *d; char p2[0x68-0x48]; unsigned char b68; char p3; unsigned char b6a; char p4;
@@ -38,7 +39,10 @@ void FUN_80044f18(O *a, O *b)
         break;
     case 4: case 5: case 10:
         r = 1;
-        goto X;
+        a->b6a = 1;
+        a->b0 = 2;
+        a->wa8 = 0x4ff;
+        break;
     case 0: case 3: case 9:
         r = 2;
         break;
@@ -48,7 +52,6 @@ void FUN_80044f18(O *a, O *b)
         break;
     case 6: case 11: case 12:
         r = 2;
-    X:
         a->b6a = 1;
         a->b0 = 2;
         a->wa8 = 0x4ff;
