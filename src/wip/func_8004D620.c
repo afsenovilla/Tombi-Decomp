@@ -1,5 +1,5 @@
 // FUNC 8004d620 1324 MAIN0
-/* score 68 (ncheck): fields >= 0xbe partly raw (per-field struct/raw greedy search), inline callit; left: store order in the init block after the switch, TBL address regs (a0), s1 = D_8007DD0C reg, case -6 adds */
+/* score 14 (ncheck): struct/raw mix per field found by greedy+random search; left: li 1 placement for wcc/w20 stores in the init block, case -6 add order (c0+c4+bc) */
 typedef struct O {
     unsigned char f00;
     char pad0[1];
@@ -10,23 +10,20 @@ typedef struct O {
     unsigned char f0F;
     union { int d; struct { short lo, hi; } p; } u10;
     union { int d; struct { short lo, hi; } p; } u14;
-    char pad3[6];
+    int f18;
+    char pad3[2];
     short f1E;
-    short f20;
-    char pad4[10];
-    short f2C;
-    char pad5[134];
+    char pad4[148];
     short fB4;
     short fB6;
-    char pad6[2];
+    char pad5[2];
     short fBA;
-    short fBC;
-    char pad7[6];
-    short fC4;
+    char pad6[10];
     unsigned short fC6;
-    char pad8[6];
+    char pad7[2];
+    unsigned short fCA;
+    char pad8[2];
     short fCE;
-    short fD0;
 } O;
 #define F00 o->f00
 #define F02 o->f02
@@ -36,25 +33,25 @@ typedef struct O {
 #define F12 (*(short *)((char *)o + 0x12))
 #define F14 o->u14.d
 #define F16 (*(short *)((char *)o + 0x16))
-#define F18 (*(int *)((char *)o + 0x18))
+#define F18 o->f18
 #define F1E o->f1E
-#define F20 o->f20
+#define F20 (*(short *)((char *)o + 0x20))
 #define F22 (*(short *)((char *)o + 0x22))
-#define F2C o->f2C
+#define F2C (*(short *)((char *)o + 0x2c))
 #define FB4 o->fB4
 #define FB6 o->fB6
 #define FBA o->fBA
-#define FBC o->fBC
+#define FBC (*(short *)((char *)o + 0xbc))
 #define FBE (*(short *)((char *)o + 0xbe))
 #define FC0 (*(short *)((char *)o + 0xc0))
 #define FC2 (*(short *)((char *)o + 0xc2))
-#define FC4 o->fC4
+#define FC4 (*(short *)((char *)o + 0xc4))
 #define FC6 o->fC6
 #define FC8 (*(short *)((char *)o + 0xc8))
-#define FCA (*(unsigned short *)((char *)o + 0xca))
+#define FCA o->fCA
 #define FCC (*(short *)((char *)o + 0xcc))
 #define FCE o->fCE
-#define FD0 o->fD0
+#define FD0 (*(short *)((char *)o + 0xd0))
 typedef struct G { short n, f2, f4, f6; } G;
 extern G D_800A4648[];
 extern unsigned char D_8009C943;
@@ -103,8 +100,8 @@ O *func_8004D620(int a, int b)
     O *o;
     unsigned short *p;
     unsigned short k;
+    unsigned short *q;
     char *base;
-    char *t;
     int r;
     unsigned short h;
     unsigned int n;
@@ -123,7 +120,7 @@ O *func_8004D620(int a, int b)
         s1 = D_8007DD34[a];
         s1 += D_8009C960 * 2;
         if (*s1 == 0xff)
-            s1 = D_8007DD0C; s1 += D_8009C960 * 2;
+            { s1 = D_8007DD0C; s1 += D_8009C960 * 2; }
     } else {
         s5 = D_8007DE38[D_8009C960];
         s5 += a;
@@ -157,25 +154,25 @@ O *func_8004D620(int a, int b)
             FC2 = D_8007D454[a] + 0x78;
             break;
         }
-        FC4 = 0x14;
-        FC6 = 0xffff;
         setpos(o, F12, F16);
-        FCE = 8;
-        FD0 = 6;
+        FC4 = 0x14;
         FCA = D_8009C943;
-        FCC = 1;
-        F20 = 1;
         F22 = 0;
+        FCC = 1;
+        FD0 = 6;
+        FC6 = 0xffff;
+        F20 = 1;
+        FCE = 8;
         *(short *)((char *)D_800A4648 + FCA * 8) = 0;
-        t = D_1F800398;
+        base = D_1F800398;
         if ((unsigned)(b - 2) < 2) {
-            FC8 = *(unsigned short *)(s1[0] * 2 + t + 0x10) + s1[1];
+            q = (unsigned short *)(s1[0] * 2 + (int)base); FC8 = q[8] + s1[1];
         } else {
             short c = *s5;
-            unsigned short *q = (unsigned short *)(t + (D_8007DE24[D_8009C960] * 2 + 0x10));
+            q = (unsigned short *)(base + (D_8007DE24[D_8009C960] * 2 + 0x10));
             if ((unsigned char)c == 0xff) {
                 s1 = D_8007DD0C + D_8009C960 * 2;
-                FC8 = *(unsigned short *)(s1[0] * 2 + t + 0x10) + s1[1];
+                q = (unsigned short *)(s1[0] * 2 + (int)base); FC8 = q[8] + s1[1];
             } else {
                 FC8 = c + *q;
             }
@@ -183,8 +180,10 @@ O *func_8004D620(int a, int b)
         if (b == 1 || b == 4) {
             callit(o, a);
         }
-        base = D_1F800398 + *(short *)(D_1F800398 + 8);
-        p = (unsigned short *)(base + *(short *)(base + (unsigned short)FC8 * 2));
+        base = D_1F800398;
+        base += *(short *)(base + 8);
+        q = (unsigned short *)(base + (unsigned short)FC8 * 2);
+        p = (unsigned short *)(base + *(short *)q);
         while (1) {
             k = *p++;
             if ((unsigned short)(k + 2) < 2) {
