@@ -1,15 +1,17 @@
 // FUNC 8011f288 896 X000
+// MATCHING 8011f288 896
+/* Holds 3 functions merged by splat: func_8011F288, func_8011F500, func_8011F580. */
 #include "TOBJ.H"
 extern unsigned char D_800A6047[];
 extern void *D_8013B2BC[];
-extern int D_1F8002D4;
+extern int D_1F8002D4[];
 extern unsigned char D_800A603C[];
 extern unsigned short D_800A6066;
 extern unsigned char D_800A603D, D_800A603E;
 extern unsigned char D_8009CDAE;
 extern short D_800A604E;
 extern unsigned char D_800A60A1;
-extern Fix16 *D_800A607C;
+extern Fix16 *D_800A607C[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void AnimAdvance(TObj *o);
@@ -22,20 +24,20 @@ void func_8011F288(TObj *o)
         o->b0a = 0;
         o->b0f = D_800A6047[0] + 1;
         o->anim = D_8013B2BC[0];
+        o->d3c = D_1F8002D4[0];
+        o->b0d = 0;
+        o->w22 = 0;
+        o->b.raw = 0;
         o->w1e = 9;
         o->timer = 10;
         o->a.raw = 0xf00000;
         o->y.raw = 0xfe7c0000;
         o->animFrame = 1;
+        o->b69 = 0;
         o->box0 = 8;
         o->box1 = 0x10;
         o->box2 = 0x58;
-        o->b0d = 0;
-        o->w22 = 0;
-        o->b.raw = 0;
-        o->b69 = 0;
         o->box3 = 0x88;
-        o->d3c = D_1F8002D4;
         AnimLoadDuration(o);
         o->step = 0;
         o->state = 0;
@@ -94,11 +96,11 @@ void func_8011F500(TObj *o)
         o->box2 = 4;
         o->box3 = 8;
         o->b0a = 0x11;
+        o->b0f = D_800A6047[0] + 1;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->b0f = D_800A6047[0] + 1;
-        o->d->p.whole = D_800A607C->p.whole;
+        o->d->p.whole = D_800A607C[0]->p.whole;
         o->b04++;
     }
 }
