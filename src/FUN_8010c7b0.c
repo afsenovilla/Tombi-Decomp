@@ -1,5 +1,7 @@
 // FUNC 8010c7b0 292 X000
+// MATCHING 8010c7b0 292
 #include "TOBJ.H"
+typedef struct { TObj b; char pad[0xe8 - 0xc0]; short e8, ea; } OX;
 extern TObj *DAT_8009f0ec;
 extern TObj *FUN_8004baa8(TObj *, TObj *);
 extern void FUN_800ee428(TObj *);
@@ -9,19 +11,25 @@ void FUN_8010c7b0(TObj *o)
     TObj *n;
     int h, t, f;
     Fix16 *p;
-    f = o->animFrame & 1;
-    h = o->h->p.whole;
-    t = h - 6; if (!f) t = h + 6;
-    *(short *)((char *)o + 0xe8) = t;
-    *(short *)((char *)o + 0xea) = o->y.p.whole - 8;
+    {
+        int t1, h1;
+        t1 = o->animFrame & 1;
+        h1 = o->h->p.whole;
+        if (t1) t1 = h1 - 6; else t1 = h1 + 6;
+        ((OX *)o)->e8 = t1;
+    }
+    ((OX *)o)->ea = o->y.p.whole - 8;
     n = FUN_8004baa8(o, DAT_8009f0ec);
     if (n == 0) {
         *(signed char *)&o->b0f = -8;
         p = o->h;
-        f = o->animFrame & 1;
-        h = p->p.whole;
-        t = h + 8; if (!f) t = h - 8;
-        p->p.whole = t;
+        {
+            int t2, h2;
+            t2 = o->animFrame & 1;
+            h2 = p->p.whole;
+            if (t2) t2 = h2 + 8; else t2 = h2 - 8;
+            p->p.whole = t2;
+        }
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;

@@ -1,4 +1,5 @@
 // FUNC 800ee6d0 272 X000
+/* falta solo: el juego copia d a $a0 (beqz v0; move a0,v0) y compara sltiu sobre a0; probado: d uchar, d reutilizado como arg, inline turn/angdiff, cast */
 extern unsigned short DAT_8009d670;
 extern unsigned short DAT_8009c960;
 extern short FUN_8001fe3c(int, int);

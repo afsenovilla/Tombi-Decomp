@@ -1,4 +1,5 @@
 // FUNC 800579a8 316 MAIN0
+// MATCHING 800579a8 316
 #include "raw7.h"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 extern MATRIX M;
@@ -6,7 +7,7 @@ extern MATRIX A;
 extern MATRIX B;
 extern short SV[3];
 extern short SV2[3];
-extern void f0(void *), RotMatrix(void *, void *), MulMatrix0(void *, void *, void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int);
+extern void f0(void *), RotMatrix(void *, void *), MulMatrix0(void *, void *, void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, char *);
 extern char *frame;
 void FUN_800579a8(char *o)
 {
@@ -26,5 +27,5 @@ void FUN_800579a8(char *o)
     M.t[2] += 0x220;
     SetRotMatrix(&M);
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)));
+    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o);
 }

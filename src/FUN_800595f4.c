@@ -1,4 +1,6 @@
 // FUNC 800595f4 308 MAIN0
+// MATCHING 800595f4 308
+// FLAGS -O2 -G0 -fno-strength-reduce
 typedef struct { unsigned tag; unsigned char r0, g0, b0, code; short x0, y0; unsigned char u0, v0; unsigned short clut; short w, h; } SPRT;
 typedef struct { char pad[0x18]; char *data; } A;
 typedef struct { unsigned short clut; unsigned char pad[6]; unsigned char w, h; unsigned char pad2[2]; signed char dx, dy; unsigned char pad3[2]; } T;
@@ -16,7 +18,7 @@ void FUN_800595f4(A *a, short x, short y, unsigned short idx)
     T *t;
     SPRT *p;
     e = (short *)(a->data + idx * 4);
-    s = (unsigned char *)(a->data + e[1]);
+    s = (unsigned char *)(*(char * volatile *)&a->data + e[1]);
     t = (T *)(s + 2);
     n = *e;
     do {
