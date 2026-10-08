@@ -1,5 +1,5 @@
 // FUNC 80047f3c 408 MAIN0
-/* score 74: rewritten in func_800482EC style (TObj fields, short temps); code identical except register rotation: game o=t0, p=a2, px=a3 (ours o=a2, p=a3, px=t0). Local copies of o and decl orders do not change it. */
+/* score 74: rewritten in func_800482EC style (TObj fields, short temps); code identical except register rotation: game o=t0, p=a2, px=a3 (ours o=a2, p=a3, px=t0). Local copies of o and decl orders do not change it.  b18: also tried inline wrapper (changes return tails), dy/hy/py vars like func_80048500, greedy short/int/ushort of all locals, per-access alias pointer for o and for p (greedy), void*/char* params with typed locals: all stay 74. */
 #include "TOBJ.H"
 
 int func_80047F3C(TObj *o, TObj *p)
