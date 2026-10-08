@@ -1,5 +1,5 @@
 // FUNC 801328b4 764 X000
-/* score 24: only case 0 scheduling after the GetClut call differs (game stores anim right after loading it and loads b0c for the copy before the b69/b6b/step stores). Tried full permutation/hill-climb of the statements, raw stores, early row pointer, -fno-expensive-optimizations. b25: 1500-step hill-climb over order + raw/field variants of the 7 stmts stays 24; chained zero stores (o->b69 = o->b6b = o->step = 0) 28; -fno-schedule-insns(2) much worse. */
+// MATCHING 801328b4 764
 #include "TOBJ.H"
 
 typedef struct { unsigned char b[8]; } V801328B4;
@@ -7,7 +7,7 @@ typedef struct { unsigned char b[8]; } V801328B4;
 extern V801328B4 D_801392EC[][4];
 extern void *D_8013B24C[];
 extern void (*D_801392E0[])(TObj *);
-extern int D_1F8002D4;
+extern int D_1F8002D4[];
 extern unsigned short FUN_8005e420(int, int);
 extern int ObjCullRegister(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -35,13 +35,13 @@ void FUN_801328b4(TObj *o)
         o->w1e = 0xf;
         o->b0d = 1;
         o->w08 = FUN_8005e420(0x90, 0x1e6);
-        o->b6b = 0;
         o->anim = D_8013B24C[o->b0c];
+        o->d3c = D_1F8002D4[0];
         t = D_801392EC[o->b0c];
-        o->step = 0;
-        o->b69 = 0;
-        o->d3c = D_1F8002D4;
         o->b04++;
+        o->b69 = 0;
+        o->b6b = 0;
+        o->step = 0;
         ((V801328B4 *)&o->wb4)[0] = t[0];
         ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1];
         ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2];
