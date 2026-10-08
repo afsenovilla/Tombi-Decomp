@@ -1,5 +1,5 @@
-// FUNC 8012236c 312 X000
-/* score 64: short r + unsigned short k copy gives the game's lh/move/slti (as in func_80122724). Left: case 0 table load reg (game v0, sw anim right after), DAT_186 load should come before lw d34 (k then lands in a3). */
+// FUNC 8012236c 340 X000
+/* score 40 (size corrected 312 -> 340: the splat fragment 80122410 (28 B) is the tail of case 0). Left: case 0 store order around the anim table load (game stores anim right after the load, then loads D_1F8002D4), case 1 DAT_186 load placement. */
 #include "TOBJ.H"
 extern short DAT_1f800176;
 extern unsigned short DAT_1f800186;
@@ -16,12 +16,12 @@ void FUN_8012236c(TObj *o)
     short r;
     switch (o->b04) {
     case 0:
-        o->w1e = 11;
         o->b0d = 0;
         o->anim = PTR_8013b1fc[o->subtype];
+        o->b04++;
         o->b0f = 3;
         o->d3c = DAT_1f8002d4[0];
-        o->b04++;
+        o->w1e = 11;
         o->d34 = o->y.p.whole;
         o->d30 = o->h->p.whole;
         break;
