@@ -1,10 +1,11 @@
 // FUNC 800f67bc 1144 X000
+// MATCHING 800f67bc 1144
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
 extern short D_801153C0[];
-extern short D_8009C944, D_8009C946;
+extern short D_8009C944, D_8009C946[];
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -89,7 +90,7 @@ void func_800F67BC(TObj *o)
         o->state++;
     case 1:
         o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946 << 8;
+        o->y.raw += D_8009C946[0] << 8;
         func_8010F254(o);
         FUN_8001fd48(o);
         AnimAdvance(o);

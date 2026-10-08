@@ -1,4 +1,5 @@
 // FUNC 8003f598 564 MAIN0
+// MATCHING 8003f598 564
 #include "TOBJ.H"
 extern unsigned short DAT_1f800282;
 extern short FUN_800411cc(TObj *, int, int);
@@ -20,8 +21,9 @@ static __inline__ unsigned char attr(TObj *o)
     return 0;
 }
 
-int FUN_8003f598(TObj *o, short dy)
+int lzDecompressToBuffer_8003F598(TObj *o_, short dy)
 {
+    TObj *o = o_;
     BA1(o) = 0;
     if (FUN_800411cc(o, (short)(o->h->p.whole + 8), (short)(dy + (o->y.p.whole + o->box2))) && attr(o))
         return 1;
