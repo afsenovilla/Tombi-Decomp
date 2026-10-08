@@ -1,5 +1,5 @@
 // FUNC 800285ec 360 MAIN0
-/* wip r8: score 4. calc() returning unsigned short gives the separate copy of its result into s, but as andi 0xffff instead of the game's plain move a2,v0 (an int return gets coalesced into s). */
+// MATCHING 800285ec 360
 typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
@@ -10,7 +10,7 @@ extern unsigned short DAT_1f80016e;
 extern short E[];
 extern short E2;
 
-static __inline__ unsigned short calc(void)
+static __inline__ int calc(void)
 {
     int t;
     if (DAT_800a60d6 == 3) {
@@ -24,8 +24,13 @@ void func_800285EC(TObj *o)
 {
     char pad;
     short n;
-    int s = calc();
-    n = E[0] + s;
+    int s;
+    int r;
+    r = calc();
+    s = r;
+    r = 0;
+    n = s;
+    n += E[0];
     if (n != -0x50) {
         if (n > -0x50) {
             if (n >= -0x33) {
