@@ -1,5 +1,5 @@
 // FUNC 800ed750 1212 X000
-/* score 6 (ncheck and matchcheck): only diff is the 2nd read of b->cnt[i] for lim = 0x1000 / cnt: game reloads lh 8(a1) from the same base after the first div (no CSE). b->cnt[i] gives CSE (10), volatile gives lhu+sll/sra, raw offsets/pointer c[4] CSE too; (&o->w50)[i] reloads but from o+i*2 base (6). Tried statement permutations, int/short a/lim/i. */
+// MATCHING 800ed750 1212
 #include "TOBJ.H"
 typedef struct { short spd[2]; short pos[2]; short cnt[2]; } B;
 typedef struct { int n; char *b8; int tab[4]; short val[2]; } E;
@@ -77,8 +77,8 @@ void FUN_800ed750(TObj *o)
                 if (b->cnt[i] < 4) {
                     e->val[i] = b->pos[i];
                     a = b->spd[i] / b->cnt[i];
-                    lim = 0x1000 / (&o->w50)[i];
                     b->pos[i] += a;
+                    lim = 0x1000 / b->cnt[i];
                     if (lim < b->pos[i]) {
                         b->pos[i] = lim;
                         b->spd[i] *= -1;
