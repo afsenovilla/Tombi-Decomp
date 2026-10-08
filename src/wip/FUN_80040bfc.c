@@ -1,9 +1,10 @@
 // FUNC 80040bfc 308 MAIN0
+/* score 60 (was 65, greedy param types). Game keeps inline-param copies (move $9,$4 k=u; move $6,$4; move $5,lo; move $3,hi) used by the lo+hi<u and u<lo tests and the mult, while t2=lo-u and k-lo use the originals; early returns jump to the final jr with v0=0. Probably nested inlines; not found yet. */
 extern unsigned short *DAT_1f800278;
 
-static __inline__ int chk(int u, int lo, int hi, int s, int d, int sw)
+static __inline__ int chk(int u, int lo, short hi, short s, unsigned short d, int sw)
 {
-    int k = u;
+    short k = u;
     int t2 = 0;
     if (lo + hi < u) return 0;
     if (u < lo) {
