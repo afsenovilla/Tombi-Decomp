@@ -1,12 +1,5 @@
 // FUNC 80118040 1016 X000
-/* score 6 (b52, was 24): the loop address is now written as an explicit shift chain m = (w << 3) + w; m = (m << 2) - w;
-   m <<= 2 into a second var with q = table + off declared before w/m (higher pseudo number goes first in the
-   commutative addu, so m must be declared after q) and e = m + q. Left: prologue only (game: sw s2; move s2,a0 before
-   sw s6; lhu s6). sched2 -dS: the lhu of stack param t (luid 14, after the reg copies 4..10) is "blocked" by the
-   memory unit after every save store and sinks to the top. Tried t short/ushort/int, K&R, all n/x types.
-   b30 notes: loop as `loop: ... goto loop` with manual dp/off pointers (stops hoisting of the table base and the
-   constant 1), subtype chain as if/else-if stores, raw S16 stores for 0x2c/0x20/0xc6 (sink them past the division
-   mults), statement order from hill-climbing (wb4 = h % 10 first, d3c after b0a). */
+// MATCHING 80118040 1016
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -22,11 +15,11 @@ extern char *D_800A4468;
 extern char *D_800B0BB0;
 extern char D_80012100[];
 extern char D_800122A0[];
-extern void FUN_80026a10(void);
+extern void FUN_80026a10(int);
 extern TObj *FUN_80018448(void);
 extern unsigned short GetClut(int, int);
 
-void func_80118040(int n, int x, int y, int z, short t)
+void func_80118040(int n, short x, short y, short z, short t)
 {
     int i;
     TObj *o;
@@ -43,7 +36,7 @@ void func_80118040(int n, int x, int y, int z, short t)
     char *q;
     int w, m;
 
-    FUN_80026a10();
+    FUN_80026a10(n);
     for (i = 7; i >= 0; i--) {
         if (D_800A3FE0[i][0].a == -1)
             break;
@@ -100,7 +93,7 @@ loop:
         m = (m << 2) - w;
         m = m << 2;
         q = (char *)D_800A3FE0 + off;
-        e = (E118 *)(m + q);
+        e = (E118 *)(m + (int)q);
         e->a = 0;
         if (dp[0x5a] != 0 || cnt != 0) {
             e->b = py;
