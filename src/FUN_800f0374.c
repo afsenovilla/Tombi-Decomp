@@ -1,4 +1,5 @@
 // FUNC 800f0374 220 X000
+// MATCHING 800f0374 220
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern void FUN_8003fd78(TObj *, int, int);
@@ -6,7 +7,6 @@ extern TObj *DAT_8009c330;
 
 int FUN_800f0374(TObj *o)
 {
-
     B(o, 0xad) = 0;
     FUN_8003fd78(o, 0, 0);
     if ((o->b69 | o->b9c | o->b9e | o->b9f | o->bbe) == 0) {
@@ -24,10 +24,9 @@ int FUN_800f0374(TObj *o)
             o->d8c = 0;
             return 1;
         }
-        return 0;
     } else {
         o->velY = 0;
         o->b9c = 0;
-        return 0;
     }
+    return 0;
 }
