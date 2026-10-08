@@ -6,7 +6,7 @@ _Generated with `python tools/progress.py` (2026-10-08). Do not edit by hand._
 
 | Level | Progress | Bytes | Functions |
 |---|---|---|---|
-| **C that matches byte for byte (matching)** | **90.0 %** `[######################..]` | 473696 / 526284 | 1250 |
+| **C that matches byte for byte (matching)** | **92.4 %** `[######################..]` | 486160 / 526284 | 1259 |
 | Named by us | 6.5 % `[##......................]` | 34236 / 526284 | 189 / 1044 |
 | With the TObj structure applied (coverage, not C progress) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
 
@@ -17,8 +17,8 @@ Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 9899
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library |
 |---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 228328 B (516 f) | 14.5 % | 56.6 % | 82.1 % (735 f) | 98952 B |
-| X000.BIN (AREA00 overlay) | 297956 B (528 f) | 0.3 % | 90.7 % | 96.0 % (515 f) | 40 B |
+| MAIN0.EXE (game core) | 228328 B (516 f) | 14.5 % | 56.6 % | 84.4 % (741 f) | 98952 B |
+| X000.BIN (AREA00 overlay) | 297956 B (528 f) | 0.3 % | 90.7 % | 98.5 % (518 f) | 40 B |
 
 ## What is NOT counted (the real denominator is larger)
 
