@@ -1,4 +1,5 @@
 // FUNC 8010d888 644 X000
+// Score 12: only the two loads before the subu are swapped (game: lhu v0,w7a; lhu a0,wb6) and b gets v1 instead of a0.
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[10]; unsigned char bca; } PObj;
 extern TObj *D_8009C330;
@@ -10,7 +11,7 @@ extern void FUN_8010d280(TObj *);
 
 void func_8010D888(TObj *o)
 {
-    unsigned int d;
+    unsigned short d;
     unsigned short b;
     switch (o->state) {
     case 0:
@@ -37,8 +38,7 @@ void func_8010D888(TObj *o)
         else
             o->w74 = 0x200;
         b = o->wb6;
-        d = ((unsigned short)o->w7a - b) & 0xff;
-        if (d) {
+        if ((d = ((unsigned short)o->w7a - b) & 0xff)) {
             if (d < 0x80)
                 o->wb6 = b + 4;
             else
