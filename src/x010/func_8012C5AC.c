@@ -1,8 +1,14 @@
 // FUNC 8012c5ac 320 X010
+// MATCHING 8012c5ac 320
 #include "TOBJ.H"
 
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned char D_8009C93F, D_8009C942;
+extern unsigned char D_800A603Cx[], D_800A603Dx[], D_800A603Ex[];
+extern unsigned char D_8009C93Fx[], D_8009C942x[];
+#define D_800A603C D_800A603Cx[0]
+#define D_800A603D D_800A603Dx[0]
+#define D_800A603E D_800A603Ex[0]
+#define D_8009C93F D_8009C93Fx[0]
+#define D_8009C942 D_8009C942x[0]
 extern void *D_801322F4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
