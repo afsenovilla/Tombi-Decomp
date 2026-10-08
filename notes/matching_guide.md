@@ -87,3 +87,9 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
 - **Parametros `int` con `(short)` solo en el uso** (p.ej. `sll s0,a1,5` sin extension previa): declara el parametro `int` y castea al pasarlo (FUN_801306f0, en wip por asignacion s0/s1).
 - Constantes de direccion `lui+addiu` que se pasan a funciones: declara `extern char DAT_x[]` y pasa el array (no el literal 0x800d7e28); si se usa 2 veces gcc la guarda en un s-reg.
 - **Epilogo `jr $ra; addiu $sp` (delay slot lleno)** aparece en las funciones de libreria 0x8006xxxx (libcard...), con la logica ya identica (FUN_8006911c, FUN_800693c8, FUN_80069410): no se arregla con flags (-O1/-O3/-fno-delayed-branch/-mips2 probados). Dejar en wip.
+
+## Ensambladores probados (resultado: ninguno mejora)
+ASPSX 2.34 (DOS), 2.56, 2.77 (4.3/4.4), 2.81 y 2.86 (4.6). Con 2.81/2.86 salen las mismas 205 exactas;
+2.56/2.77 son algo peores. Los casos que fallan (store en el delay slot de `jr`, `addiu sp` tras el primer
+load de global, `jr; addiu $sp`) no dependen de la versión del ensamblador. `tools/permute.py` tampoco
+los arregla (12 funciones a distancia 2-6: 0 aciertos): el hueco es sistemático, no de tipos.
