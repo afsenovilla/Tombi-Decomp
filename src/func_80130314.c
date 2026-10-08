@@ -1,6 +1,5 @@
 // FUNC 80130314 988 X000
-/* score 2 (ncheck, era 10): solo falla la posicion de addiu v1,v1,1 (state+1) respecto al subu del timer en case 0. */
-/* w5: natural form (b6b=0 ... timer = 1 - *((unsigned char *)o + 0x6b); state++) gives score 10, only a0/v1 swap of state/b6b. */
+// MATCHING 80130314 988
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
 extern unsigned char D_8009D07B;
@@ -12,7 +11,6 @@ void func_80130314(TObj *o)
 {
     Fix16 v[3];
     short d;
-    int s;
     switch (o->state) {
     case 0:
         switch (o->subtype) {
@@ -28,16 +26,15 @@ void func_80130314(TObj *o)
             o->d88 = 0;
             break;
         }
-        s = *(volatile unsigned char *)&o->state;
-        o->b6b = 0;
         o->velH = 0x400;
-        o->velX = 0x40;
+        o->b6b = 0;
         o->b6a = 0;
         o->b69 = 0;
+        o->timer = 1 - *((unsigned char *)o + 0x6b);
         o->w22 = 0;
+        o->state++;
         o->velY = 0;
-        o->timer = 1 - *(volatile unsigned char *)&o->b6b;
-        o->state = s + 1;
+        o->velX = 0x40;
         break;
     case 1:
         o->velH = d = o->velH - o->velX;
