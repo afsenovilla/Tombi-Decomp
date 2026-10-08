@@ -1,5 +1,5 @@
 // FUNC 8004d620 1324 MAIN0
-/* score 14 (ncheck): struct/raw mix per field found by greedy+random search; left: li 1 placement for wcc/w20 stores in the init block, case -6 add order (c0+c4+bc) */
+/* score 6 (ncheck): case -6 fixed (o->fC4 struct read + {short t=FC0+fC4; FC0=t+FBC;} / {short t=FBE+h; FBE=t+FBA;}). Left: init block li a0,1 is scheduled after lbu D_8009C943 (game: right after the addu, before sh c0) and sh zero,0x22 lands before sh cc instead of last. Tried: hill-climb of init lines (with setpos expanded too), raw/struct/short/ushort per init store (greedy + 1500 random order+form), F20=FCC=1 chains. */
 typedef struct O {
     unsigned char f00;
     char pad0[1];
@@ -18,7 +18,8 @@ typedef struct O {
     short fB6;
     char pad5[2];
     short fBA;
-    char pad6[10];
+    char pad6[8];
+    short fC4;
     unsigned short fC6;
     char pad7[2];
     unsigned short fCA;
@@ -201,8 +202,8 @@ O *func_8004D620(int a, int b)
                     p += 2;
                     FBC = 0;
                     FBA = -h;
-                    FC0 += FC4 + FBC;
-                    FBE = FBE + h + FBA;
+                    {short t = FC0 + o->fC4; FC0 = t + FBC;}
+                    {short t = FBE + h; FBE = t + FBA;}
                     break;
                 case -8:
                     FC6 = *p++;
