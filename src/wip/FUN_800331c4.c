@@ -1,10 +1,9 @@
 // FUNC 800331c4 932 MAIN0
-/* score 224 (b48, was 271): scan loop as if ((x = D) != 0) { wx = 0x80; wy = 0x90; do {...} while ((x = D) != 0); }
-   gives the game's duplicated lh+lhu test and hoisted t1/t0 constants. Game shares registers by variable reuse: s0 = i
-   (init loop, sort inner loop, final loop), s1 = k (scan diff temp `k = a - b + 0x2d`, sort outer counter, final 0x14
-   with `sll s6,s1,1` = k*2 not constant-folded). Open: ours folds k = 0x14 into li 0x14/li 0x28 (k never crosses the
-   call, so k ends in t0 and the scan temps in v0); frame 0x180 vs 0x160 (32 B of extra vars: short temps?); s2/s1 swap
-   for o. Tried k = 0x14 inside the loop body, chk8 as inline or open-coded. */
+/* score 30 (b55, was 224): list[64] (frame 0x160), (unsigned short)k tests keep k (s1) set in the scan, final loop as
+   for (i...) with do {} while (0) after k = 0x14, r int with u temp, branch order of h1/h2. Left: h2 in a0 instead of
+   v1 inside the animFrame if; sort inner loop schedules sll before lh; k*2 folded to li 0x28 (game sll s6,s1,1:
+   needs a CODE_LABEL between k = 0x14 and the loop for combine, plus k sign bits known; a label via &&lbl kept the
+   extension); lw list[0] scheduled late. */
 #include "TOBJ.H"
 typedef struct P { short x, y; } P;
 extern short DAT_1f80019e;
@@ -12,18 +11,13 @@ extern unsigned short DAT_1f80019eu;
 extern unsigned short DAT_1f800250;
 extern TObj **DAT_1f800260;
 extern unsigned char DAT_8007a0a0[];
-extern short FUN_8002078c(P, P);
-
-static __inline__ int chk(int d, int w)
-{
-    return (d & 0xffff) < w;
-}
+extern int FUN_8002078c(P, P);
 
 
 int FUN_800331c4(TObj *o)
 {
     P b, a;
-    TObj *list[72];
+    TObj *list[64];
     TObj **p;
     TObj *q, *t;
     Fix16 *h1, *h2;
@@ -48,17 +42,17 @@ int FUN_800331c4(TObj *o)
             k = o->d->p.whole - q->d->p.whole + 0x2d;
             c = (unsigned short)k < 0x5a;
             if (o->animFrame & 1) {
-                h1 = o->h;
                 h2 = q->h;
+                h1 = o->h;
             } else {
                 h1 = q->h;
                 h2 = o->h;
             }
             k = h1->p.whole - h2->p.whole;
-            if (chk(k, wx))
+            if ((unsigned short)k < wx)
                 c++;
             k = o->y.p.whole - q->y.p.whole + 0x20;
-            if (chk(k, wy))
+            if ((unsigned short)k < wy)
                 c++;
             if (c == 3) {
                 list[n] = q;
@@ -82,23 +76,20 @@ int FUN_800331c4(TObj *o)
     }
     if (n != 0) {
         k = 0x14;
+        do {} while (0);
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        i = 0;
-        if (list[0] != 0) {
-            do {
-                short r;
-                b.x = list[i]->h->p.whole;
-                b.y = list[i]->y.p.whole;
-                r = FUN_8002078c(a, b);
-                if ((((r - (unsigned short)o->waa) + k) & 0xff) < k * 2) {
-                    o->wac = r;
-                    if (o->y.p.whole < b.y)
-                        return 2;
-                    return 1;
-                }
-                i++;
-            } while (list[i] != 0);
+        for (i = 0; list[i] != 0; i++) {
+            int r; int u;
+            b.x = list[i]->h->p.whole;
+            b.y = list[i]->y.p.whole;
+            u = FUN_8002078c(a, b); r = u;
+            u = u - (unsigned short)o->waa; if ((unsigned char)(u + k) < k * 2) {
+                o->wac = r;
+                if (o->y.p.whole < b.y)
+                    return 2;
+                return 1;
+            }
         }
     }
     return 0;
