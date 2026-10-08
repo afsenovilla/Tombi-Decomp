@@ -1,4 +1,5 @@
 // FUNC 800399c4 716 MAIN0
+/* score 48: case 4 with active=c first puts o in a0 (c=1 local-allocated to v1) and stops case 3/4 tail merging; inner switch order 9,10,2 (case 2 falls into the tail). Left: global regs g/sub/x/y/z (game g=s2 sub=s3 x=s4 y=s5 z=s6; ours g=s3 sub=s6 x=s2 y=s4 z=s5). Tried decl order, local types. */
 #include "TOBJ.H"
 typedef struct { char p0[0x8a]; unsigned short c; char p1[0x1190 - 0x8c]; int idx, k, sub, x, y, z; } G;
 extern G *D_8009F0F0;
@@ -43,12 +44,12 @@ void func_800399C4(void)
             o->b0a = 13;
             func_800EDFB8(o, 1);
             break;
-        case 2:
-            o->b0a = 2;
-            break;
         case 10:
             o->b0a = 0x10;
             o->da0 = 0;
+            break;
+        case 2:
+            o->b0a = 2;
             break;
         }
         o->b04 = 0;
@@ -88,12 +89,12 @@ void func_800399C4(void)
         unsigned char c;
         if (o == 0) break;
         c = 1;
+        o->active = c;
         o->type = 0x1e;
         o->a.raw = x << 16;
         o->y.raw = y << 16;
         o->b.raw = z << 16;
         o->b0a = 2;
-        o->active = c;
         o->animFrame = 0;
         o->subtype = sub;
         o->b0c = idx;
