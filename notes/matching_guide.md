@@ -55,3 +55,15 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
   reordene los stores: si los s-regs salen permutados, mueve el store del parametro "perdido" al principio (FUN_80020d20).
 - Constantes `char` negativas (p.ej. `li $v0,-30` para un `sb`): escribe `*(signed char *)&o->campo = -30;` (con campo unsigned sale `li 0xe2`).
 - Cuando el original lee `byte b = TABLA[idx]` ANTES de `o->state++`, escribelo asi (variable temporal) para que no cambie el orden de loads.
+
+## Aprendido (shard0, segunda tanda)
+- `slti` + `bltz` sobre un `lhu` (rangos tipo `x>=0 && x<3`) = **switch** de GCC (arbol de comparaciones), no `if`. Escribe
+  `switch (x) { case 0: case 1: case 2: ... }`; con `unsigned short` los `>= 0` se pliegan si los escribes a mano.
+  Dos `case` separados que van al mismo cuerpo generan cadena `beq/slti` distinta a `case 1: case 2:` (que se funde en rango).
+- Un switch con casos 0 y 1 que sale como `beq v1,1; slti v1,2; bnez v1 -> fin` necesita un `case` extra imposible (p.ej. `case 99: break;` antes de `case 0:`)
+  para que el arbol quede igual (FUN_800313c8).
+- Si dos bucles consecutivos usan "el mismo" puntero, el original usa **variables distintas** (una en $s1, otra en $a0): declara `p` y `q` separados (FUN_8001801c).
+- Parametro `unsigned char op` + `switch(op)` con 4 casos consecutivos y cuerpo por caso con `idx*4 + base + 0x1090` repetido por caso reproduce el codigo (FUN_800387e0, casi).
+- Una direccion de global en registro (`lui r; addiu r,r,lo; lhu x,(r)`) aparece cuando la direccion se usa 2+ veces en el bloque (load+store con `*p`); con un solo uso no he logrado reproducirla.
+- Si el original recarga un global en cada rama (dos `lhu` seguidos del mismo sitio) y gcc lo funde, declara el global con dos nombres distintos (`DAT_x` y `DAT_xb`): gcc 2.7 no los trata como alias (FUN_8001f1c0).
+- Hay un script util: comparar tu .o con el juego instrucción a instrucción (diff unificado de capstone) acelera mucho mas que mirar el `DIFF` de palabras.
