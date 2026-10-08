@@ -1,7 +1,7 @@
 // FUNC 80133474 3152 X000
-/* wip: only the ang sign-extension differs (game: andi at join then sll/sra 16 into s0).
- * AnimAdvance_ is a second extern name for AnimAdvance to stop cross-jumping state 1 into state 6 (debt).
- * NB: ncheck/matchcheck mask j targets; a version with the odd branch unmasked 'matches' but jumps past the andi. */
+// MATCHING 80133474 3152
+/* Debt: AnimAdvance_ = second extern name for AnimAdvance (case 5/6), stops cross-jumping state 1 into
+ * state 6. D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038. */
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
@@ -137,7 +137,8 @@ void func_80133474(TObj *o)
             break;
         case 3: {
             E4 *e;
-            unsigned short t;
+            unsigned int t;
+            unsigned short u;
             int ang;
             o->visible = D_800A6039;
             o->active = 2;
@@ -146,11 +147,11 @@ void func_80133474(TObj *o)
             e = &D_80011DAC[D_80011EB4[*D_800A605C[0]]];
             o->anim = D_8013B17C[e->anim];
             if (o->animFrame & 1) {
-                t = D_800A60C4 + 0x80 - e->ang;
-                t &= 0xff;
+                u = D_800A60C4 + 0x80 - e->ang;
+                t = u; t &= 0xff;
             } else {
-                t = e->ang + D_800A60C4;
-                t &= 0xff;
+                u = e->ang + D_800A60C4;
+                t = u; t &= 0xff;
             }
             ang = (short)t;
             o->h->p.whole = D_800A6078->p.whole + MulCos(ang, e->rad);
