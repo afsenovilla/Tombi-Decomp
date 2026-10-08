@@ -1,5 +1,5 @@
 // FUNC 8003f7cc 768 MAIN0
-/* score 123: structure ok; regalloc differs (game passes dir in a3 then copies to s1; h in a0 with copy) */
+/* score 115 (if(!dir) ba6=2 else 3 inverts branch like game). Still: game passes dir in a3 then copies to s1; h in a0 with v1 copy; probe-inline, dir copy var, short h tried (worse/no gain) */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
@@ -41,23 +41,23 @@ left:
     if (h >= 14) hi = 14;
     r = func_8004065C(o, o->h->p.whole + dx, o->y.p.whole - lo, dir);
     if (r) {
-        if (dir == (o->animFrame & 1)) o->ba6 = dir ? 3 : 2;
+        if (dir == (o->animFrame & 1)) { if (!dir) o->ba6 = 2; else o->ba6 = 3; }
     } else {
         r = func_8004065C(o, o->h->p.whole + dx, o->y.p.whole + hi, dir);
         if (r) {
-            if (dir == (o->animFrame & 1)) o->ba6 = dir ? 3 : 2;
+            if (dir == (o->animFrame & 1)) { if (!dir) o->ba6 = 2; else o->ba6 = 3; }
         } else {
             r = func_8004065C(o, o->h->p.whole + dx, o->y.p.whole + lo, dir);
             if (r) {
-                if (dir == (o->animFrame & 1)) o->ba6 = dir ? 3 : 2;
+                if (dir == (o->animFrame & 1)) { if (!dir) o->ba6 = 2; else o->ba6 = 3; }
             }
         }
     }
     dir = dir2;
     if (func_8004065C(o, o->h->p.whole + dx2, o->y.p.whole + hi, dir)) {
-        if (dir == (o->animFrame & 1)) o->ba6 = dir ? 3 : 2;
+        if (dir == (o->animFrame & 1)) { if (!dir) o->ba6 = 2; else o->ba6 = 3; }
     } else if (func_8004065C(o, o->h->p.whole + dx2, o->y.p.whole + lo, dir)) {
-        if (dir == (o->animFrame & 1)) o->ba6 = dir ? 3 : 2;
+        if (dir == (o->animFrame & 1)) { if (!dir) o->ba6 = 2; else o->ba6 = 3; }
     }
     return r;
 }
