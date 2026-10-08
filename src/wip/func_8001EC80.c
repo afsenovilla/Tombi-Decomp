@@ -1,5 +1,5 @@
 // FUNC 8001ec80 888 MAIN0
-/* score 207: else-branch value should be computed in a1 then copied to s0; first-branch regs v1/a0 swapped */
+/* score 90 (was 207): adj() inline returning short fixed the second branch copies; (signed char) table byte << 8. Left: first branch has w in a0 and the switch value in v1, game swaps them (tried n temp, order, types, inline adj2). */
 extern short D_800A3428;
 extern unsigned char D_800784C8, D_800784C9;
 extern unsigned char D_800784CA[];
@@ -20,7 +20,7 @@ void SsSeqSetVol(short a, short b, short c);
 void SsSeqPlay(short a, int b, int c);
 void FUN_8001f5b8(int a, short b);
 
-static __inline__ int adj(int v)
+static __inline__ short adj(int v)
 {
     switch (D_8009C960) {
     case 0:
@@ -98,7 +98,7 @@ int func_8001EC80(int arg)
     a = 1;
     if (b < 0) {
         a = D_80078478[D_8009C960];
-        b = D_80078428[D_8009C960][D_8009C962] << 8;
+        b = (signed char)D_80078428[D_8009C960][D_8009C962] << 8;
     }
     FUN_8001f5b8(a, b);
     SsSeqPlay(D_800A3428, 1, 1);
