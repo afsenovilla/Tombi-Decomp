@@ -1,5 +1,5 @@
 // FUNC 80021b20 1016 MAIN0
-// score 90 (was 162): scratchpad as D_1F8000E0[] array (keeps load order), shared-store clamps (v = w30; if (x < v || (v = w32, v < x)) store), d7c in both branches, final copy as 6 int stores. Left: a0/a2 swap in smax/smin inline copies (r vs b param copy), w4c reg (v1 vs a0) and q address order.
+// score 90 (was 162): scratchpad as D_1F8000E0[] array (keeps load order), shared-store clamps (v = w30; if (x < v || (v = w32, v < x)) store), d7c in both branches, final copy as 6 int stores. Left: a0/a2 swap in smax/smin inline copies (r vs b param copy), w4c reg (v1 vs a0) and q address order. b18 tried: 12 smax/smin inline forms (return-style, int r, copies), caller-scope macro vars (162+), D_8009C962 as D_8009C960[1] / D_8009C982 as array (no change), q split, hill-climb of the top block (no gain).
 typedef struct { int x, y, z; } V3;
 typedef struct { short x, y; } SP;
 typedef struct { short a, b, c, d; } S4;
