@@ -2,7 +2,8 @@
 // MATCHING 80040f78 596
 /* Debt: r is pinned to $4 with register asm (global-alloc gives the DAT_1f800278 pointer pseudo a0 first:
    20 refs/23 insns beats r's 22/41). r doubles as the second word b, r = 0 goes before if (w & 0x10)
-   (beqz delay slot), int inline in the a/y-passed branch. */
+   (beqz delay slot), int inline in the a/y-passed branch.
+   Tried without asm: separate b local (score 76, r then lands in a2), short/ushort r, r = 0 in the else, while loop, int w/n: pointer pseudo always outranks r. */
 extern unsigned short *DAT_1f800278;
 extern unsigned short DAT_1f800282, DAT_1f800284;
 extern int FUN_8004094c(int, int);
