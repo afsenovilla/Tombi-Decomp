@@ -1,7 +1,8 @@
 // FUNC 800544c8 928 MAIN0
 // MATCHING 800544c8 928
-// FLAGS -O2 -G0 -fno-strength-reduce
-/* volatile first o->d3c read and volatile D_164V load pin the game load order (debt) */
+// FLAGS -O2 -G0 -fno-strength-reduce -fno-expensive-optimizations
+/* volatile first o->d3c read and volatile D_164V load pin the game load order (debt); -fno-expensive-optimizations gives the second la of D_1F8000C0 (was a second extern name).
+   Tried without volatiles: all 720 orders of the e/s/n/q/p/tp statements (best 59): the d3c reload needs an uncached first read. */
 #include "TOBJ.H"
 typedef struct {
     unsigned int tag;
@@ -22,7 +23,7 @@ extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
 extern long D_1F800070;
 extern long D_1F800074;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetDrawMode(void *, int, int, int, void *);
@@ -63,7 +64,7 @@ void func_800544C8(TObj *o)
     else
         D_1F800064 = o->b.p.whole;
     SetRotMatrix(D_1F8000C0);
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(D_1F8000C0);
     if (proj()) return;
     e = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
     s = (SP *)D_164V;
