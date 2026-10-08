@@ -1,5 +1,5 @@
 // FUNC 8011e0d4 824 X001
-/* score 6: only case 0 scheduling differs: game loads o->y (lh 0x16) right after the sb of b04 and stores d84 after the D_8013C6FC load; tried hill-climb/random statement orders, raw/array/temp forms for y, b04 and d38. Covers csv pieces 8011E0D8/8011E1A4/8011E358 (one function: the shared code jals 8011e0d8, one insn after the prologue). */
+// MATCHING 8011e0d4 824
 #include "TOBJ.H"
 #define VX (*(unsigned short *)&o->velX)
 extern int FUN_80020078(TObj *, int);
@@ -26,6 +26,18 @@ static __inline__ short big(short a, short b)
     if (b > a) return b + 0x20;
     return a + 0x20;
 }
+static __inline__ void setup(TObj *q, int y, int d)
+{
+    q->d84 = 0;
+    q->d88 = 0;
+    q->d8c = 0;
+    q->b68 = 0;
+    q->d34 = y;
+    q->active = 3;
+    q->b0f = 4;
+    q->d38 = d;
+}
+
 void func_8011E0D4(TObj *o)
 {
     short *p;
@@ -41,14 +53,7 @@ void func_8011E0D4(TObj *o)
         p = &D_8013C6D0[o->subtype * 2]; o->box2 = *p++;
         o->box3 = *p;
         o->b04++;
-        o->d84 = 0;
-        o->d38 = D_8013C6FC[o->subtype];
-        o->d88 = 0;
-        o->d8c = 0;
-        o->b68 = 0;
-        o->d34 = o->y.p.whole - 0x18;
-        o->active = 3;
-        o->b0f = 4;
+        setup(o, o->y.p.whole - 0x18, D_8013C6FC[o->subtype]);
         break;
     case 1:
         x = big(o->box2, o->box0);
