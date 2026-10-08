@@ -40,7 +40,7 @@ void FUN_80058f98(int o, int x, int y)
         break;
     case 9:
         p = DAT_1f800164;
-        q = (unsigned char *)(*(short *)(*(int *)(o + 0x18) + *PTR_DAT_800121b4 * 4 + 2) + *(int *)(o + 0x18));
+        q = (unsigned char *)(*(volatile int *)(o + 0x18) + *(short *)(*(volatile int *)(o + 0x18) + *PTR_DAT_800121b4 * 4 + 2));
         SetSprt(p);
         p->code |= 1;
         SetSemiTrans(p, 0);
