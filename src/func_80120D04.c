@@ -1,5 +1,6 @@
 // FUNC 80120d04 1056 X000
-// wip score 228: structure right (gotos into the step-2 switch); gcc CSEs &D_1F800000 into s0 and puts p in s2, game rematerializes lui/addiu per use and keeps p in s0; case 1 tail gets cross-jumped
+// MATCHING 80120d04 1056
+// FLAGS -O2 -G0 -fno-expensive-optimizations
 #include "TOBJ.H"
 
 extern unsigned short D_8009C962[];
@@ -15,6 +16,26 @@ void ObjFreeDup(TObj *o);
 void FUN_80120734(TObj *o);
 void func_80120890(TObj *o);
 void FUN_80120bcc(TObj *o);
+
+#define C0() \
+    FUN_80021f5c(&o->w48); \
+    sv[0] = o->d84; \
+    sv[1] = o->d88; \
+    sv[2] = o->d8c; \
+    RotMatrix(sv, &o->w48);
+
+#define VEC() \
+    sv[0] = o->d30 >> 16; \
+    sv[1] = o->d34 >> 16; \
+    sv[2] = o->d38 >> 16; \
+    MulMatrix0(&p->w48, D_1F800000, &o->w48); \
+    ApplyRotMatrix(sv, &o->w5c); \
+    *(int *)&o->w5c += p->a.p.whole; \
+    o->d60 += p->y.p.whole; \
+    o->d64 += p->b.p.whole; \
+    o->a.p.whole = *(int *)&o->w5c; \
+    o->y.p.whole = o->d60; \
+    o->b.p.whole = o->d64;
 
 void func_80120D04(TObj *o)
 {
@@ -44,16 +65,15 @@ void func_80120D04(TObj *o)
             }
             o->b0a = 0x15;
             o->da0 = 0;
-            goto c0;
+            C0();
+            break;
         case 1:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
             o->ba4 = 0;
             FUN_80021f5c(D_1F800000);
-            sv[0] = ((short *)&o->d30)[1];
-            sv[1] = ((short *)&o->d34)[1];
-            sv[2] = ((short *)&o->d38)[1];
-            goto mul;
+            VEC();
+            break;
         case 2:
         case 3:
             p = (TObj *)o->d90;
@@ -61,12 +81,16 @@ void func_80120D04(TObj *o)
             FUN_80021f5c(D_1F800000);
             RotMatrixX(p->velH, D_1F800000);
             RotMatrixY((unsigned short)p->wb4, D_1F800000);
-            goto vec;
+            VEC();
+            break;
         case 4:
         case 5:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
-            goto rx;
+            FUN_80021f5c(D_1F800000);
+            RotMatrixX(p->velH, D_1F800000);
+            VEC();
+            break;
         }
         break;
     case 1:
@@ -85,46 +109,27 @@ void func_80120D04(TObj *o)
             switch (o->b0c) {
             case 0:
                 FUN_80120bcc(o);
-            c0:
-                FUN_80021f5c(&o->w48);
-                sv[0] = o->d84;
-                sv[1] = o->d88;
-                sv[2] = o->d8c;
-                RotMatrix(sv, &o->w48);
+                C0();
                 break;
             case 1:
                 p = (TObj *)o->d90;
                 FUN_80021f5c(D_1F800000);
-                sv[0] = ((short *)&o->d30)[1];
-                sv[1] = ((short *)&o->d34)[1];
-                sv[2] = ((short *)&o->d38)[1];
-                goto mul;
+                VEC();
+                break;
             case 2:
             case 3:
                 p = (TObj *)o->d90;
                 FUN_80021f5c(D_1F800000);
                 RotMatrixX(p->velH, D_1F800000);
                 RotMatrixY((unsigned short)p->wb4, D_1F800000);
-                goto vec;
+                VEC();
+                break;
             case 4:
             case 5:
                 p = (TObj *)o->d90;
-            rx:
                 FUN_80021f5c(D_1F800000);
                 RotMatrixX(p->velH, D_1F800000);
-            vec:
-                sv[0] = ((short *)&o->d30)[1];
-                sv[1] = ((short *)&o->d34)[1];
-                sv[2] = ((short *)&o->d38)[1];
-            mul:
-                MulMatrix0(&p->w48, D_1F800000, &o->w48);
-                ApplyRotMatrix(sv, &o->w5c);
-                *(int *)&o->w5c += p->a.p.whole;
-                o->d60 += p->y.p.whole;
-                o->d64 += p->b.p.whole;
-                o->a.p.whole = *(int *)&o->w5c;
-                o->y.p.whole = o->d60;
-                o->b.p.whole = o->d64;
+                VEC();
                 break;
             }
             break;
