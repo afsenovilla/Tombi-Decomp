@@ -1,11 +1,13 @@
 // FUNC 80124ff4 708 X000
-/* score 141: structure/layout right (LAND duplicated as macro, return-0 shared). Remaining: land section regalloc/sched: game keeps dy in t0 with copy a3 (move a3,t0 in bgtz delay), dx2 short-extended lazily, quotient copied (mflo v0; move v1,v0); inline/int-dx2/copies tried */
+/* score 131 (reused temp v for d34/d30 loads fixes their order): structure/layout right (LAND duplicated as macro, return-0 shared). Remaining: land section regalloc/sched: game keeps dy in t0 with copy a3 (move a3,t0 in bgtz delay), dx2 short-extended lazily, quotient copied (mflo v0; move v1,v0); inline/int-dx2/copies tried */
 #include "TOBJ.H"
 
 #define LAND()                                          \
-    dy = e->d34 - (unsigned short)e->y.p.whole;         \
-    dx2 = e->h->p.whole - e->d30;                       \
-    dx = o->h->p.whole - e->d30;                        \
+    v = e->d34;                                         \
+    dy = v - (unsigned short)e->y.p.whole;              \
+    v = e->d30;                                         \
+    dx2 = e->h->p.whole - v;                            \
+    dx = o->h->p.whole - v;                             \
     if (dx <= 0) {                                      \
         r = 0;                                          \
     } else if (dx2 < dx) {                              \
@@ -28,6 +30,7 @@ int func_80124FF4(TObj *o, TObj *e)
     short dx, dx2;
     int dy, r;
     short t;
+    int v;
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) > 0x5a) return 0;
     if ((unsigned short)(o->h->p.whole - e->h->p.whole + (e->box0 + o->box0)) > e->box1 + o->box1) return 0;
     dy0 = o->y.p.whole - e->y.p.whole;
