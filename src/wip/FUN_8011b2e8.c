@@ -1,4 +1,6 @@
 // FUNC 8011b2e8 456 X000
+/* score 2: only the w74 = u store: game recomputes andi v0,v1,0xff in the j delay slot and shares sh v0,0x74;
+   ours stores v1 in the slot. Tried temp w (types), u types, (uchar)box0, statement perms. */
 #include "TOBJ.H"
 extern short DAT_80138690[];
 extern short DAT_80138698[];

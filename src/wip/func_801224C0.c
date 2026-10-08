@@ -1,10 +1,13 @@
 // FUNC 801224c0 612 X000
-/* score 124: logic ok; game keeps stores in source order (less scheduling) */
+/* score 106 (D_800A4574 and D_1F800186 as [0] arrays): case 0 store order and case 1 regs still differ, game is 8 B longer; game keeps stores in source order (less scheduling) */
 #include "TOBJ.H"
 
 extern void *D_8013B208;
+extern int D_1F8002D4;
+extern short D_1F800176;
+extern unsigned short D_1F800186[];
 extern int D_800A4570;
-extern int D_800A4574;
+extern int D_800A4574[];
 short GetClut(int x, int y);
 void ObjListPush_1F80022C(TObj *o);
 void FUN_80018934(TObj *o);
@@ -24,20 +27,20 @@ void func_801224C0(TObj *o)
         o->b04++;
         o->w22 = 0;
         o->step = 0;
-        o->d3c = *(int *)0x1F8002D4;
+        o->d3c = D_1F8002D4;
         o->d34 = o->y.p.whole;
         o->d30 = o->h->p.whole;
         break;
     case 1:
-        sx = *(short *)0x1F800176;
+        sx = D_1F800176;
         if (sx >= 0x35d) break;
         o->b.p.whole = 0;
         o->a.p.whole = (short)(o->d30 - sx) >> 1;
-        o->y.p.whole = (short)(o->d34 - *(unsigned short *)0x1F800186) >> 1;
+        o->y.p.whole = (short)(o->d34 - D_1F800186[0]) >> 1;
         o->y.p.whole -= (D_800A4570 >> 8) << 2;
         m = o->w08 & 0x7fc0;
         n = m;
-        o->a.p.whole -= D_800A4574 >> 10;
+        o->a.p.whole -= D_800A4574[0] >> 10;
         switch (o->step) {
         case 0:
             if (o->timer == 0) {

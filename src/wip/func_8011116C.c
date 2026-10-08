@@ -1,5 +1,5 @@
 // FUNC 8011116c 464 X000
-/* diff: game keeps o in a2 (move a2,a0), recomputes c1<<2 for the |3 branch (no CSE); rest of the body matches structurally */
+/* score 99 (if/else for i): game still keeps o in a2 (move a2,a0), loads D_8009D2B3 first and recomputes c<<2 for |3 (no CSE); tried inline wrapper, int/short c, c*4 */
 typedef struct {
     short t0, t1, t2;
     unsigned char pad[0x6c - 6];
@@ -12,8 +12,8 @@ extern unsigned char D_8009CF06;
 extern unsigned char D_8009D006;
 static __inline__ int getidx(unsigned char c)
 {
-    int i = D_8009D2B3 + (c << 2);
-    if (D_8009C990 & 3) i = (c << 2) | 3;
+    int i;
+    if (D_8009C990 & 3) i = (c << 2) | 3; else i = D_8009D2B3 + (c << 2);
     if (D_8009CF06) i = 8;
     if (D_8009D006) i = 8;
     return i;
