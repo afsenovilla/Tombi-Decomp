@@ -1,5 +1,5 @@
 // FUNC 801328b4 764 X000
-/* score 28: only case 0 scheduling after the GetClut call differs (game stores anim and loads b0c for the copy before the b69/b6b/step stores). Tried statement permutations, raw stores, early row pointer. */
+/* score 24: only case 0 scheduling after the GetClut call differs (game stores anim right after loading it and loads b0c for the copy before the b69/b6b/step stores). Tried full permutation/hill-climb of the statements, raw stores, early row pointer, -fno-expensive-optimizations. */
 #include "TOBJ.H"
 
 typedef struct { unsigned char b[8]; } V801328B4;
@@ -21,6 +21,8 @@ extern void freeObjectLayer2(TObj *);
 
 void FUN_801328b4(TObj *o)
 {
+    V801328B4 *t;
+
     switch (o->b04) {
     case 0:
         o->box0 = 0x20;
@@ -33,13 +35,17 @@ void FUN_801328b4(TObj *o)
         o->w1e = 0xf;
         o->b0d = 1;
         o->w08 = FUN_8005e420(0x90, 0x1e6);
-        o->anim = D_8013B24C[o->b0c];
-        o->b69 = 0;
         o->b6b = 0;
+        o->anim = D_8013B24C[o->b0c];
+        t = D_801392EC[o->b0c];
         o->step = 0;
+        o->b69 = 0;
         o->d3c = D_1F8002D4;
         o->b04++;
-        COPY();
+        ((V801328B4 *)&o->wb4)[0] = t[0];
+        ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1];
+        ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2];
+        ((V801328B4 *)&o->wb4)[3] = D_801392EC[o->b0c][3];
         AnimLoadDuration(o);
         break;
     case 1:
