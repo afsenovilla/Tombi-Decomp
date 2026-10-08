@@ -1,6 +1,7 @@
-/* wip: score 272 (ncheck). Funcion completa = 688 + 384 B (splat corta en 8011EAE8, que es fragmento de esta).
-   Falla: frame 0x88 vs 0x80 (8 B de locales de mas), el switch del juego hace andi 0xff sobre b04 copiado,
-   y la asignacion de registros del bucle de case 0 (juego: cur en s0, prev en a1, tab en a3). Bucles con goto ya ok. */
+/* wip: score 70 (ncheck), was 272. Full function = 688 + 384 B (splat cuts at 8011EAE8, a fragment of this).
+   Fixed: frame, prev/cur pointer pair (p reused for o->parent), while-loop search, hoisted 0x1000 local.
+   Left: s-reg order of x/y/z/k (game k=s2 y=s3 x=s4 z=s5, ours y=s2 x=s3 z=s4 k=s5; types/decl order brute-forced),
+   an extra "beqz s1" before the search loop (game has no top test), and two sh 0x1000 scheduled early in loop0. */
 // FUNC 8011e838 1072 X000
 typedef struct { unsigned short frac; short whole; } FP;
 typedef union { int raw; FP p; } FX;
@@ -37,7 +38,8 @@ extern void ObjFreeDup(E *);
 void func_8011E838(E *o)
 {
     E *s;
-    E *n;
+    E *p;
+    int c;
     short *tab;
     int x, y, z;
     short i;
@@ -50,34 +52,36 @@ void func_8011E838(E *o)
 
     switch (o->b04) {
     case 0:
+        s = o;
         if (o->b0c == 0) {
-            s = o->parent;
+            c = 0x1000;
+            p = o->parent;
             tab = D_80138BAC;
-            z = s->b.raw;
-            s->next = 0;
-            x = s->a.raw - 0x170000;
-            y = s->y.raw + 0x100000;
-            s = o;
+            z = p->b.raw;
+            x = p->a.raw - 0x170000;
+            y = p->y.raw + 0x100000;
+            p->next = 0;
+            p = o;
         loop0:
-                s->wb4 = 0;
-                s->wb6 = 0;
-                s->wbc = 0x1000;
-                s->wbe = 0x1000;
-                s->wb8 = *tab++;
-                s->c0 = s->a.p.whole;
-                s->c2 = s->y.p.whole;
-                n = s->next;
-                if (n == 0) goto done0;
-                s->c4 = n->a.raw - x;
-                s->c8 = n->y.raw - y;
-                s->cc = n->b.raw - z;
-                s->box0 = n->a.p.whole;
-                s->box2 = n->y.p.whole;
-                x = n->a.raw;
-                y = n->y.raw;
-                z = n->b.raw;
-                s = n;
-                goto loop0;
+            s->wb4 = 0;
+            s->wb6 = 0;
+            s->wbc = c;
+            s->wbe = c;
+            s->wb8 = *tab++;
+            s->c0 = s->a.p.whole;
+            s->c2 = s->y.p.whole;
+            if (s->next == 0) goto done0;
+            s = s->next;
+            p->c4 = s->a.raw - x;
+            p->c8 = s->y.raw - y;
+            p->cc = s->b.raw - z;
+            p->box0 = s->a.p.whole;
+            p->box2 = s->y.p.whole;
+            x = s->a.raw;
+            y = s->y.raw;
+            z = s->b.raw;
+            p = s;
+            goto loop0;
         done0:
             s->a.p.whole -= 0x1e;
             s->c8 = s->y.raw - y;
@@ -93,7 +97,7 @@ void func_8011E838(E *o)
             s = o;
             o->wb4 = 0;
             i = 0;
-            do {
+            while (s != 0) {
                 if (s->b69 != 0) {
                     o->wb4 = i;
                     s->b69 = 0;
@@ -106,9 +110,9 @@ void func_8011E838(E *o)
                 }
                 s = s->next;
                 i++;
-            } while (s != 0);
+            }
             dy = o->y.p.whole - (unsigned short)o->c2;
-            if (o->wb4 != o->wb6) {
+            if ((unsigned short)o->wb4 != (unsigned short)o->wb6) {
                 o->wb6 = o->wb4;
                 o->wbe = D_80138BC8[(unsigned short)o->wb4];
             }
@@ -122,10 +126,10 @@ void func_8011E838(E *o)
             s = o;
             mp = &m;
             k = 0;
-            n = o->parent;
-            x = n->a.raw - 0x170000;
-            z = n->b.raw;
-            y = n->y.raw + 0x100000;
+            p = o->parent;
+            x = p->a.raw - 0x170000;
+            z = p->b.raw;
+            y = p->y.raw + 0x100000;
             o->a.raw = x;
             o->b.raw = z;
             o->y.raw = y;
@@ -143,16 +147,16 @@ void func_8011E838(E *o)
                 ApplyMatrixLV(mp, &in, &out);
                 x += out.vx;
                 y += out.vy;
-                n = s->next;
                 z += out.vz;
-                if (n == 0) goto done1;
-                n->a.raw = x;
-                n->y.raw = y;
-                n->b.raw = z;
-                s->box0 = n->a.p.whole;
+                if (s->next == 0) goto done1;
+                p = s;
+                s = s->next;
+                s->a.raw = x;
+                s->y.raw = y;
+                s->b.raw = z;
+                p->box0 = s->a.p.whole;
                 k += dy;
-                s->box2 = n->y.p.whole;
-                s = n;
+                p->box2 = s->y.p.whole;
                 goto loop1;
         done1:
             s->box0 = x >> 16;
@@ -161,7 +165,7 @@ void func_8011E838(E *o)
         if (o->b0c < 9) ObjCullRegister(o);
         break;
     case 2:
-        o->b04 = 3;
+        o->b04++;
         break;
     case 3:
         ObjFreeDup(o);
