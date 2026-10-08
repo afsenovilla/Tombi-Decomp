@@ -1,4 +1,5 @@
 // FUNC 8003be14 364 MAIN0
+// MATCHING 8003be14 364
 #include "TOBJ.H"
 extern unsigned char DAT_8007a138[];
 extern char DAT_80077d0c[], DAT_80077cdc[];
@@ -26,16 +27,11 @@ void FUN_8003be14(TObj *o)
         o->state = o->state + 1;
         break;
     case 1:
-        {
-            TObj *p = o;
-            int w;
-            u = o->animFrame;
-            if (u & 2)
-                w = u & 1;
-            else
-                w = (unsigned short)(1 - u);
-            FUN_8001fa88(p, w);
-        }
+        u = o->animFrame;
+        if (u & 2)
+            FUN_8001fa88(o, u & 1);
+        else
+            FUN_8001fa88(o, 1 - u);
         s = o->velV + 0x40;
         o->velV = s;
         if (s > 0x400)

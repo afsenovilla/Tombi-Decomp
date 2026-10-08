@@ -9,29 +9,22 @@ typedef struct {
 } TO;
 extern short DAT_1f8003bc;
 
-static __inline__ int f(TO *a, TO *b)
+int FUN_8004b6a0(TO *a, TO *b)
 {
     char pad;
     int d, ad, v, w, e;
-    
-    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) < 0x5b) {
-        e = a->se8;
-        d = e - a->h40->s2;
-        ad = d;
-        if ((short)d < 0) ad = -d;
-        w = e - b->h40->s2;
-        if (a->s2e & 1) v = b->s6c + ad; else v = b->s6c;
-        if ((unsigned short)(v + w) > b->s6e + (short)ad) return 0;
-        w = b->s70 + (a->sea - b->s16);
-        if (b->s72 < (unsigned short)w) return 0;
-        if (!(a->s2e & 1)) DAT_1f8003bc = -b->s6c;
-        else DAT_1f8003bc = b->s6e - b->s6c;
-        return 1;
-    }
-    return 0;
-}
 
-int FUN_8004b6a0(TO *a, TO *b)
-{
-    return f(a, b);
+    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b) return 0;
+    e = a->se8;
+    d = e - a->h40->s2;
+    ad = d;
+    if ((short)d < 0) ad = -d;
+    w = e - b->h40->s2;
+    if (a->s2e & 1) v = b->s6c + ad; else v = b->s6c;
+    if ((unsigned short)(v + w) > b->s6e + (short)ad) return 0;
+    d = b->s70 + (a->sea - b->s16);
+    if (b->s72 < (unsigned short)d) return 0;
+    if (!(a->s2e & 1)) DAT_1f8003bc = -b->s6c;
+    else DAT_1f8003bc = b->s6e - b->s6c;
+    return 1;
 }
