@@ -9,7 +9,7 @@ Usage: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]
   --mark   adds `// MATCHING addr size` if it matches (better to mark with matchcheck)
 Requirements: tools/setup_native.sh (old-gcc in /opt/oldgcc, maspsx in /opt/maspsx, binutils-mipsel-linux-gnu).
 """
-import difflib, os, re, shutil, subprocess, sys, tempfile
+import difflib, os, re, shutil, struct, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GCC = os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")
@@ -36,10 +36,26 @@ def build(src, flags, d, inc):
     rel = []
     for line in subprocess.run(["mipsel-linux-gnu-objdump", "-r", "-j", ".text", d + "/a.o"],
                                capture_output=True, text=True).stdout.splitlines():
-        m = re.match(r"([0-9a-f]{8})\s+(R_MIPS_\w+)", line)
+        m = re.match(r"([0-9a-f]{8})\s+(R_MIPS_\w+)\s+(\S+)", line)
         if m:
             rel.append((int(m.group(1), 16), 0x4A if m.group(2) == "R_MIPS_26" else 0x52))
+            if m.group(2) == "R_MIPS_26" and m.group(3) == ".text":
+                LOCAL_J.append(int(m.group(1), 16))
     return open(d + "/t.bin", "rb").read(), rel
+
+
+LOCAL_J = []  # offsets of `j` to labels inside the function: masked by the relocation, so checked separately
+
+
+def bad_jumps(code, ref, addr):
+    """Local `j` whose target (relative to the function start) differs from the game's."""
+    out = []
+    for off in LOCAL_J:
+        if off + 4 > min(len(code), len(ref)): continue
+        a = (struct.unpack("<I", code[off:off + 4])[0] & 0x3FFFFFF) << 2
+        b = (((struct.unpack("<I", ref[off:off + 4])[0] & 0x3FFFFFF) << 2) | (addr & 0xF0000000)) - addr
+        if a != b: out.append(off)
+    return out
 
 
 def main():
@@ -60,6 +76,7 @@ def main():
             print("SKIP (no // FUNC):", f); continue
         addr, size, prog, flags = h
         d = tempfile.mkdtemp()
+        del LOCAL_J[:]
         try:
             code, rel = build(f, flags, d, inc)
             if "--asm" in opts:
@@ -77,13 +94,15 @@ def main():
             same = sum(x.size for x in difflib.SequenceMatcher(None, A, B, autojunk=False).get_matching_blocks())
             print("SCORE %s %d" % (name, (len(A) - same) + (len(B) - same)))
             continue
-        if a == b and len(code) == size:
+        bj = bad_jumps(code, ref, addr)
+        if a == b and len(code) == size and not bj:
             ok += 1; print("MATCH   %s  %08x %d" % (name, addr, size))
             if "--mark" in opts and "// MATCHING" not in open(f).read():
                 t = open(f).read().splitlines(); t.insert(1, "// MATCHING %08x %d" % (addr, size))
                 open(f, "w").write("\n".join(t) + "\n")
         else:
             bad += 1; print("DIFF    %s  %08x  (ours %d B, game %d B)" % (name, addr, len(code), size))
+            for k in bj: print("   +%04x local j target differs" % k)
             for k in range(0, max(len(a), len(b)), 4):
                 if a[k:k + 4] != b[k:k + 4]:
                     print("   +%04x ours=%s game=%s" % (k, a[k:k + 4].hex(), b[k:k + 4].hex()))

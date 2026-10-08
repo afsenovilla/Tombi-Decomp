@@ -1,5 +1,5 @@
 // FUNC 8010ca18 912 X000
-// MATCHING 8010ca18 912
+/* false match: bytes identical but a local j targets a different instruction (ncheck now checks this). */
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];

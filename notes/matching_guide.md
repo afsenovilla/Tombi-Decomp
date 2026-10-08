@@ -211,6 +211,25 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   matched sibling func_80108708: `f = o->animFrame;` before the stores, zero stores, `b69`, then `S8(o,0xf) = -20`,
   `U8(o,0xa2) = 2`, `o->animFrame = f & 1` last. Look for a matched sibling before brute-forcing.
 
+### More recipes (sixth batch: large functions)
+- **ncheck now checks local `j` targets** (they are masked as relocations): a version whose `j` lands elsewhere used to
+  print MATCH. Always set your own `WORK` dir for matchcheck; matchcheck compiles tomba-header files to an empty
+  function, so ncheck is the reference for those.
+- **Cross-jumping**: shared tails after differing constant loads (`li v0,K; j L`) come from writing the full statement
+  sequence in every branch, never `goto` + variable. To keep identical tails apart, make them differ (second extern
+  name for one callee/table, debt). Wrong-way sharing: write the inner choice as a `switch` with `return` per case.
+- **Frame size**: a short local modified in an `if` adds 8 B per spot (use int temps); an inline reading the same
+  struct-array field twice adds 8 B per repeat; `{char a[16]; {char b[16];}}` adds exactly 16 B.
+- **Order pinning**: raw-offset stores (`S16(o,0x6c) = ...`) pin later loads, in-struct stores do not; a load moving
+  above in-struct stores is a plain scalar extern; a store to another field between two reads forces a reload.
+- **Hoisting**: gcc 2.7's loop pass decisions are visible with `-dL`; put statements that reuse a value next to each
+  other. `-fno-expensive-optimizations` (FLAGS) when the game reloads `lui/addiu` of a symbol at every use.
+- **Shapes**: `if (x) f(a,1,0); else f(a,0,0);` gives `beqz; move rX,zero; li rX,1`; `for(;n<6;n++)` when the branch to
+  the test has the increment in its delay slot; `if(r>=n) m=r; else m=r+1;` vs `if(r<n) m=r+1; else m=r;` choose
+  bnez+move vs beqz/j; repeated per-case code is a `static __inline__` (macros let jump threading merge trees).
+- **Search**: hill-climb statement order (move one line to every position) calling ncheck's `build()` in-process
+  (~0.15 s per variant); it beats exhaustive permutation.
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
