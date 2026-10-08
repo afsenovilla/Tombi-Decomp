@@ -1,4 +1,5 @@
 // FUNC 8012c8ec 504 X000
+// MATCHING 8012c8ec 504
 #include "TOBJ.H"
 extern char DAT_80077cf4[];
 extern unsigned short *DAT_8013a1c0[];
@@ -7,7 +8,18 @@ extern unsigned char DAT_80138fd8[];
 extern void FUN_80127214(TObj *);
 extern int FUN_801274cc(TObj *);
 
-void FUN_8012c8ec(TObj *o)
+static __inline__ void SetBox(TObj *o)
+{
+    unsigned char *p;
+    p = &DAT_80138fd8[((unsigned short *)o->anim)[1] * 4];
+    o->box0 = *p++;
+    o->box1 = *p++;
+    o->box2 = *p++;
+    o->box3 = *p;
+    o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff;
+}
+
+void func_8012C8EC(TObj *o)
 {
     unsigned char *p;
     switch (o->state) {
@@ -18,12 +30,7 @@ void FUN_8012c8ec(TObj *o)
         o->wac = 0x18;
         o->state++;
         o->anim = DAT_8013a1c0[0];
-        p = &DAT_80138fd8[((unsigned short *)o->anim)[1] * 4];
-        o->box0 = *p++;
-        o->box1 = *p++;
-        o->box2 = *p++;
-        o->box3 = *p;
-        o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff;
+        SetBox(o);
         break;
     case 1:
         FUN_80127214(o);
@@ -47,12 +54,7 @@ void FUN_8012c8ec(TObj *o)
         o->wac = 0x19;
         o->state++;
         o->anim = DAT_8013a1c4[0];
-        p = &DAT_80138fd8[((unsigned short *)o->anim)[1] * 4];
-        o->box0 = *p++;
-        o->box1 = *p++;
-        o->box2 = *p++;
-        o->box3 = *p;
-        o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff;
+        SetBox(o);
         break;
     case 4:
         FUN_80127214(o);

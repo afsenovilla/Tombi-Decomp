@@ -16,6 +16,7 @@ void FUN_80108168(TObj *o)
         B(DAT_8009c330, 8) = o->active;
         u = o->animFrame;
         o->velX = 0x5a;
+        *(signed char *)&o->b0f = -0x14;
         o->active = 2;
         B(o, 0xa2) = 2;
         o->d8c = 0;
@@ -26,7 +27,6 @@ void FUN_80108168(TObj *o)
         o->b9f = 0;
         B(o, 0xad) = 0;
         o->b69 = 0;
-        *(signed char *)&o->b0f = -0x14;
         o->animFrame = u & 1;
         FUN_800eeb5c(o, 0x2b);
         o->state++;
