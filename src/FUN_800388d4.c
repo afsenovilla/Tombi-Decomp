@@ -1,8 +1,10 @@
 // FUNC 800388d4 496 MAIN0
-/* score 126 (ncheck). b29: game loads a (lw a2,0x1090) before the switch index andi/addiu/sltiu; ours schedules the index chain into the idx load chain, and regs differ (game: index a1, b v1, r a3, f t1). Tried: sibling FUN_800387e0 style (int address arithmetic, worse), op int/char/short (andi lost), volatile a load, type brute force (only a=uchar helps, wrong). */
+// MATCHING 800388d4 496
+/* empty loop after the `a` load: its loop notes end the scheduling block (debt; any empty loop works). In-struct store VS->v[idx] lets the g load move above it. */
 extern unsigned char *DAT_8009f0f0;
 extern int DAT_8009d60c;
 
+typedef struct { char pad[0x1090]; int v[1]; } VS;
 void FUN_800388d4(unsigned char op)
 {
     int tmp;
@@ -19,6 +21,7 @@ void FUN_800388d4(unsigned char op)
     unsigned short x;
     idx = *(unsigned char *)(*(unsigned short *)(o + 0x8a) + code + 1);
     a = *(int *)(o + idx * 4 + 0x1090);
+    do { } while (0); /* loop notes split the sched block: a loads before the switch index */
     switch (op) {
     case 0x1c: case 0x1e: case 0x20: case 0x22:
     case 0x24: case 0x26: case 0x28: case 0x2a:
@@ -64,7 +67,7 @@ void FUN_800388d4(unsigned char op)
         r = a ^ b;
         break;
     }
-    *(int *)(o + idx * 4 + 0x1090) = r;
+    ((VS *)o)->v[idx] = r;
     g = DAT_8009f0f0;
     if (r == 0)
         g[0x89] = 0;
