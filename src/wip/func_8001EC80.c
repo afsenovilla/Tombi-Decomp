@@ -1,5 +1,8 @@
 // FUNC 8001ec80 888 MAIN0
-/* score 90 (was 207): adj() inline returning short fixed the second branch copies; (signed char) table byte << 8. Left: first branch has w in a0 and the switch value in v1, game swaps them (tried n temp, order, types, inline adj2). */
+/* score 68 (b23, was 90): tail fixed with int b = (short)arg and a row pointer t + b = t[i]; b = (short)(b << 8).
+   Left: (1) first branch: game has switch value in a0 (lui/lhu) and w in v1, ours swapped; (2) second branch: game keeps
+   v in a1 and copies x = v into s0 (move s0,a1 in delay slots) before the sll/sra for SsSeqSetVol; ours extends first.
+   Tried int/short x, adj return/param types, non-inline second branch, adj in the first branch. */
 extern short D_800A3428;
 extern unsigned char D_800784C8, D_800784C9;
 extern unsigned char D_800784CA[];
@@ -51,7 +54,7 @@ int func_8001EC80(int arg)
     int v, w;
     short x;
     int a;
-    short b;
+    int b;
     if (D_800A3428 != -1) {
         SsSeqStop(D_800A3428);
         SsSeqClose(D_800A3428);
@@ -94,11 +97,10 @@ int func_8001EC80(int arg)
         D_8009BD10 = x;
         D_8009BD14 = 0;
     }
-    b = arg;
+    b = (short)arg;
     a = 1;
     if (b < 0) {
-        a = D_80078478[D_8009C960];
-        b = (signed char)D_80078428[D_8009C960][D_8009C962] << 8;
+        { unsigned char *t = D_80078428[D_8009C960]; a = D_80078478[D_8009C960]; b = t[D_8009C962]; b = (short)(b << 8); }
     }
     FUN_8001f5b8(a, b);
     SsSeqPlay(D_800A3428, 1, 1);
