@@ -1,5 +1,5 @@
 // FUNC 8005b624 784 MAIN0
-/* score 2 (ncheck): solo falla el orden de las invariantes izadas del bucle (juego: li s4,1 antes de sll s5,c,3). */
+// MATCHING 8005b624 784
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
 extern unsigned char D_80080524[];
@@ -53,9 +53,9 @@ void func_8005B624(int k, int b)
             o->subtype = b;
             o->b0c = d[i];
             o->w08 = 0x7d16;
-            o->a.raw = (c * 8 + 160 - i * 16) << 16;
             o->b0d = 1;
             o->animFrame = 1;
+            o->a.raw = (c * 8 + 160 - i * 16) << 16;
             o->b0f = 0;
             o->y.raw = 0xa00000;
             o->category |= 0x80;

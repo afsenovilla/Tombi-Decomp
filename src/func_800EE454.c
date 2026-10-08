@@ -1,13 +1,16 @@
 // FUNC 800ee454 140 X000
+// MATCHING 800ee454 140
 #include "TOBJ.H"
 extern unsigned char D_801152E8[];
 void func_800EE454(TObj *o)
 {
-    unsigned char d = D_801152E8[o->wb0] - o->d8c;
-    unsigned int u;
+    unsigned int c = (unsigned char)(D_801152E8[o->wb0] - o->d8c);
+    short d;
+    unsigned short u;
     int v;
+    d = c;
     if (d == 0) return;
-    u = d;
+    u = c;
     if (u < 0x80) {
         if (d >= 4) v = o->d8c + 4;
         else if (d >= 2) v = o->d8c + 2;

@@ -9,11 +9,14 @@ extern unsigned char *PTR_DAT_800782cc[];
 
 int SoundFindFreeVoice(unsigned a)
 {
-    int i = 0x17;
-    int m = -1;
-    short *p = DAT_800a3cf6;
+    int i;
+    short *p;
+    int m;
     int k;
     short *q;
+    i = 0x17;
+    m = -1;
+    p = DAT_800a3cf6;
     do {
         if (!DAT_8009f0d0[i] && *p == m)
             return i;
@@ -24,7 +27,7 @@ int SoundFindFreeVoice(unsigned a)
     k = (a & 0xffff) * 2;
     q = DAT_8009c8ee;
     do {
-        if (*q >= (short)(PTR_DAT_800782cc[DAT_800780c4[k]] + (DAT_800780c5[k] << 3))[5])
+        if (*q >= (short)*(PTR_DAT_800782cc[DAT_800780c4[k]] + (DAT_800780c5[k] << 3) + 5))
             return i;
         i--;
         q--;
