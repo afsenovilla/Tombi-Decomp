@@ -1,4 +1,5 @@
 // FUNC 8011116c 464 X000
+// MATCHING 8011116c 464
 typedef struct { short a[3]; char pad[0x6c - 6]; unsigned short b[4]; } T74;
 extern T74 DAT_80115510[];
 extern unsigned char DAT_8009d2b3, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
@@ -6,7 +7,7 @@ typedef struct { char pad[0xb2]; unsigned short wb2; char pad2[0xc1 - 0xb4]; uns
 
 static __inline__ void body(P *o)
 {
-    int i;
+    short i;
     unsigned short w;
     short s;
     i = DAT_8009d2b3 + o->bc1 * 4;
