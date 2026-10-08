@@ -1,4 +1,5 @@
 // FUNC 80108ad0 748 X000
+/* score 2 (was 16): only diff is the sb 0xf(-20) store, which the game sinks after the b69 store while keeping li -20 early (same issue as func_80108168/func_80107FCC); "animFrame &= 1" first was the fix for the rest. Inline helper for the zero stores, raw/struct forms, -fno-schedule-insns tried. */
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009C330;
@@ -24,7 +25,9 @@ void func_80108AD0(TObj *o)
             o->velX = 0x12c;
             o->state = 1;
         }
+        o->animFrame &= 1;
         o->active = 2;
+        *(signed char *)&o->b0f = -20;
         B(o, 0xa3) = 2;
         o->d8c = 0;
         o->velY = 0;
@@ -34,8 +37,6 @@ void func_80108AD0(TObj *o)
         o->b9f = 0;
         B(o, 0xad) = 0;
         o->b69 = 0;
-        *(signed char *)&o->b0f = -20;
-        o->animFrame &= 1;
         PlayerSetAnimIfChanged(o, 0x2c);
     case 1:
         AnimAdvance(o);

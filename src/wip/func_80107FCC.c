@@ -1,4 +1,5 @@
 // FUNC 80107fcc 412 X000
+/* score 2 (was 18): only diff is the sb 0xf(-20) store, which the game sinks after the b69 store while keeping li -20 early (same as func_80108168/func_80108AD0). */
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
@@ -8,13 +9,14 @@ extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
 void func_80107FCC(TObj *o)
 {
-    unsigned short f;
     switch (o->state) {
     case 0:
         U8(D_8009C330, 8) = o->active;
-        f = o->animFrame;
+        o->animFrame &= 1;
         o->velX = 0x78;
-        U8(o, 0xa2) = o->active = 2;
+        o->active = 2;
+        S8(o, 0xf) = -20;
+        U8(o, 0xa2) = 2;
         o->d8c = 0;
         o->velY = 0;
         o->b9c = 0;
@@ -23,8 +25,6 @@ void func_80107FCC(TObj *o)
         o->b9f = 0;
         U8(o, 0xad) = 0;
         o->b69 = 0;
-        S8(o, 0xf) = -20;
-        o->animFrame = f & 1;
         PlayerSetAnimIfChanged(o, 0x2b);
         o->state++;
     case 1:
