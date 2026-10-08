@@ -1,5 +1,5 @@
 // FUNC 8010e114 532 X000
-/* score 128 (ncheck): game hoists lw *list above the counter store (sh 0x1F80019E); r in a3, p in a1; return-0 block inline after bnez */
+/* score 24 (ncheck, era 128): solo falta intercambiar registros de r (juego a3) y la copia de d (juego t0). */
 typedef struct P { short x; short y; } P;
 typedef struct S {
     unsigned char b0; char p0; unsigned char type; char p1[0x16 - 3];
@@ -21,16 +21,17 @@ int func_8010E114(void)
 {
     S **list = D_1F800260;
     S *p;
-    int r;
+    int r; short c;
+    unsigned int f;
     unsigned short h, w, d;
     unsigned short n = D_1F800250;
     D_1F80019E = n;
     r = 0;
-    if ((D_1F8003C4 & D_1F8001FC) != 0) {
+    if ((D_1F8001FC & D_1F8003C4) == 0) return 0;
     if (n != 0)
     do {
-        D_1F80019E--;
         p = list[0];
+        D_1F80019E--;
         list++;
         if (!(p->b0 & 2))
             continue;
@@ -43,15 +44,17 @@ int func_8010E114(void)
                 break;
             }
             h = p->w72 + 10;
+            c = (unsigned short)(h + (D_800A604E[0] - p->w16)) < (short)h * 2;
             w = p->w6e + 10;
-            if ((unsigned short)(h + (D_800A604E[0] - p->w16)) < (short)h * 2) {
+            if (c) {
                 d = w + (D_800A6078->y - p->pos->y);
                 if (d < (short)w * 2) {
+                    f = D_800A604E[12] & 1;
                     if ((short)w < (short)d) {
-                        if ((D_800A604E[12] & 1) ^ 1)
+                        if ((f ^ 1) != 0)
                             goto done;
                     } else {
-                        if (D_800A604E[12] & 1)
+                        if (f)
                             goto done;
                     }
                     if ((short)d < (short)w)
@@ -69,6 +72,4 @@ int func_8010E114(void)
         }
     } while (D_1F80019Es != 0);
     return r;
-    }
-    return 0;
 }
