@@ -1,4 +1,5 @@
 // FUNC 8012dcfc 400 X000
+// MATCHING 8012dcfc 400
 #include "TOBJ.H"
 extern void FUN_8001fec0(TObj *o);
 extern void FUN_8001fe6c(TObj *o);
@@ -28,18 +29,16 @@ void FUN_8012dcfc(TObj *o)
         break;
     case 1:
         FUN_8001fec0(o);
-        v = o->velY;
-        u = *(unsigned short *)&o->velY + 0x20;
-        o->velY = u;
-        o->y.raw = o->y.raw + v * 0x100;
-        if ((short)u > 0) o->state = 2;
+        o->y.raw += o->velY * 0x100;
+        o->velY += 0x20;
+        if (o->velY > 0) o->state = 2;
         break;
     case 2:
         FUN_8001fec0(o);
-        o->y.raw = o->y.raw + o->velY * 0x100;
-        v = o->y.p.whole;
-        *(unsigned short *)&o->velY = *(unsigned short *)&o->velY + 0x20;
-        if (FUN_80040278(o, o->h->p.whole, (short)(v + 0x10 + o->b0c * -0x10)) != 0) {
+        o->y.raw += o->velY * 0x100;
+        v = o->y.p.whole + 0x10;
+        o->velY += 0x20;
+        if (FUN_80040278(o, o->h->p.whole, (short)(v - o->b0c * 16)) != 0) {
             if (o->w7a == 0) o->active = 1;
             o->step = 1;
             o->state = 0;

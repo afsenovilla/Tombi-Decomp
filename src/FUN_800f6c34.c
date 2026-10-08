@@ -1,4 +1,5 @@
 // FUNC 800f6c34 332 X000
+// MATCHING 800f6c34 332
 #include "TOBJ.H"
 extern unsigned short DAT_8009d670[];
 extern unsigned short DAT_1f8003c6;
@@ -9,24 +10,24 @@ extern unsigned char *DAT_8009f0ec;
 void FUN_800f6c34(TObj *o)
 {
     int a;
-    unsigned short *k = DAT_8009d670;
-    short s, s1;
+    short s;
+    int s1;
     unsigned short u;
     Fix16 *h;
-    if (*k & DAT_1f8003c6) {
+    if (DAT_8009d670[0] & DAT_1f8003c6) {
         DAT_8009d2b0 = 0;
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (*k & 0x10) {
+    if (DAT_8009d670[0] & 0x10) {
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (*k & 0x40) {
+    if (DAT_8009d670[0] & 0x40) {
         DAT_8009c330[9] = 0;
         *(unsigned char *)&o->wac = 1;
         u = o->animFrame;
@@ -40,11 +41,12 @@ void FUN_800f6c34(TObj *o)
         o->velX = 0;
         o->velY = 0;
         s1 = h->p.whole;
-        s = s1 + 0xe;
-        if ((u & 1) == 0)
+        if (u & 1)
+            s = s1 + 0xe;
+        else
             s = s1 - 0xe;
-        a = 0x10;
         h->p.whole = s;
+        a = 0x10;
         o->timer = 10;
         o->d84 = 0;
         if (o->animFrame & 1)

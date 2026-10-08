@@ -9,22 +9,23 @@ void FUN_8002c578(TObj *p, int x, int y, int z)
     TObj *o = ObjAlloc();
     if (o != 0) {
         short *t;
-        short w;
+        unsigned short w;
+        short w2;
         o->active = 1;
         o->type = 0x12;
-        t = DAT_8009c338;
         w = p->animFrame;
+        t = DAT_8009c338;
         o->a.raw = x << 16;
         o->y.raw = y << 16;
         o->b.raw = z << 16;
         o->animFrame = w;
         o->w1e = t[4];
-        w = t[5];
+        w2 = t[5];
         o->b0a = 8;
         *(signed char *)&o->b0f = -28;
         o->b0d = 1;
         o->subtype = 0;
-        o->w08 = w;
+        o->w08 = w2;
         o->category |= 0x80;
         o->b1d = 0x4d;
         *(TObj **)((char *)o + 0x90) = p;
