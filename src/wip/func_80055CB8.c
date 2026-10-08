@@ -45,7 +45,7 @@ typedef struct {
 } O;
 
 extern PolyFT4 *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern char *DAT_1f8001e0;
 extern void SetSemiTrans(PolyFT4 *, int);
 
 static __inline__ int onscreen(PolyFT4 *p)
@@ -58,10 +58,10 @@ static __inline__ int onscreen(PolyFT4 *p)
 
 static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
 {
-    d = d << 2;
+    d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
     {
         unsigned v = *(unsigned *)d;
         *(unsigned *)d = (unsigned)a;
@@ -70,7 +70,7 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-/* score 25: volatile x3/y3 stores + volatile y0 read fix the onscreen block; left: lui 0x9000000 (addprim e) scheduled above the b0d&1 if, and j/addiu 1 tail of addprim. */
+/* score 21: volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim(p, base, z, b0f, e) with d = ((signed char)d + c) << 2 (as FUN_80052db8) fixed the sum. Left: lui 0x9000000 (e) lands in the beqz delay slot of the b0d&1 if (game: after lh z). Tried: e inside the inline (45), param orders. */
 void func_80055CB8(O *o)
 {
     PolyFT4 *p;
@@ -110,7 +110,7 @@ void func_80055CB8(O *o)
             if (o->b0d & 1) {
                 p->clut = o->w08;
             }
-            if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), 0, o->z + o->b0f, 0x9000000) == 0) {
+            if (addprim((unsigned *)p, DAT_1f8001e0 + 0x10, o->z, o->b0f, 0x9000000) == 0) {
                 DAT_1f800164 = DAT_1f800164 + 1;
             }
         }
