@@ -70,7 +70,7 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-/* score 21: volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim(p, base, z, b0f, e) with d = ((signed char)d + c) << 2 (as FUN_80052db8) fixed the sum. Left: lui 0x9000000 (e) lands in the beqz delay slot of the b0d&1 if (game: after lh z). Tried: e inside the inline (45), param orders. */
+/* score 21: volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim(p, base, z, b0f, e) with d = ((signed char)d + c) << 2 (as FUN_80052db8) fixed the sum. Left: lui 0x9000000 (e) lands in the beqz delay slot of the b0d&1 if (game: after lh z). Tried: e inside the inline (45), all 120 param orders (same), e|v / v|=e, goto-next form of FUN_80052db8, short/schar param types, z read into a local, open-coded OT insert (47). The li is the first insn of the join block in ours (reorg steals it into the beqz slot); game schedules lh z first. */
 void func_80055CB8(O *o)
 {
     PolyFT4 *p;
