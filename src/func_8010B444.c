@@ -1,5 +1,5 @@
 // FUNC 8010b444 832 X000
-/* r9 score 6: only the last block: game hoists 'la D_80010748' between the G+0x2e and G+0x20 stores (G in v1) and stores o->anim in the jal delay slot. */
+// MATCHING 8010b444 832
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
@@ -94,10 +94,10 @@ void func_8010B444(TObj *o)
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            *(unsigned short *)(G + 0x2e) = 0xffff;
-            o->anim = D_80010748;
             *(short *)(G + 0x20) = 0;
+            *(unsigned short *)(G + 0x2e) = 0xffff;
             *(short *)(G + 0x2c) = 0;
+            o->anim = D_80010748;
             AnimLoadDuration(o);
             o->d8c = D_801152E8[o->wb0];
             o->state = 4;

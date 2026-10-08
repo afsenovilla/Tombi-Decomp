@@ -1,5 +1,5 @@
 // FUNC 80038184 180 MAIN0
-// Score 29: branch flag==0 uses p+2 (lbu 2(v1)) where the game reuses q (lbu 0(a2)); loop copy regs differ.
+// Score 29: flag==0 branch uses p+2 (lbu 2(v1)) where the game reuses q (lbu 0(a2)). Game loop = int-counter for loop strength-reduced (move a1,sp; move v1,a2(q copy); addiu a2,sp,4; slt) - direct "for(i<4) buf[i]=*q++" gives that loop shape but scores 41 (no q copy).
 typedef struct {
     char pad[0x8a];
     unsigned short pc;

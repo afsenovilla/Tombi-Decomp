@@ -1,5 +1,5 @@
 // FUNC 80111dc8 400 X000
-// wip score 65: (d8c - 0x80) - w78 gets folded to d8c - (w78 + 0x80); start of the b69 block has swapped regs (velX + s)
+// wip score 59 (int s, short t, short a; was 65). Left: game loads table s into v0 and copies to v1 (move v1,v0 in bnez slot), velX read lh for test; 8-byte frame lost with int s. Tried temp r short/int, if/else forms.
 #include "TOBJ.H"
 extern short DAT_8013c984[];
 extern short DAT_8007a1f0[], DAT_8007a5f0[];
@@ -8,9 +8,9 @@ void FUN_80111dc8(TObj *o)
 {
     int u;
     unsigned v;
-    short s;
-    int t;
-    int a;
+    int s;
+    short t;
+    short a;
     if (o->b69 != 0) {
         o->b69 = 0;
         u = (o->d38 + 0x800 & 0xfff) >> 4;
