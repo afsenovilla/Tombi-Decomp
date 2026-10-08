@@ -1,5 +1,6 @@
 // FUNC 80044424 300 MAIN0
-// score 14: dy test written with the full expression (no CSE with dy). Left: game CSEs it (subu v1 then move t4,v1) while ours computes dy twice; tried temps/types/order
+// score 14 (b12 also tried: separate int/short temp + dy copy, & 0xffff test form, inline ovl(d,s,m) param copy, per-local type brute force: all 23-50)
+// dy test written with the full expression (no CSE with dy). Left: game CSEs it (subu v1 then move t4,v1) while ours computes dy twice; tried temps/types/order
 #include "TOBJ.H"
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
