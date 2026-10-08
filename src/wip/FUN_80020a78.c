@@ -1,6 +1,6 @@
 // FUNC 80020a78 116 MAIN0
 extern unsigned short DAT_8009c960;
-extern char DAT_8009c994[];
+extern unsigned DAT_8009c994[][8];
 
 unsigned FUN_80020a78(int n)
 {
@@ -12,5 +12,5 @@ unsigned FUN_80020a78(int n)
         t = 7;
     else if (t == 0x11)
         t = 0xc;
-    return *(unsigned *)(DAT_8009c994 + t * 0x20 + q * 4) & (1 << r);
+    return DAT_8009c994[t][q] & (1 << r);
 }
