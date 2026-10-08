@@ -1,6 +1,6 @@
 // FUNC 800563ac 116 MAIN0
 // MATCHING 800563ac 116
-typedef struct O { char p0[0x1e]; short v1e; char p1[0x9e-0x20]; unsigned short a, b, c, d; char p2[4]; unsigned short e; } O;
+typedef struct O { char p0[0x1e]; short v1e; char p1[0x9e]; unsigned short a, b, c, d; char p2[4]; unsigned short e; } O;
 typedef struct L { short x0, x1, x2, x3; short a, b, c, d; short m; } L;
 extern void FUN_800591c0(int);
 extern void FUN_80056420(L *, int, int);
