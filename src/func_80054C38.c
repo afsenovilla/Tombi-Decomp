@@ -1,11 +1,6 @@
-// r9 wip: score 19 (4 bytes short). Only diff: li a1,0x9000000 gets moved into the delay slot of the 'b0d & 1' branch; game has nop there and loads D_1F800070 first, then li, then lb b0f.
-// b17: sched1 puts the li (otadd's e param) first in the block, reorg then steals it into the beqz slot. Tried: all 24 param orders,
-// e as literal (43), b computed inside, signed char d param, volatile/array/literal/struct-literal D_1F800070 (volatile la form puts li after la),
-// b33: all 120 orders of the 5 args as locals before the call: no change (19); extern volatile D_1F800070 (plain lui form): no change; inline returning short gives 14 but adds a wrong move v0,a0 (size then matches by accident); flags no-sched/-fno-sched2 worse.
-// asm barrier at inline start, return form. The final bnez nop is fine (maspsx expands the lw macro).
-// b40: sched1 places li late; sched2 (bottom-up) picks li last because lw D_1F800070 (prio 5) beats it; game needs lw c not ready/lower prio than li. Tried c/d param types (long/short/schar/uchar), d=(sc)d;d+=c;d<<=2, ==0/return/result-var call forms, volatile on c/b/b0f, D_1F800070[0]: all >=19.
-// b48: sched2 -dR: block 274-297 roots lw c(287), lb d(294), lw b(283), li e(291) all prio 1; at the last pick {li, lw c} the load wins by 'greater potential hazard', so li ends first and reorg copies it into the beqz slot (label has 2 preds -> only the first insn of the target thread can be copied). Game needs lw c picked last, i.e. li with prio>=2 or lw c not ready.
 // FUNC 80054c38 796 MAIN0
+// MATCHING 80054c38 796
+/* c loaded before an empty loop (its notes split the scheduling block) so the e constant lands after lw c, as in the game (debt). */
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -109,7 +104,13 @@ void func_80054C38(TObj *o)
         p->tpage += o->w1e;
         if (o->b0d & 1)
             p->clut = o->w08;
-        if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800070, o->b0f, 0x9000000))
-            DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+        {
+            int c = D_1F800070;
+            unsigned long e;
+            do { } while (0); /* loop notes end the sched block after the c load (debt) */
+            e = 0x9000000;
+            if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, c, o->b0f, e))
+                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+        }
     }
 }
