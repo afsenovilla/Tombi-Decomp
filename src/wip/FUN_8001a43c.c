@@ -1,4 +1,5 @@
 // FUNC 8001a43c 528 MAIN0
+// score 2 (w5): only diff: game has nop in jal FUN_8001c314 slot (move a0,zero only in the bne slot); ours repeats move a0,zero. Tried arg=0 before if, c314(arg), full calls per branch, prototypes.
 typedef struct G { char pad[0x4e]; unsigned short w4e; char pad2[0x5e - 0x50]; short w5e; char pad3[0x64 - 0x60]; unsigned short w64; } G;
 extern G *DAT_1f8001d4;
 extern unsigned char DAT_1f8001ce;
@@ -53,11 +54,11 @@ void FUN_8001a43c(void)
         if (DAT_8009c974[0] == 0) {
             DAT_8009c974[0] = 1;
         } else if (DAT_8009c960 == DAT_8009d2a8) {
-            arg = 0;
             if (DAT_8009c962 == DAT_8009d2aa) {
                 FUN_8001c314(0);
                 break;
             }
+            arg = 0;
         }
         FUN_8001c218(arg);
         DAT_8009f7e4 = 0;

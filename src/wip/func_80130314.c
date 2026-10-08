@@ -1,5 +1,6 @@
 // FUNC 80130314 988 X000
 /* score 2 (ncheck, era 10): solo falla la posicion de addiu v1,v1,1 (state+1) respecto al subu del timer en case 0. */
+/* w5: natural form (b6b=0 ... timer = 1 - *((unsigned char *)o + 0x6b); state++) gives score 10, only a0/v1 swap of state/b6b. */
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
 extern unsigned char D_8009D07B;
