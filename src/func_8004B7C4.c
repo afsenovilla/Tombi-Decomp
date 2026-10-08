@@ -1,5 +1,5 @@
 // FUNC 8004b7c4 740 MAIN0
-/* false match: bytes identical but a local j targets a different instruction (ncheck now checks this). */
+// MATCHING 8004b7c4 740
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
 extern short D_1F80019E;
@@ -14,7 +14,7 @@ int func_8004B7C4(PO *o, TObj *e)
     ad = d;
     if (d < 0) ad = -d;
     d = o->we8 - e->h->p.whole;
-    if (o->t.animFrame & 1) t = e->box0 + ad;
+    if (o->t.animFrame & 1) t = e->box0 + ad + d;
     else t = e->box0 + d;
     if ((unsigned short)t > e->box1 + ad)
         return 0;
