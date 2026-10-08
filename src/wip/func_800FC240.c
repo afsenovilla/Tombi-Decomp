@@ -1,6 +1,7 @@
 // FUNC 800fc240 468 X000
-/* wip (score 92): gcc cross-jumps the step=0x3e/state=0 blocks (2000e branch and case 2) and moves the
-   2000e block out of line; the game keeps every block separate. Store order of the header also differs. */
+/* wip (score 71, was 92): short r and raw stores for 0xb2/0xd1/0xe0 fix the header order (same recipe as the
+   matched FUN_800fc414 case 4). Left: gcc cross-jumps the `sb step; sb state; j` tails of the 2000e branch and
+   switch cases 1/2 (2000e block ends up out of line); the game keeps every block separate. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -20,7 +21,7 @@ extern unsigned char D_8009CE3D;
 int func_800FC240(TObjX *x)
 {
     TObj *o = &x->o;
-    int r;
+    short r;
 
     if (D_8009C938 != 0) {
         return 0;
@@ -29,10 +30,10 @@ int func_800FC240(TObjX *x)
         return 0;
     }
     D_8009C330[8] = 0;
-    x->bd1 = 0;
+    *((unsigned char *)o + 0xd1) = 0;
     o->active = 3;
-    x->we0 = 0x8c;
-    o->wb2 = 0;
+    *(short *)((char *)o + 0xe0) = 0x8c;
+    *(short *)((char *)o + 0xb2) = 0;
     o->b04 = 1;
     if (D_8009C960 == 0x2000e) {
         o->step = 0x3e;
