@@ -1,5 +1,5 @@
 // FUNC 8002b3c8 1276 MAIN0
-/* score 30 (ncheck): only case 1 differs (registers of the two /30 divisions). b20 finding: one reused `int t` for both halves (`u = a - 0xa0; t = wc4; t -= u; t <<= 8; velH = t / 30;` then same with wc6/y) reproduces the game's exact schedule (WAR deps), but t/u die twice so gcc gives them to global-alloc (t->a2) while the game has t in v1, u in v0, i.e. local-alloc (one death each). Need a form with one shared t that dies once. Tried int/short temps, statement orders, *256 vs <<8, inline helpers, function-scope vars. Tail: (o->d30 >> 16) gives lh; order a, y, b. */
+// MATCHING 8002b3c8 1276
 #include "TOBJ.H"
 typedef struct { TObj t; short wc0, wc2, wc4, wc6; unsigned short wc8, wca, wcc; } SX;
 #define X(o) ((SX *)(o))
@@ -22,10 +22,15 @@ void FUN_8002b3c8(TObj *o)
     case 1:
         if (--o->timer != 0) break;
         if (o->active == 1) {
-            int t = o->a.p.whole - 0xa0; int u;
-            o->velH = ((X(o)->wc4 - t) << 8) / 30;
+            int t; int u;
+            {
+                int w = o->a.p.whole - 0xa0;
+                t = (X(o)->wc4 - w) << 8;
+            }
+            o->velH = t / 30;
             u = o->y.p.whole + 0x78;
-            o->velV = ((X(o)->wc6 - u) << 8) / 30;
+            t = (X(o)->wc6 - u) << 8;
+            o->velV = t / 30;
         } else {
             o->velH = 0;
             o->velV = 0;
