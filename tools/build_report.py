@@ -42,8 +42,10 @@ def main():
     if "--no-split" not in ARGS:
         for prog in PROGS:
             shutil.rmtree("asm/" + prog, ignore_errors=True)
-            subprocess.run([sys.executable, "-m", "splat", "split", "config/%s.yaml" % prog, "--disassemble-all"],
-                           check=True, capture_output=True)
+            r = subprocess.run([sys.executable, "-m", "splat", "split", "config/%s.yaml" % prog, "--disassemble-all"],
+                               capture_output=True, text=True)
+            if r.returncode:
+                sys.exit("splat failed for %s:\n%s" % (prog, (r.stdout + r.stderr)[-3000:]))
     game = game_addresses()
     units, nt, nb = [], 0, 0
     # base objects: compile every src/*.c with the native pipeline

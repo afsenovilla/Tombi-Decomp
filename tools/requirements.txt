@@ -7,5 +7,6 @@ intervaltree
 colorama
 n64img
 crunch64
+pygfxd
 capstone
 # splat64==0.35.2 is installed with --no-deps (its optional pylibyaml accelerator needs a C build)
