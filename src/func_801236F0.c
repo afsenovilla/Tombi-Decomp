@@ -1,10 +1,9 @@
 // FUNC 801236f0 812 X000
 // MATCHING 801236f0 812
 /* Covers splat entries func_801236F0 + func_801237E4 (split at the jump table).
-   Matching debt: volatile accesses on animFrame (2nd read), velH store and step read fix the schedule. */
+   animFrame is read once per table (no volatile). */
 #include "TOBJ.H"
 
-typedef struct { short h, v; } VV;
 extern void FUN_8003c980(TObj *);
 extern void FUN_800188e0(TObj *);
 extern void FUN_80020aec(int);
@@ -22,9 +21,6 @@ extern void (*D_8007A890[])(TObj *);
 
 void func_801236F0(TObj *o)
 {
-    int f, g;
-    unsigned short h;
-
     switch (o->b04) {
     case 0:
         FUN_8003c980(o);
@@ -37,14 +33,11 @@ void func_801236F0(TObj *o)
         switch (o->step) {
         case 0:
             if (ObjCullRegister(o) && (o->b68 & 1)) {
-                f = o->animFrame;
-                g = *(volatile unsigned short *)&o->animFrame;
                 o->b68 = 0;
                 o->b9c = 0;
-                *(volatile short *)&o->velH = D_80138F8C[f * 2];
-                h = D_80138F8E[g * 2];
-                o->step = *(volatile unsigned char *)&o->step + 1;
-                o->velV = h;
+                o->velH = D_80138F8C[o->animFrame * 2];
+                o->velV = D_80138F8E[o->animFrame * 2];
+                o->step++;
                 if (D_8009CE4D[0] == 0 && o->animFrame == 0) {
                     o->wb4 = 1;
                     D_8009C93F[0] = 1;
