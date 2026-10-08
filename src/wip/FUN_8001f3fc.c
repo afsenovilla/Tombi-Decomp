@@ -9,13 +9,11 @@ int FUN_8001f3fc(unsigned short a, unsigned short b)
     unsigned int u = DAT_800a3f90;
     int i = 0;
     unsigned short cnt;
-    if (0 < DAT_8009d688) {
-        do {
-            if (DAT_800a3d00[(short)u].a == a)
-                return -1;
-            u = (u + 1) & 0x7f;
-            i++;
-        } while (i < DAT_8009d688);
+    char pad;
+    for (i = 0; i < DAT_8009d688; i++) {
+        if (DAT_800a3d00[(short)u].a == a)
+            return -1;
+        u = (u + 1) & 0x7f;
     }
     cnt = DAT_8009d688 + 1;
     DAT_800a3d00[DAT_8009f2d0].a = a;
