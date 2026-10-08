@@ -14,12 +14,12 @@ void MusicStopOrFadeIn(int a)
 {
     unsigned short t;
     if (a) {
-        t = DAT_8007833c[DAT_8009c960];
-        DAT_8009bd1c = 1;
-        DAT_8009bd18 = 1;
-        DAT_8009bd14 = 1;
+        a = 1;
+        DAT_8009bd1c = a;
+        DAT_8009bd18 = a;
+        DAT_8009bd14 = a;
         DAT_8009bd20 = -1;
-        DAT_8009bd24 = t - 1;
+        DAT_8009bd24 = DAT_8007833c[DAT_8009c960] - 1;
     } else {
         if (DAT_800a3428 != -1) {
             SsSeqStop(DAT_800a3428);
