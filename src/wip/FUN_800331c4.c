@@ -1,9 +1,9 @@
 // FUNC 800331c4 932 MAIN0
-/* score 30 (b55, was 224): list[64] (frame 0x160), (unsigned short)k tests keep k (s1) set in the scan, final loop as
-   for (i...) with do {} while (0) after k = 0x14, r int with u temp, branch order of h1/h2. Left: h2 in a0 instead of
-   v1 inside the animFrame if; sort inner loop schedules sll before lh; k*2 folded to li 0x28 (game sll s6,s1,1:
-   needs a CODE_LABEL between k = 0x14 and the loop for combine, plus k sign bits known; a label via &&lbl kept the
-   extension); lw list[0] scheduled late. */
+/* score 12 (b55, was 224): list[64] (frame 0x160), (unsigned short)k tests keep k (s1) set in the scan, final loop as
+   for (i...), r int with u temp, branch order of h1/h2. Left: (1) h2 gets a0 instead of v1 inside the animFrame if
+   (-dg: h2 conflicts with v1 because local-alloc gives h1val v1; game h1val a0); (2) k*2 folded to li 0x28 (game
+   sll s6,s1,1: combine knows k = 0x14 since no CODE_LABEL between; a label via static &&lbl keeps k but then the
+   sign extension stays: sll 16 / sra 15). */
 #include "TOBJ.H"
 typedef struct P { short x, y; } P;
 extern short DAT_1f80019e;
@@ -23,7 +23,6 @@ int FUN_800331c4(TObj *o)
     Fix16 *h1, *h2;
     short i, m, n, c, k;
     short best;
-    unsigned short u;
     int wx, wy;
     short x;
 
@@ -65,7 +64,7 @@ int FUN_800331c4(TObj *o)
         m = k;
         best = list[k]->y.p.whole;
         for (i = k; i < n; i++) {
-            if (best < list[i]->y.p.whole) {
+            if (list[i]->y.p.whole > best) {
                 m = i;
                 best = list[i]->y.p.whole;
             }
@@ -76,7 +75,6 @@ int FUN_800331c4(TObj *o)
     }
     if (n != 0) {
         k = 0x14;
-        do {} while (0);
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
         for (i = 0; list[i] != 0; i++) {
