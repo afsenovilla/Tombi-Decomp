@@ -1,6 +1,5 @@
 // FUNC 8002eb34 680 MAIN0
-/* wip (score 98, 672 vs 680 B): game computes b = r & 1 into a0 and copies it to s2 (move s2,a0), and case 1
-   copies b again before the *3 (move v0,a0); gcc here merges b into s. Everything else lines up (shifted 8 B). */
+// MATCHING 8002eb34 680
 #include "TOBJ.H"
 
 extern TObj *ObjAlloc();
@@ -15,7 +14,10 @@ extern short D_8007A3F0[];
 void func_8002EB34(TObj *o)
 {
     TObj *n;
-    int r, s, b, i;
+    short r;
+    short s;
+    short b;
+    short i;
 
     switch (o->b04) {
     case 0:
@@ -56,8 +58,8 @@ void func_8002EB34(TObj *o)
                 n->d->raw = o->d->raw;
                 i = r & 0xf0;
                 n->h->raw += (D_8007A5F0[i] * s) >> 4;
-                n->b04 = 1;
                 n->y.raw += (D_8007A3F0[i] * s) >> 4;
+                n->b04 = 1;
                 FUN_8002eddc(n);
             }
             break;
