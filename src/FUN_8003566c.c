@@ -1,12 +1,13 @@
 // FUNC 8003566c 5708 MAIN0
-/* wip: remaining diffs: (1) case 3/5 clamp "w30 > 0x60 - b0*16": game recomputes sll/subu in the then-branch (keeps only the lbu), ours CSEs the shift; (2) case 5 "waa = TB(2)+0x80; if (af&1) waa = (waa+0x40)&0xff": game reloads waa (lhu 0xaa) in each branch, ours folds into the table value. */
+// MATCHING 8003566c 5708
 #include "TOBJ.H"
 #include "raw7.h"
 
 typedef struct { short x, y; } P;
-typedef struct { short a, b, c; } D600;
 
 extern TObj D_800A6038;
+extern Fix16 *D_800A6078, *D_800A607C;
+extern short D_800A604E;
 extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
 typedef struct {
@@ -54,7 +55,6 @@ extern void FUN_800efc04(TObj *);
 #define G D_800A6038
 #define TB(n) D_8007A072[(short)(o->animFrame + o->animFrame * 2) + (n) - 1]
 #define TK(n) D_8007A072[k + (n) - 1]
-#define LIMIT() (0x60 - D_8009C330->b0 * 16)
 
 void FUN_8003566c(TObj *o)
 {
@@ -104,12 +104,12 @@ void FUN_8003566c(TObj *o)
         else va = D_8007A04C[i] - 0x20;
         vb = D_8007A04C[i + 1];
         if (o->animFrame >= 6) {
-            x = G.h->p.whole + MulCos((unsigned char)va, vb);
+            x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
-            o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         } else {
-            o->velX = G.h->p.whole + MulCos((unsigned char)va, vb);
-            o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+            o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         }
         o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
@@ -168,12 +168,12 @@ void FUN_8003566c(TObj *o)
         else va = D_8007A04C[i] - 0x20;
         vb = D_8007A04C[i + 1];
         if (o->animFrame >= 6) {
-            x = G.h->p.whole + MulCos((unsigned char)va, vb);
+            x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
-            o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         } else {
-            o->velX = G.h->p.whole + MulCos((unsigned char)va, vb);
-            o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+            o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         }
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 0x10);
@@ -213,7 +213,7 @@ void FUN_8003566c(TObj *o)
         }
     case 3:
         D_8009C338->w30 += o->wa8 >> 8;
-        if (D_8009C338->w30 > 0x60 - (unsigned short)(D_8009C330->b0 * 16)) D_8009C338->w30 = 0x60 - (unsigned short)(D_8009C330->b0 * 16);
+        if (D_8009C338->w30 > 0x60 - D_8009C330->b0 * 16) D_8009C338->w30 = 0x60 - (D_8009C330->b0 << 4);
         D_8009C338->w32 -= (o->wa8 >> 8) * 2;
         if (D_8009C338->w32 < 0) D_8009C338->w32 = 0;
         o->wa8 -= 0x280;
@@ -271,12 +271,12 @@ void FUN_8003566c(TObj *o)
             D_8009C338->bd = 0;
             o->wa8 = 0x2000;
             D_8009C338->w30 += 0x20;
-            if (D_8009C338->w30 > 0x60 - (unsigned short)(D_8009C330->b0 * 16)) D_8009C338->w30 = 0x60 - (unsigned short)(D_8009C330->b0 * 16);
+            if (D_8009C338->w30 > 0x60 - D_8009C330->b0 * 16) D_8009C338->w30 = 0x60 - (D_8009C330->b0 << 4);
             D_8009C338->w32 -= o->wa8 >> 8;
             if (D_8009C338->w32 < 0) D_8009C338->w32 = 0;
-            if (o->animFrame & 1) o->velX = G.h->p.whole + 0x10;
-            else o->velX = G.h->p.whole - 0x10;
-            o->velY = G.y.p.whole - 0x10;
+            if (o->animFrame & 1) o->velX = D_800A6078->p.whole + 0x10;
+            else o->velX = D_800A6078->p.whole - 0x10;
+            o->velY = D_800A604E - 0x10;
             t.x = o->velX + MulCos(D_8009C338->we, 0xc);
             t.y = o->velY + MulNegSinScaled(D_8009C338->we, 0xc);
             s.x = o->h->p.whole;
@@ -291,13 +291,13 @@ void FUN_8003566c(TObj *o)
                 if (G.b9e == 4 || G.b9e == 7) *(unsigned char *)o->d94 = D_8009C330->b6;
                 o->waa = TB(2) + 0x80;
                 if (o->animFrame & 1) {
+                    o->velX = D_800A6078->p.whole + 0x10;
                     o->waa = (o->waa + 0x40) & 0xff;
-                    o->velX = G.h->p.whole + 0x10;
                 } else {
+                    o->velX = D_800A6078->p.whole - 0x10;
                     o->waa = (o->waa - 0x40) & 0xff;
-                    o->velX = G.h->p.whole - 0x10;
                 }
-                o->velY = G.y.p.whole - 0x10;
+                o->velY = D_800A604E - 0x10;
                 o->h->p.whole = o->velX + MulCos(o->waa, 0xc);
                 o->y.p.whole = o->velY + MulNegSinScaled(o->waa, 0xc);
                 D_8009C338->w32 = 0;
@@ -351,8 +351,8 @@ void FUN_8003566c(TObj *o)
         if (o->animFrame & 1) va = 0x80 - D_8007A04C[i];
         else va = D_8007A04C[i];
         vb = D_8007A04C[i + 1];
-        o->velX = G.h->p.whole + MulCos((unsigned char)va, vb);
-        o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+        o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+        o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         FUN_80031588(D_8009D600, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
@@ -402,8 +402,8 @@ void FUN_8003566c(TObj *o)
         if (o->animFrame & 1) va = 0x80 - D_8007A04C[i];
         else va = D_8007A04C[i];
         vb = D_8007A04C[i + 1];
-        o->velX = G.h->p.whole + MulCos((unsigned char)va, vb);
-        o->velY = G.y.p.whole + MulNegSinScaled((unsigned char)va, vb);
+        o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+        o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         FUN_80031588(D_8009D600, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
