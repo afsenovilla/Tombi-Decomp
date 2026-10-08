@@ -1,45 +1,52 @@
 // FUNC 80111dc8 400 X000
-/* score 27 (was 59): left: table value s loaded into v0 and copied to v1 (move v1,v0 in bnez slot), merge block of the y update starts with lw y (ours sll t), and the d8c angle diff loads w78 with lbu (game lhu, (d-0x80)-w order kept only via a char cast). char pad[4] restores the 8-byte frame. */
+/* score 6: only the velX sum register differs (game: addu v1,v0,v1 i.e. sum tied to s in v1; ours sum in v0 tied to the velX load). Reusing r (the table value) for the sum keeps the s=r copy in the bnez delay slot (score 27 -> 6). y update written in full in both branches (cross-jump gives the lw-first merge block). Tried: s/r/a types, s+=, inline sel(), x temps, r reused for d. */
 #include "TOBJ.H"
 extern short DAT_8013c984[];
 extern short DAT_8007a1f0[], DAT_8007a5f0[];
 
-void FUN_80111dc8(TObj *o)
+static __inline__ void f(TObj *o)
 {
-    int u;
     int s;
     char pad[4];
+    int r;
     short a;
-    int d;
     int t;
     unsigned int v;
+    int d;
 
     if (o->b69) {
         o->b69 = 0;
-        u = ((o->d38 + 0x800) & 0xfff) >> 4;
-        o->w78 = u;
-        if (u > 0x80) o->w78 = 0x80;
+        o->w78 = ((o->d38 + 0x800) & 0xfff) >> 4;
+        if (o->w78 > 0x80) o->w78 = 0x80;
         o->velY = 0x100;
-        s = DAT_8013c984[(unsigned)(o->w78 - 0x40) >> 3 & 0xf];
-        if (s == 0 && (s = -4, o->velX < 0)) s = 4;
-        s = (unsigned short)o->velX + s;
-        o->velX = s;
-        a = -s;
+        r = DAT_8013c984[(unsigned)(o->w78 - 0x40) >> 3 & 0xf];
+        s = r;
+        if (r == 0) {
+            s = -4;
+            if (o->velX < 0) s = 4;
+        }
+        r = (unsigned short)o->velX + s;
+        a = -r;
+        o->velX = r;
         o->velV = (a * DAT_8007a1f0[o->w78]) >> 12;
         o->velH = (a * DAT_8007a5f0[o->w78]) >> 12;
         o->h->raw += o->velH << 8;
-        t = o->velV;
+        o->y.raw = o->y.raw + (o->velV << 8);
     } else {
         o->velY += 0x20;
         if (o->velY > 0x380) o->velY = 0x380;
-        t = o->velY;
+        o->y.raw = o->y.raw + (o->velY << 8);
     }
-    o->y.raw = (t << 8) + o->y.raw;
     d = o->d8c;
-    v = (char)(d - 0x80 - (unsigned short)o->w78) & 0xff;
+    { int w = (unsigned short)o->w78; v = (unsigned char)(d - 0x80 - w); }
     if (v != 0) {
         if (v < 0x80) o->d8c = d - 1;
         else o->d8c = d + 1;
         o->d8c = (unsigned char)o->d8c;
     }
+}
+
+void FUN_80111dc8(TObj *o)
+{
+    f(o);
 }
