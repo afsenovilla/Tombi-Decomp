@@ -1,5 +1,5 @@
 // FUNC 80038cd0 1152 MAIN0
-// Score 10: only case 2 differs: game keeps p[1] in a1 and loads vars[p[2]] into v1 before computing the p[1] address; ours reuses v1 for p[1].
+// Score 10: only case 2 differs: game keeps p[1] in a1 and loads vars[p[2]] into v1 before computing the p[1] address; ours reuses v1 for p[1]. b18 tried: i1/i2/v temps in every order and type (int/short/uchar/ushort), function-scope i/r as temps, inline get/set helpers, q = p+1 forms, p = D_8009D60C + pc forms: all stay 10 (local-alloc ties p[1] to the dying p register).
 typedef struct {
     unsigned short lab[0x45];
     unsigned short pc;   /* 0x8a */
