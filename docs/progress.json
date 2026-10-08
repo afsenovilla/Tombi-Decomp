@@ -2,32 +2,32 @@
   "date": "2026-10-08",
   "totals": {
     "lib": 98992,
-    "named": 9172,
-    "unnamed": 517112,
+    "named": 34236,
+    "unnamed": 492048,
     "typed": 399676,
     "game": 526284,
     "n_game": 1044,
-    "n_named": 57,
-    "n_unnamed": 987,
+    "n_named": 189,
+    "n_unnamed": 855,
     "n_typed": 568,
     "n_lib": 901,
     "excluded": 479,
-    "unnamed_typed": 397860
+    "unnamed_typed": 394744
   },
-  "matching_bytes": 151860,
+  "matching_bytes": 167848,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
       "lib": 98952,
-      "named": 8136,
-      "unnamed": 220192,
+      "named": 33200,
+      "unnamed": 195128,
       "typed": 129292,
       "n_lib": 898,
-      "n_named": 52,
-      "n_unnamed": 464,
+      "n_named": 184,
+      "n_unnamed": 332,
       "n_typed": 188,
       "excluded": 479,
       "n_excluded": 479,
-      "unnamed_typed": 127920,
+      "unnamed_typed": 124804,
       "range": [
         2147574772,
         2147973359

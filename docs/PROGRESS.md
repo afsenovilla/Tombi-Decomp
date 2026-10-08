@@ -6,8 +6,8 @@ _Generado con `python tools/progress.py` (2026-10-08). No editar a mano._
 
 | Nivel | Progreso | Bytes | Funciones |
 |---|---|---|---|
-| **C que coincide byte a byte (matching)** | **28.9 %** `[#######.................]` | 151860 / 526284 | 615 |
-| Nombradas por nosotros | 1.7 % `[........................]` | 9172 / 526284 | 57 / 1044 |
+| **C que coincide byte a byte (matching)** | **31.9 %** `[########................]` | 167848 / 526284 | 636 |
+| Nombradas por nosotros | 6.5 % `[##......................]` | 34236 / 526284 | 189 / 1044 |
 | Con la estructura TObj aplicada (cobertura, no es avance de C) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
 
 "Codigo de juego" = funciones dentro del codigo de los programas analizados, **sin** contar las de la
@@ -17,7 +17,7 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 
 | Programa | Codigo de juego | Nombrado | Tipado (TObj) | Matching | Libreria Psy-Q |
 |---|---|---|---|---|---|
-| MAIN0.EXE (nucleo del juego) | 228328 B (516 f) | 3.6 % | 56.6 % | 32.3 % (342 f) | 98952 B |
+| MAIN0.EXE (nucleo del juego) | 228328 B (516 f) | 14.5 % | 56.6 % | 39.3 % (363 f) | 98952 B |
 | X000.BIN (overlay AREA00) | 297956 B (528 f) | 0.3 % | 90.7 % | 26.2 % (273 f) | 40 B |
 
 ## Que NO esta contado (el denominador real es mayor)

@@ -1,70 +1,391 @@
 address,name,confidence,comment
+80016984,FlipFrame,alta,doble buffer: PutDispEnv/PutDrawEnv/DrawOTag/ClearOTagR
 80016a44,GsSetOrign,alta,Psy-Q (sugerido por Ghidra)
+80016a5c,initGlobalState,media,psx_tomba (alineado de direcciones)
+80016b50,initGraphics,media,psx_tomba (alineado de direcciones)
+80016ca8,initDisplay,media,psx_tomba (alineado de direcciones)
+80016fc0,compactOrderingTable,alta,psx_tomba (por bytes)
+8001703c,initTasks,alta,psx_tomba (por bytes)
+80017088,ThreadTableRun,media,recorre tabla de hilos en 801FD800 (0x38 bytes c/u): estado 2/3 -> OpenTh/ChangeTh
+8001715c,startTask,alta,psx_tomba (por bytes)
+800171b8,ThreadCreate,media,ThreadCreate(slot; funcion) rellena la tabla de hilos y hace OpenTh
+80017238,ThreadWaitFrames,media,estado de hilo=1 con contador y ChangeTh al hilo principal
+8001726c,exitTask,alta,psx_tomba (por bytes)
+80017328,setTask,alta,psx_tomba (por bytes)
+80017414,tickTaskTimers,alta,psx_tomba (por bytes)
+8001747c,setTaskEntry,alta,psx_tomba (por bytes)
+800174fc,loadTIM,alta,psx_tomba (por bytes)
+800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
+80017678,resetDrawLists,alta,psx_tomba (por bytes)
+80017b44,initHud,alta,psx_tomba (por bytes)
+80017d04,clearAreaConfig,alta,psx_tomba (por bytes)
+80017d30,initObjectPoolUnlayered,alta,psx_tomba (por bytes)
+80017dd4,initObjectPoolLayer1,alta,psx_tomba (por bytes)
+80017ea8,initObjectPool,alta,psx_tomba (por bytes)
+80017f50,initLayer1DrawList,alta,psx_tomba (por bytes)
+80017f80,initMainDrawList,alta,psx_tomba (por bytes)
+80017fec,initLayer4DrawList,alta,psx_tomba (por bytes)
+8001801c,initObjectPoolLayer8,alta,psx_tomba (por bytes)
+800180f8,initLayer5DrawList,alta,psx_tomba (por bytes)
+80018128,clearLayer1Buffer,alta,psx_tomba (por bytes)
+80018154,clearOtBuffer,alta,psx_tomba (por bytes)
+80018180,initObjectPoolLayer7,alta,psx_tomba (por bytes)
+80018254,clearMenuState,alta,psx_tomba (por bytes)
+80018280,clearMenuParams,alta,psx_tomba (por bytes)
+800182ac,initObjectPoolLayer7,media,psx_tomba (alineado de direcciones)
+800183b8,allocObjectLayer2,alta,psx_tomba (por bytes)
+80018448,ObjAlloc,alta,saca un objeto del pool (lista en scratchpad 1F800208; contador 1F800238)
+800184d8,allocObjectLayer4,alta,psx_tomba (por bytes)
+80018568,allocObjectLayer5,alta,psx_tomba (por bytes)
+800185f8,allocObjectLayer1,media,psx_tomba (alineado de direcciones)
+80018678,allocObjectLayer,media,psx_tomba (alineado de direcciones)
+800186f8,allocObjectUnlayered,alta,psx_tomba (por bytes)
+80018744,freeObjectLayer1,alta,psx_tomba (alineado de direcciones)
+80018790,freeObjectLayer2,alta,psx_tomba (alineado de direcciones)
+800187e4,ObjFree,alta,pone a cero campos del objeto y lo devuelve al pool de ObjAlloc (1F800208)
+80018838,ObjFreeDup,alta,copia identica de ObjFree
+8001888c,freeObjectLayer8,alta,psx_tomba (por bytes)
+800188e0,freeObjectLayer5,alta,psx_tomba (alineado de direcciones)
+80018934,freeObjectLayer7,alta,psx_tomba (alineado de direcciones)
+80018980,PoolFree_1F800210,media,pone a 0 el objeto y lo devuelve a otra reserva de libres (contador 1F80023E)
+80018c2c,ObjListPush_1F800218,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018c68,ObjListPush_1F80021C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018ca4,ObjListPush_1F800220,media,igual que las ObjListPush pero con tope de 0x56 objetos
+80018cf0,ObjListPush_1F800224,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018d2c,ObjListPush_1F800230,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018d68,ObjListPush_1F800228,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018da4,ObjListPush_1F80022C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
+80018de0,initSpriteSlots,alta,psx_tomba (por bytes)
+80018ebc,initSpriteSlots8,alta,psx_tomba (por bytes)
+80018f68,initAreaScripts,alta,psx_tomba (por bytes)
+80019084,MemCardInit,alta,OpenEvent/EnableEvent de tarjeta + _bu_init
+80019b0c,titleScreenHandler,alta,psx_tomba (por bytes)
+80019cec,gameStateDispatcher,alta,psx_tomba (por bytes)
+80019d88,introSequenceHandler,alta,psx_tomba (por bytes)
+80019f98,gameplayStateDispatcher,alta,psx_tomba (por bytes)
+8001a0f0,displayDebugScreen,alta,psx_tomba (por bytes)
+8001a43c,debugSelectHandler,alta,psx_tomba (por bytes)
+8001a64c,gameplayMainHandler,alta,psx_tomba (por bytes)
+8001a940,gameplayTick,alta,psx_tomba (por bytes)
+8001acdc,phoenixMountainTick,alta,psx_tomba (por bytes)
+8001b328,inventoryScreenTick,alta,psx_tomba (por bytes)
+8001b680,cutsceneAreaTick,alta,psx_tomba (por bytes)
+8001b9b0,specialAreaTick,alta,psx_tomba (por bytes)
+8001baf4,cutsceneAreaHandler,media,psx_tomba (alineado de direcciones)
+8001bcd8,eventAreaTick,alta,psx_tomba (por bytes)
+8001be1c,displayLoadingScreen,alta,psx_tomba (por bytes)
+8001beec,resolveAreaVariant,alta,psx_tomba (por bytes)
+8001c314,setAreaSubState,alta,psx_tomba (por bytes)
+8001c9a8,openMenuScreen,alta,psx_tomba (por bytes)
+8001d4b0,MovieDecodeFrame,alta,StGetNext + DecDCTvlc + StFreeRing (video FMV)
+8001d63c,cdSeekStream,alta,psx_tomba (por bytes)
+8001dbdc,SoundUpdate,alta,por frame: cola de comandos de sonido + fundidos de musica
+8001e1ec,getSfxVabOffset,alta,psx_tomba (por bytes)
+8001e228,keyOffSfxVoice,alta,psx_tomba (por bytes)
+8001e288,setSoundChannel,alta,psx_tomba (por bytes)
+8001e430,SoundFindFreeVoice,media,busca voz libre entre las 16..23 del SPU
+8001e4f0,SfxPlay,media,reserva voz y lanza efecto de sonido (id&0x3ff); devuelve voz o -1
+8001e560,SfxPlay2,media,como SfxPlay pero carga ademas un segundo sonido (param2&0xFF|0x8000)
+8001e5f4,SfxPlay3,media,variante de SfxPlay con ids 0x8100/0x800
+8001e9e8,setEventComplete,media,psx_tomba (alineado de direcciones)
+8001eaa4,playSfxWrapped,alta,psx_tomba (por bytes)
+8001eb64,startAreaBgm,alta,psx_tomba (por bytes)
+8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
+8001f4bc,SoundStopAll,alta,para secuencias y apaga todas las voces
+8001f5b8,setReverbMode,alta,psx_tomba (por bytes)
+8001f620,MusicMute,alta,flag + SsSeqSetVol a 0
+8001f658,MusicUnmute,alta,restaura volumen guardado
+8001f690,SfxStopAll,alta,SpuSetKey(0 apagar 0xFF0000) = voces 16..23
+8001f6b4,SoundInit,alta,SsStart + SpuSetCommonAttr + reserva de voces
+8001f820,SoundShutdown,alta,SsEnd
+8001f8e4,ObjSetFacingToPlayer,media,compara X del objeto con scratchpad 1F80016A y pone +0x2E a 1 o 0
+8001f9e0,Rand,alta,LCG 0x41C64E6D+0x3039; semilla en scratchpad 1F800200
+8001fa20,applyAnimVelocityXY,alta,psx_tomba (por bytes)
+8001fa60,applyAnimVelocityY,alta,psx_tomba (por bytes)
+8001fa88,applyAnimVelocityX,alta,psx_tomba (por bytes)
+8001fab4,applyFrameVelocityXY,alta,psx_tomba (por bytes)
+8001faf4,applyFrameVelocityX,alta,psx_tomba (por bytes)
+8001fb20,applyFrameVelocityY,alta,psx_tomba (por bytes)
+8001fce4,ObjApplyVelocity,media,suma +0x80/+0x82 (x256) a la posicion X y a +0x14
+8001fd48,applyObjectAltSpeedXY,alta,psx_tomba (por bytes)
+8001fd94,ObjAddVelY7E,media,Y(+0x14) += short(+0x7E)*0x100
+8001fdac,MulNegSinScaled,alta,tabla 8007A1F0 = -2867*sin(2*pi*i/256); resultado = tabla[i]*v*16>>16
+8001fddc,MulCos,alta,tabla 8007A5F0 = 4096*cos(2*pi*i/256); resultado = tabla[i]*v*16>>16
+8001fe0c,MulNegSin,alta,tabla 8007A3F0 = -4096*sin(2*pi*i/256)
+8001fe3c,MulCosDup,media,igual que MulCos (misma tabla 8007A5F0)
+8001fe6c,AnimLoadDuration,media,param+0x2c = duracion del fotograma actual (&0x3fff)
+8001fe94,AnimJump,media,salta el script de animacion un desplazamiento relativo y recarga la duracion
+8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
+800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
+80020eac,loadCollisionBounds,alta,psx_tomba (por bytes)
+80020f14,fontDebugPrintf,alta,psx_tomba (por bytes)
+800212b4,drawNowLoading,alta,psx_tomba (por bytes)
+80021340,drawUiSprite,alta,psx_tomba (por bytes)
+80021478,drawNowLoadingSprite,alta,psx_tomba (por bytes)
+800216c4,setSpawnAreaFlag,alta,psx_tomba (por bytes)
+80021aec,loadSectionHeight,alta,psx_tomba (por bytes)
+80021f5c,getBaseMatrix,alta,psx_tomba (por bytes)
+80026a10,addPlayerAP,alta,psx_tomba (por bytes)
+80026bfc,spawnItemNotification,alta,psx_tomba (por bytes)
+80026c50,addItemToInventory,alta,psx_tomba (por bytes)
+80026e0c,removeItemFromInventory,alta,psx_tomba (por bytes)
+80026f4c,increaseMaxHealth,alta,psx_tomba (por bytes)
+80027124,updateInventoryOverlay,alta,psx_tomba (por bytes)
+800277f8,syncObjectTargetY,alta,psx_tomba (por bytes)
+80028420,stepScrollReturnY,alta,psx_tomba (por bytes)
+800284d8,stepScrollApproachX,alta,psx_tomba (por bytes)
+80028b40,stepScrollClearX,alta,psx_tomba (por bytes)
+80028f94,handleInventoryScroll,alta,psx_tomba (por bytes)
+8002b020,updateObjectsLayer8,alta,psx_tomba (por bytes)
+8002b8cc,spawnItemPickupObject,alta,psx_tomba (por bytes)
+8002b920,cloneItemPickupObject,alta,psx_tomba (por bytes)
+8002dc50,showMessageBox,alta,psx_tomba (por bytes)
+8002dcc8,showMessageBoxDirect,alta,psx_tomba (por bytes)
+8002dcf0,showMessageBoxDirectTimed,alta,psx_tomba (por bytes)
+80030f38,updateObjectsLayer7,alta,psx_tomba (por bytes)
+80037e18,loadCompressedTIM,alta,psx_tomba (por bytes)
+80037fbc,scriptStart,alta,psx_tomba (por bytes)
+80038024,scriptReset,alta,psx_tomba (por bytes)
+8003840c,scriptOpBranch,alta,psx_tomba (por bytes)
+8003bafc,lzDecompress,alta,psx_tomba (por bytes)
+8003bd80,updateObjectsLayer1,alta,psx_tomba (por bytes)
+8003be14,updateItemPickupAnim,alta,psx_tomba (por bytes)
+8003c7c4,applyItemEffect,alta,psx_tomba (por bytes)
+8003c980,initItemObject,alta,psx_tomba (por bytes)
+8003e300,ObjSpawnType0,media,ObjSpawn(0..)
+8003e33c,ObjSpawnType1,media,ObjSpawn(1..)
+8003e378,spawnItemAtPos,alta,psx_tomba (por bytes)
+8003e3cc,spawnItemDropAtPos,alta,psx_tomba (por bytes)
+8003e420,spawnItemBounce,alta,psx_tomba (por bytes)
+8003e474,ObjSpawnType5,media,ObjSpawn(5..)
+8003e4b0,ObjSpawnType8,media,ObjSpawn(8..)
+8003e4ec,ObjSpawn,media,crea objeto: tipo=param1 subtipo=param2 posicion desde struct param4
+8003f598,lzDecompressToBuffer,media,psx_tomba (alineado de direcciones)
+8003facc,ObjCheckHeadCollision,media,limita Y al techo (DAT_800A4580-0x90) y prueba colision a x+-4 / y-0x15
+8003fd78,ObjTileCollide,media,carga hitbox (+0x6C..+0x72) de tabla segun anim y prueba colision con el mapa
+80040278,TileCollideAt,media,prepara 1F800278 y llama a la comprobacion de colision en (x y)
+800408d8,rewardFlowerSeeds,media,psx_tomba (alineado de direcciones)
+8004094c,rewardPigBag,media,psx_tomba (alineado de direcciones)
+8004258c,decreaseObjectTimer,alta,psx_tomba (por bytes)
+8004c0dc,updateObjectsUnlayered,alta,psx_tomba (por bytes)
+8004db4c,drawInfoMessageText,alta,psx_tomba (por bytes)
+8004f38c,loadSoundBank,alta,psx_tomba (por bytes)
+8004f3bc,startSoundTask,alta,psx_tomba (por bytes)
+8004fb68,loadAreaResources,alta,psx_tomba (por bytes)
+80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
+80059728,addTilePrim,alta,psx_tomba (por bytes)
+8005a7a0,awardEventProgress,alta,psx_tomba (por bytes)
+8005a8a8,setEventStarted,alta,psx_tomba (por bytes)
+8005a9a4,setEventComplete,alta,psx_tomba (por bytes)
 8005b9c4,EnterCriticalSection,alta,Psy-Q
 8005b9d4,ExitCriticalSection,alta,Psy-Q
 8005ba64,GetGp,alta,Psy-Q
+8005bd24,bcopy,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bd58,bzero,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bd88,memcpy,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bdbc,memset,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bdec,rand,alta,"Psy-Q (psx_tomba, por bytes)"
+8005be2c,strcat,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bed4,strcmp,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bf38,strcpy,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bf7c,strlen,alta,"Psy-Q (psx_tomba, por bytes)"
+8005bfac,strncat,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c020,strncpy,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c098,strstr,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c7d0,toupper,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c800,tolower,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c830,memchr,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c880,putchar,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c934,sprintf,alta,"Psy-Q (psx_tomba, por bytes)"
+8005d190,memmove,alta,"Psy-Q (psx_tomba, por bytes)"
+8005d21c,_card_clear,alta,"Psy-Q (psx_tomba, por bytes)"
 8005d274,InitCARD,alta,Psy-Q
 8005d2c8,StartCARD,alta,Psy-Q
+8005e088,LoadTPage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e174,LoadClut,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e1dc,LoadClut2,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e244,SetDefDrawEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e314,SetDefDispEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e350,GetTPage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e420,GetClut,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e438,DumpTPage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e508,DumpClut,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e548,NextPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e564,IsEndPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e580,AddPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e5bc,AddPrims,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e5f8,CatPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e61c,TermPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e634,SetSemiTrans,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e65c,SetShadeTex,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e684,SetPolyF3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e698,SetPolyFT3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e6ac,SetPolyG3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e6c0,SetPolyGT3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e6d4,SetPolyF4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e6e8,SetPolyFT4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e6fc,SetPolyG4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e710,SetPolyGT4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e724,SetSprt8,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e738,SetSprt16,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e74c,SetSprt,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e760,SetTile1,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e774,SetTile8,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e788,SetTile16,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e79c,SetTile,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e7b0,SetLineF2,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e7c4,SetLineG2,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e7d8,SetLineF3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e7f8,SetLineG3,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e818,SetLineF4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e838,SetLineG4,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e858,SetDrawTPage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e90c,SetDrawMove,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e96c,SetDrawLoad,alta,"Psy-Q (psx_tomba, por bytes)"
+8005e9d8,MargePrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ea10,DumpDrawEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005eb90,DumpDispEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ec3c,ResetGraph,alta,"Psy-Q (psx_tomba, por bytes)"
+8005edc0,SetGraphReverse,alta,"Psy-Q (psx_tomba, por bytes)"
+8005eed4,SetGraphDebug,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ef38,SetGraphQueue,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f004,DrawSyncCallback,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f060,SetDispMask,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f0fc,DrawSync,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f168,checkRECT,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f290,ClearImage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f324,ClearImage2,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f3c0,LoadImage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f424,StoreImage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f488,MoveImage,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f54c,ClearOTag,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f604,ClearOTagR,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f69c,DrawPrim,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f6fc,DrawOTag,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f770,PutDrawEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f874,DrawOTagEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f990,GetDrawEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005f9c8,PutDispEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005fe70,GetDispEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+8005fea8,GetODE,alta,"Psy-Q (psx_tomba, por bytes)"
+8005fed8,SetTexWindow,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ff14,SetDrawArea,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ff98,SetDrawOffset,alta,"Psy-Q (psx_tomba, por bytes)"
+8005ffdc,SetPriority,alta,"Psy-Q (psx_tomba, por bytes)"
+80060008,SetDrawMode,alta,"Psy-Q (psx_tomba, por bytes)"
+80060060,SetDrawEnv,alta,"Psy-Q (psx_tomba, por bytes)"
+80060278,SetDrawEnv2,alta,"Psy-Q (psx_tomba, por bytes)"
+80060508,get_mode,alta,"Psy-Q (psx_tomba, por bytes)"
+80060560,get_cs,alta,"Psy-Q (psx_tomba, por bytes)"
+8006062c,get_ce,alta,"Psy-Q (psx_tomba, por bytes)"
+800606f8,get_ofs,alta,"Psy-Q (psx_tomba, por bytes)"
+8006073c,get_tw,alta,"Psy-Q (psx_tomba, por bytes)"
+800607c0,get_dx,alta,"Psy-Q (psx_tomba, por bytes)"
+80060888,_otc,alta,"Psy-Q (psx_tomba, por bytes)"
+80060970,_clr,alta,"Psy-Q (psx_tomba, por bytes)"
+80060bcc,_dws,alta,"Psy-Q (psx_tomba, por bytes)"
+80060e08,_drs,alta,"Psy-Q (psx_tomba, por bytes)"
+8006108c,_ctl,alta,"Psy-Q (psx_tomba, por bytes)"
+800610c8,_cwb,alta,"Psy-Q (psx_tomba, por bytes)"
+80061118,_cwc,alta,"Psy-Q (psx_tomba, por bytes)"
+80061164,_param,alta,"Psy-Q (psx_tomba, por bytes)"
+80061194,_addque,alta,"Psy-Q (psx_tomba, por bytes)"
+800611b8,_addque2,alta,"Psy-Q (psx_tomba, por bytes)"
+80061498,_exeque,alta,"Psy-Q (psx_tomba, por bytes)"
+80061784,_reset,alta,"Psy-Q (psx_tomba, por bytes)"
+800618e0,_sync,alta,"Psy-Q (psx_tomba, por bytes)"
+80061a28,set_alarm,alta,"Psy-Q (psx_tomba, por bytes)"
+80061a5c,get_alarm,alta,"Psy-Q (psx_tomba, por bytes)"
+80061bc8,_version,alta,"Psy-Q (psx_tomba, por bytes)"
+80061ca4,GPU_memset,alta,"Psy-Q (psx_tomba, por bytes)"
+80061ce0,OpenTIM,alta,"Psy-Q (psx_tomba, por bytes)"
+80061cf0,ReadTIM,alta,"Psy-Q (psx_tomba, por bytes)"
+80061d58,OpenTMD,alta,"Psy-Q (psx_tomba, por bytes)"
+80061d98,ReadTMD,alta,"Psy-Q (psx_tomba, por bytes)"
+80062044,get_tim_addr,alta,"Psy-Q (psx_tomba, por bytes)"
+80062164,get_tmd_addr,alta,"Psy-Q (psx_tomba, por bytes)"
+800622fc,unpack_packet,alta,"Psy-Q (psx_tomba, por bytes)"
+8006347c,rsin,alta,"Psy-Q (psx_tomba, por bytes)"
+800634b8,sin_1,alta,"Psy-Q (psx_tomba, por bytes)"
+80063548,rcos,alta,"Psy-Q (psx_tomba, por bytes)"
+800635e8,SetFogNear,alta,"Psy-Q (psx_tomba, por bytes)"
+80063844,InitGeom,alta,psx_tomba (alineado de direcciones)
+80063e6c,SetTransMatrix,alta,"Psy-Q (psx_tomba, por bytes)"
+80063e8c,SetVertex0,alta,"Psy-Q (psx_tomba, por bytes)"
+80063e9c,SetVertex1,alta,"Psy-Q (psx_tomba, por bytes)"
+80063eac,SetVertex2,alta,"Psy-Q (psx_tomba, por bytes)"
+80063ebc,SetVertexTri,alta,"Psy-Q (psx_tomba, por bytes)"
+80063edc,SetRGBfifo,alta,"Psy-Q (psx_tomba, por bytes)"
+80063ef0,SetIR123,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f04,SetIR0,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f10,SetSZfifo3,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f24,SetSZfifo4,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f3c,SetSXSYfifo,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f50,SetRii,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f64,SetMAC123,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f78,SetData32,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f84,SetDQA,alta,"Psy-Q (psx_tomba, por bytes)"
+80063f90,SetDQB,alta,"Psy-Q (psx_tomba, por bytes)"
 80063fdc,SetGeomOffset,alta,Psy-Q
 80063ffc,SetGeomScreen,alta,Psy-Q
+800649bc,ratan2,alta,"Psy-Q (psx_tomba, por bytes)"
+80064bdc,StSetRing,alta,"Psy-Q (psx_tomba, por bytes)"
+80064c0c,CdInit,alta,"Psy-Q (psx_tomba, por bytes)"
+80064c9c,def_cbsync,alta,"Psy-Q (psx_tomba, por bytes)"
+80064d64,CdReset,alta,"Psy-Q (psx_tomba, por bytes)"
+80064e08,CdComstr,alta,"Psy-Q (psx_tomba, por bytes)"
+80064e3c,CdIntstr,alta,"Psy-Q (psx_tomba, por bytes)"
+80064ee0,CdControl,alta,"Psy-Q (psx_tomba, por bytes)"
+80065018,CdControlF,alta,"Psy-Q (psx_tomba, por bytes)"
+80065144,CdControlB,alta,"Psy-Q (psx_tomba, por bytes)"
+80065288,CdMix,alta,"Psy-Q (psx_tomba, por bytes)"
+800652a8,CdGetSector,alta,"Psy-Q (psx_tomba, por bytes)"
+800652c8,CdDataCallback,alta,"Psy-Q (psx_tomba, por bytes)"
+8006530c,CdIntToPos,alta,"Psy-Q (psx_tomba, por bytes)"
+80065410,CdPosToInt,alta,"Psy-Q (psx_tomba, por bytes)"
+80065490,getintr,alta,"Psy-Q (psx_tomba, por bytes)"
+80065a18,CD_sync,alta,"Psy-Q (psx_tomba, por bytes)"
+80065c98,CD_ready,alta,"Psy-Q (psx_tomba, por bytes)"
+80065f64,CD_cw,alta,"Psy-Q (psx_tomba, por bytes)"
+80066380,CD_vol,alta,"Psy-Q (psx_tomba, por bytes)"
+80066408,CD_flush,alta,"Psy-Q (psx_tomba, por bytes)"
+800664e8,CD_initvol,alta,"Psy-Q (psx_tomba, por bytes)"
+800665dc,CD_initintr,alta,"Psy-Q (psx_tomba, por bytes)"
+8006662c,CD_init,alta,"Psy-Q (psx_tomba, por bytes)"
+80066818,CD_datasync,alta,"Psy-Q (psx_tomba, por bytes)"
+80066984,CD_getsector,alta,"Psy-Q (psx_tomba, por bytes)"
+80066a94,callback,alta,"Psy-Q (psx_tomba, por bytes)"
+80066bc8,cb_read,alta,"Psy-Q (psx_tomba, por bytes)"
+80066ddc,cd_read_retry,alta,"Psy-Q (psx_tomba, por bytes)"
+80066fa8,CdReadBreak,alta,"Psy-Q (psx_tomba, por bytes)"
+80066ff8,CdRead,alta,"Psy-Q (psx_tomba, por bytes)"
+800670d8,CdReadSync,alta,"Psy-Q (psx_tomba, por bytes)"
+800671bc,CdRead2,alta,"Psy-Q (psx_tomba, por bytes)"
+80067270,StClearRing,alta,"Psy-Q (psx_tomba, por bytes)"
 800672d0,StUnSetRing,alta,Psy-Q
+80067328,data_ready_callback,alta,"Psy-Q (psx_tomba, por bytes)"
+800673b8,StGetBackloc,alta,"Psy-Q (psx_tomba, por bytes)"
+80067418,StSetStream,alta,"Psy-Q (psx_tomba, por bytes)"
+800674a0,StFreeRing,alta,"Psy-Q (psx_tomba, por bytes)"
+80067558,init_ring_status,alta,"Psy-Q (psx_tomba, por bytes)"
+80067594,StGetNext,alta,"Psy-Q (psx_tomba, por bytes)"
 80067658,StSetMask,alta,Psy-Q
+80067fe8,mem2mem,alta,"Psy-Q (psx_tomba, por bytes)"
+800681d8,VSync,alta,"Psy-Q (psx_tomba, por bytes)"
+80068320,v_wait,alta,"Psy-Q (psx_tomba, por bytes)"
+80068cd4,startIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
+80068d24,trapIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
+80068ea8,setIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
 80068f7c,SetVideoMode,alta,Psy-Q
+80068f94,GetVideoMode,alta,devuelve la variable que escribe SetVideoMode
+80068fc4,PadInit,media,psx_tomba (alineado de direcciones)
+80069050,StartPAD,media,psx_tomba (alineado de direcciones)
+8006911c,StopPAD,media,psx_tomba (alineado de direcciones)
+8006bfa4,_SsInit,media,psx_tomba (alineado de direcciones)
+8006eb00,SsStart,media,psx_tomba (alineado de direcciones)
 80071738,_SsVmDamperOff,alta,Psy-Q
 80071748,_SsVmDamperOn,alta,Psy-Q
 800745a8,SsSetAutoKeyOffMode,alta,Psy-Q
 800758d0,SpuQuit,alta,Psy-Q
 800773c0,_spu_setInTransfer,alta,Psy-Q
 800773ec,_spu_getInTransfer,alta,Psy-Q
-8001fdac,MulNegSinScaled,alta,tabla 8007A1F0 = -2867*sin(2*pi*i/256); resultado = tabla[i]*v*16>>16
-8001fddc,MulCos,alta,tabla 8007A5F0 = 4096*cos(2*pi*i/256); resultado = tabla[i]*v*16>>16
-8001fe6c,AnimLoadDuration,media,param+0x2c = duracion del fotograma actual (&0x3fff)
-8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
-80016984,FlipFrame,alta,doble buffer: PutDispEnv/PutDrawEnv/DrawOTag/ClearOTagR
-80018448,ObjAlloc,alta,saca un objeto del pool (lista en scratchpad 1F800208; contador 1F800238)
-80017088,ThreadTableRun,media,recorre tabla de hilos en 801FD800 (0x38 bytes c/u): estado 2/3 -> OpenTh/ChangeTh
-800171b8,ThreadCreate,media,ThreadCreate(slot; funcion) rellena la tabla de hilos y hace OpenTh
-8001d4b0,MovieDecodeFrame,alta,StGetNext + DecDCTvlc + StFreeRing (video FMV)
-8001dbdc,SoundUpdate,alta,por frame: cola de comandos de sonido + fundidos de musica
-8001e430,SoundFindFreeVoice,media,busca voz libre entre las 16..23 del SPU
-8001e4f0,SfxPlay,media,reserva voz y lanza efecto de sonido (id&0x3ff); devuelve voz o -1
-8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
-8001f4bc,SoundStopAll,alta,para secuencias y apaga todas las voces
-8001f6b4,SoundInit,alta,SsStart + SpuSetCommonAttr + reserva de voces
-80019084,MemCardInit,alta,OpenEvent/EnableEvent de tarjeta + _bu_init
-80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
-800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
-8001fe0c,MulNegSin,alta,tabla 8007A3F0 = -4096*sin(2*pi*i/256)
-8001fe3c,MulCosDup,media,igual que MulCos (misma tabla 8007A5F0)
-8001f9e0,Rand,alta,LCG 0x41C64E6D+0x3039; semilla en scratchpad 1F800200
-8001fe94,AnimJump,media,salta el script de animacion un desplazamiento relativo y recarga la duracion
-8001fce4,ObjApplyVelocity,media,suma +0x80/+0x82 (x256) a la posicion X y a +0x14
-80017238,ThreadWaitFrames,media,estado de hilo=1 con contador y ChangeTh al hilo principal
-8001f620,MusicMute,alta,flag + SsSeqSetVol a 0
-8001f658,MusicUnmute,alta,restaura volumen guardado
-8001f690,SfxStopAll,alta,SpuSetKey(0 apagar 0xFF0000) = voces 16..23
-8001f820,SoundShutdown,alta,SsEnd
-80068f94,GetVideoMode,alta,devuelve la variable que escribe SetVideoMode
-8003e4ec,ObjSpawn,media,crea objeto: tipo=param1 subtipo=param2 posicion desde struct param4
-8003e300,ObjSpawnType0,media,ObjSpawn(0..)
-8003e33c,ObjSpawnType1,media,ObjSpawn(1..)
-8003e474,ObjSpawnType5,media,ObjSpawn(5..)
-8003e4b0,ObjSpawnType8,media,ObjSpawn(8..)
-80018980,PoolFree_1F800210,media,pone a 0 el objeto y lo devuelve a otra reserva de libres (contador 1F80023E)
-80018c2c,ObjListPush_1F800218,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018c68,ObjListPush_1F80021C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018cf0,ObjListPush_1F800224,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018d2c,ObjListPush_1F800230,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018d68,ObjListPush_1F800228,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018da4,ObjListPush_1F80022C,media,anade el objeto a la lista de objetos visibles de un tipo (pila descendente)
-80018ca4,ObjListPush_1F800220,media,igual que las ObjListPush pero con tope de 0x56 objetos
-800187e4,ObjFree,alta,pone a cero campos del objeto y lo devuelve al pool de ObjAlloc (1F800208)
-80018838,ObjFreeDup,alta,copia identica de ObjFree
-800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
-8001e560,SfxPlay2,media,como SfxPlay pero carga ademas un segundo sonido (param2&0xFF|0x8000)
-8001e5f4,SfxPlay3,media,variante de SfxPlay con ids 0x8100/0x800
-8001f8e4,ObjSetFacingToPlayer,media,compara X del objeto con scratchpad 1F80016A y pone +0x2E a 1 o 0
-8001fd94,ObjAddVelY7E,media,Y(+0x14) += short(+0x7E)*0x100
-8003fd78,ObjTileCollide,media,carga hitbox (+0x6C..+0x72) de tabla segun anim y prueba colision con el mapa
-80040278,TileCollideAt,media,prepara 1F800278 y llama a la comprobacion de colision en (x y)
-8003facc,ObjCheckHeadCollision,media,limita Y al techo (DAT_800A4580-0x90) y prueba colision a x+-4 / y-0x15

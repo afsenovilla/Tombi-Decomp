@@ -107,7 +107,8 @@ def main():
     shutil.rmtree(WORK, ignore_errors=True); os.makedirs(WORK + "/inc")
     inc = os.path.join(ROOT, "include")
     if os.path.isdir(inc):
-        for f in os.listdir(inc): shutil.copy(os.path.join(inc, f), WORK + "/inc/" + f.upper())
+        for f in os.listdir(inc):
+            if os.path.isfile(os.path.join(inc, f)): shutil.copy(os.path.join(inc, f), WORK + "/inc/" + f.upper())
     pre = ["mount c %s" % os.path.dirname(WORK), "mount d %s" % PSYQ, "c:", "cd %s" % os.path.basename(WORK)]
     env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
     bat = []
