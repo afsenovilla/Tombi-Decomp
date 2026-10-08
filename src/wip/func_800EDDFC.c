@@ -1,4 +1,5 @@
 // FUNC 800eddfc 408 X000
+/* score 10 (ncheck): inner case 0 - game loads o->b6 before o->y (lbu 6; lhu 0x16; addiu; sh 0x80; sb 6; sh 0x7e) */
 typedef struct O {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
     char p0[0x16 - 8]; unsigned short y;
@@ -8,18 +9,18 @@ typedef struct O {
     char p4[0x84 - 0x82]; int d84; int d88; int d8c;
     char p5[0x94 - 0x90]; struct O *p94;
 } O;
-extern void FUN_800202b4(O *);
-extern unsigned char DAT_800a60d6[];
-extern unsigned short DAT_800a6066;
+extern void ObjCullRegister(O *);
+extern unsigned char D_800A60D6[];
+extern unsigned short D_800A6066;
 
-void FUN_800eddfc(O *o)
+void func_800EDDFC(O *o)
 {
     unsigned short v;
     int w;
     switch (o->b5) {
     case 0: {
         O *p = o->p94;
-        FUN_800202b4(p);
+        ObjCullRegister(p);
         o->b1 = p->b1;
         if (o->b6 == 0) o->b6++;
         if (o->b69 & 2) {
@@ -33,7 +34,7 @@ void FUN_800eddfc(O *o)
     }
     case 1: {
         O *p = o->p94;
-        FUN_800202b4(p);
+        ObjCullRegister(p);
         o->b1 = p->b1;
         switch (o->b6) {
         case 0:
@@ -45,13 +46,13 @@ void FUN_800eddfc(O *o)
             o->d8c = 0x1000;
             o->s7c = v;
         case 1:
-            if (DAT_800a6066 & 1) o->s7a = 1;
+            if (D_800A6066 & 1) o->s7a = 1;
             else o->s7a = -1;
             o->b6++;
         case 2:
             p = o->p94;
             o->d8c = ((p->d84 >> 3) + 0x1000) & 0xfff;
-            if (DAT_800a60d6[0] == 0) {
+            if (D_800A60D6[0] == 0) {
                 o->d8c = 0;
                 o->b69 = 0;
                 o->b5 = 0;
