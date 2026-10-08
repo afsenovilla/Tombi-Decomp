@@ -1,11 +1,11 @@
 // FUNC 80113484 720 X000
 // MATCHING 80113484 720
+// Debt left: register asm index (tried ~200 temp/type/order forms: best 7, loads or v0/v1 swapped); one second extern name.
 #include "TOBJ.H"
 typedef void (*ObjFn)(TObj *);
 typedef union { int w; struct { unsigned short a, b; } h; } Stage;
 extern Stage DAT_8009c960;
-extern Stage DAT_8009c960b;
-extern Stage DAT_8009c960c;
+extern Stage DAT_8009c960c; /* debt: second name; with one name CSE (follow-jumps) shares one la between .w and the else .h.a in the anim block, the game reloads; tried casts, switch, goto, ptr temp, inverted if */
 extern unsigned char DAT_8009cf9d;
 extern int DAT_1f8002e0[];
 extern int DAT_1f8002d4[];
@@ -45,7 +45,7 @@ void FUN_80113484(TObj *o)
                 /* debt: register asm; local-alloc otherwise gives the earlier-born index $2 */
                 register int i asm("$3");
                 i = o->b0c & 0x7f;
-                o->w1e = DAT_80115a18[DAT_8009c960c.h.a * 4 + i];
+                o->w1e = DAT_80115a18[DAT_8009c960.h.a * 4 + i];
             }
             o->d3c = DAT_1f8002d4[0];
         }
@@ -65,7 +65,7 @@ void FUN_80113484(TObj *o)
         }
         *(signed char *)&o->b0f = -3;
         o->wac = 0;
-        if (DAT_8009c960b.w == 0x30009)
+        if (DAT_8009c960.w == 0x30009)
             o->anim = *DAT_80115a08[o->b0c & 0x7f];
         else
             o->anim = *DAT_80115948[DAT_8009c960c.h.a * 4 + (o->b0c & 0x7f)];
