@@ -1,4 +1,5 @@
 // FUNC 800ebc64 220 X000
+// MATCHING 800ebc64 220
 #include "TOBJ.H"
 extern unsigned short DAT_800a6066;
 extern int DAT_1f8002c8[];
@@ -17,9 +18,9 @@ void FUN_800ebc64(TObj *o)
     o->b0a = 2;
     o->b0d = 0x80;
     *(signed char *)&o->b0f = -7;
-    o->category |= 0x80;
     o->d8c = 0;
     o->b6b = 0;
     o->animFrame = u & 1;
+    o->category |= 0x80;
     o->b04++;
 }

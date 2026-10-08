@@ -10,11 +10,11 @@ extern char DAT_800b0bc1[];
 
 void FUN_80018ebc(void)
 {
+    int k = 0;
     int a = 0;
     char c = -0x62;
     int i = 0;
-    int k;
-    for (k = 0;; k += 10) {
+    for (;; k += 10) {
         DAT_800b0bbc[k] = a;
         a += 4;
         *(short *)(DAT_800b0bb8 + k) = -1;

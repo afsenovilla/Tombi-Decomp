@@ -10,6 +10,7 @@ int FUN_8006ab10(char *o, int a)
         *(char **)(o + 0x14) = LAB_8006ab78;
         *(int *)(o + 0x20) = a;
         *(char **)(o + 0x18) = LAB_8006ab94;
+        return 1;
     }
-    return r == 0;
+    return 0;
 }
