@@ -1,6 +1,5 @@
-/* wip: score 56. Falla solo el orden de scheduling en dos bloques: case 0 (copias de env.r0/g0/b0 y carga de
-   D_1F8001D4 para w4e++) y case 4 (lw de D_80077A8C antes de los sb). Permutaciones de sentencias no lo arreglan. */
 // FUNC 8001aeb4 1140 MAIN0
+// MATCHING 8001aeb4 1140
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
     RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
@@ -18,7 +17,7 @@ extern G *D_1F8001D4;
 extern unsigned char D_1F8001CF, D_1F8001CE, D_1F8001C2;
 extern short D_1F8001C6;
 extern unsigned short D_1F8003B8, D_1F8003BA;
-extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8009F086[], D_8009F087[];
 extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
@@ -62,15 +61,15 @@ void func_8001AEB4(void)
         r.h = 1;
         StoreImage(&r, (unsigned long *)0x801FBBA0);
         GetDrawEnv(&env);
-        D_8009E375 = 0xf8;
-        D_8009F085 = 0xf8;
-        D_8009E376 = 200;
-        D_8009F086 = 200;
-        D_8009E377 = 0xc0;
-        D_8009F087 = 0xc0;
+        D_8009F085[0] = 0xf8;
+        D_8009E376[0] = 200;
+        D_8009F087[0] = 0xc0;
+        D_8009E377[0] = 0xc0;
+        D_8009F086[0] = 200;
         D_8009BC98 = env.r0;
         D_8009BC9C = env.g0;
         D_8009BCA0 = env.b0;
+        D_8009E375[0] = 0xf8;
         D_1F8001D4->w4e++;
         break;
     case 1:
@@ -117,12 +116,12 @@ void func_8001AEB4(void)
         r.h = 1;
         LoadImage(&r, (unsigned long *)0x801FBBA0);
         D_1F8001CE = 0;
-        D_8009E375 = D_8009BC98;
-        D_8009F085 = D_8009BC98;
-        D_8009E376 = D_8009BC9C;
-        D_8009E377 = D_8009BCA0;
-        D_8009F086 = D_8009BC9C;
-        D_8009F087 = D_8009BCA0;
+        D_8009E375[0] = D_8009BC98;
+        D_8009F085[0] = D_8009BC98;
+        D_8009E376[0] = D_8009BC9C;
+        D_8009E377[0] = D_8009BCA0;
+        D_8009F086[0] = D_8009BC9C;
+        D_8009F087[0] = D_8009BCA0;
         n = D_80077A8C[D_8009C960 + D_8009F838][D_8009C962];
     play:
         FUN_8004fa80(n, 1);
@@ -148,12 +147,12 @@ void func_8001AEB4(void)
         D_8009C974 = 0;
         D_8009C967 = 0;
         stopBgm(0);
-        D_8009E375 = 0;
-        D_8009E376 = 0;
-        D_8009E377 = 0;
-        D_8009F085 = 0;
-        D_8009F086 = 0;
-        D_8009F087 = 0;
+        D_8009E375[0] = 0;
+        D_8009E376[0] = 0;
+        D_8009E377[0] = 0;
+        D_8009F085[0] = 0;
+        D_8009F086[0] = 0;
+        D_8009F087[0] = 0;
         D_1F8001D4->b68 = 1;
         D_1F8001D4->w48 = 1;
         D_1F8001D4->w4a = 1;

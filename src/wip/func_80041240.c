@@ -1,5 +1,5 @@
 // FUNC 80041240 576 MAIN0
-/* score 98: structure matches; game has an extra copy "move a1,a2" of cs before "bgez" (neg branch uses copy, else branch uses a2) which shifts all temp regs by one; game also hoists (short)y before x&7 */
+/* score 98: structure matches; game has an extra copy "move a1,a2" of cs before "bgez" (neg branch uses copy, else branch uses a2) which shifts all temp regs by one. Hoisting (short)y before x&7 is fixed by "int ys = (short)y;" before "xm = x & 7" (same score). Tried t = cs copies, k inline per branch. */
 extern unsigned short *D_1F800278;
 extern unsigned short D_1F800284;
 extern short *func_8003F200(int, int);

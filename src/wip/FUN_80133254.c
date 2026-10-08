@@ -1,11 +1,11 @@
 // FUNC 80133254 544 X000
-// wip: logica OK; difiere el scheduling del caso 0 (constante 8 en v1, lw h tras los sh) y regs a2/a1 de anim[2] en casos 1-2
+// wip: score 34 (antes 85). DAT_8013b188 como array y orden de stores del caso 0 por permutacion; falta: lw h tras los sh de 8, y en casos 1-2 el sh animFrame va al final (a2) con lh+lhu de velY.
 #include "TOBJ.H"
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_800a6066;
 extern void *DAT_8013b17c;
 extern void *DAT_8013b184;
-extern void *DAT_8013b188;
+extern void *DAT_8013b188[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern short FUN_80040278(TObj *, int, int);
@@ -15,12 +15,12 @@ void FUN_80133254(TObj *o)
     switch (o->state) {
     case 0:
         o->box0 = 8;
-        o->box2 = 8;
         o->box1 = 0x10;
+        o->box2 = 8;
         o->box3 = 0x10;
-        o->active = 2;
         o->velY = -0x400;
         o->velX = o->h->p.whole;
+        o->active = 2;
         o->anim = DAT_8013b184;
         FUN_8001fe6c(o);
         o->w78 = 1;
@@ -41,7 +41,7 @@ void FUN_80133254(TObj *o)
         o->velY += 0x20;
         if (FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x20))) {
             o->animFrame = DAT_800a6066 ^ 1;
-            o->anim = DAT_8013b188;
+            o->anim = DAT_8013b188[0];
             FUN_8001fe6c(o);
             o->state = 3;
         }
