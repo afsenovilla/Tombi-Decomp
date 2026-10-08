@@ -1,6 +1,7 @@
 // FUNC 80120494 672 X000
 // MATCHING 80120494 672
 /* Debt: register asm("$3") on q (global-alloc puts it in $6 otherwise; tried decl orders, types, inline tail, goto/inline layouts). */
+/* Tried (debt2): full tail per case with block-local p/a/q gives q=$3, temp=$6 like the game, but sched puts "lw a0,0xa0" after the q load so cross-jumping swallows it (score 114, any order/scope); goto tail + p=(int*)p[1] reuse: 14. */
 typedef struct {
     char p0[5];
     unsigned char step;
