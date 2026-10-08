@@ -1,19 +1,22 @@
 // FUNC 8003facc 196 MAIN0
-extern short DAT_800a4580[];
-extern short FUN_800408d8(int, int, int);
+#include "TOBJ.H"
+extern short D_800A4580;
+short FUN_800408d8(TObj *o, short a, short b);
 
-int ObjCheckHeadCollision(int p)
+int ObjCheckHeadCollision(TObj *o)
 {
     short r;
-    short y = *(short *)(p + 0x16);
-    if (y < DAT_800a4580[0] - 0x90) {
-        *(short *)(p + 0x16) = DAT_800a4580[0] - 0x90;
+    TObj *s;
+    short y = o->y.p.whole;
+    short top = D_800A4580;
+    s = o;
+    if (y < top - 0x90) {
+        o->y.p.whole = top - 0x90;
         return 1;
     }
-    if ((r = FUN_800408d8(p, (short)(*(unsigned short *)(*(int *)(p + 0x40) + 2) + 4), (short)(y - 0x15))) != 0)
+    if ((r = FUN_800408d8(s, s->h->p.whole + 4, y - 0x15)) != 0)
         return r;
-    if ((r = FUN_800408d8(p, (short)(*(unsigned short *)(*(int *)(p + 0x40) + 2) - 4),
-                          (short)(*(unsigned short *)(p + 0x16) - 0x15))) != 0)
+    if ((r = FUN_800408d8(s, s->h->p.whole - 4, s->y.p.whole - 0x15)) != 0)
         return r;
     return 0;
 }
