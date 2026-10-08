@@ -1,19 +1,21 @@
 // FUNC 80124a84 312 X000
+// wip: solo falla que el juego recalcula u6-u5 (subu) en el segundo bloque; aqui CSE lo reutiliza.
 #include "TOBJ.H"
 
-static __inline__ int inl(TObj *a, TObj *b)
+int FUN_80124a84(TObj *a, TObj *b)
 {
-    unsigned short u5, u6;
-    short d, e, s;
-    u5 = b->box0;
-    u6 = a->h->p.whole;
+    int u5, u6;
+    short d, e, s, t;
+    u5 = (unsigned short)b->box0;
+    u6 = (unsigned short)a->h->p.whole;
     if ((unsigned short)(u6 - u5) <= (d = b->h->p.whole - u5)) {
         if ((unsigned short)(a->box2 + (a->y.p.whole - b->y.p.whole)) > (e = b->box2 - b->y.p.whole) + a->box3)
             return 0;
-        if ((short)(u6 - u5) <= 0)
+        t = u6 - u5;
+        if (t <= 0)
             s = 0;
         else
-            s = (short)(u6 - u5) * e / d;
+            s = t * e / d;
         if (b->box2 - s <= a->y.p.whole + a->box2) {
             a->y.p.whole = b->box2 - s - a->box2;
             a->y.p.frac = 0;
@@ -23,9 +25,4 @@ static __inline__ int inl(TObj *a, TObj *b)
         }
     }
     return 0;
-}
-
-int FUN_80124a84(TObj *a, TObj *b)
-{
-    return inl(a, b);
 }
