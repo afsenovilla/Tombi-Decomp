@@ -1,6 +1,7 @@
 // FUNC 800f262c 248 X000
+// MATCHING 800f262c 248
 extern unsigned char *DAT_8009c330;
-extern unsigned short DAT_8009d670;
+extern volatile unsigned short DAT_8009d670[];
 extern unsigned short DAT_1f8003c6;
 extern void FUN_8010f328(void);
 
@@ -12,7 +13,7 @@ void FUN_800f262c(unsigned char *o)
         DAT_8009c330[8] = 1;
         o[6] = 2;
     }
-    if ((DAT_8009d670 & DAT_1f8003c6) != 0) {
+    if ((DAT_8009d670[0] & DAT_1f8003c6) != 0) {
         if (DAT_8009c330[8] != 0)
             return;
         u = *(short *)(DAT_8009c330 + 0x20) + 1;

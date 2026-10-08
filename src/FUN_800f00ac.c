@@ -1,4 +1,5 @@
 // FUNC 800f00ac 712 X000
+// MATCHING 800f00ac 712
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern int FUN_800eff1c(TObj *);
@@ -6,7 +7,7 @@ extern void FUN_8003fd78(TObj *, int, int);
 extern TObj *DAT_80096330;
 extern int DAT_8009c984;
 extern unsigned short DAT_1f8003c4;
-extern unsigned short DAT_8009d670[];
+extern volatile unsigned short DAT_8009d670[];
 extern unsigned char DAT_8009d2b0[];
 
 void FUN_800f00ac(TObj *o)
@@ -19,7 +20,7 @@ void FUN_800f00ac(TObj *o)
         case 1:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            if ((DAT_8009c984 & 0x40) && (DAT_1f8003c4 & DAT_8009d670[0])) o->ba7 = 1;
+            if ((DAT_8009c984 & 0x40) && (DAT_8009d670[0] & DAT_1f8003c4)) o->ba7 = 1;
             B(DAT_80096330, 8) = o->animFrame & 1;
             o->step = 0x10;
             o->state = 0;
@@ -42,7 +43,7 @@ void FUN_800f00ac(TObj *o)
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
             B(DAT_80096330, 8) = o->animFrame & 1;
-            if ((DAT_8009c984 & 0x40) && (DAT_1f8003c4 & DAT_8009d670[0])) o->ba7 = 1;
+            if ((DAT_8009c984 & 0x40) && (DAT_8009d670[0] & DAT_1f8003c4)) o->ba7 = 1;
             o->step = 0x1e;
             o->state = 0;
             break;
