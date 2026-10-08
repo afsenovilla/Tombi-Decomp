@@ -1,43 +1,52 @@
 // FUNC 80028754 368 MAIN0
-/* w5: score 126 (was 138). Left: game has move t0,a0 at entry (o copy), e6 address in a2/a0 regs, and the two
-   `e6 = 0x3a - d` stores are not cross-jumped; ours is 16 B shorter. */
-typedef struct O { char p[0x32]; short y32; } O;
+/* w5: score 103, rewritten from the mirror function func_800285EC (matched). Body matches except the game moves o to t0 (move t0,a0 in the first bne slot, addiu sp first), so n gets a0; inline wrappers/local copies of o did not help. */
+typedef struct { char p[0x32]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
-extern short DAT_1f8000f2;
-extern short DAT_1f80016e;
-extern short DAT_1f8000e6[];
-extern short E6;
+extern unsigned short F2u;
+extern short F2;
+extern unsigned short DAT_1f80016e;
+extern short E[];
+extern short E2;
 
-static __inline__ void body(O *o)
+static __inline__ int calc(void)
 {
-    short d;
-    short t;
-    short *e;
-    if (DAT_800a60d6 == 3)
-        { unsigned short b = DAT_1f8000f2 - 0x14; d = b - DAT_800a606c; }
-    else
-        d = DAT_1f8000f2 - DAT_1f80016e;
-    t = d + *e;
-    if (t != 0x3a) {
-        if (t < 0x3a) {
-            if (t < -6) {
-                DAT_1f8000f2 += 2;
-                if (o->y32 < DAT_1f8000f2) DAT_1f8000f2 = o->y32;
-                else d += 2;
-            } else {
-                *e += 2;
-            }
-            if (d + *e > 0x3a) *e = 0x3a - d;
-        } else {
-            *e -= 2;
-            if (d + *e < 0x3a) *e = 0x3a - d;
-        }
+    int t;
+    if (DAT_800a60d6 == 3) {
+        t = F2u - 0x14;
+        return t - DAT_800a606c;
     }
-    if (o->y32 < DAT_1f8000f2 + E6) E6 = o->y32 - DAT_1f8000f2;
+    return F2u - DAT_1f80016e;
 }
 
-void FUN_80028754(O *o)
+void FUN_80028754(TObj *o)
 {
-    body(o);
+    char pad;
+    short n;
+    int s;
+    int r;
+    r = calc();
+    s = r;
+    r = 0;
+    n = s;
+    n += E[0];
+    if (n != 0x3a) {
+        if (n < 0x3a) {
+            if (n < -6) {
+                F2 += 2;
+                if (*(short *)((char *)o + 0x32) < F2) F2 = *(short *)((char *)o + 0x32);
+                else s += 2;
+            } else {
+                E[0] += 2;
+            }
+            if ((short)s + E[0] > 0x3a)
+                E[0] = 0x3a - s;
+        } else {
+            E[0] -= 2;
+            if ((short)s + E[0] < 0x3a)
+                E[0] = 0x3a - s;
+        }
+    }
+    if (o->y < F2 + E2)
+        E2 = o->y - F2;
 }
