@@ -79,3 +79,11 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
 - **Orden del prologo (`addiu sp` ANTES de `lui/lw` global, con el `li`/`sw ra` despues)**: nuestro -O2 mueve el `subu sp` al delay slot del primer `lh/lw` global; en el binario esta primero. NO resuelto (probado: volatile, pad, literal de direccion, -fno-schedule-insns2, if/else invertido). Afecta a FUN_80114890, FUN_800184d8, FUN_80059728 (wip, solo difieren en eso). Si alguien lo resuelve, arregla varias.
 - Un `char pad;` sin usar reproduce frames de 8 bytes sin saves (`char pad[4]` da 16).
 - Para fijar `lhu` en la lectura y `lh` en el test del bucle sobre la misma global, declara dos externs con el mismo simbolo de distinto tipo (`DAT_x` short y `DAT_x_u` unsigned short): el nombre no importa para los bytes.
+
+## Aprendido (hard.csv, funciones medianas)
+- **Declaraciones a mitad de bloque** (`int t = ...;` tras otras sentencias) hicieron que gcc 2.7 descartase la sentencia: declara siempre las locales al principio de la funcion (FUN_80108f60).
+- **Orden de stores del scheduler**: si solo difiere la posicion de UN store en una cadena de stores, prueba a moverlo a todas las posiciones (script trivial: mover cada linea a cada hueco y llamar a matchcheck). FUN_80123648: el `sw s2,0x94` iba tras el `0x18`.
+- **Arbol `beq 1 / slti 4`** con `x<4 ? x&1 : 3`: escribe `if (t != 1) {ternario} else {...}` (el bloque fallthrough es el primero). FUN_80125984. Retorno `short` de callee => `sll/bltz` (declara `extern short f()`).
+- **Parametros `int` con `(short)` solo en el uso** (p.ej. `sll s0,a1,5` sin extension previa): declara el parametro `int` y castea al pasarlo (FUN_801306f0, en wip por asignacion s0/s1).
+- Constantes de direccion `lui+addiu` que se pasan a funciones: declara `extern char DAT_x[]` y pasa el array (no el literal 0x800d7e28); si se usa 2 veces gcc la guarda en un s-reg.
+- **Epilogo `jr $ra; addiu $sp` (delay slot lleno)** aparece en las funciones de libreria 0x8006xxxx (libcard...), con la logica ya identica (FUN_8006911c, FUN_800693c8, FUN_80069410): no se arregla con flags (-O1/-O3/-fno-delayed-branch/-mips2 probados). Dejar en wip.
