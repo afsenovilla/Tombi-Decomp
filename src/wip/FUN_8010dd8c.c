@@ -1,5 +1,5 @@
 // FUNC 8010dd8c 504 X000
-// wip: solo falla que el juego RECARGA velY (lh 0x7e) tras el if (U8(o,0xac)==2) y nuestro CSE reutiliza el valor (regs v0/v1 vs v0/a1)
+// wip score 19: velY re-read after the ac==2 block via volatile (game: lh + move copy; volatile gives lhu+sll/sra), timer/velY decrement order swapped to match. Left: that lh form and bgtz delay slot.
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *DAT_8009c330;
@@ -11,7 +11,8 @@ extern void FUN_800eea7c(TObj *, int, int);
 
 void FUN_8010dd8c(TObj *o)
 {
-    short r, w;
+    short r, w, v;
+    unsigned short u;
     int d;
     char pad[8];
 
@@ -41,8 +42,8 @@ void FUN_8010dd8c(TObj *o)
     o->wb2 = w;
     if (w < 0)
         o->wb2 = 0;
-    o->timer--;
     o->velY -= 0x10;
+    o->timer--;
     if (U8(o, 0xac) == 2) {
         DAT_8009d2e8 = S32(o, 0xe4);
         U8(DAT_8009c330, 8) = 0;
@@ -54,9 +55,11 @@ void FUN_8010dd8c(TObj *o)
         U8(o, 0xab) &= 0x7f;
         return;
     }
-    if (o->velY >= 0) {
+    v = *(volatile short *)&o->velY;
+    u = v;
+    if (v >= 0) {
         if (o->b69) {
-            o->velY -= 0x10;
+            o->velY = u - 0x10;
             o->b69 = 0;
             return;
         }
