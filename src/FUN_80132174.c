@@ -1,6 +1,5 @@
 // FUNC 80132174 1856 X000
-/* score 24: only the b04==0 init tail differs (game loads DAT_1f8002dc and o->b04 right after the AnimLoadDuration call,
-   stores stay in source order); tried statement permutations (random + positional), locals for b04/h/DAT_1f8002dc, E* alias. */
+// MATCHING 80132174 1856
 #include "TOBJ.H"
 typedef struct { TObj o; unsigned short c0, c2, c4, c6, c8, ca, cc, ce, d0; short d2; } E;
 #define EX(o) ((E *)(o))
@@ -49,9 +48,6 @@ static __inline__ void draw(int a, int b)
 void FUN_80132174(TObj *o)
 {
     int d;
-    int t;
-    unsigned char b;
-    Fix16 *h;
 
     switch (o->b04) {
     case 0:
@@ -70,14 +66,12 @@ void FUN_80132174(TObj *o)
         o->wac = 2;
         o->anim = PTR_8013ad38[0];
         FUN_8001fe6c(o);
-        t = DAT_1f8002dc;
-        b = o->b04;
+        o->d3c = DAT_1f8002dc;
         o->movetab = DAT_80077cdc;
         o->timer = 1;
         *(signed char *)&o->b0f = -9;
         EX(o)->c4 = 0xffff;
-        h = o->h;
-        o->b04 = b + 1;
+        o->b04++;
         o->b6a = 0;
         o->step = 0;
         o->state = 0;
@@ -85,11 +79,10 @@ void FUN_80132174(TObj *o)
         o->wb4 = 0;
         EX(o)->c6 = 0;
         EX(o)->ca = 0;
-        o->d3c = t;
+        *(short *)&o->bbe = o->h->p.whole;
         EX(o)->c0 = o->y.p.whole;
-        *(short *)&o->bbe = h->p.whole;
-        o->d64 = 0x1000;
         EX(o)->c2 = o->d->p.whole;
+        o->d64 = 0x1000;
         break;
     case 1:
         if (DAT_8009c942 != 0) {
