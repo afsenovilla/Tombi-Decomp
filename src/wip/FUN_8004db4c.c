@@ -5,8 +5,10 @@ extern void FUN_8004dc10(int);
 void FUN_8004db4c(int a, int idx)
 {
     short *base = (short *)(DAT_1f800398 + *(short *)(DAT_1f800398 + 8));
-    short *p = (short *)((char *)base + base[idx]);
+    short *p;
     unsigned short v;
+
+    p = (short *)((char *)base + *(short *)((char *)base + (idx << 1)));
     
     while (1) {
         v = *p;
