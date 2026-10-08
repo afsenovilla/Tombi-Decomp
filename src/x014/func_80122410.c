@@ -1,0 +1,5 @@
+// FUNC 80122410 8 X014
+// MATCHING 80122410 8
+void func_80122410(void)
+{
+}

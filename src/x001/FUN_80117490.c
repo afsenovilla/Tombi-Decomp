@@ -1,0 +1,8 @@
+// FUNC 80117490 32 X001
+// MATCHING 80117490 32
+extern void FUN_80116990(void);
+
+void FUN_80117490(void)
+{
+    FUN_80116990();
+}
