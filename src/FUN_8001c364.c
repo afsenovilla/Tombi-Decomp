@@ -1,4 +1,5 @@
 // FUNC 8001c364 720 MAIN0
+// MATCHING 8001c364 720
 typedef struct { char p0[0x4e]; unsigned short w4e; } PO;
 typedef struct {
     unsigned short a, b; char p00[3]; unsigned char b7; char p01[0x21 - 8]; unsigned char b21; unsigned short c22; char p1[0x434 - 0x24]; unsigned short d434, d436; char p2[0x440 - 0x438]; unsigned short d440;
@@ -16,7 +17,7 @@ extern unsigned char *PTR_80077b64[];
 extern void FUN_8004fa80(int, int);
 extern void FUN_8001f4bc(void);
 extern int FUN_8001beec(void);
-extern void FUN_8004f3ec(void);
+extern void FUN_8004f3ec(int);
 extern int FUN_8001d1bc(int);
 extern void FUN_8004f490(int, int, int);
 extern void FUN_80039338(void);
@@ -28,7 +29,8 @@ void FUN_8001c364(void)
     G *g;
     int f;
     int u;
-    unsigned short a, b;
+    int idx;
+    unsigned char c;
     switch (D_1f8001d4->w4e) {
     case 0:
         FUN_8004fa80(9, 1);
@@ -64,17 +66,14 @@ void FUN_8001c364(void)
         g->b = g->d436;
         g->c22 = g->d440;
         u = FUN_8001beec() & 0xff;
-        a = D_8009c960a;
-        b = D_8009c962;
-        {
-            unsigned char c = PTR_80077b64[a + DAT_8009f838][b];
-            DAT_1f8001de = 0;
-            DAT_8009d2a8 = a;
-            DAT_8009d2aa = b;
-            DAT_8009d2ac = DAT_8009c982;
-            DAT_1f8001dc = c;
-        }
-        FUN_8004f3ec();
+        idx = D_8009c960a + DAT_8009f838;
+        c = PTR_80077b64[idx][D_8009c962];
+        DAT_1f8001de = 0;
+        DAT_8009d2a8 = D_8009c960a;
+        DAT_8009d2aa = D_8009c962;
+        DAT_8009d2ac = DAT_8009c982;
+        DAT_1f8001dc = c;
+        FUN_8004f3ec(idx);
         if (FUN_8001d1bc(f) != -1) D_8009c960.b7 = 2;
         FUN_8004f490(D_8009c960a + DAT_8009f838, D_8009c962, u | f);
         FUN_80039338();

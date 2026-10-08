@@ -1,4 +1,5 @@
 // FUNC 80127380 332 X000
+// w5: score 20 (was 57). Left: game keeps la DAT_80138fd8 before sll w,2 at the tail label (j slot nop); ours lets reorg pull sll into the j slot, and dx copy (move a1,a2) is missing.
 typedef struct AE { char p0[2]; unsigned short w2; unsigned short w4; unsigned short v; } AE;
 typedef struct H { char p0[2]; unsigned short x; } H;
 typedef struct O {
@@ -31,20 +32,20 @@ int FUN_80127380(O *o)
         o->a = n;
         w = n->w2;
     tail:
-        tb = DAT_80138fd8;
-        tb = (w << 2) + tb;
+        tb = &DAT_80138fd8[w * 4];
         o->w6c = *tb++;
         o->w6e = *tb++;
         o->w70 = *tb;
         o->w72 = tb[1];
         o->t = o->a->v & 0x3fff;
         u = o->a->w4;
-        dx = u & 0xff;
+        k = u & 0xff;
+        dx = k;
         dy = u >> 8;
-        if (o->af & 1) dx = -dx;
+        if (o->af & 1) dx = -k;
         o->h->x += dx;
         o->y += dy;
-        return 0;
+        break;
     case 0x8000:
         goto fin;
     case 0xc000:

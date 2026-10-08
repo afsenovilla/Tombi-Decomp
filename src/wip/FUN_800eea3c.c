@@ -1,5 +1,5 @@
 // FUNC 800eea3c 64 X000
-// wip: solo falta intercambiar v0/v1 (game: lh v1; move v0,v1; tests sobre v1)
+// wip (w5 tried int/short/ushort/uint for r,s in both orders, int return, ghidra-shaped re-read): only v0/v1 swap left (game: lh v1; move v0,v1; tests on v1)
 void FUN_800eea3c(char *o)
 {
     char pad[4];
