@@ -1,5 +1,5 @@
 // FUNC 80100788 4088 X000
-/* score 1167: player step dispatcher. Case order/logic follow the jump table (0x23/0x2f after 0x2e, 0x16/0x49 after 0x48). Main gap: the angle-step inline turn(): game keeps two copies of the 0..255 delta (v1 signed, a1 unsigned) and every case keeps its own compare tree, only the final sw/lbu/sw is cross-jumped; ours merges the trees across cases (~60 instrs shorter). Use /tmp-style jal-offset comparison to locate drift. */
+/* score 1014 (b16: turn() with unsigned int c=(u8)(...); short s=c; unsigned char u=c; s>=4 first: 1167->1014; game still has no andi on u and a bnez/fallthrough a+4 tree): player step dispatcher. Case order/logic follow the jump table (0x23/0x2f after 0x2e, 0x16/0x49 after 0x48). Main gap: the angle-step inline turn(): game keeps two copies of the 0..255 delta (v1 signed, a1 unsigned) and every case keeps its own compare tree, only the final sw/lbu/sw is cross-jumped; ours merges the trees across cases (~60 instrs shorter). Use /tmp-style jal-offset comparison to locate drift. */
 #include "TOBJ.H"
 #include "raw7.h"
 extern unsigned char D_8009D2B0;
@@ -146,15 +146,13 @@ static __inline__ void turn(TObj *o)
 {
     int a = o->d8c;
     int n;
-    int s = (unsigned char)(D_801152E8[o->wb0] - a);
-    unsigned int c = s;
+    unsigned int c = (unsigned char)(D_801152E8[o->wb0] - a);
+    short s = c;
+    unsigned char u = c;
     if (s != 0) {
-        if (c < 0x80) {
-            if (s < 4) {
-                if (s < 2) n = a + 1; else n = a + 2;
-            } else {
-                n = a + 4;
-            }
+        if (u < 0x80) {
+            if (s >= 4) n = a + 4;
+            else if (s < 2) n = a + 1; else n = a + 2;
         } else {
             if (s < 0xfd) n = a - 4;
             else if (s < 0xff) n = a - 2;
