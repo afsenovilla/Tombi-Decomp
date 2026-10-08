@@ -1,9 +1,12 @@
 // FUNC 80118040 1016 X000
-/* score 24 (b30, was 84): loop as `loop: ... goto loop` with manual dp/off pointers (stops hoisting of the table
-   base and the constant 1), subtype chain as if/else-if stores, raw S16 stores for 0x2c/0x20/0xc6 (sink them past the
-   division mults), statement order from hill-climbing (wb4 = h % 10 first, d3c after b0a). Left: prologue (game saves s2
-   and does move s2,a0 before sw s6/lhu s6) and the loop address order: game (off + table) + wc6*140 with wc6 in v0,
-   ours (wc6*140 + table) + off; separate q/k temps get folded back. */
+/* score 6 (b52, was 24): the loop address is now written as an explicit shift chain m = (w << 3) + w; m = (m << 2) - w;
+   m <<= 2 into a second var with q = table + off declared before w/m (higher pseudo number goes first in the
+   commutative addu, so m must be declared after q) and e = m + q. Left: prologue only (game: sw s2; move s2,a0 before
+   sw s6; lhu s6). sched2 -dS: the lhu of stack param t (luid 14, after the reg copies 4..10) is "blocked" by the
+   memory unit after every save store and sinks to the top. Tried t short/ushort/int, K&R, all n/x types.
+   b30 notes: loop as `loop: ... goto loop` with manual dp/off pointers (stops hoisting of the table base and the
+   constant 1), subtype chain as if/else-if stores, raw S16 stores for 0x2c/0x20/0xc6 (sink them past the division
+   mults), statement order from hill-climbing (wb4 = h % 10 first, d3c after b0a). */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -37,6 +40,8 @@ void func_80118040(int n, int x, int y, int z, short t)
     int h;
     unsigned short *dp;
     int off;
+    char *q;
+    int w, m;
 
     FUN_80026a10();
     for (i = 7; i >= 0; i--) {
@@ -90,7 +95,12 @@ void func_80118040(int n, int x, int y, int z, short t)
     py = 1;
     i = 0;
 loop:
-        e = (E118 *)(X(o)->wc6 * 140 + (off + (int)D_800A3FE0));
+        w = X(o)->wc6;
+        m = (w << 3) + w;
+        m = (m << 2) - w;
+        m = m << 2;
+        q = (char *)D_800A3FE0 + off;
+        e = (E118 *)(m + q);
         e->a = 0;
         if (dp[0x5a] != 0 || cnt != 0) {
             e->b = py;
