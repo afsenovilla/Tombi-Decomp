@@ -1,5 +1,5 @@
 // FUNC 80118638 468 X000
-// r11: score 18; diffs: case1/2 game loads b4,bc,c4,cc into a0,a1,v0,v1 first then adds; final neg uses lh (ours lhu).
+// MATCHING 80118638 468
 #define H(o) (*(unsigned short *)(p + (o)))
 #define SH(o) (*(short *)(p + (o)))
 extern unsigned int FUN_8001f9e0(void);
@@ -9,7 +9,6 @@ void func_80118638(char *p)
 {
     short v;
     unsigned short t;
-    short a, b, c, d;
     switch ((unsigned char)p[5]) {
     case 0:
         p[5] = FUN_8001f9e0() & 1;
@@ -30,11 +29,10 @@ void func_80118638(char *p)
             return;
         }
         if (t & 1) {
-            b = H(0xbc) - 1;
-            a = H(0xb4) - 1;
-            c = H(0xc4) + 1;
-            d = H(0xcc) + 1;
-            goto store;
+            H(0xb4)--;
+            H(0xbc)--;
+            H(0xc4)++;
+            H(0xcc)++;
         }
         break;
     case 2:
@@ -48,16 +46,10 @@ void func_80118638(char *p)
             return;
         }
         if (t & 1) {
-            b = H(0xbc) + 1;
-            a = H(0xb4) + 1;
-            c = H(0xc4) - 1;
-            d = H(0xcc) - 1;
-            
-        store:
-            H(0xb4) = a;
-            H(0xbc) = b;
-            H(0xc4) = c;
-            H(0xcc) = d;
+            H(0xb4)++;
+            H(0xbc)++;
+            H(0xc4)--;
+            H(0xcc)--;
         }
         break;
     default:
@@ -68,5 +60,5 @@ void func_80118638(char *p)
     H(0x80) = v;
     if ((unsigned short)(v + 0x80) < 0x101)
         return;
-    v = SH(0x7c); SH(0x7c) = -v;
+    SH(0x7c) *= -1;
 }
