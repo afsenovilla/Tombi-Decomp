@@ -1,4 +1,5 @@
 // FUNC 800388d4 496 MAIN0
+/* score 126 (ncheck). b29: game loads a (lw a2,0x1090) before the switch index andi/addiu/sltiu; ours schedules the index chain into the idx load chain, and regs differ (game: index a1, b v1, r a3, f t1). Tried: sibling FUN_800387e0 style (int address arithmetic, worse), op int/char/short (andi lost), volatile a load, type brute force (only a=uchar helps, wrong). */
 extern unsigned char *DAT_8009f0f0;
 extern int DAT_8009d60c;
 
