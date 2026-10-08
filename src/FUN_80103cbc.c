@@ -1,4 +1,5 @@
 // FUNC 80103cbc 132 X000
+// MATCHING 80103cbc 132
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct R {
     char p0[6]; char b6; char p1[0x16 - 7]; unsigned short s16; char p2[0x20 - 0x18]; short s20;
@@ -25,7 +26,7 @@ void FUN_80103cbc(TO *o)
         o->s7e = 0;
         o->h->s2 = r->h->s2;
         o->s16 = r->s16 - r->s70;
-        o->b6 = 2;
         o->w8c = r->b8c;
+        o->b6 = 2;
     }
 }

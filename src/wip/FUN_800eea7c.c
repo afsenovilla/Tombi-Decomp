@@ -1,5 +1,5 @@
 // FUNC 800eea7c 104 X000
-// FLAGS -O2 -G0 -g
+// FLAGS -O2 -G0
 typedef struct D { char pad[0x2c]; unsigned short a; unsigned short b; } D;
 extern D *DAT_80096330;
 extern void FUN_800efc04(void);
