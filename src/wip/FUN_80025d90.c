@@ -1,4 +1,5 @@
 // FUNC 80025d90 432 MAIN0
+// score 100 (unsigned char b in AXIS; equivalent since a is a byte)
 typedef struct { char p0[9]; unsigned char b9; } G;
 extern unsigned char DAT_8009d618;
 extern G DAT_8009d610;
@@ -10,7 +11,7 @@ extern unsigned short DAT_1f8001fe;
 
 #define AXIS(v, hi, lo) ({                                  \
     unsigned char a = (v);                                      \
-    unsigned short b;                                           \
+    unsigned char b;                                           \
     int r;                                                      \
     (v) = 0;                                                    \
     if ((unsigned)(a - 0x50) < 0x60) r = 0;                     \

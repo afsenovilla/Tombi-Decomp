@@ -10,11 +10,26 @@ extern char DAT_8009d00f;
 extern unsigned int DAT_8009c96c;
 extern char DAT_800b144c[];
 
+/* score 5: unsigned char digits + unsigned char q6 (equivalent mod 256) fix the allocation; left: extra andi 0xff from q6 truncation and a lui/mfhi swap. */
 void FUN_80017b44(void)
 {
-    unsigned int n, q7, q6, q5, q4, q3, q2, q1;
+    unsigned int n;
+    unsigned int q7;
+    unsigned char q6;
+    unsigned int q5;
+    unsigned int q4;
+    unsigned int q3;
+    unsigned int q2;
+    unsigned int q1;
     char *p;
-    unsigned int d0, d1, d2, d3, d4, d5, d6, d7;
+    unsigned char d0;
+    unsigned char d1;
+    unsigned char d2;
+    unsigned char d3;
+    unsigned char d4;
+    unsigned char d5;
+    unsigned char d6;
+    unsigned char d7;
 
     memset(DAT_8009c930, 0, 0x2c);
     DAT_1f8001c6 = 0;

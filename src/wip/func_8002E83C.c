@@ -1,5 +1,5 @@
 // FUNC 8002e83c 624 MAIN0
-/* score 98: game stores anim/d3c via a0 (move a0,sX before a cross-jumped tail sw 0x24(a0); jal AnimLoadDuration; sw 0x3c(a0)) with the D_ loads duplicated in each path; also c-path y mult scheduled early */
+/* score 94 (short r,k): game stores anim/d3c via a0 (move a0,sX before a cross-jumped tail sw 0x24(a0); jal AnimLoadDuration; sw 0x3c(a0)) with the D_ loads duplicated in each path; also c-path y mult scheduled early */
 #include "TOBJ.H"
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -16,7 +16,7 @@ extern void ObjFree(TObj *);
 void func_8002E83C(TObj *o)
 {
     TObj *c, *p;
-    int r, k;
+    short r, k;
     switch (o->b04) {
     case 0:
         switch (o->subtype) {
