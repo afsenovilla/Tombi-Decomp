@@ -1,67 +1,80 @@
-// r9 wip: score 40. Whole function 8012127c..8012160c (splat splits it into 3: func_8012127C/func_801212A0/func_801213D0). Only the prologue differs: game keeps p in a3 as 'addiu a3,0x1c; lhu t0,0(a3); addiu a3,4', we fold it into lhu 28(v1) + p=v1+32 (so p/n regs swap).
 // FUNC 8012127c 912 X000
+// wip r8: score 4, covers whole function (splat split it into func_8012127C/func_801212A0/func_801213D0, 36+304+572 B). Only diff: game does sll v1,n,16; sra v1,v1,16 for g (ours sll v0 / sra v1).
 #include "TOBJ.H"
 typedef struct {
     unsigned char c[0x36];
-    short idx;
-    unsigned char pad[0x18];
-    unsigned char z[3];
-    unsigned char pad2;
-} P;
+    short phase;
+    char p38[0x50 - 0x38];
+    unsigned char z50, z51, z52;
+    char p53;
+} E;
+typedef struct {
+    char p0[0x1c];
+    short n;
+    char p1e[2];
+    E e[1];
+} H;
 extern unsigned char D_80138D74[][8][12];
 
 void func_8012127C(TObj *o)
 {
-    short n, k, r;
-    P *p;
-    p = (P *)((unsigned char *)o->da0 + 0x1c);
-    n = *(unsigned short *)p;
-    p = (P *)((unsigned char *)p + 4);
+    short n;
+    E *e;
+    int ph, g;
+    unsigned short *p;
+    H *h;
+
+    e = (E *)o->da0;
+    e = (E *)((char *)e + 0x1c);
+    n = *(unsigned short *)e;
+    e = (E *)((char *)e + 4);
+
     switch (o->state) {
     case 0:
         o->state++;
         o->ba4 = 0;
         o->timer = 0;
         do {
-            r = (0x20 - n) >> 3;
-            k = (0x20 - n) & 7;
-            p->z[0] = 0;
-            p->z[1] = 0;
-            p->z[2] = 0;
-            p->c[0] = D_80138D74[r][k][0];
-            p->c[1] = D_80138D74[r][k][1];
-            p->c[2] = D_80138D74[r][k][2];
-            p->c[4] = D_80138D74[r][k][3];
-            p->c[5] = D_80138D74[r][k][4];
-            p->c[6] = D_80138D74[r][k][5];
-            p->c[8] = D_80138D74[r][k][6];
-            p->c[9] = D_80138D74[r][k][7];
-            p->c[10] = D_80138D74[r][k][8];
-            p->c[12] = D_80138D74[r][k][9];
-            p->c[13] = D_80138D74[r][k][10];
-            p->c[14] = D_80138D74[r][k][11];
-            p->idx = k;
-            p++;
-        } while (--n);
+            g = n;
+            g = 0x20 - g;
+            ph = (unsigned short)(0x20 - n) & 7;
+            e->z50 = 0;
+            e->z51 = 0;
+            e->z52 = 0;
+            e->c[0] = D_80138D74[g >> 3][ph][0];
+            e->c[1] = D_80138D74[g >> 3][ph][1];
+            e->c[2] = D_80138D74[g >> 3][ph][2];
+            e->c[4] = D_80138D74[g >> 3][ph][3];
+            e->c[5] = D_80138D74[g >> 3][ph][4];
+            e->c[6] = D_80138D74[g >> 3][ph][5];
+            e->c[8] = D_80138D74[g >> 3][ph][6];
+            e->c[9] = D_80138D74[g >> 3][ph][7];
+            e->c[10] = D_80138D74[g >> 3][ph][8];
+            e->c[12] = D_80138D74[g >> 3][ph][9];
+            e->c[13] = D_80138D74[g >> 3][ph][10];
+            e->c[14] = D_80138D74[g >> 3][ph][11];
+            e->phase = ph;
+            e++;
+        } while (--n != 0);
         break;
     case 1:
         do {
-            r = (0x20 - n) >> 3;
-            p->idx = (p->idx + 1) & 7;
-            p->c[0] = D_80138D74[r][p->idx][0];
-            p->c[1] = D_80138D74[r][p->idx][1];
-            p->c[2] = D_80138D74[r][p->idx][2];
-            p->c[4] = D_80138D74[r][p->idx][3];
-            p->c[5] = D_80138D74[r][p->idx][4];
-            p->c[6] = D_80138D74[r][p->idx][5];
-            p->c[8] = D_80138D74[r][p->idx][6];
-            p->c[9] = D_80138D74[r][p->idx][7];
-            p->c[10] = D_80138D74[r][p->idx][8];
-            p->c[12] = D_80138D74[r][p->idx][9];
-            p->c[13] = D_80138D74[r][p->idx][10];
-            p->c[14] = D_80138D74[r][p->idx][11];
-            p++;
-        } while (--n);
+            g = (0x20 - (short)n) >> 3;
+            e->phase = (e->phase + 1) & 7;
+            e->c[0] = D_80138D74[g][e->phase][0];
+            e->c[1] = D_80138D74[g][e->phase][1];
+            e->c[2] = D_80138D74[g][e->phase][2];
+            e->c[4] = D_80138D74[g][e->phase][3];
+            e->c[5] = D_80138D74[g][e->phase][4];
+            e->c[6] = D_80138D74[g][e->phase][5];
+            e->c[8] = D_80138D74[g][e->phase][6];
+            e->c[9] = D_80138D74[g][e->phase][7];
+            e->c[10] = D_80138D74[g][e->phase][8];
+            e->c[12] = D_80138D74[g][e->phase][9];
+            e->c[13] = D_80138D74[g][e->phase][10];
+            e->c[14] = D_80138D74[g][e->phase][11];
+            e++;
+        } while (--n != 0);
         break;
     }
 }
