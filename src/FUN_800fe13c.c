@@ -1,5 +1,5 @@
 // FUNC 800fe13c 1568 X000
-/* score 22: case 2 fixed (D_8009C960 as struct G960 with cf06 at +0x5a6, D_8009D2B1 as [0]: gcc CSE expresses c960/c962 relative to la cf06). Left: case 0 velH/velV block: game loads 0xee after the animFrame store, 0xf2 after sh 0xe0 and y (0x16) after sh velH; ours hoists 0xee to the top. Tried: hill-climb of the case 0 store block, 144 combos raw/struct reads x int/short d x separate temps, inline helpers with o param (28). */
+// MATCHING 800fe13c 1568
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -54,7 +54,9 @@ static __inline__ void SetAnimFromTable(TObj *o)
 void FUN_800fe13c(TObj *o)
 {
     TObj *q;
-    int d;
+    short d;
+    int a1;
+    int a2;
     short v;
     P800FE13C *p;
     unsigned short f;
@@ -107,13 +109,17 @@ void FUN_800fe13c(TObj *o)
         o->visible = 1;
         o->b69 = 0;
         o->velV = 0;
-        d = X(o)->wee - o->h->p.whole;
-        o->velH = d << 2;
+        a1 = S16(o, 0xee) - ((short *)o->h)[1];
+        d = a1;
+        d <<= 2;
+        S16(o, 0x80) = d;
         S16(o, 0xe0) = 0x8c;
         U8(o, 0xa1) = 0;
         U8(o, 0xac) = 0;
-        d = X(o)->wf2 - o->y.p.whole;
-        o->velV = d << 2;
+        a2 = S16(o, 0xf2) - o->y.p.whole;
+        d = a2;
+        d <<= 2;
+        S16(o, 0x82) = d;
         D_8009C330->w2c = 0x10;
         D_8009C330->w2e = 0x10;
         o->anim = D_80010A04;
