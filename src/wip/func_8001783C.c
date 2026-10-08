@@ -1,9 +1,9 @@
 // FUNC 8001783c 776 MAIN0
-/* score 14 (was 74 under current ncheck): b45 random hill-climb over store order + per-global volatile mask (tools in
-   /tmp only). Register pattern now matches the game (li 0x45; li v1,0xff; sw; li 3 ...); only a few store targets are
-   still swapped (CFD0/ea and 1c8/CEAF positions). Volatile externs are debt: they chain the stores (volatile mems
-   depend on each other in sched), which is what makes zero-stores stay early as in the game. Earlier note: scalar
-   externs + all-volatile in game order gave 52. */
+/* score 6 (was 74 under current ncheck): b45 random hill-climb + exhaustive swap/move/volatile-toggle descent over
+   the pre-if store order and per-global volatile mask. Register pattern matches the game; only the stores to
+   DAT_1f8001c8 (game +0x128) and D_8009CEAF (game +0x158) are exchanged. Tried every position pair of those two lines
+   x volatile toggles: none better. Volatile externs are debt (volatile mems are chained in sched, which keeps the
+   zero stores early as in the game). */
 extern volatile unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
@@ -77,7 +77,7 @@ void func_8001783C(void)
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
     FUN_80021f5c(D_1F8000C0);
-    D_8009CFD0 = 1498;
+    DAT_1f8000ea = -544;
     DAT_1f8000ee = 160;
     D_8009CF1C = D_8009F3DC;
     DAT_1f8000f2 = -128;
@@ -86,7 +86,7 @@ void func_8001783C(void)
     DAT_1f800200 = 69;
     DAT_1f8003ce = 0;
     DAT_1f8000f6 = 0;
-    D_8009D090 = 255;
+    DAT_1f8003d2 = 255;
     DAT_1f8003d3 = 255;
     D_8009C96C = 0;
     D_8009C960[0] = 0;
@@ -97,11 +97,11 @@ void func_8001783C(void)
     D_8009C971 = 4;
     D_8009C970 = 4;
     DAT_1f8003d1 = 0;
-    DAT_1f8000ea = -544;
+    D_8009CFD0 = 1498;
     D_8009F838 = 0;
     D_8009C962 = 0;
     D_8009CFD2 = 1593;
-    DAT_1f8003d2 = 255;
+    D_8009D090 = 255;
     D_8009CDA3 = 0;
     D_8009C973 = 1;
     DAT_1f8001c8 = 0;
