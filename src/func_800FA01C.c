@@ -1,5 +1,5 @@
 // FUNC 800fa01c 832 X000
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 800fa01c 832
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
@@ -70,7 +70,7 @@ void func_800FA01C(TObj *o)
     case 1:
         AnimAdvance(o);
         if (D_8009C960 == 0x30000) break;
-        if (D_1f8003c6 & D_1f8001fc) {
+        if (D_1f8001fc & D_1f8003c6) {
             U8(D_8009C330, 9) = 0;
             setanim(o, 9);
             o->b04 = 1;
