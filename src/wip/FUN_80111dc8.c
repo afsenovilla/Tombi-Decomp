@@ -3,6 +3,7 @@
 /* b32 also tried: s/r reuse for the sum (all 3 sum targets), ternary/if-else selection forms, s/r types: none below 6. */
 /* b47: -dg shows the cause: s (global) gets preference a0 from a = -s (set_preference peels the neg), and r is allocated first (v0); the game needs s in v1 with the sum. Reusing r for v (the d8c delta) keeps the copy but s takes a0 (12); local t for the sum gets tied to a (33-47); type brute force s/r/a/t: no gain. */
 /* b52: with sum in s, register int s asm("$3") makes a tie to s (v1) since s dies at the neg (14); a=~s+1 (39); 0-s, -1*s, 0x10000-s fold to neg (16); a=-s before the velX store (16). Needs s free of a0 preference AND a not tied to s. */
+/* b58: o->velX += s / a = -o->velX (51), sum into s (16), r = s + velX (12), no a var with (short)-r per use (6), short-param inline vel(o, -r) (6): no gain. */
 #include "TOBJ.H"
 extern short DAT_8013c984[];
 extern short DAT_8007a1f0[], DAT_8007a5f0[];

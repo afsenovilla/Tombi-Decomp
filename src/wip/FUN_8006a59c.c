@@ -1,4 +1,5 @@
 // FUNC 8006a59c 212 MAIN0
+/* score 46: library code from a newer compiler (jr ra; addiu sp in delay slot with s-regs saved): not reproducible with CC1PSX 4.3. */
 typedef struct S {
     int a0;
     int a4;

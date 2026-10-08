@@ -1,4 +1,5 @@
 // FUNC 800697b4 204 MAIN0
+/* score 52: library code from a newer compiler (jr ra; addiu sp in delay slot with s0 saved, filled jal slots): not reproducible with CC1PSX 4.3. */
 extern int DAT_800981e4;
 extern int DAT_800981e0;
 extern int DAT_8009bf78[];
