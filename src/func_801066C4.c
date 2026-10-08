@@ -1,5 +1,5 @@
 // FUNC 801066c4 852 X000
-/* score 38: falta que en case 4/26 la carga de D_8009D2E8 suba antes del sh w20 y el sh h propio (a1) no se fusione con el de case 3/41. */
+// MATCHING 801066c4 852
 #include "TOBJ.H"
 typedef struct { char pad[9]; unsigned char b9; char pad2[0x20 - 10]; short w20; } P;
 extern P *D_8009C330;
@@ -19,9 +19,7 @@ extern void func_801213D0(TObj *);
 
 void func_801066C4(TObj *o)
 {
-    int t;
     TObj *q;
-    Fix16 *dst;
     switch (o->state) {
     case 0:
         switch (D_8009D2E8->type) {
@@ -36,15 +34,20 @@ void func_801066C4(TObj *o)
         case 4: case 26:
             q = D_8009D2E8;
             D_8009C330->w20 = 0;
-            dst = q->h;
+            {
+            int t;
+            Fix16 *dst = q->h;
             t = o->h->p.whole;
             dst->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
+            }
             goto tail;
         case 3: case 28: case 31: case 43:
             D_8009C330->w20 = 0;
             D_8009D2E8->animFrame = o->animFrame & 1;
-            t = o->h->p.whole;
+            {
+            int t = o->h->p.whole;
             D_8009D2E8->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
+            }
             goto tail;
         case 41:
             if (D_8009D2E8->b6a != 1) goto e41;
@@ -54,8 +57,10 @@ void func_801066C4(TObj *o)
             break;
         e41:
             D_8009C330->w20 = 0;
-            t = o->h->p.whole;
+            {
+            int t = o->h->p.whole;
             D_8009D2E8->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
+            }
         tail:
             D_8009D2E8->y.p.whole = o->y.p.whole + 8;
             D_8009D2E8->d8c = o->d88 - 0xc0;
