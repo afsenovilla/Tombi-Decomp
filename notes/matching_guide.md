@@ -230,6 +230,26 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
 - **Search**: hill-climb statement order (move one line to every position) calling ncheck's `build()` in-process
   (~0.15 s per variant); it beats exhaustive permutation.
 
+### More recipes (seventh batch: register allocation and scheduling residue)
+- **Read the allocator**: `cc1 -dl -dg` prints per pseudo "used N times across L insns", "dies in N places" and
+  preferences. Global-alloc ranks by floor_log2(N)*N/L; a pseudo dying in more than one place never gets a
+  local-alloc register. `-dS -dR` dumps show sched1/sched2 ready lists (a ready store always wins over ALU; only a
+  dependency holds it back). `-dL` shows loop hoisting ("savings ... moved/not desirable"; threshold ~29, -3 per move).
+- **Flip a priority tie without changing code**: reuse a variable for an earlier value (switch selector), move a
+  last use earlier, write a cross-jumped tail out in full in every branch, `do {...} while (0)` around one statement
+  (debt), read back a just-stored field (debt). Last resort: `register T x asm("$N")` (debt).
+- **Preferences**: a parameter preferring a0 pushes other pseudos off a0; copying it into a `char *` used through raw
+  offsets drops the preference. Param copies stay at the top only while consecutive; a promoted `short` param breaks
+  the run.
+- **CSE control**: write the second use as `a - -b`; reassign a temp before re-reading a field to keep both loads;
+  the operand order of `&`/`|` between two globals decides which loads first; tree fold reassociates `x+(y+K)`,
+  so put K in a variable.
+- **Symbols**: ncheck now checks relocated addresses. "address of X differs" means a wrong extern name, wrong struct
+  field offsets, or two globals swapped; psx_tomba ports carry NTSC names that must be renamed to PAL addresses.
+- **Shapes**: `static __inline__` with direct `return 0/1` keeps branches where jump.c would emit a store-flag;
+  `if (c0) goto ret0; ... if (cond) { ret0: return 0; }` for a shared return-0 block; real C loops (not goto loops)
+  get loop-depth ref weighting.
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
