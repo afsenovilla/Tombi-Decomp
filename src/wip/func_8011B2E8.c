@@ -1,4 +1,6 @@
 // FUNC 8011b2e8 456 X000
+// wip score 2 (ncheck=matchcheck): only diff: game ends case-0 branch 1 with 'j; andi v0,v1,0xff' and a shared
+// 'sh v0,0x74' tail (cross-jump); ours stores u (v1) directly. w-temp versions put lbu 0x6c above the sh (41).
 #include "TOBJ.H"
 extern short DAT_80138690[];
 extern short DAT_80138698[];
@@ -14,7 +16,6 @@ void func_8011B2E8(TObj *o)
     unsigned char t = o->b04;
     unsigned char u;
     unsigned int v;
-    short w;
     switch (t) {
     case 0:
         o->b04 = t + 1;
@@ -29,12 +30,11 @@ void func_8011B2E8(TObj *o)
         o->anim = *PTR_80138680[o->subtype];
         if (u < 0xc) {
             o->d64 = u * 0x400 + 0x1000;
-            w = u;
+            o->w74 = u;
         } else {
             o->d64 = 0x1000 - (u - 0xb) * 0x200;
-            w = -((u - 0xb) >> 1);
+            o->w74 = -((u - 0xb) >> 1);
         }
-        o->w74 = w;
         v = *(unsigned char *)&o->box0 & 0xf;
         if (v < 8)
             o->d8c = v << 2;

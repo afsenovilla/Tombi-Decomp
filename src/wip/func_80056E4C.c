@@ -1,4 +1,5 @@
 // FUNC 80056e4c 860 MAIN0
+// wip score 40 (was 59): xy read volatile fixes the load order/size; left: la a0 for the volatile xy (game lui s1 direct), regs in uv block and v0/v1 at +0x2dc.
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -84,7 +85,7 @@ void func_80056E4C(TObj *o)
     if (project())
         return;
     hh = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
-    xy = D_1F800070;
+    xy = *(volatile long *)&D_1F800070;
     s = (unsigned char *)*(volatile int *)&o->d3c;
     p = DAT_1f800164;
     s += hh[1];
