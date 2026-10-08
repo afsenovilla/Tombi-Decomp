@@ -1,5 +1,5 @@
 // FUNC 800437e0 532 MAIN0
-// wip score 33 (was 82): int di raw diff + (unsigned short)di in the <0xc test fixed regs; landing block first (if (dy <= 0)), temps t/w for the s16 store. Left: one extra andi from the (unsigned short)di cast (game adds raw t2+a1 without CSE against the first test; plain di gets CSEd, d sign-extends).
+// wip score 33 (was 82): int di raw diff + (unsigned short)di in the <0xc test fixed regs; landing block first (if (dy <= 0)), temps t/w for the s16 store. Left: one extra andi from the (unsigned short)di cast (game adds raw t2+a1 without CSE against the first test; plain di gets CSEd, d sign-extends). b20: tried all int/short/ushort combos of d/dy/di/hy for both tests, inline tst() helpers, operand orders: int operands get CSEd with the first test's sum (RTL (plus:SI (subreg:SI d_HI) (subreg:SI hy_HI)) simplifies to the same pseudos), short ones keep an sll/sra (dd score 12 vs 7 for this version).
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0x14]; unsigned short s14; unsigned short s16;
