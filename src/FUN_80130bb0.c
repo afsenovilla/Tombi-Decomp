@@ -1,5 +1,5 @@
 // FUNC 80130bb0 3124 X000
-/* score 20: only the check() inline (shared with func_801317E4) result/d registers differ: game a0/a1, ours v0/a0 + 2 moves. */
+// MATCHING 80130bb0 3124
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short x, y; } P;
@@ -47,30 +47,28 @@ extern char D_80077d84[];
             o->d->p.whole -= m;                            \
     }
 
-static __inline__ int fin(int r, unsigned short d)
-{
-    short x = 0;
-    if (r == 1) x = d < 0xf8;
-    return x;
-}
-
-static __inline__ int fin3(TObj *o, unsigned short d)
-{
-    if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) >= 0x100) return 0;
-    return d < 0xf8;
-}
-
 static __inline__ int check(TObj *o)
 {
     short r;
-    if (o->d->p.whole != DAT_800a607c->p.whole) return 0;
-    r = 0;
-    if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
-        r = 1;
-    } else if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
-        r = 1;
+    unsigned short d;
+    int x;
+    if (o->d->p.whole != DAT_800a607c->p.whole) {
+        x = 0;
+    } else {
+        r = 0;
+        if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
+            r = 1;
+        } else if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
+            r = 1;
+        }
+        x = 0;
+        d = DAT_800a604e - o->y.p.whole + 0x30;
+        if (r == 1)
+            x = d < 0xf8;
+        else
+            x = 0;
     }
-    return fin(r, DAT_800a604e - o->y.p.whole + 0x30);
+    return x;
 }
 
 void FUN_80130bb0(TObj *o)
