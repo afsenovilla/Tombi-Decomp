@@ -1,4 +1,6 @@
 // FUNC 8010186c 204 X000
+// MATCHING 8010186c 204
+// FLAGS -O2 -G0 -fno-schedule-insns
 typedef struct P { char p0[8]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; char p3[2]; unsigned short h2e; } P;
 typedef struct O { char p0[6]; unsigned char state; char p1[0x24-7]; void *anim; char p2[0x7c-0x28]; short vx; short vy;
   char p3[0x8c-0x80]; int d8c; char p4[0x9c-0x90]; unsigned char b9c; char p5[0xa4-0x9d]; unsigned char ba4; unsigned char ba5;
