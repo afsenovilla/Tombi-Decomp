@@ -1,5 +1,5 @@
 // FUNC 800317c0 6188 MAIN0
-/* score 26 (ncheck): only case 1 differs: v1/a1 swap between the new waa sum and &D_8007A072 before the animFrame&1 branch. Crutches: volatile re-read of o->waa in case 5, char pad[16] in the tail block for the frame size. Tried: n/p types and scope, t pointer, sum temp, operand order. */
+// MATCHING 800317c0 6188
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
 typedef struct {
@@ -179,24 +179,21 @@ void func_800317C0(TObj *o)
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 16);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 16);
         {
-            short *p;
             n = TB(o);
             o->waa += D_8007A072[n];
             if (o->animFrame & 1) {
-                p = &D_8007A072[n + 1];
-                if (o->waa < *p + 0x40) {
+                if (o->waa < D_8007A072[n + 1] + 0x40) {
                     FUN_800312e8(o);
-                    o->waa = *p;
+                    o->waa = D_8007A072[n + 1];
                     D_8009C338->b0c = 1;
                     D_800A6038.d8c = 0;
                     o->timer = 1;
                     o->state++;
                 }
             } else {
-                p = &D_8007A072[n + 1];
-                if (*p + 0xc0 < o->waa) {
+                if (o->waa > D_8007A072[n + 1] + 0xc0) {
                     FUN_800312e8(o);
-                    o->waa = *p;
+                    o->waa = D_8007A072[n + 1];
                     D_8009C338->b0c = 1;
                     D_800A6038.d8c = 0;
                     o->timer = 1;
