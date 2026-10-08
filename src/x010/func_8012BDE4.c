@@ -1,5 +1,5 @@
-// FUNC 8012c5ac 320 X010
-// MATCHING 8012c5ac 320
+// FUNC 8012bde4 320 X010
+// MATCHING 8012bde4 320
 #include "TOBJ.H"
 
 extern TObj D_800A6038;
@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int FUN_8002dcc8(int, int, void *);
 
-void func_8012C5AC(TObj *o)
+void func_8012BDE4(TObj *o)
 {
     TObj *q;
 
@@ -26,7 +26,7 @@ void func_8012C5AC(TObj *o)
         o->wac = 5;
         o->anim = D_801322F4[0];
         AnimLoadDuration(o);
-        o->d90 = FUN_8002dcc8(2, 0x28, &o->a);
+        o->d90 = FUN_8002dcc8(2, 7, &o->a);
         break;
     case 1:
         AnimAdvance(o);
