@@ -38,7 +38,15 @@ jobs:
             echo "::notice::GAME_FILES_URL secret not set; skipping the report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          curl -fsSL -o "$RUNNER_TEMP/game.zip" "$GAME_FILES_URL"
+          # Accepts a direct URL, a Google Drive share link (.../file/d/<ID>/view) or a bare Drive file ID.
+          URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.google.com/uc?export=download&id=$ID"; fi
+          curl -fsSL -o "$RUNNER_TEMP/game.zip" "$URL"
+          if ! unzip -tq "$RUNNER_TEMP/game.zip" >/dev/null; then
+            echo "::error::The download is not a zip. Share the file as 'Anyone with the link' and check GAME_FILES_URL."; exit 1
+          fi
           unzip -o -q "$RUNNER_TEMP/game.zip" -d "$RUNNER_TEMP/game"
           mkdir -p game/AREA00
           cp "$(find "$RUNNER_TEMP/game" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
