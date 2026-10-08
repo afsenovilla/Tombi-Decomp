@@ -1,4 +1,5 @@
 // FUNC 8001783c 776 MAIN0
+// wip score 34 (was 70): statement order found by random permutation; game loads 0xff/3 constants earlier. Declaring all globals as X[] keeps store order (score 40) but constants still late.
 extern unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
@@ -75,33 +76,33 @@ void func_8001783C(void)
     DAT_1f8000ea = -544;
     DAT_1f8000ee = 160;
     DAT_1f8000f2 = -128;
-    DAT_1f800200 = 69;
-    DAT_1f8000e2 = 0;
-    DAT_1f8000e6 = 0;
-    DAT_1f8000f6 = 0;
-    DAT_1f8003d2 = 255;
-    DAT_1f8003d3 = 255;
-    D_8009C96C = 0;
-    D_8009C960[0] = 0;
-    D_8009C977 = 255;
-    D_8009D090 = 255;
-    D_8009C980 = 3;
-    D_8009C972 = 9;
-    D_8009C971 = 4;
-    D_8009C970 = 4;
-    D_8009CFD0 = 1498;
-    D_8009CFD2 = 1593;
-    DAT_1f8003ce = 0;
     DAT_1f8001c8 = 0;
-    DAT_1f8003d1 = 0;
+    D_8009C960[0] = 0;
+    DAT_1f800200 = 69;
+    DAT_1f8003d3 = 255;
+    D_8009D090 = 255;
     D_8009F838 = 0;
-    D_8009C962 = 0;
-    D_8009CDA3 = 0;
-    D_8009C973 = 1;
-    D_8009CEAF = 1;
-    D_8009CDA4 = 1;
+    DAT_1f8000f6 = 0;
+    D_8009C980 = 3;
+    DAT_1f8003d1 = 0;
+    DAT_1f8000e6 = 0;
     D_8009CFD4 = 1681;
+    D_8009C96C = 0;
+    DAT_1f8003ce = 0;
+    D_8009C962 = 0;
+    DAT_1f8000e2 = 0;
+    D_8009CDA3 = 0;
+    D_8009CFD2 = 1593;
+    D_8009CDA4 = 1;
+    D_8009C972 = 9;
+    DAT_1f8003d2 = 255;
+    D_8009C970 = 4;
+    D_8009CEAF = 1;
+    D_8009C973 = 1;
+    D_8009C977 = 255;
     D_8009CF1C = D_8009F3DC;
+    D_8009C971 = 4;
+    D_8009CFD0 = 1498;
     if (DAT_1f8001b3 == 0) {
         if (DAT_1f8001ab != 0) {
             D_8009D1A4 = 27;
