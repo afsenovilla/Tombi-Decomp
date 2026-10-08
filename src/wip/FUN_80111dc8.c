@@ -1,5 +1,5 @@
 // FUNC 80111dc8 400 X000
-// wip score 59 (int s, short t, short a; was 65). Left: game loads table s into v0 and copies to v1 (move v1,v0 in bnez slot), velX read lh for test; 8-byte frame lost with int s. Tried temp r short/int, if/else forms.
+/* score 27 (was 59): left: table value s loaded into v0 and copied to v1 (move v1,v0 in bnez slot), merge block of the y update starts with lw y (ours sll t), and the d8c angle diff loads w78 with lbu (game lhu, (d-0x80)-w order kept only via a char cast). char pad[4] restores the 8-byte frame. */
 #include "TOBJ.H"
 extern short DAT_8013c984[];
 extern short DAT_8007a1f0[], DAT_8007a5f0[];
@@ -7,43 +7,39 @@ extern short DAT_8007a1f0[], DAT_8007a5f0[];
 void FUN_80111dc8(TObj *o)
 {
     int u;
-    unsigned v;
     int s;
-    short t;
+    char pad[4];
     short a;
-    if (o->b69 != 0) {
+    int d;
+    int t;
+    unsigned int v;
+
+    if (o->b69) {
         o->b69 = 0;
-        u = (o->d38 + 0x800 & 0xfff) >> 4;
+        u = ((o->d38 + 0x800) & 0xfff) >> 4;
         o->w78 = u;
-        if (0x80 < u)
-            o->w78 = 0x80;
+        if (u > 0x80) o->w78 = 0x80;
         o->velY = 0x100;
-        s = *(short *)((char *)DAT_8013c984 + ((o->w78 - 0x40U) >> 2 & 0x1e));
-        if (s == 0 && (s = -4, o->velX < 0))
-            s = 4;
-        s = o->velX + s;
+        s = DAT_8013c984[(unsigned)(o->w78 - 0x40) >> 3 & 0xf];
+        if (s == 0 && (s = -4, o->velX < 0)) s = 4;
+        s = (unsigned short)o->velX + s;
         o->velX = s;
-        a = (short)-s;
+        a = -s;
         o->velV = (a * DAT_8007a1f0[o->w78]) >> 12;
-        a = (a * DAT_8007a5f0[o->w78]) >> 12;
-        o->velH = a;
-        o->h->raw = o->h->raw + ((a << 16) >> 8);
+        o->velH = (a * DAT_8007a5f0[o->w78]) >> 12;
+        o->h->raw += o->velH << 8;
         t = o->velV;
     } else {
-        s = o->velY + 0x20;
-        o->velY = s;
-        if (0x380 < s)
-            o->velY = 0x380;
+        o->velY += 0x20;
+        if (o->velY > 0x380) o->velY = 0x380;
         t = o->velY;
     }
-    o->y.raw = o->y.raw + t * 0x100;
-    a = o->d8c;
-    v = (int)(a - 0x80) - (unsigned short)o->w78 & 0xff;
+    o->y.raw = (t << 8) + o->y.raw;
+    d = o->d8c;
+    v = (char)(d - 0x80 - (unsigned short)o->w78) & 0xff;
     if (v != 0) {
-        int b = a - 1;
-        if (0x7f < v)
-            b = a + 1;
-        o->d8c = b;
-        o->d8c = *(unsigned char *)&o->d8c;
+        if (v < 0x80) o->d8c = d - 1;
+        else o->d8c = d + 1;
+        o->d8c = (unsigned char)o->d8c;
     }
 }
