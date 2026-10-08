@@ -1,5 +1,5 @@
 // FUNC 8012b5d0 1220 X000
-/* score 148: InRange inline returning short fixes most; left: case 2 game computes dx (h - D_1F80016A) fully before dy with an unfilled load slot (ours interleaves), and InRange result lands in a0 + copy instead of v0. */
+// MATCHING 8012b5d0 1220
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
 extern unsigned char D_801390EC[], D_801390F4[];
@@ -28,9 +28,9 @@ static __inline__ void SetBox(TObj *o)
 
 static __inline__ short InRange(TObj *o)
 {
-    return (unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) < 0x5b
-        && (unsigned short)(o->y.p.whole - D_1F80016E + 0x46) < 0x6f
-        && (unsigned short)(o->h->p.whole - D_1F80016A + 0x80) < 0x101;
+    if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x46) >= 0x6f) return 0;
+    return (unsigned short)(o->h->p.whole - D_1F80016A + 0x80) < 0x101;
 }
 
 void func_8012B5D0(TObj *o)
@@ -63,8 +63,9 @@ void func_8012B5D0(TObj *o)
         if (o->b0c == 1)
             break;
         dx = o->h->p.whole - D_1F80016A;
+        dx += 0xa0;
         if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) >= 0x5b
-            || (unsigned short)(dx + 0xa0) >= 0x141) {
+            || dx >= 0x141) {
             o->timer = 0;
         } else if (o->timer++ > 0x3c) {
             o->state++;
