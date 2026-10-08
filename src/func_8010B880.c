@@ -1,5 +1,5 @@
 // FUNC 8010b880 1160 X000
-// wip: matches up to the state-1 case 0x15 chain loop: game keeps three separate "x = 1; goto store" exits and does not hoist the 3 in the loop; ours merges exits / hoists. Rest of the file is believed right.
+// MATCHING 8010b880 1160
 typedef struct { char p0[2]; short s2; } H;
 typedef struct PO {
     unsigned char b0; char p1; unsigned char b2; char p3[3]; unsigned char b6;
@@ -99,40 +99,51 @@ void func_8010B880(TO *o)
         if (o->bc6 != 0) return;
         switch (D_8009F0EC->b2) {
         case 0xb:
-            if (D_8009F0EC->d94 == 0) *(unsigned char *)D_8009F0EC = 1;
-            else *(unsigned char *)D_8009F0EC = 3;
+            p = D_8009F0EC;
+            if (p->d94 == 0)
+                *(unsigned char *)p = 1;
+            else
+                *(unsigned char *)p = 3;
         case 0x15:
-            if (D_8009F0EC->d94 == 0) {
-                p = D_8009F0EC;
-                x = 1;
-            } else {
-                *(unsigned char *)D_8009F0EC = 3;
+            p = D_8009F0EC;
+            if (p->d94 != 0) {
+                *(unsigned char *)p = 3;
                 p = D_8009F0EC->d94;
-                while (p->d94 != 0) {
+                if (p->d94 == 0) {
+                    *(unsigned char *)p = 1;
+                } else {
+                loop1:
                     *(unsigned char *)p = 3;
                     p = p->d94;
+                    if (p->d94 != 0)
+                        goto loop1;
+                    *(unsigned char *)p = 1;
                 }
-                x = 1;
+            } else {
+                *(unsigned char *)p = 1;
             }
             break;
         case 0x1d: case 0x31:
-            p = D_8009F0EC;
-            x = 1;
+            *(unsigned char *)D_8009F0EC = 1;
             break;
         case 0xc: case 0xd: case 0xe:
         default:
-            p = D_8009F0EC;
-            x = 3;
+            *(unsigned char *)D_8009F0EC = 3;
             break;
         }
-        *(unsigned char *)p = x;
         o->anim = D_80010D68;
         AnimJump(o, 0);
         o->b9d = 0;
-        if (D_8009F0EC->b2 == 0x15) s = 0x22;
-        else {
+        switch (D_8009F0EC->b2) {
+        case 0x15:
+            s = 0x22;
+            break;
+        case 0x31:
             s = 0x46;
-            if (D_8009F0EC->b2 != 0x31) s = 8;
+            break;
+        default:
+            s = 8;
+            break;
         }
         o->step = s;
         o->state = 0;
