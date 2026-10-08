@@ -21,7 +21,6 @@ void FUN_800f00ac(TObj *o);
 void func_80107C00(TObj *o)
 {
     volatile unsigned short *k;
-    int v;
     switch (o->state) {
     case 0:
         D_8009C330[0xb] = o->animFrame;
