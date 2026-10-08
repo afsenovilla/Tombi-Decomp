@@ -13,7 +13,7 @@ void FUN_8011f1d0(char *o)
         U8(o, 4)++;
         U8(o, 0) = 2;
         if (DAT_8009cdac == 0xff)
-            { char * volatile *pg = &G; S32(o, 0xa0) = *(int *)(*pg + 0x30) + (int)*pg; }
+            { char * volatile *pg = &G; S32(o, 0xa0) = (int)*pg + *(int *)(*pg + 0x30); }
         break;
     case 1:
         U8(o, 1) = 1;

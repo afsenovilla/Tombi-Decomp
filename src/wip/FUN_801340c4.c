@@ -3,8 +3,8 @@
 extern TObj *FUN_800183b8(void);
 extern void FUN_8001fe6c(TObj *);
 extern unsigned short DAT_800a6066;
-extern volatile int DAT_1f8002d4;
-extern void *PTR_DAT_8013b184;
+extern int DAT_1f8002d4;
+extern void * volatile PTR_DAT_8013b184;
 
 void FUN_801340c4(int x, int y, int z)
 {
