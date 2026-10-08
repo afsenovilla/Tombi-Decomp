@@ -4,7 +4,13 @@
  * (floor_log2(refs)*refs/live_length, see cc1 -dg) puts p4 before f2. Loop 2 field order brute-forced (5040 perms).
  * Left: id==1 POS block: game stores a,y then lh G then d30,d34,b,d38 (natural order) with dy<<16 NOT hoisted;
  * natural source order makes loop.c hoist dy<<16 (life 11 in -dL dump) -> 208. Tried: all 720 orders x 3 forms,
- * dx/dy as arrays/volatile/address-taken, POS as static inline (all worse). */
+ * dx/dy as arrays/volatile/address-taken, POS as static inline (all worse).
+ * b40: game tests f1 with plain bnez (no andi 0xffff): f1 must be int (score rises only from the POS length shift).
+ * Game hoists &D_800A603C.f50 (t0, bd6 addr derived as t0+0x84): `short *g = &D_800A603C.f50.p.whole;` at function
+ * scope + (*g + 10) << 16 reproduces that. loop.c threshold starts ~29 and drops 3 per moved reg; move if
+ * thr*savings*life >= real insns (156): dx chain sits exactly at 2*3*26=156, dy chain (life 10) always moves.
+ * Still need dx/dy chains and the 0xff600000 const NOT hoisted while const 1, D_800804DA, f50 are. 2880 store orders x
+ * v/w forms with int f1: best 97. Tried w set twice (w=dy; w<<=16), volatile/array dx dy, g at loop top. */
 typedef struct { unsigned short frac; short whole; } FixParts;
 typedef union { int raw; FixParts p; } Fix16;
 
