@@ -1,5 +1,8 @@
 // FUNC 8003f7cc 768 MAIN0
-/* score 34: type search (hi int, t unsigned short) from 84. Left: s-reg numbering (game dir2=s4, lo=s5, hi=s7), k copy (move v1,a0) in the box2 clamp, dir = t copy (game passes a3=t to the first call, no andi). */
+/* score 34: type search (hi int, t unsigned short) from 84. Left: s-reg numbering (game dir2=s4, lo=s5, hi=s7), k copy (move v1,a0) in the box2 clamp, dir = t copy (game passes a3=t to the first call, no andi).
+   b36: `int t` reproduces the game's move s1,a3 (dir = t) but the score rises to 69 only because the missing k copy shifts
+   everything by one insn; `k = o->box2; h = k;` keeps a copy (36) but with roles inverted (lo from the load, compare on the copy);
+   `h = o->box2; k = h;` gets CSE-collapsed in every type combo. */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
