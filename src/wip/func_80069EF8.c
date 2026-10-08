@@ -1,5 +1,11 @@
 // FUNC 80069ef8 632 MAIN0
-/* score 42 (ncheck): library code (pad/memcard). Unreachable with CC1PSX 4.3: game epilogue is "jr ra; addiu sp" with saved s-regs, and it uses sra for (u8)>>4 where gcc 2.7 emits srl. Also s1/s2 swapped (v vs r) and buf[n] reloads n. Logic is complete. */
+// FLAGS -O2 -G0 -mno-split-addresses
+// CC gcc-2.8.1
+/* score 2 (b56, was 42 with 2.7.2): gcc-2.8.1 + -mno-split-addresses (2.8.1 otherwise splits %hi/%lo into two regs;
+   -G8 works too). sra comes from int temps (k, r), t - D_8009C33C written in both compares, v set in if/else.
+   Left: the first poll loop jumps to 0x5c (the load-delay nop after lw D_80098210) where the game jumps to 0x60
+   (nop before the label); same with real ASPSX (matchcheck). Tried do/for/goto/local-pointer loop forms, ASPSX versions.
+   Debt: volatile read of s->n in the 0xff compare (game reloads n for the index). */
 typedef struct {
     char p0[0x3c];
     unsigned char *buf;
@@ -19,12 +25,14 @@ extern int FUN_8006bfa4(void);
 
 int func_80069EF8(S *s, int c)
 {
-    unsigned int r;
+    int r;
     short v;
     unsigned int t;
+    int k;
 
-    v = 0x88;
-    if (((int)*s->buf >> 4) == 8 && s->n > 8) v = 0x22;
+    k = *s->buf;
+    if ((k >> 4) == 8 && s->n > 8) v = 0x22;
+    else v = 0x88;
     while (!(D_80098210[2] & 2));
     FUN_8006bf84(400);
     r = *(volatile unsigned char *)D_80098210;
@@ -36,11 +44,10 @@ int func_80069EF8(S *s, int c)
             if (*(volatile unsigned short *)0x1f801128 != 0) t = *(volatile unsigned short *)0x1f801128 + t;
             else t += 0x10000;
         }
-        t -= D_8009C33C;
         if (*(volatile unsigned short *)0x1f801124 & 0x200) {
-            if (t >= D_800A0A18) return -2;
+            if (t - D_8009C33C >= D_800A0A18) return -2;
         } else {
-            if ((t >> 3) >= D_800A0A18) return -2;
+            if ((t - D_8009C33C) >> 3 >= D_800A0A18) return -2;
         }
     }
     if (s->e8 != 8 && D_800981F0 == 2) {
@@ -55,7 +62,7 @@ int func_80069EF8(S *s, int c)
         j[5] |= 0x10;
     }
     s->cnt++;
-    if (s->n != 0xff) s->buf[s->n] = r;
+    if (*(volatile unsigned char *)&s->n != 0xff) s->buf[s->n] = r;
     s->n++;
     return r;
 }
