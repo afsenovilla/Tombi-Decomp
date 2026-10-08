@@ -1,5 +1,5 @@
 // FUNC 801317e4 492 X000
-/* score 12: solo falta que el resultado del inline vaya en a0 (y d en a1) en vez de v0/a0. */
+// MATCHING 801317e4 492
 #include "TOBJ.H"
 extern void *D_8013AD64[];
 extern Fix16 *D_800A607C;
@@ -10,23 +10,28 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
 
-static __inline__ int fin(unsigned short d, int r)
-{
-    if (r != 1) return 0;
-    return d < 0xf8;
-}
-
 static __inline__ int check(TObj *o)
 {
     short r;
-    if (o->d->p.whole != D_800A607C->p.whole) return 0;
-    r = 0;
-    if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 12) {
-        r = 1;
-    } else if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6) {
-        r = 1;
+    unsigned short d;
+    int x;
+    if (o->d->p.whole != D_800A607C->p.whole) {
+        x = 0;
+    } else {
+        r = 0;
+        if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 12) {
+            r = 1;
+        } else if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6) {
+            r = 1;
+        }
+        x = 0;
+        d = D_800A604E - o->y.p.whole + 0x30;
+        if (r == 1)
+            x = d < 0xf8;
+        else
+            x = 0;
     }
-    return fin(D_800A604E - o->y.p.whole + 0x30, r);
+    return x;
 }
 
 void func_801317E4(TObj *o)
