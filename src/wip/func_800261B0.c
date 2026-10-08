@@ -1,4 +1,5 @@
 // FUNC 800261b0 140 MAIN0
+/* score 8: only the `addiu s0,sp,0x10` (&align pseudo, created by instantiation and reused by CSE as the call arg) lands in the 2nd jal delay slot; game has it after that call (bne delay slot). b31 tried: explicit p at every statement position, inner-block p, early return, arg/array types, callee protos, D_8009D614 as array (17), store order, FLAGS variants (-fno-schedule-insns2 etc.): all 8. */
 extern unsigned char D_8009D614;
 extern unsigned char D_8009D615;
 extern void func_80069410(int, unsigned char *, int);
