@@ -1,5 +1,5 @@
 // FUNC 8002f4e0 1152 MAIN0
-// wip: solo falla que gcc reasocia (D + (r-8)) como ((D-8) + r) tras MulNegSinScaled
+// MATCHING 8002f4e0 1152
 #include "TOBJ.H"
 typedef struct { short w0; short w2; } P;
 typedef struct { void **tab; int a; int b; } AT;
@@ -84,33 +84,33 @@ void func_8002F4E0(TObj *o)
             break;
         case 5:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 8);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 28) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 28) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         case 6:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 16);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 16) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 16) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         case 7:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 24);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 8) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 8) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         case 8:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 4);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 24) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 24) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         case 9:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 20);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 20) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 20) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         case 10:
             o->h->p.whole = D_800A6038.h->p.whole + MulCos(*(short *)&o->d84, 28);
-            o->y.p.whole = D_800A6038.y.p.whole + (MulNegSinScaled(*(short *)&o->d84, 12) - 8);
-            o->d->p.whole = D_800A6038.d->p.whole + (MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            o->y.p.whole = D_800A6038.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 12) - 8);
+            o->d->p.whole = D_800A6038.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
             break;
         }
         o->d84 = (o->d84 + 0x10) & 0xff;

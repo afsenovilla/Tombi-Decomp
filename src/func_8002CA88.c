@@ -1,5 +1,5 @@
 // FUNC 8002ca88 604 MAIN0
-/* score 22 (ncheck): case 0 load order - game loads o->subtype before o->b0c, and D_800A6047 after sh 0x1a but before sb 4/5 */
+// MATCHING 8002ca88 604
 #include "TOBJ.H"
 extern void *D_800121F4[];
 extern unsigned short D_800A604A[];
@@ -15,14 +15,15 @@ void func_8002CA88(TObj *o)
     switch (o->b04) {
     case 0:
         if (o->step == 0) {
-            o->anim = D_800121F4[o->b0c + o->subtype];
+            o->anim = (D_800121F4 + o->subtype)[o->b0c];
             AnimLoadDuration(o);
             o->a.p.whole = D_800A604A[0];
             o->y.p.whole = D_800A604E[0] - 8;
             *(short *)((char *)o + 0x1a) = D_800A6052[0];
+            { unsigned char t = D_800A6047;
             o->b04 = 1;
             o->step = 0;
-            o->b0f = D_800A6047 - 1;
+            o->b0f = t - 1; }
         }
         break;
     case 1:
