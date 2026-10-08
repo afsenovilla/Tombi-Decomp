@@ -1,4 +1,5 @@
 // FUNC 8004432c 248 MAIN0
+// MATCHING 8004432c 248
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char t0, t1, t2, t3, t4, t5, t6, t7; char p0[0x16 - 8]; unsigned short s16;
@@ -7,13 +8,15 @@ typedef struct {
     char p3[0xb4 - 0x74]; unsigned short sb4;
 } TO;
 
-static __inline__ int hit(TO *a, TO *b)
+static __inline__ short hit(TO *a, TO *b)
 {
-    int r = 0;
-    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) < 0x5b
-        && (unsigned short)(a->h40->s2 - b->h40->s2 + (a->s6c + b->s6c)) <= (a->s6e + b->s6e)
-        && (unsigned short)(a->s16 - b->s16 + (a->s70 + b->s70)) <= (a->s72 + b->s72)) r = 1;
-    return r;
+    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b)
+        return 0;
+    if ((unsigned short)(a->h40->s2 - b->h40->s2 + (a->s6c + b->s6c)) > (a->s6e + b->s6e))
+        return 0;
+    if ((unsigned short)(a->s16 - b->s16 + (a->s70 + b->s70)) > (a->s72 + b->s72))
+        return 0;
+    return 1;
 }
 
 void FUN_8004432c(TO *a, TO *b)
