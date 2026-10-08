@@ -1,0 +1,5 @@
+// FUNC 8002215c 8 MAIN0
+// MATCHING 8002215c 8
+void func_8002215C(void)
+{
+}

@@ -1,10 +1,11 @@
 // FUNC 8010bd08 432 X000
+// MATCHING 8010bd08 432
 #include "TOBJ.H"
 extern TObj *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_8009d2b2;
 
-void FUN_8010bd08(TObj *o)
+void func_8010BD08(TObj *o)
 {
     TObj *q;
     Fix16 *h;
@@ -36,10 +37,13 @@ void FUN_8010bd08(TObj *o)
             if (DAT_8009f0ec->d94 != 0) {
             DAT_8009f0ec->active = 3;
             q = (TObj *)DAT_8009f0ec->d94;
-            while (q->d94) {
-                q->active = 3;
-                q = (TObj *)q->d94;
-            }
+            if (q->d94) goto loop;
+            q->active = 1;
+            break;
+        loop:
+            q->active = 3;
+            q = (TObj *)q->d94;
+            if (q->d94) goto loop;
             q->active = 1;
             } else {
                 DAT_8009f0ec->active = 1;
