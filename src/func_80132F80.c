@@ -1,4 +1,5 @@
 // FUNC 80132f80 724 X000
+// MATCHING 80132f80 724
 #include "TOBJ.H"
 extern Fix16 *D_800A6078;
 extern void *D_8013B18C, *D_8013B180, *D_8013B17C;
@@ -16,6 +17,7 @@ void func_80132F80(TObj *o)
     short near;
     Fix16 *pp = D_800A6078;
     int x, t;
+    int s2;
     px = pp->p.whole;
     hx = o->h->p.whole;
     near = (unsigned short)(px - hx + 0x40) < 0x80;
@@ -37,16 +39,18 @@ void func_80132F80(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
+        t = near;
         if (--o->timer == 0) {
             o->state = 0;
-        } else if (near) {
+        } else if (t) {
             o->state = 0;
         }
         break;
     case 2:
         AnimAdvance(o);
         t = o->h->p.whole;
-        if (func_8004065C(o, (o->animFrame & 1) ? t - 8 : t + 8, o->y.p.whole, 0) == 0) {
+        s2 = (o->animFrame & 1) ? t - 8 : t + 8;
+        if (func_8004065C(o, s2, o->y.p.whole, 0) == 0) {
             FUN_8001faf4(o);
         }
         o->y.raw += o->velY << 8;

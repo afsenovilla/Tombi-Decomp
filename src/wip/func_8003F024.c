@@ -3,13 +3,15 @@
 extern TObj *FUN_80018568();
 extern unsigned char D_8007B084[];
 extern unsigned char *D_8007B14C[];
-void func_8003F024(TObj *o, short type, unsigned char sub, short *pos, short vh, short vv)
+void func_8003F024(TObj *o, short type, int sub0, short *pos, short vh, short vv)
 {
+    unsigned char st = type;
+    unsigned char sub = sub0;
     TObj *n = FUN_80018568();
     if (n != 0) {
         n->active = 4;
         n->type = 3;
-        n->subtype = type;
+        n->subtype = st;
         n->b0c = sub | 0x80;
         n->b0f = D_8007B14C[D_8007B084[type]][3];
         n->animFrame = 0;
