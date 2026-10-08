@@ -28,7 +28,6 @@ extern void FUN_8001f96c(int, int, int, int);
 void func_801040D0(TObj *o)
 {
     short hit;
-    volatile unsigned short *k;
 
     switch (o->state) {
     case 1:
@@ -66,10 +65,9 @@ void func_801040D0(TObj *o)
             LAND(o);
         break;
     case 2:
-        k = D_8009D670;
-        if (*k & 0x80)
+        if (D_8009D670[0] & 0x80)
             o->animFrame = 1;
-        if (*k & 0x20)
+        if (D_8009D670[0] & 0x20)
             o->animFrame = 0;
         D_8009D2E8->h->p.whole = o->h->p.whole;
         D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;
