@@ -1,5 +1,5 @@
 // FUNC 80043ebc 544 MAIN0
-/* score 8: only the dy test differs: game computes (dy-8) + (e->box2+o->box2) with dy=a0, o->box2=a1 and the dy copy (move a1,a0) late; the (dy-8)+(...) grouping gives dy=v1 (12), this form gives dy=a0 but adds in another order. Tried ~30 groupings, block-local short b = box sum (10), temps, types. */
+/* score 8: only the dy test differs: game computes (dy-8) + (e->box2+o->box2) with dy=a0, o->box2=a1 and the dy copy (move a1,a0) late; the (dy-8)+(...) grouping gives dy=v1 (12), this form gives dy=a0 but adds in another order. Tried ~30 groupings, block-local short b = box sum (10), temps, types. b29: also tried dy int/ushort, dy assigned after the test (37), compare-only inline chk(d,o,e) (8-48), whole body as static inline wrapper (8), per-local type brute force (8); root cause is reg alloc: o->box2 must get a1 so the dy copy is late. */
 #include "TOBJ.H"
 
 typedef struct { short x, y; } Off;
