@@ -181,7 +181,7 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
 - `register int r asm("$17")`: func_800428C0. `__asm__ volatile("nop")` before a loop: func_8006A200.
 - Constant loaded as the address of a symbol (`D_31FFFF`): func_8005D4EC.
 - Second extern name for the same global: func_8002A0FC, func_8002A258 (and others, see the source comments).
-- `__asm__ volatile("")` barrier: func_80112C24. Jump-table data as `__asm__(".word")`: func_80116704.
+- `__asm__ volatile("")` barrier: func_80112C24. Jump-table data as `__asm__(".word")` (avoid: the full build links that data from the owner's .rodata; func_80116758 had it, now FUNC starts after the tables).
   `volatile` accesses to force order: func_801236F0. Second extern names also in func_800425C4, func_80047AF0,
   func_8002235C, func_80101938, func_8011AD98, func_80137458. Files holding several small functions merged by splat: func_8011D204 (6),
   func_8011F288 (wip, 3).

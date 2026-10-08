@@ -79,6 +79,34 @@ Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/`, the DOS `
 `/opt/psyq/new/` and `ASPSX.EXE` 2.86 to `/opt/psyq/46/BIN/`, install `wine` and `dosbox`, then run
 `python3 tools/matchcheck.py src/<Name>.c`.
 
+## Full build
+
+`tools/build_full.py` links both programs from the matched C plus splat assembly for everything else and
+checks them against the retail files:
+
+```bash
+python3 tools/build_full.py          # splat split + compile src/*.c + link; prints SHA-1 and OK/FAIL
+python3 tools/build_full.py --no-split   # reuse the previous split (build/full/asm)
+```
+
+Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`) and `build/X000.BIN` (must equal `ce168475…`); work files
+in `build/full/` (linker scripts `*.full.ld`, maps, objects). On a mismatch it lists the first differing
+offsets and the function or splat range that produced them.
+
+- Each `src/*.c` replaces the splat lines in `[addr, addr+size)` of its `// FUNC` header (the header is the
+  truth, even when splat had cut that range into several functions).
+- String literals, jump tables and static data of a C file are linked at their original addresses (found from
+  the retail bytes of the instructions that reference them). Data a file merely *re-defines* (globals ported
+  from psx_tomba headers) is dropped in favour of the real data from splat, and every external symbol of a C
+  file gets its retail address (`PROVIDE` in the linker script, renamed when the name belongs to another
+  address, e.g. NTSC-named symbols).
+- X000 is linked at `0x800E8028`; MAIN0 symbols it uses are absolute (`build/full/undefined_*_auto.x000.txt`).
+- A file that does not compile or cannot be placed is reported as `WARN ... kept as asm` and the build still
+  links the retail assembly for it. Today only `FUN_80068ae4` (a BIOS stub in the 0x8006xxxx library range
+  whose inline `asm` ends in `.data`; it needs ASPSX) stays as asm.
+- Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
+  each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
+
 ## Progress report (objdiff / decomp.dev)
 
 `tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
@@ -111,6 +139,7 @@ game/           your own game files (ignored by git)
 |------|---------|
 | `tools/ncheck.py` | Fast native compile-and-compare (`--score`, `--asm`, `--mark`) |
 | `tools/matchcheck.py` | Reference compile-and-compare with the original PSY-Q binaries |
+| `tools/build_full.py` | Full build of MAIN0.EXE and X000.BIN, byte-for-byte check against the retail files |
 | `tools/fn.py` | Disassembly (capstone) and Ghidra pseudo-C of one function |
 | `tools/progress.py` | Regenerates `docs/PROGRESS.md` and the SVG charts |
 | `tools/classify.py` | Separates complete functions from Ghidra fragments (`notes/todo_match3.csv`) |

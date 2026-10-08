@@ -306,6 +306,11 @@ extern const u32 D_80012D88[];
 extern const u32 D_80012DAC[];
 extern const u32 D_80012DE0[];
 
+extern u8 D_8009C3F0;
+extern u8 D_8009BCA6;
+void func_800346A8(u8* self);
+/* The effect tables live in the retail .rodata (linked from splat by tools/build_full.py). */
+#ifdef EFFECT_TABLES
 const u32 D_80010814[] = {
     (u32)D_80011B98,
     (u32)D_80011BDC,
@@ -2894,6 +2899,7 @@ const u32 D_80012DE0[] = {
     0x40050000,
     (u32)D_80012DE0,
 };
+#endif
 
 void func_800340FC(void)
 {

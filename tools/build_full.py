@@ -237,8 +237,10 @@ def compile_all():
         res = pool.map(_compile, jobs)
     ok = []
     for u, r in zip(units, res):
-        if r is None: ok.append(u)
-        else: print("WARN %s does not compile, kept as asm: %s" % (u["src"], r.strip().splitlines()[-1] if r.strip() else "?"))
+        ok.append(u)
+        if r is not None:
+            u["failed"] = True
+            print("WARN %s does not compile, kept as asm: %s" % (u["src"], r.strip().splitlines()[-1] if r.strip() else "?"))
     return ok
 
 
@@ -246,6 +248,7 @@ def compile_all():
 def analyse(u, game, vram, hdr):
     """Places the C object: .text at FUNC addr, referenced data sections at their retail address.
     Returns False (keep asm) when the object cannot be placed."""
+    if u.get("failed"): return False
     e = Elf(u["obj"])
     u["elf"] = e
     gb = lambda a, n: game[hdr + a - vram: hdr + a - vram + n]
@@ -479,7 +482,7 @@ def report(p, out, game, order, ncfun, nunits):
     data = open(out, "rb").read()
     sha = hashlib.sha1(data).hexdigest()
     ok = sha == P["sha1"]
-    print("%-9s %s  %s  (%d/%d C functions linked)" % (P["out"], sha, "OK" if ok else "FAIL", ncfun, nunits))
+    print("%-9s %s  %s  (%d of %d src files linked, the rest kept as asm)" % (P["out"], sha, "OK" if ok else "FAIL", ncfun, nunits))
     if ok: return True
     if len(data) != len(game): print("   size %d, retail %d" % (len(data), len(game)))
     diffs = [i for i in range(min(len(data), len(game))) if data[i] != game[i]]
