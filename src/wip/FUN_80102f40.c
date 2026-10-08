@@ -1,5 +1,9 @@
 // FUNC 80102f40 700 X000
-/* score 50 (was 99): h snap/+-8 layout per game (goto snap, +8 out of line), short flag, o->h->whole = P->h->whole fix, byte wac store, buf[16] for the 0x40 frame. Left: hw read twice (lh+lhu) where game copies (move a2,v1), P pointer reg in the type test, load order of o->h vs P->h. */
+/* score 46 (b30, was 50): h block rewritten with a shared h pointer and t (P->h x) read once, compares on h->p.whole
+   (no buf pad needed, frame 0x40 comes out). Left: (1) P/type regs swapped at the top (game P=v1,type=a0; global-alloc
+   priority: type 3 refs/5 insns beats P 3 refs/9; local p, inline, switch, temps all unchanged); (2) t read as
+   lhu+lh where game does lh + move a0 (and hw copy in a2). Tried: int/short t,hw,x/y temps, assignments in the
+   compare, direct field forms (copy appears for hw but snap then reloads). */
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
@@ -16,7 +20,7 @@ void FUN_80102f40(TObj *o)
     short flag;
     TObj *p;
     Fix16 *h;
-    int t; short hw; char buf[16];
+    short t; 
     volatile unsigned short *pad;
 
     switch (o->state) {
@@ -35,22 +39,20 @@ void FUN_80102f40(TObj *o)
         if (o->velX < 0) {
             h = o->h;
             t = DAT_8009d2e8->h->p.whole;
-            hw = h->p.whole;
-            if (t < hw)
-                h->p.whole = hw - 8;
+            if (t < h->p.whole)
+                h->p.whole -= 8;
             else
                 goto snap;
         } else {
             h = o->h;
             t = DAT_8009d2e8->h->p.whole;
-            hw = h->p.whole;
-            if (t <= hw) {
+            if (h->p.whole >= t) {
             snap:
                 h->p.whole = t;
                 if (flag)
                     FUN_800eeb5c(o, 0x23);
             } else {
-                h->p.whole = hw + 8;
+                h->p.whole += 8;
             }
         }
     next:
