@@ -1,5 +1,7 @@
 // FUNC 80047484 1464 MAIN0
-/* score 16: only s3/s4 swapped (game: s3 = hoisted constant 2, s4 = list pointer r). The game hoists BOTH 1 and 2 out of the loop; plain constants only hoist 1 (score 185), so `two` is a local set at the loop top. Tried: decl order/types of two, two set before the loop, r as int/index, *r++, for/do-while loop forms, one+two locals (40), register asm (8 but no hoist), if-chains for the nested switches. */
+// MATCHING 80047484 1464
+/* Debt: register asm("$20") on r (s3/s4 priority: hoisted const 2 has its live length doubled as a REG_EQUIV constant, so it loses to r).
+   The two block-local `p` copies add block notes (luids) so the constant 2's lifetime passes loop.c's move threshold and it gets hoisted like in the game. */
 #include "TOBJ.H"
 extern unsigned char D_8009C93A;
 extern unsigned short D_8009C960;
@@ -61,7 +63,7 @@ extern void func_80126BBC(TObj *, unsigned char *);
 
 void FUN_80047484(TObj *o)
 {
-    unsigned char **r;
+    register unsigned char **r asm("$20");
     unsigned char *q;
     short v;
     int two;
@@ -71,7 +73,6 @@ void FUN_80047484(TObj *o)
     D_1F80019E = D_1F800246;
     while (D_1F80019E != 0) {
         q = *r;
-        two = 2;
         D_1F80019E = D_1F80019E - 1;
         r++;
         if (q[0] & 1) {
@@ -95,13 +96,13 @@ void FUN_80047484(TObj *o)
                 v = func_8004306C(o, q);
                 if (v != 0) {
                     if (*(unsigned char *)&o->wac == 1 && v == 1) {
-                        q[0] = two;
-                        q[4] = two;
+                        q[0] = 2;
+                        q[4] = 2;
                         q[5] = 1;
                         q[6] = 0;
                         q[0x69] = 0;
-                        *(unsigned char **)((char *)o + 0xe4) = q;
-                        *(unsigned char *)&o->wac = two;
+                        { TObj *p = o; *(unsigned char **)((char *)p + 0xe4) = q; }
+                        { TObj *p = o; *(unsigned char *)&p->wac = 2; }
                     }
                     D_1F80019E = 0;
                 }
