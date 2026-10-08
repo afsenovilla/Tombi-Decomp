@@ -1,6 +1,7 @@
 // FUNC 800428c0 272 MAIN0
 // MATCHING 800428c0 272
 // tamano real 272 (Ghidra corta en 188). Con register asm("$17") da MATCH; sin el, r/o intercambian s0/s1.
+// Debt pass: -dg o 8 refs/39, r 10/47, p 8/42 (need o > r > p); tried return 0 in r<0 (regs ok, shape differs), dropping redundant r=1 sets, r types, p[0x68]=r=1.
 #include "TOBJ.H"
 extern int func_800425C4(TObj *a, char *b);
 extern void FUN_8001f96c(int a, int b, int c, int d);
