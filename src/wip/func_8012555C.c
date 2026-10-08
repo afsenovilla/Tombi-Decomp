@@ -1,5 +1,5 @@
 // FUNC 8012555c 664 X000
-// WIP score 47: only the dy copy differs (game: raw dy in v1, short copy in a1 via global alloc; ours no copy / copy in t5)
+// WIP score 47: computing dy after the y test gives the game copy in a1, but a second copy (move a0,a1) remains; with dy before the test the copy lands in t5
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
@@ -8,7 +8,7 @@ void FUN_8004258c(TObj *o, int n);
 
 void func_8012555C(TObj *o, TObj *p)
 {
-    short dx, wx, px, sx, cx; int dy;
+    short dx, wx, px, sx, cx, dy;
 
     if (p->subtype == 0) {
         func_80043C74(o, p);
@@ -21,9 +21,9 @@ void func_8012555C(TObj *o, TObj *p)
     dx = o->h->p.whole - p->h->p.whole;
     if ((unsigned short)(dx + wx) > p->box1 + o->box1)
         return;
-    dy = (unsigned short)o->y.p.whole - (unsigned short)p->y.p.whole;
-    if ((unsigned short)(dy + (p->box2 + o->box2)) > o->box3 + p->box3)
+    if ((unsigned short)((o->y.p.whole - p->y.p.whole) + (p->box2 + o->box2)) > o->box3 + p->box3)
         return;
+    dy = o->y.p.whole - p->y.p.whole;
     sx = dx;
     cx = px;
     if (dx < 0) {
@@ -37,7 +37,7 @@ void func_8012555C(TObj *o, TObj *p)
         o->h->p.whole = p->h->p.whole + px;
         return;
     }
-    if ((short)dy <= 0) {
+    if (dy <= 0) {
         if (*(unsigned char *)&o->wac == 2) {
             short a = p->box2, b = p->y.p.whole, c = o->box2;
             o->y.p.frac = 0;
