@@ -67,3 +67,15 @@ Objetivo: escribir C en `src/<Nombre>.c` que, compilado con **GCC 2.7.2.SN.1** (
 - Una direccion de global en registro (`lui r; addiu r,r,lo; lhu x,(r)`) aparece cuando la direccion se usa 2+ veces en el bloque (load+store con `*p`); con un solo uso no he logrado reproducirla.
 - Si el original recarga un global en cada rama (dos `lhu` seguidos del mismo sitio) y gcc lo funde, declara el global con dos nombres distintos (`DAT_x` y `DAT_xb`): gcc 2.7 no los trata como alias (FUN_8001f1c0).
 - Hay un script util: comparar tu .o con el juego instrucción a instrucción (diff unificado de capstone) acelera mucho mas que mirar el `DIFF` de palabras.
+
+## Aprendido (shard3)
+- **Funciones con varias globales y base-reg (`lui v0; addiu v0,..; sw x,0(v0); sw y,4(v0)`)**: usar `// FLAGS -O1 -G0` (con -O2 gcc emite `sw x,D+4`). FUN_8006957c.
+- **Stores que el scheduler reordena respecto a loads de globales** (original: todos los stores en orden de fuente y luego los loads): declara el puntero destino `volatile int *o` / `volatile char *` en -O2. ObjFreeDup.
+- **Cadena de `beq` por rangos de un campo de bits (`x & 0xc000` con casos 0/4000/8000/c000) = `switch`**. El bloque de cola compartido (`o->t = v&0x3fff; return 0`) que en el binario esta ENTRE los casos se reproduce con `goto tail` desde el caso 0 hacia dentro del caso 0x4000. Las asignaciones de registros se arreglan usando una variable temporal distinta (`w`) en los casos que la comparten. AnimAdvance.
+- Frame de 0x10 sin saves en una hoja (`addiu sp,-0x10` incluso en delay slot de la 1a rama): declarar `char pad[16];` sin usar.
+- Para ver rapido flags: script tipo `for fl in "-O2 -G0" "-O1 -G0"...` sustituyendo la linea `// FLAGS`.
+- NO uses `git stash -u` en el arbol compartido (otros agentes tienen ficheros sin trackear); usa `git pull --rebase --autostash`.
+- **`move $a3,$a0; move $t0,$a1` al principio de una hoja** = el original usa una funcion `static __inline__` con esos parametros (gcc 2.7 copia los args a regs nuevos al expandir). Reproducirlo con un `static __inline__ int hit(TO *a, TO *b)` (FUN_8004461c / FUN_8004432c, en wip: esa parte ya coincide, falta el resto del scheduling).
+- **Orden del prologo (`addiu sp` ANTES de `lui/lw` global, con el `li`/`sw ra` despues)**: nuestro -O2 mueve el `subu sp` al delay slot del primer `lh/lw` global; en el binario esta primero. NO resuelto (probado: volatile, pad, literal de direccion, -fno-schedule-insns2, if/else invertido). Afecta a FUN_80114890, FUN_800184d8, FUN_80059728 (wip, solo difieren en eso). Si alguien lo resuelve, arregla varias.
+- Un `char pad;` sin usar reproduce frames de 8 bytes sin saves (`char pad[4]` da 16).
+- Para fijar `lhu` en la lectura y `lh` en el test del bucle sobre la misma global, declara dos externs con el mismo simbolo de distinto tipo (`DAT_x` short y `DAT_x_u` unsigned short): el nombre no importa para los bytes.
