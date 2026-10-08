@@ -1,4 +1,5 @@
 // FUNC 80112be0 68 X000
+// FLAGS -O1 -G8
 extern unsigned char DAT_8009c964;
 extern unsigned char DAT_8009c93a;
 extern void fa(void);
