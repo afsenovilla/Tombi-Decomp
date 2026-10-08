@@ -1,4 +1,5 @@
 // FUNC 800eec40 512 X000
+// MATCHING 800eec40 512
 #include "TOBJ.H"
 extern unsigned short D_8009C960;
 extern short D_8009C944;
@@ -36,8 +37,13 @@ void func_800EEC40(TObj *o)
             o->d8c = (o->d8c + 4) & 0xff;
             if (o->d8c <= 0x40)
                 return;
-            if (D_8009C960 == 3 && D_8009C944 != 0)
-                goto load;
+            if (D_8009C960 == 3 && D_8009C944 != 0) {
+                o->anim = D_800112E0;
+                AnimLoadDuration(o);
+            } else {
+                o->anim = D_80010AE8;
+                AnimJump(o, 3);
+            }
         } else {
             if (o->d8c < 0x80)
                 o->d8c = (0x100 - o->d8c) & 0xff;
@@ -45,15 +51,13 @@ void func_800EEC40(TObj *o)
             if (o->d8c >= 0xc0)
                 return;
             if (D_8009C960 == 3 && D_8009C944 != 0) {
-load:
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
-                o->d8c = 0;
-                return;
+            } else {
+                o->anim = D_80010AE8;
+                AnimJump(o, 3);
             }
         }
-        o->anim = D_80010AE8;
-        AnimJump(o, 3);
         break;
     }
     o->d8c = 0;
