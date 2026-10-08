@@ -3,7 +3,9 @@
    b36: `int t` reproduces the game's move s1,a3 (dir = t) but the score rises to 69 only because the missing k copy shifts
    everything by one insn; `k = o->box2; h = k;` keeps a copy (36) but with roles inverted (lo from the load, compare on the copy);
    `h = o->box2; k = h;` gets CSE-collapsed in every type combo.
-   b53: int t + int lo + `lo = o->box2; if (lo >= 8) lo = 8; hi = o->box2; if (hi >= 14) hi = 14;` gives the game's `move s1,a3` and tail order (36) but lhu+sll/sra instead of lh a0 + copy; MIN()/inline min(), lo=hi=box2 chains: 34-78. */
+   b53: int t + int lo + `lo = o->box2; if (lo >= 8) lo = 8; hi = o->box2; if (hi >= 14) hi = 14;` gives the game's `move s1,a3` and tail order (36) but lhu+sll/sra instead of lh a0 + copy; MIN()/inline min(), lo=hi=box2 chains: 34-78.
+   b54: k/v/lo/hi/t type brute force with `k = o->box2; v = k; lo = v; if (k >= 8) ...` (1024 combos): best 34 (same);
+   static __inline__ chk(o,x,y,dir) per call adds $fp and more regs (165+). */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
