@@ -89,6 +89,9 @@ python3 tools/build_full.py          # splat split + compile src/*.c + link; pri
 python3 tools/build_full.py --no-split   # reuse the previous split (build/full/asm)
 ```
 
+Run `tools/setup_native.sh` first (toolchain and the `include/tomba/psyq` headers; without them the files that
+include those headers are kept as asm, the output still matches). A full run takes about 1.5 minutes.
+
 Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`) and `build/X000.BIN` (must equal `ce168475…`); work files
 in `build/full/` (linker scripts `*.full.ld`, maps, objects). On a mismatch it lists the first differing
 offsets and the function or splat range that produced them.
