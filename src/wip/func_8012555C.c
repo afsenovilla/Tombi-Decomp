@@ -1,5 +1,5 @@
 // FUNC 8012555c 664 X000
-// WIP score 40: dy assigned inside the y test (box3 sum < expr form); game evaluates the dy expression first and copies it to a1 after the adds; here box3 sum is evaluated first. Tried: (u16)expr > sum (58, right order but dy in t5), dy after test (47, extra move), int dy, e temp, e0/e1 locals.
+// WIP score 40: dy assigned inside the y test (box3 sum < expr form); game evaluates the dy expression first and copies it to a1 after the adds; here box3 sum is evaluated first. Tried: (u16)expr > sum (58, right order but dy in t5), dy after test (47, extra move), int dy, e temp, e0/e1 locals. b25: whole body as static __inline__ f(o,p) in FUN_80043c74 style (98); greedy int/short/ushort per local (no gain); separate dy + full expr in test (58).
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
