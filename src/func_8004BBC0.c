@@ -1,5 +1,5 @@
 // FUNC 8004bbc0 1060 MAIN0
-// wip score 64: only diff = second loop: gcc hoists both 0xb and 0x21 (extra s3 save); game hoists only 0xb (s2).
+// MATCHING 8004bbc0 1060
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct { char p0[4]; unsigned short s4; } A;
 typedef struct {
@@ -17,11 +17,11 @@ extern unsigned short D_1F800254, D_1F800250;
 extern unsigned char **D_1F800268, **D_1F800260;
 extern unsigned short D_8009C960;
 extern short FUN_80041ca8(TO *, short, short);
-extern void func_801269D0(TO *), func_8004B454(TO *, unsigned char *), func_80126940(TO *), func_8011FE38(TO *);
-extern void func_80126FE4(TO *), func_80126A64(TO *), func_80126D2C(TO *), func_80126E8C(TO *), func_801212C4(TO *);
-extern void func_8011DF8C(TO *), func_8012767C(TO *), func_8011EF98(TO *), func_8004B7C4(TO *, unsigned char *);
-extern void func_8011F5D8(TO *), func_8011F474(TO *), func_801212D4(TO *), func_8011D3F8(TO *), func_8011F38C(TO *);
-extern void func_80126F64(TO *), func_80121254(TO *);
+extern void func_801269D0(TO *, unsigned char *), func_8004B454(TO *, unsigned char *), func_80126940(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
+extern void func_80126FE4(TO *, unsigned char *), func_80126A64(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
+extern void func_8011DF8C(TO *, unsigned char *), func_8012767C(TO *, unsigned char *), func_8011EF98(TO *, unsigned char *), func_8004B7C4(TO *, unsigned char *);
+extern void func_8011F5D8(TO *, unsigned char *), func_8011F474(TO *, unsigned char *), func_801212D4(TO *, unsigned char *), func_8011D3F8(TO *, unsigned char *), func_8011F38C(TO *, unsigned char *);
+extern void func_80126F64(TO *, unsigned char *), func_80121254(TO *, unsigned char *);
 
 int func_8004BBC0(TO *o, unsigned char f)
 {
@@ -39,7 +39,7 @@ int func_8004BBC0(TO *o, unsigned char f)
     if (o->s2e & 1) d = -0x10;
     r = FUN_80041ca8(o, o->h40->s2 + d, o->sea);
     if (r != 0) {
-        { int c = 6; if (r == 2) c = 5; o->b9e = c; }
+        o->b9e = (r == 2) ? 5 : 6;
         if (o->s2e & 1) o->h40->s2 -= 0xc;
         else o->h40->s2 += 0xc;
         D_1F8003C0++;
@@ -64,7 +64,7 @@ int func_8004BBC0(TO *o, unsigned char f)
         if (*e & 1) {
             switch (e[2]) {
             case 1:
-                func_801269D0(o);
+                func_801269D0(o, e);
                 break;
             case 3:
                 func_8004B454(o, e);
@@ -72,52 +72,52 @@ int func_8004BBC0(TO *o, unsigned char f)
             case 4:
                 if (D_8009C960 == 0) {
             case 2:
-                    func_80126940(o);
+                    func_80126940(o, e);
                 } else {
-                    func_8011FE38(o);
+                    func_8011FE38(o, e);
                 }
                 break;
             case 5:
-                func_80126FE4(o);
+                func_80126FE4(o, e);
                 break;
             case 6:
-                func_80126A64(o);
+                func_80126A64(o, e);
                 break;
             case 0x15:
-                func_80126D2C(o);
+                func_80126D2C(o, e);
                 break;
             case 0xe:
-                func_80126E8C(o);
+                func_80126E8C(o, e);
                 break;
             case 0x1c:
-                func_801212C4(o);
+                func_801212C4(o, e);
                 break;
             case 0x1d:
-                func_8011DF8C(o);
+                func_8011DF8C(o, e);
                 break;
             case 0x14:
-                func_8012767C(o);
+                func_8012767C(o, e);
                 break;
             case 0x34:
-                func_8011EF98(o);
+                func_8011EF98(o, e);
                 break;
             case 0x10: case 0x11: case 0x19: case 0x35: case 0x37: case 0x3d: case 0x3e:
                 func_8004B7C4(o, e);
                 break;
             case 0x1f:
-                func_8011F5D8(o);
+                func_8011F5D8(o, e);
                 break;
             case 0x22:
-                func_8011F474(o);
+                func_8011F474(o, e);
                 break;
             case 0x31:
-                func_801212D4(o);
+                func_801212D4(o, e);
                 break;
             case 0x42:
-                func_8011D3F8(o);
+                func_8011D3F8(o, e);
                 break;
             case 0x24:
-                func_8011F38C(o);
+                func_8011F38C(o, e);
                 break;
             }
         }
@@ -132,10 +132,10 @@ int func_8004BBC0(TO *o, unsigned char f)
             if (*e & 1) {
                 switch (e[2]) {
                 case 0xb:
-                    func_80126F64(o);
+                    func_80126F64(o, e);
                     break;
                 case 0x21:
-                    func_80121254(o);
+                    func_80121254(o, e);
                     break;
                 }
             }
