@@ -1,4 +1,5 @@
 // FUNC 8002dd1c 596 MAIN0
+// MATCHING 8002dd1c 596
 typedef struct {
     unsigned char active, b01, type, b03;
     char p04[6];
@@ -24,18 +25,18 @@ typedef struct {
 } E2d;
 extern short DAT_800a4648[];
 extern unsigned char DAT_8009d67c;
-extern char *DAT_1f800398[];
+extern char *DAT_1f800398;
+#define SP398 (*(char * volatile *)&DAT_1f800398)
 extern E2d *ObjAlloc(void);
 
-E2d *FUN_8002dd1c(int k, short dx, short *pos, short anim, unsigned short w)
+E2d *FUN_8002dd1c(int k, int dx, short *pos, short anim, unsigned short w)
 {
     int i;
-    short *p;
     E2d *o;
     unsigned short v;
     char *b;
-    for (i = 0, p = DAT_800a4648; i < 4; i++, p += 4) {
-        if (*p == -1 && (o = ObjAlloc()) != 0) {
+    for (i = 0; i < 4; i++) {
+        if (DAT_800a4648[i * 4] == -1 && (o = ObjAlloc()) != 0) {
             o->type = 0x1a;
             o->b0a = 10;
             o->w1e = 0x14;
@@ -69,8 +70,9 @@ E2d *FUN_8002dd1c(int k, short dx, short *pos, short anim, unsigned short w)
             o->b6 = 0xffff;
             o->b8 = 0;
             o->ba = -(o->c2 >> 1);
-            o->bc = -0x30 - o->c4;
+            o->bc = -o->c4 - 0x30;
             o->be = pos[1] + o->ba;
+            o->c0 = pos[3] + o->bc;
             o->ce = 8;
             o->d0 = 6;
             o->c6 = 0xffff;
@@ -79,12 +81,14 @@ E2d *FUN_8002dd1c(int k, short dx, short *pos, short anim, unsigned short w)
             o->d2 = w;
             o->w20 = 1;
             o->w22 = 0;
-            o->c0 = pos[3] + o->bc;
-            *p = 0;
-            v = *(short *)(DAT_1f800398[0] + k * 2 + 0x10) + dx;
+            DAT_800a4648[i * 4] = 0;
+            b = SP398;
+            v = *(short *)(b + k * 2 + 0x10) + dx;
             o->c8 = v;
-            b = DAT_1f800398[0] + *(unsigned short *)(DAT_1f800398[0] + 8);
-            o->d94 = (int)(b + *(unsigned short *)(b + v * 2));
+            b = SP398;
+            b += *(unsigned short *)(b + 8);
+            b += *(unsigned short *)(b + (v << 1));
+            o->d94 = (int)b;
             return o;
         }
     }
