@@ -1,5 +1,5 @@
 // FUNC 80108168 464 X000
-/* score 2: only diff is the sb 0xf(-20) store, which the game sinks after the b69 store while keeping li -20 early; moving the statement moves the li too */
+/* score 2: only diff is the sb 0xf(-20) store, which the game sinks after the b69 store while keeping li -20 early; moving the statement moves the li too. Also tried (w4): all positions of the u/-20 lines x 3 forms, raw/struct forms of every store, a volatile -20 store after b69 (puts the sb right but moves lhu/li 2 regs), inline helper for the zero stores, -fno-schedule-insns. Same residual in func_80107FCC/func_80108AD0. */
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern TObj *DAT_8009c330;
