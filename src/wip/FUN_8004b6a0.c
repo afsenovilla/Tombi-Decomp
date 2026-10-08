@@ -1,31 +1,37 @@
 // FUNC 8004b6a0 292 MAIN0
+typedef struct { char p0[2]; unsigned short s2; } H;
+typedef struct {
+    char p0[0x16]; unsigned short s16;
+    char p1[0x2e - 0x18]; unsigned short s2e;
+    char p1b[0x40 - 0x30]; H *h40; H *h44;
+    char p2[0x6c - 0x48]; unsigned short s6c; short s6e; unsigned short s70; short s72;
+    char p3[0xe8 - 0x74]; unsigned short se8; unsigned short sea;
+} TO;
 extern short DAT_1f8003bc;
 
-int FUN_8004b6a0(char *a, char *b)
+static __inline__ int f(TO *a, TO *b)
 {
     char pad;
-    int ad, v, w;
-    short d;
-    unsigned short e;
-    if ((unsigned short)(*(unsigned short *)(*(char **)(a + 0x44) + 2) - *(unsigned short *)(*(char **)(b + 0x44) + 2) + 0x2d) < 0x5b) {
-        e = *(unsigned short *)(a + 0xe8);
-        d = e - *(unsigned short *)(*(char **)(a + 0x40) + 2);
-        ad = d < 0 ? -d : d;
-        if (*(unsigned short *)(a + 0x2e) & 1)
-            v = *(unsigned short *)(b + 0x6c) + ad;
-        else
-            v = *(unsigned short *)(b + 0x6c);
-        w = e - *(unsigned short *)(*(char **)(b + 0x40) + 2);
-        if (*(short *)(b + 0x6e) + (short)ad < (unsigned short)(v + w))
-            return 0;
-        w = *(unsigned short *)(b + 0x70) + (*(unsigned short *)(a + 0xea) - *(unsigned short *)(b + 0x16));
-        if (*(short *)(b + 0x72) < (unsigned short)w)
-            return 0;
-        if (*(unsigned short *)(a + 0x2e) & 1)
-            DAT_1f8003bc = *(short *)(b + 0x6e) - *(unsigned short *)(b + 0x6c);
-        else
-            DAT_1f8003bc = -*(unsigned short *)(b + 0x6c);
+    int d, ad, v, w, e;
+    
+    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) < 0x5b) {
+        e = a->se8;
+        d = e - a->h40->s2;
+        ad = d;
+        if ((short)d < 0) ad = -d;
+        w = e - b->h40->s2;
+        if (a->s2e & 1) v = b->s6c + ad; else v = b->s6c;
+        if ((unsigned short)(v + w) > b->s6e + (short)ad) return 0;
+        w = b->s70 + (a->sea - b->s16);
+        if (b->s72 < (unsigned short)w) return 0;
+        if (!(a->s2e & 1)) DAT_1f8003bc = -b->s6c;
+        else DAT_1f8003bc = b->s6e - b->s6c;
         return 1;
     }
     return 0;
+}
+
+int FUN_8004b6a0(TO *a, TO *b)
+{
+    return f(a, b);
 }

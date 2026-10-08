@@ -15,23 +15,23 @@ extern void FUN_8004f3bc(void);
 
 void FUN_8001c218(unsigned short p)
 {
-    unsigned short u;
-    int r;
+    int u;
     unsigned short *q;
     unsigned short a, b;
-    u = FUN_8001beec();
+    unsigned char c;
+    u = FUN_8001beec() & 0xff;
     q = DAT_8009c960;
     a = q[0];
     b = q[1];
+    c = PTR_80077b64[a + DAT_8009f838][b];
     DAT_1f8001de = 0;
     DAT_8009d2a8 = a;
     DAT_8009d2aa = b;
     DAT_8009d2ac = DAT_8009c982;
-    DAT_1f8001dc = PTR_80077b64[a + DAT_8009f838][b];
+    DAT_1f8001dc = c;
     FUN_8004f3ec();
-    r = FUN_8001d1bc((short)p);
-    if (r != -1) DAT_8009c967 = 2;
-    FUN_8004f490(q[0] + DAT_8009f838, q[1], (short)(p | (u & 0xff)));
+    if (FUN_8001d1bc((short)p) != -1) DAT_8009c967 = 2;
+    FUN_8004f490(q[0] + DAT_8009f838, q[1], (short)(p | u));
     FUN_80039338();
     FUN_8004f3bc();
 }
