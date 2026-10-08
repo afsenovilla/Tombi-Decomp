@@ -1,5 +1,5 @@
 // FUNC 800480d4 536 MAIN0
-// wip score 107 (rewritten in the style of the matched sibling func_800482EC; int hy). Left: game keeps o/p in t0/t1 (ours a2/a3: two fewer early pseudos) and loads o->box3 with lhu (sll/sra later). As a static inline wrapper: 142.
+// wip score 38 (b53: `short w = ...; TObj *q = o; o->y.p.frac = 0; o->b69 = 1; q->y.p.whole = w;` in the dy<=0 tail fixes the o/p t0/t1 global-alloc order, 107->38; left: game reads o->box3/p->box2/o->box2 with lhu in hy (o->box3 reused via sll/sra in the compare), dy+hy unextended, t6-t9 shifted) (rewritten in the style of the matched sibling func_800482EC; int hy). Left: game keeps o/p in t0/t1 (ours a2/a3: two fewer early pseudos) and loads o->box3 with lhu (sll/sra later). As a static inline wrapper: 142.
 #include "TOBJ.H"
 
 int func_800480D4(TObj *o, TObj *p)
@@ -48,9 +48,13 @@ int func_800480D4(TObj *o, TObj *p)
     if (dy <= 0) {
         if (o->b9c & 1)
             return 0;
-        o->y.p.frac = 0;
-        o->b69 = 1;
-        o->y.p.whole = p->y.p.whole - (p->box2 + (o->box3 - o->box2));
+        {
+            short w = p->y.p.whole - (p->box2 + (o->box3 - o->box2));
+            TObj *q = o;
+            o->y.p.frac = 0;
+            o->b69 = 1;
+            q->y.p.whole = w;
+        }
         return 1;
     }
     if (o->category == 2 && *(unsigned short *)&o->b04 == 0x102)
