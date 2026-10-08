@@ -1,6 +1,11 @@
 // FUNC 800505f0 2228 MAIN0
 // FLAGS -O2 -G0 -fno-strength-reduce
-/* score 517: twin of wip func_80052190 (rotated FT4 sprite). Logic decoded from asm; game frame 0x80 spills t1-t9 around SetSemiTrans (caller-save) and keeps q at sp+0x18, count at sp+0x10; ours frame 0x60. Register allocation not attempted further. */
+/* score 301 (b23, was 517): twin of wip func_80052190 (rotated FT4 sprite). b23: short x,y (lbu+sll/sra), the
+   D_8009C962 test as a switch (slti/bgez), (a+0x40)&0xff as a local a4 computed before the loop (game hoists its offset
+   t7 and &sin[a4] t8->sp+32), and &cos/&sin[(b+0xc0)&0xff] as pointer locals before the loop (game t9 and sp+80).
+   Left: frame 0x78 vs 0x80 (game spills n@16 sh, q@24, sp+32, sp+80; caller-save t1-t9 at 40..72), the table bases
+   (game: la s7=cos, la t4=sin in the preheader after the FUN_80037c80 calls), q/n spill slots swapped, prologue order
+   (game: lh s; lw xy; e; lh e[1]; reload o->d3c; lhu e[0]). Use -dL to see the loop hoisting decisions. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -91,7 +96,7 @@ void FUN_800505f0(TObj *o)
     int ndx, ndy;
     int v;
     unsigned short af;
-    int x, y;
+    short x, y;
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
@@ -110,8 +115,12 @@ void FUN_800505f0(TObj *o)
     cy = xy >> 16;
     cx = xy;
     if (D_8009C330->w28[D_1F8001F4] != s) {
-        if (D_8009C960h == 6 && (D_8009C962h >= 2 || (short)D_8009C962h < 0))
-            FUN_80037c80(o);
+        if (D_8009C960h == 6) {
+            switch (D_8009C962h) {
+            case 0: case 1: break;
+            default: FUN_80037c80(o);
+            }
+        }
         FUN_80037c80(o);
     }
     a = (o->d8c + 0x80) & 0xff;
@@ -119,6 +128,9 @@ void FUN_800505f0(TObj *o)
     f = q + 0xb;
     D_8009C330->w18 = cx;
     D_8009C330->w1a = cy;
+    {int a4 = (a + 0x40) & 0xff;
+    short *cb = &D_8007A5F0[(b + 0xc0) & 0xff];
+    short *sb = &D_8007A3F0[(b + 0xc0) & 0xff];
     do {
         x = (signed char)f[3];
         y = (signed char)f[4];
@@ -151,10 +163,10 @@ void FUN_800505f0(TObj *o)
             p->y1 = cy + ((ndx * D_8007A3F0[a]) >> 12) + ((ndy * D_8007A3F0[(a + 0xc0) & 0xff]) >> 12);
             p->x0 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + ((ndy * D_8007A5F0[(b + 0x40) & 0xff]) >> 12);
             p->y0 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + ((ndy * D_8007A3F0[(b + 0x40) & 0xff]) >> 12);
-            p->x3 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[(a + 0x40) & 0xff]) >> 12);
-            p->y3 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[(a + 0x40) & 0xff]) >> 12);
-            p->x2 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * D_8007A5F0[(b + 0xc0) & 0xff]) >> 12);
-            p->y2 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * D_8007A3F0[(b + 0xc0) & 0xff]) >> 12);
+            p->x3 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[a4]) >> 12);
+            p->y3 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[a4]) >> 12);
+            p->x2 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * *cb) >> 12);
+            p->y2 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * *sb) >> 12);
         } else {
             dx = x;
             dy = y;
@@ -164,14 +176,14 @@ void FUN_800505f0(TObj *o)
             p->y0 = cy + ((ndx * D_8007A3F0[a]) >> 12) + ((ndy * D_8007A3F0[(a + 0xc0) & 0xff]) >> 12);
             p->x1 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + ((ndy * D_8007A5F0[(b + 0x40) & 0xff]) >> 12);
             p->y1 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + ((ndy * D_8007A3F0[(b + 0x40) & 0xff]) >> 12);
-            p->x2 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[(a + 0x40) & 0xff]) >> 12);
-            p->y2 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[(a + 0x40) & 0xff]) >> 12);
-            p->x3 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * D_8007A5F0[(b + 0xc0) & 0xff]) >> 12);
-            p->y3 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * D_8007A3F0[(b + 0xc0) & 0xff]) >> 12);
+            p->x2 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[a4]) >> 12);
+            p->y2 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[a4]) >> 12);
+            p->x3 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * *cb) >> 12);
+            p->y3 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * *sb) >> 12);
         }
         if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, o->b0f, 0x9000000))
             DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
         q += 0x10;
         f += 0x10;
-    } while (--n);
+    } while (--n);}
 }
