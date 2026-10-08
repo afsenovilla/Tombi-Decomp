@@ -1,5 +1,5 @@
 // FUNC 8012555c 664 X000
-// WIP score 20 (was 40): FUN_80043c74 sibling style (w first, e0/e1 locals, t=w, c copy) fixed all global regs. Left: game computes o->y-p->y once into v1, adds box2 sum into v0 and copies v1->a1 (dy) AFTER the add; here dy (int, u16 casts) is a separate subu into t8 (so sx lands in t9). Tried: dy short/int/u16 assigned before/inside/after the test, recompute vs dy in test, block temp q, operand orders (26-58).
+// MATCHING 8012555c 664
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
@@ -9,7 +9,8 @@ void FUN_8004258c(TObj *o, int n);
 void func_8012555C(TObj *o, TObj *p)
 {
     short d, w, t, e0, e1, sx, c;
-    int dy;
+    int dy, dd;
+    unsigned short u;
 
     if (p->subtype == 0) {
         func_80043C74(o, p);
@@ -23,8 +24,10 @@ void func_8012555C(TObj *o, TObj *p)
     e0 = p->box1; e1 = o->box1;
     if ((unsigned short)(d + w) > e0 + e1)
         return;
-    dy = (unsigned short)o->y.p.whole - (unsigned short)p->y.p.whole;
-    if ((unsigned short)(o->y.p.whole - p->y.p.whole + (p->box2 + o->box2)) > o->box3 + p->box3)
+    dd = (unsigned short)o->y.p.whole - (unsigned short)p->y.p.whole;
+    u = dd + (p->box2 + o->box2);
+    dy = dd;
+    if (u > o->box3 + p->box3)
         return;
     sx = d;
     c = t;
