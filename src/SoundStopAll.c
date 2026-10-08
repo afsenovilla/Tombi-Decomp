@@ -1,4 +1,5 @@
 // FUNC 8001f4bc 252 MAIN0
+// MATCHING 8001f4bc 252
 extern short VA, VB;
 extern short X1[], Y1[];
 extern short Z1, Z2, Z3, Z4, Z5;
@@ -14,16 +15,14 @@ void SoundStopAll(void)
         g2(VA);
         VA = -1;
     }
-    i = 0;
     if (VB != -1) {
         g1(VB);
         g2(VB);
         VB = -1;
-        i = 0;
     }
     Z1 = 0;
     Z2 = 0;
-    for (; i < 24; i++) {
+    for (i = 0; i < 24; i++) {
         Y1[i] = 0xf;
         X1[i] = -1;
     }
