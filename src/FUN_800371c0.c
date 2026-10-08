@@ -1,4 +1,5 @@
 // FUNC 800371c0 660 MAIN0
+// MATCHING 800371c0 660
 extern unsigned char *FUN_80037454(int, unsigned char *, int);
 
 void FUN_800371c0(int a, int b, unsigned char *dst, int d)
@@ -7,9 +8,8 @@ void FUN_800371c0(int a, int b, unsigned char *dst, int d)
     int *q;
     unsigned char *p;
     int n, a4;
-    a4 = a + 4;
-    b = b << 2;
-    q = (int *)(a4 + b);
+    q = (int *)(a + 4);
+    q = (int *)((int)q + (b << 2));
     n = q[1] - *q;
     if (d != -1) {
         *(int *)dst = 0x10;
@@ -19,12 +19,11 @@ void FUN_800371c0(int a, int b, unsigned char *dst, int d)
         dst = dst + 0x10;
     }
     p = (unsigned char *)(a + *q);
-    for (;;) {
-        c = *p;
+    loop: {
+        c = *p++;
         n = n - 1;
         if (n < 1)
-            break;
-        p++;
+            return;
         if (c & 1) {
             int x = *p++;
             int y = *p++;
@@ -106,4 +105,5 @@ void FUN_800371c0(int a, int b, unsigned char *dst, int d)
             dst = dst + 1;
         }
     }
+    goto loop;
 }
