@@ -1,11 +1,11 @@
 // FUNC 80021858 572 MAIN0
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 80021858 572
 // Portado de psx_tomba (camera.c, func_800243E8); licencia MIT del proyecto original.
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_8007BF78[];
-extern u8 D_8009C617;
+extern int** D_80079474[];
+extern u8 D_8009D2AF;
 
 
 typedef struct {
@@ -14,7 +14,7 @@ typedef struct {
     int z;
 } VEC3;
 
-extern VEC3 D_8009C61C;
+extern VEC3 D_8009D2B4;
 
 
 
@@ -39,7 +39,7 @@ void func_800243E8(void)
             D_8009BCEA = 2;
         }
     }
-    row = (s16*)((u8*)D_8007BF78[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
     *(int*)(p + 0x10) = *row++ << 16;
     *(int*)(p + 0x14) = *row++ << 16;
     *(int*)(p + 0x18) = *row << 16;
@@ -62,12 +62,12 @@ void func_800243E8(void)
 
         *dst |= 1 << r[1];
     }
-    if (D_8009C618 == 3 || D_8009C617 == 0) {
+    if (D_8009C618 == 3 || D_8009D2AF == 0) {
         func_800242AC(p);
         *(s16*)(p + 0x12) = *(u16*)(p + 0xEE);
         *(s16*)(p + 0x16) -= 0x104;
     } else if ((CURRENT_TASK)->loadGameSelected != 0) {
         (CURRENT_TASK)->loadGameSelected = 0;
-        *(VEC3*)&D_800A5398[0x10] = D_8009C61C;
+        *(VEC3*)&D_800A5398[0x10] = D_8009D2B4;
     }
 }
