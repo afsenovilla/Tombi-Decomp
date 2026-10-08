@@ -1,4 +1,5 @@
 // FUNC 801228bc 212 X000
+// MATCHING 801228bc 212
 #include "TOBJ.H"
 extern unsigned short DAT_8009c962;
 extern int DAT_8009c984;
@@ -10,10 +11,11 @@ extern void FUN_8011a148(int, int, int, int);
 
 void FUN_801228bc(TObj *o)
 {
-    if (DAT_8009c962 == 4)
+    unsigned short *p = &DAT_8009c962;
+    if (*p == 4)
         o->b0f = 8;
-    if (DAT_8009c962 == 5)
-        o->b0f = 0xfb;
+    if (*p == 5)
+        *(signed char *)&o->b0f = -5;
     if ((DAT_8009c984 & 2) != 0)
         FUN_801340c4(o->a.p.whole, o->y.p.whole, o->b.p.whole);
     if (DAT_8009cda6 != 0xff)

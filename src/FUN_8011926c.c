@@ -1,4 +1,6 @@
 // FUNC 8011926c 240 X000
+// MATCHING 8011926c 240
+typedef struct P { char p[0x24]; int w24; char q[0x3c - 0x28]; int w3c; } P;
 extern int DAT_1f8002d4;
 extern int DAT_8013b1f0;
 extern int FUN_800202b4(char *);
@@ -19,8 +21,8 @@ void FUN_8011926c(char *o)
         o[3] = 0;
         *(signed char *)&o[0xf] = -8;
         *(short *)(o + 0x2e) = 0;
-        *(int *)(o + 0x3c) = DAT_1f8002d4;
-        *(int *)(o + 0x24) = DAT_8013b1f0;
+        ((P *)o)->w3c = DAT_1f8002d4;
+        ((P *)o)->w24 = DAT_8013b1f0;
         FUN_8001fe6c(o);
         FUN_8001e4f0(0x30);
         break;
