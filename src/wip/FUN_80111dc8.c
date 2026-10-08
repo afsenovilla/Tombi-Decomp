@@ -1,5 +1,6 @@
 // FUNC 80111dc8 400 X000
 /* score 6: only the velX sum register differs (game: addu v1,v0,v1 i.e. sum tied to s in v1; ours sum in v0 tied to the velX load). Reusing r (the table value) for the sum keeps the s=r copy in the bnez delay slot (score 27 -> 6). y update written in full in both branches (cross-jump gives the lw-first merge block). Tried: s/r/a types, s+=, inline sel(), x temps, r reused for d. */
+/* b32 also tried: s/r reuse for the sum (all 3 sum targets), ternary/if-else selection forms, s/r types: none below 6. */
 #include "TOBJ.H"
 extern short DAT_8013c984[];
 extern short DAT_8007a1f0[], DAT_8007a5f0[];

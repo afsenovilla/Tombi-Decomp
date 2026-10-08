@@ -1,6 +1,7 @@
 // FUNC 80044424 300 MAIN0
 // score 14 (b12 also tried: separate int/short temp + dy copy, & 0xffff test form, inline ovl(d,s,m) param copy, per-local type brute force: all 23-50)
 // b27 also tried: t=E; dy=t (copy forms, F2-F8 with all int/short types), short dy + dy-in-test (copy appears but d moves t0->a1 and dy-block load order differs, 42), decl order perms, statement hill-climb: none below 14.
+// b32 also tried: block-local int t for sx (sx=t; test d+t: gives the sx copy too), u for dy (copy appears with short dy but d moves to a1, 25-41), one var t for both sx-temp and dy (32), inline ovl() (no frame in game, 40+).
 // dy test written with the full expression (no CSE with dy). Left: game CSEs it (subu v1 then move t4,v1) while ours computes dy twice; tried temps/types/order
 #include "TOBJ.H"
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
