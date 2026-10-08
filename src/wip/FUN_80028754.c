@@ -1,5 +1,5 @@
 // FUNC 80028754 368 MAIN0
-/* w5: score 103, rewritten from the mirror function func_800285EC (matched). Body matches except the game moves o to t0 (move t0,a0 in the first bne slot, addiu sp first), so n gets a0; inline wrappers/local copies of o did not help. */
+/* w5: score 103, rewritten from the mirror function func_800285EC (matched). Body matches except the game moves o to t0 (move t0,a0 in the first bne slot, addiu sp first), so n gets a0; inline wrappers/local copies of o did not help. b25: in the game n is allocated before o (global-alloc priority), so n takes a0 and o ends up last in t0; mirror body as static __inline__ inl(o) gives 111, type greedy on n/s/r 108. */
 typedef struct { char p[0x32]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
