@@ -1,4 +1,5 @@
 // FUNC 8005892c 492 MAIN0
+// MATCHING 8005892c 492
 // FLAGS -O2 -G0 -fno-strength-reduce
 typedef struct {
     unsigned long tag;
@@ -25,9 +26,9 @@ extern void SetSemiTrans(SPRT *, int);
 extern void AddPrim(void *, void *);
 extern void FUN_80059464(int, int);
 
-void FUN_8005892c(O58 *o, int x0, int y0)
+void func_8005892C(O58 *o, int x0, int y0)
 {
-    int x = x0, y = y0;
+    short x = x0, y = y0;
     SPRT *p;
     unsigned char *q;
     unsigned short *r;
