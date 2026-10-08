@@ -1,4 +1,5 @@
 // FUNC 8012b5d0 1220 X000
+/* score 148: InRange inline returning short fixes most; left: case 2 game computes dx (h - D_1F80016A) fully before dy with an unfilled load slot (ours interleaves), and InRange result lands in a0 + copy instead of v0. */
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
 extern unsigned char D_801390EC[], D_801390F4[];
@@ -25,7 +26,7 @@ static __inline__ void SetBox(TObj *o)
     o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff;
 }
 
-static __inline__ int InRange(TObj *o)
+static __inline__ short InRange(TObj *o)
 {
     return (unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) < 0x5b
         && (unsigned short)(o->y.p.whole - D_1F80016E + 0x46) < 0x6f
@@ -37,6 +38,7 @@ void func_8012B5D0(TObj *o)
     short *q = &o->wb4;
     int r;
     unsigned short dx;
+    unsigned short dy;
     switch (o->state) {
     case 0:
         o->movetab = D_80077CF4;
@@ -50,10 +52,10 @@ void func_8012B5D0(TObj *o)
         AnimAdvanceWithBox(o);
         FUN_8001fb20(o);
         if (FUN_801274cc(o)) {
-            r = (unsigned short)q[1];
+            int t = (unsigned short)q[1];
             o->timer = 0;
+            o->d8c = t;
             o->state++;
-            o->d8c = r;
         }
         break;
     case 2:
