@@ -1,5 +1,5 @@
 // FUNC 8002b3c8 1276 MAIN0
-/* score 30 (ncheck): only case 1 differs: the two /30 divisions (mult magic) get a1/a2/a3 instead of game a2/a1/t0 and the sign term (x>>31) is scheduled later. Tried int/short temps, statement orders, *256 vs <<8. Tail: (o->d30 >> 16) gives lh; order a, y, b. */
+/* score 30 (ncheck): only case 1 differs (registers of the two /30 divisions). b20 finding: one reused `int t` for both halves (`u = a - 0xa0; t = wc4; t -= u; t <<= 8; velH = t / 30;` then same with wc6/y) reproduces the game's exact schedule (WAR deps), but t/u die twice so gcc gives them to global-alloc (t->a2) while the game has t in v1, u in v0, i.e. local-alloc (one death each). Need a form with one shared t that dies once. Tried int/short temps, statement orders, *256 vs <<8, inline helpers, function-scope vars. Tail: (o->d30 >> 16) gives lh; order a, y, b. */
 #include "TOBJ.H"
 typedef struct { TObj t; short wc0, wc2, wc4, wc6; unsigned short wc8, wca, wcc; } SX;
 #define X(o) ((SX *)(o))
