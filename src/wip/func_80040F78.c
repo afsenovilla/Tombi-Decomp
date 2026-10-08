@@ -1,14 +1,15 @@
-/* wip: score 59 (ncheck). Inline inr() con lo/hi unsigned short y r short mejora de 112 a 59.
-   Falla: registro del puntero DAT_1f800278 (juego a1, nuestro v1), la copia lo->v1 del inline y el orden a+b. */
+/* wip: ncheck score 68 but fewer differing instructions than the old 59 version (38 vs 55 diff lines):
+   int r, callees return int, s = a + b computed before the compares (fixes base reg a1 for DAT_1f800278).
+   Left: hi in a3 (game a2), r in a2 (game a0), inr() result comes out as xori instead of bnez/move/j/li. */
 // FUNC 80040f78 596 MAIN0
 extern unsigned short *DAT_1f800278;
 extern unsigned short DAT_1f800282, DAT_1f800284;
-extern short FUN_8004094c(int, int);
-extern short FUN_80040d30(int, int);
-extern short func_80040AC0(int, int);
-extern short func_80040BFC(int, int);
+extern int FUN_8004094c(int, int);
+extern int FUN_80040d30(int, int);
+extern int func_80040AC0(int, int);
+extern int func_80040BFC(int, int);
 
-static __inline__ short inr(short m, unsigned short lo, unsigned short hi)
+static __inline__ int inr(short m, short lo, short hi)
 {
     if (m < lo) return 0;
     if (lo + hi < m) return 0;
@@ -17,9 +18,10 @@ static __inline__ short inr(short m, unsigned short lo, unsigned short hi)
 int func_80040F78(void *o, int x, int y)
 {
     short n, m;
-    short r;
+    int r;
     unsigned short w, a, b, c;
     int lo, hi;
+    unsigned short s;
     n = *(short *)DAT_1f800278++;
     if (n == 0)
         return 0;
@@ -38,7 +40,8 @@ int func_80040F78(void *o, int x, int y)
             c = *DAT_1f800278++;
             lo = c & 0xf;
             hi = (c >> 4) & 0xf;
-            if ((short)a < (short)y || (short)y < (short)(a + b))
+            s = a + b;
+            if ((short)a < (short)y || (short)y < (short)s)
                 r = 0;
             else
                 r = inr((short)x % 8, lo, hi);
