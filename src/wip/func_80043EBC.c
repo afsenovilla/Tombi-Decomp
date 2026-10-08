@@ -1,5 +1,5 @@
 // FUNC 80043ebc 544 MAIN0
-/* score 12: only the dy block differs: game dy=a0, o->box2=a1 and the dy copy (move a1,a0) after the -8 sum; ours dy=v1 and copy right after subu. Tried dy as int/short temps, recomputing in the test, assigning after the test, type brute force. */
+/* score 8: only the dy test differs: game computes (dy-8) + (e->box2+o->box2) with dy=a0, o->box2=a1 and the dy copy (move a1,a0) late; the (dy-8)+(...) grouping gives dy=v1 (12), this form gives dy=a0 but adds in another order. Tried ~30 groupings, block-local short b = box sum (10), temps, types. */
 #include "TOBJ.H"
 
 typedef struct { short x, y; } Off;
@@ -21,7 +21,7 @@ void func_80043EBC(TObj *o, TObj *e)
     if ((unsigned short)(dx + sx) > e->box1 + 16 + o->box1)
         return;
     dy = o->y.p.whole - (e->y.p.whole + ty);
-    if ((unsigned short)(dy - 8 + (e->box2 + o->box2)) > o->box3 + e->box3 - 16)
+    if ((unsigned short)(dy + e->box2 + o->box2 - 8) > o->box3 + e->box3 - 16)
         return;
     cx = px;
     ax = dx;
