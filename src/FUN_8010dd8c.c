@@ -1,5 +1,6 @@
 // FUNC 8010dd8c 504 X000
-// wip score 19: velY re-read after the ac==2 block via volatile (game: lh + move copy; volatile gives lhu+sll/sra), timer/velY decrement order swapped to match. Left: that lh form and bgtz delay slot.
+// MATCHING 8010dd8c 504
+/* volatile store of velY makes the later read reload it (game: lh + move copy) */
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *DAT_8009c330;
@@ -11,10 +12,10 @@ extern void FUN_800eea7c(TObj *, int, int);
 
 void FUN_8010dd8c(TObj *o)
 {
-    short r, w, v;
-    unsigned short u;
+    short r, w;
+    short v;
+    short u;
     int d;
-    char pad[8];
 
     switch (o->state) {
     case 0:
@@ -42,7 +43,7 @@ void FUN_8010dd8c(TObj *o)
     o->wb2 = w;
     if (w < 0)
         o->wb2 = 0;
-    o->velY -= 0x10;
+    *(volatile short *)&o->velY = o->velY - 0x10;
     o->timer--;
     if (U8(o, 0xac) == 2) {
         DAT_8009d2e8 = S32(o, 0xe4);
@@ -55,7 +56,7 @@ void FUN_8010dd8c(TObj *o)
         U8(o, 0xab) &= 0x7f;
         return;
     }
-    v = *(volatile short *)&o->velY;
+    v = o->velY;
     u = v;
     if (v >= 0) {
         if (o->b69) {
