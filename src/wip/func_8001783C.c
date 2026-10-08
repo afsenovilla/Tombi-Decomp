@@ -3,7 +3,10 @@
    the pre-if store order and per-global volatile mask. Register pattern matches the game; only the stores to
    DAT_1f8001c8 (game +0x128) and D_8009CEAF (game +0x158) are exchanged. Tried every position pair of those two lines
    x volatile toggles: none better. Volatile externs are debt (volatile mems are chained in sched, which keeps the
-   zero stores early as in the game). */
+   zero stores early as in the game).
+   b50: simulated annealing over statement order x per-global kind {scalar, [0] array (in-struct: ordered against
+   the sh 0(s0) store), volatile, volatile array} from this version and from game order: nothing below 6; the CEAF
+   store position is chaotic (only index after C980 works); moving 1c8 before C973 gives 7. */
 extern volatile unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
