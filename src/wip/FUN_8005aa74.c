@@ -174,20 +174,16 @@ void FUN_8005aa74(int id, int kind, int w, int p4)
     case 4: tab = D_801339A0; break;
     case 5:
         switch (D_8009C962) {
-        case 0: tab = D_80102F9C; break;
-        case 1: tab = D_8011A000; break;
-        case 2: tab = D_80102F9C; break;
-        case 3: tab = D_8011A000; break;
+        case 0: case 2: tab = D_80102F9C; break;
+        case 1: case 3: tab = D_8011A000; break;
         }
         break;
     case 6: tab = D_801228B8; break;
     case 7: tab = D_80118C64; break;
     case 8:
         switch (D_8009C962) {
-        case 0: tab = D_80102F9C; break;
-        case 1: tab = D_801184C4; break;
-        case 2: tab = D_80102F9C; break;
-        case 3: tab = D_801184C4; break;
+        case 0: case 2: tab = D_80102F9C; break;
+        case 1: case 3: tab = D_801184C4; break;
         }
         break;
     case 9: tab = D_8012D9E0; break;
