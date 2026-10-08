@@ -6,7 +6,18 @@ from capstone import Cs, CS_ARCH_MIPS, CS_MODE_MIPS32, CS_MODE_LITTLE_ENDIAN
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 addr = int(sys.argv[1], 16); prog = sys.argv[2] if len(sys.argv) > 2 else ("X000" if addr >= 0x800E8028 else "MAIN0")
 csv = {"MAIN0": "notes/functions_main0.csv", "X000": "notes/functions_x000.csv"}[prog]
-size = next(int(l.split(",")[2]) for l in open(os.path.join(R, csv)) if l.startswith("%08x," % addr))
+def _size():
+    for l in open(os.path.join(R, csv)):
+        if l.startswith("%08x," % addr): return int(l.split(",")[2])
+    # not in Ghidra's list: use splat's boundaries (asm/<prog>/nonmatchings/<prog>/*.s)
+    d = os.path.join(R, "asm", prog.lower(), "nonmatchings", prog.lower())
+    for f in (os.listdir(d) if os.path.isdir(d) else []):
+        t = open(os.path.join(d, f)).read(2000)
+        if "%08X " % addr in t.split("\n", 3)[2] if t.count("\n") > 2 else False:
+            m = re.search(r"nonmatching \S+, 0x([0-9A-Fa-f]+)", t)
+            if m: return int(m.group(1), 16)
+    return 0x200
+size = _size()
 if prog == "MAIN0":
     d = open(R + "/game/MAIN0.EXE", "rb").read(); off = 0x800 + addr - struct.unpack("<I", d[0x18:0x1c])[0]
 else:

@@ -143,17 +143,47 @@ gcc 2.7 decides aliasing via MEM_IN_STRUCT: a **scalar global** at a fixed addre
   forces a reload afterwards: order statements so each `sb` closes its group.
 - **Small things**: `abs()` gives `bgez; nop; negu` exactly. `case 0 ... 12:` gives `slti 13; bltz`. An 8-byte frame with
   no saves can come from an explicit `(short)` cast on an expression. Pad frames are inconsistent: try several sizes.
-  `int + (signed char)field` with swapped operands: declare the int operand `short`. A loop rereading a flag set by an
+  `int + (signed char)field` with swapped operands: copy/declare the int operand as `short`. A loop rereading a flag set by an
   interrupt (`D_8009BCDC`) is `extern volatile int`. `(short)(o->d30 - 2) + r` stops gcc reassociating a constant.
 - **Hand-written GTE routines** (80022ABC, 80022630): `gte_*` asm macros, `stsxy3` with fixed offsets, the list parameter
   advanced as `long *f; n = *f++`, and `addPrim` as `t = *ot; *ot = p; p->tag = t | len;`.
+
+### More recipes (fourth batch)
+- **Check the wip's logic first** against the constants in delay slots (`beq ...; addiu v0,3` = `step = 3`): several old
+  wips matched with a one-line logic fix.
+- **Splat cuts big functions at jump tables**: merge the full range (8011D670, 80117CAC, 801236F0, 8012127C = 36+304+572 B)
+  and add empty cases (`case 0: case 6: break;`) to recreate the tablejump.
+- **Register copies**: an `addu rX,rY,zero` whose copy is used later = re-read the same expression from memory in C
+  (`if (P->h <= o->h) o->h = P->h;`), not a local. A missing `move` after an inline result: `r = calc(); s = r; r = 0;`.
+  Keep a sign extension in one register by reassigning: `g = n << 16; g >>= 16; g = 0x20 - g;`. Reuse a dead variable
+  for a later value to swap two registers. A temp pointer at function scope fixes v0/v1 swaps in `*b++` copies.
+- **Declarations**: prototype callees with their real `short` parameters (changes argument setup order). A dead
+  `int one = 1` local can stop gcc hoisting a constant. Brute force int/short types of locals with `--score`.
+- **Comparisons**: `X > (u16)Y` vs `(u16)Y > X` changes which operand lands in v0/v1. A comparison that computes the
+  right-hand side first: write it reversed. `a == K || a == K+1` always folds to `addiu; sltiu`; for `beq; bne` write
+  `if (a == K) goto L; if (a == K+1) { L: ... }`.
+- **Copies of struct fields**: three consecutive ints as one block (`*(V3 *)&n->d30 = *(V3 *)&n->a`) keeps
+  `lw lw lw sw sw sw`. Array of struct `D[i].f` in a loop gives `lui at` per access; separate arrays hoist the base.
+- **Shared tails**: `mult` in each `j` delay slot with a shared `mfhi` tail = the division written in each branch. Two
+  identical cases scheduled differently: write both in full and read the global as `[0]` in one. A switch jumping into
+  another switch's calls: `case N: goto cN;` with labels inside the second switch. A merge block starting with `la`
+  leaves a `nop` in the `j` slot: load the table through a local and put the shared code under a label in the second case.
+- **Globals and order**: convert several globals to `[0]` at once to fix the order as a block; a `volatile` read needs
+  the preceding store to be `volatile` too. A single raw-offset store makes gcc reload a scalar global after it.
+- **Inlines**: a 0/1 assigned with branches (`beqz; addu v0,zero,zero` / `j; li v0,1`) = inline returning `short` with
+  explicit `return 0` / `return 1`. Frame without saved regs, `move aN,a0` at entry or untruncated copies = (nested)
+  `static __inline__`; each level adds frame and copies. Script VM: `p = (u8 *)(g->pc + (int)D_8009D60C)`.
+- **Frames**: a frame bigger than the game's can come from `x = -o->f` inside if/else-if (copy the field to a local in
+  each branch); a function saving only `$ra` with a bigger frame often needs its params passed straight to a call.
 
 ### Matching debt (workarounds to revisit)
 Functions that match only thanks to a compiler hint rather than plain C; keep them to a minimum:
 - `register int r asm("$17")`: func_800428C0. `__asm__ volatile("nop")` before a loop: func_8006A200.
 - Constant loaded as the address of a symbol (`D_31FFFF`): func_8005D4EC.
 - Second extern name for the same global: func_8002A0FC, func_8002A258 (and others, see the source comments).
-- Asm-only thunk: thunk_FUN_8011a628. Files holding several small functions merged by splat: func_8011D204 (6),
+- `__asm__ volatile("")` barrier: func_80112C24. Jump-table data as `__asm__(".word")`: func_80116704.
+  `volatile` accesses to force order: func_801236F0. Second extern names also in func_800425C4, func_80047AF0,
+  func_8002235C, func_80101938, func_8011AD98, func_80137458. Files holding several small functions merged by splat: func_8011D204 (6),
   func_8011F288 (wip, 3).
 
 ## Git rules (several agents work at the same time)
