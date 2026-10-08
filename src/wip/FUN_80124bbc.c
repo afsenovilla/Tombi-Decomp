@@ -1,4 +1,5 @@
 // FUNC 80124bbc 340 X000
+// FLAGS -O2 -G0 -fno-schedule-insns
 #include "TOBJ.H"
 int FUN_80124bbc(TObj *o, TObj *p)
 {
@@ -14,8 +15,8 @@ int FUN_80124bbc(TObj *o, TObj *p)
     uy += dy + o->box0;
     if (uy > dy + o->box1 + 0xe)
         return 0;
-    dx = p->box2 - p->y.p.whole;
     ux = o->box2 + (o->y.p.whole - p->y.p.whole);
+    dx = p->box2 - p->y.p.whole;
     if (ux > dx + o->box3)
         return 0;
     s = o->y.p.whole + o->box2 - p->y.p.whole;
