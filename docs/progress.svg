@@ -1,48 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="440" viewBox="0 0 900 440" role="img" aria-label="Progreso de la descompilacion">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="440" viewBox="0 0 900 440" role="img" aria-label="Decompilation progress">
 <rect width="900" height="440" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
-<text x="28" y="44" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL espa&#241;ol) &#8212; progreso de la descompilaci&#243;n</text>
-<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Actualizado 2026-10-08 &#183; unidad: bytes de c&#243;digo de juego (sin librer&#237;a Psy-Q)</text>
-<text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Matching (C que recompila igual)</text>
+<text x="28" y="44" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>
+<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-08 &#183; unit: bytes of game code (excluding the Psy-Q library)</text>
+<text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Matching (C that recompiles identically)</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="98" width="143.5" height="18" rx="9" fill="#16a34a"/>
 <text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">31.9 %</text>
-<text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Funciones con nombre propio</text>
+<text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Functions with our own names</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="134" width="29.3" height="18" rx="9" fill="#22c55e"/>
 <text x="796" y="149" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">6.5 %</text>
-<text x="28" y="184" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Con estructura TObj aplicada (cobertura)</text>
+<text x="28" y="184" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">With the TObj structure applied (coverage)</text>
 <rect x="330" y="170" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="170" width="341.7" height="18" rx="9" fill="#38bdf8"/>
 <text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">75.9 %</text>
-<text x="28" y="242" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">Composici&#243;n del c&#243;digo analizado</text>
-<text x="28" y="282" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">MAIN0.EXE (nucleo del juego)</text>
-<rect x="330.0" y="268" width="52.7" height="22" fill="#22c55e"><title>Nombrada por nosotros: 33200 bytes</title></rect>
-<rect x="382.7" y="268" width="198.3" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 124804 bytes</title></rect>
-<rect x="581.0" y="268" width="111.7" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 70324 bytes</title></rect>
-<rect x="692.8" y="268" width="157.2" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 98952 bytes</title></rect>
+<text x="28" y="242" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">Composition of the analyzed code</text>
+<text x="28" y="282" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">MAIN0.EXE (game core)</text>
+<rect x="330.0" y="268" width="52.7" height="22" fill="#22c55e"><title>Named by us: 33200 bytes</title></rect>
+<rect x="382.7" y="268" width="198.3" height="22" fill="#38bdf8"><title>Unnamed, with TObj: 124804 bytes</title></rect>
+<rect x="581.0" y="268" width="111.7" height="22" fill="#f59e0b"><title>Unnamed, untyped: 70324 bytes</title></rect>
+<rect x="692.8" y="268" width="157.2" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 98952 bytes</title></rect>
 <text x="858" y="283" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">319 KB</text>
-<text x="28" y="316" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">X000.BIN (overlay AREA00)</text>
-<rect x="330.0" y="302" width="1.8" height="22" fill="#22c55e"><title>Nombrada por nosotros: 1036 bytes</title></rect>
-<rect x="331.8" y="302" width="471.0" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 269940 bytes</title></rect>
-<rect x="802.9" y="302" width="47.1" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 26980 bytes</title></rect>
-<rect x="849.9" y="302" width="0.1" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 40 bytes</title></rect>
+<text x="28" y="316" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">X000.BIN (AREA00 overlay)</text>
+<rect x="330.0" y="302" width="1.8" height="22" fill="#22c55e"><title>Named by us: 1036 bytes</title></rect>
+<rect x="331.8" y="302" width="471.0" height="22" fill="#38bdf8"><title>Unnamed, with TObj: 269940 bytes</title></rect>
+<rect x="802.9" y="302" width="47.1" height="22" fill="#f59e0b"><title>Unnamed, untyped: 26980 bytes</title></rect>
+<rect x="849.9" y="302" width="0.1" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 40 bytes</title></rect>
 <text x="858" y="317" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">291 KB</text>
 <text x="28" y="350" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">TOTAL</text>
-<rect x="330.0" y="336" width="110.0" height="22" fill="#16a34a"><title>Matching en C: 167848 bytes</title></rect>
-<rect x="440.0" y="336" width="22.4" height="22" fill="#22c55e"><title>Nombrada por nosotros: 34236 bytes</title></rect>
-<rect x="462.5" y="336" width="258.8" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 394744 bytes</title></rect>
-<rect x="721.3" y="336" width="63.8" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 97304 bytes</title></rect>
-<rect x="785.1" y="336" width="64.9" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 98992 bytes</title></rect>
+<rect x="330.0" y="336" width="110.0" height="22" fill="#16a34a"><title>Matching C: 167848 bytes</title></rect>
+<rect x="440.0" y="336" width="22.4" height="22" fill="#22c55e"><title>Named by us: 34236 bytes</title></rect>
+<rect x="462.5" y="336" width="258.8" height="22" fill="#38bdf8"><title>Unnamed, with TObj: 394744 bytes</title></rect>
+<rect x="721.3" y="336" width="63.8" height="22" fill="#f59e0b"><title>Unnamed, untyped: 97304 bytes</title></rect>
+<rect x="785.1" y="336" width="64.9" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 98992 bytes</title></rect>
 <text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">774 KB</text>
 <rect x="28" y="378" width="13" height="13" rx="3" fill="#16a34a"/>
-<text x="47" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Matching en C</text>
-<rect x="154" y="378" width="13" height="13" rx="3" fill="#22c55e"/>
-<text x="173" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Nombrada por nosotros</text>
-<rect x="336" y="378" width="13" height="13" rx="3" fill="#38bdf8"/>
-<text x="355" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Sin nombre, con TObj</text>
-<rect x="511" y="378" width="13" height="13" rx="3" fill="#f59e0b"/>
-<text x="530" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Sin nombre, sin tipos</text>
-<rect x="693" y="378" width="13" height="13" rx="3" fill="#94a3b8"/>
-<text x="712" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Libreria Sony (Psy-Q)</text>
-<text x="28" y="416" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">No incluye SCES_013.31, MAIN1-8 (comparten ~98 % del c&#243;digo con MAIN0) ni los overlays X*.BIN de las dem&#225;s &#225;reas.</text>
+<text x="47" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Matching C</text>
+<rect x="133" y="378" width="13" height="13" rx="3" fill="#22c55e"/>
+<text x="152" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Named by us</text>
+<rect x="245" y="378" width="13" height="13" rx="3" fill="#38bdf8"/>
+<text x="264" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Unnamed, with TObj</text>
+<rect x="406" y="378" width="13" height="13" rx="3" fill="#f59e0b"/>
+<text x="425" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Unnamed, untyped</text>
+<rect x="553" y="378" width="13" height="13" rx="3" fill="#94a3b8"/>
+<text x="572" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Sony library (Psy-Q)</text>
+<text x="28" y="416" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Does not include SCES_013.31, MAIN1-8 (they share ~98 % of the code with MAIN0) or the X*.BIN overlays of the other areas.</text>
 </svg>

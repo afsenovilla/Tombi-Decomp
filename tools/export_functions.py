@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Genera notes/functions_<prog>.csv (address,name,size,typed) a partir de un decompilado
-exportado con ExportAll (game/*_decomp.c). Solo guarda metadatos, no codigo.
+"""Generates notes/functions_<prog>.csv (address,name,size,typed) from a decompilation
+exported with ExportAll (game/*_decomp.c). Stores metadata only, no code.
 
-Uso: python tools/export_functions.py game/MAIN0_EXE_decomp.c notes/functions_main0.csv
+Usage: python tools/export_functions.py game/MAIN0_EXE_decomp.c notes/functions_main0.csv
 """
 import csv
 import re
@@ -24,7 +24,7 @@ def main():
         w = csv.writer(f)
         w.writerow(["address", "name", "size", "typed"])
         w.writerows(rows)
-    print("%d funciones -> %s" % (len(rows), sys.argv[2]))
+    print("%d functions -> %s" % (len(rows), sys.argv[2]))
 
 
 if __name__ == "__main__":

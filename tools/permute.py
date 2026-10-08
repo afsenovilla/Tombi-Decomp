@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Permuter propio (solo CPU, sin IA): parte de un C aproximado (normalmente src/wip/X.c) y aplica
-mutaciones aleatorias (tipos, casts, orden de operandos/declaraciones, register, flags) buscando
-que el ensamblado coincida con el del juego. Mide la distancia con `matchcheck --score`.
+"""Our own permuter (CPU only, no AI): starts from approximate C (usually src/wip/X.c) and applies
+random mutations (types, casts, operand/declaration order, register, flags) looking for
+assembly that matches the game's. Measures the distance with `matchcheck --score`.
 
-Uso: tools/permute.py src/wip/Fun.c [--rounds 200] [--pop 24] [--work /opt/psyq/pm_x] [--seed N]
-Si llega a distancia 0: lo copia a src/<Nombre>.c y lo marca con // MATCHING.
-Si no, guarda el mejor en src/wip/<Nombre>.c (solo si mejora al original).
+Usage: tools/permute.py src/wip/Fun.c [--rounds 200] [--pop 24] [--work /opt/psyq/pm_x] [--seed N]
+If it reaches distance 0: copies it to src/<Name>.c and marks it with // MATCHING.
+Otherwise, saves the best one to src/wip/<Name>.c (only if it improves on the original).
 """
 import os, random, re, shutil, subprocess, sys
 
@@ -40,10 +40,10 @@ def m_extern_type(L):
 
 def m_cast(L):
     i = random.randrange(len(L)); m = list(CAST.finditer(L[i]))
-    if m:  # cambiar o quitar un cast existente
+    if m:  # change or remove an existing cast
         c = random.choice(m); new = "" if random.random() < 0.4 else "(%s)" % random.choice(TYPES)
         L[i] = L[i][:c.start()] + new + L[i][c.end():]; return True
-    mm = re.search(r"=\s*([\w>.\-\[\]*()]+);", L[i])  # añadir un cast al rvalue
+    mm = re.search(r"=\s*([\w>.\-\[\]*()]+);", L[i])  # add a cast to the rvalue
     if mm and "(" not in mm.group(1)[:1]:
         L[i] = L[i][:mm.start(1)] + "(%s)" % random.choice(TYPES) + L[i][mm.start(1):]; return True
     return False
@@ -87,7 +87,7 @@ def m_flags(L):
     return False
 
 def m_abs_addr(L):
-    """DAT_xxxxxxxx -> acceso por direccion absoluta (el compilador separa lui/addu/lw distinto)."""
+    """DAT_xxxxxxxx -> access by absolute address (the compiler splits lui/addu/lw differently)."""
     decl = {}
     for l in L:
         m = re.match(r"^extern\s+((?:struct\s+)?[\w\s\*]+?)\s+(DAT_[0-9a-fA-F]{8})(\[\])?;", l)
@@ -132,17 +132,17 @@ def score_all(cands):
 def main():
     base = open(SRC).read()
     hm = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)", base)
-    if not hm: sys.exit("falta // FUNC")
+    if not hm: sys.exit("missing // FUNC")
     name = os.path.basename(SRC)[:-2]
     best, bs = base, score_all([base])[0]
-    print("inicial:", bs, flush=True)
+    print("initial:", bs, flush=True)
     for rd in range(ROUNDS):
         if bs == 0: break
         cands = [mutate(best) for _ in range(POP)]
         sc = score_all(cands)
         k = min(range(POP), key=lambda i: sc[i])
         if sc[k] <= bs and (sc[k] < bs or cands[k] != best):
-            if sc[k] < bs: print("ronda %d: %d -> %d" % (rd, bs, sc[k]), flush=True)
+            if sc[k] < bs: print("round %d: %d -> %d" % (rd, bs, sc[k]), flush=True)
             best, bs = cands[k], sc[k]
     if bs == 0:
         dst = "%s/src/%s.c" % (ROOT, name); open(dst, "w").write(best)
@@ -151,7 +151,7 @@ def main():
         if os.path.abspath(SRC) != os.path.abspath(dst) and "/wip/" in SRC: os.remove(SRC)
         print("MATCH", name)
     else:
-        print("mejor distancia:", bs)
+        print("best distance:", bs)
         if bs < score_all([base])[0] and "/wip/" in SRC: open(SRC, "w").write(best)
 
 main()

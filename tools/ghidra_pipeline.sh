@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Pipeline de Ghidra en modo headless (sin interfaz).
-#   tools/ghidra_pipeline.sh import   importa y analiza MAIN0.EXE y X000.BIN (una sola vez)
-#   tools/ghidra_pipeline.sh apply    crea funciones, aplica nombres y estructuras y exporta el decompilado
+# Ghidra pipeline in headless mode (no GUI).
+#   tools/ghidra_pipeline.sh import   imports and analyzes MAIN0.EXE and X000.BIN (only once)
+#   tools/ghidra_pipeline.sh apply    creates functions, applies names and structures and exports the decompilation
 #   tools/ghidra_pipeline.sh all      import + apply
-# Variables: GHIDRA (instalacion), PROJ (carpeta del proyecto), OUT (salida del decompilado)
+# Variables: GHIDRA (installation), PROJ (project folder), OUT (decompilation output)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GHIDRA="${GHIDRA:-/opt/tools/ghidra_12.1.4_PUBLIC}"
@@ -38,5 +38,5 @@ case "${1:-all}" in
   import) do_import ;;
   apply)  do_apply ;;
   all)    do_import; do_apply ;;
-  *) echo "uso: $0 import|apply|all"; exit 1 ;;
+  *) echo "usage: $0 import|apply|all"; exit 1 ;;
 esac

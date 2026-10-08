@@ -1,26 +1,26 @@
-# Overlays (codigo cargado en tiempo de ejecucion)
+# Overlays (code loaded at runtime)
 
-## AREA00/X000.BIN (343.888 bytes)
-- No es un PS-X EXE: no tiene cabecera. Primer dword = `0x1D` (29), luego una tabla de
-  punteros absolutos (`0x800E9ECC`...) que apuntan dentro del propio fichero.
-- **Direccion de carga: `0x800E8028`** (fin `0x8013C0F8`). Evidencia: con esa base, los
-  punteros de la cabecera caen en codigo valido (`jal`/`j` + `nop`, offset 0x1EA4) y 46 de
-  los 218 destinos que MAIN0 llama en esa zona quedan justo tras un `jr ra; nop`
-  (con bases vecinas salen 0-4).
-- Los otros ~172 destinos que llama MAIN0 caen en zonas de datos de X000: pertenecen a
-  otro overlay que se carga en la misma zona (por identificar; otros `X*.BIN`).
-- `AREA00/A000.GAM` (178 bytes): cabecera `"GAM\0"` + tablas pequenas. Probablemente
-  parametros del nivel, no codigo.
+## AREA00/X000.BIN (343,888 bytes)
+- It is not a PS-X EXE: it has no header. First dword = `0x1D` (29), followed by a table of
+  absolute pointers (`0x800E9ECC`...) that point inside the file itself.
+- **Load address: `0x800E8028`** (end `0x8013C0F8`). Evidence: with that base, the
+  header pointers land on valid code (`jal`/`j` + `nop`, offset 0x1EA4) and 46 of
+  the 218 targets that MAIN0 calls in that region fall right after a `jr ra; nop`
+  (neighboring bases give 0-4).
+- The other ~172 targets called by MAIN0 fall in X000 data regions: they belong to
+  another overlay loaded into the same region (to be identified; other `X*.BIN`).
+- `AREA00/A000.GAM` (178 bytes): `"GAM\0"` header + small tables. Probably
+  level parameters, not code.
 
-## Importar en Ghidra
-Importar `X000.BIN` como **Raw Binary**, lenguaje MIPS 32 little endian,
-direccion base `800e8028`.
+## Importing into Ghidra
+Import `X000.BIN` as **Raw Binary**, language MIPS 32 little endian,
+base address `800e8028`.
 
-## Que hace X000.BIN (analizado con su decompilado, 531 funciones)
-- Es codigo de comportamiento de objetos del nivel (enemigos/escenario): llama
-  constantemente a las funciones de animacion de MAIN0 (`AnimAdvance` 252 veces,
-  `AnimLoadDuration` 171, `AnimJump` 135), a `Rand`, `SfxPlay`, `ObjAlloc` y a las tablas
-  trigonometricas.
-- Llama a 156 direcciones de MAIN0; **71 de ellas no eran funcion en MAIN0** (Ghidra no las
-  creo porque en MAIN0 nadie las llama). Lista en `notes/main0_missing_functions.txt`.
-  Las mas llamadas: 8003FD78 (64 veces), 8001FD94, 8001E5F4, 8003FACC.
+## What X000.BIN does (analyzed from its decompilation, 531 functions)
+- It is behavior code for level objects (enemies/scenery): it constantly
+  calls MAIN0's animation functions (`AnimAdvance` 252 times,
+  `AnimLoadDuration` 171, `AnimJump` 135), `Rand`, `SfxPlay`, `ObjAlloc` and the
+  trigonometric tables.
+- It calls 156 MAIN0 addresses; **71 of them were not functions in MAIN0** (Ghidra did not
+  create them because nothing in MAIN0 calls them). List in `notes/main0_missing_functions.txt`.
+  The most called: 8003FD78 (64 times), 8001FD94, 8001E5F4, 8003FACC.

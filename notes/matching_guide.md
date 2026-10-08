@@ -1,117 +1,127 @@
-# Guía de matching (para trabajar de forma autónoma)
+# Matching guide (for working autonomously)
 
-Objetivo: escribir C en `src/<Nombre>.c` que, compilado con la cadena original, produzca **exactamente**
-los bytes de la función en el juego. Verificación: `tools/matchcheck.py` (enmascara relocaciones).
+Goal: write C in `src/<Name>.c` that, compiled with the original toolchain, produces **exactly**
+the bytes of the function in the game. Verification: `tools/matchcheck.py` (masks relocations).
 
-## Cadena de compilación (ya configurada en matchcheck)
-- **CC1PSX de Psy-Q 4.3** (GCC 2.7.2.SN.1, Win32 vía Wine): `/opt/psyq/cc43/CC1PSX.EXE`, flags por defecto `-O2 -G0`.
-- CPPPSX 2.7.2 (DOSBox) para el preprocesado; **ASPSX 2.86** (Wine) para ensamblar.
-- El CC1PSX de DOS que usamos al principio tiene otro planificador: no lo uses (`CC1_WINE=0` solo para pruebas).
+## Toolchain (already configured in matchcheck)
+- **CC1PSX from Psy-Q 4.3** (GCC 2.7.2.SN.1, Win32 via Wine): `/opt/psyq/cc43/CC1PSX.EXE`, default flags `-O2 -G0`.
+- CPPPSX 2.7.2 (DOSBox) for preprocessing; **ASPSX 2.86** (Wine) for assembling.
+- The DOS CC1PSX we used at first has a different scheduler: do not use it (`CC1_WINE=0` for tests only).
 
-## Ciclo de trabajo
-1. `python3 tools/fn.py <addr>` → ensamblador (capstone) + decompilado de Ghidra.
-2. Escribe `src/<Nombre>.c`. Cabecera obligatoria `// FUNC <addr> <size> [MAIN0|X000]`; opcional `// FLAGS -O2 -G0 ...`.
-   Objetos: `#include "TOBJ.H"` (include/tobj.h). Globales: `extern T DAT_xxxxxxxx;` (el nombre no importa).
-3. `WORK=/opt/psyq/w_<id> WINEPREFIX=/opt/wine python3 tools/matchcheck.py src/<Nombre>.c [--asm]`
-   (`--asm` deja el .s en `build/`; `--score` da la distancia 0 = idéntico). Un WORK propio por agente.
-4. Con `MATCH`: `... matchcheck.py --mark src/<Nombre>.c` (añade `// MATCHING addr size`); borra `src/wip/<Nombre>.c` si existía.
-5. Si no sale en ~6 intentos de verdad distintos: deja el mejor en `src/wip/<Nombre>.c` (sin MATCHING) y sigue.
+### Fast native checker (`tools/ncheck.py`)
+- old-gcc `gcc-2.7.2-psx` cc1 + maspsx 2.86 + GNU as, no Wine or DOSBox. Install with `tools/setup_native.sh`
+  (old-gcc in `/opt/oldgcc`, maspsx in `/opt/maspsx`, `binutils-mipsel-linux-gnu`).
+- Reproduces 628 of the 636 verified functions in seconds: **use it to iterate**
+  (`python3 tools/ncheck.py [--score] [--asm] src/<Name>.c`).
+- `tools/matchcheck.py` (CC1PSX 4.3 via Wine + ASPSX 2.86) remains the **reference check**.
+- Functions ported from psx_tomba include `include/tomba/` headers and are verified with ncheck.
 
-## Antes de empezar una función
-- **Comprueba el tamaño**: Ghidra corta funciones con jump table o con un `j` al epílogo. El final real es el
-  `jr $ra` seguido del siguiente `addiu $sp,-N`; pon el tamaño real en `// FUNC` (FUN_80121fe0: 312, no 144).
-- Fragmentos (empiezan con epílogo, usan `$sN` sin cargarlo, `j` suelto, <8 B) no son matcheables: sáltalos.
-  `notes/todo_match3.csv` ya marca los fragmentos evidentes (`tools/classify.py`).
-- Wips antiguos escritos para el compilador DOS (char* y offsets a mano): suele compensar reescribirlos de cero
-  con TObj/switch; quita `-fno-delayed-branch` y `-g` de sus FLAGS.
+## Work cycle
+1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.
+2. Write `src/<Name>.c`. Mandatory header `// FUNC <addr> <size> [MAIN0|X000]`; optional `// FLAGS -O2 -G0 ...`.
+   Objects: `#include "TOBJ.H"` (include/tobj.h). Globals: `extern T DAT_xxxxxxxx;` (the name does not matter).
+3. Iterate with `python3 tools/ncheck.py src/<Name>.c [--score] [--asm]`, then confirm with
+   `WORK=/opt/psyq/w_<id> WINEPREFIX=/opt/wine python3 tools/matchcheck.py src/<Name>.c [--asm]`
+   (`--asm` leaves the .s in `build/`; `--score` gives the distance, 0 = identical). One WORK dir per agent.
+4. On `MATCH`: `... matchcheck.py --mark src/<Name>.c` (adds `// MATCHING addr size`); delete `src/wip/<Name>.c` if it existed.
+5. If it does not match after ~6 genuinely different attempts: leave the best one in `src/wip/<Name>.c` (without MATCHING) and move on.
 
-## Recetas por síntoma (GCC 2.7.2 / CC1PSX 4.3)
+## Before starting a function
+- **Check the size**: Ghidra cuts functions short when they have a jump table or a `j` to the epilogue. The real end is the
+  `jr $ra` followed by the next `addiu $sp,-N`; put the real size in `// FUNC` (FUN_80121fe0: 312, not 144).
+- Fragments (starting with an epilogue, using `$sN` without loading it, a stray `j`, <8 B) are not matchable: skip them.
+  `notes/todo_match3.csv` already flags the obvious fragments (`tools/classify.py`).
+- Old wips written for the DOS compiler (char* and hand-computed offsets): it is usually worth rewriting them from scratch
+  with TObj/switch; remove `-fno-delayed-branch` and `-g` from their FLAGS.
 
-### Orden de loads de globales frente a stores (lo más frecuente)
-gcc 2.7 decide alias por MEM_IN_STRUCT: un **global escalar** de dirección fija nunca choca con un acceso
-"in struct" (`o->campo`, array), así que el planificador **sube** su load por encima de esos stores.
-- El juego lee el global **después** de los stores → declara el global como array y usa `X[0]`
-  (`extern int X[];`), o como miembro de struct (`extern G DAT; DAT.y`), o simbolo+offset. También sirve para
-  que un **store** a global conserve su orden. (Si el array se usa 2+ veces en el bloque, su dirección va a un registro.)
-- El juego lo **sube** → deja el global escalar y accede al objeto con campos de struct (TObj), no con `*(short*)(p+off)`.
-- Al revés: stores con casts `char*`/offsets crudos hacen que gcc recargue globales tras cada store; con campos
-  TObj se quedan en registro (ObjSpawn).
-- Para lecturas secuenciales de un puntero global usa `*DAT_ptr++` (`p[1]` cuenta como in-struct y se adelanta).
+## Recipes by symptom (GCC 2.7.2 / CC1PSX 4.3)
 
-### Accesos con la dirección en registro (`lui r; addiu r,lo; lhu 0(r)`)
-- Un único acceso así = **volatile en el punto de uso**: `*(volatile unsigned short *)&DAT` (no basta con el extern volatile),
-  o `extern volatile unsigned short DAT[]` + `DAT[0]` (mando en `DAT_8009d670`). Una dirección literal da `lui+ori` y no sirve.
-- Dos lecturas así sin fusionar = `volatile unsigned short *k = &DAT;` usado dos veces, asignado dentro de la rama donde se usa.
-- Base en un s-reg para varios campos a través de llamadas = puntero local (`unsigned short *g = DAT; g[0]/g[1]`,
-  `int *g = &G;` con la primera lectura pronto en el fuente).
-- Struct de scratchpad con base en s-reg (`lui/addiu sym+0x30`, resto como `s1-0x30`): `extern S DAT_1f8000c0;` y campos.
-- Dos `lw` del mismo campo sin store entre medias: haz volatile SOLO la segunda lectura (`*(T *volatile *)&s->f` o
+### Order of global loads relative to stores (the most common)
+gcc 2.7 decides aliasing via MEM_IN_STRUCT: a **scalar global** at a fixed address never conflicts with an
+"in struct" access (`o->field`, array), so the scheduler **hoists** its load above those stores.
+- The game reads the global **after** the stores → declare the global as an array and use `X[0]`
+  (`extern int X[];`), or as a struct member (`extern G DAT; DAT.y`), or symbol+offset. This also makes
+  a **store** to a global keep its order. (If the array is used 2+ times in the block, its address goes into a register.)
+- The game **hoists** it → keep the scalar global and access the object through struct fields (TObj), not `*(short*)(p+off)`.
+- Conversely: stores with `char*` casts/raw offsets make gcc reload globals after each store; with TObj
+  fields they stay in a register (ObjSpawn).
+- For sequential reads through a global pointer use `*DAT_ptr++` (`p[1]` counts as in-struct and gets hoisted).
+
+### Accesses with the address in a register (`lui r; addiu r,lo; lhu 0(r)`)
+- A single such access = **volatile at the point of use**: `*(volatile unsigned short *)&DAT` (a volatile extern is not enough),
+  or `extern volatile unsigned short DAT[]` + `DAT[0]` (controller at `DAT_8009d670`). A literal address gives `lui+ori` and does not work.
+- Two such reads that are not merged = `volatile unsigned short *k = &DAT;` used twice, assigned inside the branch where it is used.
+- Base in an s-reg for several fields across calls = local pointer (`unsigned short *g = DAT; g[0]/g[1]`,
+  `int *g = &G;` with the first read early in the source).
+- Scratchpad struct with base in an s-reg (`lui/addiu sym+0x30`, the rest as `s1-0x30`): `extern S DAT_1f8000c0;` and fields.
+- Two `lw` of the same field with no store in between: make ONLY the second read volatile (`*(T *volatile *)&s->f` or
   `*(volatile int *)&o->f`).
 
-### Orden de operandos (`addu`, `or`)
-- La expansión de ASPSX: dirección **literal** `*(int *)(k + 0x801fd80c)` → `addu at,reg,at`; **símbolo extern** → `addu at,at,reg`.
-- `x << 2` en vez de `x * 4` pone la base primero; `(char *)o + idx + 0x64` frente a `&arr[idx]`; base como `int`
-  y `(T*)(x + code) + 1` conserva el orden del fuente. `a + (b+0x10)` ≠ `(a+b)+0x10`.
-- `or` con orden equivocado: usa una variable distinta como destino (`m = btn & 0xff0f; btn = a | m;`).
-- Patrón `sll; addiu K; addu D` = `(int)&((struct{char pad[K]; int a[1];}*)D)->a[i]`.
-- Con CC1PSX 4.3, `int + (signed char)campo` sale con operandos invertidos y el orden del fuente no lo arregla.
+### Operand order (`addu`, `or`)
+- ASPSX expansion: **literal** address `*(int *)(k + 0x801fd80c)` → `addu at,reg,at`; **extern symbol** → `addu at,at,reg`.
+- `x << 2` instead of `x * 4` puts the base first; `(char *)o + idx + 0x64` versus `&arr[idx]`; base as `int`
+  and `(T*)(x + code) + 1` keeps the source order. `a + (b+0x10)` ≠ `(a+b)+0x10`.
+- `or` in the wrong order: use a different variable as the destination (`m = btn & 0xff0f; btn = a | m;`).
+- Pattern `sll; addiu K; addu D` = `(int)&((struct{char pad[K]; int a[1];}*)D)->a[i]`.
+- With CC1PSX 4.3, `int + (signed char)field` comes out with swapped operands and the source order does not fix it.
 
-### Parámetros (se ven en el prólogo)
-- `move sN,a0` en el delay slot del primer `jal` = parámetro `unsigned char`. Copias duplicadas (`move s6,s1`),
-  `move v1,a1 ... move s1,v1`, o `sll rX,aN,16` sin `sra` = parámetro `short` (escribe `x << 16` en el uso).
-- Si en una llamada `a0`/`a1` no se carga pero conserva el parámetro, la función **recibe ese argumento**:
-  pásalo (`ObjSetAnimFromTable(o)`) y se arregla la asignación de registros.
-- `move a3,a0; move t0,a1` al inicio de una hoja = un `static __inline__` expandido (o a0/a1 usados como temporales).
-- Parámetro `int` con `(short)` solo en el uso evita la extensión previa. `char *` se lee con `lbu`: usa `signed char *` para `lb`.
-- Constante de dirección pasada a función: `extern char DAT_x[]` (no el literal).
+### Parameters (visible in the prologue)
+- `move sN,a0` in the delay slot of the first `jal` = `unsigned char` parameter. Duplicate copies (`move s6,s1`),
+  `move v1,a1 ... move s1,v1`, or `sll rX,aN,16` without `sra` = `short` parameter (write `x << 16` at the use).
+- If `a0`/`a1` is not loaded for a call but still holds the parameter, the function **receives that argument**:
+  pass it (`ObjSetAnimFromTable(o)`) and the register allocation gets fixed.
+- `move a3,a0; move t0,a1` at the start of a leaf = an expanded `static __inline__` (or a0/a1 used as temporaries).
+- An `int` parameter with `(short)` only at the use avoids the early extension. `char *` is read with `lbu`: use `signed char *` for `lb`.
+- Address constant passed to a function: `extern char DAT_x[]` (not the literal).
 
-### Ramas, switch y colas compartidas
-- `slti`/`bltz` sobre un valor = árbol de comparaciones de un **switch**. Casos separados que van al mismo cuerpo
-  ≠ `case 1: case 2:`; añade un `case` imposible (`case 99: break;`) o un `case 1: break;` vacío para rehacer el árbol.
-  Switch de 4 casos dispersos que en el juego es jump table: añade un `case N:` ficticio para forzar tablejump.
-- **Cola compartida** (`j L` con el valor en el delay slot y un `sh/sw` común) = la sentencia completa escrita en
-  **cada rama** (cross-jumping): `if (a) o->x = 0xf0; else o->x = 0x50;`, una llamada completa por rama, división en cada rama.
-- Un case que salta a mitad de otro (con `sw` en el delay slot del `j`) = `goto common` con una local asignada en ambos.
-- Fallthrough sin `j` = case sin `break`. Bloques idénticos consecutivos = código duplicado en el fuente.
-- `bgez; negu; j; sra` = `x < 0 ? -x >> 16 : x >> 16` (shift dentro de cada rama).
-- `addiu` en el delay slot de un branch antes del if = la expresión completa se calcula antes del if.
-- `if (call() && inline_attr(o)) return 1;` para un call==0 que salta directo a la siguiente comprobación.
-- Temporales compartidos entre cases acaban en t0/a3: decláralos locales al bloque.
+### Branches, switch and shared tails
+- `slti`/`bltz` on a value = comparison tree of a **switch**. Separate cases that go to the same body
+  ≠ `case 1: case 2:`; add an impossible `case` (`case 99: break;`) or an empty `case 1: break;` to rebuild the tree.
+  A 4-case sparse switch that is a jump table in the game: add a dummy `case N:` to force a tablejump.
+- **Shared tail** (`j L` with the value in the delay slot and a common `sh/sw`) = the full statement written in
+  **each branch** (cross-jumping): `if (a) o->x = 0xf0; else o->x = 0x50;`, a full call per branch, division in each branch.
+- A case that jumps into the middle of another (with `sw` in the delay slot of the `j`) = `goto common` with a local assigned in both.
+- Fallthrough without `j` = case without `break`. Identical consecutive blocks = duplicated code in the source.
+- `bgez; negu; j; sra` = `x < 0 ? -x >> 16 : x >> 16` (shift inside each branch).
+- `addiu` in the delay slot of a branch before the if = the full expression is computed before the if.
+- `if (call() && inline_attr(o)) return 1;` for a call==0 that jumps straight to the next check.
+- Temporaries shared between cases end up in t0/a3: declare them local to the block.
 
-### Bucles
-- gcc rota `for(;;){...; if(--n<1) break; ...}`. Si el juego tiene el test arriba y un `j` al inicio: `loop:` + `goto loop`.
-- `lh v0; move sN,v0` con test sobre v0 y luego `sll v0,n,16; bnez` = local `short n` con `while (n != 0)`.
-- Puntero de bucle cuyo init va tras las constantes izadas = `e = &arr[i];` dentro del bucle; `-fno-strength-reduce` quita givs sobrantes.
-- Dos bucles consecutivos con "el mismo" puntero en registros distintos = dos variables distintas.
+### Loops
+- gcc rotates `for(;;){...; if(--n<1) break; ...}`. If the game has the test at the top and a `j` to the start: `loop:` + `goto loop`.
+- `lh v0; move sN,v0` with a test on v0 and then `sll v0,n,16; bnez` = local `short n` with `while (n != 0)`.
+- Loop pointer whose init comes after the hoisted constants = `e = &arr[i];` inside the loop; `-fno-strength-reduce` removes surplus givs.
+- Two consecutive loops with "the same" pointer in different registers = two different variables.
 
-### CSE, constantes y tipos
-- `andi x,0xffff` innecesario antes de test de bits = `t % 32 == 0`; usa `(t & 0x1f) == 0` si no aparece.
-- Resta que gcc pliega (`y-(v-8)` → `(y+8)-v`): temporal `unsigned short b = v - 8;` solo en esa rama.
-- Campo leído tras un `sh` de constante elegida por condición = dos stores en if/else.
-- `x ? 2 : 1` en un campo = `if (c) *p = 2; else *p = 1;`. Resultados 0/1 sin `xori/andi` = inline que devuelve `short`.
-- Lee el campo en un `int` temporal antes de una resta truncada para conservar `lhu`; `x %= 10` reutiliza el cociente de `short q = x/10`.
-- Constantes `char` negativas: `*(signed char *)&o->campo = -30;`.
-- Hexadecimales tipo `0x9e-0x74` forman un solo pp-number por la `e-`: escribe el valor decimal.
-- `addPrim` con máscaras `0xff000000/0xffffff` = bitfield `struct {unsigned addr:24; unsigned len:8;}`.
-- Mismo global leído con `lhu` y con `lh`: dos externs con distinto tipo y nombre (el nombre no importa).
+### CSE, constants and types
+- Unnecessary `andi x,0xffff` before a bit test = `t % 32 == 0`; use `(t & 0x1f) == 0` if it does not appear.
+- A subtraction that gcc folds (`y-(v-8)` → `(y+8)-v`): temporary `unsigned short b = v - 8;` only in that branch.
+- Field read after an `sh` of a constant chosen by a condition = two stores in if/else.
+- `x ? 2 : 1` into a field = `if (c) *p = 2; else *p = 1;`. 0/1 results without `xori/andi` = inline returning `short`.
+- Read the field into an `int` temporary before a truncated subtraction to keep `lhu`; `x %= 10` reuses the quotient of `short q = x/10`.
+- Negative `char` constants: `*(signed char *)&o->field = -30;`.
+- Hex values like `0x9e-0x74` form a single pp-number because of the `e-`: write the decimal value.
+- `addPrim` with masks `0xff000000/0xffffff` = bitfield `struct {unsigned addr:24; unsigned len:8;}`.
+- Same global read with `lhu` and with `lh`: two externs with different types and names (the name does not matter).
 
-### Prólogo, epílogo y frame
-- Con CC1PSX 4.3 el epílogo `j $31; addu $sp` (delay slot lleno) sí sale cuando solo se guarda `$ra`;
-  con s-regs guardados (librería 0x8006xxxx) no se reproduce: déjalas en wip.
-- Si el juego carga una global antes de `addiu sp` o adelanta una constante: guárdalas en locales antes del if (`n = g; c = 2;`).
-- Frame sin saves: `char pad[16];` (16 B) o `char pad;` (8 B) sin usar. Frames 0x38/0x10 sin saves suelen ser inlines.
-- Declara las locales al principio del bloque (a mitad de bloque gcc 2.7 llegó a descartar una sentencia).
-- Algunas funciones necesitan `// FLAGS -O1 -G0` (base-reg `sw x,0(v0); sw y,4(v0)`) o `-O2 -G0 -fno-schedule-insns`.
+### Prologue, epilogue and frame
+- With CC1PSX 4.3 the epilogue `j $31; addu $sp` (filled delay slot) does come out when only `$ra` is saved;
+  with saved s-regs (library 0x8006xxxx) it cannot be reproduced: leave those in wip.
+- If the game loads a global before `addiu sp` or hoists a constant: store them in locals before the if (`n = g; c = 2;`).
+- Frame without saves: an unused `char pad[16];` (16 B) or `char pad;` (8 B). 0x38/0x10 frames without saves are usually inlines.
+- Declare locals at the start of the block (in the middle of a block gcc 2.7 has been seen to drop a statement).
+- Some functions need `// FLAGS -O1 -G0` (base-reg `sw x,0(v0); sw y,4(v0)`) or `-O2 -G0 -fno-schedule-insns`.
 
-## Reglas de git (hay varios agentes a la vez)
-- Solo `master`, sin ramas ni PRs. Commits pequeños cada 3 matches.
-- El índice es compartido: **`git commit -m "..." -- <tus rutas>`** (un `git commit` normal se lleva lo que otros tengan en stage).
-- `git pull --rebase origin master`; si hay conflicto solo en `src/wip` o `notes`: `git rebase --abort` y
-  `git merge -X theirs origin/master`. No uses `git stash -u` (hay ficheros sin trackear de otros agentes).
-- Usa un directorio temporal propio (`/tmp/<id>`): el scratchpad de la sesión es compartido.
-- No reescribas `include/tobj.h` (crea `include/<nombre8>.h`). Nunca subas el SDK, binarios del juego ni decompilados crudos.
+## Git rules (several agents work at the same time)
+- Only `master`, no branches or PRs. Small commits every 3 matches.
+- The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
+- `git pull --rebase origin master`; if the conflict is only in `src/wip` or `notes`: `git rebase --abort` and
+  `git merge -X theirs origin/master`. Do not use `git stash -u` (there are untracked files from other agents).
+- Use your own temporary directory (`/tmp/<id>`): the session scratchpad is shared.
+- Do not rewrite `include/tobj.h` (create `include/<name8>.h`). Never commit the SDK, game binaries or raw decompilations.
 
-## Historial (resuelto)
-- ASPSX 2.34 (DOS) emitía `ori` para `li`; se usa ASPSX 2.86. Versiones 2.56/2.77/2.81 no aportan nada.
-- El CC1PSX DOS ponía `addiu sp` después del primer load de global; el CC1PSX 4.3 lo resuelve (con la receta de arrays).
-- `tools/permute.py` (mutaciones aleatorias, solo CPU) dio 1 acierto en 32 casos: útil solo para diferencias de tipos.
+## History (resolved)
+- ASPSX 2.34 (DOS) emitted `ori` for `li`; ASPSX 2.86 is used instead. Versions 2.56/2.77/2.81 add nothing.
+- The DOS CC1PSX placed `addiu sp` after the first global load; CC1PSX 4.3 fixes it (with the array recipe).
+- `tools/permute.py` (random mutations, CPU only) got 1 hit out of 32 cases: only useful for type differences.
+- `tools/ncheck.py` (native old-gcc + maspsx) replaces Wine/DOSBox for iteration; matchcheck is still the final check.

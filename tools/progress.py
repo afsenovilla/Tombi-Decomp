@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Calcula el progreso de la descompilacion y escribe docs/PROGRESS.md y docs/progress.json.
+"""Computes decompilation progress and writes docs/PROGRESS.md and docs/progress.json.
 
-Lee notes/functions_*.csv (tools/export_functions.py), notes/names_*.csv y src/ (C propio).
-Uso: python tools/progress.py
+Reads notes/functions_*.csv (tools/export_functions.py), notes/names_*.csv and src/ (our own C).
+Usage: python tools/progress.py
 """
 import csv
 import json
@@ -13,10 +13,16 @@ import datetime
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 N = lambda *p: os.path.join(ROOT, *p)
 
-# programa -> (csv de funciones, csv de nombres, rango de codigo [lo, hi])
+# program -> (functions csv, names csv, code range [lo, hi])
+# The keys are kept as-is because they are also the keys of "programs" in docs/progress.json;
+# DISPLAY gives the English label used in PROGRESS.md and the SVGs.
 PROGRAMS = {
     "MAIN0.EXE (nucleo del juego)": ("functions_main0.csv", "names_main0.csv", (0x800163F4, 0x800778EF)),
     "X000.BIN (overlay AREA00)": ("functions_x000.csv", "names_x000.csv", (0x800E8028, 0x8013C0F8)),
+}
+DISPLAY = {
+    "MAIN0.EXE (nucleo del juego)": "MAIN0.EXE (game core)",
+    "X000.BIN (overlay AREA00)": "X000.BIN (AREA00 overlay)",
 }
 
 
@@ -28,7 +34,7 @@ def read_csv(path):
 
 
 def matching_detail():
-    """{prog: [bytes, n]} por direccion (>= 0x800E8028 = X000)."""
+    """{prog: [bytes, n]} by address (>= 0x800E8028 = X000)."""
     out = {"MAIN0": [0, 0], "X000": [0, 0]}
     for dp, _, files in os.walk(N("src")):
         for fn in files:
@@ -40,7 +46,7 @@ def matching_detail():
 
 
 def count_matching_c():
-    """Bytes de funciones con C 'matching' declaradas en src/ con el marcador // MATCHING <direccion> <bytes>."""
+    """Bytes of functions with 'matching' C declared in src/ with the marker // MATCHING <address> <bytes>."""
     total = 0
     src = N("src")
     if not os.path.isdir(src):
@@ -76,7 +82,7 @@ def analyse(csv_f, names_f, rng):
             if r["typed"] == "1": d["typed"] += size; d["n_typed"] += 1
             d["items"].append((a, size, "named"))
         elif not is_fun:
-            d["lib"] += size; d["n_lib"] += 1          # nombre dado por Ghidra (firma de libreria)
+            d["lib"] += size; d["n_lib"] += 1          # name given by Ghidra (library signature)
             d["items"].append((a, size, "lib"))
         else:
             d["unnamed"] += size; d["n_unnamed"] += 1
@@ -102,8 +108,8 @@ def bar(p, w=24):
 
 
 COL = {"match": "#16a34a", "named": "#22c55e", "typed": "#38bdf8", "unnamed": "#f59e0b", "lib": "#94a3b8"}
-LAB = {"match": "Matching en C", "named": "Nombrada por nosotros", "typed": "Sin nombre, con TObj",
-       "unnamed": "Sin nombre, sin tipos", "lib": "Libreria Sony (Psy-Q)"}
+LAB = {"match": "Matching C", "named": "Named by us", "typed": "Unnamed, with TObj",
+       "unnamed": "Unnamed, untyped", "lib": "Sony library (Psy-Q)"}
 FONT = "font-family=\"Segoe UI,Helvetica,Arial,sans-serif\""
 
 
@@ -121,13 +127,13 @@ def write_svgs(res, tot, matching):
     json.dump(hist, open(hist_path, "w"), indent=1)
 
     W = 900
-    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="440" viewBox="0 0 %d 440" role="img" aria-label="Progreso de la descompilacion">' % (W, W),
+    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="440" viewBox="0 0 %d 440" role="img" aria-label="Decompilation progress">' % (W, W),
          '<rect width="%d" height="440" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % W,
-         '<text x="28" y="44" %s font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL espa&#241;ol) &#8212; progreso de la descompilaci&#243;n</text>' % FONT,
-         '<text x="28" y="66" %s font-size="12.5" fill="#64748b">Actualizado %s &#183; unidad: bytes de c&#243;digo de juego (sin librer&#237;a Psy-Q)</text>' % (FONT, today)]
-    # niveles
-    levels = [("Matching (C que recompila igual)", matching, "match"), ("Funciones con nombre propio", tot["named"], "named"),
-              ("Con estructura TObj aplicada (cobertura)", tot["typed"], "typed")]
+         '<text x="28" y="44" %s font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>' % FONT,
+         '<text x="28" y="66" %s font-size="12.5" fill="#64748b">Updated %s &#183; unit: bytes of game code (excluding the Psy-Q library)</text>' % (FONT, today)]
+    # levels
+    levels = [("Matching (C that recompiles identically)", matching, "match"), ("Functions with our own names", tot["named"], "named"),
+              ("With the TObj structure applied (coverage)", tot["typed"], "typed")]
     y = 108
     for lab, val, key in levels:
         p = pct(val, tot["game"])
@@ -137,8 +143,8 @@ def write_svgs(res, tot, matching):
         if wbar: o.append('<rect x="330" y="%d" width="%.1f" height="18" rx="9" fill="%s"/>' % (y - 10, wbar, COL[key]))
         o.append('<text x="796" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">%.1f %%</text>' % (y + 5, FONT, p))
         y += 36
-    # composicion
-    o.append('<text x="28" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">Composici&#243;n del c&#243;digo analizado</text>' % (y + 26, FONT))
+    # composition
+    o.append('<text x="28" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">Composition of the analyzed code</text>' % (y + 26, FONT))
     y += 52
     rows = [(k, r) for k, r in res.items()] + [("TOTAL", None)]
     for k, r in rows:
@@ -149,7 +155,7 @@ def write_svgs(res, tot, matching):
             seg = {"lib": r["lib"], "named": r["named"], "typed": r["unnamed_typed"],
                    "unnamed": r["unnamed"] - r["unnamed_typed"], "match": 0}
         totb = sum(seg.values()) or 1
-        o.append('<text x="28" y="%d" %s font-size="13" fill="#1e293b">%s</text>' % (y + 14, FONT, esc(k)))
+        o.append('<text x="28" y="%d" %s font-size="13" fill="#1e293b">%s</text>' % (y + 14, FONT, esc(DISPLAY.get(k, k))))
         x = 330.0
         for key in ("match", "named", "typed", "unnamed", "lib"):
             wseg = 520.0 * seg[key] / totb
@@ -158,28 +164,29 @@ def write_svgs(res, tot, matching):
             x += wseg
         o.append('<text x="858" y="%d" %s font-size="12" fill="#64748b" text-anchor="start">%d KB</text>' % (y + 15, FONT, totb // 1024))
         y += 34
-    # leyenda
+    # legend
     x = 28
     y += 8
     for key in ("match", "named", "typed", "unnamed", "lib"):
         o.append('<rect x="%d" y="%d" width="13" height="13" rx="3" fill="%s"/>' % (x, y, COL[key]))
         o.append('<text x="%d" y="%d" %s font-size="12" fill="#334155">%s</text>' % (x + 19, y + 11, FONT, esc(LAB[key])))
         x += 19 + 7 * len(LAB[key]) + 16
-    o.append('<text x="28" y="%d" %s font-size="11.5" fill="#94a3b8">No incluye SCES_013.31, MAIN1-8 (comparten ~98 %% del c&#243;digo con MAIN0) ni los overlays X*.BIN de las dem&#225;s &#225;reas.</text>' % (y + 38, FONT))
+    o.append('<text x="28" y="%d" %s font-size="11.5" fill="#94a3b8">Does not include SCES_013.31, MAIN1-8 (they share ~98 %% of the code with MAIN0) or the X*.BIN overlays of the other areas.</text>' % (y + 38, FONT))
     o.append("</svg>")
     open(N("docs", "progress.svg"), "w").write("\n".join(o))
 
-    # mapas de memoria por programa
+    # memory maps per program
     for key, (name, r) in zip(("main0", "x000"), res.items()):
         lo, hi = r["range"]
-        ROW = 0x4000                      # 16 KB por fila
+        name = DISPLAY.get(name, name)
+        ROW = 0x4000                      # 16 KB per row
         rowsn = (hi - lo) // ROW + 1
         wpx = 880.0
         h = 62 + rowsn * 16 + 28
-        m = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-label="Mapa de %s">' % (W, h, W, h, esc(name)),
+        m = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-label="Map of %s">' % (W, h, W, h, esc(name)),
              '<rect width="%d" height="%d" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % (W, h),
-             '<text x="28" y="36" %s font-size="18" font-weight="700" fill="#0f172a">Mapa de funciones &#8212; %s</text>' % (FONT, esc(name)),
-             '<text x="28" y="54" %s font-size="12" fill="#64748b">Cada fila = 16 KB desde 0x%08X. Cada bloque = una funci&#243;n, color seg&#250;n su estado. Gris claro = datos o hueco.</text>' % (FONT, lo)]
+             '<text x="28" y="36" %s font-size="18" font-weight="700" fill="#0f172a">Function map &#8212; %s</text>' % (FONT, esc(name)),
+             '<text x="28" y="54" %s font-size="12" fill="#64748b">Each row = 16 KB from 0x%08X. Each block = one function, colored by its status. Light gray = data or gap.</text>' % (FONT, lo)]
         for i in range(rowsn):
             yy = 66 + i * 16
             m.append('<rect x="10" y="%d" width="%.1f" height="13" fill="#f1f5f9"/>' % (yy, wpx))
@@ -201,57 +208,57 @@ def main():
            ("lib", "named", "unnamed", "typed", "game", "n_game", "n_named", "n_unnamed", "n_typed", "n_lib", "excluded", "unnamed_typed")}
     matching = count_matching_c()
     levels = [
-        ("Funciones de juego con nombre propio", tot["named"], "bytes"),
-        ("Funciones de juego con tipos (TObj)", tot["typed"], "bytes"),
-        ("C 'matching' en src/", matching, "bytes"),
+        ("Game functions with our own names", tot["named"], "bytes"),
+        ("Game functions with types (TObj)", tot["typed"], "bytes"),
+        ("'Matching' C in src/", matching, "bytes"),
     ]
     out = []
     w = out.append
-    w("# Progreso de la descompilacion de Tombi! (PAL espanol, SCES_013.31)\n")
-    w("_Generado con `python tools/progress.py` (%s). No editar a mano._\n" % datetime.date.today().isoformat())
-    w("## Resumen\n")
-    w("| Nivel | Progreso | Bytes | Funciones |")
+    w("# Tombi! decompilation progress (PAL Spanish, SCES_013.31)\n")
+    w("_Generated with `python tools/progress.py` (%s). Do not edit by hand._\n" % datetime.date.today().isoformat())
+    w("## Summary\n")
+    w("| Level | Progress | Bytes | Functions |")
     w("|---|---|---|---|")
-    w("| **C que coincide byte a byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(v[1] for v in matching_detail().values())))
-    w("| Nombradas por nosotros | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["named"], tot["game"]), bar(pct(tot["named"], tot["game"])), tot["named"], tot["game"], tot["n_named"], tot["n_game"]))
-    w("| Con la estructura TObj aplicada (cobertura, no es avance de C) | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["typed"], tot["game"]), bar(pct(tot["typed"], tot["game"])), tot["typed"], tot["game"], tot["n_typed"], tot["n_game"]))
+    w("| **C that matches byte for byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(v[1] for v in matching_detail().values())))
+    w("| Named by us | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["named"], tot["game"]), bar(pct(tot["named"], tot["game"])), tot["named"], tot["game"], tot["n_named"], tot["n_game"]))
+    w("| With the TObj structure applied (coverage, not C progress) | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["typed"], tot["game"]), bar(pct(tot["typed"], tot["game"])), tot["typed"], tot["game"], tot["n_typed"], tot["n_game"]))
     w("")
-    w("\"Codigo de juego\" = funciones dentro del codigo de los programas analizados, **sin** contar las de la")
-    w("libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son %d bytes (%d funciones) aparte.\n" % (tot["lib"], tot["n_lib"]))
-    w("## Desglose por programa\n")
-    w("| Programa | Codigo de juego | Nombrado | Tipado (TObj) | Matching | Libreria Psy-Q |")
+    w("\"Game code\" = functions inside the code of the analyzed programs, **excluding** those from")
+    w("Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra %d bytes (%d functions).\n" % (tot["lib"], tot["n_lib"]))
+    w("## Breakdown by program\n")
+    w("| Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library |")
     w("|---|---|---|---|---|---|")
     md = matching_detail()
     for k, r in res.items():
         w("| %s | %d B (%d f) | %.1f %% | %.1f %% | %.1f %% (%d f) | %d B |" % (
-            k, r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
+            DISPLAY.get(k, k), r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
             pct(md.get(k.split(".")[0], [0, 0])[0], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
     w("")
-    w("## Que NO esta contado (el denominador real es mayor)\n")
-    w("- `MAIN1..8.EXE`: comparten ~98 % del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.")
-    w("- `SCES_013.31` (cargador, 651 KB): casi todo es libreria Psy-Q; sin analizar.")
-    w("- Resto de overlays `X*.BIN` de las 20 areas (solo se ha analizado `AREA00/X000.BIN`).")
-    w("- Funciones que solo llama un overlay y que Ghidra no reconoce, y overlays aun sin identificar")
-    w("  (172 destinos de MAIN0 en `0x800E8000+` no caen en X000).")
-    w("- Funciones fuera del codigo (`%d` bytes de falsos positivos de Ghidra en RAM sin contenido)." % tot["excluded"])
+    w("## What is NOT counted (the real denominator is larger)\n")
+    w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
+    w("- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.")
+    w("- The remaining `X*.BIN` overlays of the 20 areas (only `AREA00/X000.BIN` has been analyzed).")
+    w("- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified")
+    w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
+    w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])
     w("")
-    w("## Funciones sin nombrar mas grandes (siguientes objetivos)\n")
+    w("## Largest unnamed functions (next targets)\n")
     allun = []
     for k, r in res.items():
         for size, addr in r["unnamed_list"]:
             allun.append((size, addr, k.split()[0]))
     allun.sort(reverse=True)
-    w("| Tamano | Direccion | Programa |")
+    w("| Size | Address | Program |")
     w("|---|---|---|")
     for size, addr, k in allun[:15]:
         w("| %d B | `%s` | %s |" % (size, addr, k))
     w("")
-    w("## Como se mide\n")
-    w("- Unidad: bytes de codigo por funcion (el tamano que da Ghidra).")
-    w("- *Nombrada*: esta en `notes/names_*.csv` y no es de libreria. *Tipada*: su primer parametro es `TObj *`.")
-    w("- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; verificado con `tools/matchcheck.py`,")
-    w("  asi que es 0 %. Todavia no hay toolchain para recompilar y comparar con el original.")
-    w("- Las cifras de tipado salen del ultimo export de Ghidra (`notes/functions_*.csv`) y pueden ir por detras.")
+    w("## How it is measured\n")
+    w("- Unit: bytes of code per function (the size reported by Ghidra).")
+    w("- *Named*: it is in `notes/names_*.csv` and is not a library function. *Typed*: its first parameter is `TObj *`.")
+    w("- *Matching*: functions in `src/*.c` marked with `// MATCHING <address> <bytes>`; verified byte for byte")
+    w("  against the retail executable with `tools/ncheck.py` / `tools/matchcheck.py` (relocations masked).")
+    w("- The typing figures come from the latest Ghidra export (`notes/functions_*.csv`) and may lag behind.")
     open(N("docs", "PROGRESS.md"), "w").write("\n".join(out) + "\n")
     json.dump({"date": datetime.date.today().isoformat(), "totals": {k: v for k, v in tot.items()},
                "matching_bytes": matching,

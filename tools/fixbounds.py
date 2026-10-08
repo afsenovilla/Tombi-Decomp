@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Detecta funciones mal cortadas por Ghidra y propone fusiones.
-Una funcion bien cortada termina en `jr/j/b` incondicional + delay slot. Si no, la siguiente es su continuacion.
-Salida: notes/merged_todo.csv (prog,address,size,name,partes) con las cadenas fusionadas."""
+"""Detects functions that Ghidra split incorrectly and proposes merges.
+A correctly bounded function ends in an unconditional `jr/j/b` + delay slot. Otherwise, the next one is its continuation.
+Output: notes/merged_todo.csv (prog,address,size,name,parts) with the merged chains."""
 import csv, os, struct
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def img(prog):
@@ -21,7 +21,7 @@ for p, f in (("MAIN0", "functions_main0.csv"), ("X000", "functions_x000.csv")):
         rows[p].append((int(r["address"], 16), int(r["size"]), r["name"]))
     rows[p].sort()
 def branch_targets(d, bias, a, s):
-    """Destinos de ramas (beq/bne/blez/bgtz/bltz/bgez/b) fuera de [a, a+s)."""
+    """Branch targets (beq/bne/blez/bgtz/bltz/bgez/b) outside [a, a+s)."""
     res = []
     for pc in range(a, a + s, 4):
         wd = w(d, pc + bias); op = wd >> 26
@@ -39,7 +39,7 @@ for p in rows:
         a, s, n = L[i]; parts = [n]; end = a + s; j = i
         while j + 1 < len(L) and L[j + 1][0] == end and not terminal(w(d, end - 8 + bias)):
             j += 1; end += L[j][1]; parts.append(L[j][2])
-        # ramas hacia delante que salen del rango actual y caen en una de las siguientes funciones
+        # forward branches that leave the current range and land in one of the following functions
         ch = True
         while ch:
             ch = False
@@ -56,4 +56,4 @@ for p in rows:
 with open(R + "/notes/merged_funcs.csv", "w") as f:
     f.write("prog,address,size,name,parts\n")
     for r in out: f.write("%s,%s,%d,%s,%s\n" % r)
-print("funciones:", sum(len(v) for v in rows.values()), "-> tras fusionar:", len(out), "(fusiones:", frag, ")")
+print("functions:", sum(len(v) for v in rows.values()), "-> after merging:", len(out), "(merges:", frag, ")")

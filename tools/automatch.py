@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Intenta emparejar funciones SIN usar IA: convierte el decompilado de Ghidra en C compilable,
-lo compila con varias combinaciones de flags y verifica con matchcheck. Solo gasta CPU.
-Uso: tools/automatch.py [--max-size N] [--limit N] [--work DIR]
-Los que coinciden se copian a src/<Nombre>.c con la marca // MATCHING.
+"""Tries to match functions WITHOUT using AI: turns Ghidra's decompilation into compilable C,
+compiles it with several flag combinations and verifies with matchcheck. CPU only.
+Usage: tools/automatch.py [--max-size N] [--limit N] [--work DIR]
+The ones that match are copied to src/<Name>.c with the // MATCHING marker.
 """
 import csv, os, re, shutil, subprocess, sys
 
@@ -77,7 +77,7 @@ def main():
                 subprocess.run([sys.executable, ROOT + "/tools/matchcheck.py", "--mark", dst],
                                env=env, capture_output=True)
                 won += 1; print("AUTO-MATCH", name, addr, flush=True)
-        print("lote %d/%d: %d aciertos en total" % (b // (BATCH // len(VARIANTS)) + 1,
+        print("batch %d/%d: %d matches in total" % (b // (BATCH // len(VARIANTS)) + 1,
               -(-len(todo) // (BATCH // len(VARIANTS))), won), flush=True)
 
 main()

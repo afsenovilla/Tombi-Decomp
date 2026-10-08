@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Verificador RAPIDO y nativo (sin Wine ni DOSBox): old-gcc `gcc-2.7.2-psx` cc1 + maspsx + GNU as.
-Reproduce 607 de las 615 funciones que coinciden con la cadena original (CC1PSX 4.3 + ASPSX 2.86) en
-segundos. Úsalo para iterar; la verificación final sigue siendo `tools/matchcheck.py`.
+"""FAST native checker (no Wine or DOSBox): old-gcc `gcc-2.7.2-psx` cc1 + maspsx + GNU as.
+Reproduces 628 of the 636 functions that match with the original toolchain (CC1PSX 4.3 + ASPSX 2.86) in
+seconds. Use it to iterate; the final check is still `tools/matchcheck.py`.
 
-Uso: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]
-  --score  imprime `SCORE <fichero> <distancia>` (0 = idéntico)
-  --asm    deja el .s generado en build/<nombre>.s
-  --mark   añade `// MATCHING addr size` si coincide (mejor marca con matchcheck)
-Requisitos: tools/setup_native.sh (old-gcc en /opt/oldgcc, maspsx en /opt/maspsx, binutils-mipsel-linux-gnu).
+Usage: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]
+  --score  prints `SCORE <file> <distance>` (0 = identical)
+  --asm    leaves the generated .s in build/<name>.s
+  --mark   adds `// MATCHING addr size` if it matches (better to mark with matchcheck)
+Requirements: tools/setup_native.sh (old-gcc in /opt/oldgcc, maspsx in /opt/maspsx, binutils-mipsel-linux-gnu).
 """
 import difflib, os, re, shutil, subprocess, sys, tempfile
 
@@ -17,7 +17,7 @@ MASPSX = os.environ.get("MASPSX", "/opt/maspsx/maspsx.py")
 ASPSX_VER = os.environ.get("ASPSX_VER", "2.86")
 _src = open(os.path.join(ROOT, "tools", "matchcheck.py")).read().replace("\nmain()\n", "\n")
 M = {"__file__": os.path.join(ROOT, "tools", "matchcheck.py")}
-exec(compile(_src, "matchcheck", "exec"), M)  # reutiliza header(), game_bytes(), mask()
+exec(compile(_src, "matchcheck", "exec"), M)  # reuses header(), game_bytes(), mask()
 
 
 def build(src, flags, d, inc):
@@ -46,9 +46,9 @@ def main():
     opts = {a for a in sys.argv[1:] if a.startswith("--")}
     files = [a for a in sys.argv[1:] if not a.startswith("--")]
     inc = tempfile.mkdtemp()
-    for f in os.listdir(os.path.join(ROOT, "include")):  # DOS no distingue mayúsculas: copia ambas formas
+    for f in os.listdir(os.path.join(ROOT, "include")):  # DOS is case-insensitive: copy both forms
         src = os.path.join(ROOT, "include", f)
-        if os.path.isdir(src):  # p.ej. include/tomba (cabeceras de psx_tomba)
+        if os.path.isdir(src):  # e.g. include/tomba (psx_tomba headers)
             shutil.copytree(src, os.path.join(inc, f)); continue
         for nm in {f, f.upper(), f.lower()}:
             shutil.copy(src, os.path.join(inc, nm))
@@ -57,7 +57,7 @@ def main():
         name = os.path.basename(f)
         h = M["header"](f)
         if not h:
-            print("SKIP (sin // FUNC):", f); continue
+            print("SKIP (no // FUNC):", f); continue
         addr, size, prog, flags = h
         d = tempfile.mkdtemp()
         try:
@@ -88,7 +88,7 @@ def main():
                 if a[k:k + 4] != b[k:k + 4]:
                     print("   +%04x ours=%s game=%s" % (k, a[k:k + 4].hex(), b[k:k + 4].hex()))
     if "--score" not in opts:
-        print("%d match, %d fallan" % (ok, bad))
+        print("%d match, %d failed" % (ok, bad))
     sys.exit(1 if bad else 0)
 
 

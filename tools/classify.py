@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Clasifica las funciones pendientes en completas / fragmento (con motivo) para no gastar esfuerzo en trozos.
-Salida: notes/todo_match3.csv (prog,address,size,name,estado,motivo)."""
+"""Classifies the pending functions as complete ("completa") / fragment ("fragmento", with a reason) so no effort
+is wasted on pieces. The CSV column names and values are kept in Spanish for compatibility.
+Output: notes/todo_match3.csv (prog,address,size,name,estado=status,motivo=reason)."""
 import csv, os, re, struct
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def img(p):
@@ -28,6 +29,9 @@ for r in rows:
     sw_ra = any((w >> 16) == 0xAFBF for w in W); lw_ra = any((w >> 16) == 0x8FBF for w in W)
     sp_dn = sum(1 for w in W if (w >> 16) == 0x27BD and (w & 0xffff) >= 0x8000)
     sp_up = sum(1 for w in W if (w >> 16) == 0x27BD and (w & 0xffff) < 0x8000)
+    # Reasons are written to the CSV in Spanish (kept for compatibility): too small (<8 B); epilogue without
+    # prologue (tail of another function); frees the stack without reserving it (tail); starts with jr (fragment);
+    # no exit (jr/j): truncated body.
     why = ""
     if s < 8: why = "demasiado pequeña (<8 B)"
     elif lw_ra and not sw_ra: why = "epílogo sin prólogo (cola de otra función)"
@@ -41,7 +45,7 @@ with open(R + "/notes/todo_match3.csv", "w") as f:
     f.write("prog,address,size,name,estado,motivo\n")
     for o in out: f.write("%s,%s,%d,%s,%s,%s\n" % o)
 comp = [o for o in out if o[4] == "completa"]
-print("pendientes", len(out), "completas", len(comp), "fragmentos", len(out) - len(comp))
+print("pending", len(out), "complete", len(comp), "fragments", len(out) - len(comp))
 import collections
 print(collections.Counter(o[5] for o in out if o[5]))
 for n, (lo, hi) in (("c1", (0, 100)), ("c2", (100, 220)), ("c3", (220, 400)), ("c4", (400, 800))):

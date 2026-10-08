@@ -1,37 +1,37 @@
-# Progreso de la descompilacion de Tombi! (PAL espanol, SCES_013.31)
+# Tombi! decompilation progress (PAL Spanish, SCES_013.31)
 
-_Generado con `python tools/progress.py` (2026-10-08). No editar a mano._
+_Generated with `python tools/progress.py` (2026-10-08). Do not edit by hand._
 
-## Resumen
+## Summary
 
-| Nivel | Progreso | Bytes | Funciones |
+| Level | Progress | Bytes | Functions |
 |---|---|---|---|
-| **C que coincide byte a byte (matching)** | **31.9 %** `[########................]` | 167848 / 526284 | 636 |
-| Nombradas por nosotros | 6.5 % `[##......................]` | 34236 / 526284 | 189 / 1044 |
-| Con la estructura TObj aplicada (cobertura, no es avance de C) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
+| **C that matches byte for byte (matching)** | **31.9 %** `[########................]` | 167848 / 526284 | 636 |
+| Named by us | 6.5 % `[##......................]` | 34236 / 526284 | 189 / 1044 |
+| With the TObj structure applied (coverage, not C progress) | 75.9 % `[##################......]` | 399676 / 526284 | 568 / 1044 |
 
-"Codigo de juego" = funciones dentro del codigo de los programas analizados, **sin** contar las de la
-libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 funciones) aparte.
+"Game code" = functions inside the code of the analyzed programs, **excluding** those from
+Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 98992 bytes (901 functions).
 
-## Desglose por programa
+## Breakdown by program
 
-| Programa | Codigo de juego | Nombrado | Tipado (TObj) | Matching | Libreria Psy-Q |
+| Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library |
 |---|---|---|---|---|---|
-| MAIN0.EXE (nucleo del juego) | 228328 B (516 f) | 14.5 % | 56.6 % | 39.3 % (363 f) | 98952 B |
-| X000.BIN (overlay AREA00) | 297956 B (528 f) | 0.3 % | 90.7 % | 26.2 % (273 f) | 40 B |
+| MAIN0.EXE (game core) | 228328 B (516 f) | 14.5 % | 56.6 % | 39.3 % (363 f) | 98952 B |
+| X000.BIN (AREA00 overlay) | 297956 B (528 f) | 0.3 % | 90.7 % | 26.2 % (273 f) | 40 B |
 
-## Que NO esta contado (el denominador real es mayor)
+## What is NOT counted (the real denominator is larger)
 
-- `MAIN1..8.EXE`: comparten ~98 % del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.
-- `SCES_013.31` (cargador, 651 KB): casi todo es libreria Psy-Q; sin analizar.
-- Resto de overlays `X*.BIN` de las 20 areas (solo se ha analizado `AREA00/X000.BIN`).
-- Funciones que solo llama un overlay y que Ghidra no reconoce, y overlays aun sin identificar
-  (172 destinos de MAIN0 en `0x800E8000+` no caen en X000).
-- Funciones fuera del codigo (`479` bytes de falsos positivos de Ghidra en RAM sin contenido).
+- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.
+- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.
+- The remaining `X*.BIN` overlays of the 20 areas (only `AREA00/X000.BIN` has been analyzed).
+- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified
+  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).
+- Functions outside the code (`479` bytes of Ghidra false positives in RAM with no contents).
 
-## Funciones sin nombrar mas grandes (siguientes objetivos)
+## Largest unnamed functions (next targets)
 
-| Tamano | Direccion | Programa |
+| Size | Address | Program |
 |---|---|---|
 | 6188 B | `800317c0` | MAIN0.EXE |
 | 5740 B | `800f5078` | X000.BIN |
@@ -49,10 +49,10 @@ libreria de Sony (Psy-Q), que Ghidra ya identifica. Esas son 98992 bytes (901 fu
 | 2672 B | `8010f400` | X000.BIN |
 | 2632 B | `800f2b98` | X000.BIN |
 
-## Como se mide
+## How it is measured
 
-- Unidad: bytes de codigo por funcion (el tamano que da Ghidra).
-- *Nombrada*: esta en `notes/names_*.csv` y no es de libreria. *Tipada*: su primer parametro es `TObj *`.
-- *Matching*: funciones en `src/*.c` marcadas con `// MATCHING <direccion> <bytes>`; verificado con `tools/matchcheck.py`,
-  asi que es 0 %. Todavia no hay toolchain para recompilar y comparar con el original.
-- Las cifras de tipado salen del ultimo export de Ghidra (`notes/functions_*.csv`) y pueden ir por detras.
+- Unit: bytes of code per function (the size reported by Ghidra).
+- *Named*: it is in `notes/names_*.csv` and is not a library function. *Typed*: its first parameter is `TObj *`.
+- *Matching*: functions in `src/*.c` marked with `// MATCHING <address> <bytes>`; verified byte for byte
+  against the retail executable with `tools/ncheck.py` / `tools/matchcheck.py` (relocations masked).
+- The typing figures come from the latest Ghidra export (`notes/functions_*.csv`) and may lag behind.

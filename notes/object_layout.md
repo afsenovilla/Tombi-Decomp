@@ -1,38 +1,38 @@
-# Estructura de objeto del juego (deducida de MAIN0 + X000; todo por confirmar)
+# Game object structure (deduced from MAIN0 + X000; all to be confirmed)
 
-Las funciones reciben un puntero `obj` y acceden por desplazamiento. Campos vistos:
+Functions receive an `obj` pointer and access it by offset. Fields seen:
 
-| Off | Tam | Uso |
+| Off | Size | Use |
 |---|---|---|
-| +0x00 | u8 | objeto activo (0 = libre) |
-| +0x01 | u8 | visible (lo pone ObjCullRegister) |
-| +0x02 | u8 | tipo |
-| +0x03 | u8 | subtipo |
-| +0x06 | u8 | subestado (switch de las maquinas de estados) |
-| +0x10 | s32 | coordenada de eje A, 16.16 (la parte entera esta en +0x12) |
-| +0x14 | s32 | Y, 16.16 (parte entera en +0x16) |
-| +0x18 | s32 | coordenada de eje B, 16.16 (parte entera en +0x1A) |
-| +0x1C | u8 | categoria (&0x7F: 1..8 = lista de visibles) |
-| +0x24 | ptr | script de animacion actual (entradas de 8 bytes; +6 = duracion con flags 0x4000/0x8000/0xC000) |
-| +0x28 | ptr | tabla de movimiento por fotograma |
-| +0x2C | u16 | temporizador de animacion |
-| +0x2E | u16 | indice de fotograma / orientacion |
-| +0x40 | ptr | puntero a la coordenada "horizontal" (apunta a +0x10 o +0x18) |
-| +0x44 | ptr | puntero a la coordenada "profundidad" (apunta al otro) |
-| +0x6C..+0x72 | 4 x s16 | caja de colision (desplazamientos) |
-| +0x7E | s16 | velocidad Y |
-| +0x80 | s16 | velocidad horizontal |
-| +0x82 | s16 | velocidad (Y/profundidad) |
+| +0x00 | u8 | object active (0 = free) |
+| +0x01 | u8 | visible (set by ObjCullRegister) |
+| +0x02 | u8 | type |
+| +0x03 | u8 | subtype |
+| +0x06 | u8 | substate (switch of the state machines) |
+| +0x10 | s32 | axis A coordinate, 16.16 (integer part at +0x12) |
+| +0x14 | s32 | Y, 16.16 (integer part at +0x16) |
+| +0x18 | s32 | axis B coordinate, 16.16 (integer part at +0x1A) |
+| +0x1C | u8 | category (&0x7F: 1..8 = visible list) |
+| +0x24 | ptr | current animation script (8-byte entries; +6 = duration with flags 0x4000/0x8000/0xC000) |
+| +0x28 | ptr | per-frame movement table |
+| +0x2C | u16 | animation timer |
+| +0x2E | u16 | frame index / orientation |
+| +0x40 | ptr | pointer to the "horizontal" coordinate (points to +0x10 or +0x18) |
+| +0x44 | ptr | pointer to the "depth" coordinate (points to the other one) |
+| +0x6C..+0x72 | 4 x s16 | collision box (offsets) |
+| +0x7E | s16 | Y velocity |
+| +0x80 | s16 | horizontal velocity |
+| +0x82 | s16 | velocity (Y/depth) |
 
-## Eje horizontal intercambiable
-`ObjAlloc` hace que +0x40/+0x44 apunten a +0x10/+0x18 **o al reves** segun el bit 0 de la
-variable de scratchpad `1F8001C8`. Es decir, el juego (2.5D) puede intercambiar el eje X y el Z
-de todos los objetos con un solo bit. Por eso 1F8001C8 es una orientacion de camara/nivel y
-no un contador de frames como supuse al principio.
+## Swappable horizontal axis
+`ObjAlloc` makes +0x40/+0x44 point to +0x10/+0x18 **or the other way round** depending on bit 0 of the
+scratchpad variable `1F8001C8`. That is, the (2.5D) game can swap the X and Z axes
+of all objects with a single bit. That is why 1F8001C8 is a camera/level orientation and
+not a frame counter as I initially assumed.
 
-## Puntero global del jugador (8009C330) y 8009C338
-Varias funciones de X000 y de las 3 maquinas de estados grandes de MAIN0
-(800317C0, 8003566C, 80033B44) leen `_DAT_8009C330` y `_DAT_8009C338`. En
-`PlayerSetAnimIfChanged` (800EEB5C) usan +0x2C/+0x2E de ese objeto como "id de animacion
-actual / anterior", **distinto** del uso de +0x2C/+0x2E en TObj (temporizador/fotograma). Es probable
-que sea otra estructura (estado del jugador) y no un TObj.
+## Global player pointer (8009C330) and 8009C338
+Several functions in X000 and in the 3 large MAIN0 state machines
+(800317C0, 8003566C, 80033B44) read `_DAT_8009C330` and `_DAT_8009C338`. In
+`PlayerSetAnimIfChanged` (800EEB5C) they use +0x2C/+0x2E of that object as "current / previous
+animation id", **different** from the use of +0x2C/+0x2E in TObj (timer/frame). It is likely
+a different structure (player state) and not a TObj.

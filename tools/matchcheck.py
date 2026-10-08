@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Compila src/*.c con el GCC 2.7.2.SN.1 original (Psy-Q, vía DOSBox) y compara
-el código con el del juego byte a byte (enmascarando relocaciones).
+"""Compiles src/*.c with the original GCC 2.7.2.SN.1 (Psy-Q, via DOSBox) and compares
+the code with the game's byte for byte (masking relocations).
 
-Cada .c lleva en sus primeras líneas:
-    // FUNC <addr_hex> <size> [MAIN0|X000]     (una función por fichero)
-    // FLAGS -O2 -G0                            (opcional)
-Uso:  tools/matchcheck.py [--mark] [--asm] [src/fichero.c ...]
-  --mark  añade `// MATCHING <addr> <size>` a los que coinciden (lo lee progress.py)
-  --asm   deja el ensamblador generado en build/<nombre>.s
-Entorno: PSYQ_DIR (carpeta con CC1PSX.EXE, ASPSX.EXE, CPPPSX.EXE; por defecto /opt/psyq/new)
-         WORK (carpeta de trabajo para DOSBox; por defecto /opt/psyq/w)
-El SDK es de Sony: no se sube al repo.
+Each .c has in its first lines:
+    // FUNC <addr_hex> <size> [MAIN0|X000]     (one function per file)
+    // FLAGS -O2 -G0                            (optional)
+Usage:  tools/matchcheck.py [--mark] [--asm] [src/file.c ...]
+  --mark  adds `// MATCHING <addr> <size>` to the ones that match (read by progress.py)
+  --asm   leaves the generated assembly in build/<name>.s
+Environment: PSYQ_DIR (folder with CC1PSX.EXE, ASPSX.EXE, CPPPSX.EXE; default /opt/psyq/new)
+             WORK (working folder for DOSBox; default /opt/psyq/w)
+The SDK belongs to Sony: it is not committed to the repo.
 """
 import os, re, shutil, struct, subprocess, sys
 
@@ -18,8 +18,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PSYQ = os.environ.get("PSYQ_DIR", "/opt/psyq/new")
 WORK = os.environ.get("WORK", "/opt/psyq/w")
 _aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
-_cc = os.environ.get("CC1_WINE", "/opt/psyq/cc43/CC1PSX.EXE")  # por defecto: Psy-Q 4.3 (el del juego)
-CC1_WINE = _cc if (_cc != "0" and os.path.exists(_cc) and shutil.which("wine")) else None  # CC1PSX Win32 (Psy-Q 4.3+) via Wine en vez de DOSBox
+_cc = os.environ.get("CC1_WINE", "/opt/psyq/cc43/CC1PSX.EXE")  # default: Psy-Q 4.3 (the game's compiler)
+CC1_WINE = _cc if (_cc != "0" and os.path.exists(_cc) and shutil.which("wine")) else None  # Win32 CC1PSX (Psy-Q 4.3+) via Wine instead of DOSBox
 ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
@@ -41,14 +41,14 @@ def parse_expr(d, i):
     b = d[i]; i += 1
     if b == 0x00: return i + 4
     if b in (0x02, 0x04, 0x06, 0x08, 0x0C): return i + 2
-    if b >= 0x20:  # operador binario prefijo
+    if b >= 0x20:  # prefix binary operator
         i = parse_expr(d, i)
         return parse_expr(d, i)
     raise ValueError("expr op %02x" % b)
 
 
 def obj_text(path):
-    """Devuelve (bytes .text, lista de (offset, tipo)) de un PSY-Q OBJ."""
+    """Returns (.text bytes, list of (offset, type)) from a PSY-Q OBJ."""
     d = open(path, "rb").read()
     assert d[:3] == b"LNK"
     i = 4; sect = None; names = {}; code = bytearray(); relocs = []; base = 0
@@ -71,11 +71,11 @@ def obj_text(path):
             ty = d[i]; off = struct.unpack("<H", d[i + 1:i + 3])[0]
             i = parse_expr(d, i + 3)
             if sect == ".text": relocs.append((base + off, ty))
-        elif t == 0x2E: i += 1  # procesador (07 = R3000)
+        elif t == 0x2E: i += 1  # processor (07 = R3000)
         elif t == 0x08: i += 4
         elif t == 0x0E: i += 2  # section switch alias
         else:
-            # XDEF/XREF/etc: no hay más código tras esto
+            # XDEF/XREF/etc: no more code after this
             break
     return bytes(code), relocs
 
@@ -112,7 +112,7 @@ def main():
     pre = ["mount c %s" % os.path.dirname(WORK), "mount d %s" % PSYQ, "c:", "cd %s" % os.path.basename(WORK)]
     env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
     bat = []
-    CH = 20  # DOSBox falla con autoexec muy largos: se compila por lotes
+    CH = 20  # DOSBox fails with very long autoexecs: compile in batches
     def flush():
         if not bat: return
         open(WORK + "/run.conf", "w").write("[sdl]\nfullscreen=false\n[cpu]\ncycles=max\n[autoexec]\n" + "\n".join(pre + bat) + "\nexit\n")
@@ -121,7 +121,7 @@ def main():
         del bat[:]
     for n, f in enumerate(files):
         h = header(f)
-        if not h: print("SKIP (sin // FUNC):", f); continue
+        if not h: print("SKIP (no // FUNC):", f); continue
         shutil.copy(f, "%s/F%d.C" % (WORK, n)); jobs.append((n, f, h))
         flags = h[3]
         bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
@@ -132,7 +132,7 @@ def main():
         for n, f, h in jobs:
             subprocess.run(["wine", CC1_WINE, "-quiet"] + h[3].split() + ["F%d.I" % n, "-o", "F%d.S" % n], cwd=WORK,
                            env=dict(os.environ, WINEDEBUG="-all"), timeout=300, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emite addiu para `li` (la 2.34 emite ori)
+    if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emits addiu for `li` (2.34 emits ori)
         wenv = dict(os.environ, WINEDEBUG="-all")
         for n, f, h in jobs:
             subprocess.run(["wine", ASPSX_WINE, "-q", "F%d.S" % n, "-o", "F%d.OBJ" % n], cwd=WORK, env=wenv,
@@ -142,13 +142,13 @@ def main():
         name = os.path.basename(f)
         obj = "%s/F%d.OBJ" % (WORK, n)
         if not os.path.exists(obj):
-            print("SCORE %s 9999" % name if "--score" in sys.argv else "ERROR compilación: " + name); bad += 1; continue
+            print("SCORE %s 9999" % name if "--score" in sys.argv else "ERROR compiling: " + name); bad += 1; continue
         if keep_asm:
             os.makedirs(ROOT + "/build", exist_ok=True)
             shutil.copy("%s/F%d.S" % (WORK, n), ROOT + "/build/" + name.replace(".c", ".s"))
         code, rel = obj_text(obj)
         ref = game_bytes(prog, addr, size)
-        if "--score" in sys.argv:  # modo permuter: distancia entre secuencias de instrucciones (0 = coincide)
+        if "--score" in sys.argv:  # permuter mode: distance between instruction sequences (0 = match)
             import difflib
             a = [mask(code, rel)[k:k + 4] for k in range(0, len(code), 4)]
             b = [mask(ref, rel)[k:k + 4] for k in range(0, len(ref), 4)]
@@ -168,7 +168,7 @@ def main():
             for k in range(0, max(len(m1), len(m2)), 4):
                 a, b = m1[k:k + 4].hex(), m2[k:k + 4].hex()
                 if a != b: print("   +%04x ours=%s game=%s" % (k, a, b))
-    print("%d match, %d fallan" % (ok, bad))
+    print("%d match, %d failed" % (ok, bad))
     sys.exit(1 if bad else 0)
 
 

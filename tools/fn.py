@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Muestra ensamblador (capstone) y decompilado Ghidra de una función.
-Uso: tools/fn.py <addr_hex> [MAIN0|X000]"""
+"""Shows the assembly (capstone) and Ghidra decompilation of a function.
+Usage: tools/fn.py <addr_hex> [MAIN0|X000]"""
 import re, struct, sys, os
 from capstone import Cs, CS_ARCH_MIPS, CS_MODE_MIPS32, CS_MODE_LITTLE_ENDIAN
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,4 +15,4 @@ md = Cs(CS_ARCH_MIPS, CS_MODE_MIPS32 | CS_MODE_LITTLE_ENDIAN)
 for i in md.disasm(d[off:off + size], addr): print("%08x  %s %s" % (i.address, i.mnemonic, i.op_str))
 t = open(R + "/game/out/%s_decomp.c" % ("MAIN0_EXE" if prog == "MAIN0" else "X000_BIN"), errors="replace").read()
 m = re.search(r"// ==== \S+ @ %08x size=\d+\n(.*?)(?=\n// ==== |\Z)" % addr, t, re.S)
-print("\n" + (m.group(0) if m else "(sin decompilado)"))
+print("\n" + (m.group(0) if m else "(no decompilation)"))
