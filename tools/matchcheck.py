@@ -135,12 +135,21 @@ def main():
     for n, f, (addr, size, prog, _) in jobs:
         name = os.path.basename(f)
         obj = "%s/F%d.OBJ" % (WORK, n)
-        if not os.path.exists(obj): print("ERROR compilación:", name); bad += 1; continue
+        if not os.path.exists(obj):
+            print("SCORE %s 9999" % name if "--score" in sys.argv else "ERROR compilación: " + name); bad += 1; continue
         if keep_asm:
             os.makedirs(ROOT + "/build", exist_ok=True)
             shutil.copy("%s/F%d.S" % (WORK, n), ROOT + "/build/" + name.replace(".c", ".s"))
         code, rel = obj_text(obj)
         ref = game_bytes(prog, addr, size)
+        if "--score" in sys.argv:  # modo permuter: distancia entre secuencias de instrucciones (0 = coincide)
+            import difflib
+            a = [mask(code, rel)[k:k + 4] for k in range(0, len(code), 4)]
+            b = [mask(ref, rel)[k:k + 4] for k in range(0, len(ref), 4)]
+            r = difflib.SequenceMatcher(None, a, b, autojunk=False)
+            same = sum(x.size for x in r.get_matching_blocks())
+            print("SCORE %s %d" % (name, (len(a) - same) + (len(b) - same)))
+            continue
         if mask(code, rel) == mask(ref, rel) and len(code) == size:
             print("MATCH   %s  %08x %d" % (name, addr, size)); ok += 1
             if mark and "// MATCHING" not in open(f).read():
