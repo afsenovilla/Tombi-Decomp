@@ -1,8 +1,9 @@
 // FUNC 8003fb90 488 MAIN0
+// wip score 36 (was 73): DAT_1f800282 as array. Left: game loads wae (0x284) early, loads w before the wb0 store, computes hi (srl t0) then stores wae after wb0; statement/temps permutations did not beat 36.
 #include "TOBJ.H"
 extern short DAT_1f80027e;
 extern unsigned char DAT_1f8001d2;
-extern unsigned short DAT_1f800284[], DAT_1f800282;
+extern unsigned short DAT_1f800284[], DAT_1f800282[];
 typedef struct { char pad[0xa0]; unsigned char ba0; } XA0;
 #define BA0(o) (((XA0 *)(o))->ba0)
 
@@ -26,7 +27,7 @@ void FUN_8003fb90(TObj *o)
     BA0(o) = 0;
     o->bbe = 0;
     o->wb0 = a;
-    w = DAT_1f800282;
+    w = DAT_1f800282[0];
     hi = w >> 15;
     m = (w >> 5) & 0xf;
     n = m;
@@ -49,7 +50,7 @@ void FUN_8003fb90(TObj *o)
         case 3: break;
         }
     }
-    if (DAT_1f800282 & 0x1000) {
+    if (DAT_1f800282[0] & 0x1000) {
         switch (m & 3) {
         case 0: BA0(o) |= 0x10; break;
         case 1: BA0(o) |= 0x20; break;
