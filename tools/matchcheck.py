@@ -106,7 +106,16 @@ def main():
     inc = os.path.join(ROOT, "include")
     if os.path.isdir(inc):
         for f in os.listdir(inc): shutil.copy(os.path.join(inc, f), WORK + "/inc/" + f.upper())
-    bat = ["mount c %s" % os.path.dirname(WORK), "mount d %s" % PSYQ, "c:", "cd %s" % os.path.basename(WORK)]
+    pre = ["mount c %s" % os.path.dirname(WORK), "mount d %s" % PSYQ, "c:", "cd %s" % os.path.basename(WORK)]
+    env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
+    bat = []
+    CH = 20  # DOSBox falla con autoexec muy largos: se compila por lotes
+    def flush():
+        if not bat: return
+        open(WORK + "/run.conf", "w").write("[sdl]\nfullscreen=false\n[cpu]\ncycles=max\n[autoexec]\n" + "\n".join(pre + bat) + "\nexit\n")
+        subprocess.run(["dosbox", "-conf", WORK + "/run.conf", "-noconsole"], env=env, timeout=600,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        del bat[:]
     for n, f in enumerate(files):
         h = header(f)
         if not h: print("SKIP (sin // FUNC):", f); continue
@@ -115,10 +124,8 @@ def main():
         bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
                 r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n),
                 ] + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
-    open(WORK + "/run.conf", "w").write("[sdl]\nfullscreen=false\n[cpu]\ncycles=max\n[autoexec]\n" + "\n".join(bat) + "\nexit\n")
-    env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
-    subprocess.run(["dosbox", "-conf", WORK + "/run.conf", "-noconsole"], env=env, timeout=600,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if len(jobs) % CH == 0: flush()
+    flush()
     if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emite addiu para `li` (la 2.34 emite ori)
         wenv = dict(os.environ, WINEDEBUG="-all")
         for n, f, h in jobs:

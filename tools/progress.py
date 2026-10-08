@@ -27,6 +27,18 @@ def read_csv(path):
         return list(csv.DictReader(f))
 
 
+def matching_detail():
+    """{prog: [bytes, n]} por direccion (>= 0x800E8028 = X000)."""
+    out = {"MAIN0": [0, 0], "X000": [0, 0]}
+    for dp, _, files in os.walk(N("src")):
+        for fn in files:
+            if fn.endswith(".c"):
+                for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", open(os.path.join(dp, fn), errors="replace").read()):
+                    k = "X000" if int(m.group(1), 16) >= 0x800E8028 else "MAIN0"
+                    out[k][0] += int(m.group(2)); out[k][1] += 1
+    return out
+
+
 def count_matching_c():
     """Bytes de funciones con C 'matching' declaradas en src/ con el marcador // MATCHING <direccion> <bytes>."""
     total = 0
@@ -200,7 +212,7 @@ def main():
     w("## Resumen\n")
     w("| Nivel | Progreso | Bytes | Funciones |")
     w("|---|---|---|---|")
-    w("| **C que coincide byte a byte (matching)** | **%.1f %%** `%s` | %d / %d | 0 |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"]))
+    w("| **C que coincide byte a byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(v[1] for v in matching_detail().values())))
     w("| Nombradas por nosotros | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["named"], tot["game"]), bar(pct(tot["named"], tot["game"])), tot["named"], tot["game"], tot["n_named"], tot["n_game"]))
     w("| Con la estructura TObj aplicada (cobertura, no es avance de C) | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["typed"], tot["game"]), bar(pct(tot["typed"], tot["game"])), tot["typed"], tot["game"], tot["n_typed"], tot["n_game"]))
     w("")
@@ -209,9 +221,11 @@ def main():
     w("## Desglose por programa\n")
     w("| Programa | Codigo de juego | Nombrado | Tipado (TObj) | Matching | Libreria Psy-Q |")
     w("|---|---|---|---|---|---|")
+    md = matching_detail()
     for k, r in res.items():
-        w("| %s | %d B (%d f) | %.1f %% | %.1f %% | 0.0 %% | %d B |" % (
-            k, r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]), r["lib"]))
+        w("| %s | %d B (%d f) | %.1f %% | %.1f %% | %.1f %% (%d f) | %d B |" % (
+            k, r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
+            pct(md.get(k.split(".")[0], [0, 0])[0], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
     w("")
     w("## Que NO esta contado (el denominador real es mayor)\n")
     w("- `MAIN1..8.EXE`: comparten ~98 % del codigo (`.text`) con MAIN0; se tratan como variantes, no se suman.")

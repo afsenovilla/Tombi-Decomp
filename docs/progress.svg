@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="440" viewBox="0 0 900 440" role="img" aria-label="Progreso de la descompilacion">
 <rect width="900" height="440" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
 <text x="28" y="44" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL espa&#241;ol) &#8212; progreso de la descompilaci&#243;n</text>
-<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Actualizado 2026-10-07 &#183; unidad: bytes de c&#243;digo de juego (sin librer&#237;a Psy-Q)</text>
+<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Actualizado 2026-10-08 &#183; unidad: bytes de c&#243;digo de juego (sin librer&#237;a Psy-Q)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Matching (C que recompila igual)</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="98" width="4.0" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">0.0 %</text>
+<rect x="330" y="98" width="11.2" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">2.5 %</text>
 <text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Funciones con nombre propio</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="134" width="7.8" height="18" rx="9" fill="#22c55e"/>
@@ -28,12 +28,12 @@
 <rect x="849.9" y="302" width="0.1" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 40 bytes</title></rect>
 <text x="858" y="317" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">291 KB</text>
 <text x="28" y="350" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">TOTAL</text>
-<rect x="330.0" y="336" width="0.1" height="22" fill="#16a34a"><title>Matching en C: 144 bytes</title></rect>
-<rect x="330.1" y="336" width="7.6" height="22" fill="#22c55e"><title>Nombrada por nosotros: 9172 bytes</title></rect>
-<rect x="337.7" y="336" width="330.8" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 397860 bytes</title></rect>
-<rect x="668.5" y="336" width="99.2" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 119252 bytes</title></rect>
-<rect x="767.7" y="336" width="82.3" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 98992 bytes</title></rect>
-<text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">610 KB</text>
+<rect x="330.0" y="336" width="10.7" height="22" fill="#16a34a"><title>Matching en C: 13108 bytes</title></rect>
+<rect x="340.7" y="336" width="7.5" height="22" fill="#22c55e"><title>Nombrada por nosotros: 9172 bytes</title></rect>
+<rect x="348.1" y="336" width="324.1" height="22" fill="#38bdf8"><title>Sin nombre, con TObj: 397860 bytes</title></rect>
+<rect x="672.2" y="336" width="97.1" height="22" fill="#f59e0b"><title>Sin nombre, sin tipos: 119252 bytes</title></rect>
+<rect x="769.4" y="336" width="80.6" height="22" fill="#94a3b8"><title>Libreria Sony (Psy-Q): 98992 bytes</title></rect>
+<text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">623 KB</text>
 <rect x="28" y="378" width="13" height="13" rx="3" fill="#16a34a"/>
 <text x="47" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Matching en C</text>
 <rect x="154" y="378" width="13" height="13" rx="3" fill="#22c55e"/>
