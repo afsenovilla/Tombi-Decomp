@@ -1,4 +1,5 @@
 // FUNC 80121a10 328 X001
+// MATCHING 80121a10 328
 #include "TOBJ.H"
 typedef struct { TObj o; char pc0[6]; unsigned char bc6; } PL;
 extern TObj *D_8009C330;
@@ -23,7 +24,7 @@ void func_80121A10(PL *o)
             o->o.state = 0;
         }
     }
-    if (D_1F8003C6 & D_1F8001FC) {
+    if (D_1F8001FC & D_1F8003C6) {
         D_8009D2B0 = 0;
         playSFX(0x3e);
         FUN_800eae0c(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
