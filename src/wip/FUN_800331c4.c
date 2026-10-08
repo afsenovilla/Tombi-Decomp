@@ -1,10 +1,10 @@
 // FUNC 800331c4 932 MAIN0
-/* score 12 (b55, was 224): list[64] (frame 0x160), (unsigned short)k tests keep k (s1) set in the scan, final loop as
-   for (i...), r int with u temp, branch order of h1/h2. Left: (1) h2 gets a0 instead of v1 inside the animFrame if
-   (-dg: h2 conflicts with v1 because local-alloc gives h1val v1; game h1val a0); (2) k*2 folded to li 0x28 (game
-   sll s6,s1,1: combine knows k = 0x14 since no CODE_LABEL between; a label via static &&lbl keeps k but then the
-   sign extension stays: sll 16 / sra 15). */
-#include "TOBJ.H"
+/* score 2 (b55, was 224): list[64] (frame 0x160), (unsigned short)k tests keep k (s1) set in the scan, the h test as
+   one full expression per animFrame branch, final loop as for (i...), r int with u temp. Left: game hoists
+   `sll s6,s1,1` (k*2 not folded, no sign extension); ours folds k = 0x14 into li 0x28 (combine knows k's last value:
+   no CODE_LABEL between k = 0x14 and the loop). A label (static &&lbl) keeps k but leaves sll 16 / sra 15 because the
+   scan and sort sets of k kill its sign-bit info; a separate single-set var for 0x14 + label gives the right
+   `sll x,y,1` but then k (scan/sort) leaves s1. Tried RHS forms k<<1, k+k, casts; register asm (worse). */#include "TOBJ.H"
 typedef struct P { short x, y; } P;
 extern short DAT_1f80019e;
 extern unsigned short DAT_1f80019eu;
@@ -40,14 +40,10 @@ int FUN_800331c4(TObj *o)
         if ((q->active & 1) && DAT_8007a0a0[q->type]) {
             k = o->d->p.whole - q->d->p.whole + 0x2d;
             c = (unsigned short)k < 0x5a;
-            if (o->animFrame & 1) {
-                h2 = q->h;
-                h1 = o->h;
-            } else {
-                h1 = q->h;
-                h2 = o->h;
-            }
-            k = h1->p.whole - h2->p.whole;
+            if (o->animFrame & 1)
+                k = o->h->p.whole - q->h->p.whole;
+            else
+                k = q->h->p.whole - o->h->p.whole;
             if ((unsigned short)k < wx)
                 c++;
             k = o->y.p.whole - q->y.p.whole + 0x20;
