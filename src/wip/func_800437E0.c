@@ -1,5 +1,5 @@
 // FUNC 800437e0 532 MAIN0
-// wip score 129: logic right; game keeps copies (t0=sw, t6=dx, t7=dy, t4/t5 = s6e) and recomputes sh+dy for the <0xc test; maybe an inline with params
+// wip score 82 (was 129): rewritten like func_800482EC with short temps + "dy = d" copy before the 2nd test. Left: the <0xc test sign-extends d (game adds raw t2+a1), plus small reg diffs (t8/t9 vs t7/t8).
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0x14]; unsigned short s14; unsigned short s16;
@@ -14,41 +14,43 @@ typedef struct {
 
 int func_800437E0(TO *a, TO *b)
 {
-    char pad[16];
-    int w6c, w6a, sw, dx, adx, h6e, a6e, dy, sh, pen, k;
+    char pad;
+    short dx;
+    short wx;
+    short px;
+    short dy;
+    short d;
+    int hy;
+    short cx;
 
     if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b) return 0;
-    w6c = b->s6c;
-    w6a = a->s6c;
-    sw = w6c + w6a;
-    pen = sw;
+    wx = b->s6c + a->s6c;
+    px = wx;
     dx = a->h40->s2 - b->h40->s2;
-    adx = dx;
-    h6e = b->s6e;
-    a6e = a->s6e;
-    if ((unsigned short)(dx + sw) > h6e + a6e) return 0;
-    dy = a->s16 - b->s16;
-    sh = b->s70 + a->s70;
-    if ((unsigned short)(dy + sh) > a->s72 + b->s72) return 0;
-    if ((unsigned short)(sh + dy) < 0xc) {
+    if ((unsigned short)(dx + wx) > b->s6e + a->s6e) return 0;
+    d = a->s16 - b->s16;
+    hy = b->s70 + a->s70;
+    dy = d;
+    if ((unsigned short)(d + hy) > a->s72 + b->s72) return 0;
+    if (((unsigned)(hy + d) & 0xffff) < 0xc) {
         if (a->b9c & 1) return 0;
         a->sb0 = 0;
         goto land;
     }
-    if ((short)dx < 0) {
-        k = pen;
-        adx = -dx;
-        pen = -sw;
+    cx = px;
+    if (dx < 0) {
+        dx = -dx;
+        px = -px;
     } else {
-        pen = (h6e - w6c) + (a6e - w6a);
-        k = pen;
+        px = (b->s6e - b->s6c) + (a->s6e - a->s6c);
+        cx = px;
     }
-    if ((unsigned short)(k - adx) < 4) {
-        a->h40->s2 = b->h40->s2 + pen;
-        if ((short)pen < 0) a->ba6 = 2; else a->ba6 = 3;
+    if ((unsigned short)(cx - dx) < 4) {
+        a->h40->s2 = b->h40->s2 + px;
+        if (px < 0) a->ba6 = 2; else a->ba6 = 3;
         return 2;
     }
-    if ((short)dy > 0) {
+    if (dy > 0) {
         a->s16 = b->s16 + ((b->s72 - b->s70) + (a->s72 - a->s70));
         if (a->s7e < 0) a->s7e = 0;
         return 3;
