@@ -1,6 +1,7 @@
 // r9 wip: score 19 (4 bytes short). Only diff: li a1,0x9000000 gets moved into the delay slot of the 'b0d & 1' branch; game has nop there and loads D_1F800070 first, then li, then lb b0f.
 // b17: sched1 puts the li (otadd's e param) first in the block, reorg then steals it into the beqz slot. Tried: all 24 param orders,
 // e as literal (43), b computed inside, signed char d param, volatile/array/literal/struct-literal D_1F800070 (volatile la form puts li after la),
+// b33: all 120 orders of the 5 args as locals before the call: no change (19); extern volatile D_1F800070 (plain lui form): no change; inline returning short gives 14 but adds a wrong move v0,a0 (size then matches by accident); flags no-sched/-fno-sched2 worse.
 // asm barrier at inline start, return form. The final bnez nop is fine (maspsx expands the lw macro).
 // FUNC 80054c38 796 MAIN0
 #include "TOBJ.H"
