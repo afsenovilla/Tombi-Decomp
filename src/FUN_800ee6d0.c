@@ -1,5 +1,5 @@
 // FUNC 800ee6d0 272 X000
-/* falta solo: el juego copia d a $a0 (beqz v0; move a0,v0) y compara sltiu sobre a0; probado: d uchar, d reutilizado como arg, inline turn/angdiff, cast */
+// MATCHING 800ee6d0 272
 extern unsigned short DAT_8009d670;
 extern unsigned short DAT_8009c960;
 extern short FUN_8001fe3c(int, int);
@@ -9,7 +9,7 @@ void FUN_800ee6d0(char *o)
 
     volatile unsigned short *pad = &DAT_8009d670;
     int a = 10;
-    unsigned int d;
+    short d;
     int t;
     if ((*pad & 0xa0) == 0)
         *(short *)(o + 0x76) = 0;
@@ -22,7 +22,8 @@ void FUN_800ee6d0(char *o)
     t = *(int *)(o + 0x88);
     d = (*(unsigned short *)(o + 0x76) - t) & 0xff;
     if (d != 0) {
-        if (d < 0x80)
+        unsigned char e = d;
+        if (e < 0x80)
             *(int *)(o + 0x88) = t + 1;
         else
             *(int *)(o + 0x88) = t - 1;
