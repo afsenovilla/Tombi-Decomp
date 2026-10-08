@@ -1,4 +1,5 @@
 // FUNC 8003fd78 464 MAIN0
+/* falta: el juego deja sh box3 justo antes del beqz (delay slot) y lee b9c en v1 antes de los sb 0; probado: -fno-schedule-insns, b9c en local, box3 = *p al final, store por cast, box3 en ambas ramas, v unsigned */
 #include "TOBJ.H"
 extern short DAT_80115320[];
 extern short TileCollideAt(TObj *o, short x, short y);

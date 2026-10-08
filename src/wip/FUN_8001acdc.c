@@ -3,8 +3,8 @@ extern short DAT_1f8001f4, DAT_1f8001c6;
 extern unsigned char DAT_1f8001cc;
 extern unsigned DAT_1f800164;
 extern unsigned short DAT_1f8001f8;
-extern unsigned char DAT_8009cda3;
-extern unsigned short *DAT_1f8001d4;
+extern unsigned char DAT_8009cda3[];
+extern unsigned short *DAT_1f8001d4[];
 extern unsigned short DAT_1f8003b8, DAT_1f8003ba;
 extern short DAT_800a45ea, DAT_800a45ec, DAT_800a45ee;
 extern unsigned char DAT_800a45d8;
@@ -21,18 +21,20 @@ void FUN_8001acdc(void)
     if (DAT_1f8001c6 == 2 && DAT_1f8001cc == 0)
         DAT_1f8001c6 = 0;
     FUN_8001ca58();
-    g = &DAT_8009cda3;
-    if (*g == 0xff) {
-        q = DAT_1f8001d4;
-        *g = 0;
-        DAT_1f8003b8 = q[0x26];
-        DAT_1f8003ba = q[0x27];
+    if (DAT_8009cda3[0] == 0xff) {
+        unsigned short x, y;
+        q = DAT_1f8001d4[0];
+        DAT_8009cda3[0] = 0;
+        x = q[0x26];
+        y = q[0x27];
         DAT_800a45ea = 6;
         DAT_800a45ec = 0;
         DAT_800a45ee = 0;
         DAT_800a45d8 = 0;
         q[0x26] = 3;
         q[0x27] = 0;
+        DAT_1f8003b8 = x;
+        DAT_1f8003ba = y;
     }
     if (DAT_1f8001c6 == 0) {
         DAT_1f8001f8 = DAT_1f8001f8 + 1;

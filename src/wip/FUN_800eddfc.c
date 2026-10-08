@@ -1,69 +1,65 @@
 // FUNC 800eddfc 408 X000
-extern void FUN_800202b4(unsigned char *);
-extern unsigned char DAT_800a60d6;
+typedef struct O {
+    unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
+    char p0[0x16 - 8]; unsigned short y;
+    char p1[0x40 - 0x18]; unsigned short *h;
+    char p2[0x69 - 0x44]; unsigned char b69;
+    char p3[0x7a - 0x6a]; short s7a; unsigned short s7c; unsigned short s7e; short s80;
+    char p4[0x84 - 0x82]; int d84; int d88; int d8c;
+    char p5[0x94 - 0x90]; struct O *p94;
+} O;
+extern void FUN_800202b4(O *);
+extern unsigned char DAT_800a60d6[];
 extern unsigned short DAT_800a6066;
 
-void FUN_800eddfc(unsigned char *o)
+void FUN_800eddfc(O *o)
 {
-    unsigned char s, st;
-    unsigned char *p;
-    short v, w;
-    st = o[5];
-    switch (st) {
-    case 0:
-    {
-        p = *(unsigned char **)(o + 0x94);
+    unsigned short v;
+    int w;
+    switch (o->b5) {
+    case 0: {
+        O *p = o->p94;
         FUN_800202b4(p);
-        o[1] = p[1];
-        if (o[6] == 0)
-            o[6] = 1;
-        if ((o[0x69] & 2) == 0)
-            return;
-        p = *(unsigned char **)(o + 0x94);
-        p[5] = 1;
-        p[6] = 0;
-        o[5] = 1;
-        goto done;
-    }
-    case 1:
-    {
-    p = *(unsigned char **)(o + 0x94);
-    FUN_800202b4(p);
-    s = o[6];
-    o[1] = p[1];
-    if (s == 1) {
-    L:
-        v = 1;
-        if ((DAT_800a6066 & 1) == 0)
-            v = -1;
-        *(short *)(o + 0x7a) = v;
-        o[6] = o[6] + 1;
-    } else {
-        if (s < 2) {
-            if (s != 0)
-                return;
-            v = (*(short **)(o + 0x40))[1];
-            w = *(short *)(o + 0x16);
-            *(short *)(o + 0x80) = 0;
-            o[6] = o[6] + 1;
-            *(unsigned short *)(o + 0x7e) = w;
-            *(int *)(o + 0x8c) = 0x1000;
-            *(short *)(o + 0x7c) = v;
-            goto L;
+        o->b1 = p->b1;
+        if (o->b6 == 0) o->b6++;
+        if (o->b69 & 2) {
+            p = o->p94;
+            p->b5 = 1;
+            p->b6 = 0;
+            o->b5 = 1;
+            o->b6 = 0;
         }
-        if (s != 2)
-            return;
+        break;
     }
-    *(int *)(o + 0x8c) = ((*(int *)(*(int *)(o + 0x94) + 0x84) >> 3) + 0x1000) & 0xfff;
-    if (DAT_800a60d6 != 0)
-        return;
-    *(int *)(o + 0x8c) = 0;
-    o[0x69] = 0;
-    o[5] = 0;
+    case 1: {
+        O *p = o->p94;
+        FUN_800202b4(p);
+        o->b1 = p->b1;
+        switch (o->b6) {
+        case 0:
+            v = o->h[1];
+            o->s80 = 0;
+            o->b6++;
+            w = o->y;
+            o->s7e = w;
+            o->d8c = 0x1000;
+            o->s7c = v;
+        case 1:
+            if (DAT_800a6066 & 1) o->s7a = 1;
+            else o->s7a = -1;
+            o->b6++;
+        case 2:
+            p = o->p94;
+            o->d8c = ((p->d84 >> 3) + 0x1000) & 0xfff;
+            if (DAT_800a60d6[0] == 0) {
+                o->d8c = 0;
+                o->b69 = 0;
+                o->b5 = 0;
+                o->b6 = 0;
+            }
+            break;
+        }
+        break;
     }
-    default:
-        return;
     }
-done:
-    o[6] = 0;
 }

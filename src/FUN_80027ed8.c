@@ -1,4 +1,5 @@
 // FUNC 80027ed8 452 MAIN0
+// MATCHING 80027ed8 452
 #include "TOBJ.H"
 extern int DAT_1f80018c;
 #define D34(o) (*(Fix16 **)&(o)->d34)
@@ -21,7 +22,7 @@ static __inline__ void body(TObj *o)
                 o->y.raw = 0;
             o->y.raw += 0x2000;
         }
-        D34(o)->raw += o->y.raw;
+        { int y = o->y.raw; D34(o)->raw += y; }
     } else if (d < -0x20000) {
         if (o->y.raw < d) {
             if (d > -0x40000)

@@ -1,4 +1,5 @@
 // FUNC 80033638 392 MAIN0
+// MATCHING 80033638 392
 #include "TOBJ.H"
 extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
@@ -7,12 +8,20 @@ extern short FUN_800411cc(TObj *, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void SfxPlay(int);
-extern void FUN_800efa80(void);
+extern void FUN_800efa80(TObj *);
 extern unsigned short DAT_1f800282;
-extern volatile int DAT_800a60c4;
-extern unsigned char DAT_800a60d5;
+extern int DAT_800a60c4[];
+extern unsigned char DAT_800a60d5[];
 extern unsigned char *DAT_8009c330;
 extern short DAT_8007a074[];
+
+static __inline__ void f(TObj *q)
+{
+    q->waa = DAT_8007a074[(short)(q->animFrame + q->animFrame * 2)];
+    DAT_800a60d5[0] = 0;
+    *DAT_8009c330 = 0;
+    FUN_800efa80(q);
+}
 
 int FUN_80033638(TObj *o)
 {
@@ -21,6 +30,7 @@ int FUN_80033638(TObj *o)
     short t;
     unsigned short u;
     int m;
+    r = 0;
     o->d84 = 0x200;
     t = o->wa8 - 0x200;
     o->d88 = o->d88 + 0x100 & 0xfff;
@@ -37,14 +47,10 @@ int FUN_80033638(TObj *o)
         SfxPlay(5);
         o->wa8 = 0x4ff;
     }
-    DAT_800a60c4 = 0;
-    r = o->wa8 < 0x500;
-    if (r) {
-        p = DAT_8009c330;
-        o->waa = DAT_8007a074[(short)(o->animFrame * 3)];
-        DAT_800a60d5 = 0;
-        FUN_800efa80();
-        *p = 0;
+    DAT_800a60c4[0] = 0;
+    if (o->wa8 < 0x500) {
+        f(o);
+        r = 1;
     }
     return r;
 }
