@@ -1,5 +1,6 @@
 // FUNC 8010e628 68 X000
 #include "TOBJ.H"
+// r11: score 8; sw d88 is scheduled last (game: right after the if, 2 in $v1). Tried orders/types/ternary/raw offsets.
 
 void func_8010E628(TObj *o)
 {
