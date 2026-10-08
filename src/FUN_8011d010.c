@@ -1,4 +1,5 @@
 // FUNC 8011d010 500 X000
+// MATCHING 8011d010 500
 typedef struct {
     char p0[3]; unsigned char sub, st, p1[7]; unsigned char b0c; char p2[0x20 - 0xd]; short w20; char p3[0x2c - 0x22]; unsigned short w2c, w2e;
     char p4[0x69 - 0x30]; unsigned char b69; char p5[0x6c - 0x6a]; unsigned short w6c, w6e, w70, w72; char p6[0x7c - 0x74]; unsigned short w7c, w7e;
@@ -28,14 +29,13 @@ void FUN_8011d010(O *o)
         o->ba6 = *p++;
         o->w2c = *p;
         w = p[1];
-        s = o->st;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
         o->w2e = 0x80;
         o->w20 = 0;
         o->b69 = 0;
-        o->st = s + 1;
+        o->st++;
         o->w7e = w;
         break;
     case 1:

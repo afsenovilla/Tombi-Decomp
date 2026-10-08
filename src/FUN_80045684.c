@@ -1,4 +1,5 @@
 // FUNC 80045684 380 MAIN0
+// MATCHING 80045684 380
 extern short FUN_80043260(unsigned char *, unsigned char *);
 extern void FUN_8001f96c(int, int, int, int);
 extern short DAT_1f80019e;
@@ -6,7 +7,7 @@ extern short DAT_1f80019e;
 #define U(p, o) (*(unsigned short *)((p) + (o)))
 #define S(p, o) (*(short *)((p) + (o)))
 
-static __inline__ int HIT(unsigned char *a, unsigned char *b)
+static __inline__ short HIT(unsigned char *a, unsigned char *b)
 {
     if ((unsigned short)(U(*(unsigned char **)(a + 0x44), 2) - U(*(unsigned char **)(b + 0x44), 2) + 0x2d) >= 0x5b)
         return 0;
