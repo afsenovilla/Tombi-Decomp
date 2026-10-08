@@ -1,8 +1,11 @@
 // FUNC 80100788 4088 X000
-/* score 1014 (b16: turn() with unsigned int c=(u8)(...); short s=c; unsigned char u=c; s>=4 first: 1167->1014; game still has no andi on u and a bnez/fallthrough a+4 tree): player step dispatcher. Case order/logic follow the jump table (0x23/0x2f after 0x2e, 0x16/0x49 after 0x48). Main gap: the angle-step inline turn(): game keeps two copies of the 0..255 delta (v1 signed, a1 unsigned) and every case keeps its own compare tree, only the final sw/lbu/sw is cross-jumped; ours merges the trees across cases (~60 instrs shorter). Use /tmp-style jal-offset comparison to locate drift. */
+// MATCHING 80100788 4088
+/* Player step dispatcher. turn(): the d8c store written in every leaf (cross-jumping shares only the store
+   tail, as in the game); chk() is a macro so the step constant is loaded at the compare; dirC/dirD store
+   animFrame per leaf (game reloads it afterwards). */
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned char D_8009D2B0;
+extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned short D_8009D670;
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
@@ -39,14 +42,14 @@ extern void FUN_80107c00(TObj *);
 extern void FUN_801097ec(TObj *);
 extern void FUN_800fa01c(TObj *);
 extern void FUN_801237e4(TObj *);
-extern void FUN_80121e38(TObj *);
+extern void FUN_80121b58(TObj *);
 extern void FUN_80107fcc(TObj *);
 extern void FUN_80121790(TObj *);
 extern void FUN_80122410(TObj *);
 extern void FUN_8010ca18(TObj *);
 extern void FUN_8011d7e0(TObj *);
 extern void FUN_8011e688(TObj *);
-extern void FUN_8011de74(TObj *);
+extern void FUN_8011de64(TObj *);
 extern void FUN_8011e0d8(TObj *);
 extern void FUN_80121d6c(TObj *);
 extern void FUN_80122044(TObj *);
@@ -57,7 +60,7 @@ extern void FUN_80102a08(TObj *);
 extern void FUN_800ffec4(TObj *);
 extern void FUN_80108ad0(TObj *);
 extern void FUN_800fb420(TObj *);
-extern void FUN_8011e3b0(TObj *);
+extern void FUN_8011e358(TObj *);
 extern void FUN_8011e6b0(TObj *);
 extern void FUN_80122c10(TObj *);
 extern void FUN_8011eae8(TObj *);
@@ -83,8 +86,8 @@ extern void FUN_8003f598(TObj *, int);
 
 static __inline__ void dirA(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
     unsigned short f = o->animFrame & 1;
+    volatile unsigned short *k = &D_8009D670;
     unsigned short v;
     o->animFrame = f;
     if (*k & 0x20) {
@@ -106,69 +109,61 @@ static __inline__ void dirC(TObj *o)
 {
     volatile unsigned short *k = &D_8009D670;
     unsigned short f = o->animFrame & 1;
-    unsigned short v;
     o->animFrame = f;
     if (*k & 0x10) {
-        if (*k & 0x80) v = 5;
-        else if (*k & 0x20) v = 4;
-        else if (f) v = 7;
-        else v = 6;
+        if (*k & 0x80) o->animFrame = 5;
+        else if (*k & 0x20) o->animFrame = 4;
+        else if (f) o->animFrame = 7;
+        else o->animFrame = 6;
     } else {
-        if (*k & 0x80) v = 3;
-        else if (*k & 0x20) v = 2;
-        else if (f) v = 3;
-        else v = 2;
+        if (*k & 0x80) o->animFrame = 3;
+        else if (*k & 0x20) o->animFrame = 2;
+        else if (f) o->animFrame = 3;
+        else o->animFrame = 2;
     }
-    o->animFrame = v;
 }
 
 static __inline__ void dirD(TObj *o)
 {
     volatile unsigned short *k = &D_8009D670;
     unsigned short f = o->animFrame & 1;
-    unsigned short v;
     o->animFrame = f;
     if (*k & 0x10) {
-        if (*k & 0x80) v = 5;
-        else if (*k & 0x20) v = 4;
-        else if (f) v = 7;
-        else v = 6;
+        if (*k & 0x80) o->animFrame = 5;
+        else if (*k & 0x20) o->animFrame = 4;
+        else if (f) o->animFrame = 7;
+        else o->animFrame = 6;
     } else {
-        if (*k & 0x80) v = 1;
-        else if (*k & 0x20) { o->animFrame = 0; return; }
-        else if (f) v = 3;
-        else v = 2;
+        if (*k & 0x80) o->animFrame = 1;
+        else if (*k & 0x20) o->animFrame = 0;
+        else if (f) o->animFrame = 3;
+        else o->animFrame = 2;
     }
-    o->animFrame = v;
 }
 
 static __inline__ void turn(TObj *o)
 {
     int a = o->d8c;
-    int n;
     unsigned int c = (unsigned char)(D_801152E8[o->wb0] - a);
     short s = c;
-    unsigned char u = c;
+    unsigned short u = c;
     if (s != 0) {
         if (u < 0x80) {
-            if (s >= 4) n = a + 4;
-            else if (s < 2) n = a + 1; else n = a + 2;
+            if (s >= 4) { o->d8c = a + 4; o->d8c = U8(o, 0x8c); }
+            else if (s < 2) { o->d8c = a + 1; o->d8c = U8(o, 0x8c); }
+            else { o->d8c = a + 2; o->d8c = U8(o, 0x8c); }
         } else {
-            if (s < 0xfd) n = a - 4;
-            else if (s < 0xff) n = a - 2;
-            else n = a - 1;
+            if (s < 0xfd) { o->d8c = a - 4; o->d8c = U8(o, 0x8c); }
+            else if (s < 0xff) { o->d8c = a - 2; o->d8c = U8(o, 0x8c); }
+            else { o->d8c = a - 1; o->d8c = U8(o, 0x8c); }
         }
-        o->d8c = n;
-        o->d8c = (unsigned char)o->d8c;
     }
 }
 
-static __inline__ void chk(TObj *o, int n)
-{
-    if (U8(o, 0xac) != 2 && o->step == n) {
-        if (o->b9e == 0) FUN_8010e328(o, 1);
+#define chk(o, n) \
+    if (U8(o, 0xac) != 2 && o->step == n) { \
+        if (o->b9e == 0) FUN_8010e328(o, 1); \
     }
-}
 
 void func_80100788(TObj *o, int p2)
 {
@@ -176,7 +171,7 @@ void func_80100788(TObj *o, int p2)
 
     switch (o->step) {
     case 0:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
         FUN_800f1478(o);
@@ -184,12 +179,12 @@ void func_80100788(TObj *o, int p2)
         FUN_800f00ac(o);
         break;
     case 1:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
         FUN_800f1d44(o);
-        if (D_1F8003C6 & D_1F8001FC) {
-            D_8009D2B0 = 0;
+        if (D_1F8001FC & D_1F8003C6) {
+            D_8009D2B0[0] = 0;
             o->b9c = 1;
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
@@ -265,7 +260,7 @@ void func_80100788(TObj *o, int p2)
         FUN_80109038(o);
         break;
     case 19:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         FUN_80106fec(o);
         turn(o);
         break;
@@ -283,12 +278,12 @@ void func_80100788(TObj *o, int p2)
         FUN_80107c00(o);
         break;
     case 0x1c:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
         FUN_801097ec(o);
-        if (D_1F8003C6 & D_1F8001FC) {
-            D_8009D2B0 = 0;
+        if (D_1F8001FC & D_1F8003C6) {
+            D_8009D2B0[0] = 0;
             o->b9c = 1;
             U8(o, 0xc3) = 0;
             o->step = 2;
@@ -305,8 +300,8 @@ void func_80100788(TObj *o, int p2)
         FUN_801237e4(o);
         break;
     case 0x1f:
-        D_8009D2B0 = 1;
-        FUN_80121e38(o);
+        D_8009D2B0[0] = 1;
+        FUN_80121b58(o);
         FUN_8010e328(o, 0);
         break;
     case 0x20:
@@ -325,7 +320,7 @@ void func_80100788(TObj *o, int p2)
         FUN_8011e688(o);
         break;
     case 0x26:
-        FUN_8011de74(o);
+        FUN_8011de64(o);
         break;
     case 0x27:
         FUN_8011e0d8(o);
@@ -363,7 +358,7 @@ void func_80100788(TObj *o, int p2)
         FUN_800fb420(o);
         break;
     case 0x33:
-        FUN_8011e3b0(o);
+        FUN_8011e358(o);
         break;
     case 0x34:
         FUN_8011e6b0(o);
@@ -388,11 +383,11 @@ void func_80100788(TObj *o, int p2)
         FUN_80106f98(o);
         break;
     case 0x3d:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         FUN_8010d390(o);
         break;
     case 0x3e:
-        D_8009D2B0 = 1;
+        D_8009D2B0[0] = 1;
         FUN_8010d048(o);
         FUN_8010d888(o);
         break;
@@ -443,7 +438,7 @@ void func_80100788(TObj *o, int p2)
                 o->state = 0;
                 o->substep = 0;
                 o->active = 1;
-                D_8009D2B0 = 0;
+                D_8009D2B0[0] = 0;
                 D_8009C93A = 1;
             }
             break;
