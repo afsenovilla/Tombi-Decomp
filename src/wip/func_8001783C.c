@@ -1,10 +1,10 @@
 // FUNC 8001783c 776 MAIN0
-/* full-address score 26 (old struct-cast version: ncheck 20 but 48 once symbol offsets are compared; ncheck --score masks
-   relocations so it cannot see store targets). b29: plain scalar externs, stores hill-climbed by full-address score.
-   Model: in the game the li constants (3, 0xff, 0x691) and the F3DC/1B3 loads are hoisted as early as v0/v1 allow while
-   the stores stay in near-source order; making every stored global volatile in exact game order gives 24 (li not hoisted).
-   Tried: single volatile toggles, move/swap hill-climb (stuck at 26), -fno-schedule-insns{,2} (worse). */
-extern unsigned short D_8009C960[];
+/* score 14 (was 74 under current ncheck): b45 random hill-climb over store order + per-global volatile mask (tools in
+   /tmp only). Register pattern now matches the game (li 0x45; li v1,0xff; sw; li 3 ...); only a few store targets are
+   still swapped (CFD0/ea and 1c8/CEAF positions). Volatile externs are debt: they chain the stores (volatile mems
+   depend on each other in sched), which is what makes zero-stores stay early as in the game. Earlier note: scalar
+   externs + all-volatile in game order gave 52. */
+extern volatile unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
 extern unsigned short D_8009F3DC;
@@ -13,30 +13,30 @@ extern unsigned char DAT_1f8001ab;
 extern short D_8009D2A4;
 extern unsigned short D_8009D2A6;
 extern short DAT_1f8000ea;
-extern short DAT_1f8000ee;
-extern short DAT_1f8000f2;
+extern volatile short DAT_1f8000ee;
+extern volatile short DAT_1f8000f2;
 extern int DAT_1f800200;
-extern short DAT_1f8000e2;
-extern short DAT_1f8000e6;
-extern short DAT_1f8000f6;
+extern volatile short DAT_1f8000e2;
+extern volatile short DAT_1f8000e6;
+extern volatile short DAT_1f8000f6;
 extern unsigned char DAT_1f8003d2;
 extern unsigned char DAT_1f8003d3;
-extern int D_8009C96C;
-extern unsigned char D_8009C977;
+extern volatile int D_8009C96C;
+extern volatile unsigned char D_8009C977;
 extern unsigned char D_8009D090;
 extern unsigned char D_8009C980;
 extern unsigned char D_8009C972;
-extern unsigned char D_8009C971;
-extern unsigned char D_8009C970;
+extern volatile unsigned char D_8009C971;
+extern volatile unsigned char D_8009C970;
 extern short D_8009CFD0;
-extern short D_8009CFD2;
+extern volatile short D_8009CFD2;
 extern unsigned char DAT_1f8003ce;
-extern short DAT_1f8001c8;
+extern volatile short DAT_1f8001c8;
 extern unsigned char DAT_1f8003d1;
 extern short D_8009F838;
 extern short D_8009C962;
 extern unsigned char D_8009CDA3;
-extern unsigned char D_8009C973;
+extern volatile unsigned char D_8009C973;
 extern unsigned char D_8009CEAF;
 extern unsigned char D_8009CDA4;
 extern short D_8009CFD4;
@@ -77,36 +77,36 @@ void func_8001783C(void)
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
     FUN_80021f5c(D_1F8000C0);
-    DAT_1f8000ea = -544;
+    D_8009CFD0 = 1498;
     DAT_1f8000ee = 160;
+    D_8009CF1C = D_8009F3DC;
     DAT_1f8000f2 = -128;
-    DAT_1f800200 = 69;
     DAT_1f8000e2 = 0;
     DAT_1f8000e6 = 0;
+    DAT_1f800200 = 69;
+    DAT_1f8003ce = 0;
     DAT_1f8000f6 = 0;
-    DAT_1f8003d2 = 255;
-    D_8009CFD4 = 1681;
+    D_8009D090 = 255;
     DAT_1f8003d3 = 255;
+    D_8009C96C = 0;
     D_8009C960[0] = 0;
     D_8009C977 = 255;
-    D_8009D090 = 255;
     D_8009C980 = 3;
-    D_8009C973 = 1;
+    D_8009CEAF = 1;
     D_8009C972 = 9;
     D_8009C971 = 4;
     D_8009C970 = 4;
-    D_8009CFD0 = 1498;
-    D_8009CFD2 = 1593;
-    DAT_1f8003ce = 0;
-    DAT_1f8001c8 = 0;
     DAT_1f8003d1 = 0;
+    DAT_1f8000ea = -544;
     D_8009F838 = 0;
     D_8009C962 = 0;
+    D_8009CFD2 = 1593;
+    DAT_1f8003d2 = 255;
     D_8009CDA3 = 0;
-    D_8009C96C = 0;
-    D_8009CEAF = 1;
+    D_8009C973 = 1;
+    DAT_1f8001c8 = 0;
     D_8009CDA4 = 1;
-    D_8009CF1C = D_8009F3DC;
+    D_8009CFD4 = 1681;
     if (DAT_1f8001b3 == 0) {
         if (DAT_1f8001ab != 0) {
             D_8009D1A4 = 27;
