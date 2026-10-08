@@ -1,5 +1,5 @@
 // FUNC 800fe13c 1568 X000
-/* score 60: (1) case 0: game loads 0xee/0xf2 right after the animFrame store, ours hoists the 0xee load early (subu reg differs); tried raw/struct/ptr reads, int/short temps, (short) casts, statement moves. (2) case 2: game keeps &D_8009CF06 in a0 (la inside the if) with C960/C962 as -0x5a6/-0x5a4 offsets; ours only keeps it in a reg (s0) when cp is assigned at case start; in-block assignment, volatile, inline param all get propagated. */
+/* score 22: case 2 fixed (D_8009C960 as struct G960 with cf06 at +0x5a6, D_8009D2B1 as [0]: gcc CSE expresses c960/c962 relative to la cf06). Left: case 0 velH/velV block: game loads 0xee after the animFrame store, 0xf2 after sh 0xe0 and y (0x16) after sh velH; ours hoists 0xee to the top. Tried: hill-climb of the case 0 store block, 144 combos raw/struct reads x int/short d x separate temps, inline helpers with o param (28). */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -29,8 +29,9 @@ extern TObj *D_8009F0EC;
 extern int D_8009C934;
 extern unsigned char D_8009C938;
 extern unsigned char D_8009CF06[];
-extern unsigned char D_8009D2B1;
-extern unsigned short D_8009C960, D_8009C962;
+extern unsigned char D_8009D2B1[];
+typedef struct { unsigned short c960, c962; char pad[0x5a2]; unsigned char cf06; } G960;
+extern G960 D_8009C960;
 extern unsigned char D_801152E8[];
 extern char D_80010A04[];
 extern char D_800116B8[];
@@ -167,16 +168,15 @@ void FUN_800fe13c(TObj *o)
         }
         break;
     case 2:
-        cp = D_8009CF06;
         U8(o, 0xc7) = 1;
         D_8009C330->w2c = 0x3c;
         SetAnimFromTable(o);
         FUN_8001fe94(o, 1);
         if (--o->timer == 0) {
             o->state = 3;
-            cp[0] = 0;
-            D_8009D2B1 = 0;
-            if (*(unsigned short *)(cp - 0x5a6) != 10 || *(unsigned short *)(cp - 0x5a4) != 0)
+            D_8009C960.cf06 = 0;
+            D_8009D2B1[0] = 0;
+            if (D_8009C960.c960 != 10 || D_8009C960.c962 != 0)
                 D_8009C938 = 2;
         }
         break;
