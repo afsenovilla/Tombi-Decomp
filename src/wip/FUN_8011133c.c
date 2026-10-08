@@ -1,12 +1,10 @@
 // FUNC 8011133c 128 X000
-/* falta: el juego pone s en a0, o en a1 (move a1,a0 al inicio) y una copia de o en a2 para el sh $zero;
-   ademas carga 0x200 antes del primer lhu (no en el delay slot). short s ya da el li 0x200 doble. */
+/* score 38 (was 42): inline with short s param passed from an int local gives both li 0x200. Left: game keeps o in a1 (move a1,a0), s in a0 and a copy of o in a2 for the sh $zero; nested inline / extra pointer param copies did not reproduce it. */
 extern unsigned short DAT_8009d610, DAT_8009d670;
 extern unsigned char DAT_8009d618;
 
-void FUN_8011133c(char *o)
+static __inline__ void inl(short s, char *o)
 {
-    short s = 0x200;
     volatile unsigned short *k;
     if (DAT_8009d610 == 7)
         s = 0x200 >> (3 - DAT_8009d618);
@@ -18,3 +16,4 @@ void FUN_8011133c(char *o)
     else
         *(short *)(o + 0x7c) = 0;
 }
+void FUN_8011133c(char *o) { int s = 0x200; inl(s, o); }
