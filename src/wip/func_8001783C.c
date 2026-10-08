@@ -1,6 +1,8 @@
 // FUNC 8001783c 776 MAIN0
-// wip score 34 (was 70): statement order found by random permutation; game loads 0xff/3 constants earlier. Declaring all globals as X[] keeps store order (score 40) but constants still late.
-// w1: writing stores in exact game order with all globals as X[] gives 40 (scalars 70); greedy scalar toggles and early locals for F3DC/1B3 do not help.
+/* score 20 (ncheck masks symbol offsets, so the order of different-symbol stores is invisible to the score).
+   b22: scratchpad stores as ((struct{char p[N]; T v;}*)D_1F8000C0)->v (26 -> 20 after hill-climb); else-branch order fixed (D_8009D2A6 store written in both branches).
+   Observation: declaring all stored globals volatile (loads plain) and writing stores in exact game order reproduces the game's store sequence;
+   only the li hoisting differs (game hoists li 0xff into v1, li 3, li 0x691 and the F3DC/1B3 loads several stores earlier). Not solved. */
 extern unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
@@ -74,29 +76,29 @@ void func_8001783C(void)
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
     FUN_80021f5c(D_1F8000C0);
-    DAT_1f8000ea = -544;
-    DAT_1f8000ee = 160;
-    DAT_1f8000f2 = -128;
-    DAT_1f8001c8 = 0;
-    D_8009C960[0] = 0;
-    DAT_1f800200 = 69;
-    DAT_1f8003d3 = 255;
+    (((struct{char p[42]; short v;} *)D_1F8000C0)->v) = -544;
+    (((struct{char p[46]; short v;} *)D_1F8000C0)->v) = 160;
+    (((struct{char p[50]; short v;} *)D_1F8000C0)->v) = -128;
+    (((struct{char p[264]; short v;} *)D_1F8000C0)->v) = 0;
+    (((struct{char p[320]; int v;} *)D_1F8000C0)->v) = 69;
+    (((struct{char p[787]; unsigned char v;} *)D_1F8000C0)->v) = 255;
     D_8009D090 = 255;
+    *(unsigned short *)D_8009C960 = 0;
     D_8009F838 = 0;
-    DAT_1f8000f6 = 0;
-    D_8009C980 = 3;
-    DAT_1f8003d1 = 0;
-    DAT_1f8000e6 = 0;
+    (((struct{char p[54]; short v;} *)D_1F8000C0)->v) = 0;
+    (((struct{char p[785]; unsigned char v;} *)D_1F8000C0)->v) = 0;
+    (((struct{char p[38]; short v;} *)D_1F8000C0)->v) = 0;
     D_8009CFD4 = 1681;
     D_8009C96C = 0;
-    DAT_1f8003ce = 0;
+    (((struct{char p[782]; unsigned char v;} *)D_1F8000C0)->v) = 0;
     D_8009C962 = 0;
-    DAT_1f8000e2 = 0;
+    (((struct{char p[34]; short v;} *)D_1F8000C0)->v) = 0;
     D_8009CDA3 = 0;
     D_8009CFD2 = 1593;
+    D_8009C980 = 3;
     D_8009CDA4 = 1;
     D_8009C972 = 9;
-    DAT_1f8003d2 = 255;
+    (((struct{char p[786]; unsigned char v;} *)D_1F8000C0)->v) = 255;
     D_8009C970 = 4;
     D_8009CEAF = 1;
     D_8009C973 = 1;
@@ -104,8 +106,8 @@ void func_8001783C(void)
     D_8009CF1C = D_8009F3DC;
     D_8009C971 = 4;
     D_8009CFD0 = 1498;
-    if (DAT_1f8001b3 == 0) {
-        if (DAT_1f8001ab != 0) {
+    if ((((struct{char p[243]; unsigned char v;} *)D_1F8000C0)->v) == 0) {
+        if ((((struct{char p[235]; unsigned char v;} *)D_1F8000C0)->v) != 0) {
             D_8009D1A4 = 27;
             D_8009D1A5 = 33;
             D_8009D1A6 = 34;
@@ -135,13 +137,15 @@ void func_8001783C(void)
             D_8009D0AA = 1;
             D_8009D0C8 = 1;
             D_8009D0B8 = 1;
+            D_8009D2A6 = 0x8000;
         } else {
+            D_8009D0BF = 1;
+            D_8009D0C4 = 1;
             D_8009D1A4 = 27;
             D_8009D1A5 = 32;
             D_8009D2A4 = 2;
-            D_8009D0BF = 1;
-            D_8009D0C4 = 1;
+            D_8009D2A6 = 0x8000;
         }
-        D_8009D2A6 = 0x8000;
     }
 }
+
