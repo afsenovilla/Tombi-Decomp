@@ -1,4 +1,5 @@
 // FUNC 8010a9f4 668 X000
+// MATCHING 8010a9f4 668
 #include "TOBJ.H"
 extern void FUN_800eee90(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -8,10 +9,7 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
-extern TObj *DAT_80096330;
-extern TObj *DAT_80096330b;
-extern TObj *DAT_80096330c;
-extern TObj *DAT_80096330d;
+extern TObj *D_8009C330;
 extern char DAT_80010ae8[];
 extern char DAT_80010748[];
 extern int DAT_8009c960[];
@@ -24,21 +22,20 @@ extern unsigned char DAT_8009c942b[];
 extern unsigned char DAT_8009c93fb[];
 extern unsigned char DAT_801152e8[];
 
-void FUN_8010a9f4(TObj *o)
+void func_8010A9F4(TObj *o)
 {
-    char pad;
     TObj *p;
     TObj *q;
 
     switch (o->state) {
     case 0:
         o->active = 5;
-        p = DAT_80096330;
         o->d8c = 0;
-        *(unsigned char *)&p->w08 = 0;
-        q = DAT_80096330b;
-        p->timer = 0;
-        *((unsigned short *)&q->movetab + 1) = *(unsigned short *)&q->movetab = q->animFrame = 0xffff;
+        D_8009C330->timer = 0;
+        *(unsigned char *)&D_8009C330->w08 = 0;
+        D_8009C330->animFrame = 0xffff;
+        *(unsigned short *)&D_8009C330->movetab = 0xffff;
+        *((unsigned short *)&D_8009C330->movetab + 1) = 0xffff;
         o->ba4 = 0;
         o->ba5 = 0;
         o->b9c = 2;
@@ -47,7 +44,7 @@ void FUN_8010a9f4(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0x1000;
-        DAT_80096330c->timer = 0;
+        D_8009C330->timer = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->d8c = 0;
@@ -72,7 +69,7 @@ void FUN_8010a9f4(TObj *o)
         break;
     case 1:
         FUN_8001fec0(o);
-        *(unsigned char *)&DAT_80096330d->w08 = 1;
+        *(unsigned char *)&D_8009C330->w08 = 1;
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
