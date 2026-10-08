@@ -1,5 +1,5 @@
 // FUNC 80123e04 460 X000
-// 4 words differ: xy + (signed char)field comes out as field + xy (operand swap, see guide)
+// MATCHING 80123e04 460
 #include "TOBJ.H"
 typedef struct {
     unsigned int tag;
@@ -22,10 +22,11 @@ void func_80123E04(TObj *o)
 {
     Spr *s;
     PFT4 *p;
-    int xy;
+    int xy; short x, y;
     s = (Spr *)(*(volatile int *)&o->d3c + ((short *)((char *)o->d3c + (*(unsigned short *)o->anim << 2)))[1]);
     if (FUN_8004fba8(o, D_1F800070, D_1F800074) != 0) return;
     xy = D_1F800070_v;
+    y = xy >> 16;
     p = D_1F800164;
     p->code = 0x2c;
     p->r0 = o->wb6;
@@ -38,8 +39,9 @@ void func_80123E04(TObj *o)
     p->uv3 = s->uv3;
     p->tpage = o->w1e;
     p->clut = o->w08;
-    p->x0 = xy + s->dx - o->wb8;
-    p->y0 = (xy >> 16) + s->dy - o->wba;
+    x = xy;
+    p->x0 = x + s->dx - o->wb8;
+    p->y0 = y + s->dy - o->wba;
     p->x1 = p->x0 + s->w + (unsigned short)o->wb8 * 2 - 1;
     p->y1 = p->y0;
     p->x2 = p->x0;
