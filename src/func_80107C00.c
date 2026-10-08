@@ -1,5 +1,5 @@
 // FUNC 80107c00 972 X000
-/* score 12: only diff is wb2 negation: game copies lh result to v1 (addu v1,v0 in delay slot) and negu v0,v1 */
+// MATCHING 80107c00 972
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
@@ -22,14 +22,13 @@ void func_80107C00(TObj *o)
 {
     volatile unsigned short *k;
     int v;
-    char pad[16];
     switch (o->state) {
     case 0:
         D_8009C330[0xb] = o->animFrame;
         if ((o->animFrame &= 1) != 0) {
-            if ((v = o->wb2) > 0) o->wb2 = -v;
+            if (o->wb2 > 0) o->wb2 = -o->wb2;
         } else {
-            if ((v = o->wb2) < 0) o->wb2 = -v;
+            if (o->wb2 < 0) o->wb2 = -o->wb2;
         }
         B(o, 0xac) = 0;
         o->b9c = 0;
