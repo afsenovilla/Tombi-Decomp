@@ -1,4 +1,5 @@
 // FUNC 8010e66c 684 X000
+// MATCHING 8010e66c 684
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009C330;
@@ -84,8 +85,8 @@ void func_8010E66C(TObj *o)
             v = 0xf0;
         o->d88 = v;
         B(o, 0xac) = 1;
-        o->timer = 10;
         o->b9c = 2;
+        o->timer = 10;
         o->step = 2;
         o->state = 3;
     }
