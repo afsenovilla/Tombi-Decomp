@@ -1,11 +1,11 @@
 // FUNC 8002171c 316 MAIN0
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 8002171c 316
 // Portado de psx_tomba (camera.c, func_800242AC); licencia MIT del proyecto original.
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_8007BF78[];
-extern u8 D_8009C617;
+extern int** D_80079474[];
+extern u8 D_8009D2AF;
 
 
 typedef struct {
@@ -27,14 +27,14 @@ void func_80024BD4(u8* self);
 
 void func_800242AC(u8* self)
 {
-    s16* row = (s16*)((u8*)D_8007BF78[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    s16* row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
 
     *(int*)(self + 0xEC) = *row++ << 16;
     *(int*)(self + 0xF0) = *row << 16;
     *(int*)(self + 0xF4) = row[1] << 16;
     switch (GAME.selectedArea) {
     case 0:
-        if (D_8009C617 == 0 && GAME.selectedSection == 0) {
+        if (D_8009D2AF == 0 && GAME.selectedSection == 0) {
             *(s16*)(self + 0xEE) = 0x40;
         } else if (GAME.selectedSection == 3) {
             *(s16*)(self + 0xEE) = 0xD2;
