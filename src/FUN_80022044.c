@@ -1,4 +1,5 @@
 // FUNC 80022044 272 MAIN0
+// MATCHING 80022044 272
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { int vx, vy, vz; } VECTOR;
@@ -33,12 +34,12 @@ void FUN_80022044(OB *o)
     FUN_80063bfc(o, &v, &r);
     o->m.m[0][0] = r.vx;
     o->m.m[0][1] = r.vy;
+    o->m.m[0][2] = r.vz;
     o->m.m[1][0] = 0;
     o->m.m[1][1] = 0;
     o->m.m[1][2] = 0;
     o->m.m[2][0] = 0;
     o->m.m[2][1] = 0;
     o->m.m[2][2] = 0;
-    o->m.m[0][2] = r.vz;
     FUN_800635e8(0x118, 0x220);
 }
