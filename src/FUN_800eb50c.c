@@ -1,7 +1,9 @@
 // FUNC 800eb50c 416 X000
+// MATCHING 800eb50c 416
+typedef struct { char p[0x1e]; unsigned short w1e; } NN;
 typedef struct { unsigned short w; short idx; void **ptrs; int pad; } E;
 extern E DAT_80114ae4[];
-extern char DAT_8009c960[];
+extern unsigned short DAT_8009c960[];
 extern int DAT_1f8002c8[];
 extern unsigned char DAT_800a6047;
 extern char *DAT_800a611c;
@@ -19,10 +21,10 @@ void FUN_800eb50c(short a, int x, int y, int z)
         *(int *)(n + 0x14) = y << 16;
         n[3] = a;
         *(int *)(n + 0x18) = z << 16;
-        *(unsigned short *)(n + 0x1e) = DAT_80114ae4[*(unsigned short *)DAT_8009c960].w;
-        *(int *)(n + 0x3c) = DAT_1f8002c8[DAT_80114ae4[*(unsigned short *)DAT_8009c960].idx];
+        ((NN *)n)->w1e = DAT_80114ae4[DAT_8009c960[0]].w;
+        *(int *)(n + 0x3c) = DAT_1f8002c8[DAT_80114ae4[DAT_8009c960[0]].idx];
         if (a == 2 && *(int *)DAT_8009c960 == 0x50000) a = 3;
-        *(void **)(n + 0x24) = DAT_80114ae4[*(unsigned short *)DAT_8009c960].ptrs[a];
+        *(void **)(n + 0x24) = DAT_80114ae4[DAT_8009c960[0]].ptrs[a];
         FUN_8001fe6c(n);
         n[0xd] = 0;
         n[0xa] = 2;
