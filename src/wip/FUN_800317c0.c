@@ -1,5 +1,5 @@
 // FUNC 800317c0 6188 MAIN0
-/* wip (first draft by b0): ncheck score ~1600 but only 1555 vs 1547 insns; remaining: per-case scheduling/regs, clamp recompute in case 3/5, case 7/8 tails. */
+/* wip by b0: ncheck score ~1400, 1556 vs 1547 insns. Structure per case is right; left: register/scheduling diffs (velX store vs next-call arg loads from pt on the stack, clamp recompute "0x60 - b00*16" in case 3/5, case 5 waa reload, case 6 branch layout). Key fixes so far: X = DAT_800a6038 struct (game derives &X from field addresses), separate m index var in IDX macro, D600..D604 as arrays, PL->b00 goto layout. */
 #include "TOBJ.H"
 typedef struct {
     unsigned char b00, b01, p02[4], b06, b07, b08;
@@ -18,7 +18,7 @@ extern TObj DAT_800a6038;
 extern TObj *DAT_8009f0ec;
 extern TObj *DAT_800a611c;
 extern TObj *DAT_8009d2e8;
-extern short DAT_8009d600, DAT_8009d602, DAT_8009d604;
+extern short DAT_8009d600[], DAT_8009d602[], DAT_8009d604[];
 extern unsigned char DAT_8009d2b2, DAT_8009c93f;
 extern unsigned short DAT_8009d670;
 extern unsigned short DAT_1f8003c8, DAT_1f800282, DAT_1f8001f8;
@@ -63,6 +63,7 @@ void FUN_800317c0(TObj *o)
     P pt;
     char pad[12];
     int k;
+    int m;
     short *e;
     short *q;
     short t;
@@ -80,7 +81,7 @@ void FUN_800317c0(TObj *o)
         o->waa = t;
         B338(0xc) = 0;
         DAT_8009c330->w22 = 0;
-        DAT_8009d602 = 0;
+        DAT_8009d602[0] = 0;
         DAT_8009c338[0x18] = 1;
         DAT_8009c338[0x19] = 0;
         DAT_8009c338[0x1a] = 0;
@@ -90,12 +91,12 @@ void FUN_800317c0(TObj *o)
             o->d94 = (int)DAT_8009f0ec;
             DAT_8009f0ec->active = 2;
         }
-        IDX(o, k);
+        IDX(o, m);
         if (o->animFrame & 1)
-            pt.x = 0xa0 - DAT_8007a04c[(short)k];
+            pt.x = 0xa0 - DAT_8007a04c[(short)m];
         else
-            pt.x = DAT_8007a04c[(short)k] - 0x20;
-        pt.y = DAT_8007a04e[(short)k];
+            pt.x = DAT_8007a04c[(short)m] - 0x20;
+        pt.y = DAT_8007a04e[(short)m];
         if (o->animFrame >= 6) {
             k = X.h->p.whole + MulCos((unsigned char)pt.x, pt.y);
             o->velX = (o->animFrame & 1) ? k - 4 : k + 4;
@@ -136,12 +137,12 @@ void FUN_800317c0(TObj *o)
         break;
     case 1:
         AnimAdvance(&X);
-        IDX(o, k);
+        IDX(o, m);
         if (o->animFrame & 1)
-            pt.x = 0xa0 - DAT_8007a04c[(short)k];
+            pt.x = 0xa0 - DAT_8007a04c[(short)m];
         else
-            pt.x = DAT_8007a04c[(short)k] - 0x20;
-        pt.y = DAT_8007a04e[(short)k];
+            pt.x = DAT_8007a04c[(short)m] - 0x20;
+        pt.y = DAT_8007a04e[(short)m];
         if (o->animFrame >= 6) {
             k = X.h->p.whole + MulCos((unsigned char)pt.x, pt.y);
             o->velX = (o->animFrame & 1) ? k - 4 : k + 4;
@@ -283,12 +284,15 @@ void FUN_800317c0(TObj *o)
             break;
         o->waa = DAT_8007a074[AF3(o)] + 0x80;
         if (o->animFrame & 1) {
-            o->waa = (o->waa + 0x40) & 0xff;
-            o->velX = X.h->p.whole + 0x10;
+            t = X.h->p.whole;
+            o->waa = (o->waa + 0x40U) & 0xff;
+            t += 0x10;
         } else {
-            o->waa = (o->waa - 0x40) & 0xff;
-            o->velX = X.h->p.whole - 0x10;
+            t = X.h->p.whole;
+            o->waa = (o->waa - 0x40U) & 0xff;
+            t -= 0x10;
         }
+        o->velX = t;
         o->velY = X.y.p.whole - 0x10;
         o->h->p.whole = o->velX + MulCos(o->waa, 0xc);
         o->y.p.whole = o->velY + MulNegSinScaled(o->waa, 0xc);
@@ -354,33 +358,33 @@ void FUN_800317c0(TObj *o)
             SfxPlay(3);
         }
         AnimJump(&X, DAT_8009c330->w22 >> 2 & 3);
-        DAT_8009d600 = 10;
-        DAT_8009d602 = 2;
         k = AF3(o);
-        DAT_8009d604 = DAT_8007a070[k];
+        DAT_8009d600[0] = 10;
+        DAT_8009d602[0] = 2;
+        DAT_8009d604[0] = DAT_8007a070[k];
         o->waa += DAT_8007a072[k];
         if (o->waa >= 0x100)
             o->waa -= 0x100;
         if (o->waa < 0)
             o->waa += 0x100;
-        IDX(o, k);
+        IDX(o, m);
         if (o->animFrame & 1)
-            pt.x = 0x80 - DAT_8007a04c[(short)k];
+            pt.x = 0x80 - DAT_8007a04c[(short)m];
         else
-            pt.x = DAT_8007a04c[(short)k];
-        pt.y = DAT_8007a04e[(short)k];
+            pt.x = DAT_8007a04c[(short)m];
+        pt.y = DAT_8007a04e[(short)m];
         o->velX = X.h->p.whole + MulCos((unsigned char)pt.x, pt.y);
         o->velY = X.y.p.whole + MulNegSinScaled((unsigned char)pt.x, pt.y);
-        FUN_80031588(&DAT_8009d600, o->waa, &pt.x, &pt.y);
+        FUN_80031588(DAT_8009d600, o->waa, &pt.x, &pt.y);
         o->h->p.whole = o->velX + pt.x;
         o->y.p.whole = o->velY + pt.y;
-        if (BTN() && DAT_8009c93f == 0) {
-            DAT_8009c330->w22++;
-        } else {
+        if (!(BTN() && DAT_8009c93f == 0)) {
             X.b9d = 1;
             DAT_8009c330->b00 = 2;
             DAT_8009c330->w22 = 0;
             o->state = 0;
+        } else {
+            DAT_8009c330->w22++;
         }
         if (DAT_8009c330->w22 < 0x3d)
             break;
@@ -396,25 +400,26 @@ void FUN_800317c0(TObj *o)
             SfxPlay2(3, 6);
         }
         AnimJump(&X, DAT_8009c330->w22 / 3 & 3);
-        o->animFrame = X.animFrame;
-        DAT_8009d600 = 0x10;
-        DAT_8009d602 = 4;
-        k = AF3(o);
-        DAT_8009d604 = DAT_8007a070[k];
+        u = X.animFrame;
+        o->animFrame = u;
+        k = (short)(u * 3);
+        DAT_8009d600[0] = 0x10;
+        DAT_8009d602[0] = 4;
+        DAT_8009d604[0] = DAT_8007a070[k];
         o->waa += DAT_8007a072[k];
         if (o->waa >= 0x100)
             o->waa -= 0x100;
         if (o->waa < 0)
             o->waa += 0x100;
-        IDX(o, k);
+        IDX(o, m);
         if (o->animFrame & 1)
-            pt.x = 0x80 - DAT_8007a04c[(short)k];
+            pt.x = 0x80 - DAT_8007a04c[(short)m];
         else
-            pt.x = DAT_8007a04c[(short)k];
-        pt.y = DAT_8007a04e[(short)k];
+            pt.x = DAT_8007a04c[(short)m];
+        pt.y = DAT_8007a04e[(short)m];
         o->velX = X.h->p.whole + MulCos((unsigned char)pt.x, pt.y);
         o->velY = X.y.p.whole + MulNegSinScaled((unsigned char)pt.x, pt.y);
-        FUN_80031588(&DAT_8009d600, o->waa, &pt.x, &pt.y);
+        FUN_80031588(DAT_8009d600, o->waa, &pt.x, &pt.y);
         o->h->p.whole = o->velX + pt.x;
         o->y.p.whole = o->velY + pt.y;
         if (!(BTN() && DAT_8009c93f == 0)) {
