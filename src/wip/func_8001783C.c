@@ -1,14 +1,17 @@
 // FUNC 8001783c 776 MAIN0
-/* score 20 (ncheck masks symbol offsets, so the order of different-symbol stores is invisible to the score).
-   b22: scratchpad stores as ((struct{char p[N]; T v;}*)D_1F8000C0)->v (26 -> 20 after hill-climb); else-branch order fixed (D_8009D2A6 store written in both branches).
-   Observation: declaring all stored globals volatile (loads plain) and writing stores in exact game order reproduces the game's store sequence;
-   only the li hoisting differs (game hoists li 0xff into v1, li 3, li 0x691 and the F3DC/1B3 loads several stores earlier). Not solved. */
+/* full-address score 26 (old struct-cast version: ncheck 20 but 48 once symbol offsets are compared; ncheck --score masks
+   relocations so it cannot see store targets). b29: plain scalar externs, stores hill-climbed by full-address score.
+   Model: in the game the li constants (3, 0xff, 0x691) and the F3DC/1B3 loads are hoisted as early as v0/v1 allow while
+   the stores stay in near-source order; making every stored global volatile in exact game order gives 24 (li not hoisted).
+   Tried: single volatile toggles, move/swap hill-climb (stuck at 26), -fno-schedule-insns{,2} (worse). */
 extern unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
 extern unsigned short D_8009F3DC;
 extern unsigned char DAT_1f8001b3;
 extern unsigned char DAT_1f8001ab;
+extern short D_8009D2A4;
+extern unsigned short D_8009D2A6;
 extern short DAT_1f8000ea;
 extern short DAT_1f8000ee;
 extern short DAT_1f8000f2;
@@ -52,7 +55,6 @@ extern unsigned char D_8009D1AE;
 extern unsigned char D_8009D1AF;
 extern unsigned char D_8009D1B0;
 extern unsigned char D_8009D1B1;
-extern short D_8009D2A4;
 extern unsigned char D_8009D0BF;
 extern unsigned char D_8009D0C5;
 extern unsigned char D_8009D0C6;
@@ -67,7 +69,6 @@ extern unsigned char D_8009D0A9;
 extern unsigned char D_8009D0AA;
 extern unsigned char D_8009D0C8;
 extern unsigned char D_8009D0B8;
-extern unsigned short D_8009D2A6;
 extern void *memset(void *, int, int);
 extern void FUN_80021f5c(void *);
 
@@ -76,38 +77,38 @@ void func_8001783C(void)
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
     FUN_80021f5c(D_1F8000C0);
-    (((struct{char p[42]; short v;} *)D_1F8000C0)->v) = -544;
-    (((struct{char p[46]; short v;} *)D_1F8000C0)->v) = 160;
-    (((struct{char p[50]; short v;} *)D_1F8000C0)->v) = -128;
-    (((struct{char p[264]; short v;} *)D_1F8000C0)->v) = 0;
-    (((struct{char p[320]; int v;} *)D_1F8000C0)->v) = 69;
-    (((struct{char p[787]; unsigned char v;} *)D_1F8000C0)->v) = 255;
-    D_8009D090 = 255;
-    *(unsigned short *)D_8009C960 = 0;
-    D_8009F838 = 0;
-    (((struct{char p[54]; short v;} *)D_1F8000C0)->v) = 0;
-    (((struct{char p[785]; unsigned char v;} *)D_1F8000C0)->v) = 0;
-    (((struct{char p[38]; short v;} *)D_1F8000C0)->v) = 0;
+    DAT_1f8000ea = -544;
+    DAT_1f8000ee = 160;
+    DAT_1f8000f2 = -128;
+    DAT_1f800200 = 69;
+    DAT_1f8000e2 = 0;
+    DAT_1f8000e6 = 0;
+    DAT_1f8000f6 = 0;
+    DAT_1f8003d2 = 255;
     D_8009CFD4 = 1681;
-    D_8009C96C = 0;
-    (((struct{char p[782]; unsigned char v;} *)D_1F8000C0)->v) = 0;
-    D_8009C962 = 0;
-    (((struct{char p[34]; short v;} *)D_1F8000C0)->v) = 0;
-    D_8009CDA3 = 0;
-    D_8009CFD2 = 1593;
-    D_8009C980 = 3;
-    D_8009CDA4 = 1;
-    D_8009C972 = 9;
-    (((struct{char p[786]; unsigned char v;} *)D_1F8000C0)->v) = 255;
-    D_8009C970 = 4;
-    D_8009CEAF = 1;
-    D_8009C973 = 1;
+    DAT_1f8003d3 = 255;
+    D_8009C960[0] = 0;
     D_8009C977 = 255;
-    D_8009CF1C = D_8009F3DC;
+    D_8009D090 = 255;
+    D_8009C980 = 3;
+    D_8009C973 = 1;
+    D_8009C972 = 9;
     D_8009C971 = 4;
+    D_8009C970 = 4;
     D_8009CFD0 = 1498;
-    if ((((struct{char p[243]; unsigned char v;} *)D_1F8000C0)->v) == 0) {
-        if ((((struct{char p[235]; unsigned char v;} *)D_1F8000C0)->v) != 0) {
+    D_8009CFD2 = 1593;
+    DAT_1f8003ce = 0;
+    DAT_1f8001c8 = 0;
+    DAT_1f8003d1 = 0;
+    D_8009F838 = 0;
+    D_8009C962 = 0;
+    D_8009CDA3 = 0;
+    D_8009C96C = 0;
+    D_8009CEAF = 1;
+    D_8009CDA4 = 1;
+    D_8009CF1C = D_8009F3DC;
+    if (DAT_1f8001b3 == 0) {
+        if (DAT_1f8001ab != 0) {
             D_8009D1A4 = 27;
             D_8009D1A5 = 33;
             D_8009D1A6 = 34;
@@ -139,13 +140,12 @@ void func_8001783C(void)
             D_8009D0B8 = 1;
             D_8009D2A6 = 0x8000;
         } else {
-            D_8009D0BF = 1;
-            D_8009D0C4 = 1;
             D_8009D1A4 = 27;
             D_8009D1A5 = 32;
             D_8009D2A4 = 2;
+            D_8009D0BF = 1;
+            D_8009D0C4 = 1;
             D_8009D2A6 = 0x8000;
         }
     }
 }
-
