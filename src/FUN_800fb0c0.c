@@ -1,6 +1,7 @@
 // FUNC 800fb0c0 448 X000
+// MATCHING 800fb0c0 448
 typedef struct P { char pad0[0xa]; unsigned char b0a; char pad1[0x20 - 0xb]; unsigned short w20, w22; } P;
-extern unsigned short DAT_8009d670[];
+extern volatile unsigned short DAT_8009d670[];
 extern P *DAT_8009c330;
 extern int FUN_8003facc(char *);
 #define I32(p, o) (*(int *)((p) + (o)))
@@ -9,7 +10,7 @@ extern int FUN_8003facc(char *);
 void FUN_800fb0c0(char *o)
 {
     P *q;
-    short t;
+    int t;
 #define pad DAT_8009d670
     if (!(*pad & 0x10))
         DAT_8009c330->w20 = 0;
