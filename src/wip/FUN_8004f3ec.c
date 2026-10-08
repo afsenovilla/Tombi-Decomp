@@ -10,12 +10,15 @@ extern char LAB_8004eb08[];
 
 void FUN_8004f3ec(unsigned a)
 {
-    if (DAT_1f8003d2 != a + 1) {
-        DAT_1f8003d2 = a + 1;
-        FUN_8004f538(PTR_DAT_8007c5fc[a]);
+    unsigned t = a + 1;
+    if (DAT_1f8003d2 != t) {
+        { int v = PTR_DAT_8007c5fc[a]; DAT_1f8003d2 = t; FUN_8004f538(v); }
         DAT_1f8001ce = 0;
         ThreadCreate(2, LAB_8004eb08);
-        while (DAT_1f8001ce == 0 && DAT_801fd8e0 != 0)
-            ThreadWaitFrames(1);
+        if (DAT_1f8001ce == 0)
+            while (DAT_801fd8e0 != 0) {
+                ThreadWaitFrames(1);
+                if (DAT_1f8001ce != 0) break;
+            }
     }
 }

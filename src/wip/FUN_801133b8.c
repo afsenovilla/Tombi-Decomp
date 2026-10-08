@@ -1,0 +1,26 @@
+// FUNC 801133b8 204 X000
+#include "TOBJ.H"
+extern int DAT_8009c960;
+extern unsigned short DAT_8009c960_u;
+extern int *DAT_80115a08[];
+extern int *DAT_80115948[];
+extern void FUN_800202b4();
+extern void FUN_8001fe6c(TObj *);
+extern void FUN_8001e560(int, int);
+
+void FUN_801133b8(TObj *o)
+{
+    int *p;
+    FUN_800202b4();
+    if (o->step == 0) {
+        o->step = o->step + 1;
+        o->wac = 1;
+        if (DAT_8009c960 == 0x30009)
+            p = DAT_80115a08[o->b0c & 0x7f];
+        else
+            p = DAT_80115948[DAT_8009c960_u * 4 + (o->b0c & 0x7f)];
+        o->anim = (void *)p[1];
+        FUN_8001fe6c(o);
+        FUN_8001e560(0x18, 8);
+    }
+}
