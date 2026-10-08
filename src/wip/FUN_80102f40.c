@@ -1,9 +1,9 @@
 // FUNC 80102f40 700 X000
-/* score 46 (b30, was 50): h block rewritten with a shared h pointer and t (P->h x) read once, compares on h->p.whole
-   (no buf pad needed, frame 0x40 comes out). Left: (1) P/type regs swapped at the top (game P=v1,type=a0; global-alloc
-   priority: type 3 refs/5 insns beats P 3 refs/9; local p, inline, switch, temps all unchanged); (2) t read as
-   lhu+lh where game does lh + move a0 (and hw copy in a2). Tried: int/short t,hw,x/y temps, assignments in the
-   compare, direct field forms (copy appears for hw but snap then reloads). */
+/* score 38 (b44, was 50): P/type swap at the top fixed by `do { P->d8c = 0; } while (0)` (loop note adds one weighted
+   ref to P: global-alloc priority 2*4/9 > type 1*3/5). Left: t read as lhu+lh, game does one lh + `move a0` copy (and hw
+   copy in a2); also frame 0x40 comes from orphan (use) pseudos of combine (short vars), keep them. Tried: int temps
+   a2 = P->h->p.whole; t = a2; with compares on a2 (gives both copies, swapped regs, frame 48), assignment-in-compare,
+   (int)/(short) casts, h/hw/t types. combine's PARALLEL split (lh + lowpart copy) needs a dest without nonzero_bits. */
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
@@ -27,7 +27,7 @@ void FUN_80102f40(TObj *o)
     case 1:
         o->timer++;
         if (DAT_8009d2e8->type == 3 || DAT_8009d2e8->type == 0x1f)
-            DAT_8009d2e8->d8c = 0;
+            do { DAT_8009d2e8->d8c = 0; } while (0);
         FUN_800ee680(o);
         flag = 0;
         if (o->y.p.whole + DAT_8009d2e8->box2 >= DAT_8009d2e8->y.p.whole) {
