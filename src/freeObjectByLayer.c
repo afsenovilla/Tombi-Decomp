@@ -19,9 +19,9 @@
 
 
 
-const char BUILD_DATE[] asm("D_80010000") = "98/3/22";
+const char BUILD_DATE[] asm("D_80010000") = "98/8/26";
 
-const char BUILD_TIME[] asm("D_80010008") = "21:11";
+const char BUILD_TIME[] asm("D_80010008") = "14:10";
 
 void freeObjectByLayer(s32* self)
 {
