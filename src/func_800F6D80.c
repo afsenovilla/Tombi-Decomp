@@ -1,4 +1,5 @@
 // FUNC 800f6d80 168 X000
+// MATCHING 800f6d80 168
 #include "TOBJ.H"
 extern unsigned char *D_8009C330;
 extern unsigned char *D_8009F0EC;
@@ -6,8 +7,7 @@ extern unsigned char D_801152E8[];
 void func_800F6D80(TObj *o)
 {
     int v;
-    Fix16 *h;
-    short y;
+    int y;
     int c;
     D_8009C330[9] = 0;
     v = 0x10;
@@ -28,13 +28,14 @@ void func_800F6D80(TObj *o)
     o->d88 = v;
     *(volatile int *)&o->d8c = D_801152E8[o->wb0];
     c = o->animFrame & 1;
-    h = o->h;
-    y = h->p.whole;
+    /* the parameter register is reused for the hitbox pointer */
+    o = (TObj *)((volatile TObj *)o)->h;
+    y = ((Fix16 *)o)->p.whole;
     if (c) {
         y += 14;
     } else {
         y -= 14;
     }
-    h->p.whole = y;
+    ((Fix16 *)o)->p.whole = y;
     D_8009F0EC[0x69] = 0;
 }
