@@ -1,20 +1,31 @@
 // FUNC 80056e4c 860 MAIN0
-// wip score 40 (was 59): xy read volatile fixes the load order/size; left: la a0 for the volatile xy (game lui s1 direct), regs in uv block and v0/v1 at +0x2dc.
+// wip score 18 (was 59): short u + volatile xy read + s/xy/hh order. Left: volatile xy gives la a0 (game lui s1 direct), move a0,s2 placement, v0/v1 at +0x2dc.
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
-    unsigned char r0, g0, b0, code;
-    unsigned short x0, y0;
-    unsigned char u0, v0;
+    unsigned char r0;
+    unsigned char g0;
+    unsigned char b0;
+    unsigned char code;
+    unsigned short x0;
+    unsigned short y0;
+    unsigned char u0;
+    unsigned char v0;
     unsigned short clut;
-    unsigned short x1, y1;
-    unsigned char u1, v1;
+    unsigned short x1;
+    unsigned short y1;
+    unsigned char u1;
+    unsigned char v1;
     unsigned short tpage;
-    unsigned short x2, y2;
-    unsigned char u2, v2;
+    unsigned short x2;
+    unsigned short y2;
+    unsigned char u2;
+    unsigned char v2;
     unsigned short pad2;
-    unsigned short x3, y3;
-    unsigned char u3, v3;
+    unsigned short x3;
+    unsigned short y3;
+    unsigned char u3;
+    unsigned char v3;
     unsigned short pad3;
 } PolyFT4;
 
@@ -70,9 +81,14 @@ void func_80056E4C(TObj *o)
 {
     PolyFT4 *p;
     unsigned char *s;
-    int xy, t, z;
+    int xy;
+    int t;
+    int z;
     short *hh;
-    unsigned char w, h, u, v;
+    unsigned char w;
+    unsigned char h;
+    short u;
+    unsigned char v;
 
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
@@ -84,9 +100,9 @@ void func_80056E4C(TObj *o)
     SetTransMatrix(D_1F8000C0b);
     if (project())
         return;
-    hh = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
-    xy = *(volatile long *)&D_1F800070;
     s = (unsigned char *)*(volatile int *)&o->d3c;
+    xy = *(volatile long *)&D_1F800070;
+    hh = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
     p = DAT_1f800164;
     s += hh[1];
     p->code = 0x2c;
