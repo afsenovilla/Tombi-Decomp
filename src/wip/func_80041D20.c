@@ -1,4 +1,5 @@
 // FUNC 80041d20 412 MAIN0
+// r11: score 20; left: store of DAT_1f800278(q+8) and ws sign-extension should precede the q[3] load; ws/d regs a1/a2 swapped.
 #include "TOBJ.H"
 extern short *func_8003F200(int, int);
 extern short FUN_800205d8(int);
@@ -34,9 +35,8 @@ hit:
     w = *DAT_1f800278++;
     DAT_1f800278++;
     ws = w;
-    k = *(volatile unsigned short *)&q[3] >> 4;
+    k = (q[3] >> 4) & 0xf;
     if (ws == 0) goto next;
-    k &= 0xf;
     d = b - x - w;
     if (((d - 1) & 0xffff) > -ws) {
         if (d << 16 > 0) return 0;
