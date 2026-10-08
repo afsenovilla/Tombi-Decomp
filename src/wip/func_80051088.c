@@ -1,9 +1,10 @@
 // FUNC 80051088 4360 MAIN0
-/* score 938 (first draft, structure complete; frame matches 120 once otadd is an inline taking
-   DAT_1f8001e0 + 0x10, a macro version adds 8 B of stack per use).
-   Left: register allocation (game: s0=idx, s1/s2 temps, s3=p, s4=o, s5=x, s6=y, s7=a0, fp=a1),
-   tbl[] reads must be lbu + sll/sra (ours lb) so t1 gets an explicit short conversion in each branch,
-   both D_800A60E8 branches kept separate with their own calls, rotating-quad block scheduling. */
+/* score 12: only two register choices differ: k (switch selector, short) gets v0 instead of a0
+   (sra a0,v0,0x18 / lhu a0,D_800A6066 / sll v0,a0,16), and the u0 product mflo lands in t8 instead of a0
+   (global pseudo, pref LO_REG, conflicts only v0 v1 a1 yet global alloc picks $24). Tried: k as
+   int/ushort/schar/char, ternary forms, reusing k in the inner block; u0 expression forms (operand order,
+   +0x80, casts, %4). Key fixes from b49: angle inlines quadA/quadB with short a0/a1 params (gives the
+   move copies), a0 = t & 0xff with t from if/else on a hoisted g, clut stored raw at the end of the uv block. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -135,6 +136,41 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, short d, unsigned 
         DAT_1f800164 = DAT_1f800164 + 1; \
 }
 
+static __inline__ void quadA(FT4 *p, short x, short y, short a0, short a1)
+{
+int m, n2, m2, n;
+    D_800801EC = -(D_800801EC + D_800801E8);
+    m = -D_800801EC;
+    n = -D_800801EE;
+    p->x1 = x + ((m * COS(a1)) >> 12) + ((n * COS((a1 + 0xc0) & 0xff)) >> 12);
+    p->y1 = y + ((m * SIN(a1)) >> 12) + ((n * SIN((a1 + 0xc0) & 0xff)) >> 12);
+    m2 = D_800801EC + D_800801E8;
+    p->x0 = x + ((m2 * COS(a0)) >> 12) + ((n * COS((a0 + 0x40) & 0xff)) >> 12);
+    p->y0 = y + ((m2 * SIN(a0)) >> 12) + ((n * SIN((a0 + 0x40) & 0xff)) >> 12);
+    n2 = D_800801EE + D_800801EA;
+    p->x3 = x + ((m * COS(a1)) >> 12) + ((n2 * COS((a1 + 0x40) & 0xff)) >> 12);
+    p->y3 = y + ((m * SIN(a1)) >> 12) + ((n2 * SIN((a1 + 0x40) & 0xff)) >> 12);
+    p->x2 = x + ((m2 * COS(a0)) >> 12) + ((n2 * COS((a0 + 0xc0) & 0xff)) >> 12);
+    p->y2 = y + ((m2 * SIN(a0)) >> 12) + ((n2 * SIN((a0 + 0xc0) & 0xff)) >> 12);
+}
+
+static __inline__ void quadB(FT4 *p, short x, short y, short a0, short a1)
+{
+int m, n2, m2, n;
+    m = -D_800801EC;
+    n = -D_800801EE;
+    p->x0 = x + ((m * COS(a1)) >> 12) + ((n * COS((a1 + 0xc0) & 0xff)) >> 12);
+    p->y0 = y + ((m * SIN(a1)) >> 12) + ((n * SIN((a1 + 0xc0) & 0xff)) >> 12);
+    m2 = D_800801EC + D_800801E8;
+    p->x1 = x + ((m2 * COS(a0)) >> 12) + ((n * COS((a0 + 0x40) & 0xff)) >> 12);
+    p->y1 = y + ((m2 * SIN(a0)) >> 12) + ((n * SIN((a0 + 0x40) & 0xff)) >> 12);
+    n2 = D_800801EE + D_800801EA;
+    p->x2 = x + ((m * COS(a1)) >> 12) + ((n2 * COS((a1 + 0x40) & 0xff)) >> 12);
+    p->y2 = y + ((m * SIN(a1)) >> 12) + ((n2 * SIN((a1 + 0x40) & 0xff)) >> 12);
+    p->x3 = x + ((m2 * COS(a0)) >> 12) + ((n2 * COS((a0 + 0xc0) & 0xff)) >> 12);
+    p->y3 = y + ((m2 * SIN(a0)) >> 12) + ((n2 * SIN((a0 + 0xc0) & 0xff)) >> 12);
+}
+
 void func_80051088(TObj *o)
 {
     P s;
@@ -227,22 +263,29 @@ void func_80051088(TObj *o)
             c = MulCosDup((D_800A60C4 + 0x40) & 0xff, 0x18);
             sn = MulNegSin((D_800A60C4 + 0x40) & 0xff, 0x18);
         } else {
-            int t0 = (signed char)tbl[idx];
-            int t1i = (signed char)tbl[idx + 1];
+            short t0 = (signed char)tbl[idx];
+            short t1 = (signed char)tbl[idx + 1];
+            short k;
+            short an;
             if (o->animFrame & 1) {
-                if (D_800A60E8 > 0) {
-                    ang = (D_800A60C4 + 0x180 - t0) & 0xff;
-                    c = MulCosDup(ang, t1i);
-                    sn = MulNegSin(ang, t1i);
+                if (D_800A60E8 <= 0) {
+                    k = t1;
+                    an = D_800A60C4 + 0x180;
+                    an -= t0;
+                    c = MulCosDup(an & 0xff, k);
+                    sn = MulNegSin(an & 0xff, k);
                 } else {
-                    ang = (D_800A60C4 + 0x180 - t0) & 0xff;
-                    c = MulCosDup(ang, t1i);
-                    sn = MulNegSin(ang, t1i);
+                    k = t1;
+                    an = D_800A60C4 + 0x180;
+                    an -= t0;
+                    c = MulCosDup(an & 0xff, k);
+                    sn = MulNegSin(an & 0xff, k);
                 }
             } else {
-                ang = (t0 + D_800A60C4) & 0xff;
-                c = MulCosDup(ang, t1i);
-                sn = MulNegSin(ang, t1i);
+                k = t1;
+                an = t0 + D_800A60C4;
+                c = MulCosDup(an & 0xff, k);
+                sn = MulNegSin(an & 0xff, k);
             }
         }
         t.x = D_8009C330->w18 + c;
@@ -267,54 +310,33 @@ void func_80051088(TObj *o)
     p = DAT_1f800164;
     p->code = 0x2d;
     SetSemiTrans(p, o->b0d >> 7);
+    {
+    unsigned short cl;
     p->tpage = D_8009C338->w4;
-    p->v0 = 0;
+    cl = D_8009C338->w6;
     p->u0 = (D_1F8001F8 & 3) * D_800801E8 - 0x80;
+    p->v0 = 0;
     p->u1 = p->u0 + (unsigned char)D_800801E8 - 1;
     p->v1 = p->v0;
     p->u2 = p->u0;
     p->v2 = p->v0 + (unsigned char)D_800801EA - 1;
-    p->clut = D_8009C338->w6;
     p->u3 = p->u1;
     p->v3 = p->v2;
+    *(unsigned short *)((char *)p + 14) = cl;
+    }
     if (D_800A6100 && *D_800A605C >= 0xa9) {
+        int t, g = D_800A60C4;
         if (o->animFrame & 1)
-            a0 = D_800A60C4 + 0xc0;
+            t = g + 0xc0;
         else
-            a0 = D_800A60C4 + 0x40;
-        a0 &= 0xff;
+            t = g + 0x40;
+        a0 = t & 0xff;
         a1 = (a0 + 0x80) & 0xff;
     }
-    if (o->animFrame & 1) {
-        int m, n2, m2, n;
-        D_800801EC = -(D_800801EC + D_800801E8);
-        m = -D_800801EC;
-        n = -D_800801EE;
-        p->x1 = x + ((m * COS(a1)) >> 12) + ((n * COS((a1 + 0xc0) & 0xff)) >> 12);
-        p->y1 = y + ((m * SIN(a1)) >> 12) + ((n * SIN((a1 + 0xc0) & 0xff)) >> 12);
-        m2 = D_800801EC + D_800801E8;
-        p->x0 = x + ((m2 * COS(a0)) >> 12) + ((n * COS((a0 + 0x40) & 0xff)) >> 12);
-        p->y0 = y + ((m2 * SIN(a0)) >> 12) + ((n * SIN((a0 + 0x40) & 0xff)) >> 12);
-        n2 = D_800801EE + D_800801EA;
-        p->x3 = x + ((m * COS(a1)) >> 12) + ((n2 * COS((a1 + 0x40) & 0xff)) >> 12);
-        p->y3 = y + ((m * SIN(a1)) >> 12) + ((n2 * SIN((a1 + 0x40) & 0xff)) >> 12);
-        p->x2 = x + ((m2 * COS(a0)) >> 12) + ((n2 * COS((a0 + 0xc0) & 0xff)) >> 12);
-        p->y2 = y + ((m2 * SIN(a0)) >> 12) + ((n2 * SIN((a0 + 0xc0) & 0xff)) >> 12);
-    } else {
-        int m, n2, m2, n;
-        m = -D_800801EC;
-        n = -D_800801EE;
-        p->x0 = x + ((m * COS(a1)) >> 12) + ((n * COS((a1 + 0xc0) & 0xff)) >> 12);
-        p->y0 = y + ((m * SIN(a1)) >> 12) + ((n * SIN((a1 + 0xc0) & 0xff)) >> 12);
-        m2 = D_800801EC + D_800801E8;
-        p->x1 = x + ((m2 * COS(a0)) >> 12) + ((n * COS((a0 + 0x40) & 0xff)) >> 12);
-        p->y1 = y + ((m2 * SIN(a0)) >> 12) + ((n * SIN((a0 + 0x40) & 0xff)) >> 12);
-        n2 = D_800801EE + D_800801EA;
-        p->x2 = x + ((m * COS(a1)) >> 12) + ((n2 * COS((a1 + 0x40) & 0xff)) >> 12);
-        p->y2 = y + ((m * SIN(a1)) >> 12) + ((n2 * SIN((a1 + 0x40) & 0xff)) >> 12);
-        p->x3 = x + ((m2 * COS(a0)) >> 12) + ((n2 * COS((a0 + 0xc0) & 0xff)) >> 12);
-        p->y3 = y + ((m2 * SIN(a0)) >> 12) + ((n2 * SIN((a0 + 0xc0) & 0xff)) >> 12);
-    }
+    if (o->animFrame & 1)
+        quadA(p, x, y, a0, a1);
+    else
+        quadB(p, x, y, a0, a1);
     if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, (signed char)o->b0f - 4, 0x9000000) == 0)
         DAT_1f800164 = DAT_1f800164 + 1;
 }
