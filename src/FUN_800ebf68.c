@@ -1,5 +1,5 @@
 // FUNC 800ebf68 1040 X000
-/* score 52 (ncheck): left: case 2-4 d=q->waa-w74 lands in a0 not s1; game sign-extends ang (sll/sra s1 after fdac call) - tried int/ushort/ternary forms; case 7/8 statement order (DAT_800a6047 as [0] gives 52, original order visible/w76/b0f gives 66 with v0/v1 swap of 6047 vs b0c load). Case 7/8 body = full stores in each branch (cross-jumped). */
+// MATCHING 800ebf68 1040
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 DAT_80114c24[];
@@ -20,7 +20,6 @@ void FUN_800ebf68(TObj *o)
     TObj *q;
     short d;
     int r;
-    short ang;
     short c;
     int b;
     int v;
@@ -87,15 +86,11 @@ void FUN_800ebf68(TObj *o)
             if (o->b0c & 2) r = 4;
             o->velH = FUN_8001fe3c(a, r);
             o->velV = FUN_8001fe0c(a, r);
-            if (o->b0c & 1)
-                ang = o->w74 + 0x40;
-            else
-                ang = o->w74 + 0xc0;
-            ang &= 0xff;
+            a = (o->b0c & 1 ? o->w74 + 0x40 : o->w74 + 0xc0) & 0xff;
             r = FUN_8001fdac(o->velY, o->velX);
             o->velY = (o->velY + 0x10) & 0xff;
-            x = FUN_8001fe3c(ang, r);
-            v = FUN_8001fe0c(ang, r);
+            x = FUN_8001fe3c(a, r);
+            v = FUN_8001fe0c(a, r);
             o->h->p.whole = x + (q->h->p.whole + o->velH);
             o->y.p.whole = v + (q->y.p.whole + o->velV);
             o->d->p.whole = q->d->p.whole;
@@ -112,9 +107,9 @@ void FUN_800ebf68(TObj *o)
         case 7:
         case 8:
             c = (o->w76 + 0x10) & 0xff;
-            o->w76 = c;
-            o->b0f = DAT_800a6047 - 1;
             o->visible = DAT_800a6039;
+            o->b0f = DAT_800a6047 - 1;
+            o->w76 = c;
             if (o->b0c & 1) {
                 v = FUN_8001fddc(c, 8);
                 o->h->p.whole = q->h->p.whole + v;
