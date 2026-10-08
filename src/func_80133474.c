@@ -1,7 +1,8 @@
 // FUNC 80133474 3152 X000
 // MATCHING 80133474 3152
-/* Debt: AnimAdvance_ = second extern name for AnimAdvance (case 5/6), stops cross-jumping state 1 into
- * state 6. D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038. */
+/* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
+ * call;call;j blocks that cross-jumping merged).
+ * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038. */
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
@@ -31,7 +32,6 @@ extern char D_80077D30[], D_80077D3C[], D_80077D18[];
 extern int ObjCullRegister(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int AnimAdvance_(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern void ObjListPush_1F80021C(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -256,7 +256,11 @@ void func_80133474(TObj *o)
             case 1:
                 applyFrameVelocityX(o);
                 AnimAdvance(o);
-                goto L400c;
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->velY <= 0) break;
+                o->state++;
+                break;
             case 2:
                 applyFrameVelocityX(o);
                 AnimAdvance(o);
@@ -286,8 +290,12 @@ void func_80133474(TObj *o)
                 goto L4034;
             case 6:
                 applyFrameVelocityX(o);
-                AnimAdvance_(o);
-                goto L400c;
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->velY <= 0) break;
+                o->state++;
+                break;
             case 7:
                 applyFrameVelocityX(o);
                 AnimAdvance(o);
@@ -318,7 +326,6 @@ void func_80133474(TObj *o)
             L3ffc:
                 AnimAdvance(o);
                 applyFrameVelocityX(o);
-            L400c:
                 o->y.raw += o->velY << 8;
                 o->velY += 0x20;
                 if (o->velY <= 0) break;
