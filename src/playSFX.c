@@ -1,6 +1,7 @@
 // FUNC 8001e4f0 112 MAIN0
 // MATCHING 8001e4f0 112
 // Ported from psx_tomba (sound.c, playSFX); MIT licence of the original project.
+// Debt: register asm on id (upstream too). Without it slot (5 refs/10 insns) outranks id (3/11) for s0; tried id as param, copy after the call, separate mask temp, pointer store, return slot, u32 id (all 20).
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
