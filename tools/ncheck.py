@@ -87,6 +87,7 @@ def main():
             for k in range(0, max(len(a), len(b)), 4):
                 if a[k:k + 4] != b[k:k + 4]:
                     print("   +%04x ours=%s game=%s" % (k, a[k:k + 4].hex(), b[k:k + 4].hex()))
+    shutil.rmtree(inc, ignore_errors=True)
     if "--score" not in opts:
         print("%d match, %d failed" % (ok, bad))
     sys.exit(1 if bad else 0)

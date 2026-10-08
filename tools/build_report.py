@@ -103,6 +103,7 @@ def main():
                                    {"id": "main0", "name": "MAIN0.EXE"}, {"id": "x000", "name": "X000.BIN (AREA00)"}],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
+    shutil.rmtree(inc, ignore_errors=True)
     json.dump(cfg, open("objdiff.json", "w"), indent=1)
     print("units %d, target objects %d, base objects %d" % (len(units), nt, nb))
     subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
