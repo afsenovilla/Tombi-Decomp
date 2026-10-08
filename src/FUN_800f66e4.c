@@ -1,8 +1,9 @@
 // FUNC 800f66e4 216 X000
+// MATCHING 800f66e4 216
 #include "TOBJ.H"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x2c - 9]; short cur; unsigned short prev; } Cam;
 extern Cam *DAT_8009c330;
-extern void FUN_800efc04(TObj *, Cam *, int);
+extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 
 void FUN_800f66e4(TObj *o)
@@ -11,7 +12,7 @@ void FUN_800f66e4(TObj *o)
     p->cur = 4;
     if (p->prev != 4) {
         p->cur = 4;
-        FUN_800efc04(o, p, 4);
+        FUN_800efc04(o);
         FUN_8001fe94(o, 1);
         DAT_8009c330->prev = DAT_8009c330->cur;
     }

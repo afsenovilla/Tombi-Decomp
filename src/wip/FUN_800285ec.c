@@ -1,47 +1,50 @@
 // FUNC 800285ec 360 MAIN0
+typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
+extern unsigned short F2u;
+extern short F2;
+extern unsigned short DAT_1f80016e;
+extern short E[];
+extern short E2;
 
-void FUN_800285ec(int p)
+static __inline__ int calc(void)
 {
-    char pad[8];
-    int d, n;
-    int s;
-    short e;
-    unsigned short u;
-    unsigned short *q = (unsigned short *)0x1f8000e6;
-    unsigned short *r;
+    int t;
     if (DAT_800a60d6 == 3) {
-        u = *(unsigned short *)0x1f8000f2;
-        d = u - 0x14;
-        d = d - DAT_800a606c;
-    } else
-        d = *(unsigned short *)0x1f8000f2 - *(unsigned short *)0x1f80016e;
-    s = d;
-    n = (short)(s + *q);
+        t = F2u - 0x14;
+        return t - DAT_800a606c;
+    }
+    return F2u - DAT_1f80016e;
+}
+
+static __inline__ void adj(TObj *o, int s)
+{
+    short n;
+    n = s + E[0];
     if (n != -0x50) {
-        if (n < -0x4f) {
-            e = *q + 2;
-            *q = e;
-            if (s + e > -0x50)
-                *q = -s - 0x50;
-        } else {
-            u = *q - 2;
-            if (n > -0x34) {
-                e = *(unsigned short *)0x1f8000f2 - 2;
-                *(short *)0x1f8000f2 = *(short *)(p + 0x30);
-                u = *(unsigned short *)0x1f8000e6;
-                if (*(short *)0x1f8000f2 <= e) {
-                    s = s - 2;
-                    *(short *)0x1f8000f2 = e;
-                }
+        if (n > -0x50) {
+            if (n >= -0x33) {
+                F2 -= 2;
+                if (F2 < o->y) F2 = o->y;
+                else s -= 2;
+            } else {
+                E[0] -= 2;
             }
-            r = (unsigned short *)0x1f8000e6;
-            *q = u;
-            if ((short)s + *(short *)r < -0x50)
-                *r = -s - 0x50;
+            if ((short)s + E[0] < -0x50)
+                E[0] = -0x50 - s;
+        } else {
+            E[0] += 2;
+            if ((short)s + E[0] > -0x50)
+                E[0] = -0x50 - s;
         }
     }
-    if (*(short *)0x1f8000f2 + *(short *)0x1f8000e6 < *(short *)(p + 0x30))
-        *(short *)0x1f8000e6 = *(short *)(p + 0x30) - *(short *)0x1f8000f2;
+    if (F2 + E2 < o->y)
+        E2 = o->y - F2;
+}
+
+void FUN_800285ec(TObj *o)
+{
+    char pad;
+    adj(o, calc());
 }
