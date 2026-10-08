@@ -99,3 +99,12 @@ El juego emite `addiu sp` ANTES de `lui/lw` del primer acceso a global; nuestro 
 despues, con cualquier flag (-O1/-O3/-fno-schedule-*, etc.) y con simbolo o direccion absoluta.
 Es la causa de casi todos los wip a distancia 2-6. Hipotesis: el juego usa otra build de CC1PSX 2.7.2.SN.1
 (las de Psy-Q 4.0-4.4 difieren en el planificador). Pendiente: CC1PSX.EXE de otras versiones del SDK.
+
+## Aprendido (CC1PSX 4.3, tanda wip)
+- Quitar `-fno-delayed-branch`/`-g` de wip antiguos: con el CC1PSX 4.3 varios coinciden solos (FUN_80102a08).
+- Argumentos puntero consecutivos `(c, a+1, a+2, b)` donde el original hace `addiu a1,a0,4; addiu a2,a1,4`: incrementa el parametro (`a++; f(c, a, a+1, b)`), no uses variable `p` aparte (FUN_80024e58).
+- Un `lw` repetido del mismo campo (leer `o->d` antes y despues del store) se reproduce escribiendo `o->dur = o->d[n].v & ..; o->d += n;` en ese orden, sin temporales (AnimJump).
+- `x ? 2 : 1` guardado en un campo: escribe `if (c) *p = 2; else *p = 1;` (dos stores) para que gcc no comparta la constante (FUN_80019a08).
+- Orden de un `sll` respecto a `lui/addiu` global: asigna el puntero global antes de `n <<= 2;` y escribe `q + n + 4` (FUN_8003509c). `a + (b+0x10)` vs `(a+b)+0x10` cambia el orden de addiu/addu (FUN_80057368).
+- Parametros `char *` que se leen con `lb` deben ser `signed char *` (char es unsigned en este gcc: lbu).
+- Muchas entradas de los shards (m1/m2/m3) son fragmentos de Ghidra (switch con jump table cortado, `jr $ra` en medio): comprobar que el ultimo `jr $ra` y que no hay `jr $reg` antes de intentar.
