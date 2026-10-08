@@ -26,12 +26,16 @@ void FUN_8003be14(TObj *o)
         o->state = o->state + 1;
         break;
     case 1:
-        u = o->animFrame;
-        if (u & 2)
-            u = u & 1;
-        else
-            u = 1 - u;
-        FUN_8001fa88(o, u);
+        {
+            TObj *p = o;
+            int w;
+            u = o->animFrame;
+            if (u & 2)
+                w = u & 1;
+            else
+                w = (unsigned short)(1 - u);
+            FUN_8001fa88(p, w);
+        }
         s = o->velV + 0x40;
         o->velV = s;
         if (s > 0x400)

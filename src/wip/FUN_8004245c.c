@@ -4,15 +4,14 @@ extern unsigned short *DAT_1f800278;
 
 int FUN_8004245c(short a, int y, short b)
 {
-    int n;
-    char pad[8];
+    short n;
     unsigned short w, x0, h;
     int d;
     short *q;
     q = FUN_8003f200(a, b);
     DAT_1f800278 = (unsigned short *)(q + 1);
     n = *q;
-    while ((short)n != 0) {
+    while (n != 0) {
         w = *DAT_1f800278++;
         n--;
         if (w & 0x4000) {
