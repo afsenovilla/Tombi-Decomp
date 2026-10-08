@@ -1,5 +1,5 @@
 // FUNC 8012555c 664 X000
-// WIP score 40: dy assigned inside the y test (box3 sum < expr form); game evaluates the dy expression first and copies it to a1 after the adds; here box3 sum is evaluated first. Tried: (u16)expr > sum (58, right order but dy in t5), dy after test (47, extra move), int dy, e temp, e0/e1 locals. b25: whole body as static __inline__ f(o,p) in FUN_80043c74 style (98); greedy int/short/ushort per local (no gain); separate dy + full expr in test (58).
+// WIP score 20 (was 40): FUN_80043c74 sibling style (w first, e0/e1 locals, t=w, c copy) fixed all global regs. Left: game computes o->y-p->y once into v1, adds box2 sum into v0 and copies v1->a1 (dy) AFTER the add; here dy (int, u16 casts) is a separate subu into t8 (so sx lands in t9). Tried: dy short/int/u16 assigned before/inside/after the test, recompute vs dy in test, block temp q, operand orders (26-58).
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
@@ -8,7 +8,8 @@ void FUN_8004258c(TObj *o, int n);
 
 void func_8012555C(TObj *o, TObj *p)
 {
-    short dx, wx, px, sx, cx, dy;
+    short d, w, t, e0, e1, sx, c;
+    int dy;
 
     if (p->subtype == 0) {
         func_80043C74(o, p);
@@ -16,27 +17,29 @@ void func_8012555C(TObj *o, TObj *p)
     }
     if ((unsigned short)(o->d->p.whole - p->d->p.whole + 0x2d) >= 0x5b)
         return;
-    wx = p->box0 + o->box0;
-    px = wx;
-    dx = o->h->p.whole - p->h->p.whole;
-    if ((unsigned short)(dx + wx) > p->box1 + o->box1)
+    w = p->box0 + o->box0;
+    t = w;
+    d = o->h->p.whole - p->h->p.whole;
+    e0 = p->box1; e1 = o->box1;
+    if ((unsigned short)(d + w) > e0 + e1)
         return;
-    if (o->box3 + p->box3 < (unsigned short)((dy = o->y.p.whole - p->y.p.whole) + (p->box2 + o->box2)))
+    dy = (unsigned short)o->y.p.whole - (unsigned short)p->y.p.whole;
+    if ((unsigned short)(o->y.p.whole - p->y.p.whole + (p->box2 + o->box2)) > o->box3 + p->box3)
         return;
-    sx = dx;
-    cx = px;
-    if (dx < 0) {
-        dx = -dx;
-        px = -px;
+    sx = d;
+    c = t;
+    if ((d << 16) < 0) {
+        d = -d;
+        t = -t;
     } else {
-        px = (p->box1 - p->box0) + (o->box1 - o->box0);
-        cx = px;
+        t = (e0 - p->box0) + (e1 - o->box0);
+        c = t;
     }
-    if ((unsigned short)(cx - dx) < 5) {
-        o->h->p.whole = p->h->p.whole + px;
+    if ((unsigned short)(c - d) < 5) {
+        o->h->p.whole = p->h->p.whole + t;
         return;
     }
-    if (dy <= 0) {
+    if ((short)dy <= 0) {
         if (*(unsigned char *)&o->wac == 2) {
             short a = p->box2, b = p->y.p.whole, c = o->box2;
             o->y.p.frac = 0;
