@@ -1,5 +1,5 @@
 // FUNC 800491f0 820 MAIN0
-/* score 22: only v0/v1 swapped in the case-32 box test (game: d in v1, sum in v0). Outer loop must be goto (no loop.c hoisting). b25: `e->box0 + d` order gives the game's addu operand order (box first, sum tied to box) but then box/d swap v0/v1 (score 36); tried d types, separate h/y locals, box read into var, inline hit(), cast forms, reversed compare: all 22 or 36 */
+/* score 18: only regs in the case-32 box test. Game: o->h ptr v0, e->h ptr a0, o-val v1, e-val a0, box v0, d=v1, sum=box+d in v0 (o-ptr NOT tied to o-val). `d = o->h; d -= e->h;` 22->18. b31 tried: d/s types int/short/ushort, s=box; s+=d (right addu order, regs wrong, 38), temps for e-val, -(e-o), inline chk() variants (22-88), direct expr forms (36). Outer loop must be goto (no loop.c hoisting). */
 #include "TOBJ.H"
 
 extern short D_1F80019E;
@@ -65,9 +65,9 @@ outer:
             case 32:
                 if (o->type == 0x22 || o->type == 0x2c) {
                     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 45) > 90) break;
-                    d = o->h->p.whole - e->h->p.whole;
+                    d = o->h->p.whole; d -= e->h->p.whole;
                     if ((unsigned short)(d + e->box0) > e->box1) break;
-                    d = o->y.p.whole - e->y.p.whole;
+                    d = o->y.p.whole; d -= e->y.p.whole;
                     if ((unsigned short)(d + e->box2) > e->box3) break;
                     o->active = 2;
                     o->b04 = 2;
