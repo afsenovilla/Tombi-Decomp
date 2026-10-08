@@ -1,6 +1,6 @@
 // FUNC 8002ef20 320 MAIN0
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
-typedef struct T { unsigned short w; short i; int *a; int pad; } T;
+// MATCHING 8002ef20 320
+typedef struct T { unsigned short w; short p0; short i; short p1; int *a; } T;
 extern T DAT_80079d50[];
 extern int DAT_1f8002c8[];
 extern void FUN_8001fe6c(void *);
