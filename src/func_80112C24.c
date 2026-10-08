@@ -1,5 +1,6 @@
 // FUNC 80112c24 1040 X000
 // MATCHING 80112c24 1040
+/* D_8009C960h (halfword name for D_8009C960) stays: a cast, a union or -fno-expensive-optimizations all CSE the la (21). */
 #include "TOBJ.H"
 extern unsigned char D_8009D0AA, D_8009D0C8, D_8009D0D0, D_8009D0D1;
 extern int D_8009C960[];
@@ -36,7 +37,6 @@ fail:
 
 void func_80112C24(TObj *o)
 {
-    int *a;
     ObjCullRegister(o);
     switch (o->step) {
     case 0:
@@ -48,12 +48,10 @@ void func_80112C24(TObj *o)
             o->timer = 10;
             o->wac = 1;
             if (D_8009C960[0] == 0x30009) {
-                a = D_80115A08[o->b0c & 0x7f];
+                o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
             } else {
-                a = D_80115948[D_8009C960h[0] * 4 + (o->b0c & 0x7f)];
+                o->anim = (void *)D_80115948[D_8009C960h[0] * 4 + (o->b0c & 0x7f)][1];
             }
-            o->anim = (void *)a[1];
-            __asm__ volatile(""); /* matching debt: keeps move a0 after the sw (sched barrier) */
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);
             if (o->subtype == 6) {
