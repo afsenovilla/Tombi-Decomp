@@ -1,4 +1,4 @@
-// r9 wip: score 44. Only s0/s1 swap: game p=s0, E index (i*8+a*1024)=s1; ours the reverse. Tried register, decl order, pointer e, DAT_1f800164 forms.
+// r9 wip: score 44. Only s0/s1 swap: game p=s0, E index (i*8+a*1024)=s1; ours the reverse. Tried register, decl order, pointer e, DAT_1f800164 forms; b18: types of a/i/f, block-local p, q copy for AddPrim; DAT_1f800164 = p + 1 fixes the swap (score 19) but then the game reloads DAT for ++.
 // FUNC 800591c0 676 MAIN0
 typedef struct {
     unsigned int tag;
