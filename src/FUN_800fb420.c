@@ -1,5 +1,5 @@
 // FUNC 800fb420 2252 X000
-/* score 57 (ncheck; visually one 8-insn region): only the end of anim31 (inlined FUN_800fb370 body) differs: game keeps lw v1=P; lhu v0,0x2c(v1); nop; sh v0,0x2e(v1); jal FUN_800fb0c0; move a0,s1 while ours schedules move a0,s1 into the load-delay nop and swaps v0/v1. Tried q-pointer copy, char* inline (as matched FUN_800fb370), call inside inline, goto label, volatile. */
+// MATCHING 800fb420 2252
 #include "TOBJ.H"
 typedef struct {
     char p0[2]; short w02; char p4[3];
@@ -49,12 +49,13 @@ static __inline__ void anim31(TObj *o)
         DAT_8009c330->w2c = 0x31;
         FUN_800efc04(o);
         FUN_8001fe94(o, u);
+        DAT_8009c330->w2e = DAT_8009c330->w2c;
     } else {
         DAT_8009c330->w2c = 0x31;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0xf);
+        DAT_8009c330->w2e = DAT_8009c330->w2c;
     }
-    DAT_8009c330->w2e = DAT_8009c330->w2c;
 }
 
 void FUN_800fb420(TObj *o)
