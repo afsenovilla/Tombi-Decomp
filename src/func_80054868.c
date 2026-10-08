@@ -1,7 +1,7 @@
 // FUNC 80054868 976 MAIN0
 // MATCHING 80054868 976
-// FLAGS -O2 -G0 -fno-strength-reduce
-/* volatile first o->d3c read and volatile D_164V load pin the game load order (debt) */
+// FLAGS -O2 -G0 -fno-strength-reduce -fno-expensive-optimizations
+/* e built in two steps (base, then += index) keeps the game load order; the matrix address is reloaded for each call (-fno-expensive-optimizations). */
 #include "TOBJ.H"
 typedef struct {
     unsigned int tag;
@@ -13,7 +13,6 @@ typedef struct {
 } SP;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern char *DAT_1f800164;
-extern char *volatile D_164V;
 extern char *DAT_1f8001e0;
 extern int D_8009C960;
 extern C4C *D_1F8001D4;
@@ -22,7 +21,7 @@ extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
 extern long D_1F800070;
 extern long D_1F800074;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetDrawMode(void *, int, int, int, void *);
@@ -64,10 +63,11 @@ void func_80054868(TObj *o)
     else
         D_1F800064 = o->b.p.whole;
     SetRotMatrix(D_1F8000C0);
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(D_1F8000C0);
     if (proj()) return;
-    e = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
-    s = (SP *)D_164V;
+    e = (short *)o->d3c;
+    e += *(unsigned short *)o->anim * 2;
+    s = (SP *)DAT_1f800164;
     n = e[0];
     q = (char *)(o->d3c + e[1]);
     p = (unsigned char *)q + 0xf;
