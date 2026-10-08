@@ -1,6 +1,7 @@
-// FUNC 800544c8 928 MAIN0
+// FUNC 80054868 976 MAIN0
+// MATCHING 80054868 976
 // FLAGS -O2 -G0 -fno-strength-reduce
-/* score 6: only diff is scheduling of the first "s = DAT_1f800164" load: game loads o->d3c before lhu anim[0] and D_164 after; uses a second extern name for D_1F8000C0 (SetTransMatrix) */
+/* volatile first o->d3c read and volatile D_164V load pin the game load order (debt) */
 #include "TOBJ.H"
 typedef struct {
     unsigned int tag;
@@ -12,6 +13,7 @@ typedef struct {
 } SP;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern char *DAT_1f800164;
+extern char *volatile D_164V;
 extern char *DAT_1f8001e0;
 extern int D_8009C960;
 extern C4C *D_1F8001D4;
@@ -27,6 +29,7 @@ extern void SetDrawMode(void *, int, int, int, void *);
 extern void AddPrim(void *, void *);
 extern void SetSprt(void *);
 extern void SetSemiTrans(void *, int);
+extern void SetShadeTex(void *, int);
 
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
 #define gte_rtps() __asm__ volatile ("nop;nop;.word 0x4a180001")
@@ -45,7 +48,7 @@ static __inline__ int proj(void)
     return 0;
 }
 
-void func_800544C8(TObj *o)
+void func_80054868(TObj *o)
 {
     SP *s;
     short *e;
@@ -63,10 +66,10 @@ void func_800544C8(TObj *o)
     SetRotMatrix(D_1F8000C0);
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
-    e = (short *)(o->d3c + *(unsigned short *)o->anim * 4);
-    s = (SP *)DAT_1f800164;
+    e = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
+    s = (SP *)D_164V;
     n = e[0];
-    q = (char *)(*(volatile int *)&o->d3c + e[1]);
+    q = (char *)(o->d3c + e[1]);
     p = (unsigned char *)q + 0xf;
     tp = *(unsigned short *)(q + 6);
     SetDrawMode(s, 0, 0, 0, 0);
@@ -86,6 +89,10 @@ void func_800544C8(TObj *o)
             *(int *)&s->u0 = *(int *)q;
             if (o->b0d & 1)
                 s->clut = o->w08;
+            SetShadeTex(s, 0);
+            s->r0 = o->b6b;
+            s->g0 = o->b6b;
+            s->b0 = o->b6b;
             AddPrim(DAT_1f8001e0 + D_1F800074 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
             DAT_1f800164 += 0x14;
         }
