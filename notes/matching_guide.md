@@ -93,3 +93,9 @@ ASPSX 2.34 (DOS), 2.56, 2.77 (4.3/4.4), 2.81 y 2.86 (4.6). Con 2.81/2.86 salen l
 2.56/2.77 son algo peores. Los casos que fallan (store en el delay slot de `jr`, `addiu sp` tras el primer
 load de global, `jr; addiu $sp`) no dependen de la versión del ensamblador. `tools/permute.py` tampoco
 los arregla (12 funciones a distancia 2-6: 0 aciertos): el hueco es sistemático, no de tipos.
+
+## Hallazgo: orden del prologo (ThreadWaitFrames y similares)
+El juego emite `addiu sp` ANTES de `lui/lw` del primer acceso a global; nuestro CC1PSX los pone
+despues, con cualquier flag (-O1/-O3/-fno-schedule-*, etc.) y con simbolo o direccion absoluta.
+Es la causa de casi todos los wip a distancia 2-6. Hipotesis: el juego usa otra build de CC1PSX 2.7.2.SN.1
+(las de Psy-Q 4.0-4.4 difieren en el planificador). Pendiente: CC1PSX.EXE de otras versiones del SDK.
