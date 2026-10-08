@@ -1,5 +1,11 @@
 // FUNC 800698c4 820 MAIN0
-/* score 126: library code; game epilogue is "jr ra; addiu sp" with saved s-regs (not reproducible with CC1PSX 4.3 per guide). Also: phantom 8-byte stack var at -O2 (gone with -fno-rerun-cse-after-loop), &D_80098204 should be preloaded before the bltz, final return uses branches (bnez; move v0,zero; li v0,1) instead of sltiu. */
+// FLAGS -O2 -G8
+// CC gcc-2.8.1
+/* score 68 (b56, was 126 with 2.7.2): gcc-2.8.1 -G8 (with -G0 2.8.1 splits %hi/%lo; -mno-split-addresses
+   loses the la hoisting). Left: the first D_80098204[idx] read is symbol+index (lui at; addu at; lw) in the game,
+   but 2.8.1 always materializes la and CSE shares it with the loop's hoisted la (game: la v1 in the bltz slot,
+   move s1,v1); that also flips s0/s1 (e vs table base) and the idx/pointer regs at the 0x3003 store. 2.7.2 gives
+   exactly the game's addressing but not the epilogue; real CC1PSX 4.4 behaves like old-gcc 2.8.1 here. */
 typedef struct { unsigned char pad[0xc]; int dc; unsigned char p10[0x37 - 0x10]; unsigned char b37; unsigned char p38[0x50 - 0x38]; unsigned char b50; unsigned char p51[0xe8 - 0x51]; unsigned char be8; } E;
 typedef struct { unsigned char b0; unsigned char p1[3]; unsigned short w4; unsigned char p6[2]; unsigned short w8; unsigned short a; unsigned short c; unsigned short e; } H;
 extern volatile H *D_80098210;
@@ -15,6 +21,7 @@ extern void func_8006A200(void);
 
 int func_800698C4(E *e)
 {
+    int r;
     volatile H *h = D_80098210;
 
     h->a = 0x40;
@@ -66,7 +73,6 @@ int func_800698C4(E *e)
         }
         *D_8009820C = ~0x80;
     }
-    if (e->b50 == 0) return 1;
-    if (e->b37 != 0) return 0;
+    if (e->b50 != 0 && e->b37 != 0) return 0;
     return 1;
 }

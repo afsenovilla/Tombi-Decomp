@@ -1,8 +1,8 @@
 // FUNC 80069ef8 632 MAIN0
-// FLAGS -O2 -G0 -mno-split-addresses
+// FLAGS -O2 -G8
 // CC gcc-2.8.1
-/* score 2 (b56, was 42 with 2.7.2): gcc-2.8.1 + -mno-split-addresses (2.8.1 otherwise splits %hi/%lo into two regs;
-   -G8 works too). sra comes from int temps (k, r), t - D_8009C33C written in both compares, v set in if/else.
+/* score 2 (b56, was 42 with 2.7.2): gcc-2.8.1 + -G8 (with -G0 2.8.1 splits %hi/%lo into two regs;
+   -mno-split-addresses works too). sra comes from int temps (k, r), t - D_8009C33C written in both compares, v set in if/else.
    Left: the first poll loop jumps to 0x5c (the load-delay nop after lw D_80098210) where the game jumps to 0x60
    (nop before the label); same with real ASPSX (matchcheck). Tried do/for/goto/local-pointer loop forms, ASPSX versions.
    Debt: volatile read of s->n in the 0xff compare (game reloads n for the index). */
