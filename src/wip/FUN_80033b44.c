@@ -1,5 +1,5 @@
 // FUNC 80033b44 5056 MAIN0
-/* wip (ncheck): 3 regions left: case 0 switch c==4 body v0/v1 swap; case 1 tail waa+T72 sum in a1 vs v1 (la base swapped); case 2/3 the clamp compare: game stores waa before slt into v0, ours sinks sh after slt (cross-jumped). Frame matched with a nested block pad at the end (debt). */
+/* score 36 (ncheck = matchcheck), same size: 2 regions left, both register swaps: case 0 switch c==4 body (game q=v0,byte=v1); case 1 tail (game: sum in v1, la T72 in a1; ours swapped). Fixed so far: clamp flag reuses w (anti-dependence keeps sh before slt), dir() as inline returning int into short s, frame via nested block pad at the end (debt). */
 #include "TOBJ.H"
 typedef struct V2 { short x, y; } V2;
 typedef struct {
@@ -188,14 +188,14 @@ void FUN_80033b44(TObj *o)
                 cc = (unsigned short)o->wac;
                 w = ((unsigned short)o->waa - 2) & 0xff;
                 o->waa = w;
-                g = w < cc;
+                w = w < cc;
             } else {
                 cc = (unsigned short)o->wac;
                 w = ((unsigned short)o->waa + 2) & 0xff;
                 o->waa = w;
-                g = cc < w;
+                w = cc < w;
             }
-            if (g) o->waa = cc & 0xff;
+            if (w) o->waa = cc & 0xff;
         }
         if (--o->timer <= 0) {
             short g;
@@ -232,14 +232,14 @@ void FUN_80033b44(TObj *o)
                 cc = (unsigned short)o->wac;
                 w = ((unsigned short)o->waa + 2) & 0xff;
                 o->waa = w;
-                g = cc < w;
+                w = cc < w;
             } else {
                 cc = (unsigned short)o->wac;
                 w = ((unsigned short)o->waa - 2) & 0xff;
                 o->waa = w;
-                g = w < cc;
+                w = w < cc;
             }
-            if (g) o->waa = cc & 0xff;
+            if (w) o->waa = cc & 0xff;
         }
         if (--o->timer <= 0) {
             short g;
