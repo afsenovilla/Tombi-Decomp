@@ -1,8 +1,7 @@
 // FUNC 8001ec80 888 MAIN0
-/* score 68 (b23, was 90): tail fixed with int b = (short)arg and a row pointer t + b = t[i]; b = (short)(b << 8).
-   Left: (1) first branch: game has switch value in a0 (lui/lhu) and w in v1, ours swapped; (2) second branch: game keeps
-   v in a1 and copies x = v into s0 (move s0,a1 in delay slots) before the sll/sra for SsSeqSetVol; ours extends first.
-   Tried int/short x, adj return/param types, non-inline second branch, adj in the first branch. */
+// MATCHING 8001ec80 888
+/* debt: three register asm locals (w, v, c); without them global/local alloc swaps the switch value with w
+   (priority 3*14/39 < 2*6/10), coalesces v into x's s-reg, and computes the byte shift in v0. */
 extern short D_800A3428;
 extern unsigned char D_800784C8, D_800784C9;
 extern unsigned char D_800784CA[];
@@ -23,36 +22,13 @@ void SsSeqSetVol(short a, short b, short c);
 void SsSeqPlay(short a, int b, int c);
 void FUN_8001f5b8(int a, short b);
 
-static __inline__ short adj(int v)
-{
-    switch (D_8009C960) {
-    case 0:
-    case 2:
-        v += 5;
-        break;
-    case 6:
-        switch (D_8009C962) {
-        case 0: v -= 5; break;
-        case 1: v += 12; break;
-        case 2: v += 12; break;
-        }
-        break;
-    case 9:
-        switch (D_8009C962) {
-        case 0: v -= 11; break;
-        case 1: case 2: case 3: case 4: case 5: case 6: v += 10; break;
-        }
-        break;
-    }
-    return v;
-}
-
 int func_8001EC80(int arg)
 {
     unsigned short *p;
     unsigned short t;
-    int v, w;
-    short x;
+    register int v asm("$5");
+    register int w asm("$3");
+    int x;
     int a;
     int b;
     if (D_800A3428 != -1) {
@@ -92,7 +68,27 @@ int func_8001EC80(int arg)
         D_8009BD28 = w;
         D_8009BD14 = 1;
     } else {
-        x = adj(D_8007833C[*p]);
+        v = D_8007833C[*p];
+        switch (D_8009C960) {
+        case 0:
+        case 2:
+            v += 5;
+            break;
+        case 6:
+            switch (D_8009C962) {
+            case 0: v -= 5; break;
+            case 1: v += 12; break;
+            case 2: v += 12; break;
+            }
+            break;
+        case 9:
+            switch (D_8009C962) {
+            case 0: v -= 11; break;
+            case 1: case 2: case 3: case 4: case 5: case 6: v += 10; break;
+            }
+            break;
+        }
+        x = v;
         SsSeqSetVol(D_800A3428, x, x);
         D_8009BD10 = x;
         D_8009BD14 = 0;
@@ -100,7 +96,7 @@ int func_8001EC80(int arg)
     b = (short)arg;
     a = 1;
     if (b < 0) {
-        { unsigned char *t = D_80078428[D_8009C960]; a = D_80078478[D_8009C960]; b = t[D_8009C962]; b = (short)(b << 8); }
+        { register int c asm("$5"); unsigned char *t = D_80078428[D_8009C960]; a = D_80078478[D_8009C960]; c = t[D_8009C962]; c = (short)(c << 8); b = c; }
     }
     FUN_8001f5b8(a, b);
     SsSeqPlay(D_800A3428, 1, 1);
