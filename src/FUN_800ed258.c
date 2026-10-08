@@ -1,5 +1,5 @@
 // FUNC 800ed258 1272 X000
-/* score 4: only case 0 e->bc sum differs (game: addu v1,v1,v0 with p in v1; ours addu v0,v0,v1). Two loads of *p need a volatile; tried operand orders, temps, char* forms, no local p. */
+// MATCHING 800ed258 1272
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
     char p08[2];
@@ -64,7 +64,8 @@ void FUN_800ed258(S *o)
         o->velV = 0;
         o->velY = 0x4b0;
         p = DAT_80114c64[o->b0c];
-        e->bc = ((int *)*(int *volatile *)p)[1] + *p;
+        p = (int *)(*p + ((int *)*(int *volatile *)p)[1]);
+        e->bc = (int)p;
         e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);
         o->da8 = e->b8;
         FUN_80025aa8(o->da0, e->b8);
