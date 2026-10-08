@@ -1,5 +1,6 @@
 // FUNC 80030034 976 MAIN0
 // wip: only the sext temp/constant 2 registers differ (a0<->v1)
+// r2: m = n; n = (short)n; spawn(m,..) and short-param variants still 16 (short param n makes gcc const-propagate n into the cases and drops the s0 copy).
 #include "TOBJ.H"
 typedef struct { int a, y, b; } P3;
 extern P3 D_800A6048;

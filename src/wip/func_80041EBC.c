@@ -1,5 +1,6 @@
 // FUNC 80041ebc 608 MAIN0
 // matchcheck: 3 words differ (x lands in v0, game a2). ncheck does not expand div checks: verify with matchcheck
+// r12: tried int/short brute force of h,k,lo,nn,m,x, reusing nn for x, permuting declarations: still 6.
 typedef struct O { char p[0x44]; short *q; } O;
 extern unsigned short *func_8003F200(int, int);
 extern unsigned short *DAT_1f800278;

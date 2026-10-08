@@ -1,4 +1,5 @@
 // FUNC 8006ab10 104 MAIN0
+// wip: same as func_800697A0: game puts the final epilogue insn (addiu sp) in the jr $ra delay slot; ours "jr ra; nop" after it (library with saved regs, see guide).
 typedef struct { char p0[0x14]; void *f14; void *f18; char p1[4]; int f20; char p2[0x22]; unsigned char b46; } S;
 extern int (*D_800981C8)();
 extern void func_8006AB78();
