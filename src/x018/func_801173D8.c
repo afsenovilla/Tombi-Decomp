@@ -1,0 +1,5 @@
+// FUNC 801173d8 8 X018
+// MATCHING 801173d8 8
+void func_801173D8(void)
+{
+}
