@@ -1,4 +1,5 @@
 // FUNC 80057d04 248 MAIN0
+// MATCHING 80057d04 248
 extern char DAT_1f8000c0[];
 extern int DAT_8009c960;
 extern int DAT_1f8001e0;
@@ -10,16 +11,17 @@ extern void FUN_80024a70(int, int);
 
 void FUN_80057d04(void)
 {
+    char pad;
     int i;
     int *p;
     unsigned char *base;
     SetRotMatrix(DAT_1f8000c0);
     SetTransMatrix(DAT_1f8000c0);
     base = DAT_800b0d98;
-    p = (int *)base;
     if (DAT_8009c960 == 0x60009) {
         i = 0;
-        if (DAT_800b0d98[3] != 0) {
+        if (i < DAT_800b0d98[3]) {
+            p = (int *)base;
             do {
                 FUN_80120280(p[1], DAT_1f8001e0 + 0x10);
                 p++;
@@ -28,7 +30,8 @@ void FUN_80057d04(void)
         }
     } else {
         i = 0;
-        if (DAT_800b0d98[3] != 0) {
+        if (i < DAT_800b0d98[3]) {
+            p = (int *)base;
             do {
                 FUN_80024a70(p[1], DAT_1f8001e0 + 0x10);
                 p++;
