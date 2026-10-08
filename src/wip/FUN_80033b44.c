@@ -1,5 +1,5 @@
 // FUNC 80033b44 5056 MAIN0
-/* score 16 (ncheck): only case 1 tail differs: game `addu v1,a1(t),a0(k2)` (ours k2 first) and y lands in a0 instead of v1. Fixed 36->16: case 0 switch byte read into function-scope k and case 7 through p (global pseudos change local-alloc order); case 1 tail via pointer local t + second extern name DAT_8007a072b for the += (la priority, debt). Tried: index forms, int/char* t, t scope, x/y types/order, sum into function vars. Earlier: clamp flag reuses w, dir() inline returning int, frame via nested block pad (debt). */
+/* score 16 (ncheck): only case 1 tail differs: game `addu v1,a1(t),a0(k2)` (ours k2 first) and y lands in a0 instead of v1. Fixed 36->16: case 0 switch byte read into function-scope k and case 7 through p (global pseudos change local-alloc order); case 1 tail via pointer local t + second extern name DAT_8007a072b for the += (la priority, debt). Tried: index forms, int/char* t, t scope, x/y types/order, sum into function vars. Earlier: clamp flag reuses w, dir() inline returning int, frame via nested block pad (debt). b35 also tried (all >=16): k2 as int byte offset with char*/int t, ternary-comma cond, reusing k/f/w/cc for x/y, split y=t[..]; y+=0x40, t=table before += (602). */
 #include "TOBJ.H"
 typedef struct V2 { short x, y; } V2;
 typedef struct {
