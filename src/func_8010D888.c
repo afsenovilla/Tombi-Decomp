@@ -1,5 +1,5 @@
 // FUNC 8010d888 644 X000
-// Score 4: d = o->w7a first; only w7a load lands in v1 instead of v0 (tried int/short types, extra local, volatile)
+// MATCHING 8010d888 644
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[10]; unsigned char bca; } PObj;
 extern TObj *D_8009C330;
@@ -12,7 +12,6 @@ extern void FUN_8010d280(TObj *);
 void func_8010D888(TObj *o)
 {
     unsigned short d;
-    unsigned short b;
     switch (o->state) {
     case 0:
         FUN_800eea7c(o, 0x44, 0);
@@ -23,7 +22,8 @@ void func_8010D888(TObj *o)
     case 1:
         if (AnimAdvance(o) && (unsigned short)(*(unsigned short *)o->anim - 0x136) >= 4)
             PlayerSetAnimIfChanged(o, 0x44);
-        switch (o->w76 & 7) {
+        d = o->w76 & 7;
+        switch (d) {
         case 0: o->w7a = 0; break;
         case 1: o->w7a = 0x20; break;
         case 2: o->w7a = 0x40; break;
@@ -37,13 +37,11 @@ void func_8010D888(TObj *o)
             o->w74 = 0;
         else
             o->w74 = 0x200;
-        d = o->w7a;
-        b = o->wb6;
-        if ((d = (d - b) & 0xff)) {
+        if ((d = (o->w7a - o->wb6) & 0xff)) {
             if (d < 0x80)
-                o->wb6 = b + 4;
+                o->wb6 = o->wb6 + 4;
             else
-                o->wb6 = b - 4;
+                o->wb6 = o->wb6 - 4;
         }
         o->wb6 = (unsigned char)o->wb6;
         if (((o->wb6 - 0x40) & 0xff) < 0x80) {
