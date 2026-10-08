@@ -1,6 +1,5 @@
 // FUNC 80101938 1084 X000
-// FLAGS -O2 -G0 -fno-schedule-insns
-/* score 20 (ncheck): falla case 0 (p en v1, juego v0), case 1: li s2,1 antes de move a0,s0, y p->h2c=4 (juego: p en a1, 4 en a2, sh tras lhu h2e y repetido en el delay del jal). */
+// MATCHING 80101938 1084
 typedef struct P { unsigned char b0; char p0[7]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; unsigned short h2c; unsigned short h2e; } P;
 typedef struct O {
     unsigned char active; unsigned char visible; unsigned char type; char p00[3]; unsigned char state; char p07[0x16-7];
@@ -15,6 +14,7 @@ typedef struct E { char p0[4]; unsigned char b4, b5, b6; } E;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
 extern unsigned char D_8009D2AF;
+extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009D00F;
 extern char D_80010748[];
@@ -34,37 +34,21 @@ extern void FUN_800f1308(O *);
 
 static __inline__ void land(O *o)
 {
-    P *p;
-    int i;
     D_8009C330->b8 = 0;
-    i = o->hb0;
     o->ba4 = 0;
     o->ba5 = 0;
     o->b9c = 0;
     o->bac = 0;
-    p = D_8009C330;
     o->hb2 = 0;
     o->vx = 0;
     o->vy = 0;
-    o->d8c = D_801152E8[i];
-    p->h20 = 0;
+    o->d8c = D_801152E8[o->hb0];
+    D_8009C330->h20 = 0;
     o->anim = D_80010748;
     AnimJump(o, 0);
-    p = D_8009C330;
-    p->h2e = 0xffff;
-    p->h28 = 0xffff;
-    p->h2a = 0xffff;
-}
-
-static __inline__ void setanim(O *o, P *p, short n)
-{
-    p->h2c = n;
-    if (p->h2e != n) {
-        ObjSetAnimFromTable(o);
-        AnimJump(o, 0);
-        p = D_8009C330;
-        p->h2e = p->h2c;
-    }
+    D_8009C330->h2e = 0xffff;
+    D_8009C330->h28 = 0xffff;
+    D_8009C330->h2a = 0xffff;
 }
 
 void func_80101938(O *o)
@@ -114,7 +98,7 @@ void func_80101938(O *o)
         o->state++;
         if (o->b69 == 1 || ObjTileCollide(o, 4, 0) != 0) {
             land(o);
-            if (D_8009D2AF == 0) {
+            if (D_8009D2AFa[0] == 0) {
                 D_8009D2AF = 1;
                 D_8009C93A = 1;
             }
@@ -131,11 +115,17 @@ void func_80101938(O *o)
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
-        setanim(o, D_8009C330, 4);
+        D_8009C330->h2c = 4;
+        if (D_8009C330->h2e != 4) {
+            D_8009C330->h2c = 4;
+            ObjSetAnimFromTable(o);
+            AnimJump(o, 0);
+            D_8009C330->h2e = D_8009C330->h2c;
+        }
         if (o->b69 == 1 || ObjTileCollide(o, 4, 0) != 0) {
             SfxPlay3(0x1c, 0x7f);
             land(o);
-            if (D_8009D2AF == 0) {
+            if (D_8009D2AFa[0] == 0) {
                 D_8009D2AF = 1;
                 D_8009C93A = 1;
             }
