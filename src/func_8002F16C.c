@@ -1,5 +1,5 @@
 // FUNC 8002f16c 536 MAIN0
-// wip r8: score 20. Remaining: the h->p.whole block; game loads D_800A6066 first, then D_800A6078, o->h, and stores sh v0,2(a0) right at the join (before lhu D_800A604E).
+// MATCHING 8002f16c 536
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -18,7 +18,6 @@ void func_8002F16C(TObj *o)
 {
     unsigned char b;
     int s;
-    int u;
     Fix16 *f;
     short t;
     unsigned char v;
@@ -63,10 +62,10 @@ void func_8002F16C(TObj *o)
 L:
     s = DAT_800a6078[1];
     f = o->h;
-    u = s + 4;
-    if (!(DAT_800a6066 & 1))
-        u = s - 4;
-    f->p.whole = u;
+    if (DAT_800a6066 & 1)
+        f->p.whole = s + 4;
+    else
+        f->p.whole = s - 4;
     o->y.p.whole = DAT_800a604e - 8;
     o->d->p.whole = DAT_800a607c[1];
     switch (o->b0c) {

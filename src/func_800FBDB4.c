@@ -1,5 +1,5 @@
 // FUNC 800fbdb4 632 X000
-/* score 34 (ncheck): left: pad pointer (&D_8009D670) materialized after sh 0x7c; tail keeps 8 in a2 with sh 0x2c in beq and jal delay slots */
+// MATCHING 800fbdb4 632
 typedef struct S {
     char p0[5]; unsigned char step, state; char p1[0x20 - 7];
     short timer; char p2[0x2c - 0x22]; unsigned short w2c, frame; char p3[0x69 - 0x30];
@@ -19,7 +19,6 @@ void func_800FBDB4(S *o)
     int a;
     char pad8;
     short v, k, i, vx;
-    volatile unsigned short *pad;
     S *g;
     if (o->state != 0)
         return;
@@ -53,16 +52,14 @@ void func_800FBDB4(S *o)
     if (o->wb4 < 0x29) o->velX = 0;
     if (o->frame & 1) {
         o->velX = -0x300;
-        pad = &D_8009D670;
         o->velY = -0x600;
-        if (*pad & 0x80) { o->velX = -0x480; o->velY = -0x800; }
-        if (*pad & 0x20) { o->velX = -0x200; o->velY = -0x400; }
+        if (*(volatile unsigned short *)&D_8009D670 & 0x80) { o->velX = -0x480; o->velY = -0x800; }
+        if (*(volatile unsigned short *)&D_8009D670 & 0x20) { o->velX = -0x200; o->velY = -0x400; }
     } else {
         o->velX = 0x300;
-        pad = &D_8009D670;
         o->velY = -0x600;
-        if (*pad & 0x80) { o->velX = 0x200; o->velY = -0x400; }
-        if (*pad & 0x20) { o->velX = 0x480; o->velY = -0x800; }
+        if (*(volatile unsigned short *)&D_8009D670 & 0x80) { o->velX = 0x200; o->velY = -0x400; }
+        if (*(volatile unsigned short *)&D_8009D670 & 0x20) { o->velX = 0x480; o->velY = -0x800; }
     }
     g = D_8009C330;
     g->timer = 10;
@@ -70,6 +67,7 @@ void func_800FBDB4(S *o)
     o->wb6 = 0;
     g->w2c = 8;
     if (g->frame != 8) {
+        g->w2c = 8;
         ObjSetAnimFromTable(o);
         AnimJump(o, 0);
         D_8009C330->frame = D_8009C330->w2c;

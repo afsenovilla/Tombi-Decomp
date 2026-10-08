@@ -12,11 +12,11 @@ static __inline__ void clampv(TObj *o, int i)
     if (o->velY < -lim) o->velY = -lim;
 }
 
-/* score 66 (ncheck): game copies o to a1 (a0 = abs temp), sets a dead a3=0 before the switch
-   and a2=0 (byte index, not propagated) after the merge; frame is 0x10 */
+
+/* score 17: (short)(velY-8) + pad[16] fixed most; left: game has dead a3=0 before switch and a separate a2=0 index set after the merge (ours reuses k); tried j copies, short/char params */
 void func_8010F254(TObj *o)
 {
-    char pad[8];
+    char pad[16];
     int k;
     short a = abs(o->wb2);
     k = 0;
@@ -25,7 +25,7 @@ void func_8010F254(TObj *o)
         o->velY = o->velY + D_80115468;
         break;
     default:
-        o->velY = o->velY - 8 + (D_80115468 - (a >> 7));
+        o->velY = (short)(o->velY - 8) + (D_80115468 - (a >> 7));
         break;
     }
     clampv(o, k);
