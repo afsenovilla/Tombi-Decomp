@@ -1,6 +1,7 @@
 // FUNC 8004db4c 196 MAIN0
+// MATCHING 8004db4c 196
 extern int DAT_1f800398;
-extern void FUN_8004dc10(int);
+extern void FUN_8004dc10(int, int);
 
 void FUN_8004db4c(int a, int idx)
 {
@@ -9,7 +10,7 @@ void FUN_8004db4c(int a, int idx)
     unsigned short v;
 
     p = (short *)((char *)base + *(short *)((char *)base + (idx << 1)));
-    
+
     while (1) {
         v = *p;
         p++;
@@ -17,7 +18,7 @@ void FUN_8004db4c(int a, int idx)
         idx = (short)v;
         if (idx != -3 && idx != -7) {
             if (idx == -6) p += 2;
-            else FUN_8004dc10(a);
+            else FUN_8004dc10(a, idx);
         }
     }
 }
