@@ -1,6 +1,6 @@
 // FUNC 80026c50 444 MAIN0
 // MATCHING 80026c50 444
-// Portado de psx_tomba (inventory.c, addItemToInventory); licencia MIT del proyecto original.
+// Ported from psx_tomba (inventory.c, addItemToInventory); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -40,6 +40,6 @@ u_char addItemToInventory(u_long item_id, u_char qty, bool printMessage)
     GAME.item[item_id] = qty;
     GAME.inventory.counter += 1;
     playSFX(10);
-    GAME.inventory.sortMode |= SORT_MODE_DEFAULT;
+    GAME.inventory.sortMode |= INVENTORY_SORT_MODE_DEFAULT;
     return GAME.item[item_id];
 }
