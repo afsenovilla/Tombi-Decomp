@@ -1,6 +1,5 @@
-/* wip: score 8 (ncheck). Falla solo asignacion v0/v1 de las constantes 8 y 1 en case 0 (el juego: li v1,8 ... li v1,1).
-   Orden original y permutaciones (script) no lo resuelven; tamano real 484 (splat corta en 80123D18). 
-   w1: also tried 7-stmt permutations, 0x7e==x, volatile stores, scalar/array of 4 globals. */
+/* v reused for D_8009C941 and the constant 8 puts 8 in v1 (game); store order found by permutation. */
+// MATCHING 80123c20 484
 // FUNC 80123c20 484 X000
 #include "TOBJ.H"
 extern unsigned char DAT_8009c940[];
@@ -17,19 +16,21 @@ extern void FUN_800188e0(TObj *);
 
 void func_80123C20(TObj *o)
 {
+    int v;
     switch (o->b04) {
     case 0:
         if (DAT_8009c940[0] != 0) {
-            if (D_8009C941 == 0x7e) {
-                o->active = 1;
+            if ((v = D_8009C941) == 0x7e) {
                 DAT_8009c940[0] = 0;
-                o->box2 = 8;
+                v = 8;
+                o->box0 = v;
+                o->box2 = v;
+                o->box1 = 0x10;
+                o->active = 1;
                 o->b69 = 0;
+                o->box3 = 0x10;
                 o->b0a = 0;
                 o->b0d = 1;
-                o->box1 = 0x10;
-                o->box3 = 0x10;
-                o->box0 = 8;
                 o->w1e = 6;
                 o->w08 = 0x7c0f;
                 o->anim = PTR_8013b0d8;
