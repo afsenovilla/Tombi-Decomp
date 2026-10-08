@@ -1,5 +1,7 @@
 // FUNC 8003f024 288 MAIN0
+// score 6: only prologue order differs (game: move s3,a2 in jal delay slot, n in a2); tried uchar/int params, st order
 #include "TOBJ.H"
+typedef struct { int x, y, z; } V3;
 extern TObj *FUN_80018568();
 extern unsigned char D_8007B084[];
 extern unsigned char *D_8007B14C[];
@@ -18,9 +20,7 @@ void func_8003F024(TObj *o, short type, int sub0, short *pos, short vh, short vv
         n->h->raw = pos[1] << 16;
         n->y.raw = pos[3] << 16;
         n->d->raw = pos[5] << 16;
-        n->d30 = n->a.raw;
-        n->d34 = n->y.raw;
-        n->d38 = n->b.raw;
+        *(V3 *)&n->d30 = *(V3 *)&n->a;
         n->velH = vh;
         n->velV = vv;
         o->d94 = (int)n;
