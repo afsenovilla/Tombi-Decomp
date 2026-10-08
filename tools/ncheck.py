@@ -27,7 +27,7 @@ def build(src, flags, d, inc):
                    check=True, capture_output=True)
     g = re.search(r"-G(\d+)", flags)
     G = g.group(1) if g else "0"
-    mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + ASPSX_VER] + (["-G" + G] if G != "0" else []),
+    mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + ASPSX_VER, "--expand-div"] + (["-G" + G] if G != "0" else []),
                          input=open(d + "/a.s").read(), check=True, capture_output=True, text=True).stdout
     open(d + "/b.s", "w").write(mas)
     subprocess.run(["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O1", "-G0",

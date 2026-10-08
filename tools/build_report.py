@@ -42,6 +42,7 @@ def main():
     if "--no-split" not in ARGS:
         for prog in PROGS:
             shutil.rmtree("asm/" + prog, ignore_errors=True)
+            shutil.rmtree("build/splat_src/" + prog, ignore_errors=True)  # stale C stubs make splat skip functions
             r = subprocess.run([sys.executable, "-m", "splat", "split", "config/%s.yaml" % prog, "--disassemble-all"],
                                capture_output=True, text=True)
             if r.returncode:

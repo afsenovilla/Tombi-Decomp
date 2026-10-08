@@ -11,7 +11,8 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
 ### Fast native checker (`tools/ncheck.py`)
 - old-gcc `gcc-2.7.2-psx` cc1 + maspsx 2.86 + GNU as, no Wine or DOSBox. Install with `tools/setup_native.sh`
   (old-gcc in `/opt/oldgcc`, maspsx in `/opt/maspsx`, `binutils-mipsel-linux-gnu`).
-- Reproduces 628 of the 636 verified functions in seconds: **use it to iterate**
+- Runs maspsx with `--expand-div` (signed `/` and `%` get ASPSX's `break 7/6` checks). Reproduces 989 of the 994
+  verified functions in seconds: **use it to iterate**
   (`python3 tools/ncheck.py [--score] [--asm] src/<Name>.c`).
 - `tools/matchcheck.py` (CC1PSX 4.3 via Wine + ASPSX 2.86) remains the **reference check**.
 - Functions ported from psx_tomba include `include/tomba/` headers and are verified with ncheck.
@@ -30,7 +31,13 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
 - **Check the size**: Ghidra cuts functions short when they have a jump table or a `j` to the epilogue. The real end is the
   `jr $ra` followed by the next `addiu $sp,-N`; put the real size in `// FUNC` (FUN_80121fe0: 312, not 144).
 - Fragments (starting with an epilogue, using `$sN` without loading it, a stray `j`, <8 B) are not matchable: skip them.
-  `notes/todo_match3.csv` already flags the obvious fragments (`tools/classify.py`).
+  `notes/todo_match4.csv` lists the pending game functions with splat's boundaries (better than Ghidra's).
+- **splat boundaries can also be wrong**: it cuts at jump tables (read the table from the binary: for X000 the file offset
+  is `addr - 0x800E8028`) and sometimes merges several small functions. If the next entry is the rest of the same
+  function, match the whole range (func_80122C10 = 172 + 600 B; func_8011D9D8 = 856 B).
+- **Brute force scheduling differences**: when only instruction order differs, a small script that tries scalar `X`
+  vs array `X[]` per global plus permutations of the statements involved, scored with `ncheck --score`, usually
+  finds the match in seconds (func_8002AC68, func_8004C1EC).
 - Old wips written for the DOS compiler (char* and hand-computed offsets): it is usually worth rewriting them from scratch
   with TObj/switch; remove `-fno-delayed-branch` and `-g` from their FLAGS.
 
@@ -111,6 +118,43 @@ gcc 2.7 decides aliasing via MEM_IN_STRUCT: a **scalar global** at a fixed addre
 - Frame without saves: an unused `char pad[16];` (16 B) or `char pad;` (8 B). 0x38/0x10 frames without saves are usually inlines.
 - Declare locals at the start of the block (in the middle of a block gcc 2.7 has been seen to drop a statement).
 - Some functions need `// FLAGS -O1 -G0` (base-reg `sw x,0(v0); sw y,4(v0)`) or `-O2 -G0 -fno-schedule-insns`.
+
+### More recipes (third batch of agents)
+- **Inlines everywhere**: copied box/collision code is a `static __inline__` helper; writing it as an inline fixes
+  register allocation and tail merging (8012C8EC, 80029CB4). `addu v0,zero,zero` in the delay slot of each failing
+  branch followed by `bnez v0` = inline returning a boolean (8012ED60). An inline returning 0/1 whose last test copies a
+  variable first = a nested inline, e.g. `fin(r, D - y + 0x30)` with `short r` in the caller. The OT-insertion helper is
+  an inline with 5 parameters like `FUN_8004fdc8(a, b, c, d, e)` (fixes the frame size).
+- **Loops**: when the game does not hoist constants, write `label: ... if (n) goto label;` instead of do/while; a constant
+  the game does hoist = a local assigned before the label (func_800491F0 170 -> 22).
+- **Scratchpad addresses** used several times: declare an extern symbol (`extern short D_1F80019E;`) instead of a literal,
+  which gcc CSEs into a register with `li/ori`; relocations are masked so the name does not matter.
+- **Same global, two externs**: a second scalar name makes gcc reload it after field stores; `[0]` loads stay after field
+  stores while scalars hoist; read into temps before the first store to fix the order of two loads (func_80134404).
+- **Duplicated case tails** kept separate in the game = the full stores written in every case, not a variable stored after
+  the switch. A comparison result computed per case and branched once (`slti; j L`) = a `short` flag + `goto tail`.
+  A case that falls into another case's final store: invert the `if` in the other case so the store comes last.
+- **Shared tail that is a call**: the full call is written in each branch. One store breaking cross-jumping: use a local
+  copy of the pointer for that store only (`S *p = o; p->f = x;`).
+- **Extra `move` copy** = an extra pseudo: copy into a temp right before use, give an inline parameter a narrower type,
+  assign a ternary to an `int` before passing it as `short`, or declare the variable at function scope (8004E41C).
+- **Player struct `D_8009C330`**: a local `p` only for the stores that reuse the old load; later stores as
+  `((PL *)D_8009C330)->field`; raw byte stores where the game reloads the pointer. A `sb` through a global pointer
+  forces a reload afterwards: order statements so each `sb` closes its group.
+- **Small things**: `abs()` gives `bgez; nop; negu` exactly. `case 0 ... 12:` gives `slti 13; bltz`. An 8-byte frame with
+  no saves can come from an explicit `(short)` cast on an expression. Pad frames are inconsistent: try several sizes.
+  `int + (signed char)field` with swapped operands: declare the int operand `short`. A loop rereading a flag set by an
+  interrupt (`D_8009BCDC`) is `extern volatile int`. `(short)(o->d30 - 2) + r` stops gcc reassociating a constant.
+- **Hand-written GTE routines** (80022ABC, 80022630): `gte_*` asm macros, `stsxy3` with fixed offsets, the list parameter
+  advanced as `long *f; n = *f++`, and `addPrim` as `t = *ot; *ot = p; p->tag = t | len;`.
+
+### Matching debt (workarounds to revisit)
+Functions that match only thanks to a compiler hint rather than plain C; keep them to a minimum:
+- `register int r asm("$17")`: func_800428C0. `__asm__ volatile("nop")` before a loop: func_8006A200.
+- Constant loaded as the address of a symbol (`D_31FFFF`): func_8005D4EC.
+- Second extern name for the same global: func_8002A0FC, func_8002A258 (and others, see the source comments).
+- Asm-only thunk: thunk_FUN_8011a628. Files holding several small functions merged by splat: func_8011D204 (6),
+  func_8011F288 (wip, 3).
 
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
