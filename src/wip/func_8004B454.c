@@ -1,5 +1,5 @@
 // FUNC 8004b454 296 MAIN0
-/* score 33 (ncheck): falla orden lbu b->bc tras subu de d, t1/t2 intercambiados y operandos addu (h40->s2 + t2). El 2o test reutiliza una variable (juego: e en a3). */
+/* score 19: per-local type search (x short, t1 short) from 33. Left: x read with lh+move (game lhu, unsigned), t1 sign-extended for the 2nd test, game keeps the 2nd sum in a3 (e). */
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0xc]; unsigned char bc;
@@ -18,11 +18,14 @@ extern E DAT_8007b5e4[];
 
 static __inline__ void f(TO *a, TO *b)
 {
-    char pad[8];
-    unsigned short t1, t2;
-    int d, e, w;
-    unsigned v;
-    unsigned short x;
+
+    short t1;
+    unsigned short t2;
+    int d;
+    unsigned short e;
+    unsigned short w;
+    unsigned short v;
+    short x;
 
     if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) < 0x5b) {
         x = a->se8;
