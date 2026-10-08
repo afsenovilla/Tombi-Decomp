@@ -1,5 +1,5 @@
 // FUNC 8001d6a4 820 MAIN0
-// wip: falta 0x7fffff como lui 0x80/addiu -1, orden de s-regs en el prologo y addu en DecDCTin
+// wip score 24 (was 83; short cnt): prologue s-reg save order, 0x7fffff as lui/addiu, addu order in DecDCTin. Old note: falta 0x7fffff como lui 0x80/addiu -1, orden de s-regs en el prologo y addu en DecDCTin
 typedef struct { unsigned short w; unsigned short h; int pad; } Ent;
 typedef struct {
     int *in[2];
@@ -44,7 +44,8 @@ void func_8001D6A4(void)
 {
     M *m = &D_8009BCA8;
     volatile int *d = &m->f34;
-    int k, cnt;
+    int k;
+    short cnt;
     D_1F8001CC = 1;
     D_1F8001D4->w48 = 0;
     D_1F8001D4->b68 = 0;
