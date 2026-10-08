@@ -1,5 +1,5 @@
 // FUNC 8003ff48 816 MAIN0
-/* score 104: control flow and layout match; left: register allocation (game keeps x in a1 plus a t3 copy, raw y in t5, d without copy), frame setup order (game addiu sp before the first lw), D88 computed as (short)s>>8 in game (casts there raise the score). Tried: type brute force of x/y/s/d/lim/a/b, local x copy, inline body wrapper. */
+/* score 100 (b32: x &= 7; int xi = x; stores D_8009BD80 = xi gives the game andi a1 + move copy). Left: global-alloc order o/k/xi (game o=t1,k=t2,xcopy=t3; ours k=t1,xi=t2,o=t3: -dl shows o 7 refs/128 insns has lowest priority, needs more o refs or fewer k refs). Was 104: control flow and layout match; left: register allocation (game keeps x in a1 plus a t3 copy, raw y in t5, d without copy), frame setup order (game addiu sp before the first lw), D88 computed as (short)s>>8 in game (casts there raise the score). Tried: type brute force of x/y/s/d/lim/a/b, local x copy, inline body wrapper. */
 #include "TOBJ.H"
 
 extern unsigned short *D_1F800278;
@@ -18,13 +18,15 @@ int func_8003FF48(TObj *o, unsigned short x, short y)
     int s;
     unsigned short a;
     short b;
-    int r;
+    unsigned short r;
+    int xi;
 
     D_8009BD70 = *D++;
     if (D_8009BD70 == 0)
         return 0;
     k = 0;
     x &= 7;
+    xi = x;
     do {
         D_8009BD70--;
         D_8009BD7C = *D++;
@@ -64,7 +66,7 @@ int func_8003FF48(TObj *o, unsigned short x, short y)
                 D_8009BD68 = a + b;
         } else {
             r = b * (x - D_8009BD8C) / D_8009BD90;
-            D_8009BD80 = x;
+            D_8009BD80 = xi;
             D_8009BD68 = a + r;
         }
         d = D_8009BD68 - y;
@@ -80,7 +82,7 @@ int func_8003FF48(TObj *o, unsigned short x, short y)
             D_8009BD90 = (s >> 4) & 0xf;
             lim = D_8009BD8C + D_8009BD90 - x + 0x10;
         common:
-            D_8009BD80 = x;
+            D_8009BD80 = xi;
             if (-(short)d < lim && (short)d <= 0) {
             hit:
                 o->y.p.frac = 0;
