@@ -9,6 +9,7 @@ typedef struct O {
     char p4[0x84 - 0x44]; int d84; int d88; int d8c;
 } O;
 extern G *DAT_80096330;
+extern G *DAT_80096330b[];
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 
@@ -17,6 +18,7 @@ void FUN_800f4ed0(O *o, short a, int b)
     int d;
     int v;
     int s;
+    G *g;
     if (o->af & 1) {
         s = 0x1bf;
         s -= b;
@@ -36,10 +38,10 @@ void FUN_800f4ed0(O *o, short a, int b)
         v += o->d34;
     }
     o->y = v;
-    d = DAT_80096330->we;
-    if (DAT_80096330->b8)
-        d = d - DAT_80096330->w2;
+    g = DAT_80096330b[0];
+    d = g->we;
+    if (g->b8)
+        g->we = d - g->w2;
     else
-        d = d + DAT_80096330->w2;
-    DAT_80096330->we = d;
+        g->we = g->w2 + d;
 }
