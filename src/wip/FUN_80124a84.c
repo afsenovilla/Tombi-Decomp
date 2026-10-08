@@ -1,11 +1,11 @@
 // FUNC 80124a84 312 X000
-// wip: solo falla que el juego recalcula u6-u5 (subu) en el segundo bloque; aqui CSE lo reutiliza.
+// wip score 12 (was 27): types brute-forced (u5 short, t int). Left: game loads both ->h (lw 0x40) before lhu box0, recomputes u6-u5 (subu t2,t1) for t, and orders the e computation (subu before andi) differently.
 #include "TOBJ.H"
 
 int FUN_80124a84(TObj *a, TObj *b)
 {
-    int u5, u6;
-    short d, e, s, t;
+    short u5; int u6;
+    short d; short e; short s; int t;
     u5 = (unsigned short)b->box0;
     u6 = (unsigned short)a->h->p.whole;
     if ((unsigned short)(u6 - u5) <= (d = b->h->p.whole - u5)) {

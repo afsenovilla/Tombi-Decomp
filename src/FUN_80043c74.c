@@ -1,4 +1,5 @@
 // FUNC 80043c74 268 MAIN0
+// MATCHING 80043c74 268
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0x16]; unsigned short s16;
@@ -9,8 +10,7 @@ typedef struct {
 
 static __inline__ int f(TO *a, TO *b)
 {
-    char pad[16];
-    int d, w, t, e0, e1;
+    short d; short w; short t; short e0; short e1;
     if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b) return 0;
     d = a->h40->s2 - b->h40->s2;
     w = b->s6c + a->s6c;
