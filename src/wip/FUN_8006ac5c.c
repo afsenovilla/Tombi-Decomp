@@ -1,4 +1,5 @@
 // FUNC 8006ac5c 152 MAIN0
+/* score 32: library code; epilogue (jr $ra; addiu $sp in delay slot with s-regs saved) is unreproducible. Game also keeps a second copy of a (s3 = a1 copy in jalr delay slot, FP loaded after the s-reg saves). Tried param types int/char/uchar/short, K&R char params, local copy types: best 24 with short a + FP(o,a,b) but adds sll/sra. */
 typedef struct { char p0[0x14]; int w14, w18; char p1[0x46 - 0x1c]; char b46; char p2[0x51 - 0x47]; char b51, b52, b53; char p3[0xe4 - 0x54]; unsigned char be4; } TO;
 extern int (*FP)(TO *o, int a, int b);
 extern char A14[], A18[];
