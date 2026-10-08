@@ -1,7 +1,5 @@
 // FUNC 800f1478 2252 X000
-/* score 14: only the wb0 -> wb6 block differs (game: lh v1; bgez v1; move v0,v1 = load reg tested, copy shifted;
-   ours swaps v0/v1). Tried int/short/unsigned types, decl order, function vs block scope, inline helper,
-   goto forms, register asm. char pad[8] is needed for the 0x28 frame (origin unknown). */
+// MATCHING 800f1478 2252
 #include "TOBJ.H"
 #include "raw7.h"
 extern unsigned char *DAT_800a611c;
@@ -55,7 +53,6 @@ void FUN_800f1478(TObj *o)
     unsigned char c;
     unsigned char *p;
     int t;
-    char pad[8];
 
     U8(o, 0xa2) = 0;
     U8(o, 0xa3) = 0;
@@ -112,18 +109,13 @@ void FUN_800f1478(TObj *o)
                     FUN_8001fec0(o);
             }
             {
-            int w = o->wb0;
-            int u = w;
-            if (w < 0) {
-                u = u * 4 + 0x100;
-                o->wb6 = u & 0xff;
-            } else {
-                u <<= 2;
-                if (w > 0)
-                    o->wb6 = u & 0xff;
+                short u = o->wb0;
+                if (u < 0)
+                    o->wb6 = (short)((u << 2) + 0x100) & 0xff;
+                else if (u > 0)
+                    o->wb6 = (short)(u << 2) & 0xff;
                 else
                     o->wb6 = 0;
-            }
             }
             FUN_8010f400(o);
             if (o->velY > 0x400) {
@@ -155,7 +147,7 @@ void FUN_800f1478(TObj *o)
 
     switch (c) {
     case 4:
-        if (DAT_1f8003c4 & DAT_1f8001fc) {
+        if (DAT_1f8001fc & DAT_1f8003c4) {
             o->b04 = 5;
             o->step = 0x61;
             o->state = 0;
@@ -171,7 +163,7 @@ void FUN_800f1478(TObj *o)
         }
         break;
     case 9:
-        if (DAT_1f8003c8 & DAT_1f8001fc) {
+        if (DAT_1f8001fc & DAT_1f8003c8) {
             o->b04 = 1;
             o->step = 0x3b;
             o->state = 0;
@@ -179,7 +171,7 @@ void FUN_800f1478(TObj *o)
         }
         break;
     case 10:
-        if (DAT_1f8003c8 & DAT_1f8001fc) {
+        if (DAT_1f8001fc & DAT_1f8003c8) {
             o->b04 = 1;
             o->step = 0x3c;
             o->state = 0;
@@ -187,7 +179,7 @@ void FUN_800f1478(TObj *o)
         }
         break;
     case 12:
-        if (DAT_1f8003c8 & DAT_1f8001fc) {
+        if (DAT_1f8001fc & DAT_1f8003c8) {
             o->b04 = 5;
             o->step = 0xb;
             o->state = 6;
@@ -200,7 +192,7 @@ void FUN_800f1478(TObj *o)
         break;
     }
 
-    if (DAT_1f8003c6 & DAT_1f8001fc) {
+    if (DAT_1f8001fc & DAT_1f8003c6) {
         o->ba4 = 0;
         DAT_8009c330[0x1e] = 0;
         DAT_8009c330[0x1f] = 0;
