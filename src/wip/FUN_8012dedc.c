@@ -21,7 +21,7 @@ void FUN_8012dedc(O *o)
         o->b0d = 0;
         o->b69 = 0;
         o->b68 = 0;
-        o->b0f = -9;
+        *(signed char *)&o->b0f = -9;
         o->d3c = G2d4;
         o->anim = T4d94;
         FUN_8001fe6c(o);
