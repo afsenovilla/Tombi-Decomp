@@ -1,8 +1,5 @@
 // FUNC 801252b8 676 X000
-/* score 12, only 2 words differ (b30): `(dy0 = d)` inside the y-overlap test (short dy0) removes the extra copy at the
-   bgez; left: game `addu v0,v1,v0; move a1,v1` vs ours `move a1,v1; addu v1,v1,v0` (sched1 puts the copy, lower uid,
-   before the add, so local-alloc ties the add to d's reg). Tried: copy in RHS/comma positions, statement perms of the
-   dx/dy block, d/dy0 types. Earlier (b19): inline returning the diff, register, greedy local types, hill-climb. */
+// MATCHING 801252b8 676
 #include "TOBJ.H"
 
 extern short func_80124FF4(TObj *o, TObj *e);
@@ -30,7 +27,11 @@ void func_801252B8(TObj *o, TObj *e)
     sx = e->box0 + o->box0;
     if ((unsigned short)(dx + sx) > e->box1 + o->box1) return;
     d = (unsigned short)o->y.p.whole - (unsigned short)e->y.p.whole;
-    if ((unsigned short)((e->box2 + o->box2) + (dy0 = d)) > o->box3 + e->box3) return;
+    {
+        short t = d + (e->box2 + o->box2);
+        dy0 = d;
+        if ((unsigned short)t > o->box3 + e->box3) return;
+    }
     if (dx < 0) {
         dx = -dx;
         px = -sx;
