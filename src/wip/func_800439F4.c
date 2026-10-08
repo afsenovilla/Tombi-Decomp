@@ -1,21 +1,23 @@
-/* wip: score 20. Left: dy is computed twice (dy and the re-read in the test); game computes it once into v1 and
-   copies to a1 (move a1,v1). Using dy in the test drops the copy (score 39-45, tried int/short/ushort dy and sy,
-   sy = dy before/after the test); plus the t8/t9 swap that follows from it. */
 // FUNC 800439f4 640 MAIN0
+/* wip: score 16 (was 20). Left: game computes d = a.y-b.y into v1 and copies it (move a1,v1) right after the
+   test's addu, and keeps ax = dx as move $10,$9 before the first test; here gcc ties d/dy (no copy) and ax goes
+   through a1. Tried: d/dy/sy type combos, dy = d before/after test, inline wrapper (like FUN_80043c74), inline
+   test helper, statement hill-climb (this order). */
 #include "TOBJ.H"
 
 int func_800439F4(TObj *a, TObj *b)
 {
     short s, dx, ax, w, off, d0, sy;
-    int dy;
+    int dy, d;
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) > 0x5a) return 0;
     s = b->box0 + a->box0;
-    off = s;
     dx = a->h->p.whole - b->h->p.whole;
-    ax = dx;
     if ((unsigned short)(dx + s) > b->box1 + a->box1) return 0;
-    dy = (unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole;
-    if ((unsigned short)(((unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole) + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
+    ax = dx;
+    off = s;
+    d = (unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole;
+    if ((unsigned short)(d + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
+    dy = d;
     w = off;
     d0 = ax;
     if (dx < 0) {
