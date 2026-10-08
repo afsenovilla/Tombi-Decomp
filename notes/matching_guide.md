@@ -17,6 +17,17 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
 - `tools/matchcheck.py` (CC1PSX 4.3 via Wine + ASPSX 2.86) remains the **reference check**.
 - Functions ported from psx_tomba include `include/tomba/` headers and are verified with ncheck.
 
+### Per-file compiler (`// CC`)
+- Some MAIN0 library-range code (0x8006xxxx..0x8007xxxx) was built with a **newer compiler** (GCC 2.8.1, Psy-Q 4.4):
+  the tell-tale is an epilogue `jr $ra; addiu $sp` (filled delay slot) with s-regs saved, which 2.7.2 never emits.
+- Mark such a file with a header line `// CC gcc-2.8.1` (the old-gcc release name; no line = `gcc-2.7.2`, the default).
+  It is honored by every tool: `ncheck.py` (and so `build_full.py`/`build_report.py`) compile it with
+  `/opt/oldgcc/gcc-2.8.1-psx` (installed by `tools/setup_native.sh`), `matchcheck.py` with the CC1PSX of that version
+  (`CC1_BY_CC`: `gcc-2.8.1` -> `/opt/psyq/cc44/CC1PSX.EXE`, Psy-Q 4.4, override with `CC1_WINE_281`).
+- To test a wip quickly without editing it: `OLDGCC=/opt/oldgcc/gcc-2.8.1-psx python3 tools/ncheck.py --score src/wip/X.c`
+  (`OLDGCC` only replaces the default compiler; a `// CC` line always wins).
+- Matched this way: FUN_8006911c, func_800692E8, FUN_80069390, func_800693C8, FUN_80069410, func_8006B020.
+
 ## Work cycle
 1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.
 2. Write `src/<Name>.c`. Mandatory header `// FUNC <addr> <size> [MAIN0|X000]`; optional `// FLAGS -O2 -G0 ...`.
@@ -113,7 +124,8 @@ gcc 2.7 decides aliasing via MEM_IN_STRUCT: a **scalar global** at a fixed addre
 
 ### Prologue, epilogue and frame
 - With CC1PSX 4.3 the epilogue `j $31; addu $sp` (filled delay slot) does come out when only `$ra` is saved;
-  with saved s-regs (library 0x8006xxxx) it cannot be reproduced: leave those in wip.
+  with saved s-regs (library 0x8006xxxx) it cannot be reproduced with 4.3: that code was built with a newer compiler.
+  Add `// CC gcc-2.8.1` (see "Per-file compiler" above) and recheck; if the score gets worse, it is not that.
 - If the game loads a global before `addiu sp` or hoists a constant: store them in locals before the if (`n = g; c = 2;`).
 - Frame without saves: an unused `char pad[16];` (16 B) or `char pad;` (8 B). 0x38/0x10 frames without saves are usually inlines.
 - Declare locals at the start of the block (in the middle of a block gcc 2.7 has been seen to drop a statement).

@@ -82,6 +82,11 @@ Each function lives in its own file, `src/<Name>.c`, with a small header:
 // MATCHING 8001fddc 48          added once the bytes match
 ```
 
+Optional header lines: `// FLAGS -O2 -G0 ...` (compiler flags) and `// CC gcc-2.8.1` (compiler, by old-gcc release
+name; the default is `gcc-2.7.2`). A few MAIN0 library objects (0x8006xxxx) were built with the newer GCC 2.8.1
+(Psy-Q 4.4): `ncheck.py`, `build_full.py` and `build_report.py` compile those with `/opt/oldgcc/gcc-2.8.1-psx`, and
+`matchcheck.py` with Psy-Q 4.4 `CC1PSX.EXE` (`/opt/psyq/cc44/`).
+
 Two checkers compile the file and compare the result with the retail binary, masking relocations:
 
 | Tool | Toolchain | Use |
@@ -114,7 +119,8 @@ python3 tools/ncheck.py src/x0*/*.c       # area overlays X001..X019
 python3 tools/fn.py 8001fddc
 ```
 
-Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/`, the DOS `CPPPSX.EXE` to
+Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/` (and PSY-Q 4.4's to `/opt/psyq/cc44/` for the
+`// CC gcc-2.8.1` files), the DOS `CPPPSX.EXE` to
 `/opt/psyq/new/` and `ASPSX.EXE` 2.86 to `/opt/psyq/46/BIN/`, install `wine` and `dosbox`, then run
 `python3 tools/matchcheck.py src/<Name>.c`.
 

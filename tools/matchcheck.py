@@ -5,9 +5,12 @@ the code with the game's byte for byte (masking relocations).
 Each .c has in its first lines:
     // FUNC <addr_hex> <size> [MAIN0|X000|X001..X019]     (one function per file; overlays: src/x0nn/)
     // FLAGS -O2 -G0                            (optional)
+    // CC gcc-2.8.1                             (optional: compiler other than the default gcc-2.7.2)
 Usage:  tools/matchcheck.py [--mark] [--asm] [src/file.c ...]
   --mark  adds `// MATCHING <addr> <size>` to the ones that match (read by progress.py)
   --asm   leaves the generated assembly in build/<name>.s
+`// CC <name>` selects the compiler of that file: here the CC1PSX of the same GCC version (CC1_BY_CC:
+gcc-2.7.2 = Psy-Q 4.3, the default; gcc-2.8.1 = Psy-Q 4.4), in tools/ncheck.py old-gcc /opt/oldgcc/<name>-psx.
 Environment: PSYQ_DIR (folder with CC1PSX.EXE, ASPSX.EXE, CPPPSX.EXE; default /opt/psyq/new)
              WORK (working folder for DOSBox; default /opt/psyq/w)
 The SDK belongs to Sony: it is not committed to the repo.
@@ -20,6 +23,8 @@ WORK = os.environ.get("WORK", "/opt/psyq/w")
 _aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
 _cc = os.environ.get("CC1_WINE", "/opt/psyq/cc43/CC1PSX.EXE")  # default: Psy-Q 4.3 (the game's compiler)
 CC1_WINE = _cc if (_cc != "0" and os.path.exists(_cc) and shutil.which("wine")) else None  # Win32 CC1PSX (Psy-Q 4.3+) via Wine instead of DOSBox
+CC_DEFAULT = "gcc-2.7.2"  # the game's compiler; files with `// CC <other>` were built with a newer one
+CC1_BY_CC = {"gcc-2.7.2": _cc, "gcc-2.8.1": os.environ.get("CC1_WINE_281", "/opt/psyq/cc44/CC1PSX.EXE")}
 ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
@@ -103,6 +108,18 @@ def header(src):
     return int(m.group(1), 16), int(m.group(2)), m.group(3) or "MAIN0", (f.group(1).strip() if f else "-O2 -G0")
 
 
+def cc_of(src):
+    """Compiler of a file: `// CC gcc-X.Y.Z` header line (old-gcc release name), default CC_DEFAULT."""
+    m = re.search(r"^//\s*CC\s+(gcc-[0-9.]+)\s*$", open(src, errors="replace").read(), re.M)
+    return m.group(1) if m else CC_DEFAULT
+
+
+def cc1_for(cc):
+    """Win32 CC1PSX for a non-default `// CC` (None: unavailable)."""
+    p = CC1_BY_CC.get(cc)
+    return p if (p and p != "0" and os.path.exists(p) and shutil.which("wine")) else None
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     mark = "--mark" in sys.argv; keep_asm = "--asm" in sys.argv
@@ -127,23 +144,31 @@ def main():
     for n, f in enumerate(files):
         h = header(f)
         if not h: print("SKIP (no // FUNC):", f); continue
-        shutil.copy(f, "%s/F%d.C" % (WORK, n)); jobs.append((n, f, h))
+        shutil.copy(f, "%s/F%d.C" % (WORK, n))
         flags = h[3]
+        cc = cc_of(f)
+        if cc != CC_DEFAULT and not cc1_for(cc):
+            print("ERROR %s: no CC1PSX for // CC %s (CC1_BY_CC in tools/matchcheck.py, needs wine)" % (os.path.basename(f), cc))
+            continue
+        jobs.append((n, f, h, cc))
+        wine_cc1 = CC1_WINE if cc == CC_DEFAULT else cc1_for(cc)
         bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
-                ] + ([] if CC1_WINE else [r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n)]) + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
+                ] + ([] if wine_cc1 else [r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n)]) + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
         if len(jobs) % CH == 0: flush()
     flush()
-    if CC1_WINE:
-        for n, f, h in jobs:
-            subprocess.run(["wine", CC1_WINE, "-quiet"] + h[3].split() + ["F%d.I" % n, "-o", "F%d.S" % n], cwd=WORK,
+    for n, f, h, cc in jobs:
+        wine_cc1 = CC1_WINE if cc == CC_DEFAULT else cc1_for(cc)
+        if wine_cc1:
+            subprocess.run(["wine", wine_cc1, "-quiet"] + h[3].split() + ["F%d.I" % n, "-o", "F%d.S" % n], cwd=WORK,
                            env=dict(os.environ, WINEDEBUG="-all"), timeout=300, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emits addiu for `li` (2.34 emits ori)
         wenv = dict(os.environ, WINEDEBUG="-all")
-        for n, f, h in jobs:
+        for n, f, h, cc in jobs:
             subprocess.run(["wine", ASPSX_WINE, "-q", "F%d.S" % n, "-o", "F%d.OBJ" % n], cwd=WORK, env=wenv,
                            timeout=300, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    ok = bad = 0
-    for n, f, (addr, size, prog, _) in jobs:
+    ok = 0
+    bad = sum(1 for f in files if header(f) and cc_of(f) != CC_DEFAULT and not cc1_for(cc_of(f)))
+    for n, f, (addr, size, prog, _), cc in jobs:
         name = os.path.basename(f)
         obj = "%s/F%d.OBJ" % (WORK, n)
         if not os.path.exists(obj):

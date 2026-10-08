@@ -6,7 +6,8 @@ How it works (all output under build/full/, ignored by git):
   1. tools/gen_symbols.py names the splat symbols after our C functions; splat 0.35.2 splits
      game/MAIN0.EXE and game/AREA00/X000.BIN (config/*.yaml, rewritten to build/full/*.yaml) into one
      .s per function plus the .rodata/.data files.
-  2. Every src/*.c is compiled with the native pipeline of tools/ncheck.py (cpp -> cc1 -> maspsx -> as).
+  2. Every src/*.c is compiled with the native pipeline of tools/ncheck.py (cpp -> cc1 -> maspsx -> as),
+     with the old-gcc its `// CC gcc-X.Y.Z` header line names (default gcc-2.7.2; see ncheck.gcc_for).
      The `// FUNC addr size PROG` header is the truth: the C .text replaces every splat line inside
      [addr, addr+size), even when splat had cut that range into several functions.
   3. Data sections of a C object:

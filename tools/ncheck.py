@@ -7,12 +7,15 @@ Usage: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]     (area overla
   --score  prints `SCORE <file> <distance>` (0 = identical)
   --asm    leaves the generated .s in build/<name>.s
   --mark   adds `// MATCHING addr size` if it matches (better to mark with matchcheck)
+Compiler: old-gcc gcc-2.7.2-psx (OLDGCC overrides it); a file with a `// CC gcc-2.8.1` header line is compiled
+with /opt/oldgcc/gcc-2.8.1-psx instead (OLDGCC_ROOT; tools/matchcheck.py maps it to the CC1PSX of that version).
 Requirements: tools/setup_native.sh (old-gcc in /opt/oldgcc, maspsx in /opt/maspsx, binutils-mipsel-linux-gnu).
 """
 import difflib, os, re, shutil, struct, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GCC = os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")
+GCC = os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")  # compiler of the files without `// CC`
+OLDGCC_ROOT = os.environ.get("OLDGCC_ROOT", "/opt/oldgcc")
 MASPSX = os.environ.get("MASPSX", "/opt/maspsx/maspsx.py")
 ASPSX_VER = os.environ.get("ASPSX_VER", "2.86")
 _src = open(os.path.join(ROOT, "tools", "matchcheck.py")).read().replace("\nmain()\n", "\n")
@@ -20,7 +23,16 @@ M = {"__file__": os.path.join(ROOT, "tools", "matchcheck.py")}
 exec(compile(_src, "matchcheck", "exec"), M)  # reuses header(), game_bytes(), mask()
 
 
+def gcc_for(src):
+    """old-gcc folder for a file: GCC, or OLDGCC_ROOT/<name>-psx for a `// CC <name>` header line."""
+    cc = M["cc_of"](src)
+    return GCC if cc == M["CC_DEFAULT"] else os.path.join(OLDGCC_ROOT, cc + "-psx")
+
+
 def build(src, flags, d, inc):
+    GCC = gcc_for(src)
+    if not os.path.exists(GCC + "/cc1"):
+        raise subprocess.CalledProcessError(1, GCC, stderr=("compiler %s not installed (tools/setup_native.sh)" % GCC).encode())
     subprocess.run([GCC + "/cpp", "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + inc, "-I" + inc + "/tomba", "-D_LANGUAGE_C", src, d + "/a.i"],
                    check=True, capture_output=True)
     subprocess.run([GCC + "/cc1", "-quiet", "-w", "-funsigned-char"] + flags.split() + [d + "/a.i", "-o", d + "/a.s"],

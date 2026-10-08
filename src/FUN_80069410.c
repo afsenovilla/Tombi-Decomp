@@ -1,5 +1,6 @@
 // FUNC 80069410 72 MAIN0
-/* score 3: only the epilogue differs (game: jr $ra with addiu $sp in the delay slot after s-reg restores; library code from another toolchain). Tried -O1/-O3/-fno-delayed-branch/-fomit-frame-pointer: no change or worse. Unreproducible with CC1PSX 4.3/ASPSX 2.86 per guide. */
+// MATCHING 80069410 72
+// CC gcc-2.8.1
 extern int (*DAT_800981c0)(void);
 extern int FUN_8006a254(int a, int b, int c);
 

@@ -7,6 +7,7 @@ Steps (all output under build/ and asm/, both ignored by git):
      named after our C functions (tools/gen_symbols.py writes the symbol files first).
   2. Each retail function is assembled into a *target* object  -> build/target/<prog>/<func>.o
   3. Each src/*.c and src/x0nn/*.c is compiled with the native toolchain (tools/ncheck.py) -> build/base/<prog>/<func>.o
+     (honoring a `// CC gcc-X.Y.Z` header line: old-gcc of that version, see ncheck.gcc_for)
   4. objdiff.json is written with one unit per function (categories: game / sdk, main0 / x000).
   5. objdiff-cli writes build/report.json.
 

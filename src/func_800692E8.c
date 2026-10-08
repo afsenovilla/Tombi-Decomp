@@ -1,5 +1,6 @@
 // FUNC 800692e8 168 MAIN0
-// only diff: epilogue jr ra/addiu sp (s-regs saved, guide: not reproducible)
+// MATCHING 800692e8 168
+// CC gcc-2.8.1
 typedef struct { unsigned char n; char p[3]; unsigned char *v; } E;
 typedef struct { char p[8]; E *e; char q[0xea - 0xc]; unsigned char n; } T;
 extern T *(*D_800981C0)();

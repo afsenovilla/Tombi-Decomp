@@ -1,5 +1,6 @@
 // FUNC 8006911c 248 MAIN0
-// wip: solo difiere el epilogo (jr ra; addiu sp en delay slot), tipico de libcard 0x8006xxxx
+// MATCHING 8006911c 248
+// CC gcc-2.8.1
 typedef struct C { int *tab; char p[0xe3-4]; unsigned char n; char p1; unsigned short s; } C;
 extern C *(*DAT_800981c0)(void);
 unsigned FUN_8006911c(int unused, int k, int idx)
