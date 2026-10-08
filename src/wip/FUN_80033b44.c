@@ -1,5 +1,5 @@
 // FUNC 80033b44 5056 MAIN0
-/* score 36 (ncheck = matchcheck), same size: 2 regions left, both register swaps: case 0 switch c==4 body (game q=v0,byte=v1); case 1 tail (game: sum in v1, la T72 in a1; ours swapped). Fixed so far: clamp flag reuses w (anti-dependence keeps sh before slt), dir() as inline returning int into short s, frame via nested block pad at the end (debt). */
+/* score 16 (ncheck): only case 1 tail differs: game `addu v1,a1(t),a0(k2)` (ours k2 first) and y lands in a0 instead of v1. Fixed 36->16: case 0 switch byte read into function-scope k and case 7 through p (global pseudos change local-alloc order); case 1 tail via pointer local t + second extern name DAT_8007a072b for the += (la priority, debt). Tried: index forms, int/char* t, t scope, x/y types/order, sum into function vars. Earlier: clamp flag reuses w, dir() inline returning int, frame via nested block pad (debt). */
 #include "TOBJ.H"
 typedef struct V2 { short x, y; } V2;
 typedef struct {
@@ -17,6 +17,7 @@ extern short DAT_8009d600s, DAT_8009d602s, DAT_8009d604a[];
 extern unsigned short DAT_8007a04c[];
 extern unsigned short DAT_8007a070[];
 extern short DAT_8007a072[];
+extern short DAT_8007a072b[];
 extern unsigned char DAT_8009d2b2[];
 extern volatile unsigned short DAT_8009d670[];
 extern unsigned short DAT_1f8003c8;
@@ -102,13 +103,14 @@ void FUN_80033b44(TObj *o)
         switch (c) {
         case 4:
             q = DAT_8009f0ec;
-            o->w74 = *q;
+            k = *q;
+            o->w74 = k;
             *q = 2;
             goto set94;
         case 7:
-            q = DAT_8009f0ec;
-            o->w74 = *q;
-            *q = 5;
+            p = (P *)DAT_8009f0ec;
+            o->w74 = p->b0;
+            p->b0 = 5;
         set94:
             o->d94 = (int)DAT_8009f0ec;
             break;
@@ -165,15 +167,16 @@ void FUN_80033b44(TObj *o)
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 0x10);
         k = o->animFrame + o->animFrame * 2;
-        o->waa += DAT_8007a072[k];
+        o->waa += DAT_8007a072b[k];
         {
-            int x, y;
+            int x, y; short *t;
+            t = DAT_8007a072;
             if (o->animFrame & 1) {
                 x = o->waa;
-                y = DAT_8007a072[k + 1] + 0x40;
+                y = t[k + 1] + 0x40;
             } else {
                 y = o->waa;
-                x = DAT_8007a072[k + 1] + 0xc0;
+                x = t[k + 1] + 0xc0;
             }
             if (x < y) FUN_80033834(o);
         }
@@ -398,7 +401,7 @@ void FUN_80033b44(TObj *o)
         DAT_8009c330->w22++;
         break;
     }
-    { char pady[16]; { char padz[16]; } }
+    { char pady[24]; { char padz[16]; } }
     if (o->w22 != 0 && --o->w22 <= 0) o->active = 1;
     if (o->b6a != 0) {
         o->b6a = 0;
