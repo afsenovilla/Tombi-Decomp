@@ -1,5 +1,5 @@
 // FUNC 80028be0 948 MAIN0
-// score 93: case 3/7 decel tails cross-jump differently than the game
+// MATCHING 80028be0 948
 #include "TOBJ.H"
 typedef struct { char p[0x24]; int d24; char q[0x70 - 0x28]; signed char b70, b71, b72, b73; } S;
 extern unsigned char D_8009C93F;
@@ -22,16 +22,19 @@ static __inline__ int approach(S *o)
 }
 static __inline__ int decel(S *o)
 {
-    if (o->d24 == 0) {
-        o->b71 = 0;
-        o->b72 = 0;
-        o->b73 = 0;
-        return 1;
+    int v = o->d24;
+    if (v != 0) {
+        if (v > 0) v -= 0x80;
+        else v += 0x80;
+        o->d24 = v;
+        return 0;
     }
-    if (o->d24 > 0) o->d24 -= 0x80;
-    else o->d24 += 0x80;
-    return 0;
+    o->b71 = 0;
+    o->b72 = 0;
+    o->b73 = 0;
+    return 1;
 }
+
 void func_80028BE0(S *o)
 {
     TObj *p;
