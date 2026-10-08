@@ -1,5 +1,5 @@
 // FUNC 8012236c 312 X000
-/* score 65: o=a2 y s=a0 ya coinciden; falta orden del case 0 y k/j del case 1 (k debe ir en a3, DAT_186 en a1). */
+/* score 64: short r + unsigned short k copy gives the game's lh/move/slti (as in func_80122724). Left: case 0 table load reg (game v0, sw anim right after), DAT_186 load should come before lw d34 (k then lands in a3). */
 #include "TOBJ.H"
 extern short DAT_1f800176;
 extern unsigned short DAT_1f800186;
@@ -11,9 +11,9 @@ extern void FUN_80018934(TObj *);
 
 void FUN_8012236c(TObj *o)
 {
-    int k, t;
+    unsigned short k; int t;
     unsigned short j;
-    char pad[8];
+    short r;
     switch (o->b04) {
     case 0:
         o->w1e = 11;
@@ -26,8 +26,9 @@ void FUN_8012236c(TObj *o)
         o->d30 = o->h->p.whole;
         break;
     case 1:
-        k = DAT_1f800176;
-        if (k < 0x71a) {
+        r = DAT_1f800176;
+        k = r;
+        if (r < 0x71a) {
             j = DAT_1f800186;
             o->b.p.whole = 0;
             o->a.p.whole = (short)(o->d30 - k) >> 3;

@@ -5,15 +5,15 @@ extern void (*DAT_80079bac[])(unsigned char *);
 extern void (*DAT_80079d74[])(unsigned char *);
 extern void (*DAT_8007b310[])(unsigned char *);
 extern int DAT_1f800198;
-
-/* casi: solo p/q intercambiados (juego p=s0, q=s1). do/while real iza &DAT_80077d9c a s2: por eso goto */
+/* score 16: still p/q swapped (game p=s0, q=s1 = p+2); gcc gives s0 to the la'd pointer. for/struct version makes the giv naturally but hoists &DAT_80077d9c (87). */
 void FUN_8001d36c(void)
 {
-    unsigned char *p = DAT_800a6610;
+    unsigned char *p;
     unsigned char *q;
     void (*f)(unsigned char *);
     DAT_1f800198 = 0;
-    q = p + 2;
+    q = DAT_800a6610 + 2;
+    p = DAT_800a6610;
 loop:
         if (*p != 0) {
             switch (q[0x1a] & 0x7f) {
@@ -26,9 +26,9 @@ loop:
             f(p);
         }
     next:
-        q += 0xd4;
         DAT_1f800198 = DAT_1f800198 + 1;
         p += 0xd4;
+        q += 0xd4;
     if (DAT_1f800198 < 200)
         goto loop;
 }

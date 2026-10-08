@@ -50,7 +50,7 @@ extern void SetSemiTrans(PolyFT4 *, int);
 
 static __inline__ int onscreen(PolyFT4 *p)
 {
-    if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100 || *(volatile unsigned short *)&p->y3 < 0x100) &&
+    if ((*(volatile unsigned short *)&p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100 || p->y3 < 0x100) &&
         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140 || p->x3 < 0x140))
         return 1;
     return 0;
@@ -70,6 +70,7 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
+/* score 25: volatile x3/y3 stores + volatile y0 read fix the onscreen block; left: lui 0x9000000 (addprim e) scheduled above the b0d&1 if, and j/addiu 1 tail of addprim. */
 void func_80055CB8(O *o)
 {
     PolyFT4 *p;
@@ -96,8 +97,8 @@ void func_80055CB8(O *o)
             p->y1 = p->y0;
         }
         p->y2 = p->y0 + e->h;
-        p->x3 = p->x1;
-        p->y3 = p->y2;
+        *(volatile unsigned short *)&p->x3 = p->x1;
+        *(volatile unsigned short *)&p->y3 = p->y2;
         if (onscreen(p)) {
             p->code = 0x2d;
             SetSemiTrans(p, o->b0d >> 7);
@@ -109,7 +110,7 @@ void func_80055CB8(O *o)
             if (o->b0d & 1) {
                 p->clut = o->w08;
             }
-            if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), 0, o->b0f + o->z, 0x9000000) == 0) {
+            if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), 0, o->z + o->b0f, 0x9000000) == 0) {
                 DAT_1f800164 = DAT_1f800164 + 1;
             }
         }
