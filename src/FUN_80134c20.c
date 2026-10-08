@@ -1,4 +1,5 @@
 // FUNC 80134c20 572 X000
+// MATCHING 80134c20 572
 #include "TOBJ.H"
 extern int DAT_1f8002d0[];
 extern void *PTR_8013ac18[];
@@ -14,6 +15,9 @@ extern void FUN_80018790(TObj *);
 
 void FUN_80134c20(TObj *o)
 {
+    int st;
+    void *an;
+
     switch (o->b04) {
     case 0:
         o->box0 = 10;
@@ -52,31 +56,23 @@ void FUN_80134c20(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            switch (o->state) {
-            case 0:
-                o->anim = PTR_8013ac34[0];
-                FUN_8001fe6c(o);
-                o->state++;
-                break;
-            case 1:
-                break;
-            default:
-                return;
-            }
-            break;
+            st = o->state;
+            if (st == 0) goto c0;
+        chk:
+            if (st == 1) goto fec;
+            return;
+        c0:
+            an = PTR_8013ac34[0];
+            goto set;
         case 1:
-            switch (o->state) {
-            case 0:
-                o->anim = PTR_8013ac3c[0];
-                FUN_8001fe6c(o);
-                o->state++;
-                break;
-            case 1:
-                break;
-            default:
-                return;
-            }
-            break;
+            st = o->state;
+            if (st != 0) goto chk;
+            an = PTR_8013ac3c[0];
+        set:
+            o->anim = an;
+            FUN_8001fe6c(o);
+            o->state++;
+            goto fec;
         case 2:
             o->b04 = 3;
             return;
@@ -88,6 +84,7 @@ void FUN_80134c20(TObj *o)
         default:
             return;
         }
+    fec:
         FUN_8001fec0(o);
         break;
     case 3:
