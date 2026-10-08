@@ -21,7 +21,7 @@ void FUN_8002c0e0(TObj *o)
     } else
         o->step = st + 1;
     p = (unsigned char *)o->d90;
-    switch (o->animFrame = *(unsigned short *)(p + 0x2e) & 7) {
+    switch ((short)(o->animFrame = *(unsigned short *)(p + 0x2e) & 7)) {
     case 0: case 2:
         o->d88 = 0x40;
         v = 0xe0;
@@ -42,7 +42,8 @@ void FUN_8002c0e0(TObj *o)
     case 6:
         o->d88 = 0x80;
         v = 0x20;
-        break;
+        o->d8c = v;
+        goto D;
     case 7:
         v = 0xe0;
         o->d88 = 0;
