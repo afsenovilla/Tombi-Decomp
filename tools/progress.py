@@ -202,11 +202,30 @@ def write_svgs(res, tot, matching):
         open(N("docs", "map_%s.svg" % key), "w").write("\n".join(m))
 
 
+def covered(items):
+    """Game-code bytes (non-library items) covered by matched ranges; a matched range can span several
+    Ghidra/splat functions or include library code, so count the overlap, never the raw marker size."""
+    ranges = []
+    for dp, _, files in os.walk(N("src")):
+        for fn in files:
+            if fn.endswith(".c"):
+                for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", open(os.path.join(dp, fn), errors="replace").read()):
+                    ranges.append((int(m.group(1), 16), int(m.group(2))))
+    tot = 0
+    for a, size, kind in items:
+        if kind == "lib": continue
+        for s0, n in ranges:
+            lo, hi = max(a, s0), min(a + size, s0 + n)
+            if hi > lo: tot += hi - lo
+    return tot
+
+
 def main():
     res = {k: analyse(*v) for k, v in PROGRAMS.items()}
     tot = {key: sum(r[key] for r in res.values()) for key in
            ("lib", "named", "unnamed", "typed", "game", "n_game", "n_named", "n_unnamed", "n_typed", "n_lib", "excluded", "unnamed_typed")}
-    matching = count_matching_c()
+    cov = {k.split(".")[0]: covered(r["items"]) for k, r in res.items()}
+    matching = sum(cov.values())
     levels = [
         ("Game functions with our own names", tot["named"], "bytes"),
         ("Game functions with types (TObj)", tot["typed"], "bytes"),
@@ -232,7 +251,7 @@ def main():
     for k, r in res.items():
         w("| %s | %d B (%d f) | %.1f %% | %.1f %% | %.1f %% (%d f) | %d B |" % (
             DISPLAY.get(k, k), r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
-            pct(md.get(k.split(".")[0], [0, 0])[0], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
+            pct(cov[k.split(".")[0]], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
     w("")
     w("## What is NOT counted (the real denominator is larger)\n")
     w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
