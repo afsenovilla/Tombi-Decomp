@@ -1,62 +1,64 @@
 // FUNC 80108168 464 X000
-extern unsigned char *DAT_9c330;
-extern int DAT_9c960;
-extern unsigned char DAT_9cda2, DAT_93a;
-extern void FUN_800eeb5c(void *, int);
-extern void FUN_8001fec0(void *);
+#include "TOBJ.H"
+#define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
+extern TObj *DAT_8009c330;
+extern int DAT_8009c960[];
+extern unsigned char DAT_8009cda2, DAT_8009c93a;
+extern void FUN_800eeb5c(TObj *, int);
+extern void FUN_8001fec0(TObj *);
 
-void FUN_80108168(unsigned char *o)
+void FUN_80108168(TObj *o)
 {
-    unsigned short u;
     unsigned char t;
-    switch (o[6]) {
+    unsigned short u;
+    switch (o->state) {
     case 0:
-        DAT_9c330[8] = o[0];
-        u = *(unsigned short *)(o + 0x2e);
-        *(short *)(o + 0x7c) = 0x5a;
-        o[0] = 2;
-        o[0xa2] = 2;
-        *(int *)(o + 0x8c) = 0;
-        *(short *)(o + 0x7e) = 0;
-        o[0x9c] = 0;
-        o[0x9d] = 0;
-        o[0x9e] = 0;
-        o[0x9f] = 0;
-        o[0xad] = 0;
-        o[0x69] = 0;
-        *(signed char *)(o + 0xf) = -0x14;
-        *(unsigned short *)(o + 0x2e) = u & 1;
+        B(DAT_8009c330, 8) = o->active;
+        u = o->animFrame;
+        o->velX = 0x5a;
+        o->active = 2;
+        B(o, 0xa2) = 2;
+        o->d8c = 0;
+        o->velY = 0;
+        o->b9c = 0;
+        o->b9d = 0;
+        o->b9e = 0;
+        o->b9f = 0;
+        B(o, 0xad) = 0;
+        o->b69 = 0;
+        *(signed char *)&o->b0f = -0x14;
+        o->animFrame = u & 1;
         FUN_800eeb5c(o, 0x2b);
-        o[6] = o[6] + 1;
+        o->state++;
     case 1:
         FUN_8001fec0(o);
-        if (DAT_9cda2 == 0)
-            o[6] = o[6] + 1;
+        if (DAT_8009cda2 == 0)
+            o->state++;
         break;
     case 2:
         FUN_8001fec0(o);
-        *(unsigned short *)(*(unsigned char **)(o + 0x44) + 2) += 5;
-        *(short *)(o + 0x7c) -= 5;
-        if (DAT_9c960 == 0x40001) {
-            *(int *)(o + 0x14) += -0x60000;
-            if (*(short *)(o + 0x16) < -0x20f)
-                *(short *)(o + 0x16) = -0x20f;
+        o->d->p.whole += 5;
+        o->velX -= 5;
+        if (DAT_8009c960[0] == 0x40001) {
+            o->y.raw += -0x60000;
+            if (o->y.p.whole < -0x20f)
+                o->y.p.whole = -0x20f;
         }
-        if (*(short *)(o + 0x7c) == 0) {
-            *(signed char *)(o + 0xf) = -8;
-            t = DAT_9c330[8];
-            o[0x9c] = 0;
-            o[0] = t;
-            *(short *)(o + 0xb2) = 0;
-            *(short *)(o + 0x7c) = 0;
-            *(short *)(o + 0x7e) = 0;
-            *(short *)(DAT_9c330 + 0x20) = 0;
-            o[4] = 1;
-            o[5] = 0;
-            o[6] = 0;
-            o[7] = 0;
-            *(short *)(o + 0x20) = 0;
-            DAT_93a = 1;
+        if (o->velX == 0) {
+            *(signed char *)&o->b0f = -8;
+            t = B(DAT_8009c330, 8);
+            o->b9c = 0;
+            o->active = t;
+            o->wb2 = 0;
+            o->velX = 0;
+            o->velY = 0;
+            DAT_8009c330->timer = 0;
+            o->b04 = 1;
+            o->step = 0;
+            o->state = 0;
+            o->substep = 0;
+            o->timer = 0;
+            DAT_8009c93a = 1;
         }
         break;
     }
