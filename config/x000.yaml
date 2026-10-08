@@ -1,0 +1,35 @@
+name: X000.BIN
+sha1: ce168475f667f2ca8842eabad2aec829e301c5c5
+options:
+  basename: x000
+  target_path: game/AREA00/X000.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x000
+  src_path: build/splat_src/x000
+  build_path: build
+  ld_script_path: build/x000.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x000.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x000.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x000.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x000
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x000]
+  - [0x53F50]

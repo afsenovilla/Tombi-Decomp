@@ -1,0 +1,11 @@
+# Python tools for the progress report (tools/build_report.py)
+spimdisasm==1.36.0
+rabbitizer
+pyyaml
+tqdm
+intervaltree
+colorama
+n64img
+crunch64
+capstone
+# splat64==0.35.2 is installed with --no-deps (its optional pylibyaml accelerator needs a C build)

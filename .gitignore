@@ -28,3 +28,6 @@ __pycache__/
 *_decomp.c
 build/
 include/tomba/psyq/
+asm/
+objdiff.json
+config/symbol_addrs_*.txt

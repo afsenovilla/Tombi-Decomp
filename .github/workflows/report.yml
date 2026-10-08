@@ -1,0 +1,59 @@
+name: Progress report
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Fetch game files
+        id: fetch
+        env:
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+        run: |
+          # GAME_FILES_URL: direct download link to a zip with MAIN0.EXE and AREA00/X000.BIN
+          # (the files of your own copy of the game; never committed to the repository).
+          if [ -z "$GAME_FILES_URL" ]; then
+            echo "::notice::GAME_FILES_URL secret not set; skipping the report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          curl -fsSL -o "$RUNNER_TEMP/game.zip" "$GAME_FILES_URL"
+          unzip -o -q "$RUNNER_TEMP/game.zip" -d "$RUNNER_TEMP/game"
+          mkdir -p game/AREA00
+          cp "$(find "$RUNNER_TEMP/game" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
+          cp "$(find "$RUNNER_TEMP/game" -iname X000.BIN | head -1)" game/AREA00/X000.BIN
+          echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
+          echo "ce168475f667f2ca8842eabad2aec829e301c5c5  game/AREA00/X000.BIN" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCES_013.31_report
+          path: build/report.json

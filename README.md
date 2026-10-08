@@ -79,6 +79,16 @@ Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/`, the DOS `
 `/opt/psyq/new/` and `ASPSX.EXE` 2.86 to `/opt/psyq/46/BIN/`, install `wine` and `dosbox`, then run
 `python3 tools/matchcheck.py src/<Name>.c`.
 
+## Progress report (objdiff / decomp.dev)
+
+`tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
+[decomp.dev](https://decomp.dev) displays: [splat](https://github.com/ethteck/splat) splits the retail
+binaries into one assembly file per function (`config/main0.yaml`, `config/x000.yaml`), each function is
+assembled as the *target* object, each `src/*.c` is compiled as the *base* object, and `objdiff-cli`
+compares them (`build/report.json`). The GitHub Actions workflow `.github/workflows/report.yml` runs it on
+every push; it needs a `GAME_FILES_URL` secret pointing to a zip with your own `MAIN0.EXE` and
+`AREA00/X000.BIN`.
+
 ## Repository layout
 
 ```
@@ -89,6 +99,8 @@ include/tomba/  headers from psx_tomba (see THIRD_PARTY_NOTICES.md)
 notes/          memory maps, structures, function lists and names, guides
 docs/           generated progress report and charts
 ghidra/scripts/ Ghidra scripts (headless pipeline, struct and name import)
+config/         splat configurations for MAIN0.EXE and X000.BIN
+.github/        CI workflow that publishes the objdiff report
 tools/          checkers, progress report, analysis helpers, setup scripts
 game/           your own game files (ignored by git)
 ```
