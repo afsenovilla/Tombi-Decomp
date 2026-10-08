@@ -1,4 +1,5 @@
 // FUNC 8002f16c 536 MAIN0
+// wip r8: score 20. Remaining: the h->p.whole block; game loads D_800A6066 first, then D_800A6078, o->h, and stores sh v0,2(a0) right at the join (before lhu D_800A604E).
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -13,10 +14,13 @@ extern short *DAT_800a6078;
 extern short *DAT_800a607c;
 extern short DAT_800a604e;
 
-void FUN_8002f16c(TObj *o)
+void func_8002F16C(TObj *o)
 {
     unsigned char b;
-    short s;
+    int s;
+    int u;
+    Fix16 *f;
+    short t;
     unsigned char v;
     switch (o->state) {
     case 0:
@@ -35,33 +39,44 @@ void FUN_8002f16c(TObj *o)
     o->timer = o->timer - 1;
     o->visible = DAT_800a6039;
     if (o->timer >= 0x3d) {
-        v = o->b6b;
-        b = v + 8;
-        if (v > 0x7e) b = v;
+        if (o->b6b < 0x7f)
+            b = o->b6b + 8;
+        else
+            b = o->b6b;
     } else {
         if (o->timer < 0) {
-            DAT_800a6038 = 3;
-            if (DAT_800a6118 < 1) DAT_800a6038 = 1;
+            if (DAT_800a6118 > 0)
+                DAT_800a6038 = 3;
+            else
+                DAT_800a6038 = 1;
             DAT_800a6104 = 3;
             o->b6b = 0;
             o->b04 = 2;
             goto L;
         }
-        b = o->b6b - 2;
-        if (o->b6b == 0) b = 0;
+        if (o->b6b != 0)
+            b = o->b6b - 2;
+        else
+            b = 0;
     }
     o->b6b = b;
 L:
-    s = 4;
-    if ((DAT_800a6066 & 1) == 0) s = -4;
-    o->h->raw = *(short *)((char *)DAT_800a6078 + 2) + s;
-    o->y.raw = DAT_800a604e - 8;
-    o->d->raw = *(short *)((char *)DAT_800a607c + 2);
-    if (o->b0c == 0) {
+    s = DAT_800a6078[1];
+    f = o->h;
+    u = s + 4;
+    if (!(DAT_800a6066 & 1))
+        u = s - 4;
+    f->p.whole = u;
+    o->y.p.whole = DAT_800a604e - 8;
+    o->d->p.whole = DAT_800a607c[1];
+    switch (o->b0c) {
+    case 0:
         b = DAT_800a6047 + 1;
-    } else if (o->b0c == 1) {
+        break;
+    case 1:
         b = DAT_800a6047 - 1;
-    } else {
+        break;
+    default:
         return;
     }
     o->b0f = b;
