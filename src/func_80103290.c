@@ -1,5 +1,5 @@
 // FUNC 80103290 920 X000
-// score 17: only the arg setup order before func_8013675C differs (addu a1,zero scheduled earlier in game)
+// MATCHING 80103290 920
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
@@ -9,7 +9,7 @@ void ObjMotionStep(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void FUN_8001f96c(int, int, int, int);
 short ObjTileCollide(TObj *, int, int);
-int func_8013675C();
+int func_8013675C(short, short, short, short, short, short);
 #define BLOCK()                                                                     \
     {                                                                               \
         o->timer = 0;                                                               \
