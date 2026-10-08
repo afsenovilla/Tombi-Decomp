@@ -1,5 +1,5 @@
 // FUNC 8004cb00 1240 MAIN0
-/* score 14: only the addu operand order (game t+i, ours i+t) in the link code and the early sll/q register in case 4 differ. Block-local link vars (one copy in case 4, one at link: for case 2/8) and `int i1 = e->be;` read first fixed most. Tried: x<<2 forms (breaks regs), i*4 computed first in case 4 (breaks cross-jump), decl orders/types. */
+// MATCHING 8004cb00 1240
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5;
@@ -24,8 +24,10 @@ void FUN_8004cb00(Ent *e, int z)
     TObj *p;
     TObj *q2;
     unsigned char ty;
-    unsigned char idx;
     volatile int *q;
+    int idx;
+    int tt;
+    short s;
 
     kind = e->b1 & 0x7f;
     switch (kind) {
@@ -54,12 +56,14 @@ void FUN_8004cb00(Ent *e, int z)
             break;
         }
         if (e->bc & 0x10) {
-            volatile int *q4 = &DAT_1f800334;
-            int t4 = *q4;
-            int b4 = *q4;
-            b4 += *(int *)(t4 + idx * 4 + 4);
+            q = &DAT_1f800334;
+            s = idx << 2;
+            tt = *q;
+            q = (volatile int *)*q;
+            tt = *(int *)(tt + s + 4);
+            q = (volatile int *)((int)q + tt);
             p->ba4 = 1;
-            p->da0 = b4;
+            p->da0 = (int)q;
         }
         break;
     case 5:
@@ -73,14 +77,13 @@ void FUN_8004cb00(Ent *e, int z)
             return;
         q = &DAT_1f800338;
     link:
-        {
-            int i1 = e->be;
-            int t1 = *q;
-            int b1 = *q;
-            b1 += *(int *)(t1 + i1 * 4 + 4);
-            p->ba4 = 1;
-            p->da0 = b1;
-        }
+        s = *(volatile unsigned char *)&e->be << 2; /* volatile: keeps the lbu before the *q loads */
+        tt = *q;
+        q = (volatile int *)*q;
+        tt = *(int *)(tt + s + 4);
+        q = (volatile int *)((int)q + tt);
+        p->ba4 = 1;
+        p->da0 = (int)q;
         break;
     case 7:
         if ((DAT_8009bd98 = allocObjectLayer()) == 0)
