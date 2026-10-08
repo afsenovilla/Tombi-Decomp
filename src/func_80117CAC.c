@@ -1,107 +1,97 @@
 // FUNC 80117cac 916 X000
 // MATCHING 80117cac 916
-// Whole function: splat splits it into func_80117CAC (16), func_80117CBC (728) and func_80117F98 (168).
-typedef struct {
-    unsigned char b00[3];
-    unsigned char subtype;
-    unsigned char b04;
-    unsigned char b05[0x1b];
-    short timer;
-    unsigned char b22[0x6e];
-    short *d90;
-    unsigned char b94[0x32];
-    unsigned short wc6;
-} O;
-typedef struct {
-    short type;
-    short w02, w04, w06, w08, w0a, w0c, w0e, w10, w12;
-} E;
-extern E D_800A3FE0[][7];
-extern short D_801384B6[][9];
-extern short *D_80138630[];
-extern int ObjCullRegister(O *);
-extern void ObjFree(O *);
+/* Covers splat entries func_80117CAC (prologue) + func_80117CBC (body). */
+#include "TOBJ.H"
 
-void func_80117CAC(O *o)
+typedef struct { char pad[0xc6]; unsigned short wc6; } XC;
+typedef struct { short s[10]; } E;
+typedef struct { E e[6]; char pad[0x8c - 0x78]; } G;
+typedef struct { short s0, s2, s4, s6, s8, sa; char pad[0x8c - 0xc]; } G2;
+typedef struct { short a, b, c, d, e, f, g, h, i; } T;
+
+extern G D_800A3FE0[];
+extern G2 D_800A4058[];
+extern T D_801384B6[];
+extern short *D_80138630[];
+extern int ObjCullRegister(TObj *);
+extern void FUN_800187e4(TObj *);
+
+#define g ((G2 *)e)
+
+void func_80117CAC(TObj *o)
 {
-    int i;
     E *e;
-    short *s;
+    short *p;
+    int i;
 
     switch (o->b04) {
     case 0:
-        if (--o->timer == 0)
-            o->b04++;
+        if (--o->timer == 0) o->b04++;
         break;
     case 1:
-        if (ObjCullRegister(o) == 0)
-            o->b04++;
+        if (ObjCullRegister(o) == 0) o->b04++;
         for (i = 0; i < 6; i++) {
-            e = &D_800A3FE0[o->wc6][i];
-            switch (e->type) {
-            case 2:
-            case 3:
-                if (e->w0c <= 0)
-                    e->w0e = 0;
-                if (e->w10 <= 0)
-                    e->w12 = 0;
-            case 1:
-            case 4:
-            case 5:
-                e->w06 -= e->w0c;
-                e->w0a -= e->w10;
-                e->w0c += e->w0e;
-                e->w10 += e->w12;
-                if (--e->w02 <= 0) {
-                    s = D_801384B6[e->type];
-                    e->w02 = *s++;
-                    e->w0c = *s++;
-                    e->w0e = *s++;
-                    e->w10 = *s;
-                    e->w12 = s[1];
-                    e->type++;
-                }
-                break;
+            e = &D_800A3FE0[((XC *)o)->wc6].e[i];
+            switch (e->s[0]) {
             case 0:
             case 6:
                 break;
+            case 2:
+            case 3:
+                if (e->s[6] <= 0) e->s[7] = 0;
+                if (e->s[8] <= 0) e->s[9] = 0;
+            case 1:
+            case 4:
+            case 5:
+                e->s[3] -= e->s[6];
+                e->s[5] -= e->s[8];
+                e->s[6] += e->s[7];
+                e->s[8] += e->s[9];
+                if (--e->s[1] <= 0) {
+                    p = &D_801384B6[e->s[0]].a;
+                    e->s[1] = *p++;
+                    e->s[6] = *p++;
+                    e->s[7] = *p++;
+                    e->s[8] = p[0];
+                    e->s[9] = p[1];
+                    e->s[0]++;
+                }
+                break;
             }
         }
-        e = &D_800A3FE0[o->wc6][6];
-        switch (e->type) {
+        e = (E *)&D_800A4058[((XC *)o)->wc6];
+        switch (g->s0) {
+        case 0:
+            break;
         case 1:
-            if (--e->w02 <= 0) {
-                o->d90 = D_80138630[o->subtype];
-                e->w02 = 0x12;
-                e->type++;
-            }
+            if (--g->s2 > 0) break;
+            o->d90 = (int)D_80138630[o->subtype];
+            g->s2 = 0x12;
+            g->s0++;
             break;
         case 2:
-            s = o->d90;
-            e->w04 += s[0];
-            e->w06 += s[1];
-            e->w08 -= s[0];
-            e->w0a -= s[1];
-            o->d90 = s + 2;
-            if (--e->w02 <= 0) {
-                e->w02 = 0x1e;
-                e->type++;
-            }
+            p = (short *)o->d90;
+            g->s4 += p[0];
+            g->s6 += p[1];
+            g->s8 -= p[0];
+            g->sa -= p[1];
+            o->d90 = (int)(p + 2);
+            if (--g->s2 > 0) break;
+            g->s2 = 0x1e;
+            g->s0++;
             break;
         case 3:
-            if (--e->w02 <= 0)
-                o->b04 = 2;
-            break;
-        case 0:
+            if (--g->s2 > 0) break;
+            o->b04 = 2;
             break;
         }
         break;
     case 2:
-        D_800A3FE0[o->wc6][0].type = -1;
+        D_800A3FE0[((XC *)o)->wc6].e[0].s[0] = -1;
         o->b04++;
         break;
     case 3:
-        ObjFree(o);
+        FUN_800187e4(o);
         break;
     }
 }
