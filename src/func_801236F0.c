@@ -1,7 +1,7 @@
 // FUNC 801236f0 812 X000
-/* wip (score 22): covers func_801236F0 + func_801237E4 (jump-table split, 812 B). Only the velH/velV block of
-   b04=1/step=0 differs: the game loads animFrame twice up front (first for D_80138F8C, second for D_80138F8E),
-   stores b68/b9c, velH, then step++ and velV; here the volatile read and the order don't line up. */
+// MATCHING 801236f0 812
+/* Covers splat entries func_801236F0 + func_801237E4 (split at the jump table).
+   Matching debt: volatile accesses on animFrame (2nd read), velH store and step read fix the schedule. */
 #include "TOBJ.H"
 
 typedef struct { short h, v; } VV;
@@ -14,7 +14,7 @@ extern short TileCollideAt(TObj *, short, short);
 extern TObj *D_8009C948[];
 extern short D_80138F8C[];
 extern short D_80138F8E[];
-extern unsigned char D_8009CE4D;
+extern unsigned char D_8009CE4D[];
 extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[], D_800A4553[];
 extern int D_800A4568[];
 extern unsigned char D_8007A7F0[];
@@ -23,6 +23,7 @@ extern void (*D_8007A890[])(TObj *);
 void func_801236F0(TObj *o)
 {
     int f, g;
+    unsigned short h;
 
     switch (o->b04) {
     case 0:
@@ -39,11 +40,12 @@ void func_801236F0(TObj *o)
                 f = o->animFrame;
                 g = *(volatile unsigned short *)&o->animFrame;
                 o->b68 = 0;
-                o->velV = D_80138F8E[g * 2];
-                o->velH = D_80138F8C[f * 2];
                 o->b9c = 0;
-                o->step++;
-                if (D_8009CE4D == 0 && o->animFrame == 0) {
+                *(volatile short *)&o->velH = D_80138F8C[f * 2];
+                h = D_80138F8E[g * 2];
+                o->step = *(volatile unsigned char *)&o->step + 1;
+                o->velV = h;
+                if (D_8009CE4D[0] == 0 && o->animFrame == 0) {
                     o->wb4 = 1;
                     D_8009C93F[0] = 1;
                     D_8009C93E[0] = 1;
