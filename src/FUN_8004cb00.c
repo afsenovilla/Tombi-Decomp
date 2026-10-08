@@ -1,5 +1,5 @@
 // FUNC 8004cb00 1240 MAIN0
-/* demoted: bytes match but some relocated addresses (globals/callees) differ from the game; run tools/ncheck.py to see which ("address of X differs"). Fix the extern names/offsets. */
+// MATCHING 8004cb00 1240
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5;
@@ -15,7 +15,7 @@ extern TObj *ObjAlloc(void);
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer5(void);
 extern TObj *allocObjectLayer1(void);
-extern TObj *allocObjectLayer(void);
+extern TObj *FUN_80018678(void);
 
 
 void FUN_8004cb00(Ent *e, int z)
@@ -86,7 +86,7 @@ void FUN_8004cb00(Ent *e, int z)
         p->da0 = (int)q;
         break;
     case 7:
-        if ((DAT_8009bd98 = allocObjectLayer()) == 0)
+        if ((DAT_8009bd98 = FUN_80018678()) == 0)
             return;
         break;
     }
