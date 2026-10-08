@@ -1,5 +1,5 @@
 // FUNC 80056e4c 860 MAIN0
-// wip score 18 (was 59): short u + volatile xy read + s/xy/hh order. Left: volatile xy gives la a0 (game lui s1 direct), move a0,s2 placement, v0/v1 at +0x2dc.
+/* score 6 (was 18): only SetSemiTrans arg setup differs: game has li a1,1 in the bnez delay slot and move a0,s2 right after lhu anim; ours gets li a1,1 after lhu (reorg cannot scan past volatile loads, so li must be scheduled before them or the game has no volatile). otadd sibling form (c=z, d=b0f) fixed the tail; tried volatility combos of all 6 loads, statement hill-climb, non-volatile reload forms (all CSEd). */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -34,12 +34,12 @@ typedef struct { short vx, vy, vz, pad; } SVec;
 extern int D_8009C960;
 extern SVec D_1F800060;
 extern long D_1F80008C;
-extern long D_1F800070;
+extern volatile long D_1F800070;
 extern long D_1F800074;
 extern char D_1F8000C0[];
 extern char D_1F8000C0b[];
 extern TObj *DAT_1f8001d4;
-extern PolyFT4 *DAT_1f800164;
+extern PolyFT4 *volatile DAT_1f800164;
 extern int DAT_1f8001e0;
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
@@ -65,7 +65,7 @@ static __inline__ int project(void)
 
 static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
 {
-    d = d << 2;
+    d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
     if ((unsigned)(d - DAT_1f8001e0) >= 0xca0) return 1;
@@ -85,6 +85,7 @@ void func_80056E4C(TObj *o)
     int t;
     int z;
     short *hh;
+    unsigned short *a;
     unsigned char w;
     unsigned char h;
     short u;
@@ -100,10 +101,12 @@ void func_80056E4C(TObj *o)
     SetTransMatrix(D_1F8000C0b);
     if (project())
         return;
+    a = *(unsigned short *volatile *)&o->anim;
+    t = *(volatile int *)&o->d3c;
+    xy = D_1F800070;
     s = (unsigned char *)*(volatile int *)&o->d3c;
-    xy = *(volatile long *)&D_1F800070;
-    hh = (short *)(*(volatile int *)&o->d3c + *(unsigned short *)o->anim * 4);
     p = DAT_1f800164;
+    hh = (short *)(t + *(volatile unsigned short *)a * 4);
     s += hh[1];
     p->code = 0x2c;
     p->r0 = o->wb4;
@@ -134,6 +137,6 @@ void func_80056E4C(TObj *o)
     p->y3 = p->y2;
     z = D_1F800074;
     p->clut = o->w08;
-    if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), 0, z + (signed char)o->b0f, 0x9000000) == 0)
+    if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), z, o->b0f, 0x9000000) == 0)
         DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
 }
