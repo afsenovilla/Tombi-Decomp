@@ -6,7 +6,7 @@ extern unsigned char DAT_8009d006;
 extern char *DAT_8009c330;
 extern unsigned short DAT_80115468[][10];
 
-void FUN_8010f328(char *o)
+static __inline__ void fn(char *o)
 {
     unsigned b = (unsigned char)o[0xc1];
     unsigned u = DAT_8009d2b3 + b * 4;
@@ -25,4 +25,9 @@ void FUN_8010f328(char *o)
                 *(unsigned short *)(o + 0x7e) = DAT_80115468[u][1];
         }
     }
+}
+
+void FUN_8010f328(char *o)
+{
+    fn(o);
 }
