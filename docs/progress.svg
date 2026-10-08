@@ -4,8 +4,8 @@
 <text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-08 &#183; unit: bytes of game code (excluding the Psy-Q library)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Matching (C that recompiles identically)</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="98" width="260.3" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">57.9 %</text>
+<rect x="330" y="98" width="266.9" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">59.3 %</text>
 <text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Functions with our own names</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="134" width="29.3" height="18" rx="9" fill="#22c55e"/>
@@ -28,12 +28,12 @@
 <rect x="849.9" y="302" width="0.1" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 40 bytes</title></rect>
 <text x="858" y="317" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">291 KB</text>
 <text x="28" y="350" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#1e293b">TOTAL</text>
-<rect x="330.0" y="336" width="170.3" height="22" fill="#16a34a"><title>Matching C: 304460 bytes</title></rect>
-<rect x="500.3" y="336" width="19.1" height="22" fill="#22c55e"><title>Named by us: 34236 bytes</title></rect>
-<rect x="519.4" y="336" width="220.8" height="22" fill="#38bdf8"><title>Unnamed, with TObj: 394744 bytes</title></rect>
-<rect x="740.2" y="336" width="54.4" height="22" fill="#f59e0b"><title>Unnamed, untyped: 97304 bytes</title></rect>
-<rect x="794.6" y="336" width="55.4" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 98992 bytes</title></rect>
-<text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">907 KB</text>
+<rect x="330.0" y="336" width="173.2" height="22" fill="#16a34a"><title>Matching C: 312152 bytes</title></rect>
+<rect x="503.2" y="336" width="19.0" height="22" fill="#22c55e"><title>Named by us: 34236 bytes</title></rect>
+<rect x="522.1" y="336" width="219.0" height="22" fill="#38bdf8"><title>Unnamed, with TObj: 394744 bytes</title></rect>
+<rect x="741.1" y="336" width="54.0" height="22" fill="#f59e0b"><title>Unnamed, untyped: 97304 bytes</title></rect>
+<rect x="795.1" y="336" width="54.9" height="22" fill="#94a3b8"><title>Sony library (Psy-Q): 98992 bytes</title></rect>
+<text x="858" y="351" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#64748b" text-anchor="start">915 KB</text>
 <rect x="28" y="378" width="13" height="13" rx="3" fill="#16a34a"/>
 <text x="47" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Matching C</text>
 <rect x="133" y="378" width="13" height="13" rx="3" fill="#22c55e"/>

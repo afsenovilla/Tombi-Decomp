@@ -185,6 +185,30 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   `volatile` accesses to force order: func_801236F0. Second extern names also in func_800425C4, func_80047AF0,
   func_8002235C, func_80101938, func_8011AD98, func_80137458. Files holding several small functions merged by splat: func_8011D204 (6),
   func_8011F288 (wip, 3).
+  `volatile` stores pinning a sunk store (then permute the rest): func_80122724, func_8010E628.
+
+### More recipes (fifth batch)
+- **Check first**: `grep -il "^// FUNC <addr>" src/*.c`. Many wips (and five matches this batch) duplicated functions
+  already matched under a psx_tomba name.
+- **Per-local type brute force** (int/short/ushort/uchar, all locals together, plus `char pad[N]` sizes) closes many
+  near-misses outright (FUN_8011116c, FUN_80043c74, FUN_80017b44 134→5).
+- **Wrong callee prototype** changes delay slots and registers in the caller: check the callee's matched source or asm
+  (`(void)` vs args, `int` vs pointer).
+- **Twins/mirrors**: functions with the same opcode sequence or the same globals can share source
+  (FUN_8004232c = FUN_8004245c, FUN_80028754 mirrors func_800285EC, box collision 800437E0/800480D4 vs 800482EC).
+- **Chain**: scalar vs `X[0]` array per global group (`#define X X_A[0]`), then statement/store permutation,
+  then ~400 random permutations for leftover register swaps (func_8001AEB4 56→0, func_8005B624, stopBgm).
+- **Delay-slot copies**: `int t = (u8)expr; unsigned char d = t; if (t) ... d ...`; `lh; move; slti` is
+  `short r = G; unsigned short v = r; if (r >= K)`; `andi 0xff` + two moves is
+  `unsigned int c = (unsigned char)e` with a `short` and an `unsigned short` copy.
+- **Same store in both beq and jal delay slots**: write the store again inside the if body (func_800FBDB4).
+- **No CSE wanted**: write the full expression again in the test (`a->y - b->y`; `((unsigned)(hy + d) & 0xffff) < 0xc`).
+- **Volatile forms**: `extern volatile T X;` gives plain `lui`+`sh`/`lhu` reloads; `*(volatile T *)&X` gives the `la`
+  form; casting volatile away only at a compare (`*(unsigned short *)&X == K`) drops an `andi 0xffff`.
+- Split `t = A[i] + j` into `t = A[i]; ...; t += j;` and read 2D tables through a row pointer (func_8003F200).
+- Read-modify-write of a field (`o->animFrame &= 1`) at the start of the block fixes early load order.
+- **Open**: func_80108168 / func_80107FCC / func_80108AD0 (score 2): the game sinks `sb -20,0xf(s0)` after the `b69`
+  store but keeps `li -20` early.
 
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
