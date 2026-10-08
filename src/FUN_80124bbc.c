@@ -1,9 +1,5 @@
 // FUNC 80124bbc 340 X000
-/* score 40 without FLAGS (b39; old wip was 40 only with -fno-schedule-insns). Block 2/3 written like the matched twin
-   FUN_80124a84 (sm then e). The block-local `{ int t = dy + o->box0; uy += t; }` is what keeps p in a1 and o in a3
-   (otherwise sched1 hoists o->box0 and a1 becomes a temp, p copied to t0). Left: game adds the UNextended
-   (ph - p->box0) to lhu o->box0, ours adds sign-extended dy + lh o->box0; plus regs in block 2. Tried (u16) casts on
-   t's operands (adds andi), int/ushort d temps (back to 77), ten orderings of the uy statements. */
+// MATCHING 80124bbc 340
 #include "TOBJ.H"
 
 int FUN_80124bbc(TObj *o, TObj *p)
@@ -19,11 +15,15 @@ int FUN_80124bbc(TObj *o, TObj *p)
     unsigned short u6 = oh->p.whole;
     unsigned short u5 = ph->p.whole;
 
-    uy = u6 - u5 + 6;
-    dy = u5 - p->box0;
-    { int t = dy + o->box0; uy += t; }
-    lim = o->box1 + 0xe;
-    if (uy > dy + lim)
+    { int d;
+    uy = u6 - u5;
+    d = u5 - (unsigned short)p->box0;
+    uy += 6;
+    { unsigned short t = d; t += o->box0; uy += t; }
+    dy = d;
+    }
+    lim = 0xe;
+    if (uy > dy + (o->box1 + lim))
         return 0;
     sm = o->box2 + (o->y.p.whole - p->y.p.whole);
     e = p->box2 - p->y.p.whole;
