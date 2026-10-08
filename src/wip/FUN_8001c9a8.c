@@ -10,13 +10,15 @@ extern short DAT_800a45ee;
 
 void FUN_8001c9a8(short x)
 {
-    S *s = DAT_1f8001d4;
-    DAT_1f8003b8 = s->a;
-    DAT_1f8003ba = s->b;
+    volatile S *s = DAT_1f8001d4;
+    unsigned short a = s->a;
+    unsigned short b = s->b;
     DAT_800a45d8 = 0;
     DAT_800a45d9 = 0;
     DAT_800a45ea = x;
     DAT_800a45ee = 0;
     s->a = 3;
     s->b = 0;
+    DAT_1f8003b8 = a;
+    DAT_1f8003ba = b;
 }

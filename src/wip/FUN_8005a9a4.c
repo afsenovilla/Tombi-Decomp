@@ -10,9 +10,11 @@ extern void g5(void);
 
 int FUN_8005a9a4(int i, int arg)
 {
+    int t;
     if (T1[i] != 0xff) {
+        t = T2[i];
         T1[i] = 0xff;
-        g1(T3[T2[i]]);
+        g1(T3[t]);
         if (i != 10) {
             g2(i, 1, 1, arg);
             g3(i, 1);

@@ -17,16 +17,21 @@ void FUN_8001c218(unsigned short p)
 {
     unsigned short u;
     int r;
+    unsigned short *q;
+    unsigned short a, b;
     u = FUN_8001beec();
+    q = DAT_8009c960;
+    a = q[0];
+    b = q[1];
     DAT_1f8001de = 0;
-    DAT_8009d2a8 = DAT_8009c960[0];
-    DAT_8009d2aa = DAT_8009c960[1];
+    DAT_8009d2a8 = a;
+    DAT_8009d2aa = b;
     DAT_8009d2ac = DAT_8009c982;
-    DAT_1f8001dc = PTR_80077b64[DAT_8009c960[0] + DAT_8009f838][DAT_8009c960[1]];
+    DAT_1f8001dc = PTR_80077b64[a + DAT_8009f838][b];
     FUN_8004f3ec();
     r = FUN_8001d1bc((short)p);
     if (r != -1) DAT_8009c967 = 2;
-    FUN_8004f490(DAT_8009c960[0] + DAT_8009f838, DAT_8009c960[1], (short)(p | (u & 0xff)));
+    FUN_8004f490(q[0] + DAT_8009f838, q[1], (short)(p | (u & 0xff)));
     FUN_80039338();
     FUN_8004f3bc();
 }

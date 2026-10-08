@@ -4,8 +4,7 @@ extern void FUN_80018838(void);
 
 void FUN_800ee2a4(unsigned char *o)
 {
-    unsigned t;
-    unsigned char s;
+    unsigned char t, s;
     short v;
     s = o[4];
     switch (s) {

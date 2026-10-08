@@ -6,7 +6,6 @@ extern void FUN_8001fe6c(void *);
 
 void FUN_8002ef20(unsigned char *o)
 {
-    unsigned char t;
     if (o[3] != 9) {
         *(unsigned short *)(o + 0x1e) = DAT_80079d50[o[3]].w;
         *(int *)(o + 0x3c) = DAT_1f8002c8[DAT_80079d50[o[3]].i];
@@ -16,6 +15,7 @@ void FUN_8002ef20(unsigned char *o)
         *(int *)(o + 0x3c) = DAT_1f8002c8[DAT_80079d50[0].i];
         *(int *)(o + 0x24) = *DAT_80079d50[0].a;
     }
+    unsigned char t;
     FUN_8001fe6c(o);
     t = o[4];
     o[0xa] = 0xd;

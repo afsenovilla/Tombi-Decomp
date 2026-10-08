@@ -18,9 +18,9 @@ void FUN_80119468(TObj *o)
         o->w08 = FUN_8005e420(0xe0, 0x1e4);
         o->b0d = 1;
         o->b0a = 0;
+        o->animFrame = 0;
         o->subtype = 0;
         *(signed char *)&o->b0f = -13;
-        o->animFrame = 0;
         o->anim = DAT_8013b810;
         o->d3c = DAT_1f8002d4;
         FUN_8001fe6c(o);
