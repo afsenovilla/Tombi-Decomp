@@ -1,5 +1,5 @@
 // FUNC 800285ec 360 MAIN0
-/* score 39 (ncheck): only missing `move a2,v0` (calc result copied into s) after the E address load */
+/* wip r8: score 4. calc() returning unsigned short gives the separate copy of its result into s, but as andi 0xffff instead of the game's plain move a2,v0 (an int return gets coalesced into s). */
 typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
@@ -10,7 +10,7 @@ extern unsigned short DAT_1f80016e;
 extern short E[];
 extern short E2;
 
-static __inline__ int calc(void)
+static __inline__ unsigned short calc(void)
 {
     int t;
     if (DAT_800a60d6 == 3) {
