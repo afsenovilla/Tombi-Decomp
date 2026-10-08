@@ -1,5 +1,5 @@
 // FUNC 80127380 332 X000
-// score 8: only regalloc of d/sx swapped (game: d=a2, sx=a1 with move a1,a2; negu a1,a2)
+// MATCHING 80127380 332
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
@@ -8,12 +8,13 @@ int func_80127380(TObj *o)
 {
     A *a;
     unsigned char *p;
-    int idx, dx, dy, d;
+    int idx, dy, d;
     short sx;
     unsigned short v;
     if (--o->animTimer == 0) {
         a = o->anim;
-        switch (a->w6 & 0xc000) {
+        d = a->w6;
+        switch (d & 0xc000) {
         case 0:
             o->anim = a + 1;
             idx = a[1].w2;
@@ -38,10 +39,10 @@ int func_80127380(TObj *o)
             o->y.p.whole += dy;
             break;
         case 0x8000:
-            o->animTimer = a->w6 & 0x3fff;
+            o->animTimer = d & 0x3fff;
             return 1;
         case 0xc000:
-            o->animTimer = a->w6 & 0x3fff;
+            o->animTimer = d & 0x3fff;
             return 1;
         }
     }
