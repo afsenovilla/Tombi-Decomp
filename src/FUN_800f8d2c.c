@@ -1,6 +1,7 @@
 // FUNC 800f8d2c 2076 X000
 // MATCHING 800f8d2c 2076
 /* Debt: volatile animFrame read + volatile d88 store in case 2 pin the lhu above "sw a0,0x88" (scheduler). */
+/* Tried (debt2): raw S32(o,0x84)=0 after a temp read of animFrame breaks the CSE (reload ok, no volatile read needed), but sched2 still puts "sw a0,0x88" above the lhu (score 2) for every statement order/var split/pointer copy; only the volatile pair pins it. */
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
