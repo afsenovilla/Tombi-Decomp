@@ -1,5 +1,6 @@
-/* wip: score 36 (dy test re-reads a->y - b->y instead of using dy). Left: game computes it once and copies to a1
-   (addu a1,v1,zero) - same pattern as func_80044424; plus later reg/order diffs. */
+/* wip: score 20. Left: dy is computed twice (dy and the re-read in the test); game computes it once into v1 and
+   copies to a1 (move a1,v1). Using dy in the test drops the copy (score 39-45, tried int/short/ushort dy and sy,
+   sy = dy before/after the test); plus the t8/t9 swap that follows from it. */
 // FUNC 800439f4 640 MAIN0
 #include "TOBJ.H"
 
@@ -14,7 +15,7 @@ int func_800439F4(TObj *a, TObj *b)
     ax = dx;
     if ((unsigned short)(dx + s) > b->box1 + a->box1) return 0;
     dy = (unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole;
-    if ((unsigned short)((a->y.p.whole - b->y.p.whole) + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
+    if ((unsigned short)(((unsigned short)a->y.p.whole - (unsigned short)b->y.p.whole) + (b->box2 + a->box2)) > a->box3 + b->box3) return 0;
     w = off;
     d0 = ax;
     if (dx < 0) {
@@ -26,7 +27,7 @@ int func_800439F4(TObj *a, TObj *b)
     }
     if ((unsigned short)(w - ax) < 4) {
         a->h->p.whole = b->h->p.whole + off;
-        a->ba6 = off >= 0 ? 3 : 2;
+        if (off < 0) a->ba6 = 2; else a->ba6 = 3;
         return 2;
     }
     sy = dy;
@@ -35,9 +36,9 @@ int func_800439F4(TObj *a, TObj *b)
             a->h->p.whole = b->h->p.whole + off;
             return 2;
         }
+        a->y.p.whole = b->y.p.whole - (b->box2 + a->box2);
         a->y.p.frac = 0;
         a->b69 = 1;
-        a->y.p.whole = b->y.p.whole - (b->box2 + a->box2);
         b->b69 = 1;
         if (d0 >= 0) {
             a->bbe = 8;
@@ -58,6 +59,6 @@ int func_800439F4(TObj *a, TObj *b)
         return 3;
     }
     a->h->p.whole = b->h->p.whole + off;
-    a->ba6 = off >= 0 ? 3 : 2;
+    if (off < 0) a->ba6 = 2; else a->ba6 = 3;
     return 2;
 }
