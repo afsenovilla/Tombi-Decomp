@@ -1,15 +1,11 @@
 // FUNC 801224c0 612 X000
-/* score 9 (b42, was 16): py reused as holder of D_1F800186 (`py = D_1F800186; ... py = (short)(o->d34 - py) >> 1;`):
-   a pseudo set twice is global-allocated and its load stays early, so x lands in a1 like the game.
-   Left: game keeps D186 holder (a0) separate from py result (v0) - holder is likely m (game m=a0) but `m = D_1F800186`
-   makes global-alloc give m a1 / x a0 (m loses its a0 preference); sh b=0 early and sh a before sh y in game.
-   Earlier (b36): all dependency-valid orders of the 8 header statements, raw-offset stores, volatile step. */
+// MATCHING 801224c0 612
 #include "TOBJ.H"
 
 extern void *D_8013B208[];
 extern int D_1F8002D4[];
 extern short D_1F800176[];
-extern unsigned short D_1F800186;
+extern unsigned short D_1F800186[];
 extern int D_800A4570[];
 extern int D_800A4574[];
 short GetClut(int x, int y);
@@ -29,7 +25,8 @@ void func_801224C0(TObj *o)
     unsigned char t;
     int m;
     short n;
-    short pa, py;
+    short pa;
+    short py;
     short x;
     t = o->b04;
     switch (t) {
@@ -50,15 +47,14 @@ void func_801224C0(TObj *o)
     case 1:
         x = D_1F800176[0];
         if (x >= 0x35d) break;
-        py = D_1F800186;
         pa = (short)(o->d30 - x) >> 1;
-        py = (short)(o->d34 - py) >> 1;
-        o->y.p.whole = py;
+        py = (short)(o->d34 - D_1F800186[0]) >> 1;
         o->a.p.whole = pa;
+        o->y.p.whole = py;
+        o->b.p.whole = 0;
         m = o->w08 & 0x7fc0;
         n = m;
         o->y.p.whole -= (D_800A4570[0] >> 8) << 2;
-        o->b.p.whole = 0;
         o->a.p.whole -= D_800A4574[0] >> 10;
         switch (o->step) {
         case 0:

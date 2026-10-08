@@ -4,7 +4,8 @@
    b45: cc1 -dR trace (.sched2) shows why: sched2 schedules backward and schedule_select prefers ready insns with a
    greater 'potential hazard' (stores, memory unit) over ALU insns; so ALU addu always loses to any ready store and
    only the anti-dep (addu vh writes u's reg) delays u0/u2. To match, sb u0 must be unready or lower priority than
-   addu uw at T-145 (needs a different dep graph, not order). */
+   addu uw at T-145 (needs a different dep graph, not order).
+   b51: matchcheck also 4 (not an ncheck artifact); w += u in place, p->u1 = p->u0 + w read-backs, static inline uv helper (pq / 4 values): 4..130. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
