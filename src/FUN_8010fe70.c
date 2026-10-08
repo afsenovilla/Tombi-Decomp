@@ -1,7 +1,5 @@
 // FUNC 8010fe70 1092 X000
-/* score 314 (ncheck; only ~10 instrs differ): game copies the index u to a3 before the switch (move a3,v1 in the first beq slot)
-   and back (move v1,a3) in case 2/3 before the 0x74 multiply; tried int k=u copies, param types (bf), u=u, idx() inline, raw TS offsets.
-   Frame 0x20 and the s copy (move a3,a0) came from re-reading o->wb2 in the adds (o->wb2 = o->wb2 + g). */
+// MATCHING 8010fe70 1092
 typedef struct { short a[3]; char pad[0x24 - 6]; unsigned short g[10]; char pad2[0x74 - 0x38]; } T74;
 extern T74 DAT_80115510[];
 extern unsigned char DAT_8009d2b3, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
@@ -16,7 +14,7 @@ static __inline__ void decel(P *o, int u)
         return;
     }
     n = w;
-    if (DAT_80115510[u].a[2] < n)
+    if (n > DAT_80115510[u].a[2])
         o->wb2 = w - DAT_80115510[u].g[6];
     else if (DAT_80115510[u].a[1] < n)
         o->wb2 = w - DAT_80115510[u].g[7];
@@ -37,6 +35,7 @@ static __inline__ void decel(P *o, int u)
 static __inline__ void step(P *o, int u)
 {
     int v, s;
+    short k = u;
     switch (o->animFrame & 3) {
     case 0:
         v = o->wb2;
@@ -76,7 +75,7 @@ static __inline__ void step(P *o, int u)
         break;
     case 2:
     case 3:
-        decel(o, u);
+        decel(o, k);
         break;
     }
 }
