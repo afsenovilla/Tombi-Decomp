@@ -1,5 +1,4 @@
 // FUNC 800eebc4 124 X000
-// FLAGS -O1 -G0
 typedef struct S { char pad[0x24]; void *anim; char pad2[0x8c - 0x28]; int v; } S;
 extern unsigned short DAT_8009c960;
 extern short DAT_8009c944;
