@@ -3,7 +3,7 @@
 Reproduces 628 of the 636 functions that match with the original toolchain (CC1PSX 4.3 + ASPSX 2.86) in
 seconds. Use it to iterate; the final check is still `tools/matchcheck.py`.
 
-Usage: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]
+Usage: tools/ncheck.py [--score] [--asm] [--mark] src/X.c [...]     (area overlays: src/x0nn/*.c, `// FUNC addr size X0nn`)
   --score  prints `SCORE <file> <distance>` (0 = identical)
   --asm    leaves the generated .s in build/<name>.s
   --mark   adds `// MATCHING addr size` if it matches (better to mark with matchcheck)
@@ -46,25 +46,45 @@ def build(src, flags, d, inc):
 
 
 RELS = []     # (offset, type, symbol) of every .text relocation
-_SYMS = {}
-_NAMES = {}
+CUR_PROG = ["MAIN0"]  # program of the file being checked: selects the symbol table
+_TABLES = {}
+OVERLAYS = M["OVERLAYS"]
+
+
+def _syms():
+    """Symbol table of the current program. MAIN0 and X000 share one table (config/symbol_addrs_*.txt and
+    notes/names_*.csv of both); an area overlay X0nn uses MAIN0's plus its own: config/symbol_addrs_x0nn.txt,
+    notes/names_x0nn.csv, the names in notes/functions_x0nn.csv and the functions defined in src/x0nn/."""
+    key = CUR_PROG[0] if CUR_PROG[0] in OVERLAYS else "BASE"
+    if key in _TABLES: return _TABLES[key]
+    syms, names = {}, {}
+    for f in (("main0", "x000") if key == "BASE" else ("main0", key.lower())):
+        p = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)
+        for l in (open(p) if os.path.exists(p) else ()):
+            m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
+            if m: syms[m.group(1)] = int(m.group(2), 16)
+        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f,) if key != "BASE" and f != "main0" else ()):
+            p = os.path.join(ROOT, "notes", csvf)
+            for l in (open(p) if os.path.exists(p) else ()):
+                m = re.match(r"([0-9a-fA-F]{8}),(?:\d+,)?(\w+)", l)
+                if m:
+                    a = int(m.group(1), 16)
+                    if names.setdefault(m.group(2), a) != a: names[m.group(2)] = None  # ambiguous
+    if key != "BASE":
+        d = os.path.join(ROOT, "src", key.lower())
+        for f in (sorted(os.listdir(d)) if os.path.isdir(d) else ()):
+            m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)", open(os.path.join(d, f), errors="replace").read(300))
+            if f.endswith(".c") and m: syms[f[:-2]] = int(m.group(1), 16)
+    for k, a in names.items(): syms.setdefault(k, a)
+    _TABLES[key] = syms
+    return syms
 
 
 def sym_addr(name):
-    """Address of a symbol: config/symbol_addrs_*.txt and notes/names_*.csv, else the hex in its name
+    """Address of a symbol: the current program's table (_syms), else the hex in its name
     (D_8009C984, DAT_8009c984A, PTR_DAT_8013a1d4_b, ...). None if unknown."""
-    if not _SYMS:
-        for f in ("main0", "x000"):
-            for l in open(os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)):
-                m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
-                if m: _SYMS[m.group(1)] = int(m.group(2), 16)
-            for l in open(os.path.join(ROOT, "notes", "names_%s.csv" % f)):
-                m = re.match(r"([0-9a-fA-F]{8}),(\w+)", l)
-                if m:
-                    a = int(m.group(1), 16)
-                    if _NAMES.setdefault(m.group(2), a) != a: _NAMES[m.group(2)] = None  # ambiguous
-        for k, a in _NAMES.items(): _SYMS.setdefault(k, a)
-    if name in _SYMS: return _SYMS[name]
+    S = _syms()
+    if name in S: return S[name]
     m = re.match(r"(?:PTR_)?(?:D|DAT|FUN|func|LAB|PTR)_([0-9a-fA-F]{8})", name)
     return int(m.group(1), 16) if m else None
 
@@ -77,7 +97,7 @@ def bad_symbols(code, ref, addr, text=""):
         if off + 4 > min(len(code), len(ref)) or sym.startswith("."): continue
         S = sym_addr(sym)
         if S is None: continue
-        if sym not in _SYMS and not re.search(r"extern[^;(]*\b%s\b" % re.escape(sym), text):
+        if sym not in _syms() and not re.search(r"extern[^;(]*\b%s\b" % re.escape(sym), text):
             continue  # hex-named global declared in a shared header (psx_tomba uses NTSC addresses)
         c, g = W(code, off), W(ref, off)
         if ty == "R_MIPS_26":
@@ -124,6 +144,7 @@ def main():
         if not h:
             print("SKIP (no // FUNC):", f); continue
         addr, size, prog, flags = h
+        CUR_PROG[0] = prog
         d = tempfile.mkdtemp()
         del LOCAL_J[:]; del RELS[:]
         try:

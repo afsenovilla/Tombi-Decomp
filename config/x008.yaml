@@ -1,0 +1,36 @@
+name: X008.BIN
+sha1: 5e098dccfd123af09967ca778c83223e8a21716d
+options:
+  basename: x008
+  target_path: game/AREA08/X008.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x008
+  src_path: build/splat_src/x008
+  build_path: build
+  ld_script_path: build/x008.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x008.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x008.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x008.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x008
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x008]
+  - [0x3058C]

@@ -2,10 +2,11 @@
 """Builds the objdiff inputs and the progress report used by decomp.dev.
 
 Steps (all output under build/ and asm/, both ignored by git):
-  1. splat splits the retail binaries (config/main0.yaml, config/x000.yaml) into one .s per function,
+  1. splat splits the retail binaries (config/main0.yaml, config/x000.yaml, config/x0nn.yaml for the area
+     overlays) into one .s per function,
      named after our C functions (tools/gen_symbols.py writes the symbol files first).
   2. Each retail function is assembled into a *target* object  -> build/target/<prog>/<func>.o
-  3. Each src/*.c is compiled with the native toolchain (tools/ncheck.py) -> build/base/<prog>/<func>.o
+  3. Each src/*.c and src/x0nn/*.c is compiled with the native toolchain (tools/ncheck.py) -> build/base/<prog>/<func>.o
   4. objdiff.json is written with one unit per function (categories: game / sdk, main0 / x000).
   5. objdiff-cli writes build/report.json.
 
@@ -18,6 +19,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 ARGS = sys.argv[1:]
 OBJDIFF = ARGS[ARGS.index("--objdiff") + 1] if "--objdiff" in ARGS else os.environ.get("OBJDIFF", "objdiff-cli")
 PROGS = {"main0": "MAIN0", "x000": "X000"}
+OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]  # area overlays, src/x0nn/
+PROGS.update({p: p.upper() for p in OVERLAYS})
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
 
@@ -61,14 +64,18 @@ def main():
         if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
         for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
     base = {}
-    for f in sorted(os.listdir("src")):
+    srcs = [os.path.join("src", f) for f in sorted(os.listdir("src"))]
+    for p in OVERLAYS:
+        if os.path.isdir("src/" + p): srcs += [os.path.join("src", p, f) for f in sorted(os.listdir("src/" + p))]
+    for path in srcs:
+        f = os.path.basename(path)
         if not f.endswith(".c"): continue
-        h = NC["M"]["header"](os.path.join("src", f))
+        h = NC["M"]["header"](path)
         if not h: continue
-        prog = "x000" if h[2] == "X000" else "main0"
+        prog = h[2].lower()
         d = tempfile.mkdtemp()
         try:
-            NC["build"](os.path.join("src", f), h[3], d, inc)
+            NC["build"](path, h[3], d, inc)
             out = "build/base/%s/%s.o" % (prog, f[:-2])
             os.makedirs(os.path.dirname(out), exist_ok=True)
             shutil.copy(d + "/a.o", out); base[(prog, f[:-2])] = out; nb += 1
@@ -94,13 +101,14 @@ def main():
             finally:
                 os.unlink(t.name)
             unit = {"name": "%s/%s" % (prog, name), "target_path": out,
-                    "metadata": {"progress_categories": [prog, "game" if addr in game else "sdk"]}}
+                    "metadata": {"progress_categories": [prog, "game" if (addr in game or prog in OVERLAYS) else "sdk"]}}
             if (prog, name) in base: unit["base_path"] = base[(prog, name)]
             units.append(unit)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": "game", "name": "Game code"}, {"id": "sdk", "name": "Psy-Q SDK"},
-                                   {"id": "main0", "name": "MAIN0.EXE"}, {"id": "x000", "name": "X000.BIN (AREA00)"}],
+                                   {"id": "main0", "name": "MAIN0.EXE"}, {"id": "x000", "name": "X000.BIN (AREA00)"}]
+                                  + [{"id": p, "name": "%s.BIN (AREA%s)" % (p.upper(), p[2:])} for p in OVERLAYS],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
     shutil.rmtree(inc, ignore_errors=True)

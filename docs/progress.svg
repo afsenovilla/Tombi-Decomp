@@ -44,5 +44,5 @@
 <text x="425" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Unnamed, untyped</text>
 <rect x="553" y="378" width="13" height="13" rx="3" fill="#94a3b8"/>
 <text x="572" y="389" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12" fill="#334155">Sony library (Psy-Q)</text>
-<text x="28" y="416" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Does not include SCES_013.31, MAIN1-8 (they share ~98 % of the code with MAIN0) or the X*.BIN overlays of the other areas.</text>
+<text x="28" y="416" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">MAIN0 + X000 only: SCES_013.31 and MAIN1-8 (~98 % shared with MAIN0) are not counted; the other area overlays are in PROGRESS.md.</text>
 </svg>

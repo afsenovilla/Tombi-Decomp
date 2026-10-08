@@ -33,15 +33,33 @@ def read_csv(path):
         return list(csv.DictReader(f))
 
 
-def matching_detail():
-    """{prog: [bytes, n]} by address (>= 0x800E8028 = X000)."""
-    out = {"MAIN0": [0, 0], "X000": [0, 0]}
+OVERLAYS = ["X%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
+OVL_AREAS = {"X001": "AREA01, AREA07", "X002": "AREA02, AREA19 (alt.)", "X004": "AREA04, AREA12"}
+_RANGES = {}
+
+
+def src_ranges():
+    """{prog: [(addr, size)]} of the `// MATCHING addr size` markers in src/ (recursively); the program is the
+    PROG field of the file's `// FUNC` header (overlay sources live in src/x0nn/ and share X000's addresses)."""
+    if _RANGES: return _RANGES
     for dp, _, files in os.walk(N("src")):
         for fn in files:
-            if fn.endswith(".c"):
-                for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", open(os.path.join(dp, fn), errors="replace").read()):
-                    k = "X000" if int(m.group(1), 16) >= 0x800E8028 else "MAIN0"
-                    out[k][0] += int(m.group(2)); out[k][1] += 1
+            if not fn.endswith(".c"): continue
+            t = open(os.path.join(dp, fn), errors="replace").read()
+            h = re.search(r"//\s*FUNC\s+[0-9a-fA-F]+\s+\d+[ \t]*(MAIN0|X0\d\d)?", t)
+            prog = (h.group(1) if h else None) or "MAIN0"
+            for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", t):
+                _RANGES.setdefault(prog, []).append((int(m.group(1), 16), int(m.group(2))))
+    return _RANGES
+
+
+def matching_detail():
+    """{prog: [bytes, n]} of the MATCHING markers."""
+    out = {"MAIN0": [0, 0], "X000": [0, 0]}
+    for prog, rs in src_ranges().items():
+        out.setdefault(prog, [0, 0])
+        for a, n in rs:
+            out[prog][0] += n; out[prog][1] += 1
     return out
 
 
@@ -171,7 +189,7 @@ def write_svgs(res, tot, matching):
         o.append('<rect x="%d" y="%d" width="13" height="13" rx="3" fill="%s"/>' % (x, y, COL[key]))
         o.append('<text x="%d" y="%d" %s font-size="12" fill="#334155">%s</text>' % (x + 19, y + 11, FONT, esc(LAB[key])))
         x += 19 + 7 * len(LAB[key]) + 16
-    o.append('<text x="28" y="%d" %s font-size="11.5" fill="#94a3b8">Does not include SCES_013.31, MAIN1-8 (they share ~98 %% of the code with MAIN0) or the X*.BIN overlays of the other areas.</text>' % (y + 38, FONT))
+    o.append('<text x="28" y="%d" %s font-size="11.5" fill="#94a3b8">MAIN0 + X000 only: SCES_013.31 and MAIN1-8 (~98 %% shared with MAIN0) are not counted; the other area overlays are in PROGRESS.md.</text>' % (y + 38, FONT))
     o.append("</svg>")
     open(N("docs", "progress.svg"), "w").write("\n".join(o))
 
@@ -202,15 +220,10 @@ def write_svgs(res, tot, matching):
         open(N("docs", "map_%s.svg" % key), "w").write("\n".join(m))
 
 
-def covered(items):
-    """Game-code bytes (non-library items) covered by matched ranges; a matched range can span several
+def covered(items, prog):
+    """Game-code bytes (non-library items) covered by matched ranges of `prog`; a matched range can span several
     Ghidra/splat functions or include library code, so count the overlap, never the raw marker size."""
-    ranges = []
-    for dp, _, files in os.walk(N("src")):
-        for fn in files:
-            if fn.endswith(".c"):
-                for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", open(os.path.join(dp, fn), errors="replace").read()):
-                    ranges.append((int(m.group(1), 16), int(m.group(2))))
+    ranges = src_ranges().get(prog, [])
     tot = 0
     for a, size, kind in items:
         if kind == "lib": continue
@@ -220,11 +233,47 @@ def covered(items):
     return tot
 
 
+def overlays():
+    """Per area overlay: game bytes, matched bytes, functions, and the unmatched functions with their status:
+    piece  identical to a Ghidra piece of X000 that lies inside a larger matched range: needs its own C
+    x000   identical to an X000 function that is not matched yet (comes for free when X000's is)
+    dup    identical to a function of an earlier overlay (listed there)
+    new    no twin anywhere: the real new work."""
+    base_cov = {p: src_ranges().get(p, []) for p in ("MAIN0", "X000")}
+    def is_matched(prog, a, size):
+        return sum(max(0, min(a + size, s + n) - max(a, s)) for s, n in src_ranges().get(prog, [])) >= size
+    out, todo = {}, []
+    for p in OVERLAYS:
+        rows = read_csv(N("notes", "functions_%s.csv" % p.lower()))
+        d = dict(game=0, n=len(rows), matched=0, n_matched=0, piece=0, x000=0, dup=0, new=0, n_new=0)
+        for r in rows:
+            a, size = int(r["address"], 16), int(r["size"])
+            d["game"] += size
+            cov = sum(max(0, min(a + size, s + n) - max(a, s)) for s, n in src_ranges().get(p, []))
+            d["matched"] += min(cov, size)
+            if cov >= size: d["n_matched"] += 1; continue
+            tw = r.get("twin") or ""
+            if tw[:5] in ("MAIN0", "X000:") and is_matched(tw.split(":")[0], int(tw.split(":")[1], 16), size): st = "piece"
+            elif tw.startswith("X000:"): st = "x000"
+            elif tw.startswith("X0"): st = "dup"
+            else: st = "new"; d["n_new"] += 1
+            d[st] += size - cov
+            todo.append((size, p, r["address"], r["name"], st, tw))
+        out[p] = d
+    todo.sort(key=lambda x: (-x[0], x[1], x[2]))
+    with open(N("notes", "todo_areas.csv"), "w") as f:
+        f.write("prog,address,size,name,status,twin\n")
+        for size, p, a, name, st, tw in todo:
+            f.write("%s,%s,%d,%s,%s,%s\n" % (p, a, size, name, st, tw))
+    return out
+
+
 def main():
     res = {k: analyse(*v) for k, v in PROGRAMS.items()}
     tot = {key: sum(r[key] for r in res.values()) for key in
            ("lib", "named", "unnamed", "typed", "game", "n_game", "n_named", "n_unnamed", "n_typed", "n_lib", "excluded", "unnamed_typed")}
-    cov = {k.split(".")[0]: covered(r["items"]) for k, r in res.items()}
+    cov = {k.split(".")[0]: covered(r["items"], k.split(".")[0]) for k, r in res.items()}
+    ovl = overlays()
     matching = sum(cov.values())
     levels = [
         ("Game functions with our own names", tot["named"], "bytes"),
@@ -238,9 +287,13 @@ def main():
     w("## Summary\n")
     w("| Level | Progress | Bytes | Functions |")
     w("|---|---|---|---|")
-    w("| **C that matches byte for byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(v[1] for v in matching_detail().values())))
+    w("| **C that matches byte for byte (matching)** | **%.1f %%** `%s` | %d / %d | %d |" % (pct(matching, tot["game"]), bar(pct(matching, tot["game"])), matching, tot["game"], sum(matching_detail()[k][1] for k in ("MAIN0", "X000"))))
     w("| Named by us | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["named"], tot["game"]), bar(pct(tot["named"], tot["game"])), tot["named"], tot["game"], tot["n_named"], tot["n_game"]))
     w("| With the TObj structure applied (coverage, not C progress) | %.1f %% `%s` | %d / %d | %d / %d |" % (pct(tot["typed"], tot["game"]), bar(pct(tot["typed"], tot["game"])), tot["typed"], tot["game"], tot["n_typed"], tot["n_game"]))
+    og, om, on = sum(d["game"] for d in ovl.values()), sum(d["matched"] for d in ovl.values()), sum(d["n_matched"] for d in ovl.values())
+    w("| Matching, all 18 programs (MAIN0 + X000 + the 16 other area overlays) | %.1f %% `%s` | %d / %d | %d |" % (
+        pct(matching + om, tot["game"] + og), bar(pct(matching + om, tot["game"] + og)), matching + om, tot["game"] + og,
+        sum(matching_detail()[k][1] for k in ("MAIN0", "X000")) + on))
     w("")
     w("\"Game code\" = functions inside the code of the analyzed programs, **excluding** those from")
     w("Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra %d bytes (%d functions).\n" % (tot["lib"], tot["n_lib"]))
@@ -253,10 +306,31 @@ def main():
             DISPLAY.get(k, k), r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
             pct(cov[k.split(".")[0]], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
     w("")
+    w("## Area overlays (X001..X019)\n")
+    w("Raw code blobs loaded at `0x800E8028` like X000 ([notes/overlays.md](../notes/overlays.md)). Boundaries come from")
+    w("`tools/areas.py bounds` (`notes/functions_x0nn.csv`); about 173 KB of object code is shared by all of them (and X000)")
+    w("at the same addresses, so most of it is matched by copying the X000/MAIN0 twin (`tools/areas.py twins`, sources")
+    w("in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../notes/todo_areas.csv) by status:")
+    w("*x000* = identical to an X000 function not matched yet, *dup* = identical to a function of an earlier overlay,")
+    w("*piece* = identical to a Ghidra piece of a larger matched X000 range (needs its own C),")
+    w("*new* = no twin anywhere (the real new work).\n")
+    w("| Overlay | Areas | Code | Functions | Matching | Pending: x000 | dup | piece | new |")
+    w("|---|---|---|---|---|---|---|---|---|")
+    for p, d in ovl.items():
+        w("| %s.BIN | %s | %d B | %d | %.1f %% (%d f) | %d B | %d B | %d B | %d B (%d f) |" % (
+            p, OVL_AREAS.get(p, "AREA" + p[2:]), d["game"], d["n"], pct(d["matched"], d["game"]), d["n_matched"],
+            d["x000"], d["dup"], d["piece"], d["new"], d["n_new"]))
+    w("| **Total** | | %d B | %d | %.1f %% (%d f) | %d B | %d B | %d B | %d B (%d f) |" % (
+        og, sum(d["n"] for d in ovl.values()), pct(om, og), on, sum(d["x000"] for d in ovl.values()),
+        sum(d["dup"] for d in ovl.values()), sum(d["piece"] for d in ovl.values()), sum(d["new"] for d in ovl.values()), sum(d["n_new"] for d in ovl.values())))
+    w("")
+    w("Grand total, all programs: **%d / %d B matching (%.1f %%)**; core (MAIN0 + X000) %.1f %%, area overlays %.1f %%.\n" % (
+        matching + om, tot["game"] + og, pct(matching + om, tot["game"] + og), pct(matching, tot["game"]), pct(om, og)))
     w("## What is NOT counted (the real denominator is larger)\n")
     w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
     w("- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.")
-    w("- The remaining `X*.BIN` overlays of the 20 areas (only `AREA00/X000.BIN` has been analyzed).")
+    w("- The overlays are only counted in the \"area overlays\" section and the all-programs row: the summary above is MAIN0 + X000.")
+    w("  AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages.")
     w("- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified")
     w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
     w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])
@@ -281,7 +355,8 @@ def main():
     open(N("docs", "PROGRESS.md"), "w").write("\n".join(out) + "\n")
     json.dump({"date": datetime.date.today().isoformat(), "totals": {k: v for k, v in tot.items()},
                "matching_bytes": matching,
-               "programs": {k: {x: y for x, y in r.items() if x not in ("unnamed_list", "items")} for k, r in res.items()}},
+               "programs": {k: {x: y for x, y in r.items() if x not in ("unnamed_list", "items")} for k, r in res.items()},
+               "overlays": ovl},
               open(N("docs", "progress.json"), "w"), indent=2)
     write_svgs(res, tot, matching)
     print("\n".join(out[:16]))

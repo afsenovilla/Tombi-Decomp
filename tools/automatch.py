@@ -49,7 +49,7 @@ def main():
     for dp, _, fs in os.walk(ROOT + "/src"):
         for f in fs:
             m = re.search(r"//\s*FUNC\s+([0-9a-f]+)", open(os.path.join(dp, f), errors="replace").read())
-            if m and "wip" not in dp: have.add(m.group(1))
+            if m and "wip" not in dp and not re.search(r"/x0\d\d$", dp): have.add(m.group(1))
     blocks = decomp_blocks()
     todo = [r for r in todo if r["address"] not in have and r["address"] in blocks][:LIMIT]
     shutil.rmtree(WORK, ignore_errors=True); os.makedirs(WORK)

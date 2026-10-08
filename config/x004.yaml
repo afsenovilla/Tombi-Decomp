@@ -1,0 +1,36 @@
+name: X004.BIN
+sha1: f01c882217efee45bf76aba54ee4fadfa6c25665
+options:
+  basename: x004
+  target_path: game/AREA04/X004.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x004
+  src_path: build/splat_src/x004
+  build_path: build
+  ld_script_path: build/x004.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x004.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x004.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x004.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x004
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x004]
+  - [0x4DAE4]

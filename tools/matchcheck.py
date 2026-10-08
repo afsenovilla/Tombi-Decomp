@@ -3,7 +3,7 @@
 the code with the game's byte for byte (masking relocations).
 
 Each .c has in its first lines:
-    // FUNC <addr_hex> <size> [MAIN0|X000]     (one function per file)
+    // FUNC <addr_hex> <size> [MAIN0|X000|X001..X019]     (one function per file; overlays: src/x0nn/)
     // FLAGS -O2 -G0                            (optional)
 Usage:  tools/matchcheck.py [--mark] [--asm] [src/file.c ...]
   --mark  adds `// MATCHING <addr> <size>` to the ones that match (read by progress.py)
@@ -24,6 +24,11 @@ ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
 RAW_BASE = {"X000": 0x800E8028}
+# area overlays (notes/overlays.md): X0nn -> game/AREAnn/X0nn.BIN, all loaded at 0x800E8028; sources in src/x0nn/
+OVERLAYS = ["X%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
+for _p in OVERLAYS:
+    IMAGES[_p] = ("AREA%s/%s.BIN" % (_p[2:], _p), "raw")
+    RAW_BASE[_p] = 0x800E8028
 
 
 def game_bytes(prog, addr, size):
@@ -92,7 +97,7 @@ def mask(code, relocs):
 
 def header(src):
     txt = open(src).read()
-    m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(MAIN0|X000)?", txt)
+    m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(MAIN0|X0\d\d)?", txt)
     f = re.search(r"//\s*FLAGS\s+(.*)", txt)
     if not m: return None
     return int(m.group(1), 16), int(m.group(2)), m.group(3) or "MAIN0", (f.group(1).strip() if f else "-O2 -G0")

@@ -1,0 +1,36 @@
+name: X009.BIN
+sha1: 1b44ea24890128c3d3789b0badb252135ba4dec1
+options:
+  basename: x009
+  target_path: game/AREA09/X009.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x009
+  src_path: build/splat_src/x009
+  build_path: build
+  ld_script_path: build/x009.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x009.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x009.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x009.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x009
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x009]
+  - [0x491EC]

@@ -10,7 +10,7 @@ def img(p):
     return open(R + "/game/AREA00/X000.BIN", "rb").read(), -0x800E8028
 have = set()
 for dp, _, fs in os.walk(R + "/src"):
-    if "wip" in dp: continue
+    if "wip" in dp or re.search(r"/x0\d\d$", dp): continue  # src/x0nn: other overlays
     for f in fs:
         m = re.search(r"//\s*FUNC\s+([0-9a-f]+)", open(os.path.join(dp, f), errors="replace").read())
         if m: have.add(m.group(1))

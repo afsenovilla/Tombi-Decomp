@@ -1,0 +1,36 @@
+name: X005.BIN
+sha1: 0d2778c0d4b3e5b5dfc40fc46053e46d9d785b17
+options:
+  basename: x005
+  target_path: game/AREA05/X005.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x005
+  src_path: build/splat_src/x005
+  build_path: build
+  ld_script_path: build/x005.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x005.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x005.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x005.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x005
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x005]
+  - [0x32718]

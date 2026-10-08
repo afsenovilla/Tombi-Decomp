@@ -4,15 +4,17 @@
 All 17 unique area overlays of the PAL Spanish release are raw code blobs loaded at 0x800E8028
 (see notes/overlays.md). X000 was analysed with Ghidra; the others are analysed here:
 
-  python3 tools/areas.py bounds            writes notes/functions_x0nn.csv (address,size,name)
+  python3 tools/areas.py bounds            writes notes/functions_x0nn.csv (address,size,name,twin)
   python3 tools/areas.py twins [X001 ...]  copies matched src/*.c whose retail bytes are identical (relocation
                                            fields masked) to src/x0nn/, renaming overlay-internal symbols,
                                            then verifies them with tools/ncheck.py (adds // MATCHING)
-  python3 tools/areas.py check X001        compares our boundaries with notes/functions_x000.csv (X000 only)
+  python3 tools/areas.py check            heuristic boundaries of X000 vs Ghidra's notes/functions_x000.csv
 
 Boundaries: seeds = jal targets inside the overlay + the twins found by masked byte search; every seed is
 swept linearly until a `jr ra` that no forward branch skips; code that follows a function end directly
-continues as a new function when it starts with `addiu sp,sp,-N`, is a jal target or is referenced by a data word.
+continues as a new function when it starts with `addiu sp,sp,-N`, is a jal target or is referenced by a data word;
+remaining gaps are scanned for valid code ending in `jr ra`. Details in notes/overlays.md.
+`twins` never overwrites an existing src/x0nn/ file that is already marked // MATCHING.
 """
 import csv, os, re, struct, sys
 
@@ -258,6 +260,7 @@ def analyse(progs):
         for kind, pats in (("src", pats_src), ("x000", pats_gh)):
             for (stem, tp, ta, ts, path), P in pats:
                 if ts < 8 or len(P) * 4 != ts: continue
+                if kind == "x000" and not (len(P) >= 2 and P[-2] == JR_RA): continue  # Ghidra fragment, not a function
                 for c in im.find(P):
                     if c < (ENTRY_STUBS[1] - BASE) // 4: continue
                     claim(c, len(P), (kind, tp, ta, stem, path))
@@ -399,20 +402,170 @@ def cmd_check():
 
 
 def cmd_bounds(progs):
+    """notes/functions_x0nn.csv: address,size,name,twin. twin = PROG:address of an identical function (masked
+    relocations): a MAIN0/X000 function, or the first occurrence in an earlier overlay (X001 < X002 < ...)."""
     res = analyse(progs)
-    for prog, fl in res.items():
+    seen = {}
+    for prog in progs:
+        im = load(prog)
+        rows = []
+        for a, s, name, kind, twin in res[prog]:
+            tw = "%s:%08x" % (twin[0], twin[1]) if twin else ""
+            if not twin:
+                W = list(words(im[a - BASE:a - BASE + s]))
+                sig = tuple(w & m for w, m in zip(W, masks(W)))
+                if sig in seen and s > 8: tw = seen[sig]
+                else: seen.setdefault(sig, "%s:%08x" % (prog, a))
+            rows.append((a, s, name, tw))
         with open(os.path.join(ROOT, "notes", "functions_%s.csv" % prog.lower()), "w") as f:
-            f.write("address,size,name\n")
-            for a, s, name, kind, twin in fl:
-                f.write("%08x,%d,%s\n" % (a, s, name))
+            f.write("address,size,name,twin\n")
+            for r in rows: f.write("%08x,%d,%s,%s\n" % r)
         k = {}
-        for a, s, name, kind, twin in fl:
+        for a, s, name, kind, twin in res[prog]:
             k.setdefault(kind, [0, 0]); k[kind][0] += 1; k[kind][1] += s
-        print(prog, len(fl), "functions", sum(s for _, s, *_ in fl), "B", k)
+        dup = sum(r[1] for r in rows if r[3][:2] == "X0" and not r[3].startswith("X000"))
+        print(prog, len(rows), "functions", sum(r[1] for r in rows), "B", k, "same as an earlier overlay: %d B" % dup)
     return res
+
+
+# ----------------------------------------------------------------------------------------------- twins
+def _nc():
+    src = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
+    NC = {"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"}
+    exec(compile(src, "ncheck", "exec"), NC)
+    return NC
+
+
+def _inc():
+    import shutil, tempfile
+    inc = tempfile.mkdtemp()
+    for f in os.listdir(os.path.join(ROOT, "include")):
+        s = os.path.join(ROOT, "include", f)
+        if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
+        for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
+    return inc
+
+
+def compile_relocs(NC, path, flags, inc):
+    """(.text bytes, .text relocations [(off, type, sym)], other-section relocations [(sec, sym)]) or None."""
+    import shutil, subprocess, tempfile
+    d = tempfile.mkdtemp()
+    del NC["RELS"][:]; del NC["LOCAL_J"][:]
+    try:
+        code, _ = NC["build"](path, flags, d, inc)
+    except subprocess.CalledProcessError:
+        shutil.rmtree(d, ignore_errors=True); return None
+    rels = list(NC["RELS"])
+    other, sec = [], None
+    for line in subprocess.run(["mipsel-linux-gnu-objdump", "-r", d + "/a.o"], capture_output=True, text=True).stdout.splitlines():
+        m = re.match(r"RELOCATION RECORDS FOR \[(\S+)\]", line)
+        if m: sec = m.group(1); continue
+        m = re.match(r"[0-9a-f]{8}\s+R_MIPS_\w+\s+(\S+)", line)
+        if m and sec.startswith((".data", ".rodata", ".sdata", ".rdata")) and not m.group(1).startswith("."):
+            other.append((sec, m.group(1)))
+    shutil.rmtree(d, ignore_errors=True)
+    return code, rels, other
+
+
+def sym_map(code, rels, tb, ob):
+    """{sym: (address in the twin program, address in the overlay)}: retail relocated field minus the
+    addend of our object (REL: the addend sits in our instruction). None if inconsistent."""
+    W = lambda b, o: struct.unpack_from("<I", b, o)[0]
+    lo16 = lambda x: (x & 0xFFFF) - 0x10000 if x & 0x8000 else x & 0xFFFF
+    res, hi = {}, {}
+    for off, ty, sym in rels:
+        if sym.startswith("."): continue
+        if off + 4 > min(len(code), len(tb)): return None
+        if ty == "R_MIPS_26":
+            add = (W(code, off) & 0x3FFFFFF) << 2
+            t = ((W(tb, off) & 0x3FFFFFF) << 2) | 0x80000000
+            o = ((W(ob, off) & 0x3FFFFFF) << 2) | 0x80000000
+        elif ty == "R_MIPS_HI16":
+            hi[sym] = off; continue
+        elif ty == "R_MIPS_LO16" and sym in hi:
+            h = hi[sym]
+            add = ((W(code, h) & 0xFFFF) << 16) + lo16(W(code, off))
+            t = ((W(tb, h) & 0xFFFF) << 16) + lo16(W(tb, off))
+            o = ((W(ob, h) & 0xFFFF) << 16) + lo16(W(ob, off))
+        else:
+            return None
+        res.setdefault(sym, set()).add(((t - add) & 0xFFFFFFFF, (o - add) & 0xFFFFFFFF))
+    out = {}
+    for sym, v in res.items():
+        if len(v) != 1: return None
+        out[sym] = v.pop()
+    return out
+
+
+def cmd_twins(progs):
+    import shutil, subprocess
+    res = analyse(NEW)
+    NC = _nc(); inc = _inc()
+    cache = {}
+    report = {}
+    for prog in progs:
+        outdir = os.path.join(ROOT, "src", prog.lower())
+        os.makedirs(outdir, exist_ok=True)
+        name_at = {a: n for a, s, n, k, tw in res[prog]}
+        im = load(prog)
+        written, skipped = [], []
+        for a, s, name, kind, twin in res[prog]:
+            if kind != "src": continue
+            tp, ta, stem, path = twin
+            dst = os.path.join(outdir, name + ".c")
+            if os.path.exists(dst) and "// MATCHING" in open(dst, errors="replace").read():
+                continue  # already there (maybe edited by hand): keep it
+            text = open(path, errors="replace").read()
+            h = NC["M"]["header"](path)
+            if path not in cache: cache[path] = compile_relocs(NC, path, h[3], inc)
+            cr = cache[path]
+            if cr is None: skipped.append((name, "twin does not compile")); continue
+            code, rels, other = cr
+            tb = bytes(struct.pack("<%dI" % (s // 4), *prog_words(tp, ta, s)))
+            ob = im[a - BASE:a - BASE + s]
+            sm = sym_map(code, rels, tb, ob)
+            if sm is None: skipped.append((name, "inconsistent relocations")); continue
+            new = {}
+            for sym, (taddr, oaddr) in sm.items():
+                if taddr == oaddr: continue
+                if HEXNAME.match(sym): new[sym] = rehex(sym, oaddr)
+                elif any(r[1] == "R_MIPS_26" and r[2] == sym for r in rels):
+                    new[sym] = name_at.get(oaddr, "func_%08X" % oaddr)
+                else: new[sym] = "D_%08X" % oaddr
+            ovl = lambda n: HEXNAME.match(n) and BASE <= int(HEXNAME.match(n).group(2), 16) < 0x80140000
+            if any(sym in new or ovl(sym) for sec, sym in other):
+                skipped.append((name, "data relocations to overlay symbols")); continue
+            new[stem] = name
+            new = {k: v for k, v in new.items() if k != v}
+            body = re.sub(r"//\s*MATCHING[^\n]*\n", "", text)
+            body = re.sub(r"//\s*FUNC\s+[0-9a-fA-F]+\s+\d+[ \t]*\w*", "// FUNC %08x %d %s" % (a, s, prog), body, count=1)
+            if new:
+                body = re.sub(r"\b(%s)\b" % "|".join(sorted(map(re.escape, new), key=len, reverse=True)),
+                              lambda m: new[m.group(1)], body)
+            open(dst, "w").write(body)
+            written.append(name)
+        report[prog] = (written, skipped)
+    shutil.rmtree(inc, ignore_errors=True)
+    # verify with ncheck: keep only exact matches, marked
+    for prog in progs:
+        written, skipped = report[prog]
+        files = [os.path.join(ROOT, "src", prog.lower(), n + ".c") for n in written]
+        ok = set()
+        for k in range(0, len(files), 200):
+            r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "ncheck.py"), "--mark"] + files[k:k + 200],
+                               capture_output=True, text=True)
+            for line in r.stdout.splitlines():
+                m = re.match(r"MATCH\s+(\S+)\.c", line)
+                if m: ok.add(m.group(1))
+                elif not line.startswith(("MATCH", "   ")) and "match," not in line: print(prog, line)
+        for n in written:
+            if n not in ok:
+                os.unlink(os.path.join(ROOT, "src", prog.lower(), n + ".c")); skipped.append((n, "ncheck DIFF"))
+        print("%s: %d twins match, %d skipped %s" % (prog, len(ok), len(skipped), skipped[:8]))
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     if a and a[0] == "check": cmd_check()
     elif a and a[0] == "bounds": cmd_bounds(a[1:] or NEW)
+    elif a and a[0] == "twins": cmd_twins(a[1:] or NEW)

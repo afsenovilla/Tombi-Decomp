@@ -1,0 +1,36 @@
+name: X010.BIN
+sha1: 5093e40399319f5987668bfb1d042713216d356e
+options:
+  basename: x010
+  target_path: game/AREA10/X010.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/x010
+  src_path: build/splat_src/x010
+  build_path: build
+  ld_script_path: build/x010.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_x010.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.x010.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.x010.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x010
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x010]
+  - [0x4AE54]
