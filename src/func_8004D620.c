@@ -1,5 +1,5 @@
 // FUNC 8004d620 1324 MAIN0
-/* score 6 (ncheck): case -6 fixed (o->fC4 struct read + {short t=FC0+fC4; FC0=t+FBC;} / {short t=FBE+h; FBE=t+FBA;}). Left: init block li a0,1 is scheduled after lbu D_8009C943 (game: right after the addu, before sh c0) and sh zero,0x22 lands before sh cc instead of last. Tried: hill-climb of init lines (with setpos expanded too), raw/struct/short/ushort per init store (greedy + 1500 random order+form), F20=FCC=1 chains. b42: game sched2 puts li a0,1 right after its a0 anti-dep (addu v0,v0,a0) => in game's sched1 output li 1 precedes li 8 / setpos insns, but sched1 always puts a li just before its first use; tried local/inline-param 'one', struct (OS cast) vs raw for all 8 stores (256 masks), F20=FCC copies, plateau hill-climb 4x3000. */
+// MATCHING 8004d620 1324
 typedef struct O {
     unsigned char f00;
     char pad0[1];
@@ -23,7 +23,7 @@ typedef struct O {
     unsigned short fC6;
     char pad7[2];
     unsigned short fCA;
-    char pad8[2];
+    short fCC;
     short fCE;
 } O;
 #define F00 o->f00
@@ -155,15 +155,16 @@ O *func_8004D620(int a, int b)
             FC2 = D_8007D454[a] + 0x78;
             break;
         }
-        setpos(o, F12, F16);
         FC4 = 0x14;
-        FCA = D_8009C943;
-        F22 = 0;
-        FCC = 1;
+        *(unsigned short *)((char *)o + 0xc6) = 0xffff;
+        setpos(o, F12, F16);
+        i = 1;
+        *(unsigned short *)((char *)o + 0xca) = D_8009C943;
+        F20 = i;
+        *(short *)((char *)o + 0xce) = 8;
         FD0 = 6;
-        FC6 = 0xffff;
-        F20 = 1;
-        FCE = 8;
+        F22 = 0;
+        o->fCC = i;
         *(short *)((char *)D_800A4648 + FCA * 8) = 0;
         base = D_1F800398;
         if ((unsigned)(b - 2) < 2) {
