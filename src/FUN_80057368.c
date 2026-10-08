@@ -1,4 +1,5 @@
 // FUNC 80057368 264 MAIN0
+// MATCHING 80057368 264
 #include "raw7.h"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { int vx, vy, vz, pad; } VECTOR;
@@ -19,5 +20,5 @@ void FUN_80057368(char *o)
     M.t[1] += R.t[1];
     M.t[2] += R.t[2];
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + (S8(o, 0xf) << 2) + 0x10), o, U8(o, 0xa4));
+    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o, U8(o, 0xa4));
 }

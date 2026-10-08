@@ -1,4 +1,5 @@
 // FUNC 80019a08 260 MAIN0
+// MATCHING 80019a08 260
 typedef struct { short x, y, w, h; } RECT;
 extern char *DAT_1f8001d4;
 extern unsigned char DAT_1f8001cf;
@@ -36,8 +37,7 @@ void FUN_80019a08(void)
         char c = *(char *)(s + 0x68);
         *(short *)(s + 0x4c) = 0;
         *(short *)(s + 0x4e) = 0;
-        if (c == 0) v = 1; else v = 2;
-        *(short *)(s + 0x48) = v;
+        if (c) *(short *)(s + 0x48) = 2; else *(short *)(s + 0x48) = 1;
         *(short *)(s + 0x4a) = 0;
         }
     }
