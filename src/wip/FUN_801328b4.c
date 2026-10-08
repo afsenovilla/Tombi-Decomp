@@ -1,5 +1,5 @@
 // FUNC 801328b4 764 X000
-/* score 24: only case 0 scheduling after the GetClut call differs (game stores anim right after loading it and loads b0c for the copy before the b69/b6b/step stores). Tried full permutation/hill-climb of the statements, raw stores, early row pointer, -fno-expensive-optimizations. */
+/* score 24: only case 0 scheduling after the GetClut call differs (game stores anim right after loading it and loads b0c for the copy before the b69/b6b/step stores). Tried full permutation/hill-climb of the statements, raw stores, early row pointer, -fno-expensive-optimizations. b25: 1500-step hill-climb over order + raw/field variants of the 7 stmts stays 24; chained zero stores (o->b69 = o->b6b = o->step = 0) 28; -fno-schedule-insns(2) much worse. */
 #include "TOBJ.H"
 
 typedef struct { unsigned char b[8]; } V801328B4;
