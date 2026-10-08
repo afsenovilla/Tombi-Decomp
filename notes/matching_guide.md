@@ -207,8 +207,9 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   form; casting volatile away only at a compare (`*(unsigned short *)&X == K`) drops an `andi 0xffff`.
 - Split `t = A[i] + j` into `t = A[i]; ...; t += j;` and read 2D tables through a row pointer (func_8003F200).
 - Read-modify-write of a field (`o->animFrame &= 1`) at the start of the block fixes early load order.
-- **Open**: func_80108168 / func_80107FCC / func_80108AD0 (score 2): the game sinks `sb -20,0xf(s0)` after the `b69`
-  store but keeps `li -20` early.
+- **Sunk store with an early constant** (func_80108168 / func_80107FCC / func_80108AD0): copy the statement order of the
+  matched sibling func_80108708: `f = o->animFrame;` before the stores, zero stores, `b69`, then `S8(o,0xf) = -20`,
+  `U8(o,0xa2) = 2`, `o->animFrame = f & 1` last. Look for a matched sibling before brute-forcing.
 
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
