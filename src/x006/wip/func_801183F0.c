@@ -1,37 +1,48 @@
 // FUNC 801183f0 256 X006
-/* score 29: whole function (covers csv piece 80118440). Only the loop head differs: the game computes the entry
-   address tbl + i*8 twice (addu a0 / addu a1, both v1+v0) and reads the next entry as 8(a0); every C form tried
-   either CSEs the two addresses into one register (p[1] vs p[0]: 37) or keeps a separate +8 addiu (this form).
-   Tried: p/q copies, p++ (31), index temps of each type, inline/macro helpers, goto loop, -fno-* cse/loop flags. */
-#include "TOBJ.H"
-typedef struct { short x, y, z, pad; } V8;
-typedef struct { short w0, w2, w4, w6; int d8, dc; } E;
+/* score 7: only the path-point pointers differ: the game computes base+idx*8 twice (addu a0,v1,v0; addu a1,v1,v0)
+   from a temp base; every C form tried either CSEs them into one register or copies a=b (move a1,a0).
+   Tried: a/b from pa8[i] / &t[i] / int casts / short* view / function-scope vars. Same pattern in func_801184F0. */
+typedef struct { short x, y, z, pad; } P8;
+typedef struct { short b4, b6, b8, ba; int bc, c0, c4; } X;
+typedef struct {
+    unsigned char active, visible, type, subtype, b04, step, state, substep;
+    char p08[0x2c - 8];
+    unsigned short w2c;
+    char p2e[0x76 - 0x2e];
+    short w76;
+    char p78[0xa8 - 0x78];
+    P8 *pa8;
+    char pac[0xb4 - 0xac];
+    X x;
+} O;
 extern int SquareRoot0(int);
-extern int ratan2(int, int);
+extern short ratan2(int, int);
 
-void func_801183F0(TObj *o)
+void func_801183F0(O *o)
 {
-    E *e = (E *)&o->wb4;
-    V8 *p, *q;
+    X *x = &o->x;
+    int dx, dz, dy, d;
+    P8 *a, *b;
     int i;
-    int dx, dy, dz, d;
 
     for (;;) {
-        i = o->animTimer;
-        p = (V8 *)*(int *)&o->wa8 + (i + 1);
-        q = (V8 *)*(int *)&o->wa8 + i;
-        dx = p->x - q->x;
-        dz = p->z - q->z;
-        dy = p->y - q->y;
+        i = o->w2c;
+        a = o->pa8;
+        b = a;
+        a += i;
+        b += i;
+        dx = a[1].x - b->x;
+        dz = a[1].z - b->z;
+        dy = a[1].y - b->y;
         d = SquareRoot0(dx * dx + dz * dz);
         if (d != 0) {
-            e->dc = d << 8;
-            if (e->d8 < d << 8) break;
-            e->d8 -= d << 8;
+            x->c0 = d << 8;
+            if (x->bc < (d << 8)) break;
+            x->bc -= d << 8;
         }
-        o->animTimer++;
+        o->w2c++;
     }
-    e->w6 = ratan2(dy, d);
+    x->ba = ratan2(dy, d);
     o->w76 = dy;
-    e->w4 = ratan2(dz, dx);
+    x->b8 = ratan2(dz, dx);
 }
