@@ -1,16 +1,6 @@
 // FUNC 800fc240 468 X000
-/* wip (score 71, was 92): short r and raw stores for 0xb2/0xd1/0xe0 fix the header order (same recipe as the
-   matched FUN_800fc414 case 4). Left: gcc cross-jumps the `sb step; sb state; j` tails of the 2000e branch and
-   switch cases 1/2 (2000e block ends up out of line); the game keeps every block separate. */
+// MATCHING 800fc240 468
 #include "TOBJ.H"
-
-typedef struct {
-    TObj o;
-    unsigned char pad[0x11];
-    unsigned char bd1;
-    unsigned char pad2[0xe];
-    short we0;
-} TObjX;
 
 extern unsigned char D_8009C938;
 extern unsigned char *D_8009C330;
@@ -18,9 +8,8 @@ extern int D_8009C960;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CE3D;
 
-int func_800FC240(TObjX *x)
+int func_800FC240(TObj *o)
 {
-    TObj *o = &x->o;
     short r;
 
     if (D_8009C938 != 0) {
@@ -38,6 +27,7 @@ int func_800FC240(TObjX *x)
     if (D_8009C960 == 0x2000e) {
         o->step = 0x3e;
         o->state = 0;
+            o->substep = 0;
     } else if ((D_8009C960 & 0x3ffff) == 0x3000a) {
         r = 0;
         if (D_8009D2C3 & 0x40) {
@@ -68,17 +58,20 @@ int func_800FC240(TObjX *x)
         switch (r) {
         case 0:
             o->b9c = 2;
-            o->step = 2;
             *(unsigned char *)&o->wac = 1;
+            o->step = 2;
             o->state = 3;
+            o->substep = 0;
             break;
         case 1:
             o->step = 0x3d;
             o->state = 0;
+            o->substep = 0;
             break;
         case 2:
             o->step = 0x3e;
             o->state = 0;
+            o->substep = 0;
             break;
         default:
             return 1;
@@ -88,7 +81,7 @@ int func_800FC240(TObjX *x)
         *(unsigned char *)&o->wac = 1;
         o->step = 2;
         o->state = 3;
+        o->substep = 0;
     }
-    o->substep = 0;
     return 1;
 }
