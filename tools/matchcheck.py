@@ -18,6 +18,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PSYQ = os.environ.get("PSYQ_DIR", "/opt/psyq/new")
 WORK = os.environ.get("WORK", "/opt/psyq/w")
 _aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
+_cc = os.environ.get("CC1_WINE", "/opt/psyq/cc43/CC1PSX.EXE")  # por defecto: Psy-Q 4.3 (el del juego)
+CC1_WINE = _cc if (_cc != "0" and os.path.exists(_cc) and shutil.which("wine")) else None  # CC1PSX Win32 (Psy-Q 4.3+) via Wine en vez de DOSBox
 ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
@@ -122,10 +124,13 @@ def main():
         shutil.copy(f, "%s/F%d.C" % (WORK, n)); jobs.append((n, f, h))
         flags = h[3]
         bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
-                r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n),
-                ] + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
+                ] + ([] if CC1_WINE else [r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n)]) + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
         if len(jobs) % CH == 0: flush()
     flush()
+    if CC1_WINE:
+        for n, f, h in jobs:
+            subprocess.run(["wine", CC1_WINE, "-quiet"] + h[3].split() + ["F%d.I" % n, "-o", "F%d.S" % n], cwd=WORK,
+                           env=dict(os.environ, WINEDEBUG="-all"), timeout=300, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if ASPSX_WINE:  # ASPSX 2.86 (Psy-Q 4.6) emite addiu para `li` (la 2.34 emite ori)
         wenv = dict(os.environ, WINEDEBUG="-all")
         for n, f, h in jobs:

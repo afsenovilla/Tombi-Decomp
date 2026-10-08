@@ -1,5 +1,12 @@
 # Compilador (matching)
 
+> **ACTUALIZACION: el compilador del juego es el `CC1PSX.EXE` de Psy-Q 4.3** (Win32, se ejecuta con Wine).
+> Con el CC1PSX de la 4.3 + ASPSX 2.86 (4.6) coinciden 263 funciones; el CC1PSX 2.7.2.SN.1 en DOS que
+> usabamos antes tenia otro planificador (prologo en otro orden) y bloqueaba decenas de funciones.
+> `matchcheck.py` lo usa por defecto (`/opt/psyq/cc43/CC1PSX.EXE`, o `CC1_WINE=...`; `CC1_WINE=0` = DOS).
+> CC1PSX 4.4 es peor (6 de 206); ASPSX 2.56..2.86 dan igual (2.86 elegido).
+
+
 **El juego se compila con GCC 2.7.2.SN.1 (Psy-Q, SN Systems)** + ASPSX 2.34 (DOS).
 Verificado: `MulCos`, `MulNegSin` y `ObjApplyVelocity` salen idénticas byte a byte.
 (Psy-Q 4.6 trae GCC 2.95.2 y NO coincide; 4.7 solo trae librerías.)
