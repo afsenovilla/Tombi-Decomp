@@ -1,4 +1,5 @@
 // FUNC 800310d0 388 MAIN0
+// MATCHING 800310d0 388
 typedef struct S { unsigned char a, p, b; } S;
 extern S DAT_a;
 extern unsigned char DAT_603a;
@@ -15,11 +16,9 @@ void FUN_800310d0(void)
     switch (DAT_960) {
     case 2:
         switch (DAT_962) {
-        case 0: v = 1; break;
-        case 3: v = 3; break;
-        default: goto end;
+        case 0: DAT_603a = 1; break;
+        case 3: DAT_603a = 3; break;
         }
-        DAT_603a = v;
         break;
     case 5:
     case 8:
@@ -28,11 +27,9 @@ void FUN_800310d0(void)
         break;
     case 0x13:
         switch (DAT_962) {
-        case 0: v = 1; break;
-        case 2: v = 2; break;
-        default: goto end;
+        case 0: DAT_603a = 1; break;
+        case 2: DAT_603a = 2; break;
         }
-        DAT_603a = v;
         break;
     }
 end:
