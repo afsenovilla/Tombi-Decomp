@@ -25,13 +25,13 @@ void FUN_800f2a30(unsigned char *o)
     }
     v = *(short *)(o + 0x7c);
     o[0xac] = 0;
-    if (v < 1) {
-        *(short *)(o + 0x7c) = v + 0xd0;
-        if ((v + 0xd0) * 0x10000 > 0)
-            *(short *)(o + 0x7c) = 0;
-    } else {
+    if (v > 0) {
         *(short *)(o + 0x7c) = v - 0xd0;
         if ((v - 0xd0) * 0x10000 < 0)
+            *(short *)(o + 0x7c) = 0;
+    } else {
+        *(short *)(o + 0x7c) = v + 0xd0;
+        if ((v + 0xd0) * 0x10000 > 0)
             *(short *)(o + 0x7c) = 0;
     }
     s = *(unsigned short *)(o + 0x7c);
