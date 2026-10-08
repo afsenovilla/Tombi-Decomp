@@ -1,5 +1,5 @@
 // FUNC 80056e4c 860 MAIN0
-/* score 6 (was 18): only SetSemiTrans arg setup differs: game has li a1,1 in the bnez delay slot and move a0,s2 right after lhu anim; ours gets li a1,1 after lhu (reorg cannot scan past volatile loads, so li must be scheduled before them or the game has no volatile). otadd sibling form (c=z, d=b0f) fixed the tail; tried volatility combos of all 6 loads, statement hill-climb, non-volatile reload forms (all CSEd). */
+/* score 6 (was 18): only SetSemiTrans arg setup differs: game has li a1,1 in the bnez delay slot and move a0,s2 right after lhu anim; ours gets li a1,1 after lhu (reorg cannot scan past volatile loads, so li must be scheduled before them or the game has no volatile). otadd sibling form (c=z, d=b0f) fixed the tail; tried volatility combos of all 6 loads, statement hill-climb, non-volatile reload forms (all CSEd). b43: `t = o->d3c; xy = ...; t += *a * 4; s = o->d3c;` keeps two d3c loads WITHOUT volatile (reassigning t breaks the CSE equivalence) and puts li a1 in the bnez slot, but load order then is anim,d3c,d3c,xy,lhu,p (best 15-31 over all volatile combos x statement perms). sched2 dump: game needs move a0,s2 (insn 152) still unscheduled when filling the lhu-anim stall; ours uses it to fill the lhu wb4 stall. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
