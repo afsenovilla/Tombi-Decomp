@@ -1,8 +1,5 @@
 // FUNC 800242b8 1976 MAIN0
-/* score 116 (ncheck and matchcheck): only register allocation of the FIRST loop in each branch
-   (litF3/drawF3) differs: game n=$9 vtx=$5 len=$6 otz=$7 p=$8, ours n=$7 vtx=$8 len=$9 p=$6 otz=$5.
-   Rest matches. Tried: param order, local decl order/types, register kw, vtx copies, len as param,
-   function-scope vars instead of inline (worse), scalar vs [0] for D_1F800164, lit types. */
+// MATCHING 800242b8 1976
 typedef struct {
     unsigned long tag;
     unsigned long c0;
@@ -22,7 +19,6 @@ typedef struct {
 
 extern char *D_1F800164[];
 extern long DAT_1f800070;
-extern char *DAT_1f80008c;
 extern char *D_1F80008C[];
 extern char *volatile D_1F80008CV;
 extern unsigned long *DAT_1f8001e0;
@@ -91,7 +87,7 @@ static __inline__ char *drawF3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x28;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    D_1F80008C[0] = vtx;
     return (char *)f;
 }
 
@@ -184,7 +180,7 @@ static __inline__ char *litF3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x28;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    D_1F80008C[0] = vtx;
     return (char *)f;
 }
 
