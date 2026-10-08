@@ -3,6 +3,7 @@
 // e as literal (43), b computed inside, signed char d param, volatile/array/literal/struct-literal D_1F800070 (volatile la form puts li after la),
 // b33: all 120 orders of the 5 args as locals before the call: no change (19); extern volatile D_1F800070 (plain lui form): no change; inline returning short gives 14 but adds a wrong move v0,a0 (size then matches by accident); flags no-sched/-fno-sched2 worse.
 // asm barrier at inline start, return form. The final bnez nop is fine (maspsx expands the lw macro).
+// b40: sched1 places li late; sched2 (bottom-up) picks li last because lw D_1F800070 (prio 5) beats it; game needs lw c not ready/lower prio than li. Tried c/d param types (long/short/schar/uchar), d=(sc)d;d+=c;d<<=2, ==0/return/result-var call forms, volatile on c/b/b0f, D_1F800070[0]: all >=19.
 // FUNC 80054c38 796 MAIN0
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
