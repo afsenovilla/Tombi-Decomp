@@ -1,5 +1,8 @@
 // FUNC 8010f400 2672 X000
-/* score 740 (ours 558 insns vs 668): structure right (8 inlines, short u params) but gcc CSEs the u*0x74 index across blocks while the game recomputes it from u (move v0,a0) in every arm, and reloads wb2 after the ba6 test. Tried param type brute force (243 combos), volatile/raw reloads, -fno-cse-* flags. */
+// MATCHING 8010f400 2672
+// FLAGS -O2 -G0 -fno-cse-skip-blocks
+/* -fno-cse-skip-blocks (debt): with it gcc recomputes u*0x74 in every arm like the game (18 index computations);
+   without it CSE follows the path past chkr's skipped then-block and reuses one product (660). */
 typedef struct {
     short f0, f2, f4, f6;
     unsigned short g8, ga, gc, ge, g10, g12;
@@ -37,35 +40,23 @@ static __inline__ void chkl(P *o, short u)
         o->wbc = o->wb2;
     }
 }
-static __inline__ void setr(P *o, short u, unsigned char b)
+static __inline__ void setr(P *o, short u, short b)
 {
     short w;
     switch (b) {
     case 1:
-        w = o->wb2;
-        if (w < 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = TB(u)->ge;
+        if (o->wb2 < 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = TB(u)->ge;
         else o->wb2 = TB(u)->f0;
         break;
     case 2:
-        w = o->wb2;
-        if (w < 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = TB(u)->ge;
+        if (o->wb2 < 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = TB(u)->ge;
         else o->wb2 = TB(u)->f2;
         break;
     case 3:
-        w = o->wb2;
-        if (w < 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = TB(u)->ge;
+        if (o->wb2 < 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = TB(u)->ge;
         else o->wb2 = TB(u)->f4;
         break;
     }
@@ -74,35 +65,23 @@ zero:
     o->wb2 = 0;
 }
 
-static __inline__ void setl(P *o, short u, unsigned char b)
+static __inline__ void setl(P *o, short u, short b)
 {
     short w;
     switch (b) {
     case 1:
-        w = o->wb2;
-        if (w > 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = -TB(u)->ge;
+        if (o->wb2 > 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = -TB(u)->ge;
         else o->wb2 = -TB(u)->f0;
         break;
     case 2:
-        w = o->wb2;
-        if (w > 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = -TB(u)->ge;
+        if (o->wb2 > 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = -TB(u)->ge;
         else o->wb2 = -TB(u)->f2;
         break;
     case 3:
-        w = o->wb2;
-        if (w > 0) {
-            if (o->ba6 & 2) goto zero;
-            w = *(short *)((char *)o + 0xb2);
-        }
-        if (w == 0) o->wb2 = -TB(u)->ge;
+        if (o->wb2 > 0 && (o->ba6 & 2)) goto zero;
+        if (o->wb2 == 0) o->wb2 = -TB(u)->ge;
         else o->wb2 = -TB(u)->f4;
         break;
     }
@@ -113,35 +92,31 @@ zero:
 
 static __inline__ void accr(P *o, short u)
 {
-    short s;
-    int a;
+    int s;
     if (o->wb2 < 0 && (o->ba6 & 2))
         o->wb2 = 0;
     s = o->wb2;
-    a = s;
-    if (s < -T.f2) o->wb2 = a + T.g8;
-    else if (s < -T.f0) o->wb2 = a + T.ga;
-    else if (s < 0) o->wb2 = a + T.gc;
+    if (s < -T.f2) o->wb2 = o->wb2 + T.g8;
+    else if (s < -T.f0) o->wb2 = o->wb2 + T.ga;
+    else if (s < 0) o->wb2 = o->wb2 + T.gc;
     else if (s == 0) o->wb2 = T.ge;
-    else if (s < T.f2) o->wb2 = a + T.g10;
-    else if (s < T.f4) o->wb2 = a + T.g12;
+    else if (s < T.f2) o->wb2 = o->wb2 + T.g10;
+    else if (s < T.f4) o->wb2 = o->wb2 + T.g12;
     else o->wb2 = T.f4;
 }
 
 static __inline__ void accl(P *o, short u)
 {
-    short s;
-    int a;
+    int s;
     if (o->wb2 > 0 && (o->ba6 & 2))
         o->wb2 = 0;
     s = o->wb2;
-    a = s;
-    if (T.f2 < s) o->wb2 = a - T.g8;
-    else if (T.f0 < s) o->wb2 = a - T.ga;
-    else if (s > 0) o->wb2 = a - T.gc;
+    if (T.f2 < s) o->wb2 = o->wb2 - T.g8;
+    else if (T.f0 < s) o->wb2 = o->wb2 - T.ga;
+    else if (s > 0) o->wb2 = o->wb2 - T.gc;
     else if (s == 0) o->wb2 = -T.ge;
-    else if (-T.f2 < s) o->wb2 = a - T.g10;
-    else if (-T.f4 < s) o->wb2 = a - T.g12;
+    else if (-T.f2 < s) o->wb2 = o->wb2 - T.g10;
+    else if (-T.f4 < s) o->wb2 = o->wb2 - T.g12;
     else o->wb2 = -T.f4;
 }
 
@@ -149,22 +124,20 @@ static __inline__ void dec(P *o, short u, int g)
 {
     unsigned short s;
     short n;
-    unsigned short *gp;
     s = o->wb2;
     if ((unsigned short)(s + 0x50) < 0xa1) {
         o->wb2 = 0;
         return;
     }
-    gp = (unsigned short *)((char *)&T + g);
     n = s;
-    if (T.f4 < n) o->wb2 = s - gp[0];
-    else if (T.f2 < n) o->wb2 = s - gp[1];
-    else if (T.f0 < n) o->wb2 = s - gp[2];
-    else if (n > 0) o->wb2 = s - gp[3];
-    else if (n < -T.f4) o->wb2 = s + gp[0];
-    else if (n < -T.f2) o->wb2 = s + gp[1];
-    else if (n < -T.f0) o->wb2 = s + gp[2];
-    else if (n < 0) o->wb2 = s + gp[3];
+    if (n > T.f4) o->wb2 = s - *(unsigned short *)((char *)&T + g + 0);
+    else if (T.f2 < n) o->wb2 = s - *(unsigned short *)((char *)&T + g + 2);
+    else if (T.f0 < n) o->wb2 = s - *(unsigned short *)((char *)&T + g + 4);
+    else if (n > 0) o->wb2 = s - *(unsigned short *)((char *)&T + g + 6);
+    else if (n < -T.f4) o->wb2 = s + *(unsigned short *)((char *)&T + g + 0);
+    else if (n < -T.f2) o->wb2 = s + *(unsigned short *)((char *)&T + g + 2);
+    else if (n < -T.f0) o->wb2 = s + *(unsigned short *)((char *)&T + g + 4);
+    else if (n < 0) o->wb2 = s + *(unsigned short *)((char *)&T + g + 6);
 }
 
 static __inline__ void mid(P *o, short u)
