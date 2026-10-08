@@ -1,5 +1,5 @@
 // FUNC 80043ebc 544 MAIN0
-/* score 32: remaining diffs are register swaps (table ptr a0 vs a1, dy a0 vs v1) */
+/* score 12: only the dy block differs: game dy=a0, o->box2=a1 and the dy copy (move a1,a0) after the -8 sum; ours dy=v1 and copy right after subu. Tried dy as int/short temps, recomputing in the test, assigning after the test, type brute force. */
 #include "TOBJ.H"
 
 typedef struct { short x, y; } Off;
@@ -13,12 +13,11 @@ void func_80043EBC(TObj *o, TObj *e)
     short w;
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 45) > 90)
         return;
-    t = D_8007B610;
-    t += e->b0c;
+    { short *u = &D_8007B610[e->b0c].x;
     px = sx = e->box0 + o->box0 + 8;
-    tx = t->x;
+    tx = *u++;
     dx = o->h->p.whole - (e->h->p.whole + tx);
-    ty = t->y;
+    ty = *u; }
     if ((unsigned short)(dx + sx) > e->box1 + 16 + o->box1)
         return;
     dy = o->y.p.whole - (e->y.p.whole + ty);
