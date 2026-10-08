@@ -1,4 +1,6 @@
 // FUNC 8002c578 220 MAIN0
+// MATCHING 8002c578 220
+// FLAGS -O2 -G0 -fno-schedule-insns
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
 extern short *DAT_8009c338;
@@ -11,6 +13,7 @@ void FUN_8002c578(TObj *p, int x, int y, int z)
         short *t;
         unsigned short w;
         short w2;
+        int d;
         o->active = 1;
         o->type = 0x12;
         w = p->animFrame;
@@ -26,9 +29,10 @@ void FUN_8002c578(TObj *p, int x, int y, int z)
         o->b0d = 1;
         o->subtype = 0;
         o->w08 = w2;
+        d = DAT_1f8002cc;
         o->category |= 0x80;
         o->b1d = 0x4d;
         *(TObj **)((char *)o + 0x90) = p;
-        o->d3c = DAT_1f8002cc;
+        o->d3c = d;
     }
 }

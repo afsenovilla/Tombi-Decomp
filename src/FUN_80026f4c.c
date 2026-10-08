@@ -1,6 +1,8 @@
 // FUNC 80026f4c 156 MAIN0
+// MATCHING 80026f4c 156
 extern unsigned char DAT_8009d07f;
 extern unsigned char DAT_8009c971;
+extern volatile unsigned char V_8009c971 asm("DAT_8009c971");
 extern unsigned char DAT_8009c970;
 extern unsigned char DAT_8009d080;
 extern unsigned short DAT_800a60d0;
@@ -8,7 +10,7 @@ extern unsigned short DAT_800a60d2;
 
 void FUN_80026f4c(void)
 {
-    unsigned char c;
+    unsigned short c;
     unsigned char d;
     if (DAT_8009d07f == 0) {
         c = DAT_8009c971;
@@ -22,8 +24,9 @@ void FUN_80026f4c(void)
     }
     DAT_8009c971 = c + 1;
 done:
-    d = DAT_8009c971;
-    DAT_800a60d0 = d;
-    DAT_800a60d2 = d;
-    DAT_8009c970 = d;
+    d = V_8009c971;
+    c = d;
+    DAT_800a60d0 = c;
+    DAT_800a60d2 = c;
+    DAT_8009c970 = c;
 }
