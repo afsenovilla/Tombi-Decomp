@@ -1,6 +1,7 @@
 // FUNC 80122724 408 X000
 // MATCHING 80122724 408
 // volatile b/visible stores keep the game order (matching debt)
+// Tried: no volatile with every order of the a/y/b stores, b inside/after the `one` block, short/uchar one, FUN(o, o->visible = 1): sb stays above sh zero (2) or two li (25).
 #include "TOBJ.H"
 extern void *DAT_8013b20c[];
 extern int DAT_1f8002d4[];
