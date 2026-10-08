@@ -1,6 +1,6 @@
 // FUNC 80057ae4 268 MAIN0
 #include "TOBJ.H"
-extern short DAT_1f800060[], DAT_1f800062, DAT_1f800064;
+extern volatile short DAT_1f800060[], DAT_1f800062, DAT_1f800064;
 extern struct { char pad[0x14]; int tx; } DAT_1f800000;
 extern int DAT_1f800018, DAT_1f80001c;
 extern int DAT_1f8000d4, DAT_1f8000d8, DAT_1f8000dc;
