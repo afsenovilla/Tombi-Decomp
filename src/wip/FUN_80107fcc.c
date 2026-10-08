@@ -11,6 +11,8 @@ void FUN_80107fcc(TObj *o)
     unsigned short f;
     Fix16 *d;
     switch (o->state) {
+    case 99:
+        break;
     case 0:
         DAT_8009c330[8] = o->active;
         f = o->animFrame;
@@ -36,19 +38,19 @@ void FUN_80107fcc(TObj *o)
         break;
     case 2:
         FUN_8001fec0(o);
-        if ((DAT_1f8001c8 & 1) == 0) {
-            d = o->d;
-            d->p.whole = d->p.whole + 5;
-        } else {
+        if (DAT_1f8001c8 & 1) {
             d = o->d;
             d->p.whole = d->p.whole - 5;
+        } else {
+            d = o->d;
+            d->p.whole = d->p.whole + 5;
         }
         o->velX = o->velX - 5;
         if (o->velX != 0)
             return;
         *(signed char *)&o->b0f = -8;
+        *(unsigned char *)o = DAT_8009c330[8];
         o->b9c = 0;
-        o->active = DAT_8009c330[8];
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
