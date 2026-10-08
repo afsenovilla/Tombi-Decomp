@@ -1,5 +1,5 @@
 // FUNC 800491f0 820 MAIN0
-/* score 22: only v0/v1 swapped in the case-32 box test (game: d in v1, sum in v0). Outer loop must be goto (no loop.c hoisting) */
+/* score 22: only v0/v1 swapped in the case-32 box test (game: d in v1, sum in v0). Outer loop must be goto (no loop.c hoisting). b25: `e->box0 + d` order gives the game's addu operand order (box first, sum tied to box) but then box/d swap v0/v1 (score 36); tried d types, separate h/y locals, box read into var, inline hit(), cast forms, reversed compare: all 22 or 36 */
 #include "TOBJ.H"
 
 extern short D_1F80019E;
