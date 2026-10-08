@@ -1,6 +1,7 @@
 // FUNC 80033b44 5056 MAIN0
 // MATCHING 80033b44 5056
 /* Case 1 tail: x/y as block-local ints declared inside each branch (separate pseudos, compare cross-jumped). Debt: frame pad block at the end. */
+/* Pad: the 8-B frame chunks are combine USEs of dead pseudos (sll-16/li -65536 folded away, cc1 -dc); type brute force, compound/short-temp forms, inline vs macro, cast/& forms did not add 16 B without changing code. */
 #include "TOBJ.H"
 typedef struct V2 { short x, y; } V2;
 typedef struct {
@@ -14,7 +15,6 @@ extern unsigned char DAT_800a60d5[];
 extern unsigned char DAT_800a60d6[];
 extern unsigned char *DAT_8009f0ec;
 extern D600 DAT_8009d600;
-extern short DAT_8009d600s, DAT_8009d602s, DAT_8009d604a[];
 extern unsigned short DAT_8007a04c[];
 extern unsigned short DAT_8007a070[];
 extern short DAT_8007a072[];
@@ -94,7 +94,7 @@ void FUN_80033b44(TObj *o)
         o->active = 2;
         o->waa = k;
         *(unsigned short *)((char *)DAT_8009c330 + 0x22) = 0;
-        DAT_8009d602s = 0;
+        DAT_8009d600.w2 = 0;
         o->wa8 = 0;
         o->w74 = 0;
         o->b6b = 0;
