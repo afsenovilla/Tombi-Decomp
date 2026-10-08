@@ -1,5 +1,7 @@
 // FUNC 8003f7cc 768 MAIN0
-/* score 115 (if(!dir) ba6=2 else 3 inverts branch like game). Still: game passes dir in a3 then copies to s1; h in a0 with v1 copy; probe-inline, dir copy var, short h tried (worse/no gain) */
+/* score 88: short k = h copy (game: lh $4 then move $3,$4) fixed the box2 clamp. Still: dir lives in a3 then
+   copied to s1 (try a separate branch var passed to the first call), lo/hi/dir2 register numbers, and the
+   layout of the 2nd/3rd probe blocks. */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
@@ -8,6 +10,7 @@ short func_8003F7CC(TObj *o)
 {
     short d, dx, dx2, lo, hi, r;
     int h;
+    short k;
     int dir, dir2;
     char pad[8];
     if (*(unsigned char *)&o->waa != 0) return 0;
@@ -35,9 +38,10 @@ left:
         dir2 = 0;
     }
     h = o->box2;
-    lo = h;
+    k = h;
+    lo = k;
     if (h >= 8) lo = 8;
-    hi = h;
+    hi = k;
     if (h >= 14) hi = 14;
     r = func_8004065C(o, o->h->p.whole + dx, o->y.p.whole - lo, dir);
     if (r) {
