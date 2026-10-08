@@ -1,5 +1,5 @@
 // FUNC 80118040 1016 X000
-/* score 84: whole range 80118040+801180ac+8011832c (splat split it). Remaining: prologue save order of s2,
+/* score 78 (b35: o->d3c = D_1F8002D8 moved right after o->type = 0, found by line hill-climb; raw-offset stores did not help; t as ushort/int/char worse): whole range 80118040+801180ac+8011832c (splat split it). Remaining: prologue save order of s2,
    scheduling of the early field stores vs the division mults, subtype chain value in v1 instead of v0,
    and loop hoisting (game hoists 800 and keeps a zero var in $11 but re-materializes the table base
    and the constant 1 every iteration). Tried: store placement, statement perms, e/offset/digit-pointer forms. */
@@ -48,6 +48,7 @@ void func_80118040(int n, int x, int y, int z, short t)
     h = n / 100000;
     o->type = 0;
     o->active = 1;
+    o->d3c = D_1F8002D8;
     o->b0a = 4;
     o->w1e = 0x15;
     o->b0f = 5;
@@ -57,7 +58,6 @@ void func_80118040(int n, int x, int y, int z, short t)
     o->animTimer = 0;
     o->timer = t;
     X(o)->wc6 = i;
-    o->d3c = D_1F8002D8;
     o->wb6 = n / 10000 - h * 10;
     o->wb8 = n / 1000 - n / 10000 * 10;
     o->wba = n / 100 - n / 1000 * 10;
