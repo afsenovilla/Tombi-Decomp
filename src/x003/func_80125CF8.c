@@ -1,7 +1,5 @@
 // FUNC 80125cf8 1588 X003
-/* score ~231: control flow decoded (sibling of func_801259AC: slope/fall inline, off-screen check). Left: the
-   near() range checks (operand/register order, sltiu vs slti), shared SET tails between substeps and register
-   choice in the timer setups. */
+// MATCHING 80125cf8 1588
 #include "TOBJ.H"
 extern unsigned short D_1F80027E;
 extern unsigned short D_1F800176, D_1F800186;
@@ -29,32 +27,31 @@ extern char D_80077D24[], D_80077CE8[];
     o->box3 = *p++; \
     AnimLoadDuration(o); }
 
-static __inline__ void slope(TObj *o, short y)
-{
-    unsigned int v;
-
-    if (o->b69 == 1) {
-        o->b69 = 0;
-    } else if (FUN_80040278(o, o->h->p.whole, y)) {
-        if (o->wac >= 0xc) {
-            o->d8c = 0;
-        } else {
-            v = ((D_1F80027E << 2) + o->d8c) & 0xff;
-            if (v != 0) {
-                if (v < 0x80) o->d8c = o->d8c - 1;
-                else o->d8c = o->d8c + 1;
-                o->d8c = *(unsigned char *)&o->d8c;
-            }
-        }
+#define SLOPE(o, Y) \
+    if (o->b69 == 1) { \
+        o->b69 = 0; \
+    } else if (FUN_80040278(o, o->h->p.whole, Y)) { \
+        if (o->wac >= 0xc) { \
+            o->d8c = 0; \
+        } else { \
+            unsigned int v = ((D_1F80027E << 2) + o->d8c) & 0xff; \
+            if (v != 0) { \
+                if (v < 0x80) o->d8c = o->d8c - 1; \
+                else o->d8c = o->d8c + 1; \
+                o->d8c = *(unsigned char *)&o->d8c; \
+            } \
+        } \
     }
-}
 
 static __inline__ short near(TObj *o)
 {
-    int a = (unsigned short)(-o->h->p.whole + D_1F80016A + 0x60);
-    if ((unsigned short)(-o->d->p.whole + D_1F800172 + 0x2d) >= 0x5b) return 0;
-    if (a > 0xc0) return 0;
-    return (unsigned short)(D_1F80016E - o->y.p.whole + 0x40) <= 0x80;
+    short lim = 0xc0;
+    unsigned short a;
+    a = (unsigned short)(D_1F800172 - o->d->p.whole + 0x2d);
+    if ((unsigned int)a >= 0x5b) return 0;
+    a = (unsigned short)(D_1F80016A - o->h->p.whole + 0x60);
+    if (a > lim) return 0;
+    return (unsigned short)(D_1F80016E - o->y.p.whole + 0x40) <= lim - 0x40;
 }
 
 void func_80125CF8(TObj *o)
@@ -73,7 +70,7 @@ void func_80125CF8(TObj *o)
                 o->wac = 0x1e;
                 o->movetab = D_80077CE8;
             }
-            SET();
+            goto set;
         } else {
             o->substep++;
         }
@@ -89,9 +86,9 @@ void func_80125CF8(TObj *o)
             o->wac = 1;
             o->movetab = D_80077CE8;
         }
+    t1:
         o->timer = t;
-        SET();
-        break;
+        goto set;
     case 2:
         if (--o->timer == -1) {
             if (near(o) && (Rand() & 1)) {
@@ -104,24 +101,22 @@ void func_80125CF8(TObj *o)
                 t = D_80135D4C[Rand() & 7];
                 o->wac = 7;
                 o->movetab = D_80077D24;
+                goto t1;
             } else {
                 t = D_80135D2C[Rand() & 7];
                 o->wac = 0;
                 o->movetab = D_80077CE8;
+                goto t1;
             }
-            o->timer = t;
-            SET();
-            break;
         }
         FUN_8001fab4(o);
         AnimAdvance(o);
-        slope(o, o->y.p.whole + 0xe);
+        SLOPE(o, (short)(o->y.p.whole + 0xe));
         if (func_801256F4(o, o->animFrame)) {
             o->substep++;
             if (*w) o->wac = 0xf;
             else o->wac = 0x1e;
-            SET();
-            break;
+            goto set;
         }
         if (!o->visible) goto off;
         break;
@@ -132,7 +127,7 @@ void func_80125CF8(TObj *o)
             o->substep++;
             if (*w) o->wac = 8;
             else o->wac = 0;
-            SET();
+            goto set;
         }
         break;
     case 4:
@@ -151,17 +146,18 @@ void func_80125CF8(TObj *o)
         {
             short yy = o->y.p.whole;
             o->y.p.whole = yy + 1;
-            slope(o, yy + 0xf);
+            SLOPE(o, (short)(yy + 0xf));
         }
         if (o->visible) {
             if (--o->timer == -1) {
-                if ((Rand() & 1) == o->animFrame) {
-                    o->substep = 1;
-                } else {
+                if ((Rand() & 1) != o->animFrame) {
                     o->substep = 3;
                     if (*w) o->wac = 0xf;
                     else o->wac = 0x1e;
+                set:
                     SET();
+                } else {
+                    o->substep = 1;
                 }
             }
         } else {
