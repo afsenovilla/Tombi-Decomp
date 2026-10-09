@@ -1,4 +1,4 @@
-/* score 14: (1) Ground2 d8c +-1 result lands in v1 (game v0, same non-inverted branch shape); w=v-1 temps give v0 but reorg then inverts the branch. (2) case 4 double state store: game keeps both `state++` and `state = 1` stores at 6(s0); plain C lets flow delete the first, the x-relative store keeps both but emits -0xae(s1). Tried volatile, inline Jump(), labels, q=o copy, store after call. */
+/* score 12: Ground2 d8c +-1 result lands in v1 (game v0, same non-inverted beqz;nop;j shape); every variant giving v0 (w temp, store per arm, ?:, goto, nested inline) makes reorg invert the branch (bnez + -1 in delay, 168). Fixed: case 4 double state store = `o->state++; o->b9c = 1; o->state = 1;` (flow keeps a store overwritten only after another store; sched reorders). */
 // FUNC 8012748c 2236 X003
 #include "TOBJ.H"
 
@@ -174,9 +174,9 @@ void func_8012748C(TObj *o)
             o->velV = -0x400;
             o->movetab = D_80077CF4;
             o->d8c = 0;
-            o->b9c = 1;
             o->state++;
-            ((TObj *)((char *)x - 0xb4))->state = 1;
+            o->b9c = 1;
+            o->state = 1;
             playSFX(0x77);
             break;
         }
