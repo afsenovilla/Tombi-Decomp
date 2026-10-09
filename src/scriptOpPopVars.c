@@ -8,7 +8,7 @@
 
 void scriptOpPopVars(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
     u8* q = (u8*)p;
     s32 i;
     u16 n;

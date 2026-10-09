@@ -8,10 +8,10 @@
 
 void scriptOpLoadBackground(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
 
     if (D_8009C618 != 3) {
-        func_800EBD5C(D_800A5398, *(s16*)((u8*)D_800A53D8 + 2), D_800A53AE);
+        func_800EBD5C(PLAYER, *(s16*)((u8*)D_800A53D8 + 2), D_800A53AE);
     }
     *(s32*)((u8*)p + 0x1190) = D_800A5400;
     p->pc++;

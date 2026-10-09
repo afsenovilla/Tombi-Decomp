@@ -27,13 +27,13 @@ void* allocObjectLayer(u8 arg0)
 {
     s16  n = D_1F800238;
     s32* p;
-    unkstruct_800183E4* obj;
+    ObjectAxisView* obj;
 
     if (n > 0) {
         p = D_1F800208;
         D_1F800238 = n - 1;
         D_1F800208 = p + 1;
-        obj = (unkstruct_800183E4*)*p;
+        obj = (ObjectAxisView*)*p;
         obj->layer = arg0;
         if ((D_1F8001C8 & 1) == 0) {
             obj->drawBufA = &obj->data[0x10];

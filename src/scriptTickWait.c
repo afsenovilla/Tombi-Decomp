@@ -8,7 +8,7 @@
 
 void scriptTickWait(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
     u32 n = *(u32*)((u8*)p + 0x11D0) + 1;
 
     *(u32*)((u8*)p + 0x11D0) = n;

@@ -11,7 +11,7 @@ void closeTask(s32 id)
     s32  off;
     u16* flag;
 
-    off  = id * sizeof(unkstruct_1F8001D4);
+    off  = id * sizeof(Task);
     flag = (u16*)(TASK_TABLE + off);
 
     if (*flag != 0) {

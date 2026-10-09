@@ -18,19 +18,19 @@ void gameplayMainHandler(void)
 {
     u_short temp_v1;
     u_char temp_v0;
-    unkstruct_1F8001D4* temp_a0;
-    unkstruct_1F8001D4* temp_a0_2;
-    unkstruct_1F8001D4* temp_v1_2;
+    Task* temp_a0;
+    Task* temp_a0_2;
+    Task* temp_v1_2;
 
     temp_a0 = CURRENT_TASK;
-    temp_v1 = temp_a0->unk4E.value;
+    temp_v1 = temp_a0->step.value;
     switch (temp_v1) {                              // irregular
         case 0:
             initObjectPools(temp_a0);
             initHud();
-            temp_a0_2 = *(unkstruct_1F8001D4** )(&SCRATCHPAD+0x1D4);
+            temp_a0_2 = *(Task** )(&SCRATCHPAD+0x1D4);
             *(char* )0x1F8001CF = 1;
-            temp_a0_2->unk4E.value++;
+            temp_a0_2->step.value++;
             func_800243E8();
             func_800246B0();
             if (*(u_long*)&GAME.selectedArea == AREA06_DIRTMOTOCROSS) {
@@ -50,21 +50,21 @@ void gameplayMainHandler(void)
             GAME.totalTimePlayed++;
             gameplayTick(temp_a0);
             if (D_8009BCA0 == 2) {
-                temp_v1_2 = *(unkstruct_1F8001D4** )(&SCRATCHPAD+0x1D4);
-                temp_v1_2->unk4E.value++;
+                temp_v1_2 = *(Task** )(&SCRATCHPAD+0x1D4);
+                temp_v1_2->step.value++;
                 func_80020C00(1);
             }
             if ((*(u_char* )0x1F8001C2 != 0) && (*&D_8009C9D8 & 8) && (*&D_8009C9D8 & 0x800)) {
-                (*(unkstruct_1F8001D4** )(&SCRATCHPAD+0x1D4))->unk4E.value = 3U;
+                (*(Task** )(&SCRATCHPAD+0x1D4))->step.value = 3U;
                 return;
             }
             return;
         case 2:
             if ((*(u_char* )0x1F8001BB == 0) && (temp_v0 = GAME.playerLives - 1, GAME.playerLives = temp_v0, ((temp_v0 & 0xFF) == 0))) {
-                temp_a0->unk4E.value = 3U;
+                temp_a0->step.value = 3U;
             } else {
                 temp_a0->state2 = 0;
-                temp_a0->unk4E.value = 5U;
+                temp_a0->step.value = 5U;
                 GAME.selectedSpawnPoint = 0;
                 GAME.nextSpawnPoint = 0;
                 GAME.playerHealth = GAME.playerHealthDisplayed;
@@ -90,7 +90,7 @@ void gameplayMainHandler(void)
             D_8009E3EE = 0;
             D_8009E3EF = 0;
             temp_a0->state2 = 8;
-            temp_a0->unk4E.value = 0U;
+            temp_a0->step.value = 0U;
             break;
     }
 }

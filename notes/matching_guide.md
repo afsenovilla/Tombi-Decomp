@@ -27,6 +27,17 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
 - To test a wip quickly without editing it: `OLDGCC=/opt/oldgcc/gcc-2.8.1-psx python3 tools/ncheck.py --score src/wip/X.c`
   (`OLDGCC` only replaces the default compiler; a `// CC` line always wins).
 - Matched this way: FUN_8006911c, func_800692E8, FUN_80069390, func_800693C8, FUN_80069410, func_8006B020.
+- **Most of the library is plain gcc-2.7.2 `-O2 -G0`** after all: the Psy-Q sources matched by psx_tomba (#21: libcd
+  `c_011.c`, libetc `intr.c`/`intr_vb.c`/`vmode.c`/`vsync.c`, libgte `msc00.c`/`reg12.c`/`reg13.c`, libpress, libsnd
+  `ssopenq.c`/`ut_rfb.c`/`ut_roff.c`/`vm_*.c`, libspu `spu.c`/`s_srmp.c`/`sr_gaks.c`) compile byte-identical for PAL with
+  the default compiler and `ncheck` (maspsx 2.86 `--expand-div`); psx_tomba builds them with gcc-2.7.2-psx cc1
+  `-O2 -G0 -mips1 -mcpu=3000 -funsigned-char` and maspsx `--aspsx-version=2.56` (ASPSX 2.56 = Psy-Q 4.0), no other
+  compiler. The 2.8.1 files above remain the exception (a different library build), not the rule.
+- **Porting from psx_tomba by bytes**: compile the whole psx_tomba file with the native pipeline, mask the relocations
+  and search the masked bytes in `game/MAIN0.EXE`: the hit gives the PAL address and, from the retail `lui/addiu`
+  pairs, the PAL address of every file-local `D_xxxxxxxx` extern (rename them; `game.h` globals keep their NTSC
+  names, build_full resolves them from the retail bytes). Keep only the target function's definition (other definitions
+  become prototypes, `inline` helpers stay as `static inline`, drop file-level `__asm__("nop")`).
 
 ## Work cycle
 1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.

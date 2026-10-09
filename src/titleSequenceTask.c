@@ -30,7 +30,7 @@ u_short D_80076E80[4] = { 0xE4, 0xAC, 0x74, 0 };
 void titleSequenceTask(void)
 {
     scratchpad* scratch = PSX_SCRATCH;
-    unkstruct_1F8001D4* task = *(unkstruct_1F8001D4**)scratch->currentTask;
+    Task* task = *(Task**)scratch->currentTask;
 
     u32 sp10[2];
     u16 state;

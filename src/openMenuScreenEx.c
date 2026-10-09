@@ -428,13 +428,13 @@ typedef struct {
 
 void openMenuScreenEx(s16 arg0, s16 arg1, s16 arg2)
 {
-    unkstruct_1F8001D4* p = CURRENT_TASK;
+    Task* p = CURRENT_TASK;
 
     D_800A3952 = arg0;
     D_800A3954 = arg1;
     D_800A3956 = arg2;
     D_800A3940[0] = 0;
     p->state2 = 3;
-    p->unk4E.value = 0;
+    p->step.value = 0;
     playSFXWithNote(10, 10);
 }

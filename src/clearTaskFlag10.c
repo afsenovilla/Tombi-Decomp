@@ -10,6 +10,6 @@ void clearTaskFlag10(s32 id)
 {
     u16* p;
 
-    p = (u16*)(TASK_TABLE + id * sizeof(unkstruct_1F8001D4));
+    p = (u16*)(TASK_TABLE + id * sizeof(Task));
     *p &= ~0x10;
 }

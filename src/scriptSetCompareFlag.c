@@ -8,7 +8,7 @@
 
 void scriptSetCompareFlag(s32 arg0)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
 
     if (arg0 == 0) {
         p->cmpFlag = 0;

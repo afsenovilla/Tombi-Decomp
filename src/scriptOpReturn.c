@@ -8,7 +8,7 @@
 
 void scriptOpReturn(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
 
     p->sp = p->sp - 1;
     p->pc = *(u16*)((u8*)p + p->sp * 4 + 0x90);

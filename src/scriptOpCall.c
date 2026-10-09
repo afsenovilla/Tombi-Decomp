@@ -8,8 +8,8 @@
 
 void scriptOpCall(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
-    u8* script = D_8009C974;
+    ScriptContext* p = SCRIPT_CTX;
+    u8* script = SCRIPT_CODE;
 
     s32 v = p->pc + 2;
 

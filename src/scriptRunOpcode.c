@@ -11,8 +11,8 @@ extern u8 D_8009C245;
 
 void scriptRunOpcode(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
-    u8* script = D_8009C974;
+    ScriptContext* p = SCRIPT_CTX;
+    u8* script = SCRIPT_CODE;
     u8  op = script[p->pc];
 
     if (op < 0x80) {

@@ -396,7 +396,7 @@ asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 
 //INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/reward", initItemObject);
 
-void rewardConditionalItem(unkstruct_800A6D50* arg0)
+void rewardConditionalItem(GameObject* arg0)
 {
     if ((GAME.selectedArea == AREA10_DEEPJUNGLE) || (arg0->unkC == 1)) {
         addItemToInventory(arg0->item_id, 1, true);

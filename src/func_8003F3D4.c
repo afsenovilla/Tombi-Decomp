@@ -472,7 +472,7 @@ void func_8003F3D4(u8* self)
         }
         break;
     case 2:
-        updateItemPickupAnim((unkstruct_800A6D50*)self);
+        updateItemPickupAnim((GameObject*)self);
         if (func_800202B4(self) == 0) {
             self[4] = 3;
         }

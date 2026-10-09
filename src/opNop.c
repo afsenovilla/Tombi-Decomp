@@ -8,5 +8,5 @@
 
 void opNop(void)
 {
-    D_8009E458->pc++;
+    SCRIPT_CTX->pc++;
 }

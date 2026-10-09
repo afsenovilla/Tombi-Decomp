@@ -396,7 +396,7 @@ asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 
 //INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/reward", initItemObject);
 
-void rewardMysteriousMushroom(unkstruct_800A6D50* arg0)
+void rewardMysteriousMushroom(GameObject* arg0)
 {
     setEventComplete(EVENT_THEMISTERIOUSMUSHROOM, 0);
     addItemToInventory(arg0->item_id, 1, true);

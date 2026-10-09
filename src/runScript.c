@@ -11,10 +11,10 @@ extern u8 D_8009C245;
 
 u_char runScript(void)
 {
-    unkstruct_8009E458* p;
+    ScriptContext* p;
     int ret;
 
-    p = D_8009E458;
+    p = SCRIPT_CTX;
     if (p->state == 2) {
         *(u_int*)((u8*)p + 0x11D0) += 1;
         if (*(u_int*)((u8*)p + 0x11D0) >= *(u_int*)((u8*)p + 0x11D4)) {
@@ -25,8 +25,8 @@ u_char runScript(void)
         return p->state;
     }
     do {
-        unkstruct_8009E458* q = D_8009E458;
-        u8* script = D_8009C974;
+        ScriptContext* q = SCRIPT_CTX;
+        u8* script = SCRIPT_CODE;
         u8 op = script[q->pc];
 
         if (op < 0x80) {

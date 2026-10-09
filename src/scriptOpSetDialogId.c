@@ -8,7 +8,7 @@
 
 void scriptOpSetDialogId(void)
 {
-    unkstruct_8009E458* q = D_8009E458;
+    ScriptContext* q = SCRIPT_CTX;
 
     D_8009BCAA = *(s32*)((u8*)q + 0x1190);
     asm("");

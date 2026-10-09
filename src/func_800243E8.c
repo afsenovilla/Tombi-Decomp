@@ -27,7 +27,7 @@ void func_80024BD4(u8* self);
 
 void func_800243E8(void)
 {
-    u8* p = D_800A5398;
+    u8* p = PLAYER;
     s16* row;
     u_int flags;
     u_int plane;
@@ -68,6 +68,6 @@ void func_800243E8(void)
         *(s16*)(p + 0x16) -= 0x104;
     } else if ((CURRENT_TASK)->loadGameSelected != 0) {
         (CURRENT_TASK)->loadGameSelected = 0;
-        *(VEC3*)&D_800A5398[0x10] = D_8009D2B4;
+        *(VEC3*)&PLAYER[0x10] = D_8009D2B4;
     }
 }

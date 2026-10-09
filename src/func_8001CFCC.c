@@ -16,17 +16,17 @@ typedef struct {
 
 void func_8001CFCC(void)
 {
-    switch (CURRENT_TASK->unk4E.value) {
+    switch (CURRENT_TASK->step.value) {
     case 0:
         func_800222B8(9, 1);
         goto advance;
     case 1:
         if (*(u8*)0x1F8001CE == 0) break;
     advance:
-        CURRENT_TASK->unk4E.value++;
+        CURRENT_TASK->step.value++;
         break;
     case 2:
-        CURRENT_TASK->unk4E.value++;
+        CURRENT_TASK->step.value++;
         asm("");
         D_8009BCCF = 1;
         D_8009BCE9 = 1;
@@ -41,14 +41,14 @@ void func_8001CFCC(void)
         gp = &GAME;
         areaChanged = gp->selectedArea != D_8009C0FC;
         {
-            unkstruct_1F8001D4* task;
+            Task* task;
             task = CURRENT_TASK;
-            task->unk4E.value = 4;
+            task->step.value = 4;
 
             if (areaChanged) {
                 D_8009BCCF = 2;
                 func_80020FAC();
-                (*(unkstruct_1F8001D4**)(&SCRATCHPAD + 0x1D4))->unk4E.value = 5;
+                (*(Task**)(&SCRATCHPAD + 0x1D4))->step.value = 5;
                 asm("");
                 if (D_8009C0FC == 0) {
                     if ((u32)(D_8009C0FE - 1) < 2) {
@@ -64,7 +64,7 @@ void func_8001CFCC(void)
             } else {
                 if (gp->selectedArea == 2) {
                     if (D_8009BCCA + D_8009C0FE == 1) {
-                        task->unk4E.value = 5;
+                        task->step.value = 5;
                     }
                 }
             }

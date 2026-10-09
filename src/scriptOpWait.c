@@ -8,8 +8,8 @@
 
 void scriptOpWait(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
-    u8 v = D_8009C974[p->pc + 1];
+    ScriptContext* p = SCRIPT_CTX;
+    u8 v = SCRIPT_CODE[p->pc + 1];
 
     *(s32*)((u8*)p + 0x11D0) = 0;
     *((u8*)p + 0x88) = 2;

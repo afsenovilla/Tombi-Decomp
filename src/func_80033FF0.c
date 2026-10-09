@@ -2868,7 +2868,7 @@ const u32 D_80012DE0[] = {
 
 void func_80033FF0(s16 arg0, s32 arg1, s32 arg2, s32 arg3)
 {
-    unkstruct_80018474* temp_v0;
+    ObjectPosView* temp_v0;
 
     temp_v0 = allocObjectLayer4();
     if (temp_v0 != NULL) {

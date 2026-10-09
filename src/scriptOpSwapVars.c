@@ -8,8 +8,8 @@
 
 void scriptOpSwapVars(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
-    u8*  q = (u8*)(p->pc + (s32)D_8009C974);
+    ScriptContext* p = SCRIPT_CTX;
+    u8*  q = (u8*)(p->pc + (s32)SCRIPT_CODE);
     s32* a = (s32*)(q[1] * 4 + (s32)p + 0x1090);
     s32* b = (s32*)(q[2] * 4 + (s32)p + 0x1090);
     s32  x = *b;

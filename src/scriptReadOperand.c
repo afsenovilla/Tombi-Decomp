@@ -8,7 +8,7 @@
 
 s32 scriptReadOperand(u8* src, u8 kind)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
     u8  buf[4];
     u8* d;
 

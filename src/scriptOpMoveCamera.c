@@ -8,9 +8,9 @@
 
 void scriptOpMoveCamera(void)
 {
-    unkstruct_8009E458* temp_s0;
+    ScriptContext* temp_s0;
 
-    temp_s0 = D_8009E458;
-    func_800EDE44(D_800A5398, *(s16*)&*(s32*)((u8*)temp_s0 + 0x1190), *(s16*)&*(s32*)((u8*)temp_s0 + 0x1194));
+    temp_s0 = SCRIPT_CTX;
+    func_800EDE44(PLAYER, *(s16*)&*(s32*)((u8*)temp_s0 + 0x1190), *(s16*)&*(s32*)((u8*)temp_s0 + 0x1194));
     temp_s0->pc++;
 }

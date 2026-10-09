@@ -396,7 +396,7 @@ asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 
 //INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/reward", initItemObject);
 
-void rewardGoldenBowl(unkstruct_800A6D50* arg0)
+void rewardGoldenBowl(GameObject* arg0)
 {
     u_char health;
 

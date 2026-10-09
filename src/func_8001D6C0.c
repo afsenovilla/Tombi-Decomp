@@ -81,19 +81,19 @@ void func_8001D6C0(void) {
         keyOffSfxAll(0);
 
         {
-            unkstruct_1F8001D4* p;
+            Task* p;
             u16 savedS2;
             u16 savedUn;
             p = CURRENT_TASK;
             savedS2 = p->state2;
-            savedUn = p->unk4E.value;
+            savedUn = p->step.value;
 
             MENU_STATE->unk12 = 7;
             MENU_STATE->unk16 = 4;
             MENU_STATE->unk14 = 0;
             MENU_STATE->unk0 = 0;
             p->state2 = 3;
-            p->unk4E.value = 0;
+            p->step.value = 0;
             *(u16*)0x1F8003B8 = savedS2;
             *(u16*)0x1F8003BA = savedUn;
             func_80020058(10, 10);
@@ -137,9 +137,9 @@ void func_8001D6C0(void) {
             }
 
             if (pad & 0x4000) {
-                unkstruct_1F8001D4* task = CURRENT_TASK;
+                Task* task = CURRENT_TASK;
                 u16 s2 = task->state2;
-                u16 un = task->unk4E.value;
+                u16 un = task->step.value;
                 int c10b;
 
                 *(u16*)0x1F8003B8 = s2;
@@ -153,7 +153,7 @@ void func_8001D6C0(void) {
                     MENU_STATE->unk14 = 0;
                     MENU_STATE->unk0 = 0;
                     task->state2 = 3;
-                    task->unk4E.value = 0;
+                    task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 1:
@@ -162,7 +162,7 @@ void func_8001D6C0(void) {
                     MENU_STATE->unk14 = 0;
                     MENU_STATE->unk0 = 0;
                     task->state2 = 3;
-                    task->unk4E.value = 0;
+                    task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 2:
@@ -171,7 +171,7 @@ void func_8001D6C0(void) {
                     MENU_STATE->unk14 = 0;
                     MENU_STATE->unk0 = 0;
                     task->state2 = 3;
-                    task->unk4E.value = 0;
+                    task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 3:
@@ -180,7 +180,7 @@ void func_8001D6C0(void) {
                     MENU_STATE->unk14 = 0;
                     MENU_STATE->unk0 = 0;
                     task->state2 = 3;
-                    task->unk4E.value = 0;
+                    task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 }
@@ -269,26 +269,26 @@ void func_8001D6C0(void) {
                         SetDispMask(0);
                         func_80020FAC();
                         {
-                            unkstruct_1F8001D4* task = CURRENT_TASK;
+                            Task* task = CURRENT_TASK;
                             task->state0 = 1;
                             task->state1 = 3;
                             task->state2 = 3;
                         }
                     } else {
-                        unkstruct_1F8001D4* task;
+                        Task* task;
                         u16 s2, un;
 
                         func_80020058(10, 10);
                         task = CURRENT_TASK;
                         s2 = task->state2;
-                        un = task->unk4E.value;
+                        un = task->step.value;
 
                         MENU_STATE->unk12 = 5;
                         MENU_STATE->unk0 = 0;
                         MENU_STATE->unk1 = 0;
                         MENU_STATE->unk16 = 0;
                         task->state2 = 3;
-                        task->unk4E.value = 0;
+                        task->step.value = 0;
                         *(u16*)0x1F8003B8 = s2;
                         *(u16*)0x1F8003BA = un;
                     }

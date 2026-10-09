@@ -17,7 +17,7 @@ typedef struct {
 void displayDebugScreen(void)
 {
     scratchpad* scratch = PSX_SCRATCH;
-    unkstruct_1F8001D4* temp_v1 = *(unkstruct_1F8001D4**)&scratch->currentTask;
+    Task* temp_v1 = *(Task**)&scratch->currentTask;
     u_short var_a0;
     int* var_v1;
     u_short temp_a0;
@@ -124,13 +124,13 @@ void displayDebugScreen(void)
     } else {
         var_a0 = 0;
         if (GAME.selectedSection == GAME.currentSection) {
-            setAreaSubState();
+            setAreaModeFromSection();
             return;
         }
     }
     func_8001CE80(var_a0);
 
-    temp_v1_3 = (*(unkstruct_1F8001D4**)(&PSX_SCRATCH[0x1D4]))->unk4E.value;
+    temp_v1_3 = (*(Task**)(&PSX_SCRATCH[0x1D4]))->step.value;
     *(u_long*)&D_8009EB4C = 0;
-    (*(unkstruct_1F8001D4**)(&PSX_SCRATCH[0x1D4]))->unk4E.value=temp_v1_3+1;
+    (*(Task**)(&PSX_SCRATCH[0x1D4]))->step.value=temp_v1_3+1;
 }

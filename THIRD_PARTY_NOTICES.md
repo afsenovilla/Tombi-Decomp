@@ -3,7 +3,9 @@
 ## psx_tomba — https://github.com/hansbonini/psx_tomba
 Decompilation of the NTSC-U release of the same game (*Tomba!*, `SCUS_942.36`), MIT licensed (per its README).
 Used here:
-- `include/tomba/` — headers (`common.h`, `game.h`, macros) copied unmodified. Its PSY-Q SDK headers
+- `include/tomba/` — headers (`common.h`, `game.h`, macros) copied unmodified (refreshed from psx_tomba commit #21,
+  "Add function matches, PsyQ matches, apply enums and rename functions"), plus its library-internal headers
+  `libsnd_i.h` and `libspu_internal.h` (from `src/scus_942.36/psyq/libsnd/` and `libspu/`). Its PSY-Q SDK headers
   (`include/tomba/psyq/`, Sony copyright) are NOT stored here; `tools/setup_native.sh` fetches them locally.
 - `src/*.c` files whose header says `Portado de psx_tomba` — functions ported from its C sources and
   re-verified byte-for-byte against the PAL executable.

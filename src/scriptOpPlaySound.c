@@ -8,7 +8,7 @@
 
 void scriptOpPlaySound(void)
 {
-    unkstruct_8009E458* p = D_8009E458;
+    ScriptContext* p = SCRIPT_CTX;
 
     playSFXWithNoteAndVolume(*(s32*)((u8*)p + 0x1190),
                   *(s32*)((u8*)p + 0x1194),

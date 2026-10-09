@@ -8,6 +8,6 @@
 
 void func_8003E3C4(void)
 {
-    *(s32*)((u8*)D_8009E458 + 0x1190) = D_8009BCD4;
-    D_8009E458->pc++;
+    *(s32*)((u8*)SCRIPT_CTX + 0x1190) = D_8009BCD4;
+    SCRIPT_CTX->pc++;
 }

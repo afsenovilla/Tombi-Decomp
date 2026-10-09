@@ -428,10 +428,10 @@ typedef struct {
 
 void advanceAndResetPools(void)
 {
-    unkstruct_1F8001D4* temp_v1;
+    Task* temp_v1;
 
     temp_v1 = CURRENT_TASK;
-    temp_v1->unk4E.value++;
+    temp_v1->step.value++;
     initObjectPools();
     *(char* )0x1F8001CF = 0;
 }

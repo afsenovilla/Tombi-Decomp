@@ -396,9 +396,9 @@ asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 
 //INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/reward", initItemObject);
 
-void rewardEffectOnly(unkstruct_800A6D50* arg0)
+void rewardEffectOnly(GameObject* arg0)
 {
-    func_800E92D4(*(&D_8007E868 + ((arg0->unkC & 0x7F) * 2)), arg0->unk12, arg0->unk16, arg0->unk1A);
+    func_800E92D4(*(&D_8007E868 + ((arg0->unkC & 0x7F) * 2)), arg0->x, arg0->y, arg0->z);
     if (!(arg0->unkC & 0x80)) {
         func_8002367C(arg0->objectIndex);
     }
