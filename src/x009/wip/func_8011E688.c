@@ -2,7 +2,10 @@
    the reused int var gets v1, pointer v0). Left: tail block (D_1F8001FC & D_1F8003C6): game order sb b9c; lhu animFrame;
    lw o->h; sb b9e; ours lw o->h first (sched1 puts lw h above lhu by priority: lw->lh chain). Tried: all 720 perms of the
    block statements with f/h temps, h-block forms (+=, ternary, f first), raw/in-struct aa and b9c stores, scalar
-   D_8009D2B0 (9), volatile D2B0, empty-loop barrier after b9c (4). */
+   D_8009D2B0 (9), volatile D2B0, empty-loop barrier after b9c (4).
+   o37: cc1 -dS/-dR show all 9 insns of the block at priority 1; sched2 (reverse list scheduler) blocks the lw
+   (memory-unit hazard) at T-5..T-9 and emits it first, the game issues lw right after lhu. Tried raw/volatile b9c
+   store, volatile animFrame read in every position, v=1/x=1/s=1 copies for the constant: all 2 or worse. */
 // FUNC 8011e688 1600 X009
 #include "TOBJ.H"
 #include "raw7.h"
