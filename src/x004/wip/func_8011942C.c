@@ -1,7 +1,9 @@
 // FUNC 8011942c 540 X004
-/* score 186: logic and block layout match; registers differ throughout: game keeps o in t2 (move t2,a0 at entry)
-   and uses a0 for the prim base (da0+4) and temps, -0x100 mask in t3, copies of (uv0 & 0xff) in v1/a3.
-   Tried: whole body as static inline (TObj * and void * param), switch for the 0xd0/0xff test, per-local type search. */
+/* score 180: logic and block layout match. o35: `p = (u16 *)o->da0; p += 2;` moves o out of a0 like the game
+   (o now t3, game t2; n lands in a0, game t4). Registers still differ throughout: -0x100 mask t4 (game t3), copies of
+   (uv0 & 0xff), the (short)u >> 8 sll/sra pairs scheduled before the loads in the game's order.
+   Tried: whole body as static inline (TObj * and void * param), switch for the 0xd0/0xff test, per-local type
+   search (n int gives 157 but the game's n is short), o copied to a local. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -34,7 +36,8 @@ void func_8011942C(TObj *o)
         if (--o->timer == 0) {
             o->timer = 10;
             o->w22++;
-            p = (unsigned short *)(o->da0 + 4);
+            p = (unsigned short *)o->da0;
+            p += 2;
             n = *p;
             f = (FT4 *)(p + 3);
             do {
