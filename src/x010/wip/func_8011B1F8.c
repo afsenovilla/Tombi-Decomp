@@ -1,6 +1,9 @@
 /* score 36: everything matches except the register of o: game keeps o in t0 (move t0,a0), here global-alloc gives it a1
    (o dies at the a0 copy in case 1 before the a1..a3 global loads). Tried: block/function-scope temps in case 1, pointer copy,
-   register asm (worse), scalar/[0] forms + statement order search for case 0. */
+   register asm (worse), scalar/[0] forms + statement order search for case 0.
+   o29: -dg shows o (72) conflicts only with v0/v1/a0: sched1 puts the case-1 copy p=o before the a1..a3 loads, so o never
+   overlaps them; game needs o live across those loads. Inline with globals as params (any order), caller locals + inline,
+   explicit p copy, switch on an unsigned char local (game's andi + `s + 1` in case 2) all stay 36. */
 // FUNC 8011b1f8 312 X010
 #include "TOBJ.H"
 extern void *D_80131C88;
