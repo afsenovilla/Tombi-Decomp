@@ -1,5 +1,5 @@
 // FUNC 801278c0 1820 X001
-/* score 428 (draft, 1796 of 1820 B): slope/box push-out (o vs e, mode, angle); logic decoded from the asm, all branches present. Unsolved: 0x80 frame (0x48 B of locals unused here: an inlined helper with arrays?), register choice (dx/dy temps, abs copies), quadrant base code. Some paths return no value (v0 = stored d8c / velV in the game) */
+/* score 417 (draft, 1796 of 1820 B; o17: abs/sel block rewritten after the game: unsigned short ax/ay/t compared as (short), t = |dx| per case): slope/box push-out (o vs e, mode, angle); logic decoded from the asm, all branches present. Unsolved: 0x80 frame (0x48 B of locals unused here: an inlined helper with arrays?), register choice (dx/dy temps, abs copies), quadrant base code. Some paths return no value (v0 = stored d8c / velV in the game) */
 #include "TOBJ.H"
 extern int rcos(int);
 extern int rsin(int);
@@ -8,7 +8,7 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
 {
     unsigned short dx, dy;
     int cx, cy;
-    short ax, ay;
+    unsigned short ax, ay, t;
     short sel;
     short ky, kx;
     int base, v;
@@ -36,16 +36,20 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
     if ((short)cx < 0) ax = -cx;
     ay = cy;
     if ((short)cy < 0) ay = -cy;
-    sel = ax < ay;
-    if (ax == 0) sel = 3;
-    else if (ay == 0) sel = 2;
+    sel = (short)ax < (short)ay;
+    if ((short)ax == 0) sel = 3;
+    else if ((short)ay == 0) sel = 2;
     switch (sel) {
     case 0:
-        if (ax < ((short)dx < 0 ? -(short)dx : (short)dx)) return 2;
+        t = dx;
+        if ((short)dx < 0) t = -dx;
+        if ((short)ax < (short)t) return 2;
         ky = (short)dx * (short)cy / (short)cx;
         break;
     case 1:
-        if (ay < ((short)dy < 0 ? -(short)dy : (short)dy)) return 2;
+        t = dy;
+        if ((short)dy < 0) t = -dy;
+        if ((short)ay < (short)t) return 2;
         kx = (short)dy * (short)cx / -(short)cy;
         break;
     case 2:
