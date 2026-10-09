@@ -1,8 +1,5 @@
 // FUNC 8012632c 2108 X003
-/* score 216: all but two blocks match (case 4's two "w22 = K; substep++; wac = 0x1d; set" branches, ~10 insns each):
-   game keeps substep in v1 / reloaded wac in v0 and hoists the lbu to the block top; ours swaps v0/v1, so the lbu
-   cannot move. Tried all orders of substep++/w22/wac/anim/p (macro, inline set(), inline go3(o,w,n), temp t for
-   substep, D_80139574 vs D_80139500[n]); the near() test is the 0x8011B870 "short lim" form. */
+// MATCHING 8012632c 2108
 #include "TOBJ.H"
 extern unsigned short D_1F80027E;
 extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
@@ -16,7 +13,6 @@ extern short isObjectBelowGround(TObj *);
 extern void FUN_8001fab4(TObj *);
 extern int func_801256F4(TObj *, short);
 extern void *D_80139500[];
-extern void *D_8013950C, *D_80139530, *D_80139538, *D_80139574;
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D54[], D_80135D4C[];
 extern unsigned short D_80135D2C[];
@@ -36,49 +32,14 @@ static __inline__ void set(TObj *o)
 
 #define SET() set(o)
 
-static __inline__ void setn(TObj *o, short n)
-{
-    unsigned char *p;
-    o->wac = n;
-    o->anim = D_80139500[n];
-    p = &D_80135CB0[o->wac * 4];
-    o->box0 = *p++;
-    o->box1 = *p++;
-    o->box2 = *p;
-    o->box3 = p[1];
-    AnimLoadDuration(o);
-}
-#define BOX() \
-    { unsigned char *p = &D_80135CB0[o->wac * 4]; \
-    o->box0 = *p++; \
-    o->box1 = *p++; \
-    o->box2 = *p; \
-    o->box3 = p[1]; } \
-    AnimLoadDuration(o);
-
-static __inline__ void go1(TObj *o, short w)
-{
-    o->substep++;
-    o->w22 = w;
-    o->wac = 0x1d;
-    set(o);
-}
-
-static __inline__ void go2(TObj *o, short w)
-{
-    o->w22 = w;
-    o->substep++;
-    o->wac = 0x1d;
-    set(o);
-}
-
 static __inline__ void go3(TObj *o, short w, short n)
 {
-    o->substep++;
-    o->anim = D_80139500[n];
-    o->wac = n;
+    unsigned char t = o->substep;
+    t++;
+    o->substep = t;
     o->w22 = w;
-    BOX();
+    o->wac = n;
+    set(o);
 }
 
 static __inline__ void slope(TObj *o)
