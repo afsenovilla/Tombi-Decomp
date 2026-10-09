@@ -1,5 +1,5 @@
 // FUNC 8012c718 364 X004
-/* score 4: only the case 2 tail order: game sh wac; lw anim; sb state (in the load delay); sw anim, ours sb state; lw; sh wac. Scalar D_80135748 (array [0]: 9). Tried: all orders of the tail stores, raw-offset wac/state, scalar externs for the player fields, inline setst(o, anim), block temp for the anim; o26: `extern void *const` (hoists to block top, 18), array anim with every order of the 9 tail stores and C93F/C942 as arrays (sched dump: the scalar lw truly depends on the QImode sb state, so it can only precede it if the load is an array, but then the C93F/C942 stores sink into the load delay), -fno-schedule-insns(2). */
+// MATCHING 8012c718 364
 #include "TOBJ.H"
 
 extern TObj D_800A6038;
@@ -44,9 +44,9 @@ void func_8012C718(TObj *o)
             D_800A6038.b04 = 1;
             D_800A6038.step = 0;
             D_800A6038.state = 0;
-            o->wac = 0;
-            o->state = 0;
+            *(short *)((char *)o + 0xac) = 0;   /* raw store: the scalar anim load waits for it, not for the sb state */
             o->anim = D_80135748;
+            o->state = 0;
         }
         break;
     }
