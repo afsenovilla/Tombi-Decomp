@@ -1,7 +1,9 @@
 // FUNC 80120f34 588 X009
 /* score 24: logic/layout match; (short)r lands in a0 and the switch value (o+0xac) in v1, game has them swapped,
    and in case 2 the game compares p->active with the dispatch's v0=2 and p->b6a with the switch register.
-   Tried: int/ushort r with casts, separate switch variable (types, decl order), nested if, inline-call forms. */
+   Tried: int/ushort r with casts, separate switch variable (types, decl order), nested if, inline-call forms.
+   o15: cc1 -dl/-dg: switch value pseudo has 8 refs/14 insns (prio 1.71), the (short)r copy 3 refs/8 insns (0.375),
+   so global-alloc gives the switch value v1 first; do{}while(0) pins, t reused as switch var, register asm all fail. */
 #include "TOBJ.H"
 #include "raw7.h"
 
