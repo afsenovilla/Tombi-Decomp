@@ -1,29 +1,31 @@
-/* score 2: case 0 only: game loads p->y before o->y after the state++ store. The do {} while (0) (debt) fixes the wac store/lbu order (6 -> 2); without it gcc schedules lw d90 first. Tried raw/volatile wac store, param copy pointer, statement orders. */
-// FUNC 8011b74c 524 X001
+// FUNC 8011aefc 616 X001
+// MATCHING 8011aefc 616
 #include "TOBJ.H"
 
-typedef struct { short x, y, z, pad; } V8011B74C;
+typedef struct { short x, y, z, pad; } V8011AEFC;
 
 extern unsigned short D_1F8001C8;
 extern void *D_8013E5BC[];
 
-void func_8011B74C(TObj *o)
+#define a ((V8011AEFC *)&o->wb4)
+#define b ((V8011AEFC *)&o->wbc)
+#define c ((V8011AEFC *)((char *)o + 0xc4))
+#define d ((V8011AEFC *)((char *)o + 0xcc))
+
+void func_8011AEFC(TObj *o)
 {
-    V8011B74C *a = (V8011B74C *)&o->wb4;
-    V8011B74C *b = (V8011B74C *)&o->wbc;
-    V8011B74C *c = (V8011B74C *)((char *)o + 0xc4);
-    V8011B74C *d = (V8011B74C *)((char *)o + 0xcc);
     TObj *p;
     short dx, dy;
+    int v;
 
     switch (o->state) {
     case 0:
-        o->wac = 3;
-        do {} while (0);
+        {TObj *q;
+        q = (TObj *)o->d90;
         o->state++;
-        p = (TObj *)o->d90;
-        dy = p->y.p.whole - o->y.p.whole;
-        dx = p->h->p.whole - o->h->p.whole;
+        o->wac = 0;
+        dy = q->y.p.whole - o->y.p.whole;
+        dx = q->h->p.whole - o->h->p.whole;}
         if (D_1F8001C8 & 1) {
             a->y = 0;
             a->x = 0;
@@ -53,22 +55,18 @@ void func_8011B74C(TObj *o)
         }
         break;
     case 1:
-        p = (TObj *)o->d90;
-        o->wac = 3;
-        dy = p->y.p.whole - o->y.p.whole;
-        dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
-            c->y = dy;
-            d->y = dy;
-            c->z = dx - o->box0;
-            d->z = dx + o->box1;
+        o->d88 = ((TObj *)o->d90)->d88;
+        v = (o->d88 >> 8) & 0xff;
+        if (v < 0x60) {
+            o->box0 = 3;
+            o->box1 = 3;
+        } else if (v < 0xa0) {
+            o->box0 = 4;
+            o->box1 = 3;
         } else {
-            c->y = dy;
-            d->y = dy;
-            c->x = dx - o->box0;
-            d->x = dx + o->box1;
+            o->box0 = 4;
+            o->box1 = 4;
         }
-        break;
     case 2:
         p = (TObj *)o->d90;
         o->wac = 0;
@@ -85,6 +83,44 @@ void func_8011B74C(TObj *o)
             c->x = dx - o->box0;
             d->x = dx + o->box1;
         }
+        break;
+    case 3:
+        p = (TObj *)o->d90;
+        o->box0 = 4;
+        o->box1 = 4;
+        o->wac = 3;
+        dy = p->y.p.whole - o->y.p.whole;
+        dx = p->h->p.whole - o->h->p.whole;
+        if (D_1F8001C8 & 1) {
+            c->y = dy;
+            d->y = dy;
+            c->z = dx - o->box0;
+            d->z = dx + o->box1;
+        } else {
+            c->y = dy;
+            d->y = dy;
+            c->x = dx - o->box0;
+            d->x = dx + o->box1;
+        }
+        break;
+    case 4:
+        p = (TObj *)o->d90;
+        dy = p->y.p.whole - o->y.p.whole;
+        dx = p->h->p.whole - o->h->p.whole;
+        if (D_1F8001C8 & 1) {
+            c->y = dy;
+            d->y = dy;
+            c->z = dx - o->box0;
+            d->z = dx + o->box1;
+        } else {
+            c->y = dy;
+            d->y = dy;
+            c->x = dx - o->box0;
+            d->x = dx + o->box1;
+        }
+        break;
+    case 5:
+        o->wac = 0;
         break;
     }
     o->anim = D_8013E5BC[o->wac];
