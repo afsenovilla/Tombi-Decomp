@@ -1,6 +1,6 @@
 // FUNC 8011890c 548 X017
 /* Real size 548 B: includes the 4-byte csv piece func_8011890C (the prologue). */
-/* score ~13 (was 21; do/while(0) around the first g test fixes s4/s5): g init placement differs; s4/s5 swapped between g (&D_8009CE41, game hoists it into the loop preheader) and the hoisted constant 1. Direct D_8009CE41[0]/[0x1a0] accesses give the right regs but add a 16-byte frame slot (a loop temp of e = &tbl[++i] gets class ST_REGS and is spilled) and move the flags test. Tried: g set before/inside the loop, for-init, do/while rewrite, struct global, register keyword. */
+/* score ~13 (was 21; do/while(0) around the first g test fixes s4/s5): g init placement differs; s4/s5 swapped between g (&D_8009CE41, game hoists it into the loop preheader) and the hoisted constant 1. Direct D_8009CE41[0]/[0x1a0] accesses give the right regs but add a 16-byte frame slot (a loop temp of e = &tbl[++i] gets class ST_REGS and is spilled) and move the flags test. Tried: g set before/inside the loop, for-init, do/while rewrite, struct global, register keyword. (o19) The extra 16 B with direct D_8009CE41 accesses is a combine leftover `(use (reg 79))` of the loop-test sign extension (lh of e->flags; see cc1 -dl): the HI pseudo of the test is kept live into the body (lhu a0 in the test block), with or without volatile; -fno-strength-reduce/-fno-cse-* do not help; g assigned at its use (44) or in a preheader if/do-while (55) is worse. */
 #include "TOBJ.H"
 typedef struct {
     short flags;
