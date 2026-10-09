@@ -1,15 +1,13 @@
-/* score 15 (was 27): case 0 with box stores as inline setbox(o, 8, 0x10, 8, 0x10) (8 loads early into v1, t into a0 as in
-   the game). Left: sb b0f/sb b0d/li 5 scheduled after the TBL/D_1F8002DC loads (game: b0f, w1e, b0d before sw a8; only
-   sh wac after the loads). Raw (non-struct) b0d/w1e stores with d3c last pin them before the load but break the
-   cross-jumped anim tail with case 4 (reg of the TBL reload / d3c value, 102+). Tried setbox body orders/param types,
-   TB-struct TBL, `TBL(o)[o->wac]`, do/while anim, hill-climb of the 11 statements. */
 // FUNC 80125040 876 X010
+// MATCHING 80125040 876
+/* Box stores as inline setbox(o, 8, 0x10, 8, 0x10); D_1F8002DC as a [0] array keeps its load after the struct stores
+   (and lets case 0 share the anim tail with case 4). */
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern unsigned char D_8009D2C3, D_8009C942;
 extern void **D_8012F3A8[];
-extern int D_1F8002DC;
+extern int D_1F8002DC[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void FUN_80018790(TObj *);
@@ -49,12 +47,12 @@ void func_80125040(TObj *o)
         o->d8c = 0;
         t = D_8012F3A8[o->subtype];
         o->b04++;
-        TBL(o) = t;
-        o->d3c = D_1F8002DC;
-        o->b0d = 0;
         setbox(o, 8, 0x10, 8, 0x10);
         *(signed char *)&o->b0f = -9;
         o->w1e = 5;
+        TBL(o) = t;
+        o->b0d = 0;
+        o->d3c = D_1F8002DC[0];
         o->wac = 0;
         o->anim = TBL(o)[0];
         AnimLoadDuration(o);
