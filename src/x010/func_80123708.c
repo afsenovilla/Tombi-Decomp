@@ -1,5 +1,7 @@
 // FUNC 80123708 1552 X010
-/* score 2: whole function incl. csv pieces 801237E4/80123B94. Only diff: case 1 velY address 'addu v0,v0(idx),a0(t)' vs game 'addu v0,a0,v0' (t first). t is a REG_EQUAL constant, so the symbol ends up second. Tried: t[i]/t+i/i+t, int/char* t with << and *, block-local t/k, k=idx<<2; k+=t (target swap), t+=i, &t[i], &D[0]. */
+// MATCHING 80123708 1552
+// FLAGS -O2 -G0 -fno-cse-skip-blocks
+/* Matching debt: -fno-cse-skip-blocks (as in X001 func_80137D8C: with cse skipping the velX negation block, t keeps its symbol equivalence and cse swaps t[k] into `addu k,t`; an int t avoids the pointer flag doing the same). */
 #include "TOBJ.H"
 typedef struct { unsigned short a, b; } T4;
 extern T4 D_8012F398[];
@@ -58,7 +60,7 @@ void func_80123708(TObj *o)
     TObj *e = (TObj *)o->d90;
     int hx = e->h->raw;
     int ey = e->y.raw;
-    T4 *t;
+    int t;
 
     switch (o->state) {
     case 0:
@@ -82,10 +84,10 @@ void func_80123708(TObj *o)
     case 1:
         o->animFrame = Rand() & 1;
         o->w74 = Rand() & 3;
-        t = D_8012F398;
-        o->velX = t[o->w74].a;
+        t = (int)D_8012F398;
+        o->velX = ((T4 *)t)[o->w74].a;
         if (o->animFrame & 1) o->velX = -o->velX;
-        o->velY = (t + o->w74)->b;
+        o->velY = ((T4 *)(t + (o->w74 << 2)))->b;
         o->timer = 200;
         o->d84 = 0;
         o->d8c = 0;
