@@ -1,5 +1,9 @@
 // FUNC 80125818 3148 X004
-/* score 439 (draft, 3136 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline (used twice) and the per-case wbc tick. Remaining: statement order/regs per case, the SETANIM form per case (do-while vs plain), velV/w22 load order */
+/* score 222 (draft, 3136 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
+   (used twice) and the per-case wbc tick. o35: case 4's k test is `switch (k) { case 0: ... case 1: ... }` (439->222).
+   Remaining: near() keeps its result in a0 and copies s to v1 (tried int/short/uchar s, dy types, result var,
+   assigning the call result: no gain); lbu substep scheduled after the li in several setanim+substep++ tails
+   (statement swaps break cross-jumping; plain vs do-while SETANIM per site: no gain); case 5/8/9 operand regs. */
 #include "TOBJ.H"
 typedef struct { short x, y; } P2;
 typedef struct {
@@ -131,16 +135,8 @@ void func_80125818(TObj *o)
         o->d34 = o->y.p.whole;
         o->d38 = o->b.p.whole;
         k = D_80131148[Rand() & 0xf];
-        if (k == 1) {
-            o->animFrame = 0;
-            o->wba = ((Rand() & 1) << 5) + 0x20;
-            o->wbc = 0x38;
-            o->movetab = D_80077D0C;
-            o->wac = 6;
-            SETANIM(D_801345CC)
-            o->w22 = 0xb4;
-            o->substep++;
-        } else if (k == 0) {
+        switch (k) {
+        case 0:
             o->animFrame = 1;
             o->wba = ((Rand() & 1) << 5) + 0x20;
             o->wbc = 0x38;
@@ -149,6 +145,17 @@ void func_80125818(TObj *o)
             SETANIM(D_801345CC)
             o->w22 = 0xb4;
             o->substep++;
+            break;
+        case 1:
+            o->animFrame = 0;
+            o->wba = ((Rand() & 1) << 5) + 0x20;
+            o->wbc = 0x38;
+            o->movetab = D_80077D0C;
+            o->wac = 6;
+            SETANIM(D_801345CC)
+            o->w22 = 0xb4;
+            o->substep++;
+            break;
         }
         break;
     case 5:
