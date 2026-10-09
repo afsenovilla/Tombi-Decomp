@@ -2,6 +2,8 @@
 /* score 28: only a register swap left in the two fill() loops (cases 0/1): game keeps i in a1 and the
    loop bound b in a0, we get i in a0 and b in a1. Tried: param/local int/short combos, loop forms
    (for/while/do), clamps inside/outside the inline, swapped params, reusing a for b, register asm.
+   o23: game asm reads as fill(short a, int b): i is an unextended copy of a (move a1,a0 before the b clamp), b' an
+   extended copy (move a0,v1); that signature gives the loop exactly but swaps a/b at the caller (56, 44 with ternary b clamp).
    NB: this function is missing from notes/functions_x003.csv (covers pieces 80117F98/80118040/801180AC). */
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
