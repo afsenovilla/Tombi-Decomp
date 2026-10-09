@@ -16,7 +16,6 @@ extern void *D_8013DDF8[];
 extern unsigned short D_8009C960, D_8009C962;
 extern unsigned char D_8009C938, D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_800A60B2;
 extern int FUN_8001f9e0(void);
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
