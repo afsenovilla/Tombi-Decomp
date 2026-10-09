@@ -1,3 +1,4 @@
+// FUNC 8011afb4 644 X006
 /* score 25 (ncheck now; old comment said 12 under older scoring, that version scores 35): only case 0's order differs.
    Game: w74, w78 stores early, then loads D_1F80031C twice (first copy used for ->d4); ours delays the w78 store into a load
    delay slot and uses the second load for ->d4. Tried two extern names, single `H *volatile` extern (this), d4-first operand
