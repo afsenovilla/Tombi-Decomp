@@ -1,9 +1,5 @@
 // FUNC 80124ad0 1112 X014
-/* score 16: case 0 only: with ix = wb4 << 2; ix += (int)D (o34) la now comes first and step is in a0 like the game,
-   but base/ix are swapped (ours base v0, ix v1; game ix v0, base v1). -dl: local-alloc gives the short-lived
-   REG_EQUIV base qty the higher priority; sched1 places the la right before the addu. Tried e set twice, int b
-   temp, char or short pointer ix, *e++ reads, all orders of step++.
-   Older: score 23 with e = &D[wb4*2]; o15 brute-forced ~800 variants (temps, struct HV table, inline helpers). */
+// MATCHING 80124ad0 1112
 #include "TOBJ.H"
 
 extern short D_80126718[];
@@ -33,15 +29,14 @@ void func_80124AD0(TObj *o)
 
     switch (o->step) {
     case 0:
-        {
-        int ix;
+        { int ix;
         o->step++;
         ix = *(unsigned short *)&o->wb4 << 2;
         ix += (int)D_80126718;
-        e = (short *)ix;
+        o->velH = *(short *)ix;
+        ix += 2;
+        o->velV = *(short *)ix;
         }
-        o->velH = e[0];
-        o->velV = e[1];
         if (o->animFrame) o->velH = -o->velH;
         break;
     case 1:
