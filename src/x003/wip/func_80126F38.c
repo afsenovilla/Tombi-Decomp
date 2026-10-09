@@ -1,9 +1,9 @@
-/* score 40: only case 0 differs: game reloads lbu state first (before sb b9c) and keeps the box-table pointer in v0 (ours: lbu after sh wac, regs swapped). Tried all positions/forms of state++, early s = o->state (CSEs with the switch value), anim/table order, [0] anim. */
+/* score 17 (was 40): case 0 only. Statement order b9c, movetab, state++, d88, d84, anim, wac, d8c + D_8013950C as [0] array gives the game lbu-state-first start and the table la in v1 after sb state, but now sb state/lw anim sit before sh wac. Game order after sh wac: lh wac; sw d84/d88/d8c; addiu; sll; sb state; la table; lw anim; addu; sw anim. Natural order with scalar anim placed 2nd gives that start too (score 22) but hoists la table/lw anim above the d84 stores. Tried b= forms (array/cast/row pointer), constrained hill-climb and random order search. */
 // FUNC 80126f38 788 X003
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
-extern void *D_8013950C;
+extern void *D_8013950C[];
 extern unsigned char D_80135CB0[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -25,13 +25,13 @@ void func_80126F38(TObj *o)
     case 0:
         o->b9c = 1;
         o->movetab = D_80077D3C;
-        o->wac = 4;
-        o->d84 = 0;
-        o->d88 = 0;
-        o->d8c = 0;
         o->state++;
+        o->d88 = 0;
+        o->d84 = 0;
+        o->anim = D_8013950C[0];
+        o->wac = 4;
+        o->d8c = 0;
         b = &D_80135CB0[o->wac * 4];
-        o->anim = D_8013950C;
         o->box0 = *b++;
         o->box1 = *b++;
         o->box2 = *b;
