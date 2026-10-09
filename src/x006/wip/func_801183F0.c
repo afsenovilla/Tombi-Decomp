@@ -1,7 +1,7 @@
 // FUNC 801183f0 256 X006
-/* score 7: only the path-point pointers differ: the game computes base+idx*8 twice (addu a0,v1,v0; addu a1,v1,v0)
-   from a temp base; every C form tried either CSEs them into one register or copies a=b (move a1,a0).
-   Tried: a/b from pa8[i] / &t[i] / int casts / short* view / function-scope vars. Same pattern in func_801184F0. */
+/* score 6: only registers of the path-point pointers differ: game has base in v1, a=base+off in a0, b in a1;
+   ours ties base with a (a0) and b gets a1. b written as `base - -i` stops CSE merging a/b (old copy form scored 23).
+   Tried: base/off temps (int, char ptr, P8 ptr; block or function scope), both statement orders, off - -base, a=b copy. */
 typedef struct { short x, y, z, pad; } P8;
 typedef struct { short b4, b6, b8, ba; int bc, c0, c4; } X;
 typedef struct {
@@ -26,11 +26,9 @@ void func_801183F0(O *o)
     int i;
 
     for (;;) {
-        i = o->w2c;
-        a = o->pa8;
-        b = a;
-        a += i;
-        b += i;
+        i = o->w2c << 3;
+        b = (P8 *)((int)o->pa8 - -i);
+        a = (P8 *)((int)o->pa8 + i);
         dx = a[1].x - b->x;
         dz = a[1].z - b->z;
         dy = a[1].y - b->y;
