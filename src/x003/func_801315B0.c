@@ -1,7 +1,5 @@
 // FUNC 801315b0 820 X003
-/* score 2: only the order of the two lhu in the shared table tail (x then y) differs; writing
-   x first swaps the s1/s2 allocation of x/y. Tried: declaration order/types, store order,
-   struct copy, goto-shared tail. */
+// MATCHING 801315b0 820
 #include "TOBJ.H"
 typedef struct { unsigned short x, y; } XY;
 extern TObj D_800A6038;
@@ -53,9 +51,11 @@ void func_801315B0(TObj *o)
             if ((unsigned short)(pl->a.p.whole - 0x834) >= 0x119) break;
             if (--o->w08 != -1) break;
             {
-                XY *t = &D_80135F14[FUN_8001f9e0() & 3];
-                y = t->y;
+                XY *t;
+                x = FUN_8001f9e0() & 3;
+                t = &D_80135F14[x];
                 x = t->x;
+                y = t->y;
             }
             goto spawn;
         case 4:
@@ -68,9 +68,11 @@ void func_801315B0(TObj *o)
             if ((unsigned short)(pl->a.p.whole - 0x921) >= 0xbd) break;
             if (--o->w08 != -1) break;
             {
-                XY *t = &D_80135F24[FUN_8001f9e0() & 3];
-                y = t->y;
+                XY *t;
+                x = FUN_8001f9e0() & 3;
+                t = &D_80135F24[x];
                 x = t->x;
+                y = t->y;
             }
         spawn:
             e = FUN_800183b8();
