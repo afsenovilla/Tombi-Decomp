@@ -5,7 +5,9 @@
    shared tail; several global loads ordered after stores (some globals already [0]).
    o17: `short v; if (..) { v = D + 0x80; v -= (signed char)p->c; } else v = (signed char)p->c + D;` gives the game's
    lbu+sll/sra 24 per branch exactly (short destination keeps the sign extension); then only the a = v & 0xff
-   sll/sra and the flag register (s0) differ in that region, but the total score rises to 152. */
+   sll/sra and the flag register (s0) differ in that region, but the total score rises to 152.
+   o26: with that form the angle block matches except the missing sll/sra 16 after `andi s0,v,0xff`: gcc folds the
+   sign extension for v short/int, a short, (short) casts, (unsigned char)v, inline ang() returning short, int temp. */
 #include "TOBJ.H"
 typedef struct { unsigned char a, b, c; signed char d; } P4;
 extern unsigned char D_800A6039;
