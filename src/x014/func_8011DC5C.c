@@ -1,7 +1,5 @@
-/* score 22: whole 1428 B state machine (csv pieces 8011DD48/8011DE64/8011E0D8/8011E1A4). Left: case 4 q pointer in a0 instead of a1,
-   case 5 anim temp in v1 instead of v0 and the in-range flag is branched directly instead of the game`s 0/1 value in v0
-   (with a flag variable it lands in a0/s2). Tried: flag var scopes/types, inline helpers, statement-order search. */
 // FUNC 8011dc5c 1428 X014
+// MATCHING 8011dc5c 1428
 #include "TOBJ.H"
 typedef struct { char p0[0xe]; unsigned short w0e; } X;
 typedef struct { unsigned char c[4]; } B;
@@ -28,8 +26,8 @@ extern void func_80117C50(short, short, short, short);
 
 static __inline__ int inrange(TObj *o)
 {
-    return (unsigned short)(o->h->p.whole - D_1F800176 + 0x10) < 0x161
-        && (unsigned short)(D_1F800186 - o->y.p.whole + 0x10) < 0x101;
+    if ((unsigned short)(o->h->p.whole - D_1F800176 + 0x10) >= 0x161) return 0;
+    return (unsigned short)(D_1F800186 - o->y.p.whole + 0x10) < 0x101;
 }
 
 void func_8011DC5C(TObj *o)
@@ -39,6 +37,7 @@ void func_8011DC5C(TObj *o)
     int found;
     int n;
     int k;
+    unsigned short *q;
 
     switch (o->state) {
     pick:
@@ -46,16 +45,15 @@ void func_8011DC5C(TObj *o)
         found = 1;
         goto next;
     case 0: {
-        unsigned short *p;
         n = 0;
-        p = (unsigned short *)o->d94;
+        q = (unsigned short *)o->d94;
         o->d8c = 0;
         o->wb0 = 0;
         for (k = 0; k < 16; k++) {
-            found = (unsigned short)(p[0] - D_1F8000EE + 0xa0) < 0x141
-                && (unsigned short)(p[1] - D_1F8000F2 + 0x6e) < 0xdd;
+            found = (unsigned short)(q[0] - D_1F8000EE + 0xa0) < 0x141
+                && (unsigned short)(q[1] - D_1F8000F2 + 0x6e) < 0xdd;
             n += found;
-            p += 4;
+            q += 4;
             o->wb0 |= found << k;
         }
         if (n != 0) {
@@ -121,7 +119,6 @@ void func_8011DC5C(TObj *o)
     case 4:
         o->visible = 0;
         if (--o->timer == -1) {
-            unsigned short *q;
             unsigned char *p;
             q = (unsigned short *)o->d94;
             q += o->wae * 4;
@@ -151,16 +148,15 @@ void func_8011DC5C(TObj *o)
             if (o->subtype == 1) {
                 SETBOX(0);
                 o->wac = 0;
-                a = DA8(o)[0];
+                o->anim = DA8(o)[0];
+                AnimLoadDuration(o);
             } else {
                 SETBOX(8);
                 o->wac = 2;
-                a = DA8(o)[2];
+                o->anim = DA8(o)[2];
+                AnimLoadDuration(o);
             }
-            o->anim = a;
-            AnimLoadDuration(o);
-            if (!((unsigned short)(o->h->p.whole - D_1F800176 + 0x10) < 0x161
-                && (unsigned short)(D_1F800186 - o->y.p.whole + 0x10) < 0x101)) {
+            if (!inrange(o)) {
                 o->state = 0;
                 o->visible = 0;
             } else {
