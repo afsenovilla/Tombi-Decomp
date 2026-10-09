@@ -1,4 +1,8 @@
-/* score 27: step switch needs case 1 before case 0/2 (fixed). Left: case 0 scheduling (game: lbu subtype/b04, sw d38/d8c, table load into a0, li 8 early, then box1/box3, b0f, box0/box2, w1e; ours puts the constant box stores first). Hill-climbed statement order, raw S16 box stores, setbox inline, TBL store without temp. */
+/* score 15 (was 27): case 0 with box stores as inline setbox(o, 8, 0x10, 8, 0x10) (8 loads early into v1, t into a0 as in
+   the game). Left: sb b0f/sb b0d/li 5 scheduled after the TBL/D_1F8002DC loads (game: b0f, w1e, b0d before sw a8; only
+   sh wac after the loads). Raw (non-struct) b0d/w1e stores with d3c last pin them before the load but break the
+   cross-jumped anim tail with case 4 (reg of the TBL reload / d3c value, 102+). Tried setbox body orders/param types,
+   TB-struct TBL, `TBL(o)[o->wac]`, do/while anim, hill-climb of the 11 statements. */
 // FUNC 80125040 876 X010
 #include "TOBJ.H"
 #include "raw7.h"
@@ -18,6 +22,14 @@ extern void func_80124F0C(TObj *);
 
 #define TBL(o) (*(void ***)((char *)(o) + 0xa8))
 
+static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
+{
+    o->box0 = a;
+    o->box1 = b;
+    o->box2 = c;
+    o->box3 = d;
+}
+
 void func_80125040(TObj *o)
 {
     short *sv = &o->wb4;
@@ -35,17 +47,14 @@ void func_80125040(TObj *o)
         sv[2] = o->d->p.whole;
         o->d38 = 0;
         o->d8c = 0;
-        o->box1 = 0x10;
-        o->box3 = 0x10;
-        o->box0 = 8;
-        o->box2 = 8;
-        o->w1e = 5;
         t = D_8012F3A8[o->subtype];
         o->b04++;
-        *(signed char *)&o->b0f = -9;
         TBL(o) = t;
-        o->b0d = 0;
         o->d3c = D_1F8002DC;
+        o->b0d = 0;
+        setbox(o, 8, 0x10, 8, 0x10);
+        *(signed char *)&o->b0f = -9;
+        o->w1e = 5;
         o->wac = 0;
         o->anim = TBL(o)[0];
         AnimLoadDuration(o);
