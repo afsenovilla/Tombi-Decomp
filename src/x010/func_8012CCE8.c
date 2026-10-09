@@ -11,6 +11,9 @@ extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 extern TObj *FUN_8002dcc8(int, int, Fix16 *);
 
+/* do-while(0) macro: its loop notes end the sched block, so the a0 copy stays after the stores */
+#define SET_ANIM(o, a) do { (o)->anim = (a); AnimLoadDuration(o); } while (0)
+
 void func_8012CCE8(TObj *o)
 {
     TObj *p;
@@ -31,9 +34,7 @@ void func_8012CCE8(TObj *o)
             *(TObj **)&o->d90 = FUN_8002dcc8(2, 3, &o->a);
             o->wac = 0x1f;
             o->animFrame = o->b68 & 1;
-            do {} while (0); /* debt: ends the sched block so the a0 copy is not hoisted above the stores */
-            o->anim = D_8013238C;
-            AnimLoadDuration(o);
+            SET_ANIM(o, D_8013238C);
         }
         break;
     case 2:
