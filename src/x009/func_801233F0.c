@@ -1,5 +1,5 @@
 // FUNC 801233f0 1080 X009
-/* score 4: case 0 loads lhu 0x7a before lbu 6 (game: state first, regs v1/a0 right); tried statement order hill-climb, temps, int/ushort temps, do-while barriers */
+// MATCHING 801233f0 1080
 #include "TOBJ.H"
 
 typedef struct { short w0; } X;
@@ -50,10 +50,10 @@ void func_801233F0(TObj *o)
         }
         o->velV = -0x400;
         o->movetab = D_80077CDC;
-        o->b9c = 1;
-        o->d8c = 0;
         o->animFrame = 1 - o->w7a;
-        o->state = o->state + 1;
+        o->d8c = 0;
+        o->b9c = 1;
+        o->state++;
         break;
     case 1:
         AnimAdvance(o);
