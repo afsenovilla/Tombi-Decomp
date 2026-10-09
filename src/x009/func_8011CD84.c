@@ -1,5 +1,5 @@
-/* score 26: only case 1 (b0c != 0) copy block differs: game reloads o->w74 with lh after storing it (sh 0x74; lh 0x32; lh 0x74), ours reuses the stored value (CSE). Tried volatile/raw reads, q=o alias store, S1/C2/S3 struct copies (S3 gives the reload but lwl/swl copy), inline helpers. */
 // FUNC 8011cd84 1016 X009
+// MATCHING 8011cd84 1016
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
@@ -83,10 +83,10 @@ void func_8011CD84(TObj *o)
             e = (TObj *)o->d90;
             if (e->visible == 0) break;
             o->w74 = e->w74;
-            a = W32(o) * o->w74;
-            b = W36(o) * o->w74;
             o->w76 = e->w76;
             o->w78 = e->w78;
+            a = W32(o) * o->w74;
+            b = W36(o) * o->w74;
             o->h->raw = e->h->raw + (a << 4);
             o->y.raw = e->y.raw + (b << 4);
             o->visible = 1;
