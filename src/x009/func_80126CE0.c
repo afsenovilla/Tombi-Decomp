@@ -1,8 +1,8 @@
 // FUNC 80126ce0 1456 X009
-/* score 55: cases 0/2/4 store through a0 (gcc replaces o by the AnimLoadDuration arg copy since o dies after the call; game keeps s0 and only the anim store uses a0). Tried setanim inline (TObj* and void* + local copy), direct calls, -fno-expensive-optimizations. Rest matches (wall() inline returning int with short arg copy). */
+// MATCHING 80126ce0 1456
 #include "TOBJ.H"
 
-extern void *D_8012EEA0, *D_8012EEA4, *D_8012EE80;
+extern void *D_8012EEA0[], *D_8012EEA4[], *D_8012EE80[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
@@ -48,7 +48,7 @@ void func_80126CE0(TObj *o)
         o->b0a = 2;
         o->d8c = 0;
         o->wac = 0;
-        setanim(o, D_8012EEA0);
+        setanim(o, D_8012EEA0[0]);
         break;
     case 1:
         if (--o->timer == -1) {
@@ -89,7 +89,7 @@ void func_80126CE0(TObj *o)
             o->state = 5;
             o->b0a = 0;
             o->wac = 1;
-            setanim(o, D_8012EEA4);
+            setanim(o, D_8012EEA4[0]);
         }
         break;
     case 3:
@@ -118,7 +118,7 @@ void func_80126CE0(TObj *o)
         if (o->velV < -0x1ff) {
             o->state = 5;
             o->wac = 1;
-            setanim(o, D_8012EEA4);
+            setanim(o, D_8012EEA4[0]);
         }
         break;
     case 5:
@@ -128,7 +128,7 @@ void func_80126CE0(TObj *o)
             o->timer = 0x20;
             o->wac = 0;
             o->state++;
-            setanim(o, D_8012EE80);
+            setanim(o, D_8012EE80[0]);
             o->w9a = 0;
         }
         break;
