@@ -1,5 +1,5 @@
-/* score 40: game frame is 8 B bigger (0x30), case 1 has a dead copy (lh y; lw d34; move v1,v0), the div result lands in v0 (ours v1) and case 2 loads d34 before w74. Tried y/lim/r/v type brute force, compare forms, temps. */
 // FUNC 80118c6c 1204 X006
+// MATCHING 80118c6c 1204
 #include "TOBJ.H"
 
 typedef struct {
@@ -30,18 +30,8 @@ extern void func_801184F0(TObj *);
 
 #define SUB(o) ((Sub *)((char *)(o) + 0xb4))
 
-void func_80118C6C(TObj *o)
+static __inline__ void upd(TObj *o, Sub *t)
 {
-    TObj *p = D_8009C950;
-    Sub *s, *t;
-    E *e;
-    unsigned short y;
-    short lim;
-    int r;
-    int v;
-
-    func_80118810(o);
-    t = SUB(o);
     switch (SUB(o)->c8) {
     case 0:
         if (o->animTimer < 0x40) {
@@ -68,21 +58,38 @@ void func_80118C6C(TObj *o)
         }
         break;
     }
+}
+
+static __inline__ void pos(TObj *o)
+{
+    Sub *s;
+    E *e;
+    short d;
+
+    func_80118810(o);
+    upd(o, SUB(o));
     func_801184F0(o);
     s = SUB(o);
     e = *(E **)&o->wa8;
     e += o->animTimer;
-    if (SUB(o)->div > 0) {
-        o->d34 = SUB(o)->rad * o->w76 / SUB(o)->div;
-        v = o->d34 + e->y;
-    } else {
-        v = e->y;
-    }
-    o->d34 = v - 0x20;
+    o->d34 = (SUB(o)->div > 0 ? (o->d34 = SUB(o)->rad * o->w76 / SUB(o)->div) + e->y : e->y) - 0x20;
     o->d38 = (rsin(s->ang) * s->rad) >> 20;
     o->d30 = (rcos(s->ang) * s->rad) >> 20;
     o->a.p.whole = e->x + o->d30;
     o->b.p.whole = e->z + o->d38;
+}
+
+void func_80118C6C(TObj *o)
+{
+    TObj *p = D_8009C950;
+    Sub *t;
+    unsigned short y;
+    short lim;
+    int r;
+    short d;
+
+    t = SUB(o);
+    pos(o);
     switch (o->state) {
     case 0:
         o->state++;
@@ -101,7 +108,9 @@ void func_80118C6C(TObj *o)
             AnimLoadDuration(p);
         }
         o->y.raw += o->velV << 8;
-        if (o->y.p.whole >= o->d34) o->y.p.whole = o->d34;
+        d = o->y.p.whole;
+        r = o->d34;
+        if (r <= d) o->y.p.whole += r - d;
         break;
     case 2:
         o->velX -= 0x10;
