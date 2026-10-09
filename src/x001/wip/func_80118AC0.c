@@ -1,5 +1,5 @@
 // FUNC 80118ac0 348 X001
-/* score 26: case 0 head scheduling (game: lbu subtype reload, sb b0d, lw D_1F8002D4 early, anim load before lbu b04/0x6c); permuted all 4 stores, scalar/array D, 0x6c access forms */
+/* score 9: only case 0 block scheduling: game puts sb b0d in the lbu subtype load slot (before lw D_1F8002D4) and lbu 0x6c after lbu b04; ours fills the slot with lw D_1F8002D4. Tried (o15): all orders of d3c/anim/b0d/b04++/h, raw vs struct forms of every store, scalar vs [0] D_1F8002D4, b04 = b04 + 1 (2640 variants). */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -20,11 +20,11 @@ void func_80118AC0(TObj *o)
         } else {
             o->w1e = 10;
         }
+        h = U8(o, 0x6c) >> 4;
         o->d3c = D_1F8002D4[0];
         o->anim = D_8013E694[o->subtype];
         o->b0d = 0;
-        o->b04++;
-        h = U8(o, 0x6c) >> 4;
+        o->b04 = o->b04 + 1;
         if (h < 12) {
             o->d64 = (h << 10) + 0x1000;
         } else {
