@@ -1,4 +1,4 @@
-/* score 80: all cases right except scheduling of case 0 (game: lbu subtype/b04, sw d38/d8c, table load, then box stores with li 8 hoisted; ours interleaves the constant box stores first). Hill-climbed statement order (80). */
+/* score 27: step switch needs case 1 before case 0/2 (fixed). Left: case 0 scheduling (game: lbu subtype/b04, sw d38/d8c, table load into a0, li 8 early, then box1/box3, b0f, box0/box2, w1e; ours puts the constant box stores first). Hill-climbed statement order, raw S16 box stores, setbox inline, TBL store without temp. */
 // FUNC 80125040 876 X010
 #include "TOBJ.H"
 #include "raw7.h"
@@ -77,11 +77,6 @@ void func_80125040(TObj *o)
     case 2:
         ObjCullRegister(o);
         switch (o->step) {
-        case 0:
-        case 2:
-            func_80124F0C(o);
-            if (!o->visible) o->b04 = 3;
-            break;
         case 1:
             switch (o->state) {
             case 0:
@@ -99,6 +94,11 @@ void func_80125040(TObj *o)
                 o->state++;
                 break;
             }
+            break;
+        case 0:
+        case 2:
+            func_80124F0C(o);
+            if (!o->visible) o->b04 = 3;
             break;
         }
         break;
