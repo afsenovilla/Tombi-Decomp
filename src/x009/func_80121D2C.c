@@ -1,8 +1,6 @@
 // FUNC 80121d2c 304 X009
-/* score 28: whole function (covers csv piece 80121D6C). Only case 0 differs: o dies at the call-argument copy
-   (a0 = o), so local-alloc's optimize_reg_copy substitutes a0 for o in every store of the block; the game keeps
-   s0 for the stores and uses a0 only for the anim store in the jal delay slot. Tried: setAnim inline, block-local
-   copies of o, raw store, return instead of break, statement orders. */
+// MATCHING 80121d2c 304
+/* covers csv piece 80121D6C too. */
 #include "TOBJ.H"
 extern char D_80077CF4[];
 extern void *D_8012E9F8;
@@ -35,8 +33,7 @@ void func_80121D2C(TObj *o)
         o->timer = 60;
         o->wac = 0;
         o->state++;
-        o->anim = D_8012E9F8;
-        FUN_8001fe6c(o);
+        do { o->anim = D_8012E9F8; FUN_8001fe6c(o); } while (0);
         break;
     case 1:
         if (o->visible != 0) o->state++;
