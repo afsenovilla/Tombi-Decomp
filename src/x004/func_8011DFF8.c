@@ -1,10 +1,7 @@
 // FUNC 8011dff8 348 X004
-/* score 11: whole function (covers csv piece 8011E0D8). Only case 0's store schedule differs: the game loads the
-   shared 0xa (box0, w1e) into v1 first and keeps the box0 store between box2 and box3, the D_1F8002D4 load after
-   box3; ours sinks box0 next to w1e. Hill-climbed statement order, short/int temp for 0xa, setbox/init inlines;
-   an empty do/while after box0 gives 9. */
+// MATCHING 8011dff8 348
 #include "TOBJ.H"
-extern int D_1F8002D4;
+extern int D_1F8002D4[];
 extern void *D_8013B104[];
 extern unsigned char D_8009D2AE;
 extern void FUN_8001fe6c(TObj *);
@@ -23,7 +20,7 @@ void func_8011DFF8(TObj *o)
         o->box1 = 0x14;
         o->box2 = 0x10;
         o->box3 = 0x20;
-        o->d3c = D_1F8002D4;
+        o->d3c = D_1F8002D4[0];
         o->b0a = 2;
         o->active = 2;
         o->w1e = 0xa;
