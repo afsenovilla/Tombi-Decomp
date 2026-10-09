@@ -1,5 +1,7 @@
 // FUNC 80122410 2220 X001
-/* score 33: whole function incl. csv pieces 801228BC/80122990/80122A18 (ends at 80122CBC). Remaining: in case 4 the orbit pointer g and the %12 magic constant swap a1/a2, and at the end the la of the anim pointer is scheduled before the AnimJump arg moves (the empty do/while(0) after the final orbit, debt, fixed the y-store placement). Tried: block-local/function g, explicit orbit code, macro orbit, index temps. */
+/* score 33: whole function incl. csv pieces 801228BC/80122990/80122A18 (ends at 80122CBC). Remaining: in case 4 the orbit pointer g and the %12 magic constant swap a1/a2, and at the end the la of the anim pointer is scheduled before the AnimJump arg moves (the empty do/while(0) after the final orbit, debt, fixed the y-store placement). Tried: block-local/function g, explicit orbit code, macro orbit, index temps.
+   Also (o17): case 1 loads D_8009C330/D_8009F0EC in swapped order (+0xd8); swapping p/g assignments and a
+   statement hill-climb over the first 10 case-1 statements change nothing. */
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1;
