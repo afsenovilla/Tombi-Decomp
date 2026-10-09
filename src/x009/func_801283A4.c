@@ -1,11 +1,11 @@
 // FUNC 801283a4 1300 X009
-/* score 69: logic complete. Remaining: the game shares one `b9d = 0; break` block (at the end of case 2, right
-   after the set3b store) for the case-1 tails, while gcc here either duplicates it or emits the shared block
-   elsewhere (4 bytes short); anim load/store order in step 1 state 0. */
+// MATCHING 801283a4 1300
+/* D_800A6047 is the b0f field of the player TObj D_800A6038 (struct access keeps it after the anim store);
+   the case-1 tails goto the shared `clr: o->b9d = 0` after case 2's step switch. */
 #include "TOBJ.H"
 
 extern unsigned char D_8009C942, D_8009C964;
-extern unsigned char D_800A6047;
+extern TObj D_800A6038;
 extern void *D_8012EE9C[];
 extern int ObjCullRegister(TObj *);
 extern int FUN_8001f9e0(void);
@@ -110,14 +110,12 @@ void func_801283A4(TObj *o)
             o->state = 0;
             o->active = 3;
         }
-        o->b9d = 0;
-        break;
+        goto clr;
     link:
         if (o->b04 != 3) o->b04 = ((TObj *)o->d90)->b04;
         o->step = ((TObj *)o->d90)->step;
         o->state = ((TObj *)o->d90)->state;
-        o->b9d = 0;
-        break;
+        goto clr;
     case 2:
         o->b6a = 0;
         if (D_8009C964 == 0x20) break;
@@ -130,7 +128,6 @@ void func_801283A4(TObj *o)
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
             func_80126890(o);
-            o->b9d = 0;
             break;
         case 1:
             if (o->b0c) goto set3b;
@@ -141,9 +138,9 @@ void func_801283A4(TObj *o)
                 o->state = s + 1;
                 o->wac = 0;
                 o->anim = D_8012EE9C[0];
+                o->b0f = D_800A6038.b0f + 1;
                 o->b0a = 0;
                 o->d8c = 0;
-                o->b0f = D_800A6047 + 1;
                 FUN_8001fe6c(o);
                 o->active = 2;
                 playSFX(0x9c);
@@ -151,33 +148,28 @@ void func_801283A4(TObj *o)
                 AnimAdvance(o);
                 break;
             }
-            o->b9d = 0;
             break;
         case 2:
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
             func_80126CE0(o);
-            o->b9d = 0;
             break;
         case 4:
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
             func_80127290(o);
-            o->b9d = 0;
             break;
         case 5:
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
             func_8012781C(o);
-            o->b9d = 0;
             break;
         set3b:
             o->b04 = 3;
-        default:
-        end:
-            o->b9d = 0;
             break;
         }
+    clr:
+        o->b9d = 0;
         break;
     case 3:
         FUN_80018790(o);
