@@ -1,4 +1,4 @@
-/* score 20: only register choice differs: game puts cnt in t0 and offs in t1 (global-alloc priority: offs 7 refs vs cnt 3 refs here). Tried declaration orders, int/short cnt, macro/inline adds, offs assigned after the test. Real start 801167A0 (not in csv; csv piece 80116920 is its tail). */
+/* score 2: only the clamp compare reads e (v1, the copy) instead of n (v0): `addu v1,v0; sll v0,v0` in the game. The nested do{}while(0) around the clamp (debt) adds loop-weighted refs so cnt outranks offs in global alloc (cnt t0, offs t1 like the game). Tried: n/e/i types, ternary, if/else, goto, compare spellings, clamp inline, clamping n in place. Real start 801167A0 (csv piece 80116920 is its tail). */
 // FUNC 801167a0 540 X006
 #include "TOBJ.H"
 
@@ -47,7 +47,7 @@ void func_801167A0(L801167A0 *l, unsigned char *bank)
         n = i + 8;
     }
     e = n;
-    if (n >= cnt) e = cnt - 1;
+    do { do { if (n >= cnt) e = cnt - 1; } while (0); } while (0);
     for (; i < e; i++) {
         if (D_8011EFDC[i] == 0xff) {
             l->b165++;
