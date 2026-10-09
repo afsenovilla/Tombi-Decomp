@@ -1,7 +1,7 @@
-/* score 10: two leftovers. (1) case 0 of the func_80121540 switch: game loads D_8009C330 into v0 and the
-   constant 1 into v1 (ours swapped: local-alloc gives the const pseudo v0); tried p/q copies, char*, int one, s=switch value.
+/* score 2: (1) case 0 fixed by `v = 1;` (reusing the function-scope int v for the constant).
    (2) tail block: game schedules lw o->h after sb b9c/lhu animFrame, ours before sb b9c (sched2 order); tried
-   statement perms, U8 raw stores, f=animFrame first, scalar/[0] D_8009D2B0. */
+   statement perms, U8 raw stores, f=animFrame first, scalar/[0] D_8009D2B0;
+   also 720 orders x 6 forms of the h-nudge block, static inline nudge(o,d), raw/volatile stores. */
 // FUNC 8011e688 1600 X009
 #include "TOBJ.H"
 #include "raw7.h"
@@ -127,7 +127,8 @@ void func_8011E688(TObj *o)
             s = func_80121540(o, dx, dy, p->subtype);
             switch (s) {
             case 0:
-                U8(DAT_8009c330, 8) = 1;
+                v = 1;
+                U8(DAT_8009c330, 8) = v;
                 {
                     Fix16 *h = o->h;
                     short n;
