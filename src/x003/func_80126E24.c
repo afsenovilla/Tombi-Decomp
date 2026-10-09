@@ -1,9 +1,9 @@
 // FUNC 80126e24 276 X003
-/* score 23: game loads o->state (lbu) first in case 0, before the movetab store, and has state/table in v1/v0 swapped; tried all orders of the 5 case-0 statements, scalar vs [0] anim, state++/+=1/local copy. Sibling func_80126D18 matched. */
+// MATCHING 80126e24 276
 #include "TOBJ.H"
 
 extern unsigned char D_80135CB0[];
-extern void *D_80139578[];
+extern void *D_80139578;
 extern char D_80077CDC[];
 extern short D_1F80027E;
 extern void AnimLoadDuration(TObj *);
@@ -16,15 +16,15 @@ void func_80126E24(TObj *o)
 
     switch (o->state) {
     case 0:
+        o->movetab = D_80077CDC;
         o->wac = 0x1e;
         o->state++;
-        o->anim = D_80139578[0];
-        o->movetab = D_80077CDC;
-        p = D_80135CB0 + (o->wac << 2);
+        o->anim = D_80139578;
+        p = &D_80135CB0[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
-        o->box2 = *p;
-        o->box3 = p[1];
+        o->box2 = *p++;
+        o->box3 = *p++;
         AnimLoadDuration(o);
     case 1:
         FUN_8001fb20(o);
