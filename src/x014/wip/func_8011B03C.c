@@ -1,5 +1,8 @@
 // FUNC 8011b03c 308 X014
-/* score 38: only o's register differs (game a3, ours a1): in the game o conflicts with a1/a2, which hold D_1F800176/D_1F800186 in case 1 and are passed on to FUN_80018da4 (3 args here, the game leaves them in a1/a2 at the call). Global alloc gives o a1 because cse rewrites case 1 to use the a0 arg copy, so o dies before a1/a2 are set. Tried: x/y types and scopes, x/y as reused params, all store orders, register asm("$7") (37). */
+/* score 38: only o's register differs (game a3, ours a1): in the game o conflicts with a1/a2, which hold D_1F800176/D_1F800186 in case 1 and are passed on to FUN_80018da4 (3 args here, the game leaves them in a1/a2 at the call). Global alloc gives o a1 because cse rewrites case 1 to use the a0 arg copy, so o dies before a1/a2 are set. Tried: x/y types and scopes, x/y as reused params, all store orders, register asm("$7") (37).
+   o29: dumps show sched1 hoists the call-arg copy a0=o (insn kills o, priority boost) above the x/y loads, then local-alloc
+   rewrites the stores to a0; game must have had the copy below the loads. Same root cause as X010 func_8011B1F8 (o in t0).
+   Tried K&R/ushort/short/void* prototypes, p=o copies (top/after loads), return after call: all 38. */
 #include "TOBJ.H"
 extern void *D_8012A01C[];
 extern int D_1F8002D4[];
