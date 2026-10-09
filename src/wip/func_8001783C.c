@@ -7,6 +7,7 @@
    b50: simulated annealing over statement order x per-global kind {scalar, [0] array (in-struct: ordered against
    the sh 0(s0) store), volatile, volatile array} from this version and from game order: nothing below 6; the CEAF
    store position is chaotic (only index after C980 works); moving 1c8 before C973 gives 7. */
+/* o36: all CEAF/CDA4 position pairs x {CEAF,CDA4} volatile: nothing below 6. */
 extern volatile unsigned short D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
