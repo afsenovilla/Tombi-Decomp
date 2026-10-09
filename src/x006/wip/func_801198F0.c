@@ -1,5 +1,5 @@
 // FUNC 801198f0 3660 X006
-/* score 6: only case 2 differs: game loads d34 after the lh of y and leaves a dead copy of y (lh v0; lw a0; move v1,v0); ours hoists the lw d34 earlier, no copy. Tried y/d/lim/r temps of each type, inline clamp with param copy, assign-in-compare, ternaries. Real start 801198F0 (3660 B) covers csv piece 8011A448. Siblings: the 8-byte unused E local fixes the 0x38 frame, and the d34 ternary puts the div result in v0 (both open in wip/func_80119120 and func_80118C6C). */
+/* score 6: only case 2 differs: game loads d34 after the lh of y and leaves a dead copy of y (lh v0; lw a0; move v1,v0); ours hoists the lw d34 earlier, no copy. Tried y/d/lim/r temps of each type, inline clamp with param copy, assign-in-compare, ternaries. Real start 801198F0 (3660 B) covers csv piece 8011A448. Siblings: the 8-byte unused E local fixes the 0x38 frame, and the d34 ternary puts the div result in v0 (both open in wip/func_80119120 and func_80118C6C). Found (o23): the game's lh/lw/move order comes out exactly when d is still live after case 2 (a test read `o->w74 = d;` at the end of the function gives lh v0; lw a0; move; slt), so the source reads that short variable later on some path without emitting code; not found where. */
 #include "TOBJ.H"
 
 typedef struct {
