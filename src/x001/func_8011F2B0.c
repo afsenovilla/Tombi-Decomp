@@ -1,8 +1,7 @@
 // FUNC 8011f2b0 1044 X001
-/* score 32: logic matches (same family as X000 func_80133474). Left: case 0 tail (game copies o to a0 before the
-   d8c/category/b0f stores and loads D_800A6047 before the category byte) and the default arm of the counter switch
-   (game schedules li 3/sb b04 first; a do{}while(0) after the b04 store gives 24). Tried scalar/[0] per global,
-   inline tails, pointer copies. */
+// MATCHING 8011f2b0 1044
+/* Debt: empty do {} while (0) after the b04 store in the default arm ends the sched block so the call
+   arguments are not scheduled above the store. */
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 
@@ -77,8 +76,8 @@ void func_8011F2B0(TObj *o)
         o->y.p.whole = D_800A604EA[0] + x;
         o->d->p.whole = D_800A607CA[0]->p.whole;
         o->d8c = D_800A60C4A[0];
-        o->category |= 0x80;
         o->b0f = D_800A6047A[0] + e->z;
+        o->category |= 0x80;
         AnimLoadDuration(o);
         break;
     case 1:
@@ -113,6 +112,7 @@ void func_8011F2B0(TObj *o)
                     break;
                 default:
                     o->b04 = 3;
+                    do { } while (0);
                     removeItemFromInventory(0xa, 1);
                     addItemToInventory(0x12, 1, 1);
                     o->state = 0;
