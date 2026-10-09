@@ -1,7 +1,7 @@
-// FUNC 8011afb4 644 X006
-/* score 12: only case 0's store/load order differs: the game loads o->da0 first, stores w74/w78/w76, then loads
-   D_1F80031C twice (second extern name D_1F80031Cb here) before the dc4/da8/dc8 stores. Tried volatile, literal
-   address, temps, statement permutations (perm hill-climb). */
+/* score 25 (ncheck now; old comment said 12 under older scoring, that version scores 35): only case 0's order differs.
+   Game: w74, w78 stores early, then loads D_1F80031C twice (first copy used for ->d4); ours delays the w78 store into a load
+   delay slot and uses the second load for ->d4. Tried two extern names, single `H *volatile` extern (this), d4-first operand
+   order, k temp, hill-climb of all case-0 statements. */
 typedef struct L { char p[0x30]; int d30; char q[0x94 - 0x34]; struct L *next; } L;
 typedef struct { char p[4]; int d4; } H;
 typedef struct {
@@ -22,7 +22,7 @@ typedef struct {
     int dc4, dc8;
     short wcc;
 } O;
-extern H *D_1F80031C, *D_1F80031Cb;
+extern H *volatile D_1F80031C;
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
 extern void func_80027A30(int, int, int);
@@ -35,16 +35,14 @@ int func_8011AFB4(O *o)
 
     switch (o->substep) {
     case 0:
-        o->b0a = 0x16;
-        o->substep++;
-        h = D_1F80031Cb;
-        k = D_1F80031C->d4;
-        o->dc4 = (int)D_800E3E28;
-        o->da8 = (int)D_800E3E28;
+        o->w76 = 0;
         o->w74 = 0x300;
         o->w78 = -0x48;
-        o->w76 = 0;
-        o->dc8 = (int)h + k;
+        o->b0a = 0x16;
+        o->substep++;
+        o->dc8 = (int)D_1F80031C + D_1F80031C->d4;
+        o->dc4 = (int)D_800E3E28;
+        o->da8 = (int)D_800E3E28;
         FUN_80025aa8(o->da0, o->dc4);
         return 0;
     case 1:
