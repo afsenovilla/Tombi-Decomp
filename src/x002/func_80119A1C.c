@@ -1,5 +1,5 @@
-/* score 6: only the last spawn loop (FUN_80018448): game fills the null-check beqz delay slot from the target (addiu v0,s1,1) and hoists lhu f->sub above the b0c/b0e stores; ours fills it with li v0,1. Tried store orders, raw stores, if-block instead of continue, t = f->sub temp (fixes the load order but not the slot). */
 // FUNC 80119a1c 1316 X002
+// MATCHING 80119a1c 1316
 #include "TOBJ.H"
 typedef struct {
     short flags;
@@ -110,14 +110,16 @@ void func_80119A1C(TObj *o)
             }
         }
     }
-    for (i = 0, f = D_8011C93C; f->x != 0xff; f = &D_8011C93C[++i]) {
+    for (i = 0; (f = &D_8011C93C[i])->x != 0xff; i++) {
+        unsigned short t;
         q = FUN_80018448();
         if (q == 0) continue;
         q->active = 1;
         q->type = 0x4c;
+        t = f->sub;
         q->b0c = 0;
         q->_pad0e[0] = 0;
-        q->subtype = f->sub;
+        q->subtype = t;
         D_8009F328[i] = q;
         q->a.p.whole = f->x;
         q->y.p.whole = f->y;
