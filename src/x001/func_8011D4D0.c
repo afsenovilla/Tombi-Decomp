@@ -1,10 +1,8 @@
 // FUNC 8011d4d0 620 X001
-/* score 13: whole function (covers csv piece 8011D5F4); builds a 19-link chain sorted with insertionSortU32. Left:
-   only the head-object init block after the sort: the game stores d3c (D_1F8002D4) right after b0c, then reloads
-   b04 and loads anim table[0] (anim stored last); every statement order / [0] array tried keeps the anim load or
-   the D_1F8002D4 load in the wrong slot. */
+// MATCHING 8011d4d0 620
+/* Whole function (the csv piece 8011D5F4 is its loop tail): builds a 19-link chain sorted with insertionSortU32. */
 #include "TOBJ.H"
-extern int D_1F8002D4;
+extern int D_1F8002D4[];
 extern void *D_8013E6C4[];
 extern TObj *FUN_800184d8(void);
 extern void insertionSortU32(int, TObj **);
@@ -38,12 +36,12 @@ void func_8011D4D0(TObj *o)
         o->box3 = 0x14;
         o->w1e = 0xa;
         o->b0d = 0;
-        o->anim = D_8013E6C4[0];
+        o->d3c = D_1F8002D4[0];
         o->b0c = 0;
-        o->d3c = D_1F8002D4;
+        o->anim = D_8013E6C4[0];
+        o->b04++;
         o->wac = 0;
         o->d8c = 0;
-        o->b04++;
         q = o;
         do {
             p = list[i];
@@ -54,7 +52,7 @@ void func_8011D4D0(TObj *o)
             p->wac = i;
             p->b0c = i % 4;
             p->b0a = q->b0a;
-            p->d3c = D_1F8002D4;
+            p->d3c = D_1F8002D4[0];
             p->anim = D_8013E6C4[o->b0c];
             p->w1e = q->w1e;
             p->box0 = 4;
