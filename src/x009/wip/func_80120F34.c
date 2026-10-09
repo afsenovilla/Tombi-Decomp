@@ -3,7 +3,9 @@
    and in case 2 the game compares p->active with the dispatch's v0=2 and p->b6a with the switch register.
    Tried: int/ushort r with casts, separate switch variable (types, decl order), nested if, inline-call forms.
    o15: cc1 -dl/-dg: switch value pseudo has 8 refs/14 insns (prio 1.71), the (short)r copy 3 refs/8 insns (0.375),
-   so global-alloc gives the switch value v1 first; do{}while(0) pins, t reused as switch var, register asm all fail. */
+   so global-alloc gives the switch value v1 first; do{}while(0) pins, t reused as switch var, register asm all fail.
+   o29: int r + (short) casts + int callee gives the same 24 (pseudo 78 = (short)r 3 refs/8 insns, switch 155 8/14);
+   separate switch var of any type (early/late decl, b6a == sw) no change. */
 #include "TOBJ.H"
 #include "raw7.h"
 
