@@ -1,6 +1,5 @@
 // FUNC 8011c1b8 904 X004
-/* score 4: only the operand order of the two `addu v1,a1,v1` for q[animFrame] (game q first, ours index first).
-   Tried: pointer, char * and short * forms, (int)q + idx, index temp vars, declaration order, block-local q. */
+// MATCHING 8011c1b8 904
 #include "TOBJ.H"
 typedef struct { short x, y; } P;
 extern P D_80130CCC[];
@@ -77,7 +76,7 @@ void func_8011C1B8(TObj *o)
                 o->velH = 0;
                 o->animFrame = 1;
                 o->a.raw = q->x << 16;
-                o->y.raw = q[o->animFrame - 1].y << 16;
+                { short *s = &D_80130CCC[0].y; o->y.raw = s[o->animFrame * 2] << 16; }
                 o->state++;
                 o->b6a = 1;
                 FUN_8001eaa4(o->ba7);
@@ -101,7 +100,7 @@ void func_8011C1B8(TObj *o)
                 o->velV = 0;
                 o->velH = 0;
                 o->a.p.whole = q->x;
-                o->y.p.whole = q[o->animFrame].y;
+                { short *s = &q->y; o->y.p.whole = s[o->animFrame * 2]; }
                 o->state++;
                 o->b6a = 1;
                 FUN_8001eaa4(o->ba7);
