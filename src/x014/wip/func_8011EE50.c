@@ -1,8 +1,9 @@
 // FUNC 8011ee50 968 X014
-/* score 7: box copies fixed with `p_ = d90; p_ += off; box0 = *p_++; box1 = *p_++; box2 = *p_; box3 = p_[1];` (pointer
+/* score 2: box copies fixed with `p_ = d90; p_ += off; box0 = *p_++; box1 = *p_++; box2 = *p_; box3 = p_[1];` (pointer
    assigned in two statements keeps the increments); func_80116C10 takes o; D_800A4553/D_800A4568 as [0] in case 0 but a
-   scalar second name in case 4 (debt). Left: case 0 loads o->wa8 after both scratchpad stores (game: between them) and
-   case 1 loads state before the 2nd/3rd call args (game: after). Tried hill-climb, tb temp at every position, inlines. */
+   scalar second name in case 4 (debt); the anim table read through an in-struct pointer field (TB) so it may move above
+   the scratchpad store. Left: case 1 loads state between the 1st and 2nd call args (game: after the 3rd). Tried b6a/state
+   raw vs struct and order, state = state + 1, local copy, inline with int/short params, callee prototypes. */
 #include "TOBJ.H"
 extern int D_1F80018C, D_1F800190;
 extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[];
@@ -29,6 +30,8 @@ static __inline__ void setbox_unused(TObj *o, unsigned char *p)
     o->box3 = *p++;
 }
 
+typedef struct { char pad[0xa8]; void **tbl; } TB;
+
 void func_8011EE50(TObj *o)
 {
     unsigned char *p;
@@ -48,7 +51,7 @@ void func_8011EE50(TObj *o)
         o->state++;
         setbox(o, 0x3c);
         o->wac = 0xf;
-        o->anim = ((void **)*(int *)&o->wa8)[15];
+        o->anim = ((TB *)o)->tbl[15];
         AnimLoadDuration(o);
         o->movetab = D_80077D6C;
         break;
@@ -103,7 +106,7 @@ void func_8011EE50(TObj *o)
     case 4:
         setbox(o, 0x34);
         o->wac = 0xd;
-        o->anim = ((void **)*(int *)&o->wa8)[13];
+        o->anim = ((TB *)o)->tbl[13];
         AnimLoadDuration(o);
         o->timer = 0x3c;
         o->state++;
