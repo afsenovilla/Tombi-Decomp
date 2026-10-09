@@ -1,5 +1,5 @@
 // FUNC 80135164 1372 X001
-/* score 361: control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
+/* score 323 (o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
    for (signed char)e->c, dx/ang get s3/s0 in the game (frame 0x28), the pl->h/y/d update order.
    Tried: int/short temps, casts, shifts. */
 #include "TOBJ.H"
@@ -20,8 +20,8 @@ extern int FUN_8002dc50(int, int, int, int);
 
 static __inline__ void follow(TObj *o, E4 *e)
 {
-    int ang;
-    int dx;
+    short ang;
+    short dx;
     short dy;
 
     if (D_8009C960 == 1 && D_8009C962 < 2)
@@ -29,7 +29,7 @@ static __inline__ void follow(TObj *o, E4 *e)
     else
         o->anim = D_8013DDF8[e->a];
     if (o->animFrame & 1)
-        ang = D_800A6038.d8c + 0x80 - (signed char)e->c;
+        { int k = 0x80; ang = D_800A6038.d8c + k - (signed char)e->c; }
     else
         ang = (signed char)e->c + D_800A6038.d8c;
     ang &= 0xff;
