@@ -1,16 +1,16 @@
 // FUNC 80127d48 792 X003
-/* score 91: size 792 incl. the epilogue piece 80128048 (24 B). Cases 0-2 match in shape; case 3 is scheduled
-   differently (game loads o->state right after the two global stores, before `li 10; sh wac`, so state lands in
-   v1 and the D_80135CB0 la is not hoisted); because of that the setAnimN tail is not cross-jumped from `addu`.
-   Tried: all orders of the case-3 statements, [0] globals, raw wac store, inline param types/body orders,
-   do{}while(0) barriers. */
-#include "TOBJ.H"
+/* score 5: size 792 incl. the epilogue piece 80128048 (24 B). Inline setAnimN stores anim before reading
+   o->wac back (game reloads lh wac); globals as [0] arrays. Only case 3 left: game loads o->state after BOTH
+   global stores (lbu v1 between `sb 60E4` and `li 10`); here the lbu lands between the two global stores.
+   With `t = o->state` after the second store gcc schedules it below `sh wac` (151); the [0] stores do not
+   create a dependency for the o->state load (sched dump). Tried: positions of t load/store across the
+   expanded inline, scalar/[0]/volatile globals, t types, do{}while(0) barrier (87). */#include "TOBJ.H"
 
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D5B[];
 extern void *D_80139500[];
 extern unsigned short D_1F80027E;
-extern unsigned char D_800A603E, D_800A60E4;
+extern unsigned char D_800A603E[], D_800A60E4[];
 extern void FUN_80026bfc(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -79,10 +79,13 @@ void func_80127D48(TObj *o)
         fall(o);
         break;
     case 3:
-        D_800A603E = 2;
-        o->state++;
-        D_800A60E4 = 3;
+        { unsigned char t;
+        D_800A603E[0] = 2;
+        t = o->state;
+        D_800A60E4[0] = 3;
+        o->state = t + 1;
         setAnimN(o, 10);
+        }
         break;
     case 4:
         break;
