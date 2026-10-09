@@ -1,5 +1,6 @@
-/* score ~300: draft. The game reloads lui/addiu D_1F800000 at every use; with // FLAGS -fno-expensive-optimizations that comes out
-   and the code is structurally close (score 553 only because o lands in s0 instead of s1). Also D_8009C962 is re-read in case 1/k=1. */
+/* score 305: draft. The game reloads lui/addiu D_1F800000 at every use; with // FLAGS -fno-expensive-optimizations that comes out
+   and the code is structurally close (score 561 only because o lands in s0 instead of s1). Also D_8009C962 is re-read in case 1/k=1,
+   RotMatrixY takes (unsigned short)p->wb4, and the k=0 step switch tests case 1 first. */
 // FUNC 8011a87c 1644 X006
 #include "TOBJ.H"
 
@@ -106,7 +107,7 @@ void func_8011A87C(TObj *o)
             o->b0a = 0x15;
             FUN_80021f5c(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
-            RotMatrixY((unsigned short)p->wb4, D_1F800000);
+            RotMatrixY(p->wb4, D_1F800000);
             TAIL;
             break;
         case 4:
@@ -128,6 +129,12 @@ void func_8011A87C(TObj *o)
                 func_801198F0(o);
             } else {
                 switch (o->step) {
+                case 0:
+                    o->step++;
+                    o->wb6 = 0x200;
+                    o->wb4 = 0;
+                    o->velH = 0;
+                    break;
                 case 1:
                     o->wb6 -= 8;
                     if (o->wb6 < 0) {
@@ -136,12 +143,6 @@ void func_8011A87C(TObj *o)
                     }
                     o->velX = o->wb6 >> 1;
                     o->a.raw += o->wb6 << 8;
-                    break;
-                case 0:
-                    o->step++;
-                    o->wb6 = 0x200;
-                    o->wb4 = 0;
-                    o->velH = 0;
                     break;
                 }
                 o->velH += o->velX;
@@ -187,7 +188,7 @@ void func_8011A87C(TObj *o)
             p = (TObj *)o->d90;
             FUN_80021f5c(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
-            RotMatrixY((unsigned short)p->wb4, D_1F800000);
+            RotMatrixY(p->wb4, D_1F800000);
             TAIL;
             break;
         case 4:
