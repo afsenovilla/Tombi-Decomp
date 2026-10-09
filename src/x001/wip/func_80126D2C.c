@@ -1,9 +1,9 @@
 // FUNC 80126d2c 352 X001
-/* score 49: logic complete (subtype-7 skip, d/d38 range checks, surface height table D_8013C6A4[subtype][-dy>>3],
-   box0/box1 side clamp, carry state). Left: game reads e->h->p.whole with lhu and keeps h unsigned (sll/sra only
-   for the d30 store, done after the compare value), loads box1 with lh after the d30 store and copies it to t0
-   (the subtype register), e->y read before o->y; the 8-byte frame (first draft had it) is lost. Tried: types of
-   t/h/c, compare/statement orders, volatile table read. */
+/* score 22 (o32): only the middle block: game loads box0 (lhu a0, no andi copy) before the volatile h read and
+   box1 (lh v0 + move t0) after the d30 store; ours hoists lh box1 to the top and copies box0 with andi.
+   Found: h reused for dy + d38 (a3), short dy / unsigned short h (type brute force), volatile h read keeps
+   lhu + sll/sra for d30 (plain read is combined into an lh reload), char pad[8] for the frame.
+   Tried: statement orders of b0/d30/c/box1, raw d30 store, short s copy for box1, b0 int/short. */
 #include "TOBJ.H"
 typedef struct {
     TObj t;
@@ -18,27 +18,29 @@ extern unsigned short *D_8013C6A4[];
 void func_80126D2C(P *o, TObj *e)
 {
     int t;
-    int dy;
-    int h;
+    short dy;
+    unsigned short h;
     unsigned short b0;
     int x;
     int c;
+    char pad[8];
 
     t = e->subtype;
     if (t == 7) return;
     if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return;
     dy = e->d34;
     dy = o->ea - dy;
-    if ((unsigned short)(dy + e->d38) > e->d38) return;
-    h = D_8013C6A4[t][(short)-dy >> 3];
-    b0 = e->box0;
+    h = dy + e->d38;
+    if ((unsigned short)h > e->d38) return;
+    h = *(volatile unsigned short *)&D_8013C6A4[t][(short)-dy >> 3];
+    b0 = (unsigned short)e->box0;
     e->d30 = (short)h;
-    c = b0 + (o->e8 - (e->h->p.whole + h));
+    c = b0 + (o->e8 - ((unsigned short)e->h->p.whole + h));
     t = e->box1;
     if (t < (unsigned short)c) return;
     if (!(o->t.animFrame & 1)) x = -b0;
     else x = t - b0;
-    o->t.h->p.whole = x + (e->h->p.whole + h);
+    o->t.h->p.whole = x + ((unsigned short)e->h->p.whole + h);
     o->t.b9e = 7;
     o->t.wb8 = x;
     D_1F80019E = 0;
