@@ -1,7 +1,9 @@
 // FUNC 8011a87c 1644 X006
-/* score 305: draft. The game reloads lui/addiu D_1F800000 at every use; with a FLAGS line adding -fno-expensive-optimizations that comes out
-   and the code is structurally close (score 561 only because o lands in s0 instead of s1). Also D_8009C962 is re-read in case 1/k=1,
-   RotMatrixY takes (unsigned short)p->wb4, and the k=0 step switch tests case 1 first. */
+/* score 276: draft. o35: RotMatrixY((unsigned short)p->wb4), step switch of k=0 needs an empty `case 2:` (game tree
+   ==1, <2, !=0), D_8009C962 re-read in case 1/k=1 via a second array name (asm alias, debt). Remaining: the game
+   reloads lui/addiu D_1F800000 at every use; ours CSEs it into s0 (so p lands in s2). With a FLAGS line adding
+   -fno-expensive-optimizations the reloads come out (and the rest is then ~40 insns of a0/a1/v1 choices) but o
+   moves to s0 (game s1) and the score reads 421. */
 #include "TOBJ.H"
 
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -13,6 +15,7 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 
 extern char D_1F800000[];
 extern unsigned short D_8009C962, D_8009C982;
+extern unsigned short D_8009C962_b[] asm("D_8009C962");
 extern TObj *D_8009C950, *D_8009C94C;
 extern void *D_801229A4[];
 extern TObj *ObjAlloc(void);
@@ -107,7 +110,7 @@ void func_8011A87C(TObj *o)
             o->b0a = 0x15;
             FUN_80021f5c(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
-            RotMatrixY(p->wb4, D_1F800000);
+            RotMatrixY((unsigned short)p->wb4, D_1F800000);
             TAIL;
             break;
         case 4:
@@ -128,9 +131,10 @@ void func_8011A87C(TObj *o)
             if (D_8009C962 == 0) {
                 func_801198F0(o);
             } else {
-                switch (o->step) {
+                unsigned char t = o->step;
+                switch (t) {
                 case 0:
-                    o->step++;
+                    o->step = t + 1;
                     o->wb6 = 0x200;
                     o->wb4 = 0;
                     o->velH = 0;
@@ -143,6 +147,9 @@ void func_8011A87C(TObj *o)
                     }
                     o->velX = o->wb6 >> 1;
                     o->a.raw += o->wb6 << 8;
+                    break;
+                    break;
+                case 2:
                     break;
                 }
                 o->velH += o->velX;
@@ -162,7 +169,7 @@ void func_8011A87C(TObj *o)
                 e = (TObj *)o->d90;
                 switch (t) {
                 case 0:
-                    if (D_8009C962 == 1 && D_8009C982) {
+                    if (D_8009C962_b[0] == 1 && D_8009C982) {
                         o->wac = 3;
                         func_8011AF84(o);
                         o->step = 3;
@@ -188,7 +195,7 @@ void func_8011A87C(TObj *o)
             p = (TObj *)o->d90;
             FUN_80021f5c(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
-            RotMatrixY(p->wb4, D_1F800000);
+            RotMatrixY((unsigned short)p->wb4, D_1F800000);
             TAIL;
             break;
         case 4:
