@@ -1,7 +1,7 @@
 // FUNC 80137d8c 1552 X001
 // MATCHING 80137d8c 1552
 // FLAGS -O2 -G0 -fno-cse-skip-blocks
-/* Matching debt: -fno-cse-skip-blocks (with cse skipping the velX negation block, t keeps its symbol equivalence and cse swaps t[k] into `addu k,t`; an int t avoids the pointer flag doing the same). Frame: 10 two-short-param inlines leave two `(use (reg))` stack slots each, plus an unused 8-byte V2 local. */
+/* Matching debt: -fno-cse-skip-blocks (with cse skipping the velX negation block, t keeps its symbol equivalence and cse swaps t[k] into `addu k,t`; an int t avoids the pointer flag doing the same). Frame: 10 two-short-param inlines leave two `(use (reg))` stack slots each (t read through for velX too; the extra 8 B slot comes from that). */
 #include "TOBJ.H"
 typedef struct { short x, y; } V2;
 
@@ -53,7 +53,6 @@ void func_80137D8C(TObj *o)
     int hx = p->h->raw;
     int py = p->y.raw;
     int t;
-    V2 e;
 
     switch (o->state) {
     case 0:
@@ -77,8 +76,8 @@ void func_80137D8C(TObj *o)
     case 1:
         o->animFrame = Rand() & 1;
         o->w74 = Rand() & 3;
-        o->velX = D_8013C9DC[o->w74].x;
         t = (int)D_8013C9DC;
+        o->velX = ((V2 *)t)[o->w74].x;
         if (o->animFrame & 1) o->velX = -o->velX;
         o->velY = ((V2 *)(t + (o->w74 << 2)))->y;
         o->timer = 0xc8;
