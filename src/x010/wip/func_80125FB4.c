@@ -2,7 +2,10 @@
 /* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
    FUN_8002dcc8 call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
    jal delay slot), so the tails only merge from setanim(o, 2). Tried: pointer/extra local for
-   the V6 copy, an fx() inline, moving the copy among the global stores. */
+   the V6 copy, an fx() inline, moving the copy among the global stores.
+   Also tried (o31): p = &v before/after the copy, k = 9 local, casts/no-proto/short-arg calls, inline wrappers
+   (own stack slot, frame 64), block-local V6: the arg order stays a0,a1,a2 (RTL order); only a computed a1
+   (o->state + 1) moves a2 above a1. A second callee name in case 5 stops the merge but leaves 12 B short. */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
