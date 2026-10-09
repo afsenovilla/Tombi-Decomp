@@ -1,5 +1,5 @@
 // FUNC 801210e8 440 X001
-/* score 44: case 0 has b/b0d store order swapped (loads x and D_1F8002D4[0] into temps fixed most); case 1 allocates t to a1 instead of v1 and the clamp copy (move v1,v0) differs. Tried many var/type forms (script over 72 combos), hill-climbs. */
+/* score 31: case 0 has b/b0d store order swapped (loads x and D_1F8002D4[0] into temps fixed most; hill-climb found nothing better); case 1: clamp now `if ((short)u >= d38) t = u; else t = d38` with u16 u (o23, 44->31), but the game keeps u int in v0 with a plain copy `move v1,v0` (t = u) and compares u after the copy; our int-u versions coalesce u into t. Tried inline clamps, types, script over 72 combos. */
 #include "TOBJ.H"
 
 extern void *D_8013E6B0[];
@@ -11,7 +11,6 @@ void FUN_80018934(TObj *o);
 
 void func_801210E8(TObj *o)
 {
-
     switch (o->b04) {
     case 0: {
         int x, d;
@@ -37,7 +36,7 @@ void func_801210E8(TObj *o)
             func_80018DA4(o);
             break;
         case 1: {
-            unsigned int t; short u;
+            unsigned int t; unsigned short u;
             t = o->d30; t -= D_1F800176;
             if ((short)t < -0x100) {
                 t = (t & 0xfff) >> 3;
@@ -47,7 +46,7 @@ void func_801210E8(TObj *o)
             if ((short)t < 0x160) {
                 o->a.p.whole = t;
                 u = o->d34 - D_1F800186;
-                if ((short)u < o->d38) t = o->d38; else t = u;
+                if ((short)u >= o->d38) t = u; else t = o->d38;
                 o->y.p.whole = (t & 0xfff) >> 4;
                 o->visible = 1;
                 func_80018DA4(o);
