@@ -1,7 +1,10 @@
 // FUNC 80124ad0 1112 X014
 /* score 23: everything matches except case 0: game loads the table address (la v1) before step/wb4 and
    gets step in a0, index in v0; ours schedules la after the loads (step v0, index v1).
-   Tried: pointer arithmetic forms, struct/2D table, index variable, statement order, block-local pointer. */
+   Tried: pointer arithmetic forms, struct/2D table, index variable, statement order, block-local pointer.
+   o15: brute-forced ~800 variants (t/ix temps of several types in every order, step++ at every position,
+   struct HV table, base used twice, inline helpers): a single-set base is REG_EQUIV-moved next to the addu
+   (la late); `e = D; o->step++; e += ix*2;` keeps la first but the addu dest becomes e's reg (a0), not idx's. */
 #include "TOBJ.H"
 
 extern short D_80126718[];
