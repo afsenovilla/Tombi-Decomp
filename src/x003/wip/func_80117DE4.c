@@ -4,6 +4,9 @@
    (for/while/do), clamps inside/outside the inline, swapped params, reusing a for b, register asm.
    o23: game asm reads as fill(short a, int b): i is an unextended copy of a (move a1,a0 before the b clamp), b' an
    extended copy (move a0,v1); that signature gives the loop exactly but swaps a/b at the caller (56, 44 with ternary b clamp).
+   o30: with fill(short a, int b) looping on the param a, -dg shows caller a (12 refs/32 insns) outranks b (10/30) and
+   takes v1; game needs b first. Block-local a/b per case, clamps inside the inline, b = a; b += 8, reusing a/b in
+   cases 2/3, type brute force: no change.
    NB: this function is missing from notes/functions_x003.csv (covers pieces 80117F98/80118040/801180AC). */
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
