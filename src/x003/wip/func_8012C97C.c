@@ -1,7 +1,7 @@
 // FUNC 8012c97c 660 X003
 /* score 136: logic/layout match; register allocation differs: game keeps o in s1 and the constant 1 (k) in s0
    and addresses the case-1 stores through s1, ours gives o s0/k s1 and rewrites the case-1 stores through a0.
-   Tried: k as int/short/uchar set before the if, setanim inline (TObj */void * param), alias pointer for the call. */
+   Tried: k as int/short/uchar set before the if, setanim inline (TObj or void pointer param), alias pointer for the call. */
 #include "TOBJ.H"
 
 extern TObj D_800A6038;
