@@ -1,10 +1,14 @@
 // FUNC 8011ee50 968 X014
-/* score 106: logic complete. Main diff: the game reads the 4 box bytes as lbu (p); addiu p,1 ... lbu 1(p) with p = d90 + 0x3c kept in a register (no offset folding); every C form tried (*p++, p++ statements, inline helper, loop, int pointer) folds to lbu 0x3c..0x3f(base). The do/while(0) macro form (debt) improved the rest of the schedule. Also case-0 store order around D_800A4553/D_1F800190. */
+/* score 7: box copies fixed with `p_ = d90; p_ += off; box0 = *p_++; box1 = *p_++; box2 = *p_; box3 = p_[1];` (pointer
+   assigned in two statements keeps the increments); func_80116C10 takes o; D_800A4553/D_800A4568 as [0] in case 0 but a
+   scalar second name in case 4 (debt). Left: case 0 loads o->wa8 after both scratchpad stores (game: between them) and
+   case 1 loads state before the 2nd/3rd call args (game: after). Tried hill-climb, tb temp at every position, inlines. */
 #include "TOBJ.H"
 extern int D_1F80018C, D_1F800190;
 extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[];
-extern unsigned char D_800A4553;
-extern int D_800A4568;
+extern unsigned char D_800A4553[];
+extern unsigned char D_800A4553b;
+extern int D_800A4568[];
 extern char D_80077D6C[], D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
 extern void FUN_8001faf4(TObj *);
@@ -14,9 +18,9 @@ extern void func_8011D604(TObj *);
 extern void FUN_8001f96c(int, short, short, short);
 extern void playSFX(int);
 extern void FUN_8001fa88(TObj *, unsigned short);
-extern void func_80116C10(void);
+extern void func_80116C10(TObj *);
 
-#define setbox(o, q) do { unsigned char *p_ = (q); (o)->box0 = *p_++; (o)->box1 = *p_++; (o)->box2 = *p_++; (o)->box3 = *p_++; } while (0)
+#define setbox(o, q) { unsigned char *p_; p_ = (unsigned char *)o->d90; p_ += (q); (o)->box0 = *p_++; (o)->box1 = *p_++; (o)->box2 = *p_; (o)->box3 = p_[1]; }
 static __inline__ void setbox_unused(TObj *o, unsigned char *p)
 {
     o->box0 = *p++;
@@ -35,15 +39,14 @@ void func_8011EE50(TObj *o)
         D_8009C93F[0] = 1;
         D_8009C93E[0] = 1;
         D_8009C942[0] = 1;
-        D_800A4553 = 3;
-        D_800A4568 = 0;
+        D_800A4553[0] = 3;
+        D_800A4568[0] = 0;
         D_1F800190 = o->y.raw;
         D_1F80018C = o->h->raw;
-        p = (unsigned char *)o->d90 + 0x3c;
         o->b9c = 0;
         o->b6a = 1;
         o->state++;
-        setbox(o, p);
+        setbox(o, 0x3c);
         o->wac = 0xf;
         o->anim = ((void **)*(int *)&o->wa8)[15];
         AnimLoadDuration(o);
@@ -98,17 +101,16 @@ void func_8011EE50(TObj *o)
         D_1F80018C = o->h->raw;
         break;
     case 4:
-        p = (unsigned char *)o->d90 + 0x34;
-        setbox(o, p);
+        setbox(o, 0x34);
         o->wac = 0xd;
         o->anim = ((void **)*(int *)&o->wa8)[13];
         AnimLoadDuration(o);
         o->timer = 0x3c;
         o->state++;
-        D_1F800190 = o->y.raw;
-        D_800A4553 = 6;
         D_1F80018C = o->h->raw;
-        func_80116C10();
+        D_1F800190 = o->y.raw;
+        D_800A4553b = 6;
+        func_80116C10(o);
         break;
     case 5:
         if (--o->timer == -1) {
