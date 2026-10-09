@@ -1,5 +1,5 @@
 // FUNC 80129e14 252 X004
-/* score 40: layout/branches match (inlines with snap block after the far compare); only register allocation of the inline copies differs: game v (velH) orig t1 / copy t2, t a1/a2, x v1/a3, y part v a1/a3; ours gives v-orig a3 first. Tried param orders, int/short types, test inside inline, pointer params, compare inline. */
+// MATCHING 80129e14 252
 #include "TOBJ.H"
 extern unsigned char D_8009CF29;
 
@@ -11,16 +11,10 @@ static __inline__ void moveh(TObj *o, short v)
 
     h = o->h; t = o->velX; x = h->p.whole;
     if (x < t) {
-        if (x + v < t) {
-            h->p.whole = x + v;
-            return;
-        }
-        goto snap;
-    }
-    if (t >= x - v) {
-    snap:
-        h->p.whole = t;
-        o->velH = 0;
+        if (x + v < t) h->p.whole = x + v;
+        else { h->p.whole = t; o->velH = 0; }
+    } else if (x - v <= t) {
+        h->p.whole = t; o->velH = 0;
     } else {
         h->p.whole = x - v;
     }
@@ -32,7 +26,7 @@ static __inline__ void movey(TObj *o, short v)
     short t;
 
     y = o->y.p.whole; t = o->velY;
-    if (t >= y - v) {
+    if (y - v <= t) {
         o->y.p.whole = t;
         o->velV = 0;
     } else {
