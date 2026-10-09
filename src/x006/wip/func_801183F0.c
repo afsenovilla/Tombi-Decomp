@@ -2,6 +2,7 @@
 /* score 6: only registers of the path-point pointers differ: game has base in v1, a=base+off in a0, b in a1;
    ours ties base with a (a0) and b gets a1. b written as `base - -i` stops CSE merging a/b (old copy form scored 23).
    Tried: base/off temps (int, char ptr, P8 ptr; block or function scope), both statement orders, off - -base, a=b copy. */
+/* o36: still 6. Hypothesis: game base pseudo is not tied to a/b in local-alloc (dies twice or non-local); tried base temps (int/volatile), a-first, multiset a/b, ushort index, if/else deaths: 6..74. */
 typedef struct { short x, y, z, pad; } P8;
 typedef struct { short b4, b6, b8, ba; int bc, c0, c4; } X;
 typedef struct {
