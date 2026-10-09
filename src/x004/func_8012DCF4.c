@@ -1,35 +1,30 @@
-// FUNC 80133448 524 X003
-/* score 36: logic and frame match. Left: global-alloc puts the hoisted constant 1 in s3 and list in s4 (game: list s3,
-   const s4; -dg: list 3 refs/76 insns loses to const 5/142), and the `if (e)` branches fill their delay slot from the
-   fallthrough instead of the i+1 at the loop tail. Tried for/do-while/goto/continue loop forms, list vs p tests,
-   declaration orders, a `one` variable. Twin: X004 8012DCF4. */
+// FUNC 8012dcf4 524 X004
+// MATCHING 8012dcf4 524
+/* Loop written as a while with the increment in the test (`++i`): the branch target is the copied exit test (NOTE_INSN_LOOP_VTOP), so reorg predicts the `if (e)` skips taken and steals i+1 into their delay slots. Debt: volatile f0 read (keeps the &0x80 load in the body and the frame at 0x28) and do {} while (0) around the second spawn body (extra loop-weighted ref on o so it gets s2 before list). Twin of X003 func_80133448. */
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } SP;
 
-extern unsigned char D_8009CDAB, D_8009CFCD;
-extern SP *D_8013606C;
+extern unsigned char D_8009CDAB, D_8009CFCB;
+extern SP *D_80131438;
 extern TObj *FUN_800184d8(void);
 extern TObj *FUN_800183b8(void);
 
-void func_80133448(TObj *o)
+void func_8012DCF4(TObj *o)
 {
     SP *p, *list;
     TObj *e;
     short i;
 
-    if (!D_8009CDAB || D_8009CFCD) {
+    if (!D_8009CDAB || D_8009CFCB) {
         o->b04 = 3;
         return;
     }
-    {
-        list = D_8013606C;
-        p = list;
-        if (list->f0 != 0xff) {
-        i = 0;
-        do {
-            if (p->f0 & 0x80) {
+    list = D_80131438;
+    i = -1;
+    while ((p = &list[++i])->f0 != 0xff) {
+            if (*(volatile short *)&p->f0 & 0x80) {
                 e = FUN_800184d8();
                 if (e) {
                     e->type = 0x1a;
@@ -45,6 +40,7 @@ void func_80133448(TObj *o)
             } else {
                 e = FUN_800183b8();
                 if (e) {
+                    do {
                     e->active = 1;
                     e->type = 0x32;
                     e->b0a = 0;
@@ -63,11 +59,8 @@ void func_80133448(TObj *o)
                     e->w7a = p->fc;
                     e->b68 = 0;
                     e->d90 = (int)o;
+                    } while (0);
                 }
             }
-            i++;
-            p = &list[i];
-        } while (p->f0 != 0xff);
-        }
     }
 }
