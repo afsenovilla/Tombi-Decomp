@@ -1,7 +1,9 @@
 // FUNC 80118544 540 X014
 /* score 14: real start of csv piece 80118568 (36+504 B). Left: case 0 scheduling: game keeps the da0 sum and the
    a[] / o->d loads above the zero stores (sw 84/88/8c, da0 after the lhu a[]); every order of the C statements
-   gives the stores first. Temps before the stores fix the store placement but shift registers (20). */
+   gives the stores first. Temps before the stores fix the store placement but shift registers (20).
+   o26: `int t = a[o->b0c & 3];` before the zero stores gives the game's lbu/lw d/a[] order (14, but lh); a temp
+   for the da0 sum stored after the zero stores (20); searched every order of ba4/velV/t/p with short/int/ushort t. */
 #include "TOBJ.H"
 
 extern int D_1F800334;
