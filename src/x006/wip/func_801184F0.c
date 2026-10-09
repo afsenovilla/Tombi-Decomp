@@ -1,6 +1,8 @@
 // FUNC 801184f0 380 X006
-/* score 32: same two-register path-point problem as wip/func_801183F0 (now `base - -i` form: two addu, but base ties with a);
-   also the game computes o+0xb4 into a0 early and copies it to s2 only on the backward path (x/s2 vs s3 swap). */
+/* score 6: only the path-point pair in the backward loop: game keeps o->pa8 in v1 and computes a/b into a0/a1, ours
+   ties a with the dying pa8 temp (a0). The backward branch is an inline taking x as void * (gives the game's
+   addiu a0,s0,0xb4 + move s2,a0 copy); b before a and o->w2c = o->w2c - 1 fix the rest. Tried: user-var pa8 temp,
+   operand orders, &o->pa8[w2c] forms. */
 typedef struct { short x, y, z, pad; } P8;
 typedef struct { short b4, b6, b8, ba; int bc; unsigned int c0; int c4; } X;
 typedef struct {
@@ -16,13 +18,38 @@ extern int SquareRoot0(int);
 extern short ratan2(int, int);
 extern void func_801183F0(O *);
 
+static __inline__ void back(O *o, void *xp)
+{
+    X *x = xp;
+    int dx, dz, dy, d;
+    P8 *a, *b;
+    int i;
+
+    x->c4 -= x->c0;
+    o->w2c = o->w2c - 1;
+    for (;;) {
+        i = o->w2c << 3;
+        b = (P8 *)((int)o->pa8 - -i);
+        a = (P8 *)((int)o->pa8 + i);
+        dx = a[1].x - b->x;
+        dz = a[1].z - b->z;
+        dy = a[1].y - b->y;
+        d = SquareRoot0(dx * dx + dz * dz);
+        if (d != 0) {
+            x->c0 = d << 8;
+            x->bc += d << 8;
+            if (x->bc >= 0) break;
+        }
+        o->w2c--;
+    }
+    x->ba = ratan2(dy, d);
+    x->b8 = ratan2(dz, dx);
+}
+
 void func_801184F0(O *o)
 {
     X *x = &o->x;
-    int dx, dz, dy, d;
     int v;
-    P8 *a, *b;
-    int i;
 
     v = x->bc + x->b6;
     x->bc = v;
@@ -32,25 +59,7 @@ void func_801184F0(O *o)
                 x->bc = 0;
                 return;
             }
-            x->c4 -= x->c0;
-            o->w2c--;
-            for (;;) {
-                i = o->w2c << 3;
-                b = (P8 *)((int)o->pa8 - -i);
-                a = (P8 *)((int)o->pa8 + i);
-                dx = a[1].x - b->x;
-                dz = a[1].z - b->z;
-                dy = a[1].y - b->y;
-                d = SquareRoot0(dx * dx + dz * dz);
-                if (d != 0) {
-                    x->c0 = d << 8;
-                    x->bc += d << 8;
-                    if (x->bc >= 0) break;
-                }
-                o->w2c--;
-            }
-            x->ba = ratan2(dy, d);
-            x->b8 = ratan2(dz, dx);
+            back(o, x);
         } else {
             x->bc = v - x->c0;
             o->w2c++;
