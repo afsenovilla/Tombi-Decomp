@@ -32,8 +32,9 @@ jobs:
         env:
           GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
         run: |
-          # GAME_FILES_URL: direct download link to a zip with MAIN0.EXE and AREA00/X000.BIN
-          # (the files of your own copy of the game; never committed to the repository).
+          # GAME_FILES_URL: direct download link to EITHER a zip with MAIN0.EXE and AREA00/X000.BIN (legacy; only the
+          # MAIN0/X000 report is produced) OR a raw disc image (.bin, 2352-byte sectors) of your own copy of the game,
+          # from which every area overlay is extracted. Never committed to the repository.
           if [ -z "$GAME_FILES_URL" ]; then
             echo "::notice::GAME_FILES_URL secret not set; skipping the report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
@@ -42,17 +43,26 @@ jobs:
           URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-          if [ -n "$ID" ]; then URL="https://drive.google.com/uc?export=download&id=$ID"; fi
-          curl -fsSL -o "$RUNNER_TEMP/game.zip" "$URL"
-          if ! unzip -tq "$RUNNER_TEMP/game.zip" >/dev/null; then
-            echo "::error::The download is not a zip. Share the file as 'Anyone with the link' and check GAME_FILES_URL."; exit 1
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/game"
+          if unzip -tq "$RUNNER_TEMP/game.dl" >/dev/null 2>&1; then
+            unzip -o -q "$RUNNER_TEMP/game.dl" -d "$RUNNER_TEMP/game"
+          elif [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -gt 100000000 ]; then
+            python3 -I tools/isoext.py "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/game"
+          else
+            echo "::error::The download is neither a zip nor a disc image. Share the file as 'Anyone with the link' and check GAME_FILES_URL."; exit 1
           fi
-          unzip -o -q "$RUNNER_TEMP/game.zip" -d "$RUNNER_TEMP/game"
           mkdir -p game/AREA00
           cp "$(find "$RUNNER_TEMP/game" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
           cp "$(find "$RUNNER_TEMP/game" -iname X000.BIN | head -1)" game/AREA00/X000.BIN
           echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
           echo "ce168475f667f2ca8842eabad2aec829e301c5c5  game/AREA00/X000.BIN" | sha1sum -c -
+          for a in 01 02 03 04 05 06 08 09 10 11 13 14 16 17 18 19; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*AREA$a/X0$a.BIN" | head -1)"
+            if [ -n "$f" ]; then mkdir -p "game/AREA$a"; cp "$f" "game/AREA$a/X0$a.BIN"; fi
+          done
+          ls game/AREA*/X0*.BIN | wc -l
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Build report

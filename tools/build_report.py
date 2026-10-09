@@ -21,6 +21,8 @@ ARGS = sys.argv[1:]
 OBJDIFF = ARGS[ARGS.index("--objdiff") + 1] if "--objdiff" in ARGS else os.environ.get("OBJDIFF", "objdiff-cli")
 PROGS = {"main0": "MAIN0", "x000": "X000"}
 OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]  # area overlays, src/x0nn/
+# Overlays whose retail file is missing (legacy game zip with only MAIN0/X000) are left out of the report.
+OVERLAYS = [p for p in OVERLAYS if os.path.exists(os.path.join(ROOT, "game", "AREA" + p[1:], p.upper() + ".BIN"))]
 PROGS.update({p: p.upper() for p in OVERLAYS})
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
