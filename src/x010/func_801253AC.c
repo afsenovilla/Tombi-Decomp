@@ -1,11 +1,6 @@
 // FUNC 801253ac 1844 X010
-/* score 225: all case bodies written. The sparse-switch comparison tree differs: the game splits the lower half at
-   0x46 (one more node than this source gives; adding `case 0x48:` to 0x49 gets the shape but emits a range test).
-   Also case 10 keeps D_8009CDF2 in a1 (re-read later) and the talk-0x9f test is a materialized bool (a0/v0).
-   o20: the game tree comes out exactly with `case 0x49: break;` plus `case 0x48: default: break;` at the end of the
-   switch (a case sharing the default label is counted by balance_case_nodes but not emitted), and case 10 gets the
-   materialized bools with `{ short r = 0; int t; if (C940 == 1) r = C941 == 0x9f; t = 0; if (r) t = CDF2a[0] != 0xff; if (t) ...`
-   (first read k via an array name); the layout then shifts elsewhere (score 272), so not applied here. */
+// MATCHING 801253ac 1844
+/* D_8009CDF2 is read through two names (k via the array, the talk test via the scalar) to keep both loads. */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
@@ -13,6 +8,7 @@ extern AT D_8012F3B8[];
 extern unsigned char D_8009C93E, D_8009C93F[], D_8009C940, D_8009C941, D_8009C942[];
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A60EA;
+extern unsigned char D_8009CDF2a[];
 extern unsigned char D_8009CDF2, D_8009D143, D_8009C975;
 extern int FUN_8002dcc8(int, int, V6 *);
 extern void FUN_80026e0c(int, int);
@@ -26,12 +22,6 @@ static __inline__ void setAnim(TObj *o, void *a)
 {
     o->anim = a;
     AnimJump(o, 0);
-}
-
-static __inline__ int talk9f(void)
-{
-    if (D_8009C940 == 1) return D_8009C941 == 0x9f;
-    return 0;
 }
 
 void func_801253AC(TObj *o)
@@ -56,9 +46,14 @@ void func_801253AC(TObj *o)
         o->state = 10;
         break;
     case 10:
-        k = D_8009CDF2;
+        k = D_8009CDF2a[0];
         if (k == 0xff) break;
-        if (talk9f() && D_8009CDF2 != 0xff) {
+        {
+        int r = 0; int t;
+        if (D_8009C940 == 1) r = D_8009C941 == 0x9f;
+        t = 0;
+        if (r) t = D_8009CDF2 != 0xff;
+        if (t) {
             v = *(V6 *)&o->a;
             o->d90 = FUN_8002dcc8(4, 3, &v);
             FUN_80026e0c(0x9f, 1);
@@ -66,6 +61,7 @@ void func_801253AC(TObj *o)
             o->state = 0x5a;
             NEXT(o) = 0x46;
             break;
+        }
         }
         if (k == 0) {
             v = *(V6 *)&o->a;
@@ -113,7 +109,6 @@ void func_801253AC(TObj *o)
         o->state = 0x78;
         NEXT(o) = 0xfa;
         break;
-    case 0x48:
     case 0x49:
         break;
     case 0x5a:
@@ -128,6 +123,13 @@ void func_801253AC(TObj *o)
         o->anim = D_8012F3B8[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state = NEXT(o);
+        break;
+    case 0x6e:
+        o->timer = 200;
+        o->state = 0x6f;
+        break;
+    case 0x6f:
+        if (--o->timer == 0) goto next;
         break;
     case 0x64:
         D_8009C975 = 4;
@@ -147,14 +149,7 @@ void func_801253AC(TObj *o)
         break;
     case 0x68:
         if ((unsigned char)(D_8009C975 - 3) < 2) break;
-        o->state = NEXT(o);
-        break;
-    case 0x6e:
-        o->timer = 200;
-        o->state = 0x6f;
-        break;
-    case 0x6f:
-        if (--o->timer != 0) break;
+    next:
         o->state = NEXT(o);
         break;
     case 0x78:
@@ -174,7 +169,7 @@ void func_801253AC(TObj *o)
         D_800A603D = 0;
         D_800A603E = 0;
         o->b68 = 0;
-        switch (NEXT(o)) {
+        switch (*(unsigned short *)((char *)o + 0xc2)) {
         case 0xf0:
             o->state = 0xf0;
             break;
@@ -206,6 +201,9 @@ void func_801253AC(TObj *o)
         break;
     case 0xfa:
         o->b04 = 2;
+        break;
+    case 0x48:
+    default:
         break;
     }
 }
