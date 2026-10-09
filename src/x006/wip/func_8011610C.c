@@ -1,14 +1,15 @@
-/* score 30: constants now match (k = 0x500000 kept in a register and reused by the DF0 reset, -0x800000 reloaded) and the +0x8000 path jumps into the -0x4000 store via goto. Left: game keeps `move a2,zero` (flag = 0) as the 2nd insn instead of the bgez delay slot; jump opt merges the `store:` label with the b = 0x40000 tail (game keeps them apart); regs of the +0x8000 add swapped. Tried flag types, statement forms of both adds. */
 // FUNC 8011610c 328 X006
+/* score 16: volatile D_1F800190 keeps flag = 0 (move a2,zero) at the top (reorg cannot hoist it past the volatile load) and the start matches.
+   Left: game tests the flag with andi 0xff (uchar flag), but any uchar/& 0xff form makes reorg steal that andi from the bgez target
+   instead of the lui 0x340000 fallthrough (score 50); the +0x8000 path should jump into the -0x4000 store (goto form of old wip, 41 with int flag). */
 #include "TOBJ.H"
-extern int D_1F800190;
+extern volatile int D_1F800190;
 extern int D_1F8000F0;
 
 void func_8011610C(TObj *o)
 {
-    unsigned char flag = 0;
+    int flag = 0;
     int k;
-    int v;
     int d = D_1F800190 - 0x800000;
     d -= D_1F8000F0;
     k = 0x500000;
@@ -29,8 +30,7 @@ void func_8011610C(TObj *o)
                 else o->b.raw = d;
             } else {
                 if (o->b.raw < 0) o->b.raw = 0;
-                v = o->b.raw + 0x8000;
-                goto store;
+                o->b.raw = o->b.raw + 0x8000;
             }
         } else {
             D_1F8000F0 = D_1F800190 + k - 0x800000;
@@ -43,9 +43,7 @@ void func_8011610C(TObj *o)
                 else o->b.raw = -0x40000;
             } else {
                 if (o->b.raw > 0) o->b.raw = 0;
-                v = o->b.raw - 0x4000;
-            store:
-                o->b.raw = v;
+                o->b.raw = o->b.raw - 0x4000;
             }
         } else {
             o->b.raw = d;
