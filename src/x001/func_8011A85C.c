@@ -1,7 +1,5 @@
 // FUNC 8011a85c 1696 X001
-/* score 170: control flow decoded. Left: w74 re-read (volatile gives lhu, game lh), BURST tails merged by
-   cross-jumping where the game keeps them apart (w98 store scheduled between the arg loads), case 2 register use,
-   case 3 b0c switch tree. */
+// MATCHING 8011a85c 1696
 #include "TOBJ.H"
 
 extern short D_800A60B4[];
@@ -17,11 +15,10 @@ extern TObj *func_80020D98(void *);
 #define BURST() \
     func_801191E4(o->h->p.whole, o->y.p.whole, o->d->p.whole); \
     o->b6b = 1; \
-    playSFX(D_8009C962[0] ? 0x49 : 0x44);
+    if (D_8009C962[0] == 0) playSFX(0x44); else playSFX(0x49);
 
 void func_8011A85C(TObj *o)
 {
-    TObj *e;
 
     switch (o->state) {
     case 0:
@@ -35,7 +32,7 @@ void func_8011A85C(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->velV = 0x340;
-        if (*(volatile short *)&o->w74 == 0) {
+        if (*(short *)((char *)o + 0x74) == 0) {
             o->d84 = 0;
             o->y.raw = o->d34;
             if (D_800A60B4[0] == 0) {
@@ -66,22 +63,24 @@ void func_8011A85C(TObj *o)
             unsigned char v = ((unsigned char *)&o->d88)[1];
             if (v > 0x80) o->y.raw += (D_8007A5F0[v] * (o->velV - 0x100)) >> 4;
             else o->y.raw += (D_8007A5F0[v] * o->velV) >> 4;
-        }
-        o->d88 += 0x280;
-        if ((((unsigned)o->d88 >> 8) & 0xff) == 0) {
-            o->y.raw = o->d34;
-            if (D_8009C962[0] == 0) playSFX(0x43);
-            else playSFX(0x48);
+            o->d88 += 0x280;
+            v = (unsigned)o->d88 >> 8;
+            if (v == 0) {
+                o->y.raw = o->d34;
+                if (D_8009C962[0] == 0) playSFX(0x43);
+                else playSFX(0x48);
+            }
         }
         break;
     case 2:
-        e = (TObj *)o->d94;
+        {TObj *e = (TObj *)o->d94;
         o->d88 = 0;
         o->velV = ((o->d34 - e->y.raw) / 15) >> 8;
         o->velX = ((o->d30 - o->h->raw) >> 8) / 64;
         o->w74 = 0;
         o->active = 2;
-        goto next;
+        o->state++;
+        break;}
     case 3:
         o->y.raw -= (D_8007A5F0[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
         if (o->b6a) o->y.raw -= (D_8007A5F0[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
@@ -89,11 +88,11 @@ void func_8011A85C(TObj *o)
         o->d88 += 0x200;
         if (o->w76 < ((o->d88 >> 8) & 0xff)) {
             switch (o->b0c) {
-            case 2:
+            case 0:
                 break;
             case 1:
                 if (o->w98 == 0) {
-                    e = func_80020D98(D_8013C474);
+                    TObj *e = func_80020D98(D_8013C474);
                     if (!e) {
                         o->w98 = 1;
                         break;
@@ -120,7 +119,7 @@ void func_8011A85C(TObj *o)
                 break;
             }
         }
-        if (((unsigned char *)&o->d88)[1] >= 0x41) {
+        if ((short)((unsigned char *)&o->d88)[1] >= 0x41) {
             if (!o->b6b) {
                 BURST();
             }
@@ -149,14 +148,15 @@ void func_8011A85C(TObj *o)
         o->d88 += 0x400;
         {
             int v = o->d88 >> 8;
-            if (v & 0x80) goto next;
+            if (v & 0x80) {
+            next:
+                o->state++;
+                break;
+            }
             o->y.raw -= (D_8007A5F0[v & 0xff] * o->velV) >> 4;
         }
         if (o->b69) o->b69 = 0;
         if (o->b6a) o->state = 0;
-        break;
-    next:
-        o->state++;
         break;
     case 5:
         o->y.raw = o->d34;
