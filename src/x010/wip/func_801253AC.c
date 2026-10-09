@@ -1,7 +1,11 @@
 // FUNC 801253ac 1844 X010
 /* score 225: all case bodies written. The sparse-switch comparison tree differs: the game splits the lower half at
    0x46 (one more node than this source gives; adding `case 0x48:` to 0x49 gets the shape but emits a range test).
-   Also case 10 keeps D_8009CDF2 in a1 (re-read later) and the talk-0x9f test is a materialized bool (a0/v0). */
+   Also case 10 keeps D_8009CDF2 in a1 (re-read later) and the talk-0x9f test is a materialized bool (a0/v0).
+   o20: the game tree comes out exactly with `case 0x49: break;` plus `case 0x48: default: break;` at the end of the
+   switch (a case sharing the default label is counted by balance_case_nodes but not emitted), and case 10 gets the
+   materialized bools with `{ short r = 0; int t; if (C940 == 1) r = C941 == 0x9f; t = 0; if (r) t = CDF2a[0] != 0xff; if (t) ...`
+   (first read k via an array name); the layout then shifts elsewhere (score 272), so not applied here. */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
