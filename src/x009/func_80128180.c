@@ -1,7 +1,5 @@
 // FUNC 80128180 548 X009
-/* score 4: only the w1e=4 store uses v1 instead of v0. The game hoists li 0x10 (box0/box2) early in v1, which
-   needs a multi-set variable (k); with k single-set gcc places the li late and d90 lands in v1 instead of a0.
-   Tried: k for each other constant store, goto-tail for w08, inline box setter, chained stores, ternary forms. */
+// MATCHING 80128180 548
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3F;
@@ -19,7 +17,8 @@ void func_80128180(TObj *o)
     int k;
 
     if (!(D_8009D2C3 & 1)) {
-        if (D_8009CDC9 == 0xff) {
+        k = D_8009CDC9;
+        if (k == 0xff) {
         if (D_8009D12E || D_8009D07E) {
             o->b04 = 3;
             return;
@@ -57,8 +56,7 @@ void func_80128180(TObj *o)
     }
     *(signed char *)&o->b0f = -9;
     o->b0d = 1;
-    k = 4;
-    o->w1e = k;
+    o->w1e = 4;
     o->b04++;
     o->w7a = o->b6b;
     o->d3c = D_1F8002F0[0];
