@@ -1,4 +1,5 @@
 // FUNC 8012955c 932 X009
+// MATCHING 8012955c 932
 #include "TOBJ.H"
 
 extern TObj D_800A6038;
@@ -23,6 +24,8 @@ void func_8012955C(TObj *o)
             o->b04 = 3;
             break;
         }
+        o->d3c = D_1F8002E8;
+        o->anim = D_8012E078;
         o->w1e = 0xd;
         o->b0a = 2;
         o->b0f = 5;
@@ -35,8 +38,6 @@ void func_8012955C(TObj *o)
         o->b68 = 0;
         o->active = 3;
         AnimLoadDuration(o);
-        o->d3c = D_1F8002E8;
-        o->anim = D_8012E078;
         o->step = 0;
         o->b04++;
         break;
