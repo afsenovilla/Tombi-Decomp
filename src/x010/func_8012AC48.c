@@ -1,11 +1,15 @@
 // FUNC 8012ac48 2720 X010
-/* score 187: game keeps n in a1 and (short)n*4 in a0, reusing that offset for the anim table load at the shared set tail (p computed before the goto in both paths); ours swaps a0/a1 and recomputes the index. w9a==0 block: game loads w7a/wac/h->p first then stores. Tried: shared int k offset (227), p computed after label (218), int temps (helped 284 to 206), non-const p (interleaved box loads/stores, 187). */
+// MATCHING 8012ac48 2720
+/* Row 5 of the box table is read through scalar externs (D_8012F3E8..EB): a fixed-address scalar does not
+   conflict with the o-> stores, so those loads hoist as in the game, while the indexed reads stay ordered.
+   n (a1) and the shared byte offset k = (short)n * 4 (a0) feed both tables at the `set` tail. */
 #include "TOBJ.H"
 
 typedef struct { short a, x, y, z, sub; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 
-extern const unsigned char D_8012F3D4[];
+extern unsigned char D_8012F3D4[];
+extern unsigned char D_8012F3E8, D_8012F3E9, D_8012F3EA, D_8012F3EB;
 extern void *D_80132310[];
 extern void *D_8013237C[];
 extern unsigned short D_8012F49C[];
@@ -53,6 +57,8 @@ void func_8012AC48(TObj *o)
     short yy;
     int n;
     unsigned char *p;
+    int k;
+    int c;
 
     switch (o->b04) {
     case 0:
@@ -223,7 +229,9 @@ void func_8012AC48(TObj *o)
                 break;
             }
             if ((short)n >= 0) {
-                p = (unsigned char *)&D_8012F3D4[(short)n * 4];
+                k = (short)n;
+                k *= 4;
+                p = (unsigned char *)D_8012F3D4 + k;
                 goto set;
             }
         } else if (o->w9a == 0) {
@@ -233,10 +241,10 @@ void func_8012AC48(TObj *o)
             o->w9a = 0xf;
             o->animFrame = 1 - f;
             o->d34 = w;
-            o->box0 = D_8012F3D4[5 * 4 + 0];
-            o->box1 = D_8012F3D4[5 * 4 + 1];
-            o->box2 = D_8012F3D4[5 * 4 + 2];
-            o->box3 = D_8012F3D4[5 * 4 + 3];
+            o->box0 = D_8012F3E8;
+            o->box1 = D_8012F3E9;
+            o->box2 = D_8012F3EA;
+            o->box3 = D_8012F3EB;
             o->wac = 5;
             o->d30 = hx;
             o->anim = D_80132310[5];
@@ -251,16 +259,22 @@ void func_8012AC48(TObj *o)
             o->y.p.whole = yy + 2;
             if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, (short)(yy + 0x1c))) o->b69 = 0;
             if (--o->w9a == 0) {
+                p = (unsigned char *)D_8012F3D4;
                 n = o->d34;
                 o->b68 = 0;
-                p = (unsigned char *)&D_8012F3D4[(short)n * 4];
+                k = n << 16;
+                k >>= 14;
+                p += k;
             set:
-                o->box0 = *p++;
-                o->box1 = *p++;
-                o->box2 = *p++;
+                c = *p++;
+                o->box0 = c;
+                c = *p++;
+                o->box1 = c;
+                c = *p++;
+                o->box2 = c;
                 o->box3 = *p++;
                 o->wac = n;
-                o->anim = D_80132310[(short)n];
+                o->anim = *(void **)((char *)D_80132310 + k);
                 AnimLoadDuration(o);
             }
         }
@@ -279,11 +293,17 @@ void func_8012AC48(TObj *o)
                 FUN_8001e4f0(0xa7);
                 o->state++;
                 o->b9c = 0;
-                o->wac = 3;
-                o->box0 = D_8012F3D4[3 * 4 + 0];
-                o->box1 = D_8012F3D4[3 * 4 + 1];
-                o->box2 = D_8012F3D4[3 * 4 + 2];
-                o->box3 = D_8012F3D4[3 * 4 + 3];
+                {
+                    int b0 = D_8012F3D4[3 * 4 + 0];
+                    int b1 = D_8012F3D4[3 * 4 + 1];
+                    int b2 = D_8012F3D4[3 * 4 + 2];
+                    int b3 = D_8012F3D4[3 * 4 + 3];
+                    o->wac = 3;
+                    o->box0 = b0;
+                    o->box1 = b1;
+                    o->box2 = b2;
+                    o->box3 = b3;
+                }
                 o->anim = D_80132310[3];
                 AnimLoadDuration(o);
                 o->box2 = 0xc;
@@ -312,23 +332,24 @@ void func_8012AC48(TObj *o)
         o->b04++;
         break;
     case 4:
-        if (o->timer) {
+        if (o->timer == 0) {
+            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && !FUN_800203dc(o)) {
+                q->a = 0;
+                o->w98 = 3;
+                o->subtype = q->sub;
+                o->w9a = 0;
+                o->b68 = 0;
+                o->b9e = 0;
+                o->a.p.whole = q->x;
+                o->y.p.whole = q->y;
+                o->b.p.whole = q->z;
+                o->b04 = 0;
+                o->step = 1;
+                o->state = 0;
+                o->substep = 0;
+            }
+        } else
             o->timer--;
-        } else if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && !FUN_800203dc(o)) {
-            q->a = 0;
-            o->w98 = 3;
-            o->w9a = 0;
-            o->b68 = 0;
-            o->b9e = 0;
-            o->subtype = q->sub;
-            o->a.p.whole = q->x;
-            o->y.p.whole = q->y;
-            o->b04 = 0;
-            o->step = 1;
-            o->state = 0;
-            o->substep = 0;
-            o->b.p.whole = q->z;
-        }
         break;
     }
 }
