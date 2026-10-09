@@ -1,4 +1,4 @@
-/* score 4: y check: game loads a->box3 before a->box2 and adds w + b->box2 (addu v1,a0,v1); this form (-a->box2 + a->box3, rhs a->box3 + b->box3 + 0x40) gets the registers right but loads box2 first. With a->box3 - a->box2 the load order is right but a->box3/b->box2 swap v0/v1 (score 24). Tried operand orders, temps, inline add/sub, local type brute force. */
+/* score 4: (o38: brute-forced ~250 expression forms: box3 temp, b->box2 temp, casts, inline sub/neg; all >=4) y check: game loads a->box3 before a->box2 and adds w + b->box2 (addu v1,a0,v1); this form (-a->box2 + a->box3, rhs a->box3 + b->box3 + 0x40) gets the registers right but loads box2 first. With a->box3 - a->box2 the load order is right but a->box3/b->box2 swap v0/v1 (score 24). Tried operand orders, temps, inline add/sub, local type brute force. */
 // FUNC 80127700 396 X001
 #include "TOBJ.H"
 

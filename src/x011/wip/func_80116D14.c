@@ -1,4 +1,4 @@
-/* score 4: only scheduling in case 0: game loads lbu b04 after the two volatile D_1F800334 reads and stores d84 before b69/b04;
+/* score 4: (o38: volatile cast-at-use / char-base+0x334 / int*volatile* forms and b04 temp placements all >=4) only scheduling in case 0: game loads lbu b04 after the two volatile D_1F800334 reads and stores d84 before b69/b04;
    tried: hill-climbed statement order, raw-offset stores, b04 increment forms, pp forms, do-while/asm barriers. Includes csv piece 80116D50.
    Also (o17): non-volatile pp with only one volatile read, int *pp sibling forms (x014 func_80122DE8), box0..3 natural
    order, random/targeted permutations of the case-0 stores (best stays 4).

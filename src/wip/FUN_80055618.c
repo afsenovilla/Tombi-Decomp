@@ -1,5 +1,5 @@
 // FUNC 80055618 1696 MAIN0
-/* score 4: only addu u+w is scheduled before sb u0 (game: after); store/load order hill-climb, u/v/w/h types, a=u+w temps tried.
+/* score 4 (o38: reviewed, no new idea beyond sched2 tie; left as is): only addu u+w is scheduled before sb u0 (game: after); store/load order hill-climb, u/v/w/h types, a=u+w temps tried.
    b28: it is a sched2 tie (both insns priority 6, same regs/deps): 3000 random store orders, 2500 random load+store topological orders, raw (char*) stores per field (256 masks), TEX struct for q, setUVWH macro, struct field for the +0xc6 read, all u/v/w/h types: none below 4.
    b45: cc1 -dR trace (.sched2) shows why: sched2 schedules backward and schedule_select prefers ready insns with a
    greater 'potential hazard' (stores, memory unit) over ALU insns; so ALU addu always loses to any ready store and

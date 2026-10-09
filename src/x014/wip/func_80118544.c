@@ -1,5 +1,5 @@
 // FUNC 80118544 540 X014
-/* score 14: real start of csv piece 80118568 (36+504 B). Left: case 0 scheduling: game keeps the da0 sum and the
+/* score 14: (o38: `p=&o->d->p.whole; unsigned short t=a[..]; zero stores; o->da0=s; *p+=t;` with s=sum computed first reproduces the game store/load placement (also 14) but k-read/sum regs differ: game sum = second *k + [2] into the second read reg, computed right after lbu; `m=*k; s=*k+((int*)m)[2]` gives that addu but la/reads regs shift (20-31); s global, t reuse: worse) real start of csv piece 80118568 (36+504 B). Left: case 0 scheduling: game keeps the da0 sum and the
    a[] / o->d loads above the zero stores (sw 84/88/8c, da0 after the lhu a[]); every order of the C statements
    gives the stores first. Temps before the stores fix the store placement but shift registers (20).
    o26: `int t = a[o->b0c & 3];` before the zero stores gives the game's lbu/lw d/a[] order (14, but lh); a temp

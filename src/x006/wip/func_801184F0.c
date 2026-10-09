@@ -1,5 +1,5 @@
 // FUNC 801184f0 380 X006
-/* score 6: only the path-point pair in the backward loop: game keeps o->pa8 in v1 and computes a/b into a0/a1, ours
+/* score 6: (o38: 360 a/b expression-form/order combos, p temp, b shared with d, dead sets to make a/b global: all >=6; tiny test shows a/b live across blocks stops the pa8 tie but no code-free way found) only the path-point pair in the backward loop: game keeps o->pa8 in v1 and computes a/b into a0/a1, ours
    ties a with the dying pa8 temp (a0). The backward branch is an inline taking x as void * (gives the game's
    addiu a0,s0,0xb4 + move s2,a0 copy); b before a and o->w2c = o->w2c - 1 fix the rest. Tried: user-var pa8 temp,
    operand orders, &o->pa8[w2c] forms. */
