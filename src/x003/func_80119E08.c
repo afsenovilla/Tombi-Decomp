@@ -1,5 +1,5 @@
 // FUNC 80119e08 392 X003
-/* score 21: only difference is the game loads o->d90 into v1 for the test and copies it to s2 (move s2,v1) before the RotMatrix call; ours loads straight into s2. Tried: test/assign split with q temp, volatile load, inline parent()/follow() helpers, p assigned after stores/call, reuse of p/q in case 1. */
+// MATCHING 80119e08 392
 #include "TOBJ.H"
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { long vx, vy, vz, pad; } VECTOR;
@@ -28,14 +28,16 @@ void func_80119E08(TObj *o)
     case 1:
         if (o->d90 == 0)
             o->velX += FUN_8001f9e0() & 0x1f;
-        else
-            o->velX = ((TObj *)o->d90)->velX;
+        else {
+            p = (TObj *)o->d90;
+            o->velX = p->velX;
+        }
         o->velH = FUN_8001fe0c(o->velX, 0x1000);
         o->d8c = (o->velH >> 8) & 0xfff;
         break;
     }
-    p = (TObj *)o->d90;
-    if (p != 0) {
+    if (o->d90 != 0) {
+        p = (TObj *)o->d90;
         v.vx = 0;
         v.vy = 0;
         v.vz = o->d8c;
