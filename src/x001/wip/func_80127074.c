@@ -1,7 +1,8 @@
 // FUNC 80127074 1544 X001
 /* score 496: first full transcription (logic follows the game; register allocation and block layout far off:
    game keeps t spilled at sp+0x10, ang in s4, dx/dy in s3/s6, rcos/rsin products in s5/t0, fy/fx in fp/s7).
-   Not tuned yet. */
+   Not tuned yet. Greedy per-local type search only helps with semantics-changing types
+   (dx/dy int 452, dy unsigned 422): needs structural work (t spilled to stack, s-reg order). */
 #include "TOBJ.H"
 
 typedef struct {
