@@ -1,12 +1,15 @@
-/* score 155: logic complete (all cases); leftovers: case 0 store/load scheduling (box0/box2 const reg, d3c/anim store order), a few cross-jump tail positions (end label 4 bytes off), step 3 sine/cosine block scheduling (negu/sll order, D_800A6078 address reuse). */
 // FUNC 80138550 1788 X001
+// MATCHING 80138550 1788
+/* Debt: D_8013E710s is a second (scalar) name for D_8013E710[0]; the scalar load is hoisted above the
+   struct stores in cases 0 and 6 as in the game. */
 #include "TOBJ.H"
 
 typedef struct { short z, y, x; } P3;
 
 extern P3 D_8013C9EC[];
 extern void *D_8013E710[];
-extern int D_1F8002D4;
+extern void *D_8013E710s;
+extern int D_1F8002D4a[];
 extern unsigned char D_800A60A1, D_800A60E4, D_800A60D4, D_800A60D6;
 extern int D_800A604C;
 extern Fix16 *D_800A6078;
@@ -28,10 +31,10 @@ void func_80138550(TObj *o)
 
     switch (o->b04) {
     case 0:
-        o->box0 = 8;
-        o->box2 = 8;
         o->active = 2;
+        o->box0 = 8;
         o->box1 = 0x10;
+        o->box2 = 8;
         o->box3 = 0x10;
         o->b6a = 0;
         o->b69 = 0;
@@ -45,8 +48,8 @@ void func_80138550(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->d3c = D_1F8002D4;
-        o->anim = D_8013E710[0];
+        o->d3c = D_1F8002D4a[0];
+        o->anim = D_8013E710s;
         AnimLoadDuration(o);
         o->timer = (Rand() & 0xff) + 1;
         o->step = 0;
@@ -122,7 +125,7 @@ void func_80138550(TObj *o)
                     }
                     s1 &= 0xff;
                     s2 = -(short)MulNegSinScaled((o->d8c << 1) & 0x7e, 0x300);
-                    b = MulNegSinScaled(o->d8c & 0x7f, 0x400);
+                    b = (short)MulNegSinScaled(o->d8c & 0x7f, 0x400);
                     o->h->raw += (D_8007A5F0[s1] * s2) >> 4;
                     o->y.raw += (D_8007A1F0[s1] * -b) >> 4;
                     if (o->b6a) {
@@ -170,7 +173,7 @@ void func_80138550(TObj *o)
                 o->y.raw = D_8013C9EC[o->b0c].y << 16;
                 o->b.raw = D_8013C9EC[o->b0c].z << 16;
                 o->d8c = 0;
-                o->anim = D_8013E710[0];
+                o->anim = D_8013E710s;
                 AnimLoadDuration(o);
                 o->timer = (Rand() & 0xff) + 1;
                 o->step = 0;
