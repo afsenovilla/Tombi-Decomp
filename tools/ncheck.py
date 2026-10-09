@@ -85,6 +85,7 @@ def _syms():
     if key != "BASE":
         d = os.path.join(ROOT, "src", key.lower())
         for f in (sorted(os.listdir(d)) if os.path.isdir(d) else ()):
+            if not f.endswith(".c"): continue
             m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)", open(os.path.join(d, f), errors="replace").read(300))
             if f.endswith(".c") and m: syms[f[:-2]] = int(m.group(1), 16)
     for k, a in names.items(): syms.setdefault(k, a)
