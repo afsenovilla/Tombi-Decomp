@@ -1,8 +1,10 @@
 // FUNC 80121534 1120 X010
-/* score 135: whole function incl. csv piece 80121790. Control flow matches except the even-first
-   branch (game computes y in v0 and reuses v0=1 for b69 and the return) and the k/q copy
-   (game keeps k in a1 apart from q). The rest is global register allocation: game has
-   ang=s2 c=s3 dy=s4 dx=s5 px=s6 py=s7, box1 in t0, sel in a2. Tried: types, compare order, if/else forms. */
+/* score 91: whole function incl. csv piece 80121790. Box sums now go through the abs vars (as = box0+dx,
+   ac = box0+dy) and abs is if/else: ang->s2 and box regs match. Left: global-alloc order of c/dy/dx (game
+   c=s3 dy=s4 dx=s5; here dy=s3 dx=s4 c=s5), ac/as swapped (game: sum1 and abs(c) share a1, but with ac=sum1
+   as gets the higher priority: ac 6 refs/37 insns vs as 6/28), the k copy (game keeps k in a1 apart from q),
+   and the even-first branch (li v0,1 hoisted before the y computation). Tried: k via ac/as (sign ext),
+   var-name combos for the sums, per-local types (only u16 px helps, semantically wrong), return forms. */
 #include "TOBJ.H"
 extern int FUN_80063548(int);
 extern int FUN_8006347c(int);
@@ -26,10 +28,12 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)
         return 0;
     dx = o->h->p.whole - e->h->p.whole;
-    if (e->box1 < (unsigned short)(e->box0 + dx))
+    as = e->box0 + dx;
+    if (e->box1 < (unsigned short)as)
         return 0;
     dy = o->y.p.whole - e->y.p.whole;
-    if (e->box1 < (unsigned short)(e->box0 + dy))
+    ac = e->box0 + dy;
+    if (e->box1 < (unsigned short)ac)
         return 0;
     switch (mode) {
     case 1:
@@ -49,10 +53,8 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
         s = (unsigned)(FUN_8006347c(ang) * e->box0) >> 12;
         break;
     }
-    ac = c;
-    as = s;
-    if (c < 0) ac = -c;
-    if (s < 0) as = -s;
+    if (c < 0) ac = -c; else ac = c;
+    if (s < 0) as = -s; else as = s;
     sel = ac < as;
     if (ac == 0)
         sel = 3;
