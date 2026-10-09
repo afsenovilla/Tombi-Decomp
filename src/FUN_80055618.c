@@ -1,11 +1,10 @@
 // FUNC 80055618 1696 MAIN0
-/* score 4 (o38: reviewed, no new idea beyond sched2 tie; left as is): only addu u+w is scheduled before sb u0 (game: after); store/load order hill-climb, u/v/w/h types, a=u+w temps tried.
-   b28: it is a sched2 tie (both insns priority 6, same regs/deps): 3000 random store orders, 2500 random load+store topological orders, raw (char*) stores per field (256 masks), TEX struct for q, setUVWH macro, struct field for the +0xc6 read, all u/v/w/h types: none below 4.
-   b45: cc1 -dR trace (.sched2) shows why: sched2 schedules backward and schedule_select prefers ready insns with a
-   greater 'potential hazard' (stores, memory unit) over ALU insns; so ALU addu always loses to any ready store and
-   only the anti-dep (addu vh writes u's reg) delays u0/u2. To match, sb u0 must be unready or lower priority than
-   addu uw at T-145 (needs a different dep graph, not order).
-   b51: matchcheck also 4 (not an ncheck artifact); w += u in place, p->u1 = p->u0 + w read-backs, static inline uv helper (pq / 4 values): 4..130. */
+// MATCHING 80055618 1696
+/* Matching debt: the `__asm__ volatile("")` barrier after `p->u0 = u` in setuvwh (twice).
+   Without it sched2 ties sb u0 against addu u+w (both priority 6) and schedule_select always
+   prefers the store (potential_hazard of the memory unit beats an ALU insn), giving score 4.
+   No C-level dependency can order a store before an addu that does not touch its registers,
+   so the barrier (a full scheduling fence that emits nothing) pins sb u0 before the addu. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -114,6 +113,7 @@ void FUN_80055618(TObj *o)
             w = q[10];
             h = q[11];
             p->u0 = u;
+            __asm__ volatile("");
             p->u2 = u;
             p->v0 = v;
             p->u1 = u + w;
@@ -146,6 +146,7 @@ void FUN_80055618(TObj *o)
     w = q[10];
     h = q[11];
     p->u0 = u;
+    __asm__ volatile("");
     p->u2 = u;
     p->v0 = v;
     p->u1 = u + w;
