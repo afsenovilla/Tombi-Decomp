@@ -1,7 +1,9 @@
 // FUNC 8012736c 2060 X010
 /* score 306: 22-state cutscene, control flow and shared tails decoded. Left: store/load scheduling in most states
    (game keeps statement order: velH stored before the second global load, state++ placement), the velY test in
-   case 4 (blez vs bgtz layout) and the signed/unsigned shifts in case 5. */
+   case 4 (blez vs bgtz layout) and the signed/unsigned shifts in case 5.
+   o15: case 3 = the same `if (velY > 0) { state++; SETANIM(8); } timer--; break;` as case 6 (cross-jumped, gives the
+   game's blez/j); case 2 game loads D_1F800168 right after o->h, before h->raw (no C form found yet). */
 #include "TOBJ.H"
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
