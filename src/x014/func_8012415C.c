@@ -1,7 +1,5 @@
 // FUNC 8012415c 704 X014
-/* score 22: case 0 box setup: game keeps t[0] in v0 and t[1] in v1 (two block-local values shifted in place); here the
-   shared `a` is a global pseudo and lands in a0. Two separate vars or block-local temps make it much worse (153).
-   Rest of the function matches. */
+// MATCHING 8012415c 704
 #include "TOBJ.H"
 
 extern unsigned char D_801266F0[];
@@ -18,6 +16,8 @@ extern void func_80123D64(TObj *);
 extern void func_80123AAC(TObj *);
 extern void func_80123730(TObj *);
 
+#define SFX() do { int c = 0xda; if (D_8009C962 == 7) c = 0xf2; playSFX(c); } while (0)
+
 void func_8012415C(TObj *o)
 {
     unsigned char *t;
@@ -27,23 +27,24 @@ void func_8012415C(TObj *o)
     case 0:
         o->b04++;
         t = &D_801266F0[o->subtype * 2];
+        {
+        int b;
         a = t[0];
         o->box0 = a;
         a <<= 1;
         o->box1 = a;
+        b = t[1];
+        o->box2 = b;
+        b <<= 1;
+        o->box3 = b;
         o->w1e = 1;
         o->d84 = 0;
         o->d88 = 0;
-        a = t[1];
-        o->box2 = a;
-        a <<= 1;
-        o->box3 = a;
+        }
         if (o->b0c == 1) {
             o->b0d = 0;
             o->w22 = 0;
-            a = 0xda;
-            if (D_8009C962 == 7) a = 0xf2;
-            playSFX(a);
+            SFX();
             o->w22++;
         } else {
             o->b0d = 0x80;
@@ -66,9 +67,7 @@ void func_8012415C(TObj *o)
                 break;
             }
             if (!(o->w22 & 0x3f)) {
-                a = 0xda;
-                if (D_8009C962 == 7) a = 0xf2;
-                playSFX(a);
+                SFX();
             }
             o->w22++;
             func_80123D64(o);
