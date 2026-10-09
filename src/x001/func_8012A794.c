@@ -1,8 +1,5 @@
 // FUNC 8012a794 976 X001
-/* score 6: only the movement angle: game keeps d8c in a2 and the angle in a1 (move a1,a2 / addiu a1,a2,0x80);
-   here both share one register. Tried if/else, ternary, inline helpers taking d or the angle, int/short types.
-   Cause (cse dump): `a = d; if (!f) a = d + 0x80;` -> cse rewrites d+0x80 as a+0x80 because a lives longer than d
-   (make_regs_eqv); `a = d + 0x80; if (f) a = d;` with short d keeps two regs but in the wrong order. */
+// MATCHING 8012a794 976
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } X;
 
@@ -52,6 +49,7 @@ static __inline__ void mv(TObj *o, int a, short sp)
 void func_8012A794(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
+    short d;
 
     switch (o->state) {
     case 0:
@@ -67,9 +65,13 @@ void func_8012A794(TObj *o)
         AnimAdvance(o);
         if (x->w6) {
             {
-            int d = o->d8c;
-            short sp = *(short *)o->movetab;
-            mv(o, o->animFrame ? d : d + 0x80, sp);
+            short sp;
+            short a;
+            d = o->d8c;
+            sp = *(short *)o->movetab;
+            a = d;
+            if (!o->animFrame) a = d + 0x80;
+            mv(o, a, sp);
             }
             o->y.p.whole -= 2;
         } else {
