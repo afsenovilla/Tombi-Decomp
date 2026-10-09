@@ -1,5 +1,7 @@
 // FUNC 801319c8 732 X001
-/* score ~11 (word diffs; really 1 instruction): the pre-loop load of o->da0 goes to v0, the game uses a0 (lw a0,0xa0(s0); ... lw a3,16(a0)). Everything else matches: the loop body must be written in full in both branches (cross-jumped after sched) with the y updates in y0, y1, y2 order (selects base D+0x16). Tried: n/k types and order, temp pointer vars, raw offset reads. */
+// MATCHING 801319c8 732
+/* Matching debt: register asm("$4") for the o->da0 pointer before the loop (local-alloc gives v0; tried temp
+   vars, a shared d with the step-0 call, volatile/raw reads, statement permutations). */
 #include "TOBJ.H"
 
 typedef struct {
@@ -27,7 +29,6 @@ void func_801319C8(TObj *o)
     TObj *p;
     P40 *e;
     int n, k;
-    int d;
 
     switch (o->b04) {
     case 0:
@@ -37,8 +38,8 @@ void func_801319C8(TObj *o)
         o->a.p.whole = p->a.p.whole;
         o->y.p.whole = p->y.p.whole;
         o->b.p.whole = p->b.p.whole;
-        o->ba4 = 1;
         o->da0 = *(volatile int *)&D_1F800334 + ((int *)*(volatile int *)&D_1F800334)[11];
+        o->ba4 = 1;
         break;
     case 1:
         p = (TObj *)o->d90;
@@ -64,7 +65,11 @@ void func_801319C8(TObj *o)
         case 1:
             k = 0;
             e = D_800E3E28;
-            n = ((int *)o->da0)[4];
+            {
+                register int *dp asm("$4"); /* debt: game keeps the o->da0 pointer in a0 */
+                dp = (int *)o->da0;
+                n = dp[4];
+            }
             do {
                 if (e->x0 < 0) {
                     e->x0--;
