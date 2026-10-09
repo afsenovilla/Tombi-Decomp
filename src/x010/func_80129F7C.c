@@ -1,7 +1,5 @@
 // FUNC 80129f7c 1768 X010
-/* score 36: everything matches except the first test of near() in case 8: the game loads o->d into v1 and
-   D_1F800172 into v0 (ours swaps them). Tried: operand orders, temps for d/global, nested/&& forms of near(),
-   int/short return types for near()/land(), restructuring case 8. */
+// MATCHING 80129f7c 1768
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
 extern B D_8012F3D4[];
@@ -46,12 +44,15 @@ static __inline__ short land(TObj *o)
 static __inline__ int near(TObj *o)
 {
     int k;
-    if ((unsigned short)(D_1F800172 - o->d->p.whole + 0x2d) >= 0x5b) return 0;
+    unsigned short t;
+    t = D_1F800172 - o->d->p.whole + 0x2d;
+    if (t >= 0x5b) return 0;
     k = 0xc0;
-    if (k < (unsigned short)(D_1F80016A - o->h->p.whole + 0x60)) return 0;
-    return !(k < (unsigned short)(D_1F80016E - o->y.p.whole + 0x60));
+    t = D_1F80016A - o->h->p.whole + 0x60;
+    if (k < t) return 0;
+    t = D_1F80016E - o->y.p.whole + 0x60;
+    return !(k < t);
 }
-
 void func_80129F7C(TObj *o)
 {
     FUN_8001f8e4(o);
