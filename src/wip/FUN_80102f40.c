@@ -3,7 +3,7 @@
    ref to P: global-alloc priority 2*4/9 > type 1*3/5). Left: t read as lhu+lh, game does one lh + `move a0` copy (and hw
    copy in a2); also frame 0x40 comes from orphan (use) pseudos of combine (short vars), keep them. Tried: int temps
    a2 = P->h->p.whole; t = a2; with compares on a2 (gives both copies, swapped regs, frame 48), assignment-in-compare,
-   (int)/(short) casts, h/hw/t types. combine's PARALLEL split (lh + lowpart copy) needs a dest without nonzero_bits. b48: confirmed - t gets lh+move (game shape) when t is live at function start (reg_nonzero_bits stays 0): `__asm__("" : : "r"(t), "r"(hw));` before the switch with `short hw = h->p.whole` vars gives score 18 (only h/t swapped a0/a1), but live-at-start makes t conflict with a0 (incoming o), so the game cannot have done that: look for another way to get the split (t set from a source with full-word nonzero_bits?). */
+   (int)/(short) casts, h/hw/t types. combine's PARALLEL split (lh + lowpart copy) needs a dest without nonzero_bits. b48: confirmed - t gets lh+move (game shape) when t is live at function start (reg_nonzero_bits stays 0): `__asm__("" : : "r"(t), "r"(hw));` before the switch with `short hw = h->p.whole` vars gives score 18 (only h/t swapped a0/a1), but live-at-start makes t conflict with a0 (incoming o), so the game cannot have done that: look for another way to get the split (t set from a source with full-word nonzero_bits?). o32: t as a second parameter (short: still 38; int: 124). */
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
