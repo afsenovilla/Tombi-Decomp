@@ -1,8 +1,8 @@
 // FUNC 80134ee8 636 X001
-/* score 29 (was 85): o reused for list[0] after the sort (o in a2 at entry); subtype read into a temp t for the
-   n choice and copied to sub after list[0] = o (lbu a1 + move s4); D_1F8002E8/anim loaded into block locals declared
-   before o->w98 / e->step (loads early, stores late as in the game). Left: store/load scheduling in both blocks
-   (w1e/b0d vs loads; e-block w1e/animFrame and the sw 3c/24 position) and a 4-byte size difference (nop). */
+// MATCHING 80134ee8 636
+/* o is reused for list[0] after the sort (o in a2 at entry); subtype goes through a temp t (lbu a1 + move s4).
+   The D_1F8002E8/anim loads are block locals declared right after b0d, and w1e is a raw store so the scalar loads
+   cannot be hoisted above it (raw store pins later loads; in-struct stores don't). */
 #include "TOBJ.H"
 extern short D_1F800238;
 extern short *D_8009C948;
@@ -37,50 +37,56 @@ void func_80134EE8(TObj *o)
     o = list[0];
     o->active = 2;
     o->type = 0x13;
-    o->w1e = 1;
+    *(short *)((char *)o + 0x1e) = 1;
     o->b0d = 0;
-    o->step = 1;
-    { int d = D_1F8002E8; void *an = D_8013F134;
-    o->w98 = 2;
-    o->w9a = 2;
-    o->b04 = 0;
-    o->state = 0;
-    o->subtype = sub;
-    o->b0c = 0;
-    o->b6a = 0;
-    o->b68 = 0;
-    o->b69 = 0;
-    o->b6b = 0;
-    o->animFrame = 0;
-    o->box0 = 8;
-    o->box1 = 0x10;
-    o->box2 = 8;
-    o->box3 = 0x10;
-    o->d90 = 0;
-    o->d3c = d;
-    o->anim = an; }
+    {
+        int d = D_1F8002E8;
+        void *an = D_8013F134;
+        o->step = 1;
+        o->w98 = 2;
+        o->w9a = 2;
+        o->b04 = 0;
+        o->state = 0;
+        o->subtype = sub;
+        o->b0c = 0;
+        o->b6a = 0;
+        o->b68 = 0;
+        o->b69 = 0;
+        o->b6b = 0;
+        o->animFrame = 0;
+        o->box0 = 8;
+        o->box1 = 0x10;
+        o->box2 = 8;
+        o->box3 = 0x10;
+        o->d90 = 0;
+        o->d3c = d;
+        o->anim = an;
+    }
     o->d94 = (int)list[1];
     for (i = 1; i < n; i++) {
         e = list[i];
         e->active = 2;
         e->type = 0x13;
-        e->w1e = 1;
+        *(short *)((char *)e + 0x1e) = 1;
         e->b0d = 0;
-        e->animFrame = 0;
-        e->b04 = 0;
-        { int d = D_1F8002E8; void *an = D_8013F1BC;
-        e->step = 1;
-        e->state = 0;
-        e->d3c = d;
-        e->anim = an; }
-        e->b0c = i;
+        {
+            int d = D_1F8002E8;
+            void *an = D_8013F1BC;
+            e->animFrame = 0;
+            e->b04 = 0;
+            e->step = 1;
+            e->state = 0;
+            e->d3c = d;
+            e->anim = an;
+        }
         e->subtype = o->subtype;
+        e->b0c = i;
+        e->b0a = o->b0a;
         e->b6a = 0;
         e->b68 = 0;
         e->b69 = 0;
         e->w98 = 2;
         e->w9a = 2;
-        e->b0a = o->b0a;
         e->a.raw = o->a.raw;
         e->y.raw = o->y.raw;
         e->b.raw = o->b.raw;
