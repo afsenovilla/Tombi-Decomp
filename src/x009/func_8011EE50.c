@@ -1,7 +1,5 @@
 // FUNC 8011ee50 728 X009
-/* score 2: only the state==2 compare differs: game compares with a1 (=2, the constant also
-   used as call arg in the delay slot) where gcc reuses v1 (b04 switch value known to be 2).
-   Tried: if/else instead of switch. */
+// MATCHING 8011ee50 728
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern char D_80077D6C[];
@@ -81,7 +79,7 @@ void func_8011EE50(TObj *o)
                 FUN_8001fe6c(o);
                 o->state++;
                 break;
-            case 2:
+            case 1:
                 if (FUN_8001fec0(o)) {
                     o->state = 0;
                     o->step++;
