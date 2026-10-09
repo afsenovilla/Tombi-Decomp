@@ -1,7 +1,11 @@
 // FUNC 80135164 1372 X001
-/* score 323 (o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
+/* score 309 (o27: D_800A60B2 is player field D_800A6038.w7a, keeps the dy store first; o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
    for (signed char)e->c, dx/ang get s3/s0 in the game (frame 0x28), the pl->h/y/d update order.
-   Tried: int/short temps, casts, shifts. */
+   Tried: int/short temps, casts, shifts.
+   o27: the lb issue is gone (lbu+sll/sra now). Left: game `andi v0; move s0,v0` + dx in s3 (ang still live when
+   dx is copied from v0; ours sched1 puts `a0 = ang` for the 2nd call before `dx = v0`, so dx reuses s0 and
+   the frame is 8 B smaller), and the D_80011DD8 base register in case 1. Tried: block-local a = ang & 0xff
+   (short/int/uchar), nested inline calc(o,e,ang&0xff), short/uchar callee prototypes, local type search. */
 #include "TOBJ.H"
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
 extern TObj D_800A6038;
@@ -35,7 +39,7 @@ static __inline__ void follow(TObj *o, E4 *e)
     ang &= 0xff;
     dx = FUN_8001fddc(ang, e->d);
     dy = FUN_8001fdac(ang, e->d);
-    D_800A60B2 = dy;
+    D_800A6038.w7a = dy;
     o->h->p.whole = D_800A6038.h->p.whole + dx;
     o->y.p.whole = D_800A6038.y.p.whole + dy;
     o->d->p.whole = D_800A6038.d->p.whole;
