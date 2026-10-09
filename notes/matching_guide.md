@@ -38,6 +38,9 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
   pairs, the PAL address of every file-local `D_xxxxxxxx` extern (rename them; `game.h` globals keep their NTSC
   names, build_full resolves them from the retail bytes). Keep only the target function's definition (other definitions
   become prototypes, `inline` helpers stay as `static inline`, drop file-level `__asm__("nop")`).
+  Tools: `tools/tomba_map.py <psx_tomba .c files>` (mapping listing) and `tools/tomba_port.py --batch <listing>`
+  (ports every new unique hit, writes `src/<func>.c` on MATCH); `tools/progress.py` reports the matched library
+  bytes apart ("Psy-Q matching"), they never enter the game-code percentage.
 
 ## Work cycle
 1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.

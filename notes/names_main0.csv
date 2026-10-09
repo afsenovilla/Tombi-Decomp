@@ -343,7 +343,7 @@ address,name,confidence,comment
 80045a50,dispatchAreaActorSpawn,alta,psx_tomba #21 (por bytes)
 80045ae8,dispatchAreaNpcInit,alta,psx_tomba #21 (por bytes)
 80045b28,applyObjectPush,alta,psx_tomba #21 (por bytes)
-80045b8c,callObjectInteraction,alta,psx_tomba #21 (por bytes)
+80045b8c,callObjectInteraction,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80045d0c,dispatchObjectContact,alta,psx_tomba #21 (por bytes)
 8004bb84,dispatchAreaUnlayeredHandler,alta,psx_tomba #21 (por bytes)
 8004c0dc,updateObjectsUnlayered,alta,psx_tomba (por bytes)
@@ -388,22 +388,22 @@ address,name,confidence,comment
 8005d21c,_card_clear,alta,"Psy-Q (psx_tomba, por bytes)"
 8005d274,InitCARD,alta,Psy-Q
 8005d2c8,StartCARD,alta,Psy-Q
-8005d590,DecDCTReset,alta,psx_tomba #21 (por bytes)
-8005d5c8,DecDCTGetEnv,alta,psx_tomba #21 (por bytes)
-8005d654,DecDCTPutEnv,alta,psx_tomba #21 (por bytes)
-8005d6f0,DecDCTBufSize,alta,psx_tomba #21 (por bytes)
-8005d6fc,DecDCTin,alta,psx_tomba #21 (por bytes)
-8005d778,DecDCTout,alta,psx_tomba #21 (por bytes)
-8005d798,DecDCTinSync,alta,psx_tomba #21 (por bytes)
-8005d7d4,DecDCToutSync,alta,psx_tomba #21 (por bytes)
-8005d810,DecDCTinCallback,alta,psx_tomba #21 (por bytes)
-8005d834,DecDCToutCallback,alta,psx_tomba #21 (por bytes)
-8005d858,MDEC_reset,alta,psx_tomba #21 (por bytes)
-8005d954,MDEC_in,alta,psx_tomba #21 (por bytes)
-8005d9e8,MDEC_out,alta,psx_tomba #21 (por bytes)
-8005da78,MDEC_in_sync,alta,psx_tomba #21 (por bytes)
-8005db10,MDEC_out_sync,alta,psx_tomba #21 (por bytes)
-8005dba8,MDEC_status,alta,psx_tomba #21 (por bytes)
+8005d590,DecDCTReset,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d5c8,DecDCTGetEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d654,DecDCTPutEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d6f0,DecDCTBufSize,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d6fc,DecDCTin,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d778,DecDCTout,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d798,DecDCTinSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d7d4,DecDCToutSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d810,DecDCTinCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d834,DecDCToutCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d858,MDEC_reset,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d954,MDEC_in,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005d9e8,MDEC_out,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005da78,MDEC_in_sync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005db10,MDEC_out_sync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8005dba8,MDEC_status,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8005e088,LoadTPage,alta,"Psy-Q (psx_tomba, por bytes)"
 8005e174,LoadClut,alta,"Psy-Q (psx_tomba, por bytes)"
 8005e1dc,LoadClut2,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -452,6 +452,8 @@ address,name,confidence,comment
 8005edc0,SetGraphReverse,alta,"Psy-Q (psx_tomba, por bytes)"
 8005eed4,SetGraphDebug,alta,"Psy-Q (psx_tomba, por bytes)"
 8005ef38,SetGraphQueue,alta,"Psy-Q (psx_tomba, por bytes)"
+8005efe4,GetGraphType,alta,"Psy-Q (psx_tomba, por bytes)"
+8005eff4,GetGraphDebug,alta,"Psy-Q (psx_tomba, por bytes)"
 8005f004,DrawSyncCallback,alta,"Psy-Q (psx_tomba, por bytes)"
 8005f060,SetDispMask,alta,"Psy-Q (psx_tomba, por bytes)"
 8005f0fc,DrawSync,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -484,11 +486,13 @@ address,name,confidence,comment
 800606f8,get_ofs,alta,"Psy-Q (psx_tomba, por bytes)"
 8006073c,get_tw,alta,"Psy-Q (psx_tomba, por bytes)"
 800607c0,get_dx,alta,"Psy-Q (psx_tomba, por bytes)"
+80060870,_status,alta,"Psy-Q (psx_tomba, por bytes)"
 80060888,_otc,alta,"Psy-Q (psx_tomba, por bytes)"
 80060970,_clr,alta,"Psy-Q (psx_tomba, por bytes)"
 80060bcc,_dws,alta,"Psy-Q (psx_tomba, por bytes)"
 80060e08,_drs,alta,"Psy-Q (psx_tomba, por bytes)"
 8006108c,_ctl,alta,"Psy-Q (psx_tomba, por bytes)"
+800610b4,_getctl,alta,"Psy-Q (psx_tomba, por bytes)"
 800610c8,_cwb,alta,"Psy-Q (psx_tomba, por bytes)"
 80061118,_cwc,alta,"Psy-Q (psx_tomba, por bytes)"
 80061164,_param,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -531,20 +535,33 @@ address,name,confidence,comment
 80063f90,SetDQB,alta,"Psy-Q (psx_tomba, por bytes)"
 80063fdc,SetGeomOffset,alta,Psy-Q
 80063ffc,SetGeomScreen,alta,Psy-Q
-80064200,Lzc,alta,psx_tomba #21 (por bytes)
+80064200,Lzc,alta,"Psy-Q (psx_tomba #21, por bytes)"
 800649bc,ratan2,alta,"Psy-Q (psx_tomba, por bytes)"
 80064bdc,StSetRing,alta,"Psy-Q (psx_tomba, por bytes)"
 80064c0c,CdInit,alta,"Psy-Q (psx_tomba, por bytes)"
 80064c9c,def_cbsync,alta,"Psy-Q (psx_tomba, por bytes)"
+80064cc4,def_cbready,alta,"Psy-Q (psx_tomba, por bytes)"
+80064cec,def_cbread,alta,"Psy-Q (psx_tomba, por bytes)"
+80064d24,CdStatus,alta,"Psy-Q (psx_tomba, por bytes)"
+80064d34,CdMode,alta,"Psy-Q (psx_tomba, por bytes)"
+80064d44,CdLastCom,alta,"Psy-Q (psx_tomba, por bytes)"
+80064d54,CdLastPos,alta,"Psy-Q (psx_tomba, por bytes)"
 80064d64,CdReset,alta,"Psy-Q (psx_tomba, por bytes)"
+80064dd0,CdFlush,alta,"Psy-Q (psx_tomba, por bytes)"
+80064df0,CdSetDebug,alta,"Psy-Q (psx_tomba, por bytes)"
 80064e08,CdComstr,alta,"Psy-Q (psx_tomba, por bytes)"
 80064e3c,CdIntstr,alta,"Psy-Q (psx_tomba, por bytes)"
+80064e70,CdSync,alta,"Psy-Q (psx_tomba, por bytes)"
+80064e90,CdReady,alta,"Psy-Q (psx_tomba, por bytes)"
+80064eb0,CdSyncCallback,alta,"Psy-Q (psx_tomba, por bytes)"
+80064ec8,CdReadyCallback,alta,"Psy-Q (psx_tomba, por bytes)"
 80064ee0,CdControl,alta,"Psy-Q (psx_tomba, por bytes)"
 80065018,CdControlF,alta,"Psy-Q (psx_tomba, por bytes)"
 80065144,CdControlB,alta,"Psy-Q (psx_tomba, por bytes)"
 80065288,CdMix,alta,"Psy-Q (psx_tomba, por bytes)"
 800652a8,CdGetSector,alta,"Psy-Q (psx_tomba, por bytes)"
 800652c8,CdDataCallback,alta,"Psy-Q (psx_tomba, por bytes)"
+800652ec,CdDataSync,alta,"Psy-Q (psx_tomba, por bytes)"
 8006530c,CdIntToPos,alta,"Psy-Q (psx_tomba, por bytes)"
 80065410,CdPosToInt,alta,"Psy-Q (psx_tomba, por bytes)"
 80065490,getintr,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -558,13 +575,16 @@ address,name,confidence,comment
 8006662c,CD_init,alta,"Psy-Q (psx_tomba, por bytes)"
 80066818,CD_datasync,alta,"Psy-Q (psx_tomba, por bytes)"
 80066984,CD_getsector,alta,"Psy-Q (psx_tomba, por bytes)"
+80066a84,CD_set_test_parmnum,alta,"Psy-Q (psx_tomba, por bytes)"
 80066a94,callback,alta,"Psy-Q (psx_tomba, por bytes)"
 80066bc8,cb_read,alta,"Psy-Q (psx_tomba, por bytes)"
 80066ddc,cd_read_retry,alta,"Psy-Q (psx_tomba, por bytes)"
 80066fa8,CdReadBreak,alta,"Psy-Q (psx_tomba, por bytes)"
 80066ff8,CdRead,alta,"Psy-Q (psx_tomba, por bytes)"
 800670d8,CdReadSync,alta,"Psy-Q (psx_tomba, por bytes)"
+800671a4,CdReadCallback,alta,"Psy-Q (psx_tomba, por bytes)"
 800671bc,CdRead2,alta,"Psy-Q (psx_tomba, por bytes)"
+80067250,StCdInterrupt2,alta,"Psy-Q (psx_tomba, por bytes)"
 80067270,StClearRing,alta,"Psy-Q (psx_tomba, por bytes)"
 800672d0,StUnSetRing,alta,Psy-Q
 80067328,data_ready_callback,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -574,80 +594,158 @@ address,name,confidence,comment
 80067558,init_ring_status,alta,"Psy-Q (psx_tomba, por bytes)"
 80067594,StGetNext,alta,"Psy-Q (psx_tomba, por bytes)"
 80067658,StSetMask,alta,Psy-Q
-80067678,StCdInterrupt,alta,psx_tomba #21 (por bytes)
+80067678,StCdInterrupt,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80067fe8,mem2mem,alta,"Psy-Q (psx_tomba, por bytes)"
 800681d8,VSync,alta,"Psy-Q (psx_tomba, por bytes)"
 80068320,v_wait,alta,"Psy-Q (psx_tomba, por bytes)"
-800683cc,ResetCallback,alta,psx_tomba #21 (por bytes)
-800683fc,InterruptCallback,alta,psx_tomba #21 (por bytes)
-8006842c,DMACallback,alta,psx_tomba #21 (por bytes)
-8006845c,VSyncCallback,alta,psx_tomba #21 (por bytes)
-80068490,VSyncCallbacks,alta,psx_tomba #21 (por bytes)
-800684c0,StopCallback,alta,psx_tomba #21 (por bytes)
-800684f0,RestartCallback,alta,psx_tomba #21 (por bytes)
-80068520,CheckCallback,alta,psx_tomba #21 (por bytes)
-80068530,GetIntrMask,alta,psx_tomba #21 (por bytes)
-80068548,SetIntrMask,alta,psx_tomba #21 (por bytes)
-80068564,startIntr,alta,psx_tomba #21 (por bytes)
-8006897c,stopIntr,alta,psx_tomba #21 (por bytes)
-80068a28,restartIntr,alta,psx_tomba #21 (por bytes)
-80068ab0,memclr,alta,psx_tomba #21 (por bytes)
-80068c04,trapIntrVSync,alta,psx_tomba #21 (por bytes)
-80068c7c,setIntrVSync,alta,psx_tomba #21 (por bytes)
-80068ca8,VSync_memclr,alta,psx_tomba #21 (por bytes)
+800683cc,ResetCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800683fc,InterruptCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006842c,DMACallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006845c,VSyncCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068490,VSyncCallbacks,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800684c0,StopCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800684f0,RestartCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068520,CheckCallback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068530,GetIntrMask,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068548,SetIntrMask,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068564,startIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006897c,stopIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068a28,restartIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068ab0,memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068c04,trapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068c7c,setIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068ca8,VSync_memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068cd4,startIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
 80068d24,trapIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
 80068ea8,setIntrDMA,alta,"Psy-Q (psx_tomba, por bytes)"
+80068f50,DMA_memclr,alta,"Psy-Q (psx_tomba, por bytes)"
 80068f7c,SetVideoMode,alta,Psy-Q
 80068f94,GetVideoMode,alta,devuelve la variable que escribe SetVideoMode
 80068fc4,PadInit,media,psx_tomba (alineado de direcciones)
-80068fe4,PadInit,alta,psx_tomba #21 (por bytes)
-80069004,PadChkMtap,alta,psx_tomba #21 (por bytes)
+80068fe4,PadInit,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80069004,PadChkMtap,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80069050,StartPAD,media,psx_tomba (alineado de direcciones)
 8006911c,StopPAD,media,psx_tomba (alineado de direcciones)
-80069880,StopPAD,alta,psx_tomba #21 (por bytes)
-8006a170,_padClrIntSio0,alta,psx_tomba #21 (por bytes)
-8006a270,_padSendAtLoadInfo,alta,psx_tomba #21 (por bytes)
+80069880,StopPAD,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006a170,_padClrIntSio0,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006a270,_padSendAtLoadInfo,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006bfa4,_SsInit,media,psx_tomba (alineado de direcciones)
-8006c604,SsSeqOpen,alta,psx_tomba #21 (por bytes)
+8006c1d4,_SsClose,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c350,SsSeqClose,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c374,SsSepClose,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c398,SsEnd,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c45c,_SsInit,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c604,SsSeqOpen,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006d0ac,_SsContNrpn1,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d1e4,_SsContNrpn2,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d320,_SsContRpn1,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d398,_SsContRpn2,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d410,_SsContResetAll,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d7f4,_SsUtResolveADSR,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d850,_SsUtBuildADSR,alta,"Psy-Q (psx_tomba, por bytes)"
+8006e090,_SsSetPitchBend,alta,"Psy-Q (psx_tomba, por bytes)"
+8006e648,_SsSetProgramChange,alta,"Psy-Q (psx_tomba, por bytes)"
+8006e6c0,_SsReadDeltaValue,alta,"Psy-Q (psx_tomba, por bytes)"
+8006e778,_SsInitSoundSeq,alta,"Psy-Q (psx_tomba, por bytes)"
+8006ea90,SsSeqPlay,alta,"Psy-Q (psx_tomba, por bytes)"
+8006eac8,SsSepPlay,alta,"Psy-Q (psx_tomba, por bytes)"
 8006eb00,SsStart,media,psx_tomba (alineado de direcciones)
-8006eef8,SsStart2,alta,psx_tomba #21 (por bytes)
-8006ef18,_SsTrapIntrVSync,alta,psx_tomba #21 (por bytes)
-8006ef58,_SsSeqCalledTbyT_1per2,alta,psx_tomba #21 (por bytes)
-8006efa8,SetRCnt,alta,psx_tomba #21 (por bytes)
-8006f044,GetRCnt,alta,psx_tomba #21 (por bytes)
-8006f07c,StartRCnt,alta,psx_tomba #21 (por bytes)
-8006f0e0,ResetRCnt,alta,psx_tomba #21 (por bytes)
-800712dc,SsUtSetReverbFeedback,alta,psx_tomba #21 (por bytes)
-8007131c,SsUtReverbOff,alta,psx_tomba #21 (por bytes)
-8007133c,SsUtReverbOn,alta,psx_tomba #21 (por bytes)
-80071524,_SsVmDoAllocate,alta,psx_tomba #21 (por bytes)
+8006eb20,Snd_SetPlayMode,alta,"Psy-Q (psx_tomba, por bytes)"
+8006ec20,SsSetMVol,alta,"Psy-Q (psx_tomba, por bytes)"
+8006ec70,_SsStart,alta,"Psy-Q (psx_tomba, por bytes)"
+8006eef8,SsStart2,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006ef18,_SsTrapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006ef58,_SsSeqCalledTbyT_1per2,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006efa8,SetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006f044,GetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006f07c,StartRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006f0e0,ResetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006f118,SsSeqCalledTbyT,alta,"Psy-Q (psx_tomba, por bytes)"
+8006f38c,_SsSndCrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
+8006f66c,_SsSndDecrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
+8006f90c,_SsSndPause,alta,"Psy-Q (psx_tomba, por bytes)"
+8006f9dc,_SsSeqPlay,alta,"Psy-Q (psx_tomba, por bytes)"
+8006ff94,_SsSndNextSep,alta,"Psy-Q (psx_tomba, por bytes)"
+8007009c,_SsSndReplay,alta,"Psy-Q (psx_tomba, por bytes)"
+80070104,_SsSndStop,alta,"Psy-Q (psx_tomba, por bytes)"
+8007026c,SsSeqStop,alta,"Psy-Q (psx_tomba, por bytes)"
+80070294,SsSepStop,alta,"Psy-Q (psx_tomba, por bytes)"
+800702c0,SsSetTableSize,alta,"Psy-Q (psx_tomba, por bytes)"
+800704a0,SsSetTickMode,alta,"Psy-Q (psx_tomba, por bytes)"
+8007060c,_SsSndSetVol,alta,"Psy-Q (psx_tomba, por bytes)"
+80070644,SsSeqSetVol,alta,"Psy-Q (psx_tomba, por bytes)"
+80070674,SsSepSetVol,alta,"Psy-Q (psx_tomba, por bytes)"
+800706ac,SsSeqGetVol,alta,"Psy-Q (psx_tomba, por bytes)"
+800706e0,_SsSndTempo,alta,"Psy-Q (psx_tomba, por bytes)"
+800708c0,SsUtChangePitch,alta,"Psy-Q (psx_tomba, por bytes)"
+80070a00,SsUtGetProgAtr,alta,"Psy-Q (psx_tomba, por bytes)"
+80070b08,SsUtGetVagAtr,alta,"Psy-Q (psx_tomba, por bytes)"
+80070d44,SsUtKeyOnV,alta,"Psy-Q (psx_tomba, por bytes)"
+800710d8,SsUtKeyOffV,alta,"Psy-Q (psx_tomba, por bytes)"
+80071150,SsUtSetReverbDelay,alta,"Psy-Q (psx_tomba, por bytes)"
+80071190,SsUtSetReverbDepth,alta,"Psy-Q (psx_tomba, por bytes)"
+80071228,SsUtSetReverbType,alta,"Psy-Q (psx_tomba, por bytes)"
+800712cc,SsUtGetReverbType,alta,"Psy-Q (psx_tomba, por bytes)"
+800712dc,SsUtSetReverbFeedback,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007131c,SsUtReverbOff,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007133c,SsUtReverbOn,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007135c,SsUtSetVagAtr,alta,"Psy-Q (psx_tomba, por bytes)"
+80071524,_SsVmDoAllocate,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80071738,_SsVmDamperOff,alta,Psy-Q
 80071748,_SsVmDamperOn,alta,Psy-Q
-8007175c,_SsVmFlush,alta,psx_tomba #21 (por bytes)
-800725e4,_SsVmAlloc,alta,psx_tomba #21 (por bytes)
-80072850,note2pitch,alta,psx_tomba #21 (por bytes)
-80072914,note2pitch2,alta,psx_tomba #21 (por bytes)
-80072ff0,_SsVmKeyOnNow,alta,psx_tomba #21 (por bytes)
-800737c4,_SsVmSetSeqVol,alta,psx_tomba #21 (por bytes)
-80073e10,_SsVmSeqKeyOff,alta,psx_tomba #21 (por bytes)
+8007175c,_SsVmFlush,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800725e4,_SsVmAlloc,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80072850,note2pitch,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80072914,note2pitch2,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80072f20,_SsVmKeyOffNow,alta,"Psy-Q (psx_tomba, por bytes)"
+80072ff0,_SsVmKeyOnNow,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800737c4,_SsVmSetSeqVol,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80073e10,_SsVmSeqKeyOff,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800744e4,_SsVmVSetUp,alta,"Psy-Q (psx_tomba, por bytes)"
 800745a8,SsSetAutoKeyOffMode,alta,Psy-Q
-80074f94,_spu_writeByIO,alta,psx_tomba #21 (por bytes)
-80075160,_spu_FiDMA,alta,psx_tomba #21 (por bytes)
-80075230,_spu_r_,alta,psx_tomba #21 (por bytes)
-800752ec,_spu_t,alta,psx_tomba #21 (por bytes)
-8007557c,_spu_write,alta,psx_tomba #21 (por bytes)
-80075604,_spu_read,alta,psx_tomba #21 (por bytes)
-8007566c,_spu_FsetRXX,alta,psx_tomba #21 (por bytes)
-800756b4,_spu_FsetRXXa,alta,psx_tomba #21 (por bytes)
-80075758,_spu_FgetRXXa,alta,psx_tomba #21 (por bytes)
-800757f4,_spu_FsetDelayW,alta,psx_tomba #21 (por bytes)
-80075820,_spu_FsetDelayR,alta,psx_tomba #21 (por bytes)
-8007584c,_spu_FwaitFs,alta,psx_tomba #21 (por bytes)
+800745dc,SsSetReservedVoice,alta,"Psy-Q (psx_tomba, por bytes)"
+8007460c,SsVabClose,alta,"Psy-Q (psx_tomba, por bytes)"
+80074690,SsVabFakeBody,alta,"Psy-Q (psx_tomba, por bytes)"
+80074700,SsVabOpenHead,alta,"Psy-Q (psx_tomba, por bytes)"
+80074730,SsVabOpenHeadSticky,alta,"Psy-Q (psx_tomba, por bytes)"
+80074760,SsVabFakeHead,alta,"Psy-Q (psx_tomba, por bytes)"
+80074790,SsVabOpenHeadWithMode,alta,"Psy-Q (psx_tomba, por bytes)"
+80074b8c,_SpuInit,alta,"Psy-Q (psx_tomba, por bytes)"
+80074c84,SpuStart,alta,"Psy-Q (psx_tomba, por bytes)"
+80074f94,_spu_writeByIO,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075160,_spu_FiDMA,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075230,_spu_r_,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800752ec,_spu_t,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007557c,_spu_write,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075604,_spu_read,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007566c,_spu_FsetRXX,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800756b4,_spu_FsetRXXa,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075758,_spu_FgetRXXa,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800757f4,_spu_FsetDelayW,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075820,_spu_FsetDelayR,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007584c,_spu_FwaitFs,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800758ac,_SpuDataCallback,alta,"Psy-Q (psx_tomba, por bytes)"
 800758d0,SpuQuit,alta,Psy-Q
-80076404,SpuSetReverbModeParam,alta,psx_tomba #21 (por bytes)
-800768fc,_spu_setReverbAttr,alta,psx_tomba #21 (por bytes)
+8007595c,SpuInitMalloc,alta,"Psy-Q (psx_tomba, por bytes)"
+800759b0,SpuMalloc,alta,"Psy-Q (psx_tomba, por bytes)"
+80075c78,_spu_gcSPU,alta,"Psy-Q (psx_tomba, por bytes)"
+80075f80,SpuFree,alta,"Psy-Q (psx_tomba, por bytes)"
+80075ffc,SpuSetNoiseVoice,alta,"Psy-Q (psx_tomba, por bytes)"
+80076020,_SpuSetAnyVoice,alta,"Psy-Q (psx_tomba, por bytes)"
+80076228,SpuSetReverb,alta,"Psy-Q (psx_tomba, por bytes)"
+800762f8,_SpuIsInAllocateArea,alta,"Psy-Q (psx_tomba, por bytes)"
+80076378,_SpuIsInAllocateArea_,alta,"Psy-Q (psx_tomba, por bytes)"
+80076404,SpuSetReverbModeParam,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800768fc,_spu_setReverbAttr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80076e1c,SpuSetReverbDepth,alta,"Psy-Q (psx_tomba, por bytes)"
+80076e94,SpuSetReverbVoice,alta,"Psy-Q (psx_tomba, por bytes)"
+80076eb8,SpuClearReverbWorkArea,alta,"Psy-Q (psx_tomba, por bytes)"
+80077064,SpuSetKey,alta,"Psy-Q (psx_tomba, por bytes)"
+80077260,SpuRead,alta,"Psy-Q (psx_tomba, por bytes)"
+800772c0,SpuSetTransferStartAddr,alta,"Psy-Q (psx_tomba, por bytes)"
+80077318,SpuIsTransferCompleted,alta,"Psy-Q (psx_tomba, por bytes)"
 800773c0,_spu_setInTransfer,alta,Psy-Q
 800773ec,_spu_getInTransfer,alta,Psy-Q
-80077798,SpuRGetAllKeysStatus,alta,psx_tomba #21 (por bytes)
-80077868,SpuGetAllKeysStatus,alta,psx_tomba #21 (por bytes)
+80077404,SpuSetCommonAttr,alta,"Psy-Q (psx_tomba, por bytes)"
+80077798,SpuRGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80077868,SpuGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"

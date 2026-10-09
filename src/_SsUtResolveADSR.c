@@ -1,0 +1,20 @@
+// FUNC 8006d7f4 92 MAIN0
+// MATCHING 8006d7f4 92
+// Portado de psx_tomba (psyq/libsnd/ccadsr.c, _SsUtResolveADSR); licencia MIT del proyecto original.
+#define SKIP_ASM
+#include "common.h"
+#include "libsnd_i.h"
+
+void _SsUtResolveADSR(u16 arg0, u16 arg1, struct Unk* arg2) {
+    arg2->unkA = arg0 & 0x8000;
+    arg2->unkC = arg1 & 0x8000;
+    arg2->unk10 = arg1 & 0x4000;
+    arg2->unkE = arg1 & 0x20;
+    arg2->unk0 = (arg0 >> 8) & 0x7F;
+    arg2->unk2 = (arg0 >> 4) & 0xF;
+    arg2->unk4 = arg0 & 0xF;
+    arg2->unk6 = (arg1 >> 6) & 0x7F;
+    arg2->unk8 = arg1 & 0x1F;
+}
+
+void _SsUtBuildADSR(struct Unk* arg0, s16* arg1, s16* arg2);

@@ -223,13 +223,15 @@ def write_svgs(res, tot, matching, whole=(0, 1), areas=(0, 1)):
         open(N("docs", "map_%s.svg" % key), "w").write("\n".join(m))
 
 
-def covered(items, prog):
-    """Game-code bytes (non-library items) covered by matched ranges of `prog`; a matched range can span several
-    Ghidra/splat functions or include library code, so count the overlap, never the raw marker size."""
+def covered(items, prog, lib=False):
+    """Game-code bytes (non-library items; `lib=True`: library items only) covered by matched ranges of `prog`; a
+    matched range can span several Ghidra/splat functions or include library code, so count the overlap, never the
+    raw marker size. Library matches (Psy-Q sources ported from psx_tomba) are reported apart and never enter the
+    game-code percentage."""
     ranges = src_ranges().get(prog, [])
     tot = 0
     for a, size, kind in items:
-        if kind == "lib": continue
+        if (kind == "lib") != lib: continue
         for s0, n in ranges:
             lo, hi = max(a, s0), min(a + size, s0 + n)
             if hi > lo: tot += hi - lo
@@ -278,6 +280,7 @@ def overlays():
 def summary_lines(res, cov, ovl, tot, matching):
     """The headline figures, shared by docs/PROGRESS.md and README.md. Every function is counted once: the area
     overlays repeat a lot of MAIN0/X000 code (and each other's), so only their first copy enters the total."""
+    libm = getattr(summary_lines, "libm", 0)  # matched library bytes (set by main), reported apart
     md = matching_detail()
     m0, x0 = (next(r for k, r in res.items() if k.startswith(p)) for p in ("MAIN0", "X000"))
     ou, om, onu, onm = (sum(d[k] for d in ovl.values()) for k in ("uniq", "uniq_matched", "n_uniq", "n_uniq_matched"))
@@ -292,7 +295,8 @@ def summary_lines(res, cov, ovl, tot, matching):
         L.append("| %s | %d B | %d B | %.1f %% `%s` |" % (name, g, m, pct(m, g), bar(pct(m, g))))
     L.append("| **Whole game** | **%d B** | **%d B** | **%.1f %%** `%s` |" % (T, M, pct(M, T), bar(pct(M, T))))
     L += ["",
-          "- Bytes of machine code in game functions; Sony's Psy-Q library (%d B) is not counted." % tot["lib"],
+          "- Bytes of machine code in game functions; Sony's Psy-Q library (%d B) is not counted: %d B of it (%.1f %%) also"
+          " matches, from Psy-Q sources ported from psx_tomba, and is tracked apart." % (tot["lib"], libm, pct(libm, tot["lib"])),
           "- Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each",
           "  other; those copies match automatically and are not added again (counting every copy separately gives %.1f %%)." % (
               pct(matching + sum(d["matched"] for d in ovl.values()), tot["game"] + sum(d["game"] for d in ovl.values()))),
@@ -315,6 +319,8 @@ def main():
     tot = {key: sum(r[key] for r in res.values()) for key in
            ("lib", "named", "unnamed", "typed", "game", "n_game", "n_named", "n_unnamed", "n_typed", "n_lib", "excluded", "unnamed_typed")}
     cov = {k.split(".")[0]: covered(r["items"], k.split(".")[0]) for k, r in res.items()}
+    libcov = {k.split(".")[0]: covered(r["items"], k.split(".")[0], lib=True) for k, r in res.items()}
+    summary_lines.libm = sum(libcov.values())
     ovl = overlays()
     matching = sum(cov.values())
     levels = [
@@ -335,13 +341,14 @@ def main():
     w("\"Game code\" = functions inside the code of the analyzed programs, **excluding** those from")
     w("Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra %d bytes (%d functions).\n" % (tot["lib"], tot["n_lib"]))
     w("## Breakdown by program\n")
-    w("| Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library |")
-    w("|---|---|---|---|---|---|")
+    w("| Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |")
+    w("|---|---|---|---|---|---|---|")
     md = matching_detail()
     for k, r in res.items():
-        w("| %s | %d B (%d f) | %.1f %% | %.1f %% | %.1f %% (%d f) | %d B |" % (
+        w("| %s | %d B (%d f) | %.1f %% | %.1f %% | %.1f %% (%d f) | %d B | %d B (%.1f %%) |" % (
             DISPLAY.get(k, k), r["game"], r["n_game"], pct(r["named"], r["game"]), pct(r["typed"], r["game"]),
-            pct(cov[k.split(".")[0]], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"]))
+            pct(cov[k.split(".")[0]], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"],
+            libcov[k.split(".")[0]], pct(libcov[k.split(".")[0]], r["lib"])))
     w("")
     w("## Area overlays (X001..X019)\n")
     w("Raw code blobs loaded at `0x800E8028` like X000 ([notes/overlays.md](../notes/overlays.md)). Boundaries come from")
