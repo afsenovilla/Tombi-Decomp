@@ -1,7 +1,8 @@
 // FUNC 80134ee8 636 X001
-/* score 186: first draft. Differences: game copies o to a2 at entry and keeps sub in s4, n in s3 with
-   extra copies (s2 for the spawn loop, s0/a0 for the link loop); the link loop recomputes &list[i]
-   (sll/addiu sp/addu) every iteration instead of a strength-reduced pointer; p setup store order. */
+/* score 85: `short n` brings the n copies (s3 -> a0/s2, s0 -> a0). Left: game copies o to a2 at entry and loads
+   sub into a1 (copied to s4 later), the n copy for the compare lands in a0 (ours a1); the link loop recomputes
+   &list[i] each iteration (no strength reduction) and the p setup store order differs. Tried nested static
+   inlines for check/spawn/sort/link (no effect), -fno-strength-reduce (worse), local type brute force. */
 #include "TOBJ.H"
 extern short D_1F800238;
 extern short *D_8009C948;
@@ -15,7 +16,8 @@ void func_80134EE8(TObj *o)
 {
     TObj *list[6];
     TObj *p, *e;
-    int n, i;
+    short n;
+    int i;
     unsigned char sub;
 
     if (o->b0c) return;
