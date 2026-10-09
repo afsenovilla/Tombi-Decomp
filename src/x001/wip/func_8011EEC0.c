@@ -1,5 +1,7 @@
-/* score 181: logic believed right (4 loops over 40-byte rope segments); loop strength reduction differs: game keeps k<<16 and recomputes s + k*40 each iteration minus a 40*i giv, uses t-regs for the table base/giv; register naming shifted (t3/t4/t5). Not tuned further. */
-// FUNC 8011eec0 744 X001
+/* score 156: logic believed right (4 loops over 40-byte rope segments). Pointer forms (s + k - i) /
+   (s + k + i) give the game's `s + k*40 -/+ 40*i` giv (181 -> 156). Left: prologue (game keeps q in t1 with two
+   in-place addiu 4 and stores e->c/e->a through a copy a2 = s before e += k), register naming (t-regs shifted),
+   loop 2/4 address computation order. Tried: n/k/i/v types, q increment forms. */// FUNC 8011eec0 744 X001
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -25,7 +27,8 @@ void func_8011EEC0(TObj *o)
     short n, k;
     int i, v;
 
-    q = (int *)o->da0 + 1;
+    q = (int *)o->da0;
+    q++;
     k = o->b6b;
     n = *q++;
     s = (Seg *)q;
@@ -41,19 +44,19 @@ void func_8011EEC0(TObj *o)
         (s + k - i)->c = v + 5;
     }
     for (i = 1; i <= k; i++) {
-        s[k - i].b = s[k - i + 1].a;
-        s[k - i].d = s[k - i + 1].c;
+        (s + k - i)->b = (s + k - i)[1].a;
+        (s + k - i)->d = (s + k - i)[1].c;
         U8(o, 0xa5 + (k - i)) = 1;
     }
     e = &s[k];
     for (i = 1; i < n - k; i++) {
         v = (e->a + e->a * D_8007A570[(i << 6) / (n - k)]) >> 12;
-        s[k + i].a = v;
-        s[k + i].c = v + 5;
+        (s + k + i)->a = v;
+        (s + k + i)->c = v + 5;
     }
     for (i = 1; i < n - (k + 1); i++) {
-        s[k + i].b = s[k + i + 1].a;
-        s[k + i].d = s[k + i + 1].c;
+        (s + k + i)->b = (s + k + i)[1].a;
+        (s + k + i)->d = (s + k + i)[1].c;
         U8(o, 0xa5 + (k + i)) = 2;
     }
     s[n - 1].d = 5;
