@@ -1,8 +1,5 @@
 // FUNC 80118bfc 1304 X004
-/* score 135: logic complete. Differs: the game addresses the flag before the loop as la &D_8009CDA2 (s0)
-   and derives the loop base as s0-0x440 (D_8009C962 and D_8009CDA2 are one struct GS here), count/table spill
-   slots are swapped (sp+0x40/0x48), and the per-case skip branches land one insn apart. Tried: flag via
-   gs/global/pointer local, pointer e vs direct D_8013062C[k] (direct is closer). */
+// MATCHING 80118bfc 1304
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
 typedef struct { short vx, vy, vz, pad; } SVEC;
 typedef struct { unsigned char b0, b1, b2, n; int list[1]; } L;
@@ -26,8 +23,8 @@ extern int func_801188F0(int *);
 void func_80118BFC(L *o, unsigned char *a)
 {
     GS *gs = &D_8009C962;
-    int *tab = (int *)(a + 4);
     unsigned char cnt = a[0];
+    int *tab = (int *)(a + 4);
     short i, k, m, d;
     short x, y, z;
     short n;
@@ -60,43 +57,40 @@ void func_80118BFC(L *o, unsigned char *a)
         m = -0xb4;
         break;
     }
-    if (gs->f) i = 0x21c;
+    if (D_8009C962.f) i = 0x21c;
     func_80118720(m, 0);
     func_80118720(i, 1);
-    if (cnt != 0) {
-    i = 0;
-    n = cnt - 1;
-    do {
+    for (i = 0; i < cnt; i++) {
         if (o->n >= 0x58) return;
         switch (D_8009C962.g) {
         case 0:
-            if (D_8013062C[i].f & 8) goto next;
             k = i;
-            if (D_8009C962.f == 0 && (D_8013062C[i].f & 1)) goto next;
+            if (D_8013062C[i].f & 8) continue;
+            if (D_8009C962.f == 0 && (D_8013062C[i].f & 1)) continue;
             x = D_8013062C[i].x * 0x5a + 0x1c2;
             y = D_1F8000F2;
             z = D_8013062C[i].z * 0x5a + 0x5a;
             break;
         case 1:
-            k = n - i;
-            if (D_8013062C[k].f & 8) goto next;
-            if (D_8009C962.f == 0 && (D_8013062C[k].f & 2)) goto next;
+            k = cnt - 1 - i;
+            if (D_8013062C[k].f & 8) continue;
+            if (D_8009C962.f == 0 && (D_8013062C[k].f & 2)) continue;
             x = D_8013062C[k].x * 0x5a + 0x1c2;
             y = D_1F8000F2;
             z = D_8013062C[k].z * 0x5a + 0x14;
             break;
         case 2:
-            if (D_801308FC[i].f & 8) goto next;
             k = i;
-            if (D_8009C962.f == 0 && (D_801308FC[i].f & 1)) goto next;
+            if (D_801308FC[i].f & 8) continue;
+            if (D_8009C962.f == 0 && (D_801308FC[i].f & 1)) continue;
             x = D_801308FC[i].x * 0x5a + 0x21c;
             y = D_1F8000F2;
             z = D_801308FC[i].z * 0x5a + 0x108;
             break;
         case 3:
-            k = n - i;
-            if (D_801308FC[k].f & 8) goto next;
-            if (D_8009C962.f == 0 && (D_801308FC[k].f & 2)) goto next;
+            k = cnt - 1 - i;
+            if (D_801308FC[k].f & 8) continue;
+            if (D_8009C962.f == 0 && (D_801308FC[k].f & 2)) continue;
             x = D_801308FC[k].x * 0x5a + 0x21c;
             y = D_1F8000F2;
             z = D_801308FC[k].z * 0x5a + 0xdb;
@@ -111,12 +105,9 @@ void func_80118BFC(L *o, unsigned char *a)
             o->list[o->n] = (int)(a + tab[k]);
             o->n++;
         }
-    next:
-        i++;
-    } while (i < cnt);
     }
     } else {
-        o->n = 1;
         o->list[0] = (int)(a + *(int *)(a + 4));
+        o->n = 1;
     }
 }
