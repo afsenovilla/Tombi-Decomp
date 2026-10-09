@@ -59,17 +59,17 @@
     "X001": {
       "game": 330276,
       "n": 603,
-      "matched": 308260,
-      "n_matched": 576,
+      "matched": 308896,
+      "n_matched": 577,
       "piece": 0,
       "x000": 1100,
       "dup": 0,
-      "new": 20916,
-      "n_new": 25,
+      "new": 20280,
+      "n_new": 24,
       "uniq": 153320,
-      "uniq_matched": 132404,
+      "uniq_matched": 133040,
       "n_uniq": 284,
-      "n_uniq_matched": 259
+      "n_uniq_matched": 260
     },
     "X002": {
       "game": 200656,
