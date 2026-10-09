@@ -1,21 +1,17 @@
 // FUNC 8011eb08 840 X014
-/* score 217 (csv size 816 + the epilogue piece 8011EE38): logic and control flow match; the box table reads
-   (u8 *)d90 + 4*i are folded by CSE into constant offsets (lbu 0x2c..0x2f(base)) while the game keeps the
-   pointer and increments it (addiu b,0x2c; lbu 0(b); addiu b,1 ...). Tried macro/inline/int/index forms and
-   function-scope pointer; a non-constant index does keep the increments. */
+// MATCHING 8011eb08 840
+/* csv size 816 + the epilogue piece 8011EE38. Box pointer assigned in two statements keeps the lbu/addiu
+   increments; D_800A6038 is the player TObj. Case 5 reads q before it is set (s1 garbage), as in the game. */
 #include "TOBJ.H"
 
-extern unsigned char D_800A6038[];
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_800A6066;
-extern Fix16 *D_800A6078;
+extern TObj D_800A6038;
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8004258c(void *, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
-#define setBox(o, i) { unsigned char *b = (unsigned char *)(o)->d90 + (i) * 4; \
+#define setBox(o, i) { unsigned char *b = (unsigned char *)(o)->d90; b += (i) * 4; \
     (o)->box0 = *b++; (o)->box1 = *b++; (o)->box2 = b[0]; (o)->box3 = b[1]; (o)->wac = (i); }
 
 void func_8011EB08(TObj *o)
@@ -61,13 +57,13 @@ void func_8011EB08(TObj *o)
         setBox(o, 14);
         o->anim = ANIMS(o)[14];
         FUN_8001fe6c(o);
-        q = D_800A6038;
+        q = (unsigned char *)&D_800A6038;
         o->state++;
         *q = 2;
-        D_800A603C = 2;
-        D_800A603D = 0;
-        D_800A603E = 0;
-        D_800A6066 = o->h->p.whole > D_800A6078->p.whole;
+        D_800A6038.animFrame = o->h->p.whole > D_800A6038.h->p.whole;
+        D_800A6038.b04 = 2;
+        D_800A6038.step = 0;
+        D_800A6038.state = 0;
         FUN_8004258c(q, 1);
         break;
     case 2:
