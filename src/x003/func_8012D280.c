@@ -1,5 +1,5 @@
 // FUNC 8012d280 664 X003
-/* score 2: only `li a0,6` / `li v0,2` swapped before FUN_8002dcc8 in step 1 state 0 (sched1 orders the D_8009CF03 = 2 constant first); tried: store in arg comma exprs, volatile store, block-local k=6, do{}while(0) split, unprototyped/short callee, multi-set var for 2, statement permutations */
+// MATCHING 8012d280 664
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern unsigned char D_8009CE51;
@@ -68,7 +68,8 @@ void func_8012D280(TObj *o)
                 ObjSetFacingToPlayer(o);
                 o->wac = 5;
                 o->state++;
-                SET_ANIM(o, D_801399BC);
+                do {} while (0); /* empty loop: keeps sp+16 out of an s-reg; no scheduling barrier on the D_8009CF03 store */
+                o->anim = D_801399BC; AnimLoadDuration(o);
                 D_8009CF03 = 2;
                 o->d90 = FUN_8002dcc8(6, 4, &v);
                 break;
