@@ -1,5 +1,5 @@
-/* score 12: only regs: game keeps the 0/1 result r in a0 and dy in a1 (ours swapped). Tried int/short/char r, int/ushort dy, all declaration orders, boolean inline (early return 0: worse), reusing t/f for dy or r. */
 // FUNC 80126464 548 X004
+// MATCHING 80126464 548
 #include "TOBJ.H"
 
 extern void *D_801345BC[], *D_801345D0[];
@@ -41,8 +41,7 @@ void func_80126464(TObj *o)
             }
         }
         if (--o->timer) break;
-        r = 0;
-        if (o->d->p.whole == D_800A607C->p.whole) {
+        if (o->d->p.whole != D_800A607C->p.whole) r = 0; else {
             f = 0;
             if (((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 0xc)
                 || ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6))
