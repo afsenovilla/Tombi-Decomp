@@ -1,6 +1,6 @@
 // FUNC 8012338c 1940 X003
+// MATCHING 8012338c 1940
 /* Real size 1940 B: includes the csv piece func_801237E4 (828 B), the tail of this function. */
-/* score ~6 (word diffs) for the whole 1940 B (csv pieces func_8012338C + func_801237E4): case 0 loads o->state after the velV store (game: before), and in case 2 the game schedules li a0,1 (b9c/b5 constant) before li v0,3. Tried: statement-order hill-climbing in both blocks, chained stores, o->state = o->state + 1. */
 #include "TOBJ.H"
 
 typedef struct { unsigned char b4, b5; unsigned short b6; short b8; } Q;
@@ -54,14 +54,14 @@ void func_8012338C(TObj *o)
     switch (o->state) {
     case 0:
         FUN_8001e4f0(0xf);
+        o->b69 = 0;
+        o->animFrame = 1 - o->w7a;
+        o->state++;
+        o->d8c = 0;
         o->velV = -0x400;
         o->movetab = D_80077D0C;
         o->b9c = 1;
         o->wac = 0x21;
-        o->b69 = 0;
-        o->d8c = 0;
-        o->animFrame = 1 - o->w7a;
-        o->state = o->state + 1;
         SETANIM(o, D_8013877C);
     case 1:
         MOVE(o, 0x40);
@@ -74,6 +74,8 @@ void func_8012338C(TObj *o)
     case 2:
         MOVE(o, 0x40);
         if (func_801206F0(o)) {
+            unsigned char one;
+            one = 1;
             if (o->movetab == 0) {
                 o->d8c = q->b6;
                 o->state = 4;
@@ -83,12 +85,12 @@ void func_8012338C(TObj *o)
                 FUN_8002b920(o);
             } else {
                 o->active = 3;
-                o->b9c = 1;
+                o->b9c = one;
                 o->velV = -0x280;
                 o->d8c = 0;
                 o->movetab = D_80077CF4;
                 o->state++;
-                q->b5 = 1;
+                q->b5 = one;
                 o->b69 = 0;
                 o->wac = 0x1a;
                 SETANIM(o, D_80138760);
