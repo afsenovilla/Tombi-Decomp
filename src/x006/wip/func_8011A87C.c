@@ -1,7 +1,7 @@
-/* score 305: draft. The game reloads lui/addiu D_1F800000 at every use; with // FLAGS -fno-expensive-optimizations that comes out
+// FUNC 8011a87c 1644 X006
+/* score 305: draft. The game reloads lui/addiu D_1F800000 at every use; with a FLAGS line adding -fno-expensive-optimizations that comes out
    and the code is structurally close (score 561 only because o lands in s0 instead of s1). Also D_8009C962 is re-read in case 1/k=1,
    RotMatrixY takes (unsigned short)p->wb4, and the k=0 step switch tests case 1 first. */
-// FUNC 8011a87c 1644 X006
 #include "TOBJ.H"
 
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
