@@ -1,7 +1,9 @@
-/* score 156: logic believed right (4 loops over 40-byte rope segments). Pointer forms (s + k - i) /
-   (s + k + i) give the game's `s + k*40 -/+ 40*i` giv (181 -> 156). Left: prologue (game keeps q in t1 with two
-   in-place addiu 4 and stores e->c/e->a through a copy a2 = s before e += k), register naming (t-regs shifted),
-   loop 2/4 address computation order. Tried: n/k/i/v types, q increment forms. */// FUNC 8011eec0 744 X001
+// FUNC 8011eec0 744 X001
+/* score 121 (o32): prologue fixed (s itself advanced in place), loops 2/4 via e = s + k -/+ i and a byte pointer
+   b = (u8 *)o + 0xa5; b += k -/+ i (game form). Left: loop-4 bound: game computes k + 1 then n - (k + 1) (pre-test
+   from the raw b6b byte t5 + 1), but fold turns n - (k + 1) into (n - 1) - k; an `int one = 1` variable gives the
+   game shape (83) but takes t8 and i = 1 reuses it; ({k + 1;}) / inline inc(k) give it too (113) but lose the 8-byte
+   frame. Also e/i registers swapped (a3/a2) and last block s + n - 1 folded into offsets. */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -27,11 +29,11 @@ void func_8011EEC0(TObj *o)
     short n, k;
     int i, v;
 
-    q = (int *)o->da0;
-    q++;
+    s = (Seg *)o->da0;
     k = o->b6b;
-    n = *q++;
-    s = (Seg *)q;
+    s = (Seg *)((int *)s + 1);
+    n = *(int *)s;
+    s = (Seg *)((int *)s + 1);
     if (k == 0) return;
     if (k == n - 1) return;
     e = s;
@@ -44,9 +46,13 @@ void func_8011EEC0(TObj *o)
         (s + k - i)->c = v + 5;
     }
     for (i = 1; i <= k; i++) {
-        (s + k - i)->b = (s + k - i)[1].a;
-        (s + k - i)->d = (s + k - i)[1].c;
-        U8(o, 0xa5 + (k - i)) = 1;
+        unsigned char *b;
+        e = s + k - i;
+        b = (unsigned char *)o + 0xa5;
+        b += k - i;
+        e->b = e[1].a;
+        e->d = e[1].c;
+        *b = 1;
     }
     e = &s[k];
     for (i = 1; i < n - k; i++) {
@@ -54,12 +60,17 @@ void func_8011EEC0(TObj *o)
         (s + k + i)->a = v;
         (s + k + i)->c = v + 5;
     }
-    for (i = 1; i < n - (k + 1); i++) {
-        (s + k + i)->b = (s + k + i)[1].a;
-        (s + k + i)->d = (s + k + i)[1].c;
-        U8(o, 0xa5 + (k + i)) = 2;
+    for (i = 1; i < n - k - 1; i++) {
+        unsigned char *b;
+        e = s + k + i;
+        b = (unsigned char *)o + 0xa5;
+        b += k + i;
+        e->b = e[1].a;
+        e->d = e[1].c;
+        *b = 2;
     }
-    s[n - 1].d = 5;
-    s[n - 1].b = 0;
+    e = s + n - 1;
+    e->d = 5;
+    e->b = 0;
     U8(o, 0xa4 + n) = 2;
 }
