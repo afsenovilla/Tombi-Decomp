@@ -1,5 +1,5 @@
 // FUNC 8012d518 340 X003
-/* score 7: final 'if (slt) return 1; return 0;' collapses (game keeps bnez/li 1/move 0); first compare load order; tried int/short r, inline past(), goto forms */
+// MATCHING 8012d518 340
 #include "TOBJ.H"
 
 extern short func_800408D8(TObj *, short, short);
@@ -20,8 +20,6 @@ static __inline__ int land(TObj *o)
 
 int func_8012D518(TObj *o)
 {
-    short r;
-
     switch (o->velX & 7) {
     case 1:
     case 3:
@@ -33,12 +31,11 @@ int func_8012D518(TObj *o)
         break;
     }
     if (o->animFrame & 1) {
-        r = o->wb6 > o->a.p.whole;
+        if (o->a.p.whole < o->wb6) return 1;
     } else if (o->y.p.whole < -0x46a) {
-        r = o->wb8 - 0x14 < o->a.p.whole;
+        if (o->wb8 - 0x14 < o->a.p.whole) return 1;
     } else {
-        r = o->a.p.whole > o->wb8;
+        if (o->a.p.whole > o->wb8) return 1;
     }
-    if (r) return 1;
     return 0;
 }
