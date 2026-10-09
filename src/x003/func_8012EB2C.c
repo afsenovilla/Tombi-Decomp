@@ -1,7 +1,5 @@
 // FUNC 8012eb2c 1040 X003
-/* score 4: whole function incl. csv piece 8012ED60 (jump-table cases). Only case 0 differs:
-   game loads state before w7a (lbu v1 / lhu a0) and computes state+1 before 1-w7a. Tried: full
-   permutation of the case 0 statements, temps, ++/+=/+1 forms. */
+// MATCHING 8012eb2c 1040
 #include "TOBJ.H"
 extern short D_8007A3F0[];
 extern char D_80077CE8[];
@@ -38,10 +36,10 @@ void func_8012EB2C(TObj *o)
         o->velV = -0x400;
         o->movetab = D_80077CE8;
         o->b9c = 1;
-        o->wac = 7;
         o->d8c = 0;
+        o->wac = 7;
         o->animFrame = 1 - o->w7a;
-        o->state = o->state + 1;
+        o->state++;
         o->anim = D_8013A6B4[0];
         FUN_8001fe6c(o);
         break;
