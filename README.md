@@ -13,19 +13,19 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Progress
 
 <!-- progress:start -->
-**Whole game: 91.0 % of the game's code matches byte for byte** (1158104 of 1272064 bytes).
+**Whole game: 91.4 % of the game's code matches byte for byte** (1173348 of 1283364 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 228328 B | 198220 B | 86.8 % `[#####################...]` |
+| MAIN0.EXE: engine, shared by every area | 239628 B | 210904 B | 88.0 % `[#####################...]` |
 | X000.BIN: AREA00 + object code reused by all areas | 297956 B | 294564 B | 98.9 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 745780 B | 665320 B | 89.2 % `[#####################...]` |
-| **Whole game** | **1272064 B** | **1158104 B** | **91.0 %** `[######################..]` |
+| X001..X019.BIN: code specific to the other areas | 745780 B | 667880 B | 89.6 % `[#####################...]` |
+| **Whole game** | **1283364 B** | **1173348 B** | **91.4 %** `[######################..]` |
 
-- Bytes of machine code in game functions; Sony's Psy-Q library (98992 B) is not counted.
+- Bytes of machine code in game functions; Sony's Psy-Q library (87692 B) is not counted.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 96.8 %).
-- Also tracked for MAIN0 + X000: 6.5 % of the code named by us, 75.9 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 96.9 %).
+- Also tracked for MAIN0 + X000: 11.5 % of the code named by us, 74.7 % typed with the TObj structure.
 <!-- progress:end -->
 
 ![Progress](docs/progress.svg)
