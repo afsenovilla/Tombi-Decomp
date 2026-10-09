@@ -4,7 +4,11 @@
    `sll s6,s1,1` (k*2 not folded, no sign extension); ours folds k = 0x14 into li 0x28 (combine knows k's last value:
    no CODE_LABEL between k = 0x14 and the loop). A label (static &&lbl) keeps k but leaves sll 16 / sra 15 because the
    scan and sort sets of k kill its sign-bit info; a separate single-set var for 0x14 + label gives the right
-   `sll x,y,1` but then k (scan/sort) leaves s1. Tried RHS forms k<<1, k+k, casts; register asm (worse). */#include "TOBJ.H"
+   `sll x,y,1` but then k (scan/sort) leaves s1. Tried RHS forms k<<1, k+k, casts; register asm (worse).
+   o39: dumps show it is cse2 (rerun after loop) folding the hoisted `sign_extend(k) << 1` (same extended bb,
+   conditional jumps do not end it); -fno-rerun-cse-after-loop/-fno-cse-* flags, `k = i + 0x14` (paradoxical subreg
+   set), dead-zero sources, folded `if (i != 0) goto L` labels (cse1 deletes jump AND label), separate int/short lim
+   at 4 positions x 3 compare forms: all 2 or worse. Needs a real label between k = 0x14 and the loop pre-header. */#include "TOBJ.H"
 typedef struct P { short x, y; } P;
 extern short DAT_1f80019e;
 extern unsigned short DAT_1f80019eu;
