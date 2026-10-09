@@ -1,9 +1,9 @@
-/* score 17 (was 40): case 0 only. Statement order b9c, movetab, state++, d88, d84, anim, wac, d8c + D_8013950C as [0] array gives the game lbu-state-first start and the table la in v1 after sb state, but now sb state/lw anim sit before sh wac. Game order after sh wac: lh wac; sw d84/d88/d8c; addiu; sll; sb state; la table; lw anim; addu; sw anim. Natural order with scalar anim placed 2nd gives that start too (score 22) but hoists la table/lw anim above the d84 stores. Tried b= forms (array/cast/row pointer), constrained hill-climb and random order search. */
 // FUNC 80126f38 788 X003
+// MATCHING 80126f38 788
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
-extern void *D_8013950C[];
+extern void *D_80139510;
 extern unsigned char D_80135CB0[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -25,17 +25,17 @@ void func_80126F38(TObj *o)
     case 0:
         o->b9c = 1;
         o->movetab = D_80077D3C;
-        o->state++;
-        o->d88 = 0;
-        o->d84 = 0;
-        o->anim = D_8013950C[0];
         o->wac = 4;
+        o->d84 = 0;
+        o->d88 = 0;
         o->d8c = 0;
+        o->state++;
+        o->anim = D_80139510;
         b = &D_80135CB0[o->wac * 4];
         o->box0 = *b++;
         o->box1 = *b++;
-        o->box2 = *b;
-        o->box3 = b[1];
+        o->box2 = *b++;
+        o->box3 = *b++;
         AnimLoadDuration(o);
     case 1:
         if (o->visible && ((D_1F8001F8 + D_1F800198) & 0x1f) == 0) playSFX(0x76);
