@@ -1,5 +1,5 @@
 // FUNC 8011bb0c 1228 X009
-/* score 6: only case 2 differs: game compares D_8009D2B0 (v1) against the dispatcher's constant-2 register (v0); here cse canonicalizes to the switch selector (v1) so D lands in v0. Tried selector casts/locals, compare forms, temps, -fno-cse-follow-jumps (reloads li 2). The case 1 sin add matches with the multi-block int i as temp (no do-while debt needed). */
+// MATCHING 8011bb0c 1228
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P3;
 extern TObj D_800A6038;
@@ -141,7 +141,7 @@ void func_8011BB0C(TObj *o)
         }
         break;
     case 2:
-        if (D_8009D2B0 != 2) {
+        if (D_8009D2B0 != 3) {
             if (D_800A604A > 0x17e) D_800A604A = 0x17e;
         }
         break;
