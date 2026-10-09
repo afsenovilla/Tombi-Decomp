@@ -1,8 +1,8 @@
 // FUNC 8011afb4 644 X006
-/* score 25 (ncheck now; old comment said 12 under older scoring, that version scores 35): only case 0's order differs.
-   Game: w74, w78 stores early, then loads D_1F80031C twice (first copy used for ->d4); ours delays the w78 store into a load
-   delay slot and uses the second load for ->d4. Tried two extern names, single `H *volatile` extern (this), d4-first operand
-   order, k temp, hill-climb of all case-0 statements. */
+/* score 13 (o28): D_1F80031C as a plain array read twice (`(int)D[0] + D[0]->d4`, no second name) gives the game's two
+   loads; w76 = 0 after the dc8 statement fixes their order, but then the w76 store is scheduled after sw da8 instead of
+   between li 0x16 and sb b0a. w76 first gives the store right but swaps the D loads (16). Tried all w76/dc8 positions,
+   raw-offset w76, k/h temps, both sum orders, hill-climb of case 0. */
 typedef struct L { char p[0x30]; int d30; char q[0x94 - 0x34]; struct L *next; } L;
 typedef struct { char p[4]; int d4; } H;
 typedef struct {
@@ -23,7 +23,7 @@ typedef struct {
     int dc4, dc8;
     short wcc;
 } O;
-extern H *volatile D_1F80031C;
+extern H *D_1F80031C[];
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
 extern void func_80027A30(int, int, int);
@@ -36,12 +36,12 @@ int func_8011AFB4(O *o)
 
     switch (o->substep) {
     case 0:
-        o->w76 = 0;
         o->w74 = 0x300;
         o->w78 = -0x48;
         o->b0a = 0x16;
         o->substep++;
-        o->dc8 = (int)D_1F80031C + D_1F80031C->d4;
+        o->dc8 = (int)D_1F80031C[0] + D_1F80031C[0]->d4;
+        o->w76 = 0;
         o->dc4 = (int)D_800E3E28;
         o->da8 = (int)D_800E3E28;
         FUN_80025aa8(o->da0, o->dc4);
