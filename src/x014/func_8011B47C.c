@@ -1,7 +1,5 @@
-/* score 40: only case 1 differs. Game: lhu timer, lhu y, +1/+8, sh y, sh timer, then lw D_8009D2E8 (v0),
-   lh box2 (a0) before lh y (v0) with move copies a1/a0, flag in a2 set in the beqz delay slot. Tried raw S16 stores,
-   [0] global, block-local p, short/int flag, Clamp() inline returning 0/1, statement orders. Cases 0/2/3/4 match. */
 // FUNC 8011b47c 948 X014
+// MATCHING 8011b47c 948
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009D2E8;
@@ -19,28 +17,26 @@ extern void SfxPlay2(int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_80104cd8(TObj *);
 
-static __inline__ short Clamp(TObj *o)
-{
-    TObj *p = D_8009D2E8;
-    if (p->y.p.whole < o->y.p.whole + p->box2) {
-        o->y.p.whole = p->y.p.whole - p->box2;
-        return 1;
-    }
-    return 0;
-}
-
 void func_8011B47C(TObj *o)
 {
     TObj *q;
     volatile unsigned short *k;
     short f;
-    short y, qy, b;
+    short y;
 
     switch (o->state) {
     case 1:
-        o->y.p.whole += 8;
         o->timer++;
-        f = Clamp(o);
+        o->y.p.whole += 8;
+        y = o->y.p.whole;
+        f = 0;
+        {
+            TObj *p = D_8009D2E8;
+            if (y + p->box2 > p->y.p.whole) {
+                o->y.p.whole = p->y.p.whole - p->box2;
+                f = 1;
+            }
+        }
         if (o->velX < 0) {
             o->h->p.whole -= 8;
             if (o->h->p.whole <= D_8009D2E8->h->p.whole) {
