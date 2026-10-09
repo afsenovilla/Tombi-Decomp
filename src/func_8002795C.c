@@ -1,5 +1,5 @@
 // FUNC 8002795c 792 MAIN0
-// wip r8: score 8. Only diff: game emits flag=0 (move a2,zero) first after the return check and lui 0x34 fills the bgez delay slot; ours schedules flag=0 into the slot. Tried decl/stmt permutations, types, -fno-schedule-insns. w5: outer check + inline body(o,g) gives 28 (move a1,a0 in beqz slot matches) but flag=0 still lands in the bgez slot. b13: also tried statement permutations of g/flag/k/v init, flag types x test forms, flag++ and flag=0 as an inline param (all 8 or worse). b19: -da dump shows sched2 already puts flag=0 first; it is reorg (fill_simple backward scan) that pulls it into the bgez slot; the game's slot comes from fill_eager taking the fallthrough (bgez predicted not-taken). An asm barrier stops the backward scan but eager then fills from the target (andi); do-while(0)/while-break wrappers 192. b33: a real label after flag=0 (kept via static &&lab) stops the backward scan but eager still fills from the target (andi): game slot must come from a not-taken prediction for bgez (mostly_true_jump says GE 0 = taken), so the branch rtl/condition likely differs. b46: score is 10 now (same diff, also with matchcheck); for/while(1)/do-while(0) wrappers around the v test (return block last, to get LABEL_OUTSIDE_LOOP_P = predicted not-taken) all give 192 (return block moved out of line, flag=0 still in the slot). b53: v-test spellings (<=-1, >>31, &0x80000000, unsigned >=0x80000000) all canonicalize to the same bgez (10); flag=0 RTL is movqi a2,0 (eligible), so the game's backward scan must have been blocked by something else.
+// MATCHING 8002795c 792
 typedef struct O { char p0[0x18]; int b; char p1[0x30-0x1c]; short h30; short h32; char p2[0x3d-0x34];
   unsigned char b3d; unsigned char b3e; char p3[0x44-0x3f]; unsigned short h44; } O;
 typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c; char p2; unsigned char f9e;
@@ -17,17 +17,19 @@ void func_8002795C(O *o)
     unsigned char flag;
     int v;
     int k;
+    int m;   /* 0x340000 as an early local: sched2 leaves its lui last, reorg puts it in the bgez slot instead of flag=0 */
 
     g = &DAT_800a6038;
     if (DAT_8009d2b0 >= 3)
         return;
     flag = 0;
     k = 0x400000;
+    m = 0x340000;
     v = DAT_800a604c - 0x800000;
     v -= D_1F8000F0;
     v += k;
     if (v < 0) {
-        v += 0x340000;
+        v += m;
         if (v >= 0) {
             o->b = 0;
             o->b3d = 1;
