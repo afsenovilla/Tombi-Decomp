@@ -1,9 +1,7 @@
 // FUNC 80122bb4 916 X010
-/* score 20: whole function (covers csv pieces 80122C10, 80122CBC, 80122F14). Only case 3 differs: the game keeps
-   subtype in a0 and stores D_800A6066 = a0 - b6b after `bne a0, 1`; gcc propagates t == 1 and emits 1 - b6b (u8/short
-   t give an extra andi/move instead). Tried: switch with one case, compare on o->subtype, scalar D_800A603E/D_800A6066
-   externs, assignment in the condition. */
-#include "TOBJ.H"
+// MATCHING 80122bb4 916
+/* Whole function (covers csv pieces 80122C10, 80122CBC, 80122F14). Case 3 compares (unsigned char)t so CSE does
+   not propagate t == 1 into the D_800A6038.animFrame subtraction (game keeps subtype in a0). */#include "TOBJ.H"
 
 extern TObj D_800A6038;
 extern unsigned char D_8009C970;
@@ -72,7 +70,7 @@ void func_80122BB4(TObj *o)
             break;
         }
         t = o->subtype;
-        if (t == 1) {
+        if ((unsigned char)t == 1) {
             D_800A6038.state++;
             D_800A6038.animFrame = t - o->b6b;
         }
