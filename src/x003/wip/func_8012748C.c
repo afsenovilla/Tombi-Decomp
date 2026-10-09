@@ -1,4 +1,4 @@
-/* score 12: Ground2 d8c +-1 result lands in v1 (game v0, same non-inverted beqz;nop;j shape); every variant giving v0 (w temp, store per arm, ?:, goto, nested inline) makes reorg invert the branch (bnez + -1 in delay, 168). Fixed: case 4 double state store = `o->state++; o->b9c = 1; o->state = 1;` (flow keeps a store overwritten only after another store; sched reorders). */
+/* score 12: Ground2 d8c +-1 result lands in v1 (game v0, same non-inverted beqz;nop;j shape); every variant giving v0 (w temp, store per arm, ?:, goto, nested inline) makes reorg invert the branch (bnez + -1 in delay, 168). Fixed: case 4 double state store = `o->state++; o->b9c = 1; o->state = 1;` (flow keeps a store overwritten only after another store; sched reorders). o35: with a distinct w (v0) jump2 output already equals the game's pre-reorg RTL; the -1 is put in the beqz slot by fill_eager (fallthrough thread), so the game's reorg must see v0 live at the +1 label; also tried goto/switch/3-way/per-arm return/short,uchar,uint w/inline returning via var: all 168+ or v1. */
 // FUNC 8012748c 2236 X003
 #include "TOBJ.H"
 
