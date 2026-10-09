@@ -1,6 +1,8 @@
 // FUNC 8012a794 976 X001
 /* score 6: only the movement angle: game keeps d8c in a2 and the angle in a1 (move a1,a2 / addiu a1,a2,0x80);
-   here both share one register. Tried if/else, ternary, inline helpers taking d or the angle, int/short types. */
+   here both share one register. Tried if/else, ternary, inline helpers taking d or the angle, int/short types.
+   Cause (cse dump): `a = d; if (!f) a = d + 0x80;` -> cse rewrites d+0x80 as a+0x80 because a lives longer than d
+   (make_regs_eqv); `a = d + 0x80; if (f) a = d;` with short d keeps two regs but in the wrong order. */
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } X;
 
