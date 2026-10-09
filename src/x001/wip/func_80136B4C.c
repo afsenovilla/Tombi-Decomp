@@ -1,9 +1,21 @@
 // FUNC 80136b4c 1744 X001
-/* score ~360: structure complete; differences are scheduling of the player-struct (D_800A6038) field loads in case 3 (game uses symbol+offset per access, gcc CSEs the base), (signed char) of r->c loaded with lbu+sll/sra in game, and store order in the four "grab" blocks. Tried separate field externs (worse), hill-climbs. */
+/* score 242: structure complete. o26: case 3 rewritten in the style of the matched X009 func_8011B01C (separate
+   player-field externs D_800A6039/6066/605C/6078/604E/607C/60C4/6047/609C, arrays as [0], angle as
+   `u = ...; t = u; t &= 0xff;` per branch): 361 -> 242. Left: the game's angle tail is `andi v0; move s0,v0` (t and
+   a in different regs; int a ties them -> one instruction short, short a adds sll/sra), the case 3 head order
+   (D_800A6039 load first), store order in the four "grab" blocks and case 5. */
 #include "TOBJ.H"
 
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } R4;
 extern TObj D_800A6038;
+extern unsigned char D_800A6039;
+extern unsigned short D_800A6066;
+extern unsigned short *D_800A605C;
+extern int D_800A60C4[];
+extern Fix16 *D_800A6078[], *D_800A607C[];
+extern unsigned short D_800A604E[];
+extern unsigned char D_800A6047[];
+extern int D_800A609C[];
 extern R4 D_80011E04[];
 extern signed char D_80011EB4[];
 extern void *D_8013E568[];
@@ -22,8 +34,9 @@ extern void FUN_80020490(TObj *);
 void func_80136B4C(TObj *o)
 {
     R4 *r;
-    int ang;
-    int dx, dy;
+    short a, dx, dy;
+    unsigned short u;
+    unsigned int t;
 
     switch (o->step) {
     case 0:
@@ -40,29 +53,31 @@ void func_80136B4C(TObj *o)
     case 3:
         D_8009CEAB = 3;
         o->active = 2;
-        o->visible = D_800A6038.visible;
+        o->visible = D_800A6039;
         o->category |= 0x80;
         *(signed char *)&o->b0f = -7;
-        o->animFrame = D_800A6038.animFrame & 1;
-        r = &D_80011E04[D_80011EB4[*(unsigned short *)D_800A6038.anim]];
+        o->animFrame = D_800A6066 & 1;
+        r = &D_80011E04[D_80011EB4[*D_800A605C]];
         o->anim = D_8013E568[r->a];
         if (r->a == 6) {
             o->animFrame ^= 1;
         }
         if (o->animFrame & 1) {
-            ang = D_800A6038.d8c + 0x80 - (signed char)r->c;
+            u = D_800A60C4[0] + 0x80 - (signed char)r->c;
+            t = u; t &= 0xff;
         } else {
-            ang = (signed char)r->c + D_800A6038.d8c;
+            u = (signed char)r->c + D_800A60C4[0];
+            t = u; t &= 0xff;
         }
-        ang &= 0xff;
-        dx = MulCos(ang, r->d);
-        dy = MulNegSinScaled(ang, r->d);
-        o->h->p.whole = D_800A6038.h->p.whole + dx;
-        o->y.p.whole = D_800A6038.y.p.whole + dy;
-        o->d->p.whole = D_800A6038.d->p.whole;
-        o->d8c = D_800A6038.d8c;
-        o->b0f = D_800A6038.b0f + r->b;
-        if (D_800A6038.d64) {
+        a = (short)t;
+        dx = MulCos(a, r->d);
+        dy = MulNegSinScaled(a, r->d);
+        o->h->p.whole = D_800A6078[0]->p.whole + dx;
+        o->y.p.whole = D_800A604E[0] + dy;
+        o->d->p.whole = D_800A607C[0]->p.whole;
+        o->d8c = D_800A60C4[0];
+        o->b0f = D_800A6047[0] + r->b;
+        if (D_800A609C[0]) {
             D_8009C942 = 1;
             D_8009C93F = 1;
             D_8009C93E = 1;
@@ -74,7 +89,7 @@ void func_80136B4C(TObj *o)
             o->state = 0;
             break;
         }
-        if (D_800A6038.h->p.whole < 0x371) {
+        if (D_800A6078[0]->p.whole < 0x371) {
             D_8009C942 = 1;
             D_8009C93F = 1;
             D_8009C93E = 1;
@@ -85,7 +100,7 @@ void func_80136B4C(TObj *o)
             o->step = 5;
             o->state = 0;
         }
-        if ((unsigned short)(D_800A6038.h->p.whole - 0xb6f) < 0x50 && D_800A6038.y.p.whole >= -0x118) {
+        if ((unsigned short)(D_800A6078[0]->p.whole - 0xb6f) < 0x50 && (short)D_800A604E[0] >= -0x118) {
             o->animFrame = 1;
             D_8009C942 = 1;
             D_8009C93F = 1;
@@ -96,7 +111,7 @@ void func_80136B4C(TObj *o)
             o->step = 5;
             o->state = 0;
         }
-        if (D_800A6038.d->p.whole > 0) {
+        if (D_800A607C[0]->p.whole > 0) {
             D_8009C942 = 1;
             D_8009C93F = 1;
             D_8009C93E = 1;
