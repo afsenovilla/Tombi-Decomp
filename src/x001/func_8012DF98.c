@@ -1,5 +1,5 @@
 // FUNC 8012df98 2896 X001
-/* score 8: two leftovers. (1) case 0: game loads state before w7a (lbu v1 / lhu a0 order). (2) case 2 and case 3 each have their own copy of the 'movetab == 0' block (d8c, state=4, timer, wac; j set5); identical source order makes cross-jumping merge them, so case 2 uses a different order and its timer/wac stores come out swapped. Tried: all 24x24 orders of the two copies, raw-offset stores, temps, case 0 forms. */
+// MATCHING 8012df98 2896
 #include "TOBJ.H"
 
 typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
@@ -20,14 +20,14 @@ extern short TileCollideAt(TObj *o, short x, short y);
 extern void func_8002B920(TObj *);
 extern int func_8012BB18(TObj *);
 
-#define SETANIM(pv, A) \
+#define SETANIM(A) { unsigned char *pv; \
     o->anim = (A)[0]; \
     pv = &D_8013C800[((AH *)o->anim)->w2 * 4]; \
     o->box0 = *pv++; \
     o->box1 = *pv++; \
     o->box2 = *pv++; \
     o->box3 = *pv; \
-    o->animTimer = ((AH *)o->anim)->w6 & 0x3fff
+    o->animTimer = ((AH *)o->anim)->w6 & 0x3fff; }
 
 static __inline__ int land2(TObj *o)
 {
@@ -71,7 +71,6 @@ static __inline__ void blk(TObj *o)
 void func_8012DF98(TObj *o)
 {
     Sub *t = (Sub *)&o->wb4;
-    unsigned char *p0, *p1, *p2, *p3, *p4, *p5, *p6;
     unsigned char c;
 
     switch (o->state) {
@@ -79,16 +78,13 @@ void func_8012DF98(TObj *o)
         o->b9d = 0;
         playSFX(0xf);
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
-        o->wac = 10;
         o->b69 = 0;
         o->d8c = 0;
-        {
-            unsigned char st = o->state;
-            o->animFrame = 1 - o->w7a;
-            o->state = st + 1;
-        }
-        SETANIM(p0, D_8013DB10);
+        o->animFrame = 1 - o->w7a;
+        o->movetab = D_80077D0C;
+        o->wac = 10;
+        o->state++;
+        SETANIM(D_8013DB10);
     case 1:
         blk(o);
         o->velV += 0x40;
@@ -106,9 +102,11 @@ void func_8012DF98(TObj *o)
         if (o->movetab == 0) {
             o->d8c = t->b;
             o->state = 4;
-            o->wac = 5;
             o->timer = 0x168;
-            goto set5;
+            o->wac = 5;
+            SETANIM(D_8013DAFC);
+            func_8002B920(o);
+            break;
         }
         o->active = 3;
         o->velV = -0x280;
@@ -118,7 +116,7 @@ void func_8012DF98(TObj *o)
         t->a1 = 1;
         o->b69 = 0;
         o->wac = 4;
-        SETANIM(p1, D_8013DAF8);
+        SETANIM(D_8013DAF8);
         break;
     case 3:
         if (o->animFrame) o->d8c = (unsigned char)(o->d8c - 0x14);
@@ -133,7 +131,9 @@ void func_8012DF98(TObj *o)
             o->state = 4;
             o->timer = 0x168;
             o->wac = 5;
-            goto set5;
+            SETANIM(D_8013DAFC);
+            func_8002B920(o);
+            break;
         }
         c = t->a1--;
         if (c) {
@@ -145,15 +145,14 @@ void func_8012DF98(TObj *o)
         o->timer = 0x168;
         o->wac = 5;
         o->state++;
-    set5:
-        SETANIM(p2, D_8013DAFC);
+        SETANIM(D_8013DAFC);
         func_8002B920(o);
         break;
     case 4:
         if (--o->timer == -1) {
             o->wac = 0xb;
             o->state++;
-            SETANIM(p3, D_8013DB14);
+            SETANIM(D_8013DB14);
         }
         o->y.p.whole += 2;
         land2(o);
@@ -163,7 +162,7 @@ void func_8012DF98(TObj *o)
             o->timer = 0x78;
             o->wac = 0xc;
             o->state++;
-            SETANIM(p4, D_8013DB18);
+            SETANIM(D_8013DB18);
         }
         o->y.p.whole += 2;
         land2(o);
@@ -174,7 +173,7 @@ void func_8012DF98(TObj *o)
             o->timer = 0x3c;
             o->wac = 0xd;
             o->state++;
-            SETANIM(p5, D_8013DB1C);
+            SETANIM(D_8013DB1C);
         }
         o->y.p.whole += 2;
         land2(o);
