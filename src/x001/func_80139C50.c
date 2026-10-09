@@ -1,7 +1,5 @@
 // FUNC 80139c50 1148 X001
-/* score 4: step 1 case 0 - game schedules the o->anim store before the D_8009C330->animFrame store (reorg then puts
-   the latter in the delay slot of the cross-jump j). Original order (anim first) stops the cross-jumping of the
-   flag clears. Tried: statement hill-climb, temp pointer, [0] arrays for the flags and D_8009C330, empty-loop barrier. */
+// MATCHING 80139c50 1148
 #include "TOBJ.H"
 extern TObj D_800A6038;
 #define P D_800A6038
@@ -11,6 +9,9 @@ extern TObj *D_8009C330;
 extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CEBC, D_800A60F8, D_8009CDB2;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int D_8009C984;
+
+/* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw D_8009C330 store */
+typedef struct { char pad[0x24]; unsigned short a; } AnimH;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *FUN_8002dc50(int, int, int, int);
@@ -60,8 +61,8 @@ void func_80139C50(TObj *o)
             e->step = 0;
             e->state = 1;
             e->animFrame = e->b6b;
-            D_8009C330->animFrame = 0xffff;
-            *(unsigned short *)&o->anim = 0;
+            ((AnimH *)o)->a = 0;
+            *(unsigned short *)((char *)D_8009C330 + 0x2e) = 0xffff;
             D_8009C93E = 0;
             D_8009C942 = 0;
             D_800A60F8 = 0;
