@@ -1,5 +1,5 @@
 // FUNC 80119120 1500 X006
-/* score 44: same open diffs as the sibling wip func_80118C6C: game frame 8 B bigger (0x38), the div result lands in v0, and case 1 has a dead copy (lh y; lw d34; move v1,v0). Calling the c8-switch inline with SUB(o) reproduces the game's move a0,s3 copy. Tried: inline for the d34 base, y temp forms. */
+// MATCHING 80119120 1500
 #include "TOBJ.H"
 
 typedef struct {
@@ -60,33 +60,34 @@ static __inline__ void upd(TObj *o, Sub *t)
     }
 }
 
-void func_80119120(TObj *o)
+static __inline__ void pos(TObj *o)
 {
-    TObj *p = D_8009C950;
-    Sub *s, *t;
+    Sub *s;
     E *e;
-    unsigned short y;
-    short lim;
-    int r;
-    int v;
 
-    t = SUB(o);
     upd(o, SUB(o));
     func_801184F0(o);
     s = SUB(o);
     e = *(E **)&o->wa8;
     e += o->animTimer;
-    if (SUB(o)->div > 0) {
-        o->d34 = SUB(o)->rad * o->w76 / SUB(o)->div;
-        v = o->d34 + e->y;
-    } else {
-        v = e->y;
-    }
-    o->d34 = v - 0x20;
+    o->d34 = (SUB(o)->div > 0 ? (o->d34 = SUB(o)->rad * o->w76 / SUB(o)->div) + e->y : e->y) - 0x20;
     o->d38 = (rsin(s->ang) * s->rad) >> 20;
     o->d30 = (rcos(s->ang) * s->rad) >> 20;
     o->a.p.whole = e->x + o->d30;
     o->b.p.whole = e->z + o->d38;
+}
+
+void func_80119120(TObj *o)
+{
+    TObj *p = D_8009C950;
+    Sub *t;
+    unsigned short y;
+    short lim;
+    int r;
+    short d;
+
+    t = SUB(o);
+    pos(o);
     switch (o->state) {
     case 0:
         FUN_80025f40(0, 1, 0x50, 0x3c);
@@ -108,8 +109,9 @@ void func_80119120(TObj *o)
             o->state++;
         }
         o->y.raw += o->velV << 8;
-        y = o->y.p.whole;
-        if ((short)y >= o->d34) o->y.p.whole = o->d34;
+        d = o->y.p.whole;
+        r = o->d34;
+        if (r <= d) o->y.p.whole += r - d;
         break;
     case 2:
         o->velX -= 0x10;
