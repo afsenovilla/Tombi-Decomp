@@ -1,5 +1,5 @@
-/* score 11 (whole 1456 B incl. csv pieces 8011E1A4/8011E358): only case 3 tail block: game does lbu d88/sw d8c first and still reloads o->h early (before sw y); with d8c first in source gcc reloads o->h after sh velY. Tried all orders of d8c/h/y/velY/p lines, raw/int forms of d8c, local h pointers. */
 // FUNC 8011e0d8 1456 X009
+// MATCHING 8011e0d8 1456
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -87,15 +87,14 @@ void func_8011E0D8(TObj *o)
         o->timer = 0xc;
         o->state++;
     skip:
+        o->d8c = U8(o, 0x88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
-        o->d8c = U8(o, 0x88);
-        p = DAT_8009f0ec;
-        dx = o->h->p.whole - (p->h->p.whole - p->box0);
-        dy = o->y.p.whole - (p->y.p.whole + (p->box3 - p->box2));
-        if (dx < p->box1) {
-            if (o->b69 || func_801215C0(o, dx, dy, p->subtype))
+        dx = o->h->p.whole - (DAT_8009f0ec->h->p.whole - DAT_8009f0ec->box0);
+        dy = o->y.p.whole - (DAT_8009f0ec->y.p.whole + (DAT_8009f0ec->box3 - DAT_8009f0ec->box2));
+        if (dx < DAT_8009f0ec->box1) {
+            if (o->b69 || func_801215C0(o, dx, dy, DAT_8009f0ec->subtype))
                 FUN_800ee560(o);
         }
         break;
