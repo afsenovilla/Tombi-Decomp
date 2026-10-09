@@ -1,5 +1,5 @@
-/* score 25: two spots: case 6 substep 0 (game: lhu D_80125C9C; nop; sh w74 before lbu substep) and substep 1/2 tails (game cross-jumps the final sb substep of case 1 into case 2, with move a0 after the sra). Tried orders, raw stores, [0] arrays, goto set/n forms. */
 // FUNC 8011a5fc 996 X014
+// MATCHING 8011a5fc 996
 #include "TOBJ.H"
 
 extern unsigned short D_8009C962[];
@@ -22,6 +22,7 @@ void func_8011A5FC(TObj *o)
     TObj *p;
     int v;
     int c, sn;
+    int n;
 
     switch (o->b04) {
     case 0:
@@ -87,20 +88,23 @@ void func_8011A5FC(TObj *o)
                 o->d8c = (o->d8c + 1) & 0xff;
                 switch (o->substep) {
                 case 0:
-                    o->w74 = D_80125C9C;
-                    o->substep++;
+                    *(short *)((char *)o + 0x74) = D_80125C9C;
                     o->w76 = D_80125C9E;
+                    o->substep++;
                     break;
                 case 1:
-                    if (o->w74 < ++o->a.p.whole) {
+                    if (++o->a.p.whole > o->w74) {
                         o->a.p.whole = o->w74;
-                        o->substep++;
+                        n = o->substep + 1;
+                        goto set;
                     }
                     break;
                 case 2:
                     if (--o->a.p.whole < o->w76) {
+                        n = 1;
                         o->a.p.whole = o->w76;
-                        o->substep = 1;
+                    set:
+                        o->substep = n;
                     }
                     break;
                 }
