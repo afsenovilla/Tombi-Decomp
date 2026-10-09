@@ -1,5 +1,6 @@
 // FUNC 801198f0 3660 X006
-/* score 6: only case 2 differs: game loads d34 after the lh of y and leaves a dead copy of y (lh v0; lw a0; move v1,v0); ours hoists the lw d34 earlier, no copy. Tried y/d/lim/r temps of each type, inline clamp with param copy, assign-in-compare, ternaries. Real start 801198F0 (3660 B) covers csv piece 8011A448. Siblings: the 8-byte unused E local fixes the 0x38 frame, and the d34 ternary puts the div result in v0 (both open in wip/func_80119120 and func_80118C6C). Found (o23): the game's lh/lw/move order comes out exactly when d is still live after case 2 (a test read `o->w74 = d;` at the end of the function gives lh v0; lw a0; move; slt), so the source reads that short variable later on some path without emitting code; not found where. */
+// MATCHING 801198f0 3660
+/* Real start 801198F0 (3660 B) covers csv pieces 8011A0B4 and 8011A448. Case 2 clamp written as `if (r <= d) y += r - d` (leaves the game's dead copy of y). */
 #include "TOBJ.H"
 
 typedef struct {
@@ -148,7 +149,7 @@ void func_801198F0(TObj *o)
     int a;
     unsigned short u;
     short d;
-    E tmp;
+
 
     switch (o->step) {
     case 0:
@@ -193,7 +194,7 @@ void func_801198F0(TObj *o)
         pos(o);
         func_8011866C(o);
         if (o->b69) {
-            if (D_8009C93E == 0 && t->cc == 0 && (D_1F8003C6 & D_1F8001FC)) {
+            if (D_8009C93E == 0 && t->cc == 0 && (D_1F8001FC & D_1F8003C6)) {
                 short vv = -0x300;
                 p->anim = D_801229CC[0];
                 AnimLoadDuration(p);
@@ -229,7 +230,7 @@ void func_801198F0(TObj *o)
         o->y.raw += o->velV << 8;
         d = o->y.p.whole;
         r = o->d34;
-        if (d >= r) o->y.p.whole = r;
+        if (r <= d) o->y.p.whole += r - d;
         break;
     case 3:
         pos(o);
