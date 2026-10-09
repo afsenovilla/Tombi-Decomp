@@ -1,5 +1,5 @@
 // FUNC 80132760 516 X001
-/* score 9: only the order of 'lbu subtype' vs 'la movetab; sw movetab' at +0x74 differs (game loads subtype first, then la movetab into v1). Tried: statement permutations, early index/pointer temps, volatile subtype read, raw-offset movetab store, table pointer local. */
+/* score 9: only the order of 'lbu subtype' vs 'la movetab; sw movetab' at +0x74 differs (game loads subtype first, then la movetab into v1). Tried: statement permutations, early index/pointer temps, volatile subtype read, raw-offset movetab store, table pointer local. o20: it is regalloc, not sched: game gives subtype v0 and movetab la v1 (overlapping), local-alloc priority (2 refs/short life) always gives the la v0 first; maybe the la pseudo was global (multi-block). Tried 400 random orders with m=D_80077CF4 temp, off<<2 index, b0f/timer store forms. */
 #include "TOBJ.H"
 typedef struct { short a, b; } S2;
 extern S2 D_8013C9C0[];
