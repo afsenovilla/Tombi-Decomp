@@ -1,7 +1,8 @@
-/* score 2: (1) case 0 fixed by `v = 1;` (reusing the function-scope int v for the constant).
-   (2) tail block: game schedules lw o->h after sb b9c/lhu animFrame, ours before sb b9c (sched2 order); tried
-   statement perms, U8 raw stores, f=animFrame first, scalar/[0] D_8009D2B0;
-   also 720 orders x 6 forms of the h-nudge block, static inline nudge(o,d), raw/volatile stores. */
+/* score 2: case 0 of the func_80121540 switch fixed with `v = 1; U8(DAT_8009c330, 8) = v;` (constant through
+   the reused int var gets v1, pointer v0). Left: tail block (D_1F8001FC & D_1F8003C6): game order sb b9c; lhu animFrame;
+   lw o->h; sb b9e; ours lw o->h first (sched1 puts lw h above lhu by priority: lw->lh chain). Tried: all 720 perms of the
+   block statements with f/h temps, h-block forms (+=, ternary, f first), raw/in-struct aa and b9c stores, scalar
+   D_8009D2B0 (9), volatile D2B0, empty-loop barrier after b9c (4). */
 // FUNC 8011e688 1600 X009
 #include "TOBJ.H"
 #include "raw7.h"
@@ -127,8 +128,7 @@ void func_8011E688(TObj *o)
             s = func_80121540(o, dx, dy, p->subtype);
             switch (s) {
             case 0:
-                v = 1;
-                U8(DAT_8009c330, 8) = v;
+                v = 1; U8(DAT_8009c330, 8) = v;
                 {
                     Fix16 *h = o->h;
                     short n;
