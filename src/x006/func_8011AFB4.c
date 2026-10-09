@@ -1,8 +1,5 @@
 // FUNC 8011afb4 644 X006
-/* score 13 (o28): D_1F80031C as a plain array read twice (`(int)D[0] + D[0]->d4`, no second name) gives the game's two
-   loads; w76 = 0 after the dc8 statement fixes their order, but then the w76 store is scheduled after sw da8 instead of
-   between li 0x16 and sb b0a. w76 first gives the store right but swaps the D loads (16). Tried all w76/dc8 positions,
-   raw-offset w76, k/h temps, both sum orders, hill-climb of case 0. */
+// MATCHING 8011afb4 644
 typedef struct L { char p[0x30]; int d30; char q[0x94 - 0x34]; struct L *next; } L;
 typedef struct { char p[4]; int d4; } H;
 typedef struct {
@@ -38,10 +35,14 @@ int func_8011AFB4(O *o)
     case 0:
         o->w74 = 0x300;
         o->w78 = -0x48;
+        o->w76 = 0;
         o->b0a = 0x16;
         o->substep++;
-        o->dc8 = (int)D_1F80031C[0] + D_1F80031C[0]->d4;
-        o->w76 = 0;
+        {
+            /* debt: pins the base load in v1 (v0/v1 swap of two single-set block temps otherwise; o39) */
+            register int t asm("$3") = (int)D_1F80031C[0];
+            o->dc8 = t + D_1F80031C[0]->d4;
+        }
         o->dc4 = (int)D_800E3E28;
         o->da8 = (int)D_800E3E28;
         FUN_80025aa8(o->da0, o->dc4);
