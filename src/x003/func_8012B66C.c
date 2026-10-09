@@ -5,7 +5,7 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80135DD8[];
 extern unsigned char D_8009CE5D;
-extern unsigned char D_8009CE58[];
+extern unsigned char D_8009CE58[]; /* debt: second name for D_8009CE5D so chk() re-reads it */
 extern unsigned char D_8009D0C8;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93E[];
