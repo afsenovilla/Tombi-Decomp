@@ -1,5 +1,5 @@
 // FUNC 80120a7c 1776 X004
-/* in progress */
+// MATCHING 80120a7c 1776
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 extern unsigned char D_80130FD4[];
@@ -69,14 +69,15 @@ void func_80120A7C(TObj *o)
         o->y.raw += o->velV << 8;
         if (!func_8011FDD4(o)) break;
         if (o->movetab == 0) {
+            unsigned short w = *(unsigned short *)(q + 2);
             o->substep = 4;
             o->timer = 0x1e;
             o->wac = 0x22;
-            o->d8c = *(unsigned short *)(q + 2);
+            o->d8c = w;
             setanimbox(o, D_80133BE4[0]);
         } else {
-            o->velV = -0x280;
             o->b9c = 1;
+            o->velV = -0x280;
             o->d8c = 0;
             o->movetab = D_80077CF4;
             o->substep++;
@@ -97,19 +98,26 @@ void func_80120A7C(TObj *o)
         o->b9c = 2;
         if (!func_8011FDD4(o)) break;
         if (o->movetab == 0) {
+            unsigned short w = *(unsigned short *)(q + 2);
             o->substep = 4;
             o->timer = 0x1e;
             o->wac = 0x22;
-            o->d8c = *(unsigned short *)(q + 2);
+            o->d8c = w;
             setanimbox(o, D_80133BE4[0]);
-        } else if (q[1]--) {
-            o->velV = -(o->velV - 0x80);
-            if (o->velV < 0) o->b9c = 1;
-            o->movetab = D_80077CDC;
         } else {
+            unsigned char c = q[1];
+            unsigned short w;
+            q[1] = c + 0xff;
+            if (c) {
+                o->velV = ~(o->velV - 0x80) + 1;
+                if (o->velV < 0) o->b9c = 1;
+                o->movetab = D_80077CDC;
+                return;
+            }
+            w = *(unsigned short *)(q + 2);
             o->timer = 0x1e;
             o->wac = 0x22;
-            o->d8c = *(unsigned short *)(q + 2);
+            o->d8c = w;
             o->substep++;
             setanimbox(o, D_80133BE4[0]);
         }
