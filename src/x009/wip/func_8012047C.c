@@ -1,4 +1,7 @@
 /* score 14: only r/x1 registers swapped (game r in a3, x1 in t0; ours r t0, x1 a3): -dg shows x1 (4 refs/40 insns) outranks r (3 refs/17 insns). Tried: all orders of the x1/x2/f block, int/short types of l r x1 x2, if/else orders, reusing other vars for l/r/x1. Structure (o34): case 0 return gives the game switch tree, per-case sx block locals put o in s0, chk written per case as if (!f) return; goto hit2. */
+/* o37: -dg order is l(3 refs/11 insns) .. x1(4/40) .. r(3/17); game needs l, r, x1 (x1 takes t0 only once a3 is gone).
+   Tried: r/x1/l reused for the a/b/d range checks (18-46; d must stay in s4), separate t statement + all orders of the
+   x1/x2/a/b/f block (32+), short/u16 x1/x2 (x1 still 4 refs/40). Needs r above x1: r 3 refs in <=14 insns or x1 in >45. */
 // FUNC 8012047c 1096 X009
 typedef struct { unsigned short frac, whole; } UF;
 typedef struct O {
