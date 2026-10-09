@@ -1,5 +1,5 @@
-/* score 12: case 0 matched only with odd statement order (temps pa/dd); place(): game loads o->d30 before the scratchpad/global loads at the block start, loads d34 after the two globals, and stores a(0x12) before b/visible with a in a3. Tried y temp, nested show() inline, expression forms, [0] arrays, type brute force, permutations. */
 // FUNC 8011d544 704 X004
+// MATCHING 8011d544 704
 #include "TOBJ.H"
 extern void *D_80134D50[];
 extern int D_1F8002D4[];
@@ -22,7 +22,10 @@ static __inline__ void place(TObj *o)
     short a;
     short y;
 
-    x = ((unsigned int)((o->d30 - D_1F800176 + ((D_800A4574 >> 8) << 4)) << 21)) >> 23;
+    {
+        int d = o->d30;
+        x = ((unsigned int)((d - D_1F800176 + ((D_800A4574 >> 8) << 4)) << 21)) >> 23;
+    }
     a = x;
     if (x >= 0x180 && x <= 0x1c0) {
         return;
@@ -30,10 +33,14 @@ static __inline__ void place(TObj *o)
     if (x > 0x1c0) {
         a = -(unsigned char)(~x + 1);
     }
+    {
+        unsigned short s = D_1F800186;
+        int g = D_800A4570;
+        y = (short)(o->d34 - s - ((g >> 8) << 3)) >> 2;
+    }
+    *(short *)((char *)o + 0x12) = a;
     o->b.p.whole = 0;
-    y = (short)(-D_1F800186 + o->d34 - ((D_800A4570 >> 8) << 3)) >> 2;
     o->visible = 1;
-    o->a.p.whole = a;
     o->y.p.whole = y;
     ObjListPush_1F80022C(o);
 }
