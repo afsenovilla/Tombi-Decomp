@@ -1,5 +1,9 @@
 // FUNC 801169c0 2528 X002
-/* in progress: whole function incl. csv piece 80116D50 */
+/* score 149: whole function incl. csv piece 80116D50 (jump tables at 80115EBC/80115EDC).
+   Layout matches; differences: in the game the anim store and the FUN_8001fe94 call share one
+   cross-jumped tail (move a0 / [lw 8(v0)] / move a1 / jal / sw anim), here the store stays in
+   each branch; case 1 schedules the a/y updates differently. Tried: call inside the inline
+   (991), anim through a variable or returning inline (700-940). */
 #include "TOBJ.H"
 typedef struct {
     unsigned short w1e;
@@ -11,7 +15,8 @@ extern int D_1F8002C8[];
 extern unsigned char D_8009CE41;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CFDB, D_8009CFDC, D_8009CFDD, D_8009CFDE, D_8009CFDF, D_8009CFE0, D_8009CFE1;
-extern unsigned short D_1F800176, D_1F800186;
+extern unsigned short D_1F800176;
+extern unsigned short D_1F800186;
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -26,7 +31,6 @@ static __inline__ void sa(TObj *o, int n)
     } else {
         o->anim = D_8011C6D8[o->subtype].tab[n];
     }
-    FUN_8001fe94(o, 0);
 }
 
 #define PICK(c) if (c) sa(o, 0); else sa(o, 2); break
@@ -47,7 +51,6 @@ void func_801169C0(TObj *o)
             if (D_8009CE41 == 0) {
                 o->w1e = 5;
                 o->anim = D_8011C6D8[9].tab[0];
-                FUN_8001fe94(o, 0);
             } else if (D_8009CE41 == 0xff) {
                 sa(o, 2);
             } else {
@@ -62,6 +65,7 @@ void func_801169C0(TObj *o)
             case 6: PICK(D_8009D2C3 & 1);
             case 7: PICK(D_8009D2C3 & 0x20);
             case 8: PICK(D_8009D2C3 & 8);
+            default: goto skip;
             }
         } else {
             switch (o->subtype) {
@@ -72,8 +76,11 @@ void func_801169C0(TObj *o)
             case 6: PICK(D_8009CFDF);
             case 7: PICK(D_8009CFE0);
             case 8: PICK(D_8009CFE1);
+            default: goto skip;
             }
         }
+        FUN_8001fe94(o, 0);
+    skip:
         o->b04++;
         break;
     case 1:
