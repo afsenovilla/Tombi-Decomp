@@ -1,5 +1,5 @@
 // FUNC 80123708 1552 X010
-/* score 124: whole function incl. csv pieces 801237E4/80123B94; control flow and inlines lo/hi/lo0/hi0 right. Left: frame 0xc8 vs 0xd0 (one more inline expansion?), case 1 velY/state schedule, case 3/5/7 state++ register order. */
+/* score 2: whole function incl. csv pieces 801237E4/80123B94. Only diff: case 1 velY address 'addu v0,v0(idx),a0(t)' vs game 'addu v0,a0,v0' (t first). t is a REG_EQUAL constant, so the symbol ends up second. Tried: t[i]/t+i/i+t, int/char* t with << and *, block-local t/k, k=idx<<2; k+=t (target swap), t+=i, &t[i], &D[0]. */
 #include "TOBJ.H"
 typedef struct { unsigned short a, b; } T4;
 extern T4 D_8012F398[];
@@ -33,8 +33,8 @@ static __inline__ void lo0(TObj *o, TObj *e)
     short b = e->box2;
     if (o->y.p.whole < y - b) {
         o->y.p.whole = y - b;
-        o->state = 0;
         o->d34 = o->y.raw - e->y.raw;
+        o->state = 0;
     }
 }
 
@@ -44,8 +44,8 @@ static __inline__ void hi0(TObj *o, TObj *e)
     short b = e->box2;
     if (y + b < o->y.p.whole) {
         o->y.p.whole = y + b;
-        o->state = 0;
         o->d34 = o->y.raw - e->y.raw;
+        o->state = 0;
     }
 }
 
@@ -82,14 +82,14 @@ void func_80123708(TObj *o)
     case 1:
         o->animFrame = Rand() & 1;
         o->w74 = Rand() & 3;
-        o->velX = D_8012F398[o->w74].a;
         t = D_8012F398;
+        o->velX = t[o->w74].a;
         if (o->animFrame & 1) o->velX = -o->velX;
-        o->state++;
+        o->velY = (t + o->w74)->b;
         o->timer = 200;
         o->d84 = 0;
         o->d8c = 0;
-        o->velY = (t + o->w74)->b;
+        o->state++;
     case 2:
         FUN_8001fec0(o);
         if ((unsigned short)(o->h->p.whole - (e->h->p.whole - e->box0)) > e->box1) {
@@ -123,10 +123,10 @@ void func_80123708(TObj *o)
         o->animFrame = Rand() & 1;
         o->velY = 0x300;
         o->state++;
-        o->timer = 0x28;
         o->velX = 0;
         o->velH = 0;
         o->velV = 0;
+        o->timer = 0x28;
         MOVE();
         LO(e);
         hi0(o, e);
@@ -144,10 +144,10 @@ void func_80123708(TObj *o)
         o->animFrame = Rand() & 1;
         o->velY = -0x300;
         o->state++;
-        o->timer = 0x28;
         o->velX = 0;
         o->velH = 0;
         o->velV = 0;
+        o->timer = 0x28;
         HI(e);
         lo0(o, e);
         MOVE();
