@@ -1,8 +1,6 @@
 // FUNC 8012aa10 2048 X004
-/* score 24: case 0 matches; cases 1 and 2 differ only in the table-entry setup: game loads la D_80011DD8 into a0
-   first and the lb index into v1 (sll in place); ours lb v0, sll v1, la v0. The function-scope `int i` (global
-   pseudo) fixed the size; tried in-place shifts, char/int bases, table pointer locals. Same attach code as wip X001
-   func_80135164: (signed char)e->c through a short local + `int k = 0x80`, ang as short masked with 0xff. */
+// MATCHING 8012aa10 2048
+/* Debt: empty do {} while (0) in cases 1 and 2 ends the sched block so `la D_80011DD8` lands before the lb. */
 #include "TOBJ.H"
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
 extern TObj D_800A6038;
@@ -29,7 +27,7 @@ void func_8012AA10(TObj *o)
     short ang;
     short dx, dy;
     __typeof__(D_800A6038.h) p;
-    int i;
+    int i; char *t;
     short x;
     unsigned short u;
 
@@ -95,8 +93,14 @@ void func_8012AA10(TObj *o)
         }
         break;
     case 1:
-        i = D_80011EB4[*(unsigned short *)D_800A6038.anim] * 4;
-        e = (E4 *)((char *)D_80011DD8 + i);
+        {
+            int k = *(unsigned short *)D_800A6038.anim;
+            t = (char *)D_80011DD8;
+            do {} while (0);
+            i = D_80011EB4[k];
+            i <<= 2;
+            e = (E4 *)(t + i);
+        }
         if (e->a < 2 && !(FUN_8001f9e0() & 3)) e->a = FUN_8001f9e0() & 1;
         o->anim = D_80134CE0;
         ANG(e)
@@ -114,8 +118,14 @@ void func_8012AA10(TObj *o)
         }
         break;
     case 2:
-        i = D_80011EB4[*(unsigned short *)D_800A6038.anim] * 4;
-        e = (E4 *)((char *)D_80011DD8 + i);
+        {
+            int k = *(unsigned short *)D_800A6038.anim;
+            t = (char *)D_80011DD8;
+            do {} while (0);
+            i = D_80011EB4[k];
+            i <<= 2;
+            e = (E4 *)(t + i);
+        }
         if (e->a < 2 && !(FUN_8001f9e0() & 3)) e->a = FUN_8001f9e0() & 1;
         o->anim = D_80134CE0;
         ANG(e)
