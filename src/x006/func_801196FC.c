@@ -1,9 +1,10 @@
-/* score 21: start differs: game loads lw d8c then lhu wba after sh velV, keeps the 0xfff value in v0 with two copies (move v1 / move a0 for the sltiu test); ours: lh wba first and an andi 0xffff for the unsigned short inline param. Tried int/short/ushort/uint for inline params and locals, one or two params, split v computation, unsigned wba reads. */
 // FUNC 801196fc 500 X006
+// MATCHING 801196fc 500
 #include "TOBJ.H"
 
-static __inline__ void calc(TObj *o, short *p, unsigned short u)
+static __inline__ void calc(TObj *o, short *p)
 {
+    unsigned short u = (o->d8c - p[3]) & 0xfff;
     short d = u;
     if (d == 0) {
         o->velV = o->wb6 / 4 + 0x200;
@@ -25,12 +26,9 @@ static __inline__ void calc(TObj *o, short *p, unsigned short u)
 
 void func_801196FC(TObj *o)
 {
-    int v;
     o->step = 5;
     o->velV = 0x200;
-    v = o->d8c - o->wba;
-    v &= 0xfff;
     o->state = 0;
-    calc(o, &o->wb4, v);
+    calc(o, &o->wb4);
     o->velV = -o->velV;
 }
