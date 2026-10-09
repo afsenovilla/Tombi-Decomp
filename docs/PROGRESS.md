@@ -4,14 +4,14 @@ _Generated with `python tools/progress.py` (2026-10-09). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 89.0 % of the game's code matches byte for byte** (1132004 of 1272064 bytes).
+**Whole game: 89.0 % of the game's code matches byte for byte** (1132488 of 1272064 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 228328 B | 198220 B | 86.8 % `[#####################...]` |
 | X000.BIN: AREA00 + object code reused by all areas | 297956 B | 294564 B | 98.9 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 745780 B | 639220 B | 85.7 % `[#####################...]` |
-| **Whole game** | **1272064 B** | **1132004 B** | **89.0 %** `[#####################...]` |
+| X001..X019.BIN: code specific to the other areas | 745780 B | 639704 B | 85.8 % `[#####################...]` |
+| **Whole game** | **1272064 B** | **1132488 B** | **89.0 %** `[#####################...]` |
 
 - Bytes of machine code in game functions; Sony's Psy-Q library (98992 B) is not counted.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
@@ -43,7 +43,7 @@ in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../not
 | X001.BIN | AREA01, AREA07 | 330276 B | 603 | 92.1 % (571 f) | 1100 B | 0 B | 0 B | 25028 B (30 f) |
 | X002.BIN | AREA02, AREA19 (alt.) | 200656 B | 366 | 98.0 % (358 f) | 1100 B | 0 B | 0 B | 2920 B (6 f) |
 | X003.BIN | AREA03 | 301504 B | 589 | 94.3 % (566 f) | 1100 B | 0 B | 24 B | 16144 B (20 f) |
-| X004.BIN | AREA04, AREA12 | 282416 B | 572 | 95.2 % (550 f) | 1100 B | 0 B | 0 B | 12332 B (20 f) |
+| X004.BIN | AREA04, AREA12 | 282416 B | 572 | 95.4 % (553 f) | 1100 B | 0 B | 0 B | 11848 B (17 f) |
 | X005.BIN | AREA05 | 180984 B | 330 | 99.4 % (325 f) | 1100 B | 0 B | 0 B | 68 B (3 f) |
 | X006.BIN | AREA06 | 211508 B | 397 | 94.0 % (363 f) | 1100 B | 0 B | 0 B | 11556 B (32 f) |
 | X008.BIN | AREA08 | 175296 B | 308 | 99.2 % (304 f) | 1100 B | 0 B | 0 B | 292 B (2 f) |
@@ -56,7 +56,7 @@ in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../not
 | X017.BIN | AREA17 | 189344 B | 350 | 98.8 % (344 f) | 1100 B | 0 B | 0 B | 1148 B (4 f) |
 | X018.BIN | AREA18 | 193352 B | 356 | 98.5 % (349 f) | 1100 B | 0 B | 0 B | 1724 B (5 f) |
 | X019.BIN | AREA19 | 175124 B | 306 | 99.4 % (304 f) | 1100 B | 0 B | 0 B | 0 B (0 f) |
-| **Total** | | 3570948 B | 6753 | 96.5 % (6531 f) | 17600 B | 1212 B | 24 B | 106560 B (188 f) |
+| **Total** | | 3570948 B | 6753 | 96.5 % (6534 f) | 17600 B | 1212 B | 24 B | 106076 B (185 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.

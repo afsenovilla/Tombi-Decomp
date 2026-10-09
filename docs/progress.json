@@ -104,17 +104,17 @@
     "X004": {
       "game": 282416,
       "n": 572,
-      "matched": 268984,
-      "n_matched": 550,
+      "matched": 269468,
+      "n_matched": 553,
       "piece": 0,
       "x000": 1100,
       "dup": 0,
-      "new": 12332,
-      "n_new": 20,
+      "new": 11848,
+      "n_new": 17,
       "uniq": 100176,
-      "uniq_matched": 87844,
+      "uniq_matched": 88328,
       "n_uniq": 222,
-      "n_uniq_matched": 202
+      "n_uniq_matched": 205
     },
     "X005": {
       "game": 180984,

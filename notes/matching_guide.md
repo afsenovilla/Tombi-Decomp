@@ -262,6 +262,29 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   `if (c0) goto ret0; ... if (cond) { ret0: return 0; }` for a shared return-0 block; real C loops (not goto loops)
   get loop-depth ref weighting.
 
+### More recipes (eighth batch: area overlays X001..X019)
+- **Overlays share families**: before writing an overlay function, compile every matched source of the same size (any
+  overlay) at the target address and grep for siblings with the same jal targets; near-copies differ by a constant and
+  are not flagged as twins. csv boundaries are often wrong: pieces start mid-function, miss jump-table-only epilogues,
+  or are pure jump-table data (every word a 0x80xxxxxx pointer). Walk back to the real prologue and match the range.
+- **Player object**: scalar globals 0x800A603C..0x800A6078 are fields of the player TObj `D_800A6038`; access them as
+  struct fields to keep their order after struct stores.
+- **Setters**: box/anim setters are small static inlines (`setbox(o,a,b,c,d)`, `setanim(o,n)`); the anim set as
+  `do { o->anim = a; AnimLoadDuration(o); } while (0)` keeps the a0 copy after earlier stores.
+- **Allocation without debt**: reuse an existing function-scope variable for a constant or index (`v = 1;`, `x = rand() & 3`);
+  single-set block temps are allocated first; per-loop counters; `t = 8; t -= d;` instead of `t = 8 - d`; a
+  short-lived variable per local value.
+- **CSE/scheduling**: "only-set-once" temps are placed just before use (block-local temp for late loads, reuse a
+  variable to keep a load early); `(p->y.raw >> 16)` breaks CSE of a field the game reloads; a store to another field
+  between two stores to the same field keeps both; a label after a duplicated call stops CSE from following the jump;
+  `(unsigned char)t == 1` stops CSE propagating the constant.
+- **Control flow**: two identical blocks kept apart -> write the full tail in each copy (or reorder one copy's
+  statements); fall-through case keeps its own tail copy (macro at end of every case); `set:` label in the last case
+  with `o->wac = K; goto set;`; `for (i = 0; (e = &T[i])->x != 0xff; i++)` for a predicted-taken continue; default body
+  after the switch with `return` per case; `if (!f()) goto zero; return 2;` keeps branches.
+- **Search**: permute the first ~6 statements together with the scalar-vs-`[0]` choice per global; hill-climbing one line
+  at a time stalls.
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).

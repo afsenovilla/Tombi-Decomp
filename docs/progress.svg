@@ -4,7 +4,7 @@
 <text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-09 &#183; unit: bytes of game code (excluding the Psy-Q library)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Whole game: matching C</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="98" width="400.5" height="18" rx="9" fill="#16a34a"/>
+<rect x="330" y="98" width="400.6" height="18" rx="9" fill="#16a34a"/>
 <text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">89.0 %</text>
 <text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: matching C</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
@@ -12,8 +12,8 @@
 <text x="796" y="149" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">93.6 %</text>
 <text x="28" y="184" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">Other areas (X001..X019): matching C</text>
 <rect x="330" y="170" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="170" width="385.7" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">85.7 %</text>
+<rect x="330" y="170" width="386.0" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">85.8 %</text>
 <text x="28" y="220" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="206" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="206" width="29.3" height="18" rx="9" fill="#22c55e"/>
