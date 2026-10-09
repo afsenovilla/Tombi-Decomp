@@ -1,6 +1,5 @@
 // FUNC 8012f9a0 548 X003
-/* score 6: case 0 only - game loads o->subtype after the animFrame/w1e stores and reuses v1 for the constant 1
-   (ours hoists the lbu and puts 1 in a0). Tried: statement hill-climb, raw stores, if/switch forms, empty-loop barrier. */
+// MATCHING 8012f9a0 548
 #include "TOBJ.H"
 
 extern int D_1F8002DC[];
@@ -19,12 +18,12 @@ void func_8012F9A0(TObj *o)
 
     switch (o->b04) {
     case 0:
+        o->box0 = 8;
         o->box1 = 0x10;
+        o->box2 = 8;
         o->box3 = 0x10;
         o->animFrame = 1;
-        o->box0 = 8;
         o->w1e = 1;
-        o->box2 = 8;
         o->b04++;
         o->d3c = D_1F8002DC[0];
         *(signed char *)&o->b0f = -10;
