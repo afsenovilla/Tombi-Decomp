@@ -1,14 +1,14 @@
 // FUNC 80129cc0 2584 X003
-/* score 484 (draft, size within 8 B): cutscene script with the player D_800A6038 (34 states, jump table 0..250, inner switch on wc2 0xf0..0xfe). Logic complete; remaining: per-case scheduling of the player-field stores (P.y.raw + 0x1600 temp, case 4 store order / &P.y.p.whole base), shared tails. Sibling: func_8012C00C */
+// MATCHING 80129cc0 2584
 #include "TOBJ.H"
 typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
 extern TObj D_800A6038;
 extern E12 D_80135DC0[];
-extern unsigned char D_800A60D4;
-extern short D_800A60EA;
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E, D_8009C940;
+extern unsigned char D_800A60D4[];
+extern short D_800A60EA[];
+extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[], D_8009C940[];
 extern unsigned char D_8009CDC7;
 extern unsigned char D_8009C975;
 extern int AnimAdvance(TObj *);
@@ -35,9 +35,9 @@ void func_80129CC0(TObj *o)
         P.velY = -0x200;
         P.state = 0;
         P.animFrame = 0;
-        D_800A60D4 = 1;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        D_800A60D4[0] = 1;
+        D_8009C93F[0] = 1;
+        D_8009C942[0] = 1;
         o->state++;
         break;
     case 1:
@@ -53,7 +53,8 @@ void func_80129CC0(TObj *o)
     case 2:
         if (--o->timer > 0) break;
         P.velH = (o->h->raw - P.h->raw) >> 6;
-        P.velV = (o->y.raw - (P.y.raw + 0x1600)) >> 6;
+        v = P.y.raw + 0x1600;
+        P.velV = (o->y.raw - v) >> 6;
         P.velY = -0x480;
         o->timer = 0x40;
         PlayerSetAnimIfChanged(&P, 0x15);
@@ -67,22 +68,25 @@ void func_80129CC0(TObj *o)
         if (--o->timer > 0) break;
         FUN_800eea7c(&P, 0xd, 0);
         P.h->p.whole = o->h->p.whole;
-        P.velY = 0;
         P.y.p.whole = o->y.p.whole - 0x10;
+        P.velY = 0;
         o->state++;
         break;
     case 4:
-        v = o->y.p.whole;
-        P.b04 = 5;
-        P.step = 0x65;
-        P.state = 0;
-        P.animFrame = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
-        P.y.p.whole = v - 0x10;
-        P.h->p.whole = o->h->p.whole;
-        P.y.p.whole = o->y.p.whole - 0x10;
-        FUN_800eea7c(&P, 0xd, 0);
+        {
+            short *py = &P.y.p.whole;
+            unsigned short u = o->y.p.whole;
+            P.b04 = 5;
+            P.step = 0x65;
+            P.state = 0;
+            P.animFrame = 0;
+            D_8009C93F[0] = 1;
+            D_8009C942[0] = 1;
+            *py = u - 0x10;
+            P.h->p.whole = o->h->p.whole;
+            *py = o->y.p.whole - 0x10;
+            FUN_800eea7c(&P, 0xd, 0);
+        }
         o->state = 10;
         break;
     case 10:
@@ -176,30 +180,32 @@ void func_80129CC0(TObj *o)
         o->timer = 0x3c;
         o->velX = -0x50;
         o->state++;
-        if (o->animFrame & 1)
-            o->velX = -0xa0;
-        else
-            o->velX = 0xa0;
+        {
+            int w = 0xa0;
+            if (o->animFrame & 1)
+                w = -0xa0;
+            o->velX = w;
+        }
         break;
     case 82:
         P.h->p.whole = o->h->p.whole;
         P.y.p.whole = o->y.p.whole - 0x10;
-        if (o->visible) {
-        move:
-            o->h->raw += o->velX << 8;
-            o->y.raw += o->velY << 8;
+        if (o->visible == 0) {
+            if (D_8009CDC7 != 0xff) {
+                P.visible = 0;
+                FUN_8005a9a4(0x23, 0);
+                o->timer = 0x168;
+            } else {
+                P.visible = 0;
+                o->timer = 8;
+            }
+            o->state = 0x78;
+            X(o)->wc2 = 0xfe;
             break;
         }
-        if (D_8009CDC7 != 0xff) {
-            P.visible = 0;
-            FUN_8005a9a4(0x23, 0);
-            o->timer = 0x168;
-        } else {
-            o->timer = 8;
-            P.visible = 0;
-        }
-        o->state = 0x78;
-        X(o)->wc2 = 0xfe;
+    move:
+        o->h->raw += o->velX << 8;
+        o->y.raw += o->velY << 8;
         break;
     case 90:
         o->anim = ANIM(1);
@@ -212,17 +218,23 @@ void func_80129CC0(TObj *o)
             q->b04 = 3;
             o->anim = ANIM(1);
             AnimJump(o, 0);
-            o->state = X(o)->wc2;
+            goto next;
         }
+        break;
+    case 110:
+        o->timer = 200;
+        o->state = 0x6f;
+        break;
+    case 111:
+        if (--o->timer == 0)
+            goto next;
         break;
     case 100:
         D_8009C975 = 4;
-        o->state = X(o)->wc2;
-        break;
+        goto next;
     case 101:
         D_8009C975 = 3;
-        o->state = X(o)->wc2;
-        break;
+        goto next;
     case 102:
         D_8009C975 = 4;
         o->state = 0x68;
@@ -233,15 +245,8 @@ void func_80129CC0(TObj *o)
         break;
     case 104:
         if ((unsigned char)(D_8009C975 - 3) < 2) break;
+    next:
         o->state = X(o)->wc2;
-        break;
-    case 110:
-        o->timer = 200;
-        o->state = 0x6f;
-        break;
-    case 111:
-        if (--o->timer == 0)
-            o->state = X(o)->wc2;
         break;
     case 120:
         o->state = 0x79;
@@ -252,12 +257,12 @@ void func_80129CC0(TObj *o)
         break;
     case 122:
         P.b04 = 5;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
-        D_8009C940 = 0;
-        D_800A60D4 = 0;
-        D_800A60EA = 0;
+        D_8009C93F[0] = 0;
+        D_8009C942[0] = 0;
+        D_8009C93E[0] = 0;
+        D_8009C940[0] = 0;
+        D_800A60D4[0] = 0;
+        D_800A60EA[0] = 0;
         P.step = 0x65;
         P.state = 0;
         o->b68 = 0;
