@@ -1,22 +1,26 @@
 // FUNC 8011610c 328 X006
-/* score 16: volatile D_1F800190 keeps flag = 0 (move a2,zero) at the top (reorg cannot hoist it past the volatile load) and the start matches.
-   Left: game tests the flag with andi 0xff (uchar flag), but any uchar/& 0xff form makes reorg steal that andi from the bgez target
-   instead of the lui 0x340000 fallthrough (score 50); the +0x8000 path should jump into the -0x4000 store (goto form of old wip, 41 with int flag). */
+/* score 22 (o39; was 16 with a different shape): `c = 0x340000` hoisted before the if + `unsigned char flag` fixes the
+   whole top (reorg takes the lui from before the branch; the andi at the target can no longer be stolen because the
+   fall-through needs v0). The +0x8000 path jumps into the -0x4000 store (`v = ...; goto st;` / `st: o->b.raw = v;`),
+   which with `k` reused as the variable gives the game's exact control flow but k lands in a2 and 0x500000 is hoisted
+   (score 22 too). With a separate `v`, jump2 cross-jumps the 0x40000 store (`sw v0; j L230`) into the st tail (320 B);
+   the game keeps them apart. Tried: volatile st / 0x40000 stores, reusing c/d/flag, unsigned v, v split (+=). */
 #include "TOBJ.H"
 extern volatile int D_1F800190;
 extern int D_1F8000F0;
 
 void func_8011610C(TObj *o)
 {
-    int flag = 0;
-    int k;
+    unsigned char flag = 0;
+    int k, c, v;
     int d = D_1F800190 - 0x800000;
     d -= D_1F8000F0;
     k = 0x500000;
     d += k;
+    c = 0x340000;
 
     if (d < 0) {
-        d += 0x340000;
+        d += c;
         flag = 1;
         if (d >= 0) {
             o->b.raw = 0;
@@ -30,7 +34,8 @@ void func_8011610C(TObj *o)
                 else o->b.raw = d;
             } else {
                 if (o->b.raw < 0) o->b.raw = 0;
-                o->b.raw = o->b.raw + 0x8000;
+                v = o->b.raw + 0x8000;
+                goto st;
             }
         } else {
             D_1F8000F0 = D_1F800190 + k - 0x800000;
@@ -43,7 +48,9 @@ void func_8011610C(TObj *o)
                 else o->b.raw = -0x40000;
             } else {
                 if (o->b.raw > 0) o->b.raw = 0;
-                o->b.raw = o->b.raw - 0x4000;
+                v = o->b.raw - 0x4000;
+            st:
+                o->b.raw = v;
             }
         } else {
             o->b.raw = d;
