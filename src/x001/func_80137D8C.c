@@ -1,5 +1,7 @@
 // FUNC 80137d8c 1552 X001
-/* score 2: only `addu v0,v0,a0` vs game `addu v0,a0,v0` for t[o->w74].y in case 1 (t = table pointer set before the velX negation if, global pseudo in a0). Tried t+idx/idx+t/char-pointer and int forms, index temp k (both decl orders), t += w74, cast index types; the swap happens in cse (expand gives (plus t k) for an index var k; cse dump has (plus k t)), even with t made opaque by an asm, and -fno-cse-skip-blocks/-follow-jumps/-rerun do not change it. Frame: 10 two-short-param inlines (each leaves two `(use (reg))` stack slots) + unused `V2 e` local (8 B) give 0xd0. State inits: `state++` first, then zero stores, then constants. */
+// MATCHING 80137d8c 1552
+// FLAGS -O2 -G0 -fno-cse-skip-blocks
+/* Matching debt: -fno-cse-skip-blocks (with cse skipping the velX negation block, t keeps its symbol equivalence and cse swaps t[k] into `addu k,t`; an int t avoids the pointer flag doing the same). Frame: 10 two-short-param inlines leave two `(use (reg))` stack slots each, plus an unused 8-byte V2 local. */
 #include "TOBJ.H"
 typedef struct { short x, y; } V2;
 
@@ -50,7 +52,7 @@ void func_80137D8C(TObj *o)
     TObj *p = (TObj *)o->d90;
     int hx = p->h->raw;
     int py = p->y.raw;
-    V2 *t;
+    int t;
     V2 e;
 
     switch (o->state) {
@@ -76,9 +78,9 @@ void func_80137D8C(TObj *o)
         o->animFrame = Rand() & 1;
         o->w74 = Rand() & 3;
         o->velX = D_8013C9DC[o->w74].x;
-        t = D_8013C9DC;
+        t = (int)D_8013C9DC;
         if (o->animFrame & 1) o->velX = -o->velX;
-        o->velY = t[o->w74].y;
+        o->velY = ((V2 *)(t + (o->w74 << 2)))->y;
         o->timer = 0xc8;
         o->d84 = 0;
         o->d8c = 0;
