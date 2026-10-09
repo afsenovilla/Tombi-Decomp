@@ -1,5 +1,5 @@
 // FUNC 80123f24 308 X001
-/* score 4: case 0: second read of D_1F800334 lands after lbu b04 (game: both lw (v1) adjacent); tried store-order hill climb, temps/volatile pointer variants; also 3000 random store orders with and without the q/v reads movable, setbox inline, b04 temp, TObj* and int *volatile * casts, split v=w+q[9] (all >= 4) */
+// MATCHING 80123f24 308
 #include "TOBJ.H"
 
 extern unsigned char D_8009CDBA;
@@ -16,12 +16,14 @@ void func_80123F24(TObj *o)
         if (D_8009CDBA == 0) {
             volatile int *g = &D_1F800334;
             int *q = (int *)*g;
-            int v = q[9] + *g;
+            int v;
+            q += 9;
+            v = *g + *q;
             o->ba4 = 0;
             o->box0 = 8;
             o->box1 = 0x10;
-            o->box3 = 0x10;
             o->box2 = 8;
+            o->box3 = 0x10;
             o->active = 1;
             o->b69 = 0;
             o->b04++;
