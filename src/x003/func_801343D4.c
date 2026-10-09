@@ -1,15 +1,12 @@
 // FUNC 801343d4 584 X003
-/* score 109: code identical to the game except that gcc hoists the constant 0x32 (n->type,
-   both branches) out of the loop into s4 (loop.c: savings 2, life 2, 102 real insns, threshold 26
-   after 0xff is moved). The game keeps li 0x32 in each branch. Tried: statement order, casts,
-   loop forms, dead stores (removed before loop), switch forms. */
+// MATCHING 801343d4 584
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_8013613C;
 extern unsigned char D_8009CE5D, D_8009CDC5;
-extern unsigned short D_8009C962;
+extern unsigned short D_8009C962[];
 extern TObj *FUN_800183b8(void);
 extern TObj *FUN_800184d8(void);
 
@@ -19,13 +16,15 @@ void func_801343D4(TObj *o)
     E28 *p;
     short i;
     TObj *n;
+    short k;
 
     base = D_8013613C;
     i = 0;
     p = base;
 
     for (; p->f0 != 0xff; p = &base[++i]) {
-        switch (p->f1a == 0x28) {
+        k = p->f1a == 0x28;
+        switch (k) {
         case 0x28:
             if (D_8009CE5D == 0xff) continue;
             break;
@@ -34,17 +33,18 @@ void func_801343D4(TObj *o)
             break;
         }
         if (*(volatile unsigned short *)&p->f0 & 0x80) {
-            n = FUN_800184d8();
-            if (n == 0) continue;
-            n->active = 1;
-            n->type = 0x32;
-            n->b0a = 0x10;
-            n->animFrame = p->f2;
-            n->subtype = p->f18;
-            n->b0c = p->f1a;
-            n->a.p.whole = p->f12;
-            n->y.p.whole = p->f14;
-            n->b.p.whole = p->f16;
+            TObj *m;
+            m = FUN_800184d8();
+            if (m == 0) continue;
+            m->active = 1;
+            m->type = 0x32;
+            m->b0a = 0x10;
+            m->animFrame = p->f2;
+            m->subtype = p->f18;
+            m->b0c = p->f1a;
+            m->a.p.whole = p->f12;
+            m->y.p.whole = p->f14;
+            m->b.p.whole = p->f16;
         } else {
             n = FUN_800183b8();
             if (n == 0) continue;
@@ -52,7 +52,7 @@ void func_801343D4(TObj *o)
             n->type = 0x32;
             n->b0a = 0;
             n->animFrame = p->f2;
-            if (D_8009C962 == 1)
+            if (D_8009C962[0] == 1)
                 n->subtype = p->f18 + 1;
             else
                 n->subtype = p->f18;
