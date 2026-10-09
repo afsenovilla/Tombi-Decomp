@@ -2,7 +2,10 @@
 /* score 145: whole function (starts with the D_800A6039 load before addiu sp, which already matches; covers csv
    pieces 8011B170/8011B330). Left: the case-0 flag n should share s0 with the angle (game s0, ours a0); the
    (signed char)p->c reads must stay lbu+sll/sra 24 (ours lb or a short copy); a = v & 0xff then sll/sra 16 in a
-   shared tail; several global loads ordered after stores (some globals already [0]). */
+   shared tail; several global loads ordered after stores (some globals already [0]).
+   o17: `short v; if (..) { v = D + 0x80; v -= (signed char)p->c; } else v = (signed char)p->c + D;` gives the game's
+   lbu+sll/sra 24 per branch exactly (short destination keeps the sign extension); then only the a = v & 0xff
+   sll/sra and the flag register (s0) differ in that region, but the total score rises to 152. */
 #include "TOBJ.H"
 typedef struct { unsigned char a, b, c; signed char d; } P4;
 extern unsigned char D_800A6039;
