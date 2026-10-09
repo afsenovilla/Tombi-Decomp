@@ -1,9 +1,9 @@
 // FUNC 801212d4 284 X010
-/* score 41. Not a csv start: the csv piece func_801213D0 is the tail of this function (0x801212D4..0x801213F0).
-   Same family as X001 wip func_80126D2C. Left: game reads the height table once (lhu t0) and sign-extends with
-   sll/sra for the d30 store, gcc re-reads it with lh; game loads e->d34 before o->ea and copies box1 (lh v1) into
-   the d register (move a0,v1) after the compare value. Tried: h/b0/d types, d30 cast forms, volatile table read,
-   statement orders, x if/else forms. */
+/* score 25. Not a csv start: the csv piece func_801213D0 is the tail of this function (0x801212D4..0x801213F0).
+   Same family as X001 wip func_80126D2C. o29: h reused for the d + d38 sum (game t0) and d = -e->d34 + o->ea fix the
+   first half. Left: combine merges the table lhu with (short)h into an extra lh (game: lhu t0 once, sll/sra for the
+   d30 store); then box1 (lh v1) copied into d after the compare value. Tried: volatile table (la form, worse),
+   pointer/index temps, (h<<16)>>16, short copy, ushort/short/uint h, all orders of b0/d30/box1/compare temp. */
 #include "TOBJ.H"
 typedef struct {
     TObj t;
@@ -22,8 +22,9 @@ void func_801212D4(P *o, TObj *e)
     unsigned short b0;
 
     if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return;
-    d = o->ea - e->d34;
-    if ((unsigned short)(d + e->d38) > e->d38) return;
+    d = -e->d34 + o->ea;
+    h = d + e->d38;
+    if ((unsigned short)h > e->d38) return;
     h = D_8012F2F8[(short)-d >> 3];
     b0 = e->box0;
     e->d30 = (short)h;
