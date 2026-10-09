@@ -1,30 +1,30 @@
 {
   "date": "2026-10-09",
   "totals": {
-    "lib": 87692,
-    "named": 61736,
+    "lib": 99540,
+    "named": 49888,
     "unnamed": 475848,
-    "typed": 401496,
-    "game": 537584,
-    "n_game": 1108,
-    "n_named": 291,
+    "typed": 399676,
+    "game": 525736,
+    "n_game": 1038,
+    "n_named": 221,
     "n_unnamed": 817,
-    "n_typed": 571,
-    "n_lib": 837,
+    "n_typed": 568,
+    "n_lib": 907,
     "excluded": 479,
     "unnamed_typed": 389376
   },
-  "matching_bytes": 505468,
+  "matching_bytes": 493620,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
-      "lib": 87652,
-      "named": 60700,
+      "lib": 99500,
+      "named": 48852,
       "unnamed": 178928,
-      "typed": 131112,
-      "n_lib": 834,
-      "n_named": 286,
+      "typed": 129292,
+      "n_lib": 904,
+      "n_named": 216,
       "n_unnamed": 294,
-      "n_typed": 191,
+      "n_typed": 188,
       "excluded": 479,
       "n_excluded": 479,
       "unnamed_typed": 119436,
@@ -32,8 +32,8 @@
         2147574772,
         2147973359
       ],
-      "game": 239628,
-      "n_game": 580
+      "game": 227780,
+      "n_game": 510
     },
     "X000.BIN (overlay AREA00)": {
       "lib": 40,
