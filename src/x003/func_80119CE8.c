@@ -1,12 +1,10 @@
 // FUNC 80119ce8 288 X003
-/* score 71: loop hoisting now matches (dd0 store written in both branches: D_801358AC life 2 gets hoisted,
-   D_8013592C not; game regs t3/t4). Left: game loads x,y,z (t0-t2) at the loop top and p->d94 (a0) right after the
-   first lbu subtype, and keeps o in a2 (move a2,a0); ours schedules those loads late and leaves o in a0.
-   Tried: inline wrapper, pad sizes (72 fixes the frame), early n = p->d94 temp, hill-climb of the loop body. */
+// MATCHING 80119ce8 288
+/* debt: empty-loop barrier after the y load keeps the x/y/z loads at the loop top. */
 #include "TOBJ.H"
 typedef struct {
-    TObj o;
-    void *dc0, *dc4, *dc8, *dcc, *dd0;
+    char pad[0xb8];
+    void *db8, *dbc, *dc0, *dc4, *dc8, *dcc, *dd0;
 } TObjX;
 #define X(p) ((TObjX *)(p))
 extern char D_80135974[], D_801358AC[];
@@ -23,15 +21,16 @@ void func_80119CE8(TObj *o)
     p = o;
     q = p;
     while (1) {
-        X(p)->dc4 = D_8013592C + o->subtype * 8;
         x = p->a.raw;
         y = p->y.raw;
+        do {} while (0);
         z = p->b.raw;
         p->wb4 = 0;
         p->wb6 = 0;
-        *(void **)&p->wb8 = D_80135974;
-        *(void **)&p->wbc = D_80135974;
+        X(p)->db8 = D_80135974;
+        X(p)->dbc = D_80135974;
         X(p)->dc0 = D_80135974;
+        X(p)->dc4 = D_8013592C + o->subtype * 8;
         X(p)->dc8 = D_80135934 + o->subtype * 8;
         X(p)->dcc = D_8013593C + o->subtype * 8;
         if (p->d94 == 0) {
