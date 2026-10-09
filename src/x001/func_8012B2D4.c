@@ -1,7 +1,5 @@
 // FUNC 8012b2d4 2116 X001
-/* score 150: full logic. Open: case 0 (step 0) loads the box constants 0xc/0x18 early into a0/v1 (ours
-   loads them at the stores); the b9f shake branch computes wd2-2 as li 0xfffe+addu; the despawn range test loads
-   D_800A457C/E in a different order. Tried: box setter inlines at several positions, hill-climbed case 0. */
+// MATCHING 8012b2d4 2116
 #include "TOBJ.H"
 
 extern int D_1F8002D0[];
@@ -59,6 +57,16 @@ static __inline__ int land(TObj *o)
     return 0;
 }
 
+static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
+{
+    o->box0 = a; o->box1 = b; o->box2 = c; o->box3 = d;
+}
+
+static __inline__ void setw(TObj *o, short a, short b, short c, short d)
+{
+    o->w48 = a; o->w4a = b; o->w4e = c; o->w50 = d;
+}
+
 typedef struct { TObj t; char pad[0xd2 - 0xc0]; unsigned short wd2; } BX;
 #define o (&b->t)
 void func_8012B2D4(BX *b)
@@ -72,21 +80,15 @@ void func_8012B2D4(BX *b)
             q[0] = o->h->p.whole;
             q[1] = o->y.p.whole;
             q[2] = o->d->p.whole;
+            o->d3c = D_1F8002D0[0];
             o->w22 = 0;
             o->b0d = 0;
             o->b68 = 0;
-            o->ba7 = 0;
-            o->d3c = D_1F8002D0[0];
-            q[4] = 0;
-            o->w4e = 7;
-            o->w50 = 0xe;
-            o->box2 = 0x10;
-            o->w4a = 0x18;
             o->w1e = 1;
-            o->box1 = 0x18;
-            o->w48 = 0xc;
-            o->box0 = 0xc;
-            o->box3 = 0x20;
+            o->ba7 = 0;
+            q[4] = 0;
+            setw(o, 0xc, 0x18, 7, 0xe);
+            setbox(o, 0xc, 0x18, 0x10, 0x20);
             o->step++;
         } else {
             o->active = 1;
@@ -133,17 +135,18 @@ void func_8012B2D4(BX *b)
             }
             if (((D_1F8001F8 + D_1F800198) & 7) == 0) {
                 if (o->y.p.whole > D_800A4582 + 0xa0 ||
-                    D_800A457E + 0xb0 < (unsigned short)(o->h->p.whole + 0xaa - D_800A457C)) {
+                    (unsigned short)(o->h->p.whole + 0xaa - D_800A457C) > D_800A457E + 0xb0) {
                     o->b04 = 3;
                     o->active = 2;
                     o->visible = 0;
                 }
             }
         } else if (o->b9f == 0) {
+            short t = o->h->p.whole;
             o->b9f = 0xf;
-            b->wd2 = o->h->p.whole;
+            b->wd2 = t;
         } else {
-            { int r = Rand() & 3; o->h->p.whole = b->wd2 - 2 + r; }
+            { int r = Rand() & 3; o->h->p.whole = (short)(b->wd2 - 2) + r; }
             if (--o->b9f == 0) {
                 o->b9e = 0;
                 o->h->p.whole = b->wd2;
