@@ -5,7 +5,11 @@
    plain store) placed after the two volatile scratchpad reads: volatile reads keep their mutual order, so the lbu
    lands after the lw's and the b04 store order (d84 before b69/b04) comes out right. Tried on top of that: base/n
    read order, base += n, n = *pp; n = *(int*)(n+0x20), pp at function scope (la hoisted), D_1F800334[0] array,
-   cast forms, t int/uchar, inc placements, da0 operand order (~700 variants, best 4). Includes csv piece 80116D50. */
+   cast forms, t int/uchar, inc placements, da0 operand order (~700 variants, best 4). Includes csv piece 80116D50.
+   n55: deref-first forms (`n = *(int*)(*pp+0x20); base = *pp;`, multi-set n/base, `n + base`) give the game's lw/lw order
+   but the la stays in v0 and the deref sinks below lbu/addiu (14); sched1 trace: the deref is a non-struct varying
+   load so every later struct store is its successor (ready only after `sh 110`), and li 8 would need to be ready
+   after the addiu. Game store order (active before ba4) as source order: 24/55. */
 // FUNC 80116d14 320 X011
 #include "TOBJ.H"
 extern unsigned char D_8009D100;
