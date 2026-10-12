@@ -5,7 +5,10 @@
    `h = o->box2; k = h;` gets CSE-collapsed in every type combo.
    b53: int t + int lo + `lo = o->box2; if (lo >= 8) lo = 8; hi = o->box2; if (hi >= 14) hi = 14;` gives the game's `move s1,a3` and tail order (36) but lhu+sll/sra instead of lh a0 + copy; MIN()/inline min(), lo=hi=box2 chains: 34-78.
    b54: k/v/lo/hi/t type brute force with `k = o->box2; v = k; lo = v; if (k >= 8) ...` (1024 combos): best 34 (same);
-   static __inline__ chk(o,x,y,dir) per call adds $fp and more regs (165+). */
+   static __inline__ chk(o,x,y,dir) per call adds $fp and more regs (165+).
+   n58: cse canonicalizes every h/k/lo copy to the reg with the latest last use (make_regs_eqv), so the compares and the
+   moves always end on one reg; a second `o->box2` read becomes a HI copy of the load temp and collapses too. 9 clamp
+   forms (if/else, ternary, re-read, k-first) x int/short for h,k,lo,hi (144 combos): nothing below 34. */
 #include "TOBJ.H"
 
 short func_8004065C(TObj *o, short x, short y, int dir);
