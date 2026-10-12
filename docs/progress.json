@@ -14,7 +14,7 @@
     "excluded": 479,
     "unnamed_typed": 389376
   },
-  "matching_bytes": 504872,
+  "matching_bytes": 508092,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
       "lib": 99464,
@@ -104,17 +104,17 @@
     "X004": {
       "game": 282416,
       "n": 572,
-      "matched": 275016,
-      "n_matched": 562,
+      "matched": 275656,
+      "n_matched": 563,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 7000,
-      "n_new": 9,
+      "new": 6360,
+      "n_new": 8,
       "uniq": 100176,
-      "uniq_matched": 93176,
+      "uniq_matched": 93816,
       "n_uniq": 222,
-      "n_uniq_matched": 213
+      "n_uniq_matched": 214
     },
     "X005": {
       "game": 180984,
@@ -224,17 +224,17 @@
     "X014": {
       "game": 236716,
       "n": 490,
-      "matched": 230972,
-      "n_matched": 482,
+      "matched": 231280,
+      "n_matched": 483,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 5344,
-      "n_new": 7,
+      "new": 5036,
+      "n_new": 6,
       "uniq": 61336,
-      "uniq_matched": 55992,
+      "uniq_matched": 56300,
       "n_uniq": 180,
-      "n_uniq_matched": 173
+      "n_uniq_matched": 174
     },
     "X016": {
       "game": 186632,
