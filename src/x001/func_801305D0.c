@@ -1,5 +1,8 @@
 // FUNC 801305d0 2036 X001
-/* score 198: only the two inlined side() probes differ: the game schedules `move a0,s0` before `lw v0,0x40(s0)` (+nop) at the d/f merge; everything else matches. Tried: void* param, separate probe inline, call per branch (worse) */
+// MATCHING 801305d0 2036
+/* Keys: side() probe inline with the call pointer copied per arm (`p = o;` as the last statement of both
+   neg/pos arms): the a0 copy ends each arm and jump2 cross-jumps it into the join, so `move a0,s0` precedes
+   the `lw 0x40(s0)` instead of filling its delay slot. */
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
 extern char D_80077CF4[];
@@ -14,6 +17,7 @@ extern short FUN_800408d8(TObj *, short, short);
 
 static __inline__ short side(TObj *o)
 {
+    TObj *p;
     short d;
     int f;
 
@@ -30,14 +34,15 @@ static __inline__ short side(TObj *o)
     neg:
         d = -0x10;
         f = 1;
+        p = o;
     } else {
     pos:
         d = 0x10;
         f = 0;
+        p = o;
     }
-    return FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f);
+    return FUN_8004065c(p, o->h->p.whole + d, o->y.p.whole, f);
 }
-
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
