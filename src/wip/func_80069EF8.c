@@ -5,6 +5,8 @@
    -mno-split-addresses works too). sra comes from int temps (k, r), t - D_8009C33C written in both compares, v set in if/else.
    Left: the first poll loop jumps to 0x5c (the load-delay nop after lw D_80098210) where the game jumps to 0x60
    (nop before the label); same with real ASPSX (matchcheck). Tried do/for/goto/local-pointer loop forms, ASPSX versions.
+   n49: __asm__ volatile("nop") after `q = D_80098210;` before the poll loop fixes the jump target but flips s1/s2 (v/r) in global-alloc (score 16);
+   tried decl order, int/short types of v/r/k, extra refs to v, reusing t/k as the pointer: no change.
    Debt: volatile read of s->n in the 0xff compare (game reloads n for the index). */
 typedef struct {
     char p0[0x3c];
