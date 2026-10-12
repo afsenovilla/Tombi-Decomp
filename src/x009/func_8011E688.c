@@ -1,12 +1,5 @@
-/* score 2: case 0 of the func_80121540 switch fixed with `v = 1; U8(DAT_8009c330, 8) = v;` (constant through
-   the reused int var gets v1, pointer v0). Left: tail block (D_1F8001FC & D_1F8003C6): game order sb b9c; lhu animFrame;
-   lw o->h; sb b9e; ours lw o->h first (sched1 puts lw h above lhu by priority: lw->lh chain). Tried: all 720 perms of the
-   block statements with f/h temps, h-block forms (+=, ternary, f first), raw/in-struct aa and b9c stores, scalar
-   D_8009D2B0 (9), volatile D2B0, empty-loop barrier after b9c (4).
-   o37: cc1 -dS/-dR show all 9 insns of the block at priority 1; sched2 (reverse list scheduler) blocks the lw
-   (memory-unit hazard) at T-5..T-9 and emits it first, the game issues lw right after lhu. Tried raw/volatile b9c
-   store, volatile animFrame read in every position, v=1/x=1/s=1 copies for the constant: all 2 or worse. */
 // FUNC 8011e688 1600 X009
+// MATCHING 8011e688 1600
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *DAT_8009c330;
@@ -163,17 +156,17 @@ void func_8011E688(TObj *o)
         break;
     }
     if (D_1F8001FC & D_1F8003C6) {
+        {
+            Fix16 *h; int f;
         D_8009D2B0[0] = 0;
-        o->b9c = 1;
+        f = 1;
+        o->b9c = f;
         o->b9e = 0;
         U8(o, 0xaa) = 0;
-        {
-            Fix16 *h = o->h;
+            h = o->h;
+            f = o->animFrame & 1;
             v = h->p.whole;
-            if (o->animFrame & 1)
-                h->p.whole = v + 0x10;
-            else
-                h->p.whole = v - 0x10;
+            if (f) h->p.whole = v + 0x10; else h->p.whole = v - 0x10;
         }
         if (D_8009C984 & 0x40) {
             if (DAT_8009d670[0] & D_1F8003C4)
