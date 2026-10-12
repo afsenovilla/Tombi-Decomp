@@ -378,6 +378,18 @@ def main():
     w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
     w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])
     w("")
+    w("## Plan\n")
+    w("1. Match every game function byte for byte (this report).")
+    w("2. All area overlays (done: 16 overlays wired in, see above).")
+    w("3. Remove the matching debt (`do{}while(0)`, `register asm`, volatile pins, `// FLAGS`, asm fences).")
+    w("4. Readable names and types (psx_tomba names, structs instead of raw offsets); then split the sources into")
+    w("   segment files (one per original .c) and link with the splat build.")
+    w("5. Visibility: objdiff report on decomp.dev (done).")
+    w("6. Assets: a decompilation is complete only when the whole disc can be rebuilt. Inventory the files of the")
+    w("   disc (`tools/isoext.py` extracts it), document every format (area `X0nn.BIN` data, graphics, sound banks,")
+    w("   STR movies, texts, `SCES_013.31` and `MAIN1..8`), write unpack/repack tools and a `make` target that")
+    w("   produces a bootable image from sources. Starts when the code passes ~95 %.")
+    w("")
     w("## Largest unnamed functions (next targets)\n")
     allun = []
     for k, r in res.items():
