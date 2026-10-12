@@ -1,7 +1,10 @@
 // FUNC 80122410 2220 X001
-/* score 33: whole function incl. csv pieces 801228BC/80122990/80122A18 (ends at 80122CBC). Remaining: in case 4 the orbit pointer g and the %12 magic constant swap a1/a2, and at the end the la of the anim pointer is scheduled before the AnimJump arg moves (the empty do/while(0) after the final orbit, debt, fixed the y-store placement). Tried: block-local/function g, explicit orbit code, macro orbit, index temps.
-   Also (o17): case 1 loads D_8009C330/D_8009F0EC in swapped order (+0xd8); swapping p/g assignments and a
-   statement hill-climb over the first 10 case-1 statements change nothing. */
+// MATCHING 80122410 2220
+/* Debt: the __asm__ volatile("") barrier before the final anim set (the empty do/while(0) an earlier agent used
+   pinned the la ahead of the AnimJump arg moves). Matched by making g single-set in case 1 (second read into g2,
+   case 4 pointer into g4: both D_8009C330/D_8009F0EC loads get the birthing boost and keep source order) and by
+   assigning the case 4 orbit pointer through a brace-block macro so g4 spans two blocks (global-alloc gives it a2
+   after the local-alloc'd division constant takes a1). */
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1;
@@ -37,6 +40,8 @@ static __inline__ TObj *orbit2(TObj *o, int a)
 {
     int c, s;
     TObj *g;
+    TObj *g2;
+    TObj *g4;
     a = (a + 0x400) & 0xfff;
     c = (rcos(a) * o->wba) >> 12;
     s = rsin(a) * o->wba;
@@ -46,12 +51,21 @@ static __inline__ TObj *orbit2(TObj *o, int a)
     return g;
 }
 #define orbit(o) orbit2(o, D_8009F0EC->d8c)
+#define ORBIT(o, gv) { int c_, s_, a_; \
+    a_ = (D_8009F0EC->d8c + 0x400) & 0xfff; \
+    c_ = (rcos(a_) * (o)->wba) >> 12; \
+    s_ = rsin(a_) * (o)->wba; \
+    gv = D_8009F0EC; \
+    (o)->h->p.whole = (o)->wb8 + (gv->h->p.whole + c_) + gv->d30; \
+    (o)->y.p.whole = gv->y.p.whole + (s_ >> 12); }
 
 void func_80122410(TObj *o)
 {
     short t[12] = { 1, 1, 2, 2, 3, 3, 3, 3, 2, 2, 1, 1 };
     P *p;
     TObj *g;
+    TObj *g2;
+    TObj *g4;
     TObj *r;
     unsigned short *k;
 
@@ -79,11 +93,11 @@ void func_80122410(TObj *o)
         q->w0c = 0;
         }
         ((unsigned char *)&o->wa8)[1] = 1;
-        g = D_8009F0EC;
-        o->h->p.whole = o->wb8 + (g->h->p.whole + g->d30);
-        o->y.p.whole = g->y.p.whole + o->wba;
-        o->velH = g->h->p.whole - o->h->p.whole;
-        o->velV = g->y.p.whole - o->y.p.whole;
+        g2 = D_8009F0EC;
+        o->h->p.whole = o->wb8 + (g2->h->p.whole + g2->d30);
+        o->y.p.whole = g2->y.p.whole + o->wba;
+        o->velH = g2->h->p.whole - o->h->p.whole;
+        o->velV = g2->y.p.whole - o->y.p.whole;
         o->wb0 = 0;
         o->d84 = 0;
         o->d88 = 0;
@@ -91,8 +105,8 @@ void func_80122410(TObj *o)
         o->velX = o->wb8;
         {
         P *r2 = D_8009C330;
-        r2->w10 = g->h->p.whole + o->wb8;
-        r2->w12 = g->y.p.whole + o->wba;
+        r2->w10 = g2->h->p.whole + o->wb8;
+        r2->w12 = g2->y.p.whole + o->wba;
         }
         o->anim = (void *)FUN_80010d68;
         AnimJump(o, 0);
@@ -192,14 +206,14 @@ void func_80122410(TObj *o)
         break;
     case 4:
         AnimAdvance(o);
-        g = orbit(o);
+        ORBIT(o, g4)
         o->wb8 += (D_8009C330->w10 * t[o->d88 % 12]) >> 8;
         if (++o->d88 >= 12) {
             o->animFrame ^= 1;
             if (o->animFrame & 1) o->wb8 = o->velX + o->wb2;
             else o->wb8 = o->velX - o->wb2;
-            orbit2(o, g->d8c);
-            do { } while (0);
+            orbit2(o, g4->d8c);
+            __asm__ volatile("");
             o->anim = (void *)FUN_80010d68;
             AnimJump(o, 0);
             o->state = 1;
