@@ -1,10 +1,11 @@
 // FUNC 80052190 2012 MAIN0
+// MATCHING 80052190 2012
 // FLAGS -O2 -G0 -fno-strength-reduce
-/* score 30 (n70, was 447): rewritten in the FUN_80123fd0/func_80053B5C macro form (SN/CS macros, short x/y, u/w,
-   A/B/C/D short temps, normal case first since the game branches with bnez), colour stores written in full per
-   branch (cross-jumped tail, constant in v0), D_1F800074 read as an array element so its lw stays after the uv
-   stores. Left: preheader order only (game loads o->d3c first, before the table pointers, and o->anim between
-   the hoisted pointer stores; e/q temps a0/v1 swapped). */
+/* Rotated FT4 sprite strip with per-object colour (MAIN0 twin of func_8005296C / func_80053B5C family): macro loop
+   body (SN/CS, short x/y, u/w, short A/B/C/D, normal case first since the game branches with bnez), colour stores
+   written in full per branch (cross-jumped tail, constant in v0), D_1F800074 read as an array element so its lw
+   stays after the uv stores, and `e = (short *)o->d3c; e += ...` (multi-set pointer) so the d3c load is not
+   boosted and sits at the top of the preheader. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
@@ -96,7 +97,8 @@ void func_80052190(TObj *o)
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
     xy = D_1F800070;
-    e = (short *)(o->d3c + *(unsigned short *)o->anim * 4);
+    e = (short *)o->d3c;
+    e += *(unsigned short *)o->anim * 2;
     q = (unsigned char *)(*(volatile int *)&o->d3c + e[1]);
     n = e[0];
     x = xy;
