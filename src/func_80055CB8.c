@@ -1,4 +1,5 @@
 // FUNC 80055cb8 756 MAIN0
+// MATCHING 80055cb8 756
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -56,7 +57,7 @@ static __inline__ int onscreen(PolyFT4 *p)
     return 0;
 }
 
-static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
+static __inline__ int addprim(unsigned e, unsigned *a, char *b, int c, int d)
 {
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
@@ -70,13 +71,18 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-/* score 21: volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim(p, base, z, b0f, e) with d = ((signed char)d + c) << 2 (as FUN_80052db8) fixed the sum. Left: lui 0x9000000 (e) lands in the beqz delay slot of the b0d&1 if (game: after lh z). Tried: e inside the inline (45), all 120 param orders (same), e|v / v|=e, goto-next form of FUN_80052db8, short/schar param types, z read into a local, open-coded OT insert (47). The li is the first insn of the join block in ours (reorg steals it into the beqz slot); game schedules lh z first. b35: rewrite in the style of matched twin FUN_80052db8 (TObj, q/f pointers, goto next, -fno-strength-reduce) gives the same 21 once the volatile onscreen/x3/y3 are kept (50 without); otadd variants (b inside, e inside, int b) x all param orders: 21/45/53; e |= v makes gcc hoist the li into an s-reg (31). b46: -dS dump: it is sched2 that puts `li a1` (inline param e, reg/v a1) first in the join block (before lh z), then reorg steals it from the target; game's nop suggests lh first and the li not stealable after a trapping load. */
+/* The `do {} while (0)` after `z = o->z` is debt: it pins the lh before the OT-insert code (sched2 otherwise puts
+   the constant `li a1` first in the join block and reorg steals it into the beqz delay slot; the game has a nop
+   there because a trapping load cannot be stolen). The loop note chains the first insn after it to the lh, so the
+   inline's tag constant is its first parameter to make that pinned insn the `li` (game: lh, lui a1, lb, lw).
+   volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim as in FUN_80052db8. */
 void func_80055CB8(O *o)
 {
     PolyFT4 *p;
     Ent *e;
     short *h;
     int n;
+    int z;
 
     h = (short *)(o->tab + *o->anim * 4);
     n = h[0];
@@ -110,7 +116,9 @@ void func_80055CB8(O *o)
             if (o->b0d & 1) {
                 p->clut = o->w08;
             }
-            if (addprim((unsigned *)p, DAT_1f8001e0 + 0x10, o->z, o->b0f, 0x9000000) == 0) {
+            z = o->z;
+            do {} while (0);
+            if (addprim(0x9000000, (unsigned *)p, DAT_1f8001e0 + 0x10, z, o->b0f) == 0) {
                 DAT_1f800164 = DAT_1f800164 + 1;
             }
         }
