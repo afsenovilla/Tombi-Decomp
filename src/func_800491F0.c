@@ -1,6 +1,10 @@
 // FUNC 800491f0 820 MAIN0
-/* score 18: only regs in the case-32 box test. Game: o->h ptr v0, e->h ptr a0, o-val v1, e-val a0, box v0, d=v1, sum=box+d in v0 (o-ptr NOT tied to o-val). `d = o->h; d -= e->h;` 22->18. b31 tried: d/s types int/short/ushort, s=box; s+=d (right addu order, regs wrong, 38), temps for e-val, -(e-o), inline chk() variants (22-88), direct expr forms (36). Outer loop must be goto (no loop.c hoisting). b46: -dl dump: function-scope d is a global pseudo (dies in 2 places) so o-val can't tie with d; block-local d1 per test + `e->box0 + d1` gives the right shape (box+d, d tied to o-val) but o-val qty wins local-alloc priority over the box/sum qty (looks like an exact tie broken by qty order) -> 36. Tried: lim=e->box1 read first, sibling form t = e->box0 + (a - b), oh/eh pointer locals, int/ushort d1, separate e-val temp (all 18-38). b53: int function-scope `d = oh - eh;` makes d a real global pseudo (box+d tie right, but lh and eval/box still win v0: 38); scripted d/s type x 9 forms with a sum var s, (u16) casts on loads, register asm("$3") d (32-38). */
-/* o36: scripted 4 d-forms x 3 sum-forms x 3 compares x types (short/int/ushort) in a block: best 22 (int, d + box) / 36 (box + d); nothing under 18. */
+// MATCHING 800491f0 820
+/* The outer list loop is a real do-while so the refs of the case-32 box test get loop depth 3 (goto loop = depth 2),
+   which flips local-alloc's priority order (box/sum/andi chain before lim/slt and o-val/d) and gives the game's
+   registers (box+d in v0, d tied to o-val in v1, e-ptr/e-val in a0). The dead `two = 2` in case 0 is debt: it makes
+   `two` multi-set so loop.c does not combine the stores' constant 2 with the compare's and hoist it (flow deletes
+   the dead store). Body of case 32 copied from the matched twin func_80048C24. */
 #include "TOBJ.H"
 
 extern short D_1F80019E;
@@ -34,11 +38,12 @@ void func_800491F0(void)
     TObj *o;
     TObj *e;
     short d;
+    unsigned char two;
     n = *(unsigned short *)0x1F800246;
     list = *(TObj ***)0x1F80021C;
     if (*(short *)0x1F80024C == 0) return;
     if (n == 0) return;
-outer:
+    do {
         o = *list++;
         n--;
         if (o->active != 2 && D_8007B63C[o->type] != 0) {
@@ -49,7 +54,7 @@ outer:
             D_1F80019E--;
             if (!(e->active & 1)) continue;
             switch (e->type) {
-            case 0: func_800489D8(o); break;
+            case 0: two = 2; func_800489D8(o); break;
             case 1: func_80126B50(o); break;
             case 2: func_80126C60(o); break;
             case 4:
@@ -65,16 +70,18 @@ outer:
             case 28: func_801216A0(o); break;
             case 32:
                 if (o->type == 0x22 || o->type == 0x2c) {
-                    if ((unsigned short)(o->d->p.whole - e->d->p.whole + 45) > 90) break;
-                    d = o->h->p.whole; d -= e->h->p.whole;
-                    if ((unsigned short)(d + e->box0) > e->box1) break;
-                    d = o->y.p.whole; d -= e->y.p.whole;
-                    if ((unsigned short)(d + e->box2) > e->box3) break;
-                    o->active = 2;
-                    o->b04 = 2;
-                    o->step = 0;
-                    o->state = 0;
-                    e->state++;
+                    if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) < 0x5b) {
+                        if ((unsigned short)(e->box0 + (o->h->p.whole - e->h->p.whole)) <= e->box1) {
+                            if ((unsigned short)(e->box2 + (o->y.p.whole - e->y.p.whole)) <= e->box3) {
+                                two = 2;
+                                o->active = two;
+                                o->b04 = two;
+                                o->step = 0;
+                                o->state = 0;
+                                e->state++;
+                            }
+                        }
+                    }
                 }
                 break;
             case 33: func_80128054(o); break;
@@ -91,5 +98,5 @@ outer:
             }
         } while (D_1F80019E != 0);
         }
-    if (n != 0) goto outer;
+    } while (n != 0);
 }
