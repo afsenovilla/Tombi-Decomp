@@ -1,4 +1,5 @@
 // FUNC 800505f0 2228 MAIN0
+// MATCHING 800505f0 2228
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "TOBJ.H"
 typedef struct {
@@ -100,7 +101,8 @@ void FUN_800505f0(TObj *o)
     if (proj()) return;
     s = *(short *)o->anim;
     xy = D_1F800070;
-    e = (short *)(o->d3c + s * 4);
+    e = (short *)o->d3c;
+    e += s * 2;
     q = (unsigned char *)(*(volatile int *)&o->d3c + e[1]);
     n = ((unsigned short *)e)[0];
     x = xy;
