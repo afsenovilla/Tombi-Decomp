@@ -9,7 +9,14 @@
    allocated before x (global.c find_reg pass 1 = lowest unused s-reg). No source form changes x's refs (cse folds a
    running px back to x+K; short/unsigned short x is promoted and identical). Tried: q = h%10 temp, o/t multi-set forms,
    running px, px int/short, callee prototypes, digit orders: all identical code. Needs an extra real ref on o and t or a
-   longer live range for x. */
+   longer live range for x.
+   n65: `short x` param with a running `x += 8` after every draw (no px) compiles to the SAME 46 bytes: gcc keeps the
+   promoted a2 copy (10 refs/71 insns) apart from the HI user var (s0). Probe: an `__asm__("" :: "r"(x))` after the
+   2nd tail call (x live past it, L~106, prio .28 < o .31) gives o=s1, t=s2, x=s3 (score 16); a probe before that call
+   does not (50). So the game's x is live until the last digit call, but no C form found that does it without code
+   (x += 0, x = x are folded/deleted before flow). Left then: hd (h%10) must be a fresh pseudo in v1: a separate `hd`
+   var gets a1 by preference (set_preference takes the first operand of the minus = h, already local-alloc'd to a1);
+   and the tail's v0/v1 swap in the m/10%10 expansion (local qty order). */
 extern void func_80118028(int, short, short);
 
 void func_80117E14(int n, int m, int x, short y)
