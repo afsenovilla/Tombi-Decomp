@@ -1,5 +1,14 @@
-/* score 12: Ground2 d8c +-1 result lands in v1 (game v0, same non-inverted beqz;nop;j shape); every variant giving v0 (w temp, store per arm, ?:, goto, nested inline) makes reorg invert the branch (bnez + -1 in delay, 168). Fixed: case 4 double state store = `o->state++; o->b9c = 1; o->state = 1;` (flow keeps a store overwritten only after another store; sched reorders). o35: with a distinct w (v0) jump2 output already equals the game's pre-reorg RTL; the -1 is put in the beqz slot by fill_eager (fallthrough thread), so the game's reorg must see v0 live at the +1 label; also tried goto/switch/3-way/per-arm return/short,uchar,uint w/inline returning via var: all 168+ or v1. */
-/* o36 (still 12): theory from reorg.c: game shape = fallthrough -1 not owned (a post-flow label before it, e.g. from cross-jumping) so neither thread fills the beqz slot and no_labels_between_p blocks the inversion; the j slot then takes -1 by the backward scan. Needs a second path jumping to the -1 arm; tried duplicate dec arms (0x40/0x80), goto dec, per-arm stores/returns, do-while: 168-198. */
+/* n51 (still 12): 3 sites: the two Ground2 sites (result used by `if (Ground2(o))`, +2d0/+78c) are the
+   non-inverted `beqz;nop;j L;addiu v0,v1,-1;addiu v0,v1,1` shape in the game, the Ground site (result unused, +3xx)
+   is inverted. The w-temp form (`int w; if (t<0x80) w=o->d8c-1; else w=o->d8c+1; o->d8c=w;`) gives the game's
+   registers (v0 result, v1 load) but reorg steals the -1 from the j's slot and inverts (168). Experiments on the
+   matched sibling func_8011D3EC (X009, `hp->p.whole = c ? x-16 : x+16`): the nop shape appears there ONLY when the
+   code after the shared store is `j Lx` whose delay slot sets v0 (`j $L16; li $2,3`, a cross-jumped tail); any
+   other following code (li before the j, store in the slot, epilogue target) inverts. So the game probably had a
+   separate `li v0,1; j L78` for the main path's return 1 (later deleted by relax_delay_slots as a jump around an
+   identical insn); every attempt to get that here (inner `return 1`, volatile reload, do{}while(0)/asm barriers,
+   uchar/short return type, r = reload var) either lets jump2 cross-jump the lone li (merge, then inversion) or
+   schedules the li between lbu/sw so r lands in v1. matchcheck (CC1PSX) agrees with ncheck on all variants. */
 // FUNC 8012748c 2236 X003
 #include "TOBJ.H"
 
