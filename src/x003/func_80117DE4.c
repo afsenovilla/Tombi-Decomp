@@ -1,13 +1,8 @@
 // FUNC 80117de4 1184 X003
-/* score 28: only a register swap left in the two fill() loops (cases 0/1): game keeps i in a1 and the
-   loop bound b in a0, we get i in a0 and b in a1. Tried: param/local int/short combos, loop forms
-   (for/while/do), clamps inside/outside the inline, swapped params, reusing a for b, register asm.
-   o23: game asm reads as fill(short a, int b): i is an unextended copy of a (move a1,a0 before the b clamp), b' an
-   extended copy (move a0,v1); that signature gives the loop exactly but swaps a/b at the caller (56, 44 with ternary b clamp).
-   o30: with fill(short a, int b) looping on the param a, -dg shows caller a (12 refs/32 insns) outranks b (10/30) and
-   takes v1; game needs b first. Block-local a/b per case, clamps inside the inline, b = a; b += 8, reusing a/b in
-   cases 2/3, type brute force: no change.
-   NB: this function is missing from notes/functions_x003.csv (covers pieces 80117F98/80118040/801180AC). */
+// MATCHING 80117de4 1184
+/* Loops written as macros on ONE function-scope `short i` shared by all four loops: the shared loop variable is
+   what keeps i in a1 (it conflicts with k in a0 in cases 2/3) and makes cse extend i rather than a before the loop.
+   Covers csv pieces 80117F98/80118040/801180AC. */
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
     unsigned char p0[3];
@@ -23,30 +18,21 @@ extern int getScrollOffsetX(void);
 extern void FUN_8005f488(RECT *, int, int);
 extern void func_80118284(L *);
 
-static __inline__ void fill(L *o, unsigned char *tbl, int *list, int a, short b)
-{
-    short i;
-
-    for (i = a; i <= b; i++) {
-        o->items[o->count] = (int)tbl + list[i];
-        o->count++;
+#define FILL() \
+    for (i = a; i <= b; i++) { \
+        o->items[o->count] = (int)tbl + list[i]; \
+        o->count++; \
     }
-}
 
-static __inline__ void addRange(L *o, unsigned char *tbl, int *list, short base, unsigned char n)
-{
-    short i;
-    int k;
-
-    for (i = 0; i < 11; i++) {
-        k = base + i;
-        if (k >= n) break;
-        if (k >= 0) {
-            o->items[i] = (int)tbl + list[k];
-            o->count++;
-        }
+#define ADDRANGE() \
+    for (i = 0; i < 11; i++) { \
+        k = base + i; \
+        if (k >= n) break; \
+        if (k >= 0) { \
+            o->items[i] = (int)tbl + list[k]; \
+            o->count++; \
+        } \
     }
-}
 
 void func_80117DE4(L *o, unsigned char *tbl)
 {
@@ -55,6 +41,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
     short a;
     short b;
     short i, base;
+    int k;
     RECT r;
 
     switch (D_8009C962) {
@@ -69,7 +56,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
         }
         if (a < 0) a = 0;
         if (b >= n) b = n - 1;
-        fill(o, tbl, list, a, b);
+        FILL();
         break;
     case 1:
     case 5:
@@ -83,10 +70,11 @@ void func_80117DE4(L *o, unsigned char *tbl)
         if (D_1F800176 >= 0x12c1) a--;
         if (a < 0) a = 0;
         if (b >= n) b = n - 1;
-        fill(o, tbl, list, a, b);
+        FILL();
         break;
     case 2:
-        addRange(o, tbl, list, (D_1F800176 + getScrollOffsetX()) / 80, n);
+        base = (D_1F800176 + getScrollOffsetX()) / 80;
+        ADDRANGE();
         func_80118284(o);
         break;
     case 3:
@@ -103,7 +91,8 @@ void func_80117DE4(L *o, unsigned char *tbl)
             FUN_8005f488(&r, 0x80, 0x100);
             o->b164++;
         }
-        addRange(o, tbl, list, (D_1F800176 + getScrollOffsetX()) / 80, n);
+        base = (D_1F800176 + getScrollOffsetX()) / 80;
+        ADDRANGE();
         break;
     }
 }
