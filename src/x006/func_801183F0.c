@@ -1,8 +1,7 @@
 // FUNC 801183f0 256 X006
-/* score 6: only registers of the path-point pointers differ: game has base in v1, a=base+off in a0, b in a1;
-   ours ties base with a (a0) and b gets a1. b written as `base - -i` stops CSE merging a/b (old copy form scored 23).
-   Tried: base/off temps (int, char ptr, P8 ptr; block or function scope), both statement orders, off - -base, a=b copy. */
-/* o36: still 6. Hypothesis: game base pseudo is not tied to a/b in local-alloc (dies twice or non-local); tried base temps (int/volatile), a-first, multiset a/b, ushort index, if/else deaths: 6..74. */
+// MATCHING 801183f0 256
+/* Path-point pair: b is reused for the dx argument of the last ratan2 so it is a multi-set (global)
+   pseudo and local-alloc cannot tie it with the dying o->pa8 temp (game: pa8 in v1, a/b in a0/a1). */
 /* n52: still 6. Register analysis (gcc local-alloc.c/global.c): game = a in a0, b in a1 (a computed first), base v1, i v0.
    Local-alloc ties the dest of `addu` with a dying operand (base or i) unless the dest is NOT block-local; and any
    config with base global fails (set_preference makes base prefer b's a1). So the game had `b` (the 2nd pointer)
@@ -31,16 +30,16 @@ void func_801183F0(O *o)
 {
     X *x = &o->x;
     int dx, dz, dy, d;
-    P8 *a, *b;
+    int a, b;
     int i;
 
     for (;;) {
         i = o->w2c << 3;
-        b = (P8 *)((int)o->pa8 - -i);
-        a = (P8 *)((int)o->pa8 + i);
-        dx = a[1].x - b->x;
-        dz = a[1].z - b->z;
-        dy = a[1].y - b->y;
+        a = (int)o->pa8 + i;
+        b = (int)o->pa8 - -i;
+        dx = ((P8 *)a)[1].x - ((P8 *)b)->x;
+        dz = ((P8 *)a)[1].z - ((P8 *)b)->z;
+        dy = ((P8 *)a)[1].y - ((P8 *)b)->y;
         d = SquareRoot0(dx * dx + dz * dz);
         if (d != 0) {
             x->c0 = d << 8;
@@ -51,5 +50,6 @@ void func_801183F0(O *o)
     }
     x->ba = ratan2(dy, d);
     o->w76 = dy;
-    x->b8 = ratan2(dz, dx);
+    b = dx;
+    x->b8 = ratan2(dz, b);
 }
