@@ -1,9 +1,11 @@
-/* score 4: (o38: volatile cast-at-use / char-base+0x334 / int*volatile* forms and b04 temp placements all >=4) only scheduling in case 0: game loads lbu b04 after the two volatile D_1F800334 reads and stores d84 before b69/b04;
-   tried: hill-climbed statement order, raw-offset stores, b04 increment forms, pp forms, do-while/asm barriers. Includes csv piece 80116D50.
-   Also (o17): non-volatile pp with only one volatile read, int *pp sibling forms (x014 func_80122DE8), box0..3 natural
-   order, random/targeted permutations of the case-0 stores (best stays 4).
-   (o32): sched1 dump: lbu b04 (QI) loses every tie to the stores and lands above the volatile loads; setbox() inline
-   with random orders best 6; volatile b04 access grows the code. */
+/* score 4 (n53): only the head of case 0 differs: game `la v1; lw v0,0(v1) [n base]; lw a1,0(v1) [base]`, ours
+   `la v0; lw a1 [base]; lw v0 [n base]` (local-alloc ties the load where the la pseudo dies with it; the game's
+   la is untied and gets v1, i.e. the second load's dest was not a tie-able local pseudo). What this version fixed
+   vs the old wip (6): a volatile READ of o->b04 (`t = *(volatile unsigned char *)&o->b04`, unsigned char t, t++,
+   plain store) placed after the two volatile scratchpad reads: volatile reads keep their mutual order, so the lbu
+   lands after the lw's and the b04 store order (d84 before b69/b04) comes out right. Tried on top of that: base/n
+   read order, base += n, n = *pp; n = *(int*)(n+0x20), pp at function scope (la hoisted), D_1F800334[0] array,
+   cast forms, t int/uchar, inc placements, da0 operand order (~700 variants, best 4). Includes csv piece 80116D50. */
 // FUNC 80116d14 320 X011
 #include "TOBJ.H"
 extern unsigned char D_8009D100;
@@ -23,18 +25,20 @@ void func_80116D14(TObj *o)
         }
         {
             volatile int *pp = &D_1F800334;
-            int n, base;
-            n = *(int *)(*pp + 0x20);
+            int n, base; unsigned char t;
             base = *pp;
+            n = *(int *)(*pp + 0x20);
+            t = *(volatile unsigned char *)&o->b04;
+            t++;
             o->box1 = 0x10;
             o->box3 = 0x10;
             o->ba4 = 0;
             o->box0 = 8;
             o->active = 1;
             o->box2 = 8;
-            o->b69 = 0;
-            o->b04++;
             o->d84 = 0x80;
+            o->b69 = 0;
+            o->b04 = t;
             o->da0 = base + n;
         }
         break;
