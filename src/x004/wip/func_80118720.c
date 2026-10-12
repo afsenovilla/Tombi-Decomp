@@ -9,7 +9,12 @@
    pseudo or a much longer range (la placed near the top of the block in sched1; it is the boosted la right before
    its first use in ours). Variable pointer forms (p + idx*64, (p+16)+idx*64, p += 48) fold into one base + offsets
    (score 110-136), early dead `base = (int)D` is dropped before cse, 400 random store-order/negation/idx-type
-   variants all 28. */
+   variants all 28.
+   n64: 160 more structural variants (macro put, nx/ny locals early/late, y before x, v.z once, int/short per local)
+   and FLAGS -fno-schedule-insns(2)/-fno-expensive-optimizations/-fno-cse-skip-blocks/-fno-strength-reduce/-O1: all 28+.
+   local-alloc.c: a pseudo gets t3 = leftover only if allocated after y/-y, i.e. D's qty priority (2*7/len) must drop
+   below -y's (857): needs the la placed at the top of the sched1 block (len ~230) = a non-boosted (multi-set) base
+   pseudo that cse must still not fold into symbol+offset. */
 typedef struct { int x, y, z; } V3;
 typedef struct { int x, y, z, pad; } V4;
 extern V4 D_80133ADC[][4];
