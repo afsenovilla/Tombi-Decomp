@@ -749,3 +749,9 @@ address,name,confidence,comment
 80077404,SpuSetCommonAttr,alta,"Psy-Q (psx_tomba, por bytes)"
 80077798,SpuRGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80077868,SpuGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8004eb08,cdLoadTask,alta,psx_tomba #24 (por bytes)
+80038cd0,execCoreOpcode,alta,psx_tomba #24 (por bytes)
+8001eb84,startAreaBgmWithReverb,alta,psx_tomba #24 (por bytes)
+8002b010,stubInventory1,alta,psx_tomba #24 (por bytes)
+8002b0ac,stubInventory2,alta,psx_tomba #24 (por bytes)
+8002b8bc,stubInventory3,alta,psx_tomba #24 (por bytes)

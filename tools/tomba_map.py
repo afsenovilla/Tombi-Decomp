@@ -5,7 +5,7 @@ native pipeline of tools/ncheck.py, masks the relocations of every function and 
 game/MAIN0.EXE. One line per function: psx_tomba name, NTSC address, size, PAL hit(s) and a tag
 (NEW = not matched here yet, HAVE:<file> = already matched, AMBIG = several identical copies, NOTFOUND = the PAL
 code differs). Feed the output to `tools/tomba_port.py --batch`.
-Usage: tools/tomba_map.py [--gcc /opt/oldgcc/gcc-2.7.2-psx] <psx_tomba .c files...>
+Usage: tools/tomba_map.py [--gcc /opt/oldgcc/gcc-2.7.2-psx] [--bin game/AREA00/X000.BIN] <psx_tomba .c files...>
 Environment: PSX_TOMBA = checkout of https://github.com/hansbonini/psx_tomba (default <parent of this repo>/hansbonini/psx_tomba)."""
 import os, re, struct, subprocess, sys, tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,10 +13,16 @@ PT = os.environ.get("PSX_TOMBA", os.path.join(os.path.dirname(ROOT), "hansbonini
 args = sys.argv[1:]
 GCC = args[args.index("--gcc") + 1] if "--gcc" in args else os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")
 if "--gcc" in args: del args[args.index("--gcc"):args.index("--gcc") + 2]
+BIN = args[args.index("--bin") + 1] if "--bin" in args else "game/MAIN0.EXE"
+if "--bin" in args: del args[args.index("--bin"):args.index("--bin") + 2]
 files = args
-MAIN0 = open(ROOT + "/game/MAIN0.EXE", "rb").read()
-LOAD = struct.unpack("<I", MAIN0[0x18:0x1C])[0]
-TEXT = MAIN0[0x800:]
+if BIN.upper().endswith(".EXE"):
+    MAIN0 = open(os.path.join(ROOT, BIN), "rb").read()
+    LOAD = struct.unpack("<I", MAIN0[0x18:0x1C])[0]
+    TEXT = MAIN0[0x800:]
+else:  # raw overlay (X0nn.BIN), all loaded at 0x800E8028
+    TEXT = open(os.path.join(ROOT, BIN), "rb").read()
+    LOAD = 0x800E8028
 # our matched funcs
 have = {}
 for f in os.listdir(ROOT + "/src"):
@@ -72,7 +78,7 @@ for src in files:
         print("ERROR", src, (e.stderr or b"")[-300:].decode(errors="replace")); continue
     merged = {}
     for a, nm in syms:
-        if a not in merged or merged[a] == "gcc2_compiled": merged[a] = nm
+        if a not in merged or merged[a] in ("gcc2_compiled", "__gnu_compiled_c"): merged[a] = nm
     syms = sorted(merged.items())
     rows = []
     for i, (a, nm) in enumerate(syms):

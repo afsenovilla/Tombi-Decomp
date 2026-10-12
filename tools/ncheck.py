@@ -29,8 +29,24 @@ def gcc_for(src):
     return GCC if cc == M["CC_DEFAULT"] else os.path.join(OLDGCC_ROOT, cc + "-psx")
 
 
+def headers_for(src, d, inc):
+    """`// HEADERS <dir>` picks a newer psx_tomba header set: include/<dir> is overlaid onto include/tomba."""
+    hm = re.search(r"^//\s*HEADERS\s+(\S+)", open(src, errors="replace").read(600), re.M)
+    if not hm: return inc
+    inc2 = os.path.join(d, "inc")
+    shutil.copytree(inc, inc2)
+    ov = os.path.join(ROOT, "include", hm.group(1))
+    for root_, _, fs in os.walk(ov):
+        for f in fs:
+            dst = os.path.join(inc2, "tomba", os.path.relpath(os.path.join(root_, f), ov))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy(os.path.join(root_, f), dst)
+    return inc2
+
+
 def build(src, flags, d, inc):
     GCC = gcc_for(src)
+    inc = headers_for(src, d, inc)
     if not os.path.exists(GCC + "/cc1"):
         raise subprocess.CalledProcessError(1, GCC, stderr=("compiler %s not installed (tools/setup_native.sh)" % GCC).encode())
     subprocess.run([GCC + "/cpp", "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + inc, "-I" + inc + "/tomba", "-D_LANGUAGE_C", src, d + "/a.i"],

@@ -41,6 +41,14 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
   Tools: `tools/tomba_map.py <psx_tomba .c files>` (mapping listing) and `tools/tomba_port.py --batch <listing>`
   (ports every new unique hit, writes `src/<func>.c` on MATCH); `tools/progress.py` reports the matched library
   bytes apart ("Psy-Q matching"), they never enter the game-code percentage.
+  `tomba_map.py --bin game/AREA00/X000.BIN` searches an overlay instead of MAIN0.EXE (psx_tomba `overlays/x00` is
+  our X000). psx_tomba's headers move on: newer sets live in `include/tomba24` (psx_tomba 3aa3d19, PR #24) and a
+  file opts in with a `// HEADERS tomba24` line (ncheck overlays that directory onto include/tomba for that file
+  only); refreshing `include/tomba` in place breaks the hand-matched files that declare the same types locally.
+  Re-run the mapping after each psx_tomba release: PRs #22-#24 (2026-10-09) gave 6 new functions (3.3 KB, cdLoadTask
+  and execCoreOpcode among them); everything else they matched was already matched here (PAL variants included).
+  NTSC sources that differ in PAL but are not matched here yet: printEventMessage (FUN_8005b38c), spawnEventTitle
+  (FUN_8005aa74 wip), moviePlayerTask (func_8001D6A4 wip): start those from the psx_tomba C, not from Ghidra.
 
 ## Work cycle
 1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.

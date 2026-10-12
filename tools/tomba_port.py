@@ -168,6 +168,11 @@ def build(txt, d):
         if os.path.isdir(s): shutil.copytree(s, inc + "/" + f)
         else:
             for nm in {f, f.upper(), f.lower()}: shutil.copy(s, inc + "/" + nm)
+    ov = ROOT + "/include/" + HEADERS  # newer psx_tomba headers overlaid onto include/tomba (ncheck does the same)
+    for root_, _, fs in os.walk(ov):
+        for f in fs:
+            dst = os.path.join(inc, "tomba", os.path.relpath(os.path.join(root_, f), ov))
+            os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy(os.path.join(root_, f), dst)
     open(d + "/a.c", "w").write(txt)
     subprocess.run([GCC + "/cpp", "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + inc, "-I" + inc + "/tomba", "-I" + os.path.dirname(src), "-D_LANGUAGE_C", d + "/a.c", d + "/a.i"], check=True, capture_output=True)
     subprocess.run([GCC + "/cc1", "-quiet", "-w", "-funsigned-char", "-O2", "-G0", d + "/a.i", "-o", d + "/a.s"], check=True, capture_output=True)
@@ -182,7 +187,8 @@ def build(txt, d):
     return open(d + "/t.bin", "rb").read(), rels
 
 d = tempfile.mkdtemp()
-hdr = "// FUNC %08x %d MAIN0\n// Portado de psx_tomba (%s, %s); licencia MIT del proyecto original.\n#define SKIP_ASM\n"
+HEADERS = os.environ.get("TOMBA_HEADERS", "tomba24")  # include/<dir> overlaid onto include/tomba (see ncheck.headers_for)
+hdr = "// FUNC %08x %d MAIN0\n// HEADERS " + HEADERS + "\n// Portado de psx_tomba (%s, %s); licencia MIT del proyecto original.\n#define SKIP_ASM\n"
 try:
     code, rels = build(hdr % (pal, 0, rel, func) + body, d)
 except subprocess.CalledProcessError as e:
