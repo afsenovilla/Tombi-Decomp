@@ -1,15 +1,5 @@
-/* n51 (still 12): 3 sites: the two Ground2 sites (result used by `if (Ground2(o))`, +2d0/+78c) are the
-   non-inverted `beqz;nop;j L;addiu v0,v1,-1;addiu v0,v1,1` shape in the game, the Ground site (result unused, +3xx)
-   is inverted. The w-temp form (`int w; if (t<0x80) w=o->d8c-1; else w=o->d8c+1; o->d8c=w;`) gives the game's
-   registers (v0 result, v1 load) but reorg steals the -1 from the j's slot and inverts (168). Experiments on the
-   matched sibling func_8011D3EC (X009, `hp->p.whole = c ? x-16 : x+16`): the nop shape appears there ONLY when the
-   code after the shared store is `j Lx` whose delay slot sets v0 (`j $L16; li $2,3`, a cross-jumped tail); any
-   other following code (li before the j, store in the slot, epilogue target) inverts. So the game probably had a
-   separate `li v0,1; j L78` for the main path's return 1 (later deleted by relax_delay_slots as a jump around an
-   identical insn); every attempt to get that here (inner `return 1`, volatile reload, do{}while(0)/asm barriers,
-   uchar/short return type, r = reload var) either lets jump2 cross-jump the lone li (merge, then inversion) or
-   schedules the li between lbu/sw so r lands in v1. matchcheck (CC1PSX) agrees with ncheck on all variants. */
 // FUNC 8012748c 2236 X003
+// MATCHING 8012748c 2236
 #include "TOBJ.H"
 
 typedef struct { short w0, w2; } X;
@@ -45,40 +35,21 @@ static __inline__ int Ground(TObj *o)
         o->b69 = 0;
         return 1;
     }
-    if ((short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0xe)) == 0) return 0;
-    if (o->wac >= 0xc) {
-        o->d8c = 0;
-    } else {
-        t = D_1F80027E * 4 + o->d8c;
-        if (t) {
-            if (t >= 0x80) o->d8c++;
-            else o->d8c--;
-            o->d8c = *(unsigned char *)&o->d8c;
+    if ((short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0xe)) != 0) {
+        if (o->wac >= 0xc) {
+            o->d8c = 0;
+        } else {
+            t = D_1F80027E * 4 + o->d8c;
+            if (t) {
+                int w;
+                if (t < 0x80) w = o->d8c - 1; else w = o->d8c + 1;
+                o->d8c = w;
+                o->d8c = *(unsigned char *)&o->d8c;
+            }
         }
-    }
-    return 1;
-}
-
-static __inline__ int Ground2(TObj *o)
-{
-    unsigned char t;
-    if (o->b69 == 1) {
-        o->b69 = 0;
         return 1;
     }
-    if ((short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0xe)) == 0) return 0;
-    if (o->wac >= 0xc) {
-        o->d8c = 0;
-    } else {
-        t = D_1F80027E * 4 + o->d8c;
-        if (t) {
-            int v = o->d8c;
-            if (t < 0x80) v--; else v++;
-            o->d8c = v;
-            o->d8c = *(unsigned char *)&o->d8c;
-        }
-    }
-    return 1;
+    return 0;
 }
 
 #define SETANIM8(o) { \
@@ -155,7 +126,7 @@ void func_8012748C(TObj *o)
         o->y.raw += o->velV << 8;
         FUN_8001fa88(o, (unsigned short)o->w7a);
         Side(o);
-        if (Ground2(o)) {
+        if (Ground(o)) {
             o->b9c = 0;
             o->velH = 0x180;
             o->state++;
@@ -219,7 +190,7 @@ void func_8012748C(TObj *o)
         o->velV += 0x20;
         if (o->velV > 0x600) o->velV = 0x600;
         o->y.raw += o->velV << 8;
-        if (Ground2(o)) {
+        if (Ground(o)) {
             o->d8c = (-(short)D_1F80027E << 2) & 0xff;
             o->active = 1;
             o->b04 = 1;
