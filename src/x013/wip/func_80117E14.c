@@ -3,7 +3,13 @@
    o15: -dl/-dg: x is 10 refs/71 insns (prio .42) > t .35 > o .31, game allocates o,t,x in the opposite order;
    short y (HI pseudo, PROMOTE_PROTOTYPES) is right (game reads a3 in the branches). 64 type combos, m%10 in other vars: no gain.
    o26: game also puts h%10 in a fresh reg (v1, not h's a1) but a separate variable for it scores 76; random search of
-   int/short h/t/o, digit statement orders and the m-digit variable: nothing below 46. */
+   int/short h/t/o, digit statement orders and the m-digit variable: nothing below 46.
+   n59: cause confirmed with -dg: y16 temps (sll s0,a3,16) are local-alloc'd to s0 before global alloc, so x (10 refs/71
+   insns, prio .42) conflicts with s0 and takes the first new reg s1; the game needs o (4 refs/26, .31) and t (6/34, .35)
+   allocated before x (global.c find_reg pass 1 = lowest unused s-reg). No source form changes x's refs (cse folds a
+   running px back to x+K; short/unsigned short x is promoted and identical). Tried: q = h%10 temp, o/t multi-set forms,
+   running px, px int/short, callee prototypes, digit orders: all identical code. Needs an extra real ref on o and t or a
+   longer live range for x. */
 extern void func_80118028(int, short, short);
 
 void func_80117E14(int n, int m, int x, short y)
