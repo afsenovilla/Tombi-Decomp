@@ -1,13 +1,14 @@
 // FUNC 8012736c 2060 X010
-/* score 8 (n66, was 205): only case 5's tail differs: game `lui v0,0xc4e; lbu v1,6; subu; addiu v1; lw a0,0xa8; sra;
-   sh velH; sb state` vs ours `lui; lbu; subu; lw a0,0xa8; addiu; sra; sh; sb` (sched1 tie at prio 3 between the
-   2nd state++ addiu and the velH sra; the game needs sra picked first AND sb state last, which plain luid ties
-   cannot give; fences/do-while, raw/volatile state forms, int/short temps, anim-load order all tried).
-   What fixed the rest (keep): function-scope `int y` (global pseudo -> v1 in both cases) and `int *hp` shared
-   with case 8 (so the o->h pointer is a global pseudo ranked after h: a1); case 2 state++ written through y
-   (`y = o->state; y = y + 1; o->state = y;`) so the y load gets an anti-dep and stays after the sb; `d` multi-set
-   for the two scratchpad loads (both a1); case 5 first state++ through a multi-set local s, `y = h - y`, h load
-   after sb via hp, `k = ...; k = k >> 15;` (multi-set so the subu is not birthing-boosted). */
+// MATCHING 8012736c 2060
+/* Matched. Keep: function-scope `int y` (global pseudo -> v1 in cases 2 and 5) and function-scope `int hv`
+   shared by case 2's two scratchpad loads and case 5's o->h pointer (global pseudo in a1; a case-8 use would put
+   the pointer in a1 where the game has v0, and block-local it steals v1 from y). Case 2 state++ through y so the
+   y load gets an anti-dep and stays after the sb. Case 5: first state++ through a multi-set local s, `y = h - y`,
+   h load after sb via hv, `k = ...; k = k >> 15;` (multi-set, subu not birthing-boosted); 2nd state++ as a
+   block-local `unsigned char s2 = o->state + 1` placed between `k = K - h` and `k >>= 15`: the lbu temp is
+   single-set (boosted, lands next to the addiu), the addiu writes a subreg (never boosted) so sched1 orders it by
+   luid (after subu, before sra) while `o->state = s2` written last keeps sb after sh; local-alloc ties lbu temp
+   and s2 into one v1 qty spanning the anims-pointer load, which then takes a0. */
 #include "TOBJ.H"
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
@@ -49,7 +50,7 @@ extern void addItemToInventory(int, int, int);
 void func_8012736C(TObj *o)
 {
     int y;
-    int *hp;
+    int hv;
     switch (o->state) {
     case 0:
         o->b0f = 2;
@@ -75,19 +76,18 @@ void func_8012736C(TObj *o)
     case 2:
         if (*D_800A605C == 0x3d) FUN_80025f40(0, 0, 0xff, 4);
         if (--o->timer == -1) {
-            { int d;
-            d = D_1F800168A[0];
-            o->velH = (d - o->h->raw) >> 15;
-            d = D_1F80016CA[0];
+            hv = D_1F800168A[0];
+            o->velH = (hv - o->h->raw) >> 15;
+            hv = D_1F80016CA[0];
             y = o->state;
             y = y + 1;
             o->state = y;
             y = o->y.raw;
-            y = d - y;
+            y = hv - y;
             o->velV = y >> 15;
             o->velY = -0x300;
             o->timer = 0x80;
-            *(signed char *)&o->b0f = -9; }
+            *(signed char *)&o->b0f = -9;
             ObjSetFacingToPlayer(o);
             SETANIM(7);
         } else if (o->timer < 0x1e) {
@@ -128,23 +128,24 @@ void func_8012736C(TObj *o)
     case 5:
         func_801271D8(o, 1);
         if (--o->timer == -1) {
-            { int h, s, k;
+            { int h, s, k; unsigned char s2;
             s = o->state;
             s = s + 1;
             o->state = s;
             y = o->y.raw;
             h = -0x780000;
             y = h - y;
-            hp = &o->h->raw;
-            h = *hp;
+            hv = (int)&o->h->raw;
+            h = *(int *)hv;
             o->velV = y >> 15;
             o->velY = -0x500;
             o->timer = 0x80;
             o->animFrame = 1;
             k = 0x0c4e0000 - h;
+            s2 = o->state + 1;
             k = k >> 15;
             o->velH = k;
-            o->state++; }
+            o->state = s2; }
             SETANIM(7);
         }
         break;
@@ -180,8 +181,7 @@ void func_8012736C(TObj *o)
             short *k = D_800A604A;
             *k = o->a.p.whole - 8;
             D_800A604E[0] = o->y.p.whole;
-            hp = &o->h->raw;
-            if (TileCollideAt(o, ((short *)hp)[1], o->y.p.whole + 0x10)) {
+            if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
                 o->state++;
                 SETANIM(9);
                 o->timer = 10;
