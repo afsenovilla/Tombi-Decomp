@@ -59,17 +59,17 @@
     "X001": {
       "game": 330276,
       "n": 603,
-      "matched": 310036,
-      "n_matched": 579,
+      "matched": 310552,
+      "n_matched": 580,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 19840,
-      "n_new": 23,
+      "new": 19324,
+      "n_new": 22,
       "uniq": 153320,
-      "uniq_matched": 133480,
+      "uniq_matched": 133996,
       "n_uniq": 284,
-      "n_uniq_matched": 261
+      "n_uniq_matched": 262
     },
     "X002": {
       "game": 200656,
@@ -134,17 +134,17 @@
     "X006": {
       "game": 211508,
       "n": 397,
-      "matched": 200400,
-      "n_matched": 368,
+      "matched": 201036,
+      "n_matched": 372,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 10708,
-      "n_new": 28,
+      "new": 10072,
+      "n_new": 24,
       "uniq": 34796,
-      "uniq_matched": 24088,
+      "uniq_matched": 24724,
       "n_uniq": 94,
-      "n_uniq_matched": 66
+      "n_uniq_matched": 70
     },
     "X008": {
       "game": 175296,
@@ -164,17 +164,17 @@
     "X009": {
       "game": 258724,
       "n": 507,
-      "matched": 250360,
-      "n_matched": 495,
+      "matched": 251960,
+      "n_matched": 498,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 7964,
-      "n_new": 11,
+      "new": 6364,
+      "n_new": 8,
       "uniq": 81636,
-      "uniq_matched": 73672,
+      "uniq_matched": 75272,
       "n_uniq": 190,
-      "n_uniq_matched": 179
+      "n_uniq_matched": 182
     },
     "X010": {
       "game": 275380,

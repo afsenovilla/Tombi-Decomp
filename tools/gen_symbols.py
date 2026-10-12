@@ -36,8 +36,30 @@ for path in files:
     if not re.search(r"\b%s\s*\(" % re.escape(stem), t):
         print("WARN: %s does not define %s()" % (f, stem)); continue
     syms[p][a] = (stem, size)
+csv_size = {}
+for p, (fcsv, _) in PROGS.items():
+    csv_size[p] = {int(r["address"], 16): int(r["size"]) for r in csv.DictReader(open(os.path.join(R, "notes", fcsv)))
+                   if r.get("size")}
 for p in PROGS:
     seen = {}
+    # Area overlays: the csv boundaries (tools/areas.py) are approximate and the matched files are exact, so a csv
+    # symbol lying inside a matched function is dropped and the others get their csv size, clamped to the next symbol,
+    # so splat splits every listed function instead of merging a run of them into one blob.
+    if p.startswith("X0") and p != "X000":
+        bin_path = os.path.join(R, "game", "AREA" + p[2:], p + ".BIN")
+        blob = open(bin_path, "rb").read() if os.path.exists(bin_path) else b""
+        addrs = sorted(syms[p]); end = 0; keep = {}
+        for i, a in enumerate(addrs):
+            n, size = syms[p][a]
+            if size is None and a < end: continue
+            off = a - 0x800E8028  # a "function" that starts with a zero word is padding/data: it makes splat emit the
+            if size is None and blob and blob[off:off + 4] == b"\0\0\0\0": continue  # rest of the overlay as .word
+            if size is None and a in csv_size[p]:
+                size = csv_size[p][a]
+                if i + 1 < len(addrs): size = min(size, addrs[i + 1] - a)
+            keep[a] = (n, size)
+            if size: end = max(end, a + size)
+        syms[p] = keep
     with open(os.path.join(R, "config", "symbol_addrs_%s.txt" % p.lower()), "w") as out:
         for a in sorted(syms[p]):
             n, size = syms[p][a]

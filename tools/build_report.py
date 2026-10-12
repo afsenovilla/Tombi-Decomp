@@ -11,7 +11,10 @@ Steps (all output under build/ and asm/, both ignored by git):
   4. objdiff.json is written with one unit per function (categories: game / sdk, main0 / x000).
   5. objdiff-cli writes build/report.json.
 
-Usage: python3 tools/build_report.py [--no-split] [--objdiff /path/to/objdiff-cli]
+Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
+By default the Psy-Q library functions are left out, so the report (and the decomp.dev headline) measures game code only,
+like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay functions that are twins of X000 (or of an
+earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
 """
 import csv, json, os, re, shutil, subprocess, sys, tempfile
 
@@ -19,10 +22,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 ARGS = sys.argv[1:]
 OBJDIFF = ARGS[ARGS.index("--objdiff") + 1] if "--objdiff" in ARGS else os.environ.get("OBJDIFF", "objdiff-cli")
+WITH_SDK = "--with-sdk" in ARGS  # also report the Psy-Q library units (category "sdk"); default: game code only
 PROGS = {"main0": "MAIN0", "x000": "X000"}
 OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]  # area overlays, src/x0nn/
 # Overlays whose retail file is missing (legacy game zip with only MAIN0/X000) are left out of the report.
-OVERLAYS = [p for p in OVERLAYS if os.path.exists(os.path.join(ROOT, "game", "AREA" + p[1:], p.upper() + ".BIN"))]
+OVERLAYS = [p for p in OVERLAYS if os.path.exists(os.path.join(ROOT, "game", "AREA" + p[2:], p.upper() + ".BIN"))]
 PROGS.update({p: p.upper() for p in OVERLAYS})
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
@@ -33,12 +37,18 @@ def run(cmd, **kw):
 
 
 def game_addresses():
-    """Addresses of game (non-SDK) functions: the todo list plus everything already matched."""
-    game = {r["address"] for r in csv.DictReader(open(os.path.join(ROOT, "notes", "todo_match.csv")))}
-    for f in os.listdir(os.path.join(ROOT, "src")):
-        if f.endswith(".c"):
-            m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)", open(os.path.join(ROOT, "src", f), errors="replace").read())
-            if m: game.add(m.group(1).lower())
+    """Addresses of game (non-SDK) functions, classified like tools/progress.py: a function is Psy-Q library when its
+    notes/names_*.csv row says "Psy-Q" or when Ghidra gave it a real name (library signature); the rest is game."""
+    game = set()
+    for prog in ("main0", "x000"):
+        ours = {}
+        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "names_%s.csv" % prog))):
+            ours[r["address"].lower()] = r
+        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "functions_%s.csv" % prog))):
+            a = r["address"].lower(); mine = ours.get(a)
+            is_fun = r["name"].startswith(("FUN_", "thunk_FUN_", "func_"))
+            lib = ("Psy-Q" in mine.get("comment", "")) if mine is not None else (not is_fun)
+            if not lib: game.add(a)
     return game
 
 
@@ -85,6 +95,12 @@ def main():
         except subprocess.CalledProcessError:
             print("base compile failed:", f)
         shutil.rmtree(d, ignore_errors=True)
+    # Area overlays share ~173 KB of code with X000 (and each other) at the same addresses: a function whose
+    # notes/functions_x0nn.csv row names a twin is left out, so every byte of the game is counted once.
+    keep = set()  # (overlay, address) of the functions counted for that overlay: listed in its csv, no twin
+    for p in OVERLAYS:
+        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "functions_%s.csv" % p))):
+            if not r.get("twin"): keep.add((p, r["address"].lower()))
     # target objects: assemble each retail function
     for prog in PROGS:
         fdir = "asm/%s/nonmatchings/%s" % (prog, prog)
@@ -103,8 +119,11 @@ def main():
                 print("target asm failed:", prog, name, e.stderr[:120]); continue
             finally:
                 os.unlink(t.name)
+            is_game = addr in game or prog in OVERLAYS
+            if not is_game and not WITH_SDK: continue  # Psy-Q library units are left out: the headline % is game code
+            if prog in OVERLAYS and (prog, addr) not in keep: continue  # twin or unlisted region: counted once elsewhere
             unit = {"name": "%s/%s" % (prog, name), "target_path": out,
-                    "metadata": {"progress_categories": [prog, "game" if (addr in game or prog in OVERLAYS) else "sdk"]}}
+                    "metadata": {"progress_categories": [prog, "game" if is_game else "sdk"]}}
             if (prog, name) in base: unit["base_path"] = base[(prog, name)]
             units.append(unit)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",

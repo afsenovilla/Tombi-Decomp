@@ -13,18 +13,18 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Progress
 
 <!-- progress:start -->
-**Whole game: 91.9 % of the game's code matches byte for byte** (1168908 of 1271552 bytes).
+**Whole game: 92.1 % of the game's code matches byte for byte** (1171660 of 1271552 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 227816 B | 205208 B | 90.1 % `[######################..]` |
 | X000.BIN: AREA00 + object code reused by all areas | 297956 B | 295664 B | 99.2 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 745780 B | 668036 B | 89.6 % `[#####################...]` |
-| **Whole game** | **1271552 B** | **1168908 B** | **91.9 %** `[######################..]` |
+| X001..X019.BIN: code specific to the other areas | 745780 B | 670788 B | 89.9 % `[######################..]` |
+| **Whole game** | **1271552 B** | **1171660 B** | **92.1 %** `[######################..]` |
 
 - Bytes of machine code in game functions; Sony's Psy-Q library (99504 B) is not counted: 67596 B of it (67.9 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 97.3 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 97.4 %).
 - Also tracked for MAIN0 + X000: 9.7 % of the code named by us, 76.0 % typed with the TObj structure.
 <!-- progress:end -->
 
@@ -159,11 +159,14 @@ offsets and the function or splat range that produced them.
 
 `tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
 [decomp.dev](https://decomp.dev) displays: [splat](https://github.com/ethteck/splat) splits the retail
-binaries into one assembly file per function (`config/main0.yaml`, `config/x000.yaml`), each function is
-assembled as the *target* object, each `src/*.c` is compiled as the *base* object, and `objdiff-cli`
-compares them (`build/report.json`). The GitHub Actions workflow `.github/workflows/report.yml` runs it on
-every push; it needs a `GAME_FILES_URL` secret pointing to a zip with your own `MAIN0.EXE` and
-`AREA00/X000.BIN`.
+binaries into one assembly file per function (`config/main0.yaml`, `config/x000.yaml`, `config/x0nn.yaml`
+for the 16 area overlays), each function is assembled as the *target* object, each `src/*.c` and
+`src/x0nn/*.c` is compiled as the *base* object, and `objdiff-cli` compares them (`build/report.json`).
+The report measures the same thing as `docs/PROGRESS.md`: game code only (the Psy-Q library is left out
+unless `--with-sdk` is given) and every shared overlay function counted once, so the decomp.dev headline is the
+whole-game figure. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
+needs a `GAME_FILES_URL` secret pointing to your own disc image (or a zip with `MAIN0.EXE` and
+`AREA00/X000.BIN`, which limits the report to those two).
 
 ## Repository layout
 
