@@ -1,5 +1,12 @@
 // FUNC 80025d90 432 MAIN0
-/* score 36 (was 100): logic, load/store order and the tail match; left: register choice in the first AXIS
+/* score 36 (was 100). n62: the block-0 ORDER of the game (andi a0 = c1&0xff before the pad lhu, `a-0x50` before
+   `& 0xff0f`) is reproduced by: `pad0 = &DAT_8009d670; a1 = c1; d = a1 - 0x50; p = *pad0; pm = p & 0xff0f;
+   m = pm | AXIS(...d...)` with ONE `d` variable reused by the second axis (multi-set => the addiu loses the
+   birthing boost and is picked after the prio-3 andi; the andi whose consumer is in another block is never boosted
+   because insns in the initial ready list skip adjust_priority). Left then (score 40) is only global-alloc order:
+   game allocates m/pm (a2) before c2 (a1) and c1 (a3); ours gives c2 a2 (c2 3 refs/19 insns = 0.158 beats m 6/82
+   = 0.146 and pm 2/40). Needs m born at the join (pm form) AND pm allocated before c1: no form found yet.
+   Previous notes: logic, load/store order and the tail match; left: register choice in the first AXIS
    (game c1=a3, g=t0, a=a0, b=a1; ours c1=a1, g=a3, a=v1, b=a0). b17: extern volatile DAT_8009d674 (reloaded
    in the tail), unsigned short a = c with the final test on c (fresh andi at the label), first load + clear
    hoisted with a volatile second name for the clear (debt). Tried type brute force of c/a/m, a precomputed
