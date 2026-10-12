@@ -3,6 +3,14 @@
    ours ties base with a (a0) and b gets a1. b written as `base - -i` stops CSE merging a/b (old copy form scored 23).
    Tried: base/off temps (int, char ptr, P8 ptr; block or function scope), both statement orders, off - -base, a=b copy. */
 /* o36: still 6. Hypothesis: game base pseudo is not tied to a/b in local-alloc (dies twice or non-local); tried base temps (int/volatile), a-first, multiset a/b, ushort index, if/else deaths: 6..74. */
+/* n52: still 6. Register analysis (gcc local-alloc.c/global.c): game = a in a0, b in a1 (a computed first), base v1, i v0.
+   Local-alloc ties the dest of `addu` with a dying operand (base or i) unless the dest is NOT block-local; and any
+   config with base global fails (set_preference makes base prefer b's a1). So the game had `b` (the 2nd pointer)
+   as a non-local pseudo (used in 2 blocks or REG_N_DEATHS != 1) with base, i, a local. Tried: multi-set a/b, dead
+   sets before/after the loop (flow deletes them), loads duplicated before the loop + at the end (cross-jumped tail:
+   lhu/lw/sll merge but then base prefers a1, and the volatile increment empties the j delay slot), short* q with
+   q += 2 / q[-1] stepping (keeps the addu), 372 expression/order combos of a/b/p/n (all 6). Not found: a C form
+   that references b in a second block without code. */
 typedef struct { short x, y, z, pad; } P8;
 typedef struct { short b4, b6, b8, ba; int bc, c0, c4; } X;
 typedef struct {
