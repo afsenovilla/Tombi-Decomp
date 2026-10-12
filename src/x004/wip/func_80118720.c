@@ -3,7 +3,13 @@
    variants (arg order, idx/k params, row pointer), local p, x/y/z int/short types, v store permutations,
    pad sizes. Camera must be scalar externs + raw-offset stores (struct cam gets CSE'd into an la register).
    Also tried (o17): put(V3*,V4*) / scalar-arg / macro / (d,i,k) forms, nx/ny locals, y before x, v.z set once,
-   v.y skipped when unchanged, all x/y/z store orders. Everything is one block (local-alloc only). */
+   v.y skipped when unchanged, all x/y/z store orders. Everything is one block (local-alloc only).
+   n60: local-alloc qty priorities (floor_log2(refs)*refs/len, from -dl): ours D={la,la+48} 7 refs/len 101 -> 1386,
+   y 6/105 -> 1142, -y 3/35 -> 857, so D is allocated before y/-y (t1). Game needs D < -y: fewer refs on the la
+   pseudo or a much longer range (la placed near the top of the block in sched1; it is the boosted la right before
+   its first use in ours). Variable pointer forms (p + idx*64, (p+16)+idx*64, p += 48) fold into one base + offsets
+   (score 110-136), early dead `base = (int)D` is dropped before cse, 400 random store-order/negation/idx-type
+   variants all 28. */
 typedef struct { int x, y, z; } V3;
 typedef struct { int x, y, z, pad; } V4;
 extern V4 D_80133ADC[][4];
