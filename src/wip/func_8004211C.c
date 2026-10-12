@@ -7,7 +7,17 @@
    an `andi 0xffff` appears at the compare; with `int lo` (single-set) sched1 gives it the birthing boost and sinks
    it to the beqz delay slot (dump: priority 7f000001). `lo = (a - lo) % t; t = y0 + h * lo / t;` (reusing lo for the
    remainder, as the game's v1 suggests) makes lo multi-set and reproduces the whole lo block, but lo becomes a
-   global pseudo whose v1 preference (with h's) makes global-alloc skip v1 for the loop pointer (a3 instead): 37. */
+   global pseudo whose v1 preference (with h's) makes global-alloc skip v1 for the loop pointer (a3 instead): 37.
+   n58 (still 28; dumps with cc1 -ds/-dS/-dl explain both): (1) y0: the game `move t0,v0` is a copy of the lh
+   temp placed BEFORE `addiu v0,v0,-16`, which is what ties the temp and the -16 result in v0 (so reorg cannot drag
+   the move into the delay slot). An explicit copy (`ys = *p++; d = ys - 16; y0 = ys;` + a dead trailing use
+   `v = y0;` so cse make_regs_eqv keeps y0 as the canonical reg for the later uses) does produce the copy, but
+   sched1 (backward list scheduler) boosts it (single-set y0, live at block end = birthing insn) and sinks it below
+   the addiu; a dead `y0 = 0` at the top does not help (flow deletes it, reg_n_sets back to 1). Needs y0 with a
+   real second set, or the copy with a lower luid than the addiu while cse still leaves the compare on the temp.
+   (2) lo: `andi v1,v0,0xf` comes first in the game because lo is NOT boosted (multi-set); with any single-set form
+   it is scheduled last (delay slot). `lo = v; lo &= 0xf;` leaves a combine `(use lo)` and changes nothing.
+   `short m` + `int lo` gives the game sll/sra/slt compare; `unsigned short m` gives andi/sltu (27, wrong shape). */
 #include "TOBJ.H"
 extern short *func_8003F200(int a, int b);
 extern unsigned short *DAT_1f800278;
