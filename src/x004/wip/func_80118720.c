@@ -1,55 +1,53 @@
 // FUNC 80118720 464 X004
-/* score 28: only register allocation differs (game: D base in t3, y/-y in t1/t2; ours D in t1). Tried: put() inline
-   variants (arg order, idx/k params, row pointer), local p, x/y/z int/short types, v store permutations,
-   pad sizes. Camera must be scalar externs + raw-offset stores (struct cam gets CSE'd into an la register).
-   Also tried (o17): put(V3*,V4*) / scalar-arg / macro / (d,i,k) forms, nx/ny locals, y before x, v.z set once,
-   v.y skipped when unchanged, all x/y/z store orders. Everything is one block (local-alloc only).
-   n60: local-alloc qty priorities (floor_log2(refs)*refs/len, from -dl): ours D={la,la+48} 7 refs/len 101 -> 1386,
-   y 6/105 -> 1142, -y 3/35 -> 857, so D is allocated before y/-y (t1). Game needs D < -y: fewer refs on the la
-   pseudo or a much longer range (la placed near the top of the block in sched1; it is the boosted la right before
-   its first use in ours). Variable pointer forms (p + idx*64, (p+16)+idx*64, p += 48) fold into one base + offsets
-   (score 110-136), early dead `base = (int)D` is dropped before cse, 400 random store-order/negation/idx-type
-   variants all 28.
-   n64: 160 more structural variants (macro put, nx/ny locals early/late, y before x, v.z once, int/short per local)
-   and FLAGS -fno-schedule-insns(2)/-fno-expensive-optimizations/-fno-cse-skip-blocks/-fno-strength-reduce/-O1: all 28+.
-   local-alloc.c: a pseudo gets t3 = leftover only if allocated after y/-y, i.e. D's qty priority (2*7/len) must drop
-   below -y's (857): needs the la placed at the top of the sched1 block (len ~230) = a non-boosted (multi-set) base
-   pseudo that cse must still not fold into symbol+offset. */
+/* score 24 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
+   n72 findings: the table base `tb` as a multi-set pointer (`tb = D; ... tb = (V4(*)[4])((V4*)tb + 3)` for the last
+   element, symbol form `&D_80133ADC[idx][k]` for the first three so cse keeps `addiu a2,tb,16/32`) is not boosted
+   by sched1 and lands after the two mults (luid ~17), which already moves y to t1 (24). Diagnosis confirmed with
+   crutches: `__asm__ volatile("")` right after `tb = D` (la pinned at block top) gives the game's registers (score 11,
+   the la itself then stays at the top in sched2); `register V4 (*tb)[4] asm("$11")` gives 9 (la 2 insns early).
+   Local-alloc qty priorities (floor_log2(refs)*refs/(death-birth), tied regs merged): base {la, +48 result} 7 refs,
+   y {sra temp, y} 6 refs, -y 3 refs; the game needs y > -y > base, i.e. the base qty below 1*3/len(-y): with 7 refs
+   only a la at the very top of the sched1 block (len > ~79) or <= 4 refs does it. The la moves to the top only if
+   one of its consumers is placed before the mult chains (nothing natural found: all consumers are the boosted
+   per-element addu/addiu). Also tried: int/short locals, nx/ny temps, all 6 store orders, p init before/after x/y,
+   (V4*)p+3 / (char*)p+48 / &p[0][3] forms, p for element 0 only (31), p for all (110-136: cse then shares one
+   base+offsets). Camera must stay scalar externs + raw-offset stores (struct cam gets CSE'd into an la register). */
 typedef struct { int x, y, z; } V3;
 typedef struct { int x, y, z, pad; } V4;
 extern V4 D_80133ADC[][4];
-
 extern int D_1F8000D4, D_1F8000D8, D_1F8000DC;
-
 static __inline__ void put(V4 *p, V3 *v)
 {
     *(int *)((char *)p + 0) = v->x - D_1F8000D4;
     *(int *)((char *)p + 4) = v->y - D_1F8000D8;
     *(int *)((char *)p + 8) = v->z - D_1F8000DC;
 }
-
 void func_80118720(short z0, int idx)
 {
     V3 v;
     int pad[3];
-    int z = z0 + 0x220;
-    int x = z * 220 / 544;
-    int y = z * 180 / 544;
-
-    v.x = -x;
-    v.y = -y;
+    int z, x, y, nx, ny;
+    V4 (*tb)[4] = D_80133ADC;
+    z = z0 + 0x220;
+    x = z * 220 / 544;
+    y = z * 180 / 544;
+    nx = -x;
+    ny = -y;
+    v.x = nx;
+    v.y = ny;
     v.z = z;
     put(&D_80133ADC[idx][0], &v);
     v.x = x;
-    v.y = -y;
+    v.y = ny;
     v.z = z;
     put(&D_80133ADC[idx][1], &v);
-    v.x = -x;
+    v.x = nx;
     v.y = y;
     v.z = z;
     put(&D_80133ADC[idx][2], &v);
     v.x = x;
     v.y = y;
     v.z = z;
-    put(&D_80133ADC[idx][3], &v);
+    tb = (V4 (*)[4])((V4 *)tb + 3);
+    put(&tb[idx][0], &v);
 }
