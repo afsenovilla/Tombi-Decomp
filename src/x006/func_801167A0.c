@@ -1,4 +1,5 @@
-/* score 2: only the clamp compare reads e (v1, the copy) instead of n (v0): `addu v1,v0; sll v0,v0` in the game. The nested do{}while(0) around the clamp (debt) adds loop-weighted refs so cnt outranks offs in global alloc (cnt t0, offs t1 like the game). Tried: n/e/i types, ternary, if/else, goto, compare spellings, clamp inline, clamping n in place. Real start 801167A0 (csv piece 80116920 is its tail). */
+/* Debt: nested do{}while(0) around the clamp (loop-weighted refs so cnt outranks offs in global alloc) and the dead `i = n` at the end (n must outlive e: cse's canonical reg of a copy pair is the longer-lived one, so the clamp compare reads n like the game instead of e). */
+// MATCHING 801167a0 540
 // FUNC 801167a0 540 X006
 #include "TOBJ.H"
 
@@ -56,4 +57,5 @@ void func_801167A0(L801167A0 *l, unsigned char *bank)
         l->list[l->n] = bank + offs[D_8011EFDC[i]];
         l->n++;
     }
+    i = n;
 }
