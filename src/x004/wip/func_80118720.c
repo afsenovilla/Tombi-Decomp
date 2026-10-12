@@ -1,8 +1,8 @@
 // FUNC 80118720 464 X004
-/* score 24 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
+/* score 25 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
    n72 findings: the table base `tb` as a multi-set pointer (`tb = D; ... tb = (V4(*)[4])((V4*)tb + 3)` for the last
    element, symbol form `&D_80133ADC[idx][k]` for the first three so cse keeps `addiu a2,tb,16/32`) is not boosted
-   by sched1 and lands after the two mults (luid ~17), which already moves y to t1 (24). Diagnosis confirmed with
+   by sched1 and lands after the two mults (luid ~17), which already moves y to t1 (25). Diagnosis confirmed with
    crutches: `__asm__ volatile("")` right after `tb = D` (la pinned at block top) gives the game's registers (score 11,
    the la itself then stays at the top in sched2); `register V4 (*tb)[4] asm("$11")` gives 9 (la 2 insns early).
    Local-alloc qty priorities (floor_log2(refs)*refs/(death-birth), tied regs merged): base {la, +48 result} 7 refs,
