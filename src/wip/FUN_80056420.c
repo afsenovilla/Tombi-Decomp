@@ -1,5 +1,10 @@
 // FUNC 80056420 2604 MAIN0
-/* score 342: structure/frame match; remaining: register allocation (o in s0 vs s1 with the loop giv swapped; case temps y/w in a0/t0 vs v1/a2, k in a2 vs t0). short k gives 287 but duplicates the range check. Tried decl orders, types, block scopes, condition forms. */
+/* score 352 (n70 notes, was 342 by an older ncheck): structure/frame match; remaining: register allocation (o in s0 vs s1
+   with both loop givs swapped; case temps y/w in a0/t0 vs v1/a2, k in a2 vs t0; `li v0,-1` scheduled late vs 2nd).
+   -dg shows the o/giv tie: o = 92 refs/463 insns (prio 1.19) vs giv2 = 21/71 (1.18); anything that removes 2 refs of
+   o, lengthens o's range by 6 insns or shortens the giv range by 1 flips it (volatile ti does, but turns the TILE copy
+   into a memcpy call: 196). short k gives 287 but duplicates the range check. Tried: decl orders, types, block scopes,
+   condition forms, xywh store order/chain perms (384), k_sep, loop forms, p scoping, -fno-strength-reduce + explicit j. */
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
