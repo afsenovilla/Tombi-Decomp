@@ -1,10 +1,16 @@
 // FUNC 801244a0 1800 X001
-/* score 134 (1808 B vs 1800): ported from x010/wip/func_8011E000.c (same code without the D_8009D2C3 & 0x40
-   tests, and the b->velX/b69 stores only in the first landing branch). Same residue as the x010 sibling:
-   ang/cx in s6/s5 (game s5/s6), r = q coalesced (game `move a3,v1` copy), cy copy propagated into the abs,
-   sabs v0/v1, a->y/b->y a0/v1 swap at +0x4e8, and in the D_1F8001D2 block t is a copy of the sum (2 extra
-   moves; game keeps t in a2 and (t - a->h + 2) in a1). Tried: q/r types (16 combos) and shapes, d/t/w types
-   (18 combos), declaration order of the shorts (no effect). */
+/* score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
+   Fixed this round: the dead `ay = q;` at the end keeps q alive past the r = q copy (cse rewrites to the reg with the
+   later last use, n48), which restores the game's `move a3,v1` copy; in the D_1F8001D2 block, block-local
+   `short t; unsigned short w;` per branch (w = t - a->h + 2; if (w >= 8)) removes the extra copy of the sum
+   (function-scope t gives temp+copy, cse substitutes the temp in the compare).
+   Left (register choices only): r gets a1 (game a3: a1/a2 skipped, cause unknown); ang/cx s5/s6 swapped (ours
+   cx 10 refs/201 insns beats ang 8 refs/178; game allocates ang first - any dead `v = ax` use flips it but then
+   cx uses are rewritten to ax); sabs result v0 vs v1 (game `move v0,s4; negu v0,s4; sll v1,v0`); +0x4e8 block
+   lh a0/v1 swap (a->y vs b->y temps); D_1F8001D2 block: game d=v1, t=a2, w=a1 (untied from the subu temp,
+   i.e. non-local), a->h temp=a3; ours d=a2, t=v1, w tied v0, a->h=a1 (w at function scope brings the copy back).
+   Tried: int/short/unsigned types of q, r, kind, v, sabs ret/param (no effect), w/t scopes and types (24 combos),
+   an `ang` copy variable, ~ang+1 vs -ang (worse), dead uses of ang/cx/kind. */
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001D2;
@@ -22,7 +28,6 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
 {
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
-    short t;
     short v;
     int q, r;
 
@@ -105,14 +110,19 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
             if ((-(s2 + -4) + b->y.p.whole) < a->y.p.whole - (a->box3 - a->box2)) return 3;
             if (D_1F8001D2 != 0) {
                 short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
-                short t;
                 if (dx > 0) {
+                    short t;
+                    unsigned short w;
                     t = b->h->p.whole + cx;
-                    if ((unsigned short)(t - a->h->p.whole + 2) >= 8) a->h->p.whole += d;
+                    w = t - a->h->p.whole + 2;
+                    if (w >= 8) a->h->p.whole += d;
                     else a->h->p.whole = t;
                 } else {
+                    short t;
+                    unsigned short w;
                     t = b->h->p.whole - cx;
-                    if ((unsigned short)(a->h->p.whole - t + 2) >= 8) a->h->p.whole -= d;
+                    w = a->h->p.whole - t + 2;
+                    if (w >= 8) a->h->p.whole -= d;
                     else a->h->p.whole = t;
                 }
                 return 3;
@@ -133,4 +143,5 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
             if (a->velY > 0x300) a->velY = 0x300;
         }
     }
+    ay = q;
 }
