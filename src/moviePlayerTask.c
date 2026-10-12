@@ -1,5 +1,8 @@
 // FUNC 8001d6a4 820 MAIN0
-// wip score 24 (was 83; short cnt): prologue s-reg save order, 0x7fffff as lui/addiu, addu order in DecDCTin. Old note: falta 0x7fffff como lui 0x80/addiu -1, orden de s-regs en el prologo y addu en DecDCTin
+// MATCHING 8001d6a4 820
+// PAL moviePlayerTask (psx_tomba movie.c name); PAL adds the 0x800000 timeout loop and DecDCTinSync.
+// The &D_8009BCA8 / &f34 temps are compiler-hoisted invariants: no pointer locals (loop.c does not hoist user
+// variables set after a branch and used across basic blocks); volatile f34 accesses give the second temp.
 typedef struct { unsigned short w; unsigned short h; int pad; } Ent;
 typedef struct {
     int *in[2];
@@ -40,12 +43,10 @@ extern int CdControlB(int, int, int);
 extern void FUN_8001726c(void);
 extern void ThreadWaitFrames(int);
 
-void func_8001D6A4(void)
+void moviePlayerTask(void)
 {
-    M *m = &D_8009BCA8;
-    volatile int *d = &m->f34;
     int k;
-    short cnt;
+    int cnt;
     D_1F8001CC = 1;
     D_1F8001D4->w48 = 0;
     D_1F8001D4->b68 = 0;
@@ -65,24 +66,24 @@ void func_8001D6A4(void)
             D_1F8001CC = 2;
             D_1F8001D4->w48 = 2;
         case 2:
-            DecDCTin(m->in[D_8009BCA8.idx], 2);
+            DecDCTin(D_8009BCA8.in[D_8009BCA8.idx], 2);
             k = D_1F8001F4;
-            m->f28 = k;
-            m->w2c = D_8009BCA8.ent[k].w;
-            m->w2e = D_8009BCA8.ent[k].h;
-            DecDCTout(m->out[D_8009BCA8.oidx], m->w30 * m->w32 / 2);
+            D_8009BCA8.f28 = k;
+            D_8009BCA8.w2c = D_8009BCA8.ent[k].w;
+            D_8009BCA8.w2e = D_8009BCA8.ent[k].h;
+            DecDCTout(D_8009BCA8.out[D_8009BCA8.oidx], D_8009BCA8.w30 * D_8009BCA8.w32 / 2);
             while (MovieDecodeFrame(&D_8009BCA8) == -1)
                 ;
-            if (*d == 0) {
-                cnt = 0x7fffff;
+            if (*(volatile int *)&D_8009BCA8.f34 == 0) {
+                cnt = 0x800000;
                 do {
-                    if (cnt == 0) {
-                        d[0] = 1;
-                        d[-3] = D_1F8001F4;
-                        ((unsigned short *)d)[-4] = D_8009BCA8.ent[D_1F8001F4].w;
-                        ((unsigned short *)d)[-3] = D_8009BCA8.ent[D_1F8001F4].h;
-                    }
                     cnt--;
+                    if (cnt == 0) {
+                        *(volatile int *)&D_8009BCA8.f34 = 1;
+                        D_8009BCA8.f28 = D_1F8001F4;
+                        D_8009BCA8.w2c = D_8009BCA8.ent[D_1F8001F4].w;
+                        D_8009BCA8.w2e = D_8009BCA8.ent[D_1F8001F4].h;
+                    }
                 } while (D_8009BCDC == 0);
             }
             SetDispMask(1);
