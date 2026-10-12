@@ -1,11 +1,9 @@
 // FUNC 80123fd0 1968 X000
-/* score 83 (was 610): b56 rewrite. Corner values u=A / u=-(A+C) as short with -u, u+C, w+D terms; angles written as
-   macros on one int ang = o->d8c ((ang+0x80)&0xff, ang&0xff) so loop.c hoists exactly the game's invariants (frame 0x90);
-   unsigned s gives the srl; d = o->d3c; d += idx*4 keeps the d3c reload; setUV order u then v.
-   Left: (1) xy/x copy: game loads xy into a0, srl s4 / move s3 later; ours loads straight into s3. `short x` fixes the top
-   exactly but then &CS[a1] (prio 27/295) beats s (30/328) for fp and s is spilled (127); needs +2 RTL insns inside the
-   loop (or -1 between switch and loop) to flip; `short n` flips it (20) but n must be int (lw/sw).
-   (2) li 0x2d lands in v0, game v1. Tried: callee proto types, code |= forms, temps, statement forms in loop. */
+// MATCHING 80123fd0 1968
+/* Rotated FT4 sprite strip. Keys: short x = xy (keeps the move s3,a0 copy), and the Psy-Q setSemiTrans macro
+   form (if/else |= 2 / &= ~2 after f->code = 0x2d): cse folds both branches to constants and deletes the dead else
+   store, but the extra insns at flow time make the scale s keep fp over &CS[a1] (global-alloc tie) and put the 0x2d
+   constant in v1. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -33,6 +31,7 @@ int FUN_8004fcc0(void *p);
 int FUN_8004fdc8(void *a, int b, int c, int d, unsigned e);
 int FUN_8004fd6c(void *a, int b, int c, int d, unsigned e);
 
+#define setSemiTrans(p, abe) ((abe) ? ((p)->code |= 2) : ((p)->code &= ~2))
 #define SN(i) D_8007A5F0[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
@@ -44,7 +43,7 @@ void FUN_80123fd0(TObj *o)
     unsigned char *q;
     int n;
     int xy;
-    int x;
+    short x;
     short y;
     unsigned int s;
     int d;
@@ -103,8 +102,7 @@ void FUN_80123fd0(TObj *o)
         }
         if (FUN_8004fcc0(f)) {
             f->code = 0x2d;
-            if (o->b0d >> 7)
-                f->code = 0x2f;
+            setSemiTrans(f, o->b0d >> 7);
             f->u0 = ((unsigned char *)o)[0xc6] << 7;
             f->v0 = 0xa0;
             f->u1 = q[10] + (((unsigned char *)o)[0xc6] << 7);
