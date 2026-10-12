@@ -1,12 +1,11 @@
 // FUNC 80069ef8 632 MAIN0
+// MATCHING 80069ef8 632
 // FLAGS -O2 -G8
 // CC gcc-2.8.1
-/* score 2 (b56, was 42 with 2.7.2): gcc-2.8.1 + -G8 (with -G0 2.8.1 splits %hi/%lo into two regs;
-   -mno-split-addresses works too). sra comes from int temps (k, r), t - D_8009C33C written in both compares, v set in if/else.
-   Left: the first poll loop jumps to 0x5c (the load-delay nop after lw D_80098210) where the game jumps to 0x60
-   (nop before the label); same with real ASPSX (matchcheck). Tried do/for/goto/local-pointer loop forms, ASPSX versions.
-   n49: __asm__ volatile("nop") after `q = D_80098210;` before the poll loop fixes the jump target but flips s1/s2 (v/r) in global-alloc (score 16);
-   tried decl order, int/short types of v/r/k, extra refs to v, reusing t/k as the pointer: no change.
+/* Matched with the same crutch as func_8006A200 (debt): __asm__ volatile("nop") after the pointer load,
+   because the game has the load-delay nop BEFORE the poll-loop label (lw; nop; L: lhu) while every ASPSX
+   (2.34..2.86) and gcc put it after the label. The loop must be `do {} while (...)`: an empty `while` body
+   costs 3 extra insns in v's live length (27 vs 24), which drops it below r in global-alloc (s1/s2 swap).
    Debt: volatile read of s->n in the 0xff compare (game reloads n for the index). */
 typedef struct {
     char p0[0x3c];
@@ -31,11 +30,14 @@ int func_80069EF8(S *s, int c)
     short v;
     unsigned int t;
     int k;
+    volatile unsigned short *q;
 
     k = *s->buf;
     if ((k >> 4) == 8 && s->n > 8) v = 0x22;
     else v = 0x88;
-    while (!(D_80098210[2] & 2));
+    q = D_80098210;
+    __asm__ volatile("nop");
+    do {} while (!(q[2] & 2));
     FUN_8006bf84(400);
     r = *(volatile unsigned char *)D_80098210;
     if (s->n != 0 || (r >> 4) != 8) D_80098210[7] = v;
