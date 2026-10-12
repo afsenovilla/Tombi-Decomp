@@ -47,8 +47,8 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
   only); refreshing `include/tomba` in place breaks the hand-matched files that declare the same types locally.
   Re-run the mapping after each psx_tomba release: PRs #22-#24 (2026-10-09) gave 6 new functions (3.3 KB, cdLoadTask
   and execCoreOpcode among them); everything else they matched was already matched here (PAL variants included).
-  NTSC sources that differ in PAL but are not matched here yet: printEventMessage (FUN_8005b38c), spawnEventTitle
-  (FUN_8005aa74 wip), moviePlayerTask (func_8001D6A4 wip): start those from the psx_tomba C, not from Ghidra.
+  NTSC sources that differ in PAL are a far better start than Ghidra: spawnEventTitle (FUN_8005aa74, score 76 → match)
+  and moviePlayerTask (func_8001D6A4, score 24 → match) were closed that way in one session each.
 
 ## Work cycle
 1. `python3 tools/fn.py <addr>` → assembly (capstone) + Ghidra decompilation.
