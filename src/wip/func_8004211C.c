@@ -17,7 +17,14 @@
    real second set, or the copy with a lower luid than the addiu while cse still leaves the compare on the temp.
    (2) lo: `andi v1,v0,0xf` comes first in the game because lo is NOT boosted (multi-set); with any single-set form
    it is scheduled last (delay slot). `lo = v; lo &= 0xf;` leaves a combine `(use lo)` and changes nothing.
-   `short m` + `int lo` gives the game sll/sra/slt compare; `unsigned short m` gives andi/sltu (27, wrong shape). */
+   `short m` + `int lo` gives the game sll/sra/slt compare; `unsigned short m` gives andi/sltu (27, wrong shape).
+   n64: both shapes ARE reproducible debt-free with in-place updates (anti-dependences pin the order):
+   `int ys = (short)*p++; y0 = ys; ys -= 16; if (b < ys) return 0;` + a dead trailing `lo = ys;` after the loop (makes
+   ys the cse-canonical reg, n48) gives `lh v0; move t0,v0; addiu v0,v0,-16; slt`; `unsigned int v = *p++; lo = v & 0xf;
+   v >>= 4; t = v & 0xf;` with `int lo` gives `andi v1,v0,0xf; srl v0,v0,4; andi a2` and no andi 0xffff. But then global
+   alloc swaps n/y0 (t0/t1: n 8 refs/63 = 3809 vs y0 6/36 = 3333, game needs y0 first) and lo/m (a3/v1: the sign-extended
+   m temp 6 refs/5 insns = 24000 beats lo 8/18 = 13333 and takes v1): score 30 (/tmp H.c form). Needs y0 a bit
+   shorter-lived or n longer, and m's extension temp weaker (or lo stronger). */
 #include "TOBJ.H"
 extern short *func_8003F200(int a, int b);
 extern unsigned short *DAT_1f800278;
