@@ -1,23 +1,17 @@
 // FUNC 800505f0 2228 MAIN0
 // FLAGS -O2 -G0 -fno-strength-reduce
-/* score 301 (b23, was 517): twin of wip func_80052190 (rotated FT4 sprite). b23: short x,y (lbu+sll/sra), the
-   D_8009C962 test as a switch (slti/bgez), (a+0x40)&0xff as a local a4 computed before the loop (game hoists its offset
-   t7 and &sin[a4] t8->sp+32), and &cos/&sin[(b+0xc0)&0xff] as pointer locals before the loop (game t9 and sp+80).
-   Left: frame 0x78 vs 0x80 (game spills n@16 sh, q@24, sp+32, sp+80; caller-save t1-t9 at 40..72), the table bases
-   (game: la s7=cos, la t4=sin in the preheader after the FUN_80037c80 calls), q/n spill slots swapped, prologue order
-   (game: lh s; lw xy; e; lh e[1]; reload o->d3c; lhu e[0]). Use -dL to see the loop hoisting decisions. */
 #include "TOBJ.H"
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
     unsigned short x0, y0;
-    unsigned short uv0, clut;
+    unsigned char u0, v0; unsigned short clut;
     unsigned short x1, y1;
-    unsigned short uv1, tpage;
+    unsigned char u1, v1; unsigned short tpage;
     unsigned short x2, y2;
-    unsigned short uv2, pad2;
+    unsigned char u2, v2; unsigned short pad2;
     unsigned short x3, y3;
-    unsigned short uv3, pad3;
+    unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
@@ -27,7 +21,7 @@ extern C4C *D_1F8001D4;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
-extern unsigned long D_1F800070;
+extern long D_1F800070;
 extern long D_1F800074;
 extern char D_1F8000C0[], D_1F8000C0b[];
 extern void SetRotMatrix(void *);
@@ -58,15 +52,6 @@ static __inline__ int proj(void)
     return 0;
 }
 
-static __inline__ int onscreen(PolyFT4 *p)
-{
-    if (p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100 || p->y3 < 0x100) {
-        if (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140 || p->x3 < 0x140)
-            return 1;
-    }
-    return 0;
-}
-
 static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned long e)
 {
     d = ((signed char)d + c) << 2;
@@ -81,22 +66,28 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     return 0;
 }
 
+#define SN(i) D_8007A5F0[i]
+#define a1 ((ang + 0x80) & 0xff)
+#define a0 (ang & 0xff)
+#define CS(i) D_8007A3F0[i]
+#define C f[-1]
+#define D f[0]
+
 void FUN_800505f0(TObj *o)
 {
     PolyFT4 *p;
     short *e;
+    short n;
     unsigned char *q;
     unsigned char *f;
-    short n;
     short s;
-    unsigned long xy;
-    int cx, cy;
-    int a, b;
-    short dx, dy;
-    int ndx, ndy;
-    int v;
-    unsigned short af;
+    int xy;
     short x, y;
+    int ang;
+    short A, B;
+    short u, w;
+    unsigned short af;
+    unsigned char c;
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
@@ -110,10 +101,10 @@ void FUN_800505f0(TObj *o)
     s = *(short *)o->anim;
     xy = D_1F800070;
     e = (short *)(o->d3c + s * 4);
-    q = (unsigned char *)(o->d3c + e[1]);
-    n = e[0];
-    cy = xy >> 16;
-    cx = xy;
+    q = (unsigned char *)(*(volatile int *)&o->d3c + e[1]);
+    n = ((unsigned short *)e)[0];
+    x = xy;
+    y = (unsigned)xy >> 16;
     if (D_8009C330->w28[D_1F8001F4] != s) {
         if (D_8009C960h == 6) {
             switch (D_8009C962h) {
@@ -123,17 +114,13 @@ void FUN_800505f0(TObj *o)
         }
         FUN_80037c80(o);
     }
-    a = (o->d8c + 0x80) & 0xff;
-    b = o->d8c & 0xff;
+    ang = o->d8c;
     f = q + 0xb;
-    D_8009C330->w18 = cx;
-    D_8009C330->w1a = cy;
-    {int a4 = (a + 0x40) & 0xff;
-    short *cb = &D_8007A5F0[(b + 0xc0) & 0xff];
-    short *sb = &D_8007A3F0[(b + 0xc0) & 0xff];
+    D_8009C330->w18 = x;
+    D_8009C330->w1a = y;
     do {
-        x = (signed char)f[3];
-        y = (signed char)f[4];
+        A = (signed char)f[3];
+        B = (signed char)f[4];
         p = DAT_1f800164;
         p->code = 0x2d;
         SetSemiTrans(p, 0);
@@ -142,48 +129,51 @@ void FUN_800505f0(TObj *o)
             p->clut = o->w08;
         else
             p->clut = *(unsigned short *)((char *)o + 0xc4);
-        ((unsigned char *)&p->uv0)[0] = q[0] + ((unsigned char)D_1F8001F4 << 6) + 4;
-        ((unsigned char *)&p->uv0)[1] = f[-10] + 4;
-        ((unsigned char *)&p->uv2)[0] = ((unsigned char *)&p->uv0)[0];
-        ((unsigned char *)&p->uv1)[1] = ((unsigned char *)&p->uv0)[1];
-        ((unsigned char *)&p->uv1)[0] = ((unsigned char *)&p->uv0)[0] + f[-1];
-        ((unsigned char *)&p->uv2)[1] = ((unsigned char *)&p->uv0)[1] + f[0];
-        ((unsigned char *)&p->uv3)[0] = ((unsigned char *)&p->uv0)[0] + f[-1];
-        ((unsigned char *)&p->uv3)[1] = ((unsigned char *)&p->uv0)[1] + f[0];
+        p->u0 = q[0] + ((unsigned char)D_1F8001F4 << 6) + 4;
+        p->v0 = f[-10] + 4;
+        c = C;
+        p->u2 = p->u0;
+        p->u1 = p->u0 + c;
+        p->v1 = p->v0;
+        p->v2 = p->v0 + D;
+        p->u3 = p->u0 + C;
+        p->v3 = p->v0 + D;
         if (o->b9d)
             af = D_8009C330->b7;
         else
             af = o->animFrame;
         if (af & 1) {
-            dx = -(x + f[-1]);
-            dy = y;
-            ndx = -dx;
-            ndy = -dy;
-            p->x1 = cx + ((ndx * D_8007A5F0[a]) >> 12) + ((ndy * D_8007A5F0[(a + 0xc0) & 0xff]) >> 12);
-            p->y1 = cy + ((ndx * D_8007A3F0[a]) >> 12) + ((ndy * D_8007A3F0[(a + 0xc0) & 0xff]) >> 12);
-            p->x0 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + ((ndy * D_8007A5F0[(b + 0x40) & 0xff]) >> 12);
-            p->y0 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + ((ndy * D_8007A3F0[(b + 0x40) & 0xff]) >> 12);
-            p->x3 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[a4]) >> 12);
-            p->y3 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[a4]) >> 12);
-            p->x2 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * *cb) >> 12);
-            p->y2 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * *sb) >> 12);
+            u = -(A + C);
+            w = B;
+            p->x1 = x + ((-u * SN(a1)) >> 12) + ((-w * SN((a1 + 0xc0) & 0xff)) >> 12);
+            p->y1 = y + ((-u * CS(a1)) >> 12) + ((-w * CS((a1 + 0xc0) & 0xff)) >> 12);
+            p->x0 = x + (((u + C) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
+            p->y0 = y + (((u + C) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
+            p->x3 = x + ((-u * SN(a1)) >> 12) + (((w + D) * SN((a1 + 0x40) & 0xff)) >> 12);
+            p->y3 = y + ((-u * CS(a1)) >> 12) + (((w + D) * CS((a1 + 0x40) & 0xff)) >> 12);
+            p->x2 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
+            p->y2 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
         } else {
-            dx = x;
-            dy = y;
-            ndx = -dx;
-            ndy = -dy;
-            p->x0 = cx + ((ndx * D_8007A5F0[a]) >> 12) + ((ndy * D_8007A5F0[(a + 0xc0) & 0xff]) >> 12);
-            p->y0 = cy + ((ndx * D_8007A3F0[a]) >> 12) + ((ndy * D_8007A3F0[(a + 0xc0) & 0xff]) >> 12);
-            p->x1 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + ((ndy * D_8007A5F0[(b + 0x40) & 0xff]) >> 12);
-            p->y1 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + ((ndy * D_8007A3F0[(b + 0x40) & 0xff]) >> 12);
-            p->x2 = cx + ((ndx * D_8007A5F0[a]) >> 12) + (((dy + f[0]) * D_8007A5F0[a4]) >> 12);
-            p->y2 = cy + ((ndx * D_8007A3F0[a]) >> 12) + (((dy + f[0]) * D_8007A3F0[a4]) >> 12);
-            p->x3 = cx + (((dx + f[-1]) * D_8007A5F0[b]) >> 12) + (((dy + f[0]) * *cb) >> 12);
-            p->y3 = cy + (((dx + f[-1]) * D_8007A3F0[b]) >> 12) + (((dy + f[0]) * *sb) >> 12);
+            u = A;
+            w = B;
+            p->x0 = x + ((-u * SN(a1)) >> 12) + ((-w * SN((a1 + 0xc0) & 0xff)) >> 12);
+            p->y0 = y + ((-u * CS(a1)) >> 12) + ((-w * CS((a1 + 0xc0) & 0xff)) >> 12);
+            p->x1 = x + (((u + C) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
+            p->y1 = y + (((u + C) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
+            p->x2 = x + ((-u * SN(a1)) >> 12) + (((w + D) * SN((a1 + 0x40) & 0xff)) >> 12);
+            p->y2 = y + ((-u * CS(a1)) >> 12) + (((w + D) * CS((a1 + 0x40) & 0xff)) >> 12);
+            p->x3 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
+            p->y3 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
         }
-        if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, o->b0f, 0x9000000))
-            DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+        {
+            int c = D_1F800074;
+            unsigned long e;
+            do { } while (0); /* loop notes end the sched block after the c load (debt, as func_80054C38) */
+            e = 0x9000000;
+            if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, c, o->b0f, e))
+                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+        }
         q += 0x10;
         f += 0x10;
-    } while (--n);}
+    } while (--n);
 }
