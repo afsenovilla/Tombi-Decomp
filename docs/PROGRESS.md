@@ -4,18 +4,18 @@ _Generated with `python tools/progress.py` (2026-10-12). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 93.3 % of the game's code matches byte for byte** (1186364 of 1271552 bytes).
+**Whole game: 95.0 % of the game's code matches byte for byte** (1207388 of 1271552 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 227816 B | 210460 B | 92.4 % `[######################..]` |
+| MAIN0.EXE: engine, shared by every area | 227816 B | 219256 B | 96.2 % `[#######################.]` |
 | X000.BIN: AREA00 + object code reused by all areas | 297956 B | 297632 B | 99.9 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 745780 B | 678272 B | 90.9 % `[######################..]` |
-| **Whole game** | **1271552 B** | **1186364 B** | **93.3 %** `[######################..]` |
+| X001..X019.BIN: code specific to the other areas | 745780 B | 690500 B | 92.6 % `[######################..]` |
+| **Whole game** | **1271552 B** | **1207388 B** | **95.0 %** `[#######################.]` |
 
 - Bytes of machine code in game functions; Sony's Psy-Q library (99504 B) is not counted: 67596 B of it (67.9 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 97.7 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 98.2 %).
 - Also tracked for MAIN0 + X000: 9.7 % of the code named by us, 76.0 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
@@ -25,7 +25,7 @@ Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 9950
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 227816 B (511 f) | 22.0 % | 56.8 % | 92.4 % (1115 f) | 99464 B | 67556 B (67.9 %) |
+| MAIN0.EXE (game core) | 227816 B (511 f) | 22.0 % | 56.8 % | 96.2 % (1120 f) | 99464 B | 67556 B (67.9 %) |
 | X000.BIN (AREA00 overlay) | 297956 B (528 f) | 0.3 % | 90.7 % | 99.9 % (522 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019)
@@ -40,23 +40,23 @@ in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../not
 
 | Overlay | Areas | Code | Functions | Matching | Pending: x000 | dup | piece | new |
 |---|---|---|---|---|---|---|---|---|
-| X001.BIN | AREA01, AREA07 | 330276 B | 603 | 94.8 % (586 f) | 0 B | 0 B | 400 B | 16752 B (16 f) |
+| X001.BIN | AREA01, AREA07 | 330276 B | 603 | 95.4 % (587 f) | 0 B | 0 B | 400 B | 14716 B (15 f) |
 | X002.BIN | AREA02, AREA19 (alt.) | 200656 B | 366 | 99.6 % (361 f) | 0 B | 0 B | 400 B | 392 B (4 f) |
-| X003.BIN | AREA03 | 301504 B | 589 | 97.1 % (578 f) | 0 B | 0 B | 400 B | 8380 B (10 f) |
+| X003.BIN | AREA03 | 301504 B | 589 | 97.8 % (579 f) | 0 B | 0 B | 400 B | 6144 B (9 f) |
 | X004.BIN | AREA04, AREA12 | 282416 B | 572 | 97.6 % (563 f) | 0 B | 0 B | 400 B | 6360 B (8 f) |
 | X005.BIN | AREA05 | 180984 B | 330 | 99.7 % (326 f) | 0 B | 0 B | 400 B | 68 B (3 f) |
 | X006.BIN | AREA06 | 211508 B | 397 | 95.2 % (373 f) | 0 B | 0 B | 400 B | 9744 B (23 f) |
 | X008.BIN | AREA08 | 175296 B | 308 | 99.6 % (305 f) | 0 B | 0 B | 400 B | 292 B (2 f) |
-| X009.BIN | AREA09 | 258724 B | 507 | 98.0 % (500 f) | 0 B | 0 B | 400 B | 4680 B (6 f) |
-| X010.BIN | AREA10 | 275380 B | 535 | 95.4 % (515 f) | 0 B | 1212 B | 400 B | 11124 B (18 f) |
+| X009.BIN | AREA09 | 258724 B | 507 | 98.7 % (501 f) | 0 B | 0 B | 400 B | 2844 B (5 f) |
+| X010.BIN | AREA10 | 275380 B | 535 | 96.1 % (516 f) | 0 B | 1212 B | 400 B | 9064 B (17 f) |
 | X011.BIN | AREA11 | 190544 B | 355 | 99.3 % (350 f) | 0 B | 0 B | 400 B | 920 B (4 f) |
 | X013.BIN | AREA13 | 182492 B | 330 | 99.3 % (324 f) | 0 B | 0 B | 400 B | 792 B (5 f) |
-| X014.BIN | AREA14 | 236716 B | 490 | 97.7 % (483 f) | 0 B | 0 B | 400 B | 5036 B (6 f) |
+| X014.BIN | AREA14 | 236716 B | 490 | 99.4 % (488 f) | 0 B | 0 B | 400 B | 976 B (1 f) |
 | X016.BIN | AREA16 | 186632 B | 359 | 99.4 % (355 f) | 0 B | 0 B | 400 B | 644 B (3 f) |
 | X017.BIN | AREA17 | 189344 B | 350 | 99.5 % (347 f) | 0 B | 0 B | 400 B | 600 B (2 f) |
 | X018.BIN | AREA18 | 193352 B | 356 | 98.9 % (350 f) | 0 B | 0 B | 400 B | 1724 B (5 f) |
 | X019.BIN | AREA19 | 175124 B | 306 | 99.8 % (305 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| **Total** | | 3570948 B | 6753 | 97.9 % (6621 f) | 0 B | 1212 B | 6400 B | 67508 B (115 f) |
+| **Total** | | 3570948 B | 6753 | 98.2 % (6630 f) | 0 B | 1212 B | 6400 B | 55280 B (106 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.

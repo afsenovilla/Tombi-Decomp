@@ -14,7 +14,7 @@
     "excluded": 479,
     "unnamed_typed": 389376
   },
-  "matching_bytes": 508092,
+  "matching_bytes": 516888,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
       "lib": 99464,
@@ -59,17 +59,17 @@
     "X001": {
       "game": 330276,
       "n": 603,
-      "matched": 313124,
-      "n_matched": 586,
+      "matched": 315160,
+      "n_matched": 587,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 16752,
-      "n_new": 16,
+      "new": 14716,
+      "n_new": 15,
       "uniq": 153320,
-      "uniq_matched": 136568,
+      "uniq_matched": 138604,
       "n_uniq": 284,
-      "n_uniq_matched": 268
+      "n_uniq_matched": 269
     },
     "X002": {
       "game": 200656,
@@ -89,17 +89,17 @@
     "X003": {
       "game": 301504,
       "n": 589,
-      "matched": 292724,
-      "n_matched": 578,
+      "matched": 294960,
+      "n_matched": 579,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 8380,
-      "n_new": 10,
+      "new": 6144,
+      "n_new": 9,
       "uniq": 122772,
-      "uniq_matched": 114392,
+      "uniq_matched": 116628,
       "n_uniq": 255,
-      "n_uniq_matched": 245
+      "n_uniq_matched": 246
     },
     "X004": {
       "game": 282416,
@@ -164,32 +164,32 @@
     "X009": {
       "game": 258724,
       "n": 507,
-      "matched": 253644,
-      "n_matched": 500,
+      "matched": 255480,
+      "n_matched": 501,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 4680,
-      "n_new": 6,
+      "new": 2844,
+      "n_new": 5,
       "uniq": 81636,
-      "uniq_matched": 76956,
+      "uniq_matched": 78792,
       "n_uniq": 190,
-      "n_uniq_matched": 184
+      "n_uniq_matched": 185
     },
     "X010": {
       "game": 275380,
       "n": 535,
-      "matched": 262644,
-      "n_matched": 515,
+      "matched": 264704,
+      "n_matched": 516,
       "piece": 400,
       "x000": 0,
       "dup": 1212,
-      "new": 11124,
-      "n_new": 18,
+      "new": 9064,
+      "n_new": 17,
       "uniq": 94360,
-      "uniq_matched": 83236,
+      "uniq_matched": 85296,
       "n_uniq": 198,
-      "n_uniq_matched": 180
+      "n_uniq_matched": 181
     },
     "X011": {
       "game": 190544,
@@ -224,17 +224,17 @@
     "X014": {
       "game": 236716,
       "n": 490,
-      "matched": 231280,
-      "n_matched": 483,
+      "matched": 235340,
+      "n_matched": 488,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 5036,
-      "n_new": 6,
+      "new": 976,
+      "n_new": 1,
       "uniq": 61336,
-      "uniq_matched": 56300,
+      "uniq_matched": 60360,
       "n_uniq": 180,
-      "n_uniq_matched": 174
+      "n_uniq_matched": 179
     },
     "X016": {
       "game": 186632,
