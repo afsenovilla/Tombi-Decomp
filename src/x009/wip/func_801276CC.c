@@ -1,3 +1,4 @@
+// FUNC 801276cc 336 X009
 /* score 29 (two diffs left, see below). n67 findings from the cc1 -dS/-dR traces (sched1/sched2 are both
    BACKWARD list schedulers: picked first = placed last; ties: boosted (reg set once) first, else store beats ALU,
    else higher luid first):
