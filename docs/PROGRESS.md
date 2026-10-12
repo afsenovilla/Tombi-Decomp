@@ -1,31 +1,31 @@
 # Tombi! decompilation progress (PAL Spanish, SCES_013.31)
 
-_Generated with `python tools/progress.py` (2026-10-09). Do not edit by hand._
+_Generated with `python tools/progress.py` (2026-10-12). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 91.6 % of the game's code matches byte for byte** (1164112 of 1271516 bytes).
+**Whole game: 91.6 % of the game's code matches byte for byte** (1165324 of 1271552 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 227780 B | 201668 B | 88.5 % `[#####################...]` |
+| MAIN0.EXE: engine, shared by every area | 227816 B | 202880 B | 89.1 % `[#####################...]` |
 | X000.BIN: AREA00 + object code reused by all areas | 297956 B | 294564 B | 98.9 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 745780 B | 667880 B | 89.6 % `[#####################...]` |
-| **Whole game** | **1271516 B** | **1164112 B** | **91.6 %** `[######################..]` |
+| **Whole game** | **1271552 B** | **1165324 B** | **91.6 %** `[######################..]` |
 
-- Bytes of machine code in game functions; Sony's Psy-Q library (99540 B) is not counted: 67596 B of it (67.9 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions; Sony's Psy-Q library (99504 B) is not counted: 67596 B of it (67.9 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 96.9 %).
-- Also tracked for MAIN0 + X000: 9.5 % of the code named by us, 76.0 % typed with the TObj structure.
+- Also tracked for MAIN0 + X000: 9.7 % of the code named by us, 76.0 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
-Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99540 bytes (907 functions).
+Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99504 bytes (906 functions).
 
 ## Breakdown by program
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 227780 B (510 f) | 21.4 % | 56.8 % | 88.5 % (1096 f) | 99500 B | 67556 B (67.9 %) |
+| MAIN0.EXE (game core) | 227816 B (511 f) | 22.0 % | 56.8 % | 89.1 % (1102 f) | 99464 B | 67556 B (67.9 %) |
 | X000.BIN (AREA00 overlay) | 297956 B (528 f) | 0.3 % | 90.7 % | 98.9 % (519 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019)

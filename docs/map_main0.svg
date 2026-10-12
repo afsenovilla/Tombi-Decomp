@@ -145,7 +145,7 @@
 <rect x="102.0" y="98" width="2.1" height="13" fill="#22c55e"><title>0x8001EAA4 40 B &#183; Named by us</title></rect>
 <rect x="104.1" y="98" width="8.2" height="13" fill="#f59e0b"><title>0x8001EACC 152 B &#183; Unnamed, untyped</title></rect>
 <rect x="112.3" y="98" width="1.7" height="13" fill="#22c55e"><title>0x8001EB64 32 B &#183; Named by us</title></rect>
-<rect x="114.0" y="98" width="1.9" height="13" fill="#94a3b8"><title>0x8001EB84 36 B &#183; Sony library (Psy-Q)</title></rect>
+<rect x="114.0" y="98" width="1.9" height="13" fill="#22c55e"><title>0x8001EB84 36 B &#183; Named by us</title></rect>
 <rect x="127.5" y="98" width="47.7" height="13" fill="#f59e0b"><title>0x8001EC80 888 B &#183; Unnamed, untyped</title></rect>
 <rect x="175.2" y="98" width="15.0" height="13" fill="#f59e0b"><title>0x8001EFF8 280 B &#183; Unnamed, untyped</title></rect>
 <rect x="190.3" y="98" width="9.5" height="13" fill="#22c55e"><title>0x8001F110 176 B &#183; Named by us</title></rect>
@@ -325,7 +325,7 @@
 <rect x="491.2" y="194" width="12.7" height="13" fill="#f59e0b"><title>0x800386F4 236 B &#183; Unnamed, untyped</title></rect>
 <rect x="503.9" y="194" width="13.1" height="13" fill="#f59e0b"><title>0x800387E0 244 B &#183; Unnamed, untyped</title></rect>
 <rect x="517.0" y="194" width="26.6" height="13" fill="#f59e0b"><title>0x800388D4 496 B &#183; Unnamed, untyped</title></rect>
-<rect x="571.8" y="194" width="61.9" height="13" fill="#f59e0b"><title>0x80038CD0 1152 B &#183; Unnamed, untyped</title></rect>
+<rect x="571.8" y="194" width="61.9" height="13" fill="#22c55e"><title>0x80038CD0 1152 B &#183; Named by us</title></rect>
 <rect x="659.9" y="194" width="31.4" height="13" fill="#22c55e"><title>0x80039338 584 B &#183; Named by us</title></rect>
 <rect x="691.3" y="194" width="58.7" height="13" fill="#f59e0b"><title>0x80039580 1092 B &#183; Unnamed, untyped</title></rect>
 <rect x="749.9" y="194" width="38.5" height="13" fill="#f59e0b"><title>0x800399C4 716 B &#183; Unnamed, untyped</title></rect>
