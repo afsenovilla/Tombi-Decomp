@@ -1,5 +1,5 @@
 // FUNC 800480d4 536 MAIN0
-// wip score 38 (b53: `short w = ...; TObj *q = o; o->y.p.frac = 0; o->b69 = 1; q->y.p.whole = w;` in the dy<=0 tail fixes the o/p t0/t1 global-alloc order, 107->38; left: game reads o->box3/p->box2/o->box2 with lhu in hy (o->box3 reused via sll/sra in the compare), dy+hy unextended, t6-t9 shifted) (rewritten in the style of the matched sibling func_800482EC; int hy). Left: game keeps o/p in t0/t1 (ours a2/a3: two fewer early pseudos) and loads o->box3 with lhu (sll/sra later). As a static inline wrapper: 142.
+// MATCHING 800480d4 536
 #include "TOBJ.H"
 
 int func_800480D4(TObj *o, TObj *p)
@@ -9,6 +9,7 @@ int func_800480D4(TObj *o, TObj *p)
     short wx;
     short px;
     short dy;
+    int di;
     int hy;
     short cx;
 
@@ -19,11 +20,12 @@ int func_800480D4(TObj *o, TObj *p)
     dx = o->h->p.whole - p->h->p.whole;
     if ((unsigned short)(dx + wx) > p->box1 + o->box1)
         return 0;
-    dy = o->y.p.whole - p->y.p.whole;
-    hy = p->box2 + (o->box3 - o->box2);
-    if ((unsigned short)(dy + hy) > o->box3 + p->box3)
+    di = (unsigned short)o->y.p.whole - (unsigned short)p->y.p.whole;
+    hy = (unsigned short)p->box2 + ((unsigned short)o->box3 - (unsigned short)o->box2);
+    dy = di;
+    if ((unsigned short)(di + hy) > o->box3 + p->box3)
         return 0;
-    if (((unsigned)(hy + dy) & 0xffff) < 0xc) {
+    if (((unsigned)(hy - -di) & 0xffff) < 0xc) {
         o->y.p.whole = p->y.p.whole - hy;
         o->y.p.frac = 0;
         o->b69 = 1;
