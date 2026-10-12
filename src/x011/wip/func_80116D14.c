@@ -1,4 +1,4 @@
-/* score 4 (n53): only the head of case 0 differs: game `la v1; lw v0,0(v1) [n base]; lw a1,0(v1) [base]`, ours
+/* --score 8 but only 4 words differ (n53; the previous wip, commit 7fa0811^.., scored 4 with 6 words wrong): only the head of case 0 differs: game `la v1; lw v0,0(v1) [n base]; lw a1,0(v1) [base]`, ours
    `la v0; lw a1 [base]; lw v0 [n base]` (local-alloc ties the load where the la pseudo dies with it; the game's
    la is untied and gets v1, i.e. the second load's dest was not a tie-able local pseudo). What this version fixed
    vs the old wip (6): a volatile READ of o->b04 (`t = *(volatile unsigned char *)&o->b04`, unsigned char t, t++,
