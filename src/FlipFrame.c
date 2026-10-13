@@ -1,8 +1,8 @@
 // FUNC 80016984 192 MAIN0
 // MATCHING 80016984 192
+#include "globals.h"
 extern unsigned short fr;
 extern char *cur, *prev;
-extern char OT_FRAMEBUFFER[];
 extern void PutDispEnv(void *), PutDrawEnv(void *), f(void *), DrawOTag(void *), ClearOTagR(void *, int);
 void FlipFrame(void)
 {

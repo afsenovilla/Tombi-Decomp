@@ -1,5 +1,6 @@
 // FUNC 80019084 448 MAIN0
 // MATCHING 80019084 448
+#include "globals.h"
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
 extern long OpenEvent(unsigned long, long, long, long (*)());
@@ -7,8 +8,6 @@ extern long EnableEvent(unsigned long);
 extern void InitCARD(long);
 extern long StartCARD(void);
 extern void _bu_init(void);
-extern long MEMCARD_SW_END_IO, MEMCARD_SW_END_ERROR, MEMCARD_SW_TIMEOUT, MEMCARD_SW_NEW_DEVICE;
-extern long MEMCARD_HW_END_IO, MEMCARD_HW_END_ERROR, MEMCARD_HW_TIMEOUT, MEMCARD_HW_NEW_DEVICE;
 
 void MemCardInit(void)
 {

@@ -1,6 +1,6 @@
 // FUNC 8001eacc 152 MAIN0
 // MATCHING 8001eacc 152
-extern unsigned char VOICE_KEY_STATUS[];
+#include "globals.h"
 extern short DAT_8009c8e0[];
 extern short DAT_800a3ce8[];
 extern void SsUtKeyOffV(short);

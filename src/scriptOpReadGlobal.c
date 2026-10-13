@@ -1,5 +1,6 @@
 // FUNC 8003a570 48 MAIN0
 // MATCHING 8003a570 48
+#include "globals.h"
 typedef struct {
     char pad[0x8a];
     unsigned short w8a;
@@ -8,7 +9,6 @@ typedef struct {
 } S8003A570;
 
 extern S8003A570 *SCRIPT_CTX;
-extern unsigned char SCRIPT_GLOBALS[];
 
 void scriptOpReadGlobal(void)
 {

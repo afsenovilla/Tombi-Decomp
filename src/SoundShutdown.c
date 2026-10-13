@@ -1,6 +1,6 @@
 // FUNC 8001f820 48 MAIN0
 // MATCHING 8001f820 48
-extern char SOUND_INITIALIZED;
+#include "globals.h"
 extern void f1(void);
 extern void f2(void);
 

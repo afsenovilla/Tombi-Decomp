@@ -1,9 +1,9 @@
 // FUNC 8001bcd8 324 MAIN0
 // MATCHING 8001bcd8 324
+#include "globals.h"
 extern short G1f4, G1c6;
 extern unsigned short G1f8;
 extern unsigned int G164;
-extern char LOAD_BUFFER_ALT[];
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec26c(void);
 extern void updateInventoryOverlay(void), FUN_8002af10(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
 extern void resetDrawLists(void), FUN_8005042c(void), FUN_8001dbdc(void);

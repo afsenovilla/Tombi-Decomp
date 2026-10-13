@@ -14,9 +14,8 @@ typedef struct {
     short x3, y3; unsigned short uv3, pad3;
 } PFT4;
 
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
-extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4 *D_1F800164;
@@ -50,7 +49,7 @@ void func_8011F240(TObj *o)
 
     if (o->anim == 0)
         return;
-    projectActorPosition(o, &D_1F800070, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
     xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;

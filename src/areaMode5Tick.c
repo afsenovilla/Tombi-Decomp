@@ -1,6 +1,6 @@
 // FUNC 8001b9b0 324 MAIN0
 // MATCHING 8001b9b0 324
-extern char LOAD_BUFFER_ALT[];
+#include "globals.h"
 extern short DAT_1f8001f4;
 extern short DAT_1f8001c6;
 extern unsigned short DAT_1f8001f8;

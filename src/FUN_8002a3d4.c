@@ -1,6 +1,7 @@
 // FUNC 8002a3d4 252 MAIN0
 // MATCHING 8002a3d4 252
 #include "TOBJ.H"
+/* PLAYER+0: a separate symbol on purpose (sharing PLAYER's lui changes the register allocation) */
 extern unsigned char DAT_800a6038;
 extern unsigned char PLAYER[];
 extern short *DAT_800a6078;

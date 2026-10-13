@@ -1,6 +1,6 @@
 // FUNC 8005a9a4 188 MAIN0
 // MATCHING 8005a9a4 188
-extern unsigned char EVENT_COMPLETE_AP_TABLE[];
+#include "globals.h"
 extern unsigned char SCRIPT_FLAGS[];
 extern void FUN_80026a10(int a);
 extern void FUN_8005aa74(int a, int b, int c, int d);

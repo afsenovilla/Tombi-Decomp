@@ -432,7 +432,7 @@ void areaMode2Tick(void)
     u_short var_a1;
     Task* temp_v1;
 
-    NEXT_PRIM = (int) ((FRAME_BUFFER_INDEX * 0xC000) + &D_800B3188) & 0xFFFFFF;
+    NEXT_PRIM = (int) ((FRAME_BUFFER_INDEX * 0xC000) + LOAD_BUFFER_ALT) & 0xFFFFFF;
     if ((*(short* )(&SCRATCHPAD+0x1C6) == 2) && (MOVIE_PLAY_STATE == MOVIE_STATE_IDLE)) {
         *(short* )0x1F8001C6 = 0;
     }

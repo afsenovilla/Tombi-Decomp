@@ -1,5 +1,6 @@
 // FUNC 8004e41c 1272 MAIN0
 // MATCHING 8004e41c 1272
+#include "globals.h"
 typedef struct {
     char p0[0x48]; short w48; unsigned short w4a; unsigned short w4c; char p4e[0x58 - 0x4e]; short w58;
     char p5a[0x68 - 0x5a]; unsigned char b68, b69, b6a, b6b;
@@ -9,7 +10,6 @@ extern unsigned char D_1f8001cc;
 extern short D_1f8001f4;
 extern unsigned short D_1f8001fc, D_1f8001f8;
 extern int D_1f800164;
-extern char LOAD_BUFFER_ALT[];
 extern unsigned short D_8007DE98[];
 extern unsigned short D_8009D670;
 extern void func_800198B4();

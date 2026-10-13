@@ -1,6 +1,6 @@
 // FUNC 8004f490 168 MAIN0
 // MATCHING 8004f490 168
-extern int *AREA_LOAD_LISTS[];
+#include "globals.h"
 extern int LOAD_NEXT_ADDR, LOAD_SLOTS, g2b0;
 extern void SfxStopAll(int);
 extern void queueLoadList(int);

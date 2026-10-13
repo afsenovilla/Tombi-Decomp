@@ -1,6 +1,6 @@
 // FUNC 8001e430 192 MAIN0
 // MATCHING 8001e430 192
-extern unsigned char VOICE_KEY_STATUS[];
+#include "globals.h"
 extern short DAT_800a3cf6[];
 extern short DAT_8009c8ee[];
 extern unsigned char DAT_800780c4[];

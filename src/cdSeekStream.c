@@ -1,7 +1,7 @@
 // FUNC 8001d63c 104 MAIN0
 // MATCHING 8001d63c 104
+#include "globals.h"
 extern unsigned char DAT_80077f3c[];
-extern short MOVIE_FILE_IDS[];
 extern char FILE_LINKS[];
 extern int CdControl(int, void *, void *);
 extern int CdControlF(int, void *);

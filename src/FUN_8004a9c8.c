@@ -2,7 +2,6 @@
 // MATCHING 8004a9c8 1204
 #include "TOBJ.H"
 typedef struct { TObj o; char pad[0x32]; short wf2; } BigObj;
-extern BigObj DAT_800a6038;
 extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern void AnimLoadDuration(TObj *);
@@ -27,7 +26,7 @@ static __inline__ void SetAnim(TObj *self, short n)
 
 void FUN_8004a9c8(TObj *o)
 {
-    TObj *p = &DAT_800a6038.o;
+    TObj *p = &((BigObj *)PLAYER)->o;
     int d;
 
     switch (o->state) {

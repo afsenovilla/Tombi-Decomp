@@ -1,7 +1,6 @@
 // FUNC 8001e228 96 MAIN0
 // MATCHING 8001e228 96
-extern unsigned char VOICE_KEY_STATUS[];
-extern short VOICE_PRIORITY[];
+#include "globals.h"
 extern short g(short a);
 
 short keyOffSfxVoice(unsigned short a)

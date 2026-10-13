@@ -1,13 +1,12 @@
 // FUNC 8001eff8 280 MAIN0
 // MATCHING 8001eff8 280
-extern short BGM_SEQ_ID;
+#include "globals.h"
 extern short BGM_VAB_ID;
 extern unsigned short VAB_IDS[];
 extern unsigned char DAT_80078520[];
 extern unsigned char DAT_80078521[];
 extern unsigned long *SEQ_DATA[];
 extern short DAT_8007836c[];
-extern short BGM_VOLUME, BGM_MUTED, BGM_FADE_ACTIVE;
 extern void SsSeqStop(int);
 extern void SsSeqClose(int);
 extern int SsSeqOpen(unsigned long *, short);

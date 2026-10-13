@@ -1,6 +1,7 @@
 // FUNC 8001dad4 100 MAIN0
 // MATCHING 8001dad4 100
-extern char LOAD_BUFFER_ALT[], DAT_800c3e28[], DAT_800d3e28[], DAT_800d5e28[];
+#include "globals.h"
+extern char DAT_800c3e28[], DAT_800d3e28[], DAT_800d5e28[];
 
 typedef struct S {
     void *p0, *p4;

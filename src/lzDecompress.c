@@ -1,9 +1,8 @@
 // FUNC 8003bafc 396 MAIN0
 // MATCHING 8003bafc 396
+#include "globals.h"
 extern int LZ_FILE_CTRL;
 extern int D_1f800074;
-extern unsigned char LZ_CURRENT_BIT;
-extern unsigned short LZ_BITMASK;
 extern void FUN_8005bd24(unsigned char *, unsigned char *, int);
 
 static __inline__ short step(void)

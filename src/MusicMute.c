@@ -1,7 +1,6 @@
 // FUNC 8001f620 56 MAIN0
 // MATCHING 8001f620 56
-extern short BGM_SEQ_ID;
-extern short BGM_MUTED;
+#include "globals.h"
 extern void FUN_80070644(int, int, int);
 void MusicMute(void)
 {

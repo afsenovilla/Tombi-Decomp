@@ -1,9 +1,9 @@
 // FUNC 80016a5c 244 MAIN0
 // MATCHING 80016a5c 244
+#include "globals.h"
 extern unsigned short D_8009f7f2;
 extern unsigned short D_8009f814;
 extern unsigned char D_1f8003d3;
-extern unsigned char LOADED_LIST_FILE_SYM;
 extern unsigned short D_8009d4fc;
 extern unsigned short D_1f8001f0;
 extern unsigned short D_1f8001f2;

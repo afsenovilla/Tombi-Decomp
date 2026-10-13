@@ -96,16 +96,6 @@ SfxDef D_800778C4[4] = {
     { 1, 0, 3, 3, 100, 0 }
 };
 
-extern s16 BGM_FADE_TIMER;
-extern s16 BGM_FADE_INTERVAL;
-extern s16 BGM_FADE_STEP;
-extern s16 BGM_FADE_TARGET;
-extern s16 PITCH_SLIDE_TIMER;
-extern s16 PITCH_SLIDE_INTERVAL;
-extern s16 PITCH_SLIDE_STEP;
-extern s16 PITCH_SLIDE_DURATION;
-extern s16 PITCH_SLIDE_VOICE;
-extern int LAST_KEYON_VOICE;
 
 typedef struct {
     u16 id;
@@ -119,22 +109,11 @@ typedef struct {
     u8 unk3;
 } BgmDef;
 
-extern u16 AREA_BGM_VOLUME[];
-extern s16 BGM_FADE_VOLUME;
 extern SfxQueueEntry SOUND_QUEUE[];
 extern BgmDef BGM_TRACK_DEFS[];
-extern s16 BGM_VAB_ID;
-extern u_long* SEQ_DATA[];
 extern s16 BGM_TRACK_VOLUME[];
-extern s16 JINGLE_VAB_ID;
 
 
-extern s16 PITCH_SLIDE_VAB;
-extern s16 PITCH_SLIDE_PROG;
-extern s16 PITCH_SLIDE_OLD_NOTE;
-extern s16 PITCH_SLIDE_OLD_FINE;
-extern s16 PITCH_SLIDE_NEW_NOTE;
-extern s16 PITCH_SLIDE_NEW_FINE;
 
 
 s32 getSfxVabOffset(u16 id);
@@ -160,8 +139,6 @@ s32 getSfxVabOffset(u16 id);
 
 
 extern BgmDef AREA_BGM_DEFS[];
-extern u8* AREA_REVERB_DEPTH[];
-extern s32 AREA_REVERB_MODE[];
 
 inline s32 adjustAreaBgmVolume(s32 id)
 {

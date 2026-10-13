@@ -1,10 +1,10 @@
 // FUNC 8004e914 500 MAIN0
 // MATCHING 8004e914 500
+#include "globals.h"
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; short w4e; } S;
 extern S *TASK_C;
 extern short DAT_1f8001f4;
 extern int DAT_1f800164;
-extern char LOAD_BUFFER_ALT[];
 extern unsigned char LOAD_COMPLETE_SYM;
 extern void FUN_8001f110(int);
 extern void FUN_8005f060(int);

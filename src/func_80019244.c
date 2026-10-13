@@ -1,5 +1,6 @@
 // FUNC 80019244 1144 MAIN0
 // MATCHING 80019244 1144
+#include "globals.h"
 typedef struct {
     char pad[0x48];
     unsigned short w48, w4a, w4c;
@@ -21,7 +22,6 @@ extern unsigned char D_8009F0E8;
 extern char D_1F8001A0[];
 extern char D_80010000[];
 extern char D_80010008[];
-extern char LOAD_BUFFER_ALT[];
 extern void titleSequenceTask(void);
 void loadCollisionBounds(void);
 void SetDispMask(int);

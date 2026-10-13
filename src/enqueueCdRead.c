@@ -312,7 +312,7 @@ void enqueueCdRead(u8* dst, s16* hdr)
 {
     s32 head = D_1F80029C;
 
-    D_8009E748[head * 2] = (s32)hdr;
-    D_8009E74C[head * 2] = (s32)dst;
+    CD_QUEUE[head * 2] = (s32)hdr;
+    CD_QUEUE_DST[head * 2] = (s32)dst;
     D_1F80029C = (head + 1) & 0x7F;
 }

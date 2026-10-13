@@ -16,7 +16,7 @@ typedef struct {
 
 void func_8001D2F0(void)
 {
-    Task* task = (Task*)D_1F8001D4;
+    Task* task = TASK_C;
 
     switch ((u_short)task->state2) {
     case 0:

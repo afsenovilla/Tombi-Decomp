@@ -2,9 +2,6 @@
 // MATCHING 8005b624 784
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
-extern unsigned char EVENT_STARTED_AP_TABLE[];
-extern unsigned char EVENT_COMPLETE_AP_TABLE[];
-extern int AP_TABLE[];
 typedef struct { short a, b; } Pair;
 extern Pair D_80080704[];
 

@@ -1,8 +1,7 @@
 // FUNC 8001f4bc 252 MAIN0
 // MATCHING 8001f4bc 252
-extern short BGM_SEQ_ID, JINGLE_SEQ_ID;
-extern short VOICE_SFX_ID[], VOICE_PRIORITY[];
-extern short BGM_FADE_ACTIVE, PITCH_SLIDE_ACTIVE, SOUND_QUEUE_TAIL, SOUND_QUEUE_HEAD, SOUND_QUEUE_COUNT;
+#include "globals.h"
+extern short VOICE_SFX_ID[];
 extern void g1(int a);
 extern void g2(int a);
 extern void g3(int a, int b);

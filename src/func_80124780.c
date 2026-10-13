@@ -25,11 +25,10 @@ typedef struct {
     short x3, y3;
 } PF4;
 
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char *D_1F800164;
 extern int D_1F8001E0;
-extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
 int projectActorPosition(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
@@ -45,7 +44,7 @@ void func_80124780(Ext *o)
     PF4 *f;
     char *q;
 
-    if (projectActorPosition(o, &D_1F800070, &D_1F800074) != 0)
+    if (projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074) != 0)
         return;
     xy = LZ_FILE_CTRL;
     x = xy;

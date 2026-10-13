@@ -1,12 +1,7 @@
 // FUNC 8001e368 200 MAIN0
 // MATCHING 8001e368 200
-extern short PITCH_SLIDE_STEP;
-extern short PITCH_SLIDE_INTERVAL;
-extern short PITCH_SLIDE_TIMER;
-extern short PITCH_SLIDE_DURATION;
-extern short PITCH_SLIDE_ACTIVE;
+#include "globals.h"
 extern short PITCH_SLIDE_VOICE;
-extern int LAST_KEYON_VOICE;
 
 int setPitchSlideParam(unsigned short a)
 {

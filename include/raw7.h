@@ -1,6 +1,7 @@
 /* accesos por offset (shard7) */
 #ifndef RAW7_H
 #define RAW7_H
+#include "globals.h"
 #define U8(o,n)  (*(unsigned char *)((char *)(o) + (n)))
 #define S8(o,n)  (*(signed char *)((char *)(o) + (n)))
 #define U16(o,n) (*(unsigned short *)((char *)(o) + (n)))

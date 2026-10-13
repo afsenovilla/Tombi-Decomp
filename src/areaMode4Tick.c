@@ -1,9 +1,9 @@
 // FUNC 8001b680 332 MAIN0
 // MATCHING 8001b680 332
+#include "globals.h"
 extern short G1f4, G1c6;
 extern unsigned short G1f8;
 extern unsigned int G164;
-extern char LOAD_BUFFER_ALT[];
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec5e8(void);
 extern void FUN_80039580(void);
 extern void updateInventoryOverlay(void), FUN_800ebc30(void), updateObjectsLayer8(void), updateObjectsLayer7(void);

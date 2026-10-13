@@ -1,7 +1,7 @@
 // FUNC 8001f6b4 364 MAIN0
 // MATCHING 8001f6b4 364
+#include "globals.h"
 typedef struct { int mask; short pad0; short pad1; short mvl, mvr; short pad2[4]; short cdvl, cdvr; short pad3[2]; int cdmix; } SC;
-extern char SOUND_INITIALIZED;
 extern void SoundShutdown(void);
 extern void FUN_8006c544(void);
 extern void FUN_800702c0(void *, int, int);
@@ -15,10 +15,8 @@ extern char DAT_800a2270[];
 extern int DAT_8009bce0;
 extern short DAT_8009bce4, DAT_8009bce6, DAT_8009bcf0, DAT_8009bcf2;
 extern int DAT_8009bcf8;
-extern short SOUND_QUEUE_TAIL, SOUND_QUEUE_HEAD, SOUND_QUEUE_COUNT, BGM_VOLUME, BGM_FADE_ACTIVE, PITCH_SLIDE_ACTIVE;
-extern short VOICE_PRIORITY[], VOICE_SFX_ID[];
+extern short VOICE_SFX_ID[];
 extern short VAB_IDS[];
-extern short BGM_SEQ_ID, JINGLE_SEQ_ID;
 
 void SoundInit(void)
 {

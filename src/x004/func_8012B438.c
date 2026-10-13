@@ -23,7 +23,7 @@ extern char D_80077CDC[];
 extern short *D_80131370[];
 extern Fix16 *D_800A6078;
 extern unsigned short D_1F8003C4, D_1F8001FC;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
 extern unsigned char D_800A603D_[];

@@ -1,21 +1,17 @@
 // FUNC 8001ec80 888 MAIN0
 // MATCHING 8001ec80 888
+#include "globals.h"
 /* debt: register asm on v; without it CSE/local-alloc make x a block-local copy, global alloc gives v x's s0 (game: v in a1).
    Tried: v/x int/short/ushort combos, x set earlier, x = v in per-case tails with goto, SsSeqSetVol(v, v).
    w: the tail stores written in every case (cross-jumped) give w the refs to win over the switch value (was asm $3).
    c: the call written in both branches lets the byte shift tie to a1 (was asm $5). */
-extern short BGM_SEQ_ID;
 extern unsigned char AREA_BGM_DEFS, D_800784C9;
 extern unsigned char D_800784CA[];
 extern unsigned short VAB_IDS[];
-extern short BGM_MUTED, BGM_FADE_VOLUME, BGM_FADE_TARGET, BGM_FADE_ACTIVE, BGM_VOLUME;
 extern unsigned short BGM_VAB_ID;
 extern void *SEQ_DATA[];
 extern unsigned short D_8009C960;
 extern unsigned short D_8009C962;
-extern short AREA_BGM_VOLUME[];
-extern unsigned char *AREA_REVERB_DEPTH[];
-extern int AREA_REVERB_MODE[];
 void SsSeqStop(short a);
 void SsSeqClose(short a);
 short SsSeqOpen(void *p, short v);

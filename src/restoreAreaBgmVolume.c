@@ -1,11 +1,9 @@
 // FUNC 8001f1c0 300 MAIN0
 // MATCHING 8001f1c0 300
-extern short BGM_SEQ_ID;
+#include "globals.h"
 extern unsigned short DAT_8009c960;
 extern unsigned short DAT_8009c960b;
 extern unsigned short DAT_8009c962;
-extern short AREA_BGM_VOLUME[];
-extern short BGM_MUTED;
 extern void SsSeqSetVol(short, short, short);
 
 void restoreAreaBgmVolume(void)

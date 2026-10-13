@@ -1,5 +1,6 @@
 // FUNC 80019b0c 480 MAIN0
 // MATCHING 80019b0c 480
+#include "globals.h"
 typedef struct { char pad[0x48]; unsigned short w48, w4a, w4c, w4e; } S1d4;
 extern S1d4 *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
@@ -9,7 +10,6 @@ extern int DAT_1f800164;
 extern short DAT_800a45ea;
 extern unsigned char DAT_8009c974;
 extern unsigned char DAT_8009c967;
-extern char LOAD_BUFFER_ALT[];
 extern void FUN_8004dd8c(void);
 extern void FUN_8005f060(int);
 extern void FUN_800261b0(void);

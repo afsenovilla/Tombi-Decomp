@@ -1,7 +1,6 @@
 // FUNC 8004a4cc 1276 MAIN0
 // MATCHING 8004a4cc 1276
 #include "TOBJ.H"
-extern TObj DAT_800a6038;
 extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c93c;
@@ -30,7 +29,7 @@ static __inline__ void SetAnim(TObj *self, short n)
 
 void FUN_8004a4cc(TObj *o)
 {
-    TObj *p = &DAT_800a6038;
+    TObj *p = (TObj *)PLAYER;
 
     switch (o->state) {
     case 0:

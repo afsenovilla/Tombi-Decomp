@@ -15,9 +15,8 @@ typedef struct {
     short x3, y3; unsigned char u3, v3; unsigned short pad2;
 } PFT4_80123FD0;
 
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
-extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern PFT4_80123FD0 *D_1F800164;
 extern int D_1F8001E0;
@@ -52,7 +51,7 @@ void FUN_80123fd0(TObj *o)
     short u, w;
     PFT4_80123FD0 *f;
 
-    if (projectActorPosition(o, &D_1F800070, &D_1F800074) != 0)
+    if (projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074) != 0)
         return;
     xy = LZ_FILE_CTRL;
     x = xy;

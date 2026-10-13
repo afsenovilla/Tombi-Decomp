@@ -2,7 +2,10 @@
 """Applies notes/data_names_main0.csv (address,name,size,source) to the C sources: renames the extern identifiers
 whose address (derived from the retail bytes of the compiled object, or spelled in a D_/DAT_<addr> name) is exactly
 a named global.  Only MAIN0 / scratchpad addresses (< 0x800E8028 or 0x1F80xxxx); other names are never touched.
-Only identifiers declared (extern) in the file itself are renamed; headers are not touched.
+Only identifiers declared (extern) in the file itself are renamed; headers are not touched (an identifier declared by a
+shared header is only reported as `HDR`: rename it in the header, whose spelled address can be the NTSC one while the
+bytes resolve to the PAL one, e.g. D_8009E748 -> CD_QUEUE). New declarations of named globals belong in
+include/tomba/globals.h (one type for every source) or globals_game.h (game.h structs).
 Needs the objects of a full build (build/full/obj) / report build (build/base/<prog>) to resolve short identifiers.
 Usage: tools/rename_data.py [--csv notes/data_names_main0.csv] [--dry]"""
 import csv, os, re, struct, sys
@@ -76,7 +79,8 @@ for dp, fn in walk():
             if not nm or not inrange(a) or nm == ident: continue
             local = re.search(r"\bextern\b[^;{}]*\b%s\b" % re.escape(ident), txt)
             if not local:
-                continue   # declared by a header (its names may be NTSC addresses): leave
+                if ident in H: print("HDR ", path, ident, nm)   # declared by a header: rename it there by hand
+                continue
             if nm in used.values() or re.search(r"\b%s\b" % re.escape(nm), txt):
                 print("SKIP", path, ident, nm); skipped += 1
                 if f.endswith(".h"): H.discard(ident)

@@ -1,9 +1,7 @@
 // FUNC 8004fa80 232 MAIN0
 // MATCHING 8004fa80 232
-extern unsigned char LOADED_LIST_FILE_SYM;
+#include "globals.h"
 extern unsigned char LOAD_COMPLETE_SYM;
-extern int LDSYS_LOAD_LIST;
-extern int SYSTEM_LOAD_LISTS[];
 extern unsigned short DAT_801fd8e0;
 extern void queueLoadList(int);
 extern void FUN_8004eb08(void);

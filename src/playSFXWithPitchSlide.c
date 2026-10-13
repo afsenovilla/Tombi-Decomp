@@ -1,13 +1,10 @@
 // FUNC 8001e76c 464 MAIN0
 // MATCHING 8001e76c 464
-extern short PITCH_SLIDE_ACTIVE;
+#include "globals.h"
 extern unsigned short PITCH_SLIDE_VOICE;
-extern unsigned char VOICE_KEY_STATUS[];
-extern short VOICE_PRIORITY[];
 extern unsigned char DAT_800780c4[];
 extern unsigned char *SFX_BANKS[];
 extern unsigned short VAB_IDS[];
-extern short PITCH_SLIDE_VAB, PITCH_SLIDE_PROG, PITCH_SLIDE_NEW_FINE, PITCH_SLIDE_OLD_FINE, PITCH_SLIDE_NEW_NOTE, PITCH_SLIDE_OLD_NOTE;
 extern short VOICE_SFX_ID[];
 extern void SsUtKeyOffV(int);
 extern int SoundFindFreeVoice(unsigned);

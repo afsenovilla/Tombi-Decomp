@@ -4,7 +4,7 @@
 
 extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
-extern unsigned char SCRIPT_GLOBALS[], D_8009CEFC[], D_8009CEFB, D_80131168[];
+extern unsigned char D_8009CEFC[], D_8009CEFB, D_80131168[];
 extern unsigned short D_8009C962, D_1F8001F8;
 extern int FUN_800202b4(TObj *);
 extern void func_8011EC78(TObj *);

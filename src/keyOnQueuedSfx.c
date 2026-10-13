@@ -1,16 +1,13 @@
 // FUNC 8001dfec 512 MAIN0
 // MATCHING 8001dfec 512
+#include "globals.h"
 typedef struct { short a; short ch; } CH;
 extern unsigned char *getSfxVabOffset(int);
-extern short SOUND_QUEUE_HEAD;
 extern CH SOUND_QUEUE[];
-extern unsigned char VOICE_KEY_STATUS[];
 extern short VOICE_SFX_ID[];
-extern short VOICE_PRIORITY[];
 extern short VAB_IDS[];
 extern short SFX_NOTE_OVERRIDE;
 extern short SFX_VOLUME_OVERRIDE;
-extern int LAST_KEYON_VOICE;
 extern short FUN_80070d44(int, int, int, int, int, int, int, int);
 
 int keyOnQueuedSfx(int p)

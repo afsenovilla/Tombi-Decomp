@@ -1,10 +1,7 @@
 // FUNC 8001e2cc 156 MAIN0
 // MATCHING 8001e2cc 156
-extern short BGM_FADE_STEP;
-extern short BGM_FADE_INTERVAL;
-extern short BGM_FADE_TIMER;
-extern short BGM_FADE_TARGET;
 
+#include "globals.h"
 int setBgmFadeParam(unsigned short a)
 {
     switch (a & 0xf00) {

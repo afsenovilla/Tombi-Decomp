@@ -7,7 +7,7 @@ extern G *SCRIPT_CTX;
 extern TObj *SCRIPT_OBJECTS[];
 extern S2 *D_800A6078, *D_800A607C[];
 extern short D_800A604C[];
-extern unsigned char SCRIPT_FLAGS[], SCRIPT_GLOBALS[];
+extern unsigned char SCRIPT_FLAGS[];
 extern signed char D_8009D2B0;
 extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1, D_8009D2B1, D_800A611A;
 extern unsigned char D_8009C93A, D_8009C942, D_8009C975, D_8009C93C, D_8009C976;

@@ -1,8 +1,6 @@
 // FUNC 8001f2ec 272 MAIN0
 // MATCHING 8001f2ec 272
-extern short JINGLE_SEQ_ID;
-extern short BGM_SEQ_ID;
-extern short JINGLE_VAB_ID;
+#include "globals.h"
 extern int SEQ_DATA[];
 extern unsigned short DAT_1f8003ac;
 extern void SsSeqStop(int);

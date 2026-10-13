@@ -1,5 +1,6 @@
 // FUNC 8004f538 1352 MAIN0
 // MATCHING 8004f538 1352
+#include "globals.h"
 typedef struct {
     short id;
     unsigned char idx;
@@ -22,8 +23,6 @@ extern char *APD_DATA[];
 extern char *SEQ_DATA[];
 extern char *D_1f8002b8[];
 extern char *WFM3_DATA[];
-extern char *WVD_BODIES[];
-extern char *WVD_HEADERS[];
 extern char D_800e8028[];
 extern char D_80098c44[];
 extern RelLog CD_QUEUE[];

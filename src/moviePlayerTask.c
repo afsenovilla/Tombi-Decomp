@@ -3,6 +3,7 @@
 // PAL moviePlayerTask (psx_tomba movie.c name); PAL adds the 0x800000 timeout loop and DecDCTinSync.
 // The &D_8009BCA8 / &f34 temps are compiler-hoisted invariants: no pointer locals (loop.c does not hoist user
 // variables set after a branch and used across basic blocks); volatile f34 accesses give the second temp.
+#include "globals.h"
 typedef struct { unsigned short w; unsigned short h; int pad; } Ent;
 typedef struct {
     int *in[2];
@@ -26,7 +27,6 @@ extern T *TASK_C;
 extern short D_1F8001F4, D_1F8001E8;
 extern char D_80077F0C[];
 extern unsigned char D_80077F3C[];
-extern short MOVIE_FILE_IDS[];
 extern E8 FILE_LINKS[];
 extern void CdMix(void *);
 extern void movieInitDecodeEnv(M *, int, int, int, int);

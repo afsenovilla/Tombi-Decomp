@@ -1,11 +1,11 @@
 // FUNC 8001b328 372 MAIN0
 // MATCHING 8001b328 372
+#include "globals.h"
 typedef struct { char p[0x4e]; unsigned short w; } O;
 extern unsigned short G1f8;
 extern short G1f4, D45ea;
 extern unsigned int G164;
 extern O *TASK_C;
-extern char LOAD_BUFFER_ALT[];
 extern int FUN_800efaa4(void), FUN_800e9888(void), FUN_800edd28(void);
 extern void FUN_800efd6c(void), FUN_800ea37c(void), FUN_800edf08(void), FUN_8005f060(int), FUN_8001dbdc(void);
 

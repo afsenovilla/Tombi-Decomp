@@ -1,5 +1,6 @@
 // FUNC 80016b50 344 MAIN0
 // MATCHING 80016b50 344
+#include "globals.h"
 typedef struct { short x, y, w, h; } R;
 extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
@@ -7,7 +8,6 @@ extern short B0e2, B0e6, B0ea, B0ee, B0f2, B0f6;
 extern char C0c0[], C118[];
 extern short G1f4;
 extern void *G1e0;
-extern char OT_FRAMEBUFFER[];
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void FUN_80016ca8(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 

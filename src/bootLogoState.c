@@ -1,11 +1,11 @@
 // FUNC 8004df00 768 MAIN0
 // MATCHING 8004df00 768
+#include "globals.h"
 typedef struct { char p0[0x48]; short w48; unsigned short w4a; unsigned short w4c; char p4e[0x58 - 0x4e]; short w58; } G;
 extern G *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM, D_1f8001cc, D_1f8001cd;
 extern short D_1f8001f4;
 extern int D_1f800164;
-extern char LOAD_BUFFER_ALT[];
 extern void func_8001D6A4();
 extern void SetDispMask(int);
 extern void loadSoundSet(int);

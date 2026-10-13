@@ -1,6 +1,7 @@
 /* Estructura de objeto (TObj): generada de ghidra/scripts/DefineObj.java. Tamano 0xC0. */
 #ifndef TOBJ_H
 #define TOBJ_H
+#include "globals.h"
 
 typedef struct { unsigned short frac; short whole; } FixParts;
 typedef union { int raw; FixParts p; } Fix16;
