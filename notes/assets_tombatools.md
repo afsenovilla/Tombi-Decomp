@@ -9,6 +9,12 @@ Outputs went to `/tmp/tombatools_out` (nothing from the tool or the disc is in t
 based on upstream 003f6bd; not vendored here) `wfm decode` -> `wfm encode` is **byte-identical for 369/369** WFM files and the
 Spanish files decode with accents. See "WFM lossless workflow" below; the sections after it are the original evaluation of upstream.
 
+**Update (second assets block): GAM re-compressor and disc rebuild.** The fork (`pal`, commit `3abf30e`) has an encoder that
+reproduces the original compressor for 743/816 GAM files (765/816 with its second variant); `tools/gam.py` keeps the
+original bytes of the rest while their data is unchanged, so `unpack -> pack` gives 816/816 identical. `tools/mkdisc.py`
+rebuilds the whole disc image with mkpsxiso and the SHA-1 is **identical** to `Tombi.bin`. See "GAM: byte-exact repack"
+and "Disc rebuild (tools/mkdisc.py)" below.
+
 ## WFM lossless workflow (fork `tombatools-pal`)
 Fork: `/opt/psyq/tombatools-pal` (git branch `pal`, commit `5e897a4`, on top of upstream `003f6bd`), MIT like upstream.
 It is a local clone, not published anywhere yet: **it should be offered upstream (hansbonini/tombatools) as a PR** (the changes are
@@ -62,7 +68,91 @@ Decoded Spanish samples (`AREA05/MFNT050S.WFM`; before: `RAT[8072]N`, `rat[8076]
 - text: "Ciudad Baco[C052]⧗\n\n[PROMPT]¿Guardar DATOS?  \nSí⮊✕ No⮊○⧗\n\n"
 ```
 
-Not done: other languages' glyphs, meaning of the `[C0xx]` codes, GAM bit-exact packing (below), anything outside WFM.
+Not done: other languages' glyphs, meaning of the `[C0xx]` codes, anything outside WFM and GAM.
+
+## GAM: byte-exact repack (fork `tombatools-pal`, commit `3abf30e`)
+`tools/gam.py` (same pattern as `tools/wfm.py`, `TOMBATOOLS` = the fork):
+```
+tools/gam.py --check                       # unpack + pack all 816 GAM, three numbers (below); exit 1 if the last is not 816/816
+tools/gam.py --check -v                    # also lists the files the encoder alone does not reproduce
+tools/gam.py unpack [PATH] [-o OUT]        # file or tree -> OUT/<path>.UNGAM (default game/disc/fs -> build/gam)
+tools/gam.py pack IN.UNGAM OUT.GAM [--orig ORIG.GAM] [--no-pad]
+tools/gam.py pack [DIR] [-o OUT] [--orig-dir game/disc/fs]   # whole tree
+```
+Results (`tools/gam.py --check`, 816 files = AREA00..19 `*.GAM` + `SYSTEM/*.GAM`):
+```
+identical, encoder only (default):             743/816
+identical, encoder only (best of both models): 765/816
+identical, original bytes kept if unchanged:   816/816
+```
+Upstream was 0/816 (its compressor is a plain longest-match LZ and always smaller). The fork's `gam pack` has two new
+flags: `--orig ORIG.GAM` (if the file to pack unpacks from ORIG to exactly the same data, ORIG's bytes are written; this is
+the fallback requested for files the encoder cannot reproduce) and `--no-pad` (the other end-of-data model, below). Changed
+data is always re-encoded with the encoder; the result is a valid stream (unit tests decode it back) that may differ from
+what the original tool would have written. Unit tests: `pkg/gamlz_test.go` (round trips, body rules, the end rules,
+`--orig`).
+
+### Compressor rules found (pkg/gamlz.go of the fork)
+Format (decoder unchanged): 16-bit LE flag word (bit 0 first, 1 = reference), literal = 1 byte, reference = offset byte
+(1..255) + length byte (5..255 used). Found by decoding the 816 originals into tokens and comparing every token with
+what a model would choose:
+- **Body (everything but the last ~255 bytes; AREA00..03 alone: 520,048 references and 5.1M literal positions checked, no exception):** greedy, no lazy matching; minimum length 5
+  (a literal is written whenever the best match is shorter, even if one starts at the next byte); window 255, length max
+  255; **a copy never overlaps itself: length <= offset** (an all-zero run is coded literal x5, then 5, 10, 20, 40, 80, 160,
+  255, 255, ...). Candidates are ranked by `(min(length, offset), length)`; a full tie goes to the **farthest** offset.
+- **Last 255 bytes (`T = n - 255`)**: a source starting before T may not reach T (`length <= T - source`; pieces of one long
+  periodic run end exactly at T: e.g. (152,81) (233,81) (255,22)); a source starting at T is unusable; a source after T
+  (offset >= 5) may overlap its destination freely ((5,245) etc.).
+- **Bytes behind the data:** the original read past the end. The decoded stream of 304 files is longer than the header
+  size and every extra byte is zero, up to `(n & ~255) + 252` (a zero pad; `E mod 256 = 252` in 250+ files). A reference
+  that is still at the maximum length (255) when it would run past n is redone with length and offset limited to
+  `(remaining - 4) & 255`: `L, M(...)` ending exactly 4 bytes before n, one literal, and then a reference that runs 252
+  bytes into the pad (`(251,255)` at n-3, `(30,254)` at n-2, `(253,253)` at n-1: the same formula wrapped).
+- **Group trailer:** if the last flag word is full (16 tokens) the encoder still writes one more flag word `0000`
+  (`left=2` in 45 files).
+- Not constants of the format but properties of each original: whether the bytes behind the data were zeros (pad model, 743
+  files) or something that stops a match at n (`--no-pad`, 22 more files). The unpacked data cannot tell which, so the
+  default is the pad model and `tools/gam.py --check` also tries `--no-pad`.
+
+### The 51 files the encoder alone does not reproduce (all differ in the last ~260 bytes only)
+Everything before the last 255 bytes is identical for all 816 files. Left unexplained (`tools/gam.py --check -v` lists them):
+- 12 files (AREA01 B000/B100, AREA04 B400..BI00, AREA07 B000/B100, ...): at 62 bytes from the end the original takes the
+  periodic piece (229,36) then (255,26) while a source in the last 255 bytes that reaches n exactly (e.g. (192,62)) exists.
+- 8 files (AREA10 B004 B104 B203 B302 B404 B504 B603 B702): the last 16 bytes stay literals though (240,16)-like
+  candidates from the last-255 region exist.
+- about 12 files (AREA00/04/12 D001 D101 D201 D301, AREA01/07 A006 and D403, AREA05 B102 B302, AREA09 B003): a zero tail
+  of 8..260 bytes, or a last stretch of 250 bytes, is written as literals; the same shape is matched in other files (the
+  B300 family). A rule that refuses every free-region reference reaching n exactly (tried for sources 1..16 bytes after T)
+  changes which files fail but not how many (51 either way), so the real condition is still unknown (probably what the
+  original had behind n in memory, which is not in the file).
+- about 20 files with one-off differences in the final tokens (offsets >= 100 with length 5..9 within 8 bytes of the end,
+  zero-pad lengths 2..248 that stop early, ...).
+If an exact encoder for these is ever needed, the missing information is most likely the content of the buffer behind
+the data in the original tool; with it the rest looks deterministic.
+
+## Disc rebuild (tools/mkdisc.py)
+Status: **the rebuilt image has the same SHA-1 as `game/disc/Tombi.bin`** (`ec50074b6fd98f611bae11e3de68d6e76ffdd6d4`, 209341
+sectors, 492,370,032 bytes); no sector differs. `tools/mkdisc.py --check` takes about 12 s.
+```
+tools/mkdisc.py --check                    # build into /tmp, compare size and SHA-1 (lists differing sectors if any); exit 1 if different
+tools/mkdisc.py [build] [-o OUT.bin] [--fs game/disc/fs] [--disc game/disc/Tombi.bin] [--work build/mkdisc]
+```
+How it works: mkpsxiso 2.30 (https://github.com/Lameguy64/mkpsxiso, commit a6b11ea, `cmake -S . -B build && cmake --build build`;
+looked up in `$MKPSXISO_DIR`, `/opt/psyq/mkpsxiso/build`, `PATH`; the `tools/mkpsxiso` submodule of psx_tomba is not
+needed) is not given a layout written by hand: `dumpsxiso -x dump -s layout.xml Tombi.bin` produces an mkpsxiso project that
+already contains the file order, dates, the license/system area (`license_data.dat`, first 16 sectors), the system id
+strings, the XA attributes and the 150-sector `<dummy>` gap after `ZZZ/DUMMY.DAT`. `mkdisc.py` rewrites each `<file>` with an
+explicit `source`:
+- the 2257 ordinary files (`type="data"`) come from `game/disc/fs` (so an edited or repacked file is what gets packed);
+- the 30 `MOVIE/*.STR` (`type="mixed"`, XA/STR sectors with their own subheaders, form 1 and form 2 mixed) come from the raw
+  dump. `game/disc/fs/MOVIE` was written by `tools/isoext.py`, which keeps only the user data of each sector (2048 or 2324
+  bytes, e.g. 9,746,100 bytes against 10,932,480 in the image) and cannot be turned back into sectors; replacing the
+  movies would need a new extraction in raw form (`dumpsxiso`), not a change of `mkdisc.py`.
+The cache (`build/mkdisc/`, 0.9 GB: the dump) is gitignored; `--check` uses `/tmp/mkdisc_work`. Tested with a repacked
+`AREA00/A001.GAM` (5 bytes longer): the image builds, `dumpsxiso` extracts the new file back identically, following LBAs move.
+What it does not do: when a file changes size the LBAs stored inside the game (the file table in the executable and the
+overlays, see `tools/cdsplit.py` / `FILE_TABLE` in psx_tomba, and `fla recalc` of TombaTools) are not rewritten; that is
+needed before such an image boots, and `fla recalc` has still not been tested.
 
 # Original evaluation of upstream (before the fork)
 
@@ -147,9 +237,8 @@ contents (unpack OK, inner format unknown), `EXE/MAIN*.EXE` and the inner struct
 3. (DONE in the fork, 369/369) Make WFM encode lossless: keep unmapped `[80xx]` as raw glyph indices (or take the glyph table from the original
    file and only rewrite the dialogue stream), and emit unknown `[C0xx]` verbatim. Then the target is
    decode+encode == original for all 369 WFM; check with `cmp` in a script.
-4. GAM: implement the original LZ compressor variant so `pack(unpack(x)) == x` (try matching the greedy/lazy
-   choices on the 816 samples), or store only the original GAM bytes plus a manifest of modified ones.
-5. Add a script that rebuilds `fs/` from decoded assets and compares SHA-1 against the original `Tombi.bin`, and use
+4. (DONE, 743/816 by the encoder, 816/816 with `--orig`, see "GAM: byte-exact repack") GAM: implement the original LZ compressor variant so `pack(unpack(x)) == x`, or keep the original bytes of unmodified files.
+5. (DONE, `tools/mkdisc.py`, SHA-1 identical) Add a script that rebuilds the image from `fs/` and compares SHA-1 against the original `Tombi.bin`; use
    `fla recalc` only if a file size changes.
 6. Then reverse the remaining formats in order of size/impact: `*.000`, `X?00.BIN` data tables, `SYSTEM/*.BIN`,
    `WVD`, and wrap `MOVIE/*.STR` as opaque.

@@ -203,6 +203,16 @@ game/           your own game files (ignored by git)
 | `tools/ghidra_pipeline.sh` | Headless Ghidra: import, apply names and structs, export pseudo-C |
 | `tools/setup_ghidra.sh`, `tools/setup_native.sh` | Toolchain installers |
 | `tools/psxexe_info.py` | Prints the PS-X EXE header |
+| `tools/wfm.py` | Assets: WFM font/dialogue files <-> YAML + glyph PNGs, byte-exact round trip (369/369) through a [TombaTools](https://github.com/hansbonini/tombatools) fork |
+| `tools/gam.py` | Assets: GAM (the game's LZ) unpack/pack; `--check` runs the whole round trip (816 files) |
+| `tools/mkdisc.py` | Assets: rebuilds the `.bin/.cue` from `game/disc/fs` with mkpsxiso, SHA-1 identical to the original (`--check`) |
+
+**Assets.** `wfm.py`, `gam.py` and `mkdisc.py` work on your own disc (`game/disc/Tombi.bin` and the files extracted to
+`game/disc/fs`, never committed) and call outside tools: a PAL fork of TombaTools (Go, not vendored; `TOMBATOOLS`
+defaults to `/opt/psyq/tombatools-pal`) and mkpsxiso/dumpsxiso 2.30 (`MKPSXISO_DIR`). `wfm.py --check` gives 369/369
+identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-compressor reproduces (743 by itself,
+765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
+the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
 
 ## Related projects
 
