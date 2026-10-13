@@ -8,7 +8,7 @@ extern unsigned short D_1F80016A, D_1F800176;
 extern short D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8001e4f0(int);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
@@ -61,7 +61,7 @@ void func_80125438(TObj *o)
     case 2:
         FUN_8001fec0(o);
         if ((unsigned short)(o->h->p.whole - D_1F800176 - 0x30) < 0x110) {
-            FUN_8001fa88(o, o->animFrame);
+            applyAnimVelocityX(o, o->animFrame);
             {
                 int q;
                 WALLCHK(o, q);
@@ -79,7 +79,7 @@ void func_80125438(TObj *o)
         }
         break;
     case 3:
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         WALLCHK(o, r);
         o->y.raw += o->velV << 8;
         FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x30);

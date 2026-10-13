@@ -2,7 +2,7 @@
 // MATCHING 801200dc 1712
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void func_8011FEF0(TObj *);
 extern int func_8011FDD4(TObj *);
 extern void func_8011FB1C(TObj *);
@@ -25,7 +25,7 @@ extern unsigned short *D_80133BD4[], *D_80133BD0[], *D_80133BD8[], *D_80133BB8[]
     }
 
 #define FALL(dv)                                        \
-    FUN_8001faf4(o);                                    \
+    applyFrameVelocityX(o);                                    \
     func_8011FEF0(o);                                   \
     o->velV += dv;                                      \
     if (o->velV > 0x500) o->velV = 0x500;               \

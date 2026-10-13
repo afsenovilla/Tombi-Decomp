@@ -6,7 +6,7 @@ extern unsigned short *D_80138794[];
 extern unsigned char D_80135B30[];
 extern unsigned short D_1F80016A, D_1F800172;
 extern int AnimAdvanceWithBox(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int func_801206F0(TObj *);
 
 void func_801241C0(TObj *o)
@@ -33,7 +33,7 @@ void func_801241C0(TObj *o)
         break;
     case 1:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (func_801206F0(o)) {
             o->timer = 0;
             o->state++;

@@ -4,7 +4,7 @@
 
 extern TObj D_800A6038;
 extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void addItemToInventory(int, int, int);
 
 void func_8012F10C(TObj *o)
@@ -22,7 +22,7 @@ void func_8012F10C(TObj *o)
         D_8009C93E[0] = 1;
         o->w08 = 0xc8;
         o->state++;
-        FUN_8005a9a4(0x38, 0);
+        setEventComplete(0x38, 0);
         break;
     case 2:
         if (--o->w08 > 0) break;

@@ -17,8 +17,8 @@ extern short D_1F800284;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
-extern void FUN_8001faf4(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyFrameVelocityX(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern short FUN_800408d8(TObj *, short, short);
@@ -195,7 +195,7 @@ void func_80128A2C(TObj *o)
         setAnim(o, D_8013FCC4[0]);
         break;
     case 4:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->y.raw -= 0xc000;
         if (AnimAdvance(o)) {
             o->step = 1;
@@ -217,7 +217,7 @@ void func_80128A2C(TObj *o)
         break;
     case 6:
         if (p->w8) {
-            FUN_8001fa88(o, 1 - o->animFrame);
+            applyAnimVelocityX(o, 1 - o->animFrame);
             o->y.raw -= 0x8000;
             if (AnimAdvance(o)) {
                 o->state = 0;
@@ -236,7 +236,7 @@ void func_80128A2C(TObj *o)
                 FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10);
             }
         } else {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             o->y.raw += 0x8000;
             if (AnimAdvance(o)) {
                 o->state = 0;
@@ -258,10 +258,10 @@ void func_80128A2C(TObj *o)
         break;
     case 7:
         if (p->w8) {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             o->y.p.whole--;
         } else {
-            FUN_8001fa88(o, 1 - o->animFrame);
+            applyAnimVelocityX(o, 1 - o->animFrame);
             o->y.p.whole++;
         }
         if (!AnimAdvance(o)) break;
@@ -280,7 +280,7 @@ void func_80128A2C(TObj *o)
         setAnim(o, D_8013FC74[0]);
         break;
     case 9:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (AnimAdvance(o)) {
             o->step = 1;
             o->state = 0;
@@ -324,7 +324,7 @@ void func_80128A2C(TObj *o)
         setAnim(o, D_8013FCC8[0]);
         break;
     case 12:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->y.raw += 0x5000;
         if (AnimAdvance(o)) {
             o->state = 0;
@@ -339,7 +339,7 @@ void func_80128A2C(TObj *o)
         }
         break;
     case 14:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (AnimAdvance(o)) {
             o->b69 = 0;
             o->y.p.whole -= 3;

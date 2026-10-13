@@ -21,7 +21,7 @@ extern void func_8012DF98(TObj *);
 extern void func_8012D4AC(TObj *);
 extern void func_8012CA08(TObj *);
 extern void func_8012CB78(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_8012EFC4(TObjX *e)
 {
@@ -151,7 +151,7 @@ void func_8012EFC4(TObjX *e)
     case 3:
         if (o->subtype == 8 && o->b0c == 0)
             (*(short *)o->d94)--;
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

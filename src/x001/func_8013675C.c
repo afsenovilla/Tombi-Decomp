@@ -6,7 +6,7 @@ extern unsigned short D_8009C960[], D_8009C962;
 extern unsigned short D_8009D2C0;
 extern int D_1F8002D0, D_1F8002E4;
 extern void *D_8013DE08, *D_8013DD50;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 
 TObj *func_8013675C(short k, short d, short n, short x, short y, short z)
@@ -15,7 +15,7 @@ TObj *func_8013675C(short k, short d, short n, short x, short y, short z)
 
     if (n != 0) {
     if ((D_8009D2C0 >> (n - 1)) & 1) return 0;
-    o = FUN_800183b8();
+    o = allocObjectLayer2();
     if (o != 0) {
     o->active = 1;
     o->type = 0x16;

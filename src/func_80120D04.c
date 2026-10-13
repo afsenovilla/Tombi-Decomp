@@ -5,7 +5,7 @@
 
 extern unsigned short D_8009C962[];
 extern char D_1F800000[];
-void FUN_80021f5c(void *m);
+void getBaseMatrix(void *m);
 void RotMatrixX(int r, void *m);
 void RotMatrixY(int r, void *m);
 void RotMatrix(short *v, void *m);
@@ -18,7 +18,7 @@ void func_80120890(TObj *o);
 void FUN_80120bcc(TObj *o);
 
 #define C0() \
-    FUN_80021f5c(&o->w48); \
+    getBaseMatrix(&o->w48); \
     sv[0] = o->d84; \
     sv[1] = o->d88; \
     sv[2] = o->d8c; \
@@ -71,14 +71,14 @@ void func_80120D04(TObj *o)
             p = (TObj *)o->d90;
             o->b0a = 0x15;
             o->ba4 = 0;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             VEC();
             break;
         case 2:
         case 3:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixX(p->velH, D_1F800000);
             RotMatrixY((unsigned short)p->wb4, D_1F800000);
             VEC();
@@ -87,7 +87,7 @@ void func_80120D04(TObj *o)
         case 5:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixX(p->velH, D_1F800000);
             VEC();
             break;
@@ -113,13 +113,13 @@ void func_80120D04(TObj *o)
                 break;
             case 1:
                 p = (TObj *)o->d90;
-                FUN_80021f5c(D_1F800000);
+                getBaseMatrix(D_1F800000);
                 VEC();
                 break;
             case 2:
             case 3:
                 p = (TObj *)o->d90;
-                FUN_80021f5c(D_1F800000);
+                getBaseMatrix(D_1F800000);
                 RotMatrixX(p->velH, D_1F800000);
                 RotMatrixY((unsigned short)p->wb4, D_1F800000);
                 VEC();
@@ -127,7 +127,7 @@ void func_80120D04(TObj *o)
             case 4:
             case 5:
                 p = (TObj *)o->d90;
-                FUN_80021f5c(D_1F800000);
+                getBaseMatrix(D_1F800000);
                 RotMatrixX(p->velH, D_1F800000);
                 VEC();
                 break;

@@ -7,8 +7,8 @@ typedef struct {
 extern E28 *D_80117AC8[];
 extern unsigned char D_8009D2C3[];
 extern unsigned char D_8009CEED, D_8009D0DA, D_8009CDDE, D_8009CE0C, D_8009D008;
-extern TObj *FUN_800183b8(void);
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer2(void);
+extern TObj *allocObjectLayer4(void);
 
 void func_8011724C(TObj *o)
 {
@@ -24,7 +24,7 @@ void func_8011724C(TObj *o)
     for (; p->f0 != 0xff; p = &base[++i]) {
         if (p->fe == 3 && D_8009D0DA == 0) continue;
         if (p->f0 & 0x80) {
-            TObj *m = FUN_800184d8();
+            TObj *m = allocObjectLayer4();
             if (m == 0) continue;
             m->active = 1;
             m->type = 0x1a;
@@ -36,7 +36,7 @@ void func_8011724C(TObj *o)
             m->y.p.whole = p->f14;
             m->b.p.whole = p->f16;
         } else {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n == 0) continue;
             n->active = 3;
             n->type = 0x32;
@@ -61,7 +61,7 @@ void func_8011724C(TObj *o)
             }
         }
     }
-    n = FUN_800183b8();
+    n = allocObjectLayer2();
     if (n != 0) {
         n->active = 3;
         n->type = 0x32;
@@ -86,7 +86,7 @@ void func_8011724C(TObj *o)
         }
         if (D_8009CDDE == 0) n->b04 = 2;
     }
-    n = FUN_800183b8();
+    n = allocObjectLayer2();
     if (n != 0) {
         n->active = 3;
         n->type = 0x32;

@@ -8,8 +8,8 @@ extern void *D_80132310[];
 extern void playSFX(int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_8001fb20(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void applyFrameVelocityY(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
@@ -66,7 +66,7 @@ void func_8012A664(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         WALL();
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
@@ -81,7 +81,7 @@ void func_8012A664(TObj *o)
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         WALL();
         if (land(o)) {
             o->b9c = 0;
@@ -90,7 +90,7 @@ void func_8012A664(TObj *o)
         }
         break;
     case 3:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->b69 == 1 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x1a)) o->b69 = 0;
         if (o->w7a & 1) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;

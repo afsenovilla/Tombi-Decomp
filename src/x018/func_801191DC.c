@@ -13,9 +13,9 @@ extern Fix16 *D_800A6078;
 extern unsigned char D_8009CE28;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_80026f4c(void);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventComplete(int, int);
+extern void increaseMaxHealth(void);
 extern void func_8004D620(int, int);
 extern void FUN_80026e0c(int, int);
 
@@ -48,7 +48,7 @@ void func_801191DC(TObj *o)
         o->animFrame = D_800A6078->p.whole < o->h->p.whole;
         setanim(o, 4);
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0xc, &v);
+        o->d90 = showMessageBoxDirect(3, 0xc, &v);
         o->state++;
         break;
     case 1:
@@ -62,8 +62,8 @@ void func_801191DC(TObj *o)
         break;
     case 2:
         if (--o->timer > 0) break;
-        if (D_8009CE28 != 0xff) FUN_8005a9a4(0x84, 0);
-        FUN_80026f4c();
+        if (D_8009CE28 != 0xff) setEventComplete(0x84, 0);
+        increaseMaxHealth();
         func_8004D620(0x15, 3);
         FUN_80026e0c(0x99, 1);
         o->timer = 0x50;

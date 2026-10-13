@@ -2,9 +2,9 @@
 // MATCHING 80116b58 444
 #include "TOBJ.H"
 
-extern void FUN_8003c980(TObj *);
+extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_80116B58(TObj *o)
 {
@@ -12,7 +12,7 @@ void func_80116B58(TObj *o)
 
     switch (t) {
     case 0:
-        FUN_8003c980(o);
+        initItemObject(o);
         o->velH = -0x80;
         o->velV = 0xd5;
         o->d30 = 0x3c0000;
@@ -45,7 +45,7 @@ void func_80116B58(TObj *o)
         o->b04 = t + 1;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

@@ -18,7 +18,7 @@ extern E8 D_8011C93C[];
 extern TObj *D_8009F2D8[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
 extern unsigned char D_8009D2C3, D_8009CE41;
 extern unsigned char D_8009CFDC[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern TObj *FUN_80018448(void);
 
 void func_80119A1C(TObj *o)
@@ -30,7 +30,7 @@ void func_80119A1C(TObj *o)
     TObj *q;
 
     for (i = 0, e = D_8011C984; e->flags != 0xff; e = &D_8011C984[++i]) {
-        p = FUN_800183b8();
+        p = allocObjectLayer2();
         if (p == 0) continue;
         p->active = 3;
         if (p->subtype) p->active = 2;
@@ -65,7 +65,7 @@ void func_80119A1C(TObj *o)
     }
     if (D_8009CE41 == 0) {
         for (i = 0, e = D_8011CA9C; e->flags != 0xff; e = &D_8011CA9C[++i]) {
-            p = FUN_800183b8();
+            p = allocObjectLayer2();
             if (p == 0) continue;
             p->active = 2;
             p->type = 0x52;

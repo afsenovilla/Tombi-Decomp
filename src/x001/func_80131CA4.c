@@ -9,15 +9,15 @@ extern short D_8013C984[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern unsigned short D_1F80016A, D_1F80016E, D_1F800176;
 extern short D_1F80017A[];
-extern TObj *FUN_800185f8(void);
-extern void FUN_80018790(TObj *);
+extern TObj *allocObjectLayer8(void);
+extern void freeObjectLayer2(TObj *);
 extern void FUN_800202b4(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_80020aec(int);
-extern void FUN_8003e3cc(int, int, V3 *, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void spawnItemDropAtPos(int, int, V3 *, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern short FUN_80040278(TObj *, short, short);
 
 void func_80131CA4(TObj *o)
@@ -60,7 +60,7 @@ void func_80131CA4(TObj *o)
             else o->step = 3;
             break;
         }
-        p = FUN_800185f8();
+        p = allocObjectLayer8();
         if (p != 0) {
         p->active = 2;
         p->type = 5;
@@ -178,7 +178,7 @@ void func_80131CA4(TObj *o)
             break;
         case 4:
             if (!o->visible) goto reset;
-            FUN_8001fa88(o, 0);
+            applyAnimVelocityX(o, 0);
             o->velY += 0x30;
             if (o->velY > 0x500) o->velY = 0x500;
             else if (o->velY > 0) {
@@ -203,7 +203,7 @@ void func_80131CA4(TObj *o)
                 o->velX = 0x200;
                 break;
             }
-            FUN_8001fa88(o, 0);
+            applyAnimVelocityX(o, 0);
             o->velY += 0x30;
             if (o->velY > 0x500) o->velY = 0x500;
             o->y.raw += o->velY << 8;
@@ -219,8 +219,8 @@ void func_80131CA4(TObj *o)
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole;
             v.z.p.whole = o->d->p.whole;
-            FUN_8003e3cc(0, 0, &v, 0x80, -0x400);
-            FUN_8003e3cc(2, 1, &v, -0x80, -0x400);
+            spawnItemDropAtPos(0, 0, &v, 0x80, -0x400);
+            spawnItemDropAtPos(2, 1, &v, -0x80, -0x400);
             o->b04++;
             p = (TObj *)o->d94;
             if (p) {
@@ -232,7 +232,7 @@ void func_80131CA4(TObj *o)
             break;
         case 1:
             FUN_8001e4f0(0x50);
-            FUN_8005a8a8(0xb4, 0, 0);
+            setEventStarted(0xb4, 0, 0);
             o->step++;
         case 2:
             FUN_800202b4(o);
@@ -267,7 +267,7 @@ void func_80131CA4(TObj *o)
                 }
                 if (r) {
                     D_8009CEB0[0] = 2;
-                    FUN_8005a9a4(0xb4, 0);
+                    setEventComplete(0xb4, 0);
                     o->step++;
                 }
             }
@@ -277,7 +277,7 @@ void func_80131CA4(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -5,7 +5,7 @@ extern unsigned char D_8009CDC9;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009C93E;
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 /* The `goto ret0` after the call keeps case 1's `return 0` block alive: with a plain `return 0` jump2
    cross-jumps case 1's `move v0,0; j end` into case 0's copy (the label before it drops the minimum to 1)
@@ -25,7 +25,7 @@ int func_801276CC(TObj *o)
             D_8009C93E = 1;
             o->timer = 300;
             o->substep++;
-            FUN_8005a9a4(0x25, 0);
+            setEventComplete(0x25, 0);
             goto ret0;
         case 1:
             if (--o->timer == -1) o->substep++;

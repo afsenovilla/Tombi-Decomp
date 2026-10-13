@@ -15,9 +15,9 @@ extern void FUN_80021858(void);
 extern void FUN_80021b20(void);
 extern void FUN_8004bfe4(void);
 extern void FUN_800263bc(void);
-extern void FUN_8001eb64(void);
-extern void FUN_8001b9b0(void);
-extern unsigned char *FUN_80018678(void);
+extern void startAreaBgm(void);
+extern void areaMode5Tick(void);
+extern unsigned char *allocObjectLayer7(void);
 
 void FUN_8001b7cc(void)
 {
@@ -35,10 +35,10 @@ void FUN_8001b7cc(void)
         FUN_800263bc();
         DAT_800b1410 = 0;
         DAT_1f8001cf = 1;
-        if (DAT_8009c967 != 1) FUN_8001eb64();
+        if (DAT_8009c967 != 1) startAreaBgm();
         u = DAT_1f8001d4;
         u->c = u->c + 1;
-        e = FUN_80018678();
+        e = allocObjectLayer7();
         if (e) {
             e[0] = 1;
             e[2] = 10;
@@ -53,7 +53,7 @@ void FUN_8001b7cc(void)
         break;
     case 1:
         DAT_8009c968[0] = DAT_8009c968[0] + 1;
-        FUN_8001b9b0();
+        areaMode5Tick();
         if (DAT_1f8001c2 != 0 && (DAT_8009d670[0] & 8) != 0 && (DAT_8009d670[0] & 0x800) != 0)
             DAT_1f8001d4->c = 3;
         break;

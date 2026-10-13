@@ -16,7 +16,7 @@ extern E3 D_801308FC[];
 extern void SetRotMatrix(MAT *);
 extern void SetTransMatrix(MAT *);
 extern void func_80118720(short, int);
-extern void FUN_80021f5c(MAT *);
+extern void getBaseMatrix(MAT *);
 extern void ApplyRotMatrix(SVEC *, int *);
 extern int func_801188F0(int *);
 
@@ -96,7 +96,7 @@ void func_80118BFC(L *o, unsigned char *a)
             z = D_801308FC[k].z * 0x5a + 0xdb;
             break;
         }
-        FUN_80021f5c(&mt);
+        getBaseMatrix(&mt);
         v.vx = x;
         v.vy = y;
         v.vz = z;

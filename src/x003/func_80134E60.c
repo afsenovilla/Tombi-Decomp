@@ -7,7 +7,7 @@ extern unsigned char D_8009CFCD;
 extern void func_80134CF8(TObj *);
 extern void func_801346C8(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_80134E60(TObj *o)
 {
@@ -33,7 +33,7 @@ void func_80134E60(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

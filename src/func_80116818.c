@@ -12,14 +12,14 @@ extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern void FUN_80029cb4(TObj *);
 extern void FUN_80029078(TObj *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
-extern unsigned char *FUN_800186f8(void);
-extern void FUN_8001eacc(void);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
+extern unsigned char *allocObjectUnlayered(void);
+extern void keyOffActiveSfxVoices(void);
 extern void FUN_8001f110(int);
-extern void FUN_8001d63c(int);
+extern void cdSeekStream(int);
 extern void FUN_8001f4bc(void);
-extern void FUN_8001eb64(void);
+extern void startAreaBgm(void);
 extern void FUN_8001d6a4();
 extern void FUN_800171b8(int, void *);
 
@@ -60,9 +60,9 @@ void func_80116818(TObj *o)
         if (g->w16 >= -0xe7) break;
         D_8009C966 = 1;
         o->state++;
-        FUN_8005a8a8(2, 0, 1);
+        setEventStarted(2, 0, 1);
         if (D_8009D095 != 0) break;
-        p = FUN_800186f8();
+        p = allocObjectUnlayered();
         if (p == 0) break;
         p[0] = 1;
         p[2] = 0xd;
@@ -88,9 +88,9 @@ void func_80116818(TObj *o)
             o->w48 = 0;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            FUN_8001eacc();
+            keyOffActiveSfxVoices();
             FUN_8001f110(1);
-            FUN_8001d63c(2);
+            cdSeekStream(2);
             o->state++;
         } else if (g->w12 < 0x49e) {
             D_8009C966 = 2;
@@ -154,8 +154,8 @@ void func_80116818(TObj *o)
             o->animTimer = 0x4c0;
             o->y.raw = -0x10000;
             o->visible = 1;
-            FUN_8001eb64();
-            FUN_8005a9a4(2, 0);
+            startAreaBgm();
+            setEventComplete(2, 0);
         }
         break;
     }

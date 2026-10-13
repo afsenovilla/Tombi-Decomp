@@ -2,7 +2,7 @@
 // MATCHING 80041d20 412
 #include "TOBJ.H"
 extern short *func_8003F200(int, int);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 extern unsigned short *DAT_1f800278;
 extern short DAT_1f80027c;
 
@@ -44,7 +44,7 @@ hit:
         if (d << 16 > 0) return 0;
         goto next;
     }
-    s = FUN_800205d8(k, ws);
+    s = angleFromDelta(k, ws);
     DAT_1f80027c = s;
     if (s < 0x40) {
         DAT_1f80027c = s + 0xc0;

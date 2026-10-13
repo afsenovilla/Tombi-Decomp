@@ -6,8 +6,8 @@
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_80043260(TObj *, TObj *);
-extern short FUN_80043c74(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern short pushOutOfBoxX(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8012687C(TObj *o, TObj *p)
 {
@@ -46,11 +46,11 @@ void func_8012687C(TObj *o, TObj *p)
                 o->b04 = 2;
                 o->step = 0;
                 o->state = 0;
-                FUN_8004258c(o, 1);
+                decreaseObjectTimer(o, 1);
             }
         }
     } else {
-        if (!FUN_80043c74(o, p)) return;
+        if (!pushOutOfBoxX(o, p)) return;
         if (p->subtype) return;
         if (D_1F8001A4) return;
         if (o->active & 2) return;
@@ -60,7 +60,7 @@ void func_8012687C(TObj *o, TObj *p)
         o->b04 = 2;
         o->step = 0;
         o->state = 0;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
     }
     D_1F80019E = 0;
 }

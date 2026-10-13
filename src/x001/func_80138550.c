@@ -18,7 +18,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern int MulNegSinScaled(int, int);
 extern short TileCollideAt(TObj *, short, short);
@@ -185,7 +185,7 @@ void func_80138550(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

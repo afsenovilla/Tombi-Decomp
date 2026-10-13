@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 
 extern short D_1F80019E;
-extern short func_8004461C(TObj *, TObj *);
-extern int FUN_80042c70(TObj *, TObj *);
-extern int FUN_80042b98(TObj *, TObj *);
-extern void FUN_8002b920(TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
+extern int resolveHitResultE(TObj *, TObj *);
+extern int resolveHitResultD(TObj *, TObj *);
+extern void cloneItemPickupObject(TObj *);
 extern void FUN_800e9f74(int, int, int, int);
 
 void func_80125B88(TObj *o, TObj *e)
@@ -14,9 +14,9 @@ void func_80125B88(TObj *o, TObj *e)
     TObj *q;
     int r;
 
-    if (func_8004461C(o, e) < 0) return;
+    if (boxesOverlapSigned(o, e) < 0) return;
     if (e->b0c == 0) {
-        r = FUN_80042c70(o, e);
+        r = resolveHitResultE(o, e);
         if (r) {
             if (r == 2) FUN_800e9f74(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
             if (e->active != 3) {
@@ -24,7 +24,7 @@ void func_80125B88(TObj *o, TObj *e)
                     e->active = 2;
                 } else {
                     e->active = 3;
-                    if (e->b04 != 2) FUN_8002b920(e);
+                    if (e->b04 != 2) cloneItemPickupObject(e);
                 }
                 e->animFrame = (o->animFrame & 1) + 2;
                 e->b04 = 2;
@@ -41,7 +41,7 @@ void func_80125B88(TObj *o, TObj *e)
             }
         }
     } else {
-        switch (FUN_80042b98(o, e)) {
+        switch (resolveHitResultD(o, e)) {
         case 0:
             q = *(TObj **)&e->wa8;
             q->b68 = 0;
@@ -86,7 +86,7 @@ void func_80125B88(TObj *o, TObj *e)
             for (q = (TObj *)e->d90; q; q = (TObj *)q->d90) {
                 q->active = e->active;
                 q->animFrame = (o->animFrame & 1) + 2;
-                if (q->b0c == 0 && q->b04 != 2) FUN_8002b920(q);
+                if (q->b0c == 0 && q->b04 != 2) cloneItemPickupObject(q);
                 q->b04 = 2;
                 q->step = 0;
                 q->state = 0;

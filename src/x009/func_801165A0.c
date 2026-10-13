@@ -20,9 +20,9 @@ extern short D_800A457C;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
 extern void FUN_8002a3d4(O *);
-extern void FUN_8002715c(int);
+extern void stepPlayerXToward(int);
 extern int FUN_800270a0(O *, int, unsigned char);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 void func_801165A0(O *o)
 {
@@ -110,7 +110,7 @@ void func_801165A0(O *o)
                             *s = 0;
                             o->state = 0;
                             o->w4a = 0;
-                            FUN_8005a8a8(0x1c, 0, 1);
+                            setEventStarted(0x1c, 0, 1);
                             D_8009C982 = 1;
                         }
                     }
@@ -121,10 +121,10 @@ void func_801165A0(O *o)
             case 2:
                 if (D_800A60DA == 2) {
                     if (D_1F80016A >= 0x71) {
-                        FUN_8002715c(0x90);
+                        stepPlayerXToward(0x90);
                         D_8009C982 = 1;
                     } else {
-                        FUN_8002715c(0x48);
+                        stepPlayerXToward(0x48);
                         D_8009C982 = 2;
                     }
                     if (D_1F800172 >= 0x3d) FUN_800270a0(o, 1, D_8009C982);

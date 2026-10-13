@@ -10,7 +10,7 @@ extern void FUN_8001e4f0(int);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800187e4(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int FUN_800202b4(TObj *);
 
 void FUN_800eb0c8(TObj *o)
@@ -41,7 +41,7 @@ void FUN_800eb0c8(TObj *o)
         if (o->subtype == 0) {
             if (FUN_8001fec0(o) != 0)
                 o->b04 = 3;
-            FUN_8001fa88(o, 1 - o->animFrame);
+            applyAnimVelocityX(o, 1 - o->animFrame);
             o->timer = o->timer - 1;
             if (o->timer == -1)
                 o->b04 = 3;

@@ -7,7 +7,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009D00A[];
 extern void *D_8013A3B4[];
 extern void *D_8013A368[];
-extern TObj *FUN_8002dcc8(int, int, void *);
+extern TObj *showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 
@@ -26,7 +26,7 @@ void func_801304B8(TObj *o)
             D_800A603C = 5;
             D_800A603D = 0;
             D_800A603E = 0;
-            o->d90 = (int)FUN_8002dcc8(2, 0xd, &o->a);
+            o->d90 = (int)showMessageBoxDirect(2, 0xd, &o->a);
             o->wac = 3;
             o->animFrame = o->b68 & 1;
             o->anim = D_8013A3B4[0];

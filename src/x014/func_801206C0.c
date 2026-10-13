@@ -12,7 +12,7 @@ extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern short FUN_800411cc(TObj *, short, short);
 extern void FUN_8002052c(TObj *, int);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 static __inline__ int touch(TObj *o, TObj *p)
 {
@@ -171,7 +171,7 @@ void func_801206C0(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -11,9 +11,9 @@ extern unsigned char D_8013C7C8[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern int FUN_800408d8(TObj *, int, int);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8012A290(TObj *o)
 {
@@ -60,7 +60,7 @@ void func_8012A290(TObj *o)
         D_800A603C = 2;
         D_800A603D = 0;
         D_800A603E = 1;
-        FUN_8004258c(p, 1);
+        decreaseObjectTimer(p, 1);
         D_800A60B6 = 0x200;
         o->wac = 7;
         o->state++;
@@ -83,7 +83,7 @@ void func_8012A290(TObj *o)
         AnimLoadDuration(o);
         break;
     case 6:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->timer = 0x80;

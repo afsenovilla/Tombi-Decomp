@@ -14,7 +14,7 @@ extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
 extern short FUN_800408d8(TObj *, short, short);
 extern void func_80128110(TObj *);
@@ -75,7 +75,7 @@ void func_8012A794(TObj *o)
             }
             o->y.p.whole -= 2;
         } else {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             o->y.p.whole -= 3;
         }
         if (wall(o)) {

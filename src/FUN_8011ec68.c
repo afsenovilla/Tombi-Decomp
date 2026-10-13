@@ -31,7 +31,7 @@ extern unsigned char DAT_8009c938a[];
 extern unsigned char DAT_8009c938;
 extern int FUN_8001f9e0(void);
 extern void FUN_8011a148(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
 extern void FUN_80063a6c(MATRIX *, VECTOR *, VECTOR *);
@@ -124,7 +124,7 @@ void FUN_8011ec68(S *o)
                     o->animFrame = q->animFrame;
                     if (DAT_8009c938a[0] == 0 && q->wc0 != 0 && --q->wc0 == 0 && !(DAT_8009c984a[0] & 1)) {
                         DAT_8009c984a[0] |= 1;
-                        FUN_8005a8a8(2, 0, 0);
+                        setEventStarted(2, 0, 0);
                         FUN_8001e4f0(0x35);
                     }
                     break;

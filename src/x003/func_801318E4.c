@@ -9,8 +9,8 @@ extern TObj *D_8009F2D8[];
 extern TObj *D_8009F3D4[];
 extern unsigned short D_8009C962;
 extern unsigned char D_8009D2C3, D_8009CDC7, D_8009CDC1;
-extern TObj *FUN_800183b8(void);
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer2(void);
+extern TObj *allocObjectLayer4(void);
 
 void func_801318E4(TObj *o)
 {
@@ -27,7 +27,7 @@ void func_801318E4(TObj *o)
         i = 0;
         p = D_80135FFC;
         for (; p->f0 != 0xff; p = &D_80135FFC[++i]) {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n == 0) continue;
             {
                 n->active = 3;
@@ -60,7 +60,7 @@ void func_801318E4(TObj *o)
         p = D_80135F54;
         for (; p->f0 != 0xff; p = &D_80135F54[++i]) {
             if (*(volatile unsigned short *)&p->f0 & 0x80) {
-                n = FUN_800184d8();
+                n = allocObjectLayer4();
                 if (n == 0) continue;
                 {
                     n->active = 1;
@@ -74,7 +74,7 @@ void func_801318E4(TObj *o)
                     n->b.p.whole = p->f16;
                 }
             } else {
-                n = FUN_800183b8();
+                n = allocObjectLayer2();
                 if (n) {
                     n->active = 3;
                     n->type = 0x32;
@@ -105,7 +105,7 @@ void func_801318E4(TObj *o)
         p = D_80135FC4;
         for (; p->f0 != 0xff; p = &D_80135FC4[++i]) {
             if (*(volatile unsigned short *)&p->f0 & 0x80) {
-                n = FUN_800184d8();
+                n = allocObjectLayer4();
                 if (n == 0) continue;
                 {
                     n->active = 1;
@@ -119,7 +119,7 @@ void func_801318E4(TObj *o)
                     n->b.p.whole = p->f16;
                 }
             } else {
-                n = FUN_800183b8();
+                n = allocObjectLayer2();
                 if (n == 0) continue;
                 {
                     n->active = 2;

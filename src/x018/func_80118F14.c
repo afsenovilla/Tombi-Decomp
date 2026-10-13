@@ -12,8 +12,8 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CE28[];
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
 
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
 
@@ -45,7 +45,7 @@ void func_80118F14(TObj *o)
         o->animFrame = o->b68 & 1;
         setanim(o, 4);
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0xb, &v);
+        o->d90 = showMessageBoxDirect(3, 0xb, &v);
         o->state++;
         break;
     case 1:
@@ -55,7 +55,7 @@ void func_80118F14(TObj *o)
         p->b04 = 3;
         o->timer = 4;
         if (D_8009CE28[0] == 0) {
-            FUN_8005a8a8(0x84, 0, 0);
+            setEventStarted(0x84, 0, 0);
             o->timer = 200;
         }
         o->state = 8;

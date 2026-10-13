@@ -2,7 +2,7 @@
 // MATCHING 80127eb0 736
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void FUN_80127214(TObj *);
 extern int FUN_801274cc(TObj *);
 extern TObj *FUN_80018448(void);
@@ -34,7 +34,7 @@ void FUN_80127eb0(TObj *o)
         a = PTR_DAT_8013a1b8[0];
         goto common;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         FUN_80127214(o);
         o->velV += 0x20;
         o->y.raw += o->velV << 8;
@@ -44,7 +44,7 @@ void FUN_80127eb0(TObj *o)
         o->substep++;
         break;
     case 3:
-        if (o->velV < 0x400) FUN_8001faf4(o);
+        if (o->velV < 0x400) applyFrameVelocityX(o);
         FUN_80127214(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;

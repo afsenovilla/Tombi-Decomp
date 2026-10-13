@@ -13,7 +13,7 @@ extern void *D_8013A20C[];
 extern void *D_8013A210[];
 extern unsigned char D_80138FD8[];
 extern void FUN_8001e4f0(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int FUN_801274cc(TObj *);
@@ -34,7 +34,7 @@ static __inline__ void move(TObj *o)
 {
     P *p = (P *)&o->wb4;
     if (o->movetab != 0) {
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
     }
     if (o->b9d != 0) {
         if (o->animFrame != (o->b9d & 1)) {

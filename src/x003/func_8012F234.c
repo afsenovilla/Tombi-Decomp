@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void *D_8013A70C[];
 extern unsigned char D_800A603E, D_800A60E4;
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 
@@ -20,7 +20,7 @@ void func_8012F234(TObj *o)
 {
     switch (o->state) {
     case 0:
-        FUN_80026bfc(1, 6);
+        spawnItemNotification(1, 6);
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
         o->d8c = 0;

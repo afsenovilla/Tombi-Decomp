@@ -7,9 +7,9 @@ typedef struct { short vx, vy, vz, pad; } SVEC;
 extern TObj *D_8009C948, *D_8009C94C[];
 extern unsigned char D_8009C964, D_8009C93A, D_8009C940, D_8009C941, D_8009D07E;
 extern void FUN_800201ac(TObj *, int);
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 extern void RotMatrix(SVEC *, void *);
-extern void FUN_8001888c(TObj *);
+extern void freeObjectLayer8(TObj *);
 extern void func_80117D48(TObj *);
 extern void func_801177F8(TObj *);
 extern void func_801178B0(TObj *);
@@ -57,7 +57,7 @@ void func_8011759C(TObj *o)
             FUN_800201ac(o, 0xa0);
             func_801177F8(o);
             func_801178B0(o);
-            FUN_80021f5c(&o->w48);
+            getBaseMatrix(&o->w48);
             v.vx = o->d84;
             v.vy = o->d88;
             v.vz = o->d8c;
@@ -68,7 +68,7 @@ void func_8011759C(TObj *o)
     case 2:
         break;
     case 3:
-        FUN_8001888c(o);
+        freeObjectLayer8(o);
         break;
     }
 }

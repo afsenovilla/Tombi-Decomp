@@ -29,7 +29,7 @@ extern unsigned char D_80077F3C[];
 extern short D_8007D284[];
 extern E8 D_8007DEF0[];
 extern void CdMix(void *);
-extern void FUN_8001dad4(M *, int, int, int, int);
+extern void movieInitDecodeEnv(M *, int, int, int, int);
 extern void FUN_8001db38(E8 *);
 extern int MovieDecodeFrame(M *);
 extern void DecDCTin(int *, int);
@@ -40,7 +40,7 @@ extern void DecDCToutCallback(void *);
 extern void StUnSetRing(void);
 extern void StClearRing(void);
 extern int CdControlB(int, int, int);
-extern void FUN_8001726c(void);
+extern void exitTask(void);
 extern void ThreadWaitFrames(int);
 
 void moviePlayerTask(void)
@@ -57,7 +57,7 @@ void moviePlayerTask(void)
         }
         switch (D_1F8001D4->w48) {
         case 0:
-            FUN_8001dad4(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
+            movieInitDecodeEnv(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
             FUN_8001db38(&D_8007DEF0[D_8007D284[D_80077F3C[D_1F8001CD]]]);
             D_1F8001D4->w48++;
             while (MovieDecodeFrame(&D_8009BCA8) == -1)
@@ -100,7 +100,7 @@ void moviePlayerTask(void)
                 ;
             D_1F8001CC = 0;
             D_1F8001D3 = 0;
-            FUN_8001726c();
+            exitTask();
             break;
         }
         ThreadWaitFrames(1);

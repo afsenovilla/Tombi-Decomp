@@ -6,7 +6,7 @@ typedef struct {
 } E28;
 extern E28 *D_80119CFC;
 extern unsigned char D_8009CE41[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_801199F0(TObj *o)
 {
@@ -16,7 +16,7 @@ void func_801199F0(TObj *o)
     TObj *p;
 
     for (i = 0, e = tbl; e->f0 != 0xff; e = &tbl[++i]) {
-        p = FUN_800183b8();
+        p = allocObjectLayer2();
         if (p) {
             p->active = 3;
             p->type = 0x32;

@@ -1,7 +1,7 @@
 // FUNC 8012f3b0 372 X003
 // MATCHING 8012f3b0 372
 #include "TOBJ.H"
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void AnimLoadDuration(TObj *);
 extern char DAT_80077d0c[];
 extern void *D_8013A698[];
@@ -27,7 +27,7 @@ void func_8012F3B0(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        if (o->step == 2) FUN_8001fa88(o, 1 - o->animFrame);
+        if (o->step == 2) applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x20;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

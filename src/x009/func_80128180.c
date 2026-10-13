@@ -9,7 +9,7 @@ extern unsigned short D_8009D0B0;
 extern int D_1F8002F0[];
 extern void *D_8012EE80;
 extern void AnimLoadDuration(TObj *o);
-extern void FUN_8003e3cc(int, int, V3F *, int, int);
+extern void spawnItemDropAtPos(int, int, V3F *, int, int);
 
 void func_80128180(TObj *o)
 {
@@ -27,7 +27,7 @@ void func_80128180(TObj *o)
             v.x.p.whole = 0xd90;
             v.y.p.whole = -0x244;
             v.z.p.whole = 0xb9a;
-            FUN_8003e3cc(0x8a, 0, &v, 0, 0);
+            spawnItemDropAtPos(0x8a, 0, &v, 0, 0);
         }
         o->b04 = 3;
         return;
@@ -38,7 +38,7 @@ void func_80128180(TObj *o)
         v.x.p.whole = 0xd90;
         v.y.p.whole = -0x244;
         v.z.p.whole = 0xb9a;
-        FUN_8003e3cc(0x8a, 0, &v, 0, 0);
+        spawnItemDropAtPos(0x8a, 0, &v, 0, 0);
     }
     if (D_8009D083 == 2) {
     if (D_8009D0B0 || D_8009D081 || o->subtype) {
@@ -48,7 +48,7 @@ void func_80128180(TObj *o)
     v.x.p.whole = 0xbb8;
     v.y.p.whole = -0x276;
     v.z.p.whole = 0xb9a;
-    FUN_8003e3cc(0xc, 0, &v, 0, 0);
+    spawnItemDropAtPos(0xc, 0, &v, 0, 0);
     o->b04 = 3;
     return;
     }

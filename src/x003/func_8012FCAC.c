@@ -6,11 +6,11 @@ extern unsigned char D_8009D087;
 extern unsigned char D_8009C93F, D_8009C940, D_8009C941, D_8009C942;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void *D_80138FC8[], *D_80138FD8[];
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026e0c(int, int);
 
 static __inline__ void setAnim(TObj *o, void *a)
@@ -50,7 +50,7 @@ void func_8012FCAC(TObj *o)
         break;
     case 3:
         AnimAdvance(o);
-        o->d90 = FUN_8002dcc8(8, 1, &o->a);
+        o->d90 = showMessageBoxDirect(8, 1, &o->a);
         o->state++;
         break;
     case 4:
@@ -60,12 +60,12 @@ void func_8012FCAC(TObj *o)
         p->b04 = 3;
         }
         o->state++;
-        FUN_8005a8a8(0xbe, 0, 0);
+        setEventStarted(0xbe, 0, 0);
         o->timer = 300;
         break;
     case 6:
         AnimAdvance(o);
-        o->d90 = FUN_8002dcc8(8, 2, &o->a);
+        o->d90 = showMessageBoxDirect(8, 2, &o->a);
         o->state++;
         break;
     case 8:
@@ -98,7 +98,7 @@ void func_8012FCAC(TObj *o)
         break;
     case 12:
         o->state++;
-        o->d90 = FUN_8002dcc8(8, 4, &o->a);
+        o->d90 = showMessageBoxDirect(8, 4, &o->a);
         break;
     case 13:
         AnimAdvance(o);
@@ -107,7 +107,7 @@ void func_8012FCAC(TObj *o)
         p->b04 = 3;
         }
         o->state++;
-        FUN_8005a9a4(0xbe, 0);
+        setEventComplete(0xbe, 0);
         o->timer = 300;
         break;
     case 5:
@@ -131,7 +131,7 @@ void func_8012FCAC(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        o->d90 = FUN_8002dcc8(m, n, q);
+        o->d90 = showMessageBoxDirect(m, n, q);
         o->wac = 2;
         o->animFrame = o->b68 & 1;
         setAnim(o, D_80138FC8[0]);

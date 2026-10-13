@@ -12,7 +12,7 @@ extern short D_800A6066;
 extern unsigned char D_8009CF29, D_8009CF2D;
 extern Fix16 *D_800A6078[];
 extern void AnimJump(TObj *, int);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_800eea7c(void *, int, int);
 extern void FUN_8003e300(int, int, V3 *);
 
@@ -32,7 +32,7 @@ void func_8012A31C(TObj *o)
         break;
     case 1:
         *(V6 *)&v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(2, 0, (V6 *)&v);
+        o->d90 = showMessageBoxDirect(2, 0, (V6 *)&v);
         o->anim = D_801311D0[o->subtype].anims[3];
         AnimJump(o, 0);
         o->state++;

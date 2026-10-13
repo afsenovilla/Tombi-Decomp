@@ -24,10 +24,10 @@ extern short D_1F8001C6;
 extern TObj *ObjAlloc(void);
 extern int MulCos(short, short);
 extern int MulNegSinScaled(short, short);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventComplete(int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_80059d44(short);
-extern TObj *FUN_8002dcc8(int, int, V6 *);
+extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
 extern int AnimAdvance(void *);
 extern void func_80116928(TObj *, int, int);
@@ -87,14 +87,14 @@ void func_8011A114(Ctl *o)
         c->y.p.whole++;
         if (D_800A6038.y.p.whole - 0x20 < c->y.p.whole) {
             c->b04 = 3;
-            FUN_8005a9a4(0x9f, 0);
+            setEventComplete(0x9f, 0);
             o->w08 = 0x15e;
             o->state++;
         }
         break;
     case 3:
         if (--o->w08 <= 0) {
-            FUN_8005a9a4(0x90, 0);
+            setEventComplete(0x90, 0);
             o->w08 = 0x12c;
             o->state++;
         }
@@ -136,7 +136,7 @@ void func_8011A114(Ctl *o)
             o->w08 = 0x3c;
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
-            a->d90 = (int)FUN_8002dcc8(7, 3, &v);
+            a->d90 = (int)showMessageBoxDirect(7, 3, &v);
             func_80117CEC(a, 2, 0);
             o->state++;
         }
@@ -154,7 +154,7 @@ void func_8011A114(Ctl *o)
         AnimAdvance(a);
         a->h->p.whole++;
         if (--o->w08 <= 0) {
-            FUN_8005a8a8(0xa0, 0, 0);
+            setEventStarted(0xa0, 0, 0);
             o->w08 = 200;
             o->state++;
         }
@@ -183,7 +183,7 @@ void func_8011A114(Ctl *o)
         if (--o->w08 <= 0) {
             v.v[1] = 0xa0;
             v.v[3] = -0x50;
-            a->d90 = (int)FUN_8002dcc8(9, 0, &v);
+            a->d90 = (int)showMessageBoxDirect(9, 0, &v);
             o->state++;
         }
         break;
@@ -206,7 +206,7 @@ void func_8011A114(Ctl *o)
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
             func_80116928(d, 3, 0);
-            a->d90 = (int)FUN_8002dcc8(7, 4, &v);
+            a->d90 = (int)showMessageBoxDirect(7, 4, &v);
             func_80117CEC(a, 2, 0);
             o->state++;
         }
@@ -225,7 +225,7 @@ void func_8011A114(Ctl *o)
         if (--o->w08 <= 0) {
             func_80117CEC(a, 0, 0);
             D_8009C93E[0] = 1;
-            FUN_8005a8a8(0x9d, 0, 0);
+            setEventStarted(0x9d, 0, 0);
             o->w08 = 200;
             o->state++;
         }
@@ -234,7 +234,7 @@ void func_8011A114(Ctl *o)
         if (--o->w08 <= 0) {
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
-            a->d90 = (int)FUN_8002dcc8(7, 5, &v);
+            a->d90 = (int)showMessageBoxDirect(7, 5, &v);
             func_80117CEC(a, 2, 0);
             o->state++;
         }
@@ -245,19 +245,19 @@ void func_8011A114(Ctl *o)
             ((TObj *)a->d90)->b04 = 3;
             func_80117CEC(a, 0, 0);
             if (D_8009CE15 == 0xff) {
-                a->d90 = (int)FUN_8002dcc8(7, 6, &v);
+                a->d90 = (int)showMessageBoxDirect(7, 6, &v);
                 func_80117CEC(a, 2, 0);
                 o->state = 0x19;
             } else if (D_8009CDBB) {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
-                a->d90 = (int)FUN_8002dcc8(7, 7, &v);
+                a->d90 = (int)showMessageBoxDirect(7, 7, &v);
                 func_80117CEC(a, 2, 0);
                 o->state = 0x16;
             } else {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
-                a->d90 = (int)FUN_8002dcc8(7, 8, &v);
+                a->d90 = (int)showMessageBoxDirect(7, 8, &v);
                 func_80117CEC(a, 2, 0);
                 o->state = 0x16;
             }
@@ -288,7 +288,7 @@ void func_8011A114(Ctl *o)
         if (--o->w08 <= 0) {
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
-            a->d90 = (int)FUN_8002dcc8(7, 6, &v);
+            a->d90 = (int)showMessageBoxDirect(7, 6, &v);
             func_80117CEC(a, 2, 0);
             o->state = 0x19;
         }

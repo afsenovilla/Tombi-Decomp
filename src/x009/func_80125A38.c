@@ -16,10 +16,10 @@ extern unsigned short D_1F80016A, D_1F80016E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
-extern int FUN_8002078c(P2, P2);
+extern int angleBetweenPoints(P2, P2);
 extern int func_8004065C(TObj *, int, int, int);
 extern short TileCollideAt(TObj *, int, int);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 static __inline__ int Blocked(TObj *o)
 {
@@ -52,7 +52,7 @@ void func_80125A38(TObj *o)
         a.y = o->y.p.whole;
         b.x = D_1F80016A;
         b.y = D_1F80016E - 0x40;
-        o->d88 = FUN_8002078c(a, b);
+        o->d88 = angleBetweenPoints(a, b);
         if ((unsigned)(o->d88 - 0x41) < 0x80) o->animFrame = 1;
         else o->animFrame = 0;
         o->velH = 0x180;
@@ -81,7 +81,7 @@ void func_80125A38(TObj *o)
         o->state++;
         o->anim = D_8012EEB0[0];
         AnimLoadDuration(o);
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             n->active = 2;
             n->type = 0x21;

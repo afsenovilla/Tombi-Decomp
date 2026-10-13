@@ -14,10 +14,10 @@ extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_801346C8(TObj *o)
 {
@@ -43,10 +43,10 @@ void func_801346C8(TObj *o)
         o->anim = D_80136148[o->subtype].p[1];
         AnimLoadDuration(o);
         if (D_8009CE3B == s) {
-            o->d90 = FUN_8002dcc8(5, 0, &v);
+            o->d90 = showMessageBoxDirect(5, 0, &v);
             o->state = 10;
         } else {
-            o->d90 = FUN_8002dcc8(5, 0, &v);
+            o->d90 = showMessageBoxDirect(5, 0, &v);
             o->state = 1;
         }
         break;
@@ -106,13 +106,13 @@ void func_801346C8(TObj *o)
             o->anim = D_80136148[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(5, 2, &v);
+            o->d90 = showMessageBoxDirect(5, 2, &v);
             o->state = 11;
         } else {
             o->anim = D_80136148[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(5, 1, &v);
+            o->d90 = showMessageBoxDirect(5, 1, &v);
             o->state = 12;
         }
         break;
@@ -139,7 +139,7 @@ void func_801346C8(TObj *o)
         }
     case 14:
         o->timer = 200;
-        FUN_8005a9a4(0x97, 0);
+        setEventComplete(0x97, 0);
         o->state++;
         break;
     case 15:

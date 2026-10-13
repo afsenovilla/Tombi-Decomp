@@ -7,7 +7,7 @@ extern int D_1F8002DC;
 extern int GetClut(int, int);
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
-extern void FUN_80018790(TObj *o);
+extern void freeObjectLayer2(TObj *o);
 extern void func_8012C004(TObj *o);
 extern void func_8012C1A8(TObj *o);
 extern void func_8012C3D0(TObj *o);
@@ -88,7 +88,7 @@ void func_8012D4AC(TObj *o)
     case 2:
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

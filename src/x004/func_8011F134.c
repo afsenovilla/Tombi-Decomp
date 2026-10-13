@@ -4,7 +4,7 @@
 
 extern unsigned char D_1F8001A4;
 void func_80043C74();
-void FUN_8004258c(TObj *o, int n);
+void decreaseObjectTimer(TObj *o, int n);
 
 void func_8011F134(TObj *o, TObj *p)
 {
@@ -63,7 +63,7 @@ void func_8011F134(TObj *o, TObj *p)
                 o->b04 = 2;
                 o->step = 1;
                 o->state = 0;
-                FUN_8004258c(o, 1);
+                decreaseObjectTimer(o, 1);
             }
         } else {
             short a = p->box2, b = p->y.p.whole, c = o->box2;

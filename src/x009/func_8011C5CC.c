@@ -9,7 +9,7 @@ extern int ObjCullRegister(TObj *);
 extern void func_8011BFD8(TObj *);
 extern void func_8011C30C(TObj *);
 extern void func_8011C494(TObj *);
-extern void FUN_8003ecb0(char *d, Fix16 *pos, int a, int b, TObj *o);
+extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
 extern void ObjFreeDup(TObj *);
 
 void func_8011C5CC(TObj *o)
@@ -61,7 +61,7 @@ void func_8011C5CC(TObj *o)
                 v[0].p.whole = o->h->p.whole;
                 v[1].p.whole = o->y.p.whole - 0x20;
                 v[2].p.whole = o->d->p.whole;
-                FUN_8003ecb0(D_8012B27C, v, 0, -0x400, o);
+                spawnItemFromEntry(D_8012B27C, v, 0, -0x400, o);
                 ((TX *)o)->c[0]->b04 = 2;
                 ((TX *)o)->c[1]->b04 = 2;
                 ((TX *)o)->c[2]->b04 = 2;

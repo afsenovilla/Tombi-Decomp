@@ -1,6 +1,6 @@
 // FUNC 80125fb4 1280 X010
 /* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
-   FUN_8002dcc8 call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
+   showMessageBoxDirect call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
    jal delay slot), so the tails only merge from setanim(o, 2). Tried: pointer/extra local for
    the V6 copy, an fx() inline, moving the copy among the global stores.
    Also tried (o31): p = &v before/after the copy, k = 9 local, casts/no-proto/short-arg calls, inline wrappers
@@ -16,9 +16,9 @@ extern unsigned char D_8009D0E7[];
 extern unsigned char D_8009C970, D_8009C971;
 extern short D_800A6108, D_800A610A, D_800A60EA;
 extern void FUN_8001fe94(TObj *, int);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventComplete(int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
 extern void FUN_8001e4f0(int);
@@ -45,14 +45,14 @@ void func_80125FB4(TObj *o)
         o->state++;
         break;
     case 1:
-        FUN_8005a9a4(0x7e, 0);
+        setEventComplete(0x7e, 0);
         o->timer = 300;
         o->state++;
         break;
     case 2:
         if (--o->timer > 0) break;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(5, 6, &v);
+        o->d90 = showMessageBoxDirect(5, 6, &v);
         setanim(o, 2);
         for (i = 0; i < 10; i++)
             FUN_80026e0c(i + 0x43, D_8009D0E7[i]);
@@ -65,7 +65,7 @@ void func_80125FB4(TObj *o)
         p->b04 = 3;
         FUN_80026c50(0x2c, 1, 1);
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(5, 7, &v);
+        o->d90 = showMessageBoxDirect(5, 7, &v);
         o->state++;
         }
         break;
@@ -82,7 +82,7 @@ void func_80125FB4(TObj *o)
     case 5:
         if (--o->timer > 0) break;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(5, 8, &v);
+        o->d90 = showMessageBoxDirect(5, 8, &v);
         setanim(o, 2);
         o->state++;
         break;
@@ -93,7 +93,7 @@ void func_80125FB4(TObj *o)
         p->b04 = 3;
         FUN_80026c50(0x95, 1, 1);
         setanim(o, 0);
-        FUN_8005a8a8(0x9c, 0, 0);
+        setEventStarted(0x9c, 0, 0);
         o->timer = 300;
         o->state++;
         }
@@ -108,7 +108,7 @@ void func_80125FB4(TObj *o)
         D_8009C93F = 1;
         D_8009C942 = 1;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(5, 9, &v);
+        o->d90 = showMessageBoxDirect(5, 9, &v);
         setanim(o, 2);
         o->state++;
         break;

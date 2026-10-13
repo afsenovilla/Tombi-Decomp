@@ -2,7 +2,7 @@
 // MATCHING 80126770 464
 #include "TOBJ.H"
 extern unsigned char DAT_1f8001a4;
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void FUN_80126770(TObj *o)
 {
@@ -33,7 +33,7 @@ void FUN_80126770(TObj *o)
                     o->b04 = 2;
                     o->step = 0;
                     o->state = 0;
-                    FUN_8004258c(o, 1);
+                    decreaseObjectTimer(o, 1);
                 }
             }
         }
@@ -46,7 +46,7 @@ void FUN_80126770(TObj *o)
             o->b04 = 2;
             o->step = 0;
             o->state = 0;
-            FUN_8004258c(o, 1);
+            decreaseObjectTimer(o, 1);
         }
     }
 }

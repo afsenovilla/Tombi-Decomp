@@ -9,7 +9,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern short D_1F80016A, D_1F80016E;
 extern short D_1F80016Ex[], D_1F80016Ey[]; /* debt: two more names for D_1F80016E keep both reloads after the stores */
 extern void *D_80134D88;
-extern int FUN_8002078c(P, P);
+extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 
@@ -30,7 +30,7 @@ void func_80127B14(TObj *o)
         a.y = o->y.p.whole;
         b.x = D_1F80016A;
         b.y = D_1F80016E;
-        o->d88 = FUN_8002078c(a, b);
+        o->d88 = angleBetweenPoints(a, b);
         if ((unsigned)(o->d88 - 4) < 0xbc)
             o->animFrame = 1;
         else

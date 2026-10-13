@@ -13,7 +13,7 @@ extern Fn D_80135C64[];
 extern int FUN_800203dc(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001f9e0(void);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void func_801226A0(TObj *);
 extern void func_80121FD0(TObj *);
 extern void func_80121A88(TObj *);
@@ -160,9 +160,9 @@ void func_80124B78(TObj *o)
     case 3:
         if (o->subtype >= 2) {
             (*(short *)o->d90)--;
-            FUN_80018790(o);
+            freeObjectLayer2(o);
         } else {
-            FUN_80018790(o);
+            freeObjectLayer2(o);
         }
         break;
     }

@@ -27,7 +27,7 @@ extern short D_8009C946[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
-extern void FUN_8001f2ec(int);
+extern void playJingle(int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_80025f40(int, int, int, int);
@@ -40,7 +40,7 @@ extern void FUN_800fc414(TObj *);
 extern char D_80077D24[];
 extern void FUN_8002ff20(int, int, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 
 #define SETANIM_IF(n) \
     D_8009C330->w2c = n; \
@@ -106,7 +106,7 @@ void FUN_800fd358(TObj *o)
                 D_8009C942 = 1;
                 D_8009C938 = 1;
                 FUN_8001f110(0);
-                FUN_8001f2ec(3);
+                playJingle(3);
             }
         }
         D_8009C330->b8 = D_8009C938;
@@ -150,7 +150,7 @@ void FUN_800fd358(TObj *o)
         BLINK();
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
-            FUN_8001fa88(o, o->animFrame ^ 1);
+            applyAnimVelocityX(o, o->animFrame ^ 1);
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         o->velY += 0x40;
@@ -179,7 +179,7 @@ void FUN_800fd358(TObj *o)
         BLINK();
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
-            FUN_8001fa88(o, o->animFrame ^ 1);
+            applyAnimVelocityX(o, o->animFrame ^ 1);
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         o->y.raw += o->velY << 8;

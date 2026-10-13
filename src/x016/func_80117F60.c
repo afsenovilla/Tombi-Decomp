@@ -6,7 +6,7 @@ extern S2 *D_800A6078;
 extern void func_80117E04(TObj *);
 extern void func_80117B40(TObj *);
 extern int func_800202B4(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_80117F60(TObj *o)
 {
@@ -34,7 +34,7 @@ void func_80117F60(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

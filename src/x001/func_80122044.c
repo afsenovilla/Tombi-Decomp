@@ -13,7 +13,7 @@ extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
-extern void FUN_8003fb90(TObj *);
+extern void applyCollisionTileResponse(TObj *);
 extern void SfxPlay2(int, int);
 
 void func_80122044(TObj *o)
@@ -46,7 +46,7 @@ void func_80122044(TObj *o)
         o->y.p.whole++;
         AnimAdvance(o);
         if (TileCollideAt(o, o->h->p.whole + ((o->animFrame & 1) ? 9 : -9), o->y.p.whole + 0x10)) {
-            FUN_8003fb90(o);
+            applyCollisionTileResponse(o);
             D_8009C942[0] = 0;
             D_8009C93F[0] = 0;
             X(o)->baa = 0;

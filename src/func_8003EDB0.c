@@ -5,19 +5,19 @@ typedef struct { unsigned short a, b; } VP;
 extern VP D_8007B380[];
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
-extern void FUN_8003c980(TObj *);
+extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern short TileCollideAt(TObj *, int, int);
 extern void ObjApplyVelocity(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_8003EDB0(TObj *o)
 {
     char pad;
     switch (o->b04) {
     case 0:
-        FUN_8003c980(o);
+        initItemObject(o);
         o->active = 4;
         if (o->velV != 0) {
             o->wb4 = 1;
@@ -70,7 +70,7 @@ void func_8003EDB0(TObj *o)
         D_8007A890[D_8007A7F0[o->subtype]](o);
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

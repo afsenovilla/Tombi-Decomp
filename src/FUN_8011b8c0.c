@@ -19,7 +19,7 @@ extern signed char D_80138748[][12];
 extern signed char D_80138720[];
 extern signed char D_801386B4[];
 extern short D_8007A3F0[];
-extern unsigned char *FUN_800183b8(void);
+extern unsigned char *allocObjectLayer2(void);
 extern void FUN_8001e4f0(int);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
 extern void FUN_80063a6c(MATRIX *, VECTOR *, VECTOR *);
@@ -74,7 +74,7 @@ void FUN_8011b8c0(TO2 *o)
                 p->t.d84 = 0x1000;
                 p->t.d88 = 0x1000;
                 p->t.d8c = 0x1000;
-                if (p->t.d94 == 0 && (o->t.subtype < 2 || o->t.subtype == 3) && (q = FUN_800183b8()) != 0) {
+                if (p->t.d94 == 0 && (o->t.subtype < 2 || o->t.subtype == 3) && (q = allocObjectLayer2()) != 0) {
                     q[0] = 1;
                     b = o->t.b1d;
                     q[2] = 2;

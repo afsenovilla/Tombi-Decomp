@@ -4,14 +4,14 @@
 typedef struct { unsigned short f, sub, c; short x, y, z; } Spawn;
 extern unsigned char D_8009CE22;
 extern Spawn D_8013143C;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012E750(TObj *o)
 {
     TObj *e;
 
     if (D_8009CE22) {
-        e = FUN_800183b8();
+        e = allocObjectLayer2();
         if (e) {
             e->active = 3;
             e->type = 0x32;

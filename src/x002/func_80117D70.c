@@ -19,8 +19,8 @@ extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern unsigned char D_8009CE41[];
 extern unsigned char D_8009CE44[];
-extern void FUN_8005a8a8(int, int, int);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern void setEventStarted(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_80117D70(TO2 *o)
 {
@@ -45,9 +45,9 @@ void func_80117D70(TO2 *o)
         o->t.wbc = o->t.animFrame;
         o->t.animFrame = o->t.b68 & 1;
         if (D_8009CE41[0] == 0xff) {
-            o->t.d90 = FUN_8002dcc8(7, 0xb, &v);
+            o->t.d90 = showMessageBoxDirect(7, 0xb, &v);
         } else {
-            o->t.d90 = FUN_8002dcc8(7, 6, &v);
+            o->t.d90 = showMessageBoxDirect(7, 6, &v);
         }
         o->t.state++;
         break;
@@ -64,7 +64,7 @@ void func_80117D70(TO2 *o)
         D_800A60EA[0] = 0;
         o->t.timer = 4;
         if (D_8009CE44[0] == 0) {
-            FUN_8005a8a8(0xa0, 0, 0);
+            setEventStarted(0xa0, 0, 0);
             o->t.timer = 200;
         }
         o->t.state = 2;

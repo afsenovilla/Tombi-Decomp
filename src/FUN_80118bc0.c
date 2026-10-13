@@ -11,7 +11,7 @@ typedef struct {
 extern char D_80077cf4[], D_80077cdc[];
 extern E T_80138664[];
 extern int T_8013b1d4[];
-extern void FUN_8001fe6c(O *), FUN_8001faf4(O *), FUN_8001fec0(O *), FUN_800187e4(O *);
+extern void FUN_8001fe6c(O *), applyFrameVelocityX(O *), FUN_8001fec0(O *), FUN_800187e4(O *);
 extern int FUN_800202b4(O *);
 extern short FUN_80040278(O *, int, int);
 
@@ -47,7 +47,7 @@ void FUN_80118bc0(O *o)
                 o->state = 3;
             break;
         }
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         FUN_8001fec0(o);
         break;
     case 2:

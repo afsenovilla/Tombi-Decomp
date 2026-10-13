@@ -9,7 +9,7 @@ extern unsigned char D_8009CDBF[];
 extern int D_1F8002F0[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void func_8013946C(TObj *);
 extern void func_80139770(TObj *);
 
@@ -55,7 +55,7 @@ void func_80139914(TObj *o)
     case 2:
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

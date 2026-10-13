@@ -6,7 +6,7 @@ extern unsigned char D_80130FD4[];
 extern A *D_80133BDC[], *D_80133BE0[], *D_80133BE4[], *D_80133C04[], *D_80133C08[], *D_80133C0C[];
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern void FUN_8001e4f0(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_8011FDD4(TObj *);
@@ -28,7 +28,7 @@ static __inline__ void wall(TObj *o)
 {
     unsigned char *q = (unsigned char *)&o->wb4;
 
-    if (o->movetab) FUN_8001fa88(o, 1 - o->animFrame);
+    if (o->movetab) applyAnimVelocityX(o, 1 - o->animFrame);
     if ((o->b9d & 2) && o->animFrame != (o->b9d & 1)) o->movetab = 0;
     if (o->animFrame == 1)
         *(short *)(q + 4) = 0x10;

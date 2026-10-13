@@ -37,14 +37,14 @@ extern short D_1F8001C6;
 extern Q *D_1F8001D4;
 extern char D_8001D6A4[];
 extern void FUN_800eea7c(PL *, int, int);
-extern O *FUN_8002dc50(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern O *showMessageBox(int, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void stopBgm(int);
 extern void ThreadCreate(int, char *);
-extern void FUN_8001eb64(void);
+extern void startAreaBgm(void);
 extern void func_801179B4(int, int, int, int);
-extern void FUN_80018790(O *);
+extern void freeObjectLayer2(O *);
 
 void func_80116FE0(O *o)
 {
@@ -109,7 +109,7 @@ void func_80116FE0(O *o)
             }
             break;
         case 4:
-            o->d90 = FUN_8002dc50(2, c->arg, D_80118200[D_8009D088[0] & 0xf].x, D_80118200[D_8009D088[0] & 0xf].y);
+            o->d90 = showMessageBox(2, c->arg, D_80118200[D_8009D088[0] & 0xf].x, D_80118200[D_8009D088[0] & 0xf].y);
             o->wb6++;
             break;
         case 5:
@@ -118,11 +118,11 @@ void func_80116FE0(O *o)
             o->wb6++;
             break;
         case 6:
-            FUN_8005a8a8(c->arg, 0, 0);
+            setEventStarted(c->arg, 0, 0);
             o->wb6++;
             break;
         case 7:
-            FUN_8005a9a4(c->arg, 0);
+            setEventComplete(c->arg, 0);
             o->wb6++;
             break;
         case 8:
@@ -158,7 +158,7 @@ void func_80116FE0(O *o)
             o->wb6++;
             break;
         case 14:
-            FUN_8001eb64();
+            startAreaBgm();
             o->wb6++;
             break;
         case 15:
@@ -220,7 +220,7 @@ void func_80116FE0(O *o)
                 break;
             case 2:
                 if (D_8009CE48 != 0xff) {
-                    o->d90 = FUN_8002dc50(3, 0, 0xa0, 0xa0);
+                    o->d90 = showMessageBox(3, 0, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;
                 } else {
@@ -239,7 +239,7 @@ void func_80116FE0(O *o)
                 break;
             case 4:
                 if (D_8009CDCB != 0xff) {
-                    o->d90 = FUN_8002dc50(3, 1, 0xa0, 0xa0);
+                    o->d90 = showMessageBox(3, 1, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;
                 } else {
@@ -258,7 +258,7 @@ void func_80116FE0(O *o)
                 break;
             case 6:
                 if (D_8009D2DA == 0) {
-                    o->d90 = FUN_8002dc50(3, 2, 0xa0, 0xa0);
+                    o->d90 = showMessageBox(3, 2, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;
                 } else {
@@ -277,7 +277,7 @@ void func_80116FE0(O *o)
                 break;
             case 8:
                 if (D_8009CE0B != 0xff) {
-                    o->d90 = FUN_8002dc50(3, 3, 0xa0, 0xa0);
+                    o->d90 = showMessageBox(3, 3, 0xa0, 0xa0);
                     o->timer = 0x168;
                 } else {
                     o->timer = 1;
@@ -304,7 +304,7 @@ void func_80116FE0(O *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

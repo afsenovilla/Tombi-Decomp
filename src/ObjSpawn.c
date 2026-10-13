@@ -1,7 +1,7 @@
 // FUNC 8003e4ec 996 MAIN0
 // MATCHING 8003e4ec 996
 #include "TOBJ.H"
-extern TObj *FUN_80018568(void);
+extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b368[];
 extern unsigned char DAT_8007b084[];
 extern unsigned char *DAT_8007b14c[];
@@ -12,7 +12,7 @@ extern Fix16 *DAT_800a607c[];
 
 void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
 {
-    TObj *o = FUN_80018568();
+    TObj *o = allocObjectLayer5();
     unsigned char c;
     int d;
 

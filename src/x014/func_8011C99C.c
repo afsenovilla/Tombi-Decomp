@@ -7,7 +7,7 @@ extern unsigned char D_8009C93F;
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_80042FBC(TObj *, TObj *);
-extern void FUN_8004258c(void *, int);
+extern void decreaseObjectTimer(void *, int);
 
 static __inline__ void grab(TObj *o, TObj *p)
 {
@@ -16,7 +16,7 @@ static __inline__ void grab(TObj *o, TObj *p)
     o->b04 = 2;
     o->step = 0;
     o->state = 0;
-    FUN_8004258c(o, 2);
+    decreaseObjectTimer(o, 2);
 }
 
 void func_8011C99C(TObj *o, TObj *p)

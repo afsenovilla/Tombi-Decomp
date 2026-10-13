@@ -2,7 +2,7 @@
 // MATCHING 80121d08 648
 #include "TOBJ.H"
 
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -26,7 +26,7 @@ void func_80121D08(TObj *o)
         if (o->b0c == 0) {
             st = o->subtype;
             for (i = 0; i < 6; i++) {
-                e = FUN_800183b8();
+                e = allocObjectLayer2();
                 if (e) {
                     e->type = 0x47;
                     e->active = 2;

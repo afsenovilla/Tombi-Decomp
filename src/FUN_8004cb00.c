@@ -15,7 +15,7 @@ extern TObj *ObjAlloc(void);
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer5(void);
 extern TObj *allocObjectLayer1(void);
-extern TObj *FUN_80018678(void);
+extern TObj *allocObjectLayer7(void);
 
 
 void FUN_8004cb00(Ent *e, int z)
@@ -86,7 +86,7 @@ void FUN_8004cb00(Ent *e, int z)
         p->da0 = (int)q;
         break;
     case 7:
-        if ((DAT_8009bd98 = FUN_80018678()) == 0)
+        if ((DAT_8009bd98 = allocObjectLayer7()) == 0)
             return;
         break;
     }

@@ -12,7 +12,7 @@ extern unsigned char D_8009CEAE;
 void ObjCullRegister(TObj *o);
 void func_80118998(short x, short y, short z);
 void FUN_8002ee50(int a, int x, int y, int z);
-void FUN_8003c7c4(char *, V3 *, int, int, int);
+void applyItemEffect(char *, V3 *, int, int, int);
 void FUN_80020aec(int a);
 void ObjFreeDup(TObj *o);
 
@@ -45,7 +45,7 @@ void func_8011FD7C(TObj *o)
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole;
             v.z.p.whole = o->d->p.whole;
-            FUN_8003c7c4(D_8013C760, &v, 0, 0, 0);
+            applyItemEffect(D_8013C760, &v, 0, 0, 0);
             o->timer = 0x20;
             D_8009CEAE = 4;
             break;

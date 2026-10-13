@@ -7,7 +7,7 @@ extern signed char D_800A611B;
 void FUN_8003509c(TObj *o, int n);
 void ObjCullRegister(TObj *o);
 void func_80033B44(TObj *o);
-void FUN_80018744(TObj *o);
+void freeObjectLayer1(TObj *o);
 
 void func_80034F58(TObj *o)
 {
@@ -45,7 +45,7 @@ void func_80034F58(TObj *o)
         o->b04 = 3;
         break;
     case 3:
-        FUN_80018744(o);
+        freeObjectLayer1(o);
         break;
     }
 }

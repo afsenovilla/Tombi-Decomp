@@ -12,8 +12,8 @@ extern short D_1F80027E, D_1F800284;
 extern unsigned short D_1F800176, D_1F80017A[];
 extern int func_800203DC(TObj *o);
 extern int ObjCullRegister(TObj *o);
-extern void FUN_8001fb20(TObj *o);
-extern void FUN_8001fab4(TObj *o);
+extern void applyFrameVelocityY(TObj *o);
+extern void applyFrameVelocityXY(TObj *o);
 extern void func_8012BB18(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
 
@@ -121,7 +121,7 @@ void func_8012EAE8(TObj *o)
                 o->h->p.whole = D_1F800176 + 0x150;
             }
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (land2(o)) {
             d = q[1];
             o->active = 1;
@@ -134,7 +134,7 @@ void func_8012EAE8(TObj *o)
         switch (o->b0c) {
         case 0:
             ObjCullRegister(o);
-            FUN_8001fab4(o);
+            applyFrameVelocityXY(o);
             func_8012BB18(o);
             land(o, q);
             if ((unsigned short)(o->h->p.whole - 0x30 - D_1F800176) < 0xe0) {

@@ -7,8 +7,8 @@ extern int DAT_1f8002d4[];
 extern void *D_8013B104[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fe6c(TObj *);
-extern TObj *FUN_800182ac(void);
-extern void FUN_80018790(TObj *);
+extern TObj *allocObjectLayer1(void);
+extern void freeObjectLayer2(TObj *);
 
 void func_80125248(TObj *o)
 {
@@ -43,7 +43,7 @@ void func_80125248(TObj *o)
         case 1:
             break;
         case 2:
-            n = FUN_800182ac();
+            n = allocObjectLayer1();
             if (n != 0) {
                 n->active = 1;
                 n->type = 2;
@@ -59,7 +59,7 @@ void func_80125248(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

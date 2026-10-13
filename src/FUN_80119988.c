@@ -11,7 +11,7 @@ extern short FUN_8001fe3c(int, int);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern short FUN_8001e4f0(int);
-extern void FUN_8001eaa4(int);
+extern void queueSfxKeyOff(int);
 extern int FUN_8001f9e0(void);
 extern void FUN_8011a148(int, int, int, int);
 extern struct V3 D_1F800168;
@@ -153,7 +153,7 @@ void FUN_80119988(TObjE *e)
             *(struct V3 *)&o->d30 = D_1F800168;
             o->d64 -= 0x20;
             if (--e->cc == 0) {
-                FUN_8001eaa4(e->ce);
+                queueSfxKeyOff(e->ce);
                 o->step = 5;
             }
             break;

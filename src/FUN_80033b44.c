@@ -36,7 +36,7 @@ extern void FUN_80033834(TObj *);
 extern short FUN_800331c4(TObj *);
 extern short FUN_80033638(TObj *);
 extern void ObjApplyVelocity(TObj *);
-extern short FUN_8002078c(V2, V2);
+extern short angleBetweenPoints(V2, V2);
 extern void FUN_800339a4(TObj *);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_80031588(D600 *, int, short *, short *);
@@ -48,7 +48,7 @@ static __inline__ short dir(TObj *o)
     a.y = o->y.p.whole;
     b.x = DAT_800a6038.h->p.whole;
     b.y = DAT_800a6038.y.p.whole;
-    return FUN_8002078c(a, b);
+    return angleBetweenPoints(a, b);
 }
 #define DIR dir
 

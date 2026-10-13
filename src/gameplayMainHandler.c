@@ -31,7 +31,7 @@ void gameplayMainHandler(void)
             temp_a0_2 = *(Task** )(&SCRATCHPAD+0x1D4);
             *(char* )0x1F8001CF = 1;
             temp_a0_2->step.value++;
-            func_800243E8();
+            initPlayerAtSpawn();
             func_800246B0();
             if (*(u_long*)&GAME.selectedArea == AREA06_DIRTMOTOCROSS) {
                 func_8011AF40();

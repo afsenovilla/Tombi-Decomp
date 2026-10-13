@@ -4,8 +4,8 @@
 extern char D_80077D0C[];
 extern void *D_8013FC94[];
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8001faf4(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyFrameVelocityX(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void func_8012B184(TObj *o)
 {
@@ -23,8 +23,8 @@ void func_8012B184(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        if (o->w98 == 0) FUN_8001faf4(o);
-        else FUN_8001fa88(o, 1 - o->animFrame);
+        if (o->w98 == 0) applyFrameVelocityX(o);
+        else applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

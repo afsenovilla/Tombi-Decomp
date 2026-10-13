@@ -44,22 +44,22 @@ extern short D_800A60D2_[];
 extern short D_800A60D0_[];
 #define D_800A60D0 D_800A60D0_[0]
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern int FUN_8002dc50(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern int showMessageBox(int, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_8001f110(int);
 extern void FUN_800171b8(int, void *);
 extern void FUN_8001d6a4();
-extern void FUN_8001eb64(void);
-extern void FUN_8003e918(TObj *, Pos *, int);
+extern void startAreaBgm(void);
+extern void dispatchAreaItemUpdate(TObj *, Pos *, int);
 extern void FUN_8003fd78(TObj *, int, int);
 extern void FUN_800eea7c(TObj *, short, short);
 extern void FUN_80026c50(int, int, int);
 extern void FUN_8001e4f0(int);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_80118684(TObj *o)
 {
@@ -127,7 +127,7 @@ void func_80118684(TObj *o)
             case 1:
                 if (o->h->p.whole < 200) o->animFrame = 0;
                 if (o->h->p.whole >= 241) o->animFrame = 1;
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 q->a.raw += q->velX << 8;
                 q->y.raw += q->velX << 8;
                 FUN_8003fd78(q, 0, 0);
@@ -149,7 +149,7 @@ void func_80118684(TObj *o)
             case 1:
                 if (o->h->p.whole < 200) o->animFrame = 0;
                 if (o->h->p.whole >= 241) o->animFrame = 1;
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 if (D_8009D2B0 == 3) break;
                 if (o->h->p.whole - q->h->p.whole >= 40) break;
                 if (!(D_1F8001FC & D_1F8003C4)) break;
@@ -163,7 +163,7 @@ void func_80118684(TObj *o)
             if (o->a.p.whole > D_800A604A) o->animFrame = 1;
             else o->animFrame = 0;
             FUN_8001fe6c(o);
-            o->d90 = FUN_8002dc50(7, e[1], 0xdc, 0x9c);
+            o->d90 = showMessageBox(7, e[1], 0xdc, 0x9c);
             o->wb6++;
             break;
         case 5:
@@ -171,7 +171,7 @@ void func_80118684(TObj *o)
             if (o->a.p.whole > D_800A604A) o->animFrame = 1;
             else o->animFrame = 0;
             FUN_8001fe6c(o);
-            o->d90 = FUN_8002dc50(7, e[1], 0xdc, 0x9c);
+            o->d90 = showMessageBox(7, e[1], 0xdc, 0x9c);
             o->wb6++;
             break;
         case 6:
@@ -182,11 +182,11 @@ void func_80118684(TObj *o)
             o->wb6++;
             break;
         case 7:
-            FUN_8005a8a8(e[1], 0, 0);
+            setEventStarted(e[1], 0, 0);
             o->wb6++;
             break;
         case 8:
-            FUN_8005a9a4(e[1], 0);
+            setEventComplete(e[1], 0);
             o->wb6++;
             break;
         case 9:
@@ -212,7 +212,7 @@ void func_80118684(TObj *o)
             o->wb6++;
             break;
         case 14:
-            FUN_8001eb64();
+            startAreaBgm();
             o->wb6++;
             break;
         case 15:
@@ -242,7 +242,7 @@ void func_80118684(TObj *o)
                 o->movetab = D_80077CDC;
                 o->step++;
             case 1:
-                FUN_8001fa88(o, 0);
+                applyAnimVelocityX(o, 0);
                 if (o->a.p.whole < 261) break;
                 o->anim = D_8011F868[0];
                 D_8009C93B = 1;
@@ -256,7 +256,7 @@ void func_80118684(TObj *o)
                     s.x = o->h->p.whole;
                     s.y = o->y.p.whole;
                     s.z = o->d->p.whole;
-                    FUN_8003e918(o, &s, 1);
+                    dispatchAreaItemUpdate(o, &s, 1);
                     o->step = 0;
                     o->animFrame = 1;
                     o->wb6++;
@@ -274,7 +274,7 @@ void func_80118684(TObj *o)
                 o->wb8 = 1;
                 o->step++;
             case 1:
-                FUN_8001fa88(o, 1);
+                applyAnimVelocityX(o, 1);
                 if (o->a.p.whole >= 176) break;
                 o->anim = D_8011F874[0];
                 FUN_8001fe6c(o);
@@ -320,7 +320,7 @@ void func_80118684(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

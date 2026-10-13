@@ -27,7 +27,7 @@ extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C8;
 extern unsigned char D_8009C990, D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void func_800EEE90(S *);
 extern void ObjSetAnimFromTable(S *);
 extern void AnimLoadDuration(S *);
@@ -56,7 +56,7 @@ void func_8011B330(S *s)
         D_8009D2E8 = e;
         if (*(unsigned char *)&s->o.wac >= 2) {
             if (e->type == 0x3a) {
-                n = FUN_800182ac();
+                n = allocObjectLayer1();
                 if (n) {
                     n->active = 1;
                     n->type = 1;

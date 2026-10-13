@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 
 extern short D_1F80019E;
-extern short func_8004461C(TObj *a, TObj *b);
-extern int FUN_80042b98(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *a, TObj *b);
+extern int resolveHitResultD(TObj *, TObj *);
 extern int FUN_80042d5c(TObj *, TObj *);
 extern void FUN_800e9f74(int, int, int, int);
 
@@ -12,11 +12,11 @@ void func_8011FF64(TObj *o, TObj *p)
 {
     int r;
 
-    if (func_8004461C(o, p) == -1) return;
+    if (boxesOverlapSigned(o, p) == -1) return;
     p->w7a = o->animFrame & 1;
     if (*(unsigned short *)&p->wb4) {
         if (*(unsigned short *)&p->wb6) {
-            r = FUN_80042b98(o, p);
+            r = resolveHitResultD(o, p);
             if (r) {
                 if (r == 2) p->b68 = 5;
                 else if ((o->type == 0 || o->type == 5) && o->w98 == 1) p->b68 = 1;
@@ -27,7 +27,7 @@ void func_8011FF64(TObj *o, TObj *p)
                 p->state = 0;
             }
         } else {
-            r = FUN_80042b98(o, p);
+            r = resolveHitResultD(o, p);
             if (r) {
                 if (r == 1) {
                     p->active = 3;

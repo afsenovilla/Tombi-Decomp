@@ -6,8 +6,8 @@ extern short D_1F800284;
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short FUN_800411cc(TObj *, short, short);
-extern short FUN_80042fbc(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern short boxesOverlap(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8011CC1C(TObj *o, TObj *e)
 {
@@ -21,9 +21,9 @@ void func_8011CC1C(TObj *o, TObj *e)
         o->step = 0;
         o->state = 0;
         o->animFrame &= 1;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
     } else {
-        if (FUN_80042fbc(o, e) == 0) return;
+        if (boxesOverlap(o, e) == 0) return;
         if (D_1F8001A4 != 0) return;
         {
             int ah, bh;
@@ -34,7 +34,7 @@ void func_8011CC1C(TObj *o, TObj *e)
             o->step = 0;
             o->state = 0;
             o->animFrame = ah < bh;
-            FUN_8004258c(o, 3);
+            decreaseObjectTimer(o, 3);
         }
     }
     D_1F80019E = 0;

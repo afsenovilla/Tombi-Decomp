@@ -7,10 +7,10 @@ extern int DAT_1f8002d4[];
 extern void *D_8012E004[];
 extern int FUN_800202b4(TObj *);
 extern void func_801174C4(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 extern void func_80124C70(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_801248D4(TObj *o)
 {
@@ -69,7 +69,7 @@ void func_801248D4(TObj *o)
             case 2:
                 FUN_800202b4(o);
                 D_800A603B = 1;
-                FUN_8005a9a4(0xbd, 0);
+                setEventComplete(0xbd, 0);
                 o->b04 = 3;
                 break;
             }
@@ -115,7 +115,7 @@ void func_801248D4(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

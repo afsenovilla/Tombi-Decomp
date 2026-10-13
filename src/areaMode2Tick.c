@@ -436,7 +436,7 @@ void areaMode2Tick(void)
     if ((*(short* )(&SCRATCHPAD+0x1C6) == 2) && (MOVIE_PLAY_STATE == MOVIE_STATE_IDLE)) {
         *(short* )0x1F8001C6 = 0;
     }
-    func_8001D6C0();
+    updatePauseMenu();
     if (GAME.inventoryScreen == 0xFF) {
         GAME.inventoryScreen = 0;
         temp_v1 = CURRENT_TASK;
@@ -458,7 +458,7 @@ void areaMode2Tick(void)
         if (*(short* )0x1F8001C6 == 0) {
             func_8003C9D4();
             updateObjectsLayer7();
-            func_8001DFD4();
+            updateMainObjects();
             updateObjectsUnlayered();
             func_80055BA0();
         }

@@ -5,9 +5,9 @@
 extern void FUN_800202b4(TObj *);
 extern int FUN_800203dc(TObj *);
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_80018790(TObj *);
-extern TObj *FUN_800183b8(void);
-extern TObj *FUN_800182ac(void);
+extern void freeObjectLayer2(TObj *);
+extern TObj *allocObjectLayer2(void);
+extern TObj *allocObjectLayer1(void);
 extern void *PTR_DAT_8013b104;
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009d2ae[];
@@ -37,7 +37,7 @@ void FUN_8012e1c0(TObj *o)
             o->b68 = 0;
             o->b0f = 0;
             if ((DAT_8009d2ae[0] >> o->subtype) & 1) {
-                n = FUN_800183b8();
+                n = allocObjectLayer2();
                 if (n != 0) {
                     n->active = 1;
                     n->type = 3;
@@ -87,7 +87,7 @@ void FUN_8012e1c0(TObj *o)
             case 1:
                 break;
             case 2:
-                n = FUN_800182ac();
+                n = allocObjectLayer1();
                 if (n != 0) {
                     n->active = 1;
                     n->type = 2;
@@ -104,7 +104,7 @@ void FUN_8012e1c0(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -2,7 +2,7 @@
 // MATCHING 80127820 1680
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void FUN_80127214(TObj *);
 extern int FUN_801274cc(TObj *);
 extern TObj *FUN_80018448(void);
@@ -36,7 +36,7 @@ void FUN_80127820(TObj *o)
         if (o->movetab == 0) o->movetab = DAT_80077cf4;
         break;
     case 1:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
@@ -51,7 +51,7 @@ void FUN_80127820(TObj *o)
         }
         break;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
@@ -93,7 +93,7 @@ void FUN_80127820(TObj *o)
         }
         break;
     case 4:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
@@ -133,7 +133,7 @@ void FUN_80127820(TObj *o)
         }
         break;
     case 6:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;

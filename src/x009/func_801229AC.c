@@ -10,7 +10,7 @@ extern int D_1F800198;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
 extern void func_80121964(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -49,7 +49,7 @@ void func_801229AC(TObj *o)
         if (o->visible) playSFX(0x95);
         break;
     case 1:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (!(o->b9d & 2) || o->animFrame != (o->b9d & 1)) {
             f = o->animFrame;
             d = 0x10;
@@ -83,7 +83,7 @@ void func_801229AC(TObj *o)
         }
         break;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (!(o->b9d & 2) || o->animFrame != (o->b9d & 1)) {
             f = o->animFrame;
             d = 0x10;

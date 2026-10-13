@@ -1,7 +1,7 @@
 // FUNC 80136a98 296 X000
 // MATCHING 80136a98 296
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern unsigned char DAT_8009cda9;
 extern unsigned DAT_8009c984[];
 
@@ -12,7 +12,7 @@ void FUN_80136a98(TObj *o)
     unsigned f;
     switch (DAT_8009cda9) {
     case 0:
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n != 0) {
             n->active = 1;
             n->type = 0x14;
@@ -29,7 +29,7 @@ void FUN_80136a98(TObj *o)
         o->b04 = 3;
         break;
     default:
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n != 0) {
             n->active = 1;
             n->type = 0x14;

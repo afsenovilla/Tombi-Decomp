@@ -13,7 +13,7 @@ extern int ObjCullRegister(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern short func_8004065C(TObj *, short, short, short);
 extern void FUN_80020aec(int);
-extern void FUN_8001e76c(int, int, int, int);
+extern void playSFXWithPitchSlide(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_800189b8(TObj *);
 
@@ -91,7 +91,7 @@ void func_8012F988(TObj *o)
         case 4:
             if (o->timer) {
                 o->h->p.whole--;
-                if (--o->timer == 0) FUN_8001e76c(0xd, 1, -8, 0xb4);
+                if (--o->timer == 0) playSFXWithPitchSlide(0xd, 1, -8, 0xb4);
             }
             o->d8c += 0x10;
             if (o->d8c >= 0x1000) o->d8c = 0x1000;

@@ -7,7 +7,7 @@ extern short D_1F800176;
 extern void playSFX(int);
 extern void ObjListPush_1F800230(TObj *);
 extern void func_8011752C(TObj *);
-extern void FUN_8001888c(TObj *);
+extern void freeObjectLayer8(TObj *);
 
 void func_80117364(TObj *o)
 {
@@ -62,7 +62,7 @@ void func_80117364(TObj *o)
         o->step++;
         break;
     case 3:
-        FUN_8001888c(o);
+        freeObjectLayer8(o);
         break;
     }
 }

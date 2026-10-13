@@ -26,7 +26,7 @@ extern SVECTOR D_1F800060;
 extern long D_1F800070;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
-extern void FUN_80021f5c(MATRIX *);
+extern void getBaseMatrix(MATRIX *);
 extern void SetRotMatrix(MATRIX *);
 extern void ApplyRotMatrix(SVECTOR *, long *);
 extern void SetTransMatrix(MATRIX *);
@@ -70,7 +70,7 @@ void func_80054C38(TObj *o)
     Face *f;
     char *v0, *v1, *v2, *v3;
 
-    FUN_80021f5c(&D_1F800000);
+    getBaseMatrix(&D_1F800000);
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
     D_1F800060.vz = o->b.p.whole;

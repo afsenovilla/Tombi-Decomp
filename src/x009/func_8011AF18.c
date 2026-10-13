@@ -3,12 +3,12 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0; signed char b1, b2, b3; } T4;
 extern T4 D_8012B218[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 TObj *func_8011AF18(TObj *o, int k)
 {
     unsigned char s;
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
     if (n == 0)
         return 0;
     n->active = 1;

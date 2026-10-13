@@ -17,9 +17,9 @@ extern unsigned char D_800A60A1;
 extern unsigned short D_800A604E;
 extern unsigned char D_800A60D6, D_800A60E2, D_800A60DA, D_800A60F8;
 extern TObj *D_800A60C8;
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_8013AAB8(O *o)
 {
@@ -71,11 +71,11 @@ void func_8013AAB8(O *o)
     case 2:
         switch (D_8009CEDF[0]) {
         case 0xfe:
-            D_800A60C8 = FUN_8002dc50(2, 0x1c, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x1c, 0x80, 0x6c);
             o->step++;
             break;
         case 0xff:
-            D_800A60C8 = FUN_8002dc50(2, 0x1a, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x1a, 0x80, 0x6c);
             o->step++;
             break;
         }
@@ -86,14 +86,14 @@ void func_8013AAB8(O *o)
             t = D_800A60C8;
             if (t->b04 != 2) break;
             t->b04 = 3;
-            D_800A60C8 = FUN_8002dc50(2, 0x1d, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x1d, 0x80, 0x6c);
             o->step++;
             break;
         case 0xff:
             t = D_800A60C8;
             if (t->b04 != 2) break;
             t->b04 = 3;
-            D_800A60C8 = FUN_8002dc50(2, 0x1b, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x1b, 0x80, 0x6c);
             o->step++;
             break;
         }
@@ -115,7 +115,7 @@ void func_8013AAB8(O *o)
             p->step = 3;
             p->state = 0;
             FUN_80026c50(0x66, 1, 1);
-            FUN_8005a9a4(0xb5, 0);
+            setEventComplete(0xb5, 0);
             o->w08 = 0xb4;
             o->step = 5;
             break;

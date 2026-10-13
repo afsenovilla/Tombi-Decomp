@@ -9,12 +9,12 @@ extern unsigned char D_8009CFCB[];
 extern unsigned char D_8009CE3B, D_8009D13E, D_8009CFCA;
 extern short D_1F8001C6;
 extern AT3 D_801314C8[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_8012FBF4(TObj *o)
 {
@@ -37,10 +37,10 @@ void func_8012FBF4(TObj *o)
         o->anim = D_801314C8[o->subtype].p[1];
         AnimLoadDuration(o);
         if (D_8009CE3B == 1) {
-            o->d90 = (int)FUN_8002dcc8(2, 0xe, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
             o->state = 10;
         } else {
-            o->d90 = (int)FUN_8002dcc8(2, 0xe, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
             o->state = 1;
         }
         break;
@@ -103,13 +103,13 @@ void func_8012FBF4(TObj *o)
             o->anim = D_801314C8[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
-            o->d90 = (int)FUN_8002dcc8(2, 0x10, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0x10, &v);
             o->state = 11;
         } else {
             o->anim = D_801314C8[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
-            o->d90 = (int)FUN_8002dcc8(2, 0xf, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0xf, &v);
             o->state = 12;
         }
         break;
@@ -131,7 +131,7 @@ void func_8012FBF4(TObj *o)
         break;
     case 14:
         o->timer = 200;
-        FUN_8005a9a4(0x97, 0);
+        setEventComplete(0x97, 0);
         o->state++;
         break;
     case 15:

@@ -4,7 +4,7 @@
 extern void FUN_800eee90(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8002cd20(TObj *, int, int);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
@@ -58,7 +58,7 @@ void func_8010A9F4(TObj *o)
         if (DAT_8009c960[0] == 0x30000) FUN_8002cd20(o, 0, 0);
         o->state++;
         if (DAT_8009cff9 != 0) {
-            p = FUN_800183b8();
+            p = allocObjectLayer2();
             if (p != 0) {
                 p->active = 2;
                 p->type = 0x54;

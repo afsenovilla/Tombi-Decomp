@@ -27,7 +27,7 @@ extern short D_8009C946[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
-extern void FUN_8001f2ec(int);
+extern void playJingle(int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_80025f40(int, int, int, int);
@@ -84,7 +84,7 @@ void FUN_800fdb7c(TObj *o)
                 D_8009C942 = 1;
                 D_8009C938 = 1;
                 FUN_8001f110(0);
-                FUN_8001f2ec(3);
+                playJingle(3);
             }
         }
         D_8009C330->b8 = D_8009C938;

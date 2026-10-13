@@ -5,12 +5,12 @@ typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
 extern E D_8013145C[];
 extern unsigned short *D_800A6078;
 extern unsigned short D_800A604E[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012EB78(short i, short flag)
 {
     E *p = &D_8013145C[i];
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
     if (n == 0) return;
     n->active = 4;
     n->type = 0x32;

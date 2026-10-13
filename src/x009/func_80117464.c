@@ -2,7 +2,7 @@
 // MATCHING 80117464 96
 #include "TOBJ.H"
 typedef struct { short vx, vy, vz, pad; } SV;
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 extern void RotMatrix(SV *, void *);
 
 void func_80117464(TObj *o)
@@ -10,7 +10,7 @@ void func_80117464(TObj *o)
     SV r;
     void *m = &o->w48;
 
-    FUN_80021f5c(m);
+    getBaseMatrix(m);
     r.vx = o->d84;
     r.vy = o->d88;
     r.vz = o->d8c;

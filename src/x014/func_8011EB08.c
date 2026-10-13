@@ -7,7 +7,7 @@
 extern TObj D_800A6038;
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8004258c(void *, int);
+extern void decreaseObjectTimer(void *, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
@@ -64,7 +64,7 @@ void func_8011EB08(TObj *o)
         D_800A6038.b04 = 2;
         D_800A6038.step = 0;
         D_800A6038.state = 0;
-        FUN_8004258c(q, 1);
+        decreaseObjectTimer(q, 1);
         break;
     case 2:
     case 7:

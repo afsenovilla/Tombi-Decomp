@@ -4,9 +4,9 @@
 /* `goto after` lands after the spawn call: the label ends CSE's view, so `one` stays in s2 there (no nor fold);
    the duplicated calls cross-jump into one jal. */
 #include "TOBJ.H"
-extern short func_8004461C(TObj *, TObj *);
-extern short FUN_80042b98(TObj *, TObj *);
-extern void FUN_8002b920(TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
+extern short resolveHitResultD(TObj *, TObj *);
+extern void cloneItemPickupObject(TObj *);
 extern void FUN_800e9f74(int, int, int, int);
 extern short D_1F80019E;
 
@@ -16,9 +16,9 @@ void func_8011F844(TObj *a, TObj *o)
     int one;
     unsigned short t;
 
-    if (func_8004461C(a, o) == -1) return;
+    if (boxesOverlapSigned(a, o) == -1) return;
     one = 1;
-    r = FUN_80042b98(a, o);
+    r = resolveHitResultD(a, o);
     if (r != 0) {
         if (r == one) {
             if (a->type == 6 && (o->w98 -= 2) <= 0) {
@@ -29,7 +29,7 @@ void func_8011F844(TObj *a, TObj *o)
             o->active = 3;
             o->animFrame = one - (a->animFrame & 1);
             if (o->b04 != 2)
-                FUN_8002b920(o);
+                cloneItemPickupObject(o);
             o->b04 = 2;
             o->step = 0;
             o->state = 0;

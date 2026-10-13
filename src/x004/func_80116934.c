@@ -18,7 +18,7 @@ extern unsigned char D_8009CDA2;
 extern unsigned short D_8009C962[], D_8009C982[];
 extern short D_1F8001C8;
 extern void func_80029CB4(O *);
-extern unsigned int FUN_80028420(O *);
+extern unsigned int stepScrollReturnY(O *);
 extern unsigned int FUN_80028a80(O *);
 extern int func_80116764(O *);
 extern void FUN_80020828(void);
@@ -31,7 +31,7 @@ void func_80116934(O *o)
     }
     switch (o->state) {
     case 0:
-        if (FUN_80028420(o) & FUN_80028a80(o)) {
+        if (stepScrollReturnY(o) & FUN_80028a80(o)) {
             o->substep = 0;
             o->state++;
         }

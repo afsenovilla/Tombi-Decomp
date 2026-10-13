@@ -5,7 +5,7 @@
 typedef struct { unsigned short f, s, c, x, y, z; } T;
 extern unsigned char D_8009D2C3, D_8009CF2D, D_8009CF29[];
 extern T D_8013144C;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012EA30(TObj *o)
@@ -19,7 +19,7 @@ void func_8012EA30(TObj *o)
             break;
         }
         if (!D_8009CF2D) {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n) {
                 n->active = 3;
                 n->type = 0x32;

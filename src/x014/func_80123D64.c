@@ -11,8 +11,8 @@ extern short D_800A4580[]; /* debt: second name for D_800A4582 keeps the game's 
 extern void FUN_800202b4(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int FUN_8001f9e0(void);
-extern int FUN_800205d8(short, short);
-extern TObj *FUN_800183b8(void);
+extern int angleFromDelta(short, short);
+extern TObj *allocObjectLayer2(void);
 extern short FUN_80041240(TObj *, int, int);
 extern short FUN_80041ebc(TObj *, int, int);
 
@@ -59,10 +59,10 @@ void func_80123D64(TObj *o)
         o->h->p.whole = D_1F800176 + D_801266E0[FUN_8001f9e0() & 7];
         o->y.p.whole = D_1F80017A[0] - 0xf0;
         o->d->p.whole = D_1F800172[0];
-        o->d38 = FUN_800205d8(D_1F80016A[0] - o->h->p.whole, D_1F80016E[0] - o->y.p.whole);
+        o->d38 = angleFromDelta(D_1F80016A[0] - o->h->p.whole, D_1F80016E[0] - o->y.p.whole);
         o->d8c = (unsigned char)(o->d38 + 0x40);
         o->d38 = *(unsigned char *)&o->d38;
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             unsigned char f;
             n->active = 2;

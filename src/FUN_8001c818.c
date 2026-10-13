@@ -7,10 +7,10 @@ extern unsigned short DAT_1f8001fc;
 extern void FUN_800261b0(void);
 extern void MusicStopOrFadeIn(int);
 extern void SoundStopAll(void);
-extern void FUN_8004fa80(int, int);
+extern void queueSystemLoadList(int, int);
 extern void SetDispMask(int);
 extern void FUN_800e897c(void);
-extern void FUN_80017328(void *);
+extern void setTask(void *);
 extern char LAB_8004dd8c[];
 
 void FUN_8001c818(void)
@@ -29,7 +29,7 @@ void FUN_8001c818(void)
         u->c = u->c + 1;
         SoundStopAll();
         DAT_1f8001ce = 0;
-        FUN_8004fa80(0x5d, 1);
+        queueSystemLoadList(0x5d, 1);
         break;
     case 1:
         if (DAT_1f8001ce != 0) {
@@ -54,7 +54,7 @@ void FUN_8001c818(void)
         t->c = 0;
         t->d = 0;
         DAT_1f8001d0 = 0;
-        FUN_80017328(LAB_8004dd8c);
+        setTask(LAB_8004dd8c);
         break;
     }
 }

@@ -9,7 +9,7 @@ int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 short GetClut(int, int);
 void FUN_80134190(TObj *o);
-void FUN_80018790(TObj *o);
+void freeObjectLayer2(TObj *o);
 void func_80134404(TObj *o)
 {
     int t;
@@ -81,7 +81,7 @@ void func_80134404(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

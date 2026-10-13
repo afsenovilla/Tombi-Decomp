@@ -10,7 +10,7 @@ extern void *D_8013FA90[];
 extern void *D_8013FAB8[], *D_8013FABC[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void func_80138E7C(TObj *);
 extern void func_80139174(TObj *);
 
@@ -58,7 +58,7 @@ void func_8013946C(TObj *o)
         }
         break;
     case 3:
-        FUN_8005a9a4(0x1b, 0);
+        setEventComplete(0x1b, 0);
         o->timer = 0xb4;
         o->step++;
         break;

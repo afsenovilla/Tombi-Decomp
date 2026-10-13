@@ -6,7 +6,7 @@ extern P D_80130CCC[];
 extern short D_1F80016A[];
 extern int ObjCullRegister(TObj *);
 extern unsigned char FUN_8001e4f0(int);
-extern void FUN_8001eaa4(int);
+extern void queueSfxKeyOff(int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_80018838(TObj *);
 
@@ -79,7 +79,7 @@ void func_8011C1B8(TObj *o)
                 { short *s = &D_80130CCC[0].y; o->y.raw = s[o->animFrame * 2] << 16; }
                 o->state++;
                 o->b6a = 1;
-                FUN_8001eaa4(o->ba7);
+                queueSfxKeyOff(o->ba7);
                 FUN_8001e4f0(0x84);
                 FUN_8001fce4(o);
                 break;
@@ -103,7 +103,7 @@ void func_8011C1B8(TObj *o)
                 { short *s = &q->y; o->y.p.whole = s[o->animFrame * 2]; }
                 o->state++;
                 o->b6a = 1;
-                FUN_8001eaa4(o->ba7);
+                queueSfxKeyOff(o->ba7);
                 FUN_8001e4f0(0x84);
                 FUN_8001fce4(o);
                 break;

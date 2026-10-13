@@ -24,7 +24,7 @@ extern unsigned char D_8009CEAB;
 extern unsigned char D_8009C942, D_8009C93F, D_8009C93E;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern int MulCos(int, int);
 extern int MulNegSinScaled(int, int);
 extern void func_8004D620(int, int);
@@ -135,7 +135,7 @@ void func_80136B4C(TObj *o)
             o->state++;
             break;
         case 1:
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             AnimAdvance(o);
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
@@ -144,7 +144,7 @@ void func_80136B4C(TObj *o)
             }
             break;
         case 2:
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             AnimAdvance(o);
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
@@ -155,7 +155,7 @@ void func_80136B4C(TObj *o)
             }
             break;
         case 3:
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             AnimAdvance(o);
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
@@ -178,7 +178,7 @@ void func_80136B4C(TObj *o)
             o->state++;
             break;
         case 6:
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             AnimAdvance(o);
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
@@ -187,7 +187,7 @@ void func_80136B4C(TObj *o)
             }
             break;
         case 7:
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             AnimAdvance(o);
             o->y.raw += o->velY << 8;
             o->velY += 0x20;

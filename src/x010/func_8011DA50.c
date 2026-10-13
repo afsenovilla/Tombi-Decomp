@@ -12,9 +12,9 @@ extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int rcos(int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void func_8004D620(int, int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_8011DA50(TObj *o)
 {
@@ -51,7 +51,7 @@ void func_8011DA50(TObj *o)
         o->w22 += 0x10;
         break;
     case 2:
-        FUN_8005a9a4(0x77, 0);
+        setEventComplete(0x77, 0);
         func_8004D620(0x32, 2);
         D_8009CD9A = 9;
         D_8009CD9E = 0x3c;
@@ -61,7 +61,7 @@ void func_8011DA50(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

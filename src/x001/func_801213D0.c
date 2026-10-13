@@ -16,7 +16,7 @@ extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
 extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_80104dc8(TObj *);
 extern void func_80104EA0(TObj *);
@@ -75,7 +75,7 @@ void func_801213D0(TObj *o)
         }
         if (AnimAdvance(o)) {
             SfxPlay2(0x22, 0x23);
-            n = FUN_800182ac();
+            n = allocObjectLayer1();
             if (n) {
                 n->active = 1;
                 n->type = 1;

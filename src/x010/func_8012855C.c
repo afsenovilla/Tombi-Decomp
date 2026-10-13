@@ -5,7 +5,7 @@ extern unsigned short D_8009C962;
 extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
-extern void FUN_80018790(char *);
+extern void freeObjectLayer2(char *);
 extern void func_8012736C(char *);
 extern void func_80127B78(char *);
 extern void func_80127E08(char *);
@@ -69,7 +69,7 @@ void func_8012855C(char *o)
         break;
     case 2:
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -11,13 +11,13 @@ extern Fix16 *D_800A6078;
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern short D_800A60EA[];
 extern unsigned char D_8009CE54[], D_8009CE53[], D_8009D2B1[];
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern void FUN_800eea7c(TObj *, short, short);
 extern void func_80128AF8(TObj *, int, int);
 extern void playSFX(int);
 extern void SfxPlay2(int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 void func_80129EF8(TObj *o)
 {
@@ -60,7 +60,7 @@ void func_80129EF8(TObj *o)
         break;
     case 2:
         v = *(V *)&p->a;
-        p->d90 = (int)FUN_8002dcc8(2, 0, &v);
+        p->d90 = (int)showMessageBoxDirect(2, 0, &v);
         func_80128AF8(p, 0x20, 0);
         FUN_800eea7c(&D_800A6038, 0, 0);
         o->state++;
@@ -74,7 +74,7 @@ void func_80129EF8(TObj *o)
         o->w08 = 1;
         if (D_8009CE53[0] == 0) {
             o->w08 = 0xfa;
-            FUN_8005a8a8(0xaf, 0, 0);
+            setEventStarted(0xaf, 0, 0);
         }
         o->state = 0x14;
         if (D_8009D2B1[0] == 1) {
@@ -91,7 +91,7 @@ void func_80129EF8(TObj *o)
             break;
         FUN_800eea7c(&D_800A6038, 0, 0);
         v = *(V *)&p->a;
-        p->d90 = (int)FUN_8002dcc8(2, 1, &v);
+        p->d90 = (int)showMessageBoxDirect(2, 1, &v);
         func_80128AF8(p, 0x20, 0);
         o->state++;
         break;
@@ -101,7 +101,7 @@ void func_80129EF8(TObj *o)
         if (q->b04 != 2)
             break;
         q->b04 = 3;
-        FUN_8005a9a4(0xaf, 0);
+        setEventComplete(0xaf, 0);
         o->w08 = 0x12c;
         o->state = 0x14;
         func_80128AF8(p, 0x14, 0);
@@ -109,7 +109,7 @@ void func_80129EF8(TObj *o)
     }
     case 6:
         v = *(V *)&p->a;
-        p->d90 = (int)FUN_8002dcc8(2, 2, &v);
+        p->d90 = (int)showMessageBoxDirect(2, 2, &v);
         func_80128AF8(p, 0x20, 0);
         o->state++;
         break;
@@ -122,7 +122,7 @@ void func_80129EF8(TObj *o)
         o->w08 = 1;
         if (D_8009CE54[0] == 0) {
             o->w08 = 0xfa;
-            FUN_8005a8a8(0xb0, 0, 0);
+            setEventStarted(0xb0, 0, 0);
         }
         o->state = 0x14;
         if (D_8009D2B1[0] == 2) {
@@ -139,7 +139,7 @@ void func_80129EF8(TObj *o)
             break;
         FUN_800eea7c(&D_800A6038, 0, 0);
         v = *(V *)&p->a;
-        p->d90 = (int)FUN_8002dcc8(2, 3, &v);
+        p->d90 = (int)showMessageBoxDirect(2, 3, &v);
         o->state++;
         func_80128AF8(p, 0x20, 0);
         break;
@@ -149,7 +149,7 @@ void func_80129EF8(TObj *o)
         if (q->b04 != 2)
             break;
         q->b04 = 3;
-        FUN_8005a9a4(0xb0, 0);
+        setEventComplete(0xb0, 0);
         o->w08 = 0x78;
         o->state++;
         func_80128AF8(p, 0x14, 0);
@@ -168,7 +168,7 @@ void func_80129EF8(TObj *o)
         if (--o->w08 > 0)
             break;
         v = *(V *)&p->a;
-        p->d90 = (int)FUN_8002dcc8(2, 4, &v);
+        p->d90 = (int)showMessageBoxDirect(2, 4, &v);
         p->animFrame = 0;
         p->step = 0;
         p->state = 0;

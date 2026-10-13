@@ -11,7 +11,7 @@ extern unsigned char D_8009C942[], D_8009C93F[], D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A60EA[];
 extern short D_1F8001C6;
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern void FUN_8001fe94(TObj *, int);
 extern void AnimAdvance(TObj *);
 
@@ -44,7 +44,7 @@ void func_80118C84(TObj *o)
         o->animFrame = o->b68 & 1;
         setanim(o, 4);
         v = *(V *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(3, 0xa, &v);
+        o->d90 = (int)showMessageBoxDirect(3, 0xa, &v);
         o->state++;
         break;
     case 1:

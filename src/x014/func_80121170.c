@@ -3,11 +3,11 @@
 #include "TOBJ.H"
 extern unsigned short D_1F800176;
 extern unsigned short D_1F80017A[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 int func_80121170(TObj *o)
 {
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
     if (n) {
         n->active = 1;
         n->type = 0x46;

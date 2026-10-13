@@ -9,8 +9,8 @@ extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
 extern unsigned char D_800A6038;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void func_801289C8(TObj *, int, int);
 
@@ -31,7 +31,7 @@ void func_80132D80(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        FUN_8005a8a8(0xac, 0, 0);
+        setEventStarted(0xac, 0, 0);
         o->w08 = 300;
         o->state = 1;
         break;
@@ -51,14 +51,14 @@ void func_80132D80(TObj *o)
         o->state++;
         if (D_8009CFFC == 0) break;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(7, 2, &v);
+        p->d90 = showMessageBoxDirect(7, 2, &v);
         func_801289C8(p, 3, 0);
         o->state = 17;
         break;
     case 11:
         p->animFrame = 1;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(7, 0, &v);
+        p->d90 = showMessageBoxDirect(7, 0, &v);
         func_801289C8(p, 3, 0);
         o->state++;
         break;
@@ -67,7 +67,7 @@ void func_80132D80(TObj *o)
         if (q->b04 != 2) break;
         q->b04 = 3;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(7, 1, &v);
+        p->d90 = showMessageBoxDirect(7, 1, &v);
         func_801289C8(p, 3, 0);
         o->state++;
         break;
@@ -77,7 +77,7 @@ void func_80132D80(TObj *o)
         q->b04 = 3;
         p->animFrame = 0;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(7, 2, &v);
+        p->d90 = showMessageBoxDirect(7, 2, &v);
         func_801289C8(p, 3, 0);
         o->state++;
         break;
@@ -95,7 +95,7 @@ void func_80132D80(TObj *o)
         if (--o->w08 > 0) break;
         p->animFrame = 1;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(7, 3, &v);
+        p->d90 = showMessageBoxDirect(7, 3, &v);
         func_801289C8(p, 3, 0);
         o->state++;
         break;

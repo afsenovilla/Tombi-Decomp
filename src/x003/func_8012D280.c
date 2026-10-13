@@ -11,8 +11,8 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 extern int FUN_800202b4(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_80018790(TObj *);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void freeObjectLayer2(TObj *);
 extern void func_8012C97C(TObj *);
 extern void func_8012CDC0(TObj *);
 extern void func_8012CFE0(TObj *);
@@ -71,7 +71,7 @@ void func_8012D280(TObj *o)
                 do {} while (0); /* empty loop: keeps sp+16 out of an s-reg; no scheduling barrier on the D_8009CF03 store */
                 o->anim = D_801399BC; AnimLoadDuration(o);
                 D_8009CF03 = 2;
-                o->d90 = FUN_8002dcc8(6, 4, &v);
+                o->d90 = showMessageBoxDirect(6, 4, &v);
                 break;
             case 1:
                 AnimAdvance(o);
@@ -99,7 +99,7 @@ void func_8012D280(TObj *o)
         break;
     case 2:
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

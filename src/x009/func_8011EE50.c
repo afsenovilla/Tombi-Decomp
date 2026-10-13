@@ -10,7 +10,7 @@ extern unsigned char D_8009CFE5[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void FUN_80018744(TObj *);
+extern void freeObjectLayer1(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800e9f74(int, int, int, int);
 extern short FUN_800411cc(TObj *, short, short);
@@ -99,7 +99,7 @@ void func_8011EE50(TObj *o)
         }
         break;
     case 3:
-        FUN_80018744(o);
+        freeObjectLayer1(o);
         break;
     }
 }

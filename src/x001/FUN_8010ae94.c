@@ -6,7 +6,7 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_800eee90(TObj *);
 extern void FUN_800eec40(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void FUN_8010ae94(TObj *o)
 {
@@ -43,7 +43,7 @@ void FUN_8010ae94(TObj *o)
             o->velY = -0x570;
         PlayerSetAnimIfChanged(o, 4);
         if (o->y.p.whole < -0x20c) {
-            FUN_8005a9a4(0xa4, 0);
+            setEventComplete(0xa4, 0);
             o->b04 = 5;
             *(short *)((char *)o + 0xf6) = 0;
             o->step = 2;

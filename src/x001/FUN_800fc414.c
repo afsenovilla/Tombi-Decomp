@@ -28,7 +28,7 @@ extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fd94(TObj *);
 extern void ObjGravityStep(TObj *);
 extern short FUN_800fc240(TObj *);
@@ -133,7 +133,7 @@ void FUN_800fc414(TObj *o)
         if (o->timer != 0)
             o->timer--;
         FUN_8001fec0(o);
-        FUN_8001fa88(o, (o->animFrame & 1) ^ 1);
+        applyAnimVelocityX(o, (o->animFrame & 1) ^ 1);
         {
             int d0 = o->d8c;
             if (o->animFrame & 1)

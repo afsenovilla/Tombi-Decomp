@@ -14,9 +14,9 @@ extern int DAT_8009c984;
 extern int DAT_8009c984a[];
 extern char DAT_80010748[];
 extern void AnimLoadDuration(TObj *);
-extern TObj *FUN_8002dc50(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern TObj *showMessageBox(int, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 #define W1C(o) (*(short *)&(o)->category)
 
@@ -45,7 +45,7 @@ void FUN_80136ce0(TObj *o)
         DAT_8009cebeA[0] = 0;
         if (DAT_8009c984 & 0x80)
             { if (DAT_8009c984 & 8) { if (DAT_8009c984 & 0x10) DAT_8009cebeA[0] = 6; else DAT_8009cebeA[0] = 4; } else DAT_8009cebeA[0] = 5; }
-        DAT_800a60c8 = FUN_8002dc50(6, DAT_8009cebeR, 0xe0, 0x6c);
+        DAT_800a60c8 = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
         DAT_8009c984 |= 0x80;
         o->step++;
         break;
@@ -64,7 +64,7 @@ void FUN_80136ce0(TObj *o)
         case 1:
             DAT_800a60c8->b04 = 3;
             DAT_8009cebe = 2;
-            FUN_8005a8a8(5, 0, 0);
+            setEventStarted(5, 0, 0);
             W1C(o) = 1;
             o->w08 = 0x168;
             o->step = 4;
@@ -73,7 +73,7 @@ void FUN_80136ce0(TObj *o)
             DAT_800a60c8->b04 = 3;
             if (DAT_8009c984 & 0x18) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = FUN_8002dc50(6, 3, 0xe0, 0x6c);
+                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -85,7 +85,7 @@ void FUN_80136ce0(TObj *o)
         case 3:
             DAT_800a60c8->b04 = 3;
             { if (DAT_8009c984 & 8) { if (DAT_8009c984 & 0x10) DAT_8009cebe = 7; else DAT_8009cebe = 4; } else DAT_8009cebe = 5; }
-            DAT_800a60c8 = FUN_8002dc50(6, DAT_8009cebeR, 0xe0, 0x6c);
+            DAT_800a60c8 = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
@@ -93,7 +93,7 @@ void FUN_80136ce0(TObj *o)
             DAT_800a60c8->b04 = 3;
             if (DAT_8009c984 & 0x10) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = FUN_8002dc50(6, 3, 0xe0, 0x6c);
+                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -114,7 +114,7 @@ void FUN_80136ce0(TObj *o)
             DAT_800a60c8->b04 = 3;
             if (DAT_8009c984 & 8) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = FUN_8002dc50(6, 3, 0xe0, 0x6c);
+                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -134,13 +134,13 @@ void FUN_80136ce0(TObj *o)
         case 6:
             DAT_800a60c8->b04 = 3;
             DAT_8009cebe = 7;
-            DAT_800a60c8 = FUN_8002dc50(6, 7, 0xe0, 0x6c);
+            DAT_800a60c8 = showMessageBox(6, 7, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
         case 7:
             DAT_800a60c8->b04 = 3;
-            FUN_8005a9a4(5, 0);
+            setEventComplete(5, 0);
             DAT_8009cebe = 8;
             o->w08 = 0x168;
             o->step = 5;
@@ -149,7 +149,7 @@ void FUN_80136ce0(TObj *o)
         case 8:
             DAT_800a60c8->b04 = 3;
             DAT_8009cebe = 9;
-            DAT_800a60c8 = FUN_8002dc50(6, 9, 0xe0, 0x6c);
+            DAT_800a60c8 = showMessageBox(6, 9, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
@@ -196,14 +196,14 @@ void FUN_80136ce0(TObj *o)
     case 4:
         if (--o->w08 != 0)
             break;
-        DAT_800a60c8 = FUN_8002dc50(6, DAT_8009cebe, 0xe0, 0x6c);
+        DAT_800a60c8 = showMessageBox(6, DAT_8009cebe, 0xe0, 0x6c);
         o->step = 2;
         W1C(o) = 1;
         break;
     case 5:
         if (--o->w08 != 0)
             break;
-        FUN_8005a8a8(7, 0, 0);
+        setEventStarted(7, 0, 0);
         o->w08 = 300;
         o->step = 4;
         W1C(o) = 1;

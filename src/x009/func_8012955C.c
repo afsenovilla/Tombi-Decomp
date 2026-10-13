@@ -10,8 +10,8 @@ extern void *D_8012E078, *D_8012E07C;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern TObj *FUN_8002dc50(int, int, int, int);
-extern void FUN_80018790(TObj *);
+extern TObj *showMessageBox(int, int, int, int);
+extern void freeObjectLayer2(TObj *);
 
 void func_8012955C(TObj *o)
 {
@@ -58,7 +58,7 @@ void func_8012955C(TObj *o)
                 D_8009C93F = 1;
                 o->anim = D_8012E07C;
                 AnimLoadDuration(o);
-                o->d90 = (int)FUN_8002dc50(3, 1, 0x64, 0x9c);
+                o->d90 = (int)showMessageBox(3, 1, 0x64, 0x9c);
                 o->step++;
             }
             break;
@@ -112,7 +112,7 @@ void func_8012955C(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

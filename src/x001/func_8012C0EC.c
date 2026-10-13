@@ -18,7 +18,7 @@ extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern void FUN_800eae0c(short, int, int, int);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001e4f0(int);
 extern void func_8012BB18(TObj *o);
 
@@ -122,7 +122,7 @@ void func_8012C0EC(TObj *o)
         CHK
         break;
     case 3:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (land2(o)) {
             if (--o->timer == -1) {
                 if (o->visible) {

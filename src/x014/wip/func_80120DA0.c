@@ -11,7 +11,7 @@
 typedef struct { unsigned short x, y; } V2;
 extern V2 D_801265B0[];
 extern short D_1F800284;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern short func_80041240(TObj *, short, short);
 extern short func_80041EBC(TObj *, short, short);
 extern void FUN_8001f96c(int, short, short, short);
@@ -24,7 +24,7 @@ static __inline__ void debris(TObj *o, int m, short af, short ex)
     V2 *t = D_801265B0;
 
     for (i = 0; i < 3; i++) {
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             n->active = 2;
             n->type = 0x46;

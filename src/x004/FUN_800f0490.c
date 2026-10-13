@@ -30,7 +30,7 @@ typedef struct { unsigned char c, f, a, b; } E;
 typedef struct { unsigned short a, b; } T2;
 
 extern int FUN_8005efe4(void);
-extern void FUN_80037e18(int);
+extern void loadCompressedTIM(int);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8002c654(void);
 extern void FUN_8002cd20(TObj *, int, int);
@@ -90,7 +90,7 @@ void FUN_800f0490(TObj *o)
         case 7: a = 0; break;
         default: a = 0; break;
         }
-        FUN_80037e18(a);
+        loadCompressedTIM(a);
         {
             PL *q = DAT_8009c330;
             *(unsigned char *)q = 0;

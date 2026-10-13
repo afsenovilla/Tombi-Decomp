@@ -5,7 +5,7 @@ extern TObj D_800A6038;
 extern TObj *D_800A60C8;
 extern unsigned char D_8009C93A, D_8009C93F, D_8009C93E, D_8009C942, D_8009CEDE;
 extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_800eeae4(TObj *, int, int);
 extern void FUN_8003fd78(TObj *, int, int);
 
@@ -30,7 +30,7 @@ void func_8013A8CC(TObj *o)
         FUN_8003fd78(&D_800A6038, 0, 0);
         if (D_800A6038.h->p.whole >= 0x279) {
             e->animFrame = 0;
-            D_800A60C8 = FUN_8002dc50(2, 0x19, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
             FUN_800eeae4(&D_800A6038, 0, 0);
             o->step++;
         }

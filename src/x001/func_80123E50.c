@@ -2,13 +2,13 @@
 // MATCHING 80123e50 212
 #include "TOBJ.H"
 
-extern TObj *FUN_80018568(void);
+extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b084[];
 extern unsigned char *DAT_8007b14c[];
 
 void func_80123E50(Fix16 *pos, unsigned char c, short vx)
 {
-    TObj *o = FUN_80018568();
+    TObj *o = allocObjectLayer5();
 
     if (o == 0) return;
     o->active = 1;

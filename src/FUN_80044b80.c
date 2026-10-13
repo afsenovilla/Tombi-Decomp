@@ -5,7 +5,7 @@
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern unsigned short DAT_1f80019e;
-extern void FUN_80042b98(TObj *, TObj *);
+extern void resolveHitResultD(TObj *, TObj *);
 extern TObj *FUN_80018448(void);
 
 static __inline__ short hit(TObj *a, TObj *b)
@@ -43,7 +43,7 @@ void FUN_80044b80(TObj *a, TObj *b)
     short t;
 
     if (hit(a, b) >= 0) {
-        FUN_80042b98(a, b);
+        resolveHitResultD(a, b);
         t = a->type;
         if ((unsigned char)t == 10)
             return;

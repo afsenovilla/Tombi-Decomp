@@ -8,7 +8,7 @@ extern void FUN_80121b28(TObj *);
 extern void FUN_80121e50(TObj *);
 extern void FUN_80121fe0(TObj *);
 extern void FUN_80018838(TObj *);
-extern void FUN_8003ecb0(void *, Fix16 *, int, int, TObj *);
+extern void spawnItemFromEntry(void *, Fix16 *, int, int, TObj *);
 
 void FUN_80122118(TObj *o)
 {
@@ -55,7 +55,7 @@ void FUN_80122118(TObj *o)
                 v[0].p.whole = o->h->p.whole;
                 v[1].p.whole = o->y.p.whole - 0x20;
                 v[2].p.whole = o->d->p.whole;
-                FUN_8003ecb0(DAT_80138f04, v, 0, -0x400, o);
+                spawnItemFromEntry(DAT_80138f04, v, 0, -0x400, o);
                 U8(PTR(o, 0xb4), 4) = 2;
                 U8(PTR(o, 0xb8), 4) = 2;
                 U8(PTR(o, 0xbc), 4) = 2;

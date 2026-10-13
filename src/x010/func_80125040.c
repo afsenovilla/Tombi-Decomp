@@ -10,7 +10,7 @@ extern void **D_8012F3A8[];
 extern int D_1F8002DC[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int func_800203DC(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -36,7 +36,7 @@ void func_80125040(TObj *o)
     switch (o->b04) {
     case 0:
         if (D_8009D2C3 & 0x40) {
-            FUN_80018790(o);
+            freeObjectLayer2(o);
             break;
         }
         o->b0c = o->subtype;

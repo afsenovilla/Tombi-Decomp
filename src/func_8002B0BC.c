@@ -18,8 +18,8 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A603F;
 extern unsigned short acquireSpriteSlot(int);
 extern void func_8002B3C8(S *);
 extern void ObjListPush_1F800230(S *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8001888c(S *);
+extern void setEventStarted(int, int, int);
+extern void freeObjectLayer8(S *);
 void func_8002B0BC(S *o)
 {
     int x, y, x2, y2, c0, c1, c2, c3;
@@ -66,7 +66,7 @@ void func_8002B0BC(S *o)
         if (D_8009D2B0 != 3) {
             if (o->wce & 0x7fff) {
                 if (o->wd2)
-                    FUN_8005a8a8(o->wd2, 0, 3);
+                    setEventStarted(o->wd2, 0, 3);
                 m = o->wce & 0x7fff;
                 if (m == 2)
                     break;
@@ -89,7 +89,7 @@ void func_8002B0BC(S *o)
         o->b04++;
         break;
     case 3:
-        FUN_8001888c(o);
+        freeObjectLayer8(o);
         break;
     }
 }

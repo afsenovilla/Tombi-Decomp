@@ -32,7 +32,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8010f400(TObj *);
 extern void FUN_800efa80(TObj *);
-extern void FUN_8001fc14(TObj *, int, int);
+extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8001e4f0(int);
 extern int FUN_8005bdec(void);
@@ -116,7 +116,7 @@ void func_800F1D44(TObj *o)
             }
             FUN_8010f400(o);
             FUN_800efa80(o);
-            FUN_8001fc14(o, o->wb6, o->wb2);
+            setObjectSpeedPolar2(o, o->wb6, o->wb2);
             o->h->raw += D_8009C944[0] << 8;
             o->y.raw += D_8009C944[1] << 8;
             FUN_8001fce4(o);

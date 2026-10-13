@@ -8,7 +8,7 @@ extern void *D_8012E04C;
 extern char D_80077D0C[];
 void AnimLoadDuration(TObj *o);
 void func_8004D620(int a, int b);
-void FUN_8001fa88(TObj *o, unsigned short v);
+void applyAnimVelocityX(TObj *o, unsigned short v);
 
 void func_8012455C(TObj *o)
 {
@@ -32,7 +32,7 @@ void func_8012455C(TObj *o)
         D_8009CFE5[o->b0c] = 1;
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) {
             o->velV = 0x400;

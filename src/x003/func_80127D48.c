@@ -7,7 +7,7 @@ extern unsigned char D_80135D5B[];
 extern void *D_80139500[];
 extern unsigned short D_1F80027E;
 extern unsigned char D_800A603E[], D_800A60E4[];
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 
@@ -54,7 +54,7 @@ void func_80127D48(TObj *o)
     switch (o->state) {
     case 0:
         o->b9c = 0;
-        FUN_80026bfc(2, 6);
+        spawnItemNotification(2, 6);
         if (w[1] == 0 || w[1] == 5) {
             o->state = 2;
             o->timer = 2;

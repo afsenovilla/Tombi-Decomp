@@ -12,7 +12,7 @@ extern int ObjCheckHeadCollision(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void SfxPlay2(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_80104cd8(TObj *);
@@ -90,7 +90,7 @@ void func_8011D5F4(TObj *o)
         break;
     case 3:
         if (AnimAdvance(o)) {
-            q = FUN_800182ac();
+            q = allocObjectLayer1();
             if (q) {
                 q->active = 1;
                 q->type = 1;

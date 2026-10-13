@@ -1,7 +1,7 @@
 // FUNC 8012e0b8 264 X000
 // MATCHING 8012e0b8 264
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern unsigned short FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *o);
 extern unsigned char DAT_800a6047[];
@@ -10,7 +10,7 @@ extern void *PTR_8013b26c;
 
 void FUN_8012e0b8(int x, int y, int z)
 {
-    TObj *o = FUN_800183b8();
+    TObj *o = allocObjectLayer2();
     if (o != 0) {
         o->active = 2;
         o->box0 = 6;

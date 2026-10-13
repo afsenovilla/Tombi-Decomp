@@ -11,7 +11,7 @@ extern void FUN_80121eb8(TObj *);
 extern void FUN_80122084(TObj *);
 extern void FUN_80122804(TObj *);
 extern void FUN_80122b40(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 static __inline__ int nearCam(TObj *o)
 {
@@ -100,7 +100,7 @@ void func_80121BAC(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

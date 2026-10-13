@@ -12,9 +12,9 @@ extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *);
 extern void FUN_8001f110(int);
 extern void FUN_8001f4bc(void);
-extern void FUN_8001eb64(void);
+extern void startAreaBgm(void);
 extern void FUN_800171b8(int, char *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void ObjFreeDup(TObj *);
 
 void func_8011D73C(TObj *o)
@@ -91,13 +91,13 @@ void func_8011D73C(TObj *o)
             switch (o->state) {
             case 0:
                 D_8009C975 = 4;
-                FUN_8001eb64();
+                startAreaBgm();
                 o->state++;
             case 1:
                 if (D_8009C975) break;
                 D_800A60EA = 0;
                 D_8009C93F = 0;
-                FUN_8005a9a4(0x16, 0);
+                setEventComplete(0x16, 0);
                 o->step = 0;
                 break;
             }

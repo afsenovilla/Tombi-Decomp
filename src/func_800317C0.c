@@ -66,7 +66,7 @@ extern short FUN_800411cc(TObj *, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void FUN_8002c578(TObj *, int, int, int);
-extern short FUN_8002078c(XY, XY);
+extern short angleBetweenPoints(XY, XY);
 extern void FUN_800ec710(int, TObj *);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_80031588(D600 *, int, short *, short *);
@@ -306,7 +306,7 @@ void func_800317C0(TObj *o)
         t.y = o->velY + MulNegSinScaled(D_8009C338->w0e, 12);
         c.x = o->h->p.whole;
         c.y = o->y.p.whole;
-        o->waa = FUN_8002078c(c, t);
+        o->waa = angleBetweenPoints(c, t);
         o->velH = MulCos(o->waa, o->wa8);
         o->velV = MulNegSinScaled(o->waa, o->wa8);
         ObjApplyVelocity(o);

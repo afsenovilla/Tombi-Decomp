@@ -12,8 +12,8 @@ extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a9a4(int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 
 void func_8012F75C(TObj *o)
@@ -32,7 +32,7 @@ void func_8012F75C(TObj *o)
         D_800A603E[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->d90 = FUN_8002dcc8(5, 0, &v);
+        o->d90 = showMessageBoxDirect(5, 0, &v);
         o->anim = D_801314BC[o->subtype].anims[1];
         AnimLoadDuration(o);
         o->state++;
@@ -47,7 +47,7 @@ void func_8012F75C(TObj *o)
         o->timer = 4;
         D_1F8001C6 = 0;
         if (D_8009CE24[0] == 1) {
-            FUN_8005a9a4(0x80, 1);
+            setEventComplete(0x80, 1);
             FUN_80026c50(0x96, 1, 1);
             o->timer = 200;
         }

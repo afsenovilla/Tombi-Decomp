@@ -6,7 +6,7 @@ extern short D_8007A5F0[];
 extern char D_80077CD0[];
 extern void *D_8011C420[];
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
 
 static inline void SetAnim(TObj *o, void *a)
@@ -28,7 +28,7 @@ void func_80116E54(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
         o->d88 = (o->d88 + 1) & 0xff;
         if (o->d88 == 0)

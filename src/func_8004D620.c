@@ -67,7 +67,7 @@ extern unsigned short D_8007D5A4[];
 extern char *D_1F800398;
 extern void playSFX(int);
 extern O *ObjAlloc(void);
-extern void FUN_8004db4c(O *, int);
+extern void drawInfoMessageText(O *, int);
 extern void func_8004DC10(O *, int);
 
 static __inline__ void setpos(O *o, short x, short y)
@@ -84,10 +84,10 @@ static __inline__ void callit(O *o, int a)
     signed char c;
     do {
         c = D_8007DE88[i];
-        if (c == -1) { FUN_8004db4c(o, 0); return; }
+        if (c == -1) { drawInfoMessageText(o, 0); return; }
         i++;
     } while (c != a);
-    FUN_8004db4c(o, 1);
+    drawInfoMessageText(o, 1);
 }
 
 #define TBL(x) (*(unsigned short *)(D_1F800398 + (x) * 2 + 0x10))
@@ -189,7 +189,7 @@ O *func_8004D620(int a, int b)
         while (1) {
             k = *p++;
             if ((unsigned short)(k + 2) < 2) {
-                if (b == 0 || b == 3) FUN_8004db4c(o, 2);
+                if (b == 0 || b == 3) drawInfoMessageText(o, 2);
                 return o;
             }
             if (flag == 0 || (short)k == -12) {

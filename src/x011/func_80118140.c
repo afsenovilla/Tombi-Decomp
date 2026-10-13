@@ -8,7 +8,7 @@ extern unsigned char D_8009C942A[], D_8009D2B0;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A60EA[], D_1F8001C6;
 extern AT3 D_80119C48[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe6c(TObj *);
 
 void func_80118140(TObj *o)
@@ -30,7 +30,7 @@ void func_80118140(TObj *o)
         v = *(B12 *)&o->a;
         o->anim = D_80119C48[o->subtype].p[2];
         FUN_8001fe6c(o);
-        o->d90 = (int)FUN_8002dcc8(2, 0xc, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 0xc, &v);
         o->state++;
         break;
     case 1:

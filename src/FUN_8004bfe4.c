@@ -4,7 +4,7 @@ extern unsigned short DAT_8009c960;
 extern unsigned short DAT_8009c962;
 extern unsigned char **PTR_8007bee4[];
 extern void (*PTR_8007bf34[])(unsigned char *);
-extern unsigned char *FUN_800186f8(void);
+extern unsigned char *allocObjectUnlayered(void);
 
 void FUN_8004bfe4(void)
 {
@@ -13,7 +13,7 @@ void FUN_8004bfe4(void)
 
     p = PTR_8007bee4[DAT_8009c960][DAT_8009c962];
     while (*p != 0xff) {
-        e = FUN_800186f8();
+        e = allocObjectUnlayered();
         if (e) {
             *e = 1;
             e[2] = p[0];

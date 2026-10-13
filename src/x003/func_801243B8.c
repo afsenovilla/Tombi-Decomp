@@ -21,7 +21,7 @@ extern int D_1F80018C, D_1F800190;
 extern TObj *ObjAlloc(void);
 extern int func_801206F0(TObj *);
 extern void func_80120438(TObj *);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 #define SETANIM(k) \
     o->anim = D_801386F8[k]; \
@@ -156,7 +156,7 @@ void func_801243B8(TObj *o)
                 DUST();
                 D_8009C93F[0] = 0;
                 D_8009C942[0] = 0;
-                FUN_8005a8a8(0x1f, 0, 1);
+                setEventStarted(0x1f, 0, 1);
                 o->b69 = 0;
                 x->wc = 0;
                 o->timer = 0x64;

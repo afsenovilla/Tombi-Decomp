@@ -26,7 +26,7 @@ extern void func_8012748C(TObj *);
 extern void func_80127D48(TObj *);
 extern void func_80128060(TObj *);
 extern void FUN_80020490(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern int FUN_800203dc(TObj *);
 
 void func_801281FC(TObj *o)
@@ -161,7 +161,7 @@ void func_801281FC(TObj *o)
     case 3:
         if (o->subtype >= 2) {
             (*(short *)o->d90)--;
-            FUN_80018790(o);
+            freeObjectLayer2(o);
         } else {
             *(signed char *)&o->b0f = -9;
             o->timer = D_80135D3C[Rand() & 7] + 0x12c;

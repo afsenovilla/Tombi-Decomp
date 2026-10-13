@@ -23,7 +23,7 @@ extern void func_801178CC(TObj *, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001d63c(int);
+extern void cdSeekStream(int);
 extern void FUN_8001f110(int);
 extern void FUN_80026e0c(int, int);
 
@@ -159,7 +159,7 @@ void func_80119B58(TObj *o)
                 v -= w;
                 o->velV = v >> 15;
             }
-            FUN_8001d63c(D_80125684[D_8009C962[0]]);
+            cdSeekStream(D_80125684[D_8009C962[0]]);
         }
         break;
     case 6:

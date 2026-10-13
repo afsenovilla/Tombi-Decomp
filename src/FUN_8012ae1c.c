@@ -13,11 +13,11 @@ extern unsigned short *D_8013A20C[];
 extern unsigned short *D_8013A210[];
 extern unsigned char D_80138FD8[];
 extern void FUN_8001e4f0(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int FUN_801274cc(TObj *);
-extern void FUN_8002b920(TObj *);
+extern void cloneItemPickupObject(TObj *);
 
 #define SETBOX(o, A) \
     { \
@@ -35,7 +35,7 @@ static __inline__ void move(TObj *o)
 {
     P *p = (P *)&o->wb4;
     if (o->movetab != 0) {
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
     }
     if (o->b9d != 0) {
         if (o->animFrame != (o->b9d & 1)) {
@@ -59,7 +59,7 @@ static __inline__ void fin(TObj *t)
 static __inline__ void fin2(TObj *t)
 {
     ANIMT(t);
-    FUN_8002b920(t);
+    cloneItemPickupObject(t);
 }
 
 void FUN_8012ae1c(TObj *o)

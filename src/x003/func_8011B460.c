@@ -8,7 +8,7 @@ extern unsigned char D_800A60E4;
 extern unsigned char D_8009C940;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern int SquareRoot0(int);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 
 int func_8011B460(TObj *o)
 {
@@ -23,7 +23,7 @@ int func_8011B460(TObj *o)
     if ((unsigned short)dx >= 0x5b) return 0;
     dx = D_1F80016A - o->h->p.whole;
     dy = D_1F80016E - o->y.p.whole;
-    a = FUN_800205d8(dx, dy);
+    a = angleFromDelta(dx, dy);
     o->wb0 = (unsigned char)a;
     if ((unsigned char)(a - o->d38 + 0x30) >= 0x61) {
     ret0:

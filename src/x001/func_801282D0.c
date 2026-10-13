@@ -9,7 +9,7 @@ extern short D_1F80027E, D_1F800284, D_1F80016A;
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 
 void func_801282D0(TObj *o)
@@ -36,7 +36,7 @@ void func_801282D0(TObj *o)
     case 2:
         FUN_8001fec0(o);
         if (o->d8c != 0x40 && o->d8c != 0xc0) {
-            FUN_8001fb20(o);
+            applyFrameVelocityY(o);
             if (o->b69 == 1) {
                 o->wae = -1;
                 o->wb2 = 0;

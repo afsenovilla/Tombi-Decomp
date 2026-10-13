@@ -12,7 +12,7 @@ extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
-extern int FUN_8002dcc8(int, int, V12 *);
+extern int showMessageBoxDirect(int, int, V12 *);
 extern void FUN_80026c50(int, int, int);
 
 void func_8011750C(TObj *o)
@@ -35,10 +35,10 @@ void func_8011750C(TObj *o)
             o->wbc = o->animFrame;
             o->animFrame = o->b68 & 1;
             if (D_8009CE1A[0] == 1) {
-                o->d90 = FUN_8002dcc8(2, 0x26, &b);
+                o->d90 = showMessageBoxDirect(2, 0x26, &b);
                 o->state = 3;
             } else {
-                o->d90 = FUN_8002dcc8(2, 0x23, &b);
+                o->d90 = showMessageBoxDirect(2, 0x23, &b);
                 o->state++;
             }
         }

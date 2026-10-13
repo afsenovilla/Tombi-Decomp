@@ -10,7 +10,7 @@ extern TObj D_800A6038;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern int func_8004065C(TObj *, int, int, int);
 extern short TileCollideAt(TObj *, int, int);
 
@@ -46,7 +46,7 @@ void func_80126460(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         s = Blocked(o);
         o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
         c = TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30));
@@ -94,7 +94,7 @@ void func_80126460(TObj *o)
         o->state++;
     case 4:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         Blocked(o);
         o->y.raw += o->velV << 8;
         TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30));

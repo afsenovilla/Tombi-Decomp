@@ -1,13 +1,13 @@
 // FUNC 8012176c 240 X014
 // MATCHING 8012176c 240
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
-extern int FUN_800205d8(int, int);
+extern TObj *allocObjectLayer2(void);
+extern int angleFromDelta(int, int);
 extern unsigned short D_1F80016A[], D_1F80016E[];
 
 int func_8012176C(TObj *p, int sub)
 {
-    TObj *o = FUN_800183b8();
+    TObj *o = allocObjectLayer2();
     short dx, dy;
     if (o != 0) {
         o->active = 1;
@@ -20,6 +20,6 @@ int func_8012176C(TObj *p, int sub)
         o->b.raw = p->b.p.whole << 16;
         dx = D_1F80016A[0] - o->a.p.whole;
         dy = D_1F80016E[0] - o->y.p.whole;
-        return o->d38 = (unsigned char)FUN_800205d8(dx, dy);
+        return o->d38 = (unsigned char)angleFromDelta(dx, dy);
     }
 }

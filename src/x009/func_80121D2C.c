@@ -6,7 +6,7 @@ extern char D_80077CF4[];
 extern void *D_8012E9F8;
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_80040278(TObj *, short, short);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 
 static __inline__ void setAnim(TObj *p, void *a)
 {
@@ -42,7 +42,7 @@ void func_80121D2C(TObj *o)
         if (o->visible == 0) break;
         o->step++;
         o->state = 0;
-        if (!land(o)) FUN_8001fb20(o);
+        if (!land(o)) applyFrameVelocityY(o);
         break;
     }
 }

@@ -6,8 +6,8 @@ typedef struct { short w0; } X;
 extern char D_80077CDC[];
 extern void *D_8012E9F8[];
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_8001fb20(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
@@ -57,7 +57,7 @@ void func_801233F0(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         COLL();
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
@@ -74,7 +74,7 @@ void func_801233F0(TObj *o)
             o->velV = 0x400;
         }
         o->y.raw += o->velV << 8;
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         COLL();
         if (land(o)) {
             o->b9c = 0;
@@ -86,7 +86,7 @@ void func_801233F0(TObj *o)
         if (COLL()) {
             o->velH = 0;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
             o->b69 = 0;
         }
@@ -126,7 +126,7 @@ void func_801233F0(TObj *o)
             o->step = 2;
             o->state = 0;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
             o->b69 = 0;
         }

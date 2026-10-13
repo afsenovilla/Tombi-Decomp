@@ -18,7 +18,7 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_80118028(TO2 *o)
 {
@@ -45,13 +45,13 @@ void func_80118028(TO2 *o)
         switch (Rand() & 3) {
         case 0:
         case 1:
-            o->t.d90 = FUN_8002dcc8(3, 0, &v);
+            o->t.d90 = showMessageBoxDirect(3, 0, &v);
             break;
         case 2:
-            o->t.d90 = FUN_8002dcc8(3, 1, &v);
+            o->t.d90 = showMessageBoxDirect(3, 1, &v);
             break;
         case 3:
-            o->t.d90 = FUN_8002dcc8(3, 2, &v);
+            o->t.d90 = showMessageBoxDirect(3, 2, &v);
             break;
         }
         o->t.state++;

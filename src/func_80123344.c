@@ -12,7 +12,7 @@ extern E D_80138F14[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void playSFX(int n);
-extern void FUN_800188e0(TObj *o);
+extern void freeObjectLayer5(TObj *o);
 
 void func_80123344(TObj *o)
 {
@@ -90,7 +90,7 @@ void func_80123344(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

@@ -11,8 +11,8 @@ extern short D_800A60EA[];
 extern unsigned char D_8009CDDC;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
 
 void func_80129BE0(TObj *o)
 {
@@ -31,7 +31,7 @@ void func_80129BE0(TObj *o)
         break;
     case 1:
         v = *(V6 *)&o->a;
-        *(volatile int *)&o->d90 = FUN_8002dcc8(2, 1, &v);
+        *(volatile int *)&o->d90 = showMessageBoxDirect(2, 1, &v);
         o->anim = D_801311B8[*(volatile unsigned char *)&o->subtype].anims[3];
         AnimJump(o, 0);
         o->state++;
@@ -47,7 +47,7 @@ void func_80129BE0(TObj *o)
         if (D_8009CDDC == 0) {
             o->state = 3;
             o->timer = 200;
-            FUN_8005a8a8(0x38, 0, 0);
+            setEventStarted(0x38, 0, 0);
         }
         break;
     case 3:

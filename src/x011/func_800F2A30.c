@@ -8,7 +8,7 @@ extern TObj *D_8009D2E8;
 extern unsigned char D_801152E8[];
 extern unsigned char D_8009CF06[], D_8009CE61;
 void SfxPlay3(int, int);
-void FUN_8005a9a4(int, int);
+void setEventComplete(int, int);
 void func_800F2A30(TObj *o)
 {
     if (*((unsigned char *)o + 0xc9)) D_8009C330->w2e = 0xff;
@@ -38,6 +38,6 @@ void func_800F2A30(TObj *o)
     D_8009C330->w20 = 0;
     if (D_8009CF06[0] && o->subtype != 1) {
         o->subtype = 1;
-        if (D_8009CE61 != 0xff) FUN_8005a9a4(0xbd, 1);
+        if (D_8009CE61 != 0xff) setEventComplete(0xbd, 1);
     }
 }

@@ -10,9 +10,9 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern int FUN_80063548(int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_8004d620(int, int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_80123C20(TObj *o)
 {
@@ -55,7 +55,7 @@ void func_80123C20(TObj *o)
         o->w22 += 0x10;
         break;
     case 2:
-        FUN_8005a9a4(0x77, 0);
+        setEventComplete(0x77, 0);
         FUN_8004d620(0x32, 2);
         DAT_8009cd98 = 9;
         DAT_8009cd9c = 0x3c;
@@ -65,7 +65,7 @@ void func_80123C20(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

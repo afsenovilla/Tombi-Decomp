@@ -10,7 +10,7 @@ extern char D_80077D0C[];
 extern short D_1F80027E, D_1F800284;
 extern int Rand(void);
 extern void ObjSetFacingToPlayer(TObj *o);
-extern void FUN_8001fab4(TObj *o);
+extern void applyFrameVelocityXY(TObj *o);
 extern void func_8012BB18(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern void FUN_800eae0c(short, int, int, int);
@@ -86,7 +86,7 @@ void func_8012BD6C(TObj *o)
         o->box3 = *p2;
         o->animTimer = ((AH *)o->anim)->w6 & 0x3fff;
     case 3:
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         func_8012BB18(o);
         land2(o);
         if (o->h->p.whole >= 0x943) {

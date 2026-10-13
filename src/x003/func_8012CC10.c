@@ -6,7 +6,7 @@ typedef struct { char c[12]; } B12;
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009CF03[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void *D_801399CC[], *D_801399BC[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 
@@ -40,7 +40,7 @@ void func_8012CC10(TObj *o)
         o->anim = D_801399BC[0];
         FUN_8001fe6c(o);
         D_8009CF03[0] = 2;
-        o->d90 = (int)FUN_8002dcc8(6, 5, &v);
+        o->d90 = (int)showMessageBoxDirect(6, 5, &v);
         break;
     case 2:
         FUN_8001fec0(o);

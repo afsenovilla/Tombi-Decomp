@@ -9,13 +9,13 @@ extern unsigned short D_1F8001F8_h;
 extern unsigned char D_800A4553;
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
-extern void FUN_8003c980(TObj *);
+extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 extern void FUN_80020c04(int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_80123B30(TObj *o)
 {
@@ -23,7 +23,7 @@ void func_80123B30(TObj *o)
 
     switch (o->b04) {
     case 0:
-        FUN_8003c980(o);
+        initItemObject(o);
         o->velV = 0;
         if (o->velH) o->step = 2;
         else o->step = 0;
@@ -76,7 +76,7 @@ void func_80123B30(TObj *o)
         D_8007A890[D_8007A7F0[o->subtype]](o);
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

@@ -8,7 +8,7 @@ extern char D_80077CDC[];
 extern void *D_8013DDF0[], *D_8013DDF4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 
 void func_80135850(TObj *o)
 {
@@ -24,7 +24,7 @@ void func_80135850(TObj *o)
             o->state++;
         case 1:
             AnimAdvance(o);
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             if (--o->timer <= 0) {
                 o->anim = D_8013DDF4[0];
                 AnimLoadDuration(o);

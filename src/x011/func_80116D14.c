@@ -6,7 +6,7 @@ extern unsigned char D_8009CE3A;
 extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
 extern void addItemToInventory(int, int, int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 /* Same shape as x001 func_80123F24 (volatile pointer local + q offset, sum into v). Includes csv piece 80116D50. */
 void func_80116D14(TObj *o)
@@ -46,7 +46,7 @@ void func_80116D14(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

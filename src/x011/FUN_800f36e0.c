@@ -31,7 +31,7 @@ extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char D_801152E8[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void FUN_8010f328(TObj *);
 extern void FUN_80110fdc(TObj *);
 extern void FUN_8010eaf8(TObj *);
@@ -107,7 +107,7 @@ void FUN_800f36e0(TObj *o)
         c = S8(o, 0xe3);
         if (c < D_8007A038[D_8009D2B2]) {
             S8(o, 0xe3) = c + 1;
-            q = FUN_800182ac();
+            q = allocObjectLayer1();
             if (q != 0) {
                 q->active = 1;
                 q->type = D_8009D2B2;

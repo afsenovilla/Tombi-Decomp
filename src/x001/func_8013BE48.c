@@ -14,7 +14,7 @@ extern unsigned char D_8009CDB5[];
 extern unsigned short D_1F800176;
 extern short D_1F80016E[];
 extern int Rand(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(O *);
 
 void func_8013BE48(O *o)
@@ -44,7 +44,7 @@ void func_8013BE48(O *o)
                 o->w1e = 0;
             }
             o->w08 = D_8013CA00[Rand() & 7];
-            e = FUN_800183b8();
+            e = allocObjectLayer2();
             if (e) {
                 e->active = 2;
                 e->type = 2;

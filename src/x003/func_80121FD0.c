@@ -12,8 +12,8 @@ extern unsigned short D_1F80016A;
 extern unsigned short D_1F80016E;
 extern unsigned short D_1F800172;
 extern void FUN_8001f8e4(TObj *);
-extern void FUN_8001fab4(TObj *);
-extern void FUN_8001fa20(TObj *, unsigned short);
+extern void applyFrameVelocityXY(TObj *);
+extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern int Rand(void);
 extern short func_8004065C(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
@@ -76,7 +76,7 @@ void func_80121FD0(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;
             x->b0a = 0;
@@ -110,7 +110,7 @@ void func_80121FD0(TObj *o)
     case 4: {
         unsigned char c;
         AnimAdvanceWithBox(o);
-        FUN_8001fa20(o, 1 - o->animFrame);
+        applyAnimVelocityXY(o, 1 - o->animFrame);
         if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;
             x->b0a = 0;

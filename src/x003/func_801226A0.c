@@ -12,7 +12,7 @@ extern A *D_801386F8[];
 extern int Rand(void);
 extern void SfxPlay2(int, int);
 extern void ObjSetFacingToPlayer(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern void func_801205A4(TObj *);
 extern int func_801206F0(TObj *);
@@ -101,7 +101,7 @@ void func_801226A0(TObj *o)
         SETANIM(o->wac);
         break;
     case 4:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_801206F0(o);
         STEP(k);
         if (k == 0) break;
@@ -123,7 +123,7 @@ void func_801226A0(TObj *o)
         SETANIM(o->wac);
         break;
     case 5:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_801206F0(o);
         STEP(k);
         if (k == 0) break;
@@ -154,7 +154,7 @@ void func_801226A0(TObj *o)
             o->state = r;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_801206F0(o);
         break;
     case 8:
@@ -167,7 +167,7 @@ void func_801226A0(TObj *o)
         if (k != 0) {
             o->substep++;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_801206F0(o);
         break;
     case 10:
@@ -186,7 +186,7 @@ void func_801226A0(TObj *o)
             o->substep = 0;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_801206F0(o);
         break;
     }

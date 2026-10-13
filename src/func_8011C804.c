@@ -36,7 +36,7 @@ extern short D_80138A10[], D_80138A64[], D_80138A30[], D_80138A84[];
 extern short D_8013884C[], D_8013886C[], D_80138848[];
 extern char D_801388C8[], D_80138908[], D_80138948[];
 extern short D_80138988[], D_8013898A[], D_8013898C[];
-extern E *FUN_800183b8(void);
+extern E *allocObjectLayer2(void);
 extern void ObjCullRegister(E *);
 extern void FUN_800201ac(E *, int);
 extern void ObjFreeDup(E *);
@@ -86,7 +86,7 @@ void func_8011C804(E *o)
                     e->box2 = 0xf;
                     e->box3 = 0x1e;
                     e->p[6] = D_80138848;
-                    if (o->subtype == 4 && (c = FUN_800183b8()) != 0) {
+                    if (o->subtype == 4 && (c = allocObjectLayer2()) != 0) {
                         unsigned char d;
                         c->active = 1;
                         d = o->b1d;

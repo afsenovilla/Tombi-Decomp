@@ -9,7 +9,7 @@ extern unsigned char D_8009C975;
 extern TObj *D_1F8001D4;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_801190BC(TObj *o)
 {
@@ -52,7 +52,7 @@ void func_801190BC(TObj *o)
         case 2:
             if (o->b69) {
                 o->step++;
-                FUN_8005a9a4(0x96, 0);
+                setEventComplete(0x96, 0);
             }
             ObjCullRegister(o);
             break;

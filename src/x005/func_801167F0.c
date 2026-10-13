@@ -10,7 +10,7 @@ extern unsigned char D_8009C93F;
 extern short D_800A60EA;
 extern short D_1F8001C6;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_801167F0(TObj *o)
 {
@@ -22,11 +22,11 @@ void func_801167F0(TObj *o)
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
         if (D_8009D2C3 & 0x10) {
-            o->d90 = FUN_8002dcc8(2, 0x58, &v);
+            o->d90 = showMessageBoxDirect(2, 0x58, &v);
         } else if (D_8009CDD5 == 0xff) {
-            o->d90 = FUN_8002dcc8(2, 0x4e, &v);
+            o->d90 = showMessageBoxDirect(2, 0x4e, &v);
         } else {
-            o->d90 = FUN_8002dcc8(2, 0x3c, &v);
+            o->d90 = showMessageBoxDirect(2, 0x3c, &v);
         }
         D_8009C942 = 1;
         D_8009D2B0 = 2;

@@ -17,10 +17,10 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009D132, D_8009D0B7;
 extern short D_800A60EA[], D_1F8001C6;
 extern void FUN_8001fe94(P *, int);
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern int AnimAdvance(P *);
 extern void FUN_80026e0c(int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 static __inline__ void SetAnim(P *o, short n)
 {
@@ -53,11 +53,11 @@ void func_80117FAC(P *o)
         SetAnim(o, 4);
         if (D_8009D132 && D_8009D0B7) {
             v = *(V *)&o->o.a;
-            o->o.d90 = (int)FUN_8002dcc8(3, 4, &v);
+            o->o.d90 = (int)showMessageBoxDirect(3, 4, &v);
             o->o.state = k2;
         } else {
             v = *(V *)&o->o.a;
-            o->o.d90 = (int)FUN_8002dcc8(3, 3, &v);
+            o->o.d90 = (int)showMessageBoxDirect(3, 3, &v);
             o->o.state++;
         }
         break;
@@ -79,7 +79,7 @@ void func_80117FAC(P *o)
             o->o.timer = 0xc8;
             FUN_80026e0c(0x8e, 1);
             FUN_80026e0c(0x13, 1);
-            FUN_8005a9a4(0x72, 0);
+            setEventComplete(0x72, 0);
             o->o.state = 8;
         }
         break;

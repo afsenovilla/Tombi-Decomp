@@ -8,7 +8,7 @@ extern unsigned short D_1F8001F8;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fab4(TObj *);
+extern void applyFrameVelocityXY(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern void SfxPlay2(int, int);
 
@@ -52,7 +52,7 @@ void func_8012D9FC(TObj *o)
         o->state++;
     case 3:
         AnimAdvance(o);
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         if (o->velH + 8 < o->h->p.whole)
             o->h->p.whole = o->velH + 8;
         if (o->h->p.whole < o->velH - 8)

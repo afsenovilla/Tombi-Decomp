@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8011F508(TObj *o, TObj *e)
 {
@@ -23,6 +23,6 @@ void func_8011F508(TObj *o, TObj *e)
         *((unsigned char *)o + 0xd1) = 1;
         o->animFrame = ah < bh;
     }
-    FUN_8004258c(o, 2);
+    decreaseObjectTimer(o, 2);
     D_1F80019E = 0;
 }

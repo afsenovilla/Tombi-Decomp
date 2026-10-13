@@ -5,7 +5,7 @@
 extern unsigned char D_8009CE56;
 extern unsigned char D_8009CEAF[];
 extern int *D_1F800338[];
-extern TObj *FUN_800185f8(void);
+extern TObj *allocObjectLayer8(void);
 extern void FUN_801148d0(TObj *, char, int, int, short);
 
 void func_8013B344(TObj *o)
@@ -16,7 +16,7 @@ void func_8013B344(TObj *o)
 
     o->b04 = 3;
     if (D_8009CE56 == 0xff) return;
-    e = FUN_800185f8();
+    e = allocObjectLayer8();
     if (e) {
         int **g;
         int *b;
@@ -41,7 +41,7 @@ void func_8013B344(TObj *o)
         o->step = 0;
         o->state = 0;
     }
-    f = FUN_800185f8();
+    f = allocObjectLayer8();
     if (f) {
         int **g;
         int *b;

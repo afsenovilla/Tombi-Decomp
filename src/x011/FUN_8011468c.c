@@ -12,7 +12,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800202b4(TObj *);
 extern void FUN_80113f38(TObj *);
 extern void FUN_801142c0(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void FUN_8011468c(TObj *o)
 {
@@ -55,7 +55,7 @@ void FUN_8011468c(TObj *o)
             FUN_801142c0(o);
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

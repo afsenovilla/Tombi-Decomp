@@ -14,7 +14,7 @@ extern int D_8009C984;
 typedef struct { char pad[0x24]; unsigned short a; } AnimH;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8004d620(int, int);
 
@@ -36,11 +36,11 @@ void func_80139C50(TObj *o)
         e->state = 0;
         switch (D_8009CEBC) {
         case 0:
-            D_800A60C8 = FUN_8002dc50(2, 10, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 10, 0x80, 0x6c);
             o->step++;
             break;
         case 1:
-            D_800A60C8 = FUN_8002dc50(2, 11, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 11, 0x80, 0x6c);
             o->step++;
             break;
         }

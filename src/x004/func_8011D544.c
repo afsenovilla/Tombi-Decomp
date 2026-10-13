@@ -14,7 +14,7 @@ extern void func_8011D804(TObj *);
 extern void FUN_80059d44(short);
 extern void playSFX(int);
 extern void ObjListPush_1F80022C(TObj *);
-extern void FUN_80018934(TObj *);
+extern void freeObjectLayer7(TObj *);
 
 static __inline__ void place(TObj *o)
 {
@@ -113,7 +113,7 @@ void func_8011D544(TObj *o)
         o->b04 = t + 1;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

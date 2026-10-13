@@ -19,7 +19,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int FUN_8001f9e0(void);
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
-extern int FUN_8002dc50(int, int, int, int);
+extern int showMessageBox(int, int, int, int);
 
 static __inline__ void follow(TObj *o, E4 *e)
 {
@@ -88,7 +88,7 @@ void func_80135164(TObj *o)
         follow(o, e);
         if (D_800A6038.b69) {
             D_8009C942 = 1;
-            o->d90 = FUN_8002dc50(2, 0xc, 0x80, 0x6c);
+            o->d90 = showMessageBox(2, 0xc, 0x80, 0x6c);
             o->state = 2;
         }
         break;

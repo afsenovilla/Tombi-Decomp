@@ -7,7 +7,7 @@ extern unsigned short D_1F800176[];
 extern unsigned short D_1F800186[];
 extern int D_800A4570[];
 extern void FUN_80018da4(TObj *);
-extern void FUN_80018934(TObj *);
+extern void freeObjectLayer7(TObj *);
 
 void func_8011B1F8(TObj *o)
 {
@@ -46,7 +46,7 @@ void func_8011B1F8(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

@@ -2,7 +2,7 @@
 // MATCHING 801210a8 752
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void func_80120438(TObj *);
 extern int func_801206F0(TObj *);
 extern TObj *FUN_80018448(void);
@@ -34,7 +34,7 @@ void func_801210A8(TObj *o)
         a = D_80138734[0];
         goto common;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012080C(o);
         func_80120438(o);
         o->velV += 0x20;
@@ -46,7 +46,7 @@ void func_801210A8(TObj *o)
         break;
     case 3:
         if (o->velV < 0x400) {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             func_8012080C(o);
         }
         func_80120438(o);

@@ -33,9 +33,9 @@ extern int D_1F800070i;
 extern int D_1F800074i;
 int FUN_8004fba8(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
-void FUN_8004fe1c(void *o, void *p, void *q);
-int FUN_8004fdc8(void *a, int b, int c, int d, unsigned e);
-int FUN_8004fd6c(void *a, int b, int c, int d, unsigned e);
+void setupActorPolyFT4(void *o, void *p, void *q);
+int insertPrim(void *a, int b, int c, int d, unsigned e);
+int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
 void func_80124780(Ext *o)
 {
@@ -60,11 +60,11 @@ void func_80124780(Ext *o)
     p->y3 = y + o->wce;
     if (FUN_8004fcc0(p) == 0)
         return;
-    FUN_8004fe1c(o, p, (char *)*(volatile int *)&o->t.d3c + *(short *)(o->t.d3c + (*(unsigned short *)o->t.anim << 2) + 2));
+    setupActorPolyFT4(o, p, (char *)*(volatile int *)&o->t.d3c + *(short *)(o->t.d3c + (*(unsigned short *)o->t.anim << 2) + 2));
     if (o->t.b0b != 0)
-        FUN_8004fdc8(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
+        insertPrim(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
     else
-        FUN_8004fd6c(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
+        insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
     q = D_1F800164;
     f = (PF4 *)(q + 0x28);
     D_1F800164 = (char *)f;
@@ -83,9 +83,9 @@ void func_80124780(Ext *o)
     f->y3 = f->y2;
 
     if (o->t.b0b != 0)
-        FUN_8004fdc8(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
+        insertPrim(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
     else
-        FUN_8004fd6c(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
+        insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
     D_1F800164 += 0x18;
 }
 

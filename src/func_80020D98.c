@@ -6,7 +6,7 @@ extern unsigned short D_8009C960;
 extern unsigned short D_8009C962;
 extern unsigned short D_80078790[];
 extern unsigned int D_8009CB94[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 TObj *func_80020D98(SP *p)
 {
@@ -22,7 +22,7 @@ TObj *func_80020D98(SP *p)
     if (k >= 32) n++;
     { int s = k % 32; if (D_8009CB94[n] & (1 << s)) return 0; }
     if (p->b4 != 2) return 0;
-    o = FUN_800183b8();
+    o = allocObjectLayer2();
     if (o == 0) return 0;
 o->type = p->b0;
 o->subtype = p->b1;

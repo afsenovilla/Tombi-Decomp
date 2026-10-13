@@ -12,12 +12,12 @@ extern unsigned char *DAT_8009c330;
 extern void *PTR_8013ac14, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
 extern char DAT_801396ca[];
 extern char D_80010748[];
-extern int FUN_8002dc50(int, int, int, int);
+extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8003c7c4(void *, void *, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
+extern void applyItemEffect(void *, void *, int, int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_8004d620(int, int);
 extern void FUN_8001e4f0(int);
@@ -65,7 +65,7 @@ void FUN_801377b8(TObj *o)
             X.step = 0;
             X.state = 0;
             DAT_8009d2b0 = 0;
-            X.d90 = FUN_8002dc50(4, 2, 0x80, 0x6c);
+            X.d90 = showMessageBox(4, 2, 0x80, 0x6c);
             p->anim = PTR_8013ac20;
             AnimLoadDuration(p);
             p->b04 = 2;
@@ -73,7 +73,7 @@ void FUN_801377b8(TObj *o)
             p->state = 0;
         } else {
             DAT_8009cebd = 0;
-            X.d90 = FUN_8002dc50(4, 0, 0x80, 0x6c);
+            X.d90 = showMessageBox(4, 0, 0x80, 0x6c);
         }
         o->step++;
         break;
@@ -109,7 +109,7 @@ void FUN_801377b8(TObj *o)
             p->step = 0;
             p->state = 0;
             if (DAT_8009ce4a == 0) {
-                FUN_8005a8a8(0xa6, 0, 0);
+                setEventStarted(0xa6, 0, 0);
                 o->w08 = 300;
                 o->step = 6;
                 o->state = 0;
@@ -133,7 +133,7 @@ void FUN_801377b8(TObj *o)
             buf[1] = p->h->p.whole + 0x10;
             buf[3] = p->y.p.whole;
             buf[5] = p->d->p.whole;
-            FUN_8003c7c4(DAT_801396ca, buf, 0, 0, 1);
+            applyItemEffect(DAT_801396ca, buf, 0, 0, 1);
             X.b04 = 5;
             X.step = 0;
             X.state = 0;
@@ -163,7 +163,7 @@ void FUN_801377b8(TObj *o)
             break;
         case 10: case 11: case 12: case 13: case 14: case 15:
             ((TObj *)X.d90)->b04 = 3;
-            FUN_8005a9a4(0xa6, 0);
+            setEventComplete(0xa6, 0);
             o->step = 5;
             if (DAT_8009d00d == 0)
                 FUN_8004d620(0xc, 3);
@@ -191,7 +191,7 @@ void FUN_801377b8(TObj *o)
             X.anim = D_80010748;
             AnimLoadDuration(&X);
             DAT_8009cebd = 1;
-            X.d90 = FUN_8002dc50(4, 1, 0x80, 0x6c);
+            X.d90 = showMessageBox(4, 1, 0x80, 0x6c);
             o->step = 1;
         }
         break;
@@ -200,7 +200,7 @@ void FUN_801377b8(TObj *o)
             FUN_8001e4f0(9);
         if (--o->w08 > 0)
             break;
-        X.d90 = FUN_8002dc50(4, DAT_8009cebd, 0x80, 0x6c);
+        X.d90 = showMessageBox(4, DAT_8009cebd, 0x80, 0x6c);
         o->step = 1;
         break;
     case 5:
@@ -244,7 +244,7 @@ void FUN_801377b8(TObj *o)
             FUN_8001e4f0(9);
         if (--o->w08 > 0)
             break;
-        X.d90 = FUN_8002dc50(4, 3, 0x80, 0x6c);
+        X.d90 = showMessageBox(4, 3, 0x80, 0x6c);
         o->step = 1;
         break;
     }

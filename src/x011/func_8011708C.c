@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 typedef struct { unsigned char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT;
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
-extern TObj *FUN_80018568(void);
-extern void FUN_8005a8a8(int, int, int);
+extern TObj *allocObjectLayer5(void);
+extern void setEventStarted(int, int, int);
 extern signed char D_8009D2B0;
 extern unsigned short D_800A604A;
 extern Fix16 *D_800A607C;
@@ -41,7 +41,7 @@ void func_8011708C(TObj *o)
         v = *(B12 *)&o->a;
         o->anim = D_80119C48[o->subtype].p[1];
         FUN_8001fe6c(o);
-        o->d90 = FUN_8002dcc8(2, 6, &v);
+        o->d90 = showMessageBoxDirect(2, 6, &v);
         o->state++;
         break;
     case 1:
@@ -51,7 +51,7 @@ void func_8011708C(TObj *o)
         D_8009C942[0] = 0;
         D_800A60EA[0] = 0;
         o->animFrame = 1;
-        q = FUN_80018568();
+        q = allocObjectLayer5();
         if (q != 0) {
             q->active = 2;
             q->type = 0xf;
@@ -69,7 +69,7 @@ void func_8011708C(TObj *o)
         v = *(B12 *)&o->a;
         o->anim = D_80119C48[o->subtype].p[2];
         FUN_8001fe6c(o);
-        o->d90 = FUN_8002dcc8(2, 7, &v);
+        o->d90 = showMessageBoxDirect(2, 7, &v);
         o->state++;
         break;
     case 3:
@@ -81,13 +81,13 @@ void func_8011708C(TObj *o)
     case 4:
         if (D_8009D082 != 3) break;
         v = *(B12 *)&o->a;
-        o->d90 = FUN_8002dcc8(2, 8, &v);
+        o->d90 = showMessageBoxDirect(2, 8, &v);
         o->state++;
         break;
     case 5:
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
-        FUN_8005a8a8(0x68, 0, 0);
+        setEventStarted(0x68, 0, 0);
         o->timer = 0x168;
         o->state++;
         break;
@@ -95,14 +95,14 @@ void func_8011708C(TObj *o)
         if (--o->timer != 0) break;
         o->animFrame = 0;
         v = *(B12 *)&o->a;
-        o->d90 = FUN_8002dcc8(2, 9, &v);
+        o->d90 = showMessageBoxDirect(2, 9, &v);
         o->state++;
         break;
     case 7:
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
         v = *(B12 *)&o->a;
-        o->d90 = FUN_8002dcc8(2, 0xa, &v);
+        o->d90 = showMessageBoxDirect(2, 0xa, &v);
         o->state++;
         break;
     case 8:

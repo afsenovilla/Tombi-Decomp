@@ -19,16 +19,16 @@ extern unsigned short D_1F8000F2x[];
 extern unsigned short D_1F8001C6, D_1F8000F2;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003CE;
 extern void D_8001D6A4(void);
-extern unsigned int FUN_80028420(TObj *);
-extern unsigned int FUN_80028b40(TObj *);
+extern unsigned int stepScrollReturnY(TObj *);
+extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
-extern void FUN_800277f8(TObj *);
-extern void FUN_800284d8(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void syncObjectTargetY(TObj *);
+extern void stepScrollApproachX(TObj *);
+extern void setEventComplete(int, int);
 extern void SoundStopAll(void);
 extern void ThreadCreate(int, void (*)(void));
 extern int Rand(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void func_801184CC(void);
 
 void func_801163BC(TObj *o)
@@ -40,7 +40,7 @@ void func_801163BC(TObj *o)
     case 0: {
         unsigned char *f = &D_8009CDA2;
         if (*f != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) *f = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) *f = 0;
             break;
         }
         o->subtype = 0;
@@ -55,8 +55,8 @@ void func_801163BC(TObj *o)
     case 1:
         if (D_8009C93A != 0) o->step++;
         FUN_80027c74(o);
-        FUN_800277f8(o);
-        FUN_800284d8(o);
+        syncObjectTargetY(o);
+        stepScrollApproachX(o);
         break;
     case 2:
         D_8012568C[o->subtype](o);
@@ -64,7 +64,7 @@ void func_801163BC(TObj *o)
         break;
     case 4:
         D_8009C93Fx[0] = 1;
-        FUN_8005a9a4(D_801256A8[D_8009C962], 0);
+        setEventComplete(D_801256A8[D_8009C962], 0);
         o->w48 = 0x154;
         o->step++;
         break;
@@ -147,7 +147,7 @@ void func_801163BC(TObj *o)
             pl->b4 = 1;
             pl->b5 = 0x30;
             pl->b6 = 0;
-            q = FUN_800183b8();
+            q = allocObjectLayer2();
             if (q) {
                 q->active = 2;
                 q->type = 0x54;

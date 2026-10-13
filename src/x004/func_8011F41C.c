@@ -2,16 +2,16 @@
 // MATCHING 8011f41c 192
 #include "TOBJ.H"
 extern short D_1F80019E;
-extern short func_80044550(TObj *, TObj *);
-extern int func_800429D0(TObj *, TObj *);
+extern short boxesOverlapSide(TObj *, TObj *);
+extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void FUN_8001f96c(int, short, short, short);
 
 void func_8011F41C(TObj *o, TObj *e)
 {
     int r;
-    if (func_80044550(o, e) >= 0) {
-        r = func_800429D0(o, e);
+    if (boxesOverlapSide(o, e) >= 0) {
+        r = resolveHitResultB(o, e);
         if (r) {
             if (r == 7 && o->subtype == 0) {
                 e->active = 2;

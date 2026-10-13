@@ -10,7 +10,7 @@ extern unsigned short D_1F80027E;
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short FUN_800408d8(TObj *, short, short);
 extern short FUN_8004065c(TObj *, short, short, short);
 
@@ -48,7 +48,7 @@ void func_80129DAC(TObj *o)
         break;
     case 1:
         FUN_8001fec0(o);
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (o->w22 == 0) {
             if (o->animFrame) {
                 if (!(o->h->p.whole > D_1F80016A)) {

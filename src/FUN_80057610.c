@@ -10,7 +10,7 @@ extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
 extern SVECTOR D_1f800060, D_1f800068;
 extern unsigned short D_1f8001c8;
 extern int *D_1f8001e0;
-extern void FUN_80021f5c(MATRIX *);
+extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
 extern void FUN_8006395c(MATRIX *, MATRIX *, MATRIX *);
 extern void FUN_80063bcc(SVECTOR *, int *);
@@ -20,7 +20,7 @@ extern void FUN_800242b8(int, int *, O *, int, int);
 
 void FUN_80057610(O *o)
 {
-    FUN_80021f5c(&D_1f800020);
+    getBaseMatrix(&D_1f800020);
     switch (D_1f8001c8 & 1) {
     case 0:
         D_1f800060.vx = o->a84;

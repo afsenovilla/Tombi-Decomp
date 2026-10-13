@@ -7,8 +7,8 @@ extern unsigned char DAT_800a60da;
 extern unsigned char DAT_8009c93e;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c942;
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 void FUN_80121e50(TObj *o)
 {
@@ -20,14 +20,14 @@ void FUN_80121e50(TObj *o)
     case 1:
         if (DAT_8009c96c < 100000) {
             if (DAT_8009cdb4 == 0) {
-                FUN_8005a8a8(0x10, 0, 0);
+                setEventStarted(0x10, 0, 0);
                 goto L;
             }
             o->step = o->step - 1;
             break;
         }
         if (DAT_8009cdb4 != 0xff) {
-            FUN_8005a9a4(0x10, 0);
+            setEventComplete(0x10, 0);
         L:
             o->step = o->step + 1;
             DAT_8009c93f = 1;

@@ -3,7 +3,7 @@
 typedef struct N { char p0; char f1; char f2; char f3; char p1[0xe]; short x; char p2[2]; short y; char p3[2]; short z; char p4[0x2e - 0x1c]; short w; } N;
 typedef struct O { char p0[4]; unsigned char state; char p1[0x1c-5]; N *n; } O;
 extern unsigned char DAT_8009ce4a, DAT_8009cebd, DAT_8009d00e;
-extern N *FUN_800183b8(void);
+extern N *allocObjectLayer2(void);
 
 void FUN_80137378(O *o)
 {
@@ -13,7 +13,7 @@ void FUN_80137378(O *o)
     if (DAT_8009ce4a == 0xff)
         o->state = 3;
     if (DAT_8009cebd >= 6) st = 3; else {
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             n->p0 = 1;
             n->f2 = 0x15;

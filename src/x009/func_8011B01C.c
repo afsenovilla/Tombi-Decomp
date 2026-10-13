@@ -20,7 +20,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_8011B01C(TObj *o)
 {
@@ -94,7 +94,7 @@ void func_8011B01C(TObj *o)
         o->b04 = 3;
         FUN_80026e0c(0xc, 1);
         FUN_80026c50(0xd, 1, 1);
-        FUN_8005a9a4(0x28, 1);
+        setEventComplete(0x28, 1);
         o->state = 3;
         break;
     }

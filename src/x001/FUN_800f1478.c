@@ -25,7 +25,7 @@ extern void FUN_800efa80(TObj *);
 extern void FUN_800f1308(TObj *);
 extern short func_800F0E7C(TObj *);
 extern void FUN_8010f400(TObj *);
-extern void FUN_8001fc14(TObj *, int, int);
+extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern int func_8010E114(void);
 extern void func_8010E328(TObj *, short);
@@ -136,7 +136,7 @@ void FUN_800f1478(TObj *o)
             }
             YADJ(o);
             if (!(DAT_1f8001fc & (DAT_1f8003c6 | DAT_1f8003c8))) {
-                FUN_8001fc14(o, o->wb6, o->wb2);
+                setObjectSpeedPolar2(o, o->wb6, o->wb2);
                 o->h->raw += DAT_8009c944 << 8;
                 o->y.raw += DAT_8009c946[0] << 8;
                 FUN_8001fce4(o);

@@ -8,7 +8,7 @@ extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009d2b0;
 extern short D_1F8001C6;
 extern AT3 D_8011999C[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 
@@ -32,10 +32,10 @@ void func_80118110(TObj *o)
         o->animFrame = o->b68 & 1;
         switch (o->subtype) {
         case 0:
-            o->d90 = (int)FUN_8002dcc8(2, 0x23, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0x23, &v);
             break;
         case 1:
-            o->d90 = (int)FUN_8002dcc8(2, 0x27, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 0x27, &v);
             break;
         }
         o->state = 1;

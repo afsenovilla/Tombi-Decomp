@@ -3,14 +3,14 @@
 #include "TOBJ.H"
 
 extern short D_1F80019E;
-extern short func_8004461C(TObj *, TObj *);
-extern int FUN_80042b98(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
+extern int resolveHitResultD(TObj *, TObj *);
 extern void FUN_8002ee50(int, int, int, int);
 
 void func_8011CBA0(TObj *o, TObj *e)
 {
-    if (func_8004461C(o, e) >= 0) {
-        if (FUN_80042b98(o, e)) {
+    if (boxesOverlapSigned(o, e) >= 0) {
+        if (resolveHitResultD(o, e)) {
             e->active = 2;
             e->b04 = 2;
             e->step = 0;

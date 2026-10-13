@@ -14,7 +14,7 @@ int Rand(void);
 void FUN_8001e5f4(int a, int b);
 void func_80136B4C(TObj *o);
 void addItemToInventory(int a, int b, int c);
-void FUN_80018790(TObj *o);
+void freeObjectLayer2(TObj *o);
 
 void func_8013721C(TObj *o)
 {
@@ -92,7 +92,7 @@ void func_8013721C(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

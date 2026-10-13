@@ -13,10 +13,10 @@ extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int rcos(int);
 extern int rsin(int);
-extern void FUN_80026bfc(int, int);
-extern void FUN_8003c7c4(char *, FV *, int, int, int);
-extern void FUN_8001fa88(TObj *, int);
-extern void FUN_80018790(TObj *);
+extern void spawnItemNotification(int, int);
+extern void applyItemEffect(char *, FV *, int, int, int);
+extern void applyAnimVelocityX(TObj *, int);
+extern void freeObjectLayer2(TObj *);
 
 void func_8012F448(TObj *o)
 {
@@ -86,7 +86,7 @@ void func_8012F448(TObj *o)
             o->step = 1;
             o->state = 0;
             if (o->subtype == 0)
-                FUN_80026bfc(0, 6);
+                spawnItemNotification(0, 6);
             break;
         case 1:
             if (o->state == 1) {
@@ -95,7 +95,7 @@ void func_8012F448(TObj *o)
                     v.a.p.whole = o->h->p.whole;
                     v.y.p.whole = o->y.p.whole;
                     v.b.p.whole = o->d->p.whole;
-                    FUN_8003c7c4(D_8013C94A + o->b6b * 6, &v, 0, 0, 1);
+                    applyItemEffect(D_8013C94A + o->b6b * 6, &v, 0, 0, 1);
                 }
             }
             break;
@@ -108,7 +108,7 @@ void func_8012F448(TObj *o)
                 o->state++;
                 break;
             case 1:
-                FUN_8001fa88(o, (unsigned short)(1 - o->animFrame));
+                applyAnimVelocityX(o, (unsigned short)(1 - o->animFrame));
                 o->velV += 0x40;
                 if (o->velV > 0x400)
                     o->velV = 0x400;
@@ -125,7 +125,7 @@ void func_8012F448(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -5,7 +5,7 @@ extern unsigned char DAT_8009d2b1, DAT_8009cf06, DAT_8009c938, DAT_8009c942;
 extern unsigned short DAT_8009c960, DAT_8009c962;
 extern unsigned char *DAT_8009f0ec;
 extern void FUN_8001f110(int);
-extern void FUN_8001f2ec(int);
+extern void playJingle(int);
 
 void FUN_800fe75c(TObj *o)
 {
@@ -18,7 +18,7 @@ void FUN_800fe75c(TObj *o)
             DAT_8009c942 = 1;
             *p = 1;
             FUN_8001f110(0);
-            FUN_8001f2ec(3);
+            playJingle(3);
         }
         o->timer = 0xb4;
         *(signed char *)&o->b0f = -8;

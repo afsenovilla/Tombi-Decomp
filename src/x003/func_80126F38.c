@@ -12,7 +12,7 @@ extern short D_800A4582;
 extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
@@ -40,7 +40,7 @@ void func_80126F38(TObj *o)
     case 1:
         if (o->visible && ((D_1F8001F8 + D_1F800198) & 0x1f) == 0) playSFX(0x76);
         AnimAdvance(o);
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         if (o->animFrame & 1)
             v = -0x18;
         else

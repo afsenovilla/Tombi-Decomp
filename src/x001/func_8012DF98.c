@@ -14,7 +14,7 @@ extern unsigned char D_8013C800[];
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern short D_1F80027E, D_1F800284;
 extern void playSFX(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern void func_8002B920(TObj *);
@@ -61,7 +61,7 @@ static __inline__ int land2(TObj *o)
 static __inline__ void blk(TObj *o)
 {
     Sub *s = (Sub *)&o->wb4;
-    if (o->movetab) FUN_8001fa88(o, 1 - o->animFrame);
+    if (o->movetab) applyAnimVelocityX(o, 1 - o->animFrame);
     if ((o->b9d & 2) && o->animFrame != (o->b9d & 1)) o->movetab = 0;
     if (o->animFrame == 1) s->wb8 = 0x10;
     else s->wb8 = -0x10;

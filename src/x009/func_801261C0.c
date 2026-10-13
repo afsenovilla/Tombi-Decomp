@@ -6,7 +6,7 @@ extern void *D_8012EE80[], *D_8012EE84[];
 extern char D_80077D00[];
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern short FUN_80040278(TObj *, short, short);
 extern short func_8004065C(TObj *, short, short, short);
 
@@ -47,7 +47,7 @@ void func_801261C0(TObj *o)
         break;
     case 2:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         f = o->b9d;
         a = o->animFrame;
         if (!(f & 2) || a != (f & 1)) {

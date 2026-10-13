@@ -6,7 +6,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern unsigned char D_8009D0E2;
 extern short D_800A60EA;
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void removeItemFromInventory(int, int);
 
 void func_8011767C(TObj *o)
@@ -22,7 +22,7 @@ void func_8011767C(TObj *o)
         break;
     case 1:
         D_8009C93E = 1;
-        FUN_8005a9a4(0x61, 0);
+        setEventComplete(0x61, 0);
         removeItemFromInventory(0x3e, D_8009D0E2);
         o->w08 = 200;
         o->state++;

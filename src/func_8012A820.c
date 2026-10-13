@@ -10,11 +10,11 @@ extern void *D_8013A1F4[];
 extern void *D_8013A1F8[];
 extern unsigned char D_80138FD8[];
 extern void FUN_80020aec(int);
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern void func_8004065C(TObj *, short, short, int);
 extern int FUN_801274cc(TObj *);
-extern void FUN_8001fb20(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityY(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern TObj *ObjAlloc();
 extern short D_1F80027E;
 extern short DAT_1f80027e;
@@ -46,7 +46,7 @@ void func_8012A820(TObj *o)
         if ((unsigned)(o->subtype - 9) < 2) {
             FUN_80020aec(o->b6b);
         }
-        FUN_80026bfc(0, 6);
+        spawnItemNotification(0, 6);
         o->movetab = D_80077CF4;
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
@@ -91,7 +91,7 @@ void func_8012A820(TObj *o)
                 n->animFrame = o->animFrame & 1;
             }
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         COLLIDE(o);
         FUN_801274cc(o);
         break;
@@ -104,12 +104,12 @@ void func_8012A820(TObj *o)
             o->state++;
             o->timer = 0xe;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         COLLIDE(o);
         FUN_801274cc(o);
         break;
     case 5:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->y.p.whole += 3;
         COLLIDE(o);
         if (FUN_801274cc(o)) {
@@ -141,7 +141,7 @@ void func_8012A820(TObj *o)
         o->anim = D_8013A1EC[0];
         SETBOX(o);
         ANIMT(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         COLLIDE(o);
         FUN_801274cc(o);
         break;

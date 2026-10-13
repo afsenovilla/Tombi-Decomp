@@ -17,10 +17,10 @@ extern TObj D_800A6038;
 extern short D_800A604E[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
-extern TObj *FUN_8002dcc8(int, int, V6 *);
+extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void func_80117CEC(TObj *, int, int);
 extern void func_80116928(void *, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_800eea7c(TObj *, int, int);
 
 void func_8011BDA8(TObj *o)
@@ -49,7 +49,7 @@ void func_8011BDA8(TObj *o)
         o->w08 = 0x3c;
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
-        a->d90 = (int)FUN_8002dcc8(7, 9, &v);
+        a->d90 = (int)showMessageBoxDirect(7, 9, &v);
         func_80117CEC(a, 2, 0);
         o->state++;
         break;
@@ -107,7 +107,7 @@ void func_8011BDA8(TObj *o)
         if (--o->w08 > 0) {
             break;
         }
-        FUN_8005a9a4(0x9d, 0);
+        setEventComplete(0x9d, 0);
         o->w08 = 0xc8;
         o->state++;
         break;
@@ -117,7 +117,7 @@ void func_8011BDA8(TObj *o)
         }
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
-        a->d90 = (int)FUN_8002dcc8(7, 10, &v);
+        a->d90 = (int)showMessageBoxDirect(7, 10, &v);
         func_80117CEC(a, 2, 0);
         o->state++;
         break;
@@ -132,7 +132,7 @@ void func_8011BDA8(TObj *o)
         }
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
-        a->d90 = (int)FUN_8002dcc8(3, 3, &v);
+        a->d90 = (int)showMessageBoxDirect(3, 3, &v);
         o->state++;
         break;
     case 8:
@@ -146,7 +146,7 @@ void func_8011BDA8(TObj *o)
         }
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
-        a->d90 = (int)FUN_8002dcc8(3, 4, &v);
+        a->d90 = (int)showMessageBoxDirect(3, 4, &v);
         o->state++;
         break;
     case 9:

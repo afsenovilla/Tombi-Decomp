@@ -5,7 +5,7 @@
 extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void *D_8013238C[];
-extern TObj *FUN_8002dcc8(int, int, Fix16 *);
+extern TObj *showMessageBoxDirect(int, int, Fix16 *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern unsigned int FUN_8001f9e0(void);
@@ -28,7 +28,7 @@ void func_8012CB50(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        o->d90 = (int)FUN_8002dcc8(2, 2, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 2, &o->a);
         o->wac = 0x1f;
         o->animFrame = o->b68 & 1;
         o->anim = D_8013238C[0];

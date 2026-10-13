@@ -11,9 +11,9 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern int rcos(int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_8004d620(int, int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 static __inline__ void setbox(TObj *q, short a, short b, short c, short d)
 {
     q->box0 = a;
@@ -57,7 +57,7 @@ void func_8011E594(TObj *o)
         o->w22 += 0x10;
         break;
     case 2:
-        FUN_8005a9a4(0x77, 0);
+        setEventComplete(0x77, 0);
         FUN_8004d620(0x32, 2);
         D_8009CD99 = 9;
         D_8009CD9D = 0x3c;
@@ -67,7 +67,7 @@ void func_8011E594(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

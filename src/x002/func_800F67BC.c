@@ -11,7 +11,7 @@ extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
 extern void func_8010F254(TObj *);
-extern void FUN_8001fd48(TObj *);
+extern void applyObjectAltSpeedXY(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 extern TObj *func_8004BBC0(TObj *, int);
 extern void func_800EFC8C(TObj *, int);
@@ -92,7 +92,7 @@ void func_800F67BC(TObj *o)
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         func_8010F254(o);
-        FUN_8001fd48(o);
+        applyObjectAltSpeedXY(o);
         AnimAdvance(o);
         if (ObjCheckHeadCollision(o)) {
             land(o);

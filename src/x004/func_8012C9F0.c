@@ -12,9 +12,9 @@ extern void *D_8013577C[], *D_80135784[];
 extern short D_8007A5F0[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, void *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern int showMessageBoxDirect(int, int, void *);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_8003e474(int, int, void *);
 
@@ -48,7 +48,7 @@ void func_8012C9F0(TObj *o)
         D_8009D086[0] = 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        o->d90 = FUN_8002dcc8(3, 0, &o->a);
+        o->d90 = showMessageBoxDirect(3, 0, &o->a);
         o->wac = 2;
         o->animFrame = ~D_800A6066 & 1;
         o->anim = D_80135784[0];
@@ -63,7 +63,7 @@ void func_8012C9F0(TObj *o)
         if (D_8009CE63 == 0) {
             o->timer = 0x140;
             o->state++;
-            FUN_8005a8a8(0xbf, 0, 0);
+            setEventStarted(0xbf, 0, 0);
         } else {
             D_8009C93F[0] = 0;
             D_8009C942[0] = 0;
@@ -94,7 +94,7 @@ void func_8012C9F0(TObj *o)
         D_800A603C[0] = 5;
         D_800A603D[0] = 0;
         D_800A603E[0] = 0;
-        o->d90 = FUN_8002dcc8(3, 0, &o->a);
+        o->d90 = showMessageBoxDirect(3, 0, &o->a);
         o->wac = 2;
         o->animFrame = o->b68 & 1;
         o->anim = D_80135784[0];
@@ -120,7 +120,7 @@ void func_8012C9F0(TObj *o)
         o->state++;
         D_8009C940 = 0;
         FUN_80026e0c(0x90, 1);
-        o->d90 = FUN_8002dcc8(3, 1, &o->a);
+        o->d90 = showMessageBoxDirect(3, 1, &o->a);
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
         D_800A603C[0] = 5;
@@ -163,7 +163,7 @@ void func_8012C9F0(TObj *o)
         break;
     case 10:
         o->state++;
-        o->d90 = FUN_8002dcc8(3, 2, &o->a);
+        o->d90 = showMessageBoxDirect(3, 2, &o->a);
         o->wac = 2;
         o->anim = D_80135784[0];
         AnimLoadDuration(o);
@@ -178,7 +178,7 @@ void func_8012C9F0(TObj *o)
         o->state++;
         o->anim = D_8013577C[0];
         o->timer = 0x140;
-        FUN_8005a9a4(0xbf, 0);
+        setEventComplete(0xbf, 0);
         break;
         }
     case 12:
@@ -186,7 +186,7 @@ void func_8012C9F0(TObj *o)
         break;
     case 13:
         o->state++;
-        o->d90 = FUN_8002dcc8(3, 3, &o->a);
+        o->d90 = showMessageBoxDirect(3, 3, &o->a);
         o->wac = 2;
         o->anim = D_80135784[0];
         AnimLoadDuration(o);
@@ -209,7 +209,7 @@ void func_8012C9F0(TObj *o)
         break;
     case 16:
         o->state++;
-        o->d90 = FUN_8002dcc8(3, 4, &o->a);
+        o->d90 = showMessageBoxDirect(3, 4, &o->a);
         o->wac = 2;
         o->anim = D_80135784[0];
         AnimLoadDuration(o);

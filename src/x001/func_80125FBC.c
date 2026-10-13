@@ -1,10 +1,10 @@
 // FUNC 80125fbc 72 X001
 // MATCHING 80125fbc 72
 #include "TOBJ.H"
-extern short func_80044550(TObj *, TObj *);
-extern void func_800428C0(TObj *, TObj *);
+extern short boxesOverlapSide(TObj *, TObj *);
+extern void resolveHitResultA(TObj *, TObj *);
 
 void func_80125FBC(TObj *a, TObj *b)
 {
-    if (func_80044550(a, b) >= 0) func_800428C0(a, b);
+    if (boxesOverlapSide(a, b) >= 0) resolveHitResultA(a, b);
 }

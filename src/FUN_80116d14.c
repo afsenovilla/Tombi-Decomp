@@ -18,13 +18,13 @@ extern unsigned char DAT_1f8001cc, DAT_1f8001cd;
 extern int DAT_800a609c;
 extern S2 *DAT_800a6078;
 extern char DAT_8001d6a4[];
-extern unsigned int FUN_80028420(TObj *);
-extern unsigned int FUN_80028b40(TObj *);
+extern unsigned int stepScrollReturnY(TObj *);
+extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
-extern void FUN_800277f8(TObj *);
+extern void syncObjectTargetY(TObj *);
 extern void FUN_80029078(TObj *);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8002715c(int);
+extern void setEventComplete(int, int);
+extern void stepPlayerXToward(int);
 extern int FUN_800270a0(TObj *, int, int);
 extern void FUN_800216c4(void);
 extern void FUN_80029cb4(TObj *);
@@ -32,7 +32,7 @@ extern void FUN_8002a4d0(TObj *);
 extern void FUN_8001f110(int);
 extern void FUN_8001f4bc(void);
 extern void FUN_800171b8(int, char *);
-extern void FUN_8001eb64(void);
+extern void startAreaBgm(void);
 
 void FUN_80116d14(TObj *o)
 {
@@ -53,7 +53,7 @@ void FUN_80116d14(TObj *o)
         o->step++;
     case 1:
         if (DAT_8009cda2[0] != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) DAT_8009cda2[0] = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) DAT_8009cda2[0] = 0;
             break;
         }
         o->subtype = 1;
@@ -69,7 +69,7 @@ void FUN_80116d14(TObj *o)
         if (DAT_8009c93a != 0) o->step++;
         FUN_80027c74(o);
         *(unsigned char *)&o->d3c = 0;
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
         FUN_80029078(o);
         break;
     case 3:
@@ -85,7 +85,7 @@ void FUN_80116d14(TObj *o)
         case 0:
         case 1:
             if (DAT_8009ce0b != 0 && DAT_800a60da == 2 && (unsigned)(*(unsigned short *)&DAT_1f80016a - 0x400) < 0x18) {
-                FUN_8002715c(0x40c);
+                stepPlayerXToward(0x40c);
                 if (DAT_1f800172 >= 0x2e) {
                     if (!FUN_800270a0(o, 2, 2)) break;
                     DAT_800a609c = 1;
@@ -107,7 +107,7 @@ void FUN_80116d14(TObj *o)
             o->step++;
             break;
         case 2:
-            if (DAT_8009cdc0 == 1) FUN_8005a9a4(0x1c, 0);
+            if (DAT_8009cdc0 == 1) setEventComplete(0x1c, 0);
             DAT_8009c982[0] = 0;
             break;
         default:
@@ -229,7 +229,7 @@ void FUN_80116d14(TObj *o)
         if (DAT_1f8001cc != 0) break;
         DAT_1f8001c6 = 0;
         DAT_8009c975 = 4;
-        FUN_8001eb64();
+        startAreaBgm();
         o->step++;
         break;
     case 13:

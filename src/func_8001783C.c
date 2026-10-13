@@ -70,13 +70,13 @@ extern unsigned char D_8009D0AA;
 extern unsigned char D_8009D0C8;
 extern unsigned char D_8009D0B8;
 extern void *memset(void *, int, int);
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 
 void func_8001783C(void)
 {
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
-    FUN_80021f5c(D_1F8000C0);
+    getBaseMatrix(D_1F8000C0);
     DAT_1f8000ea = -544;
     DAT_1f8000ee = 160;
     DAT_1f8000f2 = -128;

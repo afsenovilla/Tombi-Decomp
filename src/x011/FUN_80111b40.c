@@ -13,7 +13,7 @@ extern unsigned char *L_80115d3c[];
 extern AB D_80115d70[];
 extern unsigned char DAT_8009ce4a, DAT_8009d0b8;
 extern int FUN_8001f9e0(void);
-extern void FUN_8003ecb0(unsigned char *, V3 *, int, int, O *);
+extern void spawnItemFromEntry(unsigned char *, V3 *, int, int, O *);
 
 void FUN_80111b40(O *o)
 {
@@ -27,32 +27,32 @@ void FUN_80111b40(O *o)
     if (e[0] == 0xff) {
         l = L_80115d3c[e[1]];
         for (i = 0; *l != 0xff; i++) {
-            FUN_8003ecb0(l, &v, D_80115d70[i].a, D_80115d70[i].b, o);
+            spawnItemFromEntry(l, &v, D_80115d70[i].a, D_80115d70[i].b, o);
             l += 6;
         }
     } else if (e[0] == 0xfe) {
         switch (e[1]) {
         case 0:
             if ((FUN_8001f9e0() & 7) < 4) {
-                FUN_8003ecb0(L_80115d3c[1], &v, 0, -0x400, o);
+                spawnItemFromEntry(L_80115d3c[1], &v, 0, -0x400, o);
             } else {
                 l = L_80115d3c[0];
                 for (i = 0; *l != 0xff; i++) {
-                    FUN_8003ecb0(l, &v, D_80115d70[i].a, D_80115d70[i].b, o);
+                    spawnItemFromEntry(l, &v, D_80115d70[i].a, D_80115d70[i].b, o);
                     l += 6;
                 }
             }
             break;
         case 1:
-            if (DAT_8009ce4a == 0xff) FUN_8003ecb0(L_80115d3c[8], &v, 0, -0x400, o);
-            else FUN_8003ecb0(L_80115d3c[7], &v, 0, -0x400, o);
+            if (DAT_8009ce4a == 0xff) spawnItemFromEntry(L_80115d3c[8], &v, 0, -0x400, o);
+            else spawnItemFromEntry(L_80115d3c[7], &v, 0, -0x400, o);
             break;
         case 2:
-            if (DAT_8009d0b8 == 0) FUN_8003ecb0(L_80115d3c[9], &v, 0, -0x400, o);
-            else FUN_8003ecb0(L_80115d3c[10], &v, 0, -0x400, o);
+            if (DAT_8009d0b8 == 0) spawnItemFromEntry(L_80115d3c[9], &v, 0, -0x400, o);
+            else spawnItemFromEntry(L_80115d3c[10], &v, 0, -0x400, o);
             break;
         }
     } else {
-        FUN_8003ecb0(e, &v, 0, -0x400, o);
+        spawnItemFromEntry(e, &v, 0, -0x400, o);
     }
 }

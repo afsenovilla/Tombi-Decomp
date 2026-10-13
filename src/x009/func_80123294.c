@@ -7,7 +7,7 @@ extern void *D_8012EA40[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 
 static __inline__ int Ground(TObj *o)
 {
@@ -47,5 +47,5 @@ void func_80123294(TObj *o)
         }
         break;
     }
-    if (o->visible && !Ground(o)) FUN_8001fb20(o);
+    if (o->visible && !Ground(o)) applyFrameVelocityY(o);
 }

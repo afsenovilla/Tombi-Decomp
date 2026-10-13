@@ -6,11 +6,11 @@ typedef struct {
     short x, y;
 } E;
 extern E D_8012A878[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 TObj *func_80117EC0(TObj *o, int idx)
 {
-    TObj *p = FUN_800183b8();
+    TObj *p = allocObjectLayer2();
 
     if (p == 0) return 0;
     p->active = 1;

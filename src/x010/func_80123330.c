@@ -12,7 +12,7 @@ extern unsigned char D_8009C942;
 extern unsigned char D_8009C93E;
 void AnimLoadDuration(TObj *o);
 void FUN_800eea7c(TObj *o, short a, short c);
-void FUN_8005a8a8(int a, int b, int c);
+void setEventStarted(int a, int b, int c);
 
 void func_80123330(TObj *o)
 {
@@ -35,7 +35,7 @@ void func_80123330(TObj *o)
             D_800A6038.d8c = 0;
             D_800A6038.h->p.whole = o->h->p.whole;
             o->y.p.whole = D_800A6038.y.p.whole + 8;
-            FUN_8005a8a8(0xb2, 0, 0);
+            setEventStarted(0xb2, 0, 0);
             o->timer = 0xfa;
             o->state++;
         }

@@ -11,7 +11,7 @@ extern void func_8011EC78(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800ea544(TObj *, short, short, short);
 extern unsigned int FUN_8001f9e0(void);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 #define SPARKLE(o)                                                         \
     switch ((o)->state) {                                                  \
@@ -186,7 +186,7 @@ void func_801274FC(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

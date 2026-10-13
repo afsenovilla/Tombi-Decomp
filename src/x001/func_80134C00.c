@@ -13,7 +13,7 @@ extern int Rand(void);
 extern int ObjCullRegister(TObj *);
 extern int FUN_800203dc(P *);
 extern int FUN_800201ac(P *, int);
-extern void FUN_80018790(P *);
+extern void freeObjectLayer2(P *);
 extern void func_80134EE8(P *);
 extern void func_80132B64(P *);
 extern void func_80133A24(P *);
@@ -88,7 +88,7 @@ void func_80134C00(P *o)
         o->t.b69 = 0;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

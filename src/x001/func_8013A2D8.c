@@ -12,7 +12,7 @@ extern TObj *D_800A60C8;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern unsigned char D_800A60F8;
 extern void AnimLoadDuration(TObj *o);
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 
 void func_8013A2D8(TObj *o)
 {
@@ -26,13 +26,13 @@ void func_8013A2D8(TObj *o)
         AnimLoadDuration(&D_800A6038);
         switch (D_8009CEAB) {
         case 1:
-            D_800A60C8 = FUN_8002dc50(2, 0x1f, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x1f, 0x80, 0x6c);
             break;
         case 2:
-            D_800A60C8 = FUN_8002dc50(2, 0x20, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x20, 0x80, 0x6c);
             break;
         case 3:
-            D_800A60C8 = FUN_8002dc50(2, 0x21, 0x80, 0x6c);
+            D_800A60C8 = showMessageBox(2, 0x21, 0x80, 0x6c);
             break;
         default:
             return;

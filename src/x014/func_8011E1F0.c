@@ -29,7 +29,7 @@ extern void (*D_80125CD8[])(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 
 static __inline__ int chk(TObj *o)
 {
@@ -67,7 +67,7 @@ void func_8011E1F0(TObj *o)
                 break;
             }
         }
-        o->d38 = FUN_800205d8((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
+        o->d38 = angleFromDelta((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
         o->wb6 = D_8009C962[0];
         x = ((o->d38 + 8) & 0xff) >> 4;
         o->wb8 = x;

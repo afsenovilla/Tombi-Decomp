@@ -8,7 +8,7 @@ extern unsigned short *D_80133B98[];
 extern unsigned short D_1F80016A;
 extern unsigned short D_1F800172;
 extern int AnimAdvanceWithBox(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int func_8011FDD4(TObj *);
 
 void func_80123558(TObj *o)
@@ -34,7 +34,7 @@ void func_80123558(TObj *o)
         break;
     case 1:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (func_8011FDD4(o)) {
             o->timer = 0;
             o->state++;

@@ -13,8 +13,8 @@ extern unsigned char D_8009CD98[], D_8009CD9C[], D_800B146C[], D_800B1474[], D_8
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_800188e0(TObj *);
+extern void setEventComplete(int, int);
+extern void freeObjectLayer5(TObj *);
 
 void func_80116CDC(TObj *o)
 {
@@ -90,7 +90,7 @@ void func_80116CDC(TObj *o)
         break;
     case 2:
         if (o->subtype == 0) {
-            FUN_8005a9a4(0x77, 0);
+            setEventComplete(0x77, 0);
             switch (D_8009C960[0]) {
             case 0:
                 k = 0;
@@ -111,7 +111,7 @@ void func_80116CDC(TObj *o)
             o->b04++;
         }
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

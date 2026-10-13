@@ -9,7 +9,7 @@ extern B D_80135B30[];
 extern A *D_801386F8[];
 extern short D_1F80016A;
 extern void FUN_8001f8e4(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_801206F0(TObj *);
 extern int func_8012080C(TObj *);
@@ -71,7 +71,7 @@ void func_80121A88(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
         if (func_801206F0(o) == 0 && x->w0e++ >= 4) goto fail;
@@ -95,7 +95,7 @@ void func_80121A88(TObj *o)
         SETANIM(0xd);
     case 4:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
         func_8012080C(o);

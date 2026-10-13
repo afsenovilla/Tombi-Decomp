@@ -41,7 +41,7 @@ extern int DAT_1f800310A[];
 #define DAT_1f800310 DAT_1f800310A[0]
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
-extern void func_80027A30(int, int, int);
+extern void subtractScaledVertices(int, int, int);
 
 #define SETUP(o, n, w, v, P, Q) \
     o->wac = w; \
@@ -107,7 +107,7 @@ int func_80120494(S *o)
     common:
         o->wcc = o->velV;
         FUN_80025aa8(o->da0, o->db8);
-        func_80027A30(o->db8, o->dbc, o->wcc);
+        subtractScaledVertices(o->db8, o->dbc, o->wcc);
         return 0;
     case 8:
         o->step = 0;

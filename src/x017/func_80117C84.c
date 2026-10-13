@@ -5,7 +5,7 @@ extern void func_80117224(TObj *);
 extern void func_8011750C(TObj *);
 extern void func_80117864(TObj *);
 extern void func_801179EC(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern unsigned char D_8009C940;
 extern unsigned char D_8009C941;
 extern unsigned char D_8009CE0A;
@@ -59,7 +59,7 @@ void func_80117C84(TObj *o)
                 D_800A603C = 5;
                 D_800A603D = 0;
                 D_800A603E = 0;
-                FUN_8005a9a4(0x66, 0);
+                setEventComplete(0x66, 0);
                 o->timer = 300;
                 o->state++;
             }

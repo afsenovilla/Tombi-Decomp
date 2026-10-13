@@ -11,7 +11,7 @@ extern unsigned short *D_8013A1BC[];
 extern unsigned char D_80138FD8[];
 extern unsigned short D_1F800282;
 extern int AnimAdvanceWithBox(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *FUN_80018448(void);
 
@@ -40,7 +40,7 @@ static __inline__ void Spawn(TObj *o)
 }
 
 #define FALL() \
-    FUN_8001faf4(o); \
+    applyFrameVelocityX(o); \
     o->velV += 0x40; \
     if (o->velV > 0x500) \
         o->velV = 0x500; \

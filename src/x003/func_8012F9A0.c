@@ -9,7 +9,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_8012F9A0(TObj *o)
 {
@@ -63,7 +63,7 @@ void func_8012F9A0(TObj *o)
         break;
     case 2:
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

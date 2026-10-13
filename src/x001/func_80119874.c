@@ -16,8 +16,8 @@ extern int FUN_800202b4(TObj *);
 extern int func_80119750(TObj *);
 extern void MusicStopOrFadeIn(int);
 extern void ThreadCreate(int, void *);
-extern void FUN_8001eb64(void);
-extern void FUN_8005a8a8(int, int, int);
+extern void startAreaBgm(void);
+extern void setEventStarted(int, int, int);
 extern void ObjFree(TObj *);
 
 void func_80119874(TObj *o)
@@ -77,11 +77,11 @@ void func_80119874(TObj *o)
         case 5:
             D_8009D081 = 4;
             D_8009C975 = 4;
-            FUN_8001eb64();
+            startAreaBgm();
             o->step++;
             break;
         case 6:
-            FUN_8005a8a8(0xa4, 0, 0);
+            setEventStarted(0xa4, 0, 0);
             o->timer = 0x1e0;
             o->step++;
             break;

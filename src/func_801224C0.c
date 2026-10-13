@@ -10,7 +10,7 @@ extern int D_800A4570[];
 extern int D_800A4574[];
 short GetClut(int x, int y);
 void ObjListPush_1F80022C(TObj *o);
-void FUN_80018934(TObj *o);
+void freeObjectLayer7(TObj *o);
 
 static __inline__ void fin(TObj *o, short m)
 {
@@ -90,7 +90,7 @@ void func_801224C0(TObj *o)
         o->b04 = t + 1;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

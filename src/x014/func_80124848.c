@@ -2,11 +2,11 @@
 // MATCHING 80124848 212
 #include "TOBJ.H"
 
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 int func_80124848(TObj *o, unsigned char sub, unsigned char k)
 {
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
     int x;
 
     if (n != 0) {

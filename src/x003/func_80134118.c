@@ -13,8 +13,8 @@ typedef struct {
 } E;
 extern E *D_801360E4;
 extern unsigned char D_8009CDC8;
-extern TObj *FUN_800184d8(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer4(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_80134118(TObj *o)
 {
@@ -32,7 +32,7 @@ void func_80134118(TObj *o)
         k = e->b0c == 0x28; /* compared with 0x28 below: kept as in the game */
         if (k == 0x28 && D_8009CDC8 == 0xff) continue;
         if (*(volatile unsigned short *)&e->flags & 0x80) {
-            p = FUN_800184d8();
+            p = allocObjectLayer4();
             if (p) {
                 p->active = 1;
                 p->type = 0x32;
@@ -45,7 +45,7 @@ void func_80134118(TObj *o)
                 p->b.p.whole = e->z;
             }
         } else {
-            p = FUN_800183b8();
+            p = allocObjectLayer2();
             if (p) {
                 p->active = 3;
                 p->type = 0x32;

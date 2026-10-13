@@ -12,7 +12,7 @@ extern unsigned short D_8009C962;
 extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
 extern void FUN_800270a0(TObj *, int, int);
-extern void FUN_8002715c(int);
+extern void stepPlayerXToward(int);
 extern void FUN_8002a4d0(TObj *);
 
 void func_801162D8(TObj *o)
@@ -38,7 +38,7 @@ void func_801162D8(TObj *o)
             }
             if (D_8009CDED != 0) {
                 if ((unsigned short)(pl->a.p.whole - 0x70) < 0x60 && pl->b.p.whole > 0) {
-                    FUN_8002715c(0xa0);
+                    stepPlayerXToward(0xa0);
                     if (pl->b.p.whole >= 0x5b) FUN_800270a0(o, 1, 1);
                 }
             } else {
@@ -46,7 +46,7 @@ void func_801162D8(TObj *o)
                 D_800A60E0 = 3;
             }
             if ((unsigned short)(*(volatile short *)&pl->a.p.whole - 0x70) < 0x60 && pl->b.p.whole < 0) {
-                FUN_8002715c(0xa0);
+                stepPlayerXToward(0xa0);
                 if (pl->b.p.whole < -0x5a) FUN_800270a0(o, 1, 3);
             }
             break;

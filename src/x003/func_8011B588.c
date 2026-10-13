@@ -5,7 +5,7 @@
 extern short D_1F80016A, D_1F80016E;
 extern TObj D_800A6038;
 extern unsigned char D_80135A78[];
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 
 int func_8011B588(TObj *o, int mode, int target)
 {
@@ -15,7 +15,7 @@ int func_8011B588(TObj *o, int mode, int target)
     unsigned char thr;
 
     if (mode == 0)
-        t = FUN_800205d8(D_1F80016A - o->h->p.whole, D_1F80016E - o->y.p.whole);
+        t = angleFromDelta(D_1F80016A - o->h->p.whole, D_1F80016E - o->y.p.whole);
     else if (mode == 1) {
         if (o->subtype & 2)
             t = (o->subtype & 1) << 7;

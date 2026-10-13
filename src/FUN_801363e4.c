@@ -23,10 +23,10 @@ extern char D_801396C4[];
 
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_800eb50c(int, int, int, int);
 extern void FUN_80025f40(int, int, int, int);
-extern void FUN_8003c7c4(char *, Fix16 *, int, int, int);
+extern void applyItemEffect(char *, Fix16 *, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_80026c50(int, int, int);
 
@@ -79,7 +79,7 @@ void FUN_801363e4(TObj *o)
             if (DAT_800a60a1[0] == 0) return;
             q->anim = D_8013B148;
             FUN_8001fe6c(q);
-            DAT_800a60c8 = FUN_8002dc50(7, DAT_8009cebf[0], 0xd0, 0x6c);
+            DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0xd0, 0x6c);
             q->anim = D_8013B134;
             FUN_8001fe6c(q);
             o->w08 = 0x30;
@@ -127,7 +127,7 @@ void FUN_801363e4(TObj *o)
                 if (--o->w08 != 0) return;
                 DAT_800a60c8->b04 = 3;
                 DAT_8009cebf[0]++;
-                DAT_800a60c8 = FUN_8002dc50(7, DAT_8009cebf[0], 0x120, 0x6c);
+                DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
                 q->anim = D_8013B138;
                 FUN_8001fe6c(q);
                 o->state = 0;
@@ -144,7 +144,7 @@ void FUN_801363e4(TObj *o)
             v[2].p.whole = q->b.p.whole;
             q->anim = D_8013B13C;
             FUN_8001fe6c(q);
-            FUN_8003c7c4(D_801396C4, v, 0, 0, 1);
+            applyItemEffect(D_801396C4, v, 0, 0, 1);
             o->step = 5;
             break;
         case 2:
@@ -162,7 +162,7 @@ void FUN_801363e4(TObj *o)
         FUN_8001fec0(q);
         if (--o->w08 != 0) return;
         DAT_8009cebf[0]++;
-        DAT_800a60c8 = FUN_8002dc50(7, DAT_8009cebf[0], 0x120, 0x6c);
+        DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
         q->anim = D_8013B138;
         FUN_8001fe6c(q);
         o->step = 3;
@@ -175,7 +175,7 @@ void FUN_801363e4(TObj *o)
             FUN_80026c50(3, 1, 1);
         }
         if (--o->w08 != 0) return;
-        DAT_800a60c8 = FUN_8002dc50(7, DAT_8009cebf[0], 0x120, 0x6c);
+        DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
         q->anim = D_8013B138;
         FUN_8001fe6c(q);
         o->step = 3;

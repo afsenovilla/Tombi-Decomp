@@ -7,7 +7,7 @@ extern unsigned char D_8009CEB0;
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_80043260(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_80126BBC(TObj *o, TObj *p)
 {
@@ -26,7 +26,7 @@ void func_80126BBC(TObj *o, TObj *p)
         o->b04 = 2;
         o->step = 0;
         o->state = 0;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
         D_1F80019E = 0;
     } else if (U8(o, 0xc3) != 0) {
         p->b6a = o->ba6;

@@ -17,7 +17,7 @@ extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 static __inline__ void setAnim(TO2 *o, unsigned short n)
 {
@@ -47,7 +47,7 @@ void func_801182FC(TO2 *o)
         o->t.animFrame = o->t.b68 & 1;
         setAnim(o, 4);
         v = *(V6 *)&o->t.a;
-        o->t.d90 = FUN_8002dcc8(3, 5, &v);
+        o->t.d90 = showMessageBoxDirect(3, 5, &v);
         o->t.state++;
         break;
     case 1:

@@ -8,7 +8,7 @@ extern char C0c0[], C118[];
 extern short G1f4;
 extern void *G1e0;
 extern char P6a8[];
-extern void FUN_80063fdc(int, int), FUN_80063ffc(int), FUN_80021f5c(char *), FUN_80021fac(char *);
+extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void FUN_80016ca8(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
 void FUN_80016b50(void)
@@ -28,14 +28,14 @@ void FUN_80016b50(void)
     A114 = 0;
     A110 = 0;
     A10c = 0;
-    FUN_80021f5c(C0c0);
+    getBaseMatrix(C0c0);
     B0e2 = 0;
     B0e6 = 0;
     B0ea = -0x220;
     B0ee = 0;
     B0f2 = 0;
     B0f6 = 0;
-    FUN_80021fac(C118);
+    initLighting(C118);
     FUN_80016ca8(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;

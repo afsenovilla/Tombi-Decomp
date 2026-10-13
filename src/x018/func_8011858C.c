@@ -12,9 +12,9 @@ extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 static __inline__ void setanim(TObj *o, short n)
 {
@@ -44,7 +44,7 @@ void func_8011858C(TObj *o)
         o->animFrame = o->b68 & 1;
         setanim(o, 4);
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 6, &v);
+        o->d90 = showMessageBoxDirect(3, 6, &v);
         o->state++;
         break;
     case 1:
@@ -54,14 +54,14 @@ void func_8011858C(TObj *o)
         q->b04 = 3;
         setanim(o, 1);
         addItemToInventory(0x38, 1, 1);
-        FUN_8005a9a4(0xb6, 0);
+        setEventComplete(0xb6, 0);
         o->timer = 200;
         o->state = 2;
         break;
     case 2:
         if (--o->timer > 0) break;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 8, &v);
+        o->d90 = showMessageBoxDirect(3, 8, &v);
         setanim(o, 4);
         o->state++;
         break;
@@ -87,7 +87,7 @@ void func_8011858C(TObj *o)
         if (--o->timer > 0) break;
         o->animFrame ^= 1;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 9, &v);
+        o->d90 = showMessageBoxDirect(3, 9, &v);
         setanim(o, 4);
         o->state++;
         break;
@@ -97,7 +97,7 @@ void func_8011858C(TObj *o)
         if (q->b04 != 2) break;
         q->b04 = 3;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 7, &v);
+        o->d90 = showMessageBoxDirect(3, 7, &v);
         o->state++;
         break;
     case 7:
@@ -106,7 +106,7 @@ void func_8011858C(TObj *o)
         if (q->b04 != 2) break;
         q->b04 = 3;
         setanim(o, 8);
-        FUN_8005a9a4(0x74, 0);
+        setEventComplete(0x74, 0);
         o->state++;
         break;
     case 8:

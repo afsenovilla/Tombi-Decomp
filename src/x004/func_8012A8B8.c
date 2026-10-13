@@ -8,7 +8,7 @@ extern int AnimAdvance(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void func_8012A31C(TObj *o);
 extern void func_8012A740(TObj *o);
-extern void FUN_80018790(TObj *o);
+extern void freeObjectLayer2(TObj *o);
 
 void func_8012A8B8(TObj *o)
 {
@@ -42,7 +42,7 @@ void func_8012A8B8(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

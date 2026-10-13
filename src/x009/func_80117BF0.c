@@ -2,7 +2,7 @@
 // MATCHING 80117bf0 344
 #include "TOBJ.H"
 extern unsigned char D_8009D2B1;
-extern void FUN_8001e76c(int, int, int, int);
+extern void playSFXWithPitchSlide(int, int, int, int);
 extern void FUN_8001e4f0(int);
 
 void func_80117BF0(TObj *o)
@@ -20,7 +20,7 @@ void func_80117BF0(TObj *o)
                 o->state = 2;
                 o->timer = 0x40;
                 o->velV = 0x100;
-                FUN_8001e76c(0x93, 1, 8, 0x78);
+                playSFXWithPitchSlide(0x93, 1, 8, 0x78);
                 FUN_8001e4f0(0x91);
             }
         }

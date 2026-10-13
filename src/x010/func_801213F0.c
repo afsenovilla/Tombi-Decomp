@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short D_8012F2F8[];
 extern short D_1F80019E;
-extern int func_800428C0(TObj *, TObj *);
+extern int resolveHitResultA(TObj *, TObj *);
 
 void func_801213F0(TObj *a, TObj *b)
 {
@@ -22,7 +22,7 @@ void func_801213F0(TObj *a, TObj *b)
     if (n < 0) n = 0;
     t = p[n >> 3];
     if ((unsigned short)(a->h->p.whole - (b->h->p.whole + t) + (b->box0 + a->box0)) > b->box1 + a->box1) return;
-    if (func_800428C0(a, b) != 0) {
+    if (resolveHitResultA(a, b) != 0) {
         b->animFrame = a->animFrame & 1;
     }
     D_1F80019E = 0;

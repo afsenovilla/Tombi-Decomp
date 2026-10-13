@@ -4,7 +4,7 @@
 
 extern unsigned char D_8009CDB2;
 extern int D_8009C984;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_80139A80(TObj *o)
 {
@@ -14,7 +14,7 @@ void func_80139A80(TObj *o)
         if (D_8009C984 & 0x100) {
             o->b04 = 3;
         } else {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n) {
                 n->active = 1;
                 n->type = 0x16;

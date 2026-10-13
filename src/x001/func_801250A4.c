@@ -6,7 +6,7 @@ extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_800439F4(TObj *, TObj *);
 extern short func_80124C20(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_801250A4(TObj *a, TObj *b)
 {
@@ -22,7 +22,7 @@ void func_801250A4(TObj *a, TObj *b)
         a->b04 = 2;
         a->step = 0;
         a->state = 0;
-        FUN_8004258c(a, 1);
+        decreaseObjectTimer(a, 1);
         D_1F80019E = 0;
     }
 }

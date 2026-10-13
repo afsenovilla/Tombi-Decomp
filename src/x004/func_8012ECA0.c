@@ -6,7 +6,7 @@ typedef struct { unsigned short w0, w2, w4, w6, w8, wa; } F;
 extern F D_801314A4;
 extern E D_8013145C[];
 extern unsigned char D_8009CF24[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012ECA0(void)
 {
@@ -15,7 +15,7 @@ void func_8012ECA0(void)
     E *p;
 
     {
-    TObj *m = FUN_800183b8();
+    TObj *m = allocObjectLayer2();
     if (m) {
         m->active = 3;
         m->type = 0x32;
@@ -30,7 +30,7 @@ void func_8012ECA0(void)
     for (i = 0; i < 5; i++) {
         if (D_8009CF24[i] == 0) continue;
         p = &D_8013145C[i];
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n == 0) continue;
         n->active = 4;
         n->type = 0x32;

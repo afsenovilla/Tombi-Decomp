@@ -1,11 +1,11 @@
 // FUNC 80122f18 136 X014
 // MATCHING 80122f18 136
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 int func_80122F18(TObj *o)
 {
-    TObj *p = FUN_800183b8();
+    TObj *p = allocObjectLayer2();
 
     if (p != 0) {
         p->active = 1;

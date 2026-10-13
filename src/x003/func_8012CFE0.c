@@ -9,9 +9,9 @@ extern void *D_801399BC[], *D_801399C0[], *D_801399C4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_8012CFE0(TObj *o)
 {
@@ -25,7 +25,7 @@ void func_8012CFE0(TObj *o)
         o->wac = 5;
         o->anim = D_801399BC[0];
         AnimLoadDuration(o);
-        o->d90 = FUN_8002dcc8(6, 7, &v);
+        o->d90 = showMessageBoxDirect(6, 7, &v);
         o->state++;
         break;
     case 1:
@@ -39,7 +39,7 @@ void func_8012CFE0(TObj *o)
         }
         break;
     case 2:
-        FUN_8005a9a4(0xad, 0);
+        setEventComplete(0xad, 0);
         o->timer = 0x12c;
         o->state++;
         break;
@@ -48,7 +48,7 @@ void func_8012CFE0(TObj *o)
         if (--o->timer == 0) o->state++;
         break;
     case 4:
-        o->d90 = FUN_8002dcc8(6, 8, &v);
+        o->d90 = showMessageBoxDirect(6, 8, &v);
         o->state++;
         break;
     case 6:
@@ -68,7 +68,7 @@ void func_8012CFE0(TObj *o)
         AnimLoadDuration(o);
         o->state++;
         do { } while (0); /* debt: block boundary (game keeps the args after the state store) */
-        o->d90 = FUN_8002dcc8(6, 9, &v);
+        o->d90 = showMessageBoxDirect(6, 9, &v);
         break;
     case 10:
         D_800A603C[0] = 1;

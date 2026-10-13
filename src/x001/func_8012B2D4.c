@@ -17,7 +17,7 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern int func_800203DC(TObj *);
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern short FUN_80040278(TObj *, short, short);
 extern void func_801282D0(TObj *);
 extern void func_801285E4(TObj *);
@@ -164,7 +164,7 @@ void func_8012B2D4(BX *b)
             switch (o->state) {
             case 0:
                 o->b9c = 0;
-                FUN_80026bfc(1, 6);
+                spawnItemNotification(1, 6);
                 o->box2 = 4;
                 o->box3 = 0x14;
                 o->wac = 8;

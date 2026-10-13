@@ -9,7 +9,7 @@ extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short func_8004065C(TObj *, short, short, int);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 void func_80132F80(TObj *o)
 {
@@ -51,7 +51,7 @@ void func_80132F80(TObj *o)
         t = o->h->p.whole;
         s2 = (o->animFrame & 1) ? t - 8 : t + 8;
         if (func_8004065C(o, s2, o->y.p.whole, 0) == 0) {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
         }
         o->y.raw += o->velY << 8;
         o->velY += 0x20;
@@ -66,7 +66,7 @@ void func_80132F80(TObj *o)
         if (o->animFrame & 1) x = t - 8;
         else x = t + 8;
         if (func_8004065C(o, x, o->y.p.whole, 0) == 0) {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
         }
         o->y.raw += o->velY << 8;
         o->velY += 0x20;

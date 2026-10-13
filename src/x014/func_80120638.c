@@ -2,11 +2,11 @@
 // MATCHING 80120638 136
 #include "TOBJ.H"
 
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 int func_80120638(TObj *o)
 {
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
 
     if (n) {
         n->active = 1;

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 void func_8012EBA0(TObj *o)
 {
@@ -21,7 +21,7 @@ void func_8012EBA0(TObj *o)
         o->state++;
         break;
     case 2:
-        FUN_8005a8a8(0x7b, 0, 0);
+        setEventStarted(0x7b, 0, 0);
         o->w08 = 200;
         o->state++;
         break;

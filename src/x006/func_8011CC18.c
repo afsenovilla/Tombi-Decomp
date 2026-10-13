@@ -11,7 +11,7 @@ extern FR D_80120268[];
 extern unsigned short *D_80122E18;
 extern void FUN_800595f4(TObj *, short, short, unsigned short);
 extern void AddDrawMode(int, int);
-extern void FUN_80059728(RECT *, int, int, int);
+extern void addTilePrim(RECT *, int, int, int);
 
 void func_8011CC18(TObj *a, int b, short x, short y)
 {
@@ -36,10 +36,10 @@ void func_8011CC18(TObj *a, int b, short x, short y)
     r.y = y - 4;
     r.w = g->wd0;
     r.h = 8;
-    FUN_80059728(&r, 0xff, 0xff, 0);
+    addTilePrim(&r, 0xff, 0xff, 0);
     r.x = x - 0x40;
     r.y = y - 4;
     r.w = 0x80;
     r.h = 8;
-    FUN_80059728(&r, 0x20, 0x20, 0x20);
+    addTilePrim(&r, 0x20, 0x20, 0x20);
 }

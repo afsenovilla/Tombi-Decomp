@@ -23,18 +23,18 @@ extern char D_80010000[];
 extern char D_80010008[];
 extern char D_800B3E28[];
 extern void titleSequenceTask(void);
-void FUN_80020eac(void);
+void loadCollisionBounds(void);
 void SetDispMask(int);
-void FUN_8004fb68(int);
-void FUN_8004fa80(int, int);
+void loadSoundSet(int);
+void queueSystemLoadList(int, int);
 void *memset(void *, int, int);
-void FUN_8001d63c(int);
+void cdSeekStream(int);
 void FUN_80020f14(int, int, int, char *);
-void FUN_80017328(void (*)(void));
+void setTask(void (*)(void));
 void FUN_80016e34(int, int, int, int);
 void FUN_80025b98(void);
 void FUN_80016ca8(int, int, int);
-void FUN_800196bc(int, int);
+void drawBootLogo(int, int);
 void ThreadWaitFrames(int n);
 
 void func_80019244(void)
@@ -52,7 +52,7 @@ void func_80019244(void)
     D_8009F3DC = 0;
     D_8009D67C = 1;
     D_8009F0E8 = 0;
-    FUN_80020eac();
+    loadCollisionBounds();
     P->w48 = 9;
     P->w4a = 0;
     P->w4c = 0;
@@ -61,9 +61,9 @@ void func_80019244(void)
         switch (P->w48) {
         case 0:
             D_1F8001CE = 0;
-            FUN_8004fb68(0);
-            FUN_8004fb68(1);
-            FUN_8004fa80(0, 1);
+            loadSoundSet(0);
+            loadSoundSet(1);
+            queueSystemLoadList(0, 1);
             D_1F8001C4 = 0;
             D_1F8001C5 = 0;
             memset(D_1F8001A0, 0, 0x24);
@@ -71,7 +71,7 @@ void func_80019244(void)
             break;
         case 1:
             if (D_1F8001CE) {
-                FUN_8001d63c(0x15);
+                cdSeekStream(0x15);
                 P->w48 = 4;
             }
             break;
@@ -92,12 +92,12 @@ void func_80019244(void)
             P->w48 = 0;
             P->w4a = 1;
             P->w4c = 0;
-            FUN_80017328(titleSequenceTask);
+            setTask(titleSequenceTask);
             break;
         case 9:
             SetDispMask(0);
             D_1F8001CE = 0;
-            FUN_8004fa80(0x5e, 1);
+            queueSystemLoadList(0x5e, 1);
             P->w48 = 10;
             break;
         case 10:
@@ -142,7 +142,7 @@ void func_80019244(void)
                 break;
             }
             if (P->w48 == 0xb)
-                FUN_800196bc(*(unsigned char *)&P->w5a, 1);
+                drawBootLogo(*(unsigned char *)&P->w5a, 1);
             break;
         }
         ThreadWaitFrames(1);

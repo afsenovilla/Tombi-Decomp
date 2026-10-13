@@ -11,7 +11,7 @@ typedef struct {
 extern unsigned char D_1F8001A4;
 extern short func_800435E0(P *, TObj *);
 extern void FUN_8001f96c(int, short, short, short);
-extern void FUN_8004258c(P *, int);
+extern void decreaseObjectTimer(P *, int);
 
 void func_80126564(P *o, TObj *e)
 {
@@ -32,7 +32,7 @@ void func_80126564(P *o, TObj *e)
                 o->o.step = 0;
                 o->o.state = 0;
                 o->o.animFrame = r;
-                FUN_8004258c(o, 1);
+                decreaseObjectTimer(o, 1);
                 break;
             }
             e->active = 2;
@@ -70,7 +70,7 @@ void func_80126564(P *o, TObj *e)
         o->o.step = 0;
         o->o.state = 0;
         o->o.animFrame = r;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
         break;
     case 2:
         if (e->active == 3) break;

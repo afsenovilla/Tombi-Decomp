@@ -33,17 +33,17 @@ extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern int D_1F8000F0;
 extern SC *D_1F8001D4;
-extern unsigned int FUN_80028420(O *);
-extern unsigned int FUN_80028b40(O *);
+extern unsigned int stepScrollReturnY(O *);
+extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
-extern void FUN_800277f8(O *);
+extern void syncObjectTargetY(O *);
 extern void FUN_80029078(O *);
 extern void FUN_800216c4(void);
-extern void FUN_8002715c(int);
+extern void stepPlayerXToward(int);
 extern int FUN_800270a0(O *, int, unsigned char);
 extern void FUN_800eea7c(PL *, int, int);
 extern void AnimAdvance(PL *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_8002a3d4(O *);
 
 #define XU (*(unsigned short *)&D_1F80016A)
@@ -55,7 +55,7 @@ void func_80116990(O *o)
     case 0: {
         unsigned char *f = &D_8009CDA2;
         if (*f != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) *f = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) *f = 0;
             break;
         }
         o->subtype = 0;
@@ -66,7 +66,7 @@ void func_80116990(O *o)
         if (D_8009C93A != 0) o->step++;
         FUN_80027c74(o);
         o->b3c = 0;
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
         FUN_80029078(o);
         break;
     case 2:
@@ -110,7 +110,7 @@ void func_80116990(O *o)
             if (D_8009CDB5 == 0) break;
             if (D_800A60DA != 2) break;
             if ((unsigned short)(XU - 0x102f) >= 0x60) break;
-            FUN_8002715c(0x105f);
+            stepPlayerXToward(0x105f);
             if (D_1F800172 < 0x51) break;
             goto t11;
         }
@@ -134,7 +134,7 @@ void func_80116990(O *o)
             switch (k) {
             case 0:
                 if (D_1F80016E < -0x5dc && (unsigned short)(XU - 0x50f) < 0x60 && D_800A60DA != 0) {
-                    FUN_8002715c(0x53f);
+                    stepPlayerXToward(0x53f);
                     break;
                 }
                 if (D_8009CDF1 == 0xff && (unsigned short)(XU - 0x69c) < 0x13 && D_1F80016E >= -0x29d) {
@@ -182,7 +182,7 @@ void func_80116990(O *o)
                     D_800A60E0 = 8;
                     D_800A60D8 = 0x21;
                     if (D_1F800172 >= 0x881) {
-                        FUN_8002715c(0xb6c);
+                        stepPlayerXToward(0xb6c);
                         if (D_1F800172 >= 0x8d1) {
                             o->step = 8;
                             D_800A603C = 5;
@@ -199,7 +199,7 @@ void func_80116990(O *o)
                     break;
                 }
                 if ((unsigned short)(XU - 0x72e) < 0x20 && D_1F800172 >= 0x881) {
-                    FUN_8002715c(0x73e);
+                    stepPlayerXToward(0x73e);
                     if (D_1F800172 >= 0x895) {
                     t12:
                         FUN_800270a0(o, 1, 2);
@@ -207,7 +207,7 @@ void func_80116990(O *o)
                     }
                 }
                 if ((unsigned short)(XU - 0xb28) < 0x80 && D_1F800172 < 0x880) {
-                    FUN_8002715c(0xb68);
+                    stepPlayerXToward(0xb68);
                     if (D_1F800172 < 0x80c) FUN_800270a0(o, 1, 1);
                 }
                 if (D_1F800172 < 0x87a) {
@@ -249,7 +249,7 @@ void func_80116990(O *o)
         D_800A6078->s2--;
         if (D_800A6078->s2 < 0x6ae) {
             o->step++;
-            FUN_8005a9a4(0x18, 0);
+            setEventComplete(0x18, 0);
             o->w4a = 0x154;
         }
         FUN_8002a3d4(o);

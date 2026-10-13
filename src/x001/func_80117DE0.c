@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern void FUN_80020078(TObj *, int);
-extern void FUN_8001888c(TObj *);
+extern void freeObjectLayer8(TObj *);
 
 void func_80117DE0(TObj *o)
 {
@@ -47,7 +47,7 @@ void func_80117DE0(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_8001888c(o);
+        freeObjectLayer8(o);
         break;
     }
 }

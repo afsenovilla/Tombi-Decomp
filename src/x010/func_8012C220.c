@@ -8,8 +8,8 @@ extern void *D_801322F4[], *D_801322E4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern TObj *FUN_8002dcc8(int, int, void *);
-extern void FUN_8005a9a4(int, int);
+extern TObj *showMessageBoxDirect(int, int, void *);
+extern void setEventComplete(int, int);
 
 void func_8012C220(TObj *o)
 {
@@ -25,7 +25,7 @@ void func_8012C220(TObj *o)
         o->wac = 5;
         o->anim = D_801322F4[0];
         AnimLoadDuration(o);
-        o->d90 = (int)FUN_8002dcc8(2, 0x26, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x26, &o->a);
     case 1:
         AnimAdvance(o);
         if (((TObj *)o->d90)->b04 == 2) {
@@ -82,7 +82,7 @@ void func_8012C220(TObj *o)
         break;
     case 3:
         o->state++;
-        o->d90 = (int)FUN_8002dcc8(2, 0x27, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x27, &o->a);
         break;
     case 4:
         AnimAdvance(o);
@@ -93,7 +93,7 @@ void func_8012C220(TObj *o)
         break;
     case 5:
         o->state++;
-        o->d90 = (int)FUN_8002dcc8(2, 0x28, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x28, &o->a);
         break;
     case 6:
         AnimAdvance(o);
@@ -105,7 +105,7 @@ void func_8012C220(TObj *o)
             D_800A603D[0] = 0;
             D_800A603E[0] = 0;
             o->state++;
-            FUN_8005a9a4(0x3e, 1);
+            setEventComplete(0x3e, 1);
         }
         break;
     case 7:

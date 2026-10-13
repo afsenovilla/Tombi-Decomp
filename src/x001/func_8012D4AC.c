@@ -10,9 +10,9 @@ extern unsigned char D_800A603E;
 extern unsigned char D_800A60E4[];
 extern short D_1F80027E;
 extern short D_1F800284;
-extern void FUN_80026bfc(int, int);
-extern void FUN_8001fb20(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void spawnItemNotification(int, int);
+extern void applyFrameVelocityY(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern TObj *FUN_80018448(void);
 extern short func_8004065C(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
@@ -56,7 +56,7 @@ static __inline__ int land(TObj *o)
     o->animTimer = ((A *)o->anim)->w6 & 0x3fff;
 
 #define COMMON() \
-    FUN_8001fb20(o); \
+    applyFrameVelocityY(o); \
     func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0); \
     func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1); \
     land(o);
@@ -71,7 +71,7 @@ void func_8012D4AC(TObj *o)
     switch (o->state) {
     case 0:
         o->b9c = 0;
-        FUN_80026bfc(0, 6);
+        spawnItemNotification(0, 6);
         o->movetab = D_80077CF4;
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
@@ -125,7 +125,7 @@ void func_8012D4AC(TObj *o)
         COMMON();
         break;
     case 5:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->y.p.whole += 3;
         func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
         func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);

@@ -4,8 +4,8 @@
    animFrame is read once per table (no volatile). */
 #include "TOBJ.H"
 
-extern void FUN_8003c980(TObj *);
-extern void FUN_800188e0(TObj *);
+extern void initItemObject(TObj *);
+extern void freeObjectLayer5(TObj *);
 extern void FUN_80020aec(int);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
@@ -23,7 +23,7 @@ void func_801236F0(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        FUN_8003c980(o);
+        initItemObject(o);
         o->active = 1;
         o->wb4 = 0;
         D_8009C948[0] = o;
@@ -87,7 +87,7 @@ void func_801236F0(TObj *o)
         }
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

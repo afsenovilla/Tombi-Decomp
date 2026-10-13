@@ -45,7 +45,7 @@ extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short FUN_80035428(TObj *);
-extern short FUN_8002078c(P, P);
+extern short angleBetweenPoints(P, P);
 extern void FUN_8002c578(TObj *, int, int, int);
 extern void FUN_800ec710(int, TObj *);
 extern void FUN_80025f40(int, int, int, int);
@@ -281,7 +281,7 @@ void FUN_8003566c(TObj *o)
             t.y = o->velY + MulNegSinScaled(D_8009C338->we, 0xc);
             s.x = o->h->p.whole;
             s.y = o->y.p.whole;
-            o->waa = FUN_8002078c(s, t);
+            o->waa = angleBetweenPoints(s, t);
             o->velH = MulCos(o->waa, o->wa8);
             o->velV = MulNegSinScaled(o->waa, o->wa8);
             ObjApplyVelocity(o);

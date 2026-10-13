@@ -7,12 +7,12 @@ extern void *D_8013A6B4[];
 extern void *D_8013A6B8[];
 extern void *D_8013A6BC[];
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern short FUN_800408d8(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
-extern void FUN_8002b920(TObj *);
+extern void cloneItemPickupObject(TObj *);
 
 static __inline__ int hit(TObj *o)
 {
@@ -45,7 +45,7 @@ void func_8012EB2C(TObj *o)
         break;
     case 1:
         FUN_8001fec0(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         k = 0xe;
         if (o->w7a & 1) k = -0xe;
         FUN_8004065c(o, o->h->p.whole + k, o->y.p.whole, o->w7a);
@@ -60,7 +60,7 @@ void func_8012EB2C(TObj *o)
         break;
     case 2:
         FUN_8001fec0(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         k = 0xe;
         if (o->w7a & 1) k = -0xe;
         FUN_8004065c(o, o->h->p.whole + k, o->y.p.whole, o->w7a);
@@ -69,7 +69,7 @@ void func_8012EB2C(TObj *o)
         if (hit(o) || o->velV > 0x580) {
             o->b9c = 0;
             o->state++;
-            FUN_8002b920(o);
+            cloneItemPickupObject(o);
         }
         break;
     case 3:

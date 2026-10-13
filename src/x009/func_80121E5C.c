@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int FUN_8001f9e0(void);
 extern short TileCollideAt(TObj *, short, short);
 extern char D_80077CF4[];
@@ -69,6 +69,6 @@ void func_80121E5C(TObj *o)
         break;
     }
     if (o->visible && !ground(o)) {
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
     }
 }

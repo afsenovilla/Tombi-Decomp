@@ -7,7 +7,7 @@ extern int D_1F8002F0[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void func_80116E54(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 static __inline__ void setanim(TObj *p)
 {
     p->d3c = D_1F8002F0[0];
@@ -40,7 +40,7 @@ void func_80116FA8(TObj *o)
         break;
     case 2:
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

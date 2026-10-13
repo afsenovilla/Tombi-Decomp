@@ -18,7 +18,7 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 extern void loadImageRect(void *, int, int, int, int);
-extern void FUN_80021f5c(MAT *);
+extern void getBaseMatrix(MAT *);
 extern void MulMatrix0(MAT *, MAT *, MAT *);
 extern void ApplyRotMatrix(SVEC *, int *);
 
@@ -52,7 +52,7 @@ void func_80117148(TObj *o)
         ObjCullRegister(o);
         AnimAdvance(o);
         p = (TObj *)o->d90;
-        FUN_80021f5c(&D_1F800000);
+        getBaseMatrix(&D_1F800000);
         D_1F800060.vx = o->d30;
         D_1F800060.vy = o->d34;
         D_1F800060.vz = o->d38;

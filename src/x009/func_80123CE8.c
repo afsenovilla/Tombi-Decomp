@@ -2,7 +2,7 @@
 // MATCHING 80123ce8 316
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern char D_80077D0C[];
 extern void *D_8012E9F8[];
 
@@ -26,7 +26,7 @@ void func_80123CE8(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

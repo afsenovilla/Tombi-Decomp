@@ -17,7 +17,7 @@ extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void SfxPlay(int);
-extern void FUN_8001fab4(TObj *);
+extern void applyFrameVelocityXY(TObj *);
 extern short FUN_8004065c(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern void func_80128110(TObj *);
@@ -114,7 +114,7 @@ void func_801285E4(TObj *o)
             }
         } else {
             o->b9c = 1;
-            FUN_8001fab4(o);
+            applyFrameVelocityXY(o);
             if (chk(o)) {
                 p->w8 = 0;
                 o->step = 2;

@@ -13,7 +13,7 @@ extern short func_80041EBC(TObj *, short, short);
 extern short ObjTileCollide(TObj *, int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void FUN_80104cd8(TObj *);
 extern void func_80104A04(TObj *);
 
@@ -50,7 +50,7 @@ void func_8011D3EC(TObj *o)
         PlayerSetAnimIfChanged(o, 0xf);
         if (AnimAdvance(o)) {
             SfxPlay2(0x22, 0x23);
-            e = FUN_800182ac();
+            e = allocObjectLayer1();
             if (e) {
                 e->active = 1;
                 e->type = 4;

@@ -9,9 +9,9 @@ extern void *D_8013A6C0[], *D_8013A6C4[];
 extern unsigned short D_8007A3F0[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void FUN_80026bfc(int, int);
-extern void FUN_8001fa88(TObj *, int);
-extern void FUN_8001faf4(TObj *);
+extern void spawnItemNotification(int, int);
+extern void applyAnimVelocityX(TObj *, int);
+extern void applyFrameVelocityX(TObj *);
 extern int TileCollideAt(TObj *, int, int);
 extern void FUN_800408d8(TObj *, int, int);
 extern void func_8012D66C(TObj *);
@@ -21,7 +21,7 @@ void func_8012EF3C(TObj *o)
     switch (o->state) {
     case 0:
         o->b9c = 0;
-        FUN_80026bfc(1, 6);
+        spawnItemNotification(1, 6);
         *(signed char *)&o->b0f = -7;
         o->velV = 0x300;
         o->movetab = D_80077CD0;
@@ -31,14 +31,14 @@ void func_8012EF3C(TObj *o)
         o->state++;
         o->anim = D_8013A6C0[0];
         AnimLoadDuration(o);
-        FUN_8001fa88(o, *(unsigned short *)&o->w7a);
+        applyAnimVelocityX(o, *(unsigned short *)&o->w7a);
         break;
     case 1:
         o->state++;
         o->velV -= 0x20;
         o->y.raw += o->velV << 8;
         if (o->b69 == 1 || (short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) o->b69 = 0;
-        FUN_8001fa88(o, *(unsigned short *)&o->w7a);
+        applyAnimVelocityX(o, *(unsigned short *)&o->w7a);
         break;
     case 2:
         o->state++;
@@ -52,7 +52,7 @@ void func_8012EF3C(TObj *o)
         if (o->b69 == 1 || (short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) o->b69 = 0;
         AnimAdvance(o);
         o->animFrame = D_800A6038.animFrame & 1;
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012D66C(o);
         break;
     case 4:
@@ -65,7 +65,7 @@ void func_8012EF3C(TObj *o)
         FUN_800408d8(o, o->h->p.whole, (short)(o->y.p.whole - 0x20));
         AnimAdvance(o);
         o->animFrame = D_800A6038.animFrame & 1;
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012D66C(o);
         break;
     case 5:
@@ -73,7 +73,7 @@ void func_8012EF3C(TObj *o)
         o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
         AnimAdvance(o);
         o->animFrame = D_800A6038.animFrame & 1;
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012D66C(o);
         break;
     case 6:

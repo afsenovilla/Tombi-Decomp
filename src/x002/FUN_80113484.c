@@ -17,7 +17,7 @@ extern ObjFn DAT_80115d90[];
 extern ObjFn DAT_80115dac[];
 extern ObjFn DAT_80115dc8[];
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void FUN_80113484(TObj *o)
 {
@@ -79,7 +79,7 @@ void FUN_80113484(TObj *o)
         DAT_80115dc8[o->subtype](o);
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

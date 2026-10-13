@@ -9,7 +9,7 @@ typedef struct O {
     char p4[0x90 - 0x6b]; int d90;
 } O;
 extern void FUN_8001fec0(O *);
-extern int FUN_8002dcf0(int, int, V *, int);
+extern int showMessageBoxDirectTimed(int, int, V *, int);
 
 void FUN_801139b4(O *o)
 {
@@ -18,7 +18,7 @@ void FUN_801139b4(O *o)
     case 0:
         v = o->v;
         *(unsigned short *)(v.c + 6) = *(unsigned short *)(v.c + 6) - 0x40;
-        o->d90 = FUN_8002dcf0(13, 2, &v, (short)o->timer);
+        o->d90 = showMessageBoxDirectTimed(13, 2, &v, (short)o->timer);
         o->state++;
         break;
     case 1:

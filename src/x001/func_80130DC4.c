@@ -5,7 +5,7 @@
 extern char D_80077D3C[];
 extern short D_1F80027E;
 extern void AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern short FUN_800408d8(TObj *, short, short);
 
@@ -25,7 +25,7 @@ void func_80130DC4(TObj *o)
             o->state = 0;
             break;
         }
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->y.p.whole -= 3;
         d = 0x10;
         if (o->animFrame & 1) d = -0x10;

@@ -32,9 +32,9 @@ extern DRAWENV *GetDrawEnv(DRAWENV *);
 extern void EnterCriticalSection(void);
 extern void FlushCache(void);
 extern void ExitCriticalSection(void);
-extern void FUN_80018280(void);
-extern void FUN_8001b328(void);
-extern void FUN_8004fa80(int, int);
+extern void clearMenuParams(void);
+extern void inventoryScreenTick(void);
+extern void queueSystemLoadList(int, int);
 extern void stopBgm(int);
 
 void func_8001AEB4(void)
@@ -91,13 +91,13 @@ void func_8001AEB4(void)
         {
             unsigned short *q = &D_800A45EAu;
             s = *q;
-            FUN_80018280();
+            clearMenuParams();
             *q = s;
         }
         SetDispMask(1);
         goto next;
     case 3:
-        FUN_8001b328();
+        inventoryScreenTick();
         if (D_1F8001C2 != 0) {
             k = &D_8009D670;
             if ((*k & 8) && (*k & 0x800)) D_1F8001D4->w4e = 6;
@@ -124,7 +124,7 @@ void func_8001AEB4(void)
         D_8009F087[0] = D_8009BCA0;
         n = D_80077A8C[D_8009C960 + D_8009F838][D_8009C962];
     play:
-        FUN_8004fa80(n, 1);
+        queueSystemLoadList(n, 1);
     next:
         D_1F8001D4->w4e++;
         break;

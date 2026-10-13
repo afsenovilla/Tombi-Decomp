@@ -17,14 +17,14 @@ extern unsigned short D_8013C8E8[];
 extern char D_80077CF4[];
 extern short D_1F80027E, D_1F800284;
 extern unsigned char D_800A603E, D_800A60E4;
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern short func_8004065C(TObj *, short, short, short);
 extern TObj *FUN_80018448(void);
 extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern void FUN_800eae0c(short, int, int, int);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 
 static __inline__ int land2(TObj *o)
 {
@@ -67,7 +67,7 @@ void func_8012CB78(TObj *o)
     switch (o->state) {
     case 0:
         o->b9d = 0;
-        FUN_80026bfc(0, 6);
+        spawnItemNotification(0, 6);
         o->timer = 0x1e;
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
@@ -135,7 +135,7 @@ void func_8012CB78(TObj *o)
             }
             o->timer = 0x1e;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (land2(o)) {
             o->d8c = (unsigned short)s->b;
             if (s->c4) c = D_8013C8E8[-o->wb2];
@@ -177,7 +177,7 @@ void func_8012CB78(TObj *o)
         o->box2 = *p2++;
         o->box3 = *p2;
         o->animTimer = ((AH *)o->anim)->w6 & 0x3fff;
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         land2(o);
         break;
     case 8:

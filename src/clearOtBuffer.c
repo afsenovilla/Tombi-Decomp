@@ -1,0 +1,8 @@
+// FUNC 80018154 44 MAIN0
+// MATCHING 80018154 44
+extern char DAT_800b0d98[];
+extern void *memset(void *, int, int);
+void clearOtBuffer(void)
+{
+    memset(DAT_800b0d98, 0, 0x16c);
+}

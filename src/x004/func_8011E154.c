@@ -16,7 +16,7 @@ extern unsigned char D_8009D0AA[], D_8009D0C8[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void playSFX(int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_8011E154(TObj *o)
 {
@@ -116,7 +116,7 @@ void func_8011E154(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

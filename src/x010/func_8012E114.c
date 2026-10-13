@@ -14,8 +14,8 @@ typedef struct {
 typedef struct { Fix16 a, y, b; } V3;
 extern E *D_8012F574;
 extern unsigned char D_8009CDF2;
-extern TObj *FUN_800184d8(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer4(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012E114(TObj *o)
 {
@@ -28,7 +28,7 @@ void func_8012E114(TObj *o)
     for (i = 0, e = tbl; e->flags != 0xff; e = &tbl[++i]) {
         if (e->b0c == 0x28 && D_8009CDF2 == 0xff) continue;
         if (*(volatile unsigned short *)&e->flags & 0x80) {
-            p = FUN_800184d8();
+            p = allocObjectLayer4();
             if (p) {
                 p->active = 1;
                 p->type = 0x32;
@@ -41,7 +41,7 @@ void func_8012E114(TObj *o)
                 p->b.p.whole = e->z;
             }
         } else {
-            p = FUN_800183b8();
+            p = allocObjectLayer2();
             if (p) {
                 p->active = 3;
                 p->type = 0x32;

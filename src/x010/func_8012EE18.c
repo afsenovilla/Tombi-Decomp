@@ -4,11 +4,11 @@
 
 typedef struct { unsigned short f, sub, c, x, y, z; } SP;
 extern SP D_8012F598;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012EE18(TObj *o)
 {
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
 
     if (n != 0) {
         n->active = 3;

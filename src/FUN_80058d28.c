@@ -26,7 +26,7 @@ extern void FUN_8005e74c(Sprt *);
 extern unsigned short FUN_8005e420(int, int);
 extern void FUN_8005e580(int, Sprt *);
 extern void FUN_80059464(int, int);
-extern void FUN_80059728(short *, int, int, int);
+extern void addTilePrim(short *, int, int, int);
 
 void FUN_80058d28(TObj *o, int idx, short x, short y, short flag)
 {
@@ -59,10 +59,10 @@ void FUN_80058d28(TObj *o, int idx, short x, short y, short flag)
     else
         r[2] = DAT_8009cd9c[idx];
     r[3] = 4;
-    FUN_80059728(r, 0xff, 0xff, 0);
+    addTilePrim(r, 0xff, 0xff, 0);
     r[0] = x + 0x13;
     r[1] = y + 2;
     r[2] = 0x3d;
     r[3] = 4;
-    FUN_80059728(r, DAT_800802ec[idx].a, DAT_800802ec[idx].b, DAT_800802ec[idx].c);
+    addTilePrim(r, DAT_800802ec[idx].a, DAT_800802ec[idx].b, DAT_800802ec[idx].c);
 }

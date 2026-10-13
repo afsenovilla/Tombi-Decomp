@@ -7,7 +7,7 @@
 extern unsigned short DAT_8009c960;
 extern short DAT_1f80019e;
 extern void FUN_8011fa6c(void);
-extern int FUN_80042c70(TObj *, TObj *);
+extern int resolveHitResultE(TObj *, TObj *);
 extern void FUN_800e9f74(int, int, int, int);
 
 static __inline__ short hit(TObj *a, TObj *b)
@@ -35,7 +35,7 @@ void FUN_80044d54(TObj *a, TObj *b)
     }
     if (hit(a, b) != -1) {
         b->w7a = a->animFrame & 1;
-        t = FUN_80042c70(a, b);
+        t = resolveHitResultE(a, b);
         if (t != 0) {
             if (t == 1) {
                 b->active = 3;

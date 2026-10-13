@@ -7,7 +7,7 @@ extern short D_8007A1F0[], D_8007A5F0[];
 extern int *D_800A6078;
 extern int D_800A604C[];
 extern int SquareRoot0(int);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 
 int func_8011B324(TObj *o)
 {
@@ -17,7 +17,7 @@ int func_8011B324(TObj *o)
     dx = D_1F80016A - o->h->p.whole;
     dy = D_1F80016E - o->y.p.whole;
     if (SquareRoot0(dx * dx + dy * dy) > 0x10) {
-    a = (unsigned char)FUN_800205d8(dx, dy);
+    a = (unsigned char)angleFromDelta(dx, dy);
     o->wb0 = a;
     a += 0x80;
     a &= 0xff;

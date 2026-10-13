@@ -13,7 +13,7 @@ extern char D_80010748[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 extern SC *D_1F8001D4;
 extern void AnimLoadDuration(TObj *);
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 
 void func_8013AF10(TObj *o)
 {
@@ -34,7 +34,7 @@ void func_8013AF10(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        D_800A60C8[0] = FUN_8002dc50(2, 0x1e, 0x80, 0x6c);
+        D_800A60C8[0] = showMessageBox(2, 0x1e, 0x80, 0x6c);
         D_800A6066x[0] = D_800A6078->p.whole > e->h->p.whole;
         e->animFrame = D_800A6078->p.whole < e->h->p.whole;
         o->step++;

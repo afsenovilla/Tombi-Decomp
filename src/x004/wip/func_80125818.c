@@ -22,10 +22,10 @@ extern unsigned short D_80131128[];
 extern int Rand(void);
 extern void SfxPlay(int);
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fa88(TObj *, int);
-extern void FUN_8001fa60(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
+extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fdac(int, int);
-extern int FUN_8002078c(P2, P2);
+extern int angleBetweenPoints(P2, P2);
 extern short FUN_800411cc(TObj *, short, short);
 extern short FUN_80041ebc(TObj *, short, short);
 
@@ -173,7 +173,7 @@ void func_80125818(TObj *o)
             SETANIM(D_801345B8)
             o->substep++;
         }
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         TICK
         break;
     case 6:
@@ -206,7 +206,7 @@ void func_80125818(TObj *o)
             SETANIM(D_801345D0)
             if (X(o)->wca) SfxPlay(0x12);
         }
-        FUN_8001fa60(o, X(o)->wcc);
+        applyAnimVelocityY(o, X(o)->wcc);
         break;
     case 8:
         if (o->animFrame) d = -0x20;
@@ -221,7 +221,7 @@ void func_80125818(TObj *o)
             SETANIM(D_801345B8)
             o->substep++;
         }
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         break;
     case 9:
         if (D_1F8001C8 == 0)
@@ -247,7 +247,7 @@ void func_80125818(TObj *o)
             o->animFrame = 0;
             o->h->p.whole += 2;
         }
-        o->y.raw += (short)FUN_8001fdac((FUN_8002078c(a, b) + 0x100) & 0xf8, 0x200) << 8;
+        o->y.raw += (short)FUN_8001fdac((angleBetweenPoints(a, b) + 0x100) & 0xf8, 0x200) << 8;
         TICK
         break;
     case 10:

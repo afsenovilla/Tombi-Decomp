@@ -8,11 +8,11 @@ extern unsigned short D_8007A3F0[];
 extern int FUN_8001f9e0(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 static __inline__ void spawn(TObj *o, int sub)
 {
-    TObj *n = FUN_800183b8();
+    TObj *n = allocObjectLayer2();
     if (n) {
         n->active = 2;
         n->type = 0x39;

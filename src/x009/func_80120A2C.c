@@ -4,9 +4,9 @@
 
 extern short D_1F80019E;
 extern short FUN_8004461c(TObj *a, TObj *b);
-extern int FUN_80042b98(TObj *, TObj *);
+extern int resolveHitResultD(TObj *, TObj *);
 extern void FUN_800e9f74(int, int, int, int);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_80120A2C(TObj *o, TObj *p)
 {
@@ -16,7 +16,7 @@ void func_80120A2C(TObj *o, TObj *p)
 
     if (FUN_8004461c(o, p) == -1) return;
     p->w7a = o->animFrame & 1;
-    r = FUN_80042b98(o, p);
+    r = resolveHitResultD(o, p);
     if (r != 0) {
         if (r == 1) {
             if (!(p->active & 2)) {
@@ -27,7 +27,7 @@ void func_80120A2C(TObj *o, TObj *p)
             }
         } else if ((unsigned short)p->wb4 != 3) {
             if (o->type == 1) if (o->subtype == 4) if (o->b0d | p->b0d) {
-                n = FUN_800183b8();
+                n = allocObjectLayer2();
                 if (n) {
                     n->active = 1;
                     n->type = 0x1c;

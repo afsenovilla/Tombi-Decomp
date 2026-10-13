@@ -2,7 +2,7 @@
 // MATCHING 8011b4b0 300
 #include "TOBJ.H"
 extern unsigned char DAT_a, DAT_b, DAT_c, DAT_d, DAT_e;
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80018980(TObj *);
 
 void FUN_8011b4b0(TObj *o)
@@ -25,7 +25,7 @@ void FUN_8011b4b0(TObj *o)
         break;
     case 2:
         o->step++;
-        *(TObj **)&o->category = FUN_8002dc50(10, 0, 100, 236);
+        *(TObj **)&o->category = showMessageBox(10, 0, 100, 236);
         break;
     case 3:
         q = *(TObj **)&o->category;

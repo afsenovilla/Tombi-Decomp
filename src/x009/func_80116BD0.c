@@ -12,7 +12,7 @@ extern CAM DAT_1f8000c0;
 #define CAMP (&DAT_1f8000c0)
 extern SVEC DAT_1f800060;
 extern SVEC DAT_1f800068;
-extern void FUN_80021f5c(MAT *);
+extern void getBaseMatrix(MAT *);
 extern void RotMatrixY(long, MAT *);
 extern void RotMatrixX(long, MAT *);
 extern void ApplyMatrixSV(MAT *, SVEC *, SVEC *);
@@ -29,7 +29,7 @@ void func_80116BD0(O *o)
     o->w08 = *o->d34 - 0xa00000;
     o->w0c = CAMP->pos[4].raw + 0x800000;
     o->w10 = *o->d38;
-    FUN_80021f5c(&CAMP->m);
+    getBaseMatrix(&CAMP->m);
     RotMatrixY(o->w24 + (o->w7c << 4) / 360, &CAMP->m);
     RotMatrixX(o->w20 + (o->w78 << 4) / 360, &CAMP->m);
     CAMP->m.t[0] = -CAMP->pos[0].p.whole;

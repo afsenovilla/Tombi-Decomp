@@ -1,0 +1,9 @@
+// FUNC 80021f5c 80 MAIN0
+// MATCHING 80021f5c 80
+typedef struct S { int w[8]; } S;
+extern S DAT_1f8000f8;
+
+void getBaseMatrix(S *o)
+{
+    *o = DAT_1f8000f8;
+}

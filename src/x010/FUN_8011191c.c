@@ -5,7 +5,7 @@ extern void FUN_8011145c(void *);
 extern void FUN_800202b4(void *);
 extern void FUN_80111590(void *);
 extern void FUN_80111714(void *);
-extern void FUN_80018744(void *);
+extern void freeObjectLayer1(void *);
 
 void FUN_8011191c(unsigned char *o)
 {
@@ -39,7 +39,7 @@ void FUN_8011191c(unsigned char *o)
         o[4] = 3;
         break;
     case 3:
-        FUN_80018744(o);
+        freeObjectLayer1(o);
         break;
     }
 }

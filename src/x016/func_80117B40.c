@@ -11,7 +11,7 @@ extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_80117B40(TObj *o)
 {
@@ -32,7 +32,7 @@ void func_80117B40(TObj *o)
         o->anim = D_80118D1C[o->subtype].anims[2];
         AnimLoadDuration(o);
         o->animFrame = o->b68 & 1;
-        o->d90 = FUN_8002dcc8(2, 0xc, &v);
+        o->d90 = showMessageBoxDirect(2, 0xc, &v);
         o->state = 1;
         break;
     case 1:

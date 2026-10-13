@@ -29,7 +29,7 @@ extern void FUN_8012ae1c(TObj *);
 extern void func_8012A820(TObj *);
 extern void FUN_8012a6a4(TObj *);
 extern void FUN_8002ee50(char, int, int, int);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void freeObjectLayer2(TObj *);
 
 void FUN_8012ccf8(TObj *o)
@@ -186,7 +186,7 @@ void FUN_8012ccf8(TObj *o)
                 D_1F800190 = o->y.raw;
                 FUN_8002ee50(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 FUN_8002ee50(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-                n = FUN_800183b8();
+                n = allocObjectLayer2();
                 if (n) {
                     n->active = 1;
                     n->type = 0x2b;

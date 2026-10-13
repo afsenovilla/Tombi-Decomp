@@ -6,7 +6,7 @@ extern unsigned char D_1f8001a4;
 extern unsigned char D_800a6038[];
 extern short FUN_800435e0(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void FUN_80126464(TObj *a, TObj *b)
 {
@@ -58,7 +58,7 @@ void FUN_80126464(TObj *a, TObj *b)
             a->step = 0;
             a->state = 0;
             a->animFrame = ah < bh;
-            FUN_8004258c(a, 1);
+            decreaseObjectTimer(a, 1);
         }
         break;
     case 2:

@@ -10,7 +10,7 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CFE1, D_8009CFF7;
 extern short D_800A60EA[];
 extern short D_1F8001C6;
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void func_8004D620(int, int);
@@ -34,7 +34,7 @@ void func_801179EC(TObj *o)
         o->animFrame = o->b68 & 1;
         o->anim = D_80119990[o->subtype].p[2];
         AnimJump(o, 0);
-        *(int *)((char *)o + 0x90) = (int)FUN_8002dcc8(2, 0x30, &v);
+        *(int *)((char *)o + 0x90) = (int)showMessageBoxDirect(2, 0x30, &v);
         if (D_8009CFE1 == 0) {
             D_8009CFE1 = 1;
             D_8009CFF7++;

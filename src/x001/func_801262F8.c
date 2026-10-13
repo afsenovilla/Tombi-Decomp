@@ -6,7 +6,7 @@ extern unsigned char D_1F8001A4;
 extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
 extern short func_8012614C(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 #define BAC(o) (*(unsigned char *)&(o)->wac)
 #define PE4(o) (*(TObj **)((char *)(o) + 0xe4))
@@ -58,7 +58,7 @@ void func_801262F8(TObj *o, TObj *p)
         o->b04 = 2;
         o->step = 0;
         o->state = 0;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
         break;
     case 2:
         if (p->active == 3) break;

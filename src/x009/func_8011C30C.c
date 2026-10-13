@@ -6,8 +6,8 @@ extern unsigned char D_800A60DA;
 extern unsigned int D_8009C96C;
 extern unsigned char D_8009CDB4;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 void func_8011C30C(TObj *o)
 {
@@ -18,13 +18,13 @@ void func_8011C30C(TObj *o)
     case 1:
         if (D_8009C96C <= 0x249ef) {
             if (D_8009CDB4 == 0) {
-                FUN_8005a8a8(0x10, 0, 0);
+                setEventStarted(0x10, 0, 0);
                 o->step++;
             } else {
                 o->step--;
             }
         } else if (D_8009CDB4 != 0xff) {
-            FUN_8005a9a4(0x10, 0);
+            setEventComplete(0x10, 0);
             o->step++;
         } else {
             o->b04 = 2;

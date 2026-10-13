@@ -4,8 +4,8 @@
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
-extern void FUN_8001fab4(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityXY(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern void func_80121964(TObj *);
 extern void func_801224AC(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
@@ -55,9 +55,9 @@ void func_80122F08(TObj *o)
     case 1:
         AnimAdvance(o);
         if (!(D_800A6038 & 2)) {
-            FUN_8001fab4(o);
+            applyFrameVelocityXY(o);
         } else {
-            FUN_8001fb20(o);
+            applyFrameVelocityY(o);
         }
         func_80121964(o);
         f = o->animFrame;
@@ -88,7 +88,7 @@ void func_80122F08(TObj *o)
             o->state = 1;
         }
         AnimAdvance(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->b69 == 1 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 16)) {
             o->b69 = 0;
         }

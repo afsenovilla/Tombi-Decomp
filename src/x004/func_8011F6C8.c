@@ -5,7 +5,7 @@
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
 extern short FUN_800435e0(unsigned char *, unsigned char *);
-extern void FUN_8004258c(unsigned char *, int);
+extern void decreaseObjectTimer(unsigned char *, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern unsigned char DAT_1f8001a4;
 
@@ -39,7 +39,7 @@ void func_8011F6C8(unsigned char *a, unsigned char *b)
                 a[5] = 0;
                 a[6] = 0;
                 U16(a, 0x2e) = ah < bh;
-                FUN_8004258c(a, 1);
+                decreaseObjectTimer(a, 1);
             }
         }
         break;

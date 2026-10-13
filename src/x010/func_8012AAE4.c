@@ -5,7 +5,7 @@ extern char D_80077D0C[];
 extern unsigned char D_8012F3E4, D_8012F3E5, D_8012F3E6, D_8012F3E7;
 extern void *D_80132320[];
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void func_8012AAE4(TObj *o)
 {
@@ -28,7 +28,7 @@ void func_8012AAE4(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

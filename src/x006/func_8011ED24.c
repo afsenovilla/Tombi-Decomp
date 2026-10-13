@@ -8,8 +8,8 @@ extern void *D_80122FBC;
 extern void *D_80122FC4[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_80018790(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void freeObjectLayer2(TObj *);
 extern void func_8011EBD0(TObj *);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
@@ -62,7 +62,7 @@ void func_8011ED24(TObj *o)
             }
         case 2:
             FUN_8001fec0(o);
-            FUN_8001fa88(o, 1 - o->animFrame);
+            applyAnimVelocityX(o, 1 - o->animFrame);
             o->velV += 0x40;
             if (o->velV > 0x400)
                 o->velV = 0x400;
@@ -77,7 +77,7 @@ void func_8011ED24(TObj *o)
             o->d8c = (o->d8c - 0x14) & 0xff;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -3,13 +3,13 @@
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short x, y; } P;
-extern int FUN_8002078c(P a, P b);
+extern int angleBetweenPoints(P a, P b);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e4f0(int);
 extern unsigned FUN_8001f9e0(void);
-extern void FUN_8001fd48(TObj *);
-extern void FUN_8004258c(void *, int);
+extern void applyObjectAltSpeedXY(TObj *);
+extern void decreaseObjectTimer(void *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 extern short FUN_800411cc(TObj *, short, short);
@@ -81,7 +81,7 @@ void FUN_801319d0(TObj *o)
             a.y = o->y.p.whole;
             b.x = DAT_800a6078->p.whole;
             b.y = DAT_800a604e;
-            U16(o, 0xcc) = FUN_8002078c(a, b) + 0x100;
+            U16(o, 0xcc) = angleBetweenPoints(a, b) + 0x100;
             o->w22 = 0x78;
             o->wb6 = 0;
             o->b6a = 1;
@@ -93,7 +93,7 @@ void FUN_801319d0(TObj *o)
         a.y = o->y.p.whole;
         b.x = DAT_800a6078->p.whole;
         b.y = DAT_800a604e;
-        d = FUN_8002078c(a, b) + 0x100;
+        d = angleBetweenPoints(a, b) + 0x100;
         U16(o, 0xcc) = d;
         o->h->raw += (short)FUN_8001fddc(d & 0xf8, o->wb6) << 8;
         o->y.raw += (short)FUN_8001fdac(U16(o, 0xcc) & 0xf8, o->wb6) << 8;
@@ -155,7 +155,7 @@ void FUN_801319d0(TObj *o)
         }
         break;
     case 6:
-        FUN_8001fd48(o);
+        applyObjectAltSpeedXY(o);
         q = DAT_800a6038;
         DAT_800a6078->p.whole = o->h->p.whole;
         DAT_800a604e = o->y.p.whole + 0x28;
@@ -177,7 +177,7 @@ void FUN_801319d0(TObj *o)
             DAT_800a603c[0] = 2;
             DAT_800a603d[0] = 0;
             DAT_800a603e[0] = 1;
-            FUN_8004258c(q, 1);
+            decreaseObjectTimer(q, 1);
             o->wac = 0x13;
             o->anim = DAT_8013ad7c[0];
             FUN_8001fe6c(o);

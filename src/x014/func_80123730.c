@@ -2,10 +2,10 @@
 // MATCHING 80123730 892
 /* whole function: notes/functions_x014.csv splits it at 801237e4 (func_801237E4 is its tail) */
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 #define SPAWN(C, K, V)                    \
-    e = FUN_800183b8();                   \
+    e = allocObjectLayer2();                   \
     if (e != 0) {                         \
         e->active = 1;                    \
         e->type = 0x4b;                   \

@@ -6,7 +6,7 @@ typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
 extern unsigned char D_1F8001A4;
 extern short func_80043260(TObj *, TObj *);
 extern short func_800435E0(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_8001f96c(int, short, short, short);
 
 static __inline__ void hit(TObj *o, TObj *e)
@@ -18,7 +18,7 @@ static __inline__ void hit(TObj *o, TObj *e)
     o->step = 0;
     o->state = 0;
     o->animFrame = r;
-    FUN_8004258c(o, 1);
+    decreaseObjectTimer(o, 1);
 }
 
 void func_80120C68(TObj *o, TObj *e)

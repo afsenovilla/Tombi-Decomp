@@ -13,20 +13,20 @@ extern short D_800A60B6;
 extern short D_1F800172;
 extern int D_1F8000F0;
 extern TObj *D_1F8001D4;
-extern unsigned int FUN_80028420(TObj *);
-extern unsigned int FUN_80028b40(TObj *);
+extern unsigned int stepScrollReturnY(TObj *);
+extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
 extern void func_8002795C(TObj *);
-extern void FUN_800277f8(TObj *);
+extern void syncObjectTargetY(TObj *);
 extern void func_80029078(TObj *);
-extern int FUN_8002715c(int);
+extern int stepPlayerXToward(int);
 
 void func_80115FB4(TObj *o)
 {
     switch (o->step) {
     case 0:
         if (D_8009CDA2[0] != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) D_8009CDA2[0] = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -36,14 +36,14 @@ void func_80115FB4(TObj *o)
         if (D_8009C93A != 0) o->step++;
         FUN_80027c74(o);
         func_8002795C(o);
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
         func_80029078(o);
         D_8009C982 = 0;
         break;
     case 2:
         D_80079A98[o->subtype](o);
         if (D_800A60DA == 2) {
-            FUN_8002715c(0xa0);
+            stepPlayerXToward(0xa0);
             if (D_1F800172 >= 0x50) {
                 D_800A603C = 5;
                 D_800A6039 = 0;

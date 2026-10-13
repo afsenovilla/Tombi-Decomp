@@ -29,9 +29,9 @@ extern char *D_800A605C;
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char D_801152E8[];
 extern void FUN_8001fe94(TObj *, int);
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void FUN_80110fdc(TObj *);
-extern void FUN_8001fc14(TObj *, int, int);
+extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
@@ -161,7 +161,7 @@ void FUN_800f44b0(TObj *o)
         c = S8(o, 0xe3);
         if (c < D_8007A038[D_8009D2B2]) {
             S8(o, 0xe3) = c + 1;
-            q = FUN_800182ac();
+            q = allocObjectLayer1();
             if (q != 0) {
                 q->active = 1;
                 b = D_8009D2B2;
@@ -178,7 +178,7 @@ void FUN_800f44b0(TObj *o)
         else if (w > 0) { x <<= 2; o->wb6 = x & 0xff; }
         else o->wb6 = 0;
         FUN_80110fdc(o);
-        FUN_8001fc14(o, o->wb6, o->wb2);
+        setObjectSpeedPolar2(o, o->wb6, o->wb2);
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         FUN_8001fce4(o);

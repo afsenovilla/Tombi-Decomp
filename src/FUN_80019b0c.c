@@ -13,15 +13,15 @@ extern char DAT_800b3e28[];
 extern void FUN_8004dd8c(void);
 extern void FUN_8005f060(int);
 extern void FUN_800261b0(void);
-extern void FUN_8004fb68(int);
-extern void FUN_8004fa80(int, int);
-extern void FUN_80018280(void);
+extern void loadSoundSet(int);
+extern void queueSystemLoadList(int, int);
+extern void clearMenuParams(void);
 extern void FUN_8001eff8(int);
 extern int FUN_800e9888(void);
 extern void FUN_800ea37c(void);
 extern void FUN_8001dbdc(void);
 extern void FUN_8001f110(int);
-extern void FUN_80017328(void (*)(void));
+extern void setTask(void (*)(void));
 
 void FUN_80019b0c(void)
 {
@@ -31,14 +31,14 @@ void FUN_80019b0c(void)
         FUN_8005f060(0);
         FUN_800261b0();
         DAT_1f8001ce = 0;
-        FUN_8004fb68(3);
-        FUN_8004fa80(5, 1);
+        loadSoundSet(3);
+        queueSystemLoadList(5, 1);
         DAT_1f8001d4->w4a++;
         break;
     case 1:
         if (DAT_1f8001ce == 0)
             break;
-        FUN_80018280();
+        clearMenuParams();
         DAT_800a45ea = 5;
         FUN_8001eff8(0);
         FUN_8005f060(1);
@@ -70,7 +70,7 @@ void FUN_80019b0c(void)
         DAT_1f8001d4->w4a = 0;
         DAT_1f8001d4->w4c = 0;
         DAT_1f8001d4->w4e = 0;
-        FUN_80017328(FUN_8004dd8c);
+        setTask(FUN_8004dd8c);
         break;
     }
 }

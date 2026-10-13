@@ -11,7 +11,7 @@ extern unsigned short *D_80133B5C[]; /* same table as D_80133B5C: a second name 
 extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 FUN_80129fb4) */
 extern unsigned short *D_80133B5C[], *D_80133B74[], *D_80133B78[], *D_80133B84[];
 extern int FUN_8001f9e0(void);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e560(int, int);
 extern void func_8011FC88(TObj *);
@@ -84,7 +84,7 @@ void func_80121D44(TObj *o)
         a = D_80133B5Cb[m];
         goto common;
     case 4:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_8011FDD4(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
@@ -110,7 +110,7 @@ void func_80121D44(TObj *o)
         a = D_80133B5C[o->wac];
         goto common;
     case 5:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_8011FDD4(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
@@ -147,7 +147,7 @@ void func_80121D44(TObj *o)
             o->state = r;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_8011FDD4(o);
         break;
     case 8:
@@ -164,7 +164,7 @@ void func_80121D44(TObj *o)
             k = AnimAdvanceWithBox(o);
         }
         if (k != 0) o->substep++;
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_8011FDD4(o);
         break;
     case 10:
@@ -191,7 +191,7 @@ void func_80121D44(TObj *o)
             o->substep = 0;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         func_8011FDD4(o);
         break;
     }

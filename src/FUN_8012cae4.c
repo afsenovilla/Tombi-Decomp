@@ -7,7 +7,7 @@ extern unsigned short *DAT_8013a160[];
 extern unsigned char DAT_80138fd8[];
 extern unsigned short DAT_1f80016a, DAT_1f800172;
 extern void FUN_80127214(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int FUN_801274cc(TObj *);
 
 void FUN_8012cae4(TObj *o)
@@ -32,7 +32,7 @@ void FUN_8012cae4(TObj *o)
         break;
     case 1:
         FUN_80127214(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (FUN_801274cc(o) != 0) {
             o->timer = 0;
             o->state++;

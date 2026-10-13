@@ -5,7 +5,7 @@
 
 typedef struct { short a, b; } AB;
 extern AB D_801265B0[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_80120C54(TObj *o, int k)
 {
@@ -30,7 +30,7 @@ void func_80120C54(TObj *o, int k)
     one = 1;
     { AB *t = D_801265B0; b = (char *)&t->b; p = t; }
     for (; i < 3; i++, p++) {
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n != 0) {
             n->active = 2;
             n->type = 0x46;

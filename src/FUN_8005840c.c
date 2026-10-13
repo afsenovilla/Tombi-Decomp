@@ -20,7 +20,7 @@ extern void SetSemiTrans(void *, int);
 extern unsigned short GetClut(int, int);
 extern void AddPrim(void *, void *);
 extern void SetDrawMode(DR_MODE *, int, int, int, RECT *);
-extern void FUN_80059728(RECT *, int, int, int);
+extern void addTilePrim(RECT *, int, int, int);
 typedef struct { char pad[0xc90]; int a[1]; } OTB;
 
 void FUN_8005840c(TObj *o)
@@ -55,7 +55,7 @@ void FUN_8005840c(TObj *o)
     r.y = 0;
     r.w = 0x140;
     r.h = 0x10;
-    FUN_80059728(&r, 0, 0, 1);
+    addTilePrim(&r, 0, 0, 1);
     r.y = 0xf0;
-    FUN_80059728(&r, 0, 0, 1);
+    addTilePrim(&r, 0, 0, 1);
 }

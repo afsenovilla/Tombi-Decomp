@@ -8,7 +8,7 @@ extern XY D_80135F14[];
 extern XY D_80135F24[];
 extern unsigned short D_80135F34[];
 extern int FUN_8001f9e0(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void FUN_80018980(TObj *);
 
 #define W1C(o) (*(unsigned short *)((char *)(o) + 0x1c))
@@ -75,7 +75,7 @@ void func_801315B0(TObj *o)
                 y = t->y;
             }
         spawn:
-            e = FUN_800183b8();
+            e = allocObjectLayer2();
             if (e) {
                 e->active = 2;
                 e->type = 2;

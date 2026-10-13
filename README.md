@@ -25,7 +25,7 @@ function in `src/` is verified to produce exactly the same instructions as the r
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99644 B) is not counted: 67736 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 98.3 %).
-- Also tracked for MAIN0 + X000: 9.7 % of the code named by us, 76.0 % typed with the TObj structure.
+- Also tracked for MAIN0 + X000: 12.3 % of the code named by us, 76.0 % typed with the TObj structure.
 <!-- progress:end -->
 
 ![Progress](docs/progress.svg)

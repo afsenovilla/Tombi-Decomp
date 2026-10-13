@@ -12,8 +12,8 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CFE0, D_8009CFF7, D_8009CE0B;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
 extern void func_8004D620(int, int);
 
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
@@ -45,11 +45,11 @@ void func_80116BDC(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         if (*(unsigned short *)&o->wba == 0) {
-            o->d90 = FUN_8002dcc8(3, 0x17, &v);
+            o->d90 = showMessageBoxDirect(3, 0x17, &v);
             o->state++;
             break;
         }
-        *(int *)((char *)o + 0x90) = FUN_8002dcc8(2, 0xd, &v);
+        *(int *)((char *)o + 0x90) = showMessageBoxDirect(2, 0xd, &v);
         if (D_8009CFE0 == 0) {
             D_8009CFE0 = 1;
             D_8009CFF7++;
@@ -66,7 +66,7 @@ void func_80116BDC(TObj *o)
         D_800A60EA[0] = 0;
         *(short *)((char *)o + 0x20) = 4;
         if (D_8009CE0B == 0) {
-            FUN_8005a8a8(0x67, 0, 0);
+            setEventStarted(0x67, 0, 0);
             o->timer = 200;
         }
         o->state = 2;

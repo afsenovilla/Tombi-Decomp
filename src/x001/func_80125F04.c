@@ -3,12 +3,12 @@
 #include "TOBJ.H"
 extern TObj D_800A6038;
 extern short D_1F80019E;
-extern short func_8004461C(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
 extern int func_80042D5C(TObj *, TObj *);
 
 void func_80125F04(TObj *p, TObj *o)
 {
-    if (func_8004461C(p, o) == -1)
+    if (boxesOverlapSigned(p, o) == -1)
         return;
     if (o->b6a == 2) {
         D_800A6038.active = 1;

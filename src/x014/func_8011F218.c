@@ -11,7 +11,7 @@ extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
-extern TObj *FUN_8002dcc8(int, int, V6 *);
+extern TObj *showMessageBoxDirect(int, int, V6 *);
 
 static __inline__ void SetAnim(TObj *o, short n)
 {
@@ -56,7 +56,7 @@ void func_8011F218(TObj *o)
         break;
     case 2:
         v = *(V6 *)&o->a;
-        o->da0 = (int)FUN_8002dcc8(2, D_80125E20[D_8009C962[0]], &v);
+        o->da0 = (int)showMessageBoxDirect(2, D_80125E20[D_8009C962[0]], &v);
         o->state++;
         break;
     case 3:

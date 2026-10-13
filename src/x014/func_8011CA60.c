@@ -6,8 +6,8 @@ extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern unsigned short D_8009C962;
 extern unsigned char *D_8009C330[];
-extern short FUN_80042fbc(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern short boxesOverlap(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8011CA60(TObj *a, TObj *b)
 {
@@ -15,7 +15,7 @@ void func_8011CA60(TObj *a, TObj *b)
 
     if (*(unsigned char *)&a->wac == 2) return;
     if (a->active & 2) return;
-    if (!FUN_80042fbc(a, b)) return;
+    if (!boxesOverlap(a, b)) return;
     if (D_1F8001A4) return;
     if (D_8009C962 == 7) {
         a->active = 2;
@@ -23,7 +23,7 @@ void func_8011CA60(TObj *a, TObj *b)
         a->b04 = 2;
         a->step = 0;
         a->state = 0;
-        FUN_8004258c(a, 1);
+        decreaseObjectTimer(a, 1);
     } else {
         if (a->h->p.whole > b->h->p.whole) {
             a->animFrame = 1;

@@ -14,7 +14,7 @@ extern unsigned short DAT_1f80019eu;
 extern unsigned short DAT_1f800250;
 extern TObj **DAT_1f800260;
 extern unsigned char DAT_8007a0a0[];
-extern int FUN_8002078c(P, P);
+extern int angleBetweenPoints(P, P);
 
 
 int FUN_800331c4(TObj *o)
@@ -88,7 +88,7 @@ int FUN_800331c4(TObj *o)
             int r; int u;
             b.x = list[i]->h->p.whole;
             b.y = list[i]->y.p.whole;
-            u = FUN_8002078c(a, b); r = u;
+            u = angleBetweenPoints(a, b); r = u;
             u = u - (unsigned short)o->waa; if ((unsigned char)(u + k) < k * 2) {
                 o->wac = r;
                 if (o->y.p.whole < b.y)

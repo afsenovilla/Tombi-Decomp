@@ -10,7 +10,7 @@ extern unsigned char D_8009CE59;
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
 short TileCollideAt(TObj *o, int x, int y);
-void FUN_80018790(TObj *o);
+void freeObjectLayer2(TObj *o);
 void func_80130298(TObj *o);
 void func_80130420(TObj *o);
 void func_801305D0(TObj *o);
@@ -105,7 +105,7 @@ void func_801312F8(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

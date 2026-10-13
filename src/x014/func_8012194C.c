@@ -1,10 +1,10 @@
 // FUNC 8012194c 512 X014
 // MATCHING 8012194c 512
 #include "TOBJ.H"
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer4(void);
 
 #define SPAWN(o, X, Y, Z) { \
-    e = FUN_800184d8(); \
+    e = allocObjectLayer4(); \
     if (e) { \
         e->active = 1; \
         e->type = 0x43; \

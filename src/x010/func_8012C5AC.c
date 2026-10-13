@@ -8,7 +8,7 @@ extern void *D_801322F4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 
 void func_8012C5AC(TObj *o)
 {
@@ -26,7 +26,7 @@ void func_8012C5AC(TObj *o)
         o->wac = 5;
         o->anim = D_801322F4[0];
         AnimLoadDuration(o);
-        o->d90 = FUN_8002dcc8(2, 0x28, &o->a);
+        o->d90 = showMessageBoxDirect(2, 0x28, &o->a);
         break;
     case 1:
         AnimAdvance(o);

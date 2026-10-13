@@ -10,13 +10,13 @@ extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 void InitSubsystems(void);
 void initHud(void);
-void func_800243E8(void);
+void initPlayerAtSpawn(void);
 void func_80021B20(void);
 void FUN_8004bfe4(void);
 void FUN_800263bc(void);
-void FUN_8001eb64(void);
-unsigned char *FUN_80018678(void);
-void FUN_8001bcd8(void);
+void startAreaBgm(void);
+unsigned char *allocObjectLayer7(void);
+void areaMode6Tick(void);
 extern unsigned char *D_1F8001D4;
 #define G D_1F8001D4
 void cutsceneAreaHandler(void)
@@ -29,15 +29,15 @@ void cutsceneAreaHandler(void)
     case 0:
         InitSubsystems();
         initHud();
-        func_800243E8();
+        initPlayerAtSpawn();
         func_80021B20();
         FUN_8004bfe4();
         FUN_800263bc();
         D_800B1410 = 0;
         *(unsigned char *)0x1F8001CF = 1;
-        if (D_8009C967 != 1) FUN_8001eb64();
+        if (D_8009C967 != 1) startAreaBgm();
         (*(unsigned short *)(G + 0x4e))++;
-        e = FUN_80018678();
+        e = allocObjectLayer7();
         if (e != 0) {
             e[0] = 1;
             e[2] = 0xd;
@@ -53,7 +53,7 @@ void cutsceneAreaHandler(void)
         break;
     case 1:
         D_8009C968[0]++;
-        FUN_8001bcd8();
+        areaMode6Tick();
         if (*(unsigned char *)0x1F8001C2 != 0) {
             k = &D_8009D670;
             if ((*k & 8) && (*k & 0x800)) *(unsigned short *)(G + 0x4e) = 3;

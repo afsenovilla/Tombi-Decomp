@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8009D2B1;
-extern void FUN_8001e76c(int, int, int, int);
+extern void playSFXWithPitchSlide(int, int, int, int);
 extern void playSFX(int);
 
 void func_8011792C(TObj *o)
@@ -15,13 +15,13 @@ void func_8011792C(TObj *o)
                 o->state = 1;
                 o->timer = 0x20;
                 o->velV = 0x100;
-                FUN_8001e76c(0x93, 1, 8, 0x78);
+                playSFXWithPitchSlide(0x93, 1, 8, 0x78);
                 playSFX(0x91);
             } else if (o->b6a == 2) {
                 o->state = 2;
                 o->timer = 0x20;
                 o->velV = 0x100;
-                FUN_8001e76c(0x94, 1, -8, 0x78);
+                playSFXWithPitchSlide(0x94, 1, -8, 0x78);
                 playSFX(0x92);
             }
         }

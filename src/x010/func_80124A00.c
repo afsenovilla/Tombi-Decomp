@@ -8,7 +8,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 extern int func_80123ECC(TObj *o, unsigned char a);
 
 static __inline__ int turn(TObj *o)
@@ -16,7 +16,7 @@ static __inline__ int turn(TObj *o)
     int c, a;
     unsigned char d;
 
-    a = FUN_800205d8(D_1F80016A[0] - o->h->p.whole, D_1F80016E - o->y.p.whole);
+    a = angleFromDelta(D_1F80016A[0] - o->h->p.whole, D_1F80016E - o->y.p.whole);
     c = o->d38;
     a -= c;
     d = a;

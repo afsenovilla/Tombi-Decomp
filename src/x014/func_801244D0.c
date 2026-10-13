@@ -14,7 +14,7 @@ extern void AnimAdvance(TObj *);
 extern void func_8011709C(TObj *, int);
 extern int FUN_8001f9e0(void);
 extern short FUN_800411cc(TObj *, int, int);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 static __inline__ void setup(TObj *p)
 {
@@ -105,7 +105,7 @@ void func_801244D0(TObj *o)
         ObjCullRegister(o);
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

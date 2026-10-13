@@ -55,12 +55,12 @@ extern short D_1F80016Ax[], D_1F80016Ex[], D_1F800172;
 extern unsigned short D_1F8001FC;
 extern short D_1F8000F2x[];
 #define D_1F8000F2 D_1F8000F2x[0]
-extern unsigned int FUN_80028420(O *);
-extern unsigned int FUN_80028b40(O *);
+extern unsigned int stepScrollReturnY(O *);
+extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
-extern void FUN_800277f8(O *);
+extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
-extern int FUN_8002715c(int);
+extern int stepPlayerXToward(int);
 extern int FUN_800270a0(O *, int, int);
 extern void FUN_800216c4(void);
 extern void loadSectionBounds(O *);
@@ -121,7 +121,7 @@ void func_80116D3C(O *o)
     switch (o->step) {
     case 0:
         if (D_8009CDA2[0] != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) D_8009CDA2[0] = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -130,7 +130,7 @@ void func_80116D3C(O *o)
     case 1:
         if (D_8009C93A != 0) o->step++;
         FUN_80027c74(o);
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
         func_80029078(o);
         break;
     case 2:
@@ -144,18 +144,18 @@ void func_80116D3C(O *o)
             if (p->ba2 == 2) {
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x24a) < 0x60) {
-                        FUN_8002715c(0x27a);
+                        stepPlayerXToward(0x27a);
                         if (D_1F800172 >= 0x358) {
                             T1(1);
                         }
                     }
                     if ((unsigned)(XU - 0x356) < 0x60) {
-                        FUN_8002715c(0x386);
+                        stepPlayerXToward(0x386);
                         if (D_1F800172 < 0x196) break;
                         T1(2);
                     }
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
-                        FUN_8002715c(0x3e0);
+                        stepPlayerXToward(0x3e0);
                         if (D_1F800172 < 0x196) break;
                         T1(3);
                     }
@@ -163,12 +163,12 @@ void func_80116D3C(O *o)
                 }
                 if (D_1F80016E >= -0x1df) {
                     if ((unsigned)(XU - 0x1ee) < 0x60) {
-                        FUN_8002715c(0x21e);
+                        stepPlayerXToward(0x21e);
                         if (D_1F800172 < 0x358) break;
                         T1(4);
                     }
                     if ((unsigned)(XU - 0x356) < 0x60) {
-                        FUN_8002715c(0x386);
+                        stepPlayerXToward(0x386);
                         if (D_1F800172 < 0x1f0) break;
                         T1(5);
                     }
@@ -176,12 +176,12 @@ void func_80116D3C(O *o)
                 }
                 if (D_1F80016E >= -0x2ed) {
                     if ((unsigned)(XU - 0x356) < 0x60) {
-                        FUN_8002715c(0x386);
+                        stepPlayerXToward(0x386);
                         if (D_1F800172 < 0x358) break;
                         T1(6);
                     }
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
-                        FUN_8002715c(0x3e0);
+                        stepPlayerXToward(0x3e0);
                         if (D_1F800172 < 0x3b2) break;
                         T1(7);
                     }
@@ -231,7 +231,7 @@ void func_80116D3C(O *o)
             if (p->ba2 == 2) {
                 if (D_1F80016E < -0x12b) break;
                 if ((unsigned)(XU - 0x2a1) >= 0x60) break;
-                FUN_8002715c(0x2d1);
+                stepPlayerXToward(0x2d1);
                 if (D_1F800172 >= 0x519) break;
                 T1(1);
             }
@@ -289,12 +289,12 @@ void func_80116D3C(O *o)
             if (p->ba2 == 2) {
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x465) < 0x60) {
-                        FUN_8002715c(0x495);
+                        stepPlayerXToward(0x495);
                         if (D_1F800172 < 0x196) break;
                         T1(1);
                     }
                     if ((unsigned)(XU - 0x352) < 0x60) {
-                        FUN_8002715c(0x382);
+                        stepPlayerXToward(0x382);
                         if (D_1F800172 < 0x196) break;
                         T1(2);
                     }
@@ -302,7 +302,7 @@ void func_80116D3C(O *o)
                 }
                 if (D_1F80016E >= -0x1df) {
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
-                        FUN_8002715c(0x3e0);
+                        stepPlayerXToward(0x3e0);
                         if (D_1F800172 < 0x1f0) break;
                         T1(3);
                     }
@@ -311,12 +311,12 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x239) {
                     if (p->step != 0x20) break;
                     if ((unsigned)(XU - 0x438) < 0x60) {
-                        FUN_8002715c(0x468);
+                        stepPlayerXToward(0x468);
                         if (D_1F800172 < 0x1f0) break;
                         T1(4);
                     }
                     if ((unsigned)(XU - 0x357) < 0x60) {
-                        FUN_8002715c(0x387);
+                        stepPlayerXToward(0x387);
                         if (D_1F800172 < 0x24a) break;
                         T1(5);
                     }
@@ -324,7 +324,7 @@ void func_80116D3C(O *o)
                 }
                 if (D_1F80016E >= -0x293) {
                     if ((unsigned)(XU - 0x2fb) < 0x60) {
-                        FUN_8002715c(0x32b);
+                        stepPlayerXToward(0x32b);
                         if (D_1F800172 < 0x24a) break;
                         T1(6);
                     }
@@ -362,14 +362,14 @@ void func_80116D3C(O *o)
             if (p->ba2 == 2) {
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x1ee) >= 0x60) break;
-                    FUN_8002715c(0x21e);
+                    stepPlayerXToward(0x21e);
                     if (D_1F800172 >= 0x573) break;
                     T1(1);
                 }
                 if (p->yw >= -0x280) break;
                 if (D_1F80016E < -0x293) break;
                 if ((unsigned)(XU - 0x248) >= 0x60) break;
-                FUN_8002715c(0x278);
+                stepPlayerXToward(0x278);
                 if (D_1F800172 >= 0x4bf) break;
                 T1(2);
             }
@@ -506,7 +506,7 @@ void func_80116D3C(O *o)
         p->state = 0;
         }
         FUN_800eeae4(p, 0, 0);
-        if (FUN_8002715c(o->w5a)) o->step++;
+        if (stepPlayerXToward(o->w5a)) o->step++;
         break;
     case 5:
         D_80079A98[o->subtype](o);

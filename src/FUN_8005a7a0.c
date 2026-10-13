@@ -8,8 +8,8 @@ extern void FUN_80026a10(int);
 extern void FUN_8005aa74(int, int, int, int);
 extern void FUN_8005b624(int, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_8002b8cc(int);
-extern void FUN_8001f2ec(int);
+extern void spawnItemPickupObject(int);
+extern void playJingle(int);
 extern void FUN_8001f620(void);
 
 unsigned char FUN_8005a7a0(int a, int b, int c)
@@ -20,14 +20,14 @@ unsigned char FUN_8005a7a0(int a, int b, int c)
             FUN_8005aa74(a, 0, 0x3c, c);
             FUN_8005b624(a, 0);
             FUN_8001e4f0(0x2a);
-            FUN_8002b8cc(0);
+            spawnItemPickupObject(0);
         }
     } else {
         FUN_80026a10(DAT_80080504[DAT_800805ec[a]]);
         if (a != 10) {
             FUN_8005aa74(a, 1, 1, c);
             FUN_8005b624(a, 1);
-            FUN_8001f2ec(2);
+            playJingle(2);
             FUN_8001f620();
         }
     }

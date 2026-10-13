@@ -12,7 +12,7 @@ extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
 extern void removeItemFromInventory(int, int);
 
@@ -30,7 +30,7 @@ void func_80118458(TObj *o)
         D_800A603C[0] = 5;
         D_800A603D[0] = 0;
         D_800A603E[0] = 0;
-        o->d90 = FUN_8002dcc8(2, 0x11, &v);
+        o->d90 = showMessageBoxDirect(2, 0x11, &v);
         n = o->animFrame + 2;
         if (n != ((TX *)o)->wd2) {
             o->anim = D_80118D34[o->subtype].anims[n];
@@ -48,7 +48,7 @@ void func_80118458(TObj *o)
         q1->b04 = 3; }
         o->animFrame ^= 1;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(2, 0x12, &v);
+        o->d90 = showMessageBoxDirect(2, 0x12, &v);
         o->anim = D_80118D34[o->subtype].anims[5];
         AnimJump(o, 0);
         o->timer = 0x78;
@@ -67,7 +67,7 @@ void func_80118458(TObj *o)
         v = *(V6 *)&o->a;
         o->anim = D_80118D34[o->subtype].anims[2];
         AnimJump(o, 0);
-        o->d90 = FUN_8002dcc8(2, 0x13, &v);
+        o->d90 = showMessageBoxDirect(2, 0x13, &v);
         o->state++;
         break;
     case 4:

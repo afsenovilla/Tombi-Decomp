@@ -1,10 +1,10 @@
 // FUNC 80123648 168 X000
 // MATCHING 80123648 168
 #include "raw7.h"
-extern char *FUN_80018568();
+extern char *allocObjectLayer5();
 void FUN_80123648(char *p, char *q, int c)
 {
-    char *o = FUN_80018568();
+    char *o = allocObjectLayer5();
     if (o != 0) {
         U8(o, 0) = 4;
         U8(o, 2) = 7;

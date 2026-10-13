@@ -8,12 +8,12 @@ extern TObj D_800A6038;
 extern unsigned short D_1F8001F8;
 extern unsigned short D_1F800176;
 int Rand(void);
-TObj *FUN_800183b8(void);
+TObj *allocObjectLayer2(void);
 void PoolFree_1F800210(TObj *o);
 
 static __inline__ void spawn(TObj *o, short x, short y)
 {
-    TObj *e = FUN_800183b8();
+    TObj *e = allocObjectLayer2();
 
     if (e) {
         e->active = 1;
@@ -32,7 +32,7 @@ static __inline__ void spawn2(TObj *o, unsigned short *q)
 {
     TObj *e;
 
-    e = FUN_800183b8();
+    e = allocObjectLayer2();
     if (e == 0)
         return;
     e->active = 1;

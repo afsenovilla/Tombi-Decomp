@@ -22,7 +22,7 @@ extern void ObjSetAnimFromTable(TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
-extern TObj *FUN_800182ac(void);
+extern TObj *allocObjectLayer1(void);
 extern void FUN_80104cd8(TObj *o);
 extern void func_80104A04(TObj *o);
 
@@ -106,7 +106,7 @@ void func_80104F88(TObj *o)
             case 0x3f: case 0x40: case 0x41: case 0x42:
                 break;
             default:
-                {TObj *q = FUN_800182ac();
+                {TObj *q = allocObjectLayer1();
                 if (q) {
                     q->active = 1;
                     q->type = 1;

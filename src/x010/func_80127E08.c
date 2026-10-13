@@ -8,11 +8,11 @@ extern unsigned char D_8009C941;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A6066;
 extern unsigned char D_8009D078;
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
@@ -44,7 +44,7 @@ void func_80127E08(TObj *o)
             D_800A603D = 0;
             D_800A603E = 0;
             D_800A6066 = 1 - o->animFrame;
-            o->d90 = FUN_8002dcc8(2, 0x18, &o->a);
+            o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             setAnim(o, ANIMS(o)[5]);
             D_8009D078 = 3;
             break;
@@ -82,7 +82,7 @@ void func_80127E08(TObj *o)
         D_800A603D = 0;
         D_800A603E = 0;
         D_800A6066 = 1 - o->animFrame;
-        o->d90 = FUN_8002dcc8(m, n, &o->a);
+        o->d90 = showMessageBoxDirect(m, n, &o->a);
         setAnim(o, ANIMS(o)[5]);
         break;
     case 4:
@@ -93,13 +93,13 @@ void func_80127E08(TObj *o)
         o->state++;
         break;
     case 5:
-        FUN_8005a9a4(0x40, 0);
+        setEventComplete(0x40, 0);
         o->timer = 0x168;
         o->state++;
         break;
     case 6:
         if (--o->timer == -1) {
-            o->d90 = FUN_8002dcc8(2, 0x18, &o->a);
+            o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             o->anim = ANIMS(o)[5];
             FUN_8001fe6c(o);
             D_8009D078 = 3;

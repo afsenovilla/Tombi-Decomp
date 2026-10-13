@@ -4,13 +4,13 @@
 
 extern short D_1F80019E;
 extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
-extern short func_8004461C(TObj *, TObj *);
-extern int func_80042AAC(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
+extern int resolveHitResultC(TObj *, TObj *);
 
 void func_80120BA0(TObj *o, TObj *e)
 {
-    if (func_8004461C(o, e) == -1) return;
-    if (func_80042AAC(o, e)) {
+    if (boxesOverlapSigned(o, e) == -1) return;
+    if (resolveHitResultC(o, e)) {
         if (!(e->active & 2)) {
             unsigned short f;
             e->active = 6;

@@ -64,7 +64,7 @@ extern int MulCos(int, short);
 extern int MulCosDup(int, short);
 extern int MulNegSin(int, short);
 extern int MulNegSinScaled(int, short);
-extern int FUN_8002078c(P, P);
+extern int angleBetweenPoints(P, P);
 
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
 #define gte_rtps() __asm__ volatile ("nop;nop;.word 0x4a180001")
@@ -286,7 +286,7 @@ void func_80051088(TObj *o)
         }
         t.x = D_8009C330->w18 + c;
         t.y = D_8009C330->w1a + sn;
-        r = FUN_8002078c(t, s);
+        r = angleBetweenPoints(t, s);
         {
             int b1 = (r + 0x140) & 0xff;
             int b2;

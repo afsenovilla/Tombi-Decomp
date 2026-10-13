@@ -11,7 +11,7 @@ extern void playSFX(int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void func_80123D64(TObj *);
 extern void func_80123AAC(TObj *);
 extern void func_80123730(TObj *);
@@ -96,7 +96,7 @@ void func_8012415C(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

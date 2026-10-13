@@ -11,9 +11,9 @@ extern unsigned short D_8009C962;
 extern unsigned char D_8009C942, D_8009C93F;
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
-extern TObj *FUN_800184d8(void);
-extern void FUN_80018790(TObj *);
-extern void FUN_80021f5c(void *);
+extern TObj *allocObjectLayer4(void);
+extern void freeObjectLayer2(TObj *);
+extern void getBaseMatrix(void *);
 extern void RotMatrix(SVECTOR *, void *);
 extern void FUN_80020078(TObj *, int);
 extern void func_8012194C(TObj *, int);
@@ -61,7 +61,7 @@ void func_80122418(TObj *o)
             o->b0a = 0x11;
             o->b0c = 0;
             func_8012194C(o, 0);
-            e = FUN_800184d8();
+            e = allocObjectLayer4();
             if (e) {
                 e->type = 0x42;
                 e->d30 = 0x150000;
@@ -117,7 +117,7 @@ void func_80122418(TObj *o)
         case 4: {
             SVECTOR v;
             void *m = &o->w48;
-            FUN_80021f5c(m);
+            getBaseMatrix(m);
             v.vx = o->d84;
             v.vy = o->d88;
             v.vz = o->d8c;
@@ -138,7 +138,7 @@ void func_80122418(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

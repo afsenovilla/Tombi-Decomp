@@ -9,7 +9,7 @@ extern void **DAT_80115948[];
 extern unsigned short D_1f8001f8;
 extern int D_1f800198;
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 
@@ -46,7 +46,7 @@ void FUN_800eb6ac(TObj *o)
             o->d8c = (o->d8c + 8) & 0xff;
         else
             o->d8c = (o->d8c - 8) & 0xff;
-        FUN_8001fa88(o, (unsigned short)o->w22);
+        applyAnimVelocityX(o, (unsigned short)o->w22);
         if (o->timer >= 0x1e || ((D_1f8001f8 + D_1f800198) & 1))
             FUN_800202b4(o);
         if (--o->timer == -1)

@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; short w4; char p6[4]; unsigned char ba, bb; } EX;
 extern void FUN_8001f8e4(TObj *);
-extern void FUN_8001faf4(TObj *);
-extern void FUN_8001fb20(TObj *);
-extern void FUN_8001fab4(TObj *);
+extern void applyFrameVelocityX(TObj *);
+extern void applyFrameVelocityY(TObj *);
+extern void applyFrameVelocityXY(TObj *);
 extern int FUN_80127214(TObj *);
 extern int FUN_801274cc(TObj *);
 extern int FUN_801275e4(TObj *);
@@ -69,7 +69,7 @@ void FUN_80128190(TObj *o)
     case 2:
         if (--o->timer == -1) o->substep++;
         FUN_80127214(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame != 0) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
         if (!FUN_801274cc(o)) goto fall;
@@ -91,7 +91,7 @@ void FUN_80128190(TObj *o)
         SETBOX(a);
     case 4:
         FUN_80127214(o);
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
@@ -105,7 +105,7 @@ void FUN_80128190(TObj *o)
         break;
     case 5:
         FUN_80127214(o);
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
         if (FUN_801274cc(o)) {
@@ -125,7 +125,7 @@ void FUN_80128190(TObj *o)
     case 6:
         if (--o->timer == -1) o->substep++;
         FUN_80127214(o);
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         if (!FUN_801274cc(o)) goto fall;
         if (o->wb2 != 0) {
             int g = (o->wb2 > 0);
@@ -142,7 +142,7 @@ void FUN_80128190(TObj *o)
         o->substep++;
     case 8:
         FUN_80127214(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame != 0) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
         FUN_801275e4(o);

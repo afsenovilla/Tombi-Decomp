@@ -98,8 +98,8 @@ extern unsigned char D_8009D07C, D_8009D07D, D_8009D002, D_8009CFFD, D_8009CDC1;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void addItemToInventory(int, int, int);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventComplete(int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_8001e4f0(int);
 
 void func_8011DD48(TP *o)
@@ -197,13 +197,13 @@ void func_8011DD48(TP *o)
         break;
     case 4:
         if (--o->timer > 0) break;
-        FUN_8005a9a4(0x1d, 0);
+        setEventComplete(0x1d, 0);
         o->timer = 200;
         o->state++;
         break;
     case 5:
         if (--o->timer > 0) break;
-        FUN_8005a8a8(0x1e, 0, 0);
+        setEventStarted(0x1e, 0, 0);
         o->timer = 200;
         o->state = 2;
         break;

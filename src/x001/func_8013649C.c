@@ -13,7 +13,7 @@ extern void func_80135850(TObj *);
 extern void func_80135164(TObj *);
 extern void func_80135C90(TObj *);
 extern void func_80136164(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_8013649C(TObj *o)
 {
@@ -102,7 +102,7 @@ void func_8013649C(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

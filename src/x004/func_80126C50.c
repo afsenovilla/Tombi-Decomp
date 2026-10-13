@@ -1,7 +1,7 @@
 // FUNC 80126c50 180 X004
 // MATCHING 80126c50 180
 #include "TOBJ.H"
-extern void FUN_80026bfc(int, int);
+extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern void *D_80134614[];
 
@@ -21,7 +21,7 @@ void func_80126C50(TObj *o)
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
         o->d8c = 0;
-        FUN_80026bfc(2, 6);
+        spawnItemNotification(2, 6);
         o->state++;
         break;
     case 2:

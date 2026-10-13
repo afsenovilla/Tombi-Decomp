@@ -3,7 +3,7 @@
 extern int DAT_1f8000f0;
 extern short DAT_1f8000f2;
 extern int DAT_1f800190;
-extern void FUN_800284d8(unsigned char *);
+extern void stepScrollApproachX(unsigned char *);
 #define W(o) (*(int *)((o) + 0x18))
 
 void FUN_80028250(unsigned char *o)
@@ -19,7 +19,7 @@ void FUN_80028250(unsigned char *o)
         if (W(o) > 0x3ffff)
             W(o) = 0x40000;
         if (W(o) > 0x12000)
-            FUN_800284d8(o);
+            stepScrollApproachX(o);
         p = &DAT_1f8000f0;
         *p += W(o);
         if (DAT_1f8000f2 > *(short *)(o + 0x32)) {

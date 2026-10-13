@@ -1,6 +1,6 @@
 // FUNC 8003c338 536 MAIN0
 // MATCHING 8003c338 536
-extern void FUN_8001faf4(unsigned char *), FUN_8001fe6c(unsigned char *);
+extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
 extern short FUN_800411cc(unsigned char *, int, int);
 extern unsigned short DAT_8009c960;
 extern int DAT_8013b104, DAT_80134d0c;
@@ -29,7 +29,7 @@ void FUN_8003c338(unsigned char *o)
         else
             *(int *)(o + 0x8c) = (*(int *)(o + 0x8c) + 0x14) & 0xff;
         if ((*(unsigned short *)(o + 0x2e) & 2) == 0)
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
         *(int *)(o + 0x14) = *(int *)(o + 0x14) + (*(short *)(o + 0x7e) << 8);
         v = *(short *)(o + 0x7e);
         v += (*(unsigned short *)(o + 0x2e) & 2) ? 0x50 : 0x20;
@@ -43,7 +43,7 @@ void FUN_8003c338(unsigned char *o)
         else
             *(int *)(o + 0x8c) = (*(int *)(o + 0x8c) + 0x14) & 0xff;
         if ((*(unsigned short *)(o + 0x2e) & 2) == 0)
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
         *(int *)(o + 0x14) = *(int *)(o + 0x14) + (*(short *)(o + 0x7e) << 8);
         v = *(unsigned short *)(o + 0x7e) + 0x20;
         *(short *)(o + 0x7e) = v;

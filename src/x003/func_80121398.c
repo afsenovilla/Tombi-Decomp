@@ -10,7 +10,7 @@ extern char D_80077D0C[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern void playSFX(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_801206F0(TObj *);
@@ -28,7 +28,7 @@ extern int func_801206F0(TObj *);
     { \
         X *x = (X *)((char *)o + 0xb4); \
         if (o->movetab != 0) { \
-            FUN_8001fa88(o, 1 - o->animFrame); \
+            applyAnimVelocityX(o, 1 - o->animFrame); \
         } \
         if (o->b9d & 2) { \
             if (o->animFrame != (o->b9d & 1)) { \

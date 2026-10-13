@@ -8,10 +8,10 @@ extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A60EA;
 extern AT3 D_8012F3C4[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
 
@@ -22,7 +22,7 @@ void func_801264B4(TObj *o)
     switch (o->state) {
     case 2:
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xa, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xa, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
@@ -32,7 +32,7 @@ void func_801264B4(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        FUN_8005a8a8(0x7f, 0, 0);
+        setEventStarted(0x7f, 0, 0);
         o->timer = 300;
         o->state++;
         break;
@@ -46,14 +46,14 @@ void func_801264B4(TObj *o)
         D_8009C93F = 1;
         D_8009C942 = 1;
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xb, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xb, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;
         break;
     case 7:
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xc, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xc, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
@@ -69,7 +69,7 @@ void func_801264B4(TObj *o)
         FUN_80026e0c(0x5f, 1);
         FUN_80026e0c(0x73, 1);
         FUN_80026c50(0x60, 1, 1);
-        FUN_8005a9a4(0x7f, 1);
+        setEventComplete(0x7f, 1);
         o->timer = 300;
         o->state++;
         break;
@@ -78,7 +78,7 @@ void func_801264B4(TObj *o)
         if (--o->timer > 0)
             break;
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xd, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xd, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
@@ -89,7 +89,7 @@ void func_801264B4(TObj *o)
             break;
         p->b04 = 3;
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xe, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xe, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;
@@ -112,7 +112,7 @@ void func_801264B4(TObj *o)
         break;
     case 13:
         v = *(B12 *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(5, 0xe, &v);
+        o->d90 = (int)showMessageBoxDirect(5, 0xe, &v);
         o->anim = D_8012F3C4[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;

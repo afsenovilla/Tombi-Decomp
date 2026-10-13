@@ -1,7 +1,7 @@
 // FUNC 801380b8 352 X000
 // MATCHING 801380b8 352
 extern unsigned char DAT_a, DAT_b, DAT_c;
-extern unsigned char *FUN_800183b8(void);
+extern unsigned char *allocObjectLayer2(void);
 extern short FUN_80137458(void *);
 extern void FUN_801377b8(void *);
 extern void FUN_80018980(void *);
@@ -16,7 +16,7 @@ void FUN_801380b8(unsigned char *o)
         if (DAT_a == 0xff)
             o[4] = 3;
         if (DAT_b < 6) {
-            q = FUN_800183b8();
+            q = allocObjectLayer2();
             if (q != 0) {
                 q[0] = 1;
                 q[2] = 0x15;

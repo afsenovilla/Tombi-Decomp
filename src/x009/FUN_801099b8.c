@@ -12,7 +12,7 @@ extern void FUN_8001e560(int, int);
 extern short FUN_800408d8(TObj *, short, int);
 extern int FUN_80040278(TObj *, short, short);
 extern short FUN_80041ca8(TObj *, short, int);
-extern void FUN_8003fb90(TObj *);
+extern void applyCollisionTileResponse(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800ee428(TObj *);
 extern void FUN_800ef1ac(TObj *);
@@ -74,7 +74,7 @@ void FUN_801099b8(TObj *o)
                 goto reset;
             }
             if ((short)FUN_80040278(o, DIR(o, 2, -2), (short)(o->y.p.whole + 0x10)) > 0) {
-                FUN_8003fb90(o);
+                applyCollisionTileResponse(o);
                 *(unsigned char *)&o->waa = 0;
                 o->b9e = 0;
                 if (o->bbe & 8) {

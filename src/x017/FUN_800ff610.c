@@ -14,11 +14,11 @@ extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
 extern void func_800FF0E8(TObj *);
 extern short func_800FF404();
-extern void FUN_8004258c(TObj *, unsigned char);
+extern void decreaseObjectTimer(TObj *, unsigned char);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_8001f110(int);
-extern int FUN_8001f2ec(int);
+extern int playJingle(int);
 extern void FUN_8001fe94(TObj *, int);
 
 static __inline__ short calc(void)
@@ -73,7 +73,7 @@ void FUN_800ff610(TObj *o, int arg)
             if (o->active != 1)
                 goto clr;
             o->animFrame = 0;
-            FUN_8004258c(o, func_800FF404(o));
+            decreaseObjectTimer(o, func_800FF404(o));
             o->active = 2;
             o->b04 = 2;
             o->step = 0;
@@ -124,7 +124,7 @@ void FUN_800ff610(TObj *o, int arg)
             U8(o, 0xce) = 0;
             if (o->active != 1)
                 goto clr;
-            FUN_8004258c(o, 2);
+            decreaseObjectTimer(o, 2);
             o->active = 2;
             o->b04 = 2;
             o->step = 0;
@@ -199,7 +199,7 @@ void FUN_800ff610(TObj *o, int arg)
         return;
     }
     if (o->active == 1 && arg != 0) {
-        FUN_8004258c(o, func_800FF404(o));
+        decreaseObjectTimer(o, func_800FF404(o));
         if (D_1F8001A4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
@@ -208,7 +208,7 @@ void FUN_800ff610(TObj *o, int arg)
                 D_8009C942 = 1;
                 D_8009C938 = 1;
                 FUN_8001f110(0);
-                FUN_8001f2ec(3);
+                playJingle(3);
             }
         }
     }

@@ -8,9 +8,9 @@ extern unsigned char D_8009CE55[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int FUN_800202b4(TObj *);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void FUN_8003e300(int, int, Fix16 *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_801315DC(TObj *o)
 {
@@ -45,7 +45,7 @@ void func_801315DC(TObj *o)
         if (!FUN_800202b4(o)) break;
         AnimAdvance(o);
         if (D_8009CE55[0] != 2) break;
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             n->active = 1;
             n->type = 0xf;
@@ -98,7 +98,7 @@ void func_801315DC(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

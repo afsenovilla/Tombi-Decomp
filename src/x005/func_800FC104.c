@@ -7,7 +7,7 @@ extern unsigned char D_8009C970[];
 extern unsigned char D_8009C942;
 extern unsigned char D_8009C938;
 extern void stopBgm(int);
-extern void FUN_8001f2ec(int);
+extern void playJingle(int);
 
 void func_800FC104(TObj *o)
 {
@@ -20,7 +20,7 @@ void func_800FC104(TObj *o)
             D_8009C942 = 1;
             D_8009C938 = 1;
             stopBgm(0);
-            FUN_8001f2ec(3);
+            playJingle(3);
         }
     }
 }

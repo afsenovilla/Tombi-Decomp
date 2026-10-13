@@ -7,7 +7,7 @@ extern void *D_80139578;
 extern char D_80077CDC[];
 extern short D_1F80027E;
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 
 void func_80126E24(TObj *o)
@@ -27,7 +27,7 @@ void func_80126E24(TObj *o)
         o->box3 = *p++;
         AnimLoadDuration(o);
     case 1:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0xe) != 0) {
             o->d8c = (-D_1F80027E * 4) & 0xff;
             o->state = 0;

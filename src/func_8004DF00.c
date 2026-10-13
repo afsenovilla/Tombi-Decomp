@@ -8,15 +8,15 @@ extern int D_1f800164;
 extern char D_800B3E28[];
 extern void func_8001D6A4();
 extern void SetDispMask(int);
-extern void FUN_8004fb68(int);
-extern void FUN_8004fa80(int, int);
+extern void loadSoundSet(int);
+extern void queueSystemLoadList(int, int);
 extern void func_800E8A14(void);
 extern void func_800E8A2C(void);
 extern void FUN_80016ca8(int, int, int);
 extern void FUN_80016e34(int, int, int, int);
 extern void ThreadCreate(int, void *);
 extern void stopBgm(int);
-extern void FUN_8001d63c(int);
+extern void cdSeekStream(int);
 void func_8004DF00(void)
 {
     switch (D_1f8001d4->w4a) {
@@ -25,8 +25,8 @@ void func_8004DF00(void)
         case 0:
             SetDispMask(0);
             D_1f8001ce = 0;
-            FUN_8004fb68(1);
-            FUN_8004fa80(1, 1);
+            loadSoundSet(1);
+            queueSystemLoadList(1, 1);
             D_1f8001d4->w4c++;
             break;
         case 1:
@@ -69,15 +69,15 @@ void func_8004DF00(void)
         SetDispMask(0);
         FUN_80016ca8(0, 0, 0);
         D_1f8001ce = 0;
-        FUN_8004fb68(2);
-        FUN_8004fa80(2, 1);
+        loadSoundSet(2);
+        queueSystemLoadList(2, 1);
     next:
         D_1f8001d4->w4a++;
         break;
     case 6:
         if (D_1f8001ce != 0) {
             D_1f8001d4->w4a++;
-            FUN_8001d63c(0);
+            cdSeekStream(0);
         }
         break;
     case 7:

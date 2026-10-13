@@ -8,11 +8,11 @@ extern unsigned char D_8009C942[], D_8009D2B0, D_8009CDCC[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A60EA[], D_1F8001C6;
 extern AT3 D_8012B2E4[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 void func_80128C44(TObj *o)
 {
@@ -34,9 +34,9 @@ void func_80128C44(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         if (D_8009CDCC[0] == 0)
-            o->d90 = (int)FUN_8002dcc8(2, 6, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 6, &v);
         else
-            o->d90 = (int)FUN_8002dcc8(2, 7, &v);
+            o->d90 = (int)showMessageBoxDirect(2, 7, &v);
         o->state++;
         break;
     case 1:
@@ -49,7 +49,7 @@ void func_80128C44(TObj *o)
         FUN_8001fe6c(o);
         o->timer = 4;
         if (D_8009CDCC[0] == 0) {
-            FUN_8005a8a8(0x28, 0, 0);
+            setEventStarted(0x28, 0, 0);
             o->timer = 200;
         }
         D_800A60EA[0] = 0;

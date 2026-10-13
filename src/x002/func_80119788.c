@@ -7,7 +7,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned int D_8009C96C, D_8009C98C;
 extern short D_800A60EA[], D_1F8001C6;
 extern unsigned char D_8009C93FA[], D_8009C942A[];
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_80119788(TObj *o)
 {
@@ -30,7 +30,7 @@ void func_80119788(TObj *o)
         break;
     case 1:
         o->w08 = 200;
-        FUN_8005a9a4(0x27, 0);
+        setEventComplete(0x27, 0);
         o->state++;
         break;
     case 2:

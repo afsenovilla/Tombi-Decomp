@@ -4,7 +4,7 @@
 
 extern unsigned char D_1F8001A4;
 short func_80043C74();
-void FUN_8004258c(TObj *o, int n);
+void decreaseObjectTimer(TObj *o, int n);
 
 void func_8012095C(TObj *o, TObj *p)
 {
@@ -68,7 +68,7 @@ void func_8012095C(TObj *o, TObj *p)
                 o->b04 = 2;
                 o->step = 1;
                 o->state = 0;
-                FUN_8004258c(o, 4);
+                decreaseObjectTimer(o, 4);
             }
         } else {
             short a = p->box2, b = p->y.p.whole, c = o->box2;
@@ -101,5 +101,5 @@ kill:
     o->step = 0;
     o->state = 0;
     o->animFrame = t;
-    FUN_8004258c(o, 2); }
+    decreaseObjectTimer(o, 2); }
 }

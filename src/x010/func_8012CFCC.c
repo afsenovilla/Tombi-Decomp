@@ -7,7 +7,7 @@ extern unsigned char D_8009C93A, D_8009C938;
 extern short D_1F80016A_S; /* second name for D_1F80016A: keeps the reload in the loop (debt) */
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern P4 D_8012F4AC[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012CFCC(TObj *o)
@@ -30,7 +30,7 @@ void func_8012CFCC(TObj *o)
         if (--o->w08 == 0) {
             p = D_8012F4AC;
             for (i = 0; i < 8; i++) {
-                e = FUN_800183b8();
+                e = allocObjectLayer2();
                 if (e) {
                     e->type = 0x3a;
                     e->active = 2;

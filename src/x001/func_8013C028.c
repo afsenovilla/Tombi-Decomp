@@ -14,7 +14,7 @@ extern int D_1F800198;
 extern unsigned char D_1F8001F8;
 extern int D_1F8000EC;
 extern int Rand(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8013C028(TObj *o)
@@ -33,7 +33,7 @@ void func_8013C028(TObj *o)
         if (W0A(o) < 2) {
             if (--o->w08 == -1) {
                 o->w08 = D_8013CA20[Rand() & 3];
-                e = FUN_800183b8();
+                e = allocObjectLayer2();
                 if (e) {
                     e->active = 2;
                     e->type = 0x13;

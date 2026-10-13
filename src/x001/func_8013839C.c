@@ -10,7 +10,7 @@ extern unsigned char D_8009CFC8;
 void ObjCullRegister(TObj *o);
 void AnimLoadDuration(TObj *o);
 void addItemToInventory(int a, int b, int c);
-void FUN_80018790(TObj *o);
+void freeObjectLayer2(TObj *o);
 void func_8013759C(TObj *o);
 void func_80137714(TObj *o);
 void func_80137968(TObj *o);
@@ -64,7 +64,7 @@ void func_8013839C(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

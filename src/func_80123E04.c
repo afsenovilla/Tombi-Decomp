@@ -17,7 +17,7 @@ extern int D_1F800074_v;
 extern int D_1F800070_v;
 extern int D_1F8001E0;
 int FUN_8004fba8(TObj *o, void *a, void *b);
-void FUN_8004fd6c(PFT4 *p, int a, int b, int c, int d);
+void insertPrimWithBias(PFT4 *p, int a, int b, int c, int d);
 void func_80123E04(TObj *o)
 {
     Spr *s;
@@ -48,6 +48,6 @@ void func_80123E04(TObj *o)
     p->y2 = p->y0 + s->h + (unsigned short)o->wba * 2 - 1;
     p->x3 = p->x1;
     p->y3 = p->y2;
-    FUN_8004fd6c(p, D_1F8001E0 + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
+    insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
     D_1F800164 = (PFT4 *)((char *)D_1F800164 + 0x28);
 }

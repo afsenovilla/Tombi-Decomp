@@ -9,10 +9,10 @@ extern unsigned char D_8009D138;
 extern short D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void AnimJump(TObj *, int);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void removeItemFromInventory(int, int);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventComplete(int, int);
+extern void setEventStarted(int, int, int);
 
 void func_80128304(TObj *o)
 {
@@ -35,7 +35,7 @@ void func_80128304(TObj *o)
         break;
     case 2:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(4, 1, &v);
+        o->d90 = showMessageBoxDirect(4, 1, &v);
         o->anim = D_8013117C[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
@@ -46,7 +46,7 @@ void func_80128304(TObj *o)
             e->b04 = 3;
             o->anim = D_8013117C[o->subtype].anims[0];
             AnimJump(o, 0);
-            FUN_8005a9a4(0x70, 0);
+            setEventComplete(0x70, 0);
             o->timer = 0x12c;
             o->state++;
         }
@@ -54,7 +54,7 @@ void func_80128304(TObj *o)
     case 4:
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(4, 2, &v);
+            o->d90 = showMessageBoxDirect(4, 2, &v);
             o->anim = D_8013117C[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
@@ -66,7 +66,7 @@ void func_80128304(TObj *o)
             e->b04 = 3;
             o->anim = D_8013117C[o->subtype].anims[0];
             AnimJump(o, 0);
-            FUN_8005a8a8(0x99, 0, 0);
+            setEventStarted(0x99, 0, 0);
             o->timer = 0x12c;
             o->state++;
         }
@@ -76,7 +76,7 @@ void func_80128304(TObj *o)
         break;
     case 7:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(4, 3, &v);
+        o->d90 = showMessageBoxDirect(4, 3, &v);
         o->anim = D_8013117C[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;

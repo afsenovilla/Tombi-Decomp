@@ -2,7 +2,7 @@
 // MATCHING 80120fc0 244
 #include "TOBJ.H"
 extern int SquareRoot0(int);
-extern int func_800428C0(TObj *, TObj *);
+extern int resolveHitResultA(TObj *, TObj *);
 
 void func_80120FC0(TObj *o, TObj *p)
 {
@@ -14,5 +14,5 @@ void func_80120FC0(TObj *o, TObj *p)
     dy = o->y.p.whole - p->y.p.whole;
     if (p->box3 < (unsigned short)(p->box2 + dy)) return;
     if (SquareRoot0(dx * dx + dy * dy) > p->box0) return;
-    func_800428C0(o, p);
+    resolveHitResultA(o, p);
 }

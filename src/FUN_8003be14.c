@@ -5,7 +5,7 @@ extern unsigned char DAT_8007a138[];
 extern char DAT_80077d0c[], DAT_80077cdc[];
 extern void SfxPlay(int);
 extern void FUN_800e9f74(int, int, int, int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void FUN_8003be14(TObj *o)
 {
@@ -29,9 +29,9 @@ void FUN_8003be14(TObj *o)
     case 1:
         u = o->animFrame;
         if (u & 2)
-            FUN_8001fa88(o, u & 1);
+            applyAnimVelocityX(o, u & 1);
         else
-            FUN_8001fa88(o, 1 - u);
+            applyAnimVelocityX(o, 1 - u);
         s = o->velV + 0x40;
         o->velV = s;
         if (s > 0x400)

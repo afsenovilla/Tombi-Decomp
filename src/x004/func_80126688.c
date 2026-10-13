@@ -14,7 +14,7 @@ extern short D_1F8001C8;
 extern void *D_801345B8[], *D_801345E8[], *D_801345EC[], *D_80134604[];
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
-extern short FUN_8002078c(P2, P2);
+extern short angleBetweenPoints(P2, P2);
 extern short MulCos(int, short);
 extern short MulNegSinScaled(int, short);
 extern short FUN_800411cc(TObj *, short, short);
@@ -72,7 +72,7 @@ void func_80126688(BX *b)
         p.y = o->y.p.whole;
         q.x = D_800A6078[1];
         q.y = D_800A604E;
-        *(short *)&o->bbe = FUN_8002078c(p, q) + 0x100;
+        *(short *)&o->bbe = angleBetweenPoints(p, q) + 0x100;
         if (o->h->p.whole >= D_800A6078[1]) o->animFrame = 1;
         else o->animFrame = 0;
         o->substep++;

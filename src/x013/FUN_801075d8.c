@@ -15,7 +15,7 @@ extern void FUN_800ee9cc(TObj *);
 extern void FUN_800f00ac(TObj *);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_800eae0c(int, int, int, int);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern short FUN_8003fd78(TObj *, int, int);
@@ -104,7 +104,7 @@ void FUN_801075d8(TObj *o)
         if (o->b6b + 0x20 < 0x100) o->b6b = o->b6b + 0x20; else o->b6b = 0xff;
         o->h->raw += D_8009C944[0] << 8;
         o->y.raw += D_8009C946[0] << 8;
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         FUN_8001fec0(o);
         o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;
         o->y.raw += o->d88 << 8;
@@ -124,7 +124,7 @@ void FUN_801075d8(TObj *o)
     case 4:
 
         if (o->b6b - 0x20 < 0) o->b6b = 0; else o->b6b -= 0x20;
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;
         o->y.raw += o->d88 << 8;
         o->d88 += 0x20;

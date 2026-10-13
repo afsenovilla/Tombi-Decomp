@@ -7,7 +7,7 @@ extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_80043464(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
-extern void FUN_8004258c(TObj *, int);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_80120F34(TObj *o, TObj *p)
 {
@@ -44,7 +44,7 @@ void func_80120F34(TObj *o, TObj *p)
             o->step = 1;
             o->state = 0;
             o->substep = 0;
-            FUN_8004258c(o, 1);
+            decreaseObjectTimer(o, 1);
             break;
         }
         if (o->b9c && r == (o->animFrame & 1)) break;
@@ -54,7 +54,7 @@ void func_80120F34(TObj *o, TObj *p)
         o->step = 0;
         o->state = 0;
         o->animFrame = t;
-        FUN_8004258c(o, 1);
+        decreaseObjectTimer(o, 1);
         break;
     case 2:
         /* the dispatch's delay slot (addiu v0,3) runs before this case: the game compares active with 3 */

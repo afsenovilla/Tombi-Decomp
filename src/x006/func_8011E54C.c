@@ -15,16 +15,16 @@ extern short D_800A60EA;
 extern int func_8011E364(void);
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern int FUN_8002dc50(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern int showMessageBox(int, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_80026f4c(void);
+extern void increaseMaxHealth(void);
 extern void FUN_8004d620(int, int);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_8011E54C(TObj *o)
 {
@@ -111,7 +111,7 @@ void func_8011E54C(TObj *o)
             case 1:
                 if (o->h->p.whole < 0xc4) o->animFrame = 0;
                 if (o->h->p.whole >= 0xf5) o->animFrame = 1;
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 p = D_800A6078;
                 if (p->p.whole < 0x91) break;
                 p->p.whole = 0x90;
@@ -124,7 +124,7 @@ void func_8011E54C(TObj *o)
             o->anim = D_80122C1C[0];
             o->animFrame = 1;
             FUN_8001fe6c(o);
-            o->d90 = FUN_8002dc50(2, e[1], 0xdc, 0x7e);
+            o->d90 = showMessageBox(2, e[1], 0xdc, 0x7e);
             o->wb6++;
             break;
             break;
@@ -132,7 +132,7 @@ void func_8011E54C(TObj *o)
             o->anim = D_80122C14[0];
             o->animFrame = 1;
             FUN_8001fe6c(o);
-            o->d90 = FUN_8002dc50(2, e[1], 0xdc, 0x7e);
+            o->d90 = showMessageBox(2, e[1], 0xdc, 0x7e);
             o->wb6++;
             break;
             break;
@@ -149,12 +149,12 @@ void func_8011E54C(TObj *o)
             break;
             break;
         case 8:
-            FUN_80026f4c();
+            increaseMaxHealth();
             FUN_8004d620(e[1], 3);
             goto next;
             break;
         case 9:
-            FUN_8005a8a8(e[1], 0, 0);
+            setEventStarted(e[1], 0, 0);
             o->wb6++;
             break;
             break;
@@ -167,13 +167,13 @@ void func_8011E54C(TObj *o)
                 }
                 switch (e[1]) {
                 case 0x57:
-                    FUN_8005a8a8(0x85, 0, 1);
+                    setEventStarted(0x85, 0, 1);
                     break;
                 case 0x58:
-                    FUN_8005a8a8(0x86, 0, 1);
+                    setEventStarted(0x86, 0, 1);
                     break;
                 case 0x59:
-                    FUN_8005a8a8(0x87, 0, 1);
+                    setEventStarted(0x87, 0, 1);
                     break;
                 }
                 o->timer = 0x168;
@@ -188,7 +188,7 @@ void func_8011E54C(TObj *o)
             }
             break;
         case 11:
-            FUN_8005a9a4(e[1], 0);
+            setEventComplete(e[1], 0);
             goto next;
             break;
         case 12:
@@ -198,7 +198,7 @@ void func_8011E54C(TObj *o)
                     goto next;
                     break;
                 }
-                FUN_8005a9a4(e[1], 0);
+                setEventComplete(e[1], 0);
                 o->timer = 0x168;
                 o->step++;
                 break;
@@ -239,7 +239,7 @@ void func_8011E54C(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

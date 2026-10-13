@@ -19,7 +19,7 @@ extern void FUN_8012f380(TObj *);
 extern void FUN_8012fb3c(TObj *);
 extern void FUN_8012fe98(TObj *);
 extern void FUN_801302a0(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 static __inline__ int nearObj(TObj *o, TObj *p)
 {
@@ -145,7 +145,7 @@ sw:
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

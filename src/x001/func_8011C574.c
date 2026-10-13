@@ -28,11 +28,11 @@ extern short D_800A604E;
 extern unsigned char D_800A60D4;
 extern int MulCos(int, short);
 extern int MulNegSinScaled(int, short);
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer4(void);
 extern TObj *func_80020D98(void *);
 extern int FUN_800201ac(TObj *, int);
 extern int func_800203DC(TObj *);
-extern int FUN_8002078c(P, P);
+extern int angleBetweenPoints(P, P);
 extern void func_8011CEC8(Ctx *);
 extern void func_8011D28C(TObj *);
 extern void playSFX(int);
@@ -84,7 +84,7 @@ void func_8011C574(TObj *o)
                         X(o)->wc2 = 0xffff;
                         continue;
                     }
-                    c = FUN_800184d8();
+                    c = allocObjectLayer4();
                     if (c != 0) {
                         c->da0 = o->da0;
                         c->category = 4;
@@ -200,7 +200,7 @@ void func_8011C574(TObj *o)
             p.x = o->h->p.whole + 0x10;
             p.y = o->y.p.whole;
         }
-        o->d8c = FUN_8002078c(r, p) << 4;
+        o->d8c = angleBetweenPoints(r, p) << 4;
         o->d30 = p.x;
         o->d34 = p.y;
         o->box0 = 0;

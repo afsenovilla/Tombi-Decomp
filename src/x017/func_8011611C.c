@@ -38,7 +38,7 @@ extern int D_1F8000F0;
 extern Q *D_1F8001D4;
 extern void func_80027810(O *);
 extern int FUN_800270a0(O *, int, int);
-extern void FUN_8002715c(int);
+extern void stepPlayerXToward(int);
 extern void FUN_8002a4d0(O *);
 
 void func_8011611C(O *o)
@@ -75,7 +75,7 @@ void func_8011611C(O *o)
                 p->ba0 = 1;
                 p->ba8 = 8;
                 if (p->z > 0) {
-                    FUN_8002715c(0x56);
+                    stepPlayerXToward(0x56);
                     if (p->z >= 0x5b) {
                         FUN_800270a0(o, 1, 1);
                         break;
@@ -86,7 +86,7 @@ void func_8011611C(O *o)
                 p->ba0 = 1;
                 p->ba8 = 8;
                 if (p->z > 0) {
-                    FUN_8002715c(0x230);
+                    stepPlayerXToward(0x230);
                     if (p->z >= 0x5b) {
                         FUN_800270a0(o, 1, 3);
                         break;
@@ -95,10 +95,10 @@ void func_8011611C(O *o)
             }
             if ((unsigned short)(p->x - 0x110) < 0x60) {
                 if (p->z > 0) {
-                    FUN_8002715c(0x140);
+                    stepPlayerXToward(0x140);
                     if (p->z >= 0x5b) FUN_800270a0(o, 1, 2);
                 } else if (p->z < 0) {
-                    FUN_8002715c(0x140);
+                    stepPlayerXToward(0x140);
                     if (p->z < -0x5a) FUN_800270a0(o, 1, 0);
                 }
             }

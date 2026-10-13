@@ -5,9 +5,9 @@
 extern unsigned char D_8009CDBA;
 extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_80123F24(TObj *o)
 {
@@ -37,13 +37,13 @@ void func_80123F24(TObj *o)
         break;
     case 2:
         if (D_8009CDBA == 0) {
-            FUN_8005a8a8(0x16, 0, 0);
+            setEventStarted(0x16, 0, 0);
             FUN_80026c50(0xb, 1, 1);
         }
         o->b04++;
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

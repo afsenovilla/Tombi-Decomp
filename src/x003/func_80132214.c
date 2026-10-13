@@ -9,12 +9,12 @@ extern unsigned short D_800A6066;
 extern short D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
-extern TObj *FUN_8002dcc8(int, int, void *);
+extern TObj *showMessageBoxDirect(int, int, void *);
 extern void func_801289C8(TObj *, int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 extern int Rand(void);
 
-#define SPAWN(x, k) { v = *(B12 *)&(x)->a; (x)->d90 = (int)FUN_8002dcc8(2, k, &v); }
+#define SPAWN(x, k) { v = *(B12 *)&(x)->a; (x)->d90 = (int)showMessageBoxDirect(2, k, &v); }
 #define DONE(x) (((TObj *)(x)->d90)->b04 == 2)
 #define KILL(x) ((TObj *)(x)->d90)->b04 = 3
 
@@ -85,7 +85,7 @@ void func_80132214(TObj *o)
         if (DONE(a)) {
             KILL(a);
             o->w08 = 200;
-            FUN_8005a8a8(0x23, 0, 0);
+            setEventStarted(0x23, 0, 0);
             o->state = 0x10;
         }
         break;

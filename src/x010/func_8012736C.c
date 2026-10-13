@@ -38,8 +38,8 @@ extern void FUN_800eea7c(TObj *, int, int);
 extern void FUN_80025f40(int, int, int, int);
 extern void func_801271D8(TObj *, int);
 extern short TileCollideAt(TObj *, short, short);
-extern TObj *FUN_8002dcc8(int, int, void *);
-extern void FUN_8005a8a8(int, int, int);
+extern TObj *showMessageBoxDirect(int, int, void *);
+extern void setEventStarted(int, int, int);
 extern void addItemToInventory(int, int, int);
 
 #define SETANIM(k) o->anim = ANIMS(o)[k]; AnimLoadDuration(o);
@@ -219,7 +219,7 @@ void func_8012736C(TObj *o)
         }
         ObjSetFacingToPlayer(o);
         o->state++;
-        o->d90 = (int)FUN_8002dcc8(2, 0x13, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x13, &o->a);
         break;
     case 12:
     case 14:
@@ -232,16 +232,16 @@ void func_8012736C(TObj *o)
         }
         break;
     case 13:
-        o->d90 = (int)FUN_8002dcc8(2, 0x14, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x14, &o->a);
         o->state++;
         break;
     case 15:
-        FUN_8005a8a8(0x40, 0, 0);
+        setEventStarted(0x40, 0, 0);
         o->timer = 0x168;
         o->state++;
         break;
     case 17:
-        o->d90 = (int)FUN_8002dcc8(2, 0x15, &o->a);
+        o->d90 = (int)showMessageBoxDirect(2, 0x15, &o->a);
         o->state++;
         break;
     case 19:

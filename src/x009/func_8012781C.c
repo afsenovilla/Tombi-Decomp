@@ -11,7 +11,7 @@ extern void playSFX(int);
 extern short func_8004065C(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern int func_801276CC(TObj *);
-extern void FUN_8003e3cc(int, int, Fix16 *, int, int);
+extern void spawnItemDropAtPos(int, int, Fix16 *, int, int);
 
 static __inline__ int wall(TObj *o, unsigned short d)
 {
@@ -190,10 +190,10 @@ void func_8012781C(TObj *o)
         if (func_801276CC(o)) {
             if (o->subtype == 0) {
                 if (!(D_8009D2C3 & 1)) {
-                    FUN_8003e3cc(0x8a, 0, &o->a, 0, 0);
+                    spawnItemDropAtPos(0x8a, 0, &o->a, 0, 0);
                     D_8009D083 = 1;
                 } else {
-                    FUN_8003e3cc(0xc, 0, &o->a, 0, 0);
+                    spawnItemDropAtPos(0xc, 0, &o->a, 0, 0);
                     D_8009D083 = 2;
                 }
             }

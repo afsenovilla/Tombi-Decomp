@@ -4,7 +4,7 @@
 typedef struct { short vx, vy, vz, pad; } SVEC;
 extern char D_1F800000[];
 extern char DAT_1f800000[]; /* same scratchpad matrix, second name: the game reloads its address */
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 extern void *MulMatrix0(void *, void *, void *);
 extern void ApplyRotMatrix(SVEC *, void *);
 extern int FUN_800202b4(TObj *);
@@ -34,7 +34,7 @@ void func_8011AD78(TObj *o)
         break;
     case 1:
         e = (TObj *)o->d90;
-        FUN_80021f5c(D_1F800000);
+        getBaseMatrix(D_1F800000);
         v.vx = o->d30 >> 16;
         v.vy = o->d34 >> 16;
         v.vz = o->d38 >> 16;

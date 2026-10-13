@@ -10,7 +10,7 @@ extern unsigned short D_1F8000EE;
 extern int D_800A4570[];
 extern int D_800A4574[];
 void ObjListPush_1F80022C(TObj *o);
-void FUN_80018934(TObj *o);
+void freeObjectLayer7(TObj *o);
 
 void func_8011B8A4(TObj *o)
 {
@@ -50,7 +50,7 @@ void func_8011B8A4(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

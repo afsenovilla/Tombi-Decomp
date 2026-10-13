@@ -2,9 +2,9 @@
 // MATCHING 80126004 328
 #include "TOBJ.H"
 extern unsigned char D_8009CEB0;
-extern short func_80044550(TObj *, TObj *);
-extern void func_800428C0(TObj *, TObj *);
-extern int func_800429D0(TObj *, TObj *);
+extern short boxesOverlapSide(TObj *, TObj *);
+extern void resolveHitResultA(TObj *, TObj *);
+extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void func_80132698(int, int, int);
@@ -14,14 +14,14 @@ void func_80126004(TObj *o, TObj *e)
 {
     int r;
 
-    if (func_80044550(o, e) < 0) {
+    if (boxesOverlapSide(o, e) < 0) {
         return;
     }
     if (D_8009CEB0) {
-        func_800428C0(o, e);
+        resolveHitResultA(o, e);
         return;
     }
-    r = func_800429D0(o, e);
+    r = resolveHitResultB(o, e);
     if (r == 0) {
         return;
     }

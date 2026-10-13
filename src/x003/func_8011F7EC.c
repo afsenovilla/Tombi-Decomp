@@ -2,7 +2,7 @@
 // MATCHING 8011f7ec 224
 #include "TOBJ.H"
 extern short D_1F80019E;
-extern short func_8004461C(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
 extern int func_80042B98(TObj *, TObj *);
 extern void FUN_800e9f74(int, int, int, int);
 
@@ -10,7 +10,7 @@ void func_8011F7EC(TObj *p, TObj *o)
 {
     int r;
 
-    if (func_8004461C(p, o) == -1)
+    if (boxesOverlapSigned(p, o) == -1)
         return;
     o->w7a = p->animFrame & 1;
     r = func_80042B98(p, o);

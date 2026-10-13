@@ -16,14 +16,14 @@ typedef struct Q {
     int *p40;
     int *p44;
 } Q;
-extern Q *FUN_80018568(void);
+extern Q *allocObjectLayer5(void);
 extern unsigned char DAT_8007b09a;
 extern unsigned char *DAT_8007b14c[];
 extern unsigned short DAT_8009c962;
 
 void FUN_80123b64(short *o)
 {
-    Q *q = FUN_80018568();
+    Q *q = allocObjectLayer5();
     if (q) {
         q->b0 = 1;
         q->b2 = 0xc;

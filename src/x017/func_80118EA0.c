@@ -14,14 +14,14 @@ extern char D_80010814[];
 extern void FUN_8001d6a4();
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800eea7c(TObj *, int, int);
-extern void FUN_8001d63c(int);
+extern void cdSeekStream(int);
 extern void FUN_8001f110(int);
 extern void FUN_800171b8(int, void *);
-extern void FUN_8001eb64(void);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void startAreaBgm(void);
+extern void setEventComplete(int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void func_801180BC(TObj *, unsigned short, short);
 
 void func_80118EA0(TObj *o)
@@ -100,7 +100,7 @@ void func_80118EA0(TObj *o)
         o->state = 10;
         break;
     case 10:
-        FUN_8001d63c(0xb);
+        cdSeekStream(0xb);
         D_800A6038.b04 = 5;
         D_800A6038.step = 0x62;
         D_8009C93F = 1;
@@ -118,13 +118,13 @@ void func_80118EA0(TObj *o)
         break;
     case 12:
         D_8009C975 = 4;
-        FUN_8001eb64();
+        startAreaBgm();
         D_8009CDF1 = 0xff;
         o->state++;
     case 13:
         if (D_8009C975 != 0) break;
         o->w08 = 0x12c;
-        FUN_8005a9a4(0x49, 0);
+        setEventComplete(0x49, 0);
         o->state++;
         break;
     case 14:
@@ -172,7 +172,7 @@ void func_80118EA0(TObj *o)
         break;
     case 20:
         v = *(B12 *)&s1->a;
-        s1->d90 = (int)FUN_8002dcc8(2, 0x20, &v);
+        s1->d90 = (int)showMessageBoxDirect(2, 0x20, &v);
         func_801180BC(s1, 2, 0);
         o->state++;
         break;
@@ -183,14 +183,14 @@ void func_80118EA0(TObj *o)
             q->b04 = 3;
         }
         v = *(B12 *)&s1->a;
-        s1->d90 = (int)FUN_8002dcc8(2, 0x23, &v);
+        s1->d90 = (int)showMessageBoxDirect(2, 0x23, &v);
         o->state++;
         break;
     case 22:
         p = (TObj *)s1->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        FUN_8005a8a8(0x76, 0, 0);
+        setEventStarted(0x76, 0, 0);
         func_801180BC(s1, 0, 0);
         o->w08 = 0x12c;
         o->state++;
@@ -198,7 +198,7 @@ void func_80118EA0(TObj *o)
     case 23:
         if (--o->w08 > 0) break;
         v = *(B12 *)&s2->a;
-        s2->d90 = (int)FUN_8002dcc8(2, 0x26, &v);
+        s2->d90 = (int)showMessageBoxDirect(2, 0x26, &v);
         func_801180BC(s2, 2, 0);
         o->state++;
         break;
@@ -214,7 +214,7 @@ void func_80118EA0(TObj *o)
     case 25:
         if (--o->w08 > 0) break;
         v = *(B12 *)&s2->a;
-        s2->d90 = (int)FUN_8002dcc8(2, 0x27, &v);
+        s2->d90 = (int)showMessageBoxDirect(2, 0x27, &v);
         func_801180BC(s2, 2, 0);
         o->state++;
         break;
@@ -222,7 +222,7 @@ void func_80118EA0(TObj *o)
         p = (TObj *)s2->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        FUN_8005a8a8(0x96, 0, 0);
+        setEventStarted(0x96, 0, 0);
         func_801180BC(s2, 0, 0);
         o->w08 = 0x12c;
         o->state = 0x63;

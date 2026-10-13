@@ -6,8 +6,8 @@ extern TObj DAT_800a6038;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c942;
 extern unsigned char DAT_8009ce06;
-extern TObj *FUN_8002dcc8(int, int, B12 *);
-extern void FUN_8005a8a8(int, int, int);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
+extern void setEventStarted(int, int, int);
 
 void func_801174B8(TObj *o)
 {
@@ -28,7 +28,7 @@ void func_801174B8(TObj *o)
         break;
     case 2:
         v = *(B12 *)&DAT_800a6038.a;
-        DAT_800a60c8 = FUN_8002dcc8(4, 0, &v);
+        DAT_800a60c8 = showMessageBoxDirect(4, 0, &v);
         o->state++;
         break;
     case 3:
@@ -36,7 +36,7 @@ void func_801174B8(TObj *o)
             break;
         DAT_800a60c8->b04 = 3;
         if (DAT_8009ce06 == 0) {
-            FUN_8005a8a8(0x62, 0, 0);
+            setEventStarted(0x62, 0, 0);
             o->w08 = 200;
             o->state++;
         } else {

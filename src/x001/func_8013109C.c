@@ -11,7 +11,7 @@ extern unsigned char D_8009CEDF;
 extern short FUN_80040278(TObj *, short, short);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fab4(TObj *);
+extern void applyFrameVelocityXY(TObj *);
 
 static __inline__ int land(TObj *o)
 {
@@ -59,7 +59,7 @@ void func_8013109C(TObj *o)
         break;
     case 3:
         AnimAdvance(o);
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         land(o);
         if (o->h->p.whole < 0x4fe) o->state++;
         break;

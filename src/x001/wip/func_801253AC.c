@@ -12,7 +12,7 @@ extern unsigned char D_8013C7B0[];
 extern short D_1F80019E;
 extern int rcos(int);
 extern int rsin(int);
-extern int func_800429D0(TObj *, TObj *);
+extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void FUN_8001f96c(int, int, int, int);
 
@@ -83,7 +83,7 @@ int func_801253AC(TObj *a, TObj *b, unsigned char k, int ang)
     }
     if ((unsigned char)(D_8013C7B0[a->animFrame & 7] - d) < 0x80) b->velH = 0x600;
     else b->velH = -0x600;
-    r = func_800429D0(a, b);
+    r = resolveHitResultB(a, b);
     if (r) {
         if (r >= 4) {
             v = b->velH;

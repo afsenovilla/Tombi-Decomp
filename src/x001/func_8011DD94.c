@@ -6,7 +6,7 @@ extern unsigned char D_8009CEAE[], D_8009C942;
 extern char D_8013C564[];
 extern void FUN_80020078(TObj *, int);
 extern void func_8011DB5C(TObj *);
-extern void FUN_8003c7c4(char *, V3 *, int, int, int);
+extern void applyItemEffect(char *, V3 *, int, int, int);
 extern void FUN_80018838(TObj *);
 
 void func_8011DD94(TObj *o)
@@ -64,7 +64,7 @@ void func_8011DD94(TObj *o)
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole - 0x18;
             v.z.p.whole = o->d->p.whole;
-            FUN_8003c7c4(D_8013C564, &v, 1, 0, 0);
+            applyItemEffect(D_8013C564, &v, 1, 0, 0);
         }
         break;
     case 1:

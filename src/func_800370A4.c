@@ -9,7 +9,7 @@ extern unsigned char *D_8009C330;
 void FUN_80035198(TObj *o);
 void ObjCullRegister(TObj *o);
 void FUN_80036f30(TObj *o);
-void FUN_80018744(TObj *o);
+void freeObjectLayer1(TObj *o);
 void func_800370A4(TObj *o)
 {
     if (D_800A60FF) o->b04 = 2;
@@ -29,7 +29,7 @@ void func_800370A4(TObj *o)
         o->b04 = 3;
         break;
     case 3:
-        FUN_80018744(o);
+        freeObjectLayer1(o);
         break;
     }
 }

@@ -9,7 +9,7 @@ extern unsigned char DAT_8009c942[];
 extern unsigned char DAT_8009d2b0;
 extern short D_1F8001C6;
 extern AT3 D_80119C48[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimLoadDuration(TObj *);
 
 void func_801187D4(TObj *o)
@@ -40,7 +40,7 @@ void func_801187D4(TObj *o)
         v = *(B12 *)&o->a;
         o->anim = D_80119C48[o->subtype].p[2];
         AnimLoadDuration(o);
-        o->d90 = (int)FUN_8002dcc8(2, 0x10, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 0x10, &v);
         o->state++;
         break;
     case 1:

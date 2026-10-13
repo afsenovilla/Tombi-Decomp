@@ -1,7 +1,7 @@
 // FUNC 8012185c 240 X014
 // MATCHING 8012185c 240
 #include "TOBJ.H"
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8012185C(TObj *o, int sub)
 {
@@ -9,7 +9,7 @@ void func_8012185C(TObj *o, int sub)
     TObj *e;
 
     for (i = 0; i < 6; i++) {
-        e = FUN_800183b8();
+        e = allocObjectLayer2();
         if (e) {
             e->type = 0x47;
             e->active = 2;

@@ -16,9 +16,9 @@ extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_80026e0c(int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 
 #define WD2(o) (((E *)(o))->wd2)
@@ -84,13 +84,13 @@ void func_8011973C(TObj *o)
             }
             o->timer = 0x12c;
             o->state = 0x65;
-            FUN_8005a9a4(0xa9, 0);
+            setEventComplete(0xa9, 0);
         } else if (D_8009C941 == 8) {
             o->timer = 0x12c;
             o->state = 0x64;
-            FUN_8005a9a4(0xa9, 0);
+            setEventComplete(0xa9, 0);
         } else {
-            o->d90 = FUN_8002dcc8(3, 0xf, &v);
+            o->d90 = showMessageBoxDirect(3, 0xf, &v);
             o->state = 0x61;
         }
         break;
@@ -103,43 +103,43 @@ void func_8011973C(TObj *o)
         break;
     case 2:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x10, &v);
+        o->d90 = showMessageBoxDirect(3, 0x10, &v);
         WD2(o) = 1;
         o->state = 9;
         break;
     case 3:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x11, &v);
+        o->d90 = showMessageBoxDirect(3, 0x11, &v);
         WD2(o) = 2;
         o->state = 9;
         break;
     case 4:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x12, &v);
+        o->d90 = showMessageBoxDirect(3, 0x12, &v);
         WD2(o) = 3;
         o->state = 9;
         break;
     case 5:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x13, &v);
+        o->d90 = showMessageBoxDirect(3, 0x13, &v);
         WD2(o) = 4;
         o->state = 9;
         break;
     case 6:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x14, &v);
+        o->d90 = showMessageBoxDirect(3, 0x14, &v);
         WD2(o) = 5;
         o->state = 9;
         break;
     case 7:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x15, &v);
+        o->d90 = showMessageBoxDirect(3, 0x15, &v);
         WD2(o) = 6;
         o->state = 9;
         break;
     case 8:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x16, &v);
+        o->d90 = showMessageBoxDirect(3, 0x16, &v);
         o->animFrame = P.h->p.whole < o->h->p.whole;
         setanim(o, 4);
         o->state = 1;
@@ -150,11 +150,11 @@ void func_8011973C(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x16, &v);
+        o->d90 = showMessageBoxDirect(3, 0x16, &v);
         o->state = 1;
         break;
     case 0x60:
-        FUN_8005a9a4(0x78, 0);
+        setEventComplete(0x78, 0);
         FUN_80026c50(0x73, 1, 1);
         o->timer = 0x12c;
         o->state = 0x62;
@@ -195,7 +195,7 @@ void func_8011973C(TObj *o)
         AnimAdvance(o);
         if (--o->timer != -1) break;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0xf, &v);
+        o->d90 = showMessageBoxDirect(3, 0xf, &v);
         o->state = 0x61;
         break;
     case 0x65:

@@ -9,13 +9,13 @@ extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern char D_80077D6C[], D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern int func_8011D7B0(TObj *);
 extern int func_8011D6BC(TObj *);
 extern void func_8011D604(TObj *);
 extern void FUN_8001f96c(int, short, short, short);
 extern void playSFX(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void func_80116C10(TObj *);
 
 #define setbox(o, q) { unsigned char *p_; p_ = (unsigned char *)o->d90; p_ += (q); (o)->box0 = *p_++; (o)->box1 = *p_++; (o)->box2 = *p_; (o)->box3 = p_[1]; }
@@ -56,7 +56,7 @@ void func_8011EE50(TObj *o)
                 playSFX(6);
             }
         } else {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             r = func_8011D6BC(o);
             if (r) {
                 o->b6a = 0;
@@ -82,7 +82,7 @@ void func_8011EE50(TObj *o)
     case 3:
         if (o->w7a) o->d8c = (unsigned char)(o->d8c + 0x14);
         else o->d8c = (unsigned char)(o->d8c - 0x14);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         func_8011D604(o);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;

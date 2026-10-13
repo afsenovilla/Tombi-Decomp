@@ -16,7 +16,7 @@ extern void FUN_80021858(void);
 extern void FUN_80021b20(void);
 extern void FUN_8004bfe4(void);
 extern void FUN_800263bc(void);
-extern void FUN_8001eb64(void);
+extern void startAreaBgm(void);
 extern void FUN_8001acdc(void);
 
 void FUN_8001ab18(void)
@@ -35,7 +35,7 @@ void FUN_8001ab18(void)
         FUN_800263bc();
         DAT_800b1410 = 2;
         if (DAT_8009c967 != 1 || DAT_8009c960 == 0x30000)
-            FUN_8001eb64();
+            startAreaBgm();
         u = DAT_1f8001d4;
         DAT_1f8001fc = 0;
         u->c = u->c + 1;

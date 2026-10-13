@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
 extern short isObjectBelowGround(TObj *);
-extern void FUN_8001fab4(TObj *);
+extern void applyFrameVelocityXY(TObj *);
 extern int func_801256F4(TObj *, short);
 extern void *D_80139500[];
 extern unsigned char D_80135CB0[];
@@ -121,7 +121,7 @@ void func_8012632C(TObj *o)
         break;
     case 4:
         if (--o->timer != -1) {
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         AnimAdvance(o);
         slope(o);
         if (func_801256F4(o, o->animFrame)) {
@@ -175,7 +175,7 @@ void func_8012632C(TObj *o)
             SET();
             break;
         }
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         AnimAdvance(o);
         slope(o);
         if (func_801256F4(o, o->animFrame)) {

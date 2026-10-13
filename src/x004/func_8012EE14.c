@@ -11,7 +11,7 @@ extern short D_800A60EA[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned short *D_800A6078;
 extern unsigned short D_800A604E[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
 
 void func_8012EE14(TObj *o)
@@ -31,7 +31,7 @@ void func_8012EE14(TObj *o)
         if (c >= 0x33) break;
         if (c < 0x2e) break;
         p = &D_8013145C[i];
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n) {
             n->active = 4;
             n->type = 0x32;

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern void *D_8013E6C4[];
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer4(void);
 extern void insertionSortU32(int, TObj **);
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
@@ -23,7 +23,7 @@ void func_8011D4D0(TObj *o)
         }
         list[0] = o;
         for (i = 1; i < 0x13; i++) {
-            q = FUN_800184d8();
+            q = allocObjectLayer4();
             if (q == 0) break;
             list[i] = q;
         }

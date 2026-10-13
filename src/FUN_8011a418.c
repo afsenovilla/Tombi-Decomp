@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern unsigned short DAT_1f8001f8;
 extern unsigned short DAT_1f800172;
 extern unsigned short DAT_1f80016a;
@@ -31,7 +31,7 @@ void FUN_8011a418(TObj *o)
     case 1:
         FUN_8001fec0(o);
         if (--o->timer == -1) {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n != 0) {
                 n->active = 2;
                 n->type = 2;

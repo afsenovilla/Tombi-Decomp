@@ -8,8 +8,8 @@ extern unsigned char D_80138FA8[];
 extern unsigned char D_80138FB8[];
 extern unsigned short *D_8013A19C[], *D_8013A1A0[];
 extern void ObjSetFacingToPlayer(TObj *);
-extern void FUN_8001fab4(TObj *);
-extern void FUN_8001fa20(TObj *, unsigned short);
+extern void applyFrameVelocityXY(TObj *);
+extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern unsigned FUN_8001f9e0(void);
 extern short FUN_80041240(TObj *, short, short);
 extern int FUN_801274cc(TObj *);
@@ -73,7 +73,7 @@ void FUN_801294fc(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        FUN_8001fab4(o);
+        applyFrameVelocityXY(o);
         if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
@@ -107,7 +107,7 @@ void FUN_801294fc(TObj *o)
         break;
     case 4:
         AnimAdvanceWithBox(o);
-        FUN_8001fa20(o, 1 - o->animFrame);
+        applyAnimVelocityXY(o, 1 - o->animFrame);
         if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;

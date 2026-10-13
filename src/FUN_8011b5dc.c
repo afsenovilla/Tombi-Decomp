@@ -5,7 +5,7 @@ extern short DAT_1f80016a, DAT_1f800176, DAT_1f80016e, DAT_1f80017a;
 extern short DAT_801386a8[];
 extern short DAT_8009f3dc;
 extern char DAT_8009c93f, DAT_8009c93e;
-extern int FUN_8002dc50(int, int, int, int);
+extern int showMessageBox(int, int, int, int);
 extern void FUN_800187e4(TObj *);
 
 void FUN_8011b5dc(TObj *o)
@@ -22,7 +22,7 @@ void FUN_8011b5dc(TObj *o)
             o->y.p.whole = 0xd8;
         else
             o->y.p.whole = 0x78;
-        o->d90 = FUN_8002dc50(9, DAT_801386a8[DAT_8009f3dc], o->a.p.whole, o->y.p.whole);
+        o->d90 = showMessageBox(9, DAT_801386a8[DAT_8009f3dc], o->a.p.whole, o->y.p.whole);
         break;
     case 1:
         if (((char *)o->d90)[4] == 2) {

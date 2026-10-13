@@ -4,7 +4,7 @@
 extern int D_1F8002D4[];
 extern void AnimLoadDuration(TObj *);
 extern int func_800202B4(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_801251C4(TObj *o)
 {
@@ -25,7 +25,7 @@ void func_801251C4(TObj *o)
     case 2:
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -6,7 +6,7 @@ extern char D_80077CDC[];
 extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133BB4[], *D_80133BB8[];
 extern TObj *ObjAlloc(void);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern int func_8011FDD4(TObj *);
 extern int func_8011FEF0(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
@@ -45,7 +45,7 @@ void func_8012078C(TObj *o)
         o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff;
         break;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8011FEF0(o);
         AnimAdvanceWithBox(o);
         o->velV += 0x20;
@@ -57,7 +57,7 @@ void func_8012078C(TObj *o)
         break;
     case 3:
         if (o->velV < 0x400) {
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             func_8011FEF0(o);
         }
         AnimAdvanceWithBox(o);

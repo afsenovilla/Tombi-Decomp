@@ -6,10 +6,10 @@ extern unsigned char D_8009D119;
 extern unsigned char D_8009CF06;
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
-extern void FUN_8003c980(TObj *);
+extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_800188e0(TObj *);
+extern void freeObjectLayer5(TObj *);
 
 void func_8011F128(TObj *o)
 {
@@ -19,7 +19,7 @@ void func_8011F128(TObj *o)
             o->b04 = 3;
             break;
         }
-        FUN_8003c980(o);
+        initItemObject(o);
         o->active = 2;
         o->b04++;
         break;
@@ -31,7 +31,7 @@ void func_8011F128(TObj *o)
         D_8007A890[D_8007A7F0[o->subtype]](o);
         break;
     case 3:
-        FUN_800188e0(o);
+        freeObjectLayer5(o);
         break;
     }
 }

@@ -8,11 +8,11 @@ extern unsigned char D_8009CDF5, D_8009CE63[];
 extern void *D_801357D8[], *D_801357DC[], *D_801357E0[];
 extern short D_1F80016A;
 extern short D_800A604A;
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern short FUN_80040278(TObj *, int, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -66,7 +66,7 @@ void func_8012D198(TObj *o)
         D_800A603C[0] = 5;
         D_800A603D[0] = 0;
         D_800A603E[0] = 0;
-        o->d90 = FUN_8002dcc8(m, n, &o->a);
+        o->d90 = showMessageBoxDirect(m, n, &o->a);
         o->wac = 2;
         setAnim(o, D_801357E0[0]);
         break;
@@ -86,7 +86,7 @@ void func_8012D198(TObj *o)
         o->y.p.whole += 2;
         FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10));
         if (o->h->p.whole < 10) {
-            FUN_8005a8a8(0x51, 0, 0);
+            setEventStarted(0x51, 0, 0);
             o->timer = 0x168;
             o->state++;
         }

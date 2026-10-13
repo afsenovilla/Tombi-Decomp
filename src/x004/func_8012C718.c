@@ -5,7 +5,7 @@
 extern TObj D_800A6038;
 extern unsigned char D_8009C93F, D_8009C942;
 extern void *D_80135748, *D_80135750[];
-extern int FUN_8002dcc8(int, int, void *);
+extern int showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
 
@@ -27,7 +27,7 @@ void func_8012C718(TObj *o)
             D_800A6038.b04 = 5;
             D_800A6038.step = 0;
             D_800A6038.state = 0;
-            o->d90 = FUN_8002dcc8(5, 6, &o->a);
+            o->d90 = showMessageBoxDirect(5, 6, &o->a);
             o->wac = 2;
             o->animFrame = o->b68 & 1;
             o->anim = D_80135750[0];

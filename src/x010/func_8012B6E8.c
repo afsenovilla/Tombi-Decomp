@@ -8,7 +8,7 @@ extern void *D_8013239C[];
 extern char D_80077D0C[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
-extern void FUN_8001faf4(TObj *o);
+extern void applyFrameVelocityX(TObj *o);
 extern void ObjFree(TObj *o);
 
 void func_8012B6E8(TObj *o)
@@ -40,7 +40,7 @@ void func_8012B6E8(TObj *o)
                 o->step++;
                 break;
             case 1:
-                FUN_8001faf4(o);
+                applyFrameVelocityX(o);
                 o->velV += 0x40;
                 if (o->velV > 0x400) o->velV = 0x400;
                 o->y.raw += o->velV << 8;

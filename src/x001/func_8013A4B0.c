@@ -5,7 +5,7 @@
 extern unsigned char D_8009CE59;
 extern unsigned char D_8009CEDE;
 extern unsigned char D_8009CEDF;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8013A4B0(TObj *o)
 {
@@ -20,7 +20,7 @@ void func_8013A4B0(TObj *o)
     case 3:
         q = &D_8009CEDE;
         if (*q == 1) {
-            e = FUN_800183b8();
+            e = allocObjectLayer2();
             if (e) {
                 e->active = 1;
                 e->active = 1;
@@ -39,7 +39,7 @@ void func_8013A4B0(TObj *o)
                 o->b04 = 1;
             }
         } else {
-            e = FUN_800183b8();
+            e = allocObjectLayer2();
             if (e) {
                 e->active = 1;
                 e->active = 1;
@@ -57,7 +57,7 @@ void func_8013A4B0(TObj *o)
         }
         break;
     case 2:
-        e = FUN_800183b8();
+        e = allocObjectLayer2();
         if (e) {
             e->active = 1;
             e->type = 0xd;

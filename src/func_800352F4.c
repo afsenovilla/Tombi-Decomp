@@ -13,7 +13,7 @@ extern int D_8009C934;
 void playSFX(int id);
 int abs(int);
 int csqrt(int x);
-short FUN_800335d4(unsigned char *o);
+short angleToPlayer(unsigned char *o);
 void func_800352F4(unsigned char *o)
 {
     int dx, dy, d, n;
@@ -31,7 +31,7 @@ void func_800352F4(unsigned char *o)
     D_800A60EC = d;
     if (D_800A60D4 == 0) D_800A60EC = d - 0x10;
     if (D_800A60EC < 0x28) D_800A60EC = 0x28;
-    d = FUN_800335d4(o);
+    d = angleToPlayer(o);
     n = D_8009C934;
     D_800A60B2 = d;
     o[5] = 3;

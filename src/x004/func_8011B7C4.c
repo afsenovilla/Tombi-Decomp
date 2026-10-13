@@ -12,8 +12,8 @@ extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern int func_8011AFA8(TObj *);
 extern int func_8011B218(TObj *);
 extern void func_8011B138(TObj *);
@@ -199,7 +199,7 @@ void func_8011B7C4(TObj *o)
             D_8009C93E[0] = 1;
             o->timer = 300;
             o->substep++;
-            FUN_8005a8a8(o->wac, 0, 0);
+            setEventStarted(o->wac, 0, 0);
             break;
         case 3:
             D_8009C93F[0] = 0;
@@ -213,7 +213,7 @@ void func_8011B7C4(TObj *o)
             D_8009C93E[0] = 1;
             o->timer = 300;
             o->substep++;
-            FUN_8005a9a4(o->wac, 0);
+            setEventComplete(o->wac, 0);
             break;
         case 2:
         case 5:

@@ -6,12 +6,12 @@ typedef struct { short x, y, z; unsigned char st, c; } R;
 extern R D_80135F00[];
 extern R D_80135ED0[];
 extern unsigned short D_8009C962;
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer4(void);
 extern void PoolFree_1F800210(TObj *);
 
 static __inline__ TObj *spawn(R *r, TObj *link)
 {
-    TObj *e = FUN_800184d8();
+    TObj *e = allocObjectLayer4();
 
     if (e) {
         e->active = 1;

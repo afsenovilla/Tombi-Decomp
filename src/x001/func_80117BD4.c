@@ -4,7 +4,7 @@
 
 extern int FUN_800201ac(TObj *o, int x);
 extern short func_8011D264(unsigned char n);
-extern void FUN_8001888c(TObj *o);
+extern void freeObjectLayer8(TObj *o);
 
 void func_80117BD4(TObj *o)
 {
@@ -30,7 +30,7 @@ void func_80117BD4(TObj *o)
     case 2:
         break;
     case 3:
-        FUN_8001888c(o);
+        freeObjectLayer8(o);
         break;
     }
 }

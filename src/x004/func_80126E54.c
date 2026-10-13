@@ -25,9 +25,9 @@ extern void func_80126D04(TObj *);
 extern void func_80126688(TObj *);
 extern void func_80126C50(TObj *);
 extern short func_800411CC(TObj *, short, short);
-extern void FUN_8001fa20(TObj *, int);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_80018790(TObj *);
+extern void applyAnimVelocityXY(TObj *, int);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void freeObjectLayer2(TObj *);
 
 #define X(o) ((S *)(o))
 
@@ -132,7 +132,7 @@ void func_80126E54(TObj *o)
                 }
                 d = o->animFrame ? -0x10 : 0x10;
                 if (!func_800411CC(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
-                    FUN_8001fa20(o, 0);
+                    applyAnimVelocityXY(o, 0);
                     o->w22++;
                 }
                 break;
@@ -145,7 +145,7 @@ void func_80126E54(TObj *o)
                         o->state = 3;
                         o->substep = 0;
                     }
-                    FUN_8001fa20(o, 1);
+                    applyAnimVelocityXY(o, 1);
                 } else {
                     if (--o->w22 == 0) {
                         o->active = 1;
@@ -186,7 +186,7 @@ void func_80126E54(TObj *o)
                 AnimLoadDuration(o);
                 break;
             case 1:
-                FUN_8001fa88(o, 1 - o->animFrame);
+                applyAnimVelocityX(o, 1 - o->animFrame);
                 o->velV += 0x40;
                 if (o->velV > 0x400) o->velV = 0x400;
                 o->y.raw += o->velV << 8;
@@ -200,7 +200,7 @@ void func_80126E54(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

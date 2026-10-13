@@ -8,7 +8,7 @@ extern SVECTOR D_1f800068;
 extern long D_1F800070;
 extern char *D_1F800164;
 extern int D_1F8001E0;
-extern void FUN_80021f5c(MATRIX *);
+extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006481c(int, MATRIX *);
 extern void FUN_800644dc(int, MATRIX *);
 extern void FUN_8006467c(int, MATRIX *);
@@ -16,7 +16,7 @@ extern void FUN_8006395c(MATRIX *, MATRIX *, MATRIX *);
 extern void FUN_80063bcc(SVECTOR *, int *);
 extern void FUN_80063ddc(MATRIX *);
 extern void FUN_80063e6c(MATRIX *);
-extern int FUN_8004fd6c(void *, int, int, int, unsigned);
+extern int insertPrimWithBias(void *, int, int, int, unsigned);
 extern int GetGraphType(void);
 extern void SetDrawMode(void *, int, int, int, void *);
 extern void AddPrim(void *, void *);
@@ -40,7 +40,7 @@ void FUN_800ecd88(TObj *o)
     unsigned char *p;
     unsigned char *q;
 
-    FUN_80021f5c(&D_1f800020);
+    getBaseMatrix(&D_1f800020);
     FUN_8006481c(o->d8c, &D_1f800020);
     FUN_800644dc(o->d84, &D_1f800020);
     FUN_8006467c(o->d88, &D_1f800020);
@@ -77,7 +77,7 @@ void FUN_800ecd88(TObj *o)
     gte_avsz4();
     gte_stotz(&D_1F800070);
     gte_stsxy(p + 0x20);
-    FUN_8004fd6c(p, D_1F8001E0 + 0x10, D_1F800070, (signed char)o->b0f, 0x8000000);
+    insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800070, (signed char)o->b0f, 0x8000000);
     D_1F800164 += 0x24;
     q = (unsigned char *)D_1F800164;
     if (GetGraphType() == 1) m = 0x80;

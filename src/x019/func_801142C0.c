@@ -11,7 +11,7 @@ extern unsigned char D_800A603C[];
 extern unsigned char D_800A60A1;
 extern short D_800A6066, D_800A60B4;
 extern void *D_8009F2D8[];
-int FUN_8002dcf0(int a, int b, P6 *p, int c);
+int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
 void AnimAdvance(TObj *o);
 void func_8004D620(int a, int b);
@@ -35,17 +35,17 @@ void func_801142C0(TObj *o)
         o->b6a = 1;
         if (*p == 2) {
             switch (D_8009CDB1) {
-            case 1: o->d90 = FUN_8002dcf0(2, 0, &pos, 0x78); break;
-            case 2: o->d90 = FUN_8002dcf0(2, 1, &pos, 0x78); break;
-            case 3: o->d90 = FUN_8002dcf0(2, 1, &pos, 0x78); break;
-            case 4: o->d90 = FUN_8002dcf0(2, 2, &pos, 0x78); break;
+            case 1: o->d90 = showMessageBoxDirectTimed(2, 0, &pos, 0x78); break;
+            case 2: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
+            case 3: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
+            case 4: o->d90 = showMessageBoxDirectTimed(2, 2, &pos, 0x78); break;
             }
         } else {
             switch (D_8009CDB1) {
-            case 1: o->d90 = FUN_8002dcf0(2, 0, &pos, 0x78); break;
-            case 2: o->d90 = FUN_8002dcf0(2, 1, &pos, 0x78); break;
-            case 3: o->d90 = FUN_8002dcf0(2, 1, &pos, 0x78); break;
-            case 4: o->d90 = FUN_8002dcf0(2, 2, &pos, 0x78); break;
+            case 1: o->d90 = showMessageBoxDirectTimed(2, 0, &pos, 0x78); break;
+            case 2: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
+            case 3: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
+            case 4: o->d90 = showMessageBoxDirectTimed(2, 2, &pos, 0x78); break;
             }
         }
         D_800A603C[0] = 6;

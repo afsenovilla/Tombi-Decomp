@@ -21,8 +21,8 @@ extern void func_800E972C(int, int, int);
 extern void func_800E8A94(int *);
 extern void playSFX(int);
 extern void stopBgm(int);
-extern void FUN_8001e9e8(int, int);
-extern void FUN_80017328(void *);
+extern void playSFXAndSetNote(int, int);
+extern void setTask(void *);
 extern void func_800E9D08(int, int);
 extern void updateSound(void);
 void func_8004E41C(int *p)
@@ -79,18 +79,18 @@ void func_8004E41C(int *p)
                 switch (D_1f8001d4->b69) {
                 case 0:
                     D_1f8001d4->b68 = 0;
-                    FUN_8001e9e8(10, 10);
-                    FUN_80017328(func_800198B4);
+                    playSFXAndSetNote(10, 10);
+                    setTask(func_800198B4);
                     break;
                 case 1:
                     D_1f8001d4->b68 = 1;
-                    FUN_8001e9e8(10, 10);
-                    FUN_80017328(func_800198B4);
+                    playSFXAndSetNote(10, 10);
+                    setTask(func_800198B4);
                     break;
                 case 2:
                     D_1f8001d4->w48 = 2;
                     D_1f8001d4->w4a = 0;
-                    FUN_8001e9e8(10, 10);
+                    playSFXAndSetNote(10, 10);
                     break;
                 }
             }

@@ -15,8 +15,8 @@ extern int AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
 extern void FUN_800eea7c(TObj *, int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 #define P D_800A6038
 #define ANIM(k) D_80135DC0[o->subtype].p[k]
@@ -93,7 +93,7 @@ void func_80129CC0(TObj *o)
         o->state = 0x46;
         break;
     case 50:
-        FUN_8005a8a8(0x23, 0, 0);
+        setEventStarted(0x23, 0, 0);
         o->timer = 200;
         o->state = 0x78;
         X(o)->wc2 = 0xfe;
@@ -193,7 +193,7 @@ void func_80129CC0(TObj *o)
         if (o->visible == 0) {
             if (D_8009CDC7 != 0xff) {
                 P.visible = 0;
-                FUN_8005a9a4(0x23, 0);
+                setEventComplete(0x23, 0);
                 o->timer = 0x168;
             } else {
                 P.visible = 0;

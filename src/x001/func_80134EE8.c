@@ -9,7 +9,7 @@ extern short *D_8009C948;
 extern int D_1F8002E8;
 extern void *D_8013F134;
 extern void *D_8013F1BC;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void insertionSortU32(int, TObj **);
 
 void func_80134EE8(TObj *o)
@@ -32,7 +32,7 @@ void func_80134EE8(TObj *o)
     }
     list[0] = o;
     sub = t;
-    for (i = 1; i < n; i++) list[i] = FUN_800183b8();
+    for (i = 1; i < n; i++) list[i] = allocObjectLayer2();
     insertionSortU32(n, list);
     o = list[0];
     o->active = 2;

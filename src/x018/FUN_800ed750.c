@@ -8,7 +8,7 @@ extern char DAT_80114c7c[];
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, char *);
 extern void FUN_80024ea0(char *, int, int);
-extern void FUN_8003c7c4(void *d, void *arg, short x, short y, int flag);
+extern void applyItemEffect(void *d, void *arg, short x, short y, int flag);
 
 #define INIT(o, b)                       \
     if (o->animFrame == 0) {             \
@@ -61,7 +61,7 @@ void FUN_800ed750(TObj *o)
             pos[0].p.whole = o->h->p.whole;
             pos[1].p.whole = o->y.p.whole - 0x50;
             pos[2].p.whole = o->d->p.whole;
-            FUN_8003c7c4(DAT_80114c7c + o->subtype * 6, pos, s, -0x200, 1);
+            applyItemEffect(DAT_80114c7c + o->subtype * 6, pos, s, -0x200, 1);
             o->w98 = 0;
         }
         if (o->visible == 0) goto set2;

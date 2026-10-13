@@ -16,9 +16,9 @@ void FUN_80054c38(TObj *o);
 void FUN_80055cb8(TObj *o);
 void FUN_80052190(TObj *o);
 void FUN_80052db8(TObj *o);
-void FUN_80055fac(TObj *o);
+void drawMessageBox(TObj *o);
 void FUN_80053b5c(TObj *o);
-void FUN_800563ac(TObj *o);
+void drawMessageBoxFrame(TObj *o);
 void FUN_80054868(TObj *o);
 void FUN_800eab58(TObj *o);
 void FUN_800ec148(TObj *o);
@@ -53,9 +53,9 @@ void FUN_80055174(void)
             case 7: FUN_80055cb8(o); break;
             case 8: FUN_80052190(o); break;
             case 1: case 9: FUN_80052db8(o); break;
-            case 10: FUN_80055fac(o); break;
+            case 10: drawMessageBox(o); break;
             case 3: case 11: FUN_80053b5c(o); break;
-            case 12: FUN_800563ac(o); break;
+            case 12: drawMessageBoxFrame(o); break;
             case 13:
                 switch (DAT_800a603a) {
                 case 0: FUN_80054868(o); break;
@@ -89,9 +89,9 @@ void FUN_80055174(void)
                 case 7: FUN_80055cb8(o); break;
                 case 8: FUN_80052190(o); break;
                 case 1: case 9: FUN_80052db8(o); break;
-                case 10: FUN_80055fac(o); break;
+                case 10: drawMessageBox(o); break;
                 case 3: case 11: FUN_80053b5c(o); break;
-                case 12: FUN_800563ac(o); break;
+                case 12: drawMessageBoxFrame(o); break;
                 case 13:
                     switch (DAT_800a603a) {
                     case 0: FUN_80054868(o); break;

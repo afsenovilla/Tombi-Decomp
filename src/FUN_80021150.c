@@ -12,7 +12,7 @@ extern DRM *DAT_8009d540;
 extern PTAG *DAT_1f8001e0;
 extern int GetGraphType(void);
 extern void FUN_80021478(int a, int b, int c, int d, int e);
-extern void FUN_80021340(short x, short y, short c);
+extern void drawUiSprite(short x, short y, short c);
 extern void SetDrawMode(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
 void FUN_80021150(int c, short s)
@@ -26,9 +26,9 @@ void FUN_80021150(int c, short s)
     for (j = 0; j < 6; j++) {
         for (i = 0; i < 7; i++) {
             if ((i + j) & 1)
-                FUN_80021340(i * 0x30, j * 0x30, 1 - c);
+                drawUiSprite(i * 0x30, j * 0x30, 1 - c);
             else
-                FUN_80021340(i * 0x30, j * 0x30, c);
+                drawUiSprite(i * 0x30, j * 0x30, c);
         }
     }
     p = DAT_8009d540;

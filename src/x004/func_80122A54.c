@@ -10,11 +10,11 @@ extern char D_80077D0C[];
 extern B D_80130FD4[];
 extern A *D_80133B5C[];
 extern void playSFX(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_8011FDD4(TObj *);
-extern void FUN_8002b920(TObj *);
+extern void cloneItemPickupObject(TObj *);
 
 #define SETANIM(k) \
     o->anim = D_80133B5C[k]; \
@@ -29,7 +29,7 @@ extern void FUN_8002b920(TObj *);
     { \
         X *x = (X *)((char *)o + 0xb4); \
         if (o->movetab != 0) { \
-            FUN_8001fa88(o, 1 - o->animFrame); \
+            applyAnimVelocityX(o, 1 - o->animFrame); \
         } \
         if (o->b9d & 2) { \
             if (o->animFrame != (o->b9d & 1)) { \
@@ -84,7 +84,7 @@ void func_80122A54(TObj *o)
             o->timer = 0x168;
             o->wac = 0x22;
             SETANIM(0x22);
-            FUN_8002b920(o);
+            cloneItemPickupObject(o);
             break;
         }
         o->b9c = 1;
@@ -112,7 +112,7 @@ void func_80122A54(TObj *o)
             o->timer = 0x168;
             o->wac = 0x22;
             SETANIM(0x22);
-            FUN_8002b920(o);
+            cloneItemPickupObject(o);
             break;
         }
         v = x2->b1--;
@@ -129,7 +129,7 @@ void func_80122A54(TObj *o)
         o->wac = 0x22;
         o->state++;
         SETANIM(0x22);
-        FUN_8002b920(o);
+        cloneItemPickupObject(o);
         break;
     case 4:
         if (--o->timer == -1) {

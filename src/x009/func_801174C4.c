@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short vx, vy, vz, pad; } SV;
 typedef struct { int vx, vy, vz; } LV;
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 extern void FUN_80063ddc(void *);
 extern void FUN_80063bcc(SV *, LV *);
 
@@ -19,7 +19,7 @@ void func_801174C4(TObj *o)
     o->y.p.whole = V(o)->vy;
     o->b.p.whole = V(o)->vz;
     p = (TObj *)o->d90;
-    FUN_80021f5c(&o->w48);
+    getBaseMatrix(&o->w48);
     r.vx = o->d30 >> 16;
     r.vy = o->d34 >> 16;
     r.vz = o->d38 >> 16;

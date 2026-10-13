@@ -8,7 +8,7 @@ extern char *D_1F800334;
 extern char *D_1F800334x[]; /* debt: second name, the game loads the pointer twice */
 extern int ObjCullRegister(TObj *);
 extern TObj *ObjAlloc(void);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 extern void FUN_80018838(TObj *);
 
 void func_801200EC(TObj *o)
@@ -60,7 +60,7 @@ void func_801200EC(TObj *o)
                 break;
             }
             if (o->b68 == 0) break;
-            FUN_8005a8a8(0x18, 0, 1);
+            setEventStarted(0x18, 0, 1);
             D_8009D084 = 1;
             o->da0 = (int)D_1F800334x[0] + *(int *)(D_1F800334 + 0x34);
             e = ObjAlloc();

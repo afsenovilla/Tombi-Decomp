@@ -6,7 +6,7 @@ typedef struct B { unsigned char c[4]; } B;
 extern B D_8013C800[];
 extern A *D_8013DAE8[];
 extern char D_80077D0C[];
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 #define SETANIM(k) \
     o->anim = D_8013DAE8[k]; \
@@ -31,7 +31,7 @@ void func_8012CA08(TObj *o)
         SETANIM(9);
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

@@ -5,7 +5,7 @@ extern short D_1F80019E;
 extern unsigned short D_1F800282;
 extern int D_8009C934;
 extern short func_80121630(TObj *, short, short, unsigned char);
-extern int func_800428C0(TObj *, TObj *);
+extern int resolveHitResultA(TObj *, TObj *);
 
 void func_801208C4(TObj *o, TObj *e)
 {
@@ -19,7 +19,7 @@ void func_801208C4(TObj *o, TObj *e)
     if ((unsigned short)u >= e->box1) return;
     t = o->y.p.whole - (e->y.p.whole + (e->box3 - e->box2));
     if (func_80121630(o, u, t, e->subtype) == 0) return;
-    if (func_800428C0(o, e) == 0 || o->type == 9) {
+    if (resolveHitResultA(o, e) == 0 || o->type == 9) {
         if (D_1F800282 & 2) {
             o->b69 = 1;
             D_8009C934 = 0;

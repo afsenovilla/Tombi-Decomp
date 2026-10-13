@@ -4,7 +4,7 @@ extern unsigned DAT_8009c984;
 extern unsigned char DAT_8009cdac, DAT_8009cebf, DAT_800a60a3, DAT_800a60a2;
 extern int DAT_1f800334;
 extern unsigned char *FUN_80018448(void);
-extern unsigned char *FUN_800184d8(void);
+extern unsigned char *allocObjectLayer4(void);
 
 void FUN_801361e4(unsigned char *o)
 {
@@ -35,7 +35,7 @@ void FUN_801361e4(unsigned char *o)
         a[5] = 0;
         a[6] = 0;
     }
-    b = FUN_800184d8();
+    b = allocObjectLayer4();
     if (b != 0) {
         b[0] = 1;
         b[2] = 0x18;
@@ -50,7 +50,7 @@ void FUN_801361e4(unsigned char *o)
         b[5] = 0;
         b[6] = 0;
     }
-    c = FUN_800184d8();
+    c = allocObjectLayer4();
     if (c != 0) {
         volatile int *pp = &DAT_1f800334;
         int base;

@@ -7,7 +7,7 @@ typedef struct { short x, y; } P;
 extern short D_8007A5F0[], D_8007A3F0[];
 extern short D_1F800176, D_1F800186;
 extern void *D_8012EE80[];
-extern int FUN_8002078c(P, P);
+extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
@@ -50,7 +50,7 @@ void func_80124E04(TObj *o)
             o->animFrame = 1;
         }
         b.y = D_1F800186 - 0xc8;
-        o->d88 = FUN_8002078c(a, b);
+        o->d88 = angleBetweenPoints(a, b);
         o->w74 = b.x;
         o->wac = 0;
         o->anim = D_8012EE80[0];

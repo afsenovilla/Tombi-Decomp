@@ -11,7 +11,7 @@ extern unsigned char D_80138FD8[];
 extern unsigned short DAT_1f80016a;
 extern unsigned short DAT_1f800172;
 extern int AnimAdvanceWithBox(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int FUN_801274cc(TObj *);
 
 static __inline__ void SetBox(TObj *o)
@@ -40,7 +40,7 @@ void func_8012C2C8(TObj *o)
         break;
     case 1:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (FUN_801274cc(o)) {
             o->d8c = w[1];
             o->timer = 0;

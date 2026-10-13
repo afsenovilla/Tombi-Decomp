@@ -23,7 +23,7 @@ typedef struct {
 extern H *D_1F80031C[];
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
-extern void func_80027A30(int, int, int);
+extern void subtractScaledVertices(int, int, int);
 
 int func_8011AFB4(O *o)
 {
@@ -89,7 +89,7 @@ int func_8011AFB4(O *o)
     common:
         o->wcc = o->w76;
         FUN_80025aa8(o->da0, o->dc4);
-        func_80027A30(o->dc4, o->dc8, o->wcc);
+        subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 4:
         o->b0a = 0x15;

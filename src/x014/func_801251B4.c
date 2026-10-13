@@ -4,11 +4,11 @@
 extern int D_1F8002DC[];
 extern void *D_8012A004[];
 extern unsigned char D_8009C942;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void func_80124AD0(TObj *);
 extern void func_80124F28(TObj *);
 
@@ -21,7 +21,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 }
 
 #define SPAWN(o, st, c) { \
-    TObj *e = FUN_800183b8(); \
+    TObj *e = allocObjectLayer2(); \
     if (e) { \
         e->active = 2; \
         e->type = 0x50; \
@@ -117,7 +117,7 @@ void func_801251B4(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

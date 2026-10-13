@@ -10,8 +10,8 @@ extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern int func_8011A6C4(TObj *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 #define DOOR(o) \
     switch (o->state) { \
@@ -142,7 +142,7 @@ void func_8011A874(TObj *o)
             D_8009C93E[0] = 1;
             o->timer = 0x12c;
             o->substep++;
-            FUN_8005a8a8(o->wac, 0, 0);
+            setEventStarted(o->wac, 0, 0);
             break;
         case 4:
             D_8009C93F[0] = 1;
@@ -150,7 +150,7 @@ void func_8011A874(TObj *o)
             D_8009C93E[0] = 1;
             o->timer = 0x12c;
             o->substep++;
-            FUN_8005a9a4(o->wac, 0);
+            setEventComplete(o->wac, 0);
             break;
         case 2:
         case 5:

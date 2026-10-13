@@ -10,13 +10,13 @@ extern short D_1F80027E;
 extern short D_1F800284;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_8001fb20(TObj *);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void applyFrameVelocityY(TObj *);
 extern short func_8004065C(TObj *, short, short, int);
 extern short FUN_800408d8(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 extern void FUN_800e9f74(int, short, short, short);
-extern void FUN_8002b920(TObj *);
+extern void cloneItemPickupObject(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -82,7 +82,7 @@ void func_8012AB64(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         wall(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
@@ -97,7 +97,7 @@ void func_8012AB64(TObj *o)
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         wall(o);
         if (land(o)) {
             o->velH = 0x180;
@@ -105,7 +105,7 @@ void func_8012AB64(TObj *o)
         }
         break;
     case 3:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         land(o);
         if (o->w7a & 1) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
@@ -122,7 +122,7 @@ void func_8012AB64(TObj *o)
                 o->wac = 0x13;
                 setAnim(o, D_8013FCBC[0]);
             } else {
-                FUN_8002b920(o);
+                cloneItemPickupObject(o);
             }
         }
         break;
@@ -139,7 +139,7 @@ void func_8012AB64(TObj *o)
                 AnimLoadDuration(o);
             }
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         land(o);
         break;
     case 5:
@@ -153,7 +153,7 @@ void func_8012AB64(TObj *o)
             o->state = 0;
             o->b9c = 0;
         }
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         land(o);
         break;
     }

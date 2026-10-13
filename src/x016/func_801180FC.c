@@ -9,10 +9,10 @@ extern unsigned char D_8009CDAC[];
 extern unsigned char D_8009D077, D_8009D12F, D_8009D076, D_8009CDED[];
 extern short D_1F8001C6;
 extern AT3 D_80118D34[];
-extern TObj *FUN_8002dcc8(int, int, B12 *);
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 void func_801180FC(TObj *o)
 {
@@ -34,20 +34,20 @@ void func_801180FC(TObj *o)
         o->animFrame = o->b68 & 1;
         if (D_8009CDAC[0] != 0xff) {
             if (D_8009D12F != 0)
-                o->d90 = (int)FUN_8002dcc8(2, 0x14, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 0x14, &v);
             else if (D_8009D076 == 0) {
-                o->d90 = (int)FUN_8002dcc8(2, 0xd, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 0xd, &v);
                 D_8009D076 = 1;
             } else
-                o->d90 = (int)FUN_8002dcc8(2, 0xe, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
             o->state = 1;
         } else {
             if (D_8009D077 == 0) {
-                o->d90 = (int)FUN_8002dcc8(2, 10, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 10, &v);
                 D_8009D077 = 1;
                 o->state = 1;
             } else {
-                o->d90 = (int)FUN_8002dcc8(2, 0xb, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 0xb, &v);
                 o->state = 3;
             }
         }
@@ -78,7 +78,7 @@ void func_801180FC(TObj *o)
         o->timer = 4;
         D_1F8001C6 = 0;
         if (D_8009CDED[0] == 0) {
-            FUN_8005a8a8(0x49, 1, 1);
+            setEventStarted(0x49, 1, 1);
             o->timer = 200;
         }
         o->state = 2;

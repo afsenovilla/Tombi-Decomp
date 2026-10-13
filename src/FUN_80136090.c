@@ -1,6 +1,6 @@
 // FUNC 80136090 340 X000
 // MATCHING 80136090 340
-extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_80018790(unsigned char *), FUN_80135db0(unsigned char *);
+extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), freeObjectLayer2(unsigned char *), FUN_80135db0(unsigned char *);
 extern void FUN_80135b0c(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char DAT_8009cdac;
@@ -51,7 +51,7 @@ void FUN_80136090(unsigned char *o)
     case 2:
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

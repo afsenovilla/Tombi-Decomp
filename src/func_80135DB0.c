@@ -7,7 +7,7 @@ extern void *D_8013B19C;
 extern void *D_8013B1A0;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 
 void func_80135DB0(TObj *o)
 {
@@ -32,7 +32,7 @@ void func_80135DB0(TObj *o)
         } else {
             AnimAdvance(o);
         }
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         o->d88 = (o->d88 + 1) & 0xff;
         o->y.raw -= (D_8007A5F0[o->d88] * o->velV) >> 4;
         if (o->d88 > 0x20) {
@@ -44,7 +44,7 @@ void func_80135DB0(TObj *o)
     case 2:
     case 5:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         if (*(unsigned short *)0x1F8001F8 & 1) {
             o->d88--;
         } else {
@@ -59,7 +59,7 @@ void func_80135DB0(TObj *o)
     case 3:
     case 6:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         o->d88 = (o->d88 + 1) & 0xff;
         o->y.raw -= (D_8007A5F0[o->d88] * o->velV) >> 4;
         if (o->d88 >= 0x80) {

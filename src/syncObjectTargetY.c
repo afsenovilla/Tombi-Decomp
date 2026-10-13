@@ -1,0 +1,8 @@
+// FUNC 800277f8 24 MAIN0
+// MATCHING 800277f8 24
+extern short *DAT_800a607c;
+typedef struct S { char pad[0x38]; short *p; } S;
+void syncObjectTargetY(S *s)
+{
+    s->p[1] = DAT_800a607c[1];
+}

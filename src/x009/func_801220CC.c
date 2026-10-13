@@ -4,7 +4,7 @@
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern void playSFX(int);
 extern int Rand(void);
@@ -146,6 +146,6 @@ void func_801220CC(TObj *o)
         break;
     }
     if (o->visible && !ground(o)) {
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
     }
 }

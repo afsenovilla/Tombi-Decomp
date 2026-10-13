@@ -4,8 +4,8 @@
 extern unsigned int DAT_8009c96c;
 extern int FUN_800202b4(TObj *);
 extern void FUN_80121124(TObj *);
-extern void FUN_8005a8a8(int, int, int);
-extern int FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern int setEventComplete(int, int);
 extern void FUN_80121ae0(TObj *);
 extern void FUN_8012160c(TObj *);
 extern void FUN_8012171c(TObj *);
@@ -47,10 +47,10 @@ void FUN_80121870(TObj *o)
                 break;
             case 1:
                 if (DAT_8009c96c <= 0xc34f) {
-                    FUN_8005a8a8(0x10, 0, 0);
+                    setEventStarted(0x10, 0, 0);
                     o->step--;
                 } else {
-                    FUN_8005a9a4(0x10, 0);
+                    setEventComplete(0x10, 0);
                     o->b04 = 2;
                     o->step = 0;
                     if (o->b0c == 0)

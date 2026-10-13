@@ -12,7 +12,7 @@ extern void FUN_80119864(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void FUN_80026e0c(int, int);
-extern void FUN_8001eaa4(int);
+extern void queueSfxKeyOff(int);
 extern void FUN_800187e4(TObj *);
 
 typedef struct P { char p[0xcc]; short cc; } P;
@@ -92,7 +92,7 @@ void FUN_801195f4(TObj *o)
     case 2:
         if (o->subtype == 0 || o->subtype == 6) {
             FUN_80026e0c(4, 1);
-            FUN_8001eaa4(*(unsigned short *)((char *)o + 0xce));
+            queueSfxKeyOff(*(unsigned short *)((char *)o + 0xce));
         }
         o->b04++;
         break;

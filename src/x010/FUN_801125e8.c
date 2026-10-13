@@ -8,7 +8,7 @@ extern int DAT_8009c960[];
 extern unsigned short DAT_8009c960h[];
 extern int FUN_800202b4(TObj *o);
 extern int FUN_80040278(TObj *o, int x, int y);
-extern void FUN_8003ecb0(char *d, Fix16 *pos, int a, int b, TObj *o);
+extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
 extern void FUN_8001fe6c(TObj *o);
 extern void FUN_80020490(TObj *o);
 extern void FUN_800eb8f0(TObj *o, int x, int y, int z);
@@ -26,8 +26,8 @@ void FUN_801125e8(TObj *o)
         FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10));
         break;
     case 1:
-        FUN_8003ecb0(DAT_80115d28, &o->a, -0x40, -0x400, o);
-        FUN_8003ecb0(DAT_80115d28 + 6, &o->a, 0x40, -0x400, o);
+        spawnItemFromEntry(DAT_80115d28, &o->a, -0x40, -0x400, o);
+        spawnItemFromEntry(DAT_80115d28 + 6, &o->a, 0x40, -0x400, o);
         o->step = 3;
         o->timer = 10;
         o->wac = 1;

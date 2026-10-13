@@ -15,7 +15,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjCullRegister(TObj *);
 extern int Rand(void);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void FUN_800187e4(TObj *);
 
 void func_80119EEC(TObj *o)
@@ -77,7 +77,7 @@ void func_80119EEC(TObj *o)
                 o->timer = 4;
                 break;
             case 1:
-                FUN_8001faf4(o);
+                applyFrameVelocityX(o);
                 v = D_8007A3F0[*(unsigned char *)&o->d88] * o->velV;
                 d = (o->d88 + 2) & 0xff;
                 o->d88 = d;

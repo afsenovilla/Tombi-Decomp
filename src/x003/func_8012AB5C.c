@@ -15,9 +15,9 @@ extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
 extern short D_800A60EA;
 extern void FUN_8001fe94(TObj *, int);
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
@@ -59,23 +59,23 @@ void func_8012AB5C(TObj *o)
         if (k != 0xff) {
             if (chk()) {
                 v = *(V6 *)&o->a;
-                o->d90 = FUN_8002dcc8(3, 1, &v);
+                o->d90 = showMessageBoxDirect(3, 1, &v);
                 o->state = 0x5a;
                 WC2(o) = 0x46;
             } else if (k == 0) {
                 v = *(V6 *)&o->a;
-                o->d90 = FUN_8002dcc8(3, 0, &v);
+                o->d90 = showMessageBoxDirect(3, 0, &v);
                 o->state = 0x5a;
                 WC2(o) = 0x32;
             } else {
                 v = *(V6 *)&o->a;
-                o->d90 = FUN_8002dcc8(3, 2, &v);
+                o->d90 = showMessageBoxDirect(3, 2, &v);
                 o->state = 0x5a;
                 WC2(o) = 0x7a;
             }
         } else {
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(3, 3, &v);
+            o->d90 = showMessageBoxDirect(3, 3, &v);
             o->state = 0x5a;
             WC2(o) = 0x7a;
         }
@@ -83,7 +83,7 @@ void func_8012AB5C(TObj *o)
     case 0x33:
         break;
     case 0x32:
-        FUN_8005a8a8(0x24, 0, 0);
+        setEventStarted(0x24, 0, 0);
         o->state = 0x78;
         WC2(o) = 0xfb;
         break;
@@ -109,7 +109,7 @@ void func_8012AB5C(TObj *o)
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole) || o->velY > 0x600) o->state = 0x49;
         break;
     case 0x49:
-        FUN_8005a9a4(0x24, 0);
+        setEventComplete(0x24, 0);
         o->animFrame ^= 1;
         setanim(o, 4);
         o->state = 0x78;

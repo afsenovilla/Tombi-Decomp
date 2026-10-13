@@ -8,7 +8,7 @@ extern int DAT_800a4570[];
 extern int DAT_1f8002d4[];
 extern void *PTR_8013b1fc[];
 extern void FUN_80018da4(TObj *);
-extern void FUN_80018934(TObj *);
+extern void freeObjectLayer7(TObj *);
 
 void FUN_8012236c(TObj *o)
 {
@@ -46,7 +46,7 @@ void FUN_8012236c(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

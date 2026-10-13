@@ -11,10 +11,10 @@ extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimLoadDuration(TObj *);
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
-extern void FUN_8005a9a4(int, int);
-extern TObj *FUN_80018568(void);
+extern void setEventComplete(int, int);
+extern TObj *allocObjectLayer5(void);
 
 void func_801177DC(TObj *o)
 {
@@ -34,7 +34,7 @@ void func_801177DC(TObj *o)
         o->animFrame = o->b68 & 1;
         o->anim = D_80119C48[o->subtype].anims[2];
         AnimLoadDuration(o);
-        o->d90 = FUN_8002dcc8(3, 7, &v);
+        o->d90 = showMessageBoxDirect(3, 7, &v);
         o->state++;
         break;
     case 1:
@@ -43,7 +43,7 @@ void func_801177DC(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 8, &v);
+        o->d90 = showMessageBoxDirect(3, 8, &v);
         o->state++;
         break;
     }
@@ -52,14 +52,14 @@ void func_801177DC(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         addItemToInventory(0x33, 1, 1);
-        FUN_8005a9a4(0x68, 0);
+        setEventComplete(0x68, 0);
         o->timer = 0x168;
         o->state++;
         break;
     case 3:
         if (--o->timer != 0) break;
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(3, 0x14, &v);
+        o->d90 = showMessageBoxDirect(3, 0x14, &v);
         o->state++;
         break;
     case 4:
@@ -70,7 +70,7 @@ void func_801177DC(TObj *o)
         D_1F8001C6 = 0;
         D_8009C942[0] = 0;
         D_800A60EA[0] = 0;
-        q = FUN_80018568();
+        q = allocObjectLayer5();
         if (q != 0) {
             q->active = 2;
             q->type = 0xf;

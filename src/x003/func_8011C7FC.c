@@ -7,7 +7,7 @@ extern TObj D_800A6038;
 extern unsigned char D_8009D2C2, D_8009C93F[], D_8009C942[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern void *D_80139870[];
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
 
@@ -30,7 +30,7 @@ void func_8011C7FC(TObj *o)
         o->state++;
         break;
     case 1:
-        a = (unsigned char)FUN_800205d8(o->h->p.whole - p->h->p.whole, o->y.p.whole - p->y.p.whole);
+        a = (unsigned char)angleFromDelta(o->h->p.whole - p->h->p.whole, o->y.p.whole - p->y.p.whole);
         o->wb0 = a;
         d = (o->velH * D_8007A5F0[a]) >> 12;
         dy = (o->velH * D_8007A1F0[a]) >> 12;

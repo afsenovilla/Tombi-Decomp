@@ -4,8 +4,8 @@
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001faf4(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityX(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern void playObjectSfx(TObj *, int);
 extern void func_80121964(TObj *);
 extern void func_801224AC(TObj *);
@@ -57,7 +57,7 @@ void func_801225BC(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         blocked(o);
         func_80121964(o);
         AnimAdvance(o);
@@ -70,7 +70,7 @@ void func_801225BC(TObj *o)
         }
         break;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         blocked(o);
         func_80121964(o);
         AnimAdvance(o);
@@ -90,7 +90,7 @@ void func_801225BC(TObj *o)
         break;
     case 3:
         if (o->visible && !ground(o)) {
-            FUN_8001fb20(o);
+            applyFrameVelocityY(o);
         }
         if (AnimAdvance(o)) {
             o->state = 0;
@@ -100,7 +100,7 @@ void func_801225BC(TObj *o)
     case 4:
         AnimAdvance(o);
         if (o->visible && !ground(o)) {
-            FUN_8001fb20(o);
+            applyFrameVelocityY(o);
         }
         func_801224AC(o);
         break;

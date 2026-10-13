@@ -8,7 +8,7 @@ extern MATRIX DAT_1f800000, DAT_1f800020, DAT_1f8000c0;
 extern SVECTOR DAT_1f800060, DAT_1f800068;
 extern unsigned short DAT_1f8001c8;
 extern int DAT_1f8001e0;
-extern void FUN_80021f5c(MATRIX *);
+extern void getBaseMatrix(MATRIX *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern MATRIX *MulMatrix0(MATRIX *, MATRIX *, MATRIX *);
 extern VECTOR *ApplyRotMatrix(SVECTOR *, long *);
@@ -18,7 +18,7 @@ extern void FUN_80023b04(int, int, TObj *, int);
 
 void FUN_80057470(TObj *o)
 {
-    FUN_80021f5c(&DAT_1f800020);
+    getBaseMatrix(&DAT_1f800020);
     switch (DAT_1f8001c8 & 1) {
     case 0:
         DAT_1f800060.vx = o->d84;

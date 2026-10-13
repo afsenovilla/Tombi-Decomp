@@ -6,9 +6,9 @@
 extern unsigned char DAT_1f8001a4;
 extern unsigned char D_8009CECC;
 extern short D_1F80019E;
-extern short FUN_80042fbc(unsigned char *, unsigned char *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8004258c(unsigned char *, int);
+extern short boxesOverlap(unsigned char *, unsigned char *);
+extern void setEventStarted(int, int, int);
+extern void decreaseObjectTimer(unsigned char *, int);
 
 void func_80126A70(unsigned char *a, unsigned char *b)
 {
@@ -16,7 +16,7 @@ void func_80126A70(unsigned char *a, unsigned char *b)
 
     if (U8(a, 0xac) == 2)
         return;
-    if (FUN_80042fbc(a, b) == 0)
+    if (boxesOverlap(a, b) == 0)
         return;
     if (DAT_1f8001a4 != 0)
         return;
@@ -28,7 +28,7 @@ void func_80126A70(unsigned char *a, unsigned char *b)
     if (S16(a, 0x98) != 1) {
         c = &D_8009CECC;
         if (*c == 0) {
-            FUN_8005a8a8(0xb1, 0, 1);
+            setEventStarted(0xb1, 0, 1);
             *c = 1;
         }
     }
@@ -40,6 +40,6 @@ void func_80126A70(unsigned char *a, unsigned char *b)
     a[5] = 0;
     a[6] = 0;
     U8(a, 0xd1) = 1;
-    FUN_8004258c(a, 1);
+    decreaseObjectTimer(a, 1);
     D_1F80019E = 0;
 }

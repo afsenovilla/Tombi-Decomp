@@ -9,12 +9,12 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern MATRIX D_1F800000;
 extern TObj *volatile D_1F800334;
 extern signed char D_80125C38[][2];
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer4(void);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void func_801190D0(TObj *);
 extern void func_8011920C(TObj *);
-extern void FUN_80021f5c(MATRIX *);
+extern void getBaseMatrix(MATRIX *);
 extern void RotMatrix(SVECTOR *, MATRIX *);
 extern void RotMatrixX(int, MATRIX *);
 extern void RotMatrixZ(int, MATRIX *);
@@ -38,7 +38,7 @@ void func_80119344(TObj *o)
         i = 0;
         q = &D_1F800334;
         for (; i < 4; i++) {
-            e = FUN_800184d8();
+            e = allocObjectLayer4();
             if (e == 0)
                 continue;
             e->active = 2;
@@ -67,7 +67,7 @@ void func_80119344(TObj *o)
         ObjCullRegister(o);
         if (o->subtype == 0) {
             func_801190D0(o);
-            FUN_80021f5c(M(o));
+            getBaseMatrix(M(o));
             sv.vx = o->d84;
             sv.vy = o->d88;
             sv.vz = o->d8c;
@@ -75,7 +75,7 @@ void func_80119344(TObj *o)
         } else {
             func_8011920C(o);
             p = (TObj *)o->d90;
-            FUN_80021f5c(&D_1F800000);
+            getBaseMatrix(&D_1F800000);
             RotMatrixX(o->d84, &D_1F800000);
             RotMatrixZ(o->d8c, &D_1F800000);
             sv.vx = o->d30 >> 16;

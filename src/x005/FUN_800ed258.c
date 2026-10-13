@@ -40,9 +40,9 @@ extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
 extern void FUN_80024ea0(int, int, int);
 extern short FUN_8001e4f0(int);
-extern void FUN_8001eaa4(int);
-extern void FUN_80020d20(int, int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void queueSfxKeyOff(int);
+extern void spawnLayer3Object(int, int, int, int);
+extern void setEventComplete(int, int);
 
 void FUN_800ed258(S *o)
 {
@@ -96,7 +96,7 @@ void FUN_800ed258(S *o)
             o->timer++;
             o->velV += o->velY / o->timer;
             if (o->subtype == 0 && *(short *)((char *)o + 0x20) == 4)
-                FUN_80020d20(6, o->aw, (short)(o->yw - 10), o->bw);
+                spawnLayer3Object(6, o->aw, (short)(o->yw - 10), o->bw);
         } else {
             o->state = 2;
             o->b6b = 0;
@@ -111,14 +111,14 @@ void FUN_800ed258(S *o)
                 c = *(volatile unsigned char *)&DAT_8009d079 + 1;
                 *(volatile unsigned char *)&DAT_8009d079 = c;
                 if (c == 0x18)
-                    FUN_8005a9a4(0x3f, 0);
+                    setEventComplete(0x3f, 0);
             }
         }
         if (o->b69 == 0) {
             o->state = 3;
             o->w22 = 0;
             o->d30 = o->timer;
-            FUN_8001eaa4(o->wac);
+            queueSfxKeyOff(o->wac);
             o->wac = FUN_8001e4f0(0x1b);
             break;
         }
@@ -167,7 +167,7 @@ void FUN_800ed258(S *o)
         if (o->b69 != 0) {
             o->state = 1;
             o->b69 = 0;
-            FUN_8001eaa4(o->wac);
+            queueSfxKeyOff(o->wac);
         }
         break;
     case 4:

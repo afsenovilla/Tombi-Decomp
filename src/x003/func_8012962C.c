@@ -11,7 +11,7 @@ extern Fix16 *D_800A6078[];
 extern short D_800A60EA;
 extern void FUN_8001fe94(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern int FUN_8002dcc8(int, int, V12 *);
+extern int showMessageBoxDirect(int, int, V12 *);
 
 void func_8012962C(TObj *o)
 {
@@ -25,7 +25,7 @@ void func_8012962C(TObj *o)
             D_8009C93F = 1;
             D_8009C942 = 1;
             b = *(V12 *)&o->a;
-            o->d90 = FUN_8002dcc8(2, 0xf, &b);
+            o->d90 = showMessageBoxDirect(2, 0xf, &b);
             o->anim = D_80135D84[o->subtype].anims[9];
             FUN_8001fe94(o, 0);
             o->animFrame = o->b68 & 1;

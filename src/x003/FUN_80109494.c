@@ -16,8 +16,8 @@ extern unsigned char DAT_801152e8[];
 extern char DAT_80010e34[];
 extern int FUN_8001fddc(int, int);
 extern void FUN_800eeb5c(TObj *, int);
-extern void FUN_8001e76c(int, int, int, int);
-extern void FUN_8001eb64(void);
+extern void playSFXWithPitchSlide(int, int, int, int);
+extern void startAreaBgm(void);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -25,7 +25,7 @@ extern int FUN_8003facc(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_8005a8a8(int, int, int);
+extern void setEventStarted(int, int, int);
 
 void FUN_80109494(TObj *o)
 {
@@ -45,8 +45,8 @@ void FUN_80109494(TObj *o)
         DAT_8009c330->w20 = 5;
         FUN_800eeb5c(o, 0x19);
         if (DAT_8009c960 == 0) {
-            FUN_8001e76c(0xd, 1, -8, 0x96);
-            FUN_8001eb64();
+            playSFXWithPitchSlide(0xd, 1, -8, 0x96);
+            startAreaBgm();
         }
         o->state = 1;
     case 1:
@@ -112,7 +112,7 @@ void FUN_80109494(TObj *o)
             o->state = 0;
             o->active = 1;
             if (DAT_8009ce61 == 0 && DAT_8009d119 != 0)
-                FUN_8005a8a8(0xbd, 0, 1);
+                setEventStarted(0xbd, 0, 1);
         }
         break;
     }

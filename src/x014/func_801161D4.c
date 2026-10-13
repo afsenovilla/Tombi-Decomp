@@ -11,9 +11,9 @@ extern short D_1F8000F2;
 extern int D_1F8000F0;
 extern void FUN_80027c74(TObj *);
 extern void func_8002795C(TObj *);
-extern void FUN_800277f8(TObj *);
+extern void syncObjectTargetY(TObj *);
 extern void FUN_80028be0(TObj *);
-extern void FUN_800284d8(TObj *);
+extern void stepScrollApproachX(TObj *);
 extern void FUN_800288c4(TObj *, int);
 extern void FUN_800274e4(TObj *);
 extern void FUN_8002771c(TObj *);
@@ -73,10 +73,10 @@ void func_801161D4(TObj *o)
             if (U8(o, 0x3d) == 0) func_8002795C(o);
             break;
         }
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
     }
     FUN_80028be0(o);
-    FUN_800284d8(o);
+    stepScrollApproachX(o);
     if (D_8009C93F == 0 && p->b9e == 0 && (*(volatile unsigned short *)&D_8009D670 & 0xc00))
         FUN_800288c4(o, 1);
     FUN_800274e4(o);

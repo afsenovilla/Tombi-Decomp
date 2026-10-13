@@ -4,11 +4,11 @@
 extern TObj D_800A6038;
 extern void *D_8013E568;
 extern int D_1F8002D4[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 void func_801374C0(unsigned char sub, short x, short y, short z)
 {
-    TObj *o = FUN_800183b8();
+    TObj *o = allocObjectLayer2();
     unsigned short t;
     if (o != 0) {
         o->active = 1;

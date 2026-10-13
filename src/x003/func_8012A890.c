@@ -10,8 +10,8 @@ extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern TObj *D_1F8001D4;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *o);
-extern void FUN_80018790(TObj *o);
-extern void FUN_8001d63c(int);
+extern void freeObjectLayer2(TObj *o);
+extern void cdSeekStream(int);
 extern void stopBgm(int);
 extern void ThreadCreate(int, void *);
 extern void removeItemFromInventory(int, int);
@@ -53,7 +53,7 @@ void func_8012A890(TObj *o)
         case 0:
             o->step++;
             o->state = 0;
-            FUN_8001d63c(7);
+            cdSeekStream(7);
             break;
         case 1:
             switch (o->state) {
@@ -94,7 +94,7 @@ void func_8012A890(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

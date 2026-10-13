@@ -6,7 +6,7 @@ extern void func_8011836C(TObj *);
 extern void func_80117D70(TObj *);
 extern void func_80118028(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_80118534(TObj *o)
 {
@@ -50,7 +50,7 @@ void func_80118534(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -27,9 +27,9 @@ extern short D_1f8001c8;
 extern short D_1f8000e6;
 extern short D_1f8000f2;
 extern int D_1f8000f0;
-extern int FUN_80028f94(S *);
+extern int handleLookScrollInput(S *);
 extern void FUN_800288c4(S *, int);
-extern void FUN_80021aec(S *);
+extern void loadSectionHeight(S *);
 extern void FUN_80116758(S *);
 extern void FUN_801165c0(S *);
 extern void FUN_80116f74(S *);
@@ -126,7 +126,7 @@ void func_80029078(S *o)
                     }
                     FUN_800288c4(o, 0);
                 } else if ((unsigned char)c == 0x12) {
-                    if (FUN_80028f94(o) == 0) break;
+                    if (handleLookScrollInput(o) == 0) break;
                     decay();
                 } else if (c & 0x10) {
                     if ((D_1f8001fc & 0x10) && D_800A60D8 != 4) {
@@ -193,7 +193,7 @@ void func_80029078(S *o)
                     if (f) decay();
                 }
             } else if (D_8009D670[0] & 0xc00) {
-                FUN_80028f94(o);
+                handleLookScrollInput(o);
                 FUN_800288c4(o, 0);
             } else {
                 decay();
@@ -316,7 +316,7 @@ void func_80029078(S *o)
         }
         break;
     }
-    FUN_80021aec(o);
+    loadSectionHeight(o);
     switch (D_8009C960) {
     case 0:
         FUN_80116758(o);

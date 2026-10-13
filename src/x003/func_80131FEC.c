@@ -9,9 +9,9 @@ extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_800A6038;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern int FUN_8002dcc8(int, int, V6 *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern int showMessageBoxDirect(int, int, V6 *);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void AnimAdvance(TObj *);
 extern void func_801289C8(TObj *, int, int);
 
@@ -39,14 +39,14 @@ void func_80131FEC(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        FUN_8005a8a8(0x1d, 0, 0);
+        setEventStarted(0x1d, 0, 0);
         o->w08 = 200;
         o->state++;
         break;
     case 2:
         if (--o->w08 > 0) break;
         v = *(V6 *)&p->a;
-        p->d90 = FUN_8002dcc8(2, 0xf, &v);
+        p->d90 = showMessageBoxDirect(2, 0xf, &v);
         func_801289C8(p, 9, 0);
         o->state++;
         break;
@@ -56,7 +56,7 @@ void func_80131FEC(TObj *o)
         if (q->b04 != 2) break;
         q->b04 = 3;
         func_801289C8(p, 0, 0);
-        FUN_8005a9a4(0x1a, 0);
+        setEventComplete(0x1a, 0);
         o->w08 = 200;
         o->state = 15;
         break;

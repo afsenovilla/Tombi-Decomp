@@ -18,7 +18,7 @@ void AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 void playSFX(int a);
 void func_8002052C(TObj *o, int a);
-void FUN_80018790(TObj *o);
+void freeObjectLayer2(TObj *o);
 
 #define SFX(o) \
     if ((o->w22 & 0x7f) == 0) { \
@@ -214,7 +214,7 @@ void func_80122FA0(TObj *o)
         func_8002052C(o, 0x50);
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

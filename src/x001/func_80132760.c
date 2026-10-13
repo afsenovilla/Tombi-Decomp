@@ -9,7 +9,7 @@ extern char D_80077CF4[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 
@@ -41,7 +41,7 @@ void func_80132760(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->w22 & 1) o->d8c = (unsigned char)(o->d8c + 8);
         else o->d8c = (unsigned char)(o->d8c - 8);
-        if (o->w22 != 2) FUN_8001fa88(o, o->w22);
+        if (o->w22 != 2) applyAnimVelocityX(o, o->w22);
         if (o->timer >= 0x1e || ((D_1F8001F8 + D_1F800198) & 1)) FUN_800202b4(o);
         if (--o->timer == -1) o->b04 = 2;
         break;

@@ -13,7 +13,7 @@ extern unsigned char D_8009C938, D_8009C93E, D_8009C93F, D_8009C942;
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
 extern int FUN_8001f9e0(void);
-extern int FUN_8002dc50(int, int, int, int);
+extern int showMessageBox(int, int, int, int);
 
 #define ANG(e) \
     if (o->animFrame & 1) { short c = (signed char)e->c; int k = 0x80; ang = (D_800A6038.d8c + k - c) & 0xff; } else { short c = (signed char)e->c; ang = (c + D_800A6038.d8c) & 0xff; }
@@ -113,7 +113,7 @@ void func_8012AA10(TObj *o)
         o->b0f = D_800A6038.b0f + e->b;
         if (D_800A6038.b69) {
             D_800A6038.active = 3;
-            o->d90 = FUN_8002dc50(2, 10, 0x80, 0x6c);
+            o->d90 = showMessageBox(2, 10, 0x80, 0x6c);
             o->state++;
         }
         break;

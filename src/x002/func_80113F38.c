@@ -18,7 +18,7 @@ extern short D_800A60EA;
 extern int AnimAdvance(S *);
 extern void TileCollideAt(S *, int, int);
 extern void FUN_80113888(S *), FUN_80113b6c(S *), FUN_80113cc8(S *);
-extern S *FUN_8002dcf0(int, int, V *, int);
+extern S *showMessageBoxDirectTimed(int, int, V *, int);
 void func_80113F38(S *o)
 {
     V v;
@@ -65,7 +65,7 @@ void func_80113F38(S *o)
         case 0:
             v = o->pos;
             v.yh -= 0x40;
-            o->p90 = FUN_8002dcf0(0xd, 2, &v, o->timer);
+            o->p90 = showMessageBoxDirectTimed(0xd, 2, &v, o->timer);
             o->state++;
             break;
         case 1:

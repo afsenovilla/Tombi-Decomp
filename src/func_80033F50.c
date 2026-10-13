@@ -4,13 +4,13 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-void func_80034420(u8* self);
+void updateScrollAnchoredEffect(u8* self);
 
 void (*D_8007D57C[16])(u8* self) = {
     (void (*)(u8*))0x801216BC,
     (void (*)(u8*))0x80121810,
     (void (*)(u8*))0x80121A74,
-    func_80034420,
+    updateScrollAnchoredEffect,
     (void (*)(u8*))0x8012029C,
     (void (*)(u8*))0x800EB450,
     (void (*)(u8*))0x8011C4CC,

@@ -14,7 +14,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern int FUN_800638cc(int);
-extern int FUN_800205d8(int, int);
+extern int angleFromDelta(int, int);
 
 static __inline__ void setup(TObj *p)
 {
@@ -63,7 +63,7 @@ void func_8011A9E0(TObj *o)
                 if (d >= 11) {
                     if (d > 0xa0) d = 0xa0;
                     d = 0xaa - d;
-                    a = FUN_800205d8(dx, dy) & 0xff;
+                    a = angleFromDelta(dx, dy) & 0xff;
                     o->d38 = a;
                     d <<= 2;
                     D_8009C946[0] = (d * D_8007A3F0[(a + 0x48) & 0xff]) >> 12;

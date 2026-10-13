@@ -8,7 +8,7 @@ extern char D_80077CDC[];
 extern char D_80077CF4[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern void func_8012080C(TObj *);
 extern int func_801206F0(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
@@ -53,7 +53,7 @@ void func_801209F8(TObj *o)
         if (o->movetab == 0) o->movetab = D_80077CF4;
         break;
     case 1:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012080C(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
@@ -67,7 +67,7 @@ void func_801209F8(TObj *o)
         SETANIM(0x17);
         break;
     case 2:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012080C(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
@@ -96,7 +96,7 @@ void func_801209F8(TObj *o)
         SETANIM(0x17);
         break;
     case 4:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012080C(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
@@ -122,7 +122,7 @@ void func_801209F8(TObj *o)
         SETANIM(0x17);
         break;
     case 6:
-        FUN_8001faf4(o);
+        applyFrameVelocityX(o);
         func_8012080C(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;

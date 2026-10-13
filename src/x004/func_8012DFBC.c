@@ -5,8 +5,8 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_8009CDDB, D_8009CF29;
 extern short D_800A6058;
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 
 void func_8012DFBC(TObj *o)
 {
@@ -18,7 +18,7 @@ void func_8012DFBC(TObj *o)
         D_8009C93F = 1;
         D_8009C942 = 1;
         D_8009C93E = 1;
-        FUN_8005a8a8(0x37, 0, 0);
+        setEventStarted(0x37, 0, 0);
         o->w08 = 200;
         o->state++;
         break;
@@ -42,7 +42,7 @@ void func_8012DFBC(TObj *o)
             D_800A603E = 0;
             o->state = 5;
         } else {
-            FUN_8005a9a4(0x37, 0);
+            setEventComplete(0x37, 0);
             o->w08 = 250;
             o->state++;
         }

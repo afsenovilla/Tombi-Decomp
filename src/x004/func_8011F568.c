@@ -3,13 +3,13 @@
 #include "TOBJ.H"
 
 extern short D_1F80019E;
-extern short func_80044550(TObj *, TObj *);
-extern void func_800428C0(TObj *, TObj *);
+extern short boxesOverlapSide(TObj *, TObj *);
+extern void resolveHitResultA(TObj *, TObj *);
 
 void func_8011F568(TObj *o, TObj *e)
 {
-    if (func_80044550(o, e) >= 0) {
-        func_800428C0(o, e);
+    if (boxesOverlapSide(o, e) >= 0) {
+        resolveHitResultA(o, e);
         D_1F80019E = 0;
     }
 }

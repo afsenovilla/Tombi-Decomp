@@ -6,7 +6,7 @@ typedef struct { char c[12]; } B12;
 extern unsigned char D_8009C942[], D_8009C93F, D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_1F8001C6, D_800A60EA;
-extern TObj *FUN_8002dcc8(int, int, void *);
+extern TObj *showMessageBoxDirect(int, int, void *);
 extern void func_801162B4(TObj *);
 extern void func_801167F0(TObj *);
 extern void func_8011698C(TObj *);
@@ -32,7 +32,7 @@ void func_80116E78(TObj *o)
         case 0:
             if (o->b68) {
                 v = *(B12 *)&o->a;
-                o->d90 = (int)FUN_8002dcc8(2, 0x33, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 0x33, &v);
                 D_8009C942[0] = 1;
                 D_8009D2B0[0] = 2;
                 D_800A603C[0] = 5;

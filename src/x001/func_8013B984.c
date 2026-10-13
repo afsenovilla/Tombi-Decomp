@@ -4,7 +4,7 @@
 
 extern unsigned char D_8009CDB2;
 extern int D_8009C984;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern short func_80139B2C(TObj *);
 extern void func_80139C50(TObj *);
 extern void PoolFree_1F800210(TObj *);
@@ -19,7 +19,7 @@ void func_8013B984(TObj *o)
             o->b04 = 3;
             break;
         }
-        e = FUN_800183b8();
+        e = allocObjectLayer2();
         if (e) {
             e->active = 1;
             e->type = 0x16;

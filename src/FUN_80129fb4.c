@@ -13,7 +13,7 @@ extern short DAT_1f80016e;
 extern unsigned short DAT_1f800172;
 extern unsigned short D_1F800172[];
 extern int FUN_8001f9e0(void);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e560(int, int);
 extern void FUN_80127380(TObj *);
@@ -99,7 +99,7 @@ void FUN_80129fb4(TObj *o)
         a = D_8013A160b[m];
         goto common;
     case 4:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         FUN_801274cc(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
@@ -125,7 +125,7 @@ void FUN_80129fb4(TObj *o)
         a = D_8013A160[o->wac];
         goto common;
     case 5:
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         FUN_801274cc(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
@@ -156,7 +156,7 @@ void FUN_80129fb4(TObj *o)
             o->state = r;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         FUN_801274cc(o);
         break;
     case 8:
@@ -173,7 +173,7 @@ void FUN_80129fb4(TObj *o)
             k = AnimAdvanceWithBox(o);
         }
         if (k != 0) o->substep++;
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         FUN_801274cc(o);
         break;
     case 10:
@@ -202,7 +202,7 @@ void FUN_80129fb4(TObj *o)
             o->substep = 0;
         }
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         FUN_801274cc(o);
         break;
     case 13:

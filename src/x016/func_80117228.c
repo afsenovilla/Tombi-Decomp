@@ -12,8 +12,8 @@ typedef struct {
     short b0c;
 } E;
 extern E *D_80118D10;
-extern TObj *FUN_800184d8(void);
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer4(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_80117228(TObj *o)
 {
@@ -24,7 +24,7 @@ void func_80117228(TObj *o)
 
     for (i = 0, e = tbl; e->flags != 0xff; e = &tbl[++i]) {
         if (*(volatile unsigned short *)&e->flags & 0x80) {
-            p = FUN_800184d8();
+            p = allocObjectLayer4();
             if (p) {
                 p->active = 1;
                 p->type = 0x1a;
@@ -37,7 +37,7 @@ void func_80117228(TObj *o)
                 p->b.p.whole = e->z;
             }
         } else {
-            p = FUN_800183b8();
+            p = allocObjectLayer2();
             if (p) {
                 p->active = 3;
                 p->type = 0x32;

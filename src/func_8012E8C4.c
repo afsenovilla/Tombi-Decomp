@@ -8,14 +8,14 @@ extern short D_8013913C[][3];
 extern int DAT_1f8002d4[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_8003e3cc(int, int, short *, int, int);
+extern void spawnItemDropAtPos(int, int, short *, int, int);
 extern void AnimJump(TObj *, int);
 extern int Rand(void);
 extern void FUN_80119584(TObj *, short, short, short);
 extern void playSFX(int);
 extern void FUN_80020aec(int);
 extern void AnimAdvance(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 #define U(x) (*(unsigned short *)&(x))
 #define BOX(o) { b = D_801391E4[(o)->subtype] + U((o)->wb4) * 4; \
@@ -73,7 +73,7 @@ void func_8012E8C4(TObj *o)
                     sv[1] = o->h->p.whole - 0x28;
                     sv[3] = o->y.p.whole - 0x18;
                     sv[5] = 0;
-                    FUN_8003e3cc(0, 0, sv, -0x100, -0x100);
+                    spawnItemDropAtPos(0, 0, sv, -0x100, -0x100);
                 }
                 o->anim = D_80139154[o->subtype][U(o->wb4)];
                 AnimJump(o, 0);
@@ -110,7 +110,7 @@ void func_8012E8C4(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

@@ -55,21 +55,21 @@ extern short D_800A60D0_[];
 #define D_800A60D0 D_800A60D0_[0]
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
-extern void FUN_8001fa60(TObj *, int);
-extern int FUN_8002dc50(int, int, int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void applyAnimVelocityX(TObj *, unsigned short);
+extern void applyAnimVelocityY(TObj *, int);
+extern int showMessageBox(int, int, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void FUN_8001f110(int);
 extern void FUN_800171b8(int, void *);
 extern void FUN_8001d6a4();
-extern void FUN_8001eb64(void);
-extern void FUN_8003e918(TObj *, Pos *, int);
+extern void startAreaBgm(void);
+extern void dispatchAreaItemUpdate(TObj *, Pos *, int);
 extern void FUN_80026c50(int, int, int);
 extern void FUN_8001e4f0(int);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 
 void func_80134E5C(TObj *o)
 {
@@ -198,7 +198,7 @@ void func_80134E5C(TObj *o)
             case 1:
                 if (o->h->p.whole < 40) o->animFrame = 0;
                 if (o->h->p.whole >= 161) o->animFrame = 1;
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 {
                     Fix16 *p = D_800A6078;
                     if (p->p.whole >= 180 && D_800A603C != 1) break;
@@ -233,7 +233,7 @@ void func_80134E5C(TObj *o)
                 }
                 break;
             case 2:
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 if (o->h->p.whole >= 121) {
                     o->step = 0;
                     o->wb6++;
@@ -245,7 +245,7 @@ void func_80134E5C(TObj *o)
             o->anim = D_8013B2D4[0];
             FUN_8001fe6c(o);
         case 7:
-            o->d90 = FUN_8002dc50(1, e[1], 120, 156);
+            o->d90 = showMessageBox(1, e[1], 120, 156);
             o->wb6++;
             break;
         case 8:
@@ -256,11 +256,11 @@ void func_80134E5C(TObj *o)
             o->wb6++;
             break;
         case 9:
-            FUN_8005a8a8(e[1], 0, 0);
+            setEventStarted(e[1], 0, 0);
             o->wb6++;
             break;
         case 10:
-            FUN_8005a9a4(e[1], 0);
+            setEventComplete(e[1], 0);
             o->wb6++;
             break;
         case 11:
@@ -286,7 +286,7 @@ void func_80134E5C(TObj *o)
             o->wb6++;
             break;
         case 16:
-            FUN_8001eb64();
+            startAreaBgm();
             o->wb6++;
             break;
         case 17:
@@ -350,12 +350,12 @@ void func_80134E5C(TObj *o)
                 o->movetab = D_80077CDC;
                 o->step++;
             case 1:
-                FUN_8001fa60(o, 0);
+                applyAnimVelocityY(o, 0);
                 if (o->y.p.whole < -51) break;
                 o->step++;
                 break;
             case 2:
-                FUN_8001fa88(o, o->animFrame);
+                applyAnimVelocityX(o, o->animFrame);
                 if (o->h->p.whole < 110) {
                     o->anim = D_8013B2D8[0];
                     FUN_8001fe6c(o);
@@ -386,13 +386,13 @@ void func_80134E5C(TObj *o)
                     s.x = o->h->p.whole;
                     s.y = o->y.p.whole;
                     s.z = o->d->p.whole;
-                    FUN_8003e918(o, &s, 0);
+                    dispatchAreaItemUpdate(o, &s, 0);
                     o->animFrame = 1;
                     o->step++;
                 }
                 break;
             case 2:
-                FUN_8001fa88(o, 0);
+                applyAnimVelocityX(o, 0);
                 if ((unsigned short)(D_800A604A - o->h->p.whole) < 32) o->step++;
                 break;
             case 3:
@@ -432,7 +432,7 @@ void func_80134E5C(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

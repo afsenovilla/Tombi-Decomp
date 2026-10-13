@@ -9,7 +9,7 @@ extern char D_80077CF4[];
 extern char D_80077CE8[];
 extern short D_1F80027E;
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fb84(TObj *, char *);
 extern short FUN_8004065c(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
@@ -142,7 +142,7 @@ void func_801305D0(TObj *o)
     case 4:
         if (p->w2) {
             o->movetab = D_80077CE8;
-            FUN_8001fa88(o, (unsigned short)(1 - o->animFrame));
+            applyAnimVelocityX(o, (unsigned short)(1 - o->animFrame));
             o->y.raw += -0x10000;
             if (o->animFrame & 1)
                 o->d8c -= 4;
@@ -187,7 +187,7 @@ void func_801305D0(TObj *o)
         o->d8c = *(unsigned char *)&o->d8c;
         if (p->w2) {
             o->movetab = D_80077CF4;
-            FUN_8001fa88(o, (unsigned short)(1 - o->animFrame));
+            applyAnimVelocityX(o, (unsigned short)(1 - o->animFrame));
             o->y.p.whole--;
         } else {
             FUN_8001fb84(o, D_80077CF4);
@@ -211,7 +211,7 @@ void func_801305D0(TObj *o)
         break;
     case 6:
         o->movetab = D_80077CE8;
-        FUN_8001fa88(o, (unsigned short)(1 - o->animFrame));
+        applyAnimVelocityX(o, (unsigned short)(1 - o->animFrame));
         o->y.raw += 0xc000;
         if (o->animFrame & 1)
             o->d8c -= 4;

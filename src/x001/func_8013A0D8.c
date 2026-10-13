@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8009CFFA, D_8009D0B2, D_8009CEAB;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 
 void func_8013A0D8(TObj *o)
 {
@@ -12,7 +12,7 @@ void func_8013A0D8(TObj *o)
 
     if (D_8009CFFA == 0 && D_8009D0B2 == 0 && (k = D_8009CEAB) != 0 && k != 0xff) {
         if (k < 3) {
-            n = FUN_800183b8();
+            n = allocObjectLayer2();
             if (n) {
                 n->active = 1;
                 n->type = 0x16;
@@ -25,7 +25,7 @@ void func_8013A0D8(TObj *o)
                 n->b.p.whole = 0;
                 *(TObj **)&o->category = n;
             }
-            m = FUN_800183b8();
+            m = allocObjectLayer2();
             if (m) {
                 m->active = 1;
                 m->type = 0x17;

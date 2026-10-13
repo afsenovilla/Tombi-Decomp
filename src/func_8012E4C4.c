@@ -10,8 +10,8 @@ extern short D_1F80019C;
 extern int func_800203DC(TObj *);
 extern void FUN_8011aa30(int, int, int);
 extern void SfxPlay2(int, int);
-extern void FUN_80020d20(int, int, int, int);
-extern void FUN_80018790(TObj *);
+extern void spawnLayer3Object(int, int, int, int);
+extern void freeObjectLayer2(TObj *);
 
 static __inline__ int Hit(TObj *o, TObj *p)
 {
@@ -29,10 +29,10 @@ static __inline__ void Act(TObj *o)
 {
     SfxPlay2(0x39, 10);
     if (o->subtype == 0) {
-        FUN_80020d20(0x16, 0x154, -0xbe, 0);
-        FUN_80020d20(0x16, 0x17c, -0xbe, 0);
+        spawnLayer3Object(0x16, 0x154, -0xbe, 0);
+        spawnLayer3Object(0x16, 0x17c, -0xbe, 0);
     } else {
-        FUN_80020d20(0x16, 0x352, -0x96, 0x5a);
+        spawnLayer3Object(0x16, 0x352, -0x96, 0x5a);
     }
     o->timer = 0x78;
     o->step++;
@@ -82,7 +82,7 @@ void func_8012E4C4(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

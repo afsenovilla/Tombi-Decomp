@@ -10,10 +10,10 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A60EA;
 extern unsigned char D_8009CDF2a[];
 extern unsigned char D_8009CDF2, D_8009D143, D_8009C975;
-extern int FUN_8002dcc8(int, int, V6 *);
+extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_80026e0c(int, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern void AnimJump(TObj *, int);
 
 #define NEXT(o) (*(short *)((char *)(o) + 0xc2))
@@ -55,7 +55,7 @@ void func_801253AC(TObj *o)
         if (r) t = D_8009CDF2 != 0xff;
         if (t) {
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(4, 3, &v);
+            o->d90 = showMessageBoxDirect(4, 3, &v);
             FUN_80026e0c(0x9f, 1);
             D_8009C940 = 0;
             o->state = 0x5a;
@@ -65,7 +65,7 @@ void func_801253AC(TObj *o)
         }
         if (k == 0) {
             v = *(V6 *)&o->a;
-            o->d90 = FUN_8002dcc8(4, 0, &v);
+            o->d90 = showMessageBoxDirect(4, 0, &v);
             o->state = 0x5a;
             NEXT(o) = 0x32;
             break;
@@ -79,18 +79,18 @@ void func_801253AC(TObj *o)
             m = 4;
             n = 1;
         }
-        o->d90 = FUN_8002dcc8(m, n, &v);
+        o->d90 = showMessageBoxDirect(m, n, &v);
         o->state = 0x5a;
         NEXT(o) = 0x7a;
         break;
     case 0x32:
         v = *(V6 *)&o->a;
-        o->d90 = FUN_8002dcc8(4, 1, &v);
+        o->d90 = showMessageBoxDirect(4, 1, &v);
         o->state = 0x5a;
         NEXT(o) = 0x33;
         break;
     case 0x33:
-        if (D_8009CDF2 == 0) FUN_8005a8a8(0x4e, 0, 0);
+        if (D_8009CDF2 == 0) setEventStarted(0x4e, 0, 0);
         o->state = 0x78;
         NEXT(o) = 0xfb;
         break;
@@ -101,7 +101,7 @@ void func_801253AC(TObj *o)
         o->b69 = 0;
         o->timer = 200;
         setAnim(o, D_8012F3B8[o->subtype].anims[1]);
-        FUN_8005a9a4(0x4e, 0);
+        setEventComplete(0x4e, 0);
         break;
     case 0x47:
         o->d->raw += o->velX << 8;

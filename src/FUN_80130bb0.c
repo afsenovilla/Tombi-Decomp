@@ -4,13 +4,13 @@
 #include "raw7.h"
 typedef struct { short x, y; } P;
 typedef struct { int a, b, c; } V3;
-extern int FUN_8002078c(P a, P b);
+extern int angleBetweenPoints(P a, P b);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e4f0(int);
 extern int FUN_8001f9e0(void);
-extern void FUN_8001fa88(TObj *, int);
-extern void FUN_8001fa60(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
+extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 extern short FUN_800411cc(TObj *, short, short);
@@ -200,7 +200,7 @@ void FUN_80130bb0(TObj *o)
                 o->substep = 9;
             }
         }
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         goto tick;
     case 6:
         if (--o->w22 == 0) {
@@ -241,7 +241,7 @@ void FUN_80130bb0(TObj *o)
             if (CA)
                 FUN_8001e4f0(0x12);
         }
-        FUN_8001fa60(o, C8);
+        applyAnimVelocityY(o, C8);
         break;
     case 8:
         dx = 0x20;
@@ -256,7 +256,7 @@ void FUN_80130bb0(TObj *o)
             FUN_8001fe6c(o);
             o->substep++;
         }
-        FUN_8001fa88(o, o->animFrame);
+        applyAnimVelocityX(o, o->animFrame);
         break;
     case 9:
         a.x = o->h->p.whole;
@@ -267,7 +267,7 @@ void FUN_80130bb0(TObj *o)
             o->animFrame = 1;
         else
             o->animFrame = 0;
-        ang = (FUN_8002078c(a, b) + 0x100) & 0xf8;
+        ang = (angleBetweenPoints(a, b) + 0x100) & 0xf8;
         o->h->raw += (short)FUN_8001fddc(ang, 0x200) << 8;
         o->y.raw += (short)FUN_8001fdac(ang, 0x200) << 8;
         MOD90;

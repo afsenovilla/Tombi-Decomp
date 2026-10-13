@@ -4,7 +4,7 @@
 typedef struct { unsigned short af, st, c, x, y, z; } SP;
 
 extern SP D_8012F598;
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012EEE0(TObj *o)
@@ -13,7 +13,7 @@ void func_8012EEE0(TObj *o)
 
     switch (o->b04) {
     case 0:
-        e = FUN_800183b8();
+        e = allocObjectLayer2();
         if (e) {
             e->active = 3;
             e->type = 0x32;

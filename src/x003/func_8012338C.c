@@ -9,11 +9,11 @@ extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern unsigned short *D_8013877C[], *D_80138764[], *D_80138760[], *D_80138780[], *D_80138784[], *D_80138788[];
 extern unsigned char D_80135B30[];
 extern void FUN_8001e4f0(int);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern int func_801206F0(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
-extern void FUN_8002b920(TObj *);
+extern void cloneItemPickupObject(TObj *);
 
 #define SETANIM(o, tbl)                                              \
     {                                                                \
@@ -33,7 +33,7 @@ extern void FUN_8002b920(TObj *);
     {                                                                            \
         Q *r = (Q *)&o->wb4;                                                     \
         if (o->movetab != 0)                                                     \
-            FUN_8001fa88(o, 1 - o->animFrame);                                   \
+            applyAnimVelocityX(o, 1 - o->animFrame);                                   \
         if ((o->b9d & 2) && o->animFrame != (o->b9d & 1))                        \
             o->movetab = 0;                                                      \
         if (o->animFrame == 1)                                                   \
@@ -82,7 +82,7 @@ void func_8012338C(TObj *o)
                 o->timer = 0x168;
                 o->wac = 0x1b;
                 SETANIM(o, D_80138764);
-                FUN_8002b920(o);
+                cloneItemPickupObject(o);
             } else {
                 o->active = 3;
                 o->b9c = one;
@@ -112,7 +112,7 @@ void func_8012338C(TObj *o)
                     o->timer = 0x168;
                     o->wac = 0x1b;
                     SETANIM(o, D_80138764);
-                    FUN_8002b920(o);
+                    cloneItemPickupObject(o);
                 } else {
                     t = q->b5;
                     q->b5 = t + 0xff;
@@ -129,7 +129,7 @@ void func_8012338C(TObj *o)
                         o->wac = 0x1b;
                         o->state++;
                         SETANIM(o, D_80138764);
-                        FUN_8002b920(o);
+                        cloneItemPickupObject(o);
                     }
                 }
             }

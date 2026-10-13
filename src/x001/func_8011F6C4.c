@@ -9,8 +9,8 @@ extern void *D_8013E704[], *D_8013E70C;
 extern char D_8013C728[];
 extern unsigned char D_8009CE55A[], D_8009CEAD, D_8009C93F, D_8009C942, D_8009C93E;
 extern void FUN_8001fe6c(TObj *);
-extern TObj *FUN_800183b8(void);
-extern void FUN_8003c7c4(char *, FV *, int, int, int);
+extern TObj *allocObjectLayer2(void);
+extern void applyItemEffect(char *, FV *, int, int, int);
 extern void FUN_8004d620(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
@@ -90,7 +90,7 @@ void func_8011F6C4(TObj *o)
         o->anim = D_8013E70C;
         FUN_8001fe6c(o);
         o->timer = 0x50;
-        n = FUN_800183b8();
+        n = allocObjectLayer2();
         if (n != 0) {
             n->active = 1;
             n->subtype = 1;
@@ -108,7 +108,7 @@ void func_8011F6C4(TObj *o)
         v.a.p.whole = o->a.p.whole;
         v.y.p.whole = o->y.p.whole + 0x30;
         v.b.p.whole = o->b.p.whole;
-        FUN_8003c7c4(D_8013C728, &v, 0, 0, 1);
+        applyItemEffect(D_8013C728, &v, 0, 0, 1);
         FUN_8004d620(0xf, 2);
         FUN_80026e0c(0x12, 1);
         FUN_80026c50(0xa, 1, 0);

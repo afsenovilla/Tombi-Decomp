@@ -1,5 +1,0 @@
-// FUNC 80022164 8 MAIN0
-// MATCHING 80022164 8
-void func_80022164(void)
-{
-}

@@ -16,8 +16,8 @@ extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_800eea7c(TObj *, int, int);
-extern int FUN_8002dcc8(int, int, void *);
-extern void FUN_8005a9a4(int, int);
+extern int showMessageBoxDirect(int, int, void *);
+extern void setEventComplete(int, int);
 extern void func_801271D8(TObj *, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
@@ -76,7 +76,7 @@ void func_801280FC(TObj *o)
         o->d34 = D_800A6038.y.raw;
         o->d30 = D_800A6038.h->p.whole;
         o->state++;
-        o->d90 = FUN_8002dcc8(2, 0x1a, &o->a);
+        o->d90 = showMessageBoxDirect(2, 0x1a, &o->a);
         break;
     case 6:
         func_801271D8(o, 4);
@@ -89,7 +89,7 @@ void func_801280FC(TObj *o)
     case 7:
         func_801271D8(o, 2);
         o->state++;
-        o->d90 = FUN_8002dcc8(2, D_8012F3C8[D_8009CF1C], &o->a);
+        o->d90 = showMessageBoxDirect(2, D_8012F3C8[D_8009CF1C], &o->a);
         break;
     case 8:
         func_801271D8(o, 2);
@@ -118,7 +118,7 @@ void func_801280FC(TObj *o)
         n = 0x24;
     talk:
         o->state++;
-        o->d90 = FUN_8002dcc8(m, n, &o->a);
+        o->d90 = showMessageBoxDirect(m, n, &o->a);
         break;
     case 12:
         func_801271D8(o, 2);
@@ -131,7 +131,7 @@ void func_801280FC(TObj *o)
     case 13:
         func_801271D8(o, 3);
         D_8009C984[0] |= 8;
-        FUN_8005a9a4(8, 0);
+        setEventComplete(8, 0);
         o->timer = 0x168;
         o->state++;
         break;

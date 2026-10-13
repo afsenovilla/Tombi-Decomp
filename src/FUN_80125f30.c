@@ -1,13 +1,13 @@
 // FUNC 80125f30 224 X000
 // MATCHING 80125f30 224
-extern short FUN_80042fbc(void);
+extern short boxesOverlap(void);
 extern int *DAT_8009c330;
 
 void FUN_80125f30(unsigned char *o, unsigned char *p)
 {
     unsigned short u;
 
-    if (FUN_80042fbc() != 0) {
+    if (boxesOverlap() != 0) {
         p[0x69] = 1;
         if (o[0x9c] == 1 && *(unsigned short *)((char *)DAT_8009c330 + 0x20) == 1) {
             *(short *)((char *)DAT_8009c330 + 0x20) = 0xe;

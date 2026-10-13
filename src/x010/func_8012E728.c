@@ -5,7 +5,7 @@
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void func_8012E550(TObj *);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012E728(TObj *o)
@@ -32,7 +32,7 @@ void func_8012E728(TObj *o)
                 D_8009C93F = 1;
                 D_8009C942 = 1;
                 D_8009C93E = 1;
-                FUN_8005a9a4(0xb7, 0);
+                setEventComplete(0xb7, 0);
                 o->w08 = 200;
                 o->state = 1;
                 break;

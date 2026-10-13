@@ -4,7 +4,7 @@
 extern char D_80077CF4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int func_8011D604(TObj *);
 extern int func_8011D7B0(TObj *);
 extern void func_80116C10(TObj *);
@@ -41,7 +41,7 @@ void func_8011E76C(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         func_8011D604(o);
         o->velV += 0x30;
         o->y.raw += o->velV << 8;
@@ -57,7 +57,7 @@ void func_8011E76C(TObj *o)
         if (o->velV > 0x400)
             o->velV = 0x400;
         o->y.raw += o->velV << 8;
-        FUN_8001fa88(o, o->w7a);
+        applyAnimVelocityX(o, o->w7a);
         func_8011D604(o);
         if (func_8011D7B0(o)) {
             o->b9c = 1;

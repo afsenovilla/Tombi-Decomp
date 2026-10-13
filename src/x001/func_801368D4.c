@@ -5,12 +5,12 @@
 extern unsigned short D_8009C960[], D_8009C962;
 extern int D_1F8002D0[], D_1F8002E4[];
 extern void *D_8013DE3C[], *D_8013DDE4[];
-extern TObj *FUN_800183b8(void);
+extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 
 void func_801368D4(short x, short y, short z)
 {
-    TObj *o = FUN_800183b8();
+    TObj *o = allocObjectLayer2();
 
     if (o != 0) {
         o->active = 1;

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern char D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 #define DA8(o) (*(void ***)((char *)(o) + 0xa8))
 
 void func_80124F0C(TObj *o)
@@ -23,7 +23,7 @@ void func_80124F0C(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;

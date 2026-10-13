@@ -4,7 +4,7 @@
 extern char D_80077D0C[];
 extern void *D_8013F1FC;
 extern TObj *D_8009C948;
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void func_801344FC(TObj *o)
 {
@@ -29,7 +29,7 @@ void func_801344FC(TObj *o)
         ((struct { char pad[0xa]; short n; } *)D_8009C948)->n--;
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400) {
             o->velV = 0x400;

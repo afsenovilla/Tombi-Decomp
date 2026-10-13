@@ -4,8 +4,8 @@
 typedef struct { char p0[0x8a]; unsigned short c; char p1[0x1190 - 0x8c]; int idx, k, sub, x, y, z; } G;
 extern G *D_8009F0F0;
 extern TObj *D_8009F2D8[];
-extern TObj *FUN_800183b8(void);
-extern TObj *FUN_800184d8(void);
+extern TObj *allocObjectLayer2(void);
+extern TObj *allocObjectLayer4(void);
 extern TObj *ObjAlloc(void);
 extern void func_800EDFB8(TObj *o, int n);
 
@@ -20,7 +20,7 @@ void func_800399C4(void)
     int z = g->z;
     switch (k) {
     case 2: case 9: case 10: {
-        TObj *o = FUN_800183b8();
+        TObj *o = allocObjectLayer2();
         if (o == 0) break;
         if (k == 9) o->active = 1; else o->active = 2;
         if (k == 9) o->type = 0x19; else o->type = 0x18;
@@ -85,7 +85,7 @@ void func_800399C4(void)
         break;
     }
     case 4: {
-        TObj *o = FUN_800184d8();
+        TObj *o = allocObjectLayer4();
         unsigned char c;
         if (o == 0) break;
         c = 1;

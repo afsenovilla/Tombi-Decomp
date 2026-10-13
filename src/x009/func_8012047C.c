@@ -26,7 +26,7 @@ extern short D_1F80019E;
 extern short func_80121434(O *, short, short, int, unsigned char);
 extern short func_801214D0(O *, short, short, unsigned char);
 extern short func_801215C0(O *, short, short, int);
-extern void FUN_8003fb90(O *);
+extern void applyCollisionTileResponse(O *);
 
 void func_8012047C(O *o, O *e)
 {
@@ -100,7 +100,7 @@ void func_8012047C(O *o, O *e)
         return;
     }
 hit2:
-    FUN_8003fb90(o);
+    applyCollisionTileResponse(o);
     o->h->whole += e->velX;
     D_1F80019E = 0;
     o->velY = 0;

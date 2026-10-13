@@ -8,7 +8,7 @@ extern int DAT_1f8002d4[];
 extern short DAT_1f800176;
 extern unsigned short DAT_1f800186;
 extern void FUN_80018da4(TObj *, int);
-extern void FUN_80018934(TObj *);
+extern void freeObjectLayer7(TObj *);
 
 void func_80122724(TObj *o)
 {
@@ -52,7 +52,7 @@ void func_80122724(TObj *o)
         o->b04++;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

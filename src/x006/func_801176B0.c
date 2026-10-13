@@ -18,14 +18,14 @@ extern void AnimAdvance(TObj *);
 extern void FUN_80020078(TObj *, int);
 extern void func_80118304(int, int, int);
 extern int FUN_8001e4f0(int);
-extern void FUN_8001eaa4(int);
+extern void queueSfxKeyOff(int);
 extern void FUN_8001f110(int);
 extern void FUN_8004d620(int, int);
-extern TObj *FUN_8002dc50(int, int, int, int);
+extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001e560(int, int);
-extern TObj *FUN_8002dcc8(int, int, Fix16 *);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8001f2ec(int);
+extern TObj *showMessageBoxDirect(int, int, Fix16 *);
+extern void setEventStarted(int, int, int);
+extern void playJingle(int);
 extern void FUN_800187e4(TObj *);
 
 void func_801176B0(TObj *o)
@@ -61,7 +61,7 @@ void func_801176B0(TObj *o)
             if (D_1F80016A < 0x177)
                 break;
             D_8009C958[0] = 0;
-            FUN_8001eaa4(o->d30);
+            queueSfxKeyOff(o->d30);
             FUN_8001e4f0(0xfe);
             o->timer = 0x1e;
             o->step++;
@@ -76,7 +76,7 @@ void func_801176B0(TObj *o)
             break;
         case 2:
             o->step++;
-            o->d90 = (int)FUN_8002dcc8(2, 0, &o->a);
+            o->d90 = (int)showMessageBoxDirect(2, 0, &o->a);
             D_8009CFCE = 1;
             o->anim = D_80122FB4[0];
             AnimLoadDuration(o);
@@ -90,7 +90,7 @@ void func_801176B0(TObj *o)
             o->step++;
             break;
         case 4:
-            FUN_8005a8a8(0x79, 0, 0);
+            setEventStarted(0x79, 0, 0);
             o->step = 6;
             o->timer = 0x15e;
             break;
@@ -100,7 +100,7 @@ void func_801176B0(TObj *o)
             break;
         case 7:
             o->step++;
-            o->d90 = (int)FUN_8002dcc8(2, 1, &o->a);
+            o->d90 = (int)showMessageBoxDirect(2, 1, &o->a);
             o->anim = D_80122FB4[0];
             AnimLoadDuration(o);
             break;
@@ -154,7 +154,7 @@ void func_801176B0(TObj *o)
             }
             if (D_8009C942 != 1)
                 break;
-            FUN_8001eaa4(o->d30);
+            queueSfxKeyOff(o->d30);
             FUN_8001e4f0(0xfe);
             o->step++;
             break;
@@ -175,7 +175,7 @@ void func_801176B0(TObj *o)
             if (--o->timer != -1)
                 break;
             o->step++;
-            FUN_8002dc50(2, 0xb, 0xa0, 0x6e);
+            showMessageBox(2, 0xb, 0xa0, 0x6e);
             o->timer = 0x46;
             break;
         case 3:
@@ -235,7 +235,7 @@ void func_801176B0(TObj *o)
         case 8:
             if (--o->timer != -1)
                 break;
-            FUN_8001f2ec(3);
+            playJingle(3);
             o->timer = 0x5a;
             o->step++;
             break;

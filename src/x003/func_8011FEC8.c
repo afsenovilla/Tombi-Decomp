@@ -2,13 +2,13 @@
 // MATCHING 8011fec8 156
 #include "TOBJ.H"
 extern short D_1F80019E;
-extern short func_8004461C(TObj *, TObj *);
-extern int func_800428C0(TObj *, TObj *);
+extern short boxesOverlapSigned(TObj *, TObj *);
+extern int resolveHitResultA(TObj *, TObj *);
 
 void func_8011FEC8(TObj *o, TObj *e)
 {
-    if (e->d94 == 0 && func_8004461C(o, e) >= 0) {
-        func_800428C0(o, e);
+    if (e->d94 == 0 && boxesOverlapSigned(o, e) >= 0) {
+        resolveHitResultA(o, e);
         if (o->type != 1) {
             if (o->animFrame < 4) e->animFrame = o->animFrame & 1;
             else e->animFrame = 3;

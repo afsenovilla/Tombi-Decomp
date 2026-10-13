@@ -12,7 +12,7 @@ extern int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void playSFX(int);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void func_80128180(TObj *);
 extern void func_80124E04(TObj *);
 extern void func_8012516C(TObj *);
@@ -172,7 +172,7 @@ void func_801283A4(TObj *o)
         o->b9d = 0;
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
 }

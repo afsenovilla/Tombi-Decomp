@@ -9,7 +9,7 @@ extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8001faf4(TObj *);
+extern void applyFrameVelocityX(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern int FUN_8001f9e0(void);
@@ -117,7 +117,7 @@ void func_80123828(TObj *o)
         if (land(o)) {
             o->b9c = 0;
             o->velV = 0;
-            FUN_8001faf4(o);
+            applyFrameVelocityX(o);
             o->y.p.whole += 2;
         } else {
             o->velV += 0x40;

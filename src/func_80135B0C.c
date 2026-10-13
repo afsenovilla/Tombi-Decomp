@@ -2,7 +2,7 @@
 // MATCHING 80135b0c 676
 #include "TOBJ.H"
 typedef struct { short x, y; } P;
-extern int FUN_8002078c(P a, P b);
+extern int angleBetweenPoints(P a, P b);
 extern unsigned short D_1F80016A;
 extern unsigned short D_1F80016E;
 extern short D_8007A5F0[];
@@ -27,7 +27,7 @@ void func_80135B0C(TObj *o)
         a.y = o->y.p.whole;
         b.x = D_1F80016A;
         b.y = D_1F80016E;
-        o->d88 = FUN_8002078c(a, b);
+        o->d88 = angleBetweenPoints(a, b);
         o->timer = 0x78;
         o->step++;
         break;
@@ -55,7 +55,7 @@ void func_80135B0C(TObj *o)
         a.y = o->y.p.whole;
         b.x = 0x1ec;
         b.y = -0x87;
-        o->d88 = FUN_8002078c(a, b);
+        o->d88 = angleBetweenPoints(a, b);
         o->timer = 0x78;
         o->step--;
         break;

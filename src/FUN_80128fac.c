@@ -7,7 +7,7 @@ extern unsigned char D_80138FD8[];
 extern unsigned short *D_8013A184[], *D_8013A1A4[], *D_8013A1A8[], *D_8013A1AC[], *D_8013A1FC[];
 extern short D_1F80016A;
 extern void ObjSetFacingToPlayer(TObj *);
-extern void FUN_8001fb20(TObj *);
+extern void applyFrameVelocityY(TObj *);
 extern int FUN_801274cc(TObj *);
 extern int FUN_801275e4(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
@@ -69,7 +69,7 @@ void FUN_80128fac(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame)
             o->h->raw = o->h->raw - (o->velH << 8);
         else
@@ -101,7 +101,7 @@ void FUN_80128fac(TObj *o)
         SETANIM(o, D_8013A1A8);
     case 4:
         AnimAdvanceWithBox(o);
-        FUN_8001fb20(o);
+        applyFrameVelocityY(o);
         if (o->animFrame)
             o->h->raw = o->h->raw - (o->velH << 8);
         else

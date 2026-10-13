@@ -27,15 +27,15 @@ extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
 extern char D_8001D6A4[];
-extern unsigned int FUN_80028420(O *);
-extern unsigned int FUN_80028b40(O *);
+extern unsigned int stepScrollReturnY(O *);
+extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
-extern void FUN_800277f8(O *);
+extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
-extern int FUN_8002715c(int);
+extern int stepPlayerXToward(int);
 extern int FUN_800270a0(O *, int, int);
-extern void FUN_8005a9a4(int, int);
-extern void FUN_8001eacc(void);
+extern void setEventComplete(int, int);
+extern void keyOffActiveSfxVoices(void);
 extern void stopBgm(int);
 extern void SoundStopAll(void);
 extern void ThreadCreate(int, char *);
@@ -49,7 +49,7 @@ void func_80117494(O *o)
     switch (o->step) {
     case 0:
         if (D_8009CDA2[0] != 0) {
-            if (FUN_80028420(o) & FUN_80028b40(o)) D_8009CDA2[0] = 0;
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -58,7 +58,7 @@ void func_80117494(O *o)
     case 1:
         if (D_8009C93A != 0) o->step++;
         FUN_80027c74(o);
-        FUN_800277f8(o);
+        syncObjectTargetY(o);
         func_80029078(o);
         break;
     case 2:
@@ -81,10 +81,10 @@ void func_80117494(O *o)
                 if ((unsigned short)(ZU + 0x56a) >= 0x10) break;
                 D_800A6038.ba0 = 1;
                 D_800A6038.ba8 = 10;
-                if (D_1F800172 > 0) FUN_8002715c(0x784);
+                if (D_1F800172 > 0) stepPlayerXToward(0x784);
                 break;
             case 4:
-                if (D_8009CDC3 != 0xff) FUN_8005a9a4(0x1f, 0);
+                if (D_8009CDC3 != 0xff) setEventComplete(0x1f, 0);
                 *p = 0;
                 break;
             default:
@@ -99,21 +99,21 @@ void func_80117494(O *o)
             unsigned short *p = &D_8009C982;
             if (*p != 0) goto clr;
             if (D_800A6038.ba2 != 0) {
-                if ((unsigned)(XU - 0xcac) < 0x60) FUN_8002715c(0xcdc);
-                else if ((unsigned)(XU - 0x12dd) < 0x60) FUN_8002715c(0x130d);
-                else if ((unsigned)(XU - 0x155b) < 0x60) FUN_8002715c(0x158b);
+                if ((unsigned)(XU - 0xcac) < 0x60) stepPlayerXToward(0xcdc);
+                else if ((unsigned)(XU - 0x12dd) < 0x60) stepPlayerXToward(0x130d);
+                else if ((unsigned)(XU - 0x155b) < 0x60) stepPlayerXToward(0x158b);
             }
             if (D_800A6038.ba2 == 2 && (unsigned)(XU - 0x107a) < 0x40 && (unsigned short)(ZU + 0x78e) < 0x20)
-                FUN_8002715c(0x109a);
+                stepPlayerXToward(0x109a);
             if (D_8009CDC5 == 0xff && (unsigned)(XU - 0xc72) < 0x14 && (unsigned short)(ZU + 0x63e) < 0x10) {
                 D_800A6038.ba0 = 1;
                 D_800A6038.ba8 = 0xc;
-                if (D_1F800172 > 0) FUN_8002715c(0xc7c);
+                if (D_1F800172 > 0) stepPlayerXToward(0xc7c);
             }
             if ((unsigned)(XU - 0x10a1) < 0x10 && (unsigned short)(ZU + 0x5b4) < 0x10) {
                 D_800A6038.ba0 = 1;
                 if (D_1F800172 > 0) {
-                    FUN_8002715c(0x10a9);
+                    stepPlayerXToward(0x10a9);
                     if (D_1F800172 >= 0x51) {
                         o->step = 6;
                         D_800A6038.active = 5;
@@ -128,7 +128,7 @@ void func_80117494(O *o)
             c = &D_8009CDC7;
             if (*c == 2) {
                 *c = 3;
-                FUN_8001eacc();
+                keyOffActiveSfxVoices();
                 stopBgm(1);
                 o->step = 4;
                 D_8009C975 = 3;
@@ -142,7 +142,7 @@ void func_80117494(O *o)
             if (D_1F80016E < -0x986) {
                 if ((unsigned)(XU - 0x1536) >= 0x35) break;
                 if (D_1F800172 <= 0) break;
-                FUN_8002715c(0x1550);
+                stepPlayerXToward(0x1550);
                 if (D_1F800172 < 0x2e) break;
                 FUN_800270a0(o, 1, 1);
                 break;
@@ -150,7 +150,7 @@ void func_80117494(O *o)
             if (D_1F80016E < -0x937) break;
             if ((unsigned)(XU - 0x153e) >= 0x1d) break;
             if (D_1F800172 < -0x59) break;
-            FUN_8002715c(0x154d);
+            stepPlayerXToward(0x154d);
             if (D_1F800172 < -0x2c) break;
             FUN_800270a0(o, 1, 2);
             break;

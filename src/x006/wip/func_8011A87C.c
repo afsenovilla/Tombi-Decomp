@@ -22,7 +22,7 @@ extern TObj *ObjAlloc(void);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void FUN_80021f5c(void *);
+extern void getBaseMatrix(void *);
 extern void RotMatrix(SVECTOR *, void *);
 extern void RotMatrixY(int, void *);
 extern void RotMatrixZ(int, void *);
@@ -78,7 +78,7 @@ void func_8011A87C(TObj *o)
             m = M(o);
             o->b0a = 0x15;
             o->da0 = 0;
-            FUN_80021f5c(m);
+            getBaseMatrix(m);
             v.vx = o->d84;
             v.vy = o->d88;
             v.vz = o->d8c;
@@ -101,14 +101,14 @@ void func_8011A87C(TObj *o)
             p = (TObj *)o->d90;
             o->b0a = 0x15;
             o->ba4 = 0;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             TAIL;
             break;
         case 2:
         case 3:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
             RotMatrixY((unsigned short)p->wb4, D_1F800000);
             TAIL;
@@ -117,7 +117,7 @@ void func_8011A87C(TObj *o)
         case 5:
             p = (TObj *)o->d90;
             o->b0a = 0x15;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
             TAIL;
             break;
@@ -155,7 +155,7 @@ void func_8011A87C(TObj *o)
                 o->velH += o->velX;
             }
             m = M(o);
-            FUN_80021f5c(m);
+            getBaseMatrix(m);
             v.vx = o->d84;
             v.vy = o->d88;
             v.vz = o->d8c;
@@ -187,13 +187,13 @@ void func_8011A87C(TObj *o)
                 }
             }
             p = (TObj *)o->d90;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             TAIL;
             break;
         case 2:
         case 3:
             p = (TObj *)o->d90;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
             RotMatrixY((unsigned short)p->wb4, D_1F800000);
             TAIL;
@@ -201,7 +201,7 @@ void func_8011A87C(TObj *o)
         case 4:
         case 5:
             p = (TObj *)o->d90;
-            FUN_80021f5c(D_1F800000);
+            getBaseMatrix(D_1F800000);
             RotMatrixZ(p->velH, D_1F800000);
             TAIL;
             break;

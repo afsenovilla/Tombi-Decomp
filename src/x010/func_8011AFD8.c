@@ -14,7 +14,7 @@ extern int D_800A4574[];
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void ObjListPush_1F80022C(TObj *);
-extern void FUN_80018934(TObj *);
+extern void freeObjectLayer7(TObj *);
 
 void func_8011AFD8(TObj *o)
 {
@@ -74,7 +74,7 @@ void func_8011AFD8(TObj *o)
         o->b04 = t + 1;
         break;
     case 3:
-        FUN_80018934(o);
+        freeObjectLayer7(o);
         break;
     }
 }

@@ -3,15 +3,15 @@
 #include "TOBJ.H"
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
-extern short FUN_80042fbc(TObj *, TObj *);
-extern void FUN_8004258c(TObj *, int);
+extern short boxesOverlap(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
 
 void func_8011CE64(TObj *o, TObj *e)
 {
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;
     if (e->subtype == 0) return;
-    if (FUN_80042fbc(o, e) == 0) return;
+    if (boxesOverlap(o, e) == 0) return;
     e->b69 = 1;
     e->active = 2;
     e->b04 = 2;
@@ -23,6 +23,6 @@ void func_8011CE64(TObj *o, TObj *e)
     o->b04 = 2;
     o->step = 0;
     o->state = 0;
-    FUN_8004258c(o, 1);
+    decreaseObjectTimer(o, 1);
     D_1F80019E = 0;
 }

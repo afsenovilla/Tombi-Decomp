@@ -13,7 +13,7 @@ void func_8004D620(int a, int b);
 void FUN_80111b40(TObj *o);
 void AnimLoadDuration(TObj *o);
 void SfxPlay2(int a, int b);
-void FUN_8005a9a4(int a, int b);
+void setEventComplete(int a, int b);
 short TileCollideAt(TObj *o, int x, int y);
 void FUN_800eb8f0(TObj *o, int a, int b, int c);
 void FUN_80020490(TObj *o);
@@ -55,7 +55,7 @@ void func_80112C24(TObj *o)
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);
             if (o->subtype == 6) {
-                FUN_8005a9a4(0x19, 0);
+                setEventComplete(0x19, 0);
             }
             break;
         }

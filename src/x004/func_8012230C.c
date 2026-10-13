@@ -6,7 +6,7 @@ typedef struct B { unsigned char c[4]; } B;
 extern char D_80077D0C[];
 extern B D_80130FD4[];
 extern A *D_80133BF4[];
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void func_8012230C(TObj *o)
 {
@@ -28,7 +28,7 @@ void func_8012230C(TObj *o)
         o->animTimer = ((A *)o->anim)->w6 & 0x3fff;
         break;
     case 1:
-        FUN_8001fa88(o, 1 - o->animFrame);
+        applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
         if (o->velV > 0x400)
             o->velV = 0x400;

@@ -14,10 +14,10 @@ extern unsigned char D_8009CDC5b; /* same byte as D_8009CDC5: second name makes 
 extern unsigned short D_8009C962;
 extern unsigned char D_8009C975;
 extern short D_800A60EA[];
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
-extern void FUN_8005a8a8(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
 extern short func_8004065C(TObj *, short, short, short);
 
 static __inline__ int chk(void)
@@ -51,7 +51,7 @@ void func_8012C00C(TObj *o)
         if (c != 0xff) {
             if (chk()) {
                 v = *(V *)&o->a;
-                o->d90 = (int)FUN_8002dcc8(2, 3, &v);
+                o->d90 = (int)showMessageBoxDirect(2, 3, &v);
                 o->state = 0x5a;
                 X(o)->wc2 = 0x46;
                 break;
@@ -62,30 +62,30 @@ void func_8012C00C(TObj *o)
             }
         }
         v = *(V *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(2, 3, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 3, &v);
         o->state = 0x5a;
         X(o)->wc2 = 0x7a;
         break;
     case 30:
         v = *(V *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(2, 0, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 0, &v);
         o->state = 0x5a;
         X(o)->wc2 = 0x1f;
         break;
     case 31:
         v = *(V *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(2, 1, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 1, &v);
         o->state = 0x5a;
         X(o)->wc2 = 0x32;
         break;
     case 50:
-        FUN_8005a8a8(0x21, 0, 0);
+        setEventStarted(0x21, 0, 0);
         o->state = 0x5a;
         X(o)->wc2 = 0x33;
         break;
     case 51:
         v = *(V *)&o->a;
-        o->d90 = (int)FUN_8002dcc8(2, 2, &v);
+        o->d90 = (int)showMessageBoxDirect(2, 2, &v);
         o->state = 0x5a;
         X(o)->wc2 = 0x34;
         break;
@@ -104,7 +104,7 @@ void func_8012C00C(TObj *o)
         }
         break;
     case 72:
-        FUN_8005a9a4(0x21, 0);
+        setEventComplete(0x21, 0);
         o->anim = D_80135DF0[o->subtype].p[4];
         AnimJump(o, 0);
     case 52:

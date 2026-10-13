@@ -16,7 +16,7 @@ extern void FUN_800f00ac(TObj *);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_800eae0c(int, int, int, int);
 extern void func_8010E97C(TObj *);
-extern void FUN_8001fc14(TObj *, int, int);
+extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void ObjApplyVelocity(TObj *);
 extern void FUN_800ee4e0(TObj *, short);
 
@@ -89,7 +89,7 @@ void func_801237E4(TObj *o)
         break;
     case 2:
         func_8010E97C(o);
-        FUN_8001fc14(o, o->wb6, o->wb2);
+        setObjectSpeedPolar2(o, o->wb6, o->wb2);
         ObjApplyVelocity(o);
         if (o->wb2 == 0) {
             *(unsigned char *)&D_8009C330->w08 = 0;

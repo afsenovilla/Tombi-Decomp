@@ -20,7 +20,7 @@ extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e4f0(int);
 extern int AnimAdvance(TObj *);
-extern void FUN_8001fa88(TObj *, int);
+extern void applyAnimVelocityX(TObj *, int);
 extern int FUN_8003facc(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 
@@ -57,7 +57,7 @@ void func_8011B170(TObj *o)
     case 2:
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
-            FUN_8001fa88(o, o->animFrame ^ 1);
+            applyAnimVelocityX(o, o->animFrame ^ 1);
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         o->velY += 0x40;
@@ -77,7 +77,7 @@ void func_8011B170(TObj *o)
     case 3:
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
-            FUN_8001fa88(o, o->animFrame ^ 1);
+            applyAnimVelocityX(o, o->animFrame ^ 1);
         o->h->raw += D_8009C944 << 8;
         o->y.raw += D_8009C946[0] << 8;
         o->y.raw += o->velY << 8;

@@ -11,12 +11,12 @@ extern unsigned char D_8009CE3B, D_8009D13E;
 extern unsigned char D_8009CFCA;
 extern short D_800A60EA[];
 extern short D_1F8001C6;
-extern TObj *FUN_8002dcc8(int, int, V *);
+extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, int, int);
 extern void addItemToInventory(int, int, int);
-extern void FUN_8005a9a4(int, int);
+extern void setEventComplete(int, int);
 
 void func_8012D8E4(TObj *o)
 {
@@ -38,10 +38,10 @@ void func_8012D8E4(TObj *o)
         o->anim = D_8012F538[o->subtype].p[1];
         AnimLoadDuration(o);
         if (D_8009CE3B == 1) {
-            o->d90 = (int)FUN_8002dcc8(3, 0, &v);
+            o->d90 = (int)showMessageBoxDirect(3, 0, &v);
             o->state = 10;
         } else {
-            o->d90 = (int)FUN_8002dcc8(3, 0, &v);
+            o->d90 = (int)showMessageBoxDirect(3, 0, &v);
             o->state = 1;
         }
         break;
@@ -116,13 +116,13 @@ void func_8012D8E4(TObj *o)
             o->anim = D_8012F538[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V *)&o->a;
-            o->d90 = (int)FUN_8002dcc8(3, 2, &v);
+            o->d90 = (int)showMessageBoxDirect(3, 2, &v);
             o->state = 0xb;
         } else {
             o->anim = D_8012F538[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V *)&o->a;
-            o->d90 = (int)FUN_8002dcc8(3, 1, &v);
+            o->d90 = (int)showMessageBoxDirect(3, 1, &v);
             o->state = 0xc;
         }
         break;
@@ -153,7 +153,7 @@ void func_8012D8E4(TObj *o)
     }
     case 14:
         o->timer = 200;
-        FUN_8005a9a4(0x97, 0);
+        setEventComplete(0x97, 0);
         o->state++;
         break;
     case 15:

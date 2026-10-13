@@ -25,8 +25,8 @@ extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int FUN_8004fba8(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
-int FUN_8004fdc8(void *a, int b, int c, int d, unsigned e);
-int FUN_8004fd6c(void *a, int b, int c, int d, unsigned e);
+int insertPrim(void *a, int b, int c, int d, unsigned e);
+int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
 #define setSemiTrans(p, abe) ((abe) ? ((p)->code |= 2) : ((p)->code &= ~2))
 #define SN(i) D_8007A5F0[i]
@@ -104,9 +104,9 @@ void func_8011F240(TObj *o)
             p->g = o->d60;
             p->b = o->d64;
             if (o->b0b != 0)
-                r = FUN_8004fdc8(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                r = insertPrim(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
-                r = FUN_8004fd6c(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                r = insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             if (!r)
                 D_1F800164 = (PFT4 *)((char *)D_1F800164 + 0x28);
         }

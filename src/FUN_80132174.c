@@ -18,7 +18,7 @@ extern void FUN_8001fec0(TObj *);
 extern unsigned FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);
 extern short FUN_8005e420(int, int);
-extern void FUN_80018790(TObj *);
+extern void freeObjectLayer2(TObj *);
 extern void FUN_801307a0(TObj *);
 extern void FUN_801308d8(TObj *);
 extern void FUN_80130a38(TObj *);
@@ -27,11 +27,11 @@ extern void FUN_801317e4(TObj *);
 extern void FUN_801319d0(TObj *);
 extern void FUN_801320a8(TObj *);
 extern short FUN_800411cc(TObj *, short, short);
-extern void FUN_8001fa20(TObj *, unsigned short);
-extern void FUN_8001fa88(TObj *, unsigned short);
+extern void applyAnimVelocityXY(TObj *, unsigned short);
+extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8005f290(short *, int, int, int);
-extern void FUN_800371c0(int, int, char *, int);
-extern void FUN_800174fc(char *, int, int, int, int);
+extern void unpackSpriteFrame(int, int, char *, int);
+extern void loadTIM(char *, int, int, int, int);
 
 static __inline__ void draw(int a, int b)
 {
@@ -41,8 +41,8 @@ static __inline__ void draw(int a, int b)
     r[2] = 0x20;
     r[3] = 0x60;
     FUN_8005f290(r, 0, 0, 0);
-    FUN_800371c0(DAT_1f800350, (short)a, DAT_800d7e28, 0xa001c0);
-    FUN_800174fc(DAT_800d7e28, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
+    unpackSpriteFrame(DAT_1f800350, (short)a, DAT_800d7e28, 0xa001c0);
+    loadTIM(DAT_800d7e28, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
 }
 
 void FUN_80132174(TObj *o)
@@ -162,7 +162,7 @@ void FUN_80132174(TObj *o)
                 if (o->animFrame)
                     d = -8;
                 if (FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18) == 0) {
-                    FUN_8001fa20(o, 0);
+                    applyAnimVelocityXY(o, 0);
                     o->w22++;
                 }
                 break;
@@ -175,7 +175,7 @@ void FUN_80132174(TObj *o)
                         o->state = 3;
                         o->substep = 0;
                     }
-                    FUN_8001fa20(o, 1);
+                    applyAnimVelocityXY(o, 1);
                 } else {
                     if (--o->w22 == 0) {
                         o->active = 1;
@@ -214,7 +214,7 @@ void FUN_80132174(TObj *o)
                 FUN_8001fe6c(o);
                 break;
             case 1:
-                FUN_8001fa88(o, 1 - o->animFrame);
+                applyAnimVelocityX(o, 1 - o->animFrame);
                 if ((o->velV += 0x40) > 0x400)
                     o->velV = 0x400;
                 o->y.raw += o->velV << 8;
@@ -231,7 +231,7 @@ void FUN_80132174(TObj *o)
         }
         break;
     case 3:
-        FUN_80018790(o);
+        freeObjectLayer2(o);
         break;
     }
     if (EX(o)->ca == 1 && EX(o)->c4 != *(unsigned short *)o->anim) {
