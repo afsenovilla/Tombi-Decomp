@@ -501,6 +501,8 @@ class Core:
             return self._wpp_surface(item[1], item[2])
         if k == "clut":
             return self._clut_surface(item[1])
+        if k == "composed":
+            return self._composed_surface(item[1], item[2], item[3])
         raise err("c.badkind", k)
 
     def _page_surface(self, name, ld, idx, crop=None, pal=None, title=None):
@@ -610,6 +612,36 @@ class Core:
         s.pageinfo = recs[0]
         s.ld, s.idx = "SYS", k
         return s
+
+    def composed_image(self):
+        """Disc image the composed room views are captured from (the capture runs the game, so an extracted folder is not enough)."""
+        return self.disc.image if self.disc.image and os.path.isfile(self.disc.image) else None
+
+    def composed_exe(self):
+        return self.disc.ensure("EXE/MAIN0.EXE")
+
+    def _composed_surface(self, area, section, kind):
+        """Read-only surface of a captured room view (tools/gfx_composed.py); the picture must be in the cache."""
+        from PIL import Image
+        import gfx_composed as GC
+        img = self.composed_image()
+        p = GC.cached(img, area, section, kind) if img else None
+        if not p:
+            raise err("c.nocomposed", area, section)
+        return ComposedSurface(self, "room_%02d_%d_%s" % (area, section, kind), Image.open(p).convert("RGBA"))
+
+    def _composed_nodes(self, N):
+        import gfx_composed as GC
+        out = []
+        for a, n in GC.rooms():
+            kids = []
+            for s in range(n):
+                if GC.unreachable(a, s):
+                    continue
+                kids.append(N(tr("t.room", s), ("composed", a, s, "composed"), id="composed:%d:%d" % (a, s)))
+                kids.append(N(tr("t.roomsky", s), ("composed", a, s, "sky"), id="composedsky:%d:%d" % (a, s)))
+            out.append(N("AREA%02d" % a, children=kids))
+        return N(tr("t.composed"), children=out)
 
     def _clut_surface(self, name):
         p = self.page_info(name)
@@ -723,6 +755,7 @@ class Core:
         scr.append(N(tr("t.backdrops"), children=[N("L%d  %s" % (k, palinfer.backdrop(self, k)["name"]), ("screen", "backdrop_L%d" % k), id="backdrop:L%d" % k)
                                                  for k in palinfer.backdrop_lists(self)]))
         root.append(N(tr("t.screens"), children=scr))
+        root.append(self._composed_nodes(N))
         ui = [N(tr("t.uitable"), children=[N("%d  %s  (%d,%d %dx%d)" % (i, UI_NAMES.get(i, "UI %d" % i), u, v, w, h), ("ui", i), id="ui:%d" % i)
                                            for i, u, v, w, h, cx, cy in self.ui_table()])]
         for nm in ("SYSTEM/A00000.GAM", UI_PAGE):
@@ -1196,11 +1229,36 @@ class Surface:
         return None
 
 
+class ComposedSurface(Surface):
+    """Read-only RGB picture (a captured room view): no palette, no pages, nothing to import."""
+
+    def __init__(self, core, title, image):
+        super().__init__(core, title, 16)
+        self.image = image
+        self.W, self.H = image.size
+        self.crop = (0, 0, self.W, self.H)
+        self.opaque = True
+
+    def render(self, ref=None, region=None):
+        im = self.image
+        if region:
+            x, y, w, h = region
+            im = im.crop((x, y, x + w, y + h))
+        return im
+
+    def indexed(self, region=None, ref=None):
+        return self.render(None, region).convert("RGB")
+
+    def import_png(self, path, region=None, ref=None):
+        raise err("c.composedro")
+
+
 # ------------------------------------------------------------------ strings
 S_ES = {
     "l.deduced": "paleta deducida: {0} ({1})",
     "c.notiso": "{0} no es una imagen de disco ISO9660 (.bin de 2352 bytes por sector o .iso).", "c.nofile": "No existe {0}.",
     "c.nofs": "No se encuentra la carpeta SYS en {0}: ¿es el disco de Tombi! (PAL)?", "c.nolists": "No se pudieron leer las listas de carga (SYS/LD0*.BIN).",
+    "c.nocomposed": "La vista compuesta de AREA{0:02d} sala {1} aún no está generada.", "c.composedro": "La vista compuesta es solo de lectura.",
     "c.nores": "No se pudo leer {0}.", "c.size": "{0}: tamaño {1} distinto del original {2}.", "c.nopage": "No hay ninguna página llamada {0}.",
     "c.badkind": "Elemento desconocido: {0}", "c.notwpp": "{0} no es un archivo de sprites WPP.", "c.nomatch": "El patrón {0} no coincide con ningún archivo.",
     "c.wppsize": "{0}: el archivo de sprites recodificado mide {1} bytes y el original {2}; el cambio no cabe (usa menos detalle/colores repetidos).",
@@ -1226,6 +1284,7 @@ S_EN = {
     "l.deduced": "palette inferred: {0} ({1})",
     "c.notiso": "{0} is not an ISO9660 disc image (.bin with 2352-byte sectors or .iso).", "c.nofile": "{0} does not exist.",
     "c.nofs": "No SYS folder found in {0}: is it the Tombi! (PAL) disc?", "c.nolists": "The load lists (SYS/LD0*.BIN) could not be read.",
+    "c.nocomposed": "The composed view of AREA{0:02d} room {1} is not generated yet.", "c.composedro": "The composed view is read-only.",
     "c.nores": "Could not read {0}.", "c.size": "{0}: size {1} differs from the original {2}.", "c.nopage": "There is no page named {0}.",
     "c.badkind": "Unknown item: {0}", "c.notwpp": "{0} is not a WPP sprite file.", "c.nomatch": "Pattern {0} matches no file.",
     "c.wppsize": "{0}: the re-encoded sprite file is {1} bytes, the original {2}; the change does not fit (use less detail / repeated colours).",

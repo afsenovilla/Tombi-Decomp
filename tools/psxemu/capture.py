@@ -18,14 +18,16 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from psxemu import machine as _machine
+    from psxemu.rooms import ROOM_COUNTS, UNREACHABLE
 else:
     from . import machine as _machine
+    from .rooms import ROOM_COUNTS, UNREACHABLE
 
 TITLE_TASK = "titleSequenceTask"
 
 
-def boot(verbose=False):
-    m = _machine.Machine()
+def boot(verbose=False, exe=None, disc=None):
+    m = _machine.Machine(exe=exe, disc=disc)
     m.verbose = verbose
     return m
 
@@ -127,9 +129,9 @@ SKY_DEPTH = 100                  # ordering table slots 0..99 (far end): the sky
 HUD_SLOTS = 3                    # the last ordering table slots: HUD, dialogue box and text
 
 
-def base_state(path=None, log=print):
+def base_state(path=None, log=print, exe=None, disc=None):
     """Machine paused at the debug area select; the state is cached in `path`."""
-    m = boot()
+    m = boot(exe=exe, disc=disc)
     if path and os.path.exists(path):
         m.load_state(path)
         return m
@@ -167,13 +169,11 @@ def render_frame(m, keep=None, idx=-1):
 
 
 def room_sections(m=None):
-    """[(area, sections)] of the areas present on the disc (game/AREAnn)."""
-    m = m or base_state()
-    out = []
-    for a in range(24):
-        if os.path.isdir(os.path.join(_machine.ROOT, "game", "AREA%02d" % a)):
-            out.append((a, m.cpu.r16(SECTION_COUNT + 2 * a)))
-    return out
+    """[(area, sections)] of the areas on the disc.  Read from the game (u16 table SECTION_COUNT) when a base machine is given, else the
+    static ROOM_COUNTS (same values)."""
+    if m is None:
+        return list(ROOM_COUNTS)
+    return [(a, m.cpu.r16(SECTION_COUNT + 2 * a)) for a, _ in ROOM_COUNTS]
 
 
 def _running(m):
@@ -244,19 +244,21 @@ _W = {}
 
 
 def _worker(args):
-    base, it, out, force = args
+    base, it, out, force, exe, disc = args
     if "m" not in _W:
-        _W["m"] = boot()
+        _W["m"] = boot(exe=exe, disc=disc)
     return _one(_W["m"], base, out, it[0], it[1], it[2], force, log=lambda *a: None)
 
 
-def rooms(out, area=None, section=None, jobs=1, force=False, log=print, base_path=None, progress=None):
+def rooms(out, area=None, section=None, jobs=1, force=False, log=print, base_path=None, progress=None, exe=None, disc=None):
     """room_<AA>_<n>_composed.png / _sky.png for every room (or one area / section) into `out`.  Returns [(area, section, status, info)].
-    progress(done, total) is called after every room.  jobs > 1 = worker processes (one machine each)."""
+    progress(done, total) is called after every room.  jobs > 1 = worker processes (one machine each).  exe / disc: MAIN0.EXE and the disc
+    image when they are not game/MAIN0.EXE and game/disc/Tombi.bin."""
     os.makedirs(out, exist_ok=True)
     base_path = base_path or os.path.join(out, "rooms_base.state")
-    m = base_state(base_path, log)
-    todo = [(a, s, n) for a, n in room_sections(m) for s in range(n) if (area is None or a == area) and (section is None or s == section)]
+    m = base_state(base_path, log, exe, disc)
+    todo = [(a, s, n) for a, n in room_sections(m) for s in range(n) if (area is None or a == area) and (section is None or s == section)
+            and ((a, s) not in UNREACHABLE or (area is not None and section is not None))]
     results = []
     if jobs <= 1:
         for it in todo:
@@ -265,8 +267,8 @@ def rooms(out, area=None, section=None, jobs=1, force=False, log=print, base_pat
                 progress(len(results), len(todo))
     else:
         import multiprocessing as mp
-        with mp.Pool(jobs) as pool:
-            for r in pool.imap_unordered(_worker, [(base_path, it, out, force) for it in todo]):
+        with mp.get_context("spawn").Pool(jobs) as pool:      # spawn: also safe from the editor's threads and in the frozen exe
+            for r in pool.imap_unordered(_worker, [(base_path, it, out, force, exe, disc) for it in todo]):
                 results.append(r)
                 log("AREA%02d:%d %s" % r[:3] + ("" if r[2] == "skip" else "  %s" % (r[3],)))
                 if progress:

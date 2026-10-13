@@ -12,11 +12,12 @@ The game's own loader (cdLoadTask: CdRead + lzDecompress + LoadImage) runs nativ
 import csv
 import os
 import struct
+import sys
 
 from . import cpu as _cpu
 from . import gpu as _gpu
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # PyInstaller: notes/*.csv are bundled
 VBLANK_EVERY = 25000
 PAD_BUF = 0x8009F7F0       # joypadInit: PadInitDirect(0x8009F7F0, 0x8009F812)
 MOVIE_TASK = 0x8001D6A4     # moviePlayerTask (psx_tomba name)        # instructions between two simulated VBlank interrupts
@@ -68,6 +69,7 @@ class Machine:
                 self.addr.setdefault(a, n)
         self.disc_path = disc or os.path.join(ROOT, "game", "disc", "Tombi.bin")
         self._disc = None
+        self._layout = None
         self.loc = 0
         self.threads = {}
         self.cur_th = 0xFF000000
@@ -110,9 +112,13 @@ class Machine:
 
     def read_sectors(self, lba, n):
         f = self.disc()
+        if self._layout is None:        # raw 2352 byte sectors (Tombi.bin) or a cooked 2048 byte image (.iso)
+            f.seek(16 * 2352 + 25)
+            self._layout = (2352, 24) if f.read(5) == b"CD001" else (2048, 0)
+        size, off = self._layout
         out = bytearray()
         for i in range(n):
-            f.seek((lba + i) * 2352 + 24)
+            f.seek((lba + i) * size + off)
             out += f.read(2048)
         return bytes(out)
 

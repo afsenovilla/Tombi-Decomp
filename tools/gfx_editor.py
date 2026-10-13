@@ -184,7 +184,8 @@ class App:
                      ("b.exppage", lambda: self.export(False)), ("b.expsel", lambda: self.export(True)),
                      ("b.imppage", lambda: self.import_(False)), ("b.impsel", lambda: self.import_(True)), None,
                      ("b.undo", self.undo), ("b.preview", self.preview), None,
-                     ("b.savemod", self.save_mod), ("b.loadmod", self.load_mod), ("b.iso", self.generate)):
+                     ("b.savemod", self.save_mod), ("b.loadmod", self.load_mod), ("b.iso", self.generate), None,
+                     ("b.composedall", self.composed_all)):
             if item is None:
                 ttk.Separator(bar, orient="vertical").pack(side="left", fill="y", padx=5)
                 continue
@@ -434,12 +435,82 @@ class App:
                 self.show_anim(n["item"][1])
             except Exception as e:
                 messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
+        elif n and n["item"] and n["item"][0] == "composed":
+            self.show_composed(n["item"])
         elif n and n["item"]:
             try:
                 self.show(n["item"])
             except Exception as e:
                 self.say(str(e))
                 messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
+
+    # ---- composed room views (tools/gfx_composed.py: the game runs in the MIPS interpreter, results cached)
+    def show_composed(self, item):
+        import gfx_composed as GC
+        _, area, sec, kind = item
+        img = self.core.composed_image()
+        if not img:
+            messagebox.showinfo(tr("info"), tr("d.composedimg"))
+            return
+        if GC.cached(img, area, sec, "composed"):
+            if kind == "sky" and not GC.cached(img, area, sec, "sky"):
+                self.say(tr("l.nosky"))
+                return
+            self.show(item)
+        else:
+            self.generate_composed(area, sec, then=lambda: self.show_composed(item))
+
+    def composed_all(self):
+        import gfx_composed as GC
+        if not self.core:
+            messagebox.showinfo(tr("info"), tr("d.openfirst"))
+            return
+        img = self.core.composed_image()
+        if not img:
+            messagebox.showinfo(tr("info"), tr("d.composedimg"))
+            return
+        todo = GC.missing(img)
+        if not todo:
+            self.say(tr("l.composeddone", 0, GC.cache_dir(img)))
+            return
+        if messagebox.askyesno(tr("info"), tr("d.composedall", len(todo), GC.cache_dir(img))):
+            self.generate_composed(None, None)
+
+    def generate_composed(self, area, sec, then=None):
+        """Captures one room (area, sec) or all the missing ones in a worker thread, with progress in the status bar."""
+        import gfx_composed as GC
+        try:
+            import numpy  # noqa: F401
+        except ImportError as e:
+            messagebox.showerror(tr("error"), tr("d.composednp", e))
+            return
+        img, exe = self.core.composed_image(), self.core.composed_exe()
+        res, prog = {}, [0, 1]
+        self.lock(True)
+
+        def job():
+            try:
+                res["r"] = GC.generate(img, exe, area, sec, jobs=1 if area is not None else min(4, os.cpu_count() or 1),
+                                       progress=lambda d, t: prog.__setitem__(slice(0, 2), [d, t]))
+            except Exception:
+                res["err"] = traceback.format_exc()
+            res["done"] = True
+
+        def tick():
+            if not res.get("done"):
+                self.say(tr("l.composing", *prog))
+                self.root.after(300, tick)
+                return
+            self.lock(False)
+            bad = [r for r in res.get("r", []) if r[2] == "fail"]
+            if "err" in res or bad:
+                messagebox.showerror(tr("error"), res["err"] if "err" in res else tr("d.composedfail", len(bad), "\n".join("AREA%02d:%d %s" % (a, s, e) for a, s, _, e in bad[:8])))
+            else:
+                self.say(tr("l.composeddone", len(res.get("r", [])), GC.cache_dir(img)))
+            if then and "err" not in res:
+                then()
+        threading.Thread(target=job, daemon=True).start()
+        tick()
 
     # ---- showing
     def show(self, item, keep=False):
@@ -927,6 +998,8 @@ class App:
 
 
 def main():
+    import multiprocessing
+    multiprocessing.freeze_support()      # the composed room views use worker processes (frozen exe: tools/gfx_composed.py)
     root = tk.Tk()
     App(root, sys.argv[1] if len(sys.argv) > 1 else None)
     root.mainloop()
