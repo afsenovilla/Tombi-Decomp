@@ -17,6 +17,11 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
                                                  world map texture, title font sheet (tools/screens.py)
   OUT_DIR/vram/<AREA|SYSTEM>/listNN/             every load list replayed into VRAM: vram.png (1024 x 512, 16 bit view) and every GRPX page
                                                  (room pages, atlases, ...) with its palette, palette blocks as swatches
+  OUT_DIR/sound/bank/<SNDxxxx>/                  every VAB sample of the 52 .WVD banks as WAV (+ vab.json with the tone table) (tools/audio.py)
+  OUT_DIR/sound/music/*.mid                      the 36 .SEQ sequences as standard MIDI (type 0)
+  OUT_DIR/sound/movie_audio/*.wav                the XA ADPCM audio track of each of the 30 .STR movies (37.8 kHz stereo)
+  OUT_DIR/video/NAME.png, NAME.mp4               poster frame of each movie (pure Python MDEC, tools/str.py); mp4 only if ffmpeg is in PATH
+                                                 (all frames as PNG: python3 tools/str.py frames Tombi.bin NAME OUT_DIR)
 The retail disc is only read.  Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same
 with no Python:
   double-click it (window), or  tombi-assets.exe Tombi.bin OUT_DIR"""
@@ -77,6 +82,13 @@ def extract(img, out, log=print):
     print_("exporting the room models as 3D (glTF .glb, open in Blender / Windows 3D Viewer) ...")
     ng = room.export_glb(os.path.join(out, "rooms3d"), log=lambda m: None)
     print_("done: %d models under %s" % (ng, os.path.join(out, "rooms3d")))
+    print_("sound: VAG samples as WAV, SEQ music as MIDI, movie audio (XA) as WAV (tools/audio.py) ...")
+    import audio
+    audio.export_all(os.path.abspath(img), out, log=print_)
+    print_("video: poster frame of every movie (pure Python MDEC) and, if ffmpeg is in PATH, mp4 (tools/str.py) ...")
+    import importlib
+    strmod = importlib.import_module("str")
+    strmod.export_all(os.path.abspath(img), out, log=print_)
 
 
 def gui():

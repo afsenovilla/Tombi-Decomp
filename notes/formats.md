@@ -14,8 +14,8 @@ measurements and a guess. Hexdumps are the first 64 bytes (offsets in the file).
 | `SYSTEM/*.BIN` (`D?SPSUB`, `G?OVER`, `I?NFO`, `O?PTSUB0`) | 9 x 8 | Open (overlays at `0x800E8028`, like the area ones) | section below |
 | `SYSTEM/DSPCLUT.TIM` | 1 | Open, but trivial: 6 raw CLUTs | section below |
 | `SYSTEM/SUBMAP.WMD` | 1 | Open | section below |
-| `SOUND/*.WVD`, `SOUND/*.SEQ` | 52 + 36 | **Partly** (WVD container read from the loader; SEQ is standard Sony `pQES`) | section below |
-| `MOVIE/*.STR` | 30 | Standard XA/STR, wrap as opaque | section below |
+| `SOUND/*.WVD`, `SOUND/*.SEQ` | 52 + 36 | **Yes**, extracted by `tools/audio.py` (WAV / MIDI) | section below |
+| `MOVIE/*.STR` | 30 | **Yes**, decoded by `tools/str.py` / `tools/audio.py` | section below |
 
 Everything in the disc image is reached through the file table inside `EXE/MAINn.EXE` (`notes/cdfiles.md`), whose entries are
 `LoadRecord.fileId` indices; the `FILE_*` names in `include/tomba24/cdfiles.h` come from the US build and are **wrong for PAL**
@@ -356,7 +356,27 @@ standard Sony `pQES` sequence files (36 files, 9 KB..; `S_AR000.SEQ` = music of 
 0030  37 6a 00 54 73 00 91 33 67 00 93 33 66 00 96 4b
 ```
 
+### Decoding (`tools/audio.py`, verified on all 52 + 36 files)
+* WVD: `u32 bodyTable (12), headerTable, size`. Both tables are `u32` offsets, entry 0 = `4*(N+1)`, entries 1..N = start of bank i-1 relative to the
+  table (body table: sample bodies, the last entry is the end of the bodies = start of the header table; header table: the last header runs to the end of
+  the file). Each header is a `pBAV` VAB: 32 byte header (`ver,id,size,rsvd16,ps,ts,vs,mvol,pan,a1,a2`), 128 program attrs x 16 B, `ps` x 16 tones x 32 B
+  (`prior,mode,vol,pan,center,shift,min,max,vib..,pbmin,pbmax,2 rsvd, adsr1,adsr2,prog,vag,4 rsvd`), then `u16[256]` VAG sizes in 8-byte units. Entry k
+  is the size of VAG k (1-based as stored in `tone.vag`; entry 0 = 0); the VAGs are stored back to back without header and their sizes add up exactly
+  to the body size. 835 samples in 52 banks. Sample rate is not stored (SPU plays root note at 44100 Hz: WAVs are written at 44100, adjust with the tones' `center/shift`).
+* ADPCM block (16 B): `shift = b0 & 15, filter = b0 >> 4` (coefs 0,60/-0,115/-52,98/-55,122/-60 over 64), flags byte (1 = end, 2 = repeat, 4 = loop start), 14 bytes of
+  nibbles, low first. Loop start/end go into a WAV `smpl` chunk.
+* SEQ: `pQES`, BE `version(1)`, `u16 resolution (0x1E0)`, `u24 tempo (us/quarter)`, `u8 num, u8 log2 den`, then plain MIDI events with delta times and running
+  status up to `FF 2F 00`; wrapping them in `MThd`/`MTrk` (type 0) is the whole conversion. All 36 parse to the byte; lengths are whole bars.
+
 ## `MOVIE/*.STR`
+Raw layout (read from the image, `isoext.py` output mixes sizes): per 2352 byte sector subheader `file=1, channel=1`; video sectors are Form 1 (submode
+`0x48`, 2048 B), audio sectors Form 2 (submode `0x64`, coding `0x01` = 4 bit stereo 37800 Hz), 7 video : 1 audio. Video payload = 32 byte header + 2016 B:
+`60 01 01 80`, `u16 chunk, u16 nchunks, u32 frame, u32 demuxsize, u16 w, u16 h`, then `u16 nwords, 0x3800, u16 qscale, u16 version` (the BS header also repeats
+at 0x20). Version 2 (e.g. LOGO, BOY) and 3 (100_?, ...) both occur; movies are 320x224, 110..1415 frames. Bitstream = LE 16 bit words read MSB first; 16x16
+macroblocks column by column, blocks Cr, Cb, Y0..Y3; v2 block = 10 bit signed DC (coefficient 2*DC) , v3 = DC difference (MPEG-1 DC size VLC, Y shared) from 128,
+then MPEG-1 intra run/level VLC (escape `000001` + 6 bit run + 10 bit signed level, EOB `10`), dequant `level*qscale*matrix>>3` (escape: `(x-1)|1`), 8x8 IDCT, +128,
+YCbCr -> RGB (1.402 / 0.3437 / 0.7143 / 1.772). The pure Python decoder matches ffmpeg's mdec at 49 dB PSNR (v2 and v3). XA ADPCM audio decoded by
+`audio.py` is bit-identical to ffmpeg's `adpcm_xa` (all 30 movies, 717 s in total, none silent). Old summary:
 Standard PlayStation XA/STR video (30 files, 2.3 MB..29.5 MB; `100_?` per language). The extracted files hold the 2324-byte form 2
 sector payloads, so they start at the video frame header: `60 01 01 80` (`0x0160`, `0x8001` = STR video sector), chunk 0 of 9, frame 1,
 demux size `0x09E4`, **320 x 224**, `0x3800` = BS v2 frames (MDEC). In the file table the size is stored as sectors x 2336
