@@ -27,6 +27,18 @@ Font glyph bitmaps plus the dialogue/menu text of one area and language. Fully h
 `dialogues.yaml` + glyph PNGs, encode back, 369/369 byte-identical). See `notes/assets_tombatools.md` for the
 Spanish glyph additions (`fonts/es`). Loaded with `LOAD_KIND_WFM3`.
 
+### WFM3 in pure Python (`tools/wfm_py.py`, 369/369 byte-identical, no Go)
+Header 144 bytes (`WFM3`, u32 pad, u32 dialogue-table offset, u16 n_dialogues, u16 n_glyphs, 128 reserved), `u16` glyph offsets, glyphs
+`u16 w(VRAM words), u16 h, u16 advance (=4w in all 36,046 glyphs), u16 handakuten` + 4bpp pixels (low nibble first), then `u16` dialogue offsets
+(relative to the table) and u16 token streams ended by FFFE/FFFF (a few files end unterminated). Tokens: `0x8000+n` glyph n (engine: low 12 bits = id,
+top nibble flags: 8 normal, C corner icon without advance, E no advance; `C04D`/`C052` are the corner "next page" arrows);
+FFF2 pose n, FFF3 halt, FFF5 choice, FFF6 move dx dy, FFF7 color n, FFF8 voice tone tail, FFF9 delay n, FFFA box w h, FFFB clear (page break), FFFC wait,
+FFFD newline. Glyph tables are per file (only the glyphs that file uses, 71-148 for the S files); characters are not stored, the bitmaps are identified
+with `tools/wfm_charmap.json` (250 bitmap hashes -> 101 characters; no `ü : % *` exist in the PAL fonts). The two 8 px `Z` bitmaps: the second one
+stays `{G:n}`. Box metrics measured on 5,802 boxed dialogues: width = widest line (sum of advances) + 16 (88 % exact, the rest has trailing spaces),
+height = 16 + 13 * lines, cursor starts at (8, 6), 128 glyphs per message slot (`MESSAGE_GLYPHS[][128]`). WFM files are plain files of the disc (no
+container): a changed size only needs `mkdisc.py --relayout`. `tools/text_editor.py` / `dist/windows/tombi-text.exe` build on this.
+
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see
 `notes/assets_tombatools.md` "GAM: byte-exact repack"). The game decompresses it with `lzDecompress` for load records of type

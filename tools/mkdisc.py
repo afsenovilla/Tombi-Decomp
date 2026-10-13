@@ -20,7 +20,7 @@ the tables are rewritten from the new layout (tools/cdfiles.py) and the image is
                   differ (if any) and exits 1 if the image is not identical
 
 Tools: mkpsxiso and dumpsxiso 2.30 (https://github.com/Lameguy64/mkpsxiso, build it with cmake; the git submodule
-of psx_tomba is not needed). Looked up in $MKPSXISO_DIR, then /opt/psyq/mkpsxiso/build, then PATH.
+of psx_tomba is not needed). Looked up in $MKPSXISO_DIR, the folder bundled in tombi-text.exe, tools/bin, /opt/psyq/mkpsxiso/build, then PATH.
 """
 import argparse, hashlib, os, shutil, subprocess, sys, tempfile
 import xml.etree.ElementTree as ET
@@ -36,9 +36,13 @@ SECTOR = 2352
 
 
 def tool(name):
-    for d in (os.environ.get("MKPSXISO_DIR"), "/opt/psyq/mkpsxiso/build"):
-        if d and os.access(os.path.join(d, name), os.X_OK):
-            return os.path.join(d, name)
+    """mkpsxiso/dumpsxiso: $MKPSXISO_DIR, the copy bundled in the Windows exe (tools/text_editor.py), /opt/psyq, PATH."""
+    exe = name + (".exe" if os.name == "nt" else "")
+    here = os.path.dirname(os.path.abspath(__file__))
+    for d in (os.environ.get("MKPSXISO_DIR"), getattr(sys, "_MEIPASS", None), os.path.join(here, "bin"),
+              "/opt/psyq/mkpsxiso/build"):
+        if d and os.path.isfile(os.path.join(d, exe)) and os.access(os.path.join(d, exe), os.X_OK):
+            return os.path.join(d, exe)
     p = shutil.which(name)
     if p:
         return p
@@ -46,7 +50,8 @@ def tool(name):
 
 
 def run(cmd, quiet=True):
-    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    r = subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     if r.returncode:
         sys.stderr.write(r.stdout)
         sys.exit("failed: %s" % " ".join(cmd))
