@@ -1,12 +1,12 @@
 // FUNC 80114890 64 X000
 // MATCHING 80114890 64
 // Game has addiu sp first, then lui/lhu; ours schedules lhu before the sp adjust.
-extern unsigned short D_8009C960;
+#include "gamestate.h"
 extern void fa(void);
 extern void fb(void);
 
 void FUN_80114890(void)
 {
-    if (D_8009C960 == 1) fa();
+    if (GAME.selectedArea == 1) fa();
     else fb();
 }

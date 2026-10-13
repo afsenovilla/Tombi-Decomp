@@ -1,9 +1,8 @@
 // FUNC 80046d58 1836 MAIN0
 // MATCHING 80046d58 1836
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C960;
-extern unsigned char D_8009D2C3;
 extern short D_1F80024C;
 extern TObj **D_1F800224;
 extern short D_1F80019E;
@@ -77,7 +76,7 @@ void func_80046D58(TObj *o)
         case 2: func_80124F3C(o, e); break;
         case 3: func_80043EBC(o, e); break;
         case 4:
-            if (D_8009C960 == 0)
+            if (GAME.selectedArea == 0)
                 func_80124FA4(o, e);
             else
                 func_8011FE08(o, e);
@@ -85,7 +84,7 @@ void func_80046D58(TObj *o)
         case 5: func_80125044(o, e); break;
         case 6: func_801252B8(o, e); break;
         case 7:
-            switch (D_8009C960) {
+            switch (GAME.selectedArea) {
             case 0: func_801249E0(o, e); break;
             case 3: func_8011FBB8(o, e); break;
             case 4: func_8011EEC0(o, e); break;
@@ -150,7 +149,7 @@ void func_80046D58(TObj *o)
         case 0x45:
             switch (e->b0c) {
             case 3:
-                if (D_8009C960 == 1 || (D_8009D2C3 & 0x40))
+                if (GAME.selectedArea == 1 || (GAME.purifiedAreas & 0x40))
                     func_80045BAC(o, e);
                 break;
             case 4:

@@ -2,17 +2,10 @@
 // MATCHING 8002a4d0 1244
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 
 extern unsigned char D_8009C938;
-extern unsigned char D_8009CDA2;
 extern unsigned char D_8009C93C;
-extern unsigned char D_8009C975;
-extern unsigned short D_8009C960;
-extern unsigned short D_8009C962;
-extern unsigned short D_8009C982;
-extern unsigned short D_8009CD94[];
-extern unsigned short D_8009CD96;
-extern unsigned short D_8009CDA0;
 extern int *D_80079A48[];
 extern short D_1F8000E6;
 extern TObj *TASK_C;
@@ -32,7 +25,7 @@ void FUN_8002a4d0(TObj *o)
     unsigned char c;
 
     if (D_8009C938) {
-        D_8009CDA2 = 0;
+        GAME.disableSelectMenu = 0;
         func_80029CB4();
         return;
     }
@@ -84,35 +77,35 @@ void FUN_8002a4d0(TObj *o)
         done = done & r1;
         goto tail;
     case 1:
-        S32(o, 0x68) = (int)((char *)D_80079A48[D_8009C960][D_8009C962] + D_8009C982 * 8);
+        S32(o, 0x68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
         o->substep = 0;
         o->state++;
         S16(o, 0x4c) = *(unsigned short *)S32(o, 0x68);
         S16(o, 0x50) = ((unsigned short *)S32(o, 0x68))[1];
-        D_8009CDA2 = 1;
+        GAME.disableSelectMenu = 1;
         c = ((unsigned char *)S32(o, 0x68))[4];
         U8(o, 0x3f) = c;
         if (c == 2) {
-            D_8009CDA2 = 0;
+            GAME.disableSelectMenu = 0;
             o->state = 3;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
         } else if (c == 3) {
-            D_8009CDA2 = 0;
+            GAME.disableSelectMenu = 0;
             o->state = 4;
         }
-        m = D_8009CD94;
+        m = ((unsigned short*)&GAME.nextArea);
         c = ((unsigned char *)S32(o, 0x68))[5];
         m[0] = c;
-        D_8009CD96 = ((unsigned char *)S32(o, 0x68))[6];
-        D_8009CDA0 = ((unsigned char *)S32(o, 0x68))[7];
-        if (c != D_8009C960)
+        GAME.nextSection = ((unsigned char *)S32(o, 0x68))[6];
+        GAME.nextSpawnPoint = ((unsigned char *)S32(o, 0x68))[7];
+        if (c != GAME.selectedArea)
             FUN_8001f110(1);
-        switch (D_8009C960) {
+        switch (GAME.selectedArea) {
         case 1:
-            switch (D_8009C962) {
+            switch (GAME.selectedSection) {
             case 2:
-                if (D_8009CD96 == 4) {
+                if (GAME.nextSection == 4) {
                     s->visible = 1;
                     s->b04 = 5;
                     s->step = 10;
@@ -127,7 +120,7 @@ void FUN_8002a4d0(TObj *o)
                 s->state = 0;
                 return;
             case 4:
-                if (D_8009CD96 == 2)
+                if (GAME.nextSection == 2)
                     return;
                 s->b04 = 5;
                 s->visible = 0;
@@ -142,7 +135,7 @@ void FUN_8002a4d0(TObj *o)
                 return;
             }
         case 9:
-            if (D_8009C962 == 0) {
+            if (GAME.selectedSection == 0) {
                 if (m[0] == 1)
                     return;
                 s->b04 = 5;
@@ -157,7 +150,7 @@ void FUN_8002a4d0(TObj *o)
             s->state = 0;
             return;
         case 3:
-            if (D_8009C962 == 0 || D_8009C962 == 4) {
+            if (GAME.selectedSection == 0 || GAME.selectedSection == 4) {
                 if (m[0] == 9)
                     return;
                 s->b04 = 5;
@@ -205,7 +198,7 @@ void FUN_8002a4d0(TObj *o)
             o->state++;
         break;
     case 3:
-        if (D_8009C975 != 1)
+        if (GAME.fadeScreenControl != 1)
             break;
     case 4:
         TASK_C->w4c = 7;

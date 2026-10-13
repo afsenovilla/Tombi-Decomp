@@ -1,8 +1,8 @@
 // FUNC 80049524 824 MAIN0
 // MATCHING 80049524 824
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C960;
 extern unsigned short D_1F800248;
 extern short D_1F80024C;
 extern TObj **D_1F800228;
@@ -62,7 +62,7 @@ void func_80049524(void)
             case 1: func_80126B50(o, e); break;
             case 2: func_80126C60(o, e); break;
             case 4:
-                switch (D_8009C960) {
+                switch (GAME.selectedArea) {
                 case 0: func_80126D04(o, e); break;
                 case 3: func_8012038C(o, e); break;
                 }

@@ -1,11 +1,11 @@
 // FUNC 8003e960 848 MAIN0
 // MATCHING 8003e960 848
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short h; short v; } VT;
 extern VT D_8007B374[];
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
-extern unsigned short D_8009C962;
 extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
@@ -57,7 +57,7 @@ void func_8003E960(TObj *o)
                     }
                 }
             }
-            if (o->subtype == 0x94 && D_8009C962 == 3 && o->y.p.whole >= -0x3bf) {
+            if (o->subtype == 0x94 && GAME.selectedSection == 3 && o->y.p.whole >= -0x3bf) {
                 o->y.p.whole = -0x3c0;
                 o->active = 2;
                 o->step++;

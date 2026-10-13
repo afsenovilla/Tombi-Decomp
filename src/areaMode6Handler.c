@@ -1,11 +1,10 @@
 // FUNC 8001baf4 484 MAIN0
 // MATCHING 8001baf4 484
-extern unsigned char D_8009C967;
+#include "gamestate.h"
 extern unsigned char D_800B1410;
 extern volatile unsigned short D_8009D674;
 
 extern unsigned short D_8009D670;
-extern int D_8009C968[];
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 void InitSubsystems(void);
@@ -35,7 +34,7 @@ void cutsceneAreaHandler(void)
         FUN_800263bc();
         D_800B1410 = 0;
         *(unsigned char *)0x1F8001CF = 1;
-        if (D_8009C967 != 1) startAreaBgm();
+        if (GAME.keepBgm != 1) startAreaBgm();
         (*(unsigned short *)(G + 0x4e))++;
         e = allocObjectLayer7();
         if (e != 0) {
@@ -52,7 +51,7 @@ void cutsceneAreaHandler(void)
         *(volatile unsigned short *)&D_8009D670 = t;
         break;
     case 1:
-        D_8009C968[0]++;
+        ((int*)&GAME.totalTimePlayed)[0]++;
         areaMode6Tick();
         if (*(unsigned char *)0x1F8001C2 != 0) {
             k = &D_8009D670;

@@ -1,10 +1,9 @@
 // FUNC 80039580 1092 MAIN0
 // MATCHING 80039580 1092
+#include "gamestate.h"
 typedef struct { char p0[0x84]; unsigned char *p84; unsigned char b88; char p89; unsigned short w8a; } S;
 extern int D_8009D69C;
 extern unsigned short D_800A603C;
-extern unsigned short D_8009C960;
-extern unsigned short D_8009C962;
 extern S D_8009F840;
 extern S *SCRIPT_CTX;
 extern unsigned char *SCRIPT_CODE;
@@ -43,27 +42,27 @@ void func_80039580(void)
 {
     if (D_8009D69C == 0) return;
     if (D_800A603C == 0x505) return;
-    switch (D_8009C960) {
+    switch (GAME.selectedArea) {
     case 0:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0 ... 2:
             D_8009D4F0 = run();
         }
         break;
     case 1:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0 ... 4:
             D_8009D4F0 = run();
         }
         break;
     case 2:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0 ... 2:
             D_8009D4F0 = run();
         }
         break;
     case 0x13:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0 ... 1:
             D_8009D4F0 = run();
         }

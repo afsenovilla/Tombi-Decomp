@@ -6,10 +6,10 @@
    `two` multi-set so loop.c does not combine the stores' constant 2 with the compare's and hoist it (flow deletes
    the dead store). Body of case 32 copied from the matched twin func_80048C24. */
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern short D_1F80019E;
 extern unsigned char D_8007B63C[];
-extern unsigned short D_8009C960;
 void func_800489D8(TObj *o);
 void func_80126B50(TObj *o);
 void func_80126C60(TObj *o);
@@ -58,7 +58,7 @@ void func_800491F0(void)
             case 1: func_80126B50(o); break;
             case 2: func_80126C60(o); break;
             case 4:
-                switch (D_8009C960) {
+                switch (GAME.selectedArea) {
                 case 0: func_80126CA4(o); break;
                 case 3: func_8012032C(o); break;
                 }

@@ -1,8 +1,7 @@
 // FUNC 800498f4 944 MAIN0
 // MATCHING 800498f4 944
+#include "gamestate.h"
 typedef struct S { char p[0xc]; unsigned char b0c; } S;
-extern unsigned short D_8009C960;
-extern unsigned short D_8009C962;
 extern void func_80118534(S *), func_8012B454(S *), func_80129BE4(S *), func_80134E60(S *);
 extern void func_8012BEDC(S *), func_8012C858(S *), func_8012A890(S *), func_80129A9C(S *);
 extern void func_80129524(S *), func_8012FB4C(S *), func_80130320(S *), func_8012A8B8(S *);
@@ -12,9 +11,9 @@ extern void func_80118AE8(S *), func_801184FC(S *), func_80118014(S *), func_801
 extern void func_8011A32C(S *);
 void func_800498F4(S *o)
 {
-    switch (D_8009C960) {
+    switch (GAME.selectedArea) {
     case 2:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 2:
         case 3:
             break;
@@ -24,7 +23,7 @@ void func_800498F4(S *o)
         }
         break;
     case 3:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 4:
             if (o->b0c == 0x28)
@@ -59,7 +58,7 @@ void func_800498F4(S *o)
         break;
     case 4:
     case 12:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 7: func_80129A9C(o); break;
         case 8: func_80129524(o); break;
         case 9: func_8012FB4C(o); break;
@@ -75,7 +74,7 @@ void func_800498F4(S *o)
         func_801294B4(o);
         break;
     case 10:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 4:
             switch (o->b0c) {
@@ -93,7 +92,7 @@ void func_800498F4(S *o)
         }
         break;
     case 11:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
         case 3:
             func_80119940(o);
@@ -107,13 +106,13 @@ void func_800498F4(S *o)
         }
         break;
     case 16:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 5: func_80117F60(o); break;
         case 6: func_80118AE8(o); break;
         }
         break;
     case 17:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0: case 1: case 3: case 4: case 5: case 10:
             func_801184FC(o);
             break;
@@ -123,7 +122,7 @@ void func_800498F4(S *o)
         }
         break;
     case 18:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1: func_801170F4(o); break;
         case 2: func_8011A32C(o); break;
         case -1: break;

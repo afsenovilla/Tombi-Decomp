@@ -4,8 +4,8 @@
    The two block-local `p` copies add block notes (luids) so the constant 2's lifetime passes loop.c's move threshold and it gets hoisted like in the game.
    Debt pass: tried `two` var with one/two sets, goto/do/for loops, r[i] indexing, orders; -dg: r 7 refs/267 vs const 2 7 refs/524 (doubled), needs ~3 more weighted refs on 2. */
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char D_8009C93A;
-extern unsigned short D_8009C960;
 extern short D_1F800246;
 extern unsigned char **D_1F80021C;
 extern short D_1F80019E;
@@ -84,7 +84,7 @@ void FUN_80047484(TObj *o)
                 func_80125F30(o, q);
                 break;
             case 2:
-                switch (D_8009C960) {
+                switch (GAME.selectedArea) {
                 case 0: func_801257F4(o, q); break;
                 case 1: func_801240A8(o, q); break;
                 case 3: func_8011F8CC(o, q); break;
@@ -115,7 +115,7 @@ void FUN_80047484(TObj *o)
                 func_80126240(o, q);
                 break;
             case 7:
-                switch (D_8009C960) {
+                switch (GAME.selectedArea) {
                 case 0: func_8012555C(o, q); break;
                 case 4: func_8011F134(o, q); break;
                 case 10: func_8012095C(o, q); break;
@@ -125,7 +125,7 @@ void FUN_80047484(TObj *o)
                 func_80126464(o, q);
                 break;
             case 0x1f:
-                if (D_8009C960 == 1) func_80124410(o, q);
+                if (GAME.selectedArea == 1) func_80124410(o, q);
                 else func_8011DE58(o, q);
                 break;
             case 9:

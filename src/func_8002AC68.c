@@ -1,5 +1,6 @@
 // FUNC 8002ac68 480 MAIN0
 // MATCHING 8002ac68 480
+#include "gamestate.h"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
     int d8;
@@ -16,7 +17,6 @@ typedef struct {
 } S;
 extern unsigned short D_800A6066;
 extern short DAT_1f800286;
-extern int D_8009C960;
 extern unsigned short D_8009C960_u;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
@@ -57,10 +57,10 @@ void func_8002AC68(S *o)
         DAT_1f800286 = 0;
         o->w58 = w;
         o->b4++;
-        if (D_8009C960 == 6) {
+        if ((*(int*)&GAME.selectedArea) == 6) {
             o->b4 = 2;
             SetGeomScreen(0x220);
-        } else if (D_8009C960 == 0x60009) {
+        } else if ((*(int*)&GAME.selectedArea) == 0x60009) {
             o->b4 = 2;
             D_8009E375 = 0;
             D_8009E376 = 0;
