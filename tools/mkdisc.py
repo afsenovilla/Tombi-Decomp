@@ -7,11 +7,14 @@ so that every ordinary file (type="data") comes from game/disc/fs (so edited fil
 `*.STR` files (type="mixed": XA/STR sectors with their own subheaders, form 1 and form 2 mixed) come from the raw
 dump, because game/disc/fs only keeps the user data of those sectors (see tools/isoext.py) and cannot be turned
 back into sectors. If a file in fs changes size, mkpsxiso moves the following LBAs by itself (file order is
-kept); the file table inside the executable/overlays that stores LBAs is NOT updated (see `fla recalc` in
-notes/assets_tombatools.md).
+kept). The game reads files by the LBA/size table inside EXE/MAIN0..8.EXE (notes/cdfiles.md), so with --relayout
+the tables are rewritten from the new layout (tools/cdfiles.py) and the image is built again.
 
   tools/mkdisc.py [build] [-o OUT.bin] [--fs DIR] [--disc ORIGINAL.bin] [--work DIR]
                   writes OUT.bin and OUT.cue (default build/mkdisc/Tombi.bin)
+  tools/mkdisc.py build --relayout
+                  after building, reads the LBAs/sizes of the new image, patches the file tables of EXE/MAIN*.EXE in --fs (IN PLACE, only
+                  when something changed; names come from the executables of the original disc) and builds again; also writes OUT.layout.json
   tools/mkdisc.py --check
                   builds into /tmp (dump cache in /tmp/mkdisc_work), compares size and SHA-1 with the original image, lists the sectors that
                   differ (if any) and exits 1 if the image is not identical
@@ -21,6 +24,9 @@ of psx_tomba is not needed). Looked up in $MKPSXISO_DIR, then /opt/psyq/mkpsxiso
 """
 import argparse, hashlib, os, shutil, subprocess, sys, tempfile
 import xml.etree.ElementTree as ET
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cdfiles
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FS = os.path.join(ROOT, "game", "disc", "fs")
@@ -104,12 +110,34 @@ def build(a):
     project = os.path.join(work, "project.xml")
     st = make_project(xml, dump, os.path.abspath(a.fs), out_bin, out_cue, project)
     run([tool("mkpsxiso"), "-y", "-q", "-o", out_bin, "-c", out_cue, project])
+    if a.relayout:
+        if relayout(a, dump, out_bin):
+            run([tool("mkpsxiso"), "-y", "-q", "-o", out_bin, "-c", out_cue, project])
+            relayout(a, dump, out_bin)   # second pass: layout must not move (EXE sizes are fixed); 0 changes expected
     # mkpsxiso writes the .bin name it was given in the cue
     print("built %s (%d bytes, %d sectors); %d files from %s, %d from the raw dump"
           % (out_bin, os.path.getsize(out_bin), os.path.getsize(out_bin) // SECTOR, st["fs"], a.fs, st["dump"]))
     for m in st["missing"]:
         print("warning: %s not in %s, taken from the dump" % (m, a.fs), file=sys.stderr)
     return out_bin
+
+
+def relayout(a, dump, out_bin):
+    """Rewrites the file tables of fs/EXE/MAIN*.EXE from the layout of out_bin; True if an executable changed."""
+    import glob, json
+    ref = cdfiles.layout_from_image(a.disc)
+    lay = cdfiles.layout_from_image(out_bin)
+    changed = 0
+    for exe in sorted(glob.glob(os.path.join(a.fs, "EXE", "MAIN*.EXE"))):
+        pristine = os.path.join(dump, "EXE", os.path.basename(exe))
+        cur = open(exe, "rb").read()
+        new, n = cdfiles.update_bytes(cur, open(pristine, "rb").read(), ref, lay)
+        if n:
+            open(exe, "wb").write(new)
+            changed += 1
+        print("relayout %s: %d table entries changed" % (os.path.relpath(exe, a.fs), n))
+    json.dump({k: list(v) for k, v in lay.items()}, open(os.path.splitext(out_bin)[0] + ".layout.json", "w"), indent=0)
+    return changed
 
 
 def sha1(path):
@@ -171,12 +199,14 @@ def main():
         s.add_argument("--work", default=None, help="cache for the dump of the original image (default build/mkdisc; /tmp/mkdisc_work for --check)")
         if name == "build":
             s.add_argument("-o", "--out", default=os.path.join(WORK, "Tombi.bin"))
+            s.add_argument("--relayout", action="store_true", help="patch the file tables of fs/EXE/MAIN*.EXE with the new LBAs/sizes and rebuild")
     a = p.parse_args(argv)
     if a.work is None:
         a.work = "/tmp/mkdisc_work" if a.cmd == "check" else WORK
     for path in (a.disc, a.fs):
         if not os.path.exists(path):
             sys.exit("%s not found" % path)
+    a.relayout = getattr(a, "relayout", False)
     return check(a) if a.cmd == "check" else (build(a) and 0)
 
 

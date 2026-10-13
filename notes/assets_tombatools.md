@@ -150,9 +150,20 @@ explicit `source`:
   movies would need a new extraction in raw form (`dumpsxiso`), not a change of `mkdisc.py`.
 The cache (`build/mkdisc/`, 0.9 GB: the dump) is gitignored; `--check` uses `/tmp/mkdisc_work`. Tested with a repacked
 `AREA00/A001.GAM` (5 bytes longer): the image builds, `dumpsxiso` extracts the new file back identically, following LBAs move.
-What it does not do: when a file changes size the LBAs stored inside the game (the file table in the executable and the
-overlays, see `tools/cdsplit.py` / `FILE_TABLE` in psx_tomba, and `fla recalc` of TombaTools) are not rewritten; that is
-needed before such an image boots, and `fla recalc` has still not been tested.
+Changing a file's size: see "Rebuilding a modified disc" below (`--relayout`).
+
+## Rebuilding a modified disc (file table, `tools/cdfiles.py`)
+The game does not read the ISO directory: each `EXE/MAINn.EXE` holds a table of 8-byte entries (BCD `CdlLOC` of LBA+150, u32 size)
+at file offset `0x6E6F0` (format, order and findings in `notes/cdfiles.md`). `SCES_013.31` has none (it opens `EXE/MAINn.EXE` by name).
+```
+tools/mkdisc.py build --relayout [--fs DIR] [-o OUT.bin]   # build, read the new LBAs, patch fs/EXE/MAIN*.EXE (in place), build again
+tools/cdfiles.py check OUT.bin DIR/EXE/MAIN*.EXE --names game/disc/fs/EXE   # every entry equals the image layout?
+tools/cdfiles.py dump game/disc/fs/EXE/MAIN0.EXE ; tools/cdfiles.py update EXE LAYOUT [-o OUT]
+```
+`--relayout` on the unmodified tree changes nothing and the image stays bit-exact. Tested with a GAM enlarged by 5000 bytes (copy of
+the tree in /tmp): 2281 of 2287 files move, and all 9 tables match the new layout (`check`: 1119 entries x 8 executables + 1116 for MAIN5).
+Not tested on hardware or in an emulator (none available here), and `fla recalc` of TombaTools was not used. Other places that may hold
+LBAs (overlays, `SYS/LD*.BIN`) were not found: see the open points in `notes/cdfiles.md`.
 
 # Original evaluation of upstream (before the fork)
 
