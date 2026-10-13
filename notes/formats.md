@@ -389,3 +389,16 @@ textured polygons that sample the 4 bpp / 8 bpp room pages (`Bnnn`) and carry th
   N+1 offsets, so with N = 1 (small models: AREA04/12 D4xx..DIxx, AREA13 D102, some AREA14) it took the first sector's `u32 count` as the end
   offset, and for the last sector of larger models (AREA03 D105 etc.) it cut the sector short. The small models are single objects (plants,
   props), not room slices.
+
+### Far background (sky / distant scenery): investigated, NOT resolved
+Findings (no tool written; nothing extracted):
+- Room load lists hold only: `Bnnn` GRPX pages + `CLUTnn`, the kind `0x50` WMD file and its sub-pieces. The decompressed `Dxxx.GAM` is the WMD (`arg` bytes)
+  followed by the sub-pieces named `SYS/LD0SYS.BIN` (type -1): `0x51` = table of 79 small object models (rgb `3c` flat polys, not a background),
+  `0x40..0x45` ("FOUR", 2088/4172 B records), `0x80..0x82` APD, `0x70` WHM. None looked like a background image or layer.
+- The `Bnnn` pages with no WMD polygon on them (AREA00 `B000`, AREA03 `B000..B002`, AREA10 `B000/B001`...) are 8 bpp enemy/NPC sprite sheets
+  (viewed with the room CLUT, rows of animation frames), NOT the sky. Pages shared with WMD polygons are the 4 bpp room textures.
+- The far scenery art does exist in VRAM: in AREA00 the area page `A002` (x 576.., y 0..255, 4 bpp) holds cloud banks, mountain/horizon strips and
+  gradient bands next to effect sprites, i.e. the sky is composed of sprite/tile parts. The placement data (which strips, scroll factors, sky fill colour)
+  was not found: `src/` has no matched background drawing code (only `scriptOpLoadBackground`, which stores a value and calls `func_800EBD5C`).
+- Next step: trace `func_800EBD5C` / the overlay (`X0nn.BIN`) draw routine that links POLY_FT4/SPRT before the WMD in the OT, or break on the
+  GPU primitives in an emulator trace, to get the strip table + CLUT rows; then composite behind `room.py` output.
