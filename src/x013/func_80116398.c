@@ -6,7 +6,7 @@ typedef struct {
     unsigned char pad[0xf2 - 0xc0];
     short wf2;
 } PL;
-extern PL D_800A6038;
+extern PL PLAYER;
 extern unsigned char D_8009CFF9, D_8009C975;
 extern signed char D_8009D2B0;
 extern int FUN_800202b4(TObj *);
@@ -20,7 +20,7 @@ void func_80116398(TObj *o)
     PL *p;
 
     FUN_800202b4(o);
-    p = &D_800A6038;
+    p = &PLAYER;
     switch (o->state) {
     case 0:
         if ((*(int *)&p->t.b04 & 0xffffff) != 0x30405) break;

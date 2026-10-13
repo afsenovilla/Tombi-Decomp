@@ -2,7 +2,7 @@
 // MATCHING 80037c80 320
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p0[2]; unsigned char type; char p3[0x24 - 3]; unsigned short *anim; } O;
-extern int DAT_1f800348, DAT_1f800350;
+extern int WPP_DATA, DAT_1f800350;
 extern unsigned short DAT_1f8001f4;
 extern short DAT_1f8001f4s;
 extern char *DAT_8009c330;
@@ -15,7 +15,7 @@ void FUN_80037c80(O *o)
     RECT r;
     switch (o->type) {
     case 0:
-        unpackSpriteFrame(DAT_1f800348, *o->anim, (char *)0x801fb000, 0);
+        unpackSpriteFrame(WPP_DATA, *o->anim, (char *)0x801fb000, 0);
         r.y = 2;
         r.w = 0x10;
         r.h = 0x50;

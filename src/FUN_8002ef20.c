@@ -2,18 +2,18 @@
 // MATCHING 8002ef20 320
 typedef struct T { unsigned short w; short p0; short i; short p1; int *a; } T;
 extern T DAT_80079d50[];
-extern int DAT_1f8002c8[];
+extern int SPR_DATA[];
 extern void FUN_8001fe6c(void *);
 
 void FUN_8002ef20(unsigned char *o)
 {
     if (o[3] != 9) {
         *(unsigned short *)(o + 0x1e) = DAT_80079d50[o[3]].w;
-        *(int *)(o + 0x3c) = DAT_1f8002c8[DAT_80079d50[o[3]].i];
+        *(int *)(o + 0x3c) = SPR_DATA[DAT_80079d50[o[3]].i];
         *(int *)(o + 0x24) = DAT_80079d50[o[3]].a[o[0xc]];
     } else {
         *(unsigned short *)(o + 0x1e) = DAT_80079d50[0].w;
-        *(int *)(o + 0x3c) = DAT_1f8002c8[DAT_80079d50[0].i];
+        *(int *)(o + 0x3c) = SPR_DATA[DAT_80079d50[0].i];
         *(int *)(o + 0x24) = *DAT_80079d50[0].a;
     }
     FUN_8001fe6c(o);

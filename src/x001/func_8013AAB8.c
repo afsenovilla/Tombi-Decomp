@@ -11,7 +11,7 @@ typedef struct {
 } O;
 extern unsigned char D_8009CEDF[], D_8009CEDE, D_8009CE59;
 extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[];
-extern unsigned char D_800A6038, D_800A603C[], D_800A603D[], D_800A603E[];
+extern unsigned char PLAYER, D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A6066;
 extern unsigned char D_800A60A1;
 extern unsigned short D_800A604E;
@@ -36,7 +36,7 @@ void func_8013AAB8(O *o)
         if (!D_800A60A1) break;
         if ((unsigned short)(D_800A604E + 0x6d6) >= 6) break;
         if (D_8009CEDF[0] == 0) {
-            D_800A6038 = 1;
+            PLAYER = 1;
             D_800A6066 = 1;
             D_800A603C[0] = 5;
             D_800A603D[0] = 0;
@@ -52,7 +52,7 @@ void func_8013AAB8(O *o)
             D_8009CEDF[0] = 1;
             o->step++;
         } else if (D_8009CEDF[0] == 0xfe) {
-            D_800A6038 = 1;
+            PLAYER = 1;
             D_800A6066 = 1;
             D_800A603C[0] = 5;
             D_800A603D[0] = 0;

@@ -1,14 +1,14 @@
 // FUNC 8001c634 84 MAIN0
 // MATCHING 8001c634 84
 typedef struct Th { char pad[0x4a]; short a; short b; } Th;
-extern Th *DAT_1f8001d4;
+extern Th *TASK_C;
 extern char DAT_1f8001cf;
 extern char DAT_8009e375, DAT_8009e376, DAT_8009e377;
 extern char DAT_8009f085, DAT_8009f086, DAT_8009f087;
 
 void FUN_8001c634(void)
 {
-    int t = (int)DAT_1f8001d4;
+    int t = (int)TASK_C;
     DAT_1f8001cf = 1;
     DAT_8009e375 = 0;
     DAT_8009e376 = 0;

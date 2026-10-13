@@ -5,13 +5,13 @@
 
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C942, D_8009D078, D_8009CF1C, D_8009C975, D_8009C93C;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern int D_8009C984[];
 extern short D_1F8000F2, D_1F80016E;
-extern SC *D_1F8001D4;
+extern SC *TASK_C;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -36,12 +36,12 @@ void func_801280FC(TObj *o)
     case 1:
         if (D_1F80016E < -0xe9) break;
         D_8009C942 = 1;
-        D_800A6038.active = 5;
+        PLAYER.active = 5;
         D_800A603C = 5;
         D_800A603D = 0x64;
         D_800A603E = 0;
-        FUN_800eea7c(&D_800A6038, 0x1e, 0);
-        D_800A6038.y.p.whole = -0xd2;
+        FUN_800eea7c(&PLAYER, 0x1e, 0);
+        PLAYER.y.p.whole = -0xd2;
         o->d34 = 0xff2e0000;
         U8(o, 0xa7) = 0;
         o->timer = 0x3c;
@@ -69,12 +69,12 @@ void func_801280FC(TObj *o)
         break;
     case 5:
         func_801271D8(o, 1);
-        FUN_800eea7c(&D_800A6038, 0x47, 0);
+        FUN_800eea7c(&PLAYER, 0x47, 0);
         U8(o, 0xa7) = 0;
-        D_800A6038.y.p.whole = -0xe2;
-        D_800A6038.animFrame = 0;
-        o->d34 = D_800A6038.y.raw;
-        o->d30 = D_800A6038.h->p.whole;
+        PLAYER.y.p.whole = -0xe2;
+        PLAYER.animFrame = 0;
+        o->d34 = PLAYER.y.raw;
+        o->d30 = PLAYER.h->p.whole;
         o->state++;
         o->d90 = showMessageBoxDirect(2, 0x1a, &o->a);
         break;
@@ -149,8 +149,8 @@ void func_801280FC(TObj *o)
     case 15:
         func_801271D8(o, 4);
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     }

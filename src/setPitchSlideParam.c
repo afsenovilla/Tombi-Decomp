@@ -1,31 +1,31 @@
 // FUNC 8001e368 200 MAIN0
 // MATCHING 8001e368 200
-extern short DAT_8009bd38;
-extern short DAT_8009bd34;
-extern short DAT_8009bd30;
-extern short DAT_8009bd3c;
-extern short DAT_8009bd2c;
-extern short DAT_8009bd40;
-extern int DAT_8009bd08;
+extern short PITCH_SLIDE_STEP;
+extern short PITCH_SLIDE_INTERVAL;
+extern short PITCH_SLIDE_TIMER;
+extern short PITCH_SLIDE_DURATION;
+extern short PITCH_SLIDE_ACTIVE;
+extern short PITCH_SLIDE_VOICE;
+extern int LAST_KEYON_VOICE;
 
 int setPitchSlideParam(unsigned short a)
 {
     switch (a & 0xf00) {
     case 0:
-        DAT_8009bd34 = a & 0xff;
-        DAT_8009bd30 = 1;
+        PITCH_SLIDE_INTERVAL = a & 0xff;
+        PITCH_SLIDE_TIMER = 1;
         break;
     case 0x100:
-        DAT_8009bd38 = a & 0xff;
-        if (DAT_8009bd38 >= 0x80)
-            DAT_8009bd38 = DAT_8009bd38 | 0xff00;
+        PITCH_SLIDE_STEP = a & 0xff;
+        if (PITCH_SLIDE_STEP >= 0x80)
+            PITCH_SLIDE_STEP = PITCH_SLIDE_STEP | 0xff00;
         break;
     case 0x200:
-        DAT_8009bd3c = a & 0xff;
+        PITCH_SLIDE_DURATION = a & 0xff;
         break;
     case 0x300:
-        DAT_8009bd2c = 1;
-        DAT_8009bd40 = DAT_8009bd08;
+        PITCH_SLIDE_ACTIVE = 1;
+        PITCH_SLIDE_VOICE = LAST_KEYON_VOICE;
         break;
     }
     return 0;

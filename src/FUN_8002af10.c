@@ -6,7 +6,7 @@ extern unsigned char DAT_800b0d9b;
 extern unsigned char DAT_800b0d99;
 extern unsigned char DAT_8009cda2;
 extern char DAT_800b0d98[];
-extern int DAT_1f800330;
+extern int WMD_DATA;
 extern void (*PTR_DAT_80079b3c[])(char *, int);
 
 void FUN_8002af10(void)
@@ -40,6 +40,6 @@ void FUN_8002af10(void)
     case 5: case 8: case 0xb: case 0x10: case 0x11: case 0x13:
         return;
     }
-    PTR_DAT_80079b3c[DAT_8009c960](DAT_800b0d98, DAT_1f800330);
+    PTR_DAT_80079b3c[DAT_8009c960](DAT_800b0d98, WMD_DATA);
     DAT_800b0d99 = DAT_8009cda2;
 }

@@ -12,7 +12,7 @@ extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern short D_800A60B6;
 extern short D_1F800172;
 extern int D_1F8000F0;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
@@ -75,8 +75,8 @@ void func_80115FB4(TObj *o)
             { int *g = &D_1F8000F0; *g += *k << 8; }
         }
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     }

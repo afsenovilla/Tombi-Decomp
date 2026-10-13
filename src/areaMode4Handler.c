@@ -17,8 +17,8 @@ void FUN_800263bc(void);
 void startAreaBgm(void);
 unsigned char *allocObjectLayer7(void);
 void areaMode6Tick(void);
-extern unsigned char *D_1F8001D4;
-#define G D_1F8001D4
+extern unsigned char *TASK_C;
+#define G TASK_C
 void cutsceneAreaHandler(void)
 {
     unsigned char *e;

@@ -18,11 +18,11 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern int D_8009C960;
-extern C4C *D_1F8001D4;
+extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern unsigned short D_1F8001C8;
 extern short D_1F8000F6, D_1F8000EE;
@@ -44,7 +44,7 @@ static __inline__ int proj(void)
     gte_rtps();
     gte_stflg(&D_1F80008C);
     if (D_1F80008C < 0) return 1;
-    gte_stsxy(&D_1F800070);
+    gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&D_1F800074);
     return 0;
 }
@@ -85,7 +85,7 @@ void FUN_80052db8(TObj *o)
     if (o->anim == 0) return;
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && D_1F8001D4->w4c != 3)
+    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;
@@ -113,8 +113,8 @@ void FUN_80052db8(TObj *o)
     do {
         p = DAT_1f800164;
         if (o->animFrame & 1) {
-            p->x0 = D_1F800070 + (((signed char)f[2] * k - 0x1000) >> 12);
-            p->y0 = (D_1F800070 >> 16) + (((signed char)f[3] * k - 0x1000) >> 12);
+            p->x0 = LZ_FILE_CTRL + (((signed char)f[2] * k - 0x1000) >> 12);
+            p->y0 = (LZ_FILE_CTRL >> 16) + (((signed char)f[3] * k - 0x1000) >> 12);
             p->x1 = p->x0 + ((f[-2] * k + 0x1000) >> 12);
             p->y1 = p->y0;
             p->x2 = p->x0;
@@ -122,8 +122,8 @@ void FUN_80052db8(TObj *o)
             p->x3 = p->x1;
             p->y3 = p->y2;
         } else {
-            p->x0 = D_1F800070 - (((signed char)f[2] * k - 0x1000) >> 12);
-            p->y0 = (D_1F800070 >> 16) + (((signed char)f[3] * k - 0x1000) >> 12);
+            p->x0 = LZ_FILE_CTRL - (((signed char)f[2] * k - 0x1000) >> 12);
+            p->y0 = (LZ_FILE_CTRL >> 16) + (((signed char)f[3] * k - 0x1000) >> 12);
             p->x1 = p->x0 - ((f[-2] * k + 0x1000) >> 12);
             p->y1 = p->y0;
             p->x2 = p->x0;

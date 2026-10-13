@@ -5,7 +5,7 @@ extern short FUN_8004461c(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
 extern void FUN_800e9f74(int, int, int, int);
-extern unsigned char DAT_800a6038, DAT_800a603c, DAT_800a603d, DAT_800a603e;
+extern unsigned char PLAYER, DAT_800a603c, DAT_800a603d, DAT_800a603e;
 extern short DAT_1f80019e;
 
 void FUN_80125c84(TObj *a, TObj *o)
@@ -14,7 +14,7 @@ void FUN_80125c84(TObj *a, TObj *o)
     unsigned short t;
     if (FUN_8004461c(a, o) != -1) {
         if (o->b6a == 2) {
-            DAT_800a6038 = 1;
+            PLAYER = 1;
             DAT_800a603c = 1;
             DAT_800a603d = 0;
             DAT_800a603e = 0;

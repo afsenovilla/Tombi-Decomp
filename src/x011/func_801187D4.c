@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
-extern TObj DAT_800a6038;
+extern TObj PLAYER;
 extern unsigned char DAT_8009c940, DAT_8009c941;
 extern unsigned char DAT_8009c942[];
 extern unsigned char DAT_8009d2b0;
@@ -32,9 +32,9 @@ void func_801187D4(TObj *o)
             break;
         DAT_8009c942[0] = 1;
         DAT_8009d2b0 = 2;
-        DAT_800a6038.b04 = 5;
-        DAT_800a6038.step = 0;
-        DAT_800a6038.state = 0;
+        PLAYER.b04 = 5;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(B12 *)&o->a;
@@ -53,12 +53,12 @@ void func_801187D4(TObj *o)
         break;
     case 2:
         DAT_8009c942[0] = 0;
-        DAT_800a6038.wb2 = 0;
+        PLAYER.wb2 = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
-        DAT_800a6038.b04 = 1;
-        DAT_800a6038.step = 0;
-        DAT_800a6038.state = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

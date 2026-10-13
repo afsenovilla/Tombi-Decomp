@@ -13,7 +13,7 @@ extern short D_8009CD96;
 extern short D_8009CDA0;
 extern unsigned char D_8009C93C;
 extern unsigned char D_8009C975;
-extern SC *D_1F8001D4;
+extern SC *TASK_C;
 extern void func_8011610C(TObj *);
 extern void func_80116254(TObj *);
 extern void func_80118304(int, int, int);
@@ -75,8 +75,8 @@ void func_801163B8(TObj *o)
         goto call;
     case 7:
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     default:

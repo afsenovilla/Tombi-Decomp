@@ -4,7 +4,7 @@
 #include "raw7.h"
 
 extern unsigned char D_8009C93A;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CE4E;
 extern unsigned char D_8009D2C3;
 extern void func_801337B4(TObj *);
@@ -20,9 +20,9 @@ void func_80133A2C(TObj *o)
         if (D_8009C93A == 0) break;
         switch (o->step) {
         case 0:
-            if (U8(&D_800A6038, 0xa2) != 1) break;
-            if ((unsigned short)(D_800A6038.h->p.whole - 0xc8e) >= 0x28) break;
-            if (D_800A6038.y.p.whole != -0x7bb) break;
+            if (U8(&PLAYER, 0xa2) != 1) break;
+            if ((unsigned short)(PLAYER.h->p.whole - 0xc8e) >= 0x28) break;
+            if (PLAYER.y.p.whole != -0x7bb) break;
             switch (D_8009CE4E) {
             case 0:
                 o->step = 1;

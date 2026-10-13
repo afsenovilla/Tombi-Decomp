@@ -13,7 +13,7 @@
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short *D_800A605C;
 extern unsigned short D_800A6066;
 extern short D_800A604A[];
@@ -61,11 +61,11 @@ void func_8012736C(TObj *o)
             *(signed char *)&o->b0f = -7;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A6038.active = 5;
+            PLAYER.active = 5;
             D_800A603C = 5;
             D_800A603D = 100;
             D_800A603E = 0;
-            FUN_800eea7c(&D_800A6038, 0x1e, 0);
+            FUN_800eea7c(&PLAYER, 0x1e, 0);
             D_800A604E[0] = -0x1e;
             o->d34 = -0x1e0000;
             o->timer = 0x3c;
@@ -259,7 +259,7 @@ void func_8012736C(TObj *o)
         D_8009D078 = 1;
         D_8009C93F = 0;
         D_8009C942 = 0;
-        D_800A6038.active = 1;
+        PLAYER.active = 1;
         D_800A603C = 1;
         D_800A603D = 0;
         D_800A603E = 0;

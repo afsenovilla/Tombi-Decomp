@@ -10,7 +10,7 @@ typedef struct {
 } T80117E04;
 
 extern T80117E04 D_80118D14[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 
 extern void AnimLoadDuration(TObj *);
 
@@ -21,7 +21,7 @@ void func_80117E04(TObj *o)
     o->box2 = D_80118D14[o->subtype].b2;
     o->box3 = D_80118D14[o->subtype].b3;
     o->w1e = D_80118D14[o->subtype].w4;
-    o->d3c = D_1F8002C8[D_80118D14[o->subtype].w6];
+    o->d3c = SPR_DATA[D_80118D14[o->subtype].w6];
     o->anim = D_80118D14[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->d8c = 0;

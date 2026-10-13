@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char p[0x24]; int d24; char q[0x70 - 0x28]; signed char b70, b71, b72, b73; } S;
 extern unsigned char D_8009C93F;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 static __inline__ int approach(S *o)
 {
     switch (o->b71) {
@@ -49,7 +49,7 @@ void func_80028BE0(S *o)
         }
         return;
     }
-    p = &D_800A6038;
+    p = &PLAYER;
     switch (o->b70) {
     case 0:
         if (p->ba4) {

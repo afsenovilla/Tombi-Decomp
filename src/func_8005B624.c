@@ -2,9 +2,9 @@
 // MATCHING 8005b624 784
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
-extern unsigned char D_80080524[];
-extern unsigned char D_800805EC[];
-extern int D_80080504[];
+extern unsigned char EVENT_STARTED_AP_TABLE[];
+extern unsigned char EVENT_COMPLETE_AP_TABLE[];
+extern int AP_TABLE[];
 typedef struct { short a, b; } Pair;
 extern Pair D_80080704[];
 
@@ -16,9 +16,9 @@ void func_8005B624(int k, int b)
     TObj *o;
 
     if (b == 0)
-        n = D_80080504[D_80080524[k]];
+        n = AP_TABLE[EVENT_STARTED_AP_TABLE[k]];
     else
-        n = D_80080504[D_800805EC[k]];
+        n = AP_TABLE[EVENT_COMPLETE_AP_TABLE[k]];
     if (n == 0)
         return;
     q1 = n / 10;

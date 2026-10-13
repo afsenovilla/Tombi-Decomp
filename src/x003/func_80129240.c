@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_80135D8E[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_8009CEF0;
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
@@ -20,7 +20,7 @@ void func_80129240(TObj *o)
         o->d34 = o->y.p.whole;
         o->d84 = 0;
         o->subtype = 1;
-        o->d3c = D_1F8002C8[D_80135D8E[0]];
+        o->d3c = SPR_DATA[D_80135D8E[0]];
         o->state++;
         break;
     case 1:

@@ -6,7 +6,7 @@ typedef struct { Fix16 a, y, b; } V3;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801311D0[];
 extern unsigned char D_8009C93E, D_8009C93F[];
-extern unsigned char D_800A6038[];
+extern unsigned char PLAYER[];
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A6066;
 extern unsigned char D_8009CF29, D_8009CF2D;
@@ -52,10 +52,10 @@ void func_8012A31C(TObj *o)
     case 3:
         if (o->visible == 0) {
             D_8009C93E = 0;
-            D_800A6038[4] = 5;
+            PLAYER[4] = 5;
             D_800A603D = 0x64;
             D_800A603E = 0;
-            FUN_800eea7c(D_800A6038, 2, 0);
+            FUN_800eea7c(PLAYER, 2, 0);
             D_800A6066 = 1;
             o->state++;
             break;
@@ -71,7 +71,7 @@ void func_8012A31C(TObj *o)
         D_800A6078[0]->p.whole--;
         if (D_800A6078[0]->p.whole < 0xa0) {
             D_800A6078[0]->p.whole = 0xa0;
-            FUN_800eea7c(D_800A6038, 0, 0);
+            FUN_800eea7c(PLAYER, 0, 0);
             D_800A603C = 5;
             D_800A603D = 0;
             D_800A603E = 0;

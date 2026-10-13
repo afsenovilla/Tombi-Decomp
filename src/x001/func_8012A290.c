@@ -2,7 +2,7 @@
 // MATCHING 8012a290 828
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern short D_800A60B6;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
@@ -29,15 +29,15 @@ void func_8012A290(TObj *o)
             o->anim = D_8013FC88[0];
             AnimLoadDuration(o);
         }
-        D_800A6038.b69 = 1;
-        D_800A6038.h->p.whole = o->h->p.whole;
+        PLAYER.b69 = 1;
+        PLAYER.h->p.whole = o->h->p.whole;
         {
-            short t = D_800A6038.y.p.whole - 0x18;
+            short t = PLAYER.y.p.whole - 0x18;
             o->velY = o->y.p.whole - t;
         }
         if (o->velY != 0) {
-            if (o->velY < 0) D_800A6038.y.p.whole--;
-            else D_800A6038.y.p.whole++;
+            if (o->velY < 0) PLAYER.y.p.whole--;
+            else PLAYER.y.p.whole++;
         }
         break;
     case 2:
@@ -46,12 +46,12 @@ void func_8012A290(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV > 0) o->state++;
         else if ((short)FUN_800408d8(o, o->h->p.whole, (short)(o->y.p.whole - 0x10))) o->velV = 0;
-        D_800A6038.b69 = 1;
-        D_800A6038.h->p.whole = o->h->p.whole;
-        D_800A6038.y.p.whole = o->y.p.whole + (D_800A6038.box3 - D_800A6038.box2);
+        PLAYER.b69 = 1;
+        PLAYER.h->p.whole = o->h->p.whole;
+        PLAYER.y.p.whole = o->y.p.whole + (PLAYER.box3 - PLAYER.box2);
         break;
     case 3: {
-        TObj *p = &D_800A6038;
+        TObj *p = &PLAYER;
         *(signed char *)&o->b0f = -9;
         o->b6a = 0;
         D_800A6066 = 2;

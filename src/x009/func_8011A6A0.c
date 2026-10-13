@@ -4,12 +4,12 @@
 extern TObj **D_1F800260;
 extern unsigned short D_1F800250;
 extern short D_1F80019E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 int func_8011A6A0(TObj *o)
 {
     TObj **list = D_1F800260;
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     TObj *n;
 
     if ((D_1F80019E = D_1F800250) == 0)

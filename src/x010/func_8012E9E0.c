@@ -2,7 +2,7 @@
 // MATCHING 8012e9e0 388
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_8009C962;
 extern unsigned char D_8009D2C3;
 extern short D_8009C944;
@@ -25,15 +25,15 @@ void func_8012E9E0(TObj *o)
         o->b04++;
         break;
     case 1: {
-        TObj *p = &D_800A6038;
-        switch (D_800A6038.step) {
+        TObj *p = &PLAYER;
+        switch (PLAYER.step) {
         case 0x3e:
-            if (D_800A6038.y.p.whole < o->y.raw) {
-                D_800A6038.y.p.whole = o->y.raw;
+            if (PLAYER.y.p.whole < o->y.raw) {
+                PLAYER.y.p.whole = o->y.raw;
                 { int y = o->y.raw;
-                D_800A6038.step = 0x3d;
-                D_800A6038.state = 0;
-                D_800A6038.w78 = y; }
+                PLAYER.step = 0x3d;
+                PLAYER.state = 0;
+                PLAYER.w78 = y; }
             }
             break;
         case 2:

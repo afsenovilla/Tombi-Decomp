@@ -16,7 +16,7 @@ typedef struct O {
 } O;
 typedef void (*Fn)(O *);
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_80079A98[];
 extern unsigned char D_8009CDA2[];
 extern unsigned char D_8009C93A, D_8009C93F, D_8009C975;
@@ -79,8 +79,8 @@ void func_80117494(O *o)
                 if (D_8009CDC8 != 0xff) break;
                 if ((unsigned)(XU - 0x778) >= 0x18) break;
                 if ((unsigned short)(ZU + 0x56a) >= 0x10) break;
-                D_800A6038.ba0 = 1;
-                D_800A6038.ba8 = 10;
+                PLAYER.ba0 = 1;
+                PLAYER.ba8 = 10;
                 if (D_1F800172 > 0) stepPlayerXToward(0x784);
                 break;
             case 4:
@@ -98,28 +98,28 @@ void func_80117494(O *o)
             unsigned char *c;
             unsigned short *p = &D_8009C982;
             if (*p != 0) goto clr;
-            if (D_800A6038.ba2 != 0) {
+            if (PLAYER.ba2 != 0) {
                 if ((unsigned)(XU - 0xcac) < 0x60) stepPlayerXToward(0xcdc);
                 else if ((unsigned)(XU - 0x12dd) < 0x60) stepPlayerXToward(0x130d);
                 else if ((unsigned)(XU - 0x155b) < 0x60) stepPlayerXToward(0x158b);
             }
-            if (D_800A6038.ba2 == 2 && (unsigned)(XU - 0x107a) < 0x40 && (unsigned short)(ZU + 0x78e) < 0x20)
+            if (PLAYER.ba2 == 2 && (unsigned)(XU - 0x107a) < 0x40 && (unsigned short)(ZU + 0x78e) < 0x20)
                 stepPlayerXToward(0x109a);
             if (D_8009CDC5 == 0xff && (unsigned)(XU - 0xc72) < 0x14 && (unsigned short)(ZU + 0x63e) < 0x10) {
-                D_800A6038.ba0 = 1;
-                D_800A6038.ba8 = 0xc;
+                PLAYER.ba0 = 1;
+                PLAYER.ba8 = 0xc;
                 if (D_1F800172 > 0) stepPlayerXToward(0xc7c);
             }
             if ((unsigned)(XU - 0x10a1) < 0x10 && (unsigned short)(ZU + 0x5b4) < 0x10) {
-                D_800A6038.ba0 = 1;
+                PLAYER.ba0 = 1;
                 if (D_1F800172 > 0) {
                     stepPlayerXToward(0x10a9);
                     if (D_1F800172 >= 0x51) {
                         o->step = 6;
-                        D_800A6038.active = 5;
-                        D_800A6038.b04 = 5;
-                        D_800A6038.visible = 0;
-                        D_800A6038.step = 0x40;
+                        PLAYER.active = 5;
+                        PLAYER.b04 = 5;
+                        PLAYER.visible = 0;
+                        PLAYER.step = 0x40;
                         D_8009C93F = 1;
                         break;
                     }
@@ -211,24 +211,24 @@ void func_80117494(O *o)
         D_8009CDA2[0] = 1;
         break;
     case 6:
-        D_800A6038.yw -= 2;
-        D_800A6038.bw -= 2;
-        if (D_800A6038.bw < 0) D_800A6038.bw = 0;
-        if (D_800A6038.yw < -0x78e) {
-            D_800A6038.yw = -0x7ee;
-            D_800A6038.visible = 1;
-            D_800A6038.active = 2;
-            D_800A6038.b04 = 1;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+        PLAYER.yw -= 2;
+        PLAYER.bw -= 2;
+        if (PLAYER.bw < 0) PLAYER.bw = 0;
+        if (PLAYER.yw < -0x78e) {
+            PLAYER.yw = -0x7ee;
+            PLAYER.visible = 1;
+            PLAYER.active = 2;
+            PLAYER.b04 = 1;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             o->step++;
         }
         func_80029CB4(o);
         break;
     case 7:
-        if (D_800A6038.yw >= -0x787) {
-            D_800A6038.active = 1;
-            D_800A6038.bw = 0;
+        if (PLAYER.yw >= -0x787) {
+            PLAYER.active = 1;
+            PLAYER.bw = 0;
             D_8009C93F = 0;
             o->step = 2;
         }

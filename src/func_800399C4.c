@@ -2,8 +2,8 @@
 // MATCHING 800399c4 716
 #include "TOBJ.H"
 typedef struct { char p0[0x8a]; unsigned short c; char p1[0x1190 - 0x8c]; int idx, k, sub, x, y, z; } G;
-extern G *D_8009F0F0;
-extern TObj *D_8009F2D8[];
+extern G *SCRIPT_CTX;
+extern TObj *SCRIPT_OBJECTS[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 extern TObj *ObjAlloc(void);
@@ -11,7 +11,7 @@ extern void func_800EDFB8(TObj *o, int n);
 
 void func_800399C4(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     int k = g->k;
     int idx = g->idx;
     int sub = g->sub;
@@ -55,7 +55,7 @@ void func_800399C4(void)
         o->b04 = 0;
         o->step = 0;
         o->state = 0;
-        D_8009F2D8[idx] = o;
+        SCRIPT_OBJECTS[idx] = o;
         break;
     }
     case 3: {
@@ -81,7 +81,7 @@ void func_800399C4(void)
         o->b04 = 0;
         o->step = 0;
         o->state = 0;
-        D_8009F2D8[idx] = o;
+        SCRIPT_OBJECTS[idx] = o;
         break;
     }
     case 4: {
@@ -106,7 +106,7 @@ void func_800399C4(void)
         o->b04 = 0;
         o->step = 0;
         o->state = 0;
-        D_8009F2D8[idx] = o;
+        SCRIPT_OBJECTS[idx] = o;
         break;
     }
     case 5: case 6: case 7: case 8:

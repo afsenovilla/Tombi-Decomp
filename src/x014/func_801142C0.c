@@ -10,7 +10,7 @@ extern unsigned char *D_8009C330;
 extern unsigned char D_800A603C[];
 extern unsigned char D_800A60A1;
 extern short D_800A6066, D_800A60B4;
-extern void *D_8009F2D8[];
+extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
 void AnimAdvance(TObj *o);
@@ -75,7 +75,7 @@ void func_801142C0(TObj *o)
                 func_8004D620(D_8009CDB1 + 7, 2);
             }
             o->b6a = 0;
-            D_8009F2D8[o->b0c] = 0;
+            SCRIPT_OBJECTS[o->b0c] = 0;
             D_800A603C[0] = 1;
             D_800A603C[1] = 0;
             D_800A603C[2] = 0;

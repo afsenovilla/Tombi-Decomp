@@ -5,7 +5,7 @@
 
 typedef struct { short x, y; } P;
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern Fix16 *D_800A6078, *D_800A607C;
 extern short D_800A604E;
 extern TObj *D_800A611C;
@@ -52,7 +52,7 @@ extern void FUN_80025f40(int, int, int, int);
 extern void FUN_80031588(short *, int, short *, short *);
 extern void FUN_800efc04(TObj *);
 
-#define G D_800A6038
+#define G PLAYER
 #define TB(n) D_8007A072[(short)(o->animFrame + o->animFrame * 2) + (n) - 1]
 #define TK(n) D_8007A072[k + (n) - 1]
 

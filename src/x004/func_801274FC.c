@@ -4,7 +4,7 @@
 
 extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
-extern unsigned char D_8009CEA4[], D_8009CEFC[], D_8009CEFB, D_80131168[];
+extern unsigned char SCRIPT_GLOBALS[], D_8009CEFC[], D_8009CEFB, D_80131168[];
 extern unsigned short D_8009C962, D_1F8001F8;
 extern int FUN_800202b4(TObj *);
 extern void func_8011EC78(TObj *);
@@ -139,7 +139,7 @@ void func_801274FC(TObj *o)
             *c = *c + 1;
             n = o->subtype;
             k = n / 8 + 0x58;
-            D_8009CEA4[k] |= 1 << (n % 8);
+            SCRIPT_GLOBALS[k] |= 1 << (n % 8);
             o->b04 = 3;
             break;
         case 3:

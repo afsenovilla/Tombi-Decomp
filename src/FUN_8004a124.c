@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CFF9;
 extern void FUN_800eea7c(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -12,7 +12,7 @@ extern short TileCollideAt(TObj *, short, short);
 
 void FUN_8004a124(TObj *o)
 {
-    TObj *s = &D_800A6038;
+    TObj *s = &PLAYER;
 
     switch (o->state) {
     case 0:

@@ -2,7 +2,7 @@
 // MATCHING 8012955c 932
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CDAC, D_8009C93F;
 extern unsigned char *D_8009C330;
 extern int D_1F8002E8;
@@ -15,12 +15,12 @@ extern void freeObjectLayer2(TObj *);
 
 void func_8012955C(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     TObj *p;
 
     switch (o->b04) {
     case 0:
-        if (D_8009CDAC == 0 || D_800A6038.a.p.whole < 0x280) {
+        if (D_8009CDAC == 0 || PLAYER.a.p.whole < 0x280) {
             o->b04 = 3;
             break;
         }

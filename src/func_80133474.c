@@ -3,12 +3,12 @@
 /* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
  * call;call;j blocks that cross-jumping merged).
  * D_8013B18C, D_800A607C, D_800A60C4 now use only their [0] array names.
- * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / D_800A6038.
+ * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / PLAYER.
  * Tried (debt2): D_8009C984s as [0]/pointer/temp forms keeps la+lw 0(reg) (score 8), all-scalar D_8009C984 465. */
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A6039, D_800A6047, D_800A603C, D_800A603D, D_800A60DA;
 extern unsigned short D_800A6066;
 extern unsigned short *D_800A605C[];
@@ -98,15 +98,15 @@ void func_80133474(TObj *o)
         case 0:
             switch (o->state) {
             case 0:
-                D_800A6038.visible = 1;
-                D_800A6038.d8c = 0;
+                PLAYER.visible = 1;
+                PLAYER.d8c = 0;
                 D_8009C984 |= 2;
-                func_800EEA7C(&D_800A6038, 0xd, 0);
+                func_800EEA7C(&PLAYER, 0xd, 0);
                 o->timer = 2;
                 if (D_8009CDA7[0] == 0) {
                     o->w78 = 1;
-                    o->h->p.whole = D_800A6038.h->p.whole;
-                    D_800A6038.y.p.whole = o->y.p.whole - o->box2;
+                    o->h->p.whole = PLAYER.h->p.whole;
+                    PLAYER.y.p.whole = o->y.p.whole - o->box2;
                     setEventStarted(3, 0, 0);
                     o->timer = 300;
                     D_8009C942 = 1;
@@ -155,7 +155,7 @@ void func_80133474(TObj *o)
             }
             ang = (short)t;
             o->h->p.whole = D_800A6078->p.whole + MulCos(ang, e->rad);
-            o->y.p.whole = D_800A6038.y.p.whole + MulNegSinScaled(ang, e->rad);
+            o->y.p.whole = PLAYER.y.p.whole + MulNegSinScaled(ang, e->rad);
             o->d->p.whole = D_800A607Ca[0]->p.whole;
             o->d8c = D_800A60C4a[0];
             o->b0f = D_800A6047 + (unsigned char)e->z;
@@ -167,7 +167,7 @@ void func_80133474(TObj *o)
             }
             if (D_8009C960 != 0) break;
             if (D_8009C962 == 0 && D_800A603D == 0x20 && D_800A607Ca[0]->p.whole > 0 &&
-                D_800A6038.y.p.whole >= -0x2f && (unsigned short)(D_800A6078->p.whole - 0x400) < 0x18) {
+                PLAYER.y.p.whole >= -0x2f && (unsigned short)(D_800A6078->p.whole - 0x400) < 0x18) {
                 D_8009C984s &= ~2;
                 o->b04 = 2;
                 o->step = 5;
@@ -209,7 +209,7 @@ void func_80133474(TObj *o)
                 o->movetab = D_80077D30;
                 o->velY = -0x280;
                 showMessageBox(5, 0, 0x100, 0x9c);
-                D_800A6038.animFrame = 0;
+                PLAYER.animFrame = 0;
                 goto L4034;
             case 2: {
                 V12 v;
@@ -218,7 +218,7 @@ void func_80133474(TObj *o)
                 o->y.raw += o->velY << 8;
                 o->velY += 0x20;
                 if (o->y.p.whole < -0xef) break;
-                D_800A6038.visible = 1;
+                PLAYER.visible = 1;
                 v = *(V12 *)&o->a;
                 ObjSpawnType5(0x10, 0, &v);
                 ObjSpawnType5(0x10, 0, &v);
@@ -248,7 +248,7 @@ void func_80133474(TObj *o)
                 AnimLoadDuration(o);
                 removeItemFromInventory(1, 1);
                 o->movetab = D_80077D3C;
-                o->animFrame = !(D_800A6038.h->p.whole < o->h->p.whole);
+                o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
                 o->velY = -0x400;
                 D_8009C984 &= ~2;
                 func_8004D620(0x10, 2);
@@ -285,7 +285,7 @@ void func_80133474(TObj *o)
                 AnimLoadDuration(o);
                 o->movetab = D_80077D3C;
                 o->velY = -0x300;
-                o->animFrame = !(D_800A6038.h->p.whole < o->h->p.whole);
+                o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
                 FUN_80020490(o);
                 goto L4034;
             case 6:

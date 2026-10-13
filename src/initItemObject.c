@@ -15,7 +15,7 @@ extern ClutPos DAT_8007b2d4[];
 extern unsigned char DAT_8009ce5b;
 extern unsigned char DAT_8009d0c1;
 extern unsigned char DAT_8009d0bc;
-extern int D_1f8002c8[];
+extern int SPR_DATA[];
 extern unsigned short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 
@@ -39,7 +39,7 @@ void initItemObject(TObj *o)
     o->box1 = d->bx1;
     o->box2 = d->bx2;
     o->box3 = d->bx3;
-    o->d3c = D_1f8002c8[d->b4];
+    o->d3c = SPR_DATA[d->b4];
     o->animFrame = 1;
     if (o->subtype == 2) {
         if ((o->b0c & 0x7f) >= 4) {

@@ -22,7 +22,7 @@ extern char D_80077CDC[];
 extern short *D_8011C8E8[];
 extern Fix16 *D_800A6078;
 extern unsigned short D_1F8003C4, D_1F8001FC;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
 extern unsigned char D_800A603D_[];
@@ -98,7 +98,7 @@ void func_80118684(TObj *o)
     case 1:
         e = D_8011C8E8[(unsigned short)o->wb4];
         e += (unsigned short)o->wb6 * 2;
-        q = &D_800A6038;
+        q = &PLAYER;
         switch (e[0]) {
         case 0:
             break;

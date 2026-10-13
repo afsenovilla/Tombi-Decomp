@@ -5,7 +5,7 @@
 extern void *D_80131CC8[];
 extern unsigned short D_8012F378[];
 extern unsigned char D_800A6047;
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern int ObjCullRegister(TObj *);
 extern void FUN_80121eb8(TObj *);
 extern void FUN_80122084(TObj *);
@@ -70,7 +70,7 @@ void func_80121BAC(TObj *o)
         if (o->step == 0) {
             r = nearCam(o);
             if (r) {
-                if (D_800A6038 == 1) {
+                if (PLAYER == 1) {
                     o->step = 1;
                     o->state = 0;
                 }

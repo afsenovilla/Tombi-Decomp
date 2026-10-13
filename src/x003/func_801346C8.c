@@ -4,8 +4,8 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **p; int a, b; } T12;
 extern T12 D_80136148[];
-extern TObj D_800A6038;
-#define P D_800A6038
+extern TObj PLAYER;
+#define P PLAYER
 extern unsigned char D_8009CDAB, D_8009CE3B, D_8009CFCA, D_8009D13E;
 extern unsigned char D_8009C942[], D_8009C93E[], D_8009CFCD[];
 extern signed char D_8009D2B0[];

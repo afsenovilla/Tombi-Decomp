@@ -2,7 +2,7 @@
 // MATCHING 80121f90 1160
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern S2 *D_800A6078;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6, D_8009C93A;
 extern short D_800A6066;
@@ -35,7 +35,7 @@ void func_80121F90(TObj *o)
         o->a.raw -= o->velH << 8;
         if (o->h->p.whole < D_800A457C - 0x96) {
             if (o->subtype == 3) {
-                pl = &D_800A6038;
+                pl = &PLAYER;
                 if (D_800A60D6 == 3) {
                     pl->active = 2;
                     D_800A603C = 2;
@@ -80,7 +80,7 @@ void func_80121F90(TObj *o)
         o->a.raw += o->velH << 8;
         if (D_800A457E + 0x96 < o->h->p.whole) {
             if (o->subtype == 3) {
-                pl = &D_800A6038;
+                pl = &PLAYER;
                 if (D_800A60D6 == 3) {
                     pl->active = 2;
                     D_800A603C = 2;

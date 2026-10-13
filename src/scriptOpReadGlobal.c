@@ -7,12 +7,12 @@ typedef struct {
     int d1190;
 } S8003A570;
 
-extern S8003A570 *D_8009F0F0;
-extern unsigned char D_8009CEA4[];
+extern S8003A570 *SCRIPT_CTX;
+extern unsigned char SCRIPT_GLOBALS[];
 
 void scriptOpReadGlobal(void)
 {
-    S8003A570 *p = D_8009F0F0;
-    p->d1190 = D_8009CEA4[p->d1190];
+    S8003A570 *p = SCRIPT_CTX;
+    p->d1190 = SCRIPT_GLOBALS[p->d1190];
     p->w8a++;
 }

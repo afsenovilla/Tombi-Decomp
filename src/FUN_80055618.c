@@ -24,14 +24,14 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern int D_8009C960;
-extern C4C *D_1F8001D4;
+extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
-extern unsigned long D_1F800070;
+extern unsigned long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char D_1F8000C0[], D_1F8000C0b[];
-extern ROW D_800a3fe0[];
+extern ROW LOAD_BUFFER[];
 extern short **D_800a4468;
 extern short *D_800b0bb0;
 extern void SetRotMatrix(void *);
@@ -52,7 +52,7 @@ static __inline__ int proj(void)
     gte_rtps();
     gte_stflg(&D_1F80008C);
     if (D_1F80008C < 0) return 1;
-    gte_stsxy(&D_1F800070);
+    gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&D_1F800074);
     return 0;
 }
@@ -89,17 +89,17 @@ void FUN_80055618(TObj *o)
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && D_1F8001D4->w4c != 3)
+    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;
     SetRotMatrix(D_1F8000C0);
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
-    xy = D_1F800070;
+    xy = LZ_FILE_CTRL;
     x = xy;
     y = xy >> 16;
-    tbl = D_800a3fe0;
+    tbl = LOAD_BUFFER;
     for (i = 0; i < 6; i++) {
         if ((&tbl[WC6(o)].e[i])->n > 0) {
             d = o->d3c;
@@ -154,12 +154,12 @@ void FUN_80055618(TObj *o)
     p->v2 = v + h;
     p->u3 = u + w;
     p->v3 = v + h;
-    p->x0 = x + D_800a3fe0[WC6(o)].e[6].x0 / 100;
-    p->y0 = y + D_800a3fe0[WC6(o)].e[6].y0 / 100;
-    p->x1 = x + D_800a3fe0[WC6(o)].e[6].x1 / 100;
+    p->x0 = x + LOAD_BUFFER[WC6(o)].e[6].x0 / 100;
+    p->y0 = y + LOAD_BUFFER[WC6(o)].e[6].y0 / 100;
+    p->x1 = x + LOAD_BUFFER[WC6(o)].e[6].x1 / 100;
     p->y1 = p->y0;
     p->x2 = p->x0;
-    p->y2 = y + D_800a3fe0[WC6(o)].e[6].y1 / 100;
+    p->y2 = y + LOAD_BUFFER[WC6(o)].e[6].y1 / 100;
     p->x3 = p->x1;
     p->y3 = p->y2;
     p->tpage = o->w1e;

@@ -1,7 +1,7 @@
 // FUNC 8011d59c 688 X003
 // MATCHING 8011d59c 688
 #include "TOBJ.H"
-extern unsigned char D_800A6038[];
+extern unsigned char PLAYER[];
 extern unsigned char D_800A6039[];
 extern unsigned char D_800A603C[];
 extern unsigned char D_800A603D[];
@@ -18,7 +18,7 @@ extern short D_8009CDA0;
 extern unsigned char D_8009C975[];
 extern unsigned char D_8009C93C;
 extern unsigned char D_1F8003D1;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
 extern int func_8011D2F8(TObj *);
@@ -29,7 +29,7 @@ void func_8011D59C(TObj *o)
     case 0:
         if (o->visible && func_8011D2F8(o)) {
             o->state++;
-            D_800A6038[0] = 2;
+            PLAYER[0] = 2;
             D_8009C93F[0] = 1;
             D_8009C93E[0] = 1;
             D_8009C942[0] = 1;
@@ -42,7 +42,7 @@ void func_8011D59C(TObj *o)
         break;
     case 1:
         if (--o->timer == -1) {
-            D_800A6038[0] = 5;
+            PLAYER[0] = 5;
             D_800A603C[0] = 5;
             D_8009C93E[0] = 0;
             D_800A6039[0] = 0;
@@ -79,8 +79,8 @@ void func_8011D59C(TObj *o)
         o->w76 = o->w74;
         o->w78 = o->w74;
         if (D_8009C975[0] == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
             D_8009E375[0] = 0xff;
             D_8009E376[0] = 0xff;
             D_8009E377[0] = 0xff;

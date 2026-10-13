@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009C93F[], D_8009D00F;
+extern unsigned char D_8009C93F[], TALK_POSE;
 extern unsigned char D_8009CF0B[];
 extern unsigned short D_8009C962[];
 extern short D_80125E20[];
@@ -42,7 +42,7 @@ void func_8011F218(TObj *o)
         if (D_8009CF0B[D_8009C962[0]] == 2) {
             o->state = 4;
         } else {
-            D_8009D00F = 2;
+            TALK_POSE = 2;
             D_8009CF0B[D_8009C962[0]] = 2;
             o->state++;
         }
@@ -51,7 +51,7 @@ void func_8011F218(TObj *o)
         if (--o->timer == -1) {
             o->state++;
             SetAnim(o, 0x13);
-            D_8009D00F = 0;
+            TALK_POSE = 0;
         }
         break;
     case 2:

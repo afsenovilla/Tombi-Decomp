@@ -13,7 +13,7 @@ extern unsigned char DAT_8009d2b0;
 extern unsigned char DAT_8009c975[];
 extern unsigned char DAT_8009c93c[];
 extern unsigned short DAT_1f8001f8;
-extern TObj *DAT_1f8001d4;
+extern TObj *TASK_C;
 
 void FUN_8010ac90(TObj *o)
 {
@@ -63,8 +63,8 @@ void FUN_8010ac90(TObj *o)
         FUN_800eeb5c(o, 4);
         if (o->timer != 0) {
             if (--o->timer <= 0) {
-                DAT_1f8001d4->w4c = 7;
-                DAT_1f8001d4->w4e = 0;
+                TASK_C->w4c = 7;
+                TASK_C->w4e = 0;
             }
         }
         break;

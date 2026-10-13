@@ -2,7 +2,7 @@
 // MATCHING 801174b8 452
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
-extern TObj DAT_800a6038;
+extern TObj PLAYER;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c942;
 extern unsigned char DAT_8009ce06;
@@ -15,9 +15,9 @@ void func_801174B8(TObj *o)
 
     switch (o->state) {
     case 0:
-        DAT_800a6038.b04 = 5;
-        DAT_800a6038.step = 0;
-        DAT_800a6038.state = 0;
+        PLAYER.b04 = 5;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         DAT_8009c93f = 1;
         DAT_8009c942 = 1;
         o->state++;
@@ -27,7 +27,7 @@ void func_801174B8(TObj *o)
         o->state++;
         break;
     case 2:
-        v = *(B12 *)&DAT_800a6038.a;
+        v = *(B12 *)&PLAYER.a;
         DAT_800a60c8 = showMessageBoxDirect(4, 0, &v);
         o->state++;
         break;
@@ -52,10 +52,10 @@ void func_801174B8(TObj *o)
         DAT_8009c93f = 0;
         DAT_8009c942 = 0;
         DAT_8009c93e = 0;
-        DAT_800a6038.wb2 = 0;
-        DAT_800a6038.b04 = 1;
-        DAT_800a6038.step = 0;
-        DAT_800a6038.state = 0;
+        PLAYER.wb2 = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->step = 0;
         o->state = 0;
         break;

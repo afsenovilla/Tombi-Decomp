@@ -3,7 +3,7 @@
 extern unsigned short D_8009f7f2;
 extern unsigned short D_8009f814;
 extern unsigned char D_1f8003d3;
-extern unsigned char D_1f8003d2;
+extern unsigned char LOADED_LIST_FILE_SYM;
 extern unsigned short D_8009d4fc;
 extern unsigned short D_1f8001f0;
 extern unsigned short D_1f8001f2;
@@ -13,7 +13,7 @@ extern unsigned short D_1f8001f8;
 extern unsigned char D_1f8001cc;
 extern unsigned char D_1f8001d0;
 extern unsigned char D_1f8001d1;
-extern unsigned char D_1f8001ce;
+extern unsigned char LOAD_COMPLETE_SYM;
 extern unsigned char D_1f8001cf;
 extern unsigned char D_1f8001d3;
 extern unsigned short D_1f8001c6;
@@ -31,7 +31,7 @@ void FUN_80016a5c(void)
     D_8009f7f2 = 0xffff;
     D_8009f814 = 0xffff;
     D_1f8003d3 = 0xff;
-    D_1f8003d2 = 0xff;
+    LOADED_LIST_FILE_SYM = 0xff;
     D_8009d4fc = 4;
     D_1f8001f0 = 0;
     D_1f8001f2 = 0;
@@ -41,7 +41,7 @@ void FUN_80016a5c(void)
     D_1f8001cc = 0;
     D_1f8001d0 = 0;
     D_1f8001d1 = 0;
-    D_1f8001ce = 0;
+    LOAD_COMPLETE_SYM = 0;
     D_1f8001cf = 0;
     D_1f8001d3 = 0;
     D_1f8001c6 = 0;

@@ -16,7 +16,7 @@ typedef struct {
 
 extern long D_1F800070;
 extern long D_1F800074;
-extern int D_1F800070i;
+extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4 *D_1F800164;
@@ -51,7 +51,7 @@ void func_8011F240(TObj *o)
     if (o->anim == 0)
         return;
     FUN_8004fba8(o, &D_1F800070, &D_1F800074);
-    xy = D_1F800070i;
+    xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;
     ang = o->d8c;

@@ -2,7 +2,7 @@
 // MATCHING 8011e54c 1668
 #include "TOBJ.H"
 extern unsigned char D_8009D0FB, D_8009D0FC, D_8009D0FD;
-extern unsigned char D_8009D0A4[], D_8009CDA4[];
+extern unsigned char D_8009D0A4[], SCRIPT_FLAGS[];
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009C93F;
 extern void *D_1F8002D4;
@@ -194,7 +194,7 @@ void func_8011E54C(TObj *o)
         case 12:
             switch (o->step) {
             case 0:
-                if (D_8009CDA4[e[1]] == 0xff) {
+                if (SCRIPT_FLAGS[e[1]] == 0xff) {
                     goto next;
                     break;
                 }

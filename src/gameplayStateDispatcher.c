@@ -1,15 +1,15 @@
 // FUNC 80019f98 284 MAIN0
 // MATCHING 80019f98 284
-extern unsigned short *DAT_1f8001d4;
+extern unsigned short *TASK_C;
 extern short DAT_1f8001dc;
 extern short DAT_1f8001de;
-extern unsigned char DAT_1f8001ce;
+extern unsigned char LOAD_COMPLETE_SYM;
 extern void FUN_8001a43c(void), FUN_8001a64c(void), FUN_8001ab18(void), FUN_8001aeb4(void), FUN_8001b49c(void), FUN_8001b7cc(void), FUN_8001baf4(void), FUN_8001c364(void), FUN_8001c634(void);
 void gameplayStateDispatcher(void)
 {
     short *p;
     short a, b;
-    switch (DAT_1f8001d4[0x4c / 2]) {
+    switch (TASK_C[0x4c / 2]) {
     case 0: FUN_8001a43c(); break;
     case 1: FUN_8001a64c(); break;
     case 2: FUN_8001ab18(); break;
@@ -21,9 +21,9 @@ void gameplayStateDispatcher(void)
     case 8: FUN_8001c634();
     }
     a = DAT_1f8001dc;
-    if (-1 < a && DAT_1f8001ce != 0) {
+    if (-1 < a && LOAD_COMPLETE_SYM != 0) {
         DAT_1f8001dc = -1;
-        DAT_1f8001d4[0x4c / 2] = a;
-        DAT_1f8001d4[0x4e / 2] = DAT_1f8001de;
+        TASK_C[0x4c / 2] = a;
+        TASK_C[0x4e / 2] = DAT_1f8001de;
     }
 }

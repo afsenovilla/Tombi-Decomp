@@ -1,9 +1,9 @@
 // FUNC 80122bb4 916 X010
 // MATCHING 80122bb4 916
 /* Whole function (covers csv pieces 80122C10, 80122CBC, 80122F14). Case 3 compares (unsigned char)t so CSE does
-   not propagate t == 1 into the D_800A6038.animFrame subtraction (game keeps subtype in a0). */#include "TOBJ.H"
+   not propagate t == 1 into the PLAYER.animFrame subtraction (game keeps subtype in a0). */#include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C970;
 extern void *D_80131CC8;
 
@@ -19,8 +19,8 @@ void func_80122BB4(TObj *o)
             break;
         case 1:
             o->d88 = 0x10;
-            D_800A6038.a.p.whole = o->h->p.whole;
-            D_800A6038.y.p.whole = o->y.p.whole - 10;
+            PLAYER.a.p.whole = o->h->p.whole;
+            PLAYER.y.p.whole = o->y.p.whole - 10;
             break;
         case 2:
             o->d88 = -0x10;
@@ -28,7 +28,7 @@ void func_80122BB4(TObj *o)
         }
         o->b6a = 0;
         o->b69 = 0;
-        o->b6b = D_800A6038.animFrame & 1;
+        o->b6b = PLAYER.animFrame & 1;
         o->state++;
         o->w22 = 0;
         o->velH = 0x400;
@@ -41,7 +41,7 @@ void func_80122BB4(TObj *o)
         if (o->timer) o->velY -= o->velH;
         else o->velY += o->velH;
         o->d8c = ((o->velY >> 8) + o->d88) & 0xff;
-        D_800A6038.d8c = o->d8c;
+        PLAYER.d8c = o->d8c;
         if (o->velH <= 0) {
             o->velH = 0;
             o->state++;
@@ -54,7 +54,7 @@ void func_80122BB4(TObj *o)
         if (o->timer) o->velY += o->velH;
         else o->velY -= o->velH;
         o->d8c = ((o->velY >> 8) + o->d88) & 0xff;
-        D_800A6038.d8c = o->d8c;
+        PLAYER.d8c = o->d8c;
         if (o->velH >= 0x400) {
             o->velH = 0x400;
             o->state--;
@@ -66,13 +66,13 @@ void func_80122BB4(TObj *o)
     case 3:
         if (D_8009C970 == 0) {
             o->state = 6;
-            D_800A6038.state++;
+            PLAYER.state++;
             break;
         }
         t = o->subtype;
         if ((unsigned char)t == 1) {
-            D_800A6038.state++;
-            D_800A6038.animFrame = t - o->b6b;
+            PLAYER.state++;
+            PLAYER.animFrame = t - o->b6b;
         }
         o->state++;
         break;

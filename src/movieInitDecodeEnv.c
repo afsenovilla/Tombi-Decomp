@@ -1,6 +1,6 @@
 // FUNC 8001dad4 100 MAIN0
 // MATCHING 8001dad4 100
-extern char DAT_800b3e28[], DAT_800c3e28[], DAT_800d3e28[], DAT_800d5e28[];
+extern char LOAD_BUFFER_ALT[], DAT_800c3e28[], DAT_800d3e28[], DAT_800d5e28[];
 
 typedef struct S {
     void *p0, *p4;
@@ -21,7 +21,7 @@ void movieInitDecodeEnv(o, a, b, c, d)
     short b, c;
     int d;
 {
-    o->p0 = DAT_800b3e28;
+    o->p0 = LOAD_BUFFER_ALT;
     o->p4 = DAT_800c3e28;
     o->pc = DAT_800d3e28;
     o->p10 = DAT_800d5e28;

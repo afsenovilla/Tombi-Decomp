@@ -2,7 +2,7 @@
 // MATCHING 8011ba34 660
 #include "TOBJ.H"
 
-extern unsigned char D_800A6038[], D_800A6039[], D_800A603C[], D_800A603D[];
+extern unsigned char PLAYER[], D_800A6039[], D_800A603C[], D_800A603D[];
 extern void *D_8013986C[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern void AnimLoadDuration(TObj *);
@@ -32,7 +32,7 @@ void func_8011BA34(TObj *o)
         func_8011B588(o, 0, 0);
         if (func_8011B324(o)) {
             o->state++;
-            D_800A6038[0] = 5;
+            PLAYER[0] = 5;
             D_800A603C[0] = 5;
             D_800A603D[0] = 0x40;
             D_800A6039[0] = 0;

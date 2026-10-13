@@ -11,7 +11,7 @@ typedef struct O {
 } O;
 typedef void (*Fn)(O *);
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_80079A98[];
 extern unsigned char D_8009CDA2[];
 extern unsigned char D_8009C93A, D_8009C93E;
@@ -35,7 +35,7 @@ extern void FUN_8002a4d0(O *);
 
 void func_801165E0(O *o)
 {
-    PL *p = &D_800A6038;
+    PL *p = &PLAYER;
 
     switch (o->step) {
     case 0:
@@ -75,7 +75,7 @@ void func_801165E0(O *o)
             break;
         case 1:
         case 5:
-            if (D_800A6038.ba2 == 2) {
+            if (PLAYER.ba2 == 2) {
                 if (D_1F800172 >= -0x46) break;
                 if (D_1F80016A < 0x21c) {
                     FUN_800270a0(o, 1, 0);

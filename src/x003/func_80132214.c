@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 
-extern TObj *D_8009F2D8, *D_8009F2DC;
+extern TObj *SCRIPT_OBJECTS, *D_8009F2DC;
 extern Fix16 *D_800A6078;
 extern unsigned short D_800A6066;
 extern short D_800A60EA;
@@ -20,7 +20,7 @@ extern int Rand(void);
 
 void func_80132214(TObj *o)
 {
-    TObj *a = D_8009F2D8;
+    TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;
     B12 v;
 

@@ -2,7 +2,7 @@
 // MATCHING 8001a940 472
 extern int DAT_1f800164;
 extern short DAT_1f8001f4;
-extern char DAT_800b3e28[];
+extern char LOAD_BUFFER_ALT[];
 extern short DAT_1f8001c6;
 extern unsigned char DAT_1f8001cc;
 extern unsigned char DAT_1f8003d0;
@@ -28,7 +28,7 @@ extern void FUN_8001dbdc(void);
 void gameplayTick(void)
 {
     unsigned char c;
-    DAT_1f800164 = (int)&DAT_800b3e28[DAT_1f8001f4 * 0xc000] & 0xffffff;
+    DAT_1f800164 = (int)&LOAD_BUFFER_ALT[DAT_1f8001f4 * 0xc000] & 0xffffff;
     if (DAT_1f8001c6 == 2) {
         if (DAT_1f8001cc == 0) {
             DAT_1f8001c6 = 0;

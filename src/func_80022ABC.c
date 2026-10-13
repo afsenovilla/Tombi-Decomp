@@ -10,7 +10,7 @@ typedef struct {
 } PolyF3;
 
 extern PolyF3 *DAT_1f800164;
-extern long DAT_1f800070;
+extern long LZ_FILE_CTRL;
 extern char *DAT_1f80008c;
 extern unsigned long *DAT_1f8001e0;
 
@@ -42,11 +42,11 @@ char *func_80022ABC(long *f, char *vtx, unsigned long *ot)
             p = DAT_1f800164;
             gte_ldv3c(vtx + 4);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     gte_stsxy3_f3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&
                         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140)) {

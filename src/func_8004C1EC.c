@@ -14,7 +14,7 @@ extern unsigned short D_8009C962s;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CDB5;
 extern unsigned short D_80078792;
-extern int D_1F800358[];
+extern int APD_DATA[];
 extern int D_1F80035C;
 extern int D_1F800370, D_1F800374, D_1F800378;
 extern void FUN_8004c570(S *);
@@ -34,9 +34,9 @@ void func_8004C1EC(S *o)
         o->b4++;
         o->b5 = 0;
         if (D_8009C960[0] == 1 && !(D_8009D2C3 & 1) && D_8009CDB5 == 0 && D_8009C962s < 2) {
-            D_1F800358[0] = D_1F800370;
+            APD_DATA[0] = D_1F800370;
             D_1F80035C = D_1F800374;
-            D_1F800358[D_80078792] = D_1F800378;
+            APD_DATA[D_80078792] = D_1F800378;
         }
         FUN_8004c570(o);
         FUN_8004c6c8(o);

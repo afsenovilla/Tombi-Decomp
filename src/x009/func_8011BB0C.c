@@ -2,7 +2,7 @@
 // MATCHING 8011bb0c 1228
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P3;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_800A604A;
 extern short D_800A604Ax[];
 extern unsigned char *D_8009C330;
@@ -20,7 +20,7 @@ extern void ObjFreeDup(TObj *);
 
 void func_8011BB0C(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     int i;
     TObj *e;
 

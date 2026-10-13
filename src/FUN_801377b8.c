@@ -2,8 +2,8 @@
 // MATCHING 801377b8 1936
 #include "TOBJ.H"
 typedef struct { TObj o; unsigned char bc0; } BigObj;
-extern BigObj DAT_800a6038;
-#define X DAT_800a6038.o
+extern BigObj PLAYER;
+#define X PLAYER.o
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c940, DAT_8009c941, DAT_8009c942;
 extern unsigned char DAT_8009cebd, DAT_8009d0a7, DAT_8009d2b0, DAT_8009ce4a, DAT_8009d00d, DAT_8009f3dc;
 extern int DAT_8009c984;
@@ -52,7 +52,7 @@ void FUN_801377b8(TObj *o)
     case 0:
         DAT_8009c93f = 1;
         if (*(unsigned short *)&o->anim != 0) {
-            DAT_800a6038.bc0 = 1;
+            PLAYER.bc0 = 1;
             DAT_8009cebd = 1;
             o->step = 3;
             break;
@@ -211,7 +211,7 @@ void FUN_801377b8(TObj *o)
         X.step = 0;
         X.state = 0;
         DAT_8009c942 = 0;
-        DAT_800a6038.bc0 = 0;
+        PLAYER.bc0 = 0;
         DAT_8009c93e = 0;
         DAT_8009c93f = 0;
         { unsigned char *c = &DAT_8009cebd; *c = *c + 1; }
@@ -234,7 +234,7 @@ void FUN_801377b8(TObj *o)
         DAT_8009cebd = 0;
     clear:
         *(short *)&o->anim = 0;
-        DAT_800a6038.bc0 = 0;
+        PLAYER.bc0 = 0;
         DAT_8009c93f = 0;
         DAT_8009c942 = 0;
         DAT_8009c93e = 0;

@@ -4,8 +4,8 @@ extern void EnterCriticalSection(void);
 extern void CloseTh(int);
 extern void ExitCriticalSection(void);
 extern void ChangeTh(int);
-extern short *DAT_1f8001d4;
-#define P DAT_1f8001d4
+extern short *TASK_C;
+#define P TASK_C
 void exitTask(void)
 {
     *P = 0;

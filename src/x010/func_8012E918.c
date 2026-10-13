@@ -1,13 +1,13 @@
 // FUNC 8012e918 188 X010
 // MATCHING 8012e918 188
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603D, D_800A603E;
 extern short D_800A604E, D_800A60B0;
 
 void func_8012E918(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
 
     switch (D_800A603D) {
     case 0x3e:

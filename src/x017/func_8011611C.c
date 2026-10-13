@@ -26,7 +26,7 @@ typedef struct {
 typedef struct { char p[0x4c]; short w4c, w4e; } Q;
 typedef void (*Fn)(O *);
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_80079AD0[];
 extern unsigned char D_8009C93A, D_8009C93C, D_8009C975;
 extern unsigned char D_8009D001[];
@@ -35,7 +35,7 @@ extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
-extern Q *D_1F8001D4;
+extern Q *TASK_C;
 extern void func_80027810(O *);
 extern int FUN_800270a0(O *, int, int);
 extern void stepPlayerXToward(int);
@@ -43,7 +43,7 @@ extern void FUN_8002a4d0(O *);
 
 void func_8011611C(O *o)
 {
-    PL *p = &D_800A6038;
+    PL *p = &PLAYER;
 
     switch (o->step) {
     case 0:
@@ -142,8 +142,8 @@ void func_8011611C(O *o)
         }
     case 6:
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         D_1F8000F2[0]++;
         if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;

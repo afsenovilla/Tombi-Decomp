@@ -1,11 +1,11 @@
 // FUNC 8003ac50 68 MAIN0
 // MATCHING 8003ac50 68
-extern char *D_8009F0F0;
+extern char *SCRIPT_CTX;
 extern void func_8004D620(int, int);
 
 void scriptOpShowMessage2(void)
 {
-    char *p = D_8009F0F0;
+    char *p = SCRIPT_CTX;
     func_8004D620(*(int *)(p + 0x1190), 2);
     *(unsigned short *)(p + 0x8a) += 1;
 }

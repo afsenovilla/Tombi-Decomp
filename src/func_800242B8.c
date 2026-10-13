@@ -18,7 +18,7 @@ typedef struct {
 } PolyG3;
 
 extern char *D_1F800164[];
-extern long DAT_1f800070;
+extern long LZ_FILE_CTRL;
 extern char *D_1F80008C[];
 extern char *volatile D_1F80008CV;
 extern unsigned long *DAT_1f8001e0;
@@ -62,11 +62,11 @@ static __inline__ char *drawF3(long *f, char *vtx, unsigned long *ot)
             p = (void *)D_1F800164[0];
             gte_ldv3c(vtx + 4);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     gte_stsxy3_f3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&
                         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140)) {
@@ -106,11 +106,11 @@ static __inline__ char *drawFT3(long *f, char *vtx, unsigned long *ot)
             p = (void *)D_1F800164[0];
             gte_ldv3c(vtx + 0xc);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     gte_stsxy3_g3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&
                         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140)) {
@@ -152,11 +152,11 @@ static __inline__ char *litF3(long *f, char *vtx, unsigned long *ot)
             p = (void *)D_1F800164[0];
             gte_ldv3c(vtx + 4);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     gte_stsxy3_f3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&
                         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140)) {
@@ -198,11 +198,11 @@ static __inline__ char *litG3(long *f, char *vtx, unsigned long *ot)
         do {
             gte_ldv3c(vtx + 0xc);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     p = (void *)D_1F800164[0];
                     gte_stsxy3_g3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&

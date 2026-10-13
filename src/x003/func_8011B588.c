@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_1F80016A, D_1F80016E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_80135A78[];
 extern int angleFromDelta(int, int);
 
@@ -20,7 +20,7 @@ int func_8011B588(TObj *o, int mode, int target)
         if (o->subtype & 2)
             t = (o->subtype & 1) << 7;
         else
-            t = (D_800A6038.h->p.whole < o->h->p.whole) << 7;
+            t = (PLAYER.h->p.whole < o->h->p.whole) << 7;
     } else
         t = target;
     cur = o->d38;

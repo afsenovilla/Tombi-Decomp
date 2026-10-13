@@ -11,7 +11,7 @@ extern unsigned char DAT_800a60d6;
 extern unsigned short DAT_1f800282;
 extern unsigned short DAT_1f800282b;
 extern TObj *DAT_8009c330;
-extern char DAT_800a6038[];
+extern char PLAYER[];
 extern short *DAT_800a6078;
 extern unsigned short DAT_800a604e;
 extern unsigned short DAT_800a60a8;
@@ -49,14 +49,14 @@ int FUN_80035428(TObj *o)
     switch ((signed char)DAT_8009c330->substep) {
     case 0:
     case 2:
-        if (FUN_80041ebc(DAT_800a6038, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (FUN_80041ebc(PLAYER, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }
         break;
     case 1:
     case 3:
-        if (FUN_80041ebc(DAT_800a6038, DAT_800a6078[1] - 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (FUN_80041ebc(PLAYER, DAT_800a6078[1] - 0x10, DAT_800a604e + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }

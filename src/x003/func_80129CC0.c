@@ -4,7 +4,7 @@
 typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern E12 D_80135DC0[];
 extern unsigned char D_800A60D4[];
 extern short D_800A60EA[];
@@ -18,7 +18,7 @@ extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
-#define P D_800A6038
+#define P PLAYER
 #define ANIM(k) D_80135DC0[o->subtype].p[k]
 
 void func_80129CC0(TObj *o)

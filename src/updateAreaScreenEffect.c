@@ -1,7 +1,7 @@
 // FUNC 800310d0 388 MAIN0
 // MATCHING 800310d0 388
 typedef struct S { unsigned char a, p, b; } S;
-extern S DAT_a;
+extern S PLAYER;
 extern unsigned char DAT_603a;
 extern unsigned short DAT_960, DAT_962;
 extern unsigned char DAT_36c2;
@@ -11,7 +11,7 @@ extern void updateObjectsLayer1(void);
 void updateAreaScreenEffect(void)
 {
     unsigned char v;
-    S *p = &DAT_a;
+    S *p = &PLAYER;
     DAT_603a = 0;
     switch (DAT_960) {
     case 2:

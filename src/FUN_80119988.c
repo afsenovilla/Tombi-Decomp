@@ -26,8 +26,8 @@ extern unsigned char D_8009C942A[];
 #define D_8009C942 D_8009C942A[0]
 extern unsigned char D_8009C93FA[];
 #define D_8009C93F D_8009C93FA[0]
-extern unsigned char D_800A6038A[];
-#define D_800A6038 D_800A6038A[0]
+extern unsigned char PLAYER[];
+#define D_800A6038 PLAYER[0]
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603DA[];
 #define D_800A603D D_800A603DA[0]

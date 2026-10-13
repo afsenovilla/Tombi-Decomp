@@ -5,7 +5,7 @@ typedef struct S {
     unsigned short w6c, w6e, w70, w72; char p3[0xa4 - 0x74]; unsigned char ba4; char p4[0xbc - 0xa5];
     unsigned short wbc, wbe, wc0, wc2; char p5[0xce - 0xc4]; unsigned short wce, wd0, wd2;
 } S;
-extern char D_800B0BB8[];
+extern char SPRITE_SLOTS[];
 extern char D_800B0BBA[];
 extern unsigned char D_800B0BBC[], D_800B0BBD[], D_800B0BBE[], D_800B0BBF[];
 extern unsigned char D_8009CDA2;
@@ -61,7 +61,7 @@ void func_8002B0BC(S *o)
         if (o->b00 == 1) {
             int off2 = o->wbe * 10;
             if (--*(short *)(D_800B0BBA + off2) == 0)
-                *(short *)(D_800B0BB8 + o->wbe * 10) = -1;
+                *(short *)(SPRITE_SLOTS + o->wbe * 10) = -1;
         }
         if (D_8009D2B0 != 3) {
             if (o->wce & 0x7fff) {

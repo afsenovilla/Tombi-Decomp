@@ -4,7 +4,7 @@ typedef struct O { char p0[0x18]; int b; char p1[0x30-0x1c]; short h30; short h3
   unsigned char b3d; unsigned char b3e; char p3[0x44-0x3f]; unsigned short h44; } O;
 typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c; char p2; unsigned char f9e;
   char p3[0xa9-0x9f]; unsigned char fa9; } G;
-extern G DAT_800a6038;
+extern G PLAYER;
 extern signed char DAT_8009d2b0;
 extern int D_1F8000F0;
 extern int DAT_800a604c;
@@ -19,7 +19,7 @@ void func_8002795C(O *o)
     int k;
     int m;   /* 0x340000 as an early local: sched2 leaves its lui last, reorg puts it in the bgez slot instead of flag=0 */
 
-    g = &DAT_800a6038;
+    g = &PLAYER;
     if (DAT_8009d2b0 >= 3)
         return;
     flag = 0;

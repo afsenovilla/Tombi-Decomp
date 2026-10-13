@@ -7,13 +7,13 @@ typedef struct {
     int cnt[64];
 } S8003A570;
 
-extern S8003A570 *D_8009F0F0;
-extern unsigned char *D_8009D60C;
+extern S8003A570 *SCRIPT_CTX;
+extern unsigned char *SCRIPT_CODE;
 
 void func_80038514(void)
 {
-    S8003A570 *p = D_8009F0F0;
-    unsigned char *code = D_8009D60C;
+    S8003A570 *p = SCRIPT_CTX;
+    unsigned char *code = SCRIPT_CODE;
     unsigned short tmp;
     int i;
     unsigned char *s;

@@ -1,9 +1,9 @@
 // FUNC 8005a7a0 264 MAIN0
 // MATCHING 8005a7a0 264
-extern int DAT_80080504[];
-extern unsigned char DAT_80080524[];
-extern unsigned char DAT_800805ec[];
-extern unsigned char DAT_8009cda4[];
+extern int AP_TABLE[];
+extern unsigned char EVENT_STARTED_AP_TABLE[];
+extern unsigned char EVENT_COMPLETE_AP_TABLE[];
+extern unsigned char SCRIPT_FLAGS[];
 extern void FUN_80026a10(int);
 extern void FUN_8005aa74(int, int, int, int);
 extern void FUN_8005b624(int, int);
@@ -15,7 +15,7 @@ extern void FUN_8001f620(void);
 unsigned char FUN_8005a7a0(int a, int b, int c)
 {
     if (b == 0) {
-        FUN_80026a10(DAT_80080504[DAT_80080524[a]]);
+        FUN_80026a10(AP_TABLE[EVENT_STARTED_AP_TABLE[a]]);
         if (a != 10) {
             FUN_8005aa74(a, 0, 0x3c, c);
             FUN_8005b624(a, 0);
@@ -23,7 +23,7 @@ unsigned char FUN_8005a7a0(int a, int b, int c)
             spawnItemPickupObject(0);
         }
     } else {
-        FUN_80026a10(DAT_80080504[DAT_800805ec[a]]);
+        FUN_80026a10(AP_TABLE[EVENT_COMPLETE_AP_TABLE[a]]);
         if (a != 10) {
             FUN_8005aa74(a, 1, 1, c);
             FUN_8005b624(a, 1);
@@ -31,5 +31,5 @@ unsigned char FUN_8005a7a0(int a, int b, int c)
             FUN_8001f620();
         }
     }
-    return DAT_8009cda4[a];
+    return SCRIPT_FLAGS[a];
 }

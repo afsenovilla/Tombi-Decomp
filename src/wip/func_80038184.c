@@ -7,8 +7,8 @@ typedef struct {
     int vars[1];
 } S80038184;
 
-extern S80038184 *D_8009F0F0;
-extern unsigned char *D_8009D60C;
+extern S80038184 *SCRIPT_CTX;
+extern unsigned char *SCRIPT_CODE;
 
 static __inline__ void copy4(char *d, unsigned char *q, int n)
 {
@@ -20,8 +20,8 @@ static __inline__ void copy4(char *d, unsigned char *q, int n)
 
 void func_80038184(unsigned char flag)
 {
-    S80038184 *s = D_8009F0F0;
-    unsigned char *p = D_8009D60C + s->pc;
+    S80038184 *s = SCRIPT_CTX;
+    unsigned char *p = SCRIPT_CODE + s->pc;
     unsigned char idx = p[1];
     unsigned char *q = p + 2;
     int v;

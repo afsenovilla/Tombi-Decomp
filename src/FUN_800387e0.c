@@ -1,12 +1,12 @@
 // FUNC 800387e0 244 MAIN0
 // MATCHING 800387e0 244
-extern unsigned char *DAT_8009f0f0;
-extern unsigned char *DAT_8009d60c;
+extern unsigned char *SCRIPT_CTX;
+extern unsigned char *SCRIPT_CODE;
 
 void FUN_800387e0(unsigned char op)
 {
-    unsigned char *b = DAT_8009f0f0;
-    unsigned char *code = DAT_8009d60c;
+    unsigned char *b = SCRIPT_CTX;
+    unsigned char *code = SCRIPT_CODE;
     unsigned char idx = code[*(unsigned short *)(b + 0x8a) + 1];
     unsigned char *q;
     int v;
@@ -26,7 +26,7 @@ void FUN_800387e0(unsigned char op)
         break;
     }
     v = *(int *)(idx * 4 + (int)b + 0x1090);
-    q = DAT_8009f0f0;
+    q = SCRIPT_CTX;
     if (v == 0) {
         q[0x89] = 0;
     } else {

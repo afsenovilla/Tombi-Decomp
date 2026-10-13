@@ -2,7 +2,7 @@
 // MATCHING 80137968 404
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void *D_8013E6DC;
 extern unsigned char D_8009CEAF, D_8009D0B4, D_8009CE56;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
@@ -26,11 +26,11 @@ void func_80137968(TObj *o)
             D_8009C93F = 1;
             D_8009C942 = 1;
             D_8009C93E = 1;
-            o->animFrame = D_800A6038.animFrame & 1;
-            FUN_800eea7c(&D_800A6038, 0xd, 0);
+            o->animFrame = PLAYER.animFrame & 1;
+            FUN_800eea7c(&PLAYER, 0xd, 0);
             D_800A60C4[0] = 0;
-            D_800A6038.h->p.whole = o->h->p.whole;
-            o->y.p.whole = D_800A6038.y.p.whole + 8;
+            PLAYER.h->p.whole = o->h->p.whole;
+            o->y.p.whole = PLAYER.y.p.whole + 8;
             setEventStarted(0xb2, 0, 0);
             o->timer = 250;
             o->state++;

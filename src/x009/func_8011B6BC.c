@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e; short k; void **anims; } T16;
 extern T16 D_8012B23C[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_8009CFF8;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -20,7 +20,7 @@ void func_8011B6BC(TObj *o)
         o->box2 = D_8012B23C[o->subtype].b2;
         o->box3 = D_8012B23C[o->subtype].b3;
         o->w1e = D_8012B23C[o->subtype].w1e;
-        o->d3c = D_1F8002C8[D_8012B23C[o->subtype].k];
+        o->d3c = SPR_DATA[D_8012B23C[o->subtype].k];
         o->anim = *D_8012B23C[o->subtype].anims;
         o->d8c = 0;
         o->b0d = 0;

@@ -1,7 +1,7 @@
 // FUNC 8011b6f4 380 X003
 // MATCHING 8011b6f4 380
 #include "TOBJ.H"
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern unsigned short D_1F800172, D_1F80016A, D_1F80016E;
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
@@ -12,7 +12,7 @@ static __inline__ int near(TObj *o, short x, short w)
 {
     int d;
 
-    if (D_800A6038 == 2) return 0;
+    if (PLAYER == 2) return 0;
     d = D_1F800172 - (unsigned short)o->d->p.whole + 0x2d;
     if ((unsigned short)d >= 0x5b) return 0;
     d = D_1F80016A - (unsigned short)o->h->p.whole + x;

@@ -1,7 +1,7 @@
 // FUNC 80136ce0 1676 X000
 // MATCHING 80136ce0 1676
 #include "TOBJ.H"
-extern TObj DAT_800a6038;
+extern TObj PLAYER;
 extern unsigned short DAT_800a6066;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_800a60f8;
@@ -27,16 +27,16 @@ void FUN_80136ce0(TObj *o)
     switch (o->step) {
     case 0:
         o->w08 = 0x14;
-        DAT_800a6038.animFrame = 0;
-        DAT_800a6038.b04 = 1;
+        PLAYER.animFrame = 0;
+        PLAYER.b04 = 1;
         DAT_8009c93f = 1;
         DAT_8009c93e = 1;
         DAT_8009c942 = 1;
-        DAT_800a6038.step = 0;
-        DAT_800a6038.state = 0;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         DAT_8009d2b0 = 0;
-        DAT_800a6038.anim = DAT_80010748;
-        AnimLoadDuration(&DAT_800a6038);
+        PLAYER.anim = DAT_80010748;
+        AnimLoadDuration(&PLAYER);
         o->step++;
         break;
     case 1:
@@ -97,9 +97,9 @@ void FUN_80136ce0(TObj *o)
                 o->step = 2;
                 W1C(o) = 1;
             } else {
-                DAT_800a6038.b04 = 1;
-                DAT_800a6038.step = 0;
-                DAT_800a6038.state = 0;
+                PLAYER.b04 = 1;
+                PLAYER.step = 0;
+                PLAYER.state = 0;
                 DAT_800a60f8 = 0;
                 o->b04 = 0;
                 o->step = 0;
@@ -118,9 +118,9 @@ void FUN_80136ce0(TObj *o)
                 o->step = 2;
                 W1C(o) = 1;
             } else {
-                DAT_800a6038.b04 = 1;
-                DAT_800a6038.step = 0;
-                DAT_800a6038.state = 0;
+                PLAYER.b04 = 1;
+                PLAYER.step = 0;
+                PLAYER.state = 0;
                 DAT_800a60f8 = 0;
                 o->b04 = 1;
                 o->step = 0;
@@ -156,9 +156,9 @@ void FUN_80136ce0(TObj *o)
         case 9:
             DAT_800a60c8->b04 = 3;
             DAT_8009cebe = 0xb;
-            DAT_800a6038.b04 = 1;
-            DAT_800a6038.step = 0;
-            DAT_800a6038.state = 0;
+            PLAYER.b04 = 1;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             t->b04 = 2;
             t->step = 2;
             t->state = 0;
@@ -176,14 +176,14 @@ void FUN_80136ce0(TObj *o)
     case 3:
         if (--o->w08 != 0)
             break;
-        DAT_800a6038.timer = 0x50;
-        DAT_800a6038.active = 3;
-        DAT_800a6038.b04 = 5;
-        DAT_800a6038.animFrame = 0;
+        PLAYER.timer = 0x50;
+        PLAYER.active = 3;
+        PLAYER.b04 = 5;
+        PLAYER.animFrame = 0;
         DAT_800a6066 = 0;
-        DAT_800a6038.step = 1;
-        DAT_800a6038.state = 0;
-        DAT_800a6038.substep = 0;
+        PLAYER.step = 1;
+        PLAYER.state = 0;
+        PLAYER.substep = 0;
         o->b04 = 0;
         o->step = 0;
         W1C(o) = 0;

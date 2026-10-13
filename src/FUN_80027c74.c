@@ -3,7 +3,7 @@
 typedef struct O { char p0[0x14]; int y; char p1[0x2c-0x18]; short h2c; short h2e; char p2[0x34-0x30]; int *d34;
   char p3[0x3c-0x38]; unsigned char b3c; char p4[0x44-0x3d]; unsigned short h44; char p5[0x58-0x46]; unsigned short w58; } O;
 typedef struct G { char p0[0x9c]; unsigned char f9c; } G;
-extern G DAT_800a6038;
+extern G PLAYER;
 extern unsigned short DAT_800a6066;
 extern unsigned char DAT_800a60d4, DAT_800a60d6;
 extern int DAT_800a6068;
@@ -17,7 +17,7 @@ void FUN_80027c74(O *o)
     G *g;
     u = DAT_800a6066 & 1;
     base = *o->d34 - 0x100000;
-    g = &DAT_800a6038;
+    g = &PLAYER;
     if (DAT_800a60d4)
         u = o->w58;
     o->w58 = u;

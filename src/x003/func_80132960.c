@@ -2,8 +2,8 @@
 // MATCHING 80132960 1056
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
-#define P D_800A6038
+extern TObj PLAYER;
+#define P PLAYER
 extern TObj *D_8009F3D4;
 extern unsigned char D_8009D00A, D_8009CEF0;
 extern unsigned char D_8009C93F[], D_8009C942[];

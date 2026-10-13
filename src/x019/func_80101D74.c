@@ -8,7 +8,7 @@ extern unsigned char *D_800A611C;
 extern int D_8009C934;
 extern int D_8009C960;
 extern unsigned char D_8009C93A[];
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
 extern char D_80010748[];
@@ -132,7 +132,7 @@ void func_80101D74(TObj *o)
     case 0x64:
         o->d8c = 0;
     case 0x65:
-        if (D_8009D00F != 0) {
+        if (TALK_POSE != 0) {
             FUN_800f1308(o);
         } else if (D_1f8003ce == 0 || *(unsigned short *)o->anim != 0) {
         anim:

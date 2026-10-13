@@ -3,7 +3,7 @@
 extern char DAT_800b1320[];
 extern char *DAT_1f800220, *DAT_1f800264;
 extern short DAT_1f800252, DAT_1f80024a;
-extern char DAT_800a3fe0[];
+extern char LOAD_BUFFER[];
 extern void initSpriteSlots(void);
 
 void initMainDrawList(void)
@@ -16,7 +16,7 @@ void initMainDrawList(void)
     DAT_1f800252 = 0;
     DAT_1f80024a = 0;
     do {
-        *(short *)(DAT_800a3fe0 + off) = m;
+        *(short *)(LOAD_BUFFER + off) = m;
         i--;
         off -= 0x8c;
     } while (i >= 0);

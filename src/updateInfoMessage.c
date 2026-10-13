@@ -10,9 +10,9 @@ typedef struct S {
 typedef struct G { short n, f2, f4, f6; } G;
 typedef struct E { short v, pad[3]; } E;
 typedef struct M { short a; unsigned short mask; short pad[3]; } M;
-extern G D_800A4648[];
-extern E D_800A4DE0[][128];
-extern M D_800A5DE0[];
+extern G MESSAGE_SLOTS[];
+extern E MESSAGE_GLYPHS[][128];
+extern M GLYPH_CACHE[];
 typedef struct M2 { unsigned short mask; short pad[4]; } M2;
 extern M2 D_800A5DE2[];
 extern M2 D_800A5DE2_st[];
@@ -30,22 +30,22 @@ void updateInfoMessage(S *o)
             o->timer = 0x78;
         break;
     case 1:
-        D_800A4648[o->wca].f4 = o->wbe;
-        D_800A4648[o->wca].f6 = o->wc0;
+        MESSAGE_SLOTS[o->wca].f4 = o->wbe;
+        MESSAGE_SLOTS[o->wca].f6 = o->wc0;
         o->b01 = 1;
         ObjListPush_1F800220(o);
-        if (--o->timer == 0 || D_800A4648[o->wca].f2 == -1) {
-            D_800A4648[o->wca].f2 = -1;
+        if (--o->timer == 0 || MESSAGE_SLOTS[o->wca].f2 == -1) {
+            MESSAGE_SLOTS[o->wca].f2 = -1;
             o->b04++;
         }
         break;
     case 2:
-        for (i = 0; i < D_800A4648[o->wca].n; i++) {
-            int v = D_800A4DE0[o->wca][i].v * 10;
+        for (i = 0; i < MESSAGE_SLOTS[o->wca].n; i++) {
+            int v = MESSAGE_GLYPHS[o->wca][i].v * 10;
             if ((*(unsigned short *)((char *)D_800A5DE2 + v) &= ~(1 << o->wca)) == 0)
-                *(short *)((char *)D_800A5DE0 + v) = -1;
+                *(short *)((char *)GLYPH_CACHE + v) = -1;
         }
-        D_800A4648[o->wca].n = -1;
+        MESSAGE_SLOTS[o->wca].n = -1;
         o->b04++;
         break;
     case 3:

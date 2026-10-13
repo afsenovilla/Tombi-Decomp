@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 typedef struct { short k; short pad; void **anims; int pad2; } T12;
 extern T12 DAT_80114c20[];
-extern int DAT_1f8002c8[];
+extern int SPR_DATA[];
 extern unsigned short DAT_800a6066;
 typedef struct G { char p0; unsigned char b1; char p1[0xf - 2]; unsigned char b0f; } G;
-extern G DAT_800a6038;
+extern G PLAYER;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_800ebd40(TObj *);
@@ -23,7 +23,7 @@ void FUN_800ec420(TObj *o)
         if (o->subtype == 9)
             goto inc;
         o->w1e = 0x13;
-        o->d3c = DAT_1f8002c8[DAT_80114c20[o->subtype].k];
+        o->d3c = SPR_DATA[DAT_80114c20[o->subtype].k];
         o->anim = DAT_80114c20[o->subtype].anims[o->b0c];
         FUN_8001fe6c(o);
         v = DAT_800a6066;
@@ -49,8 +49,8 @@ void FUN_800ec420(TObj *o)
             FUN_800ebf68(o);
             break;
         case 9:
-            o->visible = DAT_800a6038.b1;
-            o->b0f = DAT_800a6038.b0f - 1;
+            o->visible = PLAYER.b1;
+            o->b0f = PLAYER.b0f - 1;
             if (FUN_8001fec0(o) != 0)
                 o->b04 = 3;
             break;

@@ -1,6 +1,6 @@
 // FUNC 8001b9b0 324 MAIN0
 // MATCHING 8001b9b0 324
-extern char DAT_800b3e28[];
+extern char LOAD_BUFFER_ALT[];
 extern short DAT_1f8001f4;
 extern short DAT_1f8001c6;
 extern unsigned short DAT_1f8001f8;
@@ -20,7 +20,7 @@ extern void SoundUpdate(void);
 
 void areaMode5Tick(void)
 {
-    DAT_1f800164 = (unsigned int)(DAT_800b3e28 + DAT_1f8001f4 * 0xc000) & 0xffffff;
+    DAT_1f800164 = (unsigned int)(LOAD_BUFFER_ALT + DAT_1f8001f4 * 0xc000) & 0xffffff;
     FUN_8001ca58();
     if (DAT_1f8001c6 == 0) {
         DAT_1f8001f8 = DAT_1f8001f8 + 1;

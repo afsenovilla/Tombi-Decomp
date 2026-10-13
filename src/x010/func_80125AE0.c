@@ -10,7 +10,7 @@ typedef struct {
 } T80125AE0;
 
 extern T80125AE0 D_8012F3B0[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_800A6047;
 extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
@@ -22,7 +22,7 @@ void func_80125AE0(TObj *o)
     o->box2 = D_8012F3B0[o->subtype].b2;
     o->box3 = D_8012F3B0[o->subtype].b3;
     o->w1e = D_8012F3B0[o->subtype].w4;
-    o->d3c = D_1F8002C8[D_8012F3B0[o->subtype].w6];
+    o->d3c = SPR_DATA[D_8012F3B0[o->subtype].w6];
     AnimLoadDuration(o);
     o->anim = D_8012F3B0[o->subtype].anim[0];
     AnimJump(o, 0);

@@ -2,7 +2,7 @@
 // MATCHING 801206c0 1428
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C942;
 extern int DAT_1f8002dc[];
 extern void *D_80129F9C[];
@@ -34,7 +34,7 @@ static __inline__ int out(TObj *o)
 
 void func_801206C0(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     short d, v;
     int t;
 

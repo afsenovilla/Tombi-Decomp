@@ -10,7 +10,7 @@ typedef struct {
 } T8012A6D8;
 
 extern T8012A6D8 D_80135DB8[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_800A6047, D_8009CDC7[];
 extern void AnimLoadDuration(TObj *);
 
@@ -21,7 +21,7 @@ void func_8012A6D8(TObj *o)
     o->box2 = D_80135DB8[o->subtype].b2;
     o->box3 = D_80135DB8[o->subtype].b3;
     o->w1e = D_80135DB8[o->subtype].w4;
-    o->d3c = D_1F8002C8[D_80135DB8[o->subtype].w6];
+    o->d3c = SPR_DATA[D_80135DB8[o->subtype].w6];
     if (D_8009CDC7[0] != 0xff) o->anim = D_80135DB8[o->subtype].anim[1];
     else o->anim = D_80135DB8[o->subtype].anim[2];
     AnimLoadDuration(o);

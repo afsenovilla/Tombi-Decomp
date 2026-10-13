@@ -15,8 +15,8 @@ typedef struct {
     unsigned short w24;
 } Ctl;
 
-extern TObj D_800A6038;
-extern TObj *D_8009F2D8, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
+extern TObj PLAYER;
+extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
 extern unsigned char D_8009C93A, D_8009C942[], D_8009C93F[], D_8009D2B0, D_8009C975, D_8009C93C;
 extern unsigned char D_8009CFEA, D_8009C93E[], D_8009CE15, D_8009CDBB, D_8009D0B2;
 extern unsigned short D_1F8001F8;
@@ -62,7 +62,7 @@ extern void func_80117CEC(TObj *, int, int);
 
 void func_8011A114(Ctl *o)
 {
-    TObj *a = D_8009F2D8;
+    TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;
     TObj *c = D_8009F2F8;
     TObj *d = D_8009F328;
@@ -70,7 +70,7 @@ void func_8011A114(Ctl *o)
 
     switch (o->state) {
     case 0:
-        { Fix16 *h = D_800A6038.h, *dd = D_800A6038.d; Spawn(h->p.whole, D_800A6038.y.p.whole, dd->p.whole); }
+        { Fix16 *h = PLAYER.h, *dd = PLAYER.d; Spawn(h->p.whole, PLAYER.y.p.whole, dd->p.whole); }
         if (D_8009C93A) {
             D_8009C942[0] = 1;
             D_8009C93F[0] = 1;
@@ -79,13 +79,13 @@ void func_8011A114(Ctl *o)
         }
         break;
     case 1:
-        { Fix16 *h = D_800A6038.h, *dd = D_800A6038.d; Spawn(h->p.whole, D_800A6038.y.p.whole, dd->p.whole); }
-        if (D_800A6038.b69) o->state++;
+        { Fix16 *h = PLAYER.h, *dd = PLAYER.d; Spawn(h->p.whole, PLAYER.y.p.whole, dd->p.whole); }
+        if (PLAYER.b69) o->state++;
         break;
     case 2:
         { Fix16 *h = c->h, *dd = c->d; Spawn(h->p.whole, c->y.p.whole, dd->p.whole); }
         c->y.p.whole++;
-        if (D_800A6038.y.p.whole - 0x20 < c->y.p.whole) {
+        if (PLAYER.y.p.whole - 0x20 < c->y.p.whole) {
             c->b04 = 3;
             setEventComplete(0x9f, 0);
             o->w08 = 0x15e;
@@ -270,7 +270,7 @@ void func_8011A114(Ctl *o)
             *(signed char *)&b->b0f = -8;
             b->animFrame = 1;
             func_80117CEC(b, 3, 0);
-            o->w08 = b->h->p.whole - D_800A6038.h->p.whole;
+            o->w08 = b->h->p.whole - PLAYER.h->p.whole;
             o->state++;
         }
         break;
@@ -304,12 +304,12 @@ void func_8011A114(Ctl *o)
         D_8009C942[0] = 0;
         D_8009C93F[0] = 0;
         D_8009C93E[0] = 0;
-        D_800A6038.wb2 = 0;
+        PLAYER.wb2 = 0;
         D_1F8001C6 = 0;
         o->b0f = o->w24;
-        D_800A6038.b04 = 1;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->step = 0;
         o->state = 0;
         break;

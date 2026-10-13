@@ -1,14 +1,14 @@
 // FUNC 80019a08 260 MAIN0
 // MATCHING 80019a08 260
 typedef struct { short x, y, w, h; } RECT;
-extern char *DAT_1f8001d4;
+extern char *TASK_C;
 extern unsigned char DAT_1f8001cf;
 extern void ClearImage(RECT *r, int a, int b, int c);
 extern void FUN_8001783c(void);
 
 void gameInitState(void)
 {
-    char *s = DAT_1f8001d4;
+    char *s = TASK_C;
     RECT r;
     unsigned short u = *(unsigned short *)(s + 0x4a);
     short *q;

@@ -1,7 +1,7 @@
 // FUNC 8011a4a8 504 X009
 // MATCHING 8011a4a8 504
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CF06[], D_8009D006[], D_8009C990, D_8009D2B3;
 extern unsigned long *D_8012B1A0, *D_8012B1B4;
 extern unsigned long *D_8012B190[], *D_8012B1A4[];
@@ -18,7 +18,7 @@ void func_8011A4A8(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        D_800A6038.active = 5;
+        PLAYER.active = 5;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;

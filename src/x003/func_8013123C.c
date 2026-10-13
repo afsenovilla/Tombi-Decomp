@@ -4,7 +4,7 @@
 
 #define W1C(o) (*(unsigned short *)&(o)->category)
 #define W1E(o) (*(unsigned short *)&(o)->w1e)
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_1F8001F8;
 extern unsigned short D_1F800176;
 int Rand(void);
@@ -59,7 +59,7 @@ static __inline__ void spawn2(TObj *o, unsigned short *q)
 
 void func_8013123C(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     switch (o->b04) {
     case 0:
         o->b04++;

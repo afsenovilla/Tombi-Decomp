@@ -7,30 +7,30 @@ extern long EnableEvent(unsigned long);
 extern void InitCARD(long);
 extern long StartCARD(void);
 extern void _bu_init(void);
-extern long DAT_8009f10c, DAT_8009f110, DAT_8009f114, DAT_8009f118;
-extern long DAT_8009f0f4, DAT_8009f0f8, DAT_8009f0fc, DAT_8009f100;
+extern long MEMCARD_SW_END_IO, MEMCARD_SW_END_ERROR, MEMCARD_SW_TIMEOUT, MEMCARD_SW_NEW_DEVICE;
+extern long MEMCARD_HW_END_IO, MEMCARD_HW_END_ERROR, MEMCARD_HW_TIMEOUT, MEMCARD_HW_NEW_DEVICE;
 
 void MemCardInit(void)
 {
     EnterCriticalSection();
-    DAT_8009f10c = OpenEvent(0xf4000001, 4, 0x2000, 0);
-    DAT_8009f110 = OpenEvent(0xf4000001, 0x8000, 0x2000, 0);
-    DAT_8009f114 = OpenEvent(0xf4000001, 0x100, 0x2000, 0);
-    DAT_8009f118 = OpenEvent(0xf4000001, 0x2000, 0x2000, 0);
-    DAT_8009f0f4 = OpenEvent(0xf0000011, 4, 0x2000, 0);
-    DAT_8009f0f8 = OpenEvent(0xf0000011, 0x8000, 0x2000, 0);
-    DAT_8009f0fc = OpenEvent(0xf0000011, 0x100, 0x2000, 0);
-    DAT_8009f100 = OpenEvent(0xf0000011, 0x2000, 0x2000, 0);
+    MEMCARD_SW_END_IO = OpenEvent(0xf4000001, 4, 0x2000, 0);
+    MEMCARD_SW_END_ERROR = OpenEvent(0xf4000001, 0x8000, 0x2000, 0);
+    MEMCARD_SW_TIMEOUT = OpenEvent(0xf4000001, 0x100, 0x2000, 0);
+    MEMCARD_SW_NEW_DEVICE = OpenEvent(0xf4000001, 0x2000, 0x2000, 0);
+    MEMCARD_HW_END_IO = OpenEvent(0xf0000011, 4, 0x2000, 0);
+    MEMCARD_HW_END_ERROR = OpenEvent(0xf0000011, 0x8000, 0x2000, 0);
+    MEMCARD_HW_TIMEOUT = OpenEvent(0xf0000011, 0x100, 0x2000, 0);
+    MEMCARD_HW_NEW_DEVICE = OpenEvent(0xf0000011, 0x2000, 0x2000, 0);
     InitCARD(0);
     ExitCriticalSection();
     StartCARD();
     _bu_init();
-    EnableEvent(DAT_8009f10c);
-    EnableEvent(DAT_8009f110);
-    EnableEvent(DAT_8009f114);
-    EnableEvent(DAT_8009f118);
-    EnableEvent(DAT_8009f0f4);
-    EnableEvent(DAT_8009f0f8);
-    EnableEvent(DAT_8009f0fc);
-    EnableEvent(DAT_8009f100);
+    EnableEvent(MEMCARD_SW_END_IO);
+    EnableEvent(MEMCARD_SW_END_ERROR);
+    EnableEvent(MEMCARD_SW_TIMEOUT);
+    EnableEvent(MEMCARD_SW_NEW_DEVICE);
+    EnableEvent(MEMCARD_HW_END_IO);
+    EnableEvent(MEMCARD_HW_END_ERROR);
+    EnableEvent(MEMCARD_HW_TIMEOUT);
+    EnableEvent(MEMCARD_HW_NEW_DEVICE);
 }

@@ -1,10 +1,10 @@
 // FUNC 8011eb08 840 X014
 // MATCHING 8011eb08 840
 /* csv size 816 + the epilogue piece 8011EE38. Box pointer assigned in two statements keeps the lbu/addiu
-   increments; D_800A6038 is the player TObj. Case 5 reads q before it is set (s1 garbage), as in the game. */
+   increments; PLAYER is the player TObj. Case 5 reads q before it is set (s1 garbage), as in the game. */
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
 extern void decreaseObjectTimer(void *, int);
@@ -57,13 +57,13 @@ void func_8011EB08(TObj *o)
         setBox(o, 14);
         o->anim = ANIMS(o)[14];
         FUN_8001fe6c(o);
-        q = (unsigned char *)&D_800A6038;
+        q = (unsigned char *)&PLAYER;
         o->state++;
         *q = 2;
-        D_800A6038.animFrame = o->h->p.whole > D_800A6038.h->p.whole;
-        D_800A6038.b04 = 2;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.animFrame = o->h->p.whole > PLAYER.h->p.whole;
+        PLAYER.b04 = 2;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         decreaseObjectTimer(q, 1);
         break;
     case 2:

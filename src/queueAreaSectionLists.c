@@ -1,7 +1,7 @@
 // FUNC 8004f490 168 MAIN0
 // MATCHING 8004f490 168
-extern int *PTR_8007dea0[];
-extern int g298, g2a4, g2b0;
+extern int *AREA_LOAD_LISTS[];
+extern int LOAD_NEXT_ADDR, LOAD_SLOTS, g2b0;
 extern void SfxStopAll(int);
 extern void FUN_8004f538(int);
 void queueAreaSectionLists(int a, int b, int c)
@@ -10,11 +10,11 @@ void queueAreaSectionLists(int a, int b, int c)
     if (c == 0) {
         SfxStopAll(1);
     } else {
-        p = PTR_8007dea0[a];
+        p = AREA_LOAD_LISTS[a];
         FUN_8004f538(p[0]);
-        g2a4 = g298;
+        LOAD_SLOTS = LOAD_NEXT_ADDR;
     }
-    p = PTR_8007dea0[a];
+    p = AREA_LOAD_LISTS[a];
     FUN_8004f538(p[b + 1]);
-    g2b0 = g298;
+    g2b0 = LOAD_NEXT_ADDR;
 }

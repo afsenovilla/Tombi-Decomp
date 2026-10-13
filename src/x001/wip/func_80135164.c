@@ -1,5 +1,5 @@
 // FUNC 80135164 1372 X001
-/* score 309 (o27: D_800A60B2 is player field D_800A6038.w7a, keeps the dy store first; o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
+/* score 309 (o27: D_800A60B2 is player field PLAYER.w7a, keeps the dy store first; o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
    for (signed char)e->c, dx/ang get s3/s0 in the game (frame 0x28), the pl->h/y/d update order.
    Tried: int/short temps, casts, shifts.
    o27: the lb issue is gone (lbu+sll/sra now). Left: game `andi v0; move s0,v0` + dx in s3 (ang still live when
@@ -8,7 +8,7 @@
    (short/int/uchar), nested inline calc(o,e,ang&0xff), short/uchar callee prototypes, local type search. */
 #include "TOBJ.H"
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern E4 D_80011DD8[];
 extern signed char D_80011EB4[];
 extern void *D_8013DE4C[];
@@ -32,18 +32,18 @@ static __inline__ void follow(TObj *o, E4 *e)
     else
         o->anim = D_8013DDF8[e->a];
     if (o->animFrame & 1)
-        { int k = 0x80; ang = D_800A6038.d8c + k - (signed char)e->c; }
+        { int k = 0x80; ang = PLAYER.d8c + k - (signed char)e->c; }
     else
-        ang = (signed char)e->c + D_800A6038.d8c;
+        ang = (signed char)e->c + PLAYER.d8c;
     ang &= 0xff;
     dx = FUN_8001fddc(ang, e->d);
     dy = FUN_8001fdac(ang, e->d);
-    D_800A6038.w7a = dy;
-    o->h->p.whole = D_800A6038.h->p.whole + dx;
-    o->y.p.whole = D_800A6038.y.p.whole + dy;
-    o->d->p.whole = D_800A6038.d->p.whole;
-    o->d8c = D_800A6038.d8c;
-    o->b0f = D_800A6038.b0f + e->b;
+    PLAYER.w7a = dy;
+    o->h->p.whole = PLAYER.h->p.whole + dx;
+    o->y.p.whole = PLAYER.y.p.whole + dy;
+    o->d->p.whole = PLAYER.d->p.whole;
+    o->d8c = PLAYER.d8c;
+    o->b0f = PLAYER.b0f + e->b;
 }
 
 void func_80135164(TObj *o)
@@ -51,27 +51,27 @@ void func_80135164(TObj *o)
     E4 *e;
     TObj *p;
 
-    o->visible = D_800A6038.visible;
+    o->visible = PLAYER.visible;
     switch (o->state) {
     case 0:
         o->active = 2;
-        o->animFrame = D_800A6038.animFrame & 1;
+        o->animFrame = PLAYER.animFrame & 1;
         o->category |= 0x80;
-        e = &D_80011DD8[D_80011EB4[*(unsigned short *)D_800A6038.anim]];
+        e = &D_80011DD8[D_80011EB4[*(unsigned short *)PLAYER.anim]];
         follow(o, e);
         if (D_8009C938) break;
         switch (D_8009C962) {
         case 1:
-            if (D_800A6038.h->p.whole >= 0x1000) break;
-            D_800A6038.h->p.whole = 0x1000;
+            if (PLAYER.h->p.whole >= 0x1000) break;
+            PLAYER.h->p.whole = 0x1000;
             goto set;
         case 3:
-            if ((unsigned short)(D_800A6038.y.p.whole + 0x2d6) < 0x48) {
-                if ((unsigned short)(D_800A6038.h->p.whole - 0x7f0) >= 0x20) break;
-                D_800A6038.h->p.whole = 0x7ee;
+            if ((unsigned short)(PLAYER.y.p.whole + 0x2d6) < 0x48) {
+                if ((unsigned short)(PLAYER.h->p.whole - 0x7f0) >= 0x20) break;
+                PLAYER.h->p.whole = 0x7ee;
             } else {
-                if (D_800A6038.h->p.whole < 0xad3) break;
-                D_800A6038.h->p.whole = 0xad2;
+                if (PLAYER.h->p.whole < 0xad3) break;
+                PLAYER.h->p.whole = 0xad2;
             }
         set:
             D_800A603C = 5;
@@ -82,11 +82,11 @@ void func_80135164(TObj *o)
         }
         break;
     case 1:
-        e = &D_80011DD8[D_80011EB4[*(unsigned short *)D_800A6038.anim]];
+        e = &D_80011DD8[D_80011EB4[*(unsigned short *)PLAYER.anim]];
         if (e->a < 2 && (FUN_8001f9e0() & 3) == 0)
             e->a = FUN_8001f9e0() & 1;
         follow(o, e);
-        if (D_800A6038.b69) {
+        if (PLAYER.b69) {
             D_8009C942 = 1;
             o->d90 = showMessageBox(2, 0xc, 0x80, 0x6c);
             o->state = 2;

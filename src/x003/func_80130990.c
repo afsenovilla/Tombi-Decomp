@@ -1,7 +1,7 @@
 // FUNC 80130990 1196 X003
 // MATCHING 80130990 1196
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009D2C3, D_1F8001A4, D_8009C93A, D_8009C93F;
 extern unsigned short D_8009C962;
 extern short D_8009C944, D_8009C946;
@@ -14,7 +14,7 @@ extern void FUN_80018980(TObj *);
 
 void func_80130990(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     short v;
 
     switch (o->b04) {
@@ -38,11 +38,11 @@ void func_80130990(TObj *o)
             }
             break;
         case 1:
-            if (D_800A6038.y.p.whole >= -0x153) goto clr;
-            if (U8(&D_800A6038, 0xa2) | U8(&D_800A6038, 0xa3)) goto clr;
+            if (PLAYER.y.p.whole >= -0x153) goto clr;
+            if (U8(&PLAYER, 0xa2) | U8(&PLAYER, 0xa3)) goto clr;
             if (D_8009C93F) goto clr;
-            if (D_800A6038.step == 0x34) goto clr;
-            switch (D_800A6038.b9c) {
+            if (PLAYER.step == 0x34) goto clr;
+            switch (PLAYER.b9c) {
             case 0:
                 D_8009C944 = 0x100;
                 break;

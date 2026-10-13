@@ -1,7 +1,7 @@
 // FUNC 8011d2b8 652 X004
 // MATCHING 8011d2b8 652
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_8009C982[];
 extern unsigned char D_8009C93F, D_8009C93A;
 extern void FUN_800202b4(TObj *);
@@ -9,7 +9,7 @@ extern void FUN_80018838(TObj *);
 
 void func_8011D2B8(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     unsigned char b = o->b04;
     unsigned char s;
 
@@ -52,9 +52,9 @@ void func_8011D2B8(TObj *o)
             if (o->h->p.whole > 0xb0) {
                 o->timer = 0x5a;
                 o->step++;
-                D_800A6038.b04 = 1;
-                D_800A6038.step = 0x12;
-                D_800A6038.state = 0;
+                PLAYER.b04 = 1;
+                PLAYER.step = 0x12;
+                PLAYER.state = 0;
             }
             break;
         case 2:

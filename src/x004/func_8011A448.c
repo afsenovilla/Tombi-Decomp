@@ -7,7 +7,7 @@ typedef struct {
     short a, b, c, d, e, f, g, h, i, j;
 } E118;
 
-extern E118 D_800A3FE0[][7];
+extern E118 LOAD_BUFFER[][7];
 typedef struct { char pad[0xc2]; unsigned short wc2, wc4, wc6; short wc8; } X118;
 #define X(o) ((X118 *)(o))
 extern int D_1F8002D8;
@@ -38,7 +38,7 @@ void func_8011A448(int n, short x, short y, short z, short t)
 
     FUN_80026a10(n);
     for (i = 7; i >= 0; i--) {
-        if (D_800A3FE0[i][0].a == -1)
+        if (LOAD_BUFFER[i][0].a == -1)
             break;
     }
     if (i < 0)
@@ -92,7 +92,7 @@ loop:
         m = (w << 3) + w;
         m = (m << 2) - w;
         m = m << 2;
-        q = (char *)D_800A3FE0 + off;
+        q = (char *)LOAD_BUFFER + off;
         e = (E118 *)(m + (int)q);
         e->a = 0;
         if (dp[0x5a] != 0 || cnt != 0) {
@@ -116,7 +116,7 @@ loop:
     if (i < 6) goto loop;
     D_800A4468 = D_80012100;
     D_800B0BB0 = D_800122A0;
-    e = &D_800A3FE0[X(o)->wc6][6];
+    e = &LOAD_BUFFER[X(o)->wc6][6];
     e->a = 1;
     e->b = (cnt << 2) | 1;
     e->c = cnt * 400;

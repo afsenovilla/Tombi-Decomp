@@ -7,7 +7,7 @@ extern void FUN_80025f40(int, int, int, int);
 extern char *PTR_80079d58[];
 extern unsigned short DAT_1f8001f8;
 extern unsigned char DAT_800a6039, DAT_800a6047;
-extern char DAT_800a6038, DAT_800a6104;
+extern char PLAYER, DAT_800a6104;
 extern short DAT_800a6118;
 extern unsigned short DAT_800a6066;
 extern short *DAT_800a6078;
@@ -45,9 +45,9 @@ void func_8002F16C(TObj *o)
     } else {
         if (o->timer < 0) {
             if (DAT_800a6118 > 0)
-                DAT_800a6038 = 3;
+                PLAYER = 3;
             else
-                DAT_800a6038 = 1;
+                PLAYER = 1;
             DAT_800a6104 = 3;
             o->b6b = 0;
             o->b04 = 2;

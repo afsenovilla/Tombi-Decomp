@@ -5,7 +5,7 @@
 extern int D_1F8002D4[];
 extern short D_1F80027E;
 extern void *D_8013E740[];
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CE59;
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
@@ -31,7 +31,7 @@ void func_801312F8(TObj *o)
         o->b0d = 1;
         o->w08 = 0x7813;
         o->d3c = d;
-        o->b0f = D_800A6038.b0f + 1;
+        o->b0f = PLAYER.b0f + 1;
         o->b68 = 0;
         o->wb6 = 0;
         o->wb4 = 0;

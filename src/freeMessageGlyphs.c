@@ -3,22 +3,22 @@
 typedef struct A { short n; short x[3]; } A;
 typedef struct B { short a; unsigned short m; short c[3]; } B;
 typedef struct C { short id; short x[3]; } C;
-extern A DAT_800a4648[];
-extern C DAT_800a4de0[][128];
-extern B DAT_800a5de0[];
+extern A MESSAGE_SLOTS[];
+extern C MESSAGE_GLYPHS[][128];
+extern B GLYPH_CACHE[];
 void freeMessageGlyphs(unsigned int p)
 {
     char pad[4];
     int i;
     int k;
     unsigned int u;
-    if (DAT_800a4648[p].n != -1) {
-        for (i = 0; i < DAT_800a4648[p].n; i++) {
-            k = DAT_800a4de0[p][i].id;
-            u = DAT_800a5de0[k].m & ~(1 << p);
-            DAT_800a5de0[k].m = u;
-            if (u == 0) DAT_800a5de0[k].a = -1;
+    if (MESSAGE_SLOTS[p].n != -1) {
+        for (i = 0; i < MESSAGE_SLOTS[p].n; i++) {
+            k = MESSAGE_GLYPHS[p][i].id;
+            u = GLYPH_CACHE[k].m & ~(1 << p);
+            GLYPH_CACHE[k].m = u;
+            if (u == 0) GLYPH_CACHE[k].a = -1;
         }
-        DAT_800a4648[p].n = -1;
+        MESSAGE_SLOTS[p].n = -1;
     }
 }

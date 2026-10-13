@@ -1,7 +1,7 @@
 // FUNC 8001b7cc 484 MAIN0
 // MATCHING 8001b7cc 484
 typedef struct Th { char pad[0x4c]; short b; unsigned short c; } Th;
-extern Th *DAT_1f8001d4;
+extern Th *TASK_C;
 extern char DAT_1f8001c2, DAT_1f8001cf;
 extern unsigned short DAT_1f8001fc;
 extern int DAT_8009c968[];
@@ -21,7 +21,7 @@ extern unsigned char *allocObjectLayer7(void);
 
 void FUN_8001b7cc(void)
 {
-    Th *t = DAT_1f8001d4;
+    Th *t = TASK_C;
     Th *u;
     unsigned char *e;
     char pad[4];
@@ -36,7 +36,7 @@ void FUN_8001b7cc(void)
         DAT_800b1410 = 0;
         DAT_1f8001cf = 1;
         if (DAT_8009c967 != 1) startAreaBgm();
-        u = DAT_1f8001d4;
+        u = TASK_C;
         u->c = u->c + 1;
         e = allocObjectLayer7();
         if (e) {
@@ -55,7 +55,7 @@ void FUN_8001b7cc(void)
         DAT_8009c968[0] = DAT_8009c968[0] + 1;
         areaMode5Tick();
         if (DAT_1f8001c2 != 0 && (DAT_8009d670[0] & 8) != 0 && (DAT_8009d670[0] & 0x800) != 0)
-            DAT_1f8001d4->c = 3;
+            TASK_C->c = 3;
         break;
     case 2:
     case 3:
@@ -65,8 +65,8 @@ void FUN_8001b7cc(void)
         DAT_8009f085 = 0;
         DAT_8009f086 = 0;
         DAT_8009f087 = 0;
-        DAT_1f8001d4->b = 8;
-        DAT_1f8001d4->c = 0;
+        TASK_C->b = 8;
+        TASK_C->c = 0;
         break;
     }
 }

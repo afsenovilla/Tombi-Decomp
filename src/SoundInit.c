@@ -1,7 +1,7 @@
 // FUNC 8001f6b4 364 MAIN0
 // MATCHING 8001f6b4 364
 typedef struct { int mask; short pad0; short pad1; short mvl, mvr; short pad2[4]; short cdvl, cdvr; short pad3[2]; int cdmix; } SC;
-extern char DAT_80078788;
+extern char SOUND_INITIALIZED;
 extern void SoundShutdown(void);
 extern void FUN_8006c544(void);
 extern void FUN_800702c0(void *, int, int);
@@ -15,10 +15,10 @@ extern char DAT_800a2270[];
 extern int DAT_8009bce0;
 extern short DAT_8009bce4, DAT_8009bce6, DAT_8009bcf0, DAT_8009bcf2;
 extern int DAT_8009bcf8;
-extern short DAT_8009f2d0, DAT_800a3f90, DAT_8009d688, DAT_8009bd10, DAT_8009bd14, DAT_8009bd2c;
-extern short DAT_8009c8c0[], DAT_800a3cc8[];
-extern short DAT_1f8003a8[];
-extern short DAT_800a3428, DAT_8009f0c8;
+extern short SOUND_QUEUE_TAIL, SOUND_QUEUE_HEAD, SOUND_QUEUE_COUNT, BGM_VOLUME, BGM_FADE_ACTIVE, PITCH_SLIDE_ACTIVE;
+extern short VOICE_PRIORITY[], VOICE_SFX_ID[];
+extern short VAB_IDS[];
+extern short BGM_SEQ_ID, JINGLE_SEQ_ID;
 
 void SoundInit(void)
 {
@@ -26,7 +26,7 @@ void SoundInit(void)
     short m;
     int *s;
     short *q, *p;
-    if (DAT_80078788 != 0)
+    if (SOUND_INITIALIZED != 0)
         SoundShutdown();
     FUN_8006c544();
     FUN_800702c0(DAT_800a2270, 4, 1);
@@ -44,24 +44,24 @@ void SoundInit(void)
     FUN_80077404(s);
     FUN_8006eed8();
     i = 0;
-    DAT_8009f2d0 = 0;
-    DAT_800a3f90 = 0;
-    DAT_8009d688 = 0;
-    DAT_8009bd10 = 0;
-    DAT_8009bd14 = 0;
-    DAT_8009bd2c = 0;
+    SOUND_QUEUE_TAIL = 0;
+    SOUND_QUEUE_HEAD = 0;
+    SOUND_QUEUE_COUNT = 0;
+    BGM_VOLUME = 0;
+    BGM_FADE_ACTIVE = 0;
+    PITCH_SLIDE_ACTIVE = 0;
     do {
-        DAT_8009c8c0[i] = 0xf;
-        DAT_800a3cc8[i] = -1;
+        VOICE_PRIORITY[i] = 0xf;
+        VOICE_SFX_ID[i] = -1;
         i++;
     } while (i < 0x18);
     m = -1;
     i = 7;
     do {
-        DAT_1f8003a8[i] = m;
+        VAB_IDS[i] = m;
         i--;
     } while (i >= 0);
-    DAT_800a3428 = -1;
-    DAT_8009f0c8 = -1;
-    DAT_80078788 = 1;
+    BGM_SEQ_ID = -1;
+    JINGLE_SEQ_ID = -1;
+    SOUND_INITIALIZED = 1;
 }

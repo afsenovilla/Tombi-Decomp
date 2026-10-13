@@ -1,24 +1,24 @@
 // FUNC 8001e2cc 156 MAIN0
 // MATCHING 8001e2cc 156
-extern short DAT_8009bd20;
-extern short DAT_8009bd1c;
-extern short DAT_8009bd18;
-extern short DAT_8009bd28;
+extern short BGM_FADE_STEP;
+extern short BGM_FADE_INTERVAL;
+extern short BGM_FADE_TIMER;
+extern short BGM_FADE_TARGET;
 
 int setBgmFadeParam(unsigned short a)
 {
     switch (a & 0xf00) {
     case 0:
-        DAT_8009bd1c = a & 0xff;
-        DAT_8009bd18 = 1;
+        BGM_FADE_INTERVAL = a & 0xff;
+        BGM_FADE_TIMER = 1;
         break;
     case 0x100:
-        DAT_8009bd20 = a & 0xff;
-        if (DAT_8009bd20 >= 0x80)
-            DAT_8009bd20 = DAT_8009bd20 | 0xff00;
+        BGM_FADE_STEP = a & 0xff;
+        if (BGM_FADE_STEP >= 0x80)
+            BGM_FADE_STEP = BGM_FADE_STEP | 0xff00;
         break;
     case 0x200:
-        DAT_8009bd28 = a & 0xff;
+        BGM_FADE_TARGET = a & 0xff;
         break;
     }
     return 0;

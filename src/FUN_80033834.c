@@ -2,7 +2,7 @@
 // MATCHING 80033834 296
 typedef struct { char p0[6]; unsigned char step; char p1[0x20 - 7]; short timer; char p2[0x2e - 0x22]; unsigned short af; char p3[0x7a - 0x30]; short w7a; char p4[0xaa - 0x7c]; short waa; short wac; } O;
 extern short DAT_8007a074[];
-extern char DAT_800a6038[];
+extern char PLAYER[];
 extern int DAT_800a60c4;
 extern void FUN_800312e8(void);
 extern void AnimJump(char *, int);
@@ -17,7 +17,7 @@ void FUN_80033834(O *o)
     f = o->af;
     f = f * 3;
     FUN_800312e8();
-    AnimJump(DAT_800a6038, 0);
+    AnimJump(PLAYER, 0);
     o->wac = DAT_8007a074[(short)f];
     switch (o->af & 7) {
     case 0:

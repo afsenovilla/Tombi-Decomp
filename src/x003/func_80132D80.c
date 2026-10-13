@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
-extern TObj *D_8009F2D8;
+extern TObj *SCRIPT_OBJECTS;
 extern unsigned char D_8009C93A, D_8009CE50, D_8009CFFC;
 extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -16,7 +16,7 @@ extern void func_801289C8(TObj *, int, int);
 
 void func_80132D80(TObj *o)
 {
-    TObj *p = D_8009F2D8;
+    TObj *p = SCRIPT_OBJECTS;
     TObj *q;
     V6 v;
 
@@ -43,7 +43,7 @@ void func_80132D80(TObj *o)
         if (p->b68 == 0) break;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A6038 = 1;
+        PLAYER = 1;
         D_800A6066 = 0;
         D_800A603C = 5;
         D_800A603D = 0;
@@ -125,7 +125,7 @@ void func_80132D80(TObj *o)
         D_8009C93E[0] = 0;
         p->animFrame = 1;
         p->b68 = 0;
-        D_800A6038 = 1;
+        PLAYER = 1;
         D_800A60EA = 0;
         D_800A603C = 1;
         D_800A603D = 0;

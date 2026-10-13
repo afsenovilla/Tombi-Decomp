@@ -26,7 +26,7 @@ typedef struct {
 } Face;
 
 extern PolyGT3 *DAT_1f800164;
-extern long DAT_1f800070;
+extern long LZ_FILE_CTRL;
 extern unsigned long *DAT_1f8001e0;
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
@@ -52,11 +52,11 @@ long *func_8011FDC4(long *f, unsigned long *ot)
         do {
             gte_ldv3c((char *)f + 0x10);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     gte_avsz3();
                     gte_stotz(&otz);
                     p = DAT_1f800164;

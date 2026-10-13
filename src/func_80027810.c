@@ -9,7 +9,7 @@ typedef struct {
 typedef struct { char p[0x14]; int d14; } G;
 extern unsigned char D_8009C939;
 extern Fix16 *D_800A6078[];
-extern G D_800A6038;
+extern G PLAYER;
 extern signed char D_8009D2B0[];
 extern Fix16 D_1F8000F0;
 
@@ -23,7 +23,7 @@ void func_80027810(S *o)
     if (D_8009C939 != 0) return;
     o->f34->raw = D_800A6078[0]->raw;
     f = o->f34;
-    g = &D_800A6038;
+    g = &PLAYER;
     if (o->s2e < f->p.whole) {
         f->raw = o->s2e << 16;
         if (D_8009D2B0[0] != 3) {

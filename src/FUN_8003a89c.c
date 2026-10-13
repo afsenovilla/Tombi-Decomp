@@ -2,15 +2,15 @@
 // MATCHING 8003a89c 416
 extern unsigned char DAT_8009c93a, DAT_8009c93e, DAT_8009c93f;
 extern int DAT_8009d69c;
-extern unsigned char *DAT_8009f0f0;
-extern unsigned char DAT_800a603c, DAT_800a603d, DAT_800a603e, DAT_800a6038, DAT_800a60d6;
+extern unsigned char *SCRIPT_CTX;
+extern unsigned char DAT_800a603c, DAT_800a603d, DAT_800a603e, PLAYER, DAT_800a60d6;
 extern short DAT_800a60ea, DAT_800a6066, DAT_800a6058;
 extern unsigned short DAT_8009c960;
 extern short DAT_800a6118;
 
 void FUN_8003a89c(void)
 {
-    unsigned char *o = DAT_8009f0f0;
+    unsigned char *o = SCRIPT_CTX;
     int a, b;
     if (DAT_8009c93a == 0)
         return;
@@ -22,7 +22,7 @@ void FUN_8003a89c(void)
         switch (DAT_800a603c) {
         case 1:
             DAT_8009c93f = 0;
-            DAT_800a6038 = 1;
+            PLAYER = 1;
             DAT_800a60d6 = 0;
             break;
         case 4:
@@ -51,7 +51,7 @@ void FUN_8003a89c(void)
             if (DAT_800a603c == 1) {
                 DAT_8009c93f = 0;
                 if (DAT_8009c960 != 0 || DAT_800a6118 == 0)
-                    DAT_800a6038 = 1;
+                    PLAYER = 1;
             }
             DAT_800a603d = b;
             DAT_800a603e = 0;

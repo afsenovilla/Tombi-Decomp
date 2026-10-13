@@ -2,7 +2,7 @@
 // MATCHING 8011b3a8 352
 /* debt: volatile timer store (game reloads it for the first division; the second divides by a short 20) */
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void *D_8012E024;
 
 void func_8011B3A8(TObj *o)
@@ -13,12 +13,12 @@ void func_8011B3A8(TObj *o)
     char pad[16];
 
     if (o->state == 0) {
-        o->visible = D_800A6038.visible;
-        o->animFrame = D_800A6038.animFrame & 1;
+        o->visible = PLAYER.visible;
+        o->animFrame = PLAYER.animFrame & 1;
         o->anim = D_8012E024;
-        o->h->p.whole = D_800A6038.h->p.whole;
-        o->y.p.whole = D_800A6038.y.p.whole;
-        o->d->p.whole = D_800A6038.d->p.whole;
+        o->h->p.whole = PLAYER.h->p.whole;
+        o->y.p.whole = PLAYER.y.p.whole;
+        o->d->p.whole = PLAYER.d->p.whole;
         *(volatile short *)&o->timer = 20;
         vy = (-0x6c00 - (o->y.p.whole << 8)) / o->timer;
         o->d8c = 0;
@@ -29,7 +29,7 @@ void func_8011B3A8(TObj *o)
         o->velY = vy;
         o->velX = vx;
         o->category |= 0x80;
-        o->b0f = D_800A6038.b0f - 1;
+        o->b0f = PLAYER.b0f - 1;
         o->state++;
     }
 }

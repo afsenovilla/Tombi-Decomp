@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C939, D_8009C93F, D_800A60D6;
 extern unsigned short D_8009D670;
 extern short D_1F8000F2;
@@ -20,7 +20,7 @@ extern void FUN_8002771c(TObj *);
 
 void func_801161D4(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     int t;
 
     if (D_8009C939 == 0) {

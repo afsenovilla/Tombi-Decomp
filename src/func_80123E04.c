@@ -14,7 +14,7 @@ extern char D_1F800070[];
 extern char D_1F800074[];
 extern PFT4 *D_1F800164;
 extern int D_1F800074_v;
-extern int D_1F800070_v;
+extern int LZ_FILE_CTRL;
 extern int D_1F8001E0;
 int FUN_8004fba8(TObj *o, void *a, void *b);
 void insertPrimWithBias(PFT4 *p, int a, int b, int c, int d);
@@ -25,7 +25,7 @@ void func_80123E04(TObj *o)
     int xy; short x, y;
     s = (Spr *)(*(volatile int *)&o->d3c + ((short *)((char *)o->d3c + (*(unsigned short *)o->anim << 2)))[1]);
     if (FUN_8004fba8(o, D_1F800070, D_1F800074) != 0) return;
-    xy = D_1F800070_v;
+    xy = LZ_FILE_CTRL;
     y = xy >> 16;
     p = D_1F800164;
     p->code = 0x2c;

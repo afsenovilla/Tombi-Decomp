@@ -4,12 +4,12 @@ typedef struct {
     char p0[0x48]; short w48; unsigned short w4a; unsigned short w4c; char p4e[0x58 - 0x4e]; short w58;
     char p5a[0x68 - 0x5a]; unsigned char b68, b69, b6a, b6b;
 } G;
-extern G *D_1f8001d4;
+extern G *TASK_C;
 extern unsigned char D_1f8001cc;
 extern short D_1f8001f4;
 extern unsigned short D_1f8001fc, D_1f8001f8;
 extern int D_1f800164;
-extern char D_800B3E28[];
+extern char LOAD_BUFFER_ALT[];
 extern unsigned short D_8007DE98[];
 extern unsigned short D_8009D670;
 extern void func_800198B4();
@@ -28,80 +28,80 @@ extern void updateSound(void);
 void func_8004E41C(int *p)
 {
     int d;
-    switch (D_1f8001d4->w4a) {
+    switch (TASK_C->w4a) {
     case 0:
         SetDispMask(0);
-        D_1f8001d4->w4c = 0;
-        D_1f8001d4->w4a++;
+        TASK_C->w4c = 0;
+        TASK_C->w4a++;
     case 1:
         if (D_1f8001cc == 0) {
             FUN_80016ca8(0, 0, 0);
-            D_1f8001d4->w4a++;
+            TASK_C->w4a++;
         }
         break;
     case 2:
         func_800E8A5C();
         SetDispMask(1);
         FUN_8001eff8(0);
-        D_1f800164 = (int)(D_800B3E28 + D_1f8001f4 * 0xc000) & 0xffffff;
+        D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
         func_800E972C(0x30, 0xd0, 1);
-        D_1f8001d4->b69 = 0;
-        D_1f8001d4->b6a = D_8007DE98[D_1f8001d4->b69];
-        D_1f8001d4->b6b = D_8007DE98[D_1f8001d4->b69];
-        D_1f8001d4->w58 = 0x3cc;
-        D_1f8001d4->w4a++;
+        TASK_C->b69 = 0;
+        TASK_C->b6a = D_8007DE98[TASK_C->b69];
+        TASK_C->b6b = D_8007DE98[TASK_C->b69];
+        TASK_C->w58 = 0x3cc;
+        TASK_C->w4a++;
         break;
     case 3:
-        D_1f800164 = (int)(D_800B3E28 + D_1f8001f4 * 0xc000) & 0xffffff;
-        if (--D_1f8001d4->w58 <= 0) {
-            D_1f8001d4->w4a++;
+        D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
+        if (--TASK_C->w58 <= 0) {
+            TASK_C->w4a++;
         }
         func_800E8A94(p);
         if (*(volatile unsigned short *)&D_8009D670 != 0) {
-            D_1f8001d4->w58 = 0x3cc;
+            TASK_C->w58 = 0x3cc;
         }
-        switch (D_1f8001d4->w4c) {
+        switch (TASK_C->w4c) {
         case 0:
-            if ((D_1f8001fc & 0x80) && D_1f8001d4->b69 != 0) {
-                D_1f8001d4->b69--;
-                D_1f8001d4->b6b = D_8007DE98[D_1f8001d4->b69];
-                D_1f8001d4->w4c++;
+            if ((D_1f8001fc & 0x80) && TASK_C->b69 != 0) {
+                TASK_C->b69--;
+                TASK_C->b6b = D_8007DE98[TASK_C->b69];
+                TASK_C->w4c++;
                 playSFX(8);
             }
-            if ((D_1f8001fc & 0x20) && D_1f8001d4->b69 < 2) {
-                D_1f8001d4->b69++;
-                D_1f8001d4->b6b = D_8007DE98[D_1f8001d4->b69];
-                D_1f8001d4->w4c++;
+            if ((D_1f8001fc & 0x20) && TASK_C->b69 < 2) {
+                TASK_C->b69++;
+                TASK_C->b6b = D_8007DE98[TASK_C->b69];
+                TASK_C->w4c++;
                 playSFX(8);
             }
             if (D_1f8001fc & 0x4008) {
                 stopBgm(0);
-                switch (D_1f8001d4->b69) {
+                switch (TASK_C->b69) {
                 case 0:
-                    D_1f8001d4->b68 = 0;
+                    TASK_C->b68 = 0;
                     playSFXAndSetNote(10, 10);
                     setTask(func_800198B4);
                     break;
                 case 1:
-                    D_1f8001d4->b68 = 1;
+                    TASK_C->b68 = 1;
                     playSFXAndSetNote(10, 10);
                     setTask(func_800198B4);
                     break;
                 case 2:
-                    D_1f8001d4->w48 = 2;
-                    D_1f8001d4->w4a = 0;
+                    TASK_C->w48 = 2;
+                    TASK_C->w4a = 0;
                     playSFXAndSetNote(10, 10);
                     break;
                 }
             }
             break;
         case 1:
-            if (D_1f8001d4->b6a != D_1f8001d4->b6b) {
+            if (TASK_C->b6a != TASK_C->b6b) {
                 d = -4;
-                if (D_1f8001d4->b6a < D_1f8001d4->b6b) d = 4;
-                D_1f8001d4->b6a += d;
-                if (D_1f8001d4->b6b == D_1f8001d4->b6a) {
-                    D_1f8001d4->w4c--;
+                if (TASK_C->b6a < TASK_C->b6b) d = 4;
+                TASK_C->b6a += d;
+                if (TASK_C->b6b == TASK_C->b6a) {
+                    TASK_C->w4c--;
                 }
             }
             break;
@@ -110,14 +110,14 @@ void func_8004E41C(int *p)
         if (D_1f8001f8 & 0x20) {
             func_800E972C(0x38, 0xa0, 0);
         }
-        func_800E9D08(D_1f8001d4->b6a, D_1f8001d4->b69);
+        func_800E9D08(TASK_C->b6a, TASK_C->b69);
         updateSound();
         break;
     case 4:
         stopBgm(0);
         *p = 0;
-        D_1f8001d4->w48 = 3;
-        D_1f8001d4->w4a = 0;
+        TASK_C->w48 = 3;
+        TASK_C->w4a = 0;
         break;
     }
 }

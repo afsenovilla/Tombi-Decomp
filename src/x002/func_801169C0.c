@@ -7,7 +7,7 @@ typedef struct {
     void **tab;
 } Ent;
 extern Ent D_8011C6D8[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_8009CE41;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CFDB, D_8009CFDC, D_8009CFDD, D_8009CFDE, D_8009CFDF, D_8009CFE0, D_8009CFE1;
@@ -44,7 +44,7 @@ void func_801169C0(TObj *o)
         o->d34 = o->y.p.whole;
         o->w08 = FUN_8005e420(0x80, 0x1ff);
         o->w1e = D_8011C6D8[o->subtype].w1e;
-        o->d3c = D_1F8002C8[D_8011C6D8[o->subtype].idx];
+        o->d3c = SPR_DATA[D_8011C6D8[o->subtype].idx];
         if (o->subtype == 1) {
             if (D_8009CE41 == 0) {
                 o->w1e = 5;

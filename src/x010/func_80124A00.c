@@ -2,7 +2,7 @@
 // MATCHING 80124a00 1292
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_1F80016A[], D_1F80016E;
 extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
@@ -34,9 +34,9 @@ static __inline__ int turn(TObj *o)
 
 static __inline__ int near(TObj *o)
 {
-    if ((unsigned short)(D_800A6038.d->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
-    if ((unsigned short)(D_800A6038.h->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
-    return (unsigned short)(D_800A6038.y.p.whole - o->y.p.whole + 0x50) < 0xa1;
+    if ((unsigned short)(PLAYER.d->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)(PLAYER.h->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
+    return (unsigned short)(PLAYER.y.p.whole - o->y.p.whole + 0x50) < 0xa1;
 }
 
 void func_80124A00(TObj *o)

@@ -7,14 +7,14 @@ extern unsigned char D_8009D0B4[];
 extern unsigned short D_800A604A[];
 extern unsigned char D_8009CE56;
 extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern char D_80010748[];
 extern Fix16 *D_800A6078[];
 extern short D_800A604E[];
 extern TObj *D_8009F2EC[];
 extern unsigned char D_8009CFCF, D_8009C975;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern int FUN_8001f9e0(void);
 extern void FUN_801148d0(TObj *, char, int, int, short);
 extern void FUN_8001fe6c(void *);
@@ -49,8 +49,8 @@ void func_8013B51C(TObj *o)
         D_8009C93F = 1;
         D_8009C93E = 1;
         D_8009C942 = 1;
-        D_800A6038.anim = D_80010748;
-        FUN_8001fe6c(&D_800A6038);
+        PLAYER.anim = D_80010748;
+        FUN_8001fe6c(&PLAYER);
         o->a.raw = e->h->raw;
         {
             int y = e->y.raw;
@@ -101,7 +101,7 @@ void func_8013B51C(TObj *o)
         D_8009CD96 = 2;
         D_8009CDA0 = 1;
         {
-            TObj *q = D_1F8001D4;
+            TObj *q = TASK_C;
             q->w4c = 7;
             q->w4e = 0;
         }

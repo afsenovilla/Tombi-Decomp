@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_800A60E0;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 void func_80116E60(TObj *o)
 {
@@ -14,10 +14,10 @@ void func_80116E60(TObj *o)
         D_800A60E0 = 8;
         break;
     case 1:
-        D_800A6038.d->p.whole--;
+        PLAYER.d->p.whole--;
         break;
     case 2:
-        D_800A6038.d->p.whole++;
+        PLAYER.d->p.whole++;
         break;
     }
 }

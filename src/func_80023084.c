@@ -14,7 +14,7 @@ typedef struct {
 } PolyG4;
 
 extern PolyG4 *DAT_1f800164;
-extern long DAT_1f800070;
+extern long LZ_FILE_CTRL;
 extern char *DAT_1f80008c;
 extern unsigned long *DAT_1f8001e0;
 
@@ -49,17 +49,17 @@ char *func_80023084(long *f, char *vtx, unsigned long *ot)
         do {
             gte_ldv3c(vtx + 0x10);
             gte_rtpt();
-            gte_stflg(&DAT_1f800070);
-            if (DAT_1f800070 >= 0) {
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
                 gte_nclip();
-                gte_stopz(&DAT_1f800070);
-                if (DAT_1f800070 > 0) {
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
                     p = DAT_1f800164;
                     gte_stsxy3_g4(p);
                     gte_ldv0(vtx + 0x28);
                     gte_rtps();
-                    gte_stflg(&DAT_1f800070);
-                    if (DAT_1f800070 >= 0) {
+                    gte_stflg(&LZ_FILE_CTRL);
+                    if (LZ_FILE_CTRL >= 0) {
                         gte_stsxy(&p->x3);
                         if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100 || p->y3 < 0x100) &&
                             (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140 || p->x3 < 0x140)) {

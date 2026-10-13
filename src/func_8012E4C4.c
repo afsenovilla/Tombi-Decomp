@@ -2,7 +2,7 @@
 // MATCHING 8012e4c4 1024
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[0xec - 0xc0]; } E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern E D_800B1478[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -51,7 +51,7 @@ void func_8012E4C4(TObj *o)
         o->b04++;
         break;
     case 1:
-        pl = &D_800A6038;
+        pl = &PLAYER;
         switch (o->step) {
         case 0:
             if (func_800203DC(o) == 0)

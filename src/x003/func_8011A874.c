@@ -3,7 +3,7 @@
 /* includes the csv piece 8011ADC0 (the shared epilogue) */
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A60E3;
 extern unsigned char D_8009CDCD, D_8009CEF0, D_8009D2C3, D_8009CE4E, D_8009D0D9, D_8009CDDB;
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
@@ -79,7 +79,7 @@ void func_8011A874(TObj *o)
                 else o->state = t + 1;
                 break;
             case 1:
-                if (D_800A6038.h->p.whole < 0x25) D_800A6038.h->p.whole = 0x25;
+                if (PLAYER.h->p.whole < 0x25) PLAYER.h->p.whole = 0x25;
                 o->d88 = 0;
                 break;
             case 2:

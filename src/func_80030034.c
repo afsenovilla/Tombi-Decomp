@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { int a, y, b; } P3;
 extern P3 D_800A6048;
-extern unsigned char D_800A6038, D_800A6104;
+extern unsigned char PLAYER, D_800A6104;
 extern TObj *ObjAlloc(void);
 extern void func_80111A50(int a, int b, int c);
 
@@ -24,7 +24,7 @@ static __inline__ void spawn(short sub, int idx)
 
 void func_80030034(short n)
 {
-    if (n != 2) D_800A6038 = 7;
+    if (n != 2) PLAYER = 7;
     D_800A6104 = 2;
     switch (n) {
     case 0:

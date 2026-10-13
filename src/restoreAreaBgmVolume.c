@@ -1,11 +1,11 @@
 // FUNC 8001f1c0 300 MAIN0
 // MATCHING 8001f1c0 300
-extern short DAT_800a3428;
+extern short BGM_SEQ_ID;
 extern unsigned short DAT_8009c960;
 extern unsigned short DAT_8009c960b;
 extern unsigned short DAT_8009c962;
-extern short DAT_8007833c[];
-extern short DAT_8009bd0c;
+extern short AREA_BGM_VOLUME[];
+extern short BGM_MUTED;
 extern void SsSeqSetVol(short, short, short);
 
 void restoreAreaBgmVolume(void)
@@ -14,9 +14,9 @@ void restoreAreaBgmVolume(void)
     short sv;
     short d;
 
-    if (DAT_800a3428 == -1)
+    if (BGM_SEQ_ID == -1)
         return;
-    v = DAT_8007833c[DAT_8009c960];
+    v = AREA_BGM_VOLUME[DAT_8009c960];
     switch (DAT_8009c960b) {
     case 0:
     case 2:
@@ -48,7 +48,7 @@ void restoreAreaBgmVolume(void)
     }
 
     sv = v;
-    d = DAT_800a3428;
+    d = BGM_SEQ_ID;
     SsSeqSetVol(d, sv, sv);
-    DAT_8009bd0c = 0;
+    BGM_MUTED = 0;
 }

@@ -1,7 +1,7 @@
 // FUNC 8001c9a8 88 MAIN0
 // MATCHING 8001c9a8 88
 typedef struct S { char pad[0x4c]; unsigned short a; unsigned short b; } S;
-extern S *DAT_1f8001d4;
+extern S *TASK_C;
 extern unsigned short DAT_1f8003b8[];
 extern unsigned short DAT_1f8003ba[];
 extern char DAT_800a45d8[];
@@ -11,7 +11,7 @@ extern short DAT_800a45ee[];
 
 void openMenuScreen(short x)
 {
-    S *s = DAT_1f8001d4;
+    S *s = TASK_C;
     unsigned short a = s->a;
     unsigned short b = s->b;
     DAT_800a45d8[0] = 0;

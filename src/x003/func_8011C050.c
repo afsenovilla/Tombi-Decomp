@@ -2,7 +2,7 @@
 // MATCHING 8011c050 904
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void *D_80139874[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -16,7 +16,7 @@ static __inline__ void setAnim(TObj *o, void *a)
 
 void func_8011C050(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
 
     switch (o->state) {
     case 0:

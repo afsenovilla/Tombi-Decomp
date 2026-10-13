@@ -12,23 +12,23 @@ typedef struct {
 
 typedef struct { Rel *e; char *base; } RelLog;
 
-extern char *D_1f8002a4[];
-extern char *D_1f8002c8[];
+extern char *LOAD_SLOTS[];
+extern char *SPR_DATA[];
 extern char *D_1f800310[];
-extern char *D_1f800330[];
-extern char *D_1f800348[];
+extern char *WMD_DATA[];
+extern char *WPP_DATA[];
 extern char *D_1f800308[];
-extern char *D_1f800358[];
-extern char *D_8009d630[];
+extern char *APD_DATA[];
+extern char *SEQ_DATA[];
 extern char *D_1f8002b8[];
-extern char *D_1f800398[];
-extern char *D_8009d2f0[];
-extern char *D_8009d3f0[];
+extern char *WFM3_DATA[];
+extern char *WVD_BODIES[];
+extern char *WVD_HEADERS[];
 extern char D_800e8028[];
 extern char D_80098c44[];
-extern RelLog D_8009f3e0[];
+extern RelLog CD_QUEUE[];
 extern int D_1f80029c;
-extern char *D_1f800298;
+extern char *LOAD_NEXT_ADDR;
 
 int FUN_8004f538(Rel *e, int unused, char *base)
 {
@@ -44,8 +44,8 @@ int FUN_8004f538(Rel *e, int unused, char *base)
         }
         if (e->ptr != 0) base = e->ptr;
         if (e->idx != 0xff) {
-            if (e->idx < 0x80) D_1f8002a4[e->idx] = base;
-            else base = D_1f8002a4[e->idx & 0x7f];
+            if (e->idx < 0x80) LOAD_SLOTS[e->idx] = base;
+            else base = LOAD_SLOTS[e->idx & 0x7f];
         }
         if (e->type == 0xf0) {
             saved = base;
@@ -56,24 +56,24 @@ int FUN_8004f538(Rel *e, int unused, char *base)
             saved = base;
             base = D_80098c44;
         }
-        D_8009f3e0[D_1f80029c].e = e;
-        D_8009f3e0[D_1f80029c].base = base;
+        CD_QUEUE[D_1f80029c].e = e;
+        CD_QUEUE[D_1f80029c].base = base;
         D_1f80029c = (D_1f80029c + 1) & 0x7f;
         if ((e->flags & 0xf) < 3) {
             t = e->type;
             lo = t & 0xf;
             switch (t & 0xf0) {
             case 0x00: case 0x10: case 0x20: break;
-            case 0x30: D_1f8002c8[lo] = base; break;
+            case 0x30: SPR_DATA[lo] = base; break;
             case 0x40: D_1f800310[lo] = base; break;
-            case 0x50: D_1f800330[lo] = base; break;
-            case 0x60: D_1f800348[lo] = base; break;
+            case 0x50: WMD_DATA[lo] = base; break;
+            case 0x60: WPP_DATA[lo] = base; break;
             case 0x70: D_1f800308[lo] = base; break;
-            case 0x80: D_1f800358[lo] = base; break;
+            case 0x80: APD_DATA[lo] = base; break;
             case 0x90: case 0xa0: break;
-            case 0xb0: D_8009d630[lo] = base; break;
+            case 0xb0: SEQ_DATA[lo] = base; break;
             case 0xc0: D_1f8002b8[lo] = base; break;
-            case 0xd0: D_1f800398[lo] = base; break;
+            case 0xd0: WFM3_DATA[lo] = base; break;
             }
             if ((e->type & 0xf0) != 0x10) base += e->size;
             e++;
@@ -83,17 +83,17 @@ int FUN_8004f538(Rel *e, int unused, char *base)
                 lo = t & 0xf;
                 switch (t & 0xf0) {
                 case 0x00: case 0x10: case 0x20: break;
-                case 0x30: D_1f8002c8[lo] = base; break;
+                case 0x30: SPR_DATA[lo] = base; break;
                 case 0x40: D_1f800310[lo] = base; break;
-                case 0x50: D_1f800330[lo] = base; break;
-                case 0x60: D_1f800348[lo] = base; break;
+                case 0x50: WMD_DATA[lo] = base; break;
+                case 0x60: WPP_DATA[lo] = base; break;
                 case 0x70: D_1f800308[lo] = base; break;
-                case 0x80: D_1f800358[lo] = base; break;
-                case 0x90: D_8009d2f0[lo] = base; break;
-                case 0xa0: D_8009d3f0[lo] = base; break;
-                case 0xb0: D_8009d630[lo] = base; break;
+                case 0x80: APD_DATA[lo] = base; break;
+                case 0x90: WVD_BODIES[lo] = base; break;
+                case 0xa0: WVD_HEADERS[lo] = base; break;
+                case 0xb0: SEQ_DATA[lo] = base; break;
                 case 0xc0: D_1f8002b8[lo] = base; break;
-                case 0xd0: D_1f800398[lo] = base; break;
+                case 0xd0: WFM3_DATA[lo] = base; break;
                 }
                 if ((e->type & 0xf0) != 0x10) base += e->size;
                 e++;
@@ -105,7 +105,7 @@ int FUN_8004f538(Rel *e, int unused, char *base)
         case 3: base++;
         }
     }
-    if (pending == 1) D_1f800298 = saved;
-    else D_1f800298 = base;
+    if (pending == 1) LOAD_NEXT_ADDR = saved;
+    else LOAD_NEXT_ADDR = base;
     return 0;
 }

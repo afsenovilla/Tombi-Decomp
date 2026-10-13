@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } R4;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A6039;
 extern unsigned short D_800A6066;
 extern unsigned short *D_800A605C;
@@ -173,7 +173,7 @@ void func_80136B4C(TObj *o)
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x300;
-            o->animFrame = !(D_800A6038.h->p.whole < o->h->p.whole);
+            o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
             FUN_80020490(o);
             o->state++;
             break;

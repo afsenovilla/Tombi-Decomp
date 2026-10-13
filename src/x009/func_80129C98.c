@@ -12,7 +12,7 @@ typedef struct {
     short b0c;
 } E;
 extern E D_8012B2E8[];
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern unsigned char D_8009CE54;
 extern unsigned char D_8009CDCC[];
 extern TObj *allocObjectLayer4(void);
@@ -58,7 +58,7 @@ void func_80129C98(TObj *o)
                 p->w78 = e->w78;
                 p->w7a = e->w7a;
                 p->d90 = (int)o;
-                D_8009F2D8[i] = p;
+                SCRIPT_OBJECTS[i] = p;
                 if (*(unsigned short *)&p->wba == 0 && D_8009CE54 == 0xff) p->b04 = 2;
                 if (*(unsigned short *)&p->wba == 1) {
                     if (D_8009CDCC[0] == 0xff) p->b04 = 3;

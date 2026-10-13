@@ -6,7 +6,7 @@ typedef struct {
     char p0[0x24]; int d24; char p1[8]; short w30; short w32; P *d34; P *d38;
     unsigned char b3c; unsigned char b3d; char p2[0x1a]; unsigned short w58;
 } O;
-extern S D_800A6038;
+extern S PLAYER;
 extern P *D_800A6078;
 extern P *D_800A607C;
 extern int D_8009C960;
@@ -21,7 +21,7 @@ extern void func_80029078(O *);
 
 static __inline__ void Clamp(O *o)
 {
-    S *s = &D_800A6038;
+    S *s = &PLAYER;
     char pad;
     if (s->b0 < 4 || s->b0 == 7) {
         unsigned short x = o->d34->w2;
@@ -46,7 +46,7 @@ static __inline__ void Clamp(O *o)
 
 void func_80029CB4(O *o)
 {
-    S *s = &D_800A6038;
+    S *s = &PLAYER;
     int t;
     if (D_8009C939 == 0) {
         switch (D_800A60D6) {

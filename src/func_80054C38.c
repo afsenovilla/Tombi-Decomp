@@ -23,7 +23,7 @@ typedef struct {
 } Face;
 extern MATRIX D_1F800000, D_1F8000C0;
 extern SVECTOR D_1F800060;
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern void getBaseMatrix(MATRIX *);
@@ -91,7 +91,7 @@ void func_80054C38(TObj *o)
     gte_ldv0(v3);
     gte_rtps();
     gte_avsz4();
-    gte_stotz(&D_1F800070);
+    gte_stotz(&LZ_FILE_CTRL);
     gte_stsxy(&p->x3);
     if (onscreen(p)) {
         f = (Face *)(*(volatile int *)&o->d3c + ((short *)(o->d3c + (*(unsigned short *)o->anim << 2)))[1]);
@@ -105,7 +105,7 @@ void func_80054C38(TObj *o)
         if (o->b0d & 1)
             p->clut = o->w08;
         {
-            int c = D_1F800070;
+            int c = LZ_FILE_CTRL;
             unsigned long e;
             do { } while (0); /* loop notes end the sched block after the c load (debt) */
             e = 0x9000000;

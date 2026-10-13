@@ -1,11 +1,11 @@
 // FUNC 8004db4c 196 MAIN0
 // MATCHING 8004db4c 196
-extern int DAT_1f800398;
+extern int WFM3_DATA;
 extern void drawMessageGlyph(int, int);
 
 void drawInfoMessageText(int a, int idx)
 {
-    short *base = (short *)(DAT_1f800398 + *(short *)(DAT_1f800398 + 8));
+    short *base = (short *)(WFM3_DATA + *(short *)(WFM3_DATA + 8));
     short *p;
     unsigned short v;
 

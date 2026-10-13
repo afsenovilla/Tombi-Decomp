@@ -1,7 +1,7 @@
 // FUNC 8011cc8c 408 X003
 // MATCHING 8011cc8c 408
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void *D_80139870[];
 extern void func_8011B6F4(TObj *), func_8011B870(TObj *), func_8011BA34(TObj *), func_8011BCC8(TObj *);
 extern void func_8011C050(TObj *), func_8011C7FC(TObj *);
@@ -35,7 +35,7 @@ void func_8011CC8C(TObj *o)
             break;
         case 1:
             if (AnimAdvance(o)) {
-                { TObj *pl = &D_800A6038; pl->y.p.whole--; }
+                { TObj *pl = &PLAYER; pl->y.p.whole--; }
                 o->step = 3;
                 o->state = 0;
                 o->wac = 3;

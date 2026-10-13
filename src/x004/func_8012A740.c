@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w; short idx; void **ptrs; } E;
 extern E D_801311C8[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_800A6047;
 extern unsigned char D_8009CF2D;
 extern void FUN_8001fe6c(TObj *);
@@ -16,7 +16,7 @@ void func_8012A740(TObj *o)
         o->box2 = D_801311C8[o->subtype].b2;
         o->box3 = D_801311C8[o->subtype].b3;
         o->w1e = D_801311C8[o->subtype].w;
-        o->d3c = D_1F8002C8[D_801311C8[o->subtype].idx];
+        o->d3c = SPR_DATA[D_801311C8[o->subtype].idx];
         o->anim = D_801311C8[o->subtype].ptrs[o->b6b];
         FUN_8001fe6c(o);
         o->b0a = 2;

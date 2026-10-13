@@ -13,8 +13,8 @@ typedef struct {
     char p50[0x68 - 0x50];
     unsigned char b68, b69, b6a;
 } G;
-extern G *D_1F8001D4;
-extern unsigned char D_1F8001CF, D_1F8001CE, D_1F8001C2;
+extern G *TASK_C;
+extern unsigned char D_1F8001CF, LOAD_COMPLETE_SYM, D_1F8001C2;
 extern short D_1F8001C6;
 extern unsigned short D_1F8003B8, D_1F8003BA;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8009F086[], D_8009F087[];
@@ -45,10 +45,10 @@ void func_8001AEB4(void)
     unsigned short s;
     volatile unsigned short *k;
 
-    switch (D_1F8001D4->w4e) {
+    switch (TASK_C->w4e) {
     case 0:
         D_1F8001CF = 1;
-        D_1F8001D4->b6a = 0;
+        TASK_C->b6a = 0;
         SetDispMask(0);
         r.x = 0x120;
         r.y = 0x1e0;
@@ -70,10 +70,10 @@ void func_8001AEB4(void)
         D_8009BC9C = env.g0;
         D_8009BCA0 = env.b0;
         D_8009F085[0] = 0xf8;
-        D_1F8001D4->w4e++;
+        TASK_C->w4e++;
         break;
     case 1:
-        D_1F8001CE = 0;
+        LOAD_COMPLETE_SYM = 0;
         switch (D_800A45EA) {
         case 0: case 1: case 2: case 6: n = 3; break;
         case 4: n = 4; break;
@@ -84,7 +84,7 @@ void func_8001AEB4(void)
         }
         goto play;
     case 2:
-        if (D_1F8001CE == 0) break;
+        if (LOAD_COMPLETE_SYM == 0) break;
         EnterCriticalSection();
         FlushCache();
         ExitCriticalSection();
@@ -100,7 +100,7 @@ void func_8001AEB4(void)
         inventoryScreenTick();
         if (D_1F8001C2 != 0) {
             k = &D_8009D670;
-            if ((*k & 8) && (*k & 0x800)) D_1F8001D4->w4e = 6;
+            if ((*k & 8) && (*k & 0x800)) TASK_C->w4e = 6;
         }
         break;
     case 4:
@@ -115,7 +115,7 @@ void func_8001AEB4(void)
         r.w = 0x100;
         r.h = 1;
         LoadImage(&r, (unsigned long *)0x801FBBA0);
-        D_1F8001CE = 0;
+        LOAD_COMPLETE_SYM = 0;
         D_8009E375[0] = D_8009BC98;
         D_8009F085[0] = D_8009BC98;
         D_8009E376[0] = D_8009BC9C;
@@ -126,22 +126,22 @@ void func_8001AEB4(void)
     play:
         queueSystemLoadList(n, 1);
     next:
-        D_1F8001D4->w4e++;
+        TASK_C->w4e++;
         break;
     case 5:
-        if (D_1F8001CE != 0) {
+        if (LOAD_COMPLETE_SYM != 0) {
             EnterCriticalSection();
             FlushCache();
             ExitCriticalSection();
             SetDispMask(1);
             D_1F8001C6 = 0;
-            D_1F8001D4->w4c = D_1F8003B8;
-            D_1F8001D4->w4e = D_1F8003BA;
+            TASK_C->w4c = D_1F8003B8;
+            TASK_C->w4e = D_1F8003BA;
         }
         break;
     case 6:
-        D_1F8001D4->w4c = 8;
-        D_1F8001D4->w4e = 0;
+        TASK_C->w4c = 8;
+        TASK_C->w4e = 0;
         break;
     case 7:
         D_8009C974 = 0;
@@ -153,11 +153,11 @@ void func_8001AEB4(void)
         D_8009F085[0] = 0;
         D_8009F086[0] = 0;
         D_8009F087[0] = 0;
-        D_1F8001D4->b68 = 1;
-        D_1F8001D4->w48 = 1;
-        D_1F8001D4->w4a = 1;
-        D_1F8001D4->w4c = 0;
-        D_1F8001D4->w4e = 0;
+        TASK_C->b68 = 1;
+        TASK_C->w48 = 1;
+        TASK_C->w4a = 1;
+        TASK_C->w4c = 0;
+        TASK_C->w4e = 0;
         break;
     }
 }

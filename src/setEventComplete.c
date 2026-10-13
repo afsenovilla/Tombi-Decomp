@@ -1,7 +1,7 @@
 // FUNC 8005a9a4 188 MAIN0
 // MATCHING 8005a9a4 188
-extern unsigned char DAT_800805ec[];
-extern unsigned char DAT_8009cda4[];
+extern unsigned char EVENT_COMPLETE_AP_TABLE[];
+extern unsigned char SCRIPT_FLAGS[];
 extern void FUN_80026a10(int a);
 extern void FUN_8005aa74(int a, int b, int c, int d);
 extern void FUN_8005b624(int a, int b);
@@ -11,10 +11,10 @@ extern void FUN_8001f620(void);
 int setEventComplete(int i, int arg)
 {
     int t;
-    if (DAT_8009cda4[i] != 0xff) {
-        t = DAT_800805ec[i];
-        DAT_8009cda4[i] = 0xff;
-        FUN_80026a10(((int *)(DAT_800805ec - 0xe8))[t]); /* tabla en 0x80080504: base simbolo+offset para que no se adelante al sb */
+    if (SCRIPT_FLAGS[i] != 0xff) {
+        t = EVENT_COMPLETE_AP_TABLE[i];
+        SCRIPT_FLAGS[i] = 0xff;
+        FUN_80026a10(((int *)(EVENT_COMPLETE_AP_TABLE - 0xe8))[t]); /* tabla en 0x80080504: base simbolo+offset para que no se adelante al sb */
         if (i != 10) {
             FUN_8005aa74(i, 1, 1, arg);
             FUN_8005b624(i, 1);
@@ -22,5 +22,5 @@ int setEventComplete(int i, int arg)
             FUN_8001f620();
         }
     }
-    return DAT_8009cda4[i];
+    return SCRIPT_FLAGS[i];
 }

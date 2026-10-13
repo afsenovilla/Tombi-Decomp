@@ -5,7 +5,7 @@ typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 D_80135FFC[], D_80135F54[], D_80135FC4[];
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F3D4[];
 extern unsigned short D_8009C962;
 extern unsigned char D_8009D2C3, D_8009CDC7, D_8009CDC1;
@@ -47,7 +47,7 @@ void func_801318E4(TObj *o)
                 n->w78 = p->fa;
                 n->w7a = p->fc;
                 n->d90 = (int)o;
-                D_8009F2D8[i] = n;
+                SCRIPT_OBJECTS[i] = n;
                 n->b68 = 0;
             }
         }
@@ -93,7 +93,7 @@ void func_801318E4(TObj *o)
                     n->w78 = p->fa;
                     n->w7a = p->fc;
                     n->d90 = (int)o;
-                    D_8009F2D8[i] = n;
+                    SCRIPT_OBJECTS[i] = n;
                 }
                 if (p->fe == 3 && D_8009CDC1) n->b04 = 3;
             }

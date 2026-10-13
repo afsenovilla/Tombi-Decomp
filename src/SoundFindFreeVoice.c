@@ -1,11 +1,11 @@
 // FUNC 8001e430 192 MAIN0
 // MATCHING 8001e430 192
-extern unsigned char DAT_8009f0d0[];
+extern unsigned char VOICE_KEY_STATUS[];
 extern short DAT_800a3cf6[];
 extern short DAT_8009c8ee[];
 extern unsigned char DAT_800780c4[];
 extern unsigned char DAT_800780c5[];
-extern unsigned char *PTR_DAT_800782cc[];
+extern unsigned char *SFX_BANKS[];
 
 int SoundFindFreeVoice(unsigned a)
 {
@@ -15,7 +15,7 @@ int SoundFindFreeVoice(unsigned a)
     int k;
     short *q;
     do {
-        if (!DAT_8009f0d0[i] && *p == m)
+        if (!VOICE_KEY_STATUS[i] && *p == m)
             return i;
         i--;
         p--;
@@ -24,7 +24,7 @@ int SoundFindFreeVoice(unsigned a)
     k = (a & 0xffff) * 2;
     q = DAT_8009c8ee;
     do {
-        if (*q >= (short)(PTR_DAT_800782cc[DAT_800780c4[k]] + (DAT_800780c5[k] << 3))[5])
+        if (*q >= (short)(SFX_BANKS[DAT_800780c4[k]] + (DAT_800780c5[k] << 3))[5])
             return i;
         i--;
         q--;

@@ -2,7 +2,7 @@
 // MATCHING 801315b0 820
 #include "TOBJ.H"
 typedef struct { unsigned short x, y; } XY;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern XY D_80135F10;
 extern XY D_80135F14[];
 extern XY D_80135F24[];
@@ -15,7 +15,7 @@ extern void FUN_80018980(TObj *);
 
 void func_801315B0(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     TObj *e;
     unsigned short x, y;
 

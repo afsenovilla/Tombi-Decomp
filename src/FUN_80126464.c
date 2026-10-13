@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern unsigned char D_1f8001a4;
-extern unsigned char D_800a6038[];
+extern unsigned char PLAYER[];
 extern short FUN_800435e0(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
@@ -43,10 +43,10 @@ void FUN_80126464(TObj *a, TObj *b)
             b->active = 4;
             b->b6a = 2;
             a->active = 2;
-            D_800a6038[4] = 1;
-            D_800a6038[5] = 0x40;
-            D_800a6038[6] = 0;
-            D_800a6038[7] = 0;
+            PLAYER[4] = 1;
+            PLAYER[5] = 0x40;
+            PLAYER[6] = 0;
+            PLAYER[7] = 0;
             return;
         }
         {
@@ -66,10 +66,10 @@ void FUN_80126464(TObj *a, TObj *b)
             return;
         b->active = 3;
         if (b->b6a == 2) {
-            D_800a6038[0] = 1;
-            D_800a6038[4] = 1;
-            D_800a6038[5] = 0;
-            D_800a6038[6] = 0;
+            PLAYER[0] = 1;
+            PLAYER[4] = 1;
+            PLAYER[5] = 0;
+            PLAYER[6] = 0;
         }
         b->b6a = 0;
         b->b04 = 2;

@@ -20,21 +20,21 @@ typedef struct {
 } PL;
 typedef struct { char p[0x4a]; short w4a, w4c, w4e; } Q;
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern CMD *D_801181FC[];
 extern XY D_80118200[];
 extern unsigned char D_8009D088[];
 extern unsigned char D_8009C93A, D_8009C93F, D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
 extern unsigned int D_8009C968;
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
 extern unsigned char D_8009CE48, D_8009CDCB, D_8009CE0B;
 extern unsigned short D_8009D2DA;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
-extern Q *D_1F8001D4;
+extern Q *TASK_C;
 extern char D_8001D6A4[];
 extern void FUN_800eea7c(PL *, int, int);
 extern O *showMessageBox(int, int, int, int);
@@ -67,12 +67,12 @@ void func_80116FE0(O *o)
     case 1:
         c = D_801181FC[o->wb4];
         c += o->wb6;
-        p = &D_800A6038;
+        p = &PLAYER;
         switch (c->op) {
         case 0:
-            D_1F8001D4->w4a = 2;
-            D_1F8001D4->w4c = 0;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4a = 2;
+            TASK_C->w4c = 0;
+            TASK_C->w4e = 0;
             break;
         case 1:
             D_8009D088[0] = c->arg;
@@ -98,10 +98,10 @@ void func_80116FE0(O *o)
                 break;
             case 1:
                 if (--o->timer != 0) break;
-                D_800A6038.b04 = 5;
-                D_800A6038.step = 0x64;
-                D_800A6038.state = 0;
-                D_800A6038.animFrame = 1;
+                PLAYER.b04 = 5;
+                PLAYER.step = 0x64;
+                PLAYER.state = 0;
+                PLAYER.animFrame = 1;
                 FUN_800eea7c(p, 0, 0);
                 o->step = 0;
                 o->wb6++;
@@ -129,16 +129,16 @@ void func_80116FE0(O *o)
             break;
         case 9:
             D_8009C975 = 3;
-            D_800A6038.xw++;
+            PLAYER.xw++;
             o->wb6++;
             break;
         case 10:
-            D_800A6038.xw++;
+            PLAYER.xw++;
             if (D_8009C975 != 1) break;
-            D_800A6038.b04 = 5;
-            D_800A6038.step = 0x40;
-            D_800A6038.state = 0;
-            D_800A6038.visible = 0;
+            PLAYER.b04 = 5;
+            PLAYER.step = 0x40;
+            PLAYER.state = 0;
+            PLAYER.visible = 0;
             o->wb6++;
             break;
         case 11:
@@ -164,13 +164,13 @@ void func_80116FE0(O *o)
         case 15:
             switch (o->step) {
             case 0:
-                D_800A6038.animFrame = 0;
+                PLAYER.animFrame = 0;
                 FUN_800eea7c(p, 1, 0);
                 o->step++;
                 break;
             case 1:
-                if (++D_800A6038.xw < 0x105) break;
-                D_800A6038.animFrame = 1;
+                if (++PLAYER.xw < 0x105) break;
+                PLAYER.animFrame = 1;
                 FUN_800eea7c(p, 0, 0);
                 o->step = 0;
                 o->wb6++;
@@ -180,12 +180,12 @@ void func_80116FE0(O *o)
         case 16:
             switch (o->step) {
             case 0:
-                D_800A6038.animFrame = 0;
+                PLAYER.animFrame = 0;
                 FUN_800eea7c(p, 1, 0);
                 o->step++;
                 break;
             case 1:
-                if (++D_800A6038.xw < 0x14b) break;
+                if (++PLAYER.xw < 0x14b) break;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -200,11 +200,11 @@ void func_80116FE0(O *o)
                 D_8011A8C4 = t / 3000 - h * 60;
                 D_8011A8C0 = h % 1000;
                 for (i = 0; i < 0x100; i++) {
-                    if (i != 0x12 && D_8009CDA4[i]) D_8011A8C8++;
+                    if (i != 0x12 && SCRIPT_FLAGS[i]) D_8011A8C8++;
                 }
                 D_8011A8CC = 0;
                 for (i = 0; i < 0x100; i++) {
-                    if (i != 0x12 && D_8009CDA4[i] == 0xff) D_8011A8CC++;
+                    if (i != 0x12 && SCRIPT_FLAGS[i] == 0xff) D_8011A8CC++;
                 }
                 o->step++;
             case 1:

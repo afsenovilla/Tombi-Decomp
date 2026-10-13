@@ -2,7 +2,7 @@
 // MATCHING 8013a2d8 460
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned short D_800A6066;
 extern Fix16 *D_800A6078;
@@ -22,8 +22,8 @@ void func_8013A2D8(TObj *o)
 
     switch (o->step) {
     case 0:
-        D_800A6038.anim = D_80010748;
-        AnimLoadDuration(&D_800A6038);
+        PLAYER.anim = D_80010748;
+        AnimLoadDuration(&PLAYER);
         switch (D_8009CEAB) {
         case 1:
             D_800A60C8 = showMessageBox(2, 0x1f, 0x80, 0x6c);

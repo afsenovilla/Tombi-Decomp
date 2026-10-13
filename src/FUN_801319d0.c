@@ -15,7 +15,7 @@ extern int FUN_8001fdac(int, int);
 extern short FUN_800411cc(TObj *, short, short);
 extern Fix16 *DAT_800a6078;
 extern unsigned short DAT_800a604e;
-extern unsigned char DAT_800a6038[];
+extern unsigned char PLAYER[];
 extern unsigned char DAT_800a603c[], DAT_800a603d[], DAT_800a603e[], DAT_800a603f;
 extern short DAT_800a6066, DAT_800a60b6;
 extern void *DAT_8013ad70[];
@@ -156,7 +156,7 @@ void FUN_801319d0(TObj *o)
         break;
     case 6:
         applyObjectAltSpeedXY(o);
-        q = DAT_800a6038;
+        q = PLAYER;
         DAT_800a6078->p.whole = o->h->p.whole;
         DAT_800a604e = o->y.p.whole + 0x28;
         if (DAT_800a603f == 1) {

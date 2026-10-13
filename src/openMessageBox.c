@@ -23,10 +23,10 @@ typedef struct {
     unsigned short c6;
     short c8, ca, cc, ce, d0, d2;
 } E2d;
-extern short DAT_800a4648[];
+extern short MESSAGE_SLOTS[];
 extern unsigned char DAT_8009d67c;
-extern char *DAT_1f800398;
-#define SP398 (*(char * volatile *)&DAT_1f800398)
+extern char *WFM3_DATA;
+#define SP398 (*(char * volatile *)&WFM3_DATA)
 extern E2d *ObjAlloc(void);
 
 E2d *openMessageBox(int k, int dx, short *pos, short anim, unsigned short w)
@@ -36,7 +36,7 @@ E2d *openMessageBox(int k, int dx, short *pos, short anim, unsigned short w)
     unsigned short v;
     char *b;
     for (i = 0; i < 4; i++) {
-        if (DAT_800a4648[i * 4] == -1 && (o = ObjAlloc()) != 0) {
+        if (MESSAGE_SLOTS[i * 4] == -1 && (o = ObjAlloc()) != 0) {
             o->type = 0x1a;
             o->b0a = 10;
             o->w1e = 0x14;
@@ -81,7 +81,7 @@ E2d *openMessageBox(int k, int dx, short *pos, short anim, unsigned short w)
             o->d2 = w;
             o->w20 = 1;
             o->w22 = 0;
-            DAT_800a4648[i * 4] = 0;
+            MESSAGE_SLOTS[i * 4] = 0;
             b = SP398;
             v = *(short *)(b + k * 2 + 0x10) + dx;
             o->c8 = v;

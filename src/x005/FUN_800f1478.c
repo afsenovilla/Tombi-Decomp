@@ -6,7 +6,7 @@ extern unsigned char *DAT_800a611c;
 extern unsigned char *DAT_8009d2e8;
 extern unsigned char *DAT_8009c330;
 extern unsigned short DAT_8009d670;
-extern unsigned char DAT_8009d00f;
+extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_1f8003ce;
 extern unsigned char DAT_8009d2b0[];
@@ -99,7 +99,7 @@ void FUN_800f1478(TObj *o)
             o->substep = 0;
             o->state++;
         case 1:
-            if (DAT_8009d00f) {
+            if (TALK_POSE) {
                 FUN_800f1308(o);
             } else {
                 c = func_800F0E7C(o);

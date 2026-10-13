@@ -1,12 +1,12 @@
 // FUNC 8001f658 56 MAIN0
 // MATCHING 8001f658 56
-extern short DAT_8009bd10;
-extern short DAT_8009bd0c;
-extern short DAT_800a3428;
+extern short BGM_VOLUME;
+extern short BGM_MUTED;
+extern short BGM_SEQ_ID;
 extern void SsSeqSetVol(int, int, int);
 
 void MusicUnmute(void)
 {
-    DAT_8009bd0c = 0;
-    SsSeqSetVol(DAT_800a3428, DAT_8009bd10, DAT_8009bd10);
+    BGM_MUTED = 0;
+    SsSeqSetVol(BGM_SEQ_ID, BGM_VOLUME, BGM_VOLUME);
 }

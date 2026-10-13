@@ -10,8 +10,8 @@ typedef struct {
     int a[6];
 } S;
 typedef struct { short v[6]; } V6;
-extern S *D_8009F0F0;
-extern TObj *D_8009F2D8[];
+extern S *SCRIPT_CTX;
+extern TObj *SCRIPT_OBJECTS[];
 extern unsigned char D_8009D2B0, D_8009C93F, D_800A603C, D_800A603D, D_800A603E, D_800A60E4, D_8009C942;
 extern unsigned short D_800A6066;
 extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
@@ -21,8 +21,8 @@ extern void func_800ECBBC(TObj *);
 
 void scriptOpShowMessageBox(void)
 {
-    S *s = D_8009F0F0;
-    TObj *o = D_8009F2D8[s->idx];
+    S *s = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[s->idx];
     V6 tmp;
     unsigned int cmd = s->cmd;
 

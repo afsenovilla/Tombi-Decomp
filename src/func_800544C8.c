@@ -17,11 +17,11 @@ extern char *DAT_1f800164;
 extern char *volatile D_164V;
 extern char *DAT_1f8001e0;
 extern int D_8009C960;
-extern C4C *D_1F8001D4;
+extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
 extern long D_1F80008C;
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char D_1F8000C0[];
 extern void SetRotMatrix(void *);
@@ -43,7 +43,7 @@ static __inline__ int proj(void)
     gte_rtps();
     gte_stflg(&D_1F80008C);
     if (D_1F80008C < 0) return 1;
-    gte_stsxy(&D_1F800070);
+    gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&D_1F800074);
     return 0;
 }
@@ -59,7 +59,7 @@ void func_800544C8(TObj *o)
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && D_1F8001D4->w4c != 3)
+    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;
@@ -79,8 +79,8 @@ void func_800544C8(TObj *o)
         s = (SP *)DAT_1f800164;
         s->w = p[-5];
         s->h = p[-4];
-        s->x0 = (signed char)p[-1] + D_1F800070;
-        s->y0 = (signed char)p[0] + (D_1F800070 >> 16);
+        s->x0 = (signed char)p[-1] + LZ_FILE_CTRL;
+        s->y0 = (signed char)p[0] + (LZ_FILE_CTRL >> 16);
         if (((unsigned short)s->y0 < 0x101 || (unsigned short)(s->y0 + s->h) < 0x101)
             && ((unsigned short)s->x0 < 0x141 || (unsigned short)(s->x0 + s->w) < 0x141)) {
             SetSprt(s);

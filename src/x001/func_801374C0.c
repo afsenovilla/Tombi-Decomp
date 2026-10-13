@@ -1,7 +1,7 @@
 // FUNC 801374c0 220 X001
 // MATCHING 801374c0 220
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern void *D_8013E568;
 extern int D_1F8002D4[];
 extern TObj *allocObjectLayer2(void);
@@ -13,7 +13,7 @@ void func_801374C0(unsigned char sub, short x, short y, short z)
     if (o != 0) {
         o->active = 1;
         o->type = 0x17;
-        t = D_800A6038.animFrame;
+        t = PLAYER.animFrame;
         o->a.raw = x << 16;
         o->y.raw = y << 16;
         o->b.raw = z << 16;

@@ -6,7 +6,7 @@ extern unsigned char D_8009C93C, D_8009C93F, D_8009C940, D_8009C941;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern unsigned char D_8009C975;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void setEventComplete(int, int);
@@ -72,7 +72,7 @@ void func_801190BC(TObj *o)
             break;
         case 4:
             if (D_8009C975 == 1) {
-                p = D_1F8001D4;
+                p = TASK_C;
                 p->w4c = 7;
                 p->w4e = 0;
             }

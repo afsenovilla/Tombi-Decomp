@@ -3,7 +3,7 @@
 /* Real size 628 B: includes the csv piece func_8011CA00 (112 B), which is the tail of this function. */
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009D2C2, D_8009C93F[], D_8009C942[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern void *D_80139870[];
@@ -13,7 +13,7 @@ extern void FUN_8001fe6c(TObj *);
 
 void func_8011C7FC(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     int a, dy, d;
 
     switch (o->state) {

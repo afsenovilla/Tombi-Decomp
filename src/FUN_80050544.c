@@ -2,14 +2,14 @@
 // MATCHING 80050544 172
 extern unsigned char DAT_800a6039[];
 extern unsigned char DAT_800a603a[];
-extern unsigned char DAT_800a6038[];
+extern unsigned char PLAYER[];
 extern void FUN_800ea124(void *);
 extern void FUN_800505f0(void *);
 extern void FUN_800eb714(void *);
 extern void FUN_800ead48(void *);
 void FUN_80050544(void)
 {
-    unsigned char *p = DAT_800a6038;
+    unsigned char *p = PLAYER;
     if (DAT_800a6039[0] != 0) {
         switch (DAT_800a603a[0]) {
         case 0:

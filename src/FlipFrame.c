@@ -2,7 +2,7 @@
 // MATCHING 80016984 192
 extern unsigned short fr;
 extern char *cur, *prev;
-extern char base[];
+extern char OT_FRAMEBUFFER[];
 extern void PutDispEnv(void *), PutDrawEnv(void *), f(void *), DrawOTag(void *), ClearOTagR(void *, int);
 void FlipFrame(void)
 {
@@ -10,7 +10,7 @@ void FlipFrame(void)
     int idx = (short)n * 0xd10;
     fr = n;
     prev = cur;
-    cur = base + idx;
+    cur = OT_FRAMEBUFFER + idx;
     PutDispEnv(cur + 0xca0);
     PutDrawEnv(cur + 0xcb4);
     f(prev + 0xc9c);

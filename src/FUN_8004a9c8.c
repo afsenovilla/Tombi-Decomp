@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { TObj o; char pad[0x32]; short wf2; } BigObj;
 extern BigObj DAT_800a6038;
-extern unsigned char DAT_800a6038b[];
+extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -13,9 +13,9 @@ extern void FUN_800e940c(void *, int, int);
 
 #define SETANIM(o, a, b) \
     switch ((o)->b6a - 1) { \
-    case 0: FUN_800e8a98(DAT_800a6038b, a, b); break; \
-    case 1: FUN_800e96e8(DAT_800a6038b, a, b); break; \
-    case 2: FUN_800e940c(DAT_800a6038b, a, b); break; \
+    case 0: FUN_800e8a98(PLAYER, a, b); break; \
+    case 1: FUN_800e96e8(PLAYER, a, b); break; \
+    case 2: FUN_800e940c(PLAYER, a, b); break; \
     }
 
 static __inline__ void SetAnim(TObj *self, short n)

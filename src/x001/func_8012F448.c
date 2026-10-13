@@ -4,7 +4,7 @@
 typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims; } E20;
 typedef struct { Fix16 a, y, b; } FV;
 extern E20 D_8013C928[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_8009C942;
 extern unsigned char D_800A6047;
 extern char D_8013C94A[];
@@ -35,7 +35,7 @@ void func_8012F448(TObj *o)
         o->box2 = D_8013C928[o->subtype].b2;
         o->box3 = D_8013C928[o->subtype].b3;
         o->w1e = D_8013C928[o->subtype].w1e;
-        o->d3c = D_1F8002C8[D_8013C928[o->subtype].idx];
+        o->d3c = SPR_DATA[D_8013C928[o->subtype].idx];
         o->wac = D_8013C928[o->subtype].wac;
         o->anim = D_8013C928[o->subtype].anims[o->wac];
         AnimLoadDuration(o);

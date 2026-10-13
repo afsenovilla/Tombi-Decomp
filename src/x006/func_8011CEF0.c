@@ -20,7 +20,7 @@ typedef struct {
     signed char dx, dy;
 } EL;
 
-extern int D_1F800070, D_1F800074;
+extern int LZ_FILE_CTRL, D_1F800074;
 extern FT4 *D_1F800164;
 extern int D_1F8001E0;
 extern int FUN_8004fba8(void *, int *, int *);
@@ -50,15 +50,15 @@ void func_8011CEF0(TObj *o)
     int r;
 
     if (o->anim == 0) return;
-    FUN_8004fba8(o, &D_1F800070, &D_1F800074);
+    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
     f = (short *)(o->d3c + (*(short *)o->anim << 2));
     n = f[0];
     e = (EL *)(*(volatile int *)&o->d3c + f[1]);
     do {
         p = D_1F800164;
         if (o->animFrame & 1) {
-            p->x0 = e->dx + D_1F800070;
-            p->y0 = e->dy + (D_1F800070 >> 16);
+            p->x0 = e->dx + LZ_FILE_CTRL;
+            p->y0 = e->dy + (LZ_FILE_CTRL >> 16);
             p->x1 = p->x0 + e->w;
             p->x2 = p->x0;
             p->y1 = *(short *)((char *)p + 10);
@@ -66,8 +66,8 @@ void func_8011CEF0(TObj *o)
             p->x3 = p->x1;
             p->y3 = p->y2;
         } else {
-            p->x0 = D_1F800070 - e->dx;
-            p->y0 = e->dy + (D_1F800070 >> 16);
+            p->x0 = LZ_FILE_CTRL - e->dx;
+            p->y0 = e->dy + (LZ_FILE_CTRL >> 16);
             p->x1 = p->x0 - e->w;
             p->x2 = p->x0;
             p->y1 = *(short *)((char *)p + 10);

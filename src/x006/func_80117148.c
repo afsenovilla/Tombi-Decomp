@@ -10,7 +10,7 @@ extern int D_1F800168[], D_1F80016C[], D_1F800170[];
 extern void *D_801229A8[];
 extern unsigned char D_8009CF06, D_8009D006, D_8009C990, D_8009D2B3, D_8009C964[];
 extern void *D_8011F2DC, *D_8011F2F0, *D_8011F2CC[], *D_8011F2E0[];
-extern unsigned char D_800A6038[];
+extern unsigned char PLAYER[];
 extern short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
 extern int D_800A6048[], D_800A604C[], D_800A6050[];
 extern void AnimLoadDuration(TObj *);
@@ -65,7 +65,7 @@ void func_80117148(TObj *o)
         o->y.p.whole = D_1F800020.t[1];
         o->b.p.whole = D_1F800020.t[2];
         o->d8c = ((0x1000 - ((TObj *)o->d90)->d8c) & 0xfff) >> 4;
-        D_800A6038[0] = 3;
+        PLAYER[0] = 3;
         D_800A60A4[0] = 0x18;
         D_800A60A6[0] = 0x30;
         D_800A60A8[0] = 0x18;

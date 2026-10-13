@@ -41,7 +41,7 @@ extern short D_800A60EA_[];
 #define D_800A60EA D_800A60EA_[0]
 extern short D_800A6066_[];
 #define D_800A6066 D_800A6066_[0]
-extern C4C *D_1F8001D4;
+extern C4C *TASK_C;
 extern short D_8009CD94_[];
 #define D_8009CD94 D_8009CD94_[0]
 extern short D_8009CDA0_[];
@@ -316,7 +316,7 @@ void func_80134E5C(TObj *o)
             break;
         case 20:
             {
-                C4C *c = D_1F8001D4;
+                C4C *c = TASK_C;
                 D_8009CD96 = 2;
                 D_8009CDA0 = 1;
                 D_8009CD94 = 0;

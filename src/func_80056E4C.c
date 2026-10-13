@@ -22,11 +22,11 @@ typedef struct { short vx, vy, vz, pad; } SVec;
 extern int D_8009C960;
 extern SVec D_1F800060;
 extern long D_1F80008C;
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char D_1F8000C0[];
 extern char D_1F8000C0b[];
-extern TObj *DAT_1f8001d4;
+extern TObj *TASK_C;
 extern PolyFT4 *DAT_1f800164;
 extern int DAT_1f8001e0;
 extern void SetRotMatrix(void *);
@@ -43,7 +43,7 @@ static __inline__ int project(void)
     gte_rtps();
     gte_stflg(&D_1F80008C);
     if (D_1F80008C < 0) return 1;
-    gte_stsxy(&D_1F800070);
+    gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&D_1F800074);
     return 0;
 }
@@ -75,7 +75,7 @@ void func_80056E4C(TObj *o)
 
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && *(unsigned short *)&DAT_1f8001d4->w4c != 3)
+    if (D_8009C960 == 0x10005 && *(unsigned short *)&TASK_C->w4c != 3)
         D_1F800060.vz = o->b.p.whole >> 2;
     else
         D_1F800060.vz = o->b.p.whole;
@@ -84,7 +84,7 @@ void func_80056E4C(TObj *o)
     if (project()) return;
     a = (unsigned short *)o->anim;
     hh = (short *)(o->d3c + *a * 4);
-    xy = D_1F800070;
+    xy = LZ_FILE_CTRL;
     s = (unsigned char *)(*(volatile int *)&o->d3c + hh[1]);
     p = DAT_1f800164;
     p->code = 0x2c;

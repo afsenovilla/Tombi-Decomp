@@ -1,7 +1,7 @@
 // FUNC 800f1308 368 X017
 // MATCHING 800f1308 368
 #include "TOBJ.H"
-extern unsigned char DAT_8009d00f;
+extern unsigned char TALK_POSE;
 extern TObj *DAT_8009c330;
 extern int FUN_8005bdec(void);
 extern void FUN_800efc04(TObj *o);
@@ -22,7 +22,7 @@ extern int FUN_8001fec0(TObj *o);
 
 void FUN_800f1308(TObj *o)
 {
-    switch (DAT_8009d00f) {
+    switch (TALK_POSE) {
     case 1:
         if ((FUN_8005bdec() & 0x3f) == 0)
             SETANIM(o, 0x4c);

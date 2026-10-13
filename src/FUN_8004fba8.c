@@ -12,7 +12,7 @@ typedef struct { short m[3][3]; int t[3]; } MATRIX;
 extern SVECTOR DAT_1f800060;
 extern int DAT_1f80008c;
 extern MATRIX DAT_1f8000c0;
-extern char *DAT_1f8001d4;
+extern char *TASK_C;
 extern int DAT_8009c960;
 extern void SetRotMatrix(MATRIX *);
 extern void SetTransMatrix(MATRIX *);
@@ -21,7 +21,7 @@ int FUN_8004fba8(char *p, long *sxy, long *z)
 {
     DAT_1f800060.vx = *(short *)(p + 0x12);
     DAT_1f800060.vy = *(short *)(p + 0x16);
-    if (DAT_8009c960 == 0x10005 && *(unsigned short *)(DAT_1f8001d4 + 0x4c) != 3)
+    if (DAT_8009c960 == 0x10005 && *(unsigned short *)(TASK_C + 0x4c) != 3)
         DAT_1f800060.vz = *(short *)(p + 0x1a) >> 2;
     else
         DAT_1f800060.vz = *(short *)(p + 0x1a);

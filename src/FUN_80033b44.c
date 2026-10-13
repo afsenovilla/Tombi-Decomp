@@ -10,7 +10,7 @@ typedef struct {
 } P;
 typedef struct { short w0, w2, w4; } D600;
 extern P *DAT_8009c330;
-extern TObj DAT_800a6038;
+extern TObj PLAYER;
 extern unsigned char DAT_800a60d5[];
 extern unsigned char DAT_800a60d6[];
 extern unsigned char *DAT_8009f0ec;
@@ -46,16 +46,16 @@ static __inline__ short dir(TObj *o)
     V2 b, a;
     a.x = o->h->p.whole;
     a.y = o->y.p.whole;
-    b.x = DAT_800a6038.h->p.whole;
-    b.y = DAT_800a6038.y.p.whole;
+    b.x = PLAYER.h->p.whole;
+    b.y = PLAYER.y.p.whole;
     return angleBetweenPoints(a, b);
 }
 #define DIR dir
 
 static __inline__ short near(TObj *o, int d, int w)
 {
-    if ((unsigned short)(DAT_800a6038.h->p.whole - o->h->p.whole + d) > w) return 0;
-    if ((unsigned short)(DAT_800a6038.y.p.whole - o->y.p.whole + d) > w) return 0;
+    if ((unsigned short)(PLAYER.h->p.whole - o->h->p.whole + d) > w) return 0;
+    if ((unsigned short)(PLAYER.y.p.whole - o->y.p.whole + d) > w) return 0;
     return 1;
 }
 
@@ -87,7 +87,7 @@ void FUN_80033b44(TObj *o)
     switch (o->state) {
     case 0:
         p = DAT_8009c330;
-        o->animFrame = DAT_800a6038.animFrame;
+        o->animFrame = PLAYER.animFrame;
         DAT_800a60d5[0] = 1;
         p->b7 = o->animFrame;
         k = DAT_8007a072[(short)(o->animFrame + o->animFrame * 2) + 1];
@@ -118,11 +118,11 @@ void FUN_80033b44(TObj *o)
         IDX(o, idx);
         if (o->animFrame & 1) a = 0xa0 - DAT_8007a04c[idx]; else a = DAT_8007a04c[idx] - 0x20;
         r = DAT_8007a04c[idx + 1];
-        o->velX = DAT_800a6038.h->p.whole + MulCos((unsigned char)a, r);
-        o->velY = DAT_800a6038.y.p.whole + MulNegSinScaled((unsigned char)a, r);
+        o->velX = PLAYER.h->p.whole + MulCos((unsigned char)a, r);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)a, r);
         o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
-        o->d->p.whole = DAT_800a6038.d->p.whole;
+        o->d->p.whole = PLAYER.d->p.whole;
         o->ba5 = 1;
         p = DAT_8009c330;
         o->box0 = 6;
@@ -148,7 +148,7 @@ void FUN_80033b44(TObj *o)
         DAT_8009c330->w28 = 0xffff;
         DAT_8009c330->w2a = 0xffff;
         FUN_800314a8(o);
-        AnimJump(&DAT_800a6038, 0);
+        AnimJump(&PLAYER, 0);
         o->state++;
         o->waa += 0x80;
         DAT_8009c330->w2e = 0xffff;
@@ -158,12 +158,12 @@ void FUN_80033b44(TObj *o)
         SPIN(o);
         o->d84 = 0x100;
         o->d8c = 0;
-        AnimAdvance(&DAT_800a6038);
+        AnimAdvance(&PLAYER);
         IDX(o, idx);
         if (o->animFrame & 1) a = 0xa0 - DAT_8007a04c[idx]; else a = DAT_8007a04c[idx] - 0x20;
         r = DAT_8007a04c[idx + 1];
-        o->velX = DAT_800a6038.h->p.whole + MulCos((unsigned char)a, r);
-        o->velY = DAT_800a6038.y.p.whole + MulNegSinScaled((unsigned char)a, r);
+        o->velX = PLAYER.h->p.whole + MulCos((unsigned char)a, r);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)a, r);
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 0x10);
         k = o->animFrame + o->animFrame * 2;
@@ -323,14 +323,14 @@ void FUN_80033b44(TObj *o)
         SPIN(o);
         o->d8c = 0;
         o->d84 = 0x200;
-        o->animFrame = DAT_800a6038.animFrame;
+        o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
-        AnimJump(&DAT_800a6038, 0);
+        AnimJump(&PLAYER, 0);
         if ((DAT_1f8001f8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xc0, 2);
             SfxPlay(3);
         }
-        AnimJump(&DAT_800a6038, (DAT_8009c330->w22 >> 2) & 3);
+        AnimJump(&PLAYER, (DAT_8009c330->w22 >> 2) & 3);
         k = o->animFrame + o->animFrame * 2;
         DAT_8009d600.w0 = 10;
         DAT_8009d600.w2 = 2;
@@ -341,8 +341,8 @@ void FUN_80033b44(TObj *o)
         IDX(o, idx);
         if (o->animFrame & 1) a = 0x80 - DAT_8007a04c[idx]; else a = DAT_8007a04c[idx];
         r = DAT_8007a04c[idx + 1];
-        o->velX = DAT_800a6038.h->p.whole + MulCos((unsigned char)a, r);
-        o->velY = DAT_800a6038.y.p.whole + MulNegSinScaled((unsigned char)a, r);
+        o->velX = PLAYER.h->p.whole + MulCos((unsigned char)a, r);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)a, r);
         FUN_80031588(&DAT_8009d600, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;
@@ -363,15 +363,15 @@ void FUN_80033b44(TObj *o)
         SPIN(o);
         o->d8c = 0;
         o->d84 = 0x200;
-        o->animFrame = DAT_800a6038.animFrame;
+        o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
-        AnimJump(&DAT_800a6038, 0);
+        AnimJump(&PLAYER, 0);
         if ((DAT_1f8001f8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }
-        AnimJump(&DAT_800a6038, (DAT_8009c330->w22 / 3) & 3);
-        o->animFrame = DAT_800a6038.animFrame;
+        AnimJump(&PLAYER, (DAT_8009c330->w22 / 3) & 3);
+        o->animFrame = PLAYER.animFrame;
         k = o->animFrame + o->animFrame * 2;
         DAT_8009d600.w0 = 0x10;
         DAT_8009d600.w2 = 4;
@@ -382,8 +382,8 @@ void FUN_80033b44(TObj *o)
         IDX(o, idx);
         if (o->animFrame & 1) a = 0x80 - DAT_8007a04c[idx]; else a = DAT_8007a04c[idx];
         r = DAT_8007a04c[idx + 1];
-        o->velX = DAT_800a6038.h->p.whole + MulCos((unsigned char)a, r);
-        o->velY = DAT_800a6038.y.p.whole + MulNegSinScaled((unsigned char)a, r);
+        o->velX = PLAYER.h->p.whole + MulCos((unsigned char)a, r);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)a, r);
         FUN_80031588(&DAT_8009d600, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;

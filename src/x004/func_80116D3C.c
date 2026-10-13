@@ -38,7 +38,7 @@ typedef struct O {
 } O;
 typedef void (*Fn)(O *);
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_80079A98[];
 extern E8 *D_801305DC[];
 extern unsigned char D_8009CDA2[];
@@ -101,22 +101,22 @@ extern void func_80116AE0(O *);
 
 #define F6047() \
     if (D_1F80016E < -0x3f2) \
-        D_800A6038.b0f = 0; \
+        PLAYER.b0f = 0; \
     else if (D_1F80016E < -0x3b5) \
-        D_800A6038.b0f = -8;
+        PLAYER.b0f = -8;
 
 static __inline__ short blocked(void)
 {
-    if (D_800A6038.bac >= 2) return 1;
-    if (D_800A6038.b69 == 0) return 1;
-    if (D_800A6038.b9c | D_800A6038.b9e | D_800A6038.baa | D_8009C940) return 1;
+    if (PLAYER.bac >= 2) return 1;
+    if (PLAYER.b69 == 0) return 1;
+    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | D_8009C940) return 1;
     if (D_1F8001FC & 0x10) return 0;
     return 1;
 }
 
 void func_80116D3C(O *o)
 {
-    PL *p = &D_800A6038;
+    PL *p = &PLAYER;
 
     switch (o->step) {
     case 0:
@@ -439,10 +439,10 @@ void func_80116D3C(O *o)
             o->step = 10;
         tail11:
             *q = 0;
-            D_800A6038.active = 3;
-            D_800A6038.b04 = 5;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+            PLAYER.active = 3;
+            PLAYER.b04 = 5;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             break;
         }
         case 13:
@@ -531,38 +531,38 @@ void func_80116D3C(O *o)
         o->w32 = -100;
         o->w30 = -100;
         o->step++;
-        D_800A6038.yw = -0x22;
-        FUN_800eea7c(&D_800A6038, 1, 0);
-        D_800A6038.animFrame = 1;
+        PLAYER.yw = -0x22;
+        FUN_800eea7c(&PLAYER, 1, 0);
+        PLAYER.animFrame = 1;
         break;
     case 9:
-        D_800A6038.h->whole -= 2;
-        if (D_800A6038.h->whole < 0x114) {
-            D_800A6038.we0 = 0x5a;
-            D_800A6038.active = 3;
-            D_800A6038.b04 = 1;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+        PLAYER.h->whole -= 2;
+        if (PLAYER.h->whole < 0x114) {
+            PLAYER.we0 = 0x5a;
+            PLAYER.active = 3;
+            PLAYER.b04 = 1;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             o->step = 2;
         } else {
-            AnimAdvance(&D_800A6038);
+            AnimAdvance(&PLAYER);
         }
         break;
     case 6:
     case 10:
-        if (D_800A6038.state != 2) break;
+        if (PLAYER.state != 2) break;
         o->step++;
-        FUN_800eea7c(&D_800A6038, 1, 0);
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0x65;
-        D_800A6038.state = 0;
-        D_800A6038.animFrame = 0;
+        FUN_800eea7c(&PLAYER, 1, 0);
+        PLAYER.b04 = 5;
+        PLAYER.step = 0x65;
+        PLAYER.state = 0;
+        PLAYER.animFrame = 0;
         break;
     case 7:
     case 11:
-        AnimAdvance(&D_800A6038);
-        D_800A6038.h->whole += 1;
-        if (D_800A6038.h->whole < 0x1b9) break;
+        AnimAdvance(&PLAYER);
+        PLAYER.h->whole += 1;
+        if (PLAYER.h->whole < 0x1b9) break;
         o->step++;
         break;
     case 12:
@@ -572,21 +572,21 @@ void func_80116D3C(O *o)
         o->w32 = -0x3ac;
         o->w30 = -0x3ac;
         o->step++;
-        D_800A6038.yw = -0x36a;
-        FUN_800eea7c(&D_800A6038, 1, 0);
-        D_800A6038.animFrame = 1;
+        PLAYER.yw = -0x36a;
+        FUN_800eea7c(&PLAYER, 1, 0);
+        PLAYER.animFrame = 1;
         break;
     case 13:
-        D_800A6038.h->whole -= 2;
-        if (D_800A6038.h->whole < 0x114) {
-            D_800A6038.we0 = 0x5a;
-            D_800A6038.active = 3;
-            D_800A6038.b04 = 1;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+        PLAYER.h->whole -= 2;
+        if (PLAYER.h->whole < 0x114) {
+            PLAYER.we0 = 0x5a;
+            PLAYER.active = 3;
+            PLAYER.b04 = 1;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             o->step = 2;
         } else {
-            AnimAdvance(&D_800A6038);
+            AnimAdvance(&PLAYER);
         }
         break;
     }

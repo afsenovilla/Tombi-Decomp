@@ -40,7 +40,7 @@ typedef struct {
     short w30, w32, w34, w36;
 } G338;
 typedef struct { short a, b, c; } D600;
-extern P38 D_800A6038;
+extern P38 PLAYER;
 extern Fix16 *D_800A6078;
 extern G330 *D_8009C330;
 extern G338 *D_8009C338;
@@ -82,7 +82,7 @@ extern void FUN_800efc04(TObj *);
 
 #define TB(o) ((short)(o->animFrame + o->animFrame * 2))
 
-#define PADOK() ((*(volatile unsigned short *)&D_8009D670 & D_1F8003C8) && D_800A6038.b04 == 1 && D_800A6038.ba4 == 0)
+#define PADOK() ((*(volatile unsigned short *)&D_8009D670 & D_1F8003C8) && PLAYER.b04 == 1 && PLAYER.ba4 == 0)
 
 void func_800317C0(TObj *o)
 {
@@ -97,8 +97,8 @@ void func_800317C0(TObj *o)
     D_8009C330->w2e = 0xffff;
     switch (o->state) {
     case 0:
-        o->animFrame = D_800A6038.animFrame;
-        D_800A6038.b9d = 1;
+        o->animFrame = PLAYER.animFrame;
+        PLAYER.b9d = 1;
         D_8009C330->b7 = o->animFrame;
         v = D_8007A074[TB(o)];
         o->b0a = 0;
@@ -112,7 +112,7 @@ void func_800317C0(TObj *o)
         D_8009C338->w34 = 0;
         D_8009C338->w36 = 0;
         o->wa8 = 0;
-        if (D_800A6038.b9e == 4 || D_800A6038.b9e == 7) {
+        if (PLAYER.b9e == 4 || PLAYER.b9e == 7) {
             o->d94 = (int)D_8009F0EC;
             *D_8009F0EC = 2;
         }
@@ -125,14 +125,14 @@ void func_800317C0(TObj *o)
             if (o->animFrame & 1) v2 = k - 4;
             else v2 = k + 4;
             o->velX = v2;
-            o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+            o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         } else {
             o->velX = D_800A6078->p.whole + MulCos((unsigned char)dx, dy);
-            o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+            o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         }
         o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + 0x80) & 0xff, 16);
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + 0x80) & 0xff, 16);
-        o->d->p.whole = D_800A6038.d->p.whole;
+        o->d->p.whole = PLAYER.d->p.whole;
         o->ba5 = 1;
         o->box0 = 6;
         o->box2 = 6;
@@ -156,12 +156,12 @@ void func_800317C0(TObj *o)
         D_8009C330->w28 = 0xffff;
         D_8009C330->w2a = 0xffff;
         FUN_800314a8(o);
-        AnimJump((TObj *)&D_800A6038, 0);
+        AnimJump((TObj *)&PLAYER, 0);
         o->waa += 0x80;
         o->state++;
         break;
     case 1:
-        AnimAdvance((TObj *)&D_800A6038);
+        AnimAdvance((TObj *)&PLAYER);
         IDX(o, i);
         if (o->animFrame & 1) dx = 160 - D_8007A04C[i];
         else dx = D_8007A04C[i] - 32;
@@ -171,10 +171,10 @@ void func_800317C0(TObj *o)
             if (o->animFrame & 1) v2 = k - 4;
             else v2 = k + 4;
             o->velX = v2;
-            o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+            o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         } else {
             o->velX = D_800A6078->p.whole + MulCos((unsigned char)dx, dy);
-            o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+            o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         }
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 16);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 16);
@@ -186,7 +186,7 @@ void func_800317C0(TObj *o)
                     FUN_800312e8(o);
                     o->waa = D_8007A072[n + 1];
                     D_8009C338->b0c = 1;
-                    D_800A6038.d8c = 0;
+                    PLAYER.d8c = 0;
                     o->timer = 1;
                     o->state++;
                 }
@@ -195,7 +195,7 @@ void func_800317C0(TObj *o)
                     FUN_800312e8(o);
                     o->waa = D_8007A072[n + 1];
                     D_8009C338->b0c = 1;
-                    D_800A6038.d8c = 0;
+                    PLAYER.d8c = 0;
                     o->timer = 1;
                     o->state++;
                 }
@@ -232,7 +232,7 @@ void func_800317C0(TObj *o)
             SfxPlay(5);
             o->wa8 = 0x4ff;
         }
-        D_800A6038.d8c = 0;
+        PLAYER.d8c = 0;
         if (o->wa8 >= 0x500) break;
         {
             unsigned short w = D_8007A074[TB(o)];
@@ -258,7 +258,7 @@ void func_800317C0(TObj *o)
         o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + (unsigned short)D_8009C338->w0e) & 0xff, 24);
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + (unsigned short)D_8009C338->w0e) & 0xff, 24);
         D_8009C338->w0e += D_8007A072[TB(o)] >> 1;
-        D_800A6038.d8c = 0;
+        PLAYER.d8c = 0;
         if (o->animFrame & 1) {
             {
                 unsigned char b = 1;
@@ -269,7 +269,7 @@ void func_800317C0(TObj *o)
             o->waa = ((unsigned short)o->waa + (unsigned short)D_8009C338->w0e) & 0xff;
             D_8009C338->b0c = 3;
             FUN_800313c8(o);
-            AnimJump((TObj *)&D_800A6038, 0);
+            AnimJump((TObj *)&PLAYER, 0);
             D_8009C338->w0e = (D_8007A072[TB(o) + 1] - 0x40) & 0xff;
             o->ba5 = 0;
             o->active = 2;
@@ -284,7 +284,7 @@ void func_800317C0(TObj *o)
             o->waa = ((unsigned short)o->waa + (unsigned short)D_8009C338->w0e) & 0xff;
             D_8009C338->b0c = 3;
             FUN_800313c8(o);
-            AnimJump((TObj *)&D_800A6038, 0);
+            AnimJump((TObj *)&PLAYER, 0);
             D_8009C338->w0e = (D_8007A072[TB(o) + 1] + 0x40) & 0xff;
             o->ba5 = 0;
             o->active = 2;
@@ -301,7 +301,7 @@ void func_800317C0(TObj *o)
         if (D_8009C338->w32 < 0) D_8009C338->w32 = 0;
         if (o->animFrame & 1) o->velX = D_800A6078->p.whole + 16;
         else o->velX = D_800A6078->p.whole - 16;
-        o->velY = D_800A6038.y.p.whole - 16;
+        o->velY = PLAYER.y.p.whole - 16;
         t.x = o->velX + MulCos(D_8009C338->w0e, 12);
         t.y = o->velY + MulNegSinScaled(D_8009C338->w0e, 12);
         c.x = o->h->p.whole;
@@ -327,34 +327,34 @@ void func_800317C0(TObj *o)
                 o->velX = pv - 16;
             }
         }
-        o->velY = D_800A6038.y.p.whole - 16;
+        o->velY = PLAYER.y.p.whole - 16;
         o->h->p.whole = o->velX + MulCos(o->waa, 12);
         o->y.p.whole = o->velY + MulNegSinScaled(o->waa, 12);
         D_8009C338->w32 = 0;
         D_8009C338->w0e = 0;
         D_8009C338->b0c = 0;
-        D_800A6038.b9d = 0;
+        PLAYER.b9d = 0;
         o->ba5 = 0;
         o->state++;
         break;
     case 6:
         if (o->animFrame & 1) o->velX = D_800A6078->p.whole + 16;
         else o->velX = D_800A6078->p.whole - 16;
-        o->velY = D_800A6038.y.p.whole - 16;
-        AnimAdvance((TObj *)&D_800A6038);
+        o->velY = PLAYER.y.p.whole - 16;
+        AnimAdvance((TObj *)&PLAYER);
         D_8009C338->w0e += D_8007A072[TB(o)];
         if (o->animFrame & 1) {
             if (D_8009C338->w0e < -64) {
-                if (D_800A6038.b9e == 4 || D_800A6038.b9e == 7)
+                if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                     *(unsigned char *)o->d94 = D_8009C330->b6;
-                if (PADOK() && D_800A6038.bac < 2 && D_8009C93F == 0) {
+                if (PADOK() && PLAYER.bac < 2 && D_8009C93F == 0) {
                     FUN_800ec710(D_8009D2B2, o);
-                    D_800A6038.b9d = 0;
+                    PLAYER.b9d = 0;
                     D_8009C338->w0e = 0;
                     o->waa -= 0x40;
                     o->state++;
                 } else {
-                    D_800A6038.b9d = 0;
+                    PLAYER.b9d = 0;
                     D_8009C338->b0c = 0;
                     D_8009C330->b0 = 0;
                     o->b04 = 2;
@@ -363,10 +363,10 @@ void func_800317C0(TObj *o)
                 }
             }
         } else if (D_8009C338->w0e > 64) {
-            if (D_800A6038.b9e == 4 || D_800A6038.b9e == 7)
+            if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                 *(unsigned char *)o->d94 = D_8009C330->b6;
-            if (!PADOK() || D_800A6038.bac >= 2 || D_8009C93F != 0) {
-                D_800A6038.b9d = 0;
+            if (!PADOK() || PLAYER.bac >= 2 || D_8009C93F != 0) {
+                PLAYER.b9d = 0;
                 D_8009C338->b0c = 0;
                 D_8009C330->b0 = 0;
                 o->b04 = 2;
@@ -374,7 +374,7 @@ void func_800317C0(TObj *o)
                 o->state = 0;
             } else {
                 FUN_800ec710(D_8009D2B2, o);
-                D_800A6038.b9d = 0;
+                PLAYER.b9d = 0;
                 D_8009C338->w0e = 0;
                 o->waa += 0x40;
                 o->state++;
@@ -384,14 +384,14 @@ void func_800317C0(TObj *o)
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + (unsigned short)D_8009C338->w0e) & 0xff, 12);
         break;
     case 7:
-        o->animFrame = D_800A6038.animFrame;
+        o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
-        AnimJump((TObj *)&D_800A6038, 0);
+        AnimJump((TObj *)&PLAYER, 0);
         if ((D_1F8001F8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xc0, 2);
             SfxPlay(3);
         }
-        AnimJump((TObj *)&D_800A6038, D_8009C330->w22 >> 2 & 3);
+        AnimJump((TObj *)&PLAYER, D_8009C330->w22 >> 2 & 3);
         n = TB(o);
         D_8009D600.a = 10;
         D_8009D600.b = 2;
@@ -404,12 +404,12 @@ void func_800317C0(TObj *o)
         else dx = D_8007A04C[i];
         dy = D_8007A04E[i];
         o->velX = D_800A6078->p.whole + MulCos((unsigned char)dx, dy);
-        o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
         if (!PADOK() || D_8009C93F != 0) {
-            D_800A6038.b9d = 1;
+            PLAYER.b9d = 1;
             D_8009C330->b0 = 2;
             D_8009C330->w22 = 0;
             o->state = 0;
@@ -421,15 +421,15 @@ void func_800317C0(TObj *o)
         o->state++;
         break;
     case 8:
-        o->animFrame = D_800A6038.animFrame;
+        o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
-        AnimJump((TObj *)&D_800A6038, 0);
+        AnimJump((TObj *)&PLAYER, 0);
         if ((D_1F8001F8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }
-        AnimJump((TObj *)&D_800A6038, D_8009C330->w22 / 3 & 3);
-        o->animFrame = D_800A6038.animFrame;
+        AnimJump((TObj *)&PLAYER, D_8009C330->w22 / 3 & 3);
+        o->animFrame = PLAYER.animFrame;
         n = TB(o);
         D_8009D600.a = 16;
         D_8009D600.b = 4;
@@ -442,27 +442,27 @@ void func_800317C0(TObj *o)
         else dx = D_8007A04C[i];
         dy = D_8007A04E[i];
         o->velX = D_800A6078->p.whole + MulCos((unsigned char)dx, dy);
-        o->velY = D_800A6038.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
+        o->velY = PLAYER.y.p.whole + MulNegSinScaled((unsigned char)dx, dy);
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
         if (!PADOK() || D_8009C93F != 0) {
             D_8009C330->b0 = 1;
             D_8009C330->w22 = 0;
-            D_800A6038.b9d = 1;
+            PLAYER.b9d = 1;
             o->state = 0;
         }
         D_8009C330->w22++;
         break;
     }
-    if (D_800A6038.bac >= 2) {
+    if (PLAYER.bac >= 2) {
         char pad[16];
-        D_8009D2E8 = D_800A6038.de4;
+        D_8009D2E8 = PLAYER.de4;
         D_8009C330->b8 = 0;
-        D_800A6038.step = 14;
-        D_800A6038.ba5 = 0;
-        D_800A6038.state = 0;
-        D_800A6038.substep = 0;
+        PLAYER.step = 14;
+        PLAYER.ba5 = 0;
+        PLAYER.state = 0;
+        PLAYER.substep = 0;
         D_8009C330->w2c = 13;
         if (D_8009C330->w2e != 13) {
             FUN_800efc04(o);
@@ -470,7 +470,7 @@ void func_800317C0(TObj *o)
             D_8009C330->w2e = D_8009C330->w2c;
         }
         D_8009C330->w2e = 0xffff;
-        D_800A6038.b9d = 0;
+        PLAYER.b9d = 0;
         D_8009C338->b0c = 0;
         D_8009C330->b0 = 0;
         o->b04 = 2;

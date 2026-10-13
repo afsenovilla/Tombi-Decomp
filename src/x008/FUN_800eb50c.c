@@ -4,7 +4,7 @@ typedef struct { char p[0x1e]; unsigned short w1e; } NN;
 typedef struct { unsigned short w; short idx; void **ptrs; int pad; } E;
 extern E DAT_80114ae4[];
 extern unsigned short DAT_8009c960[];
-extern int DAT_1f8002c8[];
+extern int SPR_DATA[];
 extern unsigned char DAT_800a6047;
 extern char *DAT_800a611c;
 extern char *FUN_80018448(void);
@@ -22,7 +22,7 @@ void FUN_800eb50c(short a, int x, int y, int z)
         n[3] = a;
         *(int *)(n + 0x18) = z << 16;
         ((NN *)n)->w1e = DAT_80114ae4[DAT_8009c960[0]].w;
-        *(int *)(n + 0x3c) = DAT_1f8002c8[DAT_80114ae4[DAT_8009c960[0]].idx];
+        *(int *)(n + 0x3c) = SPR_DATA[DAT_80114ae4[DAT_8009c960[0]].idx];
         if (a == 2 && *(int *)DAT_8009c960 == 0x50000) a = 3;
         *(void **)(n + 0x24) = DAT_80114ae4[DAT_8009c960[0]].ptrs[a];
         FUN_8001fe6c(n);

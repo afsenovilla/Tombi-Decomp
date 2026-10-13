@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[], D_8009C93C[], D_8009C975[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
@@ -11,7 +11,7 @@ extern int D_1F800190, D_1F80018C;
 extern unsigned char D_800A603C[], D_800A603D[];
 extern short D_8009CD94[], D_8009CD96[], D_8009CDA0[];
 extern unsigned char D_1F8003D1[];
-extern SC *D_1F8001D4;
+extern SC *TASK_C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
 extern int func_801204DC(TObj *);
@@ -25,7 +25,7 @@ void func_80120780(TObj *o)
         if (o->visible == 0) break;
         if (func_801204DC(o) == 0) break;
         o->state++;
-        D_800A6038.active = 2;
+        PLAYER.active = 2;
         D_8009C93F[0] = 1;
         D_8009C93E[0] = 1;
         D_8009C942[0] = 1;
@@ -37,10 +37,10 @@ void func_80120780(TObj *o)
         break;
     case 1:
         if (--o->timer == -1) {
-            D_800A6038.active = 5;
+            PLAYER.active = 5;
             D_800A603C[0] = 5;
             D_8009C93E[0] = 0;
-            D_800A6038.visible = 0;
+            PLAYER.visible = 0;
             D_800A603D[0] = 0x40;
             o->timer = 0x14;
             o->state++;
@@ -75,8 +75,8 @@ void func_80120780(TObj *o)
         o->w76 = o->w74;
         o->w78 = o->w74;
         if (D_8009C975[0] == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
             D_8009E375[0] = 0xff;
             D_8009E376[0] = 0xff;
             D_8009E377[0] = 0xff;

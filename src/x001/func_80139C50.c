@@ -1,8 +1,8 @@
 // FUNC 80139c50 1148 X001
 // MATCHING 80139c50 1148
 #include "TOBJ.H"
-extern TObj D_800A6038;
-#define P D_800A6038
+extern TObj PLAYER;
+#define P PLAYER
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
 extern TObj *D_8009C330;

@@ -16,7 +16,7 @@ typedef struct {
     char p9f;
     union { int i; unsigned char b[4]; } a0;
 } G;
-extern G D_800A6038;
+extern G PLAYER;
 extern unsigned char D_800A60D8;
 extern unsigned char D_8009C93A, D_8009C93F;
 extern unsigned char D_8009C964, D_8009C965;
@@ -80,7 +80,7 @@ static __inline__ void clamp(S *o)
 void func_80029078(S *o)
 {
     int f;
-    G *g = &D_800A6038;
+    G *g = &PLAYER;
     int a, b;
     unsigned char c;
     unsigned char t1, t2, t3;

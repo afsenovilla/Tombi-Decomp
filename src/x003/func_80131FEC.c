@@ -6,7 +6,7 @@ typedef struct { short v[6]; } V6;
 extern TObj *D_8009F2E0;
 extern unsigned char D_8009CDC1, D_8009C93A;
 extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -34,7 +34,7 @@ void func_80131FEC(TObj *o)
         if (D_8009C93A == 0) break;
         D_8009C93F = 1;
         D_8009C942 = 1;
-        D_800A6038 = 1;
+        PLAYER = 1;
         D_800A6066 = 0;
         D_800A603C = 5;
         D_800A603D = 0;

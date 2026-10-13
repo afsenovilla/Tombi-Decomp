@@ -29,7 +29,7 @@ extern long D_1F800070;
 extern long D_1F800074;
 extern char *D_1F800164;
 extern int D_1F8001E0;
-extern int D_1F800070i;
+extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
 int FUN_8004fba8(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
@@ -47,7 +47,7 @@ void func_80124780(Ext *o)
 
     if (FUN_8004fba8(o, &D_1F800070, &D_1F800074) != 0)
         return;
-    xy = D_1F800070i;
+    xy = LZ_FILE_CTRL;
     x = xy;
     y = xy >> 16;
     p->x0 = x + o->t.wb4;
@@ -83,9 +83,9 @@ void func_80124780(Ext *o)
     f->y3 = f->y2;
 
     if (o->t.b0b != 0)
-        insertPrim(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
+        insertPrim(f, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
     else
-        insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800070i, (signed char)o->t.b0f, 0x5000000);
+        insertPrimWithBias(f, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
     D_1F800164 += 0x18;
 }
 

@@ -6,12 +6,12 @@ typedef struct {
     short xmin, xmax, ymin, ymax;
     Fix16 *pos;
 } Cam;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern Fix16 D_1F8000F0;
 
 void func_80116234(Cam *c)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     Fix16 *q;
 
     c->pos->raw = pl->h->raw;

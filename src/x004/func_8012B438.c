@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
 extern unsigned char D_8009CEFB, D_8009CDDD, D_8009D0C8, D_8009C971;
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_8009C970_[];
 #define D_8009C970 D_8009C970_[0]
 extern unsigned char D_8009C93F_[];
@@ -207,7 +207,7 @@ void func_8012B438(TObj *o)
         case 10:
             switch (o->step) {
             case 0:
-                if (D_8009CDA4[e[1]] != 0xff) {
+                if (SCRIPT_FLAGS[e[1]] != 0xff) {
                     setEventComplete(e[1], 0);
                     o->timer = 300;
                     o->step++;

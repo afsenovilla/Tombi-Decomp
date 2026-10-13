@@ -2,7 +2,7 @@
 // MATCHING 8012eba0 312
 #include "TOBJ.H"
 extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
-extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern void setEventStarted(int, int, int);
 
 void func_8012EBA0(TObj *o)
@@ -32,7 +32,7 @@ void func_8012EBA0(TObj *o)
         D_8009C93F = 0;
         D_8009C942 = 0;
         D_8009C93E = 0;
-        D_800A6038 = 1;
+        PLAYER = 1;
         D_800A603C = 1;
         D_800A603D = 0;
         D_800A603E = 0;

@@ -15,7 +15,7 @@ typedef struct { short x, y, z, sub; } E8;
 
 extern E D_8011C984[], D_8011CA9C[];
 extern E8 D_8011C93C[];
-extern TObj *D_8009F2D8[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
+extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
 extern unsigned char D_8009D2C3, D_8009CE41;
 extern unsigned char D_8009CFDC[];
 extern TObj *allocObjectLayer2(void);
@@ -50,7 +50,7 @@ void func_80119A1C(TObj *o)
         p->w78 = e->w78;
         p->w7a = e->w7a;
         p->b68 = 0;
-        D_8009F2D8[i] = p;
+        SCRIPT_OBJECTS[i] = p;
         p->d90 = (int)o;
         if (i == 0 && D_8009D2C3 != 0x7f) p->b04 = 2;
     }

@@ -19,8 +19,8 @@ typedef struct {
     u16 mask;
     u8 x, y, b6, b7, b8, b9;
 } GlyphSlot;
-extern GlyphSlot D_800A5DE0[];
-extern u16 *D_1F800398[];
+extern GlyphSlot GLYPH_CACHE[];
+extern u16 *WFM3_DATA[];
 
 short loadMessageGlyph(int p, int id, int bank)
 {
@@ -41,19 +41,19 @@ short loadMessageGlyph(int p, int id, int bank)
     freeSlot = -1;
     key = (bank << 12) | (id & 0xfff);
     for (i = 0; i < 0x3c; i++) {
-        if (D_800A5DE0[i].id == key) {
-            D_800A5DE0[i].mask |= 1 << p;
+        if (GLYPH_CACHE[i].id == key) {
+            GLYPH_CACHE[i].mask |= 1 << p;
             return i;
         }
-        if (D_800A5DE0[i].id == -1) {
+        if (GLYPH_CACHE[i].id == -1) {
             freeSlot = i;
         }
     }
     if ((short)freeSlot == -1) {
         return -1;
     }
-    D_800A5DE0[(short)freeSlot].mask |= 1 << p;
-    src = D_1F800398[bank];
+    GLYPH_CACHE[(short)freeSlot].mask |= 1 << p;
+    src = WFM3_DATA[bank];
     dst = (u16 *)(id * 2 + (int)src);
     src = (u16 *)((u8 *)src + dst[0x48]);
     w = *src++;
@@ -61,14 +61,14 @@ short loadMessageGlyph(int p, int id, int bank)
     n = w * h;
     a = *src++;
     b = *src++;
-    D_800A5DE0[(short)freeSlot].id = key;
-    D_800A5DE0[(short)freeSlot].b8 = 0;
-    D_800A5DE0[(short)freeSlot].b6 = a;
-    D_800A5DE0[(short)freeSlot].b7 = h;
-    D_800A5DE0[(short)freeSlot].b9 = b;
+    GLYPH_CACHE[(short)freeSlot].id = key;
+    GLYPH_CACHE[(short)freeSlot].b8 = 0;
+    GLYPH_CACHE[(short)freeSlot].b6 = a;
+    GLYPH_CACHE[(short)freeSlot].b7 = h;
+    GLYPH_CACHE[(short)freeSlot].b9 = b;
     if (n < 0x1b) {
         load = (DR_LOAD *)D_1F800164;
-        setRECT(&rect, D_800A5DE0[(short)freeSlot].x, D_800A5DE0[(short)freeSlot].y, w, h);
+        setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y, w, h);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
         for (j = 0; j < w * h; j++) {
@@ -78,7 +78,7 @@ short loadMessageGlyph(int p, int id, int bank)
         D_1F800164 += sizeof(DR_LOAD);
     } else {
         load = (DR_LOAD *)D_1F800164;
-        setRECT(&rect, D_800A5DE0[(short)freeSlot].x, D_800A5DE0[(short)freeSlot].y, w, h >> 1);
+        setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y, w, h >> 1);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
         for (j = 0; j < w * (u16)(h >> 1); j++) {
@@ -87,7 +87,7 @@ short loadMessageGlyph(int p, int id, int bank)
         addPrim(D_1F8001E0 + 4, load);
         D_1F800164 += sizeof(DR_LOAD);
         load = (DR_LOAD *)D_1F800164;
-        setRECT(&rect, D_800A5DE0[(short)freeSlot].x, D_800A5DE0[(short)freeSlot].y + (h >> 1), w, h >> 1);
+        setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y + (h >> 1), w, h >> 1);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
         for (j = 0; j < w * (u16)(h >> 1); j++) {

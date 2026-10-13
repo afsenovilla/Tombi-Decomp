@@ -6,7 +6,7 @@
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } PL;
 typedef void (*Fn)(TObj *);
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_8012568C[];
 extern short D_801256A8[];
 extern unsigned char D_80125684[];
@@ -33,7 +33,7 @@ extern void func_801184CC(void);
 
 void func_801163BC(TObj *o)
 {
-    PL *pl = &D_800A6038;
+    PL *pl = &PLAYER;
     TObj *q;
 
     switch (o->step) {

@@ -1,7 +1,7 @@
 // FUNC 8002fe78 168 MAIN0
 // MATCHING 8002fe78 168
 #include "TOBJ.H"
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern void FUN_8002ef20(TObj *);
 extern void FUN_8002fc98(TObj *);
 extern void ObjFree(TObj *);
@@ -12,7 +12,7 @@ void func_8002FE78(TObj *o)
         FUN_8002ef20(o);
         break;
     case 1:
-        if (D_800A6038 != 5)
+        if (PLAYER != 5)
             FUN_8002fc98(o);
         break;
     case 2:

@@ -2,7 +2,7 @@
 // MATCHING 8012c97c 660
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009D2C3, D_8009CF03;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_8009C93F, D_8009C942;
 extern void *D_801399D8[], *D_801399D4[];
@@ -51,7 +51,7 @@ void func_8012C97C(TObj *o)
     case 2:
         AnimAdvance(o);
         o->a.raw += 0x14000;
-        D_800A6038.a.raw += 0x14000;
+        PLAYER.a.raw += 0x14000;
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;

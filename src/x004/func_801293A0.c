@@ -8,7 +8,7 @@ typedef struct {
     void **tab;
 } Ent;
 extern Ent D_80131174[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_8009CE22;
 extern unsigned char D_800A6047[];
 extern void FUN_8001fe6c(TObj *);
@@ -21,7 +21,7 @@ void func_801293A0(TObj *o)
         o->box2 = D_80131174[o->subtype].b2;
         o->box3 = D_80131174[o->subtype].b3;
         o->w1e = D_80131174[o->subtype].w1e;
-        o->d3c = D_1F8002C8[D_80131174[o->subtype].idx];
+        o->d3c = SPR_DATA[D_80131174[o->subtype].idx];
         o->anim = *D_80131174[o->subtype].tab;
         FUN_8001fe6c(o);
         o->b0d = 1;

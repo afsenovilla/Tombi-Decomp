@@ -3,7 +3,7 @@
 /* covers csv entries 80122fa0 (596 B) and 801231f4 (1188 B): one function cut at a jump into the middle */
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern int D_1F8002DC[];
 extern void *D_80129F9C[];
 
@@ -44,7 +44,7 @@ static __inline__ short clamp(TObj *o)
 
 void func_80122FA0(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     short dx, dy;
 
     switch (o->b04) {
@@ -186,12 +186,12 @@ void func_80122FA0(TObj *o)
                 o->velX = 0;
             }
             p->active = 1;
-            D_800A6038.step = 0x47;
-            D_800A6038.animFrame = 2;
-            D_800A6038.d8c = 0;
-            D_800A6038.b04 = 1;
-            D_800A6038.state = 1;
-            D_800A6038.velY = 0x200;
+            PLAYER.step = 0x47;
+            PLAYER.animFrame = 2;
+            PLAYER.d8c = 0;
+            PLAYER.b04 = 1;
+            PLAYER.state = 1;
+            PLAYER.velY = 0x200;
             o->active = 2;
             o->b04++;
             break;

@@ -2,7 +2,7 @@
 // MATCHING 8012c718 364
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C93F, D_8009C942;
 extern void *D_80135748, *D_80135750[];
 extern int showMessageBoxDirect(int, int, void *);
@@ -24,9 +24,9 @@ void func_8012C718(TObj *o)
             o->state++;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A6038.b04 = 5;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+            PLAYER.b04 = 5;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             o->d90 = showMessageBoxDirect(5, 6, &o->a);
             o->wac = 2;
             o->animFrame = o->b68 & 1;
@@ -41,9 +41,9 @@ void func_8012C718(TObj *o)
             e->b04 = 3;
             D_8009C93F = 0;
             D_8009C942 = 0;
-            D_800A6038.b04 = 1;
-            D_800A6038.step = 0;
-            D_800A6038.state = 0;
+            PLAYER.b04 = 1;
+            PLAYER.step = 0;
+            PLAYER.state = 0;
             *(short *)((char *)o + 0xac) = 0;   /* raw store: the scalar anim load waits for it, not for the sb state */
             o->anim = D_80135748;
             o->state = 0;

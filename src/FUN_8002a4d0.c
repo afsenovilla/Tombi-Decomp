@@ -15,15 +15,15 @@ extern unsigned short D_8009CD96;
 extern unsigned short D_8009CDA0;
 extern int *D_80079A48[];
 extern short D_1F8000E6;
-extern TObj *D_1F8001D4;
-extern TObj D_800A6038;
+extern TObj *TASK_C;
+extern TObj PLAYER;
 extern void func_80029CB4(void);
 extern int func_800271B8(TObj *);
 extern void FUN_8001f110(int);
 
 void FUN_8002a4d0(TObj *o)
 {
-    TObj *s = &D_800A6038;
+    TObj *s = &PLAYER;
     unsigned short *m;
     short r1;
     int r2, r3, done;
@@ -179,7 +179,7 @@ void FUN_8002a4d0(TObj *o)
             s->state = 0;
             return;
         default:
-            t = U16(D_1F8001D4, 0x4c);
+            t = U16(TASK_C, 0x4c);
             if (t == 0)
                 return;
             if (t < 3) {
@@ -208,8 +208,8 @@ void FUN_8002a4d0(TObj *o)
         if (D_8009C975 != 1)
             break;
     case 4:
-        D_1F8001D4->w4c = 7;
-        D_1F8001D4->w4e = 0;
+        TASK_C->w4c = 7;
+        TASK_C->w4e = 0;
         break;
     }
 }

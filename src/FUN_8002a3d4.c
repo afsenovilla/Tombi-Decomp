@@ -2,7 +2,7 @@
 // MATCHING 8002a3d4 252
 #include "TOBJ.H"
 extern unsigned char DAT_800a6038;
-extern unsigned char DAT_800a6038b[];
+extern unsigned char PLAYER[];
 extern short *DAT_800a6078;
 extern int DAT_8009c960;
 extern void FUN_80027c74(TObj *);
@@ -14,7 +14,7 @@ void FUN_8002a3d4(TObj *o)
     unsigned char *g;
     FUN_80027c74(o);
     FUN_8002795c(o);
-    g = DAT_800a6038b;
+    g = PLAYER;
     if (DAT_800a6038 < 4 || DAT_800a6038 == 7) {
         b = *(short *)(o->d34 + 2);
         if (DAT_800a6078[1] < (a = b - 0x90)) DAT_800a6078[1] = a;

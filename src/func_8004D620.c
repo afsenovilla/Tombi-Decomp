@@ -54,7 +54,7 @@ typedef struct O {
 #define FCE o->fCE
 #define FD0 (*(short *)((char *)o + 0xd0))
 typedef struct G { short n, f2, f4, f6; } G;
-extern G D_800A4648[];
+extern G MESSAGE_SLOTS[];
 extern unsigned char D_8009C943;
 extern unsigned short D_8009C960;
 extern unsigned char *D_8007DD34[];
@@ -64,7 +64,7 @@ extern unsigned char D_8007DE24[];
 extern signed char D_8007DE88[];
 extern unsigned short D_8007D454[];
 extern unsigned short D_8007D5A4[];
-extern char *D_1F800398;
+extern char *WFM3_DATA;
 extern void playSFX(int);
 extern O *ObjAlloc(void);
 extern void drawInfoMessageText(O *, int);
@@ -90,7 +90,7 @@ static __inline__ void callit(O *o, int a)
     drawInfoMessageText(o, 1);
 }
 
-#define TBL(x) (*(unsigned short *)(D_1F800398 + (x) * 2 + 0x10))
+#define TBL(x) (*(unsigned short *)(WFM3_DATA + (x) * 2 + 0x10))
 
 O *func_8004D620(int a, int b)
 {
@@ -109,9 +109,9 @@ O *func_8004D620(int a, int b)
 
     D_8009C943 = 0xff;
     for (i = 2; i >= 0; i--) {
-        if (D_800A4648[i].n == -1) {
+        if (MESSAGE_SLOTS[i].n == -1) {
             D_8009C943 = i;
-            D_800A4648[i].f2 = i;
+            MESSAGE_SLOTS[i].f2 = i;
             break;
         }
     }
@@ -165,8 +165,8 @@ O *func_8004D620(int a, int b)
         FD0 = 6;
         F22 = 0;
         o->fCC = i;
-        *(short *)((char *)D_800A4648 + FCA * 8) = 0;
-        base = D_1F800398;
+        *(short *)((char *)MESSAGE_SLOTS + FCA * 8) = 0;
+        base = WFM3_DATA;
         if ((unsigned)(b - 2) < 2) {
             q = (unsigned short *)(s1[0] * 2 + (int)base); FC8 = q[8] + s1[1];
         } else {
@@ -182,7 +182,7 @@ O *func_8004D620(int a, int b)
         if (b == 1 || b == 4) {
             callit(o, a);
         }
-        base = D_1F800398;
+        base = WFM3_DATA;
         base += *(short *)(base + 8);
         q = (unsigned short *)(base + (unsigned short)FC8 * 2);
         p = (unsigned short *)(base + *(short *)q);

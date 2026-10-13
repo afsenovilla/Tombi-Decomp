@@ -19,11 +19,11 @@ typedef struct {
 
 extern C80119F5C D_800A4550;
 extern P80119F5C D_8012AC88[];
-extern unsigned char D_800A6038[];
+extern unsigned char PLAYER[];
 extern int D_1F8000EC[], D_1F8000F0[], D_1F8000F4[];
 extern short D_1F800256;
 extern TObj **D_1F80026C;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern unsigned char D_8009C975, D_8009C93C;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern void func_80119D2C(TObj *);
@@ -140,12 +140,12 @@ void func_80119F5C(TObj *o)
             ADVANCE(o, x);
         }
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     }
-    D_800A6038[0] = 5;
+    PLAYER[0] = 5;
     D_1F8000EC[0] = o->a.raw;
     D_1F8000F0[0] = o->y.raw;
     D_1F8000F4[0] = o->b.raw;

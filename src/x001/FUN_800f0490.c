@@ -53,7 +53,7 @@ extern T2 DAT_8007a024[];
 extern unsigned short DAT_800a6040[];
 extern unsigned short DAT_800a60fc[];
 extern unsigned char DAT_8009c970, DAT_8009c970b[];
-extern int DAT_1f8002c8[];
+extern int SPR_DATA[];
 extern char DAT_80010748[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short DAT_8009c960;
@@ -118,7 +118,7 @@ void FUN_800f0490(TObj *o)
         DAT_800a60fc[0] = DAT_8007a024[DAT_8009d2b3].b;
         o->w9a = DAT_8009c970;
         o->w98 = DAT_8009c970b[0];
-        o->d3c = DAT_1f8002c8[0];
+        o->d3c = SPR_DATA[0];
         o->anim = DAT_80010748;
         FUN_8001fe6c(o);
         o->step++;

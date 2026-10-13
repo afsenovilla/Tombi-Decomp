@@ -2,9 +2,9 @@
 // MATCHING 80118ea0 2208
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
-extern TObj *D_8009F2D8;
+extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009CE3A, D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_8009C975, D_8009CDF1;
 extern unsigned char *D_8009C330;
@@ -26,7 +26,7 @@ extern void func_801180BC(TObj *, unsigned short, short);
 
 void func_80118EA0(TObj *o)
 {
-    TObj *s1 = D_8009F2D8;
+    TObj *s1 = SCRIPT_OBJECTS;
     TObj *s2 = D_8009F2DC;
     TObj *p;
     B12 v;
@@ -37,60 +37,60 @@ void func_80118EA0(TObj *o)
         if (D_8009C93A == 0) break;
         D_8009C93F = 1;
         D_8009C942 = 1;
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0x64;
-        D_800A6038.state = 0;
-        D_800A6038.anim = D_80010814;
-        FUN_8001fe6c(&D_800A6038);
+        PLAYER.b04 = 5;
+        PLAYER.step = 0x64;
+        PLAYER.state = 0;
+        PLAYER.anim = D_80010814;
+        FUN_8001fe6c(&PLAYER);
         o->state++;
         break;
     case 1:
-        D_800A6038.h->raw -= 0x12800;
-        if (D_800A6038.h->p.whole < 0x4a) {
-            FUN_800eea7c(&D_800A6038, 0, 0);
+        PLAYER.h->raw -= 0x12800;
+        if (PLAYER.h->p.whole < 0x4a) {
+            FUN_800eea7c(&PLAYER, 0, 0);
             o->w08 = 0x14;
             o->state++;
         }
         break;
     case 2:
         if (--o->w08 > 0) break;
-        D_800A6038.animFrame = 1;
+        PLAYER.animFrame = 1;
         D_8009C330[9] = 5;
-        D_800A6038.b9c = 1;
-        D_800A6038.b04 = 6;
-        D_800A6038.b69 = 0;
-        D_800A6038.wb2 = 0;
-        D_800A6038.velH = 0;
-        D_800A6038.velV = 0;
-        D_800A6038.velX = 0;
-        D_800A6038.velY = 0;
-        D_800A6038.step = 4;
-        D_800A6038.state = 0;
+        PLAYER.b9c = 1;
+        PLAYER.b04 = 6;
+        PLAYER.b69 = 0;
+        PLAYER.wb2 = 0;
+        PLAYER.velH = 0;
+        PLAYER.velV = 0;
+        PLAYER.velX = 0;
+        PLAYER.velY = 0;
+        PLAYER.step = 4;
+        PLAYER.state = 0;
         o->state++;
         break;
     case 3:
-        if (D_800A6038.b69 == 0) break;
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0x64;
-        D_800A6038.state = 0;
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        if (PLAYER.b69 == 0) break;
+        PLAYER.b04 = 5;
+        PLAYER.step = 0x64;
+        PLAYER.state = 0;
+        FUN_800eea7c(&PLAYER, 0, 0);
         o->w08 = 0x1e;
         o->state++;
         break;
     case 4:
         if (--o->w08 > 0) break;
-        D_800A6038.animFrame = 0;
-        D_800A6038.anim = D_80010814;
-        FUN_8001fe6c(&D_800A6038);
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0x64;
-        D_800A6038.state = 0;
+        PLAYER.animFrame = 0;
+        PLAYER.anim = D_80010814;
+        FUN_8001fe6c(&PLAYER);
+        PLAYER.b04 = 5;
+        PLAYER.step = 0x64;
+        PLAYER.state = 0;
         o->state++;
         break;
     case 5:
-        D_800A6038.h->raw += 0x12800;
-        if (D_800A6038.h->p.whole >= 0x79) {
-            FUN_800eea7c(&D_800A6038, 0, 0);
+        PLAYER.h->raw += 0x12800;
+        if (PLAYER.h->p.whole >= 0x79) {
+            FUN_800eea7c(&PLAYER, 0, 0);
             o->w08 = 0x1e;
             o->state++;
         }
@@ -101,8 +101,8 @@ void func_80118EA0(TObj *o)
         break;
     case 10:
         cdSeekStream(0xb);
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0x62;
+        PLAYER.b04 = 5;
+        PLAYER.step = 0x62;
         D_8009C93F = 1;
         D_8009C975 = 3;
         o->state++;
@@ -235,11 +235,11 @@ void func_80118EA0(TObj *o)
         D_8009C942 = 0;
         s1->step = 1;
         s2->step = 1;
-        D_800A6038.b04 = 1;
-        D_800A6038.animFrame = 0;
-        D_800A6038.wb2 = 0;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.b04 = 1;
+        PLAYER.animFrame = 0;
+        PLAYER.wb2 = 0;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->b04 = 3;
         break;
     }

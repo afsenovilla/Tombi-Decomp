@@ -14,7 +14,7 @@ typedef struct {
     short x3, y3; unsigned short uv3, pad3;
 } PFT4_8011C00C;
 
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern int D_1F800070i;
 extern int D_1F800074i;
@@ -52,7 +52,7 @@ void func_8011EBC0(TObj *o)
     short sc;
     PFT4_8011C00C *f;
 
-    FUN_8004fba8(o, &D_1F800070, &D_1F800074);
+    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
     xy = D_1F800070i;
     x = xy;
     y = (unsigned)xy >> 16;

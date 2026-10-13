@@ -3,17 +3,17 @@
 #include "TOBJ.H"
 typedef struct { char pad[0x8a]; unsigned short w8a; char pad2[0x1190 - 0x8c]; int d1190; int d1194; int d1198; int d119c; } G;
 typedef struct { short s0, s2; } S2;
-extern G *D_8009F0F0;
-extern TObj *D_8009F2D8[];
+extern G *SCRIPT_CTX;
+extern TObj *SCRIPT_OBJECTS[];
 extern S2 *D_800A6078, *D_800A607C[];
 extern short D_800A604C[];
-extern unsigned char D_8009CDA4[], D_8009CEA4[];
+extern unsigned char SCRIPT_FLAGS[], SCRIPT_GLOBALS[];
 extern signed char D_8009D2B0;
 extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1, D_8009D2B1, D_800A611A;
 extern unsigned char D_8009C93A, D_8009C942, D_8009C975, D_8009C93C, D_8009C976;
 extern short D_800A6066;
 extern int D_8009C96C;
-extern char D_800A6038[];
+extern char PLAYER[];
 extern short D_800A60D0[];
 extern unsigned char D_8009C971;
 extern short D_800A60D2[];
@@ -37,11 +37,11 @@ extern void FUN_800eeae4(char *, int, int);
 
 static __inline__ int op81(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     TObj *o;
     int b, a;
     a = g->d1194;
-    o = D_8009F2D8[g->d1190];
+    o = SCRIPT_OBJECTS[g->d1190];
     b = g->d1198;
     if (o != 0) {
         o->w74 = a;
@@ -64,8 +64,8 @@ static __inline__ int op81(void)
 
 static __inline__ int op82(void)
 {
-    G *g = D_8009F0F0;
-    TObj **p = &D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj **p = &SCRIPT_OBJECTS[g->d1190];
     TObj *o = *p;
     if (o != 0) {
         o->b04 = 3;
@@ -78,7 +78,7 @@ static __inline__ int op82(void)
 
 static __inline__ int op83(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     D_800A6078->s2 = g->d1190;
     D_800A604C[1] = g->d1194;
     D_800A607C[0]->s2 = g->d1198;
@@ -88,7 +88,7 @@ static __inline__ int op83(void)
 
 static __inline__ int op84(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     int v;
     g->d1190 = D_800A6078->s2;
     g->d1194 = D_800A604C[1];
@@ -100,8 +100,8 @@ static __inline__ int op84(void)
 
 static __inline__ int op86(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) g->d1190 = o->b6a;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -109,8 +109,8 @@ static __inline__ int op86(void)
 
 static __inline__ int op87(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) {
         o->h->p.whole = g->d1194;
         o->y.p.whole = g->d1198;
@@ -122,8 +122,8 @@ static __inline__ int op87(void)
 
 static __inline__ int op88(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) {
         g->d1190 = o->h->p.whole;
         g->d1194 = o->y.p.whole;
@@ -135,8 +135,8 @@ static __inline__ int op88(void)
 
 static __inline__ int op89(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) o->animFrame = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -144,8 +144,8 @@ static __inline__ int op89(void)
 
 static __inline__ int op8a(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) g->d1190 = o->animFrame;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -153,8 +153,8 @@ static __inline__ int op8a(void)
 
 static __inline__ int op8b(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) g->d1190 = o->b04 == 2;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -162,8 +162,8 @@ static __inline__ int op8b(void)
 
 static __inline__ int op8c(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) o->active = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -171,8 +171,8 @@ static __inline__ int op8c(void)
 
 static __inline__ int op8d(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) {
         FUN_800202b4(o);
         g->d1190 = o->visible;
@@ -183,8 +183,8 @@ static __inline__ int op8d(void)
 
 static __inline__ int op8e(void)
 {
-    G *g = D_8009F0F0;
-    int v = D_8009CDA4[g->d1190];
+    G *g = SCRIPT_CTX;
+    int v = SCRIPT_FLAGS[g->d1190];
     (*(short *)((char *)g + 0x8a))++;
     g->d1190 = v;
     return 1;
@@ -192,16 +192,16 @@ static __inline__ int op8e(void)
 
 static __inline__ int op8f(void)
 {
-    G *g = D_8009F0F0;
-    D_8009CDA4[g->d1190] = g->d1194;
+    G *g = SCRIPT_CTX;
+    SCRIPT_FLAGS[g->d1190] = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op90(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) {
         int t = o->type & 0x7f;
         if (t == 0x18) goto l;
@@ -218,8 +218,8 @@ static __inline__ int op90(void)
 
 static __inline__ int op91(void)
 {
-    G *g = D_8009F0F0;
-    int v = D_8009CEA4[g->d1190];
+    G *g = SCRIPT_CTX;
+    int v = SCRIPT_GLOBALS[g->d1190];
     (*(short *)((char *)g + 0x8a))++;
     g->d1190 = v;
     return 1;
@@ -227,16 +227,16 @@ static __inline__ int op91(void)
 
 static __inline__ int op92(void)
 {
-    G *g = D_8009F0F0;
-    D_8009CEA4[g->d1190] = g->d1194;
+    G *g = SCRIPT_CTX;
+    SCRIPT_GLOBALS[g->d1190] = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op93(void)
 {
-    G *g = D_8009F0F0;
-    if (D_8009D2B0 != 3) FUN_800ecb40(D_800A6038, D_800A6078->s2, D_800A604C[1]);
+    G *g = SCRIPT_CTX;
+    if (D_8009D2B0 != 3) FUN_800ecb40(PLAYER, D_800A6078->s2, D_800A604C[1]);
     g->d1190 = D_800A60A0;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -244,8 +244,8 @@ static __inline__ int op93(void)
 
 static __inline__ int op94(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if ((D_8009D2B0 != 3 || D_800A60A3 == 1) && o != 0) o->b6b = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -253,8 +253,8 @@ static __inline__ int op94(void)
 
 static __inline__ int op95(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) {
         switch (o->type & 0x7f) {
         case 0x18:
@@ -279,7 +279,7 @@ static __inline__ int op95(void)
 
 static __inline__ int op96(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     if (D_8009D2B0 != 3) {
         switch (g->d1190) {
         case 0: D_800A60A3 = 0; break;
@@ -293,7 +293,7 @@ static __inline__ int op96(void)
 
 static __inline__ int op98(void)
 {
-    char *p = (char *)D_8009F0F0;
+    char *p = (char *)SCRIPT_CTX;
     *(int *)(p + 0x1190) = D_800A60D6;
     *(short *)(p + 0x8a) += 1;
     return 1;
@@ -301,7 +301,7 @@ static __inline__ int op98(void)
 
 static __inline__ int op99(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     D_800A6066 = g->d1190;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -309,7 +309,7 @@ static __inline__ int op99(void)
 
 static __inline__ int op9a(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     {
         int a = g->d1190;
         if (g->d1194) FUN_8005a7a0(a, 1, 0);
@@ -321,7 +321,7 @@ static __inline__ int op9a(void)
 
 static __inline__ int op9b(void)
 {
-    unsigned char *p = (unsigned char *)D_8009F0F0;
+    unsigned char *p = (unsigned char *)SCRIPT_CTX;
     *(int *)(p + 0x1190) = D_800A60A1;
     (*(short *)(p + 0x8a))++;
     return 1;
@@ -329,7 +329,7 @@ static __inline__ int op9b(void)
 
 static __inline__ int op9c(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     D_8009C942 = g->d1190;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -337,7 +337,7 @@ static __inline__ int op9c(void)
 
 static __inline__ int op9d(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     func_8004D620(g->d1190, 2);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -345,7 +345,7 @@ static __inline__ int op9d(void)
 
 static __inline__ int op9e(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     playSFXWithNoteAndVolume(g->d1190, g->d1194, g->d1198);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -353,8 +353,8 @@ static __inline__ int op9e(void)
 
 static __inline__ int op9f(void)
 {
-    unsigned char *g = (unsigned char *)D_8009F0F0;
-    unsigned char *p = (unsigned char *)D_8009F2D8[*(int *)(g + 0x1190)];
+    unsigned char *g = (unsigned char *)SCRIPT_CTX;
+    unsigned char *p = (unsigned char *)SCRIPT_OBJECTS[*(int *)(g + 0x1190)];
     int f = *(int *)(g + 0x1194);
     if (p != 0 && p[2] == 0x19) {
         if (f == 0) {
@@ -370,7 +370,7 @@ static __inline__ int op9f(void)
 
 static __inline__ int opa0(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     D_8009C975 = 0x10;
     D_8009C93C = g->d1190;
     D_8009C976 = g->d1194;
@@ -380,7 +380,7 @@ static __inline__ int opa0(void)
 
 static __inline__ int opa2(void)
 {
-    char *p = (char *)D_8009F0F0;
+    char *p = (char *)SCRIPT_CTX;
     int a = *(int *)(p + 0x1190);
     int b = *(int *)(p + 0x1194);
     int c = *(int *)(p + 0x1198);
@@ -399,8 +399,8 @@ static __inline__ int opa2(void)
 
 static __inline__ int opa3(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) g->d1190 = o->b69;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -408,8 +408,8 @@ static __inline__ int opa3(void)
 
 static __inline__ int opa4(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) o->b69 = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -417,8 +417,8 @@ static __inline__ int opa4(void)
 
 static __inline__ int opa5(void)
 {
-    G *g = D_8009F0F0;
-    TObj *o = D_8009F2D8[g->d1190];
+    G *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->d1190];
     if (o != 0) o->b9c = g->d1194;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -426,15 +426,15 @@ static __inline__ int opa5(void)
 
 static __inline__ int opa6(void)
 {
-    G *g = D_8009F0F0;
-    FUN_800eeae4(D_800A6038, (short)g->d1190, (short)g->d1194);
+    G *g = SCRIPT_CTX;
+    FUN_800eeae4(PLAYER, (short)g->d1190, (short)g->d1194);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opa7(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     g->d1190 = D_8009D2B1;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -442,7 +442,7 @@ static __inline__ int opa7(void)
 
 static __inline__ int opa8(void)
 {
-    char *p = (char *)D_8009F0F0;
+    char *p = (char *)SCRIPT_CTX;
     *(int *)(p + 0x1190) = D_800A611A;
     *(unsigned short *)(p + 0x8a) += 1;
     return 1;
@@ -450,7 +450,7 @@ static __inline__ int opa8(void)
 
 static __inline__ int opa9(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     unsigned char m = D_8009C971;
     short v = D_800A60D0[0];
     int a = g->d1190;
@@ -469,7 +469,7 @@ static __inline__ int opa9(void)
 
 static __inline__ int opaa(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     g->d1190 = D_8009C96C;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -477,7 +477,7 @@ static __inline__ int opaa(void)
 
 static __inline__ int opab(void)
 {
-    G *g = D_8009F0F0;
+    G *g = SCRIPT_CTX;
     (*(short *)((char *)g + 0x8a))++;
     return 0;
 }

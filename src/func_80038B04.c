@@ -9,17 +9,17 @@ typedef struct {
     char b89;
     unsigned short w8a;
 } G;
-extern G *D_8009F0F0;
-extern unsigned char *D_8009D60C;
-extern int D_8009F2D8[64];
+extern G *SCRIPT_CTX;
+extern unsigned char *SCRIPT_CODE;
+extern int SCRIPT_OBJECTS[64];
 extern char D_80013650[];
 extern int D_8009D69C;
 extern int printf(char *, ...);
 
 void func_80038B04(void)
 {
-    G *g = D_8009F0F0;
-    unsigned char *t = D_8009D60C;
+    G *g = SCRIPT_CTX;
+    unsigned char *t = SCRIPT_CODE;
     char buf[80];
     F s;
     F *src;
@@ -32,7 +32,7 @@ void func_80038B04(void)
     }
     buf[i] = 0;
     for (i = 63; i >= 0; i--) {
-        D_8009F2D8[i] = 0;
+        SCRIPT_OBJECTS[i] = 0;
     }
     src = g->p80;
     g->b88 = 0;

@@ -1,7 +1,7 @@
 // FUNC 8013b0f4 352 X001
 // MATCHING 8013b0f4 352
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
 extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CE59, D_8009CEDE;
@@ -21,12 +21,12 @@ void func_8013B0F4(TObj *o)
         D_8009C93F = 1;
         D_8009C93E = 1;
         D_8009C942 = 1;
-        D_800A6038.anim = D_80010748;
-        AnimLoadDuration(&D_800A6038);
+        PLAYER.anim = D_80010748;
+        AnimLoadDuration(&PLAYER);
         e->animFrame = 0;
         D_800A6066 = 0;
         D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
-        FUN_800eeae4(&D_800A6038, 0, 0);
+        FUN_800eeae4(&PLAYER, 0, 0);
         o->step++;
         break;
     case 1:

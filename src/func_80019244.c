@@ -7,9 +7,9 @@ typedef struct {
     short w58, w5a;
 } T80019244;
 
-extern T80019244 *D_1F8001D4;
-#define P D_1F8001D4
-extern unsigned char D_1F8001D1, D_1F8001D0, D_1F8001CE, D_1F8001C4, D_1F8001C5;
+extern T80019244 *TASK_C;
+#define P TASK_C
+extern unsigned char D_1F8001D1, D_1F8001D0, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
 extern int D_1F800164;
 extern short D_1F8001F4, D_1F8001F6;
 
@@ -21,7 +21,7 @@ extern unsigned char D_8009F0E8;
 extern char D_1F8001A0[];
 extern char D_80010000[];
 extern char D_80010008[];
-extern char D_800B3E28[];
+extern char LOAD_BUFFER_ALT[];
 extern void titleSequenceTask(void);
 void loadCollisionBounds(void);
 void SetDispMask(int);
@@ -60,7 +60,7 @@ void func_80019244(void)
     for (;;) {
         switch (P->w48) {
         case 0:
-            D_1F8001CE = 0;
+            LOAD_COMPLETE_SYM = 0;
             loadSoundSet(0);
             loadSoundSet(1);
             queueSystemLoadList(0, 1);
@@ -70,7 +70,7 @@ void func_80019244(void)
             P->w48++;
             break;
         case 1:
-            if (D_1F8001CE) {
+            if (LOAD_COMPLETE_SYM) {
                 cdSeekStream(0x15);
                 P->w48 = 4;
             }
@@ -81,7 +81,7 @@ void func_80019244(void)
             P->w48++;
             break;
         case 3:
-            D_1F800164 = (int)(D_800B3E28 + D_1F8001F4 * 0xc000) & 0xffffff;
+            D_1F800164 = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
             p = P;
             if (--p->w58 == -1)
                 p->w48++;
@@ -96,12 +96,12 @@ void func_80019244(void)
             break;
         case 9:
             SetDispMask(0);
-            D_1F8001CE = 0;
+            LOAD_COMPLETE_SYM = 0;
             queueSystemLoadList(0x5e, 1);
             P->w48 = 10;
             break;
         case 10:
-            if (D_1F8001CE) {
+            if (LOAD_COMPLETE_SYM) {
                 SetDispMask(0);
                 FUN_80016e34(0, 0, 0, 0);
                 SetDispMask(1);
@@ -111,7 +111,7 @@ void func_80019244(void)
             }
             break;
         case 11:
-            D_1F800164 = (int)(D_800B3E28 + D_1F8001F4 * 0xc000) & 0xffffff;
+            D_1F800164 = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
             p = P;
             switch (p->w4a) {
             case 0:

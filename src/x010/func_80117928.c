@@ -9,7 +9,7 @@ typedef struct { E e[6]; char pad[0x8c - 0x78]; } G;
 typedef struct { short s0, s2, s4, s6, s8, sa; char pad[0x8c - 0xc]; } G2;
 typedef struct { short a, b, c, d, e, f, g, h, i; } T;
 
-extern G D_800A3FE0[];
+extern G LOAD_BUFFER[];
 extern G2 D_800A4058[];
 extern T D_8012F0F6[];
 extern short *D_8012F270[];
@@ -31,7 +31,7 @@ void func_80117928(TObj *o)
     case 1:
         if (ObjCullRegister(o) == 0) o->b04++;
         for (i = 0; i < 6; i++) {
-            e = &D_800A3FE0[((XC *)o)->wc6].e[i];
+            e = &LOAD_BUFFER[((XC *)o)->wc6].e[i];
             switch (e->s[0]) {
             case 0:
             case 6:
@@ -87,7 +87,7 @@ void func_80117928(TObj *o)
         }
         break;
     case 2:
-        D_800A3FE0[((XC *)o)->wc6].e[0].s[0] = -1;
+        LOAD_BUFFER[((XC *)o)->wc6].e[0].s[0] = -1;
         o->b04++;
         break;
     case 3:

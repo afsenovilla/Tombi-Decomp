@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_1F80019E;
-extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultC(TObj *, TObj *);
 
@@ -21,7 +21,7 @@ void func_80120BA0(TObj *o, TObj *e)
             e->animFrame = f & 1;
         }
         if (e->b6a == 2) {
-            D_800A6038 = 1;
+            PLAYER = 1;
             D_800A603C = 1;
             D_800A603D = 0;
             D_800A603E = 0;

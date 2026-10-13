@@ -1,7 +1,7 @@
 // FUNC 80120890 828 X000
 // MATCHING 80120890 828
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_8007A5F0[];
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern void FUN_800eea7c(TObj *, int, int);
@@ -11,7 +11,7 @@ void func_80120890(TObj *o)
     TObj *g;
     short d;
     if (o->b0c == 0) {
-        g = &D_800A6038;
+        g = &PLAYER;
         switch (o->state) {
         case 0:
             d = o->h->p.whole - (*(unsigned short *)0x1F80016A + 0x20);

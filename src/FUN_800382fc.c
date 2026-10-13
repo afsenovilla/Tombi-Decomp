@@ -1,7 +1,7 @@
 // FUNC 800382fc 272 MAIN0
 // MATCHING 800382fc 272
-extern unsigned char *DAT_8009f0f0;
-extern unsigned char *DAT_8009d60c;
+extern unsigned char *SCRIPT_CTX;
+extern unsigned char *SCRIPT_CODE;
 
 static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
 {
@@ -25,14 +25,14 @@ void FUN_800382fc(void)
     unsigned char c;
     unsigned char *s;
     pc = 2;
-    o = DAT_8009f0f0;
-    code = DAT_8009d60c;
+    o = SCRIPT_CTX;
+    code = SCRIPT_CODE;
     n = code[*(unsigned short *)(o + 0x8a) + 1];
     q = buf;
     for (i = 0; i < n; i++) {
         s = code + (*(unsigned short *)(o + 0x8a) + pc);
         c = *s++;
-        buf[i] = rd(DAT_8009f0f0, c, s);
+        buf[i] = rd(SCRIPT_CTX, c, s);
         if (c == 0)
             pc += 2;
         else

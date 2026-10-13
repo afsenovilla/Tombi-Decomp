@@ -13,13 +13,13 @@ extern unsigned short D_8009C962;
 extern short *D_800A605C;
 extern unsigned short D_80115320[];
 extern unsigned short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
-extern TO D_800A6038;
+extern TO PLAYER;
 extern unsigned char D_8009C938, D_8009C942, D_8009C93F;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F800248;
 extern short D_1F80019E;
 extern unsigned char **D_1F800228;
-extern C *D_1F8001D4;
+extern C *TASK_C;
 extern short D_800A4582;
 extern void func_8011E514(void), FUN_800490ac(void), func_80048E68(void), func_800491F0(void);
 extern void func_80046D58(TO *), FUN_8004432c(TO *, unsigned char *), func_80047484(TO *), func_80126770(TO *);
@@ -58,7 +58,7 @@ void func_80047AF0(void)
     FUN_800490ac();
     func_80048E68();
     func_800491F0();
-    p = &D_800A6038;
+    p = &PLAYER;
     switch (p->b0) {
     case 0: case 5:
     default:
@@ -77,7 +77,7 @@ void func_80047AF0(void)
         if (D_8009C942 | D_8009C93F) goto tail;
         break;
     }
-    if (D_1F8001A4 == 0 && D_1F8001D4->s4c == 1 && D_8009D2B0 != 3 && D_800A4582 + 0xa0 < p->s16) {
+    if (D_1F8001A4 == 0 && TASK_C->s4c == 1 && D_8009D2B0 != 3 && D_800A4582 + 0xa0 < p->s16) {
         p->b0 = 5;
         p->b4 = 2;
         p->b5 = 3;

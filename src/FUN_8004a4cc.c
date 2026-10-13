@@ -2,12 +2,12 @@
 // MATCHING 8004a4cc 1276
 #include "TOBJ.H"
 extern TObj DAT_800a6038;
-extern unsigned char DAT_800a6038b[];
+extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c93c;
 extern unsigned char DAT_8009c975;
 extern short DAT_1f800176;
-extern TObj *DAT_1f8001d4;
+extern TObj *TASK_C;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_800e8a98(void *, int, int);
@@ -16,9 +16,9 @@ extern void FUN_800e940c(void *, int, int);
 
 #define SETANIM(o, a, b) \
     switch ((o)->b6a - 1) { \
-    case 0: FUN_800e8a98(DAT_800a6038b, a, b); break; \
-    case 1: FUN_800e96e8(DAT_800a6038b, a, b); break; \
-    case 2: FUN_800e940c(DAT_800a6038b, a, b); break; \
+    case 0: FUN_800e8a98(PLAYER, a, b); break; \
+    case 1: FUN_800e96e8(PLAYER, a, b); break; \
+    case 2: FUN_800e940c(PLAYER, a, b); break; \
     }
 
 static __inline__ void SetAnim(TObj *self, short n)
@@ -114,8 +114,8 @@ void FUN_8004a4cc(TObj *o)
         p->y.raw -= o->velV << 8;
         if (DAT_8009c975 == 1) {
             DAT_8009cff9 = 1;
-            DAT_1f8001d4->w4c = 7;
-            DAT_1f8001d4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     }

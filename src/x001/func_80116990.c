@@ -15,7 +15,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern unsigned char D_800A6039[];
 extern Fn D_80079A98[];
 extern unsigned char D_8009CDA2;
@@ -32,7 +32,7 @@ extern S2 *D_800A6078x[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern int D_1F8000F0;
-extern SC *D_1F8001D4;
+extern SC *TASK_C;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
@@ -143,7 +143,7 @@ void func_80116990(O *o)
                     D_8009C942 = 1;
                     D_8009CEF7 = 0;
                     D_8009D2B0 = 0;
-                    D_800A6038.b0 = 5;
+                    PLAYER.b0 = 5;
                     D_800A603C = 5;
                     D_800A603D = 0;
                     D_800A603E = 0;
@@ -227,9 +227,9 @@ void func_80116990(O *o)
         if (D_8009C93F == 0) D_80079A98[o->subtype](o);
         break;
     case 4: {
-        unsigned char *f = &D_800A6038.b6;
+        unsigned char *f = &PLAYER.b6;
         if (*f == 2) {
-            FUN_800eea7c(&D_800A6038, 1, 0);
+            FUN_800eea7c(&PLAYER, 1, 0);
             D_800A603C = 5;
             D_800A603D = 0x41;
             *f = 0;
@@ -245,7 +245,7 @@ void func_80116990(O *o)
         break;
     }
     case 5:
-        AnimAdvance(&D_800A6038);
+        AnimAdvance(&PLAYER);
         D_800A6078->s2--;
         if (D_800A6078->s2 < 0x6ae) {
             o->step++;
@@ -257,7 +257,7 @@ void func_80116990(O *o)
     case 6: {
         PL *pl;
         if (o->w4a == 0) {
-            pl = &D_800A6038;
+            pl = &PLAYER;
             AnimAdvance(pl);
             D_800A6078->s2--;
             if (D_800A6078->s2 < 0x67c) {
@@ -295,8 +295,8 @@ void func_80116990(O *o)
     case 10: {
         short *q;
         if (D_8009C975 == 1) {
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         q = &D_1F8000F2;
         *q -= 2;

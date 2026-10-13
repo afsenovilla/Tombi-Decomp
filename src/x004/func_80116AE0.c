@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_1F80016A, D_1F800172;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_8009C940;
@@ -12,9 +12,9 @@ extern int FUN_800270a0(TObj *, int, int);
 
 static __inline__ short busy(void)
 {
-    if (U8(&D_800A6038, 0xac) >= 2) return 1;
-    if (D_800A6038.b69 == 0) return 1;
-    if (D_800A6038.b9c | D_800A6038.b9e | U8(&D_800A6038, 0xaa) | D_8009C940) return 1;
+    if (U8(&PLAYER, 0xac) >= 2) return 1;
+    if (PLAYER.b69 == 0) return 1;
+    if (PLAYER.b9c | PLAYER.b9e | U8(&PLAYER, 0xaa) | D_8009C940) return 1;
     if (D_1F8001FC & 0x10) return 0;
     return 1;
 }

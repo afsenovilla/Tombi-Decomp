@@ -11,7 +11,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 
-extern PL D_800A6038;
+extern PL PLAYER;
 extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
 extern unsigned char D_8009C93A, D_8009C93C, D_8009C975, D_8009CDC0, D_800A60DA;
@@ -26,7 +26,7 @@ extern void setEventStarted(int, int, int);
 
 void func_801165A0(O *o)
 {
-    PL *pl = &D_800A6038;
+    PL *pl = &PLAYER;
 
     switch (o->step) {
     case 0:

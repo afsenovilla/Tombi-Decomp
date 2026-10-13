@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
-extern G6038 D_800A6038;
+extern G6038 PLAYER;
 extern unsigned short D_8009C962;
 extern unsigned char D_8009C938, D_8009C966, D_8009D095, D_8009C933, D_8009C93F, D_8009C942;
 extern unsigned char D_8009D2B0, D_8009C930, D_8009C93E, D_8009C975[], D_8009C93C[];
@@ -47,7 +47,7 @@ static __inline__ void slide(TObj *o)
 
 void func_80116818(TObj *o)
 {
-    G6038 *g = &D_800A6038;
+    G6038 *g = &PLAYER;
     unsigned char *p;
 
     switch (o->state) {

@@ -17,8 +17,8 @@ typedef struct L { short x0, x1, x2, x3; short a, b, c, d; short m; short pad[7]
 
 extern void *D_1f800164;
 extern int D_1f8001e0;
-extern Hdr DAT_800a4648[];
-extern Ent DAT_800a4de0[][128];
+extern Hdr MESSAGE_SLOTS[];
+extern Ent MESSAGE_GLYPHS[][128];
 extern Img DAT_800a5de4[];
 extern void FUN_8005f990(char *);
 extern void FUN_80060008(void *, int, int, int, int);
@@ -43,27 +43,27 @@ void drawMessageBox(O *o)
     FUN_8005e580(D_1f8001e0 + 8, r);
     D_1f800164 = (char *)D_1f800164 + 0xc;
     s = (Sprt *)0x1f800000;
-    for (i = 0, j = 0; i < DAT_800a4648[o->idx].n; j++, i++) {
-        f = DAT_800a4de0[o->idx][j].f;
-        if (*(short *)&DAT_800a4de0[o->idx][j].f & 0x8000) {
-            DAT_800a4de0[o->idx][j].f = f - (f & 0x8000);
+    for (i = 0, j = 0; i < MESSAGE_SLOTS[o->idx].n; j++, i++) {
+        f = MESSAGE_GLYPHS[o->idx][j].f;
+        if (*(short *)&MESSAGE_GLYPHS[o->idx][j].f & 0x8000) {
+            MESSAGE_GLYPHS[o->idx][j].f = f - (f & 0x8000);
         } else if (!(f & 0x4000) || o->v22 < 0x1f) {
             FUN_8005e74c(s);
             s->r0 = 0x80;
             s->g0 = 0x80;
             s->b0 = 0x80;
             if (DAT_800a5de4[f &= 0xfff].flag == 0) {
-                s->x0 = DAT_800a4648[o->idx].x + DAT_800a4de0[o->idx][j].x;
-                s->y0 = DAT_800a4648[o->idx].y + DAT_800a4de0[o->idx][j].y;
+                s->x0 = MESSAGE_SLOTS[o->idx].x + MESSAGE_GLYPHS[o->idx][j].x;
+                s->y0 = MESSAGE_SLOTS[o->idx].y + MESSAGE_GLYPHS[o->idx][j].y;
             } else {
-                s->x0 = DAT_800a4648[o->idx].x + DAT_800a4de0[o->idx][j].x - 7;
-                s->y0 = DAT_800a4648[o->idx].y + DAT_800a4de0[o->idx][j].y - 9;
+                s->x0 = MESSAGE_SLOTS[o->idx].x + MESSAGE_GLYPHS[o->idx][j].x - 7;
+                s->y0 = MESSAGE_SLOTS[o->idx].y + MESSAGE_GLYPHS[o->idx][j].y - 9;
             }
             s->u0 = DAT_800a5de4[(short)f].u << 2;
             s->v0 = DAT_800a5de4[(short)f].v;
             s->w = DAT_800a5de4[(short)f].w;
             s->h = DAT_800a5de4[(short)f].h;
-            s->clut = DAT_800a4de0[o->idx][j].clut;
+            s->clut = MESSAGE_GLYPHS[o->idx][j].clut;
             {
                 Sprt *q = D_1f800164;
                 *q = *s;

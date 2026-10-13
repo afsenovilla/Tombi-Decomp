@@ -6,7 +6,7 @@ extern E8 TBL8011[];
 extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
 typedef struct G { char p0[0xf]; unsigned char b0f; char p1[0x16 - 0x10]; unsigned short y; char p2[0x40 - 0x18]; Fix16 *h; Fix16 *d; } G;
-extern G DAT_800a6038;
+extern G PLAYER;
 
 void FUN_80111714(TObj *o)
 {
@@ -35,9 +35,9 @@ void FUN_80111714(TObj *o)
         }
         o->b6b = t;
     L:
-        o->h->p.whole = DAT_800a6038.h->p.whole;
-        o->y.p.whole = DAT_800a6038.y - 8;
-        o->d->p.whole = DAT_800a6038.d->p.whole;
-        o->b0f = DAT_800a6038.b0f - 1;
+        o->h->p.whole = PLAYER.h->p.whole;
+        o->y.p.whole = PLAYER.y - 8;
+        o->d->p.whole = PLAYER.d->p.whole;
+        o->b0f = PLAYER.b0f - 1;
     }
 }

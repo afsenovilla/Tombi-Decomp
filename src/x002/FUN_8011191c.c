@@ -1,6 +1,6 @@
 // FUNC 8011191c 308 X002
 // MATCHING 8011191c 308
-extern unsigned char DAT_a;
+extern unsigned char PLAYER;
 extern void FUN_8011145c(void *);
 extern void FUN_800202b4(void *);
 extern void FUN_80111590(void *);
@@ -14,7 +14,7 @@ void FUN_8011191c(unsigned char *o)
         FUN_8011145c(o);
         break;
     case 1:
-        if ((unsigned)(DAT_a - 4) >= 2) {
+        if ((unsigned)(PLAYER - 4) >= 2) {
             FUN_800202b4(o);
             switch (o[3]) {
             case 0:

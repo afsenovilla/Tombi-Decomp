@@ -16,7 +16,7 @@ extern unsigned char D_801152E8[];
 extern unsigned char D_8009D2AF;
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char D_8009C93A;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern char D_80010748[];
 extern E *D_8009D2E8;
 extern E *D_800A611C;
@@ -133,7 +133,7 @@ void func_80101938(O *o)
         }
         break;
     case 2:
-        if (D_8009D00F != 0) {
+        if (TALK_POSE != 0) {
             FUN_800f1308(o);
         } else {
             D_8009C330->h2c = 0;

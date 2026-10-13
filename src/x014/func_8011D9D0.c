@@ -9,7 +9,7 @@ typedef struct {
 extern int D_1F8002D0;
 extern int D_80125CC4[], D_80125CE4[], D_80125D04[];
 extern unsigned short D_8009C962;
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 #define S16(o, x) (*(short *)((char *)(o) + (x)))
 #define S32(o, x) (*(int *)((char *)(o) + (x)))
 #define U8(o, x) (*(unsigned char *)((char *)(o) + (x)))
@@ -21,7 +21,7 @@ static __inline__ void setRank(SB *s)
     i = 0;
     n = 0;
     for (; i < 0x100; i++) {
-        if (D_8009CDA4[i] == 0xff) n++;
+        if (SCRIPT_FLAGS[i] == 0xff) n++;
     }
     if (n < 0x33) i = 7;
     else if (n < 0x3d) i = 6;

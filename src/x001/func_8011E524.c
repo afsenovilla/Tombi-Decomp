@@ -34,7 +34,7 @@ typedef struct {
     char p24[0x28 - 0x24];
 } E;
 
-extern O D_800A6038;
+extern O PLAYER;
 extern short D_1F8000EE;
 extern void func_8011EEC0(O *);
 
@@ -64,11 +64,11 @@ void func_8011E524(O *o, short n)
     }
     e = (E *)q + n;
     o->b68 = 0;
-    if ((unsigned short)(D_800A6038.yw + D_800A6038.box2 - (o->yw + e->w0a)) < 0x19 && D_800A6038.b9c != 1) {
-        D_800A6038.yw = o->yw + e->w0a - D_800A6038.box2;
-        D_800A6038.yf = 0;
-        D_800A6038.velY = 0;
-        D_800A6038.b69 = 1;
+    if ((unsigned short)(PLAYER.yw + PLAYER.box2 - (o->yw + e->w0a)) < 0x19 && PLAYER.b9c != 1) {
+        PLAYER.yw = o->yw + e->w0a - PLAYER.box2;
+        PLAYER.yf = 0;
+        PLAYER.velY = 0;
+        PLAYER.b69 = 1;
         o->b68 = 1;
         o->b6b = n;
     }
@@ -76,7 +76,7 @@ void func_8011E524(O *o, short n)
     case 0: {
         short v;
         if (o->b68 == 0) break;
-        v = (short)D_800A6038.wb2 >> 8;
+        v = (short)PLAYER.wb2 >> 8;
         if (v == 0) break;
         if (v > 0) {
             if (v < 2) o->w82 = 0x100;
@@ -116,8 +116,8 @@ void func_8011E524(O *o, short n)
             break;
         }
         if (e->w0a >= o->d34) o->step++;
-        if (D_800A6038.b9c != 0) break;
-        D_800A6038.yw = o->yw + e->w0a - D_800A6038.box2;
+        if (PLAYER.b9c != 0) break;
+        PLAYER.yw = o->yw + e->w0a - PLAYER.box2;
         break;
     case 2:
         e = (E *)q + o->b6b;
@@ -125,16 +125,16 @@ void func_8011E524(O *o, short n)
         e->w12 -= DV;
         e->w1a -= DV;
         e->w22 -= DV;
-        if (D_800A6038.b9c == 0) D_800A6038.yw -= DV;
+        if (PLAYER.b9c == 0) PLAYER.yw -= DV;
         if (e->w0a > 0) break;
         o->step++;
         break;
     case 3:
         if (o->b68) {
-            if (D_800A6038.wb2 >> 8) o->step = 0;
+            if (PLAYER.wb2 >> 8) o->step = 0;
             else o->step++;
         }
-        if (D_800A6038.b9c) o->step = 8;
+        if (PLAYER.b9c) o->step = 8;
         break;
     case 4: {
         short a;
@@ -156,9 +156,9 @@ void func_8011E524(O *o, short n)
         e->w1a += DV;
         e->w22 += DV;
         if (e->w0a >= o->d34) o->step++;
-        if (D_800A6038.b9c) o->step += 4;
-        else D_800A6038.yw += DV;
-        if (D_800A6038.wb2 >> 8) o->step = 0;
+        if (PLAYER.b9c) o->step += 4;
+        else PLAYER.yw += DV;
+        if (PLAYER.wb2 >> 8) o->step = 0;
         break;
     case 6:
         e = (E *)q + o->b6b;
@@ -167,13 +167,13 @@ void func_8011E524(O *o, short n)
         e->w1a -= DV;
         e->w22 -= DV;
         if (e->w0a <= 0) o->step -= 2;
-        if (D_800A6038.b9c) o->step += 4;
-        else D_800A6038.yw -= DV;
-        if (D_800A6038.wb2 >> 8) o->step = 0;
+        if (PLAYER.b9c) o->step += 4;
+        else PLAYER.yw -= DV;
+        if (PLAYER.wb2 >> 8) o->step = 0;
         break;
     case 7:
-        if (D_800A6038.wb2 >> 8) o->step = 0;
-        if (D_800A6038.b9c) o->step = 0xb;
+        if (PLAYER.wb2 >> 8) o->step = 0;
+        if (PLAYER.b9c) o->step = 0xb;
         break;
     case 8: {
         short a;
@@ -195,9 +195,9 @@ void func_8011E524(O *o, short n)
         e->w1a += DV;
         e->w22 += DV;
         if (e->w0a >= o->d34) o->step++;
-        if (D_800A6038.b9c) break;
+        if (PLAYER.b9c) break;
         o->step -= 4;
-        D_800A6038.yw += DV;
+        PLAYER.yw += DV;
         break;
     case 10:
         e = (E *)q + o->b6b;
@@ -206,9 +206,9 @@ void func_8011E524(O *o, short n)
         e->w1a -= DV;
         e->w22 -= DV;
         if (e->w0a <= 0) o->step -= 2;
-        if (D_800A6038.b9c) break;
+        if (PLAYER.b9c) break;
         o->step -= 4;
-        D_800A6038.yw -= DV;
+        PLAYER.yw -= DV;
         break;
     case 11:
         if (o->b68 == 0) break;

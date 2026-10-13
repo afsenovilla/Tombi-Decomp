@@ -22,12 +22,12 @@ typedef struct { char d[8]; } E8;
 extern M D_8009BCA8;
 extern volatile int D_8009BCDC;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8001D3;
-extern T *D_1F8001D4;
+extern T *TASK_C;
 extern short D_1F8001F4, D_1F8001E8;
 extern char D_80077F0C[];
 extern unsigned char D_80077F3C[];
-extern short D_8007D284[];
-extern E8 D_8007DEF0[];
+extern short MOVIE_FILE_IDS[];
+extern E8 FILE_LINKS[];
 extern void CdMix(void *);
 extern void movieInitDecodeEnv(M *, int, int, int, int);
 extern void FUN_8001db38(E8 *);
@@ -48,23 +48,23 @@ void moviePlayerTask(void)
     int k;
     int cnt;
     D_1F8001CC = 1;
-    D_1F8001D4->w48 = 0;
-    D_1F8001D4->b68 = 0;
+    TASK_C->w48 = 0;
+    TASK_C->b68 = 0;
     for (;;) {
         if (D_1F8001D3 == 1) {
-            D_1F8001D4->w48 = 3;
+            TASK_C->w48 = 3;
             CdMix(D_80077F0C);
         }
-        switch (D_1F8001D4->w48) {
+        switch (TASK_C->w48) {
         case 0:
             movieInitDecodeEnv(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
-            FUN_8001db38(&D_8007DEF0[D_8007D284[D_80077F3C[D_1F8001CD]]]);
-            D_1F8001D4->w48++;
+            FUN_8001db38(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[D_1F8001CD]]]);
+            TASK_C->w48++;
             while (MovieDecodeFrame(&D_8009BCA8) == -1)
                 ;
         case 1:
             D_1F8001CC = 2;
-            D_1F8001D4->w48 = 2;
+            TASK_C->w48 = 2;
         case 2:
             DecDCTin(D_8009BCA8.in[D_8009BCA8.idx], 2);
             k = D_1F8001F4;

@@ -1,12 +1,12 @@
 // FUNC 80017238 52 MAIN0
 // MATCHING 80017238 52
 typedef struct Th { short state; short wait; } Th;
-extern Th *DAT_1f8001d4;
+extern Th *TASK_C;
 extern void ChangeTh(unsigned);
 
 void ThreadWaitFrames(short n)
 {
-    Th *t = DAT_1f8001d4;
+    Th *t = TASK_C;
     t->wait = n;
     t->state = 1;
     ChangeTh(0xff000000);

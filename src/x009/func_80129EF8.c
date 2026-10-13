@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 
 typedef struct V { char c[12]; } V;
-extern TObj *D_8009F2D8;
-extern TObj D_800A6038;
+extern TObj *SCRIPT_OBJECTS;
+extern TObj PLAYER;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned short D_800A6066[];
 extern Fix16 *D_800A6078;
@@ -21,7 +21,7 @@ extern void setEventComplete(int, int);
 
 void func_80129EF8(TObj *o)
 {
-    TObj *p = D_8009F2D8;
+    TObj *p = SCRIPT_OBJECTS;
     V v;
 
     switch (o->state) {
@@ -36,10 +36,10 @@ void func_80129EF8(TObj *o)
             break;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A6038.b04 = 5;
+        PLAYER.b04 = 5;
         D_800A603D[0] = 0x64;
         D_800A603E[0] = 0;
-        p = &D_800A6038;
+        p = &PLAYER;
         FUN_800eea7c(p, 0, 0);
         o->state++;
         if (D_8009CE53[0] == 1 && D_8009D2B1[0] == 1) {
@@ -52,7 +52,7 @@ void func_80129EF8(TObj *o)
             o->state = 6;
             if (D_8009CE54[0] == 1 && D_8009D2B1[0] == 2) {
                 SfxPlay2(0x25, 0x28);
-                FUN_800eea7c(&D_800A6038, 0x29, 0);
+                FUN_800eea7c(&PLAYER, 0x29, 0);
                 o->w08 = 0x78;
                 o->state = 8;
             }
@@ -62,7 +62,7 @@ void func_80129EF8(TObj *o)
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 0, &v);
         func_80128AF8(p, 0x20, 0);
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        FUN_800eea7c(&PLAYER, 0, 0);
         o->state++;
         break;
     case 3: {
@@ -79,7 +79,7 @@ void func_80129EF8(TObj *o)
         o->state = 0x14;
         if (D_8009D2B1[0] == 1) {
             playSFX(0x20);
-            FUN_800eea7c(&D_800A6038, 0x28, 0);
+            FUN_800eea7c(&PLAYER, 0x28, 0);
             o->w08 = 0xc8;
             o->state = 0x12;
         }
@@ -89,7 +89,7 @@ void func_80129EF8(TObj *o)
     case 4:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        FUN_800eea7c(&PLAYER, 0, 0);
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 1, &v);
         func_80128AF8(p, 0x20, 0);
@@ -127,7 +127,7 @@ void func_80129EF8(TObj *o)
         o->state = 0x14;
         if (D_8009D2B1[0] == 2) {
             SfxPlay2(0x25, 0x28);
-            FUN_800eea7c(&D_800A6038, 0x29, 0);
+            FUN_800eea7c(&PLAYER, 0x29, 0);
             o->w08 = 0xc8;
             o->state = 0x13;
         }
@@ -137,7 +137,7 @@ void func_80129EF8(TObj *o)
     case 8:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        FUN_800eea7c(&PLAYER, 0, 0);
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 3, &v);
         o->state++;
@@ -196,14 +196,14 @@ void func_80129EF8(TObj *o)
     case 18:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        FUN_800eea7c(&PLAYER, 0, 0);
         o->w08 = 100;
         o->state = 4;
         break;
     case 19:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&D_800A6038, 0, 0);
+        FUN_800eea7c(&PLAYER, 0, 0);
         o->w08 = 100;
         o->state = 8;
         break;

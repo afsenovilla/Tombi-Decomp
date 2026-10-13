@@ -1,9 +1,9 @@
 // FUNC 80017d04 44 MAIN0
 // MATCHING 80017d04 44
-extern char DAT_800a6038[];
+extern char PLAYER[];
 extern void memset();
 
 void clearPlayerObject(void)
 {
-    memset(DAT_800a6038, 0, 0x178);
+    memset(PLAYER, 0, 0x178);
 }

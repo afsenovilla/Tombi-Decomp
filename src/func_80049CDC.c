@@ -2,18 +2,18 @@
 // MATCHING 80049cdc 1096
 #include "TOBJ.H"
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_1F800176;
 extern unsigned char D_8009C93C, D_8009C975, D_8009CFF9, D_8009D2C3;
 extern int D_8009C960;
-extern G4 *D_1F8001D4;
+extern G4 *TASK_C;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 
 void func_80049CDC(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     switch (o->state) {
     case 0:
         if ((*(int *)&pl->b04 & 0xffffff) == 0x23001) {
@@ -111,8 +111,8 @@ void func_80049CDC(TObj *o)
             if (D_8009C960 == 0x7000E && D_8009D2C3 == 0xff) {
                 o->state++;
             } else {
-                D_1F8001D4->w4c = 7;
-                D_1F8001D4->w4e = 0;
+                TASK_C->w4c = 7;
+                TASK_C->w4e = 0;
             }
         }
         break;

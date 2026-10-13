@@ -13,7 +13,7 @@ extern short TileCollideAt(TObj *, short, short);
 extern void playSFX(int);
 extern int Rand(void);
 extern void *D_8012EA04[];
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern unsigned char D_8009D2B1;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -54,7 +54,7 @@ void func_80122F08(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        if (!(D_800A6038 & 2)) {
+        if (!(PLAYER & 2)) {
             applyFrameVelocityXY(o);
         } else {
             applyFrameVelocityY(o);

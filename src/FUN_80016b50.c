@@ -7,7 +7,7 @@ extern short B0e2, B0e6, B0ea, B0ee, B0f2, B0f6;
 extern char C0c0[], C118[];
 extern short G1f4;
 extern void *G1e0;
-extern char P6a8[];
+extern char OT_FRAMEBUFFER[];
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void FUN_80016ca8(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
@@ -42,8 +42,8 @@ void FUN_80016b50(void)
     r.y = 0;
     r.h = 0x200;
     FUN_8005f290(&r, 0, 0, 0);
-    FUN_8005f604(P6a8, 0x328);
-    FUN_8005f604(P6a8 + 0xd10, 0x328);
+    FUN_8005f604(OT_FRAMEBUFFER, 0x328);
+    FUN_8005f604(OT_FRAMEBUFFER + 0xd10, 0x328);
     G1f4 = 0;
-    G1e0 = P6a8;
+    G1e0 = OT_FRAMEBUFFER;
 }

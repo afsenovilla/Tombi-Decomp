@@ -1,15 +1,15 @@
 // FUNC 800388d4 496 MAIN0
 // MATCHING 800388d4 496
 /* empty loop after the `a` load: its loop notes end the scheduling block (debt; any empty loop works). In-struct store VS->v[idx] lets the g load move above it. */
-extern unsigned char *DAT_8009f0f0;
-extern int DAT_8009d60c;
+extern unsigned char *SCRIPT_CTX;
+extern int SCRIPT_CODE;
 
 typedef struct { char pad[0x1090]; int v[1]; } VS;
 void FUN_800388d4(unsigned char op)
 {
     int tmp;
-    unsigned char *o = DAT_8009f0f0;
-    int code = DAT_8009d60c;
+    unsigned char *o = SCRIPT_CTX;
+    int code = SCRIPT_CODE;
     int idx;
     int a;
     int b;
@@ -25,7 +25,7 @@ void FUN_800388d4(unsigned char op)
     switch (op) {
     case 0x1c: case 0x1e: case 0x20: case 0x22:
     case 0x24: case 0x26: case 0x28: case 0x2a:
-        b = *(int *)(DAT_8009f0f0 + *(unsigned char *)(*(unsigned short *)(o + 0x8a) + code + 2) * 4 + 0x1090);
+        b = *(int *)(SCRIPT_CTX + *(unsigned char *)(*(unsigned short *)(o + 0x8a) + code + 2) * 4 + 0x1090);
         f = 0;
         break;
     case 0x1d: case 0x1f: case 0x21: case 0x23:
@@ -68,7 +68,7 @@ void FUN_800388d4(unsigned char op)
         break;
     }
     ((VS *)o)->v[idx] = r;
-    g = DAT_8009f0f0;
+    g = SCRIPT_CTX;
     if (r == 0)
         g[0x89] = 0;
     else

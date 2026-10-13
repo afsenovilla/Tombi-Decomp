@@ -13,7 +13,7 @@ typedef struct {
     short x3, y3; unsigned short u3, pad3;
 } PFT4;
 
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char *D_1F800164;
 extern int D_1F8001E0;
@@ -59,7 +59,7 @@ void func_8011D1BC(TObj *o)
     int r;
 
     if (o->anim == 0) return;
-    FUN_8004fba8(o, &D_1F800070, &D_1F800074);
+    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
     t = (short *)o->d3c;
     t = (short *)((char *)t + *(short *)o->anim * 4);
     s = o->d64 >> 4;
@@ -69,8 +69,8 @@ void func_8011D1BC(TObj *o)
     do {
         p = (PFT4 *)D_1F800164;
         if (o->animFrame & 1) {
-            p->x0 = D_1F800070 + ((unsigned)(((signed char *)q)[2] * s) >> 8);
-            p->y0 = (D_1F800070 >> 16) + ((unsigned)(((signed char *)q)[3] * s) >> 8);
+            p->x0 = LZ_FILE_CTRL + ((unsigned)(((signed char *)q)[2] * s) >> 8);
+            p->y0 = (LZ_FILE_CTRL >> 16) + ((unsigned)(((signed char *)q)[3] * s) >> 8);
             p->x1 = p->x0 + ((unsigned)(q[-2] * s) >> 8);
             p->y1 = p->y0;
             p->x2 = p->x0;
@@ -78,8 +78,8 @@ void func_8011D1BC(TObj *o)
             p->x3 = p->x1;
             p->y3 = p->y2;
         } else {
-            p->x0 = D_1F800070 - ((unsigned)(((signed char *)q)[2] * s) >> 8);
-            p->y0 = (D_1F800070 >> 16) + ((unsigned)(((signed char *)q)[3] * s) >> 8);
+            p->x0 = LZ_FILE_CTRL - ((unsigned)(((signed char *)q)[2] * s) >> 8);
+            p->y0 = (LZ_FILE_CTRL >> 16) + ((unsigned)(((signed char *)q)[3] * s) >> 8);
             p->x1 = p->x0 - ((unsigned)(q[-2] * s) >> 8);
             p->y1 = p->y0;
             p->x2 = p->x0;

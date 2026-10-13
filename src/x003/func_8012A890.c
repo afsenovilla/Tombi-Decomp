@@ -7,7 +7,7 @@ extern unsigned char D_800A603C, D_800A603D, D_8009C93F;
 extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *o);
 extern void freeObjectLayer2(TObj *o);
@@ -87,7 +87,7 @@ void func_8012A890(TObj *o)
             D_8009CD94 = 10;
             D_8009CD96 = 0;
             D_8009CDA0 = 0;
-            p = D_1F8001D4;
+            p = TASK_C;
             p->w4c = 7;
             p->w4e = 0;
             break;

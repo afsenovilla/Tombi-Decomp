@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern unsigned char D_800A60E4;
 extern unsigned char D_8009C940;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
@@ -16,7 +16,7 @@ int func_8011B460(TObj *o)
     int a;
 
     if (D_1F8001A4 != 0) goto ret0;
-    if (D_800A6038 != 1) return 0;
+    if (PLAYER != 1) return 0;
     if (D_800A60E4 == 2) return 0;
     if (D_8009C940 != 0) return 0;
     dx = D_1F800172 - o->d->p.whole + 0x2d;

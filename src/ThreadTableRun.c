@@ -1,6 +1,6 @@
 // FUNC 80017088 212 MAIN0
 // MATCHING 80017088 212
-extern unsigned short *DAT_1f8001d4;
+extern unsigned short *TASK_C;
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
 extern int OpenTh(int, int, int);
@@ -8,18 +8,18 @@ extern void ChangeTh(int);
 void ThreadTableRun(void)
 {
     unsigned short *p;
-    DAT_1f8001d4 = (unsigned short *)0x801fd800;
+    TASK_C = (unsigned short *)0x801fd800;
     do {
-        if (*DAT_1f8001d4 != 2) {
-            if (*DAT_1f8001d4 != 3) goto next;
+        if (*TASK_C != 2) {
+            if (*TASK_C != 3) goto next;
             EnterCriticalSection();
-            *(int *)(DAT_1f8001d4 + 2) = OpenTh(*(int *)(DAT_1f8001d4 + 6), *(int *)(DAT_1f8001d4 + 4), *(int *)(DAT_1f8001d4 + 8));
+            *(int *)(TASK_C + 2) = OpenTh(*(int *)(TASK_C + 6), *(int *)(TASK_C + 4), *(int *)(TASK_C + 8));
             ExitCriticalSection();
         }
-        p = DAT_1f8001d4;
+        p = TASK_C;
         *p = 4;
         ChangeTh(*(int *)(p + 2));
     next:
-        DAT_1f8001d4 = DAT_1f8001d4 + 0x38;
-    } while (DAT_1f8001d4 <= (unsigned short *)0x801fd94f);
+        TASK_C = TASK_C + 0x38;
+    } while (TASK_C <= (unsigned short *)0x801fd94f);
 }

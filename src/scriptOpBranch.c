@@ -1,13 +1,13 @@
 // FUNC 8003840c 264 MAIN0
 // MATCHING 8003840c 264
-extern unsigned char *DAT_8009f0f0;
-extern int DAT_8009d60c;
+extern unsigned char *SCRIPT_CTX;
+extern int SCRIPT_CODE;
 
 void scriptOpBranch(unsigned char op)
 {
     short tmp;
-    int code = DAT_8009d60c;
-    unsigned char *o = DAT_8009f0f0;
+    int code = SCRIPT_CODE;
+    unsigned char *o = SCRIPT_CTX;
     unsigned char r;
     unsigned char *p;
     int k;

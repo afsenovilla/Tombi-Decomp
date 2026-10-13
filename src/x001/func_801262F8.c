@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_1F8001A4;
-extern unsigned char D_800A6038, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short func_8012614C(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
@@ -64,7 +64,7 @@ void func_801262F8(TObj *o, TObj *p)
         if (p->active == 3) break;
         p->active = 3;
         if (p->b6a == 2) {
-            D_800A6038 = 1;
+            PLAYER = 1;
             D_800A603C = 1;
             D_800A603D = 0;
             D_800A603E = 0;

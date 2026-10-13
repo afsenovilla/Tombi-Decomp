@@ -2,7 +2,7 @@
 // MATCHING 8004e2d4 328
 typedef struct Th { char pad[0x48]; short a; unsigned short c; } Th;
 typedef struct { short x, y, w, h; } RECT;
-extern Th *DAT_1f8001d4;
+extern Th *TASK_C;
 extern char DAT_1f8001cc, DAT_1f8001cd;
 extern void SetDispMask(int);
 extern void FUN_80016ca8(int, int, int);
@@ -13,7 +13,7 @@ extern char LAB_8001d6a4[];
 
 void FUN_8004e2d4(void)
 {
-    Th *t = DAT_1f8001d4;
+    Th *t = TASK_C;
     unsigned short c = t->c;
     RECT r;
     Th *u;
@@ -21,7 +21,7 @@ void FUN_8004e2d4(void)
     case 0:
         SetDispMask(0);
         FUN_80016ca8(0, 0, 0);
-        u = DAT_1f8001d4;
+        u = TASK_C;
         u->c = u->c + 1;
         r.x = 0x180;
         r.y = 0x100;
@@ -33,7 +33,7 @@ void FUN_8004e2d4(void)
         DAT_1f8001cc = 1;
         DAT_1f8001cd = 0;
         ThreadCreate(1, LAB_8001d6a4);
-        u = DAT_1f8001d4;
+        u = TASK_C;
         u->c = u->c + 1;
         break;
     case 2:
@@ -41,7 +41,7 @@ void FUN_8004e2d4(void)
         break;
     case 3:
         MusicStopOrFadeIn(0);
-        u = DAT_1f8001d4;
+        u = TASK_C;
         u->a = 4;
         u->c = 0;
         break;

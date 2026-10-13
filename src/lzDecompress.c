@@ -1,14 +1,14 @@
 // FUNC 8003bafc 396 MAIN0
 // MATCHING 8003bafc 396
-extern int D_1f800070;
+extern int LZ_FILE_CTRL;
 extern int D_1f800074;
-extern unsigned char DAT_8009bd60;
-extern unsigned short DAT_8009bd64;
+extern unsigned char LZ_CURRENT_BIT;
+extern unsigned short LZ_BITMASK;
 extern void FUN_8005bd24(unsigned char *, unsigned char *, int);
 
 static __inline__ short step(void)
 {
-    if (++DAT_8009bd60 < 16) return 0;
+    if (++LZ_CURRENT_BIT < 16) return 0;
     return 1;
 }
 
@@ -18,14 +18,14 @@ void lzDecompress(unsigned char *p, unsigned char *dst)
     unsigned char off;
 
     p += 4;
-    D_1f800070 = ((p[1] << 8) | p[0]) | ((p[3] << 8) | (p[2] << 16));
+    LZ_FILE_CTRL = ((p[1] << 8) | p[0]) | ((p[3] << 8) | (p[2] << 16));
     p += 4;
-    DAT_8009bd64 = (p[1] << 8) | p[0];
+    LZ_BITMASK = (p[1] << 8) | p[0];
     p += 2;
-    DAT_8009bd60 = 0;
+    LZ_CURRENT_BIT = 0;
     D_1f800074 = 0;
     do {
-        if ((DAT_8009bd64 >> DAT_8009bd60) & 1) {
+        if ((LZ_BITMASK >> LZ_CURRENT_BIT) & 1) {
             off = *p++;
             n = *p++;
             FUN_8005bd24(dst - off, dst, n);
@@ -36,9 +36,9 @@ void lzDecompress(unsigned char *p, unsigned char *dst)
             D_1f800074++;
         }
         if (step()) {
-            DAT_8009bd64 = (p[1] << 8) | p[0];
+            LZ_BITMASK = (p[1] << 8) | p[0];
             p += 2;
-            DAT_8009bd60 = 0;
+            LZ_CURRENT_BIT = 0;
         }
-    } while (D_1f800070 > D_1f800074);
+    } while (LZ_FILE_CTRL > D_1f800074);
 }

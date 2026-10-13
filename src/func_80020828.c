@@ -5,7 +5,7 @@ typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; 
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0x6c - 0x48]; } S3;
 extern unsigned short D_1f8001c8;
 extern short D_1f80019c;
-extern char D_800A6038[];
+extern char PLAYER[];
 extern char D_1F8000EC[];
 extern void *D_800A6078, *D_800A607C, *D_800A4584, *D_800A4588;
 extern S1 D_800B1478[];
@@ -16,7 +16,7 @@ void func_80020828(void)
     S2 *e2;
     S3 *e3;
     S1 *e1;
-    char *b = D_800A6038;
+    char *b = PLAYER;
     if (!(D_1f8001c8 & 1)) {
         D_800A6078 = b + 0x10;
         D_800A607C = b + 0x18;

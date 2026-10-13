@@ -5,7 +5,7 @@ typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
 extern SVECTOR D_1f800068;
-extern long D_1F800070;
+extern long LZ_FILE_CTRL;
 extern char *D_1F800164;
 extern int D_1F8001E0;
 extern void getBaseMatrix(MATRIX *);
@@ -132,9 +132,9 @@ void func_801189EC(TObj *o)
     gte_rtpt();
     gte_stsxy3_g4(p);
     gte_avsz3();
-    gte_stotz(&D_1F800070);
-    if (o->b0b) insertPrim(p, D_1F8001E0 + 0x10, D_1F800070, (signed char)o->b0f, 0x6000000);
-    else insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800070, (signed char)o->b0f, 0x6000000);
+    gte_stotz(&LZ_FILE_CTRL);
+    if (o->b0b) insertPrim(p, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->b0f, 0x6000000);
+    else insertPrimWithBias(p, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->b0f, 0x6000000);
     D_1F800164 += 0x1c;
     q = (unsigned char *)D_1F800164;
     if (GetGraphType() == 1) m = 0x80;
@@ -142,6 +142,6 @@ void func_801189EC(TObj *o)
     else m = 0x20;
     SetDrawMode(q, 0, 0, m, 0);
     if (o->b0b) AddPrim((int *)(D_1F8001E0 + 0x10) + (signed char)o->b0f, q);
-    else AddPrim((int *)D_1F8001E0 + (D_1F800070 + 4) + (signed char)o->b0f, q);
+    else AddPrim((int *)D_1F8001E0 + (LZ_FILE_CTRL + 4) + (signed char)o->b0f, q);
     D_1F800164 += 0xc;
 }

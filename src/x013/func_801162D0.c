@@ -7,7 +7,7 @@ typedef struct {
     short xmin, xmax, ymin, ymax;
     Fix16 *pos;
 } Cam;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern Fix16 D_1F8000F0;
 extern int D_1F8000F0_b;
 extern unsigned short D_8009C962;
@@ -21,7 +21,7 @@ void func_801162D0(Cam *c)
         func_80115FB4(c);
         return;
     }
-    pl = &D_800A6038;
+    pl = &PLAYER;
     c->pos->raw = pl->h->raw;
     if (c->xmax < c->pos->p.whole) {
         c->pos->raw = c->xmax << 16;

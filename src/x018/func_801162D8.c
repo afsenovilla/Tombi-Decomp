@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 typedef void (*Fn)(TObj *);
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern Fn D_80079AD0[];
 extern unsigned char D_8009C93A, D_8009CDED, D_800A60E0;
 extern unsigned short D_8009C962;
@@ -17,7 +17,7 @@ extern void FUN_8002a4d0(TObj *);
 
 void func_801162D8(TObj *o)
 {
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
 
     switch (o->step) {
     case 0:

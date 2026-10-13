@@ -4,7 +4,7 @@
 
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
-extern unsigned char D_800A6038[], D_800A603C[], D_800A603D[], D_800A603E[];
+extern unsigned char PLAYER[], D_800A603C[], D_800A603D[], D_800A603E[];
 extern signed char D_8009D2B0[];
 extern unsigned short D_1F800172, D_1F80016A, D_1F80016E;
 extern void AnimLoadDuration(TObj *);
@@ -15,7 +15,7 @@ static __inline__ int near(TObj *o)
 {
     unsigned short t;
     short lim = 0xc8;
-    if (D_800A6038[0] == 2) return 0;
+    if (PLAYER[0] == 2) return 0;
     t = D_1F800172 - o->d->p.whole + 0x2d;
     if (t >= 0x5b) return 0;
     t = D_1F80016A - o->h->p.whole + 0x64;
@@ -43,7 +43,7 @@ void func_8011B870(TObj *o)
             o->velH = 0x80;
             D_800A603C[0] = 1;
             D_8009D2B0[0] = 0;
-            D_800A6038[0] = 2;
+            PLAYER[0] = 2;
             D_800A603D[0] = 0x36;
             D_800A603E[0] = 0;
             o->state = 0;

@@ -2,7 +2,7 @@
 // MATCHING 8012f10c 360
 #include "TOBJ.H"
 
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
 extern void setEventComplete(int, int);
 extern void addItemToInventory(int, int, int);
@@ -11,9 +11,9 @@ void func_8012F10C(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_800A6038.b04 = 5;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.b04 = 5;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
         o->state++;
@@ -26,9 +26,9 @@ void func_8012F10C(TObj *o)
         break;
     case 2:
         if (--o->w08 > 0) break;
-        D_800A6038.b04 = 1;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
         D_8009C93E[0] = 0;

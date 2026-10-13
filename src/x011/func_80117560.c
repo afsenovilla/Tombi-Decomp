@@ -5,7 +5,7 @@
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_80119C48[];
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_8009C940[], D_8009C941;
 extern unsigned char D_8009C942[];
 extern signed char D_8009D2B0[];
@@ -33,9 +33,9 @@ void func_80117560(TObj *o)
         }
         if (D_8009D2B0[0] == 3)
             break;
-        if ((unsigned short)(D_800A6038.a.p.whole - 0x40) >= 0x20)
+        if ((unsigned short)(PLAYER.a.p.whole - 0x40) >= 0x20)
             break;
-        if (D_800A6038.d->p.whole != 0)
+        if (PLAYER.d->p.whole != 0)
             break;
         if ((D_1F8001FC & D_1F8003C4) == 0)
             break;

@@ -6,7 +6,7 @@ extern char D_80077D00[];
 extern void *D_8012EE80[];
 extern short D_8007A5F0[];
 extern short D_1F800176;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -105,7 +105,7 @@ void func_80126460(TObj *o)
         }
         break;
     case 5:
-        if (D_800A6038.active != 1 || *(unsigned char *)&D_800A6038.wac >= 2) {
+        if (PLAYER.active != 1 || *(unsigned char *)&PLAYER.wac >= 2) {
             o->state = 1;
         } else {
             o->step = 3;

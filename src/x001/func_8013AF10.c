@@ -1,7 +1,7 @@
 // FUNC 8013af10 484 X001
 // MATCHING 8013af10 484
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern unsigned short D_800A6066x[]; /* second name for D_800A6066: forces the reloads after the store */
 extern TObj *D_800A60C8[];
@@ -11,7 +11,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned short D_8009C960, D_8009C962, D_8009CD94, D_8009CD96, D_8009CDA0;
 extern char D_80010748[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
-extern SC *D_1F8001D4;
+extern SC *TASK_C;
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 
@@ -25,8 +25,8 @@ void func_8013AF10(TObj *o)
         D_8009C93F = 1;
         D_8009C93E = 1;
         D_8009C942 = 1;
-        D_800A6038.anim = D_80010748;
-        AnimLoadDuration(&D_800A6038);
+        PLAYER.anim = D_80010748;
+        AnimLoadDuration(&PLAYER);
         D_800A6066 = 0;
         e->b04 = 1;
         e->step = 0;
@@ -54,8 +54,8 @@ void func_8013AF10(TObj *o)
             D_8009CEDF = 0;
             D_8009CDA0 = 0;
             D_8009CD96 = D_8009C962;
-            D_1F8001D4->w4c = 7;
-            D_1F8001D4->w4e = 0;
+            TASK_C->w4c = 7;
+            TASK_C->w4e = 0;
         }
         break;
     }

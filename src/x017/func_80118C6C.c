@@ -6,7 +6,7 @@ typedef struct {
 } E28;
 extern E28 *D_80119A58;
 extern unsigned char D_8009CE3A[];
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -53,7 +53,7 @@ void func_80118C6C(TObj *o)
             n->w76 = p->f8;
             n->w78 = p->fa;
             n->w7a = p->fc;
-            D_8009F2D8[i] = n;
+            SCRIPT_OBJECTS[i] = n;
             n->d90 = (int)o;
             if (D_8009CE3A[0]) {
                 switch (n->subtype) {

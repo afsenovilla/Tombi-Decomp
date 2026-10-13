@@ -2,7 +2,7 @@
 // MATCHING 801176b0 1836
 #include "TOBJ.H"
 extern TObj *D_8009C94C;
-extern char *D_1F8001D4;
+extern char *TASK_C;
 extern unsigned char D_8009C958[];
 extern unsigned char D_8009C93A, D_8009CFCE, D_8009C93E, D_8009C942;
 extern unsigned char D_8009C970, D_8009C93C, D_8009C975, D_8009C967, D_8009C938;
@@ -201,7 +201,7 @@ void func_801176B0(TObj *o)
         case 5:
             if (D_8009C975 != 1)
                 break;
-            p = D_1F8001D4;
+            p = TASK_C;
             *(short *)(p + 0x4c) = 7;
             *(short *)(p + 0x4e) = 0;
             break;
@@ -214,7 +214,7 @@ void func_801176B0(TObj *o)
         case 7:
             if (D_8009C975 != 1)
                 break;
-            p = D_1F8001D4;
+            p = TASK_C;
             *(short *)(p + 0x4c) = 0;
             *(short *)(p + 0x4e) = 5;
             a = D_8009C960;
