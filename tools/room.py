@@ -96,29 +96,38 @@ def parse_wmd(d):
     return [p[:4] for p in parse_wmd_ex(d)]
 
 
-def parse_wmd_ex(d):
-    """Like parse_wmd, plus the per vertex colours: (clut, tpage, cmd, verts, [(r, g, b)...])."""
+def parse_wmd_ex(d, lenient=False):
+    """Like parse_wmd, plus the per vertex colours: (clut, tpage, cmd, verts, [(r, g, b)...]).
+    lenient: stop at a packet that runs past the end of its sector and keep what was read (some object
+    tables have a truncated last model) instead of raising."""
     n = struct.unpack_from("<I", d, 0)[0]
     # N sector offsets (no terminator: with N = 1 the table is 8 bytes and sector 0 starts right after it); last sector runs to the end
     o = list(struct.unpack_from("<%dI" % n, d, 4)) + [len(d)]
     out = []
     for i in range(n):
         s = d[o[i]:o[i + 1]]
-        p = 0
-        for _ in range(4):
-            c = struct.unpack_from("<I", s, p)[0]
-            p += 4
-            for _ in range(c):
-                cl, tp, r0, g0, b0, cmd = struct.unpack_from("<HHBBBB", s, p)
-                nv = 4 if cmd & 8 else 3
-                ex = (nv - 1) * 4 if cmd & 0x10 else 0
-                vs = [struct.unpack_from("<hhhBB", s, p + 8 + ex + 8 * k) for k in range(nv)]
-                cols = [(r0, g0, b0)] * nv
-                if ex:
-                    cols = [cols[0]] + [struct.unpack_from("<BBB", s, p + 8 + 4 * k) for k in range(nv - 1)]
-                out.append((cl, tp, cmd, vs, cols))
-                p += 8 + ex + 8 * nv
+        try:
+            _parse_sector(s, out)
+        except struct.error:
+            if not lenient: raise
     return out
+
+
+def _parse_sector(s, out):
+    p = 0
+    for _ in range(4):
+        c = struct.unpack_from("<I", s, p)[0]
+        p += 4
+        for _ in range(c):
+            cl, tp, r0, g0, b0, cmd = struct.unpack_from("<HHBBBB", s, p)
+            nv = 4 if cmd & 8 else 3
+            ex = (nv - 1) * 4 if cmd & 0x10 else 0
+            vs = [struct.unpack_from("<hhhBB", s, p + 8 + ex + 8 * k) for k in range(nv)]
+            cols = [(r0, g0, b0)] * nv
+            if ex:
+                cols = [cols[0]] + [struct.unpack_from("<BBB", s, p + 8 + 4 * k) for k in range(nv - 1)]
+            out.append((cl, tp, cmd, vs, cols))
+            p += 8 + ex + 8 * nv
 
 
 def render(v, pk, scale=1):

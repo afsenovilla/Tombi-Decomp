@@ -82,7 +82,7 @@ def sky_part(sky, model):
     h = max((y1 - y0) * 1.3, 256 * S)
     tw = h * sky.width / sky.height
     nt = max(1, int(((x1 - x0) * 1.4 + tw) / tw) + 1)
-    a = np.asarray(sky.convert("RGBA"), np.uint8)
+    a = np.array(sky.convert("RGBA"), np.uint8)  # a writable copy (asarray of a PIL image is read-only)
     a[..., 3] = 255
     wide = np.concatenate([a if i % 2 == 0 else a[:, ::-1] for i in range(nt)], 1)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
@@ -181,7 +181,7 @@ def load_object(ld, idx, k):
     o = list(struct.unpack_from("<%dI" % n, b, 4)) + [len(b)]
     sub = b[o[k]:o[k + 1]]
     # an object model is one sector (4 groups of packets): wrap it as a 1-sector WMD
-    pk = R.parse_wmd_ex(struct.pack("<II", 1, 8) + sub)
+    pk = R.parse_wmd_ex(struct.pack("<II", 1, 8) + sub, lenient=True)
     v = V.area_context(ld, idx)
     return _finish("%s:%d #%d" % (ld, idx, k), v, pk, None, lambda: R.build_glb(v, pk))
 
