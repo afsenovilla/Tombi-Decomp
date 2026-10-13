@@ -36,3 +36,8 @@ include/macro.inc
 include/labels.inc
 include/include_asm.h
 include/gte_macros.inc
+
+# Windows build of the asset extractor (committed by .github/workflows/assets-exe.yml)
+!dist/
+!dist/windows/
+!dist/windows/tombi-assets.exe
