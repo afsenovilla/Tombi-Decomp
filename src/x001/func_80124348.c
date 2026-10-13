@@ -2,7 +2,7 @@
 // MATCHING 80124348 140
 #include "TOBJ.H"
 extern short func_800435E0(TObj *, TObj *);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 
 void func_80124348(TObj *p, TObj *o)
 {
@@ -14,7 +14,7 @@ void func_80124348(TObj *p, TObj *o)
         o->step = 3;
         o->state = 0;
         if (o->subtype == 0)
-            FUN_8004d620(0x12, 2);
+            printInfoMessage(0x12, 2);
         o->animFrame = p->animFrame & 1;
     }
 }

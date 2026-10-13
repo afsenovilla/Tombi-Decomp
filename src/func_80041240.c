@@ -3,7 +3,7 @@
 /* debt: volatile read of c keeps lhu (stops combine turning cs = (short)c into lh). */
 extern unsigned short *D_1F800278;
 extern unsigned short D_1F800284;
-extern short *func_8003F200(int, int);
+extern short *getCollisionPlaneAt(int, int);
 
 typedef struct O { char pad[0x44]; short *h; } O;
 
@@ -25,7 +25,7 @@ int func_80041240(O *o, short x, short y)
     char xm;
     int ys;
 
-    p = func_8003F200((short)x, o->h[1]);
+    p = getCollisionPlaneAt((short)x, o->h[1]);
     D_1F800278 = (unsigned short *)(p + 1);
     n = *p;
     if (n == 0) return 0;

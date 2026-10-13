@@ -15,7 +15,7 @@ extern void FUN_8001e4f0(int);
 extern void FUN_800e9f74(int, int, int, int);
 extern short FUN_800411cc(TObj *, short, short);
 extern int func_8011ECC8(TObj *);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 {
@@ -91,7 +91,7 @@ void func_8011EE50(TObj *o)
             break;
         case 1:
             c = &D_8009CEF6;
-            func_8004D620(*c + 0x29, 2);
+            printInfoMessage(*c + 0x29, 2);
             (*c)++;
             D_8009CFE5[o->b0c] = 1;
             o->b04++;

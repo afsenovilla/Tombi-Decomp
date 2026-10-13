@@ -1,7 +1,7 @@
 // FUNC 80041d20 412 MAIN0
 // MATCHING 80041d20 412
 #include "TOBJ.H"
-extern short *func_8003F200(int, int);
+extern short *getCollisionPlaneAt(int, int);
 extern int angleFromDelta(int, int);
 extern unsigned short *DAT_1f800278;
 extern short DAT_1f80027c;
@@ -17,7 +17,7 @@ int func_80041D20(TObj *o, short a, int b)
     short s;
     short ws;
     unsigned short t3;
-    p = func_8003F200(a, o->d->p.whole);
+    p = getCollisionPlaneAt(a, o->d->p.whole);
     DAT_1f800278 = (unsigned short *)(p + 1);
     n = cnt = *p;
     goto test;

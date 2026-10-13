@@ -19,7 +19,7 @@ extern E4 D_80011E30[];
 extern void *D_8013E70C, *D_8013E708;
 extern int MulCos(short a, int b);
 extern int MulNegSinScaled(short a, int b);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
@@ -49,7 +49,7 @@ void func_8011F2B0(TObj *o)
             }
         }
         if (c) {
-            func_8004D620(0xf, 2);
+            printInfoMessage(0xf, 2);
             o->b04 = 3;
             o->step = 0;
             o->state = 0;
@@ -107,7 +107,7 @@ void func_8011F2B0(TObj *o)
                 case 3:
                     a = 0xe;
                 call:
-                    func_8004D620(a, 3);
+                    printInfoMessage(a, 3);
                     o->state = 0;
                     break;
                 default:

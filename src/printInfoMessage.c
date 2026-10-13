@@ -92,7 +92,7 @@ static __inline__ void callit(O *o, int a)
 
 #define TBL(x) (*(unsigned short *)(WFM3_DATA + (x) * 2 + 0x10))
 
-O *func_8004D620(int a, int b)
+O *printInfoMessage(int a, int b)
 {
     int i;
     unsigned char *s1;

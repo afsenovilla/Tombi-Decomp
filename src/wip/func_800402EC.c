@@ -2,7 +2,7 @@
 // wip score 201 (b53: d = y - a hoisted above the bs<0 test, as in the game's bgez delay slot): layout ok (hit block before loop via goto, pad[24]); left: gcc reassociates x-1-(signed char)xm and x+8-xm, fl&1 hoist order, regalloc. b53: -dg order now x>ret>o>f1>cnt>y>fl>ys, game ret>x>o>f1>cnt>ys>fl>y (s0..s7); game keeps (signed char)xm as `sx = xm << 24` + `sx >> 24` per use (try int sx; fold still gives x-(s+1))
 #include "TOBJ.H"
 
-extern unsigned short *func_8003F200(int, int);
+extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *D_1F800278;
 extern unsigned short D_1F800282;
 extern unsigned short D_1F800284;
@@ -80,7 +80,7 @@ int func_800402EC(TObj *o, int x, int y, int fl)
             if (cnt >= 8)
                 return ret;
             if ((fl & 0xff00) == 0xff00) {
-                D = func_8003F200((short)x, o->d->p.whole);
+                D = getCollisionPlaneAt((short)x, o->d->p.whole);
             } else {
                 t = D_8007B5AC;
                 t += *(unsigned short *)(t + 8);

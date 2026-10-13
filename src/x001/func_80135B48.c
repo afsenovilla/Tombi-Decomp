@@ -5,7 +5,7 @@
 extern unsigned short D_8009D2C0;
 extern unsigned char D_8009CDB5;
 extern unsigned char D_8009CEC1, D_8009CEC2, D_8009CEC3, D_8009CEC4, D_8009CEC5, D_8009CEC6, D_8009CEC7;
-extern void *func_8004D620(int, int);
+extern void *printInfoMessage(int, int);
 extern void func_80135A14(TObj *);
 
 void func_80135B48(TObj *o)
@@ -18,7 +18,7 @@ void func_80135B48(TObj *o)
         unsigned char *c = &D_8009CDB5;
         *c = *c + 1;
         if (*c >= 9) *c = 8;
-        else func_8004D620(*c - 1, 2);
+        else printInfoMessage(*c - 1, 2);
     }
     switch (o->b0c) {
     case 1:

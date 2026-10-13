@@ -1,6 +1,6 @@
 // FUNC 8004245c 304 MAIN0
 // MATCHING 8004245c 304
-extern short *FUN_8003f200(int a, int b);
+extern short *getCollisionPlaneAt(int a, int b);
 extern unsigned short *DAT_1f800278;
 
 int FUN_8004245c(short a, int y, short b)
@@ -9,7 +9,7 @@ int FUN_8004245c(short a, int y, short b)
     unsigned short w, x0, h;
     int d;
     short *q;
-    q = FUN_8003f200(a, b);
+    q = getCollisionPlaneAt(a, b);
     DAT_1f800278 = (unsigned short *)(q + 1);
     n = *q;
     if (n == 0) return 0;

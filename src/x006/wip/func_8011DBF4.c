@@ -24,7 +24,7 @@ extern long D_1F800074;
 extern int D_1F800078;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-extern int FUN_8004fba8(void *o, long *sxy, long *z);
+extern int projectActorPosition(void *o, long *sxy, long *z);
 extern int FUN_8004fcc0(void *p);
 extern void SetSemiTrans(void *, int);
 
@@ -57,7 +57,7 @@ void func_8011DBF4(TObj *o)
     int u, v;
 
     if (o->anim == 0) return;
-    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
     x = LZ_FILE_CTRL;
     y = (unsigned long)LZ_FILE_CTRL >> 16;
     k = o->d64 >> 4;

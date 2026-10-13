@@ -16,7 +16,7 @@ extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001fce4(TObj *);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 
 void func_80139C50(TObj *o)
 {
@@ -118,7 +118,7 @@ void func_80139C50(TObj *o)
                 o->state = 0;
                 D_8009CDB2 = 2;
                 { int *q = &D_8009C984; *q |= 0x100; }
-                FUN_8004d620(0x13, 2);
+                printInfoMessage(0x13, 2);
                 D_8009C93E = 0;
                 D_8009C942 = 0;
                 D_800A60F8 = 0;

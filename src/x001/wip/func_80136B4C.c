@@ -27,7 +27,7 @@ extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern int MulCos(int, int);
 extern int MulNegSinScaled(int, int);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern short TileCollideAt(TObj *, int, int);
 extern void FUN_80020490(TObj *);
 
@@ -131,7 +131,7 @@ void func_80136B4C(TObj *o)
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x400;
-            func_8004D620(0x11, 2);
+            printInfoMessage(0x11, 2);
             o->state++;
             break;
         case 1:

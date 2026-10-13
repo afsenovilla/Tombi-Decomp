@@ -17,7 +17,7 @@ extern void FUN_80016e34(int, int, int, int);
 extern void ThreadCreate(int, void *);
 extern void stopBgm(int);
 extern void cdSeekStream(int);
-void func_8004DF00(void)
+void bootLogoState(void)
 {
     switch (TASK_C->w4a) {
     case 0:

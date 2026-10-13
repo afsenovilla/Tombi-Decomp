@@ -11,7 +11,7 @@ extern unsigned char D_8009CE55A[], D_8009CEAD, D_8009C93F, D_8009C942, D_8009C9
 extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer2(void);
 extern void applyItemEffect(char *, FV *, int, int, int);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
 
@@ -109,7 +109,7 @@ void func_8011F6C4(TObj *o)
         v.y.p.whole = o->y.p.whole + 0x30;
         v.b.p.whole = o->b.p.whole;
         applyItemEffect(D_8013C728, &v, 0, 0, 1);
-        FUN_8004d620(0xf, 2);
+        printInfoMessage(0xf, 2);
         FUN_80026e0c(0x12, 1);
         FUN_80026c50(0xa, 1, 0);
         D_8009CEAD = 1;

@@ -7,7 +7,7 @@ extern signed char DAT_c;
 extern unsigned char DAT_d;
 extern short DAT_e;
 
-int FUN_800270a0(O *o, char x, unsigned char y)
+int tryStartItemInteraction(O *o, char x, unsigned char y)
 {
     char *p = &DAT_a;
     *p = 0;

@@ -27,7 +27,7 @@ extern void func_800E8348(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void FUN_800ecb40(char *, int, int);
 extern void FUN_8005a7a0(int, int, int);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void playSFXWithNoteAndVolume(int, int, int);
 extern void func_800EDFB8(TObj *, int);
 extern void playSFX(int);
@@ -338,7 +338,7 @@ static __inline__ int op9c(void)
 static __inline__ int op9d(void)
 {
     G *g = SCRIPT_CTX;
-    func_8004D620(g->d1190, 2);
+    printInfoMessage(g->d1190, 2);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -386,7 +386,7 @@ static __inline__ int opa2(void)
     int c = *(int *)(p + 0x1198);
     if (a < 0) {
         if (c != 0) {
-            func_8004D620(0x15, 3);
+            printInfoMessage(0x15, 3);
             playSFX(10);
         }
         increaseMaxHealth();

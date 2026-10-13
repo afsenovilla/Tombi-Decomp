@@ -16,7 +16,7 @@ extern void FUN_800261b0(void);
 extern void loadSoundSet(int);
 extern void queueSystemLoadList(int, int);
 extern void clearMenuParams(void);
-extern void FUN_8001eff8(int);
+extern void startBgmTrack(int);
 extern int FUN_800e9888(void);
 extern void FUN_800ea37c(void);
 extern void FUN_8001dbdc(void);
@@ -40,7 +40,7 @@ void FUN_80019b0c(void)
             break;
         clearMenuParams();
         DAT_800a45ea = 5;
-        FUN_8001eff8(0);
+        startBgmTrack(0);
         FUN_8005f060(1);
         TASK_C->w4a++;
         break;

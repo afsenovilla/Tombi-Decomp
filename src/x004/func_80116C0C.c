@@ -6,7 +6,7 @@ extern short D_1F80016A, D_1F800172;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_800A60E4, D_800A60A1, D_800A60D4, D_800A60D6, D_800A60E2, D_8009C940;
 extern unsigned char D_8009D2B0, D_8009C93F, D_8009C942;
-extern int FUN_800270a0(TObj *, int, int);
+extern int tryStartItemInteraction(TObj *, int, int);
 
 static __inline__ short Blocked(void)
 {
@@ -20,7 +20,7 @@ static __inline__ short Blocked(void)
 void func_80116C0C(TObj *o)
 {
     if (D_1F80016A < 0x78 && D_1F800172 == 0x546) {
-        if (FUN_800270a0(o, 1, 0)) {
+        if (tryStartItemInteraction(o, 1, 0)) {
             D_8009D2B0 = 0;
             D_8009C93F = 1;
             D_8009C942 = 1;
@@ -29,7 +29,7 @@ void func_80116C0C(TObj *o)
     }
     if (Blocked()) return;
     if (D_1F800172 == 0x4ec && (unsigned short)D_1F80016A - 0x408 < 0x60u) {
-        if (FUN_800270a0(o, 1, 2)) {
+        if (tryStartItemInteraction(o, 1, 2)) {
             D_8009D2B0 = 0;
             D_8009C93F = 1;
             D_8009C942 = 1;

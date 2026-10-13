@@ -7,7 +7,7 @@ extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_800A604A, D_800A604E;
 extern void (*D_80079AD0[])(TObj *);
 extern void func_80027810(TObj *);
-extern void FUN_800270a0(TObj *, int, int);
+extern void tryStartItemInteraction(TObj *, int, int);
 extern void FUN_8002a4d0(TObj *);
 
 void func_80116358(TObj *o)
@@ -27,25 +27,25 @@ void func_80116358(TObj *o)
         case 1:
             if (D_1F800172 == 0) {
                 if (D_800A604A < 30 && D_800A604E >= -59)
-                    FUN_800270a0(o, 1, 0);
+                    tryStartItemInteraction(o, 1, 0);
             } else {
                 if (D_1F80016A < 30 && D_1F80016E >= -77)
-                    FUN_800270a0(o, 1, 1);
+                    tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 2:
             if (D_1F80016A < 30 && D_1F80016E >= -59)
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             break;
         case 4:
             if (D_1F80016A < 28 && D_1F80016E >= -87)
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             break;
         case 5:
             if (D_1F80016A >= 0x128 && D_1F80016E >= -59)
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             else if (D_1F800172 >= 0x2bd)
-                FUN_800270a0(o, 1, 2);
+                tryStartItemInteraction(o, 1, 2);
             break;
         }
         break;

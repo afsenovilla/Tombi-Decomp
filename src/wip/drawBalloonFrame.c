@@ -46,7 +46,7 @@ extern void SetDrawMode(void *, int, int, int, void *);
 
 #define setlen(p, n) (((unsigned char *)(p))[3] = (n))
 
-void FUN_80056420(R *o, short c, short tp)
+void drawBalloonFrame(R *o, short c, short tp)
 {
     SPRT *sp = (SPRT *)0x1f800000;
     POLY_FT4 *ft = (POLY_FT4 *)0x1f800014;

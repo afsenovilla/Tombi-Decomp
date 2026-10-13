@@ -12,7 +12,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern int rcos(int);
 extern void setEventComplete(int, int);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern void freeObjectLayer5(TObj *);
 static __inline__ void setbox(TObj *q, short a, short b, short c, short d)
 {
@@ -58,7 +58,7 @@ void func_8011E594(TObj *o)
         break;
     case 2:
         setEventComplete(0x77, 0);
-        FUN_8004d620(0x32, 2);
+        printInfoMessage(0x32, 2);
         D_8009CD99 = 9;
         D_8009CD9D = 0x3c;
         D_800B146D = 0x3c;

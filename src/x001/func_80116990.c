@@ -40,7 +40,7 @@ extern void syncObjectTargetY(O *);
 extern void FUN_80029078(O *);
 extern void FUN_800216c4(void);
 extern void stepPlayerXToward(int);
-extern int FUN_800270a0(O *, int, unsigned char);
+extern int tryStartItemInteraction(O *, int, unsigned char);
 extern void FUN_800eea7c(PL *, int, int);
 extern void AnimAdvance(PL *);
 extern void setEventComplete(int, int);
@@ -152,7 +152,7 @@ void func_80116990(O *o)
                 if (D_1F80016A < 0x17e && D_1F80016E >= -0x18f) goto t10;
                 if (D_1F80016A >= 0x7fc && D_1F80016E >= -0x293) {
                 t11:
-                    FUN_800270a0(o, 1, 1);
+                    tryStartItemInteraction(o, 1, 1);
                     break;
                 }
                 if (D_1F80016A >= 0x821) D_8009C982 = 2;
@@ -167,7 +167,7 @@ void func_80116990(O *o)
                 }
                 if (D_1F80016A < 0xb4b) break;
                 if (D_1F80016E < -0x1d5) break;
-                FUN_800270a0(o, 1, k);
+                tryStartItemInteraction(o, 1, k);
                 break;
             default:
                 D_8009C982 = 0;
@@ -195,20 +195,20 @@ void func_80116990(O *o)
                 }
                 if (D_1F80016A >= 0xfab && D_1F80016E >= -0x1cb) {
                 t10:
-                    FUN_800270a0(o, 1, 0);
+                    tryStartItemInteraction(o, 1, 0);
                     break;
                 }
                 if ((unsigned short)(XU - 0x72e) < 0x20 && D_1F800172 >= 0x881) {
                     stepPlayerXToward(0x73e);
                     if (D_1F800172 >= 0x895) {
                     t12:
-                        FUN_800270a0(o, 1, 2);
+                        tryStartItemInteraction(o, 1, 2);
                         break;
                     }
                 }
                 if ((unsigned short)(XU - 0xb28) < 0x80 && D_1F800172 < 0x880) {
                     stepPlayerXToward(0xb68);
-                    if (D_1F800172 < 0x80c) FUN_800270a0(o, 1, 1);
+                    if (D_1F800172 < 0x80c) tryStartItemInteraction(o, 1, 1);
                 }
                 if (D_1F800172 < 0x87a) {
                     short *q = &D_1F8000F2;
@@ -274,7 +274,7 @@ void func_80116990(O *o)
     case 7:
         D_800A6039[0] = 0;
         if (--o->w4a == -1) {
-            FUN_800270a0(o, 1, 3);
+            tryStartItemInteraction(o, 1, 3);
             o->step = 3;
             D_8009C93F = 0;
         }

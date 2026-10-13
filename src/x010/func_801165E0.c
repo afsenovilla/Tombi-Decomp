@@ -27,7 +27,7 @@ extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern void func_80027810(O *);
 extern int stepPlayerXToward(int);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 extern void FUN_8002a4d0(O *);
 
 #define XU (*(unsigned short *)&D_1F80016A)
@@ -65,30 +65,30 @@ void func_801165E0(O *o)
                 if ((unsigned)(XU - 0x56e) >= 0x60) break;
                 stepPlayerXToward(0x59e);
                 if (*y < 0x88) break;
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
                 break;
             }
             if (D_8009D078 < 2) break;
             if (D_1F80016A < 0xc8b) break;
             if (D_1F80016E < -0x60) break;
-            FUN_800270a0(o, 1, 1);
+            tryStartItemInteraction(o, 1, 1);
             break;
         case 1:
         case 5:
             if (PLAYER.ba2 == 2) {
                 if (D_1F800172 >= -0x46) break;
                 if (D_1F80016A < 0x21c) {
-                    FUN_800270a0(o, 1, 0);
+                    tryStartItemInteraction(o, 1, 0);
                     break;
                 }
                 if (D_1F80016A < 0x30d) break;
-                FUN_800270a0(o, 1, 1);
+                tryStartItemInteraction(o, 1, 1);
                 break;
             }
             if (D_8009D2C3 & 0x40) {
                 if (D_1F80016A < 0x487) break;
                 if (D_1F80016E < -0x171) break;
-                FUN_800270a0(o, 1, 2);
+                tryStartItemInteraction(o, 1, 2);
                 break;
             }
             if (D_1F80016A < 0x44d) break;
@@ -96,39 +96,39 @@ void func_801165E0(O *o)
             break;
         case 2:
         case 6:
-            if (D_1F80016A < 0x81 && D_1F80016E >= -0x40 && FUN_800270a0(o, 1, 0)) D_8009C93E = 1;
+            if (D_1F80016A < 0x81 && D_1F80016E >= -0x40 && tryStartItemInteraction(o, 1, 0)) D_8009C93E = 1;
             break;
         case 3:
         case 7:
             if ((unsigned)(XU - 0x53f) < 0x40) {
                 if (D_8009D2C3 & 0x40) {
                     if ((unsigned short)(ZU + 0x392) < 0x1e) {
-                        FUN_800270a0(o, 1, 1);
+                        tryStartItemInteraction(o, 1, 1);
                         break;
                     }
                 } else {
                     if ((unsigned short)(ZU + 0x434) < 0x1e) {
-                        FUN_800270a0(o, 1, 1);
+                        tryStartItemInteraction(o, 1, 1);
                         break;
                     }
                 }
             }
             if (D_1F80016A < 0x14 && D_1F80016E >= -0x40f) {
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
                 break;
             }
             if (D_1F80016A < 0x7c2) break;
             if ((unsigned short)(ZU + 0x3fa) < 0x64) {
-                FUN_800270a0(o, 1, 2);
+                tryStartItemInteraction(o, 1, 2);
                 break;
             }
             if (D_1F80016A < 0x7c7) break;
-            if ((unsigned short)(ZU + 0xe8) < 0x50) FUN_800270a0(o, 1, 3);
+            if ((unsigned short)(ZU + 0xe8) < 0x50) tryStartItemInteraction(o, 1, 3);
             break;
         case 8:
             if (D_1F80016A < 0x3a && D_1F80016E >= -0x3b) {
-                if (D_8009D2C3 & 0x40) FUN_800270a0(o, 1, 1);
-                else FUN_800270a0(o, 1, 0);
+                if (D_8009D2C3 & 0x40) tryStartItemInteraction(o, 1, 1);
+                else tryStartItemInteraction(o, 1, 0);
             }
             break;
         }

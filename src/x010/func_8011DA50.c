@@ -13,7 +13,7 @@ extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int rcos(int);
 extern void setEventComplete(int, int);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void freeObjectLayer5(TObj *);
 
 void func_8011DA50(TObj *o)
@@ -52,7 +52,7 @@ void func_8011DA50(TObj *o)
         break;
     case 2:
         setEventComplete(0x77, 0);
-        func_8004D620(0x32, 2);
+        printInfoMessage(0x32, 2);
         D_8009CD9A = 9;
         D_8009CD9E = 0x3c;
         D_800B146E = 0x3c;

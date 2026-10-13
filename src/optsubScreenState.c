@@ -11,7 +11,7 @@ extern void FUN_8005f060(int);
 extern void loadSoundSet(int);
 extern void queueSystemLoadList(int, int);
 extern void FUN_800e827c(void);
-extern void FUN_8001eff8(int);
+extern void startBgmTrack(int);
 extern int FUN_800e8284(void);
 extern void FUN_800e8618(void);
 extern void FUN_800e8700(void);
@@ -33,7 +33,7 @@ void optsubScreenState(void)
         if (LOAD_COMPLETE_SYM != 0) {
             FUN_8005f060(1);
             FUN_800e827c();
-            FUN_8001eff8(0);
+            startBgmTrack(0);
             g = TASK_C;
             g->w4c = 0;
             g->w4a++;

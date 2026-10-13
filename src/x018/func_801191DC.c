@@ -16,7 +16,7 @@ extern void AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
 extern void increaseMaxHealth(void);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void FUN_80026e0c(int, int);
 
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
@@ -64,7 +64,7 @@ void func_801191DC(TObj *o)
         if (--o->timer > 0) break;
         if (D_8009CE28 != 0xff) setEventComplete(0x84, 0);
         increaseMaxHealth();
-        func_8004D620(0x15, 3);
+        printInfoMessage(0x15, 3);
         FUN_80026e0c(0x99, 1);
         o->timer = 0x50;
         o->state = 8;

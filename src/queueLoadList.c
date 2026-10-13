@@ -30,7 +30,7 @@ extern RelLog CD_QUEUE[];
 extern int D_1f80029c;
 extern char *LOAD_NEXT_ADDR;
 
-int FUN_8004f538(Rel *e, int unused, char *base)
+int queueLoadList(Rel *e, int unused, char *base)
 {
     int pending = 0;
     char *saved;

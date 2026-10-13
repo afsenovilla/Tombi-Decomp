@@ -21,7 +21,7 @@ static __inline__ unsigned char attr(TObj *o)
     return 0;
 }
 
-int lzDecompressToBuffer_8003F598(TObj *o_, short dy)
+int probeTileShapeThreePoints(TObj *o_, short dy)
 {
     TObj *o = o_;
     BA1(o) = 0;

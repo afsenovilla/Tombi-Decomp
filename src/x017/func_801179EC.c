@@ -13,7 +13,7 @@ extern short D_1F8001C6;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 
 void func_801179EC(TObj *o)
 {
@@ -39,7 +39,7 @@ void func_801179EC(TObj *o)
             D_8009CFE1 = 1;
             D_8009CFF7++;
         }
-        func_8004D620(D_8009CFF7 + 0x32, 2);
+        printInfoMessage(D_8009CFF7 + 0x32, 2);
         o->state++;
         break;
     case 1:

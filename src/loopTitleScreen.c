@@ -16,7 +16,7 @@ extern void func_800198B4();
 extern void SetDispMask(int);
 extern void FUN_80016ca8(int, int, int);
 extern void func_800E8A5C(void);
-extern void FUN_8001eff8(int);
+extern void startBgmTrack(int);
 extern void func_800E972C(int, int, int);
 extern void func_800E8A94(int *);
 extern void playSFX(int);
@@ -25,7 +25,7 @@ extern void playSFXAndSetNote(int, int);
 extern void setTask(void *);
 extern void func_800E9D08(int, int);
 extern void updateSound(void);
-void func_8004E41C(int *p)
+void loopTitleScreen(int *p)
 {
     int d;
     switch (TASK_C->w4a) {
@@ -42,7 +42,7 @@ void func_8004E41C(int *p)
     case 2:
         func_800E8A5C();
         SetDispMask(1);
-        FUN_8001eff8(0);
+        startBgmTrack(0);
         D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
         func_800E972C(0x30, 0xd0, 1);
         TASK_C->b69 = 0;

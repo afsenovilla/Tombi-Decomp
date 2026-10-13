@@ -2,7 +2,7 @@
 // MATCHING 8001be1c 208
 extern short *TASK_C;
 extern int DAT_8009f7e4;
-extern void FUN_80021150(int, int);
+extern void drawLoadingSprites(int, int);
 
 void displayLoadingScreen(void)
 {
@@ -17,7 +17,7 @@ void displayLoadingScreen(void)
         o[0x31] = 0;
         o[0x30] = 0xf;
         o[0x32] = 0;
-        FUN_80021150(o[0x31], 0);
+        drawLoadingSprites(o[0x31], 0);
         DAT_8009f7e4 = DAT_8009f7e4 + 1;
     }
     p = TASK_C;
@@ -28,5 +28,5 @@ void displayLoadingScreen(void)
     }
     q = TASK_C;
     q[0x32] = (q[0x32] + 0xc) & 0xff;
-    FUN_80021150(q[0x31], q[0x32]);
+    drawLoadingSprites(q[0x31], q[0x32]);
 }

@@ -72,7 +72,7 @@ extern unsigned char D_8009D0B8;
 extern void *memset(void *, int, int);
 extern void getBaseMatrix(void *);
 
-void func_8001783C(void)
+void initGameConfig(void)
 {
     memset(D_8009C960, 0, 0x988);
     memset(D_8009C930, 0, 0x2c);

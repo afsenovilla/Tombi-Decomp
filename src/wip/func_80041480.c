@@ -5,7 +5,7 @@ typedef struct {
     short *p44;
 } O80041480;
 
-extern unsigned short *func_8003F200(int, int);
+extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *D_1F800278;
 #define D D_1F800278
 
@@ -78,6 +78,6 @@ static __inline__ int body(unsigned char x, int y)
 
 int func_80041480(O80041480 *o, short x, short y)
 {
-    D = func_8003F200(x, o->p44[1]);
+    D = getCollisionPlaneAt(x, o->p44[1]);
     return body(x, y);
 }

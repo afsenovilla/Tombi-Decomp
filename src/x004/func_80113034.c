@@ -11,7 +11,7 @@ extern void **D_80115A08[];
 extern void **D_80115948[];
 extern unsigned short DAT_1f8001f8;
 extern void ObjCullRegister(TObj *);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void FUN_80111b40(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
@@ -36,12 +36,12 @@ static __inline__ short chk(TObj *o)
         f = D_8009D0D1;
         break;
     default:
-        func_8004D620(0, 2);
+        printInfoMessage(0, 2);
         return 0;
     }
     if (f)
         return 1;
-    func_8004D620(0, 2);
+    printInfoMessage(0, 2);
     return 0;
 }
 

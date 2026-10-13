@@ -4,7 +4,7 @@ extern unsigned char LOADED_LIST_FILE_SYM;
 extern unsigned char LOAD_COMPLETE_SYM;
 extern unsigned short DAT_801fd8e0;
 extern int LDAR_LOAD_LISTS[];
-extern void FUN_8004f538(int);
+extern void queueLoadList(int);
 extern void ThreadCreate(int, void *);
 extern void ThreadWaitFrames(int);
 extern char LAB_8004eb08[];
@@ -13,7 +13,7 @@ void loadAreaListFile(int a)
 {
     if (LOADED_LIST_FILE_SYM != a + 1) {
         LOADED_LIST_FILE_SYM = a + 1;
-        FUN_8004f538(LDAR_LOAD_LISTS[a]);
+        queueLoadList(LDAR_LOAD_LISTS[a]);
         LOAD_COMPLETE_SYM = 0;
         ThreadCreate(2, LAB_8004eb08);
         while (LOAD_COMPLETE_SYM == 0) {

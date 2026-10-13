@@ -19,7 +19,7 @@ extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern void applyItemEffect(void *, void *, int, int, int);
 extern void FUN_80026e0c(int, int);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern void FUN_8001e4f0(int);
 
 #define CEBD (*(volatile unsigned char *)&DAT_8009cebd)
@@ -166,7 +166,7 @@ void FUN_801377b8(TObj *o)
             setEventComplete(0xa6, 0);
             o->step = 5;
             if (DAT_8009d00d == 0)
-                FUN_8004d620(0xc, 3);
+                printInfoMessage(0xc, 3);
             p->b04 = 2;
             p->step = 3;
             p->state = 0;

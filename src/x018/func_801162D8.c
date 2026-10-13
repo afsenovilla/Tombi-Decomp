@@ -11,7 +11,7 @@ extern unsigned char D_8009C93A, D_8009CDED, D_800A60E0;
 extern unsigned short D_8009C962;
 extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
-extern void FUN_800270a0(TObj *, int, int);
+extern void tryStartItemInteraction(TObj *, int, int);
 extern void stepPlayerXToward(int);
 extern void FUN_8002a4d0(TObj *);
 
@@ -31,15 +31,15 @@ void func_801162D8(TObj *o)
         case 1:
             if (D_800A604A < 0x14 && D_800A604E >= -0x3b) {
                 if (D_8009CDED == 0) goto set3;
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             } else if (pl->a.p.whole >= 0x12d && pl->y.p.whole >= -0x3b) {
-                FUN_800270a0(o, 1, 2);
+                tryStartItemInteraction(o, 1, 2);
                 break;
             }
             if (D_8009CDED != 0) {
                 if ((unsigned short)(pl->a.p.whole - 0x70) < 0x60 && pl->b.p.whole > 0) {
                     stepPlayerXToward(0xa0);
-                    if (pl->b.p.whole >= 0x5b) FUN_800270a0(o, 1, 1);
+                    if (pl->b.p.whole >= 0x5b) tryStartItemInteraction(o, 1, 1);
                 }
             } else {
             set3:
@@ -47,11 +47,11 @@ void func_801162D8(TObj *o)
             }
             if ((unsigned short)(*(volatile short *)&pl->a.p.whole - 0x70) < 0x60 && pl->b.p.whole < 0) {
                 stepPlayerXToward(0xa0);
-                if (pl->b.p.whole < -0x5a) FUN_800270a0(o, 1, 3);
+                if (pl->b.p.whole < -0x5a) tryStartItemInteraction(o, 1, 3);
             }
             break;
         case 2:
-            if (D_800A604A < 0x14 && D_800A604E >= -0x3b) FUN_800270a0(o, 1, 0);
+            if (D_800A604A < 0x14 && D_800A604E >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         }
         break;

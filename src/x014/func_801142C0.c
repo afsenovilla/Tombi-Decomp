@@ -14,7 +14,7 @@ extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
 void AnimAdvance(TObj *o);
-void func_8004D620(int a, int b);
+void printInfoMessage(int a, int b);
 
 void func_801142C0(TObj *o)
 {
@@ -70,9 +70,9 @@ void func_801142C0(TObj *o)
         AnimAdvance(o);
         if (D_800A60A1) {
             if (D_8009C960 == 2) {
-                if (D_8009CDB1 == 4) func_8004D620(8, 3);
+                if (D_8009CDB1 == 4) printInfoMessage(8, 3);
             } else if (D_8009CDB1 != 0xff) {
-                func_8004D620(D_8009CDB1 + 7, 2);
+                printInfoMessage(D_8009CDB1 + 7, 2);
             }
             o->b6a = 0;
             SCRIPT_OBJECTS[o->b0c] = 0;

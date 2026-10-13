@@ -13,7 +13,7 @@ extern unsigned char D_8009CFDD, D_8009CFF7;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
 
@@ -46,7 +46,7 @@ void func_80129650(TObj *o)
             D_8009CFDD = 1;
             D_8009CFF7++;
         }
-        func_8004D620(D_8009CFF7 + 0x32, 2);
+        printInfoMessage(D_8009CFF7 + 0x32, 2);
         o->animFrame = o->b68 & 1;
         o->d90 = showMessageBoxDirect(5, 1, &v);
         o->state++;

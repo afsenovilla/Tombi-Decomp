@@ -37,7 +37,7 @@ extern void inventoryScreenTick(void);
 extern void queueSystemLoadList(int, int);
 extern void stopBgm(int);
 
-void func_8001AEB4(void)
+void inventoryScreenHandler(void)
 {
     DRAWENV env;
     RECT r;

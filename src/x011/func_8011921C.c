@@ -13,7 +13,7 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 
 void func_8011921C(TObj *o)
 {
@@ -38,7 +38,7 @@ void func_8011921C(TObj *o)
             D_8009CFDF = 1;
             D_8009CFF7++;
         }
-        FUN_8004d620(D_8009CFF7 + 0x32, 2);
+        printInfoMessage(D_8009CFF7 + 0x32, 2);
         o->state++;
         break;
     case 1:

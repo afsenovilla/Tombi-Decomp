@@ -23,7 +23,7 @@ typedef struct {
 extern int LZ_FILE_CTRL, D_1F800074;
 extern FT4 *D_1F800164;
 extern int D_1F8001E0;
-extern int FUN_8004fba8(void *, int *, int *);
+extern int projectActorPosition(void *, int *, int *);
 extern int FUN_8004fcc0(void *);
 extern void SetSemiTrans(void *, int);
 
@@ -50,7 +50,7 @@ void func_8011CEF0(TObj *o)
     int r;
 
     if (o->anim == 0) return;
-    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
     f = (short *)(o->d3c + (*(short *)o->anim << 2));
     n = f[0];
     e = (EL *)(*(volatile int *)&o->d3c + f[1]);

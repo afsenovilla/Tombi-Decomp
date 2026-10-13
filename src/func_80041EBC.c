@@ -1,7 +1,7 @@
 // FUNC 80041ebc 608 MAIN0
 // MATCHING 80041ebc 608
 typedef struct O { char p[0x44]; short *q; } O;
-extern unsigned short *func_8003F200(int, int);
+extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *DAT_1f800278;
 extern short D_1F80027E, D_1F800280, D_1F800282, D_1F800284;
 int func_80041EBC(O *o, short a, short b)
@@ -13,7 +13,7 @@ int func_80041EBC(O *o, short a, short b)
     short k, lo, nn, m;
     int x;
     char pad[8];
-    DAT_1f800278 = func_8003F200(a, o->q[1]);
+    DAT_1f800278 = getCollisionPlaneAt(a, o->q[1]);
     n = *(short *)DAT_1f800278++;
     if (n == 0) return 0;
     cnt = 0;

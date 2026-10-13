@@ -27,7 +27,7 @@ extern short D_1F8000F2[];
 extern int D_1F8000F0;
 extern Q *TASK_C;
 extern void func_80027810(O *);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 extern void FUN_8002a4d0(O *);
 
 void func_80115F88(O *o)
@@ -55,25 +55,25 @@ void func_80115F88(O *o)
                     o->step = 3;
                     break;
                 }
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             } else if (D_1F800172 < -0x59) {
-                FUN_800270a0(o, 1, 1);
+                tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 2:
         case 5:
             if (D_1F80016A < 0x46 && D_1F80016E >= -0x1d) {
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
                 break;
             }
             if (D_1F80016A < 0xfb) break;
-            if (D_1F80016E < -0xd8) FUN_800270a0(o, 1, 1);
+            if (D_1F80016E < -0xd8) tryStartItemInteraction(o, 1, 1);
             break;
         case 3:
         case 6:
             if (D_1F80016A < 0x105) break;
             if (D_1F80016E < -0x1d) break;
-            FUN_800270a0(o, 1, 0);
+            tryStartItemInteraction(o, 1, 0);
             break;
         }
         break;

@@ -31,7 +31,7 @@ extern char *D_1F800164;
 extern int D_1F8001E0;
 extern int LZ_FILE_CTRL;
 extern int D_1F800074i;
-int FUN_8004fba8(void *o, long *sxy, long *z);
+int projectActorPosition(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
 void setupActorPolyFT4(void *o, void *p, void *q);
 int insertPrim(void *a, int b, int c, int d, unsigned e);
@@ -45,7 +45,7 @@ void func_80124780(Ext *o)
     PF4 *f;
     char *q;
 
-    if (FUN_8004fba8(o, &D_1F800070, &D_1F800074) != 0)
+    if (projectActorPosition(o, &D_1F800070, &D_1F800074) != 0)
         return;
     xy = LZ_FILE_CTRL;
     x = xy;

@@ -33,7 +33,7 @@ extern void FUN_80027c74(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 extern void setEventComplete(int, int);
 extern void keyOffActiveSfxVoices(void);
 extern void stopBgm(int);
@@ -70,11 +70,11 @@ void func_80117494(O *o)
             switch (*p) {
             case 0:
                 if (D_1F80016A < 0x14 && D_1F80016E >= -0x59) {
-                    if (D_8009CEF0 != 0) FUN_800270a0(o, 1, 0);
+                    if (D_8009CEF0 != 0) tryStartItemInteraction(o, 1, 0);
                 } else if (D_1F80016A < 0xa7 && D_1F800172 < -0x5a) {
-                    FUN_800270a0(o, 1, 1);
+                    tryStartItemInteraction(o, 1, 1);
                 } else if (D_1F80016A >= 0xbc1 && D_1F80016E >= -0x489) {
-                    FUN_800270a0(o, 1, 2);
+                    tryStartItemInteraction(o, 1, 2);
                 }
                 if (D_8009CDC8 != 0xff) break;
                 if ((unsigned)(XU - 0x778) >= 0x18) break;
@@ -136,7 +136,7 @@ void func_80117494(O *o)
                 break;
             }
             if (D_1F800172 == 0 && D_1F80016A < 0xb95 && D_1F80016E >= -0x485) {
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
                 break;
             }
             if (D_1F80016E < -0x986) {
@@ -144,7 +144,7 @@ void func_80117494(O *o)
                 if (D_1F800172 <= 0) break;
                 stepPlayerXToward(0x1550);
                 if (D_1F800172 < 0x2e) break;
-                FUN_800270a0(o, 1, 1);
+                tryStartItemInteraction(o, 1, 1);
                 break;
             }
             if (D_1F80016E < -0x937) break;
@@ -152,7 +152,7 @@ void func_80117494(O *o)
             if (D_1F800172 < -0x59) break;
             stepPlayerXToward(0x154d);
             if (D_1F800172 < -0x2c) break;
-            FUN_800270a0(o, 1, 2);
+            tryStartItemInteraction(o, 1, 2);
             break;
         clr:
             *p = 0;
@@ -162,16 +162,16 @@ void func_80117494(O *o)
             unsigned short *p = &D_8009C982;
             if (*p == 0) {
                 if (D_1F80016A < 0x22) {
-                    if ((unsigned short)(ZU + 0x16d) < 0x20) FUN_800270a0(o, 1, 0);
+                    if ((unsigned short)(ZU + 0x16d) < 0x20) tryStartItemInteraction(o, 1, 0);
                     break;
                 }
                 if (D_1F80016A >= 0xb00 && D_1F80016E >= -0x4c5) {
-                    FUN_800270a0(o, 1, 1);
+                    tryStartItemInteraction(o, 1, 1);
                     break;
                 }
                 if (D_1F80016E >= -0x730) break;
                 if ((unsigned)(XU - 0x5b3) >= 0xc0) break;
-                FUN_800270a0(o, 1, 2);
+                tryStartItemInteraction(o, 1, 2);
             } else {
                 *p = 0;
             }
@@ -181,7 +181,7 @@ void func_80117494(O *o)
             unsigned short *p = &D_8009C982;
             switch (*p) {
             case 0:
-                if (D_1F80016A < 0x20 && (unsigned short)(ZU + 0x268) < 0x20) FUN_800270a0(o, 1, 0);
+                if (D_1F80016A < 0x20 && (unsigned short)(ZU + 0x268) < 0x20) tryStartItemInteraction(o, 1, 0);
                 break;
             case 1:
                 *p = 0;

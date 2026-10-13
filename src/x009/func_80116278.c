@@ -22,7 +22,7 @@ extern void FUN_80027c74(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 
 #define XU (*(unsigned short *)&D_1F80016A)
 
@@ -52,16 +52,16 @@ void func_80116278(O *o)
         if (D_8009CFEE == 1 && D_800A60DA == 2 && (unsigned)(XU - 0xb44) < 0x60) {
             stepPlayerXToward(0xb74);
             if (D_1F800172 >= 0xbb9) {
-                FUN_800270a0(o, 1, 3);
+                tryStartItemInteraction(o, 1, 3);
                 break;
             }
         }
         if (D_1F80016A < 0x4b0 && D_1F80016E >= -0x2cf)
-            FUN_800270a0(o, 1, 0);
+            tryStartItemInteraction(o, 1, 0);
         else if (D_1F800172 == 0xb40 && D_1F80016A >= 0x11d5 && D_1F80016E >= -0x1d5)
-            FUN_800270a0(o, 1, 2);
+            tryStartItemInteraction(o, 1, 2);
         else if ((unsigned)(XU - 0x1050) < 0x20 && D_1F800172 < 0xaf0)
-            FUN_800270a0(o, 1, 1);
+            tryStartItemInteraction(o, 1, 1);
         if (D_1F800172 < 0xb36) {
             short *k = &D_1F8000F2;
             *k += 2;

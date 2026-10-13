@@ -25,7 +25,7 @@ extern void FUN_80060008(void *, int, int, int, int);
 extern void FUN_8005e580(int, void *);
 extern void FUN_8005e74c(Sprt *);
 extern int FUN_8005efe4(void);
-extern void FUN_80056420(L *, int, int);
+extern void drawBalloonFrame(L *, int, int);
 
 void drawMessageBox(O *o)
 {
@@ -83,5 +83,5 @@ void drawMessageBox(O *o)
     l.c = o->c;
     l.d = o->d;
     D_1f800164 = (char *)D_1f800164 + 0xc;
-    FUN_80056420(&l, 0, o->v1e);
+    drawBalloonFrame(&l, 0, o->v1e);
 }

@@ -48,7 +48,7 @@ extern int MulNegSinScaled(short a, int b);
 extern void ObjSpawnType5(int, int, void *);
 extern void FUN_800eb50c(int, int, int, int);
 extern void FUN_80020490(TObj *);
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern short TileCollideAt(TObj *, short, short);
 
 void func_80133474(TObj *o)
@@ -251,7 +251,7 @@ void func_80133474(TObj *o)
                 o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
                 o->velY = -0x400;
                 D_8009C984 &= ~2;
-                func_8004D620(0x10, 2);
+                printInfoMessage(0x10, 2);
                 o->state++;
             case 1:
                 applyFrameVelocityX(o);

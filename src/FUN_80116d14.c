@@ -25,7 +25,7 @@ extern void syncObjectTargetY(TObj *);
 extern void FUN_80029078(TObj *);
 extern void setEventComplete(int, int);
 extern void stepPlayerXToward(int);
-extern int FUN_800270a0(TObj *, int, int);
+extern int tryStartItemInteraction(TObj *, int, int);
 extern void FUN_800216c4(void);
 extern void FUN_80029cb4(TObj *);
 extern void FUN_8002a4d0(TObj *);
@@ -87,14 +87,14 @@ void FUN_80116d14(TObj *o)
             if (DAT_8009ce0b != 0 && DAT_800a60da == 2 && (unsigned)(*(unsigned short *)&DAT_1f80016a - 0x400) < 0x18) {
                 stepPlayerXToward(0x40c);
                 if (DAT_1f800172 >= 0x2e) {
-                    if (!FUN_800270a0(o, 2, 2)) break;
+                    if (!tryStartItemInteraction(o, 2, 2)) break;
                     DAT_800a609c = 1;
                     o->step = 8;
                     break;
                 }
             }
             if (DAT_1f80016a >= 0x4a2 && DAT_1f80016e >= -0x3c) {
-                if (!FUN_800270a0(o, 2, 0)) break;
+                if (!tryStartItemInteraction(o, 2, 0)) break;
                 DAT_800a609c = 1;
                 goto s8;
             }
@@ -126,7 +126,7 @@ void FUN_80116d14(TObj *o)
             break;
         }
         if (DAT_1f80016a >= 0xa46 && DAT_1f80016e >= -0x122) {
-            if (FUN_800270a0(o, 2, 0)) o->step = 8;
+            if (tryStartItemInteraction(o, 2, 0)) o->step = 8;
             break;
         }
         if (DAT_1f80016a >= 0x9dd && DAT_1f80016e < -0x18f) {
@@ -139,7 +139,7 @@ void FUN_80116d14(TObj *o)
         if (k != 1) break;
         if (DAT_1f80016a < 0x938) break;
         if (DAT_1f80016e < -0x64) break;
-        if (FUN_800270a0(o, 2, 1)) {
+        if (tryStartItemInteraction(o, 2, 1)) {
             DAT_800a609c = k;
             o->step = 8;
         }
@@ -160,7 +160,7 @@ void FUN_80116d14(TObj *o)
     case 7:
         FUN_80029cb4(o);
         if (DAT_1f80016e < -0x559 && DAT_1f800172 == 0x1c2 && DAT_1f80016a < 0x88c) {
-            if (!FUN_800270a0(o, 2, 1)) break;
+            if (!tryStartItemInteraction(o, 2, 1)) break;
             o->step = 8;
             o->state = 0;
             break;
@@ -179,7 +179,7 @@ void FUN_80116d14(TObj *o)
         short k = DAT_1f80016a;
         unsigned short u = k;
         if (k < 0x78) {
-            if (FUN_800270a0(o, 2, 0)) o->step = 8;
+            if (tryStartItemInteraction(o, 2, 0)) o->step = 8;
             break;
         }
         if ((unsigned short)(u - 0xf0) < 0x3c) {
@@ -193,13 +193,13 @@ void FUN_80116d14(TObj *o)
             break;
         }
         if (k < 400) break;
-        if (FUN_800270a0(o, 2, 1)) o->step = 8;
+        if (tryStartItemInteraction(o, 2, 1)) o->step = 8;
         }
         break;
     case 10:
         DAT_8013841c[o->subtype](o);
         if (DAT_1f80016a < 0x29 && DAT_1f80016e >= -0x126) {
-            if (!FUN_800270a0(o, 2, 0)) break;
+            if (!tryStartItemInteraction(o, 2, 0)) break;
         s8:
             o->step = 8;
             o->state = 0;
@@ -208,7 +208,7 @@ void FUN_80116d14(TObj *o)
         if (DAT_8009d13f != 0) {
             if (DAT_1f80016a < 0x374) break;
             if (DAT_1f80016e < -0x167) break;
-            if (FUN_800270a0(o, 2, 1)) o->step = 8;
+            if (tryStartItemInteraction(o, 2, 1)) o->step = 8;
             break;
         }
         if (DAT_8009d2b0 == 3) break;

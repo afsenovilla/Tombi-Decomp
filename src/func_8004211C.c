@@ -6,7 +6,7 @@
    int load temp `ys` (`y0 = ys; ys -= 16;`) with dead trailing `lo = ys; lo = nn;` so cse keeps the temps
    canonical (move t0,v0 before addiu v0,v0,-16); `unsigned int v` with in-place `v >>= 4`; frame via pad[0x18]. */
 #include "TOBJ.H"
-extern short *func_8003F200(int a, int b);
+extern short *getCollisionPlaneAt(int a, int b);
 extern unsigned short *DAT_1f800278;
 
 static __inline__ int check(TObj *o, short a, short b)
@@ -22,7 +22,7 @@ static __inline__ int check(TObj *o, short a, short b)
     short lo;
     int ys;
 
-    q = func_8003F200(a, o->d->p.whole);
+    q = getCollisionPlaneAt(a, o->d->p.whole);
     DAT_1f800278 = (unsigned short *)(q + 1);
     nn = *q;
     n = nn;

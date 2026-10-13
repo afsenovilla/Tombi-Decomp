@@ -21,7 +21,7 @@ extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 extern void increaseMaxHealth(void);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -150,7 +150,7 @@ void func_8011E54C(TObj *o)
             break;
         case 8:
             increaseMaxHealth();
-            FUN_8004d620(e[1], 3);
+            printInfoMessage(e[1], 3);
             goto next;
             break;
         case 9:

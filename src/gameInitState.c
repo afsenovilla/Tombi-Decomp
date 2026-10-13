@@ -4,7 +4,7 @@ typedef struct { short x, y, w, h; } RECT;
 extern char *TASK_C;
 extern unsigned char DAT_1f8001cf;
 extern void ClearImage(RECT *r, int a, int b, int c);
-extern void FUN_8001783c(void);
+extern void initGameConfig(void);
 
 void gameInitState(void)
 {
@@ -23,7 +23,7 @@ void gameInitState(void)
         r.y = 0;
         r.h = 0x100;
         ClearImage(&r, 0, 0, 0);
-        FUN_8001783c();
+        initGameConfig();
         DAT_1f8001cf = 0;
         break;
     case 1:

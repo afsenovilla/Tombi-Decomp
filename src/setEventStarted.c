@@ -7,7 +7,7 @@ extern unsigned char EVENT_STARTED_AP_TABLE[];
 extern int AP_TABLE[];
 extern void FUN_80026a10(int);
 extern void FUN_8005aa74(int, int, int, int);
-extern void FUN_8005b624(int, int);
+extern void printEventMessage(int, int);
 extern void SfxPlay(int);
 extern void spawnItemPickupObject(int);
 
@@ -22,7 +22,7 @@ unsigned char setEventStarted(int p, int b, int c)
         FUN_80026a10(AP_TABLE[EVENT_STARTED_AP_TABLE[p]]);
         if (p != 10) {
             FUN_8005aa74(p, 0, 0x3c, c);
-            FUN_8005b624(p, 0);
+            printEventMessage(p, 0);
             SfxPlay(0x2a);
             spawnItemPickupObject(0);
         }

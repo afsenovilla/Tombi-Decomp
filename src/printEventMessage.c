@@ -8,7 +8,7 @@ extern int AP_TABLE[];
 typedef struct { short a, b; } Pair;
 extern Pair D_80080704[];
 
-void func_8005B624(int k, int b)
+void printEventMessage(int k, int b)
 {
     int d[8];
     int n, q1, q2, q3, q4, q5, q6, q7, q8;

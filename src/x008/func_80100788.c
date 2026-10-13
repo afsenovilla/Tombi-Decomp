@@ -82,7 +82,7 @@ extern void FUN_8011b170(TObj *);
 extern void FUN_80106a18(TObj *);
 extern void FUN_8003f7cc(TObj *);
 extern void FUN_800ff610(TObj *, int);
-extern void FUN_8003f598(TObj *, int);
+extern void probeTileShapeThreePoints(TObj *, int);
 
 static __inline__ void dirA(TObj *o)
 {
@@ -455,5 +455,5 @@ void func_80100788(TObj *o, int p2)
     }
     if (c == 0) FUN_8003f7cc(o);
     if (D_1F8001A4 == 0) FUN_800ff610(o, 1);
-    FUN_8003f598(o, 4);
+    probeTileShapeThreePoints(o, 4);
 }

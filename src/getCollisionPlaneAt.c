@@ -17,7 +17,7 @@ extern char *D_1F80030C;
 extern unsigned short D_1F8001C8;
 #define M960 D_8009C960h
 
-char *func_8003F200(short x, short y)
+char *getCollisionPlaneAt(short x, short y)
 {
     XY *t;
     char *b;

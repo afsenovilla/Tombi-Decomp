@@ -20,7 +20,7 @@ extern void func_80118304(int, int, int);
 extern int FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
 extern void FUN_8001f110(int);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern TObj *showMessageBoxDirect(int, int, Fix16 *);
@@ -161,7 +161,7 @@ void func_801176B0(TObj *o)
         case 1:
             FUN_8001f110(1);
             FUN_8001e4f0(0x101);
-            FUN_8004d620(0x25, 2);
+            printInfoMessage(0x25, 2);
             c = &D_8009C970;
             if (--*c == 0) {
                 o->step = 8;

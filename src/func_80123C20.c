@@ -11,7 +11,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern int FUN_80063548(int);
 extern void setEventComplete(int, int);
-extern void FUN_8004d620(int, int);
+extern void printInfoMessage(int, int);
 extern void freeObjectLayer5(TObj *);
 
 void func_80123C20(TObj *o)
@@ -56,7 +56,7 @@ void func_80123C20(TObj *o)
         break;
     case 2:
         setEventComplete(0x77, 0);
-        FUN_8004d620(0x32, 2);
+        printInfoMessage(0x32, 2);
         DAT_8009cd98 = 9;
         DAT_8009cd9c = 0x3c;
         DAT_800b146c = 0x3c;

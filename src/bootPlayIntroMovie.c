@@ -11,7 +11,7 @@ extern void ThreadCreate(int, void *);
 extern void MusicStopOrFadeIn(int);
 extern char LAB_8001d6a4[];
 
-void FUN_8004e2d4(void)
+void bootPlayIntroMovie(void)
 {
     Th *t = TASK_C;
     unsigned short c = t->c;

@@ -15,7 +15,7 @@ extern void FUN_80021478(int a, int b, int c, int d, int e);
 extern void drawUiSprite(short x, short y, short c);
 extern void SetDrawMode(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
-void FUN_80021150(int c, short s)
+void drawLoadingSprites(int c, short s)
 {
     int i, j;
     DRM *p;

@@ -28,7 +28,7 @@ extern u_long StGetNext(u_long **addr, u_long **header);
 extern u_long StFreeRing(u_long *base);
 extern void DecDCTvlc(u_long *bs, u_long *buf);
 extern void CdMix(void *vol);
-extern void FUN_8001eff8(int);
+extern void startBgmTrack(int);
 extern unsigned char DAT_1f8001cd;
 extern TObj *TASK_C;
 extern short DAT_80077f10[];
@@ -48,7 +48,7 @@ static __inline__ u_long *strNext(DECENV *dec)
         CdMix(DAT_80077f0c);
     }
     if (DAT_1f8001cd == 0x15 && TASK_C->b68 == 0 && sector->frameCount > 14) {
-        FUN_8001eff8(0);
+        startBgmTrack(0);
         TASK_C->b68 = 1;
     }
     dec->rect[0].w = dec->rect[1].w = sector->width;

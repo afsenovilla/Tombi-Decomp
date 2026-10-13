@@ -6,7 +6,7 @@ extern char DAT_1f8001cf;
 extern char DAT_8009e375, DAT_8009e376, DAT_8009e377;
 extern char DAT_8009f085, DAT_8009f086, DAT_8009f087;
 
-void FUN_8001c634(void)
+void transitionToGameOver(void)
 {
     int t = (int)TASK_C;
     DAT_1f8001cf = 1;

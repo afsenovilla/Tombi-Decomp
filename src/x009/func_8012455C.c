@@ -7,7 +7,7 @@ extern unsigned char D_8009CFE5[];
 extern void *D_8012E04C;
 extern char D_80077D0C[];
 void AnimLoadDuration(TObj *o);
-void func_8004D620(int a, int b);
+void printInfoMessage(int a, int b);
 void applyAnimVelocityX(TObj *o, unsigned short v);
 
 void func_8012455C(TObj *o)
@@ -26,7 +26,7 @@ void func_8012455C(TObj *o)
         AnimLoadDuration(o);
         {
             unsigned char *c = &D_8009CEF6;
-            func_8004D620(*c + 0x29, 2);
+            printInfoMessage(*c + 0x29, 2);
             *c = *c + 1;
         }
         D_8009CFE5[o->b0c] = 1;

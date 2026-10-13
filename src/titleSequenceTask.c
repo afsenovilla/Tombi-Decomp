@@ -57,7 +57,7 @@ void titleSequenceTask(void)
         }
         switch ((u16)(CURRENT_TASK)->state0) {
             case 0:
-                func_8004DF00(sp10);
+                bootLogoState(sp10);
                 break;
             case 1:
                 bootLoadMovieResources();

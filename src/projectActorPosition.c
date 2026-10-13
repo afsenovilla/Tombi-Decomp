@@ -17,7 +17,7 @@ extern int DAT_8009c960;
 extern void SetRotMatrix(MATRIX *);
 extern void SetTransMatrix(MATRIX *);
 
-int FUN_8004fba8(char *p, long *sxy, long *z)
+int projectActorPosition(char *p, long *sxy, long *z)
 {
     DAT_1f800060.vx = *(short *)(p + 0x12);
     DAT_1f800060.vy = *(short *)(p + 0x16);

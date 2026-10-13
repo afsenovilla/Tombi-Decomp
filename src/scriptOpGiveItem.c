@@ -1,7 +1,7 @@
 // FUNC 8003acd8 124 MAIN0
 // MATCHING 8003acd8 124
 extern char *SCRIPT_CTX;
-extern void func_8004D620(int, int);
+extern void printInfoMessage(int, int);
 extern void playSFX(int);
 extern void increaseMaxHealth(void);
 extern void addItemToInventory(int, int, int);
@@ -14,7 +14,7 @@ void scriptOpGiveItem(void)
     int c = *(int *)(p + 0x1198);
     if (a < 0) {
         if (c != 0) {
-            func_8004D620(0x15, 3);
+            printInfoMessage(0x15, 3);
             playSFX(10);
         }
         increaseMaxHealth();

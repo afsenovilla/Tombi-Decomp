@@ -61,7 +61,7 @@ extern void FUN_80027c74(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 extern void FUN_800216c4(void);
 extern void loadSectionBounds(O *);
 extern void AnimAdvance(PL *);
@@ -74,7 +74,7 @@ extern void func_80116AE0(O *);
 #define ZU (*(unsigned short *)&D_1F80016Ex[0])
 
 #define T1(n) \
-    if (FUN_800270a0(o, 1, n)) { \
+    if (tryStartItemInteraction(o, 1, n)) { \
         D_8009D2B0 = 0; \
         D_8009C93F = 1; \
         D_8009C942 = 1; \
@@ -82,7 +82,7 @@ extern void func_80116AE0(O *);
     break;
 
 #define T2A(n, k) \
-    if (!FUN_800270a0(o, 2, n)) break; \
+    if (!tryStartItemInteraction(o, 2, n)) break; \
     o->w5a = k; \
     o->step = 4; \
     D_8009D2B0 = 0; \
@@ -91,7 +91,7 @@ extern void func_80116AE0(O *);
     break;
 
 #define T2B(n, k) \
-    if (!FUN_800270a0(o, 2, n)) break; \
+    if (!tryStartItemInteraction(o, 2, n)) break; \
     D_8009C93F = 1; \
     D_8009C942 = 1; \
     D_8009D2B0 = 0; \
@@ -222,7 +222,7 @@ void func_80116D3C(O *o)
                 break;
             }
             if (D_1F80016A >= 0x653 && D_1F800172 == 0x4ec && D_1F80016E >= -0x225
-                && FUN_800270a0(o, 1, 5)) {
+                && tryStartItemInteraction(o, 1, 5)) {
                 D_8009D2B0 = 0;
                 D_8009C93F = 1;
                 D_8009C942 = 1;

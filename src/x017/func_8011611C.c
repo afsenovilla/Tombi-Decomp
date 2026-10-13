@@ -37,7 +37,7 @@ extern short D_1F8000F2[];
 extern int D_1F8000F0;
 extern Q *TASK_C;
 extern void func_80027810(O *);
-extern int FUN_800270a0(O *, int, int);
+extern int tryStartItemInteraction(O *, int, int);
 extern void stepPlayerXToward(int);
 extern void FUN_8002a4d0(O *);
 
@@ -65,9 +65,9 @@ void func_8011611C(O *o)
                     o->step = 3;
                     break;
                 }
-                FUN_800270a0(o, 1, 1);
+                tryStartItemInteraction(o, 1, 1);
             } else if (D_1F800172 < -0x59) {
-                FUN_800270a0(o, 1, 0);
+                tryStartItemInteraction(o, 1, 0);
             }
             break;
         case 2:
@@ -77,7 +77,7 @@ void func_8011611C(O *o)
                 if (p->z > 0) {
                     stepPlayerXToward(0x56);
                     if (p->z >= 0x5b) {
-                        FUN_800270a0(o, 1, 1);
+                        tryStartItemInteraction(o, 1, 1);
                         break;
                     }
                 }
@@ -88,7 +88,7 @@ void func_8011611C(O *o)
                 if (p->z > 0) {
                     stepPlayerXToward(0x230);
                     if (p->z >= 0x5b) {
-                        FUN_800270a0(o, 1, 3);
+                        tryStartItemInteraction(o, 1, 3);
                         break;
                     }
                 }
@@ -96,21 +96,21 @@ void func_8011611C(O *o)
             if ((unsigned short)(p->x - 0x110) < 0x60) {
                 if (p->z > 0) {
                     stepPlayerXToward(0x140);
-                    if (p->z >= 0x5b) FUN_800270a0(o, 1, 2);
+                    if (p->z >= 0x5b) tryStartItemInteraction(o, 1, 2);
                 } else if (p->z < 0) {
                     stepPlayerXToward(0x140);
-                    if (p->z < -0x5a) FUN_800270a0(o, 1, 0);
+                    if (p->z < -0x5a) tryStartItemInteraction(o, 1, 0);
                 }
             }
             break;
         case 3:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x3b) FUN_800270a0(o, 1, 0);
+            if (D_1F80016A < 0x14 && D_1F80016E >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         case 4:
-            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x3b) FUN_800270a0(o, 1, 0);
+            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         case 5:
-            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x40) FUN_800270a0(o, 1, 0);
+            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x40) tryStartItemInteraction(o, 1, 0);
             break;
         }
         break;

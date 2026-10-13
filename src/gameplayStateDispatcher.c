@@ -4,7 +4,7 @@ extern unsigned short *TASK_C;
 extern short DAT_1f8001dc;
 extern short DAT_1f8001de;
 extern unsigned char LOAD_COMPLETE_SYM;
-extern void FUN_8001a43c(void), FUN_8001a64c(void), FUN_8001ab18(void), FUN_8001aeb4(void), FUN_8001b49c(void), FUN_8001b7cc(void), FUN_8001baf4(void), FUN_8001c364(void), FUN_8001c634(void);
+extern void FUN_8001a43c(void), FUN_8001a64c(void), areaMode2Handler(void), inventoryScreenHandler(void), areaMode4Handler(void), areaMode5Handler(void), areaMode6Handler(void), FUN_8001c364(void), transitionToGameOver(void);
 void gameplayStateDispatcher(void)
 {
     short *p;
@@ -12,13 +12,13 @@ void gameplayStateDispatcher(void)
     switch (TASK_C[0x4c / 2]) {
     case 0: FUN_8001a43c(); break;
     case 1: FUN_8001a64c(); break;
-    case 2: FUN_8001ab18(); break;
-    case 3: FUN_8001aeb4(); break;
-    case 4: FUN_8001b49c(); break;
-    case 5: FUN_8001b7cc(); break;
-    case 6: FUN_8001baf4(); break;
+    case 2: areaMode2Handler(); break;
+    case 3: inventoryScreenHandler(); break;
+    case 4: areaMode4Handler(); break;
+    case 5: areaMode5Handler(); break;
+    case 6: areaMode6Handler(); break;
     case 7: FUN_8001c364(); break;
-    case 8: FUN_8001c634();
+    case 8: transitionToGameOver();
     }
     a = DAT_1f8001dc;
     if (-1 < a && LOAD_COMPLETE_SYM != 0) {

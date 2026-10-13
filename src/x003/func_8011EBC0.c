@@ -23,7 +23,7 @@ extern PFT4_8011C00C *D_1F800164;
 extern int D_1F8001E0;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-int FUN_8004fba8(void *o, long *sxy, long *z);
+int projectActorPosition(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
 int insertPrim(void *a, int b, int c, int d, unsigned e);
 int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
@@ -52,7 +52,7 @@ void func_8011EBC0(TObj *o)
     short sc;
     PFT4_8011C00C *f;
 
-    FUN_8004fba8(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
     xy = D_1F800070i;
     x = xy;
     y = (unsigned)xy >> 16;

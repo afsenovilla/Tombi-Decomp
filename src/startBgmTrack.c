@@ -15,7 +15,7 @@ extern void SsSetMVol(int, int);
 extern void SsSeqSetVol(int, int, int);
 extern void SsSeqPlay(int, int, int);
 
-int FUN_8001eff8(int n)
+int startBgmTrack(int n)
 {
     short v;
     if (BGM_SEQ_ID != -1) {
