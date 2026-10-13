@@ -49,8 +49,7 @@ that names the file in `SYS/LD0AR*.BIN` / `SYS/LD0SYS.BIN`. The records read the
 **Table container** (WPP, WMD; the same shape as the `.WVD` header tables): `u32 N`, then N or N+1 `u32` offsets; the first
 offset equals the header size (`4*(N+1)` or `4*(N+2)`), items are `[off[i], off[i+1])`. With `4*(N+2)` the last word is an end offset
 (WPP: `size-1`, leaving a 1-byte tail). Example `AREA01/A005.000`: N=358, header 1,440 bytes, 358 items of 322..750 bytes,
-tail 1 byte; item 0 starts `88 0a 00 30 1e 00 90 cb ...` (nibble-packed pixels with `00 nn` zero-run escapes: a 4 bpp RLE, to be confirmed
-against the sprite renderer). Files read with `LOAD_TYPE_RAW_4` hold **two containers back to back**; the record `arg` is the
+tail 1 byte; item 0 starts `88 0a 00 30 1e 00 90 cb ...` (a flag-byte RLE, see "WPP" below). Files read with `LOAD_TYPE_RAW_4` hold **two containers back to back**; the record `arg` is the
 size of the first: `AREA00/A004.000` = WPP table (`0x2E008`) + a second table N=83 (85,212 bytes); `AREA02/D004` = table N=127
 (`0x62`, 51,772 B) + a second block.
 
@@ -65,8 +64,44 @@ Python), `pack DIR -o OUT` rebuilds (the table header is regenerated from the it
 `--check` unpacks+packs every `.000`: **identical 286/286**. Verified visually: `AREA00/B301.000` (384x256 words, x=192) read as 8 bpp
 is a room interior (background pages); read as 4 bpp or 16 bpp it is noise, so the background pages are 8 bpp.
 
-Open: the WPP frame encoding (offsets per frame are known; the pixel codec and the frame header are not), WMD model layout, the
-`0x8F` block, what the grid values mean, and the exact VRAM layout needed to pair each page with its `CLUTnn.GAM`.
+Open: WMD model layout, the `0x8F` block, what the grid values mean, and which CLUT row each room tile uses.
+
+### WPP (done: `tools/wpp.py`)
+Decoder in the matched code: `FUN_800371c0(table, frame, dst, d)` (`src/FUN_800371c0.c`) + `FUN_80037454` (computed-jump run fill),
+called by `FUN_80037c80` (WPP_DATA[0] = scratchpad `0x1F800348` for type 0, WPP_DATA[2] = `0x1F800350` for types 1..3; frame = `*o->anim`)
+and `FUN_80132174`/`FUN_801306f0`. WPP_DATA[n] are stored by the loader (`FUN_8004f538`, kind `0x60|n`). The table is `[u32 N][u32 offsets...]`
+from the table base; frame i = `[off[i], off[i+1])`; the decoder reads `n = off[i+1]-off[i]` bytes.
+
+Item codec: a flag byte, then 8 tokens (bit 0 first): bit clear = 1 literal byte; bit set = `count, value` = `count` copies of `value`
+(count 1..255). The last group is cut where the item ends. Output = `u16 W, u16 H`, then H rows of W 16-bit words, 4 bpp (low nibble = left
+pixel; so 4*W x H pixels, index 0 transparent). The game prefixes `10 00 00 00 / 00 00 00 00 / 01 00 00 00 / DX,DY` (a TIM without CLUT,
+4 bpp) and `FUN_800174fc` does OpenTIM/ReadTIM/LoadImage to VRAM `x = buffer*16+1, y = 4` (Tombi) or `(448,160)`.
+The leading bytes of every item (`08 08 00 30 25 00`...) are therefore just flag + W,H + the first run, not a header.
+Encoder: greedy, a run for any run >= 2 equal bytes (max 255), else literal; it reproduces **12,934/12,934** items of AREA01/A005 and
+all items of the 40 files. Verified: 13,017 frames decode to exactly `4+2*W*H` bytes. Sizes: 358 frames of Tombi/enemies in `0x60`
+files (33 files `0x2E008` bytes, 40-48 px wide, 48 tall), 83 more in the second table of `AREA00/A004`, 127 in the `0x62` files (WPP_DATA[2]).
+`python3 tools/wpp.py --check` -> `WPP files identical 40/40 (13017 frames)` (`unpack` writes `frame_NNNN.4bpp` = the decoded stream, editable,
+and `frame_NNNN.png`; `pack` re-encodes).
+
+### CLUT pairing (tools/area000.py `page`, `unpack --png`; tools/wpp.py)
+- A GRPX record never names a palette. VRAM layout: 256 x 32 words at `(128,480)` per area (`AREAnn/CLUTkk.GAM`, record `x=128 y=480 256x32`,
+  loaded in the same load list as the room pages `Bnnn.GAM/.000`): **32 palettes of 256 colours** (row r = VRAM y `480+r`) for the 8 bpp room
+  pages. `tools/area000.py page AREA00/B301 -o x.png [--row N|--all-rows]` pairs page and CLUT through the load list.
+- The 16 colour sprite palettes live in the same VRAM area: the last 16 colours of rows 0..19 of every `CLUTkk.GAM` are byte-identical to
+  `SYSTEM/A00001.000` (x=368, y=480..495, 16 palettes), `A00002` (368,496, 4), `A10004` (352,480), `A00005`, `A00205/6`, `A00803/5`
+  (`x=320..336`...): the system lists load them first, then the area `CLUT` overwrites that strip with the same data.
+- **Tombi (WPP_DATA[0])** uses the CLUT at VRAM `(0x80,0x1e0)` (`FUN_800174fc` args; `GetClut(0x80,0x1f0)` in the draw code): colours 0..15 of
+  row 0 of `CLUT01.GAM` (pink hair, pink shorts); rows 1..8 are the other outfits (green, blue, purple, red, grey...), row 26/27 = pink/green
+  again. Colours 16.. of a row are the next 16 colour palettes (`--x0 16`). Enemy/NPC WPP frames use other 16 colour palettes of the same block.
+- `SYSTEM/DSPCLUT.TIM` (3072 B) is loaded as GRPX kind `0x11` at `(288,480)` 48 x 31 words (menu palettes); not paired with sprites.
+- Which of the 32 rows a room uses (and the per tile row) is chosen by the polygon CLUT field at draw time; not found in the data yet.
+
+Verified visually (images only in /tmp): Tombi frames 0,40,100 of `AREA00/A004` with `CLUT01` row 0 look right (pink hair/shorts, correct
+skin, no stray colours); the 2nd table of A004 and `AREA02/D004` (`0x62`) decode to clean sprites (bird/griffin enemy, Tombi back/front);
+`AREA00/B301` (x=192, 768x256 px 8 bpp) with `CLUT04` row 0 is a hut interior with sane colours but the page is an atlas of vertical
+strips (the room is rebuilt from strips by the tile code), not a flat picture; `AREA00/B000` is a sprite/tile atlas (colours plausible
+for rows 0..15, dark for >= 24). Not done: exact room reassembly, per-sprite CLUT of enemies, SPR frame definitions (UV/CLUT per part).
+
 
 ## `AREAxx/X0nn.BIN` (overlays)
 Headerless RAM image loaded at `0x800E8028` by load kind `0xF0`. Fully documented in `notes/overlays.md`: header/callback pointer area,

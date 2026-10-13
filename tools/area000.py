@@ -14,6 +14,11 @@ There is no common header; what a file is depends on the *kind* of the load reco
   tools/area000.py unpack FILE OUT_DIR [--png]   manifest.json + section files (+ PNG views of images and grids)
   tools/area000.py pack DIR [-o OUT]       rebuild the file from manifest.json + sections (byte-identical if unchanged)
   tools/area000.py --check [PATH...]       unpack+pack every *.000 under PATH (default game/disc/fs), print identical count
+  tools/area000.py page NAME [-o PNG] [--row N] [--all-rows]
+                                           NAME = AREA00/B000 (.GAM or .000 of a GRPX record): the VRAM rectangle as an image;
+                                           8 bpp pages are coloured with the CLUT the load list pairs with them (CLUTnn.GAM,
+                                           256 x 32 words at VRAM 128,480: row N = one 256 colour palette); --all-rows = sheet of
+                                           the 32 palettes. unpack --png also writes view8c.png (row --row, default 0).
 
 The classification uses the load records when game/disc/Tombi.bin and fs/SYS/LD0*.BIN exist (authoritative) and falls back to
 content heuristics otherwise (a table container is recognised by its header, a grid by its size, anything else is raw).
@@ -126,6 +131,117 @@ def rel_name(path):
     return "/".join(p[-2:])
 
 
+# ---------------------------------------------------------------- GAM, CLUT pairing (load lists), indexed PNG
+def gam_unpack(d):
+    """`GAM\\0`, u32 size, then 16-bit LE flag words (bit 0 first, 1 = copy: offset byte, length byte), see notes/assets_tombatools.md."""
+    if d[:4] != b"GAM\0":
+        raise ValueError("not a GAM")
+    size = struct.unpack_from("<I", d, 4)[0]
+    out = bytearray()
+    p, flags, left = 8, 0, 0
+    while len(out) < size:
+        if left == 0:
+            flags = d[p] | d[p + 1] << 8
+            p += 2
+            left = 16
+        bit = flags & 1
+        flags >>= 1
+        left -= 1
+        if bit:
+            off, ln = d[p], d[p + 1]
+            p += 2
+            for _ in range(ln):
+                out.append(out[-off])
+        else:
+            out.append(d[p])
+            p += 1
+    return bytes(out[:size])
+
+
+def read_resource(name, fs=FS):
+    """Bytes of `AREA00/B000.GAM` (unpacked) or `.000`; the extension may be omitted (.GAM is tried first)."""
+    for ext in ("", ".GAM", ".000"):
+        p = os.path.join(fs, name + ext)
+        if os.path.isfile(p):
+            d = open(p, "rb").read()
+            return gam_unpack(d) if p.endswith(".GAM") else d
+    raise FileNotFoundError(name)
+
+
+_LISTS = None
+
+
+def load_lists(fs=FS):
+    """{'AREA00': [[rec, ...], ...]}: the load records of SYS/LD0*.BIN split at the fileId -1 terminators (lists: the area list,
+    then one per section/room). rec = dict(name, kind, type, addr, arg, w, h). Empty if the disc image is missing."""
+    global _LISTS
+    if _LISTS is not None:
+        return _LISTS
+    _LISTS = {}
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import cdfiles
+        ref = cdfiles.layout_from_image(os.path.join(os.path.dirname(fs), "Tombi.bin"))
+        rows = cdfiles.resolve(cdfiles.read_exe(os.path.join(fs, "EXE", "MAIN0.EXE")), ref)
+        names = {i: r[3] for i, r in enumerate(rows) if r[3]}
+        for fn in sorted(os.listdir(os.path.join(fs, "SYS"))):
+            if not fn.startswith("LD0"):
+                continue
+            d = open(os.path.join(fs, "SYS", fn), "rb").read()
+            lists, cur = [], []
+            for o in range(4, len(d) - 19, 20):
+                fid, slot, kind, addr, arg, w, h, typ = struct.unpack_from("<hBBIIhhI", d, o)
+                if fid == -1:
+                    lists.append(cur)
+                    cur = []
+                elif fid in names:
+                    cur.append({"name": names[fid], "kind": kind, "type": typ, "addr": addr, "arg": arg, "w": w, "h": h})
+                else:
+                    break
+            if cur:
+                lists.append(cur)
+            _LISTS[fn[3:-4]] = lists
+    except Exception as e:
+        sys.stderr.write("area000: load lists unavailable (%s)\n" % e)
+    return _LISTS
+
+
+def find_clut(name):
+    """The CLUT block the load list pairs with the page/sprite file `name` ('AREA00/B000'): the CLUT*.GAM (256 x 32 words at VRAM
+    128,480, 32 palettes of 256 colours; the last 16 colours of rows 0..19 hold the 16 colour sprite palettes) of the same list;
+    files of the area list (A004 sprites, A000.. tiles) have none and take the first CLUT of the area. Returns the record or None."""
+    base = name.rsplit(".", 1)[0] if name.endswith((".GAM", ".000")) else name
+    for ld, lists in load_lists().items():
+        for lst in lists:
+            if any(r["name"].rsplit(".", 1)[0] == base for r in lst):
+                for r in lst:
+                    if "/CLUT" in r["name"]:
+                        return r
+                for lst2 in lists:
+                    for r in lst2:
+                        if "/CLUT" in r["name"]:
+                            return r
+    return None
+
+
+def rgb555(v):
+    return bytes(((v & 31) * 255 // 31, (v >> 5 & 31) * 255 // 31, (v >> 10 & 31) * 255 // 31))
+
+
+def clut_palette(blob, row, w=256, first=0, n=256):
+    """n RGB triplets of a CLUT block of w words per row (row `row`, from colour `first`)."""
+    return b"".join(rgb555(v) for v in struct.unpack_from("<%dH" % n, blob, (row * w + first) * 2))
+
+
+def png_indexed(w, h, rows, pal, transparent0=False):
+    """8-bit indexed PNG; pal = RGB bytes (<= 256 entries); transparent0 makes index 0 transparent (tRNS)."""
+    raw = b"".join(b"\0" + r for r in rows)
+    out = b"\x89PNG\r\n\x1a\n" + _chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 3, 0, 0, 0)) + _chunk(b"PLTE", pal)
+    if transparent0:
+        out += _chunk(b"tRNS", b"\0")
+    return out + _chunk(b"IDAT", zlib.compress(raw, 9)) + _chunk(b"IEND", b"")
+
+
 # ---------------------------------------------------------------- classification
 def parse_table(d):
     """u32 table container: [N][offsets...]; first offset = header size = 4*(N+1) (no end offset) or 4*(N+2) (end offset).
@@ -170,7 +286,7 @@ def classify(d, rec=None):
 
 
 # ---------------------------------------------------------------- unpack / pack (pure, in memory)
-def unpack_part(d, rec, png, pre):
+def unpack_part(d, rec, png, pre, clut=None):
     """One container -> (kind, meta, sections, files); section/file names get the prefix `pre`."""
     kind, meta = classify(d, rec)
     files, secs = {}, []
@@ -199,6 +315,9 @@ def unpack_part(d, rec, png, pre):
         sec("image.bin", 0, len(d), "raw VRAM words, %d x %d" % (meta["w"], meta["h"]))
         if png:
             files.update({pre + k: v for k, v in vram_views(d, meta["w"], meta["h"]).items()})
+            if clut:  # 8 bpp reading with the paired palette
+                w = meta["w"]
+                files[pre + "view8c.png"] = png_indexed(w * 2, meta["h"], [d[y * w * 2:(y + 1) * w * 2] for y in range(meta["h"])], clut)
     else:
         sec("data.bin", 0, len(d), "opaque")
     return kind, meta, secs, files
@@ -212,14 +331,14 @@ def split_parts(d, rec):
     return [(0, len(d), rec)]
 
 
-def unpack_bytes(d, name="", rec=None, png=False):
+def unpack_bytes(d, name="", rec=None, png=False, clut=None):
     man = {"format": "area000", "name": name, "size": len(d), "sha1": hashlib.sha1(d).hexdigest(), "parts": []}
     if rec:
         man["load_record"] = {"file": rec[0], "kind": "0x%02X" % rec[1], "type": rec[2], "arg": "0x%X" % rec[3]}
     files = {}
     for i, (off, size, r) in enumerate(split_parts(d, rec)):
         pre = "" if i == 0 else "p%d_" % i
-        kind, meta, secs, f = unpack_part(d[off:off + size], r, png, pre)
+        kind, meta, secs, f = unpack_part(d[off:off + size], r, png, pre, clut)
         for s in secs:
             s["off"] += off
         man["parts"].append({"kind": kind, "meta": meta, "off": off, "size": size, "sections": secs})
@@ -310,7 +429,13 @@ def cmd_info(a):
 def cmd_unpack(a):
     d = open(a.file, "rb").read()
     nm = rel_name(a.file)
-    man, files = unpack_bytes(d, nm, get_rec(nm), png=a.png)
+    rec = get_rec(nm)
+    clut = None
+    if a.png and rec and (rec[1] & 0xF0) == 0x10 and rec[4] >= 64:
+        cr = find_clut(nm)
+        if cr:
+            clut = clut_palette(read_resource(cr["name"]), a.row, cr["w"])
+    man, files = unpack_bytes(d, nm, rec, png=a.png, clut=clut)
     os.makedirs(a.out, exist_ok=True)
     for fn, b in files.items():
         open(os.path.join(a.out, fn), "wb").write(b)
@@ -326,6 +451,57 @@ def cmd_pack(a):
     if a.o:
         open(a.o, "wb").write(out)
     print("packed %d bytes%s" % (len(out), " (identical to the original)" if same else " (differs from the original)"))
+    return 0
+
+
+def cmd_page(a):
+    nm = a.name
+    for ext in (".GAM", ".000"):
+        if nm.endswith(ext):
+            nm = nm[:-len(ext)]
+    rec = None
+    for lists in load_lists().values():
+        for lst in lists:
+            for r in lst:
+                if r["name"].rsplit(".", 1)[0] == nm and (r["kind"] & 0xF0) == 0x10 and r["type"] in (0, 1, 0x10, 0x11):
+                    rec = rec or r
+    if not rec:
+        sys.stderr.write("no GRPX load record for %s\n" % a.name)
+        return 1
+    d = read_resource(nm)
+    w, h = rec["w"], rec["h"]
+    cr = find_clut(nm)
+    out = a.o or os.path.basename(nm) + ".png"
+    if rec["w"] * rec["h"] * 2 != len(d):
+        sys.stderr.write("size %d != %d x %d x 2\n" % (len(d), w, h))
+        return 1
+    if not cr or w < 64:
+        open(out, "wb").write(vram_views(d, w, h)["view16.png"])
+        print("%s: %d x %d words, no CLUT paired -> 16 bpp view %s" % (nm, w, h, out))
+        return 0
+    blob = read_resource(cr["name"])
+    rows = [d[y * w * 2:(y + 1) * w * 2] for y in range(h)]
+    if not a.all_rows:
+        open(out, "wb").write(png_indexed(w * 2, h, rows, clut_palette(blob, a.row, cr["w"])))
+        print("%s: VRAM x=%d y=%d, %d x %d px 8 bpp, CLUT %s row %d (VRAM 128,%d) -> %s" % (
+            nm, rec["arg"] & 0xFFFF, rec["arg"] >> 16, w * 2, h, cr["name"], a.row, 480 + a.row, out))
+        return 0
+    # sheet: the 32 palettes, 4 columns, each page scaled to half size (pure python, nearest)
+    sc = 2
+    tw, th = (w * 2) // sc, h // sc
+    cols, nrow = 4, 8
+    img = [bytearray(3 * (tw + 2) * cols) for _ in range((th + 2) * nrow)]
+    for r in range(32):
+        pal = clut_palette(blob, r, cr["w"])
+        ox, oy = (r % cols) * (tw + 2), (r // cols) * (th + 2)
+        for y in range(th):
+            line = rows[y * sc]
+            dst = img[oy + y]
+            for x in range(tw):
+                i = line[x * sc]
+                dst[(ox + x) * 3:(ox + x) * 3 + 3] = pal[i * 3:i * 3 + 3]
+    open(out, "wb").write(png_bytes((tw + 2) * cols, (th + 2) * nrow, [bytes(l) for l in img], "rgb"))
+    print("%s: sheet of the 32 CLUT rows of %s -> %s (row = r%%4 across, r//4 down)" % (nm, cr["name"], out))
     return 0
 
 
@@ -360,7 +536,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("info"); p.add_argument("files", nargs="+"); p.set_defaults(f=cmd_info)
-    p = sp.add_parser("unpack"); p.add_argument("file"); p.add_argument("out"); p.add_argument("--png", action="store_true"); p.set_defaults(f=cmd_unpack)
+    p = sp.add_parser("unpack"); p.add_argument("file"); p.add_argument("out"); p.add_argument("--png", action="store_true"); p.add_argument("--row", type=int, default=0); p.set_defaults(f=cmd_unpack)
+    p = sp.add_parser("page"); p.add_argument("name"); p.add_argument("-o"); p.add_argument("--row", type=int, default=0); p.add_argument("--all-rows", action="store_true"); p.set_defaults(f=cmd_page)
     p = sp.add_parser("pack"); p.add_argument("dir"); p.add_argument("-o"); p.set_defaults(f=cmd_pack)
     a = ap.parse_args()
     return a.f(a)
