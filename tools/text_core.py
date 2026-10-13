@@ -10,7 +10,7 @@ Command line (used by the tests; the GUI is tools/text_editor.py):
   text_core.py export SRC OUT.json|OUT.txt [--all-languages]    every dialogue as text
   text_core.py build  SRC PROJECT.json|IMPORT.json|IMPORT.txt -o OUT.bin [--work DIR] [--disc IMAGE]
 """
-import argparse, contextlib, io, json, os, re, shutil, struct, sys, unicodedata
+import argparse, contextlib, io, json, os, re, shutil, struct, sys, tempfile, unicodedata
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import i18n, text_strings
 from i18n import tr
@@ -576,7 +576,10 @@ def build_report(proj, out_bin, work, disc=None, log=print):
             open(p, "wb").write(src.read_any(name))
     # build inside the work folder (mkpsxiso already writes there; it could not create "~build-N.bin" next to the output on
     # Windows: "Cannot open or create output image file"), then move the checked image onto out_bin
-    tmp_bin = os.path.join(work, "build-%d.bin" % os.getpid())
+    # mkpsxiso.exe could not create its image under the user's Desktop either (Windows protected folders block unknown
+    # programs; the editor itself may write there): build in the system temp folder, then move the image with Python
+    tmpdir = tempfile.mkdtemp(prefix="tombi-iso-")
+    tmp_bin = os.path.join(tmpdir, "build.bin")
     tmp_cue = os.path.splitext(tmp_bin)[0] + ".cue"
     tmp_lay = os.path.splitext(tmp_bin)[0] + ".layout.json"
     ns = argparse.Namespace(fs=fs, disc=disc, work=os.path.join(work, "mkdisc"), out=tmp_bin, relayout=True)
@@ -600,6 +603,7 @@ def build_report(proj, out_bin, work, disc=None, log=print):
         except OSError as e:
             raise CoreError(tr("tc.cantwrite", out_bin, e))
     finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
         for t in (tmp_bin, tmp_cue, tmp_lay, out_bin + ".part"):
             if os.path.exists(t):
                 try:
