@@ -195,8 +195,19 @@ class Project:
         """Lines of an event title as the text says ([[gap before each letter]]), or None if the dialogue is not a title."""
         lay = self.layout(path)
         if lay is None or idx not in lay.recs:
+            if TL.is_title_file(path):
+                return self._single_line(text)      # no layout list (CFNT999 #0, #1, ...): one centred line, spaces as gaps
             return None
         return self._effective_lines(lay, idx, text)
+
+    @staticmethod
+    def _single_line(text):
+        """One centred line for a title without layout list; {NL} counts as a space, so the result is always a single line."""
+        lines = TL.text_to_lines(text)[0]
+        flat = []
+        for l in lines:
+            flat += [1 if flat and j == 0 else g for j, g in enumerate(l)]
+        return [flat] if flat else []
 
     @staticmethod
     def _effective_lines(lay, idx, text):

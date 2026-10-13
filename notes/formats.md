@@ -55,6 +55,16 @@ The tool therefore reads the layout from the overlays (text shows `Pulsera del{N
 (the old blank-glyph hack is gone), requires the same number of letters as the list, and writes moved spaces / line breaks back into
 every overlay copy (flags kept). Odd-width centring is not reproduced bit for bit (31 of 1170 lists start one column further left), so
 only titles whose spacing changed are rewritten. `python3 tools/title_layout.py` checks all 171 CFNT files.
+**Dialogues 0 and 1 of CFNT999 (no list).** In `spawnEventTitle` the title text is entry `D_800806B4[area][event]` of the title table (`src + *(u16*)(src+8)`; the table is the
+same for all areas: events 0.. -> entries 2,3,4,6,8,9,0xFF,10,11,12,13,72,14,...). Entry 0 is never selected by this routine; entry 1 is used
+as the fallback title when the table byte is 0xFF (events 6 and 18, which have no title of their own), still walked with a list taken from the
+area tables (so a letter count fixed by that list; this list was not located: the aligner only finds lists for entries 2..). Entry 1 is the
+placeholder "DUMMY CUBE" (US/PAL: `!!!DUMMYCUBE!!!`, ES `¡¡¡CUBOVACÍO!!!`, 15 letters): it is shown for events without a title, it has nothing to do with the
+cubes the letters sit on. Entry 0 is "CLEAR!" (ES `¡DESPEJADA!`, 11 letters); the routine that draws it is not in MAIN0 (not found: no other
+`0x7D16` object spawner or reader of the title table in MAIN0; the score "5000" is `printEventMessage`, digit objects 16 px apart centred on x = 160,
+y = 160, separate from the title). Its layout was therefore not read from code: the preview assumes the usual grid for a single line (letters 2 columns apart, row 0,
+centred: -(2n/2) columns, which is what every list-based one-line title has, e.g. 11 letters start at column -11) and treats spaces as 1-column gaps.
+Whether the engine accepts a different letter count for #0 was not verified; keep the original count when editing it.
 
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see
