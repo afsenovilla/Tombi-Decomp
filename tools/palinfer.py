@@ -32,16 +32,18 @@ _VOTES = {}
 
 
 def _page_table(core):
-    """[(page name, x words, y, w words, h)] of every 4 bpp unpaired page of every list, by list key."""
+    """[(page name, x words, y, w words, h)] of every unpaired (4 or 8 bpp, no CLUT in the list) page of every list, by list key."""
     out = {}
     for ld, lists in core.lists.items():
         for k, lst in enumerate(lists):
-            out[(ld, k)] = [(r["name"], r["arg"] & 0xFFFF, r["arg"] >> 16, r["w"], r["h"]) for i, r, bpp, cl in core.grpx(lst) if bpp == 4]
+            pr = core.vram.pair_cluts(lst)
+            out[(ld, k)] = [(r["name"], r["arg"] & 0xFFFF, r["arg"] >> 16, r["w"], r["h"]) for i, r in enumerate(lst)
+                            if core.vram.is_grpx(r) and not core.vram.is_clut_rec(r) and i not in pr]
     return out
 
 
 def sprite_votes(core):
-    """{page name: Counter((clut x, clut y, area))} from the SPR tables of all areas against the pages of the lists they are loaded with."""
+    """{page name: Counter((mode 0 = 4 bpp / 1 = 8 bpp, clut x, clut y, area))} from the SPR tables of all areas against the pages of the lists they are loaded with."""
     key = id(core.lists)
     if key in _VOTES:
         return _VOTES[key]
@@ -69,13 +71,13 @@ def sprite_votes(core):
                             mode, x0, y0, x1, y1 = vram.rect_words(p, 0)
                         except Exception:
                             continue
-                        if mode != 0:
+                        if mode > 1:
                             continue
                         c = vram.wpp_clut(p[2])
                         cx, cy = (c & 0x3F) * 16, c >> 6 & 0x1FF
                         for nm, px, py, pw, ph in pages:
                             if px <= x0 and x1 < px + pw and py <= y0 and y1 < py + ph:
-                                votes.setdefault(nm, Counter())[(cx, cy, ld)] += 1
+                                votes.setdefault(nm, Counter())[(mode, cx, cy, ld)] += 1
     _VOTES[key] = votes
     return votes
 
@@ -249,7 +251,9 @@ def _infer(core, name, ld, idx, use_match):
         return g
     v = sprite_votes(core).get(name)
     if v:
-        (cx, cy, ar), n = v.most_common(1)[0]
+        v = Counter({k: n for k, n in v.items() if k[0] == 0})
+    if v:
+        (_, cx, cy, ar), n = v.most_common(1)[0]
         ref = _ref_for(core, cx, cy, ar)
         if ref:
             return Guess(ref, "sprites", "%s, %d parts use CLUT (%d,%d)" % (ref.file.rsplit("/", 1)[-1], sum(v.values()), cx, cy), n)
@@ -271,3 +275,79 @@ def _infer(core, name, ld, idx, use_match):
     if best:
         return Guess(best[2], "score", best[1], int(best[0]))
     return None
+
+
+# ------------------------------------------------------------------ 8 bpp room backdrops (SYSTEM lists with no CLUT record)
+# The lists of the pre-rendered room pictures (320 x 240 picture + object textures, 8 bpp, pages at VRAM x 128, 256, 384...) have no CLUT
+# record.  The 256 colour palette of the picture is the last rows (28..31) of one of the CLUTnn.GAM files of the area the list belongs to.
+BACKDROP_NAMES = {
+    20: "cell with wooden bars", 22: "forest clearing", 23: "stone door with a face", 42: "seashore with a giant clam",
+    50: "floating island with a house", 51: "palace hall with arches", 52: "palace hall with red carpet", 53: "cave staircase",
+    54: "brick staircase", 60: "wizard study", 62: "wooden pen", 63: "cave with brick tower", 77: "clock tower", 78: "bell tower",
+    79: "gear machine room", 81: "copper castle", 82: "hall with arches", 83: "hall with shield doors", 84: "hall with shield doors (copy)",
+    85: "boiler room", 88: "workshop interior", 90: "mushroom hut in blossoms",
+}
+_BD = {}
+
+
+def _pairs(pages_bytes, wpx):
+    """Most frequent horizontal index pairs of 8 bpp plane rows (every 2nd row)."""
+    c = Counter()
+    for y in range(0, len(pages_bytes) // wpx, 2):
+        row = pages_bytes[y * wpx:(y + 1) * wpx]
+        c.update(zip(row, row[1:]))
+    return c.most_common(4000)
+
+
+def _pal_candidates256(core, areas):
+    """[(label, PalRef, words)] rows 24..31 of the CLUTnn.GAM files of the given areas (all areas if empty), >= 100 distinct colours."""
+    out, seen = [], set()
+    for ld in (areas or [l for l in core.lists if l != "SYS"]):
+        for lst in core.lists.get(ld, []):
+            for r in lst:
+                if not (core.vram.is_grpx(r) and core.vram.is_clut_rec(r) and r["w"] == 256) or r["name"] in seen:
+                    continue
+                seen.add(r["name"])
+                d = core.get(r["name"])
+                for y in range(max(0, r["h"] - 8), r["h"]):
+                    ws = struct.unpack_from("<256H", d, y * 512)
+                    if len(set(ws)) >= 100 and ws not in out:
+                        from gfx_core import PalRef
+                        out.append(("%s row %d" % (r["name"], y), PalRef(r["name"], y * 256, 256), ws))
+    return out
+
+
+def backdrop(core, k):
+    """dict(pages, ref, label, score, name) when SYSTEM list k holds a room backdrop (8 bpp), else None.  Cached."""
+    if k in _BD:
+        return _BD[k]
+    _BD[k] = res = None
+    lst = core.lists["SYS"][k] if k < len(core.lists["SYS"]) else []
+    pg = [r for r in lst if core.vram.is_grpx(r) and not core.vram.is_clut_rec(r)]
+    if k >= 9 and pg and pg[0]["arg"] & 0xFFFF == 0x80 and pg[0]["h"] == 256:
+        d0 = core.get(pg[0]["name"])[:pg[0]["w"] * 512]
+        if len(d0) == pg[0]["w"] * 512 and sum(1 for b in d0[::7] if b) / (len(d0) / 7) >= 0.6:
+            wpx = pg[0]["w"] * 2
+            areas = sorted({key[3] for n in votes_names(core, pg) for key in sprite_votes(core).get(n, {})})
+            for cand in (areas, []):
+                best = None
+                m = _pairs(d0, wpx)
+                for label, ref, ws in _pal_candidates256(core, cand):
+                    rgb = [_w2rgb(w) for w in ws]
+                    s = sum(n * (abs(rgb[a][0] - rgb[b][0]) + abs(rgb[a][1] - rgb[b][1]) + abs(rgb[a][2] - rgb[b][2])) for (a, b), n in m) / max(1, sum(n for _, n in m))
+                    if best is None or s < best[0]:
+                        best = (s, label, ref)
+                if best and best[0] < 40:
+                    res = dict(pages=[r["name"] for r in pg], ref=best[2], label=best[1], score=best[0],
+                               name=BACKDROP_NAMES.get(k, "room backdrop"))
+                    break
+    _BD[k] = res
+    return res
+
+
+def votes_names(core, pg):
+    return [r["name"] for r in pg]
+
+
+def backdrop_lists(core):
+    return [k for k in range(9, len(core.lists["SYS"])) if backdrop(core, k)]
