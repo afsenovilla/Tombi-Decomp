@@ -378,5 +378,11 @@ textured polygons that sample the 4 bpp / 8 bpp room pages (`Bnnn`) and carry th
   (page x = (t&15)*64, y = (t>>4&1)*256, mode bits 7-8; rooms use 4 bpp, no offset needed). That is why B000 looked wrong with any single row.
 - Renderer: orthographic (x right, y down), polygons sorted by mean z far to near, word 0 transparent. Verified visually: AREA00 D001 (village,
   hills, river), AREA03 D004, AREA10 D303: natural colours. The in-game camera/perspective is not reproduced.
+- 3D export (`room.py --glb AREA00:1 out.glb`, `--glb-all DIR`; `extract_sprites` -> `rooms3d/`): binary glTF 2.0, one mesh, vertices not shared
+  (uv differs per polygon). Atlas = one 256x256 tile per distinct (tpage, clut) (4/8 bpp decoded with that CLUT, word 0 -> alpha 0), 8 tiles per row,
+  embedded PNG, uv = (tile origin + u + .5) / atlas size; alphaMode MASK, doubleSided, NEAREST. Quad -> tris (0,1,2) (1,3,2). `COLOR_0` = packet
+  rgb (0x80 = 1.0, so doubled, clamped) per vertex (flat = first colour). Position = (x, -y, -z) * 0.01 (y down -> up; z negated keeps handedness).
+  15 bpp polys (tpage mode 2) have no palette and are mapped to a transparent texel. Verified: AREA00:1 / AREA10:1 parse back (accessor counts,
+  min/max, uv in 0..1) and reproject upright and textured from a 35 degree yaw.
 - 27 of ~56 models render (AREA00 D001/D101/D201, AREA03, 04 D0-D3, 10, 12, 14 ...). The rest (small models AREA04/12 D4xx..DIxx, AREA13, some
   AREA14, AREA06 `D004.000` partly) use another sector/packet variant (counts do not parse); not decoded.

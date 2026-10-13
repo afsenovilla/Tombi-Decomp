@@ -70,6 +70,9 @@ def extract(img, out, log=print):
     print_("rendering the room backgrounds (WMD models with per polygon palettes) ...")
     nr = room.export_rooms(os.path.join(out, "rooms"), log=lambda m: None)
     print_("done: %d rooms under %s" % (nr, os.path.join(out, "rooms")))
+    print_("exporting the room models as 3D (glTF .glb, open in Blender / Windows 3D Viewer) ...")
+    ng = room.export_glb(os.path.join(out, "rooms3d"), log=lambda m: None)
+    print_("done: %d models under %s" % (ng, os.path.join(out, "rooms3d")))
 
 
 def gui():
