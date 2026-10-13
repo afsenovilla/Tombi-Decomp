@@ -1,4 +1,7 @@
-/* score 70 (n73): block-local `short t; unsigned short w;` per arm (x001 form) fixes the size but flips a/b (a 48 refs/396 vs
+/* score 54 (n77): `{ int by = b->y.p.whole; ... }` temp for the D_1F8001D2-path compare fixes +0x578 (b->y a0, a->y v1).
+   Left: q/r copy a3, sabs v0/v1, d v1 (ours a2) and t/w regs in the D_1F8001D2 block (game t a2 untied from the lhu,
+   w a1 untied from andi); brute-forced d/t/w types x block/function scope: function-scope t/w wrecks global alloc (126+).
+   Older: score 70 (n73): block-local `short t; unsigned short w;` per arm (x001 form) fixes the size but flips a/b (a 48 refs/396 vs
    b 46/381, game b first); a `do { b->velX = dx; } while (0);` (debt: loop-depth weighted ref) puts b first again.
    Left (same as x001/wip/func_801244A0.c): r a1 vs a3, sabs result v0/v1, +0x4e8 lh a0/v1 swap, t/w block regs
    (game t = a2 untied from the b->h lhu, w = a1; int/unsigned short function-scope t, int w, w copy: no gain).
@@ -114,7 +117,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
                 else a->h->p.whole += s2;
                 return 3;
             }
-            if ((-(s2 + -4) + b->y.p.whole) < a->y.p.whole - (a->box3 - a->box2)) return 3;
+            { int by = b->y.p.whole; if ((-(s2 + -4) + by) < a->y.p.whole - (a->box3 - a->box2)) return 3; }
             if (D_8009D2C3 & 0x40) {
                 if (D_1F8001D2 != 0) {
                     short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
