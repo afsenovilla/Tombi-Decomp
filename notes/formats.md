@@ -384,5 +384,8 @@ textured polygons that sample the 4 bpp / 8 bpp room pages (`Bnnn`) and carry th
   rgb (0x80 = 1.0, so doubled, clamped) per vertex (flat = first colour). Position = (x, -y, -z) * 0.01 (y down -> up; z negated keeps handedness).
   15 bpp polys (tpage mode 2) have no palette and are mapped to a transparent texel. Verified: AREA00:1 / AREA10:1 parse back (accessor counts,
   min/max, uv in 0..1) and reproject upright and textured from a 35 degree yaw.
-- 27 of ~56 models render (AREA00 D001/D101/D201, AREA03, 04 D0-D3, 10, 12, 14 ...). The rest (small models AREA04/12 D4xx..DIxx, AREA13, some
-  AREA14, AREA06 `D004.000` partly) use another sector/packet variant (counts do not parse); not decoded.
+- All 66 room models of the 17 areas render (`--all` and `--glb-all`: 66/66; the earlier 27 are byte-identical). There was no second packet
+  variant: the container is `[u32 N][u32 off * N]` with NO terminator (sector i ends at off[i+1], the last at the file end). The old parser read
+  N+1 offsets, so with N = 1 (small models: AREA04/12 D4xx..DIxx, AREA13 D102, some AREA14) it took the first sector's `u32 count` as the end
+  offset, and for the last sector of larger models (AREA03 D105 etc.) it cut the sector short. The small models are single objects (plants,
+  props), not room slices.

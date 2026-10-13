@@ -6,7 +6,7 @@
   tools/room.py --glb AREA00:1 OUT.glb  3D export (glTF 2.0 binary, one embedded texture atlas, vertex colours, Y up) for Blender / 3D Viewer
   tools/room.py --glb-all DIR           every room -> DIR/AREAnn_Dxxx.glb
 
-A WMD is a u32 table container (N sectors, vertical slices of the room).  Every sector = 4 groups `u32 count` + `count` GPU-like
+A WMD is a u32 table container ([N][off * N], no terminator; N sectors, vertical slices of the room).  Every sector = 4 groups `u32 count` + `count` GPU-like
 packets (flat tri, flat quad, gouraud tri, gouraud quad), then 16 B zero padding.  Packet: `u16 clut, u16 tpage, r g b cmd`
 (cmd bit 3 = quad, bit 4 = gouraud: 2 (tri) / 3 (quad) more `r g b cmd` words follow), then 3/4 vertices `s16 x, y, z, u8 u, v`.
 clut / tpage are real GPU words (4 bpp 16-colour palettes `x = (c & 63) * 16`, `y = c >> 6`, mode bits 7-8 of tpage), so the per polygon
@@ -28,8 +28,8 @@ def parse_wmd(d):
 def parse_wmd_ex(d):
     """Like parse_wmd, plus the per vertex colours: (clut, tpage, cmd, verts, [(r, g, b)...])."""
     n = struct.unpack_from("<I", d, 0)[0]
-    o = list(struct.unpack_from("<%dI" % (n + 1), d, 4))
-    o[-1] = o[-1] or len(d)
+    # N sector offsets (no terminator: with N = 1 the table is 8 bytes and sector 0 starts right after it); last sector runs to the end
+    o = list(struct.unpack_from("<%dI" % n, d, 4)) + [len(d)]
     out = []
     for i in range(n):
         s = d[o[i]:o[i + 1]]
