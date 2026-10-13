@@ -29,7 +29,7 @@ STATIC = [
 ]
 # 4 bpp font/HUD sheet of the title list, one tile per palette of the 16 x n strips that come with it
 FONT_SHEET = ("title_font_sheet", "SYSTEM/A00204.000", 64, ["SYSTEM/A00205.000", "SYSTEM/A00206.000"], (0, 0, 256, 160))
-# "NOW LOADING": SYSTEM/A00900.000 (SYS list 9, 256 x 72, 4 bpp at VRAM 0,0); the last row (y 71) holds 3 palettes of 16 words (at word 16, 32, 48 of the row)
+# "NOW LOADING" (UiSpriteDef 0 = {0,0,112,71, clut (16,71)} -> the first embedded palette is the one the game uses): SYSTEM/A00900.000 (SYS list 9, 256 x 72, 4 bpp at VRAM 0,0); the last row (y 71) holds 3 palettes of 16 words (at word 16, 32, 48 of the row)
 NOW_LOADING = ("now_loading", "SYSTEM/A00900.000", 64, "SYSTEM/A00900.000", 71 * 64 + 16, (0, 0, 256, 64))
 # "TRY AGAIN": sprites 1 (184,192 40x16) and 2 (184,208 56x16) of the UiSpriteDef table (0x80078808) in SYSTEM/A10003.GAM; CLUT (352,509) = row 29, words 224..239 of the area CLUT strips
 TRY_AGAIN = ("try_again", "SYSTEM/A10003.GAM", 64, "AREA00/CLUT01.GAM", 29 * 256 + 224, (184, 192, 56, 32))

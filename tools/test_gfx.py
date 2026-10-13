@@ -36,6 +36,40 @@ class T(unittest.TestCase):
         r = {x.label.split()[1]: x for x in self.core.surface_for(("ui", 1)).rects}
         self.assertEqual(r["TRY"].pal.key(), ("AREA00/CLUT01.GAM", 29 * 256 + 224, 16))
 
+    def test_palette_choice(self):
+        c, G = self.core, self.G
+        for it in (("screen", "now_loading"), ("screen", "title_landscape"), ("screen", "backdrop_L9")):
+            try:
+                s = c.surface_for(it)
+            except G.CoreError:
+                continue
+            gr = c.palette_groups(s)
+            self.assertTrue(gr and gr[0][0] == G.tr("pg.inferred"))
+            self.assertTrue(callable(gr[-1][1]))
+            files = gr[-1][1]()
+            self.assertTrue(files and all(r.n == (16 if s.bpp == 4 else 256) for _, rows in files for _, r in rows))
+        s = c.surface_for(("screen", "now_loading"))
+        emb = [r for g, items in c.palette_groups(s) if not callable(items) for l, r in items if r.file == "SYSTEM/A00900.000"]
+        self.assertGreaterEqual(len(emb), 3)
+        other = emb[1] if emb[1] != s.pal else emb[2]
+        s.choose(other)
+        self.assertEqual(c.surface_for(("screen", "now_loading")).pal, other)
+        self.assertEqual(c.used_palette("SYSTEM/A00900.000"), other)
+        s2 = c.surface_for(("screen", "now_loading"))
+        s2.choose(s2.inferred)
+        self.assertNotIn("SYSTEM/A00900.000", c.pal_choice)
+        self.assertEqual(c.surface_for(("screen", "now_loading")).pal, s2.inferred)
+
+
+    def test_backdrop_layout_and_fill(self):
+        c = self.core
+        s = c.surface_for(("screen", "backdrop_L77"))
+        self.assertEqual(s.layers[0][4:], (0, 64))        # the 64 px strip of page 1 goes at the left edge
+        s22 = c.surface_for(("screen", "backdrop_L22"))
+        ws = c.pal_words(s22.pal)
+        pl = bytes(s22.plane())
+        self.assertFalse(any(ws[i] == 0 for i in set(b for y in range(240) for b in pl[y * s22.W:y * s22.W + 320]) if i))
+
     def test_backdrops(self):
         import palinfer
         ks = palinfer.backdrop_lists(self.core)

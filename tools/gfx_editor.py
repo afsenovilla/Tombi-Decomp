@@ -239,12 +239,21 @@ class App:
         ttk.Label(right, text=tr("l.palette"), font=("TkDefaultFont", 9, "bold")).pack(anchor="w", padx=4, pady=(4, 0))
         pf = ttk.Frame(right)
         pf.pack(fill="both", expand=True, padx=4)
+        self.pal_now = tk.Canvas(right, height=14, bg="#808080", highlightthickness=0)
+        self.pal_now.pack(fill="x", padx=4, pady=(2, 0))
+        self.pal_name = tk.StringVar()
+        ttk.Label(right, textvariable=self.pal_name, wraplength=320, justify="left").pack(anchor="w", padx=4)
+        ttk.Label(right, text=tr("l.palhint"), foreground="#555").pack(anchor="w", padx=4)
         self.pal_list = ttk.Treeview(pf, show="tree", selectmode="browse", height=8)
         ps = ttk.Scrollbar(pf, command=self.pal_list.yview)
         self.pal_list.configure(yscrollcommand=ps.set)
         self.pal_list.pack(side="left", fill="both", expand=True)
         ps.pack(side="right", fill="y")
         self.pal_list.bind("<<TreeviewSelect>>", self.on_pick_palette)
+        self.pal_list.bind("<<TreeviewOpen>>", self.on_open_group)
+        self.canvas.bind("<Up>", lambda e: self.cycle_palette(-1))
+        self.canvas.bind("<Down>", lambda e: self.cycle_palette(1))
+        self.canvas.bind("<Enter>", lambda e: self.canvas.focus_set())
         self.pal_refs = {}
         ttk.Label(right, text=tr("l.edit"), font=("TkDefaultFont", 9, "bold")).pack(anchor="w", padx=4, pady=(6, 0))
         self.swatch = tk.Canvas(right, width=16 * 18 + 2, height=16 * 18 + 2, bg="#808080", highlightthickness=0)
@@ -402,24 +411,52 @@ class App:
 
     def fill_palettes(self):
         self.pal_list.delete(*self.pal_list.get_children())
-        self.pal_refs, self._pal_imgs = {}, []
+        self.pal_refs, self._pal_imgs, self._lazy = {}, [], {}
         s = self.surf
+        self.update_pal_now()
         if s.bpp == 16:
             return
         cur = None
-        for label, ref in s.candidates():
-            iid = self.pal_list.insert("", "end", text=label, image=self.strip(ref))
-            self.pal_refs[iid] = ref
-            if ref == s.pal:
-                cur = iid
+        for gl, items in self.core.palette_groups(s):
+            g = self.pal_list.insert("", "end", text=gl, open=False)
+            if callable(items):
+                self._lazy[g] = items
+                self.pal_list.insert(g, "end", text="…")
+                continue
+            for label, ref in items:
+                iid = self.pal_list.insert(g, "end", text=label, image=self.strip(ref))
+                self.pal_refs[iid] = ref
+                if ref == s.pal and cur is None:
+                    cur = iid
         if s.pal and cur is None:
-            cur = self.pal_list.insert("", 0, text="%s  %d" % (s.pal.file.split("/")[-1], s.pal.off // (16 if s.pal.n == 16 else 256)), image=self.strip(s.pal))
+            g = self.pal_list.insert("", 0, text=tr("pg.inferred"), open=True)
+            cur = self.pal_list.insert(g, "end", text=self.core._ref_label(s.pal), image=self.strip(s.pal))
             self.pal_refs[cur] = s.pal
         if cur:
-            self._quiet = True
-            self.pal_list.selection_set(cur)
-            self.pal_list.see(cur)
-            self.root.after(50, lambda: setattr(self, "_quiet", False))
+            self.pal_list.item(self.pal_list.parent(cur), open=True)
+            self._select_quiet(cur)
+
+    def _select_quiet(self, iid):
+        self._quiet = True
+        self.pal_list.selection_set(iid)
+        self.pal_list.see(iid)
+        self.root.after(50, lambda: setattr(self, "_quiet", False))
+
+    def on_open_group(self, _):
+        g = self.pal_list.focus()
+        fn = self._lazy.pop(g, None)
+        if not fn:
+            return
+        self.pal_list.delete(*self.pal_list.get_children(g))
+        for item in fn():
+            if isinstance(item[1], list):       # (file, rows): a sub-group filled when opened
+                f = self.pal_list.insert(g, "end", text=item[0], open=False)
+                self._lazy[f] = (lambda rows=item[1]: rows)
+                self.pal_list.insert(f, "end", text="…")
+            else:
+                label, ref = item
+                iid = self.pal_list.insert(g, "end", text=label, image=self.strip(ref))
+                self.pal_refs[iid] = ref
 
     def strip(self, ref):
         cols = self.core.pal_rgb(ref)
@@ -432,16 +469,48 @@ class App:
         self._pal_imgs.append(ph)
         return ph
 
+    def update_pal_now(self):
+        s = self.surf
+        self.pal_now.delete("all")
+        if not s or s.bpp == 16 or not s.pal:
+            self.pal_name.set("")
+            return
+        cols = self.core.pal_rgb(s.pal)[:: (1 if s.pal.n <= 16 else 16)]
+        self.pal_now.update_idletasks()
+        w = max(self.pal_now.winfo_width(), 100) / len(cols)
+        for i, c in enumerate(cols):
+            self.pal_now.create_rectangle(i * w, 0, (i + 1) * w, 14, fill="#%02x%02x%02x" % tuple(c), outline="")
+        self.pal_name.set(tr("l.nowpal", self.core._ref_label(s.pal) + (tr("l.autotag") if s.pal == s.inferred else "")))
+
     def on_pick_palette(self, _):
         if getattr(self, "_quiet", False) or not self.surf:
             return
         sel = self.pal_list.selection()
-        if sel and sel[0] in self.pal_refs:
-            self.surf.pal = self.pal_refs[sel[0]]
-            if self.item and self.item[0] == "page":
-                self.core.pal_choice[self.item[1]] = self.surf.pal
+        if not sel:
+            return
+        if sel[0] in self.pal_refs:
+            self.surf.choose(self.pal_refs[sel[0]])
             self.redraw()
             self.draw_swatches()
+            self.update_pal_now()
+
+    def cycle_palette(self, d):
+        if not self.surf or self.surf.bpp == 16 or not self.pal_refs:
+            return "break"
+        order = [i for i in self._leaves() if i in self.pal_refs]
+        sel = self.pal_list.selection()
+        k = order.index(sel[0]) if sel and sel[0] in order else -1
+        iid = order[(k + d) % len(order)]
+        self.pal_list.item(self.pal_list.parent(iid), open=True)
+        self.pal_list.selection_set(iid)
+        self.pal_list.see(iid)
+        return "break"
+
+    def _leaves(self, p=""):
+        out = []
+        for c in self.pal_list.get_children(p):
+            out += self._leaves(c) if self.pal_list.get_children(c) else [c]
+        return out
 
     def redraw(self):
         s = self.surf

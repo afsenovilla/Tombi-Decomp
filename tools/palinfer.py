@@ -338,11 +338,45 @@ def backdrop(core, k):
                     if best is None or s < best[0]:
                         best = (s, label, ref)
                 if best and best[0] < 40:
+                    _fill_missing(core, best[2], [(core.get(r["name"])[:r["w"] * 512], r["w"] * 2) for r in pg])
                     res = dict(pages=[r["name"] for r in pg], ref=best[2], label=best[1], score=best[0],
                                name=BACKDROP_NAMES.get(k, "room backdrop"))
                     break
     _BD[k] = res
     return res
+
+
+def _fill_missing(core, ref, pages):
+    """Some room CLUT rows leave a whole 16 colour block empty (L22 forest: indices 176..191, filled at run time by data that is on no CLUT of the
+    disc).  Those pixels would show as holes: estimate each missing colour as the mean of the colours its neighbour pixels have."""
+    ws = core.pal_words(ref)
+    used = Counter()
+    for d0, wpx in pages:
+        used.update(d0)
+    miss = [i for i in range(1, 256) if ws[i] == 0 and used.get(i)]
+    if not miss:
+        return
+    ms = set(miss)
+    acc = {i: [0, 0, 0, 0] for i in miss}
+    for d0, wpx in pages:
+        for y in range(0, len(d0) // wpx):
+            row = d0[y * wpx:(y + 1) * wpx]
+            for a, b in zip(row, row[1:]):
+                for u, v in ((a, b), (b, a)):
+                    if u in ms and v not in ms and ws[v]:
+                        r, g, bl = _w2rgb(ws[v])
+                        t = acc[u]
+                        t[0] += r; t[1] += g; t[2] += bl; t[3] += 1
+    fill = {}
+    for i, t in acc.items():
+        if t[3]:
+            fill[i] = ((t[0] // t[3]) >> 3) | (((t[1] // t[3]) >> 3) << 5) | (((t[2] // t[3]) >> 3) << 10) or 1
+    if fill:
+        for i in miss:      # no known neighbour at all: the mean of the other estimates
+            if i not in fill:
+                v = list(fill.values())
+                fill[i] = (sum(x & 31 for x in v) // len(v)) | ((sum(x >> 5 & 31 for x in v) // len(v)) << 5) | ((sum(x >> 10 & 31 for x in v) // len(v)) << 10) or 1
+        core.palette_fills[ref.key()] = fill
 
 
 def votes_names(core, pg):

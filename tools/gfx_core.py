@@ -193,7 +193,7 @@ def screens_list():
 
 
 EXTRA_SCREENS = [   # (name, page, load list, index, palette PalRef args (file, first word, count), crop)
-    # NOW LOADING: A00900 (SYS list 9, 256 x 72, 4 bpp) holds its own palettes in its last row (y 71: 3 x 16 words at 16, 32, 48)
+    # NOW LOADING: A00900 (SYS list 9, 256 x 72, 4 bpp) holds its own palettes in its last row (y 71: 3 x 16 words at 16, 32, 48); UiSpriteDef 0 (w112 h71) names CLUT (16,71) = the first one (ground truth); the TRY AGAIN CLUT gives the same letters but muddy pigs/block
     ("now_loading", "SYSTEM/A00900.000", "SYS", 9, ("SYSTEM/A00900.000", 71 * 64 + 16, 16), (0, 0, 256, 64)),
     # TRY AGAIN: the two UiSpriteDef sprites (184,192 40x16 and 184,208 56x16) of the HUD page; CLUT (352,509) = row 29 of the area CLUT strips
     ("try_again", "SYSTEM/A10003.GAM", "SYS", 0, ("AREA00/CLUT01.GAM", 29 * 256 + 224, 16), (184, 192, 56, 32)),
@@ -209,6 +209,7 @@ class Core:
         self.edits = {}            # resource name (or "<wpp file>#<frame>") -> bytes
         self.undo_stack = []       # [{key: previous bytes or None}]
         self.version = 0
+        self.palette_fills = {}    # PalRef key -> {index: estimated word} for colours missing from a backdrop CLUT
         self.pal_choice = {}       # page name -> PalRef last used (saved with the mod)
         self.lists = A.load_lists()
         if not self.lists:
@@ -331,7 +332,13 @@ class Core:
     def pal_words(self, ref):
         d = self.get(ref.file)
         n = min(ref.n, max(0, len(d) // 2 - ref.off))
-        return list(struct.unpack_from("<%dH" % n, d, ref.off * 2)) + [0] * (ref.n - n)
+        ws = list(struct.unpack_from("<%dH" % n, d, ref.off * 2)) + [0] * (ref.n - n)
+        fill = self.palette_fills.get(ref.key())      # backdrop colours the CLUT file leaves empty (see palinfer.backdrop)
+        if fill:
+            for i, v in fill.items():
+                if i < len(ws) and ws[i] == 0:
+                    ws[i] = v
+        return ws
 
     def pal_rgb(self, ref):
         import vram
@@ -392,6 +399,89 @@ class Core:
                                 out.append((tr("pal.sub", short, y, s) if per > 1 else tr("pal.row", short, y), ref))
         return out
 
+    def _rows_of(self, rec, bpp):
+        """[(label, PalRef)] of one CLUT record for a 4 / 8 bpp view (8 bpp: 256 colour rows; 4 bpp: non-empty 16 colour sub-palettes)."""
+        w, h, name = rec["w"], rec["h"], rec["name"]
+        short = name.rsplit("/", 1)[-1]
+        out = []
+        if bpp == 8:
+            if w == 256:
+                out = [(tr("pal.row", short, y), PalRef(name, y * 256, 256)) for y in range(h)]
+        else:
+            per = w // 16
+            for y in range(h):
+                for k in range(per):
+                    ref = PalRef(name, y * w + k * 16, 16)
+                    if any(self.pal_words(ref)):
+                        out.append((tr("pal.sub", short, y, k) if per > 1 else tr("pal.row", short, y), ref))
+        return out
+
+    def palette_groups(self, s):
+        """Every palette usable for the 4 / 8 bpp surface `s`: [(group label, [(label, PalRef)] or a callable returning [(file, [(label, PalRef)])])]:
+        the inferred one, CLUT records of the list, palettes embedded in the page, CLUT rows resident in VRAM at that point,
+        and (lazily) every CLUT file of the disc grouped by file."""
+        bpp = s.bpp
+        if bpp == 16:
+            return []
+        groups, seen = [], set()
+        if s.inferred:
+            groups.append((tr("pg.inferred"), [(tr("pal.inf", self._ref_label(s.inferred)), s.inferred)]))
+            seen.add(s.inferred)
+
+        def add(label, items):
+            items = [(l, r) for l, r in items if r not in seen]
+            seen.update(r for l, r in items)
+            if items:
+                groups.append((label, items))
+        add(tr("pg.list"), self.palette_candidates(bpp, s.ld, s.idx))
+        emb = []
+        if bpp == 4 and s.layers:
+            name = s.layers[0][0]
+            try:
+                p = self.page_info(name)
+                d = self.get(name)
+                w, h = p["w"], p["h"]
+                if h >= 9 and not any(d[(h - 3) * w * 2:(h - 1) * w * 2]):
+                    for k in range(w // 16):
+                        ref = PalRef(name, (h - 1) * w + k * 16, 16)
+                        if any(self.pal_words(ref)):
+                            emb.append((tr("pal.emb", name.rsplit("/", 1)[-1], h - 1, k), ref))
+            except Exception:
+                pass
+        add(tr("pg.embedded"), emb)
+        res = []
+        order = [("SYS", 0)]
+        if s.ld != "SYS" and s.ld in self.lists:
+            order += [(s.ld, 0)] + [("SYS", k) for k in self.vram.sys_lists_for(s.ld, s.idx)] + [(s.ld, s.idx)]
+        elif s.idx:
+            order.append(("SYS", s.idx))
+        done = set()
+        for l, k in order:
+            if (l, k) in done or k >= len(self.lists[l]):
+                continue
+            done.add((l, k))
+            for i, r, b, cl in self.grpx(self.lists[l][k]):
+                if b == 16:
+                    res += self._rows_of(r, bpp)
+        add(tr("pg.resident"), res)
+
+        def disc():
+            out, names = [], set()
+            for l in self.lists:
+                for lst in self.lists[l]:
+                    for i, r, b, cl in self.grpx(lst):
+                        if b == 16 and r["name"] not in names:
+                            names.add(r["name"])
+                            rows = self._rows_of(r, bpp)
+                            if rows:
+                                out.append((r["name"], rows))
+            return out
+        groups.append((tr("pg.disc"), disc))
+        return groups
+
+    def _ref_label(self, ref):
+        return "%s  %s" % (ref.file.rsplit("/", 1)[-1], "w%d" % ref.off)
+
     # ---- surfaces
     def surface_for(self, item):
         """Surface for ('page', name, ld, idx) | ('screen', name) | ('ui', id) | ('wppframe', file, n) | ('clut', name)."""
@@ -422,14 +512,15 @@ class Core:
         s.W, s.H = s.crop[2], s.crop[3]
         s.ld, s.idx = ld, idx
         s.opaque = False
+        s.key = name
         if p["bpp"] == 8 and p["clut"]:
-            s.pal = self.pal_choice.get(name) or PalRef(p["clut"]["name"], 0, 256)
+            s.pal = PalRef(p["clut"]["name"], 0, 256)
         elif p["bpp"] == 8 and ld == "SYS" and self.backdrop(idx):
             bd = self.backdrop(idx)
-            s.pal = self.pal_choice.get(name) or bd["ref"]
+            s.pal = bd["ref"]
             s.pal_note = tr("l.deduced", bd["label"], "backdrop")
         elif p["bpp"] == 4:
-            s.pal = self.pal_choice.get(name) or pal
+            s.pal = pal
             if not s.pal:
                 try:
                     import palinfer
@@ -440,8 +531,8 @@ class Core:
                     s.pal, s.pal_note = g.ref, tr("l.deduced", g.label, g.method)
                 else:
                     s.pal = (s.candidates()[:1] or [(None, None)])[0][1]
-        if pal:
-            s.pal = pal
+        s.inferred = s.pal
+        s.apply_choice()
         if name == UI_PAGE:
             s.rects = self.ui_rects()
             if crop:    # rects are in page coordinates; the surface shows the crop, so move them to its origin and drop the outside ones
@@ -474,6 +565,9 @@ class Core:
         s.crop = sc["crop"] or (0, 0, full_w, full_h)
         s.W, s.H = s.crop[2], s.crop[3]
         s.pal = PalRef(sc["clut"], 0, 256)
+        s.key = sc["pages"][0][0]
+        s.inferred = s.pal
+        s.apply_choice()
         s.opaque = sc["opaque"]
         s.ld, s.idx = "SYS", 0
         s.pageinfo = self.page_info(sc["pages"][0][0])
@@ -485,14 +579,34 @@ class Core:
         if not bd:
             raise err("c.badkind", "backdrop_L%d" % k)
         recs = [self.page_info(n, "SYS", k) for n in bd["pages"]]
-        x0 = min(p["x"] for p in recs)
         s = Surface(self, "backdrop_L%d" % k, 8)
-        s.layers = [(p["name"], (p["x"] - x0) * 2, p["w"], p["h"]) for p in recs]
-        s.crop = (0, 0, max((p["x"] - x0 + p["w"]) * 2 for p in recs), max(p["h"] for p in recs))
+        # The 320 px picture is stored as page 0 (256 px) + the first 64 px of page 1: the game draws that strip at the LEFT edge.  When page 0
+        # is narrower than the picture, the sheet is rebuilt as [strip of page 1][page 0][rest of page 1][other pages] so the picture reads continuous.
+        p0 = recs[0]
+        strip = 320 - p0["w"] * 2
+        if len(recs) > 1 and 0 < strip < recs[1]["w"] * 2:
+            p1 = recs[1]
+            x = strip
+            s.layers = [(p1["name"], 0, p1["w"], p1["h"], 0, strip), (p0["name"], x, p0["w"], p0["h"])]
+            x += p0["w"] * 2
+            s.layers.append((p1["name"], x, p1["w"], p1["h"], strip, p1["w"] * 2 - strip))
+            x += p1["w"] * 2 - strip
+            for p in recs[2:]:
+                s.layers.append((p["name"], x, p["w"], p["h"]))
+                x += p["w"] * 2
+        else:
+            x, s.layers = 0, []
+            for p in recs:
+                s.layers.append((p["name"], x, p["w"], p["h"]))
+                x += p["w"] * 2
+        s.crop = (0, 0, x, max(p["h"] for p in recs))
         s.W, s.H = s.crop[2], s.crop[3]
-        s.pal = self.pal_choice.get(recs[0]["name"]) or bd["ref"]
+        s.pal = bd["ref"]
+        s.key = recs[0]["name"]
+        s.inferred = s.pal
+        s.apply_choice()
         s.pal_note = tr("l.deduced", bd["label"], "backdrop")
-        s.opaque = False
+        s.opaque = True            # room pictures are opaque: palette word 0 is black
         s.pageinfo = recs[0]
         s.ld, s.idx = "SYS", k
         return s
@@ -842,6 +956,23 @@ class Surface:
         self.header = 0
         self.ld, self.idx = "SYS", 0
         self.pageinfo = None
+        self.key = None            # Core.pal_choice key (name of the first page)
+        self.inferred = None       # the palette the editor deduced (before any manual choice)
+
+    def apply_choice(self):
+        c = self.core.pal_choice.get(self.key)
+        if c and self.bpp != 16 and c.n == (16 if self.bpp == 4 else 256):
+            self.pal = c
+
+    def choose(self, ref):
+        """Manual palette choice (remembered per entry; choosing the inferred one goes back to automatic)."""
+        self.pal = ref
+        if self.key is None:
+            return
+        if ref == self.inferred:
+            self.core.pal_choice.pop(self.key, None)
+        else:
+            self.core.pal_choice[self.key] = ref
 
     def candidates(self):
         if self.bpp == 16:
@@ -850,25 +981,27 @@ class Surface:
 
     def _layer_planes(self):
         out = []
-        for name, x0, w, h in self.layers:
+        for lay in self.layers:
+            name, x0, w, h = lay[:4]
             d = self.core.get(name)
             if self.header:
                 d = d[self.header:]
-            out.append((name, x0, w, h, decode_plane(d, w, h, self.bpp)))
+            full = w * (4 if self.bpp == 4 else 2 if self.bpp == 8 else 1)
+            sx, sw = lay[4:6] if len(lay) > 4 else (0, full)     # optional source column window (pixels): a layer can show part of a page
+            out.append((name, x0, w, h, decode_plane(d, w, h, self.bpp), sx, sw))
         return out
 
     def plane(self):
         """The cropped W x H plane (bytearray of indices, or array('H') for 16 bpp)."""
         cx, cy, cw, ch = self.crop
         lp = self._layer_planes()
-        pw = lambda l: l[2] * (4 if self.bpp == 4 else 2 if self.bpp == 8 else 1)
-        full_w = max(l[1] + pw(l) for l in lp)
+        full_w = max(l[1] + l[6] for l in lp)
         full_h = max(l[3] for l in lp)
         full = (array("H", bytes(2 * full_w * full_h)) if self.bpp == 16 else bytearray(full_w * full_h))
-        for name, x0, w, h, pl in lp:
-            wp = pw((name, x0, w))
+        for name, x0, w, h, pl, sx, sw in lp:
+            wp = w * (4 if self.bpp == 4 else 2 if self.bpp == 8 else 1)
             for y in range(h):
-                full[y * full_w + x0:y * full_w + x0 + wp] = pl[y * wp:(y + 1) * wp]
+                full[y * full_w + x0:y * full_w + x0 + sw] = pl[y * wp + sx:y * wp + sx + sw]
         out = full[:0]
         rows = [full[(cy + y) * full_w + cx:(cy + y) * full_w + cx + cw] for y in range(ch)]
         res = (array("H") if self.bpp == 16 else bytearray())
@@ -881,15 +1014,18 @@ class Surface:
         cx, cy, cw, ch = self.crop
         X, Y = x + cx, y + cy
         changes = {}
-        for name, x0, lw, lh, pl in self._layer_planes():
+        touched = {}
+        for name, x0, lw, lh, pl, sx, sw in self._layer_planes():
             wp = lw * (4 if self.bpp == 4 else 2 if self.bpp == 8 else 1)
-            ax, bx = max(X, x0), min(X + w, x0 + wp)
+            ax, bx = max(X, x0), min(X + w, x0 + sw)
             ay, by = max(Y, 0), min(Y + h, lh)
             if ax >= bx or ay >= by:
                 continue
+            pl = touched.setdefault(name, pl)
             for yy in range(ay, by):
                 src = (yy - Y) * w + (ax - X)
-                pl[yy * wp + (ax - x0):yy * wp + (bx - x0)] = flat[src:src + (bx - ax)]
+                pl[yy * wp + sx + (ax - x0):yy * wp + sx + (bx - x0)] = flat[src:src + (bx - ax)]
+        for name, pl in touched.items():
             data = encode_plane(pl, self.bpp)
             if self.header:
                 data = self.core.get(name)[:self.header] + data
@@ -1062,6 +1198,9 @@ S_ES = {
     "c.nochanges": "No hay cambios que aplicar.", "c.needimage": "Hace falta la imagen original (.bin) para generar la ISO: ábrela en lugar de la carpeta.",
     "c.space": "Poco espacio libre: la ISO necesita unos {0} MB y hay {1} MB.", "c.mkfail": "mkpsxiso falló: {0}\n{1}",
     "c.bigimg": "La imagen ({0}x{1}) es mayor que el destino ({2}x{3}).",
+    "pg.inferred": "Deducida", "pg.list": "Registros CLUT de la lista actual", "pg.embedded": "Paletas incrustadas en la página",
+    "pg.resident": "Filas CLUT residentes en la VRAM", "pg.disc": "Todos los CLUT del disco (por archivo)", "pal.inf": "{0}  (deducida)",
+    "pal.emb": "{0}  fila {1} · paleta {2}", "l.nowpal": "Paleta: {0}", "l.autotag": "  (deducida)", "l.palhint": "Arriba/Abajo: cambiar de paleta",
     "pal.row": "{0}  fila {1}", "pal.sub": "{0}  fila {1} · paleta {2}",
     "t.screens": "Pantallas", "t.backdrops": "Fondos de sala (mapas)", "t.ui": "Interfaz / HUD", "t.uitable": "Tabla UiSpriteDef (MAIN0)", "t.hudpage": "(página HUD)", "t.pages": "Páginas por lista de carga",
     "t.list": "Lista {0}", "t.anims": "Animaciones (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
@@ -1082,6 +1221,9 @@ S_EN = {
     "c.nochanges": "There are no changes to apply.", "c.needimage": "The original image (.bin) is needed to build the ISO: open it instead of the folder.",
     "c.space": "Not enough free space: the ISO needs about {0} MB and {1} MB are free.", "c.mkfail": "mkpsxiso failed: {0}\n{1}",
     "c.bigimg": "The image ({0}x{1}) is larger than the target ({2}x{3}).",
+    "pg.inferred": "Inferred", "pg.list": "CLUT records of the current list", "pg.embedded": "Palettes embedded in the page",
+    "pg.resident": "CLUT rows resident in VRAM", "pg.disc": "All CLUTs on the disc (by file)", "pal.inf": "{0}  (inferred)",
+    "pal.emb": "{0}  row {1} · palette {2}", "l.nowpal": "Palette: {0}", "l.autotag": "  (inferred)", "l.palhint": "Up/Down: cycle palettes",
     "pal.row": "{0}  row {1}", "pal.sub": "{0}  row {1} · palette {2}",
     "t.screens": "Screens", "t.backdrops": "Room backdrops (maps)", "t.ui": "Interface / HUD", "t.uitable": "UiSpriteDef table (MAIN0)", "t.hudpage": "(HUD page)", "t.pages": "Pages by load list",
     "t.list": "List {0}", "t.anims": "Animations (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
