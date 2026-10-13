@@ -5,6 +5,67 @@ First step of the assets stage (PROGRESS.md, plan step 6). Tool: https://github.
 `/usr/local/go/bin/go build` (go 1.24; only deps cobra + yaml.v3; no `os/exec` or `net` use; its unit tests pass).
 Outputs went to `/tmp/tombatools_out` (nothing from the tool or the disc is in the repo).
 
+**Update (first assets block): WFM is now lossless.** With our fork (`/opt/psyq/tombatools-pal`, branch `pal`, commit `5e897a4`,
+based on upstream 003f6bd; not vendored here) `wfm decode` -> `wfm encode` is **byte-identical for 369/369** WFM files and the
+Spanish files decode with accents. See "WFM lossless workflow" below; the sections after it are the original evaluation of upstream.
+
+## WFM lossless workflow (fork `tombatools-pal`)
+Fork: `/opt/psyq/tombatools-pal` (git branch `pal`, commit `5e897a4`, on top of upstream `003f6bd`), MIT like upstream.
+It is a local clone, not published anywhere yet: **it should be offered upstream (hansbonini/tombatools) as a PR** (the changes are
+backwards compatible: the old re-authoring encoder still runs for YAML files without the new fields).
+
+Results (disc = PAL Spanish, `game/disc/fs`):
+- **Round trip: 369/369 byte-identical** (`tools/wfm.py --check`; also with `--fonts es` only). Before: 0/369.
+- **Unknown glyphs in the 41 Spanish `*S.WFM` files** (19 distinct files): `[80xx]` tokens **9,069 -> 22** (distinct files: 5,627 -> 18);
+  glyphs without a character: 0 of 2,476 (19 files). The 22 left are one phrase, "Zumo de plátano": the 8 px font has two different
+  bitmaps for `Z`, and text cannot say which one, so the second stays `[80xx]` (still lossless).
+- Other languages still show `[80xx]` for their own special letters (B D F G H I P W): only `es` was built. The round trip does not depend on it.
+- `[C0xx]` control codes stay as raw tokens (1,436 in the S files; C050, C056, C053, C06B... are the most frequent, meaning still unknown);
+  their bytes are preserved. Event titles in CFNT999S have no space glyphs in the data (`Pulseradelabuelo`): the original file has no space word,
+  so nothing is lost, there is simply nothing to recover.
+
+What the fork changes (about 600 lines, `pkg/lossless.go` is new):
+- `decode` also writes into `dialogues.yaml`: `header_padding`, `reserved` (the 128-byte block, hex), `trailing` (bytes after the last dialogue),
+  and `glyphs:` (the whole glyph table in file order: clut/height/width/handakuten, 4bpp bitmap as hex, and the recognised `char`).
+- `encode` uses those (if present) and rebuilds header, glyph table + pointers, dialogue pointers and the dialogue stream exactly (no padding invented).
+  Unknown characters are an error instead of being silently dropped.
+- Text rules for losslessness: `[80xx]` glyph index and `[C0xx]` (any `[XXXX]`) are raw words; a glyph is written as a character only if the encoder
+  resolves that character (for the dialogue `font_height`/`font_clut`) back to the same glyph index; `\n` = FFFD, `\n\n` = FFFB, and `[FFFD]`/`[FFFB]` when
+  that would be ambiguous; `terminator: 0` = dialogue without terminator (last one of a few files); text before a `box` keeps its order; text that YAML would
+  mangle (leading newlines) is written double-quoted.
+- `--fonts a,b` (names under `fonts/` or paths; env `TOMBATOOLS_FONTS`) selects the reference sets, no more hard-coded `fonts/br` (legacy encode
+  uses the first dir). Default: every set under `fonts/`. `0059_2.png` style names (suffix after `_`) allow two bitmaps for one character.
+- `fonts/es` (239 PNGs, 8/16/24 px): every glyph bitmap of the Spanish files named by code point, derived from the PAL files (glyph PNGs dumped,
+  the missing ones identified from the ASCII art and from the surrounding Spanish text). Added over eu/us: á é í ó ú Á É Í Ó Ú ñ ¿ ¡ à ª º Q q K Z ( ) / - "
+  a middle dot (U+00B7, the `...` dot) and a down-arrow icon (U+2B07). No `ü` occurs in the Spanish text.
+- Unit tests kept passing (`go test ./...`); new: `pkg/lossless_test.go` (synthetic WFM round trips with and without font mapping, text token rules).
+
+Using it from this repo (`tools/wfm.py`, Python 3, no Go source in the repo; `TOMBATOOLS` = path of the fork, default `/opt/psyq/tombatools-pal`;
+the binary is built with `go build` on first use or when the sources are newer):
+```
+tools/wfm.py --check                       # round trip all game/disc/fs WFM, prints "identical: 369/369" (exit 1 if not)
+tools/wfm.py --check game/disc/fs/AREA05   # or one dir / one file
+tools/wfm.py decode game/disc/fs/AREA05/MFNT050S.WFM -o build/wfm   # -> build/wfm/AREA05/MFNT050S/{dialogues.yaml,glyphs/}
+tools/wfm.py decode                        # the whole tree into build/wfm (do not commit it)
+tools/wfm.py encode build/wfm/AREA05/MFNT050S/dialogues.yaml out.WFM
+tools/wfm.py decode ... --fonts es         # only the Spanish reference set (default: all sets)
+```
+
+Decoded Spanish samples (`AREA05/MFNT050S.WFM`; before: `RAT[8072]N`, `rat[8076]n`, `[8053]Guardar`, `S[805C]`):
+```yaml
+- text: |+
+    RATÓN DESAPARECIDO
+    Ha desaparecido un ratón.
+    Ha desaparecido un ratoncito.[C052]⧗
+```
+```yaml
+- text: "Ciudad Baco[C052]⧗\n\n[PROMPT]¿Guardar DATOS?  \nSí⮊✕ No⮊○⧗\n\n"
+```
+
+Not done: other languages' glyphs, meaning of the `[C0xx]` codes, GAM bit-exact packing (below), anything outside WFM.
+
+# Original evaluation of upstream (before the fork)
+
 ## What the tool covers
 | Command | Purpose |
 |---|---|
@@ -80,10 +141,10 @@ contents (unpack OK, inner format unknown), `EXE/MAIN*.EXE` and the inner struct
 ## Plan to adapt for PAL
 1. Keep our own copy (outside the tool): write a thin Python script in `tools/` (later) that calls
    `tombatools` for `gam unpack` and `cd dump` only; do not vendor its source.
-2. Fix the text side: build a per-file glyph table by matching glyph bitmaps against the `us/br/eu` fonts and adding
+2. (DONE in the fork, see top) Fix the text side: build a per-file glyph table by matching glyph bitmaps against the `us/br/eu` fonts and adding
    Spanish ones (á é í ó ú ñ ¿ ¡ Ó Í ...) as new reference PNGs (`00E1.png`, `00F1.png`, ... named by codepoint);
    add a `fonts/es` set and make the font dir and encode dir selectable (patch needed: hard-coded `fonts/br`).
-3. Make WFM encode lossless: keep unmapped `[80xx]` as raw glyph indices (or take the glyph table from the original
+3. (DONE in the fork, 369/369) Make WFM encode lossless: keep unmapped `[80xx]` as raw glyph indices (or take the glyph table from the original
    file and only rewrite the dialogue stream), and emit unknown `[C0xx]` verbatim. Then the target is
    decode+encode == original for all 369 WFM; check with `cmp` in a script.
 4. GAM: implement the original LZ compressor variant so `pack(unpack(x)) == x` (try matching the greedy/lazy
