@@ -55,7 +55,7 @@ STEPS = [   # (key, group, label es, description)
     ("banks", "Audio", "Bancos de sonido (WAV)", "VAB samples (OUT/sound/bank)"),
     ("music", "Audio", "Musica (MIDI)", "SEQ sequences (OUT/sound/music)"),
     ("movie_audio", "Audio", "Audio de peliculas (WAV)", "XA tracks (OUT/sound/movie_audio)"),
-    ("videos", "Video", "Videos (poster/mp4)", "posters + mp4 if ffmpeg (OUT/video)"),
+    ("videos", "Video", "Videos (AVI/poster)", "AVI MJPEG+PCM (needs Pillow), poster PNG, mp4 if ffmpeg (OUT/video)"),
 ]
 STEP_KEYS = [k for k, _, _, _ in STEPS]
 
@@ -161,7 +161,7 @@ class Extractor:
         self._setup()
         import importlib
         strmod = importlib.import_module("str")
-        self.log("video: poster frame of every movie and, if ffmpeg is in PATH, mp4 ...")
+        self.log("video: poster + AVI (MJPEG + PCM, ~0.07 s/frame, ~10 min for all 30 movies) of every movie and, if ffmpeg is in PATH, mp4 ...")
         strmod.export_all(self.img, self.out, log=self.log)
         if self.video_frames:
             for p, (lba, size) in sorted(strmod.str_files(self.img).items()):

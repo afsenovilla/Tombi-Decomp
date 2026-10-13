@@ -389,6 +389,16 @@ demux size `0x09E4`, **320 x 224**, `0x3800` = BS v2 frames (MDEC). In the file 
 0030  00 f2 02 20 27 7f 7f f2 f2 27 20 00 7f 02 f2 27
 ```
 
+**AVI export (`str.py avi`, `extract_sprites` step `videos`, no ffmpeg needed).** Frame rate: XA is read at 150 sectors/s (double speed, 37800 Hz stereo
+needs it) and a movie spends the same number of sectors (video + 1 audio per 7 video) on every frame, so `fps = 150 / round(sectors / frames)`: all 30 movies have
+10 sectors/frame = 15 fps (2520 audio samples per frame), so audio (`n_audio_sectors * 2016` samples) and video stay in sync (100_?: 466 frames = 31.07 s video,
+31.20 s audio). The AVI is RIFF `AVI ` / `LIST hdrl` (avih, strl vids `MJPG` scale 10 rate 150, strl auds PCM 16 bit stereo 37800) / `LIST movi` (per frame one `00dc`
+JPEG + one `01wb` chunk with that frame's audio; the audio left over goes after the last frame) / `idx1` (offsets from the `movi` fourcc). Verified by parsing it back
+(frame and chunk counts, every idx1 entry points at its chunk) and with ffprobe/ffmpeg (mjpeg 320x224 15 fps 466 frames + pcm_s16le, decodes clean).
+JPEG encoding is Pillow's (the decoder hands over YCbCr planes, chroma 4:2:0, quality 90, so no RGB conversion in Python); without Pillow the AVI is skipped with a log
+line. Speed: `decode_ycc` caches the IDCT basis image of each (coefficient, level) pair, so a block is a C-level `sum(zip(*terms))` + one clamp-table lookup, the bit
+reader is inlined; 0.115 s -> 0.045 s/frame (v2) and ~0.065 s/frame (v3, more coefficients), about 0.07 s/frame with JPEG: ~10 min for all 8,400 frames.
+
 ## Mods (tools/mod.py)
 
 `mods/<name>/mod.json` lists `patchs` (`file` = PNG in the mod folder, `targets` = `pattern` (fnmatch on the path under `game/disc/fs`, e.g. `AREA00/B301.000`) and an optional `frame` for WPP sprite files); `mods/load_order.json` `{"order": [...]}` sets the order (later wins). PNG to data: 8 bpp page = indexed 2*w x h, 4 bpp = indexed (<= 16 colours) 4*w x h, 16 bpp/CLUT = RGBA w x h (5 bit linear, alpha 0 = word 0, opaque black = 0x8000); WPP frame = indexed 4*W x H. Patched size must equal the original. `.GAM` targets go through `tools/gam.py`, WPP through `wpp.py`; `mod.py build` runs `mkdisc.py build --relayout`. The mod layout idea comes from TombaPatcher (US-only; no code reused).
