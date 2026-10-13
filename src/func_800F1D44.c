@@ -2,6 +2,7 @@
 // MATCHING 800f1d44 2280
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 typedef struct { short x, y; } XY;
 typedef struct {
     TObj o;
@@ -22,7 +23,6 @@ extern unsigned char D_8009D2B3;
 extern unsigned char D_8009D2B1;
 extern short D_8009C944[];
 extern unsigned short D_8009D610;
-extern unsigned int D_8009C984;
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
 extern XY D_801151E0[];
@@ -194,7 +194,7 @@ void func_800F1D44(TObj *o)
         if (D_8009D2B1 == 1) mode = 1;
         else if (D_8009D2B1 == 2) mode = 2;
         lim = 0x200;
-        if (D_8009C984 & 0x40) {
+        if ((*(unsigned int*)&GAME.area00_eventControl) & 0x40) {
             lim = 0x360;
             if (!(D_8009D670[0] & D_1f8003c4) && (unsigned)(o->subtype - 1) >= 2) lim = 0x200;
         }
@@ -226,7 +226,7 @@ void func_800F1D44(TObj *o)
             }
         }
     done:
-        if ((D_8009C984 & 0x40) && (D_8009D670[0] & D_1f8003c4)) {
+        if (((*(unsigned int*)&GAME.area00_eventControl) & 0x40) && (D_8009D670[0] & D_1f8003c4)) {
             dust(o);
         }
         if (o->subtype != 0) {

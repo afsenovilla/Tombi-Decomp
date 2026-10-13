@@ -1,9 +1,10 @@
 // FUNC 80134e5c 3248 X000
 // MATCHING 80134e5c 3248
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char pad[0x4c]; short w4c; short w4e; } C4C;
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009CDA5, D_8009CDAD, D_8009D0A4, D_8009C971;
+extern unsigned char D_8009CDA5, D_8009CDAD, D_8009D0A4;
 extern unsigned char D_8009C970_[];
 #define D_8009C970 D_8009C970_[0]
 extern unsigned char D_8009C93F_[];
@@ -104,7 +105,7 @@ void func_80134E5C(TObj *o)
                 o->wb4 = 5;
                 break;
             }
-        } else if (D_8009C970 < D_8009C971) {
+        } else if (D_8009C970 < GAME.playerHealthDisplayed) {
             o->wb4 = 7;
         } else {
             o->wb4 = 6;
@@ -410,7 +411,7 @@ void func_80134E5C(TObj *o)
             break;
         case 26:
             {
-                int v = D_8009C971;
+                int v = GAME.playerHealthDisplayed;
                 D_800A60D0 = v;
                 D_800A60D2 = v;
                 D_8009C970 = v;

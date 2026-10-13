@@ -1,6 +1,7 @@
 // FUNC 800f0e7c 1164 X000
 // MATCHING 800f0e7c 1164
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     unsigned char p0[0x1e];
     unsigned char b1e;
@@ -11,8 +12,6 @@ typedef struct {
 } Q800F0E7C;
 
 extern Q800F0E7C *D_8009C330;
-extern unsigned short D_8009C962;
-extern unsigned short D_8009C960;
 extern unsigned char D_8009CDB2;
 extern unsigned char D_8009CDB5;
 extern short FUN_800f0b5c();
@@ -59,7 +58,7 @@ short func_800F0E7C(TObj *o)
                 }
                 break;
             case 2:
-                if (D_8009C962 == 1 && (D_8009C960 == 2 || D_8009C960 == 0x13)) {
+                if (GAME.selectedSection == 1 && (GAME.selectedArea == 2 || GAME.selectedArea == 0x13)) {
                     if (D_8009CDB2 != 0xff || D_8009CDB5 != 0xff) {
                         return r;
                     }

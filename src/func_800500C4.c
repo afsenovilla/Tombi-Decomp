@@ -1,10 +1,9 @@
 // FUNC 800500c4 872 MAIN0
 // MATCHING 800500c4 872
 #include "TOBJ.H"
-extern int D_8009C960;
+#include "gamestate.h"
 extern unsigned short D_8009C960s;
-extern unsigned short D_8009C962;
-extern unsigned char D_8009C964, D_8009C93A, D_800A603A;
+extern unsigned char D_8009C93A, D_800A603A;
 int func_80045D0C(TObj *o);
 void func_8011CEF0(TObj *o);
 void func_8011D1BC(TObj *o);
@@ -36,11 +35,11 @@ void func_800500C4(TObj *o)
 {
     if (o->visible == 0) return;
     if ((o->b0a & 0x10) && o->da0 == 0) return;
-    if (D_8009C960 == 9 && D_8009C964 != 0x20 && D_8009C93A == 1 &&
+    if ((*(int*)&GAME.selectedArea) == 9 && GAME.selectedPlane != 0x20 && D_8009C93A == 1 &&
         o->b.p.whole < 0xb6d && (o->category & 0x7f) != 8) return;
-    if (D_8009C960s == 10 && (D_8009C962 == 0 || D_8009C962 == 4) && D_8009C964 != 0 &&
+    if (D_8009C960s == 10 && (GAME.selectedSection == 0 || GAME.selectedSection == 4) && GAME.selectedPlane != 0 &&
         (unsigned short)(o->b.p.whole + 9) < 0x13 && (o->category & 0x7f) != 8) return;
-    if (D_8009C960 == 6) {
+    if ((*(int*)&GAME.selectedArea) == 6) {
         switch (o->b0a) {
         case 0: func_8011CEF0(o); break;
         case 1: func_8011D1BC(o); break;

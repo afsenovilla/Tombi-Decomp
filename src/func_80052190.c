@@ -7,6 +7,7 @@
    stays after the uv stores, and `e = (short *)o->d3c; e += ...` (multi-set pointer) so the d3c load is not
    boosted and sits at the top of the preheader. */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -22,7 +23,6 @@ typedef struct {
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
-extern int D_8009C960;
 extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
@@ -89,7 +89,7 @@ void func_80052190(TObj *o)
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
+    if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;

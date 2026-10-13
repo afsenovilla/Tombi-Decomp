@@ -2,8 +2,8 @@
 // MATCHING 80120d04 1056
 // FLAGS -O2 -G0 -fno-expensive-optimizations
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C962[];
 extern char D_1F800000[];
 void getBaseMatrix(void *m);
 void RotMatrixX(int r, void *m);
@@ -49,7 +49,7 @@ void func_80120D04(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        if (D_8009C962[0] == 0)
+        if (((unsigned short*)&GAME.selectedSection)[0] == 0)
             return;
         o->active = 2;
         *(int *)&o->w5c = o->a.p.whole;
@@ -95,7 +95,7 @@ void func_80120D04(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        if (D_8009C962[0] == 0)
+        if (((unsigned short*)&GAME.selectedSection)[0] == 0)
             return;
         switch (o->step) {
         case 0:

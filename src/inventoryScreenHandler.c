@@ -1,5 +1,6 @@
 // FUNC 8001aeb4 1140 MAIN0
 // MATCHING 8001aeb4 1140
+#include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
     RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
@@ -22,9 +23,8 @@ extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
 extern unsigned short D_8009D670;
-extern unsigned short D_8009C960, D_8009F838, D_8009C962;
+extern unsigned short D_8009F838;
 extern short *D_80077A8C[];
-extern unsigned char D_8009C974, D_8009C967;
 extern void SetDispMask(int);
 extern int StoreImage(RECT *, unsigned long *);
 extern int LoadImage(RECT *, unsigned long *);
@@ -122,7 +122,7 @@ void inventoryScreenHandler(void)
         D_8009E377[0] = D_8009BCA0;
         D_8009F086[0] = D_8009BC9C;
         D_8009F087[0] = D_8009BCA0;
-        n = D_80077A8C[D_8009C960 + D_8009F838][D_8009C962];
+        n = D_80077A8C[GAME.selectedArea + D_8009F838][GAME.selectedSection];
     play:
         queueSystemLoadList(n, 1);
     next:
@@ -144,8 +144,8 @@ void inventoryScreenHandler(void)
         TASK_C->w4e = 0;
         break;
     case 7:
-        D_8009C974 = 0;
-        D_8009C967 = 0;
+        GAME.areaTransition = 0;
+        GAME.keepBgm = 0;
         stopBgm(0);
         D_8009E375[0] = 0;
         D_8009E376[0] = 0;

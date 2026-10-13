@@ -4,6 +4,7 @@
 #define SKIP_ASM
 #include "common.h"
 #include "psyq/libcd.h"
+#include "gamestate.h"
 
 typedef char Result_t[8];
 extern volatile s32* D_800963C0;
@@ -18,7 +19,6 @@ extern s32 D_8009BC78;
 extern s32 D_8009BC7C;
 extern void (*D_8009C860)(void);
 extern s32 D_8009C95C;
-extern s32 D_8009C960;
 extern s32 D_8009C9FC;
 extern s32 D_8009CA08;
 extern s32 D_8009EB48;

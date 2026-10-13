@@ -1,7 +1,7 @@
 // FUNC 80137458 864 X000
 // MATCHING 80137458 864
 #include "TOBJ.H"
-extern unsigned short D_8009C962;
+#include "gamestate.h"
 extern unsigned char D_8009CE4A;
 extern short D_800A604E;
 extern unsigned char D_800A60A1;
@@ -19,7 +19,6 @@ extern unsigned char D_8009CEBD;
 extern unsigned char D_800A60E4;
 extern unsigned char *D_800A611C;
 extern unsigned char D_8009D00D;
-extern int D_8009C984;
 extern unsigned char D_8009CFFB;
 
 short func_80137458(TObj *o)
@@ -27,7 +26,7 @@ short func_80137458(TObj *o)
     short n = 0;
     unsigned char **p = (unsigned char **)((char *)o + 0x1c);
 
-    if (D_8009C962 == 0) {
+    if (GAME.selectedSection == 0) {
         if (D_8009CE4A != 0xff) {
             if (D_800A604E < -0x122 && D_800A60A1 != 0 && (unsigned short)(D_800A6078[1] - 0x148) < 0x10 &&
                 D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4) != 0 && D_8009C940 == 0) {
@@ -87,7 +86,7 @@ short func_80137458(TObj *o)
         } else {
             if (D_8009D00D != 0)
                 n = 1;
-            if ((D_8009C984 & 0x40) == 0 || D_8009CFFB != 0)
+            if ((GAME.area00_eventControl & 0x40) == 0 || D_8009CFFB != 0)
                 n++;
             if (n == 0)
                 o->b04 = 2;

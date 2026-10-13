@@ -6,6 +6,7 @@
  * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / PLAYER.
  * Tried (debt2): D_8009C984s as [0]/pointer/temp forms keeps la+lw 0(reg) (score 8), all-scalar D_8009C984 465. */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
 extern TObj PLAYER;
@@ -20,7 +21,6 @@ extern int D_8009C984A[];
 #define D_8009C984 D_8009C984A[0]
 extern int D_8009C984s;
 extern unsigned char D_8009C942, D_8009C93F, D_8009CDA7[];
-extern unsigned short D_8009C960, D_8009C962;
 extern int D_1F8002D4[];
 extern void *D_8013B17C[];
 extern void *D_8013B188;
@@ -165,8 +165,8 @@ void func_80133474(TObj *o)
                 o->step = 5;
                 o->state = 0;
             }
-            if (D_8009C960 != 0) break;
-            if (D_8009C962 == 0 && D_800A603D == 0x20 && D_800A607Ca[0]->p.whole > 0 &&
+            if (GAME.selectedArea != 0) break;
+            if (GAME.selectedSection == 0 && D_800A603D == 0x20 && D_800A607Ca[0]->p.whole > 0 &&
                 PLAYER.y.p.whole >= -0x2f && (unsigned short)(D_800A6078->p.whole - 0x400) < 0x18) {
                 D_8009C984s &= ~2;
                 o->b04 = 2;
@@ -181,7 +181,7 @@ void func_80133474(TObj *o)
                 o->state = 0;
                 break;
             }
-            switch (D_8009C962) {
+            switch (GAME.selectedSection) {
             case 2:
                 if (D_800A6078->p.whole >= 0xa61) o->step = 6;
                 break;

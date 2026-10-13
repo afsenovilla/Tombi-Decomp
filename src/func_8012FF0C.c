@@ -1,11 +1,12 @@
 // FUNC 8012ff0c 916 X000
 // MATCHING 8012ff0c 916
 #include "TOBJ.H"
+#include "gamestate.h"
 extern short D_800A604A[], D_800A604E[];
 extern unsigned char D_800A6066[];
 extern short D_800A6066s;
 extern int D_800A60C4[];
-extern unsigned char D_8009C970, D_800A603E[];
+extern unsigned char D_800A603E[];
 extern void *D_8013B224;
 
 void func_8012FF0C(TObj *o)
@@ -74,7 +75,7 @@ chk:
         if (o->w22 > 2) o->state = 3;
         break;
     case 3:
-        if (D_8009C970 == 0) {
+        if (GAME.playerHealth == 0) {
             o->state = 6;
             D_800A603E[0]++;
             break;

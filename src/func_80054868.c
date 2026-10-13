@@ -3,6 +3,7 @@
 // FLAGS -O2 -G0 -fno-strength-reduce -fno-expensive-optimizations
 /* e built in two steps (base, then += index) keeps the game load order; the matrix address is reloaded for each call (-fno-expensive-optimizations). */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     unsigned int tag;
     unsigned char r0, g0, b0, code;
@@ -14,7 +15,6 @@ typedef struct {
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern char *DAT_1f800164;
 extern char *DAT_1f8001e0;
-extern int D_8009C960;
 extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
@@ -58,7 +58,7 @@ void func_80054868(TObj *o)
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
+    if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;
