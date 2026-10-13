@@ -63,7 +63,7 @@ class App:
         self._img = None
         self._loading = False
         self.scale = tk.IntVar(value=2)
-        self.all_lang = tk.BooleanVar(value=False)
+        self.lang_vars = {}
         self.only_edited = tk.BooleanVar(value=False)
         self.query = tk.StringVar()
         set_icon(root, "text")
@@ -104,7 +104,8 @@ class App:
         of = ttk.Frame(left, padding=(4, 0))
         of.pack(fill="x")
         ttk.Checkbutton(of, text="Solo modificados", variable=self.only_edited, command=self.fill_tree).pack(side="left")
-        ttk.Checkbutton(of, text="Otros idiomas", variable=self.all_lang, command=self.fill_tree).pack(side="left", padx=8)
+        self.langf = ttk.LabelFrame(left, text="Idiomas", padding=(4, 0))
+        self.langf.pack(fill="x", padx=4)
         tf = ttk.Frame(left)
         tf.pack(fill="both", expand=True, padx=4, pady=4)
         self.tree = ttk.Treeview(tf, show="tree", selectmode="browse")
@@ -199,8 +200,42 @@ class App:
         self.cur = None
         self.dirty = False
         self.set_editor("", False)
+        self.build_langs()
         self.fill_tree()
         self.say("%s: %d archivos WFM. Elige un diálogo en la lista." % (os.path.basename(path), len(src.files)))
+
+    def build_langs(self):
+        """One checkbox per language found on the disc (+ Todos / Ninguno); the choice lives in proj.langs."""
+        for w in self.langf.winfo_children():
+            w.destroy()
+        self.lang_vars = {}
+        langs = self.proj.languages()
+        if not self.proj.langs & set(langs):
+            self.proj.langs = {langs[0]}
+        for k, l in enumerate(langs):
+            v = tk.BooleanVar(value=l in self.proj.langs)
+            self.lang_vars[l] = v
+            ttk.Checkbutton(self.langf, text=C.LANG_NAMES.get(l, l), variable=v, command=self.on_langs).grid(
+                row=k // 3, column=k % 3, sticky="w", padx=2)
+        r = (len(langs) + 2) // 3
+        ttk.Button(self.langf, text="Todos", width=8, command=lambda: self.set_langs(True)).grid(row=r, column=0, pady=2)
+        ttk.Button(self.langf, text="Ninguno", width=8, command=lambda: self.set_langs(False)).grid(row=r, column=1, pady=2)
+
+    def set_langs(self, on):
+        for v in self.lang_vars.values():
+            v.set(on)
+        self.on_langs()
+
+    def on_langs(self):
+        if not self.proj:
+            return
+        self.proj.langs = {l for l, v in self.lang_vars.items() if v.get()}
+        self.proj._pool = None
+        self.dirty = True
+        if self.cur and not self.proj.selected(self.cur[0]):
+            self.cur = None
+            self.set_editor("", False)
+        self.fill_tree()
 
     def confirm_discard(self):
         if self.proj and self.dirty and self.proj.n_edits():
@@ -232,14 +267,14 @@ class App:
             return
         q, only = self.query.get().strip(), self.only_edited.get()
         if q or only:
-            res = self.proj.search(q, self.all_lang.get(), only)
+            res = self.proj.search(q, only)
             for n, i in res[:1500]:
                 self.tree.insert("", "end", iid="d|%s|%d" % (n, i), text=self.label(n, i), tags=self.tags(n, i))
             self.say("%d resultado(s)%s" % (len(res), " (se muestran 1500)" if len(res) > 1500 else ""))
             return
         areas = {}
         for n in self.proj.src.names():
-            if self.all_lang.get() or C.is_main_lang(n):
+            if self.proj.selected(n):
                 areas.setdefault(n.split("/")[0], []).append(n)
         for a in sorted(areas):
             node = self.tree.insert("", "end", iid="a|" + a, text=a, open=False)
@@ -431,13 +466,12 @@ class App:
                                          filetypes=[("Texto", "*.txt"), ("JSON", "*.json")])
         if not p:
             return
-        al = self.all_lang.get()
         self.say("Exportando…")
         self.root.update_idletasks()
         if p.lower().endswith(".json"):
-            json.dump(self.proj.export_json(al), open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            json.dump(self.proj.export_json(), open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         else:
-            open(p, "w", encoding="utf-8").write(self.proj.export_txt(al))
+            open(p, "w", encoding="utf-8").write(self.proj.export_txt())
         self.say("Exportado a %s" % p)
 
     def import_any(self):
@@ -458,7 +492,11 @@ class App:
             messagebox.showerror("Error", "%s" % e)
             return
         self.dirty = True
+        self.build_langs()
         self.fill_tree()
+        if self.cur and not self.proj.selected(self.cur[0]):
+            self.cur = None
+            self.set_editor("", False)
         if self.cur:
             self.set_editor(self.proj.text(*self.cur), True)
             self.refresh_preview()
