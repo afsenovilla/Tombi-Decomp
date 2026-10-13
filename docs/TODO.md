@@ -9,7 +9,9 @@
 - **Hidden cheats / debug features.** Search the decompiled code for button-sequence checks (pad input
   compared against sequence tables), writers of debug flags such as scratchpad `0x1F8001B4` (enables the
   debug AREA SELECT / SECTION SELECT on NEW GAME), unused debug menus and strings; verify any finding in
-  tools/psxemu.
+  tools/psxemu. Also cut content: event title #52 of CFNT999 ("MiniatureMakingTrumpets", untranslated in Danish
+  and German, no layout list) looks like a removed event; check whether any event table references it
+  (and the other list-less titles ~90, ~126, 135).
 - **"Fully linked" on decomp.dev.** Mark complete units in the objdiff report and split each object's
   `.data`/`.rodata` out of the retail binary (roadmap step 4, segment split), keeping the linked
   executables byte-identical. Long, mechanical background task; start after the struct/type work.
