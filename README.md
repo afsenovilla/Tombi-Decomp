@@ -209,6 +209,7 @@ game/           your own game files (ignored by git)
 | `tools/cdfiles.py` | Assets: the LBA/size file table inside `EXE/MAIN0..8.EXE` (`dump`, `check` against an image, `update` from a new layout); used by `mkdisc.py build --relayout` |
 | `tools/area000.py` | Assets: `AREAxx/*.000` and `SYSTEM/*.000` (uncompressed VRAM images, WPP/WMD tables, APD grids): `info`, `unpack` (+PNG views), `pack`, `--check` (286/286 identical); format in `notes/formats.md` |
 | `tools/wpp.py` | Assets: WPP sprite frames (flag-byte RLE, 4 bpp): `info`, `unpack` (indexed PNG with the Tombi CLUT), `pack`, `--check` (40/40 files identical); `area000.py page` exports room pages with their CLUT |
+| `tools/extract_sprites.py` | One-shot: every sprite frame as PNG straight from a retail disc image (no dependencies) |
 | `tools/overlay_data.py` | Assets: data layout of the area overlays `X0nn.BIN` (`summary`, `dump`, `header`, `strings`), see `notes/overlays.md` |
 
 **Assets.** `wfm.py`, `gam.py` and `mkdisc.py` work on your own disc (`game/disc/Tombi.bin` and the files extracted to

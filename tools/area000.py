@@ -27,7 +27,8 @@ PNG writing is pure Python (zlib). unpack/pack themselves do not need the disc i
 import argparse, hashlib, json, os, struct, sys, zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FS = os.path.join(ROOT, "game", "disc", "fs")
+FS = os.environ.get("TOMBI_FS", os.path.join(ROOT, "game", "disc", "fs"))  # extracted disc tree
+IMG = os.environ.get("TOMBI_IMG", "")  # the disc image (default: Tombi.bin next to the fs directory)
 
 KIND_NAMES = {0x10: "GRPX", 0x20: "NONE", 0x30: "SPR", 0x40: "FOUR", 0x50: "WMD", 0x60: "WPP", 0x70: "WHM", 0x80: "APD",
               0x90: "WVD", 0xA0: "UNKA", 0xB0: "SEQ", 0xC0: "WSS", 0xD0: "WFM3", 0xF0: "INS", 0xF8: "LDSYS"}
@@ -87,7 +88,7 @@ def load_records(fs=FS):
     try:
         sys.path.insert(0, os.path.join(ROOT, "tools"))
         import cdfiles
-        ref = cdfiles.layout_from_image(os.path.join(os.path.dirname(fs), "Tombi.bin"))
+        ref = cdfiles.layout_from_image(IMG or os.path.join(os.path.dirname(fs), "Tombi.bin"))
         rows = cdfiles.resolve(cdfiles.read_exe(os.path.join(fs, "EXE", "MAIN0.EXE")), ref)
         names = {i: r[3] for i, r in enumerate(rows) if r[3]}
         sysdir = os.path.join(fs, "SYS")
@@ -181,7 +182,7 @@ def load_lists(fs=FS):
     try:
         sys.path.insert(0, os.path.join(ROOT, "tools"))
         import cdfiles
-        ref = cdfiles.layout_from_image(os.path.join(os.path.dirname(fs), "Tombi.bin"))
+        ref = cdfiles.layout_from_image(IMG or os.path.join(os.path.dirname(fs), "Tombi.bin"))
         rows = cdfiles.resolve(cdfiles.read_exe(os.path.join(fs, "EXE", "MAIN0.EXE")), ref)
         names = {i: r[3] for i, r in enumerate(rows) if r[3]}
         for fn in sorted(os.listdir(os.path.join(fs, "SYS"))):
