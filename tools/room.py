@@ -5,6 +5,10 @@
   tools/room.py --all OUT_DIR           every room model of every area -> OUT_DIR/AREAnn_Dxxx.png
   tools/room.py --glb AREA00:1 OUT.glb  3D export (glTF 2.0 binary, one embedded texture atlas, vertex colours, Y up) for Blender / 3D Viewer
   tools/room.py --glb-all DIR           every room -> DIR/AREAnn_Dxxx.glb
+  options: --sky-dir DIR   sky captures room_<AA>_<n>_sky.png (tools/psxemu/capture.py rooms DIR); default: the cache of tools/gfx_composed.py
+           --no-sky        leave the sky out (by default it is added when a capture exists)
+The sky (far background layer the area overlay draws behind the room) becomes an unlit, double sided backdrop quad behind the model in the .glb
+(mirror-tiled horizontally to cover the model) and the picture behind the 2D room PNGs.
 
 A WMD is a u32 table container ([N][off * N], no terminator; N sectors, vertical slices of the room).  Every sector = 4 groups `u32 count` + `count` GPU-like
 packets (flat tri, flat quad, gouraud tri, gouraud quad), then 16 B zero padding.  Packet: `u16 clut, u16 tpage, r g b cmd`
@@ -19,6 +23,72 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import area000 as A
 import vram as V
 import labels
+
+SKY_DIR = None      # folder of the sky captures (None: the cache of gfx_composed for the disc image)
+USE_SKY = True
+
+
+def find_sky(ld, idx):
+    """Path of the sky capture of load list idx of area ld ('AR04'), or None (also when sky is off / no capture / no PIL)."""
+    if not USE_SKY:
+        return None
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "psxemu"))
+    try:
+        from rooms import list_to_room
+    finally:
+        sys.path.pop(0)
+    r = list_to_room(ld, idx)
+    if not r:
+        return None
+    name = "room_%02d_%d_sky.png" % r
+    d = SKY_DIR
+    if d is None:
+        try:
+            import gfx_composed
+            img = A.IMG or os.path.join(os.path.dirname(A.FS), "Tombi.bin")
+            d = gfx_composed.cache_dir(img) if os.path.isfile(img) else None
+        except Exception:
+            d = None
+    p = d and os.path.join(d, name)
+    return p if p and os.path.isfile(p) else None
+
+
+def load_sky(path):
+    """PIL RGB image of a sky capture without its black letterbox bars (a fully black border of at most 8 px)."""
+    from PIL import Image
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    px = im.load()
+    def black_row(y): return all(px[x, y] == (0, 0, 0) for x in range(w))
+    def black_col(x): return all(px[x, y] == (0, 0, 0) for y in range(h))
+    t = 0
+    while t < 8 and black_row(t): t += 1
+    b = 0
+    while b < 8 and black_row(h - 1 - b): b += 1
+    l = 0
+    while l < 8 and black_col(l): l += 1
+    r = 0
+    while r < 8 and black_col(w - 1 - r): r += 1
+    return im.crop((l, t, w - r, h - b))
+
+
+def sky_behind(png, sky):
+    """PNG bytes of the room picture `png` over the sky image (scaled to the picture height, mirror-tiled horizontally)."""
+    import io
+    from PIL import Image
+    room = Image.open(io.BytesIO(png)).convert("RGBA")
+    W, H = room.size
+    sw = max(1, round(sky.width * H / sky.height))
+    tile = sky.resize((sw, H), Image.NEAREST)
+    mir = tile.transpose(Image.FLIP_LEFT_RIGHT)
+    bg = Image.new("RGB", (W, H))
+    for k in range((W + sw - 1) // sw):
+        bg.paste(tile if k % 2 == 0 else mir, (k * sw, 0))
+    out = bg.convert("RGBA")
+    out.alpha_composite(room)
+    o = io.BytesIO()
+    out.convert("RGB").save(o, "PNG")
+    return o.getvalue()
 
 
 def parse_wmd(d):
@@ -93,9 +163,9 @@ def render(v, pk, scale=1):
     return V.png_rgba(W, H, buf)
 
 
-def build_glb(v, pk, scale=0.01):
+def build_glb(v, pk, scale=0.01, sky=None):
     """Binary glTF 2.0 (bytes) of the polygons `pk` (parse_wmd_ex): one mesh, one atlas texture of the used (tpage, clut) pairs.
-    Y is flipped (PS1 y is down) and z negated so the model is not mirrored; colours are the PS1 modulation values (0x80 = 1.0)."""
+    sky (PIL RGB, load_sky): backdrop quad.  Y is flipped (PS1 y is down) and z negated so the model is not mirrored; colours are the PS1 modulation values (0x80 = 1.0)."""
     import json
     tiles = {}
     for cl, tp, cmd, vs, cols in pk:
@@ -134,13 +204,34 @@ def build_glb(v, pk, scale=0.01):
         if len(vs) == 4:
             idx += [base + 1, base + 3, base + 2]
     n = len(pos)
+    sky_png = b""
+    if sky is not None:
+        import io
+        x0, x1 = min(p[0] for p in pos), max(p[0] for p in pos)
+        y0, y1 = min(p[1] for p in pos), max(p[1] for p in pos)
+        z0 = min(p[2] for p in pos)
+        h = max((y1 - y0) * 1.3, 256 * scale)          # at least one PS1 screen high
+        tw = h * sky.width / sky.height
+        ntile = max(1, int(((x1 - x0) * 1.4 + tw) / tw) + 1)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        z = z0 - 0.5 * h * 0.1 - 10 * scale            # just behind the farthest polygon
+        sq = [(cx - ntile * tw / 2, cy + h / 2), (cx + ntile * tw / 2, cy + h / 2), (cx - ntile * tw / 2, cy - h / 2), (cx + ntile * tw / 2, cy - h / 2)]
+        sky_pos = [(a, b, z) for a, b in sq]
+        sky_uv = [(0.0, 0.0), (float(ntile), 0.0), (0.0, 1.0), (float(ntile), 1.0)]
+        o = io.BytesIO()
+        sky.save(o, "PNG")
+        sky_png = o.getvalue()
     b_pos = struct.pack("<%df" % (3 * n), *[c for p in pos for c in p])
     b_uv = struct.pack("<%df" % (2 * n), *[c for p in uvs for c in p])
     b_col = bytes(c for p in col for c in p)
     b_idx = struct.pack("<%dI" % len(idx), *idx)
     png = V.png_rgba(AW, AH, atlas)
+    bl = [b_pos, b_uv, b_col, b_idx, png]
+    if sky is not None:
+        bl += [struct.pack("<12f", *[c for p in sky_pos for c in p]), struct.pack("<8f", *[c for p in sky_uv for c in p]),
+               struct.pack("<6I", 0, 1, 2, 1, 3, 2), sky_png]
     views, off, blob = [], 0, b""
-    for b in (b_pos, b_uv, b_col, b_idx, png):
+    for b in bl:
         views.append({"buffer": 0, "byteOffset": off, "byteLength": len(b)})
         pad = -len(b) % 4
         blob += b + b"\0" * pad
@@ -166,6 +257,23 @@ def build_glb(v, pk, scale=0.01):
             {"bufferView": 3, "componentType": 5125, "count": len(idx), "type": "SCALAR"}],
         "bufferViews": views, "buffers": [{"byteLength": len(blob)}],
     }
+    if sky is not None:
+        views[5]["target"] = views[6]["target"] = 34962
+        views[7]["target"] = 34963
+        js["extensionsUsed"] = ["KHR_materials_unlit"]
+        js["nodes"].append({"mesh": 1, "name": "sky"})
+        js["scenes"][0]["nodes"].append(1)
+        js["meshes"].append({"name": "sky", "primitives": [{"attributes": {"POSITION": 4, "TEXCOORD_0": 5}, "indices": 6, "material": 1}]})
+        js["materials"].append({"name": "sky", "alphaMode": "OPAQUE", "doubleSided": True, "extensions": {"KHR_materials_unlit": {}},
+                                "pbrMetallicRoughness": {"baseColorTexture": {"index": 1}, "metallicFactor": 0.0, "roughnessFactor": 1.0}})
+        js["textures"].append({"source": 1, "sampler": 1})
+        js["samplers"].append({"magFilter": 9729, "minFilter": 9729, "wrapS": 33648, "wrapT": 33071})
+        js["images"].append({"bufferView": 8, "mimeType": "image/png"})
+        mn2 = [min(p[i] for p in sky_pos) for i in range(3)]
+        mx2 = [max(p[i] for p in sky_pos) for i in range(3)]
+        js["accessors"] += [{"bufferView": 5, "componentType": 5126, "count": 4, "type": "VEC3", "min": mn2, "max": mx2},
+                            {"bufferView": 6, "componentType": 5126, "count": 4, "type": "VEC2"},
+                            {"bufferView": 7, "componentType": 5125, "count": 6, "type": "SCALAR"}]
     j = json.dumps(js, separators=(",", ":")).encode()
     j += b" " * (-len(j) % 4)
     return (struct.pack("<III", 0x46546C67, 2, 28 + len(j) + len(blob)) + struct.pack("<II", len(j), 0x4E4F534A) + j
@@ -179,7 +287,8 @@ def room_glb(ld, idx):
     d = rec and V.resource(rec[0]["name"])
     if not d:
         return None, None
-    return rec[0]["name"], build_glb(V.area_context(ld, idx), parse_wmd_ex(d))
+    sp = find_sky(ld, idx)
+    return rec[0]["name"], build_glb(V.area_context(ld, idx), parse_wmd_ex(d), sky=load_sky(sp) if sp else None)
 
 
 def export_glb(out, log=print):
@@ -206,7 +315,9 @@ def room_image(ld, idx, scale=1):
     d = V.resource(rec[0]["name"])
     if not d:
         return None, None
-    return rec[0]["name"], render(V.area_context(ld, idx), parse_wmd(d), scale)
+    png = render(V.area_context(ld, idx), parse_wmd(d), scale)
+    sp = find_sky(ld, idx)
+    return rec[0]["name"], sky_behind(png, load_sky(sp)) if sp else png
 
 
 def export_rooms(out, log=print, scale=2):
@@ -225,7 +336,15 @@ def export_rooms(out, log=print, scale=2):
 
 
 def main(argv=None):
-    a = sys.argv[1:] if argv is None else argv
+    global SKY_DIR, USE_SKY
+    a = list(sys.argv[1:] if argv is None else argv)
+    if "--no-sky" in a:
+        USE_SKY = False
+        a.remove("--no-sky")
+    if "--sky-dir" in a:
+        i = a.index("--sky-dir")
+        SKY_DIR = a[i + 1]
+        del a[i:i + 2]
     if len(a) == 2 and a[0] == "--glb-all":
         print(export_glb(a[1]), "rooms")
         return 0

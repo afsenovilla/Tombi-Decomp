@@ -7,7 +7,7 @@ Python 3 (Windows/Linux/macOS).
   python3 tools/extract_sprites.py                         (no arguments: a small window to pick the image, folder and what to extract)
 
 Steps for --only (comma separated, default all; each one makes its own prerequisites, the fs dump is reused if OUT_DIR/fs exists):
-  files sprites animations screens vram rooms rooms3d banks music music_audio movie_audio videos
+  files sprites animations screens vram skies rooms rooms3d banks music music_audio movie_audio videos
   (--video-frames: videos also dumps every frame as PNG;  --audio-format wav|mp3: format of banks, music_audio and movie_audio, mp3 needs lameenc,
    falls back to WAV; loop points only in WAV)
 
@@ -60,6 +60,7 @@ STEPS = [   # (key, group, label es, description)
     ("animations", "images", "Animaciones", "Tombi's animations as GIF + catalog.json (OUT/anim)"),
     ("screens", "images", "Pantallas", "title, logos, menu atlases (OUT/screens)"),
     ("vram", "images", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
+    ("skies", "rooms", "Cielos de las salas", "sky layers captured with the MIPS interpreter, needs numpy + Pillow, slow (OUT/skies)"),
     ("rooms", "rooms", "Salas PNG", "room backgrounds (OUT/rooms)"),
     ("rooms3d", "rooms", "Salas 3D (glb)", "room models as glTF (OUT/rooms3d)"),
     ("banks", "audio", "Bancos de sonido", "VAB samples (OUT/sound/bank)"),
@@ -154,15 +155,46 @@ class Extractor:
         vram.export_screens(self.out, self._usage, self._stats, log=lambda m: None)
         self.log(tr("ex.donevram", os.path.join(self.out, "vram")))
 
+    def skies(self):
+        """Runs the game in tools/psxemu for every room (~15 s each) and keeps room_<AA>_<n>_sky.png under OUT/skies; rooms / rooms3d then use them."""
+        self._setup()
+        import room, gfx_composed
+        self.log(tr("ex.skies"))
+        exe = os.path.join(self.fs, "EXE", "MAIN0.EXE")
+        try:
+            import numpy  # noqa: F401
+            from psxemu import capture
+        except ImportError as e:
+            self.log(tr("ex.skiesnp", e))
+            return
+        todo = [(a, s) for a, n in gfx_composed.rooms() for s in range(n) if not gfx_composed.unreachable(a, s)]
+        dst = os.path.join(self.out, "skies")
+        os.makedirs(dst, exist_ok=True)
+        done = [0]
+        def prog(i, n): self.log(tr("ex.skiesprog", i, n))
+        res = capture.rooms(dst, exe=exe, disc=self.img, log=lambda m: None, progress=prog)
+        for a, s, st, info in res:      # a room without sky leaves no file: rooms/rooms3d simply have no backdrop there
+            if st == "fail": self.log(tr("ex.skiesfail", a, s, info))
+        room.SKY_DIR = dst
+        self.log(tr("ex.doneskies", sum(1 for f in os.listdir(dst) if f.endswith("_sky.png")), dst))
+
+    def _sky_dir(self):
+        """Folder with sky captures for rooms / rooms3d: OUT/skies when the step ran, else the capture cache of the disc image (may not exist)."""
+        import room
+        d = os.path.join(self.out, "skies")
+        room.SKY_DIR = d if os.path.isdir(d) else None
+
     def rooms(self):
         self._setup()
         import room
+        self._sky_dir()
         self.log(tr("ex.rooms"))
         self.log(tr("ex.donerooms", room.export_rooms(os.path.join(self.out, "rooms"), log=lambda m: None), os.path.join(self.out, "rooms")))
 
     def rooms3d(self):
         self._setup()
         import room
+        self._sky_dir()
         self.log(tr("ex.rooms3d"))
         self.log(tr("ex.donerooms3d", room.export_glb(os.path.join(self.out, "rooms3d"), log=lambda m: None), os.path.join(self.out, "rooms3d")))
 
