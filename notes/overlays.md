@@ -3,7 +3,7 @@
 ## AREA00/X000.BIN (343,888 bytes)
 - It is not a PS-X EXE: it has no header. First dword = `0x1D` (29), followed by a table of
   absolute pointers (`0x800E9ECC`...) that point inside the file itself.
-- **Load address: `0x800E8028`** (end `0x8013C0F8`). Evidence: with that base, the
+- **Load address: `0x800E8028`** (end `0x8013BF78` = base + 343,888 bytes). Evidence: with that base, the
   header pointers land on valid code (`jal`/`j` + `nop`, offset 0x1EA4) and 46 of
   the 218 targets that MAIN0 calls in that region fall right after a `jr ra; nop`
   (neighboring bases give 0-4).
@@ -101,3 +101,72 @@ Tools that know the overlays: `tools/ncheck.py` / `tools/matchcheck.py` (PROG `X
 `notes/functions_x0nn.csv`, `src/x0nn/`), `tools/gen_symbols.py`, `tools/build_report.py` (`config/x0nn.yaml`),
 `tools/progress.py` (section "Area overlays" of `docs/PROGRESS.md` and `notes/todo_areas.csv`), `tools/fn.py`.
 `tools/build_full.py` still links only MAIN0 and X000.
+
+## Data layout of an area overlay (`tools/overlay_data.py`)
+
+The file is a flat image of RAM `0x800E8028..end`; there is no section table, no relocation table and no `.bss` in the
+file. (Nothing is zero-filled after the end: the next thing in RAM is the WPP buffer at `0x80140000`, so an overlay may not
+grow past `0x80140000`; X001, the largest, ends at `0x8013FFA4`.) Layout, identical for all 17 overlays:
+
+| File offset | Address | What |
+|---|---|---|
+| `0x0000` | `0x800E8028` | `u32 = 0x1D` (29), then a **pointer area** up to `0x1873`: about 1,900 words, almost all pointers into the overlay's own code (callback tables: runs of 5..257 pointers, repeated entries = a shared default handler, single zero words between runs). The first 29 words are the table the loader's base (`D_800e8028`) points at |
+| `0x03DC` | `0x800E8404` | block of **90 pointers into MAIN0** (`0x80010748`, `0x80010814`, ... : animation/movement helpers), then own-code pointers again |
+| `0x1874` | `0x800E989C` | small numeric tables (non-pointer words, 3..15 words each) up to `0x1E9F`; from about `0x1DE8` the bytes decode as MIPS (small leaf functions the csv does not list) |
+| `0x1EA4` | `0x800E9ECC` | 17 **entry stubs** of 16 bytes: `jal handler; nop; j 0x800E9F64; nop`, then the common epilogue `0x800E9F64` (`lw ra,0x10(sp); jr ra; addiu sp,sp,0x18`), then the first real function at `0x800E9F74` (file `0x1F4C`). The first 29 pointer words point at these stubs (slots without behaviour point straight at the epilogue) |
+| `0x1F4C` | `0x800E9F74` | code: ~300 shared object handlers up to `0x80114A48`, then per-area code up to the last function |
+| between functions | | the data a function's compilation unit emitted after it (`.rodata`): **jump tables** (`jtbl`, words pointing into the same function: switch statements) and small constant tables; 5,244 to 16,600 bytes per overlay |
+| `0x2CA20` | `0x80114A48` | **shared data block** `0x80114A48..0x80115EA4` (6,492 bytes, in all 17 overlays): handler parameter tables and pointer tables to `D_80114Dxx` rows and to the first per-area functions; its jump tables for the per-area code start at `0x80115EA8` |
+| tail | after the last function | `.data` of the area: object descriptors, animation/hitbox tables, pointer tables (to the same data and to MAIN0 handlers such as `updateLookScroll`), zero rows; 372 bytes (X008) to 27,232 bytes (X009) |
+
+The first 29 table words (`python3 tools/overlay_data.py header X000`): entries 0..16 point at stubs or at the epilogue
+(7 of them are "empty": every third slot is the epilogue, suggesting groups of three callbacks), entries 17..28 point into
+the body of the first function (`0x800E9FA8`, `+0x60`, `+0x8C`, ...; tiny `li v0,1` handlers) or at `0x800EA158`. The following
+rows (`0x800EA158`, `0x800EA924`, `0x800EABE0`, ...) are runs of consecutive handler addresses: one run per object
+class. The pointer area is the dispatch data MAIN0 uses to run area objects; its exact indexing is not reversed yet. The
+consumer is not found by a direct `lui/addiu 0x800E802C` in MAIN0: the only direct reference is the loader's
+`base = D_800e8028` in `src/FUN_8004f538.c` (load kind `0xF0`), so MAIN0 indexes the table through that base.
+The 8,012 bytes before the first function are part of the shared prefix: byte-identical in all 17 overlays.
+
+Per overlay (`python3 tools/overlay_data.py summary`; sizes in bytes; "code" = functions of `notes/functions_x0nn.csv` plus
+the function symbols of `config/symbol_addrs_x0nn.txt`; header+stubs is always 8,012):
+
+| File | Size | End address | Code | Data between functions | Tail data |
+|---|---|---|---|---|---|
+| X000 | 343888 | 0x8013BF78 | 305336 | 16600 | 15220 |
+| X001 | 360316 | 0x8013FFA4 | 333292 | 6064 | 15856 |
+| X002 | 228576 | 0x8011FD08 | 201408 | 14176 | 5720 |
+| X003 | 338504 | 0x8013AA70 | 304000 | 5244 | 23308 |
+| X004 | 318180 | 0x80135B0C | 282996 | 5244 | 22248 |
+| X005 | 206616 | 0x8011A740 | 181236 | 9892 | 7728 |
+| X006 | 241940 | 0x8012313C | 212048 | 5244 | 16792 |
+| X008 | 198028 | 0x801185B4 | 175524 | 14320 | 372 |
+| X009 | 299500 | 0x80131214 | 259188 | 5244 | 27232 |
+| X010 | 306772 | 0x80132E7C | 278512 | 6064 | 16008 |
+| X011 | 214788 | 0x8011C72C | 190988 | 5244 | 10988 |
+| X013 | 208200 | 0x8011AD70 | 184996 | 7296 | 9312 |
+| X014 | 272256 | 0x8012A7A8 | 237812 | 6028 | 20932 |
+| X016 | 210692 | 0x8011B72C | 187988 | 14744 | 1020 |
+| X017 | 214648 | 0x8011C6A0 | 190628 | 5244 | 11924 |
+| X018 | 216364 | 0x8011CD54 | 194072 | 14132 | 852 |
+| X019 | 190180 | 0x8011670C | 175472 | 5216 | 1800 |
+
+Findings from the dump:
+- **No text lives in the overlays.** There is no ASCII string longer than 5 characters in any of the 17 files (the few
+  hits of `overlay_data.py strings` are table bytes). Dialogue and menu text are in the `.WFM` files (`tools/wfm.py`);
+  the code refers to them by index (`LOAD_KIND_WFM3`), never by pointer.
+- Pointer words found in data: to the overlay's own functions (jump tables, callback tables), to its own data rows
+  (`D_8013xxxx`, tables of pointers to per-object rows), to MAIN0 functions (`0x800122xx` is a MAIN0 table, `func_80029CB4`,
+  `updateLookScroll`, ...) and to the 0x1F8000xx scratchpad never (those appear only as code immediates).
+- Address ranges the data points into: `0x800E8028..end` (own), `0x80010000..0x8009A000` (MAIN0). Nothing points at
+  `0x80140000+` statically: the WPP/APD/GRPX buffers are reached through the pointers the loader stores in
+  `SPR_DATA/WPP_DATA/APD_DATA[n]` (see `include/tomba24/game/cdload.h`).
+- `code?` items in the dump (1,536 bytes in X000) are gaps that start with `addiu sp,sp,-N`: functions the csv/symbol
+  lists do not cover; they are candidates for `tools/areas.py bounds`.
+- `SYSTEM/*.BIN` (`D?SPSUB`, `G?OVER`, `I?NFO*`, `X?NN`) have the same shape (`u32 id`, pointer table into `0x800E8xxx`,
+  code): they are other overlays loaded at the same address (`notes/formats.md`).
+
+`tools/overlay_data.py` usage: `summary [X0nn..]`, `dump X0nn [--min N]` (every gap with classified items and names from
+`config/symbol_addrs_x0nn.txt`; `ptr`/`jtbl`/`str`/`zero`/`word`/`code?`), `header X0nn` (the 29 entries and their stubs),
+`strings X0nn`. Data symbols are not in the symbol files yet (they only list functions), so data items are named
+`D_<addr>`; the dump shows the targets of every pointer table so the symbol files can be extended from it.

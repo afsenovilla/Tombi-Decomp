@@ -233,6 +233,9 @@ rebuild we need either a matching compressor or to keep original `.GAM` bytes an
 because we already have `fs/`, but its FLA/MSF parsing is the piece that could help to rebuild the image.
 
 ## Not covered
+(Update: `*.000`, the overlay data and the other disc file types are now documented in `notes/formats.md`; `tools/area000.py` and
+`tools/overlay_data.py` cover them. The list below is the state before that work.)
+
 `*.000` (e.g. AREA00/A004.000 273 KB, SYSTEM/A0xxxx.000 512 B pieces; 202 in SYSTEM + per-area), `X000..X800.BIN`
 (overlay code, already handled by the decomp), `SYSTEM/*.BIN` (D?SPSUB*.BIN etc., 225), `DSPCLUT.TIM`,
 `SUBMAP.WMD`, `SOUND/*.WVD` (SPU/VAB-like banks), `MOVIE/*.STR` (standard XA/STR, ffmpeg/jPSXdec), `CLUT*.GAM`

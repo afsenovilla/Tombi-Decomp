@@ -207,6 +207,8 @@ game/           your own game files (ignored by git)
 | `tools/gam.py` | Assets: GAM (the game's LZ) unpack/pack; `--check` runs the whole round trip (816 files) |
 | `tools/mkdisc.py` | Assets: rebuilds the `.bin/.cue` from `game/disc/fs` with mkpsxiso, SHA-1 identical to the original (`--check`) |
 | `tools/cdfiles.py` | Assets: the LBA/size file table inside `EXE/MAIN0..8.EXE` (`dump`, `check` against an image, `update` from a new layout); used by `mkdisc.py build --relayout` |
+| `tools/area000.py` | Assets: `AREAxx/*.000` and `SYSTEM/*.000` (uncompressed VRAM images, WPP/WMD tables, APD grids): `info`, `unpack` (+PNG views), `pack`, `--check` (286/286 identical); format in `notes/formats.md` |
+| `tools/overlay_data.py` | Assets: data layout of the area overlays `X0nn.BIN` (`summary`, `dump`, `header`, `strings`), see `notes/overlays.md` |
 
 **Assets.** `wfm.py`, `gam.py` and `mkdisc.py` work on your own disc (`game/disc/Tombi.bin` and the files extracted to
 `game/disc/fs`, never committed) and call outside tools: a PAL fork of TombaTools (Go, not vendored; `TOMBATOOLS`
