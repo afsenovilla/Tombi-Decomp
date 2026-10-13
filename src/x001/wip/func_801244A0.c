@@ -1,5 +1,9 @@
 // FUNC 801244a0 1800 X001
-/* score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
+/* score 68 (n73): ang/cx s5/s6 fixed with a weighted ref (debt): `do { c1 = rcos(ang); } while (0);` gives ang 9 refs
+   (3*9/178=.152, between dx .159 and cx .148; game order dy>dx>ang>cx). Still left: r in a1 (game a3; r's hard conflicts are
+   only v0/sp, nobody prefers a1/a2 - mode's a2 copy dies at the switch; int/short mode, rcos() decl, mode copy: worse),
+   sabs result v0/v1 (8 inline/compare forms: no change), +0x4e8 lh a0/v1 swap, D_1F8001D2 block regs.
+   Previous: score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
    Fixed this round: the dead `ay = q;` at the end keeps q alive past the r = q copy (cse rewrites to the reg with the
    later last use, n48), which restores the game's `move a3,v1` copy; in the D_1F8001D2 block, block-local
    `short t; unsigned short w;` per branch (w = t - a->h + 2; if (w >= 8)) removes the extra copy of the sum
@@ -29,7 +33,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
     short v;
-    int q, r;
+    int q, r, c1;
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = a->h->p.whole - b->h->p.whole;
@@ -49,7 +53,8 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
         }
         if ((unsigned)(((ang - r) & 0xfff) - 0x500) > 0x900) return 1;
     case 0:
-        cx = (unsigned)(rcos(ang) * b->box0) >> 12;
+        do { c1 = rcos(ang); } while (0);
+        cx = (unsigned)(c1 * b->box0) >> 12;
         cy = (unsigned)(rsin(ang) * b->box0) >> 12;
     }
     ax = cx;
