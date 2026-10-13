@@ -165,5 +165,25 @@ class GpuTest(unittest.TestCase):
         self.assertEqual(int(gp.vram[1, 1]), 31)
 
 
+class TestRooms(unittest.TestCase):
+    def test_ot_depth_marks(self):
+        """walk_ot records the ordering table slot of every primitive (depth 0 = farthest = drawn first): used to split the sky / HUD layers."""
+        from psxemu import machine as M
+        m = M.Machine(exe=False)
+        ot, n = 0x80100000, 8
+        m.cpu.R[4], m.cpu.R[5] = ot, n
+        m.h_clear_otagr(m.cpu)
+        head = ot + 4 * (n - 1)
+        for a, slot in ((0x80101000, 7), (0x80101010, 7), (0x80101020, 3), (0x80101030, 0)):
+            tag = m.cpu.r32(ot + 4 * slot)          # AddPrim: insert after the slot head
+            m.cpu.w32(a, 1 << 24 | tag & 0xFFFFFF)
+            m.cpu.w32(a + 4, 0x65000000 | slot)
+            m.cpu.w32(ot + 4 * slot, tag & 0xFF000000 | a & 0xFFFFFF)
+        pk = m.walk_ot(head)
+        depth = [((head & 0xFFFFFF) - mk) >> 2 for mk in m.walk_marks]
+        self.assertEqual([w[0] & 0xFF for _, w in pk], [7, 7, 3, 0])
+        self.assertEqual(depth, [0, 0, 4, 7])
+
+
 if __name__ == "__main__":
     unittest.main()

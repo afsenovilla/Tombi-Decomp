@@ -316,6 +316,9 @@ class Machine:
     def walk_ot(self, a):
         """[(addr, [words])] of the primitives of an OT/primitive list starting at a."""
         out = []
+        marks = self.walk_marks = []      # per primitive: address of the last empty OT entry before it (= its ordering table slot)
+        mark = 0
+        self.walk_head = a & 0xFFFFFF
         c = self.cpu
         seen = 0
         a &= 0xFFFFFF
@@ -328,12 +331,15 @@ class Machine:
             n = tag >> 24
             if n:
                 out.append((a, list(struct.unpack_from("<%dI" % n, c.mem, o + 4))))
+                marks.append(mark)
+            else:
+                mark = a
             a = tag & 0xFFFFFF
         return out
 
     def draw_packets(self, pk):
         env = dict(self.drawenv) if self.drawenv else None
-        self.frames.append((env, pk, self.dispenv))
+        self.frames.append((env, pk, self.dispenv, getattr(self, "walk_marks", None), getattr(self, "walk_head", 0)))
         del self.frames[:-self.keep_frames]
         self.frame_count += 1
         if self.render:
@@ -360,6 +366,7 @@ class Machine:
 
     def h_clear_otag(self, c):
         ot, n = c.R[4], c.R[5]
+        self.ot_info = (ot & 0xFFFFFF, n, 0)
         for i in range(n - 1):
             c.w32(ot + 4 * i, (ot + 4 * (i + 1)) & 0xFFFFFF)
         c.w32(ot + 4 * (n - 1), 0xFFFFFF)
@@ -367,6 +374,7 @@ class Machine:
 
     def h_clear_otagr(self, c):
         ot, n = c.R[4], c.R[5]
+        self.ot_info = (ot & 0xFFFFFF, n, 1)      # (address, entries, reversed)
         o = _cpu.phys(ot)
         if o >= 0 and n > 0:
             base = ot & 0xFFFFFF

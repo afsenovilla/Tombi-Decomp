@@ -546,3 +546,27 @@ Python, ~4 M instr/s; GTE after psx-spx; no load delay slots / interrupts / cach
 - **area00**: START on the title, 500 frames: first room of the Village of All Beginnings (sky/far background + 3D + dialogue), ~480 prims.
 - **worldmap**: the dialogue clicked through with CROSS, SELECT -> menu (Item/Event/Status/Map) -> DOWN x3 -> CROSS (SYS list 7 =
   A00701 map atlas); exact frame timings in `capture.TALK/TO_MAP` (deterministic). ~8 min.
+- **rooms** (`capture.py rooms OUT [--area N] [--section N] [--jobs 4] [--force]`, `screens.py OUT --composed rooms`): every area / room as
+  `room_<AA>_<n>_composed.png` (HUD / dialogue slots hidden) and `room_<AA>_<n>_sky.png` (far background alone; only for rooms that have one).
+  - **Debug area select (the game's own)**: `displayDebugScreen` / `debugSelectHandler` (gameplay mode 0): with `scratchpad.debug_mode_enabled`
+    (**0x1F8001B4**) = 1 at NEW GAME the game shows "AREA SELECT / SECTION SELECT" instead of starting; CIRCLE / START loads the pair through the
+    normal loader (`areaTransition` flag 0 -> full area list). We set the flag before START, save the machine at that menu (`rooms_base.state`)
+    and per room poke `GAME.selectedArea` (**0x8009C960**, u16) / `selectedSection` (**0x8009C962**) and press CIRCLE (spawn point
+    `selectedSpawnPoint` 0x8009C982 stays 0). Sections per area: u16 table at **0x80078790** (index = area; 0x8007878C = highest area, 23); the
+    areas on disc are 0..6, 8..11, 13, 14, 16..19 (7 = purified Dwarf Forest, 12, 15 do not exist): 109 rooms in all. Room n = load list n + 1 of
+    `LD0ARnn` (list 0 = area list). Door / warp transitions use gameplay mode 7 (`areaTransitionHandler`): `gameConfig.nextArea / nextSection /
+    nextSpawnPoint` = GAME + **0x434 / 0x436 / 0x440**, then task mode := 7, step 0 (not used: see failures).
+  - **Game task** (fixed) **0x801FD800**: +0x4A = 1 gameplay, +0x4C = mode (0 debug select, 1 / 2 / 4 / 5 / 6 = area modes of `areaMode*Handler`, 7 =
+    transition), +0x4E = step (1 = running); `0x1F8001CF` = room loaded. A room is "stable" 60 frames after mode in (1,2,4,5,6) and step 1 (~120-140 frames
+    after CIRCLE; after ~100-200 more frames Tombi can die and the debug select comes back, so capture early).
+  - **Layers**: `Machine.frames[i] = (drawenv, packets, dispenv, ot_marks, ot_head)`; the depth of a primitive = ordering table slot (head - mark) / 4, 0 =
+    farthest. The OT has 808 slots (ClearOTagR). **Slots 0..~10 = sky / far background** (area overlay: textured sprite rows `0xE1` + `0x65` and
+    poly strips, or the whole pre-rendered room picture in the static rooms); **slots ~530..800 = the 3D WMD room polys, objects, Tombi and effects**
+    z-sorted together; **slots 805..807 = HUD, dialogue box and text**. Rooms with no far layer (e.g. Phoenix Mountain) have nothing in slots < 100
+    and get no `_sky.png`. `capture.render_frame(m, keep)` re-rasterizes a recorded frame with a primitive filter.
+  - **Speed**: only the final frame is rasterized (`m.render = False` while loading; VRAM textures come from LoadImage anyway); ~12 frames / s ->
+    ~15 s per room, all 96 rooms in ~3 min with 4 processes (one machine per process, same base state).
+  - **Not captured (13 rooms)**: rooms whose load list is empty (`LD0AR11` sections 0, 3, 4; `AR16` 0..2; `AR17` 0, 6..10; `AR18` 0) inherit the area
+    overlay and resources of the room the player comes from (X011 etc.), and the game itself hangs on an empty list (`cdLoadTask` waits for a
+    queued file, LOAD_COMPLETE never set) unless the area changed. Straight from the debug select the overlay is missing and the interpreter runs
+    into zeroed RAM; entering them through a mode 7 transition from a sibling room also ends in a bad object pointer (objects of the previous area).
