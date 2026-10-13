@@ -27,7 +27,7 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
   OUT_DIR/sound/music/*.mid                      the 36 .SEQ sequences as standard MIDI (type 0)
   OUT_DIR/sound/music_audio/*.wav|mp3            every SEQ rendered to stereo 44.1 kHz audio with its own bank (software sequencer in tools/audio.py, needs numpy)
   OUT_DIR/sound/movie_audio/*.wav                the XA ADPCM audio track of each of the 30 .STR movies (37.8 kHz stereo)
-  OUT_DIR/video/NAME.png, NAME.mp4               poster frame of each movie (pure Python MDEC, tools/str.py); mp4 only if ffmpeg is in PATH
+  OUT_DIR/video/NAME.avi, NAME.mp4               each movie (pure Python MDEC, tools/str.py); mp4 only if ffmpeg is in PATH
                                                  (all frames as PNG: python3 tools/str.py frames Tombi.bin NAME OUT_DIR)
 The retail disc is only read.  Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same
 with no Python:
@@ -59,7 +59,7 @@ STEPS = [   # (key, group, label es, description)
     ("music", "Audio", "Musica (MIDI)", "SEQ sequences (OUT/sound/music)"),
     ("music_audio", "Audio", "Musica renderizada", "SEQ + bank rendered to audio (OUT/sound/music_audio)"),
     ("movie_audio", "Audio", "Audio de peliculas", "XA tracks (OUT/sound/movie_audio)"),
-    ("videos", "Video", "Videos (AVI/poster)", "AVI MJPEG+PCM (needs Pillow), poster PNG, mp4 if ffmpeg (OUT/video)"),
+    ("videos", "Video", "Videos (AVI)", "AVI MJPEG+PCM (needs Pillow), mp4 if ffmpeg (OUT/video)"),
 ]
 STEP_KEYS = [k for k, _, _, _ in STEPS]
 
@@ -167,7 +167,7 @@ class Extractor:
         self._setup()
         import importlib
         strmod = importlib.import_module("str")
-        self.log("video: poster + AVI (MJPEG + PCM, ~0.07 s/frame, ~10 min for all 30 movies) of every movie and, if ffmpeg is in PATH, mp4 ...")
+        self.log("video: AVI (MJPEG + PCM, ~0.07 s/frame, ~10 min for all 30 movies) of every movie and, if ffmpeg is in PATH, mp4 ...")
         strmod.export_all(self.img, self.out, log=self.log)
         if self.video_frames:
             for p, (lba, size) in sorted(strmod.str_files(self.img).items()):

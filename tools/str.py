@@ -5,7 +5,7 @@
   python3 tools/str.py frames Tombi.bin NAME OUT_DIR [N] [STEP]   PNG frames of MOVIE/NAME.STR (every STEP-th, at most N; slow: ~0.3 s/frame)
   python3 tools/str.py avi    Tombi.bin NAME OUT.avi        MJPEG + PCM AVI, plays everywhere (needs Pillow for the JPEG encoder)
   python3 tools/str.py mp4    Tombi.bin NAME OUT.mp4        H.264 + AAC through ffmpeg (only if ffmpeg is in PATH)
-  python3 tools/str.py all    Tombi.bin OUT_DIR             posters (OUT_DIR/video/NAME.png), NAME.avi (Pillow) and, with ffmpeg, NAME.mp4
+  python3 tools/str.py all    Tombi.bin OUT_DIR             NAME.avi (Pillow) and, with ffmpeg, NAME.mp4
 
 The .STR files are CD-XA streams: 2352 byte raw sectors, video sectors (Form 1, 2016 bytes of payload after a 32 byte header: 0x0160,
 0x8001, chunk, nchunks, frame, demux size, w, h, ...) interleaved 7:1 with XA audio sectors (audio.py).  A frame is a Bitstream v2 of
@@ -440,19 +440,18 @@ def write_avi(img, lba, size, out, log=print, label="", quality=90):
 
 def export_all(img, out, log=print, mp4=True, avi=True, only=None):
     vd = os.path.join(out, "video"); os.makedirs(vd, exist_ok=True)
-    npng = nmp4 = navi = 0
+    nmp4 = navi = 0
     for p, (lba, size) in sorted(str_files(img).items()):
         name = os.path.basename(p)[:-4]
         if only and name not in only: continue
-        poster(img, lba, size, os.path.join(vd, name + ".png")); npng += 1
         if avi:
             try:
                 if write_avi(img, lba, size, os.path.join(vd, name + ".avi"), log, name): navi += 1
             except Exception as e:
                 log("video %s: AVI failed: %r" % (name, e))
         if mp4 and to_mp4(img, lba, size, os.path.join(vd, name + ".mp4")): nmp4 += 1
-    log("video: %d poster frames, %d avi, %d mp4 (mp4 only if ffmpeg is in PATH) under %s" % (npng, navi, nmp4, vd))
-    return npng, nmp4
+    log("video: %d avi, %d mp4 (mp4 only if ffmpeg is in PATH) under %s" % (navi, nmp4, vd))
+    return navi, nmp4
 
 
 def main():
