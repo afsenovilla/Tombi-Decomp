@@ -43,7 +43,7 @@ i18n.add({
         "d.isook": "ISO generada:\n{0}\n\nArchivos cambiados: {1}\n\nSe puede borrar la carpeta de trabajo:\n{2}", "d.isofail": "Error al generar la ISO.",
         "d.fallback": "No se pudo montar la ISO (falta mkpsxiso o solo se abrió una carpeta).\n\nSe escribieron {0} archivo(s) en:\n{1}\n\nCópialos sobre la carpeta extraída del disco y reconstruye con mkpsxiso: python tools/mkdisc.py build --relayout (ver README).",
         "d.fallbacktitle": "Archivos modificados", "d.unsaved": "Hay {0} recurso(s) modificado(s) sin guardar como mod. ¿Salir igualmente?",
-        "d.preview": "Vista previa en contexto (320x240)", "d.nopreview": "La vista previa en contexto existe para los sprites de la interfaz (NOW / LOADING) y la pantalla now_loading.",
+        "d.preview": "Vista previa en contexto (320x240)", "d.nopreview": "La vista previa en contexto existe para los sprites de la interfaz (TRY / AGAIN) y la pantalla try_again.",
         "d.openfirst": "Abre primero un disco.", "d.pickfirst": "Elige primero una imagen en el árbol.", "d.revertq": "¿Descartar los cambios de {0}?",
         "d.modname": "Carpeta del mod (se crea; el nombre de la carpeta es el nombre del mod)",
         "help": "Árbol de la izquierda: Pantallas, Interfaz/HUD (tabla UiSpriteDef de MAIN0), páginas por lista de carga, sprites WPP y paletas.\n\n"
@@ -72,7 +72,7 @@ i18n.add({
         "d.isook": "ISO built:\n{0}\n\nChanged files: {1}\n\nThe work folder can be deleted:\n{2}", "d.isofail": "Error building the ISO.",
         "d.fallback": "The ISO could not be built (mkpsxiso is missing or only a folder was opened).\n\n{0} file(s) were written to:\n{1}\n\nCopy them over the extracted disc folder and rebuild with mkpsxiso: python tools/mkdisc.py build --relayout (see README).",
         "d.fallbacktitle": "Modified files", "d.unsaved": "{0} modified resource(s) are not saved as a mod. Quit anyway?",
-        "d.preview": "Preview in context (320x240)", "d.nopreview": "The in-context preview exists for the interface sprites (NOW / LOADING) and the now_loading screen.",
+        "d.preview": "Preview in context (320x240)", "d.nopreview": "The in-context preview exists for the interface sprites (TRY / AGAIN) and the try_again screen.",
         "d.openfirst": "Open a disc first.", "d.pickfirst": "Pick an image in the tree first.", "d.revertq": "Discard the changes of {0}?",
         "d.modname": "Mod folder (created; the folder name is the mod name)",
         "help": "Left tree: Screens, Interface/HUD (the UiSpriteDef table of MAIN0), pages by load list, WPP sprites and palettes.\n\n"
@@ -679,7 +679,7 @@ class App:
         uid = None
         if it and it[0] == "ui":
             uid = it[1]
-        elif not (it and it[0] == "screen" and it[1] == "now_loading"):
+        elif not (it and it[0] == "screen" and it[1] == "try_again"):
             messagebox.showinfo(tr("info"), tr("d.nopreview"))
             return
         im = self.core.preview_context(uid if uid in G.UI_SCREEN_POS else None)

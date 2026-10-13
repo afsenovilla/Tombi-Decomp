@@ -31,10 +31,10 @@ class T(unittest.TestCase):
     def test_ui_table(self):
         t = self.core.ui_table()
         self.assertEqual(len(t), 3)
-        self.assertEqual(t[1], (1, 184, 192, 40, 16, 352, 509))     # NOW
-        self.assertEqual(t[2], (2, 184, 208, 56, 16, 352, 509))     # LOADING
+        self.assertEqual(t[1], (1, 184, 192, 40, 16, 352, 509))     # TRY
+        self.assertEqual(t[2], (2, 184, 208, 56, 16, 352, 509))     # AGAIN
         r = {x.label.split()[1]: x for x in self.core.surface_for(("ui", 1)).rects}
-        self.assertEqual(r["NOW"].pal.key(), ("SYSTEM/A00802.000", 224, 16))
+        self.assertEqual(r["TRY"].pal.key(), ("AREA00/CLUT01.GAM", 29 * 256 + 224, 16))
 
     def test_page_roundtrip(self):
         for item in (("page", "SYSTEM/A10003.GAM", "SYS", 0), ("screen", "title_landscape"), ("screen", "menu_atlas_save_load"),

@@ -29,9 +29,10 @@ STATIC = [
 ]
 # 4 bpp font/HUD sheet of the title list, one tile per palette of the 16 x n strips that come with it
 FONT_SHEET = ("title_font_sheet", "SYSTEM/A00204.000", 64, ["SYSTEM/A00205.000", "SYSTEM/A00206.000"], (0, 0, 256, 160))
-# "NOW LOADING": 4 bpp page SYSTEM/A10003.GAM (VRAM 256,256 = tpage 0x14; 0x24 on the other GetGraphType), sprites 1 "NOW" (184,192,40x16) and 2
-# "LOADING" (184,208,56x16) of the UiSpriteDef table at 0x80078808, drawn by FUN_800212b4 at (104,96) and (160,96); CLUT (352,509) = palette 14 of A00802
-NOW_LOADING = ("now_loading", "SYSTEM/A10003.GAM", 64, "SYSTEM/A00802.000", 14, (184, 192, 56, 32))
+# "NOW LOADING": SYSTEM/A00900.000 (SYS list 9, 256 x 72, 4 bpp at VRAM 0,0); the last row (y 71) holds 3 palettes of 16 words (at word 16, 32, 48 of the row)
+NOW_LOADING = ("now_loading", "SYSTEM/A00900.000", 64, "SYSTEM/A00900.000", 71 * 64 + 16, (0, 0, 256, 64))
+# "TRY AGAIN": sprites 1 (184,192 40x16) and 2 (184,208 56x16) of the UiSpriteDef table (0x80078808) in SYSTEM/A10003.GAM; CLUT (352,509) = row 29, words 224..239 of the area CLUT strips
+TRY_AGAIN = ("try_again", "SYSTEM/A10003.GAM", 64, "AREA00/CLUT01.GAM", 29 * 256 + 224, (184, 192, 56, 32))
 
 
 def _words(d):
@@ -117,18 +118,19 @@ def export_screens(out, log=lambda m: None):
     if fs:
         vram.write(os.path.join(out, FONT_SHEET[0] + ".png"), fs)
         n += 1
-    nl = now_loading(*NOW_LOADING)
-    if nl:
-        vram.write(os.path.join(out, NOW_LOADING[0] + ".png"), nl)
-        n += 1
+    for sc in (NOW_LOADING, TRY_AGAIN):
+        nl = now_loading(*sc)
+        if nl:
+            vram.write(os.path.join(out, sc[0] + ".png"), nl)
+            n += 1
     return n
 
 
-def now_loading(name, page, wwords, clutf, row, crop):
+def now_loading(name, page, wwords, clutf, first, crop):
     d, c = vram.resource(page), vram.resource(clutf)
     if d is None or c is None:
         return None
-    pal = list(_words(c)[row * 16:row * 16 + 16])
+    pal = list(_words(c)[first:first + 16])
     cx, cy, cw, ch = crop
     rgb = []
     for y in range(cy, cy + ch):

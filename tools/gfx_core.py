@@ -11,7 +11,7 @@ entries, keeps all edits in memory (undo), writes/reads mods (mods/<name>/mod.js
 Edits are bytes of the *unpacked* resource (GAM files are repacked with tools/gam_py.py when a mod/disc is written).  A 4 bpp page stores
 palette indices only; the palette is a separate CLUT record (PalRef = file, first word, colour count) that the sprite/screen points at.
 UiSpriteDef (MAIN0 0x80078808): the table is `{u16 u, v, w, h; s16 clutX, clutY}` per entry; it holds only 3 plausible entries
-(0 = unused placeholder, 1 = NOW, 2 = LOADING), the bytes after them are other data."""
+(0 = unused placeholder, 1 = TRY, 2 = AGAIN), the bytes after them are other data."""
 import contextlib, fnmatch, io, json, os, re, shutil, struct, sys, tempfile
 from array import array
 
@@ -23,9 +23,9 @@ import i18n
 from i18n import tr
 
 UI_TABLE_VADDR = 0x80078808
-UI_PAGE = "SYSTEM/A10003.GAM"                      # page the NOW / LOADING sprites are cut from (tpage 0x14, resident SYSTEM list 0)
-UI_SCREEN_POS = {1: (104, 96), 2: (160, 96)}      # drawNowLoading (FUN_800212b4): screen position of the sprites
-UI_NAMES = {0: "UI 0", 1: "NOW", 2: "LOADING"}
+UI_PAGE = "SYSTEM/A10003.GAM"                      # page the TRY / AGAIN sprites are cut from (tpage 0x14, resident SYSTEM list 0)
+UI_SCREEN_POS = {1: (104, 96), 2: (160, 96)}      # FUN_800212b4 ("drawNowLoading", really the TRY AGAIN prompt): screen position of the sprites
+UI_NAMES = {0: "UI 0", 1: "TRY", 2: "AGAIN"}
 
 
 class CoreError(Exception):
@@ -192,8 +192,11 @@ def screens_list():
     return out
 
 
-EXTRA_SCREENS = [   # (name, page, w words, bpp, CLUT file, palette row (16 colours), crop, opaque)
-    ("now_loading", "SYSTEM/A10003.GAM", 64, "SYSTEM/A00802.000", 14, (184, 192, 56, 32)),
+EXTRA_SCREENS = [   # (name, page, load list, index, palette PalRef args (file, first word, count), crop)
+    # NOW LOADING: A00900 (SYS list 9, 256 x 72, 4 bpp) holds its own palettes in its last row (y 71: 3 x 16 words at 16, 32, 48)
+    ("now_loading", "SYSTEM/A00900.000", "SYS", 9, ("SYSTEM/A00900.000", 71 * 64 + 16, 16), (0, 0, 256, 64)),
+    # TRY AGAIN: the two UiSpriteDef sprites (184,192 40x16 and 184,208 56x16) of the HUD page; CLUT (352,509) = row 29 of the area CLUT strips
+    ("try_again", "SYSTEM/A10003.GAM", "SYS", 0, ("AREA00/CLUT01.GAM", 29 * 256 + 224, 16), (184, 192, 56, 32)),
 ]
 
 
@@ -416,6 +419,14 @@ class Core:
             s.pal = pal
         if name == UI_PAGE:
             s.rects = self.ui_rects()
+            if crop:    # rects are in page coordinates; the surface shows the crop, so move them to its origin and drop the outside ones
+                cx, cy, cw, ch = crop
+                keep = []
+                for r in s.rects:
+                    if r.x < cx + cw and r.x + r.w > cx and r.y < cy + ch and r.y + r.h > cy:
+                        r.x, r.y = r.x - cx, r.y - cy
+                        keep.append(r)
+                s.rects = keep
         return s
 
     def _screen_surface(self, name):
@@ -423,9 +434,9 @@ class Core:
             if sc["name"] == name:
                 break
         else:
-            for nm, page, ww, clutf, row, crop in EXTRA_SCREENS:
+            for nm, page, ld, idx, pal, crop in EXTRA_SCREENS:
                 if nm == name:
-                    return self._page_surface(page, "SYS", 0, crop, PalRef(clutf, row * 16, 16), name)
+                    return self._page_surface(page, ld, idx, crop, PalRef(*pal), name)
             raise err("c.badkind", name)
         import screens
         layers = [(f, x * 2 - min(p[1] for p in sc["pages"]) * 2, screens._pagew(f, sc["pages"]), self.page_info(f)["h"]) for f, x in sc["pages"]]
@@ -512,20 +523,20 @@ class Core:
     def ui_rects(self):
         out = []
         for i, u, v, w, h, cx, cy in self.ui_table():
-            ref = self.clut_lookup(cx, cy, 16, [("SYS", 0), ("SYS", 8)])
+            ref = self.clut_lookup(cx, cy, 16, [("AR00", 1), ("SYS", 0), ("SYS", 8)])
             lab = "%d  %s" % (i, UI_NAMES.get(i, "UI %d" % i))
             out.append(Rect(lab, u, v, w, h, ref, "ui", ("ui", i)))
         return out
 
     def preview_context(self, ui_id=None):
-        """320x240 black canvas with the sprite(s) at their screen position (NOW LOADING: ids 1 and 2). Returns a PIL image."""
+        """320x240 black canvas with the sprite(s) at their screen position (TRY AGAIN: ids 1 and 2). Returns a PIL image."""
         from PIL import Image
         s = self._page_surface(UI_PAGE, "SYS", 0)
         im = Image.new("RGBA", (320, 240), (0, 0, 0, 255))
         for i, u, v, w, h, cx, cy in self.ui_table():
             if i not in UI_SCREEN_POS or (ui_id is not None and i != ui_id):
                 continue
-            ref = self.clut_lookup(cx, cy, 16, [("SYS", 0), ("SYS", 8)])
+            ref = self.clut_lookup(cx, cy, 16, [("AR00", 1), ("SYS", 0), ("SYS", 8)])
             sub = s.render(ref, (u, v, w, h))
             im.alpha_composite(sub, UI_SCREEN_POS[i])
         return im
