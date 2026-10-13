@@ -9,7 +9,8 @@ The mod layout (mod.json with "patchs" -> file + targets[pattern], mods/load_ord
                                   {"pattern":"AREA00/A004.000","frame":12}]}]}   WPP sprite frame number (frame_0012)
 PNG rules: GRPX page 8 bpp = indexed PNG of 2*w x h, 4 bpp = indexed PNG with <= 16 colours of 4*w x h (index = palette index,
 the palette is NOT written back: edit the CLUT file with a 16 bit PNG patch), 16 bpp / CLUT = RGB(A) PNG of w x h (RGB -> 5 bit
-linear, a fully transparent pixel = 0x0000, anything else gets a nonzero word).  WPP frame = indexed PNG, 4*W x H, indices 0..15.
+linear, a fully transparent pixel = 0x0000, anything else gets a nonzero word; the STP bit of the word it replaces is kept, so a PNG
+exported from the unchanged file patches back byte-identical).  WPP frame = indexed PNG, 4*W x H, indices 0..15.
 GAM files are unpacked/repacked with tools/gam.py, WPP frames re-encoded with tools/wpp.py.
 
   tools/mod.py list                       mods found and their order
@@ -30,7 +31,7 @@ def order():
     return [n for n in first if n in names] + [n for n in names if n not in first]
 
 
-def png_words(path, w, h, bpp):
+def png_words(path, w, h, bpp, orig=None):
     from PIL import Image
     im = Image.open(path)
     if bpp in (4, 8):
@@ -49,26 +50,27 @@ def png_words(path, w, h, bpp):
     if im.size != (w, h):
         sys.exit("%s: size %s, expected %dx%d" % (path, im.size, w, h))
     out = bytearray()
-    for r, g, b, a in im.getdata():
+    for k, (r, g, b, a) in enumerate(im.getdata()):
         v = (r * 31 + 127) // 255 | ((g * 31 + 127) // 255) << 5 | ((b * 31 + 127) // 255) << 10
         if a == 0:
             v = 0
-        elif v == 0:
-            v = 0x8000   # opaque black = STP bit only
+        else:
+            if orig is not None and 2 * k + 2 <= len(orig):
+                v |= orig[2 * k + 1] & 0x80     # the STP bit (15) of the word being replaced is kept: a PNG cannot carry it
+            if v & 0x7FFF == 0 and not v & 0x8000:
+                v = 0x8000   # opaque black = STP bit only
         out += struct.pack("<H", v)
     return bytes(out)
 
 
 def patch_file(path, nm, png, frame, tmp):
-    import area000 as A, wpp, gam
+    import area000 as A, wpp, gam_py, vram
     d = open(path, "rb").read()
     is_gam = path.upper().endswith(".GAM")
     base = nm.rsplit(".", 1)[0]
     if is_gam:
-        raw = os.path.join(tmp, "raw.bin")
-        if not gam.unpack_one(path, raw):
-            sys.exit("gam unpack failed: " + nm)
-        d = open(raw, "rb").read()
+        packed = d
+        d = gam_py.unpack(packed)     # pure Python (tools/gam_py.py): no Go TombaTools needed
     rec = A.get_rec(nm)
     if frame is not None:
         r = wpp.is_wpp(nm)
@@ -91,15 +93,12 @@ def patch_file(path, nm, png, frame, tmp):
         if not lr:
             sys.exit("%s: no GRPX load record" % nm)
         w, h = lr["w"], lr["h"]
-        small = lr["h"] <= 32 and w in (16, 48, 256)
-        bpp = 16 if small else (8 if A.find_clut(base) else 4)
-        new = png_words(png, w, h, bpp)
+        bpp = vram.page_bpp(nm) or 4
+        new = png_words(png, w, h, bpp, d if bpp == 16 else None)
     if len(new) != len(d):
         sys.exit("%s: patched size %d != %d" % (nm, len(new), len(d)))
     if is_gam:
-        open(raw, "wb").write(new)
-        if not gam.pack_one(raw, path):
-            sys.exit("gam pack failed: " + nm)
+        open(path, "wb").write(gam_py.pack(new, packed))
     else:
         open(path, "wb").write(new)
 

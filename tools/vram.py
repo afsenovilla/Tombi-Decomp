@@ -186,6 +186,22 @@ def pair_cluts(lst):
     return out
 
 
+def page_bpp(name):
+    """Bits per pixel of the GRPX record `name` ('SYSTEM/A10003.GAM'): 16 for palette blocks, 8 when a load list pairs it with a 256
+    colour CLUT record (pair_cluts), else 4.  None if no load list names it."""
+    base = name.rsplit(".", 1)[0]
+    res = None
+    for lists in A.load_lists().values():
+        for lst in lists:
+            pr = pair_cluts(lst)
+            for i, r in enumerate(lst):
+                if is_grpx(r) and r["name"].rsplit(".", 1)[0] == base:
+                    if is_clut_rec(r):
+                        return 16
+                    res = res or (8 if i in pr else 4)
+    return res
+
+
 def place(v, r, paired8=False):
     d = resource(r["name"])
     w, h = r["w"], r["h"]

@@ -1,0 +1,70 @@
+name: Graphics editor (Windows exe)
+
+# Builds tools/gfx_editor.py (graphics editor, see README) into a single Windows executable with
+# PyInstaller and commits it to dist/windows/tombi-gfx.exe.  The exe bundles the mkpsxiso/dumpsxiso release binaries
+# (Lameguy64/mkpsxiso, GPL-2.0, see THIRD_PARTY_NOTICES.md) so that "Generar ISO" works without installing anything.
+on:
+  push:
+    branches: [master]
+    paths:
+      - tools/gfx_editor.py
+      - tools/gfx_core.py
+      - tools/i18n.py
+      - tools/gam_py.py
+      - tools/mod.py
+      - tools/vram.py
+      - tools/area000.py
+      - tools/screens.py
+      - tools/wpp.py
+      - tools/mkdisc.py
+      - tools/cdfiles.py
+      - tools/icons/**
+      - .github/workflows/gfx-exe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MKPSXISO_VERSION: "2.30"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch mkpsxiso
+        shell: bash
+        run: |
+          mkdir -p build/mk
+          curl -fsSL -o build/mk/mkpsxiso.zip "https://github.com/Lameguy64/mkpsxiso/releases/download/v${MKPSXISO_VERSION}/mkpsxiso-${MKPSXISO_VERSION}-win64.zip"
+          unzip -j -o build/mk/mkpsxiso.zip "*/mkpsxiso.exe" "*/dumpsxiso.exe" -d build/mk
+          ls -l build/mk
+
+      - name: Build
+        shell: bash
+        run: |
+          python -m pip install pyinstaller pillow
+          pyinstaller --onefile --windowed --name tombi-gfx --distpath build/exe --workpath build/pyi --specpath . \
+            --hidden-import gfx_core --hidden-import i18n --hidden-import gam_py --hidden-import mod --hidden-import vram --hidden-import area000 \
+            --hidden-import screens --hidden-import wpp --hidden-import mkdisc --hidden-import cdfiles --hidden-import PIL.ImageTk --paths tools \
+            --icon tools/icons/gfx.ico --add-data "tools/icons/gfx.ico;icons" --add-data "tools/icons/gfx.png;icons" \
+            --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/gfx_editor.py
+          mkdir -p dist/windows
+          cp build/exe/tombi-gfx.exe dist/windows/tombi-gfx.exe
+
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/windows/tombi-gfx.exe
+          if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
+          git commit -m "dist: rebuild tombi-gfx.exe (${GITHUB_SHA::7})"
+          git pull --no-rebase -q -X theirs origin master
+          git push origin HEAD:master

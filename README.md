@@ -206,6 +206,9 @@ game/           your own game files (ignored by git)
 | `tools/wfm.py` | Assets: WFM font/dialogue files <-> YAML + glyph PNGs, byte-exact round trip (369/369) through a [TombaTools](https://github.com/hansbonini/tombatools) fork |
 | `tools/wfm_py.py` | Assets: pure-Python WFM codec (no Go): dialogues as readable text with tags (`{NL} {CLEAR} {WAIT} {BOX w h} {PAUSE n} {COLOR n}`...), glyph table, byte-exact round trip on 369/369 files (`--check`); characters come from `tools/wfm_charmap.json` (bitmap hashes, made by `wfm_charmap_gen.py`) |
 | `tools/text_editor.py` | Text editor with live preview (tkinter; logic in `text_core.py`, `text_preview.py`): open the disc image, edit dialogues drawn with the game font in a mock box (x1/x2/x3, red warnings for lines too wide, too many lines, >128 glyphs), save/load JSON project, export/import TXT/JSON, **Generar ISO** (re-encodes the WFM and runs `mkdisc.py --relayout`); Windows build `dist/windows/tombi-text.exe` (bundles mkpsxiso) |
+| `tools/gfx_editor.py` | Graphics editor (tkinter; logic in `gfx_core.py`): open the disc image, browse screens, the `UiSpriteDef` table of MAIN0 (NOW / LOADING), VRAM pages per load list, WPP sprite frames and CLUT palettes with their real colours, rectangle overlay, export/import indexed PNG (RGB(A) PNG is quantised to the palette), palette editing (15 bit, shared-palette warning), undo, in-context preview, save/load mod (`mods/<name>/mod.json` + PNG, the `mod.py` format), **Build ISO**; UI language selector (`i18n.py`); Windows build `dist/windows/tombi-gfx.exe` (bundles mkpsxiso). Tests: `tools/test_gfx.py` |
+| `tools/gam_py.py` | Assets: pure-Python GAM encoder (the decoder is `area000.gam_unpack`), valid streams, original bytes kept for unchanged data; used by `mod.py` and the graphics editor so no Go is needed |
+| `tools/i18n.py` | UI languages of the Windows tools (es, en, fr, de, it, pt): catalogs, system language detection, choice saved in `%APPDATA%/TombiTools/settings.json` |
 | `tools/gam.py` | Assets: GAM (the game's LZ) unpack/pack; `--check` runs the whole round trip (816 files) |
 | `tools/mkdisc.py` | Assets: rebuilds the `.bin/.cue` from `game/disc/fs` with mkpsxiso, SHA-1 identical to the original (`--check`) |
 | `tools/cdfiles.py` | Assets: the LBA/size file table inside `EXE/MAIN0..8.EXE` (`dump`, `check` against an image, `update` from a new layout); used by `mkdisc.py build --relayout` |
@@ -235,6 +238,15 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
   (needs about 1.5 GB of free disk for its work folder; the first run dumps the original disc). Only characters that exist in the game fonts can
   be typed (no `ü`, `:` or `%` in the PAL fonts): missing ones are borrowed from other files when possible, else the editor says so.
   Opening a folder instead of the image, or running without the bundled mkpsxiso, writes just the patched `.WFM` files plus instructions.
+- `dist/windows/tombi-gfx.exe`: graphics editor. Open `Tombi.bin`; the tree on the left has Screens, Interface/HUD (the three plausible `UiSpriteDef`
+  entries of MAIN0: 0 unused, 1 NOW, 2 LOADING), Pages by load list, Sprites (WPP frames) and Palettes (CLUT). The middle shows the page with the palette
+  chosen in the right-hand list (x1..x8, optional sprite rectangles; click one or drag a region). `Export/Import PNG` work on the whole image or the
+  selection: an indexed PNG with the same palette is used as is, an RGB(A) PNG is converted to the nearest palette colour (transparent = index 0 / word
+  0x0000) with a warning when it has more than 16/256 colours. Clicking a palette swatch opens a colour chooser (15-bit colours, STP bit kept; a warning
+  lists the other images that share the palette). `Save mod` writes `mods/<name>/mod.json` + PNGs that `python tools/mod.py build --mods <name>` also
+  applies; `Build ISO` writes a new `.bin`/`.cue` (about 1.5 GB free; without mkpsxiso or with a folder it writes the changed files only).
+- All three exes have an **Idioma / Language** selector (Español, English, Français, Deutsch, Italiano, Português; default = system language,
+  saved in `%APPDATA%/TombiTools/settings.json`).
 
 ## Related projects
 
