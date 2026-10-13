@@ -141,7 +141,8 @@ def relayout(a, dump, out_bin):
             open(exe, "wb").write(new)
             changed += 1
         print("relayout %s: %d table entries changed" % (os.path.relpath(exe, a.fs), n))
-    json.dump({k: list(v) for k, v in lay.items()}, open(os.path.splitext(out_bin)[0] + ".layout.json", "w"), indent=0)
+    with open(os.path.splitext(out_bin)[0] + ".layout.json", "w") as fo:
+        json.dump({k: list(v) for k, v in lay.items()}, fo, indent=0)
     return changed
 
 

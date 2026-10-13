@@ -41,6 +41,7 @@ def layout_from_image(path):
 
     pvd = sec(16)
     if pvd[1:6] != b"CD001":
+        f.close()
         sys.exit("%s: not an ISO9660 image" % path)
     out = {}
 
@@ -65,7 +66,10 @@ def layout_from_image(path):
                 out[pre + nm.split(";")[0]] = (elba, esz)
 
     root = pvd[156:190]
-    walk(struct.unpack("<I", root[2:6])[0], struct.unpack("<I", root[10:14])[0], "")
+    try:
+        walk(struct.unpack("<I", root[2:6])[0], struct.unpack("<I", root[10:14])[0], "")
+    finally:
+        f.close()   # Windows: a handle left open keeps mkpsxiso from rewriting the image in the relayout pass
     return out
 
 
