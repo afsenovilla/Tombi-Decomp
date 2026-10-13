@@ -36,6 +36,15 @@ class T(unittest.TestCase):
         r = {x.label.split()[1]: x for x in self.core.surface_for(("ui", 1)).rects}
         self.assertEqual(r["TRY"].pal.key(), ("AREA00/CLUT01.GAM", 29 * 256 + 224, 16))
 
+    def test_backdrops(self):
+        import palinfer
+        ks = palinfer.backdrop_lists(self.core)
+        self.assertIn(51, ks)
+        self.assertGreaterEqual(len(ks), 18)
+        sf = self.core.surface_for(("screen", "backdrop_L51"))
+        self.assertEqual(sf.bpp, 8)
+        self.assertEqual(sf.pal.key(), ("AREA09/CLUT03.GAM", 31 * 256, 256))
+
     def test_page_roundtrip(self):
         for item in (("page", "SYSTEM/A10003.GAM", "SYS", 0), ("screen", "title_landscape"), ("screen", "menu_atlas_save_load"),
                      ("page", "SYSTEM/A00204.000", "SYS", 2)):

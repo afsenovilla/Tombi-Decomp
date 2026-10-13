@@ -670,7 +670,7 @@ class Core:
         if p["bpp"] == 4:
             return self.pal_choice.get(name) or (self._page_surface(name, p["ld"], p["idx"]).pal)
         if p["bpp"] == 8:
-            return self.pal_choice.get(name) or (PalRef(p["clut"]["name"], 0, 256) if p["clut"] else None)
+            return self.pal_choice.get(name) or (PalRef(p["clut"]["name"], 0, 256) if p["clut"] else (self.backdrop(p["idx"]) or {}).get("ref") if p["ld"] == "SYS" else None)
         return None
 
     def save_mod(self, folder, name=None, description=""):
