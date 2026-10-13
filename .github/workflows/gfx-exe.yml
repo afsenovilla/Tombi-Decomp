@@ -16,6 +16,8 @@ on:
       - tools/area000.py
       - tools/screens.py
       - tools/wpp.py
+      - tools/anim.py
+      - tools/anim_player.py
       - tools/mkdisc.py
       - tools/cdfiles.py
       - tools/icons/**
@@ -52,7 +54,7 @@ jobs:
           python -m pip install pyinstaller pillow
           pyinstaller --onefile --windowed --name tombi-gfx --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import gfx_core --hidden-import i18n --hidden-import gam_py --hidden-import mod --hidden-import vram --hidden-import area000 \
-            --hidden-import screens --hidden-import wpp --hidden-import mkdisc --hidden-import cdfiles --hidden-import PIL.ImageTk --paths tools \
+            --hidden-import screens --hidden-import wpp --hidden-import anim --hidden-import anim_player --hidden-import PIL.GifImagePlugin --hidden-import mkdisc --hidden-import cdfiles --hidden-import PIL.ImageTk --paths tools \
             --icon tools/icons/gfx.ico --add-data "tools/icons/gfx.ico;icons" --add-data "tools/icons/gfx.png;icons" \
             --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/gfx_editor.py
           mkdir -p dist/windows

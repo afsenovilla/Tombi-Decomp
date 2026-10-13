@@ -273,12 +273,23 @@ class Core:
     def area_name(self, ld):
         return "SYSTEM" if ld == "SYS" else "AREA" + ld[2:]
 
+    def sys_list_no(self, lst):
+        if getattr(self, "_sysno", None) is None:
+            self._sysno = {id(l): k for k, l in enumerate(self.lists["SYS"])}
+        return self._sysno.get(id(lst))
+
+    def backdrop(self, k):
+        import palinfer
+        return palinfer.backdrop(self, k)
+
     def grpx(self, lst):
         pr = self.vram.pair_cluts(lst)
         out = []
+        k = self.sys_list_no(lst)
+        bd = self.backdrop(k) if k is not None and k >= 9 else None
         for i, r in enumerate(lst):
             if self.vram.is_grpx(r):
-                bpp = 16 if self.vram.is_clut_rec(r) else (8 if i in pr else 4)
+                bpp = 16 if self.vram.is_clut_rec(r) else (8 if (i in pr or bd) else 4)
                 out.append((i, r, bpp, lst[pr[i]] if i in pr else None))
         return out
 
@@ -413,6 +424,10 @@ class Core:
         s.opaque = False
         if p["bpp"] == 8 and p["clut"]:
             s.pal = self.pal_choice.get(name) or PalRef(p["clut"]["name"], 0, 256)
+        elif p["bpp"] == 8 and ld == "SYS" and self.backdrop(idx):
+            bd = self.backdrop(idx)
+            s.pal = self.pal_choice.get(name) or bd["ref"]
+            s.pal_note = tr("l.deduced", bd["label"], "backdrop")
         elif p["bpp"] == 4:
             s.pal = self.pal_choice.get(name) or pal
             if not s.pal:
@@ -440,6 +455,8 @@ class Core:
         return s
 
     def _screen_surface(self, name):
+        if name.startswith("backdrop_L"):
+            return self._backdrop_surface(int(name[10:]))
         for sc in screens_list():
             if sc["name"] == name:
                 break
@@ -461,6 +478,23 @@ class Core:
         s.ld, s.idx = "SYS", 0
         s.pageinfo = self.page_info(sc["pages"][0][0])
         s.ld, s.idx = s.pageinfo["ld"], s.pageinfo["idx"]
+        return s
+
+    def _backdrop_surface(self, k):
+        bd = self.backdrop(k)
+        if not bd:
+            raise err("c.badkind", "backdrop_L%d" % k)
+        recs = [self.page_info(n, "SYS", k) for n in bd["pages"]]
+        x0 = min(p["x"] for p in recs)
+        s = Surface(self, "backdrop_L%d" % k, 8)
+        s.layers = [(p["name"], (p["x"] - x0) * 2, p["w"], p["h"]) for p in recs]
+        s.crop = (0, 0, max((p["x"] - x0 + p["w"]) * 2 for p in recs), max(p["h"] for p in recs))
+        s.W, s.H = s.crop[2], s.crop[3]
+        s.pal = self.pal_choice.get(recs[0]["name"]) or bd["ref"]
+        s.pal_note = tr("l.deduced", bd["label"], "backdrop")
+        s.opaque = False
+        s.pageinfo = recs[0]
+        s.ld, s.idx = "SYS", k
         return s
 
     def _clut_surface(self, name):
@@ -491,6 +525,18 @@ class Core:
         s.pal = pal
         s.wpp = True
         return s
+
+    def anim_data(self):
+        """(catalogue, anim.Sprites) of Tombi's animations (tools/anim.py), cached."""
+        if not getattr(self, "_anim", None):
+            import anim
+            self._anim = (anim.catalog(self.disc.raw), anim.Sprites())
+        return self._anim
+
+    def _anim_nodes(self):
+        cat = self.anim_data()[0]
+        return [dict(text="%02d  %s" % (a["id"], a["name"]), item=("anim", a["id"]), children=[], lazy=None)
+                for a in cat if a["alias_of"] is None]
 
     def wpp(self, name):
         if name not in self._wpp:
@@ -557,6 +603,9 @@ class Core:
         N = lambda text, item=None, children=None, lazy=None: dict(text=text, item=item, children=children or [], lazy=lazy)
         root = []
         scr = [N(sc["name"], ("screen", sc["name"])) for sc in screens_list()] + [N(e[0], ("screen", e[0])) for e in EXTRA_SCREENS]
+        import palinfer
+        scr.append(N(tr("t.backdrops"), children=[N("L%d  %s" % (k, palinfer.backdrop(self, k)["name"]), ("screen", "backdrop_L%d" % k))
+                                                 for k in palinfer.backdrop_lists(self)]))
         root.append(N(tr("t.screens"), children=scr))
         ui = [N(tr("t.uitable"), children=[N("%d  %s  (%d,%d %dx%d)" % (i, UI_NAMES.get(i, "UI %d" % i), u, v, w, h), ("ui", i))
                                            for i, u, v, w, h, cx, cy in self.ui_table()])]
@@ -576,6 +625,7 @@ class Core:
             pg.append(grp)
         root.append(N(tr("t.pages"), children=pg))
         root.append(N(tr("t.sprites"), lazy=self._sprite_nodes))
+        root.append(N(tr("t.anims"), lazy=self._anim_nodes))
         pal = []
         for ld in sorted(self.lists, key=lambda x: (x != "SYS", x)):
             names = []
@@ -1013,8 +1063,8 @@ S_ES = {
     "c.space": "Poco espacio libre: la ISO necesita unos {0} MB y hay {1} MB.", "c.mkfail": "mkpsxiso falló: {0}\n{1}",
     "c.bigimg": "La imagen ({0}x{1}) es mayor que el destino ({2}x{3}).",
     "pal.row": "{0}  fila {1}", "pal.sub": "{0}  fila {1} · paleta {2}",
-    "t.screens": "Pantallas", "t.ui": "Interfaz / HUD", "t.uitable": "Tabla UiSpriteDef (MAIN0)", "t.hudpage": "(página HUD)", "t.pages": "Páginas por lista de carga",
-    "t.list": "Lista {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
+    "t.screens": "Pantallas", "t.backdrops": "Fondos de sala (mapas)", "t.ui": "Interfaz / HUD", "t.uitable": "Tabla UiSpriteDef (MAIN0)", "t.hudpage": "(página HUD)", "t.pages": "Páginas por lista de carga",
+    "t.list": "Lista {0}", "t.anims": "Animaciones (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
     "w.smaller": "La imagen ({0}x{1}) es menor que el destino ({2}x{3}): se coloca arriba a la izquierda.",
     "w.palmismatch": "El PNG es indexado pero su paleta no coincide con la actual: se ajusta al color más cercano.",
     "w.nozero": "La paleta no tiene ningún color 0x0000 (transparente): los píxeles transparentes usan el índice 0.",
@@ -1033,8 +1083,8 @@ S_EN = {
     "c.space": "Not enough free space: the ISO needs about {0} MB and {1} MB are free.", "c.mkfail": "mkpsxiso failed: {0}\n{1}",
     "c.bigimg": "The image ({0}x{1}) is larger than the target ({2}x{3}).",
     "pal.row": "{0}  row {1}", "pal.sub": "{0}  row {1} · palette {2}",
-    "t.screens": "Screens", "t.ui": "Interface / HUD", "t.uitable": "UiSpriteDef table (MAIN0)", "t.hudpage": "(HUD page)", "t.pages": "Pages by load list",
-    "t.list": "List {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
+    "t.screens": "Screens", "t.backdrops": "Room backdrops (maps)", "t.ui": "Interface / HUD", "t.uitable": "UiSpriteDef table (MAIN0)", "t.hudpage": "(HUD page)", "t.pages": "Pages by load list",
+    "t.list": "List {0}", "t.anims": "Animations (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
     "w.smaller": "The image ({0}x{1}) is smaller than the target ({2}x{3}): placed at the top left.",
     "w.palmismatch": "The PNG is indexed but its palette differs from the current one: matched to the nearest colour.",
     "w.nozero": "The palette has no 0x0000 (transparent) colour: transparent pixels use index 0.",

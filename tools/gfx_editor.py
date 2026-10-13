@@ -352,10 +352,22 @@ class App:
             for c in kids:
                 self._insert(iid, c)
 
+    def show_anim(self, aid):
+        """Tree node "Animaciones": Tombi's animation in its own player window (tools/anim_player.py)."""
+        import anim_player
+        if not getattr(self, "anim_win", None) or not self.anim_win.alive():
+            self.anim_win = anim_player.AnimWindow(self.root, self.core.anim_data())
+        self.anim_win.show(aid)
+
     def on_select(self, _):
         sel = self.tree.selection()
         n = self.node_of.get(sel[0]) if sel else None
-        if n and n["item"]:
+        if n and n["item"] and n["item"][0] == "anim":
+            try:
+                self.show_anim(n["item"][1])
+            except Exception as e:
+                messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
+        elif n and n["item"]:
             try:
                 self.show(n["item"])
             except Exception as e:

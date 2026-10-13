@@ -145,6 +145,27 @@ the 20 load files parse. Layout (decoded from the drawing code `FUN_80052db8`, `
   decompiled) that picks `o+0xC4` for the 8 frames, and pairing the non-WPP SPR blocks (`0x31..0x3F`) with their texture atlases.
 
 
+### Animations (tools/anim.py)
+Tombi's animation scripts, decoded from `AnimAdvance` / `AnimJump` / `AnimLoadDuration` (MAIN0) and `ObjSetAnimFromTable` (overlay).
+- **Table.** All 17 overlays carry the same 90 x u32 pointer table at `0x800E8404` (file offset `0x3DC`); `PlayerSetAnimIfChanged(o, id)` stores the id in
+  `player+0x2C` (`+0x2E` = id of the loaded animation), `ObjSetAnimFromTable` sets `o+0x24 = table[id]`, `AnimJump(o, 0)` loads the first duration.
+  The pointers go to scripts in MAIN0's data (`0x80010748`..`0x80011800`); several ids share a script (ids 0/19/62/63/64/70, 22/27/28, 88/89) or point into
+  the middle of a longer one (the same movement from a later frame: ids 20..23, 57..61, 83..88): 82 distinct scripts.
+- **Entry** = 8 bytes `u16 frame | u16 box | u16 arg | u16 dur_flags`. `frame` = frame of Tombi's WPP table (`AREA00/A004.000`, 358 frames, the same
+  table in every area; the SPR `0x30` parts give each frame's draw offset: `min(dx), min(dy)` of its parts relative to the object position);
+  `dur_flags & 0x3FFF` = ticks the frame is shown (`o+0x2C` countdown), bits 14/15 = action when the time is up: `00` next entry (`o+0x24 += 8`),
+  `0x4000` the next 4 bytes (NOT an entry; the stream goes on after them) are a pointer: jump there and load its duration (loop), `0x8000` end: keep the frame
+  and return 1 ("finished") every `dur` ticks, `0xC000` jump and return 1. `AnimAdvanceWithBox` (enemy objects) also copies 4 hit box bytes
+  `D_80138FD8[box*4]` into the object (`o+0x6C..`); Tombi's `box` values (0..12) are probably the same hit box index. `arg` is 0 except in the jump
+  scripts 13/14/15/29 (200, 198, 192, 190, 168, 144, 136, 128: looks like a vertical speed profile) and the hurt script 9 (-14, -40: knock back speed).
+  Tick length is not measured (the preview assumes 40 ms = 2 VSyncs).
+- **Names** (`anim.NAMES`, from the state code in `X000_BIN_decomp.c` and the rendered strips): 36 of 82 scripts. Certain from code: 0 idle (walk speed `+0xB2` == 0),
+  1/2/3 walk/jog/run (speed < 0x84 / < 0x144 / above, `FUN_800efa80`), 10/11/12 climbing idle/up/down (pad bits 0x10 up, 0x40 down in `FUN_801099b8`),
+  33 crouch walk (down held). From code + strip: fall 4, crouch 5, climb_back 6, hurt 9, jump 13/14/15 (`FUN_80104f88`), turn 36, get up 48, roll 49, swimming 67/68,
+  shock 80. The rest are guesses from the pose (marked `L` in the catalogue `confidence`) or keep their number. Not done: weapon/attack, bite/throw and
+  swing animations (not found: probably other tables or other overlays' object code), other characters (enemy tables use `o->anim = D_xxxx[subtype]` in
+  the overlays with `AnimAdvanceWithBox`; same entry format, not catalogued).
+
 ### SPR / VRAM: every graphic as PNG (`tools/vram.py`, `tools/extract_sprites.py`)
 `python3 tools/extract_sprites.py game/disc/Tombi.bin OUT` writes `OUT/sprites` (WPP frames, `tools/wpp.py`), `OUT/spr` (SPR atlas cuts) and
 `OUT/vram` (pages and VRAM snapshots) and `OUT/screens` (static full screens, `tools/screens.py`); `python3 tools/vram.py --all OUT` does the last two from an extracted `game/disc/fs`.
@@ -486,3 +507,11 @@ Findings (no tool written; nothing extracted):
 - **STP bit in mod PNGs:** a 16 bit PNG patch cannot carry bit 15 (72117 of the 366 k non-zero CLUT words have it). `mod.png_words(..., orig)` keeps the STP bit of the word it replaces (opaque black = 0x8000, transparent = 0), so a CLUT exported from the unchanged file patches back byte-identical and an edited colour keeps its slot's STP.
 - **GAM writing without Go:** `tools/gam_py.py` encodes with the body rules of notes/assets_tombatools.md (greedy, min 5, window 255, no self-overlap) but not the zero-pad end rules; unchanged data keeps the original bytes. `mod.py` uses it, so mods apply on Windows. Changed streams are valid (decoded back by `area000.gam_unpack`) and may differ from the original tool in the last ~260 bytes.
 - **WPP frame edits** must re-encode to exactly the original file size (the load record `arg` and the tables are not rewritten); otherwise the editor refuses.
+
+## Room backdrops (SYSTEM lists 20, 22, 23, 42, 48, 51-54, 62, 63, 77-79, 81-85, 88, 90) and palette inference
+
+These SYSTEM lists have no CLUT record and the pages are **8 bpp**: pages at VRAM word x 0x80, 0x100, 0x180... (128 words = 256 px each); the first two pages stitched hold a pre-rendered 320 x 240 room picture, the rest are object/animation textures of that room (list 51: palace hall with arches). The 256 colour palette is row 31 (list 63 and 90: row 30) of one of the `CLUTnn.GAM` files of the area (list 51 -> `AREA09/CLUT03`, 20 -> `AREA02/CLUT03`, ...); `tools/palinfer.py backdrop()` finds it by smoothness (adjacent-pixel colour distance) among rows 24..31 of the area's CLUT files and the gfx editor lists them under Screens / Room backdrops (`backdrop_L<n>`). Names: 20 cell with wooden bars, 22 forest clearing, 23 stone door with a face, 42 seashore with a giant clam, 48 forest pier by a lake, 51 palace hall with arches, 52 hall with red carpet, 53 cave staircase, 54 brick staircase, 62 wooden pen, 63 cave with brick tower, 77 clock tower, 78 bell tower, 79 gear room, 81 copper castle, 82 hall with arches, 83/84 hall with shield doors, 85 boiler room, 88 workshop interior, 90 mushroom hut in blossoms. Lists 50 and 60 also start with a backdrop (house on a floating island / wizard study) but are not detected yet (first page too sparse for the density test). Lists 83, 86, 89, 91 are not maps: 86/89/91 are object and room texture atlases (89 cages/huts/orbs, 91 props, eggs, smoke), 8 bpp with a run time palette.
+
+Note: `FUN_800212b4` (src name `drawNowLoading`) is really the TRY AGAIN prompt drawer (would be `drawTryAgain`); src/ not renamed here.
+
+`tools/palinfer.py` (4 bpp pages without CLUT): methods embedded (A00900 row 71), sprites (SPR parts inside the page vote for the CLUT), match (WPP tiles, off), score (smoothness).

@@ -7,7 +7,7 @@ Python 3 (Windows/Linux/macOS).
   python3 tools/extract_sprites.py                         (no arguments: a small window to pick the image, folder and what to extract)
 
 Steps for --only (comma separated, default all; each one makes its own prerequisites, the fs dump is reused if OUT_DIR/fs exists):
-  files sprites screens vram rooms rooms3d banks music music_audio movie_audio videos
+  files sprites animations screens vram rooms rooms3d banks music music_audio movie_audio videos
   (--video-frames: videos also dumps every frame as PNG;  --audio-format wav|mp3: format of banks, music_audio and movie_audio, mp3 needs lameenc,
    falls back to WAV; loop points only in WAV)
 
@@ -18,6 +18,8 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
   OUT_DIR/spr/<AREA|SYSTEM>/listNN/sprKK/        every SPR frame definition (load kinds 0x30..0x3F) cut out of the simulated VRAM:
                                                  frame_NNNN_partK.png (one POLY_FT4 part, own palette), frame_NNNN.png (parts composed),
                                                  manifest.json (offsets, palettes, which atlas) (tools/vram.py)
+  OUT_DIR/anim/NN_<name>.gif|png, catalog.json   Tombi's 82 animation scripts (idle, walk, run, jump, climb, swim, hurt...) as animated GIF
+                                                 and PNG strip + the decoded catalogue (frames, ticks, loop) (tools/anim.py)
   OUT_DIR/screens/*.png                          the static full screens at their real size and palette: title landscape (320 x 240), Whoopee
                                                  Camp logo, "Sony Computer Entertainment Europe presents" (640 x 512), TOMBI! logo page, menu atlases,
                                                  world map texture, title font sheet (tools/screens.py)
@@ -55,6 +57,7 @@ def run_isoext(img, fs):
 STEPS = [   # (key, group, label es, description)
     ("files", "files", "Archivos del disco (fs)", "file system of the disc image under OUT/fs"),
     ("sprites", "images", "Sprites", "WPP sprites (OUT/sprites) + SPR frames (OUT/spr)"),
+    ("animations", "images", "Animaciones", "Tombi's animations as GIF + catalog.json (OUT/anim)"),
     ("screens", "images", "Pantallas", "title, logos, menu atlases (OUT/screens)"),
     ("vram", "images", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
     ("rooms", "rooms", "Salas PNG", "room backgrounds (OUT/rooms)"),
@@ -126,6 +129,13 @@ class Extractor:
             raise RuntimeError("the load lists (SYS/LD0*.BIN) and the disc image are needed")
         self._stats, usage = vram.export_spr(dst, log=lambda m: None)
         self._usage = usage
+
+    def animations(self):
+        self._setup()
+        import anim
+        d = os.path.join(self.out, "anim")
+        n = anim.export(d, log=lambda m: None)
+        self.log(tr("ex.animations", n, d))
 
     def screens(self):
         self._setup()
