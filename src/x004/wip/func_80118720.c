@@ -11,7 +11,12 @@
    one of its consumers is placed before the mult chains (nothing natural found: all consumers are the boosted
    per-element addu/addiu). Also tried: int/short locals, nx/ny temps, all 6 store orders, p init before/after x/y,
    (V4*)p+3 / (char*)p+48 / &p[0][3] forms, p for element 0 only (31), p for all (110-136: cse then shares one
-   base+offsets). Camera must stay scalar externs + raw-offset stores (struct cam gets CSE'd into an la register). */
+   base+offsets). Camera must stay scalar externs + raw-offset stores (struct cam gets CSE'd into an la register).
+   n77: exact local-alloc numbers (sched1 order, 80 insns): tb 7 refs span 17..79 (pri .226), y 6 refs 24..76 (.23),
+   ny 3 refs 27..43 (.1875): tb needs birth <= 4 or <= 5 refs. `do { z = z0 + 0x220; } while (0);` (debt) gives the
+   game's registers (score 13) but pins la+addiu sp at the top in sched2 too (game: la after sll a1, as in the plain
+   form). Also tried: do{}while(0) around every other statement, all statement orders with tb, multi-set/single-set
+   p for elem0/1, inline put(p,x,y,z) with its own V3 (60), -x/-y without temps, types. */
 typedef struct { int x, y, z; } V3;
 typedef struct { int x, y, z, pad; } V4;
 extern V4 D_80133ADC[][4];
