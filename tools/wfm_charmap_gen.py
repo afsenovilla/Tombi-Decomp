@@ -24,6 +24,9 @@ def main():
     p.add_argument("-o", "--out", default=os.path.join(ROOT, "tools", "wfm_charmap.json"))
     a = p.parse_args()
     table, conflicts = {}, []
+    # entries labelled by hand (accented letters, icons, ...) are kept; only the learned ones are refreshed
+    if os.path.isfile(a.out):
+        table.update(json.load(open(a.out, encoding="utf-8")))
     files = sorted(glob.glob(os.path.join(a.src, "*", "*", "dialogues.yaml")))
     for f in files:
         y = yaml.safe_load(open(f, encoding="utf-8"))
