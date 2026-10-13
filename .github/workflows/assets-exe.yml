@@ -52,5 +52,5 @@ jobs:
           git add dist/windows/tombi-assets.exe
           if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
           git commit -m "dist: rebuild tombi-assets.exe (${GITHUB_SHA::7})"
-          git pull --no-rebase -q origin master
+          git pull --no-rebase -q -X theirs origin master
           git push origin HEAD:master
