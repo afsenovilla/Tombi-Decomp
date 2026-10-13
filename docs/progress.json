@@ -209,17 +209,17 @@
     "X013": {
       "game": 182492,
       "n": 330,
-      "matched": 181300,
-      "n_matched": 324,
+      "matched": 181832,
+      "n_matched": 326,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 792,
-      "n_new": 5,
+      "new": 260,
+      "n_new": 3,
       "uniq": 7712,
-      "uniq_matched": 6920,
+      "uniq_matched": 7452,
       "n_uniq": 29,
-      "n_uniq_matched": 24
+      "n_uniq_matched": 26
     },
     "X014": {
       "game": 236716,
