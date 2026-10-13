@@ -6,6 +6,7 @@
    and keep `move a0,s2` out of them in sched2. Second o->d3c read is volatile (sibling style) to
    keep both loads; it is not the first insn so reorg can still steal li a1,1 for the bnez slot. */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -19,7 +20,6 @@ typedef struct {
     unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
-extern int D_8009C960;
 extern SVec D_1F800060;
 extern long D_1F80008C;
 extern long LZ_FILE_CTRL;
@@ -75,7 +75,7 @@ void func_80056E4C(TObj *o)
 
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && *(unsigned short *)&TASK_C->w4c != 3)
+    if ((*(int*)&GAME.selectedArea) == 0x10005 && *(unsigned short *)&TASK_C->w4c != 3)
         D_1F800060.vz = o->b.p.whole >> 2;
     else
         D_1F800060.vz = o->b.p.whole;

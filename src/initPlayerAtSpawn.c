@@ -5,7 +5,6 @@
 #include "common.h"
 #include "game.h"
 extern int** D_80079474[];
-extern u8 D_8009D2AF;
 
 
 typedef struct {
@@ -62,7 +61,7 @@ void initPlayerAtSpawn(void)
 
         *dst |= 1 << r[1];
     }
-    if (D_8009C618 == 3 || D_8009D2AF == 0) {
+    if (D_8009C618 == 3 || GAME.playerState == 0) {
         loadSpawnPosition(p);
         *(s16*)(p + 0x12) = *(u16*)(p + 0xEE);
         *(s16*)(p + 0x16) -= 0x104;
