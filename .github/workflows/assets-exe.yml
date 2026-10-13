@@ -34,7 +34,7 @@ jobs:
           python -m pip install pyinstaller
           pyinstaller --onefile --name tombi-assets --distpath build/exe --workpath build/pyi --specpath build/pyi \
             --hidden-import area000 --hidden-import wpp --hidden-import cdfiles --paths tools \
-            --add-data "tools/isoext.py;." tools/extract_sprites.py
+            --add-data "$PWD/tools/isoext.py;." tools/extract_sprites.py
           mkdir -p dist/windows
           cp build/exe/tombi-assets.exe dist/windows/tombi-assets.exe
 
