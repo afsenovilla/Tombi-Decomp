@@ -19,7 +19,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # the reference fonts have no 8 px lowercase z, so wfm.py labels its small glyph 'Z' (the 8 px font has two Z bitmaps: the
 # full-height capital aef0ef9a0232 and this x-height one, used in "Pez", "azul", "Benzin"); relabel it by hand
-OVERRIDES = {"8:8:b610f5095df5": "z"}
+OVERRIDES = {"8:8:b610f5095df5": "z",   # 8 px lowercase z (azul, Pez)
+             "24:16:fe10decaa8c4": "x"}  # 24 px lowercase x (PhoeniX, BoX, auX): the only x of the title font
 
 
 def main():
