@@ -181,8 +181,9 @@ def _charindex(glyphs):
     return idx
 
 
-def resolve(w, ch, font):
-    """Glyph index that writes character ch for a dialogue whose font is (height, clut); None if the file has none."""
+def resolve(w, ch, font, strict=False):
+    """Glyph index that writes character ch for a dialogue whose font is (height, clut); None if the file has none.
+    strict: only glyphs of the font's height (otherwise a glyph of another height is the last resort)."""
     c = w.charidx.get(ch)
     if not c:
         return None
@@ -193,7 +194,7 @@ def resolve(w, ch, font):
     for i in c:
         if w.glyphs[i].height == h:
             return i
-    return c[0]
+    return None if strict else c[0]
 
 
 def detect_font(w, words):
@@ -229,7 +230,7 @@ def words_to_text(w, words, font):
         elif GLYPH_BASE <= v < GLYPH_BASE + len(w.glyphs):
             gi = v - GLYPH_BASE
             ch = w.glyphs[gi].char
-            if ch and ch not in "{}\n" and resolve(w, ch, font) == gi:
+            if ch and ch not in "{}\n" and resolve(w, ch, font, True) == gi:
                 out.append(ch)
             else:
                 out.append("{G:%d}" % gi)
@@ -273,9 +274,16 @@ def text_to_words(w, text, font, pool=None):
             else:
                 raise WfmError(tr("wf.unknowntag", name, arg))
             continue
-        gi = resolve(w, c, font)
+        gi = resolve(w, c, font, True)
         if gi is None:
-            gi = borrow(w, c, font, pool)
+            # a glyph of the right height from another file beats one of the wrong height from this file
+            # (an 8 px 'Z' in a 16 px message looked like a small raised z)
+            try:
+                gi = borrow(w, c, font, pool)
+            except UnknownGlyph:
+                gi = resolve(w, c, font)
+                if gi is None:
+                    raise
         words.append(GLYPH_BASE + gi)
         pos += 1
     return words

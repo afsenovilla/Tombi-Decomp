@@ -17,6 +17,10 @@ import wfm_py
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# the reference fonts have no 8 px lowercase z, so wfm.py labels its small glyph 'Z' (the 8 px font has two Z bitmaps: the
+# full-height capital aef0ef9a0232 and this x-height one, used in "Pez", "azul", "Benzin"); relabel it by hand
+OVERRIDES = {"8:8:b610f5095df5": "z"}
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -35,8 +39,10 @@ def main():
             if not ch:
                 continue
             k = wfm_py.glyph_key(g["height"], g["width"], bytes.fromhex(g["image"]))
+            ch = OVERRIDES.get(k, ch)
             if table.setdefault(k, ch) != ch:
                 conflicts.append((f, k, table[k], ch))
+    table.update(OVERRIDES)
     for c in conflicts[:10]:
         print("conflict", c, file=sys.stderr)
     json.dump(dict(sorted(table.items())), open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
