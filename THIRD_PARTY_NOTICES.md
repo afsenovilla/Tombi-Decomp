@@ -14,3 +14,7 @@ Used here:
 
 ## Toolchain (not redistributed, downloaded by the setup scripts)
 - decompals/old-gcc (`gcc-2.7.2-psx`), mkst/maspsx, GNU binutils.
+
+## mkpsxiso / dumpsxiso — https://github.com/Lameguy64/mkpsxiso
+GPL-2.0. Not stored in the repo: `.github/workflows/text-exe.yml` downloads the v2.30 Windows release and bundles
+`mkpsxiso.exe` and `dumpsxiso.exe`, unmodified, inside `dist/windows/tombi-text.exe` (used by its "Generar ISO"). Source and license at the link above.

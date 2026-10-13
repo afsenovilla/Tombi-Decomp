@@ -204,6 +204,8 @@ game/           your own game files (ignored by git)
 | `tools/setup_ghidra.sh`, `tools/setup_native.sh` | Toolchain installers |
 | `tools/psxexe_info.py` | Prints the PS-X EXE header |
 | `tools/wfm.py` | Assets: WFM font/dialogue files <-> YAML + glyph PNGs, byte-exact round trip (369/369) through a [TombaTools](https://github.com/hansbonini/tombatools) fork |
+| `tools/wfm_py.py` | Assets: pure-Python WFM codec (no Go): dialogues as readable text with tags (`{NL} {CLEAR} {WAIT} {BOX w h} {PAUSE n} {COLOR n}`...), glyph table, byte-exact round trip on 369/369 files (`--check`); characters come from `tools/wfm_charmap.json` (bitmap hashes, made by `wfm_charmap_gen.py`) |
+| `tools/text_editor.py` | Text editor with live preview (tkinter; logic in `text_core.py`, `text_preview.py`): open the disc image, edit dialogues drawn with the game font in a mock box (x1/x2/x3, red warnings for lines too wide, too many lines, >128 glyphs), save/load JSON project, export/import TXT/JSON, **Generar ISO** (re-encodes the WFM and runs `mkdisc.py --relayout`); Windows build `dist/windows/tombi-text.exe` (bundles mkpsxiso) |
 | `tools/gam.py` | Assets: GAM (the game's LZ) unpack/pack; `--check` runs the whole round trip (816 files) |
 | `tools/mkdisc.py` | Assets: rebuilds the `.bin/.cue` from `game/disc/fs` with mkpsxiso, SHA-1 identical to the original (`--check`) |
 | `tools/cdfiles.py` | Assets: the LBA/size file table inside `EXE/MAIN0..8.EXE` (`dump`, `check` against an image, `update` from a new layout); used by `mkdisc.py build --relayout` |
@@ -223,6 +225,16 @@ defaults to `/opt/psyq/tombatools-pal`) and mkpsxiso/dumpsxiso 2.30 (`MKPSXISO_D
 identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-compressor reproduces (743 by itself,
 765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
 the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
+
+**Windows exes** (built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them):
+- `dist/windows/tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
+- `dist/windows/tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
+  edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the
+  box, a page has more lines than the box height allows, or a page exceeds 128 characters. `Ajustar caja` rewrites `{BOX w h}` to fit.
+  `Guardar/Cargar proyecto` keep your edits as JSON, `Exportar todo`/`Importar` use TXT or JSON, and `Generar ISO` writes a new `.bin`/`.cue`
+  (needs about 1.5 GB of free disk for its work folder; the first run dumps the original disc). Only characters that exist in the game fonts can
+  be typed (no `ü`, `:` or `%` in the PAL fonts): missing ones are borrowed from other files when possible, else the editor says so.
+  Opening a folder instead of the image, or running without the bundled mkpsxiso, writes just the patched `.WFM` files plus instructions.
 
 ## Related projects
 

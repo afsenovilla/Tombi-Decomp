@@ -41,3 +41,4 @@ include/gte_macros.inc
 !dist/
 !dist/windows/
 !dist/windows/tombi-assets.exe
+!dist/windows/tombi-text.exe
