@@ -207,6 +207,43 @@ def load_lists(fs=FS):
     return _LISTS
 
 
+_BLOCKS = {}
+
+
+def list_blocks(ld, idx):
+    """[(rec, data)] for list `idx` of load file `ld` ('AR00'): the bytes each record of the list occupies. A record with a file
+    starts a new buffer (the file, unpacked if .GAM); records of type 0xFFFFFFFF (file id 0 = no file) continue in the buffer of the
+    previous one, at the running offset (the loader adds `arg` and aligns to 4). GRPX records go to VRAM and take no room."""
+    key = (ld, idx)
+    if key in _BLOCKS:
+        return _BLOCKS[key]
+    out, cur, pos = [], None, 0
+    for r in (load_lists().get(ld) or [[]] * (idx + 1))[idx]:
+        if r["type"] != 0xFFFFFFFF:
+            nm = r["name"]
+            try:
+                cur = read_resource(nm) if nm.endswith((".GAM", ".000")) else open(os.path.join(FS, nm), "rb").read()
+            except (OSError, ValueError, IndexError):
+                cur = None
+            pos = 0
+        if (r["kind"] & 0xF0) == 0x10:
+            out.append((r, None))
+            continue
+        out.append((r, cur[pos:pos + r["arg"]] if cur is not None else None))
+        pos = (pos + r["arg"] + 3) & ~3
+    _BLOCKS[key] = out
+    return out
+
+
+def find_list(name):
+    """(ld, idx, list) of the load list that holds the file `name` ('AREA00/A004.000'), or None."""
+    for ld, lists in load_lists().items():
+        for i, lst in enumerate(lists):
+            if any(r["name"] == name and r["type"] != 0xFFFFFFFF for r in lst):
+                return ld, i, lst
+    return None
+
+
 def find_clut(name):
     """The CLUT block the load list pairs with the page/sprite file `name` ('AREA00/B000'): the CLUT*.GAM (256 x 32 words at VRAM
     128,480, 32 palettes of 256 colours; the last 16 colours of rows 0..19 hold the 16 colour sprite palettes) of the same list;

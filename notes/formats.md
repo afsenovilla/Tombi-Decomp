@@ -97,10 +97,40 @@ and `frame_NNNN.png`; `pack` re-encodes).
 - Which of the 32 rows a room uses (and the per tile row) is chosen by the polygon CLUT field at draw time; not found in the data yet.
 
 Verified visually (images only in /tmp): Tombi frames 0,40,100 of `AREA00/A004` with `CLUT01` row 0 look right (pink hair/shorts, correct
-skin, no stray colours); the 2nd table of A004 and `AREA02/D004` (`0x62`) decode to clean sprites (bird/griffin enemy, Tombi back/front);
-`AREA00/B301` (x=192, 768x256 px 8 bpp) with `CLUT04` row 0 is a hut interior with sane colours but the page is an atlas of vertical
+skin, no stray colours); `AREA00/B301` (x=192, 768x256 px 8 bpp) with `CLUT04` row 0 is a hut interior with sane colours but the page is an atlas of vertical
 strips (the room is rebuilt from strips by the tile code), not a flat picture; `AREA00/B000` is a sprite/tile atlas (colours plausible
-for rows 0..15, dark for >= 24). Not done: exact room reassembly, per-sprite CLUT of enemies, SPR frame definitions (UV/CLUT per part).
+for rows 0..15, dark for >= 24). Not done: exact room reassembly. Per sprite palettes: next section.
+
+### SPR frame definitions (load kind `0x30`..`0x3F` = `SPR_DATA[n]`, `FUN_8004f538` stores the buffer in `0x1F8002C8+4n`)
+`SPR` is not a file: the records follow a `.GAM` of the same load list with file id 0 / type `0xFFFFFFFF` ("continue in the previous buffer", `arg` =
+size, the loader aligns the next one to 4), e.g. `AREA00/A005.GAM` (LZ, 95,576 B) = WPP `0x63` (0x18C8) + SPR `0x30` (0x3248) + `0x35` + `0x31` + ...;
+the sizes add up exactly to the unpacked size. `tools/area000.py list_blocks(ld, idx)` returns the bytes of every record; all 334 SPR blocks of
+the 20 load files parse. Layout (decoded from the drawing code `FUN_80052db8`, `FUN_80055618`, `FUN_800505f0`; objects get the buffer in
+`TObj.d3c`, the animation entry's first u16 = frame number):
+- header: one u32 per frame `[u16 parts, u16 offset]` (offset from the block start; frame count = first offset / 4);
+- a part = 16 bytes = a POLY_FT4 template: `u0 v0 clut(u16) | u1 v1 tpage(u16) | u2 v2 w h | u3 v3 dx dy` (dx,dy signed screen offset, w,h size;
+  `FUN_80052db8` copies the words straight into the primitive, `tpage += TObj.w1e`, and replaces `clut` with `TObj.w08` when `b0d & 1`);
+- `clut` = GPU CLUT word: `x = (c & 0x3F) * 16`, `y = c >> 6 & 0x1FF` (bit 15 is a flag of the game, not an address).
+- **WPP link.** WPP_DATA[0] (`0x60`, 358 frames) <-> SPR `0x30` (358 frames); WPP `0x62` (`WPP_DATA[2]`: 83 frames in `AREA00/A004` 2nd table, 127 frames
+  in `AREA02/D004`, `D304`...) <-> SPR `0x35` (83) / `0x3A` (127). Frame `i` of the WPP table is frame `i` of the SPR table (`FUN_80037c80` decodes
+  frame `*o->anim` into VRAM slot `D_1F8001F4`, `FUN_800505f0` then draws the SPR parts with u offset `+ slot*64 + 4`); the pairing is by load
+  list + equal frame count (unique in every list). `WPP 0x63` (16 frames) has no SPR table of its own.
+- **Palette.** `FUN_800505f0` (the WPP drawer) uses `o->w08` for parts with the bit 1 of the count set, else `o+0xC4`, i.e. the object init sets it; but
+  the SPR part `clut` holds the intended palette wherever it is a real VRAM address. Tombi frames carry placeholders `x=768` (rows 480/481), meaning
+  "set at run time" (Tombi: `GetClut(0x80,0x1e0..)`, outfit rows). Others point into the sprite strip of the CLUT block: `(224,496)` = row 16, colours
+  96..111 of `CLUTkk` (the 75 griffin/bird frames of the 2nd table of `AREA00/A004`: red body, yellow chest/beak), `(192,496)` = row 16 colours 64..79 (21 Tombi
+  frames of the 1st table: hit/flash palette, white-grey; in other areas that slot of the CLUT is all zero, so it is not resolved there).
+  `tools/wpp.py` (`--auto`, default) writes `manifest.json["wpp_palettes"]["frames"][frame] = {clut, row, x0, vram, spr, spr_frame, spr_part} | "default"`.
+- Result: 201 of 13,017 frames get an SPR palette (all in `AREA00/A004`: 75 bird frames + 21 Tombi flash frames, plus the 21 flash frames in the other
+  `0x60` files of areas whose CLUT has the slot filled); everything else is a runtime palette (Tombi) and keeps `row 0` of the first `CLUT` of the list.
+  `python3 tools/wpp.py --check` still gives 40/40 identical.
+- Verified visually (/tmp only): the 2nd table of `AREA00/A004` is now a red/yellow griffin (75 frames); frames 169..178 etc. are grey Tombi;
+  `AREA02/D004` (127 frames), `AREA05/D005`, `AREA08/D103` are all **Tombi** (rolling, swimming, back/front, 358-frame table = the same
+  character in every area) and correctly pink: the only non-Tombi WPP is the bird of `A004`; other enemies/NPCs are presumably not WPP but textures in `A*.GAM`/`D*.GAM`
+  with SPR `0x31..0x3F` (parts carry their CLUT directly; not checked). The last 8 frames of the 2nd table of `A004` (a pink bat-like creature)
+  have the placeholder palette (object code of the unmatched `X000` overlay sets it); they are shown with the default.
+- Not done: the run-time palettes (Tombi costume rows, `GetClut(0x210, 0x1e1+n)` damage numbers = generated, not in any file), the AREA00 overlay code (not
+  decompiled) that picks `o+0xC4` for the 8 frames, and pairing the non-WPP SPR blocks (`0x31..0x3F`) with their texture atlases.
 
 
 ## `AREAxx/X0nn.BIN` (overlays)
