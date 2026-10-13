@@ -359,3 +359,9 @@ demux size `0x09E4`, **320 x 224**, `0x3800` = BS v2 frames (MDEC). In the file 
 0020  a0 06 00 38 01 00 02 00 20 00 7f 02 f2 27 27 7f
 0030  00 f2 02 20 27 7f 7f f2 f2 27 20 00 7f 02 f2 27
 ```
+
+## Mods (tools/mod.py)
+
+`mods/<name>/mod.json` lists `patchs` (`file` = PNG in the mod folder, `targets` = `pattern` (fnmatch on the path under `game/disc/fs`, e.g. `AREA00/B301.000`) and an optional `frame` for WPP sprite files); `mods/load_order.json` `{"order": [...]}` sets the order (later wins). PNG to data: 8 bpp page = indexed 2*w x h, 4 bpp = indexed (<= 16 colours) 4*w x h, 16 bpp/CLUT = RGBA w x h (5 bit linear, alpha 0 = word 0, opaque black = 0x8000); WPP frame = indexed 4*W x H. Patched size must equal the original. `.GAM` targets go through `tools/gam.py`, WPP through `wpp.py`; `mod.py build` runs `mkdisc.py build --relayout`. The mod layout idea comes from TombaPatcher (US-only; no code reused).
+
+Colour notes from comparing with TombaPatcher: it decodes 5->8 bit with a non-linear curve and shows STP as half alpha, and draws pages without the load-list CLUT pairing (grey ramp); ours uses the linear 5 bit expansion (hardware) and the VRAM replay pairing. `area000.py page` now picks the 256 colour CLUT record after the page like `vram.pair_cluts`. Room pages still need the per-tile CLUT row from the room data (row 0 is only a default).

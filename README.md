@@ -211,6 +211,7 @@ game/           your own game files (ignored by git)
 | `tools/wpp.py` | Assets: WPP sprite frames (flag-byte RLE, 4 bpp): `info`, `unpack` (indexed PNG with the Tombi CLUT), `pack`, `--check` (40/40 files identical); `area000.py page` exports room pages with their CLUT |
 | `tools/vram.py` | Assets: VRAM simulation of every load list (GRPX pages, CLUTs, GAM images at their LoadImage position) and the SPR frame definitions cut out of it (`--all OUT`: atlas parts, composed frames, flat pages, 1024x512 snapshots; `snapshot AREA00:1 x.png`; `--stats`) |
 | `tools/extract_sprites.py` | One-shot: every graphic of the game as PNG straight from a retail disc image (WPP frames, SPR atlas cuts, pages and VRAM snapshots; no dependencies); Windows build in `dist/windows/tombi-assets.exe` |
+| `tools/mod.py` | Assets: mods (`mods/<name>/mod.json` + PNG patches + `mods/load_order.json`) applied to a copy of `game/disc/fs` (GRPX pages/CLUTs, WPP frames; GAM re-packed), then `mkdisc.py build --relayout`; layout idea from TombaPatcher (US) |
 | `tools/overlay_data.py` | Assets: data layout of the area overlays `X0nn.BIN` (`summary`, `dump`, `header`, `strings`), see `notes/overlays.md` |
 
 **Assets.** `wfm.py`, `gam.py` and `mkdisc.py` work on your own disc (`game/disc/Tombi.bin` and the files extracted to

@@ -251,7 +251,12 @@ def find_clut(name):
     base = name.rsplit(".", 1)[0] if name.endswith((".GAM", ".000")) else name
     for ld, lists in load_lists().items():
         for lst in lists:
-            if any(r["name"].rsplit(".", 1)[0] == base for r in lst):
+            idx = [i for i, r in enumerate(lst) if r["name"].rsplit(".", 1)[0] == base]
+            if idx:
+                # the 256 colour CLUT record after the page (same pairing as vram.pair_cluts), else any CLUT of the list
+                for r in lst[idx[0]:] + lst[:idx[0]]:
+                    if "/CLUT" in r["name"] and r.get("w", 256) == 256:
+                        return r
                 for r in lst:
                     if "/CLUT" in r["name"]:
                         return r
