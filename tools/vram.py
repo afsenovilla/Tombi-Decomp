@@ -8,7 +8,7 @@ those records into a 16-bit buffer and then cuts the SPR frame definitions (load
 templates `u0 v0 clut | u1 v1 tpage | u2 v2 w h | u3 v3 dx dy`) out of it:
 
   tools/vram.py snapshot LIST OUT.png     full 1024 x 512 RGB555 view of one list (LIST = AREA00:1 | SYSTEM:2)
-  tools/vram.py --all OUT [--fs DIR]      everything: OUT/spr (atlas cuts, composed frames), OUT/screens (pages, snapshots)
+  tools/vram.py --all OUT [--fs DIR]      everything: OUT/spr (atlas cuts, composed frames), OUT/vram (pages, snapshots) and OUT/screens (static full screens, tools/screens.py)
   tools/vram.py --stats                   counts only (lists, pages, tables, frames, parts), nothing is written
 
 Also a library for tools/extract_sprites.py (`export_all`).  Pure Python, no dependencies.  The retail data is only read.
@@ -54,7 +54,11 @@ def png_idx(w, h, rows, pal, alpha):
 
 
 # RGB555 word -> bytes
-RGB = [bytes(((v & 31) * 255 // 31, (v >> 5 & 31) * 255 // 31, (v >> 10 & 31) * 255 // 31)) for v in range(65536)]
+def _c8(c):
+    return c << 3 | c >> 2          # 5 -> 8 bit: x8 + (x >> 2), so 31 -> 255 (bit 15 = STP is ignored here)
+
+
+RGB = [bytes((_c8(v & 31), _c8(v >> 5 & 31), _c8(v >> 10 & 31))) for v in range(65536)]
 RGBA = [RGB[v] + (b"\0" if v == 0 else b"\xff") for v in range(65536)]
 
 
@@ -847,7 +851,7 @@ def clut_word(x, y):
 
 
 def export_screens(out, usage, st, log=print, only=None):
-    """OUT/screens/<AREA|SYSTEM>/listNN/: vram.png (the whole 1024 x 512 VRAM of the list, RGB555) and one PNG per GRPX record: pages with the
+    """OUT/vram/<AREA|SYSTEM>/listNN/: vram.png (the whole 1024 x 512 VRAM of the list, RGB555) and one PNG per GRPX record: pages with the
     palette the list pairs them with (8 bpp: the 256 colour CLUT record behind them; 4 bpp atlases: the palette most SPR parts use on them),
     palette blocks as swatches.  AREA lists are shown on top of the resident SYS pages, SYSTEM lists alone."""
     L = A.load_lists()
@@ -857,7 +861,7 @@ def export_screens(out, usage, st, log=print, only=None):
         for idx, lst in enumerate(L[ld]):
             if not any(is_grpx(r) for r in lst):
                 continue
-            dst = os.path.join(out, "screens", area_name(ld), "list%02d" % idx)
+            dst = os.path.join(out, "vram", area_name(ld), "list%02d" % idx)
             if ld == "SYS":
                 v = Vram()
                 load_list(v, lst)
@@ -915,6 +919,8 @@ def export_all(out, log=print):
         raise SystemExit("vram: the load lists (SYS/LD0*.BIN) and the disc image are needed")
     st, usage = export_spr(out, log=log)
     export_screens(out, usage, st, log=log)
+    import screens
+    st["static_screens"] = screens.export_screens(os.path.join(out, "screens"))
     st["lists_total"] = sum(len(v) for v in A.load_lists().values())
     return st
 

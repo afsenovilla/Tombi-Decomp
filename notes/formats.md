@@ -135,7 +135,7 @@ the 20 load files parse. Layout (decoded from the drawing code `FUN_80052db8`, `
 
 ### SPR / VRAM: every graphic as PNG (`tools/vram.py`, `tools/extract_sprites.py`)
 `python3 tools/extract_sprites.py game/disc/Tombi.bin OUT` writes `OUT/sprites` (WPP frames, `tools/wpp.py`), `OUT/spr` (SPR atlas cuts) and
-`OUT/screens` (pages and VRAM snapshots); `python3 tools/vram.py --all OUT` does the last two from an extracted `game/disc/fs`.
+`OUT/vram` (pages and VRAM snapshots) and `OUT/screens` (static full screens, `tools/screens.py`); `python3 tools/vram.py --all OUT` does the last two from an extracted `game/disc/fs`.
 Pure Python, about 2 minutes, 95 MB of PNG (never committed).
 
 **VRAM replay.** Every list of `SYS/LD0*.BIN` (`area000.load_lists()`: 19 area files + `LD0SYS` = 248 lists, 95 of them SYSTEM) names GRPX
@@ -175,10 +175,19 @@ placeholder palettes `x >= 512` (Tombi: `GetClut(0x80, 0x1e0..)`) map to `x = 12
   (Tombi in 34 lists, resident tables) holds only a `manifest.json` with `"same_as"` (101 tables). Parts with no visible pixel are not written (`"blank": true`, 2,993 of
   the cut ones); palette slots that are empty in the list's `CLUT` (filled at run time or only in the CLUT of another room) are taken from another `CLUTnn` of the area, else
   a grey ramp (`palette_note` in the manifest, 6,954 parts).
-- `OUT/screens/<AREA|SYSTEM>/listNN/vram.png` = the whole 1024 x 512 VRAM of the list as RGB555 (8 bpp data looks like noise there; that is the 16 bit view): AREA lists on top
+- `OUT/vram/<AREA|SYSTEM>/listNN/vram.png` = the whole 1024 x 512 VRAM of the list as RGB555 (8 bpp data looks like noise there; that is the 16 bit view): AREA lists on top
   of the resident pages, SYSTEM lists alone (231 snapshots). Next to it every GRPX record: `NAME.png` for 8 bpp pages with the CLUT the list pairs them with (318;
   row 0 of a 256 x 32 block, or the palette their 8 bpp SPR parts use), `NAME_4bpp.png` / `NAME_8bpp.png` for atlases coloured with the palette most SPR parts use on them (72),
   `NAME_16bpp.png` + `NAME_4bpp_gray.png` when nothing says how a page is read (131), `NAME_palettes.png` for palette blocks (141, each colour 4 x 4 px).
+
+**Static full screens (`tools/screens.py` -> `OUT/screens/*.png`).** All are 8 bpp pages of `LD0SYS` with the 256 x 1 CLUT record next to them (`arg` of the CLUT = (128, 509..511)).
+The record width is the LoadImage pitch, not the picture width: `A00200` (title landscape) is 256 words x 256 rows = 512 px pitch, but the picture is 320 x 240 px (160 words; the rest is
+zero), `A09400` ("Sony Computer Entertainment Europe presents") is 320 words x 512 rows = 640 x 512 px (hi-res PAL frame), `A00100`/`A00006` (Whoopee Camp logo, identical files) is 384 words
+x 256 but only about 576 x 128 px are used. `A00202`+`A00203` (palette at (128,510) vs (128,511) of the landscape) is the TOMBI! logo page, 256 x 256 px, cut into sprites by code; `A00204` is a 4 bpp font/HUD
+sheet (256 x 256 px) with 11 palettes (`A00205` 3 + `A00206` 8 strips of 16 colours) = one tile per palette in `title_font_sheet.png`. The menu/map pages (`A00400/1`, `A00500/1`, `A00701`) are texture
+atlases (8 bpp, each page keeps its own CLUT record; the font in them is 4 bpp with `DSPCLUT.TIM`), not screens, and are written as such. 15 -> 24 bit: `c << 3 | c >> 2` per channel (31 -> 255), STP (bit 15) ignored,
+word `0x0000` transparent only in the sprite/atlas outputs (`title_logo_page`), opaque in the full screens. Unresolved: the language variants (`A?0003`, `A?0301`, `A?0601`, `A?0703` of `LD1..3SYS`), the 4 bpp pages of
+SYSTEM lists 3, 6, 9 (menus) have no palette in their list (run-time/`DSPCLUT`) and stay as 4 bpp gray + 16 bit views in `OUT/vram`.
 
 **Verified visually (PNGs in /tmp only).** Start-up logo (`SYSTEM/list01` `A00100`: pink/yellow "Whoopee Camp"), `SYSTEM/list94` ("Sony Computer Entertainment Europe presents"),
 title screen (`SYSTEM/list02`: `A00200` landscape with volcanoes/forest/river, `A00202` TOMBI! logo with the pink-haired Tombi), save/load menu (`SYSTEM/list04`), enemies: the evil pig

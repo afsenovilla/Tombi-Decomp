@@ -12,8 +12,11 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
   OUT_DIR/spr/<AREA|SYSTEM>/listNN/sprKK/        every SPR frame definition (load kinds 0x30..0x3F) cut out of the simulated VRAM:
                                                  frame_NNNN_partK.png (one POLY_FT4 part, own palette), frame_NNNN.png (parts composed),
                                                  manifest.json (offsets, palettes, which atlas) (tools/vram.py)
-  OUT_DIR/screens/<AREA|SYSTEM>/listNN/          every load list replayed into VRAM: vram.png (1024 x 512, 16 bit view) and every GRPX page
-                                                 (title screen, logos, menus, room pages, atlases) with its palette, palette blocks as swatches
+  OUT_DIR/screens/*.png                          the static full screens at their real size and palette: title landscape (320 x 240), Whoopee
+                                                 Camp logo, "Sony Computer Entertainment Europe presents" (640 x 512), TOMBI! logo page, menu atlases,
+                                                 world map texture, title font sheet (tools/screens.py)
+  OUT_DIR/vram/<AREA|SYSTEM>/listNN/             every load list replayed into VRAM: vram.png (1024 x 512, 16 bit view) and every GRPX page
+                                                 (room pages, atlases, ...) with its palette, palette blocks as swatches
 The retail disc is only read.  Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same
 with no Python:
   double-click it (window), or  tombi-assets.exe Tombi.bin OUT_DIR"""
@@ -65,7 +68,8 @@ def extract(img, out, log=print):
     st = vram.export_all(out, log=lambda m: None)
     print_("done: %d load lists, %d pages, %d SPR tables, %d frames / %d parts (%d identical tables shared, %d frame PNGs + %d part PNGs written); under %s and %s" % (
         st["lists_total"], st["pages"], st["tables"], st["frames_total"], st["parts_total"], st["tables_deduplicated"],
-        st["frames_written"], st["parts_written"], os.path.join(out, "spr"), os.path.join(out, "screens")))
+        st["frames_written"], st["parts_written"], os.path.join(out, "spr"), os.path.join(out, "vram")))
+    print_("static full screens: %d under %s" % (st.get("static_screens", 0), os.path.join(out, "screens")))
     import room
     print_("rendering the room backgrounds (WMD models with per polygon palettes) ...")
     nr = room.export_rooms(os.path.join(out, "rooms"), log=lambda m: None)
