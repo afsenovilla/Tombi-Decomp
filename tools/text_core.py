@@ -23,8 +23,17 @@ class CoreError(Exception):
     pass
 
 
+LANG_NAMES = {"B": "Inglés", "D": "Danés", "F": "Francés", "G": "Alemán", "H": "Neerlandés", "I": "Italiano",
+              "P": "Portugués", "S": "Español", "W": "Sueco"}
+
+
+def lang_of(path):
+    """Language letter of a WFM file (the last letter of its name: MFNT050S -> S)."""
+    return os.path.splitext(os.path.basename(path))[0][-1:].upper()
+
+
 def is_main_lang(path):
-    return os.path.splitext(os.path.basename(path))[0].endswith(LANG_MAIN)
+    return lang_of(path) == LANG_MAIN
 
 
 def norm(text):
@@ -120,6 +129,15 @@ class Project:
         self._wfm = {}
         self._orig = {}
         self._pool = None
+        self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
+
+    def languages(self):
+        """Language letters present on the disc, in LANG_NAMES order (unknown ones last)."""
+        have = {lang_of(n) for n in self.src.names()}
+        return sorted(have, key=lambda l: (list(LANG_NAMES).index(l) if l in LANG_NAMES else 99, l))
+
+    def selected(self, path):
+        return lang_of(path) in self.langs
 
     # decoded files
     def wfm(self, path):
@@ -165,7 +183,7 @@ class Project:
         if self._pool is None:
             self._pool = W.GlyphPool()
             for n in self.src.names():
-                if is_main_lang(n):
+                if is_main_lang(n) or self.selected(n):
                     self._pool.add(self.wfm(n))
         return self._pool
 
@@ -189,11 +207,11 @@ class Project:
             return str(e)
 
     # search
-    def search(self, query, all_languages=False, edited_only=False):
+    def search(self, query, edited_only=False):
         q = fold(query)
         res = []
         for n in self.src.names():
-            if not all_languages and not is_main_lang(n):
+            if not self.selected(n):
                 continue
             for i in range(self.count(n)):
                 if edited_only and not self.edited(n, i):
@@ -204,7 +222,7 @@ class Project:
 
     # project file
     def to_json(self):
-        return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path),
+        return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path), "languages": sorted(self.langs),
                 "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
 
     def load_edits(self, data, replace=True):
@@ -212,10 +230,15 @@ class Project:
         ed = data.get("edits") if isinstance(data.get("edits"), dict) else data
         if replace:
             self.edits = {}
+            if isinstance(data.get("languages"), list):
+                self.langs = {str(l).upper() for l in data["languages"]} & set(self.languages()) or {LANG_MAIN}
         applied, problems = 0, []
         for path, d in ed.items():
             if path not in self.src.files:
                 problems.append("%s: archivo no encontrado en este disco" % path)
+                continue
+            if not self.selected(path):
+                problems.append("%s: idioma no seleccionado, se omite" % path)
                 continue
             if not isinstance(d, dict):
                 continue
@@ -232,18 +255,18 @@ class Project:
                 applied += norm(before) != norm(t)
         return applied, problems
 
-    def export_json(self, all_languages=False):
+    def export_json(self):
         out = {}
         for n in self.src.names():
-            if all_languages or is_main_lang(n):
+            if self.selected(n):
                 out[n] = {str(i): self.text(n, i) for i in range(self.count(n))}
         return out
 
-    def export_txt(self, all_languages=False):
+    def export_txt(self):
         lines = ["# Tombi! textos. Cada diálogo empieza con '=== ARCHIVO #n ==='; los saltos de línea reales se ignoran,",
                  "# usa {NL} {CLEAR} {WAIT} ... (ver ayuda del editor).", ""]
         for n in self.src.names():
-            if all_languages or is_main_lang(n):
+            if self.selected(n):
                 for i in range(self.count(n)):
                     lines.append("=== %s #%d ===" % (n, i))
                     lines.append(self.text(n, i).rstrip("\n"))
@@ -267,6 +290,8 @@ class Project:
         """{path: bytes} for every edited file, and a list of readable errors (nothing is returned if there are any)."""
         files, errors = {}, []
         for path, e in sorted(self.edits.items()):
+            if not self.selected(path):
+                continue
             w = clone(self.wfm(path))
             for idx, text in sorted(e.items()):
                 try:
@@ -363,12 +388,17 @@ def main():
     r.add_argument("-o", "--out", default="preview.png"); r.add_argument("--scale", type=int, default=2)
     r.add_argument("--text", help="render this text instead of the dialogue's own")
     e = sub.add_parser("export")
-    e.add_argument("src"); e.add_argument("out"); e.add_argument("--all-languages", action="store_true")
+    e.add_argument("src"); e.add_argument("out"); e.add_argument("--all-languages", action="store_true"); e.add_argument("--languages", help="letters, e.g. SB")
     b = sub.add_parser("build")
     b.add_argument("src"); b.add_argument("project"); b.add_argument("-o", "--out", required=True)
     b.add_argument("--work"); b.add_argument("--disc")
     a = p.parse_args()
     proj = Project(Source(a.src))
+    if a.cmd == "export":
+        if a.all_languages:
+            proj.langs = set(proj.languages())
+        elif a.languages:
+            proj.langs = set(a.languages.upper())
     if a.cmd == "render":
         import text_preview
         text = a.text if a.text is not None else proj.text(a.path, a.idx)
@@ -380,9 +410,9 @@ def main():
         print(proj.original(a.path, a.idx))
     elif a.cmd == "export":
         if a.out.lower().endswith(".json"):
-            json.dump(proj.export_json(a.all_languages), open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            json.dump(proj.export_json(), open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         else:
-            open(a.out, "w", encoding="utf-8").write(proj.export_txt(a.all_languages))
+            open(a.out, "w", encoding="utf-8").write(proj.export_txt())
     else:
         if a.project.lower().endswith(".txt"):
             ap, pr = proj.import_txt(open(a.project, encoding="utf-8").read())
