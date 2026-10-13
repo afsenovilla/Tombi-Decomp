@@ -1,4 +1,8 @@
-/* score 142 (was 146: dead `ay = q;` at the end keeps q alive past the r = q copy, restoring the game's move a3,v1;
+/* score 70 (n73): block-local `short t; unsigned short w;` per arm (x001 form) fixes the size but flips a/b (a 48 refs/396 vs
+   b 46/381, game b first); a `do { b->velX = dx; } while (0);` (debt: loop-depth weighted ref) puts b first again.
+   Left (same as x001/wip/func_801244A0.c): r a1 vs a3, sabs result v0/v1, +0x4e8 lh a0/v1 swap, t/w block regs
+   (game t = a2 untied from the b->h lhu, w = a1; int/unsigned short function-scope t, int w, w copy: no gain).
+   Older: score 142 (was 146: dead `ay = q;` at the end keeps q alive past the r = q copy, restoring the game's move a3,v1;
    see x001/wip/func_801244A0.c, same source, for the block-local t/w form of the D_1F8001D2 block, which here
    scores worse (238) although it fixes the size). Older notes: remaining diffs are register choices only: q/r copy at +0xe4, ay abs at +0x158 (game negates the ay copy, gcc propagates cy), sabs result v0/v1, the by/ay temps at +0x578 and t/d at +0x604. Tried: int/short types of q/r/t/d/w, reversed compares, sabs forms; -fno-cse-skip-blocks not needed after the if/else sabs. */
 // FUNC 8011e000 2276 X010
@@ -20,7 +24,6 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
 {
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
-    short t;
     short v;
     int q, r;
 
@@ -115,19 +118,25 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
             if (D_8009D2C3 & 0x40) {
                 if (D_1F8001D2 != 0) {
                     short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
-                        if (dx > 0) {
+                    if (dx > 0) {
+                        short t;
+                        unsigned short w;
                         t = b->h->p.whole + cx;
-                        if ((unsigned short)(t - a->h->p.whole + 2) >= 8) a->h->p.whole += d;
+                        w = t - a->h->p.whole + 2;
+                        if (w >= 8) a->h->p.whole += d;
                         else a->h->p.whole = t;
                     } else {
+                        short t;
+                        unsigned short w;
                         t = b->h->p.whole - cx;
-                        if ((unsigned short)(a->h->p.whole - t + 2) >= 8) a->h->p.whole -= d;
+                        w = a->h->p.whole - t + 2;
+                        if (w >= 8) a->h->p.whole -= d;
                         else a->h->p.whole = t;
                     }
                     return 3;
                 }
                 a->y.p.whole = (-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2);
-                b->velX = dx;
+                do { b->velX = dx; } while (0);
                 b->b69 = 1;
                 if (a->velY < 0) a->velY = 0;
             } else {
