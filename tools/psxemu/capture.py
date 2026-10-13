@@ -5,7 +5,9 @@ the disc image through the HLE CD library), lets the task system run, and raster
   tools/psxemu/capture.py title OUT.png
 
 Scenes:
-  title   - boot -> SCE/Whoopee Camp logos -> title (the FMVs are skipped by the HLE movie task), captured once "PRESS START" blinks on.
+  title    - boot -> SCE/Whoopee Camp logos -> title (the FMVs are skipped by the HLE movie task), captured once "PRESS START" blinks on.
+  area00   - START on the title: first room of AREA00 (sky, village, Tombi, dialogue box).
+  worldmap - + the dialogue clicked through (CROSS), SELECT menu -> Map.
 """
 import os
 import sys
@@ -63,7 +65,47 @@ def title(m=None, log=print, settle=150):
     return frame_image(m), m
 
 
-SCENES = {"title": title}
+# pad scripts: (buttons, frames held) - buttons as in Machine.set_pad, 0 = released
+CROSS, SELECT, START, DOWN = 0x4000, 0x0001, 0x0008, 0x0040
+# the old man's dialogue + "The 100 Year Old Wise Man" event banner (the emulation is deterministic: this exact timing was found by trial)
+TALK = ([(CROSS, 3), (0, 30)] * 4 + [(0, 100), (SELECT, 3), (0, 120)] + [(CROSS, 3), (0, 40)] * 18 + [(0, 60)]
+        + [(CROSS, 3), (0, 30)] * 4 + [(0, 60)])
+TO_MAP = [(SELECT, 3), (0, 150)] + [(DOWN, 3), (0, 15)] * 3 + [(CROSS, 3), (0, 250)]   # menu: Item/Event/Status/Map
+
+
+def play(m, script, max_instr=150_000_000):
+    for buttons, n in script:
+        m.set_pad(buttons)
+        m.run_frames(n, max_instr=max_instr)
+    m.set_pad(0)
+
+
+def area00(m=None, log=print):
+    """New game: the first room of AREA00 (Village of All Beginnings) with its sky/far background, Tombi and the first dialogue."""
+    _, m = title(m, log)
+    return area00_from(m, log)
+
+
+def area00_from(m, log=print):
+    """area00 starting from the machine state title() leaves."""
+    play(m, [(START, 4), (0, 500)])   # rasterize all frames: the dialogue font is drawn into VRAM and used as a texture
+    log("area00: frame %d, %d primitives" % (m.frame_count, len(m.frames[-1][1])))
+    return frame_image(m), m
+
+
+def worldmap(m=None, log=print):
+    """Pause menu -> Map from the first room (after the opening dialogue)."""
+    _, m = area00(m, log)
+    return worldmap_from(m, log)
+
+
+def worldmap_from(m, log=print):
+    play(m, TALK + TO_MAP)
+    log("worldmap: frame %d, %d primitives" % (m.frame_count, len(m.frames[-1][1])))
+    return frame_image(m), m
+
+
+SCENES = {"title": title, "area00": area00, "worldmap": worldmap}
 
 
 def main(argv=None):

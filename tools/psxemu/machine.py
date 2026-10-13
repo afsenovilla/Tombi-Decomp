@@ -18,6 +18,7 @@ from . import gpu as _gpu
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VBLANK_EVERY = 25000
+PAD_BUF = 0x8009F7F0       # joypadInit: PadInitDirect(0x8009F7F0, 0x8009F812)
 MOVIE_TASK = 0x8001D6A4     # moviePlayerTask (psx_tomba name)        # instructions between two simulated VBlank interrupts
 
 
@@ -213,6 +214,16 @@ class Machine:
             R[2] = 0
 
     # ------------------------------------------------------------------ VBlank
+    def set_pad(self, buttons):
+        """Holds pad 1 buttons (PSX bit mask, 1 = pressed: SELECT 0x1, START 0x8, UP 0x10, RIGHT 0x20, DOWN 0x40, LEFT 0x80, L2 0x100,
+        R2 0x200, L1 0x400, R1 0x800, TRIANGLE 0x1000, CIRCLE 0x2000, CROSS 0x4000, SQUARE 0x8000).  The game reads the PadInitDirect
+        buffer at PAD_BUF (status 0, id 0x41 = digital pad, buttons active low)."""
+        self.pad = buttons
+        c = self.cpu
+        c.w8(PAD_BUF, 0)
+        c.w8(PAD_BUF + 1, 0x41)
+        c.w16(PAD_BUF + 2, ~buttons & 0xFFFF)
+
     def vblank(self):
         self.vblanks += 1
         c = self.cpu
@@ -401,6 +412,42 @@ class Machine:
         if self.verbose:
             print("printf:", c.cstr(c.R[4]).rstrip())
         c.R[2] = 0
+
+    # ------------------------------------------------------------------ save states
+    STATE_KEYS = ("loc", "threads", "cur_th", "next_th", "events", "next_ev", "vblank_funcs", "vsync_cb", "vblanks", "frame_count",
+                  "drawenv", "dispenv", "opened", "pad")
+
+    def save_state(self, path):
+        import pickle
+        c = self.cpu
+        st = {k: getattr(self, k, None) for k in self.STATE_KEYS}
+        st.update(mem=bytes(c.mem), R=list(c.R), hi=c.hi, lo=c.lo, pc=c.pc, cop0=list(c.cop0), icount=c.icount,
+                  gte=(list(c.gte.d), list(c.gte.c), c.gte.flag), vram=self.gpu.vram.tobytes(),
+                  gpu=(self.gpu.tpage, self.gpu.tw, self.gpu.clip, self.gpu.ofs, self.gpu.set_mask))
+        with open(path, "wb") as f:
+            pickle.dump(st, f)
+
+    def load_state(self, path):
+        import pickle
+        import numpy as np
+        with open(path, "rb") as f:
+            st = pickle.load(f)
+        c = self.cpu
+        c.mem[:] = st["mem"]
+        c.R[:] = st["R"]
+        c.hi, c.lo, c.pc, c.icount = st["hi"], st["lo"], st["pc"], st["icount"]
+        c.cop0[:] = st["cop0"]
+        c.gte.d[:], c.gte.c[:], c.gte.flag = st["gte"][0], st["gte"][1], st["gte"][2]
+        self.gpu.vram[:] = np.frombuffer(st["vram"], dtype=np.uint16).reshape(self.gpu.vram.shape)
+        g = self.gpu
+        g.tpage, g.tw, g.clip, g.ofs, g.set_mask = st["gpu"]
+        c.blocks.clear()
+        for k in self.STATE_KEYS:
+            setattr(self, k, st[k])
+        if self.pad is not None:
+            self.set_pad(self.pad)
+
+    pad = None
 
     # ------------------------------------------------------------------ output
     def png_area(self, x, y, w, h):

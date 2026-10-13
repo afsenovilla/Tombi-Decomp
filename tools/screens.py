@@ -6,7 +6,11 @@ be seen: the right bit depth, the real width/height (not the 256 word LoadImage 
 with them.  Every image is an 8 bpp page of the SYSTEM load lists (`SYS/LD0SYS.BIN`) with a 256 colour CLUT record (256 x 1 words) that
 the game uploads next to it; `arg = y << 16 | x` of the page record says where in VRAM it lives, which gives the stitching order.
 
-  tools/screens.py OUT/screens [--fs DIR]
+  tools/screens.py OUT/screens [--fs DIR] [--composed title|all]
+
+--composed also writes the screens as the game composes them, captured by running MAIN0.EXE in the MIPS interpreter (tools/psxemu,
+needs game/MAIN0.EXE + game/disc/Tombi.bin): title_composed.png (~10 s); with `all` also area00_composed.png and worldmap_composed.png
+(several minutes).
 """
 import os, sys
 
@@ -155,12 +159,28 @@ def main(argv=None):
     ap.add_argument("out")
     ap.add_argument("--fs")
     ap.add_argument("--img")
+    ap.add_argument("--composed", choices=("title", "all"))
     a = ap.parse_args(argv)
     if a.fs:
         vram.A.FS = os.path.abspath(a.fs)
     if a.img:
         vram.A.IMG = os.path.abspath(a.img)
     print(export_screens(a.out, log=print), "screens")
+    if a.composed:
+        export_composed(a.out, a.composed == "all")
+
+
+def export_composed(out, everything=False, log=print):
+    """Composed screens from tools/psxemu/capture.py (one boot; each scene continues from the previous one)."""
+    from psxemu import capture
+    os.makedirs(out, exist_ok=True)
+    img, m = capture.title(log=log)
+    img.save(os.path.join(out, "title_composed.png"))
+    if everything:
+        img, m = capture.area00_from(m, log=log)
+        img.save(os.path.join(out, "area00_composed.png"))
+        img, m = capture.worldmap_from(m, log=log)
+        img.save(os.path.join(out, "worldmap_composed.png"))
 
 
 if __name__ == "__main__":

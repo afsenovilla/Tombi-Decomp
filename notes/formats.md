@@ -520,3 +520,29 @@ Note: `FUN_800212b4` (src name `drawNowLoading`) is really the TRY AGAIN prompt 
 - The 320 px room picture is page 0 (256 px) **plus the first 64 px of page 1, drawn at the LEFT edge**; `Core._backdrop_surface` rebuilds the sheet as `[strip of page 1][page 0][rest of page 1][other pages]` (Surface layers accept a source window `(name, x0, w, h, sx, sw)`). Page 0 of L90 is already 512 px wide: no strip.
 - L22 (forest): its CLUT row (AREA02/CLUT05 row 31) has 16 empty words (indices 176..191); no CLUT of the disc holds them (filled at run time), so `palinfer._fill_missing` estimates the used ones from neighbouring pixels (not original data). Backdrops render opaque.
 - Editor palette list: inferred / list CLUTs / embedded / resident / every disc CLUT file; the choice is stored per page in `mod.json` (`tombi_gfx.palettes`).
+
+## MIPS capture (tools/psxemu)
+
+Composed screens are captured by **running the game**: `tools/psxemu` is a pure Python R3000A interpreter (basic blocks compiled to
+Python, ~4 M instr/s; GTE after psx-spx; no load delay slots / interrupts / caches) with HLE of the BIOS and Psy-Q libraries by address
+(`notes/names_main0.csv` + `functions_main0.csv`):
+
+- BIOS B0 OpenTh/ChangeTh/CloseTh = the task system's threads; OpenEvent(RCntCNT3, func) = the VBlank handler, fired every 25 000
+  instructions (and by VSync).
+- libcd: CdControl(Setloc) / CdRead read 2048 byte sectors of `game/disc/Tombi.bin`; the game's own `cdLoadTask` (load lists,
+  lzDecompress, LoadImage, overlays at 0x800E8028) runs natively.
+- libgpu: LoadImage/StoreImage/MoveImage/ClearImage/PutDrawEnv (isbg clear)/DrawOTag... -> `psxemu/gpu.py` (numpy VRAM, SPRT/TILE/
+  POLY F/FT/G/GT 3/4, lines, E1..E6, semi transparency, CLUT 4/8 bpp, modulation). Every frame is rasterized (the dialogue font is
+  rendered into VRAM and used as a texture, so skipping frames breaks text).
+- stubs: libsnd/libspu/MDEC/card/pad libs; the FMV task 0x8001D6A4 sets MOVIE_PLAY_STATE (0x1F8001CC) = 0 and exits.
+- pad: PadInitDirect buffer 0x8009F7F0 (status 0, id 0x41, buttons active low) written by `Machine.set_pad`.
+- `Machine.save_state/load_state` pickle RAM, registers, threads and VRAM.
+
+`tools/psxemu/capture.py title|area00|worldmap OUT.png`, `tools/screens.py OUT --composed title|all`:
+- **title** (frame ~906, ~31 M instructions, ~10 s): DRAWENV 320 x 256 at (384,256)/(704,256). Landscape = 2 SPRT 16 bpp (tpage 0x80
+  at x 0 256 x 240, tpage 0x82 at x 256 64 x 240, from y 8); **TOMBI! logo = 2 SPRT 8 bpp, tpage 0x84 (VRAM word 256), CLUT (128,510)**:
+  (16,24) uv (0,8) 240 x 112 and (256,24) uv (8,112) 48 x 112 (the "!" + head piece). Text = 16 x 8 SPRT (tpage 6, CLUT row 480+);
+  the NEW GAME / LOAD drum = POLY_FT4 strips (cmd 0x2C) squeezed toward its edges. The logo drops in: it is complete after ~150 frames.
+- **area00**: START on the title, 500 frames: first room of the Village of All Beginnings (sky/far background + 3D + dialogue), ~480 prims.
+- **worldmap**: the dialogue clicked through with CROSS, SELECT -> menu (Item/Event/Status/Map) -> DOWN x3 -> CROSS (SYS list 7 =
+  A00701 map atlas); exact frame timings in `capture.TALK/TO_MAP` (deterministic). ~8 min.
