@@ -1,5 +1,10 @@
 // FUNC 801244a0 1800 X001
-/* score 68 (n73): ang/cx s5/s6 fixed with a weighted ref (debt): `do { c1 = rcos(ang); } while (0);` gives ang 9 refs
+/* score 52 (n78): ported x010's `{ int by = b->y.p.whole; ... }` compare temp (fixes the +0x4e8 lh swap).
+   n78 tried (no gain): r as ax (game ax=a3 too, but short ax adds sll/sra before `ang - r`; int ax 229), r = int
+   box-check temp, sabs forms (game needs jump.c NOT to turn the if/else into `r = x; if (x<0) r = -x;`, so the
+   else-arm move lands in the bgez slot and r shares v0 with the test; ~x+1 keeps a nor), sabs result into
+   existing vars, function-scope t/w/a->h temps in the D_1F8001D2 block (size grows).
+   Older: score 68 (n73): ang/cx s5/s6 fixed with a weighted ref (debt): `do { c1 = rcos(ang); } while (0);` gives ang 9 refs
    (3*9/178=.152, between dx .159 and cx .148; game order dy>dx>ang>cx). Still left: r in a1 (game a3; r's hard conflicts are
    only v0/sp, nobody prefers a1/a2 - mode's a2 copy dies at the switch; int/short mode, rcos() decl, mode copy: worse),
    sabs result v0/v1 (8 inline/compare forms: no change), +0x4e8 lh a0/v1 swap, D_1F8001D2 block regs.
@@ -112,7 +117,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
                 else a->h->p.whole += s2;
                 return 3;
             }
-            if ((-(s2 + -4) + b->y.p.whole) < a->y.p.whole - (a->box3 - a->box2)) return 3;
+            { int by = b->y.p.whole; if ((-(s2 + -4) + by) < a->y.p.whole - (a->box3 - a->box2)) return 3; }
             if (D_1F8001D2 != 0) {
                 short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
                 if (dx > 0) {
