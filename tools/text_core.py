@@ -574,7 +574,9 @@ def build_report(proj, out_bin, work, disc=None, log=print):
             p = os.path.join(fs, *name.split("/"))
             os.makedirs(os.path.dirname(p), exist_ok=True)
             open(p, "wb").write(src.read_any(name))
-    tmp_bin = os.path.join(os.path.dirname(out_bin), "~build-%d.bin" % os.getpid())
+    # build inside the work folder (mkpsxiso already writes there; it could not create "~build-N.bin" next to the output on
+    # Windows: "Cannot open or create output image file"), then move the checked image onto out_bin
+    tmp_bin = os.path.join(work, "build-%d.bin" % os.getpid())
     tmp_cue = os.path.splitext(tmp_bin)[0] + ".cue"
     tmp_lay = os.path.splitext(tmp_bin)[0] + ".layout.json"
     ns = argparse.Namespace(fs=fs, disc=disc, work=os.path.join(work, "mkdisc"), out=tmp_bin, relayout=True)
@@ -592,11 +594,13 @@ def build_report(proj, out_bin, work, disc=None, log=print):
             if name not in new.layout or new.layout[name][1] != len(data) or new.read_any(name) != data:
                 raise CoreError(tr("tc.verify", name))
         try:
-            os.replace(tmp_bin, out_bin)
+            part = out_bin + ".part"
+            shutil.move(tmp_bin, part)             # may cross drives (work folder vs output), unlike os.replace
+            os.replace(part, out_bin)              # same folder: atomic, the old image stays until the new one is complete
         except OSError as e:
             raise CoreError(tr("tc.cantwrite", out_bin, e))
     finally:
-        for t in (tmp_bin, tmp_cue, tmp_lay):
+        for t in (tmp_bin, tmp_cue, tmp_lay, out_bin + ".part"):
             if os.path.exists(t):
                 try:
                     os.remove(t)
