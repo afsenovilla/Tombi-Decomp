@@ -214,25 +214,25 @@ def wav_stats(path):
     return dict(seconds=n / w.getframerate(), channels=nc, rate=w.getframerate(), rms=rms, peak=max(map(abs, v)) if v else 0)
 
 
-def export_all(img, out, log=print, xa=True):
+def export_all(img, out, log=print, xa=True, banks=True, music=True):
     snd = os.path.join(out, "sound")
     files = iso_files(img)
     cnt = dict(wvd=0, vag=0, seq=0, xa=0)
     with open(img, "rb") as f:
         for path, (lba, size) in sorted(files.items()):
-            if not path.startswith("SOUND/"): continue
+            if not path.startswith("SOUND/") or not (banks or music): continue
             f.seek(lba * 2352); data = []
             for i in range((size + 2047) // 2048):
                 f.seek((lba + i) * 2352 + 24); data.append(f.read(2048))
             data = b"".join(data)[:size]
             base = os.path.basename(path)
-            if path.endswith(".WVD"):
+            if path.endswith(".WVD") and banks:
                 cnt["vag"] += extract_wvd_bytes(data, os.path.join(snd, "bank", base[:-4])); cnt["wvd"] += 1
-            elif path.endswith(".SEQ"):
+            elif path.endswith(".SEQ") and music:
                 os.makedirs(os.path.join(snd, "music"), exist_ok=True)
                 with open(os.path.join(snd, "music", base[:-4] + ".mid"), "wb") as o: o.write(seq_to_midi(data))
                 cnt["seq"] += 1
-    log("sound: %d banks -> %d VAG WAVs, %d SEQ -> MIDI under %s" % (cnt["wvd"], cnt["vag"], cnt["seq"], snd))
+    if banks or music: log("sound: %d banks -> %d VAG WAVs, %d SEQ -> MIDI under %s" % (cnt["wvd"], cnt["vag"], cnt["seq"], snd))
     if xa:
         os.makedirs(os.path.join(snd, "movie_audio"), exist_ok=True)
         for path, (lba, size) in sorted(files.items()):

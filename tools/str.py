@@ -217,13 +217,13 @@ def to_mp4(img, lba, size, out):
         os.unlink(t.name)
 
 
-def export_all(img, out, log=print):
+def export_all(img, out, log=print, mp4=True):
     vd = os.path.join(out, "video"); os.makedirs(vd, exist_ok=True)
     npng = nmp4 = 0
     for p, (lba, size) in sorted(str_files(img).items()):
         name = os.path.basename(p)[:-4]
         poster(img, lba, size, os.path.join(vd, name + ".png")); npng += 1
-        if to_mp4(img, lba, size, os.path.join(vd, name + ".mp4")): nmp4 += 1
+        if mp4 and to_mp4(img, lba, size, os.path.join(vd, name + ".mp4")): nmp4 += 1
     log("video: %d poster frames, %d mp4 (needs ffmpeg in PATH%s) under %s" % (npng, nmp4, "" if nmp4 else ": not found / failed", vd))
     return npng, nmp4
 
