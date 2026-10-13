@@ -49,7 +49,9 @@ NAMES_NOTE.update({i: "L" for i in NAMES if i not in NAMES_NOTE})
 
 
 def name_of(i):
-    return NAMES.get(i, "anim_%02d" % i)
+    """Display name: the user/default label (tools/labels.py, id "anim:tombi:N") over the built-in name over anim_NN."""
+    import labels
+    return labels.name("anim:tombi:%d" % i) or NAMES.get(i, "anim_%02d" % i)
 
 
 # ------------------------------------------------------------------ script decoding
@@ -208,7 +210,8 @@ def strip(spr, an, zoom=2, bg=(40, 40, 56, 255)):
 
 
 def fname(an):
-    return "%02d_%s" % (an["id"], an["name"])
+    import labels
+    return "%02d_%s" % (an["id"], labels.slug(an["name"]) or "anim_%02d" % an["id"])
 
 
 def export(out, zoom=2, tick=TICK_MS, reader=None, log=print):

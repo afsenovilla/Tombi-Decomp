@@ -1,0 +1,242 @@
+{
+ "anim:tombi:0": {
+  "name": "idle",
+  "note": "confianza H"
+ },
+ "anim:tombi:1": {
+  "name": "walk",
+  "note": "confianza H"
+ },
+ "anim:tombi:2": {
+  "name": "jog",
+  "note": "confianza H"
+ },
+ "anim:tombi:3": {
+  "name": "run",
+  "note": "confianza H"
+ },
+ "anim:tombi:4": {
+  "name": "fall",
+  "note": "confianza M"
+ },
+ "anim:tombi:5": {
+  "name": "crouch",
+  "note": "confianza M"
+ },
+ "anim:tombi:6": {
+  "name": "climb back",
+  "note": "confianza M"
+ },
+ "anim:tombi:7": {
+  "name": "climb back still",
+  "note": "confianza L"
+ },
+ "anim:tombi:9": {
+  "name": "hurt knockback",
+  "note": "confianza M"
+ },
+ "anim:tombi:10": {
+  "name": "climb side idle",
+  "note": "confianza H"
+ },
+ "anim:tombi:11": {
+  "name": "climb side up",
+  "note": "confianza H"
+ },
+ "anim:tombi:12": {
+  "name": "climb side down",
+  "note": "confianza H"
+ },
+ "anim:tombi:13": {
+  "name": "jump start",
+  "note": "confianza M"
+ },
+ "anim:tombi:14": {
+  "name": "jump",
+  "note": "confianza M"
+ },
+ "anim:tombi:15": {
+  "name": "jump alt",
+  "note": "confianza M"
+ },
+ "anim:tombi:16": {
+  "name": "flung air",
+  "note": "confianza L"
+ },
+ "anim:tombi:30": {
+  "name": "edge balance",
+  "note": "confianza L"
+ },
+ "anim:tombi:33": {
+  "name": "crouch walk",
+  "note": "confianza M"
+ },
+ "anim:tombi:35": {
+  "name": "climb back grab",
+  "note": "confianza L"
+ },
+ "anim:tombi:36": {
+  "name": "turn around",
+  "note": "confianza M"
+ },
+ "anim:tombi:45": {
+  "name": "climb side up b",
+  "note": "confianza L"
+ },
+ "anim:tombi:47": {
+  "name": "knocked down",
+  "note": "confianza L"
+ },
+ "anim:tombi:48": {
+  "name": "get up",
+  "note": "confianza M"
+ },
+ "anim:tombi:49": {
+  "name": "roll land",
+  "note": "confianza M"
+ },
+ "anim:tombi:53": {
+  "name": "dive horizontal",
+  "note": "confianza L"
+ },
+ "anim:tombi:55": {
+  "name": "get up slow",
+  "note": "confianza L"
+ },
+ "anim:tombi:57": {
+  "name": "knockdown big",
+  "note": "confianza L"
+ },
+ "anim:tombi:61": {
+  "name": "recover flip",
+  "note": "confianza L"
+ },
+ "anim:tombi:67": {
+  "name": "swim stroke",
+  "note": "confianza M"
+ },
+ "anim:tombi:68": {
+  "name": "swim float",
+  "note": "confianza M"
+ },
+ "anim:tombi:69": {
+  "name": "swim turn",
+  "note": "confianza L"
+ },
+ "anim:tombi:71": {
+  "name": "swim stroke slow",
+  "note": "confianza L"
+ },
+ "anim:tombi:78": {
+  "name": "victory pose",
+  "note": "confianza L"
+ },
+ "anim:tombi:80": {
+  "name": "shocked skeleton",
+  "note": "confianza M"
+ },
+ "anim:tombi:81": {
+  "name": "shiver cold",
+  "note": "confianza L"
+ },
+ "anim:tombi:83": {
+  "name": "burnt fall",
+  "note": "confianza L"
+ },
+ "backdrop:L20": {
+  "name": "cell with wooden bars",
+  "note": ""
+ },
+ "backdrop:L22": {
+  "name": "forest clearing",
+  "note": ""
+ },
+ "backdrop:L23": {
+  "name": "stone door with a face",
+  "note": ""
+ },
+ "backdrop:L42": {
+  "name": "seashore with a giant clam",
+  "note": ""
+ },
+ "backdrop:L50": {
+  "name": "floating island with a house",
+  "note": ""
+ },
+ "backdrop:L51": {
+  "name": "palace hall with arches",
+  "note": ""
+ },
+ "backdrop:L52": {
+  "name": "palace hall with red carpet",
+  "note": ""
+ },
+ "backdrop:L53": {
+  "name": "cave staircase",
+  "note": ""
+ },
+ "backdrop:L54": {
+  "name": "brick staircase",
+  "note": ""
+ },
+ "backdrop:L60": {
+  "name": "wizard study",
+  "note": ""
+ },
+ "backdrop:L62": {
+  "name": "wooden pen",
+  "note": ""
+ },
+ "backdrop:L63": {
+  "name": "cave with brick tower",
+  "note": ""
+ },
+ "backdrop:L77": {
+  "name": "clock tower",
+  "note": ""
+ },
+ "backdrop:L78": {
+  "name": "bell tower",
+  "note": ""
+ },
+ "backdrop:L79": {
+  "name": "gear machine room",
+  "note": ""
+ },
+ "backdrop:L81": {
+  "name": "copper castle",
+  "note": ""
+ },
+ "backdrop:L82": {
+  "name": "hall with arches",
+  "note": ""
+ },
+ "backdrop:L83": {
+  "name": "hall with shield doors",
+  "note": ""
+ },
+ "backdrop:L84": {
+  "name": "hall with shield doors (copy)",
+  "note": ""
+ },
+ "backdrop:L85": {
+  "name": "boiler room",
+  "note": ""
+ },
+ "backdrop:L88": {
+  "name": "workshop interior",
+  "note": ""
+ },
+ "backdrop:L90": {
+  "name": "mushroom hut in blossoms",
+  "note": ""
+ },
+ "screen:now_loading": {
+  "name": "NOW LOADING",
+  "note": "pantalla de carga"
+ },
+ "screen:try_again": {
+  "name": "TRY AGAIN",
+  "note": ""
+ }
+}

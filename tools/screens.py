@@ -12,6 +12,7 @@ import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vram
+import labels
 
 RGB = vram.RGB
 
@@ -111,7 +112,7 @@ def export_screens(out, log=lambda m: None):
         if not ps:
             continue
         data = render(ps, list(_words(c)[:256]), crop, opaque)
-        vram.write(os.path.join(out, name + ".png"), data)
+        vram.write(os.path.join(out, labels.fname("screen:" + name, name) + ".png"), data)
         n += 1
         log(name)
     fs = font_sheet(*FONT_SHEET)
@@ -121,7 +122,7 @@ def export_screens(out, log=lambda m: None):
     for sc in (NOW_LOADING, TRY_AGAIN):
         nl = now_loading(*sc)
         if nl:
-            vram.write(os.path.join(out, sc[0] + ".png"), nl)
+            vram.write(os.path.join(out, labels.fname("screen:" + sc[0], sc[0]) + ".png"), nl)
             n += 1
     return n
 

@@ -191,6 +191,8 @@ class App:
             b = ttk.Button(bar, text=tr(item[0]), command=item[1])
             b.pack(side="left", padx=1)
             self.buttons.append(b)
+        ttk.Button(bar, text=tr("lb.export"), command=self.export_labels).pack(side="left", padx=(8, 1))
+        ttk.Button(bar, text=tr("lb.import"), command=self.import_labels).pack(side="left", padx=1)
         ttk.Button(bar, text=tr("b.help"), command=self.help).pack(side="left", padx=(8, 1))
         i18n.selector(bar, self.rebuild).pack(side="right")
         self.status = tk.StringVar(value=self.status_text)
@@ -205,6 +207,10 @@ class App:
         self.tree.pack(side="left", fill="both", expand=True)
         sb.pack(side="right", fill="y")
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
+        self.tree.bind("<F2>", self.rename)
+        menu = tk.Menu(self.root, tearoff=0)
+        menu.add_command(label=tr("lb.rename") + "  (F2)", command=self.rename)
+        self.tree.bind("<Button-3>", lambda ev: (self.tree.selection_set(self.tree.identify_row(ev.y)), menu.tk_popup(ev.x_root, ev.y_root)))
         self.tree.bind("<<TreeviewSelect>>", self.on_select)
 
         mid = ttk.Frame(pw)
@@ -338,7 +344,7 @@ class App:
             self._insert("", n)
 
     def _insert(self, parent, n):
-        iid = self.tree.insert(parent, "end", text=n["text"], open=False)
+        iid = self.tree.insert(parent, "end", text=self.node_text(n), open=False)
         self.node_of[iid] = n
         if n["children"]:
             for c in n["children"]:
@@ -346,6 +352,58 @@ class App:
         elif n["lazy"]:
             n["_loaded"] = False
             self.tree.insert(iid, "end", text="…")
+
+    def node_text(self, n):
+        import labels
+        return labels.show(n["id"], n["text"]) if n.get("id") else n["text"]
+
+    def rename(self, _=None):
+        """F2 / context menu: name + note of the selected tree item (tools/labels.py)."""
+        import labels
+        sel = self.tree.selection()
+        n = self.node_of.get(sel[0]) if sel else None
+        if not n or not n.get("id"):
+            return
+        cur = labels.get(n["id"]) or {"name": "", "note": ""}
+        top = tk.Toplevel(self.root)
+        top.title(tr("lb.rename"))
+        top.transient(self.root)
+        ttk.Label(top, text=n["id"], foreground="#555").grid(row=0, column=0, columnspan=2, padx=8, pady=(8, 2), sticky="w")
+        ttk.Label(top, text=tr("lb.name")).grid(row=1, column=0, padx=8, sticky="w")
+        nv = tk.StringVar(value=cur["name"])
+        ent = ttk.Entry(top, textvariable=nv, width=40)
+        ent.grid(row=1, column=1, padx=8, pady=2)
+        ttk.Label(top, text=tr("lb.note")).grid(row=2, column=0, padx=8, sticky="nw")
+        note = tk.Text(top, width=40, height=4)
+        note.insert("1.0", cur["note"])
+        note.grid(row=2, column=1, padx=8, pady=2)
+
+        def ok(_=None):
+            labels.set(n["id"], nv.get(), note.get("1.0", "end"))
+            self.tree.item(sel[0], text=self.node_text(n))
+            top.destroy()
+        row = ttk.Frame(top)
+        row.grid(row=3, column=0, columnspan=2, pady=8)
+        ttk.Button(row, text="OK", command=ok).pack(side="left", padx=4)
+        ttk.Button(row, text=tr("lb.cancel"), command=top.destroy).pack(side="left", padx=4)
+        ent.focus_set()
+        top.bind("<Return>", ok)
+        top.bind("<Escape>", lambda e: top.destroy())
+
+    def export_labels(self):
+        import labels
+        p = filedialog.asksaveasfilename(title=tr("lb.export"), defaultextension=".json", initialfile="labels.json", filetypes=[("JSON", "*.json")])
+        if p:
+            self.say(tr("lb.exported", labels.export_user(p), p))
+
+    def import_labels(self):
+        import labels
+        p = filedialog.askopenfilename(title=tr("lb.import"), filetypes=[("JSON", "*.json")])
+        if p:
+            n = labels.import_file(p)
+            self.say(tr("lb.imported", n))
+            if self.core:
+                self.fill_tree()
 
     def on_open_node(self, _):
         iid = self.tree.focus()

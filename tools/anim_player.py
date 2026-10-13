@@ -65,6 +65,7 @@ class AnimWindow:
         bar.pack(fill="x")
         self.play_txt = tk.StringVar(value=tr("an.play"))
         ttk.Button(bar, textvariable=self.play_txt, command=self.toggle).pack(side="left")
+        ttk.Button(bar, text=tr("lb.rename"), command=self.rename).pack(side="left", padx=(8, 2))
         ttk.Button(bar, text=tr("an.prev"), command=lambda: self.step(-1)).pack(side="left", padx=2)
         ttk.Button(bar, text=tr("an.next"), command=lambda: self.step(1)).pack(side="left")
         ttk.Label(bar, text=tr("an.speed")).pack(side="left", padx=(10, 2))
@@ -94,6 +95,22 @@ class AnimWindow:
 
     def zoom_n(self):
         return int(self.zoom.get()[1:])
+
+    def rename(self):
+        """Name + note of this animation (tools/labels.py, id anim:tombi:N); the GIF file name uses it."""
+        from tkinter import simpledialog
+        import labels
+        if not self.an:
+            return
+        lid = "anim:tombi:%d" % self.an["id"]
+        cur = labels.get(lid) or {"name": "", "note": ""}
+        nm = simpledialog.askstring(tr("lb.rename"), tr("lb.name"), initialvalue=cur["name"] or self.an["name"], parent=self.win)
+        if nm is None:
+            return
+        nt = simpledialog.askstring(tr("lb.rename"), tr("lb.note"), initialvalue=cur["note"], parent=self.win)
+        labels.set(lid, nm, cur["note"] if nt is None else nt)
+        self.an["name"] = labels.name(lid) or anim.name_of(self.an["id"])
+        self.show(self.an["id"])
 
     def show(self, aid):
         self.an = next(a for a in self.cat if a["id"] == aid)

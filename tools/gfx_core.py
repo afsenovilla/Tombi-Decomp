@@ -649,7 +649,7 @@ class Core:
 
     def _anim_nodes(self):
         cat = self.anim_data()[0]
-        return [dict(text="%02d  %s" % (a["id"], a["name"]), item=("anim", a["id"]), children=[], lazy=None)
+        return [dict(text="%02d  %s" % (a["id"], a["name"]), item=("anim", a["id"]), children=[], lazy=None, id="anim:tombi:%d" % a["id"])
                 for a in cat if a["alias_of"] is None]
 
     def wpp(self, name):
@@ -714,17 +714,19 @@ class Core:
     # ---- catalogue / tree
     def tree(self):
         """[node] with node = dict(text, item, children|lazy)."""
-        N = lambda text, item=None, children=None, lazy=None: dict(text=text, item=item, children=children or [], lazy=lazy)
+        N = lambda text, item=None, children=None, lazy=None, id=None: dict(text=text, item=item, children=children or [], lazy=lazy, id=id)
         root = []
         scr = [N(sc["name"], ("screen", sc["name"])) for sc in screens_list()] + [N(e[0], ("screen", e[0])) for e in EXTRA_SCREENS]
+        for n in scr:
+            n["id"] = "screen:" + n["item"][1]
         import palinfer
-        scr.append(N(tr("t.backdrops"), children=[N("L%d  %s" % (k, palinfer.backdrop(self, k)["name"]), ("screen", "backdrop_L%d" % k))
+        scr.append(N(tr("t.backdrops"), children=[N("L%d  %s" % (k, palinfer.backdrop(self, k)["name"]), ("screen", "backdrop_L%d" % k), id="backdrop:L%d" % k)
                                                  for k in palinfer.backdrop_lists(self)]))
         root.append(N(tr("t.screens"), children=scr))
-        ui = [N(tr("t.uitable"), children=[N("%d  %s  (%d,%d %dx%d)" % (i, UI_NAMES.get(i, "UI %d" % i), u, v, w, h), ("ui", i))
+        ui = [N(tr("t.uitable"), children=[N("%d  %s  (%d,%d %dx%d)" % (i, UI_NAMES.get(i, "UI %d" % i), u, v, w, h), ("ui", i), id="ui:%d" % i)
                                            for i, u, v, w, h, cx, cy in self.ui_table()])]
         for nm in ("SYSTEM/A00000.GAM", UI_PAGE):
-            ui.append(N(nm.split("/")[-1] + "  " + tr("t.hudpage"), ("page", nm, "SYS", 0)))
+            ui.append(N(nm.split("/")[-1] + "  " + tr("t.hudpage"), ("page", nm, "SYS", 0), id="page:" + nm))
         root.append(N(tr("t.ui"), children=ui))
         pg = []
         for ld in sorted(self.lists, key=lambda x: (x != "SYS", x)):
@@ -733,8 +735,8 @@ class Core:
                 pages = [(r, bpp) for i, r, bpp, cl in self.grpx(lst) if bpp != 16]
                 if not pages:
                     continue
-                grp["children"].append(N(tr("t.list", k), children=[
-                    N("%s  (%dx%d, %d bpp)" % (r["name"].split("/")[-1], r["w"] * (4 if bpp == 4 else 2), r["h"], bpp), ("page", r["name"], ld, k))
+                grp["children"].append(N(tr("t.list", k), id="list:%s:%d" % (ld, k), children=[
+                    N("%s  (%dx%d, %d bpp)" % (r["name"].split("/")[-1], r["w"] * (4 if bpp == 4 else 2), r["h"], bpp), ("page", r["name"], ld, k), id="page:" + r["name"])
                     for r, bpp in pages]))
             pg.append(grp)
         root.append(N(tr("t.pages"), children=pg))
@@ -748,13 +750,13 @@ class Core:
                     if bpp == 16 and r["name"] not in names:
                         names.append(r["name"])
             if names:
-                pal.append(N(self.area_name(ld), children=[N(n.split("/")[-1], ("clut", n)) for n in sorted(names)]))
+                pal.append(N(self.area_name(ld), children=[N(n.split("/")[-1], ("clut", n), id="clut:" + n) for n in sorted(names)]))
         root.append(N(tr("t.palettes"), children=pal))
         return root
 
     def _sprite_nodes(self):
         import wpp
-        N = lambda text, item=None, children=None, lazy=None: dict(text=text, item=item, children=children or [], lazy=lazy)
+        N = lambda text, item=None, children=None, lazy=None, id=None: dict(text=text, item=item, children=children or [], lazy=lazy, id=id)
         out = []
         seen = set()
         for ld, lists in sorted(self.lists.items()):
@@ -763,7 +765,7 @@ class Core:
                     nm = r["name"]
                     if (r["kind"] & 0xF0) == 0x60 and r["type"] != 0xFFFFFFFF and nm.endswith(".000") and nm not in seen and wpp.is_wpp(nm):
                         seen.add(nm)
-                        out.append(N(nm, lazy=(lambda nm=nm: self._frame_nodes(nm))))
+                        out.append(N(nm, lazy=(lambda nm=nm: self._frame_nodes(nm)), id="wppfile:" + nm))
         return out
 
     def _frame_nodes(self, nm):
@@ -772,8 +774,15 @@ class Core:
         for k in sorted(frames):
             n = int(k.split("_")[1][:4])
             w, h = struct.unpack_from("<HH", frames[k])
-            out.append(dict(text="#%d  (%dx%d)" % (n, w * 4, h), item=("wppframe", nm, n), children=[], lazy=None))
+            out.append(dict(text="#%d  (%dx%d)" % (n, w * 4, h), item=("wppframe", nm, n), children=[], lazy=None, id="wpp:%s:frame:%d" % (nm, n)))
         return out
+
+    def item_id(self, item):
+        """Stable label id (tools/labels.py) of a tree item, or None."""
+        k = item[0]
+        return {"page": lambda: "page:" + item[1], "screen": lambda: ("backdrop:L" + item[1][10:]) if item[1].startswith("backdrop_L") else "screen:" + item[1],
+                "ui": lambda: "ui:%d" % item[1], "wppframe": lambda: "wpp:%s:frame:%d" % (item[1], item[2]), "clut": lambda: "clut:" + item[1],
+                "anim": lambda: "anim:tombi:%d" % item[1]}[k]() if k in ("page", "screen", "ui", "wppframe", "clut", "anim") else None
 
     def item_name(self, item):
         return ":".join(str(x) for x in (item[0],) + tuple(item[1:2]))
@@ -1198,6 +1207,8 @@ S_ES = {
     "c.nochanges": "No hay cambios que aplicar.", "c.needimage": "Hace falta la imagen original (.bin) para generar la ISO: ábrela en lugar de la carpeta.",
     "c.space": "Poco espacio libre: la ISO necesita unos {0} MB y hay {1} MB.", "c.mkfail": "mkpsxiso falló: {0}\n{1}",
     "c.bigimg": "La imagen ({0}x{1}) es mayor que el destino ({2}x{3}).",
+    "lb.rename": "Renombrar…", "lb.name": "Nombre:", "lb.note": "Nota:", "lb.cancel": "Cancelar", "lb.export": "Exportar etiquetas", "lb.import": "Importar etiquetas",
+    "lb.exported": "{0} etiqueta(s) exportadas a {1}", "lb.imported": "{0} etiqueta(s) importadas",
     "pg.inferred": "Deducida", "pg.list": "Registros CLUT de la lista actual", "pg.embedded": "Paletas incrustadas en la página",
     "pg.resident": "Filas CLUT residentes en la VRAM", "pg.disc": "Todos los CLUT del disco (por archivo)", "pal.inf": "{0}  (deducida)",
     "pal.emb": "{0}  fila {1} · paleta {2}", "l.nowpal": "Paleta: {0}", "l.autotag": "  (deducida)", "l.palhint": "Arriba/Abajo: cambiar de paleta",
@@ -1221,6 +1232,8 @@ S_EN = {
     "c.nochanges": "There are no changes to apply.", "c.needimage": "The original image (.bin) is needed to build the ISO: open it instead of the folder.",
     "c.space": "Not enough free space: the ISO needs about {0} MB and {1} MB are free.", "c.mkfail": "mkpsxiso failed: {0}\n{1}",
     "c.bigimg": "The image ({0}x{1}) is larger than the target ({2}x{3}).",
+    "lb.rename": "Rename…", "lb.name": "Name:", "lb.note": "Note:", "lb.cancel": "Cancel", "lb.export": "Export labels", "lb.import": "Import labels",
+    "lb.exported": "{0} label(s) exported to {1}", "lb.imported": "{0} label(s) imported",
     "pg.inferred": "Inferred", "pg.list": "CLUT records of the current list", "pg.embedded": "Palettes embedded in the page",
     "pg.resident": "CLUT rows resident in VRAM", "pg.disc": "All CLUTs on the disc (by file)", "pal.inf": "{0}  (inferred)",
     "pal.emb": "{0}  row {1} · palette {2}", "l.nowpal": "Palette: {0}", "l.autotag": "  (inferred)", "l.palhint": "Up/Down: cycle palettes",

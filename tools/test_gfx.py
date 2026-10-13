@@ -70,6 +70,36 @@ class T(unittest.TestCase):
         pl = bytes(s22.plane())
         self.assertFalse(any(ws[i] == 0 for i in set(b for y in range(240) for b in pl[y * s22.W:y * s22.W + 320]) if i))
 
+    def test_labels(self):
+        import labels
+        old = labels.user_path
+        labels.user_path = lambda: os.path.join(self.tmp, "u.json")
+        labels.reload()
+        try:
+            self.assertEqual(labels.name("backdrop:L22"), "forest clearing")
+            labels.set("backdrop:L22", "Bosque", "nota")
+            self.assertEqual(labels.fname("backdrop:L22", "L22"), "L22_bosque")
+            self.assertEqual(labels.show("backdrop:L22", "x"), "Bosque  (x)")
+            p = os.path.join(self.tmp, "e.json")
+            self.assertEqual(labels.export_user(p), 1)
+            labels.set("backdrop:L22", "")
+            self.assertEqual(labels.name("backdrop:L22"), "forest clearing")
+            labels.import_file(p)
+            self.assertEqual(labels.name("backdrop:L22"), "Bosque")
+            ids = []
+            def walk(ns):
+                for n in ns:
+                    ids.append(n.get("id"))
+                    walk(n["children"])
+            walk(self.core.tree())
+            self.assertIn("backdrop:L22", ids)
+            self.assertIn("page:SYSTEM/A00900.000", ids)
+            import anim
+            self.assertEqual(anim.name_of(0), "idle")
+        finally:
+            labels.user_path = old
+            labels.reload()
+
     def test_backdrops(self):
         import palinfer
         ks = palinfer.backdrop_lists(self.core)

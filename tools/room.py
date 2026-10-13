@@ -18,6 +18,7 @@ import os, struct, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import area000 as A
 import vram as V
+import labels
 
 
 def parse_wmd(d):
@@ -191,7 +192,7 @@ def export_glb(out, log=print):
                 log("room %s:%d skipped: %r" % (ld, i, e))
                 continue
             if g:
-                V.write(os.path.join(out, nm.replace("/", "_").rsplit(".", 1)[0] + ".glb"), g)
+                V.write(os.path.join(out, labels.fname("room:%s:%d" % (ld, i), nm.replace("/", "_").rsplit(".", 1)[0]) + ".glb"), g)
                 n += 1
     return n
 
@@ -218,7 +219,7 @@ def export_rooms(out, log=print, scale=2):
                 log("room %s:%d skipped: %r" % (ld, i, e))
                 continue
             if png:
-                V.write(os.path.join(out, nm.replace("/", "_").rsplit(".", 1)[0] + ".png"), png)
+                V.write(os.path.join(out, labels.fname("room:%s:%d" % (ld, i), nm.replace("/", "_").rsplit(".", 1)[0]) + ".png"), png)
                 n += 1
     return n
 
