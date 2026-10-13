@@ -11,6 +11,7 @@ on:
       - tools/isoext.py
       - tools/area000.py
       - tools/wpp.py
+      - tools/vram.py
       - tools/cdfiles.py
       - .github/workflows/assets-exe.yml
   workflow_dispatch:
@@ -32,9 +33,9 @@ jobs:
         shell: bash
         run: |
           python -m pip install pyinstaller
-          pyinstaller --onefile --name tombi-assets --distpath build/exe --workpath build/pyi --specpath build/pyi \
-            --hidden-import area000 --hidden-import wpp --hidden-import cdfiles --paths tools \
-            --add-data "$PWD/tools/isoext.py;." tools/extract_sprites.py
+          pyinstaller --onefile --name tombi-assets --distpath build/exe --workpath build/pyi --specpath . \
+            --hidden-import area000 --hidden-import wpp --hidden-import vram --hidden-import cdfiles --paths tools \
+            --add-data "tools/isoext.py;." tools/extract_sprites.py
           mkdir -p dist/windows
           cp build/exe/tombi-assets.exe dist/windows/tombi-assets.exe
 
