@@ -38,6 +38,24 @@ with `tools/wfm_charmap.json` (331 bitmap hashes incl. 81 labelled by hand from 
 height = 16 + 13 * lines, cursor starts at (8, 6), 128 glyphs per message slot (`MESSAGE_GLYPHS[][128]`). WFM files are plain files of the disc (no
 container): a changed size only needs `mkdisc.py --relayout`. `tools/text_editor.py` / `dist/windows/tombi-text.exe` build on this.
 
+
+### Event title layout (CFNT999*.WFM, 24 px): spaces and line breaks are in the overlays (`tools/title_layout.py`)
+The WFM of a title holds only its letters (`Pulseradelabuelo`, 16 words, no flag bits, no space glyph); in game it shows as "Pulsera del" /
+"abuelo", centred, each letter on an orange tile. Gaps and line breaks are **not in the WFM**: `spawnEventTitle` (FUN_8005aa74) walks a
+list of 4-byte records per title, `u8 0, s8 col, s8 row, u8 flags`, one per letter in order (dialogue word i = record i): the letter goes
+to x = col * 10, y = row * 14 (relative to the title origin, centred on column 0), `flags & 0xF` indexes the timing/colour tables
+`D_800804E0 / D_800804EC`, bit 7 marks the first 11 letters that appear one after another (`0x80 | i`; other letters get a zone code
+1/2/3/4). Letters are 2 columns apart, a space adds 1 column, a line break moves 2 rows (28 px) down (rows -4 / -2 / 0 for 3 / 2 / 1 lines).
+Lists end with a record whose first byte is 0xFF and are stored one after another, dialogue k = list k - 2 (dialogues 0 and 1, the locked
+titles, and four others (52, ~90, ~126, 135) have none): 130 lists, in every language the same way, found by matching list lengths to the
+word counts of the CFNT file. Where: every `X?NN.BIN` / `I?NFO*.BIN` overlay of the language (`?` = digit n of MAINn; letters
+B F G I H S P W D = n 0..8, `tools/cdfiles.py`), e.g. `AREA19/I5NFO.BIN` offset 0x697C (RAM 0x800F0B1C) for Spanish; the copies are identical.
+The event tables point INTO the lists (at record 10 of each title), so a list can be rewritten in place but not made longer or shorter.
+The tool therefore reads the layout from the overlays (text shows `Pulsera del{NL}` + `abuelo`), ignores ' ' and {NL} in 24 px WFM text
+(the old blank-glyph hack is gone), requires the same number of letters as the list, and writes moved spaces / line breaks back into
+every overlay copy (flags kept). Odd-width centring is not reproduced bit for bit (31 of 1170 lists start one column further left), so
+only titles whose spacing changed are rewritten. `python3 tools/title_layout.py` checks all 171 CFNT files.
+
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see
 `notes/assets_tombatools.md` "GAM: byte-exact repack"). The game decompresses it with `lzDecompress` for load records of type

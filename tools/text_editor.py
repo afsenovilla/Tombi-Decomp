@@ -417,7 +417,10 @@ class App:
         except Exception as e:
             self.show_warnings([("err", tr("te.internal", e))])
             return
-        im, warns = text_preview.render(wc, words, scale=self.scale.get())
+        im, warns = text_preview.render(wc, words, scale=self.scale.get(), title=self.proj.title_lines(n, i, text))
+        prob = self.proj.title_problem(n, i, text)
+        if prob:
+            warns.append(prob)
         buf = io.BytesIO()
         im.save(buf, "PNG")
         self._img = tk.PhotoImage(data=base64.b64encode(buf.getvalue()))

@@ -17,6 +17,7 @@ from i18n import tr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py as W
+import title_layout as TL
 
 LANG_MAIN = "S"          # the PAL Spanish disc uses the *S.WFM files; the other languages are still on the disc
 PROJECT_VERSION = 1
@@ -88,6 +89,15 @@ class Source:
     def names(self):
         return sorted(self.files)
 
+    def all_names(self):
+        """Every file name of the disc (the overlays that hold the event title layout are among them)."""
+        if self.kind == "image":
+            return list(self.layout)
+        if not hasattr(self, "_all"):
+            self._all = [os.path.relpath(os.path.join(d, f), self.root).replace(os.sep, "/")
+                         for d, _, fs in os.walk(self.root) for f in fs if f.upper().endswith(".BIN")]
+        return self._all
+
     def read(self, name):
         if self.kind == "folder":
             return open(self.files[name], "rb").read()
@@ -132,6 +142,7 @@ class Project:
         self._wfm = {}
         self._orig = {}
         self._pool = None
+        self._layouts = {}
         self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
 
     def languages(self):
@@ -154,13 +165,60 @@ class Project:
     def count(self, path):
         return len(self.wfm(path).dialogues)
 
+    def layout(self, path):
+        """Event title layout (title_layout.Layout) of a CFNT file: where each letter goes, read from the overlays; None when the
+        file is not a title font or the overlays are not on this source."""
+        if not TL.is_title_file(path):
+            return None
+        if path not in self._layouts:
+            try:
+                self._layouts[path] = TL.load_layout(self.src.read_any, self.src.all_names(), path, self.wfm(path))
+            except Exception:       # noqa: BLE001  no overlays (folder with only WFM files): titles without spacing
+                self._layouts[path] = None
+        return self._layouts[path]
+
     def original(self, path, idx):
         key = (path, idx)
         if key not in self._orig:
             w = self.wfm(path)
             d = w.dialogues[idx]
-            self._orig[key] = W.words_to_text(w, d.words, d.font)
+            lay = self.layout(path)
+            lines = lay.lines(idx) if lay else None
+            if lines and sum(map(len, lines)) == len(d.words):
+                toks = [W.words_to_text(w, [v], d.font) for v in d.words]
+                self._orig[key] = TL.lines_to_text(toks, lines)
+            else:
+                self._orig[key] = W.words_to_text(w, d.words, d.font)
         return self._orig[key]
+
+    def title_lines(self, path, idx, text):
+        """Lines of an event title as the text says ([[gap before each letter]]), or None if the dialogue is not a title."""
+        lay = self.layout(path)
+        if lay is None or idx not in lay.recs:
+            return None
+        return self._effective_lines(lay, idx, text)
+
+    @staticmethod
+    def _effective_lines(lay, idx, text):
+        """Lines the text asks for; a text without any space or {NL} (projects saved before the layout was known) keeps the original."""
+        lines = TL.text_to_lines(text)[0]
+        orig = lay.lines(idx)
+        if orig and not re.search(r" |\{NL\}", text) and (len(orig) > 1 or any(g for l in orig for g in l)):
+            n = sum(map(len, lines))
+            if n == sum(map(len, orig)):
+                return orig
+        return lines
+
+    def title_problem(self, path, idx, text):
+        """Readable problem of an event title text (the number of letters is fixed by the layout), or None."""
+        lay = self.layout(path)
+        if lay is None or idx not in lay.recs:
+            return None
+        n = TL.text_to_lines(text)[1]
+        want = len(lay.recs[idx])
+        if n != want:
+            return tr("tc.titlelen", n, want)
+        return None
 
     def text(self, path, idx):
         return self.edits.get(path, {}).get(idx, self.original(path, idx))
@@ -205,9 +263,9 @@ class Project:
     def validate(self, path, idx, text):
         try:
             self.words(path, idx, text)
-            return None
         except W.WfmError as e:
             return str(e)
+        return self.title_problem(path, idx, text)
 
     # search
     def search(self, query, edited_only=False):
@@ -311,7 +369,41 @@ class Project:
                     files[path] = W.encode(w)
                 except W.WfmError as ex:
                     errors.append("%s: %s" % (path, ex))
+        self._title_patches(files, errors)
         return ({} if errors else files), errors
+
+    def _title_patches(self, files, errors):
+        """Event titles: the spacing and line breaks of the edited titles go into the overlays that hold the layout (same number of
+        records, so nothing moves). Adds the changed overlays to files."""
+        new = {}                   # language letter -> (wfm, {dialogue: records})
+        for path, e in sorted(self.edits.items()):
+            lay = self.layout(path) if self.selected(path) else None
+            if lay is None:
+                continue
+            lang = lang_of(path)
+            for idx, text in sorted(e.items()):
+                if idx not in lay.recs:
+                    continue
+                prob = self.title_problem(path, idx, text)
+                if prob:
+                    errors.append("%s #%d: %s" % (path, idx, prob))
+                    continue
+                lines = self._effective_lines(lay, idx, text)
+                if lines == lay.lines(idx):
+                    continue                    # same spacing as the original: nothing to write
+                old = lay.recs[idx]
+                recs = TL.lines_to_records(lines, [r[2] for r in old])
+                prev = new.setdefault(lang, (self.wfm(path), {}))[1]
+                if idx in prev and prev[idx] != recs:
+                    errors.append("%s #%d: %s" % (path, idx, tr("tc.titleconflict")))
+                prev[idx] = recs
+        if errors:
+            return
+        for lang, (w, recs) in new.items():
+            try:
+                files.update(TL.patch_files(self.src.read_any, self.src.all_names(), w, lang, recs))
+            except (OSError, KeyError) as ex:
+                errors.append("%s: %s" % (lang, ex))
 
 
 def clone(w):
@@ -406,7 +498,10 @@ def main():
         import text_preview
         text = a.text if a.text is not None else proj.text(a.path, a.idx)
         words, wc = proj.words(a.path, a.idx, text)
-        im, warns = text_preview.render(wc, words, scale=a.scale)
+        im, warns = text_preview.render(wc, words, scale=a.scale, title=proj.title_lines(a.path, a.idx, text))
+        prob = proj.title_problem(a.path, a.idx, text)
+        if prob:
+            warns.append(prob)
         im.save(a.out)
         for w in warns:
             print(w)

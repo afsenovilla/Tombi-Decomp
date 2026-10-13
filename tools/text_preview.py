@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py as W
+import title_layout as TL
 
 MARGIN, LINE_STEP, GLYPH_LIMIT, TOP = 8, 13, 128, 6   # cursor starts at (8, 6) after BOX/CLEAR; NL = x 8, y + 13
 # 8/16 px fonts: index 1 is the body of the strokes, 2..7 are the shaded edges (white text, grey shading in the game);
@@ -93,7 +94,44 @@ def fit_box(wfm, words):
     return wmax + 2 * MARGIN, 2 * MARGIN + LINE_STEP * max(lines, 1)
 
 
-def render(wfm, words, font=None, scale=2):
+TILE_W, TILE_H, COL_PX, ROW_PX = 20, 28, 10, 14        # event title: a tile per letter, columns of 10 px, rows of 14 px
+TILE_FILL, TILE_EDGE = (236, 132, 20, 255), (150, 70, 8, 255)
+
+
+def render_title(wfm, words, lines, scale=2):
+    """An event title as the game draws it: lines centred on the screen, each letter on an orange tile, the gaps between words
+    and the line breaks as `lines` says ([[gap before each letter]], see title_layout.py). Returns (image, warnings)."""
+    glyphs = [wfm.glyphs[v - W.GLYPH_BASE] for v in words if W.GLYPH_BASE <= v < W.GLYPH_BASE + len(wfm.glyphs)]
+    recs = TL.lines_to_records(lines)
+    warnings = []
+    if len(recs) != len(glyphs):
+        warnings.append(tr("tp.titlelen", len(glyphs), len(recs)))
+        recs = recs[:len(glyphs)]
+    if not recs:
+        return Image.new("RGBA", (64, 32), BG), warnings
+    x0 = min(c for c, _, _ in recs) * COL_PX
+    x1 = max(c for c, _, _ in recs) * COL_PX + TILE_W
+    y0 = min(r for _, r, _ in recs) * ROW_PX
+    y1 = max(r for _, r, _ in recs) * ROW_PX + TILE_H
+    pad = 16
+    half = max(-x0, x1, 160)                      # the 320 px wide screen, centred on column 0
+    im = Image.new("RGBA", (2 * half + 2 * pad, y1 - y0 + 2 * pad), BG)
+    d = ImageDraw.Draw(im)
+    ox, oy = half + pad, pad - y0
+    for g, (c, r, _) in zip(glyphs, recs):
+        x, y = ox + c * COL_PX, oy + r * ROW_PX
+        d.rounded_rectangle([x, y, x + TILE_W - 1, y + TILE_H - 1], radius=3, fill=TILE_FILL, outline=TILE_EDGE)
+        im.alpha_composite(glyph_image(g), (x + (TILE_W - g.width) // 2, y + (TILE_H - g.height) // 2))
+    if scale != 1:
+        im = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
+    return im, warnings
+
+
+def render(wfm, words, font=None, scale=2, title=None):
+    """title: lines of an event title (Project.title_lines) to draw it as the game does; None for dialogues."""
+    if title is not None and any(v >= W.GLYPH_BASE and v < W.GLYPH_BASE + len(wfm.glyphs) and wfm.glyphs[v - W.GLYPH_BASE].height == W.TITLE_HEIGHT
+                                 for v in words):
+        return render_title(wfm, words, title, scale)
     pages, box = paginate(wfm, words)
     warnings = []
     boxed = box is not None

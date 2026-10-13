@@ -15,6 +15,9 @@ corner icons such as the "next page" arrow); 0xFFF2..0xFFFD are control codes (b
 There are no character codes in the file: a glyph is a bitmap. tools/wfm_charmap.json maps bitmap hashes to characters
 (made by tools/wfm_charmap_gen.py), so text can be shown and written as normal strings.
 
+Event titles (24 px glyphs, CFNT999*) hold only their letters: the gaps between words and the line breaks are stored in the code overlays
+(tools/title_layout.py); text_to_words ignores ' ' and {NL} for that font.
+
 Text syntax (what words_to_text writes and text_to_words reads; real line feeds are cosmetic and ignored when encoding):
   plain characters            glyphs with a known character
   {G:n}                       glyph n without a character (or one the encoder could not pick back); keeps the file lossless
@@ -40,6 +43,7 @@ CTRL = {  # code: (name, number of arguments)
 }
 NAME2CODE = {v[0]: k for k, v in CTRL.items()}
 TERMINATORS = (0xFFFE, 0xFFFF)
+TITLE_HEIGHT = 24        # the event title font (CFNT999*): letters only, spacing and line breaks live in the overlays
 NEWLINE_AFTER = ("NL", "CLEAR", "BOX")   # cosmetic line feed written after these tags
 
 CHARMAP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wfm_charmap.json")
@@ -255,6 +259,8 @@ def text_to_words(w, text, font, pool=None):
                 raise WfmError(tr("wf.badtag", repr(text[pos:pos + 12])))
             name, arg = m.group(1), m.group(2)
             pos = m.end()
+            if name.upper() == "NL" and not arg and font[0] == TITLE_HEIGHT:
+                continue            # event titles: line breaks are not in the WFM (see title_layout.py)
             if name == "G" and arg.startswith(":"):
                 gi = int(arg[1:])
                 if gi >= len(w.glyphs):
@@ -274,6 +280,9 @@ def text_to_words(w, text, font, pool=None):
             else:
                 raise WfmError(tr("wf.unknowntag", name, arg))
             continue
+        if c == " " and font[0] == TITLE_HEIGHT:
+            pos += 1                # event titles (24 px): word gaps are not in the WFM but in the overlays (title_layout.py)
+            continue
         gi = resolve(w, c, font, True)
         if gi is None:
             # a glyph of the right height from another file beats one of the wrong height from this file
@@ -291,10 +300,6 @@ def text_to_words(w, text, font, pool=None):
 
 def borrow(w, ch, font, pool):
     g = pool.find(ch, font) if pool else None
-    if g is None and ch == " ":
-        # the 24 px font (CFNT999*) has no space glyph and the data has no space token: add a blank half-width glyph
-        h = font[0]
-        g = Glyph(2, h, 8, 0, bytes(_image_size(8, h)))
     if g is None:
         raise UnknownGlyph(tr("wf.noglyph", repr(ch), ord(ch)))
     ng = Glyph(g.clut, g.height, g.width, g.hand, g.image)
