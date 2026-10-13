@@ -148,53 +148,25 @@ def write_svgs(res, tot, matching, whole=(0, 1), areas=(0, 1)):
     json.dump(hist, open(hist_path, "w"), indent=1)
 
     W = 900
-    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="476" viewBox="0 0 %d 476" role="img" aria-label="Decompilation progress">' % (W, W),
-         '<rect width="%d" height="476" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % W,
+    rows = getattr(summary_lines, "rows", [])   # the same rows (and figures) as the Summary table
+    H = 108 + 36 * (len(rows) + 1) + 30
+    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-label="Decompilation progress">' % (W, H, W, H),
+         '<rect width="%d" height="%d" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % (W, H),
          '<text x="28" y="44" %s font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>' % FONT,
-         '<text x="28" y="66" %s font-size="12.5" fill="#64748b">Updated %s &#183; unit: bytes of game code (excluding the Psy-Q library)</text>' % (FONT, today)]
-    # levels
-    levels = [("Whole game: matching C", whole[0], whole[1], "match"),
-              ("MAIN0 + X000: matching C", matching, tot["game"], "match"),
-              ("Other areas (X001..X019): matching C", areas[0], areas[1], "match"),
-              ("MAIN0 + X000: named by us", tot["named"], tot["game"], "named")]
+         '<text x="28" y="66" %s font-size="12.5" fill="#64748b">Updated %s &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>' % (FONT, today)]
+    levels = [(name.split(":")[0] + ": matching C", m, g, "match", "%.1f %%") for name, g, n, m, nm in rows]
+    levels.append(("Whole game: matching C", whole[0], whole[1], "match", "%.2f %%"))
+    levels.append(("MAIN0 + X000: named by us", tot["named"], tot["game"], "named", "%.1f %%"))
     y = 108
-    for lab, val, den, key in levels:
+    for lab, val, den, key, fmt in levels:
         p = pct(val, den)
-        o.append('<text x="28" y="%d" %s font-size="14" fill="#1e293b">%s</text>' % (y + 4, FONT, esc(lab)))
+        bold = ' font-weight="700"' if lab.startswith("Whole") else ""
+        o.append('<text x="28" y="%d" %s font-size="14"%s fill="#1e293b">%s</text>' % (y + 4, FONT, bold, esc(lab)))
         o.append('<rect x="330" y="%d" width="450" height="18" rx="9" fill="#e2e8f0"/>' % (y - 10))
         wbar = max(0 if p == 0 else 4, 450 * p / 100.0)
         if wbar: o.append('<rect x="330" y="%d" width="%.1f" height="18" rx="9" fill="%s"/>' % (y - 10, wbar, COL[key]))
-        o.append('<text x="796" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">%.1f %%</text>' % (y + 5, FONT, p))
+        o.append(('<text x="796" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">' + fmt + '</text>') % (y + 5, FONT, p))
         y += 36
-    # composition
-    o.append('<text x="28" y="%d" %s font-size="15" font-weight="700" fill="#0f172a">Composition of MAIN0 + X000</text>' % (y + 26, FONT))
-    y += 52
-    rows = [(k, r) for k, r in res.items()] + [("TOTAL", None)]
-    for k, r in rows:
-        if r is None:
-            seg = {"lib": tot["lib"], "named": tot["named"], "typed": tot["unnamed_typed"] if "unnamed_typed" in tot else 0,
-                   "unnamed": tot["unnamed"] - tot.get("unnamed_typed", 0), "match": matching}
-        else:
-            seg = {"lib": r["lib"], "named": r["named"], "typed": r["unnamed_typed"],
-                   "unnamed": r["unnamed"] - r["unnamed_typed"], "match": 0}
-        totb = sum(seg.values()) or 1
-        o.append('<text x="28" y="%d" %s font-size="13" fill="#1e293b">%s</text>' % (y + 14, FONT, esc(DISPLAY.get(k, k))))
-        x = 330.0
-        for key in ("match", "named", "typed", "unnamed", "lib"):
-            wseg = 520.0 * seg[key] / totb
-            if wseg > 0:
-                o.append('<rect x="%.1f" y="%d" width="%.1f" height="22" fill="%s"><title>%s: %d bytes</title></rect>' % (x, y, wseg, COL[key], LAB[key], seg[key]))
-            x += wseg
-        o.append('<text x="858" y="%d" %s font-size="12" fill="#64748b" text-anchor="start">%d KB</text>' % (y + 15, FONT, totb // 1024))
-        y += 34
-    # legend
-    x = 28
-    y += 8
-    for key in ("match", "named", "typed", "unnamed", "lib"):
-        o.append('<rect x="%d" y="%d" width="13" height="13" rx="3" fill="%s"/>' % (x, y, COL[key]))
-        o.append('<text x="%d" y="%d" %s font-size="12" fill="#334155">%s</text>' % (x + 19, y + 11, FONT, esc(LAB[key])))
-        x += 19 + 7 * len(LAB[key]) + 16
-    o.append('<text x="28" y="%d" %s font-size="11.5" fill="#94a3b8">MAIN0 + X000 only: SCES_013.31 and MAIN1-8 (~98 %% shared with MAIN0) are not counted; the other area overlays are in PROGRESS.md.</text>' % (y + 38, FONT))
     o.append("</svg>")
     open(N("docs", "progress.svg"), "w").write("\n".join(o))
 
@@ -293,7 +265,7 @@ def summary_lines(res, cov, ovl, tot, matching):
             ("X000.BIN: AREA00 + object code reused by all areas", x0[0], x0[2], x0[1], x0[3]),
             ("X001..X019.BIN: code specific to the other areas", ou, onu, om, onm)]
     T = sum(r[1] for r in rows); M = sum(r[3] for r in rows); F = sum(r[2] for r in rows); FM = sum(r[4] for r in rows)
-    summary_lines.whole, summary_lines.areas = (M, T), (om, ou)
+    summary_lines.whole, summary_lines.areas, summary_lines.rows = (M, T), (om, ou), rows
     L = ["**Whole game: %.2f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
          "| Part | Code | Matching bytes | Matching |", "|---|---:|---:|---|"]
     for name, g, n, m, nm in rows:
