@@ -14,6 +14,8 @@ There is no common header; what a file is depends on the *kind* of the load reco
   tools/area000.py unpack FILE OUT_DIR [--png]   manifest.json + section files (+ PNG views of images and grids)
   tools/area000.py pack DIR [-o OUT]       rebuild the file from manifest.json + sections (byte-identical if unchanged)
   tools/area000.py --check [PATH...]       unpack+pack every *.000 under PATH (default game/disc/fs), print identical count
+  tools/area000.py room AREA00:1 OUT.png [--scale N]
+                                           room background = WMD model of load list 1 with the per polygon CLUT/tpage (tools/room.py)
   tools/area000.py page NAME [-o PNG] [--row N] [--all-rows]
                                            NAME = AREA00/B000 (.GAM or .000 of a GRPX record): the VRAM rectangle as an image;
                                            8 bpp pages are coloured with the CLUT the load list pairs with them (CLUTnn.GAM,
@@ -548,6 +550,12 @@ def cmd_page(a):
     return 0
 
 
+def cmd_room(a):
+    """room AREA00:1 OUT.png: render the WMD room model of that load list (tools/room.py)."""
+    import room
+    return room.main([a.list, a.out, str(a.scale)])
+
+
 def cmd_check(paths):
     todo = []
     for p in paths or [FS]:
@@ -581,6 +589,7 @@ def main():
     p = sp.add_parser("info"); p.add_argument("files", nargs="+"); p.set_defaults(f=cmd_info)
     p = sp.add_parser("unpack"); p.add_argument("file"); p.add_argument("out"); p.add_argument("--png", action="store_true"); p.add_argument("--row", type=int, default=0); p.set_defaults(f=cmd_unpack)
     p = sp.add_parser("page"); p.add_argument("name"); p.add_argument("-o"); p.add_argument("--row", type=int, default=0); p.add_argument("--all-rows", action="store_true"); p.set_defaults(f=cmd_page)
+    p = sp.add_parser("room"); p.add_argument("list"); p.add_argument("out"); p.add_argument("--scale", type=int, default=1); p.set_defaults(f=cmd_room)
     p = sp.add_parser("pack"); p.add_argument("dir"); p.add_argument("-o"); p.set_defaults(f=cmd_pack)
     a = ap.parse_args()
     return a.f(a)

@@ -66,6 +66,10 @@ def extract(img, out, log=print):
     print_("done: %d load lists, %d pages, %d SPR tables, %d frames / %d parts (%d identical tables shared, %d frame PNGs + %d part PNGs written); under %s and %s" % (
         st["lists_total"], st["pages"], st["tables"], st["frames_total"], st["parts_total"], st["tables_deduplicated"],
         st["frames_written"], st["parts_written"], os.path.join(out, "spr"), os.path.join(out, "screens")))
+    import room
+    print_("rendering the room backgrounds (WMD models with per polygon palettes) ...")
+    nr = room.export_rooms(os.path.join(out, "rooms"), log=lambda m: None)
+    print_("done: %d rooms under %s" % (nr, os.path.join(out, "rooms")))
 
 
 def gui():

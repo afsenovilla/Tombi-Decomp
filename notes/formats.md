@@ -64,7 +64,7 @@ Python), `pack DIR -o OUT` rebuilds (the table header is regenerated from the it
 `--check` unpacks+packs every `.000`: **identical 286/286**. Verified visually: `AREA00/B301.000` (384x256 words, x=192) read as 8 bpp
 is a room interior (background pages); read as 4 bpp or 16 bpp it is noise, so the background pages are 8 bpp.
 
-Open: WMD model layout, the `0x8F` block, what the grid values mean, and which CLUT row each room tile uses.
+Open: the `0x8F` block and what the grid values mean. (WMD layout and the per polygon CLUT: solved, section "WMD rooms" below.)
 
 ### WPP (done: `tools/wpp.py`)
 Decoder in the matched code: `FUN_800371c0(table, frame, dst, d)` (`src/FUN_800371c0.c`) + `FUN_80037454` (computed-jump run fill),
@@ -365,3 +365,18 @@ demux size `0x09E4`, **320 x 224**, `0x3800` = BS v2 frames (MDEC). In the file 
 `mods/<name>/mod.json` lists `patchs` (`file` = PNG in the mod folder, `targets` = `pattern` (fnmatch on the path under `game/disc/fs`, e.g. `AREA00/B301.000`) and an optional `frame` for WPP sprite files); `mods/load_order.json` `{"order": [...]}` sets the order (later wins). PNG to data: 8 bpp page = indexed 2*w x h, 4 bpp = indexed (<= 16 colours) 4*w x h, 16 bpp/CLUT = RGBA w x h (5 bit linear, alpha 0 = word 0, opaque black = 0x8000); WPP frame = indexed 4*W x H. Patched size must equal the original. `.GAM` targets go through `tools/gam.py`, WPP through `wpp.py`; `mod.py build` runs `mkdisc.py build --relayout`. The mod layout idea comes from TombaPatcher (US-only; no code reused).
 
 Colour notes from comparing with TombaPatcher: it decodes 5->8 bit with a non-linear curve and shows STP as half alpha, and draws pages without the load-list CLUT pairing (grey ramp); ours uses the linear 5 bit expansion (hardware) and the VRAM replay pairing. `area000.py page` now picks the 256 colour CLUT record after the page like `vram.pair_cluts`. Room pages still need the per-tile CLUT row from the room data (row 0 is only a default).
+
+
+## WMD rooms (room backgrounds; `tools/room.py`, `area000.py room AREA00:1 out.png`, `extract_sprites` -> `rooms/`)
+The room background is NOT a tilemap over the `Bnnn` page: it is the kind `0x50` WMD model of the room load list (`AREA00/D001.GAM`, ...),
+textured polygons that sample the 4 bpp / 8 bpp room pages (`Bnnn`) and carry their own GPU words, so the CLUT row is per polygon in the data.
+- u32 table container, N sectors (vertical slices of the room, ascending x). Sector = 4 groups `u32 count` + packets (flat tri, flat quad,
+  gouraud tri, gouraud quad), then 16 zero bytes.
+- Packet: `u16 clut, u16 tpage, r g b cmd` (cmd 0x24/0x25 tri, 0x2c/0x2d quad, 0x34 gouraud tri...: bit 3 = quad, bit 4 = gouraud, which inserts
+  2 (tri) / 3 (quad) extra `r g b cmd` words), then 3/4 vertices `s16 x, y, z; u8 u, v` (8 B).
+- `clut` = real GPU word (x = (c&63)*16, y = c>>6; room palettes are 16 colour rows of `CLUTnn` at y 480..511), `tpage` = real GPU word
+  (page x = (t&15)*64, y = (t>>4&1)*256, mode bits 7-8; rooms use 4 bpp, no offset needed). That is why B000 looked wrong with any single row.
+- Renderer: orthographic (x right, y down), polygons sorted by mean z far to near, word 0 transparent. Verified visually: AREA00 D001 (village,
+  hills, river), AREA03 D004, AREA10 D303: natural colours. The in-game camera/perspective is not reproduced.
+- 27 of ~56 models render (AREA00 D001/D101/D201, AREA03, 04 D0-D3, 10, 12, 14 ...). The rest (small models AREA04/12 D4xx..DIxx, AREA13, some
+  AREA14, AREA06 `D004.000` partly) use another sector/packet variant (counts do not parse); not decoded.
