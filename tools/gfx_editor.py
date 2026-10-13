@@ -216,7 +216,8 @@ class App:
 
         mid = ttk.Frame(pw)
         pw.add(mid, weight=4)
-        tb = ttk.Frame(mid, padding=(4, 2))
+        self.mid = mid
+        tb = self.tb = ttk.Frame(mid, padding=(4, 2))
         tb.pack(fill="x")
         ttk.Label(tb, text=tr("l.zoom")).pack(side="left")
         self.zoom = tk.StringVar(value="x%d" % self.scale)
@@ -227,7 +228,7 @@ class App:
         ttk.Checkbutton(tb, text=tr("l.rects"), variable=self.rects_var, command=self.toggle_rects).pack(side="left", padx=8)
         self.sel_var = tk.StringVar(value=tr("l.nosel"))
         ttk.Label(tb, textvariable=self.sel_var).pack(side="left", padx=8)
-        cf = ttk.Frame(mid)
+        cf = self.cf = ttk.Frame(mid)
         cf.pack(fill="both", expand=True)
         self.canvas = tk.Canvas(cf, bg="#404050", highlightthickness=0)
         hs = ttk.Scrollbar(cf, orient="horizontal", command=self.canvas.xview)
@@ -427,9 +428,33 @@ class App:
             self.anim_win = anim_player.AnimWindow(self.root, self.core.anim_data())
         self.anim_win.show(aid)
 
+    def show_model(self, item):
+        """Tree node "Modelos 3D": interactive 3D viewport in the centre panel (tools/model_viewer.py)."""
+        import model_viewer
+        if getattr(self, "mview", None) is None:
+            self.mview = model_viewer.ModelViewer(self.mid, say=self.say)
+        if not self.mview.winfo_ismapped():
+            self.tb.pack_forget()
+            self.cf.pack_forget()
+            self.mview.pack(fill="both", expand=True)
+        self.mview.show(*item[1:])
+
+    def hide_model(self):
+        if getattr(self, "mview", None) is not None and self.mview.winfo_ismapped():
+            self.mview.pack_forget()
+            self.tb.pack(fill="x")
+            self.cf.pack(fill="both", expand=True)
+
     def on_select(self, _):
         sel = self.tree.selection()
         n = self.node_of.get(sel[0]) if sel else None
+        if n and n["item"] and n["item"][0] == "model3d":
+            try:
+                self.show_model(n["item"])
+            except Exception as e:
+                messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
+            return
+        self.hide_model()
         if n and n["item"] and n["item"][0] == "anim":
             try:
                 self.show_anim(n["item"][1])

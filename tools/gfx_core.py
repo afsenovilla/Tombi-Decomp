@@ -775,6 +775,7 @@ class Core:
         root.append(N(tr("t.pages"), children=pg))
         root.append(N(tr("t.sprites"), lazy=self._sprite_nodes))
         root.append(N(tr("t.anims"), lazy=self._anim_nodes))
+        root.append(self._model_nodes(N))
         pal = []
         for ld in sorted(self.lists, key=lambda x: (x != "SYS", x)):
             names = []
@@ -786,6 +787,18 @@ class Core:
                 pal.append(N(self.area_name(ld), children=[N(n.split("/")[-1], ("clut", n), id="clut:" + n) for n in sorted(names)]))
         root.append(N(tr("t.palettes"), children=pal))
         return root
+
+    def _model_nodes(self, N):
+        """Tree node "Modelos 3D": WMD rooms (kind 0x50) per area and the object model tables (kind 0x51), previewed by tools/model_viewer.py."""
+        import model_view as MV
+        rooms = {}
+        for ld, i, nm in MV.rooms():
+            rooms.setdefault(ld, []).append(N("%s  (%s)" % (nm.split("/")[-1].split(".")[0], tr("t.list", i)), ("model3d", "room", ld, i, None), id="room:%s:%d" % (ld, i)))
+        objs = [N(tr("m.set", self.area_name(ld), i, n), id="objset:%s:%d" % (ld, i),
+                  lazy=(lambda ld=ld, i=i, n=n: [N(tr("m.obj", k), ("model3d", "obj", ld, i, k), id="obj:%s:%d:%d" % (ld, i, k)) for k in range(n)]))
+                for ld, i, n in MV.objects()]
+        return N(tr("t.models"), children=[N(tr("t.m.rooms"), children=[N(self.area_name(ld), children=c) for ld, c in sorted(rooms.items())]),
+                                          N(tr("t.m.objs"), children=objs)])
 
     def _sprite_nodes(self):
         import wpp
@@ -815,7 +828,8 @@ class Core:
         k = item[0]
         return {"page": lambda: "page:" + item[1], "screen": lambda: ("backdrop:L" + item[1][10:]) if item[1].startswith("backdrop_L") else "screen:" + item[1],
                 "ui": lambda: "ui:%d" % item[1], "wppframe": lambda: "wpp:%s:frame:%d" % (item[1], item[2]), "clut": lambda: "clut:" + item[1],
-                "anim": lambda: "anim:tombi:%d" % item[1]}[k]() if k in ("page", "screen", "ui", "wppframe", "clut", "anim") else None
+                "anim": lambda: "anim:tombi:%d" % item[1],
+                "model3d": lambda: ("room:%s:%d" % item[2:4]) if item[1] == "room" else "obj:%s:%d:%d" % item[2:5]}[k]() if k in ("page", "screen", "ui", "wppframe", "clut", "anim", "model3d") else None
 
     def item_name(self, item):
         return ":".join(str(x) for x in (item[0],) + tuple(item[1:2]))
