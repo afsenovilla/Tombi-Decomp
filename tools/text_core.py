@@ -542,7 +542,15 @@ def have_mkpsxiso():
 
 
 def build_disc(proj, out_bin, work, disc=None, log=print):
-    """Writes the edited WFM files and builds out_bin (+ .cue) with tools/mkdisc.py --relayout. Returns the list of files."""
+    """Writes the edited WFM files and builds out_bin (+ .cue) with tools/mkdisc.py --relayout. Returns the list of files.
+    See build_report for the details (output path, size, verification)."""
+    return build_report(proj, out_bin, work, disc, log)["files"]
+
+
+def build_report(proj, out_bin, work, disc=None, log=print):
+    """Like build_disc but returns {"files", "out", "cue", "size", "verified"}. The image is built under a temporary name next to
+    out_bin, read back (every written file must be on it byte for byte) and only then moved onto out_bin, so an old or locked
+    out_bin can never be silently kept, and out_bin may be the image that was opened."""
     import mkdisc
     files, errors = proj.encode_edited()
     if errors:
@@ -552,6 +560,7 @@ def build_disc(proj, out_bin, work, disc=None, log=print):
     disc = disc or proj.src.image
     if not disc or not os.path.isfile(disc):
         raise CoreError(tr("tc.needimage"))
+    out_bin = os.path.abspath(out_bin)
     work = os.path.abspath(work)
     fs = os.path.join(work, "fs")
     shutil.rmtree(fs, ignore_errors=True)
@@ -565,15 +574,40 @@ def build_disc(proj, out_bin, work, disc=None, log=print):
             p = os.path.join(fs, *name.split("/"))
             os.makedirs(os.path.dirname(p), exist_ok=True)
             open(p, "wb").write(src.read_any(name))
-    ns = argparse.Namespace(fs=fs, disc=disc, work=os.path.join(work, "mkdisc"), out=os.path.abspath(out_bin), relayout=True)
+    tmp_bin = os.path.join(os.path.dirname(out_bin), "~build-%d.bin" % os.getpid())
+    tmp_cue = os.path.splitext(tmp_bin)[0] + ".cue"
+    tmp_lay = os.path.splitext(tmp_bin)[0] + ".layout.json"
+    ns = argparse.Namespace(fs=fs, disc=disc, work=os.path.join(work, "mkdisc"), out=tmp_bin, relayout=True)
     buf = io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            mkdisc.build(ns)
-    except SystemExit as e:
-        raise CoreError(tr("tc.mkfail", e, buf.getvalue()[-1500:]))
-    log(next((l for l in buf.getvalue().splitlines() if l.startswith("built")), ""))
-    return sorted(files)
+        try:
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                mkdisc.build(ns)
+        except SystemExit as e:
+            raise CoreError(tr("tc.mkfail", e, buf.getvalue()[-1500:]))
+        log(next((l for l in buf.getvalue().splitlines() if l.startswith("built")), ""))
+        # read back: the written files must be on the new image
+        new = Source(tmp_bin)
+        for name, data in files.items():
+            if name not in new.layout or new.layout[name][1] != len(data) or new.read_any(name) != data:
+                raise CoreError(tr("tc.verify", name))
+        try:
+            os.replace(tmp_bin, out_bin)
+        except OSError as e:
+            raise CoreError(tr("tc.cantwrite", out_bin, e))
+    finally:
+        for t in (tmp_bin, tmp_cue, tmp_lay):
+            if os.path.exists(t):
+                try:
+                    os.remove(t)
+                except OSError:
+                    pass
+    cue = os.path.splitext(out_bin)[0] + ".cue"
+    try:
+        open(cue, "w", newline="\r\n").write('FILE "%s" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n' % os.path.basename(out_bin))
+    except OSError:
+        cue = None
+    return {"files": sorted(files), "out": out_bin, "cue": cue, "size": os.path.getsize(out_bin), "verified": True}
 
 
 def write_patched(proj, out_dir):

@@ -61,7 +61,7 @@ ES = {'te.title': 'Tombi! – editor de textos',
  'te.writtenin': 'Archivos modificados escritos en {0}',
  'te.isodone': 'ISO generada: {0}',
  'te.modfiles': 'Archivos modificados',
- 'te.fallback': 'No se pudo montar la ISO (falta mkpsxiso o solo se abrió una carpeta).\n'
+ 'te.fallback': 'NO SE HA GENERADO NINGUNA ISO (falta mkpsxiso o solo se abrió una carpeta); la imagen de destino no se ha tocado.\n'
                 '\n'
                 'Se escribieron {0} archivo(s) en:\n'
                 '{1}\n'
@@ -69,7 +69,7 @@ ES = {'te.title': 'Tombi! – editor de textos',
                 'Cópialos sobre la carpeta extraída del disco y reconstruye con mkpsxiso: python tools/mkdisc.py build --relayout (ver README del '
                 'repositorio).',
  'te.done': 'Listo',
- 'te.isook': 'ISO generada:\n{0}\n\nArchivos cambiados: {1}\n\nSe puede borrar la carpeta de trabajo:\n{2}',
+ 'te.isook': 'ISO generada y comprobada (se ha vuelto a leer: los archivos cambiados están dentro):\n{0}\nTamaño: {3} bytes\n\nArchivos cambiados ({4}): {1}\n\nSe puede borrar la carpeta de trabajo:\n{2}',
  'te.helptext': 'Etiquetas del texto (los saltos de línea reales se ignoran, solo cuentan las etiquetas):\n'
                 '\n'
                 '{NL}  salto de línea            {CLEAR}  nueva página (limpia la caja)\n'
@@ -92,6 +92,8 @@ ES = {'te.title': 'Tombi! – editor de textos',
  'tc.nochanges': 'No hay cambios que aplicar.',
  'tc.needimage': 'Hace falta la imagen original (.bin) para generar la ISO: ábrela en lugar de la carpeta.',
  'tc.mkfail': 'mkpsxiso falló: {0}\n{1}',
+ 'tc.verify': 'La imagen generada no contiene {0} tal como se escribió: no se ha guardado.',
+ 'tc.cantwrite': 'No se puede escribir {0} (¿abierto en otro programa, como el emulador?): {1}',
  'lang.B': 'Inglés',
  'lang.D': 'Danés',
  'lang.F': 'Francés',
@@ -193,7 +195,7 @@ EN = {'te.title': 'Tombi! – text editor',
  'te.writtenin': 'Modified files written to {0}',
  'te.isodone': 'ISO built: {0}',
  'te.modfiles': 'Modified files',
- 'te.fallback': 'The ISO could not be built (mkpsxiso is missing or only a folder was opened).\n'
+ 'te.fallback': 'NO ISO WAS BUILT (mkpsxiso is missing or only a folder was opened); the destination image was not touched.\n'
                 '\n'
                 '{0} file(s) were written to:\n'
                 '{1}\n'
@@ -201,7 +203,7 @@ EN = {'te.title': 'Tombi! – text editor',
                 'Copy them over the extracted disc folder and rebuild with mkpsxiso: python tools/mkdisc.py build --relayout (see the repository '
                 'README).',
  'te.done': 'Done',
- 'te.isook': 'ISO built:\n{0}\n\nChanged files: {1}\n\nThe work folder can be deleted:\n{2}',
+ 'te.isook': 'ISO built and checked (read back: the changed files are inside):\n{0}\nSize: {3} bytes\n\nChanged files ({4}): {1}\n\nThe work folder can be deleted:\n{2}',
  'te.helptext': 'Tags in the text (real line breaks are ignored, only tags count):\n'
                 '\n'
                 '{NL}  line break            {CLEAR}  new page (clears the box)\n'
@@ -225,6 +227,8 @@ EN = {'te.title': 'Tombi! – text editor',
  'tc.nochanges': 'There are no changes to apply.',
  'tc.needimage': 'The original image (.bin) is needed to build the ISO: open it instead of the folder.',
  'tc.mkfail': 'mkpsxiso failed: {0}\n{1}',
+ 'tc.verify': 'The built image does not contain {0} as written: nothing was saved.',
+ 'tc.cantwrite': 'Cannot write {0} (open in another program, such as the emulator?): {1}',
  'lang.B': 'English',
  'lang.D': 'Danish',
  'lang.F': 'French',

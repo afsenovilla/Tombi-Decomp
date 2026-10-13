@@ -629,7 +629,8 @@ class App:
                     res["files"] = C.write_patched(self.proj, d)
                     res["dir"] = d
                 else:
-                    res["files"] = C.build_disc(self.proj, out, work)
+                    res.update(C.build_report(self.proj, out, work))
+                    res["files"] = res["files"]
             except Exception as e:
                 res["err"] = str(e) if isinstance(e, (C.CoreError, W.WfmError)) else traceback.format_exc()
             self.root.after(0, done)
@@ -643,8 +644,8 @@ class App:
                 self.say(tr("te.writtenin", res["dir"]))
                 messagebox.showinfo(tr("te.modfiles"), tr("te.fallback", len(res["files"]), res["dir"]))
             else:
-                self.say(tr("te.isodone", out))
-                messagebox.showinfo(tr("te.done"), tr("te.isook", out, ", ".join(res["files"]), work))
+                self.say(tr("te.isodone", res["out"]))
+                messagebox.showinfo(tr("te.done"), tr("te.isook", res["out"], ", ".join(res["files"]), work, res["size"], len(res["files"])))
         threading.Thread(target=job, daemon=True).start()
 
 
