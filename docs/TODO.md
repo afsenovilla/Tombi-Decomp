@@ -13,3 +13,7 @@
 - **"Fully linked" on decomp.dev.** Mark complete units in the objdiff report and split each object's
   `.data`/`.rodata` out of the retail binary (roadmap step 4, segment split), keeping the linked
   executables byte-identical. Long, mechanical background task; start after the struct/type work.
+- **Free-form event titles (code mod).** Change `spawnEventTitle` (src/spawnEventTitle.c) so it lays out the
+  letters from the text itself (centred lines, a gap per space, `{NL}` breaks, tile animation kept) instead
+  of the fixed per-title layout lists in the overlays; build a modified MAIN0 and let the text editor put it
+  in the ISO. Then titles can have any length. Same idea for other text limits once more code is clean.
