@@ -30,6 +30,26 @@ Si falta uno, se toma prestado de otro archivo del disco; si no existe en ningun
 Rojo en la vista previa: una línea no cabe en la caja, sobran líneas o hay más de 128 caracteres en una página."""
 
 
+def set_icon(root, name):
+    """Window/taskbar icon: the bundled .ico on Windows, a PNG (iconphoto) elsewhere or as fallback."""
+    base = [os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons")]
+    for d in base:
+        ico, png = os.path.join(d, name + ".ico"), os.path.join(d, name + ".png")
+        try:
+            if os.name == "nt" and os.path.isfile(ico):
+                root.iconbitmap(ico)
+                return
+        except Exception:
+            pass
+        try:
+            if os.path.isfile(png):
+                root._icon_img = tk.PhotoImage(file=png)
+                root.iconphoto(True, root._icon_img)
+                return
+        except Exception:
+            pass
+
+
 class App:
     def __init__(self, root, path=None):
         self.root = root
@@ -46,6 +66,7 @@ class App:
         self.all_lang = tk.BooleanVar(value=False)
         self.only_edited = tk.BooleanVar(value=False)
         self.query = tk.StringVar()
+        set_icon(root, "text")
         self._build()
         root.protocol("WM_DELETE_WINDOW", self.on_close)
         if path:
@@ -95,10 +116,14 @@ class App:
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
         self.tree.bind("<<TreeviewSelect>>", self.on_select)
 
-        right = ttk.PanedWindow(pw, orient="vertical")
+        right = ttk.Frame(pw)
         pw.add(right, weight=4)
+        # grid with fixed row ratios (a vertical PanedWindow gave the editor no height on Windows)
+        right.columnconfigure(0, weight=1)
+        right.rowconfigure(0, weight=2, minsize=220, uniform="pane")
+        right.rowconfigure(1, weight=3, minsize=260, uniform="pane")
         top = ttk.Frame(right)
-        right.add(top, weight=2)
+        top.grid(row=0, column=0, sticky="nsew")
         hf = ttk.Frame(top, padding=(4, 4))
         hf.pack(fill="x")
         self.title = tk.StringVar(value="")
@@ -107,7 +132,7 @@ class App:
         ttk.Button(hf, text="Ajustar caja", command=self.fit_box).pack(side="right", padx=2)
         xf = ttk.Frame(top)
         xf.pack(fill="both", expand=True, padx=4)
-        self.editor = tk.Text(xf, wrap="word", undo=True, height=10, font=("Consolas", 12), state="disabled")
+        self.editor = tk.Text(xf, wrap="word", undo=True, height=6, width=40, font=("Consolas", 12), state="disabled")
         sy = ttk.Scrollbar(xf, command=self.editor.yview)
         self.editor.configure(yscrollcommand=sy.set)
         self.editor.pack(side="left", fill="both", expand=True)
@@ -117,7 +142,7 @@ class App:
         self.editor.bind("<<Modified>>", self.on_modified)
 
         bottom = ttk.Frame(right)
-        right.add(bottom, weight=3)
+        bottom.grid(row=1, column=0, sticky="nsew")
         pf = ttk.Frame(bottom, padding=(4, 2))
         pf.pack(fill="x")
         ttk.Label(pf, text="Vista previa (tamaño nativo ×):").pack(side="left")
@@ -127,7 +152,7 @@ class App:
         ttk.Label(pf, textvariable=self.info).pack(side="right")
         cf = ttk.Frame(bottom)
         cf.pack(fill="both", expand=True, padx=4)
-        self.canvas = tk.Canvas(cf, bg="#222228", highlightthickness=0)
+        self.canvas = tk.Canvas(cf, bg="#222228", highlightthickness=0, height=120)
         vs = ttk.Scrollbar(cf, command=self.canvas.yview)
         hs = ttk.Scrollbar(bottom, orient="horizontal", command=self.canvas.xview)
         self.canvas.configure(yscrollcommand=vs.set, xscrollcommand=hs.set)

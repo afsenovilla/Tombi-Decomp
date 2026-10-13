@@ -194,6 +194,17 @@ def gui():
     from tkinter import filedialog, messagebox, ttk
     root = tk.Tk()
     root.title("Tombi! asset extractor")
+    for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons")):
+        try:
+            if os.name == "nt" and os.path.isfile(os.path.join(d, "assets.ico")):
+                root.iconbitmap(os.path.join(d, "assets.ico"))
+                break
+            if os.path.isfile(os.path.join(d, "assets.png")):
+                root._icon_img = tk.PhotoImage(file=os.path.join(d, "assets.png"))
+                root.iconphoto(True, root._icon_img)
+                break
+        except Exception:
+            pass
     root.resizable(True, True)
     img_v, out_v = tk.StringVar(), tk.StringVar()
     frm = ttk.Frame(root, padding=12); frm.grid(sticky="nsew")

@@ -13,6 +13,7 @@ on:
       - tools/wfm_py.py
       - tools/wfm_charmap.json
       - tools/mkdisc.py
+      - tools/icons/**
       - tools/cdfiles.py
       - .github/workflows/text-exe.yml
   workflow_dispatch:
@@ -47,7 +48,7 @@ jobs:
           python -m pip install pyinstaller pillow
           pyinstaller --onefile --windowed --name tombi-text --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import wfm_py --hidden-import text_core --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --paths tools \
-            --add-data "tools/wfm_charmap.json;." \
+            --icon tools/icons/text.ico --add-data "tools/wfm_charmap.json;." --add-data "tools/icons/text.ico;icons" --add-data "tools/icons/text.png;icons" \
             --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/text_editor.py
           mkdir -p dist/windows
           cp build/exe/tombi-text.exe dist/windows/tombi-text.exe

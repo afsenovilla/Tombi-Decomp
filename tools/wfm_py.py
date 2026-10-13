@@ -280,6 +280,10 @@ def text_to_words(w, text, font, pool=None):
 
 def borrow(w, ch, font, pool):
     g = pool.find(ch, font) if pool else None
+    if g is None and ch == " ":
+        # the 24 px font (CFNT999*) has no space glyph and the data has no space token: add a blank half-width glyph
+        h = font[0]
+        g = Glyph(2, h, 8, 0, bytes(_image_size(8, h)))
     if g is None:
         raise UnknownGlyph("el carácter %r (U+%04X) no tiene glifo en este archivo ni en ningún otro del disco" % (ch, ord(ch)))
     ng = Glyph(g.clut, g.height, g.width, g.hand, g.image)
