@@ -1,11 +1,12 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009CDBA;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC;
-extern unsigned char D_8009C93F, D_8009C975, D_8009CE40, D_8009D093, D_8009D092;
+extern unsigned char D_8009C93F, D_8009CE40, D_8009D093, D_8009D092;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003D0;
 extern short D_1F8001C6, D_800A60EA;
 extern char D_8001D6A4[];
@@ -57,10 +58,10 @@ void func_8011D73C(TObj *o)
             case 0:
                 FUN_8001f110(1);
                 D_8009C93F = 1;
-                D_8009C975 = 3;
+                GAME.fadeScreenControl = 3;
                 o->state++;
             case 1:
-                if (D_8009C975 != 1) break;
+                if (GAME.fadeScreenControl != 1) break;
                 FUN_8001f4bc();
                 D_1F8001CC = 1;
                 if (D_8009CE40) {
@@ -90,11 +91,11 @@ void func_8011D73C(TObj *o)
         case 2:
             switch (o->state) {
             case 0:
-                D_8009C975 = 4;
+                GAME.fadeScreenControl = 4;
                 startAreaBgm();
                 o->state++;
             case 1:
-                if (D_8009C975) break;
+                if (GAME.fadeScreenControl) break;
                 D_800A60EA = 0;
                 D_8009C93F = 0;
                 setEventComplete(0x16, 0);

@@ -1,6 +1,7 @@
 // FUNC 80116990 2816 X001
 // MATCHING 80116990 2816
 // FLAGS -O2 -G0 -fno-cse-skip-blocks
+#include "gamestate.h"
 typedef struct { short s0, s2; } S2;
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 typedef struct O {
@@ -18,14 +19,10 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 extern PL PLAYER;
 extern unsigned char D_800A6039[];
 extern Fn D_80079A98[];
-extern unsigned char D_8009CDA2;
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C942, D_8009CEF7, D_8009C93C, D_8009C975;
+extern unsigned char D_8009C93A, D_8009C93F, D_8009C942, D_8009CEF7, D_8009C93C;
 extern unsigned char D_8009CDB5, D_8009CE58, D_8009CDF1, D_8009CE48, D_8009CDBC;
 extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, D_800A603C, D_800A603D, D_800A603E;
 extern signed char D_8009D2B0;
-extern unsigned short D_8009C962, D_8009C982;
-extern unsigned int D_8009C96C;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern unsigned short D_800A6066;
 extern S2 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
@@ -53,7 +50,7 @@ void func_80116990(O *o)
 {
     switch (o->step) {
     case 0: {
-        unsigned char *f = &D_8009CDA2;
+        unsigned char *f = &GAME.disableSelectMenu;
         if (*f != 0) {
             if (stepScrollReturnY(o) & stepScrollClearX(o)) *f = 0;
             break;
@@ -71,16 +68,16 @@ void func_80116990(O *o)
         break;
     case 2:
         D_80079A98[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p != 0) {
                 *p = 0;
                 break;
             }
             if (D_1F80016A >= 0xb6e && D_1F80016E < -0x1d6) {
                 FUN_800216c4();
-                D_8009C962 = 1;
+                GAME.selectedSection = 1;
                 *p = 0;
                 break;
             }
@@ -93,7 +90,7 @@ void func_80116990(O *o)
             goto t10;
         }
         case 1: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             short x;
             if (*p != 0) {
                 *p = 0;
@@ -101,7 +98,7 @@ void func_80116990(O *o)
             }
             x = D_1F80016A;
             if (x < 0xb6d) {
-                D_8009C962 = 0;
+                GAME.selectedSection = 0;
                 FUN_800216c4();
                 *p = 0;
                 break;
@@ -115,7 +112,7 @@ void func_80116990(O *o)
             goto t11;
         }
         case 2: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p == 0) {
                 if (D_1F80016A < 0x65) goto t10;
                 if (D_1F80016A >= 0x779 && D_1F80016E >= -0x1c6) goto t11;
@@ -129,7 +126,7 @@ void func_80116990(O *o)
             break;
         }
         case 3: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             unsigned short k = *p;
             switch (k) {
             case 0:
@@ -155,7 +152,7 @@ void func_80116990(O *o)
                     tryStartItemInteraction(o, 1, 1);
                     break;
                 }
-                if (D_1F80016A >= 0x821) D_8009C982 = 2;
+                if (D_1F80016A >= 0x821) GAME.selectedSpawnPoint = 2;
                 break;
             case 1:
                 *p = 0;
@@ -170,15 +167,15 @@ void func_80116990(O *o)
                 tryStartItemInteraction(o, 1, k);
                 break;
             default:
-                D_8009C982 = 0;
+                GAME.selectedSpawnPoint = 0;
                 break;
             }
             break;
         }
         case 4: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p == 0) {
-                if (D_8009C96C > 999999 && D_8009CE48 != 0 && (unsigned short)(XU - 0xb5c) < 0x20) {
+                if (GAME.playerAP > 999999 && D_8009CE48 != 0 && (unsigned short)(XU - 0xb5c) < 0x20) {
                     D_800A60E0 = 8;
                     D_800A60D8 = 0x21;
                     if (D_1F800172 >= 0x881) {
@@ -285,16 +282,16 @@ void func_80116990(O *o)
         break;
     case 9:
         if (--o->w48 == -1) {
-            D_8009CD94 = 0xd;
-            D_8009CD96 = 0;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 0xd;
+            (*(short*)&GAME.nextSection) = 0;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
         }
     case 10: {
         short *q;
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

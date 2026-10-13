@@ -1,8 +1,8 @@
 // FUNC 80135850 452 X001
 // MATCHING 80135850 452
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C960, D_8009C962;
 extern Fix16 *D_800A6078;
 extern char D_80077CDC[];
 extern void *D_8013DDF0[], *D_8013DDF4[];
@@ -14,7 +14,7 @@ void func_80135850(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C960 == 1 && D_8009C962 < 2) break;
+        if (GAME.selectedArea == 1 && GAME.selectedSection < 2) break;
         switch (o->state) {
         case 0:
             o->timer = 0x3c;
@@ -40,7 +40,7 @@ void func_80135850(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C960 == 1 && D_8009C962 < 2) break;
+        if (GAME.selectedArea == 1 && GAME.selectedSection < 2) break;
         if (o->state == 0) {
             o->b6b = o->animFrame;
             o->animFrame = o->h->p.whole > D_800A6078->p.whole;

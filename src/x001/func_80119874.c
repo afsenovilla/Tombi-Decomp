@@ -1,9 +1,9 @@
 // FUNC 80119874 604 X001
 // MATCHING 80119874 604
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char D_8009D081;
 extern unsigned char D_8009C93F;
-extern unsigned char D_8009C975;
 extern unsigned char D_1F8001CC;
 extern unsigned char D_1F8001CD;
 extern short D_1F8001C6;
@@ -62,10 +62,10 @@ void func_80119874(TObj *o)
             FUN_800202b4(o);
             o->step++;
             D_8009C93F = 1;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             break;
         case 4:
-            if (D_8009C975 == 1) {
+            if (GAME.fadeScreenControl == 1) {
                 D_1F8001CC = 1;
                 D_1F8001CD = 9;
                 D_1F8001C6 = 2;
@@ -76,7 +76,7 @@ void func_80119874(TObj *o)
             break;
         case 5:
             D_8009D081 = 4;
-            D_8009C975 = 4;
+            GAME.fadeScreenControl = 4;
             startAreaBgm();
             o->step++;
             break;

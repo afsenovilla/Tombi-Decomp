@@ -1,14 +1,14 @@
 // FUNC 8011bc6c 280 X001
 // MATCHING 8011bc6c 280
 #include "TOBJ.H"
-extern unsigned short D_8009C962;
+#include "gamestate.h"
 extern short D_1F80016A, D_1F80016E;
 
 void func_8011BC6C(TObj *o)
 {
     switch (o->state) {
     case 0:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 1:
             o->state++;

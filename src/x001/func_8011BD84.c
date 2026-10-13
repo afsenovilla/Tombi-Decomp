@@ -1,8 +1,8 @@
 // FUNC 8011bd84 980 X001
 // MATCHING 8011bd84 980
 #include "TOBJ.H"
-extern unsigned char D_8009CDB5, D_8009CDA2;
-extern unsigned short D_8009C962, D_8009CD96;
+#include "gamestate.h"
+extern unsigned char D_8009CDB5;
 extern short D_1F80016E;
 extern unsigned short D_1F80016A;
 extern int ObjCullRegister(TObj *);
@@ -51,7 +51,7 @@ void func_8011BD84(TObj *o)
         case 2:
             switch (o->state) {
             case 0:
-                switch (D_8009C962) {
+                switch (GAME.selectedSection) {
                 case 0:
                 case 1:
                     o->state++;
@@ -82,7 +82,7 @@ void func_8011BD84(TObj *o)
         case 3:
             switch (o->state) {
             case 0:
-                if (D_8009CD96 != 2 && D_8009CDA2 != 0) o->state++;
+                if (GAME.nextSection != 2 && GAME.disableSelectMenu != 0) o->state++;
                 break;
             case 1:
                 o->d88 = (o->d88 - 0x18) & 0xfff;
@@ -108,7 +108,7 @@ void func_8011BD84(TObj *o)
         case 5:
             switch (o->state) {
             case 0:
-                if (D_8009CD96 != 4 && D_8009CDA2 != 0) o->state++;
+                if (GAME.nextSection != 4 && GAME.disableSelectMenu != 0) o->state++;
                 break;
             case 1:
                 o->d88 = (o->d88 + 0x18) & 0xfff;

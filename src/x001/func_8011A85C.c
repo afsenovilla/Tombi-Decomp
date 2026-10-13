@@ -1,9 +1,9 @@
 // FUNC 8011a85c 1696 X001
 // MATCHING 8011a85c 1696
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern short D_800A60B4[];
-extern unsigned short D_8009C962[];
 extern short D_8007A5F0[];
 extern char D_8013C474[];
 extern void playSFX(int);
@@ -15,7 +15,7 @@ extern TObj *func_80020D98(void *);
 #define BURST() \
     func_801191E4(o->h->p.whole, o->y.p.whole, o->d->p.whole); \
     o->b6b = 1; \
-    if (D_8009C962[0] == 0) playSFX(0x44); else playSFX(0x49);
+    if (((unsigned short*)&GAME.selectedSection)[0] == 0) playSFX(0x44); else playSFX(0x49);
 
 void func_8011A85C(TObj *o)
 {
@@ -53,7 +53,7 @@ void func_8011A85C(TObj *o)
         }
         o->state++;
         o->b6b = 0;
-        if (D_8009C962[0] == 0) playSFX(0x42);
+        if (((unsigned short*)&GAME.selectedSection)[0] == 0) playSFX(0x42);
         else playSFX(0x47);
         break;
     case 1:
@@ -67,7 +67,7 @@ void func_8011A85C(TObj *o)
             v = (unsigned)o->d88 >> 8;
             if (v == 0) {
                 o->y.raw = o->d34;
-                if (D_8009C962[0] == 0) playSFX(0x43);
+                if (((unsigned short*)&GAME.selectedSection)[0] == 0) playSFX(0x43);
                 else playSFX(0x48);
             }
         }

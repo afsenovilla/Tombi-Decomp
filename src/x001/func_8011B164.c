@@ -1,10 +1,10 @@
 // FUNC 8011b164 820 X001
 // MATCHING 8011b164 820
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern short D_8007A3F0[];
 extern short D_8007A5F0[];
-extern unsigned short D_8009C962[];
 extern void FUN_8001e4f0(int);
 
 void func_8011B164(TObj *o)
@@ -79,7 +79,7 @@ void func_8011B164(TObj *o)
             o->d88 = 0;
             o->ba6 = 0x20;
             o->b6b = 0;
-            FUN_8001e4f0(D_8009C962[0] == 0 ? 0x42 : 0x47);
+            FUN_8001e4f0(((unsigned short*)&GAME.selectedSection)[0] == 0 ? 0x42 : 0x47);
         }
         if (o->b68 != 0) {
             o->state = 0;
