@@ -1,0 +1,10 @@
+# Addresses splat must not turn into symbols (tools/gen_symbols.py writes them with `ignore:true`):
+# lui/addiu or lui/sw pairs of the retail code that are plain constants or literal addresses in the original
+# source (psx_tomba's TASK_TABLE macro, the 0x800000-1 timeout of moviePlayerTask), so objdiff compares them as
+# immediates, like our C emits them.  Format: PROG 0xADDRESS
+MAIN0 0x801FD800
+MAIN0 0x801FD804
+MAIN0 0x801FD808
+MAIN0 0x801FD80C
+MAIN0 0x801FD810
+MAIN0 0x007FFFFF

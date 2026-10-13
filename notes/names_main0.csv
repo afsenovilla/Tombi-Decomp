@@ -107,6 +107,7 @@ address,name,confidence,comment
 8001e9e8,setEventComplete,media,psx_tomba (alineado de direcciones)
 8001eaa4,playSfxWrapped,alta,psx_tomba (por bytes)
 8001eb64,startAreaBgm,alta,psx_tomba (por bytes)
+8001eb84,startAreaBgmWithReverb,alta,psx_tomba #24 (por bytes)
 8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
 8001f4bc,SoundStopAll,alta,para secuencias y apaga todas las voces
 8001f5b8,setReverbMode,alta,psx_tomba (por bytes)
@@ -194,7 +195,10 @@ address,name,confidence,comment
 8002abf8,dispatchSectionConfirm,alta,psx_tomba #21 (por bytes)
 8002ae48,getScrollOffsetX,alta,psx_tomba #21 (por bytes)
 8002aeb8,getScrollOffsetY,alta,psx_tomba #21 (por bytes)
+8002b010,stubInventory1,alta,psx_tomba #24 (por bytes)
 8002b020,updateObjectsLayer8,alta,psx_tomba (por bytes)
+8002b0ac,stubInventory2,alta,psx_tomba #24 (por bytes)
+8002b8bc,stubInventory3,alta,psx_tomba #24 (por bytes)
 8002b8cc,spawnItemPickupObject,alta,psx_tomba (por bytes)
 8002b920,cloneItemPickupObject,alta,psx_tomba (por bytes)
 8002dc50,showMessageBox,alta,psx_tomba (por bytes)
@@ -228,6 +232,7 @@ address,name,confidence,comment
 80038640,scriptOpPushVars,alta,psx_tomba #21 (por bytes)
 8003869c,scriptOpPopVars,alta,psx_tomba #21 (por bytes)
 80038ac4,scriptOpWait,alta,psx_tomba #21 (por bytes)
+80038cd0,execCoreOpcode,alta,psx_tomba #24 (por bytes)
 80039150,scriptRunOpcode,alta,psx_tomba #21 (por bytes)
 800391b0,runScript,alta,psx_tomba #21 (por bytes)
 8003926c,runScriptContext,alta,psx_tomba #21 (por bytes)
@@ -353,6 +358,7 @@ address,name,confidence,comment
 8004db4c,drawInfoMessageText,alta,psx_tomba (por bytes)
 8004dd8c,titleSequenceTask,alta,psx_tomba #21 (por bytes)
 8004e200,bootLoadMovieResources,alta,psx_tomba #21 (por bytes)
+8004eb08,cdLoadTask,alta,psx_tomba #24 (por bytes)
 8004f34c,enqueueCdRead,alta,psx_tomba #21 (por bytes)
 8004f38c,loadSoundBank,alta,psx_tomba (por bytes)
 8004f3bc,startSoundTask,alta,psx_tomba (por bytes)
@@ -516,7 +522,7 @@ address,name,confidence,comment
 800634b8,sin_1,alta,"Psy-Q (psx_tomba, por bytes)"
 80063548,rcos,alta,"Psy-Q (psx_tomba, por bytes)"
 800635e8,SetFogNear,alta,"Psy-Q (psx_tomba, por bytes)"
-80063844,InitGeom,alta,psx_tomba (alineado de direcciones)
+80063844,InitGeom,alta,Psy-Q libgte msc00.c (psx_tomba; alineado de direcciones)
 80063e6c,SetTransMatrix,alta,"Psy-Q (psx_tomba, por bytes)"
 80063e8c,SetVertex0,alta,"Psy-Q (psx_tomba, por bytes)"
 80063e9c,SetVertex1,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -612,6 +618,7 @@ address,name,confidence,comment
 8006897c,stopIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068a28,restartIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ab0,memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068ae4,FUN_80068ae4,alta,"Psy-Q libapi: trampolin BIOS A0 llamada 0x72 (jr $t2), cuerpo asm"
 80068c04,trapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068c7c,setIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ca8,VSync_memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -749,9 +756,3 @@ address,name,confidence,comment
 80077404,SpuSetCommonAttr,alta,"Psy-Q (psx_tomba, por bytes)"
 80077798,SpuRGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80077868,SpuGetAllKeysStatus,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8004eb08,cdLoadTask,alta,psx_tomba #24 (por bytes)
-80038cd0,execCoreOpcode,alta,psx_tomba #24 (por bytes)
-8001eb84,startAreaBgmWithReverb,alta,psx_tomba #24 (por bytes)
-8002b010,stubInventory1,alta,psx_tomba #24 (por bytes)
-8002b0ac,stubInventory2,alta,psx_tomba #24 (por bytes)
-8002b8bc,stubInventory3,alta,psx_tomba #24 (por bytes)

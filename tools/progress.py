@@ -9,9 +9,11 @@ import json
 import os
 import re
 import datetime
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 N = lambda *p: os.path.join(ROOT, *p)
+sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 # program -> (functions csv, names csv, code range [lo, hi])
 # The keys are kept as-is because they are also the keys of "programs" in docs/progress.json;
@@ -278,24 +280,28 @@ def overlays():
 
 
 def summary_lines(res, cov, ovl, tot, matching):
-    """The headline figures, shared by docs/PROGRESS.md and README.md. Every function is counted once: the area
-    overlays repeat a lot of MAIN0/X000 code (and each other's), so only their first copy enters the total."""
+    """The headline figures, shared by docs/PROGRESS.md, README.md and the objdiff report of decomp.dev: they come
+    from the unit list of tools/units.py (every src file with a MATCHING marker, plus the csv rows no file covers),
+    where every function is counted once: the area overlays repeat a lot of MAIN0/X000 code (and each other's), so
+    only their first copy enters the total."""
     libm = getattr(summary_lines, "libm", 0)  # matched library bytes (set by main), reported apart
-    md = matching_detail()
-    m0, x0 = (next(r for k, r in res.items() if k.startswith(p)) for p in ("MAIN0", "X000"))
-    ou, om, onu, onm = (sum(d[k] for d in ovl.values()) for k in ("uniq", "uniq_matched", "n_uniq", "n_uniq_matched"))
-    rows = [("MAIN0.EXE: engine, shared by every area", m0["game"], m0["n_game"], cov["MAIN0"], md.get("MAIN0", [0, 0])[1]),
-            ("X000.BIN: AREA00 + object code reused by all areas", x0["game"], x0["n_game"], cov["X000"], md.get("X000", [0, 0])[1]),
+    import units as U
+    T_ = U.totals()
+    m0, x0 = T_["MAIN0"], T_["X000"]
+    ou, om, onu, onm = (sum(T_[p][i] for p in U.OVERLAYS) for i in (0, 1, 2, 3))
+    rows = [("MAIN0.EXE: engine, shared by every area", m0[0], m0[2], m0[1], m0[3]),
+            ("X000.BIN: AREA00 + object code reused by all areas", x0[0], x0[2], x0[1], x0[3]),
             ("X001..X019.BIN: code specific to the other areas", ou, onu, om, onm)]
     T = sum(r[1] for r in rows); M = sum(r[3] for r in rows); F = sum(r[2] for r in rows); FM = sum(r[4] for r in rows)
     summary_lines.whole, summary_lines.areas = (M, T), (om, ou)
-    L = ["**Whole game: %.1f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
+    L = ["**Whole game: %.2f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
          "| Part | Code | Matching bytes | Matching |", "|---|---:|---:|---|"]
     for name, g, n, m, nm in rows:
         L.append("| %s | %d B | %d B | %.1f %% `%s` |" % (name, g, m, pct(m, g), bar(pct(m, g))))
-    L.append("| **Whole game** | **%d B** | **%d B** | **%.1f %%** `%s` |" % (T, M, pct(M, T), bar(pct(M, T))))
+    L.append("| **Whole game** | **%d B** | **%d B** | **%.2f %%** `%s` |" % (T, M, pct(M, T), bar(pct(M, T))))
     L += ["",
-          "- Bytes of machine code in game functions; Sony's Psy-Q library (%d B) is not counted: %d B of it (%.1f %%) also"
+          "- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev"
+          " (`tools/units.py` is the common list); Sony's Psy-Q library (%d B) is not counted: %d B of it (%.1f %%) also"
           " matches, from Psy-Q sources ported from psx_tomba, and is tracked apart." % (tot["lib"], libm, pct(libm, tot["lib"])),
           "- Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each",
           "  other; those copies match automatically and are not added again (counting every copy separately gives %.1f %%)." % (

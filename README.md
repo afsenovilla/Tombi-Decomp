@@ -13,16 +13,16 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Progress
 
 <!-- progress:start -->
-**Whole game: 95.0 % of the game's code matches byte for byte** (1207388 of 1271552 bytes).
+**Whole game: 95.22 % of the game's code matches byte for byte** (1274332 of 1338296 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 227816 B | 219256 B | 96.2 % `[#######################.]` |
-| X000.BIN: AREA00 + object code reused by all areas | 297956 B | 297632 B | 99.9 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 745780 B | 690500 B | 92.6 % `[######################..]` |
-| **Whole game** | **1271552 B** | **1207388 B** | **95.0 %** `[#######################.]` |
+| MAIN0.EXE: engine, shared by every area | 276808 B | 268224 B | 96.9 % `[#######################.]` |
+| X000.BIN: AREA00 + object code reused by all areas | 311060 B | 310736 B | 99.9 % `[########################]` |
+| X001..X019.BIN: code specific to the other areas | 750428 B | 695372 B | 92.7 % `[######################..]` |
+| **Whole game** | **1338296 B** | **1274332 B** | **95.22 %** `[#######################.]` |
 
-- Bytes of machine code in game functions; Sony's Psy-Q library (99504 B) is not counted: 67596 B of it (67.9 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99644 B) is not counted: 67736 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 98.2 %).
 - Also tracked for MAIN0 + X000: 9.7 % of the code named by us, 76.0 % typed with the TObj structure.
@@ -162,9 +162,10 @@ offsets and the function or splat range that produced them.
 binaries into one assembly file per function (`config/main0.yaml`, `config/x000.yaml`, `config/x0nn.yaml`
 for the 16 area overlays), each function is assembled as the *target* object, each `src/*.c` and
 `src/x0nn/*.c` is compiled as the *base* object, and `objdiff-cli` compares them (`build/report.json`).
-The report measures the same thing as `docs/PROGRESS.md`: game code only (the Psy-Q library is left out
-unless `--with-sdk` is given) and every shared overlay function counted once, so the decomp.dev headline is the
-whole-game figure. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
+The report and `docs/PROGRESS.md` count exactly the same bytes: both take their unit list from
+`tools/units.py` (every matched source file as one unit, plus the csv functions no file covers), game code only
+(the Psy-Q library is left out unless `--with-sdk` is given) and every shared overlay function counted once, so
+the decomp.dev headline is the whole-game figure to the second decimal. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
 needs a `GAME_FILES_URL` secret pointing to your own disc image (or a zip with `MAIN0.EXE` and
 `AREA00/X000.BIN`, which limits the report to those two).
 
@@ -195,6 +196,7 @@ game/           your own game files (ignored by git)
 | `tools/fn.py` | Disassembly (capstone) and Ghidra pseudo-C of one function |
 | `tools/areas.py` | Area overlays: function boundaries (`bounds`), copies of matched twins (`twins`) |
 | `tools/progress.py` | Regenerates `docs/PROGRESS.md` and the SVG charts |
+| `tools/units.py` | The unit list shared by `progress.py`, `gen_symbols.py` and `build_report.py` (prints the totals) |
 | `tools/classify.py` | Separates complete functions from Ghidra fragments (`notes/todo_match3.csv`) |
 | `tools/fixbounds.py` | Detects functions Ghidra split incorrectly |
 | `tools/permute.py` | Small random permuter (CPU only) for near-misses |

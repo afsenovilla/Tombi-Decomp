@@ -8,13 +8,15 @@ Steps (all output under build/ and asm/, both ignored by git):
   2. Each retail function is assembled into a *target* object  -> build/target/<prog>/<func>.o
   3. Each src/*.c and src/x0nn/*.c is compiled with the native toolchain (tools/ncheck.py) -> build/base/<prog>/<func>.o
      (honoring a `// CC gcc-X.Y.Z` header line: old-gcc of that version, see ncheck.gcc_for)
-  4. objdiff.json is written with one unit per function (categories: game / sdk, main0 / x000).
+  4. objdiff.json is written with one unit per unit of tools/units.py (categories: game / sdk, main0 / x000 / x0nn):
+     the same list docs/PROGRESS.md counts, so both figures agree by construction.
   5. objdiff-cli writes build/report.json.
 
 Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
 By default the Psy-Q library functions are left out, so the report (and the decomp.dev headline) measures game code only,
 like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay functions that are twins of X000 (or of an
 earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
+Order: base objects are compiled first (gen_symbols reads them), then splat, then the target objects.
 """
 import csv, json, os, re, shutil, subprocess, sys, tempfile
 
@@ -36,24 +38,36 @@ def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
 
 
-def game_addresses():
-    """Addresses of game (non-SDK) functions, classified like tools/progress.py: a function is Psy-Q library when its
-    notes/names_*.csv row says "Psy-Q" or when Ghidra gave it a real name (library signature); the rest is game."""
-    game = set()
-    for prog in ("main0", "x000"):
-        ours = {}
-        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "names_%s.csv" % prog))):
-            ours[r["address"].lower()] = r
-        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "functions_%s.csv" % prog))):
-            a = r["address"].lower(); mine = ours.get(a)
-            is_fun = r["name"].startswith(("FUN_", "thunk_FUN_", "func_"))
-            lib = ("Psy-Q" in mine.get("comment", "")) if mine is not None else (not is_fun)
-            if not lib: game.add(a)
-    return game
-
-
 def main():
     os.chdir(ROOT)
+    import units as U
+    # base objects first: compile every src/*.c and src/x0nn/*.c with the native pipeline (tools/gen_symbols.py
+    # reads them to give the inner functions of a block-matched file their own symbols)
+    src_nc = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
+    NC = {"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"}
+    exec(compile(src_nc, "ncheck", "exec"), NC)
+    inc = tempfile.mkdtemp()
+    for f in os.listdir("include"):
+        s = os.path.join("include", f)
+        if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
+        for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
+    base, nb = {}, 0
+    shutil.rmtree("build/base", ignore_errors=True)
+    for prog, us in U.units().items():
+        for u in us:
+            if not u.file: continue
+            h = NC["M"]["header"](u.file)
+            if not h: continue
+            d = tempfile.mkdtemp()
+            try:
+                NC["build"](u.file, h[3], d, inc)
+                out = "build/base/%s/%s.o" % (prog.lower(), u.name)
+                os.makedirs(os.path.dirname(out), exist_ok=True)
+                shutil.copy(d + "/a.o", out); base[(prog, u.addr)] = out; nb += 1
+            except subprocess.CalledProcessError:
+                print("base compile failed:", u.file)
+            shutil.rmtree(d, ignore_errors=True)
+    shutil.rmtree(inc, ignore_errors=True)
     run([sys.executable, "tools/gen_symbols.py"])
     if "--no-split" not in ARGS:
         for prog in PROGS:
@@ -63,68 +77,36 @@ def main():
                                capture_output=True, text=True)
             if r.returncode:
                 sys.exit("splat failed for %s:\n%s" % (prog, (r.stdout + r.stderr)[-3000:]))
-    game = game_addresses()
-    units, nt, nb = [], 0, 0
-    # base objects: compile every src/*.c with the native pipeline
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("ncheck_mod", os.path.join(ROOT, "tools", "ncheck.py"))
-    src_nc = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
-    NC = {"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"}
-    exec(compile(src_nc, "ncheck", "exec"), NC)
-    inc = tempfile.mkdtemp()
-    for f in os.listdir("include"):
-        s = os.path.join("include", f)
-        if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
-        for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
-    base = {}
-    srcs = [os.path.join("src", f) for f in sorted(os.listdir("src"))]
-    for p in OVERLAYS:
-        if os.path.isdir("src/" + p): srcs += [os.path.join("src", p, f) for f in sorted(os.listdir("src/" + p))]
-    for path in srcs:
-        f = os.path.basename(path)
-        if not f.endswith(".c"): continue
-        h = NC["M"]["header"](path)
-        if not h: continue
-        prog = h[2].lower()
-        d = tempfile.mkdtemp()
-        try:
-            NC["build"](path, h[3], d, inc)
-            out = "build/base/%s/%s.o" % (prog, f[:-2])
-            os.makedirs(os.path.dirname(out), exist_ok=True)
-            shutil.copy(d + "/a.o", out); base[(prog, f[:-2])] = out; nb += 1
-        except subprocess.CalledProcessError:
-            print("base compile failed:", f)
-        shutil.rmtree(d, ignore_errors=True)
-    # Area overlays share ~173 KB of code with X000 (and each other) at the same addresses: a function whose
-    # notes/functions_x0nn.csv row names a twin is left out, so every byte of the game is counted once.
-    keep = set()  # (overlay, address) of the functions counted for that overlay: listed in its csv, no twin
-    for p in OVERLAYS:
-        for r in csv.DictReader(open(os.path.join(ROOT, "notes", "functions_%s.csv" % p))):
-            if not r.get("twin"): keep.add((p, r["address"].lower()))
-    # target objects: assemble each retail function
+    # target objects: one per unit, assembled from the splat function(s) inside the unit's range
+    units, nt = [], 0
+    shutil.rmtree("build/target", ignore_errors=True)
     for prog in PROGS:
+        P = PROGS[prog]
+        if P not in U.units(): continue
         fdir = "asm/%s/nonmatchings/%s" % (prog, prog)
+        asm = {}  # address -> body
         for fn in sorted(os.listdir(fdir)):
-            name = fn[:-2]
             body = open(os.path.join(fdir, fn)).read()
             m = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", body)
-            addr = m.group(1).lower() if m else ""
-            out = "build/target/%s/%s.o" % (prog, name)
+            if m: asm[int(m.group(1), 16)] = body
+        addrs = sorted(asm)
+        for u in U.units()[P]:
+            if not (U.counted(u) or (u.lib and not u.twin and WITH_SDK)): continue
+            parts = [asm[a] for a in addrs if u.addr <= a < u.addr + u.size]
+            if not parts: continue  # data (zero words) or a range splat merged elsewhere
+            out = "build/target/%s/%s.o" % (prog, u.name)
             os.makedirs(os.path.dirname(out), exist_ok=True)
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
-                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + body)
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + "\n".join(parts))
             try:
                 run(AS + [t.name, "-o", out]); nt += 1
             except subprocess.CalledProcessError as e:
-                print("target asm failed:", prog, name, e.stderr[:120]); continue
+                print("target asm failed:", prog, u.name, e.stderr[:120]); continue
             finally:
                 os.unlink(t.name)
-            is_game = addr in game or prog in OVERLAYS
-            if not is_game and not WITH_SDK: continue  # Psy-Q library units are left out: the headline % is game code
-            if prog in OVERLAYS and (prog, addr) not in keep: continue  # twin or unlisted region: counted once elsewhere
-            unit = {"name": "%s/%s" % (prog, name), "target_path": out,
-                    "metadata": {"progress_categories": [prog, "game" if is_game else "sdk"]}}
-            if (prog, name) in base: unit["base_path"] = base[(prog, name)]
+            unit = {"name": "%s/%s" % (prog, u.name), "target_path": out,
+                    "metadata": {"progress_categories": [prog, "sdk" if u.lib else "game"]}}
+            if (P, u.addr) in base: unit["base_path"] = base[(P, u.addr)]
             units.append(unit)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
@@ -133,11 +115,11 @@ def main():
                                   + [{"id": p, "name": "%s.BIN (AREA%s)" % (p.upper(), p[2:])} for p in OVERLAYS],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
-    shutil.rmtree(inc, ignore_errors=True)
     json.dump(cfg, open("objdiff.json", "w"), indent=1)
     print("units %d, target objects %d, base objects %d" % (len(units), nt, nb))
     subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
     print("wrote build/report.json")
 
 
-main()
+if __name__ == "__main__":
+    main()

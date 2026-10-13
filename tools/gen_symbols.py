@@ -1,69 +1,66 @@
 #!/usr/bin/env python3
-"""Generates splat symbol files (config/symbol_addrs_<prog>.txt) from:
-  - src/*.c and src/x0nn/*.c headers (// FUNC addr size prog) + the C function name defined in each file (exact size)
-  - notes/names_*.csv and notes/functions_*.csv (names and boundaries for the rest)
-so that splat names each retail function exactly like our C function (objdiff pairs them by name)."""
-import csv, os, re
+"""Generates the splat symbol files (config/symbol_addrs_<prog>.txt) from the unit list of tools/units.py:
+  - one sized symbol per src file with a `// MATCHING` marker, named after the C (or asm) function it defines,
+    so objdiff pairs the retail function with ours by name; when the compiled object of that file exists in
+    build/base/<prog>/<stem>.o and holds several functions (a file matched as a block), each inner function gets
+    its own symbol too, so splat cuts the retail code exactly where our object does;
+  - one sized symbol per csv row (or remainder of a row) that no file covers, with the csv name.
+Library and twin units get symbols too (splat needs them to disassemble the code sanely); only the counting
+differs.  Ghidra fragments (zero first word, shorter than 8 bytes) are already merged away by units.py: with a
+symbol there splat emits the rest of the program as .word.
+
+Usage: python3 tools/gen_symbols.py"""
+import os, re, subprocess, sys
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RANGES = {"MAIN0": (0x80010000, 0x80099000), "X000": (0x800E8028, 0x80140000)}
-PROGS = {"MAIN0": ("functions_main0.csv", "names_main0.csv"), "X000": ("functions_x000.csv", "names_x000.csv")}
-# area overlays (tools/areas.py bounds): same load address as X000, sources in src/x0nn/
-for _n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
-    _p = "X%03d" % _n
-    RANGES[_p] = RANGES["X000"]
-    PROGS[_p] = ("functions_%s.csv" % _p.lower(), "names_%s.csv" % _p.lower())
-syms = {p: {} for p in PROGS}   # addr -> (name, size or None)
-for p, (fcsv, ncsv) in PROGS.items():
-    npath = os.path.join(R, "notes", ncsv)
-    names = {r["address"]: r["name"] for r in csv.DictReader(open(npath))} if os.path.exists(npath) else {}
-    for r in csv.DictReader(open(os.path.join(R, "notes", fcsv))):
-        a = int(r["address"], 16)
-        if not (RANGES[p][0] <= a < RANGES[p][1]): continue
-        n = names.get(r["address"]) or ("func_%08X" % a if r["name"].startswith(("FUN_", "thunk_")) else r["name"])
-        syms[p][a] = (n, None)
-src = os.path.join(R, "src")
-files = [os.path.join(src, f) for f in sorted(os.listdir(src))]
-for d in sorted(os.listdir(src)):
-    if re.match(r"x0\d\d$", d): files += [os.path.join(src, d, f) for f in sorted(os.listdir(os.path.join(src, d)))]
-for path in files:
-    f = os.path.basename(path)
-    if not f.endswith(".c"): continue
-    t = open(path, errors="replace").read()
-    m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(MAIN0|X0\d\d)?", t)
-    if not m or "// MATCHING" not in t: continue
-    a, size, p = int(m.group(1), 16), int(m.group(2)), m.group(3) or "MAIN0"
-    stem = f[:-2]
-    if not re.search(r"\b%s\s*\(" % re.escape(stem), t):
-        print("WARN: %s does not define %s()" % (f, stem)); continue
-    syms[p][a] = (stem, size)
-csv_size = {}
-for p, (fcsv, _) in PROGS.items():
-    csv_size[p] = {int(r["address"], 16): int(r["size"]) for r in csv.DictReader(open(os.path.join(R, "notes", fcsv)))
-                   if r.get("size")}
-for p in PROGS:
-    seen = {}
-    # Area overlays: the csv boundaries (tools/areas.py) are approximate and the matched files are exact, so a csv
-    # symbol lying inside a matched function is dropped and the others get their csv size, clamped to the next symbol,
-    # so splat splits every listed function instead of merging a run of them into one blob.
-    if p.startswith("X0") and p != "X000":
-        bin_path = os.path.join(R, "game", "AREA" + p[2:], p + ".BIN")
-        blob = open(bin_path, "rb").read() if os.path.exists(bin_path) else b""
-        addrs = sorted(syms[p]); end = 0; keep = {}
-        for i, a in enumerate(addrs):
-            n, size = syms[p][a]
-            if size is None and a < end: continue
-            off = a - 0x800E8028  # a "function" that starts with a zero word is padding/data: it makes splat emit the
-            if size is None and blob and blob[off:off + 4] == b"\0\0\0\0": continue  # rest of the overlay as .word
-            if size is None and a in csv_size[p]:
-                size = csv_size[p][a]
-                if i + 1 < len(addrs): size = min(size, addrs[i + 1] - a)
-            keep[a] = (n, size)
-            if size: end = max(end, a + size)
-        syms[p] = keep
-    with open(os.path.join(R, "config", "symbol_addrs_%s.txt" % p.lower()), "w") as out:
-        for a in sorted(syms[p]):
-            n, size = syms[p][a]
-            if n in seen: n = "%s_%08X" % (n, a)     # splat needs unique names
-            seen[n] = a
-            out.write("%s = 0x%08X; // type:func%s\n" % (n, a, (" size:0x%X" % size) if size else ""))
-    print(p, len(syms[p]), "symbols")
+sys.path.insert(0, os.path.join(R, "tools"))
+import units as U
+
+NM = os.environ.get("MIPS_NM", "mipsel-linux-gnu-nm")
+
+
+def inner_functions(obj):
+    """[(offset, size, name)] of the function symbols of a compiled object, from nm."""
+    try:
+        out = subprocess.run([NM, "-S", "--defined-only", obj], capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    fs = []
+    for line in out.splitlines():
+        m = re.match(r"([0-9a-f]+)\s+([0-9a-f]+)\s+[Tt]\s+(\S+)", line)
+        if m and m.group(3) not in ("gcc2_compiled.", "__gnu_compiled_c"):
+            fs.append((int(m.group(1), 16), int(m.group(2), 16), m.group(3)))
+    return sorted(fs)
+
+
+def main():
+    ignored = {}   # config/symbol_ignore.txt: constants splat must not symbolize (see the file)
+    for line in open(os.path.join(R, "config", "symbol_ignore.txt")):
+        m = re.match(r"\s*(\w+)\s+0x([0-9A-Fa-f]+)", line)
+        if m: ignored.setdefault(m.group(1).upper(), []).append(int(m.group(2), 16))
+    for prog, us in U.units().items():
+        syms = []  # (addr, name, size)
+        for u in us:
+            if u.file:
+                name = U.defined_name(u.file, u.name)
+                obj = os.path.join(R, "build", "base", prog.lower(), u.name + ".o")
+                inner = inner_functions(obj) if os.path.exists(obj) else []
+                if len(inner) > 1 and inner[-1][0] + inner[-1][1] <= u.size:
+                    for off, size, nm in inner:
+                        syms.append((u.addr + off, nm, size))
+                    continue
+                syms.append((u.addr, name, u.size))
+            else:
+                syms.append((u.addr, u.name, u.size))
+        seen = {}
+        with open(os.path.join(R, "config", "symbol_addrs_%s.txt" % prog.lower()), "w") as out:
+            for a, n, size in sorted(syms):
+                if n in seen: n = "%s_%08X" % (n, a)     # splat needs unique names
+                seen[n] = a
+                out.write("%s = 0x%08X; // type:func size:0x%X\n" % (n, a, size))
+            for a in ignored.get(prog, []):
+                out.write("D_%08X = 0x%08X; // ignore:true\n" % (a, a))
+        print(prog, len(syms), "symbols")
+
+
+if __name__ == "__main__":
+    main()
