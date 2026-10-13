@@ -414,7 +414,17 @@ class Core:
         if p["bpp"] == 8 and p["clut"]:
             s.pal = self.pal_choice.get(name) or PalRef(p["clut"]["name"], 0, 256)
         elif p["bpp"] == 4:
-            s.pal = self.pal_choice.get(name) or (pal or (s.candidates()[:1] or [(None, None)])[0][1])
+            s.pal = self.pal_choice.get(name) or pal
+            if not s.pal:
+                try:
+                    import palinfer
+                    g = palinfer.infer(self, name, ld, idx)
+                except Exception:
+                    g = None
+                if g:
+                    s.pal, s.pal_note = g.ref, tr("l.deduced", g.label, g.method)
+                else:
+                    s.pal = (s.candidates()[:1] or [(None, None)])[0][1]
         if pal:
             s.pal = pal
         if name == UI_PAGE:
@@ -775,6 +785,7 @@ class Surface:
         self.pal = None
         self.rects = []
         self.selected = None
+        self.pal_note = ""
         self.opaque = False
         self.is_clut = False
         self.wpp = False
@@ -992,6 +1003,7 @@ class Surface:
 
 # ------------------------------------------------------------------ strings
 S_ES = {
+    "l.deduced": "paleta deducida: {0} ({1})",
     "c.notiso": "{0} no es una imagen de disco ISO9660 (.bin de 2352 bytes por sector o .iso).", "c.nofile": "No existe {0}.",
     "c.nofs": "No se encuentra la carpeta SYS en {0}: ¿es el disco de Tombi! (PAL)?", "c.nolists": "No se pudieron leer las listas de carga (SYS/LD0*.BIN).",
     "c.nores": "No se pudo leer {0}.", "c.size": "{0}: tamaño {1} distinto del original {2}.", "c.nopage": "No hay ninguna página llamada {0}.",
@@ -1011,6 +1023,7 @@ S_ES = {
     "w.index0": "El índice 0 de esta paleta no es transparente (palabra distinta de 0): se verá como color opaco.",
 }
 S_EN = {
+    "l.deduced": "palette inferred: {0} ({1})",
     "c.notiso": "{0} is not an ISO9660 disc image (.bin with 2352-byte sectors or .iso).", "c.nofile": "{0} does not exist.",
     "c.nofs": "No SYS folder found in {0}: is it the Tombi! (PAL) disc?", "c.nolists": "The load lists (SYS/LD0*.BIN) could not be read.",
     "c.nores": "Could not read {0}.", "c.size": "{0}: size {1} differs from the original {2}.", "c.nopage": "There is no page named {0}.",

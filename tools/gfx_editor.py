@@ -375,6 +375,8 @@ class App:
         self.redraw()
         self.draw_swatches()
         self.update_sel()
+        if s.pal_note:
+            self.say(s.pal_note)
 
     def edit_ref(self):
         s = self.surf
