@@ -368,6 +368,21 @@ standard Sony `pQES` sequence files (36 files, 9 KB..; `S_AR000.SEQ` = music of 
 * SEQ: `pQES`, BE `version(1)`, `u16 resolution (0x1E0)`, `u24 tempo (us/quarter)`, `u8 num, u8 log2 den`, then plain MIDI events with delta times and running
   status up to `FF 2F 00`; wrapping them in `MThd`/`MTrk` (type 0) is the whole conversion. All 36 parse to the byte; lengths are whole bars.
 
+### Which bank plays which SEQ, and the software sequencer
+The load lists (`src/cdLoadTask.c`, the `FILE_SOUND_*` entries) load every `S_*.SEQ` right after its `SND*.WVD`; the names differ only in the `_` / `X`
+variants. Table in `tools/audio.py` (`SEQ_BANK`): `S_TITLE`->`SND_TTL`, `S_SYS00`->`SND_SYS`, `S_END`->`SND_END`, `S_ARnnn`->`SND0nnn`, except
+`S_AR010`->`SND001_`, `S_AR010X`->`SND001_X`, `S_AR100`->`SND010_`, `S_AR100X`->`SND010_X`, `S_AR040X`->`SND004_X`, `S_AR1802`->`SND0182`,
+`S_AR140` -> `SND0140` (the game loads it with `SND0140`..`SND0146`; only the second bank differs). Bank 0 of the WVD is the music bank: the program
+numbers of all 36 SEQs exist in it (program numbers = index into the 128 program attrs, tones are stored compactly for the programs with tones > 0);
+bank 1 (if any) is a shared sound effect bank. The SEQs have no tempo events and no pitch bend; they use program change, CC7 (volume), CC6/CC99.
+Loop: **CC99 = 20 (with CC6 = 127) is the loop start and CC99 = 30 the loop end** (Sony libsnd convention); 33 of 36 songs have it.
+`render_song()` (numpy) mixes the notes: tones chosen by key range (all matching layers play), pitch `2^((key - center + shift/128 + bend)/12)` against the
+44.1 kHz sample rate, linear interpolation, VAG loop flags, SPU ADSR from `adsr1`/`adsr2` (attack linear/exp, decay to sustain level, sustain mode, release;
+closed form of the SPU step/shift counters), gain = velocity x CC7 x CC11 x program vol x tone vol x VAB master vol, pan = CC10 + tone/program pan offsets
+(constant power). Not modelled: reverb, the 24 voice limit, vibrato/portamento, CC changes during a note. The loop body is played twice in total, the last 4 s fade
+out (+1.5 s of release tails), peak normalised to 0.89. All 36 render in about 27 s. Checks: duration = tick length at the tempo (+1.5 s), onsets of the output
+line up with the MIDI note-on times (onset flux at the MIDI onsets 3.6..5x the average, 1.5..2x when shifted by 0.25 s).
+
 ## `MOVIE/*.STR`
 Raw layout (read from the image, `isoext.py` output mixes sizes): per 2352 byte sector subheader `file=1, channel=1`; video sectors are Form 1 (submode
 `0x48`, 2048 B), audio sectors Form 2 (submode `0x64`, coding `0x01` = 4 bit stereo 37800 Hz), 7 video : 1 audio. Video payload = 32 byte header + 2016 B:

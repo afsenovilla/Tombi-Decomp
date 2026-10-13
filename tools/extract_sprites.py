@@ -7,7 +7,9 @@ Python 3 (Windows/Linux/macOS).
   python3 tools/extract_sprites.py                         (no arguments: a small window to pick the image, folder and what to extract)
 
 Steps for --only (comma separated, default all; each one makes its own prerequisites, the fs dump is reused if OUT_DIR/fs exists):
-  files sprites screens vram rooms rooms3d banks music movie_audio videos      (--video-frames: videos also dumps every frame as PNG)
+  files sprites screens vram rooms rooms3d banks music music_audio movie_audio videos
+  (--video-frames: videos also dumps every frame as PNG;  --audio-format wav|mp3: format of banks, music_audio and movie_audio, mp3 needs lameenc,
+   falls back to WAV; loop points only in WAV)
 
 Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/isoext.py), then
   OUT_DIR/sprites/<AREA>/<file>/frame_NNNN.png   every WPP sprite frame (AREAxx/*.000 of load kind 0x60/0x62, 40 files, about 13 000
@@ -23,6 +25,7 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
                                                  (room pages, atlases, ...) with its palette, palette blocks as swatches
   OUT_DIR/sound/bank/<SNDxxxx>/                  every VAB sample of the 52 .WVD banks as WAV (+ vab.json with the tone table) (tools/audio.py)
   OUT_DIR/sound/music/*.mid                      the 36 .SEQ sequences as standard MIDI (type 0)
+  OUT_DIR/sound/music_audio/*.wav|mp3            every SEQ rendered to stereo 44.1 kHz audio with its own bank (software sequencer in tools/audio.py, needs numpy)
   OUT_DIR/sound/movie_audio/*.wav                the XA ADPCM audio track of each of the 30 .STR movies (37.8 kHz stereo)
   OUT_DIR/video/NAME.png, NAME.mp4               poster frame of each movie (pure Python MDEC, tools/str.py); mp4 only if ffmpeg is in PATH
                                                  (all frames as PNG: python3 tools/str.py frames Tombi.bin NAME OUT_DIR)
@@ -52,9 +55,10 @@ STEPS = [   # (key, group, label es, description)
     ("vram", "Imagenes", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
     ("rooms", "3D / Salas", "Salas PNG", "room backgrounds (OUT/rooms)"),
     ("rooms3d", "3D / Salas", "Salas 3D (glb)", "room models as glTF (OUT/rooms3d)"),
-    ("banks", "Audio", "Bancos de sonido (WAV)", "VAB samples (OUT/sound/bank)"),
+    ("banks", "Audio", "Bancos de sonido", "VAB samples (OUT/sound/bank)"),
     ("music", "Audio", "Musica (MIDI)", "SEQ sequences (OUT/sound/music)"),
-    ("movie_audio", "Audio", "Audio de peliculas (WAV)", "XA tracks (OUT/sound/movie_audio)"),
+    ("music_audio", "Audio", "Musica renderizada", "SEQ + bank rendered to audio (OUT/sound/music_audio)"),
+    ("movie_audio", "Audio", "Audio de peliculas", "XA tracks (OUT/sound/movie_audio)"),
     ("videos", "Video", "Videos (AVI/poster)", "AVI MJPEG+PCM (needs Pillow), poster PNG, mp4 if ffmpeg (OUT/video)"),
 ]
 STEP_KEYS = [k for k, _, _, _ in STEPS]
@@ -64,10 +68,11 @@ class Extractor:
     """Independent steps; each one computes (and caches) its own prerequisites: the fs dump is skipped when OUT/fs already exists, the
     SPR palette usage (needed by the VRAM page colouring) is computed once per instance."""
 
-    def __init__(self, img, out, log=print, video_frames=False):
+    def __init__(self, img, out, log=print, video_frames=False, audio_format="wav"):
         self.img, self.out, self.log = os.path.abspath(img), os.path.abspath(out), log
         self.fs = os.path.join(self.out, "fs")
         self.video_frames = video_frames
+        self.audio_format = audio_format
         self._env = False
         self._usage = None      # (stats, usage) of vram.export_spr
         self._stats = None
@@ -150,11 +155,12 @@ class Extractor:
     def _audio(self, **kw):
         self._setup()
         import audio
-        kw = dict(dict(banks=False, music=False, xa=False), **kw)
+        kw = dict(dict(banks=False, music=False, xa=False, fmt=self.audio_format), **kw)
         audio.export_all(self.img, self.out, log=self.log, **kw)
 
     def banks(self): self._audio(banks=True)
     def music(self): self._audio(music=True)
+    def music_audio(self): self._audio(music_audio=True)
     def movie_audio(self): self._audio(xa=True)
 
     def videos(self):
@@ -176,9 +182,9 @@ class Extractor:
             getattr(self, k)()
 
 
-def extract(img, out, log=print, only=None, video_frames=False):
+def extract(img, out, log=print, only=None, video_frames=False, audio_format="wav"):
     """Runs the chosen steps (names in STEP_KEYS, default: all) under `out`."""
-    Extractor(img, out, log, video_frames).run(only)
+    Extractor(img, out, log, video_frames, audio_format).run(only)
 
 
 def gui():
@@ -220,6 +226,11 @@ def gui():
     frames_v = tk.BooleanVar(value=False)
     ttk.Checkbutton(frm, text="Videos: volcar tambien todos los fotogramas PNG (lento, mucho espacio)", variable=frames_v).grid(row=3, column=0, columnspan=3, sticky="w")
 
+    fmt_v = tk.StringVar(value="WAV")
+    ff = ttk.Frame(frm); ff.grid(row=3, column=2, sticky="e")
+    ttk.Label(ff, text="Formato de audio:").pack(side="left")
+    ttk.Combobox(ff, textvariable=fmt_v, values=("WAV", "MP3"), width=6, state="readonly").pack(side="left", padx=4)
+
     bf = ttk.Frame(frm); bf.grid(row=4, column=0, columnspan=3, pady=8)
     btn_sel = ttk.Button(bf, text="Extraer seleccionado"); btn_sel.pack(side="left", padx=6)
     btn_all = ttk.Button(bf, text="Extraer todo"); btn_all.pack(side="left", padx=6)
@@ -244,9 +255,9 @@ def gui():
             pass
         root.after(100, pump)
 
-    def work(img, out, steps, vf):
+    def work(img, out, steps, vf, af):
         try:
-            ex = Extractor(img, out, log=put, video_frames=vf)
+            ex = Extractor(img, out, log=put, video_frames=vf, audio_format=af)
             for i, k in enumerate(steps, 1):
                 put("[%d/%d] %s" % (i, len(steps), next(l for kk, _, l, _ in STEPS if kk == k)))
                 getattr(ex, k)()
@@ -262,7 +273,7 @@ def gui():
         if not steps: messagebox.showwarning("Falta", "Marca al menos una casilla."); return
         btn_sel.configure(state="disabled"); btn_all.configure(state="disabled")
         put("Extrayendo %s -> %s: %s" % (img, out, ", ".join(steps)))
-        threading.Thread(target=work, args=(img, out, steps, frames_v.get()), daemon=True).start()
+        threading.Thread(target=work, args=(img, out, steps, frames_v.get(), fmt_v.get().lower()), daemon=True).start()
 
     btn_sel.configure(command=lambda: start(False))
     btn_all.configure(command=lambda: start(True))
@@ -276,16 +287,18 @@ def main():
             return gui()
         except Exception as e:   # no tkinter or no display: fall back to the usage text
             sys.exit("%s\n(no window: %s)" % (__doc__, e))
-    args, only, frames = [], None, False
+    args, only, frames, afmt = [], None, False, "wav"
     it = iter(sys.argv[1:])
     for x in it:
         if x == "--only": only = next(it, "").split(",")
         elif x.startswith("--only="): only = x[7:].split(",")
         elif x == "--video-frames": frames = True
+        elif x == "--audio-format": afmt = next(it, "")
+        elif x.startswith("--audio-format="): afmt = x.split("=", 1)[1]
         else: args.append(x)
-    if len(args) != 2 or (only and any(k not in STEP_KEYS for k in only)):
+    if len(args) != 2 or (only and any(k not in STEP_KEYS for k in only)) or afmt not in ("wav", "mp3"):
         sys.exit(__doc__)
-    extract(args[0], args[1], only=only, video_frames=frames)
+    extract(args[0], args[1], only=only, video_frames=frames, audio_format=afmt)
 
 
 if __name__ == "__main__":
