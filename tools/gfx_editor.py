@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import i18n
 from i18n import tr
 import gfx_core as G
+import gfx_composed  # registers its i18n strings (the toolbar uses b.composedall before any composed view is opened)
 
 try:
     import tkinter as tk
