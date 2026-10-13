@@ -35,6 +35,10 @@ with no Python:
 import os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import i18n, extract_strings
+from i18n import tr
 BUNDLE = getattr(sys, "_MEIPASS", HERE)   # PyInstaller one-file build: the data files live in a temp dir
 
 
@@ -49,17 +53,17 @@ def run_isoext(img, fs):
 
 
 STEPS = [   # (key, group, label es, description)
-    ("files", "Archivos", "Archivos del disco (fs)", "file system of the disc image under OUT/fs"),
-    ("sprites", "Imagenes", "Sprites", "WPP sprites (OUT/sprites) + SPR frames (OUT/spr)"),
-    ("screens", "Imagenes", "Pantallas", "title, logos, menu atlases (OUT/screens)"),
-    ("vram", "Imagenes", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
-    ("rooms", "3D / Salas", "Salas PNG", "room backgrounds (OUT/rooms)"),
-    ("rooms3d", "3D / Salas", "Salas 3D (glb)", "room models as glTF (OUT/rooms3d)"),
-    ("banks", "Audio", "Bancos de sonido", "VAB samples (OUT/sound/bank)"),
-    ("music", "Audio", "Musica (MIDI)", "SEQ sequences (OUT/sound/music)"),
-    ("music_audio", "Audio", "Musica renderizada", "SEQ + bank rendered to audio (OUT/sound/music_audio)"),
-    ("movie_audio", "Audio", "Audio de peliculas", "XA tracks (OUT/sound/movie_audio)"),
-    ("videos", "Video", "Videos (AVI)", "AVI MJPEG+PCM (needs Pillow), mp4 if ffmpeg (OUT/video)"),
+    ("files", "files", "Archivos del disco (fs)", "file system of the disc image under OUT/fs"),
+    ("sprites", "images", "Sprites", "WPP sprites (OUT/sprites) + SPR frames (OUT/spr)"),
+    ("screens", "images", "Pantallas", "title, logos, menu atlases (OUT/screens)"),
+    ("vram", "images", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
+    ("rooms", "rooms", "Salas PNG", "room backgrounds (OUT/rooms)"),
+    ("rooms3d", "rooms", "Salas 3D (glb)", "room models as glTF (OUT/rooms3d)"),
+    ("banks", "audio", "Bancos de sonido", "VAB samples (OUT/sound/bank)"),
+    ("music", "audio", "Musica (MIDI)", "SEQ sequences (OUT/sound/music)"),
+    ("music_audio", "audio", "Musica renderizada", "SEQ + bank rendered to audio (OUT/sound/music_audio)"),
+    ("movie_audio", "audio", "Audio de peliculas", "XA tracks (OUT/sound/movie_audio)"),
+    ("videos", "video", "Videos (AVI)", "AVI MJPEG+PCM (needs Pillow), mp4 if ffmpeg (OUT/video)"),
 ]
 STEP_KEYS = [k for k, _, _, _ in STEPS]
 
@@ -80,7 +84,7 @@ class Extractor:
     def _setup(self):
         """fs dump (once) and the module environment (TOMBI_FS / TOMBI_IMG, area000.FS)."""
         if not os.path.isdir(os.path.join(self.fs, "AREA00")):
-            self.log("extracting the file system of %s ..." % self.img)
+            self.log(tr("ex.extractfs", self.img))
             run_isoext(self.img, self.fs)
         if not self._env:
             os.environ["TOMBI_FS"] = self.fs
@@ -93,7 +97,7 @@ class Extractor:
 
     def files(self):
         self._setup()
-        self.log("done: file system under %s" % self.fs)
+        self.log(tr("ex.donefs", self.fs))
 
     def sprites(self):
         self._setup()
@@ -109,11 +113,11 @@ class Extractor:
                 class Args: pass
                 a = Args(); a.file, a.out, a.clut, a.row, a.x0, a.auto = path, os.path.join(self.out, "sprites", area, f[:-4]), None, 0, 0, True
                 wpp.cmd_unpack(a); n += 1
-        self.log("done: %d sprite files under %s" % (n, os.path.join(self.out, "sprites")))
-        self.log("simulating the VRAM of every load list (SPR atlas cuts) ...")
+        self.log(tr("ex.donesprites", n, os.path.join(self.out, "sprites")))
+        self.log(tr("ex.simvram"))
         self._spr(self.out)
         st = self._stats
-        self.log("done: %d SPR tables, %d frames / %d parts (%d identical tables shared) under %s" % (
+        self.log(tr("ex.donespr",
             st["tables"], st["frames_total"], st["parts_total"], st["tables_deduplicated"], os.path.join(self.out, "spr")))
 
     def _spr(self, dst):
@@ -127,30 +131,30 @@ class Extractor:
         self._setup()
         import screens
         n = screens.export_screens(os.path.join(self.out, "screens"))
-        self.log("static full screens: %d under %s" % (n, os.path.join(self.out, "screens")))
+        self.log(tr("ex.screens", n, os.path.join(self.out, "screens")))
 
     def vram(self):
         self._setup()
         import vram, tempfile, shutil
         if self._usage is None:   # page colouring needs the palettes the SPR parts use: replay the SPR cuts into a scratch dir
-            self.log("computing SPR palette usage (scratch run, not kept) ...")
+            self.log(tr("ex.usage"))
             tmp = tempfile.mkdtemp(prefix="tombi_spr_")
             try: self._spr(tmp)
             finally: shutil.rmtree(tmp, ignore_errors=True)
         vram.export_screens(self.out, self._usage, self._stats, log=lambda m: None)
-        self.log("done: VRAM snapshots and pages under %s" % os.path.join(self.out, "vram"))
+        self.log(tr("ex.donevram", os.path.join(self.out, "vram")))
 
     def rooms(self):
         self._setup()
         import room
-        self.log("rendering the room backgrounds ...")
-        self.log("done: %d rooms under %s" % (room.export_rooms(os.path.join(self.out, "rooms"), log=lambda m: None), os.path.join(self.out, "rooms")))
+        self.log(tr("ex.rooms"))
+        self.log(tr("ex.donerooms", room.export_rooms(os.path.join(self.out, "rooms"), log=lambda m: None), os.path.join(self.out, "rooms")))
 
     def rooms3d(self):
         self._setup()
         import room
-        self.log("exporting the room models as 3D (glTF .glb) ...")
-        self.log("done: %d models under %s" % (room.export_glb(os.path.join(self.out, "rooms3d"), log=lambda m: None), os.path.join(self.out, "rooms3d")))
+        self.log(tr("ex.rooms3d"))
+        self.log(tr("ex.donerooms3d", room.export_glb(os.path.join(self.out, "rooms3d"), log=lambda m: None), os.path.join(self.out, "rooms3d")))
 
     def _audio(self, **kw):
         self._setup()
@@ -167,14 +171,14 @@ class Extractor:
         self._setup()
         import importlib
         strmod = importlib.import_module("str")
-        self.log("video: AVI (MJPEG + PCM, ~0.07 s/frame, ~10 min for all 30 movies) of every movie and, if ffmpeg is in PATH, mp4 ...")
+        self.log(tr("ex.video"))
         strmod.export_all(self.img, self.out, log=self.log)
         if self.video_frames:
             for p, (lba, size) in sorted(strmod.str_files(self.img).items()):
                 name = os.path.basename(p)[:-4]; d = os.path.join(self.out, "video", name + "_frames"); os.makedirs(d, exist_ok=True)
                 for num, w, h, bs in strmod.frames(self.img, lba, size):
                     strmod.write_png(os.path.join(d, "frame_%05d.png" % num), w, h, strmod.decode_frame(bs, w, h))
-                self.log("video: all frames of %s under %s" % (name, d))
+                self.log(tr("ex.videoframes", name, d))
 
     def run(self, steps=None):
         for k in (steps or STEP_KEYS):
@@ -188,12 +192,11 @@ def extract(img, out, log=print, only=None, video_frames=False, audio_format="wa
 
 
 def gui():
-    """Small window (tkinter, standard library): pick the disc image and the output folder, tick what to extract."""
+    """Small window (tkinter, standard library): pick the disc image and the output folder, tick what to extract.  UI language: tools/i18n.py."""
     import threading, queue
     import tkinter as tk
     from tkinter import filedialog, messagebox, ttk
     root = tk.Tk()
-    root.title("Tombi! asset extractor")
     for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons")):
         try:
             if os.name == "nt" and os.path.isfile(os.path.join(d, "assets.ico")):
@@ -207,61 +210,69 @@ def gui():
             pass
     root.resizable(True, True)
     img_v, out_v = tk.StringVar(), tk.StringVar()
-    frm = ttk.Frame(root, padding=12); frm.grid(sticky="nsew")
-    root.columnconfigure(0, weight=1); root.rowconfigure(0, weight=1)
-    frm.columnconfigure(1, weight=1); frm.rowconfigure(5, weight=1)
-    ttk.Label(frm, text="Imagen de disco (.bin):").grid(row=0, column=0, sticky="w", pady=3)
-    ttk.Entry(frm, textvariable=img_v, width=60).grid(row=0, column=1, sticky="ew", padx=6)
-    ttk.Button(frm, text="Buscar...", command=lambda: img_v.set(filedialog.askopenfilename(
-        title="Tombi! disc image", filetypes=[("Disc image", "*.bin *.img *.iso"), ("All files", "*.*")]) or img_v.get())).grid(row=0, column=2)
-    ttk.Label(frm, text="Carpeta de salida:").grid(row=1, column=0, sticky="w", pady=3)
-    ttk.Entry(frm, textvariable=out_v, width=60).grid(row=1, column=1, sticky="ew", padx=6)
-    ttk.Button(frm, text="Buscar...", command=lambda: out_v.set(filedialog.askdirectory(title="Output folder") or out_v.get())).grid(row=1, column=2)
-
-    # grouped checkboxes with select all / none per group
-    boxes = ttk.Frame(frm); boxes.grid(row=2, column=0, columnspan=3, sticky="ew", pady=6)
-    vars_ = {}
+    frames_v, fmt_v = tk.BooleanVar(value=False), tk.StringVar(value="WAV")
+    vars_ = {k: tk.BooleanVar(value=True) for k in STEP_KEYS}
+    q = queue.Queue()
+    st = {"busy": False, "log": [], "btns": []}
     groups = []
     for k, g, label, _ in STEPS:
         if g not in groups: groups.append(g)
-    for gi, g in enumerate(groups):
-        lf = ttk.LabelFrame(boxes, text=g, padding=6); lf.grid(row=0, column=gi, sticky="nsew", padx=4)
-        keys = [k for k, gg, _, _ in STEPS if gg == g]
-        for k, gg, label, _ in STEPS:
-            if gg != g: continue
-            vars_[k] = tk.BooleanVar(value=True)
-            ttk.Checkbutton(lf, text=label, variable=vars_[k]).pack(anchor="w")
-        row = ttk.Frame(lf); row.pack(anchor="w", pady=(4, 0))
-        ttk.Button(row, text="Todo", width=6, command=lambda ks=keys: [vars_[k].set(True) for k in ks]).pack(side="left")
-        ttk.Button(row, text="Nada", width=6, command=lambda ks=keys: [vars_[k].set(False) for k in ks]).pack(side="left", padx=2)
-    frames_v = tk.BooleanVar(value=False)
-    ttk.Checkbutton(frm, text="Videos: volcar tambien todos los fotogramas PNG (lento, mucho espacio)", variable=frames_v).grid(row=3, column=0, columnspan=3, sticky="w")
-
-    fmt_v = tk.StringVar(value="WAV")
-    ff = ttk.Frame(frm); ff.grid(row=3, column=2, sticky="e")
-    ttk.Label(ff, text="Formato de audio:").pack(side="left")
-    ttk.Combobox(ff, textvariable=fmt_v, values=("WAV", "MP3"), width=6, state="readonly").pack(side="left", padx=4)
-
-    bf = ttk.Frame(frm); bf.grid(row=4, column=0, columnspan=3, pady=8)
-    btn_sel = ttk.Button(bf, text="Extraer seleccionado"); btn_sel.pack(side="left", padx=6)
-    btn_all = ttk.Button(bf, text="Extraer todo"); btn_all.pack(side="left", padx=6)
-    log = tk.Text(frm, height=14, width=90, state="disabled", wrap="word")
-    log.grid(row=5, column=0, columnspan=3, sticky="nsew")
-    sb = ttk.Scrollbar(frm, command=log.yview); sb.grid(row=5, column=3, sticky="ns"); log["yscrollcommand"] = sb.set
-    q = queue.Queue()
 
     def put(msg):
         q.put(str(msg))
+
+    def build():
+        for w in root.winfo_children(): w.destroy()
+        root.title(tr("ex.title"))
+        frm = ttk.Frame(root, padding=12); frm.grid(sticky="nsew")
+        root.columnconfigure(0, weight=1); root.rowconfigure(0, weight=1)
+        frm.columnconfigure(1, weight=1); frm.rowconfigure(6, weight=1)
+        i18n.selector(frm, build).grid(row=0, column=0, columnspan=3, sticky="e")
+        ttk.Label(frm, text=tr("ex.image")).grid(row=1, column=0, sticky="w", pady=3)
+        ttk.Entry(frm, textvariable=img_v, width=60).grid(row=1, column=1, sticky="ew", padx=6)
+        ttk.Button(frm, text=tr("ex.browse"), command=lambda: img_v.set(filedialog.askopenfilename(
+            title=tr("ex.imagedlg"), filetypes=[(tr("ex.discimg"), "*.bin *.img *.iso"), (tr("ex.allfiles"), "*.*")]) or img_v.get())).grid(row=1, column=2)
+        ttk.Label(frm, text=tr("ex.outdir")).grid(row=2, column=0, sticky="w", pady=3)
+        ttk.Entry(frm, textvariable=out_v, width=60).grid(row=2, column=1, sticky="ew", padx=6)
+        ttk.Button(frm, text=tr("ex.browse"), command=lambda: out_v.set(filedialog.askdirectory(title=tr("ex.outdlg")) or out_v.get())).grid(row=2, column=2)
+        # grouped checkboxes with select all / none per group
+        boxes = ttk.Frame(frm); boxes.grid(row=3, column=0, columnspan=3, sticky="ew", pady=6)
+        for gi, g in enumerate(groups):
+            lf = ttk.LabelFrame(boxes, text=tr("sg." + g), padding=6); lf.grid(row=0, column=gi, sticky="nsew", padx=4)
+            keys = [k for k, gg, _, _ in STEPS if gg == g]
+            for k in keys:
+                ttk.Checkbutton(lf, text=tr("st." + k), variable=vars_[k]).pack(anchor="w")
+            row = ttk.Frame(lf); row.pack(anchor="w", pady=(4, 0))
+            ttk.Button(row, text=tr("ex.all"), width=6, command=lambda ks=keys: [vars_[k].set(True) for k in ks]).pack(side="left")
+            ttk.Button(row, text=tr("ex.none"), width=6, command=lambda ks=keys: [vars_[k].set(False) for k in ks]).pack(side="left", padx=2)
+        ttk.Checkbutton(frm, text=tr("ex.frames"), variable=frames_v).grid(row=4, column=0, columnspan=2, sticky="w")
+        ff = ttk.Frame(frm); ff.grid(row=4, column=2, sticky="e")
+        ttk.Label(ff, text=tr("ex.audiofmt")).pack(side="left")
+        ttk.Combobox(ff, textvariable=fmt_v, values=("WAV", "MP3"), width=6, state="readonly").pack(side="left", padx=4)
+        bf = ttk.Frame(frm); bf.grid(row=5, column=0, columnspan=3, pady=8)
+        btn_sel = ttk.Button(bf, text=tr("ex.extractsel"), command=lambda: start(False)); btn_sel.pack(side="left", padx=6)
+        btn_all = ttk.Button(bf, text=tr("ex.extractall"), command=lambda: start(True)); btn_all.pack(side="left", padx=6)
+        st["btns"] = [btn_sel, btn_all]
+        for b in st["btns"]: b.configure(state="disabled" if st["busy"] else "normal")
+        log = tk.Text(frm, height=14, width=90, state="disabled", wrap="word")
+        log.grid(row=6, column=0, columnspan=3, sticky="nsew")
+        sb = ttk.Scrollbar(frm, command=log.yview); sb.grid(row=6, column=3, sticky="ns"); log["yscrollcommand"] = sb.set
+        st["logw"] = log
+        log.configure(state="normal"); log.insert("end", "".join(m + "\n" for m in st["log"])); log.see("end"); log.configure(state="disabled")
 
     def pump():
         try:
             while True:
                 m = q.get_nowait()
-                log.configure(state="normal"); log.insert("end", m + "\n"); log.see("end"); log.configure(state="disabled")
-                if m.startswith("__END__"):
-                    btn_sel.configure(state="normal"); btn_all.configure(state="normal")
-                    if m != "__END__ok": messagebox.showerror("Extraction failed", m[8:])
-                    else: messagebox.showinfo("Listo", "Assets en\n" + out_v.get())
+                if not m.startswith("__END__"):
+                    st["log"].append(m)
+                    log = st["logw"]
+                    log.configure(state="normal"); log.insert("end", m + "\n"); log.see("end"); log.configure(state="disabled")
+                else:
+                    st["busy"] = False
+                    for b in st["btns"]: b.configure(state="normal")
+                    if m != "__END__ok": messagebox.showerror(tr("ex.failed"), m[8:])
+                    else: messagebox.showinfo(tr("ex.done"), tr("ex.doneat", out_v.get()))
         except queue.Empty:
             pass
         root.after(100, pump)
@@ -270,7 +281,7 @@ def gui():
         try:
             ex = Extractor(img, out, log=put, video_frames=vf, audio_format=af)
             for i, k in enumerate(steps, 1):
-                put("[%d/%d] %s" % (i, len(steps), next(l for kk, _, l, _ in STEPS if kk == k)))
+                put("[%d/%d] %s" % (i, len(steps), tr("st." + k)))
                 getattr(ex, k)()
             put("__END__ok")
         except Exception as e:
@@ -279,15 +290,15 @@ def gui():
     def start(everything):
         img, out = img_v.get().strip(), out_v.get().strip()
         steps = STEP_KEYS if everything else [k for k in STEP_KEYS if vars_[k].get()]
-        if not os.path.isfile(img): messagebox.showwarning("Falta", "Elige la imagen de disco (.bin)."); return
-        if not out: messagebox.showwarning("Falta", "Elige una carpeta de salida."); return
-        if not steps: messagebox.showwarning("Falta", "Marca al menos una casilla."); return
-        btn_sel.configure(state="disabled"); btn_all.configure(state="disabled")
-        put("Extrayendo %s -> %s: %s" % (img, out, ", ".join(steps)))
+        if not os.path.isfile(img): messagebox.showwarning(tr("ex.missing"), tr("ex.pickimage")); return
+        if not out: messagebox.showwarning(tr("ex.missing"), tr("ex.pickout")); return
+        if not steps: messagebox.showwarning(tr("ex.missing"), tr("ex.pickstep")); return
+        st["busy"] = True
+        for b in st["btns"]: b.configure(state="disabled")
+        put(tr("ex.extracting", img, out, ", ".join(steps)))
         threading.Thread(target=work, args=(img, out, steps, frames_v.get(), fmt_v.get().lower()), daemon=True).start()
 
-    btn_sel.configure(command=lambda: start(False))
-    btn_all.configure(command=lambda: start(True))
+    build()
     root.after(100, pump)
     root.mainloop()
 

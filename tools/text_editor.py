@@ -7,6 +7,9 @@ guarda el proyecto y genera una ISO nueva. La lógica está en text_core.py / wf
 import base64, io, json, os, re, sys, threading, traceback
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import i18n
+from i18n import tr
+import text_strings
 import text_core as C
 import wfm_py as W
 
@@ -15,20 +18,6 @@ try:
     from tkinter import filedialog, messagebox, ttk
 except ImportError:      # pragma: no cover
     sys.exit("Falta tkinter (en Linux: apt install python3-tk).")
-
-AYUDA = """Etiquetas del texto (los saltos de línea reales se ignoran, solo cuentan las etiquetas):
-
-{NL}  salto de línea            {CLEAR}  nueva página (limpia la caja)
-{WAIT}  espera un botón         {PAUSE n}  pausa de n fotogramas
-{BOX w h}  tamaño de la caja en píxeles (ancho = línea más larga + 16, alto = 16 + 13 por línea)
-{COLOR n}  color   {POSE n}  pose de Tombi   {MOVE dx dy}  mueve la caja   {VOICE tono cola}
-{HALT} {CHOICE} {F4}  códigos de control   {C052}...  palabra desconocida (se conserva tal cual)
-{G:n}  glifo n del archivo sin carácter asociado (se conserva tal cual)
-
-Solo se pueden escribir los caracteres que existen en las fuentes del juego (letras, cifras, á é í ó ú ñ ¿ ¡ y poco más).
-Si falta uno, se toma prestado de otro archivo del disco; si no existe en ninguno, el editor lo avisa y no genera el disco.
-Rojo en la vista previa: una línea no cabe en la caja, sobran líneas o hay más de 128 caracteres en una página."""
-
 
 def set_icon(root, name):
     """Window/taskbar icon: the bundled .ico on Windows, a PNG (iconphoto) elsewhere or as fallback."""
@@ -53,7 +42,7 @@ def set_icon(root, name):
 class App:
     def __init__(self, root, path=None):
         self.root = root
-        root.title("Tombi! – editor de textos")
+        root.title(tr("te.title"))
         root.geometry("1280x800")
         self.proj = None
         self.cur = None            # (path, idx)
@@ -66,6 +55,7 @@ class App:
         self.lang_vars = {}
         self.only_edited = tk.BooleanVar(value=False)
         self.query = tk.StringVar()
+        self.status_text = tr("te.nodisc.status")
         set_icon(root, "text")
         self._build()
         root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -77,10 +67,10 @@ class App:
         bar = ttk.Frame(self.root, padding=4)
         bar.pack(fill="x")
         self.buttons = []
-        for item in (("Abrir disco…", self.ask_open_image), ("Abrir carpeta…", self.ask_open_folder), None,
-                          ("Guardar proyecto", self.save_project), ("Cargar proyecto", self.load_project), None,
-                          ("Exportar todo…", self.export_all), ("Importar…", self.import_any), None,
-                          ("Generar ISO", self.generate), ("Ayuda", lambda: messagebox.showinfo("Ayuda", AYUDA))):
+        for item in ((tr("te.opendisc"), self.ask_open_image), (tr("te.openfolder"), self.ask_open_folder), None,
+                          (tr("te.saveproj"), self.save_project), (tr("te.loadproj"), self.load_project), None,
+                          (tr("te.exportall"), self.export_all), (tr("te.import"), self.import_any), None,
+                          (tr("te.iso"), self.generate), (tr("te.help"), lambda: messagebox.showinfo(tr("te.help"), tr("te.helptext")))):
             if item is None:
                 ttk.Separator(bar, orient="vertical").pack(side="left", fill="y", padx=6)
                 continue
@@ -88,7 +78,8 @@ class App:
             b = ttk.Button(bar, text=text, command=cmd)
             b.pack(side="left", padx=2)
             self.buttons.append(b)
-        self.status = tk.StringVar(value="Abre la imagen del disco (Tombi.bin) o la carpeta con los archivos extraídos.")
+        i18n.selector(bar, self.rebuild).pack(side="right")
+        self.status = tk.StringVar(value=self.status_text)
         ttk.Label(self.root, textvariable=self.status, anchor="w", relief="sunken", padding=3).pack(side="bottom", fill="x")
 
         pw = ttk.PanedWindow(self.root, orient="horizontal")
@@ -97,14 +88,14 @@ class App:
         pw.add(left, weight=1)
         sf = ttk.Frame(left, padding=(4, 4, 4, 0))
         sf.pack(fill="x")
-        ttk.Label(sf, text="Buscar:").pack(side="left")
+        ttk.Label(sf, text=tr("te.search")).pack(side="left")
         e = ttk.Entry(sf, textvariable=self.query)
         e.pack(side="left", fill="x", expand=True, padx=4)
         self.query.trace_add("write", lambda *_: self.schedule_tree())
         of = ttk.Frame(left, padding=(4, 0))
         of.pack(fill="x")
-        ttk.Checkbutton(of, text="Solo modificados", variable=self.only_edited, command=self.fill_tree).pack(side="left")
-        self.langf = ttk.LabelFrame(left, text="Idiomas", padding=(4, 0))
+        ttk.Checkbutton(of, text=tr("te.onlyedited"), variable=self.only_edited, command=self.fill_tree).pack(side="left")
+        self.langf = ttk.LabelFrame(left, text=tr("te.langs"), padding=(4, 0))
         self.langf.pack(fill="x", padx=4)
         tf = ttk.Frame(left)
         tf.pack(fill="both", expand=True, padx=4, pady=4)
@@ -129,8 +120,8 @@ class App:
         hf.pack(fill="x")
         self.title = tk.StringVar(value="")
         ttk.Label(hf, textvariable=self.title, font=("TkDefaultFont", 10, "bold")).pack(side="left")
-        ttk.Button(hf, text="Restaurar original", command=self.restore).pack(side="right", padx=2)
-        ttk.Button(hf, text="Ajustar caja", command=self.fit_box).pack(side="right", padx=2)
+        ttk.Button(hf, text=tr("te.restore"), command=self.restore).pack(side="right", padx=2)
+        ttk.Button(hf, text=tr("te.fitbox"), command=self.fit_box).pack(side="right", padx=2)
         xf = ttk.Frame(top)
         xf.pack(fill="both", expand=True, padx=4)
         self.editor = tk.Text(xf, wrap="word", undo=True, height=6, width=40, font=("Consolas", 12), state="disabled")
@@ -146,7 +137,7 @@ class App:
         bottom.grid(row=1, column=0, sticky="nsew")
         pf = ttk.Frame(bottom, padding=(4, 2))
         pf.pack(fill="x")
-        ttk.Label(pf, text="Vista previa (tamaño nativo ×):").pack(side="left")
+        ttk.Label(pf, text=tr("te.preview")).pack(side="left")
         for n in (1, 2, 3):
             ttk.Radiobutton(pf, text="×%d" % n, value=n, variable=self.scale, command=self.refresh_preview).pack(side="left", padx=3)
         self.info = tk.StringVar()
@@ -172,16 +163,32 @@ class App:
             b.state(["disabled"] if busy else ["!disabled"])
 
     def say(self, msg):
+        self.status_text = msg
         self.status.set(msg)
+
+    def rebuild(self):
+        """Interface language changed: rebuild every widget in the new language and restore the state."""
+        text = self.editor.get("1.0", "end-1c") if self.cur else ""
+        for w in self.root.winfo_children():
+            w.destroy()
+        self._build()
+        self.root.title(tr("te.title"))
+        if self.proj:
+            self.build_langs()
+            self.fill_tree()
+            if self.cur:
+                self.title.set("%s  #%s" % self.cur)
+                self.set_editor(text, True)
+                self.refresh_preview()
 
     # ---- abrir
     def ask_open_image(self):
-        p = filedialog.askopenfilename(title="Imagen del disco", filetypes=[("Imagen de disco", "*.bin *.iso *.img"), ("Todos", "*.*")])
+        p = filedialog.askopenfilename(title=tr("te.discimg"), filetypes=[(tr("te.discimg"), "*.bin *.iso *.img"), (tr("te.all"), "*.*")])
         if p:
             self.open_path(p)
 
     def ask_open_folder(self):
-        p = filedialog.askdirectory(title="Carpeta con los archivos del disco (la que contiene AREA00…)")
+        p = filedialog.askdirectory(title=tr("te.folderdlg"))
         if p:
             self.open_path(p)
 
@@ -189,20 +196,20 @@ class App:
         if not self.confirm_discard():
             return
         try:
-            self.say("Leyendo %s…" % path)
+            self.say(tr("te.reading", path))
             self.root.update_idletasks()
             src = C.Source(path)
             self.proj = C.Project(src)
         except Exception as e:
-            messagebox.showerror("No se puede abrir", str(e))
-            self.say("Error al abrir.")
+            messagebox.showerror(tr("te.cantopen"), str(e))
+            self.say(tr("te.openerr"))
             return
         self.cur = None
         self.dirty = False
         self.set_editor("", False)
         self.build_langs()
         self.fill_tree()
-        self.say("%s: %d archivos WFM. Elige un diálogo en la lista." % (os.path.basename(path), len(src.files)))
+        self.say(tr("te.opened", os.path.basename(path), len(src.files)))
 
     def build_langs(self):
         """One checkbox per language found on the disc (+ Todos / Ninguno); the choice lives in proj.langs."""
@@ -215,11 +222,11 @@ class App:
         for k, l in enumerate(langs):
             v = tk.BooleanVar(value=l in self.proj.langs)
             self.lang_vars[l] = v
-            ttk.Checkbutton(self.langf, text=C.LANG_NAMES.get(l, l), variable=v, command=self.on_langs).grid(
+            ttk.Checkbutton(self.langf, text=tr("lang." + l) if ("lang." + l) in i18n.CAT["es"] else l, variable=v, command=self.on_langs).grid(
                 row=k // 3, column=k % 3, sticky="w", padx=2)
         r = (len(langs) + 2) // 3
-        ttk.Button(self.langf, text="Todos", width=8, command=lambda: self.set_langs(True)).grid(row=r, column=0, pady=2)
-        ttk.Button(self.langf, text="Ninguno", width=8, command=lambda: self.set_langs(False)).grid(row=r, column=1, pady=2)
+        ttk.Button(self.langf, text=tr("te.allbtn"), width=8, command=lambda: self.set_langs(True)).grid(row=r, column=0, pady=2)
+        ttk.Button(self.langf, text=tr("te.nonebtn"), width=8, command=lambda: self.set_langs(False)).grid(row=r, column=1, pady=2)
 
     def set_langs(self, on):
         for v in self.lang_vars.values():
@@ -239,7 +246,7 @@ class App:
 
     def confirm_discard(self):
         if self.proj and self.dirty and self.proj.n_edits():
-            r = messagebox.askyesnocancel("Cambios sin guardar", "Hay cambios sin guardar en el proyecto. ¿Guardarlos ahora?")
+            r = messagebox.askyesnocancel(tr("te.unsaved"), tr("te.unsavedq"))
             if r is None:
                 return False
             if r:
@@ -248,7 +255,7 @@ class App:
 
     def on_close(self):
         if self.busy:
-            if not messagebox.askyesno("Trabajando", "Se está generando el disco. ¿Salir de todas formas?"):
+            if not messagebox.askyesno(tr("te.working"), tr("te.quitbusy")):
                 return
         elif not self.confirm_discard():
             return
@@ -270,7 +277,7 @@ class App:
             res = self.proj.search(q, only)
             for n, i in res[:1500]:
                 self.tree.insert("", "end", iid="d|%s|%d" % (n, i), text=self.label(n, i), tags=self.tags(n, i))
-            self.say("%d resultado(s)%s" % (len(res), " (se muestran 1500)" if len(res) > 1500 else ""))
+            self.say(tr("te.results", len(res), tr("te.shown1500") if len(res) > 1500 else ""))
             return
         areas = {}
         for n in self.proj.src.names():
@@ -283,7 +290,7 @@ class App:
                 self.tree.insert(f, "end", iid="x|" + n, text="…")
 
     def label(self, n, i):
-        t = C.plain(self.proj.text(n, i), 50) or "(vacío)"
+        t = C.plain(self.proj.text(n, i), 50) or tr("te.empty")
         base = "#%d  %s" % (i, t)
         return base if "|" in self.tree.focus() or not (self.query.get().strip() or self.only_edited.get()) \
             else "%s #%d  %s" % (os.path.basename(n)[:-4], i, t)
@@ -302,10 +309,10 @@ class App:
             try:
                 cnt = self.proj.count(n)
             except Exception as e:
-                messagebox.showerror("Error", str(e))
+                messagebox.showerror(tr("error"), str(e))
                 return
             for i in range(cnt):
-                self.tree.insert(iid, "end", iid="d|%s|%d" % (n, i), text="#%d  %s" % (i, C.plain(self.proj.text(n, i), 50) or "(vacío)"),
+                self.tree.insert(iid, "end", iid="d|%s|%d" % (n, i), text="#%d  %s" % (i, C.plain(self.proj.text(n, i), 50) or tr("te.empty")),
                                  tags=self.tags(n, i))
 
     def on_select(self, _):
@@ -380,7 +387,7 @@ class App:
         try:
             words, wc = self.proj.words(n, i, text)
         except W.WfmError as e:
-            messagebox.showerror("Texto no válido", str(e))
+            messagebox.showerror(tr("te.badtext"), str(e))
             return
         w, h = text_preview.fit_box(wc, words)
         tag = "{BOX %d %d}" % (w, h)
@@ -408,7 +415,7 @@ class App:
             self.info.set("")
             return
         except Exception as e:
-            self.show_warnings([("err", "Error interno: %s" % e)])
+            self.show_warnings([("err", tr("te.internal", e))])
             return
         im, warns = text_preview.render(wc, words, scale=self.scale.get())
         buf = io.BytesIO()
@@ -420,11 +427,11 @@ class App:
         items = [("info" if w.startswith("i:") else "err", w[2:] if w.startswith("i:") else w) for w in warns]
         base = self.proj.wfm(n)
         if len(wc.glyphs) > len(base.glyphs):
-            items.append(("info", "Se añadirán %d glifo(s) tomados de otros archivos." % (len(wc.glyphs) - len(base.glyphs))))
+            items.append(("info", tr("te.glyphs", len(wc.glyphs) - len(base.glyphs))))
         if not any(k == "err" for k, _ in items):
-            items.insert(0, ("ok", "Sin avisos."))
+            items.insert(0, ("ok", tr("te.nowarn")))
         self.show_warnings(items)
-        self.info.set("%d palabras (%d bytes), fuente %dpx" % (len(words), 2 * len(words) + 2, base.dialogues[i].font[0]))
+        self.info.set(tr("te.wordsinfo", len(words), 2 * len(words) + 2, base.dialogues[i].font[0]))
 
     def show_warnings(self, items):
         self.warn.configure(state="normal")
@@ -436,60 +443,60 @@ class App:
     # ---- proyecto
     def need_proj(self):
         if not self.proj:
-            messagebox.showinfo("Sin disco", "Abre primero el disco o la carpeta.")
+            messagebox.showinfo(tr("te.nodisc"), tr("te.opendiscfirst"))
             return False
         return True
 
     def save_project(self):
         if not self.need_proj():
             return False
-        p = filedialog.asksaveasfilename(title="Guardar proyecto", defaultextension=".json", initialfile="tombi-textos.json",
-                                         filetypes=[("Proyecto JSON", "*.json")])
+        p = filedialog.asksaveasfilename(title=tr("te.saveproj"), defaultextension=".json", initialfile="tombi-textos.json",
+                                         filetypes=[(tr("te.projjson"), "*.json")])
         if not p:
             return False
         json.dump(self.proj.to_json(), open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         self.dirty = False
-        self.say("Proyecto guardado: %s (%d cambios)" % (p, self.proj.n_edits()))
+        self.say(tr("te.projsaved", p, self.proj.n_edits()))
         return True
 
     def load_project(self):
         if not self.need_proj():
             return
-        p = filedialog.askopenfilename(title="Cargar proyecto", filetypes=[("Proyecto JSON", "*.json"), ("Todos", "*.*")])
+        p = filedialog.askopenfilename(title=tr("te.loadproj"), filetypes=[(tr("te.projjson"), "*.json"), (tr("te.all"), "*.*")])
         if p:
-            self.apply_data(lambda: self.proj.load_edits(json.load(open(p, encoding="utf-8")), replace=True), "Proyecto cargado")
+            self.apply_data(lambda: self.proj.load_edits(json.load(open(p, encoding="utf-8")), replace=True), tr("te.projloaded"))
 
     def export_all(self):
         if not self.need_proj():
             return
-        p = filedialog.asksaveasfilename(title="Exportar todo", defaultextension=".txt", initialfile="tombi-textos.txt",
-                                         filetypes=[("Texto", "*.txt"), ("JSON", "*.json")])
+        p = filedialog.asksaveasfilename(title=tr("te.exportall"), defaultextension=".txt", initialfile="tombi-textos.txt",
+                                         filetypes=[(tr("te.text"), "*.txt"), ("JSON", "*.json")])
         if not p:
             return
-        self.say("Exportando…")
+        self.say(tr("te.exporting"))
         self.root.update_idletasks()
         if p.lower().endswith(".json"):
             json.dump(self.proj.export_json(), open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         else:
             open(p, "w", encoding="utf-8").write(self.proj.export_txt())
-        self.say("Exportado a %s" % p)
+        self.say(tr("te.exported", p))
 
     def import_any(self):
         if not self.need_proj():
             return
-        p = filedialog.askopenfilename(title="Importar", filetypes=[("Texto o JSON", "*.txt *.json"), ("Todos", "*.*")])
+        p = filedialog.askopenfilename(title=tr("te.import"), filetypes=[(tr("te.textjson"), "*.txt *.json"), (tr("te.all"), "*.*")])
         if not p:
             return
         if p.lower().endswith(".json"):
-            self.apply_data(lambda: self.proj.load_edits(json.load(open(p, encoding="utf-8")), replace=False), "Importado")
+            self.apply_data(lambda: self.proj.load_edits(json.load(open(p, encoding="utf-8")), replace=False), tr("te.imported"))
         else:
-            self.apply_data(lambda: self.proj.import_txt(open(p, encoding="utf-8").read()), "Importado")
+            self.apply_data(lambda: self.proj.import_txt(open(p, encoding="utf-8").read()), tr("te.imported"))
 
     def apply_data(self, fn, what):
         try:
             applied, problems = fn()
         except Exception as e:
-            messagebox.showerror("Error", "%s" % e)
+            messagebox.showerror(tr("error"), "%s" % e)
             return
         self.dirty = True
         self.build_langs()
@@ -500,28 +507,28 @@ class App:
         if self.cur:
             self.set_editor(self.proj.text(*self.cur), True)
             self.refresh_preview()
-        self.say("%s: %d diálogo(s) cambiados." % (what, applied))
+        self.say(tr("te.applied", what, applied))
         if problems:
-            messagebox.showwarning("Avisos", "\n".join(problems[:25]) + ("\n…" if len(problems) > 25 else ""))
+            messagebox.showwarning(tr("te.warnings"), "\n".join(problems[:25]) + ("\n…" if len(problems) > 25 else ""))
 
     # ---- ISO
     def generate(self):
         if not self.need_proj():
             return
         if not self.proj.n_edits():
-            messagebox.showinfo("Sin cambios", "No hay diálogos modificados.")
+            messagebox.showinfo(tr("te.nochanges"), tr("te.nodialogues"))
             return
         files, errors = self.proj.encode_edited()
         if errors:
-            messagebox.showerror("No se puede generar", "Corrige estos textos:\n\n" + "\n".join(errors[:15]))
+            messagebox.showerror(tr("te.cantgen"), tr("te.fixtexts") + "\n\n" + "\n".join(errors[:15]))
             return
-        out = filedialog.asksaveasfilename(title="Guardar la ISO nueva como", defaultextension=".bin", initialfile="Tombi-ES.bin",
-                                           filetypes=[("Imagen de disco", "*.bin")])
+        out = filedialog.asksaveasfilename(title=tr("te.saveiso"), defaultextension=".bin", initialfile="Tombi-ES.bin",
+                                           filetypes=[(tr("te.discimg"), "*.bin")])
         if not out:
             return
         work = os.path.join(os.path.dirname(os.path.abspath(out)), "tombi-text-trabajo")
         self.lock(True)
-        self.say("Generando la ISO (puede tardar varios minutos; necesita ~1,5 GB libres)…")
+        self.say(tr("te.generating"))
         res = {}
 
         def job():
@@ -539,18 +546,14 @@ class App:
         def done():
             self.lock(False)
             if "err" in res:
-                self.say("Error al generar la ISO.")
-                messagebox.showerror("Error", res["err"])
+                self.say(tr("te.isofail"))
+                messagebox.showerror(tr("error"), res["err"])
             elif "dir" in res:
-                self.say("Archivos modificados escritos en %s" % res["dir"])
-                messagebox.showinfo("Archivos modificados", (
-                    "No se pudo montar la ISO (falta mkpsxiso o solo se abrió una carpeta).\n\nSe escribieron %d archivo(s) en:\n%s\n\n"
-                    "Cópialos sobre la carpeta extraída del disco y reconstruye con mkpsxiso: "
-                    "python tools/mkdisc.py build --relayout (ver README del repositorio).") % (len(res["files"]), res["dir"]))
+                self.say(tr("te.writtenin", res["dir"]))
+                messagebox.showinfo(tr("te.modfiles"), tr("te.fallback", len(res["files"]), res["dir"]))
             else:
-                self.say("ISO generada: %s" % out)
-                messagebox.showinfo("Listo", "ISO generada:\n%s\n\nArchivos cambiados: %s\n\nSe puede borrar la carpeta de trabajo:\n%s"
-                                    % (out, ", ".join(res["files"]), work))
+                self.say(tr("te.isodone", out))
+                messagebox.showinfo(tr("te.done"), tr("te.isook", out, ", ".join(res["files"]), work))
         threading.Thread(target=job, daemon=True).start()
 
 

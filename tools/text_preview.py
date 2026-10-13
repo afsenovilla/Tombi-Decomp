@@ -10,6 +10,9 @@ per message slot (MESSAGE_GLYPHS[][128]). Palette: an approximation for the 8/16
 (the real CLUTs are chosen at run time by the glyph clut field).
 """
 import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import i18n, text_strings
+from i18n import tr
 
 from PIL import Image, ImageDraw
 
@@ -96,7 +99,7 @@ def render(wfm, words, font=None, scale=2):
     boxed = box is not None
     fit_w, fit_h = fit_box(wfm, words)
     if not boxed:
-        warnings.append("Sin {BOX w h}: texto libre (menús, títulos); sin comprobación de caja.")
+        warnings.append(tr("tp.nobox"))
     bw, bh = box if boxed else (None, None)
     surfaces = []
     for pn, p in enumerate(pages, 1):
@@ -112,16 +115,14 @@ def render(wfm, words, font=None, scale=2):
         for i, l in enumerate(lines):
             lw = p.width(i)
             if boxed and lw > bw - 2 * MARGIN:
-                warnings.append("Página %d, línea %d: %d px de ancho; la caja admite %d (sobran %d)."
-                                % (pn, i + 1, lw, bw - 2 * MARGIN, lw - (bw - 2 * MARGIN)))
+                warnings.append(tr("tp.wide", pn, i + 1, lw, bw - 2 * MARGIN, lw - (bw - 2 * MARGIN)))
                 bad = True
                 over_px.append(i)
         if boxed and len(lines) > (bh - 2 * MARGIN) // LINE_STEP:
-            warnings.append("Página %d: %d líneas; la caja de %d px de alto admite %d."
-                            % (pn, len(lines), bh, (bh - 2 * MARGIN) // LINE_STEP))
+            warnings.append(tr("tp.lines", pn, len(lines), bh, (bh - 2 * MARGIN) // LINE_STEP))
             bad = True
         if p.glyphs > GLYPH_LIMIT:
-            warnings.append("Página %d: %d caracteres; el juego reserva %d por mensaje." % (pn, p.glyphs, GLYPH_LIMIT))
+            warnings.append(tr("tp.chars", pn, p.glyphs, GLYPH_LIMIT))
             bad = True
         # draw (extra room so overflowing text is visible)
         cw = max(w, max([p.width(i) + 2 * MARGIN for i in range(len(lines))] + [0]))
@@ -154,6 +155,6 @@ def render(wfm, words, font=None, scale=2):
     if scale != 1:
         out = out.resize((out.width * scale, out.height * scale), Image.NEAREST)
     if boxed and (fit_w, fit_h) != (bw, bh):
-        warnings.append("Caja ideal para este texto: {BOX %d %d} (ahora {BOX %d %d})." % (fit_w, fit_h, bw, bh))
+        warnings.append(tr("tp.ideal", fit_w, fit_h, bw, bh))
         warnings[-1] = "i:" + warnings[-1]      # informational, not an error
     return out, warnings

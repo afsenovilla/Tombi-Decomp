@@ -27,6 +27,9 @@ The terminator (0xFFFE close / 0xFFFF end / none) is a property of the dialogue,
   python3 tools/wfm_py.py --check [PATH]     decode+encode every WFM and count the byte-identical ones
 """
 import hashlib, json, os, re, struct, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import i18n, text_strings
+from i18n import tr
 
 MAGIC = b"WFM3"
 GLYPH_BASE = 0x8000
@@ -248,13 +251,13 @@ def text_to_words(w, text, font, pool=None):
         if c == "{":
             m = _TAG.match(text, pos)
             if not m:
-                raise WfmError("etiqueta mal formada cerca de %r" % text[pos:pos + 12])
+                raise WfmError(tr("wf.badtag", repr(text[pos:pos + 12])))
             name, arg = m.group(1), m.group(2)
             pos = m.end()
             if name == "G" and arg.startswith(":"):
                 gi = int(arg[1:])
                 if gi >= len(w.glyphs):
-                    raise WfmError("{G:%d}: el archivo solo tiene %d glifos" % (gi, len(w.glyphs)))
+                    raise WfmError(tr("wf.glyphidx", gi, len(w.glyphs)))
                 words.append(GLYPH_BASE + gi)
             elif not arg and re.fullmatch(r"[0-9A-Fa-f]{4}", name):
                 words.append(int(name, 16))
@@ -262,13 +265,13 @@ def text_to_words(w, text, font, pool=None):
                 code = NAME2CODE[name.upper()]
                 args = [int(a) for a in arg.split()]
                 if len(args) != CTRL[code][1]:
-                    raise WfmError("{%s} necesita %d argumento(s)" % (name.upper(), CTRL[code][1]))
+                    raise WfmError(tr("wf.args", name.upper(), CTRL[code][1]))
                 if any(not 0 <= a <= 0xFFFF for a in args):
-                    raise WfmError("{%s}: argumento fuera de 0..65535" % name.upper())
+                    raise WfmError(tr("wf.argrange", name.upper()))
                 words.append(code)
                 words.extend(args)
             else:
-                raise WfmError("etiqueta desconocida {%s%s}" % (name, arg))
+                raise WfmError(tr("wf.unknowntag", name, arg))
             continue
         gi = resolve(w, c, font)
         if gi is None:
@@ -285,7 +288,7 @@ def borrow(w, ch, font, pool):
         h = font[0]
         g = Glyph(2, h, 8, 0, bytes(_image_size(8, h)))
     if g is None:
-        raise UnknownGlyph("el carácter %r (U+%04X) no tiene glifo en este archivo ni en ningún otro del disco" % (ch, ord(ch)))
+        raise UnknownGlyph(tr("wf.noglyph", repr(ch), ord(ch)))
     ng = Glyph(g.clut, g.height, g.width, g.hand, g.image)
     ng.char = ch
     w.glyphs.append(ng)

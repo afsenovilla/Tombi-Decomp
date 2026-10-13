@@ -8,6 +8,8 @@ on:
     branches: [master]
     paths:
       - tools/extract_sprites.py
+      - tools/i18n.py
+      - tools/extract_strings.py
       - tools/isoext.py
       - tools/area000.py
       - tools/wpp.py
@@ -39,7 +41,7 @@ jobs:
         run: |
           python -m pip install pyinstaller pillow numpy lameenc
           pyinstaller --onefile --name tombi-assets --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import area000 --hidden-import wpp --hidden-import vram --hidden-import screens --hidden-import room --hidden-import cdfiles --hidden-import audio --hidden-import str --hidden-import numpy --hidden-import lameenc --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.JpegImagePlugin --paths tools \
+            --hidden-import i18n --hidden-import extract_strings --hidden-import area000 --hidden-import wpp --hidden-import vram --hidden-import screens --hidden-import room --hidden-import cdfiles --hidden-import audio --hidden-import str --hidden-import numpy --hidden-import lameenc --hidden-import PIL --hidden-import PIL.Image --hidden-import PIL.JpegImagePlugin --paths tools \
             --icon tools/icons/assets.ico --add-data "tools/isoext.py;." --add-data "tools/icons/assets.ico;icons" --add-data "tools/icons/assets.png;icons" tools/extract_sprites.py
           mkdir -p dist/windows
           cp build/exe/tombi-assets.exe dist/windows/tombi-assets.exe

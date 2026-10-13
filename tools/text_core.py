@@ -11,6 +11,9 @@ Command line (used by the tests; the GUI is tools/text_editor.py):
   text_core.py build  SRC PROJECT.json|IMPORT.json|IMPORT.txt -o OUT.bin [--work DIR] [--disc IMAGE]
 """
 import argparse, contextlib, io, json, os, re, shutil, struct, sys, unicodedata
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import i18n, text_strings
+from i18n import tr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py as W
@@ -72,15 +75,15 @@ class Source:
                 f.seek(16 * 2048 + 1)
                 cooked = f.read(5) == b"CD001"
             if not (raw or cooked):
-                raise CoreError("%s no es una imagen de disco ISO9660 (.bin de 2352 bytes por sector o .iso)" % path)
+                raise CoreError(tr("tc.notiso", path))
             self.sector, self.off = (2352, 24) if raw else (2048, 0)
             lay = cdfiles.layout_from_image(path)
             self.layout = lay
             self.files = {k: v for k, v in lay.items() if k.upper().endswith(".WFM")}
         else:
-            raise CoreError("no existe %s" % path)
+            raise CoreError(tr("tc.nofile", path))
         if not self.files:
-            raise CoreError("no se encontró ningún archivo .WFM en %s" % path)
+            raise CoreError(tr("tc.nowfm", path))
 
     def names(self):
         return sorted(self.files)
@@ -235,10 +238,10 @@ class Project:
         applied, problems = 0, []
         for path, d in ed.items():
             if path not in self.src.files:
-                problems.append("%s: archivo no encontrado en este disco" % path)
+                problems.append(tr("tc.nofilein", path))
                 continue
             if not self.selected(path):
-                problems.append("%s: idioma no seleccionado, se omite" % path)
+                problems.append(tr("tc.langskip", path))
                 continue
             if not isinstance(d, dict):
                 continue
@@ -248,7 +251,7 @@ class Project:
                     if not 0 <= i < self.count(path):
                         raise ValueError
                 except ValueError:
-                    problems.append("%s #%s: diálogo inexistente" % (path, k))
+                    problems.append(tr("tc.nodlg", path, k))
                     continue
                 before = self.text(path, i)
                 self.set_text(path, i, t)
@@ -337,12 +340,12 @@ def build_disc(proj, out_bin, work, disc=None, log=print):
     import mkdisc
     files, errors = proj.encode_edited()
     if errors:
-        raise CoreError("No se puede generar el disco:\n" + "\n".join(errors[:20]))
+        raise CoreError(tr("tc.cantbuild") + "\n" + "\n".join(errors[:20]))
     if not files:
-        raise CoreError("No hay cambios que aplicar.")
+        raise CoreError(tr("tc.nochanges"))
     disc = disc or proj.src.image
     if not disc or not os.path.isfile(disc):
-        raise CoreError("Hace falta la imagen original (.bin) para generar la ISO: ábrela en lugar de la carpeta.")
+        raise CoreError(tr("tc.needimage"))
     work = os.path.abspath(work)
     fs = os.path.join(work, "fs")
     shutil.rmtree(fs, ignore_errors=True)
@@ -362,7 +365,7 @@ def build_disc(proj, out_bin, work, disc=None, log=print):
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
             mkdisc.build(ns)
     except SystemExit as e:
-        raise CoreError("mkpsxiso falló: %s\n%s" % (e, buf.getvalue()[-1500:]))
+        raise CoreError(tr("tc.mkfail", e, buf.getvalue()[-1500:]))
     log(next((l for l in buf.getvalue().splitlines() if l.startswith("built")), ""))
     return sorted(files)
 
