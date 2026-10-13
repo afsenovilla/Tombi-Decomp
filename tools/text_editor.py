@@ -55,6 +55,7 @@ class App:
         self.lang_vars = {}
         self.only_edited = tk.BooleanVar(value=False)
         self.query = tk.StringVar()
+        self.link_var = tk.BooleanVar(value=True)
         self.status_text = tr("te.nodisc.status")
         set_icon(root, "text")
         self._build()
@@ -70,6 +71,7 @@ class App:
         for item in ((tr("te.opendisc"), self.ask_open_image), (tr("te.openfolder"), self.ask_open_folder), None,
                           (tr("te.saveproj"), self.save_project), (tr("te.loadproj"), self.load_project), None,
                           (tr("te.exportall"), self.export_all), (tr("te.import"), self.import_any), None,
+                          (tr("te.replace"), self.replace_dialog), None,
                           (tr("te.iso"), self.generate), (tr("te.help"), lambda: messagebox.showinfo(tr("te.help"), tr("te.helptext")))):
             if item is None:
                 ttk.Separator(bar, orient="vertical").pack(side="left", fill="y", padx=6)
@@ -95,6 +97,7 @@ class App:
         of = ttk.Frame(left, padding=(4, 0))
         of.pack(fill="x")
         ttk.Checkbutton(of, text=tr("te.onlyedited"), variable=self.only_edited, command=self.fill_tree).pack(side="left")
+        ttk.Checkbutton(of, text=tr("te.link"), variable=self.link_var, command=self.on_link).pack(side="left", padx=8)
         self.langf = ttk.LabelFrame(left, text=tr("te.langs"), padding=(4, 0))
         self.langf.pack(fill="x", padx=4)
         tf = ttk.Frame(left)
@@ -275,8 +278,22 @@ class App:
         q, only = self.query.get().strip(), self.only_edited.get()
         if q or only:
             res = self.proj.search(q, only)
-            for n, i in res[:1500]:
-                self.tree.insert("", "end", iid="d|%s|%d" % (n, i), text=self.label(n, i), tags=self.tags(n, i))
+            seen = set()
+            shown = 0
+            for n, i in res:
+                if (n, i) in seen:
+                    continue
+                grp = [c for c in self.proj.copies(n, i) if (c, i) in set(res)] if self.proj.link else [n]
+                seen.update((c, i) for c in grp)
+                shown += 1
+                if shown > 1500:
+                    break
+                lab = self.label(n, i) + (tr("te.copies", len(grp)) if len(grp) > 1 else "")
+                top = self.tree.insert("", "end", iid="d|%s|%d" % (n, i), text=lab, tags=self.tags(n, i))
+                if len(grp) > 1:
+                    for c in grp:
+                        if c != n:
+                            self.tree.insert(top, "end", iid="d|%s|%d" % (c, i), text=c.split("/")[0] + "  " + os.path.basename(c)[:-4], tags=self.tags(c, i))
             self.say(tr("te.results", len(res), tr("te.shown1500") if len(res) > 1500 else ""))
             return
         areas = {}
@@ -350,13 +367,72 @@ class App:
         if not self.cur:
             return
         n, i = self.cur
-        self.proj.set_text(n, i, self.editor.get("1.0", "end-1c"))
+        for c in self.proj.set_text_linked(n, i, self.editor.get("1.0", "end-1c")):
+            self.update_node(c, i)
         self.dirty = True
-        self.update_node(n, i)
         self.colorize()
         if getattr(self, "_pv", None):
             self.root.after_cancel(self._pv)
         self._pv = self.root.after(100, self.refresh_preview)
+
+    def on_link(self):
+        if self.proj:
+            self.proj.link = self.link_var.get()
+            self.dirty = True
+            self.fill_tree()
+
+    def replace_dialog(self):
+        if not self.need_proj():
+            return
+        d = tk.Toplevel(self.root)
+        d.title(tr("te.replace"))
+        d.transient(self.root)
+        f = ttk.Frame(d, padding=8)
+        f.pack(fill="both", expand=True)
+        find, repl = tk.StringVar(), tk.StringVar()
+        case, word, tags, sel = tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar(value=True)
+        for r, (lab, var) in enumerate(((tr("te.rfind"), find), (tr("te.rwith"), repl))):
+            ttk.Label(f, text=lab).grid(row=r, column=0, sticky="w", pady=2)
+            ttk.Entry(f, textvariable=var, width=36).grid(row=r, column=1, sticky="ew", pady=2)
+        f.columnconfigure(1, weight=1)
+        for r, (lab, var) in enumerate(((tr("te.rcase"), case), (tr("te.rword"), word), (tr("te.rtags"), tags), (tr("te.rsel"), sel)), 2):
+            ttk.Checkbutton(f, text=lab, variable=var).grid(row=r, column=0, columnspan=2, sticky="w")
+        msg = tk.StringVar()
+        ttk.Label(f, textvariable=msg, wraplength=380).grid(row=7, column=0, columnspan=2, sticky="w", pady=4)
+
+        def run(only):
+            if not find.get():
+                return
+            opts = dict(case=case.get(), word=word.get(), tags=tags.get(), all_langs=not sel.get())
+            if only is not None and self.proj.link:
+                only = [(c, only[0][1]) for c in self.proj.copies(*only[0])]
+            n, probs = self.proj.replace_all(find.get(), repl.get(), only=only, **opts)
+            if n:
+                self.dirty = True
+                self.build_langs()
+                self.fill_tree()
+                if self.cur:
+                    self.set_editor(self.proj.text(*self.cur), True)
+                    self.refresh_preview()
+            msg.set(tr("te.rdone", n, len(probs)))
+            if probs:
+                messagebox.showwarning(tr("te.warnings"), "\n".join(probs[:25]) + ("\n…" if len(probs) > 25 else ""), parent=d)
+
+        def undo():
+            if self.proj.undo_replace():
+                self.dirty = True
+                self.fill_tree()
+                if self.cur:
+                    self.set_editor(self.proj.text(*self.cur), True)
+                    self.refresh_preview()
+                msg.set(tr("te.rundone"))
+            else:
+                msg.set(tr("te.rnoundo"))
+        bf = ttk.Frame(f)
+        bf.grid(row=6, column=0, columnspan=2, pady=6)
+        ttk.Button(bf, text=tr("te.rone"), command=lambda: run([self.cur] if self.cur else [])).pack(side="left", padx=3)
+        ttk.Button(bf, text=tr("te.rall"), command=lambda: run(None)).pack(side="left", padx=3)
+        ttk.Button(bf, text=tr("te.rundo"), command=undo).pack(side="left", padx=3)
 
     def update_node(self, n, i):
         iid = "d|%s|%d" % (n, i)
@@ -374,8 +450,8 @@ class App:
         if self.cur:
             n, i = self.cur
             self.set_editor(self.proj.original(n, i), True)
-            self.proj.set_text(n, i, self.proj.original(n, i))
-            self.update_node(n, i)
+            for c in self.proj.set_text_linked(n, i, self.proj.original(n, i)):
+                self.update_node(c, i)
             self.refresh_preview()
 
     def fit_box(self):
@@ -421,6 +497,18 @@ class App:
         prob = self.proj.title_problem(n, i, text)
         if prob:
             warns.append(prob)
+        tmax = self.proj.title_max(n, i)
+        if tmax is None:
+            self.status.set(self.status_text)
+        else:
+            hid = self.proj.title_hidden(n, i, text)
+            if prob:
+                self.status.set(tr("te.titlemax", tmax))
+            elif hid:
+                self.status.set(tr("te.titlehidden", tmax - hid, hid, tmax))
+                warns.append("i:" + tr("te.titlehidden", tmax - hid, hid, tmax))
+            else:
+                self.status.set(self.status_text)
         buf = io.BytesIO()
         im.save(buf, "PNG")
         self._img = tk.PhotoImage(data=base64.b64encode(buf.getvalue()))

@@ -143,6 +143,8 @@ class Project:
         self._orig = {}
         self._pool = None
         self._layouts = {}
+        self.link = True           # editing one entry edits its copies in the other areas
+        self.undo_stack = []
         self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
 
     def languages(self):
@@ -184,8 +186,9 @@ class Project:
             d = w.dialogues[idx]
             lay = self.layout(path)
             lines = lay.lines(idx) if lay else None
-            if lines and sum(map(len, lines)) == len(d.words):
-                toks = [W.words_to_text(w, [v], d.font) for v in d.words]
+            nvis = sum(map(len, lines)) if lines else 0
+            if lines and (nvis == len(d.words) or (0 < nvis < len(d.words) and len(lay.recs[idx]) == len(d.words))):
+                toks = [W.words_to_text(w, [v], d.font) for v in d.words[:nvis]]     # hidden surplus tiles: padding
                 self._orig[key] = TL.lines_to_text(toks, lines)
             else:
                 self._orig[key] = W.words_to_text(w, d.words, d.font)
@@ -227,9 +230,23 @@ class Project:
             return None
         n = TL.text_to_lines(text)[1]
         want = len(lay.recs[idx])
-        if n != want:
+        if n > want:
             return tr("tc.titlelen", n, want)
+        if n == 0:
+            return tr("tc.titleempty")
         return None
+
+    def title_max(self, path, idx):
+        """Most letters the title can have (the size of its layout list), or None when it has no list."""
+        lay = self.layout(path)
+        if lay is None or idx not in lay.recs:
+            return None
+        return len(lay.recs[idx])
+
+    def title_hidden(self, path, idx, text):
+        """Surplus tiles of a title shorter than its layout list (they are put off screen)."""
+        want = self.title_max(path, idx)
+        return 0 if want is None else max(0, want - TL.text_to_lines(text)[1])
 
     def text(self, path, idx):
         return self.edits.get(path, {}).get(idx, self.original(path, idx))
@@ -246,6 +263,86 @@ class Project:
                     del self.edits[path]
         else:
             self.edits.setdefault(path, {})[idx] = text
+
+    # linked copies: the same file name exists in several areas (CFNT999S.WFM x19 ...) with identical texts
+    def copies(self, path, idx):
+        """Paths (the file itself included) with the same file name, same index and same original text, in the selected languages."""
+        base = os.path.basename(path).upper()
+        orig = self.original(path, idx)
+        out = []
+        for n in self.src.names():
+            if os.path.basename(n).upper() == base and self.selected(n):
+                try:
+                    if idx < self.count(n) and (n == path or self.original(n, idx) == orig):
+                        out.append(n)
+                except CoreError:
+                    pass
+        return out if path in out else [path]
+
+    def set_text_linked(self, path, idx, text):
+        """set_text on the file and, when self.link, on all its copies. Returns the paths changed."""
+        paths = self.copies(path, idx) if self.link else [path]
+        for n in paths:
+            self.set_text(n, idx, text)
+        return paths
+
+    # find and replace
+    @staticmethod
+    def _finder(find, case, word, tags):
+        pat = re.escape(find)
+        if word:
+            pat = r"(?<!\w)" + pat + r"(?!\w)"
+        rx = re.compile(pat, 0 if case else re.I)
+
+        def sub(text, repl):
+            if tags:
+                return rx.sub(lambda m: repl, text)
+            parts = re.split(r"(\{[^}]*\})", text)       # tags {..} are left alone
+            return "".join(x if x.startswith("{") and x.endswith("}") else rx.sub(lambda m: repl, x) for x in parts)
+        return sub
+
+    def replace_all(self, find, repl, case=False, word=False, tags=False, only=None, all_langs=False):
+        """Find and replace over the texts (current text of every entry). only = [(path, idx)] limits it. Applies what is valid and
+        remembers the previous state for undo_replace. Returns (entries changed, [problems])."""
+        if not find:
+            return 0, []
+        sub = self._finder(find, case, word, tags)
+        todo, problems, before = [], [], {}
+        names = [n for n in self.src.names() if all_langs or self.selected(n)]
+        keys = only if only is not None else [(n, i) for n in names for i in range(self.count(n))]
+        for n, i in keys:
+            old = self.text(n, i)
+            new = sub(old, repl)
+            if new == old:
+                continue
+            prob = self.validate(n, i, new)
+            if prob:
+                problems.append("%s #%d: %s" % (n, i, prob))
+                continue
+            todo.append((n, i, new))
+        for n, i, new in todo:
+            if all_langs and not self.selected(n):
+                self.langs.add(lang_of(n))
+            before[(n, i)] = self.edits.get(n, {}).get(i)
+            self.set_text(n, i, new)
+        if todo:
+            self.undo_stack.append(before)
+        return len(todo), problems
+
+    def undo_replace(self):
+        """Reverts the last replace_all; returns the number of entries restored (0 = nothing to undo)."""
+        if not self.undo_stack:
+            return 0
+        for (n, i), t in self.undo_stack.pop().items():
+            if t is None:
+                e = self.edits.get(n)
+                if e and i in e:
+                    del e[i]
+                    if not e:
+                        del self.edits[n]
+            else:
+                self.edits.setdefault(n, {})[i] = t
+        return 1
 
     def n_edits(self):
         return sum(len(v) for v in self.edits.values())
@@ -295,13 +392,15 @@ class Project:
     # project file
     def to_json(self):
         return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path), "languages": sorted(self.langs),
-                "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
+                "link": self.link, "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
 
     def load_edits(self, data, replace=True):
         """data: {"edits": {path: {idx: text}}} (project) or {path: {idx: text}} (export). Returns (applied, problems)."""
         ed = data.get("edits") if isinstance(data.get("edits"), dict) else data
         if replace:
             self.edits = {}
+            if isinstance(data.get("link"), bool):
+                self.link = data["link"]
             if isinstance(data.get("languages"), list):
                 self.langs = {str(l).upper() for l in data["languages"]} & set(self.languages()) or {LANG_MAIN}
         applied, problems = 0, []
@@ -372,6 +471,10 @@ class Project:
                         words = W.text_to_words(w, text, d.font)
                     except W.UnknownGlyph:
                         words = W.text_to_words(w, text, d.font, self.pool())
+                    lay = self.layout(path)
+                    if lay is not None and idx in lay.recs and words and len(words) < len(lay.recs[idx]):
+                        # shorter title: the engine reads one glyph per record of the list, so pad (the extra tiles are off screen)
+                        words = words + [words[0]] * (len(lay.recs[idx]) - len(words))
                     d.words = words
                 except W.WfmError as ex:
                     errors.append("%s #%d: %s" % (path, idx, ex))
@@ -403,7 +506,7 @@ class Project:
                 if lines == lay.lines(idx):
                     continue                    # same spacing as the original: nothing to write
                 old = lay.recs[idx]
-                recs = TL.lines_to_records(lines, [r[2] for r in old])
+                recs = TL.pad_records(TL.lines_to_records(lines, [r[2] for r in old]), old)
                 prev = new.setdefault(lang, (self.wfm(path), {}))[1]
                 if idx in prev and prev[idx] != recs:
                     errors.append("%s #%d: %s" % (path, idx, tr("tc.titleconflict")))

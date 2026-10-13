@@ -50,9 +50,9 @@ Lists end with a record whose first byte is 0xFF and are stored one after anothe
 titles, and four others (52, ~90, ~126, 135) have none): 130 lists, in every language the same way, found by matching list lengths to the
 word counts of the CFNT file. Where: every `X?NN.BIN` / `I?NFO*.BIN` overlay of the language (`?` = digit n of MAINn; letters
 B F G I H S P W D = n 0..8, `tools/cdfiles.py`), e.g. `AREA19/I5NFO.BIN` offset 0x697C (RAM 0x800F0B1C) for Spanish; the copies are identical.
-The event tables point INTO the lists (at record 10 of each title), so a list can be rewritten in place but not made longer or shorter.
+The event tables point INTO the lists, so a list can be rewritten in place but not moved or resized. `spawnEventTitle` makes one tile per record up to the 0xFF terminator and reads one glyph per record from the text (`src += 2`, no text terminator test), so a SHORTER title is done by padding: the letters keep the normal layout, the surplus records go to row 40 (560 px below the origin, off screen; `title_layout.HIDDEN_ROW`) keeping their flags, and the WFM words are padded with a copy of the first glyph. Verified in `tools/psxemu` (AREA00 event 4 run through `FUN_8005aa74` with 12 of 15 records laid out and 3 hidden: only 12 tiles drawn, 120 frames without problems). A LONGER title needs the list moved to free space and every event-table pointer updated, or the code change in docs/TODO.md; not implemented (editor: error `max. N letters`).
 The tool therefore reads the layout from the overlays (text shows `Pulsera del{NL}` + `abuelo`), ignores ' ' and {NL} in 24 px WFM text
-(the old blank-glyph hack is gone), requires the same number of letters as the list, and writes moved spaces / line breaks back into
+(the old blank-glyph hack is gone), accepts up to as many letters as the list (fewer: hidden tiles), and writes moved spaces / line breaks back into
 every overlay copy (flags kept). Odd-width centring is not reproduced bit for bit (31 of 1170 lists start one column further left), so
 only titles whose spacing changed are rewritten. `python3 tools/title_layout.py` checks all 171 CFNT files.
 **Dialogues 0 and 1 of CFNT999 (no list).** In `spawnEventTitle` the title text is entry `D_800806B4[area][event]` of the title table (`src + *(u16*)(src+8)`; the table is the

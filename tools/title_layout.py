@@ -111,6 +111,8 @@ def align(counts, lists):
 
 # ---- geometry: text <-> records --------------------------------------------------------------------------------------
 
+HIDDEN_ROW = 40     # surplus records of a title shorter than its list: row 40 = 560 px below the origin, far outside the 256 px screen
+
 STEP, SPACE, ROW = 2, 1, 2     # columns per letter, extra columns per space, rows per line (rows are 14 px, columns 10 px)
 
 
@@ -132,6 +134,18 @@ def records_to_lines(recs):
         prev = (col, row)
     lines.append(cur)
     return lines
+
+
+def visible(recs):
+    """The records of a list that are drawn on screen (the surplus ones of a shorter title sit at HIDDEN_ROW)."""
+    return [r for r in recs if r[1] < HIDDEN_ROW]
+
+
+def pad_records(recs, old):
+    """recs (the letters) followed by hidden records up to the length of the original list `old`, whose flags they keep: spawnEventTitle
+    makes one tile per record of the list and reads one glyph per record from the text, so the list size cannot change; the surplus
+    tiles are put far below the screen (and the text is padded with a copy of a glyph, see Project.encode_edited)."""
+    return list(recs) + [(0, HIDDEN_ROW, old[k][2]) for k in range(len(recs), len(old))]
 
 
 def lines_to_records(lines, flags=None):
@@ -211,6 +225,7 @@ class Layout:
 
     def lines(self, k):
         r = self.recs.get(k)
+        r = visible(r) if r else r
         return records_to_lines(r) if r else None
 
 
