@@ -287,6 +287,80 @@ def patch_files(read, names, wfm, lang, new):
     return out
 
 
+# ---- the "completed" banner (CFNT999 dialogue 0) -----------------------------------------------------------------------------------
+# The banner ("CLEAR!", ES "¡DESPEJADA!") is NOT drawn from the text of dialogue 0 (the engine never reads it). The first K letter tiles of
+# the event title (records with flags 0x80 | i) fly to a row and show a glyph taken from two tables of EXE/MAINn.EXE (RAM 0x800804E0 area,
+# the exact address differs per language): `u16 glyph[K]` (+ pad to 4 bytes) = glyph id (word & 0x7FFF of the CFNT999 bitmap list) of tile i,
+# then `s16 x, s16 y [K]` = where tile i ends (centred row, 20 px apart). K = number of letters of the banner (6 B, 8 F, 10 G, 9 I, 9 H, 11 S,
+# 9 P, 5 W, 6 D). In the original files table[i] = word i of dialogue 0, so editing the text alone changes nothing in game: the table must
+# follow. Tiles beyond the new text length are sent off screen (y = 400).
+BANNER_ANCHOR = bytes.fromhex("0000b40000000000")      # D_800804D8[4] = {0, 180, 0, 0}, the glyph table follows
+BANNER_HIDDEN_Y = 400
+HEADER = 0x800
+
+
+def exe_name(lang):
+    return "EXE/MAIN%d.EXE" % LANG_N.index(lang)
+
+
+def banner_find(exe):
+    """(offset of the glyph table, K, offset of the position table) in the bytes of a MAINn.EXE, or None."""
+    i = exe.find(BANNER_ANCHOR)
+    if i < 0:
+        return None
+    t = i + 8
+    for k in range(1, 16):
+        s = t + ((2 * k + 3) & ~3)
+        if s + 4 * k + 8 > len(exe):
+            break
+        if struct.unpack_from("<ii", exe, s + 4 * k) == (0, 500) and \
+                all(struct.unpack_from("<h", exe, s + 4 * j + 2)[0] in (0, BANNER_HIDDEN_Y) for j in range(k)):
+            return t, k, s
+    return None
+
+
+def banner_info(read, lang):
+    """{'name', 'k', 'ids', 'xs', 'addr'} of the banner of a language (read(name) -> bytes of the disc file) or None."""
+    if lang not in LANG_N:
+        return None
+    name = exe_name(lang)
+    try:
+        exe = read(name)
+    except (OSError, KeyError):
+        return None
+    f = banner_find(exe)
+    if f is None:
+        return None
+    t, k, s = f
+    return dict(name=name, k=k, ids=list(struct.unpack_from("<%dH" % k, exe, t)),
+                xs=[struct.unpack_from("<h", exe, s + 4 * j)[0] for j in range(k)], addr=0x80010000 + t - HEADER)
+
+
+def banner_patch(read, lang, words, gaps):
+    """{exe name: bytes} with the banner tables for the letters `words` (glyph words of dialogue 0, at most K) and `gaps` (spaces before each
+    letter, 1 space = 10 px extra). Returns {} when the tables are not found or nothing changes."""
+    info = banner_info(read, lang)
+    if info is None or not words or len(words) > info["k"]:
+        return {}
+    exe = bytearray(read(info["name"]))
+    t, k, s = banner_find(bytes(exe))
+    xs = [0]
+    for g in gaps[1:len(words)]:
+        xs.append(xs[-1] + 20 + 10 * g)
+    old = info["xs"]
+    centre = (old[0] + old[-1]) / 2.0
+    shift = int(round(centre - xs[-1] / 2.0))
+    ids = [w & 0x7FFF for w in words]
+    for j in range(k):
+        if j < len(ids):
+            gid, x, y = ids[j], xs[j] + shift, 0
+        else:
+            gid, x, y = ids[0], xs[-1] + shift, BANNER_HIDDEN_Y
+        struct.pack_into("<H", exe, t + 2 * j, gid)
+        struct.pack_into("<hh", exe, s + 4 * j, x, y)
+    return {info["name"]: bytes(exe)} if bytes(exe) != read(info["name"]) else {}
+
+
 def check(root):
     """Every CFNT file of a disc folder: layout found, text round trip with the layout (python3 tools/title_layout.py [FS_DIR])."""
     import text_core as C, wfm_py as W

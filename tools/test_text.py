@@ -29,13 +29,23 @@ class BuildRoundTrip(unittest.TestCase):
             names = areas(proj.src)
             self.assertGreaterEqual(len(names), 19)
             self.assertEqual(proj.original(names[0], 0), "¡DESPEJADA!")
-            self.assertEqual(len(proj.set_text_linked(names[0], 0, "¡CONSEGUIDO!")), len(names))
+            self.assertEqual(len(proj.set_text_linked(names[0], 0, "¡LOGRADO!")), len(names))
             out = os.path.join(tmp, "Tombi-ES.bin")
             rep = C.build_report(proj, out, os.path.join(tmp, "work"))
             self.assertEqual(rep["out"], out)
             self.assertTrue(os.path.isfile(out) and os.path.isfile(os.path.splitext(out)[0] + ".cue"))
-            self.assertEqual(sorted(rep["files"]), sorted(names))
-            self.check(out, "¡CONSEGUIDO!", names)
+            self.assertEqual(sorted(rep["files"]), sorted(names + ["EXE/MAIN5.EXE"]))   # + the banner tables of the executable
+            self.check(out, "¡LOGRADO!", names)
+            # the engine draws the banner from tables of MAIN5.EXE (not from the text): they must follow the 9 letters (L O G R A D O are glyphs of the file)
+            import title_layout as TL
+            src = C.Source(out)
+            info = TL.banner_info(src.read_any, "S")
+            import wfm_py as W
+            words = W.decode(src.read(names[0])).dialogues[0].words
+            self.assertEqual(info["k"], 11)
+            self.assertEqual(info["ids"][:9], [w & 0x7FFF for w in words])
+            self.assertEqual(info["xs"][:9], [-80 + 20 * i for i in range(9)])
+            self.assertEqual(info["xs"][9:], [80, 80])
             # second edit built over the same output (and then with the output as the opened image, in place)
             proj2 = C.Project(C.Source(out))
             proj2.set_text_linked(names[3], 0, "¡HECHO!")

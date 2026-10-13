@@ -223,11 +223,30 @@ class Project:
                 return orig
         return lines
 
+    def banner(self, path, idx):
+        """Banner tables (title_layout.banner_info) when (path, idx) is dialogue 0 of a CFNT999 file (the "completed" banner), else None."""
+        if idx != 0 or not TL.is_title_file(path):
+            return None
+        lang = lang_of(path)
+        key = ("banner", lang)
+        if key not in self._layouts:
+            try:
+                self._layouts[key] = TL.banner_info(self.src.read_any, lang)
+            except Exception:       # noqa: BLE001  no executables on this source
+                self._layouts[key] = None
+        return self._layouts[key]
+
     def title_problem(self, path, idx, text):
         """Readable problem of an event title text (the number of letters is fixed by the layout), or None."""
         lay = self.layout(path)
         if lay is None or idx not in lay.recs:
-            return None
+            b = self.banner(path, idx)
+            if b is None:
+                return None
+            n = TL.text_to_lines(text)[1]
+            if n > b["k"]:
+                return tr("tc.titlelen", n, b["k"])
+            return tr("tc.titleempty") if n == 0 else None
         n = TL.text_to_lines(text)[1]
         want = len(lay.recs[idx])
         if n > want:
@@ -240,7 +259,8 @@ class Project:
         """Most letters the title can have (the size of its layout list), or None when it has no list."""
         lay = self.layout(path)
         if lay is None or idx not in lay.recs:
-            return None
+            b = self.banner(path, idx)
+            return b["k"] if b else None
         return len(lay.recs[idx])
 
     def title_hidden(self, path, idx, text):
@@ -484,6 +504,7 @@ class Project:
                 except W.WfmError as ex:
                     errors.append("%s: %s" % (path, ex))
         self._title_patches(files, errors)
+        self._banner_patches(files, errors)
         return ({} if errors else files), errors
 
     def _title_patches(self, files, errors):
@@ -518,6 +539,34 @@ class Project:
                 files.update(TL.patch_files(self.src.read_any, self.src.all_names(), w, lang, recs))
             except (OSError, KeyError) as ex:
                 errors.append("%s: %s" % (lang, ex))
+
+
+    def _banner_patches(self, files, errors):
+        """Dialogue 0 of CFNT999 (the banner shown when an event is completed): the engine takes its glyphs and positions from tables of
+        EXE/MAINn.EXE, not from the text, so they are rewritten to match the edited text. Adds the changed executables to files."""
+        for path, e in sorted(self.edits.items()):
+            if 0 not in e or not self.selected(path) or self.banner(path, 0) is None:
+                continue
+            text = e[0]
+            prob = self.title_problem(path, 0, text)
+            if prob:
+                errors.append("%s #0: %s" % (path, prob))
+                continue
+            lang = lang_of(path)
+            if path not in files:
+                continue
+            words = W.decode(files[path]).dialogues[0].words        # the words as stored in the encoded file
+            gaps = [g for l in self._single_line(text) for g in l]
+            if len(gaps) != len(words):
+                errors.append("%s #0: %s" % (path, tr("tc.titleempty")))
+                continue
+            # the glyph ids of the edited WFM (files[path]) are the ones the tables must point to; every language has one executable
+            try:
+                new = TL.banner_patch(self.src.read_any, lang, words, gaps)
+            except (OSError, KeyError) as ex:
+                errors.append("%s: %s" % (lang, ex))
+                continue
+            files.update(new)
 
 
 def clone(w):
@@ -570,7 +619,7 @@ def build_report(proj, out_bin, work, disc=None, log=print):
         open(p, "wb").write(data)
     src = Source(disc)
     for name in sorted(src.layout):
-        if re.fullmatch(r"EXE/MAIN\d\.EXE", name):
+        if re.fullmatch(r"EXE/MAIN\d\.EXE", name) and name not in files:
             p = os.path.join(fs, *name.split("/"))
             os.makedirs(os.path.dirname(p), exist_ok=True)
             open(p, "wb").write(src.read_any(name))
@@ -594,6 +643,14 @@ def build_report(proj, out_bin, work, disc=None, log=print):
         # read back: the written files must be on the new image
         new = Source(tmp_bin)
         for name, data in files.items():
+            if re.fullmatch(r"EXE/MAIN\d\.EXE", name):        # relayout rewrites the file tables of the executables: compare the rest
+                ok = name in new.layout and new.layout[name][1] == len(data)
+                if ok:
+                    f0, f1 = TL.banner_find(data), TL.banner_find(new.read_any(name))
+                    ok = f0 is not None and f0 == f1 and new.read_any(name)[f0[0]:f0[2] + 4 * f0[1]] == data[f0[0]:f0[2] + 4 * f0[1]]
+                if not ok:
+                    raise CoreError(tr("tc.verify", name))
+                continue
             if name not in new.layout or new.layout[name][1] != len(data) or new.read_any(name) != data:
                 raise CoreError(tr("tc.verify", name))
         try:

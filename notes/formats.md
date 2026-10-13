@@ -56,15 +56,32 @@ The tool therefore reads the layout from the overlays (text shows `Pulsera del{N
 every overlay copy (flags kept). Odd-width centring is not reproduced bit for bit (31 of 1170 lists start one column further left), so
 only titles whose spacing changed are rewritten. `python3 tools/title_layout.py` checks all 171 CFNT files.
 **Dialogues 0 and 1 of CFNT999 (no list).** In `spawnEventTitle` the title text is entry `D_800806B4[area][event]` of the title table (`src + *(u16*)(src+8)`; the table is the
-same for all areas: events 0.. -> entries 2,3,4,6,8,9,0xFF,10,11,12,13,72,14,...). Entry 0 is never selected by this routine; entry 1 is used
+same for all areas: events 0.. -> entries 2,3,4,6,8,9,0xFF,10,11,12,13,72,14,...). Entry 0 is never selected by this routine (it is only the banner, see below); entry 1 is used
 as the fallback title when the table byte is 0xFF (events 6 and 18, which have no title of their own), still walked with a list taken from the
 area tables (so a letter count fixed by that list; this list was not located: the aligner only finds lists for entries 2..). Entry 1 is the
 placeholder "DUMMY CUBE" (US/PAL: `!!!DUMMYCUBE!!!`, ES `¡¡¡CUBOVACÍO!!!`, 15 letters): it is shown for events without a title, it has nothing to do with the
-cubes the letters sit on. Entry 0 is "CLEAR!" (ES `¡DESPEJADA!`, 11 letters); the routine that draws it is not in MAIN0 (not found: no other
-`0x7D16` object spawner or reader of the title table in MAIN0; the score "5000" is `printEventMessage`, digit objects 16 px apart centred on x = 160,
-y = 160, separate from the title). Its layout was therefore not read from code: the preview assumes the usual grid for a single line (letters 2 columns apart, row 0,
-centred: -(2n/2) columns, which is what every list-based one-line title has, e.g. 11 letters start at column -11) and treats spaces as 1-column gaps.
-Whether the engine accepts a different letter count for #0 was not verified; keep the original count when editing it.
+cubes the letters sit on. Entry 0 is "CLEAR!" (ES `¡DESPEJADA!`) but **the engine never reads its text**; it only is the source of the bitmaps (glyph ids) and the
+reference of the banner. The score "5000" is `printEventMessage` (digit objects, 16 px apart centred on x = 160, y = 160), separate from it.
+Dialogue 1 stays the placeholder for events without title.
+
+**The "mission complete" banner (found with `tools/psxemu`, AREA00 `setEventComplete(4, 0)`).** `setEventComplete` calls `spawnEventTitle(i, 1, ...)`
+(`completed = 1`): the tiles of the event title (object `obj[3] = 1`) fly in, then the tiles whose record has bit 7 set (`flags 0x80 | i`) *morph*
+into the banner: `func_8002B0BC` (object routine, case 0) does `obj+0xC2 = acquireSpriteSlot(obj+0xC0)` and `FUN_8002b3c8` flies the tile to
+`(obj+0xC8, obj+0xCA)` and shows the glyph cell of `obj+0xC2` (cell table `D_800B0BBC`, 10 bytes per cell). `obj+0xC0 = D_800804E0[n]`,
+`obj+0xC8/CA = D_800804EC[n]` (`n = flags & 0xF`, so n = i for the banner tiles). Both are tables of **EXE/MAINn.EXE** (not of the WFM, not
+of the overlays), RAM about `0x800804E0` (the address differs per language; anchor `00 00 B4 00 00 00 00 00` = `D_800804D8[4]`, then):
+`u16 glyph[K]` (+ pad to 4 bytes), `s16 x, s16 y [K]`, then `0, 500, 1000, ...` (score table). `glyph[i]` is a **glyph id of the CFNT999 file**
+(word & 0x7FFF of the bitmap list) and in the original disc `glyph[i]` = word i of dialogue 0; positions: x = -20 * (K-1)/2 + 20 i (+10 in
+English), y = 0, relative to the screen centre (+0xA0). K = banner letters: B 6, F 8, G 10, I 9, H 9, S 11, P 9, W 5, D 6. The title records
+(overlay lists) of the event carry the 0x80|i flag for exactly the first K letters, so K cannot grow without moving data in the EXE and
+the lists.
+=> editing only the text of CFNT999 #0 (what the editor did before) changes nothing in game: the game keeps drawing glyph ids 0..7 of the file
+(the old bitmaps stay in the WFM). `tools/title_layout.banner_find/banner_info/banner_patch` read/write the tables and `text_core`
+(`Project.banner`, `_banner_patches`) rewrites `EXE/MAINn.EXE` when #0 is edited: `glyph[i]` = glyph of letter i of the new text,
+positions re-centred (space = +10 px), at most K letters, surplus tiles go off screen (y = 400). `build_report` copies the patched EXE; its
+verification compares the banner tables only (mkdisc `--relayout` rewrites the file tables of the EXE afterwards). Verified in the emulator
+(English, patched ISO + EXE, `WIN!`: four tiles `W I N !` centred, same animation) and by `tools/test_text.py`.
+Note: the emulator boots `game/MAIN0.EXE` and the CFNT files from the disc image given, so test with `Machine(exe=patched, disc=iso)`.
 
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see
