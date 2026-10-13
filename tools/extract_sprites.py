@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Extracts every sprite frame of Tombi! (PAL) as PNG straight from a disc image, with no dependencies beyond
+"""Extracts every graphic of Tombi! (PAL) as PNG straight from a disc image, with no dependencies beyond
 Python 3 (Windows/Linux/macOS).
 
   python3 tools/extract_sprites.py Tombi.bin OUT_DIR
 
-Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/isoext.py), then every WPP sprite
-file (AREAxx/*.000 of load kind 0x60/0x62, 40 files, about 13 000 frames) is unpacked with tools/wpp.py to
-OUT_DIR/sprites/<AREA>/<file>/frame_NNNN.png (indexed PNG, index 0 transparent, each frame with the palette the game data assigns it
-(CLUT field of the SPR frame definitions, tools/wpp.py --auto; Tombi's palette where the game sets it at run time)).  The retail disc is only read.
-Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same with no Python:
+Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/isoext.py), then
+  OUT_DIR/sprites/<AREA>/<file>/frame_NNNN.png   every WPP sprite frame (AREAxx/*.000 of load kind 0x60/0x62, 40 files, about 13 000
+                                                 frames, tools/wpp.py): indexed PNG, index 0 transparent, each frame with the palette the
+                                                 game data assigns it (Tombi's palette where the game sets it at run time)
+  OUT_DIR/spr/<AREA|SYSTEM>/listNN/sprKK/        every SPR frame definition (load kinds 0x30..0x3F) cut out of the simulated VRAM:
+                                                 frame_NNNN_partK.png (one POLY_FT4 part, own palette), frame_NNNN.png (parts composed),
+                                                 manifest.json (offsets, palettes, which atlas) (tools/vram.py)
+  OUT_DIR/screens/<AREA|SYSTEM>/listNN/          every load list replayed into VRAM: vram.png (1024 x 512, 16 bit view) and every GRPX page
+                                                 (title screen, logos, menus, room pages, atlases) with its palette, palette blocks as swatches
+The retail disc is only read.  Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same
+with no Python:
   tombi-assets.exe Tombi.bin OUT_DIR"""
 import os, sys
 
@@ -39,6 +45,7 @@ def main():
     sys.path.insert(0, HERE)
     import area000 as A
     import wpp
+    import vram
     A.FS = fs
     n = 0
     for area in sorted(os.listdir(fs)):
@@ -53,6 +60,11 @@ def main():
             a = Args(); a.file, a.out, a.clut, a.row, a.x0, a.auto = path, dst, None, 0, 0, True
             wpp.cmd_unpack(a); n += 1
     print("done: %d sprite files under %s" % (n, os.path.join(out, "sprites")))
+    print("simulating the VRAM of every load list (SPR atlas cuts, pages, snapshots) ...")
+    st = vram.export_all(out, log=lambda m: None)
+    print("done: %d load lists, %d pages, %d SPR tables, %d frames / %d parts (%d identical tables shared, %d frame PNGs + %d part PNGs written); under %s and %s" % (
+        st["lists_total"], st["pages"], st["tables"], st["frames_total"], st["parts_total"], st["tables_deduplicated"],
+        st["frames_written"], st["parts_written"], os.path.join(out, "spr"), os.path.join(out, "screens")))
 
 
 if __name__ == "__main__":

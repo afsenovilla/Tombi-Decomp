@@ -133,6 +133,67 @@ the 20 load files parse. Layout (decoded from the drawing code `FUN_80052db8`, `
   decompiled) that picks `o+0xC4` for the 8 frames, and pairing the non-WPP SPR blocks (`0x31..0x3F`) with their texture atlases.
 
 
+### SPR / VRAM: every graphic as PNG (`tools/vram.py`, `tools/extract_sprites.py`)
+`python3 tools/extract_sprites.py game/disc/Tombi.bin OUT` writes `OUT/sprites` (WPP frames, `tools/wpp.py`), `OUT/spr` (SPR atlas cuts) and
+`OUT/screens` (pages and VRAM snapshots); `python3 tools/vram.py --all OUT` does the last two from an extracted `game/disc/fs`.
+Pure Python, about 2 minutes, 95 MB of PNG (never committed).
+
+**VRAM replay.** Every list of `SYS/LD0*.BIN` (`area000.load_lists()`: 19 area files + `LD0SYS` = 248 lists, 95 of them SYSTEM) names GRPX
+records (kind `0x10`/`0x11`); `arg = y << 16 | x`, x in 16-bit words, `w x h` words, data = the file (`.GAM` unpacked, `.000` raw; size is `w*h*2`
+in all 521 pages). `Vram.load` copies them into a 1024 x 512 word buffer in list order (later records overwrite: the area `CLUTnn` (128,480,256x32)
+covers the lower 32 rows of the HUD/sprite pages 18..21, which is why a few HUD parts read palette data). A context is "what the game has when it
+draws room *i*": resident SYS list 0 (without the start-up logo `A00006/A00007` at 0,0: HUD pages `A00000` = page 21 and `A10003` = page 20, sprite
+palette strips `A00001/2`, `A10004`, `A00005`) + area list 0 + room list *i* (+ one SYS atlas list, below). Texture page `p` of a tpage word =
+`x = (p & 15) * 64` words, `y = (p >> 4) * 256`, mode = bits 7-8 (0 = 4 bpp: 256 px per 64 words, 1 = 8 bpp: 128 words, 2 = 16 bpp); a CLUT word is
+`x = (c & 0x3F) * 16`, `y = c >> 6 & 0x1FF`; a palette entry of word `0x0000` is transparent (GPU rule, not "index 0").
+
+**Layout found in the lists.** A 256 x n (n <= 32) record is the CLUT of the page records right before it (`pair_cluts`: room list = pages + `CLUTnn`;
+`A00200`+`A00201` = title landscape, `A00202`+`A00203` = TOMBI! logo, `A09400`+`A09401` = "Sony Computer Entertainment Europe presents", `A00006`+`A00007`
+and `A00100`+`A00101` = Whoopee Camp logo, `A00400/1`+`A00402` = save/load menu: font, frames, TOMBI! tile background). 16 x n records are sprite palette
+strips (16 colours x n palettes) and belong to the page before them (`A00000` <-> `A00001/2`, `A10003` <-> `A10004`). SYS lists 10..92 (X0nn/I?NFO
+overlays) hold one 4 bpp atlas set each for the NPC/enemy/object tables of the area that names the same overlay: `SYSTEM/A01000.000` (384 x 256 words at
+x = 64 = pages 1..6) is the atlas of the 194-frame NPC/enemy table `0x32` of AREA00 (pigs with pitchforks, the boy with the sword, the straw-hat man).
+
+**The tpage offset.** `FUN_80052db8` does `tpage += TObj.w1e` and the area/shared code sets `w1e` per object type (`o->w1e = 0x13`, `1`, `10`, `0x14`..: shared
+code in `src/FUN_8002*.c`, `src/FUN_800e*.c`; area overlays in `src/x0nn/`), so an SPR table stores pages relative to an atlas and does not say where the atlas
+is (examples: `0x34` effects are used with `w1e` 0x13/0x14/0x15 = pages 19/20/21 = `A001`/`A10003`/`A00000`; `0x32` with 1 = x 64; `0x35` WPP with 7). The
+only data-driven evidence is the load lists, so `vram.infer_base` chooses (context, offset 0..31) per table: all part rectangles inside loaded 4 bpp page data (pages
+paired with a 256 colour CLUT are 8 bpp room backgrounds and excluded; 8 bpp/16 bpp parts accept any loaded data), then the candidate whose pages are exactly
+the pages of the atlas records it touches (`fit_unused` = 0: AREA00 `0x32` = 6 pages = `A01000`), then the one that cuts the least sprite art through its rectangle borders
+(`_ring_cut`). Tables byte-identical in >= 10 areas (Tombi `0x30`, `0x31`, HUD `0x3F`, effects `0x34`, `0x39`) can only use the resident pages. Frames whose rectangles
+are not all inside the chosen atlas are retried with the other offsets that cover part of the table (`alt_offsets`; the manifest gives `tpage_offset` per such frame).
+`manifest.json` of every table records `tpage_offset`, the SYS list used, `ties` (equally good candidates = ambiguous) and `coverage`.
+
+**WPP link.** SPR tables whose frame count equals a WPP table of the list (`0x30`/358 Tombi, `0x35`/83 griffin+bat of `A004`, `0x3A`/127 of `D004`) are not cut
+from VRAM: the part `(u, v, w, h)` is cut from the decoded WPP frame of the same number (the WPP slot offset `slot*64+4` is the game's, the frame itself starts at u = 0),
+placeholder palettes `x >= 512` (Tombi: `GetClut(0x80, 0x1e0..)`) map to `x = 128`, same row. Tombi's two parts per frame use rows 480/481 of the CLUT (hair/skin and shorts).
+
+**Output.**
+- `OUT/spr/<AREA|SYSTEM>/listNN/sprKK/frame_NNNN_partK.png` (indexed PNG, 16/256 colours, tRNS for transparent words; 16 bpp parts RGBA), `frame_NNNN.png`
+  (parts composed at `dx,dy` in table order, RGBA) and `manifest.json` (per part x/y/w/h/clut/tpage/uv, per frame origin = position of (0,0) in the PNG).
+  Only lists that carry SPR tables exist (125 lists, 334 tables, 42,793 frames, 89,932 parts). A table that is byte-identical and renders identically to an earlier one
+  (Tombi in 34 lists, resident tables) holds only a `manifest.json` with `"same_as"` (101 tables). Parts with no visible pixel are not written (`"blank": true`, 2,993 of
+  the cut ones); palette slots that are empty in the list's `CLUT` (filled at run time or only in the CLUT of another room) are taken from another `CLUTnn` of the area, else
+  a grey ramp (`palette_note` in the manifest, 6,954 parts).
+- `OUT/screens/<AREA|SYSTEM>/listNN/vram.png` = the whole 1024 x 512 VRAM of the list as RGB555 (8 bpp data looks like noise there; that is the 16 bit view): AREA lists on top
+  of the resident pages, SYSTEM lists alone (231 snapshots). Next to it every GRPX record: `NAME.png` for 8 bpp pages with the CLUT the list pairs them with (318;
+  row 0 of a 256 x 32 block, or the palette their 8 bpp SPR parts use), `NAME_4bpp.png` / `NAME_8bpp.png` for atlases coloured with the palette most SPR parts use on them (72),
+  `NAME_16bpp.png` + `NAME_4bpp_gray.png` when nothing says how a page is read (131), `NAME_palettes.png` for palette blocks (141, each colour 4 x 4 px).
+
+**Verified visually (PNGs in /tmp only).** Start-up logo (`SYSTEM/list01` `A00100`: pink/yellow "Whoopee Camp"), `SYSTEM/list94` ("Sony Computer Entertainment Europe presents"),
+title screen (`SYSTEM/list02`: `A00200` landscape with volcanoes/forest/river, `A00202` TOMBI! logo with the pink-haired Tombi), save/load menu (`SYSTEM/list04`), enemies: the evil pig
+with pitchfork (AREA00 `spr32`, offset 1 + SYS list 10, all poses coherent, atlas `A01000_4bpp.png` correctly coloured) and the griffin (WPP `spr35`, red/yellow); NPCs: the boy with the sword
+and the straw-hat man (same table, last frames); HUD: AREA00 `spr3F` (digits 0..15 in beige/orange, the font `abcde..`, circles) and `spr34` (explosions, feathers, jewels, "GET!!" text);
+AREA05 `list02` `spr3B` (pink hat creatures, sombrero bandits, offset 1 + `A04000`) and `spr35` (treasure chests, buckets); Tombi `spr30` (358 frames, pink hair, green shorts).
+**Limits.** (1) The per object `w1e` is inferred, not read from the overlay data tables: tables used with several offsets (`0x33`, `0x34`, `0x39`, `0x3F`) get the best offset per table and an
+alternative per frame, so some frames show another atlas' art (stripes/noise: 8 bpp data read as 4 bpp, or an atlas that is not in the candidate contexts); `ties` in the manifest lists the
+other candidates. Frames with 8 bpp parts in a 4 bpp context (`(1,x)` tpages) are cut as 8 bpp from whatever is loaded. (2) Candidate contexts are the list, the area list 0 and the SYS lists
+that name the same overlay as the list; SYS pages loaded by other code (3D room textures `I0NFO2`, menus) are not tried. (3) Room pages (`B*.GAM` with `CLUTnn`) are exported with row 0 of the
+CLUT (or the row their 8 bpp SPR parts use): which of the 32 rows a room tile uses is chosen per polygon at draw time (not in any file), so room backgrounds can be wrongly coloured; B-pages
+that hold 8 bpp sprite sheets (AREA00 `B000`) are shown with row 0 and look wrongly coloured. (4) Runtime-generated graphics (damage numbers `GetClut(0x210, 0x1e1+n)`, fades, the WPP slots) and the
+3D models (WMD, `SUBMAP.WMD` textures are the `A07xx` pages, uncut) are not reconstructed; only `LD0*` lists (the language variants `LD1..LD8` use other file ids but the same layout) are walked.
+(5) Semi-transparent parts (tpage bits 5-6) are drawn opaque. (6) No names for characters: the tables only have ids (the pig/boy/straw-hat man labels above are descriptions of what the PNGs show).
+
 ## `AREAxx/X0nn.BIN` (overlays)
 Headerless RAM image loaded at `0x800E8028` by load kind `0xF0`. Fully documented in `notes/overlays.md`: header/callback pointer area,
 entry stubs, shared prefix of 188,028 bytes, per-area code, `.rodata` jump tables between functions, `.data` tail. Tool:
