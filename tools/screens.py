@@ -29,6 +29,9 @@ STATIC = [
 ]
 # 4 bpp font/HUD sheet of the title list, one tile per palette of the 16 x n strips that come with it
 FONT_SHEET = ("title_font_sheet", "SYSTEM/A00204.000", 64, ["SYSTEM/A00205.000", "SYSTEM/A00206.000"], (0, 0, 256, 160))
+# "NOW LOADING": 4 bpp page SYSTEM/A10003.GAM (VRAM 256,256 = tpage 0x14; 0x24 on the other GetGraphType), sprites 1 "NOW" (184,192,40x16) and 2
+# "LOADING" (184,208,56x16) of the UiSpriteDef table at 0x80078808, drawn by FUN_800212b4 at (104,96) and (160,96); CLUT (352,509) = palette 14 of A00802
+NOW_LOADING = ("now_loading", "SYSTEM/A10003.GAM", 64, "SYSTEM/A00802.000", 14, (184, 192, 56, 32))
 
 
 def _words(d):
@@ -114,7 +117,24 @@ def export_screens(out, log=lambda m: None):
     if fs:
         vram.write(os.path.join(out, FONT_SHEET[0] + ".png"), fs)
         n += 1
+    nl = now_loading(*NOW_LOADING)
+    if nl:
+        vram.write(os.path.join(out, NOW_LOADING[0] + ".png"), nl)
+        n += 1
     return n
+
+
+def now_loading(name, page, wwords, clutf, row, crop):
+    d, c = vram.resource(page), vram.resource(clutf)
+    if d is None or c is None:
+        return None
+    pal = list(_words(c)[row * 16:row * 16 + 16])
+    cx, cy, cw, ch = crop
+    rgb = []
+    for y in range(cy, cy + ch):
+        line = d[y * wwords * 2:(y + 1) * wwords * 2]
+        rgb.append(b"".join(RGB[pal[(line[x >> 1] >> 4) if x & 1 else line[x >> 1] & 15]] + (b"\xff" if pal[(line[x >> 1] >> 4) if x & 1 else line[x >> 1] & 15] else b"\0") for x in range(cx, cx + cw)))
+    return vram.png_rgba(cw, ch, rgb)
 
 
 def _pagew(f, pages):
