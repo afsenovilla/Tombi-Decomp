@@ -1,5 +1,6 @@
 // FUNC 80116d3c 6596 X004
 // MATCHING 80116d3c 6596
+#include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
@@ -43,7 +44,6 @@ typedef void (*Fn)(O *);
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern E8 *D_801305DC[];
-extern unsigned char D_8009CDD5, D_8009CDF1, D_8009CFEE;
 extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
 extern unsigned char D_8009C982b;
@@ -215,7 +215,7 @@ void func_80116D3C(O *o)
             break;
         case 1:
             F6047();
-            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
                 func_80116C0C(o);
                 break;
             }
@@ -224,7 +224,7 @@ void func_80116D3C(O *o)
                 D_8009D2B0 = 0;
                 GVARS.b3f = 1;
                 GVARS.b42 = 1;
-                D_8009CFEE = 1;
+                GCD.bcfee = 1;
             }
             if (p->ba2 == 2) {
                 if (D_1F80016E < -0x12b) break;
@@ -277,7 +277,7 @@ void func_80116D3C(O *o)
             break;
         case 2:
             F6047();
-            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
                 func_80116AE0(o);
                 break;
             }
@@ -422,7 +422,7 @@ void func_80116D3C(O *o)
                 if (D_1F80016E < -0x36f) break;
                 q = &D_8009D2B0;
                 if (*q == 3) break;
-                if (D_8009CDF1 != 0xff) break;
+                if (GCD.bcdf1 != 0xff) break;
                 o->step = 6;
                 goto tail11;
             }

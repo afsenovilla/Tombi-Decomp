@@ -1,9 +1,8 @@
 // FUNC 8011aa3c 356 X004
 // MATCHING 8011aa3c 356
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F8002D4[];
 extern void *D_80134D18;
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
@@ -19,7 +18,7 @@ void func_8011AA3C(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if (D_1F8001F8 & 0x3f) break;
+            if (SPAD.s1f8 & 0x3f) break;
             p = ObjAlloc();
             if (p == 0) break;
             one = 1;
@@ -30,7 +29,7 @@ void func_8011AA3C(TObj *o)
             p->subtype = one;
             p->b0c = 0;
             p->b0d = 0x80;
-            p->d3c = D_1F8002D4[0];
+            p->d3c = ((int*)&SPAD.i2d4)[0];
             p->anim = D_80134D18;
             p->b0a = one;
             p->h->raw = o->h->raw;

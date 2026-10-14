@@ -1,12 +1,10 @@
 // FUNC 8011d544 704 X004
 // MATCHING 8011d544 704
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern void *D_80134D50[];
-extern int D_1F8002D4[];
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern int D_800A4570;
 extern int D_800A4574;
 extern void func_8011D804(TObj *);
@@ -23,7 +21,7 @@ static __inline__ void place(TObj *o)
 
     {
         int d = o->d30;
-        x = ((unsigned int)((d - D_1F800176 + ((D_800A4574 >> 8) << 4)) << 21)) >> 23;
+        x = ((unsigned int)((d - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + ((D_800A4574 >> 8) << 4)) << 21)) >> 23;
     }
     a = x;
     if (x >= 0x180 && x <= 0x1c0) {
@@ -33,7 +31,7 @@ static __inline__ void place(TObj *o)
         a = -(unsigned char)(~x + 1);
     }
     {
-        unsigned short s = D_1F800186;
+        unsigned short s = SPAD.s186;
         int g = D_800A4570;
         y = (short)(o->d34 - s - ((g >> 8) << 3)) >> 2;
     }
@@ -58,7 +56,7 @@ void func_8011D544(TObj *o)
         o->w1e = 10;
         o->y.p.whole += 0x40;
         o->anim = D_80134D50[o->b0c];
-        dd = D_1F8002D4[0];
+        dd = ((int*)&SPAD.i2d4)[0];
         pa = o->a.p.whole;
         o->d30 = pa;
         o->d34 = o->y.p.whole;

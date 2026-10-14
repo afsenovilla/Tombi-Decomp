@@ -1,5 +1,6 @@
 // FUNC 80118bfc 1304 X004
 // MATCHING 80118bfc 1304
+#include "spad.h"
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
 typedef struct { short vx, vy, vz, pad; } SVEC;
 typedef struct { unsigned char b0, b1, b2, n; int list[1]; } L;
@@ -8,9 +9,6 @@ typedef struct { unsigned char x, f, z; } E3;
 extern MAT D_1F8000C0;
 typedef struct { unsigned short g; char pad[0x43e]; unsigned char f; } GS;
 extern GS D_8009C962;
-extern unsigned short D_1F80017E;
-extern unsigned short D_1F800176;
-extern unsigned short D_1F8000F2;
 extern E3 D_8013062C[];
 extern E3 D_801308FC[];
 extern void SetRotMatrix(MAT *);
@@ -37,7 +35,7 @@ void func_80118BFC(L *o, unsigned char *a)
     SetTransMatrix(&D_1F8000C0);
     switch (gs->g) {
     case 0:
-        d = 0x21c - D_1F80017E;
+        d = 0x21c - SPAD.s17e;
         if (d > 0) i = d + 0x1c2;
         else i = 0x1c2;
         m = -0x10e;
@@ -47,12 +45,12 @@ void func_80118BFC(L *o, unsigned char *a)
         m = -0x10e;
         break;
     case 2:
-        if ((unsigned short)(D_1F800176 - 0x2b3) < 0x199) i = 0x168;
+        if ((unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x2b3) < 0x199) i = 0x168;
         else i = 0x1c2;
         m = -0xb4;
         break;
     case 3:
-        if ((short)D_1F800176 >= 0x105) i = 0x168;
+        if ((short)(*(unsigned short*)((char*)&SPAD.i174 + 2)) >= 0x105) i = 0x168;
         else i = 0x1c2;
         m = -0xb4;
         break;
@@ -68,7 +66,7 @@ void func_80118BFC(L *o, unsigned char *a)
             if (D_8013062C[i].f & 8) continue;
             if (D_8009C962.f == 0 && (D_8013062C[i].f & 1)) continue;
             x = D_8013062C[i].x * 0x5a + 0x1c2;
-            y = D_1F8000F2;
+            y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_8013062C[i].z * 0x5a + 0x5a;
             break;
         case 1:
@@ -76,7 +74,7 @@ void func_80118BFC(L *o, unsigned char *a)
             if (D_8013062C[k].f & 8) continue;
             if (D_8009C962.f == 0 && (D_8013062C[k].f & 2)) continue;
             x = D_8013062C[k].x * 0x5a + 0x1c2;
-            y = D_1F8000F2;
+            y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_8013062C[k].z * 0x5a + 0x14;
             break;
         case 2:
@@ -84,7 +82,7 @@ void func_80118BFC(L *o, unsigned char *a)
             if (D_801308FC[i].f & 8) continue;
             if (D_8009C962.f == 0 && (D_801308FC[i].f & 1)) continue;
             x = D_801308FC[i].x * 0x5a + 0x21c;
-            y = D_1F8000F2;
+            y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_801308FC[i].z * 0x5a + 0x108;
             break;
         case 3:
@@ -92,7 +90,7 @@ void func_80118BFC(L *o, unsigned char *a)
             if (D_801308FC[k].f & 8) continue;
             if (D_8009C962.f == 0 && (D_801308FC[k].f & 2)) continue;
             x = D_801308FC[k].x * 0x5a + 0x21c;
-            y = D_1F8000F2;
+            y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_801308FC[k].z * 0x5a + 0xdb;
             break;
         }

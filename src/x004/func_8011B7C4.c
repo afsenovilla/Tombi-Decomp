@@ -1,5 +1,6 @@
 // FUNC 8011b7c4 1868 X004
 // MATCHING 8011b7c4 1868
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,8 +8,6 @@
 
 extern unsigned short D_1F8001C8;
 extern short D_1F800172;
-extern unsigned char D_8009D0DA, D_8009D0D9;
-extern unsigned char D_8009CDD7, D_8009CDCD, D_8009CDCE, D_8009CDDB;
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
@@ -53,9 +52,9 @@ void func_8011B7C4(TObj *o)
         case 4:
             if (D_1F8001C8 & 1) break;
             r = func_8011AFA8(o);
-            if (D_8009D0DA) {
+            if (GCD.bd0da) {
                 if (r == 2 && D_1F800172 == 0x384) {
-                    if (D_8009CDD7 == 0xff) {
+                    if (GCD.bcdd7 == 0xff) {
                         o->b6b = 1;
                     } else {
                         o->substep = 4;
@@ -65,7 +64,7 @@ void func_8011B7C4(TObj *o)
             } else {
                 if (r == 1 && D_1F800172 == 0x384) {
                     o->state = 0;
-                    if (D_8009CDD7 == 0) {
+                    if (GCD.bcdd7 == 0) {
                         o->substep = 1;
                         o->wac = 0x33;
                     }
@@ -99,11 +98,11 @@ void func_8011B7C4(TObj *o)
             r = func_8011B218(o);
             if (r == 1 && *p == 0x32a) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 1) {
-                    if (D_8009CDCD == 0xff) break;
+                    if (GCD.bcdcd == 0xff) break;
                     o->substep = 4;
                 } else {
                     o->state = 0;
-                    if (D_8009CDCD != 0) break;
+                    if (GCD.bcdcd != 0) break;
                     o->substep = 1;
                 }
                 o->wac = 0x29;
@@ -116,11 +115,11 @@ void func_8011B7C4(TObj *o)
             r = func_8011B218(o);
             if (r == 1 && D_1F800172 == 0x546) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 2) {
-                    if (D_8009CDCE == 0xff) break;
+                    if (GCD.bcdce == 0xff) break;
                     o->substep = 4;
                 } else {
                     o->state = 0;
-                    if (D_8009CDCE != 0) break;
+                    if (GCD.bcdce != 0) break;
                     o->substep = 1;
                 }
                 o->wac = 0x2a;
@@ -131,9 +130,9 @@ void func_8011B7C4(TObj *o)
         case 8:
             if (D_1F8001C8 & 1) break;
             r = func_8011B218(o);
-            if (D_8009D0D9) {
+            if (GCD.bd0d9) {
                 if (r == 2 && D_1F800172 == 0x1c2) {
-                    if (D_8009CDDB == 0xff) {
+                    if (GCD.bcddb == 0xff) {
                         o->b6b = 1;
                     } else {
                         o->substep = 4;
@@ -143,7 +142,7 @@ void func_8011B7C4(TObj *o)
             } else {
                 if (r == 1 && D_1F800172 == 0x1c2) {
                     o->state = 0;
-                    if (D_8009CDDB == 0) {
+                    if (GCD.bcddb == 0) {
                         o->substep = 1;
                         o->wac = 0x37;
                     }
