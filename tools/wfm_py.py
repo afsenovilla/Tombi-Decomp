@@ -29,7 +29,7 @@ The terminator (0xFFFE close / 0xFFFF end / none) is a property of the dialogue,
 
   python3 tools/wfm_py.py --check [PATH]     decode+encode every WFM and count the byte-identical ones
 """
-import hashlib, json, os, re, struct, sys
+import hashlib, json, os, re, struct, sys, unicodedata
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import i18n, text_strings
 from i18n import tr
@@ -290,6 +290,8 @@ def text_to_words(w, text, font, pool=None):
             try:
                 gi = borrow(w, c, font, pool)
             except UnknownGlyph:
+                if pool is not None:
+                    raise               # nothing at this height anywhere: do not silently draw a small raised glyph
                 gi = resolve(w, c, font)
                 if gi is None:
                     raise
@@ -310,7 +312,9 @@ def borrow(w, ch, font, pool):
 
 
 class GlyphPool:
-    """Glyph bitmaps of every character seen in a set of decoded files, to add characters a file lacks."""
+    """Glyph bitmaps of every character seen in a set of decoded files, to add characters a file lacks.
+    find() gives a glyph of exactly the font's height (same clut preferred); a character that exists at no file at that height
+    is synthesized (see _synth)."""
 
     def __init__(self):
         self.by = {}
@@ -318,13 +322,63 @@ class GlyphPool:
     def add(self, w):
         for g in w.glyphs:
             if g.char and g.width and g.height:
-                self.by.setdefault(g.char, {}).setdefault(g.height, g)
+                self.by.setdefault(g.char, {}).setdefault(g.height, {}).setdefault(g.clut, g)
 
-    def find(self, ch, font):
-        c = self.by.get(ch)
+    def get(self, ch, h, clut):
+        c = self.by.get(ch, {}).get(h)
         if not c:
             return None
-        return c.get(font[0]) or None
+        return c.get(clut) or next(iter(c.values()))
+
+    def find(self, ch, font):
+        h, clut = font
+        return self.get(ch, h, clut) or self._synth(ch, h, clut)
+
+    def _synth(self, ch, h, clut):
+        """Characters no file has at height h: (1) the 8 px glyph stretched to h vertically (16 px glyphs are as wide as 8 px
+        ones, only taller; h a multiple of 8); (2) an accented capital: the base capital with the accent rows of the lowercase
+        accented letter (its difference from the plain lowercase) set just above it."""
+        base = unicodedata.normalize("NFD", ch)
+        if len(base) == 2 and base[0].isupper():
+            cap, low, low_acc = self.get(base[0], h, clut), self.get(base[0].lower(), h, clut), \
+                self.get(unicodedata.normalize("NFC", base[0].lower() + base[1]), h, clut)
+            if cap and low and low_acc and low.width == low_acc.width == cap.width:
+                return _compose_accent(cap, low, low_acc, ch, clut)
+            return None
+        g8 = self.get(ch, 8, clut)
+        if g8 is not None and h > 8 and h % 8 == 0:
+            f = h // 8
+            wd = g8.width
+            px = g8.pixels()
+            out = [px[r * wd + c] for r in range(g8.height) for _ in range(f) for c in range(wd)]
+            return _glyph_from_pixels(clut, h, wd, g8.hand, out, ch)
+        return None
+
+
+def _glyph_from_pixels(clut, h, wd, hand, px, ch):
+    if len(px) % 2:
+        px = px + [0]
+    img = bytes(px[i] | (px[i + 1] << 4) for i in range(0, len(px), 2))
+    g = Glyph(clut, h, wd, hand, img)
+    g.char = ch
+    return g
+
+
+def _compose_accent(cap, low, low_acc, ch, clut):
+    wd, h = cap.width, cap.height
+    cp, lp, ap = cap.pixels(), low.pixels(), low_acc.pixels()
+    rows = lambda p, r: p[r * wd:(r + 1) * wd]
+    acc = [r for r in range(h) if rows(ap, r) != rows(lp, r) and any(rows(ap, r)) and not any(rows(lp, r))]
+    if not acc or acc != list(range(acc[0], acc[-1] + 1)):
+        return None
+    top = next((r for r in range(h) if any(rows(cp, r))), h)
+    shift = top - 1 - acc[-1]               # accent sits right above the capital
+    if acc[0] + shift < 0:
+        return None
+    out = list(cp)
+    for r in acc:
+        out[(r + shift) * wd:(r + shift + 1) * wd] = rows(ap, r)
+    return _glyph_from_pixels(clut, h, wd, cap.hand, out, ch)
 
 
 # ---- self test ----------------------------------------------------------------------------------------------------

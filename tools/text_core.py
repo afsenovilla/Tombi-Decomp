@@ -372,8 +372,10 @@ class Project:
         if self._pool is None:
             self._pool = W.GlyphPool()
             for n in self.src.names():
-                if is_main_lang(n) or self.selected(n):
-                    self._pool.add(self.wfm(n))
+                try:
+                    self._pool.add(self.wfm(n))     # every language: a 16 px 'W' may only exist in another one
+                except CoreError:
+                    pass
         return self._pool
 
     def words(self, path, idx, text):
@@ -382,11 +384,7 @@ class Project:
         base = self.wfm(path)
         font = base.dialogues[idx].font
         wc = clone(base)
-        try:
-            return W.text_to_words(wc, text, font), wc
-        except W.UnknownGlyph:
-            wc = clone(base)
-            return W.text_to_words(wc, text, font, self.pool()), wc
+        return W.text_to_words(wc, text, font, self.pool()), wc
 
     def validate(self, path, idx, text):
         try:
@@ -487,10 +485,7 @@ class Project:
             for idx, text in sorted(e.items()):
                 try:
                     d = w.dialogues[idx]
-                    try:
-                        words = W.text_to_words(w, text, d.font)
-                    except W.UnknownGlyph:
-                        words = W.text_to_words(w, text, d.font, self.pool())
+                    words = W.text_to_words(w, text, d.font, self.pool())
                     lay = self.layout(path)
                     if lay is not None and idx in lay.recs and words and len(words) < len(lay.recs[idx]):
                         # shorter title: the engine reads one glyph per record of the list, so pad (the extra tiles are off screen)
