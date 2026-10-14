@@ -1,8 +1,8 @@
 // FUNC 8011d3ec 660 X009
 // MATCHING 8011d3ec 660
+#include "spad.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
-extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C8;
 extern void FUN_80104dc8(TObj *);
 extern void func_80104F2C(TObj *);
 extern void FUN_800ef490(TObj *);
@@ -38,7 +38,7 @@ void func_8011D3EC(TObj *o)
         ObjAddVelY7E(o);
         AnimAdvance(o);
         if (o->b69 == 0 && !func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x40)
-            && !(D_1F8001FC & D_1F8003C8) && !(D_1F8001FC & D_1F8003C6) && !ObjTileCollide(o, 4, 0)) {
+            && !(SPAD.s1fc & SPAD.s3c8) && !(SPAD.s1fc & SPAD.s3c6) && !ObjTileCollide(o, 4, 0)) {
             break;
         }
         o->b9c = 0;

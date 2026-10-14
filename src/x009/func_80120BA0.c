@@ -1,8 +1,8 @@
 // FUNC 80120ba0 200 X009
 // MATCHING 80120ba0 200
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80019E;
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultC(TObj *, TObj *);
@@ -28,5 +28,5 @@ void func_80120BA0(TObj *o, TObj *e)
         }
         e->b6a = 0;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

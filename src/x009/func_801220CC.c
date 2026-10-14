@@ -1,5 +1,6 @@
 // FUNC 801220cc 992 X009
 // MATCHING 801220cc 992
+#include "spad.h"
 #include "gv2.h"
 #include "TOBJ.H"
 extern void ObjSetFacingToPlayer(TObj *);
@@ -13,8 +14,6 @@ extern void *D_8012E9F8[];
 extern void *D_8012EA00[];
 extern void *D_8012EA40[];
 extern unsigned char D_8012B2CC[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern char D_80077CF4[];
 
 static __inline__ short ground(TObj *o)
@@ -105,7 +104,7 @@ void func_801220CC(TObj *o)
         }
         if (*p == 1) {
             if (o->visible) {
-                t = D_1F8001F8 + D_1F800198;
+                t = SPAD.s1f8 + SPAD.i198;
                 if (!(t & 0x3f)) {
                     if (Rand() & 1) {
                         playSFX(0x95);
@@ -116,7 +115,7 @@ void func_801220CC(TObj *o)
             }
         } else if (*p == 2) {
             if (o->visible) {
-                t = D_1F8001F8 + D_1F800198;
+                t = SPAD.s1f8 + SPAD.i198;
                 if (!(t & 0x7f)) {
                     if (Rand() & 1) {
                         playSFX(0x96);

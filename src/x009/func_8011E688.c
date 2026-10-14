@@ -1,5 +1,6 @@
 // FUNC 8011e688 1600 X009
 // MATCHING 8011e688 1600
+#include "spad.h"
 #include "gv2.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -8,7 +9,6 @@ extern TObj *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short DAT_8009d670[];
-extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C6, D_1F8003C4;
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
@@ -69,11 +69,11 @@ void func_8011E688(TObj *o)
             }
             if (s == 0)
                 o->y.raw += -0x18000;
-            if ((D_1F8001F8 & 0xf) == 0)
+            if ((SPAD.s1f8 & 0xf) == 0)
                 FUN_8001e560(0x1d, 0);
         } else if (*k & 0x40) {
             FUN_800eeb5c(o, 0xc);
-            if ((D_1F8001F8 & 0xf) == 0)
+            if ((SPAD.s1f8 & 0xf) == 0)
                 FUN_8001e560(0x1d, 0);
             o->y.raw += 0x28000;
             if (o->b69) {
@@ -155,7 +155,7 @@ void func_8011E688(TObj *o)
         }
         break;
     }
-    if (D_1F8001FC & D_1F8003C6) {
+    if (SPAD.s1fc & SPAD.s3c6) {
         {
             Fix16 *h; int f;
         ((unsigned char*)&GV2.bb0)[0] = 0;
@@ -169,7 +169,7 @@ void func_8011E688(TObj *o)
             if (f) h->p.whole = v + 0x10; else h->p.whole = v - 0x10;
         }
         if (GAME.area00_eventControl & 0x40) {
-            if (DAT_8009d670[0] & D_1F8003C4)
+            if (DAT_8009d670[0] & SPAD.s3c4)
                 o->ba7 = 1;
         }
         o->step = 2;

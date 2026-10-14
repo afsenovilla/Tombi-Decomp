@@ -1,12 +1,12 @@
 // FUNC 80118f7c 564 X009
 // MATCHING 80118f7c 564
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { char p[0xb4]; short s[15]; } XS;
 #define S(o, off) (((XS *)(o))->s[((off) - 0xb4) / 2])
 
-extern unsigned char D_8009D07E;
 extern void *D_8012E9E8[], *D_8012E9BC, *D_8012E9C8;
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -19,7 +19,7 @@ void func_80118F7C(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009D07E) {
+        if (GCD.bd07e) {
             o->timer = 0x10;
             o->step++;
         }

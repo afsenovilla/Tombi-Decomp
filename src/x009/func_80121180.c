@@ -1,5 +1,6 @@
 // FUNC 80121180 212 X009
 // MATCHING 80121180 212
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct {
     char p00[0x40]; Fix16 *h;
@@ -8,7 +9,6 @@ typedef struct {
     char pb2[0xbe - 0xb2]; unsigned char bbe;
     char pbf[0xe4 - 0xbf]; TObj *de4;
 } PL;
-extern short D_1F80019E;
 extern short func_8004306C(PL *, TObj *);
 
 void func_80121180(PL *p, TObj *o)
@@ -35,5 +35,5 @@ void func_80121180(PL *p, TObj *o)
             p->bac = 2;
         }
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

@@ -1,12 +1,11 @@
 // FUNC 8011ee50 728 X009
 // MATCHING 8011ee50 728
+#include "gcd.h"
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern char D_80077D6C[];
 extern void *D_8012E04C;
 extern void *D_8012E050;
-extern unsigned char D_8009CEF6;
-extern unsigned char D_8009CFE5[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -90,10 +89,10 @@ void func_8011EE50(TObj *o)
                 o->step++;
             break;
         case 1:
-            c = &D_8009CEF6;
+            c = &GCD.bcef6;
             printInfoMessage(*c + 0x29, 2);
             (*c)++;
-            D_8009CFE5[o->b0c] = 1;
+            ((unsigned char*)&GCD.bcfe5)[o->b0c] = 1;
             o->b04++;
             break;
         }

@@ -1,8 +1,8 @@
 // FUNC 801198dc 720 X009
 // MATCHING 801198dc 720
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D0CE[];
 extern void *D_8012DAF4[];
 extern int D_1F8002D4;
 extern unsigned short D_1F800176[], D_1F800186[];
@@ -44,7 +44,7 @@ void func_801198DC(TObj *o)
             o->b0d = 1;
             o->w1e = 4;
             o->b.p.whole = 0xc8;
-            if (D_8009D0CE[0]) o->d30 = 0x98;
+            if (((unsigned char*)&GCD.bd0ce)[0]) o->d30 = 0x98;
             else o->d30 = 0x4c;
             o->b0f = 2;
             o->anim = D_8012DAF4[o->b0c];

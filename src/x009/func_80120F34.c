@@ -1,10 +1,9 @@
 // FUNC 80120f34 588 X009
 // MATCHING 80120f34 588
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_1F8001A4;
-extern short D_1F80019E;
 extern short func_80043464(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
@@ -33,7 +32,7 @@ void func_80120F34(TObj *o, TObj *p)
     case 0:
     case 3:
         if (p->active & 2) break;
-        if (D_1F8001A4) break;
+        if (SPAD.b1a4) break;
         if (o->active & 2) break;
         if (r == 2 && p->b6a == 1) {
             if ((*(unsigned char*)&o->wac) == 1) (*(unsigned char*)&o->wac) = 0;
@@ -69,5 +68,5 @@ void func_80120F34(TObj *o, TObj *p)
         p->animFrame = t;
         break;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

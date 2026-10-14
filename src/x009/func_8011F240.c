@@ -1,5 +1,6 @@
 // FUNC 8011f240 1836 X009
 // MATCHING 8011f240 1836
+#include "spad.h"
 /* Rotated FT4 sprite strip (family of FUN_80123fd0). All element reads go through the one pointer q: loop.c then
    combines the 7 address givs into a reduced reg based on the LAST one (q+12 = uv3), which is the game's s2;
    a separate f = q+12 pointer gets reduced to q+8 instead. p = D_1F800164 is read between the A/B and C/D bytes. */
@@ -15,11 +16,9 @@ typedef struct {
 } PFT4;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4 *D_1F800164;
-extern int D_1F8001E0;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -49,7 +48,7 @@ void func_8011F240(TObj *o)
 
     if (o->anim == 0)
         return;
-    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;
@@ -103,9 +102,9 @@ void func_8011F240(TObj *o)
             p->g = o->d60;
             p->b = o->d64;
             if (o->b0b != 0)
-                r = insertPrim(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                r = insertPrim(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
-                r = insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                r = insertPrimWithBias(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             if (!r)
                 D_1F800164 = (PFT4 *)((char *)D_1F800164 + 0x28);
         }

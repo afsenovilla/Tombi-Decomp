@@ -1,7 +1,7 @@
 // FUNC 8011b8e0 556 X009
 // MATCHING 8011b8e0 556
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4;
 extern void *D_8012DB6C[];
 extern void *D_8012DB74[];
 extern short FUN_8005e420(int, int);
@@ -44,7 +44,7 @@ void func_8011B8E0(TObj *o)
             o->active = 1;
             break;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         FUN_8001fe6c(o);
         break;
     case 1:

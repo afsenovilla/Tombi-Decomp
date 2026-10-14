@@ -1,10 +1,10 @@
 // FUNC 80118bf8 520 X009
 // MATCHING 80118bf8 520
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, z, pad; } SV;
 #define V(o) ((SV *)((char *)(o) + 0xb4))
-extern int D_1F8002E8;
 extern void *D_8012E9EC[];
 extern void *D_8012E9E4;
 extern short GetClut(int, int);
@@ -32,7 +32,7 @@ void func_80118BF8(TObj *o)
     o->w1e = 0xb;
     o->b0d = 1;
     o->w08 = GetClut(0x120, 0x1e1);
-    s = &D_1F8002E8;
+    s = &SPAD.i2e8;
     o->_pad0e[0] = 0;
     o->d3c = *s;
     o->subtype = 1;

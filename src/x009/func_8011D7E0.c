@@ -1,5 +1,6 @@
 // FUNC 8011d7e0 1668 X009
 // MATCHING 8011d7e0 1668
+#include "spad.h"
 #include "gv6.h"
 /* debt: char pad[4] (frame), "& 0xffff & 0xff" keeps sra, volatile pad read in case 2 */
 #include "TOBJ.H"
@@ -19,7 +20,6 @@ typedef struct {
 
 extern PL *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_1F8003C6;
 extern char D_80011108[];
 extern void func_800EE5C8(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -134,7 +134,7 @@ void func_8011D7E0(TObj *o)
         }
         if (D_8009C330->b09 == 0) break;
         func_8011D680(o, s2, s1);
-        if (((unsigned short*)&GV6.s70)[0] & D_1F8003C6) {
+        if (((unsigned short*)&GV6.s70)[0] & SPAD.s3c6) {
             D_8009C330->b09 = 0;
             o->step = 0x27;
             o->state = 0;
@@ -160,7 +160,7 @@ void func_8011D7E0(TObj *o)
         o->h->p.whole += D_8009F0EC->velX;
         o->y.p.whole += D_8009F0EC->velY;
         AnimAdvance(o);
-        if (((unsigned short*)&GV6.s70)[0] & D_1F8003C6) {
+        if (((unsigned short*)&GV6.s70)[0] & SPAD.s3c6) {
             D_8009C330->b09 = 0;
             o->step = 0x27;
             o->state = 0;

@@ -1,10 +1,10 @@
 // FUNC 8011b01c 908 X009
 // MATCHING 8011b01c 908
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char a, b, c; signed char d; } P4;
-extern unsigned char D_8009CFF8;
 extern signed char D_80011EB4[];
 extern P4 D_80011E5C[];
 extern void *D_8012E024;
@@ -46,7 +46,7 @@ void func_8011B01C(TObj *o)
             o->state = 0;
         }
         p = &D_80011E5C[D_80011EB4[*(*(unsigned short **)&PLAYER.obj.anim)]];
-        if (D_8009CFF8 == 0) {
+        if (GCD.bcff8 == 0) {
             o->b04 = 3;
             break;
         }

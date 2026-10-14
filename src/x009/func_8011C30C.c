@@ -1,11 +1,11 @@
 // FUNC 8011c30c 392 X009
 // MATCHING 8011c30c 392
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDB4;
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -17,13 +17,13 @@ void func_8011C30C(TObj *o)
         break;
     case 1:
         if (GAME.playerAP <= 0x249ef) {
-            if (D_8009CDB4 == 0) {
+            if (GCD.bcdb4 == 0) {
                 setEventStarted(0x10, 0, 0);
                 o->step++;
             } else {
                 o->step--;
             }
-        } else if (D_8009CDB4 != 0xff) {
+        } else if (GCD.bcdb4 != 0xff) {
             setEventComplete(0x10, 0);
             o->step++;
         } else {

@@ -1,5 +1,6 @@
 // FUNC 80119f5c 1356 X009
 // MATCHING 80119f5c 1356
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -23,9 +24,6 @@ typedef struct {
 extern C80119F5C D_800A4550;
 extern P80119F5C D_8012AC88[];
 extern unsigned char PLAYER[];
-extern int D_1F8000EC[], D_1F8000F0[], D_1F8000F4[];
-extern short D_1F800256;
-extern TObj **D_1F80026C;
 extern void func_80119D2C(TObj *);
 extern void func_80119E4C(TObj *);
 
@@ -108,8 +106,8 @@ void func_80119F5C(TObj *o)
         if (x->w2 > 0xc00) x->w2 = 0xc00;
         ADVANCE(o, x);
         if (x->w0 >= 0x66) {
-            n = D_1F800256;
-            l = D_1F80026C;
+            n = SPAD.s256;
+            l = (*(TObj ***)&SPAD.p26c);
             if (n != 0) {
                 do {
                     e = *l++;
@@ -146,9 +144,9 @@ void func_80119F5C(TObj *o)
         break;
     }
     PLAYER[0] = 5;
-    D_1F8000EC[0] = o->a.raw;
-    D_1F8000F0[0] = o->y.raw;
-    D_1F8000F4[0] = o->b.raw;
+    ((int*)&SPAD.iec)[0] = o->a.raw;
+    ((int*)&SPAD.if0)[0] = o->y.raw;
+    ((int*)&SPAD.if4)[0] = o->b.raw;
     o->d8c = turn(x->w6, o->d8c);
     o->d88 = turn(x->w4, o->d88);
     TURN2(c->d24, o->d88);

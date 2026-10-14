@@ -1,9 +1,9 @@
 // FUNC 8011a7e0 548 X009
 // MATCHING 8011a7e0 548
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D4[];
 extern void *D_8012E060[];
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -28,7 +28,7 @@ void func_8011A7E0(TObj *o)
         *(signed char *)&o->b0f = -11;
         o->w1e = 11;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         setAnim(o, D_8012E060[0]);
         break;
     case 1:
