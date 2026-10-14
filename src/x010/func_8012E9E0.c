@@ -1,11 +1,10 @@
 // FUNC 8012e9e0 388 X010
 // MATCHING 8012e9e0 388
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern TObj PLAYER;
-extern short D_8009C944;
-extern short D_8009C946;
 void PoolFree_1F800210(TObj *o);
 
 void func_8012E9E0(TObj *o)
@@ -19,8 +18,8 @@ void func_8012E9E0(TObj *o)
         } else {
             o->y.raw = -0x3b8;
         }
-        D_8009C944 = 0;
-        D_8009C946 = -0x40;
+        GVARS.s44 = 0;
+        GVARS.s46 = -0x40;
         o->b04++;
         break;
     case 1: {

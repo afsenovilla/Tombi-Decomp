@@ -1,9 +1,9 @@
 // FUNC 8012e728 416 X010
 // MATCHING 8012e728 416
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern void func_8012E550(TObj *);
 extern void setEventComplete(int, int);
 extern void PoolFree_1F800210(TObj *);
@@ -29,9 +29,9 @@ void func_8012E728(TObj *o)
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.step = 100;
                 PLAYER.obj.state = 0;
-                D_8009C93F = 1;
-                D_8009C942 = 1;
-                D_8009C93E = 1;
+                GVARS.b3f = 1;
+                GVARS.b42 = 1;
+                GVARS.b3e = 1;
                 setEventComplete(0xb7, 0);
                 o->w08 = 200;
                 o->state = 1;
@@ -40,9 +40,9 @@ void func_8012E728(TObj *o)
                 PLAYER.obj.b04 = 1;
                 PLAYER.obj.step = 0;
                 PLAYER.obj.state = 0;
-                D_8009C93F = 0;
-                D_8009C942 = 0;
-                D_8009C93E = 0;
+                GVARS.b3f = 0;
+                GVARS.b42 = 0;
+                GVARS.b3e = 0;
                 o->step = 0;
                 o->state = 0;
                 break;

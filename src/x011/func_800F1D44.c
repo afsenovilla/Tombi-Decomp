@@ -1,5 +1,6 @@
 // FUNC 800f1d44 2280 X011
 // MATCHING 800f1d44 2280
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -21,7 +22,6 @@ extern unsigned char *D_800A611C;
 extern volatile unsigned short D_8009D670[];
 extern unsigned char D_8009D2B3;
 extern unsigned char D_8009D2B1;
-extern short D_8009C944[];
 extern unsigned short D_8009D610;
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
@@ -117,8 +117,8 @@ void func_800F1D44(TObj *o)
             FUN_8010f400(o);
             FUN_800efa80(o);
             setObjectSpeedPolar2(o, o->wb6, o->wb2);
-            o->h->raw += D_8009C944[0] << 8;
-            o->y.raw += D_8009C944[1] << 8;
+            o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+            o->y.raw += ((short*)&GVARS.s44)[1] << 8;
             FUN_8001fce4(o);
             if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {
                 if (o->subtype != 0) {
