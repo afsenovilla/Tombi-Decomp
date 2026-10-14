@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Tombi! (PAL) character animations: decode the animation scripts, name them, export GIF + PNG strips.
 
-  tools/anim.py list [--json]            catalogue of Tombi's animations (id, name, frames, ticks, loop)
-  tools/anim.py export OUT [--zoom N] [--tick MS]
-                                         OUT/<id>_<name>.gif (animated) + OUT/<id>_<name>.png (strip) + OUT/catalog.json
+  tools/anim.py list [--owner all|tombi|<handler>] [--json]
+                                         catalogue (owner, id, name, script, frames, ticks, loop); default owner tombi
+  tools/anim.py export OUT [--owner ...] [--zoom N] [--tick MS]
+                                         OUT/<owner>/<id>.gif (animated) + <id>.png (strip) + OUT/catalog.json
+                                         (owners: tombi, then every enemy/NPC/object handler per area, see tools/animobj.py)
 
 Needs the extracted disc tree (game/disc/fs, see tools/area000.py) and Pillow.  Format notes: notes/formats.md ("Animations").
 
@@ -163,9 +165,14 @@ def bounds(spr, frames):
     x0 = y0 = 1 << 20
     x1 = y1 = -(1 << 20)
     for f in set(frames):
-        im, (ox, oy) = spr.frame(f)
+        fr = spr.frame(f)
+        if fr is None:
+            continue
+        im, (ox, oy) = fr
         x0, y0 = min(x0, ox), min(y0, oy)
         x1, y1 = max(x1, ox + im.width), max(y1, oy + im.height)
+    if x0 > x1:
+        return 0, 0, 16, 16
     return x0, y0, x1, y1
 
 
@@ -173,8 +180,10 @@ def compose(spr, f, box, zoom=1, bg=(0, 0, 0, 0)):
     """One animation frame on a canvas `box` (x0, y0, x1, y1) in game coordinates; the origin (object position) is marked by none."""
     x0, y0, x1, y1 = box
     c = spr.Image.new("RGBA", (x1 - x0, y1 - y0), bg)
-    im, (ox, oy) = spr.frame(f)
-    c.alpha_composite(im, (ox - x0, oy - y0))
+    fr = spr.frame(f)
+    if fr is not None:
+        im, (ox, oy) = fr
+        c.alpha_composite(im, (ox - x0, oy - y0))
     if zoom != 1:
         c = c.resize((c.width * zoom, c.height * zoom), spr.Image.NEAREST)
     return c
@@ -209,38 +218,122 @@ def strip(spr, an, zoom=2, bg=(40, 40, 56, 255)):
     return s
 
 
-def fname(an):
+def fname(an, owner="tombi"):
+    """File stem of one animation: Tombi `NN_name`, other owners `NN` (+ `_name` when it has a label)."""
     import labels
-    return "%02d_%s" % (an["id"], labels.slug(an["name"]) or "anim_%02d" % an["id"])
+    if owner == "tombi":
+        return "%02d_%s" % (an["id"], labels.slug(an["name"]) or "anim_%02d" % an["id"])
+    nm = labels.name("anim:%s:%d" % (owner, an["id"]))
+    return "%02d" % an["id"] + ("_" + labels.slug(nm) if nm else "")
 
 
-def export(out, zoom=2, tick=TICK_MS, reader=None, log=print):
-    os.makedirs(out, exist_ok=True)
+# ------------------------------------------------------------------ all owners: Tombi + enemies / NPCs / objects
+def tombi_owner(reader=None):
     cat = catalog(reader)
-    spr = Sprites()
+    return dict(owner="tombi", name="Tombi", handler=None, area=None, spr=dict(wpp=TOMBI_WPP), animations=cat)
+
+
+_objs = {}
+
+
+def object_owners(reader=None, area=None):
+    """Owners of the enemy / NPC / object animation scripts (tools/animobj.py): names from labels ("animowner:<id>") else the handler name."""
+    import animobj, labels
+    k = (id(reader), area)
+    if k not in _objs:
+        ows = animobj.resolve_sources(animobj.build_owners(area, reader))
+        for ow in ows:
+            ow["name"] = labels.name("animowner:" + ow["owner"]) or ow["handler"]
+            n = None
+            if ow["spr"]:
+                n = animobj.table_frames("AR%02d" % ow["area"], ow["spr"]["list"], int(ow["spr"]["kind"], 16))
+            for a in ow["animations"]:
+                a["name"] = labels.name("anim:%s:%d" % (ow["owner"], a["id"])) or a["name"]
+                a["renderable"] = n is not None and max(a["frames"]) < n
+        _objs[k] = ows
+    return _objs[k]
+
+
+def catalog_all(reader=None, owner="all"):
+    """[owner dict]: Tombi first, then the object owners.  `owner` = all | tombi | owner id | handler name (case-insensitive)."""
+    out = []
+    o = (owner or "all").lower()
+    if o in ("all", "tombi"):
+        out.append(tombi_owner(reader))
+    if o != "tombi":
+        for ow in object_owners(reader):
+            if o == "all" or o in (ow["owner"].lower(), ow["handler"].lower(), ow["name"].lower()):
+                out.append(ow)
+    return out
+
+
+def owner_source(ow):
+    """Frame source of an owner: Sprites (Tombi) or animobj.SprFrames; None when nothing draws it."""
+    if ow["owner"] == "tombi":
+        return Sprites()
+    if not ow.get("spr"):
+        return None
+    import animobj
+    return animobj.spr_frames("AR%02d" % ow["area"], ow["spr"]["list"], int(ow["spr"]["kind"], 16), ow["spr"].get("w1e", ()))
+
+
+def anim_json(ow, an):
+    return dict(id=an["id"], name=an["name"], script=an["start"], alias_of=an.get("alias_of"), table=an.get("table"), index=an.get("index"),
+                frames=an["frames"], durations=[max(e["dur"], 1) for e in an["entries"]], loop=an["loop"], end=an["end"], signal=an["signal"],
+                ticks=an["ticks"], renderable=an.get("renderable", True))
+
+
+def export(out, zoom=2, tick=TICK_MS, reader=None, log=print, owner="all"):
+    os.makedirs(out, exist_ok=True)
     n = 0
-    for an in cat:
-        if an["alias_of"] is not None or not an["entries"]:
-            continue
-        save_gif(spr, an, os.path.join(out, fname(an) + ".gif"), zoom, tick)
-        strip(spr, an, zoom).save(os.path.join(out, fname(an) + ".png"))
-        n += 1
+    meta = []
+    tspr = None
+    for ow in catalog_all(reader, owner):
+        spr = owner_source(ow)
+        d = os.path.join(out, ow["owner"])
+        done = 0
+        for an in ow["animations"]:
+            if an.get("alias_of") is not None or not an["entries"] or spr is None or not an.get("renderable", True):
+                continue
+            os.makedirs(d, exist_ok=True)
+            stem = fname(an, ow["owner"])
+            save_gif(spr, an, os.path.join(d, stem + ".gif"), zoom, tick)
+            strip(spr, an, zoom).save(os.path.join(d, stem + ".png"))
+            an["file"] = ow["owner"] + "/" + stem + ".gif"
+            done += 1
+        n += done
+        m = {k: v for k, v in ow.items() if k not in ("animations", "sprs")}
+        m["animations"] = [dict(anim_json(ow, a), file=a.get("file")) for a in ow["animations"]]
+        meta.append(m)
+        if ow["owner"] != "tombi":
+            log("%s (%s, area %s): %d/%d animations" % (ow["owner"], ow["handler"], ow["area"], done, len(ow["animations"])))
     with open(os.path.join(out, "catalog.json"), "w") as f:
-        json.dump(dict(owner="Tombi", wpp=TOMBI_WPP, tick_ms=tick, animations=cat), f, indent=1)
+        json.dump(dict(tick_ms=tick, owners=meta), f, indent=1)
     log("%d animations -> %s" % (n, out))
     return n
 
 
 def cmd_list(a):
-    cat = catalog()
+    cats = catalog_all(owner=a.owner)
+    if not cats:
+        print("no owner %r (try: list --owner all)" % a.owner, file=sys.stderr)
+        return 1
     if a.json:
-        print(json.dumps(cat, indent=1))
+        print(json.dumps([dict({k: v for k, v in ow.items() if k not in ("animations", "sprs")},
+                               animations=[anim_json(ow, x) for x in ow["animations"]]) for ow in cats], indent=1))
         return 0
-    for an in cat:
-        al = " (= %02d)" % an["alias_of"] if an["alias_of"] is not None else ""
-        lp = "loop->%d" % an["loop"] if an["loop"] is not None else an["end"]
-        print("%02d %-22s %s %2d frames %4d ticks %-8s%s%s" % (an["id"], an["name"], an["start"], len(an["entries"]), an["ticks"], lp,
-                                                              " finished-signal" if an["signal"] else "", al))
+    for ow in cats:
+        if ow["owner"] != "tombi":
+            sp = ow["spr"]
+            print("# %s  handler %s @%s  area %s  types %s  frames from %s" % (
+                ow["owner"], ow["handler"], ow["handler_addr"], ow["area"], ",".join(ow["types"]),
+                ("list %d SPR %s" % (sp["list"], sp["kind"])) if sp else "(not resolved)"))
+        for an in ow["animations"]:
+            al = " (= %02d)" % an["alias_of"] if an.get("alias_of") is not None else ""
+            lp = "loop->%d" % an["loop"] if an["loop"] is not None else an["end"]
+            print("%s %02d %-22s %s %2d frames %4d ticks %-8s%s%s%s" % (
+                ow["owner"], an["id"], an["name"], an["start"], len(an["entries"]), an["ticks"], lp, " finished-signal" if an["signal"] else "",
+                al, "" if an.get("renderable", True) else " [frames outside the SPR table]"))
     return 0
 
 
@@ -249,14 +342,16 @@ def main(argv=None):
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("list")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--owner", default="tombi", help="all | tombi | owner id | handler name (default tombi)")
     p = sp.add_parser("export")
     p.add_argument("out")
+    p.add_argument("--owner", default="all")
     p.add_argument("--zoom", type=int, default=2)
     p.add_argument("--tick", type=int, default=TICK_MS, help="ms per game tick in the GIF (default %d)" % TICK_MS)
     a = ap.parse_args(argv)
     if a.cmd == "list":
         return cmd_list(a)
-    export(a.out, a.zoom, a.tick)
+    export(a.out, a.zoom, a.tick, owner=a.owner)
     return 0
 
 
