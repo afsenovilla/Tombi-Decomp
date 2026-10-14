@@ -1,10 +1,10 @@
 // FUNC 801176b0 1836 X006
 // MATCHING 801176b0 1836
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern char *TASK_C;
-extern unsigned char D_8009CFCE;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
 extern short D_1F80016A;
 extern int D_1F8002D0[];
@@ -62,7 +62,7 @@ void func_801176B0(TObj *o)
             FUN_8001e4f0(0xfe);
             o->timer = 0x1e;
             o->step++;
-            if (D_8009CFCE == 1)
+            if (GCD.bcfce == 1)
                 o->step = 5;
             break;
         case 1:
@@ -74,7 +74,7 @@ void func_801176B0(TObj *o)
         case 2:
             o->step++;
             o->d90 = (int)showMessageBoxDirect(2, 0, &o->a);
-            D_8009CFCE = 1;
+            GCD.bcfce = 1;
             o->anim = D_80122FB4[0];
             AnimLoadDuration(o);
             break;

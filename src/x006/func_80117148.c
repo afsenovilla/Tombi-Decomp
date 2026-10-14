@@ -1,5 +1,6 @@
 // FUNC 80117148 800 X006
 // MATCHING 80117148 800
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -10,7 +11,6 @@ extern SVEC D_1F800060;
 extern int D_1F8002E0[];
 extern int D_1F800168[], D_1F80016C[], D_1F800170[];
 extern void *D_801229A8[];
-extern unsigned char D_8009CF06, D_8009D006;
 extern void *D_8011F2DC, *D_8011F2F0, *D_8011F2CC[], *D_8011F2E0[];
 extern unsigned char PLAYER[];
 extern short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
@@ -42,7 +42,7 @@ void func_80117148(TObj *o)
         o->animFrame = 0;
         o->anim = D_801229A8[0];
         AnimLoadDuration(o);
-        if (D_8009CF06 || D_8009D006) {
+        if (GCD.bcf06 || GCD.bd006) {
             loadImageRect(D_8011F2DC, 0x90, 0x1f0, 0x10, 1);
             loadImageRect(D_8011F2F0, 0x90, 0x1f1, 0x10, 1);
         } else {

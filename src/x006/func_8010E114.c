@@ -1,5 +1,6 @@
 // FUNC 8010e114 532 X006
 // MATCHING 8010e114 532
+#include "spad.h"
 #include "gvars.h"
 #include "player.h"
 typedef struct P { short x; short y; } P;
@@ -8,25 +9,21 @@ typedef struct S {
     unsigned short w16; char p2[0x40 - 0x18]; P *pos; P *pos2; char p3[0x68 - 0x48];
     unsigned char b68; char p4[0x6e - 0x69]; unsigned short w6e; char p5[2]; unsigned short w72;
 } S;
-extern S **D_1F800260;
-extern unsigned short D_1F8001FC;
-extern unsigned short D_1F8003C4;
-extern unsigned short D_1F800250;
 extern unsigned short D_1F80019E;
 extern short D_1F80019Es;
 extern P *D_800A607C;
 extern P *D_800A6078;
 int func_8010E114(void)
 {
-    S **list = D_1F800260;
+    S **list = (*(S ***)&SPAD.p260);
     S *p;
     int r; short c;
     unsigned int f;
     unsigned short h, w, d;
-    unsigned short n = D_1F800250;
+    unsigned short n = SPAD.s250;
     D_1F80019E = n;
     r = 0;
-    if ((D_1F8001FC & D_1F8003C4) == 0) return 0;
+    if ((SPAD.s1fc & SPAD.s3c4) == 0) return 0;
     if (n != 0)
     do {
         p = list[0];

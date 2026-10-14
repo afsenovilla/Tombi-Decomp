@@ -1,5 +1,6 @@
 // FUNC 801165bc 424 X006
 // MATCHING 801165bc 424
+#include "spad.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 
 typedef void (*Fn)(TObj *);
 extern Fn D_80079AD0[];
-extern short D_1F80016A, D_1F80016E;
 extern void FUN_80027810(TObj *);
 extern int tryStartItemInteraction(TObj *, int, unsigned char);
 extern void FUN_8002a4d0(TObj *);
@@ -29,12 +29,12 @@ void func_801165BC(TObj *o)
         case 1:
             if ((unsigned short)((*(unsigned short*)&PLAYER.obj.a.p.whole) - 0x2e7) < 0x80 && PLAYER.obj.b.p.whole >= 0x5b) {
                 tryStartItemInteraction(o, 1, 0);
-            } else if (D_1F80016A >= 0x3ad && D_1F80016E >= -0x3b) {
+            } else if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x3ad && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x3b) {
                 tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 2:
-            if (D_1F80016A < 0x1e && D_1F80016E >= -0x3b)
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x1e && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x3b)
                 tryStartItemInteraction(o, 1, 0);
             break;
         }

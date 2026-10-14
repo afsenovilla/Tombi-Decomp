@@ -1,10 +1,10 @@
 // FUNC 80117ddc 1320 X006
 // MATCHING 80117ddc 1320
+#include "gcd.h"
 #include "TOBJ.H"
 
 extern int D_1F8002D4[];
 extern void *D_80122DF4[], *D_80122E04[], *D_80122DC4[];
-extern unsigned short D_8009CFE2;
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void ObjListPush_1F800220(TObj *);
@@ -59,7 +59,7 @@ void func_80117DDC(TObj *o)
             AnimLoadDuration(o);
             break;
         case 4:
-            t = D_8009CFE2;
+            t = (*(unsigned short*)&GCD.scfe2);
             switch (o->b0c) {
             case 0:
                 d = S(t / 3600) % 10;

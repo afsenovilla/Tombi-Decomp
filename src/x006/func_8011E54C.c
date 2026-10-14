@@ -1,10 +1,10 @@
 // FUNC 8011e54c 1668 X006
 // MATCHING 8011e54c 1668
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D0FB, D_8009D0FC, D_8009D0FD;
-extern unsigned char D_8009D0A4[], SCRIPT_FLAGS[];
+extern unsigned char SCRIPT_FLAGS[];
 extern void *D_1F8002D4;
 extern void *D_80122C14[], *D_80122C18[], *D_80122C1C[];
 extern char D_80077CDC[];
@@ -34,21 +34,21 @@ void func_8011E54C(TObj *o)
         o->wb4 = 6;
         switch (func_8011E364()) {
         case 0:
-            if (D_8009D0FD) o->wb4 = 5;
+            if (GCD.bd0fd) o->wb4 = 5;
             else o->wb4 = 4;
             break;
         case 1:
-            if (D_8009D0FC) o->wb4 = 3;
+            if (GCD.bd0fc) o->wb4 = 3;
             else o->wb4 = 2;
             break;
         case 2:
-            if (D_8009D0FB) o->wb4 = 1;
+            if (GCD.bd0fb) o->wb4 = 1;
             else o->wb4 = 0;
             break;
         default:
-            if (D_8009D0FB) o->wb4 = 1;
-            if (D_8009D0FC) o->wb4 = 3;
-            if (D_8009D0FD) o->wb4 = 5;
+            if (GCD.bd0fb) o->wb4 = 1;
+            if (GCD.bd0fc) o->wb4 = 3;
+            if (GCD.bd0fd) o->wb4 = 5;
             break;
         }
         o->active = 2;
@@ -158,7 +158,7 @@ void func_8011E54C(TObj *o)
         case 10:
             switch (o->step) {
             case 0:
-                if (D_8009D0A4[e[1]] != 0) {
+                if (((unsigned char*)&GCD.bd0a4)[e[1]] != 0) {
                     goto next;
                     break;
                 }
