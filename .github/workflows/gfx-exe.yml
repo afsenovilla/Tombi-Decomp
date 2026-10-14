@@ -63,7 +63,7 @@ jobs:
         run: |
           python -m pip install pyinstaller pillow numpy PyOpenGL pyopengltk capstone
           pyinstaller --onefile --windowed --name tombi-gfx --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import gfx_core --hidden-import i18n --hidden-import gam_py --hidden-import mod --hidden-import vram --hidden-import area000 --hidden-import palinfer \
+            --hidden-import gfx_core --hidden-import i18n --hidden-import gam_py --hidden-import mod --hidden-import vram --hidden-import sprclut --hidden-import ui_cluts --hidden-import area000 --hidden-import palinfer \
             --hidden-import screens --hidden-import wpp --hidden-import anim --hidden-import animobj --hidden-import objects --hidden-import capstone --hidden-import labels --hidden-import anim_player --hidden-import PIL.GifImagePlugin --hidden-import mkdisc --hidden-import cdfiles --hidden-import gfx_composed --hidden-import numpy --hidden-import psxemu.capture --hidden-import psxemu.machine --hidden-import psxemu.cpu --hidden-import psxemu.gpu --hidden-import psxemu.gte --hidden-import psxemu.rooms --hidden-import PIL.ImageTk --hidden-import model_view --hidden-import model_viewer --hidden-import room --hidden-import pyopengltk --collect-submodules OpenGL --hidden-import OpenGL.platform.win32 --paths tools \
             --icon tools/icons/gfx.ico --add-data "notes/functions_main0.csv;notes" --add-data "notes/names_main0.csv;notes" --add-data "tools/labels/labels.json;labels" --add-data "tools/icons/gfx.ico;icons" --add-data "tools/icons/gfx.png;icons" \
             --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/gfx_editor.py

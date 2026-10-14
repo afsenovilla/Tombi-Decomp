@@ -277,6 +277,23 @@ placeholder palettes `x >= 512` (Tombi: `GetClut(0x80, 0x1e0..)`) map to `x = 12
   row 0 of a 256 x 32 block, or the palette their 8 bpp SPR parts use), `NAME_4bpp.png` / `NAME_8bpp.png` for atlases coloured with the palette most SPR parts use on them (72),
   `NAME_16bpp.png` + `NAME_4bpp_gray.png` when nothing says how a page is read (131), `NAME_palettes.png` for palette blocks (141, each colour 4 x 4 px).
 
+**Palettes the game picks at run time (tools/sprclut.py, tools/psxemu/clutmap.py -> tools/ui_cluts.py).** Wrong colours in the HUD, item and
+menu graphics came from three gaps, now closed from the game code and checked against the game running in `tools/psxemu`:
+- `FUN_80052db8` draws an SPR part with `tpage += o->w1e` and, when `o->b0d & 1`, `clut = o->w08` (semi transparency = `b0d >> 7`). For
+  the resident item/HUD table (`SPR_DATA[4]`, kind 0x34) `initItemObject` (MAIN0 0x8003C980) sets them from the descriptor
+  `DAT_8007B14C[DAT_8007B084[subtype]]` (`b2` = w1e, `b5` = b0d, `b6` = CLUT mode, `cx, cy`, anims): 25 frames get their tpage offset
+  (0x14 = `A10003` or 0x15 = `A00000`) and CLUT from it (e.g. the pants `GetClut(0x160, 0x1FA)`, money bags `DAT_8007B2D4`). Before, the
+  whole table was cut with one inferred offset (0x14) and the template CLUT, so frames of `A00000` came out as `A10003` noise.
+- Frames no descriptor names: a 16 x n palette strip belongs to the page record before it in its list (`A00000` -> `A00001/2`,
+  `A10003` -> `A10004`, `A00005`); a template CLUT inside a page's strip means the part is cut from that page (`vram.strip_base`).
+- Code that draws with constant or computed CLUTs (HUD counters, fonts, the pause/item menus `A00300/A10301` + `DSPCLUT.TIM`, the memory
+  card screen, the map): `clutmap.py` records the primitives (page, UV box, CLUT, abr) while the game runs through those scenes and resolves
+  texels and palette to the GRPX records by content (`tools/ui_cluts.py`, 865 pieces; palettes the game changes at run time - menu
+  highlight fades - fall back to the record loaded at that address, marked in the entry). Pages are written piece by piece with those
+  palettes (`OUT/vram/.../NAME_4bpp.png` RGBA, `OUT/screens/*_drawn.png`, `*_4bpp.png` for the 4 bpp parts of the 8 bpp menu atlases;
+  the 8 bpp image leaves those texels transparent). Glyph cells of a font sheet whose seen glyphs share one palette take it for the
+  whole sheet. Limits: only what those scenes draw is covered; regions never drawn keep the most used palette.
+
 **Static full screens (`tools/screens.py` -> `OUT/screens/*.png`).** All are 8 bpp pages of `LD0SYS` with the 256 x 1 CLUT record next to them (`arg` of the CLUT = (128, 509..511)).
 The record width is the LoadImage pitch, not the picture width: `A00200` (title landscape) is 256 words x 256 rows = 512 px pitch, but the picture is 320 x 240 px (160 words; the rest is
 zero), `A09400` ("Sony Computer Entertainment Europe presents") is 320 words x 512 rows = 640 x 512 px (hi-res PAL frame), `A00100`/`A00006` (Whoopee Camp logo, identical files) is 384 words

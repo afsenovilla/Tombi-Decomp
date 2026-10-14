@@ -695,17 +695,28 @@ def export_table(out_dir, ld, idx, kind, d, v, base, plane_frames, info, usage, 
     frames = parse_spr(d)
     man = {"load_list": "%s list %d" % (area_name(ld), idx), "kind": "0x%02X" % kind, "frames": len(frames), "tpage_offset": base,
            "source": info, "frame_list": []}
+    rules = game_frame_rules(kind, len(frames)) if plane_frames is None else {}
+    if rules:
+        man["game_rules"] = "per frame tpage offset / CLUT of the item descriptors (initItemObject) or of the page owning the palette strip"
     for fi, parts in enumerate(frames):
         items, meta = [], []
-        fbase = base
-        if plane_frames is None and alts:
-            live = [p for p in parts if p[8] and p[9]]
-            if live and not all(covered(v, p, base) for p in live):
+        fbase, fclut, why = base, None, None
+        live = [p for p in parts if p[8] and p[9]]
+        rule = rules.get(fi)
+        if plane_frames is None and rule and live and all(covered(v, p, rule["base"]) for p in live):
+            fbase, fclut, why = rule["base"], rule["clut"], "item descriptor %s" % ",".join(map(str, rule["descs"]))
+        elif plane_frames is None and alts and live:
+            own = strip_base(v, live, [base] + [a for a in alts if a != base])
+            if own is not None:
+                fbase, why = own, "page that owns the palette strip of the template CLUT"
+            elif not all(covered(v, p, base) for p in live):
                 # this frame belongs to another atlas of the same family (several objects share one table with different offsets)
                 fbase = next((a for a in alts if all(covered(v, p, a) for p in live)), base)
         for k, p in enumerate(parts):
             if p[8] == 0 or p[9] == 0:
                 continue
+            if fclut is not None:
+                p = p[:2] + (fclut,) + p[3:]
             pl = wpp_plane_of(plane_frames, fi)
             w, h, png, rgba, blank, note = render_part(v, p, fbase, pl)
             st["parts"] += 1
@@ -733,8 +744,45 @@ def export_table(out_dir, ld, idx, kind, d, v, base, plane_frames, info, usage, 
         fm = {"frame": fi, "origin": [ox, oy], "size": [W, H], "parts": meta}
         if fbase != base:
             fm["tpage_offset"] = fbase
+        if why:
+            fm["palette_source"] = why
+        if rule and rule.get("semi"):
+            fm["semi_transparent"] = True
         man["frame_list"].append(fm)
     write(os.path.join(out_dir, "manifest.json"), json.dumps(man, indent=1).encode())
+
+
+_RULES = {}
+
+
+def game_frame_rules(kind, nframes):
+    """{frame: rule} of tools/sprclut.item_frames for SPR table `kind` (frame numbers checked against the table size)."""
+    k = (kind, nframes)
+    if k not in _RULES:
+        try:
+            import sprclut
+            _RULES[k] = sprclut.item_frames(kind, nframes=nframes)
+        except (OSError, KeyError, struct.error):
+            _RULES[k] = {}
+    return _RULES[k]
+
+
+def strip_base(v, live, bases):
+    """The one tpage offset of `bases` under which every part of the frame cuts the page that owns the palette strip of its template CLUT
+    (sprclut.strip_owner), or None when no offset or several do."""
+    import sprclut
+    ok = []
+    for b in bases:
+        good = True
+        for p in live:
+            own = sprclut.strip_owner(v.recs, p[2])
+            mode, x0, y0, x1, y1 = rect_words(p, b)
+            if own is None or mode != 0 or not (own[0] <= x0 and x1 < own[0] + own[2] and own[1] <= y0 and y1 < own[1] + own[3]):
+                good = False
+                break
+        if good:
+            ok.append(b)
+    return ok[0] if len(ok) == 1 else None
 
 
 def note_usage(v, p, base, usage):
@@ -743,8 +791,84 @@ def note_usage(v, p, base, usage):
     cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
     for name, x, y, w, h, kind in v.recs:
         if kind == "page" and x <= cx < x + w and y <= cy < y + h:
-            pal = v.palette(p[2], 16 if mode == 0 else 256)[0]
-            usage.setdefault(name, Counter())[(mode, p[2], pal)] += 1
+            pal, alpha, ws = v.palette(p[2], 16 if mode == 0 else 256)
+            u = usage.get(name)
+            if u is None:
+                u = usage[name] = Usage()
+            u[(mode, p[2], pal)] += 1
+            u.rects[(mode, x0 - x, y0 - y, x1 - x, y1 - y, p[2])] = (pal, alpha)
+
+
+class Usage(Counter):
+    """Counter of (mode, clut, palette) + `rects`: {(mode, x0, y0, x1, y1 in words relative to the page, clut): (rgb, alpha)}, every
+    texture rectangle an SPR part cuts from the page, with the palette it is drawn with."""
+
+    def __init__(self, *a, **k):
+        super().__init__(*a, **k)
+        self.rects = {}
+
+
+def spr_rects_4(u):
+    """[(x0, y0, x1, y1 texels, rgb, alpha)] of the 4 bpp rectangles SPR parts cut from a page (Usage.rects, words -> texels)."""
+    if not isinstance(u, Usage):
+        return []
+    return [(x0 * 4, y0, x1 * 4 + 3, y1, pa[0], pa[1]) for (mode, x0, y0, x1, y1, clut), pa in u.rects.items() if mode == 0]
+
+
+def ui_rects(name, bpp=4):
+    """[(x0, y0, x1, y1 texels, rgb, alpha)] of the pieces of page record `name` the game draws at `bpp` with a known palette
+    (tools/ui_cluts.py, recorded by tools/psxemu/clutmap.py; the palette is read from the file the table names)."""
+    try:
+        import ui_cluts
+    except ImportError:
+        return []
+    out = []
+    n = 16 if bpp == 4 else 256
+    for e in ui_cluts.ENTRIES:
+        if e["page"] != name or e["bpp"] != bpp or not e["pal"]:
+            continue
+        d = resource(e["pal"][0])
+        if d is None or len(d) < (e["pal"][1] + n) * 2:
+            continue
+        ws = struct.unpack_from("<%dH" % n, d, e["pal"][1] * 2)
+        out.append(tuple(e["rect"]) + (b"".join(RGB[x] for x in ws), bytes(0 if x == 0 else 255 for x in ws)))
+    # font sheets: the game drew only the glyphs it needed; every cell of a sheet whose seen glyphs (<= 16 x 16, 3 or more) all use one
+    # palette is drawn with it (the bounding box of those glyphs, below the single pieces)
+    groups = {}
+    for r in out:
+        groups.setdefault(r[4:], []).append(r)
+    for pal, rs in groups.items():
+        if len(rs) >= 3 and all(r[2] - r[0] < 16 and r[3] - r[1] < 16 for r in rs):
+            out.append((min(r[0] for r in rs), min(r[1] for r in rs), max(r[2] for r in rs), max(r[3] for r in rs)) + pal)
+    return out
+
+
+def base_palette(rects):
+    """(rgb, alpha) shared by most rectangles of `rects` (by covered area): the colours for the texels no recorded piece covers."""
+    c = Counter()
+    for r in rects:
+        c[r[4:6]] += (r[2] - r[0] + 1) * (r[3] - r[1] + 1)
+    return c.most_common(1)[0][0] if c else (None, None)
+
+
+def page_drawn(d, w, h, rects, bpp=4, pal=None, alpha=None):
+    """RGBA rows of a page as the game shows its pieces: every texel inside a rectangle of `rects` (spr_rects_4 / ui_rects) takes
+    that rectangle's palette (larger rectangles first, so the more specific piece wins), the rest `pal` (or transparent when None);
+    colour word 0 is transparent (GPU rule)."""
+    idx = page_rows_4(d, w, h) if bpp == 4 else page_rows_8(d, w, h)
+    W = len(idx[0]) if idx else 0
+    n = 16 if bpp == 4 else 256
+    if pal is None:
+        rows = [bytearray(W * 4) for _ in range(h)]
+    else:
+        lut = [pal[i * 3:i * 3 + 3] + bytes((alpha[i] if i < len(alpha) else 255,)) for i in range(n)]
+        rows = [bytearray(b"".join(lut[i] for i in r)) for r in idx]
+    for _, (x0, y0, x1, y1), rp, ra in sorted((((r[2] - r[0] + 1) * (r[3] - r[1] + 1)), r[:4], r[4], r[5]) for r in rects)[::-1]:
+        lt = [rp[i * 3:i * 3 + 3] + bytes((ra[i],)) for i in range(n)]
+        a, b = max(0, x0), min(W, x1 + 1)
+        for y in range(max(0, y0), min(h, y1 + 1)):
+            rows[y][a * 4:b * 4] = b"".join(lt[i] for i in idx[y][a:b])
+    return [bytes(r) for r in rows]
 
 
 def wpp_plane_of(plane_frames, fi):
@@ -910,15 +1034,27 @@ def export_screens(out, usage, st, log=print, only=None):
                         pal = max(u8)[1][2]
                     write(os.path.join(dst, stem + ".png"), png_idx(w * 2, h, page_rows_8(d, w, h), pal, b""))
                     st["pages_8bpp_paired"] += 1
+                    r4 = ui_rects(r["name"], 4)
+                    if r4:     # the same page also holds 4 bpp pieces (menu fonts and frames): those with their own palettes
+                        write(os.path.join(dst, stem + "_4bpp.png"), png_rgba(w * 4, h, page_drawn(d, w, h, r4, 4)))
                     continue
                 u = usage.get(r["name"])
+                rects = spr_rects_4(u) + ui_rects(r["name"], 4)
                 if u:
                     (mode, clut, pal), _ = u.most_common(1)[0]
-                    if mode == 0:
+                    if mode == 0 and len({x[4] for x in rects}) > 1:
+                        # several palettes cut this page: each piece with its own (the game's) palette
+                        alpha = next(pa[1] for k, pa in u.rects.items() if k[0] == 0 and k[5] == clut)
+                        write(os.path.join(dst, stem + "_4bpp.png"), png_rgba(w * 4, h, page_drawn(d, w, h, rects, 4, pal, alpha)))
+                    elif mode == 0:
                         write(os.path.join(dst, stem + "_4bpp.png"), png_idx(w * 4, h, page_rows_4(d, w, h), pal, b""))
                     else:
                         write(os.path.join(dst, stem + "_8bpp.png"), png_idx(w * 2, h, page_rows_8(d, w, h), pal, b""))
                     st["pages_by_sprite_palette"] += 1
+                    continue
+                if rects:      # drawn by code only (menus, HUD counters): the palettes the game was seen using, the rest the most used one
+                    write(os.path.join(dst, stem + "_4bpp.png"), png_rgba(w * 4, h, page_drawn(d, w, h, rects, 4, *base_palette(rects))))
+                    st["pages_by_game_palette"] += 1
                     continue
                 write(os.path.join(dst, stem + "_16bpp.png"), png_rgb(w, h, page_rows_16(d, w, h)))
                 gray = bytes(i * 17 for i in range(16))

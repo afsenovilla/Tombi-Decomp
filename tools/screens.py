@@ -35,6 +35,9 @@ STATIC = [
 ]
 # 4 bpp font/HUD sheet of the title list, one tile per palette of the 16 x n strips that come with it
 FONT_SHEET = ("title_font_sheet", "SYSTEM/A00204.000", 64, ["SYSTEM/A00205.000", "SYSTEM/A00206.000"], (0, 0, 256, 160))
+# 4 bpp pages drawn piece by piece, each piece with the palette the game was seen using (tools/ui_cluts.py)
+DRAWN_PAGES = [("title_font_drawn", "SYSTEM/A00204.000"),
+               ("menu_item_page_drawn", "SYSTEM/A10301.000"), ("menu_frame_page_drawn", "SYSTEM/A00300.000")]
 # "NOW LOADING" (UiSpriteDef 0 = {0,0,112,71, clut (16,71)} -> the first embedded palette is the one the game uses): SYSTEM/A00900.000 (SYS list 9, 256 x 72, 4 bpp at VRAM 0,0); the last row (y 71) holds 3 palettes of 16 words (at word 16, 32, 48 of the row)
 NOW_LOADING = ("now_loading", "SYSTEM/A00900.000", 64, "SYSTEM/A00900.000", 71 * 64 + 16, (0, 0, 256, 64))
 # "TRY AGAIN": sprites 1 (184,192 40x16) and 2 (184,208 56x16) of the UiSpriteDef table (0x80078808) in SYSTEM/A10003.GAM; CLUT (352,509) = row 29, words 224..239 of the area CLUT strips
@@ -45,8 +48,26 @@ def _words(d):
     return memoryview(bytes(d[:len(d) // 2 * 2])).cast("H")
 
 
-def render(pages, clut, crop, opaque):
-    """pages = [(bytes, x words, w words, h)], clut = 256 words.  Returns PNG bytes."""
+def drawn_4bpp(ps, pages):
+    """PNG of the 4 bpp pieces of stitched pages (ps as for render, pages = [(file, x)]) as the game draws them (vram.ui_rects), or None."""
+    rects = [(f, vram.ui_rects(f, 4)) for f, _ in pages]
+    if not any(r for _, r in rects):
+        return None
+    x0 = min(p[1] for p in ps)
+    W = (max(p[1] + p[2] for p in ps) - x0) * 4
+    H = max(p[3] for p in ps)
+    rows = [bytearray(W * 4) for _ in range(H)]
+    for (d, x, w, h), (f, rs) in zip(ps, rects):
+        if not rs:
+            continue
+        for y, line in enumerate(vram.page_drawn(d, w, h, rs, 4)):
+            rows[y][(x - x0) * 16:(x - x0 + w) * 16] = line
+    return vram.png_rgba(W, H, [bytes(r) for r in rows])
+
+
+def render(pages, clut, crop, opaque, hide=()):
+    """pages = [(bytes, x words, w words, h)], clut = 256 words, hide = [(x0, y0, x1, y1)] pixels left transparent (the texels the game
+    reads as 4 bpp, written by drawn_4bpp instead).  Returns PNG bytes."""
     x0 = min(p[1] for p in pages)
     x1 = max(p[1] + p[2] for p in pages)
     h = max(p[3] for p in pages)
@@ -57,6 +78,9 @@ def render(pages, clut, crop, opaque):
             rows[y][(x - x0) * 2:(x - x0 + w) * 2] = d[y * w * 2:(y + 1) * w * 2]
     cx, cy, cw, ch = crop or (0, 0, W, h)
     rgb, a = [], []
+    for x0, y0, x1, y1 in hide:
+        for y in range(max(0, y0), min(h, y1 + 1)):
+            rows[y][max(0, x0):min(W, x1 + 1)] = bytes(len(rows[y][max(0, x0):min(W, x1 + 1)]))
     for y in range(cy, cy + ch):
         r = rows[y][cx:cx + cw]
         if opaque:
@@ -116,13 +140,28 @@ def export_screens(out, log=lambda m: None):
             ps.append((d, x, _pagew(f, pages), h))
         if not ps:
             continue
-        data = render(ps, list(_words(c)[:256]), crop, opaque)
+        hide = [] if opaque else [(r[0] // 2 + (x - min(p[1] for p in pages)) * 2, r[1], r[2] // 2 + (x - min(p[1] for p in pages)) * 2, r[3])
+                                  for f, x in pages for r in vram.ui_rects(f, 4)]
+        data = render(ps, list(_words(c)[:256]), crop, opaque, hide)
         vram.write(os.path.join(out, labels.fname("screen:" + name, name) + ".png"), data)
         n += 1
         log(name)
+        d4 = drawn_4bpp(ps, pages)
+        if d4:      # the 4 bpp pieces of the same pages (fonts, frames, icons) with the palettes the game draws them with
+            vram.write(os.path.join(out, labels.fname("screen:" + name, name) + "_4bpp.png"), d4)
+            n += 1
     fs = font_sheet(*FONT_SHEET)
     if fs:
         vram.write(os.path.join(out, FONT_SHEET[0] + ".png"), fs)
+        n += 1
+    # pages the game only draws in pieces with run-time palettes (title font, HUD, menus): each piece with the palette the game uses
+    for name, f in DRAWN_PAGES:
+        d = vram.resource(f)
+        rs = vram.ui_rects(f, 4)
+        if d is None or not rs:
+            continue
+        w = _pagew(f, [])
+        vram.write(os.path.join(out, name + ".png"), vram.png_rgba(w * 4, len(d) // 2 // w, vram.page_drawn(d, w, len(d) // 2 // w, rs, 4, *vram.base_palette(rs))))
         n += 1
     for sc in (NOW_LOADING, TRY_AGAIN):
         nl = now_loading(*sc)
