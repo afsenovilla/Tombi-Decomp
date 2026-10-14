@@ -1,10 +1,9 @@
 // FUNC 80056420 2604 MAIN0
-/* score 352 (n70 notes, was 342 by an older ncheck): structure/frame match; remaining: register allocation (o in s0 vs s1
-   with both loop givs swapped; case temps y/w in a0/t0 vs v1/a2, k in a2 vs t0; `li v0,-1` scheduled late vs 2nd).
-   -dg shows the o/giv tie: o = 92 refs/463 insns (prio 1.19) vs giv2 = 21/71 (1.18); anything that removes 2 refs of
-   o, lengthens o's range by 6 insns or shortens the giv range by 1 flips it (volatile ti does, but turns the TILE copy
-   into a memcpy call: 196). short k gives 287 but duplicates the range check. Tried: decl orders, types, block scopes,
-   condition forms, xywh store order/chain perms (384), k_sep, loop forms, p scoping, -fno-strength-reduce + explicit j. */
+/* score 35 (was 352). o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
+   f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: prologue puts `sw $17; move
+   $17,$4` first in the game; o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
+   $2 so its two stores get scheduled after the y stores; uv block has a few scheduling/reg diffs ($3 vs $6 for u1).
+   Tried: pins on k/h/x/y (worse), f as int/volatile/unpinned, separate h2/w2, x+w temp forms. */
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -46,8 +45,9 @@ extern void SetDrawMode(void *, int, int, int, void *);
 
 #define setlen(p, n) (((unsigned char *)(p))[3] = (n))
 
-void drawBalloonFrame(R *o, short c, short tp)
+void drawBalloonFrame(R *o_, short c, short tp)
 {
+    register R *o asm("$17") = o_;
     SPRT *sp = (SPRT *)0x1f800000;
     POLY_FT4 *ft = (POLY_FT4 *)0x1f800014;
     TILE *ti = (TILE *)0x1f80003c;
@@ -56,12 +56,12 @@ void drawBalloonFrame(R *o, short c, short tp)
     int k;
     short x;
     short y;
-    short w;
+    register short w asm("$6");
     short h;
     int i;
     void *p;
-
-    if (o->f != -1 && (unsigned)(k = o->f >> 12) < 8) {
+    register short f asm("$4") = o->f;
+    if (f != -1 && (unsigned)(k = f >> 12) < 8) {
         setlen(ft, 9);
         ft->code = 0x2c;
         ft->r0 = 0x80;
@@ -119,10 +119,10 @@ void drawBalloonFrame(R *o, short c, short tp)
         ft->v0 = D_80080218[k].v;
         h = D_80080218[k].h;
         w = D_80080218[k].w;
+        ft->u2 = ft->u0;
         ft->v1 = ft->v0;
         ft->u1 = ft->u0 + w;
-        ft->u2 = ft->u0;
-        ft->v2 = ft->v3 = h + ft->v0;
+        ft->v3 = ft->v2 = h + ft->v0;
         ft->u3 = ft->u1;
         ft->clut = GetClut(0x160, c + 0x1e3);
         ft->tpage = tp;
