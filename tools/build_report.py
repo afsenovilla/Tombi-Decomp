@@ -98,6 +98,19 @@ def jpdemo_sources(progs, ver="jpdemo"):
     return out
 
 
+def _jpdemo_spad_set(text):
+    """`.set` lines that make PAL scratchpad symbols (config/jpdemo/spad.txt) constants, since the demo target keeps
+    every scratchpad address literal (config/jpdemo/symbol_addrs_manual.txt). Demo C may also name any scratchpad
+    address D_1F80xxxx."""
+    S = _jpdemo_spad_set.__dict__
+    if "tab" not in S:
+        p = os.path.join(ROOT, "config", "jpdemo", "spad.txt")
+        S["tab"] = [l.split()[:2] for l in open(p) if l.strip() and not l.startswith("#")] if os.path.exists(p) else []
+    tab = dict(S["tab"])
+    tab.update((n, n[2:]) for n in re.findall(r"\bD_1F80[0-9A-F]{4}\b", text))
+    return "".join("\t.set\t%s,0x%s\n" % (n, a) for n, a in sorted(tab.items()))
+
+
 def _jpdemo_compile(job):
     src, out, name, inc = job
     NC = _jpdemo_compile.__dict__.setdefault("nc", {})
@@ -106,6 +119,7 @@ def _jpdemo_compile(job):
         NC.update({"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"})
         exec(compile(s, "ncheck", "exec"), NC)
     t = open(src, errors="replace").read()
+    NC["EXTRA_AS"] = _jpdemo_spad_set(t)
     fm = re.search(r"//\s*FLAGS\s+(.*)", t)
     flags = fm.group(1).strip() if fm else "-O2 -G0"
     d = tempfile.mkdtemp()

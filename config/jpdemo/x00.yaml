@@ -14,6 +14,7 @@ options:
   ld_script_path: build/jpdemo/x00.ld
   symbol_addrs_path:
     - config/jpdemo/symbol_addrs_x00.txt
+    - config/jpdemo/symbol_addrs_manual.txt
   undefined_funcs_auto_path: build/jpdemo/undefined_funcs_auto.x00.txt
   undefined_syms_auto_path: build/jpdemo/undefined_syms_auto.x00.txt
   find_file_boundaries: False

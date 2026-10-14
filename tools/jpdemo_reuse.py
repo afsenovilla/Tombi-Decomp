@@ -65,5 +65,20 @@ def main():
     print("config/%s/reuse.txt: %d pairs" % (ver, len(lines)))
 
 
+def spad():
+    """--spad: writes config/jpdemo/spad.txt, the PAL scratchpad symbols (0x1F80xxxx PROVIDEs of a PAL
+    tools/build_full.py link, build/full/*.full.ld). build_report assembles them as constants for the demo."""
+    os.chdir(ROOT)
+    tab = {}
+    for f in sorted(os.listdir("build/full")):
+        if f.endswith(".full.ld"):
+            for n, a in re.findall(r"PROVIDE\((\w+) = 0x(1F80[0-9A-F]{4})\);", open("build/full/" + f).read()):
+                if "__" not in n: tab[n] = a  # name__ADDR: a name build_full split by address
+    hdr = ("# PAL scratchpad symbols (name, address) from build/full/*.full.ld, written by tools/jpdemo_reuse.py --spad: the demo\n"
+           "# report assembles them as constants, since the demo target keeps scratchpad addresses literal.\n")
+    open("config/jpdemo/spad.txt", "w").write(hdr + "".join("%s %s\n" % (n, tab[n]) for n in sorted(tab)))
+    print("config/jpdemo/spad.txt: %d symbols" % len(tab))
+
+
 if __name__ == "__main__":
-    main()
+    spad() if "--spad" in sys.argv else main()

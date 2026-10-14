@@ -114,6 +114,11 @@ linked). Sources, by priority:
   except relocated bits; needs `game/` and a previous demo build). The PAL file is found by address through
   `tools/units.py`, so PAL renames do not break it.
 - fallback: the xmatch pairing in `symbol_addrs_*.txt` (same lookup by PAL address).
+- Scratchpad: `config/jpdemo/symbol_addrs_manual.txt` tells splat never to symbolize 0x1F800000-0x1F8003FF (and
+  the task table words at 0x801FD800), so the demo target always has literal addresses there. The C side keeps PAL
+  names: build_report assembles every PAL scratchpad symbol (`config/jpdemo/spad.txt`, from `tools/jpdemo_reuse.py
+  --spad` after a PAL `build_full.py`) and any `D_1F80xxxx` named in a demo file as a `.set` constant. This also
+  exposes demo functions that only matched because a different scratchpad address hid behind a relocation.
 
 - **Plumbing (1-2 days):** add `config/jpdemo/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate

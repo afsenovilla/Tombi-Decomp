@@ -14,6 +14,7 @@ options:
   ld_script_path: build/jpdemo/slpm80165.ld
   symbol_addrs_path:
     - config/jpdemo/symbol_addrs_slpm80165.txt
+    - config/jpdemo/symbol_addrs_manual.txt
   undefined_funcs_auto_path: build/jpdemo/undefined_funcs_auto.slpm80165.txt
   undefined_syms_auto_path: build/jpdemo/undefined_syms_auto.slpm80165.txt
   find_file_boundaries: False

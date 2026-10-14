@@ -18,6 +18,18 @@ GCC = os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")  # compiler of the f
 OLDGCC_ROOT = os.environ.get("OLDGCC_ROOT", "/opt/oldgcc")
 MASPSX = os.environ.get("MASPSX", "/opt/maspsx/maspsx.py")
 ASPSX_VER = os.environ.get("ASPSX_VER", "2.86")
+EXTRA_AS = ""  # assembler lines put before the code (tools/build_report.py jpdemo: `.set` of scratchpad symbols)
+
+
+def with_extra_as(s):
+    """EXTRA_AS + s; `la` of a `.set` constant is spelled lui/addiu, as for a relocated symbol (gas would use ori)."""
+    if not EXTRA_AS: return s
+    names = set(re.findall(r"\.set\t(\w+),", EXTRA_AS))
+    def la(m):
+        if m.group(2) not in names: return m.group(0)
+        m3 = m.group(3) or ""
+        return "\tlui\t%s,%%hi(%s)\n\taddiu\t%s,%s,%%lo(%s)" % (m.group(1), m.group(2) + m3, m.group(1), m.group(1), m.group(2) + m3)
+    return EXTRA_AS + re.sub(r"(?m)^[ \t]*la[ \t]+(\$\w+),[ \t]*(\w+)([+-]\d+)?[ \t]*$", la, s)
 _src = open(os.path.join(ROOT, "tools", "matchcheck.py")).read().replace("\nmain()\n", "\n")
 M = {"__file__": os.path.join(ROOT, "tools", "matchcheck.py")}
 exec(compile(_src, "matchcheck", "exec"), M)  # reuses header(), game_bytes(), mask()
@@ -60,7 +72,7 @@ def build(src, flags, d, inc):
         # `move` spelled as addu, -G0 / gcc-2.7.2 normally.
         t = re.sub(r"(?m)^\tmove\t(\$[0-9a-z]+),(\$[0-9a-z]+)", r"\taddu\t\1,\2,$0", open(d + "/a.s").read())
         t = re.sub(r"(?m)^\t\.rdata$", "\t.section .rodata", t)
-        open(d + "/b.s", "w").write(t)
+        open(d + "/b.s", "w").write(with_extra_as(t))
         subprocess.run(["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O2", "-G0",
                         d + "/b.s", "-o", d + "/a.o"], check=True, capture_output=True)
         subprocess.run(["mipsel-linux-gnu-objcopy", "-O", "binary", "-j", ".text", d + "/a.o", d + "/t.bin"], check=True)
@@ -76,7 +88,7 @@ def build(src, flags, d, inc):
         return open(d + "/t.bin", "rb").read(), rel
     mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + ASPSX_VER, "--expand-div"] + (["-G" + G] if G != "0" else []),
                          input=open(d + "/a.s").read(), check=True, capture_output=True, text=True).stdout
-    open(d + "/b.s", "w").write(mas)
+    open(d + "/b.s", "w").write(with_extra_as(mas))
     subprocess.run(["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O1", "-G0",
                     d + "/b.s", "-o", d + "/a.o"], check=True, capture_output=True)
     subprocess.run(["mipsel-linux-gnu-objcopy", "-O", "binary", "-j", ".text", d + "/a.o", d + "/t.bin"], check=True)
