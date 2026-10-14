@@ -1,8 +1,8 @@
 // FUNC 8011a544 384 X003
 // MATCHING 8011a544 384
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C962;
 extern void ObjFreeDup(TObj *);
 extern void func_80119CE8(TObj *);
 extern void func_80119E08(TObj *);
@@ -20,7 +20,7 @@ void func_8011A544(TObj *o)
     switch (v) {
     case 0:
         o->ba4 = 0;
-        v = D_8009C962;
+        v = GAME.selectedSection;
         if (v < 0) goto d0;
         if (v < 2) {
             o->active = 2;
@@ -48,7 +48,7 @@ void func_8011A544(TObj *o)
         o->b04++;
         break;
     case 1:
-        v = D_8009C962;
+        v = GAME.selectedSection;
         if (v < 0) goto d1;
         if (v < 2) func_80119E08(o);
         else { d1: func_80119F90(o); }

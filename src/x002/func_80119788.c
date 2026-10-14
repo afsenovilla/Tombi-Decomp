@@ -1,10 +1,11 @@
 // FUNC 80119788 384 X002
 // MATCHING 80119788 384
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009C93A, D_8009CDCB, D_8009D2B0;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned int D_8009C96C, D_8009C98C;
+extern unsigned int D_8009C98C;
 extern short D_800A60EA[], D_1F8001C6;
 extern unsigned char D_8009C93FA[], D_8009C942A[];
 extern void setEventComplete(int, int);
@@ -18,7 +19,7 @@ void func_80119788(TObj *o)
             break;
         if (D_8009CDCB == 0 || D_8009CDCB == 0xff)
             break;
-        if (D_8009C96C < D_8009C98C)
+        if (GAME.playerAP < D_8009C98C)
             break;
         D_8009C93FA[0] = 1;
         D_8009C942A[0] = 1;

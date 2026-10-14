@@ -1,13 +1,13 @@
 // FUNC 8012ab5c 1928 X003
 // MATCHING 8012ab5c 1928
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80135DCC[];
 extern unsigned char D_8009CDC8;
 extern unsigned char D_8009CDC0[];
 extern unsigned char D_8009D003;
-extern unsigned char D_8009C975;
 extern Fix16 *D_800A6078;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009C93E[];
@@ -134,23 +134,23 @@ void func_8012AB5C(TObj *o)
         if (--o->timer == 0) o->state = WC2(o);
         break;
     case 0x64:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = WC2(o);
         break;
     case 0x65:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = WC2(o);
         break;
     case 0x66:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = 0x68;
         break;
     case 0x67:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = 0x68;
         break;
     case 0x68:
-        if (D_8009C975 != 3 && D_8009C975 != 4) o->state = WC2(o);
+        if (GAME.fadeScreenControl != 3 && GAME.fadeScreenControl != 4) o->state = WC2(o);
         break;
     case 0x78:
         o->timer = 200;

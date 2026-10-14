@@ -1,8 +1,8 @@
 // FUNC 801196f8 320 X003
 // MATCHING 801196f8 320
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C962;
 extern int D_1F8002D4;
 extern void *D_80138EDC[];
 extern void ObjListPush_1F800220(TObj *);
@@ -16,7 +16,7 @@ void func_801196F8(TObj *o)
     case 0:
         o->b04++;
         o->b0d = 0x81;
-        if (D_8009C962 == 3) {
+        if (GAME.selectedSection == 3) {
             o->w1e = 8;
             o->w08 = 0x780c;
         } else {
@@ -30,7 +30,7 @@ void func_801196F8(TObj *o)
     case 1:
         o->visible = 1;
         ObjListPush_1F800220(o);
-        if (D_8009C962 != 3 && D_8009C962 < 4) func_801191C4(o);
+        if (GAME.selectedSection != 3 && GAME.selectedSection < 4) func_801191C4(o);
         else func_801193D0(o);
         break;
     case 2:

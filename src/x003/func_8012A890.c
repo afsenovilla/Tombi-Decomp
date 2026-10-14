@@ -1,12 +1,12 @@
 // FUNC 8012a890 716 X003
 // MATCHING 8012a890 716
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned char D_8009D004, D_8009CDC7, D_8009C940, D_8009C941, D_8009C975, D_8009D094;
+extern unsigned char D_8009D004, D_8009CDC7, D_8009C940, D_8009C941, D_8009D094;
 extern unsigned char D_800A603C, D_800A603D, D_8009C93F;
 extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern TObj *TASK_C;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *o);
@@ -61,11 +61,11 @@ void func_8012A890(TObj *o)
                 D_800A603C = 5;
                 D_800A603D = 0x62;
                 D_8009C93F = 1;
-                D_8009C975 = 3;
+                GAME.fadeScreenControl = 3;
                 o->state++;
                 break;
             case 1:
-                if (D_8009C975 == 1) {
+                if (GAME.fadeScreenControl == 1) {
                     if (D_8009D094 == 0) {
                         D_1F8003D0 = 0;
                         D_8009D094 = 1;
@@ -84,9 +84,9 @@ void func_8012A890(TObj *o)
             }
             break;
         case 2:
-            D_8009CD94 = 10;
-            D_8009CD96 = 0;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 10;
+            (*(short*)&GAME.nextSection) = 0;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
             p = TASK_C;
             p->w4c = 7;
             p->w4e = 0;

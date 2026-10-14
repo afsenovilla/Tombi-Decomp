@@ -1,6 +1,7 @@
 // FUNC 80129cc0 2584 X003
 // MATCHING 80129cc0 2584
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
@@ -10,7 +11,6 @@ extern unsigned char D_800A60D4[];
 extern short D_800A60EA[];
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[], D_8009C940[];
 extern unsigned char D_8009CDC7;
-extern unsigned char D_8009C975;
 extern int AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
 extern void FUN_800eea7c(TObj *, int, int);
@@ -230,21 +230,21 @@ void func_80129CC0(TObj *o)
             goto next;
         break;
     case 100:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         goto next;
     case 101:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         goto next;
     case 102:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = 0x68;
         break;
     case 103:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = 0x68;
         break;
     case 104:
-        if ((unsigned char)(D_8009C975 - 3) < 2) break;
+        if ((unsigned char)(GAME.fadeScreenControl - 3) < 2) break;
     next:
         o->state = X(o)->wc2;
         break;
