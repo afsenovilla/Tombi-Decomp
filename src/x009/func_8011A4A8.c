@@ -1,9 +1,10 @@
 // FUNC 8011a4a8 504 X009
 // MATCHING 8011a4a8 504
+#include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_8009CF06[], D_8009D006[], D_8009D2B3;
+extern unsigned char D_8009CF06[], D_8009D006[];
 extern unsigned long *D_8012B1A0, *D_8012B1B4;
 extern unsigned long *D_8012B190[], *D_8012B1A4[];
 extern int D_1F8002E0[];
@@ -37,7 +38,7 @@ void func_8011A4A8(TObj *o)
             loadImageRect(D_8012B1B4, 0x90, 0x1f1, 0x10, 1);
         } else {
             loadImageRect(D_8012B190[GAME.displayExpBar], 0x90, 0x1f0, 0x10, 1);
-            loadImageRect(D_8012B1A4[D_8009D2B3], 0x90, 0x1f1, 0x10, 1);
+            loadImageRect(D_8012B1A4[GV2.bb3], 0x90, 0x1f1, 0x10, 1);
         }
         o->w1e = 1;
         o->b0d = 0x80;

@@ -1,8 +1,8 @@
 // FUNC 801224ac 272 X009
 // MATCHING 801224ac 272
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2B1;
 extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_8012B2D4[];
 extern int Rand(void);
@@ -10,7 +10,7 @@ extern int Rand(void);
 static __inline__ int Other(TObj *o)
 {
     if (o->wb4 == 3) return 0;
-    return o->wb4 != D_8009D2B1;
+    return o->wb4 != GV2.bb1;
 }
 
 static __inline__ int Near(TObj *o)

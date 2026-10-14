@@ -1,3 +1,4 @@
+#include "gv2.h"
 #include "gvars.h"
 /* score 119: structure, calls and loops match (switch needs the empty cases 1-5). Writing the first lo-block and the first branch of the last block as `a = div; if (a < 0) a = 0; a += K; hi = a + 8;` keeps hi = a + 8 unfolded (was lo + 0x24). Remaining: register choice, a+K and hi swapped (game a2/v1, ours v1/a2), (D_1F800176 - 0x668)/80 branch dividend in v0 not v1 so the mult is not cross-jumped, lo/hi clamps. Game copies i/hi into a1/a0 before each loop (move a1,a0; move a0,v1) like inline param copies, but a range() inline swaps the loop regs. Tried: int/short/ushort loop vars, int/u8/short cnt, separate getScrollOffsetX temp, inverted ifs, declaration orders. */
 // FUNC 80116e4c 1560 X009
@@ -5,7 +6,6 @@ typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p[3]; unsigned char n; int e[0x58]; unsigned char b164; } Q;
 
 extern unsigned short D_8009C962;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CDA2;
 extern unsigned short D_8009CD94;
 extern unsigned char D_8009C964;
@@ -29,7 +29,7 @@ void func_80116E4C(Q *q, unsigned char *base)
 
     switch (D_8009C962) {
     case 0:
-        if ((D_8009D2C3 & 1) && q->b164 == 0) {
+        if ((GV2.bc3 & 1) && q->b164 == 0) {
             r.x = 0xb0;
             r.y = 0x1f0;
             r.w = 0x10;

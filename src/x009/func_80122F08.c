@@ -1,5 +1,6 @@
 // FUNC 80122f08 908 X009
 // MATCHING 80122f08 908
+#include "gv2.h"
 #include "TOBJ.H"
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -14,7 +15,6 @@ extern void playSFX(int);
 extern int Rand(void);
 extern void *D_8012EA04[];
 extern unsigned char PLAYER;
-extern unsigned char D_8009D2B1;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern char D_80077D24[], D_80077D30[];
@@ -34,7 +34,7 @@ static __inline__ short leave(TObj *o)
     if (o->wb4 == 3) {
         return 0;
     }
-    return o->wb4 != D_8009D2B1;
+    return o->wb4 != GV2.bb1;
 }
 
 void func_80122F08(TObj *o)

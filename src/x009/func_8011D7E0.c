@@ -1,5 +1,6 @@
 // FUNC 8011d7e0 1668 X009
 // MATCHING 8011d7e0 1668
+#include "gv6.h"
 /* debt: char pad[4] (frame), "& 0xffff & 0xff" keeps sra, volatile pad read in case 2 */
 #include "TOBJ.H"
 typedef struct {
@@ -18,7 +19,6 @@ typedef struct {
 
 extern PL *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_8009D670[];
 extern unsigned short D_1F8003C6;
 extern char D_80011108[];
 extern void func_800EE5C8(TObj *);
@@ -134,19 +134,19 @@ void func_8011D7E0(TObj *o)
         }
         if (D_8009C330->b09 == 0) break;
         func_8011D680(o, s2, s1);
-        if (D_8009D670[0] & D_1F8003C6) {
+        if (((unsigned short*)&GV6.s70)[0] & D_1F8003C6) {
             D_8009C330->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
-        if (D_8009D670[0] & 0x10) {
+        if (((unsigned short*)&GV6.s70)[0] & 0x10) {
             D_8009C330->b09 = 0;
             ADJ4();
             RELEASE(4);
             o->step = 0x27;
             o->state = 0;
         }
-        if (*(volatile unsigned short *)D_8009D670 & 0x40) {
+        if (*(volatile unsigned short *)((unsigned short*)&GV6.s70) & 0x40) {
             ADJ4();
             RELEASE(8);
             D_8009C330->b09 = 0;
@@ -160,17 +160,17 @@ void func_8011D7E0(TObj *o)
         o->h->p.whole += D_8009F0EC->velX;
         o->y.p.whole += D_8009F0EC->velY;
         AnimAdvance(o);
-        if (D_8009D670[0] & D_1F8003C6) {
+        if (((unsigned short*)&GV6.s70)[0] & D_1F8003C6) {
             D_8009C330->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
-        if (D_8009D670[0] & 0x10) {
+        if (((unsigned short*)&GV6.s70)[0] & 0x10) {
             D_8009C330->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
-        if (D_8009D670[0] & 0x40) {
+        if (((unsigned short*)&GV6.s70)[0] & 0x40) {
             o->y.p.whole += 9;
             ADJ4();
             RELEASE(8);

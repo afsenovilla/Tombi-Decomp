@@ -1,10 +1,11 @@
 // FUNC 80128180 548 X009
 // MATCHING 80128180 548
+#include "gv2.h"
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3F;
 
-extern unsigned char D_8009D2C3, D_8009CDC9, D_8009D12E, D_8009D07E, D_8009D083, D_8009D081;
+extern unsigned char D_8009CDC9, D_8009D12E, D_8009D07E, D_8009D083, D_8009D081;
 extern unsigned short D_8009D0B0;
 extern int D_1F8002F0[];
 extern void *D_8012EE80;
@@ -16,7 +17,7 @@ void func_80128180(TObj *o)
     V3F v;
     int k;
 
-    if (!(D_8009D2C3 & 1)) {
+    if (!(GV2.bc3 & 1)) {
         k = D_8009CDC9;
         if (k == 0xff) {
         if (D_8009D12E || D_8009D07E) {

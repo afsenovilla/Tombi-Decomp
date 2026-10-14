@@ -1,5 +1,6 @@
 // FUNC 801220cc 992 X009
 // MATCHING 801220cc 992
+#include "gv2.h"
 #include "TOBJ.H"
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -12,7 +13,6 @@ extern void *D_8012E9F8[];
 extern void *D_8012EA00[];
 extern void *D_8012EA40[];
 extern unsigned char D_8012B2CC[];
-extern unsigned char D_8009D2B1;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern char D_80077CF4[];
@@ -68,7 +68,7 @@ void func_801220CC(TObj *o)
             o->wac = 15;
             o->b6a = 0;
         } else {
-            switch (D_8009D2B1) {
+            switch (GV2.bb1) {
             case 0:
                 *p = 0;
                 o->wac = 15;

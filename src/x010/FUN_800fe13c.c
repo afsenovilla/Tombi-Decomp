@@ -1,5 +1,6 @@
 // FUNC 800fe13c 1568 X010
 // MATCHING 800fe13c 1568
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -28,7 +29,6 @@ extern TObj *D_8009D2E8;
 extern TObj *D_800A611C;
 extern TObj *D_8009F0EC;
 extern unsigned char D_8009CF06[];
-extern unsigned char D_8009D2B1[];
 typedef struct { unsigned short c960, c962; char pad[0x5a2]; unsigned char cf06; } G960;
 extern G960 D_8009C960;
 extern unsigned char D_801152E8[];
@@ -183,7 +183,7 @@ void FUN_800fe13c(TObj *o)
         if (--o->timer == 0) {
             o->state = 3;
             D_8009C960.cf06 = 0;
-            D_8009D2B1[0] = 0;
+            ((unsigned char*)&GV2.bb1)[0] = 0;
             if (D_8009C960.c960 != 10 || D_8009C960.c962 != 0)
                 GVARS.b38 = 2;
         }

@@ -1,5 +1,6 @@
 // FUNC 8011e688 1600 X009
 // MATCHING 8011e688 1600
+#include "gv2.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -8,7 +9,6 @@ extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short DAT_8009d670[];
 extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_8009D2B0[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
@@ -158,7 +158,7 @@ void func_8011E688(TObj *o)
     if (D_1F8001FC & D_1F8003C6) {
         {
             Fix16 *h; int f;
-        D_8009D2B0[0] = 0;
+        ((unsigned char*)&GV2.bb0)[0] = 0;
         f = 1;
         o->b9c = f;
         o->b9e = 0;

@@ -1,5 +1,6 @@
 // FUNC 80102214 2036 X010
 // MATCHING 80102214 2036
+#include "gv6.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -9,12 +10,10 @@ typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned short D_8009D670, D_8009D674;
 extern unsigned short D_1F8001FC, D_1F8001FE, D_1F8003C4;
 extern unsigned char D_1F8001D2;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
-extern unsigned short D_8009D610;
 extern unsigned short D_8007A034, D_8007A036;
 extern unsigned short D_800A60FC;
 extern signed char D_8009D2B0;
@@ -59,7 +58,7 @@ void FUN_80102214(TObj *o)
     void *t[90];
     void **tp;
 
-    memcpy(pad, &D_8009D670, 8);
+    memcpy(pad, &GV6.s70, 8);
     b0 = D_1F8001FC;
     b1 = D_1F8001FE;
     U8(o, 0xe2) = 0;
@@ -67,7 +66,7 @@ void FUN_80102214(TObj *o)
         o->visible = 1;
         return;
     }
-    if (D_8009F7F0 == 0 && D_8009D610 == 7) {
+    if (D_8009F7F0 == 0 && GV6.s10 == 7) {
         unsigned char a, b, c;
         FUN_80025d90();
         a = U8(o, 0xd6);
@@ -79,9 +78,9 @@ void FUN_80102214(TObj *o)
         U8(o, 0xd5) = c;
     }
     if (GVARS.b3f) {
-        *(volatile unsigned short *)&D_8009D670 = 0;
+        *(volatile unsigned short *)&GV6.s70 = 0;
         D_1F8001FC = 0;
-        D_8009D674 = 0;
+        GV6.s74 = 0;
         D_1F8001FE = 0;
         S16(o, 0xdc) = 0;
         S16(o, 0xde) = 0;
@@ -90,7 +89,7 @@ void FUN_80102214(TObj *o)
     U8(o, 0xc7) = 0;
     switch (o->subtype) {
     case 0:
-        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4) && o->step == 1)
+        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4) && o->step == 1)
             U8(o, 0xc1) = 1;
         else
             U8(o, 0xc1) = o->ba7;
@@ -239,7 +238,7 @@ void FUN_80102214(TObj *o)
     D_1F80016E[0] = o->y.p.whole;
     D_1F800172[0] = o->d->p.whole;
     GAME.selectedPlane = o->d->p.whole / 90;
-    memcpy(&D_8009D670, pad, 8);
+    memcpy(&GV6.s70, pad, 8);
     D_1F8001FC = b0;
     D_1F8001FE = b1;
 }
