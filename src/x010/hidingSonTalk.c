@@ -18,7 +18,7 @@ extern short TileCollideAt(TObj *, int, int);
 extern void addItemToInventory(int, int, int);
 extern void setEventComplete(int, int);
 
-void func_8012D8E4(TObj *o)
+void hidingSonTalk(TObj *o)
 {
     V v;
 

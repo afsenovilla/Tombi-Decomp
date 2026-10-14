@@ -10,7 +10,7 @@ extern AT D_8013117C[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
-void func_80128114(TObj *o)
+void mermaidNecklaceTalk(TObj *o)
 {
     V6 v;
     TObj *p;

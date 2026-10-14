@@ -20,7 +20,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_80127E08(TObj *o)
+void swimTeacherJumpInTalk(TObj *o)
 {
     unsigned char *k;
     TObj *p;

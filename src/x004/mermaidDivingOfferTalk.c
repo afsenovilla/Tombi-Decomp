@@ -13,7 +13,7 @@ extern void removeItemFromInventory(int, int);
 extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
 
-void func_80128304(TObj *o)
+void mermaidDivingOfferTalk(TObj *o)
 {
     V6 v;
     TObj *e;

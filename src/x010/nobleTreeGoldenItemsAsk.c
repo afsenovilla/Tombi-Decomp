@@ -12,7 +12,7 @@ extern int AnimAdvance(TObj *);
 extern TObj *showMessageBoxDirect(int, int, void *);
 extern void setEventComplete(int, int);
 
-void func_8012C220(TObj *o)
+void nobleTreeGoldenItemsAsk(TObj *o)
 {
     switch (o->state) {
     case 0:

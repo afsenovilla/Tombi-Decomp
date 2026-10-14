@@ -17,7 +17,7 @@ extern void FUN_8003e300(int, int, Fix16 *);
 extern void FUN_800eea7c(TObj *, int, int);
 extern void setEventStarted(int, int, int);
 
-void func_8012866C(TObj *o)
+void mermaidDivingLesson(TObj *o)
 {
     V6 v;
     TObj *e;

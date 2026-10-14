@@ -7,12 +7,12 @@
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
 extern void freeObjectLayer2(char *);
-extern void func_8012736C(char *);
-extern void func_80127B78(char *);
-extern void func_80127E08(char *);
-extern void func_801280FC(char *);
+extern void swimTeacherIntroTalk(char *);
+extern void swimTeacherNoBananasTalk(char *);
+extern void swimTeacherJumpInTalk(char *);
+extern void swimTeacherFloatTalk(char *);
 
-void func_8012855C(char *o)
+void updateSwimTeacher(char *o)
 {
     unsigned char s = o[4];
 
@@ -55,16 +55,16 @@ void func_8012855C(char *o)
         ObjCullRegister(o);
         switch (o[5]) {
         case 0:
-            func_8012736C(o);
+            swimTeacherIntroTalk(o);
             break;
         case 1:
-            func_80127B78(o);
+            swimTeacherNoBananasTalk(o);
             break;
         case 2:
-            func_80127E08(o);
+            swimTeacherJumpInTalk(o);
             break;
         case 3:
-            func_801280FC(o);
+            swimTeacherFloatTalk(o);
             break;
         }
         break;

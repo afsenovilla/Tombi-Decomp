@@ -14,7 +14,7 @@ extern void setEventComplete(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
 
-void func_801264B4(TObj *o)
+void powerFishCollectorTalk(TObj *o)
 {
     B12 v;
 

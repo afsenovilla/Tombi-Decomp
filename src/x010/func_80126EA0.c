@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 
 extern void func_80125E00(TObj *);
-extern void func_801268D4(TObj *);
-extern void func_80125FB4(TObj *);
-extern void func_801264B4(TObj *);
+extern void tenThousandYearElderTalk(TObj *);
+extern void tenThousandYearElderBeadsTalk(TObj *);
+extern void powerFishCollectorTalk(TObj *);
 extern int AnimAdvance(TObj *);
 
 void func_80126EA0(TObj *o)
@@ -15,13 +15,13 @@ void func_80126EA0(TObj *o)
         func_80125E00(o);
         break;
     case 1:
-        func_801268D4(o);
+        tenThousandYearElderTalk(o);
         break;
     case 2:
-        func_80125FB4(o);
+        tenThousandYearElderBeadsTalk(o);
         break;
     case 3:
-        func_801264B4(o);
+        powerFishCollectorTalk(o);
         break;
     }
     AnimAdvance(o);

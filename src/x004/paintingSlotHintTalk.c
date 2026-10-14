@@ -13,7 +13,7 @@ extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
 
-void func_80129BE0(TObj *o)
+void paintingSlotHintTalk(TObj *o)
 {
     V6 v;
     TObj *p;

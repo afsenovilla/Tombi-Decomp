@@ -11,7 +11,7 @@
    (plain params; pins moved `sb a2,16(sp)`/`move s4,a3`), no ang bump, `(short)(ang - ax)` (no sext), dx/dy unsigned short with (short) casts (abs is `if ((short)dx < 0) s = -dx; else s = dx;`: move s0,s3), `ax = (animFrame & 1) ? 8 : -8` for k (a0), `asm("" : "=r"(b) : "0"(b))` after the d test (b s2 / dx s3) and
    `asm("" :: "r"(dy))` after the wb8 store (ang s4 / dy s6). Left: cx in s7 and s7 in s5 (game: cx s5, s7 s7).
    Previous: */
-/* score 92 (opusT, was 232): carried over from the x001 func_801253AC match (template x010 func_80121534): box sums
+/* score 92 (opusT, was 232): carried over from the x001 lostHatManTalk match (template x010 func_80121534): box sums
    through ax/ay (`ax = b->box0 + dx; if (b->box1 < (unsigned short)ax)`), the angle base reuses ax with
    `(short)(ang - ax) & 0xfff`, `ax = cx; if (ax < 0) ax = -ax`; second-half sums written into ax / `s = ay - s` in place,
    first-half `ay = ... + 4` and `s = ax - s`; abs through `static __inline__ short sabs(short x) { if (x < 0) return -x;
@@ -30,7 +30,7 @@
    game tests dx<<16 directly (no sra, so its sext is not shared with the dx*cy mult) where ours tests s0<<16;
    `if (dx < 0)` makes CSE share the sra with the mult (264), inline short sabs 258. All five pins still help
    (removing any: 242-375). The game compares sext(s) (v1) first: slt v0(ax),v1(s). Same family as x001
-   func_801253AC (selector/abs/box-sum shapes there).
+   lostHatManTalk (selector/abs/box-sum shapes there).
    Older (236, was 307): in-place abs `s = dx; if (s < 0) s = -dx; if (ax < s) return 2;` with s pinned $16 lets the
    four `return 2` sites take li v0,2 in the delay slot as in the game (290); greedy pins k/$16, q/$21, ax/$4, t/$23 (236, pin
    hacks, likely not the original form). Older note: logic and size match (whole 1544 B incl. csv piece 8011EAE8); remaining diffs are register allocation: game has a=s1, dx=s3, dy=s6, cx=s5, abs value s=s0, fp/s7 for the two slopes, mode kept on the stack (sb a2,0x10(sp)); ours puts a in s0, dx in s1 and s in s7. Sibling wip func_8011E000 has the same family of diffs. Tried (o27): box sums through ax/ay + in-place abs (313; helped sibling 80121534); priorities from cc1 -dl: game needs s (abs, 8 refs/201 insns) above a (24/293), i.e. s0 for s, which no tried form gives. */

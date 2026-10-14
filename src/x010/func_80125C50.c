@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern unsigned char D_8009C941;
 extern void func_80125AE0(TObj *);
-extern void func_801253AC(TObj *);
+extern void lostHatManTalk(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -28,7 +28,7 @@ void func_80125C50(TObj *o)
                 if (o->b68 || chk()) o->step++;
                 break;
             case 1:
-                func_801253AC(o);
+                lostHatManTalk(o);
                 break;
             }
         }

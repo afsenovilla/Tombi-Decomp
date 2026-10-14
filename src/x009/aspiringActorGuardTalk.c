@@ -20,7 +20,7 @@ extern void SfxPlay2(int, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
-void func_80129EF8(TObj *o)
+void aspiringActorGuardTalk(TObj *o)
 {
     TObj *p = SCRIPT_OBJECTS;
     V v;

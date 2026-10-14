@@ -13,12 +13,12 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern void func_8012B8C0(TObj *);
-extern void func_8012BA44(TObj *);
-extern void func_8012BDE4(TObj *);
-extern void func_8012BF24(TObj *);
-extern void func_8012C0DC(TObj *);
-extern void func_8012C220(TObj *);
-extern void func_8012C5AC(TObj *);
+extern void nobleTreeBiteTalk(TObj *);
+extern void nobleTreeAccordionRocksHint(TObj *);
+extern void nobleTreeRestoredTalk(TObj *);
+extern void nobleTreeGrandpaMessage(TObj *);
+extern void nobleTreeGoldenItemsAsk(TObj *);
+extern void nobleTreeGoldenItemsHint(TObj *);
 extern void func_8012C6EC(TObj *);
 
 void updateParrot(TObj *o)
@@ -74,22 +74,22 @@ void updateParrot(TObj *o)
             }
             break;
         case 1:
-            func_8012BA44(o);
+            nobleTreeBiteTalk(o);
             break;
         case 2:
-            func_8012BDE4(o);
+            nobleTreeAccordionRocksHint(o);
             break;
         case 3:
-            func_8012BF24(o);
+            nobleTreeRestoredTalk(o);
             break;
         case 4:
-            func_8012C0DC(o);
+            nobleTreeGrandpaMessage(o);
             break;
         case 5:
-            func_8012C220(o);
+            nobleTreeGoldenItemsAsk(o);
             break;
         case 6:
-            func_8012C5AC(o);
+            nobleTreeGoldenItemsHint(o);
             break;
         }
         break;

@@ -14,7 +14,7 @@ extern void ObjSetFacingToPlayer(TObj *);
 extern int showMessageBoxDirect(int, int, Fix16 *);
 extern void setEventStarted(int, int, int);
 
-void func_8012BA44(TObj *o)
+void nobleTreeBiteTalk(TObj *o)
 {
 
     switch (o->state) {

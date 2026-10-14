@@ -21,7 +21,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_80127B78(TObj *o)
+void swimTeacherNoBananasTalk(TObj *o)
 {
     short t = o->state;
     unsigned char *k;

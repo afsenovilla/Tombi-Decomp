@@ -7,7 +7,7 @@ extern void *D_80134D60[];
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 
-void func_8011AE9C(TObj *o)
+void updateKeyTablet(TObj *o)
 {
     switch (o->b04) {
     case 0:

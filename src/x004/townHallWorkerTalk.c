@@ -16,7 +16,7 @@ extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_800eea7c(void *, int, int);
 extern void FUN_8003e300(int, int, V3 *);
 
-void func_8012A31C(TObj *o)
+void townHallWorkerTalk(TObj *o)
 {
     V3 v;
     TObj *p;

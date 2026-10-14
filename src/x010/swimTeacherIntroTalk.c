@@ -46,7 +46,7 @@ extern void addItemToInventory(int, int, int);
     AnimAdvance(o); \
     if (((TObj *)o->d90)->b04 == 2) { ((TObj *)o->d90)->b04 = 3; o->state++; }
 
-void func_8012736C(TObj *o)
+void swimTeacherIntroTalk(TObj *o)
 {
     int y;
     int hv;

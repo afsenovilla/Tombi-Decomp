@@ -26,7 +26,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     AnimJump(o, 0);
 }
 
-void func_801253AC(TObj *o)
+void lostHatManTalk(TObj *o)
 {
     V6 v;
     TObj *p;

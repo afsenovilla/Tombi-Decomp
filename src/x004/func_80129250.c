@@ -5,9 +5,9 @@
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern void func_80128114(TObj *);
-extern void func_80128304(TObj *);
-extern void func_8012866C(TObj *);
+extern void mermaidNecklaceTalk(TObj *);
+extern void mermaidDivingOfferTalk(TObj *);
+extern void mermaidDivingLesson(TObj *);
 extern void FUN_8001fec0(TObj *);
 
 void func_80129250(TObj *o)
@@ -30,13 +30,13 @@ void func_80129250(TObj *o)
         }
         break;
     case 1:
-        func_80128114(o);
+        mermaidNecklaceTalk(o);
         break;
     case 2:
-        func_80128304(o);
+        mermaidDivingOfferTalk(o);
         break;
     case 3:
-        func_8012866C(o);
+        mermaidDivingLesson(o);
         break;
     }
     FUN_8001fec0(o);

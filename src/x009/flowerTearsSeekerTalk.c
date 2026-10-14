@@ -16,7 +16,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void setEventStarted(int, int, int);
 
-void func_80128C44(TObj *o)
+void flowerTearsSeekerTalk(TObj *o)
 {
     B12 v;
     TObj *p;

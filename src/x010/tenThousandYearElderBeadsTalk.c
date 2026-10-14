@@ -27,7 +27,7 @@ static __inline__ void setanim(TObj *o, int n)
     FUN_8001fe94(o, 0);
 }
 
-void func_80125FB4(TObj *o)
+void tenThousandYearElderBeadsTalk(TObj *o)
 {
     V6 v;
     short i;

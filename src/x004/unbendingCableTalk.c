@@ -15,7 +15,7 @@ extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 
-void func_8012F75C(TObj *o)
+void unbendingCableTalk(TObj *o)
 {
     V6 v;
     TObj *p;

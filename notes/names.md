@@ -160,3 +160,32 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x003 80132d80 flameBlockedNpcTalk` - MFNT030S 7/0-3: cannot go further because of the flames, gives an item found on the way
 - `x003 801346c8 hidingSonTalk` - MFNT030S 5/0-2: hide-and-seek son, food basket from his father
 - `x006 801176b0 updateMotocrossRaceStarter` - layer 3 type 0x55 (1 placement): MFNT060S 2/0-1, 2/11 race start / retry; strips show a straw-hat farmer
+- `x004 8011ae9c updateKeyTablet` - layer 3 type 0x41 (1 placement, AREA04/12 section 19): subtype 0 strip is a stone tablet engraved with a key, the other subtypes golden key pieces (uncertain role)
+- `x004 80128114 mermaidNecklaceTalk` - MFNT040S 4/0, 4/3, 4/9: how to get my necklace back from the waterfall; gives the Big fish food
+- `x004 80128304 mermaidDivingOfferTalk` - MFNT040S 4/1-3: "that's my necklace!", offers to teach diving
+- `x004 8012866c mermaidDivingLesson` - MFNT040S 4/4-9: the diving lesson (press down to dive, direction + special to move)
+- `x004 80129be0 paintingSlotHintTalk` - MFNT040S 2/1: strange painting with a slot, door with a big lock
+- `x004 8012a31c townHallWorkerTalk` - MFNT040S 2/0: town hall worker who came to repair the lake pump, carries the small room key
+- `x004 8012c9f0 lostBossItemNpcTalk` - MFNT040S 3/0-4: "lost it again", hides from his boss (same character as x003 8012fcac)
+- `x004 8012fbf4 hidingSonTalk` - MFNT040S 2/14-16: hide-and-seek son, his father's food basket (same as x003 801346c8)
+- `x004 8012f75c unbendingCableTalk` - MFNT040S 5/0: "a cable that does not bend? ... I do have one"
+- `x009 801283a4 updateJellyfish` - layer 2 type 0x21 (14 placements): strips show a purple one-eyed jellyfish with tentacles
+- `x009 8012955c updateBoatman` - layer 2 type 0x59 (1 placement): MFNT090S 3/1 "want a ride in my boat? only one way"
+- `x009 80128c44 flowerTearsSeekerTalk` - MFNT090S 2/6-7: came for Flower tears to revive the Charity fountain, needs the tear bottle
+- `x009 80129ef8 aspiringActorGuardTalk` - MFNT090S 2/0-4: guard who wants to be an actor and practises faces; the mayor went to the mountain
+- `x010 801253ac lostHatManTalk` - MFNT100S 4/0-3: man from the Watchtower whose hat a strange monkey took
+- `x010 801268d4 tenThousandYearElderTalk` - MFNT100S 5/0-5: the 10,000-year elder, the 10 numbered beads under water, learn diving from the mermaid
+- `x010 80125fb4 tenThousandYearElderBeadsTalk` - MFNT100S 5/6-8: beads returned, evil pig history, key to the underground labyrinth
+- `x010 801264b4 powerFishCollectorTalk` - MFNT100S 5/10-14: collector who trades the Power fish for the five golden items
+- `x010 8012855c updateSwimTeacher` - layer 2 type 0x4D (4 placements): runs the four swim teacher lines below
+- `x010 8012736c swimTeacherIntroTalk` - MFNT100S 2/19-21: "you can't swim...", no more bananas, thirsty; found a hat
+- `x010 80127b78 swimTeacherNoBananasTalk` - MFNT100S 2/20, 2/22: "I said no more bananas!"
+- `x010 80127e08 swimTeacherJumpInTalk` - MFNT100S 2/24: "I'll teach you to swim, jump in the river"
+- `x010 801280fc swimTeacherFloatTalk` - MFNT100S 2/26: "if you relax you can float"
+- `x010 8012ba44 nobleTreeBiteTalk` - called by updateParrot; MFNT100S 2/4-7: "why do you bite me?", the noble tree is weak, accordion rocks
+- `x010 8012bde4 nobleTreeAccordionRocksHint` - MFNT100S 2/7 (accordion rocks reminder)
+- `x010 8012bf24 nobleTreeRestoredTalk` - MFNT100S 2/8-10: all rocks jumped, the tree is healthy, message from grandpa
+- `x010 8012c0dc nobleTreeGrandpaMessage` - MFNT100S 2/10 (Tree of knowledge message, repeat)
+- `x010 8012c220 nobleTreeGoldenItemsAsk` - MFNT100S 2/38-40: asking the tree where the five golden items are
+- `x010 8012c5ac nobleTreeGoldenItemsHint` - MFNT100S 2/40 (golden items locations, repeat)
+- `x010 8012d8e4 hidingSonTalk` - MFNT100S 3/0-2: hide-and-seek son again (same as x003/x004)

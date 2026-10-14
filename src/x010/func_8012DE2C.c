@@ -2,7 +2,7 @@
 // MATCHING 8012de2c 116
 #include "gcd.h"
 #include "TOBJ.H"
-extern void func_8012D8E4(TObj *);
+extern void hidingSonTalk(TObj *);
 
 void func_8012DE2C(TObj *o)
 {
@@ -14,7 +14,7 @@ void func_8012DE2C(TObj *o)
         }
         break;
     case 1:
-        func_8012D8E4(o);
+        hidingSonTalk(o);
         break;
     }
 }

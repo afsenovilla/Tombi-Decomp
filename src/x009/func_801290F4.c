@@ -9,7 +9,7 @@ extern AT D_8012B2E4[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void func_80128ECC(TObj *);
-extern void func_80128C44(TObj *);
+extern void flowerTearsSeekerTalk(TObj *);
 
 static __inline__ void pushL(short x, short w)
 {
@@ -62,7 +62,7 @@ void func_801290F4(TObj *o)
             func_80128ECC(o);
             break;
         case 1:
-            func_80128C44(o);
+            flowerTearsSeekerTalk(o);
             break;
         }
     }

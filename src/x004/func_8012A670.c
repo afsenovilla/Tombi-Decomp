@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 extern int AnimAdvance(TObj *o);
-extern void func_8012A31C(TObj *o);
+extern void townHallWorkerTalk(TObj *o);
 
 void func_8012A670(TObj *o)
 {
@@ -22,7 +22,7 @@ void func_8012A670(TObj *o)
         }
         break;
     case 1:
-        func_8012A31C(o);
+        townHallWorkerTalk(o);
         break;
     case 3:
         AnimAdvance(o);

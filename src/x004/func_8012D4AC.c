@@ -14,7 +14,7 @@ extern void func_8012C3D0(TObj *o);
 extern void func_8012C574(TObj *o);
 extern void func_8012C718(TObj *o);
 extern void func_8012C884(TObj *o);
-extern void func_8012C9F0(TObj *o);
+extern void lostBossItemNpcTalk(TObj *o);
 extern void func_8012D198(TObj *o);
 
 void func_8012D4AC(TObj *o)
@@ -81,7 +81,7 @@ void func_8012D4AC(TObj *o)
         case 3: func_8012C574(o); break;
         case 4: func_8012C718(o); break;
         case 5: func_8012C884(o); break;
-        case 6: func_8012C9F0(o); break;
+        case 6: lostBossItemNpcTalk(o); break;
         case 7: func_8012D198(o); break;
         }
         break;

@@ -14,7 +14,7 @@ extern int ObjCullRegister(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void freeObjectLayer2(TObj *);
 
-void func_8012955C(TObj *o)
+void updateBoatman(TObj *o)
 {
     TObj *pl = &PLAYER;
     TObj *p;

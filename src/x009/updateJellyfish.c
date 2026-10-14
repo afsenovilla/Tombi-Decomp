@@ -30,7 +30,7 @@ extern void func_8012781C(TObj *);
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
 #define ANIMP(o) (*(unsigned short **)((char *)(o) + 0xa8))
 
-void func_801283A4(TObj *o)
+void updateJellyfish(TObj *o)
 {
     TObj *p;
     unsigned char s;

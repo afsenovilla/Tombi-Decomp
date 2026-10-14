@@ -22,7 +22,7 @@ extern void func_801271D8(TObj *, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
-void func_801280FC(TObj *o)
+void swimTeacherFloatTalk(TObj *o)
 {
     TObj *p;
     int m, n;

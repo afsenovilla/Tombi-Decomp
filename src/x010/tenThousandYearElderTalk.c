@@ -12,7 +12,7 @@ extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
 
-void func_801268D4(TObj *o)
+void tenThousandYearElderTalk(TObj *o)
 {
     V6 v;
     TObj *e;

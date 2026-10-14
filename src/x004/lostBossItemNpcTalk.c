@@ -17,7 +17,7 @@ extern void setEventComplete(int, int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_8003e474(int, int, void *);
 
-void func_8012C9F0(TObj *o)
+void lostBossItemNpcTalk(TObj *o)
 {
     short y;
 

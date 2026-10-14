@@ -6,7 +6,7 @@
 
 extern int AnimAdvance(TObj *o);
 extern int ObjCullRegister(TObj *o);
-extern void func_8012A31C(TObj *o);
+extern void townHallWorkerTalk(TObj *o);
 extern void func_8012A740(TObj *o);
 extern void freeObjectLayer2(TObj *o);
 
@@ -31,7 +31,7 @@ void func_8012A8B8(TObj *o)
             }
             break;
         case 1:
-            func_8012A31C(o);
+            townHallWorkerTalk(o);
             break;
         case 3:
             AnimAdvance(o);
