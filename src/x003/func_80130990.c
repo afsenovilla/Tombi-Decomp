@@ -1,10 +1,10 @@
 // FUNC 80130990 1196 X003
 // MATCHING 80130990 1196
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_1F8001A4;
 extern unsigned short D_80135EC0[], D_80135EC8[];
 extern int FUN_8001f9e0(void);
 extern void FUN_80018980(TObj *);
@@ -29,7 +29,7 @@ void func_80130990(TObj *o)
         GVARS.s44 = 0;
         break;
     case 1:
-        if (D_1F8001A4) goto clr;
+        if (SPAD.b1a4) goto clr;
         switch (o->step) {
         case 0:
             if (GVARS.b3a) {

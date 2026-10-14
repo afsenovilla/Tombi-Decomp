@@ -1,12 +1,12 @@
 // FUNC 801343d4 584 X003
 // MATCHING 801343d4 584
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_8013613C;
-extern unsigned char D_8009CE5D, D_8009CDC5;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -26,10 +26,10 @@ void func_801343D4(TObj *o)
         k = p->f1a == 0x28;
         switch (k) {
         case 0x28:
-            if (D_8009CE5D == 0xff) continue;
+            if (GCD.bce5d == 0xff) continue;
             break;
         case 0x29:
-            if (D_8009CDC5 == 0xff) continue;
+            if (GCD.bcdc5 == 0xff) continue;
             break;
         }
         if (*(volatile unsigned short *)&p->f0 & 0x80) {

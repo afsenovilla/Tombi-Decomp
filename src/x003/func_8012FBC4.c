@@ -1,7 +1,7 @@
 // FUNC 8012fbc4 232 X003
 // MATCHING 8012fbc4 232
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002DC[];
 extern void *D_8013A704[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -16,7 +16,7 @@ void func_8012FBC4(TObj *o)
     case 0:
         o->b04 = b + 1;
         o->w1e = 1;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         *(signed char *)&o->b0f = -0xb;
         o->b0d = 0x80;
         o->wac = 0x1b;

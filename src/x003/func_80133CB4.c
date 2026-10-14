@@ -1,18 +1,17 @@
 // FUNC 80133cb4 308 X003
 // MATCHING 80133cb4 308
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE4F;
-extern unsigned char D_8009D0E6;
 extern void setEventComplete(int, int);
 
 void func_80133CB4(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CE4F == 0xff) break;
-        if (D_8009D0E6 < 5) break;
+        if (GCD.bce4f == 0xff) break;
+        if (GCD.bd0e6 < 5) break;
         o->step = 1;
         o->state = 2;
         break;

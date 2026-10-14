@@ -1,9 +1,9 @@
 // FUNC 801332cc 380 X003
 // MATCHING 801332cc 380
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDC1;
 extern void func_801318E4(TObj *);
 extern void func_80131E44(TObj *);
 extern void func_80132214(TObj *);
@@ -18,7 +18,7 @@ void func_801332CC(TObj *o)
     case 0:
         func_801318E4(o);
         o->b04++;
-        if (GAME.selectedSection == 0 && D_8009CDC1 == 0) o->step = 2;
+        if (GAME.selectedSection == 0 && GCD.bcdc1 == 0) o->step = 2;
         break;
     case 1:
         if (GAME.selectedSection == 0) {

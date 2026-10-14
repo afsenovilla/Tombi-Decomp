@@ -1,8 +1,8 @@
 // FUNC 8012f9a0 548 X003
 // MATCHING 8012f9a0 548
+#include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F8002DC[];
 extern void *D_8013A698[];
 extern signed char D_80135EA0[], D_80135EB0[];
 extern short D_8007A5F0[], D_8007A3F0[];
@@ -25,7 +25,7 @@ void func_8012F9A0(TObj *o)
         o->animFrame = 1;
         o->w1e = 1;
         o->b04++;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         *(signed char *)&o->b0f = -10;
         o->b0d = 0x80;
         o->b0a = 0;

@@ -1,12 +1,11 @@
 // FUNC 8013123c 884 X003
 // MATCHING 8013123c 884
+#include "spad.h"
 #include "TOBJ.H"
 
 #define W1C(o) (*(unsigned short *)&(o)->category)
 #define W1E(o) (*(unsigned short *)&(o)->w1e)
 extern TObj PLAYER;
-extern unsigned short D_1F8001F8;
-extern unsigned short D_1F800176;
 int Rand(void);
 TObj *allocObjectLayer2(void);
 void PoolFree_1F800210(TObj *o);
@@ -86,19 +85,19 @@ void func_8013123C(TObj *o)
                 break;
             }
             if ((unsigned short)(p->a.p.whole - 0x1086) < 0xbe) {
-                if (D_1F8001F8 & 0xf)
+                if (SPAD.s1f8 & 0xf)
                     break;
                 if (!(Rand() & 1))
                     break;
-                spawn(o, D_1F800176 - 0x40, -0x6cc);
+                spawn(o, (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40, -0x6cc);
             } else {
                 if ((unsigned short)(p->a.p.whole - 0x1144) >= 0xaf)
                     break;
-                if (D_1F8001F8 & 0xf)
+                if (SPAD.s1f8 & 0xf)
                     break;
                 if (!(Rand() & 1))
                     break;
-                spawn(o, D_1F800176 - 0x40, -0x720);
+                spawn(o, (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x40, -0x720);
             }
             o->w08 = 0xf0;
             o->step++;
@@ -118,10 +117,10 @@ void func_8013123C(TObj *o)
                 o->step = 0;
                 break;
             }
-            q = &D_1F800176;
+            q = &(*(unsigned short*)((char*)&SPAD.i174 + 2));
             if ((unsigned short)(*q - 0x10a9) >= 0x73)
                 break;
-            if (D_1F8001F8 & 0xf)
+            if (SPAD.s1f8 & 0xf)
                 break;
             if (!(Rand() & 1))
                 break;

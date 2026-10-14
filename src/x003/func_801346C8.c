@@ -1,5 +1,6 @@
 // FUNC 801346c8 1468 X003
 // MATCHING 801346c8 1468
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -7,8 +8,7 @@ typedef struct { void **p; int a, b; } T12;
 extern T12 D_80136148[];
 extern TObj PLAYER;
 #define P PLAYER
-extern unsigned char D_8009CDAB, D_8009CE3B, D_8009CFCA, D_8009D13E;
-extern unsigned char D_8009CFCD[];
+extern unsigned char D_8009D13E;
 extern signed char D_8009D2B0[];
 extern unsigned char D_800A603C, D_800A603D;
 extern short D_800A60EA[];
@@ -27,7 +27,7 @@ void func_801346C8(TObj *o)
 
     switch (o->state) {
     case 0:
-        s = D_8009CDAB;
+        s = GCD.bcdab;
         if (s != 1) break;
         if (P.d->p.whole != 0x5a) break;
         if ((unsigned short)(P.h->p.whole - 0xc58) >= 0x14) break;
@@ -38,12 +38,12 @@ void func_801346C8(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&GVARS.b3e)[0] = 1;
         D_8009D2B0[0] = 2;
-        D_8009CFCD[0] = 1;
+        ((unsigned char*)&GCD.bcfcd)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = 1;
         o->anim = D_80136148[o->subtype].p[1];
         AnimLoadDuration(o);
-        if (D_8009CE3B == s) {
+        if (GCD.bce3b == s) {
             o->d90 = showMessageBoxDirect(5, 0, &v);
             o->state = 10;
         } else {
@@ -91,7 +91,7 @@ void func_801346C8(TObj *o)
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         D_800A60EA[0] = 0;
         o->animFrame = o->wbc;
-        { unsigned char *c = &D_8009CFCA; *c = *c + 1; }
+        { unsigned char *c = &GCD.bcfca; *c = *c + 1; }
         D_1F8001C6 = 0;
         o->b68 = 0;
         o->step = 0;

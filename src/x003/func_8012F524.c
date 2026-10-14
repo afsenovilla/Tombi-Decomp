@@ -1,14 +1,12 @@
 // FUNC 8012f524 1148 X003
 // MATCHING 8012f524 1148
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pc0[0x12]; unsigned short wd2; } TX;
 #define X(o) ((TX *)(o))
 typedef struct { short f0, f1, f2, f3, f4, f5; } XS;
-extern int D_1F8002DC[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern void FUN_80020490(TObj *);
@@ -42,7 +40,7 @@ void func_8012F524(TObj *o)
             o->box1 = 0x10;
             o->box2 = 8;
             o->box3 = 0x10;
-            o->d3c = D_1F8002DC[0];
+            o->d3c = ((int*)&SPAD.i2dc)[0];
             o->w1e = 1;
             o->b0d = 0;
             o->b69 = 0;
@@ -100,7 +98,7 @@ void func_8012F524(TObj *o)
                 }
                 break;
             }
-            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0) {
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0) {
                 FUN_80020490(o);
             }
             o->b9d = 0;

@@ -1,9 +1,9 @@
 // FUNC 801307b0 480 X003
 // MATCHING 801307b0 480
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDD9;
 extern int D_1F8002D0[];
 extern int D_1F8002F8[];
 extern void *D_8013A368[];
@@ -59,10 +59,10 @@ void func_801307B0(TObj *o)
         AnimAdvance(o);
         ObjCullRegister(o);
         if (!(GV2.bc3 & 0x10)) {
-            if (D_8009CDD9 == 0) func_801301C0(o);
+            if (GCD.bcdd9 == 0) func_801301C0(o);
             else func_8013034C(o);
         } else {
-            if (D_8009CDD9 == 0) func_801304B8(o);
+            if (GCD.bcdd9 == 0) func_801304B8(o);
             else func_80130644(o);
         }
         break;

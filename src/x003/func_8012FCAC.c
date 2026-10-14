@@ -1,10 +1,10 @@
 // FUNC 8012fcac 1028 X003
 // MATCHING 8012fcac 1028
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D087;
 extern void *D_80138FC8[], *D_80138FD8[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
@@ -27,10 +27,10 @@ void func_8012FCAC(TObj *o)
     switch (o->state) {
     case 0:
         o->b68 = 0;
-        if (D_8009D087 == 0) o->state = 1;
-        else if (D_8009D087 == 1) o->state = 8;
-        else if (D_8009D087 == 2) o->state = 0x10;
-        else if (D_8009D087 == 4) o->b04 = 3;
+        if (GCD.bd087 == 0) o->state = 1;
+        else if (GCD.bd087 == 1) o->state = 8;
+        else if (GCD.bd087 == 2) o->state = 0x10;
+        else if (GCD.bd087 == 4) o->b04 = 3;
         break;
     case 1:
         if (o->b68 == 0) break;
@@ -38,7 +38,7 @@ void func_8012FCAC(TObj *o)
         n = 0;
         q = &o->a;
         o->state++;
-        D_8009D087 = 1;
+        GCD.bd087 = 1;
         goto talk;
     case 2:
         AnimAdvance(o);
@@ -81,7 +81,7 @@ void func_8012FCAC(TObj *o)
         goto talk;
     case 10:
         o->state++;
-        D_8009D087 = 2;
+        GCD.bd087 = 2;
         GVARS.b40 = 0;
         FUN_80026e0c(0x8f, 1);
         m = 8;
@@ -116,7 +116,7 @@ void func_8012FCAC(TObj *o)
         break;
     case 16:
         if (o->visible == 0) {
-            D_8009D087 = 4;
+            GCD.bd087 = 4;
             o->b04 = 3;
             break;
         }

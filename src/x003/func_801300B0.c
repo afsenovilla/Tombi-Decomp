@@ -1,9 +1,9 @@
 // FUNC 801300b0 272 X003
 // MATCHING 801300b0 272
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_80138FD8[];
-extern int D_1F800300[];
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -25,7 +25,7 @@ void func_801300B0(TObj *o)
         o->w08 = GetClut(0xa0, 0x1e1);
         o->wac = 6;
         o->anim = D_80138FD8[0];
-        o->d3c = D_1F800300[0];
+        o->d3c = ((int*)&SPAD.i300)[0];
         AnimLoadDuration(o);
         break;
     case 1:

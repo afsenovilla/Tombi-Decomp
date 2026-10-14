@@ -1,10 +1,10 @@
 // FUNC 801301c0 396 X003
 // MATCHING 801301c0 396
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D00A;
 extern void *D_8013A368[];
 extern void *D_8013A378[];
 extern int showMessageBoxDirect(int, int, void *);
@@ -48,7 +48,7 @@ void func_801301C0(TObj *o)
         o->wac = 0;
         o->anim = D_8013A368[0];
         o->state = 0;
-        k = &D_8009D00A;
+        k = &GCD.bd00a;
         if (*k) {
             GVARS.b3f = 0;
             GVARS.b42 = 0;

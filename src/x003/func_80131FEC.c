@@ -1,11 +1,11 @@
 // FUNC 80131fec 552 X003
 // MATCHING 80131fec 552
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
 extern TObj *D_8009F2E0;
-extern unsigned char D_8009CDC1;
 extern unsigned char PLAYER;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
@@ -23,7 +23,7 @@ void func_80131FEC(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CDC1) {
+        if (GCD.bcdc1) {
             o->step = 2;
             o->state = 0;
             break;

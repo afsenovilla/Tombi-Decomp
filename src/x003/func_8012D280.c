@@ -1,8 +1,8 @@
 // FUNC 8012d280 664 X003
 // MATCHING 8012d280 664
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009CE51;
 extern unsigned char D_8009CF03;
 extern int D_1F8002D0[];
 extern void *D_801399C8;
@@ -26,7 +26,7 @@ void func_8012D280(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CE51 == 0xff) {
+        if (GCD.bce51 == 0xff) {
             o->b04 = 3;
             break;
         }

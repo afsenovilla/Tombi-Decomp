@@ -1,5 +1,6 @@
 // FUNC 80131e44 424 X003
 // MATCHING 80131e44 424
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -8,7 +9,6 @@ extern TObj PLAYER;
 extern short *D_800A6078;
 extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
-extern unsigned char D_8009CEEF;
 void func_801289C8(int a, int b, int c);
 
 void func_80131E44(TObj *o)
@@ -33,21 +33,21 @@ void func_80131E44(TObj *o)
         break;
     case 1:
         if (PLAYER.b69) {
-            D_8009CEEF = 1;
+            GCD.bceef = 1;
             func_801289C8(a, 0, 0);
             func_801289C8(b, 0, 0);
             o->state++;
         }
         break;
     case 2:
-        if (D_8009CEEF == 3) {
+        if (GCD.bceef == 3) {
             o->w08 = 0x3c;
             o->state++;
         }
         break;
     case 3:
         if (--o->w08 <= 0) {
-            D_8009CEEF = 4;
+            GCD.bceef = 4;
             o->step = 1;
             o->state = 0;
         }

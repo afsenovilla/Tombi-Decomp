@@ -1,11 +1,8 @@
 // FUNC 8012d740 468 X003
 // MATCHING 8012d740 468
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern unsigned short D_80135E20[];
 extern int FUN_8001f9e0(void);
 extern int FUN_80020448(short, short);
@@ -13,8 +10,8 @@ extern TObj *FUN_80018448(void);
 
 static __inline__ int inview(TObj *o)
 {
-    if ((unsigned short)(o->a.p.whole - D_1F800176 + 0x64) >= 0x209) return 0;
-    return (unsigned short)(D_1F800186 - o->y.p.whole + 0x80) < 0x1e1;
+    if ((unsigned short)(o->a.p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x64) >= 0x209) return 0;
+    return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x80) < 0x1e1;
 }
 
 void func_8012D740(TObj *o)
@@ -23,7 +20,7 @@ void func_8012D740(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0 && inview(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0 && inview(o)) {
             o->timer = D_80135E20[FUN_8001f9e0() & 0xf];
             o->state++;
         }
