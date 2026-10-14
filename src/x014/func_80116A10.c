@@ -1,5 +1,6 @@
 // FUNC 80116a10 512 X014
 // MATCHING 80116a10 512
+#include "spad.h"
 #include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
@@ -10,7 +11,6 @@ typedef struct {
 } G;
 extern int LoadImage(RECT *, void *);
 extern void func_80116900(short, short);
-extern unsigned short D_1F8001F8;
 extern unsigned short D_80125978[];
 extern unsigned short D_80125B64[];
 extern char D_801257B8[], D_80125898[], D_80125984[], D_80125A24[], D_80125AC4[];
@@ -43,7 +43,7 @@ void func_80116A10(G *g, char *s)
             if (!(i & 1)) LoadImage(&r, D_801257B8);
             else LoadImage(&r, D_80125898);
         }
-    } else if (GAME.selectedSection == 3 && !(D_1F8001F8 & 7)) {
+    } else if (GAME.selectedSection == 3 && !(SPAD.s1f8 & 7)) {
         i = g->b165;
         t = D_80125B64[i];
         g->b165++;

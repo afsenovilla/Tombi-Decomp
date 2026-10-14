@@ -1,11 +1,11 @@
 // FUNC 8011e550 540 X014
 // MATCHING 8011e550 540
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern signed char D_8009D2B0;
-extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
@@ -42,7 +42,7 @@ void func_8011E550(TObj *o)
             o->step++;
             break;
         }
-        o->d38 = angleFromDelta((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
+        o->d38 = angleFromDelta((short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole), (short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole)) & 0xff;
         o->wb6 = ((unsigned short*)&GAME.selectedSection)[0];
         x = ((o->d38 + 8) & 0xff) >> 4;
         o->wb8 = x;

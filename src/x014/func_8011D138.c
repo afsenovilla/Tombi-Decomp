@@ -1,5 +1,6 @@
 // FUNC 8011d138 420 X014
 // MATCHING 8011d138 420
+#include "spad.h"
 #define U8(p, o) (*(unsigned char *)((p) + (o)))
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
@@ -7,7 +8,6 @@
 extern short func_800435E0(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void FUN_8001f96c(int, int, int, int);
-extern unsigned char D_1F8001A4;
 
 void func_8011D138(unsigned char *a, unsigned char *b)
 {
@@ -30,7 +30,7 @@ void func_8011D138(unsigned char *a, unsigned char *b)
         }
     case 0:
     case 3:
-        if ((b[0] & 2) == 0 && D_1F8001A4 == 0 && (a[0] & 2) == 0) {
+        if ((b[0] & 2) == 0 && SPAD.b1a4 == 0 && (a[0] & 2) == 0) {
             int ah, bh;
             a[0] = 2;
             bh = S16(PTR(b, 0x40), 2);

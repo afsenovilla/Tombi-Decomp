@@ -1,8 +1,8 @@
 // FUNC 801172dc 332 X014
 // MATCHING 801172dc 332
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern int D_1F8002DC[];
 extern void *D_8012A010;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -21,7 +21,7 @@ void func_801172DC(TObj *o)
         o->b0f = 0;
         o->b0a = 0;
         o->b0d = 0x80;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         o->timer = 0x28;
         o->velH = 0x100;
         if (o->animFrame) o->velH = -0x100;

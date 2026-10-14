@@ -1,5 +1,6 @@
 // FUNC 8011d9d0 320 X014
 // MATCHING 8011d9d0 320
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -7,7 +8,6 @@ typedef struct {
     unsigned char bbe, bbf;
     short wc0, wc2, wc4, wc6;
 } SB;
-extern int D_1F8002D0;
 extern int D_80125CC4[], D_80125CE4[], D_80125D04[];
 extern unsigned char SCRIPT_FLAGS[];
 #define S16(o, x) (*(short *)((char *)(o) + (x)))
@@ -40,7 +40,7 @@ void func_8011D9D0(TObj *t)
     S16(t, 0xc4) = 0;
     S16(t, 0xc6) = 0;
     S16(t, 0x1e) = 4;
-    t->d3c = D_1F8002D0;
+    t->d3c = SPAD.i2d0;
     t->wb4 = 0;
     t->wae = 0;
     t->d84 = 0;

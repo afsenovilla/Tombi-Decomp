@@ -1,8 +1,8 @@
 // FUNC 801196a4 624 X014
 // MATCHING 801196a4 624
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F800176, D_1F800186;
 extern int Rand(void);
 extern void playSFX(int);
 
@@ -18,7 +18,7 @@ unsigned char func_801196A4(TObj *o, int d)
 
     switch ((unsigned char)d) {
     case 0:
-        if (D_1F800176 + 300 < o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 300 < o->h->p.whole) {
             t = 8;
             t -= d;
             t += Rand() & 3;
@@ -29,20 +29,20 @@ unsigned char func_801196A4(TObj *o, int d)
     case 1:
     case 2:
     case 3:
-        if (D_1F800176 + 300 < o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 300 < o->h->p.whole) {
             t = 8;
             t -= d;
             r = (Rand() & 3) - 2;
             t += r;
             d = t & 0xf;
             playSFX(7);
-        } else if (o->y.p.whole < D_1F800186 - 200) {
+        } else if (o->y.p.whole < (*(short*)&SPAD.s186) - 200) {
             d = -d & 0xf;
             playSFX(7);
         }
         break;
     case 4:
-        if (o->y.p.whole < D_1F800186 - 200) {
+        if (o->y.p.whole < (*(short*)&SPAD.s186) - 200) {
             d = add(-d, Rand() & 1) & 0xf;
             playSFX(7);
         }
@@ -50,16 +50,16 @@ unsigned char func_801196A4(TObj *o, int d)
     case 5:
     case 6:
     case 7:
-        if (D_1F800176 + 20 > o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 20 > o->h->p.whole) {
             d = (8 - d) & 0xf;
             playSFX(7);
-        } else if (o->y.p.whole < D_1F800186 - 200) {
+        } else if (o->y.p.whole < (*(short*)&SPAD.s186) - 200) {
             d = -d & 0xf;
             playSFX(7);
         }
         break;
     case 8:
-        if (D_1F800176 + 20 > o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 20 > o->h->p.whole) {
             t = 8;
             t -= d;
             t += Rand() & 1;
@@ -70,20 +70,20 @@ unsigned char func_801196A4(TObj *o, int d)
     case 9:
     case 10:
     case 11:
-        if (D_1F800176 + 20 > o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 20 > o->h->p.whole) {
             t = 8;
             t -= d;
             r = (Rand() & 3) - 2;
             t += r;
             d = t & 0xf;
             playSFX(7);
-        } else if (D_1F800186 - 40 < o->y.p.whole) {
+        } else if ((*(short*)&SPAD.s186) - 40 < o->y.p.whole) {
             d = -d & 0xf;
             playSFX(7);
         }
         break;
     case 12:
-        if (D_1F800186 - 40 < o->y.p.whole) {
+        if ((*(short*)&SPAD.s186) - 40 < o->y.p.whole) {
             d = add(-d, Rand() & 0x10) & 0xf;
             playSFX(7);
         }
@@ -91,10 +91,10 @@ unsigned char func_801196A4(TObj *o, int d)
     case 13:
     case 14:
     case 15:
-        if (D_1F800176 + 300 < o->h->p.whole) {
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 300 < o->h->p.whole) {
             d = (8 - d) & 0xf;
             playSFX(7);
-        } else if (D_1F800186 - 40 < o->y.p.whole) {
+        } else if ((*(short*)&SPAD.s186) - 40 < o->y.p.whole) {
             d = -d & 0xf;
             playSFX(7);
         }

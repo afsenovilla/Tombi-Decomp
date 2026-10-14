@@ -1,5 +1,6 @@
 // FUNC 8011e1f0 864 X014
 // MATCHING 8011e1f0 864
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -19,7 +20,6 @@ typedef struct {
 #define WC6(o) (*(unsigned short *)((char *)(o) + 0xc6))
 
 extern signed char D_8009D2B0;
-extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
@@ -35,8 +35,8 @@ static __inline__ int chk(TObj *o)
 {
     if (((unsigned short*)&GAME.selectedSection)[0] != 7) return 0;
     WC6(o) = 0;
-    if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x40) > 0x80) return 0;
-    if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x40) > 0x80) return 0;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x40) > 0x80) return 0;
+    if ((unsigned short)(o->y.p.whole - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + 0x40) > 0x80) return 0;
     if (D_80125D80[Rand() & 0xf]) WC6(o) = 1;
     else WC6(o) = 2;
     return 1;
@@ -67,7 +67,7 @@ void func_8011E1F0(TObj *o)
                 break;
             }
         }
-        o->d38 = angleFromDelta((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
+        o->d38 = angleFromDelta((short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole), (short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole)) & 0xff;
         o->wb6 = ((unsigned short*)&GAME.selectedSection)[0];
         x = ((o->d38 + 8) & 0xff) >> 4;
         o->wb8 = x;

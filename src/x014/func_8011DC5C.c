@@ -1,14 +1,12 @@
 // FUNC 8011dc5c 1428 X014
 // MATCHING 8011dc5c 1428
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p0[0xe]; unsigned short w0e; } X;
 typedef struct { unsigned char c[4]; } B;
 extern volatile unsigned short D_1F8000EE;
 extern volatile unsigned short D_1F8000F2;
-extern unsigned short D_1F8001F8;
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -25,8 +23,8 @@ extern void func_80117C50(short, short, short, short);
 
 static __inline__ int inrange(TObj *o)
 {
-    if ((unsigned short)(o->h->p.whole - D_1F800176 + 0x10) >= 0x161) return 0;
-    return (unsigned short)(D_1F800186 - o->y.p.whole + 0x10) < 0x101;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x10) >= 0x161) return 0;
+    return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x10) < 0x101;
 }
 
 void func_8011DC5C(TObj *o)
@@ -103,10 +101,10 @@ void func_8011DC5C(TObj *o)
             o->timer = 0x1e;
             o->state++;
         }
-        if (D_1F8001F8 & 3) o->visible = 0;
+        if (SPAD.s1f8 & 3) o->visible = 0;
         break;
     case 3:
-        if (D_1F8001F8 & 1) o->visible = 0;
+        if (SPAD.s1f8 & 1) o->visible = 0;
         AnimAdvance(o);
         o->velV += 0x20;
         o->y.raw += o->velV << 8;
@@ -142,7 +140,7 @@ void func_8011DC5C(TObj *o)
     case 5: {
         void *a;
         AnimAdvance(o);
-        if (D_1F8001F8 & 3) o->visible = 0;
+        if (SPAD.s1f8 & 3) o->visible = 0;
         if (--o->timer == -1) {
             if (o->subtype == 1) {
                 SETBOX(0);

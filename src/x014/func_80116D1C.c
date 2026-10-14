@@ -1,9 +1,9 @@
 // FUNC 80116d1c 420 X014
 // MATCHING 80116d1c 420
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern void *D_8001226C;
-extern int D_1F8002D8[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void FUN_800202b4(TObj *);
@@ -22,7 +22,7 @@ void func_80116D1C(TObj *o)
         o->anim = D_8001226C;
         o->w08 = 0x7ed7;
         o->animFrame = 0;
-        o->d3c = D_1F8002D8[0];
+        o->d3c = ((int*)&SPAD.i2d8)[0];
         o->b04++;
         o->timer = 0x78;
         AnimLoadDuration(o);

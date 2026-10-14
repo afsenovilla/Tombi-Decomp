@@ -1,10 +1,10 @@
 // FUNC 8011a9e0 700 X014
 // MATCHING 8011a9e0 700
+#include "spad.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D4[];
 extern void *D_80129F94;
 extern short D_8007A3F0[], D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
@@ -16,7 +16,7 @@ extern int angleFromDelta(int, int);
 static __inline__ void setup(TObj *p)
 {
     (*(TObj **)&GVARS.p54) = p;
-    p->d3c = D_1F8002D4[0];
+    p->d3c = ((int*)&SPAD.i2d4)[0];
     p->anim = D_80129F94;
     FUN_8001fe6c(p);
 }

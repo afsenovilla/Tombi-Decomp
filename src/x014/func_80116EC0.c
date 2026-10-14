@@ -1,12 +1,12 @@
 // FUNC 80116ec0 476 X014
 // MATCHING 80116ec0 476
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned short D_80125B70[];
 extern void *D_80125C00[];
 extern char D_8012A1B0[];
-extern int D_1F8002DC;
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -26,7 +26,7 @@ void func_80116EC0(TObj *o)
         o->animFrame = 0;
         o->anim = D_8012A1B0;
         *(void **)((char *)o + 0x94) = D_80125C00[((unsigned short*)&GAME.selectedSection)[0]];
-        o->d3c = D_1F8002DC;
+        o->d3c = SPAD.i2dc;
         o->b04++;
         FUN_8001fe6c(o);
         o->timer = 9;

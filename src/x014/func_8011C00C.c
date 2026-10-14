@@ -1,5 +1,6 @@
 // FUNC 8011c00c 2048 X014
 // MATCHING 8011c00c 2048
+#include "spad.h"
 /* Non-semitrans twin of func_8011B830 (same file, scale doubled `(unsigned char)sc << 1`, code 0x2c, rgb from velX written
    as `f->r = f->g = f->b = ...` to get the b,g,r store order, call result tested per branch). See func_8011B830.c for the keys. */
 #include "TOBJ.H"
@@ -14,11 +15,9 @@ typedef struct {
 } PFT4_8011C00C;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4_8011C00C *D_1F800164;
-extern int D_1F8001E0;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -50,7 +49,7 @@ void func_8011C00C(TObj *o)
     PFT4_8011C00C *f;
 
     if (o->anim == 0) return;
-    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;
@@ -126,9 +125,9 @@ void func_8011C00C(TObj *o)
             if (o->b0d & 1) *(unsigned short *)((char *)f + 0xe) = o->w08;
             f->r = f->g = f->b = *(unsigned char *)&o->velX;
             if (o->b0b != 0) {
-                if (insertPrim(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
+                if (insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
             } else {
-                if (insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
+                if (insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
             }
             D_1F800164 = (PFT4_8011C00C *)((char *)D_1F800164 + 0x28);
         }
