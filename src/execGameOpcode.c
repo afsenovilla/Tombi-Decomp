@@ -1,9 +1,8 @@
 // FUNC 8003afb4 2888 MAIN0
 // MATCHING 8003afb4 2888
 #include "TOBJ.H"
-typedef struct { char pad[0x8a]; unsigned short w8a; char pad2[0x1190 - 0x8c]; int d1190; int d1194; int d1198; int d119c; } G;
+#include "scriptctx.h"
 typedef struct { short s0, s2; } S2;
-extern G *SCRIPT_CTX;
 extern TObj *SCRIPT_OBJECTS[];
 extern S2 *D_800A6078, *D_800A607C[];
 extern short D_800A604C[];
@@ -37,12 +36,12 @@ extern void FUN_800eeae4(char *, int, int);
 
 static __inline__ int op81(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     TObj *o;
     int b, a;
-    a = g->d1194;
-    o = SCRIPT_OBJECTS[g->d1190];
-    b = g->d1198;
+    a = g->arg[1];
+    o = SCRIPT_OBJECTS[g->arg[0]];
+    b = g->arg[2];
     if (o != 0) {
         o->w74 = a;
         o->w76 = b;
@@ -64,8 +63,8 @@ static __inline__ int op81(void)
 
 static __inline__ int op82(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj **p = &SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj **p = &SCRIPT_OBJECTS[g->arg[0]];
     TObj *o = *p;
     if (o != 0) {
         o->b04 = 3;
@@ -78,43 +77,43 @@ static __inline__ int op82(void)
 
 static __inline__ int op83(void)
 {
-    G *g = SCRIPT_CTX;
-    D_800A6078->s2 = g->d1190;
-    D_800A604C[1] = g->d1194;
-    D_800A607C[0]->s2 = g->d1198;
+    ScriptCtx *g = SCRIPT_CTX;
+    D_800A6078->s2 = g->arg[0];
+    D_800A604C[1] = g->arg[1];
+    D_800A607C[0]->s2 = g->arg[2];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op84(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     int v;
-    g->d1190 = D_800A6078->s2;
-    g->d1194 = D_800A604C[1];
+    g->arg[0] = D_800A6078->s2;
+    g->arg[1] = D_800A604C[1];
     v = D_800A607C[0]->s2;
     (*(short *)((char *)g + 0x8a))++;
-    g->d1198 = v;
+    g->arg[2] = v;
     return 1;
 }
 
 static __inline__ int op86(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) g->d1190 = o->b6a;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) g->arg[0] = o->b6a;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op87(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
-        o->h->p.whole = g->d1194;
-        o->y.p.whole = g->d1198;
-        o->d->p.whole = g->d119c;
+        o->h->p.whole = g->arg[1];
+        o->y.p.whole = g->arg[2];
+        o->d->p.whole = g->arg[3];
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -122,12 +121,12 @@ static __inline__ int op87(void)
 
 static __inline__ int op88(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
-        g->d1190 = o->h->p.whole;
-        g->d1194 = o->y.p.whole;
-        g->d1198 = o->d->p.whole;
+        g->arg[0] = o->h->p.whole;
+        g->arg[1] = o->y.p.whole;
+        g->arg[2] = o->d->p.whole;
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -135,47 +134,47 @@ static __inline__ int op88(void)
 
 static __inline__ int op89(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) o->animFrame = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) o->animFrame = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op8a(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) g->d1190 = o->animFrame;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) g->arg[0] = o->animFrame;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op8b(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) g->d1190 = o->b04 == 2;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) g->arg[0] = o->b04 == 2;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op8c(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) o->active = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) o->active = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op8d(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
         FUN_800202b4(o);
-        g->d1190 = o->visible;
+        g->arg[0] = o->visible;
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -183,34 +182,34 @@ static __inline__ int op8d(void)
 
 static __inline__ int op8e(void)
 {
-    G *g = SCRIPT_CTX;
-    int v = SCRIPT_FLAGS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    int v = SCRIPT_FLAGS[g->arg[0]];
     (*(short *)((char *)g + 0x8a))++;
-    g->d1190 = v;
+    g->arg[0] = v;
     return 1;
 }
 
 static __inline__ int op8f(void)
 {
-    G *g = SCRIPT_CTX;
-    SCRIPT_FLAGS[g->d1190] = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    SCRIPT_FLAGS[g->arg[0]] = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op90(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
         int t = o->type & 0x7f;
         if (t == 0x18) goto l;
         if (t == 0x19) {
         l:
-            g->d1190 = o->b68;
+            g->arg[0] = o->b68;
         }
     } else {
-        g->d1190 = 0;
+        g->arg[0] = 0;
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -218,52 +217,52 @@ static __inline__ int op90(void)
 
 static __inline__ int op91(void)
 {
-    G *g = SCRIPT_CTX;
-    int v = SCRIPT_GLOBALS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    int v = SCRIPT_GLOBALS[g->arg[0]];
     (*(short *)((char *)g + 0x8a))++;
-    g->d1190 = v;
+    g->arg[0] = v;
     return 1;
 }
 
 static __inline__ int op92(void)
 {
-    G *g = SCRIPT_CTX;
-    SCRIPT_GLOBALS[g->d1190] = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    SCRIPT_GLOBALS[g->arg[0]] = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op93(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     if (D_8009D2B0 != 3) FUN_800ecb40(PLAYER, D_800A6078->s2, D_800A604C[1]);
-    g->d1190 = D_800A60A0;
+    g->arg[0] = D_800A60A0;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op94(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if ((D_8009D2B0 != 3 || D_800A60A3 == 1) && o != 0) o->b6b = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if ((D_8009D2B0 != 3 || D_800A60A3 == 1) && o != 0) o->b6b = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op95(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
         switch (o->type & 0x7f) {
         case 0x18:
-            o->b0f = g->d1194;
+            o->b0f = g->arg[1];
             break;
         case 0x19:
         case 0x2e:
             {
-                int c = g->d1194;
+                int c = g->arg[1];
                 ((unsigned char *)o)[0xe] = c;
                 switch (c & 0xff) {
                 case 1: *(signed char *)&o->b0f = -11; break;
@@ -279,9 +278,9 @@ static __inline__ int op95(void)
 
 static __inline__ int op96(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     if (D_8009D2B0 != 3) {
-        switch (g->d1190) {
+        switch (g->arg[0]) {
         case 0: D_800A60A3 = 0; break;
         case 1: D_800A60A3 = 1; break;
         default: D_800A60A3 = 2; break;
@@ -301,18 +300,18 @@ static __inline__ int op98(void)
 
 static __inline__ int op99(void)
 {
-    G *g = SCRIPT_CTX;
-    D_800A6066 = g->d1190;
+    ScriptCtx *g = SCRIPT_CTX;
+    D_800A6066 = g->arg[0];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op9a(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     {
-        int a = g->d1190;
-        if (g->d1194) FUN_8005a7a0(a, 1, 0);
+        int a = g->arg[0];
+        if (g->arg[1]) FUN_8005a7a0(a, 1, 0);
         else FUN_8005a7a0(a, 0, 0);
     }
     (*(short *)((char *)g + 0x8a))++;
@@ -329,24 +328,24 @@ static __inline__ int op9b(void)
 
 static __inline__ int op9c(void)
 {
-    G *g = SCRIPT_CTX;
-    D_8009C942 = g->d1190;
+    ScriptCtx *g = SCRIPT_CTX;
+    D_8009C942 = g->arg[0];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op9d(void)
 {
-    G *g = SCRIPT_CTX;
-    printInfoMessage(g->d1190, 2);
+    ScriptCtx *g = SCRIPT_CTX;
+    printInfoMessage(g->arg[0], 2);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int op9e(void)
 {
-    G *g = SCRIPT_CTX;
-    playSFXWithNoteAndVolume(g->d1190, g->d1194, g->d1198);
+    ScriptCtx *g = SCRIPT_CTX;
+    playSFXWithNoteAndVolume(g->arg[0], g->arg[1], g->arg[2]);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -370,10 +369,10 @@ static __inline__ int op9f(void)
 
 static __inline__ int opa0(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     D_8009C975 = 0x10;
-    D_8009C93C = g->d1190;
-    D_8009C976 = g->d1194;
+    D_8009C93C = g->arg[0];
+    D_8009C976 = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -399,43 +398,43 @@ static __inline__ int opa2(void)
 
 static __inline__ int opa3(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) g->d1190 = o->b69;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) g->arg[0] = o->b69;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opa4(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) o->b69 = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) o->b69 = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opa5(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
-    if (o != 0) o->b9c = g->d1194;
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
+    if (o != 0) o->b9c = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opa6(void)
 {
-    G *g = SCRIPT_CTX;
-    FUN_800eeae4(PLAYER, (short)g->d1190, (short)g->d1194);
+    ScriptCtx *g = SCRIPT_CTX;
+    FUN_800eeae4(PLAYER, (short)g->arg[0], (short)g->arg[1]);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opa7(void)
 {
-    G *g = SCRIPT_CTX;
-    g->d1190 = D_8009D2B1;
+    ScriptCtx *g = SCRIPT_CTX;
+    g->arg[0] = D_8009D2B1;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -450,18 +449,18 @@ static __inline__ int opa8(void)
 
 static __inline__ int opa9(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     unsigned char m = D_8009C971;
     short v = D_800A60D0[0];
-    int a = g->d1190;
+    int a = g->arg[0];
     if (v < m) {
         D_800A60D0[0] = v + a;
         if (D_800A60D0[0] > m) D_800A60D0[0] = m;
         D_800A60D2[0] = D_800A60D0[0];
         D_8009C970[0] = D_800A60D0[0];
-        g->d1190 = 0;
+        g->arg[0] = 0;
     } else {
-        g->d1190 = 1;
+        g->arg[0] = 1;
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -469,15 +468,15 @@ static __inline__ int opa9(void)
 
 static __inline__ int opaa(void)
 {
-    G *g = SCRIPT_CTX;
-    g->d1190 = D_8009C96C;
+    ScriptCtx *g = SCRIPT_CTX;
+    g->arg[0] = D_8009C96C;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
 
 static __inline__ int opab(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     (*(short *)((char *)g + 0x8a))++;
     return 0;
 }

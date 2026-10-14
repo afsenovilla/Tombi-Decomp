@@ -1,5 +1,7 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "gamestate.h"
+#include "gametask.h"
 typedef struct { short x, y; } XY;
 typedef struct { short op, arg; } CMD;
 typedef struct O {
@@ -26,7 +28,6 @@ extern XY D_80118200[];
 extern unsigned char D_8009D088[];
 extern unsigned char D_8009C93A, D_8009C93F, D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
-extern unsigned int D_8009C968;
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
 extern unsigned char D_8009CE48, D_8009CDCB, D_8009CE0B;
@@ -34,7 +35,6 @@ extern unsigned short D_8009D2DA;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
-extern Q *TASK_C;
 extern char D_8001D6A4[];
 extern void FUN_800eea7c(PL *, int, int);
 extern O *showMessageBox(int, int, int, int);
@@ -70,9 +70,9 @@ void func_80116FE0(O *o)
         p = &PLAYER;
         switch (c->op) {
         case 0:
-            TASK_C->w4a = 2;
-            TASK_C->w4c = 0;
-            TASK_C->w4e = 0;
+            TASK_C->state1 = 2;
+            TASK_C->mode = 0;
+            TASK_C->step = 0;
             break;
         case 1:
             D_8009D088[0] = c->arg;
@@ -194,7 +194,7 @@ void func_80116FE0(O *o)
         case 17:
             switch (o->step) {
             case 0:
-                t = D_8009C968;
+                t = (*(unsigned int*)&GAME.totalTimePlayed);
                 h = t / 180000;
                 D_8011A8C8 = 0;
                 D_8011A8C4 = t / 3000 - h * 60;

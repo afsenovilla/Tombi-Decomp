@@ -1,5 +1,6 @@
 // FUNC 8010e114 532 X000
 // MATCHING 8010e114 532
+#include "player.h"
 typedef struct P { short x; short y; } P;
 typedef struct S {
     unsigned char b0; char p0; unsigned char type; char p1[0x16 - 3];
@@ -13,10 +14,8 @@ extern unsigned short D_1F800250;
 extern unsigned short D_1F80019E;
 extern short D_1F80019Es;
 extern unsigned char D_8009C93A[];
-extern unsigned short D_800A604E[];
 extern P *D_800A607C;
 extern P *D_800A6078;
-extern int D_800A6094;
 int func_8010E114(void)
 {
     S **list = D_1F800260;
@@ -45,12 +44,12 @@ int func_8010E114(void)
                 break;
             }
             h = p->w72 + 10;
-            c = (unsigned short)(h + (D_800A604E[0] - p->w16)) < (short)h * 2;
+            c = (unsigned short)(h + (((unsigned short*)&PLAYER.obj.y.p.whole)[0] - p->w16)) < (short)h * 2;
             w = p->w6e + 10;
             if (c) {
                 d = w + (D_800A6078->y - p->pos->y);
                 if (d < (short)w * 2) {
-                    f = D_800A604E[12] & 1;
+                    f = ((unsigned short*)&PLAYER.obj.y.p.whole)[12] & 1;
                     if ((short)w < (short)d) {
                         if ((f ^ 1) != 0)
                             goto done;
@@ -65,7 +64,7 @@ int func_8010E114(void)
                 }
             }
         done:
-            D_800A6094 = 1;
+            (*(int*)&PLAYER.obj.w5c) = 1;
             p->b68 = r;
             if (r != 0)
                 D_1F80019E = 0;

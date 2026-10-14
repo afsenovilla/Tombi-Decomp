@@ -1,7 +1,7 @@
 // FUNC 8011cc1c 336 X014
 // MATCHING 8011cc1c 336
 #include "TOBJ.H"
-extern unsigned short D_8009C962;
+#include "gamestate.h"
 extern short D_1F800284;
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
@@ -13,7 +13,7 @@ void func_8011CC1C(TObj *o, TObj *e)
 {
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;
-    if (e->subtype == 1 && D_8009C962 != 7) {
+    if (e->subtype == 1 && GAME.selectedSection != 7) {
         if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole + o->box2) == 0) return;
         if (D_1F800284 != ((e->wac + 1) & 3)) return;
         o->active = 2;

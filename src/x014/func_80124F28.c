@@ -1,13 +1,13 @@
 // FUNC 80124f28 652 X014
 // MATCHING 80124f28 652
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short w0; unsigned short w2; } AH;
 
 typedef struct B { unsigned short c[4]; } B;
 extern B D_80126758[];
 extern B D_80126728[];
-extern unsigned short D_8009C962;
 extern void playSFX(int);
 extern int AnimAdvance(TObj *o);
 
@@ -25,7 +25,7 @@ void func_80124F28(TObj *o)
             o->box2 = *p++;
             o->box3 = *p;
         }
-        if (D_8009C962 == 7) playSFX(0xf4);
+        if (GAME.selectedSection == 7) playSFX(0xf4);
         else playSFX(0xe4);
         o->step++;
     case 1:

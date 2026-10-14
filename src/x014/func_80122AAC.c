@@ -1,8 +1,8 @@
 // FUNC 80122aac 828 X014
 // MATCHING 80122aac 828
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char D_8009C942;
-extern unsigned short D_8009C962;
 extern unsigned short D_1F8001F8;
 extern TObj *ObjAlloc(void);
 extern int func_800202B4(TObj *);
@@ -38,7 +38,7 @@ void func_80122AAC(TObj *o)
             o->y.raw += o->velV << 8;
             if (--o->timer == 0) {
                 o->state++;
-                if (D_8009C962 == 7) o->timer = 0x3c;
+                if (GAME.selectedSection == 7) o->timer = 0x3c;
                 else o->timer = 0x1e;
                 for (i = 0; i < 2; i++) {
                     n = ObjAlloc();
@@ -52,7 +52,7 @@ void func_80122AAC(TObj *o)
                     }
                 }
                 func_80118314(o->a.p.whole, o->y.p.whole, o->b.p.whole);
-                if (D_8009C962 == 7) playSFX(0xf6);
+                if (GAME.selectedSection == 7) playSFX(0xf6);
                 else playSFX(0xea);
             }
             break;
@@ -61,7 +61,7 @@ void func_80122AAC(TObj *o)
             if (D_1F8001F8 & 1) o->visible = 1;
             else o->visible = 0;
             if (--o->timer == 0) {
-                if (D_8009C962 == 7) {
+                if (GAME.selectedSection == 7) {
                     o->state = 5;
                 } else {
                     o->timer = 0x3c;
@@ -79,7 +79,7 @@ void func_80122AAC(TObj *o)
             break;
         case 5:
             o->visible = 0;
-            if (D_8009C962 != 7) func_80116900(o->wac, 0);
+            if (GAME.selectedSection != 7) func_80116900(o->wac, 0);
             o->active = 2;
             o->step = 0;
             o->b04++;

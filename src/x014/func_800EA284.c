@@ -1,9 +1,9 @@
 // FUNC 800ea284 704 X014
 // MATCHING 800ea284 704
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short x, y; } V2;
-extern unsigned short D_8009C960;
 extern void *D_8013B0EC[];
 extern void *D_80134CF4[];
 extern V2 D_80114A68[];
@@ -19,7 +19,7 @@ void func_800EA284(TObj *o)
     char pad[8];
     switch (o->b04) {
     case 0:
-        if (D_8009C960 == 0) o->anim = D_8013B0EC[o->subtype];
+        if (GAME.selectedArea == 0) o->anim = D_8013B0EC[o->subtype];
         else o->anim = D_80134CF4[o->subtype];
         v[1] = -0x400;
         AnimLoadDuration(o);

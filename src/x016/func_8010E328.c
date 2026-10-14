@@ -1,6 +1,7 @@
 // FUNC 8010e328 700 X016
 // MATCHING 8010e328 700
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     TObj o;
     unsigned char bc0, bc1, bc2, bc3;
@@ -13,7 +14,6 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } P;
 extern unsigned short DAT_1f8003c8;
 extern unsigned short DAT_1f8001fc;
 extern unsigned char D_8009D2B0;
-extern unsigned char D_8009C990;
 extern unsigned char D_8009D2B1;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
@@ -32,7 +32,7 @@ void func_8010E328(S *s, short mode)
     D_8009D2B0 = 0;
     s->bcd = 0;
     s->bce = 0;
-    switch (D_8009C990) {
+    switch (GAME.displayExpBar) {
     case 1:
         if (s->bcc == 1) func_80030034(0);
         func_8010E114();

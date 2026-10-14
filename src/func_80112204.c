@@ -1,8 +1,8 @@
 // FUNC 80112204 796 X000
 // MATCHING 80112204 796
 #include "TOBJ.H"
+#include "player.h"
 extern short *D_800A6078;
-extern unsigned short D_800A604E[];
 extern char D_80115AFA[];
 extern int D_8009C960[];
 extern unsigned short D_8009C960h;
@@ -31,7 +31,7 @@ void func_80112204(TObj *o)
     switch (o->step) {
     case 0:
         D_800A6078[1] += dx;
-        D_800A604E[0] += dy;
+        ((unsigned short*)&PLAYER.obj.y.p.whole)[0] += dy;
         break;
     case 1:
         FUN_80020c04(o->b6b);

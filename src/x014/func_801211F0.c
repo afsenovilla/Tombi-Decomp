@@ -1,11 +1,11 @@
 // FUNC 801211f0 516 X014
 // MATCHING 801211f0 516
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned short D_1F80017A[];
 extern unsigned short D_80126590[];
 extern short D_801265A0[];
-extern unsigned short D_8009C962;
 extern short DAT_8007a1f0[];
 extern short DAT_8007a5f0[];
 extern int Rand(void);
@@ -21,7 +21,7 @@ void func_801211F0(TObj *o)
         o->d38 = D_801265A0[Rand() & 7];
         o->velH = 0;
         o->step++;
-        if (D_8009C962 == 7)
+        if (GAME.selectedSection == 7)
             FUN_8001e4f0(0xf0);
         else
             FUN_8001e4f0(0xcf);

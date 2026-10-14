@@ -2,11 +2,11 @@
 // MATCHING 80049cdc 1096
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
 extern short D_1F800176;
 extern unsigned char D_8009C93C, D_8009CFF9;
-extern G4 *TASK_C;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -111,8 +111,8 @@ void func_80049CDC(TObj *o)
             if ((*(int*)&GAME.selectedArea) == 0x7000E && GAME.purifiedAreas == 0xff) {
                 o->state++;
             } else {
-                TASK_C->w4c = 7;
-                TASK_C->w4e = 0;
+                TASK_C->mode = 7;
+                TASK_C->step = 0;
             }
         }
         break;

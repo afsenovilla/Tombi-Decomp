@@ -1,9 +1,9 @@
 // FUNC 80122de8 304 X014
 // MATCHING 80122de8 304
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern int D_1F800334;
-extern unsigned short D_8009C962;
 extern void func_8012284C(TObj *);
 extern void func_80122AAC(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -15,7 +15,7 @@ void func_80122DE8(TObj *o)
         int *pp = &D_1F800334;
         int *q = (int *)*pp;
         q += 1;
-        if (D_8009C962 == 7) o->da0 = *pp + q[5];
+        if (GAME.selectedSection == 7) o->da0 = *pp + q[5];
         else o->da0 = *pp + q[0];
         o->ba4 = 1;
         o->box0 = 0x10;

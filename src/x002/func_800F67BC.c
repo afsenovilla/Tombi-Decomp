@@ -68,7 +68,7 @@ void func_800F67BC(TObj *o)
         o->wb0 = 0;
         if (o->wb2 > 8) t = 2;
         U8(p, 5) = t;
-        k = U8(D_8009C330, 0xb) * 7;
+        k = D_8009C330->b0b * 7;
         if (o->wb2 < 4) {
             if (o->animFrame & 1) {
                 o->velX = -D_801153C0[k + 4] / 3;

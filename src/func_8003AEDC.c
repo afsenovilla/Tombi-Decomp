@@ -1,25 +1,23 @@
 // FUNC 8003aedc 148 MAIN0
 // MATCHING 8003aedc 148
 #include "gamestate.h"
-typedef struct { char p0[0x8a]; unsigned short c; char p1[0x1190-0x8c]; int v; } G;
-extern G *SCRIPT_CTX;
-extern short D_800A60D0[];
-extern short D_800A60D2[];
+#include "scriptctx.h"
+#include "player.h"
 
 void func_8003AEDC(void)
 {
-    G *g = SCRIPT_CTX;
+    ScriptCtx *g = SCRIPT_CTX;
     unsigned char m = GAME.playerHealthDisplayed;
-    short v = D_800A60D0[0];
-    int a = g->v;
+    short v = ((short*)&PLAYER.obj.w98)[0];
+    int a = g->arg[0];
     if (v < m) {
-        D_800A60D0[0] = v + a;
-        if (D_800A60D0[0] > m) D_800A60D0[0] = m;
-        D_800A60D2[0] = D_800A60D0[0];
-        ((unsigned char*)&GAME.playerHealth)[0] = D_800A60D0[0];
-        g->v = 0;
+        ((short*)&PLAYER.obj.w98)[0] = v + a;
+        if (((short*)&PLAYER.obj.w98)[0] > m) ((short*)&PLAYER.obj.w98)[0] = m;
+        ((short*)&PLAYER.obj.w9a)[0] = ((short*)&PLAYER.obj.w98)[0];
+        ((unsigned char*)&GAME.playerHealth)[0] = ((short*)&PLAYER.obj.w98)[0];
+        g->arg[0] = 0;
     } else {
-        g->v = 1;
+        g->arg[0] = 1;
     }
-    g->c++;
+    g->pc++;
 }

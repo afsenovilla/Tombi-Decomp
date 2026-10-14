@@ -2,12 +2,12 @@
 // MATCHING 800fa91c 1232
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern unsigned char *D_800A611C;
 extern unsigned char *D_8009F0EC;
 extern int D_8009C934;
-extern unsigned char D_8009C970[];
 extern unsigned short D_1f8001fc;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
@@ -57,10 +57,10 @@ void func_800FA91C(TObj *o)
         o->wb0 = 0;
         U8(D_8009C330, 8) = 0;
         U8(D_8009C330, 9) = 0;
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         o->velV = 0;
         setanim(o, 0x1e);
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         U8(D_8009C330, 9) = 0xff;
         o->substep = 0;
         o->state++;
@@ -88,11 +88,11 @@ void func_800FA91C(TObj *o)
                 if (D_1f8001fc & 0x20)
                     o->animFrame = 0;
                 if (D_1f8001fc & 0xf0)
-                    U8(D_8009C330, 0xa)++;
-                if (U8(D_8009C330, 0xa) > 10) {
+                    D_8009C330->b0a++;
+                if (D_8009C330->b0a > 10) {
                     o->b9c = 2;
                     SfxPlay2(2, 4);
-                    U8(D_8009C330, 0xa) = 0;
+                    D_8009C330->b0a = 0;
                     U8(D_8009C330, 9) = 0;
                     o->state = 3;
                     o->timer = 0;
@@ -100,12 +100,12 @@ void func_800FA91C(TObj *o)
                 }
             }
         } else {
-            U8(D_8009C330, 0xa) = 0;
+            D_8009C330->b0a = 0;
             U8(D_8009C330, 9) = 0xff;
             o->timer = 0;
         }
         if (o->w98 != o->w9a) {
-            D_8009C970[0] = o->w98;
+            ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 o->b04 = 2;
                 o->step = 3;
@@ -115,7 +115,7 @@ void func_800FA91C(TObj *o)
             }
             o->w9a = o->w98;
             setanim(o, 0x10);
-            U8(D_8009C330, 0xa) = 0;
+            D_8009C330->b0a = 0;
             U8(D_8009C330, 9) = 0xff;
             SfxPlay2(0x23, 0x24);
             FUN_80025f40(0, 0x81, 0x81, 0x3c);
@@ -126,7 +126,7 @@ void func_800FA91C(TObj *o)
         AnimAdvance(o);
         if (--o->timer != 0) break;
         setanim(o, 0);
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         U8(D_8009C330, 9) = 0;
         o->state = 1;
         break;

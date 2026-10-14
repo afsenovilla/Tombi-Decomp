@@ -12,12 +12,12 @@ extern void SfxPlay(int);
 static __inline__ short hit(TObj *a, TObj *b)
 {
     short dx;
-    if ((unsigned short)(U16(PTR(a, 0x44), 2) - U16(PTR(b, 0x44), 2) + 0x2d) >= 0x5b)
+    if ((unsigned short)(U16(a->d, 2) - U16(b->d, 2) + 0x2d) >= 0x5b)
         return -1;
-    dx = U16(PTR(a, 0x40), 2) - U16(PTR(b, 0x40), 2);
-    if ((unsigned short)(dx + (U16(b, 0x6c) + U16(a, 0x6c))) > S16(b, 0x6e) + S16(a, 0x6e))
+    dx = U16(a->h, 2) - U16(b->h, 2);
+    if ((unsigned short)(dx + (U16(b, 0x6c) + U16(a, 0x6c))) > b->box1 + a->box1)
         return -1;
-    if ((unsigned short)((U16(a, 0x16) - U16(b, 0x16)) + (U16(a, 0x70) + U16(b, 0x70))) > S16(a, 0x72) + S16(b, 0x72))
+    if ((unsigned short)((U16(a, 0x16) - U16(b, 0x16)) + (U16(a, 0x70) + U16(b, 0x70))) > a->box3 + b->box3)
         return -1;
     DAT_1f80019e = 0;
     if (dx < 0)

@@ -1,11 +1,10 @@
 // FUNC 800fc240 468 X019
 // MATCHING 800fc240 468
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009C938;
 extern unsigned char *D_8009C330;
-extern int D_8009C960;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CE3D;
 
 int func_800FC240(TObj *o)
@@ -24,13 +23,13 @@ int func_800FC240(TObj *o)
     *(short *)((char *)o + 0xe0) = 0x8c;
     *(short *)((char *)o + 0xb2) = 0;
     o->b04 = 1;
-    if (D_8009C960 == 0x2000e) {
+    if ((*(int*)&GAME.selectedArea) == 0x2000e) {
         o->step = 0x3e;
         o->state = 0;
             o->substep = 0;
-    } else if ((D_8009C960 & 0x3ffff) == 0x3000a) {
+    } else if (((*(int*)&GAME.selectedArea) & 0x3ffff) == 0x3000a) {
         r = 0;
-        if (D_8009D2C3 & 0x40) {
+        if (GAME.purifiedAreas & 0x40) {
             if (o->y.p.whole >= -0x8b) {
                 r = 1;
                 o->w56 = -0x8c;

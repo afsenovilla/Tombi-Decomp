@@ -3,6 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
+#include "gametask.h"
 
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
@@ -10,7 +11,6 @@ extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C942, D_8009D078, D_8009CF1C, D_8009C93C;
 extern short D_1F8000F2, D_1F80016E;
-extern SC *TASK_C;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -42,7 +42,7 @@ void func_801280FC(TObj *o)
         FUN_800eea7c(&PLAYER, 0x1e, 0);
         PLAYER.y.p.whole = -0xd2;
         o->d34 = 0xff2e0000;
-        U8(o, 0xa7) = 0;
+        o->ba7 = 0;
         o->timer = 0x3c;
         o->state++;
         D_8009D078 = 4;
@@ -69,7 +69,7 @@ void func_801280FC(TObj *o)
     case 5:
         func_801271D8(o, 1);
         FUN_800eea7c(&PLAYER, 0x47, 0);
-        U8(o, 0xa7) = 0;
+        o->ba7 = 0;
         PLAYER.y.p.whole = -0xe2;
         PLAYER.animFrame = 0;
         o->d34 = PLAYER.y.raw;
@@ -148,8 +148,8 @@ void func_801280FC(TObj *o)
     case 15:
         func_801271D8(o, 4);
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         break;
     }

@@ -1,6 +1,7 @@
 // FUNC 8001d4b0 396 MAIN0
 // MATCHING 8001d4b0 396
 #include "TOBJ.H"
+#include "gametask.h"
 typedef unsigned long u_long;
 typedef unsigned short u_short;
 typedef struct { short x, y, w, h; } RECT;
@@ -30,7 +31,6 @@ extern void DecDCTvlc(u_long *bs, u_long *buf);
 extern void CdMix(void *vol);
 extern void startBgmTrack(int);
 extern unsigned char DAT_1f8001cd;
-extern TObj *TASK_C;
 extern short DAT_80077f10[];
 extern char DAT_80077f0c[];
 
@@ -44,12 +44,12 @@ static __inline__ u_long *strNext(DECENV *dec)
         if (--cnt == 0) return 0;
     }
     if (sector->frameCount >= DAT_80077f10[DAT_1f8001cd] - 3) {
-        TASK_C->w48 = 3;
+        TASK_C->state0 = 3;
         CdMix(DAT_80077f0c);
     }
-    if (DAT_1f8001cd == 0x15 && TASK_C->b68 == 0 && sector->frameCount > 14) {
+    if (DAT_1f8001cd == 0x15 && TASK_C->loadGameSelected == 0 && sector->frameCount > 14) {
         startBgmTrack(0);
-        TASK_C->b68 = 1;
+        TASK_C->loadGameSelected = 1;
     }
     dec->rect[0].w = dec->rect[1].w = sector->width;
     dec->rect[0].h = dec->rect[1].h = sector->height;

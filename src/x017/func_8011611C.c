@@ -2,6 +2,8 @@
 // MATCHING 8011611c 1136
 /* The csv entry 80115F24 starts with 126 data words (jump tables of other functions); the code starts at
    8011611C and covers the csv pieces 80116258 and 801162B8 too. */
+#include "gamestate.h"
+#include "gametask.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -28,14 +30,11 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009C93C, D_8009C975;
+extern unsigned char D_8009C93A, D_8009C93C;
 extern unsigned char D_8009D001[];
-extern unsigned short D_8009C962;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
-extern Q *TASK_C;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void stepPlayerXToward(int);
@@ -53,7 +52,7 @@ void func_8011611C(O *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
             if (D_1F800172 >= 0xb5) {
                 if (D_8009D001[0] == 0) {
@@ -133,17 +132,17 @@ void func_8011611C(O *o)
         break;
     case 5:
         if (--o->w48 == -1) {
-            D_8009CD94 = 0x11;
-            D_8009CD96 = 2;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 0x11;
+            (*(short*)&GAME.nextSection) = 2;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
         }
     case 6:
-        if (D_8009C975 == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+        if (GAME.fadeScreenControl == 1) {
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         D_1F8000F2[0]++;
         if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;

@@ -1,6 +1,7 @@
 // FUNC 8011e1f0 864 X014
 // MATCHING 8011e1f0 864
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct {
     unsigned short a;   /* 0xb4 */
@@ -18,7 +19,6 @@ typedef struct {
 #define WC6(o) (*(unsigned short *)((char *)(o) + 0xc6))
 
 extern signed char D_8009D2B0;
-extern unsigned short D_8009C962[];
 extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
@@ -33,7 +33,7 @@ extern int angleFromDelta(int, int);
 
 static __inline__ int chk(TObj *o)
 {
-    if (D_8009C962[0] != 7) return 0;
+    if (((unsigned short*)&GAME.selectedSection)[0] != 7) return 0;
     WC6(o) = 0;
     if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x40) > 0x80) return 0;
     if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x40) > 0x80) return 0;
@@ -68,7 +68,7 @@ void func_8011E1F0(TObj *o)
             }
         }
         o->d38 = angleFromDelta((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
-        o->wb6 = D_8009C962[0];
+        o->wb6 = ((unsigned short*)&GAME.selectedSection)[0];
         x = ((o->d38 + 8) & 0xff) >> 4;
         o->wb8 = x;
         o->animFrame = ~((x - 4) >> 3) & 1;

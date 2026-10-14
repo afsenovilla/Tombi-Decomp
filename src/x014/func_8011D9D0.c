@@ -1,6 +1,7 @@
 // FUNC 8011d9d0 320 X014
 // MATCHING 8011d9d0 320
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     short wb4, wb6, wb8, wba, wbc;
     unsigned char bbe, bbf;
@@ -8,7 +9,6 @@ typedef struct {
 } SB;
 extern int D_1F8002D0;
 extern int D_80125CC4[], D_80125CE4[], D_80125D04[];
-extern unsigned short D_8009C962;
 extern unsigned char SCRIPT_FLAGS[];
 #define S16(o, x) (*(short *)((char *)(o) + (x)))
 #define S32(o, x) (*(int *)((char *)(o) + (x)))
@@ -52,6 +52,6 @@ void func_8011D9D0(TObj *t)
     S32(t, 0x90) = D_80125CE4[U8(t, 2)];
     S32(t, 0x94) = D_80125D04[U8(t, 2)];
     S32(t, 0x24) = **(int **)((char *)t + 0xa8);
-    if (D_8009C962 != 7) return;
+    if (GAME.selectedSection != 7) return;
     setRank((SB *)&t->wb4);
 }

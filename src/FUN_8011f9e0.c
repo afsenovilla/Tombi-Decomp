@@ -1,6 +1,7 @@
 // FUNC 8011f9e0 1924 X000
 // MATCHING 8011f9e0 1924
 #include "TOBJ.H"
+#include "player.h"
 
 typedef struct { unsigned char p0[9]; unsigned char b9; } P8011F9E0;
 
@@ -15,10 +16,8 @@ extern unsigned char D_800A603C_[], D_800A603D_[], D_800A603E_[];
 #define D_800A603C D_800A603C_[0]
 #define D_800A603D D_800A603D_[0]
 #define D_800A603E D_800A603E_[0]
-extern unsigned char D_800A60A1_[], D_800A60D4;
+extern unsigned char D_800A60A1_[];
 #define D_800A60A1 D_800A60A1_[0]
-extern unsigned short D_800A6066;
-extern short D_800A60B4, D_800A60B6, D_800A60B8, D_800A60BA, D_800A60EA;
 extern unsigned char D_8009CEBF;
 extern unsigned char D_8009C93F;
 extern void AnimLoadDuration(TObj *);
@@ -62,16 +61,16 @@ void FUN_8011f9e0(TObj *o)
                 o->b69 = 0;
                 o->timer = 0x20;
                 o->state++;
-                D_800A6066 = 0;
+                PLAYER.obj.animFrame = 0;
                 D_8009C330->b9 = 0x14;
-                D_800A60D4 = 1;
-                D_800A60B4 = 0x130;
+                PLAYER.obj.b9c = 1;
+                PLAYER.obj.velX = 0x130;
                 D_800A603C = 6;
                 D_800A60A1 = 0;
-                D_800A60EA = 0;
-                D_800A60B8 = 0;
-                D_800A60BA = 0;
-                D_800A60B6 = 0;
+                PLAYER.obj.wb2 = 0;
+                PLAYER.obj.velH = 0;
+                PLAYER.obj.velV = 0;
+                PLAYER.obj.velY = 0;
                 *k = 4;
                 D_800A603E = 0;
             }
@@ -163,7 +162,7 @@ void FUN_8011f9e0(TObj *o)
         AnimAdvance(o);
         BOB();
         if (--o->timer == 0) {
-            *(volatile unsigned short *)&D_800A6066 ^= 1;
+            *(volatile unsigned short *)&PLAYER.obj.animFrame ^= 1;
             p = (TObj *)o->d90;
             p->animFrame ^= 1;
             o->state++;
@@ -178,13 +177,13 @@ void FUN_8011f9e0(TObj *o)
         p->h->p.whole = D_800A6078->p.whole + 6;
         BOB();
         if (o->h->p.whole < 0x129) {
-            D_800A6066 = 1;
+            PLAYER.obj.animFrame = 1;
             D_8009C330->b9 = 0xe;
-            D_800A60D4 = 1;
-            D_800A60B4 = -0x100;
+            PLAYER.obj.b9c = 1;
+            PLAYER.obj.velX = -0x100;
             D_800A603C = 6;
             D_800A60A1 = 0;
-            D_800A60B6 = 0;
+            PLAYER.obj.velY = 0;
             D_800A603D = 4;
             D_800A603E = 0;
             o->timer = 0x40;

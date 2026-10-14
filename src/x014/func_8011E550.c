@@ -1,10 +1,10 @@
 // FUNC 8011e550 540 X014
 // MATCHING 8011e550 540
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009C938;
 extern signed char D_8009D2B0;
-extern unsigned short D_8009C962[];
 extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
@@ -24,7 +24,7 @@ void func_8011E550(TObj *o)
     if (D_8009C938 != 0 || D_8009D2B0 == 3) {
         o->state = 0;
         o->step++;
-    } else if (D_8009C962[0] == 7) {
+    } else if (((unsigned short*)&GAME.selectedSection)[0] == 7) {
         func_8011E1F0(o);
     } else switch (o->state) {
     case 0:
@@ -43,14 +43,14 @@ void func_8011E550(TObj *o)
             break;
         }
         o->d38 = angleFromDelta((short)(D_1F80016A - o->h->p.whole), (short)(D_1F80016E - o->y.p.whole)) & 0xff;
-        o->wb6 = D_8009C962[0];
+        o->wb6 = ((unsigned short*)&GAME.selectedSection)[0];
         x = ((o->d38 + 8) & 0xff) >> 4;
         o->wb8 = x;
         o->animFrame = ~((x - 4) >> 3) & 1;
         o->state++;
     case 1:
         if (D_8009D2B0 != 3) {
-            D_80125CD8[D_8009C962[0]](o);
+            D_80125CD8[((unsigned short*)&GAME.selectedSection)[0]](o);
         }
         break;
     case 2:

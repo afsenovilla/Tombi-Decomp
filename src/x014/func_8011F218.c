@@ -1,11 +1,11 @@
 // FUNC 8011f218 712 X014
 // MATCHING 8011f218 712
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short v[6]; } V6;
 extern unsigned char D_8009C93F[], TALK_POSE;
 extern unsigned char D_8009CF0B[];
-extern unsigned short D_8009C962[];
 extern short D_80125E20[];
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
@@ -39,11 +39,11 @@ void func_8011F218(TObj *o)
         ObjSetFacingToPlayer(o);
         D_8009C93F[0] = 1;
         o->timer = 0x3c;
-        if (D_8009CF0B[D_8009C962[0]] == 2) {
+        if (D_8009CF0B[((unsigned short*)&GAME.selectedSection)[0]] == 2) {
             o->state = 4;
         } else {
             TALK_POSE = 2;
-            D_8009CF0B[D_8009C962[0]] = 2;
+            D_8009CF0B[((unsigned short*)&GAME.selectedSection)[0]] = 2;
             o->state++;
         }
         break;
@@ -56,7 +56,7 @@ void func_8011F218(TObj *o)
         break;
     case 2:
         v = *(V6 *)&o->a;
-        o->da0 = (int)showMessageBoxDirect(2, D_80125E20[D_8009C962[0]], &v);
+        o->da0 = (int)showMessageBoxDirect(2, D_80125E20[((unsigned short*)&GAME.selectedSection)[0]], &v);
         o->state++;
         break;
     case 3:

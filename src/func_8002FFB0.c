@@ -1,8 +1,8 @@
 // FUNC 8002ffb0 132 MAIN0
 // MATCHING 8002ffb0 132
 #include "TOBJ.H"
+#include "player.h"
 extern TObj *ObjAlloc();
-extern int D_800A6048[];
 
 void func_8002FFB0(int a, int b)
 {
@@ -12,9 +12,9 @@ void func_8002FFB0(int a, int b)
         o->type = 0x4e;
         o->subtype = a;
         o->b0c = b;
-        o->a.raw = D_800A6048[0];
-        o->y.raw = D_800A6048[1];
-        o->b.raw = D_800A6048[2];
+        o->a.raw = ((int*)&PLAYER.obj.a.raw)[0];
+        o->y.raw = ((int*)&PLAYER.obj.a.raw)[1];
+        o->b.raw = ((int*)&PLAYER.obj.a.raw)[2];
         o->step = 1;
     }
 }

@@ -2,6 +2,7 @@
 // MATCHING 8011cad4 688
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern TObj PLAYER;
@@ -11,7 +12,6 @@ extern int D_800A4568[];
 extern int D_1F800190, D_1F80018C;
 extern unsigned char D_800A603C[], D_800A603D[];
 extern unsigned char D_1F8003D1[];
-extern SC *TASK_C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
 extern int func_8011C830(TObj *);
@@ -75,8 +75,8 @@ void func_8011CAD4(TObj *o)
         o->w76 = o->w74;
         o->w78 = o->w74;
         if (((unsigned char*)&GAME.fadeScreenControl)[0] == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
             D_8009E375[0] = 0xff;
             D_8009E376[0] = 0xff;
             D_8009E377[0] = 0xff;

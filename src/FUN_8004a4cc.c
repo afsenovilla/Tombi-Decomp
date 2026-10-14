@@ -1,12 +1,12 @@
 // FUNC 8004a4cc 1276 MAIN0
 // MATCHING 8004a4cc 1276
 #include "TOBJ.H"
+#include "gametask.h"
 extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c93c;
 extern unsigned char DAT_8009c975;
 extern short DAT_1f800176;
-extern TObj *TASK_C;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_800e8a98(void *, int, int);
@@ -113,8 +113,8 @@ void FUN_8004a4cc(TObj *o)
         p->y.raw -= o->velV << 8;
         if (DAT_8009c975 == 1) {
             DAT_8009cff9 = 1;
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         break;
     }

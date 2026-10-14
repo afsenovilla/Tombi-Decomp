@@ -1,18 +1,17 @@
 // FUNC 8003a26c 108 MAIN0
 // MATCHING 8003a26c 108
 #include "TOBJ.H"
-typedef struct { char pad[0x8a]; unsigned short w8a; char pad2[0x1190 - 0x8c]; int d1190; int d1194; int d1198; int d119c; } G;
-extern G *SCRIPT_CTX;
+#include "scriptctx.h"
 extern TObj *SCRIPT_OBJECTS[];
 
 void scriptOpSetObjectPosition(void)
 {
-    G *g = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[g->d1190];
+    ScriptCtx *g = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[g->arg[0]];
     if (o != 0) {
-        o->h->p.whole = g->d1194;
-        o->y.p.whole = g->d1198;
-        o->d->p.whole = g->d119c;
+        o->h->p.whole = g->arg[1];
+        o->y.p.whole = g->arg[2];
+        o->d->p.whole = g->arg[3];
     }
-    g->w8a++;
+    g->pc++;
 }

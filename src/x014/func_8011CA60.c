@@ -1,10 +1,10 @@
 // FUNC 8011ca60 320 X014
 // MATCHING 8011ca60 320
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
-extern unsigned short D_8009C962;
 extern unsigned char *D_8009C330[];
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
@@ -17,7 +17,7 @@ void func_8011CA60(TObj *a, TObj *b)
     if (a->active & 2) return;
     if (!boxesOverlap(a, b)) return;
     if (D_1F8001A4) return;
-    if (D_8009C962 == 7) {
+    if (GAME.selectedSection == 7) {
         a->active = 2;
         a->animFrame = b->h->p.whole > a->h->p.whole;
         a->b04 = 2;

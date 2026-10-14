@@ -115,14 +115,14 @@ void FUN_800fe13c(TObj *o)
         a1 = S16(o, 0xee) - ((short *)o->h)[1];
         d = a1;
         d <<= 2;
-        S16(o, 0x80) = d;
+        o->velH = d;
         S16(o, 0xe0) = 0x8c;
         U8(o, 0xa1) = 0;
         U8(o, 0xac) = 0;
         a2 = S16(o, 0xf2) - o->y.p.whole;
         d = a2;
         d <<= 2;
-        S16(o, 0x82) = d;
+        o->velV = d;
         D_8009C330->w2c = 0x10;
         D_8009C330->w2e = 0x10;
         o->anim = D_80010A04;

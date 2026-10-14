@@ -1,11 +1,11 @@
 // FUNC 801244d0 888 X014
 // MATCHING 801244d0 888
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern int D_1F8002DC[];
 extern void *D_80129FF0;
 extern unsigned char D_8009C942;
-extern unsigned short D_8009C962;
 extern short D_8007A3F0[], D_8007A5F0[];
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
@@ -66,7 +66,7 @@ void func_801244D0(TObj *o)
             o->velH = 0x80;
             o->velX = 8;
             o->step++;
-            if (D_8009C962 != 7) func_8011709C(o, 1);
+            if (GAME.selectedSection != 7) func_8011709C(o, 1);
             o->timer = 6;
             break;
         case 1:
@@ -75,7 +75,7 @@ void func_801244D0(TObj *o)
                 r = FUN_8001f9e0() & 3;
                 k = r;
                 if (r == 0) k = 2;
-                if (D_8009C962 != 7) func_8011709C(o, k);
+                if (GAME.selectedSection != 7) func_8011709C(o, k);
             }
             a = o->d8c;
             v = o->velH;
