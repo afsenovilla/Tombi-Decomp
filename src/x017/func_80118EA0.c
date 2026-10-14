@@ -1,5 +1,6 @@
 // FUNC 80118ea0 2208 X017
 // MATCHING 80118ea0 2208
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -9,8 +10,6 @@ extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
 extern unsigned char *D_8009C330;
-extern unsigned char D_1F8001CC, D_1F8001CD;
-extern short D_1F8001C6;
 extern char D_80010814[];
 extern void FUN_8001d6a4();
 extern void FUN_8001fe6c(TObj *);
@@ -110,9 +109,9 @@ void func_80118EA0(TObj *o)
         break;
     case 11:
         if (GAME.fadeScreenControl != 1) break;
-        D_1F8001CC = 1;
-        D_1F8001CD = 0xc;
-        D_1F8001C6 = 2;
+        SPAD.b1cc = 1;
+        SPAD.b1cd = 0xc;
+        SPAD.s1c6 = 2;
         FUN_8001f110(0);
         FUN_800171b8(1, FUN_8001d6a4);
         o->state++;
@@ -230,7 +229,7 @@ void func_80118EA0(TObj *o)
         break;
     case 99:
         if (--o->w08 > 0) break;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         GVARS.b3e = 0;
         GVARS.b3f = 0;
         GVARS.b42 = 0;

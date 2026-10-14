@@ -1,5 +1,6 @@
 // FUNC 801180fc 860 X016
 // MATCHING 801180fc 860
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
@@ -7,7 +8,6 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], DAT_8009d2b0;
 extern unsigned char D_8009D12F;
-extern short D_1F8001C6;
 extern AT3 D_80118D34[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
@@ -60,7 +60,7 @@ void func_801180FC(TObj *o)
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->timer = 4;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         o->state = 2;
         break;
     case 2:
@@ -76,7 +76,7 @@ void func_801180FC(TObj *o)
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->timer = 4;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         if (((unsigned char*)&GCD.bcded)[0] == 0) {
             setEventStarted(0x49, 1, 1);
             o->timer = 200;
@@ -84,7 +84,7 @@ void func_801180FC(TObj *o)
         o->state = 2;
         break;
     case 9:
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->anim = D_80118D34[o->subtype].p[0];

@@ -1,5 +1,6 @@
 // FUNC 8010eaf8 1532 X018
 // MATCHING 8010eaf8 1532
+#include "gv2.h"
 #include "gcd.h"
 #include "gv6.h"
 #include "TOBJ.H"
@@ -8,13 +9,12 @@
 
 typedef struct { short f0, f2, f4, f6, f8; short pad[5]; } T8010EAF8;
 
-extern unsigned char D_8009D2B3;
 extern T8010EAF8 D_8011545C[];
 
 static __inline__ int getU(TObj *o)
 {
     int b = U8(o, 0xc1);
-    int u = D_8009D2B3 + b * 4;
+    int u = GV2.bb3 + b * 4;
     if ((GAME.displayExpBar & 3) != 0)
         u = (unsigned char)b << 2 | 3;
     if (GCD.bcf06 != 0)

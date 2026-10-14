@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X019
 // MATCHING 800f44b0 2488
+#include "gv2.h"
 #include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
@@ -22,7 +23,6 @@ typedef struct {
 
 extern P800F44B0 *D_8009C330;
 extern TObj *D_8009D2E8;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
@@ -213,7 +213,7 @@ void FUN_800f44b0(TObj *o)
             o->b9c = 0;
         }
         if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             o->b9c = 1;
             if (GAME.area00_eventControl & 0x40) {
                 if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
