@@ -1,11 +1,11 @@
 // FUNC 800fadec 680 X009
 // MATCHING 800fadec 680
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[7]; unsigned char bc7; unsigned char bc8; } PO;
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x20 - 9]; short w20; short w22; } P;
 extern P *D_8009C330;
-extern unsigned short D_8009D670;
 extern unsigned char D_801152E8[];
 extern short FUN_800411cc(PO *, int, int);
 extern void SfxPlay3(int, int);
@@ -15,7 +15,7 @@ static __inline__ short cond(PO *o)
 {
     int v = 0;
     if (o->t.wb4 < 0x29) {
-        v = (*(volatile unsigned short *)&D_8009D670 >> 4) & 1;
+        v = (*(volatile unsigned short *)&GV6.s70 >> 4) & 1;
     }
     return v;
 }
