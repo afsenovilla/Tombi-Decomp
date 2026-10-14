@@ -1,10 +1,10 @@
 // FUNC 801356c0 400 X001
 // MATCHING 801356c0 400
+#include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern int D_8009C960A[]; /* second name for ((unsigned short*)&GAME.selectedArea) (int read; debt) */
-extern unsigned short D_8009D2C0;
 extern int D_1F8002D0, D_1F8002E4;
 extern void *D_8013DE38, *D_8013DE34, *D_8013DE08;
 extern void *D_8013DDDC, *D_8013DDD8, *D_8013DD50;
@@ -51,7 +51,7 @@ void func_801356C0(TObj *o)
     o->category |= 0x80;
     FUN_8001fe6c(o);
     o->b04++;
-    if ((D_8009D2C0 >> (o->b0c - 1)) & 1) {
+    if ((GV2.sc0 >> (o->b0c - 1)) & 1) {
         p = (TObj *)o->d94;
         o->b04 = 3;
         p->b04 = 3;

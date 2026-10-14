@@ -1,3 +1,4 @@
+#include "gv2.h"
 /* score 516: first draft. Structure/size match; game keeps o in s3 and calls rcos before rsin in the BLKB blocks (cross-jumped), regs s0/s1 swapped vs ours. Sibling of X009 wip func_8011E688. */
 // FUNC 80122f54 2192 X001
 /* whole function: includes the csv piece 801231F4 */
@@ -8,7 +9,6 @@ extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short DAT_8009d670[];
 extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_8009D2B0;
 extern int D_8009C984;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -230,7 +230,7 @@ void func_80122F54(TObj *o)
         break;
     }
     if (D_1F8001FC & D_1F8003C6) {
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         (*(unsigned char*)&o->waa) = 0;
         o->b9c = 1;
         o->b9e = 0;

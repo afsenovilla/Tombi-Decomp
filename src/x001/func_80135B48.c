@@ -1,8 +1,8 @@
 // FUNC 80135b48 328 X001
 // MATCHING 80135b48 328
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned short D_8009D2C0;
 extern unsigned char D_8009CDB5;
 extern unsigned char D_8009CEC1, D_8009CEC2, D_8009CEC3, D_8009CEC4, D_8009CEC5, D_8009CEC6, D_8009CEC7;
 extern void *printInfoMessage(int, int);
@@ -11,7 +11,7 @@ extern void func_80135A14(TObj *);
 void func_80135B48(TObj *o)
 {
     if (o->b0c != 0) {
-        unsigned short *f = &D_8009D2C0;
+        unsigned short *f = &GV2.sc0;
         *f |= 1 << (o->b0c - 1);
     }
     {

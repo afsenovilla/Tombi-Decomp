@@ -1,5 +1,6 @@
 // FUNC 800f1d44 2280 X002
 // MATCHING 800f1d44 2280
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -22,7 +23,6 @@ extern unsigned char *D_800A611C;
 extern volatile unsigned short D_8009D670[];
 extern unsigned char D_8009D2B3;
 extern unsigned char D_8009D2B1;
-extern unsigned short D_8009D610;
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
 extern XY D_801151E0[];
@@ -162,7 +162,7 @@ void func_800F1D44(TObj *o)
                 if ((D_1f8001f8 & 7) == 0) FUN_8001e4f0(odd());
                 break;
             }
-            if (D_8009D610 == 7) {
+            if (GV6.s10 == 7) {
                 int f = o->animFrame & 3;
                 if ((f == 0 && (XO(o)->d5 == 3 || XO(o)->d6 == 3 || XO(o)->d7 == 3 || o->bbf == 3)) ||
                     (f == 1 && (XO(o)->d5 == 2 || XO(o)->d6 == 2 || XO(o)->d7 == 2 || o->bbf == 2))) {

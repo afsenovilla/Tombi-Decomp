@@ -1,9 +1,9 @@
 // FUNC 8013675c 376 X001
 // MATCHING 8013675c 376
+#include "gv2.h"
 #include "TOBJ.H"
 
 extern unsigned short D_8009C960[], D_8009C962;
-extern unsigned short D_8009D2C0;
 extern int D_1F8002D0, D_1F8002E4;
 extern void *D_8013DE08, *D_8013DD50;
 extern TObj *allocObjectLayer2(void);
@@ -14,7 +14,7 @@ TObj *func_8013675C(short k, short d, short n, short x, short y, short z)
     TObj *o;
 
     if (n != 0) {
-    if ((D_8009D2C0 >> (n - 1)) & 1) return 0;
+    if ((GV2.sc0 >> (n - 1)) & 1) return 0;
     o = allocObjectLayer2();
     if (o != 0) {
     o->active = 1;

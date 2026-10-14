@@ -1,5 +1,6 @@
 // FUNC 801169c0 2528 X002
 // MATCHING 801169c0 2528
+#include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned short w1e;
@@ -9,7 +10,6 @@ typedef struct {
 extern Ent D_8011C6D8[];
 extern int SPR_DATA[];
 extern unsigned char D_8009CE41;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CFDB, D_8009CFDC, D_8009CFDD, D_8009CFDE, D_8009CFDF, D_8009CFE0, D_8009CFE1;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186[];
@@ -57,13 +57,13 @@ void func_801169C0(TObj *o)
             }
         } else if (D_8009CE41 == 0) {
             switch (o->subtype) {
-            case 2: PICK(D_8009D2C3 & 2);
-            case 3: PICK(D_8009D2C3 & 0x10);
-            case 4: PICK(D_8009D2C3 & 0x40);
-            case 5: PICK(D_8009D2C3 & 4);
-            case 6: PICK(D_8009D2C3 & 1);
-            case 7: PICK(D_8009D2C3 & 0x20);
-            case 8: PICK(D_8009D2C3 & 8);
+            case 2: PICK(GV2.bc3 & 2);
+            case 3: PICK(GV2.bc3 & 0x10);
+            case 4: PICK(GV2.bc3 & 0x40);
+            case 5: PICK(GV2.bc3 & 4);
+            case 6: PICK(GV2.bc3 & 1);
+            case 7: PICK(GV2.bc3 & 0x20);
+            case 8: PICK(GV2.bc3 & 8);
             default: goto skip;
             }
         } else {
