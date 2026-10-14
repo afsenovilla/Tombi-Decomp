@@ -1,9 +1,8 @@
 // FUNC 8011afd8 544 X010
 // MATCHING 8011afd8 544
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned char D_8009D2C3;
-extern unsigned short D_8009C962;
 extern void *D_80131CAC;
 extern void *D_80131C64[];
 extern int D_1F8002D4[];
@@ -28,7 +27,7 @@ void func_8011AFD8(TObj *o)
         o->y.p.whole += 0x20;
         o->b0d = 0;
         if (o->subtype == 99) {
-            if (D_8009D2C3 & 0x40) {
+            if (GAME.purifiedAreas & 0x40) {
                 o->b04 = 3;
                 break;
             }
@@ -52,7 +51,7 @@ void func_8011AFD8(TObj *o)
         x = a - D_1F800176[0] + ((D_800A4574[0] >> 8) << 2);
         b = o->d34;
         y = b - D_1F800186[0] - ((D_800A4570[0] >> 8) << 3);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0: case 2: case 4: case 6:
             x = (short)x >> 2;
             y = (short)y >> 1;

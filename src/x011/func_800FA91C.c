@@ -2,12 +2,12 @@
 // MATCHING 800fa91c 1232
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern unsigned char *D_800A611C;
 extern unsigned char *D_8009F0EC;
 extern int D_8009C934;
-extern unsigned char D_8009C970[];
 extern unsigned short D_1f8001fc;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
@@ -105,7 +105,7 @@ void func_800FA91C(TObj *o)
             o->timer = 0;
         }
         if (o->w98 != o->w9a) {
-            D_8009C970[0] = o->w98;
+            ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 o->b04 = 2;
                 o->step = 3;

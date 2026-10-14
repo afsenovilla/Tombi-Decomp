@@ -2,6 +2,7 @@
 // MATCHING 801253ac 1844
 /* D_8009CDF2 is read through two names (k via the array, the talk test via the scalar) to keep both loads. */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3B8[];
@@ -9,7 +10,7 @@ extern unsigned char D_8009C93E, D_8009C93F[], D_8009C940, D_8009C941, D_8009C94
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A60EA;
 extern unsigned char D_8009CDF2a[];
-extern unsigned char D_8009CDF2, D_8009D143, D_8009C975;
+extern unsigned char D_8009CDF2, D_8009D143;
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_80026e0c(int, int);
 extern void setEventStarted(int, int, int);
@@ -132,23 +133,23 @@ void func_801253AC(TObj *o)
         if (--o->timer == 0) goto next;
         break;
     case 0x64:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = NEXT(o);
         break;
     case 0x65:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = NEXT(o);
         break;
     case 0x66:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = 0x68;
         break;
     case 0x67:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = 0x68;
         break;
     case 0x68:
-        if ((unsigned char)(D_8009C975 - 3) < 2) break;
+        if ((unsigned char)(GAME.fadeScreenControl - 3) < 2) break;
     next:
         o->state = NEXT(o);
         break;

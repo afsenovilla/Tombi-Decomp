@@ -1,6 +1,7 @@
 // FUNC 8011b330 1188 X010
 // MATCHING 8011b330 1188
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct {
     TObj o;
@@ -25,7 +26,7 @@ extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
 extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C8;
-extern unsigned char D_8009C990, D_8009D2B1, D_8009D2B2;
+extern unsigned char D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
 extern TObj *allocObjectLayer1(void);
 extern void func_800EEE90(S *);
@@ -136,7 +137,7 @@ void func_8011B330(S *s)
         TileCollideAt(s, s->o.h->p.whole, s->o.y.p.whole + 0x10);
         s->o.b69 = 0;
         if ((D_1F8001FC & D_1F8003C8) == 0) break;
-        switch (D_8009C990) {
+        switch (GAME.displayExpBar) {
         case 1:
             if (s->bcc == 1) func_80030034(0);
             return;

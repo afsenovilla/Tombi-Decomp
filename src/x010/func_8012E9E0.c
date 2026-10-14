@@ -1,10 +1,9 @@
 // FUNC 8012e9e0 388 X010
 // MATCHING 8012e9e0 388
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern TObj PLAYER;
-extern unsigned short D_8009C962;
-extern unsigned char D_8009D2C3;
 extern short D_8009C944;
 extern short D_8009C946;
 void PoolFree_1F800210(TObj *o);
@@ -13,9 +12,9 @@ void func_8012E9E0(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009C962 == 1) {
+        if (GAME.selectedSection == 1) {
             o->y.raw = -0xea;
-        } else if (D_8009D2C3 & 0x40) {
+        } else if (GAME.purifiedAreas & 0x40) {
             o->y.raw = -0x50;
         } else {
             o->y.raw = -0x3b8;

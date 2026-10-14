@@ -1,7 +1,7 @@
 // FUNC 8012855c 520 X010
 // MATCHING 8012855c 520
+#include "gamestate.h"
 extern unsigned char D_8009CDAC, D_8009D078, D_8009C93F;
-extern unsigned short D_8009C962;
 extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
@@ -38,7 +38,7 @@ void func_8012855C(char *o)
         o[0xa7] = 0;
         o[4]++;
         if (D_8009D078) {
-            if (D_8009C962 == 0) {
+            if (GAME.selectedSection == 0) {
                 o[5] = 1;
                 *(short *)(o + 0x12) = 0xc64;
                 *(short *)(o + 0x16) = -0x6d;

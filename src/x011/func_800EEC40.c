@@ -1,7 +1,7 @@
 // FUNC 800eec40 512 X011
 // MATCHING 800eec40 512
 #include "TOBJ.H"
-extern unsigned short D_8009C960;
+#include "gamestate.h"
 extern short D_8009C944;
 extern char D_800112E0[];
 extern char D_80010AE8[];
@@ -37,7 +37,7 @@ void func_800EEC40(TObj *o)
             o->d8c = (o->d8c + 4) & 0xff;
             if (o->d8c <= 0x40)
                 return;
-            if (D_8009C960 == 3 && D_8009C944 != 0) {
+            if (GAME.selectedArea == 3 && D_8009C944 != 0) {
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {
@@ -50,7 +50,7 @@ void func_800EEC40(TObj *o)
             o->d8c = (o->d8c - 4) & 0xff;
             if (o->d8c >= 0xc0)
                 return;
-            if (D_8009C960 == 3 && D_8009C944 != 0) {
+            if (GAME.selectedArea == 3 && D_8009C944 != 0) {
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {

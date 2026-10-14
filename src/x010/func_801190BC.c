@@ -1,11 +1,10 @@
 // FUNC 801190bc 696 X010
 // MATCHING 801190bc 696
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009C93C, D_8009C93F, D_8009C940, D_8009C941;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern unsigned char D_8009C975;
 extern TObj *TASK_C;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -62,16 +61,16 @@ void func_801190BC(TObj *o)
             o->h->raw += o->velH << 8;
             if (o->h->p.whole >= 0x385) {
                 o->step++;
-                D_8009CD94 = 4;
-                D_8009CDA0 = 0xb;
-                D_8009CD96 = 0;
+                (*(short*)&GAME.nextArea) = 4;
+                (*(short*)&GAME.nextSpawnPoint) = 0xb;
+                (*(short*)&GAME.nextSection) = 0;
                 D_8009C93C = 0;
-                D_8009C975 = 3;
+                GAME.fadeScreenControl = 3;
             }
             ObjCullRegister(o);
             break;
         case 4:
-            if (D_8009C975 == 1) {
+            if (GAME.fadeScreenControl == 1) {
                 p = TASK_C;
                 p->w4c = 7;
                 p->w4e = 0;

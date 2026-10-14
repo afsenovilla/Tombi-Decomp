@@ -1,9 +1,9 @@
 // FUNC 80108ad0 748 X010
 // MATCHING 80108ad0 748
 #include "TOBJ.H"
+#include "gamestate.h"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009C330;
-extern int D_8009C960[];
 extern unsigned short DAT_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -17,12 +17,12 @@ void func_80108AD0(TObj *o)
         B(D_8009C330, 9) = 0;
         o->velX = 0xb4;
         o->state++;
-        if (D_8009C960[0] == 0x40001) {
+        if (((int*)&GAME.selectedArea)[0] == 0x40001) {
             B(D_8009C330, 9) = 1;
             o->velX = 0x78;
             o->state = 2;
         }
-        if (*(unsigned short *)D_8009C960 == 8) {
+        if (*(unsigned short *)((int*)&GAME.selectedArea) == 8) {
             o->velX = 0x12c;
             o->state = 1;
         }

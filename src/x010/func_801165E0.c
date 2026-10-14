@@ -1,5 +1,6 @@
 // FUNC 801165e0 1288 X010
 // MATCHING 801165e0 1288
+#include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -13,10 +14,8 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009CDA2[];
 extern unsigned char D_8009C93A, D_8009C93E;
-extern unsigned char D_8009D078, D_8009D2C3;
-extern unsigned short D_8009C962;
+extern unsigned char D_8009D078;
 extern FP *D_800A6078;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
@@ -39,8 +38,8 @@ void func_801165E0(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009CDA2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
+        if (((unsigned char*)&GAME.disableSelectMenu)[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -54,9 +53,9 @@ void func_801165E0(O *o)
         func_80029078(o);
         break;
     case 2:
-        if (D_8009C962 == 8) func_80027810(o);
+        if (GAME.selectedSection == 8) func_80027810(o);
         else D_80079A98[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 4:
             if (p->ba2 == 2) {
@@ -85,7 +84,7 @@ void func_801165E0(O *o)
                 tryStartItemInteraction(o, 1, 1);
                 break;
             }
-            if (D_8009D2C3 & 0x40) {
+            if (GAME.purifiedAreas & 0x40) {
                 if (D_1F80016A < 0x487) break;
                 if (D_1F80016E < -0x171) break;
                 tryStartItemInteraction(o, 1, 2);
@@ -101,7 +100,7 @@ void func_801165E0(O *o)
         case 3:
         case 7:
             if ((unsigned)(XU - 0x53f) < 0x40) {
-                if (D_8009D2C3 & 0x40) {
+                if (GAME.purifiedAreas & 0x40) {
                     if ((unsigned short)(ZU + 0x392) < 0x1e) {
                         tryStartItemInteraction(o, 1, 1);
                         break;
@@ -127,7 +126,7 @@ void func_801165E0(O *o)
             break;
         case 8:
             if (D_1F80016A < 0x3a && D_1F80016E >= -0x3b) {
-                if (D_8009D2C3 & 0x40) tryStartItemInteraction(o, 1, 1);
+                if (GAME.purifiedAreas & 0x40) tryStartItemInteraction(o, 1, 1);
                 else tryStartItemInteraction(o, 1, 0);
             }
             break;
