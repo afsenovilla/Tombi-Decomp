@@ -1,11 +1,12 @@
 // FUNC 8012a890 716 X003
 // MATCHING 8012a890 716
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009D004, D_8009CDC7, D_8009C941, D_8009D094;
+extern unsigned char D_8009C941, D_8009D094;
 extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
 extern TObj *TASK_C;
@@ -37,9 +38,9 @@ void func_8012A890(TObj *o)
         if (o->subtype) break;
         switch (o->step) {
         case 0:
-            if ((D_8009D004 && D_8009CDC7 == 0xff) || chk()) {
-                D_8009D004 = 0;
-                if (D_8009CDC7 != 0xff) removeItemFromInventory(0x42, 5);
+            if ((GCD.bd004 && GCD.bcdc7 == 0xff) || chk()) {
+                GCD.bd004 = 0;
+                if (GCD.bcdc7 != 0xff) removeItemFromInventory(0x42, 5);
                 o->step++;
                 o->state = 0;
             }

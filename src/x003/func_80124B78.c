@@ -1,13 +1,11 @@
 // FUNC 80124b78 1156 X003
 // MATCHING 80124b78 1156
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
-extern int D_1F8002D0;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_800A4582;
 extern Fn D_80135C64[];
 extern int FUN_800203dc(TObj *);
@@ -41,7 +39,7 @@ void func_80124B78(TObj *o)
                 o->wb8 = -0x10;
             else
                 o->wb8 = 0x10;
-            o->d3c = D_1F8002D0;
+            o->d3c = SPAD.i2d0;
             o->w1e = 1;
             o->b0a = 2;
             o->b0d = 0;
@@ -111,7 +109,7 @@ void func_80124B78(TObj *o)
                 }
                 break;
             }
-            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
         } else {
             FUN_800202b4(o);
@@ -143,7 +141,7 @@ void func_80124B78(TObj *o)
                 o->step = 2;
                 o->state = 0;
             }
-            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:

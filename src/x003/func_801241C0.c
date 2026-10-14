@@ -1,10 +1,10 @@
 // FUNC 801241c0 504 X003
 // MATCHING 801241c0 504
+#include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CF4[];
 extern unsigned short *D_80138794[];
 extern unsigned char D_80135B30[];
-extern unsigned short D_1F80016A, D_1F800172;
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int func_801206F0(TObj *);
@@ -41,8 +41,8 @@ void func_801241C0(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        dx = o->h->p.whole - D_1F80016A + 0x60;
-        dz = o->d->p.whole - D_1F800172 + 0x2d;
+        dx = o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x60;
+        dz = o->d->p.whole - (*(unsigned short*)((char*)&SPAD.i170 + 2)) + 0x2d;
         if (dz >= 0x5b || dx >= 0xc1) {
             o->timer = 0;
             break;

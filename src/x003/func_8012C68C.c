@@ -1,5 +1,6 @@
 // FUNC 8012c68c 460 X003
 // MATCHING 8012c68c 460
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 
@@ -12,7 +13,6 @@ typedef struct {
 
 extern T8012C68C D_80135DE8[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CDC5[];
 extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
 
@@ -24,7 +24,7 @@ void func_8012C68C(TObj *o)
     o->box3 = D_80135DE8[o->subtype].b3;
     o->w1e = D_80135DE8[o->subtype].w4;
     o->d3c = SPR_DATA[D_80135DE8[o->subtype].w6];
-    if (D_8009CDC5[0] != 0xff) {
+    if (((unsigned char*)&GCD.bcdc5)[0] != 0xff) {
         o->anim = D_80135DE8[o->subtype].anim[5];
         AnimJump(o, 0);
     } else {

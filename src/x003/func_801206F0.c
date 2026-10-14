@@ -1,8 +1,9 @@
 // FUNC 801206f0 284 X003
 // MATCHING 801206f0 284
+#include "spad.h"
 #include "TOBJ.H"
 extern short D_1F80027E;
-extern unsigned short D_1F800282, D_1F800284;
+extern unsigned short D_1F800282;
 extern short FUN_80040278(TObj *, int, int);
 
 int func_801206F0(TObj *o)
@@ -30,7 +31,7 @@ int func_801206F0(TObj *o)
     o->wb2 = v;
     o->d8c = -v & 0xff;
     o->wb6 = (-v << 2) & 0xff;
-    o->wae = D_1F800284;
+    o->wae = (*(unsigned short*)&SPAD.s284);
     o->b9c = 0;
     if ((short)((D_1F800282 >> 5) & 0xf) >= 0xe)
         o->w98 = 0;

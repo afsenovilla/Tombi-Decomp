@@ -1,12 +1,11 @@
 // FUNC 8012724c 576 X003
 // MATCHING 8012724c 576
+#include "spad.h"
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
 extern unsigned char D_80135CB0[];
 extern void *D_80139510;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_800A4582;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -38,7 +37,7 @@ void func_8012724C(TObj *o)
         FUN_8001fe6c(o);
     case 1:
         AnimAdvance(o);
-        if (o->visible && ((D_1F8001F8 + D_1F800198) & 0x1f) == 0) playSFX(0x76);
+        if (o->visible && ((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) playSFX(0x76);
         applyFrameVelocityX(o);
         if (func_8004065C(o, o->h->p.whole + 0x18, o->y.p.whole, 0)) {
             o->b9c = 2;
@@ -46,7 +45,7 @@ void func_8012724C(TObj *o)
         }
         break;
     case 2:
-        if (o->visible && ((D_1F8001F8 + D_1F800198) & 0x1f) == 0) playSFX(0x76);
+        if (o->visible && ((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) playSFX(0x76);
         AnimAdvance(o);
         o->y.p.whole++;
         func_8004065C(o, o->h->p.whole + 0x18, o->y.p.whole, 0);

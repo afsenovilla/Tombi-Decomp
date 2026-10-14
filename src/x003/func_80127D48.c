@@ -1,12 +1,12 @@
 // FUNC 80127d48 792 X003
 // MATCHING 80127d48 792
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D5B[];
 extern void *D_80139500[];
-extern unsigned short D_1F80027E;
 extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -36,7 +36,7 @@ static __inline__ void fall(TObj *o)
         if (o->wac >= 0xc) {
             o->d8c = 0;
         } else {
-            t = ((D_1F80027E << 2) + o->d8c) & 0xff;
+            t = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff;
             if (t) {
                 if (t < 0x80) o->d8c--;
                 else o->d8c++;

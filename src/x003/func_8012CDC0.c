@@ -1,11 +1,11 @@
 // FUNC 8012cdc0 544 X003
 // MATCHING 8012cdc0 544
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
-extern unsigned char D_8009CF03;
 extern void *D_801399BC[];
 extern void *D_801399CC[];
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -34,7 +34,7 @@ void func_8012CDC0(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        if (D_8009CF03 == 3) {
+        if (GCD.bcf03 == 3) {
             o->step++;
             o->state = 0;
             PLAYER.obj.b04 = 5;

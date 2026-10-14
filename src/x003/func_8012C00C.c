@@ -1,5 +1,6 @@
 // FUNC 8012c00c 1664 X003
 // MATCHING 8012c00c 1664
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -10,8 +11,7 @@ typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
 extern E12 D_80135DF0[];
-extern unsigned char D_8009CDC5;
-extern unsigned char D_8009CDC5b; /* same byte as D_8009CDC5: second name makes chk() reload it (game reloads; volatile does not match) */
+extern unsigned char D_8009CDC5b; /* same byte as GCD.bcdc5: second name makes chk() reload it (game reloads; volatile does not match) */
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
 extern void setEventStarted(int, int, int);
@@ -45,7 +45,7 @@ void func_8012C00C(TObj *o)
         o->state = 10;
         break;
     case 10:
-        c = D_8009CDC5;
+        c = GCD.bcdc5;
         if (c != 0xff) {
             if (chk()) {
                 v = *(V *)&o->a;
@@ -119,7 +119,7 @@ void func_8012C00C(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        if (D_8009CDC5 != 0xff) {
+        if (GCD.bcdc5 != 0xff) {
             o->anim = D_80135DF0[o->subtype].p[5];
             AnimJump(o, 0);
         } else {

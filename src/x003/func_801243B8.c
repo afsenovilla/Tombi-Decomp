@@ -1,5 +1,6 @@
 // FUNC 801243b8 1984 X003
 // MATCHING 801243b8 1984
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -13,7 +14,6 @@ extern int D_1F800190;
 extern char D_80077CF4[], D_80077CDC[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
-extern unsigned char D_8009CDC3;
 extern int D_1F80018C, D_1F800190;
 extern TObj *ObjAlloc(void);
 extern int func_801206F0(TObj *);
@@ -48,7 +48,7 @@ void func_801243B8(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CDC3) {
+        if (GCD.bcdc3) {
             o->b04 = 3;
             break;
         }

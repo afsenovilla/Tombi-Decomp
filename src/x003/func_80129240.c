@@ -1,10 +1,10 @@
 // FUNC 80129240 496 X003
 // MATCHING 80129240 496
+#include "gcd.h"
 #include "TOBJ.H"
 
 extern short D_80135D8E[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CEF0;
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
 
@@ -56,7 +56,7 @@ void func_80129240(TObj *o)
         if (--o->timer <= 0) {
             o->step = 0;
             o->state = 0;
-            D_8009CEF0 = 1;
+            GCD.bcef0 = 1;
         }
         break;
     }

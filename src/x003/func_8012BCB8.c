@@ -1,8 +1,8 @@
 // FUNC 8012bcb8 164 X003
 // MATCHING 8012bcb8 164
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE5D;
 extern void func_8012B66C(TObj *);
 
 void func_8012BCB8(TObj *o)
@@ -11,7 +11,7 @@ void func_8012BCB8(TObj *o)
     switch (o->step) {
     case 0:
         if (o->b68) o->step++;
-        if (D_8009CE5D != 0xff) break;
+        if (GCD.bce5d != 0xff) break;
         if (o->step != 0) break;
         o->d88 = 1;
         o->step = 1;

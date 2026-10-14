@@ -1,11 +1,11 @@
 // FUNC 80126e24 276 X003
 // MATCHING 80126e24 276
+#include "spad.h"
 #include "TOBJ.H"
 
 extern unsigned char D_80135CB0[];
 extern void *D_80139578;
 extern char D_80077CDC[];
-extern short D_1F80027E;
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -29,7 +29,7 @@ void func_80126E24(TObj *o)
     case 1:
         applyFrameVelocityY(o);
         if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0xe) != 0) {
-            o->d8c = (-D_1F80027E * 4) & 0xff;
+            o->d8c = (-SPAD.s27e * 4) & 0xff;
             o->state = 0;
             o->step++;
         }

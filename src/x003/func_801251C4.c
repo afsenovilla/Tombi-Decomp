@@ -1,7 +1,7 @@
 // FUNC 801251c4 168 X003
 // MATCHING 801251c4 168
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void AnimLoadDuration(TObj *);
 extern int func_800202B4(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -16,7 +16,7 @@ void func_801251C4(TObj *o)
         o->box1 = 0x10;
         o->box2 = 8;
         o->box3 = 0x10;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         AnimLoadDuration(o);
         break;
     case 1:

@@ -1,11 +1,11 @@
 // FUNC 8012c97c 660 X003
 // MATCHING 8012c97c 660
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009CF03;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void *D_801399D8[], *D_801399D4[];
 extern int AnimAdvance(TObj *o);
@@ -35,7 +35,7 @@ void func_8012C97C(TObj *o)
     case 1:
         AnimAdvance(o);
         if (o->b6a) {
-            D_8009CF03 = k = 1;
+            GCD.bcf03 = k = 1;
             o->timer = 1;
             o->b69 = 0;
             o->velV = 0;

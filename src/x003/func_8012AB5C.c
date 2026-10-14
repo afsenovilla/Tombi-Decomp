@@ -1,5 +1,6 @@
 // FUNC 8012ab5c 1928 X003
 // MATCHING 8012ab5c 1928
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,9 +8,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80135DCC[];
-extern unsigned char D_8009CDC8;
-extern unsigned char D_8009CDC0[];
-extern unsigned char D_8009D003;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -27,7 +25,7 @@ static __inline__ void setanim(TObj *o, int n)
 
 static __inline__ int chk(void)
 {
-    return D_8009D003 && D_8009CDC0[8] != 0xff;
+    return GCD.bd003 && ((unsigned char*)&GCD.bcdc0)[8] != 0xff;
 }
 
 void func_8012AB5C(TObj *o)
@@ -51,7 +49,7 @@ void func_8012AB5C(TObj *o)
         o->state = 10;
         break;
     case 10:
-        k = D_8009CDC8;
+        k = GCD.bcdc8;
         if (k != 0xff) {
             if (chk()) {
                 v = *(V6 *)&o->a;
