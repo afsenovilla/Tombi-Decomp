@@ -1,13 +1,12 @@
 // FUNC 8012ee14 640 X004
 // MATCHING 8012ee14 640
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
 extern E D_8013145C[];
 extern unsigned char D_8009CF24[];
-extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009CF29;
-extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
 extern unsigned short D_800A604E[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
@@ -21,8 +20,8 @@ void func_8012EE14(TObj *o)
         E *p;
         TObj *n;
 
-        if (D_8009C940 == 0) break;
-        c = D_8009C941;
+        if (GVARS.b40 == 0) break;
+        c = GVARS.b41;
         i = c - 0x2e;
         if (D_8009CF24[i]) break;
         c &= 0xff;
@@ -50,8 +49,8 @@ void func_8012EE14(TObj *o)
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
         D_8009CF29 = 1;
         break;
@@ -60,7 +59,7 @@ void func_8012EE14(TObj *o)
         if (D_8009CF29 == 0) o->state++;
         break;
     case 2:
-        D_8009C93E[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
         o->w08 = 0x3c;
         o->state++;
         break;
@@ -72,9 +71,9 @@ void func_8012EE14(TObj *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_8009C93E[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         o->state = 0;
         o->step++;
         break;

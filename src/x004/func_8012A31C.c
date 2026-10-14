@@ -1,11 +1,11 @@
 // FUNC 8012a31c 852 X004
 // MATCHING 8012a31c 852
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { Fix16 a, y, b; } V3;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801311D0[];
-extern unsigned char D_8009C93E, D_8009C93F[];
 extern unsigned char PLAYER[];
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A6066;
@@ -27,7 +27,7 @@ void func_8012A31C(TObj *o)
         D_800A603D = 0;
         D_800A603E = 0;
         o->animFrame = o->b68 & 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         o->state++;
         break;
     case 1:
@@ -51,7 +51,7 @@ void func_8012A31C(TObj *o)
         break;
     case 3:
         if (o->visible == 0) {
-            D_8009C93E = 0;
+            GVARS.b3e = 0;
             PLAYER[4] = 5;
             D_800A603D = 0x64;
             D_800A603E = 0;
@@ -92,8 +92,8 @@ void func_8012A31C(TObj *o)
         D_8009CF2D = 1;
         D_800A603D = 0;
         D_800A603E = 0;
-        D_8009C93F[0] = 0;
-        D_8009C93E = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        GVARS.b3e = 0;
         o->b04 = 2;
         o->step = 0;
         o->state = 0;

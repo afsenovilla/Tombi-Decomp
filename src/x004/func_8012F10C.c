@@ -1,9 +1,9 @@
 // FUNC 8012f10c 360 X004
 // MATCHING 8012f10c 360
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
 extern void setEventComplete(int, int);
 extern void addItemToInventory(int, int, int);
 
@@ -14,12 +14,12 @@ void func_8012F10C(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
         break;
     case 1:
-        D_8009C93E[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
         o->w08 = 0xc8;
         o->state++;
         setEventComplete(0x38, 0);
@@ -29,9 +29,9 @@ void func_8012F10C(TObj *o)
         PLAYER.b04 = 1;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         o->state++;
         break;
     case 3:

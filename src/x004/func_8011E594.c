@@ -1,8 +1,7 @@
 // FUNC 8011e594 484 X004
 // MATCHING 8011e594 484
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C940;
-extern unsigned char D_8009C941;
 extern unsigned char D_8009CD99, D_8009CD9D;
 extern unsigned char D_800B146D, D_800B1475, D_800B1471;
 extern void *D_80134D84;
@@ -28,9 +27,9 @@ void func_8011E594(TObj *o)
 
     switch (o->b04) {
     case 0:
-        p = &D_8009C940;
+        p = &GVARS.b40;
         if (*p != 0) {
-            if (D_8009C941 != 0x7e) break;
+            if (GVARS.b41 != 0x7e) break;
             *p = 0;
             setbox(o, 8, 0x10, 8, 0x10);
             o->active = 1;

@@ -1,10 +1,10 @@
 // FUNC 8011b218 544 X004
 // MATCHING 8011b218 544
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_8009C93A;
 extern signed char D_8009D2B0;
 
 int func_8011B218(TObj *o)
@@ -24,7 +24,7 @@ int func_8011B218(TObj *o)
             o->state++;
             return 2;
         }
-        if (D_8009C93A) return 0;
+        if (GVARS.b3a) return 0;
         if (D_8009D2B0 >= 3) break;
         o->state = 3;
         o->d30 = 0;
@@ -43,7 +43,7 @@ int func_8011B218(TObj *o)
         o->state++;
         break;
     case 4:
-        if (D_8009C93A == 0) return 0;
+        if (GVARS.b3a == 0) return 0;
         o->state = 0;
         break;
     case 2:

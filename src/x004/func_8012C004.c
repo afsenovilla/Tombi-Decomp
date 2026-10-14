@@ -1,9 +1,9 @@
 // FUNC 8012c004 420 X004
 // MATCHING 8012c004 420
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_8009CE24[];
 extern void *D_80135748[];
 extern void *D_80135750[];
@@ -43,8 +43,8 @@ void func_8012C004(TObj *o)
         n = 10;
     talk:
         o->state++;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
@@ -59,8 +59,8 @@ void func_8012C004(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

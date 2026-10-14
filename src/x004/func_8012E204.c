@@ -1,10 +1,11 @@
 // FUNC 8012e204 584 X004
 // MATCHING 8012e204 584
+#include "gvars.h"
 #include "player.h"
 /* Real size 584 B: includes the csv piece func_8012E438 (20 B), the epilogue of this function. */
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E, D_8009CDD7, D_8009CF29;
+extern unsigned char D_8009CDD7, D_8009CF29;
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -17,9 +18,9 @@ void func_8012E204(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 100;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
-        D_8009C93E = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
+        GVARS.b3e = 1;
         setEventStarted(0x33, 0, 0);
         o->w08 = 200;
         o->state++;
@@ -33,12 +34,12 @@ void func_8012E204(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 7;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 3:
-        D_8009C93E = 1;
+        GVARS.b3e = 1;
         if (D_8009CDD7 == 0xff) {
             PLAYER.obj.step = 0x20;
             (*(unsigned short*)&PLAYER.obj.timer) = 1;
@@ -63,9 +64,9 @@ void func_8012E204(TObj *o)
     case 5:
         q = &(*(unsigned short*)&PLAYER.obj.timer);
         D_8009CF29 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         *q = *q - 1;
         o->step = 0;
         o->state = 0;
@@ -74,9 +75,9 @@ void func_8012E204(TObj *o)
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         o->step = 0;
         o->state = 0;
         break;

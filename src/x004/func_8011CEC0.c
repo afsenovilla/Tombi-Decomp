@@ -1,8 +1,9 @@
 // FUNC 8011cec0 1016 X004
 // MATCHING 8011cec0 1016
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
-extern unsigned char D_8009D0CC, D_8009D2C3, D_8009C93A;
+extern unsigned char D_8009D0CC, D_8009D2C3;
 extern unsigned char D_8009CF11[];
 extern char D_80130CD4[];
 extern short D_80130D14[];
@@ -24,7 +25,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 
 static __inline__ int inview(TObj *o)
 {
-    if (!D_8009C93A) return 0;
+    if (!GVARS.b3a) return 0;
     if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
     return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

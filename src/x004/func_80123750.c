@@ -1,11 +1,11 @@
 // FUNC 80123750 1092 X004
 // MATCHING 80123750 1092
+#include "gvars.h"
 #include "TOBJ.H"
 typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
 extern int D_1F8002D0;
-extern unsigned char D_8009C942;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern short D_800A4582;
@@ -62,7 +62,7 @@ void func_80123750(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942 != 0) {
+        if (GVARS.b42 != 0) {
             FUN_800202b4(o);
             break;
         }
@@ -130,7 +130,7 @@ void func_80123750(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            if (D_8009C942 != 0) {
+            if (GVARS.b42 != 0) {
                 FUN_800202b4(o);
                 break;
             }

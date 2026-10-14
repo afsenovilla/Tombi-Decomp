@@ -1,5 +1,6 @@
 // FUNC 80126e54 1576 X004
 // MATCHING 80126e54 1576
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct {
@@ -11,7 +12,6 @@ typedef struct {
     char pcc[0xd2 - 0xcc];
     short wd2;
 } S;
-extern unsigned char D_8009C942;
 extern int D_1F8002DC;
 extern unsigned short D_1F8001C8;
 extern void *D_80134608[], *D_801345F4[], *D_80134610[], *D_80134614[];
@@ -73,7 +73,7 @@ void func_80126E54(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             func_8011EC78(o);
             break;
         }
@@ -107,7 +107,7 @@ void func_80126E54(TObj *o)
         X(o)->wc0 = D_1F8001C8;
         break;
     case 2:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             func_8011EC78(o);
             break;
         }

@@ -1,5 +1,6 @@
 // FUNC 80116d3c 6596 X004
 // MATCHING 80116d3c 6596
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
@@ -42,7 +43,6 @@ typedef void (*Fn)(O *);
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern E8 *D_801305DC[];
-extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C940, D_8009C942;
 extern unsigned char D_8009CDD5, D_8009CDF1, D_8009CFEE;
 extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
@@ -74,8 +74,8 @@ extern void func_80116AE0(O *);
 #define T1(n) \
     if (tryStartItemInteraction(o, 1, n)) { \
         D_8009D2B0 = 0; \
-        D_8009C93F = 1; \
-        D_8009C942 = 1; \
+        GVARS.b3f = 1; \
+        GVARS.b42 = 1; \
     } \
     break;
 
@@ -84,14 +84,14 @@ extern void func_80116AE0(O *);
     o->w5a = k; \
     o->step = 4; \
     D_8009D2B0 = 0; \
-    D_8009C93F = 1; \
-    D_8009C942 = 1; \
+    GVARS.b3f = 1; \
+    GVARS.b42 = 1; \
     break;
 
 #define T2B(n, k) \
     if (!tryStartItemInteraction(o, 2, n)) break; \
-    D_8009C93F = 1; \
-    D_8009C942 = 1; \
+    GVARS.b3f = 1; \
+    GVARS.b42 = 1; \
     D_8009D2B0 = 0; \
     o->w5a = k; \
     o->step = 4; \
@@ -107,7 +107,7 @@ static __inline__ short blocked(void)
 {
     if (PLAYER.bac >= 2) return 1;
     if (PLAYER.b69 == 0) return 1;
-    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | D_8009C940) return 1;
+    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | GVARS.b40) return 1;
     if (D_1F8001FC & 0x10) return 0;
     return 1;
 }
@@ -126,7 +126,7 @@ void func_80116D3C(O *o)
         o->step++;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         syncObjectTargetY(o);
         func_80029078(o);
@@ -222,8 +222,8 @@ void func_80116D3C(O *o)
             if (D_1F80016A >= 0x653 && D_1F800172 == 0x4ec && D_1F80016E >= -0x225
                 && tryStartItemInteraction(o, 1, 5)) {
                 D_8009D2B0 = 0;
-                D_8009C93F = 1;
-                D_8009C942 = 1;
+                GVARS.b3f = 1;
+                GVARS.b42 = 1;
                 D_8009CFEE = 1;
             }
             if (p->ba2 == 2) {
@@ -475,20 +475,20 @@ void func_80116D3C(O *o)
         }
         break;
     case 3:
-        D_8009C942 = 1;
+        GVARS.b42 = 1;
         D_80079A98[o->subtype](o);
         break;
     case 4:
         if (p->active == 2 || p->bac >= 2) {
             o->subtype = 0;
             o->step = 2;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
             ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         {
         E8 *e = D_801305DC[GAME.selectedSection] + GAME.selectedSpawnPoint;
         unsigned char t;
@@ -511,8 +511,8 @@ void func_80116D3C(O *o)
         if (o->subtype != 0) break;
         o->step = 2;
         FUN_800216c4();
-        D_8009C93F = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b3e = 0;
         p->b04 = 1;
         p->step = 0;
         p->state = 0;

@@ -1,15 +1,16 @@
 // FUNC 80129194 188 X004
 // MATCHING 80129194 188
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CE22, D_8009C940, D_8009C941, D_8009CE3D;
+extern unsigned char D_8009CE22, D_8009CE3D;
 
 void func_80129194(TObj *o)
 {
     if (D_8009CE22 == 0) return;
-    if (D_8009C940 && D_8009C941 == 0x94) {
+    if (GVARS.b40 && GVARS.b41 == 0x94) {
         o->step = 2;
         o->state = 0;
     }

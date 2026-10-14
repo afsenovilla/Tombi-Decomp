@@ -1,8 +1,9 @@
 // FUNC 8012f508 344 X004
 // MATCHING 8012f508 344
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE52, D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
+extern unsigned char D_8009CE52;
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern void setEventStarted(int, int, int);
 
@@ -18,16 +19,16 @@ void func_8012F508(TObj *o)
         o->state++;
         break;
     case 1:
-        if (D_8009C93A == 0) break;
+        if (GVARS.b3a == 0) break;
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 2:
-        D_8009C93E = 1;
+        GVARS.b3e = 1;
         setEventStarted(0xae, 0, 0);
         o->w08 = 200;
         o->state++;
@@ -38,9 +39,9 @@ void func_8012F508(TObj *o)
     case 15:
         PLAYER = 1;
         D_800A603C = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         D_800A603D = 0;
         D_800A603E = 0;
         o->b04 = 3;

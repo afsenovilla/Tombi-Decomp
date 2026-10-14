@@ -1,5 +1,6 @@
 // FUNC 8011d544 704 X004
 // MATCHING 8011d544 704
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern void *D_80134D50[];
@@ -8,7 +9,6 @@ extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern int D_800A4570;
 extern int D_800A4574;
-extern unsigned char D_8009C93C;
 extern void func_8011D804(TObj *);
 extern void FUN_80059d44(short);
 extern void playSFX(int);
@@ -75,7 +75,7 @@ void func_8011D544(TObj *o)
             switch (o->step) {
             case 0:
                 if (GAME.fadeScreenControl == 0) {
-                    D_8009C93C = 1;
+                    GVARS.b3c = 1;
                     o->animTimer = 0x17c;
                     o->animFrame = 0x80;
                     o->step++;

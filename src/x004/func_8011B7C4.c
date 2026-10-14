@@ -1,5 +1,6 @@
 // FUNC 8011b7c4 1868 X004
 // MATCHING 8011b7c4 1868
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -8,7 +9,6 @@ extern unsigned short D_1F8001C8;
 extern short D_1F800172;
 extern unsigned char D_8009D0DA, D_8009D0D9;
 extern unsigned char D_8009CDD7, D_8009CDCD, D_8009CDCE, D_8009CDDB;
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
@@ -194,23 +194,23 @@ void func_8011B7C4(TObj *o)
         case 0:
             break;
         case 1:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 300;
             o->substep++;
             setEventStarted(o->wac, 0, 0);
             break;
         case 3:
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             o->substep = 0;
             break;
         case 4:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 300;
             o->substep++;
             setEventComplete(o->wac, 0);
@@ -220,9 +220,9 @@ void func_8011B7C4(TObj *o)
             if (--o->timer == -1) o->substep++;
             break;
         case 6:
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             o->substep = 0;
             o->b6b = 1;
             break;

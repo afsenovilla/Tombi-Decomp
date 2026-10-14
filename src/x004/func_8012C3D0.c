@@ -1,9 +1,9 @@
 // FUNC 8012c3d0 420 X004
 // MATCHING 8012c3d0 420
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern unsigned char D_8009CE22[], D_8009CE3D[];
 extern void *D_80135750[];
 extern void *D_80135748[];
@@ -23,8 +23,8 @@ void func_8012C3D0(TObj *o)
     case 1:
         if (o->b68) {
             o->state++;
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -38,8 +38,8 @@ void func_8012C3D0(TObj *o)
     case 3:
         if (o->b68) {
             o->state++;
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -55,8 +55,8 @@ void func_8012C3D0(TObj *o)
         AnimAdvance(o);
         if (((TObj *)o->d90)->b04 == 2) {
             ((TObj *)o->d90)->b04 = 3;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
