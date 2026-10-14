@@ -1,5 +1,6 @@
 // FUNC 8011bda8 1860 X002
 // MATCHING 8011bda8 1860
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -8,7 +9,6 @@ extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern void *D_8009F328;
 extern void *D_8009F32C;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009CFDB[];
 extern TObj PLAYER;
 extern short D_800A604E[];
@@ -35,7 +35,7 @@ void func_8011BDA8(TObj *o)
         }
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         PLAYER.animFrame = 1;
         PLAYER.b04 = 5;
         PLAYER.step = 0;

@@ -1,5 +1,6 @@
 // FUNC 80100788 4088 X003
 // MATCHING 80100788 4088
+#include "gv6.h"
 #include "gvars.h"
 /* Player step dispatcher. turn(): the d8c store written in every leaf (cross-jumping shares only the store
    tail, as in the game); chk() is a macro so the step constant is loaded at the compare; dirC/dirD store
@@ -8,7 +9,6 @@
 #include "raw7.h"
 #include "gamestate.h"
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
-extern unsigned short D_8009D670;
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
 extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C4;
@@ -87,7 +87,7 @@ extern void probeTileShapeThreePoints(TObj *, int);
 static __inline__ void dirA(TObj *o)
 {
     unsigned short f = o->animFrame & 1;
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short v;
     o->animFrame = f;
     if (*k & 0x20) {
@@ -100,14 +100,14 @@ static __inline__ void dirA(TObj *o)
 
 static __inline__ void dirF(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     if (*k & 0x10) o->animFrame |= 8;
     if (*k & 0x40) o->animFrame |= 4;
 }
 
 static __inline__ void dirC(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short f = o->animFrame & 1;
     o->animFrame = f;
     if (*k & 0x10) {
@@ -125,7 +125,7 @@ static __inline__ void dirC(TObj *o)
 
 static __inline__ void dirD(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short f = o->animFrame & 1;
     o->animFrame = f;
     if (*k & 0x10) {
@@ -189,7 +189,7 @@ void func_80100788(TObj *o, int p2)
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
-            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 0;

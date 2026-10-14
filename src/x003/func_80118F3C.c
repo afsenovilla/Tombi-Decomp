@@ -1,8 +1,8 @@
 // FUNC 80118f3c 464 X003
 // MATCHING 80118f3c 464
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3;
 extern int D_1F8002D4[];
 extern void *D_80138EB0[];
 extern void func_80118DF8(TObj *);
@@ -13,7 +13,7 @@ void func_80118F3C(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 2) {
+        if (GV2.bc3 & 2) {
             o->b04 = 3;
             break;
         }

@@ -1,5 +1,6 @@
 // FUNC 80119a1c 1316 X002
 // MATCHING 80119a1c 1316
+#include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
     short flags;
@@ -16,7 +17,7 @@ typedef struct { short x, y, z, sub; } E8;
 extern E D_8011C984[], D_8011CA9C[];
 extern E8 D_8011C93C[];
 extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
-extern unsigned char D_8009D2C3, D_8009CE41;
+extern unsigned char D_8009CE41;
 extern unsigned char D_8009CFDC[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *FUN_80018448(void);
@@ -52,7 +53,7 @@ void func_80119A1C(TObj *o)
         p->b68 = 0;
         SCRIPT_OBJECTS[i] = p;
         p->d90 = (int)o;
-        if (i == 0 && D_8009D2C3 != 0x7f) p->b04 = 2;
+        if (i == 0 && GV2.bc3 != 0x7f) p->b04 = 2;
     }
     for (i = 0; i < 6; i++) {
         if (D_8009CFDC[i] == 0) {
@@ -87,25 +88,25 @@ void func_80119A1C(TObj *o)
             p->d90 = (int)o;
             switch (i) {
             case 0:
-                if (!(D_8009D2C3 & 1)) p->y.p.whole -= 0xf0;
+                if (!(GV2.bc3 & 1)) p->y.p.whole -= 0xf0;
                 break;
             case 1:
-                if (!(D_8009D2C3 & 2)) p->y.p.whole -= 0x12c;
+                if (!(GV2.bc3 & 2)) p->y.p.whole -= 0x12c;
                 break;
             case 2:
-                if (!(D_8009D2C3 & 4)) p->y.p.whole -= 0x140;
+                if (!(GV2.bc3 & 4)) p->y.p.whole -= 0x140;
                 break;
             case 3:
-                if (!(D_8009D2C3 & 8)) p->y.p.whole -= 0x12c;
+                if (!(GV2.bc3 & 8)) p->y.p.whole -= 0x12c;
                 break;
             case 4:
-                if (!(D_8009D2C3 & 0x10)) p->y.p.whole -= 0x140;
+                if (!(GV2.bc3 & 0x10)) p->y.p.whole -= 0x140;
                 break;
             case 5:
-                if (!(D_8009D2C3 & 0x40)) p->y.p.whole -= 0x12c;
+                if (!(GV2.bc3 & 0x40)) p->y.p.whole -= 0x12c;
                 break;
             case 6:
-                if (!(D_8009D2C3 & 0x20)) p->y.p.whole -= 0x12c;
+                if (!(GV2.bc3 & 0x20)) p->y.p.whole -= 0x12c;
                 break;
             }
         }

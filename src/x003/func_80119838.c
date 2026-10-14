@@ -1,8 +1,8 @@
 // FUNC 80119838 244 X003
 // MATCHING 80119838 244
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3;
 extern int D_1F8002D4[];
 extern void *D_80138ED8;
 extern void AnimLoadDuration(TObj *);
@@ -14,7 +14,7 @@ void func_80119838(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 4) {
+        if (GV2.bc3 & 4) {
             o->b04 = 3;
             break;
         }

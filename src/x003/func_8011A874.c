@@ -1,12 +1,13 @@
 // FUNC 8011a874 1376 X003
 // MATCHING 8011a874 1376
+#include "gv2.h"
 #include "gvars.h"
 /* includes the csv piece 8011ADC0 (the shared epilogue) */
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 extern unsigned char D_800A60E3;
-extern unsigned char D_8009CDCD, D_8009CEF0, D_8009D2C3, D_8009CE4E, D_8009D0D9, D_8009CDDB;
+extern unsigned char D_8009CDCD, D_8009CEF0, D_8009CE4E, D_8009D0D9, D_8009CDDB;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern int func_8011A6C4(TObj *);
@@ -102,7 +103,7 @@ void func_8011A874(TObj *o)
             break;
         case 4:
             r = func_8011A6C4(o);
-            if (D_8009D2C3 & 2) {
+            if (GV2.bc3 & 2) {
                 if (r != 2) break;
                 if (D_8009CE4E == 0xff) break;
                 o->substep = 4;

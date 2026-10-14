@@ -1,5 +1,6 @@
 // FUNC 8011a114 7316 X002
 // MATCHING 8011a114 7316
+#include "gv2.h"
 #include "gvars.h"
 /* Whole function: the csv splits it into 8011A114, 8011A448, 8011B170, 8011B330, 8011B47C and 8011B7D4. */
 #include "TOBJ.H"
@@ -19,7 +20,6 @@ typedef struct {
 
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009CFEA, D_8009CE15, D_8009CDBB, D_8009D0B2;
 extern unsigned short D_1F8001F8;
 extern short D_1F8001C6;
@@ -76,7 +76,7 @@ void func_8011A114(Ctl *o)
         if (GVARS.b3a) {
             ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&GVARS.b3f)[0] = 1;
-            D_8009D2B0 = 2;
+            GV2.bb0 = 2;
             o->state++;
         }
         break;
