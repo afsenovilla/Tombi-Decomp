@@ -1,7 +1,7 @@
 // FUNC 80125c50 348 X010
 // MATCHING 80125c50 348
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C940;
 extern unsigned char D_8009C941;
 extern void func_80125AE0(TObj *);
 extern void func_801253AC(TObj *);
@@ -11,7 +11,7 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ int chk(void)
 {
-    return D_8009C940 == 1 && D_8009C941 == 0x9f;
+    return GVARS.b40 == 1 && D_8009C941 == 0x9f;
 }
 
 void func_80125C50(TObj *o)

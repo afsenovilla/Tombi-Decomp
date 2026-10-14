@@ -1,8 +1,9 @@
 // FUNC 80117364 456 X010
 // MATCHING 80117364 456
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3, D_8009C938;
+extern unsigned char D_8009D2C3;
 extern short D_1F800176;
 extern void playSFX(int);
 extern void ObjListPush_1F800230(TObj *);
@@ -33,7 +34,7 @@ void func_80117364(TObj *o)
     case 1:
         o->visible = 1;
         ObjListPush_1F800230(o);
-        if (D_8009C938) {
+        if (GVARS.b38) {
             o->b04 = 2;
             o->step = 0;
             break;

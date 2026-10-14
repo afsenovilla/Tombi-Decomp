@@ -1,10 +1,9 @@
 // FUNC 8010e66c 684 X010
 // MATCHING 8010e66c 684
+#include "gvars.h"
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009C330;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern int MulCos(int a, int b);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -52,8 +51,8 @@ void func_8010E66C(TObj *o)
         func_80030034(2);
         o->state = 1;
     case 1:
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(o);
         func_8010F400(o);
         func_8010EAF8(o);
@@ -66,8 +65,8 @@ void func_8010E66C(TObj *o)
         ObjAddVelY7E(o);
         break;
     case 2:
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(o);
         func_8010F400(o);
         ObjMotionStep(o);

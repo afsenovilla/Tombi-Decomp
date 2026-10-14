@@ -1,7 +1,8 @@
 // FUNC 8012855c 520 X010
 // MATCHING 8012855c 520
+#include "gvars.h"
 #include "gamestate.h"
-extern unsigned char D_8009CDAC, D_8009D078, D_8009C93F;
+extern unsigned char D_8009CDAC, D_8009D078;
 extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
@@ -46,7 +47,7 @@ void func_8012855C(char *o)
                 *(signed char *)(o + 0xf) = -7;
             } else {
                 o[5] = 3;
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
             }
         }
         break;

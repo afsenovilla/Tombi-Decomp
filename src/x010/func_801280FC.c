@@ -1,5 +1,6 @@
 // FUNC 801280fc 1120 X010
 // MATCHING 801280fc 1120
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -9,7 +10,7 @@ typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
 extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned char D_8009C942, D_8009D078, D_8009CF1C, D_8009C93C;
+extern unsigned char D_8009D078, D_8009CF1C;
 extern short D_1F8000F2, D_1F80016E;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
@@ -34,7 +35,7 @@ void func_801280FC(TObj *o)
         D_1F8000F2 = -300;
     case 1:
         if (D_1F80016E < -0xe9) break;
-        D_8009C942 = 1;
+        GVARS.b42 = 1;
         PLAYER.active = 5;
         D_800A603C = 5;
         D_800A603D = 0x64;
@@ -141,7 +142,7 @@ void func_801280FC(TObj *o)
             (*(short*)&GAME.nextSpawnPoint) = 3;
             (*(short*)&GAME.nextSection) = 0;
             GAME.fadeScreenControl = 3;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             o->state++;
         }
         break;

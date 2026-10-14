@@ -1,9 +1,9 @@
 // FUNC 801230d0 608 X010
 // MATCHING 801230d0 608
+#include "gvars.h"
 #include "TOBJ.H"
 extern short D_8007A3F0[];
 extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_8009C959;
 extern int AnimAdvance(TObj *);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
@@ -53,7 +53,7 @@ void func_801230D0(TObj *o)
     if (o->visible == 0 && !OnScreen(o)) {
         o->active = 2;
         o->b04 = 3;
-        c = &D_8009C959;
+        c = &GVARS.b59;
         (*c)--;
     }
 }

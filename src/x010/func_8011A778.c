@@ -1,10 +1,11 @@
 // FUNC 8011a778 1016 X010
 // MATCHING 8011a778 1016
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
 
-extern unsigned char D_8009D0CA, D_8009D2C3, D_8009CF0C[], D_8009C93A;
+extern unsigned char D_8009D0CA, D_8009D2C3, D_8009CF0C[];
 extern char D_8012F2A8[];
 extern short D_8012F2E8[];
 extern unsigned short D_1F800176, D_1F800186;
@@ -17,7 +18,7 @@ extern void FUN_80018838(TObj *);
 
 static __inline__ int near(TObj *o)
 {
-    if (D_8009C93A == 0)
+    if (GVARS.b3a == 0)
         return 0;
     if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d)
         return 0;

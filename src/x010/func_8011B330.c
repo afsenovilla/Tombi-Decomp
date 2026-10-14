@@ -1,5 +1,6 @@
 // FUNC 8011b330 1188 X010
 // MATCHING 8011b330 1188
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -24,7 +25,6 @@ typedef struct {
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
-extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C8;
 extern unsigned char D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
@@ -99,8 +99,8 @@ void func_8011B330(S *s)
         SfxPlay2(2, 4);
         s->o.state++;
     case 1:
-        s->o.h->raw += D_8009C944[0] << 8;
-        s->o.y.raw += D_8009C946[0] << 8;
+        s->o.h->raw += ((short*)&GVARS.s44)[0] << 8;
+        s->o.y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(s);
         s->o.h->raw += s->o.velX << 8;
         s->o.y.raw += s->o.velY << 8;

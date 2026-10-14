@@ -1,11 +1,11 @@
 // FUNC 801268d4 1484 X010
 // MATCHING 801268d4 1484
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_8009CE3D, D_8009CF2F, D_8009CF2E, D_8009CE18;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -23,8 +23,8 @@ void func_801268D4(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 1:
@@ -158,8 +158,8 @@ void func_801268D4(TObj *o)
         break;
     case 30:
         PLAYER.obj.b04 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.obj.wb2 = 0;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

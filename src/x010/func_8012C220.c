@@ -1,9 +1,10 @@
 // FUNC 8012c220 908 X010
 // MATCHING 8012c220 908
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009D07A;
+extern unsigned char D_8009D07A;
 extern void *D_801322F4[], *D_801322E4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -18,8 +19,8 @@ void func_8012C220(TObj *o)
         o->state++;
         ObjSetFacingToPlayer(o);
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 5;
@@ -99,8 +100,8 @@ void func_8012C220(TObj *o)
         AnimAdvance(o);
         if (((TObj *)o->d90)->b04 == 2) {
             ((TObj *)o->d90)->b04 = 3;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;

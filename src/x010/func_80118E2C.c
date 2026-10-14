@@ -1,9 +1,9 @@
 // FUNC 80118e2c 440 X010
 // MATCHING 80118e2c 440
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D2C3;
-extern unsigned char D_8009C958;
 extern void FUN_80020078(TObj *, int);
 extern void playSFX(int);
 extern void func_80118CD4(TObj *);
@@ -34,7 +34,7 @@ void func_80118E2C(TObj *o)
             s = o->step;
             switch (s) {
             case 0:
-                if (D_8009C958 == 1) {
+                if (GVARS.b58 == 1) {
                     o->step = s + 1;
                     o->timer = 0x10;
                 }

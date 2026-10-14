@@ -1,10 +1,10 @@
 // FUNC 8011d5f4 1116 X010
 // MATCHING 8011d5f4 1116
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
-extern short D_8009C944[], D_8009C946[];
 
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
@@ -61,8 +61,8 @@ void func_8011D5F4(TObj *o)
         }
         break;
     case 2:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         ObjCheckHeadCollision(o);
         if (D_8009D670[0] & 0x80) o->animFrame = 1;
         if (D_8009D670[0] & 0x20) o->animFrame = 0;
