@@ -1,4 +1,12 @@
 // FUNC 80125818 3148 X004
+/* opusAA: score 11, exactly 787 instrs, fake nop removed. near() is now a statement-expression macro NEAR(o)
+   with `short s` and the result `r_ = s == 1 && dy < 0xf8` (gives the game's a0 result, a1 dy and `move v1,s0`).
+   case 5: block-local p pinned $3, wba as `register int w asm("$4")` + asm bump, `pv = w + (pv - q)`.
+   case 8: `({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; })`.
+   case 10: t3 pinned $3 (`t3 = PLAYER.y; t3 -= U16(o->y)` + bump), o->h via `register Fix16 *hp asm("$4")`,
+   and the dy test as an unsigned v0-pinned temp. Left (11): `lbu substep` scheduled after the li in three
+   setanim+substep++ tails (cases 0/4), and `sh s0,0xbc` (wbc = 1) in the mult shadow in case 3 (statement
+   reorders tried: 11-35). */
 #include "spad.h"
 #include "player.h"
 /* score 159 (opusS, was 204; 3152 of 3148 B, one fake nop): substep AI with 11 cases. opusS applied the three
@@ -41,20 +49,15 @@ extern short FUN_80041ebc(TObj *, short, short);
 #define TICK if (--U16(o->wbc) == 0) { o->wbc = 0x28; if (X(o)->wca) SfxPlay(0x12); }
 #define SETANIM(a) do { o->anim = (a); AnimLoadDuration(o); } while (0);
 
-static __inline__ int chk(int a, unsigned short dy) { if (a != 1) return 0; return dy < 0xf8; }
-static __inline__ int near(TObj *o)
-{
-    int s;
-    unsigned short dy;
-
-    if (o->d->p.whole != (*(Fix16 **)&PLAYER.obj.d)->p.whole) return 0;
-    s = 0;
-    if (((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 0xc) ||
-        ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6))
-        s = 1;
-    dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30;
-    return chk(s, dy);
-}
+static __inline__ int chk(int a, unsigned short dy) { return a == 1 && dy < 0xf8; }
+#define NEAR(o) ({ int r_; short s; unsigned short dy; \
+    if (o->d->p.whole != (*(Fix16 **)&PLAYER.obj.d)->p.whole) r_ = 0; else { \
+    s = 0; \
+    if (((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 0xc) || \
+        ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6)) \
+        s = 1; \
+    dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30; \
+    r_ = s == 1 && dy < 0xf8; } r_; })
 
 void func_80125818(TObj *o)
 {
@@ -138,8 +141,7 @@ void func_80125818(TObj *o)
             o->substep = 9;
         }
         if (o->w22 != 0xb4 && o->w22 != 0x3c) break;
-        if (near(o)) {
-            asm("");
+        if (NEAR(o)) {
             o->step = 1;
             o->state = 0;
             o->substep = 0;
@@ -171,18 +173,19 @@ void func_80125818(TObj *o)
             o->substep++;
         }
         break;
-    case 5:
+    case 5: {
+        register unsigned short pv asm("$3");
         if (o->animFrame) d = -0x20;
         else d = 0x20;
         if ((*(short*)&SPAD.s1c8)) {
             q = o->d38;
-            p = o->b.p.whole;
+            pv = o->b.p.whole;
         } else {
             q = o->d30;
-            p = o->a.p.whole;
+            pv = o->a.p.whole;
         }
-        t = U16(o->wba) - q + p;
-        if (--o->w22 == 0 || (unsigned short)t < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
+        { register int w asm("$4") = U16(o->wba); asm("" : "=r"(w) : "0"(w)); pv = w + (pv - q); }
+        if (--o->w22 == 0 || pv < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
             FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x28;
             o->wac = 1;
@@ -191,7 +194,7 @@ void func_80125818(TObj *o)
         }
         applyAnimVelocityX(o, o->animFrame);
         TICK
-        break;
+        break; }
     case 6:
         if (--o->w22) break;
         o->w22 = 0x78;
@@ -203,7 +206,7 @@ void func_80125818(TObj *o)
         break;
     case 7:
         if (--o->w22 == 0) {
-            if (near(o)) {
+            if (NEAR(o)) {
                 o->step = 1;
                 o->state = 0;
                 o->substep = 0;
@@ -231,8 +234,7 @@ void func_80125818(TObj *o)
             t2 = -o->d38 + U16(o->b.p.whole);
         else
             t2 = -o->d30 + U16(o->a.p.whole);
-        u = t2 + 4;
-        if (u < 8 || FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
+        if (({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; }) || FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x3c;
             o->wac = 1;
             SETANIM(D_801345B8)
@@ -283,10 +285,14 @@ void func_80125818(TObj *o)
                 o->state = D_80131128[Rand() & 0xf];
                 o->substep = 0;
                 if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
-                    t = (*(unsigned short*)&PLAYER.obj.y.p.whole) - U16(o->y.p.whole);
-                    asm("" : "=r"(t) : "0"(t));
-                    if ((unsigned short)(-o->h->p.whole + (*(Fix16 **)&PLAYER.obj.h)->p.whole + 0x80) < 0x100 &&
-                        (unsigned short)(t + 0x30) < 0xf8) {
+                    register int t3 asm("$3");
+                    register Fix16 *hp asm("$4");
+                    t3 = (*(unsigned short*)&PLAYER.obj.y.p.whole);
+                    t3 -= U16(o->y.p.whole);
+                    asm("" : "=r"(t3) : "0"(t3));
+                    hp = o->h;
+                    if ((unsigned short)(-hp->p.whole + (*(Fix16 **)&PLAYER.obj.h)->p.whole + 0x80) < 0x100 &&
+                        ({ register unsigned r asm("$2") = (unsigned short)(t3 += 0x30); r < 0xf8; })) {
                         o->state = 4;
                         o->substep = 0;
                     }
