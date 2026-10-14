@@ -1,10 +1,10 @@
 // FUNC 801066c4 852 X018
 // MATCHING 801066c4 852
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char pad[9]; unsigned char b9; char pad2[0x20 - 10]; short w20; } P;
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern int D_8009C984;
 extern unsigned short D_8009D670;
 extern void FUN_8010f328(TObj *);
 extern void FUN_800ef490(TObj *);
@@ -76,7 +76,7 @@ void func_801066C4(TObj *o)
         o->b69 = 0;
         o->velV = 0;
         PlayerSetAnimIfChanged(o, 13);
-        if ((D_8009C984 & 0x40) && (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4)) {
+        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4)) {
             o->ba7 = 1;
         } else {
             o->ba7 = 0;

@@ -3,12 +3,12 @@
 /* csv entry 801162b8 (708 B) starts with 8 data words (jump-table/pointer data); code starts at 801162d8.
    debt: volatile read of pl->a in the last range test stops gcc threading the first test's failure jump past it. */
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef void (*Fn)(TObj *);
 extern TObj PLAYER;
 extern Fn D_80079AD0[];
 extern unsigned char D_8009C93A, D_8009CDED, D_800A60E0;
-extern unsigned short D_8009C962;
 extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
@@ -27,7 +27,7 @@ void func_801162D8(TObj *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
             if (D_800A604A < 0x14 && D_800A604E >= -0x3b) {
                 if (D_8009CDED == 0) goto set3;
