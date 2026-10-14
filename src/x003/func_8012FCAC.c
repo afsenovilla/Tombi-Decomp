@@ -1,10 +1,10 @@
 // FUNC 8012fcac 1028 X003
 // MATCHING 8012fcac 1028
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D087;
 extern unsigned char D_8009C93F, D_8009C940, D_8009C941, D_8009C942;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void *D_80138FC8[], *D_80138FD8[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
@@ -128,9 +128,9 @@ void func_8012FCAC(TObj *o)
     talk:
         D_8009C93F = 1;
         D_8009C942 = 1;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->d90 = showMessageBoxDirect(m, n, q);
         o->wac = 2;
         o->animFrame = o->b68 & 1;
@@ -145,11 +145,11 @@ void func_8012FCAC(TObj *o)
         p->b04 = 3;
         }
     case 15:
-        D_800A603C = 1;
+        PLAYER.obj.b04 = 1;
         D_8009C93F = 0;
         D_8009C942 = 0;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->state = 0;
         o->wac = 6;
         o->anim = D_80138FD8[0];

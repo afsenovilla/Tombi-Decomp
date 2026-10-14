@@ -1,10 +1,9 @@
 // FUNC 8011c540 456 X004
 // MATCHING 8011c540 456
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_800A60D0[];
-extern short D_800A60D2;
 extern int ObjCullRegister(TObj *);
 extern void playSFX(int);
 extern void ObjFreeDup(TObj *);
@@ -45,10 +44,10 @@ void func_8011C540(TObj *o)
             if (!o->b69) o->step = 0;
             if (++o->timer >= 0x3c) {
                 o->timer = 0;
-                p = D_800A60D0;
+                p = ((short*)&PLAYER.obj.w98);
                 if (*p < GAME.playerHealthDisplayed) {
                     playSFX(9);
-                    GAME.playerHealth = D_800A60D2 = ++*p;
+                    GAME.playerHealth = PLAYER.obj.w9a = ++*p;
                 }
             }
             break;

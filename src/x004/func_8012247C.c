@@ -1,12 +1,12 @@
 // FUNC 8012247c 1496 X004
 // MATCHING 8012247c 1496
+#include "player.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern char D_80077CF4[];
 extern B D_80130FD4[];
 extern A *D_80133B5C[];
-extern unsigned char D_800A603E;
 extern unsigned char D_800A60E4[];
 extern short D_1F80027E;
 extern unsigned short D_1F800282;
@@ -58,7 +58,7 @@ void func_8012247C(TObj *o)
         if (func_8011FDD4(o)) o->velV = 0;
         break;
     case 2:
-        D_800A603E = 2;
+        PLAYER.obj.state = 2;
         o->timer = 4;
         o->wac = 0x23;
         o->state++;

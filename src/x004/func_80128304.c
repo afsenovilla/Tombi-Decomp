@@ -1,13 +1,12 @@
 // FUNC 80128304 872 X004
 // MATCHING 80128304 872
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8013117C[];
 extern unsigned char D_8009C940, D_8009C93F, D_8009C942, D_8009C93E;
 extern unsigned char D_8009D138;
-extern short D_800A60EA;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void removeItemFromInventory(int, int);
@@ -23,9 +22,9 @@ void func_80128304(TObj *o)
     case 0:
         D_8009C940 = 0;
         removeItemFromInventory(0x94, D_8009D138);
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->state++;
@@ -91,13 +90,13 @@ void func_80128304(TObj *o)
         }
         break;
     case 15:
-        D_800A603C = 1;
+        PLAYER.obj.b04 = 1;
         D_8009C93F = 0;
         D_8009C942 = 0;
         D_8009C93E = 0;
-        D_800A60EA = 0;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.wb2 = 0;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->animFrame = 1;
         o->b68 = 0;
         o->step = 0;

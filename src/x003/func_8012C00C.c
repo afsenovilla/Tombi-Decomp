@@ -1,5 +1,6 @@
 // FUNC 8012c00c 1664 X003
 // MATCHING 8012c00c 1664
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,11 +9,9 @@ typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
 extern E12 D_80135DF0[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern unsigned char D_8009CDC5;
 extern unsigned char D_8009CDC5b; /* same byte as D_8009CDC5: second name makes chk() reload it (game reloads; volatile does not match) */
-extern short D_800A60EA[];
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
 extern void setEventStarted(int, int, int);
@@ -33,9 +32,9 @@ void func_8012C00C(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->animFrame = o->b68 & 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
@@ -171,10 +170,10 @@ void func_8012C00C(TObj *o)
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
         D_8009C93E[0] = 0;
-        D_800A60EA[0] = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         switch (X(o)->wc2) {
         case 0xf0:

@@ -1,10 +1,10 @@
 // FUNC 8012cdc0 544 X003
 // MATCHING 8012cdc0 544
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
 extern unsigned char D_8009C93F, D_8009C942;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009CF03;
 extern void *D_801399BC[];
 extern void *D_801399CC[];
@@ -37,17 +37,17 @@ void func_8012CDC0(TObj *o)
         if (D_8009CF03 == 3) {
             o->step++;
             o->state = 0;
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER.obj.b04 = 5;
+            PLAYER.obj.step = 0;
+            PLAYER.obj.state = 0;
             D_8009C93F = 1;
             D_8009C942 = 1;
             break;
         }
         if (o->b68 == 0) break;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->d90 = showMessageBoxDirect(6, 6, &v);
@@ -63,9 +63,9 @@ void func_8012CDC0(TObj *o)
         p->b04 = 3;
         o->b68 = 0;
         o->state = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 0;
         D_8009C942 = 0;
         setEventStarted(0xad, 0, 1);

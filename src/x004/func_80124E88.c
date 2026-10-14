@@ -1,15 +1,10 @@
 // FUNC 80124e88 960 X004
 // MATCHING 80124e88 960
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern Fix16 *D_800A6078;
-extern short D_800A604E;
-extern unsigned char D_800A6047;
-extern short D_800A6066;
-extern unsigned char D_800A6066A[]; /* byte view of D_800A6066 (debt) */
-extern int D_800A60C4[];
-extern unsigned char D_800A603E;
+extern unsigned char D_800A6066A[]; /* byte view of (*(short*)&PLAYER.obj.animFrame) (debt) */
 extern void *D_80134D38;
 
 void func_80124E88(TObj *o)
@@ -24,13 +19,13 @@ void func_80124E88(TObj *o)
             break;
         case 1:
             o->d88 = 0x10;
-            D_800A6078->p.whole = o->h->p.whole;
-            D_800A604E = o->y.p.whole - 10;
+            (*(Fix16 **)&PLAYER.obj.h)->p.whole = o->h->p.whole;
+            PLAYER.obj.y.p.whole = o->y.p.whole - 10;
             goto bf;
         case 2:
             o->d88 = -0x10;
         bf:
-            o->b0f = D_800A6047 + *(unsigned char *)&o->w7a;
+            o->b0f = PLAYER.obj.b0f + *(unsigned char *)&o->w7a;
             break;
         default:
             o->b6a = 0;
@@ -52,7 +47,7 @@ void func_80124E88(TObj *o)
         if (o->timer) o->velY -= o->velH;
         else o->velY += o->velH;
         o->d8c = ((o->velY >> 8) + o->d88) & 0xff;
-        D_800A60C4[0] = o->d8c;
+        ((int*)&PLAYER.obj.d8c)[0] = o->d8c;
         if (o->velH > 0) goto check;
         o->velH = 0;
         o->state++;
@@ -64,7 +59,7 @@ void func_80124E88(TObj *o)
         if (o->timer) o->velY += o->velH;
         else o->velY -= o->velH;
         o->d8c = ((o->velY >> 8) + o->d88) & 0xff;
-        D_800A60C4[0] = o->d8c;
+        ((int*)&PLAYER.obj.d8c)[0] = o->d8c;
         if (o->velH < 0x400) goto check;
         o->velH = 0x400;
         o->state--;
@@ -76,14 +71,14 @@ void func_80124E88(TObj *o)
         break;
     case 3:
         if (GAME.playerHealth == 0) {
-            k = &D_800A603E;
+            k = &PLAYER.obj.state;
             o->state = 6;
             *k = *k + 1;
             break;
         }
         if (o->subtype == 1) {
-            { unsigned char *q = &D_800A603E; *q = *q + 1; }
-            D_800A6066 = 1 - o->b6b;
+            { unsigned char *q = &PLAYER.obj.state; *q = *q + 1; }
+            (*(short*)&PLAYER.obj.animFrame) = 1 - o->b6b;
         }
         o->state++;
         break;

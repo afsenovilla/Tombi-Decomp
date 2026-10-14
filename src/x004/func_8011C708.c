@@ -1,11 +1,11 @@
 // FUNC 8011c708 392 X004
 // MATCHING 8011c708 392
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern short D_1F800172;
 extern short D_1F80016A;
 extern short D_1F800176;
-extern short *D_800A6078;
 extern void FUN_80018cf0(TObj *);
 extern void FUN_80018838(TObj *);
 
@@ -34,7 +34,7 @@ void func_8011C708(TObj *o)
         case 0:
             if (GAME.disableSelectMenu == 0 && GAME.selectedSection == 1) break;
             if (D_1F800172 == 0x32a) {
-                if (D_1F80016A < 0x92) D_800A6078[1] = 0x92;
+                if (D_1F80016A < 0x92) (*(short **)&PLAYER.obj.h)[1] = 0x92;
             }
             o->visible = 1;
             FUN_80018cf0(o);

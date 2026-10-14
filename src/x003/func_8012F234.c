@@ -1,8 +1,8 @@
 // FUNC 8012f234 380 X003
 // MATCHING 8012f234 380
+#include "player.h"
 #include "TOBJ.H"
 extern void *D_8013A70C[];
-extern unsigned char D_800A603E, D_800A60E4;
 extern void spawnItemNotification(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -39,8 +39,8 @@ void func_8012F234(TObj *o)
         break;
     case 2:
         o->state++;
-        D_800A603E = 2;
-        D_800A60E4 = 3;
+        PLAYER.obj.state = 2;
+        (*(unsigned char*)&PLAYER.obj.wac) = 3;
     case 3:
         o->velV += 0x20;
         if (o->velV > 0x300) o->velV = 0x300;

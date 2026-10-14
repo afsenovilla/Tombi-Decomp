@@ -1,5 +1,6 @@
 // FUNC 8012b66c 1612 X003
 // MATCHING 8012b66c 1612
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
@@ -7,11 +8,9 @@ extern AT D_80135DD8[];
 extern unsigned char D_8009CE5D;
 extern unsigned char D_8009CE58[]; /* debt: second name for D_8009CE5D so chk() re-reads it */
 extern unsigned char D_8009D0C8;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93E[];
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern short D_800A60EA;
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -46,9 +45,9 @@ void func_8012B66C(TObj *o)
             o->b68 = 0;
             goto reset;
         }
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->animFrame = o->b68 & 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
@@ -151,10 +150,10 @@ void func_8012B66C(TObj *o)
         D_8009C942[0] = 0;
         D_8009C93E[0] = 0;
         if (o->d88 == 0) {
-            D_800A60EA = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER.obj.wb2 = 0;
+            PLAYER.obj.b04 = 1;
+            PLAYER.obj.step = 0;
+            PLAYER.obj.state = 0;
         }
         o->b68 = 0;
         if (WC2(o) == 0xf0) {

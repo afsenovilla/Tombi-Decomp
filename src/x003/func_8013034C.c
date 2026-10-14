@@ -1,11 +1,11 @@
 // FUNC 8013034c 364 X003
 // MATCHING 8013034c 364
+#include "player.h"
 #include "TOBJ.H"
 
 extern void *D_8013A368[];
 extern void *D_8013A378[];
 extern unsigned char D_8009C93F[], D_8009C942[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -30,9 +30,9 @@ void func_8013034C(TObj *o)
         o->state++;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->d90 = showMessageBoxDirect(2, 0xe, &o->a);
         o->wac = 4;
         o->animFrame = o->b68 & 1;
@@ -45,9 +45,9 @@ void func_8013034C(TObj *o)
         p->b04 = 3;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 0;
         o->anim = D_8013A368[0];
         o->state = 0;

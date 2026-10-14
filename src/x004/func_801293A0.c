@@ -1,5 +1,6 @@
 // FUNC 801293a0 388 X004
 // MATCHING 801293a0 388
+#include "player.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0, b1, b2, b3;
@@ -10,7 +11,6 @@ typedef struct {
 extern Ent D_80131174[];
 extern int SPR_DATA[];
 extern unsigned char D_8009CE22;
-extern unsigned char D_800A6047[];
 extern void FUN_8001fe6c(TObj *);
 
 void func_801293A0(TObj *o)
@@ -30,7 +30,7 @@ void func_801293A0(TObj *o)
         o->b0a = 2;
         o->b68 = 0;
         o->category |= 0x80;
-        o->b0f = D_800A6047[0] + 5;
+        o->b0f = ((unsigned char*)&PLAYER.obj.b0f)[0] + 5;
     }
     o->b04++;
 }
