@@ -1,5 +1,6 @@
 // FUNC 8011bb0c 1228 X009
 // MATCHING 8011bb0c 1228
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P3;
 extern TObj PLAYER;
@@ -7,7 +8,6 @@ extern short D_800A604A;
 extern short D_800A604Ax[];
 extern unsigned char *D_8009C330;
 extern unsigned char D_8009CDAC;
-extern unsigned char D_8009C93F;
 extern signed char D_8009D2B0;
 extern short *D_800A6078[];
 extern P3 D_8012B26C[];
@@ -128,7 +128,7 @@ void func_8011BB0C(TObj *o)
                 pl->b04 = 1;
                 pl->step = 0;
                 pl->state = 0;
-                D_8009C93F = 0;
+                GVARS.b3f = 0;
                 o->step++;
             }
             break;

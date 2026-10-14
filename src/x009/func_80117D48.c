@@ -1,9 +1,8 @@
 // FUNC 80117d48 376 X009
 // MATCHING 80117d48 376
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_8009C948;
-extern int D_8009C94C;
 extern int func_80117EC0(TObj *, int);
 
 void func_80117D48(TObj *o)
@@ -28,8 +27,8 @@ void func_80117D48(TObj *o)
         func_80117EC0(o, 9);
         break;
     case 5:
-        D_8009C948 = func_80117EC0(o, 10);
-        D_8009C94C = func_80117EC0(o, 11);
+        (*(int*)&GVARS.p48) = func_80117EC0(o, 10);
+        (*(int*)&GVARS.p4c) = func_80117EC0(o, 11);
         func_80117EC0(o, 12);
         break;
     case 8:

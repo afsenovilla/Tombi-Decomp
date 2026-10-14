@@ -1,5 +1,6 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+#include "gvars.h"
 #include "player.h"
 #include "gamestate.h"
 typedef struct O {
@@ -12,7 +13,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93D, D_8009CFEE;
+extern unsigned char D_8009CFEE;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern unsigned int stepScrollReturnY(O *);
@@ -35,12 +36,12 @@ void func_80116278(O *o)
         }
         o->subtype = 0;
         o->step++;
-        D_8009C93D = 1;
+        GVARS.b3d = 1;
         if (GAME.selectedSection == 0 && GAME.selectedSpawnPoint == 5)
-            D_8009C93A = 1;
+            GVARS.b3a = 1;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         o->b3c = 0;
         syncObjectTargetY(o);

@@ -1,9 +1,9 @@
 // FUNC 8011b01c 908 X009
 // MATCHING 8011b01c 908
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char a, b, c; signed char d; } P4;
-extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009CFF8;
 extern signed char D_80011EB4[];
 extern P4 D_80011E5C[];
@@ -29,8 +29,8 @@ void func_8011B01C(TObj *o)
     switch (o->state) {
     case 0:
         t = 0;
-        if (D_8009C940 != 0) {
-            switch (D_8009C941) {
+        if (GVARS.b40 != 0) {
+            switch (GVARS.b41) {
             case 5:
             case 7:
             case 0xe:

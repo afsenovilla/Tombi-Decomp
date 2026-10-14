@@ -1,5 +1,6 @@
 // FUNC 801165a0 1584 X009
 // MATCHING 801165a0 1584
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct { short s0, s2; } S2;
 typedef struct O {
@@ -15,7 +16,7 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
-extern unsigned char D_8009C93A, D_8009C93C, D_8009CDC0, D_800A60DA;
+extern unsigned char D_8009CDC0, D_800A60DA;
 extern short D_800A457C;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
@@ -30,7 +31,7 @@ void func_801165A0(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009C93A) {
+        if (GVARS.b3a) {
             o->step++;
             o->state = 0;
             o->subtype = 0;
@@ -52,7 +53,7 @@ void func_801165A0(O *o)
                 case 0:
                     if (D_1F80016A < 0x348) {
                         o->state++;
-                        D_8009C93C = 0;
+                        GVARS.b3c = 0;
                         GAME.fadeScreenControl = 3;
                     }
                     if (o->p34->s2 < 0x3bc) o->p34->s2 = 0x3bc;
@@ -64,7 +65,7 @@ void func_801165A0(O *o)
                 case 2:
                     if (D_1F80016A < 0x276) {
                         o->state++;
-                        D_8009C93C = 0;
+                        GVARS.b3c = 0;
                         GAME.fadeScreenControl = 4;
                     }
                     if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;

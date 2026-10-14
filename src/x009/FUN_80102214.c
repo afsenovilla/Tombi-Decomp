@@ -1,5 +1,6 @@
 // FUNC 80102214 2036 X009
 // MATCHING 80102214 2036
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -12,7 +13,7 @@ extern unsigned short D_8009D670, D_8009D674;
 extern unsigned short D_1F8001FC, D_1F8001FE, D_1F8003C4;
 extern unsigned char D_1F8001D2;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
-extern unsigned char D_8009C93E, D_8009C93F, D_8009C938, D_8009F7F0;
+extern unsigned char D_8009F7F0;
 extern unsigned short D_8009D610;
 extern unsigned short D_8007A034, D_8007A036;
 extern unsigned short D_800A60FC;
@@ -62,7 +63,7 @@ void FUN_80102214(TObj *o)
     b0 = D_1F8001FC;
     b1 = D_1F8001FE;
     U8(o, 0xe2) = 0;
-    if (D_8009C93E) {
+    if (GVARS.b3e) {
         o->visible = 1;
         return;
     }
@@ -77,7 +78,7 @@ void FUN_80102214(TObj *o)
         U8(o, 0xd6) = b;
         U8(o, 0xd5) = c;
     }
-    if (D_8009C93F) {
+    if (GVARS.b3f) {
         *(volatile unsigned short *)&D_8009D670 = 0;
         D_1F8001FC = 0;
         D_8009D674 = 0;
@@ -121,7 +122,7 @@ void FUN_80102214(TObj *o)
         break;
     case 1:
         tp = t;
-        if (D_8009C938) {
+        if (GVARS.b38) {
             RESET(o);
             break;
         }
@@ -177,7 +178,7 @@ void FUN_80102214(TObj *o)
         break;
     case 5:
         tp = t;
-        if (D_8009C938) {
+        if (GVARS.b38) {
             RESET(o);
             break;
         }
@@ -190,7 +191,7 @@ void FUN_80102214(TObj *o)
         break;
     case 6:
         tp = t;
-        if (D_8009C938) {
+        if (GVARS.b38) {
             RESET(o);
             break;
         }

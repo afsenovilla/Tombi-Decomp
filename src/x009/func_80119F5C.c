@@ -1,5 +1,6 @@
 // FUNC 80119f5c 1356 X009
 // MATCHING 80119f5c 1356
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 #include "gametask.h"
@@ -25,7 +26,6 @@ extern unsigned char PLAYER[];
 extern int D_1F8000EC[], D_1F8000F0[], D_1F8000F4[];
 extern short D_1F800256;
 extern TObj **D_1F80026C;
-extern unsigned char D_8009C93C;
 extern void func_80119D2C(TObj *);
 extern void func_80119E4C(TObj *);
 
@@ -130,7 +130,7 @@ void func_80119F5C(TObj *o)
             o->step++;
             GAME.fadeScreenControl = 3;
             (*(short*)&GAME.nextArea) = 9;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             (*(short*)&GAME.nextSection) = 0;
             (*(short*)&GAME.nextSpawnPoint) = 2;
         }
