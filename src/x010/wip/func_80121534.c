@@ -1,5 +1,7 @@
 // FUNC 80121534 1120 X010
-/* score 91: whole function incl. csv piece 80121790. Box sums now go through the abs vars (as = box0+dx,
+/* score 83 (was 91): k pinned to a1 (register int k asm("$5")) and the angle test through a temp pinned to v0
+   fix the k copy. Pinning the short dx/dy/c or ac/as makes gcc extend them in place (worse, 109-160).
+   Earlier notes (score 91): whole function incl. csv piece 80121790. Box sums now go through the abs vars (as = box0+dx,
    ac = box0+dy) and abs is if/else: ang->s2 and box regs match. Left: global-alloc order of c/dy/dx (game
    c=s3 dy=s4 dx=s5; here dy=s3 dx=s4 c=s5), ac/as swapped (game: sum1 and abs(c) share a1, but with ac=sum1
    as gets the higher priority: ac 6 refs/37 insns vs as 6/28), the k copy (game keeps k in a1 apart from q),
@@ -21,7 +23,7 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
     short py;
     short sel;
     short t;
-    int k;
+    register int k asm("$5");
     int K, KC;
     short r;
 
@@ -46,8 +48,8 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
                 else k = q - 0x400;
             }
         }
-        if ((unsigned)(((ang - k) & 0xfff) - 0x500) > 0x900)
-            return 1;
+        { register int u asm("$2"); u = ang - k; if ((unsigned)((u & 0xfff) - 0x500) > 0x900)
+            return 1; }
     case 0:
         c = (unsigned)(FUN_80063548(ang) * e->box0) >> 12;
         s = (unsigned)(FUN_8006347c(ang) * e->box0) >> 12;

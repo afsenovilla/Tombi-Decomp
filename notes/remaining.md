@@ -50,14 +50,14 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x006 | func_8011C758 | 8011C758 | 680 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD (see 8011C4AC) |
 | FAR | x011 | func_80116688 | 80116688 | 668 | 107 | src/x011/wip/func_80116688.c (gcc-2.7.2-psx) | cases 0/2/4 tail cross-jump needs P in v0 and D in v1 |
 | FAR | x006 | func_8011DE64 | 8011DE64 | 628 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
-| FAR | x010 | func_80121534 | 80121534 | 604 | 91 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B (with 80121790); abs/box-sum regalloc |
+| FAR | x010 | func_80121534 | 80121534 | 604 | 83 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B (with 80121790); abs/box-sum regalloc |
 | FAR | x010 | func_8011E6B0 | 8011E6B0 | 564 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x004 | func_8011942C | 8011942C | 540 | 180 | src/x004/wip/func_8011942C.c (gcc-2.7.2-psx) | logic/layout match; a0 register pressure of o (p=o->da0 trick) |
 | FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x006 | func_8011CA00 | 8011CA00 | 536 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD (see 8011C4AC) |
 | FAR | x006 | func_8011DC4C | 8011DC4C | 536 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
-| FAR | x010 | func_80121790 | 80121790 | 516 | 91 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B wip (see 80121534) |
+| FAR | x010 | func_80121790 | 80121790 | 516 | 83 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B wip (see 80121534) |
 | FAR | x006 | func_8011D5F4 | 8011D5F4 | 492 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x004 | func_80118720 | 80118720 | 464 | 25 | src/x004/wip/func_80118720.c (gcc-2.7.2-psx) | only regalloc: y t1, -y t2, table base t3 (ours t2/t3 swapped) |
 | FAR | x006 | func_8011E1A4 | 8011E1A4 | 436 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
