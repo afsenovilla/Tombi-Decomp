@@ -1,12 +1,10 @@
 // FUNC 801176b0 1836 X006
 // MATCHING 801176b0 1836
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern TObj *D_8009C94C;
 extern char *TASK_C;
-extern unsigned char D_8009C958[];
-extern unsigned char D_8009C93A, D_8009CFCE, D_8009C93E, D_8009C942;
-extern unsigned char D_8009C93C, D_8009C938;
+extern unsigned char D_8009CFCE;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
 extern short D_1F80016A;
 extern int D_1F8002D0[];
@@ -29,7 +27,7 @@ extern void FUN_800187e4(TObj *);
 
 void func_801176B0(TObj *o)
 {
-    TObj *pl = D_8009C94C;
+    TObj *pl = (*(TObj **)&GVARS.p4c);
     char *p;
     unsigned short a, b, k;
     unsigned char *c;
@@ -47,19 +45,19 @@ void func_801176B0(TObj *o)
         o->d3c = D_1F8002D0[0];
         o->anim = D_80122FB0;
         AnimLoadDuration(o);
-        D_8009C93E = 1;
-        D_8009C958[0] = 1;
+        GVARS.b3e = 1;
+        ((unsigned char*)&GVARS.b58)[0] = 1;
         o->d30 = FUN_8001e4f0(0xfd);
         break;
     case 1:
         FUN_80020078(o, 0xa0);
         switch (o->step) {
         case 0:
-            if (D_8009C93A == 0)
+            if (GVARS.b3a == 0)
                 break;
             if (D_1F80016A < 0x177)
                 break;
-            D_8009C958[0] = 0;
+            ((unsigned char*)&GVARS.b58)[0] = 0;
             queueSfxKeyOff(o->d30);
             FUN_8001e4f0(0xfe);
             o->timer = 0x1e;
@@ -126,7 +124,7 @@ void func_801176B0(TObj *o)
             }
             break;
         case 12:
-            D_8009C958[0] = 4;
+            ((unsigned char*)&GVARS.b58)[0] = 4;
             o->timer = 0x14;
             o->step++;
             break;
@@ -151,7 +149,7 @@ void func_801176B0(TObj *o)
                 o->b04 = 3;
                 break;
             }
-            if (D_8009C942 != 1)
+            if (GVARS.b42 != 1)
                 break;
             queueSfxKeyOff(o->d30);
             FUN_8001e4f0(0xfe);
@@ -193,7 +191,7 @@ void func_801176B0(TObj *o)
                 (*(short*)&GAME.nextSection) = 4;
                 (*(short*)&GAME.nextSpawnPoint) = 1;
                 (*(short*)&GAME.nextArea) = 0;
-                D_8009C93C = 0;
+                GVARS.b3c = 0;
                 GAME.fadeScreenControl = 3;
             }
             break;
@@ -206,7 +204,7 @@ void func_801176B0(TObj *o)
             break;
         case 6:
             FUN_8001f110(1);
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
             break;
@@ -241,7 +239,7 @@ void func_801176B0(TObj *o)
         case 9:
             if (--o->timer != -1)
                 break;
-            D_8009C938 = 2;
+            GVARS.b38 = 2;
             break;
         }
         break;

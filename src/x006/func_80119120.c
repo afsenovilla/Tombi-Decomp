@@ -1,5 +1,6 @@
 // FUNC 80119120 1500 X006
 // MATCHING 80119120 1500
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -16,7 +17,6 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern TObj *D_8009C950;
 extern volatile unsigned short D_8009D670[];
 extern char D_8011FEA0[], D_8011F3F8[];
 extern void *D_801229D4[], *D_801229D8[], *D_801229A8[];
@@ -79,7 +79,7 @@ static __inline__ void pos(TObj *o)
 
 void func_80119120(TObj *o)
 {
-    TObj *p = D_8009C950;
+    TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t;
     unsigned short y;
     short lim;

@@ -1,3 +1,4 @@
+#include "gvars.h"
 /* Debt: nested do{}while(0) around the clamp (loop-weighted refs so cnt outranks offs in global alloc) and the dead `i = n` at the end (n must outlive e: cse's canonical reg of a copy pair is the longer-lived one, so the clamp compare reads n like the game instead of e). */
 // MATCHING 801167a0 540
 // FUNC 801167a0 540 X006
@@ -12,7 +13,6 @@ typedef struct {
     unsigned char b165;
 } L801167A0;
 
-extern unsigned int D_8009C948;
 extern unsigned char D_8011EFDC[];
 
 void func_801167A0(L801167A0 *l, unsigned char *bank)
@@ -23,7 +23,7 @@ void func_801167A0(L801167A0 *l, unsigned char *bank)
     short i, e, n;
 
     if (GAME.selectedSection != 0) return;
-    t = D_8009C948;
+    t = (*(unsigned int*)&GVARS.p48);
     if (t - 0xf16 < 0x709) {
         for (i = 4; i < 9; i++) {
             l->list[l->n] = bank + offs[i];

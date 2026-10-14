@@ -1,12 +1,12 @@
 // FUNC 801165bc 424 X006
 // MATCHING 801165bc 424
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 typedef void (*Fn)(TObj *);
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A;
 extern short D_1F80016A, D_1F80016E;
 extern void FUN_80027810(TObj *);
 extern int tryStartItemInteraction(TObj *, int, unsigned char);
@@ -16,7 +16,7 @@ void func_801165BC(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C93A) {
+        if (GVARS.b3a) {
             o->step++;
             o->subtype = 0;
         }

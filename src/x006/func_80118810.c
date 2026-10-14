@@ -1,5 +1,6 @@
 // FUNC 80118810 1116 X006
 // MATCHING 80118810 1116
+#include "gvars.h"
 
 typedef struct {
     short a;     /* 0xb4 */
@@ -25,7 +26,6 @@ typedef struct {
     short wd0;                /* 0xd0 */
 } O;
 
-extern unsigned char D_8009C93E, D_8009C958;
 extern volatile unsigned short D_8009D670[];
 extern void playSFX(int);
 extern void FUN_80025f40(int, int, int, int);
@@ -35,8 +35,8 @@ void func_80118810(O *o)
     Sub *s = &o->sub;
     int t;
 
-    if (D_8009C93E) {
-        switch (D_8009C958) {
+    if (GVARS.b3e) {
+        switch (GVARS.b58) {
         case 0:
             s->b = 0;
             break;
@@ -50,12 +50,12 @@ void func_80118810(O *o)
         case 4:
             s->b = 0;
             s->ca = 1;
-            D_8009C93E = 0;
+            GVARS.b3e = 0;
             playSFX(0xfc);
             break;
         case 5:
             s->b = 0x200;
-            D_8009C93E = 0;
+            GVARS.b3e = 0;
             playSFX(0xfc);
             break;
         }

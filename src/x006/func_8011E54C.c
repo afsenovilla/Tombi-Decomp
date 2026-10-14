@@ -1,11 +1,10 @@
 // FUNC 8011e54c 1668 X006
 // MATCHING 8011e54c 1668
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D0FB, D_8009D0FC, D_8009D0FD;
 extern unsigned char D_8009D0A4[], SCRIPT_FLAGS[];
-extern unsigned char D_8009C93A;
-extern unsigned char D_8009C93F;
 extern void *D_1F8002D4;
 extern void *D_80122C14[], *D_80122C18[], *D_80122C1C[];
 extern char D_80077CDC[];
@@ -93,7 +92,7 @@ void func_8011E54C(TObj *o)
                 o->animFrame = 1;
                 o->step++;
             case 1:
-                if (D_8009C93A != 1) break;
+                if (GVARS.b3a != 1) break;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -212,7 +211,7 @@ void func_8011E54C(TObj *o)
             PLAYER.obj.b04 = 5;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;
-            D_8009C93F = 1;
+            GVARS.b3f = 1;
             goto next;
             break;
         case 14:
@@ -220,7 +219,7 @@ void func_8011E54C(TObj *o)
             PLAYER.obj.b04 = 1;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;
-            D_8009C93F = 0;
+            GVARS.b3f = 0;
         next:
             o->wb6++;
             break;

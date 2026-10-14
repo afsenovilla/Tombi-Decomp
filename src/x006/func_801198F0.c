@@ -1,5 +1,6 @@
 // FUNC 801198f0 3660 X006
 // MATCHING 801198f0 3660
+#include "gvars.h"
 /* Real start 801198F0 (3660 B) covers csv pieces 8011A0B4 and 8011A448. Case 2 clamp written as `if (r <= d) y += r - d` (leaves the game's dead copy of y). */
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -21,7 +22,6 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern TObj *D_8009C950;
 extern int D_800A4550[];
 extern short D_800A457E;
 extern volatile unsigned short D_8009D670[];
@@ -33,9 +33,7 @@ extern short D_1F8000E2, D_1F8000E6, D_1F8000EA, D_1F8000EE[];
 extern int D_1F8000EC[], D_1F800190, D_1F8000F4;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172;
 extern unsigned short D_1F8001FC, D_1F8003C6;
-extern unsigned char D_8009C93A[], D_8009C93E, D_8009C93F[], D_8009C942;
 extern short D_8009CFE2;
-extern int D_8009C948;
 extern int Rand(void);
 extern int rsin(int);
 extern int rcos(int);
@@ -141,7 +139,7 @@ static __inline__ void turn4(int *p, int target)
 void func_801198F0(TObj *o)
 {
     int *g = D_800A4550;
-    TObj *p = D_8009C950;
+    TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t = SUB(o);
     E *e;
     unsigned short y;
@@ -186,7 +184,7 @@ void func_801198F0(TObj *o)
         t->ca = 0;
         D_8009CFE2 = 0;
         t->c4 += t->div;
-        D_8009C93A[0] = 1;
+        ((unsigned char*)&GVARS.b3a)[0] = 1;
         p->anim = D_801229A8[0];
         AnimLoadDuration(p);
         o->w7a = 0;
@@ -195,7 +193,7 @@ void func_801198F0(TObj *o)
         pos(o);
         func_8011866C(o);
         if (o->b69) {
-            if (D_8009C93E == 0 && t->cc == 0 && (D_1F8001FC & D_1F8003C6)) {
+            if (GVARS.b3e == 0 && t->cc == 0 && (D_1F8001FC & D_1F8003C6)) {
                 short vv = -0x300;
                 p->anim = D_801229CC[0];
                 AnimLoadDuration(p);
@@ -287,8 +285,8 @@ void func_801198F0(TObj *o)
             t->b -= 0xe;
             if (t->b < 0) {
                 t->b = 0;
-                D_8009C93F[0] = 1;
-                D_8009C942 = 1;
+                ((unsigned char*)&GVARS.b3f)[0] = 1;
+                GVARS.b42 = 1;
                 o->b04 = 2;
                 o->step = 0;
             }
@@ -308,7 +306,7 @@ void func_801198F0(TObj *o)
     if (o->b69) o->d8c = turn(o->d8c, (unsigned short)t->ba);
     o->d88 = turn(o->d88, 0x1000 - (unsigned short)t->ang);
     if (o->animTimer < 0xc1) {
-        D_8009C948 = t->c4 >> 8;
+        (*(int*)&GVARS.p48) = t->c4 >> 8;
         turn4(g, (0x1000 - o->d88) & 0xfff);
     }
 }
