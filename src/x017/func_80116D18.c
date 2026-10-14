@@ -1,11 +1,11 @@
 // FUNC 80116d18 1208 X017
 // MATCHING 80116d18 1208
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern void *D_1F8002D4;
 extern unsigned short D_1F800176[], D_1F800186[];
-extern unsigned char D_8009CFD6[], D_8009CDF1;
 extern void *D_8011C12C[], *D_8011C134[], *D_8011C138[], *D_8011C13C[], *D_8011C140[];
 extern void *D_8011C148, *D_8011C14C, *D_8011C150[], *D_8011C154[], *D_8011C158[];
 extern void *D_8011C160, *D_8011C164[], *D_8011C168[], *D_8011C170[], *D_8011C174, *D_8011C178, *D_8011C17C;
@@ -32,7 +32,7 @@ void func_80116D18(TObj *o)
             o->w1e = 6;
             o->b.p.whole = 0xc8;
             o->b0f = 2;
-            if (D_8009CFD6[0]) o->anim = D_8011C134[0];
+            if (((unsigned char*)&GCD.bcfd6)[0]) o->anim = D_8011C134[0];
             else o->anim = D_8011C12C[0];
             break;
         case 1:
@@ -138,7 +138,7 @@ void func_80116D18(TObj *o)
         if (GAME.selectedSection == 5) {
             switch (o->step) {
             case 0:
-                if (D_8009CDF1 != 0xff) break;
+                if (GCD.bcdf1 != 0xff) break;
                 switch (o->subtype) {
                 case 6:
                     o->anim = D_8011C154[0];

@@ -1,10 +1,10 @@
 // FUNC 80117864 392 X017
 // MATCHING 80117864 392
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { void **p; int x, y; } AT;
-extern unsigned char D_8009CFD6;
 extern signed char D_8009D2B0;
 extern AT D_80119990[];
 extern void FUN_8001fe94(TObj *, int);
@@ -32,7 +32,7 @@ void func_80117864(TObj *o)
         FUN_8001fec0(o);
         if (--o->timer > 0) break;
         FUN_80026e0c(0x3c, 1);
-        D_8009CFD6 = 1;
+        GCD.bcfd6 = 1;
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0x31;
         PLAYER.obj.state = 0;

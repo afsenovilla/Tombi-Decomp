@@ -1,5 +1,6 @@
 // FUNC 80118ea0 2208 X017
 // MATCHING 80118ea0 2208
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,8 +8,6 @@ typedef struct { char c[12]; } B12;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
-extern unsigned char D_8009CE3A;
-extern unsigned char D_8009CDF1;
 extern unsigned char *D_8009C330;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -35,7 +34,7 @@ void func_80118EA0(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CE3A != 0) break;
+        if (GCD.bce3a != 0) break;
         if (GVARS.b3a == 0) break;
         GVARS.b3f = 1;
         GVARS.b42 = 1;
@@ -121,7 +120,7 @@ void func_80118EA0(TObj *o)
     case 12:
         GAME.fadeScreenControl = 4;
         startAreaBgm();
-        D_8009CDF1 = 0xff;
+        GCD.bcdf1 = 0xff;
         o->state++;
     case 13:
         if (GAME.fadeScreenControl != 0) break;

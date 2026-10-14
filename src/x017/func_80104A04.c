@@ -1,5 +1,6 @@
 // FUNC 80104a04 724 X017
 // MATCHING 80104a04 724
+#include "spad.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; } G;
 extern G *D_8009C330;
 extern int D_8009D2E8;
-extern unsigned short D_1F8003C4;
 extern int D_8009F0EC;
 extern int D_8009F0EC_r;
 extern unsigned char D_801152E8[];
@@ -67,7 +67,7 @@ void func_80104A04(TObj *o)
             o->b9c = 2;
             o->wb2 = 0;
             D_8009C330->w20 = 0xe;
-            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4))
+            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 3;
@@ -82,7 +82,7 @@ void func_80104A04(TObj *o)
             o->b9c = 2;
             o->wb2 = 0;
             D_8009C330->w20 = 0xe;
-            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4))
+            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 3;

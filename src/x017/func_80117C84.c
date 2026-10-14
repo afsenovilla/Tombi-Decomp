@@ -1,5 +1,6 @@
 // FUNC 80117c84 536 X017
 // MATCHING 80117c84 536
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -9,15 +10,13 @@ extern void func_8011750C(TObj *);
 extern void func_80117864(TObj *);
 extern void func_801179EC(TObj *);
 extern void setEventComplete(int, int);
-extern unsigned char D_8009CE0A;
-extern unsigned char D_8009CFD6;
 
 void func_80117C84(TObj *o)
 {
     switch (o->step) {
     case 0:
         if (GVARS.b40 != 0) {
-            if (GVARS.b41 == 0x3c && D_8009CE0A == 1) {
+            if (GVARS.b41 == 0x3c && GCD.bce0a == 1) {
                 o->step = 3;
                 o->state = 0;
             }
@@ -27,8 +26,8 @@ void func_80117C84(TObj *o)
                 o->step = 5;
                 o->state = 0;
             }
-            if (D_8009CE0A != 0xff) {
-                if (D_8009CFD6 == 1) o->step = 4;
+            if (GCD.bce0a != 0xff) {
+                if (GCD.bcfd6 == 1) o->step = 4;
                 else o->step = 1;
                 o->state = 0;
             }
@@ -60,7 +59,7 @@ void func_80117C84(TObj *o)
             break;
         case 1:
             if (--o->timer <= 0) {
-                D_8009CFD6 = 1;
+                GCD.bcfd6 = 1;
                 PLAYER.obj.b04 = 1;
                 PLAYER.obj.step = 0x20;
                 PLAYER.obj.state = 0;

@@ -1,5 +1,6 @@
 // FUNC 8011611c 1136 X017
 // MATCHING 8011611c 1136
+#include "gcd.h"
 #include "gvars.h"
 /* The csv entry 80115F24 starts with 126 data words (jump tables of other functions); the code starts at
    8011611C and covers the csv pieces 80116258 and 801162B8 too. */
@@ -31,7 +32,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009D001[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
@@ -55,8 +55,8 @@ void func_8011611C(O *o)
         switch (GAME.selectedSection) {
         case 1:
             if (D_1F800172 >= 0xb5) {
-                if (D_8009D001[0] == 0) {
-                    D_8009D001[0] = 1;
+                if (((unsigned char*)&GCD.bd001)[0] == 0) {
+                    ((unsigned char*)&GCD.bd001)[0] = 1;
                     p->b04 = 5;
                     p->step = 0x41;
                     p->visible = 0;

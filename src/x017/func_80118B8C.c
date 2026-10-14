@@ -1,8 +1,8 @@
 // FUNC 80118b8c 224 X017
 // MATCHING 80118b8c 224
+#include "gcd.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned char D_8009CFD6;
 extern TObj *D_8009C330;
 extern void func_8011890C(TObj *);
 extern void FUN_80018980(TObj *);
@@ -15,7 +15,7 @@ void func_80118B8C(TObj *o)
         o->b04++;
         break;
     case 1:
-        if ((unsigned short)(PLAYER.h->p.whole - 0x100) < 0x90 && D_8009CFD6 == 0)
+        if ((unsigned short)(PLAYER.h->p.whole - 0x100) < 0x90 && GCD.bcfd6 == 0)
             *((unsigned char *)D_8009C330 + 0x1e) = 0;
         break;
     case 2:
