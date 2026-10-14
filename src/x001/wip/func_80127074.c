@@ -1,5 +1,13 @@
 // FUNC 80127074 1544 X001
 #include "spad.h"
+/* score 223 (opusS, was 272): no c/s copies of cx/cy (cx used directly for the sign test and wb8, as the game does
+   with s5); abs block in sibling order `ax = cx; ay = cy; if (ax < 0) ax = -ax; if (ay < 0) ay = -ay;` (game copies
+   both before the tests); `m = ax - m;` / `m = ay - m;` before the 0x1d/8/0x10 tests (game reuses m's s0);
+   greedy.py pins ax $4, ay $6, k $4 (289 -> 223). Left: box temps (game box0+dx sum in a0/a2, box1 in a3), t stored
+   to 16(sp) after the d test, quadrant base a0/v1, cx in s6 (game s5) and dx/fy/fx s-reg permutation, case 2/3
+   compares, `+4`/`+0x13`/`+0xb` sums go to a2/a0 in the game (a var assignment?), a0 = +-8 sign-extended in the game.
+   Tried: box0+dx into ax/ay first (266-270), int/ushort a0 (223-250), itbrute asm bumps (221, fy bump in case 1, not kept).
+   Previous: */
 /* score 272 (opusN, was 314; size 1544 = game): switch(t) written with case 1/2 first (`goto neg`) and case 0
    `if ((short)dx >= 0) goto pos;` (game tests t with beqz); m as `if ((short)dx < 0) m = -dx; else m = dx;` (m in s0
    directly, no sra temp reused by the mult); `if (m > ax) return 2` operand order. Tried: sabs() inline for m (308,
@@ -36,9 +44,15 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     register PL *p asm("$17") = p_;
     register TObj *e asm("$18") = e_;
     unsigned short dx, dy;
-    int cx, cy;
-    short ax, ay, m, k, a0, fy, fx;
-    short c, s;
+    int cx;
+    int cy;
+    register short ax asm("$4");
+    register short ay asm("$6");
+    short m;
+    register short k asm("$4");
+    short a0;
+    short fy;
+    short fx;
     int base, b; short r;
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
@@ -61,10 +75,9 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
         cy = (unsigned)(rsin(ang) * e->box0) >> 12;
         break;
     }
-    c = cx; s = cy;
     ax = cx;
-    if (ax < 0) ax = -ax;
     ay = cy;
+    if (ax < 0) ax = -ax;
     if (ay < 0) ay = -ay;
     k = ax < ay;
     if (ax == 0) k = 3;
@@ -93,11 +106,12 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     }
     if ((k & 1) == 0) {
         if ((unsigned short)(p->wea - (e->y.p.whole - fy) + 4) >= 9) return 0;
-        if ((unsigned short)(ax - m) >= 0x1d) return 0;
+        m = ax - m;
+        if ((unsigned short)m >= 0x1d) return 0;
         switch (t) {
         case 1:
         case 2:
-            if (c >= 0) goto pos;
+            if ((short)cx >= 0) goto pos;
             goto neg;
         case 0:
             if ((short)dx >= 0) goto pos;
@@ -109,8 +123,8 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
             break;
         }
         o->b9e = 9;
-        if (t == 0 && (short)dx <= 0) o->wb8 = -c;
-        else o->wb8 = c;
+        if (t == 0 && (short)dx <= 0) o->wb8 = -cx;
+        else o->wb8 = cx;
         o->wba = -fy + 0x10;
         o->velY = 0;
         e->velX = dx;
@@ -124,10 +138,12 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
         if (e->h->p.whole + fx < o->h->p.whole + a0) {
             if (o->b9e == 8) {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0x13) >= 0x24) return 0;
-                if ((unsigned short)(ay - m) < 8) return 0;
+                m = ay - m;
+                if ((unsigned short)m < 8) return 0;
             } else {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0xb) >= 0x14) return 0;
-                if ((unsigned short)(ay - m) < 0x10) return 0;
+                m = ay - m;
+                if ((unsigned short)m < 0x10) return 0;
             }
             r = fx + 8;
         } else {
@@ -136,7 +152,8 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
             } else {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 8) >= 0x14) return 0;
             }
-            if ((unsigned short)(ay - m) < 8) return 0;
+            m = ay - m;
+            if ((unsigned short)m < 8) return 0;
             r = fx - 8;
         }
         o->wba = dy;
