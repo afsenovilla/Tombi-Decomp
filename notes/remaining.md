@@ -24,7 +24,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | KEPT: pointer table (112 words) but func_80100788 (shared player step 0x47) jals it from X016 itself (80101634); step 0x47 is only set by X014 code, not provable dead |
 | DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | KEPT: 10 words of s16 offset pairs (anim data, pointed to from 8011EFDC) but func_80100788 step 0x25 jals it from X002 itself (801011BC); not provable dead |
 | NEAR | x001 | func_80127700 | 80127700 | 396 | 2 | src/x001/wip/func_80127700.c (gcc-2.7.2-psx) | one operand-order diff: addu v1,a0,v1 vs v1,v1,a0 (permuter 100k+ iters, ~250 forms tried) |
-| FAR | x004 | func_80125818 | 80125818 | 3148 | 222 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3136/3148 B, large, many diffs |
+| FAR | x004 | func_80125818 | 80125818 | 3148 | 204 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3156/3148 B; see header for case 4/5/10 leads; near() a0/v1 regs |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 352 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o vs giv2 priority tie (s0/s1 swap), case temps in wrong regs |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 516 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | first draft; o in s3 and rcos-before-rsin cross-jump in BLKB blocks, s0/s1 swap |
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 417 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | draft 1796/1820 B; unexplained 0x80 frame (inlined helper with arrays?), reg choice |

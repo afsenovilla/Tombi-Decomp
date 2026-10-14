@@ -1,11 +1,17 @@
 // FUNC 80125818 3148 X004
 #include "spad.h"
 #include "player.h"
-/* score 222 (draft, 3136 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
+/* score 204 (draft, 3156 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
    (used twice) and the per-case wbc tick. o35: case 4's k test is `switch (k) { case 0: ... case 1: ... }` (439->222).
-   Remaining: near() keeps its result in a0 and copies s to v1 (tried int/short/uchar s, dy types, result var,
-   assigning the call result: no gain); lbu substep scheduled after the li in several setanim+substep++ tails
-   (statement swaps break cross-jumping; plain vs do-while SETANIM per site: no gain); case 5/8/9 operand regs. */
+   opusG: case 5 selects p/q per branch and subtracts after the join, case 8 as -d + U16(whole) into t2 (222->204).
+   Structural leads that are right locally but raise the score until the size is fixed (ours is 4-8 B long):
+   - case 4: `if (k != 1) { if (k >= 2) break; if (k != 0) break; <case 0> } else { <case 1> }` gives the game's
+     beq 1 / slti 2 / bnez test exactly;
+   - case 5: `t = U16(o->wba) - q + p` keeps the subu after the join (only p/wba regs swapped);
+   - case 10: the player test is `if (d == pd) { dy = PY - U16(o->y); if (h-range && (u16)(dy + 0x30) < 0xf8) ... }`
+     (game computes dy before the h test; ours sinks the subu).
+   Remaining: near() keeps its result in a0 and copies s to v1 (tried nested inlines, result var: no gain);
+   lbu substep scheduled after the li in several setanim+substep++ tails. */
 #include "TOBJ.H"
 typedef struct { short x, y; } P2;
 typedef struct {
@@ -51,6 +57,10 @@ void func_80125818(TObj *o)
     P2 a, b;
     short d;
     int t;
+    int t2;
+    unsigned short p;
+    int q;
+    unsigned short u;
     short k;
 
     switch (o->substep) {
@@ -160,11 +170,14 @@ void func_80125818(TObj *o)
     case 5:
         if (o->animFrame) d = -0x20;
         else d = 0x20;
-        if ((*(short*)&SPAD.s1c8))
-            t = o->b.p.whole - o->d38;
-        else
-            t = o->a.p.whole - o->d30;
-        t += U16(o->wba);
+        if ((*(short*)&SPAD.s1c8)) {
+            q = o->d38;
+            p = o->b.p.whole;
+        } else {
+            q = o->d30;
+            p = o->a.p.whole;
+        }
+        t = p - q + U16(o->wba);
         if (--o->w22 == 0 || (unsigned short)t < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
             FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x28;
@@ -211,10 +224,11 @@ void func_80125818(TObj *o)
         if (o->animFrame) d = -0x20;
         else d = 0x20;
         if ((*(short*)&SPAD.s1c8))
-            t = o->b.p.whole - o->d38;
+            t2 = -o->d38 + U16(o->b.p.whole);
         else
-            t = o->a.p.whole - o->d30;
-        if ((unsigned short)(t + 4) < 8 || FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
+            t2 = -o->d30 + U16(o->a.p.whole);
+        u = t2 + 4;
+        if (u < 8 || FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x3c;
             o->wac = 1;
             SETANIM(D_801345B8)
