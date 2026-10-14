@@ -1,5 +1,8 @@
 // FUNC 801278c0 1820 X001
-/* score 86 (opusN, was 345): rebuilt from the x001/wip/func_801244A0.c top half (short dx/dy/cx/cy, ax/ay box temps,
+/* score 72 (opusN): cx int (srl result kept untruncated, game cx s3), tested `(short)cx < 0`, `dy * (short)cx`;
+   this fixes kx s5/cx s3 but the s3/s4 cx/dy swap and dx s5/s6 remain; `/ (short)cx` in the s2 divide (as the game
+   does) drops it to s6 again (86).
+   score 86 (opusN, was 345): rebuilt from the x001/wip/func_801244A0.c top half (short dx/dy/cx/cy, ax/ay box temps,
    sabs() inline, q/r with the dead `ay = q;` at the end for the r copy). Reassociation fixed with negated forms:
    `-(s2 + 4) + e->y`, `-(s2 + -4) + e->y`, `e->h - -(s7 + 0xc)`, `e->h - -(s7 + -0xc)`; compares written with the
    (ky/kx) side first (`-(s2+4) + e->y > o->y + box3 - box2`, `e->h - -(s7 + -0xc) > o->h + (box1 - box0)`); last
@@ -27,7 +30,7 @@ static __inline__ short sabs(short x)
 
 int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
 {
-    short dx, dy, cx, cy, ax, ay, s2, s7;
+    short dx, dy, cy, ax, ay, s2, s7; int cx;
     short kind;
     unsigned int v;
     int q, r;
@@ -55,7 +58,7 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
     }
     ax = cx;
     ay = cy;
-    if (cx < 0) ax = -cx;
+    if ((short)cx < 0) ax = -cx;
     if (ay < 0) ay = -ay;
     kind = ax < ay;
     if (ax == 0) kind = 3;
@@ -67,7 +70,7 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
         break;
     case 1:
         if (ay < sabs(dy)) return 2;
-        s7 = dy * cx / -cy;
+        s7 = dy * (short)cx / -cy;
         break;
     case 2:
         s2 = 0;

@@ -1,5 +1,12 @@
 // FUNC 80127074 1544 X001
 #include "spad.h"
+/* score 272 (opusN, was 314; size 1544 = game): switch(t) written with case 1/2 first (`goto neg`) and case 0
+   `if ((short)dx >= 0) goto pos;` (game tests t with beqz); m as `if ((short)dx < 0) m = -dx; else m = dx;` (m in s0
+   directly, no sra temp reused by the mult); `if (m > ax) return 2` operand order. Tried: sabs() inline for m (308,
+   result copied v1 -> m), short dx/dy (no change), dropping c/s for cx (297, size 1532: case 2/3 cross-jumped),
+   ax asm barrier / c copy orders (no change). Left: the extra c copy in the abs block (game ax = cx in a0, negu a0,a0),
+   k/ax/ay regs (a1/a2/a3 vs a3/a0/a2), case 2/3 return-2 jumps to epilogue with li v0,2 in delay, fx/fy s-regs.
+   Previous: */
 /* score 314 (was 496; 1536 of 1544 B). Rewritten in the style of the sibling x001 func_801278C0 wip: dx/dy unsigned
    short tested as (short), cx/cy int products, ax/ay/m short with `ax = cx; if (ax < 0) ax = -ax;`, quadrant base copied
    to b, p/e pinned to $17/$18 through register copies of the parameters, r short. Left: t is kept in a stack slot in the
@@ -16,7 +23,12 @@ typedef struct {
 extern int rcos(int);
 extern int rsin(int);
 
-#define ABS(x) ((x) < 0 ? -(x) : (x))
+static __inline__ short sabs(short x)
+{
+    short r;
+    if (x < 0) r = -x; else r = x;
+    return r;
+}
 
 #define o (&p->t)
 int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
@@ -59,27 +71,23 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     else if (ay == 0) k = 2;
     switch (k) {
     case 0:
-        m = dx;
-        if ((short)dx < 0) m = -dx;
-        if (ax < m) return 2;
+        if ((short)dx < 0) m = -dx; else m = dx;
+        if (m > ax) return 2;
         fy = (short)dx * (short)cy / (short)cx;
         break;
     case 1:
-        m = dy;
-        if ((short)dy < 0) m = -dy;
-        if (ay < m) return 2;
+        if ((short)dy < 0) m = -dy; else m = dy;
+        if (m > ay) return 2;
         fx = (short)dy * (short)cx / -(short)cy;
         break;
     case 2:
-        m = dx;
-        if ((short)dx < 0) m = -dx;
-        if (ax < m) return 2;
+        if ((short)dx < 0) m = -dx; else m = dx;
+        if (m > ax) return 2;
         fy = 0;
         break;
     case 3:
-        m = dy;
-        if ((short)dy < 0) m = -dy;
-        if (ay < m) return 2;
+        if ((short)dy < 0) m = -dy; else m = dy;
+        if (m > ay) return 2;
         fx = 0;
         break;
     }
@@ -87,12 +95,12 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
         if ((unsigned short)(p->wea - (e->y.p.whole - fy) + 4) >= 9) return 0;
         if ((unsigned short)(ax - m) >= 0x1d) return 0;
         switch (t) {
-        case 0:
-            if ((short)dx < 0) goto neg;
-            goto pos;
         case 1:
         case 2:
             if (c >= 0) goto pos;
+            goto neg;
+        case 0:
+            if ((short)dx >= 0) goto pos;
         neg:
             if (o->animFrame & 1) return 0;
             break;
