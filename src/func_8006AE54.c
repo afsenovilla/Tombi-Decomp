@@ -8,5 +8,5 @@
 int func_8006AE54(padPort *port) {
     D_8009822C = D_800981C4(port);
     *port->response_3c = 0;
-    return func_80069CE8(port, -2);
+    return _padSioRW(port, -2);
 }

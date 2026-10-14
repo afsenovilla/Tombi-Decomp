@@ -127,18 +127,18 @@ void bzero(void*, int);
 
 /* PAL function names (address-named, see notes/names_main0.csv). */
 int func_80069610(void);                        /* vsync handler (US func_80069058) */
-void FUN_800697b4(void);                        /* _padStartCom */
-int func_800698C4(padPort*);                    /* _padInitSioMode */
+void _padStartCom(void);                        /* _padStartCom */
+int _padInitSioMode(padPort*);                    /* _padInitSioMode */
 void FUN_80069bf8(padPort*);                    /* one command step */
-int func_80069CE8(padPort*, int);               /* _padSioRW */
+int _padSioRW(padPort*, int);               /* _padSioRW */
 int func_80069EF8(padPort*, int);               /* byte exchange with ack wait */
-int func_8006A170(void);                        /* _padClrIntSio0 */
+int _padClrIntSio0(void);                        /* _padClrIntSio0 */
 void func_8006A200(void);                       /* wait SIO tx ready */
 void func_8006A670(padPort*);                   /* per-step handlers stored in fn_14 / fn_18 */
 int func_8006A718(padPort*);
 void func_8006ACF4(padPort*);
 int func_8006AD48(padPort*);
-void FUN_8006957c(void);                        /* _padSetVsyncParam */
+void _padSetVsyncParam(void);                        /* _padSetVsyncParam */
 void FUN_8006bac4(void);                        /* _padInitDirSeq */
 int func_8006B62C(int);                         /* completion (D_800981AC) */
 void func_8006B5C4(padPort*);                   /* reset object (D_800981B0) */
@@ -147,8 +147,8 @@ void func_8006B7EC(padPort*);                   /* actuator map (D_800981B8) */
 int func_8006BA68(padPort*);                    /* channel of object (D_800981BC) */
 padPort* func_8006BAA0(int);                    /* object of channel (D_800981C0) */
 void FUN_8006b720(padPort*);                    /* swap command (D_800981D0) */
-void FUN_8006bf84(int);                         /* setRC2wait */
-int FUN_8006bfa4(void);                         /* chkRC2wait */
+void setRC2wait(int);                         /* setRC2wait */
+int chkRC2wait(void);                         /* chkRC2wait */
 
 /* State. */
 extern int (*D_800981AC)(int);                  /* DMA/transfer completion */

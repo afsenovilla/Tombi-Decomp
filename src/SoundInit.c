@@ -3,7 +3,7 @@
 #include "globals.h"
 typedef struct { int mask; short pad0; short pad1; short mvl, mvr; short pad2[4]; short cdvl, cdvr; short pad3[2]; int cdmix; } SC;
 extern void SoundShutdown(void);
-extern void FUN_8006c544(void);
+extern void SsInitHot(void);
 extern void FUN_800702c0(void *, int, int);
 extern void FUN_800704a0(int);
 extern void FUN_800745a8(int);
@@ -26,7 +26,7 @@ void SoundInit(void)
     short *q, *p;
     if (SOUND_INITIALIZED != 0)
         SoundShutdown();
-    FUN_8006c544();
+    SsInitHot();
     FUN_800702c0(DAT_800a2270, 4, 1);
     FUN_800704a0(1);
     FUN_800745a8(0);

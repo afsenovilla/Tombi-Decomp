@@ -9,9 +9,9 @@ extern unsigned char DAT_8009d614b;
 extern unsigned char DAT_8009d615;
 extern unsigned char DAT_8009d616;
 extern unsigned char DAT_8009d617;
-extern void FUN_80069410();
-extern int FUN_80069050(int);
-extern void FUN_80069390(int, void *);
+extern void PadSetAct();
+extern int PadGetState(int);
+extern void PadSetActAlign(int, void *);
 
 void FUN_80026000(void)
 {
@@ -26,14 +26,14 @@ void FUN_80026000(void)
         if (DAT_8009d614 != 0) {
             DAT_8009d614b = 0;
             DAT_8009d615 = 0;
-            FUN_80069410(0, p + 4, 2);
+            PadSetAct(0, p + 4, 2);
         }
-        if (FUN_80069050(0) == 6)
-            FUN_80069390(0, &buf);
+        if (PadGetState(0) == 6)
+            PadSetActAlign(0, &buf);
         break;
     case 1:
-        if (FUN_80069050(0) == 6) {
-            FUN_80069390(0, &buf);
+        if (PadGetState(0) == 6) {
+            PadSetActAlign(0, &buf);
             DAT_8009d616 = 2;
         }
         break;
@@ -43,14 +43,14 @@ void FUN_80026000(void)
         } else {
             DAT_8009d614b = 0;
             DAT_8009d615 = 0;
-            FUN_80069410(0, p + 4, 2);
+            PadSetAct(0, p + 4, 2);
             DAT_8009d617 = 0;
             DAT_8009d616 = 3;
         }
         break;
     case 3:
-        if (FUN_80069050(0) == 6) {
-            FUN_80069390(0, &buf);
+        if (PadGetState(0) == 6) {
+            PadSetActAlign(0, &buf);
             DAT_8009d616 = 0;
         }
         break;

@@ -9,7 +9,7 @@ extern unsigned char DAT_8009d614b;
 extern unsigned char DAT_8009d615;
 extern unsigned char DAT_8009d616;
 extern unsigned char DAT_8009d617;
-extern void FUN_80069410(unsigned char, void *, int, int);
+extern void PadSetAct(unsigned char, void *, int, int);
 
 void FUN_80025f40(int a, int b, int c, int d)
 {
@@ -20,7 +20,7 @@ void FUN_80025f40(int a, int b, int c, int d)
     if (DAT_8009d612 != 0 && DAT_8009d616 == 0 && DAT_8009d614 == 0) {
         DAT_8009d615 = c;
         DAT_8009d614b = b;
-        FUN_80069410(a, p + 4, 2, d);
+        PadSetAct(a, p + 4, 2, d);
         DAT_8009d617 = d;
         DAT_8009d616 = 1;
     }

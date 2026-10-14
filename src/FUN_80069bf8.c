@@ -18,8 +18,8 @@ void FUN_80069bf8(padPort* port)
     result = next();
     if (result >= 0) {
         if (D_800981F0 != 0 && (D_800981F0 != 3 || *port->response_3c != 0x80)) {
-            FUN_8006bf84(60);
-            if (!func_8006A170()) {
+            setRC2wait(60);
+            if (!_padClrIntSio0()) {
                 D_800981AC(-3);
             }
         }

@@ -17,7 +17,7 @@ extern int D_800981F0;
 extern int D_800981EC;
 extern int D_800981F4;
 extern void (*D_800981AC)(int);
-int func_800698C4(E *e);
+int _padInitSioMode(E *e);
 void func_80069BF8(E *e);
 int func_80069610(void)
 {
@@ -33,7 +33,7 @@ int func_80069610(void)
     if (D_800981E4 != 0 && D_800981FC <= D_80098200) {
         D_800981F0 = 0;
         D_800981EC = D_800981FC;
-        if (func_800698C4(&D_800981E0[D_800981FC]) == 0) D_800981AC(0xffff);
+        if (_padInitSioMode(&D_800981E0[D_800981FC]) == 0) D_800981AC(0xffff);
         D_800981F4 = 0;
         while (D_800981EC <= D_80098200) {
             func_80069BF8(&D_800981E0[D_800981EC]);

@@ -465,6 +465,7 @@ address,name,confidence,comment
 8005d21c,_card_clear,alta,"Psy-Q (psx_tomba, por bytes)"
 8005d274,InitCARD,alta,Psy-Q
 8005d2c8,StartCARD,alta,Psy-Q
+8005d300,StopCARD,alta,names batch (see notes/names.md)
 8005d590,DecDCTReset,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8005d5c8,DecDCTGetEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8005d654,DecDCTPutEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -699,20 +700,40 @@ address,name,confidence,comment
 80068f50,DMA_memclr,alta,"Psy-Q (psx_tomba, por bytes)"
 80068f7c,SetVideoMode,alta,Psy-Q
 80068f94,GetVideoMode,alta,devuelve la variable que escribe SetVideoMode
-80068fc4,PadInit,media,psx_tomba (alineado de direcciones)
-80068fe4,PadInit,alta,"Psy-Q (psx_tomba #21, por bytes)"
-80069004,PadChkMtap,alta,"Psy-Q (psx_tomba #21, por bytes)"
-80069050,StartPAD,media,psx_tomba (alineado de direcciones)
-8006911c,StopPAD,media,psx_tomba (alineado de direcciones)
-80069880,StopPAD,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006a170,_padClrIntSio0,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006a270,_padSendAtLoadInfo,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006bfa4,_SsInit,media,psx_tomba (alineado de direcciones)
+80068fa4,PadChkVsync,alta,names batch (see notes/names.md)
+80068fc4,PadStartCom,alta,names batch (see notes/names.md)
+80068fe4,PadStopCom,alta,names batch (see notes/names.md)
+80069004,PadChkMtap,alta,names batch (see notes/names.md)
+80069050,PadGetState,alta,names batch (see notes/names.md)
+8006911c,PadInfoMode,alta,names batch (see notes/names.md)
+80069214,PadInfoAct,alta,names batch (see notes/names.md)
+800692e8,PadInfoComb,alta,names batch (see notes/names.md)
+80069390,PadSetActAlign,alta,names batch (see notes/names.md)
+800693c8,PadSetMainMode,alta,names batch (see notes/names.md)
+80069410,PadSetAct,alta,names batch (see notes/names.md)
+8006957c,_padSetVsyncParam,alta,names batch (see notes/names.md)
+800697a0,_padChkVsync,alta,names batch (see notes/names.md)
+800697b4,_padStartCom,alta,names batch (see notes/names.md)
+80069880,_padStopCom,alta,names batch (see notes/names.md)
+800698c4,_padInitSioMode,alta,names batch (see notes/names.md)
+80069ce8,_padSioRW,alta,names batch (see notes/names.md)
+8006a170,_padClrIntSio0,alta,names batch (see notes/names.md)
+8006a254,_padSetAct,alta,names batch (see notes/names.md)
+8006a270,_padSendAtLoadInfo,alta,names batch (see notes/names.md)
+8006a2f4,_padRecvAtLoadInfo,alta,names batch (see notes/names.md)
+8006a564,_padGetActSize,alta,names batch (see notes/names.md)
+8006a59c,_padLoadActInfo,alta,names batch (see notes/names.md)
+8006ab10,_padSetActAlign,alta,names batch (see notes/names.md)
+8006ac5c,_padSetMainMode,alta,names batch (see notes/names.md)
+8006b464,PadInitDirect,alta,names batch (see notes/names.md)
+8006bf84,setRC2wait,alta,names batch (see notes/names.md)
+8006bfa4,chkRC2wait,alta,names batch (see notes/names.md)
 8006c1d4,_SsClose,alta,"Psy-Q (psx_tomba, por bytes)"
 8006c350,SsSeqClose,alta,"Psy-Q (psx_tomba, por bytes)"
 8006c374,SsSepClose,alta,"Psy-Q (psx_tomba, por bytes)"
 8006c398,SsEnd,alta,"Psy-Q (psx_tomba, por bytes)"
 8006c45c,_SsInit,alta,"Psy-Q (psx_tomba, por bytes)"
+8006c544,SsInitHot,alta,names batch (see notes/names.md)
 8006c604,SsSeqOpen,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006d0ac,_SsContNrpn1,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d1e4,_SsContNrpn2,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -734,10 +755,10 @@ address,name,confidence,comment
 8006eef8,SsStart2,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006ef18,_SsTrapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006ef58,_SsSeqCalledTbyT_1per2,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006efa8,SetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006efa8,SetRCnt,alta,names batch (see notes/names.md)
 8006f044,GetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006f07c,StartRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8006f0e0,ResetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8006f07c,StartRCnt,alta,names batch (see notes/names.md)
+8006f0e0,ResetRCnt,alta,names batch (see notes/names.md)
 8006f118,SsSeqCalledTbyT,alta,"Psy-Q (psx_tomba, por bytes)"
 8006f38c,_SsSndCrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
 8006f66c,_SsSndDecrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -765,8 +786,8 @@ address,name,confidence,comment
 80071228,SsUtSetReverbType,alta,"Psy-Q (psx_tomba, por bytes)"
 800712cc,SsUtGetReverbType,alta,"Psy-Q (psx_tomba, por bytes)"
 800712dc,SsUtSetReverbFeedback,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8007131c,SsUtReverbOff,alta,"Psy-Q (psx_tomba #21, por bytes)"
-8007133c,SsUtReverbOn,alta,"Psy-Q (psx_tomba #21, por bytes)"
+8007131c,SsUtReverbOff,alta,names batch (see notes/names.md)
+8007133c,SsUtReverbOn,alta,names batch (see notes/names.md)
 8007135c,SsUtSetVagAtr,alta,"Psy-Q (psx_tomba, por bytes)"
 80071524,_SsVmDoAllocate,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80071738,_SsVmDamperOff,alta,Psy-Q
@@ -781,6 +802,8 @@ address,name,confidence,comment
 80073e10,_SsVmSeqKeyOff,alta,"Psy-Q (psx_tomba #21, por bytes)"
 800744e4,_SsVmVSetUp,alta,"Psy-Q (psx_tomba, por bytes)"
 800745a8,SsSetAutoKeyOffMode,alta,Psy-Q
+800745b8,SsSetMono,alta,names batch (see notes/names.md)
+800745cc,SsSetStereo,alta,names batch (see notes/names.md)
 800745dc,SsSetReservedVoice,alta,"Psy-Q (psx_tomba, por bytes)"
 8007460c,SsVabClose,alta,"Psy-Q (psx_tomba, por bytes)"
 80074690,SsVabFakeBody,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -788,6 +811,7 @@ address,name,confidence,comment
 80074730,SsVabOpenHeadSticky,alta,"Psy-Q (psx_tomba, por bytes)"
 80074760,SsVabFakeHead,alta,"Psy-Q (psx_tomba, por bytes)"
 80074790,SsVabOpenHeadWithMode,alta,"Psy-Q (psx_tomba, por bytes)"
+80074b6c,SpuInit,alta,names batch (see notes/names.md)
 80074b8c,_SpuInit,alta,"Psy-Q (psx_tomba, por bytes)"
 80074c84,SpuStart,alta,"Psy-Q (psx_tomba, por bytes)"
 80074f94,_spu_writeByIO,alta,"Psy-Q (psx_tomba #21, por bytes)"

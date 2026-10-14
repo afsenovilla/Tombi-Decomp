@@ -120,7 +120,7 @@ INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", func_80068E5C);
 
 INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", func_80068EAC);
 
-INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", func_80068FC4);
+INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", PadStartCom);
 
 int func_80068FF0(void);
 
@@ -132,7 +132,7 @@ INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", StartPAD);
 
 void StopPAD(void);
 
-INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", func_800692E8);
+INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", PadInfoComb);
 
 INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/vmode", func_800694FC);
 

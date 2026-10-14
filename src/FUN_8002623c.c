@@ -11,7 +11,7 @@ typedef struct {
 extern PadInfo DAT_8009d610[];
 extern unsigned char DAT_8009f7f0[];
 extern unsigned char DAT_8009f812[];
-extern void FUN_8006911c(int, int, int);
+extern void PadInfoMode(int, int, int);
 
 short FUN_8002623c(short port)
 {
@@ -24,14 +24,14 @@ short FUN_8002623c(short port)
     case 0:
         if (DAT_8009f7f0[0] != 0)
             return 0;
-        FUN_8006911c(0, 2, 0);
+        PadInfoMode(0, 2, 0);
         btn = ~*(unsigned short *)&DAT_8009f7f0[2];
         ty = (DAT_8009f7f0[1] >> 4) & 7;
         break;
     case 1:
         if (DAT_8009f812[0] != 0)
             return 0;
-        FUN_8006911c(1, 2, 0);
+        PadInfoMode(1, 2, 0);
         btn = ~*(unsigned short *)&DAT_8009f812[2];
         ty = (DAT_8009f812[1] >> 4) & 7;
         break;

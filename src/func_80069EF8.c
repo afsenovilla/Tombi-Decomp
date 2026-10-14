@@ -21,8 +21,8 @@ extern volatile unsigned short *D_80098210;
 extern int D_800981F0;
 extern unsigned int D_8009C33C;
 extern unsigned int D_800A0A18;
-extern void FUN_8006bf84(int);
-extern int FUN_8006bfa4(void);
+extern void setRC2wait(int);
+extern int chkRC2wait(void);
 
 int func_80069EF8(S *s, int c)
 {
@@ -38,7 +38,7 @@ int func_80069EF8(S *s, int c)
     q = D_80098210;
     __asm__ volatile("nop");
     do {} while (!(q[2] & 2));
-    FUN_8006bf84(400);
+    setRC2wait(400);
     r = *(volatile unsigned char *)D_80098210;
     if (s->n != 0 || (r >> 4) != 8) D_80098210[7] = v;
     else D_80098210[7] = 0x22;
@@ -55,8 +55,8 @@ int func_80069EF8(S *s, int c)
         }
     }
     if (s->e8 != 8 && D_800981F0 == 2) {
-        FUN_8006bf84(60);
-        while (FUN_8006bfa4() == 0);
+        setRC2wait(60);
+        while (chkRC2wait() == 0);
     }
     *(volatile unsigned char *)D_80098210 = c;
     if (D_800981F0 == 3 && r == 0x80) {
