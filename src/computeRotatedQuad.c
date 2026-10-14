@@ -2,7 +2,7 @@
 // MATCHING 80059f18 252
 extern int MulCos(int a, int b);
 extern int MulNegSinScaled(int a, int b);
-void func_80059F18(short *v, int ang, int r, int r2)
+void computeRotatedQuad(short *v, int ang, int r, int r2)
 {
     int a, b2;
     int h;

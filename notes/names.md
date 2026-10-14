@@ -70,3 +70,5 @@ One line per name: `address name (old file) - justification`.
 - `80038514 scriptOpLoopVar` (was func_80038514) - script op: decrement var, jump to 16-bit target while it stays positive, else skip 4 bytes
 - `800386f4 scriptOpCompareVar` (was func_800386F4) - script op: compares a var with a var or a 32-bit immediate and sets cmpFlag (0 eq, 1 lt, 2 gt)
 - `8003aedc scriptOpHealPlayer` (was func_8003AEDC) - script op: adds arg to player health up to the displayed max; arg0 = 1 if already full
+- `80059f18 computeRotatedQuad` (was func_80059F18) - builds 4 quad corner offsets from angle and half-width/length via MulCos/MulNegSinScaled (psx_tomba name, matches code)
+- `80048ffc objectsOverlap` (was FUN_80048ffc) - tests two objects for hit-box overlap on depth, x and y axes

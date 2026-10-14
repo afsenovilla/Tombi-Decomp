@@ -21,7 +21,7 @@ static __inline__ int Overlap(O *a, O *b)
     return (unsigned short)((a->y - b->y) + (a->box2 + b->box2)) <= a->box3 + b->box3;
 }
 
-int FUN_80048ffc(O *a, O *b)
+int objectsOverlap(O *a, O *b)
 {
     return Overlap(a, b);
 }

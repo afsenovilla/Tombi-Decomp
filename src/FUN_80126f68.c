@@ -9,13 +9,13 @@ typedef struct O {
     struct O *d90;
     struct O *d94;
 } O;
-extern short FUN_80048ffc();
+extern short objectsOverlap();
 extern short DAT_1f80019e;
 
 void FUN_80126f68(O *o, unsigned char *p)
 {
     O *a, *b;
-    if (FUN_80048ffc(o) != 0) {
+    if (objectsOverlap(o) != 0) {
         a = o->d90;
         b = o->d94;
         o->b6a = 1;

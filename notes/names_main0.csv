@@ -420,6 +420,7 @@ address,name,confidence,comment
 80045b28,applyObjectPush,alta,psx_tomba #21 (por bytes)
 80045b8c,callObjectInteraction,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80045d0c,dispatchObjectContact,alta,psx_tomba #21 (por bytes)
+80048ffc,objectsOverlap,alta,names batch (see notes/names.md)
 8004bb84,dispatchAreaUnlayeredHandler,alta,psx_tomba #21 (por bytes)
 8004c0dc,updateObjectsUnlayered,alta,psx_tomba (por bytes)
 8004c170,spawnUnlayeredObjectAndInit,alta,psx_tomba #21 (por bytes)
@@ -454,6 +455,7 @@ address,name,confidence,comment
 800591c0,drawMessageGlyphs,alta,name from psx_tomba (US)
 80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
 80059728,addTilePrim,alta,psx_tomba (por bytes)
+80059f18,computeRotatedQuad,alta,names batch (see notes/names.md)
 8005a108,spawnUnlayeredObjectAndInit,alta,name from psx_tomba (US)
 8005a148,spawnUnlayeredObject,alta,name from psx_tomba (US)
 8005a7a0,awardEventProgress,alta,names batch (see notes/names.md)
