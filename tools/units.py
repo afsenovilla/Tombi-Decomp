@@ -42,13 +42,19 @@ _BLOBS = {}
 # the overlay / MAIN0 (or a zero / flag constant), and the only jal that names them is a case of the area dispatchers
 # (FUN_800e9f74 and the one before it) for an area id that has no overlay or is another overlay's, never reached
 # while this overlay is loaded.  Verified per overlay; the same address is real code in other overlays (X005, X008,
-# X019 ...), which are not listed.  A row that starts with such a table has the table cut off (the code follows).
+# X019 ...), which are not listed.  Second batch (X000 80116258/801162B8, X001 8011658C, X003 80116D50, X005/X013
+# 801188FC, X005/X008 80117CAC): same checks; their jals are other areas' dispatcher cases, the MAIN0 pointers are slots of
+# other areas' tables.  NOT listed on purpose: X002 8011E688, X016 8011B170, X018 8011C758: the player-step code in
+# the overlay itself jals them (steps 0x25 / 0x47, step 0x48 with object kind 0xE).  A row that starts with such a table has the table cut off (the code follows).
 # Never counted as code: the ranges are subtracted from the csv rows (so a regenerated csv stays correct) and
 # tools/gen_symbols.py gives them no symbol (splat emits them as .word data).
 DATA = [
+    ("X000", 0x80116258, 96),
+    ("X000", 0x801162B8, 116),
     ("X001", 0x80115EC4, 96),
     ("X001", 0x80116258, 96),
     ("X001", 0x801162B8, 724),
+    ("X001", 0x8011658C, 52),
     ("X002", 0x80115EC4, 96),
     ("X002", 0x80116258, 96),
     ("X002", 0x801162B8, 160),
@@ -59,14 +65,18 @@ DATA = [
     ("X003", 0x8011658C, 916),
     ("X003", 0x80116920, 156),
     ("X003", 0x801169BC, 916),
+    ("X003", 0x80116D50, 548),
     ("X004", 0x80115EC4, 96),
     ("X004", 0x80115F24, 820),
     ("X004", 0x80116258, 96),
     ("X004", 0x801162B8, 724),
     ("X004", 0x8011658C, 472),
     ("X005", 0x80115EC4, 32),
+    ("X005", 0x80117CAC, 16),
+    ("X005", 0x801188FC, 20),
     ("X006", 0x80115EC4, 96),
     ("X006", 0x80115F24, 488),
+    ("X008", 0x80117CAC, 16),
     ("X008", 0x8011832C, 276),
     ("X009", 0x80115EC4, 96),
     ("X009", 0x80115F24, 820),
@@ -79,6 +89,7 @@ DATA = [
     ("X011", 0x80115F24, 156),
     ("X013", 0x80115EC4, 96),
     ("X013", 0x80115F24, 144),
+    ("X013", 0x801188FC, 20),
     ("X016", 0x80115EC4, 96),
     ("X016", 0x80115F24, 100),
     ("X017", 0x80115EC4, 96),

@@ -3,18 +3,18 @@
   "totals": {
     "lib": 99644,
     "named": 78468,
-    "unnamed": 447164,
+    "unnamed": 446952,
     "typed": 399676,
-    "game": 525632,
-    "n_game": 1037,
+    "game": 525420,
+    "n_game": 1035,
     "n_named": 271,
-    "n_unnamed": 766,
+    "n_unnamed": 764,
     "n_typed": 568,
     "n_lib": 908,
     "excluded": 479,
     "unnamed_typed": 381504
   },
-  "matching_bytes": 516748,
+  "matching_bytes": 519488,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
       "lib": 99604,
@@ -38,11 +38,11 @@
     "X000.BIN (overlay AREA00)": {
       "lib": 40,
       "named": 1036,
-      "unnamed": 296920,
+      "unnamed": 296708,
       "typed": 270384,
       "n_lib": 3,
       "n_named": 5,
-      "n_unnamed": 523,
+      "n_unnamed": 521,
       "n_typed": 380,
       "excluded": 0,
       "n_excluded": 0,
@@ -51,25 +51,25 @@
         2148433960,
         2148778232
       ],
-      "game": 297956,
-      "n_game": 528
+      "game": 297744,
+      "n_game": 526
     }
   },
   "overlays": {
     "X001": {
-      "game": 329360,
+      "game": 329308,
       "n": 600,
       "matched": 315160,
-      "n_matched": 587,
+      "n_matched": 588,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 13800,
-      "n_new": 12,
-      "uniq": 152404,
+      "new": 13748,
+      "n_new": 11,
+      "uniq": 152352,
       "uniq_matched": 138604,
       "n_uniq": 281,
-      "n_uniq_matched": 269
+      "n_uniq_matched": 270
     },
     "X002": {
       "game": 200304,
@@ -87,19 +87,19 @@
       "n_uniq_matched": 56
     },
     "X003": {
-      "game": 297780,
+      "game": 297232,
       "n": 582,
       "matched": 296832,
-      "n_matched": 580,
+      "n_matched": 581,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 548,
-      "n_new": 1,
-      "uniq": 119048,
+      "new": 0,
+      "n_new": 0,
+      "uniq": 118500,
       "uniq_matched": 118500,
       "n_uniq": 248,
-      "n_uniq_matched": 247
+      "n_uniq_matched": 248
     },
     "X004": {
       "game": 280208,
@@ -117,18 +117,18 @@
       "n_uniq_matched": 214
     },
     "X005": {
-      "game": 180952,
-      "n": 330,
+      "game": 180916,
+      "n": 328,
       "matched": 180516,
       "n_matched": 327,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 36,
-      "n_new": 2,
-      "uniq": 5840,
+      "new": 0,
+      "n_new": 0,
+      "uniq": 5804,
       "uniq_matched": 5804,
-      "n_uniq": 26,
+      "n_uniq": 24,
       "n_uniq_matched": 24
     },
     "X006": {
@@ -147,18 +147,18 @@
       "n_uniq_matched": 71
     },
     "X008": {
-      "game": 175020,
-      "n": 307,
+      "game": 175004,
+      "n": 306,
       "matched": 174604,
       "n_matched": 305,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 16,
-      "n_new": 1,
-      "uniq": 240,
+      "new": 0,
+      "n_new": 0,
+      "uniq": 224,
       "uniq_matched": 224,
-      "n_uniq": 6,
+      "n_uniq": 5,
       "n_uniq_matched": 5
     },
     "X009": {
@@ -207,18 +207,18 @@
       "n_uniq_matched": 47
     },
     "X013": {
-      "game": 182252,
-      "n": 328,
+      "game": 182232,
+      "n": 327,
       "matched": 181832,
       "n_matched": 326,
       "piece": 400,
       "x000": 0,
       "dup": 0,
-      "new": 20,
-      "n_new": 1,
-      "uniq": 7472,
+      "new": 0,
+      "n_new": 0,
+      "uniq": 7452,
       "uniq_matched": 7452,
-      "n_uniq": 27,
+      "n_uniq": 26,
       "n_uniq_matched": 26
     },
     "X014": {

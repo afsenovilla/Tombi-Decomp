@@ -13,19 +13,19 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Progress
 
 <!-- progress:start -->
-**Whole game: 96.30 % of the game's code matches byte for byte** (1277072 of 1326148 bytes).
+**Whole game: 96.57 % of the game's code matches byte for byte** (1281412 of 1326864 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 276808 B | 268224 B | 96.9 % `[#######################.]` |
-| X000.BIN: AREA00 + object code reused by all areas | 311060 B | 310736 B | 99.9 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 738280 B | 698112 B | 94.6 % `[#######################.]` |
-| **Whole game** | **1326148 B** | **1277072 B** | **96.30 %** `[#######################.]` |
+| MAIN0.EXE: engine, shared by every area | 278408 B | 272564 B | 97.9 % `[#######################.]` |
+| X000.BIN: AREA00 + object code reused by all areas | 310848 B | 310736 B | 100.0 % `[########################]` |
+| X001..X019.BIN: code specific to the other areas | 737608 B | 698112 B | 94.6 % `[#######################.]` |
+| **Whole game** | **1326864 B** | **1281412 B** | **96.57 %** `[#######################.]` |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99644 B) is not counted: 67736 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 98.6 %).
-- Also tracked for MAIN0 + X000: 14.9 % of the code named by us, 76.0 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 98.7 %).
+- Also tracked for MAIN0 + X000: 14.9 % of the code named by us, 76.1 % typed with the TObj structure.
 <!-- progress:end -->
 
 ![Progress](docs/progress.svg)
