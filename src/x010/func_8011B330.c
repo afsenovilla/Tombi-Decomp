@@ -1,5 +1,6 @@
 // FUNC 8011b330 1188 X010
 // MATCHING 8011b330 1188
+#include "gv2.h"
 #include "spad.h"
 #include "gv6.h"
 #include "gvars.h"
@@ -26,7 +27,6 @@ typedef struct {
 
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern unsigned char D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
 extern TObj *allocObjectLayer1(void);
 extern void func_800EEE90(S *);
@@ -146,8 +146,8 @@ void func_8011B330(S *s)
             return;
         }
         s->bc3 = 0;
-        if (s->be3 >= D_8007A038[D_8009D2B2]) return;
-        if (D_8009D2B1 == 1 || D_8009D2B1 == 2) return;
+        if (s->be3 >= D_8007A038[GV2.bb2]) return;
+        if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
         p = D_8009C330;
         if (p->b0 != 0) return;
         if (s->bc0 != 0) return;

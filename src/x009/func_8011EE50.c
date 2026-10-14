@@ -1,8 +1,8 @@
 // FUNC 8011ee50 728 X009
 // MATCHING 8011ee50 728
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern char D_80077D6C[];
 extern void *D_8012E04C;
 extern void *D_8012E050;
@@ -33,7 +33,7 @@ void func_8011EE50(TObj *o)
         o->b04++;
         setbox(o, 8, 0x10, 8, 0x10);
         o->w1e = 9;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_8012E04C;
         FUN_8001fe6c(o);
         o->d8c = 0;

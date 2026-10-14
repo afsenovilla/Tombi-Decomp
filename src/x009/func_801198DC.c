@@ -1,11 +1,10 @@
 // FUNC 801198dc 720 X009
 // MATCHING 801198dc 720
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
 extern void *D_8012DAF4[];
-extern int D_1F8002D4;
-extern unsigned short D_1F800176[], D_1F800186[];
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -66,7 +65,7 @@ void func_801198DC(TObj *o)
             o->anim = D_8012DAF4[o->b0c];
             break;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         AnimLoadDuration(o);
         break;
     case 1:
@@ -74,8 +73,8 @@ void func_801198DC(TObj *o)
             ObjCullRegister(o);
         } else {
             o->visible = 1;
-            o->a.p.whole = o->d30 - D_1F800176[0];
-            o->y.p.whole = o->d34 - D_1F800186[0];
+            o->a.p.whole = o->d30 - ((unsigned short*)((char*)&SPAD.i174 + 2))[0];
+            o->y.p.whole = o->d34 - ((unsigned short*)&SPAD.s186)[0];
             ObjListPush_1F800220(o);
         }
         AnimAdvance(o);

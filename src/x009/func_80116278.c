@@ -1,5 +1,6 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
@@ -14,8 +15,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000F2;
+extern short D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
@@ -24,7 +24,7 @@ extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
 
-#define XU (*(unsigned short *)&D_1F80016A)
+#define XU (*(unsigned short *)&(*(short*)((char*)&SPAD.i168 + 2)))
 
 void func_80116278(O *o)
 {
@@ -56,14 +56,14 @@ void func_80116278(O *o)
                 break;
             }
         }
-        if (D_1F80016A < 0x4b0 && D_1F80016E >= -0x2cf)
+        if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x4b0 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x2cf)
             tryStartItemInteraction(o, 1, 0);
-        else if (D_1F800172 == 0xb40 && D_1F80016A >= 0x11d5 && D_1F80016E >= -0x1d5)
+        else if (D_1F800172 == 0xb40 && (*(short*)((char*)&SPAD.i168 + 2)) >= 0x11d5 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x1d5)
             tryStartItemInteraction(o, 1, 2);
         else if ((unsigned)(XU - 0x1050) < 0x20 && D_1F800172 < 0xaf0)
             tryStartItemInteraction(o, 1, 1);
         if (D_1F800172 < 0xb36) {
-            short *k = &D_1F8000F2;
+            short *k = &(*(short*)((char*)&SPAD.if0 + 2));
             *k += 2;
             if (o->w32 < *k)
                 *k = o->w32;

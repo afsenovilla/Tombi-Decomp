@@ -1,5 +1,6 @@
 // FUNC 8011a4a8 504 X009
 // MATCHING 8011a4a8 504
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 extern TObj PLAYER;
 extern unsigned long *D_8012B1A0, *D_8012B1B4;
 extern unsigned long *D_8012B190[], *D_8012B1A4[];
-extern int D_1F8002E0[];
 extern void *D_8013105C;
 extern void loadImageRect(unsigned long *, short, short, short, short);
 extern void AnimLoadDuration(TObj *);
@@ -43,7 +43,7 @@ void func_8011A4A8(TObj *o)
         o->w1e = 1;
         o->b0d = 0x80;
         o->b04++;
-        o->d3c = D_1F8002E0[0];
+        o->d3c = ((int*)&SPAD.i2e0)[0];
         o->anim = D_8013105C;
         AnimLoadDuration(o);
         break;

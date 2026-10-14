@@ -1,5 +1,6 @@
 // FUNC 8011a778 1016 X010
 // MATCHING 8011a778 1016
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -9,7 +10,6 @@ typedef struct { short x, y, w, h; } RECT;
 
 extern char D_8012F2A8[];
 extern short D_8012F2E8[];
-extern unsigned short D_1F800176, D_1F800186;
 extern void FUN_8005f3c0(RECT *, char *);
 extern void FUN_80018cf0(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -21,9 +21,9 @@ static __inline__ int near(TObj *o)
 {
     if (GVARS.b3a == 0)
         return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d)
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d)
         return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_8011A778(TObj *o)

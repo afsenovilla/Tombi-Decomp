@@ -1,5 +1,6 @@
 // FUNC 80128180 548 X009
 // MATCHING 80128180 548
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 typedef struct { Fix16 x, y, z; } V3F;
 
 extern unsigned char D_8009D12E;
-extern int D_1F8002F0[];
 extern void *D_8012EE80;
 extern void AnimLoadDuration(TObj *o);
 extern void spawnItemDropAtPos(int, int, V3F *, int, int);
@@ -60,7 +60,7 @@ void func_80128180(TObj *o)
     o->w1e = 4;
     o->b04++;
     o->w7a = o->b6b;
-    o->d3c = D_1F8002F0[0];
+    o->d3c = ((int*)&SPAD.i2f0)[0];
     o->anim = D_8012EE80;
     o->wac = 0;
     AnimLoadDuration(o);

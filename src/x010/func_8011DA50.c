@@ -1,11 +1,11 @@
 // FUNC 8011da50 484 X010
 // MATCHING 8011da50 484
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern void *D_80131CE0;
-extern int D_1F8002D4[];
 extern unsigned char D_800B146E, D_800B1476, D_800B1472;
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -33,7 +33,7 @@ void func_8011DA50(TObj *o)
             o->w08 = 0x7acc;
             o->b0d = 1;
             o->anim = D_80131CE0;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->d38 = o->b.p.whole;
             o->w22 = 0;
             AnimLoadDuration(o);

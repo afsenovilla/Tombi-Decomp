@@ -1,5 +1,6 @@
 // FUNC 8011ccd8 2332 X010
 // MATCHING 8011ccd8 2332
+#include "gv2.h"
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
@@ -11,7 +12,6 @@ typedef struct {
 extern G330 *D_8009C330;
 typedef struct { char pad[0xe8]; short e8, ea; } PObj;
 extern TObj *D_8009F0EC;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_801152E8[];
 extern int AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
@@ -199,7 +199,7 @@ void func_8011CCD8(TObj *o)
         break;
     }
     if (SPAD.s1fc & SPAD.s3c6) {
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         *(unsigned char *)&o->waa = 0;
         o->b9c = 1;
         o->b9e = 0;

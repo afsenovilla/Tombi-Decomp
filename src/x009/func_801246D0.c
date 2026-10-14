@@ -1,12 +1,12 @@
 // FUNC 801246d0 516 X009
 // MATCHING 801246d0 516
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_8009D11D[];
-extern int D_1F8002D4;
 extern void *D_8012E04C;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -35,7 +35,7 @@ void func_801246D0(TObj *o)
             o->b6b = 0x4f;
             o->b0a = 0xd;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         o->anim = D_8012E04C;
         *(signed char *)&o->b0f = -9;
         o->d84 = 0;

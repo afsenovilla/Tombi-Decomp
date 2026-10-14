@@ -1,11 +1,11 @@
 // FUNC 8011bd5c 336 X010
 // MATCHING 8011bd5c 336
+#include "gv2.h"
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009D2B0, D_8009D2B2;
 extern TObj *D_8009F0EC;
 extern TObj *D_8009C330;
 
@@ -15,9 +15,9 @@ void func_8011BD5C(TObj *o)
     Fix16 *h;
 
     if (SPAD.s1fc & SPAD.s3c6) {
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         ((unsigned char *)&o->wa8)[1] = 0;
-        if (D_8009D2B2 - 5 < 3) D_8009F0EC->active = 1;
+        if (GV2.bb2 - 5 < 3) D_8009F0EC->active = 1;
         o->b9c = 1;
         o->timer = 10;
         o->velH = 0;
