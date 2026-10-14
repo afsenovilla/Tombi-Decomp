@@ -1,5 +1,6 @@
 // FUNC 801178f4 1016 X002
 // MATCHING 801178f4 1016
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
@@ -7,7 +8,6 @@ extern int LoadImage(RECT *, void *);
 extern unsigned char D_8009D0CD;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CF0F[];
-extern unsigned char D_8009C93A;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern char D_8011C728[];
@@ -20,7 +20,7 @@ extern void func_80117644(TObj *o);
 
 static __inline__ int onScreen(TObj *o)
 {
-    if (D_8009C93A == 0) return 0;
+    if (GVARS.b3a == 0) return 0;
     if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
     return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

@@ -1,9 +1,7 @@
 // FUNC 801174b4 400 X002
 // MATCHING 801174b4 400
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C93E[];
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C942[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern unsigned char D_8009CF0F;
@@ -14,9 +12,9 @@ void func_801174B4(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_8009C93F[0] = 1;
-        D_8009C93E[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
         D_800A4568[0] = 0;
         D_1F800190 = o->y.raw;
