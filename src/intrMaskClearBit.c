@@ -5,7 +5,7 @@
 // I_MASK &= ~bit (libapi, built by a newer compiler): GNU as keeps the symbol+index macro in $v0.
 extern int *D_800982C8;
 extern int D_800982D0[];
-int func_8006F0AC(unsigned short i)
+int intrMaskClearBit(unsigned short i)
 {
     D_800982C8[1] &= ~D_800982D0[i];
     return 1;

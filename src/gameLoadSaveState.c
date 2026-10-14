@@ -23,7 +23,7 @@ extern void FUN_8001dbdc(void);
 extern void FUN_8001f110(int);
 extern void setTask(void (*)(void));
 
-void FUN_80019b0c(void)
+void gameLoadSaveState(void)
 {
     int r;
     switch (TASK_C->w4a) {

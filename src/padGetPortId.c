@@ -2,7 +2,7 @@
 // MATCHING 8006ba68 56
 typedef struct { char p[0xf0]; } E;
 extern E D_8009C038[];
-int func_8006BA68(E *e)
+int padGetPortId(E *e)
 {
     int i;
     for (i = 0; i < 2; i++) {

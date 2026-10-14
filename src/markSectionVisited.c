@@ -3,7 +3,7 @@
 extern unsigned short G[];
 extern unsigned char *TAB[];
 
-void FUN_800216c4(void)
+void markSectionVisited(void)
 {
     unsigned char *p = TAB[G[0]] + G[1] * 2;
     unsigned short *s = G + 0x4b2;

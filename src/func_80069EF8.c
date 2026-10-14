@@ -2,7 +2,7 @@
 // MATCHING 80069ef8 632
 // FLAGS -O2 -G8
 // CC gcc-2.8.1
-/* Matched with the same crutch as func_8006A200 (debt): __asm__ volatile("nop") after the pointer load,
+/* Matched with the same crutch as sioWaitRxReady (debt): __asm__ volatile("nop") after the pointer load,
    because the game has the load-delay nop BEFORE the poll-loop label (lw; nop; L: lhu) while every ASPSX
    (2.34..2.86) and gcc put it after the label. The loop must be `do {} while (...)`: an empty `while` body
    costs 3 extra insns in v's live length (27 vs 24), which drops it below r in global-alloc (s1/s2 swap).

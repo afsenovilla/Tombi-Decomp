@@ -9,7 +9,7 @@ extern TObj *D_8009C330;
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
-extern int FUN_8004232c(short, short, short);
+extern int probeFlaggedSegmentA(short, short, short);
 extern int AnimAdvance(TObj *);
 
 void func_80121D6C(TObj *o)
@@ -50,7 +50,7 @@ void func_80121D6C(TObj *o)
         y = o->y.p.whole - 8;
         w = o->h->p.whole + 8;
         z = o->d->p.whole;
-        if ((FUN_8004232c(o->h->p.whole - 8, y, z) & 2) || (FUN_8004232c(w, y, z) & 2)) {
+        if ((probeFlaggedSegmentA(o->h->p.whole - 8, y, z) & 2) || (probeFlaggedSegmentA(w, y, z) & 2)) {
             o->b04 = 1;
             o->step = 0x16;
             o->state = 0;
@@ -64,7 +64,7 @@ void func_80121D6C(TObj *o)
         x = o->h->p.whole;
         w = x + 8;
         z = (short)(o->d->p.whole / 90) * 90;
-        if ((FUN_8004232c(x - 8, y, z) & 2) || (FUN_8004232c(w, y, z) & 2)) {
+        if ((probeFlaggedSegmentA(x - 8, y, z) & 2) || (probeFlaggedSegmentA(w, y, z) & 2)) {
             ((unsigned char*)&GVARS.b42)[0] = 0;
             o->b04 = 1;
             o->step = 0x16;

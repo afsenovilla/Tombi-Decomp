@@ -28,8 +28,8 @@ int PadInitDirect(u8 *output0, u8 *output1) {
     D_800981B0 = func_8006B5C4;
     D_800981B4 = func_8006B730;
     D_800981B8 = func_8006B7EC;
-    D_800981BC = func_8006BA68;
-    D_800981C0 = func_8006BAA0;
+    D_800981BC = padGetPortId;
+    D_800981C0 = padGetPortBuffer;
     swapCommand = FUN_8006b720;
     asm volatile("" : "=r"(clearObj) : "0"(obj));
     D_800981E0 = obj;

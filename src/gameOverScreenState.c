@@ -13,7 +13,7 @@ extern void FUN_800e897c(void);
 extern void setTask(void *);
 extern char LAB_8004dd8c[];
 
-void FUN_8001c818(void)
+void gameOverScreenState(void)
 {
     Th *t = TASK_C;
     short s;

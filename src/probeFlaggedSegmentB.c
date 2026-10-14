@@ -3,7 +3,7 @@
 extern short *getCollisionPlaneAt(int a, int b);
 extern unsigned short *DAT_1f800278;
 
-int FUN_8004245c(short a, int y, short b)
+int probeFlaggedSegmentB(short a, int y, short b)
 {
     short n;
     unsigned short w, x0, h;

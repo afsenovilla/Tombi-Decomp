@@ -12,7 +12,7 @@ extern short D_1f8001f4;
 extern unsigned short D_1f8001fc, D_1f8001f8;
 extern int D_1f800164;
 extern unsigned short D_8007DE98[];
-extern void func_800198B4();
+extern void gameMainTask();
 extern void SetDispMask(int);
 extern void initDisplay(int, int, int);
 extern void func_800E8A5C(void);
@@ -80,12 +80,12 @@ void loopTitleScreen(int *p)
                 case 0:
                     TASK_C->b68 = 0;
                     playSFXAndSetNote(10, 10);
-                    setTask(func_800198B4);
+                    setTask(gameMainTask);
                     break;
                 case 1:
                     TASK_C->b68 = 1;
                     playSFXAndSetNote(10, 10);
-                    setTask(func_800198B4);
+                    setTask(gameMainTask);
                     break;
                 case 2:
                     TASK_C->w48 = 2;

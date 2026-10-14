@@ -8,7 +8,7 @@ extern unsigned short D_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void FUN_800ee428(TObj *);
-extern short FUN_8004245c(int, int, int);
+extern short probeFlaggedSegmentB(int, int, int);
 void func_80108708(TObj *o)
 {
     unsigned short f;
@@ -65,7 +65,7 @@ void func_80108708(TObj *o)
             o->step = 2;
             o->state = 3;
         } else {
-            r = FUN_8004245c(o->h->p.whole, o->y.p.whole,
+            r = probeFlaggedSegmentB(o->h->p.whole, o->y.p.whole,
                              (short)(o->d->p.whole + ((D_1f8001c8 & 1) ? -5 : 5)));
             if (r != 0) {
                 (*(unsigned char*)&o->waa) = 1;

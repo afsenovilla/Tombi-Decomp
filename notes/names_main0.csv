@@ -68,8 +68,9 @@ address,name,confidence,comment
 80018f68,initAreaScripts,alta,psx_tomba (por bytes)
 80019084,MemCardInit,alta,OpenEvent/EnableEvent de tarjeta + _bu_init
 800196bc,drawBootLogo,alta,psx_tomba #21 (por bytes)
+800198b4,gameMainTask,alta,"task set by loopTitleScreen for New Game/Continue"
 80019a08,gameInitState,alta,psx_tomba #21 (por bytes)
-80019b0c,titleScreenHandler,alta,psx_tomba (por bytes)
+80019b0c,gameLoadSaveState,alta,"mode 2 of gameMainTask, entered when the title choice is Continue (b68=1, gameInitState sets w48=2)"
 80019cec,gameStateDispatcher,alta,psx_tomba (por bytes)
 80019d88,introSequenceHandler,alta,psx_tomba (por bytes)
 80019f98,gameplayStateDispatcher,alta,psx_tomba (por bytes)
@@ -94,6 +95,7 @@ address,name,confidence,comment
 8001c314,setAreaModeFromSection,alta,psx_tomba #21 (por bytes)
 8001c364,areaTransitionHandler,alta,psx_tomba #21 (por bytes)
 8001c634,transitionToGameOver,alta,name from psx_tomba (US)
+8001c818,gameOverScreenState,alta,"state 3 of gameStateDispatcher, the state transitionToGameOver sets: stops vibration/music/sound, queues list "
 8001c9a8,openMenuScreen,alta,psx_tomba (por bytes)
 8001ca00,openMenuScreenEx,alta,psx_tomba #21 (por bytes)
 8001ca58,updatePauseMenu,alta,psx_tomba #21 (por bytes)
@@ -185,7 +187,7 @@ address,name,confidence,comment
 800212b4,drawNowLoading,alta,psx_tomba (por bytes)
 80021340,drawUiSprite,alta,psx_tomba (por bytes)
 80021478,drawNowLoadingSprite,alta,psx_tomba (por bytes)
-800216c4,setSpawnAreaFlag,alta,psx_tomba (por bytes)
+800216c4,markSectionVisited,alta,"looks up (byte index, bit) for [area D_8009C960][section D_8009C962] in D_8007960C and ORs the bit into the u1"
 8002171c,loadSpawnPosition,alta,psx_tomba #21 (por bytes)
 80021858,initPlayerAtSpawn,alta,psx_tomba #21 (por bytes)
 80021a94,loadSectionBounds,alta,psx_tomba #21 (por bytes)
@@ -394,6 +396,8 @@ address,name,confidence,comment
 8004094c,testCollisionSegment,alta,names batch (see notes/names.md)
 800411cc,probeCollisionAtDepthB,alta,names batch (see notes/names.md)
 80041ca8,probeCollisionAtDepthC,alta,names batch (see notes/names.md)
+8004232c,probeFlaggedSegmentA,media,"walks the collision plane segment list (getCollisionPlaneAt) for entries with flags 0x4000 and 0x10 and return"
+8004245c,probeFlaggedSegmentB,media,"byte-identical twin of probeFlaggedSegmentA (separate copy with a different caller set)"
 8004258c,decreaseObjectTimer,alta,psx_tomba (por bytes)
 800428c0,resolveHitResultA,alta,psx_tomba #21 (por bytes)
 800429d0,resolveHitResultB,alta,psx_tomba #21 (por bytes)
@@ -489,6 +493,7 @@ address,name,confidence,comment
 8005d274,InitCARD,alta,Psy-Q
 8005d2c8,StartCARD,alta,Psy-Q
 8005d300,StopCARD,alta,names batch (see notes/names.md)
+8005d4ec,busyWaitDelay,alta,"empty countdown loop from 0x31FFFF"
 8005d590,DecDCTReset,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8005d5c8,DecDCTGetEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8005d654,DecDCTPutEnv,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -713,7 +718,7 @@ address,name,confidence,comment
 8006897c,stopIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068a28,restartIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ab0,memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
-80068ae4,FUN_80068ae4,alta,"Psy-Q libapi: trampolin BIOS A0 llamada 0x72 (jr $t2), cuerpo asm"
+80068ae4,CdRemove,alta,"BIOS A0 function 0x72 trampoline, which is CdRemove in the BIOS table"
 80068c04,trapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068c7c,setIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ca8,VSync_memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -741,14 +746,25 @@ address,name,confidence,comment
 800698c4,_padInitSioMode,alta,names batch (see notes/names.md)
 80069ce8,_padSioRW,alta,names batch (see notes/names.md)
 8006a170,_padClrIntSio0,alta,names batch (see notes/names.md)
+8006a200,sioWaitRxReady,alta,"spins until SIO0 status (+4) bit 1 (RX FIFO not empty) is set"
 8006a254,_padSetAct,alta,names batch (see notes/names.md)
+8006a260,padSetCmd,alta,"libpad: generic form of the padSetCmd* helpers, stores command byte +0x37, parameter pointer +0x2c and length "
 8006a270,_padSendAtLoadInfo,alta,names batch (see notes/names.md)
 8006a2f4,_padRecvAtLoadInfo,alta,names batch (see notes/names.md)
 8006a564,_padGetActSize,alta,names batch (see notes/names.md)
 8006a59c,_padLoadActInfo,alta,names batch (see notes/names.md)
 8006ab10,_padSetActAlign,alta,names batch (see notes/names.md)
+8006ab78,padSetCmdActAlign,alta,"libpad: queues controller command 0x4d (set actuator alignment) with the 6-byte table at port+0x20"
 8006ac5c,_padSetMainMode,alta,names batch (see notes/names.md)
+8006ada8,padSetCmdConfigMode,alta,"libpad: queues controller command 0x43 (enter/exit config mode) with a one-byte parameter at port+0x24"
+8006adc8,padSetCmdQueryModel,alta,"libpad: queues controller command 0x45 (query model/status) with no parameters"
+8006addc,padSetCmdQueryMode,alta,"libpad: queues controller command 0x4c (query mode table entry) with a one-byte index"
+8006adfc,padSetCmdQueryAct,alta,"libpad: queues controller command 0x46 (query actuator info) with a one-byte index"
+8006ae1c,padSetCmdQueryComb,alta,"libpad: queues controller command 0x47 (query actuator combination) with a one-byte index"
+8006ae3c,padSetCmd4B,media,"libpad: queues controller command 0x4b with no parameters (command role unknown)"
 8006b464,PadInitDirect,alta,names batch (see notes/names.md)
+8006ba68,padGetPortId,alta,"returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise"
+8006baa0,padGetPortBuffer,alta,"inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0"
 8006bf84,setRC2wait,alta,names batch (see notes/names.md)
 8006bfa4,chkRC2wait,alta,names batch (see notes/names.md)
 8006c1d4,_SsClose,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -765,6 +781,9 @@ address,name,confidence,comment
 8006d410,_SsContResetAll,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d7f4,_SsUtResolveADSR,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d850,_SsUtBuildADSR,alta,"Psy-Q (psx_tomba, por bytes)"
+8006e024,sndCmdSetReverbFeedback,media,"sound command handler: calls SsUtSetReverbFeedback with the byte at stack arg +0x24"
+8006e048,sndCmdSetReverbDelayA,media,"sound command handler: calls SsUtSetReverbDelay with the fifth argument"
+8006e06c,sndCmdSetReverbDelayB,media,"sound command handler: calls SsUtSetReverbDelay with the byte at stack arg +0x24"
 8006e090,_SsSetPitchBend,alta,"Psy-Q (psx_tomba, por bytes)"
 8006e648,_SsSetProgramChange,alta,"Psy-Q (psx_tomba, por bytes)"
 8006e6c0,_SsReadDeltaValue,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -781,6 +800,7 @@ address,name,confidence,comment
 8006efa8,SetRCnt,alta,names batch (see notes/names.md)
 8006f044,GetRCnt,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006f07c,StartRCnt,alta,names batch (see notes/names.md)
+8006f0ac,intrMaskClearBit,alta,"libapi: clears interrupt bit D_800982D0[i] in I_MASK (D_800982C8[1]) and returns 1"
 8006f0e0,ResetRCnt,alta,names batch (see notes/names.md)
 8006f118,SsSeqCalledTbyT,alta,"Psy-Q (psx_tomba, por bytes)"
 8006f38c,_SsSndCrescendo,alta,"Psy-Q (psx_tomba, por bytes)"

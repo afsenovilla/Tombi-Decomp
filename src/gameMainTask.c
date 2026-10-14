@@ -9,9 +9,9 @@ void initLighting(void *p);
 void updatePadInput(void);
 void gameInitState(void);
 void gameStateDispatcher(void);
-void FUN_80019b0c(void);
+void gameLoadSaveState(void);
 void ThreadWaitFrames(int n);
-void func_800198B4(void)
+void gameMainTask(void)
 {
     unsigned char *p = *(unsigned char **)0x1F8001D4;
     *(unsigned char *)0x1F8001D1 = 0;
@@ -39,7 +39,7 @@ void func_800198B4(void)
         switch (*(unsigned short *)(*(unsigned char **)0x1F8001D4 + 0x48)) {
         case 0: gameInitState(); break;
         case 1: gameStateDispatcher(); break;
-        case 2: FUN_80019b0c(); break;
+        case 2: gameLoadSaveState(); break;
         }
         ThreadWaitFrames(1);
     }

@@ -8,7 +8,7 @@ extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fec0(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
-extern int FUN_8004232c(short, short, short);
+extern int probeFlaggedSegmentA(short, short, short);
 extern TObj *DAT_8009c330;
 extern unsigned short DAT_1f8001f8;
 
@@ -49,7 +49,7 @@ void FUN_80109e50(TObj *o)
         v = o->y.p.whole - 8;
         hx = o->h->p.whole + 8;
         a = (short)(o->d->p.whole / 90) * 90;
-        if ((FUN_8004232c(o->h->p.whole - 8, v, a) & 2) || (FUN_8004232c(hx, v, a) & 2)) {
+        if ((probeFlaggedSegmentA(o->h->p.whole - 8, v, a) & 2) || (probeFlaggedSegmentA(hx, v, a) & 2)) {
             o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
             o->b04 = 1;
             o->step = 0x16;
@@ -63,7 +63,7 @@ void FUN_80109e50(TObj *o)
         v = o->y.p.whole - 8;
         hx = o->h->p.whole + 8;
         a = (short)(o->d->p.whole / 90) * 90;
-        if ((FUN_8004232c(o->h->p.whole - 8, v, a) & 2) || (FUN_8004232c(hx, v, a) & 2)) {
+        if ((probeFlaggedSegmentA(o->h->p.whole - 8, v, a) & 2) || (probeFlaggedSegmentA(hx, v, a) & 2)) {
             o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
             o->b04 = 1;
             o->step = 0x16;

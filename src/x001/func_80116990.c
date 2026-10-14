@@ -35,7 +35,7 @@ extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
 extern void syncObjectTargetY(O *);
 extern void FUN_80029078(O *);
-extern void FUN_800216c4(void);
+extern void markSectionVisited(void);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
 extern void FUN_800eea7c(PL *, int, int);
@@ -76,7 +76,7 @@ void func_80116990(O *o)
                 break;
             }
             if (D_1F80016A >= 0xb6e && D_1F80016E < -0x1d6) {
-                FUN_800216c4();
+                markSectionVisited();
                 GAME.selectedSection = 1;
                 *p = 0;
                 break;
@@ -99,7 +99,7 @@ void func_80116990(O *o)
             x = D_1F80016A;
             if (x < 0xb6d) {
                 GAME.selectedSection = 0;
-                FUN_800216c4();
+                markSectionVisited();
                 *p = 0;
                 break;
             }

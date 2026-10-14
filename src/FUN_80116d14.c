@@ -26,7 +26,7 @@ extern void FUN_80029078(TObj *);
 extern void setEventComplete(int, int);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(TObj *, int, int);
-extern void FUN_800216c4(void);
+extern void markSectionVisited(void);
 extern void FUN_80029cb4(TObj *);
 extern void FUN_8002a4d0(TObj *);
 extern void FUN_8001f110(int);
@@ -102,7 +102,7 @@ void FUN_80116d14(TObj *o)
             if (DAT_1f80016a < 0x4ed) break;
             if (DAT_1f80016e >= -0x95) break;
             DAT_8009c962 = 1;
-            FUN_800216c4();
+            markSectionVisited();
             o->state = 0;
             o->step++;
             break;
@@ -122,7 +122,7 @@ void FUN_80116d14(TObj *o)
             o->state = 0;
             o->step--;
             DAT_8009c962 = 0;
-            FUN_800216c4();
+            markSectionVisited();
             break;
         }
         if (DAT_1f80016a >= 0xa46 && DAT_1f80016e >= -0x122) {
@@ -154,7 +154,7 @@ void FUN_80116d14(TObj *o)
         }
         if (DAT_1f80016a >= 0x9dc) break;
         DAT_8009c962 = 1;
-        FUN_800216c4();
+        markSectionVisited();
         o->step--;
         break;
     case 7:

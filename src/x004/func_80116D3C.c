@@ -60,7 +60,7 @@ extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
-extern void FUN_800216c4(void);
+extern void markSectionVisited(void);
 extern void loadSectionBounds(O *);
 extern void AnimAdvance(PL *);
 extern void FUN_800eea7c(PL *, int, int);
@@ -510,7 +510,7 @@ void func_80116D3C(O *o)
         D_80079A98[o->subtype](o);
         if (o->subtype != 0) break;
         o->step = 2;
-        FUN_800216c4();
+        markSectionVisited();
         GVARS.b3f = 0;
         GVARS.b3e = 0;
         p->b04 = 1;

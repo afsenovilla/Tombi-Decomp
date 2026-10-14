@@ -40,6 +40,29 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
+- `800198b4 gameMainTask` (was func_800198B4) - task set by loopTitleScreen for New Game/Continue; resets game state then loops updatePadInput + switch on mode w48 (0 gameInitState, 1 gameStateDispatcher, 2 gameLoadSaveState) + ThreadWaitFrames(1)
+- `80019b0c gameLoadSaveState` (was FUN_80019b0c) - mode 2 of gameMainTask, entered when the title choice is Continue (b68=1, gameInitState sets w48=2); loads list 5/sound set 3, runs the X000 load UI (800e9888) until it returns 1 (go to gameplay, mode 1 state 1) or -1 (back to titleSequenceTask); replaces the unapplied psx_tomba guess titleScreenHandler
+- `8001c818 gameOverScreenState` (was FUN_8001c818) - state 3 of gameStateDispatcher, the state transitionToGameOver sets: stops vibration/music/sound, queues list 0x5d, shows it 240 frames (skippable with buttons 0x6008 after 40), then returns to titleSequenceTask
+- `800216c4 markSectionVisited` (was FUN_800216c4) - looks up (byte index, bit) for [area D_8009C960][section D_8009C962] in D_8007960C and ORs the bit into the u16 array at D_8009D2C4; replaces the unapplied psx_tomba guess setSpawnAreaFlag
+- `8004232c probeFlaggedSegmentA` (was FUN_8004232c) - (uncertain) walks the collision plane segment list (getCollisionPlaneAt) for entries with flags 0x4000 and 0x10 and returns 1/2 when y is inside a segment (2 = below its top 8 px); overlays test the result & 2
+- `8004245c probeFlaggedSegmentB` (was FUN_8004245c) - (uncertain) byte-identical twin of probeFlaggedSegmentA (separate copy with a different caller set)
+- `8006ada8 padSetCmdConfigMode` (was FUN_8006ada8) - libpad: queues controller command 0x43 (enter/exit config mode) with a one-byte parameter at port+0x24
+- `8006adc8 padSetCmdQueryModel` (was FUN_8006adc8) - libpad: queues controller command 0x45 (query model/status) with no parameters
+- `8006adfc padSetCmdQueryAct` (was FUN_8006adfc) - libpad: queues controller command 0x46 (query actuator info) with a one-byte index
+- `8006ae1c padSetCmdQueryComb` (was FUN_8006ae1c) - libpad: queues controller command 0x47 (query actuator combination) with a one-byte index
+- `8006ae3c padSetCmd4B` (was FUN_8006ae3c) - (uncertain) libpad: queues controller command 0x4b with no parameters (command role unknown)
+- `8006addc padSetCmdQueryMode` (was FUN_8006addc) - libpad: queues controller command 0x4c (query mode table entry) with a one-byte index
+- `8006ab78 padSetCmdActAlign` (was FUN_8006ab78) - libpad: queues controller command 0x4d (set actuator alignment) with the 6-byte table at port+0x20; called from _padSetActAlign
+- `8006a260 padSetCmd` (was func_8006A260) - libpad: generic form of the padSetCmd* helpers, stores command byte +0x37, parameter pointer +0x2c and length +0x36
+- `8006a200 sioWaitRxReady` (was func_8006A200) - spins until SIO0 status (+4) bit 1 (RX FIFO not empty) is set; used by _padInitSioMode
+- `8006ba68 padGetPortId` (was func_8006BA68) - returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise
+- `8006baa0 padGetPortBuffer` (was func_8006BAA0) - inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0
+- `80068ae4 CdRemove` (was FUN_80068ae4) - BIOS A0 function 0x72 trampoline, which is CdRemove in the BIOS table
+- `8006f0ac intrMaskClearBit` (was func_8006F0AC) - libapi: clears interrupt bit D_800982D0[i] in I_MASK (D_800982C8[1]) and returns 1
+- `8006e024 sndCmdSetReverbFeedback` (was func_8006E024) - (uncertain) sound command handler: calls SsUtSetReverbFeedback with the byte at stack arg +0x24
+- `8006e048 sndCmdSetReverbDelayA` (was func_8006E048) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the fifth argument
+- `8006e06c sndCmdSetReverbDelayB` (was func_8006E06C) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the byte at stack arg +0x24
+- `8005d4ec busyWaitDelay` (was func_8005D4EC) - empty countdown loop from 0x31FFFF
 
 # Area overlay function names (X001..X019)
 

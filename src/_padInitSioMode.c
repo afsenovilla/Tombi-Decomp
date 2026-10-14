@@ -70,7 +70,7 @@ int _padInitSioMode(padPort* port)
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
-            func_8006A200();
+            sioWaitRxReady();
             (void)D_80098210->data;
             setRC2wait(0x1ae);
             while (!(D_8009820C->stat & 0x80)) {
@@ -83,7 +83,7 @@ int _padInitSioMode(padPort* port)
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
-            func_8006A200();
+            sioWaitRxReady();
             (void)D_80098210->data;
             setRC2wait(0x1ae);
             while (!(D_8009820C->stat & 0x80)) {
@@ -96,7 +96,7 @@ int _padInitSioMode(padPort* port)
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
-            func_8006A200();
+            sioWaitRxReady();
             (void)D_80098210->data;
             return 0;
         }
