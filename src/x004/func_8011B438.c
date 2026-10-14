@@ -71,7 +71,7 @@ void func_8011B438(TObj *o)
         break;
     case 3:
         switch (o->b0c) {
-        case 0:
+        case 2:
             o->d->p.whole++;
             if (--o->d38 <= 0)
                 o->step++;
@@ -81,7 +81,7 @@ void func_8011B438(TObj *o)
             if (--o->d38 <= 0)
                 o->step++;
             break;
-        case 2:
+        case 0:
             o->d->p.whole++;
             if (--o->d38 <= 0)
                 o->step++;
