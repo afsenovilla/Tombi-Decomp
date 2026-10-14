@@ -1,0 +1,112 @@
+// JPDEMO x00 8010E0D8 880
+// Demo version of PAL x000 80113F38 (func_80113F38.c): the player is released only when GVARS.b3f is clear.
+#include "gvars.h"
+#include "player.h"
+typedef struct P { short x; short y; } P;
+typedef struct V { short x, xh, y, yh, z, zh; } V;
+typedef struct S {
+    unsigned char b00, b01, b02, b03, b04, step, state, b07; char p0[0x10 - 8];
+    V pos; char p1[0x20 - 0x1c]; short timer; char p2[0x2e - 0x22]; unsigned short frame; char p3[0x40 - 0x30];
+    P *h; char p4[0x68 - 0x44]; unsigned char b68, b69, b6a; char p5[0x6c - 0x6b];
+    short w6c, w6e, w70, w72; char p6[0x7c - 0x74]; short velX, velY, velH, velV; char p7[0x90 - 0x84];
+    struct S *p90;
+} S;
+extern int D_800A6094;
+extern int AnimAdvance(S *);
+extern extern unsigned char D_8009A7EA; /* GVARS.b3a */
+extern unsigned short D_800A57CE; /* PLAYER y */
+extern P *D_800A57F8; /* PLAYER.obj.h */
+void TileCollideAt(S *, int, int);
+extern void FUN_80113888(S *), FUN_80113b6c(S *), FUN_80113cc8(S *);
+extern S *showMessageBoxDirectTimed(int, int, V *, int);
+void func_80113F38(S *o)
+{
+    V v;
+    int f;
+    if ((o->b00 & 8) && D_8009A7EA != 0 && (unsigned short)(o->pos.yh - D_800A57CE + 0x80) < 0x100) {
+        if (o->frame & 1) {
+            if (o->h->y - o->w6c < D_800A57F8->y)
+                D_800A57F8->y = o->h->y - o->w6c;
+        } else {
+            if (D_800A57F8->y < o->h->y + (o->w6e - o->w6c))
+                D_800A57F8->y = o->h->y + (o->w6e - o->w6c);
+        }
+    }
+    switch (o->step) {
+    case 0:
+        AnimAdvance(o);
+        break;
+    case 1:
+        switch (o->state) {
+        case 0:
+            o->velX = 0;
+            o->velY = 0;
+            o->velH = 0;
+            o->velV = 0;
+            o->state++;
+        case 1:
+            AnimAdvance(o);
+            *(int *)&o->pos.y += 0x40000;
+            TileCollideAt(o, o->h->y, (short)(o->pos.yh + o->w72 - o->w70));
+            if (--o->timer == 0) {
+                o->b6a = 0;
+                goto reset;
+            }
+            break;
+        }
+        break;
+    case 2:
+        FUN_80113888(o);
+        break;
+    case 3:
+        if (o->b01 == 0)
+            break;
+        switch (o->state) {
+        case 0:
+            v = o->pos;
+            v.yh -= 0x40;
+            o->p90 = showMessageBoxDirectTimed(0xd, 2, &v, o->timer);
+            o->state++;
+            break;
+        case 1:
+            AnimAdvance(o);
+            if (--o->timer == 0) {
+                o->b6a = 0;
+                goto reset;
+            }
+            break;
+        }
+        break;
+    case 4:
+        switch (o->state) {
+        case 0:
+            o->b68 = 0;
+            o->state++;
+        case 1:
+            AnimAdvance(o);
+            if (o->p90->b04 == 2) {
+                o->p90->b04 = 3;
+                f = GVARS.b3f;
+                *(short *)0x1F8001C6 = 0;
+                GVARS.b42 = 0;
+                PLAYER.obj.wb2 = 0;
+                if (f == 0) PLAYER.obj.b04 = 1;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
+                o->b68 = 0;
+                o->b6a = 0;
+            reset:
+                o->step = 0;
+                o->state = 0;
+            }
+            break;
+        }
+        break;
+    case 5:
+        FUN_80113b6c(o);
+        break;
+    case 7:
+        FUN_80113cc8(o);
+        break;
+    }
+}
