@@ -34,7 +34,7 @@ typedef struct { unsigned char pad[0x28]; unsigned short w28, w2a, w2c, w2e; } Q
 #define PL ((Q *)DAT_8009c330)
 
 #define YADJ(o)                                              \
-    if (U8(o, 0xad) == 0) {                                  \
+    if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {                                  \
         if (o->subtype) {                                    \
             if ((unsigned short)(o->wb0 + 5) >= 0xb)         \
                 o->y.raw += 0x50000;                         \
@@ -54,15 +54,15 @@ void FUN_800f1478(TObj *o)
     unsigned char *p;
     int t;
 
-    U8(o, 0xa2) = 0;
-    U8(o, 0xa3) = 0;
-    if (U8(o, 0xac) >= 2) {
+    (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
+    (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
+    if ((*(unsigned char*)&o->wac) >= 2) {
         DAT_8009d2e8 = DAT_800a611c;
         DAT_800a611c[4] = 2;
         DAT_8009d2e8[5] = 2;
         DAT_8009d2e8[6] = 0;
     }
-    U8(o, 0xac) = 0;
+    (*(unsigned char*)&o->wac) = 0;
     c = 0;
     if (*(volatile unsigned short *)&DAT_8009d670 & 0xa0) {
         if (o->wb2 == 0) {
@@ -119,7 +119,7 @@ void FUN_800f1478(TObj *o)
             }
             FUN_8010f400(o);
             if (o->velY > 0x400) {
-                U8(o, 0xac) = 1;
+                (*(unsigned char*)&o->wac) = 1;
                 DAT_8009c330[0x1e] = 0;
                 DAT_8009c330[0x1f] = 0;
                 t = 0x10;
