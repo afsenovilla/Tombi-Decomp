@@ -39,8 +39,8 @@ void func_80127B14(TObj *o)
         o->velH = 0x80;
     case 1:
         AnimAdvance(o);
-        o->h->raw += (D_8007A5F0[U8(o, 0x88)] * o->velH) >> 4;
-        o->y.raw += (D_8007A3F0[U8(o, 0x88)] * o->velH) >> 4;
+        o->h->raw += (D_8007A5F0[(*(unsigned char*)&o->d88)] * o->velH) >> 4;
+        o->y.raw += (D_8007A3F0[(*(unsigned char*)&o->d88)] * o->velH) >> 4;
         if (near(o)) {
             o->state++;
             o->anim = D_80134D88;

@@ -22,7 +22,7 @@ void func_8011DC0C(TObj *o)
         o->velY = 0x5a;
         o->active = 2;
         *(signed char *)&o->b0f = -8;
-        U8(o, 0xa3) = 2;
+        (*(unsigned char*)((char*)&o->da0 + 3)) = 2;
         o->w74 = 6;
         o->d8c = 0;
         o->velY = 0;
@@ -30,7 +30,7 @@ void func_8011DC0C(TObj *o)
         o->b9d = 0;
         o->b9e = 0;
         o->b9f = 0;
-        U8(o, 0xad) = 0;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 0;
         o->b69 = 0;
         o->w76 = 0;
         o->velV = 0x1e6;
@@ -49,7 +49,7 @@ void func_8011DC0C(TObj *o)
         if (o->velX <= 0) {
             o->state = 9;
             FUN_800eea7c(o, 0x19, 2);
-            if (FUN_8003fd78(o, o->w74, o->w76) && (U8(o, 0xa0) >> 4) == 4) {
+            if (FUN_8003fd78(o, o->w74, o->w76) && ((*(unsigned char*)&o->da0) >> 4) == 4) {
                 o->velX = 0x5a;
                 o->velY = 0x5a;
                 o->state = 1;
@@ -63,7 +63,7 @@ void func_8011DC0C(TObj *o)
             o->active = D_8009C330->b6;
             o->b9c = 0;
             o->ba5 = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
