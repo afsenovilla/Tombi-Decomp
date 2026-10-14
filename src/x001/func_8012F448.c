@@ -1,12 +1,12 @@
 // FUNC 8012f448 1312 X001
 // MATCHING 8012f448 1312
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims; } E20;
 typedef struct { Fix16 a, y, b; } FV;
 extern E20 D_8013C928[];
 extern int SPR_DATA[];
-extern unsigned char D_8009C942;
 extern char D_8013C94A[];
 extern char D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
@@ -58,7 +58,7 @@ void func_8012F448(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             FUN_800202b4(o);
             break;
         }

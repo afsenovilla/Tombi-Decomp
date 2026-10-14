@@ -1,6 +1,7 @@
 // FUNC 80116990 2816 X001
 // MATCHING 80116990 2816
 // FLAGS -O2 -G0 -fno-cse-skip-blocks
+#include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
 typedef struct { short s0, s2; } S2;
@@ -20,7 +21,7 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 extern PL PLAYER;
 extern unsigned char D_800A6039[];
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C942, D_8009CEF7, D_8009C93C;
+extern unsigned char D_8009CEF7;
 extern unsigned char D_8009CDB5, D_8009CE58, D_8009CDF1, D_8009CE48, D_8009CDBC;
 extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, D_800A603C, D_800A603D, D_800A603E;
 extern signed char D_8009D2B0;
@@ -60,7 +61,7 @@ void func_80116990(O *o)
         break;
     }
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         o->b3c = 0;
         syncObjectTargetY(o);
@@ -136,8 +137,8 @@ void func_80116990(O *o)
                 }
                 if (D_8009CDF1 == 0xff && (unsigned short)(XU - 0x69c) < 0x13 && D_1F80016E >= -0x29d) {
                     o->step = 4;
-                    D_8009C93F = 1;
-                    D_8009C942 = 1;
+                    GVARS.b3f = 1;
+                    GVARS.b42 = 1;
                     D_8009CEF7 = 0;
                     D_8009D2B0 = 0;
                     PLAYER.b0 = 5;
@@ -221,7 +222,7 @@ void func_80116990(O *o)
         }
         break;
     case 3:
-        if (D_8009C93F == 0) D_80079A98[o->subtype](o);
+        if (GVARS.b3f == 0) D_80079A98[o->subtype](o);
         break;
     case 4: {
         unsigned char *f = &PLAYER.b6;
@@ -273,7 +274,7 @@ void func_80116990(O *o)
         if (--o->w4a == -1) {
             tryStartItemInteraction(o, 1, 3);
             o->step = 3;
-            D_8009C93F = 0;
+            GVARS.b3f = 0;
         }
         break;
     case 8:
@@ -285,7 +286,7 @@ void func_80116990(O *o)
             (*(short*)&GAME.nextArea) = 0xd;
             (*(short*)&GAME.nextSection) = 0;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }

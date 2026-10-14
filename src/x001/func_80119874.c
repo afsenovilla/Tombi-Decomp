@@ -1,9 +1,9 @@
 // FUNC 80119874 604 X001
 // MATCHING 80119874 604
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char D_8009D081;
-extern unsigned char D_8009C93F;
 extern unsigned char D_1F8001CC;
 extern unsigned char D_1F8001CD;
 extern short D_1F8001C6;
@@ -61,7 +61,7 @@ void func_80119874(TObj *o)
         case 3:
             FUN_800202b4(o);
             o->step++;
-            D_8009C93F = 1;
+            GVARS.b3f = 1;
             GAME.fadeScreenControl = 3;
             break;
         case 4:

@@ -1,13 +1,12 @@
 // FUNC 80122044 464 X001
 // MATCHING 80122044 464
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { char pad[2]; short w2; } PL;
 extern PL *D_8009C330;
 typedef struct { char pad[0xa2]; unsigned char ba2; char pad2[7]; unsigned char baa; } XB;
 #define X(o) ((XB *)(o))
-extern unsigned char D_8009C942[];
-extern unsigned char D_8009C93F[];
 extern unsigned short D_1F8001F8;
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -32,8 +31,8 @@ void func_80122044(TObj *o)
         X(o)->baa = 1;
         o->timer = 0x20;
         o->y.p.whole += 8;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         o->state++;
     case 1:
         o->y.p.whole++;
@@ -47,8 +46,8 @@ void func_80122044(TObj *o)
         AnimAdvance(o);
         if (TileCollideAt(o, o->h->p.whole + ((o->animFrame & 1) ? 9 : -9), o->y.p.whole + 0x10)) {
             applyCollisionTileResponse(o);
-            D_8009C942[0] = 0;
-            D_8009C93F[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
             X(o)->baa = 0;
             o->b69 = 0;
             o->b9e = 0;

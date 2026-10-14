@@ -1,9 +1,9 @@
 // FUNC 8012f988 1476 X001
 // MATCHING 8012f988 1476
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern short D_1F80027E;
-extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
 extern unsigned char D_8009CEAE[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
@@ -57,9 +57,9 @@ void func_8012F988(TObj *o)
             FUN_80020aec(*(unsigned short *)&o->wb4);
             o->type = 0xc;
             o->category = 2;
-            D_8009C93F[0] = 1;
-            D_8009C93E[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             D_8009CEAE[0] = 1;
             D_800A4553[0] = 5;
             D_800A4568[0] = 0;

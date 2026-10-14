@@ -1,5 +1,6 @@
 // FUNC 8011f6c4 996 X001
 // MATCHING 8011f6c4 996
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { Fix16 a, y, b; } FV;
@@ -7,7 +8,7 @@ typedef struct { Fix16 a, y, b; } FV;
 extern TObj PLAYER;
 extern void *D_8013E704[], *D_8013E70C;
 extern char D_8013C728[];
-extern unsigned char D_8009CE55A[], D_8009CEAD, D_8009C93F, D_8009C942, D_8009C93E;
+extern unsigned char D_8009CE55A[], D_8009CEAD;
 extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer2(void);
 extern void applyItemEffect(char *, FV *, int, int, int);
@@ -113,9 +114,9 @@ void func_8011F6C4(TObj *o)
         FUN_80026e0c(0x12, 1);
         FUN_80026c50(0xa, 1, 0);
         D_8009CEAD = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         o->b04 = 3;
         break;
     }

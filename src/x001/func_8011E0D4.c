@@ -1,10 +1,10 @@
 // FUNC 8011e0d4 824 X001
 // MATCHING 8011e0d4 824
+#include "gvars.h"
 #include "TOBJ.H"
 #define VX (*(unsigned short *)&o->velX)
 extern int FUN_80020078(TObj *, int);
 extern void FUN_80018838(TObj *);
-extern unsigned char D_8009C942;
 extern unsigned short D_8007A3F0[];
 extern short D_8013C6D0[];
 extern short D_8013C6FC[];
@@ -57,7 +57,7 @@ void func_8011E0D4(TObj *o)
         break;
     case 1:
         x = big(o->box2, o->box0);
-        if (D_8009C942) {
+        if (GVARS.b42) {
             FUN_80020078(o, x);
             break;
         }

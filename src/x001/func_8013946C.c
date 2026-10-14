@@ -1,9 +1,9 @@
 // FUNC 8013946c 772 X001
 // MATCHING 8013946c 772
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D081;
-extern unsigned char D_8009C940, D_8009C93F, D_8009C942, D_8009C93E;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void *D_8013FA90[];
@@ -90,10 +90,10 @@ void func_8013946C(TObj *o)
     case 7:
         if (o->b0c == 2) {
             D_8009D081 = 6;
-            D_8009C940 = 0;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GVARS.b40 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
         }
         o->step++;
         break;

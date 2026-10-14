@@ -1,9 +1,9 @@
 // FUNC 801344fc 376 X001
 // MATCHING 801344fc 376
+#include "gvars.h"
 #include "TOBJ.H"
 extern char D_80077D0C[];
 extern void *D_8013F1FC;
-extern TObj *D_8009C948;
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void func_801344FC(TObj *o)
@@ -26,7 +26,7 @@ void func_801344FC(TObj *o)
         for (p = (TObj *)o->d94; p != 0; p = (TObj *)p->d94) {
             p->b04 = 3;
         }
-        ((struct { char pad[0xa]; short n; } *)D_8009C948)->n--;
+        ((struct { char pad[0xa]; short n; } *)(*(TObj **)&GVARS.p48))->n--;
         break;
     case 1:
         applyAnimVelocityX(o, 1 - o->animFrame);

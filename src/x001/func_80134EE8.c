@@ -1,11 +1,11 @@
 // FUNC 80134ee8 636 X001
 // MATCHING 80134ee8 636
+#include "gvars.h"
 /* o is reused for list[0] after the sort (o in a2 at entry); subtype goes through a temp t (lbu a1 + move s4).
    The D_1F8002E8/anim loads are block locals declared right after b0d, and w1e is a raw store so the scalar loads
    cannot be hoisted above it (raw store pins later loads; in-struct stores don't). */
 #include "TOBJ.H"
 extern short D_1F800238;
-extern short *D_8009C948;
 extern int D_1F8002E8;
 extern void *D_8013F134;
 extern void *D_8013F1BC;
@@ -27,7 +27,7 @@ void func_80134EE8(TObj *o)
     if (!t) n = 6;
     if (D_1F800238 < n - 1) {
         o->b04 = 3;
-        D_8009C948[5]--;
+        (*(short **)&GVARS.p48)[5]--;
         return;
     }
     list[0] = o;

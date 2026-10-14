@@ -1,9 +1,9 @@
 // FUNC 80119bf4 760 X001
 // MATCHING 80119bf4 760
+#include "gvars.h"
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern void *D_8013E540[];
-extern unsigned char D_8009C940, D_8009C941;
 extern unsigned short D_1F80016E[];
 extern unsigned short D_1F800172[];
 typedef struct { short x; } SX;
@@ -35,7 +35,7 @@ void func_80119BF4(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (D_8009C940 && D_8009C941 == 0xd) {
+            if (GVARS.b40 && GVARS.b41 == 0xd) {
                 o->h->p.whole = D_1F80016A.x;
                 o->y.p.whole = D_1F80016E[0] - 0x20;
                 o->d->p.whole = D_1F800172[0];

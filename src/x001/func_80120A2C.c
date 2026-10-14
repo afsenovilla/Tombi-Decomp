@@ -1,10 +1,10 @@
 // FUNC 80120a2c 1016 X001
 // MATCHING 80120a2c 1016
+#include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D0C9;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CF0B[];
-extern unsigned char D_8009C93A;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern char D_8013C768[];
@@ -18,7 +18,7 @@ extern void func_80120780(TObj *);
 
 static __inline__ int onscreen(TObj *o)
 {
-    if (D_8009C93A == 0) return 0;
+    if (GVARS.b3a == 0) return 0;
     if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
     return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

@@ -1,8 +1,9 @@
 // FUNC 8011dd94 832 X001
 // MATCHING 8011dd94 832
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { Fix16 x, y, z; } V3;
-extern unsigned char D_8009CEAE[], D_8009C942;
+extern unsigned char D_8009CEAE[];
 extern char D_8013C564[];
 extern void FUN_80020078(TObj *, int);
 extern void func_8011DB5C(TObj *);
@@ -70,7 +71,7 @@ void func_8011DD94(TObj *o)
     case 1:
         FUN_80020078(o, 0x78);
         if (o->b0c == 0) {
-            if (D_8009C942 == 0)
+            if (GVARS.b42 == 0)
                 func_8011DB5C(o);
             break;
         }

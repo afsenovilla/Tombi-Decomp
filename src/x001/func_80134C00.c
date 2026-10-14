@@ -1,5 +1,6 @@
 // FUNC 80134c00 744 X001
 // MATCHING 80134c00 744
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     TObj t;
@@ -7,7 +8,7 @@ typedef struct {
     short wd2;
 } P;
 
-extern unsigned char D_8009D2C3, D_8009C942;
+extern unsigned char D_8009D2C3;
 extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
@@ -40,7 +41,7 @@ void func_80134C00(P *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(&o->t);
             break;
         }

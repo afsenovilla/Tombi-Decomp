@@ -1,9 +1,10 @@
 // FUNC 8012b2d4 2116 X001
 // MATCHING 8012b2d4 2116
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern int D_1F8002D0[];
-extern unsigned char D_8009CEAE, D_8009C942;
+extern unsigned char D_8009CEAE;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern short D_800A4582, D_800A457E;
@@ -116,7 +117,7 @@ void func_8012B2D4(BX *b)
             o->substep = 0;
             break;
         }
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }

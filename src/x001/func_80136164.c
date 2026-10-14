@@ -1,9 +1,9 @@
 // FUNC 80136164 824 X001
 // MATCHING 80136164 824
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char D_8009C942[], D_8009C93F[], D_8009C93E[];
 extern void *D_8013DE2C, *D_8013DDC8, *D_8013DE0C, *D_8013DDB0;
 extern void func_80135B48(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -31,9 +31,9 @@ void func_80136164(TObj *o)
         break;
     case 1:
         if (--o->timer > 0) break;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
-        D_8009C93E[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
         o->state++;
         break;
     case 2:
@@ -75,9 +75,9 @@ void func_80136164(TObj *o)
         break;
     }
     if (!o->visible) {
-        D_8009C942[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         o->b04 = 3;
         o->step = 0;
         o->state = 0;

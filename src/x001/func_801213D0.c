@@ -1,5 +1,6 @@
 // FUNC 801213d0 960 X001
 // MATCHING 801213d0 960
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -14,7 +15,6 @@ typedef struct {
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
 extern unsigned short D_8009D670;
-extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
 extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
@@ -41,8 +41,8 @@ void func_801213D0(TObj *o)
     switch (o->substep) {
     case 0:
         D_8009D2E8->d84 = o->d88 - 0xc0;
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8010eaf8(o);
         o->h->raw += o->velX << 8;
         FUN_80104dc8(o);
@@ -54,8 +54,8 @@ void func_801213D0(TObj *o)
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
         e->d84 = o->d88 - 0xc0;
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 == 0 && func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x30) == 0

@@ -1,11 +1,11 @@
 // FUNC 8012efc4 1156 X001
 // MATCHING 8012efc4 1156
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pc0[0x12]; unsigned short d2; } TObjX;
 typedef void (*Fn)(TObj *);
 
-extern unsigned char D_8009C942;
 extern int DAT_1f8002d0[];
 extern Fn D_8013C8FC[];
 extern unsigned short D_1F8001F8;
@@ -61,7 +61,7 @@ void func_8012EFC4(TObjX *e)
         }
         break;
     case 1:
-        if (D_8009C942 != 0) {
+        if (GVARS.b42 != 0) {
             if (o->visible != 0)
                 FUN_800202b4(o);
             break;
@@ -124,7 +124,7 @@ void func_8012EFC4(TObjX *e)
     case 2:
         switch (o->step) {
         case 0:
-            if (D_8009C942 != 0) {
+            if (GVARS.b42 != 0) {
                 FUN_800202b4(o);
                 break;
             }

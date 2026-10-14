@@ -1,10 +1,10 @@
 // FUNC 80137afc 656 X001
 // MATCHING 80137afc 656
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern signed char D_8009D2B0[];
-extern unsigned char D_8009C942, D_8009C93F[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void FUN_80026e0c(int, int);
@@ -52,10 +52,10 @@ void func_80137AFC(TObj *o)
         t = p->y.p.whole - p->box2;
         if (o->y.p.whole < (short)t) {
             {
-                unsigned char *q = &D_8009C942;
+                unsigned char *q = &GVARS.b42;
                 D_8009D2B0[0] = 0;
                 *q = 0;
-                D_8009C93F[0] = 0;
+                ((unsigned char*)&GVARS.b3f)[0] = 0;
                 *q = 0;
             }
             o->y.p.whole = t;

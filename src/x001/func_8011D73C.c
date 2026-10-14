@@ -1,5 +1,6 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,7 @@
 extern unsigned char D_8009CDBA;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC;
-extern unsigned char D_8009C93F, D_8009CE40, D_8009D093, D_8009D092;
+extern unsigned char D_8009CE40, D_8009D093, D_8009D092;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003D0;
 extern short D_1F8001C6;
 extern char D_8001D6A4[];
@@ -58,7 +59,7 @@ void func_8011D73C(TObj *o)
             switch (o->state) {
             case 0:
                 FUN_8001f110(1);
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
                 GAME.fadeScreenControl = 3;
                 o->state++;
             case 1:
@@ -98,7 +99,7 @@ void func_8011D73C(TObj *o)
             case 1:
                 if (GAME.fadeScreenControl) break;
                 PLAYER.obj.wb2 = 0;
-                D_8009C93F = 0;
+                GVARS.b3f = 0;
                 setEventComplete(0x16, 0);
                 o->step = 0;
                 break;

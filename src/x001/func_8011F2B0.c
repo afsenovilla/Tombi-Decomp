@@ -1,5 +1,6 @@
 // FUNC 8011f2b0 1044 X001
 // MATCHING 8011f2b0 1044
+#include "gvars.h"
 #include "player.h"
 /* Debt: empty do {} while (0) after the b04 store in the default arm ends the sched block so the call
    arguments are not scheduled above the store. */
@@ -13,7 +14,7 @@ extern unsigned short D_800A604EA[];
 extern Fix16 * D_800A607CA[];
 extern int D_800A60C4A[];
 extern unsigned char D_800A6047A[];
-extern unsigned char D_8009C985, D_8009C940, D_8009C941, D_8009CEAD;
+extern unsigned char D_8009C985, D_8009CEAD;
 extern signed char D_80011EB4[];
 extern E4 D_80011E30[];
 extern void *D_8013E70C, *D_8013E708;
@@ -37,8 +38,8 @@ void func_8011F2B0(TObj *o)
     switch (o->state) {
     case 0:
         c = D_8009C985 & 1;
-        if (D_8009C940) {
-            switch (D_8009C941) {
+        if (GVARS.b40) {
+            switch (GVARS.b41) {
             case 5:
             case 7:
             case 0xe:

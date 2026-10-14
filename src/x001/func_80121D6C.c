@@ -1,10 +1,10 @@
 // FUNC 80121d6c 728 X001
 // MATCHING 80121d6c 728
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj *D_8009C330;
-extern unsigned char D_8009C942[], D_8009C93F[];
 extern unsigned short D_1F8001F8;
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8003facc(TObj *);
@@ -32,8 +32,8 @@ void func_80121D6C(TObj *o)
         o->d8c = 0;
         (*(unsigned char*)&o->waa) = 1;
         o->timer = 0xf;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         o->state++;
     case 1:
         AnimAdvance(o);
@@ -65,7 +65,7 @@ void func_80121D6C(TObj *o)
         w = x + 8;
         z = (short)(o->d->p.whole / 90) * 90;
         if ((FUN_8004232c(x - 8, y, z) & 2) || (FUN_8004232c(w, y, z) & 2)) {
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             o->b04 = 1;
             o->step = 0x16;
             o->state = 0;
