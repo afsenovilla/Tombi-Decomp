@@ -1,5 +1,6 @@
 // FUNC 8003f200 804 MAIN0
 // MATCHING 8003f200 804
+#include "spad.h"
 #include "player.h"
 #include "gamestate.h"
 typedef struct { short x, y; } XY;
@@ -12,8 +13,6 @@ extern XY D_8007B44C[];
 extern XY *D_8007B46C;
 extern unsigned char *D_8007B55C[];
 extern char *D_1F800308[];
-extern char *D_1F80030C;
-extern unsigned short D_1F8001C8;
 #define M960 D_8009C960h
 
 char *getCollisionPlaneAt(short x, short y)
@@ -30,16 +29,16 @@ char *getCollisionPlaneAt(short x, short y)
             b = D_1F800308[0];
             y -= 0x10e;
         } else {
-            b = D_1F80030C;
+            b = (*(char **)&SPAD.p30c);
         }
         t = D_8007B460[M960];
         t += GAME.selectedSection;
     } else if ((M960 == 4 || M960 == 12) && GAME.selectedSection < 4) {
         t = &D_8007B450[GAME.selectedSection];
-        b = D_1F800308[D_1F8001C8 & 1];
+        b = D_1F800308[SPAD.s1c8 & 1];
     } else if (M960 == 3 && (GAME.selectedSection == 1 || GAME.selectedSection == 5)) {
         if ((*(short **)&PLAYER.obj.d)[1] < 0) {
-            b = D_1F80030C;
+            b = (*(char **)&SPAD.p30c);
             t = D_8007B44C;
             y += 0x5a;
         } else {
@@ -52,7 +51,7 @@ char *getCollisionPlaneAt(short x, short y)
         b = D_1F800308[0];
         t += GAME.selectedSection;
     }
-    if (D_1F8001C8 & 1)
+    if (SPAD.s1c8 & 1)
         r = (t->y - y) / 90;
     else
         r = (y - t->y) / 90;

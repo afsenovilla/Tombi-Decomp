@@ -1,12 +1,13 @@
 // FUNC 8011e30c 1324 X000
 // MATCHING 8011e30c 1324
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "player.h"
 extern short D_1F80016E;
 extern unsigned short D_1F80016A;
 extern unsigned short D_1F80016Eu;
-extern unsigned char D_8009CE0B, D_8009CFED, D_8009D13F;
+extern unsigned char D_8009D13F;
 extern unsigned char D_800A603Cb;
 int func_800202B4(TObj *o);
 void func_8011E1B0(TObj *o);
@@ -40,7 +41,7 @@ void func_8011E30C(TObj *o)
                 }
                 break;
             case 1:
-                if (D_8009CE0B) func_8011E1B0(o);
+                if (GCD.bce0b) func_8011E1B0(o);
                 break;
             case 2:
                 switch (o->state) {
@@ -60,7 +61,7 @@ void func_8011E30C(TObj *o)
                 }
                 break;
             case 3:
-                if (D_8009CFED == 1) {
+                if (GCD.bcfed == 1) {
                     switch (o->state) {
                     case 0:
                         if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x20) < 0x41 &&

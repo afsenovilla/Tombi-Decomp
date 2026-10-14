@@ -1,5 +1,6 @@
 // FUNC 80137458 864 X000
 // MATCHING 80137458 864
+#include "plx.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -12,7 +13,6 @@ extern unsigned short D_1F8001FC;
 extern unsigned char D_800A60F8;
 extern unsigned char D_8009D0A7;
 extern unsigned char D_8009CEBD;
-extern unsigned char *D_800A611C;
 extern unsigned char D_8009D00D;
 extern unsigned char D_8009CFFB;
 
@@ -61,11 +61,11 @@ short func_80137458(TObj *o)
                 if (D_8009CEBD == 0) {
                     if (PLAYER.obj.y.p.whole < -0x110 && (*(unsigned char*)&PLAYER.obj.wac) == 3) {
                     l6ac:
-                        if (D_800A611C[2] == 0x15) {
+                        if ((*(unsigned char **)&PLX.p611c)[2] == 0x15) {
                             n++;
                             ((unsigned char*)&GVARS.b42)[0] = 0;
                             D_800A60F8 = 0;
-                            *p = D_800A611C;
+                            *p = (*(unsigned char **)&PLX.p611c);
                             *(short *)&o->anim = 0;
                         }
                     }

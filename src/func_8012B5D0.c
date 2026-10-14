@@ -1,12 +1,12 @@
 // FUNC 8012b5d0 1220 X000
 // MATCHING 8012b5d0 1220
+#include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
 extern unsigned char D_801390EC[], D_801390F4[];
 extern unsigned short *D_8013A160[];
 extern unsigned short *D_8013A21C, *D_8013A220, *D_8013A268;
 extern unsigned char D_80138FD8[];
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityXY(TObj *);
@@ -28,9 +28,9 @@ static __inline__ void SetBox(TObj *o)
 
 static __inline__ short InRange(TObj *o)
 {
-    if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) >= 0x5b) return 0;
-    if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x46) >= 0x6f) return 0;
-    return (unsigned short)(o->h->p.whole - D_1F80016A + 0x80) < 0x101;
+    if ((unsigned short)(o->d->p.whole - (*(unsigned short*)((char*)&SPAD.i170 + 2)) + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)(o->y.p.whole - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + 0x46) >= 0x6f) return 0;
+    return (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x80) < 0x101;
 }
 
 void func_8012B5D0(TObj *o)
@@ -62,9 +62,9 @@ void func_8012B5D0(TObj *o)
         AnimAdvanceWithBox(o);
         if (o->b0c == 1)
             break;
-        dx = o->h->p.whole - D_1F80016A;
+        dx = o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2));
         dx += 0xa0;
-        if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) >= 0x5b
+        if ((unsigned short)(o->d->p.whole - (*(unsigned short*)((char*)&SPAD.i170 + 2)) + 0x2d) >= 0x5b
             || dx >= 0x141) {
             o->timer = 0;
         } else if (o->timer++ > 0x3c) {

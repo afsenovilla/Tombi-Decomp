@@ -1,5 +1,6 @@
 // FUNC 80124780 772 X000
 // MATCHING 80124780 772
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -26,9 +27,7 @@ typedef struct {
 } PF4;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern char *D_1F800164;
-extern int D_1F8001E0;
 extern int D_1F800074i;
 int projectActorPosition(void *o, long *sxy, long *z);
 int FUN_8004fcc0(void *p);
@@ -44,7 +43,7 @@ void func_80124780(Ext *o)
     PF4 *f;
     char *q;
 
-    if (projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074) != 0)
+    if (projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74) != 0)
         return;
     xy = LZ_FILE_CTRL;
     x = xy;
@@ -61,9 +60,9 @@ void func_80124780(Ext *o)
         return;
     setupActorPolyFT4(o, p, (char *)*(volatile int *)&o->t.d3c + *(short *)(o->t.d3c + (*(unsigned short *)o->t.anim << 2) + 2));
     if (o->t.b0b != 0)
-        insertPrim(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
+        insertPrim(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
     else
-        insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
+        insertPrimWithBias(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
     q = D_1F800164;
     f = (PF4 *)(q + 0x28);
     D_1F800164 = (char *)f;
@@ -82,9 +81,9 @@ void func_80124780(Ext *o)
     f->y3 = f->y2;
 
     if (o->t.b0b != 0)
-        insertPrim(f, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
+        insertPrim(f, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
     else
-        insertPrimWithBias(f, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
+        insertPrimWithBias(f, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
     D_1F800164 += 0x18;
 }
 

@@ -1,12 +1,11 @@
 // FUNC 80123344 772 X000
 // MATCHING 80123344 772
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short t; unsigned short x, y, z; } E;
 extern int D_8013B0E0;
 extern int D_80134DC4;
 extern int D_1F8002D4;
-extern unsigned char D_8009D0AA[];
-extern unsigned char D_8009D0C8[];
 extern unsigned short D_80138F0C[];
 extern E D_80138F14[];
 extern void AnimLoadDuration(TObj *o);
@@ -50,7 +49,7 @@ void func_80123344(TObj *o)
             o->h->p.whole = p->h->p.whole + 12;
             o->y.p.whole = p->y.p.whole;
             o->d->p.whole = p->d->p.whole;
-            if (D_8009D0AA[0] == 0) break;
+            if (((unsigned char*)&GCD.bd0aa)[0] == 0) break;
             goto next;
         case 1:
             switch (o->step) {
@@ -80,7 +79,7 @@ void func_80123344(TObj *o)
                 o->d->p.whole = p->d->p.whole;
                 break;
             }
-            if (D_8009D0C8[0] == 0) break;
+            if (((unsigned char*)&GCD.bd0c8)[0] == 0) break;
             goto next;
         }
         break;

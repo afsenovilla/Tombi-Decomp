@@ -1,11 +1,11 @@
 // FUNC 80028b84 92 MAIN0
+#include "spad.h"
 typedef struct {
     char pad[0x30];
     short x30;
     short x32;
 } O80028B84;
 
-extern short D_1F8000F2[];
 
 static __inline__ void clamp(O80028B84 *o, short *g)
 {
@@ -20,5 +20,5 @@ static __inline__ void clamp(O80028B84 *o, short *g)
 
 void func_80028B84(O80028B84 *o)
 {
-    clamp(o, D_1F8000F2);
+    clamp(o, ((short*)((char*)&SPAD.if0 + 2)));
 }

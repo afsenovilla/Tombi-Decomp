@@ -1,11 +1,11 @@
 // FUNC 80136bc0 288 X000
 // MATCHING 80136bc0 288
+#include "spad.h"
 #include "player.h"
 typedef struct Q { char p0[0x16]; short y; } Q;
 typedef struct R { char p0[2]; unsigned short w2; } R;
 typedef struct O { char p0[0x1c]; unsigned short w1c; char p1[2]; Q *q; } O;
 extern signed char D_8009D2B0;
-extern unsigned short D_1F8001FC, D_1F8003C4;
 extern char D_800A60F8;
 
 int func_80136BC0(O *o)
@@ -31,7 +31,7 @@ int func_80136BC0(O *o)
             goto end;
         }
     }
-    if (D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4)) {
+    if (D_8009D2B0 == 1 && (SPAD.s1fc & SPAD.s3c4)) {
         r = 1;
         D_800A60F8 = 0;
         o->w1c = 1;

@@ -1,5 +1,6 @@
 // FUNC 8001783c 776 MAIN0
 // MATCHING 8001783c 776
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "globals.h"
@@ -21,19 +22,13 @@ extern short DAT_1f8000e2;
 extern short DAT_1f8000e6;
 extern short DAT_1f8000f6;
 extern unsigned char DAT_1f8003d3;
-extern unsigned char D_8009D090;
 extern unsigned char D_8009C972;
-extern short D_8009CFD0;
-extern short D_8009CFD2;
 extern unsigned char DAT_1f8003ce;
 extern short DAT_1f8001c8;
 extern unsigned char DAT_1f8003d1;
 extern short D_8009F838;
 extern unsigned char D_8009C973;
-extern unsigned char D_8009CEAF;
 extern unsigned char SCRIPT_FLAGS;
-extern short D_8009CFD4;
-extern unsigned char D_8009CF1C;
 extern unsigned char D_8009D1A4;
 extern unsigned char D_8009D1A5;
 extern unsigned char D_8009D1A6;
@@ -48,20 +43,6 @@ extern unsigned char D_8009D1AE;
 extern unsigned char D_8009D1AF;
 extern unsigned char D_8009D1B0;
 extern unsigned char D_8009D1B1;
-extern unsigned char D_8009D0BF;
-extern unsigned char D_8009D0C5;
-extern unsigned char D_8009D0C6;
-extern unsigned char D_8009D0B9;
-extern unsigned char D_8009D0BA;
-extern unsigned char D_8009D0BB;
-extern unsigned char D_8009D0BC;
-extern unsigned char D_8009D0C4;
-extern unsigned char D_8009D0C1;
-extern unsigned char D_8009D0C0;
-extern unsigned char D_8009D0A9;
-extern unsigned char D_8009D0AA;
-extern unsigned char D_8009D0C8;
-extern unsigned char D_8009D0B8;
 extern void *memset(void *, int, int);
 extern void getBaseMatrix(void *);
 
@@ -83,8 +64,8 @@ void initGameConfig(void)
     *(unsigned short *)((char*)&GAME.selectedArea) = 0;
     GAME.playerLives = 3;
     GAME.saveSlot = 255;
-    D_8009D090 = 255;
-    D_8009CF1C = D_8009F3DC;
+    GCD.bd090 = 255;
+    GCD.bcf1c = D_8009F3DC;
     DAT_1f8003ce = 0;
     DAT_1f8001c8 = 0;
     DAT_1f8003d1 = 0;
@@ -92,14 +73,14 @@ void initGameConfig(void)
     (*(short*)&GAME.selectedSection) = 0;
     GAME.inventoryScreen = 0;
     D_8009C973 = 1;
-    D_8009CEAF = 1;
+    GCD.bceaf = 1;
     SCRIPT_FLAGS = 1;
     D_8009C972 = 9;
     GAME.playerHealthDisplayed = 4;
     GAME.playerHealth = 4;
-    D_8009CFD0 = 1498;
-    D_8009CFD2 = 1593;
-    D_8009CFD4 = 1681;
+    GCD.scfd0 = 1498;
+    GCD.scfd2 = 1593;
+    GCD.scfd4 = 1681;
     if (DAT_1f8001b3 == 0) {
         if (DAT_1f8001ab != 0) {
             D_8009D1A4 = 27;
@@ -117,27 +98,27 @@ void initGameConfig(void)
             D_8009D1B0 = 36;
             D_8009D1B1 = 20;
             D_8009D2A4 = 14;
-            D_8009D0BF = 1;
-            D_8009D0C5 = 1;
-            D_8009D0C6 = 1;
-            D_8009D0B9 = 1;
-            D_8009D0BA = 1;
-            D_8009D0BB = 1;
-            D_8009D0BC = 1;
-            D_8009D0C4 = 1;
-            D_8009D0C1 = 1;
-            D_8009D0C0 = 1;
-            D_8009D0A9 = 1;
-            D_8009D0AA = 1;
-            D_8009D0C8 = 1;
-            D_8009D0B8 = 1;
+            GCD.bd0bf = 1;
+            GCD.bd0c5 = 1;
+            GCD.bd0c6 = 1;
+            GCD.bd0b9 = 1;
+            GCD.bd0ba = 1;
+            GCD.bd0bb = 1;
+            GCD.bd0bc = 1;
+            GCD.bd0c4 = 1;
+            GCD.bd0c1 = 1;
+            GCD.bd0c0 = 1;
+            GCD.bd0a9 = 1;
+            GCD.bd0aa = 1;
+            GCD.bd0c8 = 1;
+            GCD.bd0b8 = 1;
             GV2.sa6 = 0x8000;
         } else {
             D_8009D1A4 = 27;
             D_8009D1A5 = 32;
             D_8009D2A4 = 2;
-            D_8009D0BF = 1;
-            D_8009D0C4 = 1;
+            GCD.bd0bf = 1;
+            GCD.bd0c4 = 1;
             GV2.sa6 = 0x8000;
         }
     }

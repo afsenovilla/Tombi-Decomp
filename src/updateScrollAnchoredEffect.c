@@ -1,6 +1,7 @@
 // FUNC 80030fcc 260 MAIN0
 // MATCHING 80030fcc 260
 // Ported from psx_tomba (effect.c, updateScrollAnchoredEffect); MIT licence of the original project.
+#include "gcd.h"
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -348,7 +349,6 @@ const u32 D_80010814[] = {
 };
 
 
-extern u8 D_8009D088;
 extern u8 D_8009BCA6;
 
 
@@ -2909,7 +2909,7 @@ void updateScrollAnchoredEffect(u8* self)
         self[4]++;
         break;
     case 1:
-        if (self[3] == 0x1B && D_8009D088 == 0xFF) {
+        if (self[3] == 0x1B && GCD.bd088 == 0xFF) {
             break;
         }
         self[1] = 1;

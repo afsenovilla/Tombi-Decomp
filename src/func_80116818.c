@@ -1,5 +1,6 @@
 // FUNC 80116818 1276 X000
 // MATCHING 80116818 1276
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -7,7 +8,7 @@
 #include "gamestate.h"
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
 extern G6038 PLAYER;
-extern unsigned char D_8009C966, D_8009D095, D_8009C933;
+extern unsigned char D_8009C966, D_8009C933;
 extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern void FUN_80029cb4(TObj *);
@@ -61,7 +62,7 @@ void func_80116818(TObj *o)
         D_8009C966 = 1;
         o->state++;
         setEventStarted(2, 0, 1);
-        if (D_8009D095 != 0) break;
+        if (GCD.bd095 != 0) break;
         p = allocObjectUnlayered();
         if (p == 0) break;
         p[0] = 1;
@@ -75,7 +76,7 @@ void func_80116818(TObj *o)
         } else {
             p[1] = 1;
         }
-        D_8009D095 = 1;
+        GCD.bd095 = 1;
         break;
     case 1:
         FUN_80029cb4(o);

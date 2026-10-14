@@ -1,8 +1,7 @@
 // FUNC 8002e83c 624 MAIN0
+#include "spad.h"
 /* score 94 (short r,k): game stores anim/d3c via a0 (move a0,sX before a cross-jumped tail sw 0x24(a0); jal AnimLoadDuration; sw 0x3c(a0)) with the D_ loads duplicated in each path; also c-path y mult scheduled early */
 #include "TOBJ.H"
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern int D_1F8002D8;
 extern void *D_80012204;
 extern short D_8007A5F0[];
@@ -21,7 +20,7 @@ void func_8002E83C(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if (((D_1F8001F8 + D_1F800198) & 1) == 0) break;
+            if (((SPAD.s1f8 + SPAD.i198) & 1) == 0) break;
             if (--o->timer == -1) {
                 o->b04 = 3;
                 break;

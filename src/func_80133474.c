@@ -1,5 +1,6 @@
 // FUNC 80133474 3152 X000
 // MATCHING 80133474 3152
+#include "gcd.h"
 #include "gvars.h"
 /* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
  * call;call;j blocks that cross-jumping merged).
@@ -21,7 +22,6 @@ extern int D_800A60C4a[];
 extern int D_8009C984A[];
 #define D_8009C984 D_8009C984A[0]
 extern int D_8009C984s;
-extern unsigned char D_8009CDA7[];
 extern int D_1F8002D4[];
 extern void *D_8013B17C[];
 extern void *D_8013B188;
@@ -104,7 +104,7 @@ void func_80133474(TObj *o)
                 D_8009C984 |= 2;
                 func_800EEA7C(&PLAYER, 0xd, 0);
                 o->timer = 2;
-                if (D_8009CDA7[0] == 0) {
+                if (((unsigned char*)&GCD.bcda7)[0] == 0) {
                     o->w78 = 1;
                     o->h->p.whole = PLAYER.h->p.whole;
                     PLAYER.y.p.whole = o->y.p.whole - o->box2;
