@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/logo_jp.png" alt="Ore! Tomba" width="420"></p>
+<p align="center"><img src="docs/logo.png" alt="Tombi!" width="380">&nbsp;&nbsp;<img src="docs/logo_jp.png" alt="Ore! Tomba" width="380"></p>
 
 # Tombi! (Tomba!) decomp
 
