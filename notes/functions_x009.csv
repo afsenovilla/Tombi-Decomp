@@ -489,7 +489,7 @@ address,size,name,twin
 80128b4c,248,func_80128B4C,
 80128c44,648,flowerTearsSeekerTalk,
 80128ecc,552,func_80128ECC,
-801290f4,592,func_801290F4,
+801290f4,592,stepFlowerTearsSeekerTalk,
 80129344,368,func_80129344,
 801294b4,168,func_801294B4,X004:80129524
 8012955c,932,updateBoatman,
@@ -502,4 +502,4 @@ address,size,name,twin
 80129ef8,2024,aspiringActorGuardTalk,
 8012a6e0,32,FUN_8012a6e0,MAIN0:80068fc4
 8012a700,12,func_8012A700,X001:8013a0cc
-8012a70c,168,func_8012A70C,X002:8011c628
+8012a70c,168,updateAspiringActorGuard,X002:8011c628

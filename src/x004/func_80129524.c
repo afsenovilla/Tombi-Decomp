@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void func_801293A0(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void func_80129250(TObj *);
+extern void stepMermaidTalk(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void func_80129524(TObj *o)
@@ -14,7 +14,7 @@ void func_80129524(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        func_80129250(o);
+        stepMermaidTalk(o);
         break;
     case 2:
         o->b04++;

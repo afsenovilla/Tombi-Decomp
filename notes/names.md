@@ -223,3 +223,39 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x018 801194d4 witchMizunoHuntPigsTalk` - MFNT180S 3/13 "shouldn't you be hunting evil pigs?"
 - `x018 8011973c witchMizunoCandyRecipeTalk` - MFNT180S 3/15-22: lists the missing magic candy ingredients
 - `x018 80116bdc juiceManJoinFightTalk` - MFNT180S 2/13, 3/23: "want more juice? ... you'll fight the evil pig, I'll come with you"
+- `x001 80135164 wrongWayHintTalk` - MFNT010S 2/12 "Eh, vas por el camino equivocado..." (called by 8013649c)
+- `x002 80118028 sevenFriendsGoodLuckTalk` - MFNT020S 3/0-2: "I hope you find seven friends soon... good luck Tombi!"
+- `x003 8012ab5c fungaDwarfTalk` - MFNT030S 3/0-3 "...¡Funga!" (four lines, item check, starts/completes events; uncertain speaker)
+- `x003 80132214 soakedPhoenixGuideTalk` - MFNT030S 2/4-12: soaked, the Phoenix (giant bird) can take you to the jungle, sneezes, "get off the mountain"
+- `x004 80129650 scaredGoldVolunteerTalk` - MFNT040S 5/1 "Evil pigs... gold...! I'm scared but I'll go!"
+- `x004 8012d4ac updateFreedVillager` - subtype switch over the MFNT040S group 5 villager lines below (+ lostBossItemNpcTalk)
+- `x004 8012c004 cableOwnerThanksTalk` - MFNT040S 5/9-10: thanks for breaking the evil pig spell, "a cable? I used to use one"
+- `x004 8012c1a8 singingMinerRumorTalk` - MFNT040S 5/11-12: "la la la... I wasn't singing", a miner found something
+- `x004 8012c3d0 homeSweetHomeTalk` - MFNT040S 5/7-8: "home sweet home, thanks Tombi", the mermaid is somewhere above
+- `x004 8012c574 mermaidSightingTalk` - MFNT040S 5/4-5: long time since we came here, a mermaid was seen leaving the mansion
+- `x004 8012c718 ownHouseThiefTalk` - MFNT040S 5/6 "what kind of thief robs his own house..."
+- `x004 8012c884 villagerRewardTalk` - MFNT040S 5/13 "here, this is for helping us"
+- `x004 8012d198 lostTreasureBossTalk` - MFNT040S 5/2-3: "long time no see... my treasure? I gave it to my right-hand man / lost it"
+- `x005 80116e78 stepBacoTownNpcTalk` - subtype switch over the Baco town lines (wineMerchantTalk, townGuideTalk, ..., wineKeeperTalk)
+- `x005 801162b4 wineMerchantTalk` - MFNT050S 2/39-41, 2/50: "it's where?!", then "wine again! take all you want"
+- `x005 8011698c noticeBoardTownsfolkTalk` - MFNT050S 2/61, 2/67, 2/82, 2/89: town notices board, small key in the haunted mansion
+- `x005 80116cf8 safeMushroomHintTalk` - MFNT050S 2/98: healing mushrooms vs laughing/crying/suspicious mushrooms
+- `x011 80119498 stepFactoryNpcTalk` - subtype/step switch over the GoGo car, Bonsugee, factory boss and power plant talk functions
+- `x011 80118328 factoryBossIronCastleDoorTalk` - MFNT110S 2/13-15: the Iron castle door is old, "make a bomb? just kidding", the hidden bomb
+- `x011 8011921c gratefulHelperTalk` - MFNT110S 3/21 "you've done a lot for me, I'm ready to help" (subtype 3; speaker uncertain)
+- `x016 801174b8 brokenStoneGearsTalk` - MFNT160S 4/0 "the stone gears are broken..."
+- `x017 801179ec pigGateFavorTalk` - MFNT170S 2/48: "the evil pig gate near the underground labyrinth? if it's a favor for you, I'll do it"
+- `x017 80118ea0 waterfallElderHintScene` - MFNT170S 2/32-39 scene (bgm/events): we owe you, the 10,000-year elder, Old pond key, raft back
+- `x001 8013649c updateForestDwarf` - layer handler whose strips show the pink Funga-speaking dwarf with a red scarf; calls wrongWayHintTalk
+- Talk object handlers (pattern: `update<Npc>` = the placed-object handler, `switch (o->b04)` init/active/free; `step<Npc>Talk` = its `switch (o->step)` choosing which talk function runs from story flags):
+  x001 8013b984 updateLostSeedKid, 8013bab0 updatePuppyRumorNpc; x002 801182ac stepSevenFriendsTalk, 80118534 updateSevenFriendsNpc;
+  x003 80129868 stepPhoenixSpiritHintTalk, 8012b454 updateFungaDwarf, 8012bcb8 stepTreasureChestGuardTalk, 8012bedc updateTreasureChestGuard,
+  8012c858 updateTunnelDigger, 801300b0 updateLostBossItemNpc, 801331fc stepSoakedPhoenixGuideTalk, 801332cc updateSoakedPhoenixGuide,
+  80134c84 stepHidingSonTalk, 80134e60 updateHidingSon; x004 80129250 stepMermaidTalk, 801298dc stepScaredGoldVolunteerTalk,
+  80129a9c updateScaredGoldVolunteer, 80129f10 stepPaintingSlotHintTalk, 8012a124 updatePaintingSlotHintNpc, 8012a670 stepTownHallWorkerTalk,
+  8012a8b8 updateTownHallWorker, 8012fb4c updateUnbendingCableNpc, 8013013c stepHidingSonTalk, 80130320 updateHidingSon;
+  x005 801171a4 updateBacoTownNpc; x009 801290f4 stepFlowerTearsSeekerTalk, 8012a70c updateAspiringActorGuard; x010 80125c50 updateLostHatMan,
+  80126ea0 stepTenThousandYearElderTalk, 801270ac updateTenThousandYearElder, 8012de2c stepHidingSonTalk, 8012e010 updateHidingSon;
+  x011 80119940 updateFactoryNpc; x016 801179a4 updateBrokenStoneGearsNpc, 80117d80 stepClockTowerRestoredTalk, 80117f60 updateClockTowerRestoredNpc,
+  80118ae8 updateJuiceSeller; x017 80117c84 stepWaterfallHintNpcTalk (machine room / pig gate favor / elder hint lines), 801184fc updateRaftReturnNpc,
+  80118338 stepRaftReturnTalk, 8011974c updateWaterfallElderHintSceneObj; x018 801170f4 updateJuiceManJoinFight

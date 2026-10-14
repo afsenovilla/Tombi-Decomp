@@ -2,7 +2,7 @@
 // MATCHING 80129be4 220
 #include "TOBJ.H"
 extern void func_80129A2C(TObj *);
-extern void func_80129868(TObj *);
+extern void stepPhoenixSpiritHintTalk(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -17,7 +17,7 @@ void func_80129BE4(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        func_80129868(o);
+        stepPhoenixSpiritHintTalk(o);
         break;
     case 2:
         if ((unsigned short)o->wba == 3) {

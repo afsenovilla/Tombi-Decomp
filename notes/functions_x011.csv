@@ -332,7 +332,7 @@ address,size,name,twin
 80118040,108,func_80118040,
 801180ac,148,func_801180AC,
 80118140,488,factoryBossTalk,
-80118328,4,func_80118328,
+80118328,4,factoryBossIronCastleDoorTalk,
 8011832c,276,func_8011832C,
 80118440,296,func_80118440,
 80118568,132,func_80118568,
@@ -344,10 +344,10 @@ address,size,name,twin
 80118be0,488,factoryBossDoorAskTalk,
 80118dc8,620,powerPlantThanksTalk,
 80119034,488,powerPlantElevatorHintTalk,
-8011921c,636,func_8011921C,
-80119498,740,func_80119498,
+8011921c,636,gratefulHelperTalk,
+80119498,740,stepFactoryNpcTalk,
 8011977c,452,func_8011977C,
-80119940,168,func_80119940,X004:80129524
+80119940,168,updateFactoryNpc,X004:80129524
 801199e8,8,func_801199E8,
 801199f0,420,func_801199F0,
 80119b94,8,func_80119B94,

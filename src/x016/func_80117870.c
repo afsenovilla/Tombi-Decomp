@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
 
-extern void func_801174B8(TObj *);
+extern void brokenStoneGearsTalk(TObj *);
 extern void func_8011767C(TObj *);
 
 void func_80117870(TObj *o)
@@ -28,7 +28,7 @@ void func_80117870(TObj *o)
         }
         break;
     case 1:
-        func_801174B8(o);
+        brokenStoneGearsTalk(o);
         break;
     case 2:
         func_8011767C(o);
