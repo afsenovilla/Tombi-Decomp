@@ -1,10 +1,10 @@
 // FUNC 80127290 1084 X009
 // MATCHING 80127290 1084
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern unsigned char D_800A6047;
 extern void *D_8012EE98[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -37,7 +37,7 @@ void func_80127290(TObj *o)
     switch (o->state) {
     case 0:
         o->state++;
-        o->b0f = D_800A6047 + 1;
+        o->b0f = PLAYER.obj.b0f + 1;
         if (o->animFrame)
             o->velH = -0x100;
         else

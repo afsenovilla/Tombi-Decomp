@@ -1,5 +1,6 @@
 // FUNC 801253ac 1844 X010
 // MATCHING 801253ac 1844
+#include "player.h"
 /* D_8009CDF2 is read through two names (k via the array, the talk test via the scalar) to keep both loads. */
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,8 +8,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3B8[];
 extern unsigned char D_8009C93E, D_8009C93F[], D_8009C940, D_8009C941, D_8009C942[];
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_800A60EA;
 extern unsigned char D_8009CDF2a[];
 extern unsigned char D_8009CDF2, D_8009D143;
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -34,9 +33,9 @@ void func_801253AC(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->animFrame = o->b68 & 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
@@ -165,10 +164,10 @@ void func_801253AC(TObj *o)
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
         D_8009C93E = 0;
-        D_800A60EA = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.wb2 = 0;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->b68 = 0;
         switch (*(unsigned short *)((char *)o + 0xc2)) {
         case 0xf0:

@@ -1,4 +1,5 @@
 // FUNC 80125fb4 1280 X010
+#include "player.h"
 /* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
    showMessageBoxDirect call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
    jal delay slot), so the tails only merge from setanim(o, 2). Tried: pointer/extra local for
@@ -10,11 +11,10 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_8009D0E7[];
 extern unsigned char D_8009C970, D_8009C971;
-extern short D_800A6108, D_800A610A, D_800A60EA;
+extern short D_800A6108, D_800A610A;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
@@ -37,9 +37,9 @@ void func_80125FB4(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->state++;
@@ -102,9 +102,9 @@ void func_80125FB4(TObj *o)
         if (--o->timer <= 0) o->state++;
         break;
     case 8:
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         v = *(V6 *)&o->a;
@@ -126,12 +126,12 @@ void func_80125FB4(TObj *o)
             FUN_8001e4f0(10);
         }
         setanim(o, 0);
-        D_800A603C = 1;
+        PLAYER.obj.b04 = 1;
         D_8009C93F = 0;
         D_8009C942 = 0;
-        D_800A60EA = 0;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.wb2 = 0;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->animFrame = 1;
         o->b68 = 0;
         o->step = 0;

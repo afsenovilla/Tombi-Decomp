@@ -1,11 +1,10 @@
 // FUNC 80124370 1680 X010
 // MATCHING 80124370 1680
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern Fix16 *D_800A6078, *D_800A607C;
-extern unsigned short D_800A604E;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern int Rand(void);
@@ -48,9 +47,9 @@ static __inline__ void turn(TObj *o)
 
 static __inline__ int near(TObj *o)
 {
-    if ((unsigned short)(D_800A607C->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
-    if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
-    return (unsigned short)(D_800A604E - o->y.p.whole + 0x50) < 0xa1;
+    if ((unsigned short)((*(Fix16 **)&PLAYER.obj.d)->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
+    return (unsigned short)((*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x50) < 0xa1;
 }
 
 void func_80124370(TObj *o)

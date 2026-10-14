@@ -1,8 +1,8 @@
 // FUNC 801234c8 576 X010
 // MATCHING 801234c8 576
+#include "player.h"
 #include "TOBJ.H"
 
-extern unsigned short D_800A6066;
 extern unsigned char D_8009D2B0[], D_8009C93F[], D_8009C942;
 extern unsigned int FUN_8001f9e0(void);
 extern int FUN_8001fec0(TObj *);
@@ -17,7 +17,7 @@ void func_801234C8(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->animFrame = D_800A6066 & 1;
+        o->animFrame = PLAYER.obj.animFrame & 1;
         t = p->h->p.whole - p->box0;
         if (o->h->p.whole < t) {
             o->h->p.whole = t;

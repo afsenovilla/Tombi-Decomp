@@ -1,10 +1,10 @@
 // FUNC 80123828 1216 X009
 // MATCHING 80123828 1216
+#include "player.h"
 #include "TOBJ.H"
 extern char D_80077D24[];
 extern void *D_8012EA44[0];
 extern void *D_8012EA24[0];
-extern unsigned char D_800A603E, D_800A60E4;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void FUN_8001fe6c(TObj *);
@@ -65,8 +65,8 @@ void func_80123828(TObj *o)
         goto test;
     case 1:
         if (--o->timer != 0) goto fall;
-        D_800A603E = 2;
-        D_800A60E4 = 3;
+        PLAYER.obj.state = 2;
+        (*(unsigned char*)&PLAYER.obj.wac) = 3;
         goto next;
     case 2:
         r = land(o);
@@ -85,8 +85,8 @@ void func_80123828(TObj *o)
     case 4:
         FUN_8001fec0(o);
         if (--o->timer == 0) {
-            D_800A603E = 2;
-            D_800A60E4 = 3;
+            PLAYER.obj.state = 2;
+            (*(unsigned char*)&PLAYER.obj.wac) = 3;
             o->state++;
         }
     case 5:

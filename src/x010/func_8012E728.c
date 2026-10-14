@@ -1,9 +1,9 @@
 // FUNC 8012e728 416 X010
 // MATCHING 8012e728 416
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void func_8012E550(TObj *);
 extern void setEventComplete(int, int);
 extern void PoolFree_1F800210(TObj *);
@@ -26,9 +26,9 @@ void func_8012E728(TObj *o)
                 if (--o->w08 <= 0) o->state = 15;
                 break;
             case 2:
-                D_800A603C = 5;
-                D_800A603D = 100;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 5;
+                PLAYER.obj.step = 100;
+                PLAYER.obj.state = 0;
                 D_8009C93F = 1;
                 D_8009C942 = 1;
                 D_8009C93E = 1;
@@ -37,9 +37,9 @@ void func_8012E728(TObj *o)
                 o->state = 1;
                 break;
             case 15:
-                D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 1;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
                 D_8009C93F = 0;
                 D_8009C942 = 0;
                 D_8009C93E = 0;

@@ -1,10 +1,10 @@
 // FUNC 801190bc 696 X010
 // MATCHING 801190bc 696
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_8009C93C, D_8009C93F, D_8009C940, D_8009C941;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern TObj *TASK_C;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -42,9 +42,9 @@ void func_801190BC(TObj *o)
         case 1:
             if (--o->timer == -1) {
                 o->step++;
-                D_800A603C = 1;
-                D_800A603D = 0x12;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 1;
+                PLAYER.obj.step = 0x12;
+                PLAYER.obj.state = 0;
             }
             ObjCullRegister(o);
             break;

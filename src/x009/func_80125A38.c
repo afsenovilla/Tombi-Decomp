@@ -1,5 +1,6 @@
 // FUNC 80125a38 1684 X009
 // MATCHING 80125a38 1684
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,10 +9,6 @@ extern void *D_8012EE80[], *D_8012EE84[], *D_8012EEB0[], *D_8012EEB4[], *D_8012E
 extern void *D_8012EEC0[];
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-extern unsigned short *D_800A6078;
-extern unsigned short D_800A604E;
-extern unsigned char D_800A603E;
-extern short D_800A6066;
 extern unsigned short D_1F80016A, D_1F80016E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -76,7 +73,7 @@ void func_80125A38(TObj *o)
             o->state = 10;
             break;
         }
-        if ((((unsigned short)o->h->p.whole - D_800A6078[1] + 8) & 0xffff) > 0x10) break;
+        if ((((unsigned short)o->h->p.whole - (*(unsigned short **)&PLAYER.obj.h)[1] + 8) & 0xffff) > 0x10) break;
         o->wac = 0;
         o->state++;
         o->anim = D_8012EEB0[0];
@@ -153,7 +150,7 @@ void func_80125A38(TObj *o)
     case 7:
         AnimAdvance(o);
         o->y.p.whole -= 2;
-        { unsigned short *k = &D_800A604E; *k -= 2; }
+        { unsigned short *k = &(*(unsigned short*)&PLAYER.obj.y.p.whole); *k -= 2; }
         if (--o->timer == -1) o->state++;
         break;
     case 8:
@@ -169,8 +166,8 @@ void func_80125A38(TObj *o)
         break;
     case 9:
         if (--o->timer == -1) {
-            { unsigned char *c = &D_800A603E; *c = *c + 1; }
-            D_800A6066 = o->animFrame;
+            { unsigned char *c = &PLAYER.obj.state; *c = *c + 1; }
+            (*(short*)&PLAYER.obj.animFrame) = o->animFrame;
             o->b6a = 0;
         }
         if (AnimAdvance(o)) {
@@ -191,8 +188,8 @@ void func_80125A38(TObj *o)
         break;
     }
     if (GAME.playerHealth == 0 && o->b6a == 2) {
-        { unsigned char *c = &D_800A603E; *c = *c + 1; }
-        D_800A6066 = o->animFrame;
+        { unsigned char *c = &PLAYER.obj.state; *c = *c + 1; }
+        (*(short*)&PLAYER.obj.animFrame) = o->animFrame;
         o->b6a = 0;
     }
 }
