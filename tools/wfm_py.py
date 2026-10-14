@@ -345,6 +345,8 @@ class GlyphPool:
             if cap and low and low_acc and low.width == low_acc.width == cap.width:
                 return _compose_accent(cap, low, low_acc, ch, clut)
             return None
+        if ch == ":":
+            return self._synth_colon(h, clut)
         g8 = self.get(ch, 8, clut)
         if g8 is not None and h > 8 and h % 8 == 0:
             f = h // 8
@@ -353,6 +355,35 @@ class GlyphPool:
             out = [px[r * wd + c] for r in range(g8.height) for _ in range(f) for c in range(wd)]
             return _glyph_from_pixels(clut, h, wd, g8.hand, out, ch)
         return None
+
+    def _synth_colon(self, h, clut):
+        """':' is on no disc: the '.' glyph plus a copy of its dot raised to where ';' has its upper dot (or, without ';',
+        as far above the dot as the dot is tall plus a gap of the same size)."""
+        dot = self.get(".", h, clut)
+        if dot is None:
+            return None
+        wd = dot.width
+        dp = dot.pixels()
+        rows = lambda p, r: p[r * wd:(r + 1) * wd]
+        drows = [r for r in range(h) if any(rows(dp, r))]
+        if not drows:
+            return None
+        semi = self.get(";", h, clut)
+        top = None
+        if semi is not None and semi.width == wd:
+            sp = semi.pixels()
+            srows = [r for r in range(h) if any(rows(sp, r))]
+            if srows:
+                top = srows[0]
+        n = drows[-1] - drows[0] + 1
+        if top is None or top + n > drows[0]:
+            top = drows[0] - 2 * n
+        if top < 0:
+            return None
+        out = list(dp)
+        for i, r in enumerate(drows):
+            out[(top + r - drows[0]) * wd:(top + r - drows[0] + 1) * wd] = rows(dp, r)
+        return _glyph_from_pixels(clut, h, wd, dot.hand, out, ":")
 
 
 def _glyph_from_pixels(clut, h, wd, hand, px, ch):
