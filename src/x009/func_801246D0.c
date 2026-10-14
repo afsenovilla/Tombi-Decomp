@@ -1,5 +1,6 @@
 // FUNC 801246d0 516 X009
 // MATCHING 801246d0 516
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,7 +9,6 @@ extern int D_1F8002D4;
 extern void *D_8012E04C;
 extern unsigned char D_8009CFE5[];
 extern unsigned char D_8009CDCA;
-extern unsigned char D_8009C93A;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -48,7 +48,7 @@ void func_801246D0(TObj *o)
         if (D_8009CDCA == 0xff) o->b04 = 3;
         break;
     case 1:
-        if (GAME.selectedPlane == 0x21 && D_8009C93A == 1) break;
+        if (GAME.selectedPlane == 0x21 && GVARS.b3a == 1) break;
         AnimAdvance(o);
         ObjCullRegister(o);
         break;

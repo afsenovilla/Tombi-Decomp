@@ -1,5 +1,6 @@
 // FUNC 80123e24 1800 X009
 // MATCHING 80123e24 1800
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,7 +9,6 @@ typedef struct { short w0, w2, w4, w6, w8, wa; } X;
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 
 extern int D_1F8002E8;
-extern unsigned char D_8009C93A, D_8009C942;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void *D_8012EA40[], *D_8012E9FC[], *D_8012EA38[];
@@ -78,8 +78,8 @@ void func_80123E24(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane == 0x21 && D_8009C93A == 1) break;
-        if (D_8009C942 && o->step != 8) {
+        if (GAME.selectedPlane == 0x21 && GVARS.b3a == 1) break;
+        if (GVARS.b42 && o->step != 8) {
             ObjCullRegister(o);
             break;
         }
@@ -204,7 +204,7 @@ void func_80123E24(TObj *o)
         o->b04++;
         break;
     case 4:
-        if (D_8009C942) break;
+        if (GVARS.b42) break;
         if (--o->timer != -1) break;
         o->b9c = 0;
         o->box2 = 0x10;

@@ -1,9 +1,10 @@
 // FUNC 8012955c 932 X009
 // MATCHING 8012955c 932
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009CDAC, D_8009C93F;
+extern unsigned char D_8009CDAC;
 extern unsigned char *D_8009C330;
 extern int D_1F8002E8;
 extern void *D_8012E078, *D_8012E07C;
@@ -55,7 +56,7 @@ void func_8012955C(TObj *o)
                 pl->b04 = 5;
                 pl->step = 0;
                 pl->state = 0;
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
                 o->anim = D_8012E07C;
                 AnimLoadDuration(o);
                 o->d90 = (int)showMessageBox(3, 1, 0x64, 0x9c);

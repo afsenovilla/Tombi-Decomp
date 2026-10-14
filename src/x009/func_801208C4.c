@@ -1,9 +1,9 @@
 // FUNC 801208c4 360 X009
 // MATCHING 801208c4 360
+#include "gvars.h"
 #include "TOBJ.H"
 extern short D_1F80019E;
 extern unsigned short D_1F800282;
-extern int D_8009C934;
 extern short func_80121630(TObj *, short, short, unsigned char);
 extern int resolveHitResultA(TObj *, TObj *);
 
@@ -22,7 +22,7 @@ void func_801208C4(TObj *o, TObj *e)
     if (resolveHitResultA(o, e) == 0 || o->type == 9) {
         if (D_1F800282 & 2) {
             o->b69 = 1;
-            D_8009C934 = 0;
+            GVARS.i34 = 0;
         }
     }
     D_1F80019E = 0;

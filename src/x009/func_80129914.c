@@ -1,8 +1,8 @@
 // FUNC 80129914 440 X009
 // MATCHING 80129914 440
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C942[], D_8009C93F[];
 extern TObj PLAYER;
 extern void FUN_800eeae4(TObj *, int, int);
 
@@ -10,8 +10,8 @@ void func_80129914(TObj *o)
 {
     switch (o->step) {
     case 0:
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         PLAYER.animFrame = 1;
         PLAYER.b04 = 5;
         PLAYER.step = 0;

@@ -1,10 +1,8 @@
 // FUNC 801276cc 336 X009
 // MATCHING 801276cc 336
+#include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_8009CDC9;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C93E;
 extern void setEventComplete(int, int);
 
 /* The `goto ret0` after the call keeps case 1's `return 0` block alive: with a plain `return 0` jump2
@@ -20,9 +18,9 @@ int func_801276CC(TObj *o)
                 o->substep = 3;
                 return 0;
             }
-            D_8009C93F = 1;
-            D_8009C942 = 1;
-            D_8009C93E = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
+            GVARS.b3e = 1;
             o->timer = 300;
             o->substep++;
             setEventComplete(0x25, 0);
@@ -32,9 +30,9 @@ int func_801276CC(TObj *o)
         ret0:
             return 0;
         case 2:
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
             o->substep++;
             return 0;
         case 3:

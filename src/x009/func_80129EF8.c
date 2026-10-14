@@ -1,5 +1,6 @@
 // FUNC 80129ef8 2024 X009
 // MATCHING 80129ef8 2024
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct V { char c[12]; } V;
@@ -8,7 +9,6 @@ extern TObj PLAYER;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned short D_800A6066[];
 extern Fix16 *D_800A6078;
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern short D_800A60EA[];
 extern unsigned char D_8009CE54[], D_8009CE53[], D_8009D2B1[];
 extern TObj *showMessageBoxDirect(int, int, V *);
@@ -34,8 +34,8 @@ void func_80129EF8(TObj *o)
     case 1:
         if (p->b68 == 0)
             break;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         PLAYER.b04 = 5;
         D_800A603D[0] = 0x64;
         D_800A603E[0] = 0;
@@ -210,9 +210,9 @@ void func_80129EF8(TObj *o)
     case 20:
         if (--o->w08 > 0)
             break;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         D_800A60EA[0] = 0;
         D_800A603C[0] = 1;
         D_800A603D[0] = 0;
@@ -226,9 +226,9 @@ void func_80129EF8(TObj *o)
         D_800A6066[0] = p->h->p.whole < D_800A6078->p.whole;
         if (p->visible == 0) {
             D_800A603C[0] = 1;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             D_800A60EA[0] = 0;
             D_800A603D[0] = 0;
             D_800A603E[0] = 0;
