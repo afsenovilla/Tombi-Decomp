@@ -1,5 +1,13 @@
 // FUNC 80127074 1544 X001
 #include "spad.h"
+/* score 28 (opusZ, was 95): case 0 of the second switch(t) solved: case 0 first, written as a full if/else
+   (`if ((short)dx < 0) { if (animFrame & 1) return 0; } else { if (!(animFrame & 1)) return 0; } break;`), case 1/2
+   keeps the goto neg/pos form; the full if/else keeps a label in the case-0 block so jump.c does not swap it with the
+   dispatch tree, and the post-reload cross-jump then reduces it to the game`s `bltz neg; j pos`. Also: no p/e pins
+   (plain params; pins moved `sb a2,16(sp)`/`move s4,a3`), no ang bump, `(short)(ang - ax)` (no sext), short cx/cy
+   (fixes `move a2,t0`), no ax/ay `=r` barriers, `asm("" : "=r"(e) : "0"(e))` after the d test (e s2 / dx s3) and
+   `asm("" :: "r"(dy))` after the wb8 store (ang s4 / dy s6). Left: cx in s7 and fx in s5 (game: cx s5, fx s7).
+   Previous: */
 /* score 95 (opusX, was 223): ported the 801253AC/801278C0 shapes. ax/ay are the box-sum temps (`ax = e->box0 + dx;
    if ((unsigned short)ax > e->box1)`, `ay = ...dy`), the quadrant base (ax = base / 0x400 / base - 0x400 with the
    `base == 0` test first), the abs copies, the +4 sum (ay, k even) and the +0x13/+0xb/+0x10/+8 sums (ax, k odd); the
@@ -42,13 +50,11 @@ extern int rcos(int);
 extern int rsin(int);
 
 #define o (&p->t)
-int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
+int func_80127074(PL *p, TObj *e, unsigned char t, int ang)
 {
-    register PL *p asm("$17") = p_;
-    register TObj *e asm("$18") = e_;
     unsigned short dx, dy;
-    int cx;
-    int cy;
+    short cx;
+    short cy;
     short m;
     short k;
     short fy;
@@ -56,10 +62,9 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     int base, b;
     short ax;
     short ay;
-    asm("" : "=r"(ang) : "0"(ang));
-asm("" : "=r"(cx) : "0"(cx));
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
+asm("" : "=r"(e) : "0"(e));
     dx = p->we8 - e->h->p.whole;
     ax = e->box0 + dx;
     if ((unsigned short)ax > e->box1) return 0;
@@ -75,7 +80,7 @@ asm("" : "=r"(cx) : "0"(cx));
             if (base == 0) ax = 0x400;
             else ax = base - 0x400;
         }
-        if ((unsigned)(((ang - ax) & 0xfff) - 0x500) >= 0x901) return 0;
+        if ((unsigned)(((short)(ang - ax) & 0xfff) - 0x500) >= 0x901) return 0;
     case 0:
         cx = (unsigned)(rcos(ang) * e->box0) >> 12;
         cy = (unsigned)(rsin(ang) * e->box0) >> 12;
@@ -83,8 +88,6 @@ asm("" : "=r"(cx) : "0"(cx));
     }
     ax = cx;
     ay = cy;
-    asm("" : "=r"(ax) : "0"(ax));
-    asm("" : "=r"(ay) : "0"(ay));
     if (ax < 0) ax = -ax;
     if (ay < 0) ay = -ay;
     k = ax < ay;
@@ -118,13 +121,16 @@ asm("" : "=r"(cx) : "0"(cx));
         m = ax - m;
         if ((unsigned short)m >= 0x1d) return 0;
         switch (t) {
+        case 0:
+            if ((short)dx < 0) {
+                if (o->animFrame & 1) return 0;
+            } else {
+                if ((o->animFrame & 1) == 0) return 0;
+            }
+            break;
         case 1:
         case 2:
-asm("" :: "r"(dy));
             if ((short)cx >= 0) goto pos;
-            goto neg;
-        case 0:
-            if ((short)dx >= 0) goto pos;
         neg:
             if (o->animFrame & 1) return 0;
             break;
@@ -135,6 +141,7 @@ asm("" :: "r"(dy));
         o->b9e = 9;
         if (t == 0 && (short)dx <= 0) o->wb8 = -cx;
         else o->wb8 = cx;
+asm("" :: "r"(dy));
         o->wba = -fy + 0x10;
         o->velY = 0;
         e->velX = dx;

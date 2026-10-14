@@ -1,5 +1,12 @@
 // FUNC 8011e990 1544 X010
 #include "spad.h"
+/* score 28 (opusZ, was 92): case 0 of the second switch(mode) solved: case 0 first, written as a full if/else
+   (`if ((short)dx < 0) { if (a->animFrame & 1) return 0; } else { if (!(a->animFrame & 1)) return 0; } break;`), case 1/2
+   keeps the goto neg/pos form; the full if/else keeps a label in the case-0 block so jump.c does not swap it with the
+   dispatch tree, and the post-reload cross-jump then reduces it to the game`s `bltz neg; j pos`. Also: no a/b pins
+   (plain params; pins moved `sb a2,16(sp)`/`move s4,a3`), no ang bump, `(short)(ang - ax)` (no sext), dx/dy unsigned short with (short) casts (abs is `if ((short)dx < 0) s = -dx; else s = dx;`: move s0,s3), `ax = (animFrame & 1) ? 8 : -8` for k (a0), `asm("" : "=r"(b) : "0"(b))` after the d test (b s2 / dx s3) and
+   `asm("" :: "r"(dy))` after the wb8 store (ang s4 / dy s6). Left: cx in s7 and s7 in s5 (game: cx s5, s7 s7).
+   Previous: */
 /* score 92 (opusT, was 232): carried over from the x001 func_801253AC match (template x010 func_80121534): box sums
    through ax/ay (`ax = b->box0 + dx; if (b->box1 < (unsigned short)ax)`), the angle base reuses ax with
    `(short)(ang - ax) & 0xfff`, `ax = cx; if (ax < 0) ax = -ax`; second-half sums written into ax / `s = ay - s` in place,
@@ -39,8 +46,8 @@ static __inline__ short sabs(short x)
 
 int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
 {
-    short dx;
-    short dy;
+    unsigned short dx;
+    unsigned short dy;
     short cx;
     short cy;
     short ax;
@@ -55,6 +62,7 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     int r;
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
+asm("" : "=r"(b) : "0"(b));
     dx = XA(a)->we8 - b->h->p.whole;
     ax = b->box0 + dx;
     if (b->box1 < (unsigned short)ax) return 0;
@@ -64,9 +72,9 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     switch (mode) {
     case 1:
     case 2:
-        q = (dy < 0) ? 0xc00 : 0;
+        q = ((short)dy < 0) ? 0xc00 : 0;
         ax = q;
-        if (dx > 0) {
+        if ((short)dx > 0) {
             if (q == 0) ax = 0x400;
             else ax = q - 0x400;
         }
@@ -84,19 +92,19 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     else if (ay == 0) kind = 2;
     switch (kind) {
     case 0:
-        s = sabs(dx); if (s > ax) return 2;
-        fp = dx * cy / cx;
+        if ((short)dx < 0) s = -dx; else s = dx; if (s > ax) return 2;
+        fp = (short)dx * cy / cx;
         break;
     case 1:
-        s = sabs(dy); if (s > ay) return 2;
-        s7 = dy * cx / -cy;
+        if ((short)dy < 0) s = -dy; else s = dy; if (s > ay) return 2;
+        s7 = (short)dy * cx / -cy;
         break;
     case 2:
-        s = sabs(dx); if (s > ax) return 2;
+        if ((short)dx < 0) s = -dx; else s = dx; if (s > ax) return 2;
         fp = 0;
         break;
     case 3:
-        s = sabs(dy); if (s > ay) return 2;
+        if ((short)dy < 0) s = -dy; else s = dy; if (s > ay) return 2;
         s7 = 0;
         break;
     }
@@ -106,14 +114,16 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
         s = ax - s;
         if ((unsigned short)s >= 0x1d) return 0;
         switch (mode) {
+        case 0:
+            if ((short)dx < 0) {
+                if (a->animFrame & 1) return 0;
+            } else {
+                if (!(a->animFrame & 1)) return 0;
+            }
+            break;
         case 1:
         case 2:
-asm("");
             if (cx >= 0) goto l64;
-            goto l48;
-        case 0:
-            if (dx < 0) goto l48;
-            goto l64;
         l48:
             if (a->animFrame & 1) return 0;
             break;
@@ -122,8 +132,9 @@ asm("");
             break;
         }
         a->b9e = 9;
-        if (mode == 0 && dx <= 0) a->wb8 = -cx;
+        if (mode == 0 && (short)dx <= 0) a->wb8 = -cx;
         else a->wb8 = cx;
+asm("" :: "r"(dy));
         a->wba = -fp + 0x10;
         a->velY = 0;
         b->velX = dx;
@@ -133,9 +144,8 @@ asm("");
         b->w7a = mode;
         return 1;
     }
-    if (a->animFrame & 1) k = 8;
-    else k = -8;
-    if (a->h->p.whole + k > b->h->p.whole + s7) {
+    ax = (a->animFrame & 1) ? 8 : -8;
+    if (a->h->p.whole + ax > b->h->p.whole + s7) {
         if (a->b9e == 8) {
             ax = XA(a)->we8 - (b->h->p.whole + s7) + 0x13;
             if ((unsigned short)ax >= 0x24) return 0;
@@ -163,8 +173,8 @@ asm("");
         a->wb8 = s7 - 8;
     }
     b->b69 = 1;
-    if (dx > 0) dx += 10;
-    else if (dx < 0) dx -= 10;
+    if ((short)dx > 0) dx += 10;
+    else if ((short)dx < 0) dx -= 10;
     b->velX = dx;
     b->w7a = mode;
     a->velY = 0;
