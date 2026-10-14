@@ -70,7 +70,10 @@ _main = None
 def main0():
     global _main
     if _main is None:
-        _main = open(os.path.join(ROOT, "game", "MAIN0.EXE"), "rb").read()[0x800:]
+        p = os.path.join(A.FS, "EXE", "MAIN0.EXE")       # the disc copy (also there in the exe, which has no game/ folder)
+        if not os.path.exists(p):
+            p = os.path.join(ROOT, "game", "MAIN0.EXE")
+        _main = open(p, "rb").read()[0x800:]
     return _main
 
 
