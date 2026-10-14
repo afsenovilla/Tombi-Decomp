@@ -1,6 +1,7 @@
 // FUNC 80118720 464 X004
 #include "spad.h"
-/* score 25 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
+/* score 9 (pin `register int ny asm("$10")`, was 25): registers now match; only the `la t3,D_80133ADC` sits 2 insns early (game: after `sll a1,a1,6`). With the pin, tried: tb assignment at every statement position, asm volatile("") at every line (best 11, la at block top), clobbers of every temp reg at every line (no gain), y also pinned (37/28), p=D[idx] pointer forms (113), idx*64 in a separate temp, CC gcc-2.8.1 (103), AS gnu (11).
+   Older: score 25 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
    n72 findings: the table base `tb` as a multi-set pointer (`tb = D; ... tb = (V4(*)[4])((V4*)tb + 3)` for the last
    element, symbol form `&D_80133ADC[idx][k]` for the first three so cse keeps `addiu a2,tb,16/32`) is not boosted
    by sched1 and lands after the two mults (luid ~17), which already moves y to t1 (25). Diagnosis confirmed with
@@ -31,7 +32,7 @@ void func_80118720(short z0, int idx)
 {
     V3 v;
     int pad[3];
-    int z, x, y, nx, ny;
+    int z, x, y, nx; register int ny asm("$10");
     V4 (*tb)[4] = D_80133ADC;
     z = z0 + 0x220;
     x = z * 220 / 544;
