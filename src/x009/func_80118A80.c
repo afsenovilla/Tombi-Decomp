@@ -1,10 +1,10 @@
 // FUNC 80118a80 376 X009
 // MATCHING 80118a80 376
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { char p[0xe]; unsigned char b0e; char q[0x5c - 0xf]; int d5c; } X;
 #define B0E(o) (((X *)(o))->b0e)
 #define D5C(o) (((X *)(o))->d5c)
-extern int D_1F8002E8[];
 extern void *D_8012E9C0[];
 extern void *D_8012E9BC[];
 extern void AnimLoadDuration(TObj *);
@@ -14,7 +14,7 @@ extern TObj *ObjAlloc(void);
 void func_80118A80(TObj *o)
 {
     TObj *e;
-    int *g = D_1F8002E8;
+    int *g = ((int*)&SPAD.i2e8);
 
     o->w1e = 1;
     o->b0d = 0;

@@ -1,5 +1,6 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "gamestate.h"
@@ -13,7 +14,6 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009CFEE;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern unsigned int stepScrollReturnY(O *);
@@ -49,7 +49,7 @@ void func_80116278(O *o)
         break;
     case 2:
         D_80079A98[o->subtype](o);
-        if (D_8009CFEE == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2 && (unsigned)(XU - 0xb44) < 0x60) {
+        if (GCD.bcfee == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2 && (unsigned)(XU - 0xb44) < 0x60) {
             stepPlayerXToward(0xb74);
             if (D_1F800172 >= 0xbb9) {
                 tryStartItemInteraction(o, 1, 3);

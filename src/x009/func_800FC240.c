@@ -1,11 +1,11 @@
 // FUNC 800fc240 468 X009
 // MATCHING 800fc240 468
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char *D_8009C330;
-extern unsigned char D_8009CE3D;
 
 int func_800FC240(TObj *o)
 {
@@ -34,7 +34,7 @@ int func_800FC240(TObj *o)
                 r = 1;
                 o->w56 = -0x8c;
                 if (o->y.p.whole >= -0x7b) {
-                    if (D_8009CE3D == 0xff) {
+                    if (GCD.bce3d == 0xff) {
                         r = 2;
                     } else {
                         o->y.p.whole = -0x8c;
@@ -46,7 +46,7 @@ int func_800FC240(TObj *o)
                 r = 1;
                 o->w56 = -0x3c0;
                 if (o->y.p.whole >= -0x3af) {
-                    if (D_8009CE3D == 0xff) {
+                    if (GCD.bce3d == 0xff) {
                         r = 2;
                     } else {
                         o->y.p.whole = -0x3c0;

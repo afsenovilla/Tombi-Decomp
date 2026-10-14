@@ -1,7 +1,7 @@
 // FUNC 80118838 216 X009
 // MATCHING 80118838 216
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8012E020[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -25,7 +25,7 @@ void func_80118838(TObj *o)
         o->b0a = 0;
         o->animFrame = 0;
         o->w1e = 9;
-        setanim(o, D_1F8002D4[0], D_8012E020[0]);
+        setanim(o, ((int*)&SPAD.i2d4)[0], D_8012E020[0]);
         break;
     case 1:
         FUN_800202b4(o);

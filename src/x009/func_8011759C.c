@@ -1,5 +1,6 @@
 // FUNC 8011759c 604 X009
 // MATCHING 8011759c 604
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,6 @@
 typedef struct { short vx, vy, vz, pad; } SVEC;
 
 extern TObj *D_8009C94C[];
-extern unsigned char D_8009D07E;
 extern void FUN_800201ac(TObj *, int);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVEC *, void *);
@@ -64,7 +64,7 @@ void func_8011759C(TObj *o)
             v.vy = o->d88;
             v.vz = o->d8c;
             RotMatrix(&v, &o->w48);
-            if (!o->subtype && GVARS.b40 && GVARS.b41 == 0x8a) D_8009D07E = 1;
+            if (!o->subtype && GVARS.b40 && GVARS.b41 == 0x8a) GCD.bd07e = 1;
         }
         break;
     case 2:
