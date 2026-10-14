@@ -1,6 +1,6 @@
 // FUNC 800386f4 236 MAIN0
 // MATCHING 800386f4 236
-extern unsigned char *SCRIPT_CTX;
+#include "scriptctx.h"
 extern unsigned char *SCRIPT_CODE;
 
 static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
@@ -16,22 +16,22 @@ static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
 
 void func_800386F4(unsigned char m)
 {
-    unsigned char *o = SCRIPT_CTX;
+    ScriptCtx *o = SCRIPT_CTX;
     unsigned char *code = SCRIPT_CODE;
     int a, b;
     unsigned char *p;
-    a = rd(o, 0, &code[*(unsigned short *)(o + 0x8a) + 1]);
-    p = (unsigned char *)(*(unsigned short *)(o + 0x8a) + (int)code);
+    a = rd(o, 0, &code[o->pc + 1]);
+    p = (unsigned char *)(o->pc + (int)code);
     p += 2;
     b = rd(SCRIPT_CTX, m, p);
     if (a == b)
-        o[0x89] = 0;
+        o->cmpFlag = 0;
     else if (a < b)
-        o[0x89] = 1;
+        o->cmpFlag = 1;
     else
-        o[0x89] = 2;
+        o->cmpFlag = 2;
     if (m == 0)
-        *(unsigned short *)(o + 0x8a) += 3;
+        o->pc += 3;
     else
-        *(unsigned short *)(o + 0x8a) += 6;
+        o->pc += 6;
 }

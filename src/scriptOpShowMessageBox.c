@@ -1,17 +1,9 @@
 // FUNC 80039e54 848 MAIN0
 // MATCHING 80039e54 848
+#include "scriptctx.h"
 #include "player.h"
 #include "TOBJ.H"
-typedef struct {
-    char pad0[0x8a];
-    unsigned short w8a;
-    char pad1[0x1190 - 0x8c];
-    int idx;
-    unsigned int cmd;
-    int a[6];
-} S;
 typedef struct { short v[6]; } V6;
-extern S *SCRIPT_CTX;
 extern TObj *SCRIPT_OBJECTS[];
 extern unsigned char D_8009D2B0, D_8009C93F, D_8009C942;
 extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
@@ -21,16 +13,16 @@ extern void func_800ECBBC(TObj *);
 
 void scriptOpShowMessageBox(void)
 {
-    S *s = SCRIPT_CTX;
-    TObj *o = SCRIPT_OBJECTS[s->idx];
+    ScriptCtx *s = SCRIPT_CTX;
+    TObj *o = SCRIPT_OBJECTS[s->arg[0]];
     V6 tmp;
-    unsigned int cmd = s->cmd;
+    unsigned int cmd = s->arg[1];
 
     if (o != 0) {
         switch (cmd) {
         case 1:
             o->b6a = 1;
-            o->timer = s->a[0];
+            o->timer = s->arg[2];
         case 0:
         case 9:
             o->b6a = 0;
@@ -38,32 +30,32 @@ void scriptOpShowMessageBox(void)
             o->state = 0;
             break;
         case 2:
-            o->timer = s->a[0];
-            o->velX = s->a[1];
+            o->timer = s->arg[2];
+            o->velX = s->arg[3];
             o->b6a = 1;
             o->step = cmd;
             o->state = 0;
             break;
         case 3:
-            o->timer = s->a[0];
-            o->d30 = s->a[1];
-            o->d34 = s->a[2];
-            o->w98 = s->a[3];
-            o->w9a = s->a[4];
+            o->timer = s->arg[2];
+            o->d30 = s->arg[3];
+            o->d34 = s->arg[4];
+            o->w98 = s->arg[5];
+            o->w9a = s->arg[6];
             o->b6a = 1;
             o->step = cmd;
             o->state = 0;
             break;
         case 8:
-            tmp.v[1] = s->a[3];
-            tmp.v[3] = s->a[4];
-            tmp.v[5] = s->a[5];
+            tmp.v[1] = s->arg[5];
+            tmp.v[3] = s->arg[6];
+            tmp.v[5] = s->arg[7];
         case 4:
             if (cmd == 4) tmp = *(V6 *)&o->a;
-            o->d90 = showMessageBoxDirect(s->a[0], s->a[1], &tmp);
+            o->d90 = showMessageBoxDirect(s->arg[2], s->arg[3], &tmp);
             switch (o->type & 0x7f) {
             case 0x18:
-                o->w74 = s->a[2];
+                o->w74 = s->arg[4];
                 o->w76 = 0;
                 func_80113754(o);
                 D_8009D2B0 = 2;
@@ -77,11 +69,11 @@ void scriptOpShowMessageBox(void)
                 D_800A60E4x[0] = 3;
                 D_8009D2B0x[0] = 2;
                 D_8009C93Fx[0] = 1;
-                if (s->a[2] & 0x80) {
-                    o->w74 = o->animFrame + (s->a[2] & 0x7f);
+                if (s->arg[4] & 0x80) {
+                    o->w74 = o->animFrame + (s->arg[4] & 0x7f);
                 } else {
                     o->animFrame = o->b69 - 1;
-                    o->w74 = o->animFrame + s->a[2];
+                    o->w74 = o->animFrame + s->arg[4];
                 }
                 o->w76 = 0;
                 func_800ECBBC(o);
@@ -105,8 +97,8 @@ void scriptOpShowMessageBox(void)
             if (ty == 0x18) goto L1;
             if (ty == 0x19) {
             L1:
-                o->velX = s->a[0];
-                o->velY = s->a[1];
+                o->velX = s->arg[2];
+                o->velY = s->arg[3];
             }
             }
             o->b6a = 1;
@@ -124,9 +116,9 @@ void scriptOpShowMessageBox(void)
             if (ty == 0x18) goto L2;
             if (ty == 0x19) {
             L2:
-                o->velX = s->a[0];
-                o->velY = s->a[1];
-                o->w78 = s->a[2];
+                o->velX = s->arg[2];
+                o->velY = s->arg[3];
+                o->w78 = s->arg[4];
             }
             }
             o->b6a = 1;
@@ -135,5 +127,5 @@ void scriptOpShowMessageBox(void)
             break;
         }
     }
-    s->w8a++;
+    s->pc++;
 }
