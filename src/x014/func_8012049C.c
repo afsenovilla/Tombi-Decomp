@@ -1,5 +1,6 @@
 // FUNC 8012049c 412 X014
 // MATCHING 8012049c 412
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -13,7 +14,6 @@ extern void func_80116C9C(TObj *o);
 extern void func_80117428(TObj *o);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
-extern unsigned char D_8009D2B0;
 
 void func_8012049C(TObj *o)
 {
@@ -22,7 +22,7 @@ void func_8012049C(TObj *o)
     switch (o->substep) {
     case 0:
         o->active = 2;
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
         func_8011D88C(o, 0x14);

@@ -1,5 +1,6 @@
 // FUNC 80119b58 2368 X014
 // MATCHING 80119b58 2368
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -9,7 +10,6 @@ extern short D_80125C40[], D_80125C50[];
 extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
-extern unsigned char D_8009D2C3;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern int D_1F800168, D_1F80016C[];
@@ -210,7 +210,7 @@ void func_80119B58(TObj *o)
             FUN_8001f110(1);
             {
                 int n = D_80125C68[D_8009C962[0]];
-                p = &D_8009D2C3;
+                p = &GV2.bc3;
                 D_800A4555 = 4;
                 *p |= 1 << n;
             }
