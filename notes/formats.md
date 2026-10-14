@@ -619,10 +619,17 @@ Python, ~4 M instr/s; GTE after psx-spx; no load delay slots / interrupts / cach
     and get no `_sky.png`. `capture.render_frame(m, keep)` re-rasterizes a recorded frame with a primitive filter.
   - **Speed**: only the final frame is rasterized (`m.render = False` while loading; VRAM textures come from LoadImage anyway); ~12 frames / s ->
     ~15 s per room, all 96 rooms in ~3 min with 4 processes (one machine per process, same base state).
-  - **Not captured (13 rooms)**: rooms whose load list is empty (`LD0AR11` sections 0, 3, 4; `AR16` 0..2; `AR17` 0, 6..10; `AR18` 0) inherit the area
-    overlay and resources of the room the player comes from (X011 etc.), and the game itself hangs on an empty list (`cdLoadTask` waits for a
-    queued file, LOAD_COMPLETE never set) unless the area changed. Straight from the debug select the overlay is missing and the interpreter runs
-    into zeroed RAM; entering them through a mode 7 transition from a sibling room also ends in a bad object pointer (objects of the previous area).
+  - **Empty-list rooms (13: `LD0AR11` sections 0, 3, 4; `AR16` 0..2; `AR17` 0, 6..10; `AR18` 0)** (`capture.DOOR_ROOMS`): their load list is a bare
+    terminator (`ffff`), they inherit overlay / model / textures of a sibling room, so the debug select cannot enter them. `capture_room_door`
+    loads a sibling (`capture.SIBLINGS`), then does what a door does (`FUN_8002a4d0`: `GAME.nextArea / nextSection / nextSpawnPoint`
+    (0x8009CD94 / 96 / 0xCDA0), `fadeScreenControl` (GAME+0x15) := 3, wait for 1, task mode 7 step 0) and `areaTransitionHandler` runs: step 3
+    -> `queueAreaSectionLists(area, section, 0)` then step 4 waits for `LOAD_COMPLETE` (0x1F8001CE) via `gameplayStateDispatcher` (`0x1F8001DC`
+    = target mode). Two emulation fixes: (1) the empty list queues no file, so after the load-list file (LD0ARnn, LOAD_COMPLETE 1) the flag is
+    set by hand (setting it before = the section list is read from a half loaded file -> `queueLoadList` walks garbage and overwrites
+    `APD_DATA`); (2) `FUN_8004c570` spawns `APD_DATA[section & 7]` (0x1F800358): a slot the sibling did not load is 0 / stale and read as an endless
+    list, so it is pointed at the sibling's list terminator (empty). Result: the game's own mode 2 runs the room (Tombi + HUD) but **there is no
+    room model**: WMD / WPP / SPR slots of the section are empty (the rooms have no data of their own: variants / unused debug rooms), so the
+    composed image is Tombi on black (some rooms show leftovers of the sibling).
 
 ## Object placement records (room objects; `tools/objects.py`)
 The APD blocks (load kinds `0x80..0x8F`, `APD_DATA[n]`) of the room load lists are the **object spawn records** (not a grid: only `0x8E` is a

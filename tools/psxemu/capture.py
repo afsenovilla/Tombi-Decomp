@@ -18,10 +18,10 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from psxemu import machine as _machine
-    from psxemu.rooms import ROOM_COUNTS, UNREACHABLE
+    from psxemu.rooms import ROOM_COUNTS, DOOR_ROOMS
 else:
     from . import machine as _machine
-    from .rooms import ROOM_COUNTS, UNREACHABLE
+    from .rooms import ROOM_COUNTS, DOOR_ROOMS
 
 TITLE_TASK = "titleSequenceTask"
 
@@ -205,6 +205,11 @@ def capture_room(m, base, area, section, log=print):
     c.w16(GAME_SECTION, section)
     play(m, [(0, 2), (CIRCLE_BTN, 3), (0, 1)])
     _wait_running(m, "AREA%02d section %d" % (area, section))
+    return _grab(m, area, section)
+
+
+def _grab(m, area, section):
+    c = m.cpu
     pk = m.frames[-1][1]
     dep = depth_of(m)
     n_ot = m.ot_info[1]
@@ -217,6 +222,71 @@ def capture_room(m, base, area, section, log=print):
     return composed, sky, info
 
 
+# Rooms with an EMPTY load list (rooms.DOOR_ROOMS) are variants of a sibling room of the same area: they load nothing, the area keeps its overlay,
+# model and textures, and the game enters them through the normal door path (mode 7).  We load a sibling through the debug select, then do what
+# a door does (FUN_8002a4d0 state 1/2: nextArea / nextSection / nextSpawnPoint, fadeScreenControl 3 -> wait 1 -> task mode 7 step 0).
+# Two things differ from a real load: (1) the empty list never queues a file, so LOAD_COMPLETE (0x1F8001CE) is never set again after the load-list file -> we set it when the
+# transition waits (mode 7 step 4) for the lists after that file; (2) the object spawner (FUN_8004c570) reads the placement list APD_DATA[section & 7] (0x1F800358): a slot the
+# sibling did not load is 0 / stale and would be read as an endless garbage list (garbage objects, jump to a bad pointer) -> an empty list is put there.
+GAME_BASE = 0x8009C960
+APD_DATA = 0x1F800358
+LOAD_COMPLETE = 0x1F8001CE
+SIBLINGS = {(11, 0): 1, (11, 3): 1, (11, 4): 2, (16, 0): 3, (16, 1): 3, (16, 2): 3, (17, 0): 1, (17, 6): 1, (17, 7): 2, (17, 8): 3,
+            (17, 9): 1, (17, 10): 2, (18, 0): 1}
+
+
+def enter_via_door(m, base, area, section, sibling, spawn=0, no_wide=False):
+    m.load_state(base)
+    m.render = False
+    c = m.cpu
+    c.w16(GAME_AREA, area)
+    c.w16(GAME_SECTION, sibling)
+    play(m, [(0, 2), (CIRCLE_BTN, 3), (0, 1)])
+    _wait_running(m, "AREA%02d section %d (sibling)" % (area, sibling))
+    p = c.r32(APD_DATA + 4 * (sibling & 7))           # the sibling's own list: its terminator record (type 0xFF) is an empty list
+    while c.r8(p + 2) < 0xFF:
+        p += 16
+    if (section & 7) != (sibling & 7):       # a slot the sibling did not load holds a stale pointer (previous room / area) or 0
+        c.w32(APD_DATA + 4 * (section & 7), p)
+    if no_wide:                              # also no area-wide objects (their handlers may depend on the room the sibling set up)
+        c.w32(APD_DATA + 4 * min(c.r16(SECTION_COUNT + 2 * area), 15), p)
+    c.w16(GAME_BASE + 0x434, area)
+    c.w16(GAME_BASE + 0x436, section)
+    c.w16(GAME_BASE + 0x440, spawn)
+    c.w8(GAME_BASE + 0x15, 3)                        # fadeScreenControl: fade out
+    for _ in range(300):
+        m.run_frames(1, max_instr=2_000_000)
+        if c.r8(GAME_BASE + 0x15) == 1:
+            break
+    c.w16(GAME_TASK + 0x4C, 7)
+    c.w16(GAME_TASK + 0x4E, 0)
+    run = None
+    seen = False                             # the area's load-list file (LD0ARnn) is read first: LOAD_COMPLETE goes 1, then the empty lists queue nothing
+    for i in range(LOAD_TIMEOUT):
+        m.run_frames(1, max_instr=2_000_000)
+        if c.r16(GAME_TASK + 0x4C) == 7 and c.r16(GAME_TASK + 0x4E) == 4:
+            if c.r8(LOAD_COMPLETE):
+                seen = True
+            elif seen:
+                c.w8(LOAD_COMPLETE, 1)
+        if run is None and _running(m) and c.r16(GAME_SECTION) == section:
+            run = i
+        if run is not None and i - run >= SETTLE:
+            return
+    raise RuntimeError("AREA%02d section %d did not start via door from %d" % (area, section, sibling))
+
+
+def capture_room_door(m, base, area, section, sibling=None, log=print):
+    """capture_room for a room with an empty load list (see above)."""
+    sibling = sibling or SIBLINGS[(area, section)]
+    try:
+        enter_via_door(m, base, area, section, sibling)
+    except Exception as e:      # noqa: BLE001  a stale object of the sibling crashes the emulator: retry without the area-wide objects
+        log("AREA%02d:%d retry without area-wide objects (%s)" % (area, section, e))
+        enter_via_door(m, base, area, section, sibling, no_wide=True)
+    return _grab(m, area, section)
+
+
 def room_name(area, section, kind):
     return "room_%02d_%d_%s.png" % (area, section, kind)
 
@@ -227,7 +297,7 @@ def _one(m, base, out, area, sec, nsec, force=False, log=print):
     if not force and os.path.exists(pc):
         return (area, sec, "skip", None)
     try:
-        comp, sky, info = capture_room(m, base, area, sec)
+        comp, sky, info = (capture_room_door if (area, sec) in DOOR_ROOMS else capture_room)(m, base, area, sec)
     except Exception as e:      # noqa: BLE001  one broken room must not stop the run
         log("AREA%02d:%d FAIL %s" % (area, sec, e))
         return (area, sec, "fail", str(e))
@@ -257,8 +327,7 @@ def rooms(out, area=None, section=None, jobs=1, force=False, log=print, base_pat
     os.makedirs(out, exist_ok=True)
     base_path = base_path or os.path.join(out, "rooms_base.state")
     m = base_state(base_path, log, exe, disc)
-    todo = [(a, s, n) for a, n in room_sections(m) for s in range(n) if (area is None or a == area) and (section is None or s == section)
-            and ((a, s) not in UNREACHABLE or (area is not None and section is not None))]
+    todo = [(a, s, n) for a, n in room_sections(m) for s in range(n) if (area is None or a == area) and (section is None or s == section)]
     results = []
     if jobs <= 1:
         for it in todo:
