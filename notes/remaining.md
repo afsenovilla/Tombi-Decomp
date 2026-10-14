@@ -43,7 +43,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
 | FAR | main0 | func_8003ff48 | 8003FF48 | 816 | 99 | src/wip/func_8003FF48.c (gcc-2.7.2-psx) | global-alloc order o/k/xi (o has lowest priority, needs ~13 refs) |
-| FAR | x001 | func_8011EEC0 | 8011EEC0 | 744 | 121 | src/x001/wip/func_8011EEC0.c (gcc-2.7.2-psx) | loop pointer forms (e = s+k-/+i, byte pointer) and register choice |
+| FAR | x001 | func_8011EEC0 | 8011EEC0 | 744 | 44 | src/x001/wip/func_8011EEC0.c (gcc-2.7.2-psx) | loops 2/4 register rotation, loop 3 k hoist, operand orders |
 | FAR | x010 | func_80121534 | 80121534 | 604 | 83 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B (with 80121790); abs/box-sum regalloc |
 | FAR | x010 | func_8011E6B0 | 8011E6B0 | 564 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x004 | func_8011942C | 8011942C | 540 | 180 | src/x004/wip/func_8011942C.c (gcc-2.7.2-psx) | logic/layout match; a0 register pressure of o (p=o->da0 trick) |

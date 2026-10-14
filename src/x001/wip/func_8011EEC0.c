@@ -1,9 +1,10 @@
 // FUNC 8011eec0 744 X001
-/* score 121 (o32): prologue fixed (s itself advanced in place), loops 2/4 via e = s + k -/+ i and a byte pointer
-   b = (u8 *)o + 0xa5; b += k -/+ i (game form). Left: loop-4 bound: game computes k + 1 then n - (k + 1) (pre-test
-   from the raw b6b byte t5 + 1), but fold turns n - (k + 1) into (n - 1) - k; an `int one = 1` variable gives the
-   game shape (83) but takes t8 and i = 1 reuses it; ({k + 1;}) / inline inc(k) give it too (113) but lose the 8-byte
-   frame. Also e/i registers swapped (a3/a2) and last block s + n - 1 folded into offsets. */
+/* score 44 (o32): loop-4 bound n - (k + one) with `one = 1` assigned in the loop condition (cse turns it into
+   addiu t5,1 / addiu v1,1 without fold); last block e = s + (n - 1) (game n*40 - 40 + s). Earlier: prologue (s
+   advanced in place), loops 2/4 via e = s + k -/+ i and byte pointer b = (u8 *)o + 0xa5; b += k -/+ i.
+   Left: loops 2/4 regs (game k=a0, b=a1, 2nd lhu v1/a0; ours rotated), loop 1 sra k scheduled after sll i,
+   loop 3 k (sra a1,t3) hoisted out of loop in game, loop 3 s+k*40 operand order, o+n order at the end.
+   Pinning b to $5 worsens (66+). */
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -28,6 +29,7 @@ void func_8011EEC0(TObj *o)
     Seg *e;
     short n, k;
     int i, v;
+    int one;
 
     s = (Seg *)o->da0;
     k = o->b6b;
@@ -60,7 +62,7 @@ void func_8011EEC0(TObj *o)
         (s + k + i)->a = v;
         (s + k + i)->c = v + 5;
     }
-    for (i = 1; i < n - k - 1; i++) {
+    for (i = 1; one = 1, i < n - (k + one); i++) {
         unsigned char *b;
         e = s + k + i;
         b = (unsigned char *)o + 0xa5;
@@ -69,7 +71,7 @@ void func_8011EEC0(TObj *o)
         e->d = e[1].c;
         *b = 2;
     }
-    e = s + n - 1;
+    e = s + (n - 1);
     e->d = 5;
     e->b = 0;
     U8(o, 0xa4 + n) = 2;
