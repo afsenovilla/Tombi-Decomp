@@ -2,7 +2,7 @@
 // MATCHING 8004094c 372
 extern unsigned short *DAT_1f800278;
 
-int FUN_8004094c(int x, int y)
+int testCollisionSegment(int x, int y)
 {
     int base;
     short amp;

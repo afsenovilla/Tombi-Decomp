@@ -9,9 +9,9 @@ extern char C0c0[], C118[];
 extern short G1f4;
 extern void *G1e0;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
-extern void FUN_80016ca8(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
+extern void initDisplay(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
-void FUN_80016b50(void)
+void initGraphics(void)
 {
     R r;
     FUN_80063fdc(0xa0, 0x80);
@@ -36,7 +36,7 @@ void FUN_80016b50(void)
     B0f2 = 0;
     B0f6 = 0;
     initLighting(C118);
-    FUN_80016ca8(0x60, 0x97, 0xff);
+    initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;
     r.y = 0;

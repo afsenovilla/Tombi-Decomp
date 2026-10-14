@@ -12,7 +12,7 @@ extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void SfxPlay3(int, int);
-extern void FUN_80041ca8(TObj *, int, int);
+extern void probeCollisionAtDepthC(TObj *, int, int);
 extern void FUN_800ef1ac(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
@@ -88,7 +88,7 @@ void func_800FA01C(TObj *o)
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->y.p.whole += 9;
             o->h->p.whole += (o->animFrame & 1) ? -4 : 4;
-            FUN_80041ca8(o, o->h->p.whole, o->y.p.whole);
+            probeCollisionAtDepthC(o, o->h->p.whole, o->y.p.whole);
             o->step = 0xd;
             o->state = 0;
         }

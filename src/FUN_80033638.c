@@ -4,7 +4,7 @@
 extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
 extern void ObjApplyVelocity(TObj *);
-extern short FUN_800411cc(TObj *, int, int);
+extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void SfxPlay(int);
@@ -38,7 +38,7 @@ int FUN_80033638(TObj *o)
     o->velH = MulCos((unsigned char)o->waa, t);
     o->velV = MulNegSinScaled((unsigned char)o->waa, o->wa8);
     ObjApplyVelocity(o);
-    if (o->active == 1 && FUN_800411cc(o, o->h->p.whole, o->y.p.whole) != 0) {
+    if (o->active == 1 && probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole) != 0) {
         FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         u = DAT_1f800282;
         m = u >> 5 & 0xf;

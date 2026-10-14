@@ -20,7 +20,7 @@ extern void applyFrameVelocityX(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern void func_80128110(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
@@ -163,7 +163,7 @@ void func_80128A2C(TObj *o)
                 break;
             }
         } else {
-            if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+            if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
                 p->w8 = 1;
                 o->state = 5;
                 break;
@@ -220,7 +220,7 @@ void func_80128A2C(TObj *o)
             o->y.raw -= 0x8000;
             if (AnimAdvance(o)) {
                 o->state = 0;
-                if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+                if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
                     o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
                     p->w6 = 0;
                     o->step = 8;
@@ -232,7 +232,7 @@ void func_80128A2C(TObj *o)
                     o->step = 7;
                 }
             } else {
-                FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10);
+                probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10);
             }
         } else {
             applyFrameVelocityX(o);
@@ -328,7 +328,7 @@ void func_80128A2C(TObj *o)
         if (AnimAdvance(o)) {
             o->state = 0;
             o->y.p.whole -= 4;
-            if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+            if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
                 o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
                 p->w6 = 0;
                 o->step = 8;
@@ -351,7 +351,7 @@ void func_80128A2C(TObj *o)
             p->w6 = 1;
             o->b69 = 0;
             o->step = 8;
-        } else if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        } else if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->b69 = 0;
             o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
             p->w6 = 0;

@@ -9,7 +9,7 @@ typedef struct O {
 } O;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short func_8004065C(O *, int, int, int);
-extern short func_800411CC(O *, short, short);
+extern short probeCollisionAtDepthB(O *, short, short);
 
 int func_801256F4(O *o, short k)
 {
@@ -30,6 +30,6 @@ int func_801256F4(O *o, short k)
         b = v;
     }
     if (func_8004065C(o, (short)(o->h->x + b), (short)(o->y + a), k) == 0)
-        return func_800411CC(o, (short)(o->h->x + b), (short)(a + o->y + 0x22)) == 0;
+        return probeCollisionAtDepthB(o, (short)(o->h->x + b), (short)(a + o->y + 0x22)) == 0;
     return 1;
 }

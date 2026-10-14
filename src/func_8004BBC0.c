@@ -15,7 +15,7 @@ typedef struct {
 } TO;
 extern int D_1F8003C0;
 extern short D_1F80019E;
-extern short FUN_80041ca8(TO *, short, short);
+extern short probeCollisionAtDepthC(TO *, short, short);
 extern void func_801269D0(TO *, unsigned char *), func_8004B454(TO *, unsigned char *), func_80126940(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
 extern void func_80126FE4(TO *, unsigned char *), func_80126A64(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
 extern void func_8011DF8C(TO *, unsigned char *), func_8012767C(TO *, unsigned char *), func_8011EF98(TO *, unsigned char *), func_8004B7C4(TO *, unsigned char *);
@@ -36,7 +36,7 @@ int func_8004BBC0(TO *o, unsigned char f)
     else o->sea = o->s16 - 8;
     d = 0x10;
     if (o->s2e & 1) d = -0x10;
-    r = FUN_80041ca8(o, o->h40->s2 + d, o->sea);
+    r = probeCollisionAtDepthC(o, o->h40->s2 + d, o->sea);
     if (r != 0) {
         o->b9e = (r == 2) ? 5 : 6;
         if (o->s2e & 1) o->h40->s2 -= 0xc;

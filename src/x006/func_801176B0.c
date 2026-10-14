@@ -10,7 +10,7 @@ extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086,
 extern void *D_80122FB0, *D_80122FB4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void func_80118304(int, int, int);
 extern int FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
@@ -48,7 +48,7 @@ void func_801176B0(TObj *o)
         o->d30 = FUN_8001e4f0(0xfd);
         break;
     case 1:
-        FUN_80020078(o, 0xa0);
+        cullObjectToDrawList(o, 0xa0);
         switch (o->step) {
         case 0:
             if (GVARS.b3a == 0)
@@ -139,7 +139,7 @@ void func_801176B0(TObj *o)
         }
         break;
     case 2:
-        FUN_80020078(o, 0xa0);
+        cullObjectToDrawList(o, 0xa0);
         switch (o->step) {
         case 0:
             if (pl->animTimer > 0xc0) {

@@ -6,7 +6,7 @@ extern short D_8013C428[];
 extern short D_8013C404[];
 extern void **D_8013C3C4[];
 extern short FUN_8005e420(int, int);
-extern int FUN_80020078(TObj *, int);
+extern int cullObjectToDrawList(TObj *, int);
 extern void ObjFree(TObj *);
 
 void func_80118C1C(TObj *o)
@@ -36,7 +36,7 @@ void func_80118C1C(TObj *o)
             o->d8c = (unsigned char)(-((int)(v - 7) << 5) / 8);
         break;
     case 1:
-        FUN_80020078(o, 0xf0);
+        cullObjectToDrawList(o, 0xf0);
         break;
     case 2:
         break;

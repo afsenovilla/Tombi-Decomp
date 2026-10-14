@@ -9,8 +9,8 @@ extern void *D_80134CF4[];
 extern V2 D_80114A68[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
-void FUN_80020490(TObj *o);
-short FUN_800411cc(TObj *o, int x, int y);
+void despawnObjectOffscreen(TObj *o);
+short probeCollisionAtDepthB(TObj *o, int x, int y);
 void ObjFree(TObj *o);
 
 void func_800EA284(TObj *o)
@@ -26,7 +26,7 @@ void func_800EA284(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (ObjCullRegister(o) == 0) FUN_80020490(o);
+        if (ObjCullRegister(o) == 0) despawnObjectOffscreen(o);
         switch (o->step) {
         case 0:
             o->wb4 = D_80114A68[o->wb8].x;
@@ -46,7 +46,7 @@ void func_800EA284(TObj *o)
             o->wb6 += 0x20;
             if (o->animFrame & 1) o->d8c = (o->d8c - 4) & 0xfff;
             else o->d8c = (o->d8c + 8) & 0xfff;
-            if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole)) {
+            if (probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole)) {
                 o->b04 = 2;
                 o->step = 0;
             }

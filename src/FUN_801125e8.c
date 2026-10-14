@@ -10,7 +10,7 @@ extern int FUN_800202b4(TObj *o);
 extern int FUN_80040278(TObj *o, int x, int y);
 extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
 extern void FUN_8001fe6c(TObj *o);
-extern void FUN_80020490(TObj *o);
+extern void despawnObjectOffscreen(TObj *o);
 extern void FUN_800eb8f0(TObj *o, int x, int y, int z);
 
 void FUN_801125e8(TObj *o)
@@ -55,7 +55,7 @@ void FUN_801125e8(TObj *o)
             o->velV = 0x400;
         o->y.raw += o->velV << 8;
         FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10));
-        FUN_80020490(o);
+        despawnObjectOffscreen(o);
         break;
     case 7:
         FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);

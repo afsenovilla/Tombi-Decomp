@@ -28,7 +28,7 @@ extern void func_800ECBBC(TObj *);
 extern void func_800E8348(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void FUN_800ecb40(char *, int, int);
-extern void FUN_8005a7a0(int, int, int);
+extern void awardEventProgress(int, int, int);
 extern void printInfoMessage(int, int);
 extern void playSFXWithNoteAndVolume(int, int, int);
 extern void func_800EDFB8(TObj *, int);
@@ -314,8 +314,8 @@ static __inline__ int op9a(void)
     ScriptCtx *g = SCRIPT_CTX;
     {
         int a = g->arg[0];
-        if (g->arg[1]) FUN_8005a7a0(a, 1, 0);
-        else FUN_8005a7a0(a, 0, 0);
+        if (g->arg[1]) awardEventProgress(a, 1, 0);
+        else awardEventProgress(a, 0, 0);
     }
     (*(short *)((char *)g + 0x8a))++;
     return 1;

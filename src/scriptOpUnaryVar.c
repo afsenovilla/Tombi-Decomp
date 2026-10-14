@@ -3,7 +3,7 @@
 #include "scriptctx.h"
 extern unsigned char *SCRIPT_CODE;
 
-void FUN_800387e0(unsigned char op)
+void scriptOpUnaryVar(unsigned char op)
 {
     ScriptCtx *b = SCRIPT_CTX;
     unsigned char *code = SCRIPT_CODE;

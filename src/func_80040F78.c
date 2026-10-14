@@ -6,7 +6,7 @@
    Tried without asm: separate b local (score 76, r then lands in a2), short/ushort r, r = 0 in the else, while loop, int w/n: pointer pseudo always outranks r. */
 extern unsigned short *DAT_1f800278;
 extern unsigned short DAT_1f800282, DAT_1f800284;
-extern int FUN_8004094c(int, int);
+extern int testCollisionSegment(int, int);
 extern int FUN_80040d30(int, int);
 extern int func_80040AC0(int, int);
 extern int func_80040BFC(int, int);
@@ -49,7 +49,7 @@ int func_80040F78(void *o, int x, int y)
         } else {
             DAT_1f800284 = (w & 0xe00) >> 9;
             switch (w & 0xf) {
-            case 1: r = FUN_8004094c((short)x, (short)y); break;
+            case 1: r = testCollisionSegment((short)x, (short)y); break;
             case 2: r = FUN_80040d30((short)x, (short)y); break;
             case 4: r = func_80040AC0((short)x, (short)y); break;
             case 8: r = func_80040BFC((short)x, (short)y); break;

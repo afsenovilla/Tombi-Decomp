@@ -2,7 +2,7 @@
 // MATCHING 8012d518 340
 #include "TOBJ.H"
 
-extern short func_800408D8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ int land(TObj *o)
@@ -23,7 +23,7 @@ int func_8012D518(TObj *o)
     switch (o->velX & 7) {
     case 1:
     case 3:
-        if (func_800408D8(o, o->h->p.whole, o->y.p.whole - 0x10)) return 1;
+        if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) return 1;
         break;
     case 5:
     case 7:

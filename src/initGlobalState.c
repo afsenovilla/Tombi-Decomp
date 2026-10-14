@@ -26,7 +26,7 @@ extern unsigned short D_8009d5d8;
 extern unsigned short D_8009f7ea;
 extern unsigned short D_8009d4fe;
 extern unsigned short D_1f8003d8;
-void FUN_80016a5c(void)
+void initGlobalState(void)
 {
     D_8009f7f2 = 0xffff;
     D_8009f814 = 0xffff;

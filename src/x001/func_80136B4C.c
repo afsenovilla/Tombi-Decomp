@@ -27,7 +27,7 @@ extern int MulCos(int, int);
 extern int MulNegSinScaled(int, int);
 extern void printInfoMessage(int, int);
 extern short TileCollideAt(TObj *, int, int);
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 
 void func_80136B4C(TObj *o)
 {
@@ -173,7 +173,7 @@ void func_80136B4C(TObj *o)
             o->movetab = D_80077D3C;
             o->velY = -0x300;
             o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
-            FUN_80020490(o);
+            despawnObjectOffscreen(o);
             o->state++;
             break;
         case 6:

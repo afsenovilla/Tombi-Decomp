@@ -22,7 +22,7 @@ extern void func_80126B68(TObj *);
 extern void func_8012748C(TObj *);
 extern void func_80127D48(TObj *);
 extern void func_80128060(TObj *);
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern int FUN_800203dc(TObj *);
 
@@ -144,7 +144,7 @@ void func_801281FC(TObj *o)
         switch (o->step) {
         case 0:
             func_8012748C(o);
-            if (!o->visible) FUN_80020490(o);
+            if (!o->visible) despawnObjectOffscreen(o);
             break;
         case 1:
             func_80127D48(o);

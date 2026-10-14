@@ -20,7 +20,7 @@ extern int rcos(int);
 extern int rsin(int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_800ee428(TObj *);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern int func_8011E000(TObj *, TObj *, unsigned char, int);
 extern int func_8011EF98(TObj *, TObj *);
@@ -92,7 +92,7 @@ void func_8011CCD8(TObj *o)
             o->y.raw += -0x18000;
             {
                 int v = o->h->p.whole;
-                FUN_800408d8(o, (o->animFrame & 1) ? v - 4 : v + 4, o->y.p.whole - 0x15);
+                probeCollisionAtDepthA(o, (o->animFrame & 1) ? v - 4 : v + 4, o->y.p.whole - 0x15);
             }
             if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
         } else if (*pad & 0x40) {

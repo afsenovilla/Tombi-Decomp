@@ -14,7 +14,7 @@ extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e5f4(int, int);
-extern void FUN_80041ca8(TObj *, int, int);
+extern void probeCollisionAtDepthC(TObj *, int, int);
 extern void FUN_800f9548(TObj *, int, int);
 extern void FUN_800f9684(TObj *);
 extern void FUN_800ef1ac(TObj *);
@@ -45,7 +45,7 @@ static __inline__ void rot(TObj *o)
 
 #define STEP(o) \
     o->h->p.whole += (o->animFrame & 1) ? -4 : 4; \
-    FUN_80041ca8(o, (short)(o->h->p.whole + ((o->animFrame & 1) ? -8 : 8)), (short)(o->y.p.whole - 0x10));
+    probeCollisionAtDepthC(o, (short)(o->h->p.whole + ((o->animFrame & 1) ? -8 : 8)), (short)(o->y.p.whole - 0x10));
 
 void func_800F98A8(TObj *o)
 {
@@ -164,7 +164,7 @@ void func_800F98A8(TObj *o)
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) {
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->y.p.whole += 9;
-            FUN_80041ca8(o, o->h->p.whole, o->y.p.whole);
+            probeCollisionAtDepthC(o, o->h->p.whole, o->y.p.whole);
             setanim(o, 10);
             o->step = 0xd;
             o->state = 0;

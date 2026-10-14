@@ -10,7 +10,7 @@ extern int FUN_8001fec0(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_8004065c(TObj *, short, short, short);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 extern void cloneItemPickupObject(TObj *);
 
@@ -51,7 +51,7 @@ void func_8012EB2C(TObj *o)
         FUN_8004065c(o, o->h->p.whole + k, o->y.p.whole, o->w7a);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (o->velV > 0 || FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        if (o->velV > 0 || probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->velV = 0;
             o->b9c = 2;
             o->b69 = 0;
@@ -82,7 +82,7 @@ void func_8012EB2C(TObj *o)
     case 4:
         FUN_8001fec0(o);
         o->y.raw -= 0x8000;
-        if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10) || --o->timer == -1) {
+        if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10) || --o->timer == -1) {
             o->timer = 300;
             o->state++;
         }

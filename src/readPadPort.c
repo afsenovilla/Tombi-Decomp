@@ -13,7 +13,7 @@ extern unsigned char DAT_8009f7f0[];
 extern unsigned char DAT_8009f812[];
 extern void PadInfoMode(int, int, int);
 
-short FUN_8002623c(short port)
+short readPadPort(short port)
 {
     PadInfo *p = &DAT_8009d610[port];
     unsigned short btn;

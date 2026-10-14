@@ -16,7 +16,7 @@ extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, int);
 extern void applyFrameVelocityY(TObj *);
 extern int func_8004065C(TObj *, int, int, int);
-extern int FUN_800408d8(TObj *, int, int);
+extern int probeCollisionAtDepthA(TObj *, int, int);
 extern int TileCollideAt(TObj *, int, int);
 
 static __inline__ int Side(TObj *o)
@@ -112,7 +112,7 @@ void func_8012748C(TObj *o)
         Side(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if ((short)FUN_800408d8(o, o->h->p.whole, (short)(o->y.p.whole - 0x10))) o->velV = 0;
+        if ((short)probeCollisionAtDepthA(o, o->h->p.whole, (short)(o->y.p.whole - 0x10))) o->velV = 0;
         if (o->velV > 0) {
             o->b69 = 0;
             o->b9c = 2;

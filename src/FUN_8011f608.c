@@ -1,7 +1,7 @@
 // FUNC 8011f608 404 X000
 // MATCHING 8011f608 404
 #include "TOBJ.H"
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern unsigned char DAT_800a603d;
 extern unsigned char DAT_800a6047[];
@@ -26,7 +26,7 @@ void FUN_8011f608(TObj *o)
         }
         break;
     case 1:
-        FUN_80020078(o, 0x5a);
+        cullObjectToDrawList(o, 0x5a);
         switch (o->step) {
         case 0:
             if (DAT_800a603d == 5) {

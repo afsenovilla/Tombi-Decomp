@@ -12,7 +12,7 @@ extern void applyObjectAltSpeedXY(TObj *);
 extern void decreaseObjectTimer(void *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern Fix16 *DAT_800a6078;
 extern unsigned short DAT_800a604e;
 extern unsigned char PLAYER[];
@@ -27,8 +27,8 @@ extern short *DAT_80139234[];
 
 static __inline__ short hit(TObj *o)
 {
-    if (FUN_800411cc(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) return 1;
-    if (FUN_800411cc(o, o->h->p.whole - 0x20, o->y.p.whole + 0x18)) return 1;
+    if (probeCollisionAtDepthB(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) return 1;
+    if (probeCollisionAtDepthB(o, o->h->p.whole - 0x20, o->y.p.whole + 0x18)) return 1;
     return 0;
 }
 

@@ -14,7 +14,7 @@ extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 extern void applyFrameVelocityX(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern void func_80128110(TObj *);
 
 static __inline__ short wall(TObj *o)
@@ -86,7 +86,7 @@ void func_8012A794(TObj *o)
         if (o->b69 == 4) {
             x->w6 = 1;
             o->b69 = 0;
-        } else if (!FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        } else if (!probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             x->w8 = 1;
             o->step = 2;
             o->state = 0;

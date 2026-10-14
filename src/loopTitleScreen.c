@@ -14,7 +14,7 @@ extern int D_1f800164;
 extern unsigned short D_8007DE98[];
 extern void func_800198B4();
 extern void SetDispMask(int);
-extern void FUN_80016ca8(int, int, int);
+extern void initDisplay(int, int, int);
 extern void func_800E8A5C(void);
 extern void startBgmTrack(int);
 extern void func_800E972C(int, int, int);
@@ -35,7 +35,7 @@ void loopTitleScreen(int *p)
         TASK_C->w4a++;
     case 1:
         if (D_1f8001cc == 0) {
-            FUN_80016ca8(0, 0, 0);
+            initDisplay(0, 0, 0);
             TASK_C->w4a++;
         }
         break;

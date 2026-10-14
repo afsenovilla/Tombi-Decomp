@@ -24,7 +24,7 @@ extern int func_8011EC78(TObj *);
 extern void func_80126D04(TObj *);
 extern void func_80126688(TObj *);
 extern void func_80126C50(TObj *);
-extern short func_800411CC(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void applyAnimVelocityXY(TObj *, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void freeObjectLayer2(TObj *);
@@ -131,7 +131,7 @@ void func_80126E54(TObj *o)
                     o->state++;
                 }
                 d = o->animFrame ? -0x10 : 0x10;
-                if (!func_800411CC(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
+                if (!probeCollisionAtDepthB(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
                     applyAnimVelocityXY(o, 0);
                     o->w22++;
                 }

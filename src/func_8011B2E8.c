@@ -7,7 +7,7 @@ extern unsigned short DAT_801386a0[];
 extern void **PTR_80138680[];
 extern int DAT_1f8002e4[];
 extern short FUN_8005e420(int, int);
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_800187e4(TObj *);
 
 void func_8011B2E8(TObj *o)
@@ -43,7 +43,7 @@ void func_8011B2E8(TObj *o)
             o->d8c = (unsigned char)(((int)(v - 7) * -0x20) / 8);
         break;
     case 1:
-        FUN_80020078(o, (short)(DAT_801386a0[o->subtype] + o->w74 * 0x20));
+        cullObjectToDrawList(o, (short)(DAT_801386a0[o->subtype] + o->w74 * 0x20));
         break;
     case 2:
         break;

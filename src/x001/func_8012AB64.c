@@ -13,7 +13,7 @@ extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void applyFrameVelocityY(TObj *);
 extern short func_8004065C(TObj *, short, short, int);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 extern void FUN_800e9f74(int, short, short, short);
 extern void cloneItemPickupObject(TObj *);
@@ -86,7 +86,7 @@ void func_8012AB64(TObj *o)
         wall(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) o->velV = 0;
+        if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) o->velV = 0;
         if (o->velV > 0) {
             o->b9c = 2;
             o->state++;

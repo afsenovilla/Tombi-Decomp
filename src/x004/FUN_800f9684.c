@@ -12,7 +12,7 @@ extern unsigned char DAT_801152e8[];
 extern short FUN_8003fd78(O *, int, int);
 extern void FUN_800efc04(O *);
 extern void FUN_8001fe94(O *, int);
-extern void FUN_80041ca8(O *, int, int);
+extern void probeCollisionAtDepthC(O *, int, int);
 
 static __inline__ void setanim(O *o, unsigned short x)
 {
@@ -60,7 +60,7 @@ void FUN_800f9684(O *o)
         t = h->s2;
         if (o->w2e & 1) d = t - 2; else d = t + 2;
         h->s2 = d;
-        FUN_80041ca8(o, o->h->s2, (short)o->w16);
+        probeCollisionAtDepthC(o, o->h->s2, (short)o->w16);
         setanim(o, 10);
         o->b5 = 0xd;
         o->b6 = 0;

@@ -2,7 +2,7 @@
 // MATCHING 8011af20 184
 #include "gv2.h"
 #include "TOBJ.H"
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 
 void func_8011AF20(TObj *o)
@@ -16,7 +16,7 @@ void func_8011AF20(TObj *o)
         o->b04++;
         break;
     case 1:
-        FUN_80020078(o, 0x80);
+        cullObjectToDrawList(o, 0x80);
         break;
     case 2:
         break;

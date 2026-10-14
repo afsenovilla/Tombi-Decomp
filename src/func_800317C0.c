@@ -63,7 +63,7 @@ extern void ObjApplyVelocity(TObj *);
 extern void FUN_800314a8(TObj *);
 extern void FUN_800312e8(TObj *);
 extern void FUN_800313c8(TObj *);
-extern short FUN_800411cc(TObj *, int, int);
+extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void FUN_8002c578(TObj *, int, int, int);
@@ -222,7 +222,7 @@ void func_800317C0(TObj *o)
         }
         o->velV = MulNegSinScaled(o->waa, o->wa8);
         ObjApplyVelocity(o);
-        if (o->active == 1 && FUN_800411cc(o, o->h->p.whole, o->y.p.whole) != 0) {
+        if (o->active == 1 && probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole) != 0) {
             unsigned short u;
             int m;
             FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);

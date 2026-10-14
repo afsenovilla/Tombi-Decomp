@@ -10,7 +10,7 @@ extern char DAT_8009f084, DAT_8009e374, DAT_8009f082, DAT_8009e372, DAT_8009f083
 extern unsigned short DAT_8009e350, DAT_8009e352, DAT_8009f060, DAT_8009f062, DAT_8009d4fc, DAT_8009d4fe;
 extern char DAT_8009e375, DAT_8009e376, DAT_8009e377, DAT_8009f085, DAT_8009f086, DAT_8009f087;
 
-void FUN_80016ca8(char a, char b, char c)
+void initDisplay(char a, char b, char c)
 {
     FUN_8005e244(DAT_8009e35c, 0x180, 0x100, 0x140, 0x100);
     FUN_8005e314(DAT_8009e35c - 0x14, 0x2c0, 0x100, 0x140, 0x100);

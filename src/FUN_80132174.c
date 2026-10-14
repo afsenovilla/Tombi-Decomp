@@ -26,7 +26,7 @@ extern void FUN_80130bb0(TObj *);
 extern void FUN_801317e4(TObj *);
 extern void FUN_801319d0(TObj *);
 extern void FUN_801320a8(TObj *);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8005f290(short *, int, int, int);
@@ -161,7 +161,7 @@ void FUN_80132174(TObj *o)
                 d = 8;
                 if (o->animFrame)
                     d = -8;
-                if (FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18) == 0) {
+                if (probeCollisionAtDepthB(o, o->h->p.whole + d, o->y.p.whole + 0x18) == 0) {
                     applyAnimVelocityXY(o, 0);
                     o->w22++;
                 }

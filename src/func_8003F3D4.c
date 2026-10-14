@@ -459,7 +459,7 @@ void func_8003F3D4(u8* self)
         } else {
             applyFrameVelocityX(self);
         }
-        if ((s16)func_800411cc(self, *(s16*)(*(int*)(self + 0x40) + 2), *(s16*)(self + 0x16)) != 0) {
+        if ((s16)probeCollisionAtDepthB(self, *(s16*)(*(int*)(self + 0x40) + 2), *(s16*)(self + 0x16)) != 0) {
             self[0] = 2;
             self[0xA5] = 0;
             *(int*)(self + 0x8C) = (-*(s16*)0x1F80027E << 2) & 0xFF;

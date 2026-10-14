@@ -19,7 +19,7 @@ extern void SfxPlay2(int, int);
 extern void SfxPlay3(int, int);
 extern int rsin(int);
 extern int rcos(int);
-extern int FUN_800408d8(TObj *, int, int);
+extern int probeCollisionAtDepthA(TObj *, int, int);
 extern short TileCollideAt(TObj *, int, int);
 extern void FUN_800ee428(TObj *);
 extern void func_801244A0(TObj *, TObj *, int, int);
@@ -114,7 +114,7 @@ void func_80122F54(TObj *o)
                 PlayerSetAnimIfChanged(o, 0x2d);
                 o->y.raw += -0x18000;
                 a = o->h->p.whole;
-                FUN_800408d8(o, (short)((o->animFrame & 1) ? a - 4 : a + 4), (short)(o->y.p.whole - 0x15));
+                probeCollisionAtDepthA(o, (short)((o->animFrame & 1) ? a - 4 : a + 4), (short)(o->y.p.whole - 0x15));
                 if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             } else if (*k & 0x40) {
                 PlayerSetAnimIfChanged(o, 0xc);

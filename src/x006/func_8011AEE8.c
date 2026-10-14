@@ -1,7 +1,7 @@
 // FUNC 8011aee8 156 X006
 // MATCHING 8011aee8 156
 #include "TOBJ.H"
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 
 void func_8011AEE8(TObj *o)
@@ -15,7 +15,7 @@ void func_8011AEE8(TObj *o)
         o->b04++;
         break;
     case 1:
-        FUN_80020078(o, 0x80);
+        cullObjectToDrawList(o, 0x80);
         break;
     case 2:
         break;

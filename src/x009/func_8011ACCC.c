@@ -7,7 +7,7 @@
 typedef struct { short b0, b1, b2, b3; } B4;
 
 extern B4 D_8012B1B8[];
-extern void FUN_80020078(TObj *, short);
+extern void cullObjectToDrawList(TObj *, short);
 extern void ObjFreeDup(TObj *o);
 extern void func_801174C4(TObj *o);
 extern void func_8011AE94(TObj *o);
@@ -44,7 +44,7 @@ void func_8011ACCC(TObj *o)
             func_801174C4(o);
             d = o->box1 - o->box0;
             if (d < o->box0) d = o->box0 + 0x10;
-            FUN_80020078(o, d);
+            cullObjectToDrawList(o, d);
         }
         break;
     case 2:

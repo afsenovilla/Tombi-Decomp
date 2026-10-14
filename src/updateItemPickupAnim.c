@@ -7,7 +7,7 @@ extern void SfxPlay(int);
 extern void FUN_800e9f74(int, int, int, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
-void FUN_8003be14(TObj *o)
+void updateItemPickupAnim(TObj *o)
 {
     unsigned short u;
     short s;

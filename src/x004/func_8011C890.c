@@ -5,7 +5,7 @@
 
 extern void *D_80134D80;
 extern void AnimLoadDuration(TObj *);
-extern int FUN_80020078(TObj *, int);
+extern int cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
 void func_8011C890(TObj *o)
@@ -25,7 +25,7 @@ void func_8011C890(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        FUN_80020078(o, 0x60);
+        cullObjectToDrawList(o, 0x60);
         break;
     case 2:
         o->b04++;

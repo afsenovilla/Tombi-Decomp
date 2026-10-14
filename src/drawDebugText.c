@@ -23,7 +23,7 @@ extern char DAT_800a2ca0[];
 extern unsigned short FUN_8005e420(int, int);
 extern void FUN_80060008(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
-void FUN_80020f14(short x, short y, int c, unsigned char *s)
+void drawDebugText(short x, short y, int c, unsigned char *s)
 {
     SPRT8 sp;
     SPRT8 *q;

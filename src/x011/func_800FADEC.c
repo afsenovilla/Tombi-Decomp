@@ -7,7 +7,7 @@ typedef struct { TObj t; char c0[7]; unsigned char bc7; unsigned char bc8; } PO;
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x20 - 9]; short w20; short w22; } P;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
-extern short FUN_800411cc(PO *, int, int);
+extern short probeCollisionAtDepthB(PO *, int, int);
 extern void SfxPlay3(int, int);
 extern short ObjTileCollide(PO *, int, int);
 
@@ -47,10 +47,10 @@ void func_800FADEC(PO *o)
         if (cond(o)) {
             o->t.h->p.whole = o->t.d30;
             o->t.y.p.whole = o->t.d34 + 0x14;
-            k = FUN_800411cc(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x40)) != 0;
+            k = probeCollisionAtDepthB(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x40)) != 0;
             n = k;
-            if (FUN_800411cc(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x50))) n = k + 1;
-            if (FUN_800411cc(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x60))) n++;
+            if (probeCollisionAtDepthB(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x50))) n = k + 1;
+            if (probeCollisionAtDepthB(o, o->t.h->p.whole, (short)(o->t.y.p.whole - 0x60))) n++;
             if (n == 0) {
                 *(signed char *)&o->t.b0f = -20;
                 *(unsigned char *)&o->t.waa = one;

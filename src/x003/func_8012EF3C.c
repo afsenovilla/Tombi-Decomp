@@ -13,7 +13,7 @@ extern void spawnItemNotification(int, int);
 extern void applyAnimVelocityX(TObj *, int);
 extern void applyFrameVelocityX(TObj *);
 extern int TileCollideAt(TObj *, int, int);
-extern void FUN_800408d8(TObj *, int, int);
+extern void probeCollisionAtDepthA(TObj *, int, int);
 extern void func_8012D66C(TObj *);
 
 void func_8012EF3C(TObj *o)
@@ -62,7 +62,7 @@ void func_8012EF3C(TObj *o)
             o->state++;
         }
         o->y.raw += o->velV << 8;
-        FUN_800408d8(o, o->h->p.whole, (short)(o->y.p.whole - 0x20));
+        probeCollisionAtDepthA(o, o->h->p.whole, (short)(o->y.p.whole - 0x20));
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);

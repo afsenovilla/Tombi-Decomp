@@ -17,12 +17,12 @@ extern void playSFX(int);
 extern short angleBetweenPoints(P2, P2);
 extern short MulCos(int, short);
 extern short MulNegSinScaled(int, short);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 
 static __inline__ short wall(TObj *o)
 {
-    if (FUN_800411cc(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) return 1;
-    if (FUN_800411cc(o, o->h->p.whole - 0x20, o->y.p.whole + 0x18)) return 1;
+    if (probeCollisionAtDepthB(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) return 1;
+    if (probeCollisionAtDepthB(o, o->h->p.whole - 0x20, o->y.p.whole + 0x18)) return 1;
     return 0;
 }
 

@@ -12,7 +12,7 @@ extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 extern void applyFrameVelocityX(TObj *);
-extern int FUN_800408d8(TObj *, int, int);
+extern int probeCollisionAtDepthA(TObj *, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
 void func_8012A290(TObj *o)
@@ -45,7 +45,7 @@ void func_8012A290(TObj *o)
         o->velV += 0x10;
         o->y.raw += o->velV << 8;
         if (o->velV > 0) o->state++;
-        else if ((short)FUN_800408d8(o, o->h->p.whole, (short)(o->y.p.whole - 0x10))) o->velV = 0;
+        else if ((short)probeCollisionAtDepthA(o, o->h->p.whole, (short)(o->y.p.whole - 0x10))) o->velV = 0;
         PLAYER.b69 = 1;
         PLAYER.h->p.whole = o->h->p.whole;
         PLAYER.y.p.whole = o->y.p.whole + (PLAYER.box3 - PLAYER.box2);

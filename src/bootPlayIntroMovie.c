@@ -5,7 +5,7 @@ typedef struct { short x, y, w, h; } RECT;
 extern Th *TASK_C;
 extern char DAT_1f8001cc, DAT_1f8001cd;
 extern void SetDispMask(int);
-extern void FUN_80016ca8(int, int, int);
+extern void initDisplay(int, int, int);
 extern void ClearImage(RECT *, int, int, int);
 extern void ThreadCreate(int, void *);
 extern void MusicStopOrFadeIn(int);
@@ -20,7 +20,7 @@ void bootPlayIntroMovie(void)
     switch (c) {
     case 0:
         SetDispMask(0);
-        FUN_80016ca8(0, 0, 0);
+        initDisplay(0, 0, 0);
         u = TASK_C;
         u->c = u->c + 1;
         r.x = 0x180;

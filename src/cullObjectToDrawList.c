@@ -11,7 +11,7 @@ void ObjListPush_1F800228(TObj *o);
 void ObjListPush_1F80022C(TObj *o);
 void ObjListPush_1F800230(TObj *o);
 
-int FUN_80020078(TObj *o, int x)
+int cullObjectToDrawList(TObj *o, int x)
 {
     if (o->active == 0) return 0;
     o->visible = 0;

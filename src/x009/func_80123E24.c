@@ -14,7 +14,7 @@ extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 extern void func_80121A58(TObj *);
 extern void func_80121D2C(TObj *);
 extern void func_80121E5C(TObj *);
@@ -158,7 +158,7 @@ void func_80123E24(TObj *o)
             func_801233F0(o);
             if (ObjCullRegister(o)) break;
         chk:
-            if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) FUN_80020490(o);
+            if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) despawnObjectOffscreen(o);
             break;
         case 1:
             func_80123828(o);

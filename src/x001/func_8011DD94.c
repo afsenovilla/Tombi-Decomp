@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct { Fix16 x, y, z; } V3;
 extern char D_8013C564[];
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void func_8011DB5C(TObj *);
 extern void applyItemEffect(char *, V3 *, int, int, int);
 extern void FUN_80018838(TObj *);
@@ -69,7 +69,7 @@ void func_8011DD94(TObj *o)
         }
         break;
     case 1:
-        FUN_80020078(o, 0x78);
+        cullObjectToDrawList(o, 0x78);
         if (o->b0c == 0) {
             if (GVARS.b42 == 0)
                 func_8011DB5C(o);

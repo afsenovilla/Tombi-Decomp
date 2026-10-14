@@ -6,7 +6,7 @@
 extern unsigned char D_80135CB0[];
 extern void *D_80139578;
 extern void AnimLoadDuration(TObj *);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 
 void func_80126D18(TObj *o)
 {
@@ -26,7 +26,7 @@ void func_80126D18(TObj *o)
         break;
     case 1:
         o->y.p.whole -= 4;
-        if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10) != 0) {
+        if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10) != 0) {
             o->d8c = (-SPAD.s27e * 4 + 0x80) & 0xff;
             o->state++;
         }

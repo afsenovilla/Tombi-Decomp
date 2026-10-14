@@ -7,7 +7,7 @@ extern char D_80077D3C[];
 extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 
 void func_80130DC4(TObj *o)
 {
@@ -33,7 +33,7 @@ void func_80130DC4(TObj *o)
             o->step = 2;
             o->state = 0;
             o->wb0 = 1;
-        } else if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        } else if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->d8c = (-SPAD.s27e * 4 + 0x80) & 0xff;
         } else {
             o->step = 2;

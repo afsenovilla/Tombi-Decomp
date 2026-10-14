@@ -12,7 +12,7 @@ extern void printInfoMessage(int, int);
 extern void FUN_80111b40(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 extern int Rand(void);
 extern void FUN_800eb8f0(TObj *, int, int, int);
 
@@ -77,7 +77,7 @@ void func_80113034(TObj *o)
         break;
     case 4:
         if (o->visible)
-            FUN_80020490(o);
+            despawnObjectOffscreen(o);
         else
             o->b04 = 3;
         break;

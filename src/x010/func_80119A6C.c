@@ -3,7 +3,7 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern void func_801198F8(TObj *);
 extern void func_80119648(TObj *);
@@ -56,7 +56,7 @@ void func_80119A6C(TObj *o)
         }
         break;
     case 1:
-        FUN_80020078(o, 0x88);
+        cullObjectToDrawList(o, 0x88);
         if (((unsigned char*)&GV2.bc3)[0] & 0x40) {
             func_801198F8(o);
             break;

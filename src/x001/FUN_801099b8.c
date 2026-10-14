@@ -9,9 +9,9 @@ extern unsigned char D_801152E8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e560(int, int);
-extern short FUN_800408d8(TObj *, short, int);
+extern short probeCollisionAtDepthA(TObj *, short, int);
 extern int FUN_80040278(TObj *, short, short);
-extern short FUN_80041ca8(TObj *, short, int);
+extern short probeCollisionAtDepthC(TObj *, short, int);
 extern void applyCollisionTileResponse(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800ee428(TObj *);
@@ -49,7 +49,7 @@ void FUN_801099b8(TObj *o)
             FUN_800eeb5c(o, 0xb);
             if ((*(unsigned short *)0x1F8001F8 & 0xf) == 0) FUN_8001e560(0x1d, 0);
             o->y.raw -= 0x18000;
-            FUN_800408d8(o, DIR(o, -4, 4), (short)(o->y.p.whole - 0x15));
+            probeCollisionAtDepthA(o, DIR(o, -4, 4), (short)(o->y.p.whole - 0x15));
         } else if (*k & 0x40) {
             FUN_800eeb5c(o, 0xc);
             if ((*(unsigned short *)0x1F8001F8 & 0xf) == 0) FUN_8001e560(0x1d, 0);
@@ -101,7 +101,7 @@ void FUN_801099b8(TObj *o)
         o->h->p.whole += (o->animFrame & 1) ? -2 : 2;
         x = DIR(o, -8, 8);
         y = o->y.p.whole - 0x10;
-        r = FUN_80041ca8(o, x, y);
+        r = probeCollisionAtDepthC(o, x, y);
         switch (r) {
         case 0:
             o->h->p.whole += (o->animFrame & 1) ? 4 : -4;

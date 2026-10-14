@@ -38,7 +38,7 @@ extern void applyAnimVelocityX(TObj *, int);
 extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fdac(int, int);
 extern int angleBetweenPoints(P2, P2);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern short FUN_80041ebc(TObj *, short, short);
 
 #define TICK if (--U16(o->wbc) == 0) { o->wbc = 0x28; if (X(o)->wca) SfxPlay(0x12); }
@@ -103,7 +103,7 @@ void func_80125818(TObj *o)
             o->velV -= 0x10;
             o->w22++;
         }
-        if (o->velV < -0x1ff || FUN_800411cc(o, o->h->p.whole, o->y.p.whole - 0x18)) {
+        if (o->velV < -0x1ff || probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole - 0x18)) {
             o->wbc = 1;
             o->substep++;
         }
@@ -116,7 +116,7 @@ void func_80125818(TObj *o)
             o->velV += 0x10;
             o->w22++;
         }
-        if (o->velV >= 0 || FUN_800411cc(o, o->h->p.whole, o->y.p.whole - 0x18)) {
+        if (o->velV >= 0 || probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole - 0x18)) {
             o->wac = 1;
             asm("");
             o->anim = D_801345B8;
@@ -186,7 +186,7 @@ void func_80125818(TObj *o)
         }
         { register int w asm("$4") = U16(o->wba); asm("" : "=r"(w) : "0"(w)); pv = w + (pv - q); }
         if (--o->w22 == 0 || pv < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
-            FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
+            probeCollisionAtDepthB(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x28;
             o->wac = 1;
             SETANIM(D_801345B8)
@@ -234,7 +234,7 @@ void func_80125818(TObj *o)
             t2 = -o->d38 + U16(o->b.p.whole);
         else
             t2 = -o->d30 + U16(o->a.p.whole);
-        if (({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; }) || FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
+        if (({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; }) || probeCollisionAtDepthB(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x3c;
             o->wac = 1;
             SETANIM(D_801345B8)

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -12,7 +12,7 @@ void func_8011CC1C(TObj *o, TObj *e)
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;
     if (e->subtype == 1 && GAME.selectedSection != 7) {
-        if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole + o->box2) == 0) return;
+        if (probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole + o->box2) == 0) return;
         if (SPAD.s284 != ((e->wac + 1) & 3)) return;
         o->active = 2;
         o->b04 = 2;

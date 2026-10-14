@@ -13,7 +13,7 @@ extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short FUN_8004065c(TObj *, short, short, int);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 
 #define SET_ANIM(o, a) do { (o)->anim = (a); AnimLoadDuration(o); } while (0)
 
@@ -89,7 +89,7 @@ void func_80129588(TObj *o)
         if (o->velV > 0) {
             o->b9c = 1;
             o->state++;
-        } else if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        } else if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->velV = 0;
         }
         break;
@@ -121,7 +121,7 @@ void func_80129588(TObj *o)
             o->state = 0;
             break;
         }
-        if (o->b69 != 4 && !FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10))
+        if (o->b69 != 4 && !probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10))
             break;
         o->velV = 0;
         if (o->b69 == 4) {
@@ -155,7 +155,7 @@ void func_80129588(TObj *o)
         o->d8c = *(unsigned char *)&o->d8c;
         o->y.raw += -0x8000;
         AnimAdvance(o);
-        FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10);
+        probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10);
         chk(o);
         break;
     case 8:

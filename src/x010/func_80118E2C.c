@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void playSFX(int);
 extern void func_80118CD4(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -23,7 +23,7 @@ void func_80118E2C(TObj *o)
         o->active = 2;
         break;
     case 1:
-        FUN_80020078(o, 0x80);
+        cullObjectToDrawList(o, 0x80);
         if (GV2.bc3 & 0x20) break;
         if (o->b0c == 0) break;
         switch (o->subtype) {

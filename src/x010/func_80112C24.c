@@ -16,7 +16,7 @@ void SfxPlay2(int a, int b);
 void setEventComplete(int a, int b);
 short TileCollideAt(TObj *o, int x, int y);
 void FUN_800eb8f0(TObj *o, int a, int b, int c);
-void FUN_80020490(TObj *o);
+void despawnObjectOffscreen(TObj *o);
 int Rand(void);
 
 static __inline__ int check(TObj *o)
@@ -78,7 +78,7 @@ void func_80112C24(TObj *o)
             FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             o->b04 = 3;
         } else {
-            FUN_80020490(o);
+            despawnObjectOffscreen(o);
         }
         break;
     case 5:

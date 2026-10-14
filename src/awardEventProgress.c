@@ -10,7 +10,7 @@ extern void spawnItemPickupObject(int);
 extern void playJingle(int);
 extern void FUN_8001f620(void);
 
-unsigned char FUN_8005a7a0(int a, int b, int c)
+unsigned char awardEventProgress(int a, int b, int c)
 {
     if (b == 0) {
         FUN_80026a10(AP_TABLE[EVENT_STARTED_AP_TABLE[a]]);

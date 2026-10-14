@@ -13,7 +13,7 @@ extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fb84(TObj *, char *);
 extern short FUN_8004065c(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 
 static __inline__ short side(TObj *o)
 {
@@ -119,7 +119,7 @@ void func_801305D0(TObj *o)
             o->timer = 0x10;
             o->state = 4;
         } else {
-            if (!FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) break;
+            if (!probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) break;
             p->w2 = 1;
             o->timer = 0x10;
             o->state = 4;
@@ -150,7 +150,7 @@ void func_801305D0(TObj *o)
                 o->d8c += 4;
             o->d8c = *(unsigned char *)&o->d8c;
             if (o->timer) o->timer--;
-            if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+            if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
                 o->d84 = ((-SPAD.s27e << 2) + 0x80) & 0xff;
                 if (o->timer == 0 || o->d8c == o->d84) {
                     o->step = 3;
@@ -219,7 +219,7 @@ void func_801305D0(TObj *o)
             o->d8c += 4;
         o->d8c = *(unsigned char *)&o->d8c;
         if (o->timer) o->timer--;
-        if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->d84 = ((-SPAD.s27e << 2) + 0x80) & 0xff;
             if (o->timer == 0 || o->d8c == o->d84) {
                 o->step = 3;

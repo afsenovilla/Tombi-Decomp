@@ -12,8 +12,8 @@ extern void loadSoundSet(int);
 extern void queueSystemLoadList(int, int);
 extern void func_800E8A14(void);
 extern void func_800E8A2C(void);
-extern void FUN_80016ca8(int, int, int);
-extern void FUN_80016e34(int, int, int, int);
+extern void initDisplay(int, int, int);
+extern void initWideDisplayEnv(int, int, int, int);
 extern void ThreadCreate(int, void *);
 extern void stopBgm(int);
 extern void cdSeekStream(int);
@@ -44,7 +44,7 @@ void bootLogoState(void)
         goto next;
     case 2:
         TASK_C->w4a++;
-        FUN_80016ca8(0xff, 0xff, 0xff);
+        initDisplay(0xff, 0xff, 0xff);
         D_1f8001cc = 1;
         D_1f8001cd = 0x15;
         ThreadCreate(1, func_8001D6A4);
@@ -54,7 +54,7 @@ void bootLogoState(void)
         goto next;
     case 4:
         SetDispMask(0);
-        FUN_80016e34(0xff, 0xff, 0xff, 0xc);
+        initWideDisplayEnv(0xff, 0xff, 0xff, 0xc);
         SetDispMask(1);
         D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
         func_800E8A2C();
@@ -67,7 +67,7 @@ void bootLogoState(void)
         if (--TASK_C->w58 > 0) break;
         stopBgm(0);
         SetDispMask(0);
-        FUN_80016ca8(0, 0, 0);
+        initDisplay(0, 0, 0);
         LOAD_COMPLETE_SYM = 0;
         loadSoundSet(2);
         queueSystemLoadList(2, 1);

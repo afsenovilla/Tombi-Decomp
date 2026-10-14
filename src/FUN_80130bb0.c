@@ -13,7 +13,7 @@ extern void applyAnimVelocityX(TObj *, int);
 extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern Fix16 *DAT_800a6078;
 extern Fix16 *DAT_800a607c;
 extern unsigned short DAT_800a604e;
@@ -112,7 +112,7 @@ void FUN_80130bb0(TObj *o)
     case 2:
         o->y.raw += o->velV << 8;
         o->velV -= 0x10;
-        if (o->velV < -0x1ff || FUN_800411cc(o, o->h->p.whole, o->y.p.whole - 0x18)) {
+        if (o->velV < -0x1ff || probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole - 0x18)) {
             o->wac = 2;
             o->anim = DAT_8013ad38[0];
             FUN_8001fe6c(o);
@@ -124,7 +124,7 @@ void FUN_80130bb0(TObj *o)
     case 3:
         o->y.raw += o->velV << 8;
         o->velV += 0x10;
-        if (o->velV >= 0 || FUN_800411cc(o, o->h->p.whole, o->y.p.whole - 0x18)) {
+        if (o->velV >= 0 || probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole - 0x18)) {
             o->wac = 2;
             o->anim = DAT_8013ad38[0];
             FUN_8001fe6c(o);
@@ -185,7 +185,7 @@ void FUN_80130bb0(TObj *o)
         s = o->wba + ((o->h->raw - o->d30) >> 16);
         if (--o->w22 == 0
             || (unsigned short)o->wba * 2 < s
-            || FUN_800411cc(o, o->h->p.whole + dx, o->y.p.whole + 0x18)) {
+            || probeCollisionAtDepthB(o, o->h->p.whole + dx, o->y.p.whole + 0x18)) {
             o->w22 = 0x3c;
             o->wac = 2;
             o->anim = DAT_8013ad38[0];
@@ -249,7 +249,7 @@ void FUN_80130bb0(TObj *o)
             dx = -0x20;
         s = ((o->a.raw - o->d30) >> 16) + 4;
         if (s < 8
-            || FUN_800411cc(o, o->h->p.whole + dx, o->y.p.whole + 0x18)) {
+            || probeCollisionAtDepthB(o, o->h->p.whole + dx, o->y.p.whole + 0x18)) {
             o->w22 = 0x3c;
             o->wac = 2;
             o->anim = DAT_8013ad38[0];

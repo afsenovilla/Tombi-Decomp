@@ -4,7 +4,7 @@
 #include "gamestate.h"
 
 extern unsigned short D_8012F284[];
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void func_80119374(TObj *);
 extern void ObjFreeDup(TObj *);
 
@@ -32,7 +32,7 @@ void func_801194E0(TObj *o)
         }
         break;
     case 1:
-        FUN_80020078(o, 0x88);
+        cullObjectToDrawList(o, 0x88);
         if (GAME.purifiedAreas & 0x40) {
             func_80119374(o);
         } else if (o->subtype < 2) {

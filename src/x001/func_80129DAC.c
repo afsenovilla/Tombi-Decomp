@@ -10,7 +10,7 @@ extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void applyFrameVelocityX(TObj *);
-extern short FUN_800408d8(TObj *, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_8004065c(TObj *, short, short, short);
 
 void func_80129DAC(TObj *o)
@@ -70,7 +70,7 @@ void func_80129DAC(TObj *o)
             break;
             }
         }
-        if (o->b69 == 4 || FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+        if (o->b69 == 4 || probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->velV = 0;
             if (o->b69 == 4) {
                 q[3] = 1;

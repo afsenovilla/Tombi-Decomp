@@ -1,7 +1,7 @@
 // FUNC 80035428 580 MAIN0
 // MATCHING 80035428 580
 #include "TOBJ.H"
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void FUN_800eaffc(short, short, short, unsigned char);
 extern void FUN_8001f96c(int, short, short, short);
 extern void FUN_8001e4f0(int);
@@ -21,7 +21,7 @@ int FUN_80035428(TObj *o)
     short n;
     int k;
 
-    if (o->active == 1 && FUN_800411cc(o, o->h->p.whole, o->y.p.whole)) {
+    if (o->active == 1 && probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole)) {
         o->active = 2;
         o->ba5 = 0;
         o->b69 = 0;

@@ -10,7 +10,7 @@ extern void unpackSpriteFrame(int, int, char *, int);
 extern void loadTIM(char *, short, int, int, int);
 extern void ClearImage(RECT *, int, int, int);
 
-void FUN_80037c80(O *o)
+void uploadSpriteFrameToVram(O *o)
 {
     RECT r;
     switch (o->type) {

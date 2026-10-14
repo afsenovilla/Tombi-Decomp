@@ -14,7 +14,7 @@ extern TObj *allocObjectLayer4(void);
 extern void freeObjectLayer2(TObj *);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVECTOR *, void *);
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void func_8012194C(TObj *, int);
 extern void func_80121B4C(TObj *);
 extern void func_80121D08(TObj *);
@@ -121,7 +121,7 @@ void func_80122418(TObj *o)
             v.vy = o->d88;
             v.vz = o->d8c;
             RotMatrix(&v, m);
-            FUN_80020078(o, o->box0);
+            cullObjectToDrawList(o, o->box0);
             if (GVARS.b3f != 1) func_80121F90(o);
             break;
         }

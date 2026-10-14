@@ -12,7 +12,7 @@ extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer1(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800e9f74(int, int, int, int);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern int func_8011ECC8(TObj *);
 extern void printInfoMessage(int, int);
 
@@ -50,7 +50,7 @@ void func_8011EE50(TObj *o)
         else
             o->d8c = (o->d8c - 0x14) & 0xff;
         o->y.raw += 0x50000;
-        if (func_8011ECC8(o) || FUN_800411cc(o, o->h->p.whole, o->y.p.whole + 8)) {
+        if (func_8011ECC8(o) || probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole + 8)) {
             o->active = 2;
             o->ba5 = 0;
             o->b04 = 2;

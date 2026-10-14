@@ -2,7 +2,7 @@
 // MATCHING 8003f598 564
 #include "TOBJ.H"
 extern unsigned short DAT_1f800282;
-extern short FUN_800411cc(TObj *, int, int);
+extern short probeCollisionAtDepthB(TObj *, int, int);
 typedef struct { char pad[0xa1]; unsigned char ba1; } XA1;
 #define BA1(o) (((XA1 *)(o))->ba1)
 
@@ -25,11 +25,11 @@ int probeTileShapeThreePoints(TObj *o_, short dy)
 {
     TObj *o = o_;
     BA1(o) = 0;
-    if (FUN_800411cc(o, (short)(o->h->p.whole + 8), (short)(dy + (o->y.p.whole + o->box2))) && attr(o))
+    if (probeCollisionAtDepthB(o, (short)(o->h->p.whole + 8), (short)(dy + (o->y.p.whole + o->box2))) && attr(o))
         return 1;
-    if (FUN_800411cc(o, (short)(o->h->p.whole - 8), (short)(dy + (o->y.p.whole + o->box2))) && attr(o))
+    if (probeCollisionAtDepthB(o, (short)(o->h->p.whole - 8), (short)(dy + (o->y.p.whole + o->box2))) && attr(o))
         return 1;
-    if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole) && attr(o))
+    if (probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole) && attr(o))
         return 1;
     return 0;
 }

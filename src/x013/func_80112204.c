@@ -12,7 +12,7 @@ extern int ObjCullRegister(TObj *o);
 extern void FUN_80020c04(int n);
 extern void spawnItemFromEntry(char *a, Fix16 *v, int b, int c, TObj *o);
 extern void AnimLoadDuration(TObj *o);
-extern void FUN_80020490(TObj *o);
+extern void despawnObjectOffscreen(TObj *o);
 extern void func_80111DC8(TObj *o);
 extern void FUN_800eb8f0(TObj *o, int x, int y, int z);
 
@@ -70,7 +70,7 @@ void func_80112204(TObj *o)
             o->b04 = 3;
             break;
         }
-        FUN_80020490(o);
+        despawnObjectOffscreen(o);
         func_80111DC8(o);
         if (o->y.p.whole < -0xae) break;
         o->timer = 10;

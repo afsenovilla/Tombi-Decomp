@@ -10,7 +10,7 @@ extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
-extern short FUN_800411cc(TObj *, short, short);
+extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void FUN_8002052c(TObj *, int);
 extern void freeObjectLayer2(TObj *);
 
@@ -103,7 +103,7 @@ void func_801206C0(TObj *o)
         }
         o->h->raw += o->velH << 8;
         o->y.raw -= o->velV << 8;
-        if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole)) {
+        if (probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole)) {
             o->active = 2;
             o->b04 = 2;
             o->step = 0;
@@ -139,7 +139,7 @@ void func_801206C0(TObj *o)
             d = 0;
         p->h->p.whole += d;
         p->y.p.whole += 6;
-        if (FUN_800411cc(p, p->h->p.whole, p->y.p.whole)) {
+        if (probeCollisionAtDepthB(p, p->h->p.whole, p->y.p.whole)) {
             p->y.p.whole -= 6;
             o->b04 = 2;
         }

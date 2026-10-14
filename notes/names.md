@@ -40,3 +40,20 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
+- `80016a5c initGlobalState` (was FUN_80016a5c) - resets a long list of global/scratchpad state words to defaults (csv name, checked)
+- `80016b50 initGraphics` (was FUN_80016b50) - sets geometry offset/screen, identity base matrix, lighting, display envs, clears VRAM and OTs (csv name, checked)
+- `80016ca8 initDisplay` (was FUN_80016ca8) - sets up both double-buffer DRAW/DISP envs with background colour (r,g,b) and applies them (csv name, checked)
+- `80016e34 initWideDisplayEnv` (was FUN_80016e34) - SetDefDrawEnv/SetDefDispEnv 640x512 for both buffers with bg colour and screen y, then PutDispEnv/PutDrawEnv; used by boot logo
+- `80020f14 drawDebugText` (was FUN_80020f14) - draws an 8x8 font string as SPRT primitives into the OT (csv said fontDebugPrintf; no formatting, so renamed)
+- `8003be14 updateItemPickupAnim` (was FUN_8003be14) - pickup object state: plays sfx, pops upward with gravity, wobbles (psx_tomba by bytes, csv)
+- `800408d8 probeCollisionAtDepthA` (was FUN_800408d8) - loads collision plane at (x, depth) into 1f800278 and calls the A probe 800406e8; twin of probeCollisionAtDepthB (csv name rewardFlowerSeeds was wrong)
+- `8004094c testCollisionSegment` (was FUN_8004094c) - reads one (base, amplitude, period) segment from the 1f800278 collision stream and tests y against it (csv name rewardPigBag was wrong)
+- `800411cc probeCollisionAtDepthB` (was FUN_800411cc) - loads collision plane at (x, depth) and calls the B probe 80040f78 (csv name)
+- `80041ca8 probeCollisionAtDepthC` (was FUN_80041ca8) - same wrapper pattern as A/B, calling probe 800416b8 with -1
+- `8005a7a0 awardEventProgress` (was FUN_8005a7a0) - event start/complete: sets AP from EVENT_STARTED/COMPLETE tables, shows event message, jingle (csv name)
+- `80020078 cullObjectToDrawList` (was FUN_80020078) - marks object visible if within screen margin and pushes it onto its category draw list
+- `80020490 despawnObjectOffscreen` (was FUN_80020490) - deactivates an object (active=2, visible=0) once it leaves the screen area by a margin
+- `8002623c readPadPort` (was FUN_8002623c) - reads raw pad buffer for port 0/1, stores pad type and analog x/y, maps stick to d-pad bits
+- `8002757c computeCameraMatrix` (was FUN_8002757c) - builds camera matrix from base, RotMatrixY/X of angles and translates by negated camera position
+- `80037c80 uploadSpriteFrameToVram` (was FUN_80037c80) - unpackSpriteFrame to 801fb000, clears a VRAM strip, loadTIM into the per-buffer column
+- `800387e0 scriptOpUnaryVar` (was FUN_800387e0) - script ops 0x18-0x1b: inc/dec/not/neg a script var and set cmpFlag by sign

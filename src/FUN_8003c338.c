@@ -1,7 +1,7 @@
 // FUNC 8003c338 536 MAIN0
 // MATCHING 8003c338 536
 extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
-extern short FUN_800411cc(unsigned char *, int, int);
+extern short probeCollisionAtDepthB(unsigned char *, int, int);
 extern unsigned short DAT_8009c960;
 extern int DAT_8013b104, DAT_80134d0c;
 extern char DAT_80077d54[];
@@ -47,7 +47,7 @@ void FUN_8003c338(unsigned char *o)
         *(int *)(o + 0x14) = *(int *)(o + 0x14) + (*(short *)(o + 0x7e) << 8);
         v = *(unsigned short *)(o + 0x7e) + 0x20;
         *(short *)(o + 0x7e) = v;
-        if (FUN_800411cc(o, (*(short **)(o + 0x40))[1], (short)(*(unsigned short *)(o + 0x16) + 0x14)) != 0) {
+        if (probeCollisionAtDepthB(o, (*(short **)(o + 0x40))[1], (short)(*(unsigned short *)(o + 0x16) + 0x14)) != 0) {
             o[4] = 2;
             o[5] = 0;
         }

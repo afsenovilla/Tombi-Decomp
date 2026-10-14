@@ -30,7 +30,7 @@ extern short D_8007A3F0[];
 typedef struct { unsigned char p0[7]; signed char b7; unsigned char p8[0x18 - 8]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P800505F0;
 extern P800505F0 *D_8009C330;
 extern unsigned short D_8009C960h, D_8009C962h;
-extern void FUN_80037c80(TObj *);
+extern void uploadSpriteFrameToVram(TObj *);
 
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
 #define gte_rtps() __asm__ volatile ("nop;nop;.word 0x4a180001")
@@ -107,10 +107,10 @@ void FUN_800505f0(TObj *o)
         if (D_8009C960h == 6) {
             switch (D_8009C962h) {
             case 0: case 1: break;
-            default: FUN_80037c80(o);
+            default: uploadSpriteFrameToVram(o);
             }
         }
-        FUN_80037c80(o);
+        uploadSpriteFrameToVram(o);
     }
     ang = o->d8c;
     f = q + 0xb;

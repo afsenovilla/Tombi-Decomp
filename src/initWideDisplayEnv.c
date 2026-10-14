@@ -14,7 +14,7 @@ extern DISPENV *SetDefDispEnv(DISPENV *, int, int, int, int);
 extern DISPENV *PutDispEnv(DISPENV *);
 extern DRAWENV *PutDrawEnv(DRAWENV *);
 
-void FUN_80016e34(unsigned char r, unsigned char g, unsigned char b, unsigned char y)
+void initWideDisplayEnv(unsigned char r, unsigned char g, unsigned char b, unsigned char y)
 {
     SetDefDrawEnv(&DAT_8009e348[0].draw, 0x180, 0, 0x280, 0x200);
     SetDefDispEnv(&DAT_8009e348[0].disp, 0x180, 0, 0x280, 0x200);

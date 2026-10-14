@@ -9,7 +9,7 @@ typedef struct { TObj o; char pc0[0x12]; unsigned short wd2; } TX;
 typedef struct { short f0, f1, f2, f3, f4, f5; } XS;
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 extern void func_8012D740(TObj *);
 extern void func_8012D914(TObj *);
 extern void func_8012DA68(TObj *);
@@ -99,7 +99,7 @@ void func_8012F524(TObj *o)
                 break;
             }
             if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0) {
-                FUN_80020490(o);
+                despawnObjectOffscreen(o);
             }
             o->b9d = 0;
             break;

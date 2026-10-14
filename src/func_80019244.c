@@ -28,11 +28,11 @@ void loadSoundSet(int);
 void queueSystemLoadList(int, int);
 void *memset(void *, int, int);
 void cdSeekStream(int);
-void FUN_80020f14(int, int, int, char *);
+void drawDebugText(int, int, int, char *);
 void setTask(void (*)(void));
-void FUN_80016e34(int, int, int, int);
+void initWideDisplayEnv(int, int, int, int);
 void FUN_80025b98(void);
-void FUN_80016ca8(int, int, int);
+void initDisplay(int, int, int);
 void drawBootLogo(int, int);
 void ThreadWaitFrames(int n);
 
@@ -84,8 +84,8 @@ void func_80019244(void)
             p = P;
             if (--p->w58 == -1)
                 p->w48++;
-            FUN_80020f14(0x50, 0x60, 0, D_80010000);
-            FUN_80020f14(0x50, 0x70, 0, D_80010008);
+            drawDebugText(0x50, 0x60, 0, D_80010000);
+            drawDebugText(0x50, 0x70, 0, D_80010008);
             break;
         case 4:
             P->w48 = 0;
@@ -102,7 +102,7 @@ void func_80019244(void)
         case 10:
             if (LOAD_COMPLETE_SYM) {
                 SetDispMask(0);
-                FUN_80016e34(0, 0, 0, 0);
+                initWideDisplayEnv(0, 0, 0, 0);
                 SetDispMask(1);
                 P->w58 = 0xf0;
                 P->w48 = 0xb;
@@ -132,7 +132,7 @@ void func_80019244(void)
             case 3:
                 if (--p->w5a == 0) {
                     SetDispMask(0);
-                    FUN_80016ca8(0, 0, 0);
+                    initDisplay(0, 0, 0);
                     D_1F8001D1 = 0;
                     D_1F8001F6 = 0;
                     P->w48 = 0;

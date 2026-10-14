@@ -22,7 +22,7 @@ extern short **D_80079474[];
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern int *D_800A4584, *D_800A4588;
 extern O *TASK_C;
-extern void FUN_8002757c(C *);
+extern void computeCameraMatrix(C *);
 #define FLAG (*(unsigned short *)0x1F8001C8)
 #define SFLAG (*(short *)0x1F8001C8)
 
@@ -97,7 +97,7 @@ void func_80021B20(void)
         c->d78 = 0;
         c->d7c = SFLAG * 0x5A00;
     }
-    FUN_8002757c(c);
+    computeCameraMatrix(c);
     ((int*)&SPAD.i174)[0] = c->pos.x;
     ((int*)&SPAD.i174)[1] = c->pos.y;
     ((int*)&SPAD.i174)[2] = c->pos.z;

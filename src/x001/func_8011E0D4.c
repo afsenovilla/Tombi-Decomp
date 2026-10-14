@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #define VX (*(unsigned short *)&o->velX)
-extern int FUN_80020078(TObj *, int);
+extern int cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern unsigned short D_8007A3F0[];
 extern short D_8013C6D0[];
@@ -58,10 +58,10 @@ void func_8011E0D4(TObj *o)
     case 1:
         x = big(o->box2, o->box0);
         if (GVARS.b42) {
-            FUN_80020078(o, x);
+            cullObjectToDrawList(o, x);
             break;
         }
-        FUN_80020078(o, x);
+        cullObjectToDrawList(o, x);
         if (o->step == 0) {
             if (o->active == 1) o->active = 3;
             if (o->d94 == 0) {

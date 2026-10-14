@@ -28,7 +28,7 @@ extern int DAT_1f800180;
 extern int DAT_1f800184[];
 extern int DAT_1f8000e4;
 extern void SetGeomScreen(int);
-extern void FUN_8002757c(S *);
+extern void computeCameraMatrix(S *);
 
 void func_8002AC68(S *o)
 {
@@ -74,7 +74,7 @@ void func_8002AC68(S *o)
         break;
     case 1:
         D_80079AEC[D_8009C960_u](o);
-        FUN_8002757c(o);
+        computeCameraMatrix(o);
         goto tail;
     case 2:
         D_80079AEC[D_8009C960_u](o);

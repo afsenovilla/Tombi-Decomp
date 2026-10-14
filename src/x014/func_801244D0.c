@@ -13,7 +13,7 @@ extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
 extern void func_8011709C(TObj *, int);
 extern int FUN_8001f9e0(void);
-extern short FUN_800411cc(TObj *, int, int);
+extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void freeObjectLayer2(TObj *);
 
 static __inline__ void setup(TObj *p)
@@ -86,7 +86,7 @@ void func_801244D0(TObj *o)
             o->velH += o->velX;
             if (o->velH > 0x300) o->velH = 0x300;
             if (o->velH > 0x140) o->velX = 0x10;
-            if (FUN_800411cc(o, o->h->p.whole, o->y.p.whole)) {
+            if (probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole)) {
                 o->active = 2;
                 o->b04 = 2;
                 o->step = 0;

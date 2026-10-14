@@ -1,7 +1,7 @@
 // FUNC 8002c0e0 344 MAIN0
 // MATCHING 8002c0e0 344
 #include "TOBJ.H"
-extern void FUN_80020490(TObj *);
+extern void despawnObjectOffscreen(TObj *);
 extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
 extern int AnimAdvance(TObj *);
@@ -14,7 +14,7 @@ void FUN_8002c0e0(TObj *o)
     int v;
     unsigned char st;
     if (o->visible == 0)
-        FUN_80020490(o);
+        despawnObjectOffscreen(o);
     st = o->step;
     if (st != 0) {
         if (st != 1)

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern unsigned short D_8013C484[], D_8013C486[], D_8013C488[], D_8013C48A[];
-extern void FUN_80020078(TObj *, int);
+extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
 void func_8011C158(TObj *o)
@@ -29,7 +29,7 @@ void func_8011C158(TObj *o)
         if (GCD.bd081 >= 4) {
             o->b04 = 3;
         } else {
-            FUN_80020078(o, 0x92);
+            cullObjectToDrawList(o, 0x92);
         }
         break;
     case 2:
