@@ -1,5 +1,6 @@
 // FUNC 8010eaf8 1532 X019
 // MATCHING 8010eaf8 1532
+#include "gv6.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -7,7 +8,6 @@
 typedef struct { short f0, f2, f4, f6, f8; short pad[5]; } T8010EAF8;
 
 extern unsigned char D_8009D2B3, D_8009CF06, D_8009D006;
-extern unsigned short D_8009D610;
 extern T8010EAF8 D_8011545C[];
 
 static __inline__ int getU(TObj *o)
@@ -56,7 +56,7 @@ void FUN_8010eaf8(TObj *o)
     unsigned short max = D_8011545C[u].f2;
     unsigned char b;
 
-    if (D_8009D610 == 7) {
+    if (GV6.s10 == 7) {
         if (o->velY > 0) {
             switch (o->animFrame) {
             case 0:

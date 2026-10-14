@@ -1,5 +1,6 @@
 // FUNC 80117fac 848 X018
 // MATCHING 80117fac 848
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -14,7 +15,6 @@ typedef struct { short s[6]; } V;
 typedef struct { void **tbl; int x; int y; } E;
 
 extern E D_8011A564[];
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D132, D_8009D0B7;
 extern short D_1F8001C6;
 extern void FUN_8001fe94(P *, int);
@@ -45,7 +45,7 @@ void func_80117FAC(P *o)
         v = *(V *)&o->o.a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
-        D_8009D2B0 = k2;
+        GV2.bb0 = k2;
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

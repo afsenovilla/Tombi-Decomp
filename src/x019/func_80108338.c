@@ -1,12 +1,12 @@
 // FUNC 80108338 976 X019
 // MATCHING 80108338 976
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned short D_8009C960[];
 extern unsigned short D_8009C962;
 extern char *D_8009C330;
-extern unsigned char D_8009D2B0;
 void func_800EEC40(TObj *o);
 void AnimAdvance(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
@@ -45,7 +45,7 @@ void func_80108338(TObj *o)
                 o->state = 3;
                 o->substep = 0;
                 o->timer = 0;
-                D_8009D2B0 = 0;
+                GV2.bb0 = 0;
                 GVARS.b3a = 1;
                 return;
             }

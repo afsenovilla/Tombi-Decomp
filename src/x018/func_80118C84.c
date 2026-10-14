@@ -1,5 +1,6 @@
 // FUNC 80118c84 656 X018
 // MATCHING 80118c84 656
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -9,7 +10,6 @@ typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[0x12]; unsigned short wd2; } TX;
 #define X(o) ((TX *)(o))
 extern E12 D_8011A564[];
-extern unsigned char D_8009D2B0[];
 extern short D_1F8001C6;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void FUN_8001fe94(TObj *, int);
@@ -36,7 +36,7 @@ void func_80118C84(TObj *o)
         v = *(V *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
-        D_8009D2B0[0] = 2;
+        ((unsigned char*)&GV2.bb0)[0] = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
