@@ -1,5 +1,8 @@
 // FUNC 80069610 400 MAIN0
-/* diff: game has sw D_80098214 in the delay slot of the first beqz (lui at before branch); rest likely ok */
+// MATCHING 80069610 400
+// FLAGS -O2 -G0
+// AS gnu
+/* vsync handler of the pad driver (US func_80069058, libpad/padmain.c): polls both ports. Library code: assembled with GNU as, see padlocal.h. */
 typedef struct { unsigned char pad[0xf0]; } E;
 typedef struct { unsigned char pad[0xa]; unsigned short a; unsigned short c; unsigned short e; } H;
 extern H *D_80098210;
