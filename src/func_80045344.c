@@ -1,12 +1,12 @@
 // FUNC 80045344 572 MAIN0
 // MATCHING 80045344 572
+#include "spad.h"
 /* side() as a real static inline (direct returns give bgez; li 1; move zero instead of jump.c's store-flag) and the
    case 4/5/10 tail written out in full (cross-jumping merges it; the extra o refs make o outrank p in global-alloc). */
 #include "TOBJ.H"
 extern int func_800425C4(TObj *a, TObj *b);
 extern void FUN_8001f96c(int a, int b, int c, int d);
 extern void playSFX(int a);
-extern short D_1F80019E;
 
 static __inline__ short side(TObj *a, TObj *b)
 {
@@ -15,7 +15,7 @@ static __inline__ short side(TObj *a, TObj *b)
     dx = a->h->p.whole - b->h->p.whole;
     if ((unsigned short)(dx + (b->box0 + a->box0)) > b->box1 + a->box1) return -1;
     if ((unsigned short)(a->y.p.whole - b->y.p.whole + (a->box2 + b->box2)) > a->box3 + b->box3) return -1;
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
     if (dx < 0) return 0;
     return 1;
 }

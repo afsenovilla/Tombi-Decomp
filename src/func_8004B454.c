@@ -1,11 +1,10 @@
 // FUNC 8004b454 296 MAIN0
 // MATCHING 8004b454 296
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
 typedef struct E { unsigned short a, b; } E;
 extern E DAT_8007b5e4[];
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 
 void func_8004B454(PO *o, TObj *e)
 {
@@ -32,6 +31,6 @@ void func_8004B454(PO *o, TObj *e)
     o->t.wb8 = ox;
     o->t.wba = 0;
     e->b69 = 2;
-    D_1F80019E = 0;
-    D_1F8003C0 = e;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = e;
 }

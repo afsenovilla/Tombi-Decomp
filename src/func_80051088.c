@@ -1,5 +1,6 @@
 // FUNC 80051088 4360 MAIN0
 // MATCHING 80051088 4360
+#include "plx.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -48,7 +49,6 @@ extern unsigned short D_1F8001F8;
 extern char D_1F8000C0[], D_1F8000C0b[];
 extern SH *D_8009C338;
 extern PL *D_8009C330;
-extern unsigned char D_800A6100;
 extern short D_800801E8, D_800801EA, D_800801EC, D_800801EE;
 extern short costab[];
 extern short negsintab2[];
@@ -250,7 +250,7 @@ void func_80051088(TObj *o)
         p->v3 = 0x1f;
         s.x = D_8009C338->x;
         s.y = D_8009C338->y;
-        if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+        if (PLX.b6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
             c = MulCosDup((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
             sn = MulNegSin((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
         } else {
@@ -317,7 +317,7 @@ void func_80051088(TObj *o)
     p->v3 = p->v2;
     *(unsigned short *)((char *)p + 14) = cl;
     }
-    if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+    if (PLX.b6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
         int t, g = PLAYER.obj.d8c;
         if (o->animFrame & 1)
             t = g + 0xc0;

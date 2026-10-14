@@ -1,5 +1,6 @@
 // FUNC 80049cdc 1096 MAIN0
 // MATCHING 80049cdc 1096
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,6 @@
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
 extern short D_1F800176;
-extern unsigned char D_8009CFF9;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -108,7 +108,7 @@ void func_80049CDC(TObj *o)
         o->y.raw -= o->velV << 8;
         pl->y.raw -= o->velV << 8;
         if (GAME.fadeScreenControl == 1) {
-            D_8009CFF9 = 1;
+            GCD.bcff9 = 1;
             if ((*(int*)&GAME.selectedArea) == 0x7000E && GAME.purifiedAreas == 0xff) {
                 o->state++;
             } else {

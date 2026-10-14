@@ -1,12 +1,9 @@
 // FUNC 80049524 824 MAIN0
 // MATCHING 80049524 824
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned short D_1F800248;
-extern short D_1F80024C;
-extern TObj **D_1F800228;
-extern TObj **D_1F800224;
 extern short D_1F80019E;
 void func_800489D8(TObj *o, TObj *e);
 void func_80126B50(TObj *o, TObj *e);
@@ -42,17 +39,17 @@ void func_80049524(void)
     TObj **pp, **qq;
     TObj *o, *e;
 
-    n = D_1F800248;
-    pp = D_1F800228;
-    if (D_1F80024C == 0)
+    n = SPAD.s248;
+    pp = (*(TObj ***)&SPAD.p228);
+    if (SPAD.s24c == 0)
         return;
     while (n != 0) {
         o = *pp++;
         n--;
         if (!(o->active & 1))
             continue;
-        qq = D_1F800224;
-        for (D_1F80019E = D_1F80024C; D_1F80019E != 0; ) {
+        qq = (*(TObj ***)&SPAD.p224);
+        for (D_1F80019E = SPAD.s24c; D_1F80019E != 0; ) {
             e = *qq++;
             D_1F80019E--;
             if (!(e->active & 1))

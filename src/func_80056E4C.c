@@ -1,5 +1,6 @@
 // FUNC 80056e4c 860 MAIN0
 // MATCHING 80056e4c 860
+#include "spad.h"
 /* Matched (n54). Key points: `s` and `hh` must be single-set pseudos (one expression each) so that
    sched1 boosts `addu s0` ("birthing" insn) and places the a0 copy between sb6 and the call; the
    two dead (use (reg)) insns combine leaves for the /100 sign-fixups then land in the lhu->sb stalls
@@ -22,10 +23,7 @@ typedef struct {
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
 extern SVec D_1F800060;
-extern long D_1F80008C;
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
-extern char D_1F8000C0[];
 extern char D_1F8000C0b[];
 extern PolyFT4 *DAT_1f800164;
 extern int DAT_1f8001e0;
@@ -41,10 +39,10 @@ static __inline__ int project(void)
 {
     gte_ldv0(&D_1F800060);
     gte_rtps();
-    gte_stflg(&D_1F80008C);
-    if (D_1F80008C < 0) return 1;
+    gte_stflg(&SPAD.i8c);
+    if (SPAD.i8c < 0) return 1;
     gte_stsxy(&LZ_FILE_CTRL);
-    gte_stszotz(&D_1F800074);
+    gte_stszotz(&SPAD.i74);
     return 0;
 }
 static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
@@ -79,7 +77,7 @@ void func_80056E4C(TObj *o)
         D_1F800060.vz = o->b.p.whole >> 2;
     else
         D_1F800060.vz = o->b.p.whole;
-    SetRotMatrix(D_1F8000C0);
+    SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(D_1F8000C0b);
     if (project()) return;
     a = (unsigned short *)o->anim;
@@ -105,7 +103,7 @@ void func_80056E4C(TObj *o)
     p->y2 = p->y0 + (h * (unsigned short)o->wb8) / 100 - 1;
     p->x3 = p->x1;
     p->y3 = p->y2;
-    z = D_1F800074;
+    z = SPAD.i74;
     p->clut = o->w08;
     if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), z, o->b0f, 0x9000000) == 0)
         DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);

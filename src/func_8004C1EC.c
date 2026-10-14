@@ -1,5 +1,6 @@
 // FUNC 8004c1ec 556 MAIN0
 // MATCHING 8004c1ec 556
+#include "gcd.h"
 #include "gamestate.h"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
@@ -10,7 +11,6 @@ typedef struct {
     signed char b0f;
 } S;
 extern unsigned short D_8009C962s;
-extern unsigned char D_8009CDB5;
 extern unsigned short D_80078792;
 extern int APD_DATA[];
 extern int D_1F80035C;
@@ -31,7 +31,7 @@ void func_8004C1EC(S *o)
         o->b0e = ((unsigned short*)&GAME.selectedSection)[0];
         o->b4++;
         o->b5 = 0;
-        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && !(GAME.purifiedAreas & 1) && D_8009CDB5 == 0 && D_8009C962s < 2) {
+        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && !(GAME.purifiedAreas & 1) && GCD.bcdb5 == 0 && D_8009C962s < 2) {
             APD_DATA[0] = D_1F800370;
             D_1F80035C = D_1F800374;
             APD_DATA[D_80078792] = D_1F800378;
