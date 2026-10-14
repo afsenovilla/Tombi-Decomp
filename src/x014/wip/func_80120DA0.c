@@ -1,4 +1,5 @@
 // FUNC 80120da0 976 X014
+#include "spad.h"
 /* score 155: the three spawn loops are one static inline debris(o, m, af, ex) (loops 2/3 = m 5/6; game keeps af in
    s4 for them, so af is passed as a variable). Left: loop 1 still folds `m & 4` (combine nonzero_bits: m is only set
    to 1/2; passing r instead keeps the andi but r gets its own reg), and loops 2/3 use one giv with offsets where the
@@ -10,7 +11,6 @@
 
 typedef struct { unsigned short x, y; } V2;
 extern V2 D_801265B0[];
-extern short D_1F800284;
 extern TObj *allocObjectLayer2(void);
 extern short func_80041240(TObj *, short, short);
 extern short func_80041EBC(TObj *, short, short);
@@ -61,7 +61,7 @@ int func_80120DA0(TObj *o)
     }
     if (o->d38 != 0xc0) {
         r = func_80041240(o, o->h->p.whole + dx, o->y.p.whole);
-        if (r != 0 && m == r && D_1F800284 == 0) {
+        if (r != 0 && m == r && SPAD.s284 == 0) {
             o->d38 = (0x80 - o->d38) & 0xff;
             FUN_8001f96c(1, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
             if (m == 2) {
@@ -77,7 +77,7 @@ int func_80120DA0(TObj *o)
         }
     }
     if (func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x24) == 0) return 0;
-    if (D_1F800284) return 0;
+    if (SPAD.s284) return 0;
     af = 0;
     debris(o, 5, af, ex);
     af = 1;

@@ -1,9 +1,9 @@
 // FUNC 800f2a30 360 X016
 // MATCHING 800f2a30 360
+#include "plx.h"
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; char r[0x2e - 0x22]; short w2e; } G;
 extern G *D_8009C330;
-extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
 extern unsigned char D_801152E8[];
 extern unsigned char D_8009CF06[], D_8009CE61;
@@ -17,7 +17,7 @@ void func_800F2A30(TObj *o)
     SfxPlay3(0x1c, 0x7f);
     o->b9c = 0;
     if (*(unsigned char *)&o->wac >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(TObj **)&PLX.p611c);
         D_8009D2E8->b04 = 2;
         D_8009D2E8->step = 2;
         D_8009D2E8->state = 0;

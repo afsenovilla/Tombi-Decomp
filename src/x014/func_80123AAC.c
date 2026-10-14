@@ -1,8 +1,8 @@
 // FUNC 80123aac 696 X014
 // MATCHING 80123aac 696
+#include "spad.h"
 #include "TOBJ.H"
 extern unsigned short D_801266D4[];
-extern short D_1F800284;
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern void FUN_800202b4(TObj *);
 extern short FUN_80041240(TObj *, int, int);
@@ -19,12 +19,12 @@ static __inline__ int Chk(TObj *o, short k)
 {
     short r = FUN_80041240(o, o->h->p.whole, o->y.p.whole);
     int n = k;
-    if (r != 0 && n == r && D_1F800284 == 0)
+    if (r != 0 && n == r && SPAD.s284 == 0)
         n++;
     else if (FUN_80041ebc(o, o->h->p.whole, o->y.p.whole) == 0)
         n = 0;
     else
-        n = D_1F800284 == 0;
+        n = SPAD.s284 == 0;
     return n;
 }
 

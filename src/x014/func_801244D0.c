@@ -1,10 +1,10 @@
 // FUNC 801244d0 888 X014
 // MATCHING 801244d0 888
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_1F8002DC[];
 extern void *D_80129FF0;
 extern short D_8007A3F0[], D_8007A5F0[];
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
@@ -18,7 +18,7 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ void setup(TObj *p)
 {
-    p->d3c = D_1F8002DC[0];
+    p->d3c = ((int*)&SPAD.i2dc)[0];
     p->wac = 0;
     p->anim = D_80129FF0;
     FUN_8001fe6c(p);

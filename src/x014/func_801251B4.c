@@ -1,8 +1,8 @@
 // FUNC 801251b4 1072 X014
 // MATCHING 801251b4 1072
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern int D_1F8002DC[];
 extern void *D_8012A004[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fe6c(TObj *);
@@ -79,7 +79,7 @@ void func_801251B4(TObj *o)
         o->d8c = 0;
         o->w1e = 1;
         o->b04++;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         o->anim = D_8012A004[o->subtype];
         FUN_8001fe6c(o);
         break;

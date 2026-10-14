@@ -1,11 +1,11 @@
 // FUNC 80123d64 1016 X014
 // MATCHING 80123d64 1016
+#include "spad.h"
 #include "TOBJ.H"
 extern void *D_80129FA8[];
 extern unsigned short D_801266E0[];
-extern unsigned short D_1F800176, D_1F80017A[], D_1F800172[], D_1F80016A[], D_1F80016E[];
+extern unsigned short D_1F800172[], D_1F80016E[];
 extern short D_8007A5F0[], D_8007A1F0[];
-extern short D_1F800284;
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern short D_800A4580[]; /* debt: second name for D_800A4582 keeps the game's reload */
 extern void FUN_800202b4(TObj *);
@@ -27,12 +27,12 @@ static __inline__ int Chk(TObj *o, short k)
 {
     short r = FUN_80041240(o, o->h->p.whole, o->y.p.whole);
     int n = k;
-    if (r != 0 && n == r && D_1F800284 == 0)
+    if (r != 0 && n == r && SPAD.s284 == 0)
         n++;
     else if (FUN_80041ebc(o, o->h->p.whole, o->y.p.whole) == 0)
         n = 0;
     else
-        n = D_1F800284 == 0;
+        n = SPAD.s284 == 0;
     return n;
 }
 
@@ -56,10 +56,10 @@ void func_80123D64(TObj *o)
         o->anim = D_80129FA8[0];
         AnimLoadDuration(o);
         o->velH = 0x480;
-        o->h->p.whole = D_1F800176 + D_801266E0[FUN_8001f9e0() & 7];
-        o->y.p.whole = D_1F80017A[0] - 0xf0;
+        o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + D_801266E0[FUN_8001f9e0() & 7];
+        o->y.p.whole = ((unsigned short*)&SPAD.s17a)[0] - 0xf0;
         o->d->p.whole = D_1F800172[0];
-        o->d38 = angleFromDelta(D_1F80016A[0] - o->h->p.whole, D_1F80016E[0] - o->y.p.whole);
+        o->d38 = angleFromDelta(((unsigned short*)((char*)&SPAD.i168 + 2))[0] - o->h->p.whole, D_1F80016E[0] - o->y.p.whole);
         o->d8c = (unsigned char)(o->d38 + 0x40);
         o->d38 = *(unsigned char *)&o->d38;
         n = allocObjectLayer2();

@@ -1,12 +1,12 @@
 // FUNC 80122fa0 1784 X014
 // MATCHING 80122fa0 1784
+#include "spad.h"
 #include "gvars.h"
 /* covers csv entries 80122fa0 (596 B) and 801231f4 (1188 B): one function cut at a jump into the middle */
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern TObj PLAYER;
-extern int D_1F8002DC[];
 extern void *D_80129F9C[];
 
 extern short D_800A457C;
@@ -66,7 +66,7 @@ void func_80122FA0(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         o->anim = D_80129F9C[o->subtype];
         AnimLoadDuration(o);
         o->timer = 0x14;

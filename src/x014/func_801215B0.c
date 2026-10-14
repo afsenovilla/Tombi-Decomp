@@ -1,10 +1,10 @@
 // FUNC 801215b0 444 X014
 // MATCHING 801215b0 444
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_1F800334;
 extern int FUN_800202b4(TObj *);
 extern void func_801211F0(TObj *);
 extern void func_801213F4(TObj *);
@@ -15,7 +15,7 @@ void func_801215B0(TObj *o)
     switch (o->b04) {
     case 0:
         if (o->subtype == 0) {
-            int *pp = &D_1F800334;
+            int *pp = &SPAD.i334;
             int *q = (int *)*pp;
             q += 1;
             if (GAME.selectedSection == 7) o->da0 = *pp + q[2];
@@ -26,7 +26,7 @@ void func_801215B0(TObj *o)
             o->box2 = 0x1c;
             o->box3 = 0x38;
         } else {
-            int *pp = &D_1F800334;
+            int *pp = &SPAD.i334;
             int *q = (int *)*pp;
             q += 1;
             if (GAME.selectedSection == 7) o->da0 = *pp + q[1];

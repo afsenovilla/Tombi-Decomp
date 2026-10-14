@@ -1,5 +1,6 @@
 // FUNC 80121f90 1160 X014
 // MATCHING 80121f90 1160
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
@@ -8,7 +9,6 @@ extern S2 *D_800A6078;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6;
 extern short D_800A6066;
 extern short D_800A457C, D_800A457E;
-extern unsigned short D_1F80027E;
 extern short func_80040278(TObj *, short, short);
 
 void func_80121F90(TObj *o)
@@ -51,7 +51,7 @@ void func_80121F90(TObj *o)
                 short y = o->y.p.whole + 4;
                 o->y.p.whole = y;
                 if (func_80040278(o, o->h->p.whole, (short)(y + o->box2))) {
-                    o->wb2 = D_1F80027E;
+                    o->wb2 = (*(unsigned short*)&SPAD.s27e);
                     goto d4;
                 }
             }
@@ -96,7 +96,7 @@ void func_80121F90(TObj *o)
                 short y = o->y.p.whole + 4;
                 o->y.p.whole = y;
                 if (func_80040278(o, o->h->p.whole, (short)(y + o->box2))) {
-                    o->wb2 = D_1F80027E;
+                    o->wb2 = (*(unsigned short*)&SPAD.s27e);
                     goto d7;
                 }
             }

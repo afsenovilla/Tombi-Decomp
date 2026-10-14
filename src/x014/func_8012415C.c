@@ -1,11 +1,11 @@
 // FUNC 8012415c 704 X014
 // MATCHING 8012415c 704
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_801266F0[];
-extern int D_1F8002DC;
 extern void *D_80129FA4[];
 extern void playSFX(int);
 extern void AnimLoadDuration(TObj *);
@@ -49,7 +49,7 @@ void func_8012415C(TObj *o)
         } else {
             o->b0d = 0x80;
         }
-        o->d3c = D_1F8002DC;
+        o->d3c = SPAD.i2dc;
         o->anim = D_80129FA4[o->b0c];
         AnimLoadDuration(o);
         break;
