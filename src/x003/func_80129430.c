@@ -1,11 +1,11 @@
 // FUNC 80129430 384 X003
 // MATCHING 80129430 384
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 typedef struct { int *p; int pad[2]; } E12;
 extern E12 D_80135D84[];
-extern unsigned char D_8009C939[];
 extern unsigned char D_8009CDC7;
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
@@ -19,7 +19,7 @@ void func_80129430(TObj *o)
         o->velX = 0x80;
         o->velY = -0x10;
         o->d34 = o->y.raw;
-        D_8009C939[0] = 1;
+        ((unsigned char*)&GVARS.b39)[0] = 1;
         o->anim = (void *)D_80135D84[o->subtype].p[5];
         AnimLoadDuration(o);
         o->state++;

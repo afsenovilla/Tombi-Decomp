@@ -1,10 +1,9 @@
 // FUNC 8011e6b0 1080 X003
 // MATCHING 8011e6b0 1080
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj *D_8009C330;
-extern unsigned char D_8009C938[];
-extern short D_8009C944[], D_8009C946[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
@@ -51,12 +50,12 @@ void func_8011E6B0(TObj *o)
         playSFX(0x1f);
         FUN_800fc02c(o);
         o->animFrame ^= 1;
-        *(unsigned char *)&D_8009C330->w08 = D_8009C938[0];
+        *(unsigned char *)&D_8009C330->w08 = ((unsigned char*)&GVARS.b38)[0];
         FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     case 2:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         if (AnimAdvance(o)) {
@@ -65,8 +64,8 @@ void func_8011E6B0(TObj *o)
         }
         break;
     case 3:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         {
             int d = o->d8c;
             o->d8c = ((o->animFrame & 1) ? d - 0x10 : d + 0x10) & 0xff;
@@ -87,8 +86,8 @@ void func_8011E6B0(TObj *o)
         }
         break;
     case 4:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

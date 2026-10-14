@@ -1,9 +1,9 @@
 // FUNC 801304b8 396 X003
 // MATCHING 801304b8 396
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_8009D00A[];
 extern void *D_8013A3B4[];
 extern void *D_8013A368[];
@@ -21,8 +21,8 @@ void func_801304B8(TObj *o)
     case 1:
         if (o->b68) {
             o->state++;
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             PLAYER.obj.b04 = 5;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;
@@ -41,8 +41,8 @@ void func_801304B8(TObj *o)
             o->anim = D_8013A368[0];
             o->state = 0;
             if (D_8009D00A[0]) {
-                D_8009C93F = 0;
-                D_8009C942 = 0;
+                GVARS.b3f = 0;
+                GVARS.b42 = 0;
                 PLAYER.obj.b04 = 1;
                 PLAYER.obj.step = 0;
                 PLAYER.obj.state = 0;

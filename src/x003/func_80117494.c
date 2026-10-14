@@ -1,5 +1,6 @@
 // FUNC 80117494 2352 X003
 // MATCHING 80117494 2352
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -19,7 +20,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93F;
 extern unsigned char D_8009CEF0, D_8009CDC8, D_8009CDC3, D_8009CDC5, D_8009CDC7;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned char D_1F8001CC, D_1F8001CD;
@@ -54,7 +54,7 @@ void func_80117494(O *o)
         o->step++;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         syncObjectTargetY(o);
         func_80029078(o);
@@ -118,7 +118,7 @@ void func_80117494(O *o)
                         PLAYER.b04 = 5;
                         PLAYER.visible = 0;
                         PLAYER.step = 0x40;
-                        D_8009C93F = 1;
+                        GVARS.b3f = 1;
                         break;
                     }
                 }
@@ -130,7 +130,7 @@ void func_80117494(O *o)
                 stopBgm(1);
                 o->step = 4;
                 GAME.fadeScreenControl = 3;
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
                 break;
             }
             if (D_1F800172 == 0 && D_1F80016A < 0xb95 && D_1F80016E >= -0x485) {
@@ -227,7 +227,7 @@ void func_80117494(O *o)
         if (PLAYER.yw >= -0x787) {
             PLAYER.active = 1;
             PLAYER.bw = 0;
-            D_8009C93F = 0;
+            GVARS.b3f = 0;
             o->step = 2;
         }
         func_80029CB4(o);

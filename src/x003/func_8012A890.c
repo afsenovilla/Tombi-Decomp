@@ -1,11 +1,11 @@
 // FUNC 8012a890 716 X003
 // MATCHING 8012a890 716
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009D004, D_8009CDC7, D_8009C940, D_8009C941, D_8009D094;
-extern unsigned char D_8009C93F;
+extern unsigned char D_8009D004, D_8009CDC7, D_8009C941, D_8009D094;
 extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
 extern TObj *TASK_C;
@@ -21,7 +21,7 @@ extern void func_80129CC0(TObj *o);
 
 static __inline__ int chk(void)
 {
-    return D_8009C940 == 1 && D_8009C941 == 0x42;
+    return GVARS.b40 == 1 && D_8009C941 == 0x42;
 }
 
 void func_8012A890(TObj *o)
@@ -61,7 +61,7 @@ void func_8012A890(TObj *o)
             case 0:
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.step = 0x62;
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
                 GAME.fadeScreenControl = 3;
                 o->state++;
                 break;

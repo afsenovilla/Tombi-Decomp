@@ -1,5 +1,6 @@
 // FUNC 8012c00c 1664 X003
 // MATCHING 8012c00c 1664
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -9,7 +10,6 @@ typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
 extern E12 D_80135DF0[];
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern unsigned char D_8009CDC5;
 extern unsigned char D_8009CDC5b; /* same byte as D_8009CDC5: second name makes chk() reload it (game reloads; volatile does not match) */
 extern TObj *showMessageBoxDirect(int, int, V *);
@@ -36,12 +36,12 @@ void func_8012C00C(TObj *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->animFrame = o->b68 & 1;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
         break;
     case 1:
-        D_8009C93E[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
         o->state = 10;
         break;
     case 10:
@@ -167,9 +167,9 @@ void func_8012C00C(TObj *o)
         break;
     case 122:
         o->animFrame = 1;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

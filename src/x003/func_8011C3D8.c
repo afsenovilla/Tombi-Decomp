@@ -1,8 +1,9 @@
 // FUNC 8011c3d8 1060 X003
 // MATCHING 8011c3d8 1060
+#include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned char D_8009C93F, D_8009C942, D_8009D2C2;
+extern unsigned char D_8009D2C2;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short D_80078DB4[];
 extern void *D_8013987C[];
@@ -20,8 +21,8 @@ void func_8011C3D8(TObj *o)
     switch (s) {
     case 0:
         o->state = s + 1;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->velH = 0x800;
         if (o->b0c & 4) {
             o->state = 2;
@@ -67,8 +68,8 @@ void func_8011C3D8(TObj *o)
         if ((unsigned short)dx > 0x20)
             break;
         q->state = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         o->step = 0;
         o->state = 0;
         pl->h->p.whole = q->h->p.whole;
@@ -91,8 +92,8 @@ void func_8011C3D8(TObj *o)
         dx = PLAYER.y.p.whole - D_80078DB4[1] + 0x10;
         if ((unsigned short)dx > 0x20)
             break;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         o->step = 0;
         o->state = 0;
         D_8009D2C2 = 1;

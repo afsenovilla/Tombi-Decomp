@@ -1,11 +1,11 @@
 // FUNC 8012f524 1148 X003
 // MATCHING 8012f524 1148
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pc0[0x12]; unsigned short wd2; } TX;
 #define X(o) ((TX *)(o))
 typedef struct { short f0, f1, f2, f3, f4, f5; } XS;
-extern unsigned char D_8009C942;
 extern int D_1F8002DC[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -59,14 +59,14 @@ void func_8012F524(TObj *o)
             x->f2 = 0x9f6;
             break;
         case 1:
-            if (D_8009C942 == 0) {
+            if (GVARS.b42 == 0) {
                 func_8012D740(o);
             }
             break;
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }
@@ -118,7 +118,7 @@ void func_8012F524(TObj *o)
         o->b9d = 0;
         break;
     case 2:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }

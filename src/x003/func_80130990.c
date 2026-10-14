@@ -1,10 +1,10 @@
 // FUNC 80130990 1196 X003
 // MATCHING 80130990 1196
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_1F8001A4, D_8009C93A, D_8009C93F;
-extern short D_8009C944, D_8009C946;
+extern unsigned char D_1F8001A4;
 extern unsigned short D_80135EC0[], D_80135EC8[];
 extern int FUN_8001f9e0(void);
 extern void FUN_80018980(TObj *);
@@ -26,33 +26,33 @@ void func_80130990(TObj *o)
         else
             o->b04 = 3;
     clr:
-        D_8009C944 = 0;
+        GVARS.s44 = 0;
         break;
     case 1:
         if (D_1F8001A4) goto clr;
         switch (o->step) {
         case 0:
-            if (D_8009C93A) {
+            if (GVARS.b3a) {
                 o->step++;
-                D_8009C944 = 0x100;
+                GVARS.s44 = 0x100;
             }
             break;
         case 1:
             if (PLAYER.y.p.whole >= -0x153) goto clr;
             if (U8(&PLAYER, 0xa2) | U8(&PLAYER, 0xa3)) goto clr;
-            if (D_8009C93F) goto clr;
+            if (GVARS.b3f) goto clr;
             if (PLAYER.step == 0x34) goto clr;
             switch (PLAYER.b9c) {
             case 0:
-                D_8009C944 = 0x100;
+                GVARS.s44 = 0x100;
                 break;
             case 1:
-                D_8009C944 += 8;
-                if (D_8009C944 > 0x200) D_8009C944 = 0x200;
+                GVARS.s44 += 8;
+                if (GVARS.s44 > 0x200) GVARS.s44 = 0x200;
                 break;
             case 2:
-                D_8009C944 += 0x10;
-                if (D_8009C944 > 0x300) D_8009C944 = 0x300;
+                GVARS.s44 += 0x10;
+                if (GVARS.s44 > 0x300) GVARS.s44 = 0x300;
                 break;
             }
             break;
@@ -87,7 +87,7 @@ void func_80130990(TObj *o)
             if ((unsigned short)--o->w1e == 0xffff) o->step = 1;
             break;
         }
-        D_8009C946 = 0;
+        GVARS.s46 = 0;
         if (pl->b69 == 1) break;
         if (U8(pl, 0xc9))
             v = o->w08 >> 1;
@@ -95,15 +95,15 @@ void func_80130990(TObj *o)
             v = o->w08;
         if ((unsigned short)(pl->a.p.whole - 0x514) < 0xb4) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            D_8009C946 = v;
+            GVARS.s46 = v;
         }
         if ((unsigned short)(pl->a.p.whole - 0x1012) < 0x226) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            D_8009C946 = v;
+            GVARS.s46 = v;
         }
         if ((unsigned short)(pl->a.p.whole - 0x13a3) < 0x85) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            D_8009C946 = v;
+            GVARS.s46 = v;
         }
         break;
     case 3:

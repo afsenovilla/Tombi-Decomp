@@ -1,5 +1,6 @@
 // FUNC 801281fc 1532 X003
 // MATCHING 801281fc 1532
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short a, b, x, y, z; } Q;
@@ -7,7 +8,6 @@ typedef struct { char p[0xd2]; short wd2; } E;
 typedef void (*Fn)(TObj *);
 
 extern int D_1F8002DC[];
-extern unsigned char D_8009C942;
 extern unsigned short D_1F80027E;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -61,7 +61,7 @@ void func_801281FC(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }

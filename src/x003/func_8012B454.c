@@ -1,8 +1,8 @@
 // FUNC 8012b454 392 X003
 // MATCHING 8012b454 392
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C940;
 extern unsigned char D_8009C941;
 extern unsigned char D_8009D003;
 extern void func_8012B2E4(TObj *);
@@ -13,7 +13,7 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ int check(void)
 {
-    return D_8009C940 == 1 && D_8009C941 == 0x7d;
+    return GVARS.b40 == 1 && D_8009C941 == 0x7d;
 }
 
 void func_8012B454(TObj *o)
@@ -30,7 +30,7 @@ void func_8012B454(TObj *o)
                 if (o->b68) {
                     o->step++;
                 } else if (check()) {
-                    D_8009C940 = 0;
+                    GVARS.b40 = 0;
                     if (D_8009D003 == 0) D_8009D003 = 1;
                     o->step++;
                 }

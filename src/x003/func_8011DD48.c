@@ -1,5 +1,6 @@
 // FUNC 8011dd48 1116 X003
 // MATCHING 8011dd48 1116
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned char p0[8];
@@ -93,7 +94,6 @@ typedef struct {
 } TP;
 
 extern PL *D_8009C330;
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern unsigned char D_8009D07C, D_8009D07D, D_8009D002, D_8009CFFD, D_8009CDC1;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -123,8 +123,8 @@ void func_8011DD48(TP *o)
         o->animFrame &= 1;
         PlayerSetAnimIfChanged((TObj *)o, 0x2b);
         o->wf6 = o->d->p.whole;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
     case 1:
         FUN_8001fec0((TObj *)o);
@@ -240,8 +240,8 @@ void func_8011DD48(TP *o)
         o->step = 0;
         o->state = 0;
         o->substep = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         break;
     }
 }

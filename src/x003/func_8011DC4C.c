@@ -1,10 +1,11 @@
 // FUNC 8011dc4c 252 X003
 // MATCHING 8011dc4c 252
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern int D_8009F0EC;
-extern unsigned char D_8009CDC3, D_8009C93A, D_8009D2B0, D_8009D2C2;
+extern unsigned char D_8009CDC3, D_8009D2B0, D_8009D2C2;
 
 void func_8011DC4C(TObj *o)
 {
@@ -16,7 +17,7 @@ void func_8011DC4C(TObj *o)
         o->step = 9;
     }
     if ((GAME.selectedSection == 0 || GAME.selectedSection == 4) && D_8009CDC3 != 0xff && GAME.selectedSpawnPoint == 4) {
-        D_8009C93A = 1;
+        GVARS.b3a = 1;
         D_8009D2B0 = 0;
         o->active = 1;
         o->b04 = 1;
@@ -30,7 +31,7 @@ void func_8011DC4C(TObj *o)
         o->b04 = 5;
         o->step = 0x40;
         o->visible = 0;
-        D_8009C93A = 1;
+        GVARS.b3a = 1;
         *p = 2;
     }
 }

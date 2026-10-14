@@ -1,12 +1,12 @@
 // FUNC 8011a874 1376 X003
 // MATCHING 8011a874 1376
+#include "gvars.h"
 /* includes the csv piece 8011ADC0 (the shared epilogue) */
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 extern unsigned char D_800A60E3;
 extern unsigned char D_8009CDCD, D_8009CEF0, D_8009D2C3, D_8009CE4E, D_8009D0D9, D_8009CDDB;
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 extern int func_8011A6C4(TObj *);
@@ -137,17 +137,17 @@ void func_8011A874(TObj *o)
         case 0:
             break;
         case 1:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 0x12c;
             o->substep++;
             setEventStarted(o->wac, 0, 0);
             break;
         case 4:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 0x12c;
             o->substep++;
             setEventComplete(o->wac, 0);
@@ -158,9 +158,9 @@ void func_8011A874(TObj *o)
             break;
         case 3:
         case 6:
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             o->substep = 0;
             break;
         }

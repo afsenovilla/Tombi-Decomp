@@ -1,14 +1,12 @@
 // FUNC 80131e44 424 X003
 // MATCHING 80131e44 424
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 extern short *D_800A6078;
 extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
-extern unsigned char D_8009C93A;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C942;
 extern unsigned char D_8009D2B0[];
 extern unsigned char D_8009CEEF;
 void func_801289C8(int a, int b, int c);
@@ -20,9 +18,9 @@ void func_80131E44(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009C93A != 0 && D_800A6078[1] >= 0x1b9) {
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+        if (GVARS.b3a != 0 && D_800A6078[1] >= 0x1b9) {
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             PLAYER.active = 1;
             D_8009D2B0[0] = 0;
             D_800A6078[1] = 0x1b8;

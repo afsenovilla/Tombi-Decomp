@@ -1,10 +1,10 @@
 // FUNC 8012cdc0 544 X003
 // MATCHING 8012cdc0 544
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
-extern unsigned char D_8009C93F, D_8009C942;
 extern unsigned char D_8009CF03;
 extern void *D_801399BC[];
 extern void *D_801399CC[];
@@ -40,16 +40,16 @@ void func_8012CDC0(TObj *o)
             PLAYER.obj.b04 = 5;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             break;
         }
         if (o->b68 == 0) break;
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->d90 = showMessageBoxDirect(6, 6, &v);
         o->wac = 5;
         o->state++;
@@ -66,8 +66,8 @@ void func_8012CDC0(TObj *o)
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         setEventStarted(0xad, 0, 1);
         break;
     }

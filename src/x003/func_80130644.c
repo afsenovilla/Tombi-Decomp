@@ -1,9 +1,9 @@
 // FUNC 80130644 364 X003
 // MATCHING 80130644 364
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern void *D_8013A3B4[], *D_8013A3A8[];
 extern TObj *showMessageBoxDirect(int, int, Fix16 *);
 extern void FUN_8001fe6c(TObj *);
@@ -22,8 +22,8 @@ void func_80130644(TObj *o)
         if (o->b68 == 0)
             break;
         o->state++;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -39,8 +39,8 @@ void func_80130644(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

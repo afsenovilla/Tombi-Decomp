@@ -1,10 +1,10 @@
 // FUNC 8012fcac 1028 X003
 // MATCHING 8012fcac 1028
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D087;
-extern unsigned char D_8009C93F, D_8009C940, D_8009C941, D_8009C942;
 extern void *D_80138FC8[], *D_80138FD8[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
@@ -69,7 +69,7 @@ void func_8012FCAC(TObj *o)
         o->state++;
         break;
     case 8:
-        if (D_8009C940 && D_8009C941 == 0x8f) {
+        if (GVARS.b40 && GVARS.b41 == 0x8f) {
             o->state = 10;
             break;
         }
@@ -82,7 +82,7 @@ void func_8012FCAC(TObj *o)
     case 10:
         o->state++;
         D_8009D087 = 2;
-        D_8009C940 = 0;
+        GVARS.b40 = 0;
         FUN_80026e0c(0x8f, 1);
         m = 8;
         n = 3;
@@ -126,8 +126,8 @@ void func_8012FCAC(TObj *o)
         q = &o->a;
         o->state++;
     talk:
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
@@ -146,8 +146,8 @@ void func_8012FCAC(TObj *o)
         }
     case 15:
         PLAYER.obj.b04 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
         o->state = 0;

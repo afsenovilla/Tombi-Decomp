@@ -1,12 +1,11 @@
 // FUNC 801243b8 1984 X003
 // MATCHING 801243b8 1984
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8, wa, wc; } X;
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C942[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F80018C;
@@ -68,8 +67,8 @@ void func_801243B8(TObj *o)
         o->velV = 0;
         o->wac = 0x17;
         SETANIM(0x17);
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -152,8 +151,8 @@ void func_801243B8(TObj *o)
             o->b9c = 2;
             if (func_801206F0(o)) {
                 DUST();
-                D_8009C93F[0] = 0;
-                D_8009C942[0] = 0;
+                ((unsigned char*)&GVARS.b3f)[0] = 0;
+                ((unsigned char*)&GVARS.b42)[0] = 0;
                 setEventStarted(0x1f, 0, 1);
                 o->b69 = 0;
                 x->wc = 0;
@@ -169,7 +168,7 @@ void func_801243B8(TObj *o)
         break;
     case 8:
         func_80120438(o);
-        if (!D_8009C93F[0]) {
+        if (!((unsigned char*)&GVARS.b3f)[0]) {
             o->state++;
             D_800A4553[0] = 6;
             o->wac = 9;

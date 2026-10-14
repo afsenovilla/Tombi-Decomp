@@ -1,11 +1,11 @@
 // FUNC 80131fec 552 X003
 // MATCHING 80131fec 552
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 
 extern TObj *D_8009F2E0;
-extern unsigned char D_8009CDC1, D_8009C93A;
-extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
+extern unsigned char D_8009CDC1;
 extern unsigned char PLAYER;
 extern short D_800A6066, D_800A60EA;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
@@ -31,9 +31,9 @@ void func_80131FEC(TObj *o)
         o->state++;
         break;
     case 1:
-        if (D_8009C93A == 0) break;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        if (GVARS.b3a == 0) break;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         PLAYER = 1;
         D_800A6066 = 0;
         D_800A603C = 5;
@@ -62,9 +62,9 @@ void func_80131FEC(TObj *o)
         break;
     case 15:
         if (--o->w08 > 0) break;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         D_800A60EA = 0;
         D_800A603C = 1;
         D_800A603D = 0;
