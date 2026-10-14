@@ -11,7 +11,6 @@ typedef struct { unsigned addr : 24; unsigned len : 8; u8 r0, g0, b0, code; } P_
 #define getaddr(p) (u_long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 #define setRECT(r, _x, _y, _w, _h) (r)->x = (_x), (r)->y = (_y), (r)->w = (_w), (r)->h = (_h)
-extern int D_1F800164;
 extern void SetDrawLoad(DR_LOAD *p, RECT *rect);
 
 typedef struct {
@@ -67,7 +66,7 @@ short loadMessageGlyph(int p, int id, int bank)
     GLYPH_CACHE[(short)freeSlot].b7 = h;
     GLYPH_CACHE[(short)freeSlot].b9 = b;
     if (n < 0x1b) {
-        load = (DR_LOAD *)D_1F800164;
+        load = (DR_LOAD *)(*(int*)&SPAD.p164);
         setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y, w, h);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
@@ -75,9 +74,9 @@ short loadMessageGlyph(int p, int id, int bank)
             *dst++ = *src++;
         }
         addPrim((*(u_long*)&SPAD.i1e0) + 4, load);
-        D_1F800164 += sizeof(DR_LOAD);
+        (*(int*)&SPAD.p164) += sizeof(DR_LOAD);
     } else {
-        load = (DR_LOAD *)D_1F800164;
+        load = (DR_LOAD *)(*(int*)&SPAD.p164);
         setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y, w, h >> 1);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
@@ -85,8 +84,8 @@ short loadMessageGlyph(int p, int id, int bank)
             *dst++ = *src++;
         }
         addPrim((*(u_long*)&SPAD.i1e0) + 4, load);
-        D_1F800164 += sizeof(DR_LOAD);
-        load = (DR_LOAD *)D_1F800164;
+        (*(int*)&SPAD.p164) += sizeof(DR_LOAD);
+        load = (DR_LOAD *)(*(int*)&SPAD.p164);
         setRECT(&rect, GLYPH_CACHE[(short)freeSlot].x, GLYPH_CACHE[(short)freeSlot].y + (h >> 1), w, h >> 1);
         SetDrawLoad(load, &rect);
         dst = (u16 *)load->p;
@@ -94,7 +93,7 @@ short loadMessageGlyph(int p, int id, int bank)
             *dst++ = *src++;
         }
         addPrim((*(u_long*)&SPAD.i1e0) + 4, load);
-        D_1F800164 += sizeof(DR_LOAD);
+        (*(int*)&SPAD.p164) += sizeof(DR_LOAD);
     }
     return freeSlot;
 }

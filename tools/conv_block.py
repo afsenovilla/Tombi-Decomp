@@ -70,7 +70,7 @@ def conv(path):
                 for st, nm, ar in parsed:
                     mm = re.fullmatch(r"D_([0-9A-F]{8})", nm)
                     off = int(mm.group(1), 16) - BASE if mm else -1
-                    if mm and (ONLY is None or nm in ONLY) and 0 <= off < SIZE and (btype in SCAL or st) and not (st and ar) and (not (DIRECT if ONLY is None else ONLY.get(nm, False)) or direct_ok(off, btype, st, ar)):
+                    if mm and (ONLY is None or nm in ONLY) and 0 <= off < SIZE and (btype in SCAL or btype.replace("volatile ", "", 1) in SCAL or st) and not (st and ar) and (not (DIRECT if ONLY is None else ONLY.get(nm, False)) or direct_ok(off, btype, st, ar)):
                         decl[nm] = (btype + (" " + st if st else ""), ar is not None, SCAL.get(btype) if not st else None, off)
                     else:
                         keep.append((st, nm, ar))

@@ -1,9 +1,9 @@
 // FUNC 80134404 700 X000
 // MATCHING 80134404 700
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 extern void *D_8013B270[];
-extern int D_1F8002D4[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
@@ -22,7 +22,7 @@ void func_80134404(TObj *o)
         o->box3 = 0x20;
         o->w1e = 8;
         o->animFrame = 1;
-        t = D_1F8002D4[0];
+        t = ((int*)&SPAD.i2d4)[0];
         a = D_8013B270[0];
         o->d3c = t;
         o->anim = a;

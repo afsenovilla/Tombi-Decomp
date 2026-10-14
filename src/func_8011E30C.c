@@ -1,11 +1,10 @@
 // FUNC 8011e30c 1324 X000
 // MATCHING 8011e30c 1324
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "player.h"
-extern short D_1F80016E;
-extern unsigned short D_1F80016A;
 extern unsigned short D_1F80016Eu;
 extern unsigned char D_8009D13F;
 extern unsigned char D_800A603Cb;
@@ -29,8 +28,8 @@ void func_8011E30C(TObj *o)
             case 0:
                 switch (o->state) {
                 case 0:
-                    if (D_1F80016E < -0x78) break;
-                    if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x40) < 0x80) o->state++;
+                    if ((*(short*)((char*)&SPAD.i16c + 2)) < -0x78) break;
+                    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x40) < 0x80) o->state++;
                     break;
                 case 1:
                     o->d88 = (o->d88 - 0x10) & 0xfff;
@@ -64,7 +63,7 @@ void func_8011E30C(TObj *o)
                 if (GCD.bcfed == 1) {
                     switch (o->state) {
                     case 0:
-                        if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x20) < 0x41 &&
+                        if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x20) < 0x41 &&
                             (unsigned short)(o->y.p.whole - D_1F80016Eu + 0x30) < 0x61) o->state++;
                         break;
                     case 1:
@@ -115,7 +114,7 @@ void func_8011E30C(TObj *o)
                 if (D_8009D13F) {
                     switch (o->state) {
                     case 0:
-                        if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x20) < 0x41) {
+                        if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x20) < 0x41) {
                             o->d88 = 0;
                             o->state = 1;
                             if (((unsigned char*)&GVARS.b3a)[0] == 0) {

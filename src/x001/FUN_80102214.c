@@ -1,5 +1,6 @@
 // FUNC 80102214 2036 X001
 // MATCHING 80102214 2036
+#include "spad.h"
 #include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
@@ -11,8 +12,6 @@ typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned short D_1F8001FC, D_1F8001FE, D_1F8003C4;
-extern unsigned char D_1F8001D2;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_8007A034, D_8007A036;
@@ -59,8 +58,8 @@ void FUN_80102214(TObj *o)
     void **tp;
 
     memcpy(pad, &GV6.s70, 8);
-    b0 = D_1F8001FC;
-    b1 = D_1F8001FE;
+    b0 = SPAD.s1fc;
+    b1 = SPAD.s1fe;
     U8(o, 0xe2) = 0;
     if (GVARS.b3e) {
         o->visible = 1;
@@ -79,17 +78,17 @@ void FUN_80102214(TObj *o)
     }
     if (GVARS.b3f) {
         *(volatile unsigned short *)&GV6.s70 = 0;
-        D_1F8001FC = 0;
+        SPAD.s1fc = 0;
         GV6.s74 = 0;
-        D_1F8001FE = 0;
+        SPAD.s1fe = 0;
         S16(o, 0xdc) = 0;
         S16(o, 0xde) = 0;
     }
-    D_1F8001D2 = 0;
+    SPAD.b1d2 = 0;
     U8(o, 0xc7) = 0;
     switch (o->subtype) {
     case 0:
-        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4) && o->step == 1)
+        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4) && o->step == 1)
             U8(o, 0xc1) = 1;
         else
             U8(o, 0xc1) = o->ba7;
@@ -239,6 +238,6 @@ void FUN_80102214(TObj *o)
     D_1F800172[0] = o->d->p.whole;
     GAME.selectedPlane = o->d->p.whole / 90;
     memcpy(&GV6.s70, pad, 8);
-    D_1F8001FC = b0;
-    D_1F8001FE = b1;
+    SPAD.s1fc = b0;
+    SPAD.s1fe = b1;
 }

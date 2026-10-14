@@ -1,5 +1,6 @@
 // FUNC 8001783c 776 MAIN0
 // MATCHING 8001783c 776
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -9,7 +10,6 @@
    is a varying NON-struct store, which sched2 orders against every fixed store (a barrier); GAME.playerLives = 3 placed
    inside the 0xff stores' range makes the 255 pseudo overlap the 3 pseudo so it gets v1; sched2 then emits the
    free stores in source order (ties by luid). */
-extern char D_1F8000C0[];
 extern unsigned short D_8009F3DC;
 extern unsigned char DAT_1f8001b3;
 extern unsigned char DAT_1f8001ab;
@@ -50,7 +50,7 @@ void initGameConfig(void)
 {
     memset(((char*)&GAME.selectedArea), 0, 0x988);
     memset(((char*)&GVARS.b30), 0, 0x2c);
-    getBaseMatrix(D_1F8000C0);
+    getBaseMatrix(((char*)&SPAD.bc0));
     DAT_1f8000ea = -544;
     DAT_1f8000ee = 160;
     DAT_1f8000f2 = -128;

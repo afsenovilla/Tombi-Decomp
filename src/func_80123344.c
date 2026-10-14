@@ -1,11 +1,11 @@
 // FUNC 80123344 772 X000
 // MATCHING 80123344 772
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short t; unsigned short x, y, z; } E;
 extern int D_8013B0E0;
 extern int D_80134DC4;
-extern int D_1F8002D4;
 extern unsigned short D_80138F0C[];
 extern E D_80138F14[];
 extern void AnimLoadDuration(TObj *o);
@@ -36,7 +36,7 @@ void func_80123344(TObj *o)
             o->w1e = 8;
             *(int *)&o->anim = D_80134DC4;
         common:
-            o->d3c = D_1F8002D4;
+            o->d3c = SPAD.i2d4;
             break;
         }
         AnimLoadDuration(o);

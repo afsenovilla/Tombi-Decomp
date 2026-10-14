@@ -1,5 +1,6 @@
 // FUNC 80049cdc 1096 MAIN0
 // MATCHING 80049cdc 1096
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 #include "gametask.h"
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
-extern short D_1F800176;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -45,8 +45,8 @@ void func_80049CDC(TObj *o)
         break;
     case 2:
         o->h->p.whole++;
-        if (D_1F800176 + 0x134 < o->h->p.whole)
-            o->h->p.whole = D_1F800176 + 0x134;
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 0x134 < o->h->p.whole)
+            o->h->p.whole = (*(short*)((char*)&SPAD.i174 + 2)) + 0x134;
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->timer = 40;
