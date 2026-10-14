@@ -1,10 +1,12 @@
 // FUNC 8011a87c 1644 X006
+// FLAGS -O2 -G0 -fno-expensive-optimizations
 #include "gvars.h"
-/* score 276: draft. o35: RotMatrixY((unsigned short)p->wb4), step switch of k=0 needs an empty `case 2:` (game tree
-   ==1, <2, !=0), D_8009C962 re-read in case 1/k=1 via a second array name (asm alias, debt). Remaining: the game
-   reloads lui/addiu D_1F800000 at every use; ours CSEs it into s0 (so p lands in s2). With a FLAGS line adding
-   -fno-expensive-optimizations the reloads come out (and the rest is then ~40 insns of a0/a1/v1 choices) but o
-   moves to s0 (game s1) and the score reads 421. */
+/* score 179 (was 276): -fno-expensive-optimizations (the game reloads lui/addiu D_1F800000 at every use, like
+   matched x014 func_80119344) + o pinned to $17 + a separate temp f for the ObjAlloc result (game $3).
+   Remaining: the pin leaves `move $7,$4` in the prologue (one extra insn, $7 used for one sb); case-0 list walker e
+   gets $5 (game $4); k=1 inner step e lands in $5 (game $2) and a missing nop at its first branch; case-2 a0/a1
+   swap. Earlier notes: RotMatrixY((unsigned short)p->wb4), empty `case 2:` for the k=0 step switch, D_8009C962_b
+   alias for the case-1/k=1 re-read. */
 #include "TOBJ.H"
 
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -48,8 +50,9 @@ extern void func_80118304(int, int, int);
     o->b.p.whole = o->d64; \
 }
 
-void func_8011A87C(TObj *o)
+void func_8011A87C(TObj *o_)
 {
+    register TObj *o asm("$17") = o_;
     unsigned char s = o->b04;
     SVECTOR v;
     TObj *e, *p;
@@ -84,16 +87,16 @@ void func_8011A87C(TObj *o)
             v.vz = o->d8c;
             RotMatrix(&v, m);
             if (D_8009C962 == 0) {
-                e = ObjAlloc();
-                if (e) {
-                    e->active = 1;
-                    e->type = 0x3b;
-                    e->d30 = -4;
-                    e->d34 = -0x16;
-                    e->d38 = 0;
-                    e->d90 = (int)o;
+                TObj *f = ObjAlloc();
+                if (f) {
+                    f->active = 1;
+                    f->type = 0x3b;
+                    f->d30 = -4;
+                    f->d34 = -0x16;
+                    f->d38 = 0;
+                    f->d90 = (int)o;
                 }
-                (*(TObj **)&GVARS.p50) = e;
+                (*(TObj **)&GVARS.p50) = f;
             }
             (*(TObj **)&GVARS.p4c) = o;
             break;
