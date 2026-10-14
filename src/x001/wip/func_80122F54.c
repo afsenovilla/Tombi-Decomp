@@ -1,4 +1,12 @@
 #include "spad.h"
+/* opusAA: 294 -> 281. `s4 = (short)s2` as a v0-pinned `sv_ = s2 << 16; s4 = sv_ >> 16` (290); before the
+   func_8012767C call the args are pinned a0/a1 (a0 bumped) and set first, o->h via a v0-pinned pointer and
+   h->p.whole read into a v0-pinned ushort before the 0xea store (281).
+   Structural finding (not kept, 373): the game's BLKB puts x=TR(rcos) in s0 and y=TR(rsin) in s2 (`s0 = x; s2 = y`
+   after `s1 = C`), BLKA puts x in s2 and y in s0 (`s2 = TR(rcos); s0 = TR(rsin)`); with that shape plus s1 pinned
+   $17 and plain `s4 = (short)s2`, s1 lands in s1 and the s5 save goes away, but the `s2 & 0xfff` and
+   `(s4 + 0x800) & 0xfff` temps are done in place (game: v1) and 5 instrs are missing; v1 pins / keep-alives on s2
+   or s4 there all scored 369-503. */
 #include "gv2.h"
 /* score 294 (opusS, was 411): BLKA/BLKB use block-local temps for the two TR(rcos/rsin, s0) results (with pinned
    s-regs gcc set the rsin arg after the TR; temps give the game's "move a0,s0; sll; jal; sra" order), BLKB reads
@@ -150,7 +158,7 @@ void func_80122F54(TObj *o_)
             s2 = g->d8c;
             if (o->animFrame & 1) {
                 o->h->p.whole -= 4;
-                s4 = (short)s2;
+                { register int sv_ asm("$2") = s2 << 16; s4 = sv_ >> 16; }
                 if (s4 >= 0x800) {
                     o->d8c = ((s4 + 0x400) >> 4) & 0xff;
                     s0 = s4 + 0xc00;
@@ -165,7 +173,7 @@ void func_80122F54(TObj *o_)
                 }
             } else {
                 o->h->p.whole += 4;
-                s4 = (short)s2;
+                { register int sv_ asm("$2") = s2 << 16; s4 = sv_ >> 16; }
                 if (s4 <= 0x800) {
                     s0 = s4 + 0xc00;
                     o->d8c = (s0 >> 4) & 0xff;
@@ -215,9 +223,13 @@ void func_80122F54(TObj *o_)
             }
             break;
         }
+        { register TObj *a0_ asm("$4") = o; register TObj *a1_ asm("$5"); register Fix16 *h asm("$2");
+        asm("" : "=r"(a0_) : "0"(a0_)); a1_ = DAT_8009f0ec; h = o->h;
+        { register unsigned short hw asm("$2") = h->p.whole;
         S16(o, 0xea) = o->y.p.whole + s0;
-        S16(o, 0xe8) = o->h->p.whole + s4;
-        if (func_8012767C(o, DAT_8009f0ec) == 0) {
+        S16(o, 0xe8) = hw + s4; }
+        a = func_8012767C(a0_, a1_); }
+        if (a == 0) {
             a = o->h->p.whole;
             if (o->animFrame & 1) o->h->p.whole = a + 4;
             else o->h->p.whole = a - 4;
