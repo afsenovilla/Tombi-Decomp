@@ -1,6 +1,6 @@
 // FUNC 8006ab94 200 MAIN0
 // MATCHING 8006ab94 200
-int func_8006AB94(unsigned char *o)
+int padResolveActAlign(unsigned char *o)
 {
     int i;
     int j, cnt, n;

@@ -7,7 +7,7 @@ extern void func_80113754(o);
 extern void func_800ECBBC(o);
 extern void func_800E8348(o);
 
-void func_80039C90(void)
+void scriptOpSetObjField74(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     TObj *o;

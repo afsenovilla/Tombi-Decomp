@@ -20,7 +20,7 @@ int _padSetMainMode(padPort *obj, int byte1, int byte2) {
     asm("" : "=r"(result) : "0"(result));
     flag = 1;
     obj->sequenceStep = flag;
-    obj->fn_14 = (void (*)(void *))func_8006ACF4;
+    obj->fn_14 = (void (*)(void *))padQueueMainModeCmd;
     obj->fn_18 = func_8006AD48;
     obj->requestedModeIndex = byte1;
     obj->requestedModeLock = byte2;

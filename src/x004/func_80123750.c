@@ -8,7 +8,7 @@ typedef void (*Fn)(TObj *);
 typedef struct { unsigned char b0, b1; } X;
 extern short D_800A4582;
 extern Fn D_801310EC[];
-extern int FUN_800203dc(TObj *);
+extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001f9e0(void);
 extern void freeObjectLayer2(TObj *);
@@ -52,7 +52,7 @@ void func_80123750(TObj *o)
             o->step++;
             break;
         case 1:
-            if (FUN_800203dc(o)) {
+            if (isObjectInView(o)) {
                 o->step = 0;
                 o->b04++;
             }

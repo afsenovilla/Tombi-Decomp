@@ -12,7 +12,7 @@ extern Fn D_8013C8FC[];
 extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
-extern void FUN_8002052c(TObj *, int);
+extern void despawnObjectOffscreenMargin(TObj *, int);
 extern void func_8012C8EC(TObj *);
 extern void func_8012C0EC(TObj *);
 extern void func_8012BD6C(TObj *);
@@ -96,7 +96,7 @@ void func_8012EFC4(TObjX *e)
                 }
                 if (o->b0c == 0) {
                     if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0)
-                        FUN_8002052c(o, 0x50);
+                        despawnObjectOffscreenMargin(o, 0x50);
                     break;
                 }
             chk:

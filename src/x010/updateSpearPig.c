@@ -23,7 +23,7 @@ extern short FUN_80040278(TObj *, int, int);
 extern short FUN_8004065c(TObj *, short, short, short);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e4f0(int);
-extern int FUN_800203dc(TObj *);
+extern int isObjectInView(TObj *);
 extern void func_80128D78(TObj *);
 extern void func_80129F7C(TObj *);
 extern void func_80129048(TObj *);
@@ -330,7 +330,7 @@ void updateSpearPig(TObj *o)
         break;
     case 4:
         if (o->timer == 0) {
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !FUN_800203dc(o)) {
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !isObjectInView(o)) {
                 q->a = 0;
                 o->w98 = 3;
                 o->subtype = q->sub;

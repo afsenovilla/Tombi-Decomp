@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern short D_800A4582;
 
-void func_8002052C(TObj *o, int a)
+void despawnObjectOffscreenMargin(TObj *o, int a)
 {
     short y;
     if (o->active == 0) return;

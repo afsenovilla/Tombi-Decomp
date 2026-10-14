@@ -21,7 +21,7 @@ extern char *D_1F800164;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 extern int projectActorPosition(void *o, long *sxy, long *z);
-extern int FUN_8004fcc0(void *p);
+extern int isQuadOnScreen(void *p);
 extern void SetSemiTrans(void *p, int abe);
 
 #define SN(i) D_8007A5F0[i]
@@ -113,7 +113,7 @@ void func_8011DBF4(TObj *o)
             p->x2 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
             p->y2 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
         }
-        if (FUN_8004fcc0(p)) {
+        if (isQuadOnScreen(p)) {
             p->code = 0x2d;
             SetSemiTrans(p, o->b0d >> 7);
             *(int *)&p->u0 = *(int *)base;

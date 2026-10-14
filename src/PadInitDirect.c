@@ -25,8 +25,8 @@ int PadInitDirect(u8 *output0, u8 *output1) {
 
     obj = &D_8009C038[0];
     D_800981AC = func_8006B62C;
-    D_800981B0 = func_8006B5C4;
-    D_800981B4 = func_8006B730;
+    D_800981B0 = padResetPortState;
+    D_800981B4 = padGetSendByte;
     D_800981B8 = func_8006B7EC;
     D_800981BC = padGetPortId;
     D_800981C0 = padGetPortBuffer;

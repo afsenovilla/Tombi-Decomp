@@ -5,7 +5,7 @@
 /* func_8006ACB8 of US psx_tomba libpad/padportd.c: byte of the payload for the current command (PAL padPort: payload_2c_len/command one byte later). */
 #include "padlocal.h"
 
-int func_8006B730(padPort *arg0, int needsAck) {
+int padGetSendByte(padPort *arg0, int needsAck) {
     int index;
     int mode;
     u8 *ptr;

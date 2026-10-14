@@ -22,7 +22,7 @@ extern PFT4 *D_1F800164;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
-int FUN_8004fcc0(void *p);
+int isQuadOnScreen(void *p);
 int insertPrim(void *a, int b, int c, int d, unsigned e);
 int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
@@ -87,7 +87,7 @@ void func_8011F240(TObj *o)
             p->x2 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
             p->y2 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
         }
-        if (FUN_8004fcc0(p)) {
+        if (isQuadOnScreen(p)) {
             p->code = 0x2d;
             setSemiTrans(p, o->b0d >> 7);
             *(int *)&p->uv0 = *(int *)q;

@@ -30,7 +30,7 @@ extern long LZ_FILE_CTRL;
 extern char *D_1F800164;
 extern int D_1F800074i;
 int projectActorPosition(void *o, long *sxy, long *z);
-int FUN_8004fcc0(void *p);
+int isQuadOnScreen(void *p);
 void setupActorPolyFT4(void *o, void *p, void *q);
 int insertPrim(void *a, int b, int c, int d, unsigned e);
 int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
@@ -56,7 +56,7 @@ void func_80124780(Ext *o)
     p->y2 = y + o->wc6;
     p->x3 = x + o->wcc;
     p->y3 = y + o->wce;
-    if (FUN_8004fcc0(p) == 0)
+    if (isQuadOnScreen(p) == 0)
         return;
     setupActorPolyFT4(o, p, (char *)*(volatile int *)&o->t.d3c + *(short *)(o->t.d3c + (*(unsigned short *)o->t.anim << 2) + 2));
     if (o->t.b0b != 0)

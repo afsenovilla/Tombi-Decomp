@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern void FUN_800202b4(TObj *);
-extern int FUN_800203dc(TObj *);
+extern int isObjectInView(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern TObj *allocObjectLayer2(void);
@@ -53,7 +53,7 @@ void FUN_8012e1c0(TObj *o)
             }
             break;
         case 1:
-            if (FUN_800203dc(o)) {
+            if (isObjectInView(o)) {
                 o->step = 0;
                 o->state = 0;
                 o->substep = 0;

@@ -8,7 +8,7 @@ extern G *SCRIPT_CTX;
 extern Q *SCRIPT_OBJECTS[];
 extern signed char D_8009D2B0;
 
-void func_8003A6B0(void)
+void scriptOpSetObjField6B(void)
 {
     register G *g asm("$6") = SCRIPT_CTX;
     Q *o = SCRIPT_OBJECTS[g->d1190];

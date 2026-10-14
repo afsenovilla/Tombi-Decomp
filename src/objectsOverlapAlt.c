@@ -9,7 +9,7 @@ static __inline__ int hit(TObj *a, TObj *b)
     return (unsigned short)(a->y.p.whole - b->y.p.whole + (b->box2 + (a->box3 - a->box2))) <= a->box3 + b->box3;
 }
 
-int func_80047E74(TObj *a, TObj *b)
+int objectsOverlapAlt(TObj *a, TObj *b)
 {
     return hit(a, b);
 }

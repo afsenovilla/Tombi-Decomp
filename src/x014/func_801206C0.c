@@ -11,7 +11,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern void FUN_8002052c(TObj *, int);
+extern void despawnObjectOffscreenMargin(TObj *, int);
 extern void freeObjectLayer2(TObj *);
 
 static __inline__ int touch(TObj *o, TObj *p)
@@ -167,7 +167,7 @@ void func_801206C0(TObj *o)
             o->velX = 0;
             o->b04++;
         } else {
-            FUN_8002052c(o, 0x50);
+            despawnObjectOffscreenMargin(o, 0x50);
         }
         break;
     case 3:

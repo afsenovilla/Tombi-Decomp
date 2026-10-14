@@ -12,7 +12,7 @@ extern int D_1F80018C;
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern void (*D_801390F8[])(TObj *);
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
@@ -65,7 +65,7 @@ void FUN_8012ccf8(TObj *o)
             o->step++;
             break;
         case 1:
-            if (func_800203DC(o)) {
+            if (isObjectInView(o)) {
                 o->step = 0;
                 o->b04++;
             }

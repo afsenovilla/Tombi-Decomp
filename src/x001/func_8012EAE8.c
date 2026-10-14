@@ -10,7 +10,7 @@ extern AH *D_8013DAE8[];
 extern unsigned char D_8013C800[];
 extern char D_80077D30[];
 extern short D_1F800284;
-extern int func_800203DC(TObj *o);
+extern int isObjectInView(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void applyFrameVelocityY(TObj *o);
 extern void applyFrameVelocityXY(TObj *o);
@@ -107,7 +107,7 @@ void func_8012EAE8(TObj *o)
         o->animTimer = ((AH *)o->anim)->w6 & 0x3fff;
         break;
     case 1:
-        if (func_800203DC(o)) o->state++;
+        if (isObjectInView(o)) o->state++;
         break;
     case 2:
         if (o->b0c == 0) {

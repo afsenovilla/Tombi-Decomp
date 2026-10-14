@@ -1,7 +1,7 @@
 // FUNC 8006acf4 84 MAIN0
 // MATCHING 8006acf4 84
 typedef struct { char p[0x2c]; unsigned char *ptr; char q[6]; unsigned char b36; unsigned char b37; char r[0x46-0x38]; unsigned char k; } O;
-void func_8006ACF4(O *o)
+void padQueueMainModeCmd(O *o)
 {
     int k;
     k = o->k;

@@ -171,7 +171,9 @@ address,name,confidence,comment
 8001ffa4,tickAnimationFixedRate,alta,name from psx_tomba (US)
 80020078,cullObjectToDrawList,alta,names batch (see notes/names.md)
 800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
+800203dc,isObjectInView,alta,"returns 1 when the object is active and its position is within the camera window (1F800176/1F800186) widened b"
 80020490,despawnObjectOffscreen,alta,names batch (see notes/names.md)
+8002052c,despawnObjectOffscreenMargin,alta,"same as despawnObjectOffscreen (b04=3, active=2, visible=0 when out of view) but the view margin is the second"
 800205d8,angleFromDelta,alta,name from psx_tomba (US)
 8002078c,angleBetweenPoints,alta,name from psx_tomba (US)
 800207ec,setObjectAxisPointers,alta,psx_tomba #21 (por bytes)
@@ -301,6 +303,7 @@ address,name,confidence,comment
 800391b0,runScript,alta,psx_tomba #21 (por bytes)
 8003926c,runScriptContext,alta,psx_tomba #21 (por bytes)
 80039338,loadAreaSoundBank,alta,psx_tomba #21 (por bytes)
+80039c90,scriptOpSetObjField74,media,"script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler"
 80039db8,scriptOpSetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e08,scriptOpGetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e54,scriptOpShowMessageBox,alta,name from psx_tomba (US)
@@ -319,6 +322,7 @@ address,name,confidence,comment
 8003a5a0,scriptOpWriteGlobal,alta,psx_tomba #21 (por bytes)
 8003a5d4,scriptOpLoadBackground,alta,psx_tomba #21 (por bytes)
 8003a648,scriptOpSetPlayerField6B,alta,psx_tomba #21 (por bytes)
+8003a6b0,scriptOpSetObjField6B,alta,"script op (psx_tomba op94): sets byte +0x6b of SCRIPT_OBJECTS[arg0] to arg1 unless in mode 3 without player +0"
 8003a71c,scriptOpSetObjAnim,alta,psx_tomba #21 (por bytes)
 8003a7e4,scriptOpSetPlayerState,alta,psx_tomba #21 (por bytes)
 8003a8a8,fillBytesUnrolled,alta,name from psx_tomba (US)
@@ -424,6 +428,8 @@ address,name,confidence,comment
 80045b28,applyObjectPush,alta,psx_tomba #21 (por bytes)
 80045b8c,callObjectInteraction,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80045d0c,dispatchObjectContact,alta,psx_tomba #21 (por bytes)
+80047e74,objectsOverlapAlt,media,"3D hitbox overlap test like objectsOverlap but with a's x box mirrored (b->box0 + a->box1 - a->box0)"
+80048d8c,onOverlapSetFlag68,media,"runs the objectsOverlapAlt test inline and sets e->b68 = 1 on contact"
 80048ffc,objectsOverlap,alta,names batch (see notes/names.md)
 8004bb84,dispatchAreaUnlayeredHandler,alta,psx_tomba #21 (por bytes)
 8004c0dc,updateObjectsUnlayered,alta,psx_tomba (por bytes)
@@ -450,6 +456,7 @@ address,name,confidence,comment
 8004fa80,queueSystemLoadList,alta,name from psx_tomba (US)
 8004fb68,loadSoundSet,alta,name from psx_tomba (US)
 8004fba8,projectActorPosition,alta,name from psx_tomba (US)
+8004fcc0,isQuadOnScreen,media,"returns 1 when some vertex y of the 4-vertex primitive is < 0x100 and some x < 0x140 (screen bounds 320x256)"
 8004fd6c,insertPrimWithBias,alta,name from psx_tomba (US)
 8004fdc8,insertPrim,alta,name from psx_tomba (US)
 8004fe1c,setupActorPolyFT4,alta,name from psx_tomba (US)
@@ -753,9 +760,12 @@ address,name,confidence,comment
 8006a2f4,_padRecvAtLoadInfo,alta,names batch (see notes/names.md)
 8006a564,_padGetActSize,alta,names batch (see notes/names.md)
 8006a59c,_padLoadActInfo,alta,names batch (see notes/names.md)
+8006a670,padQueueActInfoCmd,alta,"libpad, called from _padLoadActInfo: by load stage +0x46 queues padSetCmdQueryMode (2), padSetCmdQueryAct (3) "
 8006ab10,_padSetActAlign,alta,names batch (see notes/names.md)
 8006ab78,padSetCmdActAlign,alta,"libpad: queues controller command 0x4d (set actuator alignment) with the 6-byte table at port+0x20"
+8006ab94,padResolveActAlign,alta,"libpad, called from _padSetActAlign: for each actuator counts the alignment slots that use it against its tabl"
 8006ac5c,_padSetMainMode,alta,names batch (see notes/names.md)
+8006acf4,padQueueMainModeCmd,alta,"libpad, called from _padSetMainMode: stage 2 queues command 0x44 (set main mode, 2 bytes at +0x51), stage 3 co"
 8006ada8,padSetCmdConfigMode,alta,"libpad: queues controller command 0x43 (enter/exit config mode) with a one-byte parameter at port+0x24"
 8006adc8,padSetCmdQueryModel,alta,"libpad: queues controller command 0x45 (query model/status) with no parameters"
 8006addc,padSetCmdQueryMode,alta,"libpad: queues controller command 0x4c (query mode table entry) with a one-byte index"
@@ -763,6 +773,8 @@ address,name,confidence,comment
 8006ae1c,padSetCmdQueryComb,alta,"libpad: queues controller command 0x47 (query actuator combination) with a one-byte index"
 8006ae3c,padSetCmd4B,media,"libpad: queues controller command 0x4b with no parameters (command role unknown)"
 8006b464,PadInitDirect,alta,names batch (see notes/names.md)
+8006b5c4,padResetPortState,alta,"libpad, called from PadInitDirect: when the port is flagged (+0x49) clears its state, counters and pointers an"
+8006b730,padGetSendByte,alta,"libpad: returns the payload byte to transmit for the current command at payload_index-3 (actuator slots for co"
 8006ba68,padGetPortId,alta,"returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise"
 8006baa0,padGetPortBuffer,alta,"inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0"
 8006bf84,setRC2wait,alta,names batch (see notes/names.md)

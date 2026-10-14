@@ -12,7 +12,7 @@ typedef struct {
 extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
-extern int FUN_800203dc(P *);
+extern int isObjectInView(P *);
 extern int FUN_800201ac(P *, int);
 extern void freeObjectLayer2(P *);
 extern void func_80134EE8(P *);
@@ -33,7 +33,7 @@ void func_80134C00(P *o)
             func_80134EE8(o);
             break;
         case 1:
-            if (!FUN_800203dc(o)) {
+            if (!isObjectInView(o)) {
                 o->t.step = 0;
                 o->t.b04++;
             }

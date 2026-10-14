@@ -11,7 +11,7 @@ extern void *D_8012E9F8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern void playSFX(int);
 
 void func_80121A58(TObj *o)
@@ -30,7 +30,7 @@ void func_80121A58(TObj *o)
         o->state++;
         o->anim = D_8012EA38[0];
         AnimLoadDuration(o);
-        if (func_800203DC(o)) {
+        if (isObjectInView(o)) {
             playSFX(0x98);
         }
         if ((o->subtype & 0x7f) == 0) {

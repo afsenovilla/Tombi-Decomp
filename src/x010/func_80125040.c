@@ -11,7 +11,7 @@
 extern void **D_8012F3A8[];
 extern void freeObjectLayer2(TObj *);
 extern int ObjCullRegister(TObj *);
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void func_80124370(TObj *);
 extern void func_80124A00(TObj *);
@@ -117,7 +117,7 @@ void func_80125040(TObj *o)
         o->b04++;
         break;
     case 4:
-        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !func_800203DC(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !isObjectInView(o)) {
             o->active = 1;
             o->b9d = 0;
             o->b69 = 0;

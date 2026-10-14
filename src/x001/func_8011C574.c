@@ -29,7 +29,7 @@ extern int MulNegSinScaled(int, short);
 extern TObj *allocObjectLayer4(void);
 extern TObj *func_80020D98(void *);
 extern int FUN_800201ac(TObj *, int);
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern int angleBetweenPoints(P, P);
 extern void func_8011CEC8(Ctx *);
 extern void func_8011D28C(TObj *);
@@ -156,7 +156,7 @@ void func_8011C574(TObj *o)
         }
         FUN_800201ac(o, 0xa0);
         if (o->visible == 0) break;
-        if (func_800203DC(o) == 0) o->visible = 0;
+        if (isObjectInView(o) == 0) o->visible = 0;
         if (o->visible == 0) break;
         s1->f0 = o->b0c;
         s1->f2 = D_800A4470[o->subtype].n;

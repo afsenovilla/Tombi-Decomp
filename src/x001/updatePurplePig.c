@@ -15,7 +15,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern void spawnItemNotification(int, int);
 extern short FUN_80040278(TObj *, short, short);
 extern void func_801282D0(TObj *);
@@ -204,7 +204,7 @@ void updatePurplePig(BX *b)
             o->substep = 0;
             break;
         }
-        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !func_800203DC(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !isObjectInView(o)) {
             o->box2 = 0x10;
             o->box3 = 0x20;
             o->b04 = 0;

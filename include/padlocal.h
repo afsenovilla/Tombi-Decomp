@@ -134,15 +134,15 @@ int _padSioRW(padPort*, int);               /* _padSioRW */
 int func_80069EF8(padPort*, int);               /* byte exchange with ack wait */
 int _padClrIntSio0(void);                        /* _padClrIntSio0 */
 void sioWaitRxReady(void);                       /* wait SIO tx ready */
-void func_8006A670(padPort*);                   /* per-step handlers stored in fn_14 / fn_18 */
+void padQueueActInfoCmd(padPort*);                   /* per-step handlers stored in fn_14 / fn_18 */
 int func_8006A718(padPort*);
-void func_8006ACF4(padPort*);
+void padQueueMainModeCmd(padPort*);
 int func_8006AD48(padPort*);
 void _padSetVsyncParam(void);                        /* _padSetVsyncParam */
 void FUN_8006bac4(void);                        /* _padInitDirSeq */
 int func_8006B62C(int);                         /* completion (D_800981AC) */
-void func_8006B5C4(padPort*);                   /* reset object (D_800981B0) */
-int func_8006B730(padPort*, int);               /* payload byte (D_800981B4) */
+void padResetPortState(padPort*);                   /* reset object (D_800981B0) */
+int padGetSendByte(padPort*, int);               /* payload byte (D_800981B4) */
 void func_8006B7EC(padPort*);                   /* actuator map (D_800981B8) */
 int padGetPortId(padPort*);                    /* channel of object (D_800981BC) */
 padPort* padGetPortBuffer(int);                    /* object of channel (D_800981C0) */

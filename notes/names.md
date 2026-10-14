@@ -63,6 +63,18 @@ One line per name: `address name (old file) - justification`.
 - `8006e048 sndCmdSetReverbDelayA` (was func_8006E048) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the fifth argument
 - `8006e06c sndCmdSetReverbDelayB` (was func_8006E06C) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the byte at stack arg +0x24
 - `8005d4ec busyWaitDelay` (was func_8005D4EC) - empty countdown loop from 0x31FFFF
+- `8006a670 padQueueActInfoCmd` (was func_8006A670) - libpad, called from _padLoadActInfo: by load stage +0x46 queues padSetCmdQueryMode (2), padSetCmdQueryAct (3) or padSetCmdQueryComb/padSetCmd4B (4)
+- `8006acf4 padQueueMainModeCmd` (was func_8006ACF4) - libpad, called from _padSetMainMode: stage 2 queues command 0x44 (set main mode, 2 bytes at +0x51), stage 3 command 0x4d (actuator alignment, 6 bytes at +0x5d)
+- `8006ab94 padResolveActAlign` (was func_8006AB94) - libpad, called from _padSetActAlign: for each actuator counts the alignment slots that use it against its table limit and writes the resolved slots to +0x5d (0xff = unused), then sets stage 0xfe
+- `8006b730 padGetSendByte` (was func_8006B730) - libpad: returns the payload byte to transmit for the current command at payload_index-3 (actuator slots for command 0, payload_2c for 0x4d); US psx_tomba func_8006ACB8 (padportd.c)
+- `8006b5c4 padResetPortState` (was func_8006B5C4) - libpad, called from PadInitDirect: when the port is flagged (+0x49) clears its state, counters and pointers and sets the 6 actuator alignment slots to 0xff
+- `800203dc isObjectInView` (was func_800203DC) - returns 1 when the object is active and its position is within the camera window (1F800176/1F800186) widened by 0x40
+- `8002052c despawnObjectOffscreenMargin` (was func_8002052C) - same as despawnObjectOffscreen (b04=3, active=2, visible=0 when out of view) but the view margin is the second argument
+- `80047e74 objectsOverlapAlt` (was func_80047E74) - (uncertain) 3D hitbox overlap test like objectsOverlap but with a's x box mirrored (b->box0 + a->box1 - a->box0); returns the bool
+- `80048d8c onOverlapSetFlag68` (was func_80048D8C) - (uncertain) runs the objectsOverlapAlt test inline and sets e->b68 = 1 on contact
+- `8003a6b0 scriptOpSetObjField6B` (was func_8003A6B0) - script op (psx_tomba op94): sets byte +0x6b of SCRIPT_OBJECTS[arg0] to arg1 unless in mode 3 without player +0x6b == 1; pc++
+- `80039c90 scriptOpSetObjField74` (was func_80039C90) - (uncertain) script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler; pc++
+- `8004fcc0 isQuadOnScreen` (was FUN_8004fcc0) - (uncertain) returns 1 when some vertex y of the 4-vertex primitive is < 0x100 and some x < 0x140 (screen bounds 320x256)
 
 # Area overlay function names (X001..X019)
 

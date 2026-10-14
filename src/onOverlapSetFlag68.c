@@ -11,7 +11,7 @@ static __inline__ short hit(TObj *o, TObj *e)
         return 1;
     return 0;
 }
-void func_80048D8C(TObj *o, TObj *e)
+void onOverlapSetFlag68(TObj *o, TObj *e)
 {
     if (hit(o, e)) {
         e->b68 = 1;

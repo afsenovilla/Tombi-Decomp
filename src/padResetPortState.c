@@ -23,7 +23,7 @@ typedef struct {
     unsigned char fea;
 } S8006B5C4;
 
-void func_8006B5C4(S8006B5C4 *a)
+void padResetPortState(S8006B5C4 *a)
 {
     int i;
     unsigned char *p;

@@ -24,7 +24,7 @@ typedef struct {
 extern int LZ_FILE_CTRL;
 extern FT4 *D_1F800164;
 extern int projectActorPosition(void *, int *, int *);
-extern int FUN_8004fcc0(void *);
+extern int isQuadOnScreen(void *);
 extern void SetSemiTrans(void *, int);
 
 static __inline__ int ot(unsigned *a, int b, int c, int z, unsigned e)
@@ -75,7 +75,7 @@ void func_8011CEF0(TObj *o)
             p->x3 = p->x1;
             p->y3 = p->y2;
         }
-        if (FUN_8004fcc0(p)) {
+        if (isQuadOnScreen(p)) {
             p->code = 0x2d;
             SetSemiTrans(p, o->b0d >> 7);
             *(int *)&p->uv0 = e->uvclut;

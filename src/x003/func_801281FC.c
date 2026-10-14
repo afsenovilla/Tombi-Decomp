@@ -24,7 +24,7 @@ extern void func_80127D48(TObj *);
 extern void func_80128060(TObj *);
 extern void despawnObjectOffscreen(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern int FUN_800203dc(TObj *);
+extern int isObjectInView(TObj *);
 
 void func_801281FC(TObj *o)
 {
@@ -172,7 +172,7 @@ void func_801281FC(TObj *o)
     case 4:
         if (o->timer) {
             o->timer--;
-        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && !FUN_800203dc(o)) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && !isObjectInView(o)) {
             o->active = 1;
             o->b04 = 0;
             o->step = 1;

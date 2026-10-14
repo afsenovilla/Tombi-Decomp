@@ -6,7 +6,7 @@ extern void padSetCmdQueryAct(S *, int);
 extern void padSetCmdQueryComb(S *, int);
 extern void padSetCmd4B(S *);
 
-void func_8006A670(S *s)
+void padQueueActInfoCmd(S *s)
 {
     switch (s->a) {
     case 2:

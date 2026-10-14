@@ -16,7 +16,7 @@ void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 void playSFX(int a);
-void func_8002052C(TObj *o, int a);
+void despawnObjectOffscreenMargin(TObj *o, int a);
 void freeObjectLayer2(TObj *o);
 
 #define SFX(o) \
@@ -113,7 +113,7 @@ void func_80122FA0(TObj *o)
                 o->b04++;
                 break;
             }
-            func_8002052C(o, 0x50);
+            despawnObjectOffscreenMargin(o, 0x50);
             break;
         case 1:
             SFX(o);
@@ -210,7 +210,7 @@ void func_80122FA0(TObj *o)
             GVARS.b58 = 1;
             break;
         }
-        func_8002052C(o, 0x50);
+        despawnObjectOffscreenMargin(o, 0x50);
         break;
     case 3:
         freeObjectLayer2(o);

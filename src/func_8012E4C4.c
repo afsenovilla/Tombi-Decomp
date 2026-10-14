@@ -6,7 +6,7 @@ typedef struct { TObj t; char pad[0xec - 0xc0]; } E;
 extern TObj PLAYER;
 extern E D_800B1478[];
 extern short D_1F80019C;
-extern int func_800203DC(TObj *);
+extern int isObjectInView(TObj *);
 extern void FUN_8011aa30(int, int, int);
 extern void SfxPlay2(int, int);
 extern void spawnLayer3Object(int, int, int, int);
@@ -53,7 +53,7 @@ void func_8012E4C4(TObj *o)
         pl = &PLAYER;
         switch (o->step) {
         case 0:
-            if (func_800203DC(o) == 0)
+            if (isObjectInView(o) == 0)
                 break;
             if ((SPAD.s1f8 + SPAD.i198) & 1) {
                 if (Hit(o, pl)) {

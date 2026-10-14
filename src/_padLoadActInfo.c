@@ -33,7 +33,7 @@ initialize:
     obj->communicationState = state;
     state = 1;
     obj->sequenceStep = state;
-    obj->fn_14 = (void (*)(void *))func_8006A670;
+    obj->fn_14 = (void (*)(void *))padQueueActInfoCmd;
     asm volatile("" ::: "memory");
     rowCount = obj->modeCount;
         processFn = func_8006A718;

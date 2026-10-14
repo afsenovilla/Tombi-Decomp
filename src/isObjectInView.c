@@ -9,7 +9,7 @@ static __inline__ int vis(void *q)
     if ((unsigned short)(p->pos->y - *(unsigned short *)0x1F800176 + 0x40) >= 0x1c1) return 0;
     return (unsigned short)(*(unsigned short *)0x1F800186 - p->z + 0x40) < 0x171;
 }
-int func_800203DC(S *o)
+int isObjectInView(S *o)
 {
     return vis(o);
 }
