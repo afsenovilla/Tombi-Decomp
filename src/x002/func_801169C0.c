@@ -1,5 +1,6 @@
 // FUNC 801169c0 2528 X002
 // MATCHING 801169c0 2528
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
@@ -10,8 +11,6 @@ typedef struct {
 } Ent;
 extern Ent D_8011C6D8[];
 extern int SPR_DATA[];
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186[];
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -81,8 +80,8 @@ void func_801169C0(TObj *o)
         o->b04++;
         break;
     case 1:
-        o->a.p.whole = o->d30 - D_1F800176;
-        o->y.p.whole = o->d34 - D_1F800186[0];
+        o->a.p.whole = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
+        o->y.p.whole = o->d34 - ((unsigned short*)&SPAD.s186)[0];
         o->visible = 1;
         FUN_80018ca4(o);
         FUN_8001fec0(o);

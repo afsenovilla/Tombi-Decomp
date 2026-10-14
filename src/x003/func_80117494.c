@@ -1,5 +1,6 @@
 // FUNC 80117494 2352 X003
 // MATCHING 80117494 2352
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
@@ -21,9 +22,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern unsigned char D_1F8001CC, D_1F8001CD;
-extern short D_1F8001C6;
 extern char D_8001D6A4[];
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
@@ -39,8 +37,8 @@ extern void SoundStopAll(void);
 extern void ThreadCreate(int, char *);
 extern void func_80029CB4(O *);
 
-#define XU (*(unsigned short *)&D_1F80016A)
-#define ZU (*(unsigned short *)&D_1F80016E)
+#define XU (*(unsigned short *)&(*(short*)((char*)&SPAD.i168 + 2)))
+#define ZU (*(unsigned short *)&(*(short*)((char*)&SPAD.i16c + 2)))
 
 void func_80117494(O *o)
 {
@@ -67,11 +65,11 @@ void func_80117494(O *o)
             unsigned short *p = &GAME.selectedSpawnPoint;
             switch (*p) {
             case 0:
-                if (D_1F80016A < 0x14 && D_1F80016E >= -0x59) {
+                if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x14 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x59) {
                     if (GCD.bcef0 != 0) tryStartItemInteraction(o, 1, 0);
-                } else if (D_1F80016A < 0xa7 && D_1F800172 < -0x5a) {
+                } else if ((*(short*)((char*)&SPAD.i168 + 2)) < 0xa7 && (*(short*)((char*)&SPAD.i170 + 2)) < -0x5a) {
                     tryStartItemInteraction(o, 1, 1);
-                } else if (D_1F80016A >= 0xbc1 && D_1F80016E >= -0x489) {
+                } else if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0xbc1 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x489) {
                     tryStartItemInteraction(o, 1, 2);
                 }
                 if (GCD.bcdc8 != 0xff) break;
@@ -79,7 +77,7 @@ void func_80117494(O *o)
                 if ((unsigned short)(ZU + 0x56a) >= 0x10) break;
                 PLAYER.ba0 = 1;
                 PLAYER.ba8 = 10;
-                if (D_1F800172 > 0) stepPlayerXToward(0x784);
+                if ((*(short*)((char*)&SPAD.i170 + 2)) > 0) stepPlayerXToward(0x784);
                 break;
             case 4:
                 if (GCD.bcdc3 != 0xff) setEventComplete(0x1f, 0);
@@ -106,13 +104,13 @@ void func_80117494(O *o)
             if (GCD.bcdc5 == 0xff && (unsigned)(XU - 0xc72) < 0x14 && (unsigned short)(ZU + 0x63e) < 0x10) {
                 PLAYER.ba0 = 1;
                 PLAYER.ba8 = 0xc;
-                if (D_1F800172 > 0) stepPlayerXToward(0xc7c);
+                if ((*(short*)((char*)&SPAD.i170 + 2)) > 0) stepPlayerXToward(0xc7c);
             }
             if ((unsigned)(XU - 0x10a1) < 0x10 && (unsigned short)(ZU + 0x5b4) < 0x10) {
                 PLAYER.ba0 = 1;
-                if (D_1F800172 > 0) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) > 0) {
                     stepPlayerXToward(0x10a9);
-                    if (D_1F800172 >= 0x51) {
+                    if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x51) {
                         o->step = 6;
                         PLAYER.active = 5;
                         PLAYER.b04 = 5;
@@ -133,23 +131,23 @@ void func_80117494(O *o)
                 GVARS.b3f = 1;
                 break;
             }
-            if (D_1F800172 == 0 && D_1F80016A < 0xb95 && D_1F80016E >= -0x485) {
+            if ((*(short*)((char*)&SPAD.i170 + 2)) == 0 && (*(short*)((char*)&SPAD.i168 + 2)) < 0xb95 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x485) {
                 tryStartItemInteraction(o, 1, 0);
                 break;
             }
-            if (D_1F80016E < -0x986) {
+            if ((*(short*)((char*)&SPAD.i16c + 2)) < -0x986) {
                 if ((unsigned)(XU - 0x1536) >= 0x35) break;
-                if (D_1F800172 <= 0) break;
+                if ((*(short*)((char*)&SPAD.i170 + 2)) <= 0) break;
                 stepPlayerXToward(0x1550);
-                if (D_1F800172 < 0x2e) break;
+                if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x2e) break;
                 tryStartItemInteraction(o, 1, 1);
                 break;
             }
-            if (D_1F80016E < -0x937) break;
+            if ((*(short*)((char*)&SPAD.i16c + 2)) < -0x937) break;
             if ((unsigned)(XU - 0x153e) >= 0x1d) break;
-            if (D_1F800172 < -0x59) break;
+            if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x59) break;
             stepPlayerXToward(0x154d);
-            if (D_1F800172 < -0x2c) break;
+            if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x2c) break;
             tryStartItemInteraction(o, 1, 2);
             break;
         clr:
@@ -159,15 +157,15 @@ void func_80117494(O *o)
         case 2: {
             unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p == 0) {
-                if (D_1F80016A < 0x22) {
+                if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x22) {
                     if ((unsigned short)(ZU + 0x16d) < 0x20) tryStartItemInteraction(o, 1, 0);
                     break;
                 }
-                if (D_1F80016A >= 0xb00 && D_1F80016E >= -0x4c5) {
+                if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0xb00 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x4c5) {
                     tryStartItemInteraction(o, 1, 1);
                     break;
                 }
-                if (D_1F80016E >= -0x730) break;
+                if ((*(short*)((char*)&SPAD.i16c + 2)) >= -0x730) break;
                 if ((unsigned)(XU - 0x5b3) >= 0xc0) break;
                 tryStartItemInteraction(o, 1, 2);
             } else {
@@ -179,7 +177,7 @@ void func_80117494(O *o)
             unsigned short *p = &GAME.selectedSpawnPoint;
             switch (*p) {
             case 0:
-                if (D_1F80016A < 0x20 && (unsigned short)(ZU + 0x268) < 0x20) tryStartItemInteraction(o, 1, 0);
+                if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x20 && (unsigned short)(ZU + 0x268) < 0x20) tryStartItemInteraction(o, 1, 0);
                 break;
             case 1:
                 *p = 0;
@@ -195,14 +193,14 @@ void func_80117494(O *o)
     case 4:
         if (GAME.fadeScreenControl != 1) break;
         o->step++;
-        D_1F8001CC = 1;
-        D_1F8001CD = 6;
-        D_1F8001C6 = 2;
+        SPAD.b1cc = 1;
+        SPAD.b1cd = 6;
+        SPAD.s1c6 = 2;
         SoundStopAll();
         ThreadCreate(1, D_8001D6A4);
         break;
     case 5:
-        if (D_1F8001CC != 0) break;
+        if (SPAD.b1cc != 0) break;
         o->subtype = 1;
         o->step = 3;
         GAME.selectedSpawnPoint = 3;

@@ -1,5 +1,6 @@
 // FUNC 800f1d44 2280 X004
 // MATCHING 800f1d44 2280
+#include "gv2.h"
 #include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
@@ -21,8 +22,6 @@ typedef struct {
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern volatile unsigned short D_8009D670[];
-extern unsigned char D_8009D2B3;
-extern unsigned char D_8009D2B1;
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
 extern XY D_801151E0[];
@@ -102,7 +101,7 @@ void func_800F1D44(TObj *o)
             o->velX = 0;
             o->state++;
         case 1:
-            if (D_8009D2B3 >= 3) o->animTimer = 1;
+            if (GV2.bb3 >= 3) o->animTimer = 1;
             FUN_8001fec0(o);
             w = o->wb0;
             t = w;
@@ -191,8 +190,8 @@ void func_800F1D44(TObj *o)
             break;
         }
         mode = 0;
-        if (D_8009D2B1 == 1) mode = 1;
-        else if (D_8009D2B1 == 2) mode = 2;
+        if (GV2.bb1 == 1) mode = 1;
+        else if (GV2.bb1 == 2) mode = 2;
         lim = 0x200;
         if ((*(unsigned int*)&GAME.area00_eventControl) & 0x40) {
             lim = 0x360;

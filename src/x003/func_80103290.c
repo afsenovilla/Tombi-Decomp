@@ -1,10 +1,10 @@
 // FUNC 80103290 920 X003
 // MATCHING 80103290 920
+#include "gv2.h"
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
-extern unsigned char D_8009D2B0[];
 void ObjMotionStep(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void FUN_8001f96c(int, int, int, int);
@@ -63,7 +63,7 @@ void func_80103290(TObj *o)
             else o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2);
         }
         if (SPAD.s1fc & SPAD.s3c6) {
-            D_8009D2B0[0] = 0;
+            ((unsigned char*)&GV2.bb0)[0] = 0;
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

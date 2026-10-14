@@ -1,5 +1,6 @@
 // FUNC 801178f4 1016 X002
 // MATCHING 801178f4 1016
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -7,8 +8,6 @@
 
 typedef struct { short x, y, w, h; } RECT;
 extern int LoadImage(RECT *, void *);
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern char D_8011C728[];
 extern short D_8011C768[];
 extern void ObjListPush_1F800224(TObj *o);
@@ -20,8 +19,8 @@ extern void func_80117644(TObj *o);
 static __inline__ int onScreen(TObj *o)
 {
     if (GVARS.b3a == 0) return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_801178F4(TObj *o)

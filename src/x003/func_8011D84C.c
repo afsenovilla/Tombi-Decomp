@@ -1,11 +1,10 @@
 // FUNC 8011d84c 1016 X003
 // MATCHING 8011d84c 1016
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern char D_80135AA8[];
 extern short D_80135AE8[];
 extern void FUN_8005f3c0(short *, char *);
@@ -18,8 +17,8 @@ extern void func_8011D59C(TObj *);
 static __inline__ int onscreen(TObj *o)
 {
     if (GVARS.b3a == 0) return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_8011D84C(TObj *o)
