@@ -24,7 +24,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | KEPT: pointer table (112 words) but func_80100788 (shared player step 0x47) jals it from X016 itself (80101634); step 0x47 is only set by X014 code, not provable dead |
 | DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | KEPT: 10 words of s16 offset pairs (anim data, pointed to from 8011EFDC) but func_80100788 step 0x25 jals it from X002 itself (801011BC); not provable dead |
 | NEAR | x001 | func_80127700 | 80127700 | 396 | 2 | src/x001/wip/func_80127700.c (gcc-2.7.2-psx) | one operand-order diff: addu v1,a0,v1 vs v1,v1,a0 (permuter 100k+ iters, ~250 forms tried) |
-| NEAR | x004 | func_80125818 | 80125818 | 3148 | 11 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 787 instrs, no fake nop (NEAR() stmt-expr macro); left: lbu substep sched after li in 3 setanim tails, case 3 sh s0,0xbc in mult shadow |
+| NEAR | x004 | func_80125818 | 80125818 | 3148 | 2 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 787 instrs, no fake nop (NEAR() stmt-expr macro, memory barriers); left: case 3 sh s0,0xbc (wbc = 1) before the mult instead of after |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 27 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17, o->f via $5 int <<16; left: x+w temp reg, uv sched |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 294 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps; left: s1 var in s5, in-place v1 temps |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 14 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | SPAD.b1d2 block fixed (t bump + w=v global); left: v a1 vs game v1 in the a->wb0 block |

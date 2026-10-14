@@ -1,5 +1,8 @@
 // FUNC 80125818 3148 X004
-/* opusAA: score 11, exactly 787 instrs, fake nop removed. near() is now a statement-expression macro NEAR(o)
+/* opusAA: score 2 = only `sh s0,0xbc` (case 3 wbc = 1) is scheduled before the mult instead of after it
+   (tried 3-statement permutations with an m temp (short/int, % before/after), U16, += 1, barriers: all 2-4).
+   `asm("" ::: "memory")` barriers after the SETANIM in case 0 (itbrute) and case 4 put the lbu substep first.
+   Before: score 11, exactly 787 instrs, fake nop removed. near() is now a statement-expression macro NEAR(o)
    with `short s` and the result `r_ = s == 1 && dy < 0xf8` (gives the game's a0 result, a1 dy and `move v1,s0`).
    case 5: block-local p pinned $3, wba as `register int w asm("$4")` + asm bump, `pv = w + (pv - q)`.
    case 8: `({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; })`.
@@ -84,6 +87,7 @@ void func_80125818(TObj *o)
             o->wbc = 1;
             o->wac = 0x16;
             SETANIM(D_8013460C)
+            asm("" ::: "memory");
             o->movetab = D_80077CDC;
             o->substep++;
         }
@@ -160,6 +164,7 @@ void func_80125818(TObj *o)
             o->movetab = D_80077D0C;
             o->wac = 6;
             SETANIM(D_801345CC)
+            asm("" ::: "memory");
             o->w22 = 0xb4;
             o->substep++;
         } else {
@@ -169,6 +174,7 @@ void func_80125818(TObj *o)
             o->movetab = D_80077D0C;
             o->wac = 6;
             SETANIM(D_801345CC)
+            asm("" ::: "memory");
             o->w22 = 0xb4;
             o->substep++;
         }
