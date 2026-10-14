@@ -1,0 +1,13 @@
+func_8011528C = 0x8011528C; // type:func size:0x1BC  PAL x011 0x80115FC0
+func_80115448 = 0x80115448; // type:func size:0x258  PAL x011 0x8011617C
+func_80115934 = 0x80115934; // type:func size:0x29C  PAL x011 0x80116688
+func_80115BD0 = 0x80115BD0; // type:func size:0x234  PAL x011 0x80116924
+func_80115E04 = 0x80115E04; // type:func size:0x1BC  PAL x011 0x80116B58
+func_80116110 = 0x80116110; // type:func size:0x154  PAL x011 0x80116E54
+func_80116264 = 0x80116264; // type:func size:0xE4  PAL x011 0x80116FA8
+func_80117E88 = 0x80117E88; // type:func size:0x27C  PAL x011 0x8011921C
+func_80118104 = 0x80118104; // type:func size:0x2E4  PAL x011 0x80119498
+func_801183E8 = 0x801183E8; // type:func size:0x1C4  PAL x011 0x8011977C
+func_801185AC = 0x801185AC; // type:func size:0xA8  PAL x004 0x80129524
+func_8011865C = 0x8011865C; // type:func size:0x1A4  PAL x011 0x801199F0
+func_80118814 = 0x80118814; // type:func size:0x98  PAL x003 0x80133668

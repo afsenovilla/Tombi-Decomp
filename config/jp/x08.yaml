@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), area overlay X08.BIN (copies in SYSTEM/ and AREA08/ are identical).
+# The first 0x2B680 bytes are the X00.BIN code every overlay repeats (split in config/jp/x00.yaml); the area part
+# starts at 0x2B680 (ID word + entry table, then code), load address 0x800E9AF8 for the whole file.
+name: X08.BIN
+sha1: e97dbfcc9349a244cd4a3761fabc58104a5bb571
+options:
+  basename: x08
+  target_path: game_jp/SYSTEM/X08.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/jp/x08
+  src_path: build/jp/splat_src/x08
+  build_path: build/jp
+  asset_path: build/jp/assets
+  ld_script_path: build/jp/x08.ld
+  symbol_addrs_path:
+    - config/jp/symbol_addrs_x08.txt
+  undefined_funcs_auto_path: build/jp/undefined_funcs_auto.x08.txt
+  undefined_syms_auto_path: build/jp/undefined_syms_auto.x08.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - [0x0, bin, x08_shared]
+  - name: x08
+    type: code
+    start: 0x2B680
+    vram: 0x80115178
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x2B680, c, x08]
+  - [0x2B8F4]

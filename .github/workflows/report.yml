@@ -76,9 +76,9 @@ jobs:
           name: SCES_013.31_report
           path: build/report.json
 
-  # Japanese release (Ore! Tomba). Same repo, separate decomp.dev version: the artifact is named after the boot
-  # executable in SYSTEM.CNF (<serial>_report). The disc image comes from the GAME_FILES_URL_JP secret (raw .bin,
-  # never committed). Until config/jp/ exists only the image is fetched and identified; the report step is skipped.
+  # Japanese release (Ore! Tomba, SLPS-01144). Same repo, separate decomp.dev version: artifact SLPS_011.44_report.
+  # The disc image comes from the GAME_FILES_URL_JP secret (raw .bin disc image, 2352-byte sectors, or a zip with the
+  # extracted disc; never committed). Skipped when the secret or config/jp/ is missing. See docs/JP.md.
   report-jp:
     runs-on: ubuntu-24.04
     steps:
@@ -97,17 +97,43 @@ jobs:
             echo "::notice::GAME_FILES_URL_JP secret not set; skipping the Japanese report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
+          if [ ! -f config/jp/slps01144.yaml ]; then
+            echo "::notice::config/jp not set up; Japanese report skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
           curl -fsSL -o "$RUNNER_TEMP/jp.dl" "$URL"
-          mkdir -p game_jp
-          python3 -I tools/isoext.py "$RUNNER_TEMP/jp.dl" game_jp
-          BOOT="$(grep -i '^BOOT' "$(find game_jp -iname SYSTEM.CNF | head -1)" | sed -E 's#.*[:\\/]([A-Za-z0-9_.]+);.*#\1#')"
-          echo "boot=$BOOT" >> "$GITHUB_OUTPUT"
-          sha1sum "$(find game_jp -iname "$BOOT" | head -1)"
-          if [ -d config/jp ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::notice::config/jp not set up yet; Japanese report skipped."; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+          mkdir -p "$RUNNER_TEMP/jp"
+          if unzip -tq "$RUNNER_TEMP/jp.dl" >/dev/null 2>&1; then
+            unzip -o -q "$RUNNER_TEMP/jp.dl" -d "$RUNNER_TEMP/jp"
+          elif [ "$(stat -c%s "$RUNNER_TEMP/jp.dl")" -gt 100000000 ]; then
+            python3 -I tools/isoext.py "$RUNNER_TEMP/jp.dl" "$RUNNER_TEMP/jp"
+          else
+            echo "::error::The download is neither a zip nor a disc image. Share the file as 'Anyone with the link' and check GAME_FILES_URL_JP."; exit 1
+          fi
+          mkdir -p game_jp/SYSTEM
+          cp "$(find "$RUNNER_TEMP/jp" -iname SLPS_011.44 | head -1)" game_jp/SLPS_011.44
+          echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
+          for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+            cp "$(find "$RUNNER_TEMP/jp" -ipath "*SYSTEM/$f.BIN" | head -1)" "game_jp/SYSTEM/$f.BIN"
+          done
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
 
       - name: Build Japanese report
         if: steps.fetch.outputs.ok == 'true'
@@ -117,7 +143,7 @@ jobs:
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.fetch.outputs.boot }}_report
+          name: SLPS_011.44_report
           path: build/jp/report.json
 
   # Japanese demo disc (SLPM-80165, "Ore! Tomba" taikenban). Separate decomp.dev version named after its boot

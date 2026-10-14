@@ -1,0 +1,5 @@
+func_80115530 = 0x80115530; // type:func size:0x9C  PAL x013 0x80116234
+func_801155CC = 0x801155CC; // type:func size:0xC8  PAL x013 0x801162D0
+func_80115694 = 0x80115694; // type:func size:0x348  PAL x013 0x80116398
+func_801159DC = 0x801159DC; // type:func size:0x18  PAL x013 0x801166E0 identical
+func_801159F4 = 0x801159F4; // type:func size:0x5E4  PAL x013 0x801166F8

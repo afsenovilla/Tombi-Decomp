@@ -13,7 +13,7 @@ Steps (all output under build/ and asm/, both ignored by git):
   5. objdiff-cli writes build/report.json.
 
 Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
-       python3 tools/build_report.py --version jpdemo [--objdiff ...]   (Japanese demo disc, see jpdemo_main)
+       python3 tools/build_report.py --version jpdemo|jp [--objdiff ...]   (Japanese demo / retail disc, see jpdemo_main)
 By default the Psy-Q library functions are left out, so the report (and the decomp.dev headline) measures game code only,
 like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay functions that are twins of X000 (or of an
 earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
@@ -40,12 +40,14 @@ def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
 
 
-# Japanese demo disc (SLPM-80165): config/jpdemo/<prog>.yaml splits game_jpdemo/; one unit per demo function, target
-# object only (no C yet), so the report starts at 0 %. Output: build/jpdemo/report.json (decomp.dev version SLPM_801.65).
-JPDEMO = {"slpm80165": "SLPM_801.65", "x00": "X00.BIN (SYSTEM)"}
+# Non-PAL versions (tools/versions.py): jpdemo = Japanese demo disc (SLPM-80165, decomp.dev version SLPM_801.65),
+# jp = Japanese retail (SLPS-01144, version SLPS_011.44). config/<v>/<prog>.yaml splits the version's game dir; one
+# unit per function, C reused from PAL or from src/<v>/. Output: build/<v>/report.json.
+from versions import VERSIONS
+JPDEMO = {p: v[0] for p, v in VERSIONS["jpdemo"]["progs"].items()}
 
 
-def jpdemo_sources(progs):
+def jpdemo_sources(progs, ver="jpdemo"):
     """{(prog, demo addr): (src path, demo name)}: the C that builds each demo function.
 
     By default a demo function reuses the PAL file that matches the PAL function tools/xmatch.py paired it with: the
@@ -62,15 +64,15 @@ def jpdemo_sources(progs):
             if u.file: pal[(p.lower(), u.addr)] = u
     out, names = {}, {}
     for prog in progs:
-        for l in open("config/jpdemo/symbol_addrs_%s.txt" % prog):
+        for l in open("config/%s/symbol_addrs_%s.txt" % (ver, prog)):
             m = re.match(r"(\w+) = 0x([0-9A-Fa-f]+); // type:func size:0x([0-9A-Fa-f]+)\s+PAL (\w+) 0x([0-9A-Fa-f]+)", l)
             if not m: continue
             a = int(m.group(2), 16)
             names[(prog, a)] = (m.group(1), int(m.group(3), 16))
             u = pal.get((m.group(4), int(m.group(5), 16)))
             if u and u.size == int(m.group(3), 16): out[(prog, a)] = (u.file, m.group(1))
-    if os.path.exists("config/jpdemo/reuse.txt"):
-        for l in open("config/jpdemo/reuse.txt"):
+    if os.path.exists("config/%s/reuse.txt" % ver):
+        for l in open("config/%s/reuse.txt" % ver):
             f = l.split("#")[0].split()
             if not f: continue
             prog, a = f[0], int(f[1], 16)
@@ -80,11 +82,12 @@ def jpdemo_sources(progs):
                 if u: out[(prog, a)] = (u.file, nm)
                 else: print("reuse.txt: no PAL src at", f[2], f[3])
             elif f[2] == "-": out.pop((prog, a), None)
-    for dp, _, fs in os.walk(os.path.join(ROOT, "src", "jpdemo")):  # demo versions: `// JPDEMO <prog> <addr> <size>`
+    tag = VERSIONS[ver]["tag"]  # version files: `// JPDEMO <prog> <addr> <size>` (jp: `// JP ...`)
+    for dp, _, fs in os.walk(os.path.join(ROOT, "src", ver)):
         for fn in sorted(fs):
             if not fn.endswith(".c"): continue
             path = os.path.join(dp, fn)
-            m = re.search(r"^//\s*JPDEMO\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", open(path, errors="replace").read(400), re.M)
+            m = re.search(r"^//\s*" + tag + r"\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", open(path, errors="replace").read(400), re.M)
             if not m or m.group(1) not in progs: continue
             a = int(m.group(2), 16)
             out[(m.group(1), a)] = (path, names.get((m.group(1), a), ("func_%08X" % a, 0))[0])
@@ -129,10 +132,10 @@ def _jpdemo_compile(job):
         shutil.rmtree(d, ignore_errors=True)
 
 
-def jpdemo_base(progs, units, out_dir):
+def jpdemo_base(progs, units, out_dir, ver="jpdemo"):
     """Compiles the C of every demo unit that has one (jpdemo_sources) into build/jpdemo/base/; sets base_path."""
     from multiprocessing import Pool
-    srcs = jpdemo_sources(progs)
+    srcs = jpdemo_sources(progs, ver)
     inc = tempfile.mkdtemp()
     for f in os.listdir("include"):
         s = os.path.join("include", f)
@@ -152,28 +155,29 @@ def jpdemo_base(progs, units, out_dir):
     n = 0
     for (u, out), r, j in zip(want, res, jobs):
         if r is None: u["base_path"] = out; n += 1
-        else: print("jpdemo base compile failed:", u["name"], os.path.relpath(j[0], ROOT), r)
+        else: print(ver, "base compile failed:", u["name"], os.path.relpath(j[0], ROOT), r)
     shutil.rmtree(inc, ignore_errors=True)
     for u in units: u.pop("addr", None)
     return n
 
 
-def jpdemo_main():
+def jpdemo_main(ver="jpdemo"):
     os.chdir(ROOT)
-    progs = [p for p in JPDEMO if os.path.exists("config/jpdemo/%s.yaml" % p)]
+    names = {p: v[0] for p, v in VERSIONS[ver]["progs"].items()}
+    progs = [p for p in names if os.path.exists("config/%s/%s.yaml" % (ver, p))]
     if not progs:
-        sys.exit("config/jpdemo/ not set up")
-    units, out_dir = [], "build/jpdemo"
+        sys.exit("config/%s/ not set up" % ver)
+    units, out_dir = [], "build/" + ver
     shutil.rmtree(out_dir + "/target", ignore_errors=True)
     for prog in progs:
         if "--no-split" not in ARGS:
-            shutil.rmtree("asm/jpdemo/" + prog, ignore_errors=True)
+            shutil.rmtree("asm/%s/%s" % (ver, prog), ignore_errors=True)
             shutil.rmtree("%s/splat_src/%s" % (out_dir, prog), ignore_errors=True)
-            r = subprocess.run([sys.executable, "-m", "splat", "split", "config/jpdemo/%s.yaml" % prog,
+            r = subprocess.run([sys.executable, "-m", "splat", "split", "config/%s/%s.yaml" % (ver, prog),
                                 "--disassemble-all"], capture_output=True, text=True)
             if r.returncode:
-                sys.exit("splat failed for jpdemo %s:\n%s" % (prog, (r.stdout + r.stderr)[-3000:]))
-        fdir = "asm/jpdemo/%s/nonmatchings/%s" % (prog, prog)
+                sys.exit("splat failed for %s %s:\n%s" % (ver, prog, (r.stdout + r.stderr)[-3000:]))
+        fdir = "asm/%s/%s/nonmatchings/%s" % (ver, prog, prog)
         for fn in sorted(os.listdir(fdir)):
             if not fn.endswith(".s"): continue
             name = fn[:-2]
@@ -191,10 +195,10 @@ def jpdemo_main():
             am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open(os.path.join(fdir, fn)).read())
             units.append({"name": "%s/%s" % (prog, name), "target_path": out, "addr": int(am.group(1), 16) if am else None,
                           "metadata": {"progress_categories": [prog]}})
-    nbase = jpdemo_base(progs, units, out_dir)
+    nbase = jpdemo_base(progs, units, out_dir, ver)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
-           "progress_categories": [{"id": p, "name": JPDEMO[p]} for p in progs],
+           "progress_categories": [{"id": p, "name": names[p]} for p in progs],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
     # objdiff reads objdiff.json from the project dir: keep the demo project in build/jpdemo/ apart from the PAL one
@@ -202,7 +206,7 @@ def jpdemo_main():
         for k in ("target_path", "base_path"):
             if k in u: u[k] = os.path.relpath(u[k], out_dir)
     json.dump(cfg, open(out_dir + "/objdiff.json", "w"), indent=1)
-    print("jpdemo units %d, base objects %d" % (len(units), nbase))
+    print("%s units %d, base objects %d" % (ver, len(units), nbase))
     subprocess.run([OBJDIFF, "report", "generate", "-p", out_dir, "-o", out_dir + "/report.json"], check=True)
     print("wrote %s/report.json" % out_dir)
 
@@ -210,8 +214,8 @@ def jpdemo_main():
 def main():
     if "--version" in ARGS:
         v = ARGS[ARGS.index("--version") + 1]
-        if v == "jpdemo": return jpdemo_main()
-        sys.exit("unknown version %r (known: jpdemo)" % v)
+        if v in VERSIONS: return jpdemo_main(v)
+        sys.exit("unknown version %r (known: %s)" % (v, ", ".join(VERSIONS)))
     os.chdir(ROOT)
     import units as U
     # base objects first: compile every src/*.c and src/x0nn/*.c with the native pipeline (tools/gen_symbols.py

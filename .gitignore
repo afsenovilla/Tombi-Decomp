@@ -2,6 +2,7 @@
 game/*
 !game/.gitkeep
 game_jp/
+game_jp
 game_jpdemo
 *.iso
 *.bin
