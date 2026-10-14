@@ -7,8 +7,14 @@ The game does not use the ISO9660 directory to load its data: it seeks to a posi
 ## Where
 - `EXE/MAIN0..8.EXE` (and `game/MAIN0.EXE`, byte-identical to `EXE/MAIN0.EXE`): the table starts at **file offset 0x6E6F0**
   = vaddr **0x8007DEF0** (load address 0x80010000, header 0x800), in all nine. The US table was at 0x800791A0 (other exe layout).
-- `SCES_013.31` has **no table**: no LBA, MSF or size of any file appears in it. It only holds the strings `\EXE\MAIN0/5/6/7/8.EXE;1`
-  and starts the MAINn by name (CdSearchFile), so the ISO directory entries of `EXE/MAINn.EXE` must stay valid (mkpsxiso writes them).
+- `SCES_013.31` has **no table**: no LBA, MSF or size of any file appears in it. It is the language menu: a table at 0x800959C0
+  (8-byte entries {path, "cdrom:"}) gives `\EXE\MAIN0/5/6/7/8.EXE;1` for menu entries 0..4 (English, Español, ...); it builds
+  "cdrom:" + path and calls the BIOS `LoadExec` (A0:51, stub 0x800123C4) with sp 0x80200000, so the MAINn is found through the
+  ISO9660 directory (mkpsxiso writes it). Before that it leaves 0x1F8003D8 = 1 (disc SCES-01331: MAINn picks the save names
+  BESCES-01331TOMBA-0n with it) and 0x1F8003DA = pad type (7 = DualShock) in the scratchpad.
+- Checked end to end (tools/psxemu, `Machine(disc=..., boot=1, card=MCD)`): the image built by text_core (verb_first + banner
+  "¡LOGRADO!") booted through that path, a memory card save loaded, the frog event of AREA00 cleared: the item popup shows the
+  verb first and the banner shows the edit. The executables keep their LBAs in a rebuild (same size, files before them unchanged).
 
 ## Entry (8 bytes, little endian)
 | Offset | Size | Meaning |
