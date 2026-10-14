@@ -11,8 +11,8 @@ Categories: DATA = table/padding misread as a function (verified by reading the 
 | DATA | 3 | 1168 |
 | LIB | 0 | 0 |
 | NEAR | 1 | 396 |
-| FAR | 51 | 42676 |
-| total | 55 | 44240 |
+| FAR | 50 | 40072 |
+| total | 54 | 41636 |
 
 Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 80116258 (96) and 801162B8 (116), x001 8011658C (52; the row continues as code from 801165C0), x003 80116D50 (548; code from 80116F74), x005 and x013 801188FC (20 each), x005 and x008 80117CAC (16 each). Their only jals are dispatcher cases of other areas (second dispatcher: area 7 -> 80116258, 12 -> 801162B8, 6 -> 80116D50, 3 -> 801188FC; first: 17 -> 8011658C, 0 -> 80117CAC) and the MAIN0 pointers are slots of other areas' tables (801162D0/80116DD0/80116E4C: areas 13/9/9; 80116EFC: area 17); the object-type slots (801162D0, 801165A8, 80116EC0) belong to types whose handlers are real code in other overlays. The three KEPT rows below are called by the player-step code of the overlay that holds them, so they stay (and the earlier "no refs" note for x002 8011E688 was wrong).
 
@@ -23,7 +23,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | DATA | x018 | func_8011C758 | 8011C758 | 680 | n/a | - | KEPT: pointer table (170 words) but FUN_80106a18 (shared player step 0x48, present in X018 at 80106AE8) jals it when the held/hit object kind is 0xE, so it can run while X018 is loaded; x006 8011C758 is real code |
 | DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | KEPT: pointer table (112 words) but func_80100788 (shared player step 0x47) jals it from X016 itself (80101634); step 0x47 is only set by X014 code, not provable dead |
 | DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | KEPT: 10 words of s16 offset pairs (anim data, pointed to from 8011EFDC) but func_80100788 step 0x25 jals it from X002 itself (801011BC); not provable dead |
-| FAR | main0 | func_80056420 | 80056420 | 2604 | 27 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17, o->f via $5 int <<16; left: x+w temp reg, uv sched |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 281 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps, v0/a0/a1 pins at the 8012767C call; left: s1 var in s5, in-place v1 temps (s1-shape variant in header: 373) |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 28 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | case 0 dispatch fixed (full if/else case 0 first), plain params, e bump, short cx/cy; left: cx/fx s5/s7 swap |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 28 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |

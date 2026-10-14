@@ -1,13 +1,5 @@
 // FUNC 80056420 2604 MAIN0
-/* opusV: 31 -> 27. o->f now loaded into $5 and shifted into $4 like the game: f is an int holding o->f << 16 ({ register int r asm("$5"); r = (unsigned short)o->f; f = r << 16; }), tests on f >> 16 and k = f >> 28. Tried after: plain/unpinned r forms (35), xy block as separate/setXYWH stores (45) or w + x / short temp (27), uv statement permutations (27), w/x/y/h/k types (27-269), itbrute asm("")/asm::r(w,x,h) over the case/uv block (no gain). Left: x+w in a2 (game v0, stores before y), uv block load order/regs. */
-/* opusP: still 31. f pinned $5 (81), f4=f<<16 pin pair (81), ushort f $5 (275), volatile f (35), uv via u/v locals (283), u3=u1 chained (235), x+w temp / x3=x1 split (31). */
-/* score 31 (was 352). Prologue fixed by declaring sp/ft/ti uninitialised and assigning them after f = o->f. o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
-   f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
-   $2 so its two stores get scheduled after the y stores; uv block has a few scheduling/reg diffs ($3 vs $6 for u1).
-   Tried: pins on k/h/x/y (worse), f as int/volatile/unpinned, separate h2/w2, x+w temp forms ({short t}, $2 pin, x1/x3 split),
-   uv statement permutations (all 35), n78: asm("" :: "r"(w)) after the x+w store (x+w then goes to v0 and its stores order right, but y moves v1->a0: 63; y/h pins don't fix), f via fr temp/launder/unsigned/int<<16 forms (31-47, unpinned f 265), w/h swap, asm("") in uv block (200+), w unpinned / w2 split (49-58), fu in $5 (combined away).
-   opusO: iterative single-asm insertion brute force (asm(""), priority bumps on w/x/y/h/f, asm :: r(w/x)) over the whole
-   case/uv block: no gain; w pinned to every other reg 57-259; x+w forms (split stores, w + x, casts) and uv operand swaps 31-35. */
+// MATCHING 80056420 2604
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -117,19 +109,21 @@ void drawBalloonFrame(R *o_, short c, short tp)
         default:
             goto skip;
         }
-        ft->x3 = ft->x1 = x + w;
+        { register short t asm("$2") = x + w; ft->x3 = ft->x1 = t; } asm("");
         ft->y1 = ft->y0 = y;
         ft->x2 = ft->x0 = x;
         ft->y3 = ft->y2 = y + h;
         ft->u0 = D_80080218[k].u;
         ft->v0 = D_80080218[k].v;
+        { int w2;
         h = D_80080218[k].h;
-        w = D_80080218[k].w;
+        w2 = D_80080218[k].w;
         ft->u2 = ft->u0;
+        ft->u1 = ft->u0 + w2;
         ft->v1 = ft->v0;
-        ft->u1 = ft->u0 + w;
-        ft->v3 = ft->v2 = h + ft->v0;
-        ft->u3 = ft->u1;
+        ft->v2 = h + ft->v0;
+        ft->v3 = ft->v2;
+        ft->u3 = ft->u1; }
         ft->clut = GetClut(0x160, c + 0x1e3);
         ft->tpage = tp;
         { void *p = DAT_1f800164;
