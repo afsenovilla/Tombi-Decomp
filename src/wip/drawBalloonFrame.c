@@ -1,4 +1,5 @@
 // FUNC 80056420 2604 MAIN0
+/* opusP: still 31. f pinned $5 (81), f4=f<<16 pin pair (81), ushort f $5 (275), volatile f (35), uv via u/v locals (283), u3=u1 chained (235), x+w temp / x3=x1 split (31). */
 /* score 31 (was 352). Prologue fixed by declaring sp/ft/ti uninitialised and assigning them after f = o->f. o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
    f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
    $2 so its two stores get scheduled after the y stores; uv block has a few scheduling/reg diffs ($3 vs $6 for u1).
