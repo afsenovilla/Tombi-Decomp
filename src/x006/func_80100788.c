@@ -80,7 +80,7 @@ extern void FUN_8011beac(TObj *);
 extern void FUN_8011b170(TObj *);
 extern void FUN_80106a18(TObj *);
 extern void FUN_8003f7cc(TObj *);
-extern void FUN_800ff610(TObj *, int);
+extern void playerHandleHazardContact(TObj *, int);
 extern void probeTileShapeThreePoints(TObj *, int);
 
 static __inline__ void dirA(TObj *o)
@@ -453,6 +453,6 @@ void func_80100788(TObj *o, int p2)
         if (o->step == 0x65) c++;
     }
     if (c == 0) FUN_8003f7cc(o);
-    if (SPAD.b1a4 == 0) FUN_800ff610(o, 1);
+    if (SPAD.b1a4 == 0) playerHandleHazardContact(o, 1);
     probeTileShapeThreePoints(o, 4);
 }

@@ -480,10 +480,21 @@ address,name,confidence,comment
 80056420,drawBalloonFrame,alta,name from psx_tomba (US)
 800571a8,drawCategory5Objects,alta,"same as drawCategory4Objects for the category 5 list (1F800228, cache 1F80026c)"
 80057288,drawCategory4Objects,alta,"calls drawObject for every entry of the category 4 list (1F800224, filled by ObjListPush_1F800224), caching th"
+80057368,drawObjectModelNoRot,alta,names batch (see notes/names.md)
+80057470,drawObjectModelRotated,alta,names batch (see notes/names.md)
+80057610,drawObjectModelRotatedVtx,alta,names batch (see notes/names.md)
+800577b8,drawObjectModelRotScaled,alta,names batch (see notes/names.md)
+800579a8,drawObjectModelCameraFixed,alta,names batch (see notes/names.md)
+80057ae4,drawObjectModelOwnMatrix,alta,names batch (see notes/names.md)
+80057bf0,drawObjectModelOwnMatrixVtx,alta,names batch (see notes/names.md)
 80057dfc,drawCategory8Objects,alta,"same as drawCategory4Objects for the category 8 list (1F800230, cache 1F800274)"
 80058604,drawHudIfShown,alta,"called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls"
 80058680,drawHud,alta,"draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots fr"
+800587a8,drawHudLives,alta,names batch (see notes/names.md)
+8005892c,drawHudAP,alta,names batch (see notes/names.md)
 80058b18,drawHudVitality,media,"draws one SPRT per vitality point up to the maximum D_8009C971 at the given position"
+80058d28,drawHudItemGauge,alta,names batch (see notes/names.md)
+80058f98,drawHudWeaponIcon,alta,names batch (see notes/names.md)
 800591c0,drawMessageGlyphs,alta,name from psx_tomba (US)
 80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
 800594e4,drawSpriteFrame,alta,"builds a SPRT from frame idx of the object's frame table (+0x18: u, v, clut, w, h, x/y offsets) at x, y and Ad"

@@ -15,7 +15,7 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_800ff610(TObj *, int);
+extern void playerHandleHazardContact(TObj *, int);
 
 static __inline__ void setanim(TObj *o, unsigned short x)
 {
@@ -60,7 +60,7 @@ void FUN_800fa35c(TObj *o)
         o->velY = 0;
         setanim(o, 0x10);
         o->substep++;
-        FUN_800ff610(o, 0);
+        playerHandleHazardContact(o, 0);
     case 1:
         if (o->timer != 0) o->timer--;
         FUN_8001fec0(o);
@@ -88,7 +88,7 @@ void FUN_800fa35c(TObj *o)
                 o->timer = 0x1e;
                 o->substep++;
             }
-            FUN_800ff610(o, 0);
+            playerHandleHazardContact(o, 0);
         }
         break;
     case 2:
@@ -99,7 +99,7 @@ void FUN_800fa35c(TObj *o)
         if (o->timer != 0 && --o->timer <= 0) o->substep++;
         if (o->b69 != 0 || FUN_8003fd78(o, 0, 0)) {
             o->velY = 0;
-            FUN_800ff610(o, 0);
+            playerHandleHazardContact(o, 0);
         }
         TURN();
         o->d8c = *(unsigned char *)&o->d8c;
@@ -121,7 +121,7 @@ void FUN_800fa35c(TObj *o)
         if (o->velY > 0x680) o->velY = 0x680;
         if (o->b69 != 0 || FUN_8003fd78(o, 0, 0)) {
             o->velY = 0;
-            FUN_800ff610(o, 0);
+            playerHandleHazardContact(o, 0);
         }
         if (FUN_8001fec0(o)) {
             DAT_8009c330->b8 = 0;

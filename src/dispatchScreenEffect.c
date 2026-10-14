@@ -1,6 +1,6 @@
 // FUNC 80031254 148 MAIN0
 // MATCHING 80031254 148
-extern void FUN_80102214(void);
+extern void updatePlayer(void);
 extern void FUN_800e9f60(void);
 extern void FUN_800eb550(void);
 extern void FUN_800eab84(void);
@@ -9,7 +9,7 @@ void dispatchScreenEffect(char *o)
 {
     switch ((unsigned char)o[2]) {
     case 0:
-        FUN_80102214();
+        updatePlayer();
         break;
     case 1:
         FUN_800e9f60();

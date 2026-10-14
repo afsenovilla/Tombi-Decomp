@@ -30,7 +30,7 @@ void FUN_8011c00c(TObj *o);
 void FUN_800ecd88(TObj *o);
 void FUN_801189ec(TObj *o);
 void FUN_80118ddc(TObj *o);
-void FUN_80057470(TObj *o);
+void drawObjectModelRotated(TObj *o);
 
 void FUN_80055174(void)
 {
@@ -70,7 +70,7 @@ void FUN_80055174(void)
             case 19: FUN_800ecd88(o); break;
             case 20: FUN_801189ec(o); break;
             case 21: FUN_80118ddc(o); break;
-            case 22: FUN_80057470(o); break;
+            case 22: drawObjectModelRotated(o); break;
             }
         }
     } else {
@@ -107,7 +107,7 @@ void FUN_80055174(void)
                 case 19: FUN_800ecd88(o); break;
                 case 20: FUN_801189ec(o); break;
                 case 21: FUN_80118ddc(o); break;
-                case 22: FUN_80057470(o); break;
+                case 22: drawObjectModelRotated(o); break;
                 }
             }
         }

@@ -40,6 +40,17 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
+- `800587a8 drawHudLives` (was func_800587A8) - drawHud element at (0x18,0xF0): one or two digit sprites of GAME.playerLives - 1 plus the icon frame
+- `8005892c drawHudAP` (was func_8005892C) - drawHud element at (0x12C,0x10): the 8 digits at HUD+0x3C (written from GAME.playerAP 8009C96C by addPlayerAP/initHud), leading zeros skipped, box frame by digit count
+- `80058d28 drawHudItemGauge` (was FUN_80058d28) - drawHud loop over 3 gauges: item icon (frame D_8009CD98[i]) and a 0x3D-wide bar filled to D_8009CD9C[i] via addTilePrim
+- `80058f98 drawHudWeaponIcon` (was FUN_80058f98) - drawHud element at (0x48,0x10): switch on the equipped weapon D_8009D2B2 (same byte spawnWeaponObject uses) picking the icon frame
+- `80057368 drawObjectModelNoRot` (was FUN_80057368) - drawObject render kind 0x10: base matrix + object position only, then the model draw FUN_80023b04
+- `80057470 drawObjectModelRotated` (was FUN_80057470) - render kind 0x11: RotMatrix from +0x84/88/8C (axes swapped by 1F8001C8 bit 0), position, MulMatrix0 with the camera, FUN_80023b04
+- `80057610 drawObjectModelRotatedVtx` (was FUN_80057610) - render kind 0x12: same matrix as kind 0x11 but draws with FUN_800242b8, which takes an extra vertex block (+0xA8)
+- `800577b8 drawObjectModelRotScaled` (was FUN_800577b8) - render kind 0x13: RotMatrixZ/X/Y from +0x84/88/8C plus ScaleMatrix by +0x74/76/78
+- `800579a8 drawObjectModelCameraFixed` (was FUN_800579a8) - render kind 0x14: fresh base matrices and a fixed translation (-0xA0,0x80,0x220) instead of the camera, drawn with FUN_80024e58
+- `80057ae4 drawObjectModelOwnMatrix` (was FUN_80057ae4) - render kind 0x15: multiplies the camera by the object's own matrix at +0x48
+- `80057bf0 drawObjectModelOwnMatrixVtx` (was FUN_80057bf0) - render kind 0x16: own matrix +0x48 like 0x15, drawn with FUN_800242b8 (extra vertex block)
 
 # X000 function names (shared overlay code)
 
@@ -115,6 +126,21 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800f6e28 playerSwingUpdatePivot` (was FUN_800f6e28) - step 6: pivot +0x30/+0x34 from D_8009F0EC; per object type (0xE offset, 0x14/0x34 area callbacks, 0x1F facing check) returns 1 to let go
 - `800f6c34 playerSwingHandlePad` (was FUN_800f6c34) - step 6 pad: jump or Up -> step 11, Down lets go (jump step state 3, nudged 14 units)
 - `800f6d80 playerDropFromHold` (was func_800F6D80) - the Down branch of playerSwingHandlePad as a function: clears the hold and spin state, faces +0x88, nudges 14 units back and clears D_8009F0EC+0x69 (the caller sets the step)
+- `80102214 updatePlayer` (was FUN_80102214) - player tick: pad/flag prologue then switch on the mode byte +0x04 (0 init FUN_800f0490, 1 normal steps func_80100788, 2 hurt steps, 5 event steps, 6 forced steps); game over (GVARS.b38) forces mode 2 step 2 state 2
+- `80101780 playerHurtModeDispatch` (was FUN_80101780) - standalone copy of updatePlayer's mode 2 block: step 0..4 -> the five hurt/death steps below, then the collision pass FUN_8003f7cc
+- `80101d74 playerEventModeDispatch` (was func_80101D74) - updatePlayer mode 5: event steps (0x40 hidden during area exits, 0x61..0x65 talk poses with playerAnimateTalkPose, step 1 timer back to mode 1 step 0)
+- `80102110 playerForcedModeDispatch` (was FUN_80102110) - copy of updatePlayer mode 6 (entered from scripted NPCs like FUN_801377b8 with a preset velX): steps 0,3,4,5,6,7 without pad control
+- `800fd358 playerStepHurtKnockback` (was FUN_800fd358) - hurt step 0: velY -0x500, hurt anim 0x39/0x53/0x50, pad vibration, health update (death jingle at 0), blink while flying back, lands into playerHurtLandRecover
+- `800fdb7c playerStepHurtStun` (was FUN_800fdb7c) - hurt step 1 (damage type 4 in func_800425C4): holds the hurt pose 0x1E until state 2 is set from outside, then bounces off (velY -0x400, velX +-0x200)
+- `800fe13c playerStepHazardRespawn` (was FUN_800fe13c) - hurt step 2: spins up (velY -0x800) and is put back at the saved spot +0xEC/+0xF0 with invulnerability +0xE0 = 0x8C; on game over plays the 180-frame death pose (anim 0x3C) and sets GVARS.b38 = 2
+- `800fe75c playerStepDie` (was FUN_800fe75c) - hurt step 3 (entered when health <= 0): game-over flag GVARS.b38 = 1, stopBgm, death jingle 3, waits 0xB4 frames then GVARS.b38 = 2 (except area 10 section 0)
+- `800fe98c playerStepHurtSpin` (was FUN_800fe98c) - hurt step 4: horizontal knock (velX +-0x200), anims 0x2E then 0x10 while +0x8C spins, health update, lands into playerHurtLandRecover
+- `800fc414 playerHurtLandRecover` (was FUN_800fc414) - shared last state of the hurt steps: substep tumble (anim 0x10/0x57) until landing, then back to mode 1 once GVARS.b38 == 0
+- `800fc240 playerHurtCheckFastFall` (was func_800FC240) - while hurt, once velY reaches 0x680 drops back to mode 1 falling (step 2 state 3) or to the swim steps 0x3D/0x3E in the water rooms
+- `800ff610 playerHandleHazardContact` (was FUN_800ff610) - handles the hazard byte +0xA1 (1 harmful floor/pit, 2 water): per-area respawn spot (+0xEC/+0xF0), damage from getHazardDamage, switches to hurt step 2 (playerStepHazardRespawn) or to swim step 0x3D
+- `800ff404 getHazardDamage` (was func_800FF404) - damage amount for playerHandleHazardContact by GAME byte +0x30 & 3 and a few area/section exceptions
+- `800ff0e8 playerUpdateWaterLevel` (was func_800FF0E8) - per area/section water surface: sets +0x56 (water level) and the push GVARS.s44/s46 (-0x40 upward when below the surface); skipped in the swim steps 0x3D/0x3E/0x42..0x48
+- `800fe8f8 playerHurtMoveAndBlink` (was func_800FE8F8) - hurt helper: adds GVARS.s44/s46 push and velX/velY to the position, blinks with 1F8001F8 bit 0 unless D_8009C330->b8
 
 # Area overlay function names (X001..X019)
 

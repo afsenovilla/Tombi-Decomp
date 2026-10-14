@@ -4,7 +4,7 @@ typedef struct { char p0[1]; unsigned char vis; char p1[8]; unsigned char k; } O
 extern short G1c6, G24e, G244;
 extern unsigned short G244u;
 extern O **G25c, **G218;
-extern void FUN_80051088(O *), FUN_800532fc(O *), FUN_80054868(O *), FUN_80057470(O *);
+extern void FUN_80051088(O *), FUN_800532fc(O *), FUN_80054868(O *), drawObjectModelRotated(O *);
 
 void FUN_80050ea4(void)
 {
@@ -22,7 +22,7 @@ void FUN_80050ea4(void)
                 case 0: FUN_80051088(o); break;
                 case 2: FUN_800532fc(o); break;
                 case 0xd: FUN_80054868(o); break;
-                case 0x11: FUN_80057470(o); break;
+                case 0x11: drawObjectModelRotated(o); break;
                 }
             } while (n != 0);
         }
@@ -38,7 +38,7 @@ void FUN_80050ea4(void)
                     case 0: FUN_80051088(o); break;
                     case 2: FUN_800532fc(o); break;
                     case 0xd: FUN_80054868(o); break;
-                    case 0x11: FUN_80057470(o); break;
+                    case 0x11: drawObjectModelRotated(o); break;
                     }
                 }
             } while (G244 != 0);

@@ -24,13 +24,13 @@ void func_8011F240(TObj *o);
 void func_8011B830(TObj *o);
 void func_8011C00C(TObj *o);
 void func_80054868(TObj *o);
-void FUN_80057368(TObj *o);
-void FUN_80057470(TObj *o);
-void FUN_80057610(TObj *o);
-void FUN_800577b8(TObj *o);
-void FUN_800579a8(TObj *o);
-void FUN_80057ae4(TObj *o);
-void FUN_80057bf0(TObj *o);
+void drawObjectModelNoRot(TObj *o);
+void drawObjectModelRotated(TObj *o);
+void drawObjectModelRotatedVtx(TObj *o);
+void drawObjectModelRotScaled(TObj *o);
+void drawObjectModelCameraFixed(TObj *o);
+void drawObjectModelOwnMatrix(TObj *o);
+void drawObjectModelOwnMatrixVtx(TObj *o);
 
 void drawObject(TObj *o)
 {
@@ -75,12 +75,12 @@ void drawObject(TObj *o)
     case 9: func_8011B830(o); break;
     case 10: func_8011C00C(o); break;
     case 13: func_80054868(o); break;
-    case 0x10: c10: FUN_80057368(o); break;
-    case 0x11: c11: FUN_80057470(o); break;
-    case 0x12: c12: FUN_80057610(o); break;
-    case 0x13: c13: FUN_800577b8(o); break;
-    case 0x14: c14: FUN_800579a8(o); break;
-    case 0x15: c15: FUN_80057ae4(o); break;
-    case 0x16: c16: FUN_80057bf0(o); break;
+    case 0x10: c10: drawObjectModelNoRot(o); break;
+    case 0x11: c11: drawObjectModelRotated(o); break;
+    case 0x12: c12: drawObjectModelRotatedVtx(o); break;
+    case 0x13: c13: drawObjectModelRotScaled(o); break;
+    case 0x14: c14: drawObjectModelCameraFixed(o); break;
+    case 0x15: c15: drawObjectModelOwnMatrix(o); break;
+    case 0x16: c16: drawObjectModelOwnMatrixVtx(o); break;
     }
 }

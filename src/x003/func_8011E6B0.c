@@ -14,7 +14,7 @@ extern void FUN_800ee428(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 extern void func_8003F7CC(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
-extern void FUN_800fc414(TObj *);
+extern void playerHurtLandRecover(TObj *);
 
 static __inline__ void land(TObj *o, short n)
 {
@@ -112,7 +112,7 @@ void func_8011E6B0(TObj *o)
         }
         break;
     case 5:
-        FUN_800fc414(o);
+        playerHurtLandRecover(o);
         break;
     }
 }
