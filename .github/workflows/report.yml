@@ -119,3 +119,72 @@ jobs:
         with:
           name: ${{ steps.fetch.outputs.boot }}_report
           path: build/jp/report.json
+
+  # Japanese demo disc (SLPM-80165, "Ore! Tomba" taikenban). Separate decomp.dev version named after its boot
+  # executable: artifact SLPM_801.65_report. The image comes from the GAME_FILES_URL_JP_DEMO secret (raw .bin disc
+  # image or a zip with SLPM_801.65 and SYSTEM/X00.BIN; never committed). Skipped when the secret or config/jpdemo/ is
+  # missing. See docs/JPDEMO.md.
+  report-jpdemo:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch demo disc
+        id: fetch
+        env:
+          GAME_FILES_URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+        run: |
+          if [ -z "$GAME_FILES_URL_JP_DEMO" ]; then
+            echo "::notice::GAME_FILES_URL_JP_DEMO secret not set; skipping the demo report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ ! -f config/jpdemo/slpm80165.yaml ]; then
+            echo "::notice::config/jpdemo not set up; demo report skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_JP_DEMO" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/jpdemo.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/jpdemo"
+          if unzip -tq "$RUNNER_TEMP/jpdemo.dl" >/dev/null 2>&1; then
+            unzip -o -q "$RUNNER_TEMP/jpdemo.dl" -d "$RUNNER_TEMP/jpdemo"
+          elif [ "$(stat -c%s "$RUNNER_TEMP/jpdemo.dl")" -gt 10000000 ]; then
+            python3 -I tools/isoext.py "$RUNNER_TEMP/jpdemo.dl" "$RUNNER_TEMP/jpdemo"
+          else
+            echo "::error::The download is neither a zip nor a disc image. Share the file as 'Anyone with the link' and check GAME_FILES_URL_JP_DEMO."; exit 1
+          fi
+          mkdir -p game_jpdemo/SYSTEM
+          cp "$(find "$RUNNER_TEMP/jpdemo" -iname SLPM_801.65 | head -1)" game_jpdemo/SLPM_801.65
+          cp "$(find "$RUNNER_TEMP/jpdemo" -ipath '*SYSTEM/X00.BIN' | head -1)" game_jpdemo/SYSTEM/X00.BIN
+          echo "44360f12e7bd9449a7d46deb412d6a9499b6c94c  game_jpdemo/SLPM_801.65" | sha1sum -c -
+          echo "fb7cbf02470e8bcbf700414dd7fada0d19578852  game_jpdemo/SYSTEM/X00.BIN" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Build demo report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --version jpdemo --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload demo report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SLPM_801.65_report
+          path: build/jpdemo/report.json

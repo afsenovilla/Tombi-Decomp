@@ -98,6 +98,12 @@ for the demo need the X00 symbol mapping from `tools/xmatch.py --csv` first.
 
 ## Making the demo a second matching target
 
+**Status:** `config/jpdemo/slpm80165.yaml` and `config/jpdemo/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)
+and X00 (whole file at the estimated base 0x800E7698). `config/jpdemo/symbol_addrs_*.txt` are committed, generated
+by `tools/xmatch.py --csv` + `tools/jpdemo_syms.py` (PAL names at demo addresses). `python3 tools/build_report.py
+--version jpdemo` writes `build/jpdemo/report.json` (one unit per demo function, no C yet, so 0 %), and the
+`report-jpdemo` CI job uploads it as `SLPM_801.65_report` for decomp.dev, from the `GAME_FILES_URL_JP_DEMO` secret.
+
 - **Plumbing (1-2 days):** add `config/jpdemo/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
   `symbol_addrs_*` from `tools/xmatch.py --csv` (PAL names at demo addresses). Then extend `tools/build_full.py` and

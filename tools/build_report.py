@@ -13,6 +13,7 @@ Steps (all output under build/ and asm/, both ignored by git):
   5. objdiff-cli writes build/report.json.
 
 Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
+       python3 tools/build_report.py --version jpdemo [--objdiff ...]   (Japanese demo disc, see jpdemo_main)
 By default the Psy-Q library functions are left out, so the report (and the decomp.dev headline) measures game code only,
 like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay functions that are twins of X000 (or of an
 earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
@@ -39,7 +40,61 @@ def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
 
 
+# Japanese demo disc (SLPM-80165): config/jpdemo/<prog>.yaml splits game_jpdemo/; one unit per demo function, target
+# object only (no C yet), so the report starts at 0 %. Output: build/jpdemo/report.json (decomp.dev version SLPM_801.65).
+JPDEMO = {"slpm80165": "SLPM_801.65", "x00": "X00.BIN (SYSTEM)"}
+
+
+def jpdemo_main():
+    os.chdir(ROOT)
+    progs = [p for p in JPDEMO if os.path.exists("config/jpdemo/%s.yaml" % p)]
+    if not progs:
+        sys.exit("config/jpdemo/ not set up")
+    units, out_dir = [], "build/jpdemo"
+    shutil.rmtree(out_dir + "/target", ignore_errors=True)
+    for prog in progs:
+        if "--no-split" not in ARGS:
+            shutil.rmtree("asm/jpdemo/" + prog, ignore_errors=True)
+            shutil.rmtree("%s/splat_src/%s" % (out_dir, prog), ignore_errors=True)
+            r = subprocess.run([sys.executable, "-m", "splat", "split", "config/jpdemo/%s.yaml" % prog,
+                                "--disassemble-all"], capture_output=True, text=True)
+            if r.returncode:
+                sys.exit("splat failed for jpdemo %s:\n%s" % (prog, (r.stdout + r.stderr)[-3000:]))
+        fdir = "asm/jpdemo/%s/nonmatchings/%s" % (prog, prog)
+        for fn in sorted(os.listdir(fdir)):
+            if not fn.endswith(".s"): continue
+            name = fn[:-2]
+            out = "%s/target/%s/%s.o" % (out_dir, prog, name)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n'
+                        + open(os.path.join(fdir, fn)).read())
+            try:
+                run(AS + [t.name, "-o", out])
+            except subprocess.CalledProcessError as e:
+                print("target asm failed:", prog, name, e.stderr[:120]); continue
+            finally:
+                os.unlink(t.name)
+            units.append({"name": "%s/%s" % (prog, name), "target_path": out,
+                          "metadata": {"progress_categories": [prog]}})
+    cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
+           "build_base": False, "build_target": False,
+           "progress_categories": [{"id": p, "name": JPDEMO[p]} for p in progs],
+           "options": {"functionRelocDiffs": "none"},
+           "units": units}
+    # objdiff reads objdiff.json from the project dir: keep the demo project in build/jpdemo/ apart from the PAL one
+    for u in units: u["target_path"] = os.path.relpath(u["target_path"], out_dir)
+    json.dump(cfg, open(out_dir + "/objdiff.json", "w"), indent=1)
+    print("jpdemo units %d" % len(units))
+    subprocess.run([OBJDIFF, "report", "generate", "-p", out_dir, "-o", out_dir + "/report.json"], check=True)
+    print("wrote %s/report.json" % out_dir)
+
+
 def main():
+    if "--version" in ARGS:
+        v = ARGS[ARGS.index("--version") + 1]
+        if v == "jpdemo": return jpdemo_main()
+        sys.exit("unknown version %r (known: jpdemo)" % v)
     os.chdir(ROOT)
     import units as U
     # base objects first: compile every src/*.c and src/x0nn/*.c with the native pipeline (tools/gen_symbols.py

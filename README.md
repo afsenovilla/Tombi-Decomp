@@ -161,8 +161,9 @@ offsets and the function or splat range that produced them.
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
 | Ore! Tomba (Japan) | from `SYSTEM.CNF` | in preparation, see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split only (asm, 0 %), see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
-Both versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
+All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
 `<serial>_report` artifact per version. Matched C is shared; only the functions that differ get a version-specific file.
 
 ## Progress report (objdiff / decomp.dev)
@@ -176,7 +177,7 @@ The report and `docs/PROGRESS.md` count exactly the same bytes: both take their 
 `tools/units.py` (every matched source file as one unit, plus the csv functions no file covers), game code only
 (the Psy-Q library is left out unless `--with-sdk` is given) and every shared overlay function counted once, so
 the decomp.dev headline is the whole-game figure to the second decimal. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
-needs a `GAME_FILES_URL` secret (and `GAME_FILES_URL_JP` for the Japanese version) pointing to your own disc image (or a zip with `MAIN0.EXE` and
+needs a `GAME_FILES_URL` secret (and `GAME_FILES_URL_JP` / `GAME_FILES_URL_JP_DEMO` for the Japanese release / demo) pointing to your own disc image (or a zip with `MAIN0.EXE` and
 `AREA00/X000.BIN`, which limits the report to those two).
 
 Units are marked `complete` (decomp.dev "fully linked", `complete_code`) when their object is linked into
