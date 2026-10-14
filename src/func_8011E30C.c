@@ -1,13 +1,13 @@
 // FUNC 8011e30c 1324 X000
 // MATCHING 8011e30c 1324
 #include "TOBJ.H"
+#include "player.h"
 extern short D_1F80016E;
 extern unsigned short D_1F80016A;
 extern unsigned short D_1F80016Eu;
 extern unsigned char D_8009CE0B, D_8009CFED, D_8009D13F;
 extern unsigned char D_8009C93A[];
-extern unsigned short D_800A603C;
-extern unsigned char D_800A603Cb, D_800A603D, D_800A603E, D_800A603F;
+extern unsigned char D_800A603Cb;
 int func_800202B4(TObj *o);
 void func_8011E1B0(TObj *o);
 void func_80018838(TObj *o);
@@ -82,7 +82,7 @@ void func_8011E30C(TObj *o)
             case 4:
                 switch (o->state) {
                 case 0:
-                    if (D_800A603C == 0x300) o->state++;
+                    if ((*(unsigned short*)&PLAYER.obj.b04) == 0x300) o->state++;
                     break;
                 case 1:
                     o->d88 = (o->d88 + 0x20) & 0xfff;
@@ -91,9 +91,9 @@ void func_8011E30C(TObj *o)
                 case 2:
                     o->state++;
                     D_800A603Cb = 5;
-                    D_800A603D = 2;
-                    D_800A603E = 0;
-                    D_800A603F = 0;
+                    PLAYER.obj.step = 2;
+                    PLAYER.obj.state = 0;
+                    PLAYER.obj.substep = 0;
                     break;
                 }
                 break;

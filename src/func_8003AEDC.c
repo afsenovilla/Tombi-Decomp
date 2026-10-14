@@ -2,20 +2,19 @@
 // MATCHING 8003aedc 148
 #include "gamestate.h"
 #include "scriptctx.h"
-extern short D_800A60D0[];
-extern short D_800A60D2[];
+#include "player.h"
 
 void func_8003AEDC(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     unsigned char m = GAME.playerHealthDisplayed;
-    short v = D_800A60D0[0];
+    short v = ((short*)&PLAYER.obj.w98)[0];
     int a = g->arg[0];
     if (v < m) {
-        D_800A60D0[0] = v + a;
-        if (D_800A60D0[0] > m) D_800A60D0[0] = m;
-        D_800A60D2[0] = D_800A60D0[0];
-        ((unsigned char*)&GAME.playerHealth)[0] = D_800A60D0[0];
+        ((short*)&PLAYER.obj.w98)[0] = v + a;
+        if (((short*)&PLAYER.obj.w98)[0] > m) ((short*)&PLAYER.obj.w98)[0] = m;
+        ((short*)&PLAYER.obj.w9a)[0] = ((short*)&PLAYER.obj.w98)[0];
+        ((unsigned char*)&GAME.playerHealth)[0] = ((short*)&PLAYER.obj.w98)[0];
         g->arg[0] = 0;
     } else {
         g->arg[0] = 1;

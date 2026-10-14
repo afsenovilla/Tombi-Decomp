@@ -1,5 +1,6 @@
 // FUNC 8011c804 2060 X000
 // MATCHING 8011c804 2060
+#include "player.h"
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { long vx, vy, vz, pad; } VECTOR;
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
@@ -30,7 +31,6 @@ typedef struct E {
     short *p[7];
 } E;
 
-extern short D_800A6052;
 extern short D_801389B8[], D_801389BC[], D_801389DC[];
 extern short D_80138A10[], D_80138A64[], D_80138A30[], D_80138A84[];
 extern short D_8013884C[], D_8013886C[], D_80138848[];
@@ -117,7 +117,7 @@ void func_8011C804(E *o)
         }
         goto inc;
     case 1:
-        if (D_800A6052 >= 0x2e && o->subtype == 0) break;
+        if (PLAYER.obj.b.p.whole >= 0x2e && o->subtype == 0) break;
         if (o->b0c == 0)
             ObjCullRegister(o);
         else

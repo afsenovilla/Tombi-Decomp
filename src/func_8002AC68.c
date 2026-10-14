@@ -1,6 +1,7 @@
 // FUNC 8002ac68 480 MAIN0
 // MATCHING 8002ac68 480
 #include "gamestate.h"
+#include "player.h"
 typedef struct {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
     int d8;
@@ -15,7 +16,6 @@ typedef struct {
     unsigned char b70, b71, b72, b73;
     unsigned char b74, b75, b76, b77;
 } S;
-extern unsigned short D_800A6066;
 extern short DAT_1f800286;
 extern unsigned short D_8009C960_u;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
@@ -40,7 +40,7 @@ void func_8002AC68(S *o)
         o->b3c = 0;
         o->b3d = 0;
         o->b3e = 0;
-        w = D_800A6066;
+        w = PLAYER.obj.animFrame;
         o->b3 = 0;
         o->b70 = 0;
         o->b71 = 0;

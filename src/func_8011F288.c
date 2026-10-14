@@ -2,15 +2,10 @@
 // MATCHING 8011f288 896
 /* Holds 3 functions merged by splat: func_8011F288, func_8011F500, func_8011F580. */
 #include "TOBJ.H"
-extern unsigned char D_800A6047[];
+#include "player.h"
 extern void *D_8013B2BC[];
 extern int D_1F8002D4[];
-extern unsigned char D_800A603C[];
-extern unsigned short D_800A6066;
-extern unsigned char D_800A603D, D_800A603E;
 extern unsigned char D_8009CDAE;
-extern short D_800A604E;
-extern unsigned char D_800A60A1;
 extern Fix16 *D_800A607C[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
@@ -22,7 +17,7 @@ void func_8011F288(TObj *o)
     switch (o->b04) {
     case 0:
         o->b0a = 0;
-        o->b0f = D_800A6047[0] + 1;
+        o->b0f = ((unsigned char*)&PLAYER.obj.b0f)[0] + 1;
         o->anim = D_8013B2BC[0];
         o->d3c = D_1F8002D4[0];
         o->b0d = 0;
@@ -55,18 +50,18 @@ void func_8011F288(TObj *o)
                 if (--o->timer == 0) {
                     o->step = 2;
                     o->state = 0;
-                    if (D_800A603C[0] != 1) {
-                        D_800A6066 = 0;
-                        D_800A603C[0] = 1;
-                        D_800A603D = 0;
-                        D_800A603E = 0;
+                    if (((unsigned char*)&PLAYER.obj.b04)[0] != 1) {
+                        PLAYER.obj.animFrame = 0;
+                        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+                        PLAYER.obj.step = 0;
+                        PLAYER.obj.state = 0;
                     }
                 }
                 break;
             }
             break;
         case 5:
-            if (D_8009CDAE == 0xff && D_800A604E >= -0xc7 && D_800A60A1 != 0 && D_800A603C[0] != 1) {
+            if (D_8009CDAE == 0xff && PLAYER.obj.y.p.whole >= -0xc7 && PLAYER.obj.b69 != 0 && ((unsigned char*)&PLAYER.obj.b04)[0] != 1) {
                 o->step = 1;
                 o->state = 0;
             }
@@ -96,7 +91,7 @@ void func_8011F500(TObj *o)
         o->box2 = 4;
         o->box3 = 8;
         o->b0a = 0x11;
-        o->b0f = D_800A6047[0] + 1;
+        o->b0f = ((unsigned char*)&PLAYER.obj.b0f)[0] + 1;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
@@ -109,7 +104,7 @@ void func_8011F580(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_800A603D == 5) {
+        if (PLAYER.obj.step == 5) {
             o->timer = 0x80;
             o->step++;
         }

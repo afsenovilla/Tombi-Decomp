@@ -1,5 +1,6 @@
 // FUNC 8002b0bc 780 MAIN0
 // MATCHING 8002b0bc 780
+#include "player.h"
 typedef struct S {
     unsigned char b00, b01; char p0[2]; unsigned char b04; char p1[5]; unsigned char b0a; char p2[0x6c - 0xb];
     unsigned short w6c, w6e, w70, w72; char p3[0xa4 - 0x74]; unsigned char ba4; char p4[0xbc - 0xa5];
@@ -13,8 +14,6 @@ extern signed char D_8009D2B0;
 extern unsigned char D_8009C93E, D_8009C933;
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern unsigned char D_800A60D6, D_800A60E4;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A603F;
 extern unsigned short acquireSpriteSlot(int);
 extern void func_8002B3C8(S *);
 extern void ObjListPush_1F800230(S *);
@@ -73,11 +72,11 @@ void func_8002B0BC(S *o)
                 if (o->wd0 == 0 || m == 3) {
                     D_8009C93F[0] = 0;
                     D_8009C942[0] = 0;
-                    if ((o->wce & 0x7fff) != 4 && (D_800A60D6 == 0 || D_800A60E4 < 2)) {
-                        D_800A603C = 1;
-                        D_800A603D = 0;
-                        D_800A603E = 0;
-                        D_800A603F = 0;
+                    if ((o->wce & 0x7fff) != 4 && (PLAYER.obj.b9e == 0 || (*(unsigned char*)&PLAYER.obj.wac) < 2)) {
+                        PLAYER.obj.b04 = 1;
+                        PLAYER.obj.step = 0;
+                        PLAYER.obj.state = 0;
+                        PLAYER.obj.substep = 0;
                     } else {
                         D_8009C93E = 0;
                     }

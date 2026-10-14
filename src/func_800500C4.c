@@ -2,8 +2,9 @@
 // MATCHING 800500c4 872
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "player.h"
 extern unsigned short D_8009C960s;
-extern unsigned char D_8009C93A, D_800A603A;
+extern unsigned char D_8009C93A;
 int func_80045D0C(TObj *o);
 void func_8011CEF0(TObj *o);
 void func_8011D1BC(TObj *o);
@@ -62,7 +63,7 @@ void func_800500C4(TObj *o)
     case 3: func_80053B5C(o); break;
     case 4: func_80054C38(o); break;
     case 5:
-        switch (D_800A603A) {
+        switch (PLAYER.obj.type) {
         case 1: func_800EAB58(o); break;
         case 2: func_800EC148(o); break;
         case 3: func_800EB77C(o); break;
