@@ -37,8 +37,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | main0 | func_800402ec | 800402EC | 880 | 122 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | x/ys/cnt unpinned, (x-1)-sx order fixed; left: bs/d regs, b sext in place, xm copy to t1, branch-1 tail cross-jump |
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
-| FAR | main0 | func_8003ff48 | 8003FF48 | 816 | 99 | src/wip/func_8003FF48.c (gcc-2.7.2-psx) | global-alloc order o/k/xi (o has lowest priority, needs ~13 refs) |
-| FAR | x001 | func_8011EEC0 | 8011EEC0 | 744 | 2 | src/x001/wip/func_8011EEC0.c (gcc-2.7.2-psx) | only loop 2 o+0xa5 addiu scheduled 7 insns early |
 | FAR | x010 | func_8011E6B0 | 8011E6B0 | 564 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
