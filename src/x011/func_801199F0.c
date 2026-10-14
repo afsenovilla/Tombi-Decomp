@@ -1,11 +1,11 @@
 // FUNC 801199f0 420 X011
 // MATCHING 801199f0 420
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_80119CFC;
-extern unsigned char D_8009CE41[];
 extern TObj *allocObjectLayer2(void);
 
 void func_801199F0(TObj *o)
@@ -36,8 +36,8 @@ void func_801199F0(TObj *o)
             p->w7a = e->fc;
             p->d90 = (int)o;
             if (i == 3) {
-                if (D_8009CE41[0] != 1) p->b04 = 2;
-                if (D_8009CE41[0x19e] != 0) p->b04 = 2;
+                if (((unsigned char*)&GCD.bce41)[0] != 1) p->b04 = 2;
+                if (((unsigned char*)&GCD.bce41)[0x19e] != 0) p->b04 = 2;
             }
         }
     }

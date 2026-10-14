@@ -1,8 +1,8 @@
 // FUNC 80119498 740 X011
 // MATCHING 80119498 740
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDF1, D_8009CE0C, D_8009CDE5, D_8009CE0A, D_8009CDF3, D_8009CE0D;
 extern int AnimAdvance(TObj *o);
 extern void func_8011708C(TObj *o);
 extern void func_80117560(TObj *o);
@@ -25,11 +25,11 @@ void func_80119498(TObj *o)
     case 0:
         switch (o->step) {
         case 0:
-            if (D_8009CDF1 != 0xff || D_8009CE0C == 0xff) {
+            if (GCD.bcdf1 != 0xff || GCD.bce0c == 0xff) {
                 o->b04 = 2;
                 break;
             }
-            if (D_8009CE0C) o->step = 2;
+            if (GCD.bce0c) o->step = 2;
             else o->step = 1;
             o->state = 0;
             break;
@@ -47,7 +47,7 @@ void func_80119498(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (D_8009CDE5) o->step = 2;
+            if (GCD.bcde5) o->step = 2;
             else o->step = 1;
             o->state = 0;
             break;
@@ -62,17 +62,17 @@ void func_80119498(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            switch (D_8009CE0A) {
+            switch (GCD.bce0a) {
             case 0:
                 o->step = 1;
                 break;
             case 0xff:
-                if (D_8009CDF1 != 0xff) o->step = 6;
-                else if (D_8009CDF3) o->step = 8;
+                if (GCD.bcdf1 != 0xff) o->step = 6;
+                else if (GCD.bcdf3) o->step = 8;
                 else o->step = 7;
                 break;
             default:
-                switch (D_8009CE0D) {
+                switch (GCD.bce0d) {
                 case 0:
                     o->step = 2;
                     break;

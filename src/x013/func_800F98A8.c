@@ -1,11 +1,11 @@
 // FUNC 800f98a8 1908 X013
 // MATCHING 800f98a8 1908
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern char D_80011108[];
 extern unsigned char D_80115220[][2];
 extern volatile unsigned short D_8009D670[];
@@ -73,7 +73,7 @@ void func_800F98A8(TObj *o)
         o->d88 = 0;
         o->d8c = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;

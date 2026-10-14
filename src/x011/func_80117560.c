@@ -1,5 +1,6 @@
 // FUNC 80117560 636 X011
 // MATCHING 80117560 636
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -11,7 +12,6 @@ extern signed char D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A60EA[];
 extern short D_1F8001C6;
-extern unsigned short D_1F8001FC, D_1F8003C4;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
 
@@ -36,7 +36,7 @@ void func_80117560(TObj *o)
             break;
         if (PLAYER.d->p.whole != 0)
             break;
-        if ((D_1F8001FC & D_1F8003C4) == 0)
+        if ((SPAD.s1fc & SPAD.s3c4) == 0)
             break;
         v = *(V *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;

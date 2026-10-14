@@ -1,5 +1,6 @@
 // FUNC 801177dc 1112 X011
 // MATCHING 801177dc 1112
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -7,7 +8,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern unsigned char D_8009D082[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -84,7 +84,7 @@ void func_801177DC(TObj *o)
         break;
     }
     case 5:
-        if (D_8009D082[0] != 1) break;
+        if (((unsigned char*)&GCD.bd082)[0] != 1) break;
         o->timer = 8;
         o->state++;
         break;
@@ -102,7 +102,7 @@ void func_801177DC(TObj *o)
         if (--o->timer == -1) {
             o->velX = -0x200;
             o->timer = 0x3c;
-            D_8009D082[0] = 4;
+            ((unsigned char*)&GCD.bd082)[0] = 4;
             o->state++;
             break;
         }
