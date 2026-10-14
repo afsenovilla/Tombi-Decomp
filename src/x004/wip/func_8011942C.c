@@ -1,9 +1,7 @@
 // FUNC 8011942c 540 X004
-/* score 180: logic and block layout match. o35: `p = (u16 *)o->da0; p += 2;` moves o out of a0 like the game
-   (o now t3, game t2; n lands in a0, game t4). Registers still differ throughout: -0x100 mask t4 (game t3), copies of
-   (uv0 & 0xff), the (short)u >> 8 sll/sra pairs scheduled before the loads in the game's order.
-   Tried: whole body as static inline (TObj * and void * param), switch for the 0xd0/0xff test, per-local type
-   search (n int gives 157 but the game's n is short), o copied to a local. */
+/* score 36 (was 180): branch 2 uses its own locals (a2/b2/c2, w1-w3); register pins found by a greedy search
+   (n=$12, c=$9, v3=$5). Left: branch-1 load/shift order and a few register choices. Earlier notes: o35 p = o->da0; p += 2
+   moves o out of a0; tried whole body inline, switch for 0xd0/0xff, per-local type search. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -19,12 +17,18 @@ void func_8011942C(TObj *o)
     int u;
     int a;
     int b;
-    int c;
+    register int c asm("$9");
     short t;
     int v0;
     short v1;
     short v2;
-    short v3;
+    register short v3 asm("$5");
+    int a2;
+    int b2;
+    int c2;
+    short w1;
+    short w2;
+    short w3;
 
     switch (o->state) {
     case 0:
@@ -65,25 +69,25 @@ void func_8011942C(TObj *o)
                     f->uv2 |= v2 << 8;
                     f->uv3 |= v3 << 8;
                 } else {
-                    a = f->uv1;
-                    b = f->uv2;
-                    c = f->uv3;
+                    a2 = f->uv1;
+                    b2 = f->uv2;
+                    c2 = f->uv3;
                     f->uv0 = u & ~0xff;
-                    f->uv1 = a & ~0xff;
-                    f->uv2 = b & ~0xff;
-                    f->uv3 = c & ~0xff;
-                    v1 = a & 0xff;
-                    v2 = b & 0xff;
-                    v3 = c & 0xff;
+                    f->uv1 = a2 & ~0xff;
+                    f->uv2 = b2 & ~0xff;
+                    f->uv3 = c2 & ~0xff;
+                    w1 = a2 & 0xff;
+                    w2 = b2 & 0xff;
+                    w3 = c2 & 0xff;
                     if (o->w22 & 1) {
-                        t += 0x30; v1 += 0x30; v2 += 0x30; v3 += 0x30;
+                        t += 0x30; w1 += 0x30; w2 += 0x30; w3 += 0x30;
                     } else {
-                        t -= 0x30; v1 -= 0x30; v2 -= 0x30; v3 -= 0x30;
+                        t -= 0x30; w1 -= 0x30; w2 -= 0x30; w3 -= 0x30;
                     }
                     f->uv0 |= t;
-                    f->uv1 |= v1;
-                    f->uv2 |= v2;
-                    f->uv3 |= v3;
+                    f->uv1 |= w1;
+                    f->uv2 |= w2;
+                    f->uv3 |= w3;
                     return;
                 }
                 f++;
