@@ -1,5 +1,6 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "gv2.h"
 #include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
@@ -32,7 +33,6 @@ extern unsigned char D_8009C975x[];
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
 extern unsigned char D_8009CE48, D_8009CDCB, D_8009CE0B;
-extern unsigned short D_8009D2DA;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -211,7 +211,7 @@ void func_80116FE0(O *o)
             case 1:
                 func_801179B4(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
                 if (!(D_1F8001FC & 0x6008)) break;
-                if (D_8009CE48 == 0xff && D_8009CDCB == 0xff && D_8009D2DA != 0 && D_8009CE0B == 0xff) {
+                if (D_8009CE48 == 0xff && D_8009CDCB == 0xff && GV2.sda != 0 && D_8009CE0B == 0xff) {
                     D_8009C975 = 3;
                     o->step = 0xb;
                     break;
@@ -230,7 +230,7 @@ void func_80116FE0(O *o)
                 break;
             case 3:
                 if (--o->timer != 0 && o->d90->substep != 1) break;
-                if (D_8009CDCB == 0xff && D_8009D2DA != 0 && D_8009CE0B == 0xff) {
+                if (D_8009CDCB == 0xff && GV2.sda != 0 && D_8009CE0B == 0xff) {
                     o->timer = 1;
                     o->step = 9;
                     break;
@@ -249,7 +249,7 @@ void func_80116FE0(O *o)
                 break;
             case 5:
                 if (--o->timer != 0 && o->d90->substep != 1) break;
-                if (D_8009D2DA != 0 && D_8009CE0B == 0xff) {
+                if (GV2.sda != 0 && D_8009CE0B == 0xff) {
                     o->timer = 1;
                     o->step = 9;
                     break;
@@ -258,7 +258,7 @@ void func_80116FE0(O *o)
                 o->step++;
                 break;
             case 6:
-                if (D_8009D2DA == 0) {
+                if (GV2.sda == 0) {
                     o->d90 = showMessageBox(3, 2, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;

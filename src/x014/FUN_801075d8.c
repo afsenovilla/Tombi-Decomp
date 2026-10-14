@@ -1,12 +1,12 @@
 // FUNC 801075d8 1576 X014
 // MATCHING 801075d8 1576
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char *D_8009C330;
 extern char D_80077D0C[];
 extern unsigned char D_8009D2B0[];
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8001F8;
 extern unsigned char D_801152E8[];
 extern void FUN_801073c0(TObj *);
@@ -85,7 +85,7 @@ void FUN_801075d8(TObj *o)
             o->ba4 = 0;
             o->b9c = 1;
             if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
-                if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4) {
+                if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
                     o->ba7 = 1;
                 }
             }
@@ -137,7 +137,7 @@ void FUN_801075d8(TObj *o)
                 b = D_801152E8[o->wb0];
                 o->ba4 = 0;
                 o->d8c = b;
-                if (((o->animFrame & 1) ? (*(volatile unsigned short *)&D_8009D670 & 0x80) : (*(volatile unsigned short *)&D_8009D670 & 0x20)) == 0) o->wb2 = 0;
+                if (((o->animFrame & 1) ? (*(volatile unsigned short *)&GV6.s70 & 0x80) : (*(volatile unsigned short *)&GV6.s70 & 0x20)) == 0) o->wb2 = 0;
                 o->step = 0;
                 o->state = 0;
             }
@@ -148,7 +148,7 @@ void FUN_801075d8(TObj *o)
                 o->b9c = 1;
                 o->ba4 = 0;
                 if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
-                    if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4) {
+                    if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
                         o->ba7 = 1;
                     }
                 }
