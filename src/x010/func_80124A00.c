@@ -1,9 +1,10 @@
 // FUNC 80124a00 1292 X010
 // MATCHING 80124a00 1292
+#include "spad.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern short D_1F80016A[], D_1F80016E;
+extern short D_1F80016A[];
 extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
@@ -16,7 +17,7 @@ static __inline__ int turn(TObj *o)
     int c, a;
     unsigned char d;
 
-    a = angleFromDelta(D_1F80016A[0] - o->h->p.whole, D_1F80016E - o->y.p.whole);
+    a = angleFromDelta(D_1F80016A[0] - o->h->p.whole, (*(short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole);
     c = o->d38;
     a -= c;
     d = a;

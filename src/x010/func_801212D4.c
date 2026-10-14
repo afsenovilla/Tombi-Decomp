@@ -1,5 +1,6 @@
 // FUNC 801212d4 284 X010
 // MATCHING 801212d4 284
+#include "spad.h"
 /* Player vs. slope-table object collision (X000 family: func_8004B454 / func_8004B7C4).
    Shape notes (all needed): `h` is used (via d) between the table lhu and the d30 store so combine
    cannot fold the lhu into an lh; `s` is a scratch variable reused for (short)h, box1, the compare
@@ -14,8 +15,6 @@ typedef struct {
     unsigned short e8;
     unsigned short ea;
 } P;
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 extern unsigned short D_8012F2F8[];
 
 void func_801212D4(P *o, TObj *e)
@@ -55,7 +54,7 @@ void func_801212D4(P *o, TObj *e)
     o->t.wb8 = d;
     s = (unsigned short)e->y.p.whole;
     o->t.velY = 0;
-    D_1F80019E = 0;
-    D_1F8003C0 = e;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = e;
     o->t.wba = oy - s;
 }

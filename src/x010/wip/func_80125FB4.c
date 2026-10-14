@@ -1,4 +1,5 @@
 // FUNC 80125fb4 1280 X010
+#include "plx.h"
 #include "gvars.h"
 #include "player.h"
 /* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
@@ -14,7 +15,6 @@ typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
 extern unsigned char D_8009D0E7[];
 extern unsigned char D_8009C970, D_8009C971;
-extern short D_800A6108, D_800A610A;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
@@ -120,8 +120,8 @@ void func_80125FB4(TObj *o)
         c = &D_8009C970;
         if (*c < D_8009C971) {
             int t = D_8009C971;
-            D_800A6108 = t;
-            D_800A610A = t;
+            PLX.s6108 = t;
+            PLX.s610a = t;
             *c = t;
             FUN_8001e4f0(10);
         }

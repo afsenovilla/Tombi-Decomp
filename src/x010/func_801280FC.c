@@ -1,5 +1,6 @@
 // FUNC 801280fc 1120 X010
 // MATCHING 801280fc 1120
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -10,7 +11,6 @@ typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
 extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned char D_8009D078, D_8009CF1C;
 extern short D_1F8000F2, D_1F80016E;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
@@ -46,7 +46,7 @@ void func_801280FC(TObj *o)
         o->ba7 = 0;
         o->timer = 0x3c;
         o->state++;
-        D_8009D078 = 4;
+        GCD.bd078 = 4;
         break;
     case 2:
         func_801271D8(o, 1);
@@ -89,7 +89,7 @@ void func_801280FC(TObj *o)
     case 7:
         func_801271D8(o, 2);
         o->state++;
-        o->d90 = showMessageBoxDirect(2, D_8012F3C8[D_8009CF1C], &o->a);
+        o->d90 = showMessageBoxDirect(2, D_8012F3C8[GCD.bcf1c], &o->a);
         break;
     case 8:
         func_801271D8(o, 2);

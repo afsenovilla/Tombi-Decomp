@@ -1,9 +1,9 @@
 // FUNC 80122f48 392 X010
 // MATCHING 80122f48 392
+#include "gcd.h"
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern void *D_80131DBC;
-extern unsigned char D_8009CEAF;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 
@@ -34,7 +34,7 @@ void func_80122F48(TObj *o)
         break;
     case 1:
         o->category |= 0x80;
-        { unsigned char *c = &D_8009CEAF; *c = *c + 1; }
+        { unsigned char *c = &GCD.bceaf; *c = *c + 1; }
         p = (TObj *)o->d90;
         o->active = 2;
         o->b04 = 2;

@@ -1,13 +1,11 @@
 // FUNC 80123330 408 X010
 // MATCHING 80123330 408
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 extern void *D_80131DC0;
-extern unsigned char D_8009CEAF;
-extern unsigned char D_8009D0B4;
-extern unsigned char D_8009CE56;
 void AnimLoadDuration(TObj *o);
 void FUN_800eea7c(TObj *o, short a, short c);
 void setEventStarted(int a, int b, int c);
@@ -24,7 +22,7 @@ void func_80123330(TObj *o)
         o->category |= 0x80;
         break;
     case 1:
-        if (D_8009CEAF == 1 && D_8009D0B4 == 0 && D_8009CE56 == 0) {
+        if (GCD.bceaf == 1 && GCD.bd0b4 == 0 && GCD.bce56 == 0) {
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             GVARS.b3e = 1;

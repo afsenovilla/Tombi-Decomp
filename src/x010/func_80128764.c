@@ -1,13 +1,11 @@
 // FUNC 80128764 1556 X010
 // MATCHING 80128764 1556
+#include "spad.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8012F3D4[];
 extern void *D_80132310[];
-extern int D_1F80016C[], D_1F800170[];
-extern short D_1F800172;
 extern int D_1F800198;
-extern unsigned short D_1F8001F8;
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
@@ -56,16 +54,16 @@ void func_80128764(TObj *o)
         FUN_8001f8e4(o);
         o->state++;
         o->velH = ((o->w74 << 16) - o->h->raw) >> 15;
-        o->velV = (D_1F80016C[0] - o->y.raw) >> 15;
-        o->velX = (D_1F800170[0] - o->d->raw) >> 15;
+        o->velV = (((int*)&SPAD.i16c)[0] - o->y.raw) >> 15;
+        o->velX = (((int*)&SPAD.i170)[0] - o->d->raw) >> 15;
         o->velY = -0x600;
-        if (o->d->p.whole == D_1F800172) {
+        if (o->d->p.whole == (*(short*)((char*)&SPAD.i170 + 2))) {
             if (D_1F800198 & 1) {
                 SETBOX(o, 0xb);
             } else {
                 SETBOX(o, 0x11);
             }
-        } else if (D_1F800172 < o->d->p.whole) {
+        } else if ((*(short*)((char*)&SPAD.i170 + 2)) < o->d->p.whole) {
             SETBOX(o, 0xd);
         } else {
             SETBOX(o, 9);
@@ -142,7 +140,7 @@ void func_80128764(TObj *o)
                 SETBOX(o, 0x26);
             }
         }
-        if (((D_1F8001F8 + D_1F800198) & 0x1f) == 0) {
+        if (((SPAD.s1f8 + D_1F800198) & 0x1f) == 0) {
             switch (o->b0c & 3) {
             case 0:
                 playSFX(0xa8);

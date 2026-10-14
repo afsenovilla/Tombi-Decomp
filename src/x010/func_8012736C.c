@@ -1,5 +1,6 @@
 // FUNC 8012736c 2060 X010
 // MATCHING 8012736c 2060
+#include "gcd.h"
 #include "gvars.h"
 /* Matched. Keep: function-scope `int y` (global pseudo -> v1 in cases 2 and 5) and function-scope `int hv`
    shared by case 2's two scratchpad loads and case 5's o->h pointer (global pseudo in a1; a case-8 use would put
@@ -19,7 +20,6 @@ extern unsigned short *D_800A605C;
 extern unsigned short D_800A6066;
 extern short D_800A604A[];
 extern short D_800A604E[];
-extern unsigned char D_8009D078;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
@@ -255,7 +255,7 @@ void func_8012736C(TObj *o)
         }
         break;
     case 21:
-        D_8009D078 = 1;
+        GCD.bd078 = 1;
         GVARS.b3f = 0;
         GVARS.b42 = 0;
         PLAYER.active = 1;

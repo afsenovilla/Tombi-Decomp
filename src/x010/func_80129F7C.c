@@ -1,11 +1,11 @@
 // FUNC 80129f7c 1768 X010
 // MATCHING 80129f7c 1768
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
 extern B D_8012F3D4[];
 extern void *D_80132310[];
 extern unsigned char D_8012F494[];
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
 extern void playSFX(int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -45,12 +45,12 @@ static __inline__ int near(TObj *o)
 {
     int k;
     unsigned short t;
-    t = D_1F800172 - o->d->p.whole + 0x2d;
+    t = (*(unsigned short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d;
     if (t >= 0x5b) return 0;
     k = 0xc0;
-    t = D_1F80016A - o->h->p.whole + 0x60;
+    t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x60;
     if (k < t) return 0;
-    t = D_1F80016E - o->y.p.whole + 0x60;
+    t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x60;
     return !(k < t);
 }
 void func_80129F7C(TObj *o)

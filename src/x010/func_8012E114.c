@@ -1,5 +1,6 @@
 // FUNC 8012e114 532 X010
 // MATCHING 8012e114 532
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short flags;
@@ -13,7 +14,6 @@ typedef struct {
 } E;
 typedef struct { Fix16 a, y, b; } V3;
 extern E *D_8012F574;
-extern unsigned char D_8009CDF2;
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
 
@@ -26,7 +26,7 @@ void func_8012E114(TObj *o)
     V3 v;
 
     for (i = 0, e = tbl; e->flags != 0xff; e = &tbl[++i]) {
-        if (e->b0c == 0x28 && D_8009CDF2 == 0xff) continue;
+        if (e->b0c == 0x28 && GCD.bcdf2 == 0xff) continue;
         if (*(volatile unsigned short *)&e->flags & 0x80) {
             p = allocObjectLayer4();
             if (p) {

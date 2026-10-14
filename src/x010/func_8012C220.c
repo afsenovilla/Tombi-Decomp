@@ -1,10 +1,10 @@
 // FUNC 8012c220 908 X010
 // MATCHING 8012c220 908
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D07A;
 extern void *D_801322F4[], *D_801322E4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -112,7 +112,7 @@ void func_8012C220(TObj *o)
     case 7:
         o->step = 0;
         o->state = 0;
-        D_8009D07A = 3;
+        GCD.bd07a = 3;
         break;
     }
 }

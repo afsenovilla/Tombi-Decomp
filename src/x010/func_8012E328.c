@@ -1,17 +1,17 @@
 // FUNC 8012e328 352 X010
 // MATCHING 8012e328 352
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE5B;
 extern void setEventStarted(int, int, int);
 
 void func_8012E328(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CE5B == 0) {
+        if (GCD.bce5b == 0) {
             o->step = 1;
             o->state = 0;
         }

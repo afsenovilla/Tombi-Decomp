@@ -1,9 +1,9 @@
 // FUNC 8012ba44 928 X010
 // MATCHING 8012ba44 928
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D07A;
 extern void *D_801322EC[];
 extern void *D_801322E4[];
 extern void *D_801322F4[];
@@ -137,7 +137,7 @@ void func_8012BA44(TObj *o)
     case 10:
         o->step = 0;
         o->state = 0;
-        D_8009D07A = 1;
+        GCD.bd07a = 1;
         break;
     }
 }

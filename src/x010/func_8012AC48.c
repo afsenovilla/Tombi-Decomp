@@ -1,5 +1,6 @@
 // FUNC 8012ac48 2720 X010
 // MATCHING 8012ac48 2720
+#include "spad.h"
 /* Row 5 of the box table is read through scalar externs (D_8012F3E8..EB): a fixed-address scalar does not
    conflict with the o-> stores, so those loads hoist as in the game, while the indexed reads stay ordered.
    n (a1) and the shared byte offset k = (short)n * 4 (a0) feed both tables at the `set` tail. */
@@ -13,10 +14,6 @@ extern unsigned char D_8012F3E8, D_8012F3E9, D_8012F3EA, D_8012F3EB;
 extern void *D_80132310[];
 extern void *D_8013237C[];
 extern unsigned short D_8012F49C[];
-extern int D_1F8002D0[];
-extern unsigned short D_1F800176, D_1F800186;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -38,8 +35,8 @@ extern void func_8012AAE4(TObj *);
 
 static __inline__ int onscreen(TObj *o)
 {
-    if ((unsigned short)(o->a.p.whole - D_1F800176 + 0xe0) >= 0x301) return 0;
-    return (unsigned short)(D_1F800186 - o->y.p.whole + 0x78) < 0x1e1;
+    if ((unsigned short)(o->a.p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0xe0) >= 0x301) return 0;
+    return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x78) < 0x1e1;
 }
 
 static __inline__ int blocked(TObj *o, short f)
@@ -84,7 +81,7 @@ void func_8012AC48(TObj *o)
             o->w1e = 1;
             o->b0d = 0;
             {
-                int t = D_1F8002D0[0];
+                int t = ((int*)&SPAD.i2d0)[0];
                 void *a = D_80132310[0];
                 o->d3c = t;
                 o->anim = a;
@@ -97,7 +94,7 @@ void func_8012AC48(TObj *o)
             case 2:
                 switch (o->state) {
                 case 0:
-                    if (((D_1F8001F8 + D_1F800198) & 3) == 0 && onscreen(o)) o->state++;
+                    if (((SPAD.s1f8 + SPAD.i198) & 3) == 0 && onscreen(o)) o->state++;
                     break;
                 case 1:
                     o->step = 0;
@@ -173,7 +170,7 @@ void func_8012AC48(TObj *o)
                 case 1:
                     if (o->visible) {
                         AnimAdvance(o);
-                        if (((D_1F8001F8 + D_1F800198) & 0x1f) == 0) FUN_8001e4f0(0xad);
+                        if (((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) FUN_8001e4f0(0xad);
                     }
                     break;
                 }
@@ -333,7 +330,7 @@ void func_8012AC48(TObj *o)
         break;
     case 4:
         if (o->timer == 0) {
-            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && !FUN_800203dc(o)) {
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !FUN_800203dc(o)) {
                 q->a = 0;
                 o->w98 = 3;
                 o->subtype = q->sub;

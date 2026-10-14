@@ -1,11 +1,11 @@
 // FUNC 80127e08 756 X010
 // MATCHING 80127e08 756
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned char D_8009D078;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -44,7 +44,7 @@ void func_80127E08(TObj *o)
             (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
             o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             setAnim(o, ANIMS(o)[5]);
-            D_8009D078 = 3;
+            GCD.bd078 = 3;
             break;
         }
         k = ((unsigned char*)&GVARS.b40);
@@ -100,7 +100,7 @@ void func_80127E08(TObj *o)
             o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             o->anim = ANIMS(o)[5];
             FUN_8001fe6c(o);
-            D_8009D078 = 3;
+            GCD.bd078 = 3;
             o->state = 2;
         }
         break;

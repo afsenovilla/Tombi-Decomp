@@ -1,8 +1,8 @@
 // FUNC 801213f0 324 X010
 // MATCHING 801213f0 324
+#include "spad.h"
 #include "TOBJ.H"
 extern unsigned short D_8012F2F8[];
-extern short D_1F80019E;
 extern int resolveHitResultA(TObj *, TObj *);
 
 void func_801213F0(TObj *a, TObj *b)
@@ -25,5 +25,5 @@ void func_801213F0(TObj *a, TObj *b)
     if (resolveHitResultA(a, b) != 0) {
         b->animFrame = a->animFrame & 1;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

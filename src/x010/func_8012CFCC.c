@@ -1,11 +1,12 @@
 // FUNC 8012cfcc 496 X010
 // MATCHING 8012cfcc 496
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P4;
 
 extern short D_1F80016A_S; /* second name for D_1F80016A: keeps the reload in the loop (debt) */
-extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
+extern short D_1F80016A[], D_1F800172[];
 extern P4 D_8012F4AC[];
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -39,7 +40,7 @@ void func_8012CFCC(TObj *o)
                     e->b0a = 2;
                     e->d8c = 0;
                     e->a.p.whole = D_1F80016A[0] + p->x;
-                    e->y.p.whole = D_1F80016E[0] + p->y;
+                    e->y.p.whole = ((short*)((char*)&SPAD.i16c + 2))[0] + p->y;
                     e->b.p.whole = D_1F800172[0] + p->z;
                     e->w74 = D_1F80016A_S + p->x / 2;
                     p++;

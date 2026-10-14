@@ -1,5 +1,6 @@
 // FUNC 8012d8e4 1352 X010
 // MATCHING 8012d8e4 1352
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,9 +9,7 @@
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_8012F538[];
-extern unsigned char D_8009CFCC[];
-extern unsigned char D_8009CE3B, D_8009D13E;
-extern unsigned char D_8009CFCA;
+extern unsigned char D_8009D13E;
 extern short D_1F8001C6;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
@@ -33,12 +32,12 @@ void func_8012D8E4(TObj *o)
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        D_8009CFCC[0] = 1;
+        ((unsigned char*)&GCD.bcfcc)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         o->anim = D_8012F538[o->subtype].p[1];
         AnimLoadDuration(o);
-        if (D_8009CE3B == 1) {
+        if (GCD.bce3b == 1) {
             o->d90 = (int)showMessageBoxDirect(3, 0, &v);
             o->state = 10;
         } else {
@@ -93,7 +92,7 @@ void func_8012D8E4(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
-        c = &D_8009CFCA;
+        c = &GCD.bcfca;
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

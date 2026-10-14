@@ -1,8 +1,8 @@
 // FUNC 8012855c 520 X010
 // MATCHING 8012855c 520
+#include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
-extern unsigned char D_8009CDAC, D_8009D078;
 extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
@@ -18,7 +18,7 @@ void func_8012855C(char *o)
 
     switch (s) {
     case 0:
-        if (D_8009CDAC == 0xff || D_8009D078 == 4) {
+        if (GCD.bcdac == 0xff || GCD.bd078 == 4) {
             o[4] = 3;
             break;
         }
@@ -38,7 +38,7 @@ void func_8012855C(char *o)
         *(char **)(o + 0xa8) = D_80132894;
         o[0xa7] = 0;
         o[4]++;
-        if (D_8009D078) {
+        if (GCD.bd078) {
             if (GAME.selectedSection == 0) {
                 o[5] = 1;
                 *(short *)(o + 0x12) = 0xc64;
