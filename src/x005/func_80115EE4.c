@@ -1,8 +1,8 @@
 // FUNC 80115ee4 252 X005
 // MATCHING 80115ee4 252
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93A;
 extern short D_1F80016A, D_1F80016E;
 extern void (*D_80079AD0[])(TObj *);
 extern void func_80027810(TObj *);
@@ -13,7 +13,7 @@ void func_80115EE4(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         func_80027810(o);
         break;
     case 1:

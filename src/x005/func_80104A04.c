@@ -1,10 +1,10 @@
 // FUNC 80104a04 724 X005
 // MATCHING 80104a04 724
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; } G;
 extern G *D_8009C330;
-extern short D_8009C944, D_8009C946[];
 extern int D_8009D2E8;
 extern unsigned short D_8009D670;
 extern unsigned short D_1F8003C4;
@@ -22,8 +22,8 @@ void func_800EFC8C(TObj *o, int);
 void func_8010E328(TObj *o, int);
 void func_80104A04(TObj *o)
 {
-    o->h->raw += D_8009C944 << 8;
-    o->y.raw += D_8009C946[0] << 8;
+    o->h->raw += GVARS.s44 << 8;
+    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
     FUN_800ef490(o);
     ObjMotionStep(o);
     if (*(unsigned char *)&o->wac == 2) {

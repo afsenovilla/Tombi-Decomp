@@ -1,5 +1,6 @@
 // FUNC 8010e114 532 X005
 // MATCHING 8010e114 532
+#include "gvars.h"
 #include "player.h"
 typedef struct P { short x; short y; } P;
 typedef struct S {
@@ -13,7 +14,6 @@ extern unsigned short D_1F8003C4;
 extern unsigned short D_1F800250;
 extern unsigned short D_1F80019E;
 extern short D_1F80019Es;
-extern unsigned char D_8009C93A[];
 extern P *D_800A607C;
 extern P *D_800A6078;
 int func_8010E114(void)
@@ -38,7 +38,7 @@ int func_8010E114(void)
         case 0x18: case 0x23: case 0x32: case 0x37: case 0x4d: case 0x55: case 0x58: case 0x59: case 0x5a:
             if (p->b68 != 0)
                 break;
-            if (D_8009C93A[0] == 0 || D_8009C93A[8] != 0 || p->pos2->y != D_800A607C->y) {
+            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != D_800A607C->y) {
                 p->b68 = r;
                 r = p->b68; /* extra refs raise r's global-alloc priority over d */
                 break;
