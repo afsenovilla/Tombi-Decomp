@@ -1,10 +1,10 @@
 // FUNC 80129b70 296 X009
 // MATCHING 80129b70 296
+#include "plx.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_800A6100;
 extern void func_80129914(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -12,7 +12,7 @@ static __inline__ short Cond(void)
 {
     if (!GVARS.b3a) return 0;
     if (GVARS.b38) return 0;
-    if (!PLAYER.obj.b69 && !D_800A6100) return 0;
+    if (!PLAYER.obj.b69 && !PLX.b6100) return 0;
     if ((unsigned int)((unsigned short)(*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x1034) >= 0xc8) return 0;
     if (PLAYER.obj.y.p.whole < -0x1d0) return 0;
     return 1;

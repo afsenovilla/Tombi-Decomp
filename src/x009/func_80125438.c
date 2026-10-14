@@ -1,10 +1,10 @@
 // FUNC 80125438 1536 X009
 // MATCHING 80125438 1536
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8012EE84[], *D_8012EE94[], *D_8012EE80[];
 extern char D_80077D0C[], D_80077D00[];
-extern unsigned short D_1F80016A, D_1F800176;
 extern short D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -54,13 +54,13 @@ void func_80125438(TObj *o)
     case 1:
         o->state++;
         o->timer = 0;
-        if ((short)(D_1F80016A - o->h->p.whole) >= 0)
+        if ((short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole) >= 0)
             o->animFrame = 1;
         else
             o->animFrame = 0;
     case 2:
         FUN_8001fec0(o);
-        if ((unsigned short)(o->h->p.whole - D_1F800176 - 0x30) < 0x110) {
+        if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x30) < 0x110) {
             applyAnimVelocityX(o, o->animFrame);
             {
                 int q;

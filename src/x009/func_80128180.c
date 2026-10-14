@@ -1,12 +1,12 @@
 // FUNC 80128180 548 X009
 // MATCHING 80128180 548
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3F;
 
-extern unsigned char D_8009CDC9, D_8009D12E, D_8009D07E, D_8009D083, D_8009D081;
-extern unsigned short D_8009D0B0;
+extern unsigned char D_8009D12E;
 extern int D_1F8002F0[];
 extern void *D_8012EE80;
 extern void AnimLoadDuration(TObj *o);
@@ -18,9 +18,9 @@ void func_80128180(TObj *o)
     int k;
 
     if (!(GV2.bc3 & 1)) {
-        k = D_8009CDC9;
+        k = GCD.bcdc9;
         if (k == 0xff) {
-        if (D_8009D12E || D_8009D07E) {
+        if (D_8009D12E || GCD.bd07e) {
             o->b04 = 3;
             return;
         }
@@ -35,14 +35,14 @@ void func_80128180(TObj *o)
         }
         o->w08 = 0x78d2;
     } else {
-    if (!D_8009D12E && !D_8009D07E && !o->subtype) {
+    if (!D_8009D12E && !GCD.bd07e && !o->subtype) {
         v.x.p.whole = 0xd90;
         v.y.p.whole = -0x244;
         v.z.p.whole = 0xb9a;
         spawnItemDropAtPos(0x8a, 0, &v, 0, 0);
     }
-    if (D_8009D083 == 2) {
-    if (D_8009D0B0 || D_8009D081 || o->subtype) {
+    if (GCD.bd083 == 2) {
+    if (GCD.sd0b0 || GCD.bd081 || o->subtype) {
         o->b04 = 3;
         return;
     }

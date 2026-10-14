@@ -1,10 +1,10 @@
 // FUNC 8012955c 932 X009
 // MATCHING 8012955c 932
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009CDAC;
 extern unsigned char *D_8009C330;
 extern int D_1F8002E8;
 extern void *D_8012E078, *D_8012E07C;
@@ -21,7 +21,7 @@ void func_8012955C(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CDAC == 0 || PLAYER.a.p.whole < 0x280) {
+        if (GCD.bcdac == 0 || PLAYER.a.p.whole < 0x280) {
             o->b04 = 3;
             break;
         }

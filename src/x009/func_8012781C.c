@@ -1,10 +1,10 @@
 // FUNC 8012781c 2404 X009
 // MATCHING 8012781c 2404
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 
 extern void *D_8012EEA8[], *D_8012EEAC[], *D_8012EEA4[];
-extern unsigned char D_8009D083;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
@@ -191,10 +191,10 @@ void func_8012781C(TObj *o)
             if (o->subtype == 0) {
                 if (!(GV2.bc3 & 1)) {
                     spawnItemDropAtPos(0x8a, 0, &o->a, 0, 0);
-                    D_8009D083 = 1;
+                    GCD.bd083 = 1;
                 } else {
                     spawnItemDropAtPos(0xc, 0, &o->a, 0, 0);
-                    D_8009D083 = 2;
+                    GCD.bd083 = 2;
                 }
             }
             o->state++;

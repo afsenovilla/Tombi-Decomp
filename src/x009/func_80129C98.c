@@ -1,5 +1,6 @@
 // FUNC 80129c98 608 X009
 // MATCHING 80129c98 608
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short flags;
@@ -13,8 +14,6 @@ typedef struct {
 } E;
 extern E D_8012B2E8[];
 extern TObj *SCRIPT_OBJECTS[];
-extern unsigned char D_8009CE54;
-extern unsigned char D_8009CDCC[];
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
 
@@ -59,10 +58,10 @@ void func_80129C98(TObj *o)
                 p->w7a = e->w7a;
                 p->d90 = (int)o;
                 SCRIPT_OBJECTS[i] = p;
-                if (*(unsigned short *)&p->wba == 0 && D_8009CE54 == 0xff) p->b04 = 2;
+                if (*(unsigned short *)&p->wba == 0 && GCD.bce54 == 0xff) p->b04 = 2;
                 if (*(unsigned short *)&p->wba == 1) {
-                    if (D_8009CDCC[0] == 0xff) p->b04 = 3;
-                    if (D_8009CDCC[-2] != 0xff) p->b04 = 3;
+                    if (((unsigned char*)&GCD.bcdcc)[0] == 0xff) p->b04 = 3;
+                    if (((unsigned char*)&GCD.bcdcc)[-2] != 0xff) p->b04 = 3;
                 }
             }
         }

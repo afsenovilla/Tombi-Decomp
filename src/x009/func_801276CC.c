@@ -1,8 +1,8 @@
 // FUNC 801276cc 336 X009
 // MATCHING 801276cc 336
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CDC9;
 extern void setEventComplete(int, int);
 
 /* The `goto ret0` after the call keeps case 1's `return 0` block alive: with a plain `return 0` jump2
@@ -14,7 +14,7 @@ int func_801276CC(TObj *o)
     if (o->subtype == 0) {
         switch (o->substep) {
         case 0:
-            if (D_8009CDC9 == 0xff) {
+            if (GCD.bcdc9 == 0xff) {
                 o->substep = 3;
                 return 0;
             }

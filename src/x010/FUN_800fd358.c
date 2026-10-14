@@ -1,5 +1,6 @@
 // FUNC 800fd358 2084 X010
 // MATCHING 800fd358 2084
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -16,7 +17,6 @@ typedef struct {
 
 extern P800FD358 *D_8009C330;
 extern TObj *D_8009D2E8;
-extern TObj *D_800A611C;
 extern TObj *D_8009F0EC;
 extern unsigned char D_1F8001A4;
 extern unsigned char D_1F8001F8;
@@ -80,7 +80,7 @@ void FUN_800fd358(TObj *o)
         o->wb0 = 0;
         D_8009C330->b8 = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(TObj **)&PLX.p611c);
             D_8009D2E8->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;

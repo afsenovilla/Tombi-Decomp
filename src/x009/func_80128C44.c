@@ -1,5 +1,6 @@
 // FUNC 80128c44 648 X009
 // MATCHING 80128c44 648
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -7,7 +8,6 @@
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 
-extern unsigned char D_8009CDCC[];
 extern short D_1F8001C6;
 extern AT3 D_8012B2E4[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -35,7 +35,7 @@ void func_80128C44(TObj *o)
         FUN_8001fe94(o, 0);
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        if (D_8009CDCC[0] == 0)
+        if (((unsigned char*)&GCD.bcdcc)[0] == 0)
             o->d90 = (int)showMessageBoxDirect(2, 6, &v);
         else
             o->d90 = (int)showMessageBoxDirect(2, 7, &v);
@@ -50,7 +50,7 @@ void func_80128C44(TObj *o)
         o->anim = D_8012B2E4[o->subtype].p[24];
         FUN_8001fe6c(o);
         o->timer = 4;
-        if (D_8009CDCC[0] == 0) {
+        if (((unsigned char*)&GCD.bcdcc)[0] == 0) {
             setEventStarted(0x28, 0, 0);
             o->timer = 200;
         }

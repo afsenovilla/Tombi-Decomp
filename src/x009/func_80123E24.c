@@ -1,5 +1,6 @@
 // FUNC 80123e24 1800 X009
 // MATCHING 80123e24 1800
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -8,9 +9,6 @@ typedef struct { short w0, w2, w4, w6, w8, wa; } X;
 #define XS(o) ((X *)((char *)(o) + 0xb4))
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 
-extern int D_1F8002E8;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void *D_8012EA40[], *D_8012E9FC[], *D_8012EA38[];
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
@@ -50,7 +48,7 @@ void func_80123E24(TObj *o)
                 x->w6 = o->d->p.whole;
             }
             o->b9d = 0;
-            o->d3c = D_1F8002E8;
+            o->d3c = SPAD.i2e8;
             o->w1e = 2;
             o->box0 = 0xc;
             o->box1 = 0x18;
@@ -128,7 +126,7 @@ void func_80123E24(TObj *o)
                     }
                     break;
                 case 2:
-                    if (D_1F8001F8 & 3) o->b0d = 1;
+                    if (SPAD.s1f8 & 3) o->b0d = 1;
                     else o->b0d = 0;
                     if (--o->timer == 0) {
                         o->active = 1;
@@ -160,7 +158,7 @@ void func_80123E24(TObj *o)
             func_801233F0(o);
             if (ObjCullRegister(o)) break;
         chk:
-            if (((D_1F8001F8 + D_1F800198) & 7) == 0) FUN_80020490(o);
+            if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) FUN_80020490(o);
             break;
         case 1:
             func_80123828(o);

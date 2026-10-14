@@ -1,11 +1,11 @@
 // FUNC 80126460 1072 X009
 // MATCHING 80126460 1072
+#include "spad.h"
 #include "TOBJ.H"
 
 extern char D_80077D00[];
 extern void *D_8012EE80[];
 extern short D_8007A5F0[];
-extern short D_1F800176;
 extern TObj PLAYER;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -72,7 +72,7 @@ void func_80126460(TObj *o)
         a = o->h->p.whole;
         if (((a - (unsigned short)p->h->p.whole + 0x80) & 0xffff) <= 0x100) {
             b = (short)a - 0xa0;
-            k = D_1F800176 - b < 0;
+            k = (*(short*)((char*)&SPAD.i174 + 2)) - b < 0;
             if (o->animFrame == p->animFrame) {
                 if (o->animFrame != k) o->animFrame = 1 - o->animFrame;
                 o->state++;

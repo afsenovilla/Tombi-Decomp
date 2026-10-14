@@ -1,5 +1,6 @@
 // FUNC 80129ef8 2024 X009
 // MATCHING 80129ef8 2024
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -11,7 +12,6 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned short D_800A6066[];
 extern Fix16 *D_800A6078;
 extern short D_800A60EA[];
-extern unsigned char D_8009CE54[], D_8009CE53[];
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void FUN_800eea7c(TObj *, short, short);
 extern void func_80128AF8(TObj *, int, int);
@@ -27,7 +27,7 @@ void func_80129EF8(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CE54[0] == 0xff) {
+        if (((unsigned char*)&GCD.bce54)[0] == 0xff) {
             o->b04 = 3;
         }
         o->state++;
@@ -43,15 +43,15 @@ void func_80129EF8(TObj *o)
         p = &PLAYER;
         FUN_800eea7c(p, 0, 0);
         o->state++;
-        if (D_8009CE53[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 1) {
+        if (((unsigned char*)&GCD.bce53)[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 1) {
             playSFX(0x20);
             FUN_800eea7c(p, 0x28, 0);
             o->w08 = 0x78;
             o->state = 4;
         }
-        if (D_8009CE53[0] == 0xff) {
+        if (((unsigned char*)&GCD.bce53)[0] == 0xff) {
             o->state = 6;
-            if (D_8009CE54[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 2) {
+            if (((unsigned char*)&GCD.bce54)[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 2) {
                 SfxPlay2(0x25, 0x28);
                 FUN_800eea7c(&PLAYER, 0x29, 0);
                 o->w08 = 0x78;
@@ -73,7 +73,7 @@ void func_80129EF8(TObj *o)
             break;
         q->b04 = 3;
         o->w08 = 1;
-        if (D_8009CE53[0] == 0) {
+        if (((unsigned char*)&GCD.bce53)[0] == 0) {
             o->w08 = 0xfa;
             setEventStarted(0xaf, 0, 0);
         }
@@ -121,7 +121,7 @@ void func_80129EF8(TObj *o)
             break;
         q->b04 = 3;
         o->w08 = 1;
-        if (D_8009CE54[0] == 0) {
+        if (((unsigned char*)&GCD.bce54)[0] == 0) {
             o->w08 = 0xfa;
             setEventStarted(0xb0, 0, 0);
         }

@@ -1,12 +1,10 @@
 // FUNC 801229ac 1372 X009
 // MATCHING 801229ac 1372
+#include "spad.h"
 #include "TOBJ.H"
 
 extern char D_80077D18[];
 extern void *D_8012EA14[], *D_8012EA1C[], *D_8012EA20[], *D_8012EA30[];
-extern short D_1F80016A;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
@@ -62,12 +60,12 @@ void func_801229AC(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV >= -0x27f) {
             if (o->animFrame) {
-                if (o->h->p.whole <= D_1F80016A) {
+                if (o->h->p.whole <= (*(short*)((char*)&SPAD.i168 + 2))) {
                     o->state = 3;
                     break;
                 }
             } else {
-                if (o->h->p.whole >= D_1F80016A) {
+                if (o->h->p.whole >= (*(short*)((char*)&SPAD.i168 + 2))) {
                     o->state = 3;
                     break;
                 }
@@ -97,12 +95,12 @@ void func_801229AC(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV < 0x280) {
             if (o->animFrame) {
-                if (o->h->p.whole <= D_1F80016A) {
+                if (o->h->p.whole <= (*(short*)((char*)&SPAD.i168 + 2))) {
                     o->state = 3;
                     break;
                 }
             } else {
-                if (o->h->p.whole >= D_1F80016A) {
+                if (o->h->p.whole >= (*(short*)((char*)&SPAD.i168 + 2))) {
                     o->state = 3;
                     break;
                 }
@@ -155,7 +153,7 @@ void func_801229AC(TObj *o)
         break;
     }
     if (o->visible) {
-        r = D_1F8001F8 + D_1F800198;
+        r = SPAD.s1f8 + SPAD.i198;
         if ((r & 0x3f) == 0) {
             if (Rand() & 1) playSFX(0x95);
         } else if ((r & 0x1f) == 0) {

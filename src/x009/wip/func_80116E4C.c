@@ -1,3 +1,4 @@
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 /* score 119: structure, calls and loops match (switch needs the empty cases 1-5). Writing the first lo-block and the first branch of the last block as `a = div; if (a < 0) a = 0; a += K; hi = a + 8;` keeps hi = a + 8 unfolded (was lo + 0x24). Remaining: register choice, a+K and hi swapped (game a2/v1, ours v1/a2), (D_1F800176 - 0x668)/80 branch dividend in v0 not v1 so the mult is not cross-jumped, lo/hi clamps. Game copies i/hi into a1/a0 before each loop (move a1,a0; move a0,v1) like inline param copies, but a range() inline swaps the loop regs. Tried: int/short/ushort loop vars, int/u8/short cnt, separate getScrollOffsetX temp, inverted ifs, declaration orders. */
@@ -6,8 +7,6 @@ typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p[3]; unsigned char n; int e[0x58]; unsigned char b164; } Q;
 
 extern unsigned short D_8009C962;
-extern unsigned char D_8009CDA2;
-extern unsigned short D_8009CD94;
 extern unsigned char D_8009C964;
 extern int D_800A4574;
 extern short D_1F800176;
@@ -47,13 +46,13 @@ void func_80116E4C(Q *q, unsigned char *base)
             MoveImage(&r, 0x20, 0x100);
             q->b164++;
         }
-        if (D_8009CDA2) {
-            if (D_8009CD94 == 3) {
+        if (GCD.bcda2) {
+            if (GCD.scd94 == 3) {
                 hi = cnt - 1;
                 for (i = cnt - 0x10; i <= hi; i++) {
                     PUSH(i)
                 }
-            } else if (D_8009CD94 == 1) {
+            } else if (GCD.scd94 == 1) {
                 hi = cnt - 4;
                 for (i = cnt - 0x14; i <= hi; i++) {
                     PUSH(i)

@@ -1,9 +1,8 @@
 // FUNC 8012455c 372 X009
 // MATCHING 8012455c 372
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CEF6;
-extern unsigned char D_8009CFE5[];
 extern void *D_8012E04C;
 extern char D_80077D0C[];
 void AnimLoadDuration(TObj *o);
@@ -25,11 +24,11 @@ void func_8012455C(TObj *o)
         o->anim = D_8012E04C;
         AnimLoadDuration(o);
         {
-            unsigned char *c = &D_8009CEF6;
+            unsigned char *c = &GCD.bcef6;
             printInfoMessage(*c + 0x29, 2);
             *c = *c + 1;
         }
-        D_8009CFE5[o->b0c] = 1;
+        ((unsigned char*)&GCD.bcfe5)[o->b0c] = 1;
         break;
     case 1:
         applyAnimVelocityX(o, 1 - o->animFrame);

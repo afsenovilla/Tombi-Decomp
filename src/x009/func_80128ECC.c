@@ -1,9 +1,9 @@
 // FUNC 80128ecc 552 X009
 // MATCHING 80128ecc 552
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012B2E4[];
-extern unsigned char D_8009CDCC;
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -46,5 +46,5 @@ void func_80128ECC(TObj *o)
         o->step = 1;
         o->state = 0;
     }
-    if (D_8009CDCC == 0xff && !o->visible) o->b04 = 3;
+    if (GCD.bcdcc == 0xff && !o->visible) o->b04 = 3;
 }
