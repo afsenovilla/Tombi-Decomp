@@ -1,6 +1,11 @@
 // FUNC 8011e990 1544 X010
 #include "spad.h"
-/* score 236 (was 307): in-place abs `s = dx; if (s < 0) s = -s; if (ax < s) return 2;` with s pinned $16 lets the
+/* score 232 (opusR, was 236): abs as `s = dx; if (s < 0) s = -dx;` gives the game's move s0,dx / negu s0,dx; the
+   game tests dx<<16 directly (no sra, so its sext is not shared with the dx*cy mult) where ours tests s0<<16;
+   `if (dx < 0)` makes CSE share the sra with the mult (264), inline short sabs 258. All five pins still help
+   (removing any: 242-375). The game compares sext(s) (v1) first: slt v0(ax),v1(s). Same family as x001
+   func_801253AC (selector/abs/box-sum shapes there).
+   Older (236, was 307): in-place abs `s = dx; if (s < 0) s = -dx; if (ax < s) return 2;` with s pinned $16 lets the
    four `return 2` sites take li v0,2 in the delay slot as in the game (290); greedy pins k/$16, q/$21, ax/$4, t/$23 (236, pin
    hacks, likely not the original form). Older note: logic and size match (whole 1544 B incl. csv piece 8011EAE8); remaining diffs are register allocation: game has a=s1, dx=s3, dy=s6, cx=s5, abs value s=s0, fp/s7 for the two slopes, mode kept on the stack (sb a2,0x10(sp)); ours puts a in s0, dx in s1 and s in s7. Sibling wip func_8011E000 has the same family of diffs. Tried (o27): box sums through ax/ay + in-place abs (313; helped sibling 80121534); priorities from cc1 -dl: game needs s (abs, 8 refs/201 insns) above a (24/293), i.e. s0 for s, which no tried form gives. */
 #include "TOBJ.H"
@@ -64,19 +69,19 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     else if (ay == 0) kind = 2;
     switch (kind) {
     case 0:
-        s = dx; if (s < 0) s = -s; if (ax < s) return 2;
+        s = dx; if (s < 0) s = -dx; if (ax < s) return 2;
         fp = dx * cy / cx;
         break;
     case 1:
-        s = dy; if (s < 0) s = -s; if (ay < s) return 2;
+        s = dy; if (s < 0) s = -dy; if (ay < s) return 2;
         s7 = dy * cx / -cy;
         break;
     case 2:
-        s = dx; if (s < 0) s = -s; if (ax < s) return 2;
+        s = dx; if (s < 0) s = -dx; if (ax < s) return 2;
         fp = 0;
         break;
     case 3:
-        s = dy; if (s < 0) s = -s; if (ay < s) return 2;
+        s = dy; if (s < 0) s = -dy; if (ay < s) return 2;
         s7 = 0;
         break;
     }
