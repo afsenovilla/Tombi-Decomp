@@ -1,5 +1,6 @@
 // FUNC 8011973c 2300 X018
 // MATCHING 8011973c 2300
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **p; int a, b; } T12;
@@ -7,7 +8,6 @@ typedef struct { char p[0xd2]; unsigned short wd2; } E;
 extern T12 D_8011A564[];
 extern TObj PLAYER;
 #define P PLAYER
-extern unsigned char D_8009C941, D_8009C940[], D_8009C942[], D_8009C93F[], D_8009C93E[];
 extern signed char D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CFF0[6];
@@ -41,10 +41,10 @@ void func_8011973C(TObj *o)
     switch (o->state) {
     case 0:
         v = *(V6 *)&o->a;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         D_8009D2B0[0] = 2;
-        D_8009C93F[0] = 1;
-        D_8009C93E[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
         D_800A603C[0] = 5;
         D_800A603D[0] = 0;
         D_800A603E[0] = 0;
@@ -52,7 +52,7 @@ void func_8011973C(TObj *o)
         o->animFrame = P.h->p.whole < o->h->p.whole;
         setanim(o, 4);
         v = *(V6 *)&o->a;
-        switch (D_8009C941) {
+        switch (GVARS.b41) {
         case 8:
             D_8009CFF0[0] = 1;
             break;
@@ -72,20 +72,20 @@ void func_8011973C(TObj *o)
             D_8009CFF5 = 1;
             break;
         }
-        FUN_80026e0c(D_8009C941, 1);
+        FUN_80026e0c(GVARS.b41, 1);
         for (i = 0; i < 6; i++)
             ;
         for (i = 0; i < 6; i++)
             if (D_8009CFF0[i] == 0) break;
         if (i == 6) {
-            if (D_8009C941 != 8) {
+            if (GVARS.b41 != 8) {
                 o->state = 0x60;
                 break;
             }
             o->timer = 0x12c;
             o->state = 0x65;
             setEventComplete(0xa9, 0);
-        } else if (D_8009C941 == 8) {
+        } else if (GVARS.b41 == 8) {
             o->timer = 0x12c;
             o->state = 0x64;
             setEventComplete(0xa9, 0);
@@ -177,10 +177,10 @@ void func_8011973C(TObj *o)
         break;
     case 0x63:
         setanim(o, 0);
-        D_8009C940[0] = 0;
-        D_8009C93E[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b40)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60EA[0] = 0;
         o->animFrame = o->wbc;
         D_1F8001C6 = 0;

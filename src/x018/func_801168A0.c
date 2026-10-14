@@ -1,10 +1,10 @@
 // FUNC 801168a0 304 X018
 // MATCHING 801168a0 304
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 extern short D_1F800172;
 extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_8009C93A;
 
 void func_801168A0(TObj *o)
 {
@@ -34,7 +34,7 @@ void func_801168A0(TObj *o)
             o->state++;
         break;
     case 4:
-        if (D_8009C93A != 0)
+        if (GVARS.b3a != 0)
             o->state = 0;
         break;
     }

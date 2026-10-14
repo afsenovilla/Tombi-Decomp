@@ -1,13 +1,12 @@
 // FUNC 80101d74 924 X018
 // MATCHING 80101d74 924
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern unsigned char *D_800A611C;
-extern int D_8009C934;
-extern unsigned char D_8009C93A[];
 extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
@@ -49,7 +48,7 @@ void func_80101D74(TObj *o)
         o->substep = 0;
         o->timer = 0;
         o->d8c = v;
-        D_8009C93A[0] = 1;
+        ((unsigned char*)&GVARS.b3a)[0] = 1;
         break;
     case 2:
         FUN_80109494(o);
@@ -87,7 +86,7 @@ void func_80101D74(TObj *o)
             D_8009D2E8[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;

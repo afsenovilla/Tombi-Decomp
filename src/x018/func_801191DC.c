@@ -1,12 +1,12 @@
 // FUNC 801191dc 760 X018
 // MATCHING 801191dc 760
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8011A564[];
 extern unsigned char D_8009D2B0[];
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern short D_1F8001C6;
 extern unsigned char D_8009CE28;
 extern void AnimJump(TObj *, int);
@@ -36,8 +36,8 @@ void func_801191DC(TObj *o)
     switch (o->state) {
     case 0:
         v = *(V6 *)&o->a;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         D_8009D2B0[0] = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
@@ -72,8 +72,8 @@ void func_801191DC(TObj *o)
         o->state = 9;
         break;
     case 9:
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
         D_1F8001C6 = 0;

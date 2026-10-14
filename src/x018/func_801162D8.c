@@ -1,5 +1,6 @@
 // FUNC 801162d8 676 X018
 // MATCHING 801162d8 676
+#include "gvars.h"
 /* csv entry 801162b8 (708 B) starts with 8 data words (jump-table/pointer data); code starts at 801162d8.
    debt: volatile read of pl->a in the last range test stops gcc threading the first test's failure jump past it. */
 #include "TOBJ.H"
@@ -8,7 +9,7 @@
 typedef void (*Fn)(TObj *);
 extern TObj PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009CDED, D_800A60E0;
+extern unsigned char D_8009CDED, D_800A60E0;
 extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
@@ -21,7 +22,7 @@ void func_801162D8(TObj *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009C93A) o->step++;
+        if (GVARS.b3a) o->step++;
         *(short *)((char *)o->d38 + 2) = 0;
         FUN_80027810(o);
         break;

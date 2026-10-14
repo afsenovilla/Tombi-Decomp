@@ -1,5 +1,6 @@
 // FUNC 8011858c 1784 X018
 // MATCHING 8011858c 1784
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -7,7 +8,6 @@ typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_8011A564[];
 extern unsigned char D_8009D2B0;
-extern unsigned char D_8009C942[], D_8009C93F[];
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -33,8 +33,8 @@ void func_8011858C(TObj *o)
     case 0:
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         D_8009D2B0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
@@ -125,8 +125,8 @@ void func_8011858C(TObj *o)
         o->state = 0x63;
         break;
     case 0x63:
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         setanim(o, 1);

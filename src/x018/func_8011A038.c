@@ -1,9 +1,10 @@
 // FUNC 8011a038 380 X018
 // MATCHING 8011a038 380
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009CE28, D_8009CE18, D_8009CFDA, D_8009CE1C, D_8009CE16, D_8009CFD9;
-extern unsigned char D_8009C940, D_8009C941, D_8009CE0B;
+extern unsigned char D_8009CE0B;
 
 void func_8011A038(TObj *o)
 {
@@ -39,9 +40,9 @@ void func_8011A038(TObj *o)
             o->state = 0;
         }
     } else {
-        p = &D_8009C940;
+        p = &GVARS.b40;
         if (*p == 0) return;
-        k = D_8009C941;
+        k = GVARS.b41;
         *p = 0;
         switch (k) {
         case 0x99:
