@@ -19,7 +19,7 @@ like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay fu
 earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
 Order: base objects are compiled first (gen_symbols reads them), then splat, then the target objects.
 """
-import csv, json, os, re, shutil, subprocess, sys, tempfile
+import csv, json, os, re, shutil, struct, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
@@ -52,7 +52,8 @@ def jpdemo_sources(progs):
     `PAL <module> <address>` comment of config/jpdemo/symbol_addrs_<prog>.txt is looked up by address among the src
     files (tools/units.py), so PAL renames do not break it; the file must cover exactly the demo function's size.
     config/jpdemo/reuse.txt overrides or adds pairs, one per line: `<prog> <demo addr> <PAL module> <PAL addr>` or
-    `<prog> <demo addr> <path>` (demo-specific C, under src/jpdemo/, with a `// JPDEMO <addr> <size>` header).
+    `<prog> <demo addr> -` (no C). Demo versions of PAL functions live in src/jpdemo/<prog>/*.c with a
+    `// JPDEMO <prog> <demo addr> <size>` header (and no FUNC/MATCHING marker, so PAL progress ignores them).
     """
     import units as U
     pal = {}
@@ -79,7 +80,14 @@ def jpdemo_sources(progs):
                 if u: out[(prog, a)] = (u.file, nm)
                 else: print("reuse.txt: no PAL src at", f[2], f[3])
             elif f[2] == "-": out.pop((prog, a), None)
-            else: out[(prog, a)] = (os.path.join(ROOT, f[2]), nm)
+    for dp, _, fs in os.walk(os.path.join(ROOT, "src", "jpdemo")):  # demo versions: `// JPDEMO <prog> <addr> <size>`
+        for fn in sorted(fs):
+            if not fn.endswith(".c"): continue
+            path = os.path.join(dp, fn)
+            m = re.search(r"^//\s*JPDEMO\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", open(path, errors="replace").read(400), re.M)
+            if not m or m.group(1) not in progs: continue
+            a = int(m.group(2), 16)
+            out[(m.group(1), a)] = (path, names.get((m.group(1), a), ("func_%08X" % a, 0))[0])
     return out
 
 
@@ -97,14 +105,21 @@ def _jpdemo_compile(job):
     try:
         NC["build"](src, flags, d, inc)
         # the function at .text offset 0 takes the demo name, so objdiff pairs it with the target symbol
-        syms = subprocess.run(["mipsel-linux-gnu-nm", d + "/a.o"], capture_output=True, text=True).stdout
-        first = sorted((l.split()[1] == "t", l.split()[2]) for l in syms.splitlines()
-                       if re.match(r"0+ [Tt] [\w$]+$", l) and l.split()[2] != "gcc2_compiled")
-        first = [n for _, n in first]
-        if not first: return "no global function at .text 0"
-        if first[0] != name:
+        from build_full import Elf
+        e = Elf(d + "/a.o")
+        text = e.idx.get(".text")
+        funcs = [y for y in e.syms if y["type"] == 2 and y["shndx"] == text]
+        first = sorted((y["size"] == 0, y["bind"] != 1, y["name"]) for y in funcs if y["value"] == 0)
+        if not first: return "no function at .text 0"
+        first = first[0][2]
+        if first != name:
             subprocess.run(["mipsel-linux-gnu-objcopy", "--redefine-sym", "%s=%s" % (name, name + "_pal"),
-                            "--redefine-sym", "%s=%s" % (first[0], name), d + "/a.o"], check=True)
+                            "--redefine-sym", "%s=%s" % (first, name), d + "/a.o"], check=True)
+        if len(funcs) == 1:  # the only function: give it the whole .text (trailing alignment nops), like splat does
+            e = Elf(d + "/a.o")
+            y = next(y for y in e.syms if y["type"] == 2 and y["shndx"] == text)
+            struct.pack_into("<I", e.d, y["off"] + 8, e.size(".text"))
+            e.save(d + "/a.o")
         os.makedirs(os.path.dirname(out), exist_ok=True)
         shutil.copy(d + "/a.o", out)
         return None
