@@ -1,4 +1,8 @@
 #include "spad.h"
+// MATCHING 8011e000 2276
+/* Matched (opusAC): in the else arm of the a->wb0 block the wb0 value is a separate var u, and the SPAD.b1d2 w temp v
+   is kept live across that arm with `asm("" : "=r"(v));` after the shift and `asm("" :: "r"(v));` after `u = -u` (no code;
+   it raises v's global-alloc priority so v gets a1 in the b1d2 block while u stays v1). Same source as x001/func_801244A0.c. */
 #include "gv2.h"
 /* score 14 (opusU, was 16): plain `b->velX = dx;` (no do/while) before `b->b69 = 1;` in the SPAD.b1d2 fall-through fixes the
    +0x678 sh/li order. Left: same as x001 (wb0 block v a1, game v1); see x001 wip header for opusU tries.
@@ -21,10 +25,10 @@
    w a1 untied from andi); brute-forced d/t/w types x block/function scope: function-scope t/w wrecks global alloc (126+).
    Older: score 70 (n73): block-local `short t; unsigned short w;` per arm (x001 form) fixes the size but flips a/b (a 48 refs/396 vs
    b 46/381, game b first); a `do { b->velX = dx; } while (0);` (debt: loop-depth weighted ref) puts b first again.
-   Left (same as x001/wip/func_801244A0.c): r a1 vs a3, sabs result v0/v1, +0x4e8 lh a0/v1 swap, t/w block regs
+   Left (same as x001/func_801244A0.c): r a1 vs a3, sabs result v0/v1, +0x4e8 lh a0/v1 swap, t/w block regs
    (game t = a2 untied from the b->h lhu, w = a1; int/unsigned short function-scope t, int w, w copy: no gain).
    Older: score 142 (was 146: dead `ay = q;` at the end keeps q alive past the r = q copy, restoring the game's move a3,v1;
-   see x001/wip/func_801244A0.c, same source, for the block-local t/w form of the SPAD.b1d2 block, which here
+   see x001/func_801244A0.c, same source, for the block-local t/w form of the SPAD.b1d2 block, which here
    scores worse (238) although it fixes the size). Older notes: remaining diffs are register choices only: q/r copy at +0xe4, ay abs at +0x158 (game negates the ay copy, gcc propagates cy), sabs result v0/v1, the by/ay temps at +0x578 and t/d at +0x604. Tried: int/short types of q/r/t/d/w, reversed compares, sabs forms; -fno-cse-skip-blocks not needed after the if/else sabs. */
 // FUNC 8011e000 2276 X010
 #include "TOBJ.H"
@@ -45,6 +49,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
     short v;
+    short u;
     int q, r;
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
@@ -110,14 +115,16 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
                 b->velX = dx;
                 b->b69 = 1;
                 if ((unsigned)(ang - 0x401) < 0x400 || ang > 0xc00) {
-                    v = (unsigned)(~ang + 1 & 0x3ff) >> 6;
-                    if (v > 8) v = 8;
+                    u = (unsigned)(~ang + 1 & 0x3ff) >> 6;
+                    if (u > 8) u = 8;
                 } else {
-                    v = (unsigned)(ang & 0x3ff) >> 6;
-                    if (v > 8) v = 8;
-                    v = -v;
+                    u = (unsigned)(ang & 0x3ff) >> 6;
+                    asm("" : "=r"(v)); /* the game keeps a w temp live across this arm */
+                    if (u > 8) u = 8;
+                    u = -u;
+                    asm("" :: "r"(v));
                 }
-                a->wb0 = v;
+                a->wb0 = u;
             } else {
                 a->y.p.whole = (-(s2 + 4) + b->y.p.whole) - a->box2;
                 a->y.p.frac = 0;

@@ -1,4 +1,8 @@
 // FUNC 801244a0 1800 X001
+// MATCHING 801244a0 1800
+/* Matched (opusAC): in the else arm of the a->wb0 block the wb0 value is a separate var u, and the SPAD.b1d2 w temp v
+   is kept live across that arm with `asm("" : "=r"(v));` after the shift and `asm("" :: "r"(v));` after `u = -u` (no code;
+   it raises v's global-alloc priority so v gets a1 in the b1d2 block while u stays v1). Same source as x010/func_8011E000.c. */
 #include "spad.h"
 /* opusU (still 14): split wb0 var u (fn-scope) + w=v gives 26 (v then gets v0). Game's w must be live across the
    wb0 `else` arm (conflict with u=v1 and v0): fake `v = cx;` before `if (u > 8)` in that arm plus `asm("" :: "r"(v));`
@@ -28,7 +32,7 @@
    (3*9/178=.152, between dx .159 and cx .148; game order dy>dx>ang>cx). Still left: r in a1 (game a3; r's hard conflicts are
    only v0/sp, nobody prefers a1/a2 - mode's a2 copy dies at the switch; int/short mode, rcos() decl, mode copy: worse),
    sabs result v0/v1 (8 inline/compare forms: no change), +0x4e8 lh a0/v1 swap, SPAD.b1d2 block regs.
-   Previous: score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
+   Previous: score 98 (size now 1800 = game): same source as x010/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
    Fixed this round: the dead `ay = q;` at the end keeps q alive past the r = q copy (cse rewrites to the reg with the
    later last use, n48), which restores the game's `move a3,v1` copy; in the SPAD.b1d2 block, block-local
    `short t; unsigned short w;` per branch (w = t - a->h + 2; if ((unsigned short)v >= 8)) removes the extra copy of the sum
@@ -58,6 +62,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
     short v;
+    short u;
     int q, r, c1;
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
@@ -122,14 +127,16 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
             b->velX = dx;
             b->b69 = 1;
             if ((unsigned)(ang - 0x401) < 0x400 || ang > 0xc00) {
-                v = (unsigned)(~ang + 1 & 0x3ff) >> 6;
-                if (v > 8) v = 8;
+                u = (unsigned)(~ang + 1 & 0x3ff) >> 6;
+                if (u > 8) u = 8;
             } else {
-                v = (unsigned)(ang & 0x3ff) >> 6;
-                if (v > 8) v = 8;
-                v = -v;
+                u = (unsigned)(ang & 0x3ff) >> 6;
+                asm("" : "=r"(v)); /* the game keeps a w temp live across this arm */
+                if (u > 8) u = 8;
+                u = -u;
+                asm("" :: "r"(v));
             }
-            a->wb0 = v;
+            a->wb0 = u;
         } else {
             if (a->b04 == 1 && a->step < 2 && sabs(dy) < 8) {
                 if ((-(s2 + -4) + b->y.p.whole) < a->y.p.whole - (a->box3 - a->box2)) return 3;
