@@ -38,7 +38,7 @@ extern void FUN_8001fe94(TObj *, int);
 #define RESET(o) \
     { \
         o->active = 3; \
-        U8(o, 0xa1) = 0; \
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0; \
         o->b04 = 2; \
         o->step = 2; \
         o->state = 2; \
@@ -126,9 +126,9 @@ void FUN_80102214(TObj *o)
             break;
         }
         if (o->step != 0x30 && S16(o, 0xe0) > 0) {
-            if (U8(o, 0xa3) & 2) {
+            if ((*(unsigned char*)((char*)&o->da0 + 3)) & 2) {
                 o->visible ^= 1;
-            } else if (U8(o, 0xa2) & 2) {
+            } else if ((*(unsigned char*)((char*)&o->da0 + 2)) & 2) {
                 o->visible ^= 1;
             } else {
                 S16(o, 0xe0) = S16(o, 0xe0) - 1;
@@ -163,7 +163,7 @@ void FUN_80102214(TObj *o)
         case 3: FUN_800fe75c(o); break;
         case 4: FUN_800fe98c(o); break;
         }
-        U8(o, 0xa8) = 0;
+        (*(unsigned char*)&o->wa8) = 0;
         o->ba6 = 0;
         f = 0;
         if (o->b9e == 0 && o->b04 == 5) {
@@ -229,7 +229,7 @@ void FUN_80102214(TObj *o)
             }
             break;
         }
-        U8(o, 0xa8) = 0;
+        (*(unsigned char*)&o->wa8) = 0;
         o->ba6 = 0;
         if (o->b9e == 0) FUN_8003f7cc(o);
         break;
