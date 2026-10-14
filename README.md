@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo_jp.png" alt="Ore! Tomba" width="420"></p>
+
 # Tombi! (Tomba!) decomp
 
 | Version | Code | Data | Functions |
