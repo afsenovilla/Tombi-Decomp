@@ -12,7 +12,7 @@ void func_80107FCC(TObj *o)
     unsigned short f;
     switch (o->state) {
     case 0:
-        U8(D_8009C330, 8) = o->active;
+        (*(unsigned char*)&D_8009C330->w08) = o->active;
         f = o->animFrame;
         o->velX = 0x78;
         o->active = 2;
@@ -22,10 +22,10 @@ void func_80107FCC(TObj *o)
         o->b9d = 0;
         o->b9e = 0;
         o->b9f = 0;
-        U8(o, 0xad) = 0;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 0;
         o->b69 = 0;
-        S8(o, 0xf) = -20;
-        U8(o, 0xa2) = 2;
+        (*(signed char*)&o->b0f) = -20;
+        (*(unsigned char*)((char*)&o->da0 + 2)) = 2;
         o->animFrame = f & 1;
         PlayerSetAnimIfChanged(o, 0x2b);
         o->state++;
@@ -43,8 +43,8 @@ void func_80107FCC(TObj *o)
             o->d->p.whole = o->d->p.whole + 5;
         }
         if ((o->velX -= 5) == 0) {
-            S8(o, 0xf) = -8;
-            U8(o, 0) = U8(D_8009C330, 8);
+            (*(signed char*)&o->b0f) = -8;
+            o->active = (*(unsigned char*)&D_8009C330->w08);
             o->b9c = 0;
             o->wb2 = 0;
             o->velX = 0;

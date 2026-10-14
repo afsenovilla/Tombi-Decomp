@@ -71,10 +71,10 @@ void FUN_800f36e0(TObj *o)
         if (o->animFrame & 1) d = 0xf0;
         o->b9d = 1;
         U8(o, 0xc8) = 0;
-        U8(o, 0xa0) = 0;
-        U8(o, 0xa1) = 0;
+        (*(unsigned char*)&o->da0) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->d88 = d;
         o->d8c = 0;
         o->wb0 = 0;
@@ -95,7 +95,7 @@ void FUN_800f36e0(TObj *o)
             break;
         }
         FUN_8001fe94(o, 0);
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = PTR(o, 0xe4);
             D_8009C330->b8 = 0;
             o->ba5 = 0;
@@ -103,7 +103,7 @@ void FUN_800f36e0(TObj *o)
             o->state = 0;
             break;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         c = S8(o, 0xe3);
         if (c < D_8007A038[D_8009D2B2]) {
             S8(o, 0xe3) = c + 1;
@@ -151,7 +151,7 @@ void FUN_800f36e0(TObj *o)
         o->h->raw += o->velX << 8;
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = PTR(o, 0xe4);
             D_8009C330->b8 = 0;
             o->ba5 = 0;
@@ -164,7 +164,7 @@ void FUN_800f36e0(TObj *o)
             o->timer = 10;
             o->d84 = 0;
             if (o->animFrame & 1) d = 0xf0;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->d88 = d;
             o->d8c = 0;
@@ -176,7 +176,7 @@ void FUN_800f36e0(TObj *o)
             o->timer = 10;
             o->d84 = 0;
             if (o->animFrame & 1) d = 0xf0;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->d88 = d;
             o->d8c = 0;
@@ -186,7 +186,7 @@ void FUN_800f36e0(TObj *o)
         }
         if (U8(o, 0xc8) != 0) {
             D_8009C330->b8 = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
             o->step = 0x32;
@@ -195,7 +195,7 @@ void FUN_800f36e0(TObj *o)
         }
         if (D_8009C330->b0 != 0) break;
         if (U8(o, 0xc6) != 0) break;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         SETANIM_IF(4);
         d = 0x10;
         o->b9d = 0;
@@ -230,7 +230,7 @@ void FUN_800f36e0(TObj *o)
             FUN_8010f0f4(o);
             FUN_8001fd94(o);
         }
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = PTR(o, 0xe4);
             D_8009C330->b8 = 0;
             o->ba5 = 0;
@@ -240,7 +240,7 @@ void FUN_800f36e0(TObj *o)
         }
         if (U8(o, 0xc8) != 0) {
             D_8009C330->b8 = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
             o->step = 0x32;
@@ -253,7 +253,7 @@ void FUN_800f36e0(TObj *o)
             o->step = 3;
             o->state = 1;
             o->ba7 = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->b9c = 0;
             o->d8c = D_801152E8[o->wb0];
             if (o->bbe & 0x20) {
@@ -269,7 +269,7 @@ void FUN_800f36e0(TObj *o)
         d = 0x10;
         b = D_8009C330->b7;
         o->b9d = 0;
-        U8(o, 0xac) = 1;
+        (*(unsigned char*)&o->wac) = 1;
         o->d84 = 0;
         o->animFrame = b;
         o->b9c = 2;

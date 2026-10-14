@@ -36,11 +36,11 @@ void func_80101D74(TObj *o)
     case 1:
         if (--o->timer > 0) goto common;
         if ((*(int*)&GAME.selectedArea) == 0x40000) {
-            S8(o, 0xf) = 8;
+            (*(signed char*)&o->b0f) = 8;
         } else if ((*(int*)&GAME.selectedArea) == 0x50000) {
-            S8(o, 0xf) = -5;
+            (*(signed char*)&o->b0f) = -5;
         } else {
-            S8(o, 0xf) = -8;
+            (*(signed char*)&o->b0f) = -8;
         }
         v = D_801152E8[o->wb0];
         o->b04 = 1;
@@ -80,19 +80,19 @@ void func_80101D74(TObj *o)
         if (--o->timer <= 0) goto anim;
     common:
         o->animFrame &= 1;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        U8(D_8009C330, 0) = 0;
+        D_8009C330->active = 0;
         v = 0x128;
         if (o->animFrame & 1) {
             v = -0x128;
@@ -115,8 +115,8 @@ void func_80101D74(TObj *o)
         o->visible = 0;
         break;
     case 0x61:
-        U8(o, 0xa2) = 0;
-        U8(o, 0xa3) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
         AnimAdvance(o);
         o->d8c = 0;
         break;
@@ -141,7 +141,7 @@ void func_80101D74(TObj *o)
         break;
     }
     c = 0;
-    U8(o, 0xa8) = 0;
+    (*(unsigned char*)&o->wa8) = 0;
     o->ba6 = 0;
     if (o->b9e == 0 && o->b04 == 5) {
         c = o->step == 0x40;

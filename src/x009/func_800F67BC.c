@@ -33,10 +33,10 @@ static __inline__ void land(TObj *o)
 {
     int v, w;
     setanim(o, 4, 1);
-    U8(o, 0xac) = 1;
+    (*(unsigned char*)&o->wac) = 1;
     o->b9c = 2;
     o->timer = 10;
-    U8(D_8009C330, 8) = 1;
+    (*(unsigned char*)&D_8009C330->w08) = 1;
     v = 0x10;
     o->velY = 0;
     o->velV = 0;
@@ -61,13 +61,13 @@ void func_800F67BC(TObj *o)
         o->b9e = 0;
         o->b69 = 0;
         o->b9c = 1;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         p = D_8009C330;
         t = 1;
         o->d8c = 0;
         o->wb0 = 0;
         if (o->wb2 > 8) t = 2;
-        U8(p, 5) = t;
+        p->step = t;
         k = D_8009C330->b0b * 7;
         if (o->wb2 < 4) {
             if (o->animFrame & 1) {
@@ -104,16 +104,16 @@ void func_800F67BC(TObj *o)
     }
     D_8009F0EC = func_8004BBC0(o, 0);
     if (o->b9e != 0) {
-        U8(D_8009C330, 8) = 0;
+        (*(unsigned char*)&D_8009C330->w08) = 0;
         D_8009C330->timer = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;
         func_800EFC8C(o, D_8009F0EC == (TObj *)1);
     }
-    if (U8(o, 0xac) != 2 && o->step == 9 && o->b9e == 0) {
+    if ((*(unsigned char*)&o->wac) != 2 && o->step == 9 && o->b9e == 0) {
         func_8010E328(o, 1);
     }
 }
