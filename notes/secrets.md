@@ -42,3 +42,43 @@ pointers to it). Layout record list = area-overlay table `[e]`.
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
 - Unreferenced dialogue / room / item text.
+
+## Follow-up research: event 32 / titles 90, 126 / dialogue references
+Legend: **[V]** verified by reading the binaries (scripts in this section: `tools/dialogue_refs.py`; the event census was a throw-away scan of `jal` sites), **[I]** inferred.
+
+### Event award paths  [V unless marked]
+- The award op of the script VM is **game opcode 0x9a** (`execGameOpcode` -> `FUN_8005a7a0` = `awardEventProgress(arg0 = event, arg1 = 0 started / 1 complete)`), not
+  `scriptOpAwardEvent` (0x8003AA68): nothing references that address (no jal, no table word in MAIN0 or the overlays), so the earlier note above
+  ("reached from script op 0x8003AA68") is wrong; it is a dead psx_tomba-named stub.
+- Event ids reach the three routines `awardEventProgress` (0x8005A7A0), `setEventStarted` (0x8005A8A8) and `setEventComplete` (0x8005A9A4) from: (a) MAIN0 and the area
+  overlays X0nn / I?NFO* code, (b) script op 0x9a, (c) `rewardJewel` / `rewardPigBag` / `rewardMysteriousMushroom` (MAIN0, immediate ids).
+- **Scripts are only 9 files**: `AREA15/{0000,0120,0130,0140,0200,0201,0210,0220,SCR0100}.WSS` (magic `W\0S\0`, u32 size, 64 x u16 entry table from +8, code at +0x88;
+  `05 nargs [kind imm32 | 00 var]* opcode` loads the argument registers, then the 1-byte game op). Events awarded there (`05 02 01 id 01 flag 9a`): 1, 12, 13, 14, 17, 20, 21, 23, 25, 26, 27, 80, 86,
+  87, 88, 113, 151, 168, 177, 179, 181, 187, 188, 189. **32 is not among them.** (Many of these small numbers are probably not event ids of the title table: 86/87/88/113 etc. look like
+  item/other ids of the same op family; not checked.)
+- Static `jal` census with an immediate in a0 (MAIN0..8, all unique X*/I* overlays): 116 distinct ids are referenced with a constant. **Event 32 is not one of them**, in no
+  language. Neighbours: AREA03 completes 29, 31, 33, 35, 36 and starts 30, 31, 33, 35 (X003); 32 and 34 are the gaps. Titled events (title table byte != 0xFF) with NO constant reference
+  at all: 0, 4, 9, 10, 11, **32**, 34, 41, 42, 44, 57, 77, 85, 111, 124, 133, 135, 170, 172. Event 4 is known to be awarded in game (motocross, AREA00), so these are awarded with
+  **data-driven ids**: the AREA03 sites are `lh a0, 0xAC(obj)` (X003 0x8011AD10, 0x8011AD54...), the id is a field of an object filled from room object data (not
+  located; no overlay writes +0xAC). Conclusion on #52: **not proven either way.**
+- Event 32 has real AP values: `EVENT_STARTED_AP_TABLE[32] = 2` (AP_TABLE 1000) and `EVENT_COMPLETE_AP_TABLE[32] = 3` (2000)  [V]. The events that really are dead (title byte 0xFF) all have AP 0/0
+  (6, 18, 45, 48, 52, 59-61, ...). So event 32 is a **fully designed event** (title + AP), unlike event 52 (note: event 52 is a different thing: no title). [I] It is probably awardable
+  through an AREA03 object whose id comes from room data (its neighbours 31/33 are AREA03 events and the US name list puts MINIATUREMAKINGTRUMPETS between them), or it is a cut event whose
+  trigger object was removed from the room data. To settle it: find the object spawn records that fill obj+0xAC (X003 handlers 0x8011AD10 / 0x8011AD54) or run AREA03 in `tools/psxemu` with a watch on 0x8005A8A8/0x8005A9A4.
+- Title table: `D_800806B4` (20 identical pointers) -> 200 bytes at 0x80080410 [V, same in MAIN0..8]. Only `spawnEventTitle` reads it (code scan for lui/addiu 0x800806B4 in MAIN0..8 and every overlay: single reader).
+  Title entries 0..135 never selected: 0, 1 (fallback for 0xFF), **90, 126** and 135 [V]. So **90 "The Black Water" and 126 "The Rusty Steel Car" are unreferenced** (no event id maps to them and
+  no other code reads CFNT999 dialogues, since the table reader is unique) [V]; entry 52 is selected only by event 32 [V]. That they were titles for cut events [I] (their neighbours in the table are in
+  event order 89 -> 0xFF, 91 -> 0xFF: the events 89 / 91 exist but have no title, AP 0 [V]; 90/126 titles belong to the 0xFF slots 89/91 or 122/124 by order [I]).
+
+### WFM3 header bytes 16..143 are a group table  [V]
+Not "reserved": 64 x u16 bases. `openMessageBox(k, dx, ...)` (src/openMessageBox.c) shows dialogue `*(u16*)(wfm + 0x10 + 2k) + dx`; `showMessageBox*(k, dx, x, y)` pass them through, script op 0x85 (`scriptOpShowMessageBox`
+cmd 4 / 8) takes k = arg2, dx = arg3 (WSS: `05 04 01 obj 01 4 01 k 01 dx 01 ... 85`). Group 0 (base 0) = system / items / info text (207-208 entries); groups 1.. are small blocks, e.g. MFNT030S: bases 0, 207, 211, 227, 232, 234, 237, 249, 254
+(group 1 = save-point name + a filler, 2 = a character's conversation states...). `k = 13` is called with dx 2 from the overlays (base 0: dialogue 2).
+
+### Unreferenced dialogue  [I, weak]
+`tools/dialogue_refs.py` lists, per MFNT0nnS file and group, the dialogues for which no static caller (jal with immediate k/dx in the area overlay, or WSS op 0x85) exists. It over-reports massively: whole groups
+of ordinary NPC speech (MFNT020S group 6, the digger's story, 20 lines; MFNT000S groups 7, 9) show up as "no reference" because NPC objects read (k, dx) from room data / state variables (7-12 call sites per area have
+computed arguments, many more NPCs are dispatched by a table). So **no cut text could be established**. Cheap hints only (not proof): filler lines that repeat or are punctuation only,
+e.g. MFNT020S group 4 `·····???` x3 and group 8 dx 1 `·····???`, MFNT030S group 1 dx 1 `..........???`, MFNT030S group 3 dx 0 and 2 both `...¡Funga!`; MFNT000S group 8 `···`. Save-point
+name dialogues (group 1 of most areas: "Montaña tormentosa", "Laberinto subterráneo", "Ciudad de Enanos" followed by `¿Guardar DATOS?`) are never called by an immediate either (the save point object passes the area/section).
+Needed for a real answer: decode the NPC object spawn data of the room files (which holds k and dx).
