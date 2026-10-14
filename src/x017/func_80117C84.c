@@ -5,8 +5,8 @@
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
-extern void func_80117224(TObj *);
-extern void func_8011750C(TObj *);
+extern void ironCastleMachineRoomTalk(TObj *);
+extern void waterfallElderHintTalk(TObj *);
 extern void func_80117864(TObj *);
 extern void func_801179EC(TObj *);
 extern void setEventComplete(int, int);
@@ -34,10 +34,10 @@ void func_80117C84(TObj *o)
         }
         break;
     case 1:
-        func_80117224(o);
+        ironCastleMachineRoomTalk(o);
         break;
     case 2:
-        func_8011750C(o);
+        waterfallElderHintTalk(o);
         break;
     case 3:
         func_80117864(o);

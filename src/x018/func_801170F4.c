@@ -2,7 +2,7 @@
 // MATCHING 801170f4 184
 #include "TOBJ.H"
 extern void func_80116F7C(TObj *);
-extern void func_80116BDC(TObj *);
+extern void juiceManJoinFightTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
@@ -14,7 +14,7 @@ void func_801170F4(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        if (o->step == 0) func_80116BDC(o);
+        if (o->step == 0) juiceManJoinFightTalk(o);
         break;
     case 2:
         o->b04++;

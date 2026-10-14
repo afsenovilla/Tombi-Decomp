@@ -189,3 +189,37 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x010 8012c220 nobleTreeGoldenItemsAsk` - MFNT100S 2/38-40: asking the tree where the five golden items are
 - `x010 8012c5ac nobleTreeGoldenItemsHint` - MFNT100S 2/40 (golden items locations, repeat)
 - `x010 8012d8e4 hidingSonTalk` - MFNT100S 3/0-2: hide-and-seek son again (same as x003/x004)
+- `x005 80116690 mansionKeyHintTalk` - MFNT050S 2/51: "did you find the key? it must open a door of the Haunted mansion"
+- `x005 801167f0 townGuideTalk` - MFNT050S 2/60, 2/78, 2/88: "this is Central Park and the Town hall", asks about the fortune tellers
+- `x005 80116b44 wineKeeperTalk` - MFNT050S 2/101-102: lets Tombi take wine "as long as it's not for you"
+- `x006 8011ed24 updatePitchforkPig` - layer 2 type 0x53 (7 placements): strips show a pink pig with a pitchfork walking, thrusting and fainting
+- `x011 8011708c goGoCarMechanicTalk` - MFNT110S 2/6-10: the GoGo car needs a fuel bar made with wine
+- `x011 80117560 goGoCarFuelTalk` - MFNT110S 2/10 (fuel bar / wine repeat)
+- `x011 801177dc goGoCarWineReceivedTalk` - MFNT110S 3/7-8, 3/20: "the famous Baco town wine!", builds the bar and drives off
+- `x011 80117c34 bonsugeeResearcherTalk` - MFNT110S 2/0-2: researcher of the Mushroom forest, Flower tears and the yellow Bonsugee
+- `x011 80117ef8 bonsugeeResearcherRepeatTalk` - MFNT110S 2/1-2 (repeat)
+- `x011 80118140 factoryBossTalk` - MFNT110S 2/12: "I'm in charge of this factory"
+- `x011 801185ec factoryBossCoconutBombTalk` - MFNT110S 2/15: the coconut-looking bomb hidden in the tallest jungle tree
+- `x011 801187d4 factoryBossNoBombHereTalk` - MFNT110S 2/16: "don't bring that here!"
+- `x011 801189f8 factoryBossDontUseBombTalk` - MFNT110S 2/17: "don't use that here!"
+- `x011 80118be0 factoryBossDoorAskTalk` - MFNT110S 2/18: "did you manage to blow the door?"
+- `x011 80118dc8 powerPlantThanksTalk` - MFNT110S 2/4-5: the power plant works again, elevator near the Watchtower
+- `x011 80119034 powerPlantElevatorHintTalk` - MFNT110S 2/5 (elevator hint repeat)
+- `x016 80117b40 clockTowerRestoredTalk` - MFNT160S 2/12: the Clock tower is alive again, the gear room is dangerous
+- `x016 801180fc juiceSellerTalk` - MFNT160S 2/10-20: juice seller (bananas, Masakari river, clock tower)
+- `x016 80118458 juiceSellerSqueezeTalk` - MFNT160S 2/17-19: squeezes the bananas into juice
+- `x017 80117224 ironCastleMachineRoomTalk` - MFNT170S 2/44: the Iron castle machine room door does not open
+- `x017 8011750c waterfallElderHintTalk` - MFNT170S 2/35, 2/38: the 10,000-year elder above the waterfall, key of the Old pond door
+- `x017 80118110 raftReturnTalk` - MFNT170S 2/35, 2/39: take the raft from the noble tree hill back to the Haunted mansion
+- `x018 8011a32c updateWitchMizuno` - step switch over the ten Mizuno lines below (init/idle + talk states)
+- `x018 801177d0 witchMizunoIntroTalk` - MFNT180S 3/0, 3/14: "I'm Mizuno, the Witch Mizuno", magic candy recipe
+- `x018 80117c38 witchMizunoLostCrystalBallsTalk` - MFNT180S 3/2-3: forgot three big crystal balls (Watchtower)
+- `x018 80117fac witchMizunoCrystalBallsFoundTalk` - MFNT180S 3/3-4: the crystal balls are back, come back later
+- `x018 801182fc witchMizunoBusyTalk` - MFNT180S 3/5 "Hocus, pocus... I'm busy"
+- `x018 8011858c witchMizunoMagicMirrorTalk` - MFNT180S 3/6-9: Magic mirror, combines the weapons into the hook-grapple
+- `x018 80118c84 witchMizunoKeepMirrorTalk` - MFNT180S 3/10: "only I can use the Magic mirror, keep it"
+- `x018 80118f14 witchMizunoSneezeTalk` - MFNT180S 3/11: sneezing (cold)
+- `x018 801191dc witchMizunoCuredTalk` - MFNT180S 3/12: cured by the cold medicine, gives a reward
+- `x018 801194d4 witchMizunoHuntPigsTalk` - MFNT180S 3/13 "shouldn't you be hunting evil pigs?"
+- `x018 8011973c witchMizunoCandyRecipeTalk` - MFNT180S 3/15-22: lists the missing magic candy ingredients
+- `x018 80116bdc juiceManJoinFightTalk` - MFNT180S 2/13, 3/23: "want more juice? ... you'll fight the evil pig, I'll come with you"

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
 extern void func_80117E04(TObj *);
-extern void func_80117B40(TObj *);
+extern void clockTowerRestoredTalk(TObj *);
 extern int func_800202B4(TObj *);
 extern void freeObjectLayer2(TObj *);
 
@@ -26,7 +26,7 @@ void func_80117F60(TObj *o)
             }
             break;
         case 1:
-            func_80117B40(o);
+            clockTowerRestoredTalk(o);
             break;
         }
         break;

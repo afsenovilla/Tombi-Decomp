@@ -2,7 +2,7 @@
 // MATCHING 80118338 80
 #include "TOBJ.H"
 extern void FUN_8001fec0(TObj *);
-extern void FUN_80118110(TObj *);
+extern void raftReturnTalk(TObj *);
 
 void FUN_80118338(TObj *o)
 {
@@ -11,7 +11,7 @@ void FUN_80118338(TObj *o)
         FUN_8001fec0(o);
         break;
     case 1:
-        FUN_80118110(o);
+        raftReturnTalk(o);
         break;
     }
 }

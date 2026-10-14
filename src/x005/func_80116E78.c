@@ -9,10 +9,10 @@ typedef struct { char c[12]; } B12;
 
 extern TObj *showMessageBoxDirect(int, int, void *);
 extern void func_801162B4(TObj *);
-extern void func_801167F0(TObj *);
+extern void townGuideTalk(TObj *);
 extern void func_8011698C(TObj *);
 extern void func_80116CF8(TObj *);
-extern void func_80116B44(TObj *);
+extern void wineKeeperTalk(TObj *);
 
 void func_80116E78(TObj *o)
 {
@@ -23,7 +23,7 @@ void func_80116E78(TObj *o)
         func_801162B4(o);
         break;
     case 1:
-        func_801167F0(o);
+        townGuideTalk(o);
         break;
     case 2:
         func_8011698C(o);
@@ -69,7 +69,7 @@ void func_80116E78(TObj *o)
         func_80116CF8(o);
         break;
     case 6:
-        func_80116B44(o);
+        wineKeeperTalk(o);
         break;
     }
 }

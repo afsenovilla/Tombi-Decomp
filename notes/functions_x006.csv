@@ -393,4 +393,4 @@ address,size,name,twin
 8011e6b0,1080,func_8011E6B0,
 8011eae8,232,func_8011EAE8,
 8011ebd0,340,func_8011EBD0,
-8011ed24,640,func_8011ED24,
+8011ed24,640,updatePitchforkPig,

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern void func_80118388(TObj *);
-extern void func_80118110(TObj *);
+extern void raftReturnTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -21,7 +21,7 @@ void func_801184FC(TObj *o)
             AnimAdvance(o);
             break;
         case 1:
-            func_80118110(o);
+            raftReturnTalk(o);
             break;
         }
         break;

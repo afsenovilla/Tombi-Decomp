@@ -6,8 +6,8 @@
 extern unsigned char D_8009D12F;
 extern void func_80118974(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void func_801180FC(TObj *);
-extern void func_80118458(TObj *);
+extern void juiceSellerTalk(TObj *);
+extern void juiceSellerSqueezeTalk(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void func_80118AE8(TObj *o)
@@ -32,10 +32,10 @@ void func_80118AE8(TObj *o)
             }
             break;
         case 1:
-            func_801180FC(o);
+            juiceSellerTalk(o);
             break;
         case 2:
-            func_80118458(o);
+            juiceSellerSqueezeTalk(o);
             break;
         }
         break;

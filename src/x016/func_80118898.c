@@ -3,8 +3,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D12F;
-extern void func_801180FC(TObj *);
-extern void func_80118458(TObj *);
+extern void juiceSellerTalk(TObj *);
+extern void juiceSellerSqueezeTalk(TObj *);
 
 void func_80118898(TObj *o)
 {
@@ -22,10 +22,10 @@ void func_80118898(TObj *o)
         }
         break;
     case 1:
-        func_801180FC(o);
+        juiceSellerTalk(o);
         break;
     case 2:
-        func_80118458(o);
+        juiceSellerSqueezeTalk(o);
         break;
     }
 }

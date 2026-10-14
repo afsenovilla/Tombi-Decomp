@@ -4,19 +4,19 @@
 #include "TOBJ.H"
 
 extern int AnimAdvance(TObj *o);
-extern void func_8011708C(TObj *o);
-extern void func_80117560(TObj *o);
-extern void func_801177DC(TObj *o);
-extern void func_80117C34(TObj *o);
-extern void func_80117EF8(TObj *o);
-extern void func_80118140(TObj *o);
+extern void goGoCarMechanicTalk(TObj *o);
+extern void goGoCarFuelTalk(TObj *o);
+extern void goGoCarWineReceivedTalk(TObj *o);
+extern void bonsugeeResearcherTalk(TObj *o);
+extern void bonsugeeResearcherRepeatTalk(TObj *o);
+extern void factoryBossTalk(TObj *o);
 extern void func_80118328(TObj *o);
-extern void func_801185EC(TObj *o);
-extern void func_801187D4(TObj *o);
-extern void func_801189F8(TObj *o);
-extern void func_80118BE0(TObj *o);
-extern void func_80118DC8(TObj *o);
-extern void func_80119034(TObj *o);
+extern void factoryBossCoconutBombTalk(TObj *o);
+extern void factoryBossNoBombHereTalk(TObj *o);
+extern void factoryBossDontUseBombTalk(TObj *o);
+extern void factoryBossDoorAskTalk(TObj *o);
+extern void powerPlantThanksTalk(TObj *o);
+extern void powerPlantElevatorHintTalk(TObj *o);
 extern void func_8011921C(TObj *o);
 
 void func_80119498(TObj *o)
@@ -34,13 +34,13 @@ void func_80119498(TObj *o)
             o->state = 0;
             break;
         case 1:
-            func_8011708C(o);
+            goGoCarMechanicTalk(o);
             break;
         case 2:
-            func_80117560(o);
+            goGoCarFuelTalk(o);
             break;
         case 3:
-            func_801177DC(o);
+            goGoCarWineReceivedTalk(o);
             break;
         }
         break;
@@ -52,10 +52,10 @@ void func_80119498(TObj *o)
             o->state = 0;
             break;
         case 1:
-            func_80117C34(o);
+            bonsugeeResearcherTalk(o);
             break;
         case 2:
-            func_80117EF8(o);
+            bonsugeeResearcherRepeatTalk(o);
             break;
         }
         break;
@@ -87,14 +87,14 @@ void func_80119498(TObj *o)
             }
             o->state = 0;
             break;
-        case 1: func_80118140(o); break;
+        case 1: factoryBossTalk(o); break;
         case 2: func_80118328(o); break;
-        case 3: func_801185EC(o); break;
-        case 4: func_801187D4(o); break;
-        case 5: func_801189F8(o); break;
-        case 6: func_80118BE0(o); break;
-        case 7: func_80118DC8(o); break;
-        case 8: func_80119034(o); break;
+        case 3: factoryBossCoconutBombTalk(o); break;
+        case 4: factoryBossNoBombHereTalk(o); break;
+        case 5: factoryBossDontUseBombTalk(o); break;
+        case 6: factoryBossDoorAskTalk(o); break;
+        case 7: powerPlantThanksTalk(o); break;
+        case 8: powerPlantElevatorHintTalk(o); break;
         }
         break;
     case 3:

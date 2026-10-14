@@ -2,7 +2,7 @@
 // MATCHING 80117d80 132
 #include "player.h"
 #include "TOBJ.H"
-extern void func_80117B40(TObj *);
+extern void clockTowerRestoredTalk(TObj *);
 
 void func_80117D80(TObj *o)
 {
@@ -17,7 +17,7 @@ void func_80117D80(TObj *o)
         }
         break;
     case 1:
-        func_80117B40(o);
+        clockTowerRestoredTalk(o);
         break;
     }
 }
