@@ -1,6 +1,8 @@
 // FUNC 8011e990 1544 X010
 #include "spad.h"
-/* score 307: logic and size match (whole 1544 B incl. csv piece 8011EAE8); remaining diffs are register allocation: game has a=s1, dx=s3, dy=s6, cx=s5, abs value s=s0, fp/s7 for the two slopes, mode kept on the stack (sb a2,0x10(sp)); ours puts a in s0, dx in s1 and s in s7. Sibling wip func_8011E000 has the same family of diffs. Tried (o27): box sums through ax/ay + in-place abs (313; helped sibling 80121534); priorities from cc1 -dl: game needs s (abs, 8 refs/201 insns) above a (24/293), i.e. s0 for s, which no tried form gives. */
+/* score 236 (was 307): in-place abs `s = dx; if (s < 0) s = -s; if (ax < s) return 2;` with s pinned $16 lets the
+   four `return 2` sites take li v0,2 in the delay slot as in the game (290); greedy pins k/$16, q/$21, ax/$4, t/$23 (236, pin
+   hacks, likely not the original form). Older note: logic and size match (whole 1544 B incl. csv piece 8011EAE8); remaining diffs are register allocation: game has a=s1, dx=s3, dy=s6, cx=s5, abs value s=s0, fp/s7 for the two slopes, mode kept on the stack (sb a2,0x10(sp)); ours puts a in s0, dx in s1 and s in s7. Sibling wip func_8011E000 has the same family of diffs. Tried (o27): box sums through ax/ay + in-place abs (313; helped sibling 80121534); priorities from cc1 -dl: game needs s (abs, 8 refs/201 insns) above a (24/293), i.e. s0 for s, which no tried form gives. */
 #include "TOBJ.H"
 
 typedef struct { char pad[0xe8]; unsigned short we8, wea; } XA;
@@ -18,10 +20,21 @@ static __inline__ short sabs(short x)
 
 int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
 {
-    short dx, dy, cx, cy, ax, ay, s, t;
-    short fp, s7, k;
+    short dx;
+    short dy;
+    short cx;
+    short cy;
+    register short ax asm("$4");
+    short ay;
+    register short t asm("$23");
+    register short s asm("$16");
+
+    short fp;
+    short s7;
+    register short k asm("$16");
     short kind;
-    int q, r;
+    register int q asm("$21");
+    int r;
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = XA(a)->we8 - b->h->p.whole;
@@ -51,19 +64,19 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     else if (ay == 0) kind = 2;
     switch (kind) {
     case 0:
-        if (ax < (s = sabs(dx))) return 2;
+        s = dx; if (s < 0) s = -s; if (ax < s) return 2;
         fp = dx * cy / cx;
         break;
     case 1:
-        if (ay < (s = sabs(dy))) return 2;
+        s = dy; if (s < 0) s = -s; if (ay < s) return 2;
         s7 = dy * cx / -cy;
         break;
     case 2:
-        if (ax < (s = sabs(dx))) return 2;
+        s = dx; if (s < 0) s = -s; if (ax < s) return 2;
         fp = 0;
         break;
     case 3:
-        if (ay < (s = sabs(dy))) return 2;
+        s = dy; if (s < 0) s = -s; if (ay < s) return 2;
         s7 = 0;
         break;
     }
