@@ -1,12 +1,13 @@
 // FUNC 801253ac 1212 X001
 #include "spad.h"
-/* score 308: first full draft from the asm (logic follows the game: box test, quadrant/angle check, rcos/rsin
-   projections, abs compares, side selection, velH kick). Frame is 0x40 in the game vs 0x30 here (16 B of locals:
-   probably inlined helpers) and the register allocation of the box pseudos and the |c|/|s| selector differ.
+/* score 280 (was 308): an unused `char pad[16]` local gives the game's 0x40 frame (s-reg save slots now match).
+   First full draft from the asm (logic follows the game: box test, quadrant/angle check, rcos/rsin
+   projections, abs compares, side selection, velH kick). The register allocation of the box pseudos and the |c|/|s| selector differ.
    o28: angle base is a copy (`base = q; if (dx > 0) { if (!q) base = 0x400; else base = q - 0x400; }` gives the
    game's move/bnez shape), ac/as both initialised before the sign tests. The quadrant selector in the game keeps
    r = ac < as (v1), q = r (a3) and switches on another copy (move v1,a3 at each join): an inline returning q gets
-   the shape partly (score 311). */
+   the shape partly (score 311).
+   Tried (pad base): box sum as short/unsigned short/int temp, operand swap (280-316). */
 #include "TOBJ.H"
 
 extern unsigned char D_8013C7B0[];
@@ -21,6 +22,7 @@ int func_801253AC(TObj *a, TObj *b, unsigned char k, int ang)
     short dx, dy, c, s, ac, as;
     int base, q, r, v;
     unsigned char d;
+    char pad[16];
 
     if ((unsigned short)(a->d->p.whole - b->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = a->h->p.whole - b->h->p.whole;
