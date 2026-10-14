@@ -9,6 +9,12 @@
    branches (cross-jumped) instead of a t temp. All register pins removed. Left: cx and s7 swapped (game cx=s5, s7=s7;
    ours s7/s5; cx bumps/pins/decl order/types do not flip it), abs returns the sra'd x (game moves raw dx: move s0,s3),
    case 0 of the mode switch is placed after the tree's j in the game, k in v1 (game a0).
+   Tried (opusW, all still 92 or worse): case 0 placed before case 1/2 in the second mode switch gives the game's
+   separate `bltz l48; j l64` case-0 block (no cross-jump) but the dispatch becomes bnez-around (135); 800 asm("")
+   placements in that switch: best 92. abs `s = dx; if (s < 0) s = -dx;` gives the game's bgez/move s0,s3/negu but
+   CSE shares the test's sra with the dx*cy mult (168, only that mult and dy s5/s6 left); blocking it with an asm copy
+   of dx before the mult works but leaves a move and reshuffles s-regs (214). k: pins/ternary/int/sum temps keep v1
+   (pin $4: 104). Single-line asm bumps of cx/s7/dx/asm("") at every line (itbrute): none below 92.
    Older (232, opusR, was 236): abs as `s = dx; if (s < 0) s = -dx;` gives the game's move s0,dx / negu s0,dx; the
    game tests dx<<16 directly (no sra, so its sext is not shared with the dx*cy mult) where ours tests s0<<16;
    `if (dx < 0)` makes CSE share the sra with the mult (264), inline short sabs 258. All five pins still help
