@@ -104,6 +104,17 @@ by `tools/xmatch.py --csv` + `tools/jpdemo_syms.py` (PAL names at demo addresses
 --version jpdemo` writes `build/jpdemo/report.json` (one unit per demo function, no C yet, so 0 %), and the
 `report-jpdemo` CI job uploads it as `SLPM_801.65_report` for decomp.dev, from the `GAME_FILES_URL_JP_DEMO` secret.
 
+**C reuse (28.1 % of demo code, 774 of 1806 functions):** the demo report compiles C for demo functions with the
+PAL toolchain (`tools/ncheck.py` build: same compiler, `// FLAGS`, `// CC`, `// AS gnu`, `// HEADERS` per file) and
+renames the object's function to the demo symbol, so objdiff matches it (relocations ignored; objects are not
+linked). Sources, by priority:
+- `src/jpdemo/<prog>/*.c`: demo versions of PAL functions (changed constants, struct offsets, pad bits), each with
+  a `// JPDEMO <prog> <demo addr> <size>` header and no FUNC/MATCHING marker, so PAL progress ignores them.
+- `config/jpdemo/reuse.txt`: demo addr -> PAL module + address, written by `tools/jpdemo_reuse.py` (exact compare
+  except relocated bits; needs `game/` and a previous demo build). The PAL file is found by address through
+  `tools/units.py`, so PAL renames do not break it.
+- fallback: the xmatch pairing in `symbol_addrs_*.txt` (same lookup by PAL address).
+
 - **Plumbing (1-2 days):** add `config/jpdemo/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
   `symbol_addrs_*` from `tools/xmatch.py --csv` (PAL names at demo addresses). Then extend `tools/build_full.py` and
