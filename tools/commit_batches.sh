@@ -7,7 +7,7 @@ split -l 45 -d /tmp/cb_list.txt /tmp/cb_c_
 i=0
 for c in /tmp/cb_c_*; do
   n=$(wc -l < $c); X=""; [ $i = 0 ] && X="$*"
-  git add $X; git commit -q -m "$P ($n files, per-file linked object identical via tools/objcmp.py; full build counts + asm list unchanged)
+  [ -n "$X" ] && git add $X; git commit -q -m "$P ($n files, per-file linked object identical via tools/objcmp.py; full build counts + asm list unchanged)
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01VgmRdkLPfdCqeoJmcLwyi2" -- $(cat $c) $X
