@@ -78,7 +78,8 @@ typedef struct padPort {
     u8 actuatorCount;                     /* 0xE9 */
     u8 combinationCount;                  /* 0xEA */
     u8 pad_eb[0x01];
-    int combinationStorageBytes;          /* 0xEC */
+    u16 combinationStorageBytes;          /* 0xEC (PAL: u16) */
+    u16 lastExtendedId;                   /* 0xEE (PAL only) */
 } padPort;
 
 
@@ -137,6 +138,15 @@ void func_8006A670(padPort*);                   /* per-step handlers stored in f
 int func_8006A718(padPort*);
 void func_8006ACF4(padPort*);
 int func_8006AD48(padPort*);
+void FUN_8006957c(void);                        /* _padSetVsyncParam */
+void FUN_8006bac4(void);                        /* _padInitDirSeq */
+int func_8006B62C(int);                         /* completion (D_800981AC) */
+void func_8006B5C4(padPort*);                   /* reset object (D_800981B0) */
+int func_8006B730(padPort*, int);               /* payload byte (D_800981B4) */
+void func_8006B7EC(padPort*);                   /* actuator map (D_800981B8) */
+int func_8006BA68(padPort*);                    /* channel of object (D_800981BC) */
+padPort* func_8006BAA0(int);                    /* object of channel (D_800981C0) */
+void FUN_8006b720(padPort*);                    /* swap command (D_800981D0) */
 void FUN_8006bf84(int);                         /* setRC2wait */
 int FUN_8006bfa4(void);                         /* chkRC2wait */
 
