@@ -36,9 +36,9 @@ void func_800F7AAC(TObj *o)
     case 0:
         o->d8c = 0;
         setanim(o, 9);
-        U8F(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->wb6 = 0;
-        *(short *)((char *)D_8009C330 + 2) = 0;
+        (*(short*)&D_8009C330->type) = 0;
         k = o->b9e;
         o->wb2 = 0;
         if (k == 0 || (k >= 3 && k != 11)) {
@@ -81,7 +81,7 @@ void func_800F7AAC(TObj *o)
             if (o->d88 < 0xb0)
                 o->d88 = 0xb0;
         }
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -113,7 +113,7 @@ void func_800F7AAC(TObj *o)
             }
         }
     skip:
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -126,7 +126,7 @@ void func_800F7AAC(TObj *o)
             o->d34 = 0;
             o->d88 = 0;
             o->d8c = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->state = 5;
         }
         break;
@@ -140,7 +140,7 @@ void func_800F7AAC(TObj *o)
             if (o->d88 < 0xd0)
                 o->d88 = 0xd0;
         }
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -149,7 +149,7 @@ void func_800F7AAC(TObj *o)
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 4);
             o->d88 = 0;
@@ -158,7 +158,7 @@ void func_800F7AAC(TObj *o)
             o->d8c = b;
         } else if (--o->timer <= 0) {
             int d;
-            U8F(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
             o->d84 = 0;
             if (o->animFrame & 1)
@@ -174,8 +174,8 @@ void func_800F7AAC(TObj *o)
     case 5:
         if (FUN_8001fec0(o)) {
             *(signed char *)&o->b0f = -8;
-            *(short *)((char *)D_8009C330 + 2) = 0;
-            U8F(o, 0xaa) = 0;
+            (*(short*)&D_8009C330->type) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;
             o->velY = 0;
             b = DAT_801152e8[o->wb0];

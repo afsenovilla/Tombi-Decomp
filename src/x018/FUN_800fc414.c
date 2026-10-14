@@ -45,7 +45,7 @@ extern void FUN_800ff610(TObj *, int);
     }
 
 #define ADD7C() \
-    if (U8(o, 0xad) == 0) \
+    if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) \
         o->y.raw += 0x7c000;
 
 #define LAND() \
@@ -86,17 +86,17 @@ extern void FUN_800ff610(TObj *, int);
 
 static __inline__ int fall(TObj *o)
 {
-    U8(o, 0xad) = 0;
+    (*(unsigned char*)((char*)&o->wac + 1)) = 0;
     FUN_8003fd78(o, 0, 0);
     if ((o->b69 | o->b9c | o->b9e | o->b9f | o->bbe) == 0) {
-        U8(o, 0xad) = 1;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 1;
         o->velY += 0x223;
         o->y.raw += o->velY << 8;
         D_8009C330->t20 = 0x21;
         if (o->velY >= 0x447) {
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
-            U8(o, 0xad) = 0;
+            (*(unsigned char*)((char*)&o->wac + 1)) = 0;
             o->velY = 0;
             o->b9c = 2;
             U8(o, 0xc3) = 0;
