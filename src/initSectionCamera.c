@@ -29,7 +29,7 @@ extern void computeCameraMatrix(C *);
 static __inline__ int smax(int a, short b) { short r = a; asm("" : "=r"(r) : "0"(r)); if (a < b) r = b; return r; }
 static __inline__ int smin(int a, short b) { register short r asm("$4") = a; if ((short)a > b) r = b; return r; }
 
-void func_80021B20(void)
+void initSectionCamera(void)
 {
     C *c;
     short *p, *q;

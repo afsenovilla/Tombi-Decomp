@@ -37,7 +37,7 @@ static __inline__ unsigned char run(void)
     return p->state;
 }
 
-void func_80039580(void)
+void tickAreaScript(void)
 {
     if (GV6.i9c == 0) return;
     if ((*(unsigned short*)&PLAYER.obj.b04) == 0x505) return;

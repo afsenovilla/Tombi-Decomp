@@ -5,7 +5,7 @@ typedef struct D { short d[64]; char *base; char *cur; unsigned char f; } D;
 extern int DAT_8009d69c;
 extern int printf(char *, ...);
 
-int FUN_80037e74(char *p, D *o)
+int openScriptFile(char *p, D *o)
 {
     H h;
     int i;

@@ -196,6 +196,7 @@ address,name,confidence,comment
 80021858,initPlayerAtSpawn,alta,psx_tomba #21 (por bytes)
 80021a94,loadSectionBounds,alta,psx_tomba #21 (por bytes)
 80021aec,loadSectionHeight,alta,psx_tomba (por bytes)
+80021b20,initSectionCamera,alta,"called by every area mode handler: reads the camera bounds for [area][section] from D_80078B7C into D_800A457C"
 80021f18,copyMatrix32,alta,psx_tomba #21 (por bytes)
 80021f5c,getBaseMatrix,alta,psx_tomba (por bytes)
 80021fac,initLighting,alta,psx_tomba #21 (por bytes)
@@ -285,6 +286,7 @@ address,name,confidence,comment
 80037454,fillBytesUnrolled,alta,psx_tomba #21 (por bytes)
 80037c80,uploadSpriteFrameToVram,alta,names batch (see notes/names.md)
 80037e18,loadCompressedTIM,alta,psx_tomba (por bytes)
+80037e74,openScriptFile,alta,"called by initAreaScripts: checks the 0x530057 magic (prints 'Not Script File' and returns -2 otherwise), copi"
 80037fbc,scriptStart,alta,psx_tomba (por bytes)
 80038024,scriptReset,alta,psx_tomba (por bytes)
 8003804c,readUnalignedU16,alta,psx_tomba #21 (por bytes)
@@ -309,6 +311,7 @@ address,name,confidence,comment
 800391b0,runScript,alta,psx_tomba #21 (por bytes)
 8003926c,runScriptContext,alta,psx_tomba #21 (por bytes)
 80039338,loadAreaSoundBank,alta,psx_tomba #21 (por bytes)
+80039580,tickAreaScript,alta,"per-frame from gameplayTick/areaMode2Tick/areaMode4Tick: in areas 0, 1, 2 and 0x13 (listed sections) runs the "
 80039c90,scriptOpSetObjField74,media,"script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler"
 80039db8,scriptOpSetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e08,scriptOpGetPlayerPosition,alta,psx_tomba #21 (por bytes)
@@ -434,6 +437,7 @@ address,name,confidence,comment
 80045b28,applyObjectPush,alta,psx_tomba #21 (por bytes)
 80045b8c,callObjectInteraction,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80045d0c,dispatchObjectContact,alta,psx_tomba #21 (por bytes)
+80047af0,processObjectCollisions,alta,"per-frame collision pass from gameplayTick/areaMode2Tick: loads the player's box for its anim, runs the object"
 80047e74,objectsOverlapAlt,media,"3D hitbox overlap test like objectsOverlap but with a's x box mirrored (b->box0 + a->box1 - a->box0)"
 8004874c,pushObjectOutOfObjectX,alta,"when the two hitboxes overlap (objectsOverlapAlt form) moves o's x to the near edge of e, sets o->b9d to the s"
 80048d8c,onOverlapSetFlag68,media,"runs the objectsOverlapAlt test inline and sets e->b68 = 1 on contact"
@@ -482,6 +486,7 @@ address,name,confidence,comment
 800591c0,drawMessageGlyphs,alta,name from psx_tomba (US)
 80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
 800594e4,drawSpriteFrame,alta,"builds a SPRT from frame idx of the object's frame table (+0x18: u, v, clut, w, h, x/y offsets) at x, y and Ad"
+800595f4,drawSpriteFrameParts,alta,"multi-part version of drawSpriteFrame: emits one SPRT per part of frame idx (count, then clut/u/v/w/h/dx/dy re"
 80059728,addTilePrim,alta,psx_tomba (por bytes)
 80059f18,computeRotatedQuad,alta,names batch (see notes/names.md)
 8005a108,spawnUnlayeredObjectAndInit,alta,name from psx_tomba (US)

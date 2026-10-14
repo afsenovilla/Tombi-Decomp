@@ -12,7 +12,7 @@ extern char DAT_8009e375, DAT_8009e376, DAT_8009e377, DAT_8009f085, DAT_8009f086
 extern void InitSubsystems(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
-extern void FUN_80021b20(void);
+extern void initSectionCamera(void);
 extern void spawnSectionUnlayeredObjects(void);
 extern void initHudState(void);
 extern void startAreaBgm(void);
@@ -30,7 +30,7 @@ void areaMode5Handler(void)
         InitSubsystems();
         FUN_80017b44();
         FUN_80021858();
-        FUN_80021b20();
+        initSectionCamera();
         spawnSectionUnlayeredObjects();
         initHudState();
         DAT_800b1410 = 0;

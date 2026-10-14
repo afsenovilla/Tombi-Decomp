@@ -5,7 +5,7 @@ extern short G1f4, G1c6;
 extern unsigned short G1f8;
 extern unsigned int G164;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec5e8(void);
-extern void FUN_80039580(void);
+extern void tickAreaScript(void);
 extern void updateInventoryOverlay(void), FUN_800ebc30(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
 extern void resetDrawLists(void), drawGameplayScene(void), FUN_8001dbdc(void);
 
@@ -17,7 +17,7 @@ void areaMode4Tick(void)
         G1f8 = G1f8 + 1;
         updateAreaScreenEffect();
         if (G1c6 == 0) {
-            FUN_80039580();
+            tickAreaScript();
             FUN_8001d36c();
             updateObjectsUnlayered();
             FUN_800ec5e8();

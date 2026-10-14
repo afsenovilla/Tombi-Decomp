@@ -36,7 +36,7 @@ static __inline__ void collide(TO *p)
     }
 }
 
-void func_80047AF0(void)
+void processObjectCollisions(void)
 {
     unsigned short *t;
     TO *p;

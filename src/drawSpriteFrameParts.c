@@ -10,7 +10,7 @@ extern void SetSprt(SPRT *);
 extern void SetSemiTrans(SPRT *, int);
 extern void AddPrim(void *, SPRT *);
 
-void FUN_800595f4(A *a, short x, short y, unsigned short idx)
+void drawSpriteFrameParts(A *a, short x, short y, unsigned short idx)
 {
     short *e;
     int n;

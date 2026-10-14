@@ -21,7 +21,7 @@ extern void SetSprt(SPRT *p);
 extern void SetSemiTrans(SPRT *p, int abe);
 extern unsigned short GetClut(int x, int y);
 extern void AddPrim(void *ot, void *p);
-extern void FUN_800595f4(SPR *s, int x, int y, int v);
+extern void drawSpriteFrameParts(SPR *s, int x, int y, int v);
 extern void AddDrawMode(int a, int b);
 
 void drawHudVitality(SPR *s, short x, short y, unsigned short n)
@@ -60,6 +60,6 @@ void drawHudVitality(SPR *s, short x, short y, unsigned short n)
             DAT_1f800164 = DAT_1f800164 + 1;
         }
     }
-    FUN_800595f4(s, (short)x, (short)y, *PTR_DAT_800120a8[(short)n]);
+    drawSpriteFrameParts(s, (short)x, (short)y, *PTR_DAT_800120a8[(short)n]);
     AddDrawMode(0x15, 1);
 }

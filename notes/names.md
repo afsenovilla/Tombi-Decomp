@@ -93,6 +93,11 @@ One line per name: `address name (old file) - justification`.
 - `80058604 drawHudIfShown` (was FUN_80058604) - called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls drawHud when the timer is 0 and D_800B1410 bit 0 is set
 - `80058680 drawHud` (was FUN_80058680) - draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots from D_800802C8)
 - `80058b18 drawHudVitality` (was FUN_80058b18) - (uncertain) draws one SPRT per vitality point up to the maximum D_8009C971 at the given position
+- `80037e74 openScriptFile` (was FUN_80037e74) - called by initAreaScripts: checks the 0x530057 magic (prints "Not Script File" and returns -2 otherwise), copies the 64-entry offset table and sets base/current pointers (data at +0x88)
+- `800595f4 drawSpriteFrameParts` (was FUN_800595f4) - multi-part version of drawSpriteFrame: emits one SPRT per part of frame idx (count, then clut/u/v/w/h/dx/dy records) at x, y; used by the HUD drawers
+- `80047af0 processObjectCollisions` (was func_80047AF0) - per-frame collision pass from gameplayTick/areaMode2Tick: loads the player's box for its anim, runs the object-vs-object passes, player contact tests (FUN_8004432c over the category 5 list, func_80046D58/func_80047484) and kills the player (state 5) below the camera floor D_800A4582+0xa0
+- `80021b20 initSectionCamera` (was func_80021B20) - called by every area mode handler: reads the camera bounds for [area][section] from D_80078B7C into D_800A457C..82, the start position from D_80079474 (clamped to the bounds), sets the view angles and runs computeCameraMatrix, then copies the camera position to 1F800174
+- `80039580 tickAreaScript` (was func_80039580) - per-frame from gameplayTick/areaMode2Tick/areaMode4Tick: in areas 0, 1, 2 and 0x13 (listed sections) runs the area script context D_8009F840 (wait counter, opcodes via func_80038CD0/func_8003AFB4) and stores its state in D_8009D4F0
 
 # Area overlay function names (X001..X019)
 

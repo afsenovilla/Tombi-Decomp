@@ -10,7 +10,7 @@ extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 void InitSubsystems(void);
 void initHud(void);
 void initPlayerAtSpawn(void);
-void func_80021B20(void);
+void initSectionCamera(void);
 void spawnSectionUnlayeredObjects(void);
 void initHudState(void);
 void startAreaBgm(void);
@@ -29,7 +29,7 @@ void cutsceneAreaHandler(void)
         InitSubsystems();
         initHud();
         initPlayerAtSpawn();
-        func_80021B20();
+        initSectionCamera();
         spawnSectionUnlayeredObjects();
         initHudState();
         D_800B1410 = 0;

@@ -7,7 +7,7 @@ extern int DAT_1f8002b8;
 extern int DAT_1f8002bc;
 extern char DAT_8009f840[];
 extern void scriptReset(char *);
-extern void FUN_80037e74(int, char *);
+extern void openScriptFile(int, char *);
 extern void scriptStart(char *, int);
 
 void initAreaScripts(void)
@@ -48,6 +48,6 @@ void initAreaScripts(void)
         return;
     }
 L:
-    FUN_80037e74(a, p);
+    openScriptFile(a, p);
     scriptStart(p, 0);
 }

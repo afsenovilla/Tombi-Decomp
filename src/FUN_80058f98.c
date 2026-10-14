@@ -5,7 +5,7 @@ extern unsigned char DAT_8009d2b2;
 extern SPRT *DAT_1f800164;
 extern int DAT_1f8001e0;
 extern unsigned short *PTR_DAT_800121b8, *PTR_DAT_800121cc, *PTR_DAT_800121d0, *PTR_DAT_800121d4, *PTR_DAT_800121b0, *PTR_DAT_800121b4;
-extern void FUN_800595f4(int, short, short, unsigned short);
+extern void drawSpriteFrameParts(int, short, short, unsigned short);
 extern void FUN_80059464(int, int);
 extern void SetSprt(SPRT *);
 extern void SetSemiTrans(SPRT *, int);
@@ -20,23 +20,23 @@ void FUN_80058f98(int o, short x, short y)
     unsigned char c;
     switch (DAT_8009d2b2) {
     case 0:
-        FUN_800595f4(o, x, y, *PTR_DAT_800121b8);
+        drawSpriteFrameParts(o, x, y, *PTR_DAT_800121b8);
         FUN_80059464(0x14, 1);
         break;
     case 5:
-        FUN_800595f4(o, x, y, *PTR_DAT_800121cc);
+        drawSpriteFrameParts(o, x, y, *PTR_DAT_800121cc);
         FUN_80059464(0x15, 1);
         break;
     case 6:
-        FUN_800595f4(o, x, y, *PTR_DAT_800121d0);
+        drawSpriteFrameParts(o, x, y, *PTR_DAT_800121d0);
         FUN_80059464(0x15, 1);
         break;
     case 7:
-        FUN_800595f4(o, x, y, *PTR_DAT_800121d4);
+        drawSpriteFrameParts(o, x, y, *PTR_DAT_800121d4);
         FUN_80059464(0x15, 1);
         break;
     case 8:
-        FUN_800595f4(o, x, y, *PTR_DAT_800121b0);
+        drawSpriteFrameParts(o, x, y, *PTR_DAT_800121b0);
         FUN_80059464(0x14, 1);
         break;
     case 9:

@@ -13,11 +13,11 @@ extern unsigned short DAT_1f8001f8;
 extern void FUN_8001ca58(void);
 extern void updateAreaScreenEffect(void);
 extern void tickHud(void);
-extern void FUN_80039580(void);
+extern void tickAreaScript(void);
 extern void FUN_8001d36c(void);
 extern void updateObjectsLayer7(void);
 extern void updateObjectsUnlayered(void);
-extern void FUN_80047af0(void);
+extern void processObjectCollisions(void);
 extern void updateInventoryOverlay(void);
 extern void FUN_8002af10(void);
 extern void updateObjectsLayer8(void);
@@ -46,11 +46,11 @@ void gameplayTick(void)
         updateAreaScreenEffect();
         tickHud();
         if (DAT_1f8001c6 == 0) {
-            FUN_80039580();
+            tickAreaScript();
             FUN_8001d36c();
             updateObjectsLayer7();
             updateObjectsUnlayered();
-            FUN_80047af0();
+            processObjectCollisions();
         }
     }
     if (DAT_1f8001c6 != 1)

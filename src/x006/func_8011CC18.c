@@ -9,7 +9,7 @@ typedef struct { short d, v; } FR;
 
 extern FR D_80120268[];
 extern unsigned short *D_80122E18;
-extern void FUN_800595f4(TObj *, short, short, unsigned short);
+extern void drawSpriteFrameParts(TObj *, short, short, unsigned short);
 extern void AddDrawMode(int, int);
 extern void addTilePrim(RECT *, int, int, int);
 
@@ -30,7 +30,7 @@ void func_8011CC18(TObj *a, int b, short x, short y)
     } else {
         v = *D_80122E18;
     }
-    FUN_800595f4(a, x, y, v);
+    drawSpriteFrameParts(a, x, y, v);
     AddDrawMode(7, 1);
     r.x = x - 0x40;
     r.y = y - 4;
