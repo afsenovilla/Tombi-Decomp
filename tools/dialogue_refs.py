@@ -9,12 +9,14 @@ References found without running the game:
     a0 (k) and a1 (dx) are loaded with an immediate in the same basic block;
   * script op 0x85 (`05 nargs [01 imm32]* 85`) in AREAnn/*.WSS (args: obj, cmd=4, k, dx, ...).
 Calls with computed k/dx (NPC objects whose ids come from room data, loops) are NOT seen, so "unreferenced" is only a
-candidate list.   usage: dialogue_refs.py [AREAnn/MFNTnn0S ...]  (default: all Spanish files)
+candidate list.   usage: dialogue_refs.py [--delta] [AREAnn/MFNTnn0S ...]  (default: all Spanish files)
+The static scan is joined by literal (k, dx) pairs of the matched C sources (src_refs; tools/objects.py dialogue_consts).
 """
 import glob, os, re, struct, sys, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "game", "disc", "fs")
 TG = {0x8002DC50, 0x8002DC88, 0x8002DCC8, 0x8002DCF0, 0x8002DD1C}
 # overlay of area nn -> its Spanish dialogue files (file names shared between areas: 07 uses 010, 12 uses 040, 19 uses 020+190, 13 uses 001+130)
@@ -47,6 +49,21 @@ def call_refs(path):
     return out, unk
 
 
+def src_refs(a):
+    """Literal (k, dx) pairs in the matched C sources of overlay X0<a>: direct showMessageBox*/openMessageBox calls AND `m = K; n = DX;`
+    assignments (NPC handlers set them per state and call once, which the basic-block scan of call_refs cannot see).  AREA00 = src/*.c
+    functions headed `// FUNC .. X000`; the others live in src/x0NN/."""
+    import objects
+    out = set()
+    if a == 0:
+        files = [f for f in glob.glob(os.path.join(ROOT, "src", "*.c")) if open(f).readline().rstrip().endswith("X000")]
+    else:
+        files = glob.glob(os.path.join(ROOT, "src", "x%03d" % a, "*.c"))
+    for f in files:
+        out |= objects.dialogue_consts(open(f).read())
+    return out
+
+
 def wss_refs(path):
     d = open(path, "rb").read()
     out = set()
@@ -67,11 +84,15 @@ def wss_refs(path):
 
 
 def main():
-    want = set(a.split("/")[-1] for a in sys.argv[1:])
+    want = set(a.split("/")[-1] for a in sys.argv[1:] if not a.startswith("--"))
     refs, unk = collections.defaultdict(set), collections.defaultdict(int)
     for p in sorted(glob.glob(FS + "/AREA*/X0??.BIN")):
         a = int(os.path.basename(p)[2:4])
         r, u = call_refs(p)
+        r0 = set(r)
+        r = r | src_refs(a)
+        if "--delta" in sys.argv:
+            print("X%03d: %d static-call refs + %d from sources = %d" % (a, len(r0), len(r - r0), len(r)))
         for f in files_of(a):
             refs[f] |= r
             unk[f] += u

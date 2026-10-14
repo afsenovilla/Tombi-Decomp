@@ -614,3 +614,44 @@ Python, ~4 M instr/s; GTE after psx-spx; no load delay slots / interrupts / cach
     overlay and resources of the room the player comes from (X011 etc.), and the game itself hangs on an empty list (`cdLoadTask` waits for a
     queued file, LOAD_COMPLETE never set) unless the area changed. Straight from the debug select the overlay is missing and the interpreter runs
     into zeroed RAM; entering them through a mode 7 transition from a sibling room also ends in a bad object pointer (objects of the previous area).
+
+## Object placement records (room objects; `tools/objects.py`)
+The APD blocks (load kinds `0x80..0x8F`, `APD_DATA[n]`) of the room load lists are the **object spawn records** (not a grid: only `0x8E` is a
+byte grid and the huge `0x8F` of AREA02/05/08/19 is an opaque table). A list = 16-byte records, ended by the first record with `type >= 0xFF`
+(`00 00 ff ...`). Spawner (verified, matched C): `FUN_8004c570` (src, called by the unlayered section-manager object `func_8004C1EC` on room
+load / change) loops over the records and calls `FUN_8004cb00(rec, z)` (`src/FUN_8004cb00.c`), which allocates by `kind` and copies the fields:
+
+| off | field | -> object |
+|---|---|---|
+| +0 | b0 section filter | +0x1D (area-wide list: spawned only if `b0 == section` or `b0 == ~section`) |
+| +1 | b1 kind (`&0x7F`) / `&0x80` | picks the allocator AND the handler table: 2 -> `allocObjectLayer2`, 3 -> `ObjAlloc`, 4/5 -> layers 4/5, 8 -> layer 1, 7 -> layer 7 (kind 6: no allocation); `0x80` ORed into category |
+| +2 | b2 type | +0x02: index into the handler table of the layer |
+| +3 | b3 | +0x0C |
+| +4 | b4 subtype | +0x03 (variant inside one handler) |
+| +5 | b5 | +0x2E (animFrame) |
+| +6/+8/+10 | s16 x, y, z | +0x10/+0x14/+0x18 whole parts (16.16) |
+| +12 | bc | +0x0A (bit 0x10: `be` indexes the SPR/WPP pointer table `DAT_1f800334/338`) |
+| +13 | bd | +0x0F |
+| +14 | be | table index (kinds 4, 8) or +0x? box (kind 3, types 0x18/0x19/0x24/0x33) |
+| +15 | bf | bits 0-1 link mode (1 parent, 2 child offset from parent, 3 last child; the x/y/z of a child are offsets and also stored at +0x30..0x38), bits 2-7 = +0x6B id (room list) or the persistent flag number `FUN_80020a78(bf>>2)` (area-wide list: spawned only while that flag is 0 = item/chest not yet taken) |
+
+Which list is used: the APD kind low nibble is the slot (`APD_DATA[slot]`, table `DAT_8007b908[area]` = identity 0..n). **Room (section) S spawns slot `S & 7`**
+(first loop) and the **area-wide slot `min(sections, 15)`** (second loop; AREA03: kind `0x86` in the area list = persistent items, `b0` = section).
+Other slots of a room's list belong to neighbouring sections. The handler of a record is `handler_table[layer][type]`; the tables are MAIN0 data
+(`updateObjects*`): layer 2 `0x80077D9C`, 3 `0x80079BAC`, 4 `0x80079D74`, 5 `0x8007B310`, 1 `0x8007A10C`, 7 `0x80079FE4`, 8 `0x80079B88`; the entries point to MAIN0 code or to
+**fixed addresses of the area overlay** (the table is identical for all areas, so the function at that address is area specific; confirmed by dumping the
+tables and the object pools of all rooms in `tools/psxemu`). Layer 4 type 7 is `dispatchAreaInitB`: the area's own object at a fixed address
+(AREA03 `func_8011A874`, AREA04/12 `func_8011B7C4`, ...). Emulator cross-check: the object pools after loading AREA03 s1 / AREA14 s0..7 contain exactly the
+(kind, type, subtype) triples of the own-slot records.
+
+`tools/objects.py list [--area N --room S --type T --layer K --event E --all-slots] --format table|csv|json -o FILE` (4,764 records of 17 areas); `events`; `dialogues`.
+Columns: area, section, list, slot, role (room/area), own, index, layer, type, subtype, handler (+name), x, y, z, b0, b3, b5, bc, bd, be, bf, events, event_note, dialogues, raw.
+
+**Event ids are NOT a record field** (obj+0xAC is never filled by the spawner): the handler writes it. Mechanisms found (all in `tools/objects.py`):
+1. area switch/door objects (layer 4 type 7): `func_8011A874` (AREA03) and `func_8011B7C4` (AREA04/12) set `o->wac` (+0xAC) by **subtype** and later call
+   `setEventStarted/Complete(o->wac)`: AREA03 subtype 0 -> 41, 4 -> 170 (0xAA), 8 -> 55; AREA04/12 0 -> 41, 4 -> 51 (0x33), 8 -> 55, 10 -> 42.
+2. AREA14 room controller (layer 2 types `0x3B..0x42` = section 0..7, `func_801163BC`): `setEventComplete(D_801256A8[section])` = 30, 111, 124, 34, 80, 85, 54, 160.
+3. scene-sequence objects (layer 2 types `0x34` X000, `0x35` X004/12, `0x4A` X002/19, `0x51` X006, `0x56` X013): the handler walks a table of `(s16 op, s16 arg)` sequences
+   (ptr table in the overlay, sequence chosen by game state, ends at op 0); the ops starting / completing an event differ per overlay (X000 9/10, X002 7/8, X004 8/9(+10 with flag check),
+   X006 9, 10 (arg 0x57..0x59 -> 133..135), 11/12, X013 6/7).
+Dialogue `(k, dx)` are **not** record fields either: NPC handlers set `m = K; n = DX;` (or call `showMessageBoxDirect(K, DX, ..)`) per state with literals; the record only selects the variant (subtype).
