@@ -1,12 +1,12 @@
 // FUNC 80125040 876 X010
 // MATCHING 80125040 876
+#include "gv2.h"
 #include "gvars.h"
 /* Box stores as inline setbox(o, 8, 0x10, 8, 0x10); D_1F8002DC as a [0] array keeps its load after the struct stores
    (and lets case 0 share the anim tail with case 4). */
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_8009D2C3;
 extern void **D_8012F3A8[];
 extern int D_1F8002DC[];
 extern unsigned short D_1F8001F8;
@@ -36,7 +36,7 @@ void func_80125040(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 0x40) {
+        if (GV2.bc3 & 0x40) {
             freeObjectLayer2(o);
             break;
         }

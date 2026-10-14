@@ -1,5 +1,6 @@
 // FUNC 8011ccd8 2332 X010
 // MATCHING 8011ccd8 2332
+#include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -9,7 +10,6 @@ typedef struct {
 extern G330 *D_8009C330;
 typedef struct { char pad[0xe8]; short e8, ea; } PObj;
 extern TObj *D_8009F0EC;
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C4, D_1F8003C6;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_801152E8[];
@@ -84,7 +84,7 @@ void func_8011CCD8(TObj *o)
         }
         if (D_8009C330->w02 != 0) o->y.raw += 0x10000;
         D_8009C330->w02 = 1;
-        pad = &D_8009D670;
+        pad = &GV6.s70;
         if (!(*pad & 0x50)) {
             PlayerSetAnimIfChanged(o, 0xc);
         } else if (*pad & 0x10) {
@@ -208,7 +208,7 @@ void func_8011CCD8(TObj *o)
             Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 0x10 : v - 0x10;
         }
         if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
-            if (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4) o->ba7 = 1;
+            if (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4) o->ba7 = 1;
         }
         o->step = 2;
         o->state = 0;

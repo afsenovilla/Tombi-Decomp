@@ -1,5 +1,6 @@
 // FUNC 8011beac 2220 X010
 // MATCHING 8011beac 2220
+#include "gv6.h"
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];
@@ -23,7 +24,6 @@ typedef struct {
 } G330;
 extern G330 *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8001FC;
 extern unsigned short D_1F8001F8;
 extern void FUN_80010d68();
@@ -94,7 +94,7 @@ void func_8011BEAC(TObj *o)
         break;
     case 3:
         AnimAdvance(o);
-        pad = &D_8009D670;
+        pad = &GV6.s70;
         if (!(*pad & 0x50)) {
             switch (*(unsigned short *)o->anim) {
             case 0x75:

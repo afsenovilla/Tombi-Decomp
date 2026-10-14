@@ -1,3 +1,4 @@
+#include "gv2.h"
 /* score 54 (n77): `{ int by = b->y.p.whole; ... }` temp for the D_1F8001D2-path compare fixes +0x578 (b->y a0, a->y v1).
    Left: q/r copy a3, sabs v0/v1, d v1 (ours a2) and t/w regs in the D_1F8001D2 block (game t a2 untied from the lhu,
    w a1 untied from andi); brute-forced d/t/w types x block/function scope: function-scope t/w wrecks global alloc (126+).
@@ -11,7 +12,6 @@
 // FUNC 8011e000 2276 X010
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3;
 extern unsigned char D_1F8001D2;
 extern int rcos(int);
 extern int rsin(int);
@@ -77,7 +77,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
     if (!(kind & 1)) {
         if (a->y.p.whole < b->y.p.whole - s2) {
             if ((-(s2 + 4) + b->y.p.whole) > a->y.p.whole + a->box2) return 3;
-            if (D_8009D2C3 & 0x40) {
+            if (GV2.bc3 & 0x40) {
                 if (D_1F8001D2 != 0) {
                     if (dx > 0) a->h->p.whole = b->h->p.whole + cx;
                     else if (b->subtype == 3) a->h->p.whole = b->h->p.whole + cx;
@@ -108,7 +108,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
                 else b->b9d = 1;
             }
         } else {
-            if (a->b04 == 1 && a->step < 2 && (D_8009D2C3 & 0x40) && sabs(dy) < 8) {
+            if (a->b04 == 1 && a->step < 2 && (GV2.bc3 & 0x40) && sabs(dy) < 8) {
                 if ((-(s2 + -4) + b->y.p.whole) < a->y.p.whole - (a->box3 - a->box2)) return 3;
                 b->b69 = 1;
                 b->velX = dx;
@@ -118,7 +118,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
                 return 3;
             }
             { int by = b->y.p.whole; if ((-(s2 + -4) + by) < a->y.p.whole - (a->box3 - a->box2)) return 3; }
-            if (D_8009D2C3 & 0x40) {
+            if (GV2.bc3 & 0x40) {
                 if (D_1F8001D2 != 0) {
                     short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
                     if (dx > 0) {
@@ -154,7 +154,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
         if (a->b69 != 0 && sabs(dx) < 10) s2 = 4;
         if (b->h->p.whole + s7 < a->h->p.whole) {
             if (b->h->p.whole + s2 + s7 < a->h->p.whole - (a->box1 - a->box0)) return 3;
-            if (D_8009D2C3 & 0x40) {
+            if (GV2.bc3 & 0x40) {
                 b->velX = dx;
                 b->b69 = 1;
                 a->h->p.whole = s7 + (b->h->p.whole + s2) + (a->box1 - a->box0);
@@ -172,7 +172,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
             }
         } else {
             if (b->h->p.whole - s2 + s7 > a->h->p.whole + a->box0) return 3;
-            if (D_8009D2C3 & 0x40) {
+            if (GV2.bc3 & 0x40) {
                 a->h->p.whole = s7 + (b->h->p.whole - s2) - a->box0;
                 b->velX = dx;
                 b->b69 = 1;

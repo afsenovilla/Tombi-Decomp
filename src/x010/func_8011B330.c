@@ -1,5 +1,6 @@
 // FUNC 8011b330 1188 X010
 // MATCHING 8011b330 1188
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -24,7 +25,6 @@ typedef struct {
 
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8001FC, D_1F8003C8;
 extern unsigned char D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
@@ -66,7 +66,7 @@ void func_8011B330(S *s)
                 }
                 f = s->o.animFrame & 1;
                 n->animFrame = f;
-                if (*(volatile unsigned short *)&D_8009D670 & 0x40) n->animFrame = f | 2;
+                if (*(volatile unsigned short *)&GV6.s70 & 0x40) n->animFrame = f | 2;
                 n->a.p.whole = s->o.a.p.whole;
                 n->y.p.whole = s->o.y.p.whole;
                 n->b.p.whole = s->o.b.p.whole;

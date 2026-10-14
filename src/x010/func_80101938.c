@@ -1,5 +1,6 @@
 // FUNC 80101938 1084 X010
 // MATCHING 80101938 1084
+#include "gv2.h"
 #include "gvars.h"
 typedef struct P { unsigned char b0; char p0[7]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; unsigned short h2c; unsigned short h2e; } P;
 typedef struct O {
@@ -14,7 +15,6 @@ typedef struct O {
 typedef struct E { char p0[4]; unsigned char b4, b5, b6; } E;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned char D_8009D2AF;
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char TALK_POSE;
 extern char D_80010748[];
@@ -98,7 +98,7 @@ void func_80101938(O *o)
         if (o->b69 == 1 || ObjTileCollide(o, 4, 0) != 0) {
             land(o);
             if (D_8009D2AFa[0] == 0) {
-                D_8009D2AF = 1;
+                GV2.baf = 1;
                 GVARS.b3a = 1;
             }
             o->state = 2;
@@ -125,7 +125,7 @@ void func_80101938(O *o)
             SfxPlay3(0x1c, 0x7f);
             land(o);
             if (D_8009D2AFa[0] == 0) {
-                D_8009D2AF = 1;
+                GV2.baf = 1;
                 GVARS.b3a = 1;
             }
             o->state++;

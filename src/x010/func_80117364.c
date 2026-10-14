@@ -1,9 +1,9 @@
 // FUNC 80117364 456 X010
 // MATCHING 80117364 456
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3;
 extern short D_1F800176;
 extern void playSFX(int);
 extern void ObjListPush_1F800230(TObj *);
@@ -23,11 +23,11 @@ void func_80117364(TObj *o)
             playSFX(0xb1);
             break;
         case 2:
-            if (D_8009D2C3 & 0x40) o->b04 = 3;
+            if (GV2.bc3 & 0x40) o->b04 = 3;
             break;
         case 3:
         case 4:
-            if (!(D_8009D2C3 & 0x40)) o->b04 = 3;
+            if (!(GV2.bc3 & 0x40)) o->b04 = 3;
             break;
         }
         break;

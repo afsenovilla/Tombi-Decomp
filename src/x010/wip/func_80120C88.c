@@ -1,7 +1,7 @@
 // FUNC 80120c88 824 X010
+#include "gv2.h"
 /* score 38 (o30: short dx,dy + int x,y; was 72): remaining diff at +0x60 box0/box1 load order. Old note, score 72: everything matches except the first two box tests: the dx temp gets a0 (prefers the dying o->h whole reg) instead of a1, so box0/box1 loads schedule differently and two load-delay nops shift all branches. Without the velX/velY stores that part matches (cf. func_80121A40). Tried: early returns, int/short/ushort dx/dy, separate sx/sy copies, operand orders, ratan2 short params, a/y reuse */
 #include "TOBJ.H"
-extern unsigned char D_8009D2C3[];
 extern int SquareRoot0(int);
 extern int ratan2(int, int);
 extern int rsin(int);
@@ -42,7 +42,7 @@ void func_80120C88(TObj *o, TObj *e)
                     e->b69 = 1;
                     e->velX = dx;
                     e->velY = y;
-                    if (D_8009D2C3[0] & 0x40) {
+                    if (((unsigned char*)&GV2.bc3)[0] & 0x40) {
                         if (o->b9c & 1) return;
                         if ((unsigned short)((a & 0xfff) - 0x901) < 0x5ff) {
                             if (e->velH > 0) {

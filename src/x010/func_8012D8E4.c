@@ -1,5 +1,6 @@
 // FUNC 8012d8e4 1352 X010
 // MATCHING 8012d8e4 1352
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,7 +8,7 @@
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_8012F538[];
-extern unsigned char D_8009D2B0[], D_8009CFCC[];
+extern unsigned char D_8009CFCC[];
 extern unsigned char D_8009CE3B, D_8009D13E;
 extern unsigned char D_8009CFCA;
 extern short D_1F8001C6;
@@ -27,7 +28,7 @@ void func_8012D8E4(TObj *o)
         if (o->b68 == 0)
             break;
         v = *(V *)&o->a;
-        D_8009D2B0[0] = 2;
+        ((unsigned char*)&GV2.bb0)[0] = 2;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

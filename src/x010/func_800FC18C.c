@@ -1,11 +1,11 @@
 // FUNC 800fc18c 180 X010
 // MATCHING 800fc18c 180
-extern unsigned char D_8009D2C3;
+#include "gv2.h"
 extern unsigned char D_8009CE3D;
 int func_800FC18C(unsigned char *o)
 {
     int r = 0;
-    if (D_8009D2C3 & 0x40) {
+    if (GV2.bc3 & 0x40) {
         if (*(short *)(o + 0x16) > -0x8c) {
             r = 1;
             *(short *)(o + 0x56) = -0x8c;
