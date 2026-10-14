@@ -1,12 +1,12 @@
 // FUNC 80117224 744 X017
 // MATCHING 80117224 744
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } V12;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119990[];
-extern unsigned char D_8009D2B0[];
 extern unsigned char D_8009CE0A[];
 extern short D_1F8001C6;
 extern void FUN_8001fe94(TObj *, int);
@@ -24,7 +24,7 @@ void func_80117224(TObj *o)
         if (o->b68) {
             b = *(V12 *)&o->a;
             ((unsigned char*)&GVARS.b42)[0] = 1;
-            D_8009D2B0[0] = 2;
+            ((unsigned char*)&GV2.bb0)[0] = 2;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;

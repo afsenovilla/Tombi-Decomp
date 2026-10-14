@@ -1,5 +1,6 @@
 // FUNC 80117c84 536 X017
 // MATCHING 80117c84 536
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -10,7 +11,6 @@ extern void func_801179EC(TObj *);
 extern void setEventComplete(int, int);
 extern unsigned char D_8009CE0A;
 extern unsigned char D_8009CFD6;
-extern unsigned char D_8009D2B0;
 
 void func_80117C84(TObj *o)
 {
@@ -49,7 +49,7 @@ void func_80117C84(TObj *o)
             if (GVARS.b3a != 0) {
                 GVARS.b42 = 1;
                 GVARS.b3f = 1;
-                D_8009D2B0 = 2;
+                GV2.bb0 = 2;
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.step = 0;
                 PLAYER.obj.state = 0;
