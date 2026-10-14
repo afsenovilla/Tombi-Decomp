@@ -1,8 +1,8 @@
 // FUNC 80116ec0 476 X014
 // MATCHING 80116ec0 476
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C962[];
 extern unsigned short D_80125B70[];
 extern void *D_80125C00[];
 extern char D_8012A1B0[];
@@ -22,10 +22,10 @@ void func_80116EC0(TObj *o)
     case 0:
         o->w1e = 1;
         o->b0d = 0x81;
-        o->w08 = (D_80125B70[D_8009C962[0]] << 6) | 0xb;
+        o->w08 = (D_80125B70[((unsigned short*)&GAME.selectedSection)[0]] << 6) | 0xb;
         o->animFrame = 0;
         o->anim = D_8012A1B0;
-        *(void **)((char *)o + 0x94) = D_80125C00[D_8009C962[0]];
+        *(void **)((char *)o + 0x94) = D_80125C00[((unsigned short*)&GAME.selectedSection)[0]];
         o->d3c = D_1F8002DC;
         o->b04++;
         FUN_8001fe6c(o);

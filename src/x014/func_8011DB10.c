@@ -1,13 +1,13 @@
 // FUNC 8011db10 332 X014
 // MATCHING 8011db10 332
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char p[4]; unsigned short t; char q[2]; } E8;
 typedef struct {
     TObj o;
     char pc0[6];
     short wc6;
 } T2;
-extern unsigned short D_8009C962;
 extern unsigned short D_1F80016A[], D_1F80016E;
 extern unsigned char D_80125D80[];
 extern void AnimAdvance(T2 *);
@@ -15,7 +15,7 @@ extern int Rand(void);
 
 static __inline__ int check(T2 *o)
 {
-    if (D_8009C962 != 7) return 0;
+    if (GAME.selectedSection != 7) return 0;
     o->wc6 = 0;
     if ((unsigned short)(o->o.h->p.whole - D_1F80016A[0] + 0x40) > 0x80) return 0;
     if ((unsigned short)(o->o.y.p.whole - D_1F80016E + 0x40) > 0x80) return 0;

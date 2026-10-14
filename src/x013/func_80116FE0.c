@@ -1,5 +1,6 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "gamestate.h"
 typedef struct { short x, y; } XY;
 typedef struct { short op, arg; } CMD;
 typedef struct O {
@@ -26,7 +27,6 @@ extern XY D_80118200[];
 extern unsigned char D_8009D088[];
 extern unsigned char D_8009C93A, D_8009C93F, D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
-extern unsigned int D_8009C968;
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
 extern unsigned char D_8009CE48, D_8009CDCB, D_8009CE0B;
@@ -194,7 +194,7 @@ void func_80116FE0(O *o)
         case 17:
             switch (o->step) {
             case 0:
-                t = D_8009C968;
+                t = (*(unsigned int*)&GAME.totalTimePlayed);
                 h = t / 180000;
                 D_8011A8C8 = 0;
                 D_8011A8C4 = t / 3000 - h * 60;

@@ -1,10 +1,10 @@
 // FUNC 801175a0 368 X014
 // MATCHING 801175a0 368
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern int D_1F8002D4[];
 extern void *D_80129F98;
-extern unsigned char D_8009C975;
 extern unsigned char D_8009C93C;
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -28,7 +28,7 @@ void func_801175A0(TObj *o)
         if (o->subtype != 1) break;
         switch (o->step) {
         case 0:
-            if (D_8009C975 != 0) break;
+            if (GAME.fadeScreenControl != 0) break;
             D_8009C93C = 2;
             o->animFrame = 0x60;
             FUN_80059d44(0x60);
@@ -36,7 +36,7 @@ void func_801175A0(TObj *o)
             break;
         case 1:
             FUN_80059d44((short)o->animFrame);
-            if (D_8009C975 == 3) o->step--;
+            if (GAME.fadeScreenControl == 3) o->step--;
             break;
         case 2:
             break;

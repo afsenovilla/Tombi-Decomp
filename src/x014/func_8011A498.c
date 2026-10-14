@@ -1,9 +1,9 @@
 // FUNC 8011a498 356 X014
 // MATCHING 8011a498 356
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short a, b; } P2;
 extern P2 D_80125C90[];
-extern unsigned short D_8009C962;
 
 void func_8011A498(TObj *o)
 {
@@ -11,7 +11,7 @@ void func_8011A498(TObj *o)
 
     switch (o->substep) {
     case 0:
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
             o->w74 = D_80125C90[2].a;
             o->w76 = D_80125C90[2].b;
