@@ -632,7 +632,7 @@ load / change) loops over the records and calls `FUN_8004cb00(rec, z)` (`src/FUN
 | +6/+8/+10 | s16 x, y, z | +0x10/+0x14/+0x18 whole parts (16.16) |
 | +12 | bc | +0x0A (bit 0x10: `be` indexes the SPR/WPP pointer table `DAT_1f800334/338`) |
 | +13 | bd | +0x0F |
-| +14 | be | table index (kinds 4, 8) or +0x? box (kind 3, types 0x18/0x19/0x24/0x33) |
+| +14 | be | table index (kinds 4, 8) or obj box0 (kind 3, types 0x18/0x19/0x24/0x33) |
 | +15 | bf | bits 0-1 link mode (1 parent, 2 child offset from parent, 3 last child; the x/y/z of a child are offsets and also stored at +0x30..0x38), bits 2-7 = +0x6B id (room list) or the persistent flag number `FUN_80020a78(bf>>2)` (area-wide list: spawned only while that flag is 0 = item/chest not yet taken) |
 
 Which list is used: the APD kind low nibble is the slot (`APD_DATA[slot]`, table `DAT_8007b908[area]` = identity 0..n). **Room (section) S spawns slot `S & 7`**

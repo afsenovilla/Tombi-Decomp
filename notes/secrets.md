@@ -82,3 +82,34 @@ computed arguments, many more NPCs are dispatched by a table). So **no cut text 
 e.g. MFNT020S group 4 `·····???` x3 and group 8 dx 1 `·····???`, MFNT030S group 1 dx 1 `..........???`, MFNT030S group 3 dx 0 and 2 both `...¡Funga!`; MFNT000S group 8 `···`. Save-point
 name dialogues (group 1 of most areas: "Montaña tormentosa", "Laberinto subterráneo", "Ciudad de Enanos" followed by `¿Guardar DATOS?`) are never called by an immediate either (the save point object passes the area/section).
 Needed for a real answer: decode the NPC object spawn data of the room files (which holds k and dx).
+
+## Room object records: where the data-driven events live  [V = verified in code/emulator, I = inferred]
+Format and tool: `notes/formats.md` "Object placement records", `tools/objects.py` (`events`, `list --event N`). The task premise "event 32 is a field of the room record
+(obj+0xAC)" is only half true: **+0xAC is written by the object handler, not by the spawner**; the record only supplies the object type and subtype.
+- AREA03 `func_8011A874` (and AREA04/12 `func_8011B7C4`) is layer 4 type 7 (`dispatchAreaInitB`): `o->wac = <const by subtype>` then `setEventStarted/Complete(o->wac)`
+  (the `lh a0, 0xAC(obj)` sites X003 0x8011AD10/0x8011AD54). AREA03: subtype 0 -> **41**, 4 -> **170**, 8 -> 55; AREA04/12: 0 -> 41, 4 -> 51, 8 -> 55, 10 -> **42**. [V]
+- Other non-constant award sites are `lh a0, 2(s)` = `e[1]` of scene sequences ("event cutscene" objects, layer 2) and the AREA14 controller table. [V]
+
+Placement of the 19 events whose award had no immediate (`objects.py events`, own-slot records only):
+| event | where | how |
+|---|---|---|
+| 0 Grandpa's bracelet | AREA13 s1 (type 0x56 scene sequence, X013 op 7 arg 0 at the end of the sequence) | sequence [I: arg 0 read as event 0] |
+| 9, 10 | AREA00 s3 (area-wide record, layer 2 type 0x34, X000 sequences) | 9 started (ops 9) / 9 and 10 completed; also 1, 12 |
+| 11, 57 (and 58) | AREA04 and AREA12 s15 (type 0x35, X004 sequences) | 11 completed (flag check), 57 started+completed, 58 started |
+| 34, 85, 111, 124 | AREA14 s3, s5, s1, s2 (controller types 0x3E, 0x40, 0x3C, 0x3D) | `D_801256A8[section]`, on clearing the room |
+| 41 | AREA03 s1 and s5 (type 7 subtype 0), AREA04/12 s0 and s1 | door/switch objects |
+| 42 | AREA04/12 s0 and s1 (type 7 subtype 10) | " |
+| 170 | AREA03 s1 and s5 (type 7 subtype 4) | " |
+| 133, 135 (and 134) | AREA06 s2 (type 0x51, X006 sequences: start via op 10 / complete via op 11) | sequence |
+| **4, 32, 44, 77, 172** | **no record/handler found that can award them** | see below |
+Also awarded through the same objects (not in the 19): AREA14 30/54/80/160, AREA06 121, AREA02 144/156, X001 164/180, AREA10 150, AREA09 189.
+
+**Event 32 ("MiniatureMakingTrumpets", title #52): no room object awards it.** It is not an immediate, not a sequence/controller/door id in any overlay,
+not in the 9 WSS scripts, and no record field carries an event id. Remaining blind spots (so "not proven impossible"): the layer-8 type-1 object
+`func_8002B0BC` (`setEventStarted(o->wd2)`, spawned only by X001 code, field filled elsewhere) and overlay functions with no C source yet.
+Together with its full AP table entries (2000/1000) the best reading is a **cut event** whose trigger (neighbours 31/33 in AREA03) is gone: AREA03 s1/s5 only holds the doors 41/170/55.
+Same verdict for 4 (motocross course; AREA06 awards 133..135/121 via its sequences), 44, 77, 172.
+
+Dialogue references: NPC `(k, dx)` are literals inside the handlers (per state: `m = 8; n = 0..4` ...), NOT record data; room data only selects the variant (subtype). `tools/dialogue_refs.py`
+now joins the matched C sources (+~100 pairs: e.g. X003 41 instead of 30, X010 47 instead of 26) with the static call scan; per-group "unreferenced" lists got shorter but remain
+a candidate list (handlers without C source and `D_xxx[state]` indexed dialogues are still invisible). `objects.py dialogues` lists the pairs per room (only for handlers with a src file).
