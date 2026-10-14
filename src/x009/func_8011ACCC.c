@@ -1,11 +1,12 @@
 // FUNC 8011accc 456 X009
 // MATCHING 8011accc 456
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short b0, b1, b2, b3; } B4;
 
 extern B4 D_8012B1B8[];
-extern unsigned char D_8009C964, D_8009C93A;
+extern unsigned char D_8009C93A;
 extern void FUN_80020078(TObj *, short);
 extern void ObjFreeDup(TObj *o);
 extern void func_801174C4(TObj *o);
@@ -39,7 +40,7 @@ void func_8011ACCC(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C964 == 0x20 || D_8009C93A != 1) {
+        if (GAME.selectedPlane == 0x20 || D_8009C93A != 1) {
             func_801174C4(o);
             d = o->box1 - o->box0;
             if (d < o->box0) d = o->box0 + 0x10;

@@ -1,9 +1,9 @@
 // FUNC 801142c0 924 X009
 // MATCHING 801142c0 924
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short s[6]; } P6;
-extern unsigned short D_8009C960;
 extern int D_8009C960_w;
 extern unsigned char D_8009CDB1;
 extern unsigned char *D_8009C330;
@@ -28,7 +28,7 @@ void func_801142C0(TObj *o)
         if (--o->timer > 0) break;
         o->timer = 0;
         pos = *(P6 *)&o->a;
-        p = &D_8009C960;
+        p = &GAME.selectedArea;
         if (*p == 2) pos.s[1] -= 0x50;
         pos.s[3] -= 0x20;
         o->b68 = 0;
@@ -63,13 +63,13 @@ void func_801142C0(TObj *o)
         o->state++;
         break;
     case 2:
-        if (D_8009C960 == 1) o->h->p.whole += 4;
-        else if (D_8009C960 == 2) o->h->p.whole -= 4;
+        if (GAME.selectedArea == 1) o->h->p.whole += 4;
+        else if (GAME.selectedArea == 2) o->h->p.whole -= 4;
         o->y.raw += 0x80000;
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + o->box3 - o->box2);
         AnimAdvance(o);
         if (D_800A60A1) {
-            if (D_8009C960 == 2) {
+            if (GAME.selectedArea == 2) {
                 if (D_8009CDB1 == 4) printInfoMessage(8, 3);
             } else if (D_8009CDB1 != 0xff) {
                 printInfoMessage(D_8009CDB1 + 7, 2);

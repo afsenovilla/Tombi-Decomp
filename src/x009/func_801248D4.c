@@ -1,8 +1,9 @@
 // FUNC 801248d4 924 X009
 // MATCHING 801248d4 924
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned char D_8009C964, D_8009C93A, D_800A603B, D_8009D2B1;
+extern unsigned char D_8009C93A, D_800A603B, D_8009D2B1;
 extern int DAT_1f8002d4[];
 extern void *D_8012E004[];
 extern int FUN_800202b4(TObj *);
@@ -53,7 +54,7 @@ void func_801248D4(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C964 != 0x20 && D_8009C93A == 1)
+        if (GAME.selectedPlane != 0x20 && D_8009C93A == 1)
             break;
         if (o->ba7 == 1)
             func_801174C4(o);
@@ -109,7 +110,7 @@ void func_801248D4(TObj *o)
                 o->b04 = 3;
                 break;
             }
-            if (D_8009C964 != 0x21)
+            if (GAME.selectedPlane != 0x21)
                 func_80124C70(o);
             break;
         }

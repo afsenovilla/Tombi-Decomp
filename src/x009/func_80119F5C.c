@@ -1,6 +1,7 @@
 // FUNC 80119f5c 1356 X009
 // MATCHING 80119f5c 1356
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct {
     short w0, w2;
@@ -24,8 +25,7 @@ extern int D_1F8000EC[], D_1F8000F0[], D_1F8000F4[];
 extern short D_1F800256;
 extern TObj **D_1F80026C;
 extern TObj *TASK_C;
-extern unsigned char D_8009C975, D_8009C93C;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
+extern unsigned char D_8009C93C;
 extern void func_80119D2C(TObj *);
 extern void func_80119E4C(TObj *);
 
@@ -128,18 +128,18 @@ void func_80119F5C(TObj *o)
         ADVANCE(o, x);
         if (x->w0 >= 0x6c) {
             o->step++;
-            D_8009C975 = 3;
-            D_8009CD94 = 9;
+            GAME.fadeScreenControl = 3;
+            (*(short*)&GAME.nextArea) = 9;
             D_8009C93C = 0;
-            D_8009CD96 = 0;
-            D_8009CDA0 = 2;
+            (*(short*)&GAME.nextSection) = 0;
+            (*(short*)&GAME.nextSpawnPoint) = 2;
         }
         break;
     case 3:
         if (x->w0 < 0x77) {
             ADVANCE(o, x);
         }
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

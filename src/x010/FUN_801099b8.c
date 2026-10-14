@@ -1,10 +1,10 @@
 // FUNC 801099b8 1176 X010
 // MATCHING 801099b8 1176
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char *D_8009C330;
 extern unsigned short D_8009D670;
 extern unsigned char D_8009D2B0;
-extern int D_8009C984[];
 extern unsigned char D_801152E8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -131,7 +131,7 @@ void FUN_801099b8(TObj *o)
         *(unsigned char *)&o->waa = 0;
         o->b9e = 0;
         o->h->p.whole += (o->animFrame & 1) ? 0x10 : -0x10;
-        if (D_8009C984[0] & 0x40) {
+        if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
             if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4) {
                 o->ba7 = 1;
             }
