@@ -1,5 +1,6 @@
 // FUNC 80117fac 848 X018
 // MATCHING 80117fac 848
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -15,7 +16,7 @@ typedef struct { short s[6]; } V;
 typedef struct { void **tbl; int x; int y; } E;
 
 extern E D_8011A564[];
-extern unsigned char D_8009D132, D_8009D0B7;
+extern unsigned char D_8009D132;
 extern short D_1F8001C6;
 extern void FUN_8001fe94(P *, int);
 extern TObj *showMessageBoxDirect(int, int, V *);
@@ -52,7 +53,7 @@ void func_80117FAC(P *o)
         o->o.wbc = o->o.animFrame;
         o->o.animFrame = o->o.b68 & 1;
         SetAnim(o, 4);
-        if (D_8009D132 && D_8009D0B7) {
+        if (D_8009D132 && GCD.bd0b7) {
             v = *(V *)&o->o.a;
             o->o.d90 = (int)showMessageBoxDirect(3, 4, &v);
             o->o.state = k2;

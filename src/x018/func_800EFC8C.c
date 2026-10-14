@@ -1,10 +1,10 @@
 // FUNC 800efc8c 656 X018
 // MATCHING 800efc8c 656
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { TObj o; char p0[6]; unsigned char c6, c7; char p1[0xe3 - 0xc8]; unsigned char e3; } TObjX;
-extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
 extern unsigned char *D_8009C330;
 extern TObj *D_8009F0EC;
@@ -17,7 +17,7 @@ void func_800EFC8C(TObjX *x, short f)
 {
     TObj *g;
     if (*(unsigned char *)&x->o.wac >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(TObj **)&PLX.p611c);
         D_8009D2E8->b04 = 2;
         D_8009D2E8->step = 2;
         D_8009D2E8->state = 0;

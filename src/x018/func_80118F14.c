@@ -1,5 +1,6 @@
 // FUNC 80118f14 712 X018
 // MATCHING 80118f14 712
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,7 +9,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8011A564[];
 extern short D_1F8001C6;
-extern unsigned char D_8009CE28[];
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -53,7 +53,7 @@ void func_80118F14(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         o->timer = 4;
-        if (D_8009CE28[0] == 0) {
+        if (((unsigned char*)&GCD.bce28)[0] == 0) {
             setEventStarted(0x84, 0, 0);
             o->timer = 200;
         }

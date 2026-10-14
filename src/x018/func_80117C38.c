@@ -1,5 +1,6 @@
 // FUNC 80117c38 884 X018
 // MATCHING 80117c38 884
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,7 +9,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_8011A564[];
-extern unsigned char D_8009CE16[];
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -63,7 +63,7 @@ void func_80117C38(TObj *o)
         setanim(o, 1);
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->timer = 4;
-        if (D_8009CE16[0] == 0) {
+        if (((unsigned char*)&GCD.bce16)[0] == 0) {
             setEventStarted(0x72, 0, 0);
             o->timer = 200;
         }

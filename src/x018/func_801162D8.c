@@ -1,5 +1,6 @@
 // FUNC 801162d8 676 X018
 // MATCHING 801162d8 676
+#include "gcd.h"
 #include "gvars.h"
 /* csv entry 801162b8 (708 B) starts with 8 data words (jump-table/pointer data); code starts at 801162d8.
    debt: volatile read of pl->a in the last range test stops gcc threading the first test's failure jump past it. */
@@ -9,7 +10,7 @@
 typedef void (*Fn)(TObj *);
 extern TObj PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009CDED, D_800A60E0;
+extern unsigned char D_800A60E0;
 extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
@@ -31,13 +32,13 @@ void func_801162D8(TObj *o)
         switch (GAME.selectedSection) {
         case 1:
             if (D_800A604A < 0x14 && D_800A604E >= -0x3b) {
-                if (D_8009CDED == 0) goto set3;
+                if (GCD.bcded == 0) goto set3;
                 tryStartItemInteraction(o, 1, 0);
             } else if (pl->a.p.whole >= 0x12d && pl->y.p.whole >= -0x3b) {
                 tryStartItemInteraction(o, 1, 2);
                 break;
             }
-            if (D_8009CDED != 0) {
+            if (GCD.bcded != 0) {
                 if ((unsigned short)(pl->a.p.whole - 0x70) < 0x60 && pl->b.p.whole > 0) {
                     stepPlayerXToward(0xa0);
                     if (pl->b.p.whole >= 0x5b) tryStartItemInteraction(o, 1, 1);
