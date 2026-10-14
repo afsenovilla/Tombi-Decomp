@@ -1,9 +1,9 @@
 // FUNC 80115ee4 252 X005
 // MATCHING 80115ee4 252
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_1F80016A, D_1F80016E;
 extern void (*D_80079AD0[])(TObj *);
 extern void func_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
@@ -18,7 +18,7 @@ void func_80115EE4(TObj *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        if (D_1F80016A < 0x14 && D_1F80016E >= -0x3b) tryStartItemInteraction(o, 1, 0);
+        if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x14 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x3b) tryStartItemInteraction(o, 1, 0);
         break;
     case 2:
         FUN_8002a4d0(o);

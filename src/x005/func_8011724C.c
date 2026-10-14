@@ -1,12 +1,12 @@
 // FUNC 8011724c 972 X005
 // MATCHING 8011724c 972
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_80117AC8[];
-extern unsigned char D_8009CEED, D_8009D0DA, D_8009CDDE, D_8009CE0C, D_8009D008;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -17,12 +17,12 @@ void func_8011724C(TObj *o)
     short i;
     TObj *n;
 
-    base = D_80117AC8[D_8009CEED];
+    base = D_80117AC8[GCD.bceed];
     i = 0;
     p = base;
 
     for (; p->f0 != 0xff; p = &base[++i]) {
-        if (p->fe == 3 && D_8009D0DA == 0) continue;
+        if (p->fe == 3 && GCD.bd0da == 0) continue;
         if (p->f0 & 0x80) {
             TObj *m = allocObjectLayer4();
             if (m == 0) continue;
@@ -84,7 +84,7 @@ void func_8011724C(TObj *o)
             n->subtype += 2;
             n->y.p.whole -= 0xc;
         }
-        if (D_8009CDDE == 0) n->b04 = 2;
+        if (GCD.bcdde == 0) n->b04 = 2;
     }
     n = allocObjectLayer2();
     if (n != 0) {
@@ -110,7 +110,7 @@ void func_8011724C(TObj *o)
             n->subtype += 2;
             n->y.p.whole -= 0xc;
         }
-        if (D_8009CE0C == 0) n->b04 = 2;
-        if (D_8009D008 != 0) n->b04 = 2;
+        if (GCD.bce0c == 0) n->b04 = 2;
+        if (GCD.bd008 != 0) n->b04 = 2;
     }
 }

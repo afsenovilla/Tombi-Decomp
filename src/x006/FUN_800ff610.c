@@ -1,5 +1,6 @@
 // FUNC 800ff610 2228 X006
 // MATCHING 800ff610 2228
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -8,7 +9,6 @@ typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short 
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned char D_8009CFFB, D_8009CDAC;
 extern unsigned char D_1F8001A4;
 extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
@@ -23,8 +23,8 @@ extern void FUN_8001fe94(TObj *, int);
 
 static __inline__ short calc(void)
 {
-    short c = D_8009CFFB != 0;
-    if (D_8009CDAC == 0xff)
+    short c = GCD.bcffb != 0;
+    if (GCD.bcdac == 0xff)
         c++;
     if (GAME.selectedArea == 0 && GAME.selectedSection < 2)
         c = 0;

@@ -1,11 +1,11 @@
 // FUNC 801167f0 412 X005
 // MATCHING 801167f0 412
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009CDD5;
 extern short D_1F8001C6;
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -20,7 +20,7 @@ void func_801167F0(TObj *o)
         v = *(V6 *)&o->a;
         if (GV2.bc3 & 0x10) {
             o->d90 = showMessageBoxDirect(2, 0x58, &v);
-        } else if (D_8009CDD5 == 0xff) {
+        } else if (GCD.bcdd5 == 0xff) {
             o->d90 = showMessageBoxDirect(2, 0x4e, &v);
         } else {
             o->d90 = showMessageBoxDirect(2, 0x3c, &v);

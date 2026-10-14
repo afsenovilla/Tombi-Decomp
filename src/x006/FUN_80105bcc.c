@@ -1,5 +1,6 @@
 // FUNC 80105bcc 2308 X006
 // MATCHING 80105bcc 2308
+#include "gcd.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -10,7 +11,6 @@ extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6, D_1F8003C4;
 extern unsigned char D_8009D2B1;
-extern unsigned char D_8009CF06;
 extern unsigned char D_801152E8[];
 extern void FUN_8010eaf8(TObj *o);
 extern void FUN_800ef490(TObj *o);
@@ -171,7 +171,7 @@ void FUN_80105bcc(TObj *o)
                 D_8009D2B1 = D_8009D2E8->subtype;
                 break;
             case 4:
-                D_8009CF06 = 1;
+                GCD.bcf06 = 1;
                 break;
             }
             D_8009D2E8->step = 3;
