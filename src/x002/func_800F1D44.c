@@ -85,19 +85,19 @@ void func_800F1D44(TObj *o)
     short w;
     unsigned short t;
 
-    if (U8(o, 0xac) >= 2) {
+    if ((*(unsigned char*)&o->wac) >= 2) {
         D_8009D2E8 = D_800A611C;
         D_8009D2E8[4] = 2;
         D_8009D2E8[5] = 2;
         D_8009D2E8[6] = 0;
     }
-    U8(o, 0xac) = 0;
+    (*(unsigned char*)&o->wac) = 0;
     if (D_8009D670[0] & 0xa0) {
         switch (o->state) {
         case 0:
             XO(o)->cd = 0;
             XO(o)->ce = 0;
-            U8(D_8009C330, 8) = 0;
+            (*(unsigned char*)&D_8009C330->w08) = 0;
             XO(o)->c3 = 0;
             o->velX = 0;
             o->state++;
@@ -120,7 +120,7 @@ void func_800F1D44(TObj *o)
             o->h->raw += D_8009C944[0] << 8;
             o->y.raw += D_8009C944[1] << 8;
             FUN_8001fce4(o);
-            if (U8(o, 0xad) == 0) {
+            if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {
                 if (o->subtype != 0) {
                     if ((unsigned short)(o->wb0 + 5) >= 11) o->y.raw += 0x50000;
                     else o->y.raw += 0x30000;
@@ -140,17 +140,17 @@ void func_800F1D44(TObj *o)
                 if (D_8009D670[0] & 0x80) {
                     if (o->wb2 < -0x1ff) {
                     inc:
-                        U8(D_8009C330, 8)++;
-                        if (U8(D_8009C330, 8) > 20) {
+                        (*(unsigned char*)&D_8009C330->w08)++;
+                        if ((*(unsigned char*)&D_8009C330->w08) > 20) {
                             XO(o)->cd = 0;
                             XO(o)->ce = 0;
-                            U8(D_8009C330, 8) = 0;
+                            (*(unsigned char*)&D_8009C330->w08) = 0;
                             o->step = 0x1c;
                             o->state = 0;
                         }
                     } else {
                     clr:
-                        U8(D_8009C330, 8) = 0;
+                        (*(unsigned char*)&D_8009C330->w08) = 0;
                     }
                 }
                 break;
@@ -235,14 +235,14 @@ void func_800F1D44(TObj *o)
     } else {
         FUN_800efa80(o);
         if (o->animFrame & 8) {
-            if ((o->animFrame & 2) && (U8(o, 0xa0) & 2)) {
+            if ((o->animFrame & 2) && ((*(unsigned char*)&o->da0) & 2)) {
                 D_8009C330->animFrame = 0xffff;
                 o->anim = D_80010DE0;
-                U8(o, 0xa2) = 1;
-            } else if ((o->animFrame & 4) && (U8(o, 0xa0) & 0x10)) {
+                (*(unsigned char*)((char*)&o->da0 + 2)) = 1;
+            } else if ((o->animFrame & 4) && ((*(unsigned char*)&o->da0) & 0x10)) {
                 D_8009C330->animFrame = 0xffff;
                 o->anim = D_80010E2C;
-                U8(o, 0xa3) = 1;
+                (*(unsigned char*)((char*)&o->da0 + 3)) = 1;
             }
         }
         XO(o)->cd = 0;

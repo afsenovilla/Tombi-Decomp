@@ -26,7 +26,7 @@ int func_80124E34(TObj *o, TObj *e)
         o->y.p.frac = 0;
         o->velY = 0;
         o->b69 = 1;
-        if (U8(o, 0xac) != 3) e->b69 = 1;
+        if ((*(unsigned char*)&o->wac) != 3) e->b69 = 1;
         d = e->d8c;
         if (d > 0x800) {
             v = ((unsigned)(-d) & 0xfff) >> 6;

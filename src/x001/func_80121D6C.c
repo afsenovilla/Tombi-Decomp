@@ -20,17 +20,17 @@ void func_80121D6C(TObj *o)
 
     switch (o->state) {
     case 0:
-        U8(o, 0xa0) = 0;
+        (*(unsigned char*)&o->da0) = 0;
         FUN_800eeb5c(o, 0x1b);
         o->wb6 = 0;
-        S16(D_8009C330, 2) = 0;
-        U8(o, 0xa2) = 3;
+        (*(short*)&D_8009C330->type) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
         o->wb0 = 0;
         o->wb2 = 0;
         o->velH = 0;
         o->velV = 0;
         o->d8c = 0;
-        U8(o, 0xaa) = 1;
+        (*(unsigned char*)&o->waa) = 1;
         o->timer = 0xf;
         D_8009C942[0] = 1;
         D_8009C93F[0] = 1;
