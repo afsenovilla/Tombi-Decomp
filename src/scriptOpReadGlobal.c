@@ -1,18 +1,12 @@
 // FUNC 8003a570 48 MAIN0
 // MATCHING 8003a570 48
 #include "globals.h"
-typedef struct {
-    char pad[0x8a];
-    unsigned short w8a;
-    char pad2[0x1190 - 0x8c];
-    int d1190;
-} S8003A570;
+#include "scriptctx.h"
 
-extern S8003A570 *SCRIPT_CTX;
 
 void scriptOpReadGlobal(void)
 {
-    S8003A570 *p = SCRIPT_CTX;
-    p->d1190 = SCRIPT_GLOBALS[p->d1190];
-    p->w8a++;
+    ScriptCtx *p = SCRIPT_CTX;
+    p->arg[0] = SCRIPT_GLOBALS[p->arg[0]];
+    p->pc++;
 }

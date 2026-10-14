@@ -1,6 +1,6 @@
 // FUNC 800382fc 272 MAIN0
 // MATCHING 800382fc 272
-extern unsigned char *SCRIPT_CTX;
+#include "scriptctx.h"
 extern unsigned char *SCRIPT_CODE;
 
 static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
