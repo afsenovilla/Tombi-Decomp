@@ -21,7 +21,7 @@ void FUN_8010dd8c(TObj *o)
     case 0:
         o->velY = 0x300;
         o->b9c = 2;
-        U8(o, 0xac) = 1;
+        (*(unsigned char*)&o->wac) = 1;
         o->b69 = 0;
         o->wb2 = 0x200;
         U8(o, 0xca) = 0;
@@ -45,15 +45,15 @@ void FUN_8010dd8c(TObj *o)
         o->wb2 = 0;
     *(volatile short *)&o->velY = o->velY - 0x10;
     o->timer--;
-    if (U8(o, 0xac) == 2) {
+    if ((*(unsigned char*)&o->wac) == 2) {
         DAT_8009d2e8 = S32(o, 0xe4);
-        U8(DAT_8009c330, 8) = 0;
+        (*(unsigned char*)&DAT_8009c330->w08) = 0;
         o->ba7 = 0;
         o->ba5 = 0;
         o->step = 0x48;
         o->state = 0;
         o->substep = 0;
-        U8(o, 0xab) &= 0x7f;
+        (*(unsigned char*)((char*)&o->waa + 1)) &= 0x7f;
         return;
     }
     v = o->velY;
@@ -75,7 +75,7 @@ void FUN_8010dd8c(TObj *o)
     FUN_800eea7c(o, 0x44, 0);
     o->b69 = 0;
     o->b9c = 0;
-    U8(o, 0xac) = 0;
+    (*(unsigned char*)&o->wac) = 0;
     o->step = 0x3e;
     o->state = 0;
 }

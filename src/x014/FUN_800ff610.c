@@ -46,9 +46,9 @@ void FUN_800ff610(TObj *o, int arg)
     if (!(o->active & 1))
         return;
     func_800FF0E8(o);
-    if (U8(o, 0xa1) == 0)
+    if ((*(unsigned char*)((char*)&o->da0 + 1)) == 0)
         return;
-    switch (U8(o, 0xa1)) {
+    switch ((*(unsigned char*)((char*)&o->da0 + 1))) {
     case 1:
         switch (GAME.selectedArea) {
         case 0:
@@ -78,7 +78,7 @@ void FUN_800ff610(TObj *o, int arg)
             o->b04 = 2;
             o->step = 0;
             o->state = 0;
-            U8(o, 0xa1) = 0;
+            (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
             return;
         case 9:
             if (GAME.selectedSection != 0)
@@ -130,7 +130,7 @@ void FUN_800ff610(TObj *o, int arg)
             o->step = 0;
             o->state = 0;
         clr:
-            U8(o, 0xa1) = 0;
+            (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
             return;
         }
         break;
@@ -194,7 +194,7 @@ void FUN_800ff610(TObj *o, int arg)
         o->state = 0;
         D_8009C944 = 0;
         D_8009C946 = -0x40;
-        U8(o, 0xa1) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         FUN_8001e5f4(0xe, 0x7f);
         return;
     }
@@ -217,7 +217,7 @@ void FUN_800ff610(TObj *o, int arg)
     U8(o, 0xc7) = 1;
     U8(o, 0xcd) = 0;
     U8(o, 0xce) = 0;
-    U8(o, 0xa1) = 0;
+    (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
     o->b04 = 2;
     o->step = 2;
     o->state = 0;
