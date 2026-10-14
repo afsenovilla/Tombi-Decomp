@@ -1,12 +1,12 @@
 // FUNC 80129650 652 X004
 // MATCHING 80129650 652
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80131188[];
-extern unsigned char D_8009D2B0;
 extern short D_1F8001C6;
 extern unsigned char D_8009CFDD, D_8009CFF7;
 extern void AnimJump(TObj *, int);
@@ -34,7 +34,7 @@ void func_80129650(TObj *o)
     case 0:
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

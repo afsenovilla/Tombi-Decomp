@@ -1,5 +1,6 @@
 // FUNC 80116ae0 300 X004
 // MATCHING 80116ae0 300
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -7,7 +8,6 @@
 extern TObj PLAYER;
 extern short D_1F80016A, D_1F800172;
 extern unsigned short D_1F8001FC;
-extern unsigned char D_8009D2B0;
 extern int tryStartItemInteraction(TObj *, int, int);
 
 static __inline__ short busy(void)
@@ -23,7 +23,7 @@ void func_80116AE0(TObj *o)
 {
     if (D_1F80016A >= 0x6d0 && D_1F800172 == 0x168) {
         if (tryStartItemInteraction(o, 1, 7)) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             GVARS.b3f = 1;
             GVARS.b42 = 1;
         }
@@ -32,7 +32,7 @@ void func_80116AE0(TObj *o)
     if (busy()) return;
     if (D_1F80016A < 0x28a && D_1F800172 == 0x21c) {
         if (tryStartItemInteraction(o, 1, 8)) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             GVARS.b3f = 1;
             GVARS.b42 = 1;
         }

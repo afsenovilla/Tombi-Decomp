@@ -1,5 +1,6 @@
 // FUNC 801162b4 988 X005
 // MATCHING 801162b4 988
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -13,7 +14,6 @@ extern unsigned char D_8009CDD5;
 extern unsigned char D_8009CDD2;
 extern unsigned char D_8009CF00;
 extern unsigned char D_8009CF04;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009CEED;
 extern short D_1F8001C6;
 extern AT D_801176CC[];
@@ -53,7 +53,7 @@ void func_801162B4(TObj *o)
             }
         }
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

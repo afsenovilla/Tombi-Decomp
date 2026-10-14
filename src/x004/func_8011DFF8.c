@@ -1,9 +1,9 @@
 // FUNC 8011dff8 348 X004
 // MATCHING 8011dff8 348
+#include "gv2.h"
 #include "TOBJ.H"
 extern int D_1F8002D4[];
 extern void *D_8013B104[];
-extern unsigned char D_8009D2AE;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void func_8011DE60(TObj *);
@@ -37,7 +37,7 @@ void func_8011DFF8(TObj *o)
         if (FUN_800202b4(o)) {
             FUN_8001e4f0(0x34);
             FUN_800ea544(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-            { unsigned char *c = &D_8009D2AE; *c |= 1 << o->subtype; }
+            { unsigned char *c = &GV2.bae; *c |= 1 << o->subtype; }
             o->b04 = 3;
         }
         break;

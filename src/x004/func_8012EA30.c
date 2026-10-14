@@ -1,9 +1,10 @@
 // FUNC 8012ea30 328 X004
 // MATCHING 8012ea30 328
+#include "gv2.h"
 #include "TOBJ.H"
 
 typedef struct { unsigned short f, s, c, x, y, z; } T;
-extern unsigned char D_8009D2C3, D_8009CF2D, D_8009CF29[];
+extern unsigned char D_8009CF2D, D_8009CF29[];
 extern T D_8013144C;
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -14,7 +15,7 @@ void func_8012EA30(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 8) {
+        if (GV2.bc3 & 8) {
             o->b04 = 3;
             break;
         }

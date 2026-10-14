@@ -1,8 +1,9 @@
 // FUNC 8012f35c 404 X004
 // MATCHING 8012f35c 404
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3, D_8009CDDC;
+extern unsigned char D_8009CDDC;
 extern unsigned char D_8009CF24[];
 extern void func_8012ECA0(TObj *);
 extern void func_8012EE14(TObj *);
@@ -14,7 +15,7 @@ void func_8012F35C(TObj *o)
     short i;
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 8) {
+        if (GV2.bc3 & 8) {
             o->b04 = 3;
         } else if (D_8009CDDC == 0xff) {
             o->b04 = 3;

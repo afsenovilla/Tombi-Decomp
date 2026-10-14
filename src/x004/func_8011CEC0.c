@@ -1,9 +1,10 @@
 // FUNC 8011cec0 1016 X004
 // MATCHING 8011cec0 1016
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
-extern unsigned char D_8009D0CC, D_8009D2C3;
+extern unsigned char D_8009D0CC;
 extern unsigned char D_8009CF11[];
 extern char D_80130CD4[];
 extern short D_80130D14[];
@@ -40,7 +41,7 @@ void func_8011CEC0(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (!D_8009D0CC || (D_8009D2C3 & 4)) {
+        if (!D_8009D0CC || (GV2.bc3 & 4)) {
             o->b04 = 3;
             break;
         }
