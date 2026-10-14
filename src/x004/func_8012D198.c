@@ -1,10 +1,10 @@
 // FUNC 8012d198 788 X004
 // MATCHING 8012d198 788
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDF5, D_8009CE63[];
 extern void *D_801357D8[], *D_801357DC[], *D_801357E0[];
 extern short D_1F80016A;
 extern int showMessageBoxDirect(int, int, void *);
@@ -26,13 +26,13 @@ void func_8012D198(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CDF5) {
+        if (GCD.bcdf5) {
             o->b04 = 3;
             break;
         }
         o->b68 = 0;
         o->animFrame = 1;
-        if (D_8009CE63[0] == 0xff) o->state = 3;
+        if (((unsigned char*)&GCD.bce63)[0] == 0xff) o->state = 3;
         else o->state = 1;
         break;
     case 1:

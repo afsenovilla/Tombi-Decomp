@@ -1,11 +1,11 @@
 // FUNC 8012e204 584 X004
 // MATCHING 8012e204 584
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 /* Real size 584 B: includes the csv piece func_8012E438 (20 B), the epilogue of this function. */
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDD7, D_8009CF29;
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -40,7 +40,7 @@ void func_8012E204(TObj *o)
         break;
     case 3:
         GVARS.b3e = 1;
-        if (D_8009CDD7 == 0xff) {
+        if (GCD.bcdd7 == 0xff) {
             PLAYER.obj.step = 0x20;
             (*(unsigned short*)&PLAYER.obj.timer) = 1;
             PLAYER.obj.b04 = 1;
@@ -63,7 +63,7 @@ void func_8012E204(TObj *o)
         break;
     case 5:
         q = &(*(unsigned short*)&PLAYER.obj.timer);
-        D_8009CF29 = 1;
+        GCD.bcf29 = 1;
         GVARS.b3f = 0;
         GVARS.b42 = 0;
         GVARS.b3e = 0;

@@ -1,9 +1,9 @@
 // FUNC 8012f508 344 X004
 // MATCHING 8012f508 344
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE52;
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern void setEventStarted(int, int, int);
 
@@ -11,7 +11,7 @@ void func_8012F508(TObj *o)
 {
     switch (o->state) {
     case 0:
-        if (D_8009CE52) {
+        if (GCD.bce52) {
             o->b04 = 3;
             break;
         }

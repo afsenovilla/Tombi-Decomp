@@ -1,12 +1,12 @@
 // FUNC 8012fbf4 1352 X004
 // MATCHING 8012fbf4 1352
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], DAT_8009d2b0;
-extern unsigned char D_8009CFCB[];
-extern unsigned char D_8009CE3B, D_8009D13E, D_8009CFCA;
+extern unsigned char D_8009D13E;
 extern short D_1F8001C6;
 extern AT3 D_801314C8[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -31,12 +31,12 @@ void func_8012FBF4(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        D_8009CFCB[0] = 1;
+        ((unsigned char*)&GCD.bcfcb)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         o->anim = D_801314C8[o->subtype].p[1];
         AnimLoadDuration(o);
-        if (D_8009CE3B == 1) {
+        if (GCD.bce3b == 1) {
             o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
             o->state = 10;
         } else {
@@ -84,7 +84,7 @@ void func_8012FBF4(TObj *o)
         PLAYER.wb2 = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
-        c = &D_8009CFCA;
+        c = &GCD.bcfca;
         PLAYER.b04 = 1;
         PLAYER.step = 0;
         PLAYER.state = 0;

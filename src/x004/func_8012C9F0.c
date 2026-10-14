@@ -1,10 +1,10 @@
 // FUNC 8012c9f0 1960 X004
 // MATCHING 8012c9f0 1960
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE62, D_8009CE63, D_8009D086[];
 extern unsigned short D_800A6066;
 extern short D_1F80016E;
 extern void *D_8013577C[], *D_80135784[];
@@ -23,7 +23,7 @@ void func_8012C9F0(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CE62 != 0xff) {
+        if (GCD.bce62 != 0xff) {
             o->b04 = 3;
             break;
         }
@@ -31,9 +31,9 @@ void func_8012C9F0(TObj *o)
         o->box0 = 0x20;
         o->box1 = 0x40;
         o->b68 = 0;
-        if (D_8009D086[0] == 0) {
+        if (((unsigned char*)&GCD.bd086)[0] == 0) {
             o->state = 1;
-        } else if (D_8009D086[0] == 1) {
+        } else if (((unsigned char*)&GCD.bd086)[0] == 1) {
             o->state = 4;
         } else {
             o->b04 = 3;
@@ -44,7 +44,7 @@ void func_8012C9F0(TObj *o)
         y = D_1F80016E;
         if (!((y < -0x40b && ((*(unsigned char*)&PLAYER.obj.waa) || PLAYER.obj.b9e)) || y == -0x450)) break;
         o->state++;
-        D_8009D086[0] = 1;
+        ((unsigned char*)&GCD.bd086)[0] = 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         o->d90 = showMessageBoxDirect(3, 0, &o->a);
@@ -59,7 +59,7 @@ void func_8012C9F0(TObj *o)
         TObj *p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        if (D_8009CE63 == 0) {
+        if (GCD.bce63 == 0) {
             o->timer = 0x140;
             o->state++;
             setEventStarted(0xbf, 0, 0);
@@ -87,7 +87,7 @@ void func_8012C9F0(TObj *o)
         }
         if (o->b68 == 0) break;
         o->state++;
-        D_8009D086[0] = 1;
+        ((unsigned char*)&GCD.bd086)[0] = 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
@@ -247,7 +247,7 @@ void func_8012C9F0(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        D_8009D086[0] = 2;
+        ((unsigned char*)&GCD.bd086)[0] = 2;
         o->state = 0;
         break;
     }

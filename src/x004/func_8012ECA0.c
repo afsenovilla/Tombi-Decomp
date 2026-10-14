@@ -1,11 +1,11 @@
 // FUNC 8012eca0 372 X004
 // MATCHING 8012eca0 372
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa; } F;
 extern F D_801314A4;
 extern E D_8013145C[];
-extern unsigned char D_8009CF24[];
 extern TObj *allocObjectLayer2(void);
 
 void func_8012ECA0(void)
@@ -28,7 +28,7 @@ void func_8012ECA0(void)
     }
     }
     for (i = 0; i < 5; i++) {
-        if (D_8009CF24[i] == 0) continue;
+        if (((unsigned char*)&GCD.bcf24)[i] == 0) continue;
         p = &D_8013145C[i];
         n = allocObjectLayer2();
         if (n == 0) continue;

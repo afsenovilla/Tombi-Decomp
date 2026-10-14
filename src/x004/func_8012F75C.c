@@ -1,5 +1,6 @@
 // FUNC 8012f75c 632 X004
 // MATCHING 8012f75c 632
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -7,7 +8,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801314BC[];
-extern unsigned char D_8009CE24[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -45,7 +45,7 @@ void func_8012F75C(TObj *o)
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->timer = 4;
         D_1F8001C6 = 0;
-        if (D_8009CE24[0] == 1) {
+        if (((unsigned char*)&GCD.bce24)[0] == 1) {
             setEventComplete(0x80, 1);
             FUN_80026c50(0x96, 1, 1);
             o->timer = 200;

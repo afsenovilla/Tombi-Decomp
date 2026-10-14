@@ -1,12 +1,12 @@
 // FUNC 8012dcf4 524 X004
 // MATCHING 8012dcf4 524
+#include "gcd.h"
 /* Loop written as a while with the increment in the test (`++i`): the branch target is the copied exit test (NOTE_INSN_LOOP_VTOP), so reorg predicts the `if (e)` skips taken and steals i+1 into their delay slots. Debt: volatile f0 read (keeps the &0x80 load in the body and the frame at 0x28) and do {} while (0) around the second spawn body (extra loop-weighted ref on o so it gets s2 before list). Twin of X003 func_80133448. */
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } SP;
 
-extern unsigned char D_8009CDAB, D_8009CFCB;
 extern SP *D_80131438;
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
@@ -17,7 +17,7 @@ void func_8012DCF4(TObj *o)
     TObj *e;
     short i;
 
-    if (!D_8009CDAB || D_8009CFCB) {
+    if (!GCD.bcdab || GCD.bcfcb) {
         o->b04 = 3;
         return;
     }

@@ -1,4 +1,5 @@
 // FUNC 80118720 464 X004
+#include "spad.h"
 /* score 25 (n72, was 28): only register allocation differs (game: y t1, -y t2, table base t3; ours base t2, -y t3).
    n72 findings: the table base `tb` as a multi-set pointer (`tb = D; ... tb = (V4(*)[4])((V4*)tb + 3)` for the last
    element, symbol form `&D_80133ADC[idx][k]` for the first three so cse keeps `addiu a2,tb,16/32`) is not boosted
@@ -20,12 +21,11 @@
 typedef struct { int x, y, z; } V3;
 typedef struct { int x, y, z, pad; } V4;
 extern V4 D_80133ADC[][4];
-extern int D_1F8000D4, D_1F8000D8, D_1F8000DC;
 static __inline__ void put(V4 *p, V3 *v)
 {
-    *(int *)((char *)p + 0) = v->x - D_1F8000D4;
-    *(int *)((char *)p + 4) = v->y - D_1F8000D8;
-    *(int *)((char *)p + 8) = v->z - D_1F8000DC;
+    *(int *)((char *)p + 0) = v->x - SPAD.id4;
+    *(int *)((char *)p + 4) = v->y - SPAD.id8;
+    *(int *)((char *)p + 8) = v->z - SPAD.idc;
 }
 void func_80118720(short z0, int idx)
 {

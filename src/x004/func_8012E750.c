@@ -1,8 +1,8 @@
 // FUNC 8012e750 196 X004
 // MATCHING 8012e750 196
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { unsigned short f, sub, c; short x, y, z; } Spawn;
-extern unsigned char D_8009CE22;
 extern Spawn D_8013143C;
 extern TObj *allocObjectLayer2(void);
 
@@ -10,7 +10,7 @@ void func_8012E750(TObj *o)
 {
     TObj *e;
 
-    if (D_8009CE22) {
+    if (GCD.bce22) {
         e = allocObjectLayer2();
         if (e) {
             e->active = 3;
