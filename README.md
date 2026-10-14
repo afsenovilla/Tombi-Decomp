@@ -1,4 +1,15 @@
-# Tombi! (Tomba!) — PlayStation decompilation
+# Tombi! (Tomba!) decomp
+
+| Version | Code | Data | Functions |
+|---|---|---|---|
+| Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) |
+| Japan (*Ore! Tomba*) | in preparation, see [docs/JP.md](docs/JP.md) | | |
+| Japan demo (`SLPM-80165`) | split only, see [docs/JPDEMO.md](docs/JPDEMO.md) | | |
+
+[![Report](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml/badge.svg)](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml)
+[![Platform](https://img.shields.io/badge/platform-PlayStation-003791)](#target)
+[![Compiler](https://img.shields.io/badge/compiler-GCC%20%2B%20maspsx-orange)](#how-matching-works)
+[![License](https://img.shields.io/github/license/afsenovilla/Tombi-Decomp)](LICENSE)
 
 A work-in-progress **matching decompilation** of *Tombi!* (known as *Tomba!* in North America and
 *Ore! Tomba* in Japan) for the original PlayStation. The goal is C source code that compiles, with the
@@ -10,7 +21,11 @@ function in `src/` is verified to produce exactly the same instructions as the r
 > This repository contains no game data, executables, disc images or Sony SDK files.
 > You need your own legally obtained copy of the game and of the toolchain.
 
-## Progress
+[![Progress map](https://decomp.dev/afsenovilla/Tombi-Decomp.png)](https://decomp.dev/afsenovilla/Tombi-Decomp)
+
+<sub>Each rectangle is a unit sized by its code; green means it matches. Click for the details on decomp.dev.</sub>
+
+## Status
 
 <!-- progress:start -->
 **Whole game: 100.00 % of the game's code matches byte for byte** (1327860 of 1327860 bytes).
@@ -28,16 +43,8 @@ function in `src/` is verified to produce exactly the same instructions as the r
 - Also tracked for MAIN0 + X000: 26.9 % of the code named by us, 76.0 % typed with the TObj structure.
 <!-- progress:end -->
 
-![Progress](docs/progress.svg)
-
-Function maps of MAIN0 and X000 (one block per function, coloured by status):
-
-![MAIN0](docs/map_main0.svg)
-
-![X000](docs/map_x000.svg)
-
 Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
-Everything in this section is regenerated with `python3 tools/progress.py`.
+The table above is regenerated with `python3 tools/progress.py`.
 
 ## Target
 

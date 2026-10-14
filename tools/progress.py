@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 # program -> (functions csv, names csv, code range [lo, hi])
 # The keys are kept as-is because they are also the keys of "programs" in docs/progress.json;
-# DISPLAY gives the English label used in PROGRESS.md and the SVGs.
+# DISPLAY gives the English label used in PROGRESS.md and docs/progress.svg.
 PROGRAMS = {
     "MAIN0.EXE (nucleo del juego)": ("functions_main0.csv", "names_main0.csv", (0x800163F4, 0x800778EF)),
     "X000.BIN (overlay AREA00)": ("functions_x000.csv", "names_x000.csv", (0x800E8028, 0x8013C0F8)),
@@ -128,8 +128,6 @@ def bar(p, w=24):
 
 
 COL = {"match": "#16a34a", "named": "#22c55e", "typed": "#38bdf8", "unnamed": "#f59e0b", "lib": "#94a3b8"}
-LAB = {"match": "Matching C", "named": "Named by us", "typed": "Unnamed, with TObj",
-       "unnamed": "Unnamed, untyped", "lib": "Sony library (Psy-Q)"}
 FONT = "font-family=\"Segoe UI,Helvetica,Arial,sans-serif\""
 
 
@@ -169,32 +167,6 @@ def write_svgs(res, tot, matching, whole=(0, 1), areas=(0, 1)):
         y += 36
     o.append("</svg>")
     open(N("docs", "progress.svg"), "w").write("\n".join(o))
-
-    # memory maps per program
-    for key, (name, r) in zip(("main0", "x000"), res.items()):
-        lo, hi = r["range"]
-        name = DISPLAY.get(name, name)
-        ROW = 0x4000                      # 16 KB per row
-        rowsn = (hi - lo) // ROW + 1
-        wpx = 880.0
-        h = 62 + rowsn * 16 + 28
-        m = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-label="Map of %s">' % (W, h, W, h, esc(name)),
-             '<rect width="%d" height="%d" rx="14" fill="#ffffff" stroke="#e2e8f0"/>' % (W, h),
-             '<text x="28" y="36" %s font-size="18" font-weight="700" fill="#0f172a">Function map &#8212; %s</text>' % (FONT, esc(name)),
-             '<text x="28" y="54" %s font-size="12" fill="#64748b">Each row = 16 KB from 0x%08X. Each block = one function, colored by its status. Light gray = data or gap.</text>' % (FONT, lo)]
-        for i in range(rowsn):
-            yy = 66 + i * 16
-            m.append('<rect x="10" y="%d" width="%.1f" height="13" fill="#f1f5f9"/>' % (yy, wpx))
-        for a, size, st in sorted(r["items"]):
-            row, col = divmod(a - lo, ROW)
-            while size > 0 and row < rowsn:
-                part = min(size, ROW - col)
-                x0 = 10 + wpx * col / ROW
-                ww = max(1.0, wpx * part / ROW)
-                m.append('<rect x="%.1f" y="%d" width="%.1f" height="13" fill="%s"><title>0x%08X %d B &#183; %s</title></rect>' % (x0, 66 + row * 16, ww, COL[st], a, size, LAB[st]))
-                size -= part; row += 1; col = 0
-        m.append("</svg>")
-        open(N("docs", "map_%s.svg" % key), "w").write("\n".join(m))
 
 
 def covered(items, prog, lib=False):
