@@ -5,7 +5,7 @@ extern unsigned short DAT_8009c960;
 extern void FUN_80122f54(void);
 extern void FUN_8011ccd8(void);
 
-void FUN_80102a08(void)
+void playerStep2EByArea(void)
 {
     switch (DAT_8009c960) {
     case 1:

@@ -38,7 +38,7 @@ extern unsigned char DAT_801152e8[];
 extern short DAT_801151e0[];
 extern T800F2B98 DAT_800e8404;
 extern short FUN_8001fddc(int, int);
-extern void FUN_8010f328(TObj *);
+extern void playerSetJumpRiseVelocity(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001fec0(TObj *);
@@ -58,7 +58,7 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
 extern void FUN_800efc8c(TObj *, int);
 
-void FUN_800f2b98(TObj *o)
+void playerStepJump(TObj *o)
 {
     T800F2B98 tab;
     short s;
@@ -97,7 +97,7 @@ void FUN_800f2b98(TObj *o)
             DAT_8009d2e8[6] = 0;
         }
         *(unsigned char *)&o->wac = 0;
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
         tab = DAT_800e8404;
         o->anim = tab.p[DAT_8009c330->w2c];
         FUN_8001fe6c(o);
@@ -123,7 +123,7 @@ void FUN_800f2b98(TObj *o)
             }
             DAT_8009c330->w20++;
         }
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
     case 2:
     common:
         o->h->raw += DAT_8009c944 << 8;

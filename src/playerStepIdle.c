@@ -21,7 +21,7 @@ extern char D_8001080c[];
 extern char D_800113cc[];
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800efa80(TObj *);
+extern void playerSelectGroundAnim(TObj *);
 extern void FUN_800f1308(TObj *);
 extern short func_800F0E7C(TObj *);
 extern void FUN_8010f400(TObj *);
@@ -48,7 +48,7 @@ typedef struct { unsigned char pad[0x28]; unsigned short w28, w2a, w2c, w2e; } Q
         }                                                    \
     }
 
-void FUN_800f1478(TObj *o)
+void playerStepIdle(TObj *o)
 {
     unsigned char c;
     unsigned char *p;
@@ -80,7 +80,7 @@ void FUN_800f1478(TObj *o)
             else
                 o->h->raw += 0x10000;
         } else {
-            FUN_800efa80(o);
+            playerSelectGroundAnim(o);
         }
         YADJ(o);
         DAT_8009c330[0x1e] = 0;
@@ -104,7 +104,7 @@ void FUN_800f1478(TObj *o)
             } else {
                 c = func_800F0E7C(o);
                 if (!c)
-                    FUN_800efa80(o);
+                    playerSelectGroundAnim(o);
                 if (*(unsigned short *)o->anim || (!DAT_8009c93f && !DAT_1f8003ce))
                     FUN_8001fec0(o);
             }

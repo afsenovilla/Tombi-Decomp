@@ -1,7 +1,7 @@
 // FUNC 8010d7f0 152 X000
 // MATCHING 8010d7f0 152
 #include "TOBJ.H"
-void func_8010D7F0(TObj *o)
+void setAngleSpeedFromDir8(TObj *o)
 {
     switch (o->w76 & 7) {
     case 0: o->w7a = 0; break;

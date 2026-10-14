@@ -19,7 +19,7 @@ extern void FUN_800ef1ac(TObj *);
 
 #define DIR(o, a, b) (o->h->p.whole + ((o->animFrame & 1) ? (a) : (b)))
 
-void FUN_801099b8(TObj *o)
+void playerStepClimb(TObj *o)
 {
     volatile unsigned short *k;
     short r;

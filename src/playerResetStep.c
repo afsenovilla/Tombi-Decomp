@@ -2,7 +2,7 @@
 // MATCHING 800ef150 92
 extern void FUN_8001e5f4(int, int);
 extern char *DAT_8009c330;
-void FUN_800ef150(char *o)
+void playerResetStep(char *o)
 {
     FUN_8001e5f4(0x1c, 0x7f);
     DAT_8009c330[8] = 0;

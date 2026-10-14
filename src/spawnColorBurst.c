@@ -5,7 +5,7 @@
 extern unsigned short D_1f8001c8;
 extern TObj *FUN_80018448(void);
 
-void FUN_800ec84c(int type)
+void spawnColorBurst(int type)
 {
     TObj *o;
     int i;

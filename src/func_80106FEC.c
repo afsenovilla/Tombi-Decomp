@@ -10,12 +10,12 @@ extern G *D_8009C330;
 void ObjSetAnimFromTable(TObj *o);
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
-void FUN_800ef4e4(TObj *o);
+void setFacingAndUpDownFromPad(TObj *o);
 void func_800EEA3C(TObj *o);
 void func_8010FE70(TObj *o);
 void FUN_800ee9cc(TObj *o);
 void FUN_800ee88c(TObj *o);
-void FUN_800f00ac(TObj *o);
+void playerCheckGroundAndFall(TObj *o);
 void ObjAddVelY7E(TObj *o);
 short ObjTileCollide(TObj *, int, int);
 void func_8010E328(TObj *o, int);
@@ -41,7 +41,7 @@ void func_80106FEC(TObj *o)
         }
         o->state++;
     case 1:
-        FUN_800ef4e4(o);
+        setFacingAndUpDownFromPad(o);
         func_800EEA3C(o);
         func_8010FE70(o);
         if (o->b69 & 2) {
@@ -51,7 +51,7 @@ void func_80106FEC(TObj *o)
         }
         FUN_800ee9cc(o);
         FUN_800ee88c(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         if (AnimAdvance(o)) goto stop;
         if ((o->animFrame & 1) && o->wb2 < 0) {
             o->step = 1;

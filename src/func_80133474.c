@@ -38,7 +38,7 @@ extern void ObjListPush_1F80021C(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern void FUN_80133254(TObj *);
 extern void func_80132F80(TObj *);
-extern void func_800EEA7C(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern void addItemToInventory(int, int, int);
@@ -102,7 +102,7 @@ void func_80133474(TObj *o)
                 PLAYER.visible = 1;
                 PLAYER.d8c = 0;
                 D_8009C984 |= 2;
-                func_800EEA7C(&PLAYER, 0xd, 0);
+                playerSetAnim(&PLAYER, 0xd, 0);
                 o->timer = 2;
                 if (((unsigned char*)&GCD.bcda7)[0] == 0) {
                     o->w78 = 1;

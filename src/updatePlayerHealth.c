@@ -8,7 +8,7 @@ extern P *D_8009C330;
 extern void stopBgm(int);
 extern void playJingle(int);
 
-void func_800FC104(TObj *o)
+void updatePlayerHealth(TObj *o)
 {
     char pad;
     if (*(unsigned char *)0x1F8001A4 == 0 && o->w9a != o->w98) {

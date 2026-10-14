@@ -3,7 +3,7 @@
 #include "gamestate.h"
 #include "player.h"
 extern unsigned char TALK_POSE;
-void func_800EEA7C(unsigned char *p, int a, int b);
+void playerSetAnim(unsigned char *p, int a, int b);
 void func_800E8A98(unsigned char *p, int a, int b);
 void func_800E96E8(unsigned char *p, int a, int b);
 void func_800E940C(unsigned char *p, int a, int b);
@@ -13,7 +13,7 @@ void clearTalkPose(void)
     TALK_POSE = 0;
     switch (*p) {
     case 0:
-        if (GAME.selectedArea == 9) func_800EEA7C(p - 2, 0, 0);
+        if (GAME.selectedArea == 9) playerSetAnim(p - 2, 0, 0);
         break;
     case 1:
         func_800E8A98(p - 2, 0, (*(short*)&PLAYER.obj.animFrame));

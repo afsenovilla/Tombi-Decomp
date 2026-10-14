@@ -15,7 +15,7 @@ extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_800eeb5c(O *, int);
-extern void FUN_800eea7c(O *, int, int);
+extern void playerSetAnim(O *, int, int);
 extern short FUN_8003fd78(O *, int, int);
 
 void FUN_80103d40(O *o)
@@ -43,7 +43,7 @@ void FUN_80103d40(O *o)
             if (o->h->s2 <= DAT_8009d2e8->h->s2) {
                 o->h->s2 = DAT_8009d2e8->h->s2;
                 if (flag) {
-                    FUN_800eea7c(o, 0xd, 0);
+                    playerSetAnim(o, 0xd, 0);
                     DAT_8009c330->w2e = 0xff;
                 }
             }
@@ -52,7 +52,7 @@ void FUN_80103d40(O *o)
             if (o->h->s2 >= DAT_8009d2e8->h->s2) {
                 o->h->s2 = DAT_8009d2e8->h->s2;
                 if (flag) {
-                    FUN_800eea7c(o, 0xd, 0);
+                    playerSetAnim(o, 0xd, 0);
                     DAT_8009c330->w2e = 0xff;
                 }
             }

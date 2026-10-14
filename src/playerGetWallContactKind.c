@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char *DAT_8009c330;
 
-int FUN_800eff1c(TObj *o)
+int playerGetWallContactKind(TObj *o)
 {
     int r = 0;
     unsigned char t;

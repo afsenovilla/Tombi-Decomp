@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[10]; unsigned char bca; } PObj;
 extern TObj *D_8009C330;
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8010d280(TObj *);
@@ -14,7 +14,7 @@ void func_8010D888(TObj *o)
     unsigned short d;
     switch (o->state) {
     case 0:
-        FUN_800eea7c(o, 0x44, 0);
+        playerSetAnim(o, 0x44, 0);
         o->timer = 10;
         ((PObj *)o)->bca = 1;
         D_8009C330->animFrame = 0xff;

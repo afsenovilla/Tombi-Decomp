@@ -9,7 +9,7 @@
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
 extern int AnimAdvance(TObj *);
-extern void func_800EEA7C(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 
 void func_80049CDC(TObj *o)
@@ -38,7 +38,7 @@ void func_80049CDC(TObj *o)
             pl->state = 0;
             pl->d8c = 0;
             pl->animFrame = 0;
-            func_800EEA7C(pl, 0, 0);
+            playerSetAnim(pl, 0, 0);
         } else {
             o->timer--;
         }
@@ -63,7 +63,7 @@ void func_80049CDC(TObj *o)
         break;
     case 4:
         pl->animFrame = 0;
-        func_800EEA7C(pl, 1, 0);
+        playerSetAnim(pl, 1, 0);
         o->state++;
         break;
     case 5:
@@ -73,7 +73,7 @@ void func_80049CDC(TObj *o)
             pl->h->p.whole = o->h->p.whole;
             o->timer = 30;
             o->state++;
-            func_800EEA7C(pl, 0x2c, 0);
+            playerSetAnim(pl, 0x2c, 0);
         }
         break;
     case 6:

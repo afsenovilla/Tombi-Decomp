@@ -2,7 +2,7 @@
 // MATCHING 8010e628 68
 #include "TOBJ.H"
 
-void func_8010E628(TObj *o)
+void playerStartFall(TObj *o)
 {
     int v;
     o->d84 = 0;

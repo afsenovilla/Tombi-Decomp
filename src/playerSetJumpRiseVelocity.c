@@ -8,7 +8,7 @@ extern unsigned char DAT_8009d006;
 extern TObj *DAT_8009c330;
 extern unsigned short DAT_80115468[][10];
 
-void FUN_8010f328(TObj *o)
+void playerSetJumpRiseVelocity(TObj *o)
 {
     int b = ((unsigned char *)o)[0xc1];
     int u = DAT_8009d2b3 + b * 4;

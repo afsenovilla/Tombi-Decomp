@@ -3,7 +3,7 @@
 extern unsigned short DAT_8009c960;
 extern void FUN_8011e1a4(void);
 extern void FUN_8011dae0(void);
-void FUN_80106f98(void)
+void playerStep3CByArea(void)
 {
 switch (DAT_8009c960) {
 case 3: FUN_8011e1a4(); break;

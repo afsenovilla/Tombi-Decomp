@@ -34,7 +34,7 @@ extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
-extern void FUN_800efa80(TObj *);
+extern void playerSelectGroundAnim(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
@@ -184,7 +184,7 @@ void FUN_800f44b0(TObj *o)
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
         if (D_8009C330->b0 == 0 && U8(o, 0xc6) == 0) {
-            FUN_800efa80(o);
+            playerSelectGroundAnim(o);
             o->b9d = 0;
             if (o->bbe & 0x20) {
                 o->step = 0x1f;

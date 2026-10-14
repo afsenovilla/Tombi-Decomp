@@ -11,7 +11,7 @@ extern P *DAT_8009c330;
 extern Q *DAT_8009c330q;
 extern unsigned short G1f8;
 extern char A0de0[], A0e2c[];
-extern void FUN_8001fec0(O *), FUN_800eea3c(O *), FUN_800efa80(O *), FUN_800ee9cc(O *), FUN_800ee88c(O *), FUN_8001e4f0(int);
+extern void FUN_8001fec0(O *), FUN_800eea3c(O *), playerSelectGroundAnim(O *), FUN_800ee9cc(O *), FUN_800ee88c(O *), FUN_8001e4f0(int);
 
 void FUN_8010df84(O *o)
 {
@@ -29,7 +29,7 @@ void FUN_8010df84(O *o)
         }
         FUN_8001fec0(o);
         FUN_800eea3c(o);
-        FUN_800efa80(o);
+        playerSelectGroundAnim(o);
         FUN_800ee9cc(o);
         FUN_800ee88c(o);
         if ((G1f8 & 7) == 0) {
@@ -48,7 +48,7 @@ void FUN_8010df84(O *o)
             o->anim = (int)A0e2c;
             o->da3 = 1;
         } else {
-            FUN_800efa80(o);
+            playerSelectGroundAnim(o);
         }
         o->step = 0;
         o->state = 0;

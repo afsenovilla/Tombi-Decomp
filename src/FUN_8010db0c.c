@@ -20,7 +20,7 @@ extern void FUN_800ef05c(int, int, int, int);
 extern void FUN_800ee680(TObj *);
 extern void FUN_800eec40(TObj *);
 extern void FUN_8003facc(TObj *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
 extern void FUN_800efc8c(TObj *, int);
 extern void FUN_800eef0c(void);
@@ -55,7 +55,7 @@ void FUN_8010db0c(TObj *o)
         FUN_8003facc(o);
         if (o->velY > 0) {
             DAT_8009c330->w2c = 4;
-            FUN_800eea7c(o, 4, 1);
+            playerSetAnim(o, 4, 1);
             OB(o, 0xac) = 1;
             DAT_8009c330->b8 = 1;
             o->velY = 0;

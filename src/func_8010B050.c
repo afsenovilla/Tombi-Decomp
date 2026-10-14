@@ -8,7 +8,7 @@ extern TObj *D_800A611C[];
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
 void FUN_800eee90(TObj *o);
-void FUN_8010f328(TObj *o);
+void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void ObjGravityStep(TObj *o);
 void ObjAddVelY7E(TObj *o);
@@ -42,14 +42,14 @@ void func_8010B050(TObj *o)
             break;
         }
         *(unsigned char *)&o->wac = 0;
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
         PlayerSetAnimIfChanged(o, 0x2e);
         o->state = 1;
     case 1:
         if (--D_8009C330->b9 != 0) {
             if (D_8009C330->b8 == 0) {
                 D_8009C330->w20++;
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         } else {
             D_8009C330->b8 = 1;
@@ -58,7 +58,7 @@ void func_8010B050(TObj *o)
                 o->state = 2;
             } else {
                 D_8009C330->w20++;
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         }
     case 2:

@@ -12,10 +12,10 @@
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
-extern void FUN_800f1478(TObj *);
-extern void FUN_800f1d44(TObj *);
+extern void playerStepIdle(TObj *);
+extern void playerStepWalk(TObj *);
 extern void FUN_8010e328(TObj *, int);
-extern void FUN_800f2b98(TObj *);
+extern void playerStepJump(TObj *);
 extern void FUN_800f44b0(TObj *);
 extern void FUN_800f36e0(TObj *);
 extern void FUN_800f5078(TObj *);
@@ -26,7 +26,7 @@ extern void FUN_800f67bc(TObj *);
 extern void FUN_800f3f3c(TObj *);
 extern void FUN_800f7aac(TObj *);
 extern void FUN_800f98a8(TObj *);
-extern void FUN_801099b8(TObj *);
+extern void playerStepClimb(TObj *);
 extern void FUN_80104698(TObj *);
 extern void FUN_801066c4(TObj *);
 extern void FUN_801075d8(TObj *);
@@ -54,8 +54,8 @@ extern void FUN_80121d6c(TObj *);
 extern void FUN_80122044(TObj *);
 extern void FUN_80106b50(TObj *);
 extern void FUN_80106db0(TObj *);
-extern void FUN_800f00ac(TObj *);
-extern void FUN_80102a08(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
+extern void playerStep2EByArea(TObj *);
 extern void FUN_800ffec4(TObj *);
 extern void FUN_80108ad0(TObj *);
 extern void FUN_800fb420(TObj *);
@@ -66,8 +66,8 @@ extern void FUN_8011eae8(TObj *);
 extern void FUN_800fbdb4(TObj *, int);
 extern void FUN_8011dc0c(TObj *);
 extern void FUN_8011d9a4(TObj *);
-extern void FUN_80106f98(TObj *);
-extern void FUN_8010d390(TObj *);
+extern void playerStep3CByArea(TObj *);
+extern void playerStepSwim(TObj *);
 extern void FUN_8010d048(TObj *);
 extern void FUN_8010d888(TObj *);
 extern void FUN_8011b330(TObj *);
@@ -173,15 +173,15 @@ void func_80100788(TObj *o, int p2)
         D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
-        FUN_800f1478(o);
+        playerStepIdle(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 1:
         D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
-        FUN_800f1d44(o);
+        playerStepWalk(o);
         if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
@@ -195,17 +195,17 @@ void func_80100788(TObj *o, int p2)
         }
         FUN_8010e328(o, 0);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 2:
         dirA(o);
-        FUN_800f2b98(o);
+        playerStepJump(o);
         chk(o, 2);
         break;
     case 3:
         FUN_800f44b0(o);
         turn(o);
-        if ((*(unsigned char*)&o->wac) < 2) FUN_800f00ac(o);
+        if ((*(unsigned char*)&o->wac) < 2) playerCheckGroundAndFall(o);
         break;
     case 4:
         if (o->b9d == 0) {
@@ -241,7 +241,7 @@ void func_80100788(TObj *o, int p2)
         FUN_800f98a8(o);
         break;
     case 13:
-        FUN_801099b8(o);
+        playerStepClimb(o);
         break;
     case 14:
         FUN_80104698(o);
@@ -290,7 +290,7 @@ void func_80100788(TObj *o, int p2)
         }
         FUN_8010e328(o, 0);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x1d:
         FUN_800fa01c(o);
@@ -333,15 +333,15 @@ void func_80100788(TObj *o, int p2)
     case 0x2a:
         FUN_80106b50(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x2b:
         FUN_80106db0(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x2e:
-        FUN_80102a08(o);
+        playerStep2EByArea(o);
         break;
     case 0x23:
     case 0x2f:
@@ -379,11 +379,11 @@ void func_80100788(TObj *o, int p2)
         FUN_8011d9a4(o);
         break;
     case 0x3c:
-        FUN_80106f98(o);
+        playerStep3CByArea(o);
         break;
     case 0x3d:
         D_8009D2B0[0] = 1;
-        FUN_8010d390(o);
+        playerStepSwim(o);
         break;
     case 0x3e:
         D_8009D2B0[0] = 1;

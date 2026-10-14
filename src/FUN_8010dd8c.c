@@ -8,7 +8,7 @@ extern int DAT_8009d2e8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern short FUN_8001fe3c(int, int);
 extern short FUN_8003fd78(TObj *, int, int);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 
 void FUN_8010dd8c(TObj *o)
 {
@@ -72,7 +72,7 @@ void FUN_8010dd8c(TObj *o)
         if (o->timer > 0)
             return;
     }
-    FUN_800eea7c(o, 0x44, 0);
+    playerSetAnim(o, 0x44, 0);
     o->b69 = 0;
     o->b9c = 0;
     (*(unsigned char*)&o->wac) = 0;

@@ -13,7 +13,7 @@ extern TObj *D_8009F0EC;
 extern unsigned char D_8009D2B1;
 extern unsigned char D_801152E8[];
 extern void FUN_8010eaf8(TObj *o);
-extern void FUN_800ef490(TObj *o);
+extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -94,7 +94,7 @@ void FUN_80105bcc(TObj *o)
         p = D_8009D2E8;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
@@ -118,7 +118,7 @@ void FUN_80105bcc(TObj *o)
         }
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         p = D_8009D2E8;
         p->animFrame = o->animFrame & 1;
         p->h->p.whole = o->h->p.whole;
@@ -198,7 +198,7 @@ void FUN_80105bcc(TObj *o)
     case 4:
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         ObjMotionStep(o);
         if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = (TObj *)S32(o, 0xe4);

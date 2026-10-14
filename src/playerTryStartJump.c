@@ -6,7 +6,7 @@
 #include "gamestate.h"
 extern void func_8010BD08();
 
-short func_8010BEB8(TObj *o)
+short playerTryStartJump(TObj *o)
 {
     short r = 0;
 

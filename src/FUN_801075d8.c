@@ -12,8 +12,8 @@ extern unsigned char D_801152E8[];
 extern void FUN_801073c0(TObj *);
 extern void FUN_801102b4(TObj *);
 extern void FUN_800ee9cc(TObj *);
-extern void FUN_800f00ac(TObj *);
-extern void startPadVibration(int, int, int, int);
+extern void playerCheckGroundAndFall(TObj *);
+extern void FUN_80025f40(int, int, int, int);
 extern void FUN_800eae0c(int, int, int, int);
 extern void applyFrameVelocityX(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -77,7 +77,7 @@ void FUN_801075d8(TObj *o)
             o->step = 0x10;
             o->state = 2;
         }
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
             D_8009D2B0[0] = 0;
             if (o->wb2 > 0x200) o->wb2 = 0x200;

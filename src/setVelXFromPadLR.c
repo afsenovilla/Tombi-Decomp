@@ -3,7 +3,7 @@
 extern unsigned short DAT_8009d610, DAT_8009d670;
 extern unsigned char DAT_8009d618;
 
-void FUN_8011133c(char *o)
+void setVelXFromPadLR(char *o)
 {
     short s;
     char *p;

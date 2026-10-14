@@ -5,7 +5,7 @@
 #include "raw7.h"
 
 extern TObj PLAYER;
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -27,7 +27,7 @@ void FUN_8004a124(TObj *o)
         s->b04 = 5;
         s->step = 0x41;
         s->state = 0;
-        FUN_800eea7c(s, 0x2c, 0);
+        playerSetAnim(s, 0x2c, 0);
         o->wac = 1;
         o->anim = ((void **)(*(int*)&o->wa8))[1];
         AnimLoadDuration(o);
@@ -66,7 +66,7 @@ void FUN_8004a124(TObj *o)
     case 4:
         o->timer = 0x10;
         s->animFrame = 0;
-        FUN_800eea7c(s, 1, 0);
+        playerSetAnim(s, 1, 0);
         o->state++;
         break;
     case 5:
@@ -76,7 +76,7 @@ void FUN_8004a124(TObj *o)
             o->timer = 0x1e;
             o->state++;
             s->animFrame = 0;
-            FUN_800eea7c(s, 0, 0);
+            playerSetAnim(s, 0, 0);
         }
         break;
     case 6:

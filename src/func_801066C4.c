@@ -6,8 +6,8 @@
 typedef struct { char pad[9]; unsigned char b9; char pad2[0x20 - 10]; short w20; } P;
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern void FUN_8010f328(TObj *);
-extern void FUN_800ef490(TObj *);
+extern void playerSetJumpRiseVelocity(TObj *);
+extern void setFacingFromPad(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_800f262c(TObj *);
 extern void func_80104F88(TObj *);
@@ -26,7 +26,7 @@ void func_801066C4(TObj *o)
         case 19:
             D_8009C330->w20 = 0;
             D_8009D2E8->d84 = 0;
-            FUN_8010f328(o);
+            playerSetJumpRiseVelocity(o);
             break;
         case 0: case 2: case 8: case 10: case 11: case 18: case 30: case 33: case 40:
         case 56: case 58: case 59: case 60: case 61: case 62: case 63: case 64: case 65: case 66:
@@ -64,10 +64,10 @@ void func_801066C4(TObj *o)
         tail:
             D_8009D2E8->y.p.whole = o->y.p.whole + 8;
             D_8009D2E8->d8c = o->d88 - 0xc0;
-            FUN_8010f328(o);
+            playerSetJumpRiseVelocity(o);
             break;
         }
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         o->d88 = 0x1c0;
         o->d8c = 0;
         o->wb2 = 0;

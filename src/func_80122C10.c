@@ -10,7 +10,7 @@ extern void playSFX(int);
 extern void FUN_800fc02c(TObj *);
 extern int AnimAdvance(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
-extern void FUN_800eeae4(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
 
 void func_80122C10(TObj *o)
 {
@@ -68,7 +68,7 @@ void func_80122C10(TObj *o)
             if (o->velX >= 0) goto skip;
         }
         D_8009C330->w2e = 0xff;
-        FUN_800eeae4(o, 0x37, 2);
+        playerSetAnimIfChangedAt(o, 0x37, 2);
         o->state = 5;
     skip:
         if (o->b69) {

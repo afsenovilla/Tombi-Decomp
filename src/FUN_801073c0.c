@@ -9,8 +9,8 @@ extern unsigned short DAT_8009c962;
 extern void FUN_800efc04();
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800efa80(TObj *);
-extern void FUN_800ef4e4(TObj *);
+extern void playerSelectGroundAnim(TObj *);
+extern void setFacingAndUpDownFromPad(TObj *);
 extern void FUN_800eea3c(TObj *);
 extern void FUN_8001e560(int, int);
 
@@ -66,8 +66,8 @@ void FUN_801073c0(TObj *o)
             FUN_8001e560(a, 2);
         }
     } else {
-        FUN_800efa80(o);
-        FUN_800ef4e4(o);
+        playerSelectGroundAnim(o);
+        setFacingAndUpDownFromPad(o);
         DAT_8009c330->b08 = 0;
         o->b9c = 0;
         o->d88 = 0;

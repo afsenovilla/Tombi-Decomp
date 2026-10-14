@@ -8,7 +8,7 @@ extern unsigned short DAT_8009d670;
 extern unsigned short DAT_1f8003c4;
 extern void FUN_800ef760(TObj *o, int v);
 
-void FUN_800efa80(TObj *o)
+void playerSelectGroundAnim(TObj *o)
 {
     short v;
     if (o->wb2 == 0) {

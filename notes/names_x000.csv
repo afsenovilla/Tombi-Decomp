@@ -1,6 +1,32 @@
 address,name,confidence,comment
-800eeb5c,PlayerSetAnimIfChanged,media,usa el objeto global 8009C330 (jugador?): si cambia el id (+2C) recarga el script de animacion
-800efc04,ObjSetAnimFromTable,media,copia una tabla de 90 punteros (800E8404) y pone obj+0x24 = tabla[id de anim del jugador]
-80127214,AnimAdvanceWithBox,media,como AnimAdvance pero ademas carga la caja de colision (box0..) desde una tabla
-8010f0f4,ObjGravityStep,media,velY += valor de tabla (80115468, 10 shorts por modo) y limita al maximo
+800ec84c,spawnColorBurst,alta,names batch (see notes/names.md)
 800ee680,ObjMotionStep,media,llama a las rutinas de fisica, suma velX a la posicion horizontal y aplica ObjAddVelY7E
+800eea7c,playerSetAnim,alta,names batch (see notes/names.md)
+800eeae4,playerSetAnimIfChangedAt,alta,names batch (see notes/names.md)
+800eeb5c,PlayerSetAnimIfChanged,media,usa el objeto global 8009C330 (jugador?): si cambia el id (+2C) recarga el script de animacion
+800ef150,playerResetStep,alta,names batch (see notes/names.md)
+800ef460,objApplyDepthVelocity,alta,names batch (see notes/names.md)
+800ef490,setFacingFromPad,alta,names batch (see notes/names.md)
+800ef4e4,setFacingAndUpDownFromPad,alta,names batch (see notes/names.md)
+800efa80,playerSelectGroundAnim,alta,names batch (see notes/names.md)
+800efc04,ObjSetAnimFromTable,media,copia una tabla de 90 punteros (800E8404) y pone obj+0x24 = tabla[id de anim del jugador]
+800eff1c,playerGetWallContactKind,alta,names batch (see notes/names.md)
+800f00ac,playerCheckGroundAndFall,alta,names batch (see notes/names.md)
+800f1478,playerStepIdle,alta,names batch (see notes/names.md)
+800f1d44,playerStepWalk,alta,names batch (see notes/names.md)
+800f2b98,playerStepJump,alta,names batch (see notes/names.md)
+800fbcec,setLeapVelocityFromPad,alta,names batch (see notes/names.md)
+800fc104,updatePlayerHealth,alta,names batch (see notes/names.md)
+80102a08,playerStep2EByArea,alta,names batch (see notes/names.md)
+80106f98,playerStep3CByArea,alta,names batch (see notes/names.md)
+801099b8,playerStepClimb,alta,names batch (see notes/names.md)
+8010beb8,playerTryStartJump,alta,names batch (see notes/names.md)
+8010cfb0,setAngleSpeedFromDir8B,alta,names batch (see notes/names.md)
+8010d390,playerStepSwim,alta,names batch (see notes/names.md)
+8010d7f0,setAngleSpeedFromDir8,alta,names batch (see notes/names.md)
+8010e628,playerStartFall,alta,names batch (see notes/names.md)
+8010f0f4,ObjGravityStep,media,velY += valor de tabla (80115468, 10 shorts por modo) y limita al maximo
+8010f328,playerSetJumpRiseVelocity,alta,names batch (see notes/names.md)
+8011133c,setVelXFromPadLR,alta,names batch (see notes/names.md)
+801113bc,adjustVelYFromPadDown,alta,names batch (see notes/names.md)
+80127214,AnimAdvanceWithBox,media,como AnimAdvance pero ademas carga la caja de colision (box0..) desde una tabla

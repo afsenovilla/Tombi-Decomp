@@ -40,35 +40,29 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
-- `80016a5c initGlobalState` (was FUN_80016a5c) - resets a long list of global/scratchpad state words to defaults (csv name, checked)
-- `80016b50 initGraphics` (was FUN_80016b50) - sets geometry offset/screen, identity base matrix, lighting, display envs, clears VRAM and OTs (csv name, checked)
-- `80016ca8 initDisplay` (was FUN_80016ca8) - sets up both double-buffer DRAW/DISP envs with background colour (r,g,b) and applies them (csv name, checked)
-- `80016e34 initWideDisplayEnv` (was FUN_80016e34) - SetDefDrawEnv/SetDefDispEnv 640x512 for both buffers with bg colour and screen y, then PutDispEnv/PutDrawEnv; used by boot logo
-- `80020f14 drawDebugText` (was FUN_80020f14) - draws an 8x8 font string as SPRT primitives into the OT (csv said fontDebugPrintf; no formatting, so renamed)
-- `8003be14 updateItemPickupAnim` (was FUN_8003be14) - pickup object state: plays sfx, pops upward with gravity, wobbles (psx_tomba by bytes, csv)
-- `800408d8 probeCollisionAtDepthA` (was FUN_800408d8) - loads collision plane at (x, depth) into 1f800278 and calls the A probe 800406e8; twin of probeCollisionAtDepthB (csv name rewardFlowerSeeds was wrong)
-- `8004094c testCollisionSegment` (was FUN_8004094c) - reads one (base, amplitude, period) segment from the 1f800278 collision stream and tests y against it (csv name rewardPigBag was wrong)
-- `800411cc probeCollisionAtDepthB` (was FUN_800411cc) - loads collision plane at (x, depth) and calls the B probe 80040f78 (csv name)
-- `80041ca8 probeCollisionAtDepthC` (was FUN_80041ca8) - same wrapper pattern as A/B, calling probe 800416b8 with -1
-- `8005a7a0 awardEventProgress` (was FUN_8005a7a0) - event start/complete: sets AP from EVENT_STARTED/COMPLETE tables, shows event message, jingle (csv name)
-- `80020078 cullObjectToDrawList` (was FUN_80020078) - marks object visible if within screen margin and pushes it onto its category draw list
-- `80020490 despawnObjectOffscreen` (was FUN_80020490) - deactivates an object (active=2, visible=0) once it leaves the screen area by a margin
-- `8002623c readPadPort` (was FUN_8002623c) - reads raw pad buffer for port 0/1, stores pad type and analog x/y, maps stick to d-pad bits
-- `8002757c computeCameraMatrix` (was FUN_8002757c) - builds camera matrix from base, RotMatrixY/X of angles and translates by negated camera position
-- `80037c80 uploadSpriteFrameToVram` (was FUN_80037c80) - unpackSpriteFrame to 801fb000, clears a VRAM strip, loadTIM into the per-buffer column
-- `800387e0 scriptOpUnaryVar` (was FUN_800387e0) - script ops 0x18-0x1b: inc/dec/not/neg a script var and set cmpFlag by sign
-- `8001f850 updatePadInput` (was FUN_8001f850) - reads pad port 0 via readPadPort, computes pressed (1f8001fc) and released (1f8001fe) edges, then updates vibration
-- `80026000 updatePadVibration` (was FUN_80026000) - per-frame actuator state machine: PadSetAct/PadSetActAlign by state and counts down the rumble timer
-- `80025f40 startPadVibration` (was FUN_80025f40) - if a vibration pad is present and idle, stores strength and duration and calls PadSetAct
-- `800261b0 stopPadVibration` (was func_800261B0) - clears actuator bytes, PadSetAct(0) and re-aligns the actuators
-- `80025b98 setAnalogPadMode` (was FUN_80025b98) - when pad 0 reports type 7 (analog), PadSetMainMode(0, 1, 0)
-- `80020aec setAreaFlagBit` (was FUN_80020aec) - sets bit n in the per-area flag bitset of the current area (areas 0x10/0x11 share 7/0xc)
-- `80020a78 testAreaFlagBit` (was func_80020A78) - tests bit n in the per-area flag bitset; same area remap as setAreaFlagBit
-- `80020c04 setSectionFlagBit` (was FUN_80020c04) - sets bit n in the flag bitset of the current section (index = sum of section counts of earlier areas + section)
-- `80020b64 testSectionFlagBit` (was func_80020B64) - tests bit n in the current section's flag bitset; pair of setSectionFlagBit
-- `8003511c getDistanceToPlayer` (was func_8003511C) - csqrt of squared x/y deltas between object and player
-- `80038514 scriptOpLoopVar` (was func_80038514) - script op: decrement var, jump to 16-bit target while it stays positive, else skip 4 bytes
-- `800386f4 scriptOpCompareVar` (was func_800386F4) - script op: compares a var with a var or a 32-bit immediate and sets cmpFlag (0 eq, 1 lt, 2 gt)
-- `8003aedc scriptOpHealPlayer` (was func_8003AEDC) - script op: adds arg to player health up to the displayed max; arg0 = 1 if already full
-- `80059f18 computeRotatedQuad` (was func_80059F18) - builds 4 quad corner offsets from angle and half-width/length via MulCos/MulNegSinScaled (psx_tomba name, matches code)
-- `80048ffc objectsOverlap` (was FUN_80048ffc) - tests two objects for hit-box overlap on depth, x and y axes
+- `800f1478 playerStepIdle` (was FUN_800f1478) - player step 0 handler: standing state; Left/Right held switches to step 1, else idle/walk anim selection
+- `800f1d44 playerStepWalk` (was func_800F1D44) - player step 1 handler (entered from step 0 when Left/Right is held)
+- `800f2b98 playerStepJump` (was FUN_800f2b98) - player step 2 handler: jump sfx (2,4), rise extended while the jump button (1F8003C6) is held 5..14 frames, state 3 = falling
+- `801099b8 playerStepClimb` (was FUN_801099b8) - player step 13 handler: climbing anims 10/11/12 (idle/up/down) chosen by pad Up/Down
+- `8010d390 playerStepSwim` (was FUN_8010d390) - player step 0x3D handler: swim stroke anims 0x43/0x47 (swim_stroke / swim_stroke_slow)
+- `80102a08 playerStep2EByArea` (was FUN_80102a08) - player step 0x2E: only dispatches to the area overlay's handler (area 1 or 10)
+- `80106f98 playerStep3CByArea` (was FUN_80106f98) - player step 0x3C: only dispatches to the area overlay's handler (area 3 or 4)
+- `800efa80 playerSelectGroundAnim` (was FUN_800efa80) - picks idle/walk/jog/run anim (0..3, 0x21 when crouching) from speed +0xB2 and loads it when it changed
+- `800f00ac playerCheckGroundAndFall` (was FUN_800f00ac) - wall-contact step changes (0x10/0x17/0x1B/0x1E/0x21) then gravity when unsupported; past max fall speed switches to step 2 state 3 (fall)
+- `800eff1c playerGetWallContactKind` (was FUN_800eff1c) - returns 1..5 from the contact flags +0xBE (and speed +0xB2 past 0x144); bit 0x20 forces step 0x1F
+- `8010f328 playerSetJumpRiseVelocity` (was FUN_8010f328) - sets velY from the per-mode jump table D_80115468 by the jump-hold counter (player +0x20 <= 12 or 13)
+- `8010e628 playerStartFall` (was func_8010E628) - sets step 2 state 3 (jump step, falling) with the knock-back timer/flags
+- `8010beb8 playerTryStartJump` (was func_8010BEB8) - if the jump button (1F8003C6) is pressed: step 2 state 0 and returns 1
+- `800ef490 setFacingFromPad` (was FUN_800ef490) - animFrame bit 0 from Right (0x20) / Left (0x80) held; neither keeps facing and sets bit 1
+- `800ef4e4 setFacingAndUpDownFromPad` (was FUN_800ef4e4) - as setFacingFromPad plus bit 3 for Up (0x10) and bit 2 for Down (0x40)
+- `800eea7c playerSetAnim` (was FUN_800eea7c) - sets player anim id, loads table[id] and starts at the given frame unconditionally
+- `800eeae4 playerSetAnimIfChangedAt` (was FUN_800eeae4) - PlayerSetAnimIfChanged with an explicit start frame
+- `800ef460 objApplyDepthVelocity` (was func_800EF460) - adds velH to the depth coordinate (*o->d) and velV to Y (16.16)
+- `800fc104 updatePlayerHealth` (was func_800FC104) - copies +0x98 health to GAME.playerHealth when it changed; at 0: game-over flags, stopBgm, playJingle(3)
+- `800fbcec setLeapVelocityFromPad` (was func_800FBCEC) - sets velX/velY launch (-0x600 up) by facing, stronger/weaker with Left/Right held
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0) - +0x7A = (+0x76 & 7) * 0x20 angle, +0x74 speed 0x200 unless bit 3 of +0x76
+- `8010cfb0 setAngleSpeedFromDir8B` (was func_8010CFB0) - byte-identical behaviour to setAngleSpeedFromDir8 (second copy)
+- `8011133c setVelXFromPadLR` (was FUN_8011133c) - velX = -/+0x200 for Left/Right held, else 0 (scaled down in mode 7)
+- `801113bc adjustVelYFromPadDown` (was FUN_801113bc) - velY += 0x20 while Down held, else -= 0x20; clamped to 0xC0..0x300
+- `800ec84c spawnColorBurst` (was FUN_800ec84c) - spawns 8 objects of type 0x5F around a circle (angle i*0x20) tinted red/blue/green by the argument
+- `800ef150 playerResetStep` (was FUN_800ef150) - SfxPlay3(0x1C,0x7F), clears the player action flags and sets step 0 state 0

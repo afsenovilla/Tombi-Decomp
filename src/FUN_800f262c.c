@@ -3,7 +3,7 @@
 extern unsigned char *DAT_8009c330;
 extern volatile unsigned short DAT_8009d670[];
 extern unsigned short DAT_1f8003c6;
-extern void FUN_8010f328(void);
+extern void playerSetJumpRiseVelocity(void);
 
 void FUN_800f262c(unsigned char *o)
 {
@@ -30,5 +30,5 @@ void FUN_800f262c(unsigned char *o)
         }
         *(unsigned short *)(DAT_8009c330 + 0x20) = *(unsigned short *)(DAT_8009c330 + 0x20) + 1;
     }
-    FUN_8010f328();
+    playerSetJumpRiseVelocity();
 }

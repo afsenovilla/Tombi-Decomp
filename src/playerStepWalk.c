@@ -30,7 +30,7 @@ extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8010f400(TObj *);
-extern void FUN_800efa80(TObj *);
+extern void playerSelectGroundAnim(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8001e4f0(int);
@@ -77,7 +77,7 @@ static __inline__ short odd(void)
     return 0;
 }
 
-void func_800F1D44(TObj *o)
+void playerStepWalk(TObj *o)
 {
     unsigned char mode;
     short lim;
@@ -114,7 +114,7 @@ void func_800F1D44(TObj *o)
                 else o->wb6 = 0;
             }
             FUN_8010f400(o);
-            FUN_800efa80(o);
+            playerSelectGroundAnim(o);
             setObjectSpeedPolar2(o, o->wb6, o->wb2);
             o->h->raw += ((short*)&GVARS.s44)[0] << 8;
             o->y.raw += ((short*)&GVARS.s44)[1] << 8;
@@ -232,7 +232,7 @@ void func_800F1D44(TObj *o)
             dust(o);
         }
     } else {
-        FUN_800efa80(o);
+        playerSelectGroundAnim(o);
         if (o->animFrame & 8) {
             if ((o->animFrame & 2) && ((*(unsigned char*)&o->da0) & 2)) {
                 D_8009C330->animFrame = 0xffff;

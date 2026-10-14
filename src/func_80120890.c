@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern short D_8007A5F0[];
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 void func_80120890(TObj *o)
 {
@@ -23,7 +23,7 @@ void func_80120890(TObj *o)
                 g->animFrame = 1;
             else
                 g->animFrame = 0;
-            FUN_800eea7c(g, 1, 0);
+            playerSetAnim(g, 1, 0);
             g->active = 6;
             g->b04 = 5;
             g->step = 0x65;
@@ -40,7 +40,7 @@ void func_80120890(TObj *o)
             break;
         case 2:
             o->state++;
-            FUN_800eea7c(g, 4, 0);
+            playerSetAnim(g, 4, 0);
             g->active = 6;
             g->b04 = 5;
             g->step = 0x65;
@@ -64,7 +64,7 @@ void func_80120890(TObj *o)
             break;
         case 4:
             o->state++;
-            FUN_800eea7c(g, 0xd, 0);
+            playerSetAnim(g, 0xd, 0);
             g->h->p.whole = o->h->p.whole;
             g->y.p.whole = o->y.p.whole - 8;
             g->d->p.whole = o->d->p.whole;

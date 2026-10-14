@@ -2,7 +2,7 @@
 // MATCHING 800f00ac 712
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
-extern int FUN_800eff1c(TObj *);
+extern int playerGetWallContactKind(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
 extern TObj *DAT_8009c330;
 extern int DAT_8009c984;
@@ -10,13 +10,13 @@ extern unsigned short DAT_1f8003c4;
 extern volatile unsigned short DAT_8009d670[];
 extern unsigned char DAT_8009d2b0[];
 
-void FUN_800f00ac(TObj *o)
+void playerCheckGroundAndFall(TObj *o)
 {
     int v;
 
     B(o, 0xad) = 0;
     if (B(o, 0xab) != 2) {
-        switch (FUN_800eff1c(o)) {
+        switch (playerGetWallContactKind(o)) {
         case 1:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;

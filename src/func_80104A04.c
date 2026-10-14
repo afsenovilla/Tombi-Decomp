@@ -11,7 +11,7 @@ extern int D_8009D2E8;
 extern int D_8009F0EC;
 extern int D_8009F0EC_r;
 extern unsigned char D_801152E8[];
-void FUN_800ef490(TObj *o);
+void setFacingFromPad(TObj *o);
 void ObjMotionStep(TObj *o);
 void ObjSetAnimFromTable(TObj *o);
 void AnimJump(TObj *o, short n);
@@ -24,7 +24,7 @@ void func_80104A04(TObj *o)
 {
     o->h->raw += GVARS.s44 << 8;
     o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-    FUN_800ef490(o);
+    setFacingFromPad(o);
     ObjMotionStep(o);
     if (*(unsigned char *)&o->wac == 2) {
         D_8009D2E8 = *(int *)((char *)o + 0xe4);

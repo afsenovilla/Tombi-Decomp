@@ -5,7 +5,7 @@ extern unsigned short DAT_8009d610;
 extern unsigned char DAT_8009d619;
 extern unsigned short DAT_8009d670;
 
-void FUN_801113bc(TObj *o)
+void adjustVelYFromPadDown(TObj *o)
 {
     short v;
     v = 0x20;

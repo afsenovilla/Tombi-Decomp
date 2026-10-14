@@ -35,7 +35,7 @@ extern void func_800EDFB8(TObj *, int);
 extern void playSFX(int);
 extern void increaseMaxHealth(void);
 extern void addItemToInventory(int, int, int);
-extern void FUN_800eeae4(char *, int, int);
+extern void playerSetAnimIfChangedAt(char *, int, int);
 
 static __inline__ int op81(void)
 {
@@ -429,7 +429,7 @@ static __inline__ int opa5(void)
 static __inline__ int opa6(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    FUN_800eeae4(PLAYER, (short)g->arg[0], (short)g->arg[1]);
+    playerSetAnimIfChangedAt(PLAYER, (short)g->arg[0], (short)g->arg[1]);
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }

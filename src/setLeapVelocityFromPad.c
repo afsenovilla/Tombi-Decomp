@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #define PAD (*(volatile unsigned short *)&GV6.s70)
 
-void func_800FBCEC(TObj *o)
+void setLeapVelocityFromPad(TObj *o)
 {
     if (o->animFrame & 1) {
         o->velX = -0x300;

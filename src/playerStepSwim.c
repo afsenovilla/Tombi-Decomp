@@ -20,9 +20,9 @@ extern void FUN_800eee90(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8010d280(TObj *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 
-void FUN_8010d390(TObj *o)
+void playerStepSwim(TObj *o)
 {
     unsigned int d;
     unsigned short dd;
@@ -118,7 +118,7 @@ void FUN_8010d390(TObj *o)
                 flag = 1;
             }
             if (!flag) {
-                FUN_800eea7c(o, 0x44, 0);
+                playerSetAnim(o, 0x44, 0);
                 o->step = 0x3e;
                 o->state = 0;
             }
@@ -141,7 +141,7 @@ void FUN_8010d390(TObj *o)
             (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
             o->step = 0x11;
         } else {
-            FUN_800eea7c(o, 4, 0);
+            playerSetAnim(o, 4, 0);
             DAT_8009c330->w2e = 0xff;
             o->step = 0x43;
         }

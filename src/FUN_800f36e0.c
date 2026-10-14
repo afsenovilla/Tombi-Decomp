@@ -32,7 +32,7 @@ extern unsigned char D_801152E8[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern TObj *allocObjectLayer1(void);
-extern void FUN_8010f328(TObj *);
+extern void playerSetJumpRiseVelocity(TObj *);
 extern void FUN_80110fdc(TObj *);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_8010f0f4(TObj *);
@@ -41,8 +41,8 @@ extern void FUN_80040278(TObj *, short, short);
 extern int FUN_8003facc(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8011133c(TObj *);
-extern void FUN_801113bc(TObj *);
+extern void setVelXFromPadLR(TObj *);
+extern void adjustVelYFromPadDown(TObj *);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_800eae0c(int, short, int, int);
@@ -132,7 +132,7 @@ void FUN_800f36e0(TObj *o)
                     D_8009C330->b8 = 1;
                     o->state = 2;
                 }
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         } else {
             D_8009C330->b8 = 1;
@@ -140,7 +140,7 @@ void FUN_800f36e0(TObj *o)
                 o->state = 2;
             } else {
                 D_8009C330->w20++;
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         }
     case 2:
@@ -217,11 +217,11 @@ void FUN_800f36e0(TObj *o)
             FUN_8001fec0(o);
             *(int *)o->h += D_8009C944 << 7;
             o->y.raw += D_8009C946 << 7;
-            FUN_8011133c(o);
+            setVelXFromPadLR(o);
             o->h->raw += o->velX << 8;
             if (--o->timer <= 0) {
                 o->timer = 0;
-                FUN_801113bc(o);
+                adjustVelYFromPadDown(o);
                 FUN_8001fd94(o);
             }
         } else {

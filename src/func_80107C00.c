@@ -8,7 +8,7 @@ extern unsigned char *D_8009C330;
 extern int D_8009F0EC;
 extern char D_80010AE8[];
 void func_800EEA3C(TObj *o);
-void FUN_800eea7c(TObj *o, int a, int b);
+void playerSetAnim(TObj *o, int a, int b);
 void FUN_80110eec(TObj *o);
 void FUN_800ee9cc(TObj *o);
 int func_8004BBC0(TObj *o, int a);
@@ -16,7 +16,7 @@ void func_800EFC8C(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void FUN_800ee428(TObj *o);
 void AnimJump(TObj *o, int a);
-void FUN_800f00ac(TObj *o);
+void playerCheckGroundAndFall(TObj *o);
 
 void func_80107C00(TObj *o)
 {
@@ -52,18 +52,18 @@ void func_80107C00(TObj *o)
         }
         if (o->bbe & 1) {
             if (!(o->animFrame & 1)) {
-                FUN_800eea7c(o, 8, 2);
+                playerSetAnim(o, 8, 2);
                 o->d8c = 0xe0;
             } else {
-                FUN_800eea7c(o, 0x11, 0);
+                playerSetAnim(o, 0x11, 0);
                 o->d8c = 0;
             }
         } else {
             if (o->animFrame & 1) {
-                FUN_800eea7c(o, 8, 2);
+                playerSetAnim(o, 8, 2);
                 o->d8c = 0x20;
             } else {
-                FUN_800eea7c(o, 0x11, 0);
+                playerSetAnim(o, 0x11, 0);
                 o->d8c = 0;
             }
         }
@@ -119,7 +119,7 @@ void func_80107C00(TObj *o)
         }
         o->velX = 0;
         o->velY = 0;
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     }
 }

@@ -8,7 +8,7 @@ extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void SfxPlay(int);
-extern void FUN_800efa80(TObj *);
+extern void playerSelectGroundAnim(TObj *);
 extern unsigned short DAT_1f800282;
 extern int DAT_800a60c4[];
 extern unsigned char DAT_800a60d5[];
@@ -20,7 +20,7 @@ static __inline__ void f(TObj *q)
     q->waa = DAT_8007a074[(short)(q->animFrame + q->animFrame * 2)];
     DAT_800a60d5[0] = 0;
     *DAT_8009c330 = 0;
-    FUN_800efa80(q);
+    playerSelectGroundAnim(q);
 }
 
 int FUN_80033638(TObj *o)

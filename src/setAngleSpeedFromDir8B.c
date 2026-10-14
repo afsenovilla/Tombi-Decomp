@@ -1,6 +1,6 @@
 // FUNC 8010cfb0 152 X000
 // MATCHING 8010cfb0 152
-void func_8010CFB0(unsigned char *o)
+void setAngleSpeedFromDir8B(unsigned char *o)
 {
     switch (*(unsigned short *)(o + 0x76) & 7) {
     case 0: *(short *)(o + 0x7a) = 0; break;

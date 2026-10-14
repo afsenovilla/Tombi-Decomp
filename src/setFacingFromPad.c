@@ -1,7 +1,7 @@
 // FUNC 800ef490 84 X000
 // MATCHING 800ef490 84
 extern volatile unsigned short DAT_8009d670;
-void FUN_800ef490(char *o)
+void setFacingFromPad(char *o)
 {
     unsigned short v = *(unsigned short *)(o + 0x2e) & 1;
     volatile unsigned short *p = &DAT_8009d670;
