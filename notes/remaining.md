@@ -35,7 +35,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x010 | func_80125FB4 | 80125FB4 | 1280 | 124 | src/x010/wip/func_80125FB4.c (gcc-2.7.2-psx) | case 5 cross-jumped into case 8 in the game |
 | FAR | x001 | func_801253AC | 801253AC | 1212 | 308 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | first full draft; regalloc and block layout far off |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 307 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
-| FAR | x010 | func_8011752C | 8011752C | 1020 | 192 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | mask/shift temps and store interleave; regalloc |
+| FAR | x010 | func_8011752C | 8011752C | 1020 | 92 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | mask/shift temps and store interleave; regalloc |
 | FAR | main0 | func_80021b20 | 80021B20 | 1016 | 82 | src/wip/func_80021B20.c (gcc-2.7.2-psx) | a0/a2 swap in smax/smin inline copies; r (3 refs) cannot outrank q/b in global alloc, no C form found |
 | FAR | x001 | func_8011CEC8 | 8011CEC8 | 924 | 98 | src/x001/wip/func_8011CEC8.c (gcc-2.7.2-psx) | first half differs; rcos/rsin, MulCosDup branch and tail already match |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 201 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | gcc reassociates x-1-(signed char)xm; regalloc order of x/ret/o differs |
