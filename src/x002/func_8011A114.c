@@ -1,5 +1,6 @@
 // FUNC 8011a114 7316 X002
 // MATCHING 8011a114 7316
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 /* Whole function: the csv splits it into 8011A114, 8011A448, 8011B170, 8011B330, 8011B47C and 8011B7D4. */
@@ -20,7 +21,6 @@ typedef struct {
 
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
-extern unsigned char D_8009CFEA, D_8009CE15, D_8009CDBB, D_8009D0B2;
 extern unsigned short D_1F8001F8;
 extern short D_1F8001C6;
 extern TObj *ObjAlloc(void);
@@ -170,7 +170,7 @@ void func_8011A114(Ctl *o)
         break;
     case 12:
         FUN_80059d44(o->w08);
-        D_8009CFEA = 1;
+        GCD.bcfea = 1;
         o->state++;
         break;
     case 13:
@@ -198,7 +198,7 @@ void func_8011A114(Ctl *o)
         break;
     case 16:
         if (--o->w08 <= 0) {
-            D_8009CFEA = 2;
+            GCD.bcfea = 2;
             o->w08 = 0x12c;
             o->state++;
         }
@@ -246,11 +246,11 @@ void func_8011A114(Ctl *o)
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
             func_80117CEC(a, 0, 0);
-            if (D_8009CE15 == 0xff) {
+            if (GCD.bce15 == 0xff) {
                 a->d90 = (int)showMessageBoxDirect(7, 6, &v);
                 func_80117CEC(a, 2, 0);
                 o->state = 0x19;
-            } else if (D_8009CDBB) {
+            } else if (GCD.bcdbb) {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
                 a->d90 = (int)showMessageBoxDirect(7, 7, &v);
@@ -280,7 +280,7 @@ void func_8011A114(Ctl *o)
         b->h->p.whole--;
         AnimAdvance(b);
         if (--o->w08 <= 0) {
-            if (!D_8009D0B2) addItemToInventory(0xe, 1, 1);
+            if (!GCD.bd0b2) addItemToInventory(0xe, 1, 1);
             b->b04 = 3;
             o->w08 = 0x3c;
             o->state++;

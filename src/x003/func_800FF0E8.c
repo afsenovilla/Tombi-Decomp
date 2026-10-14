@@ -1,9 +1,9 @@
 // FUNC 800ff0e8 796 X003
 // MATCHING 800ff0e8 796
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char D_8009D078[];
 
 void func_800FF0E8(TObj *o)
 {
@@ -73,7 +73,7 @@ void func_800FF0E8(TObj *o)
         case 1:
         case 5:
             o->w56 = -0xe4;
-            if (D_8009D078[0] == 4) {
+            if (((unsigned char*)&GCD.bd078)[0] == 4) {
                 c = o->y.p.whole < (-0xe3);
                 goto tail;
             } else {

@@ -1,10 +1,10 @@
 // FUNC 8011c4ec 304 X002
 // MATCHING 8011c4ec 304
+#include "gcd.h"
 #include "gv2.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE41, D_8009CFF7;
 extern void func_8011A114(TObj *);
 extern void func_8011BDA8(TObj *);
 
@@ -12,13 +12,13 @@ void func_8011C4EC(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CE41 == 0xff) {
+        if (GCD.bce41 == 0xff) {
             o->step = 3;
             o->state = 0;
-        } else if (D_8009CFF7 == 6) {
+        } else if (GCD.bcff7 == 6) {
             o->step = 2;
             o->state = 0;
-        } else if (D_8009CE41 == 0 && GV2.bc3 == 0x7f) {
+        } else if (GCD.bce41 == 0 && GV2.bc3 == 0x7f) {
             o->step = 1;
             o->state = 0;
         } else {

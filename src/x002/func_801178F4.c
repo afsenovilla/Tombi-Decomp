@@ -1,13 +1,12 @@
 // FUNC 801178f4 1016 X002
 // MATCHING 801178f4 1016
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
 extern int LoadImage(RECT *, void *);
-extern unsigned char D_8009D0CD;
-extern unsigned char D_8009CF0F[];
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern char D_8011C728[];
@@ -34,7 +33,7 @@ void func_801178F4(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D0CD == 0 || (GV2.bc3 & 1)) {
+        if (GCD.bd0cd == 0 || (GV2.bc3 & 1)) {
             o->b04 = 3;
             break;
         }
@@ -61,7 +60,7 @@ void func_801178F4(TObj *o)
         o->d84 = 0;
         o->d88 = D_8011C768[o->b0c];
         o->d8c = 0;
-        if (D_8009CF0F[0] == 0) {
+        if (((unsigned char*)&GCD.bcf0f)[0] == 0) {
             o->step = 0;
             v = 0x800;
         } else {

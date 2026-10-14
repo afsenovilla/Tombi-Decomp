@@ -1,9 +1,9 @@
 // FUNC 80118684 2412 X002
 // MATCHING 80118684 2412
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009CE41, D_8009CE34;
 extern unsigned char D_8009C970_[];
 #define D_8009C970 D_8009C970_[0]
 extern unsigned char D_8009C93F_[];
@@ -70,11 +70,11 @@ void func_80118684(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CE41 != 0) {
+        if (GCD.bce41 != 0) {
             o->b04 = 3;
             break;
         }
-        if (D_8009CE34 == 0) o->wb4 = 0;
+        if (GCD.bce34 == 0) o->wb4 = 0;
         else if (D_8009C970 < GAME.playerHealthDisplayed) o->wb4 = 2;
         else o->wb4 = 1;
         o->active = 2;

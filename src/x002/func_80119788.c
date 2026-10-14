@@ -1,12 +1,12 @@
 // FUNC 80119788 384 X002
 // MATCHING 80119788 384
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDCB;
 extern unsigned int D_8009C98C;
 extern short D_1F8001C6;
 extern unsigned char D_8009C93FA[], D_8009C942A[];
@@ -19,7 +19,7 @@ void func_80119788(TObj *o)
     case 0:
         if (GVARS.b3a == 0)
             break;
-        if (D_8009CDCB == 0 || D_8009CDCB == 0xff)
+        if (GCD.bcdcb == 0 || GCD.bcdcb == 0xff)
             break;
         if (GAME.playerAP < D_8009C98C)
             break;

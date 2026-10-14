@@ -1,5 +1,6 @@
 // FUNC 80119a1c 1316 X002
 // MATCHING 80119a1c 1316
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
@@ -17,8 +18,6 @@ typedef struct { short x, y, z, sub; } E8;
 extern E D_8011C984[], D_8011CA9C[];
 extern E8 D_8011C93C[];
 extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
-extern unsigned char D_8009CE41;
-extern unsigned char D_8009CFDC[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *FUN_80018448(void);
 
@@ -56,15 +55,15 @@ void func_80119A1C(TObj *o)
         if (i == 0 && GV2.bc3 != 0x7f) p->b04 = 2;
     }
     for (i = 0; i < 6; i++) {
-        if (D_8009CFDC[i] == 0) {
+        if (((unsigned char*)&GCD.bcfdc)[i] == 0) {
             p = D_8009F2E0[i];
             p->y.p.whole -= 0x140;
         }
     }
-    if (D_8009CE41 == 0xff) {
+    if (GCD.bce41 == 0xff) {
         for (i = 0; i < 6; i++) D_8009F2E0[i]->y.p.whole -= 0x140;
     }
-    if (D_8009CE41 == 0) {
+    if (GCD.bce41 == 0) {
         for (i = 0, e = D_8011CA9C; e->flags != 0xff; e = &D_8011CA9C[++i]) {
             p = allocObjectLayer2();
             if (p == 0) continue;

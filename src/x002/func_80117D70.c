@@ -1,5 +1,6 @@
 // FUNC 80117d70 696 X002
 // MATCHING 80117d70 696
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -15,8 +16,6 @@ extern AT D_8011C778[];
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern unsigned char D_8009CE41[];
-extern unsigned char D_8009CE44[];
 extern void setEventStarted(int, int, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -42,7 +41,7 @@ void func_80117D70(TO2 *o)
         }
         o->t.wbc = o->t.animFrame;
         o->t.animFrame = o->t.b68 & 1;
-        if (D_8009CE41[0] == 0xff) {
+        if (((unsigned char*)&GCD.bce41)[0] == 0xff) {
             o->t.d90 = showMessageBoxDirect(7, 0xb, &v);
         } else {
             o->t.d90 = showMessageBoxDirect(7, 6, &v);
@@ -61,7 +60,7 @@ void func_80117D70(TO2 *o)
         }
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->t.timer = 4;
-        if (D_8009CE44[0] == 0) {
+        if (((unsigned char*)&GCD.bce44)[0] == 0) {
             setEventStarted(0xa0, 0, 0);
             o->t.timer = 200;
         }

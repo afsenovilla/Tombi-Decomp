@@ -1,10 +1,10 @@
 // FUNC 80119914 264 X002
 // MATCHING 80119914 264
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short xf, x, yf, y, zf, z; } V6;
 extern unsigned int D_8009C98C;
-extern unsigned char D_8009CDCB;
 extern TObj *ObjSpawnType0(int, int, V6 *);
 extern void func_80119788(TObj *);
 extern void PoolFree_1F800210(TObj *);
@@ -15,7 +15,7 @@ void func_80119914(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (GAME.playerAP >= D_8009C98C && D_8009CDCB != 0 && GAME.goldenFlowerState == 0) {
+        if (GAME.playerAP >= D_8009C98C && GCD.bcdcb != 0 && GAME.goldenFlowerState == 0) {
             v.x = 0xb0;
             v.y = -0x38;
             v.z = 0;
