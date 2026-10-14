@@ -1,5 +1,6 @@
 // FUNC 8011973c 2300 X018
 // MATCHING 8011973c 2300
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -10,8 +11,6 @@ extern TObj PLAYER;
 #define P PLAYER
 extern signed char D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
-extern unsigned char D_8009CFF0[6];
-extern unsigned char D_8009CFF1, D_8009CFF2, D_8009CFF3, D_8009CFF4, D_8009CFF5;
 extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
@@ -54,29 +53,29 @@ void func_8011973C(TObj *o)
         v = *(V6 *)&o->a;
         switch (GVARS.b41) {
         case 8:
-            D_8009CFF0[0] = 1;
+            ((unsigned char*)&GCD.bcff0)[0] = 1;
             break;
         case 0x66:
-            D_8009CFF1 = 1;
+            GCD.bcff1 = 1;
             break;
         case 0x67:
-            D_8009CFF2 = 1;
+            GCD.bcff2 = 1;
             break;
         case 0x68:
-            D_8009CFF3 = 1;
+            GCD.bcff3 = 1;
             break;
         case 0x69:
-            D_8009CFF4 = 1;
+            GCD.bcff4 = 1;
             break;
         case 0x6a:
-            D_8009CFF5 = 1;
+            GCD.bcff5 = 1;
             break;
         }
         FUN_80026e0c(GVARS.b41, 1);
         for (i = 0; i < 6; i++)
             ;
         for (i = 0; i < 6; i++)
-            if (D_8009CFF0[i] == 0) break;
+            if (((unsigned char*)&GCD.bcff0)[i] == 0) break;
         if (i == 6) {
             if (GVARS.b41 != 8) {
                 o->state = 0x60;
@@ -165,7 +164,7 @@ void func_8011973C(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         for (i = 0; i < 6; i++)
-            if (D_8009CFF0[i] == 0) break;
+            if (((unsigned char*)&GCD.bcff0)[i] == 0) break;
         if (i == 6) break;
         v = *(V6 *)&o->a;
         setanim(o, 4);

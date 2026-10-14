@@ -1,5 +1,6 @@
 // FUNC 801191dc 760 X018
 // MATCHING 801191dc 760
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,7 +9,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8011A564[];
 extern short D_1F8001C6;
-extern unsigned char D_8009CE28;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -60,7 +60,7 @@ void func_801191DC(TObj *o)
         break;
     case 2:
         if (--o->timer > 0) break;
-        if (D_8009CE28 != 0xff) setEventComplete(0x84, 0);
+        if (GCD.bce28 != 0xff) setEventComplete(0x84, 0);
         increaseMaxHealth();
         printInfoMessage(0x15, 3);
         FUN_80026e0c(0x99, 1);
