@@ -1,5 +1,6 @@
 // FUNC 801165e0 1288 X010
 // MATCHING 801165e0 1288
+#include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
@@ -15,7 +16,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009D078;
 extern FP *D_800A6078;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
@@ -67,7 +67,7 @@ void func_801165E0(O *o)
                 tryStartItemInteraction(o, 1, 0);
                 break;
             }
-            if (D_8009D078 < 2) break;
+            if (GCD.bd078 < 2) break;
             if (D_1F80016A < 0xc8b) break;
             if (D_1F80016E < -0x60) break;
             tryStartItemInteraction(o, 1, 1);

@@ -1,5 +1,6 @@
 // FUNC 8011ccd8 2332 X010
 // MATCHING 8011ccd8 2332
+#include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -10,7 +11,6 @@ typedef struct {
 extern G330 *D_8009C330;
 typedef struct { char pad[0xe8]; short e8, ea; } PObj;
 extern TObj *D_8009F0EC;
-extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C4, D_1F8003C6;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_801152E8[];
 extern int AnimAdvance(TObj *);
@@ -94,10 +94,10 @@ void func_8011CCD8(TObj *o)
                 int v = o->h->p.whole;
                 FUN_800408d8(o, (o->animFrame & 1) ? v - 4 : v + 4, o->y.p.whole - 0x15);
             }
-            if ((D_1F8001F8 & 0xf) == 0) SfxPlay2(0x1d, 0);
+            if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
         } else if (*pad & 0x40) {
             PlayerSetAnimIfChanged(o, 0xc);
-            if ((D_1F8001F8 & 0xf) == 0) SfxPlay2(0x1d, 0);
+            if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             o->y.raw += 0x18000;
         }
         p = D_8009F0EC;
@@ -198,7 +198,7 @@ void func_8011CCD8(TObj *o)
         o->y.p.whole = D_8009F0EC->y.p.whole + o->wba - y;
         break;
     }
-    if (D_1F8001FC & D_1F8003C6) {
+    if (SPAD.s1fc & SPAD.s3c6) {
         D_8009D2B0 = 0;
         *(unsigned char *)&o->waa = 0;
         o->b9c = 1;
@@ -208,7 +208,7 @@ void func_8011CCD8(TObj *o)
             Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 0x10 : v - 0x10;
         }
         if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
-            if (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4) o->ba7 = 1;
+            if (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4) o->ba7 = 1;
         }
         o->step = 2;
         o->state = 0;

@@ -1,10 +1,9 @@
 // FUNC 8011b1f8 312 X010
 // MATCHING 8011b1f8 312
+#include "spad.h"
 #include "TOBJ.H"
 extern void *D_80131C88;
-extern int D_1F8002D4[];
 extern unsigned short D_1F800176[];
-extern unsigned short D_1F800186[];
 extern int D_800A4570[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
@@ -17,7 +16,7 @@ void func_8011B1F8(TObj *o)
         o->w1e = 8;
         o->y.p.whole += 0x20;
         o->anim = D_80131C88;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->b0f = 3;
         o->d30 = o->h->p.whole;
         o->b04++;
@@ -28,7 +27,7 @@ void func_8011B1F8(TObj *o)
         int sc;
         short ax; int ay;
         cx = D_1F800176[0];
-        cy = D_1F800186[0];
+        cy = ((unsigned short*)&SPAD.s186)[0];
         sc = D_800A4570[0];
         o->b.p.whole = 0;
         o->visible = 1;

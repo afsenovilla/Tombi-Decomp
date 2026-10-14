@@ -1,9 +1,9 @@
 // FUNC 801206f4 616 X010
 // MATCHING 801206f4 616
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
-extern unsigned char D_1F8001A4;
 extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_8001f96c(int, int, int, int);
@@ -17,7 +17,7 @@ void func_801206F4(TObj *o, TObj *e)
     if (*(unsigned short *)&e->wb4 == 0 && e->subtype < 2) {
         if (e->active & 2) return;
         if (o->active & 2) return;
-        if (D_1F8001A4) return;
+        if (SPAD.b1a4) return;
         o->active = 2;
         r = e->h->p.whole > o->h->p.whole;
         o->b04 = 2;
@@ -30,7 +30,7 @@ void func_801206F4(TObj *o, TObj *e)
     if (e->b9c == 0 && e->subtype < 2 && e->b04 == 1) {
         if (e->active & 2) return;
         if (o->active & 2) return;
-        if (D_1F8001A4) return;
+        if (SPAD.b1a4) return;
         o->active = 2;
         r = e->h->p.whole > o->h->p.whole;
         o->b04 = 2;
@@ -56,7 +56,7 @@ void func_801206F4(TObj *o, TObj *e)
     case 0:
     case 3:
         if (e->active & 2) break;
-        if (D_1F8001A4) break;
+        if (SPAD.b1a4) break;
         if (o->active & 2) break;
         o->active = 2;
         r = e->h->p.whole > o->h->p.whole;

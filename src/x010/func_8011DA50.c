@@ -1,11 +1,11 @@
 // FUNC 8011da50 484 X010
 // MATCHING 8011da50 484
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern void *D_80131CE0;
 extern int D_1F8002D4[];
-extern unsigned char D_8009CD9A, D_8009CD9E;
 extern unsigned char D_800B146E, D_800B1476, D_800B1472;
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -52,8 +52,8 @@ void func_8011DA50(TObj *o)
     case 2:
         setEventComplete(0x77, 0);
         printInfoMessage(0x32, 2);
-        D_8009CD9A = 9;
-        D_8009CD9E = 0x3c;
+        GCD.bcd9a = 9;
+        GCD.bcd9e = 0x3c;
         D_800B146E = 0x3c;
         D_800B1476 = 1;
         D_800B1472 = 0x1e;

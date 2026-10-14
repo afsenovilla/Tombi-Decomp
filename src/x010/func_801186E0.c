@@ -1,9 +1,9 @@
 // FUNC 801186e0 920 X010
 // MATCHING 801186e0 920
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CF06;
 extern void playSFX(int);
 extern short func_80041EBC(TObj *, short, short);
 
@@ -77,7 +77,7 @@ void func_801186E0(TObj *o)
                 if (o->a.p.whole >= 0xac9) {
                     if (o->b6a) {
                         unsigned char *c = &GVARS.b58;
-                        D_8009CF06 = 0;
+                        GCD.bcf06 = 0;
                         GVARS.b3f = 1;
                         GVARS.b38 = 1;
                         GVARS.b3e = 1;

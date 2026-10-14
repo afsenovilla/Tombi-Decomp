@@ -1,13 +1,11 @@
 // FUNC 8011afd8 544 X010
 // MATCHING 8011afd8 544
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern void *D_80131CAC;
 extern void *D_80131C64[];
-extern int D_1F8002D4[];
-extern unsigned short D_1F800176[];
-extern unsigned short D_1F800186[];
 extern int D_800A4570[];
 extern int D_800A4574[];
 extern void FUN_8001fe6c(TObj *);
@@ -40,7 +38,7 @@ void func_8011AFD8(TObj *o)
             o->anim = D_80131C64[o->subtype];
             o->b0f = 3;
         }
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->d30 = o->a.p.whole;
         o->d34 = o->y.p.whole;
         o->b04++;
@@ -48,9 +46,9 @@ void func_8011AFD8(TObj *o)
     case 1:
         if (o->subtype == 99) AnimAdvance(o);
         a = o->d30;
-        x = a - D_1F800176[0] + ((D_800A4574[0] >> 8) << 2);
+        x = a - ((unsigned short*)((char*)&SPAD.i174 + 2))[0] + ((D_800A4574[0] >> 8) << 2);
         b = o->d34;
-        y = b - D_1F800186[0] - ((D_800A4570[0] >> 8) << 3);
+        y = b - ((unsigned short*)&SPAD.s186)[0] - ((D_800A4570[0] >> 8) << 3);
         switch (GAME.selectedSection) {
         case 0: case 2: case 4: case 6:
             x = (short)x >> 2;

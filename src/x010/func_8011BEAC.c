@@ -1,5 +1,6 @@
 // FUNC 8011beac 2220 X010
 // MATCHING 8011beac 2220
+#include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 typedef struct {
@@ -24,8 +25,6 @@ typedef struct {
 } G330;
 extern G330 *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_1F8001FC;
-extern unsigned short D_1F8001F8;
 extern void FUN_80010d68();
 extern void FUN_80010dac();
 extern void AnimJump(TObj *, int);
@@ -112,7 +111,7 @@ void func_8011BEAC(TObj *o)
             }
             o->velY = 0;
             if (o->animFrame & 1) {
-                if (D_1F8001FC & 0x80) {
+                if (SPAD.s1fc & 0x80) {
                     o->timer = 0;
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
@@ -123,7 +122,7 @@ void func_8011BEAC(TObj *o)
                     o->state++;
                 }
             } else {
-                if (D_1F8001FC & 0x20) {
+                if (SPAD.s1fc & 0x20) {
                     o->timer = 0;
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
@@ -135,7 +134,7 @@ void func_8011BEAC(TObj *o)
                 }
             }
                 } else {
-            if ((D_1F8001F8 & 0xf) == 0) SfxPlay2(0x1d, 0);
+            if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             if (*pad & 0x10) {
                 PlayerSetAnimIfChanged(o, 0x25);
                 if (D_8009F0EC->y.p.whole - D_8009F0EC->d38 - 0x10 < o->y.p.whole)

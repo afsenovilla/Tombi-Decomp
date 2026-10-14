@@ -1,11 +1,11 @@
 // FUNC 80118cd4 344 X010
 // MATCHING 80118cd4 344
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern short D_1F800172, D_1F80016E;
 extern unsigned short D_1F80016A;
-extern unsigned char D_8009CF06;
 extern void playSFX(int);
 
 void func_80118CD4(TObj *o)
@@ -26,7 +26,7 @@ void func_80118CD4(TObj *o)
         if (x >= 0x45) break;
         o->state = st + 1;
         o->timer = 0x10;
-        D_8009CF06 = 0;
+        GCD.bcf06 = 0;
         *p = 1;
         GVARS.b38 = 1;
         GVARS.b3e = 1;

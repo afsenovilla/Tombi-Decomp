@@ -1,8 +1,8 @@
 // FUNC 8011ad54 460 X010
 // MATCHING 8011ad54 460
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D078;
 extern short D_1F80016A, D_1F80016E;
 extern int FUN_800202b4(TObj *);
 extern void func_8011AB70(TObj *);
@@ -12,7 +12,7 @@ void func_8011AD54(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009D078 != 0) {
+        if (GCD.bd078 != 0) {
             o->b04 = 3;
             break;
         }

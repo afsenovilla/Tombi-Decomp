@@ -1,10 +1,10 @@
 // FUNC 80117364 456 X010
 // MATCHING 80117364 456
+#include "spad.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_1F800176;
 extern void playSFX(int);
 extern void ObjListPush_1F800230(TObj *);
 extern void func_8011752C(TObj *);
@@ -41,7 +41,7 @@ void func_80117364(TObj *o)
         }
         switch (o->subtype) {
         case 0:
-            if (D_1F800176 < 0xac9) break;
+            if ((*(short*)((char*)&SPAD.i174 + 2)) < 0xac9) break;
         case 1:
         case 2:
         case 4:
