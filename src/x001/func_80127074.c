@@ -1,5 +1,9 @@
 // FUNC 80127074 1544 X001
+// MATCHING 80127074 1544
 #include "spad.h"
+/* Matched (opusAD): two `asm("" :: "r"(cx))` use pairs (one at the top after the declarations, one before the
+   first k-odd wba/wb8 store) raise cx's ref count so global alloc orders it ahead of dy and the slope: cx s5,
+   slope s7 as in the game. */
 /* score 28 (opusZ, was 95): case 0 of the second switch(t) solved: case 0 first, written as a full if/else
    (`if ((short)dx < 0) { if (animFrame & 1) return 0; } else { if (!(animFrame & 1)) return 0; } break;`), case 1/2
    keeps the goto neg/pos form; the full if/else keeps a label in the case-0 block so jump.c does not swap it with the
@@ -62,6 +66,7 @@ int func_80127074(PL *p, TObj *e, unsigned char t, int ang)
     int base, b;
     short ax;
     short ay;
+asm("" :: "r"(cx)); asm("" :: "r"(cx));
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
 asm("" : "=r"(e) : "0"(e));
@@ -164,6 +169,7 @@ asm("" :: "r"(dy));
                 m = ay - m;
                 if ((unsigned short)m < 0x10) return 0;
             }
+asm("" :: "r"(cx)); asm("" :: "r"(cx));
             o->wba = dy;
             o->wb8 = fx + 8;
         } else {

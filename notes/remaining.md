@@ -23,14 +23,11 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | DATA | x018 | func_8011C758 | 8011C758 | 680 | n/a | - | KEPT: pointer table (170 words) but FUN_80106a18 (shared player step 0x48, present in X018 at 80106AE8) jals it when the held/hit object kind is 0xE, so it can run while X018 is loaded; x006 8011C758 is real code |
 | DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | KEPT: pointer table (112 words) but func_80100788 (shared player step 0x47) jals it from X016 itself (80101634); step 0x47 is only set by X014 code, not provable dead |
 | DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | KEPT: 10 words of s16 offset pairs (anim data, pointed to from 8011EFDC) but func_80100788 step 0x25 jals it from X002 itself (801011BC); not provable dead |
-| FAR | x001 | func_80127074 | 80127074 | 1544 | 28 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | case 0 dispatch fixed (full if/else case 0 first), plain params, e bump, short cx/cy; left: cx/fx s5/s7 swap |
-| FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 28 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 19 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | quotient first, tt/xm/sx/r in game order, branch 1 split with two laundered sra, $5 w5 for the fl & 0xff00 delay-slot move; left: branch-1 o->h load sched, (d < 0) delay slot fill, plane offset lhu reg |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
 | FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
 | FAR | x006 | func_8011D5F4 | 8011D5F4 | 492 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
-| FAR | x010 | func_8011E990 | 8011E990 | 344 | 28 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B (with EAE8); same shape as x001 func_80127074 wip (28); left: cx/s7 s5/s7 swap |
 | FAR | x006 | func_8011D4E0 | 8011D4E0 | 276 | no wip | gcc-2.7.2-psx default | no wip; D4E0..DBF4 is one 1812 B sprite-draw function (5 csv pieces), untouched |
 | FAR | x006 | func_8011DAE0 | 8011DAE0 | 276 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x006 | func_8011D7E0 | 8011D7E0 | 228 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
