@@ -1,13 +1,13 @@
 // FUNC 8011b7c4 1868 X004
 // MATCHING 8011b7c4 1868
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned short D_1F8001C8;
 extern short D_1F800172;
 extern unsigned char D_8009D0DA, D_8009D0D9;
 extern unsigned char D_8009CDD7, D_8009CDCD, D_8009CDCE, D_8009CDDB;
 extern unsigned char D_800A60E3;
-extern unsigned short D_8009C962;
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -81,7 +81,7 @@ void func_8011B7C4(TObj *o)
             if (func_8011AFA8(o) == 2) playSFX(0x7e);
             break;
         case 20:
-            if (D_8009C962 == 2 && func_8011AFA8(o) == 2) playSFX(0x7e);
+            if (GAME.selectedSection == 2 && func_8011AFA8(o) == 2) playSFX(0x7e);
             break;
         case 3:
         case 5:

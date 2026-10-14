@@ -2,6 +2,7 @@
 // MATCHING 80102214 2036
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
@@ -12,11 +13,9 @@ extern unsigned char D_1F8001D2;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009C93E, D_8009C93F, D_8009C938, D_8009F7F0;
 extern unsigned short D_8009D610;
-extern int D_8009C984;
 extern unsigned short D_8007A034, D_8007A036;
 extern unsigned short D_800A6040, D_800A60FC;
 extern signed char D_8009D2B0;
-extern unsigned char D_8009C964;
 extern void *memcpy(void *, void *, int);
 extern void FUN_80025d90(void);
 extern void FUN_800f0490(TObj *);
@@ -89,7 +88,7 @@ void FUN_80102214(TObj *o)
     U8(o, 0xc7) = 0;
     switch (o->subtype) {
     case 0:
-        if ((D_8009C984 & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4) && o->step == 1)
+        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4) && o->step == 1)
             U8(o, 0xc1) = 1;
         else
             U8(o, 0xc1) = o->ba7;
@@ -237,7 +236,7 @@ void FUN_80102214(TObj *o)
     D_1F80016A[0] = o->h->p.whole;
     D_1F80016E[0] = o->y.p.whole;
     D_1F800172[0] = o->d->p.whole;
-    D_8009C964 = o->d->p.whole / 90;
+    GAME.selectedPlane = o->d->p.whole / 90;
     memcpy(&D_8009D670, pad, 8);
     D_1F8001FC = b0;
     D_1F8001FE = b1;

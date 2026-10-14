@@ -1,11 +1,11 @@
 // FUNC 80130e3c 1024 X003
 // MATCHING 80130e3c 1024
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short x, y, z; unsigned char st, c; } R;
 extern R D_80135F00[];
 extern R D_80135ED0[];
-extern unsigned short D_8009C962;
 extern TObj *allocObjectLayer4(void);
 extern void PoolFree_1F800210(TObj *);
 
@@ -33,7 +33,7 @@ void func_80130E3C(TObj *o)
     TObj *p;
     R *r;
 
-    switch (D_8009C962) {
+    switch (GAME.selectedSection) {
     case 0:
     case 4:
         r = D_80135F00;

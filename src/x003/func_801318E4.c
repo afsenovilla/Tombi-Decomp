@@ -1,14 +1,14 @@
 // FUNC 801318e4 1376 X003
 // MATCHING 801318e4 1376
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 D_80135FFC[], D_80135F54[], D_80135FC4[];
 extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F3D4[];
-extern unsigned short D_8009C962;
-extern unsigned char D_8009D2C3, D_8009CDC7, D_8009CDC1;
+extern unsigned char D_8009CDC7, D_8009CDC1;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -17,10 +17,10 @@ void func_801318E4(TObj *o)
     E28 *p;
     short i;
     TObj *n;
-    unsigned short v = D_8009C962;
+    unsigned short v = GAME.selectedSection;
 
     if (v == 2) {
-        if (D_8009D2C3 & 4) {
+        if (GAME.purifiedAreas & 4) {
             o->b04 = 3;
             return;
         }

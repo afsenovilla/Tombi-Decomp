@@ -1,12 +1,12 @@
 // FUNC 801343d4 584 X003
 // MATCHING 801343d4 584
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_8013613C;
 extern unsigned char D_8009CE5D, D_8009CDC5;
-extern unsigned short D_8009C962[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -52,7 +52,7 @@ void func_801343D4(TObj *o)
             n->type = 0x32;
             n->b0a = 0;
             n->animFrame = p->f2;
-            if (D_8009C962[0] == 1)
+            if (((unsigned short*)&GAME.selectedSection)[0] == 1)
                 n->subtype = p->f18 + 1;
             else
                 n->subtype = p->f18;

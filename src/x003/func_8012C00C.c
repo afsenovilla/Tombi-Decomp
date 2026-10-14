@@ -1,6 +1,7 @@
 // FUNC 8012c00c 1664 X003
 // MATCHING 8012c00c 1664
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
@@ -11,8 +12,6 @@ extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern unsigned char D_8009CDC5;
 extern unsigned char D_8009CDC5b; /* same byte as D_8009CDC5: second name makes chk() reload it (game reloads; volatile does not match) */
-extern unsigned short D_8009C962;
-extern unsigned char D_8009C975;
 extern short D_800A60EA[];
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
@@ -22,7 +21,7 @@ extern short func_8004065C(TObj *, short, short, short);
 
 static __inline__ int chk(void)
 {
-    return D_8009C962 == 5 && D_8009CDC5b == 1;
+    return GAME.selectedSection == 5 && D_8009CDC5b == 1;
 }
 
 void func_8012C00C(TObj *o)
@@ -138,21 +137,21 @@ void func_8012C00C(TObj *o)
             goto next;
         break;
     case 100:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         goto next;
     case 101:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         goto next;
     case 102:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         o->state = 0x68;
         break;
     case 103:
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state = 0x68;
         break;
     case 104:
-        if ((unsigned char)(D_8009C975 - 3) < 2)
+        if ((unsigned char)(GAME.fadeScreenControl - 3) < 2)
             break;
     next:
         o->state = X(o)->wc2;

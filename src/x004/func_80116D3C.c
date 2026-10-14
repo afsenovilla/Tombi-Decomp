@@ -1,5 +1,6 @@
 // FUNC 80116d3c 6596 X004
 // MATCHING 80116d3c 6596
+#include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -41,14 +42,11 @@ typedef void (*Fn)(O *);
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern E8 *D_801305DC[];
-extern unsigned char D_8009CDA2[];
 extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C940, D_8009C942;
-extern unsigned char D_8009D2C3, D_8009CDD5, D_8009CDF1, D_8009CFEE;
+extern unsigned char D_8009CDD5, D_8009CDF1, D_8009CFEE;
 extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
 extern unsigned char D_8009C982b;
-extern unsigned short D_8009C982;
-extern unsigned short D_8009C962;
 extern short D_1F80016Ax[], D_1F80016Ex[], D_1F800172;
 #define D_1F80016A D_1F80016Ax[0]
 #define D_1F80016E D_1F80016Ex[0]
@@ -120,8 +118,8 @@ void func_80116D3C(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009CDA2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
+        if (((unsigned char*)&GAME.disableSelectMenu)[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -135,7 +133,7 @@ void func_80116D3C(O *o)
         break;
     case 2:
         D_80079A98[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
             F6047();
             if (D_1F800172 == 0x3de && (unsigned short)(ZU + 0x428) < 0x10 && (unsigned)(XU - 0x37b) < 0x12) {
@@ -217,7 +215,7 @@ void func_80116D3C(O *o)
             break;
         case 1:
             F6047();
-            if (!(D_8009D2C3 & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
                 func_80116C0C(o);
                 break;
             }
@@ -279,7 +277,7 @@ void func_80116D3C(O *o)
             break;
         case 2:
             F6047();
-            if (!(D_8009D2C3 & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
                 func_80116AE0(o);
                 break;
             }
@@ -486,13 +484,13 @@ void func_80116D3C(O *o)
             o->step = 2;
             D_8009C93F = 0;
             D_8009C942 = 0;
-            D_8009CDA2[0] = 0;
+            ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         D_8009C93F = 1;
         D_8009C942 = 1;
         {
-        E8 *e = D_801305DC[D_8009C962] + D_8009C982;
+        E8 *e = D_801305DC[GAME.selectedSection] + GAME.selectedSpawnPoint;
         unsigned char t;
         o->p68 = e;
         t = e->b4;
