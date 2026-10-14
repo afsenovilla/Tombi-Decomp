@@ -5,6 +5,7 @@ The tk widget is tools/model_viewer.py; the polygon format is parsed by tools/ro
 
   tools/model_view.py room AR00:1 OUT.png [yaw pitch [W H]]       software render of a room
   tools/model_view.py obj  AR00:1:5 OUT.png [yaw pitch [W H]]     object model 5 of the table of load list AR00:1
+  add --objects[=1,2,3] anywhere after the mode to draw the placed objects (tools/objects.py records) as cubes (optionally only those layers)
 
 Mesh = parts (dict pos (N,3) float32 [x, -y, -z like the .glb, scale 0.01], uv (N,2) texel coordinates in tex, col (N,3) 0..1 modulation,
 idx (T,3) int32, tex (H,W,4) uint8 RGBA (alpha 0 = cut-out), kind 'model' | 'sky')."""
@@ -31,13 +32,15 @@ def _rgba_lut():
 class Mesh:
     def __init__(self, name, parts, glb=None, center=None, radius=1.0):
         self.name, self.parts, self.glb_fn, self.center, self.radius = name, parts, glb, center, radius
+        self.objs = []          # placed objects (room_objects), only for rooms
 
     @property
     def tris(self):
         return sum(len(p["idx"]) for p in self.parts if p["kind"] == "model")
 
-    def glb(self):
-        return self.glb_fn() if self.glb_fn else None
+    def glb(self, objects=False, layers=None):
+        g = self.glb_fn() if self.glb_fn else None
+        return add_glb_objects(g, self.objs, layers) if g and objects and self.objs else g
 
 
 def build_part(v, pk):
@@ -128,7 +131,12 @@ def load_room(ld, idx, sky=True):
     pk = R.parse_wmd_ex(d)
     sp = R.find_sky(ld, idx) if sky else None
     sk = R.load_sky(sp) if sp else None
-    return _finish(rec["name"].split("/")[-1].split(".")[0], v, pk, sk, lambda: R.room_glb(ld, idx)[1])
+    m = _finish(rec["name"].split("/")[-1].split(".")[0], v, pk, sk, lambda: R.room_glb(ld, idx)[1])
+    try:
+        m.objs = room_objects(ld, idx)
+    except Exception as e:
+        sys.stderr.write("objects: %r\n" % (e,))
+    return m
 
 
 def has_sky(ld, idx):
@@ -184,6 +192,136 @@ def load_object(ld, idx, k):
     pk = R.parse_wmd_ex(struct.pack("<II", 1, 8) + sub, lenient=True)
     v = V.area_context(ld, idx)
     return _finish("%s:%d #%d" % (ld, idx, k), v, pk, None, lambda: R.build_glb(v, pk))
+
+
+# ---------------------------------------------------------------- placed objects (tools/objects.py records)
+LAYER_COL = {1: (1.0, .55, .1), 2: (.2, .9, .3), 3: (.3, .6, 1.0), 4: (1.0, .25, .25), 5: (1.0, .9, .2), 7: (.8, .3, 1.0), 8: (.2, .9, .9)}
+MARK = 24        # marker half size in game units
+_objcache = {}
+
+
+def room_objects(ld, idx):
+    """Decoded placement records spawned by the room (list idx of area ld; objects.py rows with own=1), each with a 'pos' (view space, like the mesh:
+    x, -y, -z in 0.01 units; the record coordinates are the same space as the WMD vertices) and a short 'label'."""
+    import objects as O, psxemu.rooms as PR
+    r = PR.list_to_room(ld, idx)
+    if r is None:
+        return []
+    a, sec = r
+    if a not in _objcache:
+        _objcache[a] = O.build(a)
+    out = []
+    for o in _objcache[a]:
+        if o["section"] != sec or not o["own"] or o["layer"] is None:
+            continue
+        o = dict(o)
+        o["pos"] = (o["x"] * S, -o["y"] * S, -o["z"] * S)
+        o["label"] = "L%d t=0x%02X %s" % (o["layer"], o["type"], (o["handler_name"] or o["handler"] or "").split(">")[-1])
+        out.append(o)
+    return out
+
+
+def object_layers(objs):
+    return sorted({o["layer"] for o in objs})
+
+
+def object_text(o):
+    """Multi-line description of one record for the side panel."""
+    ev = " ".join(str(e) for e in o["events"]) or "-"
+    dl = " ".join("%d/%d" % d for d in o["dialogues"]) or "-"
+    return "\n".join([
+        "%s  (#%d)" % (o["handler_name"] or "?", o["index"]),
+        "layer %d  type 0x%02X  subtype %d" % (o["layer"], o["type"], o["subtype"]),
+        "x=%d y=%d z=%d" % (o["x"], o["y"], o["z"]),
+        "b0=%02X b3=%02X b5=%02X bc=%02X bd=%02X be=%02X bf=%02X" % (o["b0"], o["b3"], o["b5"], o["bc"], o["bd"], o["be"], o["bf"]),
+        "event: %s" % ev, "dialogue: %s" % dl, o["event_note"] or ""])
+
+
+_CUBE = np.array([(x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1)], np.float32)
+_CUBE_IDX = np.array([(0, 1, 3), (0, 3, 2), (4, 6, 7), (4, 7, 5), (0, 4, 5), (0, 5, 1), (2, 3, 7), (2, 7, 6), (0, 2, 6), (0, 6, 4), (1, 5, 7), (1, 7, 3)], np.int32)
+
+
+def marker_part(objs, layers=None, sel=None):
+    """Untextured part with a cube per object (layer colour; the selected one is bigger and white).  layers: set of layers to show (None = all)."""
+    pos, col, idx = [], [], []
+    for o in objs:
+        if layers is not None and o["layer"] not in layers:
+            continue
+        h = MARK * S * (1.8 if o is sel else 1.0)
+        c = (1, 1, 1) if o is sel else LAYER_COL.get(o["layer"], (.7, .7, .7))
+        b = len(pos)
+        pos += [tuple(np.array(o["pos"]) + q * h) for q in _CUBE]
+        col += [tuple(np.array(c) * (.6 + .2 * (q[0] + 1) / 2 + .2 * (q[1] + 1) / 2)) for q in _CUBE]
+        idx += (_CUBE_IDX + b).tolist()
+    return dict(kind="marker", pos=np.array(pos, np.float32).reshape(-1, 3), uv=np.full((len(pos), 2), .5, np.float32),
+                col=np.array(col, np.float32).reshape(-1, 3), idx=np.array(idx, np.int32).reshape(-1, 3), tex=_NOTEX)
+
+
+def pick_object(objs, cam, W, H, x, y, layers=None, maxd=14):
+    """Nearest visible object whose projected centre is within maxd pixels of (x, y), or None."""
+    cand = [o for o in objs if layers is None or o["layer"] in layers]
+    if not cand:
+        return None
+    pts = np.array([o["pos"] for o in cand], np.float64)
+    sx, sy, w, ok = _project(dict(pos=pts), cam, W, H)
+    d = np.hypot(sx - x, sy - y)
+    d[~ok] = 1e9
+    # nearest to the camera among the close ones
+    near = np.nonzero(d <= maxd)[0]
+    if not len(near):
+        return None
+    return cand[int(near[np.argmin(w[near])])]
+
+
+def add_glb_objects(glb, objs, layers=None):
+    """Return the .glb with optional marker nodes (one cube per object, node 'obj<i> L<layer> t=0x.. handler', extras = the record) under a node 'objects'."""
+    import json
+    js_len, = struct.unpack_from("<I", glb, 12)
+    js = json.loads(glb[20:20 + js_len])
+    bo = 20 + js_len
+    bl, = struct.unpack_from("<I", glb, bo)
+    blob = bytearray(glb[bo + 8:bo + 8 + bl])
+    use = [o for o in objs if layers is None or o["layer"] in layers]
+    if not use:
+        return glb
+    def add_view(data, target):
+        while len(blob) % 4:
+            blob.append(0)
+        js["bufferViews"].append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(data), "target": target})
+        blob.extend(data)
+        return len(js["bufferViews"]) - 1
+    # cube geometry in glTF space is the same as view space (unit cube scaled by MARK*S)
+    vp = (_CUBE * (MARK * S)).astype(np.float32)
+    bv_p = add_view(vp.tobytes(), 34962)
+    bv_i = add_view(_CUBE_IDX.astype(np.uint16).reshape(-1).tobytes(), 34963)
+    js["accessors"].append({"bufferView": bv_p, "componentType": 5126, "count": 8, "type": "VEC3",
+                            "min": vp.min(0).tolist(), "max": vp.max(0).tolist()})
+    ap = len(js["accessors"]) - 1
+    js["accessors"].append({"bufferView": bv_i, "componentType": 5123, "count": 36, "type": "SCALAR"})
+    ai = ap + 1
+    js.setdefault("materials", [])
+    js.setdefault("meshes", [])
+    mesh_of = {}
+    for L in sorted({o["layer"] for o in use}):
+        c = LAYER_COL.get(L, (.7, .7, .7))
+        js["materials"].append({"name": "obj layer %d" % L, "pbrMetallicRoughness": {"baseColorFactor": [*c, 1], "metallicFactor": 0, "roughnessFactor": 1}})
+        js["meshes"].append({"name": "marker L%d" % L, "primitives": [{"attributes": {"POSITION": ap}, "indices": ai, "material": len(js["materials"]) - 1}]})
+        mesh_of[L] = len(js["meshes"]) - 1
+    kids = []
+    for o in use:
+        js["nodes"].append({"name": "obj%d %s" % (o["index"], o["label"]), "mesh": mesh_of[o["layer"]], "translation": [round(v, 5) for v in o["pos"]],
+                            "extras": {k: o[k] for k in ("area", "section", "index", "layer", "type", "subtype", "x", "y", "z", "b0", "b3", "b5", "bc", "bd", "be", "bf",
+                                                         "handler", "handler_name", "events", "dialogues", "event_note")}})
+        kids.append(len(js["nodes"]) - 1)
+    js["nodes"].append({"name": "objects", "children": kids})
+    js["scenes"][0]["nodes"].append(len(js["nodes"]) - 1)
+    js["buffers"][0]["byteLength"] = len(blob)
+    j = json.dumps(js, separators=(",", ":")).encode()
+    j += b" " * (-len(j) % 4)
+    while len(blob) % 4:
+        blob.append(0)
+    return (struct.pack("<III", 0x46546C67, 2, 28 + len(j) + len(blob)) + struct.pack("<II", len(j), 0x4E4F534A) + j
+            + struct.pack("<II", len(blob), 0x004E4942) + bytes(blob))
 
 
 # ---------------------------------------------------------------- camera
@@ -323,14 +461,17 @@ def _frags(part, sx, sy, w, tri, W, H, opts):
 
 
 def render(mesh, cam, W, H, opts=None):
-    """RGB uint8 (H, W, 3).  opts: tex, vcol, wire, sky (bool), bg (r, g, b)."""
+    """RGB uint8 (H, W, 3).  opts: tex, vcol, wire, sky (bool), bg (r, g, b), objects (bool), layers (set or None), sel (object)."""
     opts = opts or {}
     bg = np.array(opts.get("bg", (40, 40, 56)), np.float64) / 255
     img = np.empty((H * W, 3))
     img[:] = bg
     zbuf = np.full(H * W, np.inf)
     wire = opts.get("wire", False)
-    for part in mesh.parts:
+    parts = list(mesh.parts)
+    if opts.get("objects") and mesh.objs:
+        parts.append(marker_part(mesh.objs, opts.get("layers"), opts.get("sel")))
+    for part in parts:
         if part["kind"] == "sky" and (not opts.get("sky", True) or wire):
             continue
         sx, sy, w, ok = _project(part, cam, W, H)
@@ -348,9 +489,9 @@ def render(mesh, cam, W, H, opts=None):
             p = a[seg] + (b[seg] - a[seg]) * tt[:, None]
             xi, yi = p[:, 0].astype(np.int64), p[:, 1].astype(np.int64)
             m = (xi >= 0) & (xi < W) & (yi >= 0) & (yi < H)
-            img[yi[m] * W + xi[m]] = (.75, .9, 1.0)
+            img[yi[m] * W + xi[m]] = (.75, .9, 1.0) if part["kind"] != "marker" else (1, 1, .3)
             continue
-        fr = _frags(part, sx, sy, w, idx, W, H, opts)
+        fr = _frags(part, sx, sy, w, idx, W, H, dict(opts, tex=False, vcol=True) if part["kind"] == "marker" else opts)
         if not fr:
             continue
         pix = np.concatenate([f[0] for f in fr])
@@ -371,17 +512,26 @@ i18n.add({
            "m.sky": "Cielo", "m.bg": "Fondo...", "m.glb": "Exportar .glb", "m.shot": "Captura PNG", "m.reset": "Reiniciar vista",
            "m.hint": "Arrastrar: orbitar | Botón der./central: desplazar | Rueda: zoom | Doble clic: reiniciar | WASD/QE: volar",
            "m.info": "{0}: {1} triángulos ({2})", "m.savedglb": "Exportado {0}", "m.savedshot": "Captura guardada: {0}", "m.noglb": "Sin datos para exportar",
-           "m.gl": "OpenGL", "m.soft": "software", "m.obj": "Objeto {0}", "m.set": "Tabla {0} lista {1} ({2} modelos)"},
+           "m.gl": "OpenGL", "m.soft": "software", "m.obj": "Objeto {0}", "m.set": "Tabla {0} lista {1} ({2} modelos)",
+           "m.showobj": "Mostrar objetos", "m.layer": "Capa {0}", "m.noobj": "Haz clic en un objeto", "m.nobjs": "{0} objetos", "m.glbobj": "Objetos en .glb"},
     "en": {"t.models": "3D models", "t.m.rooms": "Rooms", "t.m.objs": "Objects", "m.tex": "Textures", "m.wire": "Wireframe", "m.vcol": "Vertex colours",
            "m.sky": "Sky", "m.bg": "Background...", "m.glb": "Export .glb", "m.shot": "Screenshot PNG", "m.reset": "Reset view",
            "m.hint": "Drag: orbit | Right/middle drag: pan | Wheel: zoom | Double click: reset | WASD/QE: fly",
            "m.info": "{0}: {1} triangles ({2})", "m.savedglb": "Exported {0}", "m.savedshot": "Screenshot saved: {0}", "m.noglb": "Nothing to export",
-           "m.gl": "OpenGL", "m.soft": "software", "m.obj": "Object {0}", "m.set": "Table {0} list {1} ({2} models)"},
+           "m.gl": "OpenGL", "m.soft": "software", "m.obj": "Object {0}", "m.set": "Table {0} list {1} ({2} models)",
+           "m.showobj": "Show objects", "m.layer": "Layer {0}", "m.noobj": "Click an object", "m.nobjs": "{0} objects", "m.glbobj": "Objects in .glb"},
 })
 
 
 def main(argv=None):
     a = list(argv if argv is not None else sys.argv[1:])
+    objs, layers = False, None
+    for x in list(a):
+        if x.startswith("--objects"):
+            objs = True
+            if "=" in x:
+                layers = {int(t) for t in x.split("=")[1].split(",")}
+            a.remove(x)
     if len(a) < 3 or a[0] not in ("room", "obj"):
         print(__doc__)
         return 1
@@ -395,7 +545,8 @@ def main(argv=None):
     W, H = (int(a[5]), int(a[6])) if len(a) > 6 else (640, 480)
     import time
     t = time.time()
-    im = render(mesh, cam, W, H)
+    im = render(mesh, cam, W, H, dict(objects=objs, layers=layers))
+    print("%d objects" % len(mesh.objs))
     print("%d tris, %.2fs" % (mesh.tris, time.time() - t))
     from PIL import Image
     Image.fromarray(im).save(a[2])

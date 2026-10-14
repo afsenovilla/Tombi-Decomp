@@ -37,17 +37,25 @@ class ModelViewer(ttk.Frame):
         self.bg = (40, 40, 56)
         self.v = {k: tk.BooleanVar(value=True) for k in ("tex", "vcol", "sky")}
         self.v["wire"] = tk.BooleanVar(value=False)
+        self.v["objects"] = tk.BooleanVar(value=False)
+        self.lay = {}                  # layer -> BooleanVar
+        self.sel = None
         tb = ttk.Frame(self, padding=(4, 2))
         tb.pack(fill="x")
         for key, lab in (("tex", "m.tex"), ("wire", "m.wire"), ("vcol", "m.vcol"), ("sky", "m.sky")):
             ttk.Checkbutton(tb, text=tr(lab), variable=self.v[key], command=self.redraw).pack(side="left", padx=3)
         for lab, cmd in (("m.bg", self.pick_bg), ("m.reset", self.reset), ("m.glb", self.export_glb), ("m.shot", self.screenshot)):
             ttk.Button(tb, text=tr(lab), command=cmd).pack(side="left", padx=3)
+        ttk.Checkbutton(tb, text=tr("m.showobj"), variable=self.v["objects"], command=self._objs_changed).pack(side="left", padx=3)
+        self.layfr = ttk.Frame(tb)
+        self.layfr.pack(side="left")
         self.info = tk.StringVar()
         ttk.Label(tb, textvariable=self.info).pack(side="left", padx=8)
         ttk.Label(self, text=tr("m.hint"), foreground="#555").pack(side="bottom", anchor="w", padx=4)
+        self.side = tk.Text(self, width=34, height=8, wrap="word", state="disabled", bg="#f4f4f4", font=("TkFixedFont", 9))
+        self.side.pack(side="right", fill="y")
         self.holder = ttk.Frame(self)
-        self.holder.pack(fill="both", expand=True)
+        self.holder.pack(side="left", fill="both", expand=True)
         self.gl = None
         self.surface = None
         self._photo = None
@@ -104,7 +112,8 @@ class ModelViewer(ttk.Frame):
         w.bind("<B1-Motion>", lambda e: self._motion(e, 1))
         w.bind("<B2-Motion>", lambda e: self._motion(e, 2))
         w.bind("<B3-Motion>", lambda e: self._motion(e, 2))
-        w.bind("<ButtonRelease>", lambda e: self._release())
+        w.bind("<ButtonRelease>", self._release)
+        w.bind("<Motion>", self._hover)
         w.bind("<MouseWheel>", lambda e: self._zoom(1 if e.delta > 0 else -1))
         w.bind("<Button-4>", lambda e: self._zoom(1))
         w.bind("<Button-5>", lambda e: self._zoom(-1))
@@ -115,9 +124,11 @@ class ModelViewer(ttk.Frame):
 
     def _press(self, e):
         self._pos = (e.x, e.y)
+        self._moved = False
 
     def _motion(self, e, mode):
         dx, dy = e.x - self._pos[0], e.y - self._pos[1]
+        self._moved = True
         self._pos = (e.x, e.y)
         if mode == 1:
             self.cam.orbit(dx, dy)
@@ -125,8 +136,48 @@ class ModelViewer(ttk.Frame):
             self.cam.pan(dx, dy, self.surface.winfo_height())
         self.redraw(fast=True)
 
-    def _release(self):
+    def _release(self, e=None):
+        if e is not None and not getattr(self, "_moved", True) and e.num == 1:
+            self._click(e.x, e.y)
         self.redraw()
+
+    # ---- placed objects
+    def _layers(self):
+        return {k for k, v in self.lay.items() if v.get()}
+
+    def _objs_changed(self):
+        self.sel = None
+        self._say_obj()
+        self.redraw()
+
+    def _build_layer_checks(self):
+        for w in self.layfr.winfo_children():
+            w.destroy()
+        self.lay = {}
+        for L in MV.object_layers(self.mesh.objs if self.mesh else []):
+            self.lay[L] = tk.BooleanVar(value=True)
+            c = MV.LAYER_COL.get(L, (.7, .7, .7))
+            tk.Checkbutton(self.layfr, text=tr("m.layer", L), variable=self.lay[L], command=self._objs_changed, fg="#%02x%02x%02x" % tuple(int(v * 200) for v in c)).pack(side="left")
+
+    def _say_obj(self):
+        self.side.configure(state="normal")
+        self.side.delete("1.0", "end")
+        if self.v["objects"].get() and self.mesh:
+            self.side.insert("end", MV.object_text(self.sel) if self.sel else tr("m.noobj") + "\n" + tr("m.nobjs", len(self.mesh.objs)))
+        self.side.configure(state="disabled")
+
+    def _click(self, x, y):
+        if not (self.v["objects"].get() and self.mesh and self.mesh.objs):
+            return
+        w, h = max(8, self.surface.winfo_width()), max(8, self.surface.winfo_height())
+        self.sel = MV.pick_object(self.mesh.objs, self.cam, w, h, x, y, self._layers())
+        self._say_obj()
+        self.redraw()
+
+    def _hover(self, e):
+        if self.v["objects"].get() and self.mesh and self.mesh.objs and e.state & 0x700 == 0:
+            o = MV.pick_object(self.mesh.objs, self.cam, max(8, self.surface.winfo_width()), max(8, self.surface.winfo_height()), e.x, e.y, self._layers())
+            self.info.set(o["label"] if o else tr("m.info", self.mesh.name, self.mesh.tris, self.backend()))
 
     def _zoom(self, s):
         self.cam.zoom(s)
@@ -145,6 +196,9 @@ class ModelViewer(ttk.Frame):
             self.mesh = MV.load_room(ld, idx)
         else:
             self.mesh = MV.load_object(ld, idx, k)
+        self.sel = None
+        self._build_layer_checks()
+        self._say_obj()
         self.has_sky = any(p["kind"] == "sky" for p in self.mesh.parts)
         self.cam.reset(self.mesh.center, self.mesh.radius)
         self._glstate = None
@@ -165,6 +219,8 @@ class ModelViewer(ttk.Frame):
     def opts(self):
         o = {k: v.get() for k, v in self.v.items()}
         o["bg"] = self.bg
+        o["layers"] = self._layers()
+        o["sel"] = self.sel
         return o
 
     # ---- drawing
@@ -263,6 +319,16 @@ class ModelViewer(ttk.Frame):
                 g.glDisableClientState(g.GL_COLOR_ARRAY)
                 g.glColor3f(.75, .9, 1.0) if o["wire"] else g.glColor3f(1, 1, 1)
             g.glDrawElements(g.GL_TRIANGLES, len(idx), g.GL_UNSIGNED_INT, idx)
+        if o["objects"] and self.mesh.objs:
+            mk = MV.marker_part(self.mesh.objs, o["layers"], o["sel"])
+            if len(mk["idx"]):
+                g.glDisable(g.GL_TEXTURE_2D)
+                g.glDisableClientState(g.GL_TEXTURE_COORD_ARRAY)
+                g.glEnableClientState(g.GL_COLOR_ARRAY)
+                g.glPolygonMode(g.GL_FRONT_AND_BACK, g.GL_FILL)
+                g.glVertexPointer(3, g.GL_FLOAT, 0, np.ascontiguousarray(mk["pos"], np.float32))
+                g.glColorPointer(3, g.GL_FLOAT, 0, np.ascontiguousarray(mk["col"], np.float32))
+                g.glDrawElements(g.GL_TRIANGLES, mk["idx"].size, g.GL_UNSIGNED_INT, np.ascontiguousarray(mk["idx"].reshape(-1), np.uint32))
         g.glDisableClientState(g.GL_VERTEX_ARRAY)
         g.glDisableClientState(g.GL_TEXTURE_COORD_ARRAY)
         g.glDisableClientState(g.GL_COLOR_ARRAY)
@@ -272,7 +338,7 @@ class ModelViewer(ttk.Frame):
         if not self.mesh:
             return
         try:
-            data = self.mesh.glb()
+            data = self.mesh.glb(self.v["objects"].get(), self._layers())
         except Exception as e:
             messagebox.showerror(tr("error"), str(e))
             return

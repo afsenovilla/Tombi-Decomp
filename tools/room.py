@@ -4,6 +4,7 @@
   tools/room.py AREA00:1 OUT.png        render the model of load list 1 of area 00 (list index as in tools/vram.py snapshot)
   tools/room.py --all OUT_DIR           every room model of every area -> OUT_DIR/AREAnn_Dxxx.png
   tools/room.py --glb AREA00:1 OUT.glb  3D export (glTF 2.0 binary, one embedded texture atlas, vertex colours, Y up) for Blender / 3D Viewer
+  tools/room.py --glb AREA00:1 OUT.glb --objects   same + placed objects as marker cubes (nodes under "objects", record in extras)
   tools/room.py --glb-all DIR           every room -> DIR/AREAnn_Dxxx.glb
   options: --sky-dir DIR   sky captures room_<AA>_<n>_sky.png (tools/psxemu/capture.py rooms DIR); default: the cache of tools/gfx_composed.py
            --no-sky        leave the sky out (by default it is added when a capture exists)
@@ -357,9 +358,15 @@ def main(argv=None):
     if len(a) == 2 and a[0] == "--glb-all":
         print(export_glb(a[1]), "rooms")
         return 0
+    objs = "--objects" in a
+    if objs:
+        a.remove("--objects")
     if len(a) == 3 and a[0] == "--glb":
         nm, i = a[1].split(":")
         _, g = room_glb("AR" + nm[-2:], int(i))
+        if g and objs:      # optional marker nodes (placed objects, tools/objects.py)
+            import model_view as MV
+            g = MV.add_glb_objects(g, MV.room_objects("AR" + nm[-2:], int(i)))
         if not g:
             sys.stderr.write("no WMD room in that list\n")
             return 1
