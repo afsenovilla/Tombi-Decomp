@@ -34,7 +34,7 @@ void FUN_8010d390(TObj *o)
     switch (o->state) {
     case 0:
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->ba7 = 0;
         U8(o, 0xc3) = 0;
         o->d8c = 0;
@@ -138,7 +138,7 @@ void FUN_8010d390(TObj *o)
                 flag++;
         }
         if (flag) {
-            U8(o, 0xa1) = 0;
+            (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
             o->step = 0x11;
         } else {
             FUN_800eea7c(o, 4, 0);
