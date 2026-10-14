@@ -1,9 +1,9 @@
 // FUNC 801167bc 364 X002
 // MATCHING 801167bc 364
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_1F8002D4[];
-extern unsigned short D_1F800176, D_1F800186[];
 extern void *D_8011F860[];
 extern short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
@@ -33,8 +33,8 @@ void func_801167BC(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        o->a.p.whole = o->d30 - D_1F800176;
-        o->y.p.whole = o->d34 - D_1F800186[0];
+        o->a.p.whole = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
+        o->y.p.whole = o->d34 - ((unsigned short*)&SPAD.s186)[0];
         o->visible = 1;
         ObjListPush_1F800220(o);
         AnimAdvance(o);

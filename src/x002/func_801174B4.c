@@ -1,10 +1,10 @@
 // FUNC 801174b4 400 X002
 // MATCHING 801174b4 400
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
-extern unsigned char D_8009CF0F;
 extern int D_1F800190;
 extern int D_1F80018C;
 
@@ -47,7 +47,7 @@ void func_801174B4(TObj *o)
             o->state = 0;
             o->step++;
             D_800A4553[0] = 6;
-            D_8009CF0F = 1;
+            GCD.bcf0f = 1;
         }
         break;
     }

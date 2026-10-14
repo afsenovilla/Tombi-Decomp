@@ -1,9 +1,9 @@
 // FUNC 80105694 928 X002
 // MATCHING 80105694 928
+#include "spad.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
-extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
 extern void FUN_800ef490(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
@@ -44,7 +44,7 @@ void func_80105694(TObj *o)
             o->velY = 0;
             o->substep = 1;
         }
-        if ((D_1F8001FC & D_1F8003C8) || (D_1F8001FC & D_1F8003C6)) {
+        if ((SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6)) {
             D_8009C330->animTimer = 0xf;
             o->velY = 0;
             o->substep = 2;
@@ -61,7 +61,7 @@ void func_80105694(TObj *o)
         ObjAddVelY7E(o);
         AnimAdvance(o);
         if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x40)) != 0 ||
-            (D_1F8001FC & D_1F8003C8) || (D_1F8001FC & D_1F8003C6) || ObjTileCollide(o, 4, 0) != 0) {
+            (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             o->b9c = 0;
             o->velY = 0;
             o->substep = 2;

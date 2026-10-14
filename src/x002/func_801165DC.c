@@ -1,10 +1,10 @@
 // FUNC 801165dc 480 X002
 // MATCHING 801165dc 480
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8011F260[];
 extern void *D_8011F184;
-extern int D_1F8002D4;
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -47,7 +47,7 @@ void func_801165DC(TObj *o)
             o->anim = D_8011F184;
             break;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         AnimLoadDuration(o);
         break;
     case 1:

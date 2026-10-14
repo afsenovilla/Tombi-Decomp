@@ -1,5 +1,6 @@
 // FUNC 801169c0 2528 X002
 // MATCHING 801169c0 2528
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
@@ -9,8 +10,6 @@ typedef struct {
 } Ent;
 extern Ent D_8011C6D8[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CE41;
-extern unsigned char D_8009CFDB, D_8009CFDC, D_8009CFDD, D_8009CFDE, D_8009CFDF, D_8009CFE0, D_8009CFE1;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186[];
 extern short FUN_8005e420(int, int);
@@ -46,16 +45,16 @@ void func_801169C0(TObj *o)
         o->w1e = D_8011C6D8[o->subtype].w1e;
         o->d3c = SPR_DATA[D_8011C6D8[o->subtype].idx];
         if (o->subtype == 1) {
-            if (D_8009CE41 == 0) {
+            if (GCD.bce41 == 0) {
                 o->w1e = 5;
                 o->anim = D_8011C6D8[9].tab[0];
                 FUN_8001fe94(o, 0);
-            } else if (D_8009CE41 == 0xff) {
+            } else if (GCD.bce41 == 0xff) {
                 sa(o, 2);
             } else {
                 sa(o, 0);
             }
-        } else if (D_8009CE41 == 0) {
+        } else if (GCD.bce41 == 0) {
             switch (o->subtype) {
             case 2: PICK(GV2.bc3 & 2);
             case 3: PICK(GV2.bc3 & 0x10);
@@ -68,13 +67,13 @@ void func_801169C0(TObj *o)
             }
         } else {
             switch (o->subtype) {
-            case 2: PICK(D_8009CFDB);
-            case 3: PICK(D_8009CFDC);
-            case 4: PICK(D_8009CFDD);
-            case 5: PICK(D_8009CFDE);
-            case 6: PICK(D_8009CFDF);
-            case 7: PICK(D_8009CFE0);
-            case 8: PICK(D_8009CFE1);
+            case 2: PICK(GCD.bcfdb);
+            case 3: PICK(GCD.bcfdc);
+            case 4: PICK(GCD.bcfdd);
+            case 5: PICK(GCD.bcfde);
+            case 6: PICK(GCD.bcfdf);
+            case 7: PICK(GCD.bcfe0);
+            case 8: PICK(GCD.bcfe1);
             default: goto skip;
             }
         }
