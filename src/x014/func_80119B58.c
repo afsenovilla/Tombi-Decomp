@@ -1,5 +1,6 @@
 // FUNC 80119b58 2368 X014
 // MATCHING 80119b58 2368
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
 extern S8 *D_8009C948;
@@ -8,7 +9,6 @@ extern short D_80125C40[], D_80125C50[];
 extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
 extern unsigned char D_8009C93E;
 extern unsigned char D_800A60D6;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_800A4555;
 extern unsigned char D_8009D2C3;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
@@ -60,9 +60,9 @@ static __inline__ void setAnim(TObj *p, void *a)
 #define MSG(o)                      \
     if (D_800A60D6) {               \
         D_800A60D6 = 0;             \
-        D_800A603C = 5;             \
-        D_800A603D = 0;             \
-        D_800A603E = 0;             \
+        PLAYER.obj.b04 = 5;             \
+        PLAYER.obj.step = 0;             \
+        PLAYER.obj.state = 0;             \
     }
 
 void func_80119B58(TObj *o)

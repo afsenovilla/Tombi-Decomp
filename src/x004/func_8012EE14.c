@@ -8,7 +8,6 @@ extern unsigned char D_8009CF24[];
 extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009CF29;
 extern unsigned char D_8009C93E[], D_8009C93F[], D_8009C942[];
-extern unsigned short *D_800A6078;
 extern unsigned short D_800A604E[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
@@ -40,7 +39,7 @@ void func_8012EE14(TObj *o)
             n->b6b = p->wc;
             n->velX = p->w6;
             n->velY = p->w8;
-            n->h->p.whole = D_800A6078[1];
+            n->h->p.whole = (*(unsigned short **)&PLAYER.obj.h)[1];
             n->y.p.whole = D_800A604E[0];
             n->b.p.whole = p->wa;
             n->velV = 3;

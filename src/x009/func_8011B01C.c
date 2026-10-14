@@ -5,7 +5,6 @@
 typedef struct { unsigned char a, b, c; signed char d; } P4;
 extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009CFF8;
-extern unsigned short *D_800A605C;
 extern signed char D_80011EB4[];
 extern P4 D_80011E5C[];
 extern void *D_8012E024;
@@ -46,7 +45,7 @@ void func_8011B01C(TObj *o)
             o->step = 0;
             o->state = 0;
         }
-        p = &D_80011E5C[D_80011EB4[*D_800A605C]];
+        p = &D_80011E5C[D_80011EB4[*(*(unsigned short **)&PLAYER.obj.anim)]];
         if (D_8009CFF8 == 0) {
             o->b04 = 3;
             break;
@@ -73,7 +72,7 @@ void func_8011B01C(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        p = &D_80011E5C[D_80011EB4[*D_800A605C]];
+        p = &D_80011E5C[D_80011EB4[*(*(unsigned short **)&PLAYER.obj.anim)]];
         if (o->animFrame & 1) {
             u = ((int*)&PLAYER.obj.d8c)[0] + 0x80 - (signed char)p->c;
             t = u; t &= 0xff;
