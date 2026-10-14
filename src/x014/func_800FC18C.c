@@ -1,7 +1,7 @@
 // FUNC 800fc18c 180 X014
 // MATCHING 800fc18c 180
+#include "gcd.h"
 #include "gv2.h"
-extern unsigned char D_8009CE3D;
 int func_800FC18C(unsigned char *o)
 {
     int r = 0;
@@ -10,7 +10,7 @@ int func_800FC18C(unsigned char *o)
             r = 1;
             *(short *)(o + 0x56) = -0x8c;
             if (*(short *)(o + 0x16) > -0x7c) {
-                if (D_8009CE3D == 0xff) r = 2;
+                if (GCD.bce3d == 0xff) r = 2;
                 else *(short *)(o + 0x16) = -0x8c;
             }
         }
@@ -19,7 +19,7 @@ int func_800FC18C(unsigned char *o)
             r = 1;
             *(short *)(o + 0x56) = -0x3c0;
             if (*(short *)(o + 0x16) > -0x3b0) {
-                if (D_8009CE3D == 0xff) r = 2;
+                if (GCD.bce3d == 0xff) r = 2;
                 else *(short *)(o + 0x16) = -0x3c0;
             }
         }

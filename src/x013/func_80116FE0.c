@@ -1,5 +1,6 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "gamestate.h"
@@ -27,12 +28,10 @@ typedef struct { char p[0x4a]; short w4a, w4c, w4e; } Q;
 extern PL PLAYER;
 extern CMD *D_801181FC[];
 extern XY D_80118200[];
-extern unsigned char D_8009D088[];
 extern unsigned char D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
-extern unsigned char D_8009CE48, D_8009CDCB, D_8009CE0B;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -61,7 +60,7 @@ void func_80116FE0(O *o)
         o->wb6 = 0;
         o->active = 2;
         o->timer = 0;
-        D_8009D088[0] = 0;
+        ((unsigned char*)&GCD.bd088)[0] = 0;
         o->step = 0;
         o->b04++;
         break;
@@ -76,7 +75,7 @@ void func_80116FE0(O *o)
             TASK_C->step = 0;
             break;
         case 1:
-            D_8009D088[0] = c->arg;
+            ((unsigned char*)&GCD.bd088)[0] = c->arg;
             o->wb6++;
             break;
         case 2:
@@ -110,7 +109,7 @@ void func_80116FE0(O *o)
             }
             break;
         case 4:
-            o->d90 = showMessageBox(2, c->arg, D_80118200[D_8009D088[0] & 0xf].x, D_80118200[D_8009D088[0] & 0xf].y);
+            o->d90 = showMessageBox(2, c->arg, D_80118200[((unsigned char*)&GCD.bd088)[0] & 0xf].x, D_80118200[((unsigned char*)&GCD.bd088)[0] & 0xf].y);
             o->wb6++;
             break;
         case 5:
@@ -211,7 +210,7 @@ void func_80116FE0(O *o)
             case 1:
                 func_801179B4(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
                 if (!(D_1F8001FC & 0x6008)) break;
-                if (D_8009CE48 == 0xff && D_8009CDCB == 0xff && GV2.sda != 0 && D_8009CE0B == 0xff) {
+                if (GCD.bce48 == 0xff && GCD.bcdcb == 0xff && GV2.sda != 0 && GCD.bce0b == 0xff) {
                     D_8009C975 = 3;
                     o->step = 0xb;
                     break;
@@ -220,7 +219,7 @@ void func_80116FE0(O *o)
                 o->step++;
                 break;
             case 2:
-                if (D_8009CE48 != 0xff) {
+                if (GCD.bce48 != 0xff) {
                     o->d90 = showMessageBox(3, 0, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;
@@ -230,7 +229,7 @@ void func_80116FE0(O *o)
                 break;
             case 3:
                 if (--o->timer != 0 && o->d90->substep != 1) break;
-                if (D_8009CDCB == 0xff && GV2.sda != 0 && D_8009CE0B == 0xff) {
+                if (GCD.bcdcb == 0xff && GV2.sda != 0 && GCD.bce0b == 0xff) {
                     o->timer = 1;
                     o->step = 9;
                     break;
@@ -239,7 +238,7 @@ void func_80116FE0(O *o)
                 o->step++;
                 break;
             case 4:
-                if (D_8009CDCB != 0xff) {
+                if (GCD.bcdcb != 0xff) {
                     o->d90 = showMessageBox(3, 1, 0xa0, 0xa0);
                     o->timer = 0x168;
                     o->step++;
@@ -249,7 +248,7 @@ void func_80116FE0(O *o)
                 break;
             case 5:
                 if (--o->timer != 0 && o->d90->substep != 1) break;
-                if (GV2.sda != 0 && D_8009CE0B == 0xff) {
+                if (GV2.sda != 0 && GCD.bce0b == 0xff) {
                     o->timer = 1;
                     o->step = 9;
                     break;
@@ -268,7 +267,7 @@ void func_80116FE0(O *o)
                 break;
             case 7:
                 if (--o->timer != 0 && o->d90->substep != 1) break;
-                if (D_8009CE0B != 0xff) {
+                if (GCD.bce0b != 0xff) {
                     o->d90->b04 = 3;
                     o->step++;
                     break;
@@ -277,7 +276,7 @@ void func_80116FE0(O *o)
                 o->step = 9;
                 break;
             case 8:
-                if (D_8009CE0B != 0xff) {
+                if (GCD.bce0b != 0xff) {
                     o->d90 = showMessageBox(3, 3, 0xa0, 0xa0);
                     o->timer = 0x168;
                 } else {

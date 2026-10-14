@@ -1,5 +1,6 @@
 // FUNC 80116cdc 772 X013
 // MATCHING 80116cdc 772
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -8,7 +9,7 @@ extern void *D_8013B0D8;
 extern void *D_80134D84;
 extern void *D_80131CE0;
 extern int D_1F8002D4[];
-extern unsigned char D_8009CD98[], D_8009CD9C[], D_800B146C[], D_800B1474[], D_800B1470[];
+extern unsigned char D_800B146C[], D_800B1474[], D_800B1470[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -102,8 +103,8 @@ void func_80116CDC(TObj *o)
                 k = 1;
                 break;
             }
-            D_8009CD98[k] = 9;
-            D_8009CD9C[k] = 0x3c;
+            ((unsigned char*)&GCD.bcd98)[k] = 9;
+            ((unsigned char*)&GCD.bcd9c)[k] = 0x3c;
             D_800B146C[k] = 0x3c;
             D_800B1474[k] = 1;
             D_800B1470[k] = 0x1e;

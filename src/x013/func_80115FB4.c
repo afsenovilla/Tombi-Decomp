@@ -1,5 +1,6 @@
 // FUNC 80115fb4 640 X013
 // MATCHING 80115fb4 640
+#include "spad.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -8,8 +9,6 @@
 typedef void (*Fn)(TObj *);
 
 extern Fn D_80079A98[];
-extern short D_1F800172;
-extern int D_1F8000F0;
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
@@ -41,7 +40,7 @@ void func_80115FB4(TObj *o)
         D_80079A98[o->subtype](o);
         if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2) {
             stepPlayerXToward(0xa0);
-            if (D_1F800172 >= 0x50) {
+            if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x50) {
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.visible = 0;
                 PLAYER.obj.step = 0x41;
@@ -69,7 +68,7 @@ void func_80115FB4(TObj *o)
             short *k = &PLAYER.obj.velY;
             *k += 0x20;
             if (*k > 0x500) *k = 0x500;
-            { int *g = &D_1F8000F0; *g += *k << 8; }
+            { int *g = &SPAD.if0; *g += *k << 8; }
         }
         if (GAME.fadeScreenControl == 1) {
             TASK_C->mode = 7;

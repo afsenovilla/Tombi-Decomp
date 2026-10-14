@@ -1,5 +1,6 @@
 // FUNC 800f1d44 2280 X014
 // MATCHING 800f1d44 2280
+#include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -19,7 +20,6 @@ typedef struct {
 
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern volatile unsigned short D_8009D670[];
 extern unsigned char D_8009D2B3;
 extern unsigned char D_8009D2B1;
@@ -86,7 +86,7 @@ void func_800F1D44(TObj *o)
     unsigned short t;
 
     if ((*(unsigned char*)&o->wac) >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
         D_8009D2E8[4] = 2;
         D_8009D2E8[5] = 2;
         D_8009D2E8[6] = 0;

@@ -1,5 +1,6 @@
 // FUNC 80116398 840 X013
 // MATCHING 80116398 840
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -8,7 +9,6 @@ typedef struct {
     short wf2;
 } PL;
 extern PL PLAYER;
-extern unsigned char D_8009CFF9;
 extern signed char D_8009D2B0;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -65,7 +65,7 @@ void func_80116398(TObj *o)
         p->t.animFrame = 1;
         FUN_800eea7c(&p->t, 1, 0);
         o->state++;
-        D_8009CFF9 = 0;
+        GCD.bcff9 = 0;
         o->active = 2;
         break;
     case 5:
