@@ -1,10 +1,9 @@
 // FUNC 8011f5d8 240 X004
 // MATCHING 8011f5d8 240
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 
 void func_8011F5D8(TObj *o, TObj *p)
 {
@@ -29,6 +28,6 @@ void func_8011F5D8(TObj *o, TObj *p)
     }
     o->wba = 10;
     o->velY = 0;
-    D_1F80019E = 0;
-    D_1F8003C0 = p;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = p;
 }

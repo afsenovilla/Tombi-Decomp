@@ -1,12 +1,12 @@
 // FUNC 80128114 496 X004
 // MATCHING 80128114 496
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8013117C[];
-extern unsigned char D_8009CE3D;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -26,9 +26,9 @@ void func_80128114(TObj *o)
         break;
     case 1:
         v = *(V6 *)&o->a;
-        if (D_8009CE3D == 0xff)
+        if (GCD.bce3d == 0xff)
             o->d90 = showMessageBoxDirect(4, 9, &v);
-        else if (D_8009CE3D != 0)
+        else if (GCD.bce3d != 0)
             o->d90 = showMessageBoxDirect(4, 3, &v);
         else
             o->d90 = showMessageBoxDirect(4, 0, &v);

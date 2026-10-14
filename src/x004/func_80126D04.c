@@ -1,9 +1,9 @@
 // FUNC 80126d04 336 X004
 // MATCHING 80126d04 336
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { char pad[0xc4]; unsigned short wc4, wc6, wc8; } X4;
 
-extern short D_1F8001C8;
 extern void func_80125420(TObj *);
 extern void func_80125554(TObj *);
 extern void func_801256A8(TObj *);
@@ -50,7 +50,7 @@ void func_80126D04(TObj *o)
         func_80126464(o);
         break;
     }
-    if (D_1F8001C8 == 0) {
+    if ((*(short*)&SPAD.s1c8) == 0) {
         approach(o, ((X4 *)o)->wc8);
     } else {
         approach(o, ((X4 *)o)->wc4);

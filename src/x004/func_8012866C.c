@@ -1,5 +1,6 @@
 // FUNC 8012866c 2856 X004
 // MATCHING 8012866c 2856
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -7,7 +8,7 @@ typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8013117C[];
 extern TObj PLAYER;
 extern unsigned char D_8009CE1B;
-extern unsigned char D_800A6102, D_800A60D9;
+extern unsigned char D_800A60D9;
 extern unsigned char *D_8009C330;
 extern void AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
@@ -259,7 +260,7 @@ void func_8012866C(TObj *o)
     case 24:
         PLAYER.active = 1;
         PLAYER.b04 = 1;
-        D_800A6102 = 0;
+        PLX.b6102 = 0;
         D_800A60D9 = 0;
         GVARS.b3f = 0;
         GVARS.b42 = 0;

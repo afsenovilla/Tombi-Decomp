@@ -1,5 +1,6 @@
 // FUNC 8012a31c 852 X004
 // MATCHING 8012a31c 852
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -9,7 +10,6 @@ extern AT D_801311D0[];
 extern unsigned char PLAYER[];
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern short D_800A6066;
-extern unsigned char D_8009CF29, D_8009CF2D;
 extern Fix16 *D_800A6078[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -64,7 +64,7 @@ void func_8012A31C(TObj *o)
         if (o->b6b) break;
         if (o->h->p.whole < 0xa0) {
             o->b6b = 1;
-            D_8009CF29 = 1;
+            GCD.bcf29 = 1;
         }
         break;
     case 4:
@@ -89,7 +89,7 @@ void func_8012A31C(TObj *o)
         break;
     case 15:
         D_800A603C = 1;
-        D_8009CF2D = 1;
+        GCD.bcf2d = 1;
         D_800A603D = 0;
         D_800A603E = 0;
         ((unsigned char*)&GVARS.b3f)[0] = 0;

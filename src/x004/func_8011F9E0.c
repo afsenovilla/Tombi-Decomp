@@ -1,5 +1,6 @@
 // FUNC 8011f9e0 148 X004
 // MATCHING 8011f9e0 148
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct {
     TObj o;
@@ -8,7 +9,6 @@ typedef struct {
 } PL;
 #define BAC(o) (*(unsigned char *)&(o)->o.wac)
 extern short func_8004306C(PL *, TObj *);
-extern short D_1F80019E;
 
 void func_8011F9E0(PL *o, TObj *p)
 {
@@ -25,5 +25,5 @@ void func_8011F9E0(PL *o, TObj *p)
         o->de4 = p;
         BAC(o) = 2;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

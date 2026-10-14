@@ -1,7 +1,7 @@
 // FUNC 80129e14 252 X004
 // MATCHING 80129e14 252
+#include "gcd.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CF29;
 
 static __inline__ void moveh(TObj *o, short v)
 {
@@ -40,5 +40,5 @@ void func_80129E14(TObj *o)
     if (o->velH) moveh(o, o->velH);
     if (o->velV) movey(o, o->velV);
     if (o->d->p.whole < 0x1c) o->d->p.whole += 2;
-    if (*(int *)&o->velH == 0) D_8009CF29 = 0;
+    if (*(int *)&o->velH == 0) GCD.bcf29 = 0;
 }

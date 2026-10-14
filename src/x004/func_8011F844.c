@@ -1,5 +1,6 @@
 // FUNC 8011f844 308 X004
 // MATCHING 8011f844 308
+#include "spad.h"
 
 /* `goto after` lands after the spawn call: the label ends CSE's view, so `one` stays in s2 there (no nor fold);
    the duplicated calls cross-jump into one jal. */
@@ -8,7 +9,6 @@ extern short boxesOverlapSigned(TObj *, TObj *);
 extern short resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
 extern void FUN_800e9f74(int, int, int, int);
-extern short D_1F80019E;
 
 void func_8011F844(TObj *a, TObj *o)
 {
@@ -44,5 +44,5 @@ void func_8011F844(TObj *a, TObj *o)
             o->animFrame = one - (t & 1);
         }
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

@@ -1,5 +1,6 @@
 // FUNC 8012247c 1496 X004
 // MATCHING 8012247c 1496
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
@@ -10,7 +11,6 @@ extern A *D_80133B5C[];
 extern unsigned char D_800A60E4[];
 extern short D_1F80027E;
 extern unsigned short D_1F800282;
-extern unsigned short D_1F800284;
 extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -108,7 +108,7 @@ void func_8012247C(TObj *o)
             o->wb2 = v;
             o->d8c = -v & 0xff;
             o->wb6 = (-v << 2) & 0xff;
-            o->wae = D_1F800284;
+            o->wae = (*(unsigned short*)&SPAD.s284);
             o->b9c = 0;
             if ((short)((D_1F800282 >> 5) & 0xf) >= 0xd) o->w98 = 0;
         }

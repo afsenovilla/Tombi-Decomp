@@ -1,8 +1,8 @@
 // FUNC 8011f134 664 X004
 // MATCHING 8011f134 664
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001A4;
 void func_80043C74();
 void decreaseObjectTimer(TObj *o, int n);
 
@@ -49,7 +49,7 @@ void func_8011F134(TObj *o, TObj *p)
             o->b69 = 1;
             o->y.p.whole = b - (a + c);
         } else if (!(o->active & 2) && p->b6a != 0) {
-            if (D_1F8001A4 == 0) {
+            if (SPAD.b1a4 == 0) {
                 TObj *a = (TObj *)p->d90;
                 TObj *b = (TObj *)p->d94;
                 p->b6a = 0;

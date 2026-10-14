@@ -1,10 +1,10 @@
 // FUNC 8012c1a8 552 X004
 // MATCHING 8012c1a8 552
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE24[];
 extern void *D_801357B0[];
 extern void *D_801357B8[];
 extern void *D_801357CC[];
@@ -27,7 +27,7 @@ void func_8012C1A8(TObj *o)
     case 0:
         o->animFrame = 1;
         o->b68 = 0;
-        if (D_8009CE24[0] != 0 && D_8009CE24[0] != 0xff) {
+        if (((unsigned char*)&GCD.bce24)[0] != 0 && ((unsigned char*)&GCD.bce24)[0] != 0xff) {
             o->state = 3;
             o->wac = 0;
             o->anim = D_801357B0[0];

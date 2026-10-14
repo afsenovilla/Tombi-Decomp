@@ -1,10 +1,10 @@
 // FUNC 8012b388 176 X004
 // MATCHING 8012b388 176
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 extern int D_800A604C[], D_800A6050[];
 extern void *D_80134CE0;
-extern int D_1F8002D4[];
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 
@@ -24,7 +24,7 @@ void func_8012B388(void)
         e->b0c = 0;
         e->b0a = 2;
         e->d8c = 0;
-        e->d3c = D_1F8002D4[0];
+        e->d3c = ((int*)&SPAD.i2d4)[0];
         e->anim = D_80134CE0;
         AnimLoadDuration(e);
     }

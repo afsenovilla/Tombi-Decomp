@@ -1,10 +1,10 @@
 // FUNC 8012c3d0 420 X004
 // MATCHING 8012c3d0 420
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE22[], D_8009CE3D[];
 extern void *D_80135750[];
 extern void *D_80135748[];
 extern TObj *showMessageBoxDirect(int, int, void *);
@@ -17,7 +17,7 @@ void func_8012C3D0(TObj *o)
     case 0:
         o->animFrame = 1;
         o->b68 = 0;
-        if (D_8009CE22[0] && D_8009CE3D[0] != 0xff) o->state = 3;
+        if (((unsigned char*)&GCD.bce22)[0] && ((unsigned char*)&GCD.bce3d)[0] != 0xff) o->state = 3;
         else o->state = 1;
         break;
     case 1:

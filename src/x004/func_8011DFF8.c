@@ -1,8 +1,8 @@
 // FUNC 8011dff8 348 X004
 // MATCHING 8011dff8 348
+#include "spad.h"
 #include "gv2.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8013B104[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -20,7 +20,7 @@ void func_8011DFF8(TObj *o)
         o->box1 = 0x14;
         o->box2 = 0x10;
         o->box3 = 0x20;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->b0a = 2;
         o->active = 2;
         o->w1e = 0xa;
