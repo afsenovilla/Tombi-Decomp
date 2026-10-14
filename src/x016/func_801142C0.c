@@ -1,12 +1,12 @@
 // FUNC 801142c0 924 X016
 // MATCHING 801142c0 924
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 typedef struct { short s[6]; } P6;
 extern int D_8009C960_w;
-extern unsigned char D_8009CDB1;
 extern unsigned char *D_8009C330;
 extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
@@ -32,14 +32,14 @@ void func_801142C0(TObj *o)
         o->b68 = 0;
         o->b6a = 1;
         if (*p == 2) {
-            switch (D_8009CDB1) {
+            switch (GCD.bcdb1) {
             case 1: o->d90 = showMessageBoxDirectTimed(2, 0, &pos, 0x78); break;
             case 2: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
             case 3: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
             case 4: o->d90 = showMessageBoxDirectTimed(2, 2, &pos, 0x78); break;
             }
         } else {
-            switch (D_8009CDB1) {
+            switch (GCD.bcdb1) {
             case 1: o->d90 = showMessageBoxDirectTimed(2, 0, &pos, 0x78); break;
             case 2: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
             case 3: o->d90 = showMessageBoxDirectTimed(2, 1, &pos, 0x78); break;
@@ -68,9 +68,9 @@ void func_801142C0(TObj *o)
         AnimAdvance(o);
         if (PLAYER.obj.b69) {
             if (GAME.selectedArea == 2) {
-                if (D_8009CDB1 == 4) printInfoMessage(8, 3);
-            } else if (D_8009CDB1 != 0xff) {
-                printInfoMessage(D_8009CDB1 + 7, 2);
+                if (GCD.bcdb1 == 4) printInfoMessage(8, 3);
+            } else if (GCD.bcdb1 != 0xff) {
+                printInfoMessage(GCD.bcdb1 + 7, 2);
             }
             o->b6a = 0;
             SCRIPT_OBJECTS[o->b0c] = 0;

@@ -1,11 +1,11 @@
 // FUNC 80117870 296 X016
 // MATCHING 80117870 296
+#include "gcd.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern unsigned char D_8009CE05;
 extern unsigned short D_1F8001FC;
 
 extern void func_801174B8(TObj *);
@@ -15,7 +15,7 @@ void func_80117870(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CE05 == 0xff) break;
+        if (GCD.bce05 == 0xff) break;
         if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x82) >= 0x28) break;
         if (PLAYER.obj.y.p.whole != -0x3d) break;
         if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {

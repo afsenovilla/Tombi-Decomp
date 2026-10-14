@@ -1,5 +1,6 @@
 // FUNC 80102214 2036 X017
 // MATCHING 80102214 2036
+#include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "player.h"
@@ -15,7 +16,6 @@ extern unsigned char D_1F8001D2;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_8007A034, D_8007A036;
-extern unsigned short D_800A60FC;
 extern signed char D_8009D2B0;
 extern void *memcpy(void *, void *, int);
 extern void FUN_80025d90(void);
@@ -98,13 +98,13 @@ void FUN_80102214(TObj *o)
         U8(o, 0xc1) = 1;
         o->ba7 = 1;
         (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
-        D_800A60FC = D_8007A036;
+        PLX.s60fc = D_8007A036;
         break;
     case 2:
         U8(o, 0xc1) = 1;
         o->ba7 = 1;
         (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
-        D_800A60FC = D_8007A036;
+        PLX.s60fc = D_8007A036;
         break;
     }
     {

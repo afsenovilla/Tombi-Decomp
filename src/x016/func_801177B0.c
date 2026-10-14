@@ -1,16 +1,16 @@
 // FUNC 801177b0 192 X016
 // MATCHING 801177b0 192
+#include "gcd.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern unsigned char D_8009CE05;
 extern unsigned short D_1F8001FC;
 
 void func_801177B0(TObj *o)
 {
-    if (D_8009CE05 == 0xff) return;
+    if (GCD.bce05 == 0xff) return;
     if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x82) >= 0x28) return;
     if (PLAYER.obj.y.p.whole != -0x3d) return;
     if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {

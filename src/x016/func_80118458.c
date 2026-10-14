@@ -1,5 +1,6 @@
 // FUNC 80118458 972 X016
 // MATCHING 80118458 972
+#include "spad.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,7 +9,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_80118D34[];
-extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -78,7 +78,7 @@ void func_80118458(TObj *o)
         o->state = 9;
         break;
     case 9:
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         GVARS.b42 = 0;
         GVARS.b40 = 0;
         PLAYER.obj.wb2 = 0;

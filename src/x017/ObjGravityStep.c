@@ -1,5 +1,6 @@
 // FUNC 8010f0f4 352 X017
 // MATCHING 8010f0f4 352
+#include "gcd.h"
 #include "gv2.h"
 #include "gamestate.h"
 typedef struct T { short lim; unsigned short inc; char pad[16]; } T;
@@ -9,7 +10,6 @@ typedef struct O {
     char p2[0xc1 - 0xb4]; unsigned char bc1;
 } O;
 typedef struct G { char p0[0x20]; unsigned short w20; } G;
-extern unsigned char D_8009CF06, D_8009D006;
 extern G *D_8009C330;
 extern T D_80115466[];
 
@@ -19,9 +19,9 @@ static __inline__ int getk(O *o)
     int u = GV2.bb3 + b * 4;
     if ((GAME.displayExpBar & 3) != 0)
         u = (unsigned char)b << 2 | 3;
-    if (D_8009CF06 != 0)
+    if (GCD.bcf06 != 0)
         u = 8;
-    if (D_8009D006 != 0)
+    if (GCD.bd006 != 0)
         u = 8;
     return u;
 }

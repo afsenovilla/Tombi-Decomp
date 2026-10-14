@@ -1,5 +1,6 @@
 // FUNC 80115f88 840 X016
 // MATCHING 80115f88 840
+#include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
@@ -21,7 +22,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009D000[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
@@ -45,8 +45,8 @@ void func_80115F88(O *o)
         case 1:
         case 4:
             if (D_1F800172 >= 0xc9) {
-                if (D_8009D000[0] == 0) {
-                    D_8009D000[0] = 1;
+                if (((unsigned char*)&GCD.bd000)[0] == 0) {
+                    ((unsigned char*)&GCD.bd000)[0] = 1;
                     p->b04 = 5;
                     p->step = 0x41;
                     p->visible = 0;

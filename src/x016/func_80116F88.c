@@ -1,11 +1,11 @@
 // FUNC 80116f88 500 X016
 // MATCHING 80116f88 500
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_80118CD4;
-extern unsigned char D_8009CDED;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -16,7 +16,7 @@ void func_80116F88(TObj *o)
     short i;
     TObj *n;
 
-    if (D_8009CDED != 0xff) {
+    if (GCD.bcded != 0xff) {
         o->b04 = 2;
         return;
     }

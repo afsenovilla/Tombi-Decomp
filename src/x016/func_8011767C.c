@@ -1,10 +1,10 @@
 // FUNC 8011767c 308 X016
 // MATCHING 8011767c 308
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D0E2;
 extern void setEventComplete(int, int);
 extern void removeItemFromInventory(int, int);
 
@@ -22,7 +22,7 @@ void func_8011767C(TObj *o)
     case 1:
         GVARS.b3e = 1;
         setEventComplete(0x61, 0);
-        removeItemFromInventory(0x3e, D_8009D0E2);
+        removeItemFromInventory(0x3e, GCD.bd0e2);
         o->w08 = 200;
         o->state++;
         break;
