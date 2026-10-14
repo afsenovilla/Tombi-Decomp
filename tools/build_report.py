@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 ARGS = sys.argv[1:]
 OBJDIFF = ARGS[ARGS.index("--objdiff") + 1] if "--objdiff" in ARGS else os.environ.get("OBJDIFF", "objdiff-cli")
 WITH_SDK = "--with-sdk" in ARGS  # also report the Psy-Q library units (category "sdk"); default: game code only
+LINKED = ("main0", "x000")  # programs whose C objects tools/build_full.py links into the executable
 PROGS = {"main0": "MAIN0", "x000": "X000"}
 OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]  # area overlays, src/x0nn/
 # Overlays whose retail file is missing (legacy game zip with only MAIN0/X000) are left out of the report.
@@ -117,8 +118,22 @@ def main():
            "units": units}
     json.dump(cfg, open("objdiff.json", "w"), indent=1)
     print("units %d, target objects %d, base objects %d" % (len(units), nt, nb))
-    subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
-    print("wrote build/report.json")
+    gen = lambda: subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
+    gen()
+    # "complete" (decomp.dev "fully linked"): a unit counts only when its object is really linked into the executable
+    # by tools/build_full.py (src file of MAIN0 / X000; the area overlays are not linked from source yet) and matches
+    # 100 % of its code. Its .data/.rodata still come from the retail binary (splat), so no data is claimed: the
+    # units carry no data sections, hence complete_data stays 100 % of 0 bytes. Needs the first pass for the match.
+    rep = {u["name"]: u for u in json.load(open("build/report.json"))["units"]}
+    ncomplete = 0
+    for unit in units:
+        prog = unit["name"].split("/")[0]
+        m = rep.get(unit["name"], {}).get("measures", {})
+        if prog in LINKED and "base_path" in unit and m.get("matched_code_percent") == 100.0 and int(m.get("total_code", 0)):
+            unit["metadata"]["complete"] = True; ncomplete += 1
+    json.dump(cfg, open("objdiff.json", "w"), indent=1)
+    gen()
+    print("wrote build/report.json (%d complete units)" % ncomplete)
 
 
 if __name__ == "__main__":

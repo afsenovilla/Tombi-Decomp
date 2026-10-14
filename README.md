@@ -169,6 +169,10 @@ the decomp.dev headline is the whole-game figure to the second decimal. The GitH
 needs a `GAME_FILES_URL` secret pointing to your own disc image (or a zip with `MAIN0.EXE` and
 `AREA00/X000.BIN`, which limits the report to those two).
 
+Units are marked `complete` (decomp.dev "fully linked", `complete_code`) when their object is linked into
+MAIN0.EXE / X000.BIN by `tools/build_full.py` and matches 100 % of its code. Overlay units are not (the overlays are not
+yet linked from source), and no data is claimed: `.data`/`.rodata` still come from the retail binary via splat.
+
 ## Repository layout
 
 ```
