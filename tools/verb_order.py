@@ -101,6 +101,57 @@ def patch(exe):
     return bytes(b)
 
 
+def _slots(exe):
+    """({case b: file offset of the `addiu v0,v0,W` that adds the verb width to the item width} for b = 0, 1, 4 (b = 1 and 4 may share
+    one instruction: MAIN5), file offset of the item width table (u16 per item) used by case 0) or None.
+    The cases are found through the jump table of `switch (b)` (lui at / addu / lw v0,X(at) / jr v0)."""
+    exe = bytes(exe)
+    f = exe[FUNC:FUNC + FUNC_LEN]
+    pat = bytes.fromhex("80101200" "0180013c" "21082200")            # sll v0,s2,2 / lui at,0x8001 / addu at,at,v0
+    i = f.find(pat)
+    if i < 0 or f[i + 12 + 3] != 0x8C:                                # lw v0,X(at)
+        return None
+    jt = 0x80010000 + struct.unpack_from("<h", f, i + 12)[0] - 0x80010000 + HEADER
+    slots, table = {}, None
+    for case in (0, 1, 4):
+        t = _u(exe, jt + 4 * case) - 0x80010000 + HEADER
+        for k in range(t, t + 40, 4):
+            w = _u(exe, k)
+            if w >> 16 == 0x9422 and table is None and case == 0:       # lhu v0,disp(at) after lui at,0x8008
+                table = 0x80080000 + struct.unpack_from("<h", exe, k)[0] - 0x80010000 + HEADER
+            if w >> 16 == 0x2442:                                      # addiu v0,v0,imm
+                slots[case] = k
+                break
+        else:
+            return None
+    return slots, table
+
+
+def widths(exe):
+    """{b: verb width constant} (0x60 / 0x58 / 0x78 in the English executable) or None."""
+    r = _slots(exe)
+    return None if r is None else {c: struct.unpack_from("<h", exe, k)[0] for c, k in r[0].items()}
+
+
+MAX_VERB = 0xC0       # largest verb constant (box = item name + verb; the screen is 320 px and the widest names are ~190 px)
+
+
+def adjust(exe, d0, d1):
+    """Copy of exe with the verb width constants moved by d0 px (case 0, "obtained", dialogue 2) and d1 px (cases 1 and 4, "used /
+    equipped", dialogues 0 and 1), clamped to 16..MAX_VERB (a constant already above that is left as it is). None when the code was not found."""
+    r = _slots(exe)
+    if r is None:
+        return None
+    slots = r[0]
+    b = bytearray(exe)
+    for k in sorted(set(slots.values())):
+        cases = [c for c, v in slots.items() if v == k]
+        d = d0 if cases == [0] else d1
+        old = struct.unpack_from("<h", b, k)[0]
+        struct.pack_into("<h", b, k, max(16, min(old + d, max(MAX_VERB, old))))
+    return bytes(b)
+
+
 def check(root):
     ok = True
     for n in range(9):

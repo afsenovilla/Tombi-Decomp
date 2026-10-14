@@ -541,20 +541,50 @@ class Project:
                 errors.append("%s: %s" % (lang, ex))
 
 
+    def verb_deltas(self, lang):
+        """(d0, d1): how many px wider (negative: narrower) the verb boxes of a language got with the edits. printInfoMessage adds a
+        constant to the item name width (`W + 0x60` obtained = dialogue 2, `+ 0x58` used / equipped = dialogues 0 / 1); the box of a
+        dialogue is its widest line + 16, and the constant must follow the widest verb over the language's MFNT files."""
+        import text_preview
+        old, new = {0: [], 1: []}, {0: [], 1: []}
+        for path in self.src.names():
+            if lang_of(path) != lang or not os.path.basename(path).startswith("MFNT"):
+                continue
+            w = self.wfm(path)
+            if len(w.dialogues) < 3:
+                continue
+            for i in (0, 1, 2):
+                k = 0 if i == 2 else 1
+                o = text_preview.fit_box(w, w.dialogues[i].words)[0]
+                n = o
+                if i in self.edits.get(path, {}):
+                    try:
+                        words, wc = self.words(path, i, self.edits[path][i])
+                        n = text_preview.fit_box(wc, words)[0]
+                    except W.WfmError:
+                        pass                    # reported by encode_edited
+                old[k].append(o)
+                new[k].append(n)
+        return tuple(max(new[k]) - max(old[k]) if old[k] else 0 for k in (0, 1))
+
     def _verb_patches(self, files, errors):
-        """Item popup ("Rana Ganada"): with verb_first the executable of every selected language draws the verb box text (dialogue 2 of
-        the MFNT file) before the item name, like "Usado(a) Rana" already does (tools/verb_order.py, same size). Adds the executables."""
-        if not self.verb_first:
-            return
+        """Item popup ("Rana Ganada"): with verb_first the executable of every selected language draws the verb text (dialogue 2 of
+        the MFNT file) before the item name, like "Usado(a) Rana" already does (tools/verb_order.py, same size). Whenever the verb
+        dialogues 0 / 1 / 2 changed width, the width constants of the box follow. Adds the executables."""
         for lang in sorted(self.langs):
             if lang not in TL.LANG_N:
+                continue
+            d0, d1 = self.verb_deltas(lang)
+            if not self.verb_first and not d0 and not d1:
                 continue
             name = TL.exe_name(lang)
             try:
                 data = files[name] if name in files else self.src.read_any(name)
             except (OSError, KeyError):
                 continue                    # no executable of this language on the source
-            new = VO.patch(data)
+            new = VO.patch(data) if self.verb_first else data
+            if new is not None and (d0 or d1):
+                new = VO.adjust(new, d0, d1)
             if new is None:
                 errors.append(tr("tc.verbnf", name))
             elif new != data:
@@ -667,7 +697,7 @@ def build_report(proj, out_bin, work, disc=None, log=print):
                 if ok:
                     f0, f1 = TL.banner_find(data), TL.banner_find(new.read_any(name))
                     ok = f0 is not None and f0 == f1 and new.read_any(name)[f0[0]:f0[2] + 4 * f0[1]] == data[f0[0]:f0[2] + 4 * f0[1]]
-                    if ok and VO.is_patched(data):
+                    if ok:
                         r = slice(VO.FUNC, VO.FUNC + VO.FUNC_LEN)
                         ok = new.read_any(name)[r] == data[r]
                 if not ok:

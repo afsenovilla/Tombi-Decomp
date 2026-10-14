@@ -91,8 +91,8 @@ box made by `printInfoMessage(a = item, b = kind)` (MAIN0 0x8004D620, file offse
 last name glyph. Patch (in place, 28 bytes, MAIN0 addresses; MAIN5, the Spanish one, is linked 0x18 bytes earlier from 0x8004D824 on, so
 `verb_order` finds the code by instruction pattern): `bne s2,v0,0x8004D9C4` @0x8004D984 -> `bne ...,0x8004DA10`; the end-of-text test @0x8004DA08..0x8004DA28
 becomes `j 0x8004DB24` (return) + `li v0,3 / beq s2,v0,L / move a0,s0 / bnez s2,0x8004D9C4 / nop / L: j 0x8004D9BC / li a1,2` (the `jal drawInfoMessageText` of
-`callit`). Result: for b = 0 / 3 the verb text (dialogue 2) now precedes the name; with Spanish text " Ganada" -> "Obtienes: " (edit dialogue 2 of MFNTnnnS in every area; width
-tables are NOT touched, keep verb + name close to the original width). Emulator: `printInfoMessage(4, 0)` shows "Furious Tornado Acquired!" before, "Acquired!Furious Tornado" after.
+`callit`). Result: for b = 0 / 3 the verb text (dialogue 2) now precedes the name; with Spanish text " Ganada" -> "Obtienes: " (edit dialogue 2 of MFNTnnnS in every area; item
+width table untouched). The box width constants follow the verb: `addiu v0,v0,W` with W = 0x60 / 0x58 / 0x78 (b = 0 / 1 / 4 in MAIN0; MAIN5 has 0x48 / 0x58 shared by b = 1 and 4, found through the `switch (b)` jump table) = box width of dialogue 2 / 0-1 (widest line + 16) for the original text; `text_core._verb_patches` adds (new max - original max) over the language's MFNT files, clamped to 16..0xC0 (`verb_order.adjust`). Emulator: +24 px on MAIN0 widens the popup box by 24 px. Emulator: `printInfoMessage(4, 0)` shows "Furious Tornado Acquired!" before, "Acquired!Furious Tornado" after.
 
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see

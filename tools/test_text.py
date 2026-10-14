@@ -75,6 +75,21 @@ class VerbFirst(unittest.TestCase):
             self.assertEqual(sum(x != y for x, y in zip(old, data)), 28, name)
             self.assertTrue(all(FUNC_LO <= i < FUNC_HI for i, (x, y) in enumerate(zip(old, data)) if x != y))
 
+    def test_width_follows_verb(self):
+        import verb_order as V
+        src = C.Source(DISC)
+        proj = C.Project(src)
+        old = V.widths(src.read_any("EXE/MAIN5.EXE"))
+        self.assertEqual(old, {0: 72, 1: 88, 4: 88})
+        self.assertEqual(proj.verb_deltas("S"), (0, 0))
+        for n in src.names():
+            if C.lang_of(n) == "S" and "MFNT" in n:
+                proj.edits.setdefault(n, {})[2] = "Obtienes: "
+        files, errors = proj.encode_edited()
+        self.assertEqual(errors, [])
+        self.assertEqual(V.widths(files["EXE/MAIN5.EXE"]), {0: 96, 1: 88, 4: 88})
+        self.assertNotIn("EXE/MAIN0.EXE", files)
+
 
 FUNC_LO, FUNC_HI = 0x3DE20, 0x3DE20 + 0x560
 
