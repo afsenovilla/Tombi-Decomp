@@ -1,11 +1,11 @@
 // FUNC 8011e594 484 X004
 // MATCHING 8011e594 484
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_800B146D, D_800B1475, D_800B1471;
 extern void *D_80134D84;
-extern int D_1F8002D4[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -39,7 +39,7 @@ void func_8011E594(TObj *o)
             o->b0d = 1;
             o->w08 = 0x7a0e;
             o->anim = D_80134D84;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->d30 = o->a.p.whole;
             o->w22 = 0;
             FUN_8001fe6c(o);

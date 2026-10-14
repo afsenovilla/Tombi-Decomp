@@ -1,12 +1,12 @@
 // FUNC 8011ca80 400 X004
 // MATCHING 8011ca80 400
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F800190;
-extern int D_1F80018C;
 
 void func_8011CA80(TObj *o)
 {
@@ -18,7 +18,7 @@ void func_8011CA80(TObj *o)
         D_800A4553[0] = 3;
         D_800A4568[0] = 0;
         D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        SPAD.i18c = o->h->raw;
         o->timer = 60;
         o->state++;
         break;

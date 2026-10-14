@@ -1,5 +1,6 @@
 // FUNC 801162b4 988 X005
 // MATCHING 801162b4 988
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -11,7 +12,6 @@ extern int showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void setEventComplete(int, int);
-extern short D_1F8001C6;
 extern AT D_801176CC[];
 
 void func_801162B4(TObj *o)
@@ -59,7 +59,7 @@ void func_801162B4(TObj *o)
     case 1:
         if (((unsigned char *)o->d90)[4] == 2) {
             ((unsigned char *)o->d90)[4] = 3;
-            D_1F8001C6 = 0;
+            SPAD.s1c6 = 0;
             ((unsigned char*)&GVARS.b42)[0] = 0;
             ((short*)&PLAYER.obj.wb2)[0] = 0;
             if (((unsigned char*)&GVARS.b3f)[0] == 0) {
@@ -89,7 +89,7 @@ void func_801162B4(TObj *o)
         break;
     case 4:
         setEventComplete(0x2e, 0);
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         GCD.bceed = 2;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
@@ -118,7 +118,7 @@ void func_801162B4(TObj *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         t = (unsigned short)o->wbc;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         o->b68 = 0;
     reset:
         o->step = 0;

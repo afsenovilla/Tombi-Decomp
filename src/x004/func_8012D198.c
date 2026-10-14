@@ -1,12 +1,12 @@
 // FUNC 8012d198 788 X004
 // MATCHING 8012d198 788
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern void *D_801357D8[], *D_801357DC[], *D_801357E0[];
-extern short D_1F80016A;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -103,5 +103,5 @@ void func_8012D198(TObj *o)
         o->b04 = 3;
         break;
     }
-    if (D_1F80016A >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
+    if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
 }

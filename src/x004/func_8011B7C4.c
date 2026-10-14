@@ -1,5 +1,6 @@
 // FUNC 8011b7c4 1868 X004
 // MATCHING 8011b7c4 1868
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
@@ -7,7 +8,6 @@
 #include "gamestate.h"
 
 extern unsigned short D_1F8001C8;
-extern short D_1F800172;
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
@@ -53,7 +53,7 @@ void func_8011B7C4(TObj *o)
             if (D_1F8001C8 & 1) break;
             r = func_8011AFA8(o);
             if (GCD.bd0da) {
-                if (r == 2 && D_1F800172 == 0x384) {
+                if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     if (GCD.bcdd7 == 0xff) {
                         o->b6b = 1;
                     } else {
@@ -62,7 +62,7 @@ void func_8011B7C4(TObj *o)
                     }
                 }
             } else {
-                if (r == 1 && D_1F800172 == 0x384) {
+                if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     o->state = 0;
                     if (GCD.bcdd7 == 0) {
                         o->substep = 1;
@@ -93,7 +93,7 @@ void func_8011B7C4(TObj *o)
             break;
         case 0:
             if (D_1F8001C8 & 1) break;
-            p = &D_1F800172;
+            p = &(*(short*)((char*)&SPAD.i170 + 2));
             if (*p >= 0x384) break;
             r = func_8011B218(o);
             if (r == 1 && *p == 0x32a) {
@@ -113,7 +113,7 @@ void func_8011B7C4(TObj *o)
         case 10:
             if (!(D_1F8001C8 & 1)) break;
             r = func_8011B218(o);
-            if (r == 1 && D_1F800172 == 0x546) {
+            if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 2) {
                     if (GCD.bcdce == 0xff) break;
                     o->substep = 4;
@@ -131,7 +131,7 @@ void func_8011B7C4(TObj *o)
             if (D_1F8001C8 & 1) break;
             r = func_8011B218(o);
             if (GCD.bd0d9) {
-                if (r == 2 && D_1F800172 == 0x1c2) {
+                if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
                     if (GCD.bcddb == 0xff) {
                         o->b6b = 1;
                     } else {
@@ -140,7 +140,7 @@ void func_8011B7C4(TObj *o)
                     }
                 }
             } else {
-                if (r == 1 && D_1F800172 == 0x1c2) {
+                if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
                     o->state = 0;
                     if (GCD.bcddb == 0) {
                         o->substep = 1;

@@ -1,5 +1,6 @@
 // FUNC 8012f75c 632 X004
 // MATCHING 8012f75c 632
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -8,7 +9,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801314BC[];
-extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -44,7 +44,7 @@ void func_8012F75C(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->timer = 4;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         if (((unsigned char*)&GCD.bce24)[0] == 1) {
             setEventComplete(0x80, 1);
             FUN_80026c50(0x96, 1, 1);
@@ -57,7 +57,7 @@ void func_8012F75C(TObj *o)
         if (--o->timer != 0) o->state = 9;
         break;
     case 9:
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->anim = D_801314BC[o->subtype].anims[0];

@@ -1,9 +1,9 @@
 // FUNC 801161a8 268 X005
 // MATCHING 801161a8 268
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern int D_1F8002F0[];
 extern void *D_8011A42C[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -25,7 +25,7 @@ void func_801161A8(TObj *o)
         o->box2 = 8;
         o->b0d = 0;
         o->w1e = 7;
-        o->d3c = D_1F8002F0[0];
+        o->d3c = ((int*)&SPAD.i2f0)[0];
         o->anim = D_8011A42C[o->b0c];
         AnimLoadDuration(o);
         break;

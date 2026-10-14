@@ -1,5 +1,6 @@
 // FUNC 801274fc 1560 X004
 // MATCHING 801274fc 1560
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,6 @@
 extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
 extern unsigned char D_80131168[];
-extern unsigned short D_1F8001F8;
 extern int FUN_800202b4(TObj *);
 extern void func_8011EC78(TObj *);
 extern void FUN_8001e4f0(int);
@@ -174,7 +174,7 @@ void func_801274FC(TObj *o)
             case 2:
                 break;
             }
-            o->y.p.whole = o->d34 + (D_1F8001F8 & 1);
+            o->y.p.whole = o->d34 + (SPAD.s1f8 & 1);
             k = 2;
             o->h->p.whole = o->d30 - k + (FUN_8001f9e0() & 3);
             break;

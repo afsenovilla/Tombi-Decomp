@@ -1,12 +1,12 @@
 // FUNC 801167f0 412 X005
 // MATCHING 801167f0 412
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern short D_1F8001C6;
 extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_801167F0(TObj *o)
@@ -38,7 +38,7 @@ void func_801167F0(TObj *o)
         q = (TObj *)o->d90;
         if (q->b04 != 2) break;
         q->b04 = 3;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         GVARS.b42 = 0;
         PLAYER.obj.wb2 = 0;
         if (GVARS.b3f == 0) {
