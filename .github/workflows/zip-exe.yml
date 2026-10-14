@@ -1,0 +1,39 @@
+name: Windows tools zip
+
+# Packs the three Windows tools (dist/windows/tombi-*.exe) into dist/windows/tombi-tools.zip, so they can be
+# downloaded in one go.  Runs after any of the exe workflows finishes (their bot pushes do not trigger push events).
+on:
+  workflow_run:
+    workflows: ["Text editor (Windows exe)", "Graphics editor (Windows exe)", "Assets extractor (Windows exe)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zip-exe
+  cancel-in-progress: false
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Zip
+        run: |
+          rm -f dist/windows/tombi-tools.zip
+          cd dist/windows && zip -X -9 tombi-tools.zip tombi-assets.exe tombi-gfx.exe tombi-text.exe
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/windows/tombi-tools.zip
+          if git diff --cached --quiet; then echo "zip unchanged"; exit 0; fi
+          git commit -m "dist: rebuild tombi-tools.zip"
+          git pull --no-rebase -q -X theirs origin master
+          git push origin HEAD:master
