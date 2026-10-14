@@ -1,12 +1,7 @@
 // FUNC 8011a87c 1644 X006
+// MATCHING 8011a87c 1644
 // FLAGS -O2 -G0 -fno-expensive-optimizations
 #include "gvars.h"
-/* score 179 (was 276): -fno-expensive-optimizations (the game reloads lui/addiu D_1F800000 at every use, like
-   matched x014 func_80119344) + o pinned to $17 + a separate temp f for the ObjAlloc result (game $3).
-   Remaining: the pin leaves `move $7,$4` in the prologue (one extra insn, $7 used for one sb); case-0 list walker e
-   gets $5 (game $4); k=1 inner step e lands in $5 (game $2) and a missing nop at its first branch; case-2 a0/a1
-   swap. Earlier notes: RotMatrixY((unsigned short)p->wb4), empty `case 2:` for the k=0 step switch, D_8009C962_b
-   alias for the case-1/k=1 re-read. */
 #include "TOBJ.H"
 
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -52,12 +47,16 @@ extern void func_80118304(int, int, int);
 
 void func_8011A87C(TObj *o_)
 {
-    register TObj *o asm("$17") = o_;
-    unsigned char s = o->b04;
+    register TObj *o asm("$17");
+    unsigned char s;
     SVECTOR v;
     TObj *e, *p;
+    TObj *e1;
+    TObj *e2;
+    register TObj *e3 asm("$4");
     void *m;
 
+    o = o_; asm("" : "=r"(o) : "0"(o)); s = o->b04;
     switch (s) {
     case 0: {
         int x = o->a.p.whole, y = o->y.p.whole, z = o->b.p.whole;
@@ -72,11 +71,11 @@ void func_8011A87C(TObj *o_)
         o->d64 = z;
         switch (k) {
         case 0:
-            for (e = (TObj *)o->d94; e; e = (TObj *)e->d94) {
-                e->d90 = (int)o;
-                e->d30 = e->a.raw - o->a.raw;
-                e->d34 = e->y.raw - o->y.raw;
-                e->d38 = e->b.raw - o->b.raw;
+            for (e1 = (TObj *)o->d94; e1; e1 = (TObj *)e1->d94) {
+                e1->d90 = (int)o;
+                e1->d30 = e1->a.raw - o->a.raw;
+                e1->d34 = e1->y.raw - o->y.raw;
+                e1->d38 = e1->b.raw - o->b.raw;
             }
             m = M(o);
             o->b0a = 0x15;
@@ -169,7 +168,7 @@ void func_8011A87C(TObj *o_)
                 func_8011A73C(o);
             } else {
                 unsigned char t = o->step;
-                e = (TObj *)o->d90;
+                e2 = (TObj *)o->d90;
                 switch (t) {
                 case 0:
                     if (D_8009C962_b[0] == 1 && D_8009C982) {
@@ -182,7 +181,7 @@ void func_8011A87C(TObj *o_)
                     }
                     break;
                 case 1:
-                    if (e->wb6 == 0) o->step = t + 1;
+                    if (e2->wb6 == 0) o->step = t + 1;
                     break;
                 case 2:
                     if (func_8011B238(o) == t) o->step++;
@@ -214,12 +213,12 @@ void func_8011A87C(TObj *o_)
         ObjCullRegister(o);
         if (o->b0c == 0) {
             unsigned char t = o->step;
-            e = (*(TObj **)&GVARS.p50);
+            e3 = (*(TObj **)&GVARS.p50);
             switch (t) {
             case 0:
                 o->step = t + 1;
-                e->anim = D_801229A4[0];
-                AnimLoadDuration(e);
+                e3->anim = D_801229A4[0];
+                AnimLoadDuration(e3);
                 func_80118304(6, 0x64, 0x64);
                 break;
             case 1:
