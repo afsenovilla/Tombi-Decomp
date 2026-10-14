@@ -1,7 +1,7 @@
 // FUNC 8011ffbc 304 X001
 // MATCHING 8011ffbc 304
+#include "gv2.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CE48;
 extern unsigned char D_8009D081;
 extern void FUN_800201ac(TObj *, int);
@@ -11,7 +11,7 @@ void func_8011FFBC(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (!(D_8009D2C3 & 1)) {
+        if (!(GV2.bc3 & 1)) {
             o->b04 = 3;
             break;
         }

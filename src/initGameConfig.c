@@ -1,5 +1,6 @@
 // FUNC 8001783c 776 MAIN0
 // MATCHING 8001783c 776
+#include "gv2.h"
 #include "gvars.h"
 #include "globals.h"
 #include "gamestate.h"
@@ -12,7 +13,6 @@ extern unsigned short D_8009F3DC;
 extern unsigned char DAT_1f8001b3;
 extern unsigned char DAT_1f8001ab;
 extern short D_8009D2A4;
-extern unsigned short D_8009D2A6;
 extern short DAT_1f8000ea;
 extern short DAT_1f8000ee;
 extern short DAT_1f8000f2;
@@ -131,14 +131,14 @@ void initGameConfig(void)
             D_8009D0AA = 1;
             D_8009D0C8 = 1;
             D_8009D0B8 = 1;
-            D_8009D2A6 = 0x8000;
+            GV2.sa6 = 0x8000;
         } else {
             D_8009D1A4 = 27;
             D_8009D1A5 = 32;
             D_8009D2A4 = 2;
             D_8009D0BF = 1;
             D_8009D0C4 = 1;
-            D_8009D2A6 = 0x8000;
+            GV2.sa6 = 0x8000;
         }
     }
 }

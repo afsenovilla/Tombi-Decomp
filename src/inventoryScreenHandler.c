@@ -1,5 +1,6 @@
 // FUNC 8001aeb4 1140 MAIN0
 // MATCHING 8001aeb4 1140
+#include "gv6.h"
 #include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
@@ -22,7 +23,6 @@ extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8
 extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
-extern unsigned short D_8009D670;
 extern unsigned short D_8009F838;
 extern short *D_80077A8C[];
 extern void SetDispMask(int);
@@ -99,7 +99,7 @@ void inventoryScreenHandler(void)
     case 3:
         inventoryScreenTick();
         if (D_1F8001C2 != 0) {
-            k = &D_8009D670;
+            k = &GV6.s70;
             if ((*k & 8) && (*k & 0x800)) TASK_C->w4e = 6;
         }
         break;

@@ -1,12 +1,12 @@
 // FUNC 80039e54 848 MAIN0
 // MATCHING 80039e54 848
+#include "gv2.h"
 #include "gvars.h"
 #include "scriptctx.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern TObj *SCRIPT_OBJECTS[];
-extern unsigned char D_8009D2B0;
 extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void func_80113754(TObj *);
@@ -59,7 +59,7 @@ void scriptOpShowMessageBox(void)
                 o->w74 = s->arg[4];
                 o->w76 = 0;
                 func_80113754(o);
-                D_8009D2B0 = 2;
+                GV2.bb0 = 2;
                 GVARS.b3f = 1;
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.step = 0;

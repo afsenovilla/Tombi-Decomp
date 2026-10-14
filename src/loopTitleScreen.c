@@ -1,5 +1,6 @@
 // FUNC 8004e41c 1272 MAIN0
 // MATCHING 8004e41c 1272
+#include "gv6.h"
 #include "globals.h"
 typedef struct {
     char p0[0x48]; short w48; unsigned short w4a; unsigned short w4c; char p4e[0x58 - 0x4e]; short w58;
@@ -11,7 +12,6 @@ extern short D_1f8001f4;
 extern unsigned short D_1f8001fc, D_1f8001f8;
 extern int D_1f800164;
 extern unsigned short D_8007DE98[];
-extern unsigned short D_8009D670;
 extern void func_800198B4();
 extern void SetDispMask(int);
 extern void FUN_80016ca8(int, int, int);
@@ -57,7 +57,7 @@ void loopTitleScreen(int *p)
             TASK_C->w4a++;
         }
         func_800E8A94(p);
-        if (*(volatile unsigned short *)&D_8009D670 != 0) {
+        if (*(volatile unsigned short *)&GV6.s70 != 0) {
             TASK_C->w58 = 0x3cc;
         }
         switch (TASK_C->w4c) {

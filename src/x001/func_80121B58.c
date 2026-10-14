@@ -1,10 +1,10 @@
 // FUNC 80121b58 532 X001
 // MATCHING 80121b58 532
+#include "gv2.h"
 #include "TOBJ.H"
 extern TObj *DAT_8009c330;
 extern unsigned short DAT_8009d670;
 extern int DAT_8009c984[];
-extern unsigned char D_8009D2B0;
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
 extern char D_80010748[];
 extern void FUN_8001e4f0(int);
@@ -60,7 +60,7 @@ void func_80121B58(TObj *o)
             FUN_8001e4f0(0x3e);
         }
         if (DAT_1f8001fc & DAT_1f8003c6) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             FUN_8001e4f0(0x3e);
             FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
             o->b9c = 1;

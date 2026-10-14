@@ -1,9 +1,9 @@
 // FUNC 80120a2c 1016 X001
 // MATCHING 80120a2c 1016
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D0C9;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CF0B[];
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
@@ -31,7 +31,7 @@ void func_80120A2C(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D0C9 == 0 || (D_8009D2C3 & 2)) {
+        if (D_8009D0C9 == 0 || (GV2.bc3 & 2)) {
             o->b04 = 3;
             break;
         }
