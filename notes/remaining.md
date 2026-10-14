@@ -30,7 +30,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 14 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | SPAD.b1d2 block fixed (t bump + w=v global); left: v a1 vs game v1 in the a->wb0 block |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 223 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e/ax/ay/k pinned, no c copy; left: box temps, s-reg permutation |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 92 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
-| FAR | x010 | func_8011752C | 8011752C | 1020 | 80 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | loop 1 b shifted out of place + pins; left: which sra fills the delay slot, loops 2-4 same pattern |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 50 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | b/xm share $9, x&7 via $2 temp, h $3; left: sx src/sched, branch-1 fold + cross-jump, delay-slot move, loop-end n load |
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 16 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
