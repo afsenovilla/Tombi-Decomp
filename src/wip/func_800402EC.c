@@ -1,4 +1,5 @@
 // FUNC 800402ec 880 MAIN0
+// opusY: 50 -> 19. Quotient q computed first, then tt = x & 7 ($2), xm = tt + launder, sx = tt << 24, r = tt - (c & 0xf) - q (game order: move t1 / sll a1 / subu). Branch 1: s1 = sx >> 24 laundered, t pinned $2, x = t - s1; h side reads h->p.whole into an unsigned short t, s2 = sx >> 24 laundered, t - 1 - s2, ret = 1 last (two sra, cross-jump now matches). fl & 0xff00 via w3 copied into a $5-pinned w5 kept alive with asm("" :: "r"(w5)) (game's move a1,v1 delay slot). Loop-end n via $2-pinned q pointer and $2 int nn (lh + move t0). i2 = ((short)x / 8) * 2 temp for the plane offset. Left: branch-1 lw o->h scheduled after the second sra (game before), bltz (d < 0) delay slot filled from fallthrough (game fills from target), lhu of the plane offset into v0 (game v1). Tried: h/ret/sx bumps over branch 1, o2 pins $3, ret/h orders.
 // opusV: 82 -> 50 (52 + itbrute sx launder after r). b and xm both pinned to $9 (b dies at the divide, xm reuses t1 like the game, so (short)b is recomputed in v1), x & 7 computed in a $2-pinned temp tt then copied to xm (game's move t1,v0), r = tt - ...; h pinned $3 so branch 2's h->p.whole store matches; branch 1 uses s2 = sx >> 24 laundered. Left: sx built from t1 instead of v0 and scheduled after the f & 0x10 branch, branch 1 folds h - 1 - s into h - (s + 1) and does not cross-jump into branch 2's store, stray move a1,v1 in the fl & 0xff00 delay slot, loop-end n load (lhu t0 vs lh + move t0). Tried: tt/xm/sx orders, launders on xm/sx/w, w = h - 1 split (78-87), char/signed char xm (127-129).
 // opusP: still 82. itbrute pass with priority bumps on bs/d/b/xm/sx/x/c/a/r/k/w, asm(""), asm::r(xm), asm::r(b) at every line: no gain.
 // wip score 82 (opusO: itbrute priority bumps asm("" : "=r"(v) : "0"(v)) on a after c = *D++, r twice after its computation, x before the f & 0x10 test; was 122). was 155: ys and x and cnt unpinned (game's temps: sll v0 / sra s5, addiu v0,s4,1 + move), x = t - s via fresh int t (keeps (x-1)-sx order), second sx>>24 from an asm-laundered copy s2 (game does two sra), lh for loop-end n via *(short *)D; D++, asm("" :: "r"(f)) after the SPAD store (game computes (f&0xe00)>>9 in v0, not in place). left: bs/d regs swapped (a1/v1), b's (short) recomputed in v1 in the game (ours in place in t1), xm copied to t1 (move t1,v0) in the game, branch-1 reg/sched so the two h->p.whole stores cross-jump, game's stray move a1,v1 in the fl&0xff00 beq delay slot, n load move t0 at loop end.
@@ -75,13 +76,13 @@ asm("" : "=r"(a) : "0"(a));
             if (d < 0)
                 continue;
         }
-{ register int tt asm("$2") = x & 7; r = tt - (c & 0xf) - ((c >> 4) & 0xf) * (ys - (short)a) / (short)b; xm = tt; sx = tt << 24; }
+{ int q = ((c >> 4) & 0xf) * (ys - (short)a) / (short)b; register int tt asm("$2") = x & 7; xm = tt; asm("" : "=r"(xm) : "0"(xm)); sx = tt << 24; r = tt - (c & 0xf) - q; }
         if (f & 0x10) {
 asm("" : "=r"(sx) : "0"(sx));
             if (!f1 && (f & 4)) {
-                { int t; t = x - 1; x = t - (sx >> 24); }
+                { register int t asm("$2"); int s1; s1 = sx >> 24; asm("" : "=r"(s1) : "0"(s1)); t = x - 1; x = t - s1; }
+                h = o->h; { int s2; unsigned short t; t = h->p.whole; s2 = sx >> 24; asm("" : "=r"(s2) : "0"(s2)); t = t - 1; h->p.whole = t - s2; }
                 ret = 1;
-                h = o->h; { int s2 = sx >> 24; asm("" : "=r"(s2) : "0"(s2)); h->p.whole = h->p.whole - 1 - s2; }
             } else if (f & 8) {
                 { int t; t = x + 8; x = t - xm; }
                 ret = 2;
@@ -92,15 +93,15 @@ asm("" : "=r"(sx) : "0"(sx));
             cnt++;
             if (cnt >= 8)
                 return ret;
-            if ((fl & 0xff00) != 0xff00) {
+            { int w3 = fl & 0xff00; register int w5 asm("$5") = w3; if (w3 != 0xff00) { asm("" :: "r"(w5));
 asm("" : "=r"(x) : "0"(x));
                 t = D_8007B5AC;
                 t += *(unsigned short *)(t + 8);
-                D = (unsigned short *)(t + *(unsigned short *)(t + ((short)x / 8) * 2));
+                { int i2 = ((short)x / 8) * 2; D = (unsigned short *)(t + *(unsigned short *)(t + i2)); }
             } else {
                 D = getCollisionPlaneAt((short)x, o->d->p.whole);
-            }
-            n = *(short *)D; D++;
+            } }
+            { register int nn asm("$2"); register short *q asm("$2") = (short *)D; D++; nn = *q; n = nn; }
             continue;
         }
         if (!f1) {

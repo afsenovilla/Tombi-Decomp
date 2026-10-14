@@ -26,7 +26,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 281 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps, v0/a0/a1 pins at the 8012767C call; left: s1 var in s5, in-place v1 temps (s1-shape variant in header: 373) |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 28 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | case 0 dispatch fixed (full if/else case 0 first), plain params, e bump, short cx/cy; left: cx/fx s5/s7 swap |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 28 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
-| FAR | main0 | func_800402ec | 800402EC | 880 | 50 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | b/xm share $9, x&7 via $2 temp, h $3; left: sx src/sched, branch-1 fold + cross-jump, delay-slot move, loop-end n load |
+| FAR | main0 | func_800402ec | 800402EC | 880 | 19 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | quotient first, tt/xm/sx/r in game order, branch 1 split with two laundered sra, $5 w5 for the fl & 0xff00 delay-slot move; left: branch-1 o->h load sched, (d < 0) delay slot fill, plane offset lhu reg |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
 | FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
