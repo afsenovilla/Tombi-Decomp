@@ -45,7 +45,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_8011EEC0 | 8011EEC0 | 744 | 44 | src/x001/wip/func_8011EEC0.c (gcc-2.7.2-psx) | loops 2/4 register rotation, loop 3 k hoist, operand orders |
 | FAR | x010 | func_80121534 | 80121534 | 604 | 83 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B (with 80121790); abs/box-sum regalloc |
 | FAR | x010 | func_8011E6B0 | 8011E6B0 | 564 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
-| FAR | x004 | func_8011942C | 8011942C | 540 | 36 | src/x004/wip/func_8011942C.c (gcc-2.7.2-psx) | logic/layout match; a0 register pressure of o (p=o->da0 trick) |
 | FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
 | FAR | x010 | func_80121790 | 80121790 | 516 | 83 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B wip (see 80121534) |

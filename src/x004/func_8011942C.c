@@ -1,7 +1,7 @@
 // FUNC 8011942c 540 X004
-/* score 36 (was 180): branch 2 uses its own locals (a2/b2/c2, w1-w3); register pins found by a greedy search
-   (n=$12, c=$9, v3=$5). Left: branch-1 load/shift order and a few register choices. Earlier notes: o35 p = o->da0; p += 2
-   moves o out of a0; tried whole body inline, switch for 0xd0/0xff, per-local type search. */
+// MATCHING 8011942c 540
+/* Branch 1: the first element's +-0x60 goes to a fresh local r0 (separate pseudo from v0); c pinned in $5,
+   branch 2 keeps its own locals (a2/b2/c2, w1-w3). */
 #include "TOBJ.H"
 
 typedef struct {
@@ -17,18 +17,19 @@ void func_8011942C(TObj *o)
     int u;
     int a;
     int b;
-    register int c asm("$9");
+    register int c asm("$5");
     short t;
     int v0;
     short v1;
     short v2;
-    register short v3 asm("$5");
+    short v3;
     int a2;
     int b2;
     int c2;
     short w1;
     short w2;
     short w3;
+    int r0;
 
     switch (o->state) {
     case 0:
@@ -60,11 +61,11 @@ void func_8011942C(TObj *o)
                     v2 = (short)b >> 8;
                     v3 = (short)c >> 8;
                     if (o->w22 & 1) {
-                        v0 += 0x60; v1 += 0x60; v2 += 0x60; v3 += 0x60;
+                        r0 = v0 + 0x60; v1 += 0x60; v2 += 0x60; v3 += 0x60;
                     } else {
-                        v0 -= 0x60; v1 -= 0x60; v2 -= 0x60; v3 -= 0x60;
+                        r0 = v0 - 0x60; v1 -= 0x60; v2 -= 0x60; v3 -= 0x60;
                     }
-                    f->uv0 |= v0 << 8;
+                    f->uv0 |= r0 << 8;
                     f->uv1 |= v1 << 8;
                     f->uv2 |= v2 << 8;
                     f->uv3 |= v3 << 8;
