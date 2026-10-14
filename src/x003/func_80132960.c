@@ -1,12 +1,12 @@
 // FUNC 80132960 1056 X003
 // MATCHING 80132960 1056
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 #define P PLAYER
 extern TObj *D_8009F3D4;
 extern unsigned char D_8009D00A, D_8009CEF0;
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void FUN_800eeae4(TObj *, int, int);
 
@@ -19,8 +19,8 @@ void func_80132960(TObj *o)
         unsigned char *f = &D_8009D00A;
         short r;
         if (*f == 1) {
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             P.animFrame = 0;
             r = e->h->p.whole < P.h->p.whole;
             D_800A603C[0] = 5;

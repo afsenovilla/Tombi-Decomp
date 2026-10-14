@@ -1,9 +1,9 @@
 // FUNC 80133a2c 360 X003
 // MATCHING 80133a2c 360
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_8009C93A;
 extern TObj PLAYER;
 extern unsigned char D_8009CE4E;
 extern unsigned char D_8009D2C3;
@@ -17,7 +17,7 @@ void func_80133A2C(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (D_8009C93A == 0) break;
+        if (GVARS.b3a == 0) break;
         switch (o->step) {
         case 0:
             if (U8(&PLAYER, 0xa2) != 1) break;

@@ -1,12 +1,10 @@
 // FUNC 80133cb4 308 X003
 // MATCHING 80133cb4 308
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009CE4F;
 extern unsigned char D_8009D0E6;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C93E;
 extern void setEventComplete(int, int);
 
 void func_80133CB4(TObj *o)
@@ -26,9 +24,9 @@ void func_80133CB4(TObj *o)
             }
             break;
         case 2:
-            D_8009C93F = 1;
-            D_8009C942 = 1;
-            D_8009C93E = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
+            GVARS.b3e = 1;
             o->w08 = 300;
             setEventComplete(0xab, 0);
             o->state = 1;
@@ -36,9 +34,9 @@ void func_80133CB4(TObj *o)
         case 0:
             break;
         case 0xf:
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
             o->step = 0;
             o->state = 0;
             break;
