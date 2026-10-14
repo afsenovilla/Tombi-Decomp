@@ -1,0 +1,71 @@
+// JPDEMO x00 800EB454 140
+// Demo version of PAL main0 8002E414 (dispatchAreaDialogInit.c): areas 0, 1, 3, 4 and 9 (the demo's area numbering).
+// Ported from psx_tomba (message.c, dispatchAreaDialogInit); MIT licence of the original project.
+#define SKIP_ASM
+#include "common.h"
+#include "game.h"
+typedef struct msgBox {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+} msgBox;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ 0x00 = Adquired
+ 0x01 = Equipped the
+ 0x02 = Special Message
+ 0x03 = Special Message Adquired
+ 0x04 = Hourglass
+*/
+
+//INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/message", drawInfoMessageText);
+
+extern void func_801172C0(void), func_8011336C(void), func_80110AF0(void), func_8011074C(void), func_80111668(void);
+void dispatchAreaDialogInit(void)
+{
+    switch (GAME.selectedArea) {
+        case 0:
+            func_801172C0();
+            return;
+        case 1:
+            func_8011336C();
+            return;
+        case 3:
+            func_80110AF0();
+            return;
+        case 4:
+            func_8011074C();
+            return;
+        case 9:
+            func_80111668();
+        default:
+            return;
+    }
+}

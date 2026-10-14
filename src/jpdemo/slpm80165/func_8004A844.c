@@ -1,0 +1,37 @@
+// JPDEMO slpm80165 8004A844 208
+// Demo version of PAL main0 8004432C (FUN_8004432c.c): no type 0xb exception, the hit object becomes active 6 (PAL 4).
+typedef struct { char p0[2]; unsigned short s2; } H;
+typedef struct {
+    char t0, t1, t2, t3, t4, t5, t6, t7; char p0[0x16 - 8]; unsigned short s16;
+    char p1[0x40 - 0x18]; H *h40; H *h44;
+    char p2[0x6a - 0x48]; char b6a; char b6b; unsigned short s6c; short s6e; unsigned short s70; short s72;
+    char p3[0xb4 - 0x74]; unsigned short sb4;
+} TO;
+
+static __inline__ short hit(TO *a, TO *b)
+{
+    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b)
+        return 0;
+    if ((unsigned short)(a->h40->s2 - b->h40->s2 + (a->s6c + b->s6c)) > (a->s6e + b->s6e))
+        return 0;
+    if ((unsigned short)(a->s16 - b->s16 + (a->s70 + b->s70)) > (a->s72 + b->s72))
+        return 0;
+    return 1;
+}
+
+void FUN_8004432c(TO *a, TO *b)
+{
+    if ((unsigned short)(a->h44->s2 - b->h44->s2 + 0x2d) >= 0x5b)
+        return;
+    if ((unsigned short)(a->h40->s2 - b->h40->s2 + (a->s6c + b->s6c)) > (a->s6e + b->s6e))
+        return;
+    if ((unsigned short)(a->s16 - b->s16 + (a->s70 + b->s70)) > (a->s72 + b->s72))
+        return;
+    {
+        a->b6a = 1;
+        b->t0 = 6;
+        b->t4 = 2;
+        b->t5 = 0;
+        b->t6 = 0;
+    }
+}
