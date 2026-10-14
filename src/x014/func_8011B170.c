@@ -13,8 +13,8 @@ typedef struct {
 extern P8011B170 *D_8009C330;
 extern TObj *D_8009F0EC;
 extern char D_80077D24[];
-extern void FUN_800eee90(TObj *);
-extern void FUN_800fc104(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
+extern void updatePlayerHealth(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e4f0(int);
@@ -40,7 +40,7 @@ void func_8011B170(TObj *o)
         U8(o, 0xc3) = 0;
         o->wb0 = 0;
         D_8009C330->b8 = 0;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         *(signed char *)&o->b0f = -8;
         FUN_800fc104(o);
         o->ba4 = 0;
@@ -84,7 +84,7 @@ void func_8011B170(TObj *o)
         if (o->velY > 0x680)
             o->velY = 0x680;
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
-            FUN_800eee90(o);
+            playerReleaseBittenAndClearFlags(o);
             FUN_800eeb5c(o, 0);
             o->b04 = 1;
             o->step = 0;

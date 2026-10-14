@@ -8,7 +8,7 @@ extern unsigned short DAT_8009c960;
 extern short DAT_1f80019e;
 extern void FUN_8011fa6c(void);
 extern int resolveHitResultE(TObj *, TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 static __inline__ short hit(TObj *a, TObj *b)
 {
@@ -43,7 +43,7 @@ void FUN_80044d54(TObj *a, TObj *b)
                 b->step = 0;
                 b->state = 0;
             } else {
-                FUN_800e9f74(500, b->a.p.whole, b->y.p.whole, b->b.p.whole);
+                awardAPByArea(500, b->a.p.whole, b->y.p.whole, b->b.p.whole);
                 b->active = 2;
                 b->animFrame = 1 - (a->animFrame & 1);
                 b->b04 = 2;

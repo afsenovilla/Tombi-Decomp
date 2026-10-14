@@ -22,7 +22,7 @@ typedef struct {
 extern PO *D_8009F0EC;
 extern PO *D_8009C330;
 extern char D_80010F10[], D_80010F30[], D_80010F50[], D_80010D68[];
-extern void FUN_800ef6d8(void);
+extern void setWeaponAimFromPadKeepFacing(void);
 extern void AnimLoadDuration(TO *);
 extern void spawnWeaponObject(TO *, int);
 extern void AnimJump(TO *, int);
@@ -44,7 +44,7 @@ void func_8010B880(TO *o)
     PO *p;
     int x, s;
 
-    if (o->b9d == 0) FUN_800ef6d8();
+    if (o->b9d == 0) setWeaponAimFromPadKeepFacing();
     switch (o->state) {
     case 0:
         o->b9d = 1;

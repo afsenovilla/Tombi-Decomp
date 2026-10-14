@@ -11,7 +11,7 @@ typedef struct { char p[2]; unsigned char k; } K;
 extern P *DAT_8009c330;
 extern K *DAT_8009d2e8;
 extern void FUN_800eeb5c(O *, int);
-extern void FUN_800eee90(O *);
+extern void playerReleaseBittenAndClearFlags(O *);
 extern void FUN_8011c758(O *);
 extern void FUN_8011d5f4(O *);
 extern void FUN_8011b47c(O *);
@@ -46,7 +46,7 @@ void FUN_80106a18(O *o)
             FUN_8011b47c(o);
             break;
         default:
-            FUN_800eee90(o);
+            playerReleaseBittenAndClearFlags(o);
             o->b9c = 0;
             o->b69 = 0;
             o->bac = 0;

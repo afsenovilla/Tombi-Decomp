@@ -22,7 +22,7 @@ extern void FUN_800eec40(TObj *);
 extern void FUN_8003facc(TObj *);
 extern void playerSetAnim(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
-extern void FUN_800efc8c(TObj *, int);
+extern void playerEnterGrabStep(TObj *, int);
 extern void FUN_800eef0c(void);
 
 void FUN_8010db0c(TObj *o)
@@ -79,7 +79,7 @@ void FUN_8010db0c(TObj *o)
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;
-        FUN_800efc8c(o, DAT_8009f0ec == 1);
+        playerEnterGrabStep(o, DAT_8009f0ec == 1);
     }
     FUN_800eef0c();
 }

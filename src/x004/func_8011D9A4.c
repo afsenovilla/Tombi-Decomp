@@ -6,7 +6,7 @@ extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800eea3c(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 
 #define B(o, n) (((unsigned char *)(o))[n])
 
@@ -30,7 +30,7 @@ void func_8011D9A4(TObj *o)
         o->state++;
         break;
     case 2:
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         FUN_8001fec0(o);
         if (--o->timer > 0) break;
         ((unsigned char*)&GVARS.b3f)[0] = 0;

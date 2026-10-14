@@ -11,7 +11,7 @@ extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer1(TObj *);
 extern void FUN_8001e4f0(int);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 extern short probeCollisionAtDepthB(TObj *, short, short);
 extern int func_8011ECC8(TObj *);
 extern void printInfoMessage(int, int);
@@ -73,7 +73,7 @@ void func_8011EE50(TObj *o)
                 o->ba5 = 0;
                 o->y.p.whole -= 10;
                 FUN_8001e4f0(7);
-                FUN_800e9f74(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                awardAPByArea(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 o->anim = D_8012E050;
                 FUN_8001fe6c(o);
                 o->state++;

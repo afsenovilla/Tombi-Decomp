@@ -1,7 +1,7 @@
 // FUNC 8010a9f4 668 X002
 // MATCHING 8010a9f4 668
 #include "TOBJ.H"
-extern void FUN_800eee90(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8002cd20(TObj *, int, int);
 extern TObj *allocObjectLayer2(void);
@@ -50,7 +50,7 @@ void func_8010A9F4(TObj *o)
         o->d8c = 0;
         o->visible = 1;
         o->w22 = 0;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         o->anim = DAT_80010ae8;
         FUN_8001fe94(o, 3);
         DAT_8009c942 = 1;

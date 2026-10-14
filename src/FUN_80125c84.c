@@ -4,7 +4,7 @@
 extern short FUN_8004461c(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 extern unsigned char PLAYER, DAT_800a603c, DAT_800a603d, DAT_800a603e;
 extern short DAT_1f80019e;
 
@@ -31,7 +31,7 @@ void FUN_80125c84(TObj *a, TObj *o)
                 o->step = 0;
                 o->state = 0;
             } else {
-                FUN_800e9f74(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 o->active = 2;
                 t = a->animFrame;
                 o->b04 = 2;

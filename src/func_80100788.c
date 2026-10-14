@@ -18,18 +18,18 @@ extern void FUN_8010e328(TObj *, int);
 extern void playerStepJump(TObj *);
 extern void playerStepWeaponAttack(TObj *);
 extern void playerStepAirWeaponAttack(TObj *);
-extern void FUN_800f5078(TObj *);
-extern void FUN_800f705c(TObj *);
-extern void FUN_800f8d2c(TObj *);
+extern void playerStepSpinOnObject(TObj *);
+extern void playerStepSwingFromObject(TObj *);
+extern void playerStepFlipOntoObject(TObj *);
 extern void FUN_8010c034(TObj *);
-extern void FUN_800f67bc(TObj *);
+extern void playerStepSpinRelease(TObj *);
 extern void FUN_800f3f3c(TObj *);
-extern void FUN_800f7aac(TObj *);
-extern void FUN_800f98a8(TObj *);
+extern void playerStepPerchLeap(TObj *);
+extern void playerStepFlipOntoPerch(TObj *);
 extern void playerStepClimb(TObj *);
 extern void playerStepBitten(TObj *);
 extern void playerStepBittenJump(TObj *);
-extern void FUN_801075d8(TObj *);
+extern void playerStepSlopeSlide(TObj *);
 extern void FUN_80108708(TObj *);
 extern void FUN_80109038(TObj *);
 extern void FUN_80106fec(TObj *);
@@ -42,7 +42,7 @@ extern void playerStepPush(TObj *);
 extern void FUN_800fa01c(TObj *);
 extern void FUN_801237e4(TObj *);
 extern void FUN_80121b58(TObj *);
-extern void FUN_80107fcc(TObj *);
+extern void playerStepDepthShift(TObj *);
 extern void FUN_80121790(TObj *);
 extern void FUN_80122410(TObj *);
 extern void FUN_8010ca18(TObj *);
@@ -216,29 +216,29 @@ void func_80100788(TObj *o, int p2)
         turn(o);
         break;
     case 5:
-        FUN_800f5078(o);
+        playerStepSpinOnObject(o);
         break;
     case 6:
-        FUN_800f705c(o);
+        playerStepSwingFromObject(o);
         break;
     case 7:
-        FUN_800f8d2c(o);
+        playerStepFlipOntoObject(o);
         break;
     case 8:
         FUN_8010c034(o);
         break;
     case 9:
-        FUN_800f67bc(o);
+        playerStepSpinRelease(o);
         break;
     case 10:
         dirD(o);
         FUN_800f3f3c(o);
         break;
     case 11:
-        FUN_800f7aac(o);
+        playerStepPerchLeap(o);
         break;
     case 12:
-        FUN_800f98a8(o);
+        playerStepFlipOntoPerch(o);
         break;
     case 13:
         playerStepClimb(o);
@@ -250,7 +250,7 @@ void func_80100788(TObj *o, int p2)
         playerStepBittenJump(o);
         break;
     case 16:
-        FUN_801075d8(o);
+        playerStepSlopeSlide(o);
         break;
     case 17:
         FUN_80108708(o);
@@ -304,7 +304,7 @@ void func_80100788(TObj *o, int p2)
         FUN_8010e328(o, 0);
         break;
     case 0x20:
-        FUN_80107fcc(o);
+        playerStepDepthShift(o);
         break;
     case 0x21:
         FUN_80121790(o);

@@ -14,7 +14,7 @@ extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103628(O *);
-extern void FUN_800ee4e0(O *, int);
+extern void playerSetSlopeTilt(O *, int);
 extern short FUN_8003fd78(O *, int, int);
 
 #define PADCHK() { volatile unsigned short *pad = &DAT_8009d670; if (*pad & 0x80) o->w2e = 1; if (*pad & 0x20) o->w2e = 0; }
@@ -88,7 +88,7 @@ void FUN_801037d8(O *o)
                 o->s80 = 0;
                 o->s82 = 0;
                 o->wb2 = 0;
-                FUN_800ee4e0(o, 0);
+                playerSetSlopeTilt(o, 0);
                 DAT_8009d2e8->a8c = ((unsigned char *)o)[0x8c];
             }
             break;

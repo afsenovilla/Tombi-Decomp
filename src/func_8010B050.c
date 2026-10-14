@@ -7,7 +7,7 @@ extern G *D_8009C330;
 extern TObj *D_800A611C[];
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
-void FUN_800eee90(TObj *o);
+void playerReleaseBittenAndClearFlags(TObj *o);
 void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void ObjGravityStep(TObj *o);
@@ -38,7 +38,7 @@ void func_8010B050(TObj *o)
         case 0x4e:
             break;
         default:
-            FUN_800eee90(o);
+            playerReleaseBittenAndClearFlags(o);
             break;
         }
         *(unsigned char *)&o->wac = 0;

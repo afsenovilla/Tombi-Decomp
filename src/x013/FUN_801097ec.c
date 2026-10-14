@@ -8,7 +8,7 @@ extern unsigned char DAT_801152e8[];
 extern void FUN_8001e560(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800eea3c(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 extern void FUN_8010f400(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_800ee88c(TObj *);
@@ -34,7 +34,7 @@ void FUN_801097ec(TObj *o)
             o->state++;
         case 1:
             FUN_8001fec0(o);
-            FUN_800eea3c(o);
+            playerSetAngleFromSlope(o);
             FUN_8010f400(o);
             FUN_800ee9cc(o);
             FUN_800ee88c(o);

@@ -1,7 +1,7 @@
 // FUNC 80103774 100 X004
 // MATCHING 80103774 100
 extern char *DAT_8009d2e8;
-extern void FUN_800ee4e0(void *, int);
+extern void playerSetSlopeTilt(void *, int);
 
 void FUN_80103774(char *o)
 {
@@ -13,6 +13,6 @@ void FUN_80103774(char *o)
     *(short *)(o + 0x80) = 0;
     *(short *)(o + 0x82) = 0;
     *(short *)(o + 0xb2) = 0;
-    FUN_800ee4e0(o, 0);
+    playerSetSlopeTilt(o, 0);
     *(unsigned int *)(DAT_8009d2e8 + 0x8c) = *(unsigned char *)(o + 0x8c);
 }

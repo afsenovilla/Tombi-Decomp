@@ -8,7 +8,7 @@
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern short resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_8011F844(TObj *a, TObj *o)
 {
@@ -23,7 +23,7 @@ void func_8011F844(TObj *a, TObj *o)
         if (r == one) {
             if (a->type == 6 && (o->w98 -= 2) <= 0) {
                 o->w98 = 0;
-                FUN_800e9f74(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 goto after;
             }
             o->active = 3;
@@ -34,7 +34,7 @@ void func_8011F844(TObj *a, TObj *o)
             o->step = 0;
             o->state = 0;
         } else {
-            FUN_800e9f74(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         after:
             o->active = 2;
             t = a->animFrame;

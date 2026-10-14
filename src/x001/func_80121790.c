@@ -7,7 +7,7 @@ typedef struct { TObj o; unsigned char pc0[6]; unsigned char c6, c7; unsigned ch
 extern TObj *D_8009C330;
 extern void AnimAdvance(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
-extern void FUN_800eea3c(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 extern void FUN_800ee428(TObj *);
 extern void FUN_800f00ac(TObj *);
 
@@ -52,7 +52,7 @@ void func_80121790(TObj *o)
     case 1:
         o->b6b = inc(o->b6b);
         AnimAdvance(o);
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         o->y.raw += o->velY << 8;
         o->velY += 8;
         switch (D_8009C330->animTimer) {

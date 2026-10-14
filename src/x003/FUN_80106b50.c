@@ -6,7 +6,7 @@ extern unsigned char *DAT_8009c330;
 extern unsigned char DAT_801152e8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_800eea3c(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 extern void FUN_800ee428(TObj *);
 extern void FUN_800ee88c(TObj *);
 extern void FUN_8011116c(TObj *);
@@ -32,7 +32,7 @@ void FUN_80106b50(TObj *o)
         }
         break;
     case 1:
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         if (o->velY > 0x400) {
             B(o, 0xac) = 1;
             DAT_8009c330[0x1e] = 0;
@@ -69,7 +69,7 @@ void FUN_80106b50(TObj *o)
         o->animFrame = (o->animFrame & 1) | 2;
         o->state++;
     case 3:
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         if (o->velY > 0x400) {
             B(o, 0xac) = 1;
             DAT_8009c330[0x1e] = 0;

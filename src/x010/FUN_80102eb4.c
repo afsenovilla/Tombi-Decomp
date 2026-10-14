@@ -23,7 +23,7 @@ typedef struct O {
 } O;
 extern O *DAT_8009d2e8;
 extern void FUN_800eeb5c();
-extern void FUN_800ee4e0();
+extern void playerSetSlopeTilt();
 
 void FUN_80102eb4(O *o)
 {
@@ -38,6 +38,6 @@ void FUN_80102eb4(O *o)
     *(unsigned short *)((char *)p + 0x2e) = o->animFrame & 1;
     o->h->w = p->h->w;
     p->y = o->y + o->wba;
-    FUN_800ee4e0(o, 0);
+    playerSetSlopeTilt(o, 0);
     o->state = 2;
 }

@@ -7,7 +7,7 @@ typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
 extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_801240A8(TObj *o, TObj *e)
 {
@@ -58,7 +58,7 @@ void func_801240A8(TObj *o, TObj *e)
         break;
     case 2:
         FUN_8001e4f0(7);
-        FUN_800e9f74(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+        awardAPByArea(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
         r = o->h->p.whole > e->h->p.whole;
         e->active = 2;
         e->b04 = 2;

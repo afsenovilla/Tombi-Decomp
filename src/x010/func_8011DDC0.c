@@ -5,13 +5,13 @@
 
 extern short FUN_8004461c(TObj *a, TObj *b);
 extern int resolveHitResultD(TObj *, TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_8011DDC0(TObj *o, TObj *p)
 {
     if (FUN_8004461c(o, p) == -1) return;
     if (resolveHitResultD(o, p)) {
-        FUN_800e9f74(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
+        awardAPByArea(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
         p->active = 2;
         p->animFrame = ~o->animFrame & 1;
         p->b04 = 2;

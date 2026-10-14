@@ -9,7 +9,7 @@ extern unsigned short DAT_1f8003c6;
 extern void FUN_800ee680(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern short FUN_8003fd78(TObj *, int, int);
-extern void FUN_800ee4e0(TObj *, int);
+extern void playerSetSlopeTilt(TObj *, int);
 
 void FUN_80102f40(TObj *o)
 {
@@ -58,7 +58,7 @@ void FUN_80102f40(TObj *o)
             DAT_8009d2e8->animFrame = o->animFrame & 1;
             o->h->p.whole = DAT_8009d2e8->h->p.whole;
             DAT_8009d2e8->y.p.whole = o->y.p.whole + o->wba;
-            FUN_800ee4e0(o, 0);
+            playerSetSlopeTilt(o, 0);
             o->state = 2;
         }
         break;

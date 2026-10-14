@@ -7,7 +7,7 @@ extern short boxesOverlapFlipAware(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void resolveHitResultG(TObj *, TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 extern void FUN_8001f96c(int, int, int, int);
 
 void func_80120564(TObj *o, TObj *p)
@@ -23,7 +23,7 @@ void func_80120564(TObj *o, TObj *p)
         r = resolveHitResultB(o, p);
         if (r != 0) {
             if (r >= 6) {
-                FUN_800e9f74(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
+                awardAPByArea(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
                 p->active = 2;
                 p->animFrame = ~o->animFrame & 1;
                 p->b04 = 2;

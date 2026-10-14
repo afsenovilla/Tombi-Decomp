@@ -18,7 +18,7 @@ void AnimJump(TObj *o, short n);
 short ObjTileCollide(TObj *, int, int);
 void FUN_800ee428(TObj *o);
 int func_8004BBC0(TObj *o, int);
-void func_800EFC8C(TObj *o, int);
+void playerEnterGrabStep(TObj *o, int);
 void func_8010E328(TObj *o, int);
 void func_80104A04(TObj *o)
 {
@@ -97,7 +97,7 @@ void func_80104A04(TObj *o)
             o->ba7 = 0;
             o->b9c = 0;
             o->wb2 = 0;
-            func_800EFC8C(o, D_8009F0EC_r == 1);
+            playerEnterGrabStep(o, D_8009F0EC_r == 1);
         }
     }
     if (o->step == 0xf && !o->b9e) func_8010E328(o, 1);

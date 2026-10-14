@@ -2,7 +2,7 @@
 // MATCHING 8010ac90 516
 #include "TOBJ.H"
 #include "gametask.h"
-extern void FUN_800eee90(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800eec40(TObj *);
@@ -34,7 +34,7 @@ void FUN_8010ac90(TObj *o)
         o->d8c = 0;
         o->timer = 0x1e;
         o->w22 = 0;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         DAT_8009c93f = 1;
         DAT_8009c942 = 1;
         DAT_8009d2b0 = 3;

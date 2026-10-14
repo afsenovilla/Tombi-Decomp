@@ -7,7 +7,7 @@ extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultE(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_80125B88(TObj *o, TObj *e)
 {
@@ -18,7 +18,7 @@ void func_80125B88(TObj *o, TObj *e)
     if (e->b0c == 0) {
         r = resolveHitResultE(o, e);
         if (r) {
-            if (r == 2) FUN_800e9f74(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+            if (r == 2) awardAPByArea(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
             if (e->active != 3) {
                 if (r == 2) {
                     e->active = 2;
@@ -50,7 +50,7 @@ void func_80125B88(TObj *o, TObj *e)
             break;
         case 2:
             if (e->active & 2) break;
-            FUN_800e9f74(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+            awardAPByArea(0x1f4, e->a.p.whole, e->y.p.whole, e->b.p.whole);
             q = *(TObj **)&e->wa8;
             e->active = 2;
             q->w98 = 0;

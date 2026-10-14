@@ -6,7 +6,7 @@
 extern short boxesOverlapSigned(TObj *a, TObj *b);
 extern int resolveHitResultD(TObj *, TObj *);
 extern int FUN_80042d5c(TObj *, TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_8011FF64(TObj *o, TObj *p)
 {
@@ -35,7 +35,7 @@ void func_8011FF64(TObj *o, TObj *p)
                     p->step = 0;
                     p->state = 0;
                 } else {
-                    FUN_800e9f74(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
+                    awardAPByArea(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
                     p->active = 2;
                     {unsigned short u = o->animFrame;
                     p->b04 = 2;
@@ -47,7 +47,7 @@ void func_8011FF64(TObj *o, TObj *p)
         }
     } else if (FUN_80042d5c(o, p) && p->w98 == 0 && p->active != 5) {
         if (p->subtype == 3) {
-            FUN_800e9f74(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
+            awardAPByArea(0x1f4, p->a.p.whole, p->y.p.whole, p->b.p.whole);
             p->active = 2;
             {unsigned short u = o->animFrame;
             p->b04 = 2;

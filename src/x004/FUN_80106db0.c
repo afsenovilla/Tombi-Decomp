@@ -1,7 +1,7 @@
 // FUNC 80106db0 488 X004
 // MATCHING 80106db0 488
 #include "TOBJ.H"
-extern void FUN_800eea3c(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 extern void FUN_800ee88c(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -30,7 +30,7 @@ void FUN_80106db0(TObj *o)
         }
         break;
     case 1:
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         FUN_800ee88c(o);
         FUN_800ee9cc(o);
         FUN_8001fec0(o);
@@ -60,7 +60,7 @@ void FUN_80106db0(TObj *o)
         o->wb2 = sv;
         o->state = o->state + 1;
     case 3:
-        FUN_800eea3c(o);
+        playerSetAngleFromSlope(o);
         FUN_800ee88c(o);
         FUN_800ee9cc(o);
         FUN_8001fec0(o);

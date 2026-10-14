@@ -29,7 +29,7 @@ extern void SfxPlay2(int a, int b);
 extern void FUN_80104cd8(TObj *o);
 extern void FUN_800ee428(TObj *o);
 extern TObj *FUN_8004bbc0(TObj *, int);
-extern void FUN_800efc8c(TObj *, int);
+extern void playerEnterGrabStep(TObj *, int);
 extern void func_8010E328(TObj *, int);
 
 #define LAND() \
@@ -241,7 +241,7 @@ void FUN_80105bcc(TObj *o)
                 o->ba7 = 0;
                 o->b9c = 0;
                 o->wb2 = 0;
-                FUN_800efc8c(o, D_8009F0EC == (TObj *)1);
+                playerEnterGrabStep(o, D_8009F0EC == (TObj *)1);
             }
         }
         if (o->step == 0xf && o->b9e == 0)

@@ -10,8 +10,8 @@ extern G *D_8009C330;
 void ObjSetAnimFromTable(TObj *o);
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
-void FUN_800ef4e4(TObj *o);
-void func_800EEA3C(TObj *o);
+void setFacingAndUpDownFromPad(TObj *o);
+void playerSetAngleFromSlope(TObj *o);
 void func_8010FE70(TObj *o);
 void FUN_800ee9cc(TObj *o);
 void FUN_800ee88c(TObj *o);
@@ -41,8 +41,8 @@ void func_80106FEC(TObj *o)
         }
         o->state++;
     case 1:
-        FUN_800ef4e4(o);
-        func_800EEA3C(o);
+        setFacingAndUpDownFromPad(o);
+        playerSetAngleFromSlope(o);
         func_8010FE70(o);
         if (o->b69 & 2) {
             AnimAdvance(o);
@@ -78,7 +78,7 @@ void func_80106FEC(TObj *o)
         break;
     case 2:
         AnimAdvance(o);
-        func_800EEA3C(o);
+        playerSetAngleFromSlope(o);
         ObjAddVelY7E(o);
         o->velY += 0x30;
         if (o->velY > 0) o->b9c = 2;

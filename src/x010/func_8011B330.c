@@ -29,7 +29,7 @@ extern P *D_8009C330;
 extern TObj *D_8009D2E8;
 extern short D_8007A038[];
 extern TObj *allocObjectLayer1(void);
-extern void func_800EEE90(S *);
+extern void playerReleaseBittenAndClearFlags(S *);
 extern void ObjSetAnimFromTable(S *);
 extern void AnimLoadDuration(S *);
 extern void SfxPlay2(int, int);
@@ -72,7 +72,7 @@ void func_8011B330(S *s)
                 n->b.p.whole = s->o.b.p.whole;
                 n->h->p.whole += (s->o.animFrame & 1) ? -0x10 : 0x10;
             } else {
-                func_800EEE90(s);
+                playerReleaseBittenAndClearFlags(s);
             }
         }
         s->o.b69 = 0;

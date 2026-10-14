@@ -6,7 +6,7 @@ extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playSFX(int);
 extern int AnimAdvance(TObj *);
-extern void func_800EEA3C(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 
 void func_8011DAE0(TObj *o)
 {
@@ -30,7 +30,7 @@ void func_8011DAE0(TObj *o)
         o->state++;
         break;
     case 2:
-        func_800EEA3C(o);
+        playerSetAngleFromSlope(o);
         AnimAdvance(o);
         if (--o->timer > 0) break;
         o->wb2 = 0;

@@ -16,7 +16,7 @@ extern unsigned short DAT_8009c960, DAT_8009c962;
 extern unsigned short DAT_8009d670;
 extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
 extern void FUN_8010cda8(TObj *);
-extern void FUN_800eee90(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8010d280(TObj *);
@@ -42,7 +42,7 @@ void FUN_8010d390(TObj *o)
         DAT_8009c330->b8 = 0;
         U8(o, 0xca) = 1;
         o->timer = 10;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         o->ba4 = 0;
         o->b69 = 0;
         if (o->animFrame & 1) {

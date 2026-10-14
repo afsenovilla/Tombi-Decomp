@@ -7,7 +7,7 @@
 extern unsigned char *D_8009C330;
 extern int D_8009F0EC;
 int func_8004BBC0(TObj *o, int a);
-void func_800EFC8C(TObj *o, int a);
+void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void FUN_800ee428(TObj *o);
 void FUN_800fc02c(TObj *o);
@@ -100,7 +100,7 @@ void func_8011E358(TObj *o)
             o->velX = 0;
             o->velY = 0;
             o->wb2 = 0;
-            func_800EFC8C(o, D_8009F0EC == 1);
+            playerEnterGrabStep(o, D_8009F0EC == 1);
         }
     }
 }

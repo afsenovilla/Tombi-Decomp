@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int func_80042B98(TObj *, TObj *);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 
 void func_8011F7EC(TObj *p, TObj *o)
 {
@@ -24,7 +24,7 @@ void func_8011F7EC(TObj *p, TObj *o)
             o->step = 0;
             o->state = 0;
         } else {
-            FUN_800e9f74(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            awardAPByArea(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             o->active = 2;
             o->animFrame = 1 - (p->animFrame & 1);
             o->b04 = 2;

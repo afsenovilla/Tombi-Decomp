@@ -4,7 +4,7 @@
 #include "raw7.h"
 
 extern TObj *D_8009D2E8;
-extern void func_800EEA3C(TObj *);
+extern void playerSetAngleFromSlope(TObj *);
 
 void func_8011D378(TObj *o)
 {
@@ -16,7 +16,7 @@ void func_8011D378(TObj *o)
     o->velH = 0;
     o->velV = 0;
     o->wb2 = 0;
-    func_800EEA3C(o);
+    playerSetAngleFromSlope(o);
     D_8009D2E8->d8c = (0x100 - o->d8c) & 0xff;
     o->state = 3;
 }

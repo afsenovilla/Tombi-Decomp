@@ -7,12 +7,12 @@
 extern unsigned char *D_8009C330;
 extern int D_8009F0EC;
 extern char D_80010AE8[];
-void func_800EEA3C(TObj *o);
-void FUN_800eea7c(TObj *o, int a, int b);
-void FUN_80110eec(TObj *o);
+void playerSetAngleFromSlope(TObj *o);
+void playerSetAnim(TObj *o, int a, int b);
+void playerAccelerateDownhill(TObj *o);
 void FUN_800ee9cc(TObj *o);
 int func_8004BBC0(TObj *o, int a);
-void func_800EFC8C(TObj *o, int a);
+void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void FUN_800ee428(TObj *o);
 void AnimJump(TObj *o, int a);
@@ -42,7 +42,7 @@ void func_80107C00(TObj *o)
         o->wb2 = 0;
         D_8009C330[0] = 0;
         o->ba4 = 1;
-        func_800EEA3C(o);
+        playerSetAngleFromSlope(o);
         o->state++;
     case 1:
         k = &GV6.s70;
@@ -68,7 +68,7 @@ void func_80107C00(TObj *o)
             }
         }
         o->y.raw += 0x80000;
-        FUN_80110eec(o);
+        playerAccelerateDownhill(o);
         FUN_800ee9cc(o);
         if (o->bbe & 2) {
             o->step = 0x13;
@@ -84,7 +84,7 @@ void func_80107C00(TObj *o)
                     B(o, 0xac) = 0;
                     o->b9c = 0;
                     o->wb2 = 0;
-                    func_800EFC8C(o, D_8009F0EC == 1);
+                    playerEnterGrabStep(o, D_8009F0EC == 1);
                 }
             }
             if (o->animFrame != (o->bbe & 1)) o->wb2 = 0;

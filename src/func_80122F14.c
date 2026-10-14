@@ -42,8 +42,8 @@ extern PL *D_8009C330;
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(P *, int);
 extern void AnimAdvance(P *);
-extern void func_800EEA3C(P *);
-extern void FUN_80110eec(P *);
+extern void playerSetAngleFromSlope(P *);
+extern void playerAccelerateDownhill(P *);
 extern void FUN_800ee9cc(P *);
 extern void ObjTileCollide(P *, int, int);
 extern void FUN_800ee428(P *);
@@ -73,9 +73,9 @@ void func_80122F14(P *o)
     case 1:
         { unsigned int t = o->b6b; unsigned int r; if (t >= 0xff) r = t; else r = t + 1; o->b6b = r; }
         AnimAdvance(o);
-        func_800EEA3C(o);
+        playerSetAngleFromSlope(o);
         o->y += 0x80000;
-        FUN_80110eec(o);
+        playerAccelerateDownhill(o);
         if (o->animFrame & 1) {
             FUN_800ee9cc(o);
             o->d8c = 0x100 - (o->b6b >> 2);

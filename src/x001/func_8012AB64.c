@@ -15,7 +15,7 @@ extern void applyFrameVelocityY(TObj *);
 extern short func_8004065C(TObj *, short, short, int);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
-extern void FUN_800e9f74(int, short, short, short);
+extern void awardAPByArea(int, short, short, short);
 extern void cloneItemPickupObject(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
@@ -67,7 +67,7 @@ void func_8012AB64(TObj *o)
             o->active = 2;
             o->step = 2;
             o->animFrame = o->w7a;
-            FUN_800e9f74(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            awardAPByArea(0x1f4, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             break;
         }
         o->b9c = 1;

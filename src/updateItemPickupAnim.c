@@ -4,7 +4,7 @@
 extern unsigned char DAT_8007a138[];
 extern char DAT_80077d0c[], DAT_80077cdc[];
 extern void SfxPlay(int);
-extern void FUN_800e9f74(int, int, int, int);
+extern void awardAPByArea(int, int, int, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
 void updateItemPickupAnim(TObj *o)
@@ -14,7 +14,7 @@ void updateItemPickupAnim(TObj *o)
     switch (o->state) {
     case 0:
         SfxPlay(DAT_8007a138[o->subtype]);
-        FUN_800e9f74(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->ba5 = 0;
         if (o->subtype != 0xd) {
             o->b0b = 1;

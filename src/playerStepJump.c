@@ -53,10 +53,10 @@ extern int FUN_8003facc(TObj *);
 extern void FUN_80040278(TObj *, short, short);
 extern void FUN_800f28a0(TObj *);
 extern void playerUpdateFall(TObj *);
-extern void FUN_800f2a30(TObj *);
+extern void playerLandFromJump(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
-extern void FUN_800efc8c(TObj *, int);
+extern void playerEnterGrabStep(TObj *, int);
 
 void playerStepJump(TObj *o)
 {
@@ -203,7 +203,7 @@ void playerStepJump(TObj *o)
             o->state = 0;
             *((unsigned char *)&o->waa + 1) &= 0x7f;
         } else if (o->b69 == 1) {
-            FUN_800f2a30(o);
+            playerLandFromJump(o);
             if (*((unsigned char *)&o->waa + 1) & 0x80) {
                 o->ba4 = 0;
                 switch (DAT_8009d2b1[0]) {
@@ -230,7 +230,7 @@ void playerStepJump(TObj *o)
                 }
             }
         } else if (FUN_8003fd78(o, 4, 0) != 0) {
-            FUN_800f2a30(o);
+            playerLandFromJump(o);
             if (*((unsigned char *)&o->waa + 1) & 0x80) {
                 o->ba4 = 0;
                 o->ba5 = 0;
@@ -322,7 +322,7 @@ void playerStepJump(TObj *o)
         o->ba7 = 0;
         o->b9c = 0;
         o->wb2 = 0;
-        FUN_800efc8c(o, DAT_8009f0ec == 1);
+        playerEnterGrabStep(o, DAT_8009f0ec == 1);
     }
     FUN_800eef0c();
 }

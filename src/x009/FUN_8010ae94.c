@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char *DAT_8009c330;
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800eee90(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eec40(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void setEventComplete(int, int);
@@ -30,7 +30,7 @@ void FUN_8010ae94(TObj *o)
         o->d8c = 0;
         o->timer = 0x1e;
         o->w22 = 0;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         o->d8c = 0;
         o->state = o->state + 1;
         break;

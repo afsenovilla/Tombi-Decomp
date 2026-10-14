@@ -40,65 +40,81 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
-- `800198b4 gameMainTask` (was func_800198B4) - task set by loopTitleScreen for New Game/Continue; resets game state then loops updatePadInput + switch on mode w48 (0 gameInitState, 1 gameStateDispatcher, 2 gameLoadSaveState) + ThreadWaitFrames(1)
-- `80019b0c gameLoadSaveState` (was FUN_80019b0c) - mode 2 of gameMainTask, entered when the title choice is Continue (b68=1, gameInitState sets w48=2); loads list 5/sound set 3, runs the X000 load UI (800e9888) until it returns 1 (go to gameplay, mode 1 state 1) or -1 (back to titleSequenceTask); replaces the unapplied psx_tomba guess titleScreenHandler
-- `8001c818 gameOverScreenState` (was FUN_8001c818) - state 3 of gameStateDispatcher, the state transitionToGameOver sets: stops vibration/music/sound, queues list 0x5d, shows it 240 frames (skippable with buttons 0x6008 after 40), then returns to titleSequenceTask
-- `800216c4 markSectionVisited` (was FUN_800216c4) - looks up (byte index, bit) for [area D_8009C960][section D_8009C962] in D_8007960C and ORs the bit into the u16 array at D_8009D2C4; replaces the unapplied psx_tomba guess setSpawnAreaFlag
-- `8004232c probeFlaggedSegmentA` (was FUN_8004232c) - (uncertain) walks the collision plane segment list (getCollisionPlaneAt) for entries with flags 0x4000 and 0x10 and returns 1/2 when y is inside a segment (2 = below its top 8 px); overlays test the result & 2
-- `8004245c probeFlaggedSegmentB` (was FUN_8004245c) - (uncertain) byte-identical twin of probeFlaggedSegmentA (separate copy with a different caller set)
-- `8006ada8 padSetCmdConfigMode` (was FUN_8006ada8) - libpad: queues controller command 0x43 (enter/exit config mode) with a one-byte parameter at port+0x24
-- `8006adc8 padSetCmdQueryModel` (was FUN_8006adc8) - libpad: queues controller command 0x45 (query model/status) with no parameters
-- `8006adfc padSetCmdQueryAct` (was FUN_8006adfc) - libpad: queues controller command 0x46 (query actuator info) with a one-byte index
-- `8006ae1c padSetCmdQueryComb` (was FUN_8006ae1c) - libpad: queues controller command 0x47 (query actuator combination) with a one-byte index
-- `8006ae3c padSetCmd4B` (was FUN_8006ae3c) - (uncertain) libpad: queues controller command 0x4b with no parameters (command role unknown)
-- `8006addc padSetCmdQueryMode` (was FUN_8006addc) - libpad: queues controller command 0x4c (query mode table entry) with a one-byte index
-- `8006ab78 padSetCmdActAlign` (was FUN_8006ab78) - libpad: queues controller command 0x4d (set actuator alignment) with the 6-byte table at port+0x20; called from _padSetActAlign
-- `8006a260 padSetCmd` (was func_8006A260) - libpad: generic form of the padSetCmd* helpers, stores command byte +0x37, parameter pointer +0x2c and length +0x36
-- `8006a200 sioWaitRxReady` (was func_8006A200) - spins until SIO0 status (+4) bit 1 (RX FIFO not empty) is set; used by _padInitSioMode
-- `8006ba68 padGetPortId` (was func_8006BA68) - returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise
-- `8006baa0 padGetPortBuffer` (was func_8006BAA0) - inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0
-- `80068ae4 CdRemove` (was FUN_80068ae4) - BIOS A0 function 0x72 trampoline, which is CdRemove in the BIOS table
-- `8006f0ac intrMaskClearBit` (was func_8006F0AC) - libapi: clears interrupt bit D_800982D0[i] in I_MASK (D_800982C8[1]) and returns 1
-- `8006e024 sndCmdSetReverbFeedback` (was func_8006E024) - (uncertain) sound command handler: calls SsUtSetReverbFeedback with the byte at stack arg +0x24
-- `8006e048 sndCmdSetReverbDelayA` (was func_8006E048) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the fifth argument
-- `8006e06c sndCmdSetReverbDelayB` (was func_8006E06C) - (uncertain) sound command handler: calls SsUtSetReverbDelay with the byte at stack arg +0x24
-- `8005d4ec busyWaitDelay` (was func_8005D4EC) - empty countdown loop from 0x31FFFF
-- `8006a670 padQueueActInfoCmd` (was func_8006A670) - libpad, called from _padLoadActInfo: by load stage +0x46 queues padSetCmdQueryMode (2), padSetCmdQueryAct (3) or padSetCmdQueryComb/padSetCmd4B (4)
-- `8006acf4 padQueueMainModeCmd` (was func_8006ACF4) - libpad, called from _padSetMainMode: stage 2 queues command 0x44 (set main mode, 2 bytes at +0x51), stage 3 command 0x4d (actuator alignment, 6 bytes at +0x5d)
-- `8006ab94 padResolveActAlign` (was func_8006AB94) - libpad, called from _padSetActAlign: for each actuator counts the alignment slots that use it against its table limit and writes the resolved slots to +0x5d (0xff = unused), then sets stage 0xfe
-- `8006b730 padGetSendByte` (was func_8006B730) - libpad: returns the payload byte to transmit for the current command at payload_index-3 (actuator slots for command 0, payload_2c for 0x4d); US psx_tomba func_8006ACB8 (padportd.c)
-- `8006b5c4 padResetPortState` (was func_8006B5C4) - libpad, called from PadInitDirect: when the port is flagged (+0x49) clears its state, counters and pointers and sets the 6 actuator alignment slots to 0xff
-- `800203dc isObjectInView` (was func_800203DC) - returns 1 when the object is active and its position is within the camera window (1F800176/1F800186) widened by 0x40
-- `8002052c despawnObjectOffscreenMargin` (was func_8002052C) - same as despawnObjectOffscreen (b04=3, active=2, visible=0 when out of view) but the view margin is the second argument
-- `80047e74 objectsOverlapAlt` (was func_80047E74) - (uncertain) 3D hitbox overlap test like objectsOverlap but with a's x box mirrored (b->box0 + a->box1 - a->box0); returns the bool
-- `80048d8c onOverlapSetFlag68` (was func_80048D8C) - (uncertain) runs the objectsOverlapAlt test inline and sets e->b68 = 1 on contact
-- `8003a6b0 scriptOpSetObjField6B` (was func_8003A6B0) - script op (psx_tomba op94): sets byte +0x6b of SCRIPT_OBJECTS[arg0] to arg1 unless in mode 3 without player +0x6b == 1; pc++
-- `80039c90 scriptOpSetObjField74` (was func_80039C90) - (uncertain) script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler; pc++
-- `8004fcc0 isQuadOnScreen` (was FUN_8004fcc0) - (uncertain) returns 1 when some vertex y of the 4-vertex primitive is < 0x100 and some x < 0x140 (screen bounds 320x256)
-- `80069bf8 padCommandStep` (was FUN_80069bf8) - libpad driver: runs the next step function from D_80098230[D_800981F0], arms setRC2wait(60) and reports errors through D_800981AC; US psx_tomba func_800694FC (padmain.c)
-- `8004bfe4 spawnSectionUnlayeredObjects` (was FUN_8004bfe4) - walks the 4-byte entry list PTR_8007bee4[area][section] up to 0xff, allocates an unlayered object per entry (type, subtype) and runs its init from PTR_8007bf34 when flagged; called by every area mode handler
-- `800201ac cullObjectToDrawListMargin` (was FUN_800201ac) - same as cullObjectToDrawList but with an x margin argument: clears visible when out of the camera x window, else sets it and pushes the object to the ObjListPush_1F8002xx list of its category
-- `800594e4 drawSpriteFrame` (was FUN_800594e4) - builds a SPRT from frame idx of the object's frame table (+0x18: u, v, clut, w, h, x/y offsets) at x, y and AddPrims it to the current OT
-- `800500c4 drawObject` (was func_800500C4) - skips invisible objects and area-specific hidden cases, then dispatches the object to its renderer by draw kind (func_80045D0C) or b0a (area 6)
-- `80057288 drawCategory4Objects` (was FUN_80057288) - calls drawObject for every entry of the category 4 list (1F800224, filled by ObjListPush_1F800224), caching the list at 1F800268 so it can be redrawn while 1F8001c6 is set
-- `800571a8 drawCategory5Objects` (was FUN_800571a8) - same as drawCategory4Objects for the category 5 list (1F800228, cache 1F80026c)
-- `80057dfc drawCategory8Objects` (was FUN_80057dfc) - same as drawCategory4Objects for the category 8 list (1F800230, cache 1F800274)
-- `8005042c drawGameplayScene` (was FUN_8005042c) - (uncertain) called from gameplayTick and the areaModeNTick functions: runs the per-frame draw passes (player, object category lists, backgrounds) and the screen fade level from 8009c975/6
-- `80020d98 spawnLayer2ObjectUnlessFlagged` (was func_80020D98) - tests the section flag bit (same indexing as setSectionFlagBit over D_8009CB94) for the entry; if clear and entry kind is 2 allocates a layer 2 object with the entry type/subtype/param
-- `8004874c pushObjectOutOfObjectX` (was FUN_8004874c) - when the two hitboxes overlap (objectsOverlapAlt form) moves o's x to the near edge of e, sets o->b9d to the side (2/3) and returns 2
-- `800382fc scriptLoadArgs` (was FUN_800382fc) - script helper called by execCoreOpcode: reads the op's N operands (register index or 4-byte immediate) and stores them in SCRIPT_CTX +0x1190.. (the arg array)
-- `800263bc initHudState` (was FUN_800263bc) - initializes the HUD block D_800B1410 (active flag, 600-frame timer, displayed vitality from D_8009C970, sprite table pointers) at area load; called by every area mode handler after spawnSectionUnlayeredObjects
-- `800264d0 tickHud` (was FUN_800264d0) - per-frame HUD tick from gameplayTick/areaMode2Tick: when D_800B1410 is active runs updateHud, except in area 6 where it only counts down its timer
-- `80026544 updateHud` (was FUN_80026544) - HUD state machine for D_800B1410: follows vitality D_8009C970 against max D_8009C971, starts the change animation/blink when it changes
-- `80058604 drawHudIfShown` (was FUN_80058604) - called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls drawHud when the timer is 0 and D_800B1410 bit 0 is set
-- `80058680 drawHud` (was FUN_80058680) - draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots from D_800802C8)
-- `80058b18 drawHudVitality` (was FUN_80058b18) - (uncertain) draws one SPRT per vitality point up to the maximum D_8009C971 at the given position
-- `80037e74 openScriptFile` (was FUN_80037e74) - called by initAreaScripts: checks the 0x530057 magic (prints "Not Script File" and returns -2 otherwise), copies the 64-entry offset table and sets base/current pointers (data at +0x88)
-- `800595f4 drawSpriteFrameParts` (was FUN_800595f4) - multi-part version of drawSpriteFrame: emits one SPRT per part of frame idx (count, then clut/u/v/w/h/dx/dy records) at x, y; used by the HUD drawers
-- `80047af0 processObjectCollisions` (was func_80047AF0) - per-frame collision pass from gameplayTick/areaMode2Tick: loads the player's box for its anim, runs the object-vs-object passes, player contact tests (FUN_8004432c over the category 5 list, func_80046D58/func_80047484) and kills the player (state 5) below the camera floor D_800A4582+0xa0
-- `80021b20 initSectionCamera` (was func_80021B20) - called by every area mode handler: reads the camera bounds for [area][section] from D_80078B7C into D_800A457C..82, the start position from D_80079474 (clamped to the bounds), sets the view angles and runs computeCameraMatrix, then copies the camera position to 1F800174
-- `80039580 tickAreaScript` (was func_80039580) - per-frame from gameplayTick/areaMode2Tick/areaMode4Tick: in areas 0, 1, 2 and 0x13 (listed sections) runs the area script context D_8009F840 (wait counter, opcodes via func_80038CD0/func_8003AFB4) and stores its state in D_8009D4F0
-- `800388d4 scriptOpBinaryVar` (was FUN_800388d4) - script ops 0x1c..0x2b from execCoreOpcode: var[idx] = var[idx] (+ - * / % & | ^) var or 4-byte immediate (odd opcodes), sets the compare flag +0x89 from the sign and advances pc by 3 or 6; counterpart of scriptOpUnaryVar
+
+# X000 function names (shared overlay code)
+
+Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`). Pad bits (8009D670): 0x10 Up, 0x20 Right, 0x40 Down, 0x80 Left; 1F8003C6 = configured jump button.
+
+- `800f1478 playerStepIdle` (was FUN_800f1478) - player step 0 handler: standing state; Left/Right held switches to step 1, else idle/walk anim selection
+- `800f1d44 playerStepWalk` (was func_800F1D44) - player step 1 handler (entered from step 0 when Left/Right is held)
+- `800f2b98 playerStepJump` (was FUN_800f2b98) - player step 2 handler: jump sfx (2,4), rise extended while the jump button (1F8003C6) is held 5..14 frames, state 3 = falling
+- `801099b8 playerStepClimb` (was FUN_801099b8) - player step 13 handler: climbing anims 10/11/12 (idle/up/down) chosen by pad Up/Down
+- `8010d390 playerStepSwim` (was FUN_8010d390) - player step 0x3D handler: swim stroke anims 0x43/0x47 (swim_stroke / swim_stroke_slow)
+- `80102a08 playerStep2EByArea` (was FUN_80102a08) - player step 0x2E: only dispatches to the area overlay's handler (area 1 or 10)
+- `80106f98 playerStep3CByArea` (was FUN_80106f98) - player step 0x3C: only dispatches to the area overlay's handler (area 3 or 4)
+- `800efa80 playerSelectGroundAnim` (was FUN_800efa80) - picks idle/walk/jog/run anim (0..3, 0x21 when crouching) from speed +0xB2 and loads it when it changed
+- `800f00ac playerCheckGroundAndFall` (was FUN_800f00ac) - wall-contact step changes (0x10/0x17/0x1B/0x1E/0x21) then gravity when unsupported; past max fall speed switches to step 2 state 3 (fall)
+- `800eff1c playerGetWallContactKind` (was FUN_800eff1c) - returns 1..5 from the contact flags +0xBE (and speed +0xB2 past 0x144); bit 0x20 forces step 0x1F
+- `8010f328 playerSetJumpRiseVelocity` (was FUN_8010f328) - sets velY from the per-mode jump table D_80115468 by the jump-hold counter (player +0x20 <= 12 or 13)
+- `8010e628 playerStartFall` (was func_8010E628) - sets step 2 state 3 (jump step, falling) with the knock-back timer/flags
+- `8010beb8 playerTryStartJump` (was func_8010BEB8) - if the jump button (1F8003C6) is pressed: step 2 state 0 and returns 1
+- `800ef490 setFacingFromPad` (was FUN_800ef490) - animFrame bit 0 from Right (0x20) / Left (0x80) held; neither keeps facing and sets bit 1
+- `800ef4e4 setFacingAndUpDownFromPad` (was FUN_800ef4e4) - as setFacingFromPad plus bit 3 for Up (0x10) and bit 2 for Down (0x40)
+- `800eea7c playerSetAnim` (was FUN_800eea7c) - sets player anim id, loads table[id] and starts at the given frame unconditionally
+- `800eeae4 playerSetAnimIfChangedAt` (was FUN_800eeae4) - PlayerSetAnimIfChanged with an explicit start frame
+- `800ef460 objApplyDepthVelocity` (was func_800EF460) - adds velH to the depth coordinate (*o->d) and velV to Y (16.16)
+- `800fc104 updatePlayerHealth` (was func_800FC104) - copies +0x98 health to GAME.playerHealth when it changed; at 0: game-over flags, stopBgm, playJingle(3)
+- `800fbcec setLeapVelocityFromPad` (was func_800FBCEC) - sets velX/velY launch (-0x600 up) by facing, stronger/weaker with Left/Right held
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0) - +0x7A = (+0x76 & 7) * 0x20 angle, +0x74 speed 0x200 unless bit 3 of +0x76
+- `8010cfb0 setAngleSpeedFromDir8B` (was func_8010CFB0) - byte-identical behaviour to setAngleSpeedFromDir8 (second copy)
+- `8011133c setVelXFromPadLR` (was FUN_8011133c) - velX = -/+0x200 for Left/Right held, else 0 (scaled down in mode 7)
+- `801113bc adjustVelYFromPadDown` (was FUN_801113bc) - velY += 0x20 while Down held, else -= 0x20; clamped to 0xC0..0x300
+- `800ec84c spawnColorBurst` (was FUN_800ec84c) - spawns 8 objects of type 0x5F around a circle (angle i*0x20) tinted red/blue/green by the argument
+- `800ef150 playerResetStep` (was FUN_800ef150) - SfxPlay3(0x1C,0x7F), clears the player action flags and sets step 0 state 0
+- `801097ec playerStepPush` (was FUN_801097ec) - player step 0x1C: while Left/Right held moves at 0x200 with anim 0x20 and sfx 0x24 every 16 frames; leaves when contact flag +0xA6 clears (step 1) or the pad is released (step 0)
+- `800f262c playerJumpRiseUpdate` (was FUN_800f262c) - jump-hold logic of the jump step state 1: counts frames while the jump button (1F8003C6) is held (max 14, min 5) then calls playerSetJumpRiseVelocity
+- `800f0374 playerFallIfUnsupported` (was FUN_800f0374) - tile collision, then gravity (+0x223) when nothing supports the player; returns 1 once the fall speed passes 0x447
+- `800f1308 playerAnimateTalkPose` (was FUN_800f1308) - sets anims 0x4B..0x4F by TALK_POSE (1..5) and advances them
+- `800f2724 playerUpdateFall` (was FUN_800f2724) - falling state of the jump step: anim 4, air steering (FUN_8010eaf8), velX, gravity step
+- `8011116c playerDecelerateSpeed` (was FUN_8011116c) - reduces |speed +0xB2| toward 0 by the per-mode friction table D_80115510 (zero inside +-0x50)
+- `800ee948 spawnWeaponObject` (was FUN_800ee948) - if the active weapon objects (+0xE3) are under the limit D_8007A038[weapon], allocates a layer-1 object of type = equipped weapon (D_8009D2B2)
+- `800f44b0 playerStepWeaponAttack` (was FUN_800f44b0) - player step 3: 8-way aim from pad (Up+Left/Right...), spawns the equipped weapon object (limit D_8007A038)
+- `800f36e0 playerStepAirWeaponAttack` (was FUN_800f36e0) - player step 4: weapon object spawn as in step 3 with the jump rise/fall logic (entered from step 3 when falling)
+- `80104698 playerStepBitten` (was func_80104698) - player step 14: entered with wac == 2; state 0 attaches to the bitten object D_8009D2E8 by its type, then per-type holders
+- `801066c4 playerStepBittenJump` (was func_801066C4) - player step 15: jump (anim 13, playerSetJumpRiseVelocity) carrying the bitten object D_8009D2E8, per-type follow code
+- `800f5078 playerStepSpinOnObject` (was func_800F5078) - player step 5 (entered from playerEnterGrabStep, contact kind 3): spins around the grabbed object D_8009F0EC (types 14/66) by angle +0xB6; Left/Right raise the spin level, jump button releases to step 9
+- `800f705c playerStepSwingFromObject` (was func_800F705C) - player step 6 (contact kind 2): pendulum below the object D_8009F0EC (radius 0x18 around angle 0xC0); jump/Up -> step 11, Down drops (playerSwingHandlePad)
+- `800f8d2c playerStepFlipOntoObject` (was FUN_800f8d2c) (uncertain) - player step 7 (contact kind 1): decaying spin with anim 7 that ends standing on the object D_8009F0EC, following its rotation; jump/Up -> step 11, Down drops to the fall state
+- `800f67bc playerStepSpinRelease` (was func_800F67BC) - player step 9 (entered from step 5 on jump): launch velocity from table D_801153C0 indexed by the spin level +0xB2, then lands into step 2 state 3
+- `800f7aac playerStepPerchLeap` (was func_800F7AAC) (uncertain) - player step 11 (from steps 6/7/12 on jump/Up): plays anim 9 until frame 0x61, then leaps (velY -0x300) away with a spin (+0x88) and falls back into the jump step
+- `800f98a8 playerStepFlipOntoPerch` (was func_800F98A8) (uncertain) - player step 12: same decaying spin as step 7 around a fixed point (own position), ends standing (anim 7); jump/Up -> step 11, Down -> climb step 13 (anim 10)
+- `801075d8 playerStepSlopeSlide` (was FUN_801075d8) (uncertain) - player step 0x10 (playerGetWallContactKind 1: surface flag 0x02 at speed > 0x144): slides with speed clamped +-0x144, pad vibration and particles; bump bounces (anim 0x12); jump leaves to step 2
+- `80107fcc playerStepDepthShift` (was func_80107FCC) (uncertain) - player step 0x20: anim 0x2B, waits for GCD.bcda2 == 0, then moves 5 units per frame along the depth axis (sign from 1F8001C8 bit 0) for 0x78/5 frames
+- `801073c0 playerSlopeSlideUpdateAnim` (was FUN_801073c0) (uncertain) - step 0x10 helper: while |speed| > 0x144 anim 0x11 with growing roll (+0x6B) and an area sfx every 32 frames, else back to step 1 with the ground anim
+- `801102b4 playerSlopeSlideAccelerate` (was func_801102B4) (uncertain) - step 0x10 helper: ramps speed +0xB2 toward the D_80115510 table limits by surface direction (+0xBE bit 0) and facing; table index as playerGetSpeedTableIndex
+- `80110eec playerAccelerateDownhill` (was FUN_80110eec) (uncertain) - adds to speed +0xB2 toward +-0x500 in the direction of surface bit +0xBE&1 (bigger steps near 0); used by the slide steps 0x17 and 0x1B
+- `8010e918 playerGetSpeedTableIndex` (was func_8010E918) - returns the speed-table row: GV2.bb3 + 4 * (+0xC1), forced to (+0xC1)<<2|3 by GAME.displayExpBar&3 and to 8 by two GCD flags; same index computation as playerSlopeSlideAccelerate
+- `800e9f74 awardAPByArea` (was FUN_800e9f74) - switch on the area calling that overlay's popup function with (points,x,y,z,1); the X000 one (func_80118040) calls addPlayerAP and spawns the digit object; callers pass 500 on item pickups
+- `800ee454 playerTiltTowardSlope` (was func_800EE454) - moves the sprite angle +0x8C toward D_801152E8[slope +0xB0] by 4/2/1 per call (wrapping byte angle)
+- `800ee51c playerTiltTowardSlopeSlow` (was func_800EE51C) - moves +0x8C toward D_8011530C[slope +0xB0] by 1 per call
+- `800ee4e0 playerSetSlopeTilt` (was FUN_800ee4e0) - +0x8C = D_8011530C[+0xB0] or D_801152E8[+0xB0] by the flag argument
+- `800eea3c playerSetAngleFromSlope` (was func_800EEA3C) - +0xB6 = slope +0xB0 * 4 as a byte angle (0 when flat)
+- `800ee5c8 playerAdvanceSpinAngle` (was func_800EE5C8) - adds the spin speed (player state +0xE) to the spin angle +0xB6 and sets the half-turn flag (state +8); same as the rot() inline of the spin steps 5/6/7/12
+- `800eee40 playerReleaseBitten` (was func_800EEE40) - if the player holds an object (+0xAC >= 2) sets the bitten object D_8009D2E8 (= PLX.p611c) bytes 4/5/6 to 2,2,0; clears +0xAC
+- `800eee90 playerReleaseBittenAndClearFlags` (was FUN_800eee90) - playerReleaseBitten plus clearing GVARS.i34, +0xC7 = 1, +0x9D/+0xC6/+0xE3 and the player state byte 0
+- `800ef62c setWeaponAimFromPad` (was func_800EF62C) - 8-way aim into animFrame (0/1 sides, 2/3 neutral, 4/5 Up+side, 6/7 Up) from pad Up/Left/Right, keeping facing bit 0
+- `800ef588 setWeaponAimFromPadTurn` (was func_800EF588) - as setWeaponAimFromPad but without Up Left/Right only turn (3/2) instead of side aim
+- `800ef6d8 setWeaponAimFromPadKeepFacing` (was FUN_800ef6d8) - aim 2/3, 4/5 (Up+forward) or 6/7 (Up) without changing facing
+- `800f43d0 offsetByWeaponAim` (was func_800F43D0) - moves the object by the stored aim (player state +7): forward+down for 0..3, back-up for 4/5, up for 6/7; clears +0x69
+- `800efc8c playerEnterGrabStep` (was func_800EFC8C) - after a contact probe: releases a bitten object, then by contact kind +0x9E enters step 7 (1), 6 (2), 5 (3, attaches to D_8009F0EC) or others
+- `800f2a30 playerLandFromJump` (was func_800F2A30) - jump-step landing: sfx 0x1C, releases a bitten object, friction 0xD0 on velX moved into speed +0xB2, sprite angle from slope table
+- `800f4ed0 playerSpinPlaceAndAccelerate` (was FUN_800f4ed0) - step 5: places the player on the circle (radius state +1) around pivot +0x30/+0x34 at the spin angle, sets +0x8C and adds/subtracts the spin acceleration
+- `800f6f38 playerSwingPlaceOnCircle` (was FUN_800f6f38) - step 6: places the player on the swing circle around the pivot plus offset +0xB8/+0xBA, sets +0x8C
+- `800f9548 playerFlipPlaceAndAccelerate` (was FUN_800f9548) - step 12: as playerSpinPlaceAndAccelerate around the fixed point +0x30/+0x34
+- `800f8b7c playerFlipOntoObjectPlace` (was FUN_800f8b7c) - step 7: pivot = D_8009F0EC position + offset, circle placement plus the object's own rotation (+0x8C, box0 radius)
+- `800f6e28 playerSwingUpdatePivot` (was FUN_800f6e28) - step 6: pivot +0x30/+0x34 from D_8009F0EC; per object type (0xE offset, 0x14/0x34 area callbacks, 0x1F facing check) returns 1 to let go
+- `800f6c34 playerSwingHandlePad` (was FUN_800f6c34) - step 6 pad: jump or Up -> step 11, Down lets go (jump step state 3, nudged 14 units)
+- `800f6d80 playerDropFromHold` (was func_800F6D80) - the Down branch of playerSwingHandlePad as a function: clears the hold and spin state, faces +0x88, nudges 14 units back and clears D_8009F0EC+0x69 (the caller sets the step)
 
 # Area overlay function names (X001..X019)
 

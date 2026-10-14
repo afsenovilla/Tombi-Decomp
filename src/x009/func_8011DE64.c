@@ -10,7 +10,7 @@ extern G *D_8009C330;
 extern TObj *D_8009F0EC;
 extern unsigned short D_1F8001FC;
 extern int AnimAdvance(TObj *o);
-extern void FUN_800eee90(TObj *o);
+extern void playerReleaseBittenAndClearFlags(TObj *o);
 extern void SfxPlay3(int, int);
 extern void PlayerSetAnimIfChanged(TObj *o, int);
 extern void FUN_800ef1ac(TObj *o);
@@ -40,7 +40,7 @@ void func_8011DE64(TObj *o)
         o->d8c = 0;
         o->h->p.whole = o->h->p.whole;
         o->y.p.whole += 4;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         SfxPlay3(4, 0x7f);
         PlayerSetAnimIfChanged(o, 7);
         o->state++;

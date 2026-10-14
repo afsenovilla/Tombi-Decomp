@@ -10,7 +10,7 @@ extern char D_80077CF4[];
 extern unsigned char D_8009D2B0[];
 extern unsigned short D_1F8001F8;
 extern void func_801072FC(TObj *);
-extern void FUN_801073c0(TObj *);
+extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void FUN_80110760(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_800f00ac(TObj *);
@@ -19,7 +19,7 @@ extern void FUN_800eae0c(int, int, int, int);
 extern void func_8010E97C(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void ObjApplyVelocity(TObj *);
-extern void FUN_800ee4e0(TObj *, short);
+extern void playerSetSlopeTilt(TObj *, short);
 
 void func_801237E4(TObj *o)
 {
@@ -27,7 +27,7 @@ void func_801237E4(TObj *o)
     case 0:
         func_801072FC(o);
     case 1:
-        FUN_801073c0(o);
+        playerSlopeSlideUpdateAnim(o);
         FUN_80110760(o);
         FUN_800ee9cc(o);
         if (o->bbe == 0) {
@@ -115,5 +115,5 @@ void func_801237E4(TObj *o)
         FUN_800f00ac(o);
         break;
     }
-    FUN_800ee4e0(o, 1);
+    playerSetSlopeTilt(o, 1);
 }

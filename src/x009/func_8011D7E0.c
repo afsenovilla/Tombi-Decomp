@@ -21,9 +21,9 @@ typedef struct {
 extern PL *D_8009C330;
 extern TObj *D_8009F0EC;
 extern char D_80011108[];
-extern void func_800EE5C8(TObj *);
+extern void playerAdvanceSpinAngle(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_800eee90(TObj *);
+extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800ef1ac(TObj *);
 extern void SfxPlay3(int, int);
 extern void AnimJump(TObj *, int);
@@ -85,7 +85,7 @@ void func_8011D7E0(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        FUN_800eee90(o);
+        playerReleaseBittenAndClearFlags(o);
         *(unsigned char *)&o->waa = 0;
         o->anim = D_80011108;
         AnimJump(o, 0);
@@ -94,7 +94,7 @@ void func_8011D7E0(TObj *o)
         SfxPlay3(4, 0x7f);
         o->state++;
     case 1:
-        func_800EE5C8(o);
+        playerAdvanceSpinAngle(o);
         if (o->wb6 == 0 && D_8009C330->w0e > 0) {
             o->wb2--;
             func_800F4E9C(o);
@@ -107,7 +107,7 @@ void func_8011D7E0(TObj *o)
         if (o->wb2 < 2) o->state++;
         break;
     case 2:
-        func_800EE5C8(o);
+        playerAdvanceSpinAngle(o);
         if (o->wb6 == 0) {
             p = D_8009C330;
             if (p->w0e > 0) {
