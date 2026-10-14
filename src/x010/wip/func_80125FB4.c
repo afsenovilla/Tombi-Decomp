@@ -1,4 +1,5 @@
 // FUNC 80125fb4 1280 X010
+#include "gcd.h"
 #include "plx.h"
 #include "gvars.h"
 #include "player.h"
@@ -13,7 +14,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_8009D0E7[];
 extern unsigned char D_8009C970, D_8009C971;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -55,7 +55,7 @@ void func_80125FB4(TObj *o)
         o->d90 = showMessageBoxDirect(5, 6, &v);
         setanim(o, 2);
         for (i = 0; i < 10; i++)
-            FUN_80026e0c(i + 0x43, D_8009D0E7[i]);
+            FUN_80026e0c(i + 0x43, ((unsigned char*)&GCD.bd0e7)[i]);
         o->state++;
         break;
     case 3:

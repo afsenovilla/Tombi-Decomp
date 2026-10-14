@@ -1,7 +1,7 @@
 // FUNC 8011f644 3872 X010
 // MATCHING 8011f644 3872
+#include "gv6.h"
 #include "TOBJ.H"
-extern volatile unsigned short D_8009D670[];
 extern void playSFX(int);
 
 #define XFIX() \
@@ -55,10 +55,10 @@ side:
             a->y.p.frac = 0;
             if (a->b04 == 1) {
                 LAND();
-                if (D_8009D670[0] & 0x20) a->velX = 0x280;
-                else if (D_8009D670[0] & 0x80) a->velX = -0x280;
+                if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x280;
+                else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x280;
                 else a->velX = 0;
-                if (D_8009D670[0] & 0x40) a->velY = -0x480;
+                if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) a->velY = -0x480;
         else a->velY = -0x680;
             }
             b->b69 = 1;
@@ -89,10 +89,10 @@ side:
         a->y.p.frac = 0;
         if (a->b04 != 1) return;
         LAND();
-        if (D_8009D670[0] & 0x20) a->velX = 0x180;
-        else if (D_8009D670[0] & 0x80) a->velX = -0x400;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x180;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x400;
         else a->velX = -0x300;
-        if (D_8009D670[0] & 0x40) a->velY = -0x580;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) a->velY = -0x580;
         else a->velY = -0x780;
         return;
     case 5:
@@ -110,10 +110,10 @@ side:
         a->y.p.frac = 0;
         if (a->b04 != 1) return;
         LAND();
-        if (D_8009D670[0] & 0x20) a->velX = 0x300;
-        else if (D_8009D670[0] & 0x80) a->velX = -0x100;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x300;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x100;
         else a->velX = 0x200;
-        if (D_8009D670[0] & 0x40) a->velY = -0x400;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) a->velY = -0x400;
         else a->velY = -0x600;
         return;
     case 2:
@@ -131,8 +131,8 @@ side:
             a->y.p.frac = 0;
             if (a->b04 != 1) return;
             HIT();
-            if (D_8009D670[0] & 0x20) a->velX = 0x300;
-        else if (D_8009D670[0] & 0x80) a->velX = -0x100;
+            if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x300;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x100;
         else a->velX = 0x200;
             a->velY = 0x300;
             return;
@@ -149,10 +149,10 @@ side:
         a->y.p.frac = 0;
         if (a->b04 != 1) return;
         LAND();
-        if (D_8009D670[0] & 0x20) a->velX = 0x100;
-        else if (D_8009D670[0] & 0x80) a->velX = -0x300;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x100;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x300;
         else a->velX = -0x200;
-        if (D_8009D670[0] & 0x40) a->velY = -0x400;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) a->velY = -0x400;
         else a->velY = -0x600;
         return;
     case 6: case 8:
@@ -198,8 +198,8 @@ side:
             a->y.p.frac = 0;
             if (a->b04 != 1) return;
             HIT();
-            if (D_8009D670[0] & 0x20) a->velX = -0x300;
-        else if (D_8009D670[0] & 0x80) a->velX = 0x100;
+            if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = -0x300;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = 0x100;
         else a->velX = -0x200;
             a->velY = 0x300;
             return;
@@ -216,10 +216,10 @@ side:
         a->y.p.frac = 0;
         if (a->b04 != 1) return;
         LAND();
-        if (D_8009D670[0] & 0x20) a->velX = 0x300;
-        else if (D_8009D670[0] & 0x80) a->velX = -0x100;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) a->velX = 0x300;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) a->velX = -0x100;
         else a->velX = 0x200;
-        if (D_8009D670[0] & 0x40) a->velY = -0x400;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) a->velY = -0x400;
         else a->velY = -0x600;
         return;
     }

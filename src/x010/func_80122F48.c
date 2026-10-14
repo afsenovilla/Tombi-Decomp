@@ -1,8 +1,8 @@
 // FUNC 80122f48 392 X010
 // MATCHING 80122f48 392
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_80131DBC;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
@@ -21,7 +21,7 @@ void func_80122F48(TObj *o)
     o->animFrame = Rand() & 1;
     o->w1e = 0xe;
     o->d84 = 0;
-    o->d3c = D_1F8002D4[0];
+    o->d3c = ((int*)&SPAD.i2d4)[0];
     o->anim = D_80131DBC;
     AnimLoadDuration(o);
     switch (o->subtype) {

@@ -1,9 +1,9 @@
 // FUNC 80116d14 320 X011
 // MATCHING 80116d14 320
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D100;
-extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
 extern void addItemToInventory(int, int, int);
 extern void freeObjectLayer5(TObj *);
@@ -18,7 +18,7 @@ void func_80116D14(TObj *o)
             break;
         }
         {
-            volatile int *g = &D_1F800334;
+            volatile int *g = &SPAD.i334;
             int *q = (int *)*g;
             int v;
             unsigned char t;

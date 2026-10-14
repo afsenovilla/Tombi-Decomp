@@ -1,9 +1,9 @@
 // FUNC 8012855c 520 X010
 // MATCHING 8012855c 520
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
-extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
 extern void freeObjectLayer2(char *);
@@ -28,7 +28,7 @@ void func_8012855C(char *o)
         *(short *)(o + 0x70) = 0x10;
         *(short *)(o + 0x72) = 0x20;
         *(short *)(o + 0x2e) = 1;
-        *(int *)(o + 0x3c) = D_1F8002E0;
+        *(int *)(o + 0x3c) = SPAD.i2e0;
         o[0xd] = 0;
         o[0x6a] = 0;
         o[0xa] = 0;

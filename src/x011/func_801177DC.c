@@ -1,5 +1,6 @@
 // FUNC 801177dc 1112 X011
 // MATCHING 801177dc 1112
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -8,7 +9,6 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
@@ -66,7 +66,7 @@ void func_801177DC(TObj *o)
         TObj *p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         q = allocObjectLayer5();
