@@ -1,4 +1,5 @@
 // FUNC 80125818 3148 X004
+#include "player.h"
 /* score 222 (draft, 3136 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
    (used twice) and the per-case wbc tick. o35: case 4's k test is `switch (k) { case 0: ... case 1: ... }` (439->222).
    Remaining: near() keeps its result in a0 and copies s to v1 (tried int/short/uchar s, dy types, result var,
@@ -14,8 +15,6 @@ typedef struct {
 #define U16(f) (*(unsigned short *)&(f))
 extern void *D_801345B8, *D_8013460C, *D_80134610, *D_801345CC, *D_801345D0;
 extern char D_80077CDC[], D_80077D0C[], D_80077D84[];
-extern Fix16 *D_800A6078, *D_800A607C;
-extern unsigned short D_800A604E;
 extern short D_1F8001C8;
 extern short D_80131148[];
 extern unsigned short D_80131128[];
@@ -37,12 +36,12 @@ static __inline__ int near(TObj *o)
     int s;
     unsigned short dy;
 
-    if (o->d->p.whole != D_800A607C->p.whole) return 0;
+    if (o->d->p.whole != (*(Fix16 **)&PLAYER.obj.d)->p.whole) return 0;
     s = 0;
-    if (((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 0xc) ||
-        ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6))
+    if (((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 0xc) ||
+        ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6))
         s = 1;
-    dy = D_800A604E - o->y.p.whole + 0x30;
+    dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30;
     if (s != 1) return 0;
     return dy < 0xf8;
 }
@@ -261,9 +260,9 @@ void func_80125818(TObj *o)
                 o->wb4 = 0;
                 o->state = D_80131128[Rand() & 0xf];
                 o->substep = 0;
-                if (o->d->p.whole == D_800A607C->p.whole &&
-                    (unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 &&
-                    (unsigned short)(D_800A604E - o->y.p.whole + 0x30) < 0xf8) {
+                if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole &&
+                    (unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 &&
+                    (unsigned short)((*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30) < 0xf8) {
                     o->state = 4;
                     o->substep = 0;
                 }

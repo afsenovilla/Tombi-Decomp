@@ -1,13 +1,12 @@
 // FUNC 80129be0 564 X004
 // MATCHING 80129be0 564
+#include "player.h"
 /* debt: volatile d90 store + volatile subtype read keep sw d90 before lbu subtype in case 1 (do {} while (0) after the store gives score 4). */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801311B8[];
 extern unsigned char D_8009C942[], D_8009C93F[], D_8009C93E[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
-extern short D_800A60EA[];
 extern unsigned char D_8009CDDC;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -21,9 +20,9 @@ void func_80129BE0(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->animFrame = o->b68 & 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
@@ -54,13 +53,13 @@ void func_80129BE0(TObj *o)
         if (--o->timer == 0) o->state = 15;
         break;
     case 15:
-        D_800A603C[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
         D_8009C93E[0] = 0;
-        D_800A60EA[0] = 0;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->animFrame = 1;
         o->b68 = 0;
         o->step = 0;

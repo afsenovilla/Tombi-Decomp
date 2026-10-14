@@ -1,12 +1,10 @@
 // FUNC 8012c884 364 X004
 // MATCHING 8012c884 364
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern unsigned char D_800A603C[];
-extern unsigned char D_800A603D[];
-extern unsigned char D_800A603E[];
 extern void *D_80135784[];
 extern void *D_8013577C[];
 extern int showMessageBoxDirect(int, int, void *);
@@ -28,9 +26,9 @@ void func_8012C884(TObj *o)
             o->state++;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
-            D_800A603C[0] = 5;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+            ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+            ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->d90 = showMessageBoxDirect(5, 13, &o->a);
             o->wac = 2;
             o->animFrame = o->b68 & 1;
@@ -45,9 +43,9 @@ void func_8012C884(TObj *o)
             e->b04 = 3;
             D_8009C93F[0] = 0;
             D_8009C942[0] = 0;
-            D_800A603C[0] = 1;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+            ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+            ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->wac = 0;
             o->anim = D_8013577C[0];
             o->state = 0;

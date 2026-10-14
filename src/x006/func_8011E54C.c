@@ -1,5 +1,6 @@
 // FUNC 8011e54c 1668 X006
 // MATCHING 8011e54c 1668
+#include "player.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D0FB, D_8009D0FC, D_8009D0FD;
 extern unsigned char D_8009D0A4[], SCRIPT_FLAGS[];
@@ -9,9 +10,6 @@ extern void *D_1F8002D4;
 extern void *D_80122C14[], *D_80122C18[], *D_80122C1C[];
 extern char D_80077CDC[];
 extern short *D_8012037C[];
-extern Fix16 *D_800A6078;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_800A60EA;
 extern int func_8011E364(void);
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
@@ -112,7 +110,7 @@ void func_8011E54C(TObj *o)
                 if (o->h->p.whole < 0xc4) o->animFrame = 0;
                 if (o->h->p.whole >= 0xf5) o->animFrame = 1;
                 applyAnimVelocityX(o, o->animFrame);
-                p = D_800A6078;
+                p = (*(Fix16 **)&PLAYER.obj.h);
                 if (p->p.whole < 0x91) break;
                 p->p.whole = 0x90;
                 o->step = 0;
@@ -211,23 +209,23 @@ void func_8011E54C(TObj *o)
             }
             break;
         case 13:
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER.obj.b04 = 5;
+            PLAYER.obj.step = 0;
+            PLAYER.obj.state = 0;
             D_8009C93F = 1;
             goto next;
             break;
         case 14:
-            D_800A60EA = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER.obj.wb2 = 0;
+            PLAYER.obj.b04 = 1;
+            PLAYER.obj.step = 0;
+            PLAYER.obj.state = 0;
             D_8009C93F = 0;
         next:
             o->wb6++;
             break;
         case 15:
-            p = D_800A6078;
+            p = (*(Fix16 **)&PLAYER.obj.h);
             if (p->p.whole >= 0x69) p->p.whole = 0x68;
             break;
         }

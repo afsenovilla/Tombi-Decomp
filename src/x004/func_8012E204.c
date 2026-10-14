@@ -1,11 +1,10 @@
 // FUNC 8012e204 584 X004
 // MATCHING 8012e204 584
+#include "player.h"
 /* Real size 584 B: includes the csv piece func_8012E438 (20 B), the epilogue of this function. */
 #include "TOBJ.H"
 
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E, D_8009CDD7, D_8009CF29;
-extern unsigned short D_800A6058;
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -15,9 +14,9 @@ void func_8012E204(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C = 5;
-        D_800A603D = 100;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 100;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         D_8009C93E = 1;
@@ -31,9 +30,9 @@ void func_8012E204(TObj *o)
         o->state = 15;
         break;
     case 2:
-        D_800A603C = 5;
-        D_800A603D = 7;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 7;
+        PLAYER.obj.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->state++;
@@ -41,10 +40,10 @@ void func_8012E204(TObj *o)
     case 3:
         D_8009C93E = 1;
         if (D_8009CDD7 == 0xff) {
-            D_800A603D = 0x20;
-            D_800A6058 = 1;
-            D_800A603C = 1;
-            D_800A603E = 0;
+            PLAYER.obj.step = 0x20;
+            (*(unsigned short*)&PLAYER.obj.timer) = 1;
+            PLAYER.obj.b04 = 1;
+            PLAYER.obj.state = 0;
             o->state = 5;
             break;
         }
@@ -55,14 +54,14 @@ void func_8012E204(TObj *o)
     case 4:
         if (--o->w08 > 0)
             break;
-        D_800A603C = 1;
-        D_800A603D = 0x20;
-        D_800A603E = 0;
-        D_800A6058 = 1;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0x20;
+        PLAYER.obj.state = 0;
+        (*(unsigned short*)&PLAYER.obj.timer) = 1;
         o->state++;
         break;
     case 5:
-        q = &D_800A6058;
+        q = &(*(unsigned short*)&PLAYER.obj.timer);
         D_8009CF29 = 1;
         D_8009C93F = 0;
         D_8009C942 = 0;
@@ -72,9 +71,9 @@ void func_8012E204(TObj *o)
         o->state = 0;
         break;
     case 15:
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         D_8009C93F = 0;
         D_8009C942 = 0;
         D_8009C93E = 0;
