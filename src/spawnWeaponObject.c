@@ -3,7 +3,7 @@
 extern unsigned char DAT_8009d2b2[];
 extern short DAT_8007a038[];
 extern unsigned char *allocObjectLayer1(void);
-void FUN_800ee948(signed char *o, unsigned char p)
+void spawnWeaponObject(signed char *o, unsigned char p)
 {
     unsigned char *q;
     int pad[1];

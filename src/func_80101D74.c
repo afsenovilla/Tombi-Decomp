@@ -21,7 +21,7 @@ extern void func_80108338(TObj *);
 extern void FUN_80108dbc(TObj *);
 extern void func_8011DD48(TObj *);
 extern void FUN_8010ae94(TObj *);
-extern void FUN_800f1308(TObj *);
+extern void playerAnimateTalkPose(TObj *);
 extern void FUN_8010df84(TObj *);
 extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -132,7 +132,7 @@ void func_80101D74(TObj *o)
         o->d8c = 0;
     case 0x65:
         if (TALK_POSE != 0) {
-            FUN_800f1308(o);
+            playerAnimateTalkPose(o);
         } else if (D_1f8003ce == 0 || *(unsigned short *)o->anim != 0) {
         anim:
             AnimAdvance(o);

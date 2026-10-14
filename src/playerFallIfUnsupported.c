@@ -5,7 +5,7 @@
 extern void FUN_8003fd78(TObj *, int, int);
 extern TObj *DAT_8009c330;
 
-int FUN_800f0374(TObj *o)
+int playerFallIfUnsupported(TObj *o)
 {
     B(o, 0xad) = 0;
     FUN_8003fd78(o, 0, 0);

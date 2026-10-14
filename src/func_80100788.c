@@ -16,8 +16,8 @@ extern void playerStepIdle(TObj *);
 extern void playerStepWalk(TObj *);
 extern void FUN_8010e328(TObj *, int);
 extern void playerStepJump(TObj *);
-extern void FUN_800f44b0(TObj *);
-extern void FUN_800f36e0(TObj *);
+extern void playerStepWeaponAttack(TObj *);
+extern void playerStepAirWeaponAttack(TObj *);
 extern void FUN_800f5078(TObj *);
 extern void FUN_800f705c(TObj *);
 extern void FUN_800f8d2c(TObj *);
@@ -27,8 +27,8 @@ extern void FUN_800f3f3c(TObj *);
 extern void FUN_800f7aac(TObj *);
 extern void FUN_800f98a8(TObj *);
 extern void playerStepClimb(TObj *);
-extern void FUN_80104698(TObj *);
-extern void FUN_801066c4(TObj *);
+extern void playerStepBitten(TObj *);
+extern void playerStepBittenJump(TObj *);
 extern void FUN_801075d8(TObj *);
 extern void FUN_80108708(TObj *);
 extern void FUN_80109038(TObj *);
@@ -38,7 +38,7 @@ extern void FUN_800f86e8(TObj *);
 extern void FUN_80122f14(TObj *);
 extern void FUN_8010b880(TObj *);
 extern void FUN_80107c00(TObj *);
-extern void FUN_801097ec(TObj *);
+extern void playerStepPush(TObj *);
 extern void FUN_800fa01c(TObj *);
 extern void FUN_801237e4(TObj *);
 extern void FUN_80121b58(TObj *);
@@ -203,7 +203,7 @@ void func_80100788(TObj *o, int p2)
         chk(o, 2);
         break;
     case 3:
-        FUN_800f44b0(o);
+        playerStepWeaponAttack(o);
         turn(o);
         if ((*(unsigned char*)&o->wac) < 2) playerCheckGroundAndFall(o);
         break;
@@ -212,7 +212,7 @@ void func_80100788(TObj *o, int p2)
             dirC(o);
             D_8009C330[7] = o->animFrame;
         }
-        FUN_800f36e0(o);
+        playerStepAirWeaponAttack(o);
         turn(o);
         break;
     case 5:
@@ -244,10 +244,10 @@ void func_80100788(TObj *o, int p2)
         playerStepClimb(o);
         break;
     case 14:
-        FUN_80104698(o);
+        playerStepBitten(o);
         break;
     case 15:
-        FUN_801066c4(o);
+        playerStepBittenJump(o);
         break;
     case 16:
         FUN_801075d8(o);
@@ -280,7 +280,7 @@ void func_80100788(TObj *o, int p2)
         D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
-        FUN_801097ec(o);
+        playerStepPush(o);
         if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;

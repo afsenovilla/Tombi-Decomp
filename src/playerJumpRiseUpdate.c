@@ -5,7 +5,7 @@ extern volatile unsigned short DAT_8009d670[];
 extern unsigned short DAT_1f8003c6;
 extern void playerSetJumpRiseVelocity(void);
 
-void FUN_800f262c(unsigned char *o)
+void playerJumpRiseUpdate(unsigned char *o)
 {
     unsigned short u;
 

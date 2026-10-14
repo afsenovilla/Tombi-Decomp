@@ -52,7 +52,7 @@ extern void FUN_800eec40(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void FUN_80040278(TObj *, short, short);
 extern void FUN_800f28a0(TObj *);
-extern void FUN_800f2724(TObj *);
+extern void playerUpdateFall(TObj *);
 extern void FUN_800f2a30(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
@@ -187,7 +187,7 @@ void playerStepJump(TObj *o)
         o->y.raw += DAT_8009c946[0] << 8;
         FUN_8001fec0(o);
         if (X(o)->c9 != 0) FUN_800f28a0(o);
-        else FUN_800f2724(o);
+        else playerUpdateFall(o);
         FUN_8010f400(o);
         DAT_8009c330->b8 = 1;
         o->b9e = 0;

@@ -9,7 +9,7 @@ extern void FUN_8001e4f0(int);
 extern void FUN_800eea3c(TObj *);
 extern void FUN_800ee428(TObj *);
 extern void FUN_800ee88c(TObj *);
-extern void FUN_8011116c(TObj *);
+extern void playerDecelerateSpeed(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_8001fec0(TObj *);
 
@@ -42,7 +42,7 @@ void FUN_80106b50(TObj *o)
             o->state = 3;
         }
         FUN_800ee88c(o);
-        FUN_8011116c(o);
+        playerDecelerateSpeed(o);
         FUN_800ee9cc(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {
@@ -79,7 +79,7 @@ void FUN_80106b50(TObj *o)
             o->state = 3;
         }
         FUN_800ee88c(o);
-        FUN_8011116c(o);
+        playerDecelerateSpeed(o);
         FUN_800ee9cc(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {

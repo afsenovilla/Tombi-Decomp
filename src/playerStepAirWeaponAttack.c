@@ -56,7 +56,7 @@ extern void FUN_800eae0c(int, short, int, int);
         D_8009C330->w2e = D_8009C330->w2c; \
     }
 
-void FUN_800f36e0(TObj *o)
+void playerStepAirWeaponAttack(TObj *o)
 {
     int d;
     signed char c;

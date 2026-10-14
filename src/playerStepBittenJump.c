@@ -9,7 +9,7 @@ extern TObj *D_8009D2E8;
 extern void playerSetJumpRiseVelocity(TObj *);
 extern void setFacingFromPad(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_800f262c(TObj *);
+extern void playerJumpRiseUpdate(TObj *);
 extern void func_80104F88(TObj *);
 extern void func_80105BCC(TObj *);
 extern void func_80105694(TObj *);
@@ -17,7 +17,7 @@ extern void FUN_801064d0(TObj *);
 extern void func_8011D3EC(TObj *);
 extern void func_801213D0(TObj *);
 
-void func_801066C4(TObj *o)
+void playerStepBittenJump(TObj *o)
 {
     TObj *q;
     switch (o->state) {
@@ -85,7 +85,7 @@ void func_801066C4(TObj *o)
         o->substep = 0;
     case 1:
         if (D_8009C330->b9 != 14) {
-            FUN_800f262c(o);
+            playerJumpRiseUpdate(o);
         }
     case 2:
         switch (D_8009C330->b9) {

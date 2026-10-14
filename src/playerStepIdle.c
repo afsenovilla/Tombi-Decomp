@@ -22,7 +22,7 @@ extern char D_800113cc[];
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void playerSelectGroundAnim(TObj *);
-extern void FUN_800f1308(TObj *);
+extern void playerAnimateTalkPose(TObj *);
 extern short func_800F0E7C(TObj *);
 extern void FUN_8010f400(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
@@ -100,7 +100,7 @@ void playerStepIdle(TObj *o)
             o->state++;
         case 1:
             if (TALK_POSE) {
-                FUN_800f1308(o);
+                playerAnimateTalkPose(o);
             } else {
                 c = func_800F0E7C(o);
                 if (!c)

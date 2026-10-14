@@ -29,7 +29,7 @@ extern void ObjGravityStep(O *);
 extern void ObjAddVelY7E(O *);
 extern void ObjSetAnimFromTable(O *);
 extern void func_800EEC40(O *);
-extern void FUN_800f1308(O *);
+extern void playerAnimateTalkPose(O *);
 
 static __inline__ void land(O *o)
 {
@@ -133,7 +133,7 @@ void func_80101938(O *o)
         break;
     case 2:
         if (TALK_POSE != 0) {
-            FUN_800f1308(o);
+            playerAnimateTalkPose(o);
         } else {
             D_8009C330->h2c = 0;
             o->anim = D_80010748;

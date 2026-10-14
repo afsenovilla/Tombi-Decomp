@@ -41,7 +41,7 @@ static __inline__ void body(P *o)
         o->wb2 = w + DAT_80115510[i].b[3];
 }
 
-void FUN_8011116c(P *o)
+void playerDecelerateSpeed(P *o)
 {
     body(o);
 }

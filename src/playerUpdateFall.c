@@ -15,7 +15,7 @@ extern void FUN_8010eaf8(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
 
-void FUN_800f2724(TObj *o)
+void playerUpdateFall(TObj *o)
 {
     TObj *p = DAT_8009c330;
     TObj *q;

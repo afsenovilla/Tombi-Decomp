@@ -17,7 +17,7 @@ extern void PlayerSetAnimIfChanged(S *, int);
 extern void startPadVibration(int, int, int, int);
 extern void func_80102AC0(S *), func_80102F40(S *), func_801040D0(S *), func_801037D8(S *), func_80103290(S *);
 extern void FUN_80103d40(S *), FUN_80122a18(S *), FUN_80104454(S *);
-void func_80104698(S *o)
+void playerStepBitten(S *o)
 {
     if (o->state == 0) {
         D_8009C330->frame = 0xff;

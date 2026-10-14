@@ -40,6 +40,11 @@ One line per name: `address name (old file) - justification`.
 - `8006bf84 setRC2wait` (was FUN_8006bf84) - source says setRC2wait (libpad waitrc2.c): stores root counter 2 value and limit
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
+
+## X000 (shared overlay code)
+
+Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`). Pad bits (8009D670): 0x10 Up, 0x20 Right, 0x40 Down, 0x80 Left; 1F8003C6 = configured jump button.
+
 - `800f1478 playerStepIdle` (was FUN_800f1478) - player step 0 handler: standing state; Left/Right held switches to step 1, else idle/walk anim selection
 - `800f1d44 playerStepWalk` (was func_800F1D44) - player step 1 handler (entered from step 0 when Left/Right is held)
 - `800f2b98 playerStepJump` (was FUN_800f2b98) - player step 2 handler: jump sfx (2,4), rise extended while the jump button (1F8003C6) is held 5..14 frames, state 3 = falling
@@ -66,3 +71,14 @@ One line per name: `address name (old file) - justification`.
 - `801113bc adjustVelYFromPadDown` (was FUN_801113bc) - velY += 0x20 while Down held, else -= 0x20; clamped to 0xC0..0x300
 - `800ec84c spawnColorBurst` (was FUN_800ec84c) - spawns 8 objects of type 0x5F around a circle (angle i*0x20) tinted red/blue/green by the argument
 - `800ef150 playerResetStep` (was FUN_800ef150) - SfxPlay3(0x1C,0x7F), clears the player action flags and sets step 0 state 0
+- `801097ec playerStepPush` (was FUN_801097ec) - player step 0x1C: while Left/Right held moves at 0x200 with anim 0x20 and sfx 0x24 every 16 frames; leaves when contact flag +0xA6 clears (step 1) or the pad is released (step 0)
+- `800f262c playerJumpRiseUpdate` (was FUN_800f262c) - jump-hold logic of the jump step state 1: counts frames while the jump button (1F8003C6) is held (max 14, min 5) then calls playerSetJumpRiseVelocity
+- `800f0374 playerFallIfUnsupported` (was FUN_800f0374) - tile collision, then gravity (+0x223) when nothing supports the player; returns 1 once the fall speed passes 0x447
+- `800f1308 playerAnimateTalkPose` (was FUN_800f1308) - sets anims 0x4B..0x4F by TALK_POSE (1..5) and advances them
+- `800f2724 playerUpdateFall` (was FUN_800f2724) - falling state of the jump step: anim 4, air steering (FUN_8010eaf8), velX, gravity step
+- `8011116c playerDecelerateSpeed` (was FUN_8011116c) - reduces |speed +0xB2| toward 0 by the per-mode friction table D_80115510 (zero inside +-0x50)
+- `800ee948 spawnWeaponObject` (was FUN_800ee948) - if the active weapon objects (+0xE3) are under the limit D_8007A038[weapon], allocates a layer-1 object of type = equipped weapon (D_8009D2B2)
+- `800f44b0 playerStepWeaponAttack` (was FUN_800f44b0) - player step 3: 8-way aim from pad (Up+Left/Right...), spawns the equipped weapon object (limit D_8007A038)
+- `800f36e0 playerStepAirWeaponAttack` (was FUN_800f36e0) - player step 4: weapon object spawn as in step 3 with the jump rise/fall logic (entered from step 3 when falling)
+- `80104698 playerStepBitten` (was func_80104698) - player step 14: entered with wac == 2; state 0 attaches to the bitten object D_8009D2E8 by its type, then per-type holders
+- `801066c4 playerStepBittenJump` (was func_801066C4) - player step 15: jump (anim 13, playerSetJumpRiseVelocity) carrying the bitten object D_8009D2E8, per-type follow code

@@ -96,7 +96,7 @@ extern void FUN_8001e5f4(int, int);
         o->state = 0; \
     }
 
-void FUN_800f44b0(TObj *o)
+void playerStepWeaponAttack(TObj *o)
 {
     volatile unsigned short *k;
     unsigned short f;

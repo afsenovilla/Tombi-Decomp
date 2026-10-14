@@ -20,7 +20,7 @@ extern int FUN_8001fec0(TObj *o);
         }                                                 \
     }
 
-void FUN_800f1308(TObj *o)
+void playerAnimateTalkPose(TObj *o)
 {
     switch (TALK_POSE) {
     case 1:

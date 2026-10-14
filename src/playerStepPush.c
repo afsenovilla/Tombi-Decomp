@@ -13,7 +13,7 @@ extern void FUN_8010f400(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_800ee88c(TObj *);
 
-void FUN_801097ec(TObj *o)
+void playerStepPush(TObj *o)
 {
     short s;
     if (DAT_8009d670[0] & 0xa0) {
