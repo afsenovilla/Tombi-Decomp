@@ -31,7 +31,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
 | FAR | x001 | func_80136B4C | 80136B4C | 1744 | 242 | src/x001/wip/func_80136B4C.c (gcc-2.7.2-psx) | structure complete; case 3 rewrite, 4 jump tables, regalloc |
 | FAR | x006 | func_8011A87C | 8011A87C | 1644 | 276 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | draft; empty case 2 for k=0 step switch, RotMatrixY arg forms |
-| FAR | x009 | func_80116E4C | 80116E4C | 1560 | 119 | src/x009/wip/func_80116E4C.c (gcc-2.7.2-psx) | regalloc (a+K vs hi swap), cross-jumped mult not reproduced, range() inline swaps loop regs |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 496 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | first transcription; regalloc and block layout far off |
 | FAR | x006 | func_8011BEAC | 8011BEAC | 1536 | 246 | src/x006/wip/func_8011BD40.c (gcc-2.7.2-psx) | piece of 1900 B (with 8011BD40); digit part regalloc, u byte as (d<<16)>>13 |
 | FAR | x001 | func_80135164 | 80135164 | 1372 | 309 | src/x001/wip/func_80135164.c (gcc-2.7.2-psx) | control flow matches; angle uses lbu+sll/sra vs lb, regalloc |
