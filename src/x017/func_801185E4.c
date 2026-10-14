@@ -1,9 +1,9 @@
 // FUNC 801185e4 656 X017
 // MATCHING 801185e4 656
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern TObj PLAYER;
-extern unsigned short D_8009C982;
 extern unsigned char D_800A60E0, D_8009CFD6, D_8009D007, D_8009C939, D_8009C93F, D_8009C942, D_8009C93A;
 extern short D_1F8000EE, D_1F8000F2;
 extern unsigned char D_800A603CA[], D_800A603DA[], D_800A603EA[], TALK_POSE[], D_8009C939A[];
@@ -20,7 +20,7 @@ void func_801185E4(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009C982 == 0) {
+        if (GAME.selectedSpawnPoint == 0) {
             D_800A60E0 = 8;
             break;
         }

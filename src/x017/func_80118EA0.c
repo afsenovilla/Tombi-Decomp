@@ -1,12 +1,13 @@
 // FUNC 80118ea0 2208 X017
 // MATCHING 80118ea0 2208
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char c[12]; } B12;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
 extern unsigned char D_8009CE3A, D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
-extern unsigned char D_8009C975, D_8009CDF1;
+extern unsigned char D_8009CDF1;
 extern unsigned char *D_8009C330;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -104,11 +105,11 @@ void func_80118EA0(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0x62;
         D_8009C93F = 1;
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->state++;
         break;
     case 11:
-        if (D_8009C975 != 1) break;
+        if (GAME.fadeScreenControl != 1) break;
         D_1F8001CC = 1;
         D_1F8001CD = 0xc;
         D_1F8001C6 = 2;
@@ -117,12 +118,12 @@ void func_80118EA0(TObj *o)
         o->state++;
         break;
     case 12:
-        D_8009C975 = 4;
+        GAME.fadeScreenControl = 4;
         startAreaBgm();
         D_8009CDF1 = 0xff;
         o->state++;
     case 13:
-        if (D_8009C975 != 0) break;
+        if (GAME.fadeScreenControl != 0) break;
         o->w08 = 0x12c;
         setEventComplete(0x49, 0);
         o->state++;

@@ -2,12 +2,12 @@
 // MATCHING 80105bcc 2308
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6, D_1F8003C4;
 extern unsigned short D_8009D670;
-extern int D_8009C984;
 extern short D_8009C944;
 extern short D_8009C946[];
 extern unsigned char D_8009D2B1;
@@ -70,7 +70,7 @@ extern void func_8010E328(TObj *, int);
     D_8009C330->timer = 0xe; \
     if (D_8009D2E8->type == 0x1c && (t = D_8009D2B1) < 3 && t != 0) \
         U8(o, 0xab) |= 0x80; \
-    if ((D_8009C984 & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4)) \
+    if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4)) \
         o->ba7 = 1; \
     FUN_800ee428(o); \
     o->step = 2; \
