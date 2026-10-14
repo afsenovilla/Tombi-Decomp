@@ -90,9 +90,11 @@ void func_80113F38(S *o)
                 *(short *)0x1F8001C6 = 0;
                 GVARS.b42 = 0;
                 PLAYER.obj.wb2 = 0;
-                if (f == 0) PLAYER.obj.b04 = 1;
-                PLAYER.obj.step = 0;
-                PLAYER.obj.state = 0;
+                if (f == 0) {
+                    PLAYER.obj.b04 = 1;
+                    PLAYER.obj.step = 0;
+                    PLAYER.obj.state = 0;
+                }
                 o->b68 = 0;
                 o->b6a = 0;
             reset:
