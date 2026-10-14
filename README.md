@@ -169,7 +169,7 @@ offsets and the function or splat range that produced them.
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | from `SYSTEM.CNF` | in preparation, see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + reused PAL C, 52.6 % of code (objdiff), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split only (asm, 0 %), see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
