@@ -1,5 +1,6 @@
 // FUNC 80113f38 904 X017
 // MATCHING 80113f38 904
+#include "player.h"
 typedef struct P { short x; short y; } P;
 typedef struct V { short x, xh, y, yh, z, zh; } V;
 typedef struct S {
@@ -13,8 +14,7 @@ extern unsigned char D_8009C93A;
 extern unsigned short D_800A604E;
 extern P *D_800A6078;
 extern int D_800A6094;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_8009C942, D_8009C93F;
-extern short D_800A60EA;
+extern unsigned char D_8009C942, D_8009C93F;
 extern int AnimAdvance(S *);
 extern void TileCollideAt(S *, int, int);
 extern void FUN_80113888(S *), FUN_80113b6c(S *), FUN_80113cc8(S *);
@@ -87,12 +87,12 @@ void func_80113F38(S *o)
             if (o->p90->b04 == 2) {
                 o->p90->b04 = 3;
                 f = D_800A6094;
-                D_800A603C = 1;
+                PLAYER.obj.b04 = 1;
                 *(short *)0x1F8001C6 = 0;
                 D_8009C942 = 0;
-                D_800A60EA = 0;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER.obj.wb2 = 0;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
                 if (f == 1) {
                     D_8009C93F = 0;
                     D_800A6094 = 0;

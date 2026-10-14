@@ -1,15 +1,14 @@
 // FUNC 8011858c 1784 X018
 // MATCHING 8011858c 1784
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_8011A564[];
 extern unsigned char D_8009D2B0;
-extern short D_800A60EA[];
 extern unsigned char D_8009C942[], D_8009C93F[];
 extern short D_1F8001C6;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -37,9 +36,9 @@ void func_8011858C(TObj *o)
         D_8009C942[0] = 1;
         D_8009C93F[0] = 1;
         D_8009D2B0 = 2;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         setanim(o, 4);
@@ -128,13 +127,13 @@ void func_8011858C(TObj *o)
     case 0x63:
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         setanim(o, 1);
         o->animFrame = o->wbc;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

@@ -1,14 +1,13 @@
 // FUNC 8011750c 856 X017
 // MATCHING 8011750c 856
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } V12;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119990[];
 extern unsigned char D_8009C942[], D_8009C93F[];
 extern unsigned char D_8009D2B0[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CE1A[], D_8009D13F;
-extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -27,9 +26,9 @@ void func_8011750C(TObj *o)
             D_8009C942[0] = 1;
             D_8009C93F[0] = 1;
             D_8009D2B0[0] = 2;
-            D_800A603C[0] = 5;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+            ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+            ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->anim = D_80119990[o->subtype].anims[2];
             FUN_8001fe94(o, 0);
             o->wbc = o->animFrame;
@@ -51,7 +50,7 @@ void func_8011750C(TObj *o)
             D_1F8001C6 = 0;
             D_8009C93F[0] = 0;
             D_8009C942[0] = 0;
-            D_800A60EA[0] = 0;
+            ((short*)&PLAYER.obj.wb2)[0] = 0;
             o->timer = 4;
             o->anim = D_80119990[o->subtype].anims[0];
             FUN_8001fe94(o, 0);
@@ -70,7 +69,7 @@ void func_8011750C(TObj *o)
             D_1F8001C6 = 0;
             D_8009C942[0] = 0;
             D_8009C93F[0] = 0;
-            D_800A60EA[0] = 0;
+            ((short*)&PLAYER.obj.wb2)[0] = 0;
             o->timer = 4;
             o->anim = D_80119990[o->subtype].anims[0];
             FUN_8001fe94(o, 0);
@@ -84,14 +83,14 @@ void func_8011750C(TObj *o)
     case 9:
         D_8009C942[0] = 0;
         D_8009C93F[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
         o->anim = D_80119990[o->subtype].anims[0];
         FUN_8001fe94(o, 0);
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

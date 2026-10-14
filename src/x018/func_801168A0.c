@@ -1,9 +1,10 @@
 // FUNC 801168a0 304 X018
 // MATCHING 801168a0 304
+#include "player.h"
 #include "TOBJ.H"
 extern short D_1F800172;
 extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_800A60DA, D_8009C93A;
+extern unsigned char D_8009C93A;
 
 void func_801168A0(TObj *o)
 {
@@ -15,7 +16,7 @@ void func_801168A0(TObj *o)
             break;
         if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x30) > 0x60)
             break;
-        if (D_800A60DA != 1 && D_800A60DA == 2) {
+        if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) != 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2) {
             o->d88 = 0;
             o->state++;
         }

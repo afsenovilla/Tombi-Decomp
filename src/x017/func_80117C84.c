@@ -1,5 +1,6 @@
 // FUNC 80117c84 536 X017
 // MATCHING 80117c84 536
+#include "player.h"
 #include "TOBJ.H"
 extern void func_80117224(TObj *);
 extern void func_8011750C(TObj *);
@@ -14,9 +15,6 @@ extern unsigned char D_8009C93A;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009D2B0;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
 
 void func_80117C84(TObj *o)
 {
@@ -56,9 +54,9 @@ void func_80117C84(TObj *o)
                 D_8009C942 = 1;
                 D_8009C93F = 1;
                 D_8009D2B0 = 2;
-                D_800A603C = 5;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 5;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
                 setEventComplete(0x66, 0);
                 o->timer = 300;
                 o->state++;
@@ -67,9 +65,9 @@ void func_80117C84(TObj *o)
         case 1:
             if (--o->timer <= 0) {
                 D_8009CFD6 = 1;
-                D_800A603C = 1;
-                D_800A603D = 0x20;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 1;
+                PLAYER.obj.step = 0x20;
+                PLAYER.obj.state = 0;
                 o->state++;
             }
             break;
