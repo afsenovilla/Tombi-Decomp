@@ -1,23 +1,12 @@
 // FUNC 80125fb4 1280 X010
+// MATCHING 80125fb4 1280
 #include "gcd.h"
 #include "plx.h"
 #include "gvars.h"
 #include "player.h"
-/* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
-   showMessageBoxDirect call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
-   jal delay slot), so the tails only merge from setanim(o, 2). Tried: pointer/extra local for
-   the V6 copy, an fx() inline, moving the copy among the global stores.
-   Also tried (o31): p = &v before/after the copy, k = 9 local, casts/no-proto/short-arg calls, inline wrappers
-   (own stack slot, frame 64), block-local V6: the arg order stays a0,a1,a2 (RTL order); only a computed a1
-   (o->state + 1) moves a2 above a1. A second callee name in case 5 stops the merge but leaves 12 B short.
-   b57: the scheduler places the arg loads: register-asm pins of a0/a1/a2 (any order), asm barriers and FLAGS/CC/AS
-   variants do not change it (124-451); an asm-made a1 gives a2,a1,a0 order (131), still merging from the call.
-   opusK: case 9 also differs (game loads D_8009C971 before *c and stores the andi'd copy to all three):
-   `{unsigned char t = D_8009C971; if (*c < t) { unsigned char u = t; PLX.s6108 = u; PLX.s610a = u; *c = u; ...}}`
-   matches it exactly but scores 131 while the merge remains (offsets shift). Game case 5 is NOT merged from the
-   call: it ends `jal; addiu a2; lbu v1,3(s0); j case8+0x18; sw v0,144(s0)` (reorg stole sw/lbu from case 8),
-   so the cross-jump starts at the d90 store; case 8 needs its args in a2,a0,a1 order. Also tried: copy through
-   V6 *q = &v (and pinned to $6), i = 9 / 18/2 / (short)9 / &v + 0 for the args: no change. */
+/* Case 8 calls through an asm-named alias (smb2) so jump2 does not cross-jump case 5 into it at the call;
+   the asm("") after its d90 store keeps sched2 from hoisting the subtype load, so the merge starts at setanim.
+   The pinned a2 temp makes case 8 load its args in a2,a0,a1 order. */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
@@ -25,6 +14,7 @@ extern AT D_8012F3C4[];
 extern unsigned char D_8009C970, D_8009C971;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
+extern int smb2(int, int, V6 *) asm("showMessageBoxDirect");
 extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
 extern void FUN_80026e0c(int, int);
@@ -116,7 +106,10 @@ void func_80125FB4(TObj *o)
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         v = *(V6 *)&o->a;
-        o->d90 = showMessageBoxDirect(5, 9, &v);
+        { register int a asm("$4"); register int b asm("$5"); register V6 *p asm("$6");
+        p = &v; asm("" : "=r"(p) : "0"(p)); a = 5; asm("" : "=r"(a) : "0"(a)); b = 9;
+        o->d90 = smb2(a, b, p); }
+        asm("");
         setanim(o, 2);
         o->state++;
         break;
@@ -126,13 +119,9 @@ void func_80125FB4(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         c = &D_8009C970;
-        if (*c < D_8009C971) {
-            int t = D_8009C971;
-            PLX.s6108 = t;
-            PLX.s610a = t;
-            *c = t;
+        {unsigned char t = D_8009C971; if (*c < t) { unsigned short u = t; PLX.s6108 = u; PLX.s610a = u; *c = u;
             FUN_8001e4f0(10);
-        }
+        }}
         setanim(o, 0);
         PLAYER.obj.b04 = 1;
         GVARS.b3f = 0;

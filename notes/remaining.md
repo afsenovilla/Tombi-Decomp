@@ -30,7 +30,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 72 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | rebuilt from 244A0 top; negated forms fix reassociation; left: s-reg permutation, box0 temp, abs(cy) test |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 314 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e pinned; left: regalloc of abs/k/fx/fy temps |
-| FAR | x010 | func_80125FB4 | 80125FB4 | 1280 | 124 | src/x010/wip/func_80125FB4.c (gcc-2.7.2-psx) | case 5 cross-jumped into case 8 in the game |
 | FAR | x001 | func_801253AC | 801253AC | 1212 | 226 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | frame fixed by pad[16], int sabs inline; left sabs negate source, local regalloc |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 236 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
 | FAR | x010 | func_8011752C | 8011752C | 1020 | 80 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | loop 1 b shifted out of place + pins; left: which sra fills the delay slot, loops 2-4 same pattern |
