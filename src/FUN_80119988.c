@@ -1,5 +1,6 @@
 // FUNC 80119988 1984 X000
 // MATCHING 80119988 1984
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 struct V3 { int x, y, z; };
@@ -22,7 +23,6 @@ extern struct V3 D_800A6048;
 extern Fix16 *D_800A607C;
 extern unsigned char D_8009C939A[];
 #define D_8009C939 D_8009C939A[0]
-extern unsigned char D_8009C930;
 extern unsigned char D_8009C942A[];
 #define D_8009C942 D_8009C942A[0]
 extern unsigned char D_8009C93FA[];
@@ -114,7 +114,7 @@ void FUN_80119988(TObjE *e)
                 *(int *)D_800A607C = 0;
                 D_800A6038 = 1;
                 D_800A603C = 1;
-                D_8009C930 = 2;
+                GVARS.b30 = 2;
                 D_800A603D = 0;
                 D_800A603E = 0;
                 D_8009C942 = 0;
@@ -127,7 +127,7 @@ void FUN_80119988(TObjE *e)
             break;
         case 5:
             *(struct V3 *)&o->d30 = D_1F800168;
-            if (D_8009C930 == 4)
+            if (GVARS.b30 == 4)
                 goto snd;
             break;
         case 6:
@@ -169,7 +169,7 @@ void FUN_80119988(TObjE *e)
                 D_800A603D = 0;
                 D_800A603E = 0;
                 D_8009C93F = 1;
-                D_8009C930 = 1;
+                GVARS.b30 = 1;
                 e->ce = FUN_8001e4f0(0x36);
                 o->step = 0;
             }

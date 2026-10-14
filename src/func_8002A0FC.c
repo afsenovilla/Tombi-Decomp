@@ -1,5 +1,6 @@
 // FUNC 8002a0fc 348 MAIN0
 // MATCHING 8002a0fc 348
+#include "gvars.h"
 typedef struct {
     unsigned char b0, b1, b2, b3;
     char p4[0x34 - 4];
@@ -15,9 +16,6 @@ extern unsigned short D_1F8000F2;
 extern unsigned short D_1F80016E;
 extern unsigned char D_8009C966;
 extern unsigned char D_8009CDA6;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C93E;
-extern unsigned char D_8009C942;
 extern void FUN_80027c74(S *o);
 extern void func_8002795C(S *o);
 
@@ -43,9 +41,9 @@ void func_8002A0FC(S *o)
         if ((unsigned short)(D_1F8000F2 - D_1F80016E + 0xb4) < 0x168 || (o->f44 & 0xc)) {
             o->b3 = 1;
             if (D_8009C966 == 3 || D_8009CDA6 == 0xff) o->b3 = 0;
-            D_8009C93F = 0;
-            D_8009C93E = 0;
-            D_8009C942 = 0;
+            GVARS.b3f = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
         }
     }
 }

@@ -1,5 +1,6 @@
 // FUNC 800317c0 6188 MAIN0
 // MATCHING 800317c0 6188
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
 typedef struct {
@@ -50,7 +51,7 @@ extern short D_8007A04C[], D_8007A04E[];
 extern unsigned char *D_8009F0EC;
 extern unsigned short D_8009D670;
 extern unsigned short D_1F8003C8, D_1F8001F8, D_1F800282;
-extern unsigned char D_8009C93F, D_8009D2B2;
+extern unsigned char D_8009D2B2;
 extern int D_8009D2E8;
 extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
@@ -347,7 +348,7 @@ void func_800317C0(TObj *o)
             if (D_8009C338->w0e < -64) {
                 if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                     *(unsigned char *)o->d94 = D_8009C330->b6;
-                if (PADOK() && PLAYER.bac < 2 && D_8009C93F == 0) {
+                if (PADOK() && PLAYER.bac < 2 && GVARS.b3f == 0) {
                     FUN_800ec710(D_8009D2B2, o);
                     PLAYER.b9d = 0;
                     D_8009C338->w0e = 0;
@@ -365,7 +366,7 @@ void func_800317C0(TObj *o)
         } else if (D_8009C338->w0e > 64) {
             if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                 *(unsigned char *)o->d94 = D_8009C330->b6;
-            if (!PADOK() || PLAYER.bac >= 2 || D_8009C93F != 0) {
+            if (!PADOK() || PLAYER.bac >= 2 || GVARS.b3f != 0) {
                 PLAYER.b9d = 0;
                 D_8009C338->b0c = 0;
                 D_8009C330->b0 = 0;
@@ -408,7 +409,7 @@ void func_800317C0(TObj *o)
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
-        if (!PADOK() || D_8009C93F != 0) {
+        if (!PADOK() || GVARS.b3f != 0) {
             PLAYER.b9d = 1;
             D_8009C330->b0 = 2;
             D_8009C330->w22 = 0;
@@ -446,7 +447,7 @@ void func_800317C0(TObj *o)
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
-        if (!PADOK() || D_8009C93F != 0) {
+        if (!PADOK() || GVARS.b3f != 0) {
             D_8009C330->b0 = 1;
             D_8009C330->w22 = 0;
             PLAYER.b9d = 1;

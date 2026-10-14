@@ -1,5 +1,6 @@
 // FUNC 8012d294 1384 X000
 // MATCHING 8012d294 1384
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern int D_1F8002D0[];
@@ -7,7 +8,6 @@ extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned short D_1F800176;
 extern short D_1F80027E;
-extern unsigned char D_8009C93F;
 extern unsigned char D_800A4553;
 extern char D_80077D24[];
 extern char D_80077CDC[];
@@ -79,7 +79,7 @@ void FUN_8012d294(TObj *o)
             }
             break;
         case 2:
-            if (D_8009C93F)
+            if (GVARS.b3f)
                 break;
             switch (o->state) {
             case 0:

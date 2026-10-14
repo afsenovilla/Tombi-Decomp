@@ -1,5 +1,6 @@
 // FUNC 80027810 332 MAIN0
 // MATCHING 80027810 332
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     char p0[0x2c];
@@ -7,7 +8,6 @@ typedef struct {
     Fix16 *f34;
 } S;
 typedef struct { char p[0x14]; int d14; } G;
-extern unsigned char D_8009C939;
 extern Fix16 *D_800A6078[];
 extern G PLAYER;
 extern signed char D_8009D2B0[];
@@ -20,7 +20,7 @@ void func_80027810(S *o)
     Fix16 *c;
     int v;
 
-    if (D_8009C939 != 0) return;
+    if (GVARS.b39 != 0) return;
     o->f34->raw = D_800A6078[0]->raw;
     f = o->f34;
     g = &PLAYER;

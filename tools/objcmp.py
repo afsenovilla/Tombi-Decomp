@@ -27,7 +27,7 @@ def comp(path, flags, inc, d):
         if len(w) == 2 and w[0] == "U":
             m = re.fullmatch(r"D_([0-9A-Fa-f]{8})", w[1])
             if m: defs.append("--defsym=%s=0x%s" % (w[1], m.group(1)))
-            elif w[1] == "PLAYER": defs.append("--defsym=PLAYER=0x800A6038")
+            elif w[1] in ("PLAYER", "GVARS"): defs.append("--defsym=%s=0x%08X" % (w[1], {"PLAYER": 0x800A6038, "GVARS": 0x8009C930}[w[1]]))
             else:
                 import zlib
                 defs.append("--defsym=%s=0x%08x" % (w[1], 0x80300000 + (zlib.crc32(w[1].encode()) & 0xFFFFF) * 4))

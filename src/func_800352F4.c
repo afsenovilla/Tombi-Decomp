@@ -1,9 +1,9 @@
 // FUNC 800352f4 308 MAIN0
 // MATCHING 800352f4 308
+#include "gvars.h"
 #include "player.h"
 extern unsigned char *D_8009C338;
 extern unsigned char D_800A6100;
-extern int D_8009C934;
 void playSFX(int id);
 int abs(int);
 int csqrt(int x);
@@ -26,7 +26,7 @@ void func_800352F4(unsigned char *o)
     if (PLAYER.obj.b9c == 0) PLAYER.obj.wb4 = d - 0x10;
     if (PLAYER.obj.wb4 < 0x28) PLAYER.obj.wb4 = 0x28;
     d = angleToPlayer(o);
-    n = D_8009C934;
+    n = GVARS.i34;
     PLAYER.obj.w7a = d;
     o[5] = 3;
     o[6] = 0;

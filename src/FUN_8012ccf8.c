@@ -1,5 +1,6 @@
 // FUNC 8012ccf8 1436 X000
 // MATCHING 8012ccf8 1436
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -8,8 +9,6 @@ typedef struct { unsigned char b0, b1; } B8012CCF8;
 extern int D_1F8002D0;
 extern int D_1F800190;
 extern int D_1F80018C;
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C942[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern void (*D_801390F8[])(TObj *);
@@ -74,7 +73,7 @@ void FUN_8012ccf8(TObj *o)
         }
         break;
     case 1:
-        if (o->step == 1 && D_8009C942[0]) {
+        if (o->step == 1 && ((unsigned char*)&GVARS.b42)[0]) {
             ObjCullRegister(o);
             break;
         }
@@ -82,7 +81,7 @@ void FUN_8012ccf8(TObj *o)
         if (o->b9e == 0) {
             switch (o->step) {
             case 0:
-                if (o->state != 0 && D_8009C942[0]) {
+                if (o->state != 0 && ((unsigned char*)&GVARS.b42)[0]) {
                     ObjCullRegister(o);
                     break;
                 }
@@ -152,7 +151,7 @@ void FUN_8012ccf8(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            if (D_8009C942[0]) {
+            if (((unsigned char*)&GVARS.b42)[0]) {
                 ObjCullRegister(o);
                 break;
             }
@@ -178,8 +177,8 @@ void FUN_8012ccf8(TObj *o)
             ObjCullRegister(o);
             switch (o->state) {
             case 0:
-                D_8009C93F[0] = 1;
-                D_8009C942[0] = 1;
+                ((unsigned char*)&GVARS.b3f)[0] = 1;
+                ((unsigned char*)&GVARS.b42)[0] = 1;
                 D_800A4553[0] = 3;
                 D_800A4568[0] = 0;
                 D_1F80018C = o->h->raw;

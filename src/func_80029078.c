@@ -1,5 +1,6 @@
 // FUNC 80029078 3132 MAIN0
 // MATCHING 80029078 3132
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct {
     char p0[0x20];
@@ -19,7 +20,6 @@ typedef struct {
 } G;
 extern G PLAYER;
 extern unsigned char D_800A60D8;
-extern unsigned char D_8009C93A, D_8009C93F;
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1f8001fc;
 extern short D_1f8001c8;
@@ -86,8 +86,8 @@ void func_80029078(S *o)
 
     switch (o->b6c) {
     case 0:
-        if (D_8009C93A == 0) break;
-        if (D_8009C93F != 0) {
+        if (GVARS.b3a == 0) break;
+        if (GVARS.b3f != 0) {
             o->b6c = 6;
             break;
         }
@@ -294,7 +294,7 @@ void func_80029078(S *o)
         o->b6f = 10;
         break;
     case 10:
-        if (D_8009C93F != 0) break;
+        if (GVARS.b3f != 0) break;
         if (D_1f8001c8 == 0) {
             if (GAME.selectedPlane <= GAME.area00_fogControl) {
                 o->b6c = 0;

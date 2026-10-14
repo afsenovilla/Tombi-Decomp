@@ -1,5 +1,6 @@
 // FUNC 80047af0 900 MAIN0
 // MATCHING 80047af0 900
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct {
     unsigned char b0; char p1[3]; unsigned char b4, b5, b6;
@@ -13,7 +14,6 @@ extern short *D_800A605C;
 extern unsigned short D_80115320[];
 extern unsigned short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 extern TO PLAYER;
-extern unsigned char D_8009C938, D_8009C942, D_8009C93F;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F800248;
 extern short D_1F80019E;
@@ -28,7 +28,7 @@ static __inline__ void collide(TO *p)
 {
     unsigned char **q;
     unsigned char *e;
-    if (D_8009C938 == 0 && D_8009D2B0 != 3) {
+    if (GVARS.b38 == 0 && D_8009D2B0 != 3) {
         q = D_1F800228;
         for (D_1F80019E = D_1F800248; D_1F80019E != 0;) {
             e = *q;
@@ -68,12 +68,12 @@ void func_80047AF0(void)
             func_80046D58(p);
         }
         collide(p);
-        if (D_8009C942 | D_8009C93F) goto tail;
+        if (GVARS.b42 | GVARS.b3f) goto tail;
         func_80047484(p);
         break;
     case 4: case 6:
         collide(p);
-        if (D_8009C942 | D_8009C93F) goto tail;
+        if (GVARS.b42 | GVARS.b3f) goto tail;
         break;
     }
     if (D_1F8001A4 == 0 && TASK_C->s4c == 1 && D_8009D2B0 != 3 && D_800A4582 + 0xa0 < p->s16) {
@@ -83,7 +83,7 @@ void func_80047AF0(void)
         p->b6 = 0;
     }
 dflt:
-    if (!(D_8009C942 | D_8009C93F) && D_8009C960_h == 0 && GAME.selectedSection == 2)
+    if (!(GVARS.b42 | GVARS.b3f) && D_8009C960_h == 0 && GAME.selectedSection == 2)
         func_80126770(p);
 tail:
     func_80045F00();

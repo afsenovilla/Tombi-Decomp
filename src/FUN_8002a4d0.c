@@ -1,12 +1,11 @@
 // FUNC 8002a4d0 1244 MAIN0
 // MATCHING 8002a4d0 1244
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
 #include "gametask.h"
 
-extern unsigned char D_8009C938;
-extern unsigned char D_8009C93C;
 extern int *D_80079A48[];
 extern short D_1F8000E6;
 extern TObj PLAYER;
@@ -24,7 +23,7 @@ void FUN_8002a4d0(TObj *o)
     int t;
     unsigned char c;
 
-    if (D_8009C938) {
+    if (GVARS.b38) {
         GAME.disableSelectMenu = 0;
         func_80029CB4();
         return;
@@ -88,7 +87,7 @@ void FUN_8002a4d0(TObj *o)
         if (c == 2) {
             GAME.disableSelectMenu = 0;
             o->state = 3;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
         } else if (c == 3) {
             GAME.disableSelectMenu = 0;
