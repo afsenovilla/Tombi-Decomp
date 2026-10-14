@@ -1,5 +1,12 @@
 // FUNC 801244a0 1800 X001
 #include "spad.h"
+/* score 32 (n80): two empty clobbers fixed the r and sabs regs: `asm("" ::: "$5", "$6");` just before the
+   `(ang - r)` range test puts r in a3 (game), and `asm("" ::: "$3");` after the if/else in sabs() puts its result in v0.
+   Left: the SPAD.b1d2 block only (game d=v1, t=a2, w=a1 untied, a->h value=a3; ours d=a2, t=v1, w tied v0, a->h=a1).
+   n80 tried (no gain): clobbers ($2..$7 subsets, with/without "memory") before the arms, after t=, after w= (they
+   reorder/split the block); `register short t asm("$6")` gives d=v1 but adds a `move a2,v0` copy (73); w/d pins ignored
+   or worse; arm rewrites (h temp, h pointer, no w, int w, decl order, int d): all 32 or worse; existing function vars
+   reused as w or t (80+); `// AS gnu` / `// CC gcc-2.8.1` (135+). */
 /* score 52 (n78): ported x010's `{ int by = b->y.p.whole; ... }` compare temp (fixes the +0x4e8 lh swap).
    n78 tried (no gain): r as ax (game ax=a3 too, but short ax adds sll/sra before `ang - r`; int ax 229), r = int
    box-check temp, sabs forms (game needs jump.c NOT to turn the if/else into `r = x; if (x<0) r = -x;`, so the
@@ -30,6 +37,7 @@ static __inline__ short sabs(short x)
 {
     short r;
     if (x < 0) r = -x; else r = x;
+    asm("" ::: "$3");
     return r;
 }
 
@@ -56,6 +64,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
             if (q == 0) r = 0x400;
             else r = q - 0x400;
         }
+        asm("" ::: "$5", "$6");
         if ((unsigned)(((ang - r) & 0xfff) - 0x500) > 0x900) return 1;
     case 0:
         do { c1 = rcos(ang); } while (0);
