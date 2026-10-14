@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X006
 // MATCHING 800f44b0 2488
+#include "gv6.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -21,7 +22,6 @@ typedef struct {
 extern P800F44B0 *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *D_800A611C;
-extern unsigned short D_8009D670;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
@@ -111,7 +111,7 @@ void FUN_800f44b0(TObj *o)
         D_8009C330->b7 = o->animFrame;
         f = o->animFrame & 1;
         o->animFrame = f;
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x10) {
             if (*k & 0x80) o->animFrame = 5;
             else if (*k & 0x20) o->animFrame = 4;
@@ -216,7 +216,7 @@ void FUN_800f44b0(TObj *o)
             D_8009D2B0 = 0;
             o->b9c = 1;
             if (GAME.area00_eventControl & 0x40) {
-                if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4) {
+                if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
                     o->ba7 = 1;
                 }
             }

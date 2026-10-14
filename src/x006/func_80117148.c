@@ -1,5 +1,6 @@
 // FUNC 80117148 800 X006
 // MATCHING 80117148 800
+#include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
@@ -9,7 +10,7 @@ extern SVEC D_1F800060;
 extern int D_1F8002E0[];
 extern int D_1F800168[], D_1F80016C[], D_1F800170[];
 extern void *D_801229A8[];
-extern unsigned char D_8009CF06, D_8009D006, D_8009D2B3;
+extern unsigned char D_8009CF06, D_8009D006;
 extern void *D_8011F2DC, *D_8011F2F0, *D_8011F2CC[], *D_8011F2E0[];
 extern unsigned char PLAYER[];
 extern short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
@@ -46,7 +47,7 @@ void func_80117148(TObj *o)
             loadImageRect(D_8011F2F0, 0x90, 0x1f1, 0x10, 1);
         } else {
             loadImageRect(D_8011F2CC[GAME.displayExpBar], 0x90, 0x1f0, 0x10, 1);
-            loadImageRect(D_8011F2E0[D_8009D2B3], 0x90, 0x1f1, 0x10, 1);
+            loadImageRect(D_8011F2E0[GV2.bb3], 0x90, 0x1f1, 0x10, 1);
         }
         break;
     case 1:

@@ -1,11 +1,11 @@
 // FUNC 8011724c 972 X005
 // MATCHING 8011724c 972
+#include "gv2.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_80117AC8[];
-extern unsigned char D_8009D2C3[];
 extern unsigned char D_8009CEED, D_8009D0DA, D_8009CDDE, D_8009CE0C, D_8009D008;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
@@ -55,7 +55,7 @@ void func_8011724C(TObj *o)
             n->w78 = p->fa;
             n->w7a = p->fc;
             n->d90 = (int)o;
-            if (D_8009D2C3[0] & 0x10) {
+            if (((unsigned char*)&GV2.bc3)[0] & 0x10) {
                 n->subtype += 2;
                 n->y.p.whole -= 0xc;
             }
@@ -80,7 +80,7 @@ void func_8011724C(TObj *o)
         n->w78 = 0;
         n->w7a = 0;
         n->d90 = (int)o;
-        if (D_8009D2C3[0] & 0x10) {
+        if (((unsigned char*)&GV2.bc3)[0] & 0x10) {
             n->subtype += 2;
             n->y.p.whole -= 0xc;
         }
@@ -106,7 +106,7 @@ void func_8011724C(TObj *o)
         n->w7a = 0;
         n->b68 = 0;
         n->d90 = (int)o;
-        if (D_8009D2C3[0] & 0x10) {
+        if (((unsigned char*)&GV2.bc3)[0] & 0x10) {
             n->subtype += 2;
             n->y.p.whole -= 0xc;
         }
