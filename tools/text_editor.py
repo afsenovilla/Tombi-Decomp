@@ -56,6 +56,7 @@ class App:
         self.only_edited = tk.BooleanVar(value=False)
         self.query = tk.StringVar()
         self.link_var = tk.BooleanVar(value=True)
+        self.verb_var = tk.BooleanVar(value=False)
         self.status_text = tr("te.nodisc.status")
         set_icon(root, "text")
         self._build()
@@ -98,6 +99,7 @@ class App:
         of.pack(fill="x")
         ttk.Checkbutton(of, text=tr("te.onlyedited"), variable=self.only_edited, command=self.fill_tree).pack(side="left")
         ttk.Checkbutton(of, text=tr("te.link"), variable=self.link_var, command=self.on_link).pack(side="left", padx=8)
+        ttk.Checkbutton(left, text=tr("te.verbfirst"), variable=self.verb_var, command=self.on_verb).pack(fill="x", padx=8)
         self.langf = ttk.LabelFrame(left, text=tr("te.langs"), padding=(4, 0))
         self.langf.pack(fill="x", padx=4)
         tf = ttk.Frame(left)
@@ -219,6 +221,7 @@ class App:
         for w in self.langf.winfo_children():
             w.destroy()
         self.lang_vars = {}
+        self.verb_var.set(self.proj.verb_first)
         langs = self.proj.languages()
         if not self.proj.langs & set(langs):
             self.proj.langs = {langs[0]}
@@ -374,6 +377,12 @@ class App:
         if getattr(self, "_pv", None):
             self.root.after_cancel(self._pv)
         self._pv = self.root.after(100, self.refresh_preview)
+
+    def on_verb(self):
+        if self.proj:
+            self.proj.verb_first = self.verb_var.get()
+            self.dirty = True
+            self.refresh_preview()
 
     def on_link(self):
         if self.proj:
@@ -606,7 +615,7 @@ class App:
     def generate(self):
         if not self.need_proj():
             return
-        if not self.proj.n_edits():
+        if not self.proj.n_edits() and not self.proj.verb_first:
             messagebox.showinfo(tr("te.nochanges"), tr("te.nodialogues"))
             return
         files, errors = self.proj.encode_edited()

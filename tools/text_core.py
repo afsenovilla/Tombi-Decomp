@@ -18,6 +18,7 @@ from i18n import tr
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py as W
 import title_layout as TL
+import verb_order as VO
 
 LANG_MAIN = "S"          # the PAL Spanish disc uses the *S.WFM files; the other languages are still on the disc
 PROJECT_VERSION = 1
@@ -146,6 +147,7 @@ class Project:
         self.link = True           # editing one entry edits its copies in the other areas
         self.undo_stack = []
         self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
+        self.verb_first = False    # item popup order "Obtienes: Rana" (verb_order.py patch of EXE/MAINn.EXE; saved in the project file)
 
     def languages(self):
         """Language letters present on the disc, in LANG_NAMES order (unknown ones last)."""
@@ -410,7 +412,7 @@ class Project:
     # project file
     def to_json(self):
         return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path), "languages": sorted(self.langs),
-                "link": self.link, "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
+                "link": self.link, "verbFirst": self.verb_first, "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
 
     def load_edits(self, data, replace=True):
         """data: {"edits": {path: {idx: text}}} (project) or {path: {idx: text}} (export). Returns (applied, problems)."""
@@ -419,6 +421,8 @@ class Project:
             self.edits = {}
             if isinstance(data.get("link"), bool):
                 self.link = data["link"]
+            if isinstance(data.get("verbFirst"), bool):
+                self.verb_first = data["verbFirst"]
             if isinstance(data.get("languages"), list):
                 self.langs = {str(l).upper() for l in data["languages"]} & set(self.languages()) or {LANG_MAIN}
         applied, problems = 0, []
@@ -500,6 +504,7 @@ class Project:
                     errors.append("%s: %s" % (path, ex))
         self._title_patches(files, errors)
         self._banner_patches(files, errors)
+        self._verb_patches(files, errors)
         return ({} if errors else files), errors
 
     def _title_patches(self, files, errors):
@@ -535,6 +540,25 @@ class Project:
             except (OSError, KeyError) as ex:
                 errors.append("%s: %s" % (lang, ex))
 
+
+    def _verb_patches(self, files, errors):
+        """Item popup ("Rana Ganada"): with verb_first the executable of every selected language draws the verb box text (dialogue 2 of
+        the MFNT file) before the item name, like "Usado(a) Rana" already does (tools/verb_order.py, same size). Adds the executables."""
+        if not self.verb_first:
+            return
+        for lang in sorted(self.langs):
+            if lang not in TL.LANG_N:
+                continue
+            name = TL.exe_name(lang)
+            try:
+                data = files[name] if name in files else self.src.read_any(name)
+            except (OSError, KeyError):
+                continue                    # no executable of this language on the source
+            new = VO.patch(data)
+            if new is None:
+                errors.append(tr("tc.verbnf", name))
+            elif new != data:
+                files[name] = new
 
     def _banner_patches(self, files, errors):
         """Dialogue 0 of CFNT999 (the banner shown when an event is completed): the engine takes its glyphs and positions from tables of
@@ -643,6 +667,9 @@ def build_report(proj, out_bin, work, disc=None, log=print):
                 if ok:
                     f0, f1 = TL.banner_find(data), TL.banner_find(new.read_any(name))
                     ok = f0 is not None and f0 == f1 and new.read_any(name)[f0[0]:f0[2] + 4 * f0[1]] == data[f0[0]:f0[2] + 4 * f0[1]]
+                    if ok and VO.is_patched(data):
+                        r = slice(VO.FUNC, VO.FUNC + VO.FUNC_LEN)
+                        ok = new.read_any(name)[r] == data[r]
                 if not ok:
                     raise CoreError(tr("tc.verify", name))
                 continue
@@ -695,6 +722,7 @@ def main():
     b = sub.add_parser("build")
     b.add_argument("src"); b.add_argument("project"); b.add_argument("-o", "--out", required=True)
     b.add_argument("--work"); b.add_argument("--disc")
+    b.add_argument("--verb-first", action="store_true", help='item popup order "Obtienes: Rana" (patches EXE/MAINn.EXE, tools/verb_order.py)')
     a = p.parse_args()
     proj = Project(Source(a.src))
     if a.cmd == "export":
@@ -724,6 +752,7 @@ def main():
             ap, pr = proj.import_txt(open(a.project, encoding="utf-8").read())
         else:
             ap, pr = proj.load_edits(json.load(open(a.project, encoding="utf-8")))
+        proj.verb_first = proj.verb_first or a.verb_first
         print("applied %d edits; problems: %s" % (ap, pr))
         work = a.work or os.path.join(os.path.dirname(os.path.abspath(a.out)), "tombi-text-work")
         print("changed:", build_disc(proj, a.out, work, a.disc))

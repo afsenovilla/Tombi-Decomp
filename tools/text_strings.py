@@ -3,6 +3,8 @@ Game-language names (lang.*) are the names of the dialogue languages of the disc
 import i18n
 
 ES = {'te.title': 'Tombi! – editor de textos',
+ 'te.verbfirst': 'Verbo antes del objeto (Obtienes: Rana)',
+ 'tc.verbnf': 'no se encuentra el código del mensaje de objeto en {0}',
  'te.opendisc': 'Abrir disco…',
  'te.openfolder': 'Abrir carpeta…',
  'te.saveproj': 'Guardar proyecto',
@@ -137,6 +139,8 @@ ES = {'te.title': 'Tombi! – editor de textos',
  'wf.noglyph': 'el carácter {0} (U+{1:04X}) no tiene glifo en este archivo ni en ningún otro del disco'}
 
 EN = {'te.title': 'Tombi! – text editor',
+ 'te.verbfirst': 'Verb before the item (You get: Frog)',
+ 'tc.verbnf': 'the item message code was not found in {0}',
  'te.opendisc': 'Open disc…',
  'te.openfolder': 'Open folder…',
  'te.saveproj': 'Save project',
@@ -272,6 +276,8 @@ EN = {'te.title': 'Tombi! – text editor',
  'wf.noglyph': 'the character {0} (U+{1:04X}) has no glyph in this file nor in any other file of the disc'}
 
 FR = {'te.title': 'Tombi! – éditeur de textes',
+ 'te.verbfirst': "Verbe avant l'objet (Obtenu : Grenouille)",
+ 'tc.verbnf': "le code du message d'objet est introuvable dans {0}",
  'te.opendisc': 'Ouvrir un disque…',
  'te.openfolder': 'Ouvrir un dossier…',
  'te.saveproj': 'Enregistrer le projet',
@@ -295,6 +301,8 @@ FR = {'te.title': 'Tombi! – éditeur de textes',
  'te.done': 'Terminé'}
 
 DE = {'te.title': 'Tombi! – Texteditor',
+ 'te.verbfirst': 'Verb vor dem Gegenstand (Erhalten: Frosch)',
+ 'tc.verbnf': 'der Code der Gegenstandsmeldung wurde in {0} nicht gefunden',
  'te.opendisc': 'Disc öffnen…',
  'te.openfolder': 'Ordner öffnen…',
  'te.saveproj': 'Projekt speichern',
@@ -318,6 +326,8 @@ DE = {'te.title': 'Tombi! – Texteditor',
  'te.done': 'Fertig'}
 
 IT = {'te.title': 'Tombi! – editor di testi',
+ 'te.verbfirst': "Verbo prima dell'oggetto (Ottieni: Rana)",
+ 'tc.verbnf': 'il codice del messaggio oggetto non è stato trovato in {0}',
  'te.opendisc': 'Apri disco…',
  'te.openfolder': 'Apri cartella…',
  'te.saveproj': 'Salva progetto',
@@ -341,6 +351,8 @@ IT = {'te.title': 'Tombi! – editor di testi',
  'te.done': 'Fatto'}
 
 PT = {'te.title': 'Tombi! – editor de textos',
+ 'te.verbfirst': 'Verbo antes do objeto (Obténs: Rã)',
+ 'tc.verbnf': 'o código da mensagem de objeto não foi encontrado em {0}',
  'te.opendisc': 'Abrir disco…',
  'te.openfolder': 'Abrir pasta…',
  'te.saveproj': 'Guardar projeto',

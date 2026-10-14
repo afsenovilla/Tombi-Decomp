@@ -56,5 +56,28 @@ class BuildRoundTrip(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
 
+@unittest.skipUnless(os.path.isfile(DISC), "needs game/disc/Tombi.bin")
+class VerbFirst(unittest.TestCase):
+    def test_patch_all_executables(self):
+        import verb_order as V
+        src = C.Source(DISC)
+        proj = C.Project(src)
+        proj.verb_first = True
+        proj.langs = set(proj.languages())
+        files, errors = proj.encode_edited()
+        self.assertEqual(errors, [])
+        self.assertEqual(len(files), 9)
+        for name, data in files.items():
+            old = src.read_any(name)
+            self.assertEqual(len(data), len(old))
+            self.assertTrue(V.is_patched(data) and not V.is_patched(old), name)
+            self.assertEqual(V.patch(data), data)                      # idempotent
+            self.assertEqual(sum(x != y for x, y in zip(old, data)), 28, name)
+            self.assertTrue(all(FUNC_LO <= i < FUNC_HI for i, (x, y) in enumerate(zip(old, data)) if x != y))
+
+
+FUNC_LO, FUNC_HI = 0x3DE20, 0x3DE20 + 0x560
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -83,6 +83,17 @@ verification compares the banner tables only (mkdisc `--relayout` rewrites the f
 (English, patched ISO + EXE, `WIN!`: four tiles `W I N !` centred, same animation) and by `tools/test_text.py`.
 Note: the emulator boots `game/MAIN0.EXE` and the CFNT files from the disc image given, so test with `Machine(exe=patched, disc=iso)`.
 
+**Item popup order ("Rana Ganada" -> "Obtienes: Rana"; `tools/verb_order.py`, editor checkbox "Verbo antes del objeto").** The popup is ONE
+box made by `printInfoMessage(a = item, b = kind)` (MAIN0 0x8004D620, file offset 0x3DE20 in every `EXE/MAINn.EXE`): width = table
+`D_8007D454[a] + 0x60/0x58/0x78` (b = 0 / 1 / 4; the `{BOX w h}` of the MFNT dialogues is ignored), glyphs from x = 8 laid out by `drawMessageGlyph`
+(advance only, no per-box x). The item name is dialogue `D_8007DE38[area][a] + base` (e.g. MFNT001S #4 "Rana"); the verb is drawn by
+`drawInfoMessageText(o, n)`: b = 1 / 4 (used / equipped) draw dialogue 0 / 1 BEFORE the name (`callit`), b = 0 / 3 (obtained) draw dialogue 2 AFTER the
+last name glyph. Patch (in place, 28 bytes, MAIN0 addresses; MAIN5, the Spanish one, is linked 0x18 bytes earlier from 0x8004D824 on, so
+`verb_order` finds the code by instruction pattern): `bne s2,v0,0x8004D9C4` @0x8004D984 -> `bne ...,0x8004DA10`; the end-of-text test @0x8004DA08..0x8004DA28
+becomes `j 0x8004DB24` (return) + `li v0,3 / beq s2,v0,L / move a0,s0 / bnez s2,0x8004D9C4 / nop / L: j 0x8004D9BC / li a1,2` (the `jal drawInfoMessageText` of
+`callit`). Result: for b = 0 / 3 the verb text (dialogue 2) now precedes the name; with Spanish text " Ganada" -> "Obtienes: " (edit dialogue 2 of MFNTnnnS in every area; width
+tables are NOT touched, keep verb + name close to the original width). Emulator: `printInfoMessage(4, 0)` shows "Furious Tornado Acquired!" before, "Acquired!Furious Tornado" after.
+
 ## GAM (done)
 `"GAM\0"` header followed by an LZ77 variant (greedy matcher, min length 5, see
 `notes/assets_tombatools.md` "GAM: byte-exact repack"). The game decompresses it with `lzDecompress` for load records of type
