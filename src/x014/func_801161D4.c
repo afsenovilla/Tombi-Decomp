@@ -9,8 +9,8 @@
 
 extern TObj PLAYER;
 extern unsigned char D_800A60D6;
-extern void FUN_80027c74(TObj *);
-extern void func_8002795C(TObj *);
+extern void cameraFollowPlayerX(TObj *);
+extern void cameraFollowPlayerY(TObj *);
 extern void syncObjectTargetY(TObj *);
 extern void FUN_80028be0(TObj *);
 extern void stepScrollApproachX(TObj *);
@@ -34,8 +34,8 @@ void func_801161D4(TObj *o)
         case 9:
         case 10:
         case 11:
-            FUN_80027c74(o);
-            func_8002795C(o);
+            cameraFollowPlayerX(o);
+            cameraFollowPlayerY(o);
             (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
             (*(unsigned char*)&o->d3c) = 0;
             break;
@@ -46,8 +46,8 @@ void func_801161D4(TObj *o)
                 (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
                 (*(unsigned char*)&o->d3c) = 0;
             }
-            if ((*(unsigned char*)&o->d3c) == 0) FUN_80027c74(o);
-            func_8002795C(o);
+            if ((*(unsigned char*)&o->d3c) == 0) cameraFollowPlayerX(o);
+            cameraFollowPlayerY(o);
             (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
             break;
         case 3:
@@ -68,9 +68,9 @@ void func_801161D4(TObj *o)
             }
             if ((*(unsigned char*)&o->d3c) == 0) {
             f0:
-                FUN_80027c74(o);
+                cameraFollowPlayerX(o);
             }
-            if ((*(unsigned char*)((char*)&o->d3c + 1)) == 0) func_8002795C(o);
+            if ((*(unsigned char*)((char*)&o->d3c + 1)) == 0) cameraFollowPlayerY(o);
             break;
         }
         syncObjectTargetY(o);

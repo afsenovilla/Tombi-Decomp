@@ -11,8 +11,8 @@ typedef void (*Fn)(TObj *);
 extern Fn D_80079A98[];
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
-extern void FUN_80027c74(TObj *);
-extern void func_8002795C(TObj *);
+extern void cameraFollowPlayerX(TObj *);
+extern void cameraFollowPlayerY(TObj *);
 extern void syncObjectTargetY(TObj *);
 extern void func_80029078(TObj *);
 extern int stepPlayerXToward(int);
@@ -30,8 +30,8 @@ void func_80115FB4(TObj *o)
         break;
     case 1:
         if (GVARS.b3a != 0) o->step++;
-        FUN_80027c74(o);
-        func_8002795C(o);
+        cameraFollowPlayerX(o);
+        cameraFollowPlayerY(o);
         syncObjectTargetY(o);
         func_80029078(o);
         GAME.selectedSpawnPoint = 0;

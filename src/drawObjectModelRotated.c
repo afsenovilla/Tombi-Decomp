@@ -14,7 +14,7 @@ extern MATRIX *MulMatrix0(MATRIX *, MATRIX *, MATRIX *);
 extern VECTOR *ApplyRotMatrix(SVECTOR *, long *);
 extern void SetRotMatrix(MATRIX *);
 extern void SetTransMatrix(MATRIX *);
-extern void FUN_80023b04(int, int, TObj *, int);
+extern void drawModel(int, int, TObj *, int);
 
 void drawObjectModelRotated(TObj *o)
 {
@@ -42,5 +42,5 @@ void drawObjectModelRotated(TObj *o)
     DAT_1f800000.t[2] += DAT_1f8000c0.t[2];
     SetRotMatrix(&DAT_1f800000);
     SetTransMatrix(&DAT_1f800000);
-    FUN_80023b04(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)DAT_1f8001e0)->a[(signed char)o->b0f], o, o->ba4);
+    drawModel(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)DAT_1f8001e0)->a[(signed char)o->b0f], o, o->ba4);
 }

@@ -8,7 +8,7 @@ extern void *D_80134D50[];
 extern int D_800A4570;
 extern int D_800A4574;
 extern void func_8011D804(TObj *);
-extern void FUN_80059d44(short);
+extern void drawScreenFade(short);
 extern void playSFX(int);
 extern void ObjListPush_1F80022C(TObj *);
 extern void freeObjectLayer7(TObj *);
@@ -80,7 +80,7 @@ void func_8011D544(TObj *o)
                 }
                 break;
             case 1:
-                FUN_80059d44(o->animFrame);
+                drawScreenFade(o->animFrame);
                 o->animFrame = (o->animFrame - 0x10) & 0xff;
                 if (o->animFrame == 0) {
                     playSFX(0x82);

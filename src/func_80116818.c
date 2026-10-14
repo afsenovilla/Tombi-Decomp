@@ -11,7 +11,7 @@ extern G6038 PLAYER;
 extern unsigned char D_8009C966, D_8009C933;
 extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
-extern void FUN_80029cb4(TObj *);
+extern void updateCameraFollow(TObj *);
 extern void FUN_80029078(TObj *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -53,7 +53,7 @@ void func_80116818(TObj *o)
 
     switch (o->state) {
     case 0:
-        FUN_80029cb4(o);
+        updateCameraFollow(o);
         if (GAME.selectedSection != 0) break;
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
         if (GVARS.b38 != 0) break;
@@ -79,7 +79,7 @@ void func_80116818(TObj *o)
         GCD.bd095 = 1;
         break;
     case 1:
-        FUN_80029cb4(o);
+        updateCameraFollow(o);
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
         if (GVARS.b38 != 0) break;
         if ((GAME.area00_eventControl & 1) && GVARS.b30 == 3) {

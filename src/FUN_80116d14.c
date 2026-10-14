@@ -20,14 +20,14 @@ extern S2 *DAT_800a6078;
 extern char DAT_8001d6a4[];
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
-extern void FUN_80027c74(TObj *);
+extern void cameraFollowPlayerX(TObj *);
 extern void syncObjectTargetY(TObj *);
 extern void FUN_80029078(TObj *);
 extern void setEventComplete(int, int);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(TObj *, int, int);
 extern void markSectionVisited(void);
-extern void FUN_80029cb4(TObj *);
+extern void updateCameraFollow(TObj *);
 extern void FUN_8002a4d0(TObj *);
 extern void FUN_8001f110(int);
 extern void FUN_8001f4bc(void);
@@ -67,7 +67,7 @@ void FUN_80116d14(TObj *o)
         break;
     case 2:
         if (DAT_8009c93a != 0) o->step++;
-        FUN_80027c74(o);
+        cameraFollowPlayerX(o);
         *(unsigned char *)&o->d3c = 0;
         syncObjectTargetY(o);
         FUN_80029078(o);
@@ -146,7 +146,7 @@ void FUN_80116d14(TObj *o)
         }
         break;
     case 6:
-        FUN_80029cb4(o);
+        updateCameraFollow(o);
         if (DAT_1f80016e < -0x2ed) {
             DAT_8009c982[0] = 2;
             o->step++;
@@ -158,7 +158,7 @@ void FUN_80116d14(TObj *o)
         o->step--;
         break;
     case 7:
-        FUN_80029cb4(o);
+        updateCameraFollow(o);
         if (DAT_1f80016e < -0x559 && DAT_1f800172 == 0x1c2 && DAT_1f80016a < 0x88c) {
             if (!tryStartItemInteraction(o, 2, 1)) break;
             o->step = 8;

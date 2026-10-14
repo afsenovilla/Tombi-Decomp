@@ -2,9 +2,9 @@
 // MATCHING 8005042c 280
 extern void FUN_80063e0c(void *);
 extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(void), drawCategory3Objects(void);
-extern void drawCategory4Objects(void), drawCategory5Objects(void), FUN_80057d04(void), drawCategory8Objects(void);
+extern void drawCategory4Objects(void), drawCategory5Objects(void), drawAreaModelList(void), drawCategory8Objects(void);
 extern void drawCategory7Objects(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudIfShown(void);
-extern void FUN_80059d44(int);
+extern void drawScreenFade(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
 extern unsigned char DAT_8009c975, DAT_8009c976;
@@ -20,7 +20,7 @@ void drawGameplayScene(void)
     drawCategory3Objects();
     drawCategory4Objects();
     drawCategory5Objects();
-    FUN_80057d04();
+    drawAreaModelList();
     drawCategory8Objects();
     drawCategory7Objects();
     if (DAT_1f8001c6 == 1)
@@ -41,7 +41,7 @@ void drawGameplayScene(void)
     default:
         goto end;
     }
-    FUN_80059d44(u);
+    drawScreenFade(u);
 end:
     if (DAT_8009c960 == 6)
         FUN_8011bc34();

@@ -31,7 +31,7 @@ extern unsigned char D_80077F3C[];
 extern E8 FILE_LINKS[];
 extern void CdMix(void *);
 extern void movieInitDecodeEnv(M *, int, int, int, int);
-extern void FUN_8001db38(E8 *);
+extern void startMovieStream(E8 *);
 extern int MovieDecodeFrame(M *);
 extern void DecDCTin(int *, int);
 extern void DecDCTout(int *, int);
@@ -59,7 +59,7 @@ void moviePlayerTask(void)
         switch (TASK_C->w48) {
         case 0:
             movieInitDecodeEnv(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
-            FUN_8001db38(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[SPAD.b1cd]]]);
+            startMovieStream(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[SPAD.b1cd]]]);
             TASK_C->w48++;
             while (MovieDecodeFrame(&D_8009BCA8) == -1)
                 ;

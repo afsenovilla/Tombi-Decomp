@@ -56,6 +56,27 @@ One line per name: `address name (old file) - justification`.
 - `80054f54 drawCategory2Objects` (was FUN_80054f54) - category 2 list (1F80021C): drawObject, render kind 0xD through the player-type renderer
 - `80055174 drawCategory3Objects` (was FUN_80055174) - category 3 list (1F800220): per render kind sprite/model renderers, message boxes
 - `80057edc drawCategory7Objects` (was FUN_80057edc) - category 7 list (1F80022C): render kind 0..4 (kind 3 by player type, kind 4 area 4/12 only)
+- `8001db38 startMovieStream` (was FUN_8001db38) - moviePlayerTask helper: DecDCToutCallback, CdMix, StSetRing(0x20), StSetStream, then CdControl(CdlSetloc) and CdRead2(0x1C0) until both succeed
+- `80059d44 drawScreenFade` (was FUN_80059d44) - drawGameplayScene fade (mode D_8009C975): full-screen 0x140x0x100 semi-transparent tile of level a plus its draw modes
+- `80057d04 drawAreaModelList` (was FUN_80057d04) - draws every model pointer of the area model list D_800B0D98 (count at +3, filled per area by FUN_8002af10) with drawModelUnlit (area 9 section 6: FUN_80120280)
+- `8002216c modelDrawFT3` (was func_8002216C) - model primitive group: rtpt/nclip/avsz3 of each face into POLY_FT3 (tag length 7) linked into the OT
+- `8002235c modelDrawFT4` (was func_8002235C) - same for POLY_FT4 (tag length 9, ft4 layout, avsz4)
+- `80022630 modelDrawGT3` (was func_80022630) - same for POLY_GT3 (tag length 9, gt3 layout)
+- `80022838 modelDrawGT4` (was func_80022838) - same for POLY_GT4 (tag length 0xC)
+- `80022abc modelDrawF3Lit` (was func_80022ABC) - POLY_F3 (length 4) with normal-colour lighting (nccs) of the face colour
+- `80022c80 modelDrawF4Lit` (was func_80022C80) - POLY_F4 (length 5) with nccs lighting
+- `80022ea8 modelDrawG3Lit` (was func_80022EA8) - POLY_G3 (length 6) with ncct lighting of the three vertex colours
+- `80023084 modelDrawG4Lit` (was func_80023084) - POLY_G4 (length 8) with nccs/ncct lighting
+- `800232e4 modelDrawF3` (was func_800232E4) - POLY_F3 (length 4) without lighting
+- `8002348c modelDrawF4` (was func_8002348C) - POLY_F4 (length 5) without lighting
+- `80023698 modelDrawG3` (was func_80023698) - POLY_G3 (length 6) without lighting
+- `80023860 modelDrawG4` (was func_80023860) - POLY_G4 (length 8) without lighting
+- `80023b04 drawModel` (was func_80023B04) - draws a model by running the primitive groups above in order (lit or unlit by the last argument); used by the drawObjectModel* renderers
+- `800242b8 drawModelVtx` (was func_800242B8) - drawModel variant taking a separate vertex block (fourth argument, +0xA8), used by drawObjectModelRotatedVtx/OwnMatrixVtx
+- `80024a70 drawModelUnlit` (was func_80024A70) - drawModel with the unlit groups only; used by drawAreaModelList
+- `80027c74 cameraFollowPlayerX` (was FUN_80027c74) - camera horizontal follow: target = player +-0x10 by facing, speed ramps to 4 px/frame, clamped to the section bounds +0x2C/+0x2E (flags +0x44 bits 1/2)
+- `8002795c cameraFollowPlayerY` (was func_8002795C) - camera vertical follow of the player with dead zone and ramp, clamped to +0x32 (flag +0x44 bit 8)
+- `80029cb4 updateCameraFollow` (was func_80029CB4) - camera tick: by camera mode D_800A60D6 calls cameraFollowPlayerX/Y, then the scroll/angle steps and Clamp
 
 # X000 function names (shared overlay code)
 
@@ -169,6 +190,8 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800ee88c playerStickToGround` (was FUN_800ee88c) - when not airborne (+0xAD == 0) pushes y down 3/5 or 8/12 px (by substep and speed) to follow the ground
 - `800ee9cc playerMoveByAngleSpeed` (was FUN_800ee9cc) - velocity from angle +0xB6 and speed +0xB2, adds it to the position and applies ObjApplyVelocity
 - `800f86e8 playerStepVerticalJump` (was func_800F86E8) (uncertain) - player steps 0x16/0x49: straight-up jump (velY -0x340, -0x580 for 0x49) with anim 0x1F, lands or bites (step 0xE)
+- `8010ca18 playerStepClimbObject` (was FUN_8010ca18) - player steps 0x23/0x2F: attached to the object D_8009F0EC (anim 80011148); Up/Down climb (anims 0x26/0x27), Left/Right swaps sides (anim 0x38), jump button lets go
+- `80108ad0 playerStepWalkIntoDepth` (was func_80108AD0) - player step 0x31: anim 0x2C while the depth coordinate moves 2 per frame for 0xB4 frames (area/section specific timings), e.g. walking through a passage into the background
 
 # Area overlay function names (X001..X019)
 

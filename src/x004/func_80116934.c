@@ -16,7 +16,7 @@ typedef struct O {
 } O;
 
 extern short D_1F8001C8;
-extern void func_80029CB4(O *);
+extern void updateCameraFollow(O *);
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int FUN_80028a80(O *);
 extern int func_80116764(O *);
@@ -25,7 +25,7 @@ extern void FUN_80020828(void);
 void func_80116934(O *o)
 {
     if (GVARS.b38) {
-        func_80029CB4(o);
+        updateCameraFollow(o);
         return;
     }
     switch (o->state) {

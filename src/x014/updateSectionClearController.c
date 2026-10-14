@@ -18,7 +18,7 @@ extern unsigned short D_1F8000F2x[];
 extern void D_8001D6A4(void);
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
-extern void FUN_80027c74(TObj *);
+extern void cameraFollowPlayerX(TObj *);
 extern void syncObjectTargetY(TObj *);
 extern void stepScrollApproachX(TObj *);
 extern void setEventComplete(int, int);
@@ -51,7 +51,7 @@ void updateSectionClearController(TObj *o)
     }
     case 1:
         if (GVARS.b3a != 0) o->step++;
-        FUN_80027c74(o);
+        cameraFollowPlayerX(o);
         syncObjectTargetY(o);
         stepScrollApproachX(o);
         break;

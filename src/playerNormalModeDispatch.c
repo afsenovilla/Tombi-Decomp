@@ -45,7 +45,7 @@ extern void FUN_80121b58(TObj *);
 extern void playerStepDepthShift(TObj *);
 extern void FUN_80121790(TObj *);
 extern void FUN_80122410(TObj *);
-extern void FUN_8010ca18(TObj *);
+extern void playerStepClimbObject(TObj *);
 extern void FUN_8011d7e0(TObj *);
 extern void FUN_8011e688(TObj *);
 extern void FUN_8011de64(TObj *);
@@ -57,7 +57,7 @@ extern void FUN_80106db0(TObj *);
 extern void playerCheckGroundAndFall(TObj *);
 extern void playerStep2EByArea(TObj *);
 extern void FUN_800ffec4(TObj *);
-extern void FUN_80108ad0(TObj *);
+extern void playerStepWalkIntoDepth(TObj *);
 extern void playerStepRopeSwing(TObj *);
 extern void FUN_8011e358(TObj *);
 extern void FUN_8011e6b0(TObj *);
@@ -345,13 +345,13 @@ void playerNormalModeDispatch(TObj *o, int p2)
         break;
     case 0x23:
     case 0x2f:
-        FUN_8010ca18(o);
+        playerStepClimbObject(o);
         break;
     case 0x30:
         FUN_800ffec4(o);
         break;
     case 0x31:
-        FUN_80108ad0(o);
+        playerStepWalkIntoDepth(o);
         break;
     case 0x32:
         playerStepRopeSwing(o);

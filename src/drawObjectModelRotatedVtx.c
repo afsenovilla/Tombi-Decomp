@@ -16,7 +16,7 @@ extern void FUN_8006395c(MATRIX *, MATRIX *, MATRIX *);
 extern void FUN_80063bcc(SVECTOR *, int *);
 extern void FUN_80063ddc(MATRIX *);
 extern void FUN_80063e6c(MATRIX *);
-extern void FUN_800242b8(int, int *, O *, int, int);
+extern void drawModelVtx(int, int *, O *, int, int);
 
 void drawObjectModelRotatedVtx(O *o)
 {
@@ -44,5 +44,5 @@ void drawObjectModelRotatedVtx(O *o)
     D_1f800000.t[2] += D_1f8000c0.t[2];
     FUN_80063ddc(&D_1f800000);
     FUN_80063e6c(&D_1f800000);
-    FUN_800242b8(o->aa0, &D_1f8001e0[o->f + 4], o, o->aa8, o->ba4);
+    drawModelVtx(o->aa0, &D_1f8001e0[o->f + 4], o, o->aa8, o->ba4);
 }

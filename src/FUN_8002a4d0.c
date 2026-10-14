@@ -9,7 +9,7 @@
 extern int *D_80079A48[];
 extern short D_1F8000E6;
 extern TObj PLAYER;
-extern void func_80029CB4(void);
+extern void updateCameraFollow(void);
 extern int func_800271B8(TObj *);
 extern void FUN_8001f110(int);
 
@@ -25,7 +25,7 @@ void FUN_8002a4d0(TObj *o)
 
     if (GVARS.b38) {
         GAME.disableSelectMenu = 0;
-        func_80029CB4();
+        updateCameraFollow();
         return;
     }
     switch (o->state) {

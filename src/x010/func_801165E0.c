@@ -20,8 +20,8 @@ extern FP *D_800A6078;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
-extern void FUN_80027c74(O *);
-extern void func_8002795C(O *);
+extern void cameraFollowPlayerX(O *);
+extern void cameraFollowPlayerY(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern void func_80027810(O *);
@@ -47,8 +47,8 @@ void func_801165E0(O *o)
         break;
     case 1:
         if (GVARS.b3a != 0) o->step++;
-        FUN_80027c74(o);
-        func_8002795C(o);
+        cameraFollowPlayerX(o);
+        cameraFollowPlayerY(o);
         syncObjectTargetY(o);
         func_80029078(o);
         break;

@@ -25,7 +25,7 @@ extern Fn D_80079A98[];
 extern char D_8001D6A4[];
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
-extern void FUN_80027c74(O *);
+extern void cameraFollowPlayerX(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
@@ -35,7 +35,7 @@ extern void keyOffActiveSfxVoices(void);
 extern void stopBgm(int);
 extern void SoundStopAll(void);
 extern void ThreadCreate(int, char *);
-extern void func_80029CB4(O *);
+extern void updateCameraFollow(O *);
 
 #define XU (*(unsigned short *)&(*(short*)((char*)&SPAD.i168 + 2)))
 #define ZU (*(unsigned short *)&(*(short*)((char*)&SPAD.i16c + 2)))
@@ -53,7 +53,7 @@ void func_80117494(O *o)
         break;
     case 1:
         if (GVARS.b3a != 0) o->step++;
-        FUN_80027c74(o);
+        cameraFollowPlayerX(o);
         syncObjectTargetY(o);
         func_80029078(o);
         break;
@@ -219,7 +219,7 @@ void func_80117494(O *o)
             PLAYER.state = 0;
             o->step++;
         }
-        func_80029CB4(o);
+        updateCameraFollow(o);
         break;
     case 7:
         if (PLAYER.yw >= -0x787) {
@@ -228,7 +228,7 @@ void func_80117494(O *o)
             GVARS.b3f = 0;
             o->step = 2;
         }
-        func_80029CB4(o);
+        updateCameraFollow(o);
         break;
     }
 }

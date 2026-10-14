@@ -55,7 +55,7 @@ extern short D_1F8000F2x[];
 #define D_1F8000F2 D_1F8000F2x[0]
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
-extern void FUN_80027c74(O *);
+extern void cameraFollowPlayerX(O *);
 extern void syncObjectTargetY(O *);
 extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
@@ -127,7 +127,7 @@ void func_80116D3C(O *o)
         break;
     case 1:
         if (GVARS.b3a != 0) o->step++;
-        FUN_80027c74(o);
+        cameraFollowPlayerX(o);
         syncObjectTargetY(o);
         func_80029078(o);
         break;

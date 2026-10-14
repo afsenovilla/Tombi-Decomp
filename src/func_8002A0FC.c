@@ -14,8 +14,8 @@ typedef struct { short v; } SV;
 extern SV D_1F8000E6;
 extern short D_1F8000E6s;
 extern unsigned char D_8009C966;
-extern void FUN_80027c74(S *o);
-extern void func_8002795C(S *o);
+extern void cameraFollowPlayerX(S *o);
+extern void cameraFollowPlayerY(S *o);
 
 void func_8002A0FC(S *o)
 {
@@ -33,8 +33,8 @@ void func_8002A0FC(S *o)
             if (v > 0) D_1F8000E6s = 0;
         }
     }
-    FUN_80027c74(o);
-    func_8002795C(o);
+    cameraFollowPlayerX(o);
+    cameraFollowPlayerY(o);
     if ((unsigned short)(o->p34[1] - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x8c) < 0x118 || (o->f44 & 3)) {
         if ((unsigned short)((*(unsigned short*)((char*)&SPAD.if0 + 2)) - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + 0xb4) < 0x168 || (o->f44 & 0xc)) {
             o->b3 = 1;

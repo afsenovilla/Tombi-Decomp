@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
 extern void ObjFree(TObj *);
-extern void FUN_80059d44(int);
+extern void drawScreenFade(int);
 
 void func_801175A0(TObj *o)
 {
@@ -31,11 +31,11 @@ void func_801175A0(TObj *o)
             if (GAME.fadeScreenControl != 0) break;
             GVARS.b3c = 2;
             o->animFrame = 0x60;
-            FUN_80059d44(0x60);
+            drawScreenFade(0x60);
             o->step++;
             break;
         case 1:
-            FUN_80059d44((short)o->animFrame);
+            drawScreenFade((short)o->animFrame);
             if (GAME.fadeScreenControl == 3) o->step--;
             break;
         case 2:

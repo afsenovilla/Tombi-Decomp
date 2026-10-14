@@ -21,7 +21,7 @@ extern void FUN_80063bcc(SVECTOR *, long *);
 extern void FUN_80063cac(MATRIX *, VECTOR *);
 extern void FUN_80063ddc(MATRIX *);
 extern void FUN_80063e6c(MATRIX *);
-extern void FUN_80023b04(int, char *, TObj *, int);
+extern void drawModel(int, char *, TObj *, int);
 
 void drawObjectModelRotScaled(TObj *o)
 {
@@ -55,5 +55,5 @@ void drawObjectModelRotScaled(TObj *o)
     FUN_80063cac(&DAT_1f800000, &DAT_1f800040);
     FUN_80063ddc(&DAT_1f800000);
     FUN_80063e6c(&DAT_1f800000);
-    FUN_80023b04(o->da0, DAT_1f8001e0 + ((signed char)o->b0f * 4 + 0x10), o, o->ba4);
+    drawModel(o->da0, DAT_1f8001e0 + ((signed char)o->b0f * 4 + 0x10), o, o->ba4);
 }

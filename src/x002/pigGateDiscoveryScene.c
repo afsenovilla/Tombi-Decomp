@@ -28,7 +28,7 @@ extern int MulCos(short, short);
 extern int MulNegSinScaled(short, short);
 extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
-extern void FUN_80059d44(short);
+extern void drawScreenFade(short);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
 extern int AnimAdvance(void *);
@@ -117,7 +117,7 @@ void pigGateDiscoveryScene(Ctl *o)
     case 6:
         RING(o);
         o->w08 = (o->w08 + 8) & 0xff;
-        FUN_80059d44(MulCos(o->w08, 0x40) + 0x40);
+        drawScreenFade(MulCos(o->w08, 0x40) + 0x40);
         if (--o->w0a <= 0) {
             o->w08 = 0x80;
             o->state++;
@@ -126,7 +126,7 @@ void pigGateDiscoveryScene(Ctl *o)
     case 7:
         RING(o);
         o->w08 -= 0x10;
-        FUN_80059d44(o->w08);
+        drawScreenFade(o->w08);
         if (o->w08 <= 0) {
             o->w08 = 0x78;
             func_80116928(d, 1, 0);
@@ -169,13 +169,13 @@ void pigGateDiscoveryScene(Ctl *o)
         }
         break;
     case 12:
-        FUN_80059d44(o->w08);
+        drawScreenFade(o->w08);
         GCD.bcfea = 1;
         o->state++;
         break;
     case 13:
         o->w08 -= 0x10;
-        FUN_80059d44(o->w08);
+        drawScreenFade(o->w08);
         if (o->w08 <= 0) {
             o->w08 = 0x78;
             o->state++;
