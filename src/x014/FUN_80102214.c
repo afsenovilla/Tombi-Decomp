@@ -1,5 +1,6 @@
 // FUNC 80102214 2036 X014
 // MATCHING 80102214 2036
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -14,7 +15,7 @@ extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009C93E, D_8009C93F, D_8009C938, D_8009F7F0;
 extern unsigned short D_8009D610;
 extern unsigned short D_8007A034, D_8007A036;
-extern unsigned short D_800A6040, D_800A60FC;
+extern unsigned short D_800A60FC;
 extern signed char D_8009D2B0;
 extern void *memcpy(void *, void *, int);
 extern void FUN_80025d90(void);
@@ -96,13 +97,13 @@ void FUN_80102214(TObj *o)
     case 1:
         U8(o, 0xc1) = 1;
         o->ba7 = 1;
-        D_800A6040 = D_8007A034;
+        (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
         D_800A60FC = D_8007A036;
         break;
     case 2:
         U8(o, 0xc1) = 1;
         o->ba7 = 1;
-        D_800A6040 = D_8007A034;
+        (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
         D_800A60FC = D_8007A036;
         break;
     }

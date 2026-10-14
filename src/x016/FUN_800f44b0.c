@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X016
 // MATCHING 800f44b0 2488
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -25,7 +26,6 @@ extern unsigned short D_8009D670;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
-extern char *D_800A605C;
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char D_801152E8[];
 extern void FUN_8001fe94(TObj *, int);
@@ -147,13 +147,13 @@ void FUN_800f44b0(TObj *o)
         D_8009C330->w2a = -1;
         switch (o->animFrame) {
         case 0: case 1: case 2: case 3:
-            D_800A605C = D_80010E80;
+            (*(char **)&PLAYER.obj.anim) = D_80010E80;
             break;
         case 4: case 5:
-            D_800A605C = D_80010EA0;
+            (*(char **)&PLAYER.obj.anim) = D_80010EA0;
             break;
         case 6: case 7:
-            D_800A605C = D_80010EC0;
+            (*(char **)&PLAYER.obj.anim) = D_80010EC0;
             break;
         }
         FUN_8001fe94(o, 0);

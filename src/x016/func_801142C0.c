@@ -1,5 +1,6 @@
 // FUNC 801142c0 924 X016
 // MATCHING 801142c0 924
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -7,9 +8,6 @@ typedef struct { short s[6]; } P6;
 extern int D_8009C960_w;
 extern unsigned char D_8009CDB1;
 extern unsigned char *D_8009C330;
-extern unsigned char D_800A603C[];
-extern unsigned char D_800A60A1;
-extern short D_800A6066, D_800A60B4;
 extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
@@ -48,18 +46,18 @@ void func_801142C0(TObj *o)
             case 4: o->d90 = showMessageBoxDirectTimed(2, 2, &pos, 0x78); break;
             }
         }
-        D_800A603C[0] = 6;
-        D_800A603C[1] = 5;
-        D_800A603C[2] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 6;
+        ((unsigned char*)&PLAYER.obj.b04)[1] = 5;
+        ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
         D_8009C330[9] = 10;
         if (D_8009C960_w == 0x10002) {
-            D_800A6066 = 1;
-            D_800A60B4 = 0xc0;
+            (*(short*)&PLAYER.obj.animFrame) = 1;
+            PLAYER.obj.velX = 0xc0;
         } else {
-            D_800A6066 = 0;
-            D_800A60B4 = -0xc0;
+            (*(short*)&PLAYER.obj.animFrame) = 0;
+            PLAYER.obj.velX = -0xc0;
         }
-        D_800A60A1 = 0;
+        PLAYER.obj.b69 = 0;
         o->state++;
         break;
     case 2:
@@ -68,7 +66,7 @@ void func_801142C0(TObj *o)
         o->y.raw += 0x80000;
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + o->box3 - o->box2);
         AnimAdvance(o);
-        if (D_800A60A1) {
+        if (PLAYER.obj.b69) {
             if (GAME.selectedArea == 2) {
                 if (D_8009CDB1 == 4) printInfoMessage(8, 3);
             } else if (D_8009CDB1 != 0xff) {
@@ -76,9 +74,9 @@ void func_801142C0(TObj *o)
             }
             o->b6a = 0;
             SCRIPT_OBJECTS[o->b0c] = 0;
-            D_800A603C[0] = 1;
-            D_800A603C[1] = 0;
-            D_800A603C[2] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+            ((unsigned char*)&PLAYER.obj.b04)[1] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
             o->b04 = 3;
         }
         break;

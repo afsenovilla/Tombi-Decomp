@@ -1,5 +1,6 @@
 // FUNC 8011708c 1236 X011
 // MATCHING 8011708c 1236
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT;
@@ -8,13 +9,9 @@ extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer5(void);
 extern void setEventStarted(int, int, int);
 extern signed char D_8009D2B0;
-extern unsigned short D_800A604A;
-extern Fix16 *D_800A607C;
 extern unsigned short D_1F8001FC, D_1F8003C4;
 extern unsigned char D_8009C942[];
-extern unsigned char D_800A603C[0], D_800A603D[0], D_800A603E[0];
 extern unsigned char D_8009D082;
-extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern AT D_80119C48[];
 
@@ -28,14 +25,14 @@ void func_8011708C(TObj *o)
     case 0:
         p = &D_8009D2B0;
         if (*p == 3) break;
-        if ((unsigned short)(D_800A604A - 0x40) >= 0x20) break;
-        if (D_800A607C->p.whole != 0) break;
+        if ((unsigned short)((*(unsigned short*)&PLAYER.obj.a.p.whole) - 0x40) >= 0x20) break;
+        if ((*(Fix16 **)&PLAYER.obj.d)->p.whole != 0) break;
         if (!(D_1F8001FC & D_1F8003C4)) break;
         D_8009C942[0] = 1;
         *p = 0;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(B12 *)&o->a;
@@ -49,7 +46,7 @@ void func_8011708C(TObj *o)
         ((unsigned char *)o->d90)[4] = 3;
         D_1F8001C6 = 0;
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = 1;
         q = allocObjectLayer5();
         if (q != 0) {
@@ -114,12 +111,12 @@ void func_8011708C(TObj *o)
         break;
     case 9:
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

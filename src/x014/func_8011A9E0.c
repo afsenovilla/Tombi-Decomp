@@ -1,13 +1,12 @@
 // FUNC 8011a9e0 700 X014
 // MATCHING 8011a9e0 700
+#include "player.h"
 #include "TOBJ.H"
 
 extern TObj *D_8009C954;
 extern int D_1F8002D4[];
 extern void *D_80129F94;
 extern unsigned char D_8009C93A, D_8009C93F;
-extern Fix16 *D_800A6078;
-extern unsigned short D_800A604E;
 extern short D_8009C944[], D_8009C946[];
 extern short D_8007A3F0[], D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
@@ -57,8 +56,8 @@ void func_8011A9E0(TObj *o)
             break;
         case 2:
             if (D_8009C93F == 0) {
-                dx = D_800A6078->p.whole - o->h->p.whole;
-                dy = D_800A604E - o->y.p.whole;
+                dx = (*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole;
+                dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole;
                 d = FUN_800638cc(dx * dx + dy * dy);
                 if (d >= 11) {
                     if (d > 0xa0) d = 0xa0;

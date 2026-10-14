@@ -1,15 +1,15 @@
 // FUNC 80117d80 132 X016
 // MATCHING 80117d80 132
+#include "player.h"
 #include "TOBJ.H"
-extern Fix16 *D_800A6078;
 extern void func_80117B40(TObj *);
 
 void func_80117D80(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (o->h->p.whole < D_800A6078->p.whole) {
-            D_800A6078->p.whole = o->h->p.whole;
+        if (o->h->p.whole < (*(Fix16 **)&PLAYER.obj.h)->p.whole) {
+            (*(Fix16 **)&PLAYER.obj.h)->p.whole = o->h->p.whole;
         }
         if (o->b68) {
             o->step = 1;
