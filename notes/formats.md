@@ -629,7 +629,8 @@ Python, ~4 M instr/s; GTE after psx-spx; no load delay slots / interrupts / cach
     `APD_DATA`); (2) `FUN_8004c570` spawns `APD_DATA[section & 7]` (0x1F800358): a slot the sibling did not load is 0 / stale and read as an endless
     list, so it is pointed at the sibling's list terminator (empty). Result: the game's own mode 2 runs the room (Tombi + HUD) but **there is no
     room model**: WMD / WPP / SPR slots of the section are empty (the rooms have no data of their own: variants / unused debug rooms), so the
-    composed image is Tombi on black (some rooms show leftovers of the sibling).
+    composed image is Tombi on black (17:9 / 17:10 / 17:7 slot-aligned with a sibling show the sibling's model; 11:0, 16:0, 17:0, 17:6, 18:0 are mode 5
+    rooms (`FUN_8004bfe4` section objects crash on the sibling's state: retried without area-wide / section objects) and come out black).
 
 ## Object placement records (room objects; `tools/objects.py`)
 The APD blocks (load kinds `0x80..0x8F`, `APD_DATA[n]`) of the room load lists are the **object spawn records** (not a grid: only `0x8E` is a

@@ -230,6 +230,7 @@ def _grab(m, area, section):
 # sibling did not load is 0 / stale and would be read as an endless garbage list (garbage objects, jump to a bad pointer) -> an empty list is put there.
 GAME_BASE = 0x8009C960
 APD_DATA = 0x1F800358
+SECTION_OBJECTS = 0x8007BEE4     # PTR_8007bee4[area][section] -> list of unlayered section objects (FUN_8004bfe4, mode 5)
 LOAD_COMPLETE = 0x1F8001CE
 SIBLINGS = {(11, 0): 1, (11, 3): 1, (11, 4): 2, (16, 0): 3, (16, 1): 3, (16, 2): 3, (17, 0): 1, (17, 6): 1, (17, 7): 2, (17, 8): 3,
             (17, 9): 1, (17, 10): 2, (18, 0): 1}
@@ -248,8 +249,9 @@ def enter_via_door(m, base, area, section, sibling, spawn=0, no_wide=False):
         p += 16
     if (section & 7) != (sibling & 7):       # a slot the sibling did not load holds a stale pointer (previous room / area) or 0
         c.w32(APD_DATA + 4 * (section & 7), p)
-    if no_wide:                              # also no area-wide objects (their handlers may depend on the room the sibling set up)
+    if no_wide:                              # also no area-wide / section objects (their handlers may depend on the room the sibling set up)
         c.w32(APD_DATA + 4 * min(c.r16(SECTION_COUNT + 2 * area), 15), p)
+        c.w32(c.r32(SECTION_OBJECTS + 4 * area) + 4 * section, p + 2)      # FUN_8004bfe4's list of the section (4 byte records, 0xFF = end)
     c.w16(GAME_BASE + 0x434, area)
     c.w16(GAME_BASE + 0x436, section)
     c.w16(GAME_BASE + 0x440, spawn)
@@ -281,7 +283,7 @@ def capture_room_door(m, base, area, section, sibling=None, log=print):
     sibling = sibling or SIBLINGS[(area, section)]
     try:
         enter_via_door(m, base, area, section, sibling)
-    except Exception as e:      # noqa: BLE001  a stale object of the sibling crashes the emulator: retry without the area-wide objects
+    except Exception as e:      # noqa: BLE001  a stale object of the sibling crashes the emulator: retry without the area-wide and section objects
         log("AREA%02d:%d retry without area-wide objects (%s)" % (area, section, e))
         enter_via_door(m, base, area, section, sibling, no_wide=True)
     return _grab(m, area, section)
