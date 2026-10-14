@@ -210,6 +210,15 @@ Tombi's animation scripts, decoded from `AnimAdvance` / `AnimJump` / `AnimLoadDu
   swing animations (not found: probably other tables or other overlays' object code), other characters (enemy tables use `o->anim = D_xxxx[subtype]` in
   the overlays with `AnimAdvanceWithBox`; same entry format, not catalogued).
 
+**Enemy / NPC / object animations (tools/animobj.py, `anim.py list --owner all`, `export`).** Same 8-byte entries (`AnimAdvanceWithBox`), scripts live in each overlay's data
+(`D_8013xxxx[subtype]` pointer arrays, `o->anim = table[k]`). The tool finds them statically: the handler of every placed object (tools/objects.py) and the functions it reaches
+(jal, function pointers and function-pointer tables, depth 6; `size` from the csv widened by the `// FUNC` header of src/x0nn) are disassembled and their `lui`+offset constants
+tracked: an address that decodes as a script, or as a pointer array of scripts (cut where another table starts), is one of the owner's animations (owner = area + handler, e.g.
+`a04_func_80126e54` = black crow). `lw 0x1F8002C8+4n` = `o->d3c = SPR_DATA[n]` gives the SPR kind (0x30+n), taken from the object's room list (else the area list);
+`sh imm, 0x1E(o)` = `w1e` = the tpage offset used to cut the frames. Verified visually: AREA04 crow, AREA09 red flower, AREA10 spear pig. Limits: owners that only the shared code
+selects, tables indexed by the room, objects spawned by other objects (projectiles, bosses' parts) are not listed; when several rooms of an owner load different tables of the same
+kind only the room with most placements is rendered; a table may include its neighbours' scripts when no code references the next table (frames outside the SPR table are flagged).
+
 ### SPR / VRAM: every graphic as PNG (`tools/vram.py`, `tools/extract_sprites.py`)
 `python3 tools/extract_sprites.py game/disc/Tombi.bin OUT` writes `OUT/sprites` (WPP frames, `tools/wpp.py`), `OUT/spr` (SPR atlas cuts) and
 `OUT/vram` (pages and VRAM snapshots) and `OUT/screens` (static full screens, `tools/screens.py`); `python3 tools/vram.py --all OUT` does the last two from an extracted `game/disc/fs`.
