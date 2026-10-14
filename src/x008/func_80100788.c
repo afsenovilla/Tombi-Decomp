@@ -1,5 +1,6 @@
 // FUNC 80100788 4088 X008
 // MATCHING 80100788 4088
+#include "gvars.h"
 /* Player step dispatcher. turn(): the d8c store written in every leaf (cross-jumping shares only the store
    tail, as in the game); chk() is a macro so the step constant is loaded at the compare; dirC/dirD store
    animFrame per leaf (game reloads it afterwards). */
@@ -11,7 +12,6 @@ extern unsigned short D_8009D670;
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
 extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_8009C93A;
 extern unsigned char D_1F8001A4;
 extern void FUN_800f1478(TObj *);
 extern void FUN_800f1d44(TObj *);
@@ -439,7 +439,7 @@ void func_80100788(TObj *o, int p2)
                 o->substep = 0;
                 o->active = 1;
                 D_8009D2B0[0] = 0;
-                D_8009C93A = 1;
+                GVARS.b3a = 1;
             }
             break;
         }

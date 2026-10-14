@@ -1,5 +1,6 @@
 // FUNC 800fe98c 1768 X008
 // MATCHING 800fe98c 1768
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -17,13 +18,8 @@ extern P800FE98C *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *D_800A611C;
 extern TObj *D_8009F0EC;
-extern int D_8009C934;
 extern unsigned char D_1F8001A4[];
 extern unsigned char D_1F8001F8;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C938;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
@@ -52,8 +48,8 @@ extern void FUN_800fc414(TObj *);
 
 static __inline__ void move(TObj *o)
 {
-    o->h->raw += D_8009C944 << 8;
-    o->y.raw += D_8009C946[0] << 8;
+    o->h->raw += GVARS.s44 << 8;
+    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
     BLINK();
     o->h->raw += o->velX << 8;
     o->y.raw += o->velY << 8;
@@ -106,7 +102,7 @@ void FUN_800fe98c(TObj *o)
             D_8009D2E8->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
@@ -130,13 +126,13 @@ void FUN_800fe98c(TObj *o)
             D_8009C330->b8 = 1;
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
-                D_8009C942 = 1;
-                D_8009C938 = 1;
+                GVARS.b42 = 1;
+                GVARS.b38 = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
         }
-        D_8009C330->b8 = D_8009C938;
+        D_8009C330->b8 = GVARS.b38;
         FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         FUN_80025f40(0, 0x81, 0x81, 0x3c);
         break;

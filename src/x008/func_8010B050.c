@@ -1,10 +1,10 @@
 // FUNC 8010b050 872 X008
 // MATCHING 8010b050 872
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b8; unsigned char b9; char q[0x20 - 0xa]; unsigned short w20; char r[0x2c - 0x22]; short w2c; short w2e; } G;
 extern G *D_8009C330;
 extern TObj *D_800A611C[];
-extern short D_8009C944[], D_8009C946[];
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
 void FUN_800eee90(TObj *o);
@@ -62,8 +62,8 @@ void func_8010B050(TObj *o)
             }
         }
     case 2:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         ObjGravityStep(o);
         ObjAddVelY7E(o);
@@ -85,8 +85,8 @@ void func_8010B050(TObj *o)
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         ObjGravityStep(o);
         ObjAddVelY7E(o);

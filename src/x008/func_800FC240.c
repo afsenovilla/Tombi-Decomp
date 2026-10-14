@@ -1,9 +1,9 @@
 // FUNC 800fc240 468 X008
 // MATCHING 800fc240 468
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C938;
 extern unsigned char *D_8009C330;
 extern unsigned char D_8009CE3D;
 
@@ -11,7 +11,7 @@ int func_800FC240(TObj *o)
 {
     short r;
 
-    if (D_8009C938 != 0) {
+    if (GVARS.b38 != 0) {
         return 0;
     }
     if (o->velY < 0x680) {

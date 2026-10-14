@@ -1,5 +1,6 @@
 // FUNC 800ff610 2228 X008
 // MATCHING 800ff610 2228
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -7,9 +8,8 @@ typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short 
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned char D_8009C93F, D_8009CFFB, D_8009CDAC;
-extern short D_8009C944, D_8009C946;
-extern unsigned char D_1F8001A4, D_8009C942, D_8009C938;
+extern unsigned char D_8009CFFB, D_8009CDAC;
+extern unsigned char D_1F8001A4;
 extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
 extern void func_800FF0E8(TObj *);
@@ -117,7 +117,7 @@ void FUN_800ff610(TObj *o, int arg)
         case 14:
             if (GAME.selectedSection == 2)
                 break;
-            if (D_8009C93F)
+            if (GVARS.b3f)
                 return;
         kill:
             U8(o, 0xcd) = 0;
@@ -192,8 +192,8 @@ void FUN_800ff610(TObj *o, int arg)
         U8(o, 0xcd) = 0;
         U8(o, 0xce) = 0;
         o->state = 0;
-        D_8009C944 = 0;
-        D_8009C946 = -0x40;
+        GVARS.s44 = 0;
+        GVARS.s46 = -0x40;
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         FUN_8001e5f4(0xe, 0x7f);
         return;
@@ -205,8 +205,8 @@ void FUN_800ff610(TObj *o, int arg)
             D_8009C330->b8 = 1;
             D_8009C970 = o->w98;
             if (o->w98 <= 0) {
-                D_8009C942 = 1;
-                D_8009C938 = 1;
+                GVARS.b42 = 1;
+                GVARS.b38 = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
@@ -222,7 +222,7 @@ void FUN_800ff610(TObj *o, int arg)
     o->step = 2;
     o->state = 0;
     o->substep = 0;
-    if (D_8009C938) {
+    if (GVARS.b38) {
         o->timer = 0xb4;
         D_8009C330->w2c = 0x2f;
         t = D_800E8404;

@@ -1,9 +1,9 @@
 // FUNC 80115ea8 228 X008
 // MATCHING 80115ea8 228
+#include "gvars.h"
 #include "TOBJ.H"
 typedef void (*Fn)(TObj *);
 
-extern unsigned char D_8009C93A;
 extern Fn D_80079AB4[];
 extern short D_1F800172;
 extern void FUN_8002a3d4(TObj *);
@@ -14,7 +14,7 @@ void func_80115EA8(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_8002a3d4(o);
         break;
     case 1:

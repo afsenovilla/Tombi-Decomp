@@ -1,13 +1,12 @@
 // FUNC 80104f88 1804 X008
 // MATCHING 80104f88 1804
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
 extern unsigned short D_8009D670;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern void FUN_8010eaf8(TObj *o);
 extern void FUN_800ef490(TObj *o);
 extern void ObjGravityStep(TObj *o);
@@ -75,8 +74,8 @@ void func_80104F88(TObj *o)
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
         p->d8c = o->d88 - 0xc0;
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
