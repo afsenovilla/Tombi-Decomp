@@ -1,9 +1,9 @@
 // FUNC 80139b2c 292 X001
 // MATCHING 80139b2c 292
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009CDB2;
-extern int D_8009C984;
 extern unsigned char D_800A603C, D_800A60A1, D_8009C942, D_800A60F8;
 extern unsigned short D_800A604E;
 extern Fix16 *D_800A6078;
@@ -16,7 +16,7 @@ int func_80139B2C(TObj *o)
     int r = 0;
 
     if (D_8009CDB2 >= 2) return 0;
-    if (!(D_8009C984 & 0x100) && D_800A603C == 1 && D_800A60A1 &&
+    if (!(GAME.area00_eventControl & 0x100) && D_800A603C == 1 && D_800A60A1 &&
         (unsigned short)(D_800A604E + 0x50a) < 0x10 &&
         (unsigned short)(D_800A6078->p.whole - p->h->p.whole + 0x30) < 0x60) {
         if (*(unsigned short *)&o->anim) {

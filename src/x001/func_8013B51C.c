@@ -1,6 +1,7 @@
 // FUNC 8013b51c 1116 X001
 // MATCHING 8013b51c 1116
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009CEE1, D_8009CEE2;
 extern unsigned char D_8009D0B4[];
@@ -12,8 +13,7 @@ extern char D_80010748[];
 extern Fix16 *D_800A6078[];
 extern short D_800A604E[];
 extern TObj *D_8009F2EC[];
-extern unsigned char D_8009CFCF, D_8009C975;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
+extern unsigned char D_8009CFCF;
 extern TObj *TASK_C;
 extern int FUN_8001f9e0(void);
 extern void FUN_801148d0(TObj *, char, int, int, short);
@@ -92,14 +92,14 @@ void func_8013B51C(TObj *o)
         o->y.raw -= 8;
         if (--S16(o, 0xa) > 0) break;
         D_8009CFCF = 1;
-        D_8009C975 = 3;
+        GAME.fadeScreenControl = 3;
         o->step++;
         break;
     case 5:
-        if (D_8009C975 != 1) break;
-        D_8009CD94 = 0x13;
-        D_8009CD96 = 2;
-        D_8009CDA0 = 1;
+        if (GAME.fadeScreenControl != 1) break;
+        (*(short*)&GAME.nextArea) = 0x13;
+        (*(short*)&GAME.nextSection) = 2;
+        (*(short*)&GAME.nextSpawnPoint) = 1;
         {
             TObj *q = TASK_C;
             q->w4c = 7;

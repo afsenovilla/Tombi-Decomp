@@ -1,8 +1,8 @@
 // FUNC 80116358 644 X002
 // MATCHING 80116358 644
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char D_8009C93A;
-extern unsigned short D_8009C962;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_800A604A, D_800A604E;
 extern void (*D_80079AD0[])(TObj *);
@@ -23,7 +23,7 @@ void func_80116358(TObj *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
             if (D_1F800172 == 0) {
                 if (D_800A604A < 30 && D_800A604E >= -59)

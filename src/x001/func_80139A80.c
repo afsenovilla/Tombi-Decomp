@@ -1,9 +1,9 @@
 // FUNC 80139a80 172 X001
 // MATCHING 80139a80 172
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009CDB2;
-extern int D_8009C984;
 extern TObj *allocObjectLayer2(void);
 
 void func_80139A80(TObj *o)
@@ -11,7 +11,7 @@ void func_80139A80(TObj *o)
     TObj *n;
 
     if (D_8009CDB2 < 2) {
-        if (D_8009C984 & 0x100) {
+        if (GAME.area00_eventControl & 0x100) {
             o->b04 = 3;
         } else {
             n = allocObjectLayer2();

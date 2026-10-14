@@ -1,13 +1,13 @@
 // FUNC 80104f88 1804 X002
 // MATCHING 80104f88 1804
 #include "TOBJ.H"
+#include "gamestate.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
 extern unsigned short D_8009D670;
 extern short D_8009C944;
 extern short D_8009C946[];
-extern unsigned short D_8009C960;
 extern void FUN_8010eaf8(TObj *o);
 extern void FUN_800ef490(TObj *o);
 extern void ObjGravityStep(TObj *o);
@@ -115,7 +115,7 @@ void func_80104F88(TObj *o)
                         q->subtype = 3;
                         break;
                     case 2:
-                        switch (D_8009C960) {
+                        switch (GAME.selectedArea) {
                         case 0: case 1: case 2:
                             q->subtype = 0;
                             break;
