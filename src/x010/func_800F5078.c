@@ -39,9 +39,9 @@ static __inline__ void rot(TObj *o)
     PL *p = (PL *)D_8009C330;
     o->wb6 += p->we;
     if ((unsigned short)o->wb6 < 0x800) U8(p, 8) = 1;
-    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) U8(D_8009C330, 8) = 0;
-    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) U8(D_8009C330, 8) = 0;
-    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) U8(D_8009C330, 8) = 1;
+    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 1;
 }
 
 #define SETTBL(o) \
@@ -55,7 +55,7 @@ static __inline__ void rot(TObj *o)
 #define SND(k) \
     FUN_80025f40(0, 0, 0xff, 2); \
     FUN_8001e560(3, k); \
-    U8(D_8009C330, 10) = U8(D_8009F0EC, 12);
+    D_8009C330->b0a = D_8009F0EC->b0c;
 
 #define INC1(o, n) \
     { \
@@ -115,25 +115,25 @@ void func_800F5078(TObj *o)
     short i;
     short f;
 
-    U8(D_8009C330, 10) = 0xff;
+    D_8009C330->b0a = 0xff;
     switch (o->state) {
     case 0:
         o->wb6 = 0;
         {
-            signed char c = S8(D_8009C330, 5);
-            U8(o, 0xac) = 2;
+            signed char c = (*(signed char*)&D_8009C330->step);
+            (*(unsigned char*)&o->wac) = 2;
             o->wb2 = c + 1;
         }
-        U8(D_8009C330, 5) = 0;
-        U8(D_8009C330, 10) = U8(D_8009F0EC, 12);
+        D_8009C330->step = 0;
+        D_8009C330->b0a = D_8009F0EC->b0c;
         {
             PL *q = (PL *)D_8009C330;
             q->w2 = 0;
             q->we = 0;
         }
         o->ba4 = 0;
-        U8(D_8009C330, 8) = 0;
-        U8(D_8009C330, 9) = 0;
+        (*(unsigned char*)&D_8009C330->w08) = 0;
+        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
         {
             PL *q = (PL *)D_8009C330;
             q->wc = 0;
@@ -154,7 +154,7 @@ void func_800F5078(TObj *o)
         if (o->wb6 == 0) {
             if (o->animFrame & 1) {
                 if (((PL *)D_8009C330)->we > 0) {
-                    U8(D_8009C330, 10) = U8(D_8009F0EC, 12);
+                    D_8009C330->b0a = D_8009F0EC->b0c;
                     if (D_8009D670[0] & 0x80) INC1(o, 9);
                     if (D_8009D670[0] & 0x20) {
                         o->animFrame = 0;
@@ -164,7 +164,7 @@ void func_800F5078(TObj *o)
                 }
             } else {
                 if (((PL *)D_8009C330)->we > 0) {
-                    U8(D_8009C330, 10) = U8(D_8009F0EC, 12);
+                    D_8009C330->b0a = D_8009F0EC->b0c;
                     if (D_8009D670[0] & 0x20) INC1(o, 9);
                     if (D_8009D670[0] & 0x80) {
                         o->animFrame = 1;
@@ -176,7 +176,7 @@ void func_800F5078(TObj *o)
         }
         setanim(o, 6);
         FUN_8001fec0(o);
-        U8(D_8009C330, 1) = 0x20;
+        D_8009C330->visible = 0x20;
         a = (short)o->wb6 >> 4;
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
@@ -184,12 +184,12 @@ void func_800F5078(TObj *o)
         if (D_1f8001fc & D_1f8003c6) {
             D_8009D2B0 = 0;
             o->b9c = 1;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             FUN_8010a168(o);
             o->h->p.whole += (o->animFrame & 1) ? 16 : -16;
-            S8(o, 0xf) = -8;
+            (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            U8(D_8009C330, 1) = 0;
+            D_8009C330->visible = 0;
             o->timer = 6;
             o->d30 = 0;
             o->d34 = 0;
@@ -239,14 +239,14 @@ void func_800F5078(TObj *o)
         D_8009C330->animFrame = 0xffff;
         o->anim = D_80011108;
         FUN_8001fe94(o, D_80115388[i]);
-        U8(D_8009C330, 1) = 0x20;
+        D_8009C330->visible = 0x20;
         QBLK(o);
         FUN_800f4ed0(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
             D_8009D2B0 = 0;
             FUN_8010a518(o);
-            if (o->wb6 > o->d88) U8(D_8009C330, 9) = 1;
-            else U8(D_8009C330, 9) = 0;
+            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
+            else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->state = 3;
             break;
         }
@@ -259,7 +259,7 @@ void func_800F5078(TObj *o)
             if (o->animFrame & 1) {
                 if (((PL *)D_8009C330)->we > 0) {
                     SND(2);
-                    U8(D_8009C330, 9) = 0;
+                    (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                     SETTBL(o);
                 } else {
                     SND(2);
@@ -267,7 +267,7 @@ void func_800F5078(TObj *o)
             } else {
                 if (((PL *)D_8009C330)->we > 0) {
                     SND(2);
-                    U8(D_8009C330, 9) = 0;
+                    (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                     SETTBL(o);
                 } else {
                     SND(2);
@@ -281,12 +281,12 @@ void func_800F5078(TObj *o)
         FUN_8001fe94(o, D_80115388[i]);
         QBLK(o);
         FUN_800f4ed0(o, i, a);
-        if (U8(D_8009C330, 9) != 0) break;
+        if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) break;
         if (o->wb6 > o->d88) {
-            U8(o, 0xac) = 0;
-            S8(o, 0xf) = -8;
+            (*(unsigned char*)&o->wac) = 0;
+            (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            U8(D_8009C330, 1) = 0;
+            D_8009C330->visible = 0;
             o->timer = 6;
             o->b9e = 4;
             o->d30 = 0;
@@ -303,7 +303,7 @@ void func_800F5078(TObj *o)
             TObj *q = D_8009C330;
             U8(q, 9) = 0;
             q->animFrame = 0xffff;
-            U8(D_8009C330, 10) = 0;
+            D_8009C330->b0a = 0;
         }
         f = 0;
         rot(o);
@@ -335,8 +335,8 @@ void func_800F5078(TObj *o)
         swing(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
             FUN_8010a168(o);
-            if (o->wb6 > o->d88) U8(D_8009C330, 9) = 1;
-            else U8(D_8009C330, 9) = 0;
+            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
+            else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->state = 5;
             break;
         }
@@ -359,7 +359,7 @@ void func_800F5078(TObj *o)
             o->wb6 = 0;
             if (((PL *)D_8009C330)->we > 0) {
                 SND(2);
-                U8(D_8009C330, 9) = 0;
+                (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                 SETTBL(o);
             } else {
                 SND(2);
@@ -369,7 +369,7 @@ void func_800F5078(TObj *o)
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
         swing(o, i, a);
-        if (U8(D_8009C330, 9) != 0) break;
+        if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) break;
         if (o->wb6 > o->d88) {
             o->wb6 = o->d88;
             FUN_800f4ed0(o, i, o->wb6 >> 4);
@@ -379,10 +379,10 @@ void func_800F5078(TObj *o)
                 q->we = 0;
                 ((PL *)D_8009C330)->w2 = 0;
             }
-            U8(o, 0xac) = 0;
-            S8(o, 0xf) = -8;
+            (*(unsigned char*)&o->wac) = 0;
+            (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            U8(D_8009C330, 1) = 0;
+            D_8009C330->visible = 0;
             o->timer = 6;
             o->b9e = 4;
             o->d30 = 0;

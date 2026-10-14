@@ -40,7 +40,7 @@ static __inline__ void turn(TObj *o)
                 t = 0xfe;
             }
             o->d38 = b + (unsigned char)t;
-            o->d38 = U8(o, 0x38);
+            o->d38 = (*(unsigned char*)&o->d38);
         }
     }
 }
@@ -80,7 +80,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = 0x80;
         }
-        if (func_80123ECC(o, U8(o, 0x38))) {
+        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -104,7 +104,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = Rand() & 0x80;
         }
-        if (func_80123ECC(o, U8(o, 0x38))) {
+        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -132,7 +132,7 @@ void func_80124370(TObj *o)
             o->timer = Rand() & 0xbf;
         }
         mv(o);
-        func_80123ECC(o, U8(o, 0x38));
+        func_80123ECC(o, (*(unsigned char*)&o->d38));
         break;
     }
 }

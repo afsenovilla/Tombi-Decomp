@@ -25,10 +25,10 @@ void func_8011B7D4(TObj *o)
         o->b9e = 0;
         o->b69 = 0;
         o->b9c = 1;
-        U8(o, 0xa0) = 0;
+        (*(unsigned char*)&o->da0) = 0;
         U8(o, 0xc8) = 0;
         U8(o, 0xc3) = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
@@ -45,7 +45,7 @@ void func_8011B7D4(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         FUN_8010f400(o);
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = S32(o, 0xe4);
             D_8009C330->b8 = 0;
             o->ba5 = 0;
@@ -56,7 +56,7 @@ void func_8011B7D4(TObj *o)
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10);
         if (ObjCheckHeadCollision(o)) {
             D_8009C330->b7 = o->animFrame;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->timer = 10;
             o->step = 4;
@@ -66,7 +66,7 @@ void func_8011B7D4(TObj *o)
         if (o->velY > 0) {
             D_8009C330->b7 = o->animFrame;
             o->b9c = 2;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
             o->step = 4;
             o->state = 3;
@@ -87,7 +87,7 @@ void func_8011B7D4(TObj *o)
             o->step = 2;
         } else if (U8(o, 0xc8)) {
             g->b8 = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
             o->step = 0x32;

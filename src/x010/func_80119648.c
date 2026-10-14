@@ -11,7 +11,7 @@ static __inline__ void mv(TObj *o)
     v = o->velH;
     if (v > 0) {
         x = o->d38 + v;
-        l = S32(o, 0xb4);
+        l = (*(int*)&o->wb4);
         o->d38 = x;
         if (l < x) goto set;
         if (o->b0c) return;
@@ -19,7 +19,7 @@ static __inline__ void mv(TObj *o)
         f = l < x;
     } else {
         x = o->d38 + v;
-        l = S32(o, 0xb8);
+        l = (*(int*)&o->wb8);
         o->d38 = x;
         if (x < l) goto set;
         if (o->b0c) return;
