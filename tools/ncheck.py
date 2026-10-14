@@ -55,6 +55,25 @@ def build(src, flags, d, inc):
                    check=True, capture_output=True)
     g = re.search(r"-G(\d+)", flags)
     G = g.group(1) if g else "0"
+    if re.search(r"^//\s*AS\s+gnu", open(src, errors="replace").read(600), re.M):
+        # `// AS gnu`: library code assembled by a newer GNU as in reorder mode (psx_tomba LIBPAD recipe): no maspsx,
+        # `move` spelled as addu, -G0 / gcc-2.7.2 normally.
+        t = re.sub(r"(?m)^\tmove\t(\$[0-9a-z]+),(\$[0-9a-z]+)", r"\taddu\t\1,\2,$0", open(d + "/a.s").read())
+        t = re.sub(r"(?m)^\t\.rdata$", "\t.section .rodata", t)
+        open(d + "/b.s", "w").write(t)
+        subprocess.run(["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O2", "-G0",
+                        d + "/b.s", "-o", d + "/a.o"], check=True, capture_output=True)
+        subprocess.run(["mipsel-linux-gnu-objcopy", "-O", "binary", "-j", ".text", d + "/a.o", d + "/t.bin"], check=True)
+        rel = []
+        for line in subprocess.run(["mipsel-linux-gnu-objdump", "-r", "-j", ".text", d + "/a.o"],
+                                   capture_output=True, text=True).stdout.splitlines():
+            m = re.match(r"([0-9a-f]{8})\s+(R_MIPS_\w+)\s+(\S+)", line)
+            if m:
+                rel.append((int(m.group(1), 16), 0x4A if m.group(2) == "R_MIPS_26" else 0x52))
+                if m.group(2) == "R_MIPS_26" and m.group(3) == ".text":
+                    LOCAL_J.append(int(m.group(1), 16))
+                RELS.append((int(m.group(1), 16), m.group(2), m.group(3)))
+        return open(d + "/t.bin", "rb").read(), rel
     mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + ASPSX_VER, "--expand-div"] + (["-G" + G] if G != "0" else []),
                          input=open(d + "/a.s").read(), check=True, capture_output=True, text=True).stdout
     open(d + "/b.s", "w").write(mas)
