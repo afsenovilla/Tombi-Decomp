@@ -1,10 +1,11 @@
 // FUNC 80121f90 1160 X014
 // MATCHING 80121f90 1160
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
 extern TObj PLAYER;
 extern S2 *D_800A6078;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6, D_8009C93A;
+extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6;
 extern short D_800A6066;
 extern short D_800A457C, D_800A457E;
 extern unsigned short D_1F80027E;
@@ -25,7 +26,7 @@ void func_80121F90(TObj *o)
         if (--o->timer == -1) o->step++;
         break;
     case 2:
-        if (D_8009C93A != 0) {
+        if (GVARS.b3a != 0) {
             o->step++;
             if (o->subtype == 3) o->timer = 10;
             else o->timer = 0x1fe;

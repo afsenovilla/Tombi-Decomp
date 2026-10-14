@@ -1,8 +1,8 @@
 // FUNC 801190d0 316 X014
 // MATCHING 801190d0 316
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern TObj *D_8009C954;
 
 void func_801190D0(TObj *o)
 {
@@ -16,7 +16,7 @@ void func_801190D0(TObj *o)
         o->d8c = 0;
         o->velX = -0x40;
         o->animFrame = 0;
-        D_8009C954 = o;
+        (*(TObj **)&GVARS.p54) = o;
         break;
     case 1:
         o->d8c = (o->d8c - (o->velH >> 8)) & 0xfff;

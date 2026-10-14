@@ -1,8 +1,8 @@
 // FUNC 80122aac 828 X014
 // MATCHING 80122aac 828
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char D_8009C942;
 extern unsigned short D_1F8001F8;
 extern TObj *ObjAlloc(void);
 extern int func_800202B4(TObj *);
@@ -15,7 +15,7 @@ void func_80122AAC(TObj *o)
     int i;
     TObj *n;
 
-    if (D_8009C942 == 1) {
+    if (GVARS.b42 == 1) {
         if (o->visible) func_800202B4(o);
         return;
     }

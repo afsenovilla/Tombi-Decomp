@@ -1,9 +1,9 @@
 // FUNC 801251b4 1072 X014
 // MATCHING 801251b4 1072
+#include "gvars.h"
 #include "TOBJ.H"
 extern int D_1F8002DC[];
 extern void *D_8012A004[];
-extern unsigned char D_8009C942;
 extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -86,16 +86,16 @@ void func_801251B4(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            if (D_8009C942 == 1) goto anim;
+            if (GVARS.b42 == 1) goto anim;
             if (!FUN_8001fec0(o)) goto anim;
             o->y.p.whole += 8;
             sp2(o, 2);
             goto anim;
         case 1:
-            if (D_8009C942 != 1) func_80124AD0(o);
+            if (GVARS.b42 != 1) func_80124AD0(o);
             goto anim;
         case 2:
-            if (D_8009C942 == 1) {
+            if (GVARS.b42 == 1) {
                 if (o->visible == 1) FUN_800202b4(o);
             } else {
                 func_80124F28(o);
@@ -105,7 +105,7 @@ void func_801251B4(TObj *o)
         }
         break;
     case 2:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
         anim:
             FUN_800202b4(o);
             break;

@@ -1,8 +1,7 @@
 // FUNC 8011f4e0 880 X014
 // MATCHING 8011f4e0 880
+#include "gvars.h"
 #include "TOBJ.H"
-extern TObj *D_8009C948;
-extern unsigned char D_8009C93A, D_8009C93E, D_8009C942;
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -49,11 +48,11 @@ void func_8011F4E0(TObj *o)
             } else {
                 setanim(o, 2);
             }
-            D_8009C948 = o;
+            (*(TObj **)&GVARS.p48) = o;
             o->step++;
             break;
         case 1:
-            if (D_8009C93A) func_8011F218(o);
+            if (GVARS.b3a) func_8011F218(o);
             break;
         }
         break;
@@ -74,8 +73,8 @@ void func_8011F4E0(TObj *o)
         break;
     case 2:
         if (WC2(o) == 1) {
-            D_8009C93E = 0;
-            D_8009C942 = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
             WC2(o) = 0;
         }
         FUN_800202b4(o);

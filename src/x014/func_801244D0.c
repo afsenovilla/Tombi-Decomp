@@ -1,11 +1,11 @@
 // FUNC 801244d0 888 X014
 // MATCHING 801244d0 888
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern int D_1F8002DC[];
 extern void *D_80129FF0;
-extern unsigned char D_8009C942;
 extern short D_8007A3F0[], D_8007A5F0[];
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
@@ -56,7 +56,7 @@ void func_801244D0(TObj *o)
         setup(o);
         break;
     case 1:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             ObjCullRegister(o);
             break;
         }

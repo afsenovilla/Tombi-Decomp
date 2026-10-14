@@ -1,5 +1,6 @@
 // FUNC 8011dc5c 1428 X014
 // MATCHING 8011dc5c 1428
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p0[0xe]; unsigned short w0e; } X;
 typedef struct { unsigned char c[4]; } B;
@@ -8,8 +9,6 @@ extern volatile unsigned short D_1F8000F2;
 extern unsigned short D_1F8001F8;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
-extern unsigned char D_8009C93E;
-extern unsigned char D_8009C942;
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -88,8 +87,8 @@ void func_8011DC5C(TObj *o)
         o->timer = 0x1e;
         o->state++;
         if (x->w0e == 1) {
-            D_8009C93E = 0;
-            D_8009C942 = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
             x->w0e = 0;
         }
         break;

@@ -1,13 +1,12 @@
 // FUNC 80119b58 2368 X014
 // MATCHING 80119b58 2368
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
-extern S8 *D_8009C948;
 extern unsigned short D_8009C962[];
 extern short D_80125C40[], D_80125C50[];
 extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
-extern unsigned char D_8009C93E;
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
 extern unsigned char D_8009D2C3;
@@ -67,7 +66,7 @@ static __inline__ void setAnim(TObj *p, void *a)
 
 void func_80119B58(TObj *o)
 {
-    S8 *s = D_8009C948;
+    S8 *s = (*(S8 **)&GVARS.p48);
     int v;
     unsigned int u;
 
@@ -90,7 +89,7 @@ void func_80119B58(TObj *o)
         o->b0b = 1;
         o->b0f = 4;
         o->state++;
-        D_8009C93E = 0;
+        GVARS.b3e = 0;
         MSG(o);
         s->b4 = 2;
         s->b1 = 0;

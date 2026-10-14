@@ -1,5 +1,6 @@
 // FUNC 801163bc 1252 X014
 // MATCHING 801163bc 1252
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -11,9 +12,7 @@ extern PL PLAYER;
 extern Fn D_8012568C[];
 extern short D_801256A8[];
 extern unsigned char D_80125684[];
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C93C;
 extern unsigned char D_8009C93Fx[];
-extern unsigned char D_8009C941, D_8009C940;
 extern unsigned short D_1F8000F2x[];
 extern unsigned short D_1F8001C6, D_1F8000F2;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003CE;
@@ -52,7 +51,7 @@ void func_801163BC(TObj *o)
         break;
     }
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         syncObjectTargetY(o);
         stepScrollApproachX(o);
@@ -75,7 +74,7 @@ void func_801163BC(TObj *o)
         break;
     case 6:
         GAME.fadeScreenControl = 3;
-        D_8009C93C = 0;
+        GVARS.b3c = 0;
         o->step++;
     case 7:
         if (GAME.fadeScreenControl == 1) {
@@ -102,7 +101,7 @@ void func_801163BC(TObj *o)
         if (GAME.purifiedAreas == 0x7f) {
             o->step++;
             GAME.fadeScreenControl = 4;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             break;
         }
         o->subtype = 1;
@@ -140,8 +139,8 @@ void func_801163BC(TObj *o)
     case 13:
         if (--o->w48 == -1) {
             o->step++;
-            D_8009C941 = 0xe;
-            D_8009C940 = 1;
+            GVARS.b41 = 0xe;
+            GVARS.b40 = 1;
             pl->b0 = 5;
             pl->b4 = 1;
             pl->b5 = 0x30;

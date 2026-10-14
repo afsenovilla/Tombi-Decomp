@@ -1,9 +1,9 @@
 // FUNC 801206c0 1428 X014
 // MATCHING 801206c0 1428
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009C942;
 extern int DAT_1f8002dc[];
 extern void *D_80129F9C[];
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
@@ -70,7 +70,7 @@ void func_801206C0(TObj *o)
         o->w22 = 0;
         break;
     case 1:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             FUN_800202b4(o);
             break;
         }
@@ -156,7 +156,7 @@ void func_801206C0(TObj *o)
         o->b6a = 0;
         break;
     case 2:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             FUN_800202b4(o);
             break;
         }

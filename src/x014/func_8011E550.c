@@ -1,9 +1,9 @@
 // FUNC 8011e550 540 X014
 // MATCHING 8011e550 540
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C938;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F80016A, D_1F80016E;
 extern unsigned char D_80125CA8[];
@@ -21,7 +21,7 @@ void func_8011E550(TObj *o)
     unsigned char *t;
     int x;
 
-    if (D_8009C938 != 0 || D_8009D2B0 == 3) {
+    if (GVARS.b38 != 0 || D_8009D2B0 == 3) {
         o->state = 0;
         o->step++;
     } else if (((unsigned short*)&GAME.selectedSection)[0] == 7) {

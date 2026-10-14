@@ -1,5 +1,6 @@
 // FUNC 80122418 936 X014
 // MATCHING 80122418 936
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,7 +9,6 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern AT D_80129FCC[];
 extern int D_1F8002DC[];
 extern int D_1F800334;
-extern unsigned char D_8009C942, D_8009C93F;
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern TObj *allocObjectLayer4(void);
@@ -102,7 +102,7 @@ void func_80122418(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             ObjCullRegister(o);
             break;
         }
@@ -123,7 +123,7 @@ void func_80122418(TObj *o)
             v.vz = o->d8c;
             RotMatrix(&v, m);
             FUN_80020078(o, o->box0);
-            if (D_8009C93F != 1) func_80121F90(o);
+            if (GVARS.b3f != 1) func_80121F90(o);
             break;
         }
         }

@@ -1,10 +1,10 @@
 // FUNC 8012415c 704 X014
 // MATCHING 8012415c 704
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_801266F0[];
-extern unsigned char D_8009C942;
 extern int D_1F8002DC;
 extern void *D_80129FA4[];
 extern void playSFX(int);
@@ -56,12 +56,12 @@ void func_8012415C(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            if (D_8009C942 == 1) goto cull;
+            if (GVARS.b42 == 1) goto cull;
             ObjCullRegister(o);
             AnimAdvance(o);
             break;
         case 1:
-            if (D_8009C942 == 1) {
+            if (GVARS.b42 == 1) {
             cull:
                 ObjCullRegister(o);
                 break;
@@ -80,7 +80,7 @@ void func_8012415C(TObj *o)
     case 2:
         if (o->subtype == 0) {
             ObjCullRegister(o);
-            if (D_8009C942) break;
+            if (GVARS.b42) break;
             AnimAdvance(o);
             o->velX -= 4;
             if (o->velX <= 0) {

@@ -1,5 +1,6 @@
 // FUNC 80122fa0 1784 X014
 // MATCHING 80122fa0 1784
+#include "gvars.h"
 /* covers csv entries 80122fa0 (596 B) and 801231f4 (1188 B): one function cut at a jump into the middle */
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -8,8 +9,6 @@ extern TObj PLAYER;
 extern int D_1F8002DC[];
 extern void *D_80129F9C[];
 
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C958;
 extern short D_800A457C;
 extern short D_800A457E;
 extern short D_8007A1F0[], D_8007A5F0[];
@@ -77,7 +76,7 @@ void func_80122FA0(TObj *o)
         o->w22++;
         break;
     case 1:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             ObjCullRegister(o);
             break;
         }
@@ -198,7 +197,7 @@ void func_80122FA0(TObj *o)
         }
         break;
     case 2:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             ObjCullRegister(o);
             break;
         }
@@ -208,7 +207,7 @@ void func_80122FA0(TObj *o)
         if (o->velX < 0) {
             o->velX = 0;
             o->b04++;
-            D_8009C958 = 1;
+            GVARS.b58 = 1;
             break;
         }
         func_8002052C(o, 0x50);

@@ -1,11 +1,11 @@
 // FUNC 8011b47c 948 X014
 // MATCHING 8011b47c 948
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern volatile unsigned short D_8009D670[];
-extern short D_8009C944[], D_8009C946[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
 extern void FUN_80103628(TObj *);
 extern void FUN_80103774(TObj *);
@@ -62,8 +62,8 @@ void func_8011B47C(TObj *o)
         }
         break;
     case 2:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8003facc(o);
         k = D_8009D670;
         if (*k & 0x80)

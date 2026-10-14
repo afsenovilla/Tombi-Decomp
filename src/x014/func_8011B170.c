@@ -1,5 +1,6 @@
 // FUNC 8011b170 780 X014
 // MATCHING 8011b170 780
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -11,8 +12,6 @@ typedef struct {
 
 extern P8011B170 *D_8009C330;
 extern TObj *D_8009F0EC;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern char D_80077D24[];
 extern void FUN_800eee90(TObj *);
 extern void FUN_800fc104(TObj *);
@@ -58,8 +57,8 @@ void func_8011B170(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->velY += 0x40;
         o->y.raw += o->velY << 8;
         if (o->velY > 0) {
@@ -78,8 +77,8 @@ void func_8011B170(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (o->velY > 0x680)

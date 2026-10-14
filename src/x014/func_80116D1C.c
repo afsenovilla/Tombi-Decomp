@@ -1,9 +1,9 @@
 // FUNC 80116d1c 420 X014
 // MATCHING 80116d1c 420
+#include "gvars.h"
 #include "TOBJ.H"
 extern void *D_8001226C;
 extern int D_1F8002D8[];
-extern unsigned char D_8009C942[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void FUN_800202b4(TObj *);
@@ -47,7 +47,7 @@ void func_80116D1C(TObj *o)
                     o->a.p.whole = q->a.p.whole + dx;
                     o->y.p.whole = q->y.p.whole + dy;
                     o->b.p.whole = q->b.p.whole;
-                    if (D_8009C942[0] == 0)
+                    if (((unsigned char*)&GVARS.b42)[0] == 0)
                         AnimAdvance(o);
                     FUN_800202b4(o);
             } else
