@@ -1,6 +1,11 @@
 // FUNC 801244a0 1800 X001
 #include "spad.h"
-/* score 14 (opusQ, was 32): SPAD.b1d2 block fixed: itbrute put `asm("" : "=r"(t) : "0"(t));` right after each
+/* opusU (still 14): split wb0 var u (fn-scope) + w=v gives 26 (v then gets v0). Game's w must be live across the
+   wb0 `else` arm (conflict with u=v1 and v0): fake `v = cx;` before `if (u > 8)` in that arm plus `asm("" :: "r"(v));`
+   after it gives 4 (only the extra `move a1,s6` copy left), so the real w is some var live there. Using v for the
+   arm-2 value (`u = -v`) gives 8 (arm-2 reg a1, game v1). Tried (no gain): w = every existing var with u for wb0,
+   v types/decl order, by/sabs/d temps as v, dead `v = X` + end-of-function `ay = v`, wb0 arms with u/v/x combos.
+   score 14 (opusQ, was 32): SPAD.b1d2 block fixed: itbrute put `asm("" : "=r"(t) : "0"(t));` right after each
    `t = b->h +/- cx;` (d=v1 now, 26), and the w temp is the function var v (`v = t - a->h + 2; if ((unsigned short)v >= 8)`),
    which makes it a global pseudo (no tie to the andi), giving the game's w=a1, t=a2, h=a3 (14).
    Left: v is now a1 in the a->wb0 block too (game v1 there, so the game's w is NOT v but some other global var that

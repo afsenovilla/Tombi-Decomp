@@ -1,6 +1,8 @@
 #include "spad.h"
 #include "gv2.h"
-/* score 16 (opusQ, was 34): SPAD.b1d2 block fixed: itbrute put `asm("" : "=r"(t) : "0"(t));` right after each
+/* score 14 (opusU, was 16): plain `b->velX = dx;` (no do/while) before `b->b69 = 1;` in the SPAD.b1d2 fall-through fixes the
+   +0x678 sh/li order. Left: same as x001 (wb0 block v a1, game v1); see x001 wip header for opusU tries.
+   score 16 (opusQ, was 34): SPAD.b1d2 block fixed: itbrute put `asm("" : "=r"(t) : "0"(t));` right after each
    `t = b->h +/- cx;` (d=v1 now, 26), and the w temp is the function var v (`v = t - a->h + 2; if ((unsigned short)v >= 8)`),
    which makes it a global pseudo (no tie to the andi), giving the game's w=a1, t=a2, h=a3 (16); the +0x678 sh/li order diff is separate.
    Left: v is now a1 in the a->wb0 block too (game v1 there, so the game's w is NOT v but some other global var that
@@ -155,7 +157,7 @@ int func_8011E000(TObj *a, TObj *b, unsigned char mode, int ang)
                     return 3;
                 }
                 a->y.p.whole = (-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2);
-                do { b->velX = dx; } while (0);
+                b->velX = dx;
                 b->b69 = 1;
                 if (a->velY < 0) a->velY = 0;
             } else {
