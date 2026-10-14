@@ -1,5 +1,15 @@
 // FUNC 80127074 1544 X001
 #include "spad.h"
+/* score 95 (opusX, was 223): ported the 801253AC/801278C0 shapes. ax/ay are the box-sum temps (`ax = e->box0 + dx;
+   if ((unsigned short)ax > e->box1)`, `ay = ...dy`), the quadrant base (ax = base / 0x400 / base - 0x400 with the
+   `base == 0` test first), the abs copies, the +4 sum (ay, k even) and the +0x13/+0xb/+0x10/+8 sums (ax, k odd); the
+   +-8 offset is ax too, compared as `o->h->p.whole + ax > e->h->p.whole + fx`; the k odd tail stores wba/wb8 in each
+   branch (cross-jumped); asm bumps on ang/cx at the top, `=r` barriers on ax/ay after the abs copies and an
+   `asm("" :: "r"(dy))` in case 1/2 fix the s-reg permutation; no pins on ax/ay/k. Left: ang copy `move s4,a3` comes
+   before the saves (ang bump; without it s-regs permute, 127), `ang - ax` sign-extends ax (game uses a0 as is; int b
+   for the base: 158), `move a2,t0` scheduled before the cx sign test, case 0 of the second switch(t) is
+   `bltz neg; j pos` in the game (ours falls into the case 1/2 bgez; tried split if/else bodies 159-177).
+   Previous: */
 /* score 223 (opusS, was 272): no c/s copies of cx/cy (cx used directly for the sign test and wb8, as the game does
    with s5); abs block in sibling order `ax = cx; ay = cy; if (ax < 0) ax = -ax; if (ay < 0) ay = -ay;` (game copies
    both before the tests); `m = ax - m;` / `m = ay - m;` before the 0x1d/8/0x10 tests (game reuses m's s0);
@@ -31,13 +41,6 @@ typedef struct {
 extern int rcos(int);
 extern int rsin(int);
 
-static __inline__ short sabs(short x)
-{
-    short r;
-    if (x < 0) r = -x; else r = x;
-    return r;
-}
-
 #define o (&p->t)
 int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
 {
@@ -46,30 +49,33 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     unsigned short dx, dy;
     int cx;
     int cy;
-    register short ax asm("$4");
-    register short ay asm("$6");
     short m;
-    register short k asm("$4");
-    short a0;
+    short k;
     short fy;
     short fx;
-    int base, b; short r;
+    int base, b;
+    short ax;
+    short ay;
+    asm("" : "=r"(ang) : "0"(ang));
+asm("" : "=r"(cx) : "0"(cx));
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = p->we8 - e->h->p.whole;
-    if ((unsigned short)(e->box0 + dx) > e->box1) return 0;
+    ax = e->box0 + dx;
+    if ((unsigned short)ax > e->box1) return 0;
     dy = p->wea - e->y.p.whole;
-    if ((unsigned short)(e->box0 + dy) > e->box1) return 0;
+    ay = e->box0 + dy;
+    if ((unsigned short)ay > e->box1) return 0;
     switch (t) {
     case 1:
     case 2:
         base = (short)dy < 0 ? 0xc00 : 0;
-        b = base;
+        ax = base;
         if ((short)dx > 0) {
-            if (base) b = base - 0x400;
-            else b = 0x400;
+            if (base == 0) ax = 0x400;
+            else ax = base - 0x400;
         }
-        if ((unsigned)(((ang - b) & 0xfff) - 0x500) >= 0x901) return 0;
+        if ((unsigned)(((ang - ax) & 0xfff) - 0x500) >= 0x901) return 0;
     case 0:
         cx = (unsigned)(rcos(ang) * e->box0) >> 12;
         cy = (unsigned)(rsin(ang) * e->box0) >> 12;
@@ -77,6 +83,8 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
     }
     ax = cx;
     ay = cy;
+    asm("" : "=r"(ax) : "0"(ax));
+    asm("" : "=r"(ay) : "0"(ay));
     if (ax < 0) ax = -ax;
     if (ay < 0) ay = -ay;
     k = ax < ay;
@@ -105,12 +113,14 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
         break;
     }
     if ((k & 1) == 0) {
-        if ((unsigned short)(p->wea - (e->y.p.whole - fy) + 4) >= 9) return 0;
+        ay = p->wea - (e->y.p.whole - fy) + 4;
+        if ((unsigned short)ay >= 9) return 0;
         m = ax - m;
         if ((unsigned short)m >= 0x1d) return 0;
         switch (t) {
         case 1:
         case 2:
+asm("" :: "r"(dy));
             if ((short)cx >= 0) goto pos;
             goto neg;
         case 0:
@@ -134,30 +144,34 @@ int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
         e->w7a = t;
         return 1;
     } else {
-        a0 = (o->animFrame & 1) ? 8 : -8;
-        if (e->h->p.whole + fx < o->h->p.whole + a0) {
+        ax = (o->animFrame & 1) ? 8 : -8;
+        if (o->h->p.whole + ax > e->h->p.whole + fx) {
             if (o->b9e == 8) {
-                if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0x13) >= 0x24) return 0;
+                ax = p->we8 - (e->h->p.whole + fx) + 0x13;
+                if ((unsigned short)ax >= 0x24) return 0;
                 m = ay - m;
                 if ((unsigned short)m < 8) return 0;
             } else {
-                if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0xb) >= 0x14) return 0;
+                ax = p->we8 - (e->h->p.whole + fx) + 0xb;
+                if ((unsigned short)ax >= 0x14) return 0;
                 m = ay - m;
                 if ((unsigned short)m < 0x10) return 0;
             }
-            r = fx + 8;
+            o->wba = dy;
+            o->wb8 = fx + 8;
         } else {
             if (o->b9e == 8) {
-                if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0x10) >= 0x24) return 0;
+                ax = p->we8 - (e->h->p.whole + fx) + 0x10;
+                if ((unsigned short)ax >= 0x24) return 0;
             } else {
-                if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 8) >= 0x14) return 0;
+                ax = p->we8 - (e->h->p.whole + fx) + 8;
+                if ((unsigned short)ax >= 0x14) return 0;
             }
             m = ay - m;
             if ((unsigned short)m < 8) return 0;
-            r = fx - 8;
+            o->wba = dy;
+            o->wb8 = fx - 8;
         }
-        o->wba = dy;
-        o->wb8 = r;
         e->b69 = 1;
         if ((short)dx > 0) dx += 10;
         else if ((short)dx < 0) dx -= 10;
