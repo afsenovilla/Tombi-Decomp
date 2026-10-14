@@ -1,9 +1,9 @@
 // FUNC 80056420 2604 MAIN0
-/* score 35 (was 352). o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
-   f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: prologue puts `sw $17; move
-   $17,$4` first in the game; o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
+/* score 31 (was 352). Prologue fixed by declaring sp/ft/ti uninitialised and assigning them after f = o->f. o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
+   f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
    $2 so its two stores get scheduled after the y stores; uv block has a few scheduling/reg diffs ($3 vs $6 for u1).
-   Tried: pins on k/h/x/y (worse), f as int/volatile/unpinned, separate h2/w2, x+w temp forms. */
+   Tried: pins on k/h/x/y (worse), f as int/volatile/unpinned, separate h2/w2, x+w temp forms ({short t}, $2 pin, x1/x3 split),
+   uv statement permutations (all 35), asm("") in uv block (200+), w unpinned / w2 split (49-58), fu in $5 (combined away). */
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -48,9 +48,9 @@ extern void SetDrawMode(void *, int, int, int, void *);
 void drawBalloonFrame(R *o_, short c, short tp)
 {
     register R *o asm("$17") = o_;
-    SPRT *sp = (SPRT *)0x1f800000;
-    POLY_FT4 *ft = (POLY_FT4 *)0x1f800014;
-    TILE *ti = (TILE *)0x1f80003c;
+    SPRT *sp;
+    POLY_FT4 *ft;
+    TILE *ti;
     char pad[96];
     short pos[4][8];
     int k;
@@ -60,7 +60,9 @@ void drawBalloonFrame(R *o_, short c, short tp)
     short h;
     int i;
     void *p;
-    register short f asm("$4") = o->f;
+    register short f asm("$4");
+    f = o->f;
+    sp = (SPRT *)0x1f800000; ft = (POLY_FT4 *)0x1f800014; ti = (TILE *)0x1f80003c;
     if (f != -1 && (unsigned)(k = f >> 12) < 8) {
         setlen(ft, 9);
         ft->code = 0x2c;
