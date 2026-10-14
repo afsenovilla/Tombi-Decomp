@@ -1,7 +1,11 @@
 // FUNC 8011752c 1020 X010
-/* score 92 (was 192): each loop has its own function-scope locals (a1..w1, a2..w2, ...; 274 unpinned), then greedy
-   register pins (a2=$4 d2=$5 c2=$6 a3=$4 b2=$9 d4=$5 a4=$6 b4=$4). Left: loops 1/3 regs. Earlier (192): masks via one
-   reused temp t, shifts in place, separate x/y/z/w, p/n update after the |= stores. */
+/* score 80 (was 92): loop 1 now shifts b out of place (d1 = b1 >> 24, game v1 -> a3) and writes the adds to fresh
+   x1/y1/z1, all loop-1 locals pinned (a1=$4 b1=$3 c1=$5 d1=$7 x1=$3 y1=$8 z1=$9). Left: the game delays the LAST
+   element's sra into the branch delay slot, ours delays the out-of-place one; y1/z1 pins make the |= shifts in place.
+   Loops 2-4 follow the same game pattern (loop 2: c out of place -> t1; loop 3: b -> a3; loop 4: c -> t1, results
+   x in v1, then t0, t1), but the same rewrite there plus a fresh greedy pin search scored worse (76-126).
+   Earlier (92): each loop has its own function-scope locals, greedy pins for loops 2/4. (192): one reused mask temp t,
+   shifts in place, separate x/y/z/w, p/n update after the |= stores. */
 #include "TOBJ.H"
 
 typedef struct { char p0[0xe]; unsigned short uv0; char p1[6]; unsigned short uv1; char p2[6]; unsigned short uv2; } FT3;
@@ -13,13 +17,13 @@ void func_8011752C(TObj *o)
 {
     char *p;
     short n;
-    int a1;
-    int b1;
-    int c1;
-    int d1;
-    int x1;
-    int y1;
-    int z1;
+    register int a1 asm("$4");
+    register int b1 asm("$3");
+    register int c1 asm("$5");
+    register int d1 asm("$7");
+    register int x1 asm("$3");
+    register int y1 asm("$8");
+    register int z1 asm("$9");
     int w1;
     int t1;
     register int a2 asm("$4");
@@ -67,10 +71,10 @@ void func_8011752C(TObj *o)
             FT3 *f = (FT3 *)p;
             a1 = f->uv0; b1 = f->uv1; c1 = f->uv2;
             { t1 = a1 & 0xff; f->uv0 = t1; t1 = b1 & 0xff; f->uv1 = t1; t1 = c1 & 0xff; f->uv2 = t1; }
-            a1 <<= 16; a1 >>= 24; b1 <<= 16; b1 >>= 24; c1 = (short)c1 >> 8;
-            if (o->w22 & 1) { x1 = a1 + 0x60; y1 = b1 + 0x60; c1 = c1 + 0x60; }
-            else { x1 = a1 - 0x60; y1 = b1 - 0x60; c1 = c1 - 0x60; }
-            f->uv0 |= x1 << 8; f->uv1 |= y1 << 8; f->uv2 |= c1 << 8;
+            a1 <<= 16; a1 >>= 24; b1 <<= 16; d1 = b1 >> 24; c1 <<= 16; c1 >>= 24;
+            if (o->w22 & 1) { x1 = a1 + 0x60; y1 = d1 + 0x60; z1 = c1 + 0x60; }
+            else { x1 = a1 - 0x60; y1 = d1 - 0x60; z1 = c1 - 0x60; }
+            f->uv0 |= x1 << 8; f->uv1 |= y1 << 8; f->uv2 |= z1 << 8;
             p += sizeof(FT3);
             n--;
         }
