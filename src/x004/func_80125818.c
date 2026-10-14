@@ -1,15 +1,7 @@
 // FUNC 80125818 3148 X004
-/* opusAA: score 2 = only `sh s0,0xbc` (case 3 wbc = 1) is scheduled before the mult instead of after it
-   (tried 3-statement permutations with an m temp (short/int, % before/after), U16, += 1, barriers: all 2-4).
-   `asm("" ::: "memory")` barriers after the SETANIM in case 0 (itbrute) and case 4 put the lbu substep first.
-   Before: score 11, exactly 787 instrs, fake nop removed. near() is now a statement-expression macro NEAR(o)
-   with `short s` and the result `r_ = s == 1 && dy < 0xf8` (gives the game's a0 result, a1 dy and `move v1,s0`).
-   case 5: block-local p pinned $3, wba as `register int w asm("$4")` + asm bump, `pv = w + (pv - q)`.
-   case 8: `({ register int x asm("$3") = t2 + 4; register unsigned r asm("$2") = (unsigned short)x; r < 8; })`.
-   case 10: t3 pinned $3 (`t3 = PLAYER.y; t3 -= U16(o->y)` + bump), o->h via `register Fix16 *hp asm("$4")`,
-   and the dy test as an unsigned v0-pinned temp. Left (11): `lbu substep` scheduled after the li in three
-   setanim+substep++ tails (cases 0/4), and `sh s0,0xbc` (wbc = 1) in the mult shadow in case 3 (statement
-   reorders tried: 11-35). */
+// MATCHING 80125818 3148
+/* Matched (opusAB): case 3 sets the anim without the SETANIM do/while(0): its NOTE_INSN_LOOP_END made the next insn
+   (sh wbc) a scheduling barrier; an asm("") after `o->wac = 1` keeps the pre-call order. */
 #include "spad.h"
 #include "player.h"
 /* score 159 (opusS, was 204; 3152 of 3148 B, one fake nop): substep AI with 11 cases. opusS applied the three
@@ -126,7 +118,9 @@ void func_80125818(TObj *o)
         }
         if (o->velV >= 0 || FUN_800411cc(o, o->h->p.whole, o->y.p.whole - 0x18)) {
             o->wac = 1;
-            SETANIM(D_801345B8)
+            asm("");
+            o->anim = D_801345B8;
+            AnimLoadDuration(o);
             o->wbc = 1;
             o->substep++;
             o->w22 = 0xf0 - o->w22 % 40;
