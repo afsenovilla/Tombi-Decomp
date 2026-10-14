@@ -1,14 +1,14 @@
 // FUNC 801161d4 488 X014
 // MATCHING 801161d4 488
+#include "spad.h"
+#include "gv6.h"
+#include "gvars.h"
 /* Whole function (csv pieces func_80116258/func_801162B8 start inside it; 0x80116100..0x801161d4 is jump-table data). */
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj PLAYER;
-extern unsigned char D_8009C939, D_8009C93F, D_800A60D6;
-extern unsigned short D_8009D670;
-extern short D_1F8000F2;
-extern int D_1F8000F0;
+extern unsigned char D_800A60D6;
 extern void FUN_80027c74(TObj *);
 extern void func_8002795C(TObj *);
 extern void syncObjectTargetY(TObj *);
@@ -23,7 +23,7 @@ void func_801161D4(TObj *o)
     TObj *p = &PLAYER;
     int t;
 
-    if (D_8009C939 == 0) {
+    if (GVARS.b39 == 0) {
         switch (D_800A60D6) {
         case 4:
             if ((*(unsigned char*)((char*)&p->wa8 + 1)) == 0) goto c4;
@@ -77,9 +77,9 @@ void func_801161D4(TObj *o)
     }
     FUN_80028be0(o);
     stepScrollApproachX(o);
-    if (D_8009C93F == 0 && p->b9e == 0 && (*(volatile unsigned short *)&D_8009D670 & 0xc00))
+    if (GVARS.b3f == 0 && p->b9e == 0 && (*(volatile unsigned short *)&GV6.s70 & 0xc00))
         FUN_800288c4(o, 1);
     FUN_800274e4(o);
-    if (D_1F8000F2 > (*(short*)((char*)&o->d30 + 2))) D_1F8000F0 = (*(short*)((char*)&o->d30 + 2)) << 16;
+    if ((*(short*)((char*)&SPAD.if0 + 2)) > (*(short*)((char*)&o->d30 + 2))) SPAD.if0 = (*(short*)((char*)&o->d30 + 2)) << 16;
     FUN_8002771c(o);
 }

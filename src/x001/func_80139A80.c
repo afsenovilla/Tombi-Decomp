@@ -1,16 +1,16 @@
 // FUNC 80139a80 172 X001
 // MATCHING 80139a80 172
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDB2;
 extern TObj *allocObjectLayer2(void);
 
 void func_80139A80(TObj *o)
 {
     TObj *n;
 
-    if (D_8009CDB2 < 2) {
+    if (GCD.bcdb2 < 2) {
         if (GAME.area00_eventControl & 0x100) {
             o->b04 = 3;
         } else {

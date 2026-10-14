@@ -1,9 +1,8 @@
 // FUNC 8012552c 456 X003
 // MATCHING 8012552c 456
+#include "spad.h"
 #include "TOBJ.H"
 extern void *D_80138E94;
-extern int D_1F8002D4[];
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
 extern int FUN_800202b4(TObj *);
 extern void func_8012526C(TObj *);
 extern void func_801253B0(TObj *);
@@ -11,9 +10,9 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ int near(TObj *o)
 {
-    if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) >= 0x5b) return 0;
-    if ((short)(D_1F80016E - o->y.p.whole) < -0xb0) return 0;
-    return (unsigned short)(o->h->p.whole - D_1F80016A + 0x10) < 0x21;
+    if ((unsigned short)(o->d->p.whole - (*(unsigned short*)((char*)&SPAD.i170 + 2)) + 0x2d) >= 0x5b) return 0;
+    if ((short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole) < -0xb0) return 0;
+    return (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x10) < 0x21;
 }
 
 void func_8012552C(TObj *o)
@@ -28,7 +27,7 @@ void func_8012552C(TObj *o)
         o->box3 = 0x10;
         o->animFrame = 1;
         o->anim = D_80138E94;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->b6b = 0;
         o->b6a = 0;
         o->b69 = 0;

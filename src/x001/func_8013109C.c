@@ -1,13 +1,13 @@
 // FUNC 8013109c 604 X001
 // MATCHING 8013109c 604
+#include "spad.h"
+#include "gcd.h"
 /* size 604: the csv piece 801312E4 (20 B) is this function's epilogue. */
 #include "TOBJ.H"
 
-extern short D_1F80027E;
 extern void *D_8013E740[];
 extern void *D_8013E74C[];
 extern void *D_8013E750[];
-extern unsigned char D_8009CEDF;
 extern short FUN_80040278(TObj *, short, short);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -16,7 +16,7 @@ extern void applyFrameVelocityXY(TObj *);
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        o->d84 = (-D_1F80027E << 2) & 0xff;
+        o->d84 = (-SPAD.s27e << 2) & 0xff;
         return 1;
     }
     return 0;
@@ -71,7 +71,7 @@ void func_8013109C(TObj *o)
         o->d8c = o->d84;
         o->state++;
         setAnim(o, D_8013E740[0]);
-        { unsigned char *c = &D_8009CEDF; *c = *c + 0xfe; }
+        { unsigned char *c = &GCD.bcedf; *c = *c + 0xfe; }
         break;
     case 5:
         break;

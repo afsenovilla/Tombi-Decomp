@@ -1,7 +1,7 @@
 // FUNC 800425c4 764 MAIN0
 // MATCHING 800425c4 764
+#include "gvars.h"
 #include "TOBJ.H"
-extern TObj *D_8009C934;
 extern TObj *D_8009C934_a[]; /* same global */
 
 int func_800425C4(TObj *o, TObj *p, int r)
@@ -48,7 +48,7 @@ int func_800425C4(TObj *o, TObj *p, int r)
         break;
     case 8:
         r = 2;
-        d = &D_8009C934;
+        d = &(*(TObj **)&GVARS.i34);
         p->b68 = 0;
         *d = 0;
         o->ba5 = 0;
@@ -59,7 +59,7 @@ int func_800425C4(TObj *o, TObj *p, int r)
         if (c == 4) {
             switch (p->type) {
             case 0x24:
-                D_8009C934 = p;
+                (*(TObj **)&GVARS.i34) = p;
                 p->b68 = 1;
                 o->b69 = 1;
                 o->a.p.whole = p->a.p.whole;
@@ -69,7 +69,7 @@ int func_800425C4(TObj *o, TObj *p, int r)
             case 4:
             case 5:
             case 0x1d:
-                D_8009C934 = p;
+                (*(TObj **)&GVARS.i34) = p;
                 p->b68 = 1;
                 o->b69 = 1;
                 if (o->y.p.whole < p->y.p.whole)
@@ -111,7 +111,7 @@ int func_800425C4(TObj *o, TObj *p, int r)
             case 5:
             case 0x1d:
             case 0x24:
-                D_8009C934 = p;
+                (*(TObj **)&GVARS.i34) = p;
             case 3:
             case 6:
             case 0xb:

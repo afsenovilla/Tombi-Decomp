@@ -1,5 +1,8 @@
 // FUNC 80101938 1084 X002
 // MATCHING 80101938 1084
+#include "plx.h"
+#include "gv2.h"
+#include "gvars.h"
 typedef struct P { unsigned char b0; char p0[7]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; unsigned short h2c; unsigned short h2e; } P;
 typedef struct O {
     unsigned char active; unsigned char visible; unsigned char type; char p00[3]; unsigned char state; char p07[0x16-7];
@@ -13,14 +16,10 @@ typedef struct O {
 typedef struct E { char p0[4]; unsigned char b4, b5, b6; } E;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned char D_8009D2AF;
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
-extern unsigned char D_8009C93A;
 extern unsigned char TALK_POSE;
 extern char D_80010748[];
 extern E *D_8009D2E8;
-extern E *D_800A611C;
-extern int D_8009C934;
 extern O *D_8009F0EC;
 extern void AnimJump(O *, int);
 extern int AnimAdvance(O *);
@@ -72,13 +71,13 @@ void func_80101938(O *o)
             o->he0 = 0x8c;
         o->w22 = 0;
         if (o->bac >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(E **)&PLX.p611c);
             D_8009D2E8->b4 = 2;
             D_8009D2E8->b5 = 2;
             D_8009D2E8->b6 = 0;
         }
         o->bac = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         o->bc7 = 1;
         o->b9d = 0;
         o->bc6 = 0;
@@ -99,8 +98,8 @@ void func_80101938(O *o)
         if (o->b69 == 1 || ObjTileCollide(o, 4, 0) != 0) {
             land(o);
             if (D_8009D2AFa[0] == 0) {
-                D_8009D2AF = 1;
-                D_8009C93A = 1;
+                GV2.baf = 1;
+                GVARS.b3a = 1;
             }
             o->state = 2;
         }
@@ -126,8 +125,8 @@ void func_80101938(O *o)
             SfxPlay3(0x1c, 0x7f);
             land(o);
             if (D_8009D2AFa[0] == 0) {
-                D_8009D2AF = 1;
-                D_8009C93A = 1;
+                GV2.baf = 1;
+                GVARS.b3a = 1;
             }
             o->state++;
         }

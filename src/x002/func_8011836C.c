@@ -1,10 +1,10 @@
 // FUNC 8011836c 456 X002
 // MATCHING 8011836c 456
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w4; short idx; void **anims; } T12;
 extern T12 D_8011C770[];
 extern int SPR_DATA[];
-extern int D_1F800304[];
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_8005e420(int, int);
 
@@ -27,7 +27,7 @@ void func_8011836C(TObj *o)
     if (o->subtype == 1) {
         o->b0d = 0x81;
         o->w08 = FUN_8005e420(0x80, 0x1f9);
-        o->d3c = D_1F800304[0];
+        o->d3c = ((int*)&SPAD.i304)[0];
     }
     if (o->subtype != 0) o->active = 2;
     o->b0a = 0;

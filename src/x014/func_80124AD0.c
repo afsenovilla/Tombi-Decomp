@@ -1,10 +1,11 @@
 // FUNC 80124ad0 1112 X014
 // MATCHING 80124ad0 1112
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern short D_80126718[];
-extern short D_1F80027E, D_1F800284;
+extern short D_1F80027E;
 extern int func_8012491C(TObj *o);
 extern int func_801249D0(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -13,7 +14,7 @@ extern short func_8004065C(TObj *o, short x, short y, int k);
 static __inline__ int land(TObj *o)
 {
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 10)) {
-        o->wae = D_1F800284;
+        o->wae = SPAD.s284;
         o->wb2 = D_1F80027E;
         return 1;
     }

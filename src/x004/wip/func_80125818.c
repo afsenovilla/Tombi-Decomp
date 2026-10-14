@@ -1,4 +1,5 @@
 // FUNC 80125818 3148 X004
+#include "spad.h"
 #include "player.h"
 /* score 222 (draft, 3136 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
    (used twice) and the per-case wbc tick. o35: case 4's k test is `switch (k) { case 0: ... case 1: ... }` (439->222).
@@ -15,7 +16,6 @@ typedef struct {
 #define U16(f) (*(unsigned short *)&(f))
 extern void *D_801345B8, *D_8013460C, *D_80134610, *D_801345CC, *D_801345D0;
 extern char D_80077CDC[], D_80077D0C[], D_80077D84[];
-extern short D_1F8001C8;
 extern short D_80131148[];
 extern unsigned short D_80131128[];
 extern int Rand(void);
@@ -160,12 +160,12 @@ void func_80125818(TObj *o)
     case 5:
         if (o->animFrame) d = -0x20;
         else d = 0x20;
-        if (D_1F8001C8)
+        if ((*(short*)&SPAD.s1c8))
             t = o->b.p.whole - o->d38;
         else
             t = o->a.p.whole - o->d30;
         t += U16(o->wba);
-        if (--o->w22 == 0 || (unsigned short)t < U16(o->wba) * 2 || X(o)->wc0 != D_1F8001C8 ||
+        if (--o->w22 == 0 || (unsigned short)t < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
             FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x28;
             o->wac = 1;
@@ -210,7 +210,7 @@ void func_80125818(TObj *o)
     case 8:
         if (o->animFrame) d = -0x20;
         else d = 0x20;
-        if (D_1F8001C8)
+        if ((*(short*)&SPAD.s1c8))
             t = o->b.p.whole - o->d38;
         else
             t = o->a.p.whole - o->d30;
@@ -223,7 +223,7 @@ void func_80125818(TObj *o)
         applyAnimVelocityX(o, o->animFrame);
         break;
     case 9:
-        if (D_1F8001C8 == 0)
+        if ((*(short*)&SPAD.s1c8) == 0)
             t = X(o)->wc4 - o->h->p.whole;
         else
             t = X(o)->wc8 - o->h->p.whole;
@@ -233,7 +233,7 @@ void func_80125818(TObj *o)
             break;
         }
         a.x = o->h->p.whole;
-        if (D_1F8001C8 == 0)
+        if ((*(short*)&SPAD.s1c8) == 0)
             b.x = X(o)->wc4;
         else
             b.x = X(o)->wc8;

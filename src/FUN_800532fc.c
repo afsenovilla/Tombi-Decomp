@@ -1,6 +1,7 @@
 // FUNC 800532fc 2144 MAIN0
 // MATCHING 800532fc 2144
 // FLAGS -O2 -G0 -fno-strength-reduce
+#include "spad.h"
 /* Rotated FT4 sprite strip without scale (MAIN0 twin of func_80053B5C / X000 FUN_80123fd0): same macro loop body
    with A/B/C/D read straight from the frame (short C/D: D spills as sh/lhu) and f = DAT_1f800164 read before C/D so
    the lw s0 schedules above their lbu. */
@@ -22,13 +23,9 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern C4C *TASK_C;
-extern short D_1F800060[];
-extern short D_1F800062, D_1F800064;
-extern long D_1F80008C;
 extern long LZ_FILE_CTRL;
 extern int D_1F800078;
-extern long D_1F800074;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0b[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
@@ -43,12 +40,12 @@ extern short D_8007A3F0[];
 
 static __inline__ int proj(void)
 {
-    gte_ldv0(D_1F800060);
+    gte_ldv0(((short*)&SPAD.s60));
     gte_rtps();
-    gte_stflg(&D_1F80008C);
-    if (D_1F80008C < 0) return 1;
+    gte_stflg(&SPAD.i8c);
+    if (SPAD.i8c < 0) return 1;
     gte_stsxy(&LZ_FILE_CTRL);
-    gte_stszotz(&D_1F800074);
+    gte_stszotz(&SPAD.i74);
     return 0;
 }
 
@@ -97,13 +94,13 @@ void FUN_800532fc(TObj *o)
     short u, w;
 
     if (o->anim == 0) return;
-    D_1F800060[0] = o->a.p.whole;
-    D_1F800062 = o->y.p.whole;
+    ((short*)&SPAD.s60)[0] = o->a.p.whole;
+    SPAD.s62 = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
-        D_1F800064 = o->b.p.whole >> 2;
+        SPAD.s64 = o->b.p.whole >> 2;
     else
-        D_1F800064 = o->b.p.whole;
-    SetRotMatrix(D_1F8000C0);
+        SPAD.s64 = o->b.p.whole;
+    SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
     xy = LZ_FILE_CTRL;
@@ -158,7 +155,7 @@ void FUN_800532fc(TObj *o)
             if (o->b0b) {
                 if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, 0, o->b0f, 0x9000000)) goto next;
             } else {
-                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, D_1F800074, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
             }
             DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
         }

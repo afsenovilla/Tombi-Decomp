@@ -1,10 +1,9 @@
 // FUNC 8011617c 600 X011
 // MATCHING 8011617c 600
+#include "spad.h"
 #include "TOBJ.H"
 extern void *D_8011C2AC[];
 extern void *D_8011C2B8[];
-extern int D_1F8002D4;
-extern unsigned short D_1F800176, D_1F800186[];
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -51,14 +50,14 @@ void func_8011617C(TObj *o)
             o->anim = D_8011C2B8[o->b0c];
             break;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         FUN_8001fe6c(o);
         break;
     case 1:
         if (o->subtype != 1) {
             o->visible = 1;
-            o->a.p.whole = o->d30 - D_1F800176;
-            o->y.p.whole = o->d34 - D_1F800186[0];
+            o->a.p.whole = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
+            o->y.p.whole = o->d34 - ((unsigned short*)&SPAD.s186)[0];
             FUN_80018ca4(o);
             FUN_8001fec0(o);
         }

@@ -1,5 +1,6 @@
 // FUNC 800ecd88 668 X001
 // MATCHING 800ecd88 668
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
@@ -7,7 +8,6 @@ extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
 extern SVECTOR D_1f800068;
 extern long LZ_FILE_CTRL;
 extern char *D_1F800164;
-extern int D_1F8001E0;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006481c(int, MATRIX *);
 extern void FUN_800644dc(int, MATRIX *);
@@ -77,13 +77,13 @@ void FUN_800ecd88(TObj *o)
     gte_avsz4();
     gte_stotz(&LZ_FILE_CTRL);
     gte_stsxy(p + 0x20);
-    insertPrimWithBias(p, D_1F8001E0 + 0x10, LZ_FILE_CTRL, (signed char)o->b0f, 0x8000000);
+    insertPrimWithBias(p, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->b0f, 0x8000000);
     D_1F800164 += 0x24;
     q = (unsigned char *)D_1F800164;
     if (GetGraphType() == 1) m = 0x80;
     else if (GetGraphType() == 2) m = 0x80;
     else m = 0x20;
     SetDrawMode(q, 0, 0, m, 0);
-    AddPrim((int *)D_1F8001E0 + (LZ_FILE_CTRL + 4) + (signed char)o->b0f, q);
+    AddPrim((int *)SPAD.i1e0 + (LZ_FILE_CTRL + 4) + (signed char)o->b0f, q);
     D_1F800164 += 0xc;
 }

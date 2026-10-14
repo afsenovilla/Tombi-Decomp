@@ -1,8 +1,8 @@
 // FUNC 8011fc84 156 X003
 // MATCHING 8011fc84 156
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001A4;
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int, int);
 
@@ -11,7 +11,7 @@ void func_8011FC84(TObj *o, TObj *p)
     int v;
 
     if (o->active & 2) return;
-    if (D_1F8001A4 != 0) return;
+    if (SPAD.b1a4 != 0) return;
     if (boxesOverlap(o, p) == 0) return;
     v = 2;
     o->active = v;

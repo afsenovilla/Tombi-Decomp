@@ -1,9 +1,8 @@
 // FUNC 8012e950 204 X004
 // MATCHING 8012e950 204
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { unsigned short anim, sub, b0c, x, y, z; } Spawn;
-extern unsigned char D_8009CF2D;
-extern unsigned char D_8009CF29[];
 extern Spawn D_8013144C;
 extern TObj *allocObjectLayer2(void);
 
@@ -11,7 +10,7 @@ void func_8012E950(TObj *o)
 {
     TObj *p;
 
-    if (D_8009CF2D == 0) {
+    if (GCD.bcf2d == 0) {
         p = allocObjectLayer2();
         if (p != 0) {
             p->active = 3;
@@ -23,7 +22,7 @@ void func_8012E950(TObj *o)
             p->y.p.whole = D_8013144C.y;
             p->b.p.whole = D_8013144C.z;
             p->b6b = 0;
-            D_8009CF29[0] = 0;
+            ((unsigned char*)&GCD.bcf29)[0] = 0;
         }
     }
     o->b04++;

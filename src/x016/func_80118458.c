@@ -1,14 +1,14 @@
 // FUNC 80118458 972 X016
 // MATCHING 80118458 972
+#include "spad.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_80118D34[];
-extern unsigned char D_8009D2B0;
-extern unsigned char D_8009C942, D_8009C940;
-extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -24,8 +24,8 @@ void func_80118458(TObj *o)
     switch (o->state) {
     case 0:
         v = *(V6 *)&o->a;
-        D_8009C942 = 1;
-        D_8009D2B0 = 2;
+        GVARS.b42 = 1;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -78,9 +78,9 @@ void func_80118458(TObj *o)
         o->state = 9;
         break;
     case 9:
-        D_1F8001C6 = 0;
-        D_8009C942 = 0;
-        D_8009C940 = 0;
+        SPAD.s1c6 = 0;
+        GVARS.b42 = 0;
+        GVARS.b40 = 0;
         PLAYER.obj.wb2 = 0;
         o->anim = D_80118D34[o->subtype].anims[0];
         AnimJump(o, 0);

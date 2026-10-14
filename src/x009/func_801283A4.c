@@ -1,11 +1,11 @@
 // FUNC 801283a4 1300 X009
 // MATCHING 801283a4 1300
+#include "gvars.h"
 /* D_800A6047 is the b0f field of the player TObj PLAYER (struct access keeps it after the anim store);
    the case-1 tails goto the shared `clr: o->b9d = 0` after case 2's step switch. */
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C942;
 extern TObj PLAYER;
 extern void *D_8012EE9C[];
 extern int ObjCullRegister(TObj *);
@@ -40,7 +40,7 @@ void func_801283A4(TObj *o)
         func_80128180(o);
         break;
     case 1:
-        if (D_8009C942 && o->b6a != 2) {
+        if (GVARS.b42 && o->b6a != 2) {
             ObjCullRegister(o);
             break;
         }

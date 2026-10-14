@@ -1,16 +1,16 @@
 // FUNC 8012a740 376 X004
 // MATCHING 8012a740 376
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w; short idx; void **ptrs; } E;
 extern E D_801311C8[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CF2D;
 extern void FUN_8001fe6c(TObj *);
 
 void func_8012A740(TObj *o)
 {
-    if (D_8009CF2D == 0) {
+    if (GCD.bcf2d == 0) {
         o->box0 = D_801311C8[o->subtype].b0;
         o->box1 = D_801311C8[o->subtype].b1;
         o->box2 = D_801311C8[o->subtype].b2;

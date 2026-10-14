@@ -1,9 +1,9 @@
 // FUNC 8012d4ac 732 X004
 // MATCHING 8012d4ac 732
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_80135748[], *D_8013577C[], *D_801357CC[], *D_801357D8[];
-extern int D_1F8002DC;
 extern int GetClut(int, int);
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
@@ -69,7 +69,7 @@ void func_8012D4AC(TObj *o)
             o->anim = D_801357D8[0];
             break;
         }
-        o->d3c = D_1F8002DC;
+        o->d3c = SPAD.i2dc;
         AnimLoadDuration(o);
         break;
     case 1:

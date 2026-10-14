@@ -1,8 +1,8 @@
 // FUNC 800fbcec 200 X008
 // MATCHING 800fbcec 200
+#include "gv6.h"
 #include "TOBJ.H"
-extern unsigned short D_8009D670;
-#define PAD (*(volatile unsigned short *)&D_8009D670)
+#define PAD (*(volatile unsigned short *)&GV6.s70)
 
 void func_800FBCEC(TObj *o)
 {

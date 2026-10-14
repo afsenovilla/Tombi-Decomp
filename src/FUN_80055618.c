@@ -1,5 +1,6 @@
 // FUNC 80055618 1696 MAIN0
 // MATCHING 80055618 1696
+#include "spad.h"
 /* Matching debt: the `__asm__ volatile("")` barrier after `p->u0 = u` in setuvwh (twice).
    Without it sched2 ties sb u0 against addu u+w (both priority 6) and schedule_select always
    prefers the store (potential_hazard of the memory unit beats an ALU insn), giving score 4.
@@ -25,12 +26,8 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern C4C *TASK_C;
-extern short D_1F800060[];
-extern short D_1F800062, D_1F800064;
-extern long D_1F80008C;
 extern unsigned long LZ_FILE_CTRL;
-extern long D_1F800074;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0b[];
 extern ROW LOAD_BUFFER[];
 extern short **D_800a4468;
 extern short *D_800b0bb0;
@@ -48,12 +45,12 @@ extern void SetSemiTrans(void *, int);
 
 static __inline__ int proj(void)
 {
-    gte_ldv0(D_1F800060);
+    gte_ldv0(((short*)&SPAD.s60));
     gte_rtps();
-    gte_stflg(&D_1F80008C);
-    if (D_1F80008C < 0) return 1;
+    gte_stflg(&SPAD.i8c);
+    if (SPAD.i8c < 0) return 1;
     gte_stsxy(&LZ_FILE_CTRL);
-    gte_stszotz(&D_1F800074);
+    gte_stszotz(&SPAD.i74);
     return 0;
 }
 
@@ -87,13 +84,13 @@ void FUN_80055618(TObj *o)
     unsigned char w;
     int h;
 
-    D_1F800060[0] = o->a.p.whole;
-    D_1F800062 = o->y.p.whole;
+    ((short*)&SPAD.s60)[0] = o->a.p.whole;
+    SPAD.s62 = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
-        D_1F800064 = o->b.p.whole >> 2;
+        SPAD.s64 = o->b.p.whole >> 2;
     else
-        D_1F800064 = o->b.p.whole;
-    SetRotMatrix(D_1F8000C0);
+        SPAD.s64 = o->b.p.whole;
+    SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
     xy = LZ_FILE_CTRL;

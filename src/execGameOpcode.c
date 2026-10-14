@@ -1,5 +1,8 @@
 // FUNC 8003afb4 2888 MAIN0
 // MATCHING 8003afb4 2888
+#include "plx.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "scriptctx.h"
 typedef struct { short s0, s2; } S2;
@@ -8,8 +11,8 @@ extern S2 *D_800A6078, *D_800A607C[];
 extern short D_800A604C[];
 extern unsigned char SCRIPT_FLAGS[];
 extern signed char D_8009D2B0;
-extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1, D_8009D2B1, D_800A611A;
-extern unsigned char D_8009C93A, D_8009C942, D_8009C975, D_8009C93C, D_8009C976;
+extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1;
+extern unsigned char D_8009C975, D_8009C93C, D_8009C976;
 extern short D_800A6066;
 extern int D_8009C96C;
 extern char PLAYER[];
@@ -329,7 +332,7 @@ static __inline__ int op9b(void)
 static __inline__ int op9c(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    D_8009C942 = g->arg[0];
+    GVARS.b42 = g->arg[0];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -434,7 +437,7 @@ static __inline__ int opa6(void)
 static __inline__ int opa7(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    g->arg[0] = D_8009D2B1;
+    g->arg[0] = GV2.bb1;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -442,7 +445,7 @@ static __inline__ int opa7(void)
 static __inline__ int opa8(void)
 {
     char *p = (char *)SCRIPT_CTX;
-    *(int *)(p + 0x1190) = D_800A611A;
+    *(int *)(p + 0x1190) = PLX.b611a;
     *(unsigned short *)(p + 0x8a) += 1;
     return 1;
 }
@@ -483,7 +486,7 @@ static __inline__ int opab(void)
 
 static __inline__ int op97(void)
 {
-    if (D_8009C93A == 0) return 0;
+    if (GVARS.b3a == 0) return 0;
     FUN_8003a89c();
     return 1;
 }

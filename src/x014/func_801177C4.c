@@ -1,7 +1,7 @@
 // FUNC 801177c4 264 X014
 // MATCHING 801177c4 264
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8012A028[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -26,7 +26,7 @@ void func_801177C4(TObj *o)
         }
         o->d8c = 0;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_8012A028[o->subtype];
         AnimLoadDuration(o);
         break;

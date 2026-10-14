@@ -1,5 +1,8 @@
 // FUNC 80117d70 696 X002
 // MATCHING 80117d70 696
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
@@ -10,14 +13,9 @@ typedef struct {
     unsigned short wd2;
 } TO2;
 extern AT D_8011C778[];
-extern unsigned char D_8009C942[];
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009D2B0;
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern unsigned char D_8009CE41[];
-extern unsigned char D_8009CE44[];
 extern void setEventStarted(int, int, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -30,9 +28,9 @@ void func_80117D70(TO2 *o)
     case 0:
         if (o->t.b68 == 0) break;
         v = *(V6 *)&o->t.a;
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
-        D_8009D2B0 = 2;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -43,7 +41,7 @@ void func_80117D70(TO2 *o)
         }
         o->t.wbc = o->t.animFrame;
         o->t.animFrame = o->t.b68 & 1;
-        if (D_8009CE41[0] == 0xff) {
+        if (((unsigned char*)&GCD.bce41)[0] == 0xff) {
             o->t.d90 = showMessageBoxDirect(7, 0xb, &v);
         } else {
             o->t.d90 = showMessageBoxDirect(7, 6, &v);
@@ -62,7 +60,7 @@ void func_80117D70(TO2 *o)
         }
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->t.timer = 4;
-        if (D_8009CE44[0] == 0) {
+        if (((unsigned char*)&GCD.bce44)[0] == 0) {
             setEventStarted(0xa0, 0, 0);
             o->t.timer = 200;
         }
@@ -75,8 +73,8 @@ void func_80117D70(TO2 *o)
         }
         break;
     case 9:
-        D_8009C942[0] = 0;
-        D_8009C93F[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->t.animFrame = o->t.wbc;
         D_1F8001C6 = 0;

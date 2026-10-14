@@ -1,9 +1,9 @@
 // FUNC 80045600 132 MAIN0
 // MATCHING 80045600 132
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj o; char p[0xe4 - 0xc0]; TObj *e4; } TObjX;
 extern short func_8004306C(TObjX *o, TObj *p);
-extern short D_1F80019E;
 
 void tryAttachObjectOnOverlap(TObjX *o, TObj *p)
 {
@@ -18,6 +18,6 @@ void tryAttachObjectOnOverlap(TObjX *o, TObj *p)
             o->e4 = p;
             *(unsigned char *)&o->o.wac = 2;
         }
-        D_1F80019E = 0;
+        SPAD.s19e = 0;
     }
 }

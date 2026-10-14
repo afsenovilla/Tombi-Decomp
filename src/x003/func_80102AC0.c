@@ -1,8 +1,8 @@
 // FUNC 80102ac0 1012 X003
 // MATCHING 80102ac0 1012
+#include "gv6.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8003C6, D_1F8001FC;
 extern unsigned char D_8009D2B0;
 extern void ObjMotionStep(TObj *);
@@ -80,7 +80,7 @@ void func_80102AC0(TObj *o)
         o->velY = 0;
         o->state++;
     case 3:
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x80) o->animFrame = 1;
         if (*k & 0x20) o->animFrame = 0;
         D_8009D2E8->animFrame = o->animFrame & 1;

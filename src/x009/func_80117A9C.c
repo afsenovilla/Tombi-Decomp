@@ -1,8 +1,8 @@
 // FUNC 80117a9c 340 X009
 // MATCHING 80117a9c 340
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2B1;
 extern void playSFXWithPitchSlide(int, int, int, int);
 extern void FUN_8001e4f0(int);
 
@@ -10,7 +10,7 @@ void func_80117A9C(TObj *o)
 {
     switch (o->state) {
     case 0:
-        if (D_8009D2B1 == 0) {
+        if (GV2.bb1 == 0) {
             o->state = 1;
             o->b6a = 3;
             o->timer = 0x20;

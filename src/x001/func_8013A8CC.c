@@ -1,9 +1,10 @@
 // FUNC 8013a8cc 492 X001
 // MATCHING 8013a8cc 492
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern TObj *D_800A60C8;
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C93E, D_8009C942, D_8009CEDE;
 extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_800eeae4(TObj *, int, int);
@@ -16,8 +17,8 @@ void func_8013A8CC(TObj *o)
 
     switch (o->step) {
     case 0:
-        D_8009C942 = 1;
-        D_8009C93F = 1;
+        GVARS.b42 = 1;
+        GVARS.b3f = 1;
         PLAYER.animFrame = 0;
         PLAYER.b04 = 5;
         PLAYER.step = 100;
@@ -39,11 +40,11 @@ void func_8013A8CC(TObj *o)
         p = D_800A60C8;
         if (p->b04 == 2) {
             p->b04 = 3;
-            D_8009C93A = 1;
-            D_8009C93F = 0;
-            D_8009C93E = 0;
-            D_8009C942 = 0;
-            D_8009CEDE = 1;
+            GVARS.b3a = 1;
+            GVARS.b3f = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
+            GCD.bcede = 1;
             D_800A60F8 = 0;
             D_800A603C = 1;
             D_800A603D = 0;

@@ -1,5 +1,6 @@
 // FUNC 8011a5fc 996 X014
 // MATCHING 8011a5fc 996
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,8 +9,6 @@ extern unsigned short D_80125C70[];
 extern short D_80125C9C, D_80125C9E;
 extern void *D_80129F78;
 extern int D_1F8002DCx[];
-extern unsigned char D_8009C938;
-extern TObj *D_8009C954;
 extern short D_8007A5F0[], D_8007A1F0[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -47,10 +46,10 @@ void func_8011A5FC(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        if (D_8009C938) break;
+        if (GVARS.b38) break;
         switch (((unsigned short*)&GAME.selectedSection)[0]) {
         case 0:
-            p = D_8009C954;
+            p = (*(TObj **)&GVARS.p54);
             if (!o->b6a && p) {
                 o->d8c = ((0x1000 - p->d8c) >> 4) & 0xff;
                 o->h->p.whole = p->a.p.whole;
@@ -58,7 +57,7 @@ void func_8011A5FC(TObj *o)
             }
             break;
         case 2:
-            p = D_8009C954;
+            p = (*(TObj **)&GVARS.p54);
             if (!o->b6a && p) {
                 {
                     int i = (o->d30 + 1) & 0xff;

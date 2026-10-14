@@ -1,3 +1,5 @@
+#include "spad.h"
+#include "gv2.h"
 /* score 516: first draft. Structure/size match; game keeps o in s3 and calls rcos before rsin in the BLKB blocks (cross-jumped), regs s0/s1 swapped vs ours. Sibling of X009 wip func_8011E688. */
 // FUNC 80122f54 2192 X001
 /* whole function: includes the csv piece 801231F4 */
@@ -7,8 +9,6 @@ extern TObj *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short DAT_8009d670[];
-extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_8009D2B0;
 extern int D_8009C984;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -105,10 +105,10 @@ void func_80122F54(TObj *o)
                 o->y.raw += -0x18000;
                 a = o->h->p.whole;
                 FUN_800408d8(o, (short)((o->animFrame & 1) ? a - 4 : a + 4), (short)(o->y.p.whole - 0x15));
-                if ((D_1F8001F8 & 0xf) == 0) SfxPlay2(0x1d, 0);
+                if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             } else if (*k & 0x40) {
                 PlayerSetAnimIfChanged(o, 0xc);
-                if ((D_1F8001F8 & 0xf) == 0) SfxPlay2(0x1d, 0);
+                if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
                 o->y.raw += 0x18000;
             }
         }
@@ -229,8 +229,8 @@ void func_80122F54(TObj *o)
         o->y.p.whole = g->y.p.whole + o->wba - s0;
         break;
     }
-    if (D_1F8001FC & D_1F8003C6) {
-        D_8009D2B0 = 0;
+    if (SPAD.s1fc & SPAD.s3c6) {
+        GV2.bb0 = 0;
         (*(unsigned char*)&o->waa) = 0;
         o->b9c = 1;
         o->b9e = 0;
@@ -239,7 +239,7 @@ void func_80122F54(TObj *o)
         if (o->animFrame & 1) o->h->p.whole = a + 0x10;
         else o->h->p.whole = a - 0x10;
         if (D_8009C984 & 0x40) {
-            if (DAT_8009d670[0] & D_1F8003C4) o->ba7 = 1;
+            if (DAT_8009d670[0] & SPAD.s3c4) o->ba7 = 1;
         }
         o->step = 2;
         o->state = 0;

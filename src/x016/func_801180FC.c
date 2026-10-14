@@ -1,13 +1,13 @@
 // FUNC 801180fc 860 X016
 // MATCHING 801180fc 860
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], DAT_8009d2b0;
-extern unsigned char D_8009CDAC[];
-extern unsigned char D_8009D077, D_8009D12F, D_8009D076, D_8009CDED[];
-extern short D_1F8001C6;
+extern unsigned char D_8009D12F;
 extern AT3 D_80118D34[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
@@ -32,19 +32,19 @@ void func_801180FC(TObj *o)
         AnimJump(o, 0);
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        if (D_8009CDAC[0] != 0xff) {
+        if (((unsigned char*)&GCD.bcdac)[0] != 0xff) {
             if (D_8009D12F != 0)
                 o->d90 = (int)showMessageBoxDirect(2, 0x14, &v);
-            else if (D_8009D076 == 0) {
+            else if (GCD.bd076 == 0) {
                 o->d90 = (int)showMessageBoxDirect(2, 0xd, &v);
-                D_8009D076 = 1;
+                GCD.bd076 = 1;
             } else
                 o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
             o->state = 1;
         } else {
-            if (D_8009D077 == 0) {
+            if (GCD.bd077 == 0) {
                 o->d90 = (int)showMessageBoxDirect(2, 10, &v);
-                D_8009D077 = 1;
+                GCD.bd077 = 1;
                 o->state = 1;
             } else {
                 o->d90 = (int)showMessageBoxDirect(2, 0xb, &v);
@@ -60,7 +60,7 @@ void func_801180FC(TObj *o)
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->timer = 4;
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         o->state = 2;
         break;
     case 2:
@@ -76,15 +76,15 @@ void func_801180FC(TObj *o)
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->timer = 4;
-        D_1F8001C6 = 0;
-        if (D_8009CDED[0] == 0) {
+        SPAD.s1c6 = 0;
+        if (((unsigned char*)&GCD.bcded)[0] == 0) {
             setEventStarted(0x49, 1, 1);
             o->timer = 200;
         }
         o->state = 2;
         break;
     case 9:
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
         o->anim = D_80118D34[o->subtype].p[0];

@@ -1,5 +1,8 @@
 // FUNC 80116d3c 6596 X004
 // MATCHING 80116d3c 6596
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
@@ -42,15 +45,12 @@ typedef void (*Fn)(O *);
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern E8 *D_801305DC[];
-extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C940, D_8009C942;
-extern unsigned char D_8009CDD5, D_8009CDF1, D_8009CFEE;
 extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
 extern unsigned char D_8009C982b;
-extern short D_1F80016Ax[], D_1F80016Ex[], D_1F800172;
+extern short D_1F80016Ax[], D_1F80016Ex[];
 #define D_1F80016A D_1F80016Ax[0]
 #define D_1F80016E D_1F80016Ex[0]
-extern unsigned short D_1F8001FC;
 extern short D_1F8000F2x[];
 #define D_1F8000F2 D_1F8000F2x[0]
 extern unsigned int stepScrollReturnY(O *);
@@ -74,8 +74,8 @@ extern void func_80116AE0(O *);
 #define T1(n) \
     if (tryStartItemInteraction(o, 1, n)) { \
         D_8009D2B0 = 0; \
-        D_8009C93F = 1; \
-        D_8009C942 = 1; \
+        GVARS.b3f = 1; \
+        GVARS.b42 = 1; \
     } \
     break;
 
@@ -84,14 +84,14 @@ extern void func_80116AE0(O *);
     o->w5a = k; \
     o->step = 4; \
     D_8009D2B0 = 0; \
-    D_8009C93F = 1; \
-    D_8009C942 = 1; \
+    GVARS.b3f = 1; \
+    GVARS.b42 = 1; \
     break;
 
 #define T2B(n, k) \
     if (!tryStartItemInteraction(o, 2, n)) break; \
-    D_8009C93F = 1; \
-    D_8009C942 = 1; \
+    GVARS.b3f = 1; \
+    GVARS.b42 = 1; \
     D_8009D2B0 = 0; \
     o->w5a = k; \
     o->step = 4; \
@@ -107,8 +107,8 @@ static __inline__ short blocked(void)
 {
     if (PLAYER.bac >= 2) return 1;
     if (PLAYER.b69 == 0) return 1;
-    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | D_8009C940) return 1;
-    if (D_1F8001FC & 0x10) return 0;
+    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | GVARS.b40) return 1;
+    if (SPAD.s1fc & 0x10) return 0;
     return 1;
 }
 
@@ -126,7 +126,7 @@ void func_80116D3C(O *o)
         o->step++;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         syncObjectTargetY(o);
         func_80029078(o);
@@ -136,25 +136,25 @@ void func_80116D3C(O *o)
         switch (GAME.selectedSection) {
         case 0:
             F6047();
-            if (D_1F800172 == 0x3de && (unsigned short)(ZU + 0x428) < 0x10 && (unsigned)(XU - 0x37b) < 0x12) {
+            if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x3de && (unsigned short)(ZU + 0x428) < 0x10 && (unsigned)(XU - 0x37b) < 0x12) {
                 T1(0xb);
             }
             if (p->ba2 == 2) {
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x24a) < 0x60) {
                         stepPlayerXToward(0x27a);
-                        if (D_1F800172 >= 0x358) {
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x358) {
                             T1(1);
                         }
                     }
                     if ((unsigned)(XU - 0x356) < 0x60) {
                         stepPlayerXToward(0x386);
-                        if (D_1F800172 < 0x196) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x196) break;
                         T1(2);
                     }
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
                         stepPlayerXToward(0x3e0);
-                        if (D_1F800172 < 0x196) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x196) break;
                         T1(3);
                     }
                     break;
@@ -162,12 +162,12 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x1df) {
                     if ((unsigned)(XU - 0x1ee) < 0x60) {
                         stepPlayerXToward(0x21e);
-                        if (D_1F800172 < 0x358) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x358) break;
                         T1(4);
                     }
                     if ((unsigned)(XU - 0x356) < 0x60) {
                         stepPlayerXToward(0x386);
-                        if (D_1F800172 < 0x1f0) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x1f0) break;
                         T1(5);
                     }
                     break;
@@ -175,12 +175,12 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x2ed) {
                     if ((unsigned)(XU - 0x356) < 0x60) {
                         stepPlayerXToward(0x386);
-                        if (D_1F800172 < 0x358) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x358) break;
                         T1(6);
                     }
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
                         stepPlayerXToward(0x3e0);
-                        if (D_1F800172 < 0x3b2) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x3b2) break;
                         T1(7);
                     }
                 }
@@ -188,56 +188,56 @@ void func_80116D3C(O *o)
             }
             if (blocked()) break;
             if ((unsigned)(XU - 0x1a2) < 0x40) {
-                if (D_1F800172 == 0x384) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     T1(9);
                 }
-                if (D_1F800172 == 0x32a) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x32a) {
                     T1(10);
                 }
             }
-            if ((unsigned)(XU - 0x30a) < 0x40 && D_1F800172 == 0x168) {
+            if ((unsigned)(XU - 0x30a) < 0x40 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
                 T2A(8, 0x32a);
             }
-            if ((unsigned)(XU - 0x364) < 0x40 && D_1F800172 == 0x21c) {
+            if ((unsigned)(XU - 0x364) < 0x40 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
                 T2A(8, 0x384);
             }
             if ((unsigned)(XU - 0x4cc) < 0x40) {
-                if (D_1F800172 == 0x32a) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x32a) {
                     T2A(8, 0x4ec);
                 }
-                if (D_1F800172 == 0x384) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     T2B(8, 0x4ec);
                 }
             }
-            if ((unsigned)(XU - 0x526) < 0x40 && D_1F800172 == 0x32a) {
+            if ((unsigned)(XU - 0x526) < 0x40 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x32a) {
                 T2B(8, 0x546);
             }
             break;
         case 1:
             F6047();
-            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
                 func_80116C0C(o);
                 break;
             }
-            if (D_1F80016A >= 0x653 && D_1F800172 == 0x4ec && D_1F80016E >= -0x225
+            if (D_1F80016A >= 0x653 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x4ec && D_1F80016E >= -0x225
                 && tryStartItemInteraction(o, 1, 5)) {
                 D_8009D2B0 = 0;
-                D_8009C93F = 1;
-                D_8009C942 = 1;
-                D_8009CFEE = 1;
+                GVARS.b3f = 1;
+                GVARS.b42 = 1;
+                GCD.bcfee = 1;
             }
             if (p->ba2 == 2) {
                 if (D_1F80016E < -0x12b) break;
                 if ((unsigned)(XU - 0x2a1) >= 0x60) break;
                 stepPlayerXToward(0x2d1);
-                if (D_1F800172 >= 0x519) break;
+                if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x519) break;
                 T1(1);
             }
-            if (D_1F80016A < 0x78 && D_1F800172 == 0x546) {
+            if (D_1F80016A < 0x78 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 T1(0);
             }
             if (blocked()) break;
-            switch (D_1F800172) {
+            switch ((*(short*)((char*)&SPAD.i170 + 2))) {
             case 0x32a:
                 if ((unsigned)(XU - 0x1fc) < 0x40) {
                     T2B(3, 0x21c);
@@ -277,23 +277,23 @@ void func_80116D3C(O *o)
             break;
         case 2:
             F6047();
-            if (!(GAME.purifiedAreas & 8) && D_8009CDD5 != 0xff) {
+            if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
                 func_80116AE0(o);
                 break;
             }
-            if (D_1F800172 == 0x276 && (unsigned short)(ZU + 0x415) < 0xc && (unsigned)(XU - 0x3d3) < 0x12) {
+            if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x276 && (unsigned short)(ZU + 0x415) < 0xc && (unsigned)(XU - 0x3d3) < 0x12) {
                 T1(0xa);
             }
             if (p->ba2 == 2) {
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x465) < 0x60) {
                         stepPlayerXToward(0x495);
-                        if (D_1F800172 < 0x196) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x196) break;
                         T1(1);
                     }
                     if ((unsigned)(XU - 0x352) < 0x60) {
                         stepPlayerXToward(0x382);
-                        if (D_1F800172 < 0x196) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x196) break;
                         T1(2);
                     }
                     break;
@@ -301,7 +301,7 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x1df) {
                     if ((unsigned)(XU - 0x3b0) < 0x60) {
                         stepPlayerXToward(0x3e0);
-                        if (D_1F800172 < 0x1f0) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x1f0) break;
                         T1(3);
                     }
                     break;
@@ -310,12 +310,12 @@ void func_80116D3C(O *o)
                     if (p->step != 0x20) break;
                     if ((unsigned)(XU - 0x438) < 0x60) {
                         stepPlayerXToward(0x468);
-                        if (D_1F800172 < 0x1f0) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x1f0) break;
                         T1(4);
                     }
                     if ((unsigned)(XU - 0x357) < 0x60) {
                         stepPlayerXToward(0x387);
-                        if (D_1F800172 < 0x24a) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x24a) break;
                         T1(5);
                     }
                     break;
@@ -323,35 +323,35 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x293) {
                     if ((unsigned)(XU - 0x2fb) < 0x60) {
                         stepPlayerXToward(0x32b);
-                        if (D_1F800172 < 0x24a) break;
+                        if ((*(short*)((char*)&SPAD.i170 + 2)) < 0x24a) break;
                         T1(6);
                     }
                 }
                 break;
             }
-            if (D_1F80016A >= 0x6d0 && D_1F800172 == 0x168) {
+            if (D_1F80016A >= 0x6d0 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
                 T1(7);
             }
             if (blocked()) break;
-            if (D_1F80016A < 0x28a && D_1F800172 == 0x21c) {
+            if (D_1F80016A < 0x28a && (*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
                 T1(8);
             }
             if ((unsigned)(XU - 0x580) < 0x40) {
-                if (D_1F800172 == 0x168) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
                     T2B(9, 0x5a0);
                 }
-                if (D_1F800172 == 0x1c2) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
                     T2B(9, 0x5a0);
                 }
-                if (D_1F800172 == 0x21c) {
+                if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
                     T2B(9, 0x5a0);
                 }
                 break;
             }
-            if ((unsigned)(XU - 0x526) < 0x40 && D_1F800172 == 0x21c) {
+            if ((unsigned)(XU - 0x526) < 0x40 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
                 T2B(9, 0x546);
             }
-            if ((unsigned)(XU - 0x256) < 0x40 && D_1F80016E >= -0x180 && D_1F800172 == 0x168) {
+            if ((unsigned)(XU - 0x256) < 0x40 && D_1F80016E >= -0x180 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
                 T1(0xb);
             }
             break;
@@ -361,18 +361,18 @@ void func_80116D3C(O *o)
                 if (D_1F80016E >= -0x185) {
                     if ((unsigned)(XU - 0x1ee) >= 0x60) break;
                     stepPlayerXToward(0x21e);
-                    if (D_1F800172 >= 0x573) break;
+                    if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x573) break;
                     T1(1);
                 }
                 if (p->yw >= -0x280) break;
                 if (D_1F80016E < -0x293) break;
                 if ((unsigned)(XU - 0x248) >= 0x60) break;
                 stepPlayerXToward(0x278);
-                if (D_1F800172 >= 0x4bf) break;
+                if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x4bf) break;
                 T1(2);
             }
             if (blocked()) break;
-            switch (D_1F800172) {
+            switch ((*(short*)((char*)&SPAD.i170 + 2))) {
             case 0x546:
                 if ((unsigned)(XU - 0x1fc) < 0x40) {
                     T2B(5, 0x21c);
@@ -422,7 +422,7 @@ void func_80116D3C(O *o)
                 if (D_1F80016E < -0x36f) break;
                 q = &D_8009D2B0;
                 if (*q == 3) break;
-                if (D_8009CDF1 != 0xff) break;
+                if (GCD.bcdf1 != 0xff) break;
                 o->step = 6;
                 goto tail11;
             }
@@ -452,7 +452,7 @@ void func_80116D3C(O *o)
             T1(1);
         case 10:
         case 19:
-            if (D_1F800172 < -0x3c) {
+            if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x3c) {
                 T1(0);
             }
             break;
@@ -475,20 +475,20 @@ void func_80116D3C(O *o)
         }
         break;
     case 3:
-        D_8009C942 = 1;
+        GVARS.b42 = 1;
         D_80079A98[o->subtype](o);
         break;
     case 4:
         if (p->active == 2 || p->bac >= 2) {
             o->subtype = 0;
             o->step = 2;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
             ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         {
         E8 *e = D_801305DC[GAME.selectedSection] + GAME.selectedSpawnPoint;
         unsigned char t;
@@ -511,8 +511,8 @@ void func_80116D3C(O *o)
         if (o->subtype != 0) break;
         o->step = 2;
         FUN_800216c4();
-        D_8009C93F = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b3e = 0;
         p->b04 = 1;
         p->step = 0;
         p->state = 0;

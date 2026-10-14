@@ -1,9 +1,8 @@
 // FUNC 801208c4 360 X009
 // MATCHING 801208c4 360
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
-extern unsigned short D_1F800282;
-extern int D_8009C934;
 extern short func_80121630(TObj *, short, short, unsigned char);
 extern int resolveHitResultA(TObj *, TObj *);
 
@@ -20,10 +19,10 @@ void func_801208C4(TObj *o, TObj *e)
     t = o->y.p.whole - (e->y.p.whole + (e->box3 - e->box2));
     if (func_80121630(o, u, t, e->subtype) == 0) return;
     if (resolveHitResultA(o, e) == 0 || o->type == 9) {
-        if (D_1F800282 & 2) {
+        if (SPAD.s282 & 2) {
             o->b69 = 1;
-            D_8009C934 = 0;
+            GVARS.i34 = 0;
         }
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

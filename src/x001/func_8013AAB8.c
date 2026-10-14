@@ -1,5 +1,7 @@
 // FUNC 8013aab8 1112 X001
 // MATCHING 8013aab8 1112
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -9,8 +11,6 @@ typedef struct {
     char p20[0x24 - 0x20];
     short w24;
 } O;
-extern unsigned char D_8009CEDF[], D_8009CEDE, D_8009CE59;
-extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[];
 extern unsigned char PLAYER, D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A6066;
 extern unsigned char D_800A60A1;
@@ -28,14 +28,14 @@ void func_8013AAB8(O *o)
 
     switch (o->step) {
     case 0:
-        D_8009CEDF[0] = 0;
+        ((unsigned char*)&GCD.bcedf)[0] = 0;
         o->step++;
         break;
     case 1:
         if (D_800A603C[0] != 1) break;
         if (!D_800A60A1) break;
         if ((unsigned short)(D_800A604E + 0x6d6) >= 6) break;
-        if (D_8009CEDF[0] == 0) {
+        if (((unsigned char*)&GCD.bcedf)[0] == 0) {
             PLAYER = 1;
             D_800A6066 = 1;
             D_800A603C[0] = 5;
@@ -49,9 +49,9 @@ void func_8013AAB8(O *o)
                 p->step = 5;
                 p->state = 0;
             }
-            D_8009CEDF[0] = 1;
+            ((unsigned char*)&GCD.bcedf)[0] = 1;
             o->step++;
-        } else if (D_8009CEDF[0] == 0xfe) {
+        } else if (((unsigned char*)&GCD.bcedf)[0] == 0xfe) {
             PLAYER = 1;
             D_800A6066 = 1;
             D_800A603C[0] = 5;
@@ -69,7 +69,7 @@ void func_8013AAB8(O *o)
         }
         break;
     case 2:
-        switch (D_8009CEDF[0]) {
+        switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
             D_800A60C8 = showMessageBox(2, 0x1c, 0x80, 0x6c);
             o->step++;
@@ -81,7 +81,7 @@ void func_8013AAB8(O *o)
         }
         break;
     case 3:
-        switch (D_8009CEDF[0]) {
+        switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
             t = D_800A60C8;
             if (t->b04 != 2) break;
@@ -103,7 +103,7 @@ void func_8013AAB8(O *o)
         if (q->b04 != 2) break;
         q->b04 = 3;
         p->subtype = 0;
-        switch (D_8009CEDF[0]) {
+        switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
             p->step = 1;
             p->state = 0;
@@ -129,24 +129,24 @@ void func_8013AAB8(O *o)
         break;
     case 6:
         if (--o->w08 > 0) break;
-        D_8009C93F[0] = 0;
-        D_8009C93E[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60F8 = 0;
         D_800A603C[0] = 1;
         D_800A603D[0] = 0;
         D_800A603E[0] = 0;
         o->w24 = 0;
-        switch (D_8009CEDF[0]) {
+        switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
-            D_8009CEDE = 0;
-            D_8009CEDF[0] = 0;
-            D_8009CE59 = 2;
+            GCD.bcede = 0;
+            ((unsigned char*)&GCD.bcedf)[0] = 0;
+            GCD.bce59 = 2;
             o->step = 0;
             o->state = 0;
             break;
         case 0xff:
-            D_8009CEDF[0] = 0;
+            ((unsigned char*)&GCD.bcedf)[0] = 0;
             o->b04 = 3;
             break;
         }

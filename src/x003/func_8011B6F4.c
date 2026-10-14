@@ -1,8 +1,8 @@
 // FUNC 8011b6f4 380 X003
 // MATCHING 8011b6f4 380
+#include "spad.h"
 #include "TOBJ.H"
 extern unsigned char PLAYER;
-extern unsigned short D_1F800172, D_1F80016A, D_1F80016E;
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
 extern void FUN_8001fe6c(TObj *);
@@ -13,11 +13,11 @@ static __inline__ int near(TObj *o, short x, short w)
     int d;
 
     if (PLAYER == 2) return 0;
-    d = D_1F800172 - (unsigned short)o->d->p.whole + 0x2d;
+    d = (*(unsigned short*)((char*)&SPAD.i170 + 2)) - (unsigned short)o->d->p.whole + 0x2d;
     if ((unsigned short)d >= 0x5b) return 0;
-    d = D_1F80016A - (unsigned short)o->h->p.whole + x;
+    d = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - (unsigned short)o->h->p.whole + x;
     if ((d & 0xffff) > w) return 0;
-    d = D_1F80016E - (unsigned short)o->y.p.whole + 0x6e;
+    d = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - (unsigned short)o->y.p.whole + 0x6e;
     return (d & 0xffff) < 0xaf;
 }
 

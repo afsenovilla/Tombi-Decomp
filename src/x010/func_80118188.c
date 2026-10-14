@@ -1,11 +1,10 @@
 // FUNC 80118188 656 X010
 // MATCHING 80118188 656
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_80132C3C[];
 extern void *D_80132C54[];
-extern int D_1F8002DC;
-extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern unsigned short GetClut(int, int);
 extern int Rand(void);
@@ -49,13 +48,13 @@ void func_80118188(TObj *o)
             o->w22 = 0;
             break;
         }
-        o->d3c = D_1F8002DC;
+        o->d3c = SPAD.i2dc;
         AnimLoadDuration(o);
         break;
     case 1:
         if (o->subtype == 2) {
             v = MulNegSin(o->w22, 2);
-            o->a.p.whole = v + (o->d30 - D_1F800176);
+            o->a.p.whole = v + (o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2)));
             o->w22 = (o->w22 + o->timer) & 0xff;
             o->y.p.whole = o->d34 - D_1F800186;
             if (v < 0) {
@@ -64,7 +63,7 @@ void func_80118188(TObj *o)
                 o->animFrame = 1;
             }
         } else {
-            *(short *)((char *)o + 0x12) = o->d30 - D_1F800176;
+            *(short *)((char *)o + 0x12) = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
             o->y.p.whole = o->d34 - D_1F800186;
         }
         o->visible = 1;

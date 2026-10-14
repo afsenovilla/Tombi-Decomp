@@ -1,7 +1,7 @@
 // FUNC 8012eba0 312 X010
 // MATCHING 8012eba0 312
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern void setEventStarted(int, int, int);
 
@@ -12,12 +12,12 @@ void func_8012EBA0(TObj *o)
         o->state++;
         break;
     case 1:
-        if (D_8009C93A == 0) break;
+        if (GVARS.b3a == 0) break;
         D_800A603C = 5;
         D_800A603D = 0;
         D_800A603E = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 2:
@@ -29,9 +29,9 @@ void func_8012EBA0(TObj *o)
         if (--o->w08 == 0) o->state = 15;
         break;
     case 15:
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         PLAYER = 1;
         D_800A603C = 1;
         D_800A603D = 0;

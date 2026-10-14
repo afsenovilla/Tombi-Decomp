@@ -1,12 +1,12 @@
 // FUNC 8012284c 608 X014
 // MATCHING 8012284c 608
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short x, y, w4, w6; } PT;
 
-extern unsigned char D_8009C942;
 extern PT D_801265D4[], D_80126654[];
-extern unsigned short D_1F8000EE, D_1F8000F2;
 extern int Rand(void);
 extern TObj *FUN_80018448(void);
 extern void func_80118314(int, int, int);
@@ -18,7 +18,7 @@ void func_8012284C(TObj *o)
     int i, n, in, k;
     int x, y;
 
-    if (D_8009C942 == 1) return;
+    if (GVARS.b42 == 1) return;
     p = D_801265D4;
     if (GAME.selectedSection == 7) p = D_80126654;
     o->wb0 = 0;
@@ -26,8 +26,8 @@ void func_8012284C(TObj *o)
     k = 0;
 loop:
     in = 0;
-    if ((unsigned short)(p->x - D_1F8000EE + 0x9e) < 0x13d)
-        in = (unsigned short)(p->y - D_1F8000F2 + 0x46) < 0xab;
+    if ((unsigned short)(p->x - (*(unsigned short*)((char*)&SPAD.iec + 2)) + 0x9e) < 0x13d)
+        in = (unsigned short)(p->y - (*(unsigned short*)((char*)&SPAD.if0 + 2)) + 0x46) < 0xab;
     p++;
     n += in;
     o->wb0 |= in << k;

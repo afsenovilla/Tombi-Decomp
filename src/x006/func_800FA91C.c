@@ -1,13 +1,13 @@
 // FUNC 800fa91c 1232 X006
 // MATCHING 800fa91c 1232
+#include "plx.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern unsigned char *D_8009F0EC;
-extern int D_8009C934;
 extern unsigned short D_1f8001fc;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
@@ -65,13 +65,13 @@ void func_800FA91C(TObj *o)
         o->substep = 0;
         o->state++;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;

@@ -1,7 +1,7 @@
 // FUNC 801217f8 316 X009
 // MATCHING 801217f8 316
+#include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
 
 void func_801217F8(TObj *a, TObj *b)
 {
@@ -33,5 +33,5 @@ void func_801217F8(TObj *a, TObj *b)
     a->b04 = 2;
     a->step = 5;
     a->state = 0;
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

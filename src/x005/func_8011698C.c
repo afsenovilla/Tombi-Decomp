@@ -1,13 +1,12 @@
 // FUNC 8011698c 440 X005
 // MATCHING 8011698c 440
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009D2C3, D_8009CDDD, D_8009CEED;
-extern unsigned char D_8009C942[];
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009D2B0;
-extern short D_1F8001C6;
 extern int showMessageBoxDirect(int, int, V6 *);
 
 void func_8011698C(TObj *o)
@@ -19,17 +18,17 @@ void func_8011698C(TObj *o)
     case 0:
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
-        if (D_8009D2C3 & 0x10) {
+        if (GV2.bc3 & 0x10) {
             o->d90 = showMessageBoxDirect(2, 0x59, &v);
-        } else if (D_8009CDDD == 0xff) {
+        } else if (GCD.bcddd == 0xff) {
             o->d90 = showMessageBoxDirect(2, 0x52, &v);
-        } else if (D_8009CEED < 2) {
+        } else if (GCD.bceed < 2) {
             o->d90 = showMessageBoxDirect(2, 0x3d, &v);
         } else {
             o->d90 = showMessageBoxDirect(2, 0x43, &v);
         }
-        D_8009C942[0] = 1;
-        D_8009D2B0 = 2;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -41,10 +40,10 @@ void func_8011698C(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        D_1F8001C6 = 0;
-        D_8009C942[0] = 0;
+        SPAD.s1c6 = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        if (D_8009C93F == 0) {
+        if (GVARS.b3f == 0) {
             ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;

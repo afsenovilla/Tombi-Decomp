@@ -1,5 +1,7 @@
 // FUNC 80129cc0 2584 X003
 // MATCHING 80129cc0 2584
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { void **p; int pad[2]; } E12;
@@ -9,8 +11,6 @@ extern TObj PLAYER;
 extern E12 D_80135DC0[];
 extern unsigned char D_800A60D4[];
 extern short D_800A60EA[];
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[], D_8009C940[];
-extern unsigned char D_8009CDC7;
 extern int AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
 extern void FUN_800eea7c(TObj *, int, int);
@@ -36,12 +36,12 @@ void func_80129CC0(TObj *o)
         P.state = 0;
         P.animFrame = 0;
         D_800A60D4[0] = 1;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
         break;
     case 1:
-        if (D_8009CDC7 != 0xff) {
+        if (GCD.bcdc7 != 0xff) {
             FUN_800eea7c(&P, 0x14, 0);
             o->timer = 0x78;
         } else {
@@ -80,8 +80,8 @@ void func_80129CC0(TObj *o)
             P.step = 0x65;
             P.state = 0;
             P.animFrame = 0;
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             *py = u - 0x10;
             P.h->p.whole = o->h->p.whole;
             *py = o->y.p.whole - 0x10;
@@ -100,7 +100,7 @@ void func_80129CC0(TObj *o)
         break;
     case 70:
         o->b69 = 0;
-        if (D_8009CDC7 != 0xff) {
+        if (GCD.bcdc7 != 0xff) {
             o->state = 0x47;
             o->anim = ANIM(1);
             AnimJump(o, 0);
@@ -191,7 +191,7 @@ void func_80129CC0(TObj *o)
         P.h->p.whole = o->h->p.whole;
         P.y.p.whole = o->y.p.whole - 0x10;
         if (o->visible == 0) {
-            if (D_8009CDC7 != 0xff) {
+            if (GCD.bcdc7 != 0xff) {
                 P.visible = 0;
                 setEventComplete(0x23, 0);
                 o->timer = 0x168;
@@ -257,10 +257,10 @@ void func_80129CC0(TObj *o)
         break;
     case 122:
         P.b04 = 5;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E[0] = 0;
-        D_8009C940[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
+        ((unsigned char*)&GVARS.b40)[0] = 0;
         D_800A60D4[0] = 0;
         D_800A60EA[0] = 0;
         P.step = 0x65;

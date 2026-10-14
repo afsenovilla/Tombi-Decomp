@@ -1,10 +1,9 @@
 // FUNC 80135b0c 676 X000
 // MATCHING 80135b0c 676
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short x, y; } P;
 extern int angleBetweenPoints(P a, P b);
-extern unsigned short D_1F80016A;
-extern unsigned short D_1F80016E;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 
@@ -25,8 +24,8 @@ void func_80135B0C(TObj *o)
     case 1:
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        b.x = D_1F80016A;
-        b.y = D_1F80016E;
+        b.x = (*(unsigned short*)((char*)&SPAD.i168 + 2));
+        b.y = (*(unsigned short*)((char*)&SPAD.i16c + 2));
         o->d88 = angleBetweenPoints(a, b);
         o->timer = 0x78;
         o->step++;

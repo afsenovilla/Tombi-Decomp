@@ -1,7 +1,7 @@
 // FUNC 8012ed44 212 X010
 // MATCHING 8012ed44 212
+#include "gcd.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CE1F;
 extern void func_8012EBA0(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -16,7 +16,7 @@ void func_8012ED44(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (D_8009CE1F == 0) {
+            if (GCD.bce1f == 0) {
                 o->step = 1;
                 o->state = 0;
             }

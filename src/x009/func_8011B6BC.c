@@ -1,10 +1,10 @@
 // FUNC 8011b6bc 548 X009
 // MATCHING 8011b6bc 548
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e; short k; void **anims; } T16;
 extern T16 D_8012B23C[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CFF8;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -52,7 +52,7 @@ void func_8011B6BC(TObj *o)
         }
         break;
     case 3:
-        D_8009CFF8 = 0;
+        GCD.bcff8 = 0;
         ObjFreeDup(o);
         break;
     }

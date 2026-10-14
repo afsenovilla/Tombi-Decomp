@@ -1,10 +1,10 @@
 // FUNC 8012c6ec 436 X010
 // MATCHING 8012c6ec 436
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 
 extern void *D_801322F0[];
-extern unsigned char D_8009CDE3, D_8009CDE2, D_8009D07A, D_8009CE23;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 
@@ -41,13 +41,13 @@ void func_8012C6EC(TObj *o)
         PLAYER.obj.state = 0;
         o->b04 = 1;
         o->state = 0;
-        if (D_8009CDE3 != 0xff) {
-            if (D_8009D07A) o->step = 2;
+        if (GCD.bcde3 != 0xff) {
+            if (GCD.bd07a) o->step = 2;
             else o->step = 1;
         } else {
-            if (D_8009CDE2 == 0) o->step = 3;
-            else if (D_8009CDE2 == 0xff) o->step = 6;
-            else if (D_8009CE23) o->step = 5;
+            if (GCD.bcde2 == 0) o->step = 3;
+            else if (GCD.bcde2 == 0xff) o->step = 6;
+            else if (GCD.bce23) o->step = 5;
             else o->step = 4;
         }
         break;

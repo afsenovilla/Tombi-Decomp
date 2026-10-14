@@ -1,5 +1,6 @@
 // FUNC 801165c0 976 X001
 // MATCHING 801165c0 976
+#include "gcd.h"
 /* The csv entry 8011658C starts with 13 data words; the code starts at 801165C0 and also covers the
    csv piece 80116920. */
 #include "gamestate.h"
@@ -9,7 +10,6 @@ typedef struct {
     short w30, w32;
     FP *p34;
 } O;
-extern unsigned char D_8009CE3D;
 
 void func_801165C0(O *o)
 {
@@ -27,7 +27,7 @@ void func_801165C0(O *o)
     } else if (GAME.selectedSection == 1) {
         if (GAME.purifiedAreas & 1) o->w32 = -0xed;
     } else if (GAME.selectedSection == 2) {
-        if (D_8009CE3D == 0xff) {
+        if (GCD.bce3d == 0xff) {
             if ((short)x < 0x118) o->w32 = -0x102;
             else if ((short)x < 0x140) {
                 v = x - 0x118;

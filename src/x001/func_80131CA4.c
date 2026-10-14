@@ -1,13 +1,13 @@
 // FUNC 80131ca4 2548 X001
 // MATCHING 80131ca4 2548
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; int lim; } SB;
 typedef struct { Fix16 x, y, z; } V3;
-extern unsigned char D_8009CEB0[];
 extern char D_80077CDC[];
 extern short D_8013C984[];
 extern short D_8007A1F0[], D_8007A5F0[];
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800176;
 extern short D_1F80017A[];
 extern TObj *allocObjectLayer8(void);
 extern void freeObjectLayer2(TObj *);
@@ -50,13 +50,13 @@ void func_80131CA4(TObj *o)
         sb->x = o->a.p.whole;
         sb->y = o->y.p.whole;
         sb->z = o->b.p.whole;
-        if (D_8009CEB0[0] != 0) {
+        if (((unsigned char*)&GCD.bceb0)[0] != 0) {
             o->h->p.whole = 0x6b8;
             o->y.p.whole = -0x14;
             o->active = 3;
             o->b04 = 2;
             o->d94 = 0;
-            if (D_8009CEB0[0] == 2) o->step = 5;
+            if (((unsigned char*)&GCD.bceb0)[0] == 2) o->step = 5;
             else o->step = 3;
             break;
         }
@@ -93,7 +93,7 @@ void func_80131CA4(TObj *o)
         case 2:
             if (!o->visible) goto reset;
             o->y.p.whole += 5;
-            if ((unsigned short)(D_1F80016A - o->h->p.whole + 0x78) < 0xb9) {
+            if ((unsigned short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x78) < 0xb9) {
                 o->b69 = 0;
                 o->step++;
             }
@@ -190,7 +190,7 @@ void func_80131CA4(TObj *o)
         case 5:
             if (!o->visible) {
             reset:
-                if ((unsigned short)(D_1F800176 - 0x140) < 0x2f9) break;
+                if ((unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x140) < 0x2f9) break;
                 o->b04 = 1;
                 o->step = 0;
                 o->a.p.whole = o->wb4;
@@ -241,7 +241,7 @@ void func_80131CA4(TObj *o)
             o->y.raw += 0x4000;
             if (o->y.p.whole >= -0x95) {
                 o->step++;
-                D_8009CEB0[0] = 1;
+                ((unsigned char*)&GCD.bceb0)[0] = 1;
             }
             break;
         case 3:
@@ -259,14 +259,14 @@ void func_80131CA4(TObj *o)
             {
                 int r;
                 unsigned short t;
-                t = D_1F80016A - o->h->p.whole + 0x64;
+                t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x64;
                 if (t >= 0xc9) r = 0;
                 else {
-                    t = D_1F80016E - o->y.p.whole + 0x50;
+                    t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x50;
                     r = t < 0x79;
                 }
                 if (r) {
-                    D_8009CEB0[0] = 2;
+                    ((unsigned char*)&GCD.bceb0)[0] = 2;
                     setEventComplete(0xb4, 0);
                     o->step++;
                 }

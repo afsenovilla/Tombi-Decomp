@@ -1,5 +1,6 @@
 // FUNC 8012da60 488 X004
 // MATCHING 8012da60 488
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short flags;
@@ -12,7 +13,6 @@ typedef struct {
     short b0c;
 } E;
 extern E *D_801313FC;
-extern unsigned char D_8009CE24;
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
 
@@ -23,7 +23,7 @@ void func_8012DA60(TObj *o)
     short i;
     TObj *p;
 
-    if (D_8009CE24 != 1) {
+    if (GCD.bce24 != 1) {
         o->b04 = 2;
         return;
     }

@@ -1,9 +1,9 @@
 // FUNC 8012e828 296 X004
 // MATCHING 8012e828 296
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct { unsigned short f, s, c, x, y, z; } T;
-extern unsigned char D_8009CE22;
 extern T D_8013143C;
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -14,7 +14,7 @@ void func_8012E828(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CE22) {
+        if (GCD.bce22) {
             n = allocObjectLayer2();
             if (n) {
                 n->active = 3;

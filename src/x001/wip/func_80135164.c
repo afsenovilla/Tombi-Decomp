@@ -1,4 +1,5 @@
 // FUNC 80135164 1372 X001
+#include "gvars.h"
 /* score 309 (o27: D_800A60B2 is player field PLAYER.w7a, keeps the dy store first; o17: short ang, dx/dy short, constant 0x80 through a local): control flow matches. Differences: the angle uses lbu+sll/sra (game) instead of lb
    for (signed char)e->c, dx/ang get s3/s0 in the game (frame 0x28), the pl->h/y/d update order.
    Tried: int/short temps, casts, shifts.
@@ -14,7 +15,6 @@ extern signed char D_80011EB4[];
 extern void *D_8013DE4C[];
 extern void *D_8013DDF8[];
 extern unsigned short D_8009C960, D_8009C962;
-extern unsigned char D_8009C938, D_8009C93E, D_8009C93F, D_8009C942;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int FUN_8001f9e0(void);
 extern short FUN_8001fddc(int, int);
@@ -59,7 +59,7 @@ void func_80135164(TObj *o)
         o->category |= 0x80;
         e = &D_80011DD8[D_80011EB4[*(unsigned short *)PLAYER.anim]];
         follow(o, e);
-        if (D_8009C938) break;
+        if (GVARS.b38) break;
         switch (D_8009C962) {
         case 1:
             if (PLAYER.h->p.whole >= 0x1000) break;
@@ -87,7 +87,7 @@ void func_80135164(TObj *o)
             e->a = FUN_8001f9e0() & 1;
         follow(o, e);
         if (PLAYER.b69) {
-            D_8009C942 = 1;
+            GVARS.b42 = 1;
             o->d90 = showMessageBox(2, 0xc, 0x80, 0x6c);
             o->state = 2;
         }
@@ -96,9 +96,9 @@ void func_80135164(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 == 2) {
             p->b04 = 3;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
-            D_8009C93F = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
+            GVARS.b3f = 0;
             D_800A603C = 1;
             D_800A603D = 0;
             D_800A603E = 0;

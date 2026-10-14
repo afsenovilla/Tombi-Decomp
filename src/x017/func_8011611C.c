@@ -1,5 +1,8 @@
 // FUNC 8011611c 1136 X017
 // MATCHING 8011611c 1136
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 /* The csv entry 80115F24 starts with 126 data words (jump tables of other functions); the code starts at
    8011611C and covers the csv pieces 80116258 and 801162B8 too. */
 #include "gamestate.h"
@@ -30,11 +33,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009C93C;
-extern unsigned char D_8009D001[];
-extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000F2[];
-extern int D_1F8000F0;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void stepPlayerXToward(int);
@@ -46,7 +44,7 @@ void func_8011611C(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         func_80027810(o);
         o->p38->whole = 0;
         break;
@@ -54,9 +52,9 @@ void func_8011611C(O *o)
         D_80079AD0[o->subtype](o);
         switch (GAME.selectedSection) {
         case 1:
-            if (D_1F800172 >= 0xb5) {
-                if (D_8009D001[0] == 0) {
-                    D_8009D001[0] = 1;
+            if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0xb5) {
+                if (((unsigned char*)&GCD.bd001)[0] == 0) {
+                    ((unsigned char*)&GCD.bd001)[0] = 1;
                     p->b04 = 5;
                     p->step = 0x41;
                     p->visible = 0;
@@ -65,7 +63,7 @@ void func_8011611C(O *o)
                     break;
                 }
                 tryStartItemInteraction(o, 1, 1);
-            } else if (D_1F800172 < -0x59) {
+            } else if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x59) {
                 tryStartItemInteraction(o, 1, 0);
             }
             break;
@@ -103,13 +101,13 @@ void func_8011611C(O *o)
             }
             break;
         case 3:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x3b) tryStartItemInteraction(o, 1, 0);
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x14 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         case 4:
-            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x3b) tryStartItemInteraction(o, 1, 0);
+            if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x12d && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         case 5:
-            if (D_1F80016A >= 0x12d && D_1F80016E >= -0x40) tryStartItemInteraction(o, 1, 0);
+            if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x12d && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x40) tryStartItemInteraction(o, 1, 0);
             break;
         }
         break;
@@ -117,9 +115,9 @@ void func_8011611C(O *o)
         FUN_8002a4d0(o);
         break;
     case 3:
-        D_1F8000F2[0]--;
-        if (D_1F8000F2[0] < o->w30) {
-            D_1F8000F0 = o->w30 << 16;
+        ((short*)((char*)&SPAD.if0 + 2))[0]--;
+        if (((short*)((char*)&SPAD.if0 + 2))[0] < o->w30) {
+            SPAD.if0 = o->w30 << 16;
             o->w48 = 0x1e;
             o->step++;
         }
@@ -135,7 +133,7 @@ void func_8011611C(O *o)
             (*(short*)&GAME.nextArea) = 0x11;
             (*(short*)&GAME.nextSection) = 2;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }
@@ -144,8 +142,8 @@ void func_8011611C(O *o)
             TASK_C->mode = 7;
             TASK_C->step = 0;
         }
-        D_1F8000F2[0]++;
-        if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;
+        ((short*)((char*)&SPAD.if0 + 2))[0]++;
+        if (o->w32 < ((short*)((char*)&SPAD.if0 + 2))[0]) SPAD.if0 = o->w32 << 16;
         break;
     }
 }

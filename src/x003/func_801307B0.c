@@ -1,10 +1,10 @@
 // FUNC 801307b0 480 X003
 // MATCHING 801307b0 480
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3, D_8009CDD9;
-extern int D_1F8002D0[];
-extern int D_1F8002F8[];
 extern void *D_8013A368[];
 extern void *D_8013A3A8[];
 extern short FUN_8005e420(int, int);
@@ -31,14 +31,14 @@ void func_801307B0(TObj *o)
         o->b04 = t + 1;
         o->active = 3;
         *(signed char *)&o->b0f = -4;
-        if (!(D_8009D2C3 & 0x10)) {
+        if (!(GV2.bc3 & 0x10)) {
             o->box0 = 8;
             o->box1 = 0x10;
             o->box2 = 0xc;
             o->box3 = 0x1c;
             o->w1e = 1;
             o->b0d = 0;
-            o->d3c = D_1F8002D0[0];
+            o->d3c = ((int*)&SPAD.i2d0)[0];
             o->wac = 0;
             setAnim(o, D_8013A368[0]);
         } else {
@@ -49,7 +49,7 @@ void func_801307B0(TObj *o)
             o->w1e = 10;
             o->b0d = 1;
             o->w08 = FUN_8005e420(0xd0, 0x1e2);
-            o->d3c = D_1F8002F8[0];
+            o->d3c = ((int*)&SPAD.i2f8)[0];
             o->wac = 0;
             setAnim(o, D_8013A3A8[0]);
         }
@@ -57,11 +57,11 @@ void func_801307B0(TObj *o)
     case 1:
         AnimAdvance(o);
         ObjCullRegister(o);
-        if (!(D_8009D2C3 & 0x10)) {
-            if (D_8009CDD9 == 0) func_801301C0(o);
+        if (!(GV2.bc3 & 0x10)) {
+            if (GCD.bcdd9 == 0) func_801301C0(o);
             else func_8013034C(o);
         } else {
-            if (D_8009CDD9 == 0) func_801304B8(o);
+            if (GCD.bcdd9 == 0) func_801304B8(o);
             else func_80130644(o);
         }
         break;

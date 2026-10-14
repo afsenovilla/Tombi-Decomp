@@ -1,11 +1,11 @@
 // FUNC 801171ac 556 X018
 // MATCHING 801171ac 556
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
 extern E28 *D_8011A51C;
-extern unsigned char D_8009CE41[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -55,8 +55,8 @@ void func_801171AC(TObj *o)
                 n->d90 = (int)o;
             }
             if ((n->wba & 0xffff) == 1) {
-                if (D_8009CE41[0] != 1) n->b04 = 2;
-                if (D_8009CE41[0x19f]) n->b04 = 2;
+                if (((unsigned char*)&GCD.bce41)[0] != 1) n->b04 = 2;
+                if (((unsigned char*)&GCD.bce41)[0x19f]) n->b04 = 2;
             }
         }
     }

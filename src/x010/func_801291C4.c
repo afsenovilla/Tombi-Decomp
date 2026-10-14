@@ -1,13 +1,11 @@
 // FUNC 801291c4 1556 X010
 // MATCHING 801291c4 1556
+#include "spad.h"
 #include "TOBJ.H"
 
 extern const unsigned char D_8012F3D4[];
 extern void *D_80132310[];
 extern unsigned char D_8012F474[], D_8012F484[];
-extern unsigned short D_1F800172, D_1F80016A, D_1F80016E;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
@@ -32,11 +30,11 @@ static __inline__ int near(TObj *o)
 {
     unsigned short t;
     short lim = 0x90;
-    t = D_1F800172 - o->d->p.whole + 0x2d;
+    t = (*(unsigned short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d;
     if (t >= 0x5b) return 0;
-    t = D_1F80016A - o->h->p.whole + 0x48;
+    t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x48;
     if (t > lim) return 0;
-    t = D_1F80016E - o->y.p.whole + 0x80;
+    t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x80;
     return t <= lim + 0x70;
 }
 
@@ -120,7 +118,7 @@ void func_801291C4(TObj *o)
     o->y.p.whole = yy + 2;
     if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, (short)(yy + 0x1c))) o->b69 = 0;
     if (o->ba7 == 0) {
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0 && near(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0 && near(o)) {
             o->ba7 = 1;
             o->w22 = D_8012F484[Rand() & 0xf];
         }

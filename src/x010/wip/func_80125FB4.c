@@ -1,4 +1,7 @@
 // FUNC 80125fb4 1280 X010
+#include "gcd.h"
+#include "plx.h"
+#include "gvars.h"
 #include "player.h"
 /* score 124: everything matches except that case 5 is cross-jumped into case 8 from the
    showMessageBoxDirect call (identical arg setup); in the game case 8 sets up a2 first (li a1,9 in the
@@ -11,10 +14,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_8009C93F, D_8009C942;
-extern unsigned char D_8009D0E7[];
 extern unsigned char D_8009C970, D_8009C971;
-extern short D_800A6108, D_800A610A;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
@@ -40,8 +40,8 @@ void func_80125FB4(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 1:
@@ -55,7 +55,7 @@ void func_80125FB4(TObj *o)
         o->d90 = showMessageBoxDirect(5, 6, &v);
         setanim(o, 2);
         for (i = 0; i < 10; i++)
-            FUN_80026e0c(i + 0x43, D_8009D0E7[i]);
+            FUN_80026e0c(i + 0x43, ((unsigned char*)&GCD.bd0e7)[i]);
         o->state++;
         break;
     case 3:
@@ -105,8 +105,8 @@ void func_80125FB4(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(5, 9, &v);
         setanim(o, 2);
@@ -120,15 +120,15 @@ void func_80125FB4(TObj *o)
         c = &D_8009C970;
         if (*c < D_8009C971) {
             int t = D_8009C971;
-            D_800A6108 = t;
-            D_800A610A = t;
+            PLX.s6108 = t;
+            PLX.s610a = t;
             *c = t;
             FUN_8001e4f0(10);
         }
         setanim(o, 0);
         PLAYER.obj.b04 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.obj.wb2 = 0;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

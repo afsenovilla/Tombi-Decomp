@@ -1,13 +1,14 @@
 // FUNC 8012866c 2856 X004
 // MATCHING 8012866c 2856
+#include "plx.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8013117C[];
 extern TObj PLAYER;
 extern unsigned char D_8009CE1B;
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
-extern unsigned char D_800A6102, D_800A60D9;
+extern unsigned char D_800A60D9;
 extern unsigned char *D_8009C330;
 extern void AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
@@ -30,9 +31,9 @@ void func_8012866C(TObj *o)
         }
         v.v[1] = 0;
         FUN_8003e300(0x7e, 0, (Fix16 *)&v);
-        D_8009C93F = 1;
-        D_8009C942 = 1;
-        D_8009C93E = 0;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
+        GVARS.b3e = 0;
         PLAYER.active = 4;
         PLAYER.b04 = 5;
         PLAYER.step = 0x65;
@@ -259,11 +260,11 @@ void func_8012866C(TObj *o)
     case 24:
         PLAYER.active = 1;
         PLAYER.b04 = 1;
-        D_800A6102 = 0;
+        PLX.b6102 = 0;
         D_800A60D9 = 0;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         PLAYER.wb2 = 0;
         PLAYER.step = 0;
         PLAYER.state = 0;

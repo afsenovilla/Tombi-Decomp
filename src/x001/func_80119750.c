@@ -1,9 +1,8 @@
 // FUNC 80119750 292 X001
 // MATCHING 80119750 292
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_8007A5F0[], D_8007A3F0[];
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
@@ -13,7 +12,7 @@ int func_80119750(TObj *o)
     TObj *n;
     int r, s, i;
 
-    if ((D_1F8001F8 + D_1F800198) & 1) {
+    if ((SPAD.s1f8 + SPAD.i198) & 1) {
         n = ObjAlloc();
         if (n) {
             n->active = 1;

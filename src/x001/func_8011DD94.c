@@ -1,8 +1,9 @@
 // FUNC 8011dd94 832 X001
 // MATCHING 8011dd94 832
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { Fix16 x, y, z; } V3;
-extern unsigned char D_8009CEAE[], D_8009C942;
 extern char D_8013C564[];
 extern void FUN_80020078(TObj *, int);
 extern void func_8011DB5C(TObj *);
@@ -60,7 +61,7 @@ void func_8011DD94(TObj *o)
             }
             break;
         }
-        if (o->b0c != 0 && D_8009CEAE[0] == 4) {
+        if (o->b0c != 0 && ((unsigned char*)&GCD.bceae)[0] == 4) {
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole - 0x18;
             v.z.p.whole = o->d->p.whole;
@@ -70,14 +71,14 @@ void func_8011DD94(TObj *o)
     case 1:
         FUN_80020078(o, 0x78);
         if (o->b0c == 0) {
-            if (D_8009C942 == 0)
+            if (GVARS.b42 == 0)
                 func_8011DB5C(o);
             break;
         }
         switch (o->step) {
         case 0:
             func_8011DB5C(o);
-            if (D_8009CEAE[0] == 1) {
+            if (((unsigned char*)&GCD.bceae)[0] == 1) {
                 o->d8c = 0;
                 o->velH = 0;
                 o->d38 = 0;
@@ -86,7 +87,7 @@ void func_8011DD94(TObj *o)
             }
             break;
         case 1:
-            p = D_8009CEAE;
+            p = ((unsigned char*)&GCD.bceae);
             if (*p < 2)
                 break;
             o->d38 += 0x40;
@@ -103,7 +104,7 @@ void func_8011DD94(TObj *o)
             if (o->d38 > 0x38e)
                 o->d38 = 0x38e;
             o->d8c = o->d38 & 0xfff;
-            if (D_8009CEAE[0] == 4) {
+            if (((unsigned char*)&GCD.bceae)[0] == 4) {
                 o->d8c = 0;
                 o->velH = 0;
                 o->d38 = 0;

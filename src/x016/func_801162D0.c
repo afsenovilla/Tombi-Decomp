@@ -1,11 +1,11 @@
 // FUNC 801162d0 572 X016
 // MATCHING 801162d0 572
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 
 extern void *D_8011B3F4[], *D_8011B404[], *D_8011B410[];
 extern int DAT_1f8002d4;
-extern unsigned char D_8009CE05;
-extern unsigned short D_1F800176[], D_1F800186[];
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -54,10 +54,10 @@ void func_801162D0(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        if (o->subtype != 2 || D_8009CE05 == 0xff) {
+        if (o->subtype != 2 || GCD.bce05 == 0xff) {
             o->visible = 1;
-            o->a.p.whole = o->d30 - D_1F800176[0];
-            o->y.p.whole = o->d34 - D_1F800186[0];
+            o->a.p.whole = o->d30 - ((unsigned short*)((char*)&SPAD.i174 + 2))[0];
+            o->y.p.whole = o->d34 - ((unsigned short*)&SPAD.s186)[0];
             FUN_80018ca4(o);
             FUN_8001fec0(o);
         }

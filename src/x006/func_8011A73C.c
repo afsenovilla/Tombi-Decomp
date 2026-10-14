@@ -1,11 +1,11 @@
 // FUNC 8011a73c 320 X006
 // MATCHING 8011a73c 320
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p[0x1c]; short w1c; } X;
 typedef struct {
     TObj t;
 } S;
-extern unsigned char D_8009C942;
 extern short D_8007A3F0[];
 extern int func_8011AFB4(TObj *);
 extern int func_8011B238(TObj *);
@@ -46,7 +46,7 @@ void func_8011A73C(TObj *o)
         func_8011B238(o);
         break;
     }
-    if (D_8009C942 == 0) {
+    if (GVARS.b42 == 0) {
         o->velY = (o->velY + 0x20) & 0xff;
         o->velV = D_8007A3F0[o->velY];
         o->d34 = (unsigned short)o->wb4 + (o->velV << 4);

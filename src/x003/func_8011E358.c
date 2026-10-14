@@ -1,11 +1,10 @@
 // FUNC 8011e358 856 X003
 // MATCHING 8011e358 856
+#include "gvars.h"
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern unsigned char *D_8009C330;
-extern short D_8009C944[];
-extern short D_8009C946[];
 extern int D_8009F0EC;
 int func_8004BBC0(TObj *o, int a);
 void func_800EFC8C(TObj *o, int a);
@@ -42,8 +41,8 @@ void func_8011E358(TObj *o)
         FUN_800fc02c(o);
         break;
     case 2:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -67,8 +66,8 @@ void func_8011E358(TObj *o)
         }
         break;
     case 3:
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->d8c = (o->d8c + ((o->animFrame & 1) ? -0x10 : 0x10)) & 0xff;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;

@@ -1,12 +1,13 @@
 // FUNC 801274fc 1560 X004
 // MATCHING 801274fc 1560
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
-extern unsigned char D_8009CEFC[], D_8009CEFB, D_80131168[];
-extern unsigned short D_1F8001F8;
+extern unsigned char D_80131168[];
 extern int FUN_800202b4(TObj *);
 extern void func_8011EC78(TObj *);
 extern void FUN_8001e4f0(int);
@@ -28,7 +29,7 @@ extern void freeObjectLayer2(TObj *);
             (o)->w08 = ((D_80131168[(o)->w22] + 0x1e0) << 6) | 0x12;       \
             (o)->timer = 0x10;                                             \
         }                                                                  \
-        if (D_8009CEFB == 0x16) {                                          \
+        if (GCD.bcefb == 0x16) {                                          \
             (o)->b0d = 0;                                                  \
             (o)->b6a = 0;                                                  \
             (o)->state++;                                                  \
@@ -43,13 +44,13 @@ static __inline__ int bit(int n)
     int q = n / 8;
     int r = n - q * 8;
 
-    return D_8009CEFC[q] & (1 << r);
+    return ((unsigned char*)&GCD.bcefc)[q] & (1 << r);
 }
 
 static __inline__ int is16(TObj *o)
 {
     if (o->subtype == 0x16)
-        return D_8009CEFB != 0x16;
+        return GCD.bcefb != 0x16;
     return 0;
 }
 
@@ -136,7 +137,7 @@ void func_801274FC(TObj *o)
             }
             FUN_8001e4f0(0xf7);
             FUN_800ea544(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-            c = &D_8009CEFB;
+            c = &GCD.bcefb;
             *c = *c + 1;
             n = o->subtype;
             k = n / 8 + 0x58;
@@ -164,7 +165,7 @@ void func_801274FC(TObj *o)
                     o->w08 = ((D_80131168[o->w22] + 0x1e0) << 6) | 0x12;
                     o->timer = 0x10;
                 }
-                if (D_8009CEFB == 0x16) {
+                if (GCD.bcefb == 0x16) {
                     o->b0d = 0;
                     o->b6a = 0;
                     o->state++;
@@ -173,7 +174,7 @@ void func_801274FC(TObj *o)
             case 2:
                 break;
             }
-            o->y.p.whole = o->d34 + (D_1F8001F8 & 1);
+            o->y.p.whole = o->d34 + (SPAD.s1f8 & 1);
             k = 2;
             o->h->p.whole = o->d30 - k + (FUN_8001f9e0() & 3);
             break;

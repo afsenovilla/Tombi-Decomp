@@ -1,10 +1,10 @@
 // FUNC 8012d9fc 768 X000
 // MATCHING 8012d9fc 768
+#include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CDC[];
 extern void *D_8013B26C;
 extern unsigned char D_80139124[];
-extern unsigned short D_1F8001F8;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -58,7 +58,7 @@ void func_8012D9FC(TObj *o)
         if (o->h->p.whole < o->velH - 8)
             o->h->p.whole = o->velH - 8;
         (t = o->y.p.whole + 0x10, TileCollideAt(o, o->h->p.whole, t - o->b0c * 16));
-        if ((D_1F8001F8 & 0xf) == 0 && (Rand() & 3) == 0)
+        if ((SPAD.s1f8 & 0xf) == 0 && (Rand() & 3) == 0)
             SfxPlay2(0x3a, 0);
         if (--o->timer == 0)
             o->state = 0;

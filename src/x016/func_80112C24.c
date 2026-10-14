@@ -1,11 +1,11 @@
 // FUNC 80112c24 1040 X016
 // MATCHING 80112c24 1040
+#include "spad.h"
+#include "gcd.h"
 /* D_8009C960h (halfword name for D_8009C960) stays: a cast, a union or -fno-expensive-optimizations all CSE the la (21). */
 #include "TOBJ.H"
-extern unsigned char D_8009D0AA, D_8009D0C8, D_8009D0D0, D_8009D0D1;
 extern int D_8009C960[];
 extern unsigned short D_8009C960h[];
-extern unsigned short D_1F8001F8;
 extern int *D_80115A08[];
 extern int *D_80115948[];
 void ObjCullRegister(TObj *o);
@@ -23,10 +23,10 @@ static __inline__ int check(TObj *o)
 {
     unsigned char v;
     switch (o->b0c & 0x7f) {
-    case 0: v = D_8009D0AA; break;
-    case 1: v = D_8009D0C8; break;
-    case 2: v = D_8009D0D0; break;
-    case 3: v = D_8009D0D1; break;
+    case 0: v = GCD.bd0aa; break;
+    case 1: v = GCD.bd0c8; break;
+    case 2: v = GCD.bd0d0; break;
+    case 3: v = GCD.bd0d1; break;
     default: goto fail;
     }
     if (v) return 1;
@@ -85,7 +85,7 @@ void func_80112C24(TObj *o)
         if (--o->timer == -1) {
             o->step++;
         }
-        o->y.p.whole = o->d34 + (D_1F8001F8 & 1);
+        o->y.p.whole = o->d34 + (SPAD.s1f8 & 1);
         o->h->p.whole = (short)(o->d30 - 2) + (Rand() & 3);
         break;
     case 6:

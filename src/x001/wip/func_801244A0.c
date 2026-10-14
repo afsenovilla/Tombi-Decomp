@@ -1,28 +1,28 @@
 // FUNC 801244a0 1800 X001
+#include "spad.h"
 /* score 52 (n78): ported x010's `{ int by = b->y.p.whole; ... }` compare temp (fixes the +0x4e8 lh swap).
    n78 tried (no gain): r as ax (game ax=a3 too, but short ax adds sll/sra before `ang - r`; int ax 229), r = int
    box-check temp, sabs forms (game needs jump.c NOT to turn the if/else into `r = x; if (x<0) r = -x;`, so the
    else-arm move lands in the bgez slot and r shares v0 with the test; ~x+1 keeps a nor), sabs result into
-   existing vars, function-scope t/w/a->h temps in the D_1F8001D2 block (size grows).
+   existing vars, function-scope t/w/a->h temps in the SPAD.b1d2 block (size grows).
    Older: score 68 (n73): ang/cx s5/s6 fixed with a weighted ref (debt): `do { c1 = rcos(ang); } while (0);` gives ang 9 refs
    (3*9/178=.152, between dx .159 and cx .148; game order dy>dx>ang>cx). Still left: r in a1 (game a3; r's hard conflicts are
    only v0/sp, nobody prefers a1/a2 - mode's a2 copy dies at the switch; int/short mode, rcos() decl, mode copy: worse),
-   sabs result v0/v1 (8 inline/compare forms: no change), +0x4e8 lh a0/v1 swap, D_1F8001D2 block regs.
+   sabs result v0/v1 (8 inline/compare forms: no change), +0x4e8 lh a0/v1 swap, SPAD.b1d2 block regs.
    Previous: score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
    Fixed this round: the dead `ay = q;` at the end keeps q alive past the r = q copy (cse rewrites to the reg with the
-   later last use, n48), which restores the game's `move a3,v1` copy; in the D_1F8001D2 block, block-local
+   later last use, n48), which restores the game's `move a3,v1` copy; in the SPAD.b1d2 block, block-local
    `short t; unsigned short w;` per branch (w = t - a->h + 2; if (w >= 8)) removes the extra copy of the sum
    (function-scope t gives temp+copy, cse substitutes the temp in the compare).
    Left (register choices only): r gets a1 (game a3: a1/a2 skipped, cause unknown); ang/cx s5/s6 swapped (ours
    cx 10 refs/201 insns beats ang 8 refs/178; game allocates ang first - any dead `v = ax` use flips it but then
    cx uses are rewritten to ax); sabs result v0 vs v1 (game `move v0,s4; negu v0,s4; sll v1,v0`); +0x4e8 block
-   lh a0/v1 swap (a->y vs b->y temps); D_1F8001D2 block: game d=v1, t=a2, w=a1 (untied from the subu temp,
+   lh a0/v1 swap (a->y vs b->y temps); SPAD.b1d2 block: game d=v1, t=a2, w=a1 (untied from the subu temp,
    i.e. non-local), a->h temp=a3; ours d=a2, t=v1, w tied v0, a->h=a1 (w at function scope brings the copy back).
    Tried: int/short/unsigned types of q, r, kind, v, sabs ret/param (no effect), w/t scopes and types (24 combos),
    an `ang` copy variable, ~ang+1 vs -ang (worse), dead uses of ang/cx/kind. */
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001D2;
 extern int rcos(int);
 extern int rsin(int);
 
@@ -88,7 +88,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
     if (!(kind & 1)) {
         if (a->y.p.whole < b->y.p.whole - s2) {
             if ((-(s2 + 4) + b->y.p.whole) > a->y.p.whole + a->box2) return 3;
-            if (D_1F8001D2 != 0) {
+            if (SPAD.b1d2 != 0) {
                 if (dx > 0) a->h->p.whole = b->h->p.whole + cx;
                 else a->h->p.whole = b->h->p.whole - cx;
                 return 3;
@@ -118,7 +118,7 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
                 return 3;
             }
             { int by = b->y.p.whole; if ((-(s2 + -4) + by) < a->y.p.whole - (a->box3 - a->box2)) return 3; }
-            if (D_1F8001D2 != 0) {
+            if (SPAD.b1d2 != 0) {
                 short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
                 if (dx > 0) {
                     short t;

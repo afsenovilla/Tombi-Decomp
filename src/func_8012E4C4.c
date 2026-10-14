@@ -1,11 +1,10 @@
 // FUNC 8012e4c4 1024 X000
 // MATCHING 8012e4c4 1024
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[0xec - 0xc0]; } E;
 extern TObj PLAYER;
 extern E D_800B1478[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_1F80019C;
 extern int func_800203DC(TObj *);
 extern void FUN_8011aa30(int, int, int);
@@ -56,7 +55,7 @@ void func_8012E4C4(TObj *o)
         case 0:
             if (func_800203DC(o) == 0)
                 break;
-            if ((D_1F8001F8 + D_1F800198) & 1) {
+            if ((SPAD.s1f8 + SPAD.i198) & 1) {
                 if (Hit(o, pl)) {
                     FUN_8011aa30(pl->a.p.whole, (short)(pl->y.p.whole - 0x10), pl->b.p.whole);
                     Act(o);

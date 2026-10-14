@@ -2,6 +2,7 @@
 // MATCHING 8005aa74 2328
 // HEADERS tomba24
 // Ported from psx_tomba (main/game/event.c, spawnEventTitle); MIT licence of the original project. PAL adds the padding loop.
+#include "spad.h"
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -17,7 +18,6 @@ extern s8 **D_80118C64, **D_801184C4, **D_8012D9E0, **D_80131A78, **D_8011C208;
 extern s8 **D_80119884, **D_8011A7EC, **D_80128C70, **D_8011B350, **D_8011C088;
 extern s8 **D_8011CA44;
 extern u8 *allocObjectLayer1(void);
-extern char *D_1F80033C;
 
 void FUN_8005aa74(int event_id, int completed, int duration, int state)
 {
@@ -171,7 +171,7 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
             temp = obj[0x1C] | 0x80;
             obj[0x1C] = temp;
             *(s16*)(obj + 0x20) = duration;
-            *(int*)(obj + 0xA0) = (int)(*(char *volatile *)&D_1F80033C + *(int *)(*(char *volatile *)&D_1F80033C + 4));
+            *(int*)(obj + 0xA0) = (int)(*(char *volatile *)&(*(char **)&SPAD.p33c) + *(int *)(*(char *volatile *)&(*(char **)&SPAD.p33c) + 4));
             cnt++;
             if (event_id == 1) {
                 *(int*)(obj + 0x10) = (x - 0xA0) << 16;
@@ -242,7 +242,7 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
                 temp = obj[0x1C] | 0x80;
                 obj[0x1C] = temp;
                 *(s16*)(obj + 0x20) = duration;
-                *(int*)(obj + 0xA0) = (int)(*(char *volatile *)&D_1F80033C + *(int *)(*(char *volatile *)&D_1F80033C + 4));
+                *(int*)(obj + 0xA0) = (int)(*(char *volatile *)&(*(char **)&SPAD.p33c) + *(int *)(*(char *volatile *)&(*(char **)&SPAD.p33c) + 4));
                 if (event_id == 1) {
                     *(int*)(obj + 0x10) = (x - 0xA0) << 16;
                     *(int*)(obj + 0x14) = y << 16;

@@ -1,9 +1,8 @@
 // FUNC 8012cce8 408 X010
 // MATCHING 8012cce8 408
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C942[];
-extern unsigned char D_8009C93F[];
 extern void *D_8013238C;
 extern void *D_80132388;
 extern int AnimAdvance(TObj *);
@@ -26,8 +25,8 @@ void func_8012CCE8(TObj *o)
     case 1:
         if (o->b68) {
             o->state++;
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -43,8 +42,8 @@ void func_8012CCE8(TObj *o)
         if (p->b04 == 2) {
             p->b04 = 3;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->wac = 0x1e;

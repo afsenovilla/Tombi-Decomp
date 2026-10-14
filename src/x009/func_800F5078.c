@@ -1,5 +1,6 @@
 // FUNC 800f5078 5740 X009
 // MATCHING 800f5078 5740
+#include "gv2.h"
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { unsigned char b0; unsigned char b1; short w2; char p4[8]; short wc; short we; char p10[0x28 - 0x10]; unsigned short w28, w2a; } PL;
@@ -8,7 +9,6 @@ extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1f8001fc, D_1f8003c6;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_80115228[][2];
 extern unsigned char D_80115388[];
 extern char D_80011108[];
@@ -182,7 +182,7 @@ void func_800F5078(TObj *o)
         QBLK(o);
         FUN_800f4ed0(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             o->b9c = 1;
             (*(unsigned char*)&o->wac) = 0;
             FUN_8010a168(o);
@@ -243,7 +243,7 @@ void func_800F5078(TObj *o)
         QBLK(o);
         FUN_800f4ed0(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             FUN_8010a518(o);
             if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
             else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;

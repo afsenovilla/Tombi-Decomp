@@ -1,14 +1,12 @@
 // FUNC 80117870 296 X016
 // MATCHING 80117870 296
+#include "spad.h"
+#include "gcd.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern unsigned char D_8009CE05;
-extern unsigned char D_8009C940;
-extern unsigned char D_8009C941;
-extern unsigned char D_8009C93E;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8001FC;
 
 extern void func_801174B8(TObj *);
 extern void func_8011767C(TObj *);
@@ -17,14 +15,14 @@ void func_80117870(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CE05 == 0xff) break;
+        if (GCD.bce05 == 0xff) break;
         if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x82) >= 0x28) break;
         if (PLAYER.obj.y.p.whole != -0x3d) break;
-        if (D_8009C940 != 0 && D_8009C941 == 0x3e) {
+        if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
             o->step = 2;
             o->state = 0;
-        } else if ((*(volatile unsigned short *)&D_8009D670 & 0x10) && (D_1F8001FC & 0x2000)) {
-            D_8009C93E = 1;
+        } else if ((*(volatile unsigned short *)&GV6.s70 & 0x10) && (SPAD.s1fc & 0x2000)) {
+            GVARS.b3e = 1;
             o->step = 1;
             o->state = 0;
         }

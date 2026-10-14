@@ -1,12 +1,12 @@
 // FUNC 80118110 544 X017
 // MATCHING 80118110 544
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009d2b0;
-extern short D_1F8001C6;
 extern AT3 D_8011999C[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
@@ -48,7 +48,7 @@ void func_80118110(TObj *o)
         }
         break;
     case 9:
-        D_1F8001C6 = 0;
+        SPAD.s1c6 = 0;
         DAT_8009c942 = 0;
         PLAYER.wb2 = 0;
         o->anim = D_8011999C[o->subtype].p[0];

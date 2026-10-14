@@ -1,12 +1,11 @@
 // FUNC 8011e594 484 X004
 // MATCHING 8011e594 484
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C940;
-extern unsigned char D_8009C941;
-extern unsigned char D_8009CD99, D_8009CD9D;
 extern unsigned char D_800B146D, D_800B1475, D_800B1471;
 extern void *D_80134D84;
-extern int D_1F8002D4[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -28,9 +27,9 @@ void func_8011E594(TObj *o)
 
     switch (o->b04) {
     case 0:
-        p = &D_8009C940;
+        p = &GVARS.b40;
         if (*p != 0) {
-            if (D_8009C941 != 0x7e) break;
+            if (GVARS.b41 != 0x7e) break;
             *p = 0;
             setbox(o, 8, 0x10, 8, 0x10);
             o->active = 1;
@@ -40,7 +39,7 @@ void func_8011E594(TObj *o)
             o->b0d = 1;
             o->w08 = 0x7a0e;
             o->anim = D_80134D84;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->d30 = o->a.p.whole;
             o->w22 = 0;
             FUN_8001fe6c(o);
@@ -59,8 +58,8 @@ void func_8011E594(TObj *o)
     case 2:
         setEventComplete(0x77, 0);
         printInfoMessage(0x32, 2);
-        D_8009CD99 = 9;
-        D_8009CD9D = 0x3c;
+        GCD.bcd99 = 9;
+        GCD.bcd9d = 0x3c;
         D_800B146D = 0x3c;
         D_800B1475 = 1;
         D_800B1471 = 0x1e;

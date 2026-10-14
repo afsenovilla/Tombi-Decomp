@@ -1,11 +1,11 @@
 // FUNC 800406e8 496 MAIN0
+#include "spad.h"
 /* score 98 with maspsx --expand-div (ncheck lacks it: game div has break 7/6 checks). Left: prologue (P load before addiu sp),
    game copies a2->t6, a1->v1 at entry and uses raw y in d = h - y */
 typedef struct S { char p[0x14]; short w14; unsigned short w16; } S;
 extern unsigned short *D_1F800278;
 extern short D_1F80027E;
 extern short D_1F800280;
-extern short D_1F800282;
 int func_800406E8(S *o, short x, short y)
 {
     char pad;
@@ -44,7 +44,7 @@ int func_800406E8(S *o, short x, short y)
             o->w14 = 0;
             D_1F80027E = b;
             D_1F800280 = a;
-            D_1F800282 = fl;
+            (*(short*)&SPAD.s282) = fl;
             o->w16 += d;
             return 1;
         }

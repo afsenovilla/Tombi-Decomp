@@ -1,5 +1,9 @@
 // FUNC 8011b330 1188 X010
 // MATCHING 8011b330 1188
+#include "gv2.h"
+#include "spad.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -23,10 +27,6 @@ typedef struct {
 
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern unsigned short D_8009D670;
-extern short D_8009C944[], D_8009C946[];
-extern unsigned short D_1F8001FC, D_1F8003C8;
-extern unsigned char D_8009D2B1, D_8009D2B2;
 extern short D_8007A038[];
 extern TObj *allocObjectLayer1(void);
 extern void func_800EEE90(S *);
@@ -66,7 +66,7 @@ void func_8011B330(S *s)
                 }
                 f = s->o.animFrame & 1;
                 n->animFrame = f;
-                if (*(volatile unsigned short *)&D_8009D670 & 0x40) n->animFrame = f | 2;
+                if (*(volatile unsigned short *)&GV6.s70 & 0x40) n->animFrame = f | 2;
                 n->a.p.whole = s->o.a.p.whole;
                 n->y.p.whole = s->o.y.p.whole;
                 n->b.p.whole = s->o.b.p.whole;
@@ -99,8 +99,8 @@ void func_8011B330(S *s)
         SfxPlay2(2, 4);
         s->o.state++;
     case 1:
-        s->o.h->raw += D_8009C944[0] << 8;
-        s->o.y.raw += D_8009C946[0] << 8;
+        s->o.h->raw += ((short*)&GVARS.s44)[0] << 8;
+        s->o.y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(s);
         s->o.h->raw += s->o.velX << 8;
         s->o.y.raw += s->o.velY << 8;
@@ -136,7 +136,7 @@ void func_8011B330(S *s)
         }
         TileCollideAt(s, s->o.h->p.whole, s->o.y.p.whole + 0x10);
         s->o.b69 = 0;
-        if ((D_1F8001FC & D_1F8003C8) == 0) break;
+        if ((SPAD.s1fc & SPAD.s3c8) == 0) break;
         switch (GAME.displayExpBar) {
         case 1:
             if (s->bcc == 1) func_80030034(0);
@@ -146,8 +146,8 @@ void func_8011B330(S *s)
             return;
         }
         s->bc3 = 0;
-        if (s->be3 >= D_8007A038[D_8009D2B2]) return;
-        if (D_8009D2B1 == 1 || D_8009D2B1 == 2) return;
+        if (s->be3 >= D_8007A038[GV2.bb2]) return;
+        if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
         p = D_8009C330;
         if (p->b0 != 0) return;
         if (s->bc0 != 0) return;

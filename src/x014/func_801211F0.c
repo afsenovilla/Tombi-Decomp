@@ -1,9 +1,9 @@
 // FUNC 801211f0 516 X014
 // MATCHING 801211f0 516
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned short D_1F80017A[];
 extern unsigned short D_80126590[];
 extern short D_801265A0[];
 extern short DAT_8007a1f0[];
@@ -17,7 +17,7 @@ void func_801211F0(TObj *o)
     switch (o->step) {
     case 0:
         o->h->p.whole = *(unsigned short *)0x1F800176 + D_80126590[Rand() & 7];
-        o->y.p.whole = D_1F80017A[0] - 0xf0;
+        o->y.p.whole = ((unsigned short*)&SPAD.s17a)[0] - 0xf0;
         o->d38 = D_801265A0[Rand() & 7];
         o->velH = 0;
         o->step++;

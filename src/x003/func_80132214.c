@@ -1,11 +1,11 @@
 // FUNC 80132214 1868 X003
 // MATCHING 80132214 1868
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC;
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern TObj *showMessageBoxDirect(int, int, void *);
 extern void func_801289C8(TObj *, int, int);
 extern void setEventStarted(int, int, int);
@@ -149,9 +149,9 @@ void func_80132214(TObj *o)
         PLAYER.obj.animFrame = b->h->p.whole < (*(Fix16 **)&PLAYER.obj.h)->p.whole;
         if (!b->visible) {
             PLAYER.obj.b04 = 1;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
             PLAYER.obj.wb2 = 0;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;

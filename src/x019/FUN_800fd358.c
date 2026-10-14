@@ -1,5 +1,8 @@
 // FUNC 800fd358 2084 X019
 // MATCHING 800fd358 2084
+#include "spad.h"
+#include "plx.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -15,15 +18,7 @@ typedef struct {
 
 extern P800FD358 *D_8009C330;
 extern TObj *D_8009D2E8;
-extern TObj *D_800A611C;
 extern TObj *D_8009F0EC;
-extern int D_8009C934;
-extern unsigned char D_1F8001A4;
-extern unsigned char D_1F8001F8;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C938;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
@@ -53,7 +48,7 @@ extern void applyAnimVelocityX(TObj *, int);
 
 #define BLINK() \
     if (U8(o, 0xd1) == 0 && D_8009C330->b8 == 0) \
-        o->visible = D_1F8001F8 & 1;
+        o->visible = (*(unsigned char*)&SPAD.s1f8) & 1;
 
 void FUN_800fd358(TObj *o)
 {
@@ -84,13 +79,13 @@ void FUN_800fd358(TObj *o)
         o->wb0 = 0;
         D_8009C330->b8 = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(TObj **)&PLX.p611c);
             D_8009D2E8->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
@@ -98,18 +93,18 @@ void FUN_800fd358(TObj *o)
         D_8009C330->b0 = 0;
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         *(signed char *)&o->b0f = -8;
-        if (D_1F8001A4 == 0 && o->w9a != o->w98) {
+        if (SPAD.b1a4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
-                D_8009C942 = 1;
-                D_8009C938 = 1;
+                GVARS.b42 = 1;
+                GVARS.b38 = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
         }
-        D_8009C330->b8 = D_8009C938;
+        D_8009C330->b8 = GVARS.b38;
         o->ba4 = 0;
         o->b69 = 0;
         o->movetab = D_80077D24;
@@ -151,8 +146,8 @@ void FUN_800fd358(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->velY += 0x40;
         o->y.raw += o->velY << 8;
         if (o->velY > 0) {
@@ -180,8 +175,8 @@ void FUN_800fd358(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (FUN_800fc240(o) == 0) {

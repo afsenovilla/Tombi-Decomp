@@ -1,10 +1,10 @@
 // FUNC 8012d280 664 X003
 // MATCHING 8012d280 664
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009CE51;
 extern unsigned char D_8009CF03;
-extern int D_1F8002D0[];
 extern void *D_801399C8;
 extern void *D_801399BC;
 extern void AnimLoadDuration(TObj *);
@@ -26,7 +26,7 @@ void func_8012D280(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CE51 == 0xff) {
+        if (GCD.bce51 == 0xff) {
             o->b04 = 3;
             break;
         }
@@ -36,7 +36,7 @@ void func_8012D280(TObj *o)
         o->box2 = 0x10;
         o->box3 = 0x20;
         o->animFrame = 1;
-        o->d3c = D_1F8002D0[0];
+        o->d3c = ((int*)&SPAD.i2d0)[0];
         o->w1e = 1;
         *(signed char *)&o->b0f = -9;
         o->b0d = 0;

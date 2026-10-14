@@ -1,11 +1,11 @@
 // FUNC 8011f288 896 X000
 // MATCHING 8011f288 896
+#include "gcd.h"
 /* Holds 3 functions merged by splat: func_8011F288, func_8011F500, func_8011F580. */
 #include "TOBJ.H"
 #include "player.h"
 extern void *D_8013B2BC[];
 extern int D_1F8002D4[];
-extern unsigned char D_8009CDAE;
 extern Fix16 *D_800A607C[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
@@ -61,7 +61,7 @@ void func_8011F288(TObj *o)
             }
             break;
         case 5:
-            if (D_8009CDAE == 0xff && PLAYER.obj.y.p.whole >= -0xc7 && PLAYER.obj.b69 != 0 && ((unsigned char*)&PLAYER.obj.b04)[0] != 1) {
+            if (GCD.bcdae == 0xff && PLAYER.obj.y.p.whole >= -0xc7 && PLAYER.obj.b69 != 0 && ((unsigned char*)&PLAYER.obj.b04)[0] != 1) {
                 o->step = 1;
                 o->state = 0;
             }

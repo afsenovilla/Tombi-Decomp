@@ -1,10 +1,11 @@
 // FUNC 80134980 672 X000
 // MATCHING 80134980 672
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_8013AC14, *D_8013AC44, *D_8013AC2C;
 extern Fix16 *D_800A607C[];
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[], D_8009D00E[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void func_80134980(TObj *o)
@@ -16,9 +17,9 @@ void func_80134980(TObj *o)
         o->animFrame = 1;
         if (D_800A607C[0]->p.whole != 0) break;
         if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x50) < 0xa0) {
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->state++;
         }
         break;
@@ -58,10 +59,10 @@ void func_80134980(TObj *o)
         o->subtype = 0;
         o->h->p.whole = 0x138;
         o->y.p.whole = -0x11c;
-        D_8009D00E[0] = 1;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GCD.bd00e)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         break;
     }
 }

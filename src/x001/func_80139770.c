@@ -1,9 +1,9 @@
 // FUNC 80139770 420 X001
 // MATCHING 80139770 420
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern void *D_8013FACC[], *D_8013FAB8[];
 extern TObj *showMessageBoxDirect(int, int, Fix16 *);
 extern void FUN_8001fe6c(TObj *);
@@ -23,8 +23,8 @@ void func_80139770(TObj *o)
         if (o->b68 == 0)
             break;
         o->state++;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -43,8 +43,8 @@ void func_80139770(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

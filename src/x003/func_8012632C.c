@@ -1,10 +1,7 @@
 // FUNC 8012632c 2108 X003
 // MATCHING 8012632c 2108
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_1F80027E;
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -52,7 +49,7 @@ static __inline__ void slope(TObj *o)
         if (o->wac >= 0xc) {
             o->d8c = 0;
         } else {
-            v = ((D_1F80027E << 2) + o->d8c) & 0xff;
+            v = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff;
             if (v != 0) {
                 if (v < 0x80) o->d8c = o->d8c - 1;
                 else o->d8c = o->d8c + 1;
@@ -66,11 +63,11 @@ static __inline__ int near(TObj *o)
 {
     unsigned short t;
     short lim = 0x40;
-    t = D_1F800172 - o->d->p.whole + 0x2d;
+    t = (*(unsigned short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d;
     if (t >= 0x5b) return 0;
-    t = D_1F80016A - o->h->p.whole + 0x20;
+    t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x20;
     if (t > lim) return 0;
-    t = D_1F80016E - o->y.p.whole + 0xa0;
+    t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0xa0;
     return t <= lim + 0xa0;
 }
 
@@ -126,7 +123,7 @@ void func_8012632C(TObj *o)
         slope(o);
         if (func_801256F4(o, o->animFrame)) {
             go3(o, 0x3c, 0x1d);
-        } else if (((D_1F8001F8 + D_1F800198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
             go3(o, 0x1e, 0x1d);
         }
         } else {
@@ -181,7 +178,7 @@ void func_8012632C(TObj *o)
         if (func_801256F4(o, o->animFrame)) {
             o->w22 = 0x3c;
             o->substep++;
-        } else if (((D_1F8001F8 + D_1F800198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
             o->w22 = 0x1e;
             o->substep++;
         }

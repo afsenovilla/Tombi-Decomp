@@ -1,16 +1,16 @@
 // FUNC 80116fa8 228 X011
 // MATCHING 80116fa8 228
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8011C420;
-extern int D_1F8002F0[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void func_80116E54(TObj *);
 extern void freeObjectLayer2(TObj *);
 static __inline__ void setanim(TObj *p)
 {
-    p->d3c = D_1F8002F0[0];
+    p->d3c = ((int*)&SPAD.i2f0)[0];
     p->wac = 0;
     p->anim = D_8011C420;
     AnimLoadDuration(p);

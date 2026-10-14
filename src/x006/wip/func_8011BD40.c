@@ -1,3 +1,4 @@
+#include "gcd.h"
 /* score 246 (whole 1900 B incl. csv piece 8011BEAC): the 6 label sprites match exactly; digit part differs in register allocation: game keeps the /10 magic 0x66666667 in s7 and spills only the /60 magic (0x18(sp)); ours spills both (frame +8 in places). Also game computes the u byte as (d<<16)>>13 (ours andi+sll). Tried types of u/v/x params, of t/m/mm/s/c, separate digit inline. */
 // FUNC 8011bd40 1900 X006
 typedef struct {
@@ -10,7 +11,6 @@ typedef struct {
 
 extern SPRT_8 *D_1F800164;
 extern int D_1F8001E0;
-extern unsigned short D_8009CFE2;
 extern void SetSprt8(SPRT_8 *);
 extern void SetSemiTrans(SPRT_8 *, int);
 extern unsigned short GetClut(int, int);
@@ -36,7 +36,7 @@ static __inline__ void spr(short x, short y, int u, int v)
 
 void func_8011BD40(int a, int x, short y)
 {
-    short t = D_8009CFE2;
+    short t = (*(unsigned short*)&GCD.scfe2);
     short m, mm, s, c;
 
     spr(x, y, 0x20, 0x28);

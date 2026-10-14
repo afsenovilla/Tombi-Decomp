@@ -1,11 +1,9 @@
 // FUNC 801224c0 612 X000
 // MATCHING 801224c0 612
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013B208[];
-extern int D_1F8002D4[];
-extern short D_1F800176[];
-extern unsigned short D_1F800186[];
 extern int D_800A4570[];
 extern int D_800A4574[];
 short GetClut(int x, int y);
@@ -35,7 +33,7 @@ void func_801224C0(TObj *o)
         o->w08 = GetClut(0xc0, 0x1e7);
         o->b0d = 1;
         o->anim = D_8013B208[0];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->w22 = 0;
         o->step = 0;
         o->b0f = 2;
@@ -45,10 +43,10 @@ void func_801224C0(TObj *o)
         o->d34 = o->y.p.whole;
         break;
     case 1:
-        x = D_1F800176[0];
+        x = ((short*)((char*)&SPAD.i174 + 2))[0];
         if (x >= 0x35d) break;
         pa = (short)(o->d30 - x) >> 1;
-        py = (short)(o->d34 - D_1F800186[0]) >> 1;
+        py = (short)(o->d34 - ((unsigned short*)&SPAD.s186)[0]) >> 1;
         o->a.p.whole = pa;
         o->y.p.whole = py;
         o->b.p.whole = 0;

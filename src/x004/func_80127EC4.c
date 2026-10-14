@@ -1,10 +1,10 @@
 // FUNC 80127ec4 508 X004
 // MATCHING 80127ec4 508
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_80134D84;
 extern int DAT_1f8002d4[];
-extern short D_1F80016A;
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -44,7 +44,7 @@ void func_80127EC4(TObj *o)
                 o->velV += o->velY;
                 if ((unsigned short)(o->velV + 0x1f) >= 0x3f)
                     o->velY *= -1;
-                if (D_1F80016A >= 0x83) {
+                if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x83) {
                     o->step = 1;
                     o->state = 0;
                 }

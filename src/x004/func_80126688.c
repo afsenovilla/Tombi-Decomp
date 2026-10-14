@@ -1,5 +1,6 @@
 // FUNC 80126688 1480 X004
 // MATCHING 80126688 1480
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 
@@ -10,7 +11,6 @@ typedef struct {
 typedef struct { short x, y; } P2;
 
 extern short *D_800A6078;
-extern short D_1F8001C8;
 extern void *D_801345B8[], *D_801345E8[], *D_801345EC[], *D_80134604[];
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -81,8 +81,8 @@ void func_80126688(BX *b)
         o->h->raw += MulCos(*(unsigned short *)&o->bbe & 0xf8, o->wb6) << 8;
         o->y.raw += MulNegSinScaled(*(unsigned short *)&o->bbe & 0xf8, o->wb6) << 8;
         if ((unsigned short)o->wb6 < 0x400) o->wb6 += 0x20;
-        if (--o->w22 != 0 && !wall(o) && b->wc0 == D_1F8001C8) break;
-        if (b->wc0 != D_1F8001C8) {
+        if (--o->w22 != 0 && !wall(o) && b->wc0 == (*(short*)&SPAD.s1c8)) break;
+        if (b->wc0 != (*(short*)&SPAD.s1c8)) {
             o->velH = 0;
         } else if (o->animFrame) {
             o->velH = -0x300;
@@ -99,14 +99,14 @@ void func_80126688(BX *b)
     case 5:
         o->h->raw += o->velH << 8;
         o->y.raw += o->velV << 8;
-        if (--o->timer != 0 && !wall(o) && b->wc0 == D_1F8001C8) break;
+        if (--o->timer != 0 && !wall(o) && b->wc0 == (*(short*)&SPAD.s1c8)) break;
         o->active = 1;
         o->timer = 1;
         o->substep++;
         break;
     case 6:
-        if (--o->timer != 0 && !wall(o) && b->wc0 == D_1F8001C8) break;
-        if (D_1F8001C8 == 0) {
+        if (--o->timer != 0 && !wall(o) && b->wc0 == (*(short*)&SPAD.s1c8)) break;
+        if ((*(short*)&SPAD.s1c8) == 0) {
             if (b->wc4 < o->h->p.whole) o->animFrame = 0;
             else o->animFrame = 1;
         } else {

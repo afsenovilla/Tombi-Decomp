@@ -1,9 +1,9 @@
 // FUNC 80116758 192 X000
 // MATCHING 80116758 192
+#include "gcd.h"
 #include "gamestate.h"
 typedef struct { char p[2]; unsigned short s2; } P;
 typedef struct { char p[0x32]; short w32; P *p34; } S;
-extern unsigned char D_8009CE3D;
 void func_80116758(S *o)
 {
     short t;
@@ -15,6 +15,6 @@ void func_80116758(S *o)
             o->w32 += -(t * 190) / 104;
         }
     } else if (GAME.selectedSection == 5) {
-        if (D_8009CE3D == 0xff) o->w32 = -0x54;
+        if (GCD.bce3d == 0xff) o->w32 = -0x54;
     }
 }

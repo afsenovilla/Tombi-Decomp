@@ -1,5 +1,6 @@
 // FUNC 8011890c 548 X017
 // MATCHING 8011890c 548
+#include "gcd.h"
 /* Real size 548 B: includes the 4-byte csv piece func_8011890C (the prologue). Loop as
    `for (i = 0; (e = &tbl[i])->flags != 0xff; i++)` (no 16 B frame leftover); flags test volatile (debt). */
 #include "TOBJ.H"
@@ -16,7 +17,6 @@ typedef struct {
 extern E *D_80119A00;
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
-extern unsigned char D_8009CE41[];
 
 void func_8011890C(TObj *o)
 {
@@ -60,9 +60,9 @@ void func_8011890C(TObj *o)
                 p->w7a = e->w7a;
                 p->d90 = (int)o;
                 if (*(unsigned short *)&p->wba == 1) {
-                    if (D_8009CE41[0] != 1)
+                    if (((unsigned char*)&GCD.bce41)[0] != 1)
                         p->b04 = 2;
-                    if (D_8009CE41[0x1a0] != 0)
+                    if (((unsigned char*)&GCD.bce41)[0x1a0] != 0)
                         p->b04 = 2;
                 }
             }

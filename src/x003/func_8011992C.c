@@ -1,9 +1,9 @@
 // FUNC 8011992c 800 X003
 // MATCHING 8011992c 800
+#include "spad.h"
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3;
-extern int D_1F8002D4;
 extern void *D_80138E84[];
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
@@ -15,7 +15,7 @@ void func_8011992C(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (!(D_8009D2C3 & 4)) {
+        if (!(GV2.bc3 & 4)) {
             o->b04 = 3;
             break;
         }
@@ -30,7 +30,7 @@ void func_8011992C(TObj *o)
             o->w1e = 9;
             o->d64 = 0x1800;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         o->anim = D_80138E84[o->b0c];
         AnimLoadDuration(o);
         break;

@@ -1,12 +1,11 @@
 // FUNC 8011da50 484 X010
 // MATCHING 8011da50 484
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C940[];
-extern unsigned char D_8009C941;
 extern void *D_80131CE0;
-extern int D_1F8002D4[];
-extern unsigned char D_8009CD9A, D_8009CD9E;
 extern unsigned char D_800B146E, D_800B1476, D_800B1472;
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -20,9 +19,9 @@ void func_8011DA50(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009C940[0] != 0) {
-            if (D_8009C941 != 0x7e) break;
-            D_8009C940[0] = 0;
+        if (((unsigned char*)&GVARS.b40)[0] != 0) {
+            if (GVARS.b41 != 0x7e) break;
+            ((unsigned char*)&GVARS.b40)[0] = 0;
             o->box0 = 8;
             o->box1 = 0x10;
             o->box3 = 0x10;
@@ -34,7 +33,7 @@ void func_8011DA50(TObj *o)
             o->w08 = 0x7acc;
             o->b0d = 1;
             o->anim = D_80131CE0;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->d38 = o->b.p.whole;
             o->w22 = 0;
             AnimLoadDuration(o);
@@ -53,8 +52,8 @@ void func_8011DA50(TObj *o)
     case 2:
         setEventComplete(0x77, 0);
         printInfoMessage(0x32, 2);
-        D_8009CD9A = 9;
-        D_8009CD9E = 0x3c;
+        GCD.bcd9a = 9;
+        GCD.bcd9e = 0x3c;
         D_800B146E = 0x3c;
         D_800B1476 = 1;
         D_800B1472 = 0x1e;

@@ -1,18 +1,17 @@
 // FUNC 8011a6a0 320 X009
 // MATCHING 8011a6a0 320
+#include "spad.h"
 #include "TOBJ.H"
-extern TObj **D_1F800260;
-extern unsigned short D_1F800250;
 extern short D_1F80019E;
 extern TObj PLAYER;
 
 int func_8011A6A0(TObj *o)
 {
-    TObj **list = D_1F800260;
+    TObj **list = (*(TObj ***)&SPAD.p260);
     TObj *pl = &PLAYER;
     TObj *n;
 
-    if ((D_1F80019E = D_1F800250) == 0)
+    if ((D_1F80019E = SPAD.s250) == 0)
         goto out;
 loop:
     {

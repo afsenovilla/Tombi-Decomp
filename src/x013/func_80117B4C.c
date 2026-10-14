@@ -1,5 +1,6 @@
 // FUNC 80117b4c 196 X013
 // MATCHING 80117b4c 196
+#include "spad.h"
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned long u_long;
@@ -12,7 +13,6 @@ typedef struct { u16 u, v; } UV;
 #define setlen(p, _len) (((P_TAG *)(p))->len = (u8)(_len))
 #define setcode(p, _code) (((P_TAG *)(p))->code = (u8)(_code))
 extern SPRT *D_1F800164;
-extern u_long D_1F8001E0;
 typedef struct { short x, y; u8 u, v; } SP;
 
 void func_80117B4C(SP *s)
@@ -33,6 +33,6 @@ void func_80117B4C(SP *s)
     p->w = 8;
     p->h = 0x10;
     p->clut = 0x7812;
-    addPrim(D_1F8001E0 + 0x14, p);
+    addPrim((*(u_long*)&SPAD.i1e0) + 0x14, p);
     D_1F800164 = (SPRT *)((char *)D_1F800164 + 0x14);
 }

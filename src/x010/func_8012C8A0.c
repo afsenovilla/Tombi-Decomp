@@ -1,11 +1,11 @@
 // FUNC 8012c8a0 688 X010
 // MATCHING 8012c8a0 688
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
 
-extern unsigned char D_8009CDE3;
 extern void *D_801322E8[], *D_801322F4[];
-extern int D_1F8002D0[];
 extern short D_8007A3F0[];
 extern void MoveImage(RECT *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -28,7 +28,7 @@ void func_8012C8A0(TObj *o)
     switch (o->b04) {
     case 0:
         o->b6b = 0;
-        if (D_8009CDE3 == 0xff) {
+        if (GCD.bcde3 == 0xff) {
             r.x = 0x120;
             r.y = 0x1e4;
             r.w = 0x10;
@@ -47,7 +47,7 @@ void func_8012C8A0(TObj *o)
         o->wac = 2;
         o->b04++;
         o->anim = D_801322E8[0];
-        o->d3c = D_1F8002D0[0];
+        o->d3c = ((int*)&SPAD.i2d0)[0];
         AnimLoadDuration(o);
         break;
     case 1:

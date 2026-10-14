@@ -1,8 +1,8 @@
 // FUNC 80130314 988 X000
 // MATCHING 80130314 988
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
-extern unsigned char D_8009D07B;
 extern E *D_8009C948[];
 extern void *D_8013B224;
 extern void FUN_80123b64(Fix16 *);
@@ -16,7 +16,7 @@ void func_80130314(TObj *o)
         switch (o->subtype) {
         case 0:
             o->d88 = 0;
-            D_8009D07B = 1;
+            GCD.bd07b = 1;
             break;
         case 1:
             o->d88 = 0;

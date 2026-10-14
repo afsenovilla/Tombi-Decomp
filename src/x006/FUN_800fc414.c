@@ -1,5 +1,7 @@
 // FUNC 800fc414 3908 X006
 // MATCHING 800fc414 3908
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -16,10 +18,7 @@ typedef struct {
 } P800FC414;
 
 extern P800FC414 *D_8009C330;
-extern unsigned char D_8009C938;
 extern unsigned char D_8009C960b[];
-extern unsigned char D_8009CF06;
-extern unsigned char D_8009CE3D;
 extern unsigned char D_801152E8[];
 extern char D_80077CF4[];
 extern char D_80010748[];
@@ -196,7 +195,7 @@ void FUN_800fc414(TObj *o)
             ADD7C();
             fall(o);
         }
-        if (D_8009C938 == 0) {
+        if (GVARS.b38 == 0) {
             *(unsigned char *)&o->wac = 0;
             o->wb2 = 0;
             o->velX = 0;
@@ -244,7 +243,7 @@ void FUN_800fc414(TObj *o)
                             r = 1;
                             o->w56 = -0x8c;
                             if (o->y.p.whole > -0x7c) {
-                                if (D_8009CE3D == 0xff)
+                                if (GCD.bce3d == 0xff)
                                     r = 2;
                                 else
                                     o->y.p.whole = -0x8c;
@@ -255,7 +254,7 @@ void FUN_800fc414(TObj *o)
                             r = 1;
                             o->w56 = -0x3c0;
                             if (o->y.p.whole > -0x3b0) {
-                                if (D_8009CE3D == 0xff)
+                                if (GCD.bce3d == 0xff)
                                     r = 2;
                                 else
                                     o->y.p.whole = -0x3c0;
@@ -307,9 +306,9 @@ void FUN_800fc414(TObj *o)
         }
         if (--o->timer == 0) {
             D_8009C960b[0x951] = 0;
-            D_8009CF06 = 0;
+            GCD.bcf06 = 0;
             if (*(unsigned short *)D_8009C960b != 10 || *(unsigned short *)(D_8009C960b + 2) != 0)
-                D_8009C938 = 2;
+                GVARS.b38 = 2;
             o->substep++;
         }
         TURN();

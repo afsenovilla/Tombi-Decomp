@@ -1,5 +1,6 @@
 // FUNC 8012ba94 2100 X000
 // MATCHING 8012ba94 2100
+#include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CDC[];
 extern unsigned char D_801390EC[];
@@ -9,7 +10,6 @@ extern unsigned short *D_8013A1D4[];
 extern unsigned short *D_8013A1DC[];
 extern unsigned short *D_8013A1BC[];
 extern unsigned char D_80138FD8[];
-extern unsigned short D_1F800282;
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -108,7 +108,7 @@ void FUN_8012ba94(TObj *o)
         if (o->d8c >= 0x100)
             o->d8c = 0x100;
         if (o->b69 == 1 || (o->b69 & 8) || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-            if (((D_1F800282 >> 5) & 0xf) == 0xf)
+            if (((SPAD.s282 >> 5) & 0xf) == 0xf)
                 o->w98 = 0;
             if (!(o->b69 & 8))
                 Spawn(o);
@@ -140,7 +140,7 @@ void FUN_8012ba94(TObj *o)
         if (o->velV > 0)
             o->b9c = 2;
         if (o->b69 == 1 || (o->b69 & 8) || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-            if (((D_1F800282 >> 5) & 0xf) == 0xf)
+            if (((SPAD.s282 >> 5) & 0xf) == 0xf)
                 o->w98 = 0;
             if (!(o->b69 & 8))
                 Spawn(o);
@@ -184,7 +184,7 @@ void FUN_8012ba94(TObj *o)
                 o->d8c = 0x100;
         }
         if (o->b69 == 1 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-            if (((D_1F800282 >> 5) & 0xf) == 0xf)
+            if (((SPAD.s282 >> 5) & 0xf) == 0xf)
                 o->w98 = 0;
             Spawn(o);
             o->timer = 0x14;

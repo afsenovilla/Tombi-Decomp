@@ -1,9 +1,9 @@
 // FUNC 800ff0e8 796 X008
 // MATCHING 800ff0e8 796
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_8009C944, D_8009C946;
-extern unsigned char D_8009D078[];
 
 void func_800FF0E8(TObj *o)
 {
@@ -73,7 +73,7 @@ void func_800FF0E8(TObj *o)
         case 1:
         case 5:
             o->w56 = -0xe4;
-            if (D_8009D078[0] == 4) {
+            if (((unsigned char*)&GCD.bd078)[0] == 4) {
                 c = o->y.p.whole < (-0xe3);
                 goto tail;
             } else {
@@ -98,8 +98,8 @@ void func_800FF0E8(TObj *o)
         break;
     tail:
         if (c) {
-            D_8009C944 = 0;
-            D_8009C946 = 0;
+            GVARS.s44 = 0;
+            GVARS.s46 = 0;
             break;
         }
         goto els;
@@ -107,8 +107,8 @@ void func_800FF0E8(TObj *o)
         if (GAME.selectedSection == 2) {
             o->y.p.whole = -0xe4;
         els:
-            D_8009C944 = 0;
-            D_8009C946 = -0x40;
+            GVARS.s44 = 0;
+            GVARS.s46 = -0x40;
         }
         break;
     }

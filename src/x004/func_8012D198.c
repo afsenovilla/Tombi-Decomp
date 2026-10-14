@@ -1,12 +1,12 @@
 // FUNC 8012d198 788 X004
 // MATCHING 8012d198 788
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F[], D_8009C942[];
-extern unsigned char D_8009CDF5, D_8009CE63[];
 extern void *D_801357D8[], *D_801357DC[], *D_801357E0[];
-extern short D_1F80016A;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -26,13 +26,13 @@ void func_8012D198(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009CDF5) {
+        if (GCD.bcdf5) {
             o->b04 = 3;
             break;
         }
         o->b68 = 0;
         o->animFrame = 1;
-        if (D_8009CE63[0] == 0xff) o->state = 3;
+        if (((unsigned char*)&GCD.bce63)[0] == 0xff) o->state = 3;
         else o->state = 1;
         break;
     case 1:
@@ -45,8 +45,8 @@ void func_8012D198(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -60,8 +60,8 @@ void func_8012D198(TObj *o)
         n = 3;
     talk:
         o->state++;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -96,12 +96,12 @@ void func_8012D198(TObj *o)
         break;
     case 7:
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b04 = 3;
         break;
     }
-    if (D_1F80016A >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
+    if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
 }

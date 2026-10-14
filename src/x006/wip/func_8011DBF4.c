@@ -1,4 +1,5 @@
 // FUNC 8011dbf4 1904 X006
+#include "spad.h"
 /* score 497: rotated FT4 sprite loop (same family as wips src/wip/FUN_800505f0.c and src/wip/FUN_80123fd0.c; tail is
    the MAIN0 FUN_80052db8 code). Logic decoded. Left: loop-invariant hoisting (game keeps sin/cos bases in s5/t5,
    &sin/&cos[a] t3/fp, &sin/&cos[b] s7/s6, a/b and the a+0x40 offset spilled at sp18/sp20/sp28, &cos[a+0x40]/
@@ -20,7 +21,6 @@ typedef struct {
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800078;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
@@ -57,7 +57,7 @@ void func_8011DBF4(TObj *o)
     int u, v;
 
     if (o->anim == 0) return;
-    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     x = LZ_FILE_CTRL;
     y = (unsigned long)LZ_FILE_CTRL >> 16;
     k = o->d64 >> 4;
@@ -117,7 +117,7 @@ void func_8011DBF4(TObj *o)
             if (o->b0b) {
                 if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, 0, o->b0f, 0x9000000)) goto next;
             } else {
-                if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
             }
             DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
         }

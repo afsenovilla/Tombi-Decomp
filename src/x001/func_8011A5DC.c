@@ -1,11 +1,11 @@
 // FUNC 8011a5dc 336 X001
 // MATCHING 8011a5dc 336
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { char p[0xb4]; SV v[4]; } TX;
 
 extern void *D_8013E5BC;
-extern unsigned short D_1F8001C8;
 
 void func_8011A5DC(TObj *o)
 {
@@ -29,7 +29,7 @@ void func_8011A5DC(TObj *o)
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
         v = ((TX *)o)->v;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             v[0].y = 0;
             v[0].x = 0;
             v[1].y = 0;

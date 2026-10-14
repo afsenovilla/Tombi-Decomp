@@ -1,12 +1,13 @@
 // FUNC 8011a4a8 504 X009
 // MATCHING 8011a4a8 504
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_8009CF06[], D_8009D006[], D_8009D2B3;
 extern unsigned long *D_8012B1A0, *D_8012B1B4;
 extern unsigned long *D_8012B190[], *D_8012B1A4[];
-extern int D_1F8002E0[];
 extern void *D_8013105C;
 extern void loadImageRect(unsigned long *, short, short, short, short);
 extern void AnimLoadDuration(TObj *);
@@ -29,20 +30,20 @@ void func_8011A4A8(TObj *o)
         *(int *)&o->w5c = o->a.p.whole;
         o->d60 = o->y.p.whole;
         o->d64 = o->b.p.whole;
-        if (D_8009CF06[0]) {
+        if (((unsigned char*)&GCD.bcf06)[0]) {
             loadImageRect(D_8012B1A0, 0x90, 0x1f0, 0x10, 1);
             loadImageRect(D_8012B1B4, 0x90, 0x1f1, 0x10, 1);
-        } else if (D_8009D006[0]) {
+        } else if (((unsigned char*)&GCD.bd006)[0]) {
             loadImageRect(D_8012B1A0, 0x90, 0x1f0, 0x10, 1);
             loadImageRect(D_8012B1B4, 0x90, 0x1f1, 0x10, 1);
         } else {
             loadImageRect(D_8012B190[GAME.displayExpBar], 0x90, 0x1f0, 0x10, 1);
-            loadImageRect(D_8012B1A4[D_8009D2B3], 0x90, 0x1f1, 0x10, 1);
+            loadImageRect(D_8012B1A4[GV2.bb3], 0x90, 0x1f1, 0x10, 1);
         }
         o->w1e = 1;
         o->b0d = 0x80;
         o->b04++;
-        o->d3c = D_1F8002E0[0];
+        o->d3c = ((int*)&SPAD.i2e0)[0];
         o->anim = D_8013105C;
         AnimLoadDuration(o);
         break;

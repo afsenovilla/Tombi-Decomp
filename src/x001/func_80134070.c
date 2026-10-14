@@ -1,10 +1,10 @@
 // FUNC 80134070 1164 X001
 // MATCHING 80134070 1164
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013F034[], *D_8013F074[];
 extern short D_8007A5F0[], D_8007A3F0[];
-extern unsigned short D_1F80017E[];
 extern void func_80026BFC(int, int);
 extern void playSFX(int);
 
@@ -19,7 +19,7 @@ void func_80134070(TObj *o)
         func_80026BFC(2, 6);
         playSFX(0x54);
     }
-    o->d->p.whole = D_1F80017E[0];
+    o->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
     k = 0x10;
     if ((unsigned int)((*(TObj **)&o->wa8)->d88 - 0x40) < 0x80) o->animFrame = 1;
     else o->animFrame = 0;
@@ -34,7 +34,7 @@ void func_80134070(TObj *o)
     for (e = (TObj *)p->d90; e; e = (TObj *)e->d90) {
         e->h->raw = p->h->raw;
         e->y.raw = p->y.raw;
-        e->d->p.whole = D_1F80017E[0];
+        e->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
         if ((e->animFrame = o->animFrame) == 0) {
             e->d84 = (p->d84 + k) & 0xff;
             e->h->raw += D_8007A5F0[e->d84] * 3 << 6;
@@ -64,7 +64,7 @@ void func_80134070(TObj *o)
     for (e = (TObj *)p->d94; e; e = (TObj *)e->d94) {
         e->h->raw = p->h->raw;
         e->y.raw = p->y.raw;
-        e->d->p.whole = D_1F80017E[0];
+        e->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
         if ((e->animFrame = o->animFrame) == 0) {
             e->d84 = (p->d84 - k) & 0xff;
             e->h->raw -= D_8007A5F0[e->d84] * 3 << 6;

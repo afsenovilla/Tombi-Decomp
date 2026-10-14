@@ -1,10 +1,9 @@
 // FUNC 801165a8 328 X018
 // MATCHING 801165a8 328
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8011CA8C[];
-extern int D_1F8002D4[];
-extern unsigned short D_1F800176, D_1F800186[];
 extern unsigned short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
@@ -24,14 +23,14 @@ void func_801165A8(TObj *o)
         o->w08 = FUN_8005e420(0x80, 0x1ff);
         o->w1e = 4;
         o->anim = D_8011CA8C[o->b0c];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         AnimLoadDuration(o);
         break;
     case 1:
-        o->a.p.whole = o->d30 - D_1F800176;
+        o->a.p.whole = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
         {
             int y = o->d34;
-            o->y.p.whole = y - D_1F800186[0];
+            o->y.p.whole = y - ((unsigned short*)&SPAD.s186)[0];
         }
         o->visible = 1;
         ObjListPush_1F800220(o);

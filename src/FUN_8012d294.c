@@ -1,13 +1,11 @@
 // FUNC 8012d294 1384 X000
 // MATCHING 8012d294 1384
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D0[];
 extern int D_1F800190;
 extern int D_1F80018C;
-extern unsigned short D_1F800176;
-extern short D_1F80027E;
-extern unsigned char D_8009C93F;
 extern unsigned char D_800A4553;
 extern char D_80077D24[];
 extern char D_80077CDC[];
@@ -38,7 +36,7 @@ void FUN_8012d294(TObj *o)
         o->box1 = 0x10;
         o->box2 = 8;
         o->box3 = 0x10;
-        o->d3c = D_1F8002D0[0];
+        o->d3c = ((int*)&SPAD.i2d0)[0];
         o->w1e = 1;
         o->b0d = 0;
         o->b0a = 0;
@@ -79,7 +77,7 @@ void FUN_8012d294(TObj *o)
             }
             break;
         case 2:
-            if (D_8009C93F)
+            if (GVARS.b3f)
                 break;
             switch (o->state) {
             case 0:
@@ -137,7 +135,7 @@ void FUN_8012d294(TObj *o)
                     else
                         o->animFrame = 1;
                 } else {
-                    d = o->a.p.whole - D_1F800176;
+                    d = o->a.p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2));
                     if ((unsigned short)d >= 0x141) {
                         if (d < 0)
                             o->animFrame = 0;
@@ -154,7 +152,7 @@ void FUN_8012d294(TObj *o)
                 return;
             }
             if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8))
-                o->d8c = (-D_1F80027E << 2) & 0xff;
+                o->d8c = (-SPAD.s27e << 2) & 0xff;
             if (--o->timer == -1)
                 o->state = 0;
             break;

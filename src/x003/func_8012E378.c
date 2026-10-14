@@ -1,11 +1,11 @@
 // FUNC 8012e378 824 X003
 // MATCHING 8012e378 824
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013A698[];
 extern unsigned short D_8007A3F0[];
 extern short D_8007A5F0[];
-extern unsigned short D_1F80016E;
 extern short isObjectBelowGround(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -13,7 +13,7 @@ extern int func_8012D518(TObj *o);
 
 static __inline__ int side(TObj *o)
 {
-    unsigned short d = D_1F80016E;
+    unsigned short d = (*(unsigned short*)((char*)&SPAD.i16c + 2));
     if ((unsigned short)(d - o->y.p.whole + 0x60) < 0xc0) return 0;
     return (short)d > o->y.p.whole ? 6 : 2;
 }

@@ -1,18 +1,17 @@
 // FUNC 8011ecc8 392 X009
 // MATCHING 8011ecc8 392
+#include "spad.h"
 #include "TOBJ.H"
-extern TObj **D_1F800268;
-extern unsigned short D_1F800254;
 extern short D_1F80019E;
 extern short func_80121630(TObj *, short, short, unsigned char);
 
 int func_8011ECC8(TObj *o)
 {
-    TObj **list = D_1F800268;
+    TObj **list = (*(TObj ***)&SPAD.p268);
     TObj *e;
     short u;
 
-    if ((D_1F80019E = D_1F800254) == 0)
+    if ((D_1F80019E = SPAD.s254) == 0)
         goto out;
 loop:
     {

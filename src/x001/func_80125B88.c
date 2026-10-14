@@ -1,8 +1,8 @@
 // FUNC 80125b88 892 X001
 // MATCHING 80125b88 892
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80019E;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultE(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
@@ -101,5 +101,5 @@ void func_80125B88(TObj *o, TObj *e)
             break;
         }
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

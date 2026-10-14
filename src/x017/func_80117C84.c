@@ -1,5 +1,8 @@
 // FUNC 80117c84 536 X017
 // MATCHING 80117c84 536
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 extern void func_80117224(TObj *);
@@ -7,32 +10,24 @@ extern void func_8011750C(TObj *);
 extern void func_80117864(TObj *);
 extern void func_801179EC(TObj *);
 extern void setEventComplete(int, int);
-extern unsigned char D_8009C940;
-extern unsigned char D_8009C941;
-extern unsigned char D_8009CE0A;
-extern unsigned char D_8009CFD6;
-extern unsigned char D_8009C93A;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009D2B0;
 
 void func_80117C84(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C940 != 0) {
-            if (D_8009C941 == 0x3c && D_8009CE0A == 1) {
+        if (GVARS.b40 != 0) {
+            if (GVARS.b41 == 0x3c && GCD.bce0a == 1) {
                 o->step = 3;
                 o->state = 0;
             }
-            D_8009C940 = 0;
+            GVARS.b40 = 0;
         } else {
             if (o->b68 != 0 && (unsigned short)o->wba == 1) {
                 o->step = 5;
                 o->state = 0;
             }
-            if (D_8009CE0A != 0xff) {
-                if (D_8009CFD6 == 1) o->step = 4;
+            if (GCD.bce0a != 0xff) {
+                if (GCD.bcfd6 == 1) o->step = 4;
                 else o->step = 1;
                 o->state = 0;
             }
@@ -50,10 +45,10 @@ void func_80117C84(TObj *o)
     case 4:
         switch (o->state) {
         case 0:
-            if (D_8009C93A != 0) {
-                D_8009C942 = 1;
-                D_8009C93F = 1;
-                D_8009D2B0 = 2;
+            if (GVARS.b3a != 0) {
+                GVARS.b42 = 1;
+                GVARS.b3f = 1;
+                GV2.bb0 = 2;
                 PLAYER.obj.b04 = 5;
                 PLAYER.obj.step = 0;
                 PLAYER.obj.state = 0;
@@ -64,7 +59,7 @@ void func_80117C84(TObj *o)
             break;
         case 1:
             if (--o->timer <= 0) {
-                D_8009CFD6 = 1;
+                GCD.bcfd6 = 1;
                 PLAYER.obj.b04 = 1;
                 PLAYER.obj.step = 0x20;
                 PLAYER.obj.state = 0;

@@ -1,10 +1,10 @@
 // FUNC 80107c00 972 X001
 // MATCHING 80107c00 972
+#include "gv6.h"
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern unsigned char *D_8009C330;
-extern unsigned short D_8009D670;
 extern int D_8009F0EC;
 extern char D_80010AE8[];
 void func_800EEA3C(TObj *o);
@@ -45,7 +45,7 @@ void func_80107C00(TObj *o)
         func_800EEA3C(o);
         o->state++;
     case 1:
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0xa0) {
             if (*k & 0x80) o->animFrame = 1;
             if (*k & 0x20) o->animFrame = 0;
@@ -97,7 +97,7 @@ void func_80107C00(TObj *o)
                 B(o, 0xac) = 1;
                 o->y.p.whole -= 4;
                 FUN_800ee428(o);
-                k = &D_8009D670;
+                k = &GV6.s70;
                 if (*k & 0x80) o->animFrame = 1;
                 if (*k & 0x20) o->animFrame = 0;
                 o->anim = D_80010AE8;
@@ -110,7 +110,7 @@ void func_80107C00(TObj *o)
             o->velX = 0;
             o->velY = 0;
             FUN_800ee428(o);
-            k = &D_8009D670;
+            k = &GV6.s70;
             if (*k & 0x80) o->animFrame = 1;
             if (*k & 0x20) o->animFrame = 0;
             o->step = 4;

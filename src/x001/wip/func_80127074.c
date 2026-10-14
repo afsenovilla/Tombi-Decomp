@@ -1,4 +1,5 @@
 // FUNC 80127074 1544 X001
+#include "spad.h"
 /* score 496: first full transcription (logic follows the game; register allocation and block layout far off:
    game keeps t spilled at sp+0x10, ang in s4, dx/dy in s3/s6, rcos/rsin products in s5/t0, fy/fx in fp/s7).
    Not tuned yet. Greedy per-local type search only helps with semantics-changing types
@@ -11,8 +12,6 @@ typedef struct {
     unsigned short we8, wea;
 } PL;
 
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 extern int rcos(int);
 extern int rsin(int);
 
@@ -100,8 +99,8 @@ skip:
         o->velY = 0;
         e->velX = dx;
         e->b69 = 1;
-        D_1F80019E = 0;
-        D_1F8003C0 = e;
+        SPAD.s19e = 0;
+        (*(TObj **)&SPAD.p3c0) = e;
         e->w7a = t;
         return 1;
     } else {
@@ -133,8 +132,8 @@ skip:
         e->w7a = t;
         o->velY = 0;
         o->b9e = 8;
-        D_1F80019E = 0;
-        D_1F8003C0 = e;
+        SPAD.s19e = 0;
+        (*(TObj **)&SPAD.p3c0) = e;
         return 1;
     }
 }

@@ -1,7 +1,7 @@
 // FUNC 8011f41c 192 X004
 // MATCHING 8011f41c 192
+#include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
 extern short boxesOverlapSide(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
@@ -25,6 +25,6 @@ void func_8011F41C(TObj *o, TObj *e)
                 FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             }
         }
-        D_1F80019E = 0;
+        SPAD.s19e = 0;
     }
 }

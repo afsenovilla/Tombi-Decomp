@@ -1,8 +1,8 @@
 // FUNC 8012095c 812 X010
 // MATCHING 8012095c 812
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001A4;
 short func_80043C74();
 void decreaseObjectTimer(TObj *o, int n);
 
@@ -15,7 +15,7 @@ void func_8012095C(TObj *o, TObj *p)
     if (p->subtype == 0) {
         if (!func_80043C74(o, p)) return;
         if (o->active & 2) return;
-        if (D_1F8001A4) return;
+        if (SPAD.b1a4) return;
         goto kill;
     }
     if ((unsigned short)(o->d->p.whole - p->d->p.whole + 0x2d) >= 0x5b)
@@ -43,7 +43,7 @@ void func_8012095C(TObj *o, TObj *p)
     if ((unsigned short)(c - d) < 5) {
         o->h->p.whole = p->h->p.whole + t;
         if (o->active & 2) return;
-        if (D_1F8001A4) return;
+        if (SPAD.b1a4) return;
         goto kill;
     }
     if ((short)dy <= 0) {
@@ -54,7 +54,7 @@ void func_8012095C(TObj *o, TObj *p)
             o->y.p.whole = b - (a + c);
         } else if (!(o->active & 2)) {
             if (p->b6a == 0) goto kill;
-            if (D_1F8001A4 == 0) {
+            if (SPAD.b1a4 == 0) {
                 TObj *a = (TObj *)p->d90;
                 TObj *b = (TObj *)p->d94;
                 p->b6a = 0;

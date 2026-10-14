@@ -1,5 +1,6 @@
 // FUNC 8012ed60 1108 X000
 // MATCHING 8012ed60 1108
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -9,7 +10,6 @@ typedef struct {
 extern void *D_8013B224[];
 extern unsigned short D_80139208[];
 extern unsigned char D_800A6047;
-extern TObj *D_8009C948;
 extern unsigned char PLAYER;
 extern void FUN_80123b64(Pos8012ED60 *);
 extern int ObjCullRegister(TObj *);
@@ -102,7 +102,7 @@ void func_8012ED60(TObj *o)
         o->b0f = D_800A6047 + *(unsigned char *)&o->w7a;
         if (ObjCullRegister(o)) {
             if (o->step == 0) {
-                if (o->b0c == 1 && nearObj(o, D_8009C948)) {
+                if (o->b0c == 1 && nearObj(o, (*(TObj **)&GVARS.p48))) {
                     o->step = 1;
                     o->state = 0;
                     goto sw;

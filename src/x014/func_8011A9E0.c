@@ -1,13 +1,11 @@
 // FUNC 8011a9e0 700 X014
 // MATCHING 8011a9e0 700
+#include "spad.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern TObj *D_8009C954;
-extern int D_1F8002D4[];
 extern void *D_80129F94;
-extern unsigned char D_8009C93A, D_8009C93F;
-extern short D_8009C944[], D_8009C946[];
 extern short D_8007A3F0[], D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -17,8 +15,8 @@ extern int angleFromDelta(int, int);
 
 static __inline__ void setup(TObj *p)
 {
-    D_8009C954 = p;
-    p->d3c = D_1F8002D4[0];
+    (*(TObj **)&GVARS.p54) = p;
+    p->d3c = ((int*)&SPAD.i2d4)[0];
     p->anim = D_80129F94;
     FUN_8001fe6c(p);
 }
@@ -52,10 +50,10 @@ void func_8011A9E0(TObj *o)
             if (--o->timer == -1) o->step++;
             break;
         case 1:
-            if (D_8009C93A == 1) o->step = s + 1;
+            if (GVARS.b3a == 1) o->step = s + 1;
             break;
         case 2:
-            if (D_8009C93F == 0) {
+            if (GVARS.b3f == 0) {
                 dx = (*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole;
                 dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole;
                 d = FUN_800638cc(dx * dx + dy * dy);
@@ -65,13 +63,13 @@ void func_8011A9E0(TObj *o)
                     a = angleFromDelta(dx, dy) & 0xff;
                     o->d38 = a;
                     d <<= 2;
-                    D_8009C946[0] = (d * D_8007A3F0[(a + 0x48) & 0xff]) >> 12;
-                    D_8009C944[0] = (d * D_8007A5F0[(o->d38 + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.s46)[0] = (d * D_8007A3F0[(a + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.s44)[0] = (d * D_8007A5F0[(o->d38 + 0x48) & 0xff]) >> 12;
                     break;
                 }
             }
-            D_8009C944[0] = 0;
-            D_8009C946[0] = 0;
+            ((short*)&GVARS.s44)[0] = 0;
+            ((short*)&GVARS.s46)[0] = 0;
             break;
         }
         break;

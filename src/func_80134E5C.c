@@ -1,11 +1,11 @@
 // FUNC 80134e5c 3248 X000
 // MATCHING 80134e5c 3248
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char pad[0x4c]; short w4c; short w4e; } C4C;
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009CDA5, D_8009CDAD, D_8009D0A4;
 extern unsigned char D_8009C970_[];
 #define D_8009C970 D_8009C970_[0]
 extern unsigned char D_8009C93F_[];
@@ -77,9 +77,9 @@ void func_80134E5C(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CDA5 != 0xff) {
+        if (GCD.bcda5 != 0xff) {
             D_8009C93F = 1;
-            switch (D_8009D0A4) {
+            switch (GCD.bd0a4) {
             case 0:
                 o->wb4 = 0;
                 break;
@@ -90,9 +90,9 @@ void func_80134E5C(TObj *o)
                 o->wb4 = 2;
                 break;
             }
-        } else if (D_8009CDAD != 0xff) {
+        } else if (GCD.bcdad != 0xff) {
             D_8009C93F = 1;
-            switch (D_8009D0A4) {
+            switch (GCD.bd0a4) {
             case 0:
                 o->wb4 = 3;
                 break;

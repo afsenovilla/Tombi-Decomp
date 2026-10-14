@@ -1,4 +1,5 @@
 // FUNC 8011a87c 1644 X006
+#include "gvars.h"
 /* score 276: draft. o35: RotMatrixY((unsigned short)p->wb4), step switch of k=0 needs an empty `case 2:` (game tree
    ==1, <2, !=0), D_8009C962 re-read in case 1/k=1 via a second array name (asm alias, debt). Remaining: the game
    reloads lui/addiu D_1F800000 at every use; ours CSEs it into s0 (so p lands in s2). With a FLAGS line adding
@@ -16,7 +17,6 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern char D_1F800000[];
 extern unsigned short D_8009C962, D_8009C982;
 extern unsigned short D_8009C962_b[] asm("D_8009C962");
-extern TObj *D_8009C950, *D_8009C94C;
 extern void *D_801229A4[];
 extern TObj *ObjAlloc(void);
 extern int ObjCullRegister(TObj *);
@@ -93,9 +93,9 @@ void func_8011A87C(TObj *o)
                     e->d38 = 0;
                     e->d90 = (int)o;
                 }
-                D_8009C950 = e;
+                (*(TObj **)&GVARS.p50) = e;
             }
-            D_8009C94C = o;
+            (*(TObj **)&GVARS.p4c) = o;
             break;
         case 1:
             p = (TObj *)o->d90;
@@ -211,7 +211,7 @@ void func_8011A87C(TObj *o)
         ObjCullRegister(o);
         if (o->b0c == 0) {
             unsigned char t = o->step;
-            e = D_8009C950;
+            e = (*(TObj **)&GVARS.p50);
             switch (t) {
             case 0:
                 o->step = t + 1;

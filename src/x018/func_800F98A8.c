@@ -1,14 +1,14 @@
 // FUNC 800f98a8 1908 X018
 // MATCHING 800f98a8 1908
+#include "gv6.h"
+#include "plx.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
-extern int D_8009C934;
 extern char D_80011108[];
 extern unsigned char D_80115220[][2];
-extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1f8003c6;
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -73,13 +73,13 @@ void func_800F98A8(TObj *o)
         o->d88 = 0;
         o->d8c = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
@@ -132,18 +132,18 @@ void func_800F98A8(TObj *o)
             o->state++;
         } else if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) {
             FUN_800f9548(o, 0, 0);
-            if (D_8009D670[0] & D_1f8003c6) {
+            if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
                 (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                 o->step = 0xb;
                 o->state = 0;
             }
-            if (D_8009D670[0] & 0x10) {
+            if (((volatile unsigned short*)&GV6.s70)[0] & 0x10) {
                 (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                 STEP(o);
                 o->step = 0xb;
                 o->state = 0;
             }
-            if (D_8009D670[0] & 0x40) {
+            if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) {
                 STEP(o);
                 FUN_800f9684(o);
             }
@@ -151,17 +151,17 @@ void func_800F98A8(TObj *o)
         break;
     case 3:
         FUN_8001fec0(o);
-        if (D_8009D670[0] & D_1f8003c6) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->step = 0xb;
             o->state = 0;
         }
-        if (D_8009D670[0] & 0x10) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x10) {
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->step = 0xb;
             o->state = 0;
         }
-        if (D_8009D670[0] & 0x40) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) {
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->y.p.whole += 9;
             FUN_80041ca8(o, o->h->p.whole, o->y.p.whole);

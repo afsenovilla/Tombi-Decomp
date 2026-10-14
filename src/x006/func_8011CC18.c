@@ -1,12 +1,12 @@
 // FUNC 8011cc18 352 X006
 // MATCHING 8011cc18 352
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { char pad[0xd0]; unsigned short wd0; } G;
 typedef struct { short d, v; } FR;
 
-extern G *D_8009C94C;
 extern FR D_80120268[];
 extern unsigned short *D_80122E18;
 extern void FUN_800595f4(TObj *, short, short, unsigned short);
@@ -15,7 +15,7 @@ extern void addTilePrim(RECT *, int, int, int);
 
 void func_8011CC18(TObj *a, int b, short x, short y)
 {
-    G *g = D_8009C94C;
+    G *g = (*(G **)&GVARS.p4c);
     RECT r;
     unsigned short v;
 

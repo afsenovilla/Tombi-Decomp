@@ -1,5 +1,6 @@
 // FUNC 800fbdb4 632 X016
 // MATCHING 800fbdb4 632
+#include "gv6.h"
 typedef struct S {
     char p0[5]; unsigned char step, state; char p1[0x20 - 7];
     short timer; char p2[0x2c - 0x22]; unsigned short w2c, frame; char p3[0x69 - 0x30];
@@ -9,7 +10,6 @@ typedef struct S {
 } S;
 typedef struct V { short x, y; } V;
 extern short D_80115248s[];
-extern unsigned short D_8009D670;
 extern S *D_8009C330;
 extern void ObjSetAnimFromTable(S *);
 extern void AnimJump(S *, int);
@@ -53,13 +53,13 @@ void func_800FBDB4(S *o)
     if (o->frame & 1) {
         o->velX = -0x300;
         o->velY = -0x600;
-        if (*(volatile unsigned short *)&D_8009D670 & 0x80) { o->velX = -0x480; o->velY = -0x800; }
-        if (*(volatile unsigned short *)&D_8009D670 & 0x20) { o->velX = -0x200; o->velY = -0x400; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x80) { o->velX = -0x480; o->velY = -0x800; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x20) { o->velX = -0x200; o->velY = -0x400; }
     } else {
         o->velX = 0x300;
         o->velY = -0x600;
-        if (*(volatile unsigned short *)&D_8009D670 & 0x80) { o->velX = 0x200; o->velY = -0x400; }
-        if (*(volatile unsigned short *)&D_8009D670 & 0x20) { o->velX = 0x480; o->velY = -0x800; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x80) { o->velX = 0x200; o->velY = -0x400; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x20) { o->velX = 0x480; o->velY = -0x800; }
     }
     g = D_8009C330;
     g->timer = 10;

@@ -1,5 +1,8 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "gamestate.h"
 typedef struct O {
@@ -12,9 +15,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93D, D_8009CFEE;
-extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000F2;
+extern short D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
@@ -23,7 +24,7 @@ extern void func_80029078(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
 
-#define XU (*(unsigned short *)&D_1F80016A)
+#define XU (*(unsigned short *)&(*(short*)((char*)&SPAD.i168 + 2)))
 
 void func_80116278(O *o)
 {
@@ -35,12 +36,12 @@ void func_80116278(O *o)
         }
         o->subtype = 0;
         o->step++;
-        D_8009C93D = 1;
+        GVARS.b3d = 1;
         if (GAME.selectedSection == 0 && GAME.selectedSpawnPoint == 5)
-            D_8009C93A = 1;
+            GVARS.b3a = 1;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         o->b3c = 0;
         syncObjectTargetY(o);
@@ -48,21 +49,21 @@ void func_80116278(O *o)
         break;
     case 2:
         D_80079A98[o->subtype](o);
-        if (D_8009CFEE == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2 && (unsigned)(XU - 0xb44) < 0x60) {
+        if (GCD.bcfee == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2 && (unsigned)(XU - 0xb44) < 0x60) {
             stepPlayerXToward(0xb74);
             if (D_1F800172 >= 0xbb9) {
                 tryStartItemInteraction(o, 1, 3);
                 break;
             }
         }
-        if (D_1F80016A < 0x4b0 && D_1F80016E >= -0x2cf)
+        if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x4b0 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x2cf)
             tryStartItemInteraction(o, 1, 0);
-        else if (D_1F800172 == 0xb40 && D_1F80016A >= 0x11d5 && D_1F80016E >= -0x1d5)
+        else if (D_1F800172 == 0xb40 && (*(short*)((char*)&SPAD.i168 + 2)) >= 0x11d5 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x1d5)
             tryStartItemInteraction(o, 1, 2);
         else if ((unsigned)(XU - 0x1050) < 0x20 && D_1F800172 < 0xaf0)
             tryStartItemInteraction(o, 1, 1);
         if (D_1F800172 < 0xb36) {
-            short *k = &D_1F8000F2;
+            short *k = &(*(short*)((char*)&SPAD.if0 + 2));
             *k += 2;
             if (o->w32 < *k)
                 *k = o->w32;

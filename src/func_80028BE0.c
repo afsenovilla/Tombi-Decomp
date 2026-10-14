@@ -1,8 +1,8 @@
 // FUNC 80028be0 948 MAIN0
 // MATCHING 80028be0 948
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p[0x24]; int d24; char q[0x70 - 0x28]; signed char b70, b71, b72, b73; } S;
-extern unsigned char D_8009C93F;
 extern TObj PLAYER;
 static __inline__ int approach(S *o)
 {
@@ -38,7 +38,7 @@ static __inline__ int decel(S *o)
 void func_80028BE0(S *o)
 {
     TObj *p;
-    if (D_8009C93F) {
+    if (GVARS.b3f) {
         if (o->d24 != 0) {
             if (o->d24 > 0) o->d24 -= 0x80;
             else o->d24 += 0x80;

@@ -1,5 +1,7 @@
 // FUNC 800f705c 2524 X013
 // MATCHING 800f705c 2524
+#include "plx.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -21,9 +23,7 @@ typedef struct {
 extern PL705C *D_8009C330;
 extern PL705C *D_8009C330A[];
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern TObj *D_8009F0EC;
-extern int D_8009C934;
 extern char D_80011108[];
 extern unsigned char D_80115228[][2];
 extern unsigned char DAT_801152e8[];
@@ -127,13 +127,13 @@ void func_800F705C(TObj *o)
     switch (o->state) {
     case 0:
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;

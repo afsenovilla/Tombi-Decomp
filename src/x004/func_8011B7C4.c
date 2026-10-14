@@ -1,14 +1,13 @@
 // FUNC 8011b7c4 1868 X004
 // MATCHING 8011b7c4 1868
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned short D_1F8001C8;
-extern short D_1F800172;
-extern unsigned char D_8009D0DA, D_8009D0D9;
-extern unsigned char D_8009CDD7, D_8009CDCD, D_8009CDCE, D_8009CDDB;
-extern unsigned char D_8009C93F[], D_8009C942[], D_8009C93E[];
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
@@ -53,9 +52,9 @@ void func_8011B7C4(TObj *o)
         case 4:
             if (D_1F8001C8 & 1) break;
             r = func_8011AFA8(o);
-            if (D_8009D0DA) {
-                if (r == 2 && D_1F800172 == 0x384) {
-                    if (D_8009CDD7 == 0xff) {
+            if (GCD.bd0da) {
+                if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
+                    if (GCD.bcdd7 == 0xff) {
                         o->b6b = 1;
                     } else {
                         o->substep = 4;
@@ -63,9 +62,9 @@ void func_8011B7C4(TObj *o)
                     }
                 }
             } else {
-                if (r == 1 && D_1F800172 == 0x384) {
+                if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     o->state = 0;
-                    if (D_8009CDD7 == 0) {
+                    if (GCD.bcdd7 == 0) {
                         o->substep = 1;
                         o->wac = 0x33;
                     }
@@ -94,16 +93,16 @@ void func_8011B7C4(TObj *o)
             break;
         case 0:
             if (D_1F8001C8 & 1) break;
-            p = &D_1F800172;
+            p = &(*(short*)((char*)&SPAD.i170 + 2));
             if (*p >= 0x384) break;
             r = func_8011B218(o);
             if (r == 1 && *p == 0x32a) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 1) {
-                    if (D_8009CDCD == 0xff) break;
+                    if (GCD.bcdcd == 0xff) break;
                     o->substep = 4;
                 } else {
                     o->state = 0;
-                    if (D_8009CDCD != 0) break;
+                    if (GCD.bcdcd != 0) break;
                     o->substep = 1;
                 }
                 o->wac = 0x29;
@@ -114,13 +113,13 @@ void func_8011B7C4(TObj *o)
         case 10:
             if (!(D_1F8001C8 & 1)) break;
             r = func_8011B218(o);
-            if (r == 1 && D_1F800172 == 0x546) {
+            if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 2) {
-                    if (D_8009CDCE == 0xff) break;
+                    if (GCD.bcdce == 0xff) break;
                     o->substep = 4;
                 } else {
                     o->state = 0;
-                    if (D_8009CDCE != 0) break;
+                    if (GCD.bcdce != 0) break;
                     o->substep = 1;
                 }
                 o->wac = 0x2a;
@@ -131,9 +130,9 @@ void func_8011B7C4(TObj *o)
         case 8:
             if (D_1F8001C8 & 1) break;
             r = func_8011B218(o);
-            if (D_8009D0D9) {
-                if (r == 2 && D_1F800172 == 0x1c2) {
-                    if (D_8009CDDB == 0xff) {
+            if (GCD.bd0d9) {
+                if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
+                    if (GCD.bcddb == 0xff) {
                         o->b6b = 1;
                     } else {
                         o->substep = 4;
@@ -141,9 +140,9 @@ void func_8011B7C4(TObj *o)
                     }
                 }
             } else {
-                if (r == 1 && D_1F800172 == 0x1c2) {
+                if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
                     o->state = 0;
-                    if (D_8009CDDB == 0) {
+                    if (GCD.bcddb == 0) {
                         o->substep = 1;
                         o->wac = 0x37;
                     }
@@ -194,23 +193,23 @@ void func_8011B7C4(TObj *o)
         case 0:
             break;
         case 1:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 300;
             o->substep++;
             setEventStarted(o->wac, 0, 0);
             break;
         case 3:
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             o->substep = 0;
             break;
         case 4:
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             o->timer = 300;
             o->substep++;
             setEventComplete(o->wac, 0);
@@ -220,9 +219,9 @@ void func_8011B7C4(TObj *o)
             if (--o->timer == -1) o->substep++;
             break;
         case 6:
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
-            D_8009C93E[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
             o->substep = 0;
             o->b6b = 1;
             break;

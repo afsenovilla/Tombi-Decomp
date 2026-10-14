@@ -1,9 +1,8 @@
 // FUNC 801213f4 444 X014
 // MATCHING 801213f4 444
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern unsigned char D_801265BC[];
 extern int Rand(void);
 extern void FUN_800202b4(TObj *);
@@ -32,7 +31,7 @@ void func_801213F4(TObj *o)
         if (o->animFrame) o->d8c = (o->d8c + 0x80) & 0xfff;
         else o->d8c = (o->d8c - 0x80) & 0xfff;
         if (o->timer < 0x28) {
-            if ((D_1F8001F8 + D_1F800198) & 1) o->visible = 1;
+            if ((SPAD.s1f8 + SPAD.i198) & 1) o->visible = 1;
             else o->visible = 0;
         }
         if (--o->timer == -1) o->b04++;

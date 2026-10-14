@@ -1,10 +1,10 @@
 // FUNC 8011aefc 616 X001
 // MATCHING 8011aefc 616
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, z, pad; } V8011AEFC;
 
-extern unsigned short D_1F8001C8;
 extern void *D_8013E5BC[];
 
 #define a ((V8011AEFC *)&o->wb4)
@@ -26,7 +26,7 @@ void func_8011AEFC(TObj *o)
         o->wac = 0;
         dy = q->y.p.whole - o->y.p.whole;
         dx = q->h->p.whole - o->h->p.whole;}
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             a->y = 0;
             a->x = 0;
             b->y = 0;
@@ -72,7 +72,7 @@ void func_8011AEFC(TObj *o)
         o->wac = 0;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             c->y = dy;
             d->y = dy;
             c->z = dx - o->box0;
@@ -91,7 +91,7 @@ void func_8011AEFC(TObj *o)
         o->wac = 3;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             c->y = dy;
             d->y = dy;
             c->z = dx - o->box0;
@@ -107,7 +107,7 @@ void func_8011AEFC(TObj *o)
         p = (TObj *)o->d90;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             c->y = dy;
             d->y = dy;
             c->z = dx - o->box0;

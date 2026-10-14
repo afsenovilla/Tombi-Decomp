@@ -1,8 +1,8 @@
 // FUNC 8011ddc0 152 X010
 // MATCHING 8011ddc0 152
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80019E;
 extern short FUN_8004461c(TObj *a, TObj *b);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void FUN_800e9f74(int, int, int, int);
@@ -18,5 +18,5 @@ void func_8011DDC0(TObj *o, TObj *p)
         p->step = 2;
         p->state = 0;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

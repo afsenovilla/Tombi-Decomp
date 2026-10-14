@@ -1,10 +1,10 @@
 // FUNC 801190bc 696 X010
 // MATCHING 801190bc 696
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C93C, D_8009C93F, D_8009C940, D_8009C941;
 extern TObj *TASK_C;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -32,12 +32,12 @@ void func_801190BC(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (D_8009C940 == 0) break;
-            if (D_8009C941 != 0x5c) break;
+            if (GVARS.b40 == 0) break;
+            if (GVARS.b41 != 0x5c) break;
             o->timer = 0x3c;
             o->step++;
             ObjCullRegister(o);
-            D_8009C93F = 1;
+            GVARS.b3f = 1;
             break;
         case 1:
             if (--o->timer == -1) {
@@ -64,7 +64,7 @@ void func_801190BC(TObj *o)
                 (*(short*)&GAME.nextArea) = 4;
                 (*(short*)&GAME.nextSpawnPoint) = 0xb;
                 (*(short*)&GAME.nextSection) = 0;
-                D_8009C93C = 0;
+                GVARS.b3c = 0;
                 GAME.fadeScreenControl = 3;
             }
             ObjCullRegister(o);

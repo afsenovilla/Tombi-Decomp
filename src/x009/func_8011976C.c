@@ -1,7 +1,7 @@
 // FUNC 8011976c 368 X009
 // MATCHING 8011976c 368
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern unsigned short D_8012ABB4[];
 extern unsigned short D_8012ABAC[];
 extern void **D_8012ABA0[];
@@ -18,7 +18,7 @@ void func_8011976C(TObj *o)
         o->w1e = 10;
         o->b0d = 1;
         o->w08 = ((D_8012ABB4[o->subtype] + o->b0c) << 6) | ((D_8012ABAC[o->subtype] >> 4) & 0x3f);
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = *D_8012ABA0[o->subtype];
         v = *(unsigned char *)&o->box0 >> 4;
         if (v < 12)

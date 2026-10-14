@@ -1,17 +1,16 @@
 // FUNC 80105bcc 2308 X016
 // MATCHING 80105bcc 2308
+#include "spad.h"
+#include "gcd.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6, D_1F8003C4;
-extern unsigned short D_8009D670;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern unsigned char D_8009D2B1;
-extern unsigned char D_8009CF06;
 extern unsigned char D_801152E8[];
 extern void FUN_8010eaf8(TObj *o);
 extern void FUN_800ef490(TObj *o);
@@ -70,7 +69,7 @@ extern void func_8010E328(TObj *, int);
     D_8009C330->timer = 0xe; \
     if (D_8009D2E8->type == 0x1c && (t = D_8009D2B1) < 3 && t != 0) \
         (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
-    if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4)) \
+    if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4)) \
         o->ba7 = 1; \
     FUN_800ee428(o); \
     o->step = 2; \
@@ -87,8 +86,8 @@ void FUN_80105bcc(TObj *o)
         D_8009D2E8->d->p.whole = o->d->p.whole;
         D_8009D2E8->step = 1;
         D_8009D2E8->state = 6;
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8010eaf8(o);
         if (D_8009D2E8->type != 0x1c)
             o->h->raw += o->velX << 8;
@@ -112,7 +111,7 @@ void FUN_80105bcc(TObj *o)
             o->velY = 0;
             o->substep = 1;
         }
-        if ((D_1F8001FC & D_1F8003C8) || (D_1F8001FC & D_1F8003C6)) {
+        if ((SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6)) {
             D_8009C330->animTimer = 0xf;
             o->velY = 0;
             o->substep = 2;
@@ -125,8 +124,8 @@ void FUN_80105bcc(TObj *o)
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
         p->d8c = o->d88 - 0xc0;
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8010eaf8(o);
         if (D_8009D2E8->type != 0x1c)
             o->h->raw += o->velX << 8;
@@ -134,7 +133,7 @@ void FUN_80105bcc(TObj *o)
         ObjAddVelY7E(o);
         AnimAdvance(o);
         if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
-            (D_1F8001FC & D_1F8003C8) || (D_1F8001FC & D_1F8003C6) || ObjTileCollide(o, 4, 0) != 0) {
+            (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             o->velY = 0;
             o->substep = 2;
         }
@@ -172,7 +171,7 @@ void FUN_80105bcc(TObj *o)
                 D_8009D2B1 = D_8009D2E8->subtype;
                 break;
             case 4:
-                D_8009CF06 = 1;
+                GCD.bcf06 = 1;
                 break;
             }
             D_8009D2E8->step = 3;
@@ -197,8 +196,8 @@ void FUN_80105bcc(TObj *o)
         o->substep = 4;
         break;
     case 4:
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_800ef490(o);
         ObjMotionStep(o);
         if ((*(unsigned char*)&o->wac) == 2) {

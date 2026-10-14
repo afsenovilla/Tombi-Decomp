@@ -1,12 +1,13 @@
 // FUNC 80049cdc 1096 MAIN0
 // MATCHING 80049cdc 1096
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 #include "gametask.h"
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
-extern short D_1F800176;
-extern unsigned char D_8009C93C, D_8009CFF9;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
@@ -44,8 +45,8 @@ void func_80049CDC(TObj *o)
         break;
     case 2:
         o->h->p.whole++;
-        if (D_1F800176 + 0x134 < o->h->p.whole)
-            o->h->p.whole = D_1F800176 + 0x134;
+        if ((*(short*)((char*)&SPAD.i174 + 2)) + 0x134 < o->h->p.whole)
+            o->h->p.whole = (*(short*)((char*)&SPAD.i174 + 2)) + 0x134;
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->timer = 40;
@@ -91,7 +92,7 @@ void func_80049CDC(TObj *o)
     case 8:
         if (--o->timer == -1) {
             o->state++;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
         }
         o->velV += 0x20;
@@ -107,7 +108,7 @@ void func_80049CDC(TObj *o)
         o->y.raw -= o->velV << 8;
         pl->y.raw -= o->velV << 8;
         if (GAME.fadeScreenControl == 1) {
-            D_8009CFF9 = 1;
+            GCD.bcff9 = 1;
             if ((*(int*)&GAME.selectedArea) == 0x7000E && GAME.purifiedAreas == 0xff) {
                 o->state++;
             } else {

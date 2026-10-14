@@ -1,12 +1,11 @@
 // FUNC 80123828 1216 X009
 // MATCHING 80123828 1216
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80077D24[];
 extern void *D_8012EA44[0];
 extern void *D_8012EA24[0];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -125,7 +124,7 @@ void func_80123828(TObj *o)
             o->y.raw += o->velV << 8;
         }
         if (o->visible != 0) {
-            int t = D_1F8001F8 + D_1F800198;
+            int t = SPAD.s1f8 + SPAD.i198;
             if ((t & 0x7f) == 0) {
                 if (FUN_8001f9e0() & 1) FUN_8001e4f0(0x96);
             } else if ((t & 0x3f) == 0) {

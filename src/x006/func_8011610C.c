@@ -1,15 +1,15 @@
 // FUNC 8011610c 328 X006
 // MATCHING 8011610c 328
+#include "spad.h"
 #include "TOBJ.H"
 extern volatile int D_1F800190;
-extern int D_1F8000F0;
 
 void func_8011610C(TObj *o)
 {
     unsigned char flag = 0;
     int k, c, v;
     int d = D_1F800190 - 0x800000;
-    d -= D_1F8000F0;
+    d -= SPAD.if0;
     k = 0x500000;
     d += k;
     c = 0x340000;
@@ -34,7 +34,7 @@ void func_8011610C(TObj *o)
                 goto st;
             }
         } else {
-            D_1F8000F0 = D_1F800190 + k - 0x800000;
+            SPAD.if0 = D_1F800190 + k - 0x800000;
             return;
         }
     } else {
@@ -52,5 +52,5 @@ void func_8011610C(TObj *o)
             o->b.raw = d;
         }
     }
-    *(volatile int *)&D_1F8000F0 += o->b.raw;
+    *(volatile int *)&SPAD.if0 += o->b.raw;
 }

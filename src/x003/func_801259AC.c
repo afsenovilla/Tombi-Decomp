@@ -1,8 +1,7 @@
 // FUNC 801259ac 844 X003
 // MATCHING 801259ac 844
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_1F80027E;
-extern unsigned short D_1F800176, D_1F800186;
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -25,7 +24,7 @@ static __inline__ void fall(TObj *o)
         if (o->wac >= 0xc) {
             o->d8c = 0;
         } else {
-            v = ((D_1F80027E << 2) + o->d8c) & 0xff;
+            v = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff;
             if (v != 0) {
                 if (v < 0x80) o->d8c = o->d8c - 1;
                 else o->d8c = o->d8c + 1;
@@ -62,8 +61,8 @@ void func_801259AC(TObj *o)
                 o->state = 2;
                 o->substep = 0;
             }
-        } else if (*w == 0 || (unsigned short)(o->h->p.whole - D_1F800176 + 0x70) >= 0x220 ||
-                   (unsigned short)(D_1F800186 - o->y.p.whole + 0x70) >= 0x1c0) {
+        } else if (*w == 0 || (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x70) >= 0x220 ||
+                   (unsigned short)(SPAD.s186 - o->y.p.whole + 0x70) >= 0x1c0) {
             o->state = 0;
             o->substep = 0;
         }

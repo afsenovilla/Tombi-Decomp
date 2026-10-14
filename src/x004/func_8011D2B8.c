@@ -1,9 +1,9 @@
 // FUNC 8011d2b8 652 X004
 // MATCHING 8011d2b8 652
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_8009C93F, D_8009C93A;
 extern void FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
 
@@ -28,14 +28,14 @@ void func_8011D2B8(TObj *o)
         if (((unsigned short*)&GAME.selectedSpawnPoint)[0] != 0xb)
             o->b04 = 3;
         else
-            D_8009C93F = 1;
+            GVARS.b3f = 1;
         break;
     case 1:
         FUN_800202b4(o);
         s = o->step;
         switch (s) {
         case 0:
-            if (o->b69 && D_8009C93A == 1) {
+            if (o->b69 && GVARS.b3a == 1) {
                 o->step = s + 1;
                 o->velH = 0x200;
             }
@@ -60,7 +60,7 @@ void func_8011D2B8(TObj *o)
         case 2:
             if (--o->timer == -1) {
                 o->step++;
-                D_8009C93F = 0;
+                GVARS.b3f = 0;
             }
             break;
         }

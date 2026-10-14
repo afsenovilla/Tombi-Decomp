@@ -1,5 +1,6 @@
 // FUNC 80129588 1444 X001
 // MATCHING 80129588 1444
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
 extern unsigned char D_8013C7C8[];
@@ -8,8 +9,6 @@ extern void *D_8013FC84;
 extern void *D_8013FC7C;
 extern void *D_8013FCA0;
 extern void *D_8013FC74;
-extern short D_1F80027E;
-extern short D_1F80016A;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -129,7 +128,7 @@ void func_80129588(TObj *o)
             p->w6 = 1;
             o->wb2 = 0x80;
         } else {
-            o->wb2 = ((-D_1F80027E << 2) + 0x80) & 0xff;
+            o->wb2 = ((-SPAD.s27e << 2) + 0x80) & 0xff;
             p->w6 = 0;
         }
         {
@@ -165,7 +164,7 @@ void func_80129588(TObj *o)
             if (o->w22)
                 o->animFrame = o->h->p.whole > o->wb4;
             else
-                o->animFrame = D_1F80016A < o->h->p.whole;
+                o->animFrame = (*(short*)((char*)&SPAD.i168 + 2)) < o->h->p.whole;
             o->step = 8;
             o->state = 0;
             o->wac = 1;
@@ -179,7 +178,7 @@ void func_80129588(TObj *o)
             if (o->w22)
                 o->animFrame = o->h->p.whole > o->wb4;
             else
-                o->animFrame = D_1F80016A < o->h->p.whole;
+                o->animFrame = (*(short*)((char*)&SPAD.i168 + 2)) < o->h->p.whole;
             o->step = 8;
             o->state = 0;
             o->wac = 1;

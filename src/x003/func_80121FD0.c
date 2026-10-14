@@ -1,5 +1,6 @@
 // FUNC 80121fd0 1744 X003
 // MATCHING 80121fd0 1744
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
@@ -8,9 +9,6 @@ extern char D_80077CF4[];
 extern B D_80135B30[];
 extern unsigned char D_80135B00[];
 extern A *D_801386F8[];
-extern unsigned short D_1F80016A;
-extern unsigned short D_1F80016E;
-extern unsigned short D_1F800172;
 extern void FUN_8001f8e4(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
@@ -37,9 +35,9 @@ static __inline__ void fall(TObj *q)
 
 static __inline__ unsigned char inrange(TObj *o)
 {
-    if ((unsigned short)(o->d->p.whole - D_1F800172 + 0x2d) < 0x5b
-        && (unsigned short)(o->y.p.whole - D_1F80016E + 0x46) < 0x8d
-        && (unsigned short)(o->h->p.whole - D_1F80016A + 0x80) < 0x101) return 1;
+    if ((unsigned short)(o->d->p.whole - (*(unsigned short*)((char*)&SPAD.i170 + 2)) + 0x2d) < 0x5b
+        && (unsigned short)(o->y.p.whole - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + 0x46) < 0x8d
+        && (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x80) < 0x101) return 1;
     return 0;
 }
 

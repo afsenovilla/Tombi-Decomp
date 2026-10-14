@@ -1,13 +1,11 @@
 // FUNC 80127e08 756 X010
 // MATCHING 80127e08 756
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C942;
-extern unsigned char D_8009C940[];
-extern unsigned char D_8009C941;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned char D_8009D078;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -37,8 +35,8 @@ void func_80127E08(TObj *o)
     case 1:
         if (o->b68) {
             o->state++;
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             FUN_8001f8e4(o);
             D_800A603C = 5;
             D_800A603D = 0;
@@ -46,16 +44,16 @@ void func_80127E08(TObj *o)
             (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
             o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             setAnim(o, ANIMS(o)[5]);
-            D_8009D078 = 3;
+            GCD.bd078 = 3;
             break;
         }
-        k = D_8009C940;
+        k = ((unsigned char*)&GVARS.b40);
         if (*k == 0) break;
-        if (D_8009C941 != 3) break;
+        if (GVARS.b41 != 3) break;
         *k = 0;
         o->state++;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         FUN_8001f8e4(o);
         m = 2;
         n = 0x16;
@@ -65,8 +63,8 @@ void func_80127E08(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         D_800A603C = 1;
         D_800A603D = 0;
         D_800A603E = 0;
@@ -102,7 +100,7 @@ void func_80127E08(TObj *o)
             o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             o->anim = ANIMS(o)[5];
             FUN_8001fe6c(o);
-            D_8009D078 = 3;
+            GCD.bd078 = 3;
             o->state = 2;
         }
         break;

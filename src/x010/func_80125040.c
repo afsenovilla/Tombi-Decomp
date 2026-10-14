@@ -1,15 +1,14 @@
 // FUNC 80125040 876 X010
 // MATCHING 80125040 876
-/* Box stores as inline setbox(o, 8, 0x10, 8, 0x10); D_1F8002DC as a [0] array keeps its load after the struct stores
+#include "spad.h"
+#include "gv2.h"
+#include "gvars.h"
+/* Box stores as inline setbox(o, 8, 0x10, 8, 0x10); ((int*)&SPAD.i2dc) as a [0] array keeps its load after the struct stores
    (and lets case 0 share the anim tail with case 4). */
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_8009D2C3, D_8009C942;
 extern void **D_8012F3A8[];
-extern int D_1F8002DC[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void freeObjectLayer2(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int func_800203DC(TObj *);
@@ -35,7 +34,7 @@ void func_80125040(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 0x40) {
+        if (GV2.bc3 & 0x40) {
             freeObjectLayer2(o);
             break;
         }
@@ -52,13 +51,13 @@ void func_80125040(TObj *o)
         o->w1e = 5;
         TBL(o) = t;
         o->b0d = 0;
-        o->d3c = D_1F8002DC[0];
+        o->d3c = ((int*)&SPAD.i2dc)[0];
         o->wac = 0;
         o->anim = TBL(o)[0];
         AnimLoadDuration(o);
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }
@@ -118,7 +117,7 @@ void func_80125040(TObj *o)
         o->b04++;
         break;
     case 4:
-        if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && !func_800203DC(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !func_800203DC(o)) {
             o->active = 1;
             o->b9d = 0;
             o->b69 = 0;

@@ -1,5 +1,6 @@
 // FUNC 800271b8 812 MAIN0
 // MATCHING 800271b8 812
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct {
     char p0[7]; unsigned char step;
@@ -11,7 +12,6 @@ typedef struct {
 extern short D_1F8000EE[];
 extern short D_1F8000F6[];
 #define F6 D_1F8000F6[0]
-extern unsigned char D_8009C93C;
 
 static __inline__ int body(S *s)
 {
@@ -37,7 +37,7 @@ static __inline__ int body(S *s)
         if (s->w4a != 90) {
             s->w4a++;
             if (s->w4a == 26) {
-                D_8009C93C = 0;
+                GVARS.b3c = 0;
                 GAME.fadeScreenControl = 3;
             }
             D_1F8000EE[0] = s->w52 + s->w4c * s->w4a / 90;

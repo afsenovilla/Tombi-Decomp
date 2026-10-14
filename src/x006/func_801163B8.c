@@ -1,16 +1,11 @@
 // FUNC 801163b8 516 X006
 // MATCHING 801163b8 516
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 #include "gametask.h"
 typedef struct { char pad[0x2c]; unsigned short w2c; } PL;
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
-extern PL *D_8009C94C;
-extern unsigned char D_8009C93A;
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C93E;
-extern unsigned char D_8009C958;
-extern unsigned char D_8009C93C;
 extern void func_8011610C(TObj *);
 extern void func_80116254(TObj *);
 extern void func_80118304(int, int, int);
@@ -18,7 +13,7 @@ extern void playSFX(int);
 
 void func_801163B8(TObj *o)
 {
-    PL *p = D_8009C94C;
+    PL *p = (*(PL **)&GVARS.p4c);
 
     switch (o->step) {
     case 0:
@@ -26,7 +21,7 @@ void func_801163B8(TObj *o)
         func_8011610C(o);
         break;
     case 1:
-        if (D_8009C93A != 0) {
+        if (GVARS.b3a != 0) {
             o->step++;
         }
     call:
@@ -48,14 +43,14 @@ void func_801163B8(TObj *o)
             func_80118304(5, 100, 0x46);
             playSFX(0x103);
             o->step++;
-            D_8009C93F = 1;
-            D_8009C93E = 1;
-            D_8009C958 = 3;
+            GVARS.b3f = 1;
+            GVARS.b3e = 1;
+            GVARS.b58 = 3;
         }
         goto call;
     case 5:
         if (p->w2c >= 0xc8) {
-            D_8009C958 = 0;
+            GVARS.b58 = 0;
             o->w4a = 0x6e;
             o->step++;
         }
@@ -66,7 +61,7 @@ void func_801163B8(TObj *o)
             (*(short*)&GAME.nextArea) = 6;
             (*(short*)&GAME.nextSection) = 1;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
         }
         goto call;

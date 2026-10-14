@@ -1,5 +1,8 @@
 // FUNC 8011bda8 1860 X002
 // MATCHING 8011bda8 1860
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { char p[0x24]; unsigned short w24; } W24;
@@ -7,12 +10,6 @@ extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern void *D_8009F328;
 extern void *D_8009F32C;
-extern unsigned char D_8009C93A;
-extern unsigned char D_8009C942[];
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C93E[];
-extern unsigned char D_8009D2B0;
-extern unsigned char D_8009CFDB[];
 extern TObj PLAYER;
 extern short D_800A604E[];
 extern short D_1F8001C6;
@@ -33,12 +30,12 @@ void func_8011BDA8(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009C93A == 0) {
+        if (GVARS.b3a == 0) {
             break;
         }
-        D_8009C942[0] = 1;
-        D_8009C93F[0] = 1;
-        D_8009D2B0 = 2;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        GV2.bb0 = 2;
         PLAYER.animFrame = 1;
         PLAYER.b04 = 5;
         PLAYER.step = 0;
@@ -97,7 +94,7 @@ void func_8011BDA8(TObj *o)
         func_80117CEC(b, 0, 0);
         func_80116928(d, 3, 0);
         o->w08 = 0x3c;
-        D_8009CFDB[0] = 1;
+        ((unsigned char*)&GCD.bcfdb)[0] = 1;
         o->state++;
         break;
     case 5:
@@ -217,9 +214,9 @@ void func_8011BDA8(TObj *o)
         PLAYER.d->p.whole++;
         break;
     case 99:
-        D_8009C942[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
         D_1F8001C6 = 0;
         o->b0f = ((W24 *)o)->w24;

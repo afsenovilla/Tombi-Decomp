@@ -1,5 +1,6 @@
 // FUNC 801285e4 1096 X001
 // MATCHING 801285e4 1096
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
 extern unsigned char D_8013C7C8[];
@@ -7,8 +8,6 @@ extern unsigned char D_8013C7D8[];
 extern char D_80077CE8[];
 extern char D_80077CF4[];
 extern void *D_8013FC74[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_1F80027E;
 extern short D_1F800284;
 extern short D_8007A5F0[];
@@ -93,7 +92,7 @@ void func_801285E4(TObj *o)
             break;
         }
         AnimAdvance(o);
-        if (o->visible && ((D_1F8001F8 + D_1F800198) & 0xf) == 0)
+        if (o->visible && ((SPAD.s1f8 + SPAD.i198) & 0xf) == 0)
             SfxPlay(0x5e);
         if (p->w6) {
             int t = o->d8c;

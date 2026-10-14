@@ -1,11 +1,12 @@
 // FUNC 801282d0 788 X001
 // MATCHING 801282d0 788
+#include "spad.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8013C7B8[], D_8013C7C8[];
 extern char D_80077CE8[];
 extern void *D_8013FCB0[], *D_8013FCB8[];
-extern short D_1F80027E, D_1F800284, D_1F80016A;
+extern short D_1F80027E, D_1F800284;
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -57,7 +58,7 @@ void func_801282D0(TObj *o)
             if (o->w22)
                 o->animFrame = o->h->p.whole > o->wb4;
             else
-                o->animFrame = D_1F80016A < o->h->p.whole;
+                o->animFrame = (*(short*)((char*)&SPAD.i168 + 2)) < o->h->p.whole;
             o->wac = 0x12;
             o->anim = D_8013FCB8[0];
             FUN_8001fe6c(o);

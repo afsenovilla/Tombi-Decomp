@@ -1,9 +1,9 @@
 // FUNC 80134404 700 X000
 // MATCHING 80134404 700
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
 extern void *D_8013B270[];
-extern int D_1F8002D4[];
-extern unsigned char D_8009CDA9;
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
@@ -22,7 +22,7 @@ void func_80134404(TObj *o)
         o->box3 = 0x20;
         o->w1e = 8;
         o->animFrame = 1;
-        t = D_1F8002D4[0];
+        t = ((int*)&SPAD.i2d4)[0];
         a = D_8013B270[0];
         o->d3c = t;
         o->anim = a;
@@ -35,11 +35,11 @@ void func_80134404(TObj *o)
         o->category |= 0x80;
         o->b04++;
         o->step = o->subtype;
-        if (D_8009CDA9 == 0xff) o->b04 = 3;
+        if (GCD.bcda9 == 0xff) o->b04 = 3;
         break;
     case 1:
         ObjCullRegister(o);
-        if (D_8009CDA9 == 0xff) {
+        if (GCD.bcda9 == 0xff) {
             if (!o->visible) o->b04 = 3;
             FUN_80134190(o);
         } else if (o->visible) {

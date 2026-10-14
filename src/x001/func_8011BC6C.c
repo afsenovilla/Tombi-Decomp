@@ -1,8 +1,8 @@
 // FUNC 8011bc6c 280 X001
 // MATCHING 8011bc6c 280
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F80016A, D_1F80016E;
 
 void func_8011BC6C(TObj *o)
 {
@@ -20,7 +20,7 @@ void func_8011BC6C(TObj *o)
         }
         break;
     case 1:
-        if (D_1F80016E >= -0x140 && (unsigned short)(D_1F80016A - 0xb23) < 0x95)
+        if ((*(short*)((char*)&SPAD.i16c + 2)) >= -0x140 && (unsigned short)((*(short*)((char*)&SPAD.i168 + 2)) - 0xb23) < 0x95)
             o->state++;
         break;
     case 2:

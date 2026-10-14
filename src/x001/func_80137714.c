@@ -1,18 +1,18 @@
 // FUNC 80137714 596 X001
 // MATCHING 80137714 596
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern short D_8007A3F0[];
-extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_8009C959;
 extern int AnimAdvance(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ int inView(TObj *o)
 {
-    if ((unsigned short)(o->y.p.whole - D_1F80016E + 0xb0) >= 0x161) return 0;
-    return (unsigned short)(o->h->p.whole - D_1F80016A + 0x12c) < 0x259;
+    if ((unsigned short)(o->y.p.whole - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + 0xb0) >= 0x161) return 0;
+    return (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x12c) < 0x259;
 }
 
 void func_80137714(TObj *o)
@@ -51,6 +51,6 @@ void func_80137714(TObj *o)
     if (o->visible == 0 && !inView(o)) {
         o->active = 2;
         o->b04 = 3;
-        { unsigned char *c = &D_8009C959; *c = *c - 1; }
+        { unsigned char *c = &GVARS.b59; *c = *c - 1; }
     }
 }

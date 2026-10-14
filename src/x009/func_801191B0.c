@@ -1,9 +1,9 @@
 // FUNC 801191b0 412 X009
 // MATCHING 801191b0 412
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C93A;
 extern void func_80118BF8(TObj *);
 extern void func_80118A80(TObj *);
 extern void func_801174C4(TObj *);
@@ -37,7 +37,7 @@ void func_801191B0(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane != 0x20 && D_8009C93A == 1) {
+        if (GAME.selectedPlane != 0x20 && GVARS.b3a == 1) {
             o->b04++;
             break;
         }

@@ -1,5 +1,6 @@
 // FUNC 8011e524 2460 X001
 // MATCHING 8011e524 2460
+#include "spad.h"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
     char p08[0x14 - 8];
@@ -35,7 +36,6 @@ typedef struct {
 } E;
 
 extern O PLAYER;
-extern short D_1F8000EE;
 extern void func_8011EEC0(O *);
 
 #define DV ((short)o->w82 >> 8)
@@ -50,7 +50,7 @@ void func_8011E524(O *o, short n)
     q++;
     cnt = *q++;
     if (n < 3 || n >= cnt) return;
-    if (D_1F8000EE >= 0x4b1 && o->b6a != 0) {
+    if ((*(short*)((char*)&SPAD.iec + 2)) >= 0x4b1 && o->b6a != 0) {
         f = o->flags;
         o->b6a = 0;
         o->step = 0;

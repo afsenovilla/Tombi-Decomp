@@ -1,10 +1,10 @@
 // FUNC 8004a124 936 MAIN0
 // MATCHING 8004a124 936
+#include "gcd.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj PLAYER;
-extern unsigned char D_8009CFF9;
 extern void FUN_800eea7c(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -96,7 +96,7 @@ void FUN_8004a124(TObj *o)
             s->b04 = 5;
             s->step = 4;
             s->state = 2;
-            D_8009CFF9 = 0;
+            GCD.bcff9 = 0;
             o->active = 2;
             o->b04 = 3;
         }

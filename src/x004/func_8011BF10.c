@@ -1,8 +1,8 @@
 // FUNC 8011bf10 680 X004
 // MATCHING 8011bf10 680
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D091;
 extern short D_800A457E;
 extern TObj *FUN_80018448(void);
 extern void FUN_80018838(TObj *);
@@ -14,7 +14,7 @@ void func_8011BF10(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D091) {
+        if (GCD.bd091) {
             if (o->subtype != 1) {
                 short *k = &D_800A457E;
                 *k += 0x140;
@@ -40,7 +40,7 @@ void func_8011BF10(TObj *o)
         if (o->subtype == 1) {
             switch (o->step) {
             case 0:
-                if (D_8009D091 == 1) o->step++;
+                if (GCD.bd091 == 1) o->step++;
                 break;
             case 1:
                 if (o->b0c == 1) {
@@ -77,7 +77,7 @@ void func_8011BF10(TObj *o)
             }
             {
                 short *k = &D_800A457E;
-                D_8009D091 = 1;
+                GCD.bd091 = 1;
                 *k += 0x140;
             }
             o->b04 = 3;

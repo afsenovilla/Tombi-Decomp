@@ -1,11 +1,11 @@
 // FUNC 8011dc0c 596 X004
 // MATCHING 8011dc0c 596
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 typedef struct { char p0[6]; unsigned char b6; char p7[2]; unsigned char b9; char pa[0x20 - 0xa]; short w20; } PL;
 extern PL *D_8009C330;
-extern unsigned short D_1F8001C8;
 extern unsigned char D_801152E8[];
 extern void FUN_800eeae4(TObj *, int, int);
 extern void FUN_800eea7c(TObj *, int, int);
@@ -38,7 +38,7 @@ void func_8011DC0C(TObj *o)
         FUN_800eeae4(o, 0x19, 1);
         o->state++;
     case 1:
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             o->d->p.whole += 3;
         } else {
             o->d->p.whole -= 3;

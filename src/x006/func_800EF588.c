@@ -1,11 +1,11 @@
 // FUNC 800ef588 164 X006
 // MATCHING 800ef588 164
+#include "gv6.h"
 #include "TOBJ.H"
-extern unsigned short D_8009D670[];
 
 void func_800EF588(TObj *o)
 {
-    volatile unsigned short *k = D_8009D670;
+    volatile unsigned short *k = ((unsigned short*)&GV6.s70);
     unsigned short f = o->animFrame & 1;
     o->animFrame = f;
     if (*k & 0x10) {

@@ -1,5 +1,7 @@
 // FUNC 8011dd48 1116 X003
 // MATCHING 8011dd48 1116
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned char p0[8];
@@ -93,8 +95,6 @@ typedef struct {
 } TP;
 
 extern PL *D_8009C330;
-extern unsigned char D_8009C93F[], D_8009C942[];
-extern unsigned char D_8009D07C, D_8009D07D, D_8009D002, D_8009CFFD, D_8009CDC1;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void addItemToInventory(int, int, int);
@@ -123,8 +123,8 @@ void func_8011DD48(TP *o)
         o->animFrame &= 1;
         PlayerSetAnimIfChanged((TObj *)o, 0x2b);
         o->wf6 = o->d->p.whole;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
     case 1:
         FUN_8001fec0((TObj *)o);
@@ -148,31 +148,31 @@ void func_8011DD48(TP *o)
         o->ba2 = 0;
         switch (o->w7a) {
         case 37:
-            if (D_8009CDC1 == 0xff) break;
+            if (GCD.bcdc1 == 0xff) break;
             addItemToInventory(0x25, 1, 1);
             o->timer = 0x3c;
             o->state = 4;
             break;
         case 7:
-            p = &D_8009D07C;
+            p = &GCD.bd07c;
             if (*p) break;
             addItemToInventory(7, 1, 1);
             *p = 1;
             break;
         case 8:
-            p = &D_8009D07D;
+            p = &GCD.bd07d;
             if (*p) break;
             addItemToInventory(0x1f, 1, 1);
             *p = 1;
             break;
         case 9:
-            p = &D_8009D002;
+            p = &GCD.bd002;
             if (*p) break;
             addItemToInventory(0x67, 1, 1);
             *p = 1;
             break;
         case 55:
-            p = &D_8009CFFD;
+            p = &GCD.bcffd;
             if (*p) break;
             addItemToInventory(0x37, 1, 1);
             *p = 1;
@@ -240,8 +240,8 @@ void func_8011DD48(TP *o)
         o->step = 0;
         o->state = 0;
         o->substep = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         break;
     }
 }

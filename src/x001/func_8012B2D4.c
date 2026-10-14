@@ -1,14 +1,13 @@
 // FUNC 8012b2d4 2116 X001
 // MATCHING 8012b2d4 2116
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D0[];
-extern unsigned char D_8009CEAE, D_8009C942;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_800A4582, D_800A457E;
 extern unsigned short D_800A457C;
-extern int D_1F80018C, D_1F800190;
+extern int D_1F80018C;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
 extern short D_1F80027E;
 extern short D_1F800284;
@@ -80,7 +79,7 @@ void func_8012B2D4(BX *b)
             q[0] = o->h->p.whole;
             q[1] = o->y.p.whole;
             q[2] = o->d->p.whole;
-            o->d3c = D_1F8002D0[0];
+            o->d3c = ((int*)&SPAD.i2d0)[0];
             o->w22 = 0;
             o->b0d = 0;
             o->b68 = 0;
@@ -109,14 +108,14 @@ void func_8012B2D4(BX *b)
         }
         break;
     case 1:
-        if (o->b0c == 1 && D_8009CEAE == 1) {
+        if (o->b0c == 1 && GCD.bceae == 1) {
             o->b04 = 5;
             o->step = 0;
             o->state = 0;
             o->substep = 0;
             break;
         }
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }
@@ -133,7 +132,7 @@ void func_8012B2D4(BX *b)
             case 7: func_8012A5CC(o); break;
             case 8: func_8012A794(o); break;
             }
-            if (((D_1F8001F8 + D_1F800198) & 7) == 0) {
+            if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) {
                 if (o->y.p.whole > D_800A4582 + 0xa0 ||
                     (unsigned short)(o->h->p.whole + 0xaa - D_800A457C) > D_800A457E + 0xb0) {
                     o->b04 = 3;
@@ -198,14 +197,14 @@ void func_8012B2D4(BX *b)
         o->b04++;
         break;
     case 4:
-        if (o->b0c == 1 && D_8009CEAE == 1) {
+        if (o->b0c == 1 && GCD.bceae == 1) {
             o->b04 = 5;
             o->step = 0;
             o->state = 0;
             o->substep = 0;
             break;
         }
-        if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && !func_800203DC(o)) {
+        if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && !func_800203DC(o)) {
             o->box2 = 0x10;
             o->box3 = 0x20;
             o->b04 = 0;
@@ -237,13 +236,13 @@ void func_8012B2D4(BX *b)
             break;
         case 1:
             AnimAdvance(o);
-            if (D_8009CEAE == 2) o->step++;
+            if (GCD.bceae == 2) o->step++;
             break;
         case 2:
             AnimAdvance(o);
-            if (D_8009CEAE == 3) o->step++;
+            if (GCD.bceae == 3) o->step++;
             D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            SPAD.i190 = o->y.raw;
             break;
         case 3:
             AnimAdvance(o);
@@ -254,7 +253,7 @@ void func_8012B2D4(BX *b)
             }
             o->d8c = (o->d8c - 6) & 0xff;
             D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            SPAD.i190 = o->y.raw;
             break;
         case 4:
             AnimAdvance(o);
@@ -266,7 +265,7 @@ void func_8012B2D4(BX *b)
             }
             o->d8c = (o->d8c - 6) & 0xff;
             D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            SPAD.i190 = o->y.raw;
             break;
         case 5:
             AnimAdvance(o);
@@ -275,7 +274,7 @@ void func_8012B2D4(BX *b)
             o->y.raw += o->velV << 8;
             o->d8c = (o->d8c - 6) & 0xff;
             D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            SPAD.i190 = o->y.raw;
             if (land(o)) o->step++;
             break;
         case 6:

@@ -1,5 +1,6 @@
 // FUNC 8012eae8 1244 X001
 // MATCHING 8012eae8 1244
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -8,8 +9,7 @@ typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
 extern AH *D_8013DAE8[];
 extern unsigned char D_8013C800[];
 extern char D_80077D30[];
-extern short D_1F80027E, D_1F800284;
-extern unsigned short D_1F800176, D_1F80017A[];
+extern short D_1F800284;
 extern int func_800203DC(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void applyFrameVelocityY(TObj *o);
@@ -30,10 +30,10 @@ static __inline__ int land(TObj *o, short *q)
         return 1;
     }
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        t = D_1F80027E;
+        t = SPAD.s27e;
         if (t < 0) t = -t;
         if (t >= 9) t = 8;
-        if (D_1F80027E < 0) t = -t;
+        if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
         o->wae = D_1F800284;
@@ -58,10 +58,10 @@ static __inline__ int land2(TObj *o)
         return 1;
     }
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        t = D_1F80027E;
+        t = SPAD.s27e;
         if (t < 0) t = -t;
         if (t >= 9) t = 8;
-        if (D_1F80027E < 0) t = -t;
+        if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
         w = D_1F800284;
@@ -88,7 +88,7 @@ void func_8012EAE8(TObj *o)
         if (o->b0c == 0) {
             o->state = 2;
             o->wac = 0;
-            o->y.p.whole = D_1F80017A[0] - 0xf0;
+            o->y.p.whole = ((unsigned short*)&SPAD.s17a)[0] - 0xf0;
         } else {
             if (o->b0c == 2) {
                 o->wac = 0xe;
@@ -112,13 +112,13 @@ void func_8012EAE8(TObj *o)
     case 2:
         if (o->b0c == 0) {
             if (o->animFrame == 0) {
-                o->h->p.whole = D_1F800176 - 0x10;
+                o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x10;
                 if (o->h->p.whole < 0x3ca) {
                     o->b04 = 3;
                     break;
                 }
             } else {
-                o->h->p.whole = D_1F800176 + 0x150;
+                o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x150;
             }
         }
         applyFrameVelocityY(o);
@@ -137,7 +137,7 @@ void func_8012EAE8(TObj *o)
             applyFrameVelocityXY(o);
             func_8012BB18(o);
             land(o, q);
-            if ((unsigned short)(o->h->p.whole - 0x30 - D_1F800176) < 0xe0) {
+            if ((unsigned short)(o->h->p.whole - 0x30 - (*(unsigned short*)((char*)&SPAD.i174 + 2))) < 0xe0) {
                 o->state = 8;
                 o->substep = 0;
                 o->step++;

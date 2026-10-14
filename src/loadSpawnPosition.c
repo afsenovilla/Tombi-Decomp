@@ -1,11 +1,11 @@
 // FUNC 8002171c 316 MAIN0
 // MATCHING 8002171c 316
 // Portado de psx_tomba (camera.c, loadSpawnPosition); licencia MIT del proyecto original.
+#include "gv2.h"
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
 extern int** D_80079474[];
-extern u8 D_8009D2AF;
 
 
 typedef struct {
@@ -34,7 +34,7 @@ void loadSpawnPosition(u8* self)
     *(int*)(self + 0xF4) = row[1] << 16;
     switch (GAME.selectedArea) {
     case 0:
-        if (D_8009D2AF == 0 && GAME.selectedSection == 0) {
+        if (GV2.baf == 0 && GAME.selectedSection == 0) {
             *(s16*)(self + 0xEE) = 0x40;
         } else if (GAME.selectedSection == 3) {
             *(s16*)(self + 0xEE) = 0xD2;

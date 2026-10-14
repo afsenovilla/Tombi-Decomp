@@ -1,6 +1,7 @@
 // FUNC 80030d58 480 MAIN0
 // MATCHING 80030d58 480
 // Ported from psx_tomba (effect.c, updateEffectHitbox); MIT licence of the original project.
+#include "gcd.h"
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -33,7 +34,6 @@ u16 D_8007D5D0[10] = { 1, 0, 0, 0, 0, 1, 2, 3, 1, 1 };
 
 
 
-extern u8 D_8009CE58;
 
 
 extern const u32 D_800108AC[];
@@ -2957,7 +2957,7 @@ void updateEffectHitbox(u8* self)
             pushDrawListLayer4(self);
             break;
         case 2:
-            if (D_8009CE58 != 0) {
+            if (GCD.bce58 != 0) {
                 self[4] = 3;
                 break;
             }

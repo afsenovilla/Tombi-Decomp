@@ -1,5 +1,6 @@
 // FUNC 80118388 372 X017
 // MATCHING 80118388 372
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -11,7 +12,6 @@ typedef struct {
 
 extern T80118388 D_80119994[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CE1A[];
 extern void AnimLoadDuration(TObj *);
 
 void func_80118388(TObj *o)
@@ -31,5 +31,5 @@ void func_80118388(TObj *o)
     o->step = 0;
     o->category |= 0x80;
     o->b04++;
-    if (D_8009CE1A[0]) o->step = 1;
+    if (((unsigned char*)&GCD.bce1a)[0]) o->step = 1;
 }

@@ -1,13 +1,13 @@
 // FUNC 80104a04 724 X017
 // MATCHING 80104a04 724
+#include "spad.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; } G;
 extern G *D_8009C330;
-extern short D_8009C944, D_8009C946[];
 extern int D_8009D2E8;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8003C4;
 extern int D_8009F0EC;
 extern int D_8009F0EC_r;
 extern unsigned char D_801152E8[];
@@ -22,8 +22,8 @@ void func_800EFC8C(TObj *o, int);
 void func_8010E328(TObj *o, int);
 void func_80104A04(TObj *o)
 {
-    o->h->raw += D_8009C944 << 8;
-    o->y.raw += D_8009C946[0] << 8;
+    o->h->raw += GVARS.s44 << 8;
+    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
     FUN_800ef490(o);
     ObjMotionStep(o);
     if (*(unsigned char *)&o->wac == 2) {
@@ -67,7 +67,7 @@ void func_80104A04(TObj *o)
             o->b9c = 2;
             o->wb2 = 0;
             D_8009C330->w20 = 0xe;
-            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
+            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 3;
@@ -82,7 +82,7 @@ void func_80104A04(TObj *o)
             o->b9c = 2;
             o->wb2 = 0;
             D_8009C330->w20 = 0xe;
-            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
+            if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 3;

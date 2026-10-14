@@ -1,9 +1,9 @@
 // FUNC 8010d888 644 X004
 // MATCHING 8010d888 644
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[10]; unsigned char bca; } PObj;
 extern TObj *D_8009C330;
-extern unsigned short D_1F8001FC, D_1F8003C4, D_1F8003C6;
 extern void FUN_800eea7c(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -55,14 +55,14 @@ void func_8010D888(TObj *o)
             o->wb2 += 8;
         else
             o->wb2 -= 8;
-        if (D_1F8001FC & D_1F8003C4) {
+        if (SPAD.s1fc & SPAD.s3c4) {
             if ((unsigned short)(*(unsigned short *)o->anim - 0x136) < 4) {
                 PlayerSetAnimIfChanged(o, 0x45);
                 o->wb2 = 0x400;
             }
         }
         FUN_8010d280(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             ((PObj *)o)->bca = 0;
             o->step = 0x44;
             o->state = 0;

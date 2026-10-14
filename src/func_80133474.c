@@ -1,5 +1,7 @@
 // FUNC 80133474 3152 X000
 // MATCHING 80133474 3152
+#include "gcd.h"
+#include "gvars.h"
 /* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
  * call;call;j blocks that cross-jumping merged).
  * D_8013B18C, D_800A607C, D_800A60C4 now use only their [0] array names.
@@ -20,7 +22,6 @@ extern int D_800A60C4a[];
 extern int D_8009C984A[];
 #define D_8009C984 D_8009C984A[0]
 extern int D_8009C984s;
-extern unsigned char D_8009C942, D_8009C93F, D_8009CDA7[];
 extern int D_1F8002D4[];
 extern void *D_8013B17C[];
 extern void *D_8013B188;
@@ -103,21 +104,21 @@ void func_80133474(TObj *o)
                 D_8009C984 |= 2;
                 func_800EEA7C(&PLAYER, 0xd, 0);
                 o->timer = 2;
-                if (D_8009CDA7[0] == 0) {
+                if (((unsigned char*)&GCD.bcda7)[0] == 0) {
                     o->w78 = 1;
                     o->h->p.whole = PLAYER.h->p.whole;
                     PLAYER.y.p.whole = o->y.p.whole - o->box2;
                     setEventStarted(3, 0, 0);
                     o->timer = 300;
-                    D_8009C942 = 1;
-                    D_8009C93F = 1;
+                    GVARS.b42 = 1;
+                    GVARS.b3f = 1;
                 }
                 addItemToInventory(1, 1, 1);
                 o->state++;
             case 1:
                 if (--o->timer <= 0) {
-                    D_8009C942 = 0;
-                    D_8009C93F = 0;
+                    GVARS.b42 = 0;
+                    GVARS.b3f = 0;
                     o->step = 1;
                 }
                 break;
@@ -128,8 +129,8 @@ void func_80133474(TObj *o)
             break;
         case 2:
             if (o->w78 != 0) {
-                D_8009C942 = 0;
-                D_8009C93F = 0;
+                GVARS.b42 = 0;
+                GVARS.b3f = 0;
             }
             D_8009C984 &= ~2;
             o->step = 5;
@@ -188,8 +189,8 @@ void func_80133474(TObj *o)
             case 5:
                 if (D_800A6078->p.whole >= 0xbd && D_800A60DA == 0) {
                     o->step = 4;
-                    D_8009C942 = 1;
-                    D_8009C93F = 1;
+                    GVARS.b42 = 1;
+                    GVARS.b3f = 1;
                 }
                 break;
             }
@@ -231,8 +232,8 @@ void func_80133474(TObj *o)
             }
             case 3:
                 if (--o->timer <= 0) {
-                    D_8009C942 = 0;
-                    D_8009C93F = 0;
+                    GVARS.b42 = 0;
+                    GVARS.b3f = 0;
                     o->b04 = 3;
                 }
                 break;

@@ -24,7 +24,6 @@ extern Seg D_8013C498[];
 extern char D_8013C490[];
 extern Ctx D_800A64C0;
 extern short D_800A64C6[];
-extern short D_800A604E;
 extern int MulCos(int, short);
 extern int MulNegSinScaled(int, short);
 extern TObj *allocObjectLayer4(void);
@@ -182,7 +181,7 @@ void func_8011C574(TObj *o)
                 }
                 if (PLAYER.obj.b9c == 0) {
                     *(short *)((char *)(*(Fix16 **)&PLAYER.obj.h) + 2) += dx;
-                    D_800A604E += dy;
+                    PLAYER.obj.y.p.whole += dy;
                 }
                 o->b69 = 0;
             } else {

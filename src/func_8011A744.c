@@ -1,9 +1,9 @@
 // FUNC 8011a744 748 X000
 // MATCHING 8011a744 748
+#include "spad.h"
 #include "TOBJ.H"
 extern void *D_8013B244[];
 extern int Rand(void);
-extern int D_1F8002D4[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -20,7 +20,7 @@ void func_8011A744(TObj *o)
         o->b0d = 0;
         *(signed char *)&o->b0f = -10;
         o->anim = D_8013B244[o->b0c];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->animFrame = Rand() & 1;
         switch (o->subtype) {
         case 0:

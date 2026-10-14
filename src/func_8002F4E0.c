@@ -1,13 +1,12 @@
 // FUNC 8002f4e0 1152 MAIN0
 // MATCHING 8002f4e0 1152
+#include "plx.h"
 #include "TOBJ.H"
 typedef struct { short w0; short w2; } P;
 typedef struct { void **tab; int a; int b; } AT;
 extern AT D_80079D58[];
 extern unsigned short D_1F8001F8;
-extern unsigned char D_800A6104;
 extern TObj PLAYER;
-extern short D_800A6118;
 extern P *D_800A6078, *D_800A607C;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -62,8 +61,8 @@ void func_8002F4E0(TObj *o)
             else
                 v = o->b6b;
         } else if (o->timer < 0) {
-            if (D_800A6118 > 0) PLAYER.active = 3; else PLAYER.active = 1;
-            D_800A6104 = 3;
+            if (PLX.s6118 > 0) PLAYER.active = 3; else PLAYER.active = 1;
+            PLX.b6104 = 3;
             o->b6b = 0;
             o->b04 = 2;
             goto anim;

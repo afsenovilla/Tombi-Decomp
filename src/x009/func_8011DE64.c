@@ -1,5 +1,6 @@
 // FUNC 8011de64 512 X009
 // MATCHING 8011de64 512
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct {
     char p0[2]; short w2; char p4[4]; unsigned char b8, b9; char pa[2]; short wc, we;
@@ -7,7 +8,7 @@ typedef struct {
 } G;
 extern G *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_1F8001FC, D_1F8003C6;
+extern unsigned short D_1F8001FC;
 extern int AnimAdvance(TObj *o);
 extern void FUN_800eee90(TObj *o);
 extern void SfxPlay3(int, int);
@@ -45,7 +46,7 @@ void func_8011DE64(TObj *o)
         o->state++;
     case 1:
         AnimAdvance(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (D_1F8001FC & SPAD.s3c6) {
             D_8009C330->b9 = 0;
             o->b04 = 1;
             o->step = 0x27;

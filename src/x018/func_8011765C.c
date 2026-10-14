@@ -1,8 +1,8 @@
 // FUNC 8011765c 240 X018
 // MATCHING 8011765c 240
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE16, D_8009CE18, D_8009CFD9, D_8009CFDA;
 extern void func_80117484(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -11,10 +11,10 @@ void func_8011765C(TObj *o)
     switch (o->b04) {
     case 0:
         func_80117484(o);
-        if (D_8009CE16 == 0xff) D_8009CFD9 = 1;
-        else D_8009CFD9 = 0;
-        if (D_8009CE18 == 0xff) D_8009CFDA = 1;
-        else D_8009CFDA = 0;
+        if (GCD.bce16 == 0xff) GCD.bcfd9 = 1;
+        else GCD.bcfd9 = 0;
+        if (GCD.bce18 == 0xff) GCD.bcfda = 1;
+        else GCD.bcfda = 0;
         o->b04++;
         break;
     case 1:

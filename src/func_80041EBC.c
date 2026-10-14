@@ -1,9 +1,9 @@
 // FUNC 80041ebc 608 MAIN0
 // MATCHING 80041ebc 608
+#include "spad.h"
 typedef struct O { char p[0x44]; short *q; } O;
 extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *DAT_1f800278;
-extern short D_1F80027E, D_1F800280, D_1F800282, D_1F800284;
 int func_80041EBC(O *o, short a, short b)
 {
     short n;
@@ -47,10 +47,10 @@ int func_80041EBC(O *o, short a, short b)
             x = h + k * ((a - lo) % nn) / nn;
         }
         if ((short)(x - b) <= 0) {
-            D_1F80027E = k;
-            D_1F800280 = h;
-            D_1F800282 = flags;
-            D_1F800284 = (flags & 0xe00) >> 9;
+            SPAD.s27e = k;
+            SPAD.s280 = h;
+            (*(short*)&SPAD.s282) = flags;
+            SPAD.s284 = (flags & 0xe00) >> 9;
             return 1;
         }
     } while (n != 0);

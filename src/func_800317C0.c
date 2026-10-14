@@ -1,5 +1,8 @@
 // FUNC 800317c0 6188 MAIN0
 // MATCHING 800317c0 6188
+#include "spad.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
 typedef struct {
@@ -48,9 +51,7 @@ extern D600 D_8009D600;
 extern short D_8007A070[], D_8007A072[], D_8007A074[];
 extern short D_8007A04C[], D_8007A04E[];
 extern unsigned char *D_8009F0EC;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8003C8, D_1F8001F8, D_1F800282;
-extern unsigned char D_8009C93F, D_8009D2B2;
+extern unsigned char D_8009D2B2;
 extern int D_8009D2E8;
 extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
@@ -82,7 +83,7 @@ extern void FUN_800efc04(TObj *);
 
 #define TB(o) ((short)(o->animFrame + o->animFrame * 2))
 
-#define PADOK() ((*(volatile unsigned short *)&D_8009D670 & D_1F8003C8) && PLAYER.b04 == 1 && PLAYER.ba4 == 0)
+#define PADOK() ((*(volatile unsigned short *)&GV6.s70 & SPAD.s3c8) && PLAYER.b04 == 1 && PLAYER.ba4 == 0)
 
 void func_800317C0(TObj *o)
 {
@@ -225,7 +226,7 @@ void func_800317C0(TObj *o)
             unsigned short u;
             int m;
             FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-            u = D_1F800282;
+            u = SPAD.s282;
             m = u >> 5 & 0xf;
             if ((u & 0x3000) == 0 && m < 4 && m != 0)
                 FUN_800eaffc(o->h->p.whole, o->y.p.whole, o->d->p.whole, (unsigned char)o->animFrame);
@@ -347,7 +348,7 @@ void func_800317C0(TObj *o)
             if (D_8009C338->w0e < -64) {
                 if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                     *(unsigned char *)o->d94 = D_8009C330->b6;
-                if (PADOK() && PLAYER.bac < 2 && D_8009C93F == 0) {
+                if (PADOK() && PLAYER.bac < 2 && GVARS.b3f == 0) {
                     FUN_800ec710(D_8009D2B2, o);
                     PLAYER.b9d = 0;
                     D_8009C338->w0e = 0;
@@ -365,7 +366,7 @@ void func_800317C0(TObj *o)
         } else if (D_8009C338->w0e > 64) {
             if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                 *(unsigned char *)o->d94 = D_8009C330->b6;
-            if (!PADOK() || PLAYER.bac >= 2 || D_8009C93F != 0) {
+            if (!PADOK() || PLAYER.bac >= 2 || GVARS.b3f != 0) {
                 PLAYER.b9d = 0;
                 D_8009C338->b0c = 0;
                 D_8009C330->b0 = 0;
@@ -387,7 +388,7 @@ void func_800317C0(TObj *o)
         o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
         AnimJump((TObj *)&PLAYER, 0);
-        if ((D_1F8001F8 & 0xf) == 0) {
+        if ((SPAD.s1f8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xc0, 2);
             SfxPlay(3);
         }
@@ -408,7 +409,7 @@ void func_800317C0(TObj *o)
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
-        if (!PADOK() || D_8009C93F != 0) {
+        if (!PADOK() || GVARS.b3f != 0) {
             PLAYER.b9d = 1;
             D_8009C330->b0 = 2;
             D_8009C330->w22 = 0;
@@ -424,7 +425,7 @@ void func_800317C0(TObj *o)
         o->animFrame = PLAYER.animFrame;
         FUN_800314a8(o);
         AnimJump((TObj *)&PLAYER, 0);
-        if ((D_1F8001F8 & 0xf) == 0) {
+        if ((SPAD.s1f8 & 0xf) == 0) {
             FUN_80025f40(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }
@@ -446,7 +447,7 @@ void func_800317C0(TObj *o)
         FUN_80031588(&D_8009D600, o->waa, &dx, &dy);
         o->h->p.whole = o->velX + dx;
         o->y.p.whole = o->velY + dy;
-        if (!PADOK() || D_8009C93F != 0) {
+        if (!PADOK() || GVARS.b3f != 0) {
             D_8009C330->b0 = 1;
             D_8009C330->w22 = 0;
             PLAYER.b9d = 1;

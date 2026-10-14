@@ -1,9 +1,9 @@
 // FUNC 8012c718 364 X004
 // MATCHING 8012c718 364
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009C93F, D_8009C942;
 extern void *D_80135748, *D_80135750[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *o);
@@ -22,8 +22,8 @@ void func_8012C718(TObj *o)
     case 1:
         if (o->b68) {
             o->state++;
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             PLAYER.b04 = 5;
             PLAYER.step = 0;
             PLAYER.state = 0;
@@ -39,8 +39,8 @@ void func_8012C718(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
             PLAYER.b04 = 1;
             PLAYER.step = 0;
             PLAYER.state = 0;

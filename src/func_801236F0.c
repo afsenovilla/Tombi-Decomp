@@ -1,5 +1,7 @@
 // FUNC 801236f0 812 X000
 // MATCHING 801236f0 812
+#include "gcd.h"
+#include "gvars.h"
 /* Covers splat entries func_801236F0 + func_801237E4 (split at the jump table).
    animFrame is read once per table (no volatile). */
 #include "TOBJ.H"
@@ -13,8 +15,7 @@ extern short TileCollideAt(TObj *, short, short);
 extern TObj *D_8009C948[];
 extern short D_80138F8C[];
 extern short D_80138F8E[];
-extern unsigned char D_8009CE4D[];
-extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[], D_800A4553[];
+extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
@@ -38,11 +39,11 @@ void func_801236F0(TObj *o)
                 o->velH = D_80138F8C[o->animFrame * 2];
                 o->velV = D_80138F8E[o->animFrame * 2];
                 o->step++;
-                if (D_8009CE4D[0] == 0 && o->animFrame == 0) {
+                if (((unsigned char*)&GCD.bce4d)[0] == 0 && o->animFrame == 0) {
                     o->wb4 = 1;
-                    D_8009C93F[0] = 1;
-                    D_8009C93E[0] = 1;
-                    D_8009C942[0] = 1;
+                    ((unsigned char*)&GVARS.b3f)[0] = 1;
+                    ((unsigned char*)&GVARS.b3e)[0] = 1;
+                    ((unsigned char*)&GVARS.b42)[0] = 1;
                     D_800A4553[0] = 3;
                     D_800A4568[0] = 0;
                     *(int *)0x1F800190 = o->y.raw;

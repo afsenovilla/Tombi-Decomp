@@ -1,12 +1,10 @@
 // FUNC 8012c574 420 X004
 // MATCHING 8012c574 420
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE22[];
-extern unsigned char D_8009CE3D[];
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C942[];
 extern void *D_80135784[];
 extern void *D_8013577C[];
 extern int showMessageBoxDirect(int, int, void *);
@@ -22,7 +20,7 @@ void func_8012C574(TObj *o)
     case 0:
         o->animFrame = 1;
         o->b68 = 0;
-        if (D_8009CE22[0] && D_8009CE3D[0] != 0xff)
+        if (((unsigned char*)&GCD.bce22)[0] && ((unsigned char*)&GCD.bce3d)[0] != 0xff)
             o->state = 3;
         else
             o->state = 1;
@@ -40,8 +38,8 @@ void func_8012C574(TObj *o)
             n = 5;
         common:
             o->state++;
-            D_8009C93F[0] = 1;
-            D_8009C942[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -58,8 +56,8 @@ void func_8012C574(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
             ((unsigned char*)&PLAYER.obj.step)[0] = 0;
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;

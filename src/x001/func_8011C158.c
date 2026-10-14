@@ -1,10 +1,9 @@
 // FUNC 8011c158 284 X001
 // MATCHING 8011c158 284
+#include "gcd.h"
 #include "TOBJ.H"
 
 extern unsigned short D_8013C484[], D_8013C486[], D_8013C488[], D_8013C48A[];
-extern unsigned char D_8009CE48[];
-extern unsigned char D_8009D081;
 extern void FUN_80020078(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
@@ -20,14 +19,14 @@ void func_8011C158(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        if (D_8009CE48[0] != 0) {
+        if (((unsigned char*)&GCD.bce48)[0] != 0) {
             o->b04 = 3;
         } else {
             o->b04 = 1;
         }
         break;
     case 1:
-        if (D_8009D081 >= 4) {
+        if (GCD.bd081 >= 4) {
             o->b04 = 3;
         } else {
             FUN_80020078(o, 0x92);

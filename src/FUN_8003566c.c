@@ -1,5 +1,8 @@
 // FUNC 8003566c 5708 MAIN0
 // MATCHING 8003566c 5708
+#include "plx.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -8,7 +11,6 @@ typedef struct { short x, y; } P;
 extern TObj PLAYER;
 extern Fix16 *D_800A6078, *D_800A607C;
 extern short D_800A604E;
-extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
 typedef struct {
     unsigned char b0, p1[5], b6, b7, b8, p9[0x22 - 9];
@@ -29,10 +31,7 @@ extern unsigned char *D_8009F0EC;
 extern short D_8009D600[], D_8009D602[], D_8009D604[];
 extern short D_8007A072[];
 extern short D_8007A04C[];
-extern unsigned short D_8009D670;
-extern unsigned char D_8009C93F;
 extern unsigned char D_8009D2B2;
-extern int D_8009C934;
 extern unsigned short D_1F8001F8;
 extern short MulCos(int, short);
 extern short MulNegSinScaled(int, short);
@@ -305,12 +304,12 @@ void FUN_8003566c(TObj *o)
                 D_8009C338->bc = 0;
                 G.b9d = 0;
                 o->ba5 = 0;
-                if (!(*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || *(unsigned char *)&G.wac >= 2 || D_8009C93F) {
+                if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || *(unsigned char *)&G.wac >= 2 || GVARS.b3f) {
                     D_8009C330->b0 = 0;
                     o->b04 = 2;
                     o->step = 0;
                     o->state = 0;
-                    D_8009C934 = 0;
+                    GVARS.i34 = 0;
                 } else {
                     FUN_800ec710(D_8009D2B2, o);
                     o->waa += (o->animFrame & 1) ? -0x40 : 0x40;
@@ -356,7 +355,7 @@ void FUN_8003566c(TObj *o)
         FUN_80031588(D_8009D600, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
-        if (!(*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || D_8009C93F) {
+        if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {
             G.b9d = 1;
             D_8009C330->b0 = 2;
             D_8009C330->w22 = 0;
@@ -407,7 +406,7 @@ void FUN_8003566c(TObj *o)
         FUN_80031588(D_8009D600, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
-        if (!(*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || D_8009C93F) {
+        if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {
             D_8009C330->b0 = 1;
             D_8009C330->w22 = 0;
             G.b9d = 1;
@@ -417,10 +416,10 @@ void FUN_8003566c(TObj *o)
         break;
     }
     if (*(unsigned char *)&G.wac >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(TObj **)&PLX.p611c);
         D_8009C330->b8 = 0;
         G.step = 0xe;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         G.ba5 = 0;
         G.state = 0;
         G.substep = 0;

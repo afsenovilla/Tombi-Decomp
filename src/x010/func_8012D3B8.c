@@ -1,10 +1,10 @@
 // FUNC 8012d3b8 524 X010
 // MATCHING 8012d3b8 524
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     short f0, f2, f4, f6, f8, fa, fc, fe, f10, f12, f14, f16, f18, f1a;
 } E28;
-extern unsigned char D_8009CDAB, D_8009CFCC;
 extern E28 *D_8012F52C;
 extern TObj *allocObjectLayer4(void);
 extern TObj *allocObjectLayer2(void);
@@ -16,11 +16,11 @@ void func_8012D3B8(TObj *o)
     short i;
     TObj *n;
 
-    if (D_8009CDAB == 0) {
+    if (GCD.bcdab == 0) {
         o->b04 = 3;
         return;
     }
-    if (D_8009CFCC != 0) {
+    if (GCD.bcfcc != 0) {
         o->b04 = 3;
         return;
     }

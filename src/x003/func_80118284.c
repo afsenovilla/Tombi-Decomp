@@ -1,8 +1,8 @@
 // FUNC 80118284 740 X003
 // MATCHING 80118284 740
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
-extern unsigned short D_1F8001F8;
 extern unsigned char D_801356E8[], D_80135700[], D_80135710[], D_801356A0[], D_801356B0[], D_801356C0[], D_801356D4[];
 extern char D_801353A0[], D_801354E0[], D_801355C0[], D_80134FE0[], D_801350A0[], D_80135180[], D_80135280[];
 extern void LoadImage(RECT *, void *);
@@ -13,7 +13,7 @@ void func_80118284(TObj *o)
 {
     RECT r;
 
-    if ((D_1F8001F8 & 7) == 0) {
+    if ((SPAD.s1f8 & 7) == 0) {
         r.x = 0xf0;
         r.y = 0x1ea;
         r.w = 0x10;

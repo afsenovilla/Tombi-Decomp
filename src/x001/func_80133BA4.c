@@ -1,12 +1,12 @@
 // FUNC 80133ba4 1228 X001
 // MATCHING 80133ba4 1228
+#include "spad.h"
 #include "TOBJ.H"
 
 #define NEXT(o) (*(TObj **)&(o)->d94)
 
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-extern unsigned short D_1F80017E[];
 extern void *D_8013F1BC[];
 extern void *D_8013F200[], *D_8013F204[], *D_8013F208[], *D_8013F20C[];
 extern void AnimLoadDuration(TObj *);
@@ -30,7 +30,7 @@ void func_80133BA4(TObj *o)
             o->velX = 0x20;
         }
         o->d84 = o->d88;
-        o->d->p.whole = D_1F80017E[0];
+        o->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
         break;
     case 1:
         o->timer = 300;

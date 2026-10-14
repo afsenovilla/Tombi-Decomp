@@ -1,15 +1,13 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDBA;
 extern signed char D_8009D2B0;
-extern unsigned short D_1F8001FC;
-extern unsigned char D_8009C93F, D_8009CE40, D_8009D093, D_8009D092;
-extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003D0;
-extern short D_1F8001C6;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *);
 extern void FUN_8001f110(int);
@@ -23,7 +21,7 @@ void func_8011D73C(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009CDBA < 2) {
+        if (GCD.bcdba < 2) {
             o->b04 = 2;
             break;
         }
@@ -48,7 +46,7 @@ void func_8011D73C(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            if (D_8009D2B0 == 1 && o->b69 && (D_1F8001FC & 0x10)) {
+            if (D_8009D2B0 == 1 && o->b69 && (SPAD.s1fc & 0x10)) {
                 o->step++;
                 o->state = 0;
                 o->b69 = 0;
@@ -58,31 +56,31 @@ void func_8011D73C(TObj *o)
             switch (o->state) {
             case 0:
                 FUN_8001f110(1);
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
                 GAME.fadeScreenControl = 3;
                 o->state++;
             case 1:
                 if (GAME.fadeScreenControl != 1) break;
                 FUN_8001f4bc();
-                D_1F8001CC = 1;
-                if (D_8009CE40) {
-                    D_1F8001CD = 8;
-                    if (D_8009D093) {
-                        D_1F8003D0 = 1;
+                SPAD.b1cc = 1;
+                if (GCD.bce40) {
+                    SPAD.b1cd = 8;
+                    if (GCD.bd093) {
+                        SPAD.b3d0 = 1;
                     } else {
-                        D_1F8003D0 = 0;
-                        D_8009D093 = 1;
+                        SPAD.b3d0 = 0;
+                        GCD.bd093 = 1;
                     }
                 } else {
-                    D_1F8001CD = 5;
-                    if (!D_8009D092) {
-                        D_1F8003D0 = 0;
-                        D_8009D092 = 1;
+                    SPAD.b1cd = 5;
+                    if (!GCD.bd092) {
+                        SPAD.b3d0 = 0;
+                        GCD.bd092 = 1;
                     } else {
-                        D_1F8003D0 = 1;
+                        SPAD.b3d0 = 1;
                     }
                 }
-                D_1F8001C6 = 2;
+                SPAD.s1c6 = 2;
                 FUN_800171b8(1, D_8001D6A4);
                 o->state = 0;
                 o->step++;
@@ -98,7 +96,7 @@ void func_8011D73C(TObj *o)
             case 1:
                 if (GAME.fadeScreenControl) break;
                 PLAYER.obj.wb2 = 0;
-                D_8009C93F = 0;
+                GVARS.b3f = 0;
                 setEventComplete(0x16, 0);
                 o->step = 0;
                 break;

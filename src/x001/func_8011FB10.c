@@ -1,5 +1,6 @@
 // FUNC 8011fb10 620 X001
 // MATCHING 8011fb10 620
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned short b0, b1, b2, b3, w1e;
@@ -8,7 +9,6 @@ typedef struct {
 } Ent;
 extern Ent D_8013C730[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CEF7;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -68,7 +68,7 @@ void func_8011FB10(TObj *o)
         }
         break;
     case 3:
-        D_8009CEF7 = 0;
+        GCD.bcef7 = 0;
         FUN_80018838(o);
         break;
     }

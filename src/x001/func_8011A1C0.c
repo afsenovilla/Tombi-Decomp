@@ -1,10 +1,9 @@
 // FUNC 8011a1c0 872 X001
 // MATCHING 8011a1c0 872
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } E8;
-extern int D_1F8002D4;
-extern unsigned short D_1F8001C8;
-extern unsigned char D_8009C942;
 extern unsigned char D_8013C47C[];
 extern void *D_8013E5AC, *D_8013E5BC;
 extern int FUN_800201ac(TObj *, int);
@@ -23,7 +22,7 @@ void func_8011A1C0(TObj *o)
         o->w1e = 8;
         o->b0d = 0;
         o->_pad0e[0] = o->b0f;
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         o->b04++;
         o->step = 0;
         o->state = 0;
@@ -61,7 +60,7 @@ void func_8011A1C0(TObj *o)
             o->box2 = 0;
             dy = p->y.p.whole - o->y.p.whole;
             dx = p->h->p.whole - o->h->p.whole;
-            if (D_1F8001C8 & 1) {
+            if (SPAD.s1c8 & 1) {
                 E(0).y = 0;
                 E(0).x = 0;
                 E(1).y = 0;
@@ -92,7 +91,7 @@ void func_8011A1C0(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942 != 0 || o->subtype == 2) {
+        if (GVARS.b42 != 0 || o->subtype == 2) {
             FUN_800201ac(o, 0x40);
             break;
         }

@@ -1,11 +1,11 @@
 // FUNC 80128fac 1360 X000
 // MATCHING 80128fac 1360
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char D_80077D3C[];
 extern unsigned char D_80138FD8[];
 extern unsigned short *D_8013A184[], *D_8013A1A4[], *D_8013A1A8[], *D_8013A1AC[], *D_8013A1FC[];
-extern short D_1F80016A;
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int FUN_801274cc(TObj *);
@@ -29,10 +29,10 @@ extern int AnimAdvanceWithBox(TObj *);
 static __inline__ short past(TObj *o)
 {
     if (o->animFrame) {
-        if (o->h->p.whole >= D_1F80016A - 0x30) return 0;
+        if (o->h->p.whole >= (*(short*)((char*)&SPAD.i168 + 2)) - 0x30) return 0;
         return 1;
     }
-    if (D_1F80016A + 0x30 < o->h->p.whole) return 1;
+    if ((*(short*)((char*)&SPAD.i168 + 2)) + 0x30 < o->h->p.whole) return 1;
     return 0;
 }
 

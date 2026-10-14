@@ -1,5 +1,9 @@
 // FUNC 800f1d44 2280 X018
 // MATCHING 800f1d44 2280
+#include "gv2.h"
+#include "plx.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -17,12 +21,7 @@ typedef struct {
 
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern volatile unsigned short D_8009D670[];
-extern unsigned char D_8009D2B3;
-extern unsigned char D_8009D2B1;
-extern short D_8009C944[];
-extern unsigned short D_8009D610;
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
 extern XY D_801151E0[];
@@ -86,7 +85,7 @@ void func_800F1D44(TObj *o)
     unsigned short t;
 
     if ((*(unsigned char*)&o->wac) >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
         D_8009D2E8[4] = 2;
         D_8009D2E8[5] = 2;
         D_8009D2E8[6] = 0;
@@ -102,7 +101,7 @@ void func_800F1D44(TObj *o)
             o->velX = 0;
             o->state++;
         case 1:
-            if (D_8009D2B3 >= 3) o->animTimer = 1;
+            if (GV2.bb3 >= 3) o->animTimer = 1;
             FUN_8001fec0(o);
             w = o->wb0;
             t = w;
@@ -117,8 +116,8 @@ void func_800F1D44(TObj *o)
             FUN_8010f400(o);
             FUN_800efa80(o);
             setObjectSpeedPolar2(o, o->wb6, o->wb2);
-            o->h->raw += D_8009C944[0] << 8;
-            o->y.raw += D_8009C944[1] << 8;
+            o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+            o->y.raw += ((short*)&GVARS.s44)[1] << 8;
             FUN_8001fce4(o);
             if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {
                 if (o->subtype != 0) {
@@ -162,7 +161,7 @@ void func_800F1D44(TObj *o)
                 if ((D_1f8001f8 & 7) == 0) FUN_8001e4f0(odd());
                 break;
             }
-            if (D_8009D610 == 7) {
+            if (GV6.s10 == 7) {
                 int f = o->animFrame & 3;
                 if ((f == 0 && (XO(o)->d5 == 3 || XO(o)->d6 == 3 || XO(o)->d7 == 3 || o->bbf == 3)) ||
                     (f == 1 && (XO(o)->d5 == 2 || XO(o)->d6 == 2 || XO(o)->d7 == 2 || o->bbf == 2))) {
@@ -191,8 +190,8 @@ void func_800F1D44(TObj *o)
             break;
         }
         mode = 0;
-        if (D_8009D2B1 == 1) mode = 1;
-        else if (D_8009D2B1 == 2) mode = 2;
+        if (GV2.bb1 == 1) mode = 1;
+        else if (GV2.bb1 == 2) mode = 2;
         lim = 0x200;
         if ((*(unsigned int*)&GAME.area00_eventControl) & 0x40) {
             lim = 0x360;

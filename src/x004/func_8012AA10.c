@@ -1,5 +1,6 @@
 // FUNC 8012aa10 2048 X004
 // MATCHING 8012aa10 2048
+#include "gvars.h"
 /* Debt: empty do {} while (0) in cases 1 and 2 ends the sched block so `la D_80011DD8` lands before the lb. */
 #include "TOBJ.H"
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
@@ -9,7 +10,6 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern E4 D_80011DD8[];
 extern signed char D_80011EB4[];
 extern void *D_80134CE0;
-extern unsigned char D_8009C938, D_8009C93E, D_8009C93F, D_8009C942;
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
 extern int FUN_8001f9e0(void);
@@ -19,7 +19,7 @@ extern int showMessageBox(int, int, int, int);
     if (o->animFrame & 1) { short c = (signed char)e->c; int k = 0x80; ang = (PLAYER.d8c + k - c) & 0xff; } else { short c = (signed char)e->c; ang = (c + PLAYER.d8c) & 0xff; }
 
 #define TRIG() \
-    { D_8009C942 = 1; D_800A603C = 5; D_800A603D = 0; D_800A603E = 0; o->state = 1; }
+    { GVARS.b42 = 1; D_800A603C = 5; D_800A603D = 0; D_800A603E = 0; o->state = 1; }
 
 void func_8012AA10(TObj *o)
 {
@@ -48,7 +48,7 @@ void func_8012AA10(TObj *o)
         o->d->p.whole = PLAYER.d->p.whole;
         o->d8c = PLAYER.d8c;
         o->b0f = PLAYER.b0f + e->b;
-        if (D_8009C938) break;
+        if (GVARS.b38) break;
         if (PLAYER.d->p.whole == 0x168) {
             p = PLAYER.h;
             x = p->p.whole;
@@ -142,9 +142,9 @@ void func_8012AA10(TObj *o)
                 p->b04 = 3;
                 PLAYER.visible = 1;
                 if (PLAYER.active == 3) PLAYER.active = 1;
-                D_8009C942 = 0;
-                D_8009C93E = 0;
-                D_8009C93F = 0;
+                GVARS.b42 = 0;
+                GVARS.b3e = 0;
+                GVARS.b3f = 0;
                 D_800A603C = 1;
                 D_800A603D = 0;
                 D_800A603E = 0;

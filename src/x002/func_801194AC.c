@@ -1,12 +1,12 @@
 // FUNC 801194ac 612 X002
 // MATCHING 801194ac 612
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char *D_8007C178[];
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
-extern unsigned char D_8009CE57;
 
 void func_801194AC(TObj *o)
 {
@@ -30,7 +30,7 @@ void func_801194AC(TObj *o)
         D_8009F086 = g;
         D_8009F087 = b;
         o->b04++;
-        switch (D_8009CE57) {
+        switch (GCD.bce57) {
         case 1: case 2: case 3:
             GAME.fadeScreenControl = 0x10;
             GAME.fadeScreenAmount = 0xc0;
@@ -83,7 +83,7 @@ void func_801194AC(TObj *o)
             *k = 2;
             GAME.fadeScreenAmount = n;
             o->b04 = 3;
-        } else if (D_8009CE57 == 0xff) {
+        } else if (GCD.bce57 == 0xff) {
             o->b04 = 1;
         }
         break;

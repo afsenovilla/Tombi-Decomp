@@ -1,10 +1,9 @@
 // FUNC 801212c4 368 X009
 // MATCHING 801212c4 368
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 extern short func_80121540(TObj *, short, short, int);
 
 void func_801212C4(TObj *o, TObj *p)
@@ -43,6 +42,6 @@ void func_801212C4(TObj *o, TObj *p)
     } else {
         o->h->p.whole += 0xc;
     }
-    D_1F80019E = 0;
-    D_1F8003C0 = p;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = p;
 }

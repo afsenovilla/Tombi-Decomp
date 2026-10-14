@@ -1,9 +1,9 @@
 // FUNC 80039580 1092 MAIN0
 // MATCHING 80039580 1092
+#include "gv6.h"
 #include "gamestate.h"
 #include "player.h"
 #include "scriptctx.h"
-extern int D_8009D69C;
 extern ScriptCtx D_8009F840;
 extern unsigned char *SCRIPT_CODE;
 extern unsigned int D_800A0A10, D_800A0A14;
@@ -39,7 +39,7 @@ static __inline__ unsigned char run(void)
 
 void func_80039580(void)
 {
-    if (D_8009D69C == 0) return;
+    if (GV6.i9c == 0) return;
     if ((*(unsigned short*)&PLAYER.obj.b04) == 0x505) return;
     switch (GAME.selectedArea) {
     case 0:

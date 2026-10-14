@@ -1,16 +1,15 @@
 // FUNC 80118df8 324 X003
 // MATCHING 80118df8 324
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F800176;
-extern short D_1F800186;
 extern int Rand(void);
 
 void func_80118DF8(TObj *o)
 {
-    short *p = &D_1F800186;
+    short *p = &(*(short*)&SPAD.s186);
 
-    o->a.raw = (D_1F800176 - 0x10) << 16;
+    o->a.raw = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x10) << 16;
     if (*p >= -0x103) {
         o->subtype = Rand() & 3;
         o->y.raw = (-0x154 - (Rand() & 0xf) * 14) << 16;

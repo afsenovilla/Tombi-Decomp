@@ -1,5 +1,8 @@
 // FUNC 80100788 4088 X010
 // MATCHING 80100788 4088
+#include "spad.h"
+#include "gv6.h"
+#include "gvars.h"
 /* Player step dispatcher. turn(): the d8c store written in every leaf (cross-jumping shares only the store
    tail, as in the game); chk() is a macro so the step constant is loaded at the compare; dirC/dirD store
    animFrame per leaf (game reloads it afterwards). */
@@ -7,12 +10,8 @@
 #include "raw7.h"
 #include "gamestate.h"
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
-extern unsigned short D_8009D670;
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_8009C93A;
-extern unsigned char D_1F8001A4;
 extern void FUN_800f1478(TObj *);
 extern void FUN_800f1d44(TObj *);
 extern void FUN_8010e328(TObj *, int);
@@ -87,7 +86,7 @@ extern void probeTileShapeThreePoints(TObj *, int);
 static __inline__ void dirA(TObj *o)
 {
     unsigned short f = o->animFrame & 1;
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short v;
     o->animFrame = f;
     if (*k & 0x20) {
@@ -100,14 +99,14 @@ static __inline__ void dirA(TObj *o)
 
 static __inline__ void dirF(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     if (*k & 0x10) o->animFrame |= 8;
     if (*k & 0x40) o->animFrame |= 4;
 }
 
 static __inline__ void dirC(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short f = o->animFrame & 1;
     o->animFrame = f;
     if (*k & 0x10) {
@@ -125,7 +124,7 @@ static __inline__ void dirC(TObj *o)
 
 static __inline__ void dirD(TObj *o)
 {
-    volatile unsigned short *k = &D_8009D670;
+    volatile unsigned short *k = &GV6.s70;
     unsigned short f = o->animFrame & 1;
     o->animFrame = f;
     if (*k & 0x10) {
@@ -183,13 +182,13 @@ void func_80100788(TObj *o, int p2)
         dirA(o);
         dirF(o);
         FUN_800f1d44(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
-            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 0;
@@ -282,7 +281,7 @@ void func_80100788(TObj *o, int p2)
         dirA(o);
         dirF(o);
         FUN_801097ec(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
             U8(o, 0xc3) = 0;
@@ -439,7 +438,7 @@ void func_80100788(TObj *o, int p2)
                 o->substep = 0;
                 o->active = 1;
                 D_8009D2B0[0] = 0;
-                D_8009C93A = 1;
+                GVARS.b3a = 1;
             }
             break;
         }
@@ -454,6 +453,6 @@ void func_80100788(TObj *o, int p2)
         if (o->step == 0x65) c++;
     }
     if (c == 0) FUN_8003f7cc(o);
-    if (D_1F8001A4 == 0) FUN_800ff610(o, 1);
+    if (SPAD.b1a4 == 0) FUN_800ff610(o, 1);
     probeTileShapeThreePoints(o, 4);
 }

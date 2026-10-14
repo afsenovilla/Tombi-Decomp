@@ -1,16 +1,13 @@
 // FUNC 801281fc 1532 X003
 // MATCHING 801281fc 1532
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short a, b, x, y, z; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 typedef void (*Fn)(TObj *);
 
-extern int D_1F8002DC[];
-extern unsigned char D_8009C942;
-extern unsigned short D_1F80027E;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern Fn D_80135D6C[];
 extern unsigned short D_80135D3C[];
 extern int ObjCullRegister(TObj *);
@@ -43,7 +40,7 @@ void func_801281FC(TObj *o)
             q->z = o->d->p.whole;
             o->w1e = 0xb;
             o->step++;
-            o->d3c = D_1F8002DC[0];
+            o->d3c = ((int*)&SPAD.i2dc)[0];
         } else {
             q->a = 0;
             q->b = 0;
@@ -61,7 +58,7 @@ void func_801281FC(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             ObjCullRegister(o);
             break;
         }
@@ -124,7 +121,7 @@ void func_801281FC(TObj *o)
                             if (o->wac >= 0xc) {
                                 o->d8c = 0;
                             } else {
-                                v = ((D_1F80027E << 2) + o->d8c) & 0xff;
+                                v = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff;
                                 if (v != 0) {
                                     if (v < 0x80) o->d8c = o->d8c - 1;
                                     else o->d8c = o->d8c + 1;
@@ -175,7 +172,7 @@ void func_801281FC(TObj *o)
     case 4:
         if (o->timer) {
             o->timer--;
-        } else if (((D_1F8001F8 + D_1F800198) & 0x3f) == 0 && !FUN_800203dc(o)) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && !FUN_800203dc(o)) {
             o->active = 1;
             o->b04 = 0;
             o->step = 1;

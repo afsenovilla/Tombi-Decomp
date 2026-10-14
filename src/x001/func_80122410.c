@@ -1,5 +1,7 @@
 // FUNC 80122410 2220 X001
 // MATCHING 80122410 2220
+#include "spad.h"
+#include "gv6.h"
 /* Debt: the __asm__ volatile("") barrier before the final anim set (the empty do/while(0) an earlier agent used
    pinned the la ahead of the AnimJump arg moves). Matched by making g single-set in case 1 (second read into g2,
    case 4 pointer into g4: both D_8009C330/D_8009F0EC loads get the birthing boost and keep source order) and by
@@ -20,8 +22,6 @@ typedef struct {
 typedef struct L { unsigned char active; char p[0x94 - 1]; struct L *next; } L;
 extern P *D_8009C330;
 extern TObj *D_8009F0EC;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8001FC, D_1F8001F8;
 extern void FUN_80010d68();
 extern void FUN_80010dac();
 extern void SfxPlay3(int, int);
@@ -119,7 +119,7 @@ void func_80122410(TObj *o)
         break;
     case 3:
         AnimAdvance(o);
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (!(*k & 0x50)) {
             switch (*(unsigned short *)o->anim) {
             case 0x75:
@@ -140,7 +140,7 @@ void func_80122410(TObj *o)
             }
             o->velY = 0;
             if (o->animFrame & 1) {
-                if (D_1F8001FC & 0x80) {
+                if (SPAD.s1fc & 0x80) {
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
                     D_8009C330->b4 = 1;
@@ -150,7 +150,7 @@ void func_80122410(TObj *o)
                     o->state++;
                 }
             } else {
-                if (D_1F8001FC & 0x20) {
+                if (SPAD.s1fc & 0x20) {
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
                     D_8009C330->b4 = 1;
@@ -161,7 +161,7 @@ void func_80122410(TObj *o)
                 }
             }
         } else {
-            if (!(D_1F8001F8 & 0xf)) SfxPlay2(0x1d, 0);
+            if (!(SPAD.s1f8 & 0xf)) SfxPlay2(0x1d, 0);
             if (*k & 0x10) {
                 PlayerSetAnimIfChanged(o, 0x25);
                 if (D_8009F0EC->y.p.whole - D_8009F0EC->d38 - 0x10 < o->y.p.whole) o->y.raw += -0x18000;

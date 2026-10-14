@@ -1,8 +1,8 @@
 // FUNC 80118544 540 X014
 // MATCHING 80118544 540
+#include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F800334;
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
 
@@ -13,7 +13,7 @@ void func_80118544(TObj *o)
 
     switch (o->step) {
     case 0: {
-        volatile int *k = &D_1F800334;
+        volatile int *k = &SPAD.i334;
         int x;
         o->step++;
         x = ((int *)*k)[2];

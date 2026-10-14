@@ -1,8 +1,8 @@
 // FUNC 80119a6c 872 X010
 // MATCHING 80119a6c 872
+#include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2C3[];
 extern void FUN_80020078(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern void func_801198F8(TObj *);
@@ -30,7 +30,7 @@ void func_80119A6C(TObj *o)
         o->animFrame = 2;
         o->b69 = 0;
         o->b04++;
-        if (D_8009D2C3[0] & 0x40) o->b0c = 1;
+        if (((unsigned char*)&GV2.bc3)[0] & 0x40) o->b0c = 1;
         else o->b0c = 0;
         switch (o->subtype) {
         case 3: case 4: case 6: case 11:
@@ -57,7 +57,7 @@ void func_80119A6C(TObj *o)
         break;
     case 1:
         FUN_80020078(o, 0x88);
-        if (D_8009D2C3[0] & 0x40) {
+        if (((unsigned char*)&GV2.bc3)[0] & 0x40) {
             func_801198F8(o);
             break;
         }

@@ -1,5 +1,6 @@
 // FUNC 8012a820 1532 X000
 // MATCHING 8012a820 1532
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80077CF4[];
@@ -16,7 +17,6 @@ extern int FUN_801274cc(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *ObjAlloc();
-extern short D_1F80027E;
 extern short DAT_1f80027e;
 
 #define SETBOX(o) \
@@ -113,7 +113,7 @@ void func_8012A820(TObj *o)
         o->y.p.whole += 3;
         COLLIDE(o);
         if (FUN_801274cc(o)) {
-            a = D_1F80027E;
+            a = SPAD.s27e;
             if (a < 0) a = -a;
             if (a > 8) a = 8;
             if (DAT_1f80027e < 0) a = -a;

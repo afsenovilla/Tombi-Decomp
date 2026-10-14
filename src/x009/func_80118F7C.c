@@ -1,12 +1,12 @@
 // FUNC 80118f7c 564 X009
 // MATCHING 80118f7c 564
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { char p[0xb4]; short s[15]; } XS;
 #define S(o, off) (((XS *)(o))->s[((off) - 0xb4) / 2])
 
-extern unsigned char D_8009D07E;
-extern unsigned char D_8009C940, D_8009C93F, D_8009C942, D_8009C93E;
 extern void *D_8012E9E8[], *D_8012E9BC, *D_8012E9C8;
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -19,7 +19,7 @@ void func_80118F7C(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009D07E) {
+        if (GCD.bd07e) {
             o->timer = 0x10;
             o->step++;
         }
@@ -68,10 +68,10 @@ void func_80118F7C(TObj *o)
             o->anim = D_8012E9C8;
             AnimLoadDuration(o);
             func_80118970(o);
-            D_8009C940 = 0;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GVARS.b40 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
             removeItemFromInventory(0x8a, 1);
         }
         ObjCullRegister(o);

@@ -1,12 +1,12 @@
 // FUNC 8011b7d4 716 X010
 // MATCHING 8011b7d4 716
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 typedef struct { unsigned char b0; char p1[6]; unsigned char b7, b8; char p9[0x20 - 9]; short w20; } G;
 
 extern G *D_8009C330;
-extern short D_8009C944, D_8009C946[];
 extern int D_8009D2E8;
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(TObj *o);
@@ -38,8 +38,8 @@ void func_8011B7D4(TObj *o)
     case 1:
         o->state++;
     case 2:
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

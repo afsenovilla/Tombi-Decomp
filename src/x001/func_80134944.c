@@ -1,10 +1,10 @@
 // FUNC 80134944 700 X001
 // MATCHING 80134944 700
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern short D_8007A3F0[];
 extern short D_8007A5F0[];
-extern TObj *D_8009C948;
 extern int ObjCullRegister(TObj *);
 extern void TileCollideAt(TObj *, int, int);
 extern void func_80133A24(TObj *);
@@ -56,7 +56,7 @@ void func_80134944(TObj *o)
         break;
     case 4:
         o->b04 = 3;
-        (*(short *)&D_8009C948->b0a)--;
+        (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
         {
             TObj *q;
         for (q = (TObj *)o->d90; q; q = (TObj *)q->d90) q->b04 = 3;
@@ -68,7 +68,7 @@ void func_80134944(TObj *o)
             if (o->b0c == 0) {
                 o->b04 = 3;
                 for (e = (TObj *)o->d94; e; e = (TObj *)e->d94) e->b04 = 3;
-                (*(short *)&D_8009C948->b0a)--;
+                (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
             }
         } else {
             func_80134674(o);

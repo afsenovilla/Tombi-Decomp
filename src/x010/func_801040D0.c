@@ -1,9 +1,9 @@
 // FUNC 801040d0 804 X010
 // MATCHING 801040d0 804
+#include "gv6.h"
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *D_8009D2E8;
-extern unsigned short D_8009D670[];
 extern unsigned short DAT_1f8003c6;
 extern unsigned short DAT_1f8001fc;
 extern void func_8010EAF8(TObj *);
@@ -65,9 +65,9 @@ void func_801040D0(TObj *o)
             LAND(o);
         break;
     case 2:
-        if (D_8009D670[0] & 0x80)
+        if (((unsigned short*)&GV6.s70)[0] & 0x80)
             o->animFrame = 1;
-        if (D_8009D670[0] & 0x20)
+        if (((unsigned short*)&GV6.s70)[0] & 0x20)
             o->animFrame = 0;
         D_8009D2E8->h->p.whole = o->h->p.whole;
         D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;

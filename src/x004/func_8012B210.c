@@ -1,7 +1,7 @@
 // FUNC 8012b210 376 X004
 // MATCHING 8012b210 376
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_80134CE0;
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
@@ -19,7 +19,7 @@ void func_8012B210(TObj *o)
         o->box2 = 8;
         o->w1e = 6;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_80134CE0;
         o->category |= 0x80;
         AnimLoadDuration(o);

@@ -1,5 +1,7 @@
 // FUNC 80119988 1984 X000
 // MATCHING 80119988 1984
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 struct V3 { int x, y, z; };
@@ -16,13 +18,10 @@ extern void queueSfxKeyOff(int);
 extern int FUN_8001f9e0(void);
 extern void FUN_8011a148(int, int, int, int);
 extern struct V3 D_1F800168;
-extern unsigned short D_1F8001F8;
-extern short D_1F8001C6;
 extern struct V3 D_800A6048;
 extern Fix16 *D_800A607C;
 extern unsigned char D_8009C939A[];
 #define D_8009C939 D_8009C939A[0]
-extern unsigned char D_8009C930;
 extern unsigned char D_8009C942A[];
 #define D_8009C942 D_8009C942A[0]
 extern unsigned char D_8009C93FA[];
@@ -67,7 +66,7 @@ void FUN_80119988(TObjE *e)
             if (e->c2 != 0) e->c2--;
             if (e->c4 != 0) e->c4 -= 2;
             if (--e->cc == 0) o->step++;
-            if ((D_1F8001F8 & 7) == 0)
+            if ((SPAD.s1f8 & 7) == 0)
                 FUN_80025f40(0, 0, 0xe0, 4);
             break;
         case 2:
@@ -100,7 +99,7 @@ void FUN_80119988(TObjE *e)
             }
         common:
             D_800A6048 = *(struct V3 *)&o->a;
-            if ((D_1F8001F8 & 7) == 0)
+            if ((SPAD.s1f8 & 7) == 0)
                 FUN_80025f40(0, 0, 0xd0, 4);
             break;
         case 4:
@@ -110,11 +109,11 @@ void FUN_80119988(TObjE *e)
             } else {
                 if (o->subtype == 0)
                     FUN_80026c50(4, 1, 1);
-                D_1F8001C6 = 0;
+                SPAD.s1c6 = 0;
                 *(int *)D_800A607C = 0;
                 D_800A6038 = 1;
                 D_800A603C = 1;
-                D_8009C930 = 2;
+                GVARS.b30 = 2;
                 D_800A603D = 0;
                 D_800A603E = 0;
                 D_8009C942 = 0;
@@ -127,7 +126,7 @@ void FUN_80119988(TObjE *e)
             break;
         case 5:
             *(struct V3 *)&o->d30 = D_1F800168;
-            if (D_8009C930 == 4)
+            if (GVARS.b30 == 4)
                 goto snd;
             break;
         case 6:
@@ -169,7 +168,7 @@ void FUN_80119988(TObjE *e)
                 D_800A603D = 0;
                 D_800A603E = 0;
                 D_8009C93F = 1;
-                D_8009C930 = 1;
+                GVARS.b30 = 1;
                 e->ce = FUN_8001e4f0(0x36);
                 o->step = 0;
             }

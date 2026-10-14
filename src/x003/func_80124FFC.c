@@ -1,9 +1,9 @@
 // FUNC 80124ffc 456 X003
 // MATCHING 80124ffc 456
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; } A;
 typedef struct B { unsigned short c[4]; } B;
-extern int D_1F8002D4[];
 extern A *D_80138EC0[];
 extern B D_80135C78[];
 extern int FUN_800202b4(TObj *);
@@ -23,7 +23,7 @@ void func_80124FFC(TObj *o)
         o->w1e = 8;
         o->b0d = 0;
         o->b69 = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = 0;
         break;
     case 1:

@@ -1,5 +1,6 @@
 // FUNC 80123e04 460 X000
 // MATCHING 80123e04 460
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned int tag;
@@ -11,8 +12,6 @@ typedef struct {
 } PFT4;
 typedef struct { unsigned short uv0, p0, uv1, p1, uv2; unsigned char w, h; unsigned short uv3; signed char dx, dy; } Spr;
 extern long LZ_FILE_CTRL;
-extern char D_1F800074[];
-extern PFT4 *D_1F800164;
 extern int D_1F800074_v;
 extern int D_1F8001E0;
 int projectActorPosition(TObj *o, void *a, void *b);
@@ -23,10 +22,10 @@ void func_80123E04(TObj *o)
     PFT4 *p;
     int xy; short x, y;
     s = (Spr *)(*(volatile int *)&o->d3c + ((short *)((char *)o->d3c + (*(unsigned short *)o->anim << 2)))[1]);
-    if (projectActorPosition(o, &LZ_FILE_CTRL, D_1F800074) != 0) return;
+    if (projectActorPosition(o, &LZ_FILE_CTRL, ((char*)&SPAD.i74)) != 0) return;
     xy = LZ_FILE_CTRL;
     y = xy >> 16;
-    p = D_1F800164;
+    p = (*(PFT4 **)&SPAD.p164);
     p->code = 0x2c;
     p->r0 = o->wb6;
     p->g0 = o->wb6;
@@ -48,5 +47,5 @@ void func_80123E04(TObj *o)
     p->x3 = p->x1;
     p->y3 = p->y2;
     insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
-    D_1F800164 = (PFT4 *)((char *)D_1F800164 + 0x28);
+    (*(PFT4 **)&SPAD.p164) = (PFT4 *)((char *)(*(PFT4 **)&SPAD.p164) + 0x28);
 }

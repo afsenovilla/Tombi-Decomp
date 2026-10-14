@@ -1,9 +1,9 @@
 // FUNC 80135c90 1236 X001
 // MATCHING 80135c90 1236
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C93F, D_8009C93E, D_8009C942;
 extern unsigned short D_8009C960[], D_8009C962[];
 extern char D_80077CDC[];
 extern void *D_8013DE0C, *D_8013DDB0, *D_8013DE2C, *D_8013DDC8;
@@ -16,9 +16,9 @@ void func_80135C90(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_8009C93F = 1;
-        D_8009C93E = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b3e = 1;
+        GVARS.b42 = 1;
         o->animFrame = o->h->p.whole > (*(Fix16 **)&PLAYER.obj.h)->p.whole;
         switch (o->subtype) {
         case 2:
@@ -109,9 +109,9 @@ void func_80135C90(TObj *o)
         break;
     }
     if (!o->visible) {
-        D_8009C93E = 0;
-        D_8009C942 = 0;
-        D_8009C93F = 0;
+        GVARS.b3e = 0;
+        GVARS.b42 = 0;
+        GVARS.b3f = 0;
         o->b04 = 3;
         o->step = 0;
         o->state = 0;

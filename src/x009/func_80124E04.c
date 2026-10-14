@@ -1,11 +1,11 @@
 // FUNC 80124e04 872 X009
 // MATCHING 80124e04 872
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y; } P;
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern short D_1F800176, D_1F800186;
 extern void *D_8012EE80[];
 extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
@@ -42,14 +42,14 @@ void func_80124E04(TObj *o)
         o->state++;
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        if (o->h->p.whole < D_1F800176 + 0xa0) {
-            b.x = D_1F800176 + 0x20;
+        if (o->h->p.whole < (*(short*)((char*)&SPAD.i174 + 2)) + 0xa0) {
+            b.x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x20;
             o->animFrame = 0;
         } else {
-            b.x = D_1F800176 + 0x120;
+            b.x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x120;
             o->animFrame = 1;
         }
-        b.y = D_1F800186 - 0xc8;
+        b.y = (*(short*)&SPAD.s186) - 0xc8;
         o->d88 = angleBetweenPoints(a, b);
         o->w74 = b.x;
         o->wac = 0;

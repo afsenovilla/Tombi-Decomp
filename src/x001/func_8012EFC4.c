@@ -1,15 +1,14 @@
 // FUNC 8012efc4 1156 X001
 // MATCHING 8012efc4 1156
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pc0[0x12]; unsigned short d2; } TObjX;
 typedef void (*Fn)(TObj *);
 
-extern unsigned char D_8009C942;
 extern int DAT_1f8002d0[];
 extern Fn D_8013C8FC[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
@@ -61,7 +60,7 @@ void func_8012EFC4(TObjX *e)
         }
         break;
     case 1:
-        if (D_8009C942 != 0) {
+        if (GVARS.b42 != 0) {
             if (o->visible != 0)
                 FUN_800202b4(o);
             break;
@@ -96,12 +95,12 @@ void func_8012EFC4(TObjX *e)
                     break;
                 }
                 if (o->b0c == 0) {
-                    if (((D_1F8001F8 + D_1F800198) & 0xf) == 0)
+                    if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0)
                         FUN_8002052c(o, 0x50);
                     break;
                 }
             chk:
-                if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+                if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
                     o->b04 = 3;
                 break;
             }
@@ -124,13 +123,13 @@ void func_8012EFC4(TObjX *e)
     case 2:
         switch (o->step) {
         case 0:
-            if (D_8009C942 != 0) {
+            if (GVARS.b42 != 0) {
                 FUN_800202b4(o);
                 break;
             }
             func_8012DF98(o);
             FUN_800202b4(o);
-            if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:

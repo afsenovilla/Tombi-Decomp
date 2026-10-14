@@ -1,10 +1,9 @@
 // FUNC 8012687c 500 X001
 // MATCHING 8012687c 500
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_1F8001A4;
-extern short D_1F80019E;
 extern short func_80043260(TObj *, TObj *);
 extern short pushOutOfBoxX(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
@@ -38,7 +37,7 @@ void func_8012687C(TObj *o, TObj *p)
             }
         } else {
             if (p->subtype == 0) {
-                if (D_1F8001A4) return;
+                if (SPAD.b1a4) return;
                 if (o->active & 2) return;
                 o->active = 2;
                 if (p->h->p.whole > o->h->p.whole) o->animFrame = 1;
@@ -52,7 +51,7 @@ void func_8012687C(TObj *o, TObj *p)
     } else {
         if (!pushOutOfBoxX(o, p)) return;
         if (p->subtype) return;
-        if (D_1F8001A4) return;
+        if (SPAD.b1a4) return;
         if (o->active & 2) return;
         o->active = 2;
         if (p->h->p.whole > o->h->p.whole) o->animFrame = 1;
@@ -62,5 +61,5 @@ void func_8012687C(TObj *o, TObj *p)
         o->state = 0;
         decreaseObjectTimer(o, 1);
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

@@ -1,12 +1,14 @@
 // FUNC 8011cd84 1016 X009
 // MATCHING 8011cd84 1016
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
-extern unsigned char D_8009D0CE, D_8009D2C3, D_8009CF10[], D_8009C93A;
 extern char D_8012B284[];
 extern short D_8012B2C4[];
-extern unsigned short D_1F800176, D_1F800186;
 extern void LoadImage(RECT *, char *);
 extern int ObjCullRegister(TObj *);
 extern void ObjListPush_1F800224(TObj *);
@@ -19,9 +21,9 @@ extern void func_8011CAD4(TObj *);
 
 static __inline__ int Near(TObj *o)
 {
-    if (D_8009C93A == 0) return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    if (GVARS.b3a == 0) return 0;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_8011CD84(TObj *o)
@@ -33,7 +35,7 @@ void func_8011CD84(TObj *o)
 
     switch (s) {
     case 0:
-        if (D_8009D0CE == 0 || (D_8009D2C3 & 0x20)) {
+        if (GCD.bd0ce == 0 || (GV2.bc3 & 0x20)) {
             o->b04 = 3;
             break;
         }
@@ -61,7 +63,7 @@ void func_8011CD84(TObj *o)
         o->d84 = 0;
         o->d88 = D_8012B2C4[o->b0c];
         o->d8c = 0;
-        if (D_8009CF10[0] == 0) {
+        if (((unsigned char*)&GCD.bcf10)[0] == 0) {
             o->step = 0;
             v = 0x800;
         } else {

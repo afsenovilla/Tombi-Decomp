@@ -1,5 +1,7 @@
 // FUNC 8001aeb4 1140 MAIN0
 // MATCHING 8001aeb4 1140
+#include "spad.h"
+#include "gv6.h"
 #include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
@@ -15,14 +17,12 @@ typedef struct {
     unsigned char b68, b69, b6a;
 } G;
 extern G *TASK_C;
-extern unsigned char D_1F8001CF, LOAD_COMPLETE_SYM, D_1F8001C2;
-extern short D_1F8001C6;
-extern unsigned short D_1F8003B8, D_1F8003BA;
+extern unsigned char LOAD_COMPLETE_SYM;
+extern unsigned short D_1F8003BA;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8009F086[], D_8009F087[];
 extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
-extern unsigned short D_8009D670;
 extern unsigned short D_8009F838;
 extern short *D_80077A8C[];
 extern void SetDispMask(int);
@@ -47,7 +47,7 @@ void inventoryScreenHandler(void)
 
     switch (TASK_C->w4e) {
     case 0:
-        D_1F8001CF = 1;
+        SPAD.b1cf = 1;
         TASK_C->b6a = 0;
         SetDispMask(0);
         r.x = 0x120;
@@ -98,8 +98,8 @@ void inventoryScreenHandler(void)
         goto next;
     case 3:
         inventoryScreenTick();
-        if (D_1F8001C2 != 0) {
-            k = &D_8009D670;
+        if (SPAD.b1c2 != 0) {
+            k = &GV6.s70;
             if ((*k & 8) && (*k & 0x800)) TASK_C->w4e = 6;
         }
         break;
@@ -134,8 +134,8 @@ void inventoryScreenHandler(void)
             FlushCache();
             ExitCriticalSection();
             SetDispMask(1);
-            D_1F8001C6 = 0;
-            TASK_C->w4c = D_1F8003B8;
+            SPAD.s1c6 = 0;
+            TASK_C->w4c = SPAD.s3b8;
             TASK_C->w4e = D_1F8003BA;
         }
         break;

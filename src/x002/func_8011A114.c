@@ -1,5 +1,8 @@
 // FUNC 8011a114 7316 X002
 // MATCHING 8011a114 7316
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 /* Whole function: the csv splits it into 8011A114, 8011A448, 8011B170, 8011B330, 8011B47C and 8011B7D4. */
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -18,8 +21,6 @@ typedef struct {
 
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
-extern unsigned char D_8009C93A, D_8009C942[], D_8009C93F[], D_8009D2B0, D_8009C93C;
-extern unsigned char D_8009CFEA, D_8009C93E[], D_8009CE15, D_8009CDBB, D_8009D0B2;
 extern unsigned short D_1F8001F8;
 extern short D_1F8001C6;
 extern TObj *ObjAlloc(void);
@@ -72,10 +73,10 @@ void func_8011A114(Ctl *o)
     switch (o->state) {
     case 0:
         { Fix16 *h = PLAYER.h, *dd = PLAYER.d; Spawn(h->p.whole, PLAYER.y.p.whole, dd->p.whole); }
-        if (D_8009C93A) {
-            D_8009C942[0] = 1;
-            D_8009C93F[0] = 1;
-            D_8009D2B0 = 2;
+        if (GVARS.b3a) {
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            GV2.bb0 = 2;
             o->state++;
         }
         break;
@@ -107,7 +108,7 @@ void func_8011A114(Ctl *o)
     case 5:
         RING(o);
         if (!GAME.fadeScreenControl) {
-            D_8009C93C = 1;
+            GVARS.b3c = 1;
             func_80116928(d, 0, 0);
             o->w0a = 200;
             o->state++;
@@ -162,14 +163,14 @@ void func_8011A114(Ctl *o)
         break;
     case 11:
         if (--o->w08 <= 0 && !GAME.fadeScreenControl) {
-            D_8009C93C = 1;
+            GVARS.b3c = 1;
             o->w08 = 0x80;
             o->state++;
         }
         break;
     case 12:
         FUN_80059d44(o->w08);
-        D_8009CFEA = 1;
+        GCD.bcfea = 1;
         o->state++;
         break;
     case 13:
@@ -197,7 +198,7 @@ void func_8011A114(Ctl *o)
         break;
     case 16:
         if (--o->w08 <= 0) {
-            D_8009CFEA = 2;
+            GCD.bcfea = 2;
             o->w08 = 0x12c;
             o->state++;
         }
@@ -225,7 +226,7 @@ void func_8011A114(Ctl *o)
         a->h->p.whole++;
         if (--o->w08 <= 0) {
             func_80117CEC(a, 0, 0);
-            D_8009C93E[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
             setEventStarted(0x9d, 0, 0);
             o->w08 = 200;
             o->state++;
@@ -245,11 +246,11 @@ void func_8011A114(Ctl *o)
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
             func_80117CEC(a, 0, 0);
-            if (D_8009CE15 == 0xff) {
+            if (GCD.bce15 == 0xff) {
                 a->d90 = (int)showMessageBoxDirect(7, 6, &v);
                 func_80117CEC(a, 2, 0);
                 o->state = 0x19;
-            } else if (D_8009CDBB) {
+            } else if (GCD.bcdbb) {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
                 a->d90 = (int)showMessageBoxDirect(7, 7, &v);
@@ -279,7 +280,7 @@ void func_8011A114(Ctl *o)
         b->h->p.whole--;
         AnimAdvance(b);
         if (--o->w08 <= 0) {
-            if (!D_8009D0B2) addItemToInventory(0xe, 1, 1);
+            if (!GCD.bd0b2) addItemToInventory(0xe, 1, 1);
             b->b04 = 3;
             o->w08 = 0x3c;
             o->state++;
@@ -302,9 +303,9 @@ void func_8011A114(Ctl *o)
         }
         break;
     case 99:
-        D_8009C942[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C93E[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
         D_1F8001C6 = 0;
         o->b0f = o->w24;

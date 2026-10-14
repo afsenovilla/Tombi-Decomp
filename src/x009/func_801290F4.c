@@ -1,11 +1,11 @@
 // FUNC 801290f4 592 X009
 // MATCHING 801290f4 592
+#include "gvars.h"
 #include "player.h"
 /* debt: register asm("$6") for the player pointer in pushR (without it gcc swaps a2/a3 with the box1 copy and the shared sh 2(a2) tail is not cross-jumped; score 75). */
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012B2E4[];
-extern unsigned char D_8009C93A;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void func_80128ECC(TObj *);
@@ -25,7 +25,7 @@ static __inline__ void pushR(short w1, short w0, short x)
 void func_801290F4(TObj *o)
 {
     if (o->b0c == 0) {
-        if ((o->active & 8) && D_8009C93A && (unsigned short)(o->y.p.whole - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
+        if ((o->active & 8) && GVARS.b3a && (unsigned short)(o->y.p.whole - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
             if (o->animFrame & 1)
                 pushL(o->h->p.whole, o->box0);
             else

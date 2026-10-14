@@ -1,12 +1,11 @@
 // FUNC 8011e990 1544 X010
+#include "spad.h"
 /* score 307: logic and size match (whole 1544 B incl. csv piece 8011EAE8); remaining diffs are register allocation: game has a=s1, dx=s3, dy=s6, cx=s5, abs value s=s0, fp/s7 for the two slopes, mode kept on the stack (sb a2,0x10(sp)); ours puts a in s0, dx in s1 and s in s7. Sibling wip func_8011E000 has the same family of diffs. Tried (o27): box sums through ax/ay + in-place abs (313; helped sibling 80121534); priorities from cc1 -dl: game needs s (abs, 8 refs/201 insns) above a (24/293), i.e. s0 for s, which no tried form gives. */
 #include "TOBJ.H"
 
 typedef struct { char pad[0xe8]; unsigned short we8, wea; } XA;
 #define XA(o) ((XA *)(o))
 
-extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 extern int rcos(int);
 extern int rsin(int);
 
@@ -92,8 +91,8 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
         a->velY = 0;
         b->velX = dx;
         b->b69 = 1;
-        D_1F80019E = 0;
-        D_1F8003C0 = b;
+        SPAD.s19e = 0;
+        (*(TObj **)&SPAD.p3c0) = b;
         b->w7a = mode;
         return 1;
     }
@@ -126,7 +125,7 @@ int func_8011E990(TObj *a, TObj *b, unsigned char mode, int ang)
     b->w7a = mode;
     a->velY = 0;
     a->b9e = 8;
-    D_1F80019E = 0;
-    D_1F8003C0 = b;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = b;
     return 1;
 }

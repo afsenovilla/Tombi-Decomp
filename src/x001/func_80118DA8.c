@@ -1,10 +1,8 @@
 // FUNC 80118da8 1084 X001
 // MATCHING 80118da8 1084
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
-extern int D_1F8002D4[];
 extern void *D_8013E5B0[];
 extern TObj *ObjAlloc(void);
 extern int FUN_8001f9e0(void);
@@ -22,7 +20,7 @@ void func_80118DA8(TObj *o)
         t = o->subtype;
         switch (t) {
         case 0:
-            if ((D_1F8001F8 + D_1F800198) & 1) break;
+            if ((SPAD.s1f8 + SPAD.i198) & 1) break;
             if (--o->timer == -1) goto done;
             e = ObjAlloc();
             if (e == 0) break;
@@ -51,7 +49,7 @@ void func_80118DA8(TObj *o)
             o->b0d = 0;
             *(signed char *)&o->b0f = -10;
             o->anim = D_8013E5B0[o->wac];
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->step = 0;
             o->b04++;
             switch (o->b0c) {
@@ -99,7 +97,7 @@ void func_80118DA8(TObj *o)
             break;
         case 1:
             if (o->timer < 0x1e) {
-                if ((D_1F8001F8 + D_1F800198) & 1) ObjCullRegister(o);
+                if ((SPAD.s1f8 + SPAD.i198) & 1) ObjCullRegister(o);
             } else {
                 if (!ObjCullRegister(o)) o->b04 = 3;
             }

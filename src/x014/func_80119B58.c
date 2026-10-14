@@ -1,21 +1,19 @@
 // FUNC 80119b58 2368 X014
 // MATCHING 80119b58 2368
+#include "spad.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
-extern S8 *D_8009C948;
 extern unsigned short D_8009C962[];
 extern short D_80125C40[], D_80125C50[];
 extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
-extern unsigned char D_8009C93E;
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
-extern unsigned char D_8009D2C3;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
 extern short D_8007A1F0[], D_8007A5F0[];
-extern int D_1F800168, D_1F80016C[];
-extern short D_1F80016A, D_1F8000EE;
-extern int D_1F80018C, D_1F800190;
+extern int D_1F800190;
 extern int func_80119A4C(TObj *, S8 *);
 extern int func_80119914(TObj *, S8 *);
 extern int func_801196A4(TObj *, unsigned char);
@@ -67,7 +65,7 @@ static __inline__ void setAnim(TObj *p, void *a)
 
 void func_80119B58(TObj *o)
 {
-    S8 *s = D_8009C948;
+    S8 *s = (*(S8 **)&GVARS.p48);
     int v;
     unsigned int u;
 
@@ -90,7 +88,7 @@ void func_80119B58(TObj *o)
         o->b0b = 1;
         o->b0f = 4;
         o->state++;
-        D_8009C93E = 0;
+        GVARS.b3e = 0;
         MSG(o);
         s->b4 = 2;
         s->b1 = 0;
@@ -147,10 +145,10 @@ void func_80119B58(TObj *o)
         o->velH -= 0x40;
         if (o->velH < 0x400) {
             o->state++;
-            if (D_1F80016A > D_1F8000EE) v = -0x10;
+            if ((*(short*)((char*)&SPAD.i168 + 2)) > (*(short*)((char*)&SPAD.iec + 2))) v = -0x10;
             else v = 0x10;
-            o->velH = (D_1F800168 + v - o->h->raw) >> 15;
-            v = D_1F80016C[0];
+            o->velH = (SPAD.i168 + v - o->h->raw) >> 15;
+            v = ((int*)&SPAD.i16c)[0];
             o->timer = 0x80;
             o->wb0 = 0x40;
             *(signed char *)&o->b0f = -9;
@@ -181,7 +179,7 @@ void func_80119B58(TObj *o)
             func_801178CC(o, 0, 0, 0);
         }
         D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        SPAD.i18c = o->h->raw;
         break;
     case 7:
         u = o->ba5 + 2;
@@ -211,7 +209,7 @@ void func_80119B58(TObj *o)
             FUN_8001f110(1);
             {
                 int n = D_80125C68[D_8009C962[0]];
-                p = &D_8009D2C3;
+                p = &GV2.bc3;
                 D_800A4555 = 4;
                 *p |= 1 << n;
             }

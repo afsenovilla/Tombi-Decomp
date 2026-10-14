@@ -1,5 +1,6 @@
 // FUNC 801191c4 524 X003
 // MATCHING 801191c4 524
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -8,7 +9,7 @@ typedef struct {
 } E;
 
 extern short D_8013589C[];
-extern short D_1F800176[], D_1F800186;
+extern short D_1F800176[];
 extern int Rand(void);
 
 void func_801191C4(TObj *o)
@@ -37,7 +38,7 @@ void func_801191C4(TObj *o)
         e->ce = D_8013589C[7];
         e->d0 = 0;
         o->a.raw = (D_1F800176[0] - 0xa0) << 16;
-        { short r = (Rand() & 7) * 24 + 0x10; o->y.raw = (D_1F800186 - r) << 16; }
+        { short r = (Rand() & 7) * 24 + 0x10; o->y.raw = ((*(short*)&SPAD.s186) - r) << 16; }
         o->velH = o->subtype << 7;
         break;
     case 2:

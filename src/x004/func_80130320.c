@@ -1,9 +1,8 @@
 // FUNC 80130320 260 X004
 // MATCHING 80130320 260
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDAB;
-extern unsigned char D_8009CFCB;
 extern void func_801301B0(TObj *);
 extern void func_8012FBF4(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -19,7 +18,7 @@ void func_80130320(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            if (D_8009CDAB == 1 && D_8009CFCB == 0) {
+            if (GCD.bcdab == 1 && GCD.bcfcb == 0) {
                 o->step = 1;
                 o->state = 0;
             }

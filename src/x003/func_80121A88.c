@@ -1,5 +1,6 @@
 // FUNC 80121a88 1352 X003
 // MATCHING 80121a88 1352
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
@@ -7,7 +8,6 @@ typedef struct { unsigned char b0, b1; char p2[0xa - 2]; unsigned char b0a, b0b;
 extern char D_80077D3C[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
-extern short D_1F80016A;
 extern void FUN_8001f8e4(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
@@ -32,10 +32,10 @@ static __inline__ void fall(TObj *q)
 static __inline__ short near(TObj *o)
 {
     if (o->animFrame) {
-        if (o->h->p.whole >= D_1F80016A - 0x30) return 0;
+        if (o->h->p.whole >= (*(short*)((char*)&SPAD.i168 + 2)) - 0x30) return 0;
         return 1;
     }
-    if (D_1F80016A + 0x30 < o->h->p.whole) return 1;
+    if ((*(short*)((char*)&SPAD.i168 + 2)) + 0x30 < o->h->p.whole) return 1;
     return 0;
 }
 

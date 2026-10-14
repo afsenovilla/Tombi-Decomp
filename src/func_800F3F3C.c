@@ -1,5 +1,7 @@
 // FUNC 800f3f3c 1040 X000
 // MATCHING 800f3f3c 1040
+#include "gv6.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     TObj t;
@@ -26,9 +28,6 @@ typedef struct {
 } Q800F3F3C;
 
 extern Q800F3F3C *D_8009C330;
-extern unsigned short D_8009D670;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern int D_8009D2E8;
 extern void FUN_8010f328(P800F3F3C *);
 extern void SfxPlay2(int, int);
@@ -67,7 +66,7 @@ void func_800F3F3C(P800F3F3C *o)
             D_8009C330->b8 = 1;
             o->t.state = 2;
         }
-        if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C6) {
+        if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C6) {
             if (D_8009C330->b8 != 0) goto common;
             if (++D_8009C330->w20 >= 0xe) {
                 D_8009C330->b8 = 1;
@@ -84,8 +83,8 @@ void func_800F3F3C(P800F3F3C *o)
         FUN_8010f328(o);
     case 2:
     common:
-        o->t.h->raw += D_8009C944 << 8;
-        o->t.y.raw += D_8009C946[0] << 8;
+        o->t.h->raw += GVARS.s44 << 8;
+        o->t.y.raw += ((short*)&GVARS.s46)[0] << 8;
         func_8010F400(o);
         func_8010EAF8(o);
         o->t.h->raw += o->t.velX << 8;

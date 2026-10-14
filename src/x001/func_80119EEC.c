@@ -1,14 +1,14 @@
 // FUNC 80119eec 724 X001
 // MATCHING 80119eec 724
+#include "spad.h"
+#include "gcd.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8013E514;
 extern void *D_8013E51C;
 extern void *D_8013E524;
 extern void *D_8013E528[];
 extern void *D_8013E530;
 extern void *D_8013E538;
-extern unsigned char D_8009CE58;
 extern short D_8007A3F0[];
 extern char D_80077CDC[];
 extern void AnimLoadDuration(TObj *);
@@ -27,7 +27,7 @@ void func_80119EEC(TObj *o)
     case 0:
         o->b04++;
         o->w1e = 11;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         switch (o->b0c) {
         case 0:
             o->b0d = 0;
@@ -51,7 +51,7 @@ void func_80119EEC(TObj *o)
             o->anim = D_8013E530;
             break;
         case 5:
-            if (D_8009CE58 == 0) {
+            if (GCD.bce58 == 0) {
                 o->h->p.whole = 0x6b8;
                 o->b0d = 0x80;
                 o->y.p.whole = -0x28;
@@ -96,7 +96,7 @@ void func_80119EEC(TObj *o)
         case 4:
             break;
         case 5:
-            if (D_8009CE58 == 0xff) {
+            if (GCD.bce58 == 0xff) {
                 o->b04 = 3;
                 break;
             }

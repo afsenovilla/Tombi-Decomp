@@ -1,12 +1,13 @@
 // FUNC 8011cec0 1016 X004
 // MATCHING 8011cec0 1016
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
-extern unsigned char D_8009D0CC, D_8009D2C3, D_8009C93A;
-extern unsigned char D_8009CF11[];
 extern char D_80130CD4[];
 extern short D_80130D14[];
-extern unsigned short D_1F800176, D_1F800186;
 extern void FUN_8005f3c0(RECT *, void *);
 extern void FUN_80018cf0(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -24,9 +25,9 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 
 static __inline__ int inview(TObj *o)
 {
-    if (!D_8009C93A) return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    if (!GVARS.b3a) return 0;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_8011CEC0(TObj *o)
@@ -39,7 +40,7 @@ void func_8011CEC0(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (!D_8009D0CC || (D_8009D2C3 & 4)) {
+        if (!GCD.bd0cc || (GV2.bc3 & 4)) {
             o->b04 = 3;
             break;
         }
@@ -60,7 +61,7 @@ void func_8011CEC0(TObj *o)
         o->d84 = 0;
         o->d88 = D_80130D14[o->b0c];
         o->d8c = 0;
-        if (D_8009CF11[0] == 0) {
+        if (((unsigned char*)&GCD.bcf11)[0] == 0) {
             o->step = 0;
             k = 0x800;
         } else {

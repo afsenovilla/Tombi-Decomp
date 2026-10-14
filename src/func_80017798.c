@@ -1,12 +1,12 @@
 // FUNC 80017798 164 MAIN0
 // MATCHING 80017798 164
-extern char D_1F8000C0[];
+#include "spad.h"
 extern short D_8009F838;
 extern void getBaseMatrix();
 
 void func_80017798(void)
 {
-    getBaseMatrix(D_1F8000C0);
+    getBaseMatrix(((char*)&SPAD.bc0));
     *(short *)0x1F8000EA = -0x220;
     *(short *)0x1F8000EE = 0xA0;
     *(short *)0x1F8000F2 = -0x80;

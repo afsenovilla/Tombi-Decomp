@@ -1,5 +1,6 @@
 // FUNC 80125a38 1684 X009
 // MATCHING 80125a38 1684
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -9,7 +10,6 @@ extern void *D_8012EE80[], *D_8012EE84[], *D_8012EEB0[], *D_8012EEB4[], *D_8012E
 extern void *D_8012EEC0[];
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-extern unsigned short D_1F80016A, D_1F80016E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -47,8 +47,8 @@ void func_80125A38(TObj *o)
         o->state++;
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        b.x = D_1F80016A;
-        b.y = D_1F80016E - 0x40;
+        b.x = (*(unsigned short*)((char*)&SPAD.i168 + 2));
+        b.y = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - 0x40;
         o->d88 = angleBetweenPoints(a, b);
         if ((unsigned)(o->d88 - 0x41) < 0x80) o->animFrame = 1;
         else o->animFrame = 0;

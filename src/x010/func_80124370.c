@@ -1,12 +1,11 @@
 // FUNC 80124370 1680 X010
 // MATCHING 80124370 1680
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -28,7 +27,7 @@ static __inline__ void mv(TObj *o)
 
 static __inline__ void turn(TObj *o)
 {
-    if (o->subtype == 0 && ((D_1F8001F8 + D_1F800198) & 0xf) == 0) {
+    if (o->subtype == 0 && ((SPAD.s1f8 + SPAD.i198) & 0xf) == 0) {
         int d = o->d30;
         int b = o->d38;
         int t = d - b;
@@ -89,7 +88,7 @@ void func_80124370(TObj *o)
             o->state = 0;
             o->step++;
         }
-        if (((D_1F8001F8 + D_1F800198) & 0x1f) == 0) o->velX = Rand() & 3;
+        if (((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) o->velX = Rand() & 3;
         func_8012418C(o);
         break;
     case 2:

@@ -1,5 +1,8 @@
 // FUNC 800fe13c 1568 X016
 // MATCHING 800fe13c 1568
+#include "plx.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
@@ -24,12 +27,8 @@ typedef struct {
 
 extern P800FE13C *D_8009C330;
 extern TObj *D_8009D2E8;
-extern TObj *D_800A611C;
 extern TObj *D_8009F0EC;
-extern int D_8009C934;
-extern unsigned char D_8009C938;
 extern unsigned char D_8009CF06[];
-extern unsigned char D_8009D2B1[];
 typedef struct { unsigned short c960, c962; char pad[0x5a2]; unsigned char cf06; } G960;
 extern G960 D_8009C960;
 extern unsigned char D_801152E8[];
@@ -92,13 +91,13 @@ void FUN_800fe13c(TObj *o)
         o->ba4 = 0;
         o->wb0 = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(TObj **)&PLX.p611c);
             D_8009D2E8->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
-        D_8009C934 = 0;
+        GVARS.i34 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
@@ -156,7 +155,7 @@ void FUN_800fe13c(TObj *o)
             if (S16(o, 0xe0) == 0)
                 S16(o, 0xe0) = 0x8c;
             o->active = 3;
-            if (D_8009C938) {
+            if (GVARS.b38) {
                 D_8009C330->b8 = 0;
                 o->timer = 0xb4;
                 o->state = 2;
@@ -184,9 +183,9 @@ void FUN_800fe13c(TObj *o)
         if (--o->timer == 0) {
             o->state = 3;
             D_8009C960.cf06 = 0;
-            D_8009D2B1[0] = 0;
+            ((unsigned char*)&GV2.bb1)[0] = 0;
             if (D_8009C960.c960 != 10 || D_8009C960.c962 != 0)
-                D_8009C938 = 2;
+                GVARS.b38 = 2;
         }
         break;
     case 4:

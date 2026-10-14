@@ -1,5 +1,7 @@
 // FUNC 8012736c 2060 X010
 // MATCHING 8012736c 2060
+#include "gcd.h"
+#include "gvars.h"
 /* Matched. Keep: function-scope `int y` (global pseudo -> v1 in cases 2 and 5) and function-scope `int hv`
    shared by case 2's two scratchpad loads and case 5's o->h pointer (global pseudo in a1; a case-8 use would put
    the pointer in a1 where the game has v0, and block-local it steals v1 from y). Case 2 state++ through y so the
@@ -18,9 +20,6 @@ extern unsigned short *D_800A605C;
 extern unsigned short D_800A6066;
 extern short D_800A604A[];
 extern short D_800A604E[];
-extern unsigned char D_8009C93F;
-extern unsigned char D_8009C942;
-extern unsigned char D_8009D078;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
@@ -59,8 +58,8 @@ void func_8012736C(TObj *o)
     case 1:
         if (D_1F80016A[0] >= 0xc81 && D_1F80016E[0] >= -0x27) {
             *(signed char *)&o->b0f = -7;
-            D_8009C93F = 1;
-            D_8009C942 = 1;
+            GVARS.b3f = 1;
+            GVARS.b42 = 1;
             PLAYER.active = 5;
             D_800A603C = 5;
             D_800A603D = 100;
@@ -256,9 +255,9 @@ void func_8012736C(TObj *o)
         }
         break;
     case 21:
-        D_8009D078 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GCD.bd078 = 1;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.active = 1;
         D_800A603C = 1;
         D_800A603D = 0;

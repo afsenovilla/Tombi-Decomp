@@ -1,11 +1,10 @@
 // FUNC 8013946c 772 X001
 // MATCHING 8013946c 772
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D081;
-extern unsigned char D_8009C940, D_8009C93F, D_8009C942, D_8009C93E;
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void *D_8013FA90[];
 extern void *D_8013FAB8[], *D_8013FABC[];
 extern void AnimLoadDuration(TObj *);
@@ -18,13 +17,13 @@ void func_8013946C(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009D081 == 1) {
+        if (GCD.bd081 == 1) {
             o->timer = 0;
             o->step++;
         }
         break;
     case 1:
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0) {
             short w = o->wac + 4;
             o->wac = w;
             o->anim = D_8013FA90[w];
@@ -32,7 +31,7 @@ void func_8013946C(TObj *o)
         }
         break;
     case 2:
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0) {
             if (++o->timer >= 0x10) {
                 o->step++;
                 switch (o->wac) {
@@ -66,12 +65,12 @@ void func_8013946C(TObj *o)
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->step++;
-            D_8009D081 = 2;
+            GCD.bd081 = 2;
         }
         break;
     case 5:
         AnimAdvance(o);
-        if (D_8009D081 >= 5) o->step++;
+        if (GCD.bd081 >= 5) o->step++;
         break;
     case 6:
         switch (o->b0c) {
@@ -89,11 +88,11 @@ void func_8013946C(TObj *o)
         break;
     case 7:
         if (o->b0c == 2) {
-            D_8009D081 = 6;
-            D_8009C940 = 0;
-            D_8009C93F = 0;
-            D_8009C942 = 0;
-            D_8009C93E = 0;
+            GCD.bd081 = 6;
+            GVARS.b40 = 0;
+            GVARS.b3f = 0;
+            GVARS.b42 = 0;
+            GVARS.b3e = 0;
         }
         o->step++;
         break;

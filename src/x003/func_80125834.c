@@ -1,7 +1,7 @@
 // FUNC 80125834 376 X003
 // MATCHING 80125834 376
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_1F80027E;
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern void *D_80139578;
@@ -37,7 +37,7 @@ void func_80125834(TObj *o)
             if (o->wac >= 0xc) {
                 o->d8c = 0;
             } else {
-                v = ((D_1F80027E << 2) + o->d8c) & 0xff;
+                v = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff;
                 if (v != 0) {
                     if (v < 0x80) o->d8c = o->d8c - 1;
                     else o->d8c = o->d8c + 1;

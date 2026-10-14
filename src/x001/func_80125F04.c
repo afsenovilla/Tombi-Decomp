@@ -1,8 +1,8 @@
 // FUNC 80125f04 184 X001
 // MATCHING 80125f04 184
+#include "spad.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern short D_1F80019E;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int func_80042D5C(TObj *, TObj *);
 
@@ -24,5 +24,5 @@ void func_80125F04(TObj *p, TObj *o)
         o->step = 0;
         o->state = 0;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

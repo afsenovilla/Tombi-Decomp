@@ -1,10 +1,10 @@
 // FUNC 80103290 920 X004
 // MATCHING 80103290 920
+#include "gv2.h"
+#include "spad.h"
+#include "gv6.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8001FC, D_1F8003C6;
-extern unsigned char D_8009D2B0[];
 void ObjMotionStep(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void FUN_8001f96c(int, int, int, int);
@@ -54,7 +54,7 @@ void func_80103290(TObj *o)
         if ((o->b69 | ObjTileCollide(o, 0, 1)) || o->timer >= 11) BLOCK();
         break;
     case 2:
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x80) o->animFrame = 1;
         if (*k & 0x20) o->animFrame = 0;
         o->h->p.whole = D_8009D2E8->h->p.whole;
@@ -62,8 +62,8 @@ void func_80103290(TObj *o)
             if (D_8009D2E8->subtype == 0) o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2) + 8;
             else o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2);
         }
-        if (D_1F8001FC & D_1F8003C6) {
-            D_8009D2B0[0] = 0;
+        if (SPAD.s1fc & SPAD.s3c6) {
+            ((unsigned char*)&GV2.bb0)[0] = 0;
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

@@ -1,5 +1,6 @@
 // FUNC 80123fd0 1968 X000
 // MATCHING 80123fd0 1968
+#include "spad.h"
 /* Rotated FT4 sprite strip. Keys: short x = xy (keeps the move s3,a0 copy), and the Psy-Q setSemiTrans macro
    form (if/else |= 2 / &= ~2 after f->code = 0x2d): cse folds both branches to constants and deletes the dead else
    store, but the extra insns at flow time make the scale s keep fp over &CS[a1] (global-alloc tie) and put the 0x2d
@@ -16,13 +17,8 @@ typedef struct {
 } PFT4_80123FD0;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800074i;
 extern PFT4_80123FD0 *D_1F800164;
-extern int D_1F8001E0;
-extern short D_1F8001C8;
-extern short D_1F8000F6;
-extern short D_1F8000EE;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -51,7 +47,7 @@ void FUN_80123fd0(TObj *o)
     short u, w;
     PFT4_80123FD0 *f;
 
-    if (projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074) != 0)
+    if (projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74) != 0)
         return;
     xy = LZ_FILE_CTRL;
     x = xy;
@@ -61,12 +57,12 @@ void FUN_80123fd0(TObj *o)
     e = (short *)d;
     n = e[0];
     q = (unsigned char *)(o->d3c + e[1]);
-    switch (D_1F8001C8) {
+    switch ((*(short*)&SPAD.s1c8)) {
     case 0:
-        s = (D_1F8000F6 - o->b.p.whole) * 7 + 0x1000;
+        s = ((*(short*)((char*)&SPAD.if4 + 2)) - o->b.p.whole) * 7 + 0x1000;
         break;
     case 1:
-        s = (o->a.p.whole - D_1F8000EE) * 7 + 0x1000;
+        s = (o->a.p.whole - (*(short*)((char*)&SPAD.iec + 2))) * 7 + 0x1000;
         break;
     }
     ang = o->d8c;
@@ -113,9 +109,9 @@ void FUN_80123fd0(TObj *o)
             f->tpage = o->w1e;
             f->clut = o->w08;
             if (o->b0b != 0)
-                insertPrim(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
-                insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             D_1F800164 = (PFT4_80123FD0 *)((char *)D_1F800164 + 0x28);
         }
         q += 16;

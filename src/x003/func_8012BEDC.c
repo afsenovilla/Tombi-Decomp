@@ -1,8 +1,8 @@
 // FUNC 8012bedc 304 X003
 // MATCHING 8012bedc 304
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE5D;
 extern void func_8012BD5C(TObj *);
 extern void func_8012B66C(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -22,7 +22,7 @@ void func_8012BEDC(TObj *o)
                 if (o->b68 != 0) {
                     o->step++;
                 }
-                if (D_8009CE5D == 0xff && o->step == 0) {
+                if (GCD.bce5d == 0xff && o->step == 0) {
                     o->step = 1;
                     o->d88 = 1;
                     o->state = 0x46;

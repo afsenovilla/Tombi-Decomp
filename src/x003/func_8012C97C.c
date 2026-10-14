@@ -1,10 +1,12 @@
 // FUNC 8012c97c 660 X003
 // MATCHING 8012c97c 660
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009D2C3, D_8009CF03;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_8009C93F, D_8009C942;
+extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern void *D_801399D8[], *D_801399D4[];
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -21,7 +23,7 @@ void func_8012C97C(TObj *o)
     int k;
     switch (o->state) {
     case 0:
-        if (D_8009D2C3 & 2) {
+        if (GV2.bc3 & 2) {
             o->step = 4;
             o->a.p.whole = 0x842;
             o->y.p.whole = -0x38e;
@@ -33,7 +35,7 @@ void func_8012C97C(TObj *o)
     case 1:
         AnimAdvance(o);
         if (o->b6a) {
-            D_8009CF03 = k = 1;
+            GCD.bcf03 = k = 1;
             o->timer = 1;
             o->b69 = 0;
             o->velV = 0;
@@ -44,8 +46,8 @@ void func_8012C97C(TObj *o)
             D_800A603C = 5;
             D_800A603D = 0;
             D_800A603E = 0;
-            D_8009C93F = k;
-            D_8009C942 = k;
+            GVARS.b3f = k;
+            GVARS.b42 = k;
         }
         break;
     case 2:

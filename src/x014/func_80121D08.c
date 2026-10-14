@@ -1,5 +1,6 @@
 // FUNC 80121d08 648 X014
 // MATCHING 80121d08 648
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer2(void);
@@ -9,7 +10,6 @@ extern int ObjCullRegister(TObj *);
 extern void *D_80129FCC[];
 extern short D_801265C4[];
 extern short D_8007A5F0[], D_8007A1F0[];
-extern unsigned char D_8009C942;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 
@@ -58,7 +58,7 @@ void func_80121D08(TObj *o)
         ObjCullRegister(o);
         break;
     case 1:
-        if (D_8009C942 == 1) {
+        if (GVARS.b42 == 1) {
             ObjCullRegister(o);
             break;
         }

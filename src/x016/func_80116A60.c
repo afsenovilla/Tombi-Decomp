@@ -1,16 +1,14 @@
 // FUNC 80116a60 1016 X016
 // MATCHING 80116a60 1016
+#include "spad.h"
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 /* size 1016: includes the csv piece 80116D50 (264 B). */
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
 extern int LoadImage(RECT *, void *);
-extern unsigned char D_8009D0CB;
-extern unsigned char D_8009D2C3;
-extern unsigned char D_8009CF0D[];
-extern unsigned char D_8009C93A;
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186;
 extern char D_80118C54[];
 extern short D_80118C94[];
 extern void ObjListPush_1F800224(TObj *o);
@@ -21,9 +19,9 @@ extern void func_801167B0(TObj *o);
 
 static __inline__ int onScreen(TObj *o)
 {
-    if (D_8009C93A == 0) return 0;
-    if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
-    return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
+    if (GVARS.b3a == 0) return 0;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
 void func_80116A60(TObj *o)
@@ -35,7 +33,7 @@ void func_80116A60(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D0CB == 0 || (D_8009D2C3 & 0x40)) {
+        if (GCD.bd0cb == 0 || (GV2.bc3 & 0x40)) {
             o->b04 = 3;
             break;
         }
@@ -62,7 +60,7 @@ void func_80116A60(TObj *o)
         o->d84 = 0;
         o->d88 = D_80118C94[o->b0c];
         o->d8c = 0;
-        if (D_8009CF0D[0] == 0) {
+        if (((unsigned char*)&GCD.bcf0d)[0] == 0) {
             o->step = 0;
             v = 0x800;
         } else {

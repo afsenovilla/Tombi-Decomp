@@ -1,5 +1,6 @@
 // FUNC 80129914 392 X004
 // MATCHING 80129914 392
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -11,7 +12,6 @@ typedef struct {
 
 extern T80129914 D_80131180[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CE41;
 extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 
@@ -33,5 +33,5 @@ void func_80129914(TObj *o)
     o->step = 0;
     o->category |= 0x80;
     o->b04++;
-    if (D_8009CE41 != 1) o->b04 = 3;
+    if (GCD.bce41 != 1) o->b04 = 3;
 }

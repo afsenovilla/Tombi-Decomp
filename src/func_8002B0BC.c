@@ -1,5 +1,7 @@
 // FUNC 8002b0bc 780 MAIN0
 // MATCHING 8002b0bc 780
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 typedef struct S {
     unsigned char b00, b01; char p0[2]; unsigned char b04; char p1[5]; unsigned char b0a; char p2[0x6c - 0xb];
@@ -9,11 +11,8 @@ typedef struct S {
 extern char SPRITE_SLOTS[];
 extern char D_800B0BBA[];
 extern unsigned char D_800B0BBC[], D_800B0BBD[], D_800B0BBE[], D_800B0BBF[];
-extern unsigned char D_8009CDA2;
 extern signed char D_8009D2B0;
-extern unsigned char D_8009C93E, D_8009C933;
-extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C942[];
+extern unsigned char D_8009C933;
 extern unsigned short acquireSpriteSlot(int);
 extern void func_8002B3C8(S *);
 extern void ObjListPush_1F800230(S *);
@@ -49,7 +48,7 @@ void func_8002B0BC(S *o)
         o->b04++;
         break;
     case 1:
-        if (D_8009CDA2 != 1)
+        if (GCD.bcda2 != 1)
             func_8002B3C8(o);
         if (o->b00 & 1) {
             o->b01 = 1;
@@ -70,15 +69,15 @@ void func_8002B0BC(S *o)
                 if (m == 2)
                     break;
                 if (o->wd0 == 0 || m == 3) {
-                    D_8009C93F[0] = 0;
-                    D_8009C942[0] = 0;
+                    ((unsigned char*)&GVARS.b3f)[0] = 0;
+                    ((unsigned char*)&GVARS.b42)[0] = 0;
                     if ((o->wce & 0x7fff) != 4 && (PLAYER.obj.b9e == 0 || (*(unsigned char*)&PLAYER.obj.wac) < 2)) {
                         PLAYER.obj.b04 = 1;
                         PLAYER.obj.step = 0;
                         PLAYER.obj.state = 0;
                         PLAYER.obj.substep = 0;
                     } else {
-                        D_8009C93E = 0;
+                        GVARS.b3e = 0;
                     }
                 }
             }

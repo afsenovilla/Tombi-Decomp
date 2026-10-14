@@ -1,8 +1,8 @@
 // FUNC 80118760 652 X014
 // MATCHING 80118760 652
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
 extern void func_80117AA8(TObj *);
@@ -59,7 +59,7 @@ void func_80118760(TObj *o)
                 o->timer = 0;
                 break;
             case 1:
-                if ((D_1F8001F8 & 3) == 0) {
+                if ((SPAD.s1f8 & 3) == 0) {
                     n = ObjAlloc();
                     if (n != 0) {
                         n->active = 1;

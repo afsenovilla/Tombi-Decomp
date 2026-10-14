@@ -1,5 +1,9 @@
 // FUNC 800f44b0 2488 X017
 // MATCHING 800f44b0 2488
+#include "gv2.h"
+#include "plx.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -19,11 +23,6 @@ typedef struct {
 
 extern P800F44B0 *D_8009C330;
 extern TObj *D_8009D2E8;
-extern TObj *D_800A611C;
-extern short D_8009C944;
-extern short D_8009C946[];
-extern unsigned short D_8009D670;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
@@ -112,7 +111,7 @@ void FUN_800f44b0(TObj *o)
         D_8009C330->b7 = o->animFrame;
         f = o->animFrame & 1;
         o->animFrame = f;
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x10) {
             if (*k & 0x80) o->animFrame = 5;
             else if (*k & 0x20) o->animFrame = 4;
@@ -131,8 +130,8 @@ void FUN_800f44b0(TObj *o)
         o->b9d = 1;
         U8(o, 0xc8) = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
-            D_800A611C->b04 = 2;
+            D_8009D2E8 = (*(TObj **)&PLX.p611c);
+            (*(TObj **)&PLX.p611c)->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
@@ -179,8 +178,8 @@ void FUN_800f44b0(TObj *o)
         else o->wb6 = 0;
         FUN_80110fdc(o);
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8001fce4(o);
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
@@ -214,10 +213,10 @@ void FUN_800f44b0(TObj *o)
             o->b9c = 0;
         }
         if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-            D_8009D2B0 = 0;
+            GV2.bb0 = 0;
             o->b9c = 1;
             if (GAME.area00_eventControl & 0x40) {
-                if (*(volatile unsigned short *)&D_8009D670 & *(unsigned short *)0x1F8003C4) {
+                if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
                     o->ba7 = 1;
                 }
             }
@@ -233,8 +232,8 @@ void FUN_800f44b0(TObj *o)
     case 2:
         FUN_80110fdc(o);
         FUN_8010f0f4(o);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8001fce4(o);
         FUN_8001fd94(o);
         FUN_8001fec0(o);

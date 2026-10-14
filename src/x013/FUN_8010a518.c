@@ -1,10 +1,10 @@
 // FUNC 8010a518 1244 X013
 // MATCHING 8010a518 1244
+#include "gv6.h"
 #include "TOBJ.H"
 typedef struct { short v[9]; } T9;
 extern T9 D_800E98B0, D_800E98C4, D_800E98D8;
 extern unsigned char *D_8009C330;
-extern unsigned short D_8009D670;
 
 void FUN_8010a518(TObj *o)
 {
@@ -14,7 +14,7 @@ void FUN_8010a518(TObj *o)
     volatile unsigned short *k;
     D_8009C330[0xb] = 8;
     if (o->animFrame & 1) {
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x10) {
             D_8009C330[0xb] = 0;
             if (*k & 0x80) D_8009C330[0xb] = 7;
@@ -33,7 +33,7 @@ void FUN_8010a518(TObj *o)
             if (*k & 0x40) D_8009C330[0xb] = 3;
         }
     } else {
-        k = &D_8009D670;
+        k = &GV6.s70;
         if (*k & 0x10) {
             D_8009C330[0xb] = 0;
             if (*k & 0x80) D_8009C330[0xb] = 1;

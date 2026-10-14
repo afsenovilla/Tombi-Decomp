@@ -1,5 +1,6 @@
 // FUNC 8012748c 2236 X003
 // MATCHING 8012748c 2236
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { short w0, w2; } X;
@@ -8,7 +9,6 @@ typedef struct { short w0, w2; } X;
 extern char D_80077CF4[];
 extern unsigned char D_80135CB0[];
 extern void *D_80139520[];
-extern unsigned short D_1F80027E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern TObj *ObjAlloc(void);
@@ -39,7 +39,7 @@ static __inline__ int Ground(TObj *o)
         if (o->wac >= 0xc) {
             o->d8c = 0;
         } else {
-            t = D_1F80027E * 4 + o->d8c;
+            t = (*(unsigned short*)&SPAD.s27e) * 4 + o->d8c;
             if (t) {
                 int w;
                 if (t < 0x80) w = o->d8c - 1; else w = o->d8c + 1;
@@ -191,7 +191,7 @@ void func_8012748C(TObj *o)
         if (o->velV > 0x600) o->velV = 0x600;
         o->y.raw += o->velV << 8;
         if (Ground(o)) {
-            o->d8c = (-(short)D_1F80027E << 2) & 0xff;
+            o->d8c = (-(short)(*(unsigned short*)&SPAD.s27e) << 2) & 0xff;
             o->active = 1;
             o->b04 = 1;
             o->step = 1;

@@ -1,11 +1,9 @@
 // FUNC 8011c708 392 X004
 // MATCHING 8011c708 392
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F800172;
-extern short D_1F80016A;
-extern short D_1F800176;
 extern void FUN_80018cf0(TObj *);
 extern void FUN_80018838(TObj *);
 
@@ -33,14 +31,14 @@ void func_8011C708(TObj *o)
         switch (o->subtype) {
         case 0:
             if (GAME.disableSelectMenu == 0 && GAME.selectedSection == 1) break;
-            if (D_1F800172 == 0x32a) {
-                if (D_1F80016A < 0x92) (*(short **)&PLAYER.obj.h)[1] = 0x92;
+            if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x32a) {
+                if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x92) (*(short **)&PLAYER.obj.h)[1] = 0x92;
             }
             o->visible = 1;
             FUN_80018cf0(o);
             break;
         case 1:
-            if (GAME.selectedSection == 2 && D_1F800176 < 0x456) break;
+            if (GAME.selectedSection == 2 && (*(short*)((char*)&SPAD.i174 + 2)) < 0x456) break;
             o->visible = 1;
             FUN_80018cf0(o);
             break;

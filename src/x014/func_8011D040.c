@@ -1,16 +1,15 @@
 // FUNC 8011d040 248 X014
 // MATCHING 8011d040 248
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001A4;
-extern short D_1F80019E;
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_800eea7c(TObj *, int, int);
 
 void func_8011D040(TObj *o, TObj *e)
 {
-    if (D_1F8001A4 != 0) return;
+    if (SPAD.b1a4 != 0) return;
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;
     if (boxesOverlap(o, e) == 0) return;
@@ -31,5 +30,5 @@ void func_8011D040(TObj *o, TObj *e)
         o->step = 0x65;
         o->state = 0;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

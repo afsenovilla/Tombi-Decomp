@@ -1,9 +1,8 @@
 // FUNC 8011ffbc 304 X001
 // MATCHING 8011ffbc 304
+#include "gcd.h"
+#include "gv2.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D2C3;
-extern unsigned char D_8009CE48;
-extern unsigned char D_8009D081;
 extern void FUN_800201ac(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
@@ -11,13 +10,13 @@ void func_8011FFBC(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (!(D_8009D2C3 & 1)) {
+        if (!(GV2.bc3 & 1)) {
             o->b04 = 3;
             break;
         }
         o->b04++;
         o->active = 2;
-        if (D_8009CE48) {
+        if (GCD.bce48) {
             o->step = 1;
         } else {
             o->step = 0;
@@ -28,7 +27,7 @@ void func_8011FFBC(TObj *o)
         case 0:
             switch (o->state) {
             case 0: {
-                unsigned char *c = &D_8009D081;
+                unsigned char *c = &GCD.bd081;
                 if (*c >= 4) {
                     *c = 5;
                     o->state++;

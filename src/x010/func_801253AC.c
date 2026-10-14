@@ -1,15 +1,17 @@
 // FUNC 801253ac 1844 X010
 // MATCHING 801253ac 1844
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
-/* D_8009CDF2 is read through two names (k via the array, the talk test via the scalar) to keep both loads. */
+/* GCD.bcdf2 is read through two names (k via the array, the talk test via the scalar) to keep both loads. */
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3B8[];
-extern unsigned char D_8009C93E, D_8009C93F[], D_8009C940, D_8009C941, D_8009C942[];
+extern unsigned char D_8009C940;
 extern unsigned char D_8009CDF2a[];
-extern unsigned char D_8009CDF2, D_8009D143;
+extern unsigned char D_8009D143;
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_80026e0c(int, int);
 extern void setEventStarted(int, int, int);
@@ -37,12 +39,12 @@ void func_801253AC(TObj *o)
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
         o->animFrame = o->b68 & 1;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         o->state++;
         break;
     case 1:
-        D_8009C93E = 1;
+        GVARS.b3e = 1;
         o->state = 10;
         break;
     case 10:
@@ -50,9 +52,9 @@ void func_801253AC(TObj *o)
         if (k == 0xff) break;
         {
         int r = 0; int t;
-        if (D_8009C940 == 1) r = D_8009C941 == 0x9f;
+        if (D_8009C940 == 1) r = GVARS.b41 == 0x9f;
         t = 0;
-        if (r) t = D_8009CDF2 != 0xff;
+        if (r) t = GCD.bcdf2 != 0xff;
         if (t) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 3, &v);
@@ -90,7 +92,7 @@ void func_801253AC(TObj *o)
         NEXT(o) = 0x33;
         break;
     case 0x33:
-        if (D_8009CDF2 == 0) setEventStarted(0x4e, 0, 0);
+        if (GCD.bcdf2 == 0) setEventStarted(0x4e, 0, 0);
         o->state = 0x78;
         NEXT(o) = 0xfb;
         break;
@@ -161,9 +163,9 @@ void func_801253AC(TObj *o)
         o->state = 0x7a;
         break;
     case 0x7a:
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
-        D_8009C93E = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        GVARS.b3e = 0;
         PLAYER.obj.wb2 = 0;
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;

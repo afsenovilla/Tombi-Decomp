@@ -1,9 +1,10 @@
 // FUNC 801234c8 576 X010
 // MATCHING 801234c8 576
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D2B0[], D_8009C93F[], D_8009C942;
 extern unsigned int FUN_8001f9e0(void);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_80026e0c(int, int);
@@ -48,10 +49,10 @@ void func_801234C8(TObj *o)
         o->d84 = (o->d84 + 2) & 0xff;
         t = p->y.p.whole - p->box2;
         if (o->y.p.whole < t) {
-            D_8009D2B0[0] = 0;
-            *(volatile unsigned char *)&D_8009C942 = 0;
-            D_8009C93F[0] = 0;
-            *(volatile unsigned char *)&D_8009C942 = 0;
+            ((unsigned char*)&GV2.bb0)[0] = 0;
+            *(volatile unsigned char *)&GVARS.b42 = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            *(volatile unsigned char *)&GVARS.b42 = 0;
             o->y.p.whole = t;
             o->d30 = o->h->raw - p->h->raw;
             u = o->y.raw - p->y.raw;

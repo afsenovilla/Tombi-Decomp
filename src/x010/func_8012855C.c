@@ -1,8 +1,9 @@
 // FUNC 8012855c 520 X010
 // MATCHING 8012855c 520
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "gamestate.h"
-extern unsigned char D_8009CDAC, D_8009D078, D_8009C93F;
-extern int D_1F8002E0;
 extern char D_80132894[];
 extern int ObjCullRegister(char *);
 extern void freeObjectLayer2(char *);
@@ -17,7 +18,7 @@ void func_8012855C(char *o)
 
     switch (s) {
     case 0:
-        if (D_8009CDAC == 0xff || D_8009D078 == 4) {
+        if (GCD.bcdac == 0xff || GCD.bd078 == 4) {
             o[4] = 3;
             break;
         }
@@ -27,7 +28,7 @@ void func_8012855C(char *o)
         *(short *)(o + 0x70) = 0x10;
         *(short *)(o + 0x72) = 0x20;
         *(short *)(o + 0x2e) = 1;
-        *(int *)(o + 0x3c) = D_1F8002E0;
+        *(int *)(o + 0x3c) = SPAD.i2e0;
         o[0xd] = 0;
         o[0x6a] = 0;
         o[0xa] = 0;
@@ -37,7 +38,7 @@ void func_8012855C(char *o)
         *(char **)(o + 0xa8) = D_80132894;
         o[0xa7] = 0;
         o[4]++;
-        if (D_8009D078) {
+        if (GCD.bd078) {
             if (GAME.selectedSection == 0) {
                 o[5] = 1;
                 *(short *)(o + 0x12) = 0xc64;
@@ -46,7 +47,7 @@ void func_8012855C(char *o)
                 *(signed char *)(o + 0xf) = -7;
             } else {
                 o[5] = 3;
-                D_8009C93F = 1;
+                GVARS.b3f = 1;
             }
         }
         break;

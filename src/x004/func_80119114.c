@@ -1,11 +1,10 @@
 // FUNC 80119114 792 X004
 // MATCHING 80119114 792
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C938;
-extern unsigned short D_1F800176;
-extern short D_1F800186;
 extern void FUN_80018d2c(TObj *);
 extern void func_8011942C(TObj *);
 extern void func_80119648(TObj *);
@@ -29,25 +28,25 @@ void func_80119114(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            if (D_8009C938) goto set2;
+            if (GVARS.b38) goto set2;
             k = GAME.selectedSection;
-            if (k == 0 && (unsigned short)(D_1F800176 - 0x1d5) < 0x191) break;
-            if (k == 1 && (unsigned short)(D_1F800176 - 0x191) < 0x207 && D_1F800186 < -0xa0) break;
+            if (k == 0 && (unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x1d5) < 0x191) break;
+            if (k == 1 && (unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x191) < 0x207 && (*(short*)&SPAD.s186) < -0xa0) break;
             o->visible = 1;
             FUN_80018d2c(o);
             func_8011942C(o);
             break;
         case 1:
-            if (D_8009C938) goto set2;
+            if (GVARS.b38) goto set2;
             k = GAME.selectedSection;
-            if (k == 0 && (short)D_1F800176 < 0x30c) break;
-            if (k == 1 && (short)D_1F800176 >= 0x201) break;
+            if (k == 0 && (short)(*(unsigned short*)((char*)&SPAD.i174 + 2)) < 0x30c) break;
+            if (k == 1 && (short)(*(unsigned short*)((char*)&SPAD.i174 + 2)) >= 0x201) break;
             o->visible = 1;
             FUN_80018d2c(o);
             func_80119648(o);
             break;
         case 2:
-            if (D_8009C938) {
+            if (GVARS.b38) {
             set2:
                 o->b04 = 2;
                 o->step = 0;

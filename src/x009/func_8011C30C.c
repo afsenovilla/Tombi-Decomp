@@ -1,11 +1,11 @@
 // FUNC 8011c30c 392 X009
 // MATCHING 8011c30c 392
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDB4;
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -17,13 +17,13 @@ void func_8011C30C(TObj *o)
         break;
     case 1:
         if (GAME.playerAP <= 0x249ef) {
-            if (D_8009CDB4 == 0) {
+            if (GCD.bcdb4 == 0) {
                 setEventStarted(0x10, 0, 0);
                 o->step++;
             } else {
                 o->step--;
             }
-        } else if (D_8009CDB4 != 0xff) {
+        } else if (GCD.bcdb4 != 0xff) {
             setEventComplete(0x10, 0);
             o->step++;
         } else {
@@ -32,9 +32,9 @@ void func_8011C30C(TObj *o)
         }
         break;
     case 2:
-        D_8009C93F = 1;
-        D_8009C942 = 1;
-        D_8009C93E = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
+        GVARS.b3e = 1;
         o->timer = 0x168;
         o->step++;
         break;
@@ -42,9 +42,9 @@ void func_8011C30C(TObj *o)
         if (--o->timer == -1) o->step++;
         break;
     case 4:
-        D_8009C93F = 0;
-        D_8009C942 = 0;
-        D_8009C93E = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
+        GVARS.b3e = 0;
         o->step = 1;
         break;
     }

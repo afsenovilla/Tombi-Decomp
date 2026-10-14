@@ -1,10 +1,10 @@
 // FUNC 8011baa0 524 X010
 // MATCHING 8011baa0 524
+#include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj *D_8009C330;
-extern short D_8009C944, D_8009C946[];
 extern int D_8009D2E8;
 extern void FUN_800ee428(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -31,8 +31,8 @@ void func_8011BAA0(TObj *o)
         o->state = 2;
         break;
     case 2:
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         func_80110FDC(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

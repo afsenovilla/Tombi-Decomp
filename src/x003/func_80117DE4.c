@@ -1,5 +1,6 @@
 // FUNC 80117de4 1184 X003
 // MATCHING 80117de4 1184
+#include "spad.h"
 /* Loops written as macros on ONE function-scope `short i` shared by all four loops: the shared loop variable is
    what keeps i in a1 (it conflicts with k in a0 in cases 2/3) and makes cse extend i rather than a before the loop.
    Covers csv pieces 80117F98/80118040/801180AC. */
@@ -12,7 +13,6 @@ typedef struct {
     unsigned char b164;
 } L;
 extern int D_800A4574;
-extern short D_1F800176;
 extern int getScrollOffsetX(void);
 extern void FUN_8005f488(RECT *, int, int);
 extern void func_80118284(L *);
@@ -47,10 +47,10 @@ void func_80117DE4(L *o, unsigned char *tbl)
     case 0:
     case 4:
         if (D_800A4574 == 0) {
-            a = (D_1F800176 + 0x140) / 80;
+            a = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x140) / 80;
             b = a + 8;
         } else {
-            { int t = getScrollOffsetX() + 0x140; a = (D_1F800176 + t) / 80; }
+            { int t = getScrollOffsetX() + 0x140; a = ((*(short*)((char*)&SPAD.i174 + 2)) + t) / 80; }
             b = a + 9;
         }
         if (a < 0) a = 0;
@@ -60,19 +60,19 @@ void func_80117DE4(L *o, unsigned char *tbl)
     case 1:
     case 5:
         if (D_800A4574 == 0) {
-            a = (D_1F800176 - 0xa28) / 80;
+            a = ((*(short*)((char*)&SPAD.i174 + 2)) - 0xa28) / 80;
             b = a + 8;
         } else {
-            { int t = getScrollOffsetX() - 0xa28; a = (D_1F800176 + t) / 80; }
+            { int t = getScrollOffsetX() - 0xa28; a = ((*(short*)((char*)&SPAD.i174 + 2)) + t) / 80; }
             b = a + 9;
         }
-        if (D_1F800176 >= 0x12c1) a--;
+        if ((*(short*)((char*)&SPAD.i174 + 2)) >= 0x12c1) a--;
         if (a < 0) a = 0;
         if (b >= n) b = n - 1;
         FILL();
         break;
     case 2:
-        base = (D_1F800176 + getScrollOffsetX()) / 80;
+        base = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX()) / 80;
         ADDRANGE();
         func_80118284(o);
         break;
@@ -90,7 +90,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
             FUN_8005f488(&r, 0x80, 0x100);
             o->b164++;
         }
-        base = (D_1F800176 + getScrollOffsetX()) / 80;
+        base = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX()) / 80;
         ADDRANGE();
         break;
     }

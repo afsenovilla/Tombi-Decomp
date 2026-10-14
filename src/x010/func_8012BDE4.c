@@ -1,9 +1,9 @@
 // FUNC 8012bde4 320 X010
 // MATCHING 8012bde4 320
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009C93F[], D_8009C942[];
 extern void *D_801322F4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -19,8 +19,8 @@ void func_8012BDE4(TObj *o)
         o->state++;
         ObjSetFacingToPlayer(o);
         PLAYER.b04 = 5;
-        D_8009C93F[0] = 1;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         PLAYER.step = 0;
         PLAYER.state = 0;
         o->wac = 5;
@@ -33,8 +33,8 @@ void func_8012BDE4(TObj *o)
         q = (TObj *)o->d90;
         if (q->b04 == 2) {
             q->b04 = 3;
-            D_8009C93F[0] = 0;
-            D_8009C942[0] = 0;
+            ((unsigned char*)&GVARS.b3f)[0] = 0;
+            ((unsigned char*)&GVARS.b42)[0] = 0;
             PLAYER.b04 = 1;
             PLAYER.step = 0;
             PLAYER.state = 0;

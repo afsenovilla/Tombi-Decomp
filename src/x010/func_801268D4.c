@@ -1,12 +1,12 @@
 // FUNC 801268d4 1484 X010
 // MATCHING 801268d4 1484
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_8009C93F, D_8009C942;
-extern unsigned char D_8009CE3D, D_8009CF2F, D_8009CF2E, D_8009CE18;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
@@ -23,16 +23,16 @@ void func_801268D4(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         o->state++;
         break;
     case 1:
-        if (D_8009CE3D == 0xff) {
-            if (!D_8009CF2F) n = 0xf;
+        if (GCD.bce3d == 0xff) {
+            if (!GCD.bcf2f) n = 0xf;
             else n = 0x12;
         } else {
-            if (!D_8009CF2E) n = 2;
+            if (!GCD.bcf2e) n = 2;
             else n = 8;
         }
         o->state = n;
@@ -106,7 +106,7 @@ void func_801268D4(TObj *o)
             e->b04 = 3;
             o->anim = D_8012F3C4[o->subtype].anims[0];
             AnimJump(o, 0);
-            D_8009CF2E = 1;
+            GCD.bcf2e = 1;
             o->state = 0x1e;
         }
         break;
@@ -123,7 +123,7 @@ void func_801268D4(TObj *o)
             e->b04 = 3;
             o->anim = D_8012F3C4[o->subtype].anims[0];
             AnimJump(o, 0);
-            if (D_8009CE18 == 0) {
+            if (GCD.bce18 == 0) {
                 setEventStarted(0x74, 0, 0);
                 o->timer = 0x12c;
             } else {
@@ -152,14 +152,14 @@ void func_801268D4(TObj *o)
             e->b04 = 3;
             o->anim = D_8012F3C4[o->subtype].anims[0];
             AnimJump(o, 0);
-            D_8009CF2F = 1;
+            GCD.bcf2f = 1;
             o->state = 0x1e;
         }
         break;
     case 30:
         PLAYER.obj.b04 = 1;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         PLAYER.obj.wb2 = 0;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

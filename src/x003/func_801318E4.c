@@ -1,5 +1,6 @@
 // FUNC 801318e4 1376 X003
 // MATCHING 801318e4 1376
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -8,7 +9,6 @@ typedef struct {
 extern E28 D_80135FFC[], D_80135F54[], D_80135FC4[];
 extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F3D4[];
-extern unsigned char D_8009CDC7, D_8009CDC1;
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
 
@@ -53,7 +53,7 @@ void func_801318E4(TObj *o)
         }
         return;
     }
-    switch (D_8009CDC7) {
+    switch (GCD.bcdc7) {
     case 0:
         if (v) break;
         i = 0;
@@ -95,7 +95,7 @@ void func_801318E4(TObj *o)
                     n->d90 = (int)o;
                     SCRIPT_OBJECTS[i] = n;
                 }
-                if (p->fe == 3 && D_8009CDC1) n->b04 = 3;
+                if (p->fe == 3 && GCD.bcdc1) n->b04 = 3;
             }
         }
         return;

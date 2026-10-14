@@ -1,6 +1,7 @@
 // FUNC 800505f0 2228 MAIN0
 // MATCHING 800505f0 2228
 // FLAGS -O2 -G0 -fno-strength-reduce
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -19,12 +20,8 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern PolyFT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern C4C *TASK_C;
-extern short D_1F800060[];
-extern short D_1F800062, D_1F800064;
-extern long D_1F80008C;
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0b[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
@@ -32,7 +29,6 @@ extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 typedef struct { unsigned char p0[7]; signed char b7; unsigned char p8[0x18 - 8]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P800505F0;
 extern P800505F0 *D_8009C330;
-extern short D_1F8001F4;
 extern unsigned short D_8009C960h, D_8009C962h;
 extern void FUN_80037c80(TObj *);
 
@@ -44,12 +40,12 @@ extern void FUN_80037c80(TObj *);
 
 static __inline__ int proj(void)
 {
-    gte_ldv0(D_1F800060);
+    gte_ldv0(((short*)&SPAD.s60));
     gte_rtps();
-    gte_stflg(&D_1F80008C);
-    if (D_1F80008C < 0) return 1;
+    gte_stflg(&SPAD.i8c);
+    if (SPAD.i8c < 0) return 1;
     gte_stsxy(&LZ_FILE_CTRL);
-    gte_stszotz(&D_1F800074);
+    gte_stszotz(&SPAD.i74);
     return 0;
 }
 
@@ -90,13 +86,13 @@ void FUN_800505f0(TObj *o)
     unsigned short af;
     unsigned char c;
 
-    D_1F800060[0] = o->a.p.whole;
-    D_1F800062 = o->y.p.whole;
+    ((short*)&SPAD.s60)[0] = o->a.p.whole;
+    SPAD.s62 = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
-        D_1F800064 = o->b.p.whole >> 2;
+        SPAD.s64 = o->b.p.whole >> 2;
     else
-        D_1F800064 = o->b.p.whole;
-    SetRotMatrix(D_1F8000C0);
+        SPAD.s64 = o->b.p.whole;
+    SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
     s = *(short *)o->anim;
@@ -107,7 +103,7 @@ void FUN_800505f0(TObj *o)
     n = ((unsigned short *)e)[0];
     x = xy;
     y = (unsigned)xy >> 16;
-    if (D_8009C330->w28[D_1F8001F4] != s) {
+    if (D_8009C330->w28[SPAD.s1f4] != s) {
         if (D_8009C960h == 6) {
             switch (D_8009C962h) {
             case 0: case 1: break;
@@ -131,7 +127,7 @@ void FUN_800505f0(TObj *o)
             p->clut = o->w08;
         else
             p->clut = *(unsigned short *)((char *)o + 0xc4);
-        p->u0 = q[0] + ((unsigned char)D_1F8001F4 << 6) + 4;
+        p->u0 = q[0] + ((unsigned char)SPAD.s1f4 << 6) + 4;
         p->v0 = f[-10] + 4;
         c = C;
         p->u2 = p->u0;
@@ -168,7 +164,7 @@ void FUN_800505f0(TObj *o)
             p->y3 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
         }
         {
-            int c = D_1F800074;
+            int c = SPAD.i74;
             unsigned long e;
             do { } while (0); /* loop notes end the sched block after the c load (debt, as func_80054C38) */
             e = 0x9000000;

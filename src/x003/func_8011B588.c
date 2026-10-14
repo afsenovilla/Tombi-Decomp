@@ -1,8 +1,8 @@
 // FUNC 8011b588 364 X003
 // MATCHING 8011b588 364
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80016A, D_1F80016E;
 extern TObj PLAYER;
 extern unsigned char D_80135A78[];
 extern int angleFromDelta(int, int);
@@ -15,7 +15,7 @@ int func_8011B588(TObj *o, int mode, int target)
     unsigned char thr;
 
     if (mode == 0)
-        t = angleFromDelta(D_1F80016A - o->h->p.whole, D_1F80016E - o->y.p.whole);
+        t = angleFromDelta((*(short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole, (*(short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole);
     else if (mode == 1) {
         if (o->subtype & 2)
             t = (o->subtype & 1) << 7;

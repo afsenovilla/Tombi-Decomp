@@ -1,9 +1,9 @@
 // FUNC 8011b324 316 X003
 // MATCHING 8011b324 316
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern short D_1F80016A, D_1F80016E;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern int *D_800A6078;
 extern int SquareRoot0(int);
@@ -14,8 +14,8 @@ int func_8011B324(TObj *o)
     int dx, dy;
     int a;
 
-    dx = D_1F80016A - o->h->p.whole;
-    dy = D_1F80016E - o->y.p.whole;
+    dx = (*(short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole;
+    dy = (*(short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole;
     if (SquareRoot0(dx * dx + dy * dy) > 0x10) {
     a = (unsigned char)angleFromDelta(dx, dy);
     o->wb0 = a;

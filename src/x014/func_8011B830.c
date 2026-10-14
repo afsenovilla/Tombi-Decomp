@@ -1,5 +1,6 @@
 // FUNC 8011b830 2012 X014
 // MATCHING 8011b830 2012
+#include "spad.h"
 /* Rotated/scaled FT4 sprite strip (X014 twin of FUN_80123fd0; csv said 1660 B, real function 2012 B).
    Keys: per-axis scale from ba5/ba6 as `c = (signed char)o->ba5; short sc = (signed char)c; if (sc) ... (unsigned char)sc`
    (the folded QI sign-extension leaves two dead combine USEs = the 16 B frame gap at sp+0x20); single frame pointer q with
@@ -16,11 +17,9 @@ typedef struct {
 } PFT4_8011B830;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4_8011B830 *D_1F800164;
-extern int D_1F8001E0;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -51,7 +50,7 @@ void func_8011B830(TObj *o)
     PFT4_8011B830 *f;
 
     if (o->anim == 0) return;
-    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;
@@ -126,9 +125,9 @@ void func_8011B830(TObj *o)
             *(unsigned short *)((char *)f + 0x16) += o->w1e;
             if (o->b0d & 1) *(unsigned short *)((char *)f + 0xe) = o->w08;
             if (o->b0b != 0)
-                insertPrim(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
-                insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             D_1F800164 = (PFT4_8011B830 *)((char *)D_1F800164 + 0x28);
         }
     next:

@@ -1,5 +1,6 @@
 // FUNC 800f0e7c 1164 X009
 // MATCHING 800f0e7c 1164
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -12,8 +13,6 @@ typedef struct {
 } Q800F0E7C;
 
 extern Q800F0E7C *D_8009C330;
-extern unsigned char D_8009CDB2;
-extern unsigned char D_8009CDB5;
 extern short FUN_800f0b5c();
 extern short FUN_800f0c28(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
@@ -59,7 +58,7 @@ short func_800F0E7C(TObj *o)
                 break;
             case 2:
                 if (GAME.selectedSection == 1 && (GAME.selectedArea == 2 || GAME.selectedArea == 0x13)) {
-                    if (D_8009CDB2 != 0xff || D_8009CDB5 != 0xff) {
+                    if (GCD.bcdb2 != 0xff || GCD.bcdb5 != 0xff) {
                         return r;
                     }
                 }

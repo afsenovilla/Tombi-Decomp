@@ -1,5 +1,7 @@
 // FUNC 80051088 4360 MAIN0
 // MATCHING 80051088 4360
+#include "spad.h"
+#include "plx.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -39,16 +41,12 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern FT4 *DAT_1f800164;
 extern char *DAT_1f8001e0;
 extern C4C *TASK_C;
-extern short D_1F800060[];
-extern short D_1F800062, D_1F800064;
-extern long D_1F80008C;
 extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern unsigned short D_1F8001F8;
-extern char D_1F8000C0[], D_1F8000C0b[];
+extern char D_1F8000C0b[];
 extern SH *D_8009C338;
 extern PL *D_8009C330;
-extern unsigned char D_800A6100;
 extern short D_800801E8, D_800801EA, D_800801EC, D_800801EE;
 extern short costab[];
 extern short negsintab2[];
@@ -70,10 +68,10 @@ extern int angleBetweenPoints(P, P);
 
 static __inline__ int proj(void)
 {
-    gte_ldv0(D_1F800060);
+    gte_ldv0(((short*)&SPAD.s60));
     gte_rtps();
-    gte_stflg(&D_1F80008C);
-    if (D_1F80008C < 0) return 1;
+    gte_stflg(&SPAD.i8c);
+    if (SPAD.i8c < 0) return 1;
     gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&D_1F800074);
     return 0;
@@ -178,13 +176,13 @@ void func_80051088(TObj *o)
     short k;
     short t1;
 
-    D_1F800060[0] = o->a.p.whole;
-    D_1F800062 = o->y.p.whole;
+    ((short*)&SPAD.s60)[0] = o->a.p.whole;
+    SPAD.s62 = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
-        D_1F800064 = o->b.p.whole >> 2;
+        SPAD.s64 = o->b.p.whole >> 2;
     else
-        D_1F800064 = o->b.p.whole;
-    SetRotMatrix(D_1F8000C0);
+        SPAD.s64 = o->b.p.whole;
+    SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(D_1F8000C0b);
     if (proj()) return;
     idx = 0;
@@ -250,7 +248,7 @@ void func_80051088(TObj *o)
         p->v3 = 0x1f;
         s.x = D_8009C338->x;
         s.y = D_8009C338->y;
-        if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+        if (PLX.b6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
             c = MulCosDup((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
             sn = MulNegSin((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
         } else {
@@ -317,7 +315,7 @@ void func_80051088(TObj *o)
     p->v3 = p->v2;
     *(unsigned short *)((char *)p + 14) = cl;
     }
-    if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+    if (PLX.b6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
         int t, g = PLAYER.obj.d8c;
         if (o->animFrame & 1)
             t = g + 0xc0;

@@ -1,5 +1,6 @@
 // FUNC 8011b238 808 X006
 // MATCHING 8011b238 808
+#include "gvars.h"
 /* Sibling of func_8011B560 / X000 func_80120494. Debt: register asm("$3") on q (as in the siblings). */
 #include "gamestate.h"
 typedef struct {
@@ -35,7 +36,6 @@ extern void FUN_80025aa8(int, int);
 extern void subtractScaledVertices(int, int, int);
 
 typedef struct { char p[0x34]; int d34; } TObj_;
-extern TObj_ *D_8009C950;
 
 #define RET(w, n, r) { o->velV = -0x1000; o->wac = w; o->da0 = DAT_1f800334 + DAT_1f800334p[n]; o->b0a = 0x15; o->substep = 0; return r; }
 #define SETUP(P, Q) { a = o->da0; o->velH = 0x80; o->substep++; o->velV = 0; o->b0a = 0x16; p = P; q = Q; }
@@ -47,7 +47,7 @@ int func_8011B238(S *o)
     int *p;
     register int q asm("$3");
     int a;
-    TObj_ *g = D_8009C950;
+    TObj_ *g = (*(TObj_ **)&GVARS.p50);
 
     switch (o->substep) {
     case 0:

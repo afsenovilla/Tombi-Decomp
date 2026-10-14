@@ -1,7 +1,7 @@
 // FUNC 80119268 244 X001
 // MATCHING 80119268 244
+#include "spad.h"
 typedef struct P { char p[0x24]; int w24; char q[0x3c - 0x28]; int w3c; char r[0x64 - 0x40]; int w64; } P;
-extern int D_1F8002D4;
 extern int D_8013E684[];
 extern int ObjCullRegister(char *);
 extern int AnimAdvance(char *);
@@ -19,7 +19,7 @@ void func_80119268(char *o)
         *(int *)(o + 0x64) = 0x1400;
         *(signed char *)&o[0xf] = -0x14;
         o[0xd] = 0x80;
-        ((P *)o)->w3c = D_1F8002D4;
+        ((P *)o)->w3c = SPAD.i2d4;
         ((P *)o)->w24 = D_8013E684[(unsigned char)o[3]];
         AnimLoadDuration(o);
         break;

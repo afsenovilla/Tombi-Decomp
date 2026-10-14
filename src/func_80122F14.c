@@ -1,5 +1,6 @@
 // FUNC 80122f14 736 X000
 // MATCHING 80122f14 736
+#include "spad.h"
 typedef struct {
     unsigned char b00[5];
     unsigned char step;
@@ -39,7 +40,6 @@ typedef struct { unsigned char b0; unsigned char p1[7]; unsigned char b8; unsign
 
 extern PL *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned short D_1F8001F8;
 extern void PlayerSetAnimIfChanged(P *, int);
 extern void AnimAdvance(P *);
 extern void func_800EEA3C(P *);
@@ -130,7 +130,7 @@ void func_80122F14(P *o)
         }
         break;
     }
-    if ((D_1F8001F8 & 3) == 0) {
+    if ((SPAD.s1f8 & 3) == 0) {
         FUN_80025f40(0, 0, 0xff, 2);
     }
 }

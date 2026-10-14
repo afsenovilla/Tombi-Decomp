@@ -1,9 +1,9 @@
 // FUNC 80131904 196 X001
 // MATCHING 80131904 196
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013E690;
-extern int D_1F8002D4[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -19,7 +19,7 @@ void func_80131904(TObj *o)
         o->box2 = 0;
         o->w1e = 8;
         o->anim = D_8013E690;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->b04++;
         AnimLoadDuration(o);
         break;

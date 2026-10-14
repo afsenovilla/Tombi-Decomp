@@ -1,5 +1,6 @@
 // FUNC 80121e5c 624 X009
 // MATCHING 80121e5c 624
+#include "spad.h"
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -9,7 +10,6 @@ extern short TileCollideAt(TObj *, short, short);
 extern char D_80077CF4[];
 extern void *D_8012EA40[];
 extern unsigned char D_8012B2CC[];
-extern unsigned short D_1F80016A, D_1F80016E;
 
 static __inline__ short ground(TObj *o)
 {
@@ -51,9 +51,9 @@ void func_80121E5C(TObj *o)
             else o->timer = 0x1e0;
         } else {
             unsigned short t; short r;
-            t = D_1F80016A - o->h->p.whole + 0x64;
+            t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x64;
             if (t >= 0xf1) r = 0;
-            else { t = D_1F80016E - o->y.p.whole + 0x50; r = t < 0xc9; }
+            else { t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x50; r = t < 0xc9; }
             if (r) {
             if (D_8012B2CC[FUN_8001f9e0() & 7]) o->timer = 0x78;
             else o->timer = 0x3c;

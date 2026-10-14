@@ -1,7 +1,7 @@
 // FUNC 80118c1c 396 X001
 // MATCHING 80118c1c 396
+#include "spad.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern short D_8013C428[];
 extern short D_8013C404[];
 extern void **D_8013C3C4[];
@@ -21,7 +21,7 @@ void func_80118C1C(TObj *o)
             o->b0d = 1;
             o->w08 = FUN_8005e420(D_8013C404[o->subtype], D_8013C428[o->subtype] + o->b0c);
         }
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = *D_8013C3C4[o->subtype];
         o->b04++;
         v = *(unsigned char *)&o->box0 >> 4;

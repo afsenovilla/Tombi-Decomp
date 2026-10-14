@@ -1,10 +1,10 @@
 // FUNC 80119bac 384 X009
 // MATCHING 80119bac 384
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0f; char p; unsigned short w1e; unsigned short cx, cy; void **anims; } E12;
 extern E12 D_8012ABBC[];
-extern int D_1F8002D4[];
-extern short D_1F800176[], D_1F800186[];
+extern short D_1F800186[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjFree(TObj *);
@@ -29,12 +29,12 @@ void func_80119BAC(TObj *o)
         o->w08 = GetClut(e->cx, e->cy);
         o->b0f = e->b0f;
         o->anim = e->anims[o->b0c];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         AnimLoadDuration(o);
         break;
     case 1:
         o->visible = 1;
-        o->a.p.whole = o->d30 - D_1F800176[0];
+        o->a.p.whole = o->d30 - ((short*)((char*)&SPAD.i174 + 2))[0];
         o->y.p.whole = o->d34 - D_1F800186[0];
         ObjListPush_1F800220(o);
         AnimAdvance(o);

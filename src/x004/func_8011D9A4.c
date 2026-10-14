@@ -1,7 +1,7 @@
 // FUNC 8011d9a4 316 X004
 // MATCHING 8011d9a4 316
+#include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C93F[];
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8001e560(int, int);
@@ -14,7 +14,7 @@ void func_8011D9A4(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         o->wb2 = 0;
         B(o, 0xa2) = 1;
         PlayerSetAnimIfChanged(o, 0x41);
@@ -33,7 +33,7 @@ void func_8011D9A4(TObj *o)
         FUN_800eea3c(o);
         FUN_8001fec0(o);
         if (--o->timer > 0) break;
-        D_8009C93F[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
         o->d8c = D_801152E8[o->wb0];
         o->b04 = 1;
         o->wb2 = 0;

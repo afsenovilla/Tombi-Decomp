@@ -1,12 +1,11 @@
 // FUNC 80128d78 720 X010
 // MATCHING 80128d78 720
+#include "spad.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8012F448, D_8012F449, D_8012F44A, D_8012F44B;
 extern unsigned char D_8012F420, D_8012F421, D_8012F422, D_8012F423;
 extern void *D_80132384[], *D_8013235C[];
-extern unsigned short D_1F8001F8, D_1F800172, D_1F80016A, D_1F80016E;
-extern int D_1F800198;
 extern void ObjSetFacingToPlayer(TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -15,10 +14,10 @@ extern short TileCollideAt(TObj *o, short x, short y);
 static __inline__ int near(TObj *o, int w)
 {
     Fix16 *d = o->d;
-    if ((unsigned short)(D_1F800172 - d->p.whole + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)((*(unsigned short*)((char*)&SPAD.i170 + 2)) - d->p.whole + 0x2d) >= 0x5b) return 0;
     d = o->h;
-    if ((unsigned short)(D_1F80016A - d->p.whole + 0x60) > w) return 0;
-    return (unsigned short)(D_1F80016E - o->y.p.whole + 0x60) <= w;
+    if ((unsigned short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - d->p.whole + 0x60) > w) return 0;
+    return (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x60) <= w;
 }
 
 static __inline__ void setanim(TObj *p, void *a)
@@ -61,7 +60,7 @@ void func_80128D78(TObj *o)
         break;
     case 2:
         AnimAdvance(o);
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0) {
             ObjSetFacingToPlayer(o);
             if (near(o, 0xc0)) {
                 o->state = 0;

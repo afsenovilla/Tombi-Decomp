@@ -1,5 +1,7 @@
 // FUNC 801165e0 1288 X010
 // MATCHING 801165e0 1288
+#include "gcd.h"
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
@@ -14,8 +16,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93E;
-extern unsigned char D_8009D078;
 extern FP *D_800A6078;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
@@ -46,7 +46,7 @@ void func_801165E0(O *o)
         o->step++;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         func_8002795C(o);
         syncObjectTargetY(o);
@@ -67,7 +67,7 @@ void func_801165E0(O *o)
                 tryStartItemInteraction(o, 1, 0);
                 break;
             }
-            if (D_8009D078 < 2) break;
+            if (GCD.bd078 < 2) break;
             if (D_1F80016A < 0xc8b) break;
             if (D_1F80016E < -0x60) break;
             tryStartItemInteraction(o, 1, 1);
@@ -95,7 +95,7 @@ void func_801165E0(O *o)
             break;
         case 2:
         case 6:
-            if (D_1F80016A < 0x81 && D_1F80016E >= -0x40 && tryStartItemInteraction(o, 1, 0)) D_8009C93E = 1;
+            if (D_1F80016A < 0x81 && D_1F80016E >= -0x40 && tryStartItemInteraction(o, 1, 0)) GVARS.b3e = 1;
             break;
         case 3:
         case 7:

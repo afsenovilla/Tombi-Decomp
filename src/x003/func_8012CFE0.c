@@ -1,10 +1,10 @@
 // FUNC 8012cfe0 672 X003
 // MATCHING 8012cfe0 672
+#include "gcd.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
-extern unsigned char D_8009C942[], D_8009C93F[];
-extern unsigned char D_8009D0B8;
 extern void *D_801399BC[], *D_801399C0[], *D_801399C4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -53,7 +53,7 @@ void func_8012CFE0(TObj *o)
         break;
     case 6:
         o->state++;
-        if (D_8009D0B8 == 0) {
+        if (GCD.bd0b8 == 0) {
             FUN_80026c50(0x14, 1, 1);
             o->timer = 0x50;
             o->w22 = 1;
@@ -74,8 +74,8 @@ void func_8012CFE0(TObj *o)
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         o->velV = -0x200;
         o->animFrame = 1;
         o->wac = 7;

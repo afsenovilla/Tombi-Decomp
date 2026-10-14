@@ -1,7 +1,7 @@
 // FUNC 801216a0 344 X009
 // MATCHING 801216a0 344
+#include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
 extern short func_801215C0(TObj *, short, short, unsigned char);
 
 void func_801216A0(TObj *o, TObj *e)
@@ -19,7 +19,7 @@ void func_801216A0(TObj *o, TObj *e)
         o->b69 = 1;
         o->h->p.whole += e->velX;
         { short w = o->y.p.whole + e->velY;
-        D_1F80019E = 0;
+        SPAD.s19e = 0;
         *(short *)((char *)o + 0x14) = 0;
         o->y.p.whole = w; }
     }

@@ -1,5 +1,6 @@
 // FUNC 8012bd5c 384 X003
 // MATCHING 8012bd5c 384
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 
@@ -12,7 +13,6 @@ typedef struct {
 
 extern T8012BD5C D_80135DD0[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CE5D;
 extern void AnimLoadDuration(TObj *);
 
 void func_8012BD5C(TObj *o)
@@ -33,5 +33,5 @@ void func_8012BD5C(TObj *o)
     o->b0f = PLAYER.obj.b0f + 1;
     o->b04++;
     *(int *)((char *)o + 0x88) = 0;
-    if (D_8009CE5D == 0xff) o->b04 = 3;
+    if (GCD.bce5d == 0xff) o->b04 = 3;
 }

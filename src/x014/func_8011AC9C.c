@@ -1,8 +1,8 @@
 // FUNC 8011ac9c 220 X014
 // MATCHING 8011ac9c 220
+#include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D4[];
 extern void *D_80129F90;
 extern unsigned short D_80125CA0[];
 extern void AnimLoadDuration(TObj *);
@@ -20,7 +20,7 @@ void func_8011AC9C(TObj *o)
         o->box3 = D_80125CA0[o->b0c];
         o->w1e = 0x10;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_80129F90;
         AnimLoadDuration(o);
         break;

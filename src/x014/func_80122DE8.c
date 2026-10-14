@@ -1,9 +1,9 @@
 // FUNC 80122de8 304 X014
 // MATCHING 80122de8 304
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_1F800334;
 extern void func_8012284C(TObj *);
 extern void func_80122AAC(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -12,7 +12,7 @@ void func_80122DE8(TObj *o)
 {
     switch (o->b04) {
     case 0: {
-        int *pp = &D_1F800334;
+        int *pp = &SPAD.i334;
         int *q = (int *)*pp;
         q += 1;
         if (GAME.selectedSection == 7) o->da0 = *pp + q[5];

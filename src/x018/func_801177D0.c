@@ -1,14 +1,14 @@
 // FUNC 801177d0 1128 X018
 // MATCHING 801177d0 1128
+#include "gcd.h"
+#include "gv2.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_8011A564[];
-extern unsigned char D_8009D2B0;
-extern unsigned char D_8009CE16[];
-extern unsigned char D_8009C942[], D_8009C93F[];
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -34,9 +34,9 @@ void func_801177D0(TObj *o)
     case 0:
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
-        D_8009C942[0] = 1;
-        D_8009D2B0 = 2;
-        D_8009C93F[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        GV2.bb0 = 2;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
@@ -55,7 +55,7 @@ void func_801177D0(TObj *o)
         setanim(o, 1);
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->timer = 4;
-        if (D_8009CE16[-0xb] != 0xff) {
+        if (((unsigned char*)&GCD.bce16)[-0xb] != 0xff) {
             setEventComplete(0x67, 0);
             o->timer = 200;
         }
@@ -77,7 +77,7 @@ void func_801177D0(TObj *o)
         setanim(o, 1);
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->timer = 4;
-        if (D_8009CE16[6] == 0) {
+        if (((unsigned char*)&GCD.bce16)[6] == 0) {
             setEventStarted(0x78, 0, 0);
             o->timer = 200;
         }
@@ -88,8 +88,8 @@ void func_801177D0(TObj *o)
         o->state = 9;
         break;
     case 9:
-        D_8009C93F[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
         D_1F8001C6 = 0;

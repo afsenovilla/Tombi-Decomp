@@ -1,5 +1,7 @@
 // FUNC 8012049c 412 X014
 // MATCHING 8012049c 412
+#include "gv2.h"
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct { int a; short t; short b; } E8;
@@ -12,7 +14,6 @@ extern void func_80116C9C(TObj *o);
 extern void func_80117428(TObj *o);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
-extern unsigned char D_8009D2B0, D_8009C93E, D_8009C942, D_8009C958;
 
 void func_8012049C(TObj *o)
 {
@@ -21,9 +22,9 @@ void func_8012049C(TObj *o)
     switch (o->substep) {
     case 0:
         o->active = 2;
-        D_8009D2B0 = 0;
-        D_8009C93E = 1;
-        D_8009C942 = 1;
+        GV2.bb0 = 0;
+        GVARS.b3e = 1;
+        GVARS.b42 = 1;
         func_8011D88C(o, 0x14);
         o->substep++;
         func_8011F850();
@@ -37,7 +38,7 @@ void func_8012049C(TObj *o)
     case 2:
         if (AnimAdvance(o)) {
             func_80117428(o);
-            D_8009C958 = 0;
+            GVARS.b58 = 0;
             func_8011D948(o);
             func_80116C9C(o);
             o->substep++;

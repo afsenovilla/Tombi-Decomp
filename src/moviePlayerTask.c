@@ -3,6 +3,7 @@
 // PAL moviePlayerTask (psx_tomba movie.c name); PAL adds the 0x800000 timeout loop and DecDCTinSync.
 // The &D_8009BCA8 / &f34 temps are compiler-hoisted invariants: no pointer locals (loop.c does not hoist user
 // variables set after a branch and used across basic blocks); volatile f34 accesses give the second temp.
+#include "spad.h"
 #include "globals.h"
 typedef struct { unsigned short w; unsigned short h; int pad; } Ent;
 typedef struct {
@@ -22,9 +23,9 @@ typedef struct { char p[0x48]; unsigned short w48; char p2[0x1e]; unsigned char 
 typedef struct { char d[8]; } E8;
 extern M D_8009BCA8;
 extern volatile int D_8009BCDC;
-extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8001D3;
+extern unsigned char D_1F8001D3;
 extern T *TASK_C;
-extern short D_1F8001F4, D_1F8001E8;
+extern short D_1F8001F4;
 extern char D_80077F0C[];
 extern unsigned char D_80077F3C[];
 extern E8 FILE_LINKS[];
@@ -47,7 +48,7 @@ void moviePlayerTask(void)
 {
     int k;
     int cnt;
-    D_1F8001CC = 1;
+    SPAD.b1cc = 1;
     TASK_C->w48 = 0;
     TASK_C->b68 = 0;
     for (;;) {
@@ -58,12 +59,12 @@ void moviePlayerTask(void)
         switch (TASK_C->w48) {
         case 0:
             movieInitDecodeEnv(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
-            FUN_8001db38(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[D_1F8001CD]]]);
+            FUN_8001db38(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[SPAD.b1cd]]]);
             TASK_C->w48++;
             while (MovieDecodeFrame(&D_8009BCA8) == -1)
                 ;
         case 1:
-            D_1F8001CC = 2;
+            SPAD.b1cc = 2;
             TASK_C->w48 = 2;
         case 2:
             DecDCTin(D_8009BCA8.in[D_8009BCA8.idx], 2);
@@ -88,8 +89,8 @@ void moviePlayerTask(void)
             }
             SetDispMask(1);
             D_8009BCDC = 0;
-            D_1F8001CC = 3;
-            D_1F8001E8 = 0;
+            SPAD.b1cc = 3;
+            SPAD.s1e8 = 0;
             break;
         case 3:
             DecDCTinSync(0);
@@ -98,7 +99,7 @@ void moviePlayerTask(void)
             StClearRing();
             while (CdControlB(9, 0, 0) == 0)
                 ;
-            D_1F8001CC = 0;
+            SPAD.b1cc = 0;
             D_1F8001D3 = 0;
             exitTask();
             break;

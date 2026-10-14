@@ -1,8 +1,7 @@
 // FUNC 8011fd20 232 X003
 // MATCHING 8011fd20 232
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned char D_1F8001A4;
-extern short D_1F80019E;
 extern short func_80043464(TObj *, TObj *);
 extern void FUN_80025f40(int, int, int, int);
 
@@ -15,7 +14,7 @@ void func_8011FD20(TObj *p, TObj *o)
         return;
     if (func_80043464(p, o) != 3)
         return;
-    if (D_1F8001A4 != 0)
+    if (SPAD.b1a4 != 0)
         return;
     FUN_80025f40(0, 0, 0xff, 4);
     o->b69 = 1;
@@ -30,5 +29,5 @@ void func_8011FD20(TObj *p, TObj *o)
         p->velX = 0x180;
         p->velY = -0x980;
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

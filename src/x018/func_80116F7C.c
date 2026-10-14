@@ -1,5 +1,6 @@
 // FUNC 80116f7c 376 X018
 // MATCHING 80116f7c 376
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -11,7 +12,6 @@ typedef struct {
 
 extern T80116F7C D_8011A4B0[];
 extern int SPR_DATA[];
-extern unsigned char D_8009CDED;
 extern void AnimLoadDuration(TObj *);
 
 void func_80116F7C(TObj *o)
@@ -31,5 +31,5 @@ void func_80116F7C(TObj *o)
     o->step = 0;
     o->category |= 0x80;
     o->b04++;
-    if (D_8009CDED != 0xff) o->b04 = 3;
+    if (GCD.bcded != 0xff) o->b04 = 3;
 }

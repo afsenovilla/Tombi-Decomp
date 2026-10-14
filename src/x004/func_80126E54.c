@@ -1,5 +1,7 @@
 // FUNC 80126e54 1576 X004
 // MATCHING 80126e54 1576
+#include "spad.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct {
@@ -11,8 +13,6 @@ typedef struct {
     char pcc[0xd2 - 0xcc];
     short wd2;
 } S;
-extern unsigned char D_8009C942;
-extern int D_1F8002DC;
 extern unsigned short D_1F8001C8;
 extern void *D_80134608[], *D_801345F4[], *D_80134610[], *D_80134614[];
 extern char D_80077CDC[], D_80077D90[];
@@ -53,7 +53,7 @@ void func_80126E54(TObj *o)
         o->wac = 0x15;
         o->anim = D_80134608[0];
         AnimLoadDuration(o);
-        o->d3c = D_1F8002DC;
+        o->d3c = SPAD.i2dc;
         o->movetab = D_80077CDC;
         *(signed char *)&o->b0f = -9;
         o->step = 0;
@@ -73,7 +73,7 @@ void func_80126E54(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             func_8011EC78(o);
             break;
         }
@@ -107,7 +107,7 @@ void func_80126E54(TObj *o)
         X(o)->wc0 = D_1F8001C8;
         break;
     case 2:
-        if (D_8009C942) {
+        if (GVARS.b42) {
             func_8011EC78(o);
             break;
         }

@@ -1,5 +1,6 @@
 // FUNC 80105a34 176 X014
 // MATCHING 80105a34 176
+#include "gv2.h"
 typedef struct {
     char p0[5];
     unsigned char step;   /* 05 */
@@ -26,7 +27,6 @@ typedef struct { char p[8]; unsigned char b8; } U;
 extern unsigned char D_801152E8[];
 extern U *D_8009C330;
 extern T *D_8009D2E8;
-extern unsigned char D_8009D2B1;
 
 void func_80105A34(S *o)
 {
@@ -39,7 +39,7 @@ void func_80105A34(S *o)
     o->wb2 = 0;
     o->w7e = 0;
     if (D_8009D2E8->type == 0x1c) {
-        switch (D_8009D2B1) {
+        switch (GV2.bb1) {
         case 1:
             o->bac = 0;
             o->step = 0x2a;

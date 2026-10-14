@@ -1,9 +1,9 @@
 // FUNC 8011aba0 388 X004
 // MATCHING 8011aba0 388
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_1F8002D4[];
 extern void *D_80134D24[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001f9e0(void);
@@ -21,7 +21,7 @@ void func_8011ABA0(TObj *o)
             o->step++;
             o->w1e = 9;
             o->b0d = 0x80;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             o->anim = D_80134D24[o->subtype];
             FUN_8001fe6c(o);
             o->timer = FUN_8001f9e0() & 3;

@@ -1,8 +1,8 @@
 // FUNC 8011d4d0 620 X001
 // MATCHING 8011d4d0 620
+#include "spad.h"
 /* Whole function (the csv piece 8011D5F4 is its loop tail): builds a 19-link chain sorted with insertionSortU32. */
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8013E6C4[];
 extern TObj *allocObjectLayer4(void);
 extern void insertionSortU32(int, TObj **);
@@ -36,7 +36,7 @@ void func_8011D4D0(TObj *o)
         o->box3 = 0x14;
         o->w1e = 0xa;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->b0c = 0;
         o->anim = D_8013E6C4[0];
         o->b04++;
@@ -52,7 +52,7 @@ void func_8011D4D0(TObj *o)
             p->wac = i;
             p->b0c = i % 4;
             p->b0a = q->b0a;
-            p->d3c = D_1F8002D4[0];
+            p->d3c = ((int*)&SPAD.i2d4)[0];
             p->anim = D_8013E6C4[o->b0c];
             p->w1e = q->w1e;
             p->box0 = 4;

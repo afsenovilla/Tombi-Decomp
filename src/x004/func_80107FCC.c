@@ -1,9 +1,9 @@
 // FUNC 80107fcc 412 X004
 // MATCHING 80107fcc 412
+#include "gcd.h"
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *D_8009C330;
-extern unsigned char D_8009CDA2;
 extern unsigned short D_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -31,7 +31,7 @@ void func_80107FCC(TObj *o)
         o->state++;
     case 1:
         AnimAdvance(o);
-        if (D_8009CDA2 == 0) {
+        if (GCD.bcda2 == 0) {
             o->state++;
         }
         break;

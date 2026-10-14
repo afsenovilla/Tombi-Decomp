@@ -1,10 +1,10 @@
 // FUNC 80118724 328 X001
 // MATCHING 80118724 328
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern void *D_8013E5CC[];
-extern int D_1F8002D4[];
 extern void func_8011886C(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -23,7 +23,7 @@ void func_80118724(TObj *o)
         o->b04++;
         o->w1e = 0xb;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_8013E5CC[o->subtype];
         if (o->subtype == 2) {
             o->wb8 = -2;

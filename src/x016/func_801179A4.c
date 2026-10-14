@@ -1,12 +1,12 @@
 // FUNC 801179a4 412 X016
 // MATCHING 801179a4 412
+#include "spad.h"
+#include "gcd.h"
+#include "gv6.h"
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE05;
-extern unsigned char D_8009C940, D_8009C941, D_8009C93E;
-extern unsigned short D_8009D670;
-extern unsigned short D_1F8001FC;
 extern void func_801174B8(TObj *);
 extern void func_8011767C(TObj *);
 extern void FUN_80018980(TObj *);
@@ -22,16 +22,16 @@ void func_801179A4(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (D_8009CE05 == 0xff) break;
+            if (GCD.bce05 == 0xff) break;
             if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x82) >= 0x28) break;
             if (PLAYER.obj.y.p.whole != -0x3d) break;
-            if (D_8009C940 != 0 && D_8009C941 == 0x3e) {
+            if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
                 o->step = 2;
                 o->state = 0;
                 break;
             }
-            if ((*(volatile unsigned short *)&D_8009D670 & 0x10) && (D_1F8001FC & 0x2000)) {
-                D_8009C93E = 1;
+            if ((*(volatile unsigned short *)&GV6.s70 & 0x10) && (SPAD.s1fc & 0x2000)) {
+                GVARS.b3e = 1;
                 o->step = 1;
                 o->state = 0;
             }

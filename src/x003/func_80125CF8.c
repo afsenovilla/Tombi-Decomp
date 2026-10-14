@@ -1,9 +1,7 @@
 // FUNC 80125cf8 1588 X003
 // MATCHING 80125cf8 1588
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_1F80027E;
-extern unsigned short D_1F800176, D_1F800186;
-extern unsigned short D_1F80016A, D_1F80016E, D_1F800172;
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -34,7 +32,7 @@ extern char D_80077D24[], D_80077CE8[];
         if (o->wac >= 0xc) { \
             o->d8c = 0; \
         } else { \
-            unsigned int v = ((D_1F80027E << 2) + o->d8c) & 0xff; \
+            unsigned int v = (((*(unsigned short*)&SPAD.s27e) << 2) + o->d8c) & 0xff; \
             if (v != 0) { \
                 if (v < 0x80) o->d8c = o->d8c - 1; \
                 else o->d8c = o->d8c + 1; \
@@ -47,11 +45,11 @@ static __inline__ short near(TObj *o)
 {
     short lim = 0xc0;
     unsigned short a;
-    a = (unsigned short)(D_1F800172 - o->d->p.whole + 0x2d);
+    a = (unsigned short)((*(unsigned short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d);
     if ((unsigned int)a >= 0x5b) return 0;
-    a = (unsigned short)(D_1F80016A - o->h->p.whole + 0x60);
+    a = (unsigned short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x60);
     if (a > lim) return 0;
-    return (unsigned short)(D_1F80016E - o->y.p.whole + 0x40) <= lim - 0x40;
+    return (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x40) <= lim - 0x40;
 }
 
 void func_80125CF8(TObj *o)
@@ -162,8 +160,8 @@ void func_80125CF8(TObj *o)
             }
         } else {
         off:
-            if (*w == 0 || (unsigned short)(o->h->p.whole - D_1F800176 + 0x70) >= 0x220 ||
-                (unsigned short)(D_1F800186 - o->y.p.whole + 0x70) >= 0x1c0) {
+            if (*w == 0 || (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + 0x70) >= 0x220 ||
+                (unsigned short)(SPAD.s186 - o->y.p.whole + 0x70) >= 0x1c0) {
                 o->state = 0;
                 o->substep = 0;
             }

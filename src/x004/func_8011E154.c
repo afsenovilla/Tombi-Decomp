@@ -1,5 +1,6 @@
 // FUNC 8011e154 920 X004
 // MATCHING 8011e154 920
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -12,7 +13,6 @@ typedef struct {
 extern Ent D_80130F14[];
 extern void *D_8013B0E0, *D_80134DC4;
 extern void *D_1F8002D4[];
-extern unsigned char D_8009D0AA[], D_8009D0C8[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void playSFX(int);
@@ -58,7 +58,7 @@ void func_8011E154(TObj *o)
             o->h->p.whole = p->h->p.whole + 0xc;
             o->y.p.whole = p->y.p.whole;
             o->d->p.whole = p->d->p.whole;
-            if (D_8009D0AA[0]) o->b04++;
+            if (((unsigned char*)&GCD.bd0aa)[0]) o->b04++;
             break;
         case 1:
             t = D_80130F14;
@@ -107,7 +107,7 @@ void func_8011E154(TObj *o)
                 }
                 break;
             }
-            if (D_8009D0C8[0]) o->b04++;
+            if (((unsigned char*)&GCD.bd0c8)[0]) o->b04++;
             break;
         }
         break;

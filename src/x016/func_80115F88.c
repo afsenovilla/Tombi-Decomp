@@ -1,5 +1,8 @@
 // FUNC 80115f88 840 X016
 // MATCHING 80115f88 840
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
 typedef struct { unsigned short frac; short whole; } FP;
@@ -20,11 +23,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009C93C;
-extern unsigned char D_8009D000[];
-extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000F2[];
-extern int D_1F8000F0;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void FUN_8002a4d0(O *);
@@ -35,7 +33,7 @@ void func_80115F88(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         func_80027810(o);
         o->p38->whole = 0;
         break;
@@ -44,9 +42,9 @@ void func_80115F88(O *o)
         switch (GAME.selectedSection) {
         case 1:
         case 4:
-            if (D_1F800172 >= 0xc9) {
-                if (D_8009D000[0] == 0) {
-                    D_8009D000[0] = 1;
+            if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0xc9) {
+                if (((unsigned char*)&GCD.bd000)[0] == 0) {
+                    ((unsigned char*)&GCD.bd000)[0] = 1;
                     p->b04 = 5;
                     p->step = 0x41;
                     p->visible = 0;
@@ -55,23 +53,23 @@ void func_80115F88(O *o)
                     break;
                 }
                 tryStartItemInteraction(o, 1, 0);
-            } else if (D_1F800172 < -0x59) {
+            } else if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x59) {
                 tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 2:
         case 5:
-            if (D_1F80016A < 0x46 && D_1F80016E >= -0x1d) {
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x46 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x1d) {
                 tryStartItemInteraction(o, 1, 0);
                 break;
             }
-            if (D_1F80016A < 0xfb) break;
-            if (D_1F80016E < -0xd8) tryStartItemInteraction(o, 1, 1);
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0xfb) break;
+            if ((*(short*)((char*)&SPAD.i16c + 2)) < -0xd8) tryStartItemInteraction(o, 1, 1);
             break;
         case 3:
         case 6:
-            if (D_1F80016A < 0x105) break;
-            if (D_1F80016E < -0x1d) break;
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x105) break;
+            if ((*(short*)((char*)&SPAD.i16c + 2)) < -0x1d) break;
             tryStartItemInteraction(o, 1, 0);
             break;
         }
@@ -80,9 +78,9 @@ void func_80115F88(O *o)
         FUN_8002a4d0(o);
         break;
     case 3:
-        D_1F8000F2[0] -= 2;
-        if (D_1F8000F2[0] < o->w30) {
-            D_1F8000F0 = o->w30 << 16;
+        ((short*)((char*)&SPAD.if0 + 2))[0] -= 2;
+        if (((short*)((char*)&SPAD.if0 + 2))[0] < o->w30) {
+            SPAD.if0 = o->w30 << 16;
             o->w48 = 0x1e;
             o->step++;
         }
@@ -98,7 +96,7 @@ void func_80115F88(O *o)
             (*(short*)&GAME.nextArea) = 0x10;
             (*(short*)&GAME.nextSection) = 5;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }
@@ -107,8 +105,8 @@ void func_80115F88(O *o)
             TASK_C->mode = 7;
             TASK_C->step = 0;
         }
-        D_1F8000F2[0] += 2;
-        if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;
+        ((short*)((char*)&SPAD.if0 + 2))[0] += 2;
+        if (o->w32 < ((short*)((char*)&SPAD.if0 + 2))[0]) SPAD.if0 = o->w32 << 16;
         break;
     }
 }

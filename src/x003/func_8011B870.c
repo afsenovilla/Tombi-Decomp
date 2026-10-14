@@ -1,12 +1,12 @@
 // FUNC 8011b870 452 X003
 // MATCHING 8011b870 452
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
 extern unsigned char PLAYER[], D_800A603C[], D_800A603D[], D_800A603E[];
 extern signed char D_8009D2B0[];
-extern unsigned short D_1F800172, D_1F80016A, D_1F80016E;
 extern void AnimLoadDuration(TObj *);
 extern void func_8011B588(TObj *, int, int);
 extern int func_8011B460(TObj *);
@@ -16,11 +16,11 @@ static __inline__ int near(TObj *o)
     unsigned short t;
     short lim = 0xc8;
     if (PLAYER[0] == 2) return 0;
-    t = D_1F800172 - o->d->p.whole + 0x2d;
+    t = (*(unsigned short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d;
     if (t >= 0x5b) return 0;
-    t = D_1F80016A - o->h->p.whole + 0x64;
+    t = (*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole + 0x64;
     if (t > lim) return 0;
-    t = D_1F80016E - o->y.p.whole + 0x78;
+    t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x78;
     return t <= lim - 0x10;
 }
 
