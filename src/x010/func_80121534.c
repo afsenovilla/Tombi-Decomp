@@ -1,12 +1,8 @@
 // FUNC 80121534 1120 X010
-/* score 83 (was 91): k pinned to a1 (register int k asm("$5")) and the angle test through a temp pinned to v0
-   fix the k copy. Pinning the short dx/dy/c or ac/as makes gcc extend them in place (worse, 109-160).
-   Earlier notes (score 91): whole function incl. csv piece 80121790. Box sums now go through the abs vars (as = box0+dx,
-   ac = box0+dy) and abs is if/else: ang->s2 and box regs match. Left: global-alloc order of c/dy/dx (game
-   c=s3 dy=s4 dx=s5; here dy=s3 dx=s4 c=s5), ac/as swapped (game: sum1 and abs(c) share a1, but with ac=sum1
-   as gets the higher priority: ac 6 refs/37 insns vs as 6/28), the k copy (game keeps k in a1 apart from q),
-   and the even-first branch (li v0,1 hoisted before the y computation). Tried: k via ac/as (sign ext),
-   var-name combos for the sums, per-local types (only u16 px helps, semantically wrong), return forms. */
+// MATCHING 80121534 1120
+/* Covers 80121534 + 80121790 (csv piece). k pinned a1; abs as "ac = c; asm(""); if (c < 0) ac = -c" with |c| sharing
+   the box0+dx temp; asm("" : "=r"(ac) : "0"(ac)) in case 0 raises ac's priority; c is an int pinned s3 extended
+   through v0-pinned copies; py case extends dy first; b69 = 1 through a v0-pinned temp after an asm barrier. */
 #include "TOBJ.H"
 extern int FUN_80063548(int);
 extern int FUN_8006347c(int);
@@ -15,7 +11,7 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
 {
     short dx;
     short dy;
-    short c;
+    register int c asm("$19");
     short s;
     short ac;
     short as;
@@ -30,12 +26,12 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)
         return 0;
     dx = o->h->p.whole - e->h->p.whole;
-    as = e->box0 + dx;
-    if (e->box1 < (unsigned short)as)
+    ac = e->box0 + dx;
+    if (e->box1 < (unsigned short)ac)
         return 0;
     dy = o->y.p.whole - e->y.p.whole;
-    ac = e->box0 + dy;
-    if (e->box1 < (unsigned short)ac)
+    as = e->box0 + dy;
+    if (e->box1 < (unsigned short)as)
         return 0;
     switch (mode) {
     case 1:
@@ -55,8 +51,8 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
         s = (unsigned)(FUN_8006347c(ang) * e->box0) >> 12;
         break;
     }
-    if (c < 0) ac = -c; else ac = c;
-    if (s < 0) as = -s; else as = s;
+    ac = c; asm(""); if ((short)c < 0) ac = -c;
+    as = s; asm(""); if (s < 0) as = -s;
     sel = ac < as;
     if (ac == 0)
         sel = 3;
@@ -66,16 +62,17 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
     case 0:
         if (dx < 0) t = -dx;
         else t = dx;
+        asm("" : "=r"(ac) : "0"(ac));
         if (t > ac)
             return 2;
-        px = dx * s / c;
+        { register int cp asm("$2"); cp = (short)c; px = dx * s / cp; }
         break;
     case 1:
         if (dy < 0) t = -dy;
         else t = dy;
         if (t > as)
             return 2;
-        py = dy * c / -s;
+        { int d = dy; register int cp asm("$2"); asm(""); cp = (short)c; py = d * cp / -s; }
         break;
     case 2:
         px = 0;
@@ -91,8 +88,8 @@ short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
             if (e->y.p.whole - (px + K) > o->y.p.whole + o->box3 - o->box2)
                 return 3;
             o->y.p.whole = e->y.p.whole - (px + K) - (o->box3 - o->box2);
-            o->b69 = 1;
-            return 1;
+            asm("");
+            { register int one asm("$2") = 1; o->b69 = one; return one; }
         } else {
             if (e->y.p.whole - (px - K) < o->y.p.whole - o->box2)
                 return 3;
