@@ -1,0 +1,84 @@
+# Remaining unmatched functions (triage)
+
+Source: `build/report.json` (mtime 2026-10-14 09:27; HEAD 6d90603 at 11:27 only touched tools/text/psxemu/dist/notes, no src or asm, so the report is still current: 2524/2588 matched, 64 unmatched; not rerun). Wip scores from `tools/ncheck.py --score` (0 = identical). No wip file carries a `// CC` or `// AS gnu` header: every wip compiles with the default gcc-2.7.2-psx (+ maspsx 2.86). A wip that spans several csv pieces repeats the whole-wip score on each piece. Addresses are the function's own, the overlay is the unit. The `kept as asm` WARN lines (`build/baseline_asm.txt`) are all rodata/overlap issues in already matched Psy-Q/stub units; none is one of these 64, so there is no LIB entry.
+
+Categories: DATA = table/padding misread as a function (verified by reading the words), LIB = Psy-Q SDK code, NEAR = game code with score <= 10, FAR = game code with score > 10 or no wip.
+
+## Totals
+
+| Category | Functions | Bytes |
+|---|---|---|
+| DATA | 11 | 2052 |
+| LIB | 0 | 0 |
+| NEAR | 1 | 396 |
+| FAR | 52 | 43888 |
+| total | 64 | 46336 |
+
+## Table
+
+| Cat | Unit | Function | Address | Size | Best score | Wip / compiler | Main obstacle |
+|---|---|---|---|---|---|---|---|
+| DATA | x018 | func_8011C758 | 8011C758 | 680 | n/a | - | pointer table: 170/170 words are code pointers 0x8011A5xx-AExx (jump tables); x006 8011C758 is real code |
+| DATA | x003 | func_80116D50 | 80116D50 | 548 | n/a | - | 11 jump tables: 133 of 137 words are code pointers, 4 nop pads |
+| DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | pointer table: all 112 words are code pointers 0x8011xxxx (many repeated default) |
+| DATA | x000 | func_801162b8 | 801162B8 | 116 | n/a | - | jump tables (27 of 29 words code pointers, 2 padding) |
+| DATA | x000 | func_80116258 | 80116258 | 96 | n/a | - | 3 jump tables (pointers 0x801284B4..), no code |
+| DATA | x001 | func_8011658C | 8011658C | 52 | n/a | - | jump table: 12 pointers 0x8013xxxx + 1 pad word |
+| DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | 10 words of s16 offset pairs (0xFE00,0xF400..), no code, no refs |
+| DATA | x005 | func_801188FC | 801188FC | 20 | n/a | - | 5 words of constants (00FA0001..); x003 801188FC is a different, real function |
+| DATA | x013 | func_801188FC | 801188FC | 20 | n/a | - | 5 words of constants (81FEFC00..), no prologue |
+| DATA | x005 | func_80117CAC | 80117CAC | 16 | n/a | - | 4 words of s8/s16 constants (00FA0001..), no prologue |
+| DATA | x008 | func_80117CAC | 80117CAC | 16 | n/a | - | 4 words of constants (00FC0081..), no prologue |
+| NEAR | x001 | func_80127700 | 80127700 | 396 | 2 | src/x001/wip/func_80127700.c (gcc-2.7.2-psx) | one operand-order diff: addu v1,a0,v1 vs v1,v1,a0 (permuter 100k+ iters, ~250 forms tried) |
+| FAR | x004 | func_80125818 | 80125818 | 3148 | 222 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3136/3148 B, large, many diffs |
+| FAR | main0 | func_80056420 | 80056420 | 2604 | 352 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o vs giv2 priority tie (s0/s1 swap), case temps in wrong regs |
+| FAR | x001 | func_80122F54 | 80122F54 | 2192 | 516 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | first draft; o in s3 and rcos-before-rsin cross-jump in BLKB blocks, s0/s1 swap |
+| FAR | x001 | func_801278C0 | 801278C0 | 1820 | 417 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | draft 1796/1820 B; unexplained 0x80 frame (inlined helper with arrays?), reg choice |
+| FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
+| FAR | x001 | func_80136B4C | 80136B4C | 1744 | 242 | src/x001/wip/func_80136B4C.c (gcc-2.7.2-psx) | structure complete; case 3 rewrite, 4 jump tables, regalloc |
+| FAR | x006 | func_8011A87C | 8011A87C | 1644 | 276 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | draft; empty case 2 for k=0 step switch, RotMatrixY arg forms |
+| FAR | x009 | func_80116E4C | 80116E4C | 1560 | 119 | src/x009/wip/func_80116E4C.c (gcc-2.7.2-psx) | regalloc (a+K vs hi swap), cross-jumped mult not reproduced, range() inline swaps loop regs |
+| FAR | x001 | func_80127074 | 80127074 | 1544 | 496 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | first transcription; regalloc and block layout far off |
+| FAR | x006 | func_8011BEAC | 8011BEAC | 1536 | 246 | src/x006/wip/func_8011BD40.c (gcc-2.7.2-psx) | piece of 1900 B (with 8011BD40); digit part regalloc, u byte as (d<<16)>>13 |
+| FAR | x001 | func_80135164 | 80135164 | 1372 | 309 | src/x001/wip/func_80135164.c (gcc-2.7.2-psx) | control flow matches; angle uses lbu+sll/sra vs lb, regalloc |
+| FAR | x010 | func_80125FB4 | 80125FB4 | 1280 | 124 | src/x010/wip/func_80125FB4.c (gcc-2.7.2-psx) | case 5 cross-jumped into case 8 in the game |
+| FAR | x001 | func_801253AC | 801253AC | 1212 | 308 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | first full draft; regalloc and block layout far off |
+| FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 307 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
+| FAR | x010 | func_8011752C | 8011752C | 1020 | 192 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | mask/shift temps and store interleave; regalloc |
+| FAR | main0 | func_80021b20 | 80021B20 | 1016 | 82 | src/wip/func_80021B20.c (gcc-2.7.2-psx) | a0/a2 swap in smax/smin inline copies; r (3 refs) cannot outrank q/b in global alloc, no C form found |
+| FAR | x014 | func_80120DA0 | 80120DA0 | 976 | 155 | src/x014/wip/func_80120DA0.c (gcc-2.7.2-psx) | three spawn loops as one inline debris(); af reg and loop regalloc |
+| FAR | x001 | func_8011CEC8 | 8011CEC8 | 924 | 193 | src/x001/wip/func_8011CEC8.c (gcc-2.7.2-psx) | first half differs; rcos/rsin, MulCosDup branch and tail already match |
+| FAR | main0 | func_800402ec | 800402EC | 880 | 201 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | gcc reassociates x-1-(signed char)xm; regalloc order of x/ret/o differs |
+| FAR | x010 | func_8011E358 | 8011E358 | 856 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
+| FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
+| FAR | main0 | func_8003ff48 | 8003FF48 | 816 | 105 | src/wip/func_8003FF48.c (gcc-2.7.2-psx) | global-alloc order o/k/xi (o has lowest priority, needs ~13 refs) |
+| FAR | x001 | func_8011EEC0 | 8011EEC0 | 744 | 121 | src/x001/wip/func_8011EEC0.c (gcc-2.7.2-psx) | loop pointer forms (e = s+k-/+i, byte pointer) and register choice |
+| FAR | x006 | func_8011C758 | 8011C758 | 680 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD (see 8011C4AC) |
+| FAR | x011 | func_80116688 | 80116688 | 668 | 107 | src/x011/wip/func_80116688.c (gcc-2.7.2-psx) | cases 0/2/4 tail cross-jump needs P in v0 and D in v1 |
+| FAR | x006 | func_8011DE64 | 8011DE64 | 628 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
+| FAR | x010 | func_80121534 | 80121534 | 604 | 91 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B (with 80121790); abs/box-sum regalloc |
+| FAR | x010 | func_8011E6B0 | 8011E6B0 | 564 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
+| FAR | x004 | func_8011942C | 8011942C | 540 | 180 | src/x004/wip/func_8011942C.c (gcc-2.7.2-psx) | logic/layout match; a0 register pressure of o (p=o->da0 trick) |
+| FAR | x006 | func_8011D8C4 | 8011D8C4 | 540 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
+| FAR | x006 | func_8011CA00 | 8011CA00 | 536 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD (see 8011C4AC) |
+| FAR | x006 | func_8011DC4C | 8011DC4C | 536 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
+| FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
+| FAR | x010 | func_80121790 | 80121790 | 516 | 91 | src/x010/wip/func_80121534.c (gcc-2.7.2-psx) | piece of 1120 B wip (see 80121534) |
+| FAR | x006 | func_8011D5F4 | 8011D5F4 | 492 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
+| FAR | x004 | func_80118720 | 80118720 | 464 | 25 | src/x004/wip/func_80118720.c (gcc-2.7.2-psx) | only regalloc: y t1, -y t2, table base t3 (ours t2/t3 swapped) |
+| FAR | x006 | func_8011E1A4 | 8011E1A4 | 436 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
+| FAR | x010 | func_8011E1A4 | 8011E1A4 | 436 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
+| FAR | x006 | func_8011C5CC | 8011C5CC | 396 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD (see 8011C4AC) |
+| FAR | x006 | func_8011BD40 | 8011BD40 | 364 | 246 | src/x006/wip/func_8011BD40.c (gcc-2.7.2-psx) | piece of 1900 B (with 8011BEAC); /10 magic kept in s7, only /60 spilled in game |
+| FAR | x010 | func_8011E990 | 8011E990 | 344 | 307 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B (with EAE8); abs var s needs s0, a/dx/dy regs differ |
+| FAR | x006 | func_8011C4AC | 8011C4AC | 288 | 642 | src/x006/wip/func_8011C4AC.c (gcc-2.7.2-psx) | piece of 1900 B timer HUD; constants 0x20/0x28 and magics in s-regs, frame 0x40 |
+| FAR | x006 | func_8011D4E0 | 8011D4E0 | 276 | no wip | gcc-2.7.2-psx default | no wip; D4E0..DBF4 is one 1812 B sprite-draw function (5 csv pieces), untouched |
+| FAR | x006 | func_8011DAE0 | 8011DAE0 | 276 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
+| FAR | x006 | func_8011D7E0 | 8011D7E0 | 228 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
+| FAR | x010 | func_8011E000 | 8011E000 | 216 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B (E000,E0D8,E1A4,E358,E6B0); compare-temp trick applied, residual regalloc |
+| FAR | x006 | func_8011E0D8 | 8011E0D8 | 204 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
+| FAR | x010 | func_8011E0D8 | 8011E0D8 | 204 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
+| FAR | x000 | func_80117928 | 80117928 | 112 | 212 | src/wip/func_801176D8.c (gcc-2.7.2-psx) | tail piece of 1492 B switch (jtbl 80115EF8, cases 0,1,2,4/5) wip; score is for the whole 801176D8+80117928 wip |
+| FAR | x006 | func_8011DC0C | 8011DC0C | 64 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
+| FAR | x006 | func_8011DBF4 | 8011DBF4 | 24 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop; family of FUN_800505f0/FUN_80123fd0 |
+| FAR | x006 | func_8011E358 | 8011E358 | 12 | 497 | src/x006/wip/func_8011DBF4.c (gcc-2.7.2-psx) | piece of 1904 B rotated FT4 sprite loop (see 8011DBF4) |
