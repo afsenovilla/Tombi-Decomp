@@ -9,7 +9,9 @@
    the V6 copy, an fx() inline, moving the copy among the global stores.
    Also tried (o31): p = &v before/after the copy, k = 9 local, casts/no-proto/short-arg calls, inline wrappers
    (own stack slot, frame 64), block-local V6: the arg order stays a0,a1,a2 (RTL order); only a computed a1
-   (o->state + 1) moves a2 above a1. A second callee name in case 5 stops the merge but leaves 12 B short. */
+   (o->state + 1) moves a2 above a1. A second callee name in case 5 stops the merge but leaves 12 B short.
+   b57: the scheduler places the arg loads: register-asm pins of a0/a1/a2 (any order), asm barriers and FLAGS/CC/AS
+   variants do not change it (124-451); an asm-made a1 gives a2,a1,a0 order (131), still merging from the call. */
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
