@@ -10,6 +10,9 @@ Steps (all output under build/ and asm/, both ignored by git):
      (honoring a `// CC gcc-X.Y.Z` header line: old-gcc of that version, see ncheck.gcc_for)
   4. objdiff.json is written with one unit per unit of tools/units.py (categories: game / sdk, main0 / x000 / x0nn):
      the same list docs/PROGRESS.md counts, so both figures agree by construction.
+     Data (tools/report_data.py): each unit also carries the data sections its C object would get placed at their
+     retail address (bytes compared after relocation), and one target-only unit <prog>/data holds every other
+     non-code byte of the program, so matched_data / total_data is the share of the retail data C really reproduces.
   5. objdiff-cli writes build/report.json.
 
 Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
@@ -32,6 +35,7 @@ OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17
 # Overlays whose retail file is missing (legacy game zip with only MAIN0/X000) are left out of the report.
 OVERLAYS = [p for p in OVERLAYS if os.path.exists(os.path.join(ROOT, "game", "AREA" + p[2:], p.upper() + ".BIN"))]
 PROGS.update({p: p.upper() for p in OVERLAYS})
+PROGS_VRAM = {"MAIN0": 0x80010000}  # first byte after the file header (U.BINS gives the address of file offset 0)
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
 
@@ -161,7 +165,54 @@ def jpdemo_base(progs, units, out_dir, ver="jpdemo"):
     return n
 
 
-def jpdemo_main(ver="jpdemo"):
+def jpdemo_data(progs, units, addrs, out_dir):
+    """Data sections of the demo report, as for PAL (tools/report_data.py): claimed sections on the units with C,
+    the other non-code bytes of each program in a target-only <prog>/data unit."""
+    import report_data as RD
+    dtmp = tempfile.mkdtemp()
+    shutil.rmtree(out_dir + "/base_data", ignore_errors=True)
+    for prog in progs:
+        y = open("config/jpdemo/%s.yaml" % prog).read()
+        game = open(re.search(r"target_path:\s*(\S+)", y).group(1), "rb").read()
+        vram = int(re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", y).group(1), 16)
+        hdr = 0x800 if "type: header" in y else 0
+        gbase = vram - hdr
+        code = [(a, a + n) for nm, (a, n) in addrs.items() if nm.startswith(prog + "/") and a is not None]
+        if hdr: code.append((gbase, vram))
+        claimed = []
+        for u in units:
+            if not u["name"].startswith(prog + "/"): continue
+            body = u.pop("asm", "")
+            a, n = addrs[u["name"]]
+            if "base_path" not in u or a is None: continue
+            info = RD.claim(u["name"], u["base_path"], a, n, game, gbase, 0)
+            if not info: continue
+            e = RD.BF.Elf(u["base_path"])
+            rng = [(b, b + e.size(sec)) for sec, b in info["place"].items()]
+            if any(b < d and c < f for b, f in rng for c, d in code + claimed): continue
+            dbase = u["base_path"].replace("/base/", "/base_data/", 1)
+            os.makedirs(os.path.dirname(dbase), exist_ok=True)
+            dclaims = RD.patch_base(u["base_path"], dbase, info)
+            with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + body
+                        + RD.target_asm(dclaims, game, gbase, 0, dtmp))
+            try:
+                run(AS + [t.name, "-o", u["target_path"]])
+            except subprocess.CalledProcessError as er:
+                print("target data asm failed:", u["name"], er.stderr[:120]); continue
+            finally:
+                os.unlink(t.name)
+            u["base_path"] = dbase
+            claimed += [(b, b + m) for b, m in dclaims.values()]
+        rest = "%s/target/%s/data.o" % (out_dir, prog)
+        n = RD.rest_object(rest, game, gbase, 0, code, claimed, AS)
+        print("data %s: %d bytes claimed by C units, %d bytes left" % (prog, sum(b - a for a, b in claimed), n))
+        if n: units.append({"name": "%s/data" % prog, "target_path": rest, "metadata": {"progress_categories": [prog]}})
+    for u in units: u.pop("size", None); u.pop("asm", None)
+    shutil.rmtree(dtmp, ignore_errors=True)
+
+
+def jpdemo_main():
     os.chdir(ROOT)
     names = {p: v[0] for p, v in VERSIONS[ver]["progs"].items()}
     progs = [p for p in names if os.path.exists("config/%s/%s.yaml" % (ver, p))]
@@ -192,10 +243,15 @@ def jpdemo_main(ver="jpdemo"):
                 print("target asm failed:", prog, name, e.stderr[:120]); continue
             finally:
                 os.unlink(t.name)
-            am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open(os.path.join(fdir, fn)).read())
+            body = open(os.path.join(fdir, fn)).read()
+            am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", body)
+            sm = re.search(r"nonmatching\s+\S+,\s*0x([0-9A-Fa-f]+)", body)
             units.append({"name": "%s/%s" % (prog, name), "target_path": out, "addr": int(am.group(1), 16) if am else None,
+                          "size": int(sm.group(1), 16) if sm else 0, "asm": body,
                           "metadata": {"progress_categories": [prog]}})
-    nbase = jpdemo_base(progs, units, out_dir, ver)
+    addrs = {u["name"]: (u["addr"], u["size"]) for u in units}
+    nbase = jpdemo_base(progs, units, out_dir)
+    jpdemo_data(progs, units, addrs, out_dir)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": p, "name": names[p]} for p in progs],
@@ -228,7 +284,7 @@ def main():
         s = os.path.join("include", f)
         if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
         for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
-    base, nb = {}, 0
+    base, srcof, nb = {}, {}, 0
     shutil.rmtree("build/base", ignore_errors=True)
     for prog, us in U.units().items():
         for u in us:
@@ -240,7 +296,7 @@ def main():
                 NC["build"](u.file, h[3], d, inc)
                 out = "build/base/%s/%s.o" % (prog.lower(), u.name)
                 os.makedirs(os.path.dirname(out), exist_ok=True)
-                shutil.copy(d + "/a.o", out); base[(prog, u.addr)] = out; nb += 1
+                shutil.copy(d + "/a.o", out); base[(prog, u.addr)] = out; srcof[(prog, u.addr)] = u.file; nb += 1
             except subprocess.CalledProcessError:
                 print("base compile failed:", u.file)
             shutil.rmtree(d, ignore_errors=True)
@@ -255,11 +311,19 @@ def main():
             if r.returncode:
                 sys.exit("splat failed for %s:\n%s" % (prog, (r.stdout + r.stderr)[-3000:]))
     # target objects: one per unit, assembled from the splat function(s) inside the unit's range
-    units, nt = [], 0
+    import report_data as RD
+    units, nt, ndata = [], 0, {}
     shutil.rmtree("build/target", ignore_errors=True)
+    shutil.rmtree("build/base_data", ignore_errors=True)
+    dtmp = tempfile.mkdtemp()
     for prog in PROGS:
         P = PROGS[prog]
         if P not in U.units(): continue
+        gpath, gbase = U.BINS[P]
+        game = open(gpath, "rb").read()
+        code = [(u.addr, u.addr + u.size) for u in U.units()[P]]
+        if gbase != PROGS_VRAM.get(P, gbase): code.append((gbase, PROGS_VRAM[P]))  # PS-X EXE header
+        claimed = []
         fdir = "asm/%s/nonmatchings/%s" % (prog, prog)
         asm = {}  # address -> body
         for fn in sorted(os.listdir(fdir)):
@@ -273,18 +337,40 @@ def main():
             if not parts: continue  # data (zero words) or a range splat merged elsewhere
             out = "build/target/%s/%s.o" % (prog, u.name)
             os.makedirs(os.path.dirname(out), exist_ok=True)
+            # data sections: the ones build_full would place at their retail address (see tools/report_data.py)
+            dclaims, dbase, extra = {}, None, ""
+            if (P, u.addr) in base:
+                info = RD.claim(srcof[(P, u.addr)], base[(P, u.addr)], u.addr, u.size, game, gbase, 0)
+                if info:
+                    rng = [(a, a + RD.BF.Elf(base[(P, u.addr)]).size(sec)) for sec, a in info["place"].items()]
+                    if not any(a < d and c < b for a, b in rng for c, d in code + claimed):
+                        dbase = "build/base_data/%s/%s.o" % (prog, u.name)
+                        os.makedirs(os.path.dirname(dbase), exist_ok=True)
+                        dclaims = RD.patch_base(base[(P, u.addr)], dbase, info)
+                        extra = RD.target_asm(dclaims, game, gbase, 0, dtmp)
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
-                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + "\n".join(parts))
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + "\n".join(parts) + extra)
             try:
                 run(AS + [t.name, "-o", out]); nt += 1
             except subprocess.CalledProcessError as e:
                 print("target asm failed:", prog, u.name, e.stderr[:120]); continue
             finally:
                 os.unlink(t.name)
+            claimed += [(a, a + n) for a, n in dclaims.values()]
             unit = {"name": "%s/%s" % (prog, u.name), "target_path": out,
                     "metadata": {"progress_categories": [prog, "sdk" if u.lib else "game"]}}
-            if (P, u.addr) in base: unit["base_path"] = base[(P, u.addr)]
+            if (P, u.addr) in base: unit["base_path"] = dbase or base[(P, u.addr)]
             units.append(unit)
+        # every other non-code byte of the program: one target-only unit (unmatched until C claims it)
+        rest = "build/target/%s/data.o" % prog
+        n = RD.rest_object(rest, game, gbase, 0, code, claimed, AS)
+        ndata[prog] = (sum(b - a for a, b in claimed), n)
+        if n:
+            units.append({"name": "%s/data" % prog, "target_path": rest,
+                          "metadata": {"progress_categories": [prog, "game"]}})
+    shutil.rmtree(dtmp, ignore_errors=True)
+    for prog, (c, n) in ndata.items():
+        print("data %s: %d bytes claimed by C units, %d bytes left" % (prog, c, n))
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": "game", "name": "Game code"}, {"id": "sdk", "name": "Psy-Q SDK"},
@@ -298,14 +384,15 @@ def main():
     gen()
     # "complete" (decomp.dev "fully linked"): a unit counts only when its object is really linked into the executable
     # by tools/build_full.py (src file of MAIN0 / X000; the area overlays are not linked from source yet) and matches
-    # 100 % of its code. Its .data/.rodata still come from the retail binary (splat), so no data is claimed: the
-    # units carry no data sections, hence complete_data stays 100 % of 0 bytes. Needs the first pass for the match.
+    # 100 % of its code and of the data sections it claims (tools/report_data.py: the ones build_full places at their
+    # retail address; data the C does not define still comes from splat and stays in <prog>/data). Needs the first pass.
     rep = {u["name"]: u for u in json.load(open("build/report.json"))["units"]}
     ncomplete = 0
     for unit in units:
         prog = unit["name"].split("/")[0]
         m = rep.get(unit["name"], {}).get("measures", {})
-        if prog in LINKED and "base_path" in unit and m.get("matched_code_percent") == 100.0 and int(m.get("total_code", 0)):
+        if (prog in LINKED and "base_path" in unit and m.get("matched_code_percent") == 100.0 and int(m.get("total_code", 0))
+                and int(m.get("matched_data", 0)) == int(m.get("total_data", 0))):
             unit["metadata"]["complete"] = True; ncomplete += 1
     json.dump(cfg, open("objdiff.json", "w"), indent=1)
     gen()
