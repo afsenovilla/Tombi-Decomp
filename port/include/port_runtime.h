@@ -27,6 +27,9 @@ int port_open(const char *path);
 int port_read(int fd, void *buf, int n);
 int port_pread(int fd, void *buf, int n, long long off);
 void port_close(int fd);
+int port_create(const char *path);              /* write-only, truncates */
+int port_write(int fd, const void *buf, int n);
+int port_mkdir(const char *path);
 long long port_filesize(int fd);
 
 /* time */
@@ -52,4 +55,10 @@ extern int port_verbose;
 /* CD image */
 int port_cd_open(const char *path);
 int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
+
+/* GPU (shims/gpu.c): software rasteriser into emulated VRAM, frame dumps */
+extern const char *port_dump_dir;    /* --dump-frames DIR: write the displayed frame as PNG */
+extern int port_dump_every;          /* --dump-every N (default 10) */
+extern int port_dump_vram;           /* --dump-vram: also write the whole 1024x512 VRAM */
+void port_gpu_vblank(void);
 #endif

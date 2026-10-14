@@ -37,6 +37,7 @@ void port_vblank(void) {
     { extern void port_pad_vblank(void); port_pad_vblank(); }
     if (vsync_event_fn) call_psx(vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
+    port_gpu_vblank();
     if (port_frame % 100 == 0) {
         extern int port_cd_stats(int *);
         extern int port_gpu_lists(void), port_gpu_packets(void);
@@ -117,101 +118,7 @@ void _bu_init(void) {}
 void _patch_card2(void) {}
 void _patch_card(void) {}
 
-/* ================================================================== libgpu */
-static u16 vram[512][1024];
-static int gpu_prims, gpu_lists;
-int GetGraphType(void) { return 0; }          /* retail consoles: 1 MB VRAM GPU */
-int GetGraphDebug(void) { return 0; }
-int SetGraphDebug(int l) { return 0; }
-int ResetGraph(int mode) { return 0; }
-void SetDispMask(int m) {}
-int DrawSync(int mode) { return 0; }
-void *DrawSyncCallback(void *f) { return 0; }
-static u8 cur_drawenv[0x5C], cur_dispenv[0x14];
-void *PutDrawEnv(void *env) { memcpy(cur_drawenv, env, sizeof cur_drawenv); return env; }
-void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); return env; }
-void *PutDispEnv(void *env) { memcpy(cur_dispenv, env, sizeof cur_dispenv); return env; }
-void *GetDispEnv(void *env) { memcpy(env, cur_dispenv, sizeof cur_dispenv); return env; }
-void *memcpy(void *d, const void *s, unsigned int n);
-
-static void clip(const RECT *r, int *x, int *y, int *w, int *h) {
-    *x = r->x & 1023; *y = r->y & 511; *w = r->w; *h = r->h;
-}
-int LoadImage(RECT *r, u32 *p) {
-    int x, y, w, h; clip(r, &x, &y, &w, &h);
-    u16 *s = (u16 *)p;
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
-    return 0;
-}
-int StoreImage(RECT *r, u32 *p) {
-    int x, y, w, h; clip(r, &x, &y, &w, &h);
-    u16 *d = (u16 *)p;
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) *d++ = vram[(y + j) & 511][(x + i) & 1023];
-    return 0;
-}
-int MoveImage(RECT *r, int x, int y) {
-    for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++)
-        vram[(y + j) & 511][(x + i) & 1023] = vram[(r->y + j) & 511][(r->x + i) & 1023];
-    return 0;
-}
-int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
-    u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
-    for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) vram[(r->y + j) & 511][(r->x + i) & 1023] = c;
-    return 0;
-}
-int ClearImage2(RECT *r, u8 R, u8 G, u8 B) { return ClearImage(r, R, G, B); }
-u32 *ClearOTagR(u32 *ot, int n) {
-    for (int i = n - 1; i > 0; i--) ot[i] = (u32)&ot[i - 1] & 0xFFFFFF;
-    ot[0] = 0xFFFFFF;
-    return ot;
-}
-u32 *ClearOTag(u32 *ot, int n) {
-    for (int i = 0; i < n - 1; i++) ot[i] = (u32)&ot[i + 1] & 0xFFFFFF;
-    ot[n - 1] = 0xFFFFFF;
-    return ot;
-}
-/* Headless: walk the ordering table like the GPU DMA would (validates every packet link) and count packets.
-   The renderer milestone decodes the GP0 words here (docs/PORT.md, "Renderer"). */
-void DrawOTag(u32 *ot) {
-    u32 *p = ot; int n = 0;
-    gpu_lists++;
-    while (n < 200000) {
-        u32 tag = *p, next = tag & 0xFFFFFF;
-        n++;
-        if (next == 0xFFFFFF) break;
-        p = (u32 *)(0x80000000u | next);
-    }
-    gpu_prims += n;
-    if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
-}
-void DrawOTagEnv(u32 *ot, void *env) { PutDrawEnv(env); DrawOTag(ot); }
-void DrawPrim(void *p) {}
-int port_gpu_packets(void) { return gpu_prims; }
-int port_gpu_lists(void) { return gpu_lists; }
-u16 *port_vram(void) { return &vram[0][0]; }
-
-/* libgpu helpers that are not in LIB_KEEP (their Psy-Q C ports clash with the shared headers) */
-u32 get_mode(int dfe, int dtd, u16 tpage) {
-    return 0xE1000000u | (dtd ? 0x200 : 0) | (dfe ? 0x400 : 0) | (tpage & 0x9FF);
-}
-u32 get_cs(s16 x, s16 y) { x = x < 0 ? 0 : x > 1023 ? 1023 : x; y = y < 0 ? 0 : y > 1023 ? 1023 : y; return 0xE3000000u | ((y & 0x3FF) << 10) | (x & 0x3FF); }
-u32 get_ce(s16 x, s16 y) { x = x < 0 ? 0 : x > 1023 ? 1023 : x; y = y < 0 ? 0 : y > 1023 ? 1023 : y; return 0xE4000000u | ((y & 0x3FF) << 10) | (x & 0x3FF); }
-u32 get_ofs(s16 x, s16 y) { return 0xE5000000u | ((y & 0x7FF) << 11) | (x & 0x7FF); }
-u32 get_tw(RECT *r) {
-    if (!r) return 0;
-    u32 a = (-r->w & 0xFF) >> 3, b = (-r->h & 0xFF) >> 3, c = (r->x >> 3) & 0x1F, d = (r->y >> 3) & 0x1F;
-    return 0xE2000000u | (d << 15) | (c << 10) | (b << 5) | a;
-}
-typedef struct { u32 tag; u32 code[2]; } DR_MODE;
-void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw) {
-    p->tag = (p->tag & 0xFFFFFF) | (2u << 24);
-    p->code[0] = get_mode(dfe, dtd, tpage);
-    p->code[1] = get_tw(tw);
-}
-typedef struct { u32 tag; u32 code[1]; } DR_AREA;
-void SetDrawArea(DR_AREA *p, RECT *r) { p->tag = (p->tag & 0xFFFFFF) | (2u << 24); p->code[0] = get_cs(r->x, r->y); }
-void SetDrawOffset(DR_AREA *p, u16 *ofs) { p->tag = (p->tag & 0xFFFFFF) | (1u << 24); p->code[0] = get_ofs(ofs[0], ofs[1]); }
-void SetTexWindow(DR_AREA *p, RECT *tw) { p->tag = (p->tag & 0xFFFFFF) | (1u << 24); p->code[0] = get_tw(tw); }
+/* ================================================================== libgpu: see gpu.c */
 
 /* ================================================================== libgte */
 void port_gte_ctc2(int r, unsigned long v);
@@ -412,7 +319,20 @@ void StSetRing(void *a, int b) {}
 void StClearRing(void) {}
 void StUnSetRing(void) {}
 int StFreeRing(void *a) { return 0; }
-int StGetNext(void **a, void **b) { return 1; }
+/* Movies are skipped (no MDEC yet): the first StGetNext hands MovieDecodeFrame a sector header whose frame
+   number is past the end of every movie, so moviePlayerTask takes its own "movie finished" path (state 3:
+   CdMix, StUnSetRing, exitTask) and the boot continues.  --play-movies keeps the old behaviour (waits forever). */
+int port_play_movies;
+static struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; } fake_st_header;
+static u32 fake_st_frame[16];
+int StGetNext(void **a, void **b) {
+    if (port_play_movies) return 1;
+    fake_st_header.frameCount = 0x7FFFFFFF;
+    fake_st_header.width = 320; fake_st_header.height = 240;
+    *a = fake_st_frame; *b = &fake_st_header;
+    if (port_verbose) port_printf("[port] movie skipped (StGetNext reports the last frame)\n");
+    return 0;
+}
 void StSetStream(int a, int b, int c, void *d, void *e) {}
 /* MDEC (movies) */
 void DecDCTReset(int m) {}

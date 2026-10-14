@@ -27,12 +27,35 @@ What it does today, measured on the PAL Spanish disc:
    boot logo `SYSTEM/A09400.GAM`, `SOUND/SND_INI.WVD`, and `SYSTEM/A0000x.GAM`, all through its own `cdLoadTask`
    and our sector reader. The boot logo fades in and out over about 450 frames, about 1,500 GPU packets per
    100 frames walk through the ordering tables, and the LZ decompressors and VRAM uploads run.
-5. **It stops at frame ~550.** The title sequence loads `SYSTEM/O0PTSUB0.BIN` into the overlay region, and that
-   overlay is not decompiled (see blockers). The call to `func_800E8A14` is stubbed, the intro FMV starts, and
-   `MovieDecodeFrame` spins waiting for MDEC output that the stubs never deliver.
+5. **The intro movies are skipped** (no MDEC yet): `StGetNext` hands `MovieDecodeFrame` a sector header whose
+   frame number is past the end, so `moviePlayerTask` takes its own "movie finished" path (`CdMix`,
+   `StUnSetRing`, `exitTask`). The four boot movies are skipped this way (`--play-movies` restores the old
+   wait-forever behaviour, for MDEC work).
+6. **It stops in the title screen at frame ~760.** `titleSequenceTask` loads `SYSTEM/O0PTSUB0.BIN` and the title
+   textures (the TOMBI! logo is in VRAM, see the dumps), then calls into the overlay (`func_800E8A14`,
+   `func_800E8A2C`, `func_800E8A5C`, `func_800E8A94`, `func_800E972C`, `func_800E9D08`), which is not decompiled
+   (§2.2). Those calls are stubs, so the task idles in step 4.3 on a black screen.
 
-There is no window, no rendering and no sound yet. There are only 10 distinct stubbed functions before frame
-550, all of them libspu/libsnd setup.
+**Video (M2 step 1, done):** `shims/gpu.c` is a software GPU. `DrawOTag` walks the OT like GPU DMA and decodes
+every GP0 packet into an emulated 1024×512 VRAM: flat/gouraud/textured triangles and quads (top-left fill rule),
+rectangles and sprites, lines and polylines, fill and VRAM copy, 4/8/15-bit texture pages with CLUTs, texture
+windows, the four semi-transparency modes, modulation, drawing area/offset and the mask bit. `PutDrawEnv` applies
+clip/offset/tpage and the `isbg` clear. The displayed frame is the `DISPENV.disp` rectangle (15 or 24 bit).
+
+```
+build/port/tombi --frames 900 --dump-frames shots --dump-every 25 [--dump-vram]   # PNG per 25th vblank
+```
+
+The boot logo ("Sony Computer Entertainment Europe / Presents") renders correctly, including its fade in/out.
+The PNG writer is self-contained (stored deflate) because the runtime has no libc/zlib.
+
+**Why no window yet:** this host has the i386 `libSDL2-2.0.so.0` runtime but no 32-bit libc/crt or SDL headers,
+and the runtime is freestanding (no dynamic loader). Options, in order of cost: (a) on a host with
+`gcc-multilib` + `libsdl2-dev:i386`, drop `-ffreestanding -nostdlib`, link SDL2 and upload
+`port_gpu_frame()`'s RGB buffer to an `SDL_Texture` each vblank (≈80 lines; input goes into `port_pad_vblank`);
+(b) without 32-bit dev libs, a 64-bit viewer process that maps a shared-memory frame buffer written by the
+i386 binary (memfd + `--display-fd`), which also isolates the host toolkit from the 32-bit game process.
+The GL backend (VRAM as a texture, CLUT lookup in the shader) is step 2 and reuses the same GP0 decoder.
 
 ### How the prototype is built (`port/`)
 
@@ -44,7 +67,8 @@ There is no window, no rendering and no sound yet. There are only 10 distinct st
 | `runtime/threads.c` | BIOS `OpenTh/ChangeTh/CloseTh` as coroutines on native stacks (tiny i386 context switch). |
 | `runtime/gte.c` | Software GTE: register file, RTPS/RTPT/NCLIP/AVSZ3/4/NCCS/NCCT/MVMVA, flags. |
 | `runtime/main_port.c` | A C translation of `main()` (0x800163F4). It is the only game function still in asm, because Ghidra named it like library code. It also contains the loader and the command line. |
-| `shims/psyq.c`, `pad.c`, `libc.c` | libapi/libetc (events, VSync pacing, callbacks), libgpu (VRAM, OT clear/walk, env), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), and the libc subset. Sound, MDEC and the memory card are silent stubs. |
+| `shims/gpu.c` | libgpu and a software GPU: OT walk, GP0 decoder and rasteriser into emulated VRAM, display readout, PNG frame dumps (`--dump-frames`). |
+| `shims/psyq.c`, `pad.c`, `libc.c` | libapi/libetc (events, VSync pacing, callbacks), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), and the libc subset. Sound, MDEC (movies are skipped) and the memory card are silent stubs. |
 | `tools/inventory.py`, `tools/arity_check.py` | The inventory below and the list of "register-carried argument" calls. |
 
 The prototype is i386 because the game's structures hold 32-bit pointers. The build machine has no 32-bit libc,
@@ -116,12 +140,27 @@ Plan:
   port. Until then the title/options/menu screens cannot run natively. The prototype stops right there. A stopgap
   is a tiny MIPS interpreter for just these overlays (calls back into native code through `funcmap`), but
   decompiling them is cleaner.
+- **O0PTSUB0 (title / options), first split done:** `config/o0ptsub0.yaml` (not used by the matching build) splits
+  it with `python3 -m splat split config/o0ptsub0.yaml --disassemble-all` into `asm/o0ptsub0/`. It is small:
+  a 0x50-byte header (0x34 followed by 18 handler addresses into the overlay), then **27 functions, about
+  3,300 instructions** (`func_800E8078` .. `func_800E9F5C`). MAIN0 reaches it through `func_800E8A14`,
+  `func_800E8A2C`, `func_800E8A5C`, `func_800E8A94`, `func_800E972C` and `func_800E9D08`. Its outgoing calls are
+  only MAIN0 helpers that the port already has natively (`playSFX`, `playSFXAndSetNote`, `keyOnSFX`,
+  `updateSound`, `GetTPage`, `GetClut`, `SetDrawMode`, `addTilePrim`, `MulNegSin`/`MulCosDup`, `PadGetState`,
+  `PadInfoAct`, `SsSetStereo/Mono`, `loadCollisionBounds`) plus its own two most-called helpers `func_800E97F4`
+  (25 calls) and `func_800E9798` (19). Next steps: (1) add it to the X-overlay workflow (symbol file
+  `config/symbol_addrs_o0ptsub0.txt`, `[0x50, c, ...]` subsegments per function, m2c drafts, matching against
+  `O0PTSUB0.BIN`; the language variants O1..O8 differ only in text, ±100 bytes); (2) for the port it only needs
+  to compile, so non-matching C is enough at first; (3) give `gen_port.py` an "overlay set" so these
+  functions are compiled with an `O0PTSUB0_` prefix and dispatched while that file is resident (§2.2 dispatch
+  tables), since its addresses overlap the X000 functions. The same recipe then covers `G?OVER.BIN` (3 KB,
+  game over), `I?NFO*.BIN` (inventory/info, 39-138 KB) and `D?SPSUB*.BIN` (sub-screens, 61-175 KB).
 
 ### 2.3 Psy-Q replacements
 
 | Library | Game uses (see inventory) | Port design |
 |---|---|---|
-| libgpu | `GetClut` 109, `AddPrim` 87, `GetGraphType` 77, `SetSemiTrans` 63, `SetDrawMode` 62, `LoadImage` 41, `SetSprt`, `DrawOTag`, `ClearOTagR`, `PutDrawEnv`/`PutDispEnv`, `Move/Store/ClearImage` | The pure prim helpers (`AddPrim`, `SetPoly*`, `GetTPage`, `GetClut` ...) are compiled from their matched Psy-Q C as they are. **Renderer M2:** `DrawOTag` walks the OT (already done) and decodes the GP0 packets (POLY_F/FT/G/GT 3/4, SPRT, TILE, LINE, DR_MODE/TPAGE/AREA/OFFSET, fill/copy). Step 1 is a software rasteriser into the 1024×512 VRAM array, bit-exact and simple, shown with SDL as a texture; that is enough for PC. Step 2 is an OpenGL ES 3 / GL 3.3 backend: VRAM as an R16UI texture, palette lookup in the shader, semi-transparency modes via blending or framebuffer fetch, scaled internal resolution, widescreen by widening the projection (the game already has `initWideDisplayEnv`). The PCSX/Duckstation hardware renderers are the reference for texture-page and CLUT invalidation. |
+| libgpu | `GetClut` 109, `AddPrim` 87, `GetGraphType` 77, `SetSemiTrans` 63, `SetDrawMode` 62, `LoadImage` 41, `SetSprt`, `DrawOTag`, `ClearOTagR`, `PutDrawEnv`/`PutDispEnv`, `Move/Store/ClearImage` | The pure prim helpers (`AddPrim`, `SetPoly*`, `GetTPage`, `GetClut` ...) are compiled from their matched Psy-Q C as they are. **Renderer M2 (step 1 done, `shims/gpu.c`):** `DrawOTag` walks the OT (already done) and decodes the GP0 packets (POLY_F/FT/G/GT 3/4, SPRT, TILE, LINE, DR_MODE/TPAGE/AREA/OFFSET, fill/copy). Step 1 is a software rasteriser into the 1024×512 VRAM array, bit-exact and simple, shown with SDL as a texture; that is enough for PC. Step 2 is an OpenGL ES 3 / GL 3.3 backend: VRAM as an R16UI texture, palette lookup in the shader, semi-transparency modes via blending or framebuffer fetch, scaled internal resolution, widescreen by widening the projection (the game already has `initWideDisplayEnv`). The PCSX/Duckstation hardware renderers are the reference for texture-page and CLUT invalidation. |
 | libgte | 171 files with GTE macros; `RotMatrix*`, `MulMatrix0`, `ApplyMatrix*`, `SetRot/TransMatrix`, `rsin/rcos/ratan2`, `SquareRoot0` | Software GTE in `runtime/gte.c` (done for the ops used). Later: an optional precise path that keeps sub-pixel float vertices next to the integer SXY (PGXP-style) for the GL renderer, plus the interpolation hooks (§3). |
 | libspu / libsnd | `SsSeq*` (12/9/9/6...), `SsUtKeyOn/OffV`, `SsVabFake*`, `SpuSetReverb`, `SpuRead`... (library code is in MAIN0; much of it is matched Psy-Q C) | Emulate the **SPU**, not libsnd. Compile the matched libsnd/libspu C (the sequencer stays exact) and replace only the lowest layer (`_spu_*` register writes, SPU-RAM DMA) with a 24-voice software SPU: ADPCM decode, ADSR, pitch, reverb, mixed at 44.1 kHz into an SDL audio callback. The game's VAB/WVD data goes into a 512 KB SPU-RAM array. |
 | libcd | `CdControl/F/B`, `CdRead`, `CdReadSync`, `CdSync`, `CdMix`, `CdRead2`/`St*` (movies) | Done for data: seeking uses the game's own table (`FILE_LINKS`, LBA+150 in BCD), and sectors are read from `.bin` (raw 2352) or `.iso`. Add CUE parsing, CHD later, and an "extracted folder" mode (LBA→file map built from the ISO directory at startup). XA audio and STR streaming go through the same reader. |

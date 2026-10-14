@@ -103,6 +103,9 @@ void port_fatal(const char *f, ...) {
 /* ------------------------------------------------------------------------------------------- files, time */
 int port_open(const char *p) { long r = sys3(SYS_open, (long)p, 0 /* O_RDONLY */, 0); return r < 0 ? -1 : (int)r; }
 int port_read(int fd, void *b, int n) { return (int)sys3(SYS_read, fd, (long)b, n); }
+int port_create(const char *p) { long r = sys3(SYS_open, (long)p, 0x241 /* O_WRONLY|O_CREAT|O_TRUNC */, 0644); return r < 0 ? -1 : (int)r; }
+int port_write(int fd, const void *b, int n) { return (int)sys3(SYS_write, fd, (long)b, n); }
+int port_mkdir(const char *p) { return (int)sys3(39 /* SYS_mkdir */, (long)p, 0755, 0); }
 void port_close(int fd) { sys3(SYS_close, fd, 0, 0); }
 int port_pread(int fd, void *b, int n, long long off) {
     return (int)sys5(SYS_pread64, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));

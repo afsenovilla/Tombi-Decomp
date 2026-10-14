@@ -1,0 +1,40 @@
+# SYSTEM/O0PTSUB0.BIN: title / options sub-program (13 KB), loaded at the shared overlay base 0x800E8028.
+# Not part of the matching build (tools/build_full.py only splits MAIN0 and X000).  First split for the native
+# port (docs/PORT.md 2.2): python3 -m splat split config/o0ptsub0.yaml --disassemble-all
+# The file starts with a 19-word header (0x34, then 18 handler addresses), code follows at 0x50.
+name: O0PTSUB0.BIN
+sha1: 4ff1dade2f430ce60d8e56c339b54ed8a82f3f68
+options:
+  basename: o0ptsub0
+  target_path: game/disc/fs/SYSTEM/O0PTSUB0.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/o0ptsub0
+  src_path: build/splat_src/o0ptsub0
+  build_path: build
+  ld_script_path: build/o0ptsub0.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.o0ptsub0.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.o0ptsub0.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: o0ptsub0
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, rodata, o0ptsub0_header]
+      - [0x50, asm, o0ptsub0]
+  - [0x346C]
