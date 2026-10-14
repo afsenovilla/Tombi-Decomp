@@ -1,6 +1,9 @@
 // FUNC 801253ac 1212 X001
 #include "spad.h"
-/* score 280 (was 308): an unused `char pad[16]` local gives the game's 0x40 frame (s-reg save slots now match).
+/* score 226 (was 308): an unused `char pad[16]` local gives the game's 0x40 frame (s-reg save slots now match);
+   |dx|/|dy| through `static __inline__ int sabs(int x) { int r; if (x < 0) r = -x; else r = x; return r; }` (280 -> 226;
+   short/short 294, short r 264-290, in-place forms 272-306). Left: the game's sabs negates the unextended short (move/negu
+   v1,s5 after bgez a0) where ours does move a0,v1 before the branch; box-sum and quadrant-selector local regs swapped.
    First full draft from the asm (logic follows the game: box test, quadrant/angle check, rcos/rsin
    projections, abs compares, side selection, velH kick). The register allocation of the box pseudos and the |c|/|s| selector differ.
    o28: angle base is a copy (`base = q; if (dx > 0) { if (!q) base = 0x400; else base = q - 0x400; }` gives the
@@ -11,6 +14,12 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8013C7B0[];
+static __inline__ int sabs(int x)
+{
+    int r;
+    if (x < 0) r = -x; else r = x;
+    return r;
+}
 extern int rcos(int);
 extern int rsin(int);
 extern int resolveHitResultB(TObj *, TObj *);
@@ -53,11 +62,11 @@ int func_801253AC(TObj *a, TObj *b, unsigned char k, int ang)
     else if (as == 0) q = 2;
     switch (q) {
     case 0:
-        if (ac < (dx < 0 ? -dx : dx)) return 0;
+        if (ac < sabs(dx)) return 0;
         if ((unsigned short)(a->box2 + (a->y.p.whole - (b->y.p.whole - dx * s / c)) + 6) > a->box3 + 0xc) return 0;
         break;
     case 1:
-        if (as < (dy < 0 ? -dy : dy)) return 0;
+        if (as < sabs(dy)) return 0;
         if ((unsigned short)(a->box0 + (a->h->p.whole - (b->h->p.whole - dy * c / s)) + 6) > a->box1 + 0xc) return 0;
         break;
     case 2:
