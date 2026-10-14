@@ -11,8 +11,8 @@ Categories: DATA = table/padding misread as a function (verified by reading the 
 | DATA | 3 | 1168 |
 | LIB | 0 | 0 |
 | NEAR | 1 | 396 |
-| FAR | 52 | 43888 |
-| total | 56 | 45452 |
+| FAR | 51 | 42676 |
+| total | 55 | 44240 |
 
 Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 80116258 (96) and 801162B8 (116), x001 8011658C (52; the row continues as code from 801165C0), x003 80116D50 (548; code from 80116F74), x005 and x013 801188FC (20 each), x005 and x008 80117CAC (16 each). Their only jals are dispatcher cases of other areas (second dispatcher: area 7 -> 80116258, 12 -> 801162B8, 6 -> 80116D50, 3 -> 801188FC; first: 17 -> 8011658C, 0 -> 80117CAC) and the MAIN0 pointers are slots of other areas' tables (801162D0/80116DD0/80116E4C: areas 13/9/9; 80116EFC: area 17); the object-type slots (801162D0, 801165A8, 80116EC0) belong to types whose handlers are real code in other overlays. The three KEPT rows below are called by the player-step code of the overlay that holds them, so they stay (and the earlier "no refs" note for x002 8011E688 was wrong).
 
@@ -30,7 +30,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 72 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | rebuilt from 244A0 top; negated forms fix reassociation; left: s-reg permutation, box0 temp, abs(cy) test |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 14 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | SPAD.b1d2 block fixed (t bump + w=v global); left: v a1 vs game v1 in the a->wb0 block |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 314 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e pinned; left: regalloc of abs/k/fx/fy temps |
-| FAR | x001 | func_801253AC | 801253AC | 1212 | 172 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | sabs shape, kind selector, r>=2 logic fix done; left s-reg order, a1/a2 temps, case 1->3 cross-jump |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 232 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
 | FAR | x010 | func_8011752C | 8011752C | 1020 | 80 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | loop 1 b shifted out of place + pins; left: which sra fills the delay slot, loops 2-4 same pattern |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 82 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | x/ys/cnt unpinned, (x-1)-sx order fixed; left: bs/d regs, b sext in place, xm copy to t1, branch-1 tail cross-jump |
