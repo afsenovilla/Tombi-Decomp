@@ -1,5 +1,6 @@
 // FUNC 80100788 4088 X008
 // MATCHING 80100788 4088
+#include "spad.h"
 #include "gv6.h"
 #include "gvars.h"
 /* Player step dispatcher. turn(): the d8c store written in every leaf (cross-jumping shares only the store
@@ -11,8 +12,6 @@
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern unsigned char D_1F8001A4;
 extern void FUN_800f1478(TObj *);
 extern void FUN_800f1d44(TObj *);
 extern void FUN_8010e328(TObj *, int);
@@ -183,13 +182,13 @@ void func_80100788(TObj *o, int p2)
         dirA(o);
         dirF(o);
         FUN_800f1d44(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
-            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4))
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 0;
@@ -282,7 +281,7 @@ void func_80100788(TObj *o, int p2)
         dirA(o);
         dirF(o);
         FUN_801097ec(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
             U8(o, 0xc3) = 0;
@@ -454,6 +453,6 @@ void func_80100788(TObj *o, int p2)
         if (o->step == 0x65) c++;
     }
     if (c == 0) FUN_8003f7cc(o);
-    if (D_1F8001A4 == 0) FUN_800ff610(o, 1);
+    if (SPAD.b1a4 == 0) FUN_800ff610(o, 1);
     probeTileShapeThreePoints(o, 4);
 }

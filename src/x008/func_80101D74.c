@@ -1,12 +1,12 @@
 // FUNC 80101d74 924 X008
 // MATCHING 80101d74 924
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern unsigned char *D_800A611C;
 extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
@@ -80,7 +80,7 @@ void func_80101D74(TObj *o)
     common:
         o->animFrame &= 1;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
+            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;

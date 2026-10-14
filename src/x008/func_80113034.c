@@ -1,10 +1,7 @@
 // FUNC 80113034 900 X008
 // MATCHING 80113034 900
+#include "gcd.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D0AA;
-extern unsigned char D_8009D0C8;
-extern unsigned char D_8009D0D0;
-extern unsigned char D_8009D0D1;
 extern int D_8009C960[];
 extern unsigned short D_8009C960h;
 extern void **D_80115A08[];
@@ -24,16 +21,16 @@ static __inline__ short chk(TObj *o)
     unsigned char f;
     switch (o->b0c & 0x7f) {
     case 0:
-        f = D_8009D0AA;
+        f = GCD.bd0aa;
         break;
     case 1:
-        f = D_8009D0C8;
+        f = GCD.bd0c8;
         break;
     case 2:
-        f = D_8009D0D0;
+        f = GCD.bd0d0;
         break;
     case 3:
-        f = D_8009D0D1;
+        f = GCD.bd0d1;
         break;
     default:
         printInfoMessage(0, 2);
