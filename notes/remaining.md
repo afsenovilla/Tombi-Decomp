@@ -38,7 +38,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x010 | func_8011752C | 8011752C | 1020 | 92 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | mask/shift temps and store interleave; regalloc |
 | FAR | main0 | func_80021b20 | 80021B20 | 1016 | 82 | src/wip/func_80021B20.c (gcc-2.7.2-psx) | a0/a2 swap in smax/smin inline copies; r (3 refs) cannot outrank q/b in global alloc, no C form found |
 | FAR | x001 | func_8011CEC8 | 8011CEC8 | 924 | 98 | src/x001/wip/func_8011CEC8.c (gcc-2.7.2-psx) | first half differs; rcos/rsin, MulCosDup branch and tail already match |
-| FAR | main0 | func_800402ec | 800402EC | 880 | 201 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | gcc reassociates x-1-(signed char)xm; regalloc order of x/ret/o differs |
+| FAR | main0 | func_800402ec | 800402EC | 880 | 155 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | s-regs pinned; gcc folds x-1-sx / x+8-xm (game keeps (x-1)-sx); bs/d and c/xm order regalloc |
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
 | FAR | x010 | func_80120C88 | 80120C88 | 824 | 16 | src/x010/wip/func_80120C88.c (gcc-2.7.2-psx) | box0/box1 load order, permuter already ran 40k iterations |
 | FAR | main0 | func_8003ff48 | 8003FF48 | 816 | 99 | src/wip/func_8003FF48.c (gcc-2.7.2-psx) | global-alloc order o/k/xi (o has lowest priority, needs ~13 refs) |
