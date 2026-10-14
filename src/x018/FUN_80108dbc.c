@@ -13,18 +13,18 @@ void FUN_80108dbc(TObj *o)
 {
     switch (o->state) {
     case 0:
-        U8(DAT_8009c330, 8) = o->active;
-        U8(DAT_8009c330, 9) = 0;
+        (*(unsigned char*)&DAT_8009c330->w08) = o->active;
+        (*(unsigned char*)((char*)&DAT_8009c330->w08 + 1)) = 0;
         o->velX = 0x5a;
         o->active = 3;
-        U8(o, 0xa3) = 2;
+        (*(unsigned char*)((char*)&o->da0 + 3)) = 2;
         o->d8c = 0;
         o->velY = 0;
         o->b9c = 0;
         o->b9d = 0;
         o->b9e = 0;
         o->b9f = 0;
-        U8(o, 0xad) = 0;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 0;
         o->b69 = 0;
         o->state++;
         o->animFrame &= 1;
@@ -40,10 +40,10 @@ void FUN_80108dbc(TObj *o)
         break;
     case 9:
         DAT_8009c93a = 1;
-        S8(o, 0xf) = -8;
+        (*(signed char*)&o->b0f) = -8;
         o->ba5 = 0;
         o->b9c = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;

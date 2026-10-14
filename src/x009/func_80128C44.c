@@ -1,12 +1,12 @@
 // FUNC 80128c44 648 X009
 // MATCHING 80128c44 648
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 
 extern unsigned char D_8009C942[], D_8009D2B0, D_8009CDCC[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
-extern short D_800A60EA[], D_1F8001C6;
+extern short D_1F8001C6;
 extern AT3 D_8012B2E4[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe94(TObj *, int);
@@ -26,9 +26,9 @@ void func_80128C44(TObj *o)
         v = *(B12 *)&o->a;
         D_8009C942[0] = 1;
         D_8009D2B0 = 2;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->anim = D_8012B2E4[o->subtype].p[32];
         FUN_8001fe94(o, 0);
         o->wbc = o->animFrame;
@@ -52,7 +52,7 @@ void func_80128C44(TObj *o)
             setEventStarted(0x28, 0, 0);
             o->timer = 200;
         }
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->state = 2;
         break;
     case 2:
@@ -62,12 +62,12 @@ void func_80128C44(TObj *o)
         break;
     case 9:
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

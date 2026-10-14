@@ -1,5 +1,6 @@
 // FUNC 80117fac 848 X018
 // MATCHING 80117fac 848
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -13,9 +14,8 @@ typedef struct { void **tbl; int x; int y; } E;
 
 extern E D_8011A564[];
 extern unsigned char D_8009C942[], D_8009C93F[], D_8009D2B0;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009D132, D_8009D0B7;
-extern short D_800A60EA[], D_1F8001C6;
+extern short D_1F8001C6;
 extern void FUN_8001fe94(P *, int);
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern int AnimAdvance(P *);
@@ -45,9 +45,9 @@ void func_80117FAC(P *o)
         D_8009C942[0] = 1;
         D_8009C93F[0] = 1;
         D_8009D2B0 = k2;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->o.wbc = o->o.animFrame;
         o->o.animFrame = o->o.b68 & 1;
         SetAnim(o, 4);
@@ -90,13 +90,13 @@ void func_80117FAC(P *o)
     case 9:
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->o.animFrame = o->o.wbc;
         D_1F8001C6 = 0;
         SetAnim(o, 1);
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->o.b68 = 0;
         o->o.step = 0;
         o->o.state = 0;

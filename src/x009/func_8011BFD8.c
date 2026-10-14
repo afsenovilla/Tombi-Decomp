@@ -1,9 +1,9 @@
 // FUNC 8011bfd8 820 X009
 // MATCHING 8011bfd8 820
+#include "player.h"
 #include "TOBJ.H"
 
 #define E(o, k) (((TObj **)((char *)(o) + 0xb4))[k])
-extern unsigned char D_800A60DA;
 extern TObj *ObjAlloc(void);
 
 void func_8011BFD8(TObj *o)
@@ -13,7 +13,7 @@ void func_8011BFD8(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (o->b69 != 1 || D_800A60DA != o->b69)
+        if (o->b69 != 1 || (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) != o->b69)
             break;
         one = 1;
         e = ObjAlloc();
@@ -81,7 +81,7 @@ void func_8011BFD8(TObj *o)
         break;
     case 1:
         if (o->b69 == 1) {
-            if (D_800A60DA == 1)
+            if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 1)
                 break;
             E(o, 0)->b04 = 2;
             E(o, 1)->b04 = 2;
@@ -106,7 +106,7 @@ void func_8011BFD8(TObj *o)
             o->state++;
         }
     case 3:
-        if (o->b69 != 1 || D_800A60DA != 1) {
+        if (o->b69 != 1 || (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) != 1) {
             o->state = 0;
         }
         break;

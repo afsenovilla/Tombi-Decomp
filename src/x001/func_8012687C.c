@@ -19,7 +19,7 @@ void func_8012687C(TObj *o, TObj *p)
         r = func_80043260(o, p);
         if (r == 0) return;
         if (r == 1) {
-            if (U8(o, 0xac) != 1) {
+            if ((*(unsigned char*)&o->wac) != 1) {
                 if ((short)(o->h->p.whole - p->h->p.whole) >= 0) {
                     o->bbe = 8;
                     o->wb0 = 2;
@@ -34,7 +34,7 @@ void func_8012687C(TObj *o, TObj *p)
                 p->state = 0;
                 p->b69 = 0;
                 PTR(o, 0xe4) = p;
-                U8(o, 0xac) = 2;
+                (*(unsigned char*)&o->wac) = 2;
             }
         } else {
             if (p->subtype == 0) {

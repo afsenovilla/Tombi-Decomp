@@ -45,9 +45,9 @@ static __inline__ short hit(TObj *a, TObj *b)
     if ((unsigned short)(U16(a->d, 2) - U16(b->d, 2) + 0x2d) >= 0x5b)
         return -1;
     dx = U16(a->h, 2) - U16(b->h, 2);
-    if ((unsigned short)(dx + (U16(b, 0x6c) + U16(a, 0x6c))) > b->box1 + a->box1)
+    if ((unsigned short)(dx + ((*(unsigned short*)&b->box0) + (*(unsigned short*)&a->box0))) > b->box1 + a->box1)
         return -1;
-    if ((unsigned short)((U16(a, 0x16) - U16(b, 0x16)) + (U16(a, 0x70) + U16(b, 0x70))) > a->box3 + b->box3)
+    if ((unsigned short)(((*(unsigned short*)&a->y.p.whole) - (*(unsigned short*)&b->y.p.whole)) + ((*(unsigned short*)&a->box2) + (*(unsigned short*)&b->box2))) > a->box3 + b->box3)
         return -1;
     DAT_1f80019e = 0;
     if (dx < 0)

@@ -59,15 +59,15 @@ void FUN_800fdb7c(TObj *o)
     case 0:
         o->d8c = 0;
         o->wb0 = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->ba7 = 0;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
@@ -98,7 +98,7 @@ void FUN_800fdb7c(TObj *o)
             else
                 q->b6a = 0;
         }
-        U8(o, 0xa1) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         *(signed char *)&o->b0f = -8;
         o->b9e = 0;
         o->ba4 = 0;

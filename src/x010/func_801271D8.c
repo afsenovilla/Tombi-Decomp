@@ -1,9 +1,9 @@
 // FUNC 801271d8 404 X010
 // MATCHING 801271d8 404
+#include "player.h"
 #include "TOBJ.H"
 
 extern short D_8007A3F0[];
-extern int D_800A604C;
 extern Fix16 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
 extern unsigned short D_1F8001F8;
@@ -16,7 +16,7 @@ void func_801271D8(TObj *o, int n)
     if (n >= 2) {
         o->ba7 += 2;
         s = D_8007A3F0[o->ba7] << 6;
-        D_800A604C = o->d34 + s;
+        PLAYER.obj.y.raw = o->d34 + s;
         if (n == 3) {
             D_800A6078->raw += 0x8000;
             if (o->d30 + 0x40 < D_800A6078->p.whole) D_800A6078->p.whole = o->d30 + 0x40;
@@ -32,7 +32,7 @@ void func_801271D8(TObj *o, int n)
     } else {
         o->ba7 += 8;
         s = D_8007A3F0[o->ba7] << 7;
-        D_800A604C = o->d34 + s;
+        PLAYER.obj.y.raw = o->d34 + s;
         if (n && !(D_1F8001F8 & 0x1f)) playSFX(0xe);
     }
 }

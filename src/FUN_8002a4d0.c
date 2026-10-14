@@ -32,23 +32,23 @@ void FUN_8002a4d0(TObj *o)
     switch (o->state) {
     case 0:
         r1 = 1;
-        if (S32(o, 0x24) != 0) {
-            if (S32(o, 0x24) > 0)
-                S32(o, 0x24) -= 0x80;
+        if ((*(int*)&o->anim) != 0) {
+            if ((*(int*)&o->anim) > 0)
+                (*(int*)&o->anim) -= 0x80;
             else
-                S32(o, 0x24) += 0x80;
+                (*(int*)&o->anim) += 0x80;
             r1 = 0;
         } else {
-            U8(o, 0x71) = 0;
-            U8(o, 0x72) = 0;
-            U8(o, 0x73) = 0;
+            (*(unsigned char*)((char*)&o->box2 + 1)) = 0;
+            (*(unsigned char*)&o->box3) = 0;
+            (*(unsigned char*)((char*)&o->box3 + 1)) = 0;
         }
         r2 = 0;
-        if (S32(o, 0x20) != 0) {
-            if (S32(o, 0x20) > 0)
-                S32(o, 0x20) -= 0x100;
+        if ((*(int*)&o->timer) != 0) {
+            if ((*(int*)&o->timer) > 0)
+                (*(int*)&o->timer) -= 0x100;
             else
-                S32(o, 0x20) += 0x100;
+                (*(int*)&o->timer) += 0x100;
             r2 = 1;
         }
         v = D_1F8000E6;
@@ -70,21 +70,21 @@ void FUN_8002a4d0(TObj *o)
         if (r2 | r3) {
             done = 0;
         } else {
-            U8(o, 0x6e) = 0;
-            U8(o, 0x6f) = 0;
+            (*(unsigned char*)&o->box1) = 0;
+            (*(unsigned char*)((char*)&o->box1 + 1)) = 0;
             done = 1;
         }
         done = done & r1;
         goto tail;
     case 1:
-        S32(o, 0x68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
+        (*(int*)&o->b68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
         o->substep = 0;
         o->state++;
-        o->w4c = *(unsigned short *)S32(o, 0x68);
-        o->w50 = ((unsigned short *)S32(o, 0x68))[1];
+        o->w4c = *(unsigned short *)(*(int*)&o->b68);
+        o->w50 = ((unsigned short *)(*(int*)&o->b68))[1];
         GAME.disableSelectMenu = 1;
-        c = ((unsigned char *)S32(o, 0x68))[4];
-        U8(o, 0x3f) = c;
+        c = ((unsigned char *)(*(int*)&o->b68))[4];
+        (*(unsigned char*)((char*)&o->d3c + 3)) = c;
         if (c == 2) {
             GAME.disableSelectMenu = 0;
             o->state = 3;
@@ -95,10 +95,10 @@ void FUN_8002a4d0(TObj *o)
             o->state = 4;
         }
         m = ((unsigned short*)&GAME.nextArea);
-        c = ((unsigned char *)S32(o, 0x68))[5];
+        c = ((unsigned char *)(*(int*)&o->b68))[5];
         m[0] = c;
-        GAME.nextSection = ((unsigned char *)S32(o, 0x68))[6];
-        GAME.nextSpawnPoint = ((unsigned char *)S32(o, 0x68))[7];
+        GAME.nextSection = ((unsigned char *)(*(int*)&o->b68))[6];
+        GAME.nextSpawnPoint = ((unsigned char *)(*(int*)&o->b68))[7];
         if (c != GAME.selectedArea)
             FUN_8001f110(1);
         switch (GAME.selectedArea) {
@@ -165,7 +165,7 @@ void FUN_8002a4d0(TObj *o)
             s->state = 0;
             return;
         case 4:
-            if (U8(s, 0xa2) != 0)
+            if ((*(unsigned char*)((char*)&s->da0 + 2)) != 0)
                 return;
             s->b04 = 5;
             s->step = 0x41;

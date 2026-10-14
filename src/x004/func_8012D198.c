@@ -1,13 +1,12 @@
 // FUNC 8012d198 788 X004
 // MATCHING 8012d198 788
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F[], D_8009C942[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009CDF5, D_8009CE63[];
 extern void *D_801357D8[], *D_801357DC[], *D_801357E0[];
 extern short D_1F80016A;
-extern short D_800A604A;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -48,9 +47,9 @@ void func_8012D198(TObj *o)
         p->b04 = 3;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 0;
         o->anim = D_801357D8[0];
         o->state = 0;
@@ -63,9 +62,9 @@ void func_8012D198(TObj *o)
         o->state++;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->d90 = showMessageBoxDirect(m, n, &o->a);
         o->wac = 2;
         setAnim(o, D_801357E0[0]);
@@ -96,13 +95,13 @@ void func_8012D198(TObj *o)
         if (--o->timer == -1) o->state++;
         break;
     case 7:
-        D_800A603C[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b04 = 3;
         break;
     }
-    if (D_1F80016A >= 0x9f) D_800A604A = 0x9e;
+    if (D_1F80016A >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
 }

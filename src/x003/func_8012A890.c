@@ -1,10 +1,11 @@
 // FUNC 8012a890 716 X003
 // MATCHING 8012a890 716
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_8009D004, D_8009CDC7, D_8009C940, D_8009C941, D_8009D094;
-extern unsigned char D_800A603C, D_800A603D, D_8009C93F;
+extern unsigned char D_8009C93F;
 extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
 extern TObj *TASK_C;
@@ -58,8 +59,8 @@ void func_8012A890(TObj *o)
         case 1:
             switch (o->state) {
             case 0:
-                D_800A603C = 5;
-                D_800A603D = 0x62;
+                PLAYER.obj.b04 = 5;
+                PLAYER.obj.step = 0x62;
                 D_8009C93F = 1;
                 GAME.fadeScreenControl = 3;
                 o->state++;

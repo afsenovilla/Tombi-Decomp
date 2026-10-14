@@ -1,13 +1,12 @@
 // FUNC 80129430 384 X003
 // MATCHING 80129430 384
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct { int *p; int pad[2]; } E12;
 extern E12 D_80135D84[];
 extern unsigned char D_8009C939[];
 extern unsigned char D_8009CDC7;
-extern unsigned short *D_800A6078;
-extern short D_800A604E;
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
@@ -34,8 +33,8 @@ void func_80129430(TObj *o)
         if (o->velY < -0x180) {
             o->velY = -0x180;
         }
-        D_800A6078[1] = o->h->p.whole;
-        D_800A604E = o->y.p.whole - 0x10;
+        (*(unsigned short **)&PLAYER.obj.h)[1] = o->h->p.whole;
+        PLAYER.obj.y.p.whole = o->y.p.whole - 0x10;
         if (o->visible == 0) {
             D_8009CDC7 = 2;
             o->b04 = 3;

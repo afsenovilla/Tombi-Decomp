@@ -1,13 +1,10 @@
 // FUNC 80132214 1868 X003
 // MATCHING 80132214 1868
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC;
-extern Fix16 *D_800A6078;
-extern unsigned short D_800A6066;
-extern short D_800A60EA;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern TObj *showMessageBoxDirect(int, int, void *);
 extern void func_801289C8(TObj *, int, int);
@@ -149,15 +146,15 @@ void func_80132214(TObj *o)
         }
         break;
     case 15:
-        D_800A6066 = b->h->p.whole < D_800A6078->p.whole;
+        PLAYER.obj.animFrame = b->h->p.whole < (*(Fix16 **)&PLAYER.obj.h)->p.whole;
         if (!b->visible) {
-            D_800A603C = 1;
+            PLAYER.obj.b04 = 1;
             D_8009C93F = 0;
             D_8009C942 = 0;
             D_8009C93E = 0;
-            D_800A60EA = 0;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER.obj.wb2 = 0;
+            PLAYER.obj.step = 0;
+            PLAYER.obj.state = 0;
             b->b04 = 3;
             o->b04 = 3;
         }

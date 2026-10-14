@@ -1,8 +1,9 @@
 // FUNC 8011c354 544 X001
 // MATCHING 8011c354 544
+#include "player.h"
 #include "TOBJ.H"
 
-extern Fix16 *D_800A6078, *D_800A607C[];
+extern Fix16 *D_800A607C[];
 extern int FUN_800201ac(TObj *, int);
 extern void playSFX(int);
 extern short MulCosDup(int, int);
@@ -39,7 +40,7 @@ void func_8011C354(TObj *o)
                 o->d34 = o->y.p.whole + MulNegSin(((o->d8c >> 4) + 0x40) & 0xff, 0x19a);
                 o->d38 = D_800A607C[0]->p.whole;
             }
-            if (D_800A6078->p.whole < 0x53c) o->step++;
+            if ((*(Fix16 **)&PLAYER.obj.h)->p.whole < 0x53c) o->step++;
             break;
         case 2:
             if (FUN_800201ac(o, 0x24)) o->step = 0;

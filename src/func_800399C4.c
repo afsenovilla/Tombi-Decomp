@@ -1,8 +1,7 @@
 // FUNC 800399c4 716 MAIN0
 // MATCHING 800399c4 716
+#include "scriptctx.h"
 #include "TOBJ.H"
-typedef struct { char p0[0x8a]; unsigned short c; char p1[0x1190 - 0x8c]; int idx, k, sub, x, y, z; } G;
-extern G *SCRIPT_CTX;
 extern TObj *SCRIPT_OBJECTS[];
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer4(void);
@@ -11,13 +10,13 @@ extern void func_800EDFB8(TObj *o, int n);
 
 void func_800399C4(void)
 {
-    G *g = SCRIPT_CTX;
-    int k = g->k;
-    int idx = g->idx;
-    int sub = g->sub;
-    int x = g->x;
-    int y = g->y;
-    int z = g->z;
+    ScriptCtx *g = SCRIPT_CTX;
+    int k = g->arg[1];
+    int idx = g->arg[0];
+    int sub = g->arg[2];
+    int x = g->arg[3];
+    int y = g->arg[4];
+    int z = g->arg[5];
     switch (k) {
     case 2: case 9: case 10: {
         TObj *o = allocObjectLayer2();
@@ -112,5 +111,5 @@ void func_800399C4(void)
     case 5: case 6: case 7: case 8:
         break;
     }
-    g->c++;
+    g->pc++;
 }

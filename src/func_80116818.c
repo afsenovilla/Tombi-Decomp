@@ -115,7 +115,7 @@ void func_80116818(TObj *o)
             D_8009C93F = 0;
             D_8009C942 = 0;
             o->animTimer = 0xa0;
-            o->animFrame = U16(o, 0x42);
+            o->animFrame = (*(unsigned short*)((char*)&o->h + 2));
             o->state++;
         }
         break;

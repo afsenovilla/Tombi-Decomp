@@ -1,5 +1,6 @@
 // FUNC 8012cb78 2356 X001
 // MATCHING 8012cb78 2356
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
@@ -16,7 +17,6 @@ extern unsigned char D_8013C800[];
 extern unsigned short D_8013C8E8[];
 extern char D_80077CF4[];
 extern short D_1F80027E, D_1F800284;
-extern unsigned char D_800A603E, D_800A60E4;
 extern void spawnItemNotification(int, int);
 extern short func_8004065C(TObj *, short, short, short);
 extern TObj *FUN_80018448(void);
@@ -96,7 +96,7 @@ void func_8012CB78(TObj *o)
         }
         break;
     case 1:
-        D_800A603E = 2;
+        PLAYER.obj.state = 2;
         st = o->state;
         o->state = st + 1;
         if (o->velV == 0) {
@@ -162,7 +162,7 @@ void func_8012CB78(TObj *o)
             o->box3 = *p1;
             o->animTimer = ((AH *)o->anim)->w6 & 0x3fff;
             if (o->velH <= 0) {
-                D_800A60E4 = 3;
+                (*(unsigned char*)&PLAYER.obj.wac) = 3;
                 o->state = 6;
             }
         }

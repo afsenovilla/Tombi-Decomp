@@ -1,9 +1,9 @@
 // FUNC 8012c004 420 X004
 // MATCHING 8012c004 420
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F, D_8009C942;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern unsigned char D_8009CE24[];
 extern void *D_80135748[];
 extern void *D_80135750[];
@@ -45,9 +45,9 @@ void func_8012C004(TObj *o)
         o->state++;
         D_8009C93F = 1;
         D_8009C942 = 1;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 5;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->d90 = showMessageBoxDirect(m, n, &o->a);
         o->wac = 2;
         o->animFrame = o->b68 & 1;
@@ -61,9 +61,9 @@ void func_8012C004(TObj *o)
         p->b04 = 3;
         D_8009C93F = 0;
         D_8009C942 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER.obj.b04 = 1;
+        PLAYER.obj.step = 0;
+        PLAYER.obj.state = 0;
         o->state = 0;
         o->wac = 0;
         o->anim = D_80135748[0];

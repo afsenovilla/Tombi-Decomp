@@ -1,5 +1,6 @@
 // FUNC 8011f2b0 1044 X001
 // MATCHING 8011f2b0 1044
+#include "player.h"
 /* Debt: empty do {} while (0) after the b04 store in the default arm ends the sched block so the call
    arguments are not scheduled above the store. */
 #include "TOBJ.H"
@@ -12,7 +13,6 @@ extern unsigned short D_800A604EA[];
 extern Fix16 * D_800A607CA[];
 extern int D_800A60C4A[];
 extern unsigned char D_800A6047A[];
-extern unsigned short *D_800A605C;
 extern unsigned char D_8009C985, D_8009C940, D_8009C941, D_8009CEAD;
 extern signed char D_80011EB4[];
 extern E4 D_80011E30[];
@@ -54,7 +54,7 @@ void func_8011F2B0(TObj *o)
             o->step = 0;
             o->state = 0;
         }
-        e = &D_80011E30[D_80011EB4[*D_800A605C]];
+        e = &D_80011E30[D_80011EB4[*(*(unsigned short **)&PLAYER.obj.anim)]];
         if (D_8009CEAD == 0) {
             o->b04 = 3;
             break;
@@ -81,7 +81,7 @@ void func_8011F2B0(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        e = &D_80011E30[D_80011EB4[*D_800A605C]];
+        e = &D_80011E30[D_80011EB4[*(*(unsigned short **)&PLAYER.obj.anim)]];
         if (o->animFrame & 1) {
             u = D_800A60C4A[0] + 0x80 - e->ang;
             c = u; c &= 0xff;

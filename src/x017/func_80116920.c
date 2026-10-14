@@ -57,14 +57,14 @@ void func_80116920(int n, short x, short y, short z, short t)
     o->a.raw = x << 16;
     o->y.raw = y << 16;
     o->b.raw = z << 16;
-    S16(o, 0x2c) = 0;
+    (*(short*)&o->animTimer) = 0;
     S16(o, 0x20) = t;
     S16(o, 0xc6) = i;
     o->wb6 = n / 10000 - h * 10;
     o->wb8 = n / 1000 - n / 10000 * 10;
     o->wba = n / 100 - n / 1000 * 10;
     o->wbc = n / 10 - n / 100 * 10;
-    S16(o, 0xbe) = n - n / 10 * 10;
+    (*(short*)&o->bbe) = n - n / 10 * 10;
     if (t == 1)
         X(o)->wc8 = 0;
     else

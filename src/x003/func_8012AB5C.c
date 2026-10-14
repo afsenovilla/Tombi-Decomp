@@ -1,5 +1,6 @@
 // FUNC 8012ab5c 1928 X003
 // MATCHING 8012ab5c 1928
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short v[6]; } V6;
@@ -8,12 +9,9 @@ extern AT D_80135DCC[];
 extern unsigned char D_8009CDC8;
 extern unsigned char D_8009CDC0[];
 extern unsigned char D_8009D003;
-extern Fix16 *D_800A6078;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned char D_8009C93E[];
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern short D_800A60EA;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -42,10 +40,10 @@ void func_8012AB5C(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
-        o->animFrame = D_800A6078->p.whole < o->h->p.whole;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->animFrame = (*(Fix16 **)&PLAYER.obj.h)->p.whole < o->h->p.whole;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
         o->state++;
@@ -163,10 +161,10 @@ void func_8012AB5C(TObj *o)
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
         D_8009C93E[0] = 0;
-        D_800A60EA = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        PLAYER.obj.wb2 = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         switch (WC2(o)) {
         case 0xf0:

@@ -1,11 +1,10 @@
 // FUNC 80124370 1680 X010
 // MATCHING 80124370 1680
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern Fix16 *D_800A6078, *D_800A607C;
-extern unsigned short D_800A604E;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern int Rand(void);
@@ -41,16 +40,16 @@ static __inline__ void turn(TObj *o)
                 t = 0xfe;
             }
             o->d38 = b + (unsigned char)t;
-            o->d38 = U8(o, 0x38);
+            o->d38 = (*(unsigned char*)&o->d38);
         }
     }
 }
 
 static __inline__ int near(TObj *o)
 {
-    if ((unsigned short)(D_800A607C->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
-    if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
-    return (unsigned short)(D_800A604E - o->y.p.whole + 0x50) < 0xa1;
+    if ((unsigned short)((*(Fix16 **)&PLAYER.obj.d)->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
+    if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x64) >= 0xc9) return 0;
+    return (unsigned short)((*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x50) < 0xa1;
 }
 
 void func_80124370(TObj *o)
@@ -81,7 +80,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = 0x80;
         }
-        if (func_80123ECC(o, U8(o, 0x38))) {
+        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -105,7 +104,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = Rand() & 0x80;
         }
-        if (func_80123ECC(o, U8(o, 0x38))) {
+        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -133,7 +132,7 @@ void func_80124370(TObj *o)
             o->timer = Rand() & 0xbf;
         }
         mv(o);
-        func_80123ECC(o, U8(o, 0x38));
+        func_80123ECC(o, (*(unsigned char*)&o->d38));
         break;
     }
 }

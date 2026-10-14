@@ -26,7 +26,7 @@ void func_801161D4(TObj *o)
     if (D_8009C939 == 0) {
         switch (D_800A60D6) {
         case 4:
-            if (U8(p, 0xa9) == 0) goto c4;
+            if ((*(unsigned char*)((char*)&p->wa8 + 1)) == 0) goto c4;
         case 0:
         case 6:
         case 7:
@@ -36,25 +36,25 @@ void func_801161D4(TObj *o)
         case 11:
             FUN_80027c74(o);
             func_8002795C(o);
-            U8(o, 0x3d) = 0;
-            U8(o, 0x3c) = 0;
+            (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
+            (*(unsigned char*)&o->d3c) = 0;
             break;
         c4:
             t = p->animFrame & 1;
             if (t != o->w58) {
                 o->w58 = t;
-                U8(o, 0x3d) = 0;
-                U8(o, 0x3c) = 0;
+                (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
+                (*(unsigned char*)&o->d3c) = 0;
             }
-            if (U8(o, 0x3c) == 0) FUN_80027c74(o);
+            if ((*(unsigned char*)&o->d3c) == 0) FUN_80027c74(o);
             func_8002795C(o);
-            U8(o, 0x3d) = 0;
+            (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
             break;
         case 3:
             t = p->animFrame & 1;
             if (t != o->w58) {
                 o->w58 = t;
-                U8(o, 0x3d) = 0;
+                (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
             }
             goto f0;
         case 1:
@@ -63,14 +63,14 @@ void func_801161D4(TObj *o)
             t = p->animFrame & 1;
             if (t != o->w58) {
                 o->w58 = t;
-                U8(o, 0x3d) = 0;
-                U8(o, 0x3c) = 0;
+                (*(unsigned char*)((char*)&o->d3c + 1)) = 0;
+                (*(unsigned char*)&o->d3c) = 0;
             }
-            if (U8(o, 0x3c) == 0) {
+            if ((*(unsigned char*)&o->d3c) == 0) {
             f0:
                 FUN_80027c74(o);
             }
-            if (U8(o, 0x3d) == 0) func_8002795C(o);
+            if ((*(unsigned char*)((char*)&o->d3c + 1)) == 0) func_8002795C(o);
             break;
         }
         syncObjectTargetY(o);
@@ -80,6 +80,6 @@ void func_801161D4(TObj *o)
     if (D_8009C93F == 0 && p->b9e == 0 && (*(volatile unsigned short *)&D_8009D670 & 0xc00))
         FUN_800288c4(o, 1);
     FUN_800274e4(o);
-    if (D_1F8000F2 > S16(o, 0x32)) D_1F8000F0 = S16(o, 0x32) << 16;
+    if (D_1F8000F2 > (*(short*)((char*)&o->d30 + 2))) D_1F8000F0 = (*(short*)((char*)&o->d30 + 2)) << 16;
     FUN_8002771c(o);
 }

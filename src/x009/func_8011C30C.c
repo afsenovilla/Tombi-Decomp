@@ -1,9 +1,9 @@
 // FUNC 8011c30c 392 X009
 // MATCHING 8011c30c 392
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_800A60DA;
 extern unsigned char D_8009CDB4;
 extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern void setEventStarted(int, int, int);
@@ -13,7 +13,7 @@ void func_8011C30C(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (o->b69 == 1 && D_800A60DA == 1) o->step++;
+        if (o->b69 == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 1) o->step++;
         break;
     case 1:
         if (GAME.playerAP <= 0x249ef) {

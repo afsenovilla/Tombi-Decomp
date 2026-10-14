@@ -23,14 +23,14 @@ void func_80118AC0(TObj *o)
         o->b0d = 0;
         o->d3c = D_1F8002D4;
         o->anim = D_8013E694[o->subtype];
-        h = U8(o, 0x6c) >> 4;
+        h = (*(unsigned char*)&o->box0) >> 4;
         o->b04 = o->b04 + 1;
         if (h < 12) {
             o->d64 = (h << 10) + 0x1000;
         } else {
             o->d64 = 0x1000 - ((h - 11) << 9);
         }
-        h = U8(o, 0x6c) & 0xf;
+        h = (*(unsigned char*)&o->box0) & 0xf;
         if (h < 8) {
             o->d8c = h << 2;
         } else {

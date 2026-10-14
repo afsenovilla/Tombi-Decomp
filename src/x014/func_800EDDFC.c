@@ -1,5 +1,6 @@
 // FUNC 800eddfc 408 X014
 // MATCHING 800eddfc 408
+#include "player.h"
 typedef struct O {
     unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
     char p0[0x16 - 8]; unsigned short y;
@@ -10,8 +11,6 @@ typedef struct O {
     char p5[0x94 - 0x90]; struct O *p94;
 } O;
 extern void ObjCullRegister(O *);
-extern unsigned char D_800A60D6[];
-extern unsigned short D_800A6066;
 
 void func_800EDDFC(O *o)
 {
@@ -46,13 +45,13 @@ void func_800EDDFC(O *o)
             o->b6++;
             o->s7c = v;
         case 1:
-            if (D_800A6066 & 1) o->s7a = 1;
+            if (PLAYER.obj.animFrame & 1) o->s7a = 1;
             else o->s7a = -1;
             o->b6++;
         case 2:
             p = o->p94;
             o->d8c = ((p->d84 >> 3) + 0x1000) & 0xfff;
-            if (D_800A60D6[0] == 0) {
+            if (((unsigned char*)&PLAYER.obj.b9e)[0] == 0) {
                 o->d8c = 0;
                 o->b69 = 0;
                 o->b5 = 0;

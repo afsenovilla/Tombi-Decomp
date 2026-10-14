@@ -1,11 +1,10 @@
 // FUNC 801290f4 592 X009
 // MATCHING 801290f4 592
+#include "player.h"
 /* debt: register asm("$6") for the player pointer in pushR (without it gcc swaps a2/a3 with the box1 copy and the shared sh 2(a2) tail is not cross-jumped; score 75). */
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012B2E4[];
-extern Fix16 *D_800A6078;
-extern unsigned short D_800A604E;
 extern unsigned char D_8009C93A;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -14,19 +13,19 @@ extern void func_80128C44(TObj *);
 
 static __inline__ void pushL(short x, short w)
 {
-    if (x - w < D_800A6078->p.whole) D_800A6078->p.whole = x - w;
+    if (x - w < (*(Fix16 **)&PLAYER.obj.h)->p.whole) (*(Fix16 **)&PLAYER.obj.h)->p.whole = x - w;
 }
 
 static __inline__ void pushR(short w1, short w0, short x)
 {
-    register Fix16 *p asm("$6") = D_800A6078;
+    register Fix16 *p asm("$6") = (*(Fix16 **)&PLAYER.obj.h);
     if (p->p.whole < x + (w1 - w0)) p->p.whole = x + (w1 - w0);
 }
 
 void func_801290F4(TObj *o)
 {
     if (o->b0c == 0) {
-        if ((o->active & 8) && D_8009C93A && (unsigned short)(o->y.p.whole - D_800A604E + 0x80) < 0x100) {
+        if ((o->active & 8) && D_8009C93A && (unsigned short)(o->y.p.whole - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
             if (o->animFrame & 1)
                 pushL(o->h->p.whole, o->box0);
             else

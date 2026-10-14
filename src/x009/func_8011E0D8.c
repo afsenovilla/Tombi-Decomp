@@ -27,7 +27,7 @@ void func_8011E0D8(TObj *o)
         o->d8c = 0;
         PlayerSetAnimIfChanged(o, 9);
         o->wb6 = 0;
-        U16(DAT_8009c330, 2) = 0;
+        (*(unsigned short*)&DAT_8009c330->type) = 0;
         o->wb2 = 0;
         o->d30 = o->h->p.whole;
         o->d34 = o->y.p.whole;
@@ -57,7 +57,7 @@ void func_8011E0D8(TObj *o)
             o->d88 -= 0x10;
             if (o->d88 < 0xb0) o->d88 = 0xb0;
         }
-        o->d8c = U8(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -87,7 +87,7 @@ void func_8011E0D8(TObj *o)
         o->timer = 0xc;
         o->state++;
     skip:
-        o->d8c = U8(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -106,7 +106,7 @@ void func_8011E0D8(TObj *o)
             o->d88 -= 0x10;
             if (o->d88 < 0xd0) o->d88 = 0xd0;
         }
-        o->d8c = U8(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -120,12 +120,12 @@ void func_8011E0D8(TObj *o)
                 o->b9c = 0;
                 o->anim = D_80010C50;
                 AnimJump(o, 4);
-                U8(o, 0xaa) = 0;
+                (*(unsigned char*)&o->waa) = 0;
                 o->d88 = 0;
                 o->d8c = DAT_801152e8[o->wb0];
                 o->state++;
             } else if (--o->timer <= 0) {
-                U8(o, 0xac) = 1;
+                (*(unsigned char*)&o->wac) = 1;
                 FUN_800ee428(o);
                 o->step = 2;
                 o->state = 3;
@@ -137,11 +137,11 @@ void func_8011E0D8(TObj *o)
         o->y.p.whole += DAT_8009f0ec->velY;
         if (AnimAdvance(o)) {
             *(signed char *)&o->b0f = -8;
-            U16(DAT_8009c330, 2) = 0;
+            (*(unsigned short*)&DAT_8009c330->type) = 0;
             o->b9e = 0;
             o->velX = 0;
             o->velY = 0;
-            U8(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->anim = D_80010748;
             AnimLoadDuration(o);
             o->d8c = DAT_801152e8[o->wb0];

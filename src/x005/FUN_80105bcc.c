@@ -35,41 +35,41 @@ extern void func_8010E328(TObj *, int);
 
 #define LAND() \
     o->d8c = D_801152E8[o->wb0]; \
-    U8(D_8009C330, 8) = 0; \
+    (*(unsigned char*)&D_8009C330->w08) = 0; \
     o->b9c = 0; \
     o->ba7 = 0; \
-    U8(o, 0xac) = 0; \
+    (*(unsigned char*)&o->wac) = 0; \
     o->d84 = 0; \
     o->wb2 = 0; \
     o->velY = 0; \
     if (D_8009D2E8->type == 0x1c) { \
         switch (D_8009D2B1) { \
         case 1: \
-            U8(o, 0xac) = 0; \
+            (*(unsigned char*)&o->wac) = 0; \
             o->step = 0x2a; \
             o->state = 0; \
-            U8(o, 0xab) |= 0x80; \
+            (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
             return; \
         case 2: \
-            U8(o, 0xac) = 0; \
+            (*(unsigned char*)&o->wac) = 0; \
             o->step = 0x2b; \
             o->state = 0; \
-            U8(o, 0xab) |= 0x80; \
+            (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
             return; \
         default: \
-            U8(o, 0xac) = 0; \
+            (*(unsigned char*)&o->wac) = 0; \
         } \
     } \
     o->step = 0; \
     o->state = 0;
 
 #define TURN() \
-    U8(D_8009C330, 8) = 0; \
-    U8(o, 0xad) = 0; \
+    (*(unsigned char*)&D_8009C330->w08) = 0; \
+    (*(unsigned char*)((char*)&o->wac + 1)) = 0; \
     o->wb2 = 0; \
     D_8009C330->timer = 0xe; \
     if (D_8009D2E8->type == 0x1c && (t = D_8009D2B1) < 3 && t != 0) \
-        U8(o, 0xab) |= 0x80; \
+        (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
     if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4)) \
         o->ba7 = 1; \
     FUN_800ee428(o); \
@@ -166,7 +166,7 @@ void FUN_80105bcc(TObj *o)
             D_8009D2E8->step = 3;
             break;
         case 0x1c:
-            U8(o, 0xab) = 0;
+            (*(unsigned char*)((char*)&o->waa + 1)) = 0;
             switch (D_8009D2E8->subtype) {
             case 0 ... 2:
                 D_8009D2B1 = D_8009D2E8->subtype;
@@ -192,7 +192,7 @@ void FUN_80105bcc(TObj *o)
         o->d8c = 0x200;
         o->wb2 = 0x100;
         o->b9c = 2;
-        U8(o, 0xac) = 1;
+        (*(unsigned char*)&o->wac) = 1;
         o->velY = 0;
         o->substep = 4;
         break;
@@ -201,15 +201,15 @@ void FUN_80105bcc(TObj *o)
         o->y.raw += D_8009C946[0] << 8;
         FUN_800ef490(o);
         ObjMotionStep(o);
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = (TObj *)S32(o, 0xe4);
-            U8(D_8009C330, 8) = 0;
+            (*(unsigned char*)&D_8009C330->w08) = 0;
             D_8009C330->timer = 0;
             o->ba7 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
-            U8(o, 0xab) &= 0x7f;
+            (*(unsigned char*)((char*)&o->waa + 1)) &= 0x7f;
             break;
         }
         if (o->b69 == 1) {
@@ -233,12 +233,12 @@ void FUN_80105bcc(TObj *o)
                 TURN();
             }
         }
-        if (U8(o, 0xac) < 2) {
+        if ((*(unsigned char*)&o->wac) < 2) {
             D_8009F0EC = FUN_8004bbc0(o, 0);
             if (D_8009F0EC) {
-                U8(D_8009C330, 8) = 0;
+                (*(unsigned char*)&D_8009C330->w08) = 0;
                 D_8009C330->timer = 0;
-                U8(o, 0xac) = 0;
+                (*(unsigned char*)&o->wac) = 0;
                 o->ba7 = 0;
                 o->b9c = 0;
                 o->wb2 = 0;

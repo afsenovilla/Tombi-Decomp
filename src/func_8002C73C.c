@@ -1,14 +1,10 @@
 // FUNC 8002c73c 484 MAIN0
 // MATCHING 8002c73c 484
+#include "player.h"
 #include "TOBJ.H"
 extern char D_80014764[];
-extern unsigned short D_800A604A;
 extern unsigned short D_800A603C[];
-extern short D_800A604E[];
-extern unsigned short D_800A6052;
-extern unsigned short D_800A6066[];
 extern Fix16 *D_800A6078[];
-extern Fix16 *D_800A607C;
 extern void AnimLoadDuration(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
@@ -21,15 +17,15 @@ void func_8002C73C(TObj *o)
         if (o->step != 0) break;
         o->anim = D_80014764;
         AnimLoadDuration(o);
-        o->a.p.whole = D_800A604A;
+        o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
         if (D_800A603C[0] == 0x405) {
             o->y.p.whole = -0x24;
-        } else if (D_800A604E[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+        } else if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
             o->y.p.whole = -0xf0;
         } else {
             o->y.p.whole = -0x28;
         }
-        t = D_800A6052;
+        t = (*(unsigned short*)&PLAYER.obj.b.p.whole);
         o->b04 = 1;
         o->step = 0;
         o->b.p.whole = t;
@@ -41,13 +37,13 @@ void func_8002C73C(TObj *o)
             o->step++;
         case 1:
             o->h->p.whole = D_800A6078[0]->p.whole;
-            if (D_800A604E[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
                 o->y.p.whole = -0xf0;
             } else {
                 o->y.p.whole = -0x28;
             }
-            o->d->p.whole = D_800A607C->p.whole;
-            o->animFrame = D_800A6066[0] & 1;
+            o->d->p.whole = (*(Fix16 **)&PLAYER.obj.d)->p.whole;
+            o->animFrame = ((unsigned short*)&PLAYER.obj.animFrame)[0] & 1;
             break;
         }
         break;

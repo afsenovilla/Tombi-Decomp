@@ -34,11 +34,11 @@ void func_8011E688(TObj *o)
         FUN_800eeb5c(o, 10);
         o->d8c = 0;
         o->wb6 = 0;
-        U16(DAT_8009c330, 2) = 0;
+        (*(unsigned short*)&DAT_8009c330->type) = 0;
         o->wb2 = 0;
         o->velH = 0;
         o->velV = 0;
-        U8(o, 0xaa) = 1;
+        (*(unsigned char*)&o->waa) = 1;
         o->state++;
     case 1:
         k = DAT_8009d670;
@@ -78,7 +78,7 @@ void func_8011E688(TObj *o)
             o->y.raw += 0x28000;
             if (o->b69) {
                 o->d8c = DAT_801152e8[o->wb0];
-                U8(o, 0xaa) = 0;
+                (*(unsigned char*)&o->waa) = 0;
                 o->b9e = 0;
                 o->step = 0;
                 o->state = 0;
@@ -96,7 +96,7 @@ void func_8011E688(TObj *o)
             if ((unsigned short)dx < p->box1) {
                 if (o->b69 || func_801215C0(o, dx, dy, p->subtype)) {
                     o->d8c = DAT_801152e8[o->wb0];
-                    U8(o, 0xaa) = 0;
+                    (*(unsigned char*)&o->waa) = 0;
                     o->b9e = 0;
                     o->step = 0;
                     o->state = 0;
@@ -124,7 +124,7 @@ void func_8011E688(TObj *o)
             s = func_80121540(o, dx, dy, p->subtype);
             switch (s) {
             case 0:
-                v = 1; U8(DAT_8009c330, 8) = v;
+                v = 1; (*(unsigned char*)&DAT_8009c330->w08) = v;
                 {
                     Fix16 *h = o->h;
                     short n;
@@ -140,11 +140,11 @@ void func_8011E688(TObj *o)
                 o->wb2 = 0;
                 o->velH = 0;
                 o->velV = 0;
-                U8(o, 0xac) = 1;
+                (*(unsigned char*)&o->wac) = 1;
                 FUN_800ee428(o);
                 o->step = 2;
                 o->state = 3;
-                U8(o, 0xaa) = 0;
+                (*(unsigned char*)&o->waa) = 0;
                 break;
             case 2:
                 o->b9e = 5;
@@ -162,7 +162,7 @@ void func_8011E688(TObj *o)
         f = 1;
         o->b9c = f;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
             h = o->h;
             f = o->animFrame & 1;
             v = h->p.whole;
@@ -177,23 +177,23 @@ void func_8011E688(TObj *o)
     }
     if (o->b69) {
         FUN_8001e5f4(0x1c, 0x7f);
-        U8(DAT_8009c330, 8) = 0;
+        (*(unsigned char*)&DAT_8009c330->w08) = 0;
         o->ba7 = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->d8c = DAT_801152e8[o->wb0];
         o->step = 3;
         o->state = 1;
     } else if (FUN_8003fd78(o, 0, 0)) {
         FUN_8001e5f4(0x1c, 0x7f);
-        U8(DAT_8009c330, 8) = 0;
+        (*(unsigned char*)&DAT_8009c330->w08) = 0;
         o->ba7 = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->d8c = DAT_801152e8[o->wb0];
         o->step = 0;
         o->state = 0;

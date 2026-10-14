@@ -1,18 +1,19 @@
 // FUNC 80116c0c 304 X004
 // MATCHING 80116c0c 304
+#include "player.h"
 #include "TOBJ.H"
 
 extern short D_1F80016A, D_1F800172;
 extern unsigned short D_1F8001FC;
-extern unsigned char D_800A60E4, D_800A60A1, D_800A60D4, D_800A60D6, D_800A60E2, D_8009C940;
+extern unsigned char D_8009C940;
 extern unsigned char D_8009D2B0, D_8009C93F, D_8009C942;
 extern int tryStartItemInteraction(TObj *, int, int);
 
 static __inline__ short Blocked(void)
 {
-    if (D_800A60E4 >= 2) return 1;
-    if (!D_800A60A1) return 1;
-    if (D_8009C940 | (D_800A60E2 | (D_800A60D4 | D_800A60D6))) return 1;
+    if ((*(unsigned char*)&PLAYER.obj.wac) >= 2) return 1;
+    if (!PLAYER.obj.b69) return 1;
+    if (D_8009C940 | ((*(unsigned char*)&PLAYER.obj.waa) | (PLAYER.obj.b9c | PLAYER.obj.b9e))) return 1;
     if (D_1F8001FC & 0x10) return 0;
     return 1;
 }

@@ -36,7 +36,7 @@ void func_8011B170(TObj *o)
         if (o->b9e != 0)
             D_8009F0EC->b6a = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->ba7 = 0;
         U8(o, 0xc3) = 0;
         o->wb0 = 0;

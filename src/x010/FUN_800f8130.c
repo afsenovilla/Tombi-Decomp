@@ -64,7 +64,7 @@ void FUN_800f8130(TObj *o)
             if (o->d88 < 0xb0)
                 o->d88 = 0xb0;
         }
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
@@ -92,14 +92,14 @@ void FUN_800f8130(TObj *o)
                 o->state++;
             }
         }
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 1);
             o->d88 = 0;
@@ -118,14 +118,14 @@ void FUN_800f8130(TObj *o)
             if (o->d88 < 0xe0)
                 o->d88 = 0xe0;
         }
-        o->d8c = U8F(o, 0x88);
+        o->d8c = (*(unsigned char*)&o->d88);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
         if (o->b69) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 1);
             ADJ(-12, 12);
@@ -134,7 +134,7 @@ void FUN_800f8130(TObj *o)
                 break;
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 1);
             ADJ(-12, 12);
@@ -151,7 +151,7 @@ void FUN_800f8130(TObj *o)
             *(signed char *)&o->b0f = -8;
             DAT_8009c330->w02 = 0;
             o->b9e = 0;
-            U8F(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;
             o->velY = 0;
             o->animFrame = 0;

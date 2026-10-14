@@ -1,10 +1,8 @@
 // FUNC 8002c920 360 MAIN0
 // MATCHING 8002c920 360
+#include "player.h"
 #include "TOBJ.H"
 extern void *D_800121F4[];
-extern unsigned short D_800A6066;
-extern short D_800A604A;
-extern unsigned short D_800A604E;
 extern unsigned short D_800A6052[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -21,13 +19,13 @@ void func_8002C920(TObj *o)
         if (o->step == 0) {
             o->anim = D_800121F4[o->subtype];
             AnimLoadDuration(o);
-            x = D_800A604A;
-            if (D_800A6066 & 1) {
+            x = PLAYER.obj.a.p.whole;
+            if (PLAYER.obj.animFrame & 1) {
                 o->a.p.whole = x + 8;
             } else {
                 o->a.p.whole = x - 8;
             }
-            o->y.p.whole = D_800A604E + 0x10;
+            o->y.p.whole = (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x10;
             o->b.p.whole = D_800A6052[0];
             o->b04 = 1;
             o->step = 0;

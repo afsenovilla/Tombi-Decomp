@@ -36,14 +36,14 @@ extern void FUN_800f8b7c(TObj *, int, int);
         DAT_8009c330->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
-        U8(o, 0xaa) = 0; \
+        (*(unsigned char*)&o->waa) = 0; \
         DAT_8009f0ec->b69 = 0; \
     } \
     if (*(volatile unsigned short *)&DAT_8009d670 & 0x10) { \
         DAT_8009c330->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
-        U8(o, 0xaa) = 0; \
+        (*(unsigned char*)&o->waa) = 0; \
         DAT_8009f0ec->b69 = 0; \
     }
 
@@ -64,13 +64,13 @@ void FUN_800f8d2c(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             DAT_8009d2e8 = DAT_800a611c;
             DAT_8009d2e8->b04 = 2;
             DAT_8009d2e8->step = 2;
             DAT_8009d2e8->state = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         DAT_8009c934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
@@ -96,7 +96,7 @@ void FUN_800f8d2c(TObj *o)
         o->d30 = DAT_8009f0ec->h->p.whole + o->wb8;
         o->d34 = DAT_8009f0ec->y.p.whole + o->wba;
         FUN_8001e5f4(4, 0x7f);
-        U8(o, 0xaa) = 1;
+        (*(unsigned char*)&o->waa) = 1;
         o->state++;
     case 1:
         o->wb6 += DAT_8009c330->w0e;
@@ -164,7 +164,7 @@ void FUN_800f8d2c(TObj *o)
         if (*(volatile unsigned short *)&DAT_8009d670 & 0x40) {
             v = 0x10;
             DAT_8009c330->b09 = 0;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->b9e = 0;
             o->wb2 = 0;
             o->velH = 0;
@@ -192,7 +192,7 @@ void FUN_800f8d2c(TObj *o)
             o->step = 2;
             o->state = 3;
             o->y.p.whole += 4;
-            U8(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             DAT_8009f0ec->b69 = 0;
         }
         break;
@@ -209,7 +209,7 @@ void FUN_800f8d2c(TObj *o)
         if (*(volatile unsigned short *)&DAT_8009d670 & 0x40) {
             v = 0x10;
             DAT_8009c330->b09 = 0;
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
             o->b9e = 0;
             o->wb2 = 0;
@@ -225,7 +225,7 @@ void FUN_800f8d2c(TObj *o)
                 v = 0xf0;
             o->step = 2;
             o->state = 3;
-            U8(o, 0xaa) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->d88 = v;
             o->d8c = 0;
             DAT_8009f0ec->b69 = 0;

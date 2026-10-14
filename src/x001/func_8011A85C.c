@@ -1,9 +1,9 @@
 // FUNC 8011a85c 1696 X001
 // MATCHING 8011a85c 1696
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_800A60B4[];
 extern short D_8007A5F0[];
 extern char D_8013C474[];
 extern void playSFX(int);
@@ -35,7 +35,7 @@ void func_8011A85C(TObj *o)
         if (*(short *)((char *)o + 0x74) == 0) {
             o->d84 = 0;
             o->y.raw = o->d34;
-            if (D_800A60B4[0] == 0) {
+            if (((short*)&PLAYER.obj.velX)[0] == 0) {
                 o->animFrame = 4;
             } else {
                 if ((o->animFrame >> 1) & 1) {

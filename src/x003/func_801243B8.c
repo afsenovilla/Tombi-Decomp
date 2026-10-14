@@ -1,14 +1,12 @@
 // FUNC 801243b8 1984 X003
 // MATCHING 801243b8 1984
+#include "player.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8, wa, wc; } X;
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern unsigned char D_800A603C[];
-extern unsigned char D_800A603D[];
-extern unsigned char D_800A603E[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F80018C;
@@ -72,9 +70,9 @@ void func_801243B8(TObj *o)
         SETANIM(0x17);
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         D_800A4553[0] = 3;
         D_800A4568[0] = 0;
         D_1F80018C = o->h->raw;

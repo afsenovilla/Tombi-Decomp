@@ -17,7 +17,7 @@ void func_80120F34(TObj *o, TObj *p)
     if (o->b9e) return;
     r = func_80043464(o, p);
     if (r == -1) return;
-    switch (U8(o, 0xac)) {
+    switch ((*(unsigned char*)&o->wac)) {
     case 1:
         if (r == 3) {
             p->active = 2;
@@ -26,7 +26,7 @@ void func_80120F34(TObj *o, TObj *p)
             p->state = 0;
             p->b6a = 0;
             PTR(o, 0xe4) = p;
-            U8(o, 0xac) = 2;
+            (*(unsigned char*)&o->wac) = 2;
             FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             break;
         }
@@ -36,7 +36,7 @@ void func_80120F34(TObj *o, TObj *p)
         if (D_1F8001A4) break;
         if (o->active & 2) break;
         if (r == 2 && p->b6a == 1) {
-            if (U8(o, 0xac) == 1) U8(o, 0xac) = 0;
+            if ((*(unsigned char*)&o->wac) == 1) (*(unsigned char*)&o->wac) = 0;
             p->active = 4;
             p->b6a = 2;
             o->active = 2;

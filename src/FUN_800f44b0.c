@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X000
 // MATCHING 800f44b0 2488
+#include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -25,7 +26,6 @@ extern unsigned short D_8009D670;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
-extern char *D_800A605C;
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char D_801152E8[];
 extern void FUN_8001fe94(TObj *, int);
@@ -41,7 +41,7 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
 
 #define YADJ() \
-    if (U8(o, 0xad) == 0) { \
+    if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) { \
         if (o->subtype) { \
             if ((unsigned short)(o->wb0 + 5) >= 0xb) o->y.raw += 0x50000; \
             else o->y.raw += 0x30000; \
@@ -75,7 +75,7 @@ extern void FUN_8001e5f4(int, int);
     } \
     o->b69 = 0; \
     D_8009C330->b8 = 0; \
-    U8(o, 0xac) = 0; \
+    (*(unsigned char*)&o->wac) = 0; \
     o->ba7 = 0; \
     o->b9c = 0; \
     o->step = 0x32; \
@@ -86,7 +86,7 @@ extern void FUN_8001e5f4(int, int);
     FUN_8001e5f4(0x1c, 0x7f); \
     o->b9c = 0; \
     o->ba7 = 0; \
-    U8(o, 0xac) = 0; \
+    (*(unsigned char*)&o->wac) = 0; \
     o->b9d = 0; \
     o->d8c = D_801152E8[o->wb0]; \
     if (o->bbe & 0x20) { \
@@ -130,16 +130,16 @@ void FUN_800f44b0(TObj *o)
         o->d8c = 0;
         o->b9d = 1;
         U8(o, 0xc8) = 0;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
-            U8(D_800A611C, 4) = 2;
-            U8(D_8009D2E8, 5) = 2;
-            U8(D_8009D2E8, 6) = 0;
+            D_800A611C->b04 = 2;
+            D_8009D2E8->step = 2;
+            D_8009D2E8->state = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         U8(o, 0xc3) = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         U8(D_8009C330, 0) = 2;
         U8(D_8009C330, 7) = o->animFrame;
         D_8009C330->w2e = -1;
@@ -147,13 +147,13 @@ void FUN_800f44b0(TObj *o)
         D_8009C330->w2a = -1;
         switch (o->animFrame) {
         case 0: case 1: case 2: case 3:
-            D_800A605C = D_80010E80;
+            (*(char **)&PLAYER.obj.anim) = D_80010E80;
             break;
         case 4: case 5:
-            D_800A605C = D_80010EA0;
+            (*(char **)&PLAYER.obj.anim) = D_80010EA0;
             break;
         case 6: case 7:
-            D_800A605C = D_80010EC0;
+            (*(char **)&PLAYER.obj.anim) = D_80010EC0;
             break;
         }
         FUN_8001fe94(o, 0);
@@ -194,7 +194,7 @@ void FUN_800f44b0(TObj *o)
                 o->state = 2;
             }
         }
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = PTR(o, 0xe4);
             D_8009C330->b8 = 0;
             o->ba5 = 0;
@@ -242,7 +242,7 @@ void FUN_800f44b0(TObj *o)
             DROP();
             break;
         }
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = PTR(o, 0xe4);
             o->ba7 = 0;
             D_8009C330->b8 = 0;

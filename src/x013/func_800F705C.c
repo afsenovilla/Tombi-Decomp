@@ -95,7 +95,7 @@ static __inline__ void swing(TObj *o, int p)
 #define CATCH() { \
     int d = 0x10; \
     D_8009C330->b9 = 0; \
-    U8(o, 0xac) = 1; \
+    (*(unsigned char*)&o->wac) = 1; \
     o->b9e = 0; \
     o->wb2 = 0; \
     o->velH = 0; \
@@ -126,13 +126,13 @@ void func_800F705C(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
@@ -160,7 +160,7 @@ void func_800F705C(TObj *o)
         o->d8c = 0;
         o->d30 = D_8009F0EC->h->p.whole;
         o->d34 = D_8009F0EC->y.p.whole;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         if (o->animFrame & 1) {
             o->d8c = 0x100;
             o->wb8 -= 6;

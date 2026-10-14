@@ -31,7 +31,7 @@ void func_80118724(TObj *o)
             o->wb6 = 0;
             o->wb4 = 0;
             S16(o, 0xc0) = 2;
-            S16(o, 0xbe) = 0;
+            (*(short*)&o->bbe) = 0;
             o->wbc = 0;
             S16(o, 0xc6) = 0x20;
             S16(o, 0xc4) = 0;

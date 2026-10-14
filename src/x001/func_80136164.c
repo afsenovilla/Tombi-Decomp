@@ -1,8 +1,8 @@
 // FUNC 80136164 824 X001
 // MATCHING 80136164 824
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern Fix16 *D_800A6078;
 extern unsigned char D_8009C942[], D_8009C93F[], D_8009C93E[];
 extern void *D_8013DE2C, *D_8013DDC8, *D_8013DE0C, *D_8013DDB0;
 extern void func_80135B48(TObj *);
@@ -25,7 +25,7 @@ void func_80136164(TObj *o)
         if (GAME.selectedArea == 1 && GAME.selectedSection < 2) o->anim = D_8013DE2C;
         else o->anim = D_8013DDC8;
         AnimLoadDuration(o);
-        o->animFrame = o->h->p.whole > D_800A6078->p.whole;
+        o->animFrame = o->h->p.whole > (*(Fix16 **)&PLAYER.obj.h)->p.whole;
         o->timer = 0x3c;
         o->state = 1;
         break;

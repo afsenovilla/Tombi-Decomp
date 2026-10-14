@@ -33,7 +33,7 @@ void initItemObject(TObj *o)
     d = DAT_8007b14c[DAT_8007b084[o->subtype]];
     o->b0a = d->b0;
     o->w1e = d->b2;
-    S8(o, 0xf) = -9;
+    (*(signed char*)&o->b0f) = -9;
     o->b0d = d->b5;
     o->box0 = d->bx0;
     o->box1 = d->bx1;

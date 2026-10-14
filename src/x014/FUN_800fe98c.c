@@ -65,7 +65,7 @@ static __inline__ void move(TObj *o)
     o->active = c3; \
     S16(o, 0xe0) = 0x8c; \
     o->b9c = c2; \
-    U8(o, 0xac) = c1; \
+    (*(unsigned char*)&o->wac) = c1; \
     U8(o, 0xd1) = 0; \
     o->timer = 10; \
     o->d84 = 0; \
@@ -99,13 +99,13 @@ void FUN_800fe98c(TObj *o)
         FUN_8001e560(0x23, 0x24);
         FUN_8001e4f0(0x1f);
         o->b9c = 1;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
@@ -116,7 +116,7 @@ void FUN_800fe98c(TObj *o)
         if (o->b9e != 0)
             D_8009F0EC->b6a = 0;
         o->b9e = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->ba7 = 0;
         o->wb0 = 0;
         D_8009C330->b8 = 0;

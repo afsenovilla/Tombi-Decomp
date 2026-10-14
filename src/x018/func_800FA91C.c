@@ -50,38 +50,38 @@ void func_800FA91C(TObj *o)
         }
         o->b9e = 0;
         o->bbe = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->ba4 = 0;
         o->b9d = 0;
         o->d8c = 0;
         o->wb0 = 0;
-        U8(D_8009C330, 8) = 0;
-        U8(D_8009C330, 9) = 0;
+        (*(unsigned char*)&D_8009C330->w08) = 0;
+        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
         D_8009C330->b0a = 0;
         o->velV = 0;
         setanim(o, 0x1e);
         D_8009C330->b0a = 0;
-        U8(D_8009C330, 9) = 0xff;
+        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0xff;
         o->substep = 0;
         o->state++;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        U8(D_8009C330, 0) = 0;
+        D_8009C330->active = 0;
     case 1:
         o->wb0 = 0;
         o->wb6 = 0;
         AnimAdvance(o);
-        if (--U8(D_8009C330, 9) != 0) {
+        if (--(*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) {
             if (D_1f8001fc) {
                 if (D_1f8001fc & 0x80)
                     o->animFrame = 1;
@@ -93,7 +93,7 @@ void func_800FA91C(TObj *o)
                     o->b9c = 2;
                     SfxPlay2(2, 4);
                     D_8009C330->b0a = 0;
-                    U8(D_8009C330, 9) = 0;
+                    (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
                     o->state = 3;
                     o->timer = 0;
                     o->substep = 1;
@@ -101,7 +101,7 @@ void func_800FA91C(TObj *o)
             }
         } else {
             D_8009C330->b0a = 0;
-            U8(D_8009C330, 9) = 0xff;
+            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0xff;
             o->timer = 0;
         }
         if (o->w98 != o->w9a) {
@@ -116,7 +116,7 @@ void func_800FA91C(TObj *o)
             o->w9a = o->w98;
             setanim(o, 0x10);
             D_8009C330->b0a = 0;
-            U8(D_8009C330, 9) = 0xff;
+            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0xff;
             SfxPlay2(0x23, 0x24);
             FUN_80025f40(0, 0x81, 0x81, 0x3c);
             o->timer = 0x3c;
@@ -127,7 +127,7 @@ void func_800FA91C(TObj *o)
         if (--o->timer != 0) break;
         setanim(o, 0);
         D_8009C330->b0a = 0;
-        U8(D_8009C330, 9) = 0;
+        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
         o->state = 1;
         break;
     case 3:

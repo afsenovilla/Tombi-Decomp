@@ -1,10 +1,10 @@
 // FUNC 8003ab78 36 MAIN0
 // MATCHING 8003ab78 36
-extern unsigned char *SCRIPT_CTX;
-extern unsigned char D_800A60A1;
+#include "scriptctx.h"
+#include "player.h"
 void scriptOpGetPlayerTouchFlag(void)
 {
-    unsigned char *p = SCRIPT_CTX;
-    *(int *)(p + 0x1190) = D_800A60A1;
-    (*(short *)(p + 0x8a))++;
+    ScriptCtx *p = SCRIPT_CTX;
+    p->arg[0] = PLAYER.obj.b69;
+    ((*(short*)&p->pc))++;
 }

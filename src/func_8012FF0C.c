@@ -1,12 +1,10 @@
 // FUNC 8012ff0c 916 X000
 // MATCHING 8012ff0c 916
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_800A604A[], D_800A604E[];
 extern unsigned char D_800A6066[];
 extern short D_800A6066s;
-extern int D_800A60C4[];
-extern unsigned char D_800A603E[];
 extern void *D_8013B224;
 
 void func_8012FF0C(TObj *o)
@@ -20,8 +18,8 @@ void func_8012FF0C(TObj *o)
             break;
         case 1:
             o->d88 = 0x10;
-            D_800A604A[0] = o->h->p.whole;
-            D_800A604E[0] = o->y.p.whole - 10;
+            ((short*)&PLAYER.obj.a.p.whole)[0] = o->h->p.whole;
+            ((short*)&PLAYER.obj.y.p.whole)[0] = o->y.p.whole - 10;
             o->b6a = 0;
             break;
         case 2:
@@ -47,7 +45,7 @@ void func_8012FF0C(TObj *o)
             o->velY -= o->velH;
         else
             o->velY += o->velH;
-        D_800A60C4[0] = o->d8c = (((unsigned short)o->velY << 16) >> 24) + o->d88 & 0xff;
+        ((int*)&PLAYER.obj.d8c)[0] = o->d8c = (((unsigned short)o->velY << 16) >> 24) + o->d88 & 0xff;
         if (o->velH <= 0) {
             o->velH = 0;
             o->state++;
@@ -61,7 +59,7 @@ void func_8012FF0C(TObj *o)
             o->velY += o->velH;
         else
             o->velY -= o->velH;
-        D_800A60C4[0] = o->d8c = (((unsigned short)o->velY << 16) >> 24) + o->d88 & 0xff;
+        ((int*)&PLAYER.obj.d8c)[0] = o->d8c = (((unsigned short)o->velY << 16) >> 24) + o->d88 & 0xff;
         if (o->velH >= 0x400) {
             o->velH = 0x400;
             o->state--;
@@ -77,11 +75,11 @@ chk:
     case 3:
         if (GAME.playerHealth == 0) {
             o->state = 6;
-            D_800A603E[0]++;
+            ((unsigned char*)&PLAYER.obj.state)[0]++;
             break;
         }
         if (o->subtype == 1) {
-            D_800A603E[0]++;
+            ((unsigned char*)&PLAYER.obj.state)[0]++;
             D_800A6066s = 1 - o->b6b;
         }
         goto next;

@@ -15,21 +15,21 @@ void func_80108708(TObj *o)
     short r;
     switch (o->state) {
     case 0:
-        U8(D_8009C330, 8) = o->active;
+        (*(unsigned char*)&D_8009C330->w08) = o->active;
         f = o->animFrame;
         o->velX = 0x5a;
         o->velY = -0x200;
         o->active = 2;
         o->d8c = 0;
         o->b9c = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->b9d = 0;
         o->b9e = 0;
         o->b9f = 0;
-        U8(o, 0xad) = 0;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 0;
         o->b69 = 0;
-        S8(o, 0xf) = -20;
-        U8(o, 0xa2) = 2;
+        (*(signed char*)&o->b0f) = -20;
+        (*(unsigned char*)((char*)&o->da0 + 2)) = 2;
         o->animFrame = f & 1;
         PlayerSetAnimIfChanged(o, 0x15);
         o->state++;
@@ -48,7 +48,7 @@ void func_80108708(TObj *o)
         o->velX -= 5;
         o->velY += 0x10;
         if (o->velX == 0) {
-            S8(o, 0xf) = -8;
+            (*(signed char*)&o->b0f) = -8;
             PlayerSetAnimIfChanged(o, 0x16);
             o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
             if (S16(o, 0xe0) != 0) {
@@ -61,18 +61,18 @@ void func_80108708(TObj *o)
             D_8009C330->timer = 0;
             FUN_800ee428(o);
             o->b04 = 1;
-            U8(o, 0xa2) = 0;
+            (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
             o->step = 2;
             o->state = 3;
         } else {
             r = FUN_8004245c(o->h->p.whole, o->y.p.whole,
                              (short)(o->d->p.whole + ((D_1f8001c8 & 1) ? -5 : 5)));
             if (r != 0) {
-                U8(o, 0xaa) = 1;
+                (*(unsigned char*)&o->waa) = 1;
                 if (r == 1) {
                     o->d->p.whole += (D_1f8001c8 & 1) ? -5 : 5;
                     o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
-                    U8(o, 0xa2) = 3;
+                    (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
                     o->wb2 = 0;
                     o->step = 0x15;
                     o->state = 0;

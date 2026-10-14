@@ -1,10 +1,10 @@
 // FUNC 8012a740 376 X004
 // MATCHING 8012a740 376
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w; short idx; void **ptrs; } E;
 extern E D_801311C8[];
 extern int SPR_DATA[];
-extern unsigned char D_800A6047;
 extern unsigned char D_8009CF2D;
 extern void FUN_8001fe6c(TObj *);
 
@@ -24,7 +24,7 @@ void func_8012A740(TObj *o)
         o->b0d = 0;
         o->b68 = 0;
         o->category |= 0x80;
-        o->b0f = D_800A6047 + 10;
+        o->b0f = PLAYER.obj.b0f + 10;
         o->b04++;
     }
 }

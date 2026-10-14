@@ -9,7 +9,7 @@ extern void func_800EEA3C(TObj *);
 void func_8011D378(TObj *o)
 {
     o->b69 = 0;
-    U8(o, 0xac) = 3;
+    (*(unsigned char*)&o->wac) = 3;
     o->b9c = 0;
     o->velX = 0;
     o->velY = 0;

@@ -16,7 +16,7 @@ void FUN_8004a124(TObj *o)
 
     switch (o->state) {
     case 0:
-        if ((S32(s, 4) & 0xffffff) != 0x30405)
+        if (((*(int*)&s->b04) & 0xffffff) != 0x30405)
             break;
         o->h->p.whole = s->h->p.whole;
         s->h->p.whole = o->h->p.whole;
@@ -29,7 +29,7 @@ void FUN_8004a124(TObj *o)
         s->state = 0;
         FUN_800eea7c(s, 0x2c, 0);
         o->wac = 1;
-        o->anim = ((void **)S32(o, 0xa8))[1];
+        o->anim = ((void **)(*(int*)&o->wa8))[1];
         AnimLoadDuration(o);
         o->velV = 0x500;
         o->state++;
@@ -46,7 +46,7 @@ void FUN_8004a124(TObj *o)
             o->timer = 0x1e;
             o->wac = 0;
             o->state++;
-            o->anim = ((void **)S32(o, 0xa8))[0];
+            o->anim = ((void **)(*(int*)&o->wa8))[0];
             AnimLoadDuration(o);
         }
         break;
@@ -59,7 +59,7 @@ void FUN_8004a124(TObj *o)
         if (TileCollideAt(s, s->h->p.whole, s->y.p.whole + 0x14)) {
             o->wac = 0;
             o->state++;
-            o->anim = ((void **)S32(o, 0xa8))[0];
+            o->anim = ((void **)(*(int*)&o->wa8))[0];
             AnimLoadDuration(o);
         }
         break;
@@ -85,7 +85,7 @@ void FUN_8004a124(TObj *o)
             o->b0f = s->b0f + 1;
             o->wac = 3;
             o->animFrame = 0;
-            o->anim = ((void **)S32(o, 0xa8))[3];
+            o->anim = ((void **)(*(int*)&o->wa8))[3];
             AnimLoadDuration(o);
         }
         break;

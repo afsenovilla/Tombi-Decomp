@@ -1,10 +1,10 @@
 // FUNC 8012cc10 432 X003
 // MATCHING 8012cc10 432
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009CF03[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void *D_801399CC[], *D_801399BC[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe6c(TObj *);
@@ -29,11 +29,11 @@ void func_8012CC10(TObj *o)
         FUN_8001fec0(o);
         if (o->b68 == 0)
             break;
-        D_800A603C[0] = 5;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 5;
         o->state++;
         o->animFrame = o->b68 & 1;

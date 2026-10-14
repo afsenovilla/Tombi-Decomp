@@ -1,5 +1,6 @@
 // FUNC 80126688 1480 X004
 // MATCHING 80126688 1480
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -9,7 +10,6 @@ typedef struct {
 typedef struct { short x, y; } P2;
 
 extern short *D_800A6078;
-extern short D_800A604E;
 extern short D_1F8001C8;
 extern void *D_801345B8[], *D_801345E8[], *D_801345EC[], *D_80134604[];
 extern void AnimLoadDuration(TObj *);
@@ -71,7 +71,7 @@ void func_80126688(BX *b)
         p.x = o->h->p.whole;
         p.y = o->y.p.whole;
         q.x = D_800A6078[1];
-        q.y = D_800A604E;
+        q.y = PLAYER.obj.y.p.whole;
         *(short *)&o->bbe = angleBetweenPoints(p, q) + 0x100;
         if (o->h->p.whole >= D_800A6078[1]) o->animFrame = 1;
         else o->animFrame = 0;

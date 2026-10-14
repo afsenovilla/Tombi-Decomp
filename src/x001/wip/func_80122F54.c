@@ -53,8 +53,8 @@ void func_80122F54(TObj *o)
         PlayerSetAnimIfChanged(o, 0xa);
         o->d8c = 0;
         o->wb6 = 0;
-        U16(DAT_8009c330, 2) = 0;
-        U8(o, 0xaa) = 1;
+        (*(unsigned short*)&DAT_8009c330->type) = 0;
+        (*(unsigned char*)&o->waa) = 1;
         {
             int t = o->wb8;
             Fix16 *h;
@@ -94,8 +94,8 @@ void func_80122F54(TObj *o)
             }
             break;
         }
-        if (U16(DAT_8009c330, 2)) o->y.raw += 0x10000;
-        U16(DAT_8009c330, 2) = 1;
+        if ((*(unsigned short*)&DAT_8009c330->type)) o->y.raw += 0x10000;
+        (*(unsigned short*)&DAT_8009c330->type) = 1;
         {
             volatile unsigned short *k = DAT_8009d670;
             if (!(*k & 0x50)) {
@@ -123,8 +123,8 @@ void func_80122F54(TObj *o)
         }
         if (o->b69 || (a = o->h->p.whole, TileCollideAt(o, (short)((o->animFrame & 1) ? a + 9 : a - 9), (short)(o->y.p.whole + 0x10)))) {
             o->d8c = DAT_801152e8[o->wb0];
-            U16(DAT_8009c330, 2) = 0;
-            U8(o, 0xaa) = 0;
+            (*(unsigned short*)&DAT_8009c330->type) = 0;
+            (*(unsigned char*)&o->waa) = 0;
             o->b9e = 0;
             o->step = 0;
             o->state = 0;
@@ -216,9 +216,9 @@ void func_80122F54(TObj *o)
             o->wb2 = 0;
             o->velH = 0;
             o->velV = 0;
-            U16(DAT_8009c330, 2) = 0;
-            U8(o, 0xaa) = 0;
-            U8(o, 0xac) = 1;
+            (*(unsigned short*)&DAT_8009c330->type) = 0;
+            (*(unsigned char*)&o->waa) = 0;
+            (*(unsigned char*)&o->wac) = 1;
             FUN_800ee428(o);
             o->step = 2;
             o->state = 3;
@@ -231,10 +231,10 @@ void func_80122F54(TObj *o)
     }
     if (D_1F8001FC & D_1F8003C6) {
         D_8009D2B0 = 0;
-        U8(o, 0xaa) = 0;
+        (*(unsigned char*)&o->waa) = 0;
         o->b9c = 1;
         o->b9e = 0;
-        U16(DAT_8009c330, 2) = 0;
+        (*(unsigned short*)&DAT_8009c330->type) = 0;
         a = o->h->p.whole;
         if (o->animFrame & 1) o->h->p.whole = a + 0x10;
         else o->h->p.whole = a - 0x10;

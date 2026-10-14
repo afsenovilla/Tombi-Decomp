@@ -1,5 +1,6 @@
 // FUNC 801177dc 1112 X011
 // MATCHING 801177dc 1112
+#include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
@@ -7,9 +8,7 @@ extern AT D_80119C48[];
 extern unsigned char D_8009C942[];
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D082[];
-extern short D_800A60EA[];
 extern short D_1F8001C6;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
@@ -27,9 +26,9 @@ void func_801177DC(TObj *o)
         v = *(V6 *)&o->a;
         D_8009C942[0] = 1;
         D_8009D2B0 = 2;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         o->anim = D_80119C48[o->subtype].anims[2];
@@ -69,7 +68,7 @@ void func_801177DC(TObj *o)
         p->b04 = 3;
         D_1F8001C6 = 0;
         D_8009C942[0] = 0;
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         q = allocObjectLayer5();
         if (q != 0) {
             q->active = 2;
@@ -117,11 +116,11 @@ void func_801177DC(TObj *o)
         o->state++;
         break;
     case 9:
-        D_800A60EA[0] = 0;
+        ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->b68 = 0;
         o->b04 = 2;
         break;

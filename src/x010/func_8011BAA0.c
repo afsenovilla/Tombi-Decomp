@@ -20,14 +20,14 @@ void func_8011BAA0(TObj *o)
         FUN_800ee428(o);
         o->b9d = 1;
         U8(o, 0xc8) = 0;
-        U8(o, 0xa0) = 0;
-        U8(o, 0xa1) = 0;
+        (*(unsigned char*)&o->da0) = 0;
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         o->wb0 = 0;
         o->wb6 = 0;
         D_8009C330->active = 2;
         D_8009C330->animFrame = 0xffff;
-        U16(D_8009C330, 0x28) = 0xffff;
-        U16(D_8009C330, 0x2a) = 0xffff;
+        (*(unsigned short*)&D_8009C330->movetab) = 0xffff;
+        (*(unsigned short*)((char*)&D_8009C330->movetab + 2)) = 0xffff;
         o->state = 2;
         break;
     case 2:
@@ -37,9 +37,9 @@ void func_8011BAA0(TObj *o)
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
-        if (U8(o, 0xac) == 2) {
+        if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = S32(o, 0xe4);
-            U8(D_8009C330, 8) = 0;
+            (*(unsigned char*)&D_8009C330->w08) = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -47,7 +47,7 @@ void func_8011BAA0(TObj *o)
         }
         if (o->velY > 0) {
             FUN_800ee428(o);
-            U8(o, 0xac) = 1;
+            (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->step = 4;
             o->state = 3;
@@ -55,7 +55,7 @@ void func_8011BAA0(TObj *o)
         pl = D_8009C330;
         if (pl->active == 0) {
             if (U8(o, 0xc6) == 0) {
-                U8(o, 0xac) = 0;
+                (*(unsigned char*)&o->wac) = 0;
                 PlayerSetAnimIfChanged(o, 4);
                 o->b9d = 0;
                 o->b9c = 1;
@@ -70,8 +70,8 @@ void func_8011BAA0(TObj *o)
                 o->state = 2;
             }
         } else if (U8(o, 0xc8)) {
-            U8(pl, 8) = 0;
-            U8(o, 0xac) = 0;
+            (*(unsigned char*)&pl->w08) = 0;
+            (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
             o->step = 0x32;

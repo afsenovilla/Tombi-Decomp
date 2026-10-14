@@ -1,5 +1,6 @@
 // FUNC 80126e54 1576 X004
 // MATCHING 80126e54 1576
+#include "player.h"
 #include "TOBJ.H"
 typedef struct {
     TObj o;
@@ -13,7 +14,6 @@ typedef struct {
 extern unsigned char D_8009C942;
 extern int D_1F8002DC;
 extern unsigned short D_1F8001C8;
-extern Fix16 *D_800A607C;
 extern void *D_80134608[], *D_801345F4[], *D_80134610[], *D_80134614[];
 extern char D_80077CDC[], D_80077D90[];
 extern short FUN_8005e420(int, int);
@@ -102,7 +102,7 @@ void func_80126E54(TObj *o)
         } else {
             X(o)->wca = 0;
         }
-        if (!(D_800A607C->p.whole < o->d->p.whole)) o->w08 = FUN_8005e420(0xe0, 0x1f0);
+        if (!((*(Fix16 **)&PLAYER.obj.d)->p.whole < o->d->p.whole)) o->w08 = FUN_8005e420(0xe0, 0x1f0);
         else o->w08 = FUN_8005e420(0xe0, 0x1f2);
         X(o)->wc0 = D_1F8001C8;
         break;

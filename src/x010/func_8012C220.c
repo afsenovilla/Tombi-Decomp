@@ -1,9 +1,9 @@
 // FUNC 8012c220 908 X010
 // MATCHING 8012c220 908
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F[], D_8009C942[], D_8009D07A;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void *D_801322F4[], *D_801322E4[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -17,11 +17,11 @@ void func_8012C220(TObj *o)
     case 0:
         o->state++;
         ObjSetFacingToPlayer(o);
-        D_800A603C[0] = 5;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 5;
         o->anim = D_801322F4[0];
         AnimLoadDuration(o);
@@ -101,9 +101,9 @@ void func_8012C220(TObj *o)
             ((TObj *)o->d90)->b04 = 3;
             D_8009C93F[0] = 0;
             D_8009C942[0] = 0;
-            D_800A603C[0] = 1;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+            ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+            ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->state++;
             setEventComplete(0x3e, 1);
         }

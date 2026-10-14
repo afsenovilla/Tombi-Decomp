@@ -56,9 +56,9 @@ void FUN_80122118(TObj *o)
                 v[1].p.whole = o->y.p.whole - 0x20;
                 v[2].p.whole = o->d->p.whole;
                 spawnItemFromEntry(DAT_80138f04, v, 0, -0x400, o);
-                U8(PTR(o, 0xb4), 4) = 2;
-                U8(PTR(o, 0xb8), 4) = 2;
-                U8(PTR(o, 0xbc), 4) = 2;
+                U8((*(void **)&o->wb4), 4) = 2;
+                U8((*(void **)&o->wb8), 4) = 2;
+                U8((*(void **)&o->wbc), 4) = 2;
                 U8(PTR(o, 0xc0), 4) = 2;
                 U8(PTR(o, 0xc4), 4) = 2;
                 U8(PTR(o, 0xc8), 4) = 2;

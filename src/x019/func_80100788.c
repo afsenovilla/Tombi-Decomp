@@ -149,19 +149,19 @@ static __inline__ void turn(TObj *o)
     unsigned short u = c;
     if (s != 0) {
         if (u < 0x80) {
-            if (s >= 4) { o->d8c = a + 4; o->d8c = U8(o, 0x8c); }
-            else if (s < 2) { o->d8c = a + 1; o->d8c = U8(o, 0x8c); }
-            else { o->d8c = a + 2; o->d8c = U8(o, 0x8c); }
+            if (s >= 4) { o->d8c = a + 4; o->d8c = (*(unsigned char*)&o->d8c); }
+            else if (s < 2) { o->d8c = a + 1; o->d8c = (*(unsigned char*)&o->d8c); }
+            else { o->d8c = a + 2; o->d8c = (*(unsigned char*)&o->d8c); }
         } else {
-            if (s < 0xfd) { o->d8c = a - 4; o->d8c = U8(o, 0x8c); }
-            else if (s < 0xff) { o->d8c = a - 2; o->d8c = U8(o, 0x8c); }
-            else { o->d8c = a - 1; o->d8c = U8(o, 0x8c); }
+            if (s < 0xfd) { o->d8c = a - 4; o->d8c = (*(unsigned char*)&o->d8c); }
+            else if (s < 0xff) { o->d8c = a - 2; o->d8c = (*(unsigned char*)&o->d8c); }
+            else { o->d8c = a - 1; o->d8c = (*(unsigned char*)&o->d8c); }
         }
     }
 }
 
 #define chk(o, n) \
-    if (U8(o, 0xac) != 2 && o->step == n) { \
+    if ((*(unsigned char*)&o->wac) != 2 && o->step == n) { \
         if (o->b9e == 0) FUN_8010e328(o, 1); \
     }
 
@@ -206,7 +206,7 @@ void func_80100788(TObj *o, int p2)
     case 3:
         FUN_800f44b0(o);
         turn(o);
-        if (U8(o, 0xac) < 2) FUN_800f00ac(o);
+        if ((*(unsigned char*)&o->wac) < 2) FUN_800f00ac(o);
         break;
     case 4:
         if (o->b9d == 0) {

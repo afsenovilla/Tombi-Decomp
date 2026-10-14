@@ -1,8 +1,8 @@
 // FUNC 8012a820 1532 X000
 // MATCHING 8012a820 1532
+#include "player.h"
 #include "TOBJ.H"
 extern char D_80077CF4[];
-extern unsigned char D_800A603E;
 extern unsigned char D_800A60E4[];
 extern void *D_8013A1EC[];
 extern void *D_8013A1F0[];
@@ -65,7 +65,7 @@ void func_8012A820(TObj *o)
         }
         break;
     case 2:
-        D_800A603E = 2;
+        PLAYER.obj.state = 2;
         o->timer = 4;
         o->wac = 0x23;
         o->state++;

@@ -39,7 +39,7 @@ void func_800FA01C(TObj *o)
         U8(p, 8) = 0;
         p->we = 0;
         p->w2 = 0;
-        U8(D_8009C330, 9) = 0;
+        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
         ((PL *)D_8009C330)->wc = 0;
         ((PL *)D_8009C330)->w28 = 0xffff;
         ((PL *)D_8009C330)->w2a = 0xffff;
@@ -51,19 +51,19 @@ void func_800FA01C(TObj *o)
         o->d8c = 0;
         o->h->p.whole = o->h->p.whole;
         o->y.p.whole += 4;
-        if (U8(o, 0xac) >= 2) {
+        if ((*(unsigned char*)&o->wac) >= 2) {
             D_8009D2E8 = D_800A611C;
             D_8009D2E8[4] = 2;
             D_8009D2E8[5] = 2;
             D_8009D2E8[6] = 0;
         }
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         D_8009C934 = 0;
         U8(o, 0xc7) = 1;
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        U8(D_8009C330, 0) = 0;
+        D_8009C330->active = 0;
         setanim(o, 7);
         SfxPlay3(4, 0x7f);
         o->state++;
@@ -71,21 +71,21 @@ void func_800FA01C(TObj *o)
         AnimAdvance(o);
         if ((*(int*)&GAME.selectedArea) == 0x30000) break;
         if (D_1f8001fc & D_1f8003c6) {
-            U8(D_8009C330, 9) = 0;
+            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             setanim(o, 9);
             o->b04 = 1;
             o->step = 0xb;
             o->state = 0;
         }
         if (D_1f8001fc & 0x10) {
-            U8(D_8009C330, 9) = 0;
+            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             setanim(o, 9);
             o->b04 = 1;
             o->step = 0xb;
             o->state = 0;
         }
         if (D_1f8001fc & 0x40) {
-            U8(D_8009C330, 9) = 0;
+            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->y.p.whole += 9;
             o->h->p.whole += (o->animFrame & 1) ? -4 : 4;
             FUN_80041ca8(o, o->h->p.whole, o->y.p.whole);

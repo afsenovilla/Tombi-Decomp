@@ -1,10 +1,10 @@
 // FUNC 80116358 644 X002
 // MATCHING 80116358 644
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char D_8009C93A;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_800A604A, D_800A604E;
 extern void (*D_80079AD0[])(TObj *);
 extern void func_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
@@ -26,7 +26,7 @@ void func_80116358(TObj *o)
         switch (GAME.selectedSection) {
         case 1:
             if (D_1F800172 == 0) {
-                if (D_800A604A < 30 && D_800A604E >= -59)
+                if (PLAYER.obj.a.p.whole < 30 && PLAYER.obj.y.p.whole >= -59)
                     tryStartItemInteraction(o, 1, 0);
             } else {
                 if (D_1F80016A < 30 && D_1F80016E >= -77)
