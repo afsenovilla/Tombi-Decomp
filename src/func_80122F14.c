@@ -44,9 +44,9 @@ extern void PlayerSetAnimIfChanged(P *, int);
 extern void AnimAdvance(P *);
 extern void playerSetAngleFromSlope(P *);
 extern void playerAccelerateDownhill(P *);
-extern void FUN_800ee9cc(P *);
+extern void playerMoveByAngleSpeed(P *);
 extern void ObjTileCollide(P *, int, int);
-extern void FUN_800ee428(P *);
+extern void playerSetFallLean(P *);
 extern void startPadVibration(int, int, int, int);
 
 void func_80122F14(P *o)
@@ -77,10 +77,10 @@ void func_80122F14(P *o)
         o->y += 0x80000;
         playerAccelerateDownhill(o);
         if (o->animFrame & 1) {
-            FUN_800ee9cc(o);
+            playerMoveByAngleSpeed(o);
             o->d8c = 0x100 - (o->b6b >> 2);
         } else {
-            FUN_800ee9cc(o);
+            playerMoveByAngleSpeed(o);
             o->d8c = o->b6b >> 2;
         }
         if (o->bbe == 0) {
@@ -118,7 +118,7 @@ void func_80122F14(P *o)
                         o->step = 4;
                         o->state = 1;
                     } else {
-                        FUN_800ee428(o);
+                        playerSetFallLean(o);
                         o->step = 2;
                         o->state = 3;
                     }

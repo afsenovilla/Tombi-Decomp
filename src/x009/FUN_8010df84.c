@@ -11,7 +11,7 @@ extern P *DAT_8009c330;
 extern Q *DAT_8009c330q;
 extern unsigned short G1f8;
 extern char A0de0[], A0e2c[];
-extern void FUN_8001fec0(O *), playerSetAngleFromSlope(O *), playerSelectGroundAnim(O *), FUN_800ee9cc(O *), FUN_800ee88c(O *), FUN_8001e4f0(int);
+extern void FUN_8001fec0(O *), playerSetAngleFromSlope(O *), playerSelectGroundAnim(O *), playerMoveByAngleSpeed(O *), playerStickToGround(O *), FUN_8001e4f0(int);
 
 void FUN_8010df84(O *o)
 {
@@ -30,8 +30,8 @@ void FUN_8010df84(O *o)
         FUN_8001fec0(o);
         playerSetAngleFromSlope(o);
         playerSelectGroundAnim(o);
-        FUN_800ee9cc(o);
-        FUN_800ee88c(o);
+        playerMoveByAngleSpeed(o);
+        playerStickToGround(o);
         if ((G1f8 & 7) == 0) {
             if ((G1f8 & 0xf) == 0)
                 FUN_8001e4f0(0);

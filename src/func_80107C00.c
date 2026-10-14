@@ -10,11 +10,11 @@ extern char D_80010AE8[];
 void playerSetAngleFromSlope(TObj *o);
 void playerSetAnim(TObj *o, int a, int b);
 void playerAccelerateDownhill(TObj *o);
-void FUN_800ee9cc(TObj *o);
+void playerMoveByAngleSpeed(TObj *o);
 int func_8004BBC0(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
-void FUN_800ee428(TObj *o);
+void playerSetFallLean(TObj *o);
 void AnimJump(TObj *o, int a);
 void playerCheckGroundAndFall(TObj *o);
 
@@ -69,7 +69,7 @@ void func_80107C00(TObj *o)
         }
         o->y.raw += 0x80000;
         playerAccelerateDownhill(o);
-        FUN_800ee9cc(o);
+        playerMoveByAngleSpeed(o);
         if (o->bbe & 2) {
             o->step = 0x13;
             o->state = 0;
@@ -96,7 +96,7 @@ void func_80107C00(TObj *o)
                 o->velY = 0;
                 B(o, 0xac) = 1;
                 o->y.p.whole -= 4;
-                FUN_800ee428(o);
+                playerSetFallLean(o);
                 k = &GV6.s70;
                 if (*k & 0x80) o->animFrame = 1;
                 if (*k & 0x20) o->animFrame = 0;
@@ -109,7 +109,7 @@ void func_80107C00(TObj *o)
             }
             o->velX = 0;
             o->velY = 0;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             k = &GV6.s70;
             if (*k & 0x80) o->animFrame = 1;
             if (*k & 0x20) o->animFrame = 0;

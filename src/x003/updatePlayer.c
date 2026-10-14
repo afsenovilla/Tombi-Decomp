@@ -19,18 +19,18 @@ extern signed char D_8009D2B0;
 extern void *memcpy(void *, void *, int);
 extern void FUN_80025d90(void);
 extern void FUN_800f0490(TObj *);
-extern void FUN_80100788(TObj *);
+extern void playerNormalModeDispatch(TObj *);
 extern void playerEventModeDispatch(TObj *);
 extern void playerStepHurtKnockback(TObj *);
 extern void playerStepHurtStun(TObj *);
 extern void playerStepHazardRespawn(TObj *);
 extern void playerStepDie(TObj *);
 extern void playerStepHurtSpin(TObj *);
-extern void FUN_800fa01c(TObj *);
-extern void FUN_80109920(TObj *);
-extern void FUN_8010b444(TObj *);
-extern void FUN_8010b050(TObj *);
-extern void FUN_800f8130(TObj *);
+extern void playerStepPerchIdle(TObj *);
+extern void playerStepForcedHold(TObj *);
+extern void playerStepForcedJump(TObj *);
+extern void playerStepForcedLaunch(TObj *);
+extern void playerStepTossed(TObj *);
 extern void FUN_8003f7cc(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 
@@ -143,7 +143,7 @@ void updatePlayer(TObj *o)
             o->active = 1;
             o->visible = 1;
         }
-        FUN_80100788(o);
+        playerNormalModeDispatch(o);
         break;
     case 2:
         if (S16(o, 0xe0) > 0) {
@@ -200,27 +200,27 @@ void updatePlayer(TObj *o)
         }
         switch (o->step) {
         case 0:
-            FUN_800fa01c(o);
+            playerStepPerchIdle(o);
             break;
         case 3:
             o->animFrame &= 1;
-            FUN_80109920(o);
+            playerStepForcedHold(o);
             break;
         case 4:
             o->animFrame &= 1;
-            FUN_8010b444(o);
+            playerStepForcedJump(o);
             break;
         case 5:
             o->animFrame &= 1;
-            FUN_8010b050(o);
+            playerStepForcedLaunch(o);
             o->d8c = 0;
             break;
         case 6:
-            FUN_800f8130(o);
+            playerStepTossed(o);
             break;
         case 7:
             o->d8c = 0;
-            FUN_8010b050(o);
+            playerStepForcedLaunch(o);
             if (o->b69) {
                 o->b04 = 1;
                 o->step = 0;

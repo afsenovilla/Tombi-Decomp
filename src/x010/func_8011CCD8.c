@@ -19,7 +19,7 @@ extern void SfxPlay3(int, int);
 extern int rcos(int);
 extern int rsin(int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern int func_8011E000(TObj *, TObj *, unsigned char, int);
@@ -189,7 +189,7 @@ void func_8011CCD8(TObj *o)
             D_8009C330->w02 = 0;
             *(unsigned char *)&o->waa = 0;
             *(unsigned char *)&o->wac = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
             break;

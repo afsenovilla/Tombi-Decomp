@@ -13,7 +13,7 @@ extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
 extern short FUN_8003fd78(TObj *, int, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern int func_801214D0(TObj *, short, short, int);
 extern short func_801215C0(TObj *, short, short, int);
 extern short func_80121540(TObj *, short, short, int);
@@ -141,7 +141,7 @@ void func_8011E688(TObj *o)
                 o->velH = 0;
                 o->velV = 0;
                 (*(unsigned char*)&o->wac) = 1;
-                FUN_800ee428(o);
+                playerSetFallLean(o);
                 o->step = 2;
                 o->state = 3;
                 (*(unsigned char*)&o->waa) = 0;

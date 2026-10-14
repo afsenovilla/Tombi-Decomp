@@ -2,13 +2,13 @@
 // MATCHING 8011e2d0 136
 #include "TOBJ.H"
 extern int ObjCheckHeadCollision(TObj *);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 
 static __inline__ void fall(TObj *o)
 {
     o->b9c = 2;
     *(char *)&o->wac = 1;
-    FUN_800ee428(o);
+    playerSetFallLean(o);
     o->step = 2;
     o->state = 3;
 }

@@ -14,7 +14,7 @@ extern int FUN_80040278(TObj *, short, short);
 extern short probeCollisionAtDepthC(TObj *, short, int);
 extern void applyCollisionTileResponse(TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void FUN_800ef1ac(TObj *);
 
 #define DIR(o, a, b) (o->h->p.whole + ((o->animFrame & 1) ? (a) : (b)))
@@ -113,7 +113,7 @@ void FUN_801099b8(TObj *o)
             o->velH = 0;
             o->velV = 0;
             D_8009C330[8] = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
             break;

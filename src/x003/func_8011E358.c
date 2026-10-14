@@ -9,7 +9,7 @@ extern int D_8009F0EC;
 int func_8004BBC0(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
-void FUN_800ee428(TObj *o);
+void playerSetFallLean(TObj *o);
 void FUN_800fc02c(TObj *o);
 void SfxPlay2(int a, int b);
 int ObjCheckHeadCollision(TObj *o);
@@ -49,14 +49,14 @@ void func_8011E358(TObj *o)
         if (ObjCheckHeadCollision(o)) {
             o->b9c = 2;
             B(o, 0xac) = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }
         if (o->velY > 0) {
             o->b9c = 2;
             B(o, 0xac) = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }
@@ -76,14 +76,14 @@ void func_8011E358(TObj *o)
         if (ObjCheckHeadCollision(o)) {
             o->b9c = 2;
             B(o, 0xac) = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }
         if (o->velY > 0) {
             o->b9c = 2;
             B(o, 0xac) = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }

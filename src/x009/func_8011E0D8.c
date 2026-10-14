@@ -13,7 +13,7 @@ extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimJump(TObj *, int);
 extern void SfxPlay3(int, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void FUN_800ee560(TObj *);
 extern short func_801215C0(TObj *, short, short, int);
 
@@ -126,7 +126,7 @@ void func_8011E0D8(TObj *o)
                 o->state++;
             } else if (--o->timer <= 0) {
                 (*(unsigned char*)&o->wac) = 1;
-                FUN_800ee428(o);
+                playerSetFallLean(o);
                 o->step = 2;
                 o->state = 3;
             }

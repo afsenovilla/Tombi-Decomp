@@ -32,7 +32,7 @@ extern int rcos(int);
 extern int rsin(int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern TObj *func_8004BBC0(TObj *, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void func_8010E328(TObj *, int);
 extern void func_801222C4(TObj *);
 
@@ -192,7 +192,7 @@ void func_80122410(TObj *o)
             o->velV = 0;
             o->velX = 0;
             o->velY = 0;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             D_8009C330->b4 = 0;
             o->step = 2;
             o->state = 3;

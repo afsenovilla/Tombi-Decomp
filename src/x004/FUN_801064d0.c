@@ -1,6 +1,6 @@
 // FUNC 801064d0 500 X004
 // MATCHING 801064d0 500
-extern void FUN_8001e560(int, int), FUN_800ee680(unsigned char *), FUN_8001fec0(unsigned char *), FUN_800ee428(unsigned char *), FUN_80040278(unsigned char *, int, int);
+extern void FUN_8001e560(int, int), FUN_800ee680(unsigned char *), FUN_8001fec0(unsigned char *), playerSetFallLean(unsigned char *), FUN_80040278(unsigned char *, int, int);
 extern int FUN_8003facc(unsigned char *);
 extern unsigned char *DAT_8009d2e8;
 extern short DAT_8009c944, DAT_8009c946;
@@ -34,7 +34,7 @@ void FUN_801064d0(unsigned char *o)
             o[0xac] = 1;
             if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1f8003c4) != 0)
                 o[0xa7] = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o[5] = 2;
             o[6] = 3;
             o[7] = 0;
@@ -47,7 +47,7 @@ void FUN_801064d0(unsigned char *o)
             *(short *)(o + 0x7e) = 0;
             if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1f8003c4) != 0)
                 o[0xa7] = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o[5] = 2;
             o[6] = 3;
             o[7] = 0;

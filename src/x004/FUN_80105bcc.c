@@ -27,7 +27,7 @@ extern void AnimLoadDuration(TObj *o);
 extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
 extern void FUN_80104cd8(TObj *o);
-extern void FUN_800ee428(TObj *o);
+extern void playerSetFallLean(TObj *o);
 extern TObj *FUN_8004bbc0(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
 extern void func_8010E328(TObj *, int);
@@ -71,7 +71,7 @@ extern void func_8010E328(TObj *, int);
         (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
     if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4)) \
         o->ba7 = 1; \
-    FUN_800ee428(o); \
+    playerSetFallLean(o); \
     o->step = 2; \
     o->state = 3;
 

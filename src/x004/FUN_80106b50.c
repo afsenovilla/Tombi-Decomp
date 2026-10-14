@@ -7,10 +7,10 @@ extern unsigned char DAT_801152e8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e4f0(int);
 extern void playerSetAngleFromSlope(TObj *);
-extern void FUN_800ee428(TObj *);
-extern void FUN_800ee88c(TObj *);
+extern void playerSetFallLean(TObj *);
+extern void playerStickToGround(TObj *);
 extern void FUN_8011116c(TObj *);
-extern void FUN_800ee9cc(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_8001fec0(TObj *);
 
 void FUN_80106b50(TObj *o)
@@ -37,13 +37,13 @@ void FUN_80106b50(TObj *o)
             B(o, 0xac) = 1;
             DAT_8009c330[0x1e] = 0;
             DAT_8009c330[0x1f] = 0;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }
-        FUN_800ee88c(o);
+        playerStickToGround(o);
         FUN_8011116c(o);
-        FUN_800ee9cc(o);
+        playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {
             o->active = 1;
@@ -74,13 +74,13 @@ void FUN_80106b50(TObj *o)
             B(o, 0xac) = 1;
             DAT_8009c330[0x1e] = 0;
             DAT_8009c330[0x1f] = 0;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
         }
-        FUN_800ee88c(o);
+        playerStickToGround(o);
         FUN_8011116c(o);
-        FUN_800ee9cc(o);
+        playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {
             t = DAT_801152e8[o->wb0];

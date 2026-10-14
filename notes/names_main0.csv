@@ -475,6 +475,10 @@ address,name,confidence,comment
 8004fe1c,setupActorPolyFT4,alta,name from psx_tomba (US)
 800500c4,drawObject,alta,"skips invisible objects and area-specific hidden cases, then dispatches the object to its renderer by draw kin"
 8005042c,drawGameplayScene,media,"called from gameplayTick and the areaModeNTick functions: runs the per-frame draw passes (player, object categ"
+80050544,drawPlayer,alta,names batch (see notes/names.md)
+80050ea4,drawCategory1Objects,alta,names batch (see notes/names.md)
+80054f54,drawCategory2Objects,alta,names batch (see notes/names.md)
+80055174,drawCategory3Objects,alta,names batch (see notes/names.md)
 80055fac,drawMessageBox,alta,name from psx_tomba (US)
 800563ac,drawMessageBoxFrame,alta,name from psx_tomba (US)
 80056420,drawBalloonFrame,alta,name from psx_tomba (US)
@@ -488,6 +492,7 @@ address,name,confidence,comment
 80057ae4,drawObjectModelOwnMatrix,alta,names batch (see notes/names.md)
 80057bf0,drawObjectModelOwnMatrixVtx,alta,names batch (see notes/names.md)
 80057dfc,drawCategory8Objects,alta,"same as drawCategory4Objects for the category 8 list (1F800230, cache 1F800274)"
+80057edc,drawCategory7Objects,alta,names batch (see notes/names.md)
 80058604,drawHudIfShown,alta,"called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls"
 80058680,drawHud,alta,"draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots fr"
 800587a8,drawHudLives,alta,names batch (see notes/names.md)

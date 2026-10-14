@@ -4,7 +4,7 @@
 typedef struct { TObj b; char pad[0xe8 - 0xc0]; short e8, ea; } OX;
 extern TObj *DAT_8009f0ec;
 extern TObj *FUN_8004baa8(TObj *, TObj *);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 
 void FUN_8010c7b0(TObj *o)
 {
@@ -38,7 +38,7 @@ void FUN_8010c7b0(TObj *o)
         o->b9e = 0;
         *(char *)&o->waa = 0;
         *(char *)&o->wac = 1;
-        FUN_800ee428(o);
+        playerSetFallLean(o);
         o->step = 2;
         o->state = 3;
     } else {

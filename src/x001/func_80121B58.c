@@ -11,7 +11,7 @@ extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
 extern void FUN_800eae0c(int, short, int, int);
 extern void func_80110CAC(TObj *);
-extern void FUN_800ee9cc(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_800f00ac(TObj *);
 extern void func_80121A10(TObj *);
 extern void FUN_800ef4e4(TObj *);
@@ -34,7 +34,7 @@ void func_80121B58(TObj *o)
         o->state++;
     case 2:
         func_80110CAC(o);
-        FUN_800ee9cc(o);
+        playerMoveByAngleSpeed(o);
         FUN_800f00ac(o);
         func_80121A10(o);
         if (o->wb2 == 0) {

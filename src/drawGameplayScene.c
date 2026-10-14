@@ -1,9 +1,9 @@
 // FUNC 8005042c 280 MAIN0
 // MATCHING 8005042c 280
 extern void FUN_80063e0c(void *);
-extern void FUN_80050544(void), FUN_80050ea4(void), FUN_80054f54(void), FUN_80055174(void);
+extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(void), drawCategory3Objects(void);
 extern void drawCategory4Objects(void), drawCategory5Objects(void), FUN_80057d04(void), drawCategory8Objects(void);
-extern void FUN_80057edc(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudIfShown(void);
+extern void drawCategory7Objects(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudIfShown(void);
 extern void FUN_80059d44(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
@@ -14,15 +14,15 @@ void drawGameplayScene(void)
 {
     int u;
     FUN_80063e0c(DAT_1f800118);
-    FUN_80050544();
-    FUN_80050ea4();
-    FUN_80054f54();
-    FUN_80055174();
+    drawPlayer();
+    drawCategory1Objects();
+    drawCategory2Objects();
+    drawCategory3Objects();
     drawCategory4Objects();
     drawCategory5Objects();
     FUN_80057d04();
     drawCategory8Objects();
-    FUN_80057edc();
+    drawCategory7Objects();
     if (DAT_1f8001c6 == 1)
         FUN_800597bc();
     switch (DAT_8009c975) {

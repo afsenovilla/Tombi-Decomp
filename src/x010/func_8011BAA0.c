@@ -6,7 +6,7 @@
 
 extern TObj *D_8009C330;
 extern int D_8009D2E8;
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void func_80110FDC(TObj *);
 
@@ -17,7 +17,7 @@ void func_8011BAA0(TObj *o)
 
     switch (o->state) {
     case 0:
-        FUN_800ee428(o);
+        playerSetFallLean(o);
         o->b9d = 1;
         U8(o, 0xc8) = 0;
         (*(unsigned char*)&o->da0) = 0;
@@ -46,7 +46,7 @@ void func_8011BAA0(TObj *o)
             break;
         }
         if (o->velY > 0) {
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->step = 4;

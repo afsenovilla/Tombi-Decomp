@@ -11,7 +11,7 @@ extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
 extern char D_80010748[];
-extern void func_80101938(TObj *);
+extern void playerEventStepLandIdle(TObj *);
 extern void FUN_80109494(TObj *);
 extern void FUN_801231f4(TObj *);
 extern void func_8010A9F4(TObj *);
@@ -64,7 +64,7 @@ void playerEventModeDispatch(TObj *o)
         break;
     case 0:
     case 6:
-        func_80101938(o);
+        playerEventStepLandIdle(o);
         break;
     case 7:
         func_80108168(o);

@@ -21,7 +21,7 @@ extern int rsin(int);
 extern int rcos(int);
 extern int probeCollisionAtDepthA(TObj *, int, int);
 extern short TileCollideAt(TObj *, int, int);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void func_801244A0(TObj *, TObj *, int, int);
 extern int func_8012767C(TObj *, TObj *);
 
@@ -233,7 +233,7 @@ void func_80122F54(TObj *o)
             (*(unsigned short*)&DAT_8009c330->type) = 0;
             (*(unsigned char*)&o->waa) = 0;
             (*(unsigned char*)&o->wac) = 1;
-            FUN_800ee428(o);
+            playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
             break;

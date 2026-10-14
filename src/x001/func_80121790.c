@@ -8,7 +8,7 @@ extern TObj *D_8009C330;
 extern void AnimAdvance(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playerSetAngleFromSlope(TObj *);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern void FUN_800f00ac(TObj *);
 
 static __inline__ short inc(unsigned char x)
@@ -70,10 +70,10 @@ void func_80121790(TObj *o)
             o->ba4 = 0;
             if (D_8009C330->active == 0) {
                 *(unsigned char *)&o->wac = 1;
-                FUN_800ee428(o);
+                playerSetFallLean(o);
                 o->step = 2;
             } else {
-                FUN_800ee428(o);
+                playerSetFallLean(o);
                 o->step = 4;
             }
             o->state = 3;

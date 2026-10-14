@@ -2,8 +2,8 @@
 // MATCHING 80106db0 488
 #include "TOBJ.H"
 extern void playerSetAngleFromSlope(TObj *);
-extern void FUN_800ee88c(TObj *);
-extern void FUN_800ee9cc(TObj *);
+extern void playerStickToGround(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
@@ -31,8 +31,8 @@ void FUN_80106db0(TObj *o)
         break;
     case 1:
         playerSetAngleFromSlope(o);
-        FUN_800ee88c(o);
-        FUN_800ee9cc(o);
+        playerStickToGround(o);
+        playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         t = o->timer - 1;
         o->timer = t;
@@ -61,8 +61,8 @@ void FUN_80106db0(TObj *o)
         o->state = o->state + 1;
     case 3:
         playerSetAngleFromSlope(o);
-        FUN_800ee88c(o);
-        FUN_800ee9cc(o);
+        playerStickToGround(o);
+        playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         t = o->timer - 1;
         o->timer = t;

@@ -51,6 +51,11 @@ One line per name: `address name (old file) - justification`.
 - `800579a8 drawObjectModelCameraFixed` (was FUN_800579a8) - render kind 0x14: fresh base matrices and a fixed translation (-0xA0,0x80,0x220) instead of the camera, drawn with FUN_80024e58
 - `80057ae4 drawObjectModelOwnMatrix` (was FUN_80057ae4) - render kind 0x15: multiplies the camera by the object's own matrix at +0x48
 - `80057bf0 drawObjectModelOwnMatrixVtx` (was FUN_80057bf0) - render kind 0x16: own matrix +0x48 like 0x15, drawn with FUN_800242b8 (extra vertex block)
+- `80050544 drawPlayer` (was FUN_80050544) - drawGameplayScene: if PLAYER is active, switch on PLAYER.obj.type (800A603A) to the player renderer (FUN_800505f0 or the X000 ones)
+- `80050ea4 drawCategory1Objects` (was FUN_80050ea4) - like drawCategory4Objects for the category 1 list (1F800218, ObjListPush_1F800218 in cullObjectToDrawList), by render kind 0/2/0xD/0x11
+- `80054f54 drawCategory2Objects` (was FUN_80054f54) - category 2 list (1F80021C): drawObject, render kind 0xD through the player-type renderer
+- `80055174 drawCategory3Objects` (was FUN_80055174) - category 3 list (1F800220): per render kind sprite/model renderers, message boxes
+- `80057edc drawCategory7Objects` (was FUN_80057edc) - category 7 list (1F80022C): render kind 0..4 (kind 3 by player type, kind 4 area 4/12 only)
 
 # X000 function names (shared overlay code)
 
@@ -141,6 +146,29 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800ff404 getHazardDamage` (was func_800FF404) - damage amount for playerHandleHazardContact by GAME byte +0x30 & 3 and a few area/section exceptions
 - `800ff0e8 playerUpdateWaterLevel` (was func_800FF0E8) - per area/section water surface: sets +0x56 (water level) and the push GVARS.s44/s46 (-0x40 upward when below the surface); skipped in the swim steps 0x3D/0x3E/0x42..0x48
 - `800fe8f8 playerHurtMoveAndBlink` (was func_800FE8F8) - hurt helper: adds GVARS.s44/s46 push and velX/velY to the position, blinks with 1F8001F8 bit 0 unless D_8009C330->b8
+- `80100788 playerNormalModeDispatch` (was func_80100788) - updatePlayer mode 1: the switch on o->step calling every normal player step, then collision, playerHandleHazardContact and the tile shape probe
+- `800fb420 playerStepRopeSwing` (was FUN_800fb420) - player step 0x32: pendulum around +0x30/+0x34 with radius +0xB4 and angle +0x84 (anim 0x31/0x34); Left/Right at the ends raise the swing level +0xB2
+- `800fb0c0 playerRopeAdjustLength` (was FUN_800fb0c0) - rope step helper: Up/Down accelerate the rope length (+0x38, clamped 0x28..0x78) into +0xB4
+- `800fb280 playerRopeGetSwingSpeed` (was FUN_800fb280) - rope step helper: angle increment (2/3, 4 when D_8009C330[10]) added to +0x84 each frame
+- `800fb370 playerRopeSetAnim` (was FUN_800fb370) - sets the rope anim 0x31 with the frame taken from the swing angle (frame 15 when the rope is shortest)
+- `800fadec playerRopeCheckRelease` (was func_800FADEC) - rope step helper: jump button lets go (step 2, 0x49 or 0x37 by headroom probes); landing on ground/object returns to step 0/1
+- `800fbdb4 playerStepRopeJumpOff` (was func_800FBDB4) - player step 0x37: launch velocity from the swing angle sector and Left/Right, jump sfx, then jump step 2 state 2
+- `800fa01c playerStepPerchIdle` (was func_800FA01C) - player step 0x1D: standing on a perch (anim 7); jump/Up -> playerStepPerchLeap (11), Down -> climb step 13, like the end of steps 7/12
+- `800fa91c playerStepGrabbedStruggle` (was func_800FA91C) - player step 0x40: held in pose 0x1E; more than 10 pad presses break free (state 3, jump sfx); damage while held goes to hurt/die
+- `8010b444 playerStepForcedJump` (was func_8010B444) - forced-mode step 4: jump without pad control (anim 4, jump sfx, playerSetJumpRiseVelocity for 5 frames), lands into the idle anim
+- `8010b050 playerStepForcedLaunch` (was func_8010B050) - forced-mode steps 5/7: same rise as playerStepForcedJump with anim 0x2E and the preset velX (set by FUN_801377b8)
+- `80109920 playerStepForcedHold` (was FUN_80109920) - forced-mode step 3: clears motion and holds pose 0x1E
+- `800f8130 playerStepTossed` (was FUN_800f8130) - forced-mode step 6: follows the anim offset until frame 0x87, then flies off (velY -0x300) rotating, lands (sfx 0x1C) and waits in event step 1
+- `8010c034 playerStepClingToObject` (was FUN_8010c034) - player step 8: kept at offset +0xB8/+0xBA of the object D_8009F0EC (anim 80010D68), turning walks round it; per-type release
+- `8010b880 playerStepClingWeaponAttack` (was func_8010B880) - player step 0x18: weapon attack (spawnWeaponObject, aim from pad) while clinging to D_8009F0EC, back to step 8/0x22/0x46 by object type
+- `80109038 playerStepLaneJump` (was func_80109038) - player step 18: jump (anim 0x19, velY -0x570) that moves the depth coordinate to the next 90-unit lane
+- `80108708 playerStepLaneShiftFall` (was func_80108708) (uncertain) - player step 17: drifts 5 units per frame along depth for 0x5A frames (anim 0x15/0x16) then falls into the next lane
+- `80101938 playerEventStepLandIdle` (was func_80101938) - event steps 0/6: falls with anim 4 until landing, then stands (talk pose or idle anim)
+- `8010186c playerEventLandReset` (was FUN_8010186c) - landing reset for the event steps: idle anim 80010748, clears speeds/anim cache, state++
+- `800ee428 playerSetFallLean` (was FUN_800ee428) - +0x20 = 10, +0x88 = 0x10/0xF0 by facing, +0x84/+0x8C = 0: the lean set before entering the fall state (step 2 state 3)
+- `800ee88c playerStickToGround` (was FUN_800ee88c) - when not airborne (+0xAD == 0) pushes y down 3/5 or 8/12 px (by substep and speed) to follow the ground
+- `800ee9cc playerMoveByAngleSpeed` (was FUN_800ee9cc) - velocity from angle +0xB6 and speed +0xB2, adds it to the position and applies ObjApplyVelocity
+- `800f86e8 playerStepVerticalJump` (was func_800F86E8) (uncertain) - player steps 0x16/0x49: straight-up jump (velY -0x340, -0x580 for 0x49) with anim 0x1F, lands or bites (step 0xE)
 
 # Area overlay function names (X001..X019)
 

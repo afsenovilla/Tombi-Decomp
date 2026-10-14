@@ -10,8 +10,8 @@ extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void playerSetAngleFromSlope(TObj *);
 extern void FUN_8010f400(TObj *);
-extern void FUN_800ee9cc(TObj *);
-extern void FUN_800ee88c(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
+extern void playerStickToGround(TObj *);
 
 void FUN_801097ec(TObj *o)
 {
@@ -36,8 +36,8 @@ void FUN_801097ec(TObj *o)
             FUN_8001fec0(o);
             playerSetAngleFromSlope(o);
             FUN_8010f400(o);
-            FUN_800ee9cc(o);
-            FUN_800ee88c(o);
+            playerMoveByAngleSpeed(o);
+            playerStickToGround(o);
             if (o->ba6 == 0) {
                 ((unsigned char *)o)[0xc3] = 0;
                 o->step = 1;

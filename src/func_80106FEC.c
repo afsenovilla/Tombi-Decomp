@@ -13,8 +13,8 @@ int AnimAdvance(TObj *o);
 void setFacingAndUpDownFromPad(TObj *o);
 void playerSetAngleFromSlope(TObj *o);
 void func_8010FE70(TObj *o);
-void FUN_800ee9cc(TObj *o);
-void FUN_800ee88c(TObj *o);
+void playerMoveByAngleSpeed(TObj *o);
+void playerStickToGround(TObj *o);
 void playerCheckGroundAndFall(TObj *o);
 void ObjAddVelY7E(TObj *o);
 short ObjTileCollide(TObj *, int, int);
@@ -49,8 +49,8 @@ void func_80106FEC(TObj *o)
             func_8010FE70(o);
             o->b69 = 1;
         }
-        FUN_800ee9cc(o);
-        FUN_800ee88c(o);
+        playerMoveByAngleSpeed(o);
+        playerStickToGround(o);
         playerCheckGroundAndFall(o);
         if (AnimAdvance(o)) goto stop;
         if ((o->animFrame & 1) && o->wb2 < 0) {

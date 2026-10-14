@@ -11,7 +11,7 @@ extern unsigned short D_1F8001F8;
 extern unsigned char D_801152E8[];
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerSlopeSlideAccelerate(TObj *);
-extern void FUN_800ee9cc(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
 extern void playerCheckGroundAndFall(TObj *);
 extern void FUN_80025f40(int, int, int, int);
 extern void FUN_800eae0c(int, int, int, int);
@@ -50,7 +50,7 @@ void playerStepSlopeSlide(TObj *o)
     case 1:
         playerSlopeSlideUpdateAnim(o);
         playerSlopeSlideAccelerate(o);
-        FUN_800ee9cc(o);
+        playerMoveByAngleSpeed(o);
         if (o->bbe == 0) {
             g = D_8009C330;
             if (g[8] == o->animFrame) goto L;

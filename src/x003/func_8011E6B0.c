@@ -10,7 +10,7 @@ extern void playSFX(int);
 extern void FUN_800fc02c(TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 extern int AnimAdvance(TObj *);
-extern void FUN_800ee428(TObj *);
+extern void playerSetFallLean(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 extern void func_8003F7CC(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
@@ -22,7 +22,7 @@ static __inline__ void land(TObj *o, short n)
     o->b9c = n;
     *(unsigned char *)&o->wac = 1;
     o->b04 = 1;
-    FUN_800ee428(o);
+    playerSetFallLean(o);
     o->step = n;
     o->state = 3;
     o->substep = 0;
