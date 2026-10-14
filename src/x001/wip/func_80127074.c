@@ -1,9 +1,10 @@
 // FUNC 80127074 1544 X001
 #include "spad.h"
-/* score 496: first full transcription (logic follows the game; register allocation and block layout far off:
-   game keeps t spilled at sp+0x10, ang in s4, dx/dy in s3/s6, rcos/rsin products in s5/t0, fy/fx in fp/s7).
-   Not tuned yet. Greedy per-local type search only helps with semantics-changing types
-   (dx/dy int 452, dy unsigned 422): needs structural work (t spilled to stack, s-reg order). */
+/* score 314 (was 496; 1536 of 1544 B). Rewritten in the style of the sibling x001 func_801278C0 wip: dx/dy unsigned
+   short tested as (short), cx/cy int products, ax/ay/m short with `ax = cx; if (ax < 0) ax = -ax;`, quadrant base copied
+   to b, p/e pinned to $17/$18 through register copies of the parameters, r short. Left: t is kept in a stack slot in the
+   game (sb $6,16(sp) / lbu) and ours matches that, but abs temps and k/fx/fy regs differ (k $7, fx $23, fy $30,
+   cx $21), a0 = +-8 is sign-extended in the game, (ax - m) reuses m's reg, second switch(t) case order. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -18,69 +19,76 @@ extern int rsin(int);
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 #define o (&p->t)
-int func_80127074(PL *p, TObj *e, unsigned char t, int ang)
+int func_80127074(PL *p_, TObj *e_, unsigned char t, int ang)
 {
-    short dx, dy, c, s, ac, as, a0, m, k;
-    short fy, fx;
-    int r;
+    register PL *p asm("$17") = p_;
+    register TObj *e asm("$18") = e_;
+    unsigned short dx, dy;
+    int cx, cy;
+    short ax, ay, m, k, a0, fy, fx;
+    short c, s;
+    int base, b; short r;
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = p->we8 - e->h->p.whole;
-    if (e->box1 < (unsigned short)(e->box0 + dx)) return 0;
+    if ((unsigned short)(e->box0 + dx) > e->box1) return 0;
     dy = p->wea - e->y.p.whole;
-    if (e->box1 < (unsigned short)(e->box0 + dy)) return 0;
+    if ((unsigned short)(e->box0 + dy) > e->box1) return 0;
     switch (t) {
-    case 0:
-        break;
     case 1:
     case 2:
-        k = (dy < 0) ? 0xc00 : 0;
-        a0 = k;
-        if (dx > 0) {
-            if (k) a0 = k - 0x400;
-            else a0 = 0x400;
+        base = (short)dy < 0 ? 0xc00 : 0;
+        b = base;
+        if ((short)dx > 0) {
+            if (base) b = base - 0x400;
+            else b = 0x400;
         }
-        if ((unsigned)(((ang - a0) & 0xfff) - 0x500) > 0x900) return 0;
+        if ((unsigned)(((ang - b) & 0xfff) - 0x500) >= 0x901) return 0;
+    case 0:
+        cx = (unsigned)(rcos(ang) * e->box0) >> 12;
+        cy = (unsigned)(rsin(ang) * e->box0) >> 12;
         break;
-    default:
-        goto skip;
     }
-    c = (unsigned)(rcos(ang) * e->box0) >> 12;
-    s = (unsigned)(rsin(ang) * e->box0) >> 12;
-skip:
-    ac = ABS(c);
-    as = ABS(s);
-    k = ac < as;
-    if (ac == 0) k = 3;
-    else if (as == 0) k = 2;
+    c = cx; s = cy;
+    ax = cx;
+    if (ax < 0) ax = -ax;
+    ay = cy;
+    if (ay < 0) ay = -ay;
+    k = ax < ay;
+    if (ax == 0) k = 3;
+    else if (ay == 0) k = 2;
     switch (k) {
     case 0:
-        m = ABS(dx);
-        if (ac < m) return 2;
-        fy = dx * s / c;
+        m = dx;
+        if ((short)dx < 0) m = -dx;
+        if (ax < m) return 2;
+        fy = (short)dx * (short)cy / (short)cx;
         break;
     case 1:
-        m = ABS(dy);
-        if (as < m) return 2;
-        fx = dy * c / -s;
+        m = dy;
+        if ((short)dy < 0) m = -dy;
+        if (ay < m) return 2;
+        fx = (short)dy * (short)cx / -(short)cy;
         break;
     case 2:
-        m = ABS(dx);
-        if (ac < m) return 2;
+        m = dx;
+        if ((short)dx < 0) m = -dx;
+        if (ax < m) return 2;
         fy = 0;
         break;
     case 3:
-        m = ABS(dy);
-        if (as < m) return 2;
+        m = dy;
+        if ((short)dy < 0) m = -dy;
+        if (ay < m) return 2;
         fx = 0;
         break;
     }
     if ((k & 1) == 0) {
         if ((unsigned short)(p->wea - (e->y.p.whole - fy) + 4) >= 9) return 0;
-        if ((unsigned short)(ac - m) >= 0x1d) return 0;
+        if ((unsigned short)(ax - m) >= 0x1d) return 0;
         switch (t) {
         case 0:
-            if (dx < 0) goto neg;
+            if ((short)dx < 0) goto neg;
             goto pos;
         case 1:
         case 2:
@@ -93,7 +101,7 @@ skip:
             break;
         }
         o->b9e = 9;
-        if (t == 0 && dx <= 0) o->wb8 = -c;
+        if (t == 0 && (short)dx <= 0) o->wb8 = -c;
         else o->wb8 = c;
         o->wba = -fy + 0x10;
         o->velY = 0;
@@ -108,10 +116,10 @@ skip:
         if (e->h->p.whole + fx < o->h->p.whole + a0) {
             if (o->b9e == 8) {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0x13) >= 0x24) return 0;
-                if ((unsigned short)(as - m) < 8) return 0;
+                if ((unsigned short)(ay - m) < 8) return 0;
             } else {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 0xb) >= 0x14) return 0;
-                if ((unsigned short)(as - m) < 0x10) return 0;
+                if ((unsigned short)(ay - m) < 0x10) return 0;
             }
             r = fx + 8;
         } else {
@@ -120,14 +128,14 @@ skip:
             } else {
                 if ((unsigned short)(p->we8 - (e->h->p.whole + fx) + 8) >= 0x14) return 0;
             }
-            if ((unsigned short)(as - m) < 8) return 0;
+            if ((unsigned short)(ay - m) < 8) return 0;
             r = fx - 8;
         }
         o->wba = dy;
         o->wb8 = r;
         e->b69 = 1;
-        if (dx > 0) dx += 10;
-        else if (dx < 0) dx -= 10;
+        if ((short)dx > 0) dx += 10;
+        else if ((short)dx < 0) dx -= 10;
         e->velX = dx;
         e->w7a = t;
         o->velY = 0;
