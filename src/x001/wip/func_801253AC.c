@@ -1,4 +1,5 @@
 // FUNC 801253ac 1212 X001
+#include "spad.h"
 /* score 308: first full draft from the asm (logic follows the game: box test, quadrant/angle check, rcos/rsin
    projections, abs compares, side selection, velH kick). Frame is 0x40 in the game vs 0x30 here (16 B of locals:
    probably inlined helpers) and the register allocation of the box pseudos and the |c|/|s| selector differ.
@@ -9,7 +10,6 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8013C7B0[];
-extern short D_1F80019E;
 extern int rcos(int);
 extern int rsin(int);
 extern int resolveHitResultB(TObj *, TObj *);
@@ -97,6 +97,6 @@ int func_801253AC(TObj *a, TObj *b, unsigned char k, int ang)
         playSFX(5);
         FUN_8001f96c(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
     }
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
     return 1;
 }

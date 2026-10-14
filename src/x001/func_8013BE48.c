@@ -1,5 +1,6 @@
 // FUNC 8013be48 480 X001
 // MATCHING 8013be48 480
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -10,7 +11,6 @@ typedef struct {
 } O;
 
 extern unsigned short D_8013CA00[];
-extern unsigned char D_8009CDB5[];
 extern unsigned short D_1F800176;
 extern short D_1F80016E[];
 extern int Rand(void);
@@ -29,7 +29,7 @@ void func_8013BE48(O *o)
         o->w1e = 0;
         o->w20 = 0;
         o->w08 = D_8013CA00[Rand() & 7];
-        if (D_8009CDB5[0]) o->b04++;
+        if (((unsigned char*)&GCD.bcdb5)[0]) o->b04++;
         else o->b04 = 3;
         break;
     case 1:

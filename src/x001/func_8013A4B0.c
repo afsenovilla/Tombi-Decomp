@@ -1,10 +1,8 @@
 // FUNC 8013a4b0 436 X001
 // MATCHING 8013a4b0 436
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE59;
-extern unsigned char D_8009CEDE;
-extern unsigned char D_8009CEDF;
 extern TObj *allocObjectLayer2(void);
 
 void func_8013A4B0(TObj *o)
@@ -15,10 +13,10 @@ void func_8013A4B0(TObj *o)
 
     o->b04 = 3;
     p = (TObj **)&o->category;
-    switch (D_8009CE59) {
+    switch (GCD.bce59) {
     case 1:
     case 3:
-        q = &D_8009CEDE;
+        q = &GCD.bcede;
         if (*q == 1) {
             e = allocObjectLayer2();
             if (e) {
@@ -33,9 +31,9 @@ void func_8013A4B0(TObj *o)
                 e->subtype = 0;
                 e->b0c = 0;
                 *p = e;
-                D_8009CE59 = 3;
+                GCD.bce59 = 3;
                 *q = 0;
-                D_8009CEDF = 0;
+                GCD.bcedf = 0;
                 o->b04 = 1;
             }
         } else {

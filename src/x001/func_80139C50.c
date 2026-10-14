@@ -1,5 +1,6 @@
 // FUNC 80139c50 1148 X001
 // MATCHING 80139c50 1148
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -8,7 +9,7 @@ extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
 extern TObj *D_8009C330;
-extern unsigned char D_8009CEBC, D_800A60F8, D_8009CDB2;
+extern unsigned char D_800A60F8;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 
 /* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw D_8009C330 store */
@@ -35,7 +36,7 @@ void func_80139C50(TObj *o)
         AnimLoadDuration(&P);
         e->step = 1;
         e->state = 0;
-        switch (D_8009CEBC) {
+        switch (GCD.bcebc) {
         case 0:
             D_800A60C8 = showMessageBox(2, 10, 0x80, 0x6c);
             o->step++;
@@ -49,7 +50,7 @@ void func_80139C50(TObj *o)
     case 1:
         p = D_800A60C8;
         if (p->b04 != 2) break;
-        f = &D_8009CEBC;
+        f = &GCD.bcebc;
         switch (*f) {
         case 0:
             p->b04 = 3;
@@ -117,7 +118,7 @@ void func_80139C50(TObj *o)
                 o->b04 = 3;
                 o->step = 0;
                 o->state = 0;
-                D_8009CDB2 = 2;
+                GCD.bcdb2 = 2;
                 { int *q = &GAME.area00_eventControl; *q |= 0x100; }
                 printInfoMessage(0x13, 2);
                 GVARS.b3e = 0;
@@ -146,7 +147,7 @@ void func_80139C50(TObj *o)
                 o->b04 = 3;
                 o->step = 0;
                 o->state = 0;
-                D_8009CDB2 = 2;
+                GCD.bcdb2 = 2;
                 GVARS.b42 = 0;
                 D_800A60F8 = 0;
                 GVARS.b3f = 0;

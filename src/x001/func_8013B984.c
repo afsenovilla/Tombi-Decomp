@@ -1,9 +1,9 @@
 // FUNC 8013b984 300 X001
 // MATCHING 8013b984 300
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDB2;
 extern TObj *allocObjectLayer2(void);
 extern short func_80139B2C(TObj *);
 extern void func_80139C50(TObj *);
@@ -15,7 +15,7 @@ void func_8013B984(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CDB2 >= 2 || (GAME.area00_eventControl & 0x100)) {
+        if (GCD.bcdb2 >= 2 || (GAME.area00_eventControl & 0x100)) {
             o->b04 = 3;
             break;
         }

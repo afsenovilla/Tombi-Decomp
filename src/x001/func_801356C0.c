@@ -1,11 +1,11 @@
 // FUNC 801356c0 400 X001
 // MATCHING 801356c0 400
+#include "spad.h"
 #include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern int D_8009C960A[]; /* second name for ((unsigned short*)&GAME.selectedArea) (int read; debt) */
-extern int D_1F8002D0, D_1F8002E4;
 extern void *D_8013DE38, *D_8013DE34, *D_8013DE08;
 extern void *D_8013DDDC, *D_8013DDD8, *D_8013DD50;
 extern void FUN_8001fe6c(TObj *);
@@ -21,7 +21,7 @@ void func_801356C0(TObj *o)
     if (D_8009C960A[0] == 0x20001) o->w1e = 2;
     else o->w1e = 1;
     if (((unsigned short*)&GAME.selectedArea)[0] == 1 && GAME.selectedSection < 2) {
-        o->d3c = D_1F8002D0;
+        o->d3c = SPAD.i2d0;
         switch (o->subtype) {
         case 2:
             o->anim = D_8013DE38;
@@ -34,7 +34,7 @@ void func_801356C0(TObj *o)
             break;
         }
     } else {
-        o->d3c = D_1F8002E4;
+        o->d3c = SPAD.i2e4;
         switch (o->subtype) {
         case 2:
             o->anim = D_8013DDDC;

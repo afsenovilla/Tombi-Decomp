@@ -1,9 +1,9 @@
 // FUNC 8013721c 676 X001
 // MATCHING 8013721c 676
+#include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CEAB, D_8009CEAD;
 extern int D_1F8002D4[];
 extern void *D_8013E570[], *D_8013E700;
 void AnimLoadDuration(TObj *o);
@@ -23,7 +23,7 @@ void func_8013721C(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if (D_8009CEAB == 0 || D_8009CEAB >= 3) {
+            if (GCD.bceab == 0 || GCD.bceab >= 3) {
                 o->b04 = 3;
                 break;
             }
@@ -56,7 +56,7 @@ void func_8013721C(TObj *o)
             o->b0a = 2;
             AnimLoadDuration(o);
             o->b04 = 1;
-            if (D_8009CEAD) {
+            if (GCD.bcead) {
                 o->b04 = 3;
             }
             break;
@@ -85,7 +85,7 @@ void func_8013721C(TObj *o)
             break;
         case 1:
             addItemToInventory(10, 1, 1);
-            D_8009CEAD = 1;
+            GCD.bcead = 1;
             o->b04 = 3;
             break;
         }

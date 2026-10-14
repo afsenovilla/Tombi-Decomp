@@ -1,11 +1,11 @@
 // FUNC 80137968 404 X001
 // MATCHING 80137968 404
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 extern void *D_8013E6DC;
-extern unsigned char D_8009CEAF, D_8009D0B4, D_8009CE56;
 extern int D_800A60C4[];
 extern void AnimLoadDuration(TObj *o);
 extern void FUN_800eea7c(TObj *, int, int);
@@ -22,7 +22,7 @@ void func_80137968(TObj *o)
         o->state++;
         o->category |= 0x80;
     case 1:
-        if (D_8009CEAF == 1 && !D_8009D0B4 && !D_8009CE56) {
+        if (GCD.bceaf == 1 && !GCD.bd0b4 && !GCD.bce56) {
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             GVARS.b3e = 1;

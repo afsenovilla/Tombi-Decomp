@@ -1,10 +1,9 @@
 // FUNC 80135b48 328 X001
 // MATCHING 80135b48 328
+#include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDB5;
-extern unsigned char D_8009CEC1, D_8009CEC2, D_8009CEC3, D_8009CEC4, D_8009CEC5, D_8009CEC6, D_8009CEC7;
 extern void *printInfoMessage(int, int);
 extern void func_80135A14(TObj *);
 
@@ -15,32 +14,32 @@ void func_80135B48(TObj *o)
         *f |= 1 << (o->b0c - 1);
     }
     {
-        unsigned char *c = &D_8009CDB5;
+        unsigned char *c = &GCD.bcdb5;
         *c = *c + 1;
         if (*c >= 9) *c = 8;
         else printInfoMessage(*c - 1, 2);
     }
     switch (o->b0c) {
     case 1:
-        D_8009CEC2 = 1;
+        GCD.bcec2 = 1;
         break;
     case 2:
-        D_8009CEC1 = 1;
+        GCD.bcec1 = 1;
         break;
     case 3:
-        D_8009CEC4 = 1;
+        GCD.bcec4 = 1;
         break;
     case 4:
-        D_8009CEC3 = 1;
+        GCD.bcec3 = 1;
         break;
     case 5:
-        D_8009CEC5 = 1;
+        GCD.bcec5 = 1;
         break;
     case 6:
-        D_8009CEC6 = 1;
+        GCD.bcec6 = 1;
         break;
     case 7:
-        D_8009CEC7 = 1;
+        GCD.bcec7 = 1;
         break;
     }
     func_80135A14(o);

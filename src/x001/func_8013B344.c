@@ -1,9 +1,8 @@
 // FUNC 8013b344 448 X001
 // MATCHING 8013b344 448
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE56;
-extern unsigned char D_8009CEAF[];
 extern int *D_1F800338[];
 extern TObj *allocObjectLayer8(void);
 extern void FUN_801148d0(TObj *, char, int, int, short);
@@ -15,7 +14,7 @@ void func_8013B344(TObj *o)
     short n;
 
     o->b04 = 3;
-    if (D_8009CE56 == 0xff) return;
+    if (GCD.bce56 == 0xff) return;
     e = allocObjectLayer8();
     if (e) {
         int **g;
@@ -67,7 +66,7 @@ void func_8013B344(TObj *o)
     }
     e->d94 = (int)f;
     f->d90 = (int)e;
-    n = D_8009CEAF[0];
+    n = ((unsigned char*)&GCD.bceaf)[0];
     if (n > 30) n = 30;
     for (i = 0; i < n; i++) FUN_801148d0(e, 2, e->a.p.whole, e->y.p.whole, 0x87c);
 }

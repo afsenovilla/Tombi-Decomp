@@ -1,5 +1,6 @@
 // FUNC 8013c028 396 X001
 // MATCHING 8013c028 396
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { char pad[0xa]; short w0a; } W0AS;
@@ -10,9 +11,6 @@ typedef struct { short x; short y; } XY;
 extern TObj *D_8009C948[];
 extern unsigned short D_8013CA20[];
 extern XY D_8013CA10[];
-extern int D_1F800198;
-extern unsigned char D_1F8001F8;
-extern int D_1F8000EC;
 extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -37,10 +35,10 @@ void func_8013C028(TObj *o)
                 if (e) {
                     e->active = 2;
                     e->type = 0x13;
-                    e->subtype = (D_1F8001F8 + D_1F800198) & 1;
+                    e->subtype = ((*(unsigned char*)&SPAD.s1f8) + SPAD.i198) & 1;
                     e->b0c = 0;
                     r = Rand() & 3;
-                    e->a.raw = D_1F8000EC;
+                    e->a.raw = SPAD.iec;
                     e->y.raw = D_8013CA10[r].y << 16;
                     e->b.raw = D_8013CA10[r].x << 16;
                     W0A(D_8009C948[0])++;

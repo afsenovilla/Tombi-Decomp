@@ -1,14 +1,14 @@
 // FUNC 801369f8 180 X001
 // MATCHING 801369f8 180
+#include "gcd.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CEAB;
 extern int D_1F8002D4[];
 extern void *D_8013E570[];
 extern void AnimLoadDuration(TObj *);
 
 void func_801369F8(TObj *o)
 {
-    unsigned char k = D_8009CEAB;
+    unsigned char k = GCD.bceab;
 
     if (k != 0 && k < 3) {
         o->box0 = 8;
