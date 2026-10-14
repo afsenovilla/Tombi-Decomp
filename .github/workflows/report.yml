@@ -75,3 +75,47 @@ jobs:
         with:
           name: SCES_013.31_report
           path: build/report.json
+
+  # Japanese release (Ore! Tomba). Same repo, separate decomp.dev version: the artifact is named after the boot
+  # executable in SYSTEM.CNF (<serial>_report). The disc image comes from the GAME_FILES_URL_JP secret (raw .bin,
+  # never committed). Until config/jp/ exists only the image is fetched and identified; the report step is skipped.
+  report-jp:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch Japanese disc
+        id: fetch
+        env:
+          GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+        run: |
+          if [ -z "$GAME_FILES_URL_JP" ]; then
+            echo "::notice::GAME_FILES_URL_JP secret not set; skipping the Japanese report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/jp.dl" "$URL"
+          mkdir -p game_jp
+          python3 -I tools/isoext.py "$RUNNER_TEMP/jp.dl" game_jp
+          BOOT="$(grep -i '^BOOT' "$(find game_jp -iname SYSTEM.CNF | head -1)" | sed -E 's#.*[:\\/]([A-Za-z0-9_.]+);.*#\1#')"
+          echo "boot=$BOOT" >> "$GITHUB_OUTPUT"
+          sha1sum "$(find game_jp -iname "$BOOT" | head -1)"
+          if [ -d config/jp ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::notice::config/jp not set up yet; Japanese report skipped."; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Build Japanese report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --version jp --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload Japanese report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.fetch.outputs.boot }}_report
+          path: build/jp/report.json

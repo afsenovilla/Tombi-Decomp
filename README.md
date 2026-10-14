@@ -155,6 +155,16 @@ offsets and the function or splat range that produced them.
 - Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
   each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
 
+## Versions
+
+| Version | Serial | Status |
+|---------|--------|--------|
+| Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
+| Ore! Tomba (Japan) | from `SYSTEM.CNF` | in preparation, see [docs/JP.md](docs/JP.md) |
+
+Both versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
+`<serial>_report` artifact per version. Matched C is shared; only the functions that differ get a version-specific file.
+
 ## Progress report (objdiff / decomp.dev)
 
 `tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
@@ -166,7 +176,7 @@ The report and `docs/PROGRESS.md` count exactly the same bytes: both take their 
 `tools/units.py` (every matched source file as one unit, plus the csv functions no file covers), game code only
 (the Psy-Q library is left out unless `--with-sdk` is given) and every shared overlay function counted once, so
 the decomp.dev headline is the whole-game figure to the second decimal. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
-needs a `GAME_FILES_URL` secret pointing to your own disc image (or a zip with `MAIN0.EXE` and
+needs a `GAME_FILES_URL` secret (and `GAME_FILES_URL_JP` for the Japanese version) pointing to your own disc image (or a zip with `MAIN0.EXE` and
 `AREA00/X000.BIN`, which limits the report to those two).
 
 Units are marked `complete` (decomp.dev "fully linked", `complete_code`) when their object is linked into
@@ -188,6 +198,9 @@ config/         splat configurations for MAIN0.EXE and the X0nn.BIN overlays
 .github/        CI workflow that publishes the objdiff report
 tools/          checkers, progress report, analysis helpers, setup scripts
 game/           your own game files (ignored by git)
+game_jp/        your own Japanese disc files (ignored by git)
+config/jp/      splat configuration of the Japanese executables (planned)
+src/jp/         Japanese-only or differing functions (planned)
 ```
 
 ## Tools

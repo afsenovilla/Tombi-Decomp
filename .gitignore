@@ -1,6 +1,7 @@
 # Material con copyright: aporta tu propia copia, no se sube al repo
 game/*
 !game/.gitkeep
+game_jp/
 *.iso
 *.bin
 *.cue
