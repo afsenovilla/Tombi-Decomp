@@ -111,7 +111,7 @@ extern s32 D_8009B178;
 extern u8 GPU_CTLBUF[];
 extern volatile QueueItem GPU_QITEM[];
 
-const char D_80015BA8[] = "$Id: sys.c,v 1.129 1996/12/25 03:36:20 noda Exp $";
+extern const char D_80015BA8[];
 
 /**
  * @brief Initialize or reset the graphics system
