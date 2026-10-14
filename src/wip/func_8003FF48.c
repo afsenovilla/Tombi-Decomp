@@ -1,6 +1,9 @@
 // FUNC 8003ff48 816 MAIN0
 #include "spad.h"
-/* score 100 (b32: x &= 7; int xi = x; stores D_8009BD80 = xi gives the game andi a1 + move copy). Left: global-alloc order o/k/xi (game o=t1,k=t2,xcopy=t3; ours k=t1,xi=t2,o=t3: -dl shows o 7 refs/128 insns has lowest priority, needs more o refs or fewer k refs). Was 104: control flow and layout match; left: register allocation (game keeps x in a1 plus a t3 copy, raw y in t5, d without copy), frame setup order (game addiu sp before the first lw), D88 computed as (short)s>>8 in game (casts there raise the score). Tried: type brute force of x/y/s/d/lim/a/b, local x copy, inline body wrapper. b46: o needs ~13 refs to outrank k; duplicating the hit block in the else branch is not cross-jumped here (860 B, 257).
+/* score 99 (b57: o/k/xi/x pinned with register asm (o=t1 k=t2 xi=t3 x=a1); the game does the arithmetic on the t3 copy
+   and stores D_8009BD80 from a1. Left: param copy order (move t1,a0 after move t5,a2), D84/D88/D90 block regs.
+   Short ss copy of D84 still cascades (144); lim pinned to v1 101; int y param pinned 282).
+   Older: score 100 (b32: x &= 7; int xi = x; stores D_8009BD80 = xi gives the game andi a1 + move copy). Left: global-alloc order o/k/xi (game o=t1,k=t2,xcopy=t3; ours k=t1,xi=t2,o=t3: -dl shows o 7 refs/128 insns has lowest priority, needs more o refs or fewer k refs). Was 104: control flow and layout match; left: register allocation (game keeps x in a1 plus a t3 copy, raw y in t5, d without copy), frame setup order (game addiu sp before the first lw), D88 computed as (short)s>>8 in game (casts there raise the score). Tried: type brute force of x/y/s/d/lim/a/b, local x copy, inline body wrapper. b46: o needs ~13 refs to outrank k; duplicating the hit block in the else branch is not cross-jumped here (860 B, 257).
    b51: game keeps (D84 << 16) in a2 = a short copy `ss = D_8009BD84` used for D88 = ss >> 8 and D90 = (ss >> 4) & 0xf
    (sra 0x18 / sra 0x14), D8C from the raw lhu (& 0xf); D88 compared through a copy (a0); D6C store after D88 store;
    d (a3) has no copy. Writing it that way gives the right shape locally but scores 112-137 (alloc cascade). */
@@ -14,22 +17,24 @@ extern unsigned short D_8009BD84;
 extern short D_8009BD88, D_8009BD8C, D_8009BD90;
 #define D D_1F800278
 
-int func_8003FF48(TObj *o, unsigned short x, short y)
+int func_8003FF48(TObj *o_, unsigned short x_, short y)
 {
-    int k;
+    register TObj *o asm("$9") = o_;
+    register int x asm("$5");
+    register int k asm("$10");
     short d;
     int lim;
     int s;
     unsigned short a;
     short b;
     unsigned short r;
-    int xi;
+    register int xi asm("$11");
 
     D_8009BD70 = *D++;
     if (D_8009BD70 == 0)
         return 0;
     k = 0;
-    x &= 7;
+    x = x_ & 7;
     xi = x;
     do {
         D_8009BD70--;
@@ -69,8 +74,8 @@ int func_8003FF48(TObj *o, unsigned short x, short y)
             } else
                 D_8009BD68 = a + b;
         } else {
-            r = b * (x - D_8009BD8C) / D_8009BD90;
-            D_8009BD80 = xi;
+            r = b * (xi - D_8009BD8C) / D_8009BD90;
+            D_8009BD80 = x;
             D_8009BD68 = a + r;
         }
         d = D_8009BD68 - y;
@@ -79,14 +84,14 @@ int func_8003FF48(TObj *o, unsigned short x, short y)
         D_8009BD88 = s >> 8;
         if (D_8009BD88 == 1) {
             D_8009BD8C = s & 0xf;
-            lim = x - D_8009BD8C + 0x10;
+            lim = xi - D_8009BD8C + 0x10;
             goto common;
         } else if (D_8009BD88 == 2) {
             D_8009BD8C = s & 0xf;
             D_8009BD90 = (s >> 4) & 0xf;
-            lim = D_8009BD8C + D_8009BD90 - x + 0x10;
+            lim = D_8009BD8C + D_8009BD90 - xi + 0x10;
         common:
-            D_8009BD80 = xi;
+            D_8009BD80 = x;
             if (-(short)d < lim && (short)d <= 0) {
             hit:
                 o->y.p.frac = 0;
