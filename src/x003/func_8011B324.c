@@ -1,11 +1,11 @@
 // FUNC 8011b324 316 X003
 // MATCHING 8011b324 316
+#include "player.h"
 #include "TOBJ.H"
 
 extern short D_1F80016A, D_1F80016E;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern int *D_800A6078;
-extern int D_800A604C[];
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
@@ -24,7 +24,7 @@ int func_8011B324(TObj *o)
     dy = (o->velH * D_8007A1F0[a]) >> 12;
     dx = (o->velH * D_8007A5F0[a]) >> 12;
     *D_800A6078 += dx << 8;
-    D_800A604C[0] += dy << 8;
+    ((int*)&PLAYER.obj.y.raw)[0] += dy << 8;
     o->velH += 0x80;
     if (o->velH > 0x800) o->velH = 0x800;
     return 0;

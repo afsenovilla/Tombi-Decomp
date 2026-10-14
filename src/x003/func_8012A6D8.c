@@ -1,5 +1,6 @@
 // FUNC 8012a6d8 440 X003
 // MATCHING 8012a6d8 440
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -11,7 +12,7 @@ typedef struct {
 
 extern T8012A6D8 D_80135DB8[];
 extern int SPR_DATA[];
-extern unsigned char D_800A6047, D_8009CDC7[];
+extern unsigned char D_8009CDC7[];
 extern void AnimLoadDuration(TObj *);
 
 void func_8012A6D8(TObj *o)
@@ -30,6 +31,6 @@ void func_8012A6D8(TObj *o)
     o->b0d = 0;
     o->b68 = 0;
     o->category |= 0x80;
-    o->b0f = D_800A6047 + 1;
+    o->b0f = PLAYER.obj.b0f + 1;
     o->b04++;
 }

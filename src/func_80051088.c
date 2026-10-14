@@ -1,5 +1,6 @@
 // FUNC 80051088 4360 MAIN0
 // MATCHING 80051088 4360
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -47,12 +48,7 @@ extern unsigned short D_1F8001F8;
 extern char D_1F8000C0[], D_1F8000C0b[];
 extern SH *D_8009C338;
 extern PL *D_8009C330;
-extern short D_800A6066;
-extern unsigned char D_800A60D5;
-extern unsigned short *D_800A605C;
 extern unsigned char D_800A6100;
-extern int D_800A60C4;
-extern short D_800A60E8;
 extern short D_800801E8, D_800801EA, D_800801EC, D_800801EE;
 extern short costab[];
 extern short negsintab2[];
@@ -198,13 +194,13 @@ void func_80051088(TObj *o)
     D_8009C338->y = y;
     a0 = o->d8c & 0xff;
     a1 = (o->d8c + 0x80) & 0xff;
-    if (D_800A60D5)
+    if (PLAYER.obj.b9d)
         k = D_8009C330->b7;
     else
-        k = D_800A6066;
+        k = (*(short*)&PLAYER.obj.animFrame);
     switch (k) {
     case 0: case 1: case 2: case 3:
-        switch (*D_800A605C) {
+        switch (*(*(unsigned short **)&PLAYER.obj.anim)) {
         case 0x8b: break;
         case 0x94: idx += 2; break;
         case 0x97: idx += 4; break;
@@ -214,7 +210,7 @@ void func_80051088(TObj *o)
         }
         break;
     case 4: case 5:
-        switch (*D_800A605C) {
+        switch (*(*(unsigned short **)&PLAYER.obj.anim)) {
         case 0x8e: case 0x8f: case 0x90: idx += 6; break;
         case 0x95: idx += 8; break;
         case 0x98: idx += 10; break;
@@ -224,7 +220,7 @@ void func_80051088(TObj *o)
         }
         break;
     case 6: case 7:
-        switch (*D_800A605C) {
+        switch (*(*(unsigned short **)&PLAYER.obj.anim)) {
         case 0x91: case 0x92: case 0x93: idx += 0xc; break;
         case 0x96: idx += 0xe; break;
         case 0x99: idx += 0x10; break;
@@ -254,9 +250,9 @@ void func_80051088(TObj *o)
         p->v3 = 0x1f;
         s.x = D_8009C338->x;
         s.y = D_8009C338->y;
-        if (D_800A6100 && *D_800A605C >= 0xa9) {
-            c = MulCosDup((D_800A60C4 + 0x40) & 0xff, 0x18);
-            sn = MulNegSin((D_800A60C4 + 0x40) & 0xff, 0x18);
+        if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+            c = MulCosDup((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
+            sn = MulNegSin((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
         } else {
             short t0;
             short kk;
@@ -264,22 +260,22 @@ void func_80051088(TObj *o)
             t0 = (signed char)tbl[idx];
             k = (signed char)tbl[idx + 1];
             if (o->animFrame & 1) {
-                if (D_800A60E8 <= 0) {
+                if (PLAYER.obj.wb0 <= 0) {
                     kk = k;
-                    an = D_800A60C4 + 0x180;
+                    an = PLAYER.obj.d8c + 0x180;
                     an -= t0;
                     c = MulCosDup(an & 0xff, kk);
                     sn = MulNegSin(an & 0xff, kk);
                 } else {
                     kk = k;
-                    an = D_800A60C4 + 0x180;
+                    an = PLAYER.obj.d8c + 0x180;
                     an -= t0;
                     c = MulCosDup(an & 0xff, kk);
                     sn = MulNegSin(an & 0xff, kk);
                 }
             } else {
                 kk = k;
-                an = t0 + D_800A60C4;
+                an = t0 + PLAYER.obj.d8c;
                 c = MulCosDup(an & 0xff, kk);
                 sn = MulNegSin(an & 0xff, kk);
             }
@@ -321,8 +317,8 @@ void func_80051088(TObj *o)
     p->v3 = p->v2;
     *(unsigned short *)((char *)p + 14) = cl;
     }
-    if (D_800A6100 && *D_800A605C >= 0xa9) {
-        int t, g = D_800A60C4;
+    if (D_800A6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
+        int t, g = PLAYER.obj.d8c;
         if (o->animFrame & 1)
             t = g + 0xc0;
         else

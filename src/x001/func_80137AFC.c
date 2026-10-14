@@ -1,8 +1,8 @@
 // FUNC 80137afc 656 X001
 // MATCHING 80137afc 656
+#include "player.h"
 #include "TOBJ.H"
 
-extern unsigned short D_800A6066;
 extern signed char D_8009D2B0[];
 extern unsigned char D_8009C942, D_8009C93F[];
 extern int Rand(void);
@@ -16,7 +16,7 @@ void func_80137AFC(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->animFrame = D_800A6066 & 1;
+        o->animFrame = PLAYER.obj.animFrame & 1;
         t = p->h->p.whole - p->box0;
         if (o->h->p.whole < (short)t) {
             o->h->p.whole = t;

@@ -1,7 +1,7 @@
 // FUNC 80132f80 724 X000
 // MATCHING 80132f80 724
+#include "player.h"
 #include "TOBJ.H"
-extern Fix16 *D_800A6078;
 extern void *D_8013B18C, *D_8013B180, *D_8013B17C;
 extern char D_80077CF4[];
 extern int Rand(void);
@@ -15,7 +15,7 @@ void func_80132F80(TObj *o)
 {
     unsigned short px, hx;
     short near;
-    Fix16 *pp = D_800A6078;
+    Fix16 *pp = (*(Fix16 **)&PLAYER.obj.h);
     int x, t;
     int s2;
     px = pp->p.whole;

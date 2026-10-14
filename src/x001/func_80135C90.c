@@ -1,10 +1,10 @@
 // FUNC 80135c90 1236 X001
 // MATCHING 80135c90 1236
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009C93F, D_8009C93E, D_8009C942;
 extern unsigned short D_8009C960[], D_8009C962[];
-extern Fix16 *D_800A6078;
 extern char D_80077CDC[];
 extern void *D_8013DE0C, *D_8013DDB0, *D_8013DE2C, *D_8013DDC8;
 extern void AnimLoadDuration(TObj *);
@@ -19,7 +19,7 @@ void func_80135C90(TObj *o)
         D_8009C93F = 1;
         D_8009C93E = 1;
         D_8009C942 = 1;
-        o->animFrame = o->h->p.whole > D_800A6078->p.whole;
+        o->animFrame = o->h->p.whole > (*(Fix16 **)&PLAYER.obj.h)->p.whole;
         switch (o->subtype) {
         case 2:
         case 3:
@@ -61,7 +61,7 @@ void func_80135C90(TObj *o)
             if (D_8009C960[0] == 1 && D_8009C962[0] < 2) o->anim = D_8013DE2C;
             else o->anim = D_8013DDC8;
             AnimLoadDuration(o);
-            { int t = D_800A6078->p.whole < o->h->p.whole;
+            { int t = (*(Fix16 **)&PLAYER.obj.h)->p.whole < o->h->p.whole;
             o->state++;
             o->animFrame = t; }
         }

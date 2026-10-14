@@ -1,9 +1,10 @@
 // FUNC 8011a6c4 432 X003
 // MATCHING 8011a6c4 432
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned short D_1F80016A, D_1F80016E;
-extern unsigned char D_800A60DA, D_800A60DB, D_8009C93A;
+extern unsigned char D_8009C93A;
 
 int func_8011A6C4(TObj *o)
 {
@@ -11,8 +12,8 @@ int func_8011A6C4(TObj *o)
     case 0:
         if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x20) > 0x40) return 0;
         if ((unsigned short)(o->y.p.whole - D_1F80016E + 0x30) > 0x60) break;
-        if (D_800A60DA == 1) return 1;
-        if (D_800A60DA == 2) {
+        if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 1) return 1;
+        if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2) {
             o->d30 = 0;
             o->state++;
             return 2;
@@ -28,10 +29,10 @@ int func_8011A6C4(TObj *o)
         if ((o->d30 >> 16) < -0x1f) o->state++;
         break;
     case 2:
-        if (D_800A60DB == 2) o->state++;
+        if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 3)) == 2) o->state++;
         break;
     case 3:
-        if (!D_800A60DB) o->state++;
+        if (!(*(unsigned char*)((char*)&PLAYER.obj.da0 + 3))) o->state++;
         break;
     case 4:
         o->h->raw += 0x18000;

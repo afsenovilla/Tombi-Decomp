@@ -1,12 +1,12 @@
 // FUNC 80127d48 792 X003
 // MATCHING 80127d48 792
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D5B[];
 extern void *D_80139500[];
 extern unsigned short D_1F80027E;
-extern unsigned char D_800A603E[], D_800A60E4[];
 extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -78,8 +78,8 @@ void func_80127D48(TObj *o)
         {
         unsigned char t;
         unsigned char *p;
-        D_800A603E[0] = 2;
-        D_800A60E4[0] = 3;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 2;
+        ((unsigned char*)&PLAYER.obj.wac)[0] = 3;
         /* debt: volatile load + volatile store create the anti-dependence that keeps lbu before sh wac */
         t = *(volatile unsigned char *)&o->state;
         *(volatile short *)&o->wac = 10;

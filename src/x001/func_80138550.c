@@ -1,5 +1,6 @@
 // FUNC 80138550 1788 X001
 // MATCHING 80138550 1788
+#include "player.h"
 /* Debt: D_8013E710s is a second (scalar) name for D_8013E710[0]; the scalar load is hoisted above the
    struct stores in cases 0 and 6 as in the game. */
 #include "TOBJ.H"
@@ -10,9 +11,6 @@ extern P3 D_8013C9EC[];
 extern void *D_8013E710[];
 extern void *D_8013E710s;
 extern int D_1F8002D4a[];
-extern unsigned char D_800A60A1, D_800A60E4, D_800A60D4, D_800A60D6;
-extern int D_800A604C;
-extern Fix16 *D_800A6078;
 extern short D_8007A5F0[], D_8007A1F0[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
@@ -80,8 +78,8 @@ void func_80138550(TObj *o)
         case 2:
             if (o->velY < 0x600) o->velY += 0x20;
             ObjAddVelY7E(o);
-            if (o->b6a && !D_800A60A1 && D_800A60E4 < 2 && D_800A60D4 && (unsigned char)(D_800A60D6 - 5) >= 2)
-                D_800A604C += o->velY << 8;
+            if (o->b6a && !PLAYER.obj.b69 && (*(unsigned char*)&PLAYER.obj.wac) < 2 && PLAYER.obj.b9c && (unsigned char)(PLAYER.obj.b9e - 5) >= 2)
+                PLAYER.obj.y.raw += o->velY << 8;
             if (o->b69) {
                 o->anim = D_8013E710[2];
                 AnimLoadDuration(o);
@@ -129,9 +127,9 @@ void func_80138550(TObj *o)
                     o->h->raw += (D_8007A5F0[s1] * s2) >> 4;
                     o->y.raw += (D_8007A1F0[s1] * -b) >> 4;
                     if (o->b6a) {
-                        if ((unsigned char)(D_800A60D6 - 5) >= 2) {
-                            D_800A6078->raw += (D_8007A5F0[s1] * s2) >> 4;
-                            D_800A604C += (D_8007A1F0[s1] * -b) >> 4;
+                        if ((unsigned char)(PLAYER.obj.b9e - 5) >= 2) {
+                            (*(Fix16 **)&PLAYER.obj.h)->raw += (D_8007A5F0[s1] * s2) >> 4;
+                            PLAYER.obj.y.raw += (D_8007A1F0[s1] * -b) >> 4;
                         }
                         if (AnimAdvance(o)) {
                             o->anim = D_8013E710[10];

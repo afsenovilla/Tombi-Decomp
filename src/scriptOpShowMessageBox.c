@@ -1,5 +1,6 @@
 // FUNC 80039e54 848 MAIN0
 // MATCHING 80039e54 848
+#include "player.h"
 #include "TOBJ.H"
 typedef struct {
     char pad0[0x8a];
@@ -12,8 +13,7 @@ typedef struct {
 typedef struct { short v[6]; } V6;
 extern S *SCRIPT_CTX;
 extern TObj *SCRIPT_OBJECTS[];
-extern unsigned char D_8009D2B0, D_8009C93F, D_800A603C, D_800A603D, D_800A603E, D_800A60E4, D_8009C942;
-extern unsigned short D_800A6066;
+extern unsigned char D_8009D2B0, D_8009C93F, D_8009C942;
 extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void func_80113754(TObj *);
@@ -68,9 +68,9 @@ void scriptOpShowMessageBox(void)
                 func_80113754(o);
                 D_8009D2B0 = 2;
                 D_8009C93F = 1;
-                D_800A603C = 5;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER.obj.b04 = 5;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
                 break;
             case 0x19:
                 o->b68 = 2;
@@ -86,10 +86,10 @@ void scriptOpShowMessageBox(void)
                 o->w76 = 0;
                 func_800ECBBC(o);
                 {
-                    unsigned short *k = &D_800A6066;
-                    D_800A603C = 1;
-                    D_800A603D = 2;
-                    D_800A603E = 0;
+                    unsigned short *k = &PLAYER.obj.animFrame;
+                    PLAYER.obj.b04 = 1;
+                    PLAYER.obj.step = 2;
+                    PLAYER.obj.state = 0;
                     *k |= 8;
                 }
                 break;

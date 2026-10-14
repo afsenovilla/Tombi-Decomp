@@ -1,9 +1,9 @@
 // FUNC 80129868 452 X003
 // MATCHING 80129868 452
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D2C3;
-extern short *D_800A6078;
 extern void func_80128A1C(TObj *);
 extern void func_80128DF8(TObj *);
 extern void func_80128C08(TObj *);
@@ -63,7 +63,7 @@ void func_80129868(TObj *o)
         break;
     case 4:
         if (!(D_8009D2C3 & 4)) {
-            if (D_800A6078[1] > 0xa0) D_800A6078[1] = 0xa0;
+            if ((*(short **)&PLAYER.obj.h)[1] > 0xa0) (*(short **)&PLAYER.obj.h)[1] = 0xa0;
         }
     anim:
         FUN_8001fec0(o);

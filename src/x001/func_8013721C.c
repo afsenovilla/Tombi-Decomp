@@ -1,12 +1,11 @@
 // FUNC 8013721c 676 X001
 // MATCHING 8013721c 676
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009CEAB, D_8009CEAD;
 extern int D_1F8002D4[];
 extern void *D_8013E570[], *D_8013E700;
-extern unsigned short *D_800A6078;
-extern short D_800A604E;
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 int ObjCullRegister(TObj *o);
@@ -64,10 +63,10 @@ void func_8013721C(TObj *o)
         }
         break;
     case 1:
-        if ((unsigned short)(D_800A6078[1] - 0x8ae) < 0x200 && (Rand() & 0x3f) == 0) {
-            if (D_800A604E < -0x190) {
+        if ((unsigned short)((*(unsigned short **)&PLAYER.obj.h)[1] - 0x8ae) < 0x200 && (Rand() & 0x3f) == 0) {
+            if (PLAYER.obj.y.p.whole < -0x190) {
                 v = 0x7f;
-            } else if (D_800A604E < -0xc8) {
+            } else if (PLAYER.obj.y.p.whole < -0xc8) {
                 v = 0x70;
             } else {
                 v = 0x60;
