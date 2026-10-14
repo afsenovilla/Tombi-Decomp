@@ -1,5 +1,6 @@
 // FUNC 8011708c 1236 X011
 // MATCHING 8011708c 1236
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -11,7 +12,6 @@ extern TObj *allocObjectLayer5(void);
 extern void setEventStarted(int, int, int);
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC, D_1F8003C4;
-extern unsigned char D_8009D082;
 extern short D_1F8001C6;
 extern AT D_80119C48[];
 
@@ -62,7 +62,7 @@ void func_8011708C(TObj *o)
         o->state = 2;
         break;
     case 2:
-        if (D_8009D082 != 1) break;
+        if (GCD.bd082 != 1) break;
         v = *(B12 *)&o->a;
         o->anim = D_80119C48[o->subtype].p[2];
         FUN_8001fe6c(o);
@@ -72,11 +72,11 @@ void func_8011708C(TObj *o)
     case 3:
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
-        D_8009D082 = 2;
+        GCD.bd082 = 2;
         o->state++;
         break;
     case 4:
-        if (D_8009D082 != 3) break;
+        if (GCD.bd082 != 3) break;
         v = *(B12 *)&o->a;
         o->d90 = showMessageBoxDirect(2, 8, &v);
         o->state++;

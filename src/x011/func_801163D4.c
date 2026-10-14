@@ -1,9 +1,8 @@
 // FUNC 801163d4 692 X011
 // MATCHING 801163d4 692
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CE0C;
-extern unsigned char D_8009D082;
 extern int ObjCullRegister(TObj *o);
 extern void ObjFreeDup(TObj *o);
 extern int func_80116688(TObj *o);
@@ -15,12 +14,12 @@ void func_801163D4(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009CE0C == 0xff) {
+        if (GCD.bce0c == 0xff) {
             o->b04 = 2;
             break;
         }
         o->b04++;
-        D_8009D082 = 0;
+        GCD.bd082 = 0;
         o->b68 = 0;
         if (o->b0c == 0) {
             o->da0 = 0;
@@ -44,7 +43,7 @@ void func_801163D4(TObj *o)
     case 1:
         if (ObjCullRegister(o) == 0) break;
         if (o->b0c != 1) {
-            if (D_8009D082 == 4) {
+            if (GCD.bd082 == 4) {
                 o->velX = -0x180;
                 o->a.raw += -0x18000;
                 o->d8c += 0x80;
@@ -63,11 +62,11 @@ void func_801163D4(TObj *o)
             if (func_80116688(o) != 0) {
                 o->timer = 0x1e;
                 o->step++;
-                D_8009D082 = 1;
+                GCD.bd082 = 1;
             }
             break;
         case 2:
-            c = &D_8009D082;
+            c = &GCD.bd082;
             if (*c == 2) {
                 o->step++;
             }
@@ -79,7 +78,7 @@ void func_801163D4(TObj *o)
             break;
         case 3:
             if (func_80116924(o) != 0) {
-                D_8009D082 = 3;
+                GCD.bd082 = 3;
                 o->step = 4;
             }
             break;
@@ -89,7 +88,7 @@ void func_801163D4(TObj *o)
             o->a.raw += o->velX << 8;
             if (--o->timer == 0) {
                 o->step = 4;
-                D_8009D082 = 5;
+                GCD.bd082 = 5;
             }
             break;
         }

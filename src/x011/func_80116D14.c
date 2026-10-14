@@ -1,8 +1,8 @@
 // FUNC 80116d14 320 X011
 // MATCHING 80116d14 320
+#include "gcd.h"
 #include "TOBJ.H"
 extern unsigned char D_8009D100;
-extern unsigned char D_8009CE3A;
 extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
 extern void addItemToInventory(int, int, int);
@@ -13,7 +13,7 @@ void func_80116D14(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009D100 != 0 || D_8009CE3A == 0) {
+        if (D_8009D100 != 0 || GCD.bce3a == 0) {
             o->b04 = 3;
             break;
         }

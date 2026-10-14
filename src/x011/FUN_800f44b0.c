@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X011
 // MATCHING 800f44b0 2488
+#include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "player.h"
@@ -21,7 +22,6 @@ typedef struct {
 
 extern P800F44B0 *D_8009C330;
 extern TObj *D_8009D2E8;
-extern TObj *D_800A611C;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
@@ -130,8 +130,8 @@ void FUN_800f44b0(TObj *o)
         o->b9d = 1;
         U8(o, 0xc8) = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = D_800A611C;
-            D_800A611C->b04 = 2;
+            D_8009D2E8 = (*(TObj **)&PLX.p611c);
+            (*(TObj **)&PLX.p611c)->b04 = 2;
             D_8009D2E8->step = 2;
             D_8009D2E8->state = 0;
         }
