@@ -1,5 +1,6 @@
 // FUNC 80019244 1144 MAIN0
 // MATCHING 80019244 1144
+#include "spad.h"
 #include "globals.h"
 typedef struct {
     char pad[0x48];
@@ -10,8 +11,7 @@ typedef struct {
 
 extern T80019244 *TASK_C;
 #define P TASK_C
-extern unsigned char D_1F8001D1, D_1F8001D0, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
-extern int D_1F800164;
+extern unsigned char D_1F8001D1, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
 extern short D_1F8001F4, D_1F8001F6;
 
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
@@ -19,7 +19,6 @@ extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 extern short D_8009F3DC;
 extern unsigned char D_8009D67C;
 extern unsigned char D_8009F0E8;
-extern char D_1F8001A0[];
 extern char D_80010000[];
 extern char D_80010008[];
 extern void titleSequenceTask(void);
@@ -48,7 +47,7 @@ void func_80019244(void)
     D_8009F086 = 0;
     D_8009F087 = 0;
     D_1F8001D1 = 0;
-    D_1F8001D0 = 0;
+    SPAD.b1d0 = 0;
     D_8009F3DC = 0;
     D_8009D67C = 1;
     D_8009F0E8 = 0;
@@ -66,7 +65,7 @@ void func_80019244(void)
             queueSystemLoadList(0, 1);
             D_1F8001C4 = 0;
             D_1F8001C5 = 0;
-            memset(D_1F8001A0, 0, 0x24);
+            memset(((char*)&SPAD.b1a0), 0, 0x24);
             P->w48++;
             break;
         case 1:
@@ -81,7 +80,7 @@ void func_80019244(void)
             P->w48++;
             break;
         case 3:
-            D_1F800164 = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
+            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
             p = P;
             if (--p->w58 == -1)
                 p->w48++;
@@ -111,7 +110,7 @@ void func_80019244(void)
             }
             break;
         case 11:
-            D_1F800164 = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
+            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
             p = P;
             switch (p->w4a) {
             case 0:

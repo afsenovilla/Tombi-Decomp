@@ -1,5 +1,6 @@
 // FUNC 80029cb4 616 MAIN0
 // MATCHING 80029cb4 616
+#include "spad.h"
 #include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned char b0; char p0[0x15]; short w16; char p1[0x16]; unsigned short w2e; char p2[0x79]; unsigned char ba9; } S;
@@ -13,7 +14,6 @@ extern P *D_800A6078;
 extern P *D_800A607C;
 extern unsigned short D_8009C960h;
 extern unsigned char D_800A60D6;
-extern short D_1F800286;
 extern void FUN_80027c74(O *);
 extern void func_8002795C(O *);
 extern void func_80028BE0(O *);
@@ -98,6 +98,6 @@ void func_80029CB4(O *o)
     }
     func_80028BE0(o);
     func_80029078(o);
-    D_1F800286 = -o->d24 >> 6;
+    SPAD.s286 = -o->d24 >> 6;
     Clamp(o);
 }

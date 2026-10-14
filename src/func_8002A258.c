@@ -1,5 +1,6 @@
 // FUNC 8002a258 380 MAIN0
 // MATCHING 8002a258 380
+#include "gcd.h"
 #include "gvars.h"
 typedef struct {
     unsigned char b0, b1, b2, b3;
@@ -19,7 +20,6 @@ extern unsigned short DAT_1f80016e;
 extern int DAT_1f80018c;
 extern int DAT_1f800190;
 extern unsigned char D_8009C966;
-extern unsigned char D_8009CDA6;
 void FUN_80027ed8(S8002A258 *o);
 void func_8002809C(S8002A258 *o);
 
@@ -44,7 +44,7 @@ void func_8002A258(S8002A258 *o)
     if ((unsigned short)(o->p34[1] - DAT_1f80016a + 0x40) < 0x80 || (o->w44 & 3)) {
         if ((unsigned short)(DAT_1f8000f2 - DAT_1f80016e + 0x5a) < 0xb4 || (o->w44 & 0xc)) {
             o->b3 = 1;
-            if (D_8009C966 == 3 || D_8009CDA6 == 0xff) o->b3 = 0;
+            if (D_8009C966 == 3 || GCD.bcda6 == 0xff) o->b3 = 0;
             GVARS.b3f = 0;
             GVARS.b3e = 0;
             GVARS.b42 = 0;

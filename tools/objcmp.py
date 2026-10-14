@@ -7,6 +7,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 NC = {}
 BLOCK_SYMS = {"PLAYER": 0x800A6038, "GVARS": 0x8009C930, "GV2": 0x8009D2A0, "GV6": 0x8009D600}  # struct blocks of include/*.h
+import json
+try:
+    for _v in json.load(open(os.path.join(ROOT, "tools", "blocks.json"))).values(): BLOCK_SYMS[_v["sym"]] = _v["base"]
+except Exception: pass
 def init():
     src = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
     NC.update({"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"})

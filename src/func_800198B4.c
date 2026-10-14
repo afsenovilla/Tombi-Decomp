@@ -1,6 +1,6 @@
 // FUNC 800198b4 340 MAIN0
 // MATCHING 800198b4 340
-extern unsigned char D_1F800118[];
+#include "spad.h"
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 extern int D_8009F7E4;
@@ -32,7 +32,7 @@ void func_800198B4(void)
     D_8009F7E4 = 0;
     *(unsigned char *)0x1F8001CE = 0;
     D_8009F838 = 0;
-    initLighting(D_1F800118);
+    initLighting(((unsigned char*)&SPAD.b118));
     *(short *)0x1F8001FC = 0;
     for (;;) {
         FUN_8001f850();

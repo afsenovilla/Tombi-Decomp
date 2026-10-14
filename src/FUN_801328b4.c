@@ -1,5 +1,6 @@
 // FUNC 801328b4 764 X000
 // MATCHING 801328b4 764
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { unsigned char b[8]; } V801328B4;
@@ -7,7 +8,6 @@ typedef struct { unsigned char b[8]; } V801328B4;
 extern V801328B4 D_801392EC[][4];
 extern void *D_8013B24C[];
 extern void (*D_801392E0[])(TObj *);
-extern int D_1F8002D4[];
 extern unsigned short FUN_8005e420(int, int);
 extern int ObjCullRegister(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -36,7 +36,7 @@ void FUN_801328b4(TObj *o)
         o->b0d = 1;
         o->w08 = FUN_8005e420(0x90, 0x1e6);
         o->anim = D_8013B24C[o->b0c];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         t = D_801392EC[o->b0c];
         o->b04++;
         o->b69 = 0;

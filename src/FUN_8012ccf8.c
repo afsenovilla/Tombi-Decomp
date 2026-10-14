@@ -1,12 +1,12 @@
 // FUNC 8012ccf8 1436 X000
 // MATCHING 8012ccf8 1436
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 typedef struct { unsigned char b0, b1; } B8012CCF8;
 
-extern int D_1F8002D0;
 extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned char D_800A4553[];
@@ -51,7 +51,7 @@ void FUN_8012ccf8(TObj *o)
                 o->wb8 = -0x10;
             else
                 o->wb8 = 0x10;
-            o->d3c = D_1F8002D0;
+            o->d3c = SPAD.i2d0;
             o->w1e = 1;
             o->b0a = 2;
             o->b0d = 0;

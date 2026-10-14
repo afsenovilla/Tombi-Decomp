@@ -1,7 +1,7 @@
 // FUNC 80033040 328 MAIN0
 // MATCHING 80033040 328
+#include "plx.h"
 #include "TOBJ.H"
-extern unsigned char D_800A60FF;
 extern unsigned char *D_8009C338;
 extern unsigned char *D_8009C330;
 extern signed char D_800A611B;
@@ -11,7 +11,7 @@ extern void func_800317C0(TObj *);
 extern void freeObjectLayer1(TObj *);
 void func_80033040(TObj *o)
 {
-    if (D_800A60FF != 0)
+    if (PLX.b60ff != 0)
         o->b04 = 2;
     switch (o->b04) {
     case 0:

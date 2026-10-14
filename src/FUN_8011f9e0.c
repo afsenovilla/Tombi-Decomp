@@ -1,5 +1,6 @@
 // FUNC 8011f9e0 1924 X000
 // MATCHING 8011f9e0 1924
+#include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "player.h"
@@ -7,7 +8,6 @@
 typedef struct { unsigned char p0[9]; unsigned char b9; } P8011F9E0;
 
 extern P8011F9E0 *D_8009C330;
-extern TObj *D_800A611C;
 extern Fix16 *D_800A6078_[];
 #define D_800A6078 D_800A6078_[0]
 extern void *D_8013B14C;
@@ -144,7 +144,7 @@ void FUN_8011f9e0(TObj *o)
                 *(signed char *)&p->b0f = -10;
             }
         } else {
-            D_800A611C->b04 = 3;
+            (*(TObj **)&PLX.p611c)->b04 = 3;
             o->state++;
         }
         break;

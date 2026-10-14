@@ -1,5 +1,6 @@
 // FUNC 8003566c 5708 MAIN0
 // MATCHING 8003566c 5708
+#include "plx.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -10,7 +11,6 @@ typedef struct { short x, y; } P;
 extern TObj PLAYER;
 extern Fix16 *D_800A6078, *D_800A607C;
 extern short D_800A604E;
-extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
 typedef struct {
     unsigned char b0, p1[5], b6, b7, b8, p9[0x22 - 9];
@@ -416,7 +416,7 @@ void FUN_8003566c(TObj *o)
         break;
     }
     if (*(unsigned char *)&G.wac >= 2) {
-        D_8009D2E8 = D_800A611C;
+        D_8009D2E8 = (*(TObj **)&PLX.p611c);
         D_8009C330->b8 = 0;
         G.step = 0xe;
         GVARS.i34 = 0;

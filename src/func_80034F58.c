@@ -1,8 +1,8 @@
 // FUNC 80034f58 324 MAIN0
 // MATCHING 80034f58 324
+#include "plx.h"
 #include "gv2.h"
 #include "TOBJ.H"
-extern unsigned char D_800A60FF;
 extern signed char D_800A611B;
 void FUN_8003509c(TObj *o, int n);
 void ObjCullRegister(TObj *o);
@@ -12,7 +12,7 @@ void freeObjectLayer1(TObj *o);
 void func_80034F58(TObj *o)
 {
     unsigned char st;
-    if (D_800A60FF != 0) {
+    if (PLX.b60ff != 0) {
         o->b04 = 2;
     }
     st = o->b04;

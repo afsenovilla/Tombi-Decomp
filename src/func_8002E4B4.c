@@ -1,10 +1,10 @@
 // FUNC 8002e4b4 528 MAIN0
 // MATCHING 8002e4b4 528
+#include "spad.h"
 #include "TOBJ.H"
 extern int GetGraphType(void);
 extern short GetClut(int x, int y);
 extern char D_80012528[];
-extern int D_1F8002D8[];
 extern short D_1F80016A[];
 extern unsigned short D_1F80016E[];
 extern unsigned short D_1F800172[];
@@ -28,7 +28,7 @@ void func_8002E4B4(TObj *o)
         o->w08 = GetClut(0x160, o->b0c + 0x1f1);
         o->animFrame = 0;
         o->anim = D_80012528;
-        o->d3c = D_1F8002D8[0];
+        o->d3c = ((int*)&SPAD.i2d8)[0];
         o->d30 = D_1F80016A[0] << 16;
         o->y.p.whole = D_1F80016E[0];
         o->d->p.whole = D_1F800172[0];

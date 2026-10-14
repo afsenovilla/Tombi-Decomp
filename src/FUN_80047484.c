@@ -1,13 +1,12 @@
 // FUNC 80047484 1464 MAIN0
 // MATCHING 80047484 1464
+#include "spad.h"
 #include "gvars.h"
 /* Debt: register asm("$20") on r (s3/s4 priority: hoisted const 2 has its live length doubled as a REG_EQUIV constant, so it loses to r).
    The two block-local `p` copies add block notes (luids) so the constant 2's lifetime passes loop.c's move threshold and it gets hoisted like in the game.
    Debt pass: tried `two` var with one/two sets, goto/do/for loops, r[i] indexing, orders; -dg: r 7 refs/267 vs const 2 7 refs/524 (doubled), needs ~3 more weighted refs on 2. */
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F800246;
-extern unsigned char **D_1F80021C;
 extern short D_1F80019E;
 extern short func_8004306C(TObj *, unsigned char *);
 extern void FUN_80045684(TObj *, unsigned char *);
@@ -69,8 +68,8 @@ void FUN_80047484(TObj *o)
     short v;
 
     if (GVARS.b3a == 0) return;
-    r = D_1F80021C;
-    D_1F80019E = D_1F800246;
+    r = (*(unsigned char ***)&SPAD.p21c);
+    D_1F80019E = SPAD.s246;
     while (D_1F80019E != 0) {
         q = *r;
         D_1F80019E = D_1F80019E - 1;

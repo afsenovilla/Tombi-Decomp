@@ -3,23 +3,18 @@
 <SYM>.<field> accesses (header include/<hdr>). Use with tools/greedy_conv.py conv_block files...  (see BLOCKS)."""
 import re, sys, os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BLOCKS = {
-    # name: (symbol, header, base, size, [(offset, field, ctype)])
-    "gv2": ("GV2", "gv2.h", 0x8009D2A0, 0x40, [(0x06, "sa6", "unsigned short"), (0x0e, "bae", "unsigned char"), (0x0f, "baf", "unsigned char"),
-            (0x10, "bb0", "unsigned char"), (0x11, "bb1", "unsigned char"), (0x12, "bb2", "unsigned char"), (0x13, "bb3", "unsigned char"),
-            (0x20, "sc0", "unsigned short"), (0x22, "bc2", "unsigned char"), (0x23, "bc3", "unsigned char"), (0x3a, "sda", "unsigned short")]),
-    "gv6": ("GV6", "gv6.h", 0x8009D600, 0xB0, [(0x00, "s00", "short"), (0x10, "s10", "unsigned short"), (0x14, "b14", "unsigned char"),
-            (0x70, "s70", "unsigned short"), (0x74, "s74", "unsigned short"), (0x94, "i94", "int"), (0x9c, "i9c", "int"), (0xa0, "ia0", "int")]),
-}
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import json
+BLOCKS = {k: (v["sym"], v["hdr"], v["base"], v["size"], v["fields"]) for k, v in json.load(open(os.path.join(ROOT, "tools", "blocks.json"))).items()}
 SYM, HDR, BASE, SIZE, FL = BLOCKS[os.environ["BLOCK"]]
-SZ = {"unsigned char": 1, "short": 2, "unsigned short": 2, "int": 4}
+SZ = {"unsigned char": 1, "short": 2, "unsigned short": 2, "int": 4, "unsigned int": 4, "void *": 4}
 fields = [(o, n, SZ[t], t) for o, n, t in FL]
 TOK = r"\bD_(?:%s)\b" % "|".join("%08X" % a for a in range(BASE, BASE + SIZE))
 fields.sort()
 SCAL = {"unsigned char": (1, 0), "u_char": (1, 0), "u8": (1, 0), "char": (1, 0), "U8": (1, 0), "uchar": (1, 0),
         "short": (2, 1), "s16": (2, 1), "S16": (2, 1), "unsigned short": (2, 0), "u16": (2, 0), "U16": (2, 0), "ushort": (2, 0), "u_short": (2, 0),
         "int": (4, 1), "s32": (4, 1), "S32": (4, 1), "long": (4, 1), "unsigned": (4, 0), "unsigned int": (4, 0), "u32": (4, 0), "U32": (4, 0), "uint": (4, 0), "unsigned long": (4, 0), "u_long": (4, 0), "u_int": (4, 0)}
-FSIGN = {"unsigned char": (1, 0), "short": (2, 1), "unsigned short": (2, 0), "int": (4, 1)}
+FSIGN = {"unsigned char": (1, 0), "short": (2, 1), "unsigned short": (2, 0), "int": (4, 1), "unsigned int": (4, 0)}
 
 
 def base_of(off):

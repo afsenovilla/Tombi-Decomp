@@ -1,5 +1,6 @@
 // FUNC 8002b0bc 780 MAIN0
 // MATCHING 8002b0bc 780
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 typedef struct S {
@@ -10,7 +11,6 @@ typedef struct S {
 extern char SPRITE_SLOTS[];
 extern char D_800B0BBA[];
 extern unsigned char D_800B0BBC[], D_800B0BBD[], D_800B0BBE[], D_800B0BBF[];
-extern unsigned char D_8009CDA2;
 extern signed char D_8009D2B0;
 extern unsigned char D_8009C933;
 extern unsigned short acquireSpriteSlot(int);
@@ -48,7 +48,7 @@ void func_8002B0BC(S *o)
         o->b04++;
         break;
     case 1:
-        if (D_8009CDA2 != 1)
+        if (GCD.bcda2 != 1)
             func_8002B3C8(o);
         if (o->b00 & 1) {
             o->b01 = 1;

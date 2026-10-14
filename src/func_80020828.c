@@ -1,12 +1,12 @@
 // FUNC 80020828 592 MAIN0
 // MATCHING 80020828 592
+#include "spad.h"
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xec - 0x48]; } S1;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xd4 - 0x48]; } S2;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0x6c - 0x48]; } S3;
 extern unsigned short D_1f8001c8;
 extern short D_1f80019c;
 extern char PLAYER[];
-extern char D_1F8000EC[];
 extern void *D_800A6078, *D_800A607C, *D_800A4584, *D_800A4588;
 extern S1 D_800B1478[];
 extern S2 D_800A6610[];
@@ -25,11 +25,11 @@ void func_80020828(void)
         D_800A6078 = b + 0x18;
     }
     if (!(D_1f8001c8 & 1)) {
-        D_800A4584 = D_1F8000EC;
-        D_800A4588 = D_1F8000EC + 8;
+        D_800A4584 = ((char*)&SPAD.iec);
+        D_800A4588 = ((char*)&SPAD.iec) + 8;
     } else {
-        D_800A4588 = D_1F8000EC;
-        D_800A4584 = D_1F8000EC + 8;
+        D_800A4588 = ((char*)&SPAD.iec);
+        D_800A4584 = ((char*)&SPAD.iec) + 8;
     }
     e1 = D_800B1478;
     for (D_1f80019c = 0; D_1f80019c < 4; D_1f80019c++, e1++) {
