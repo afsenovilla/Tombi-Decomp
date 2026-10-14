@@ -1,6 +1,11 @@
 #include "spad.h"
 #include "gv2.h"
-/* score 516: first draft. Structure/size match; game keeps o in s3 and calls rcos before rsin in the BLKB blocks (cross-jumped), regs s0/s1 swapped vs ours. Sibling of X009 wip func_8011E688. */
+/* score 411 (was 516): o pinned s3 (param o_ copied to register asm("$19")), s0/s1/s2/s4 pinned s0/s1/s2/s4; the
+   !animFrame ladders test s4 <= 0x800 first (BLKA branch first, as in the game); TR split into "x = f(); x <<= 3; x >>= 12"
+   (game shifts in place in the s reg). Left: game sets the rsin arg (move a0,s0) before the rcos TR and computes
+   s1 -= (s4+0x800)&0xfff in a v1 temp (ours updates s4 in place), BLKB cross-jumps into the BLKA tail in the game,
+   case-1 g->d8c handling (s2 sll/sra placement), a0/a1/v1 choices around DAT_8009f0ec loads. Tried 9 BLKA orderings
+   (411-427). Sibling of X009 func_8011E688 (matched). */
 // FUNC 80122f54 2192 X001
 /* whole function: includes the csv piece 801231F4 */
 #include "TOBJ.H"
@@ -28,24 +33,28 @@ extern int func_8012767C(TObj *, TObj *);
     s0 &= 0xfff; \
     s1 = 0x1000; \
     s0 = s1 - s0; \
-    s2 = TR(rcos, s0); \
-    s0 = TR(rsin, s0); \
+    s2 = rcos(s0); s2 <<= 3; s0 = rsin(s0); s2 >>= 12; s0 <<= 3; s0 >>= 12; \
     s1 -= (s4 + 0x800) & 0xfff; \
     s4 = s2 + NTR(rcos, s1); \
     s0 = s0 + NTR(rsin, s1); \
 }
 #define BLKB(C) { \
-    s2 = TR(rsin, s0); \
-    s0 = TR(rcos, s0); \
+    s2 = rsin(s0) << 3; s2 >>= 12; \
+    s0 = rcos(s0) << 3; s0 >>= 12; \
     s1 = C; \
     s4 = s0 + NTR(rcos, s1); \
     s0 = s2 + NTR(rsin, s1); \
 }
 
-void func_80122F54(TObj *o)
+void func_80122F54(TObj *o_)
 {
+    register TObj *o asm("$19") = o_;
     TObj *g;
-    int a, s0, s1, s2, s4;
+    int a;
+    register int s0 asm("$16");
+    register int s1 asm("$17");
+    register int s2 asm("$18");
+    register int s4 asm("$20");
     short v;
 
     switch (o->state) {
@@ -155,17 +164,17 @@ void func_80122F54(TObj *o)
             } else {
                 o->h->p.whole += 4;
                 s4 = (short)s2;
-                if (s4 > 0x800) {
+                if (s4 <= 0x800) {
+                    s0 = s4 + 0xc00;
+                    o->d8c = (s0 >> 4) & 0xff;
+                    BLKA;
+                } else {
                     s0 = s4 + 0x400;
                     o->d8c = (s0 >> 4) & 0xff;
                     s0 &= 0xfff;
                     s1 = 0x1000;
                     s0 = s1 - s0;
                     BLKB(s1 - (s2 & 0xfff));
-                } else {
-                    s0 = s4 + 0xc00;
-                    o->d8c = (s0 >> 4) & 0xff;
-                    BLKA;
                 }
             }
             break;
@@ -189,17 +198,17 @@ void func_80122F54(TObj *o)
             } else {
                 o->h->p.whole += 4;
                 s4 = s0;
-                if (s4 > 0x800) {
+                if (s4 <= 0x800) {
+                    s0 = s4 + 0xc00;
+                    o->d8c = (s0 >> 4) & 0xff;
+                    BLKA;
+                } else {
                     s0 = s4 + 0x400;
                     o->d8c = (s0 >> 4) & 0xff;
                     s0 &= 0xfff;
                     s1 = 0x1000;
                     s0 = s1 - s0;
                     BLKB(s1 - s4);
-                } else {
-                    s0 = s4 + 0xc00;
-                    o->d8c = (s0 >> 4) & 0xff;
-                    BLKA;
                 }
             }
             break;

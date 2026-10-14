@@ -26,7 +26,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | NEAR | x001 | func_80127700 | 80127700 | 396 | 2 | src/x001/wip/func_80127700.c (gcc-2.7.2-psx) | one operand-order diff: addu v1,a0,v1 vs v1,v1,a0 (permuter 100k+ iters, ~250 forms tried) |
 | FAR | x004 | func_80125818 | 80125818 | 3148 | 204 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3156/3148 B; see header for case 4/5/10 leads; near() a0/v1 regs |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 31 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17; left: o->f load reg, x+w temp reg, uv sched |
-| FAR | x001 | func_80122F54 | 80122F54 | 2192 | 516 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | first draft; o in s3 and rcos-before-rsin cross-jump in BLKB blocks, s0/s1 swap |
+| FAR | x001 | func_80122F54 | 80122F54 | 2192 | 411 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | o/s0-s4 pinned, BLKA-first ladders; left: rsin arg/TR order, BLKB cross-jump, s1 temp |
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 345 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | size matches; left: (ky+4)/(kx+12) reassociation, regalloc |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
 | FAR | x006 | func_8011A87C | 8011A87C | 1644 | 179 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | -fno-expensive-optimizations + o pin in $17; prologue copy, a0/a1 choices |
@@ -35,7 +35,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_801253AC | 801253AC | 1212 | 226 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | frame fixed by pad[16], int sabs inline; left sabs negate source, local regalloc |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 307 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
 | FAR | x010 | func_8011752C | 8011752C | 1020 | 92 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | mask/shift temps and store interleave; regalloc |
-| FAR | main0 | func_80021b20 | 80021B20 | 1016 | 82 | src/wip/func_80021B20.c (gcc-2.7.2-psx) | a0/a2 swap in smax/smin inline copies; r (3 refs) cannot outrank q/b in global alloc, no C form found |
 | FAR | x001 | func_8011CEC8 | 8011CEC8 | 924 | 98 | src/x001/wip/func_8011CEC8.c (gcc-2.7.2-psx) | first half differs; rcos/rsin, MulCosDup branch and tail already match |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 122 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | x/ys/cnt unpinned, (x-1)-sx order fixed; left: bs/d regs, b sext in place, xm copy to t1, branch-1 tail cross-jump |
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |

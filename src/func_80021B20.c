@@ -1,5 +1,8 @@
 // FUNC 80021b20 1016 MAIN0
-// score 78 (n80: empty asm("" ::: "$4") after the w30/w32 clamp store fixes the p34 clamp regs, was 82). n80 also tried: brute force of asm volatile("") and clobbers of $2-$9 at every statement (no other gain), $2-$7 clobbers inside smax/smin before/after the compare (82-110), clobber before r = a in both inlines (149), q before w + split q with volatile/clobbers (78/114). Older: score 90 -> b29: 76 by full-address score (tools ncheck --score is blind to symbol offsets): final 6-int copy as extern int ((int*)&SPAD.i174)[] array (stores keep loads after them). scratchpad as ((int*)&SPAD.ie0)[] array (keeps load order), shared-store clamps (v = w30; if (x < v || (v = w32, v < x)) store), d7c in both branches, final copy as 6 int stores. Left: a0/a2 swap in smax/smin inline copies (r vs b param copy), w4c reg (v1 vs a0) and q address order. b18 tried: 12 smax/smin inline forms (return-style, int r, copies), caller-scope macro vars (162+), D_8009C962 as D_8009C960[1] / D_8009C982 as array (no change), q split, hill-climb of the top block (no gain). b29: r/b pseudos: -dl shows b (3 refs/4 insns) outranks r (3 refs/7 insns) so b gets a0; ~15 more inline forms, caller-scope r/b (104+), q index forms all unchanged. b46: q computed before w (game loads TASK_C after D_8009C982) no gain (82 = current ncheck score); split q += idx*4 forms 113-118. b51: no-op self-moves (r = r, else r = r) to add refs to r are deleted (no change); register asm("$4") r in inlines 164; q via raw (D962<<2)+row 80, row-pointer/split forms 82-171; switch on TASK_C->w4c directly 82. n64: global.c analysis: r (3 refs/7 insns, prio 4285) must outrank q (15/60 = 7500) or b (3/4 = 7500) to get a0, so the game's r has >=4 refs or q avoids a0 in pass 0 (regs_someone_prefers: a lower-priority conflicting pseudo copied to/from hard a0); no C form found: int r with compare on r (cse rewrites to the load temp), r<<16 inside the inline, (unsigned short) r, short/int caller temps, function-scope x/v as result, b evaluated first, macro forms (w1 168, others 82).
+// MATCHING 80021b20 1016
+/* smax: asm("" : "=r"(r) : "0"(r)) after r = a gives r the a0 priority; smin takes int a (lhu + off) with r pinned
+   a0 and the caller's << 16 through a v0-pinned temp; q row loaded before TASK_C->w4c, then q += D982 * 4;
+   asm("") after the 0x1F8000F2 load keeps the w30 load after it; p34 pinned a0 in the second clamp. */
 #include "spad.h"
 #include "gcd.h"
 typedef struct { int x, y, z; } V3;
@@ -23,8 +26,8 @@ extern void FUN_8002757c(C *);
 #define FLAG (*(unsigned short *)0x1F8001C8)
 #define SFLAG (*(short *)0x1F8001C8)
 
-static __inline__ int smax(int a, short b) { short r = a; if (a < b) r = b; return r; }
-static __inline__ int smin(short a, short b) { short r = a; if (b < a) r = b; return r; }
+static __inline__ int smax(int a, short b) { short r = a; asm("" : "=r"(r) : "0"(r)); if (a < b) r = b; return r; }
+static __inline__ int smin(int a, short b) { register short r asm("$4") = a; if ((short)a > b) r = b; return r; }
 
 void func_80021B20(void)
 {
@@ -53,8 +56,9 @@ void func_80021B20(void)
         ((int*)&SPAD.ie0)[2] = 0xFDC00000;
     else
         ((int*)&SPAD.ie0)[2] = 0xFDE00000;
+    q = D_80079474[D_8009C960[0]][D_8009C962];
     w = TASK_C->w4c;
-    q = D_80079474[D_8009C960[0]][D_8009C962] + D_8009C982 * 4;
+    q += D_8009C982 * 4;
     switch (w) {
     case 1: case 2:
         off = -0x38;
@@ -65,21 +69,22 @@ void func_80021B20(void)
     }
     if (!(FLAG & 1)) {
         ((int*)&SPAD.ie0)[3] = smax(*q++, c->w2c) << 16;
-        ((int*)&SPAD.ie0)[4] = smin(*q++ + off, c->w32) << 16;
+        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->w32) << 16; ((int*)&SPAD.ie0)[4] = t; }
         ((int*)&SPAD.ie0)[5] = *q << 16;
     } else {
         ((int*)&SPAD.ie0)[3] = *q++ << 16;
-        ((int*)&SPAD.ie0)[4] = smin(*q++ + off, c->w32) << 16;
+        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->w32) << 16; ((int*)&SPAD.ie0)[4] = t; }
         ((int*)&SPAD.ie0)[5] = smax(*q, c->w2c) << 16;
     }
     x = *(short *)0x1F8000F2;
+    asm("");
     v = c->w30;
     if (x < v || (v = c->w32, v < x))
         ((int*)&SPAD.ie0)[4] = v << 16;
-asm("" ::: "$4");
+    { register int *pp asm("$4") = c->p34;
     v = c->w2e;
-    if (v < ((SP *)c->p34)->y || (v = c->w2c, ((SP *)c->p34)->y < v))
-        *c->p34 = v << 16;
+    if (v < ((SP *)pp)->y || (v = c->w2c, ((SP *)pp)->y < v))
+        *pp = v << 16; }
     if (GCD.bcda2) {
         c->d20 = 0x1000;
         if (FLAG & 1) c->d24 = -0x1000;
