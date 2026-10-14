@@ -35,14 +35,16 @@ def access(v, off, ctype):
     if d: return "(*(%s*)((char*)&%s + %d))" % (ctype, base, d)
     return "(*(%s*)&%s)" % (ctype, base)
 
-def convert(s, vars_):
+def convert(s, vars_, allow=None):
     for v in vars_:
         V = re.escape(v)
         def m1(m):
+            if allow is not None and (v, int(m.group(2), 0)) not in allow: return m.group(0)
             r = access(v, int(m.group(2), 0), MAC[m.group(1)])
             return r if r else m.group(0)
         s = re.sub(r"\b(U8F|U8|S8|U16|S16|S32|PTR)\(%s, *(0x[0-9a-fA-F]+|\d+)\)" % V, m1, s)
         def m2(m):
+            if allow is not None and (v, int(m.group(2), 0)) not in allow: return m.group(0)
             r = access(v, int(m.group(2), 0), m.group(1))
             return r if r else m.group(0)
         s = re.sub(r"\*\(((?:unsigned )?(?:char|short|int)|u8|s8|u16|s16|u32|s32|void ?\*) ?\*\)\(\((?:unsigned char|char|u8) ?\*\)%s \+ (0x[0-9a-fA-F]+|\d+)\)" % V, m2, s)
@@ -81,7 +83,19 @@ def work(a):
         if keep:
             open(f, "w", errors="surrogateescape").write(convert(orig, keep))
             return f, True
-        return f, False
+        # stage 3: per (variable, offset)
+        occ = set()
+        for v in vs:
+            for m in re.finditer(r"\b(?:U8F|U8|S8|U16|S16|S32|PTR)\(%s, *(0x[0-9a-fA-F]+|\d+)\)" % re.escape(v), orig): occ.add((v, int(m.group(1), 0)))
+            for m in re.finditer(r"\)%s \+ (0x[0-9a-fA-F]+|\d+)\)" % re.escape(v), orig): occ.add((v, int(m.group(1), 0)))
+        allow = set()
+        for o_ in sorted(occ):
+            new = convert(orig, vs, allow | {o_})
+            if new == orig: continue
+            open(f, "w", errors="surrogateescape").write(new)
+            if objcmp.job((f, inc, tmp)) is None: allow.add(o_)
+        open(f, "w", errors="surrogateescape").write(convert(orig, vs, allow) if allow else orig)
+        return f, bool(allow)
     return f, True
 
 if __name__ == "__main__":

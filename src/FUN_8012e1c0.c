@@ -24,9 +24,9 @@ void FUN_8012e1c0(TObj *o)
     case 0:
         switch (o->step) {
         case 0:
-            S16(o, 0x6c) = 0x14;
-            S16(o, 0x6e) = 0x28;
-            S16(o, 0x70) = 0x18;
+            o->box0 = 0x14;
+            o->box1 = 0x28;
+            o->box2 = 0x18;
             S16(o, 0x72) = 0x30;
             o->d3c = DAT_1f8002d4;
             o->step++;

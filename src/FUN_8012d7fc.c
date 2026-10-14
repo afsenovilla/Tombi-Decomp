@@ -14,9 +14,9 @@ void FUN_8012d7fc(TObj *o)
     switch (o->state) {
     case 0:
         PTR(o, 0x28) = DAT_80077cdc;
-        U8(o, 0x69) = 0;
+        o->b69 = 0;
         S16(o, 0xac) = 0x2d;
-        U8(o, 6) = U8(o, 6) + 1;
+        o->state = o->state + 1;
         o->anim = DAT_8013a214;
         p = DAT_80138fd8 + DAT_8013a214[1] * 4;
         o->box0 = *p++;
