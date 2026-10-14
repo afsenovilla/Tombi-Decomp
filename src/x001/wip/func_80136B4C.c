@@ -1,4 +1,5 @@
 // FUNC 80136b4c 1744 X001
+#include "gvars.h"
 /* score 242: structure complete. o26: case 3 rewritten in the style of the matched X009 func_8011B01C (separate
    player-field externs D_800A6039/6066/605C/6078/604E/607C/60C4/6047/609C, arrays as [0], angle as
    `u = ...; t = u; t &= 0xff;` per branch): 361 -> 242. Left: the game's angle tail is `andi v0; move s0,v0` (t and
@@ -21,7 +22,6 @@ extern signed char D_80011EB4[];
 extern void *D_8013E568[];
 extern char D_80077D3C[];
 extern unsigned char D_8009CEAB;
-extern unsigned char D_8009C942, D_8009C93F, D_8009C93E;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -78,9 +78,9 @@ void func_80136B4C(TObj *o)
         o->d8c = D_800A60C4[0];
         o->b0f = D_800A6047[0] + r->b;
         if (D_800A609C[0]) {
-            D_8009C942 = 1;
-            D_8009C93F = 1;
-            D_8009C93E = 1;
+            GVARS.b42 = 1;
+            GVARS.b3f = 1;
+            GVARS.b3e = 1;
             o->animFrame = 0;
             D_8009CEAB = 2;
             o->timer = 0x3c;
@@ -90,9 +90,9 @@ void func_80136B4C(TObj *o)
             break;
         }
         if (D_800A6078[0]->p.whole < 0x371) {
-            D_8009C942 = 1;
-            D_8009C93F = 1;
-            D_8009C93E = 1;
+            GVARS.b42 = 1;
+            GVARS.b3f = 1;
+            GVARS.b3e = 1;
             o->animFrame = 0;
             D_8009CEAB = 2;
             o->timer = 0x3c;
@@ -102,9 +102,9 @@ void func_80136B4C(TObj *o)
         }
         if ((unsigned short)(D_800A6078[0]->p.whole - 0xb6f) < 0x50 && (short)D_800A604E[0] >= -0x118) {
             o->animFrame = 1;
-            D_8009C942 = 1;
-            D_8009C93F = 1;
-            D_8009C93E = 1;
+            GVARS.b42 = 1;
+            GVARS.b3f = 1;
+            GVARS.b3e = 1;
             D_8009CEAB = 2;
             o->timer = 0x3c;
             o->b04 = 2;
@@ -112,9 +112,9 @@ void func_80136B4C(TObj *o)
             o->state = 0;
         }
         if (D_800A607C[0]->p.whole > 0) {
-            D_8009C942 = 1;
-            D_8009C93F = 1;
-            D_8009C93E = 1;
+            GVARS.b42 = 1;
+            GVARS.b3f = 1;
+            GVARS.b3e = 1;
             D_8009CEAB = 2;
             o->animFrame = 1;
             o->b04 = 2;
@@ -207,9 +207,9 @@ void func_80136B4C(TObj *o)
             o->d->p.whole = 0;
             o->active = 1;
             o->animFrame = 0;
-            D_8009C942 = 0;
-            D_8009C93F = 0;
-            D_8009C93E = 0;
+            GVARS.b42 = 0;
+            GVARS.b3f = 0;
+            GVARS.b3e = 0;
         }
         break;
     }

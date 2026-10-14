@@ -1,10 +1,11 @@
 // FUNC 8013b0f4 352 X001
 // MATCHING 8013b0f4 352
+#include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
-extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CE59, D_8009CEDE;
+extern unsigned char D_8009CE59, D_8009CEDE;
 extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
@@ -18,9 +19,9 @@ void func_8013B0F4(TObj *o)
 
     switch (o->step) {
     case 0:
-        D_8009C93F = 1;
-        D_8009C93E = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b3e = 1;
+        GVARS.b42 = 1;
         PLAYER.anim = D_80010748;
         AnimLoadDuration(&PLAYER);
         e->animFrame = 0;
@@ -33,9 +34,9 @@ void func_8013B0F4(TObj *o)
         p = D_800A60C8;
         if (p->b04 == 2) {
             p->b04 = 3;
-            D_8009C93F = 0;
-            D_8009C93E = 0;
-            D_8009C942 = 0;
+            GVARS.b3f = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
             D_8009CE59 = 1;
             D_8009CEDE = 1;
             D_800A60F8 = 0;

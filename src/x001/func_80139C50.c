@@ -1,5 +1,6 @@
 // FUNC 80139c50 1148 X001
 // MATCHING 80139c50 1148
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj PLAYER;
@@ -7,7 +8,7 @@ extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
 extern TObj *D_8009C330;
-extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CEBC, D_800A60F8, D_8009CDB2;
+extern unsigned char D_8009CEBC, D_800A60F8, D_8009CDB2;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 
 /* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw D_8009C330 store */
@@ -27,9 +28,9 @@ void func_80139C50(TObj *o)
 
     switch (o->step) {
     case 0:
-        D_8009C93F = 1;
-        D_8009C93E = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b3e = 1;
+        GVARS.b42 = 1;
         P.anim = D_80010748;
         AnimLoadDuration(&P);
         e->step = 1;
@@ -63,10 +64,10 @@ void func_80139C50(TObj *o)
             e->animFrame = e->b6b;
             ((AnimH *)o)->a = 0;
             *(unsigned short *)((char *)D_8009C330 + 0x2e) = 0xffff;
-            D_8009C93E = 0;
-            D_8009C942 = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
             D_800A60F8 = 0;
-            D_8009C93F = 0;
+            GVARS.b3f = 0;
             break;
         case 1:
             p->b04 = 3;
@@ -119,10 +120,10 @@ void func_80139C50(TObj *o)
                 D_8009CDB2 = 2;
                 { int *q = &GAME.area00_eventControl; *q |= 0x100; }
                 printInfoMessage(0x13, 2);
-                D_8009C93E = 0;
-                D_8009C942 = 0;
+                GVARS.b3e = 0;
+                GVARS.b42 = 0;
                 D_800A60F8 = 0;
-                D_8009C93F = 0;
+                GVARS.b3f = 0;
             }
             break;
         case 2:
@@ -146,10 +147,10 @@ void func_80139C50(TObj *o)
                 o->step = 0;
                 o->state = 0;
                 D_8009CDB2 = 2;
-                D_8009C942 = 0;
+                GVARS.b42 = 0;
                 D_800A60F8 = 0;
-                D_8009C93F = 0;
-                D_8009C93E = 0;
+                GVARS.b3f = 0;
+                GVARS.b3e = 0;
                 { int *q = &GAME.area00_eventControl; *q |= 0x100; }
             }
             break;

@@ -1,5 +1,6 @@
 // FUNC 8013aab8 1112 X001
 // MATCHING 8013aab8 1112
+#include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -10,7 +11,6 @@ typedef struct {
     short w24;
 } O;
 extern unsigned char D_8009CEDF[], D_8009CEDE, D_8009CE59;
-extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[];
 extern unsigned char PLAYER, D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A6066;
 extern unsigned char D_800A60A1;
@@ -129,9 +129,9 @@ void func_8013AAB8(O *o)
         break;
     case 6:
         if (--o->w08 > 0) break;
-        D_8009C93F[0] = 0;
-        D_8009C93E[0] = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b3e)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60F8 = 0;
         D_800A603C[0] = 1;
         D_800A603D[0] = 0;

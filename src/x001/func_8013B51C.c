@@ -1,5 +1,6 @@
 // FUNC 8013b51c 1116 X001
 // MATCHING 8013b51c 1116
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -7,7 +8,6 @@ extern unsigned char D_8009CEE1, D_8009CEE2;
 extern unsigned char D_8009D0B4[];
 extern unsigned short D_800A604A[];
 extern unsigned char D_8009CE56;
-extern unsigned char D_8009C93E, D_8009C93F, D_8009C942;
 extern TObj PLAYER;
 extern char D_80010748[];
 extern Fix16 *D_800A6078[];
@@ -46,9 +46,9 @@ void func_8013B51C(TObj *o)
             D_8009CEE2 = 0;
         }
         if (D_8009CE56 != 2) break;
-        D_8009C93F = 1;
-        D_8009C93E = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b3e = 1;
+        GVARS.b42 = 1;
         PLAYER.anim = D_80010748;
         FUN_8001fe6c(&PLAYER);
         o->a.raw = e->h->raw;

@@ -1,11 +1,12 @@
 // FUNC 80139b2c 292 X001
 // MATCHING 80139b2c 292
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern unsigned char D_8009CDB2;
-extern unsigned char D_8009C942, D_800A60F8;
+extern unsigned char D_800A60F8;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC, D_1F8003C4;
 
@@ -23,7 +24,7 @@ int func_80139B2C(TObj *o)
         } else if (D_8009D2B0 == PLAYER.obj.b04 && (D_1F8001FC & D_1F8003C4)) {
             r = 1;
             *(unsigned short *)&o->anim = 1;
-            D_8009C942 = 1;
+            GVARS.b42 = 1;
             D_800A60F8 = 1;
         }
     }
