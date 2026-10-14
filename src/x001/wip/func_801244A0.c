@@ -1,5 +1,12 @@
 // FUNC 801244a0 1800 X001
 #include "spad.h"
+/* score 14 (opusQ, was 32): SPAD.b1d2 block fixed: itbrute put `asm("" : "=r"(t) : "0"(t));` right after each
+   `t = b->h +/- cx;` (d=v1 now, 26), and the w temp is the function var v (`v = t - a->h + 2; if ((unsigned short)v >= 8)`),
+   which makes it a global pseudo (no tie to the andi), giving the game's w=a1, t=a2, h=a3 (14).
+   Left: v is now a1 in the a->wb0 block too (game v1 there, so the game's w is NOT v but some other global var that
+   conflicts with v0). Tried (no gain): w = kind/ax/ay/s7/q/r/c1/dy/cy/s2/dx/cx (26-110), separate var u for the wb0
+   block with fn/block-scope v (26: tie returns), fn/blk-scope w with dead end uses, w -> u copy before the compare,
+   int/unsigned v (134), itbrute bumps of v/t/w/h/d around both blocks. */
 /* score 32 (n80): two empty clobbers fixed the r and sabs regs: `asm("" ::: "$5", "$6");` just before the
    `(ang - r)` range test puts r in a3 (game), and `asm("" ::: "$3");` after the if/else in sabs() puts its result in v0.
    Left: the SPAD.b1d2 block only (game d=v1, t=a2, w=a1 untied, a->h value=a3; ours d=a2, t=v1, w tied v0, a->h=a1).
@@ -19,7 +26,7 @@
    Previous: score 98 (size now 1800 = game): same source as x010/wip/func_8011E000.c (which has the D_8009D2C3 & 0x40 tests).
    Fixed this round: the dead `ay = q;` at the end keeps q alive past the r = q copy (cse rewrites to the reg with the
    later last use, n48), which restores the game's `move a3,v1` copy; in the SPAD.b1d2 block, block-local
-   `short t; unsigned short w;` per branch (w = t - a->h + 2; if (w >= 8)) removes the extra copy of the sum
+   `short t; unsigned short w;` per branch (w = t - a->h + 2; if ((unsigned short)v >= 8)) removes the extra copy of the sum
    (function-scope t gives temp+copy, cse substitutes the temp in the compare).
    Left (register choices only): r gets a1 (game a3: a1/a2 skipped, cause unknown); ang/cx s5/s6 swapped (ours
    cx 10 refs/201 insns beats ang 8 refs/178; game allocates ang first - any dead `v = ax` use flips it but then
@@ -131,17 +138,17 @@ int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
                 short d = a->y.p.whole - ((-(s2 + -4) + b->y.p.whole) + (a->box3 - a->box2));
                 if (dx > 0) {
                     short t;
-                    unsigned short w;
                     t = b->h->p.whole + cx;
-                    w = t - a->h->p.whole + 2;
-                    if (w >= 8) a->h->p.whole += d;
+asm("" : "=r"(t) : "0"(t));
+                    v = t - a->h->p.whole + 2;
+                    if ((unsigned short)v >= 8) a->h->p.whole += d;
                     else a->h->p.whole = t;
                 } else {
                     short t;
-                    unsigned short w;
                     t = b->h->p.whole - cx;
-                    w = a->h->p.whole - t + 2;
-                    if (w >= 8) a->h->p.whole -= d;
+asm("" : "=r"(t) : "0"(t));
+                    v = a->h->p.whole - t + 2;
+                    if ((unsigned short)v >= 8) a->h->p.whole -= d;
                     else a->h->p.whole = t;
                 }
                 return 3;
