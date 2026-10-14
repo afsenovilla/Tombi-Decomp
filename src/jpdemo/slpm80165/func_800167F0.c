@@ -1,5 +1,6 @@
 // JPDEMO slpm80165 800167F0 412
-// Demo version of PAL main0 80017B44 (initHud.c): only clears 0x1F8001C6 and runs initAreaScripts before the AP digits.
+// Demo version of PAL main0 80017B44 (initHud.c): only clears 0x1F8001C6 and runs initAreaScripts before the AP
+// digits.
 // Portado de psx_tomba (gameinit.c, initHud); licencia MIT del proyecto original.
 #define SKIP_ASM
 #include "common.h"

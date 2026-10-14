@@ -1,6 +1,6 @@
 // JPDEMO slpm80165 8001CE14 768
-// Demo version of PAL main0 8005B624 (printEventMessage.c): AP value from one short pair per event (index b),
-// no zero check, digits at y 0x70.
+// Demo version of PAL main0 8005B624 (printEventMessage.c): AP value from one short pair per event (index b), no zero
+// check, digits at y 0x70.
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
 extern unsigned char D_8006B354[];

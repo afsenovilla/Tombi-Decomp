@@ -1,6 +1,6 @@
 // JPDEMO x00 800F4A54 1276
-// Demo version of PAL x000 800F8130 (FUN_800f8130.c): jump speed -0x2c0 (PAL -0x300), angle +0x8c reset to 0
-// instead of a per-object table value.
+// Demo version of PAL x000 800F8130 (FUN_800f8130.c): jump speed -0x2c0 (PAL -0x300), angle +0x8c reset to 0 instead
+// of a per-object table value.
 #include "TOBJ.H"
 typedef struct {
     char pad0[2];

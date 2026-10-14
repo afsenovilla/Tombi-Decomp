@@ -1,5 +1,6 @@
 // JPDEMO slpm80165 8003BAB8 196
-// Demo version of PAL x001 80123E50 (func_80123E50.c): subtype 0x11 (PAL 0x13), animation set from the 20-byte item table.
+// Demo version of PAL x001 80123E50 (func_80123E50.c): subtype 0x11 (PAL 0x13), animation set from the 20-byte item
+// table.
 extern unsigned char D_8006DDEF[];
 #include "TOBJ.H"
 

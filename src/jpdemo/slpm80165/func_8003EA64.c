@@ -1,5 +1,6 @@
 // JPDEMO slpm80165 8003EA64 624
-// Demo version of PAL main0 80041EBC (func_80041EBC.c): returns 0 for a negative column first; 4-bit slope field (PAL 3 bits).
+// Demo version of PAL main0 80041EBC (func_80041EBC.c): returns 0 for a negative column first; 4-bit slope field (PAL
+// 3 bits).
 #include "spad.h"
 typedef struct O { char p[0x44]; short *q; } O;
 extern unsigned short *getCollisionPlaneAt(int, int);

@@ -1,6 +1,6 @@
 // JPDEMO x00 800EC1EC 360
-// Demo version of PAL x002 80119F40 (func_80119F40.c): short index without the &1 mask; scratchpad
-// read through a literal address.
+// Demo version of PAL x002 80119F40 (func_80119F40.c): short index without the &1 mask; scratchpad read through a
+// literal address.
 #include "TOBJ.H"
 
 typedef struct { short v[2][8][2]; } T;

@@ -1,5 +1,6 @@
 // JPDEMO x00 80103ACC 396
-// Demo version of PAL x000 801231F4 (FUN_801231f4.c): player animation change inline (PAL calls PlayerSetAnimIfChanged); frame id 0xf8 (PAL 0xbd).
+// Demo version of PAL x000 801231F4 (FUN_801231f4.c): player animation change inline (PAL calls
+// PlayerSetAnimIfChanged); frame id 0xf8 (PAL 0xbd).
 #include "tobj.h"
 extern TObj *D_8009C330_anim;
 extern void func_800EDA04(TObj *);

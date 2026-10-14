@@ -1,5 +1,6 @@
 // JPDEMO slpm80165 80046630 428
-// Demo version of PAL main0 80057470 (FUN_80057470.c): 4th argument is the word at +0xa8; also calls func_8003F160(o, 0) at the end.
+// Demo version of PAL main0 80057470 (FUN_80057470.c): 4th argument is the word at +0xa8; also calls func_8003F160(o,
+// 0) at the end.
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;

@@ -1,5 +1,6 @@
 // JPDEMO slpm80165 800157BC 344
-// Demo version of PAL main0 80016B50 (initGraphics.c): geometry offset y 0x70 and 0x808-entry ordering tables (PAL 0x80, 0x328).
+// Demo version of PAL main0 80016B50 (initGraphics.c): geometry offset y 0x70 and 0x808-entry ordering tables (PAL
+// 0x80, 0x328).
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
 extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;

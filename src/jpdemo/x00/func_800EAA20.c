@@ -1,6 +1,6 @@
 // JPDEMO x00 800EAA20 1204
-// Demo version of PAL x000 800ED750 (FUN_800ed750.c): the item effect id is +0x1e (0xff: none) instead of
-// a per-subtype table entry.
+// Demo version of PAL x000 800ED750 (FUN_800ed750.c): the item effect id is +0x1e (0xff: none) instead of a per-
+// subtype table entry.
 #include "TOBJ.H"
 typedef struct { short spd[2]; short pos[2]; short cnt[2]; } B;
 typedef struct { int n; char *b8; int tab[4]; short val[2]; } E;

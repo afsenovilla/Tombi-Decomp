@@ -1,6 +1,6 @@
 // JPDEMO slpm80165 8004B78C 360
-// Demo version of PAL main0 80045684 (FUN_80045684.c): hit step 2 (PAL 7), no b[0] != 3 test, attached object
-// at +0xd0 (PAL +0xe4).
+// Demo version of PAL main0 80045684 (FUN_80045684.c): hit step 2 (PAL 7), no b[0] != 3 test, attached object at
+// +0xd0 (PAL +0xe4).
 extern short FUN_80043260(unsigned char *, unsigned char *);
 extern void FUN_8001f96c(int, int, int, int);
 extern short DAT_1f80019e;

@@ -1,6 +1,6 @@
 // JPDEMO x00 80112124 692
-// Demo version of PAL x000 801195F4 (FUN_801195f4.c): subtype 0 also takes over the player (active 4, mode 5,
-// GVARS flags) and starts sound 0x36; subtypes 0/1 start at step 0 (PAL 10).
+// Demo version of PAL x000 801195F4 (FUN_801195f4.c): subtype 0 also takes over the player (active 4, mode 5, GVARS
+// flags) and starts sound 0x36; subtypes 0/1 start at step 0 (PAL 10).
 #include "TOBJ.H"
 #define H(o, n) (*(short *)((char *)(o) + (n)))
 #define I(o, n) (*(int *)((char *)(o) + (n)))
