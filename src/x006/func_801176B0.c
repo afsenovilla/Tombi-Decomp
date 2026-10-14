@@ -1,17 +1,16 @@
 // FUNC 801176b0 1836 X006
 // MATCHING 801176b0 1836
 #include "TOBJ.H"
+#include "gamestate.h"
 extern TObj *D_8009C94C;
 extern char *TASK_C;
 extern unsigned char D_8009C958[];
 extern unsigned char D_8009C93A, D_8009CFCE, D_8009C93E, D_8009C942;
-extern unsigned char D_8009C970, D_8009C93C, D_8009C975, D_8009C967, D_8009C938;
+extern unsigned char D_8009C93C, D_8009C938;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
 extern short D_1F80016A;
 extern int D_1F8002D0[];
 extern unsigned short D_1F8001FC;
-extern short D_8009CD96, D_8009CDA0, D_8009CD94, D_8009C982, D_8009D2AC, D_8009D2A8, D_8009D2AA;
-extern unsigned short D_8009C960, D_8009C962;
 extern void *D_80122FB0, *D_80122FB4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -162,7 +161,7 @@ void func_801176B0(TObj *o)
             FUN_8001f110(1);
             FUN_8001e4f0(0x101);
             printInfoMessage(0x25, 2);
-            c = &D_8009C970;
+            c = &GAME.playerHealth;
             if (--*c == 0) {
                 o->step = 8;
                 o->timer = 0x3c;
@@ -191,15 +190,15 @@ void func_801176B0(TObj *o)
             } else if (k & 0x2000) {
                 FUN_8001e560(0x1b, 0x1c);
                 o->step++;
-                D_8009CD96 = 4;
-                D_8009CDA0 = 1;
-                D_8009CD94 = 0;
+                (*(short*)&GAME.nextSection) = 4;
+                (*(short*)&GAME.nextSpawnPoint) = 1;
+                (*(short*)&GAME.nextArea) = 0;
                 D_8009C93C = 0;
-                D_8009C975 = 3;
+                GAME.fadeScreenControl = 3;
             }
             break;
         case 5:
-            if (D_8009C975 != 1)
+            if (GAME.fadeScreenControl != 1)
                 break;
             p = TASK_C;
             *(short *)(p + 0x4c) = 7;
@@ -208,29 +207,29 @@ void func_801176B0(TObj *o)
         case 6:
             FUN_8001f110(1);
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
             break;
         case 7:
-            if (D_8009C975 != 1)
+            if (GAME.fadeScreenControl != 1)
                 break;
             p = TASK_C;
             *(short *)(p + 0x4c) = 0;
             *(short *)(p + 0x4e) = 5;
-            a = D_8009C960;
-            b = D_8009C962;
-            D_8009C982 = 0;
-            D_8009CDA0 = 0;
-            D_8009D2AC = 0;
-            D_8009C967 = 0;
+            a = GAME.selectedArea;
+            b = GAME.selectedSection;
+            (*(short*)&GAME.selectedSpawnPoint) = 0;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
+            (*(short*)&GAME.currentSpawnPoint) = 0;
+            GAME.keepBgm = 0;
             D_8009E375 = 0;
             D_8009E376 = 0;
             D_8009E377 = 0;
             D_8009F085 = 0;
             D_8009F086 = 0;
             D_8009F087 = 0;
-            D_8009D2A8 = a;
-            D_8009D2AA = b;
+            (*(short*)&GAME.currentArea) = a;
+            (*(short*)&GAME.currentSection) = b;
             break;
         case 8:
             if (--o->timer != -1)

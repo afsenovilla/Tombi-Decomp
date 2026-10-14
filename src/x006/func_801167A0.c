@@ -2,6 +2,7 @@
 // MATCHING 801167a0 540
 // FUNC 801167a0 540 X006
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct {
     unsigned char p0[3];
@@ -11,7 +12,6 @@ typedef struct {
     unsigned char b165;
 } L801167A0;
 
-extern unsigned short D_8009C962;
 extern unsigned int D_8009C948;
 extern unsigned char D_8011EFDC[];
 
@@ -22,7 +22,7 @@ void func_801167A0(L801167A0 *l, unsigned char *bank)
     unsigned int t;
     short i, e, n;
 
-    if (D_8009C962 != 0) return;
+    if (GAME.selectedSection != 0) return;
     t = D_8009C948;
     if (t - 0xf16 < 0x709) {
         for (i = 4; i < 9; i++) {

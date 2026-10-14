@@ -1,6 +1,7 @@
 // FUNC 8011b238 808 X006
 // MATCHING 8011b238 808
 /* Sibling of func_8011B560 / X000 func_80120494. Debt: register asm("$3") on q (as in the siblings). */
+#include "gamestate.h"
 typedef struct {
     char p0[7];
     unsigned char substep;
@@ -35,12 +36,11 @@ extern void subtractScaledVertices(int, int, int);
 
 typedef struct { char p[0x34]; int d34; } TObj_;
 extern TObj_ *D_8009C950;
-extern unsigned short D_8009C962[];
 
 #define RET(w, n, r) { o->velV = -0x1000; o->wac = w; o->da0 = DAT_1f800334 + DAT_1f800334p[n]; o->b0a = 0x15; o->substep = 0; return r; }
 #define SETUP(P, Q) { a = o->da0; o->velH = 0x80; o->substep++; o->velV = 0; o->b0a = 0x16; p = P; q = Q; }
 #define COMMON { o->wcc = o->velV; FUN_80025aa8(o->da0, o->dc4); subtractScaledVertices(o->dc4, o->dc8, o->wcc); return 0; }
-#define FADE { if (D_8009C962[0] == 0) { int v; o->w7a += 0x10; v = g->d34 + ((short)o->w7a >> 8); g->d34 = v; if (v > 0) g->d34 = 0; } }
+#define FADE { if (((unsigned short*)&GAME.selectedSection)[0] == 0) { int v; o->w7a += 0x10; v = g->d34 + ((short)o->w7a >> 8); g->d34 = v; if (v > 0) g->d34 = 0; } }
 
 int func_8011B238(S *o)
 {
