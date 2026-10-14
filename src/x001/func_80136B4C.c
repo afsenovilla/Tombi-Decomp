@@ -1,11 +1,8 @@
 // FUNC 80136b4c 1744 X001
+// MATCHING 80136b4c 1744
 #include "gvars.h"
-/* score 18 (was 242). o-F: case 5 state 0 falls through into state 1 (no break: the game runs the state-1 body
-   in the same frame); D_8009CEAB = 2 before o->anim in state 0 (anim store lands in the jal delay slot); angle
-   as in the matched x001 func_80135164 (t pinned $2, int a pinned $16 behind asm("")); D_8009CEAB, D_800A6039,
-   D_800A6066 as arrays. Left: only the scheduling of the case 3 head (game: lbu D_800A6039 first, then CEAB=3,
-   active=2, lbu category, sb visible, lhu D_800A6066, ori, sb category, b0f=-7, andi, sh animFrame). All 720
-   orders of those 6 statements tried (best is the one here), plus scalar/array/PLAYER-field forms. */
+/* case 3: D_800A6039 read into a $3-pinned local before the stores; asm("") before r keeps the
+   D_800A605C load from being scheduled up into the head. */
 #include "TOBJ.H"
 
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } R4;
@@ -52,12 +49,14 @@ void func_80136B4C(TObj *o)
         o->state = 0;
         break;
     case 3:
+        {register unsigned char v asm("$3") = D_800A6039[0];
         D_8009CEAB[0] = 3;
-        o->animFrame = D_800A6066[0] & 1;
         o->active = 2;
+        o->visible = v;
+        o->animFrame = D_800A6066[0] & 1;
         o->category |= 0x80;
-        o->visible = D_800A6039[0];
-        *(signed char *)&o->b0f = -7;
+        *(signed char *)&o->b0f = -7;}
+        asm("");
         r = &D_80011E04[D_80011EB4[*D_800A605C]];
         o->anim = D_8013E568[r->a];
         if (r->a == 6) {
