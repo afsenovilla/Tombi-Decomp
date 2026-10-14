@@ -1,5 +1,6 @@
 // FUNC 8011fd7c 576 X001
 // MATCHING 8011fd7c 576
+#include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3;
@@ -8,7 +9,6 @@ extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern void *D_8013E5CC[];
 extern char D_8013C760[];
-extern unsigned char D_8009CEAE;
 void ObjCullRegister(TObj *o);
 void func_80118998(short x, short y, short z);
 void FUN_8002ee50(int a, int x, int y, int z);
@@ -47,7 +47,7 @@ void func_8011FD7C(TObj *o)
             v.z.p.whole = o->d->p.whole;
             applyItemEffect(D_8013C760, &v, 0, 0, 0);
             o->timer = 0x20;
-            D_8009CEAE = 4;
+            GCD.bceae = 4;
             break;
         case 1:
             if (--o->timer == -1) {

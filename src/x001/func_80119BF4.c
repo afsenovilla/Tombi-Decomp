@@ -1,5 +1,6 @@
 // FUNC 80119bf4 760 X001
 // MATCHING 80119bf4 760
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern int D_1F8002D4[];
@@ -9,7 +10,6 @@ extern unsigned short D_1F800172[];
 typedef struct { short x; } SX;
 extern SX D_1F80016A;
 extern short D_8007A5F0[];
-extern unsigned char D_8009D081;
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 extern void FUN_80026e0c(int, int);
@@ -70,7 +70,7 @@ void func_80119BF4(TObj *o)
                 o->step++;
             break;
         case 3:
-            D_8009D081 = 1;
+            GCD.bd081 = 1;
             FUN_80026e0c(0xd, 1);
             o->b04 = 3;
             break;

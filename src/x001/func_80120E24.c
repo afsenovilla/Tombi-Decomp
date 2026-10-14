@@ -1,8 +1,8 @@
 // FUNC 80120e24 296 X001
 // MATCHING 80120e24 296
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F800186;
 extern void ObjListPush_1F80022C(TObj *);
 
 void func_80120E24(TObj *o)
@@ -39,7 +39,7 @@ void func_80120E24(TObj *o)
     }
     {
         int y = o->d34;
-        o->y.p.whole = ((unsigned int)(y - D_1F800186) & 0xfff) >> 4;
+        o->y.p.whole = ((unsigned int)(y - SPAD.s186) & 0xfff) >> 4;
     }
     o->visible = 1;
     ObjListPush_1F80022C(o);

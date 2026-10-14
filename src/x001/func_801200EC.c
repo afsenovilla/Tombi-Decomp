@@ -1,8 +1,9 @@
 // FUNC 801200ec 1008 X001
 // MATCHING 801200ec 1008
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009D084, D_8009CDF1[], D_800A4555[];
+extern unsigned char D_8009D084, D_800A4555[];
 extern unsigned char D_8009D084x[]; /* debt: second name, keeps the load after the b68 store */
 extern char *D_1F800334;
 extern char *D_1F800334x[]; /* debt: second name, the game loads the pointer twice */
@@ -27,7 +28,7 @@ void func_801200EC(TObj *o)
             o->box3 = 0x57;
             o->active = 1;
             o->b68 = 0;
-            if (D_8009D084x[0] || D_8009CDF1[0] == 0xff) {
+            if (D_8009D084x[0] || ((unsigned char*)&GCD.bcdf1)[0] == 0xff) {
                 o->da0 = (int)D_1F800334x[0] + *(int *)(D_1F800334 + 0x34);
             }
             break;
@@ -36,7 +37,7 @@ void func_801200EC(TObj *o)
             o->b04++;
             o->active = 2;
             o->b0f = 8;
-            if (D_8009CDF1[0] == 0xff) o->y.p.whole += 0x10;
+            if (((unsigned char*)&GCD.bcdf1)[0] == 0xff) o->y.p.whole += 0x10;
             else o->y.p.whole += 0x76;
             break;
         case 3:
@@ -55,7 +56,7 @@ void func_801200EC(TObj *o)
         case 0:
             s = o->step;
             if (s != 0) break;
-            if (D_8009D084 || D_8009CDF1[0] == 0xff) {
+            if (D_8009D084 || ((unsigned char*)&GCD.bcdf1)[0] == 0xff) {
                 o->step = s + 1;
                 break;
             }

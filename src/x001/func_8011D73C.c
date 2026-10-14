@@ -1,14 +1,13 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009CDBA;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC;
-extern unsigned char D_8009CE40, D_8009D093, D_8009D092;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003D0;
 extern short D_1F8001C6;
 extern char D_8001D6A4[];
@@ -24,7 +23,7 @@ void func_8011D73C(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009CDBA < 2) {
+        if (GCD.bcdba < 2) {
             o->b04 = 2;
             break;
         }
@@ -66,19 +65,19 @@ void func_8011D73C(TObj *o)
                 if (GAME.fadeScreenControl != 1) break;
                 FUN_8001f4bc();
                 D_1F8001CC = 1;
-                if (D_8009CE40) {
+                if (GCD.bce40) {
                     D_1F8001CD = 8;
-                    if (D_8009D093) {
+                    if (GCD.bd093) {
                         D_1F8003D0 = 1;
                     } else {
                         D_1F8003D0 = 0;
-                        D_8009D093 = 1;
+                        GCD.bd093 = 1;
                     }
                 } else {
                     D_1F8001CD = 5;
-                    if (!D_8009D092) {
+                    if (!GCD.bd092) {
                         D_1F8003D0 = 0;
-                        D_8009D092 = 1;
+                        GCD.bd092 = 1;
                     } else {
                         D_1F8003D0 = 1;
                     }

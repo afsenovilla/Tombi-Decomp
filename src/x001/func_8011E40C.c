@@ -1,8 +1,7 @@
 // FUNC 8011e40c 280 X001
 // MATCHING 8011e40c 280
+#include "spad.h"
 #include "TOBJ.H"
-extern short D_1F8000EE;
-extern unsigned short D_1F80016A;
 extern void FUN_80018cf0(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void func_8011E524(TObj *, short);
@@ -28,11 +27,11 @@ void func_8011E40C(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (D_1F8000EE < 0x4b0) {
+        if ((*(short*)((char*)&SPAD.iec + 2)) < 0x4b0) {
             o->visible = 1;
             FUN_80018cf0(o);
         }
-        func_8011E524(o, (short)(D_1F80016A - o->a.p.whole) >> 4);
+        func_8011E524(o, (short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->a.p.whole) >> 4);
         o->b68 = 0;
         break;
     case 2:

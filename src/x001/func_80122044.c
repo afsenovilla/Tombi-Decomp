@@ -1,5 +1,6 @@
 // FUNC 80122044 464 X001
 // MATCHING 80122044 464
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -7,7 +8,6 @@ typedef struct { char pad[2]; short w2; } PL;
 extern PL *D_8009C330;
 typedef struct { char pad[0xa2]; unsigned char ba2; char pad2[7]; unsigned char baa; } XB;
 #define X(o) ((XB *)(o))
-extern unsigned short D_1F8001F8;
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -55,7 +55,7 @@ void func_80122044(TObj *o)
             o->step = 0;
             o->state = 0;
         }
-        if ((D_1F8001F8 & 0xf) == 0) {
+        if ((SPAD.s1f8 & 0xf) == 0) {
             SfxPlay2(0x1d, 0);
         }
         break;

@@ -1,11 +1,11 @@
 // FUNC 80121d6c 728 X001
 // MATCHING 80121d6c 728
+#include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj *D_8009C330;
-extern unsigned short D_1F8001F8;
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
@@ -46,7 +46,7 @@ void func_80121D6C(TObj *o)
     case 2:
         if (!FUN_8003facc(o)) o->y.p.whole--;
         AnimAdvance(o);
-        if (!(D_1F8001F8 & 0xf)) FUN_8001e560(0x1d, 0);
+        if (!(SPAD.s1f8 & 0xf)) FUN_8001e560(0x1d, 0);
         y = o->y.p.whole - 8;
         w = o->h->p.whole + 8;
         z = o->d->p.whole;

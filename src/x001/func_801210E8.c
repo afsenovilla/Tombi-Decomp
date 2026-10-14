@@ -1,11 +1,9 @@
 // FUNC 801210e8 440 X001
 // MATCHING 801210e8 440
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013E6B0[];
-extern int D_1F8002D4[];
-extern unsigned short D_1F800176;
-extern unsigned short D_1F800186[];
 void func_80018DA4(TObj *o);
 void freeObjectLayer7(TObj *o);
 
@@ -19,7 +17,7 @@ void func_801210E8(TObj *o)
         o->w1e = 0xb;
         o->y.p.whole += 0x180;
         o->anim = D_8013E6B0[o->b0c];
-        d = D_1F8002D4[0];
+        d = ((int*)&SPAD.i2d4)[0];
         o->b0f = 0;
         o->d30 = x;
         o->b.p.whole = 0;
@@ -37,7 +35,7 @@ void func_801210E8(TObj *o)
             break;
         case 1: {
             short t; unsigned int u;
-            u = o->d30; u -= D_1F800176; t = u;
+            u = o->d30; u -= (*(unsigned short*)((char*)&SPAD.i174 + 2)); t = u;
             if (t < -0x100) {
                 t = (u & 0xfff) >> 3;
             } else {
@@ -45,7 +43,7 @@ void func_801210E8(TObj *o)
             }
             if ((short)t < 0x160) {
                 o->a.p.whole = t;
-                t = o->d34 - D_1F800186[0];
+                t = o->d34 - ((unsigned short*)&SPAD.s186)[0];
                 if ((short)t < o->d38) t = o->d38;
                 t = (t & 0xfff) >> 4; o->y.p.whole = t;
                 o->visible = 1;

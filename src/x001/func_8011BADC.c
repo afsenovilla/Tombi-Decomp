@@ -1,5 +1,6 @@
 // FUNC 8011badc 400 X001
 // MATCHING 8011badc 400
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -8,7 +9,6 @@ typedef struct {
 } E;
 
 extern void *D_8013E5BC;
-extern unsigned short D_1F8001C8;
 
 void func_8011BADC(TObj *o)
 {
@@ -23,7 +23,7 @@ void func_8011BADC(TObj *o)
         p = (TObj *)o->d90;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             ((E *)o)->b6 = 0;
             ((E *)o)->b4 = 0;
             ((E *)o)->be = 0;
@@ -58,7 +58,7 @@ void func_8011BADC(TObj *o)
         p = (TObj *)o->d90;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;
-        if (D_1F8001C8 & 1) {
+        if (SPAD.s1c8 & 1) {
             ((E *)o)->c6 = dy;
             ((E *)o)->ce = dy;
             ((E *)o)->c8 = dx - o->box0;

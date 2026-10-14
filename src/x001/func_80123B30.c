@@ -1,10 +1,9 @@
 // FUNC 80123b30 800 X001
 // MATCHING 80123b30 800
+#include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F80018C, D_1F800190;
-extern int D_1F800198;
-extern unsigned char D_1F8001F8;
+extern int D_1F80018C;
 extern unsigned short D_1F8001F8_h;
 extern unsigned char D_800A4553;
 extern unsigned char D_8007A7F0[];
@@ -37,7 +36,7 @@ void func_80123B30(TObj *o)
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
             D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            SPAD.i190 = o->y.raw;
             if (o->b69 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                 o->timer = 0x1e;
                 o->step++;
@@ -48,7 +47,7 @@ void func_80123B30(TObj *o)
             n->active = 1;
             n->type = 0x31;
             n->subtype = 1;
-            n->b0c = (D_1F8001F8 + D_1F800198) & 3;
+            n->b0c = ((*(unsigned char*)&SPAD.s1f8) + SPAD.i198) & 3;
             n->h->raw = o->h->raw;
             n->y.raw = o->y.raw;
             n->d->raw = o->d->raw;

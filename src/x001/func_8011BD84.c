@@ -1,8 +1,8 @@
 // FUNC 8011bd84 980 X001
 // MATCHING 8011bd84 980
+#include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char D_8009CDB5;
 extern short D_1F80016E;
 extern unsigned short D_1F80016A;
 extern int ObjCullRegister(TObj *);
@@ -25,7 +25,7 @@ void func_8011BD84(TObj *o)
         case 0:
             switch (o->state) {
             case 0:
-                if (D_8009CDB5 == 0) {
+                if (GCD.bcdb5 == 0) {
                     o->state = 3;
                     break;
                 }

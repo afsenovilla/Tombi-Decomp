@@ -1,5 +1,6 @@
 // FUNC 801237e4 844 X001
 // MATCHING 801237e4 844
+#include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,7 @@
 extern TObj *D_8009C330;
 extern char D_80077CF4[];
 extern unsigned char D_8009D2B0[];
-extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C4, D_1F8003C6;
+extern unsigned short D_1F8001F8;
 extern void func_801072FC(TObj *);
 extern void FUN_801073c0(TObj *);
 extern void FUN_80110760(TObj *);
@@ -59,7 +60,7 @@ void func_801237E4(TObj *o)
             o->state = 2;
         }
         FUN_800f00ac(o);
-        if (D_1F8001FC & D_1F8003C6) {
+        if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             if (o->wb2 > 0x200) {
                 o->wb2 = 0x200;
@@ -69,7 +70,7 @@ void func_801237E4(TObj *o)
             }
             o->ba4 = 0;
             o->b9c = 1;
-            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & D_1F8003C4)) {
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4)) {
                 o->ba7 = 1;
             }
             o->step = 2;

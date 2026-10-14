@@ -1,5 +1,6 @@
 // FUNC 801213d0 960 X001
 // MATCHING 801213d0 960
+#include "spad.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -15,7 +16,6 @@ typedef struct {
 
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
-extern unsigned short D_1F8001FC, D_1F8003C8, D_1F8003C6;
 extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_80104dc8(TObj *);
@@ -59,7 +59,7 @@ void func_801213D0(TObj *o)
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 == 0 && func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x30) == 0
-            && (D_1F8001FC & D_1F8003C8) == 0 && (D_1F8001FC & D_1F8003C6) == 0
+            && (SPAD.s1fc & SPAD.s3c8) == 0 && (SPAD.s1fc & SPAD.s3c6) == 0
             && ObjTileCollide(o, 4, 0) == 0) break;
         if (*(volatile unsigned short *)&GV6.s70 & 0x40) D_8009C330->w2c = 0xf;
         else D_8009C330->w2c = 0xe;
