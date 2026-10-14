@@ -1,10 +1,11 @@
 // FUNC 801185e4 656 X017
 // MATCHING 801185e4 656
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
 extern TObj PLAYER;
-extern unsigned char D_800A60E0, D_8009CFD6, D_8009D007, D_8009C939, D_8009C93F, D_8009C942, D_8009C93A;
+extern unsigned char D_800A60E0, D_8009CFD6, D_8009D007, D_8009C939, D_8009C93A;
 extern short D_1F8000EE, D_1F8000F2;
 extern unsigned char D_800A603CA[], D_800A603DA[], D_800A603EA[], TALK_POSE[], D_8009C939A[];
 extern short D_1F8000EEA[], D_1F8000F2A[];
@@ -42,8 +43,8 @@ void func_801185E4(TObj *o)
         FUN_8001e5f4(0x28, 0x7f);
         o->state = 3;
         D_8009D007 = 1;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         break;
     case 1:
     case 2:

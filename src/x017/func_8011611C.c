@@ -1,5 +1,6 @@
 // FUNC 8011611c 1136 X017
 // MATCHING 8011611c 1136
+#include "gvars.h"
 /* The csv entry 80115F24 starts with 126 data words (jump tables of other functions); the code starts at
    8011611C and covers the csv pieces 80116258 and 801162B8 too. */
 #include "gamestate.h"
@@ -30,7 +31,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009C93C;
 extern unsigned char D_8009D001[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
@@ -46,7 +46,7 @@ void func_8011611C(O *o)
 
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         func_80027810(o);
         o->p38->whole = 0;
         break;
@@ -135,7 +135,7 @@ void func_8011611C(O *o)
             (*(short*)&GAME.nextArea) = 0x11;
             (*(short*)&GAME.nextSection) = 2;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }

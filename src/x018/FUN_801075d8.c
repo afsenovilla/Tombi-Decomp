@@ -1,5 +1,6 @@
 // FUNC 801075d8 1576 X018
 // MATCHING 801075d8 1576
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char *D_8009C330;
@@ -7,7 +8,6 @@ extern char D_80077D0C[];
 extern unsigned char D_8009D2B0[];
 extern unsigned short D_8009D670;
 extern unsigned short D_1F8001F8;
-extern short D_8009C944[], D_8009C946[];
 extern unsigned char D_801152E8[];
 extern void FUN_801073c0(TObj *);
 extern void FUN_801102b4(TObj *);
@@ -102,8 +102,8 @@ void FUN_801075d8(TObj *o)
         break;
     case 2:
         if (o->b6b + 0x20 < 0x100) o->b6b = o->b6b + 0x20; else o->b6b = 0xff;
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         applyFrameVelocityX(o);
         FUN_8001fec0(o);
         o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;

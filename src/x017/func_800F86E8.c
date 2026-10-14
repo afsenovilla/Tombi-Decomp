@@ -1,5 +1,6 @@
 // FUNC 800f86e8 1172 X017
 // MATCHING 800f86e8 1172
+#include "gvars.h"
 typedef struct P { char p0[2]; short h02; char p04[4]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x2c-0x22]; unsigned short h2c; unsigned short h2e; } P;
 typedef struct H { short p0; short whole; } H;
 typedef struct O {
@@ -13,7 +14,6 @@ typedef struct O {
 } O;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned char D_8009C942[];
 extern unsigned char D_8009C93F;
 extern char D_80010CA0[];
 extern void *D_8009D2E8;
@@ -89,8 +89,8 @@ void func_800F86E8(O *o)
                 o->active = 1;
             else
                 o->active = 3;
-            if (D_8009C942[0] != 0)
-                D_8009C942[0] = 0;
+            if (((unsigned char*)&GVARS.b42)[0] != 0)
+                ((unsigned char*)&GVARS.b42)[0] = 0;
             if (D_8009C93F != 0)
                 D_8009C93F = 0;
             D_8009D2E8 = o->de4;
@@ -130,8 +130,8 @@ void func_800F86E8(O *o)
         break;
     case 3:
         if (AnimAdvance(o) != 0) {
-            if (D_8009C942[0] != 0)
-                D_8009C942[0] = 0;
+            if (((unsigned char*)&GVARS.b42)[0] != 0)
+                ((unsigned char*)&GVARS.b42)[0] = 0;
             if (D_8009C93F != 0)
                 D_8009C93F = 0;
             o->b0f = -8;

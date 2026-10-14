@@ -1,12 +1,13 @@
 // FUNC 80118ea0 2208 X017
 // MATCHING 80118ea0 2208
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char c[12]; } B12;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
-extern unsigned char D_8009CE3A, D_8009C93A, D_8009C93E, D_8009C93F, D_8009C942;
+extern unsigned char D_8009CE3A;
 extern unsigned char D_8009CDF1;
 extern unsigned char *D_8009C330;
 extern unsigned char D_1F8001CC, D_1F8001CD;
@@ -35,9 +36,9 @@ void func_80118EA0(TObj *o)
     switch (o->state) {
     case 0:
         if (D_8009CE3A != 0) break;
-        if (D_8009C93A == 0) break;
-        D_8009C93F = 1;
-        D_8009C942 = 1;
+        if (GVARS.b3a == 0) break;
+        GVARS.b3f = 1;
+        GVARS.b42 = 1;
         PLAYER.b04 = 5;
         PLAYER.step = 0x64;
         PLAYER.state = 0;
@@ -104,7 +105,7 @@ void func_80118EA0(TObj *o)
         cdSeekStream(0xb);
         PLAYER.b04 = 5;
         PLAYER.step = 0x62;
-        D_8009C93F = 1;
+        GVARS.b3f = 1;
         GAME.fadeScreenControl = 3;
         o->state++;
         break;
@@ -231,9 +232,9 @@ void func_80118EA0(TObj *o)
     case 99:
         if (--o->w08 > 0) break;
         D_1F8001C6 = 0;
-        D_8009C93E = 0;
-        D_8009C93F = 0;
-        D_8009C942 = 0;
+        GVARS.b3e = 0;
+        GVARS.b3f = 0;
+        GVARS.b42 = 0;
         s1->step = 1;
         s2->step = 1;
         PLAYER.b04 = 1;
