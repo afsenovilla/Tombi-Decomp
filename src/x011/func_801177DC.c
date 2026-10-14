@@ -1,12 +1,12 @@
 // FUNC 801177dc 1112 X011
 // MATCHING 801177dc 1112
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D082[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
@@ -25,7 +25,7 @@ void func_801177DC(TObj *o)
     case 0:
         v = *(V6 *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

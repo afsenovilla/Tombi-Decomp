@@ -1,5 +1,6 @@
 // FUNC 801189f8 488 X011
 // MATCHING 801189f8 488
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_80119C48[];
-extern unsigned char D_8009D2B0[];
 extern short D_1F8001C6;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
@@ -22,7 +22,7 @@ void func_801189F8(TObj *o)
         if (o->b68 == 0)
             break;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0[0] = 2;
+        ((unsigned char*)&GV2.bb0)[0] = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

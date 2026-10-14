@@ -1,12 +1,12 @@
 // FUNC 8011921c 636 X011
 // MATCHING 8011921c 636
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern unsigned char D_8009D2B0;
 extern unsigned char D_8009CFDF, D_8009CFF7;
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
@@ -23,7 +23,7 @@ void func_8011921C(TObj *o)
     case 0:
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

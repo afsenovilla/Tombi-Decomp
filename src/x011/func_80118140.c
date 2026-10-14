@@ -1,11 +1,12 @@
 // FUNC 80118140 488 X011
 // MATCHING 80118140 488
+#include "gv2.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 
-extern unsigned char D_8009C942A[], D_8009D2B0;
+extern unsigned char D_8009C942A[];
 extern short D_1F8001C6;
 extern AT3 D_80119C48[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -21,7 +22,7 @@ void func_80118140(TObj *o)
         if (o->b68 == 0)
             break;
         D_8009C942A[0] = 1;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
