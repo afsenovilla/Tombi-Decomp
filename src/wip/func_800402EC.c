@@ -1,5 +1,5 @@
 // FUNC 800402ec 880 MAIN0
-// wip score 122 (was 155): ys and x and cnt unpinned (game's temps: sll v0 / sra s5, addiu v0,s4,1 + move), x = t - s via fresh int t (keeps (x-1)-sx order), second sx>>24 from an asm-laundered copy s2 (game does two sra), lh for loop-end n via *(short *)D; D++, asm("" :: "r"(f)) after the SPAD store (game computes (f&0xe00)>>9 in v0, not in place). left: bs/d regs swapped (a1/v1), b's (short) recomputed in v1 in the game (ours in place in t1), xm copied to t1 (move t1,v0) in the game, branch-1 reg/sched so the two h->p.whole stores cross-jump, game's stray move a1,v1 in the fl&0xff00 beq delay slot, n load move t0 at loop end.
+// wip score 82 (opusO: itbrute priority bumps asm("" : "=r"(v) : "0"(v)) on a after c = *D++, r twice after its computation, x before the f & 0x10 test; was 122). was 155: ys and x and cnt unpinned (game's temps: sll v0 / sra s5, addiu v0,s4,1 + move), x = t - s via fresh int t (keeps (x-1)-sx order), second sx>>24 from an asm-laundered copy s2 (game does two sra), lh for loop-end n via *(short *)D; D++, asm("" :: "r"(f)) after the SPAD store (game computes (f&0xe00)>>9 in v0, not in place). left: bs/d regs swapped (a1/v1), b's (short) recomputed in v1 in the game (ours in place in t1), xm copied to t1 (move t1,v0) in the game, branch-1 reg/sched so the two h->p.whole stores cross-jump, game's stray move a1,v1 in the fl&0xff00 beq delay slot, n load move t0 at loop end.
 // older: wip score 155 (was 201): s0..s7 pinned to the game's ret/x/o/f1/cnt/ys/fl/y and f/b/c to a3/t1/a0; fl branches swapped (getCollisionPlaneAt in the else), (short)r >= 0 -> goto hit. sx = xm << 24 computed once, `sx >> 24` per use (xm asm-laundered no longer needed). left: gcc folds x - 1 - sx into x - (sx + 1) and x + 8 - xm into x - (xm - 8) (game keeps (x-1)-sx, (x+8)-t1 with xm copied to t1); bs/d swapped (a1/v1); game computes c & 0xf before xm; loop-end n load is lh + move t0 in the game
 #include "spad.h"
 #include "TOBJ.H"
@@ -60,6 +60,7 @@ int func_800402EC(TObj *o, int x_, int y_, int fl_)
         bs = b;
         if (bs == 0)
             continue;
+asm("" : "=r"(a) : "0"(a));
         d = y - a;
         if (bs < 0) {
             if (d < bs)
@@ -91,6 +92,7 @@ int func_800402EC(TObj *o, int x_, int y_, int fl_)
             if (cnt >= 8)
                 return ret;
             if ((fl & 0xff00) != 0xff00) {
+asm("" : "=r"(x) : "0"(x));
                 t = D_8007B5AC;
                 t += *(unsigned short *)(t + 8);
                 D = (unsigned short *)(t + *(unsigned short *)(t + ((short)x / 8) * 2));
@@ -103,6 +105,7 @@ int func_800402EC(TObj *o, int x_, int y_, int fl_)
         if (!f1) {
             if (!(f & 4))
                 continue;
+asm("" : "=r"(r) : "0"(r));
             if ((short)r >= 0) {
                 k = 1;
                 goto hit;
@@ -111,6 +114,7 @@ int func_800402EC(TObj *o, int x_, int y_, int fl_)
         } else {
             if (!(f & 8))
                 continue;
+asm("" : "=r"(r) : "0"(r));
             if ((short)r <= 0) {
                 k = 2;
                 goto hit;

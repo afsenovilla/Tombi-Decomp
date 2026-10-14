@@ -10,6 +10,10 @@
    - case 5: `t = U16(o->wba) - q + p` keeps the subu after the join (only p/wba regs swapped);
    - case 10: the player test is `if (d == pd) { dy = PY - U16(o->y); if (h-range && (u16)(dy + 0x30) < 0xf8) ... }`
      (game computes dy before the h test; ours sinks the subu).
+   opusO: applying all three gives 786 instrs (one short, score 289); case 10 dy as int t with asm("" : "=r"(t) : "0"(t))
+   after it and U16(o->y) gives exactly 787 instrs/3148 B but scores 340 (game: lw a0 o->h hoisted before the PLAYER.h
+   load, dy subu in place in v1 then addiu v1,v1,48; ours keeps dy in a0/a1 and loads PLAYER.h first). Other dy types
+   (t2/u/d/k/p, with/without the asm) 311-416.
    Remaining: near() keeps its result in a0 and copies s to v1 (tried nested inlines, result var: no gain);
    lbu substep scheduled after the li in several setanim+substep++ tails. */
 #include "TOBJ.H"

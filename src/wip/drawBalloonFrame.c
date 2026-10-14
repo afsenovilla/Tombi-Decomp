@@ -3,7 +3,9 @@
    f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
    $2 so its two stores get scheduled after the y stores; uv block has a few scheduling/reg diffs ($3 vs $6 for u1).
    Tried: pins on k/h/x/y (worse), f as int/volatile/unpinned, separate h2/w2, x+w temp forms ({short t}, $2 pin, x1/x3 split),
-   uv statement permutations (all 35), n78: asm("" :: "r"(w)) after the x+w store (x+w then goes to v0 and its stores order right, but y moves v1->a0: 63; y/h pins don't fix), f via fr temp/launder/unsigned/int<<16 forms (31-47, unpinned f 265), w/h swap, asm("") in uv block (200+), w unpinned / w2 split (49-58), fu in $5 (combined away). */
+   uv statement permutations (all 35), n78: asm("" :: "r"(w)) after the x+w store (x+w then goes to v0 and its stores order right, but y moves v1->a0: 63; y/h pins don't fix), f via fr temp/launder/unsigned/int<<16 forms (31-47, unpinned f 265), w/h swap, asm("") in uv block (200+), w unpinned / w2 split (49-58), fu in $5 (combined away).
+   opusO: iterative single-asm insertion brute force (asm(""), priority bumps on w/x/y/h/f, asm :: r(w/x)) over the whole
+   case/uv block: no gain; w pinned to every other reg 57-259; x+w forms (split stores, w + x, casts) and uv operand swaps 31-35. */
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
