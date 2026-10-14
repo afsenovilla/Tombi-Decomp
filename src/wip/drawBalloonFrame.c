@@ -1,4 +1,5 @@
 // FUNC 80056420 2604 MAIN0
+/* opusV: 31 -> 27. o->f now loaded into $5 and shifted into $4 like the game: f is an int holding o->f << 16 ({ register int r asm("$5"); r = (unsigned short)o->f; f = r << 16; }), tests on f >> 16 and k = f >> 28. Tried after: plain/unpinned r forms (35), xy block as separate/setXYWH stores (45) or w + x / short temp (27), uv statement permutations (27), w/x/y/h/k types (27-269), itbrute asm("")/asm::r(w,x,h) over the case/uv block (no gain). Left: x+w in a2 (game v0, stores before y), uv block load order/regs. */
 /* opusP: still 31. f pinned $5 (81), f4=f<<16 pin pair (81), ushort f $5 (275), volatile f (35), uv via u/v locals (283), u3=u1 chained (235), x+w temp / x3=x1 split (31). */
 /* score 31 (was 352). Prologue fixed by declaring sp/ft/ti uninitialised and assigning them after f = o->f. o pinned to $17 via a register copy of the parameter (fixes the o/giv tie), w pinned $6,
    f = o->f pinned $4 local, uv stores in the game's order (u2, v1, u1, v3=v2, u3). Left: o->f is loaded into $5 then sll into $4 (ours lhu $4); case tail x+w goes to $6 instead of
@@ -63,10 +64,10 @@ void drawBalloonFrame(R *o_, short c, short tp)
     short h;
     int i;
     void *p;
-    register short f asm("$4");
-    f = o->f;
+    register int f asm("$4");
+    { register int r asm("$5"); r = (unsigned short)o->f; f = r << 16; }
     sp = (SPRT *)0x1f800000; ft = (POLY_FT4 *)0x1f800014; ti = (TILE *)0x1f80003c;
-    if (f != -1 && (unsigned)(k = f >> 12) < 8) {
+    if ((f>>16) != -1 && (unsigned)(k = f >> 28) < 8) {
         setlen(ft, 9);
         ft->code = 0x2c;
         ft->r0 = 0x80;
