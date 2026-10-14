@@ -2,6 +2,7 @@
 // MATCHING 800fd358 2084
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 
 typedef struct {
     unsigned char b0;
@@ -19,7 +20,6 @@ extern TObj *D_8009F0EC;
 extern int D_8009C934;
 extern unsigned char D_1F8001A4;
 extern unsigned char D_1F8001F8;
-extern unsigned char D_8009C970[];
 extern unsigned char D_8009C942;
 extern unsigned char D_8009C938;
 extern short D_8009C944;
@@ -101,7 +101,7 @@ void FUN_800fd358(TObj *o)
         if (D_1F8001A4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
-            D_8009C970[0] = o->w98;
+            ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 D_8009C942 = 1;
                 D_8009C938 = 1;

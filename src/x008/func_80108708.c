@@ -2,8 +2,8 @@
 // MATCHING 80108708 968
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009C330;
-extern unsigned short D_8009C960, D_8009C962;
 extern unsigned short D_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -33,7 +33,7 @@ void func_80108708(TObj *o)
         o->animFrame = f & 1;
         PlayerSetAnimIfChanged(o, 0x15);
         o->state++;
-        if (D_8009C960 == 10 && (D_8009C962 == 1 || D_8009C962 == 5)) {
+        if (GAME.selectedArea == 10 && (GAME.selectedSection == 1 || GAME.selectedSection == 5)) {
             o->velY = -0x300;
             o->state = 2;
         }
