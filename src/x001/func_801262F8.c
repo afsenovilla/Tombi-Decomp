@@ -1,8 +1,8 @@
 // FUNC 801262f8 620 X001
 // MATCHING 801262f8 620
+#include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_1F8001A4;
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short func_8012614C(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
@@ -40,7 +40,7 @@ void func_801262F8(TObj *o, TObj *p)
     case 0:
     case 3:
         if (p->active & 2) break;
-        if (D_1F8001A4) break;
+        if (SPAD.b1a4) break;
         if (o->active & 2) break;
         if (r == 3 && p->b6a == 1) {
             if (BAC(o) == 1) BAC(o) = 0;

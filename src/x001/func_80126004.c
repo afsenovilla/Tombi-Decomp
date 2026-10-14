@@ -1,7 +1,7 @@
 // FUNC 80126004 328 X001
 // MATCHING 80126004 328
+#include "gcd.h"
 #include "TOBJ.H"
-extern unsigned char D_8009CEB0;
 extern short boxesOverlapSide(TObj *, TObj *);
 extern void resolveHitResultA(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
@@ -17,7 +17,7 @@ void func_80126004(TObj *o, TObj *e)
     if (boxesOverlapSide(o, e) < 0) {
         return;
     }
-    if (D_8009CEB0) {
+    if (GCD.bceb0) {
         resolveHitResultA(o, e);
         return;
     }

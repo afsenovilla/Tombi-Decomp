@@ -1,5 +1,6 @@
 // FUNC 8012cb78 2356 X001
 // MATCHING 8012cb78 2356
+#include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
 
@@ -16,7 +17,6 @@ extern AH *D_8013DB00[], *D_8013DB04[], *D_8013DB08[], *D_8013DB0C[];
 extern unsigned char D_8013C800[];
 extern unsigned short D_8013C8E8[];
 extern char D_80077CF4[];
-extern short D_1F80027E, D_1F800284;
 extern void spawnItemNotification(int, int);
 extern short func_8004065C(TObj *, short, short, short);
 extern TObj *FUN_80018448(void);
@@ -40,13 +40,13 @@ static __inline__ int land2(TObj *o)
         return 1;
     }
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        t = D_1F80027E;
+        t = SPAD.s27e;
         if (t < 0) t = -t;
         if (t >= 9) t = 8;
-        if (D_1F80027E < 0) t = -t;
+        if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
-        w = D_1F800284;
+        w = SPAD.s284;
         o->wb6 = (-t << 2) & 0xff;
         o->b9c = 0;
         o->wae = w;

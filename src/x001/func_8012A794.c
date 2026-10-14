@@ -1,11 +1,9 @@
 // FUNC 8012a794 976 X001
 // MATCHING 8012a794 976
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } X;
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
-extern short D_1F80027E;
 extern short D_8007A5F0[], D_8007A1F0[];
 extern unsigned char D_8013C7C8[], D_8013C7D8[];
 extern char D_80077CE8[], D_80077CF4[];
@@ -61,7 +59,7 @@ void func_8012A794(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        if (o->visible && !((D_1F8001F8 + D_1F800198) & 0xf)) playSFX(0x5e);
+        if (o->visible && !((SPAD.s1f8 + SPAD.i198) & 0xf)) playSFX(0x5e);
         AnimAdvance(o);
         if (x->w6) {
             {
@@ -96,7 +94,7 @@ void func_8012A794(TObj *o)
             break;
         } else {
             o->b69 = 0;
-            o->d8c = (-D_1F80027E * 4 + 0x80) & 0xff;
+            o->d8c = (-SPAD.s27e * 4 + 0x80) & 0xff;
             x->w6 = 0;
         }
         if (--o->timer == -1) {

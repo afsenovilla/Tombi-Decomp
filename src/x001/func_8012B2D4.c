@@ -1,10 +1,10 @@
 // FUNC 8012b2d4 2116 X001
 // MATCHING 8012b2d4 2116
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern int D_1F8002D0[];
-extern unsigned char D_8009CEAE;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 extern short D_800A4582, D_800A457E;
@@ -110,7 +110,7 @@ void func_8012B2D4(BX *b)
         }
         break;
     case 1:
-        if (o->b0c == 1 && D_8009CEAE == 1) {
+        if (o->b0c == 1 && GCD.bceae == 1) {
             o->b04 = 5;
             o->step = 0;
             o->state = 0;
@@ -199,7 +199,7 @@ void func_8012B2D4(BX *b)
         o->b04++;
         break;
     case 4:
-        if (o->b0c == 1 && D_8009CEAE == 1) {
+        if (o->b0c == 1 && GCD.bceae == 1) {
             o->b04 = 5;
             o->step = 0;
             o->state = 0;
@@ -238,11 +238,11 @@ void func_8012B2D4(BX *b)
             break;
         case 1:
             AnimAdvance(o);
-            if (D_8009CEAE == 2) o->step++;
+            if (GCD.bceae == 2) o->step++;
             break;
         case 2:
             AnimAdvance(o);
-            if (D_8009CEAE == 3) o->step++;
+            if (GCD.bceae == 3) o->step++;
             D_1F80018C = o->h->raw;
             D_1F800190 = o->y.raw;
             break;

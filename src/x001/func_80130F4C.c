@@ -1,15 +1,15 @@
 // FUNC 80130f4c 336 X001
 // MATCHING 80130f4c 336
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80027E;
 extern short FUN_80040278(TObj *, short, short);
 extern int AnimAdvance(TObj *);
 
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        o->d84 = (-D_1F80027E << 2) & 0xff;
+        o->d84 = (-SPAD.s27e << 2) & 0xff;
         return 1;
     }
     return 0;

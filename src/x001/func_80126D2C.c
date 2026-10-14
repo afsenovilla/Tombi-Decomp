@@ -1,6 +1,7 @@
 // FUNC 80126d2c 352 X001
 // MATCHING 80126d2c 352
 // FLAGS -O2 -G0 -fno-expensive-optimizations
+#include "spad.h"
 /* Debt: -fno-expensive-optimizations stops local-alloc's optimize_reg_copy_1 from folding the
    `t2 = s` copy (game: lh v0; move t0,v0; slt v0,v0,v1). The dead `s = 0` (after the compare) and
    `s = 1` (at the end) keep cse1 from making t2 canonical on its not-taken rescan (make_regs_eqv:
@@ -15,7 +16,6 @@ typedef struct {
     unsigned short ea;
 } P;
 extern short D_1F80019E;
-extern TObj *D_1F8003C0;
 extern unsigned short *D_8013C6A4[];
 
 void func_80126D2C(P *o, TObj *e)
@@ -46,7 +46,7 @@ void func_80126D2C(P *o, TObj *e)
     o->t.b9e = 7;
     o->t.wb8 = x;
     D_1F80019E = 0;
-    D_1F8003C0 = e;
+    (*(TObj **)&SPAD.p3c0) = e;
     o->t.wba = o->t.y.p.whole - e->y.p.whole;
     o->t.velY = 0;
     if (((unsigned char *)o)[0xa9] == 0) {

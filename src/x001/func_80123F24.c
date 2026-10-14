@@ -1,8 +1,8 @@
 // FUNC 80123f24 308 X001
 // MATCHING 80123f24 308
+#include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009CDBA;
 extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
 extern void setEventStarted(int, int, int);
@@ -13,7 +13,7 @@ void func_80123F24(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (D_8009CDBA == 0) {
+        if (GCD.bcdba == 0) {
             volatile int *g = &D_1F800334;
             int *q = (int *)*g;
             int v;
@@ -36,7 +36,7 @@ void func_80123F24(TObj *o)
         ObjCullRegister(o);
         break;
     case 2:
-        if (D_8009CDBA == 0) {
+        if (GCD.bcdba == 0) {
             setEventStarted(0x16, 0, 0);
             FUN_80026c50(0xb, 1, 1);
         }

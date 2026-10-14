@@ -1,5 +1,6 @@
 // FUNC 80126564 792 X001
 // MATCHING 80126564 792
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -8,7 +9,6 @@ typedef struct {
     TObj *e4;
 } P;
 
-extern unsigned char D_1F8001A4;
 extern short func_800435E0(P *, TObj *);
 extern void FUN_8001f96c(int, short, short, short);
 extern void decreaseObjectTimer(P *, int);
@@ -23,7 +23,7 @@ void func_80126564(P *o, TObj *e)
     case 1:
         if (r < 3) {
             if (e->b6a == 0) {
-                if (D_1F8001A4) break;
+                if (SPAD.b1a4) break;
                 if (o->o.active & 2) break;
                 *(unsigned char *)&o->o.wac = 0;
                 o->o.active = 2;
@@ -62,7 +62,7 @@ void func_80126564(P *o, TObj *e)
     case 0:
     case 3:
         if (e->active & 2) break;
-        if (D_1F8001A4) break;
+        if (SPAD.b1a4) break;
         if (o->o.active & 2) break;
         o->o.active = 2;
         r = e->h->p.whole > o->o.h->p.whole;

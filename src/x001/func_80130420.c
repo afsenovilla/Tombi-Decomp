@@ -1,5 +1,6 @@
 // FUNC 80130420 432 X001
 // MATCHING 80130420 432
+#include "spad.h"
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -8,12 +9,11 @@ extern short func_8004065C(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern char D_80077D3C[];
 extern void *D_8013E74C[];
-extern short D_1F80027E;
 
 static __inline__ int ground(TObj *o)
 {
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 16)) {
-        o->d84 = -D_1F80027E * 4 & 0xff;
+        o->d84 = -SPAD.s27e * 4 & 0xff;
         return 1;
     }
     return 0;

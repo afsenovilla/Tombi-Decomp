@@ -1,5 +1,6 @@
 // FUNC 801319c8 732 X001
 // MATCHING 801319c8 732
+#include "spad.h"
 /* Matching debt: register asm("$4") for the o->da0 pointer before the loop (local-alloc gives v0; tried temp
    vars, a shared d with the step-0 call, volatile/raw reads, statement permutations). */
 #include "TOBJ.H"
@@ -16,9 +17,6 @@ typedef struct {
 
 extern char D_80077CDC[];
 extern P40 D_800E3E28[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
-extern int D_1F800334;
 extern void FUN_80018d2c(TObj *);
 extern void FUN_80025aa8(int, P40 *);
 extern int FUN_800202b4(TObj *);
@@ -38,7 +36,7 @@ void func_801319C8(TObj *o)
         o->a.p.whole = p->a.p.whole;
         o->y.p.whole = p->y.p.whole;
         o->b.p.whole = p->b.p.whole;
-        o->da0 = *(volatile int *)&D_1F800334 + ((int *)*(volatile int *)&D_1F800334)[11];
+        o->da0 = *(volatile int *)&SPAD.i334 + ((int *)*(volatile int *)&SPAD.i334)[11];
         o->ba4 = 1;
         break;
     case 1:
@@ -93,7 +91,7 @@ void func_801319C8(TObj *o)
             if (o->velV > 0x400)
                 o->velV = 0x400;
             o->y.raw += o->velV << 8;
-            if (o->timer >= 0x1e || ((D_1F8001F8 + D_1F800198) & 1))
+            if (o->timer >= 0x1e || ((SPAD.s1f8 + SPAD.i198) & 1))
                 FUN_800202b4(o);
             if (--o->timer == -1)
                 o->b04++;

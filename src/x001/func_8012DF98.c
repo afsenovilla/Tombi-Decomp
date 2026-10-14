@@ -1,5 +1,6 @@
 // FUNC 8012df98 2896 X001
 // MATCHING 8012df98 2896
+#include "spad.h"
 #include "TOBJ.H"
 
 typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
@@ -12,7 +13,6 @@ typedef struct {
 extern AH *D_8013DB10[], *D_8013DAF8[], *D_8013DAFC[], *D_8013DB14[], *D_8013DB18[], *D_8013DB1C[];
 extern unsigned char D_8013C800[];
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
-extern short D_1F80027E, D_1F800284;
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
@@ -43,13 +43,13 @@ static __inline__ int land2(TObj *o)
         return 1;
     }
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        t = D_1F80027E;
+        t = SPAD.s27e;
         if (t < 0) t = -t;
         if (t >= 9) t = 8;
-        if (D_1F80027E < 0) t = -t;
+        if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
-        w = D_1F800284;
+        w = SPAD.s284;
         o->wb6 = (-t << 2) & 0xff;
         o->b9c = 0;
         o->wae = w;

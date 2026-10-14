@@ -1,9 +1,10 @@
 // FUNC 8012a5cc 456 X001
 // MATCHING 8012a5cc 456
+#include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013FC88[];
-extern short D_1F80027E, D_1F800284, D_1F80016A;
+extern short D_1F80027E, D_1F800284;
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -52,7 +53,7 @@ void func_8012A5CC(TObj *o)
             o->state = 0;
             o->b69 &= 1;
             if (o->w22) o->animFrame = o->h->p.whole > o->wb4;
-            else o->animFrame = D_1F80016A < o->h->p.whole;
+            else o->animFrame = (*(short*)((char*)&SPAD.i168 + 2)) < o->h->p.whole;
         }
         break;
     }

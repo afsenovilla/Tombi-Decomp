@@ -1,5 +1,6 @@
 // FUNC 801305d0 2036 X001
 // MATCHING 801305d0 2036
+#include "spad.h"
 /* Keys: side() probe inline with the call pointer copied per arm (`p = o;` as the last statement of both
    neg/pos arms): the a0 copy ends each arm and jump2 cross-jumps it into the join, so `move a0,s0` precedes
    the `lw 0x40(s0)` instead of filling its delay slot. */
@@ -7,7 +8,6 @@
 typedef struct { short w0, w2, w4, w6, w8; } S;
 extern char D_80077CF4[];
 extern char D_80077CE8[];
-extern short D_1F80027E;
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fb84(TObj *, char *);
@@ -46,7 +46,7 @@ static __inline__ short side(TObj *o)
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        o->d84 = (-D_1F80027E << 2) & 0xff;
+        o->d84 = (-SPAD.s27e << 2) & 0xff;
         return 1;
     }
     return 0;
@@ -151,7 +151,7 @@ void func_801305D0(TObj *o)
             o->d8c = *(unsigned char *)&o->d8c;
             if (o->timer) o->timer--;
             if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
-                o->d84 = ((-D_1F80027E << 2) + 0x80) & 0xff;
+                o->d84 = ((-SPAD.s27e << 2) + 0x80) & 0xff;
                 if (o->timer == 0 || o->d8c == o->d84) {
                     o->step = 3;
                     o->state = 0;
@@ -220,7 +220,7 @@ void func_801305D0(TObj *o)
         o->d8c = *(unsigned char *)&o->d8c;
         if (o->timer) o->timer--;
         if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
-            o->d84 = ((-D_1F80027E << 2) + 0x80) & 0xff;
+            o->d84 = ((-SPAD.s27e << 2) + 0x80) & 0xff;
             if (o->timer == 0 || o->d8c == o->d84) {
                 o->step = 3;
                 o->state = 0;

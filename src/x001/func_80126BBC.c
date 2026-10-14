@@ -1,9 +1,9 @@
 // FUNC 80126bbc 264 X001
 // MATCHING 80126bbc 264
+#include "gcd.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern unsigned char D_8009CEB0;
 extern unsigned char D_1F8001A4;
 extern short D_1F80019E;
 extern short func_80043260(TObj *, TObj *);
@@ -13,7 +13,7 @@ void func_80126BBC(TObj *o, TObj *p)
 {
     p->b6a = 0;
     if (func_80043260(o, p) == 0) return;
-    if (D_8009CEB0 != 0) return;
+    if (GCD.bceb0 != 0) return;
     if (p->w98 != 0) {
         if (D_1F8001A4 != 0) return;
         if (o->active & 2) return;

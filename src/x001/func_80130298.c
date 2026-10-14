@@ -1,9 +1,8 @@
 // FUNC 80130298 392 X001
 // MATCHING 80130298 392
+#include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F80027E;
-extern short D_1F80016A;
 extern void *D_8013E740[];
 extern short FUN_80040278(TObj *, short, short);
 extern void AnimLoadDuration(TObj *);
@@ -11,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        o->d84 = (-D_1F80027E << 2) & 0xff;
+        o->d84 = (-SPAD.s27e << 2) & 0xff;
         return 1;
     }
     return 0;
@@ -36,7 +35,7 @@ void func_80130298(TObj *o)
         if (o->visible) o->state++;
         break;
     case 2:
-        if (o->h->p.whole < D_1F80016A) {
+        if (o->h->p.whole < (*(short*)((char*)&SPAD.i168 + 2))) {
             o->state = 0;
             o->animFrame = 0;
             o->step++;

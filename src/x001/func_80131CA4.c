@@ -1,9 +1,9 @@
 // FUNC 80131ca4 2548 X001
 // MATCHING 80131ca4 2548
+#include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; int lim; } SB;
 typedef struct { Fix16 x, y, z; } V3;
-extern unsigned char D_8009CEB0[];
 extern char D_80077CDC[];
 extern short D_8013C984[];
 extern short D_8007A1F0[], D_8007A5F0[];
@@ -50,13 +50,13 @@ void func_80131CA4(TObj *o)
         sb->x = o->a.p.whole;
         sb->y = o->y.p.whole;
         sb->z = o->b.p.whole;
-        if (D_8009CEB0[0] != 0) {
+        if (((unsigned char*)&GCD.bceb0)[0] != 0) {
             o->h->p.whole = 0x6b8;
             o->y.p.whole = -0x14;
             o->active = 3;
             o->b04 = 2;
             o->d94 = 0;
-            if (D_8009CEB0[0] == 2) o->step = 5;
+            if (((unsigned char*)&GCD.bceb0)[0] == 2) o->step = 5;
             else o->step = 3;
             break;
         }
@@ -241,7 +241,7 @@ void func_80131CA4(TObj *o)
             o->y.raw += 0x4000;
             if (o->y.p.whole >= -0x95) {
                 o->step++;
-                D_8009CEB0[0] = 1;
+                ((unsigned char*)&GCD.bceb0)[0] = 1;
             }
             break;
         case 3:
@@ -266,7 +266,7 @@ void func_80131CA4(TObj *o)
                     r = t < 0x79;
                 }
                 if (r) {
-                    D_8009CEB0[0] = 2;
+                    ((unsigned char*)&GCD.bceb0)[0] = 2;
                     setEventComplete(0xb4, 0);
                     o->step++;
                 }

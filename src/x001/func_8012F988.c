@@ -1,10 +1,10 @@
 // FUNC 8012f988 1476 X001
 // MATCHING 8012f988 1476
+#include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern short D_1F80027E;
-extern unsigned char D_8009CEAE[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern short D_800A45AC[];
@@ -60,7 +60,7 @@ void func_8012F988(TObj *o)
             ((unsigned char*)&GVARS.b3f)[0] = 1;
             ((unsigned char*)&GVARS.b3e)[0] = 1;
             ((unsigned char*)&GVARS.b42)[0] = 1;
-            D_8009CEAE[0] = 1;
+            ((unsigned char*)&GCD.bceae)[0] = 1;
             D_800A4553[0] = 5;
             D_800A4568[0] = 0;
             D_800A45AC[0] = 0;
@@ -102,20 +102,20 @@ void func_8012F988(TObj *o)
             if (o->b69 || FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) {
                 FUN_8001e560(5, 0);
                 o->step++;
-                D_8009CEAE[0] = 2;
+                ((unsigned char*)&GCD.bceae)[0] = 2;
             }
             D_1F800190 = o->y.raw;
             D_1F80018C = o->h->raw;
             break;
         case 5:
-            if (D_8009CEAE[0] == 3) o->step++;
+            if (((unsigned char*)&GCD.bceae)[0] == 3) o->step++;
             o->y.p.whole += 4;
             FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x1e);
             break;
         case 6:
             o->y.p.whole += 4;
             FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x1e);
-            if (D_8009CEAE[0] == 4) o->b04++;
+            if (((unsigned char*)&GCD.bceae)[0] == 4) o->b04++;
             break;
         }
         break;

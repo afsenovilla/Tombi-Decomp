@@ -1,9 +1,9 @@
 // FUNC 80130dc4 392 X001
 // MATCHING 80130dc4 392
+#include "spad.h"
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
-extern short D_1F80027E;
 extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
@@ -34,7 +34,7 @@ void func_80130DC4(TObj *o)
             o->state = 0;
             o->wb0 = 1;
         } else if (FUN_800408d8(o, o->h->p.whole, o->y.p.whole - 0x10)) {
-            o->d8c = (-D_1F80027E * 4 + 0x80) & 0xff;
+            o->d8c = (-SPAD.s27e * 4 + 0x80) & 0xff;
         } else {
             o->step = 2;
             o->state = 0;

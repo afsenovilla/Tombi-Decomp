@@ -1,13 +1,11 @@
 // FUNC 80132760 516 X001
 // MATCHING 80132760 516
+#include "spad.h"
 #include "TOBJ.H"
 typedef struct { short a, b; } S2;
 extern S2 D_8013C9C0[];
 extern void *D_8013E6E4[];
-extern int D_1F8002D4[];
 extern char D_80077CF4[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int FUN_800202b4(TObj *);
@@ -30,7 +28,7 @@ void func_80132760(TObj *o)
         o->animFrame = 0;
         { S2 *p = &D_8013C9C0[k]; o->w22 = p->a; o->velV = p->b; }
         o->w1e = 10;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         k = o->subtype;
         o->anim = D_8013E6E4[k];
         AnimLoadDuration(o);
@@ -42,7 +40,7 @@ void func_80132760(TObj *o)
         if (o->w22 & 1) o->d8c = (unsigned char)(o->d8c + 8);
         else o->d8c = (unsigned char)(o->d8c - 8);
         if (o->w22 != 2) applyAnimVelocityX(o, o->w22);
-        if (o->timer >= 0x1e || ((D_1F8001F8 + D_1F800198) & 1)) FUN_800202b4(o);
+        if (o->timer >= 0x1e || ((SPAD.s1f8 + SPAD.i198) & 1)) FUN_800202b4(o);
         if (--o->timer == -1) o->b04 = 2;
         break;
     case 2:
