@@ -27,7 +27,7 @@ extern char D_80077cdc[];
 extern char D_80077d0c[];
 extern char D_80077d84[];
 
-#define WBC U16(o, 0xbc)
+#define WBC (*(unsigned short*)&o->wbc)
 #define C8 U16(o, 0xc8)
 #define CA U16(o, 0xca)
 
@@ -82,7 +82,7 @@ void FUN_80130bb0(TObj *o)
 
     switch (o->substep) {
     case 0:
-        if (U16(o, 0xb4)) {
+        if ((*(unsigned short*)&o->wb4)) {
             o->w22 = 0xf0;
             WBC = 1;
             o->wac = 2;
@@ -261,7 +261,7 @@ void FUN_80130bb0(TObj *o)
     case 9:
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        b.x = S16(o, 0xbe);
+        b.x = (*(short*)&o->bbe);
         b.y = U16(o, 0xc0) - 0x38;
         if (b.x < a.x)
             o->animFrame = 1;
@@ -271,9 +271,9 @@ void FUN_80130bb0(TObj *o)
         o->h->raw += (short)FUN_8001fddc(ang, 0x200) << 8;
         o->y.raw += (short)FUN_8001fdac(ang, 0x200) << 8;
         MOD90;
-        dx = U16(o, 0xbe) - (unsigned short)o->h->p.whole + 4;
+        dx = (*(unsigned short*)&o->bbe) - (unsigned short)o->h->p.whole + 4;
         if ((unsigned short)dx < 8) {
-            o->h->p.whole = S16(o, 0xbe);
+            o->h->p.whole = (*(short*)&o->bbe);
             o->timer = 0xb4;
             o->substep++;
         }

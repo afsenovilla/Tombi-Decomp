@@ -15,7 +15,7 @@ void FUN_80126464(TObj *a, TObj *b)
     r = FUN_800435e0(a, b);
     if (r == -1)
         return;
-    switch (U8(a, 0xac)) {
+    switch ((*(unsigned char*)&a->wac)) {
     case 1:
         if (r < 3) {
             b->b69 = 0;
@@ -25,7 +25,7 @@ void FUN_80126464(TObj *a, TObj *b)
             b->state = 0;
             b->animFrame = a->animFrame & 1;
             S32(a, 0xe4) = (int)b;
-            U8(a, 0xac) = 2;
+            (*(unsigned char*)&a->wac) = 2;
             FUN_8001f96c(2, a->a.p.whole, a->y.p.whole, a->b.p.whole);
             break;
         }
@@ -37,9 +37,9 @@ void FUN_80126464(TObj *a, TObj *b)
             return;
         if (a->active & 2)
             return;
-        if (U8(a, 0xac) != 3 && r == 3 && b->b6a == 1) {
-            if (U8(a, 0xac) == 1)
-                U8(a, 0xac) = 0;
+        if ((*(unsigned char*)&a->wac) != 3 && r == 3 && b->b6a == 1) {
+            if ((*(unsigned char*)&a->wac) == 1)
+                (*(unsigned char*)&a->wac) = 0;
             b->active = 4;
             b->b6a = 2;
             a->active = 2;
