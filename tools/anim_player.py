@@ -16,32 +16,35 @@ i18n.add({
            "an.loop": "Bucle", "an.zoom": "Zoom:", "an.gif": "Exportar GIF", "an.entries": "Fotogramas del script (frame · ticks)",
            "an.info": "{0}  (id {1})  ·  script {2}  ·  {3} fotogramas, {4} ticks  ·  {5}", "an.looptype": "bucle al fotograma {0}", "an.holdtype": "termina y mantiene el último",
            "an.now": "Fotograma {0}/{1}  ·  frame WPP {2}  ·  {3} ticks", "an.savegif": "Guardar GIF", "an.gifok": "GIF guardado: {0}", "an.gifs": "Imagen GIF",
-           "an.conf": "nombre: confianza {0} (H código, M código + imagen, L solo imagen)", "an.noname": "nombre sin identificar",
-           "t.anims": "Animaciones (Tombi)"},
+           "an.conf": "nombre: confianza {0} (H código, M código + imagen, L solo imagen)", "an.noname": "nombre sin identificar", "an.obj": "{0} · handler {1} (área {2}) · tabla {3} · fotogramas de SPR {4} de la lista {5}",
+           "an.objnosrc": "sin tabla SPR resuelta",
+           "t.anims": "Animaciones"},
     "en": {"an.title": "Animations", "an.play": "Play", "an.pause": "Pause", "an.prev": "◀ Step", "an.next": "Step ▶", "an.speed": "Speed:",
            "an.loop": "Loop", "an.zoom": "Zoom:", "an.gif": "Export GIF", "an.entries": "Script entries (frame · ticks)",
            "an.info": "{0}  (id {1})  ·  script {2}  ·  {3} frames, {4} ticks  ·  {5}", "an.looptype": "loops to frame {0}", "an.holdtype": "ends and holds the last frame",
            "an.now": "Frame {0}/{1}  ·  WPP frame {2}  ·  {3} ticks", "an.savegif": "Save GIF", "an.gifok": "GIF saved: {0}", "an.gifs": "GIF image",
-           "an.conf": "name confidence {0} (H code, M code + strip, L strip only)", "an.noname": "name not identified",
-           "t.anims": "Animations (Tombi)"},
+           "an.conf": "name confidence {0} (H code, M code + strip, L strip only)", "an.noname": "name not identified", "an.obj": "{0} · handler {1} (area {2}) · table {3} · frames from SPR {4} of list {5}",
+           "an.objnosrc": "no SPR table resolved",
+           "t.anims": "Animations"},
     "fr": {"an.title": "Animations", "an.play": "Lecture", "an.pause": "Pause", "an.speed": "Vitesse :", "an.loop": "Boucle", "an.gif": "Exporter GIF",
-           "t.anims": "Animations (Tombi)"},
+           "t.anims": "Animations"},
     "de": {"an.title": "Animationen", "an.play": "Abspielen", "an.pause": "Pause", "an.speed": "Tempo:", "an.loop": "Schleife", "an.gif": "GIF exportieren",
-           "t.anims": "Animationen (Tombi)"},
+           "t.anims": "Animationen"},
     "it": {"an.title": "Animazioni", "an.play": "Riproduci", "an.pause": "Pausa", "an.speed": "Velocità:", "an.loop": "Ciclo", "an.gif": "Esporta GIF",
-           "t.anims": "Animazioni (Tombi)"},
+           "t.anims": "Animazioni"},
     "pt": {"an.title": "Animações", "an.play": "Reproduzir", "an.pause": "Pausa", "an.speed": "Velocidade:", "an.loop": "Ciclo", "an.gif": "Exportar GIF",
-           "t.anims": "Animações (Tombi)"},
+           "t.anims": "Animações"},
 })
 
 SPEEDS = ["0.25x", "0.5x", "1x", "2x", "4x"]
 
 
 class AnimWindow:
-    """One Toplevel; `show(id)` switches animation. `data` = (catalogue, anim.Sprites)."""
+    """One Toplevel; `show(owner, id)` switches animation. `provider(owner)` -> (owner dict of tools/anim.py, frame source)."""
 
-    def __init__(self, root, data):
-        self.cat, self.spr = data
+    def __init__(self, root, provider):
+        self.provider = provider
+        self.owner, self.ow, self.cat, self.spr = None, None, [], None
         self.root = root
         self.win = tk.Toplevel(root)
         self.win.title(tr("an.title"))
@@ -102,17 +105,21 @@ class AnimWindow:
         import labels
         if not self.an:
             return
-        lid = "anim:tombi:%d" % self.an["id"]
+        lid = "anim:%s:%d" % (self.owner, self.an["id"])
         cur = labels.get(lid) or {"name": "", "note": ""}
         nm = simpledialog.askstring(tr("lb.rename"), tr("lb.name"), initialvalue=cur["name"] or self.an["name"], parent=self.win)
         if nm is None:
             return
         nt = simpledialog.askstring(tr("lb.rename"), tr("lb.note"), initialvalue=cur["note"], parent=self.win)
         labels.set(lid, nm, cur["note"] if nt is None else nt)
-        self.an["name"] = labels.name(lid) or anim.name_of(self.an["id"])
-        self.show(self.an["id"])
+        self.an["name"] = labels.name(lid) or (anim.name_of(self.an["id"]) if self.owner == "tombi" else "anim_%02d" % self.an["id"])
+        self.show(self.owner, self.an["id"])
 
-    def show(self, aid):
+    def show(self, owner, aid):
+        if owner != self.owner:
+            self.owner = owner
+            self.ow, self.spr = self.provider(owner)
+            self.cat = self.ow["animations"]
         self.an = next(a for a in self.cat if a["id"] == aid)
         an = self.an
         self.box = anim.bounds(self.spr, an["frames"])
@@ -122,7 +129,12 @@ class AnimWindow:
         else:
             how = tr("an.holdtype")
         self.info.set(tr("an.info", an["name"], aid, an["start"], len(an["entries"]), an["ticks"], how))
-        self.conf.set(tr("an.conf", an["confidence"]) if an["confidence"] else tr("an.noname"))
+        if self.owner == "tombi":
+            self.conf.set(tr("an.conf", an["confidence"]) if an["confidence"] else tr("an.noname"))
+        else:
+            sp = self.ow.get("spr")
+            self.conf.set(tr("an.obj", self.ow["name"], self.ow["handler"], self.ow["area"], an.get("table") or "-",
+                             sp["kind"] if sp else "-", sp["list"] if sp else tr("an.objnosrc")))
         self.entries.configure(state="normal")
         self.entries.delete("1.0", "end")
         self.entries.insert("end", "  ".join("%d·%d%s" % (e["frame"], e["dur"], {0: "", 0x4000: "↺", 0x8000: "■", 0xC000: "↺■"}[e["flags"]])
@@ -204,7 +216,7 @@ class AnimWindow:
     def export_gif(self):
         if not self.an:
             return
-        p = filedialog.asksaveasfilename(parent=self.win, title=tr("an.savegif"), defaultextension=".gif", initialfile=anim.fname(self.an) + ".gif",
+        p = filedialog.asksaveasfilename(parent=self.win, title=tr("an.savegif"), defaultextension=".gif", initialfile=anim.fname(self.an, self.owner) + ".gif",
                                          filetypes=[(tr("an.gifs"), "*.gif")])
         if p:
             anim.save_gif(self.spr, self.an, p, self.zoom_n(), int(anim.TICK_MS / float(self.speed.get()[:-1])))

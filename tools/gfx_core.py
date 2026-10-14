@@ -672,17 +672,44 @@ class Core:
         s.wpp = True
         return s
 
-    def anim_data(self):
-        """(catalogue, anim.Sprites) of Tombi's animations (tools/anim.py), cached."""
-        if not getattr(self, "_anim", None):
+    def anim_owner(self, owner):
+        """(owner dict, frame source) of one animation owner of tools/anim.py: "tombi" or an enemy/NPC/object handler id "aNN_<handler>"; cached."""
+        c = getattr(self, "_anim", None)
+        if c is None:
+            c = self._anim = {}
+        if owner not in c:
             import anim
-            self._anim = (anim.catalog(self.disc.raw), anim.Sprites())
-        return self._anim
+            if owner == "tombi":
+                c[owner] = (anim.tombi_owner(self.disc.raw), anim.Sprites())
+            else:
+                ow = next(o for o in anim.object_owners(None, int(owner[1:3])) if o["owner"] == owner)
+                c[owner] = (ow, anim.owner_source(ow))
+        return c[owner]
 
     def _anim_nodes(self):
-        cat = self.anim_data()[0]
-        return [dict(text="%02d  %s" % (a["id"], a["name"]), item=("anim", a["id"]), children=[], lazy=None, id="anim:tombi:%d" % a["id"])
-                for a in cat if a["alias_of"] is None]
+        """"Animaciones": Tombi, then the enemies / NPCs / objects of each area (the scripts of every placed object handler)."""
+        import anim
+        N = lambda text, item=None, children=None, lazy=None, id=None: dict(text=text, item=item, children=children or [], lazy=lazy, id=id)
+
+        def owner_kids(owner):
+            ow = self.anim_owner(owner)[0]
+            return [N("%02d  %s" % (a["id"], a["name"]), ("anim", owner, a["id"]), id="anim:%s:%d" % (owner, a["id"]))
+                    for a in ow["animations"] if a.get("alias_of") is None and a.get("renderable", True)]
+
+        def area_kids(area):
+            import labels
+            out = []
+            for ow in anim.object_owners(None, area):
+                kids = [a for a in ow["animations"] if a.get("renderable", True)]
+                if kids:
+                    out.append(N("%s  (%s, %d)" % (ow["name"], ",".join(ow["types"]), len(kids)), lazy=lambda o=ow["owner"]: owner_kids(o), id="animowner:" + ow["owner"]))
+            return out
+        out = [N("Tombi", lazy=lambda: owner_kids("tombi"), id="animowner:tombi")]
+        for ld in sorted(self.lists):
+            if ld.startswith("AR"):
+                a = int(ld[2:])
+                out.append(N(tr("t.animarea", a), lazy=lambda a=a: area_kids(a), id="animarea:%d" % a))
+        return out
 
     def wpp(self, name):
         if name not in self._wpp:
@@ -828,7 +855,7 @@ class Core:
         k = item[0]
         return {"page": lambda: "page:" + item[1], "screen": lambda: ("backdrop:L" + item[1][10:]) if item[1].startswith("backdrop_L") else "screen:" + item[1],
                 "ui": lambda: "ui:%d" % item[1], "wppframe": lambda: "wpp:%s:frame:%d" % (item[1], item[2]), "clut": lambda: "clut:" + item[1],
-                "anim": lambda: "anim:tombi:%d" % item[1],
+                "anim": lambda: "anim:%s:%d" % (item[1], item[2]),
                 "model3d": lambda: ("room:%s:%d" % item[2:4]) if item[1] == "room" else "obj:%s:%d:%d" % item[2:5]}[k]() if k in ("page", "screen", "ui", "wppframe", "clut", "anim", "model3d") else None
 
     def item_name(self, item):
@@ -1286,7 +1313,7 @@ S_ES = {
     "pal.emb": "{0}  fila {1} · paleta {2}", "l.nowpal": "Paleta: {0}", "l.autotag": "  (deducida)", "l.palhint": "Arriba/Abajo: cambiar de paleta",
     "pal.row": "{0}  fila {1}", "pal.sub": "{0}  fila {1} · paleta {2}",
     "t.screens": "Pantallas", "t.backdrops": "Fondos de sala (mapas)", "t.ui": "Interfaz / HUD", "t.uitable": "Tabla UiSpriteDef (MAIN0)", "t.hudpage": "(página HUD)", "t.pages": "Páginas por lista de carga",
-    "t.list": "Lista {0}", "t.anims": "Animaciones (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
+    "t.list": "Lista {0}", "t.anims": "Animaciones", "t.animarea": "Enemigos / NPC / objetos: área {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
     "w.smaller": "La imagen ({0}x{1}) es menor que el destino ({2}x{3}): se coloca arriba a la izquierda.",
     "w.palmismatch": "El PNG es indexado pero su paleta no coincide con la actual: se ajusta al color más cercano.",
     "w.nozero": "La paleta no tiene ningún color 0x0000 (transparente): los píxeles transparentes usan el índice 0.",
@@ -1312,7 +1339,7 @@ S_EN = {
     "pal.emb": "{0}  row {1} · palette {2}", "l.nowpal": "Palette: {0}", "l.autotag": "  (inferred)", "l.palhint": "Up/Down: cycle palettes",
     "pal.row": "{0}  row {1}", "pal.sub": "{0}  row {1} · palette {2}",
     "t.screens": "Screens", "t.backdrops": "Room backdrops (maps)", "t.ui": "Interface / HUD", "t.uitable": "UiSpriteDef table (MAIN0)", "t.hudpage": "(HUD page)", "t.pages": "Pages by load list",
-    "t.list": "List {0}", "t.anims": "Animations (Tombi)", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
+    "t.list": "List {0}", "t.anims": "Animations", "t.animarea": "Enemies / NPCs / objects: area {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
     "w.smaller": "The image ({0}x{1}) is smaller than the target ({2}x{3}): placed at the top left.",
     "w.palmismatch": "The PNG is indexed but its palette differs from the current one: matched to the nearest colour.",
     "w.nozero": "The palette has no 0x0000 (transparent) colour: transparent pixels use index 0.",

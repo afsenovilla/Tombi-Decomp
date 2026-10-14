@@ -18,8 +18,9 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
   OUT_DIR/spr/<AREA|SYSTEM>/listNN/sprKK/        every SPR frame definition (load kinds 0x30..0x3F) cut out of the simulated VRAM:
                                                  frame_NNNN_partK.png (one POLY_FT4 part, own palette), frame_NNNN.png (parts composed),
                                                  manifest.json (offsets, palettes, which atlas) (tools/vram.py)
-  OUT_DIR/anim/NN_<name>.gif|png, catalog.json   Tombi's 82 animation scripts (idle, walk, run, jump, climb, swim, hurt...) as animated GIF
-                                                 and PNG strip + the decoded catalogue (frames, ticks, loop) (tools/anim.py)
+  OUT_DIR/anim/<owner>/NN[_name].gif|png         Tombi's 82 animation scripts (idle, walk, run, jump...: anim/tombi/NN_<name>) and the scripts of every
+  OUT_DIR/anim/catalog.json                      enemy / NPC / object handler (anim/aNN_<handler>/NN) as animated GIF + PNG strip, and the decoded
+                                                 catalogue (owner, handler, area, script, frames, durations, loop) (tools/anim.py, tools/animobj.py)
   OUT_DIR/screens/*.png                          the static full screens at their real size and palette: title landscape (320 x 240), Whoopee
                                                  Camp logo, "Sony Computer Entertainment Europe presents" (640 x 512), TOMBI! logo page, menu atlases,
                                                  world map texture, title font sheet (tools/screens.py)
@@ -57,7 +58,7 @@ def run_isoext(img, fs):
 STEPS = [   # (key, group, label es, description)
     ("files", "files", "Archivos del disco (fs)", "file system of the disc image under OUT/fs"),
     ("sprites", "images", "Sprites", "WPP sprites (OUT/sprites) + SPR frames (OUT/spr)"),
-    ("animations", "images", "Animaciones", "Tombi's animations as GIF + catalog.json (OUT/anim)"),
+    ("animations", "images", "Animaciones", "animations of Tombi, enemies, NPCs and objects as GIF + catalog.json (OUT/anim/<owner>/)"),
     ("screens", "images", "Pantallas", "title, logos, menu atlases (OUT/screens)"),
     ("vram", "images", "Paginas VRAM", "raw VRAM snapshots and pages (OUT/vram)"),
     ("skies", "rooms", "Cielos de las salas", "sky layers captured with the MIPS interpreter, needs numpy + Pillow, slow (OUT/skies)"),

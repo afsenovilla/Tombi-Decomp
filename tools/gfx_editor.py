@@ -422,12 +422,12 @@ class App:
             for c in kids:
                 self._insert(iid, c)
 
-    def show_anim(self, aid):
-        """Tree node "Animaciones": Tombi's animation in its own player window (tools/anim_player.py)."""
+    def show_anim(self, owner, aid):
+        """Tree node "Animaciones": an animation of Tombi or of an enemy/NPC/object in its own player window (tools/anim_player.py)."""
         import anim_player
         if not getattr(self, "anim_win", None) or not self.anim_win.alive():
-            self.anim_win = anim_player.AnimWindow(self.root, self.core.anim_data())
-        self.anim_win.show(aid)
+            self.anim_win = anim_player.AnimWindow(self.root, self.core.anim_owner)
+        self.anim_win.show(owner, aid)
 
     def show_model(self, item):
         """Tree node "Modelos 3D": interactive 3D viewport in the centre panel (tools/model_viewer.py)."""
@@ -458,7 +458,7 @@ class App:
         self.hide_model()
         if n and n["item"] and n["item"][0] == "anim":
             try:
-                self.show_anim(n["item"][1])
+                self.show_anim(n["item"][1], n["item"][2])
             except Exception as e:
                 messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
         elif n and n["item"] and n["item"][0] == "composed":
