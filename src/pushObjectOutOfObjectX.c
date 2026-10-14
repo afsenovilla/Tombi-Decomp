@@ -2,7 +2,7 @@
 // MATCHING 8004874c 288
 #include "TOBJ.H"
 
-int FUN_8004874c(TObj *o, TObj *e)
+int pushObjectOutOfObjectX(TObj *o, TObj *e)
 {
     short dx, w, r;
     char pad;

@@ -8,7 +8,7 @@ extern unsigned short D_80078790[];
 extern unsigned int D_8009CB94[];
 extern TObj *allocObjectLayer2(void);
 
-TObj *func_80020D98(SP *p)
+TObj *spawnLayer2ObjectUnlessFlagged(SP *p)
 {
     int i, n, k;
     TObj *o;

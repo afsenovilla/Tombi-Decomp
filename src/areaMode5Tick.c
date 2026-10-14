@@ -15,7 +15,7 @@ extern void updateObjectsLayer8(void);
 extern void FUN_800ed4d0(void);
 extern void updateObjectsLayer7(void);
 extern void resetDrawLists(void);
-extern void FUN_8005042c(void);
+extern void drawGameplayScene(void);
 extern void SoundUpdate(void);
 
 void areaMode5Tick(void)
@@ -41,7 +41,7 @@ void areaMode5Tick(void)
         }
     }
     if (DAT_1f8001c6 != 2)
-        FUN_8005042c();
+        drawGameplayScene();
     else
         resetDrawLists();
     SoundUpdate();

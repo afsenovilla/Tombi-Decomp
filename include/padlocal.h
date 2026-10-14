@@ -129,7 +129,7 @@ void bzero(void*, int);
 int func_80069610(void);                        /* vsync handler (US func_80069058) */
 void _padStartCom(void);                        /* _padStartCom */
 int _padInitSioMode(padPort*);                    /* _padInitSioMode */
-void FUN_80069bf8(padPort*);                    /* one command step */
+void padCommandStep(padPort*);                    /* one command step */
 int _padSioRW(padPort*, int);               /* _padSioRW */
 int func_80069EF8(padPort*, int);               /* byte exchange with ack wait */
 int _padClrIntSio0(void);                        /* _padClrIntSio0 */

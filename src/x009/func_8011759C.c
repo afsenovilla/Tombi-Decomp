@@ -8,7 +8,7 @@
 typedef struct { short vx, vy, vz, pad; } SVEC;
 
 extern TObj *D_8009C94C[];
-extern void FUN_800201ac(TObj *, int);
+extern void cullObjectToDrawListMargin(TObj *, int);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVEC *, void *);
 extern void freeObjectLayer8(TObj *);
@@ -56,7 +56,7 @@ void func_8011759C(TObj *o)
         break;
     case 1:
         if (GAME.selectedPlane == 0x20 || GVARS.b3a != 1) {
-            FUN_800201ac(o, 0xa0);
+            cullObjectToDrawListMargin(o, 0xa0);
             func_801177F8(o);
             func_801178B0(o);
             getBaseMatrix(&o->w48);

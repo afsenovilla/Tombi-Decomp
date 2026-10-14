@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "gv2.h"
 #include "TOBJ.H"
-extern void FUN_800201ac(TObj *, int);
+extern void cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
 void func_8011FFBC(TObj *o)
@@ -35,12 +35,12 @@ void func_8011FFBC(TObj *o)
                 break;
             }
             case 1:
-                FUN_800201ac(o, 0x90);
+                cullObjectToDrawListMargin(o, 0x90);
                 break;
             }
             break;
         case 1:
-            FUN_800201ac(o, 0x90);
+            cullObjectToDrawListMargin(o, 0x90);
             break;
         }
         break;

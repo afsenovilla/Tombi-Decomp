@@ -32,7 +32,7 @@ void FUN_800579a8(TObj *o);
 void FUN_80057ae4(TObj *o);
 void FUN_80057bf0(TObj *o);
 
-void func_800500C4(TObj *o)
+void drawObject(TObj *o)
 {
     if (o->visible == 0) return;
     if ((o->b0a & 0x10) && o->da0 == 0) return;

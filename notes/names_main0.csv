@@ -170,6 +170,7 @@ address,name,confidence,comment
 8001fec0,AnimAdvance,media,avanza el script de animacion; flags 0x4000/0x8000/0xC000 en +6; devuelve 1 si termina o salta
 8001ffa4,tickAnimationFixedRate,alta,name from psx_tomba (US)
 80020078,cullObjectToDrawList,alta,names batch (see notes/names.md)
+800201ac,cullObjectToDrawListMargin,alta,"same as cullObjectToDrawList but with an x margin argument: clears visible when out of the camera x window, el"
 800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
 800203dc,isObjectInView,alta,"returns 1 when the object is active and its position is within the camera window (1F800176/1F800186) widened b"
 80020490,despawnObjectOffscreen,alta,names batch (see notes/names.md)
@@ -183,6 +184,7 @@ address,name,confidence,comment
 80020c04,setSectionFlagBit,alta,names batch (see notes/names.md)
 80020cb0,insertionSortU32,alta,psx_tomba #21 (por bytes)
 80020d20,spawnLayer3Object,alta,name from psx_tomba (US)
+80020d98,spawnLayer2ObjectUnlessFlagged,alta,"tests the section flag bit (same indexing as setSectionFlagBit over D_8009CB94) for the entry"
 80020eac,loadCollisionBounds,alta,psx_tomba (por bytes)
 80020f14,drawDebugText,alta,names batch (see notes/names.md)
 80021150,drawLoadingSprites,alta,name from psx_tomba (US)
@@ -210,6 +212,9 @@ address,name,confidence,comment
 80026000,updatePadVibration,alta,names batch (see notes/names.md)
 800261b0,stopPadVibration,alta,names batch (see notes/names.md)
 8002623c,readPadPort,alta,names batch (see notes/names.md)
+800263bc,initHudState,alta,"initializes the HUD block D_800B1410 (active flag, 600-frame timer, displayed vitality from D_8009C970, sprite"
+800264d0,tickHud,alta,"per-frame HUD tick from gameplayTick/areaMode2Tick: when D_800B1410 is active runs updateHud, except in area 6"
+80026544,updateHud,alta,"HUD state machine for D_800B1410: follows vitality D_8009C970 against max D_8009C971, starts the change animat"
 80026a10,addPlayerAP,alta,psx_tomba (por bytes)
 80026bfc,spawnItemNotification,alta,psx_tomba (por bytes)
 80026c50,addItemToInventory,alta,psx_tomba (por bytes)
@@ -289,6 +294,7 @@ address,name,confidence,comment
 80038150,scriptTickWait,alta,psx_tomba #21 (por bytes)
 80038238,scriptOpSwapVars,alta,psx_tomba #21 (por bytes)
 80038290,scriptOpRandom,alta,psx_tomba #21 (por bytes)
+800382fc,scriptLoadArgs,alta,"script helper called by execCoreOpcode: reads the op's N operands (register index or 4-byte immediate) and sto"
 8003840c,scriptOpBranch,alta,psx_tomba (por bytes)
 80038514,scriptOpLoopVar,alta,names batch (see notes/names.md)
 800385ac,scriptOpCall,alta,psx_tomba #21 (por bytes)
@@ -429,9 +435,11 @@ address,name,confidence,comment
 80045b8c,callObjectInteraction,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80045d0c,dispatchObjectContact,alta,psx_tomba #21 (por bytes)
 80047e74,objectsOverlapAlt,media,"3D hitbox overlap test like objectsOverlap but with a's x box mirrored (b->box0 + a->box1 - a->box0)"
+8004874c,pushObjectOutOfObjectX,alta,"when the two hitboxes overlap (objectsOverlapAlt form) moves o's x to the near edge of e, sets o->b9d to the s"
 80048d8c,onOverlapSetFlag68,media,"runs the objectsOverlapAlt test inline and sets e->b68 = 1 on contact"
 80048ffc,objectsOverlap,alta,names batch (see notes/names.md)
 8004bb84,dispatchAreaUnlayeredHandler,alta,psx_tomba #21 (por bytes)
+8004bfe4,spawnSectionUnlayeredObjects,alta,"walks the 4-byte entry list PTR_8007bee4[area][section] up to 0xff, allocates an unlayered object per entry (t"
 8004c0dc,updateObjectsUnlayered,alta,psx_tomba (por bytes)
 8004c170,spawnUnlayeredObjectAndInit,alta,psx_tomba #21 (por bytes)
 8004c1b0,spawnUnlayeredObject,alta,psx_tomba #21 (por bytes)
@@ -460,11 +468,20 @@ address,name,confidence,comment
 8004fd6c,insertPrimWithBias,alta,name from psx_tomba (US)
 8004fdc8,insertPrim,alta,name from psx_tomba (US)
 8004fe1c,setupActorPolyFT4,alta,name from psx_tomba (US)
+800500c4,drawObject,alta,"skips invisible objects and area-specific hidden cases, then dispatches the object to its renderer by draw kin"
+8005042c,drawGameplayScene,media,"called from gameplayTick and the areaModeNTick functions: runs the per-frame draw passes (player, object categ"
 80055fac,drawMessageBox,alta,name from psx_tomba (US)
 800563ac,drawMessageBoxFrame,alta,name from psx_tomba (US)
 80056420,drawBalloonFrame,alta,name from psx_tomba (US)
+800571a8,drawCategory5Objects,alta,"same as drawCategory4Objects for the category 5 list (1F800228, cache 1F80026c)"
+80057288,drawCategory4Objects,alta,"calls drawObject for every entry of the category 4 list (1F800224, filled by ObjListPush_1F800224), caching th"
+80057dfc,drawCategory8Objects,alta,"same as drawCategory4Objects for the category 8 list (1F800230, cache 1F800274)"
+80058604,drawHudIfShown,alta,"called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls"
+80058680,drawHud,alta,"draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots fr"
+80058b18,drawHudVitality,media,"draws one SPRT per vitality point up to the maximum D_8009C971 at the given position"
 800591c0,drawMessageGlyphs,alta,name from psx_tomba (US)
 80059464,AddDrawMode,alta,SetDrawMode + AddPrim en la OT indicada
+800594e4,drawSpriteFrame,alta,"builds a SPRT from frame idx of the object's frame table (+0x18: u, v, clut, w, h, x/y offsets) at x, y and Ad"
 80059728,addTilePrim,alta,psx_tomba (por bytes)
 80059f18,computeRotatedQuad,alta,names batch (see notes/names.md)
 8005a108,spawnUnlayeredObjectAndInit,alta,name from psx_tomba (US)
@@ -751,6 +768,7 @@ address,name,confidence,comment
 800697b4,_padStartCom,alta,names batch (see notes/names.md)
 80069880,_padStopCom,alta,names batch (see notes/names.md)
 800698c4,_padInitSioMode,alta,names batch (see notes/names.md)
+80069bf8,padCommandStep,alta,"libpad driver: runs the next step function from D_80098230[D_800981F0], arms setRC2wait(60) and reports errors"
 80069ce8,_padSioRW,alta,names batch (see notes/names.md)
 8006a170,_padClrIntSio0,alta,names batch (see notes/names.md)
 8006a200,sioWaitRxReady,alta,"spins until SIO0 status (+4) bit 1 (RX FIFO not empty) is set"

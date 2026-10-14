@@ -21,7 +21,7 @@ extern unsigned char DAT_8009c990;
 extern short DAT_800802dc[];
 extern short DAT_800802e4[];
 extern Col6 DAT_800802ec[];
-extern void FUN_800594e4(TObj *, int, int, int);
+extern void drawSpriteFrame(TObj *, int, int, int);
 extern void FUN_8005e74c(Sprt *);
 extern unsigned short FUN_8005e420(int, int);
 extern void FUN_8005e580(int, Sprt *);
@@ -36,7 +36,7 @@ void FUN_80058d28(TObj *o, int idx, short x, short y, short flag)
     int c;
 
     if (flag)
-        FUN_800594e4(o, (short)(x + 8), y, *(unsigned short *)((void **)o->movetab)[DAT_8009cd98[idx] + 1]);
+        drawSpriteFrame(o, (short)(x + 8), y, *(unsigned short *)((void **)o->movetab)[DAT_8009cd98[idx] + 1]);
     p = D_1f800164;
     s = (unsigned char *)o->b.raw + *(short *)(*(volatile int *)&o->b.raw + (*(unsigned short *)o->d34 << 2) + 2);
     FUN_8005e74c(p);

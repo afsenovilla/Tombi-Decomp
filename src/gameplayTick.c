@@ -12,7 +12,7 @@ extern unsigned char DAT_1f8001d3;
 extern unsigned short DAT_1f8001f8;
 extern void FUN_8001ca58(void);
 extern void updateAreaScreenEffect(void);
-extern void FUN_800264d0(void);
+extern void tickHud(void);
 extern void FUN_80039580(void);
 extern void FUN_8001d36c(void);
 extern void updateObjectsLayer7(void);
@@ -22,7 +22,7 @@ extern void updateInventoryOverlay(void);
 extern void FUN_8002af10(void);
 extern void updateObjectsLayer8(void);
 extern void resetDrawLists(void);
-extern void FUN_8005042c(void);
+extern void drawGameplayScene(void);
 extern void FUN_8001dbdc(void);
 
 void gameplayTick(void)
@@ -44,7 +44,7 @@ void gameplayTick(void)
     if (DAT_1f8001c6 == 0) {
         DAT_1f8001f8++;
         updateAreaScreenEffect();
-        FUN_800264d0();
+        tickHud();
         if (DAT_1f8001c6 == 0) {
             FUN_80039580();
             FUN_8001d36c();
@@ -60,7 +60,7 @@ void gameplayTick(void)
         updateObjectsLayer8();
     }
     if (DAT_1f8001c6 != 2)
-        FUN_8005042c();
+        drawGameplayScene();
     else
         resetDrawLists();
     FUN_8001dbdc();

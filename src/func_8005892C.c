@@ -20,7 +20,7 @@ typedef struct {
 } O58;
 extern SPRT *DAT_1f800164;
 extern unsigned long *DAT_1f8001e0;
-extern void FUN_800594e4(O58 *, int, int, int);
+extern void drawSpriteFrame(O58 *, int, int, int);
 extern void SetSprt(SPRT *);
 extern void SetSemiTrans(SPRT *, int);
 extern void AddPrim(void *, void *);
@@ -41,7 +41,7 @@ void func_8005892C(O58 *o, int x0, int y0)
     dx = -0x44;
     do {
         if (i == 7 || *q != 0 || n != 0) {
-            FUN_800594e4(o, (short)(x + dx), (short)y, *o->a24[*q]);
+            drawSpriteFrame(o, (short)(x + dx), (short)y, *o->a24[*q]);
             n++;
         }
         q++;

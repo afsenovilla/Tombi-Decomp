@@ -2,7 +2,7 @@
 // MATCHING 80117bd4 264
 #include "TOBJ.H"
 
-extern int FUN_800201ac(TObj *o, int x);
+extern int cullObjectToDrawListMargin(TObj *o, int x);
 extern short func_8011D264(unsigned char n);
 extern void freeObjectLayer8(TObj *o);
 
@@ -19,7 +19,7 @@ void func_80117BD4(TObj *o)
         o->box3 = 0;
         break;
     case 1:
-        if (FUN_800201ac(o, 0x50)) {
+        if (cullObjectToDrawListMargin(o, 0x50)) {
             a = func_8011D264(o->subtype);
             if (a < 0x800)
                 o->d8c = a * 3 / 4;

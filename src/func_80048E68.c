@@ -5,7 +5,7 @@ extern short IDX;
 #define LST (*(unsigned char ***)0x1f80021c)
 extern unsigned char DAT_8007b6a4[];
 extern short func_80047F3C(void *, void *);
-extern short FUN_8004874c(void *, void *);
+extern short pushObjectOutOfObjectX(void *, void *);
 extern short func_80048500(void *, void *);
 extern short func_800482EC(void *, void *);
 extern void func_80121934(void *);
@@ -39,7 +39,7 @@ void func_80048E68(void)
                         if (v != 0) IDX = 0;
                         break;
                     case 6:
-                        v = FUN_8004874c(o, q);
+                        v = pushObjectOutOfObjectX(o, q);
                         if (v != 0) IDX = 0;
                         break;
                     case 7:

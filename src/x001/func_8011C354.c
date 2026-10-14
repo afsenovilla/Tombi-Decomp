@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern Fix16 *D_800A607C[];
-extern int FUN_800201ac(TObj *, int);
+extern int cullObjectToDrawListMargin(TObj *, int);
 extern void playSFX(int);
 extern short MulCosDup(int, int);
 extern short MulNegSin(int, int);
@@ -28,7 +28,7 @@ void func_8011C354(TObj *o)
             o->d8c = 0;
             o->b69 = 0;
         case 1:
-            if (FUN_800201ac(o, 0x60)) {
+            if (cullObjectToDrawListMargin(o, 0x60)) {
                 if (o->b69) {
                     if ((unsigned short)o->wb4 == 0) playSFX(0x4b);
                     if (o->d8c >= -0x6f) {
@@ -43,7 +43,7 @@ void func_8011C354(TObj *o)
             if ((*(Fix16 **)&PLAYER.obj.h)->p.whole < 0x53c) o->step++;
             break;
         case 2:
-            if (FUN_800201ac(o, 0x24)) o->step = 0;
+            if (cullObjectToDrawListMargin(o, 0x24)) o->step = 0;
             break;
         }
         break;

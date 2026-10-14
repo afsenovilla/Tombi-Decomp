@@ -6,7 +6,7 @@
 typedef struct { short x, y, z, pad; } E8;
 extern unsigned char D_8013C47C[];
 extern void *D_8013E5AC, *D_8013E5BC;
-extern int FUN_800201ac(TObj *, int);
+extern int cullObjectToDrawListMargin(TObj *, int);
 extern void func_8011A528(TObj *);
 extern void FUN_80018838(TObj *);
 
@@ -92,11 +92,11 @@ void func_8011A1C0(TObj *o)
         break;
     case 1:
         if (GVARS.b42 != 0 || o->subtype == 2) {
-            FUN_800201ac(o, 0x40);
+            cullObjectToDrawListMargin(o, 0x40);
             break;
         }
         if (o->step == 0) {
-            if (FUN_800201ac(o, 0x40) == 0) goto clear;
+            if (cullObjectToDrawListMargin(o, 0x40) == 0) goto clear;
             if (o->b6a == 1) {
                 o->step = 1;
                 o->state = 0;
@@ -112,7 +112,7 @@ void func_8011A1C0(TObj *o)
                 o->state = 0;
             }
         } else {
-            FUN_800201ac(o, 0x40);
+            cullObjectToDrawListMargin(o, 0x40);
         }
         func_8011A528(o);
     clear:

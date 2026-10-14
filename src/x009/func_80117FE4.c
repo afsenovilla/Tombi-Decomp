@@ -6,11 +6,11 @@ typedef struct { short x, y; } XY;
 typedef struct { char c[6]; } S6;
 extern S6 D_8012A938[];
 extern XY D_8012A930[];
-extern TObj *func_80020D98(S6 *);
+extern TObj *spawnLayer2ObjectUnlessFlagged(S6 *);
 
 void func_80117FE4(TObj *o, int i)
 {
-    TObj *n = func_80020D98(&D_8012A938[i]);
+    TObj *n = spawnLayer2ObjectUnlessFlagged(&D_8012A938[i]);
 
     n->animFrame = 0;
     n->a.raw = D_8012A930[i].x << 16;

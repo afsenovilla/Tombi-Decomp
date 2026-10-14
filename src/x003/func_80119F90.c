@@ -33,7 +33,7 @@ typedef struct E {
 extern short D_801358B0[], D_801358D0[], D_80135978[], D_80135998[], D_801359CC[], D_801359EC[];
 extern short D_80135A20[], D_80135A40[];
 extern short D_80135944[], D_80135946[], D_80135948[];
-extern void FUN_800201ac(E *, int);
+extern void cullObjectToDrawListMargin(E *, int);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern VECTOR *ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
 
@@ -53,7 +53,7 @@ void func_80119F90(E *o)
     MATRIX m;
     short *q;
 
-    FUN_800201ac(o, 0x40);
+    cullObjectToDrawListMargin(o, 0x40);
     if (o->visible == 0) return;
     if (o->d90 != 0) return;
     e = o;

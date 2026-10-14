@@ -10,7 +10,7 @@ void ObjListPush_1F800228(TObj *o);
 void ObjListPush_1F80022C(TObj *o);
 void ObjListPush_1F800230(TObj *o);
 
-int FUN_800201ac(TObj *o, int x)
+int cullObjectToDrawListMargin(TObj *o, int x)
 {
     if (o->active == 0) return 0;
     o->visible = 0;

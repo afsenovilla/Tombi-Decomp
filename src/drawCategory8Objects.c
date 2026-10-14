@@ -8,9 +8,9 @@ extern int * volatile DAT_1f800230_v;
 extern volatile unsigned short DAT_1f800242_v;
 extern unsigned short DAT_1f800242;
 extern short DAT_1f800242_s[];
-extern void FUN_800500c4(int);
+extern void drawObject(int);
 
-void FUN_80057dfc(void)
+void drawCategory8Objects(void)
 {
     int n;
     int *p, *q;
@@ -19,7 +19,7 @@ void FUN_80057dfc(void)
         n = DAT_1f800258;
         p = DAT_1f800274;
         while (n != 0) {
-            FUN_800500c4(*p++);
+            drawObject(*p++);
             n--;
         }
     } else {
@@ -32,7 +32,7 @@ void FUN_80057dfc(void)
                 DAT_1f800230_v = q + 1;
                 x = *q;
                 DAT_1f800242_v = DAT_1f800242_v - 1;
-                FUN_800500c4(x);
+                drawObject(x);
             } while (DAT_1f800242_s[0] != 0);
         }
         }

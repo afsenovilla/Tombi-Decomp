@@ -38,7 +38,7 @@ extern char D_801388C8[], D_80138908[], D_80138948[];
 extern short D_80138988[], D_8013898A[], D_8013898C[];
 extern E *allocObjectLayer2(void);
 extern void ObjCullRegister(E *);
-extern void FUN_800201ac(E *, int);
+extern void cullObjectToDrawListMargin(E *, int);
 extern void ObjFreeDup(E *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern VECTOR *ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
@@ -121,7 +121,7 @@ void func_8011C804(E *o)
         if (o->b0c == 0)
             ObjCullRegister(o);
         else
-            FUN_800201ac(o, 0x40);
+            cullObjectToDrawListMargin(o, 0x40);
         if (o->visible == 0) break;
         if (o->d90 != 0) break;
         e = o;

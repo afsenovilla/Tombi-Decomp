@@ -6,9 +6,9 @@ extern short DAT_1f80024c;
 extern unsigned short DAT_1f80024c_u;
 extern int ** DAT_1f800224;
 extern int **DAT_1f800268;
-extern void FUN_800500c4(int *o);
+extern void drawObject(int *o);
 
-void FUN_80057288(void)
+void drawCategory4Objects(void)
 {
     if (DAT_1f8001c6 != 0) {
         int n = DAT_1f800254;
@@ -16,7 +16,7 @@ void FUN_80057288(void)
         for (; n != 0; n--) {
             int *o = *p;
             p++;
-            FUN_800500c4(o);
+            drawObject(o);
         }
     } else {
         unsigned short n = DAT_1f80024c_u;
@@ -26,7 +26,7 @@ void FUN_80057288(void)
         if (n != 0) do {
             int *o = *DAT_1f800224++;
             DAT_1f80024c_u--;
-            FUN_800500c4(o);
+            drawObject(o);
         } while (DAT_1f80024c != 0);
     }
 }

@@ -27,8 +27,8 @@ extern short D_800A64C6[];
 extern int MulCos(int, short);
 extern int MulNegSinScaled(int, short);
 extern TObj *allocObjectLayer4(void);
-extern TObj *func_80020D98(void *);
-extern int FUN_800201ac(TObj *, int);
+extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
+extern int cullObjectToDrawListMargin(TObj *, int);
 extern int isObjectInView(TObj *);
 extern int angleBetweenPoints(P, P);
 extern void func_8011CEC8(Ctx *);
@@ -116,7 +116,7 @@ void func_8011C574(TObj *o)
                         X(c)->wc0 = c->b.p.whole;
                     }
                     if (j == 3 && k == D_800A4470[3].n - 1) {
-                        q = func_80020D98(D_8013C490);
+                        q = spawnLayer2ObjectUnlessFlagged(D_8013C490);
                         if (q != 0) {
                             q->active = 1;
                             q->a.raw = c->a.raw;
@@ -154,7 +154,7 @@ void func_8011C574(TObj *o)
             }
             X(o)->wc2 = s1->f6;
         }
-        FUN_800201ac(o, 0xa0);
+        cullObjectToDrawListMargin(o, 0xa0);
         if (o->visible == 0) break;
         if (isObjectInView(o) == 0) o->visible = 0;
         if (o->visible == 0) break;

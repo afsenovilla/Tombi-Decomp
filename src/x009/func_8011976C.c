@@ -5,7 +5,7 @@
 extern unsigned short D_8012ABB4[];
 extern unsigned short D_8012ABAC[];
 extern void **D_8012ABA0[];
-extern int FUN_800201ac(TObj *, int);
+extern int cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFree(TObj *);
 
 void func_8011976C(TObj *o)
@@ -32,7 +32,7 @@ void func_8011976C(TObj *o)
             o->d8c = (unsigned char)(-((int)(v - 7) << 5) / 8);
         break;
     case 1:
-        FUN_800201ac(o, 200);
+        cullObjectToDrawListMargin(o, 200);
         break;
     case 2:
         break;

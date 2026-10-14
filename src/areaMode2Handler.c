@@ -14,8 +14,8 @@ extern void InitSubsystems(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
 extern void FUN_80021b20(void);
-extern void FUN_8004bfe4(void);
-extern void FUN_800263bc(void);
+extern void spawnSectionUnlayeredObjects(void);
+extern void initHudState(void);
 extern void startAreaBgm(void);
 extern void FUN_8001acdc(void);
 
@@ -31,8 +31,8 @@ void areaMode2Handler(void)
         DAT_1f8001cf = 1;
         FUN_80021858();
         FUN_80021b20();
-        FUN_8004bfe4();
-        FUN_800263bc();
+        spawnSectionUnlayeredObjects();
+        initHudState();
         DAT_800b1410 = 2;
         if (DAT_8009c967 != 1 || DAT_8009c960 == 0x30000)
             startAreaBgm();

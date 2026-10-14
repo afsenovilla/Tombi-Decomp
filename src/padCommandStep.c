@@ -5,7 +5,7 @@
 /* one command step of the pad driver (US func_800694FC, libpad/padmain.c, with the PAL stop-condition). Crutches: `index`/`count` register pins and the $a0 clobber only steer register allocation. */
 #include "padlocal.h"
 
-void FUN_80069bf8(padPort* port)
+void padCommandStep(padPort* port)
 {
     int* index = &D_800981F0;
     register int count asm("$3");

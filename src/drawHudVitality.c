@@ -24,7 +24,7 @@ extern void AddPrim(void *ot, void *p);
 extern void FUN_800595f4(SPR *s, int x, int y, int v);
 extern void AddDrawMode(int a, int b);
 
-void FUN_80058b18(SPR *s, short x, short y, unsigned short n)
+void drawHudVitality(SPR *s, short x, short y, unsigned short n)
 {
     int i = 0;
     SPRT *p;

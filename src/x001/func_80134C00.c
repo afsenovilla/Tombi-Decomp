@@ -13,7 +13,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
 extern int isObjectInView(P *);
-extern int FUN_800201ac(P *, int);
+extern int cullObjectToDrawListMargin(P *, int);
 extern void freeObjectLayer2(P *);
 extern void func_80134EE8(P *);
 extern void func_80132B64(P *);
@@ -80,7 +80,7 @@ void func_80134C00(P *o)
             o->t.y.raw -= D_8007A3F0[*(unsigned char *)&o->t.d84] << 8;
         }
         o->t.b69 = 0;
-        if (!FUN_800201ac(o, 0xa0)) {
+        if (!cullObjectToDrawListMargin(o, 0xa0)) {
             if (o->t.y.p.whole >= -0x190) o->t.y.p.whole = -0x190;
         }
         break;

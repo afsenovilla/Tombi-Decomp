@@ -12,7 +12,7 @@ extern unsigned char D3690;
 extern unsigned char D2f81;
 extern char A2048[], A2068[], A20ec[], A2100[], A2150[], A22a0[], A24f8[], A2678[];
 
-void FUN_800263bc(void)
+void initHudState(void)
 {
     int i;
     GT *g = &G;

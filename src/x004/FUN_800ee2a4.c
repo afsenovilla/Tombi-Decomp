@@ -1,7 +1,7 @@
 // FUNC 800ee2a4 304 X004
 // MATCHING 800ee2a4 304
 #include "TOBJ.H"
-extern void FUN_800201ac(TObj *, int);
+extern void cullObjectToDrawListMargin(TObj *, int);
 extern void FUN_80018838(void);
 
 void FUN_800ee2a4(TObj *o)
@@ -34,7 +34,7 @@ void FUN_800ee2a4(TObj *o)
         *(int *)((char *)o + 0xa0) = 0;
         break;
     case 1:
-        FUN_800201ac(o, 0x40);
+        cullObjectToDrawListMargin(o, 0x40);
         break;
     case 2:
         break;

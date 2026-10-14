@@ -75,6 +75,24 @@ One line per name: `address name (old file) - justification`.
 - `8003a6b0 scriptOpSetObjField6B` (was func_8003A6B0) - script op (psx_tomba op94): sets byte +0x6b of SCRIPT_OBJECTS[arg0] to arg1 unless in mode 3 without player +0x6b == 1; pc++
 - `80039c90 scriptOpSetObjField74` (was func_80039C90) - (uncertain) script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler; pc++
 - `8004fcc0 isQuadOnScreen` (was FUN_8004fcc0) - (uncertain) returns 1 when some vertex y of the 4-vertex primitive is < 0x100 and some x < 0x140 (screen bounds 320x256)
+- `80069bf8 padCommandStep` (was FUN_80069bf8) - libpad driver: runs the next step function from D_80098230[D_800981F0], arms setRC2wait(60) and reports errors through D_800981AC; US psx_tomba func_800694FC (padmain.c)
+- `8004bfe4 spawnSectionUnlayeredObjects` (was FUN_8004bfe4) - walks the 4-byte entry list PTR_8007bee4[area][section] up to 0xff, allocates an unlayered object per entry (type, subtype) and runs its init from PTR_8007bf34 when flagged; called by every area mode handler
+- `800201ac cullObjectToDrawListMargin` (was FUN_800201ac) - same as cullObjectToDrawList but with an x margin argument: clears visible when out of the camera x window, else sets it and pushes the object to the ObjListPush_1F8002xx list of its category
+- `800594e4 drawSpriteFrame` (was FUN_800594e4) - builds a SPRT from frame idx of the object's frame table (+0x18: u, v, clut, w, h, x/y offsets) at x, y and AddPrims it to the current OT
+- `800500c4 drawObject` (was func_800500C4) - skips invisible objects and area-specific hidden cases, then dispatches the object to its renderer by draw kind (func_80045D0C) or b0a (area 6)
+- `80057288 drawCategory4Objects` (was FUN_80057288) - calls drawObject for every entry of the category 4 list (1F800224, filled by ObjListPush_1F800224), caching the list at 1F800268 so it can be redrawn while 1F8001c6 is set
+- `800571a8 drawCategory5Objects` (was FUN_800571a8) - same as drawCategory4Objects for the category 5 list (1F800228, cache 1F80026c)
+- `80057dfc drawCategory8Objects` (was FUN_80057dfc) - same as drawCategory4Objects for the category 8 list (1F800230, cache 1F800274)
+- `8005042c drawGameplayScene` (was FUN_8005042c) - (uncertain) called from gameplayTick and the areaModeNTick functions: runs the per-frame draw passes (player, object category lists, backgrounds) and the screen fade level from 8009c975/6
+- `80020d98 spawnLayer2ObjectUnlessFlagged` (was func_80020D98) - tests the section flag bit (same indexing as setSectionFlagBit over D_8009CB94) for the entry; if clear and entry kind is 2 allocates a layer 2 object with the entry type/subtype/param
+- `8004874c pushObjectOutOfObjectX` (was FUN_8004874c) - when the two hitboxes overlap (objectsOverlapAlt form) moves o's x to the near edge of e, sets o->b9d to the side (2/3) and returns 2
+- `800382fc scriptLoadArgs` (was FUN_800382fc) - script helper called by execCoreOpcode: reads the op's N operands (register index or 4-byte immediate) and stores them in SCRIPT_CTX +0x1190.. (the arg array)
+- `800263bc initHudState` (was FUN_800263bc) - initializes the HUD block D_800B1410 (active flag, 600-frame timer, displayed vitality from D_8009C970, sprite table pointers) at area load; called by every area mode handler after spawnSectionUnlayeredObjects
+- `800264d0 tickHud` (was FUN_800264d0) - per-frame HUD tick from gameplayTick/areaMode2Tick: when D_800B1410 is active runs updateHud, except in area 6 where it only counts down its timer
+- `80026544 updateHud` (was FUN_80026544) - HUD state machine for D_800B1410: follows vitality D_8009C970 against max D_8009C971, starts the change animation/blink when it changes
+- `80058604 drawHudIfShown` (was FUN_80058604) - called from drawGameplayScene: unless in mode 3, keeps the HUD timer at 0x78 while D_8009C93F is set and calls drawHud when the timer is 0 and D_800B1410 bit 0 is set
+- `80058680 drawHud` (was FUN_80058680) - draws the HUD elements of D_800B1410 (vitality via drawHudVitality, other counters and the three item slots from D_800802C8)
+- `80058b18 drawHudVitality` (was FUN_80058b18) - (uncertain) draws one SPRT per vitality point up to the maximum D_8009C971 at the given position
 
 # Area overlay function names (X001..X019)
 

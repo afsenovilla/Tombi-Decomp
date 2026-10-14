@@ -2,7 +2,7 @@
 // MATCHING 800587a8 388
 #include "gamestate.h"
 typedef struct { char p[0x24]; unsigned short **tbl; char q[0x30 - 0x28]; unsigned short *dot; } O;
-void FUN_800594e4(O *o, short x, short y, int k);
+void drawSpriteFrame(O *o, short x, short y, int k);
 void AddDrawMode(int, int);
 void func_800587A8(O *o, short x, short y)
 {
@@ -10,12 +10,12 @@ void func_800587A8(O *o, short x, short y)
     unsigned short *t;
     if (*g - 1 >= 10) {
         t = o->tbl[(*g - 1) / 10];
-        FUN_800594e4(o, x - 5, y, *t);
-        FUN_800594e4(o, x + 5, y, *o->tbl[(*g - 1) % 10]);
+        drawSpriteFrame(o, x - 5, y, *t);
+        drawSpriteFrame(o, x + 5, y, *o->tbl[(*g - 1) % 10]);
     } else {
         t = o->tbl[*g - 1];
-        FUN_800594e4(o, x, y, *t);
+        drawSpriteFrame(o, x, y, *t);
     }
-    FUN_800594e4(o, x, y - 4, *o->dot);
+    drawSpriteFrame(o, x, y - 4, *o->dot);
     AddDrawMode(0x15, 1);
 }

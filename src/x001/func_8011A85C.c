@@ -10,7 +10,7 @@ extern void playSFX(int);
 extern int func_8011A72C(TObj *o);
 extern void func_801191E4(int x, int y, int z);
 extern TObj *func_8013675C(short k, short d, short n, short x, short y, short z);
-extern TObj *func_80020D98(void *);
+extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
 
 #define BURST() \
     func_801191E4(o->h->p.whole, o->y.p.whole, o->d->p.whole); \
@@ -92,7 +92,7 @@ void func_8011A85C(TObj *o)
                 break;
             case 1:
                 if (o->w98 == 0) {
-                    TObj *e = func_80020D98(D_8013C474);
+                    TObj *e = spawnLayer2ObjectUnlessFlagged(D_8013C474);
                     if (!e) {
                         o->w98 = 1;
                         break;

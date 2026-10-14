@@ -14,7 +14,7 @@ static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
     return tmp;
 }
 
-void FUN_800382fc(void)
+void scriptLoadArgs(void)
 {
     int buf[16];
     unsigned char *o;

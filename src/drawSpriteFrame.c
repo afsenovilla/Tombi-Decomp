@@ -14,7 +14,7 @@ extern void SetSprt(void *);
 extern void SetSemiTrans(void *, int);
 extern void AddPrim(void *, void *);
 
-void FUN_800594e4(int obj, short x, short y, unsigned short idx)
+void drawSpriteFrame(int obj, short x, short y, unsigned short idx)
 {
     SPRT *p;
     unsigned char *s;

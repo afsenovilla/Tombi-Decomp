@@ -1,7 +1,7 @@
 // FUNC 80118fe4 216 X010
 // MATCHING 80118fe4 216
 #include "TOBJ.H"
-extern int FUN_800201ac(TObj *, int);
+extern int cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
 void func_80118FE4(TObj *o)
@@ -25,7 +25,7 @@ void func_80118FE4(TObj *o)
         o->d8c = 0;
         break;
     case 1:
-        FUN_800201ac(o, 0x40);
+        cullObjectToDrawListMargin(o, 0x40);
         break;
     case 2:
         break;

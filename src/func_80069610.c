@@ -18,7 +18,7 @@ extern int D_800981EC;
 extern int D_800981F4;
 extern void (*D_800981AC)(int);
 int _padInitSioMode(E *e);
-void func_80069BF8(E *e);
+void padCommandStep(E *e);
 int func_80069610(void)
 {
     int t;
@@ -36,7 +36,7 @@ int func_80069610(void)
         if (_padInitSioMode(&D_800981E0[D_800981FC]) == 0) D_800981AC(0xffff);
         D_800981F4 = 0;
         while (D_800981EC <= D_80098200) {
-            func_80069BF8(&D_800981E0[D_800981EC]);
+            padCommandStep(&D_800981E0[D_800981EC]);
         }
         D_80098210->e = 0x88;
     }

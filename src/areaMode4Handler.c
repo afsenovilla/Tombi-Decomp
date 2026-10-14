@@ -16,8 +16,8 @@ extern void FUN_800175f0(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
 extern void FUN_80021b20(void);
-extern void FUN_8004bfe4(void);
-extern void FUN_800263bc(void);
+extern void spawnSectionUnlayeredObjects(void);
+extern void initHudState(void);
 extern void startAreaBgm(void);
 extern void areaMode4Tick(void);
 extern unsigned char *allocObjectLayer7(void);
@@ -32,8 +32,8 @@ void areaMode4Handler(void)
         FUN_80017b44();
         FUN_80021858();
         FUN_80021b20();
-        FUN_8004bfe4();
-        FUN_800263bc();
+        spawnSectionUnlayeredObjects();
+        initHudState();
         DAT_800b1410 = 0;
         DAT_1f8001cf = 1;
         if (DAT_8009c967 != 1)

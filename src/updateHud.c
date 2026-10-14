@@ -12,7 +12,7 @@ extern short DAT_80079784[];
 extern unsigned char DAT_800a6104[];
 extern unsigned char DAT_8009c970_[], DAT_8009c971_[];
 
-void FUN_80026544(TObj *o)
+void updateHud(TObj *o)
 {
     int i;
     unsigned char *p;

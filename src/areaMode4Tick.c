@@ -7,7 +7,7 @@ extern unsigned int G164;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec5e8(void);
 extern void FUN_80039580(void);
 extern void updateInventoryOverlay(void), FUN_800ebc30(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
-extern void resetDrawLists(void), FUN_8005042c(void), FUN_8001dbdc(void);
+extern void resetDrawLists(void), drawGameplayScene(void), FUN_8001dbdc(void);
 
 void areaMode4Tick(void)
 {
@@ -33,7 +33,7 @@ void areaMode4Tick(void)
         }
     }
     if (G1c6 != 2)
-        FUN_8005042c();
+        drawGameplayScene();
     else
         resetDrawLists();
     FUN_8001dbdc();

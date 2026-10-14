@@ -6,7 +6,7 @@ extern unsigned char **PTR_8007bee4[];
 extern void (*PTR_8007bf34[])(unsigned char *);
 extern unsigned char *allocObjectUnlayered(void);
 
-void FUN_8004bfe4(void)
+void spawnSectionUnlayeredObjects(void)
 {
     unsigned char *e;
     unsigned char *p;

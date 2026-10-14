@@ -12,7 +12,7 @@ extern void FUN_80054868(TObj *);
 extern void FUN_800eab58(TObj *);
 extern void FUN_800ec148(TObj *);
 extern void FUN_800eb77c(TObj *);
-extern void FUN_800500c4(TObj *);
+extern void drawObject(TObj *);
 
 void FUN_80054f54(void)
 {
@@ -33,7 +33,7 @@ void FUN_80054f54(void)
                 case 3: FUN_800eb77c(o); break;
                 }
             } else {
-                FUN_800500c4(o);
+                drawObject(o);
             }
         }
     } else {
@@ -53,7 +53,7 @@ void FUN_80054f54(void)
                     case 3: FUN_800eb77c(o); break;
                     }
                 } else {
-                    FUN_800500c4(o);
+                    drawObject(o);
                 }
             }
         } while (DAT_1f800246s != 0);
