@@ -26,13 +26,13 @@ void func_80118724(TObj *o)
         o->d3c = D_1F8002D4[0];
         o->anim = D_8013E5CC[o->subtype];
         if (o->subtype == 2) {
-            S16(o, 0xb8) = -2;
+            o->wb8 = -2;
             S16(o, 0xc8) = -2;
-            S16(o, 0xb6) = 0;
-            S16(o, 0xb4) = 0;
+            o->wb6 = 0;
+            o->wb4 = 0;
             S16(o, 0xc0) = 2;
             S16(o, 0xbe) = 0;
-            S16(o, 0xbc) = 0;
+            o->wbc = 0;
             S16(o, 0xc6) = 0x20;
             S16(o, 0xc4) = 0;
             S16(o, 0xd0) = 2;

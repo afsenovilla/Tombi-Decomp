@@ -57,10 +57,10 @@ void func_800FA91C(TObj *o)
         o->wb0 = 0;
         U8(D_8009C330, 8) = 0;
         U8(D_8009C330, 9) = 0;
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         o->velV = 0;
         setanim(o, 0x1e);
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         U8(D_8009C330, 9) = 0xff;
         o->substep = 0;
         o->state++;
@@ -88,11 +88,11 @@ void func_800FA91C(TObj *o)
                 if (D_1f8001fc & 0x20)
                     o->animFrame = 0;
                 if (D_1f8001fc & 0xf0)
-                    U8(D_8009C330, 0xa)++;
-                if (U8(D_8009C330, 0xa) > 10) {
+                    D_8009C330->b0a++;
+                if (D_8009C330->b0a > 10) {
                     o->b9c = 2;
                     SfxPlay2(2, 4);
-                    U8(D_8009C330, 0xa) = 0;
+                    D_8009C330->b0a = 0;
                     U8(D_8009C330, 9) = 0;
                     o->state = 3;
                     o->timer = 0;
@@ -100,7 +100,7 @@ void func_800FA91C(TObj *o)
                 }
             }
         } else {
-            U8(D_8009C330, 0xa) = 0;
+            D_8009C330->b0a = 0;
             U8(D_8009C330, 9) = 0xff;
             o->timer = 0;
         }
@@ -115,7 +115,7 @@ void func_800FA91C(TObj *o)
             }
             o->w9a = o->w98;
             setanim(o, 0x10);
-            U8(D_8009C330, 0xa) = 0;
+            D_8009C330->b0a = 0;
             U8(D_8009C330, 9) = 0xff;
             SfxPlay2(0x23, 0x24);
             FUN_80025f40(0, 0x81, 0x81, 0x3c);
@@ -126,7 +126,7 @@ void func_800FA91C(TObj *o)
         AnimAdvance(o);
         if (--o->timer != 0) break;
         setanim(o, 0);
-        U8(D_8009C330, 0xa) = 0;
+        D_8009C330->b0a = 0;
         U8(D_8009C330, 9) = 0;
         o->state = 1;
         break;

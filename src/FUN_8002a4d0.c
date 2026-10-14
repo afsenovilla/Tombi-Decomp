@@ -80,8 +80,8 @@ void FUN_8002a4d0(TObj *o)
         S32(o, 0x68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
         o->substep = 0;
         o->state++;
-        S16(o, 0x4c) = *(unsigned short *)S32(o, 0x68);
-        S16(o, 0x50) = ((unsigned short *)S32(o, 0x68))[1];
+        o->w4c = *(unsigned short *)S32(o, 0x68);
+        o->w50 = ((unsigned short *)S32(o, 0x68))[1];
         GAME.disableSelectMenu = 1;
         c = ((unsigned char *)S32(o, 0x68))[4];
         U8(o, 0x3f) = c;
