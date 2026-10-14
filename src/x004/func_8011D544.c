@@ -1,14 +1,13 @@
 // FUNC 8011d544 704 X004
 // MATCHING 8011d544 704
 #include "TOBJ.H"
+#include "gamestate.h"
 extern void *D_80134D50[];
 extern int D_1F8002D4[];
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern int D_800A4570;
 extern int D_800A4574;
-extern unsigned char D_8009D2C3;
-extern unsigned char D_8009C975;
 extern unsigned char D_8009C93C;
 extern void func_8011D804(TObj *);
 extern void FUN_80059d44(short);
@@ -71,11 +70,11 @@ void func_8011D544(TObj *o)
         o->d3c = dd;
         break;
     case 1:
-        if (!(D_8009D2C3 & 8) && o->subtype) {
+        if (!(GAME.purifiedAreas & 8) && o->subtype) {
             func_8011D804(o);
             switch (o->step) {
             case 0:
-                if (D_8009C975 == 0) {
+                if (GAME.fadeScreenControl == 0) {
                     D_8009C93C = 1;
                     o->animTimer = 0x17c;
                     o->animFrame = 0x80;
@@ -90,7 +89,7 @@ void func_8011D544(TObj *o)
                     o->animTimer = 0x17c;
                     o->step++;
                 }
-                if (D_8009C975 == 3) {
+                if (GAME.fadeScreenControl == 3) {
                     o->step = 3;
                 }
                 break;
@@ -101,7 +100,7 @@ void func_8011D544(TObj *o)
                     o->animFrame = 0x80;
                     o->step--;
                 }
-                if (D_8009C975 == 3) {
+                if (GAME.fadeScreenControl == 3) {
                     o->step = 3;
                 }
                 break;

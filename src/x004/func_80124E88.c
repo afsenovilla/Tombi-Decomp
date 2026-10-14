@@ -1,6 +1,7 @@
 // FUNC 80124e88 960 X004
 // MATCHING 80124e88 960
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern Fix16 *D_800A6078;
 extern short D_800A604E;
@@ -8,7 +9,6 @@ extern unsigned char D_800A6047;
 extern short D_800A6066;
 extern unsigned char D_800A6066A[]; /* byte view of D_800A6066 (debt) */
 extern int D_800A60C4[];
-extern unsigned char D_8009C970;
 extern unsigned char D_800A603E;
 extern void *D_80134D38;
 
@@ -75,7 +75,7 @@ void func_80124E88(TObj *o)
         if (o->w22 >= 3) o->state = 3;
         break;
     case 3:
-        if (D_8009C970 == 0) {
+        if (GAME.playerHealth == 0) {
             k = &D_800A603E;
             o->state = 6;
             *k = *k + 1;

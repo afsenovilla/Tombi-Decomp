@@ -1,8 +1,8 @@
 // FUNC 80124954 388 X004
 // MATCHING 80124954 388
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned short D_8009C962;
 extern void playSFX(int);
 
 void func_80124954(TObj *o)
@@ -29,7 +29,7 @@ void func_80124954(TObj *o)
             if (o->d8c < 6 || o->d8c > 0xfa) o->d8c = 0;
             else o->d8c = (o->d8c + 6) & 0xff;
             if (o->d8c == 0) {
-                if (D_8009C962 < 4) playSFX(0xf8);
+                if (GAME.selectedSection < 4) playSFX(0xf8);
                 else playSFX(0xfa);
             }
         }

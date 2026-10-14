@@ -1,8 +1,9 @@
 // FUNC 8012b438 2848 X004
 // MATCHING 8012b438 2848
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009CEFB, D_8009CDDD, D_8009D0C8, D_8009C971;
+extern unsigned char D_8009CEFB, D_8009CDDD, D_8009D0C8;
 extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_8009C970_[];
 #define D_8009C970 D_8009C970_[0]
@@ -72,7 +73,7 @@ void func_8012B438(TObj *o)
         if (D_8009CEFB >= 0x17) {
             if (D_8009CDDD != 0xff) o->wb4 = 4;
             else if (D_8009D0C8 == 0) o->wb4 = 2;
-            else if (D_8009C970 < D_8009C971) o->wb4 = 5;
+            else if (D_8009C970 < GAME.playerHealthDisplayed) o->wb4 = 5;
             else o->wb4 = 3;
         } else if (D_8009CDDD == 0) o->wb4 = 0;
         else o->wb4 = 1;
@@ -332,7 +333,7 @@ void func_8012B438(TObj *o)
             break;
         case 23:
             {
-                int v = D_8009C971;
+                int v = GAME.playerHealthDisplayed;
                 D_800A60D0 = v;
                 D_800A60D2 = v;
                 D_8009C970 = v;

@@ -1,13 +1,13 @@
 // FUNC 801242b0 1320 X004
 // MATCHING 801242b0 1320
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short x, y, z, pad; } V3S;
 
 extern void *D_80134D44[];
 extern void *D_80134D38[];
 extern unsigned short D_1F8001C8;
-extern unsigned short D_8009C962;
 extern void playSFX(int);
 
 static __inline__ int nearCam(TObj *o)
@@ -69,7 +69,7 @@ void func_801242B0(TObj *o)
         if (o->b69 == 1) {
             o->step = 3;
             o->state = 0;
-            if (D_8009C962 < 4) playSFX(0xf8);
+            if (GAME.selectedSection < 4) playSFX(0xf8);
             else playSFX(0xfa);
         } else {
             o->y.raw += o->velV << 8;
@@ -102,7 +102,7 @@ void func_801242B0(TObj *o)
         if (o->b69 == 1) {
             o->step = 3;
             o->state = 0;
-            if (D_8009C962 < 4) playSFX(0xf8);
+            if (GAME.selectedSection < 4) playSFX(0xf8);
             else playSFX(0xfa);
         } else {
             o->y.raw += o->velV << 8;
@@ -119,7 +119,7 @@ void func_801242B0(TObj *o)
         if (o->b69 == 1) {
             o->step = 3;
             o->state = 0;
-            if (D_8009C962 < 4) playSFX(0xf8);
+            if (GAME.selectedSection < 4) playSFX(0xf8);
             else playSFX(0xfa);
         } else {
             o->y.raw += o->velV << 8;

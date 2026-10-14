@@ -1,7 +1,8 @@
 // FUNC 80129250 336 X004
 // MATCHING 80129250 336
 #include "TOBJ.H"
-extern unsigned char D_8009CE22, D_8009C940, D_8009C941, D_8009C990, D_8009CE3D;
+#include "gamestate.h"
+extern unsigned char D_8009CE22, D_8009C940, D_8009C941, D_8009CE3D;
 extern short D_800A604E;
 extern void func_80128114(TObj *);
 extern void func_80128304(TObj *);
@@ -17,7 +18,7 @@ void func_80129250(TObj *o)
             o->step = 2;
             o->state = 0;
         }
-        if (D_800A604E >= -0xa8 && D_8009C990 != 1 && D_8009CE3D != 0 && D_8009CE3D != 0xff) {
+        if (D_800A604E >= -0xa8 && GAME.displayExpBar != 1 && D_8009CE3D != 0 && D_8009CE3D != 0xff) {
             o->step = 3;
             o->state = 0;
         }
