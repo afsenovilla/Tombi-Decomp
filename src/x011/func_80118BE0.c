@@ -1,11 +1,12 @@
 // FUNC 80118be0 488 X011
 // MATCHING 80118be0 488
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern unsigned char D_8009C942[], D_8009D2B0[];
+extern unsigned char D_8009D2B0[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -18,7 +19,7 @@ void func_80118BE0(TObj *o)
     switch (o->state) {
     case 0:
         if (o->b68 == 0) break;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         D_8009D2B0[0] = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
@@ -40,7 +41,7 @@ void func_80118BE0(TObj *o)
         o->state++;
         break;
     case 2:
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;

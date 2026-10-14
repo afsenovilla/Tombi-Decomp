@@ -1,13 +1,12 @@
 // FUNC 80117560 636 X011
 // MATCHING 80117560 636
+#include "gvars.h"
 #include "TOBJ.H"
 
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_80119C48[];
 extern TObj PLAYER;
-extern unsigned char D_8009C940[], D_8009C941;
-extern unsigned char D_8009C942[];
 extern signed char D_8009D2B0[];
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern short D_800A60EA[];
@@ -23,11 +22,11 @@ void func_80117560(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009C940[0]) {
-            if (D_8009C941 == 0x41) {
+        if (((unsigned char*)&GVARS.b40)[0]) {
+            if (GVARS.b41 == 0x41) {
                 o->step = 3;
                 o->state = 0;
-                D_8009C940[0] = 0;
+                ((unsigned char*)&GVARS.b40)[0] = 0;
             }
             break;
         }
@@ -40,7 +39,7 @@ void func_80117560(TObj *o)
         if ((D_1F8001FC & D_1F8003C4) == 0)
             break;
         v = *(V *)&o->a;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         D_8009D2B0[0] = 0;
         D_800A603C[0] = 5;
         D_800A603D[0] = 0;
@@ -62,7 +61,7 @@ void func_80117560(TObj *o)
         o->state++;
         break;
     case 2:
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60EA[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;

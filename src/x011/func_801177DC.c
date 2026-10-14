@@ -1,11 +1,11 @@
 // FUNC 801177dc 1112 X011
 // MATCHING 801177dc 1112
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern unsigned char D_8009C942[];
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D082[];
 extern short D_1F8001C6;
@@ -24,7 +24,7 @@ void func_801177DC(TObj *o)
     switch (o->state) {
     case 0:
         v = *(V6 *)&o->a;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         D_8009D2B0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
@@ -67,7 +67,7 @@ void func_801177DC(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         D_1F8001C6 = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         q = allocObjectLayer5();
         if (q != 0) {

@@ -1,5 +1,6 @@
 // FUNC 8011708c 1236 X011
 // MATCHING 8011708c 1236
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char c[12]; } B12;
@@ -10,7 +11,6 @@ extern TObj *allocObjectLayer5(void);
 extern void setEventStarted(int, int, int);
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC, D_1F8003C4;
-extern unsigned char D_8009C942[];
 extern unsigned char D_8009D082;
 extern short D_1F8001C6;
 extern AT D_80119C48[];
@@ -28,7 +28,7 @@ void func_8011708C(TObj *o)
         if ((unsigned short)((*(unsigned short*)&PLAYER.obj.a.p.whole) - 0x40) >= 0x20) break;
         if ((*(Fix16 **)&PLAYER.obj.d)->p.whole != 0) break;
         if (!(D_1F8001FC & D_1F8003C4)) break;
-        D_8009C942[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
         *p = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
@@ -45,7 +45,7 @@ void func_8011708C(TObj *o)
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
         D_1F8001C6 = 0;
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = 1;
         q = allocObjectLayer5();
@@ -110,7 +110,7 @@ void func_8011708C(TObj *o)
         o->state++;
         break;
     case 9:
-        D_8009C942[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;

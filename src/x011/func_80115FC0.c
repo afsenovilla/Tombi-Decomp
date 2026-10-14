@@ -1,5 +1,6 @@
 // FUNC 80115fc0 444 X011
 // MATCHING 80115fc0 444
+#include "gvars.h"
 #include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
@@ -10,7 +11,6 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
@@ -20,7 +20,7 @@ void func_80115FC0(O *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         o->p38->whole = 0;
         func_80027810(o);
         break;
