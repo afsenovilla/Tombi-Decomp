@@ -1,21 +1,7 @@
 // FUNC 801278c0 1820 X001
-/* score 72 (opusN): cx int (srl result kept untruncated, game cx s3), tested `(short)cx < 0`, `dy * (short)cx`;
-   this fixes kx s5/cx s3 but the s3/s4 cx/dy swap and dx s5/s6 remain; `/ (short)cx` in the s2 divide (as the game
-   does) drops it to s6 again (86).
-   score 86 (opusN, was 345): rebuilt from the x001/wip/func_801244A0.c top half (short dx/dy/cx/cy, ax/ay box temps,
-   sabs() inline, q/r with the dead `ay = q;` at the end for the r copy). Reassociation fixed with negated forms:
-   `-(s2 + 4) + e->y`, `-(s2 + -4) + e->y`, `e->h - -(s7 + 0xc)`, `e->h - -(s7 + -0xc)`; compares written with the
-   (ky/kx) side first (`-(s2+4) + e->y > o->y + box3 - box2`, `e->h - -(s7 + -0xc) > o->h + (box1 - box0)`); last
-   d8c written `if (ang >= 0x800) (ang+0x800)... else ang >> 4`. sabs() without the $3 clobber here (game v1).
-   Left: box0 temp a1/a3 swap at the top; s-reg permutation (game cx s3, dy s4, kx s5, dx s6; ours dy s3, kx s4,
-   dx s5, cx s6); abs(cy) test reads ay (game tests cy: `if (cy < 0) ay = -cy` still cse'd; int cx/cy 149). */
-/* Older: score 345 (was 417; size now 1820 = game). slope/box push-out (o vs e, mode, angle). Found: ax/ay short (compared as
-   short, == 0 tests), v unsigned with `(..)+0xc00 / else` form (srl, andi per arm), the b9c / type-step-state exits are
-   plain `return;` (v0 = the loaded field in the game), quadrant base copied into a second var b, first x-block written
-   `ang >= 0x800 ? .. : ang >> 4` so ang>>4 is the shared tail. Left: gcc here reassociates e->y - (ky + 4) into
-   (e->y - 4) - ky and e->h + (kx + 12) into (e->h + 12) + kx (the game keeps ky+4 / kx+12 first); the same for the last
-   x-block pair; register choice (box1 $8, dx sum $5, abs temps); last-block d8c tail order. -fno-expensive-optimizations
-   gives 340 but moves e to $19. */
+// MATCHING 801278c0 1820
+/* Matched (opusQ): itbrute priority bumps (cx/ax/cy), `/ (short)cx` in the s2 divide, and a local
+   `Fix16 *oh = o->h;` pointer in the category==2 block. */
 #include "TOBJ.H"
 
 extern int rcos(int);
@@ -34,10 +20,12 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
     short kind;
     unsigned int v;
     int q, r;
+asm("" :: "r"(cx));
 
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return 0;
     dx = o->h->p.whole - e->h->p.whole;
     ax = e->box0 + dx;
+asm("" : "=r"(ax) : "0"(ax));
     if ((unsigned short)ax > e->box1) return 0;
     dy = o->y.p.whole - e->y.p.whole;
     ay = e->box0 + dy;
@@ -50,6 +38,7 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
         if (dx > 0) {
             if (q == 0) r = 0x400;
             else r = q - 0x400;
+asm("" :: "r"(cx));
         }
         if ((unsigned)(((ang - r) & 0xfff) - 0x500) > 0x900) return 1;
     case 0:
@@ -66,7 +55,7 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
     switch (kind) {
     case 0:
         if (ax < sabs(dx)) return 2;
-        s2 = dx * cy / cx;
+        s2 = dx * cy / (short)cx;
         break;
     case 1:
         if (ay < sabs(dy)) return 2;
@@ -109,15 +98,16 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
         }
     }
     if (o->category == 2 && o->type != 0) {
-        if (e->h->p.whole + s7 < o->h->p.whole) {
-            if (e->h->p.whole - -(s7 + 0xc) < o->h->p.whole) return 3;
-            o->h->p.whole = e->h->p.whole - -(s7 + 0xc);
+        Fix16 *oh = o->h;
+        if (e->h->p.whole + s7 < oh->p.whole) {
+            if (e->h->p.whole - -(s7 + 0xc) < oh->p.whole) return 3;
+            oh->p.whole = e->h->p.whole - -(s7 + 0xc);
             o->b9d = 3;
             if (ang < 0x800) o->d8c = ((ang + 0x800) & 0xfff) >> 4;
             else o->d8c = ang >> 4;
         } else {
-            if (o->h->p.whole < e->h->p.whole - -(s7 + -0xc)) return 3;
-            o->h->p.whole = e->h->p.whole - -(s7 + -0xc);
+            if (oh->p.whole < e->h->p.whole - -(s7 + -0xc)) return 3;
+            oh->p.whole = e->h->p.whole - -(s7 + -0xc);
             o->b9d = 2;
             if (ang >= 0x800) o->d8c = ((ang + 0x800) & 0xfff) >> 4;
             else o->d8c = ang >> 4;
@@ -144,4 +134,5 @@ int func_801278C0(TObj *o, TObj *e, unsigned char mode, int ang)
         else o->d8c = ang >> 4;
     }
     ay = q;
+asm("" : "=r"(cy) : "0"(cy));
 }

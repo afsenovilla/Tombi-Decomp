@@ -27,7 +27,6 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x004 | func_80125818 | 80125818 | 3148 | 159 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI, 787-instr form + 1 fake nop; left: near() s copy to v1 / result a0, case 10 dy in v1 |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 31 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17; left: o->f load reg, x+w temp reg, uv sched |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 294 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps; left: s1 var in s5, in-place v1 temps |
-| FAR | x001 | func_801278C0 | 801278C0 | 1820 | 72 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | rebuilt from 244A0 top; negated forms fix reassociation; left: s-reg permutation, box0 temp, abs(cy) test |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 14 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | SPAD.b1d2 block fixed (t bump + w=v global); left: v a1 vs game v1 in the a->wb0 block |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 314 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e pinned; left: regalloc of abs/k/fx/fy temps |
 | FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 232 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
