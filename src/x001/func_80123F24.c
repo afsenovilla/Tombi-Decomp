@@ -1,9 +1,9 @@
 // FUNC 80123f24 308 X001
 // MATCHING 80123f24 308
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern int D_1F800334;
 extern int ObjCullRegister(TObj *);
 extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
@@ -14,7 +14,7 @@ void func_80123F24(TObj *o)
     switch (o->b04) {
     case 0:
         if (GCD.bcdba == 0) {
-            volatile int *g = &D_1F800334;
+            volatile int *g = &SPAD.i334;
             int *q = (int *)*g;
             int v;
             q += 9;

@@ -1,10 +1,10 @@
 // FUNC 8013109c 604 X001
 // MATCHING 8013109c 604
+#include "spad.h"
 #include "gcd.h"
 /* size 604: the csv piece 801312E4 (20 B) is this function's epilogue. */
 #include "TOBJ.H"
 
-extern short D_1F80027E;
 extern void *D_8013E740[];
 extern void *D_8013E74C[];
 extern void *D_8013E750[];
@@ -16,7 +16,7 @@ extern void applyFrameVelocityXY(TObj *);
 static __inline__ int land(TObj *o)
 {
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        o->d84 = (-D_1F80027E << 2) & 0xff;
+        o->d84 = (-SPAD.s27e << 2) & 0xff;
         return 1;
     }
     return 0;

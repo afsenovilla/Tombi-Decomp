@@ -1,11 +1,11 @@
 // FUNC 801200ec 1008 X001
 // MATCHING 801200ec 1008
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009D084, D_800A4555[];
 extern unsigned char D_8009D084x[]; /* debt: second name, keeps the load after the b68 store */
-extern char *D_1F800334;
 extern char *D_1F800334x[]; /* debt: second name, the game loads the pointer twice */
 extern int ObjCullRegister(TObj *);
 extern TObj *ObjAlloc(void);
@@ -29,7 +29,7 @@ void func_801200EC(TObj *o)
             o->active = 1;
             o->b68 = 0;
             if (D_8009D084x[0] || ((unsigned char*)&GCD.bcdf1)[0] == 0xff) {
-                o->da0 = (int)D_1F800334x[0] + *(int *)(D_1F800334 + 0x34);
+                o->da0 = (int)D_1F800334x[0] + *(int *)((*(char **)&SPAD.i334) + 0x34);
             }
             break;
         case 1:
@@ -63,7 +63,7 @@ void func_801200EC(TObj *o)
             if (o->b68 == 0) break;
             setEventStarted(0x18, 0, 1);
             D_8009D084 = 1;
-            o->da0 = (int)D_1F800334x[0] + *(int *)(D_1F800334 + 0x34);
+            o->da0 = (int)D_1F800334x[0] + *(int *)((*(char **)&SPAD.i334) + 0x34);
             e = ObjAlloc();
             if (e != 0) {
                 e->type = 0x3d;

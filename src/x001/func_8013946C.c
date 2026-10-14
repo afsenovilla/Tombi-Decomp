@@ -1,11 +1,10 @@
 // FUNC 8013946c 772 X001
 // MATCHING 8013946c 772
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void *D_8013FA90[];
 extern void *D_8013FAB8[], *D_8013FABC[];
 extern void AnimLoadDuration(TObj *);
@@ -24,7 +23,7 @@ void func_8013946C(TObj *o)
         }
         break;
     case 1:
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0) {
             short w = o->wac + 4;
             o->wac = w;
             o->anim = D_8013FA90[w];
@@ -32,7 +31,7 @@ void func_8013946C(TObj *o)
         }
         break;
     case 2:
-        if (((D_1F8001F8 + D_1F800198) & 3) == 0) {
+        if (((SPAD.s1f8 + SPAD.i198) & 3) == 0) {
             if (++o->timer >= 0x10) {
                 o->step++;
                 switch (o->wac) {

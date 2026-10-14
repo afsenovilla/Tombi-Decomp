@@ -1,10 +1,10 @@
 // FUNC 80121a10 328 X001
 // MATCHING 80121a10 328
+#include "gv2.h"
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj o; char pc0[6]; unsigned char bc6; } PL;
 extern TObj *D_8009C330;
-extern unsigned char D_8009D2B0;
 extern unsigned int D_8009C984[];
 extern volatile unsigned short D_8009D670[];
 extern void FUN_800efa80(PL *);
@@ -25,7 +25,7 @@ void func_80121A10(PL *o)
         }
     }
     if (SPAD.s1fc & SPAD.s3c6) {
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         playSFX(0x3e);
         FUN_800eae0c(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
         FUN_800eae0c(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);

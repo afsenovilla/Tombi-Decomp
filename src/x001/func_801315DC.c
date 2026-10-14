@@ -1,10 +1,10 @@
 // FUNC 801315dc 808 X001
 // MATCHING 801315dc 808
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 extern void **D_8013C97C[];
 extern void *D_8013E674, *D_8013E680;
-extern int D_1F8002D4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -23,7 +23,7 @@ void func_801315DC(TObj *o)
         o->w1e = 8;
         o->b0d = 0x80;
         o->anim = D_8013C97C[o->subtype][0];
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->box0 = 0xb;
         o->box1 = 0x16;
         o->box2 = 0x10;
@@ -56,7 +56,7 @@ void func_801315DC(TObj *o)
             n->w1e = 7;
             n->b0d = 0;
             n->anim = D_8013C97C[n->subtype][0];
-            n->d3c = D_1F8002D4[0];
+            n->d3c = ((int*)&SPAD.i2d4)[0];
             n->box0 = 0xb;
             n->box1 = 0x16;
             n->box2 = 0x10;

@@ -1,13 +1,10 @@
 // FUNC 80119874 604 X001
 // MATCHING 80119874 604
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char D_1F8001CC;
-extern unsigned char D_1F8001CD;
-extern short D_1F8001C6;
-extern int D_1F8002D4;
 extern void *D_8013E548;
 extern char LAB_8001d6a4[];
 extern void AnimLoadDuration(TObj *);
@@ -30,7 +27,7 @@ void func_80119874(TObj *o)
         o->b04++;
         *(short *)((char *)o + 0x1e) = 7;
         o->b0d = 0;
-        d = D_1F8002D4;
+        d = SPAD.i2d4;
         a = D_8013E548;
         *(signed char *)&o->b0f = -12;
         o->d3c = d;
@@ -66,9 +63,9 @@ void func_80119874(TObj *o)
             break;
         case 4:
             if (GAME.fadeScreenControl == 1) {
-                D_1F8001CC = 1;
-                D_1F8001CD = 9;
-                D_1F8001C6 = 2;
+                SPAD.b1cc = 1;
+                SPAD.b1cd = 9;
+                SPAD.s1c6 = 2;
                 MusicStopOrFadeIn(0);
                 ThreadCreate(1, LAB_8001d6a4);
                 o->step++;

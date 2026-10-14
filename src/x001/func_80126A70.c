@@ -1,11 +1,11 @@
 // FUNC 80126a70 300 X001
 // MATCHING 80126a70 300
+#include "spad.h"
 #include "gcd.h"
 #define U8(p, o) (*(unsigned char *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
 extern unsigned char DAT_1f8001a4;
-extern short D_1F80019E;
 extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void setEventStarted(int, int, int);
 extern void decreaseObjectTimer(unsigned char *, int);
@@ -41,5 +41,5 @@ void func_80126A70(unsigned char *a, unsigned char *b)
     a[6] = 0;
     U8(a, 0xd1) = 1;
     decreaseObjectTimer(a, 1);
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

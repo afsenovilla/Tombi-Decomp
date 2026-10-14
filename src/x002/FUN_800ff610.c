@@ -1,5 +1,6 @@
 // FUNC 800ff610 2228 X002
 // MATCHING 800ff610 2228
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -9,7 +10,6 @@ typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short 
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned char D_1F8001A4;
 extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
 extern void func_800FF0E8(TObj *);
@@ -200,7 +200,7 @@ void FUN_800ff610(TObj *o, int arg)
     }
     if (o->active == 1 && arg != 0) {
         decreaseObjectTimer(o, func_800FF404(o));
-        if (D_1F8001A4 == 0 && o->w9a != o->w98) {
+        if (SPAD.b1a4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
             D_8009C970 = o->w98;

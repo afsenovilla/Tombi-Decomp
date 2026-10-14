@@ -1,9 +1,9 @@
 // FUNC 80119bf4 760 X001
 // MATCHING 80119bf4 760
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[];
 extern void *D_8013E540[];
 extern unsigned short D_1F80016E[];
 extern unsigned short D_1F800172[];
@@ -23,7 +23,7 @@ void func_80119BF4(TObj *o)
         o->b04++;
         o->w1e = 10;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_8013E540[0];
         o->d30 = o->h->p.whole;
         o->d34 = o->y.p.whole;

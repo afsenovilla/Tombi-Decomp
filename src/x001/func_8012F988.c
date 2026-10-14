@@ -1,10 +1,10 @@
 // FUNC 8012f988 1476 X001
 // MATCHING 8012f988 1476
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_1F80027E;
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern short D_800A45AC[];
@@ -41,7 +41,7 @@ void func_8012F988(TObj *o)
         case 0:
             o->y.p.whole += 4;
             if (FUN_80040278(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) {
-                o->d8c = (-D_1F80027E << 6) & 0xfc0;
+                o->d8c = (-SPAD.s27e << 6) & 0xfc0;
                 o->step++;
             }
             break;
@@ -52,7 +52,7 @@ void func_8012F988(TObj *o)
             }
             o->y.p.whole += 2;
             func_8004065C(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
-            if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) o->d8c = (-D_1F80027E << 6) & 0xfc0;
+            if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) o->d8c = (-SPAD.s27e << 6) & 0xfc0;
             if (o->h->p.whole >= 0x2d0) break;
             FUN_80020aec(*(unsigned short *)&o->wb4);
             o->type = 0xc;
@@ -81,7 +81,7 @@ void func_8012F988(TObj *o)
                 o->step++;
                 break;
             }
-            o->d8c = (-D_1F80027E << 6) & 0xfc0;
+            o->d8c = (-SPAD.s27e << 6) & 0xfc0;
             break;
         case 3:
             if (o->d8c == 0x200) o->step++;

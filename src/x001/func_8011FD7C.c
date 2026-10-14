@@ -1,12 +1,10 @@
 // FUNC 8011fd7c 576 X001
 // MATCHING 8011fd7c 576
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3;
-extern int D_1F8002D4[];
-extern unsigned short D_1F8001F8;
-extern int D_1F800198;
 extern void *D_8013E5CC[];
 extern char D_8013C760[];
 void ObjCullRegister(TObj *o);
@@ -25,7 +23,7 @@ void func_8011FD7C(TObj *o)
         o->b04++;
         o->w1e = 0xb;
         o->b0d = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = D_8013E5CC[o->subtype];
         o->box0 = 0x10;
         o->box1 = 0x1c;
@@ -52,7 +50,7 @@ void func_8011FD7C(TObj *o)
         case 1:
             if (--o->timer == -1) {
                 o->step++;
-            } else if ((D_1F8001F8 + D_1F800198) & 1) {
+            } else if ((SPAD.s1f8 + SPAD.i198) & 1) {
                 ObjCullRegister(o);
             }
             break;

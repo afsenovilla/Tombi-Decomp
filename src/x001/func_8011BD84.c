@@ -1,10 +1,9 @@
 // FUNC 8011bd84 980 X001
 // MATCHING 8011bd84 980
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F80016E;
-extern unsigned short D_1F80016A;
 extern int ObjCullRegister(TObj *);
 extern void func_8011BC6C(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -29,8 +28,8 @@ void func_8011BD84(TObj *o)
                     o->state = 3;
                     break;
                 }
-                if (D_1F80016E < -0x140) break;
-                if ((unsigned short)(o->h->p.whole - D_1F80016A + 0x40) < 0x80) o->state++;
+                if ((*(short*)((char*)&SPAD.i16c + 2)) < -0x140) break;
+                if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x40) < 0x80) o->state++;
                 break;
             case 1:
                 o->d88 = (o->d88 - 0x10) & 0xfff;
