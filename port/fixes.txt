@@ -1,0 +1,14 @@
+# Port-only source fixes, applied by port/tools/gen_port.py to the filtered copy (src/ is never modified).
+# Format: <src path> | <exact text> | <replacement>      (every occurrence in that file; '#' starts a comment line)
+#
+# Calls that rely on MIPS argument registers still holding a value (port/tools/arity_check.py lists them):
+src/initLighting.c | extern void applyLighting(void); | extern void applyLighting();
+src/initLighting.c | applyLighting(); | applyLighting(o);
+#
+# BIOS kernel memory (below 0x10000, which a Linux process cannot map): the thread control block table
+src/initTasks.c | int r = *(int *)0x110; | int r = (int)port_bios_tcb_table();
+#
+# startTask(i, fn): the matching C declares one parameter; fn reaches setTaskEntry in $a1 untouched
+src/startTask.c | extern void setTaskEntry(void *); | extern void setTaskEntry(void *, int);
+src/startTask.c | void startTask(int i) | void startTask(int i, int fn)
+src/startTask.c | setTaskEntry((void *)(k + 0x801fd80c)); | setTaskEntry((void *)(k + 0x801fd80c), fn);
