@@ -20,6 +20,6 @@
 <text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.00 %</text>
 <text x="28" y="256" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="242" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="242" width="70.5" height="18" rx="9" fill="#22c55e"/>
-<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">15.7 %</text>
+<rect x="330" y="242" width="121.0" height="18" rx="9" fill="#22c55e"/>
+<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">26.9 %</text>
 </svg>
