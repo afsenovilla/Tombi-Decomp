@@ -8,7 +8,7 @@ extern int DAT_8009c984[];
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
 extern char D_80010748[];
 extern void FUN_8001e4f0(int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_800eae0c(int, short, int, int);
 extern void func_80110CAC(TObj *);
 extern void FUN_800ee9cc(TObj *);
@@ -23,7 +23,7 @@ void func_80121B58(TObj *o)
     switch (o->state) {
     case 0:
         FUN_8001e4f0(0x3e);
-        FUN_80025f40(0, 0, 0xff, 0x14);
+        startPadVibration(0, 0, 0xff, 0x14);
         FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
         o->state++;
     case 1:

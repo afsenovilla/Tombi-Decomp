@@ -11,7 +11,7 @@ typedef struct {
 } TObjE;
 extern short FUN_8001fe0c(int, int);
 extern short FUN_8001fe3c(int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern short FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
@@ -67,7 +67,7 @@ void FUN_80119988(TObjE *e)
             if (e->c4 != 0) e->c4 -= 2;
             if (--e->cc == 0) o->step++;
             if ((SPAD.s1f8 & 7) == 0)
-                FUN_80025f40(0, 0, 0xe0, 4);
+                startPadVibration(0, 0, 0xe0, 4);
             break;
         case 2:
             o->d30 += ((e->d0 << 16) - o->d30) >> 5;
@@ -89,7 +89,7 @@ void FUN_80119988(TObjE *e)
             if (e->c2 < e->c8) e->c2 += 2;
             if (e->c4 < e->ca) e->c4 += 4;
             if (--e->cc == 0) {
-                FUN_80025f40(0, 1, 0xff, 0x14);
+                startPadVibration(0, 1, 0xff, 0x14);
                 e->c0 = 0;
                 e->c2 = 0;
                 e->c4 = 0;
@@ -100,11 +100,11 @@ void FUN_80119988(TObjE *e)
         common:
             D_800A6048 = *(struct V3 *)&o->a;
             if ((SPAD.s1f8 & 7) == 0)
-                FUN_80025f40(0, 0, 0xd0, 4);
+                startPadVibration(0, 0, 0xd0, 4);
             break;
         case 4:
             if (D_800A607C->p.whole > 0) {
-                FUN_80025f40(0, 1, 0xff, 0x14);
+                startPadVibration(0, 1, 0xff, 0x14);
                 D_800A607C->p.whole -= 4;
             } else {
                 if (o->subtype == 0)

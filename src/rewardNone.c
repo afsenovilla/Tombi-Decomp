@@ -399,7 +399,7 @@ asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 void rewardNone(GameObject* arg0)
 {
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     arg0->state++;
 }

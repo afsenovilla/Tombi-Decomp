@@ -9,8 +9,8 @@ typedef struct {
     unsigned char flag;
 } SpawnDesc;
 
-extern int FUN_80020b64(int);
-extern void FUN_80020c04(int);
+extern int testSectionFlagBit(int);
+extern void setSectionFlagBit(int);
 extern void FUN_8003e300(int, int, int);
 extern void FUN_8003e33c(int, int, int);
 extern void spawnItemAtPos(int, int, int, int, int);
@@ -23,7 +23,7 @@ extern void FUN_8001e4f0(int);
 
 void applyItemEffect(SpawnDesc *d, int arg, short x, short y, int flag)
 {
-    if (FUN_80020b64(d->id) == 0) {
+    if (testSectionFlagBit(d->id) == 0) {
         switch (d->kind) {
         case 0: FUN_8003e300(d->a, d->b, arg); break;
         case 1: FUN_8003e33c(d->a, d->b, arg); break;
@@ -34,7 +34,7 @@ void applyItemEffect(SpawnDesc *d, int arg, short x, short y, int flag)
         case 6: FUN_80123e50(arg, d->id, x, y); break;
         case 8: FUN_8003e4b0(d->a, d->b, arg); break;
         }
-        if (flag) FUN_80020c04(d->id);
+        if (flag) setSectionFlagBit(d->id);
         if (d->flag == 0) FUN_8001e4f0(0x15);
     }
 }

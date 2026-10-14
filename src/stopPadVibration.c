@@ -9,7 +9,7 @@ extern int PadSetAct(int, unsigned char *, int);
 extern int PadGetState(int);
 extern void PadSetActAlign(int, signed char *);
 
-void func_800261B0(void)
+void stopPadVibration(void)
 {
     signed char align[6] = {0, 1, 0xff, 0xff, 0xff, 0xff};
     D_8009D614 = 0;

@@ -11,7 +11,7 @@ extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern void AnimAdvance(TObj *);
-extern void FUN_80020c04(int);
+extern void setSectionFlagBit(int);
 extern void freeObjectLayer5(TObj *);
 
 void func_8003E960(TObj *o)
@@ -78,7 +78,7 @@ void func_8003E960(TObj *o)
         break;
     case 2:
         if (o->b0c & 0x80) {
-            FUN_80020c04(o->b6b);
+            setSectionFlagBit(o->b6b);
             o->b0c &= 0x7f;
         }
         D_8007A890[D_8007A7F0[o->subtype]](o);

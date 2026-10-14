@@ -13,7 +13,7 @@ extern void FUN_801073c0(TObj *);
 extern void FUN_801102b4(TObj *);
 extern void FUN_800ee9cc(TObj *);
 extern void FUN_800f00ac(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_800eae0c(int, int, int, int);
 extern void applyFrameVelocityX(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -96,7 +96,7 @@ void FUN_801075d8(TObj *o)
             o->d8c = (-o->wb0 << 2) & 0xff;
         }
         if (o->ba4) {
-            if ((D_1F8001F8 & 3) == 0) FUN_80025f40(0, 0, 0xff, 2);
+            if ((D_1F8001F8 & 3) == 0) startPadVibration(0, 0, 0xff, 2);
             if ((D_1F8001F8 & 0xf) == 0) FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
         }
         break;

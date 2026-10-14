@@ -402,7 +402,7 @@ void rewardAnimalDash(GameObject* arg0)
     GAME.area00_eventControl |= 0x40;
     playSFX(10);
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     GAME.unk6ad = 1;
     GAME.unk736 = 1;

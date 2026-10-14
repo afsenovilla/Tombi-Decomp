@@ -11,7 +11,7 @@ extern unsigned char DAT_8009d616;
 extern unsigned char DAT_8009d617;
 extern void PadSetAct(unsigned char, void *, int, int);
 
-void FUN_80025f40(int a, int b, int c, int d)
+void startPadVibration(int a, int b, int c, int d)
 {
     B buf;
     char *p;

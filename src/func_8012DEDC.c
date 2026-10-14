@@ -6,7 +6,7 @@ typedef struct {
     unsigned short w6c, w6e, w70, w72;
 } O;
 extern int G2d4[], T4d94;
-extern void FUN_8001fe6c(O *), FUN_800202b4(O *), FUN_8012dcfc(O *), FUN_8012d9fc(O *), FUN_8001fec0(O *), FUN_80020aec(int), freeObjectLayer2(O *);
+extern void FUN_8001fe6c(O *), FUN_800202b4(O *), FUN_8012dcfc(O *), FUN_8012d9fc(O *), FUN_8001fec0(O *), setAreaFlagBit(int), freeObjectLayer2(O *);
 extern int FUN_800203dc(O *);
 extern void FUN_80026c50(int, int, int);
 
@@ -56,7 +56,7 @@ void func_8012DEDC(O *o)
                 break;
             case 2:
                 FUN_80026c50(0, 1, 1);
-                FUN_80020aec(o->b6b);
+                setAreaFlagBit(o->b6b);
                 o->st = 3;
                 break;
             }

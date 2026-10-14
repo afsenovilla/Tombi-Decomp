@@ -42,7 +42,7 @@ void titleSequenceTask(void)
     while(true) {
         *(u16* )0x1F8001F8 = *(u16* )(D_1F8000F8+0x100) + 1;
         asm("");
-        func_8001F850();
+        updatePadInput();
         task = CURRENT_TASK;
         state = task->state0;
         if ((state >= 3U) && (JOYPAD_STATE & (JOY_CROSS | JOY_START)) && (state != 4)) {

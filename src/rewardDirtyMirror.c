@@ -402,7 +402,7 @@ void rewardDirtyMirror(GameObject* arg0)
     addItemToInventory(ITEM_DIRTYMIRROR, 1, true);
     setEventStarted(EVENT_AMAGICMIRROR, 0, 0);
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     arg0->state++;
 }

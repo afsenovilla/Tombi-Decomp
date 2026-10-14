@@ -16,7 +16,7 @@ extern void func_800FF0E8(TObj *);
 extern short func_800FF404();
 extern void decreaseObjectTimer(TObj *, unsigned char);
 extern void FUN_8001e5f4(int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_8001f110(int);
 extern int playJingle(int);
 extern void FUN_8001fe94(TObj *, int);
@@ -212,7 +212,7 @@ void FUN_800ff610(TObj *o, int arg)
             }
         }
     }
-    FUN_80025f40(0, 0x81, 0x81, 0x3c);
+    startPadVibration(0, 0x81, 0x81, 0x3c);
     o->active = 3;
     U8(o, 0xc7) = 1;
     U8(o, 0xcd) = 0;

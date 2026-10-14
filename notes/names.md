@@ -57,3 +57,16 @@ One line per name: `address name (old file) - justification`.
 - `8002757c computeCameraMatrix` (was FUN_8002757c) - builds camera matrix from base, RotMatrixY/X of angles and translates by negated camera position
 - `80037c80 uploadSpriteFrameToVram` (was FUN_80037c80) - unpackSpriteFrame to 801fb000, clears a VRAM strip, loadTIM into the per-buffer column
 - `800387e0 scriptOpUnaryVar` (was FUN_800387e0) - script ops 0x18-0x1b: inc/dec/not/neg a script var and set cmpFlag by sign
+- `8001f850 updatePadInput` (was FUN_8001f850) - reads pad port 0 via readPadPort, computes pressed (1f8001fc) and released (1f8001fe) edges, then updates vibration
+- `80026000 updatePadVibration` (was FUN_80026000) - per-frame actuator state machine: PadSetAct/PadSetActAlign by state and counts down the rumble timer
+- `80025f40 startPadVibration` (was FUN_80025f40) - if a vibration pad is present and idle, stores strength and duration and calls PadSetAct
+- `800261b0 stopPadVibration` (was func_800261B0) - clears actuator bytes, PadSetAct(0) and re-aligns the actuators
+- `80025b98 setAnalogPadMode` (was FUN_80025b98) - when pad 0 reports type 7 (analog), PadSetMainMode(0, 1, 0)
+- `80020aec setAreaFlagBit` (was FUN_80020aec) - sets bit n in the per-area flag bitset of the current area (areas 0x10/0x11 share 7/0xc)
+- `80020a78 testAreaFlagBit` (was func_80020A78) - tests bit n in the per-area flag bitset; same area remap as setAreaFlagBit
+- `80020c04 setSectionFlagBit` (was FUN_80020c04) - sets bit n in the flag bitset of the current section (index = sum of section counts of earlier areas + section)
+- `80020b64 testSectionFlagBit` (was func_80020B64) - tests bit n in the current section's flag bitset; pair of setSectionFlagBit
+- `8003511c getDistanceToPlayer` (was func_8003511C) - csqrt of squared x/y deltas between object and player
+- `80038514 scriptOpLoopVar` (was func_80038514) - script op: decrement var, jump to 16-bit target while it stays positive, else skip 4 bytes
+- `800386f4 scriptOpCompareVar` (was func_800386F4) - script op: compares a var with a var or a 32-bit immediate and sets cmpFlag (0 eq, 1 lt, 2 gt)
+- `8003aedc scriptOpHealPlayer` (was func_8003AEDC) - script op: adds arg to player health up to the displayed max; arg0 = 1 if already full

@@ -6,7 +6,7 @@ extern unsigned char D_8009F085, D_8009F086, D_8009F087;
 extern int D_8009F7E4;
 extern short D_8009F838;
 void initLighting(void *p);
-void FUN_8001f850(void);
+void updatePadInput(void);
 void gameInitState(void);
 void gameStateDispatcher(void);
 void FUN_80019b0c(void);
@@ -35,7 +35,7 @@ void func_800198B4(void)
     initLighting(((unsigned char*)&SPAD.b118));
     *(short *)0x1F8001FC = 0;
     for (;;) {
-        FUN_8001f850();
+        updatePadInput();
         switch (*(unsigned short *)(*(unsigned char **)0x1F8001D4 + 0x48)) {
         case 0: gameInitState(); break;
         case 1: gameStateDispatcher(); break;

@@ -28,7 +28,7 @@ typedef struct {
 } O;
 
 extern void playSFX(int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 
 void func_80118810(O *o)
 {
@@ -77,7 +77,7 @@ void func_80118810(O *o)
         }
         break;
     case 1:
-        if (o->sub.b != 0) FUN_80025f40(0, 0, 0x60, 5);
+        if (o->sub.b != 0) startPadVibration(0, 0, 0x60, 5);
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u + 6;
@@ -91,7 +91,7 @@ void func_80118810(O *o)
         }
         break;
     case 2:
-        if (o->sub.b != 0) FUN_80025f40(0, 0, 0x48, 5);
+        if (o->sub.b != 0) startPadVibration(0, 0, 0x48, 5);
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u + 4;
@@ -105,7 +105,7 @@ void func_80118810(O *o)
         }
         break;
     case 3:
-        if (o->sub.b != 0) FUN_80025f40(0, 0, 0x70, 5);
+        if (o->sub.b != 0) startPadVibration(0, 0, 0x70, 5);
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x100) o->sub.b = u + 4;

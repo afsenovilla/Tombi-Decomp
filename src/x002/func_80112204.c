@@ -9,7 +9,7 @@ extern unsigned short D_8009C960h;
 extern int *D_80115A08[];
 extern int *D_80115948[];
 extern int ObjCullRegister(TObj *o);
-extern void FUN_80020c04(int n);
+extern void setSectionFlagBit(int n);
 extern void spawnItemFromEntry(char *a, Fix16 *v, int b, int c, TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern void despawnObjectOffscreen(TObj *o);
@@ -34,7 +34,7 @@ void func_80112204(TObj *o)
         ((unsigned short*)&PLAYER.obj.y.p.whole)[0] += dy;
         break;
     case 1:
-        FUN_80020c04(o->b6b);
+        setSectionFlagBit(o->b6b);
         v[0].p.whole = o->h->p.whole;
         v[1].p.whole = o->y.p.whole;
         v[2].p.whole = o->d->p.whole;
@@ -79,7 +79,7 @@ void func_80112204(TObj *o)
         break;
     case 5:
         FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-        FUN_80020c04(o->b6b);
+        setSectionFlagBit(o->b6b);
         o->b04++;
         break;
     case 7:

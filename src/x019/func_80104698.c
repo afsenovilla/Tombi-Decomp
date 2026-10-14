@@ -14,7 +14,7 @@ extern S *D_8009D2E8;
 extern void ObjCheckHeadCollision(S *);
 extern void FUN_8001f96c(int, int, int, int);
 extern void PlayerSetAnimIfChanged(S *, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void func_80102AC0(S *), func_80102F40(S *), func_801040D0(S *), func_801037D8(S *), func_80103290(S *);
 extern void FUN_80103d40(S *), FUN_80122a18(S *), FUN_80104454(S *);
 void func_80104698(S *o)
@@ -75,7 +75,7 @@ void func_80104698(S *o)
         }
         PlayerSetAnimIfChanged(o, 0xd);
         o->substep = 0;
-        FUN_80025f40(0, 0, 0xff, 4);
+        startPadVibration(0, 0, 0xff, 4);
         o->state++;
     } else {
         switch (D_8009D2E8->type) {

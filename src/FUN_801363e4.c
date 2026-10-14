@@ -25,7 +25,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_800eb50c(int, int, int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void applyItemEffect(char *, Fix16 *, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_80026c50(int, int, int);
@@ -123,7 +123,7 @@ void FUN_801363e4(TObj *o)
                 o->state++;
                 break;
             case 3:
-                if (*DAT_800a605c == 0x3d) FUN_80025f40(0, 0, 0xff, 4);
+                if (*DAT_800a605c == 0x3d) startPadVibration(0, 0, 0xff, 4);
                 if (--o->w08 != 0) return;
                 DAT_800a60c8->b04 = 3;
                 DAT_8009cebf[0]++;

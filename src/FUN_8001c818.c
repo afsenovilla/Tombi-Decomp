@@ -4,7 +4,7 @@ typedef struct Th { char pad[0x48]; short a, b; unsigned short c; short d; char 
 extern Th *TASK_C;
 extern char LOAD_COMPLETE_SYM, DAT_1f8001d0;
 extern unsigned short DAT_1f8001fc;
-extern void FUN_800261b0(void);
+extern void stopPadVibration(void);
 extern void MusicStopOrFadeIn(int);
 extern void SoundStopAll(void);
 extern void queueSystemLoadList(int, int);
@@ -21,7 +21,7 @@ void FUN_8001c818(void)
     Th *w;
     switch (t->c) {
     case 0:
-        FUN_800261b0();
+        stopPadVibration();
         MusicStopOrFadeIn(0);
         u = TASK_C;
         u->e = 0xf0;

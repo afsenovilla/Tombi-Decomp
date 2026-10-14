@@ -2,7 +2,7 @@
 // MATCHING 80020c04 172
 extern unsigned short n1, n2;
 extern unsigned short tabw[];
-void FUN_80020c04(int p)
+void setSectionFlagBit(int p)
 {
     char pad;
     int i, s = 0, r;

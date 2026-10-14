@@ -401,7 +401,7 @@ void rewardMysteriousMushroom(GameObject* arg0)
     setEventComplete(EVENT_THEMISTERIOUSMUSHROOM, 0);
     addItemToInventory(arg0->item_id, 1, true);
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     arg0->state++;
 }

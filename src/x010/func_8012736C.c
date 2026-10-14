@@ -34,7 +34,7 @@ extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void ObjSetFacingToPlayer(TObj *);
 extern void FUN_800eea7c(TObj *, int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void func_801271D8(TObj *, int);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *showMessageBoxDirect(int, int, void *);
@@ -73,7 +73,7 @@ void func_8012736C(TObj *o)
         }
         break;
     case 2:
-        if (*D_800A605C == 0x3d) FUN_80025f40(0, 0, 0xff, 4);
+        if (*D_800A605C == 0x3d) startPadVibration(0, 0, 0xff, 4);
         if (--o->timer == -1) {
             hv = D_1F800168A[0];
             o->velH = (hv - o->h->raw) >> 15;

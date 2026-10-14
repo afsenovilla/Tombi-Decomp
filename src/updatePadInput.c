@@ -7,14 +7,14 @@ extern volatile unsigned short DAT_8009d676;
 extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8001fe;
 extern unsigned short readPadPort(int);
-extern void FUN_80026000(void);
+extern void updatePadVibration(void);
 
-void FUN_8001f850(void)
+void updatePadInput(void)
 {
     DAT_8009d674 = DAT_8009d670[0];
     DAT_8009d676 = DAT_8009d672;
     DAT_8009d670[0] = readPadPort(0);
     DAT_1f8001fc = ~DAT_8009d674 & DAT_8009d670[0];
     DAT_1f8001fe = ~DAT_8009d670[0] & DAT_8009d674;
-    FUN_80026000();
+    updatePadVibration();
 }

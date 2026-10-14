@@ -413,7 +413,7 @@ void rewardCrystalBalls(GameObject* arg0)
             break;
     }
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     arg0->state++;
 }

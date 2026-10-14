@@ -3,7 +3,7 @@
 extern unsigned short DAT_8009c960;
 extern unsigned int DAT_8009c994[][8];
 
-void FUN_80020aec(int bit)
+void setAreaFlagBit(int bit)
 {
     int w, b;
     unsigned int k;

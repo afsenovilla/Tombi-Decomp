@@ -23,7 +23,7 @@ extern void applyFrameVelocityXY(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void setEventStarted(int, int, int);
 extern void addItemToInventory(int, int, int);
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern void freeObjectLayer2(TObj *);
 
 void FUN_8012d294(TObj *o)
@@ -173,7 +173,7 @@ void FUN_8012d294(TObj *o)
         case 2:
             setEventStarted(0xa7, 0, 1);
             addItemToInventory(0x23, 1, 1);
-            FUN_80020aec(o->b6b);
+            setAreaFlagBit(o->b6b);
             o->b04 = 3;
             break;
         }

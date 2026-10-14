@@ -5,7 +5,7 @@ typedef struct { unsigned short a; unsigned short pad[0x118]; unsigned short bit
 extern unsigned short D_80078790[];
 extern S D_8009C962;
 
-int func_80020B64(int n)
+int testSectionFlagBit(int n)
 {
     int i;
     int s = 0;

@@ -14,7 +14,7 @@ static __inline__ int rd(unsigned char *g, unsigned char c, unsigned char *t)
     return tmp;
 }
 
-void func_800386F4(unsigned char m)
+void scriptOpCompareVar(unsigned char m)
 {
     ScriptCtx *o = SCRIPT_CTX;
     unsigned char *code = SCRIPT_CODE;

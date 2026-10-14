@@ -11,7 +11,7 @@ extern E4d ***DAT_8007b908[];
 extern unsigned short DAT_8009c960, DAT_8009c962;
 extern short DAT_80078790[];
 extern void FUN_8004cb00(E4d *e, int k);
-extern int FUN_80020a78(int k);
+extern int testAreaFlagBit(int k);
 
 void FUN_8004d260(void)
 {
@@ -26,7 +26,7 @@ void FUN_8004d260(void)
         n = 15;
     for (e = *t[n]; e->type < 0xff; e++) {
         k = e->f >> 2;
-        if (FUN_80020a78(k) == 0) {
+        if (testAreaFlagBit(k) == 0) {
             if (e->a == DAT_8009c962 || e->a == ~DAT_8009c962)
                 FUN_8004cb00(e, k);
         }

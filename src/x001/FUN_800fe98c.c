@@ -26,7 +26,7 @@ extern void playJingle(int);
 extern void FUN_8001f96c(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern int AnimAdvance(TObj *);
 extern int FUN_8003facc(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
@@ -133,7 +133,7 @@ void FUN_800fe98c(TObj *o)
         }
         D_8009C330->b8 = GVARS.b38;
         FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-        FUN_80025f40(0, 0x81, 0x81, 0x3c);
+        startPadVibration(0, 0x81, 0x81, 0x3c);
         break;
     case 2:
         move(o);

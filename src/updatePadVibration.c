@@ -13,7 +13,7 @@ extern void PadSetAct();
 extern int PadGetState(int);
 extern void PadSetActAlign(int, void *);
 
-void FUN_80026000(void)
+void updatePadVibration(void)
 {
     B buf;
     char *p;

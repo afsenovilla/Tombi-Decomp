@@ -11,7 +11,7 @@ void ObjCullRegister(TObj *o);
 void func_80118998(short x, short y, short z);
 void FUN_8002ee50(int a, int x, int y, int z);
 void applyItemEffect(char *, V3 *, int, int, int);
-void FUN_80020aec(int a);
+void setAreaFlagBit(int a);
 void ObjFreeDup(TObj *o);
 
 void func_8011FD7C(TObj *o)
@@ -57,8 +57,8 @@ void func_8011FD7C(TObj *o)
         case 2:
             o->b04 = 3;
             ((TObj *)o->d94)->b04 = 3;
-            FUN_80020aec(o->b6b);
-            FUN_80020aec(((TObj *)o->d94)->b6b);
+            setAreaFlagBit(o->b6b);
+            setAreaFlagBit(((TObj *)o->d94)->b6b);
             break;
         }
         break;

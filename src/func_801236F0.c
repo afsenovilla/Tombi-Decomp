@@ -8,7 +8,7 @@
 
 extern void initItemObject(TObj *);
 extern void freeObjectLayer5(TObj *);
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -83,7 +83,7 @@ void func_801236F0(TObj *o)
             break;
         case 1:
             ObjCullRegister(o);
-            FUN_80020aec(o->b6b);
+            setAreaFlagBit(o->b6b);
             break;
         }
         break;

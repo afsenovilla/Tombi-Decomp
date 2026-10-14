@@ -5,7 +5,7 @@ extern unsigned short DAT_1f8003da;
 extern int PadInfoMode(int, int, int);
 extern void PadSetMainMode(int, int, int);
 
-void FUN_80025b98(void)
+void setAnalogPadMode(void)
 {
     if (DAT_8009f7f0 == 0 && PadInfoMode(0, 2, 0) != 0 && DAT_1f8003da == 7)
         PadSetMainMode(0, 1, 0);

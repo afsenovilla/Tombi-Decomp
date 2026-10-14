@@ -38,7 +38,7 @@ extern int Rand(void);
 extern int rsin(int);
 extern int rcos(int);
 extern void AnimLoadDuration(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void func_801183F0(TObj *);
 extern void func_801184F0(TObj *);
 extern void func_80118810(TObj *);
@@ -265,7 +265,7 @@ void func_801198F0(TObj *o)
             o->b69 = 0;
         }
         if (r) {
-            FUN_80025f40(0, 0, 0xe0, 5);
+            startPadVibration(0, 0, 0xe0, 5);
             p->anim = D_801229A8[0];
             AnimLoadDuration(p);
             o->b9c = 0;

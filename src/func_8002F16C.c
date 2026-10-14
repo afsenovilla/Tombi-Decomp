@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern char *PTR_80079d58[];
 extern unsigned short DAT_1f8001f8;
 extern unsigned char DAT_800a6039, DAT_800a6047;
@@ -33,7 +33,7 @@ void func_8002F16C(TObj *o)
         return;
     }
     if (o->b0c == 0 && (DAT_1f8001f8 & 3) == 0)
-        FUN_80025f40(0, 0, 0xff, 2);
+        startPadVibration(0, 0, 0xff, 2);
     AnimAdvance(o);
     o->timer = o->timer - 1;
     o->visible = DAT_800a6039;

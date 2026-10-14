@@ -10,7 +10,7 @@ extern TObj PLAYER;
 extern P *D_800A6078, *D_800A607C;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern short MulCos(int, int);
 extern int MulNegSinScaled(int, int);
 
@@ -52,7 +52,7 @@ void func_8002F4E0(TObj *o)
         o->state++;
     case 1:
         if (o->b0c == 0 && (D_1F8001F8 & 3) == 0)
-            FUN_80025f40(0, 0, 0xff, 2);
+            startPadVibration(0, 0, 0xff, 2);
         o->timer--;
         o->visible = PLAYER.visible;
         if (o->timer >= 0x3d) {

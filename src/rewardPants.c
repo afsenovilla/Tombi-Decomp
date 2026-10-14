@@ -407,7 +407,7 @@ void rewardPants(GameObject* arg0)
     }
     playSFX(10);
     if (!(arg0->unkC & 0x80)) {
-        func_80020AEC(arg0->objectIndex);
+        setAreaFlagBit(arg0->objectIndex);
     }
     arg0->state++;
 }

@@ -8,7 +8,7 @@ extern unsigned char DAT_800a6039, DAT_800a6047[], DAT_800a60a1[], DAT_800a6104[
 extern Fix16 *DAT_800a6078, *DAT_800a607c;
 extern unsigned short DAT_800a604e;
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_8001fec0(TObj *);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
@@ -32,7 +32,7 @@ void FUN_8002f960(TObj *o)
         break;
     case 1:
         if (o->b0c == 0 && !(DAT_1f8001f8 & 3))
-            FUN_80025f40(0, 0, 0xff, 2);
+            startPadVibration(0, 0, 0xff, 2);
         FUN_8001fec0(o);
         o->visible = DAT_800a6039;
         o->h->p.whole = DAT_800a6078->p.whole + FUN_8001fddc((short)o->d84, (short)o->d88);

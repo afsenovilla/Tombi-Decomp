@@ -3,7 +3,7 @@
 #include "gamestate.h"
 extern int D_8009C994[][8];
 
-int func_80020A78(int n)
+int testAreaFlagBit(int n)
 {
     int q = n / 32;
     int r = n % 32;

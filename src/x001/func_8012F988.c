@@ -12,7 +12,7 @@ extern int D_1F80018C, D_1F800190;
 extern int ObjCullRegister(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern short func_8004065C(TObj *, short, short, short);
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern void playSFXWithPitchSlide(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_800189b8(TObj *);
@@ -54,7 +54,7 @@ void func_8012F988(TObj *o)
             func_8004065C(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
             if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) o->d8c = (-SPAD.s27e << 6) & 0xfc0;
             if (o->h->p.whole >= 0x2d0) break;
-            FUN_80020aec(*(unsigned short *)&o->wb4);
+            setAreaFlagBit(*(unsigned short *)&o->wb4);
             o->type = 0xc;
             o->category = 2;
             ((unsigned char*)&GVARS.b3f)[0] = 1;

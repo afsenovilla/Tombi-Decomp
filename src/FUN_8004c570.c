@@ -6,7 +6,7 @@ extern unsigned short DAT_8009c962;
 extern E **DAT_8007b908[];
 extern short DAT_80078790[];
 extern void FUN_8004cb00(E *, int);
-extern int FUN_80020a78(int);
+extern int testAreaFlagBit(int);
 
 void FUN_8004c570(void)
 {
@@ -25,7 +25,7 @@ void FUN_8004c570(void)
     q = &p->type;
     while (*q < 0xff) {
         b = q[0xd] >> 2;
-        r = FUN_80020a78(b);
+        r = testAreaFlagBit(b);
         if (r == 0) {
             if (p->active == DAT_8009c962 || p->active == ~DAT_8009c962)
                 FUN_8004cb00(p, b);

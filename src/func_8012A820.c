@@ -10,7 +10,7 @@ extern void *D_8013A1F0[];
 extern void *D_8013A1F4[];
 extern void *D_8013A1F8[];
 extern unsigned char D_80138FD8[];
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern void spawnItemNotification(int, int);
 extern void func_8004065C(TObj *, short, short, int);
 extern int FUN_801274cc(TObj *);
@@ -44,7 +44,7 @@ void func_8012A820(TObj *o)
         o->b9c = 0;
         o->category |= 0x80;
         if ((unsigned)(o->subtype - 9) < 2) {
-            FUN_80020aec(o->b6b);
+            setAreaFlagBit(o->b6b);
         }
         spawnItemNotification(0, 6);
         o->movetab = D_80077CF4;

@@ -13,7 +13,7 @@ extern void AnimJump(TObj *, int);
 extern int Rand(void);
 extern void FUN_80119584(TObj *, short, short, short);
 extern void playSFX(int);
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern void AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
 
@@ -97,7 +97,7 @@ void func_8012E8C4(TObj *o)
         if (o->timer != 0) {
             if (--o->timer == 0) {
                 if (U(o->wb4) >= D_80139134[o->subtype]) {
-                    FUN_80020aec(o->b6b);
+                    setAreaFlagBit(o->b6b);
                     o->b04++;
                 } else {
                     o->active = 1;

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern short func_80043464(TObj *, TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 
 void func_8011FD20(TObj *p, TObj *o)
 {
@@ -16,7 +16,7 @@ void func_8011FD20(TObj *p, TObj *o)
         return;
     if (SPAD.b1a4 != 0)
         return;
-    FUN_80025f40(0, 0, 0xff, 4);
+    startPadVibration(0, 0, 0xff, 4);
     o->b69 = 1;
     p->step = 0x33;
     p->b04 = 1;

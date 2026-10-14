@@ -31,7 +31,7 @@ void cdSeekStream(int);
 void drawDebugText(int, int, int, char *);
 void setTask(void (*)(void));
 void initWideDisplayEnv(int, int, int, int);
-void FUN_80025b98(void);
+void setAnalogPadMode(void);
 void initDisplay(int, int, int);
 void drawBootLogo(int, int);
 void ThreadWaitFrames(int n);
@@ -126,7 +126,7 @@ void func_80019244(void)
             case 2:
                 if (--p->w58 == -1) {
                     p->w4a++;
-                    FUN_80025b98();
+                    setAnalogPadMode();
                 }
                 break;
             case 3:

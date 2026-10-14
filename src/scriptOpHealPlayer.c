@@ -4,7 +4,7 @@
 #include "scriptctx.h"
 #include "player.h"
 
-void func_8003AEDC(void)
+void scriptOpHealPlayer(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     unsigned char m = GAME.playerHealthDisplayed;

@@ -47,7 +47,7 @@ extern void FUN_80110eec(P *);
 extern void FUN_800ee9cc(P *);
 extern void ObjTileCollide(P *, int, int);
 extern void FUN_800ee428(P *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 
 void func_80122F14(P *o)
 {
@@ -131,6 +131,6 @@ void func_80122F14(P *o)
         break;
     }
     if ((SPAD.s1f8 & 3) == 0) {
-        FUN_80025f40(0, 0, 0xff, 2);
+        startPadVibration(0, 0, 0xff, 2);
     }
 }

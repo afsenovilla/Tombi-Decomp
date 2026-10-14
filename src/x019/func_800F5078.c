@@ -16,7 +16,7 @@ extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e5f4(int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_800f4ed0(TObj *, int, short);
 extern void FUN_8010a168(TObj *);
@@ -53,7 +53,7 @@ static __inline__ void rot(TObj *o)
     }
 
 #define SND(k) \
-    FUN_80025f40(0, 0, 0xff, 2); \
+    startPadVibration(0, 0, 0xff, 2); \
     FUN_8001e560(3, k); \
     D_8009C330->b0a = D_8009F0EC->b0c;
 

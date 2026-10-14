@@ -2,7 +2,7 @@
 // MATCHING 8011add4 500
 #include "TOBJ.H"
 
-void FUN_80025f40(int a, int b, int c, int d);
+void startPadVibration(int a, int b, int c, int d);
 void FUN_8001e4f0(int a);
 
 void func_8011ADD4(TObj *o)
@@ -32,7 +32,7 @@ void func_8011ADD4(TObj *o)
         if ((unsigned short)(o->velV + 0xff) >= 0x1ff) {
             { int t = o->velY; o->velY = -t; }
             if (o->b69) {
-                FUN_80025f40(0, 0, 0xff, 4);
+                startPadVibration(0, 0, 0xff, 4);
             }
         }
         if (o->velH == o->w74) {

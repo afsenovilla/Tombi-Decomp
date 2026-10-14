@@ -12,7 +12,7 @@ extern unsigned char DAT_8009c974;
 extern unsigned char DAT_8009c967;
 extern void FUN_8004dd8c(void);
 extern void FUN_8005f060(int);
-extern void FUN_800261b0(void);
+extern void stopPadVibration(void);
 extern void loadSoundSet(int);
 extern void queueSystemLoadList(int, int);
 extern void clearMenuParams(void);
@@ -29,7 +29,7 @@ void FUN_80019b0c(void)
     switch (TASK_C->w4a) {
     case 0:
         FUN_8005f060(0);
-        FUN_800261b0();
+        stopPadVibration();
         LOAD_COMPLETE_SYM = 0;
         loadSoundSet(3);
         queueSystemLoadList(5, 1);

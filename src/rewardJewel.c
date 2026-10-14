@@ -411,7 +411,7 @@ void rewardJewel(GameObject* arg0)
                 addItemToInventory(arg0->item_id, 1, true);
                 asm("");
                 if (!(arg0->unkC & 0x80)) {
-                    func_80020AEC(arg0->objectIndex);
+                    setAreaFlagBit(arg0->objectIndex);
                     asm("");
                 }
                 arg0->state++;
@@ -429,7 +429,7 @@ void rewardJewel(GameObject* arg0)
                 addItemToInventory(arg0->item_id, 1, true);
                 asm("");
                 if (!(arg0->unkC & 0x80)) {
-                    func_80020AEC(arg0->objectIndex);
+                    setAreaFlagBit(arg0->objectIndex);
                     asm("");
                 }
                 arg0->state++;
@@ -447,7 +447,7 @@ void rewardJewel(GameObject* arg0)
                 setEventComplete(EVENT_GREENHIDDENPOWERS, 1);
                 addItemToInventory(arg0->item_id, 1, true);
                 if (!(arg0->unkC & 0x80)) {
-                    func_80020AEC(arg0->objectIndex);
+                    setAreaFlagBit(arg0->objectIndex);
                 }
                 arg0->state++;
             } else {

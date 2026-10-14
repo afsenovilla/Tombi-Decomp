@@ -13,7 +13,7 @@ extern int ObjCullRegister(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
-extern void FUN_80020c04(int);
+extern void setSectionFlagBit(int);
 extern void freeObjectLayer5(TObj *);
 
 void func_80123B30(TObj *o)
@@ -71,7 +71,7 @@ void func_80123B30(TObj *o)
         }
         break;
     case 2:
-        FUN_80020c04(o->b6b);
+        setSectionFlagBit(o->b6b);
         D_8007A890[D_8007A7F0[o->subtype]](o);
         break;
     case 3:

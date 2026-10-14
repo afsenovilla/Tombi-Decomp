@@ -13,7 +13,7 @@ extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
@@ -118,7 +118,7 @@ void func_800FA91C(TObj *o)
             D_8009C330->b0a = 0;
             (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0xff;
             SfxPlay2(0x23, 0x24);
-            FUN_80025f40(0, 0x81, 0x81, 0x3c);
+            startPadVibration(0, 0x81, 0x81, 0x3c);
             o->timer = 0x3c;
         }
         break;

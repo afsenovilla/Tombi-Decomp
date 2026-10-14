@@ -4,7 +4,7 @@
 #include "scriptctx.h"
 extern unsigned char *SCRIPT_CODE;
 
-void func_80038514(void)
+void scriptOpLoopVar(void)
 {
     ScriptCtx *p = SCRIPT_CTX;
     unsigned char *code = SCRIPT_CODE;

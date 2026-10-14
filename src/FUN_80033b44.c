@@ -38,7 +38,7 @@ extern short FUN_80033638(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short angleBetweenPoints(V2, V2);
 extern void FUN_800339a4(TObj *);
-extern void FUN_80025f40(int, int, int, int);
+extern void startPadVibration(int, int, int, int);
 extern void FUN_80031588(D600 *, int, short *, short *);
 
 static __inline__ short dir(TObj *o)
@@ -327,7 +327,7 @@ void FUN_80033b44(TObj *o)
         FUN_800314a8(o);
         AnimJump(&PLAYER, 0);
         if ((DAT_1f8001f8 & 0xf) == 0) {
-            FUN_80025f40(0, 0, 0xc0, 2);
+            startPadVibration(0, 0, 0xc0, 2);
             SfxPlay(3);
         }
         AnimJump(&PLAYER, (DAT_8009c330->w22 >> 2) & 3);
@@ -367,7 +367,7 @@ void FUN_80033b44(TObj *o)
         FUN_800314a8(o);
         AnimJump(&PLAYER, 0);
         if ((DAT_1f8001f8 & 0xf) == 0) {
-            FUN_80025f40(0, 0, 0xff, 2);
+            startPadVibration(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }
         AnimJump(&PLAYER, (DAT_8009c330->w22 / 3) & 3);

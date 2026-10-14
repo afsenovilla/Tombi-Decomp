@@ -14,7 +14,7 @@ extern void freeObjectLayer2(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_80020aec(int);
+extern void setAreaFlagBit(int);
 extern void spawnItemDropAtPos(int, int, V3 *, int, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -215,7 +215,7 @@ void func_80131CA4(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            FUN_80020aec(o->b6b);
+            setAreaFlagBit(o->b6b);
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole;
             v.z.p.whole = o->d->p.whole;
