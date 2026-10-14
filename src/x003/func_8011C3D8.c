@@ -1,9 +1,9 @@
 // FUNC 8011c3d8 1060 X003
 // MATCHING 8011c3d8 1060
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned char D_8009D2C2;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short D_80078DB4[];
 extern void *D_8013987C[];
@@ -96,7 +96,7 @@ void func_8011C3D8(TObj *o)
         GVARS.b42 = 0;
         o->step = 0;
         o->state = 0;
-        D_8009D2C2 = 1;
+        GV2.bc2 = 1;
         PLAYER.h->p.whole = 0xb93;
         PLAYER.y.p.whole = -0x484;
         o->b0a = 2;

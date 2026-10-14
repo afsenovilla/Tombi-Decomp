@@ -1,5 +1,6 @@
 // FUNC 8010e328 700 X004
 // MATCHING 8010e328 700
+#include "gv2.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct {
@@ -13,9 +14,6 @@ typedef struct {
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } P;
 extern unsigned short DAT_1f8003c8;
 extern unsigned short DAT_1f8001fc;
-extern unsigned char D_8009D2B0;
-extern unsigned char D_8009D2B1;
-extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
 extern P *D_8009C330;
 extern TObj *D_8009F0EC;
@@ -29,7 +27,7 @@ void func_8010E328(S *s, short mode)
     short v, t;
 
     if ((DAT_1f8001fc & DAT_1f8003c8) == 0) return;
-    D_8009D2B0 = 0;
+    GV2.bb0 = 0;
     s->bcd = 0;
     s->bce = 0;
     switch (GAME.displayExpBar) {
@@ -43,10 +41,10 @@ void func_8010E328(S *s, short mode)
         return;
     }
     s->bc3 = 0;
-    if (s->be3 >= D_8007A038[D_8009D2B2]) return;
+    if (s->be3 >= D_8007A038[GV2.bb2]) return;
     switch (mode) {
     case 0:
-        switch (D_8009D2B1) {
+        switch (GV2.bb1) {
         case 1:
             s->o.step = 0x2a;
             s->o.state = 0;
@@ -63,7 +61,7 @@ void func_8010E328(S *s, short mode)
         s->o.state = 0;
         return;
     case 1:
-        if (D_8009D2B1 == 1 || D_8009D2B1 == 2) return;
+        if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
         p = D_8009C330;
         if (p->b0 != 0) return;
         if (s->bc0 != 0) return;
@@ -84,7 +82,7 @@ void func_8010E328(S *s, short mode)
         s->o.state = 0;
         return;
     case 2:
-        if (D_8009D2B1 == 1 || D_8009D2B1 == 2) return;
+        if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
         if (D_8009C330->b0 != 0) return;
         if (s->bc0 != 0) return;
         D_8009C330->b4 = 0;

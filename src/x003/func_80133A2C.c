@@ -1,12 +1,12 @@
 // FUNC 80133a2c 360 X003
 // MATCHING 80133a2c 360
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern TObj PLAYER;
 extern unsigned char D_8009CE4E;
-extern unsigned char D_8009D2C3;
 extern void func_801337B4(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -29,7 +29,7 @@ void func_80133A2C(TObj *o)
                 o->state = 0;
                 break;
             case 1:
-                if (D_8009D2C3 & 2) {
+                if (GV2.bc3 & 2) {
                     o->step = 1;
                     o->state = 2;
                 }

@@ -1,5 +1,6 @@
 // FUNC 80131e44 424 X003
 // MATCHING 80131e44 424
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -7,7 +8,6 @@ extern TObj PLAYER;
 extern short *D_800A6078;
 extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
-extern unsigned char D_8009D2B0[];
 extern unsigned char D_8009CEEF;
 void func_801289C8(int a, int b, int c);
 
@@ -22,7 +22,7 @@ void func_80131E44(TObj *o)
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             PLAYER.active = 1;
-            D_8009D2B0[0] = 0;
+            ((unsigned char*)&GV2.bb0)[0] = 0;
             D_800A6078[1] = 0x1b8;
             PLAYER.animFrame = 0;
             PLAYER.b04 = 5;

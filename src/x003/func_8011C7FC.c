@@ -1,11 +1,11 @@
 // FUNC 8011c7fc 628 X003
 // MATCHING 8011c7fc 628
+#include "gv2.h"
 #include "gvars.h"
 /* Real size 628 B: includes the csv piece func_8011CA00 (112 B), which is the tail of this function. */
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_8009D2C2;
 extern short D_8007A1F0[], D_8007A5F0[];
 extern void *D_80139870[];
 extern int angleFromDelta(int, int);
@@ -19,7 +19,7 @@ void func_8011C7FC(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009D2C2 != 2)
+        if (GV2.bc2 != 2)
             break;
         o->velH = 0x800;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
@@ -54,7 +54,7 @@ void func_8011C7FC(TObj *o)
         break;
     case 2:
         if (FUN_8001fec0(o)) {
-            D_8009D2C2 = 0;
+            GV2.bc2 = 0;
             o->step = 3;
             o->state = 0;
             o->wac = 3;

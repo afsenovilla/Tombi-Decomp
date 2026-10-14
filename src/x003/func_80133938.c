@@ -1,9 +1,9 @@
 // FUNC 80133938 232 X003
 // MATCHING 80133938 232
+#include "gv2.h"
 #include "player.h"
 #include "TOBJ.H"
 extern unsigned char D_8009CE4E;
-extern unsigned char D_8009D2C3;
 extern void func_801337B4(TObj *);
 
 void func_80133938(TObj *o)
@@ -20,7 +20,7 @@ void func_80133938(TObj *o)
                 o->state = 0;
                 break;
             case 1:
-                if (D_8009D2C3 & 2) {
+                if (GV2.bc3 & 2) {
                     o->step = 1;
                     o->state = 2;
                 }

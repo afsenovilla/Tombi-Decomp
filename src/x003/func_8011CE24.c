@@ -1,10 +1,10 @@
 // FUNC 8011ce24 600 X003
 // MATCHING 8011ce24 600
+#include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern int D_1F8002E0[];
-extern unsigned char D_8009D2C2;
 extern void *D_8013987C[];
 extern TObj *ObjAlloc(void);
 extern void AnimLoadDuration(TObj *);
@@ -66,7 +66,7 @@ void func_8011CE24(TObj *o)
             p->d90 = (int)o;
         }
         if (o->b0c & 8) {
-            if (D_8009D2C2) {
+            if (GV2.bc2) {
                 GVARS.b3f = 1;
                 GVARS.b42 = 1;
                 o->step = 8;
