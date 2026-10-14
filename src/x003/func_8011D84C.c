@@ -1,10 +1,9 @@
 // FUNC 8011d84c 1016 X003
 // MATCHING 8011d84c 1016
+#include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009D0CF;
-extern unsigned char D_8009CF0E[];
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern char D_80135AA8[];
@@ -31,7 +30,7 @@ void func_8011D84C(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D0CF == 0 || (GV2.bc3 & 8)) {
+        if (GCD.bd0cf == 0 || (GV2.bc3 & 8)) {
             o->b04 = 3;
             break;
         }
@@ -58,7 +57,7 @@ void func_8011D84C(TObj *o)
         o->d84 = 0;
         o->d88 = D_80135AE8[o->b0c];
         o->d8c = 0;
-        if (D_8009CF0E[0] == 0) {
+        if (((unsigned char*)&GCD.bcf0e)[0] == 0) {
             o->step = 0;
             o->w74 = 0x800;
             o->w76 = 0x800;

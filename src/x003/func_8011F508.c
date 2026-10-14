@@ -1,8 +1,7 @@
 // FUNC 8011f508 300 X003
 // MATCHING 8011f508 300
+#include "spad.h"
 #include "TOBJ.H"
-extern unsigned char D_1F8001A4;
-extern short D_1F80019E;
 extern void decreaseObjectTimer(TObj *, int);
 
 void func_8011F508(TObj *o, TObj *e)
@@ -11,7 +10,7 @@ void func_8011F508(TObj *o, TObj *e)
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return;
     if ((unsigned short)((o->h->p.whole - e->h->p.whole) + (e->box0 + o->box0)) > e->box1 + o->box1) return;
     if ((unsigned short)((o->y.p.whole - e->y.p.whole) + (e->box2 + o->box2)) > o->box3 + e->box3) return;
-    if (D_1F8001A4) return;
+    if (SPAD.b1a4) return;
     {
         int ah, bh;
         o->active = 2;
@@ -24,5 +23,5 @@ void func_8011F508(TObj *o, TObj *e)
         o->animFrame = ah < bh;
     }
     decreaseObjectTimer(o, 2);
-    D_1F80019E = 0;
+    SPAD.s19e = 0;
 }

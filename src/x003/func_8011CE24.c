@@ -1,10 +1,10 @@
 // FUNC 8011ce24 600 X003
 // MATCHING 8011ce24 600
+#include "spad.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F8002E0[];
 extern void *D_8013987C[];
 extern TObj *ObjAlloc(void);
 extern void AnimLoadDuration(TObj *);
@@ -35,7 +35,7 @@ void func_8011CE24(TObj *o)
         o->ba6 = 0;
         o->ba7 = 0;
         o->w1e = 0xe;
-        o->d3c = D_1F8002E0[0];
+        o->d3c = ((int*)&SPAD.i2e0)[0];
         *(signed char *)&o->b0f = -12;
         o->b0d = 1;
         o->w08 = 0x7c90;

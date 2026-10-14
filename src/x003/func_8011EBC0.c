@@ -1,5 +1,6 @@
 // FUNC 8011ebc0 1872 X003
 // MATCHING 8011ebc0 1872
+#include "spad.h"
 /* X003 twin of x014/func_8011C00C (rotated sprite, no semitrans): no anim check, byte scale `s = (unsigned char)sc` (no ba7),
    C/D int (`(C + u)`, `(D + w)` operand order), code 0x2d/0x2f via `sc = 0x2d; f->code = sc;` (li v1), no rgb copy,
    OT call result ignored. */
@@ -15,11 +16,9 @@ typedef struct {
 } PFT4_8011C00C;
 
 extern long LZ_FILE_CTRL;
-extern long D_1F800074;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4_8011C00C *D_1F800164;
-extern int D_1F8001E0;
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -51,7 +50,7 @@ void func_8011EBC0(TObj *o)
     short sc;
     PFT4_8011C00C *f;
 
-    projectActorPosition(o, &LZ_FILE_CTRL, &D_1F800074);
+    projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     xy = LZ_FILE_CTRL;
     x = xy;
     y = (unsigned)xy >> 16;
@@ -117,9 +116,9 @@ void func_8011EBC0(TObj *o)
             *(unsigned short *)((char *)f + 0x16) += o->w1e;
             if (o->b0d & 1) *(unsigned short *)((char *)f + 0xe) = o->w08;
             if (o->b0b != 0) {
-                insertPrim(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             } else {
-                insertPrimWithBias(f, D_1F8001E0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
+                insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             }
             D_1F800164 = (PFT4_8011C00C *)((char *)D_1F800164 + 0x28);
         }

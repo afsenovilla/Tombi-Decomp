@@ -1,5 +1,6 @@
 // FUNC 801193d0 808 X003
 // MATCHING 801193d0 808
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -7,7 +8,7 @@ typedef struct { short vx, vy, vz, pad; } SV;
 typedef struct { char p[0xb4]; SV v[4]; } OX;
 
 extern short D_8013589C[];
-extern short D_1F800176[], D_1F800186;
+extern short D_1F800176[];
 extern unsigned int FUN_8001f9e0(void);
 
 #define V(o) (((OX *)(o))->v)
@@ -29,7 +30,7 @@ void func_801193D0(TObj *o)
         if (((unsigned short*)&GAME.selectedSection)[0] == 3)
             o->y.raw = (-0x272 - (FUN_8001f9e0() & 0xf) * 42) << 16;
         else
-            o->y.raw = (D_1F800186 - ((FUN_8001f9e0() & 7) * 32 + k)) << 16;
+            o->y.raw = ((*(short*)&SPAD.s186) - ((FUN_8001f9e0() & 7) * 32 + k)) << 16;
         o->velH = o->subtype * 24;
         break;
     case 1:
@@ -42,7 +43,7 @@ void func_801193D0(TObj *o)
         if (((unsigned short*)&GAME.selectedSection)[0] == 3)
             o->y.raw = (-0x272 - (FUN_8001f9e0() & 0xf) * 42) << 16;
         else
-            o->y.raw = (D_1F800186 - ((FUN_8001f9e0() & 7) * 32 + k)) << 16;
+            o->y.raw = ((*(short*)&SPAD.s186) - ((FUN_8001f9e0() & 7) * 32 + k)) << 16;
         o->velH = o->subtype * 24;
         break;
     case 2:

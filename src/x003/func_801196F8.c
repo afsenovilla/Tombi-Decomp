@@ -1,9 +1,9 @@
 // FUNC 801196f8 320 X003
 // MATCHING 801196f8 320
+#include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_1F8002D4;
 extern void *D_80138EDC[];
 extern void ObjListPush_1F800220(TObj *);
 extern void func_801191C4(TObj *);
@@ -23,7 +23,7 @@ void func_801196F8(TObj *o)
             o->w1e = 9;
             o->w08 = 0x780b;
         }
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         o->anim = D_80138EDC[o->b0c];
         o->d->p.whole -= o->subtype * 4;
         break;

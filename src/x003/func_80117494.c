@@ -1,5 +1,6 @@
 // FUNC 80117494 2352 X003
 // MATCHING 80117494 2352
+#include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
 typedef struct {
@@ -20,7 +21,6 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009CEF0, D_8009CDC8, D_8009CDC3, D_8009CDC5, D_8009CDC7;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -68,13 +68,13 @@ void func_80117494(O *o)
             switch (*p) {
             case 0:
                 if (D_1F80016A < 0x14 && D_1F80016E >= -0x59) {
-                    if (D_8009CEF0 != 0) tryStartItemInteraction(o, 1, 0);
+                    if (GCD.bcef0 != 0) tryStartItemInteraction(o, 1, 0);
                 } else if (D_1F80016A < 0xa7 && D_1F800172 < -0x5a) {
                     tryStartItemInteraction(o, 1, 1);
                 } else if (D_1F80016A >= 0xbc1 && D_1F80016E >= -0x489) {
                     tryStartItemInteraction(o, 1, 2);
                 }
-                if (D_8009CDC8 != 0xff) break;
+                if (GCD.bcdc8 != 0xff) break;
                 if ((unsigned)(XU - 0x778) >= 0x18) break;
                 if ((unsigned short)(ZU + 0x56a) >= 0x10) break;
                 PLAYER.ba0 = 1;
@@ -82,7 +82,7 @@ void func_80117494(O *o)
                 if (D_1F800172 > 0) stepPlayerXToward(0x784);
                 break;
             case 4:
-                if (D_8009CDC3 != 0xff) setEventComplete(0x1f, 0);
+                if (GCD.bcdc3 != 0xff) setEventComplete(0x1f, 0);
                 *p = 0;
                 break;
             default:
@@ -103,7 +103,7 @@ void func_80117494(O *o)
             }
             if (PLAYER.ba2 == 2 && (unsigned)(XU - 0x107a) < 0x40 && (unsigned short)(ZU + 0x78e) < 0x20)
                 stepPlayerXToward(0x109a);
-            if (D_8009CDC5 == 0xff && (unsigned)(XU - 0xc72) < 0x14 && (unsigned short)(ZU + 0x63e) < 0x10) {
+            if (GCD.bcdc5 == 0xff && (unsigned)(XU - 0xc72) < 0x14 && (unsigned short)(ZU + 0x63e) < 0x10) {
                 PLAYER.ba0 = 1;
                 PLAYER.ba8 = 0xc;
                 if (D_1F800172 > 0) stepPlayerXToward(0xc7c);
@@ -123,7 +123,7 @@ void func_80117494(O *o)
                     }
                 }
             }
-            c = &D_8009CDC7;
+            c = &GCD.bcdc7;
             if (*c == 2) {
                 *c = 3;
                 keyOffActiveSfxVoices();
