@@ -41,44 +41,20 @@ One line per name: `address name (old file) - justification`.
 - `8006bfa4 chkRC2wait` (was FUN_8006bfa4) - compares elapsed root counter 2 ticks against the limit; same as chkRC2wait (waitrc2.c)
 - `8005d300 StopCARD` (was func_8005D300) - calls StopCARD2, _patch_card2 and a card restart helper; psx_tomba libcard init.c StopCARD matched by bytes
 
-## X000 (shared overlay code)
+# Area overlay function names (X001..X019)
 
-Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`). Pad bits (8009D670): 0x10 Up, 0x20 Right, 0x40 Down, 0x80 Left; 1F8003C6 = configured jump button.
+Overlay-scoped: a name applies only to the overlay named on its line (the same address in another overlay is another function; the same
+name in several overlays means the same role, not the same code). Applied with `tools/apply_ovl_names.py`. Handler = the function a
+placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names come from the rendered animation strips (`tools/anim.py export`).
 
-- `800f1478 playerStepIdle` (was FUN_800f1478) - player step 0 handler: standing state; Left/Right held switches to step 1, else idle/walk anim selection
-- `800f1d44 playerStepWalk` (was func_800F1D44) - player step 1 handler (entered from step 0 when Left/Right is held)
-- `800f2b98 playerStepJump` (was FUN_800f2b98) - player step 2 handler: jump sfx (2,4), rise extended while the jump button (1F8003C6) is held 5..14 frames, state 3 = falling
-- `801099b8 playerStepClimb` (was FUN_801099b8) - player step 13 handler: climbing anims 10/11/12 (idle/up/down) chosen by pad Up/Down
-- `8010d390 playerStepSwim` (was FUN_8010d390) - player step 0x3D handler: swim stroke anims 0x43/0x47 (swim_stroke / swim_stroke_slow)
-- `80102a08 playerStep2EByArea` (was FUN_80102a08) - player step 0x2E: only dispatches to the area overlay's handler (area 1 or 10)
-- `80106f98 playerStep3CByArea` (was FUN_80106f98) - player step 0x3C: only dispatches to the area overlay's handler (area 3 or 4)
-- `800efa80 playerSelectGroundAnim` (was FUN_800efa80) - picks idle/walk/jog/run anim (0..3, 0x21 when crouching) from speed +0xB2 and loads it when it changed
-- `800f00ac playerCheckGroundAndFall` (was FUN_800f00ac) - wall-contact step changes (0x10/0x17/0x1B/0x1E/0x21) then gravity when unsupported; past max fall speed switches to step 2 state 3 (fall)
-- `800eff1c playerGetWallContactKind` (was FUN_800eff1c) - returns 1..5 from the contact flags +0xBE (and speed +0xB2 past 0x144); bit 0x20 forces step 0x1F
-- `8010f328 playerSetJumpRiseVelocity` (was FUN_8010f328) - sets velY from the per-mode jump table D_80115468 by the jump-hold counter (player +0x20 <= 12 or 13)
-- `8010e628 playerStartFall` (was func_8010E628) - sets step 2 state 3 (jump step, falling) with the knock-back timer/flags
-- `8010beb8 playerTryStartJump` (was func_8010BEB8) - if the jump button (1F8003C6) is pressed: step 2 state 0 and returns 1
-- `800ef490 setFacingFromPad` (was FUN_800ef490) - animFrame bit 0 from Right (0x20) / Left (0x80) held; neither keeps facing and sets bit 1
-- `800ef4e4 setFacingAndUpDownFromPad` (was FUN_800ef4e4) - as setFacingFromPad plus bit 3 for Up (0x10) and bit 2 for Down (0x40)
-- `800eea7c playerSetAnim` (was FUN_800eea7c) - sets player anim id, loads table[id] and starts at the given frame unconditionally
-- `800eeae4 playerSetAnimIfChangedAt` (was FUN_800eeae4) - PlayerSetAnimIfChanged with an explicit start frame
-- `800ef460 objApplyDepthVelocity` (was func_800EF460) - adds velH to the depth coordinate (*o->d) and velV to Y (16.16)
-- `800fc104 updatePlayerHealth` (was func_800FC104) - copies +0x98 health to GAME.playerHealth when it changed; at 0: game-over flags, stopBgm, playJingle(3)
-- `800fbcec setLeapVelocityFromPad` (was func_800FBCEC) - sets velX/velY launch (-0x600 up) by facing, stronger/weaker with Left/Right held
-- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0) - +0x7A = (+0x76 & 7) * 0x20 angle, +0x74 speed 0x200 unless bit 3 of +0x76
-- `8010cfb0 setAngleSpeedFromDir8B` (was func_8010CFB0) - byte-identical behaviour to setAngleSpeedFromDir8 (second copy)
-- `8011133c setVelXFromPadLR` (was FUN_8011133c) - velX = -/+0x200 for Left/Right held, else 0 (scaled down in mode 7)
-- `801113bc adjustVelYFromPadDown` (was FUN_801113bc) - velY += 0x20 while Down held, else -= 0x20; clamped to 0xC0..0x300
-- `800ec84c spawnColorBurst` (was FUN_800ec84c) - spawns 8 objects of type 0x5F around a circle (angle i*0x20) tinted red/blue/green by the argument
-- `800ef150 playerResetStep` (was FUN_800ef150) - SfxPlay3(0x1C,0x7F), clears the player action flags and sets step 0 state 0
-- `801097ec playerStepPush` (was FUN_801097ec) - player step 0x1C: while Left/Right held moves at 0x200 with anim 0x20 and sfx 0x24 every 16 frames; leaves when contact flag +0xA6 clears (step 1) or the pad is released (step 0)
-- `800f262c playerJumpRiseUpdate` (was FUN_800f262c) - jump-hold logic of the jump step state 1: counts frames while the jump button (1F8003C6) is held (max 14, min 5) then calls playerSetJumpRiseVelocity
-- `800f0374 playerFallIfUnsupported` (was FUN_800f0374) - tile collision, then gravity (+0x223) when nothing supports the player; returns 1 once the fall speed passes 0x447
-- `800f1308 playerAnimateTalkPose` (was FUN_800f1308) - sets anims 0x4B..0x4F by TALK_POSE (1..5) and advances them
-- `800f2724 playerUpdateFall` (was FUN_800f2724) - falling state of the jump step: anim 4, air steering (FUN_8010eaf8), velX, gravity step
-- `8011116c playerDecelerateSpeed` (was FUN_8011116c) - reduces |speed +0xB2| toward 0 by the per-mode friction table D_80115510 (zero inside +-0x50)
-- `800ee948 spawnWeaponObject` (was FUN_800ee948) - if the active weapon objects (+0xE3) are under the limit D_8007A038[weapon], allocates a layer-1 object of type = equipped weapon (D_8009D2B2)
-- `800f44b0 playerStepWeaponAttack` (was FUN_800f44b0) - player step 3: 8-way aim from pad (Up+Left/Right...), spawns the equipped weapon object (limit D_8007A038)
-- `800f36e0 playerStepAirWeaponAttack` (was FUN_800f36e0) - player step 4: weapon object spawn as in step 3 with the jump rise/fall logic (entered from step 3 when falling)
-- `80104698 playerStepBitten` (was func_80104698) - player step 14: entered with wac == 2; state 0 attaches to the bitten object D_8009D2E8 by its type, then per-type holders
-- `801066c4 playerStepBittenJump` (was func_801066C4) - player step 15: jump (anim 13, playerSetJumpRiseVelocity) carrying the bitten object D_8009D2E8, per-type follow code
+- `x001/x003/x004/x009/x010/x018 updateAreaMechanisms` (x001 8011bd84, x003 8011a874, x004 8011b7c4, x009 8011ab44, x010 80118558, x018 801169d0) - the area's layer 4 type 7 handler (`dispatchAreaInitB` target, objects.py AREA_INIT_B); switch on subtype over linked switches/doors/rotating parts that copy the parent's state (`o->d90`) and start/complete events through `o->wac`
+- `x003 8011a6c4 / x004 8011afa8 / x009 8011aa04 / x010 80118418 / x018 801168a0 stepAreaSwitch` - subtype 0 of updateAreaMechanisms: activates when the player is inside a +-0x20/0x30 box with player state byte da0+2 == 2, sinks and returns 1/2 that the caller turns into setEventStarted/Complete
+- `x002 80118684 / x004 8012b438 / x006 8011e54c / x013 80116fe0 updateSceneSequence` - the layer 2 "scene sequence" objects of objects.py SEQ_TYPES: walk a table of (op, arg) sequences, show message boxes and start/complete events per op
+- `x014 801163bc updateSectionClearController` - section controller (called through the FUN_801168a0 thunk): locks the scroll, runs the room's sub-handler table D_8012568C, then setEventComplete(D_801256A8[section]) (objects.py AREA14_BOSS_EVENT), timer and fade out
+- `x004 80126e54 updateBlackCrow` - layer handler whose animation tables render a black crow (labels.json animowner a04)
+- `x009 80123e24 updateRedFlower` - handler whose strips show a red flower bud that blooms and laughs (labels.json animowner a09)
+- `x010 8012ac48 updateSpearPig` - handler whose strips show the blue pig with a spear (labels.json animowner a10)
+- `x010 8012ce80 updateShieldSpearPig` - strips show the same blue spear pig holding a round wooden shield, then throwing the spear
+- `x010 8012c8a0 updateParrot` - strips show a red/yellow parrot standing, walking and flying
+- `x001 8012b2d4 updatePurplePig` - layer 2 type 0 (11 placements, AREA01/07): strips show a purple pig walking, turning and falling
+- `x001 80138d4c updateCeilingDrip` - layer 2 type 34: strips show water gathering on the ceiling, forming a drop, falling and splashing

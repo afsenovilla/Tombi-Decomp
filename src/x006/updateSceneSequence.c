@@ -23,7 +23,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_8011E54C(TObj *o)
+void updateSceneSequence(TObj *o)
 {
     short *e;
     Fix16 *p;

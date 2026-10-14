@@ -122,6 +122,12 @@ def src_of(addr, ovl):
     for pat in pats:
         for f in glob.glob(os.path.join(ROOT, pat)) + glob.glob(os.path.join(ROOT, pat.replace("%08x" % addr, "%08X" % addr))):
             return f
+    # renamed functions: find the file by its `// FUNC addr` header
+    for d in ("src/x%03d" % ovl, "src"):
+        for f in sorted(glob.glob(os.path.join(ROOT, d, "*.c"))):
+            with open(f, errors="replace") as fh:
+                if re.match(r"//\s*FUNC\s+%08x\b" % addr, fh.read(64), re.I):
+                    return f
     return None
 
 

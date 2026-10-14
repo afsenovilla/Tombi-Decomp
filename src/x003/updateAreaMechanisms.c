@@ -10,7 +10,7 @@ extern TObj PLAYER;
 extern unsigned char D_800A60E3;
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
-extern int func_8011A6C4(TObj *);
+extern int stepAreaSwitch(TObj *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
@@ -40,7 +40,7 @@ extern void setEventComplete(int, int);
         break; \
     }
 
-void func_8011A874(TObj *o)
+void updateAreaMechanisms(TObj *o)
 {
     unsigned char s = o->b04;
     unsigned char t;
@@ -57,7 +57,7 @@ void func_8011A874(TObj *o)
         ObjCullRegister(o);
         switch (o->subtype) {
         case 0:
-            r = func_8011A6C4(o);
+            r = stepAreaSwitch(o);
             if (r == 1) {
                 if (D_800A60E3 == r) {
                     if (GCD.bcdcd == 0xff) break;
@@ -102,7 +102,7 @@ void func_8011A874(TObj *o)
             }
             break;
         case 4:
-            r = func_8011A6C4(o);
+            r = stepAreaSwitch(o);
             if (GV2.bc3 & 2) {
                 if (r != 2) break;
                 if (GCD.bce4e == 0xff) break;
@@ -118,7 +118,7 @@ void func_8011A874(TObj *o)
             DOOR(o);
             break;
         case 8:
-            r = func_8011A6C4(o);
+            r = stepAreaSwitch(o);
             if (GCD.bd0d9) {
                 if (r != 2) break;
                 if (GCD.bcddb == 0xff) break;

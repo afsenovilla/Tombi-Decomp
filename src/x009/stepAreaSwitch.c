@@ -1,11 +1,11 @@
-// FUNC 80118418 320 X010
-// MATCHING 80118418 320
+// FUNC 8011aa04 320 X009
+// MATCHING 8011aa04 320
 #include "spad.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 
-void func_80118418(TObj *o)
+void stepAreaSwitch(TObj *o)
 {
     switch (o->state) {
     case 0:

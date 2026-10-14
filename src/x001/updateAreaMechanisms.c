@@ -8,7 +8,7 @@ extern int ObjCullRegister(TObj *);
 extern void func_8011BC6C(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_8011BD84(TObj *o)
+void updateAreaMechanisms(TObj *o)
 {
     switch (o->b04) {
     case 0:

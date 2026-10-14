@@ -21,7 +21,7 @@ extern void func_8012C220(TObj *);
 extern void func_8012C5AC(TObj *);
 extern void func_8012C6EC(TObj *);
 
-void func_8012C8A0(TObj *o)
+void updateParrot(TObj *o)
 {
     RECT r;
 

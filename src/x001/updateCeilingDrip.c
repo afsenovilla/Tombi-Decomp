@@ -10,7 +10,7 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_80138D4C(TObj *o)
+void updateCeilingDrip(TObj *o)
 {
     switch (o->subtype) {
     case 0:

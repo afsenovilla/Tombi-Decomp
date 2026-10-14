@@ -388,7 +388,7 @@ address,size,name,twin
 8011e364,80,func_8011E364,
 8011e3b4,352,func_8011E3B4,
 8011e514,56,func_8011E514,
-8011e54c,316,func_8011E54C,
+8011e54c,316,updateSceneSequence,
 8011e688,40,func_8011E688,
 8011e6b0,1080,func_8011E6B0,
 8011eae8,232,func_8011EAE8,

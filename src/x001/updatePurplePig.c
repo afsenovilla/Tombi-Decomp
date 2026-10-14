@@ -68,7 +68,7 @@ static __inline__ void setw(TObj *o, short a, short b, short c, short d)
 
 typedef struct { TObj t; char pad[0xd2 - 0xc0]; unsigned short wd2; } BX;
 #define o (&b->t)
-void func_8012B2D4(BX *b)
+void updatePurplePig(BX *b)
 {
     short *q = &o->wb4;
 

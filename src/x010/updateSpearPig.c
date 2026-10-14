@@ -47,7 +47,7 @@ static __inline__ int blocked(TObj *o, short f)
     return FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
 }
 
-void func_8012AC48(TObj *o)
+void updateSpearPig(TObj *o)
 {
     Q *q = (Q *)&o->wb4;
     TObj *e;

@@ -28,7 +28,7 @@ extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
 extern void func_801184CC(void);
 
-void func_801163BC(TObj *o)
+void updateSectionClearController(TObj *o)
 {
     PL *pl = &PLAYER;
     TObj *q;

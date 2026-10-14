@@ -4,9 +4,9 @@
 
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
-extern void func_80118418(TObj *);
+extern void stepAreaSwitch(TObj *);
 
-void func_80118558(TObj *o)
+void updateAreaMechanisms(TObj *o)
 {
     unsigned char s = o->b04;
 
@@ -21,7 +21,7 @@ void func_80118558(TObj *o)
         ObjCullRegister(o);
         switch (o->subtype) {
         case 0:
-            func_80118418(o);
+            stepAreaSwitch(o);
             break;
         case 1:
             switch (o->state) {

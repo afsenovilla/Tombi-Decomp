@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 
-int func_8011A6C4(TObj *o)
+int stepAreaSwitch(TObj *o)
 {
     switch (o->state) {
     case 0:

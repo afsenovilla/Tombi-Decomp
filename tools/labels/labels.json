@@ -239,15 +239,15 @@
   "name": "TRY AGAIN",
   "note": ""
  },
- "animowner:a04_func_80126e54": {
+ "animowner:a04_updateblackcrow": {
   "name": "black crow",
   "note": "name from the rendered strips (tools/anim.py export)"
  },
- "animowner:a09_func_80123e24": {
+ "animowner:a09_updateredflower": {
   "name": "red flower (bud, bloom, laugh)",
   "note": "name from the rendered strips (tools/anim.py export)"
  },
- "animowner:a10_func_8012ac48": {
+ "animowner:a10_updatespearpig": {
   "name": "blue spear pig (koma)",
   "note": "name from the rendered strips (tools/anim.py export)"
  }

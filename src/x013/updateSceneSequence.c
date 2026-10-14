@@ -44,7 +44,7 @@ extern void startAreaBgm(void);
 extern void func_801179B4(int, int, int, int);
 extern void freeObjectLayer2(O *);
 
-void func_80116FE0(O *o)
+void updateSceneSequence(O *o)
 {
     CMD *c;
     PL *p;

@@ -13,12 +13,12 @@ extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
-extern int func_8011AFA8(TObj *);
+extern int stepAreaSwitch(TObj *);
 extern int func_8011B218(TObj *);
 extern void func_8011B138(TObj *);
 extern void func_8011B438(TObj *);
 
-void func_8011B7C4(TObj *o)
+void updateAreaMechanisms(TObj *o)
 {
     int r;
     short *p;
@@ -51,7 +51,7 @@ void func_8011B7C4(TObj *o)
         switch (o->subtype) {
         case 4:
             if (D_1F8001C8 & 1) break;
-            r = func_8011AFA8(o);
+            r = stepAreaSwitch(o);
             if (GCD.bd0da) {
                 if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
                     if (GCD.bcdd7 == 0xff) {
@@ -77,10 +77,10 @@ void func_8011B7C4(TObj *o)
         case 14:
         case 16:
         case 18:
-            if (func_8011AFA8(o) == 2) playSFX(0x7e);
+            if (stepAreaSwitch(o) == 2) playSFX(0x7e);
             break;
         case 20:
-            if (GAME.selectedSection == 2 && func_8011AFA8(o) == 2) playSFX(0x7e);
+            if (GAME.selectedSection == 2 && stepAreaSwitch(o) == 2) playSFX(0x7e);
             break;
         case 3:
         case 5:

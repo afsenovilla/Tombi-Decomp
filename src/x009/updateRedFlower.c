@@ -27,7 +27,7 @@ extern void func_801233F0(TObj *);
 extern void func_80123828(TObj *);
 extern void func_80123CE8(TObj *);
 
-void func_80123E24(TObj *o)
+void updateRedFlower(TObj *o)
 {
     X *x = XS(o);
     TObj *e;

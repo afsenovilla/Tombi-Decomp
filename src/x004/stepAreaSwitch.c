@@ -7,7 +7,7 @@
 
 extern signed char D_8009D2B0;
 
-int func_8011AFA8(TObj *o)
+int stepAreaSwitch(TObj *o)
 {
     switch (o->state) {
     case 0:

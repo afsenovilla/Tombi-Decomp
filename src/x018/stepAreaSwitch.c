@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-void func_801168A0(TObj *o)
+void stepAreaSwitch(TObj *o)
 {
     switch (o->state) {
     case 0:

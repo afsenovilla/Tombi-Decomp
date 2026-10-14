@@ -31,7 +31,7 @@ extern void freeObjectLayer2(TObj *);
 
 #define X(o) ((S *)(o))
 
-void func_80126E54(TObj *o)
+void updateBlackCrow(TObj *o)
 {
     int d;
 

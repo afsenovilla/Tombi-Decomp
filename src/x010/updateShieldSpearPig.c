@@ -12,7 +12,7 @@ extern void func_8012CB50(TObj *);
 extern void func_8012CCE8(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_8012CE80(TObj *o)
+void updateShieldSpearPig(TObj *o)
 {
     switch (o->b04) {
     case 0:

@@ -1,12 +1,12 @@
-// FUNC 8011ab44 392 X009
-// MATCHING 8011ab44 392
+// FUNC 801169d0 392 X018
+// MATCHING 801169d0 392
 #include "TOBJ.H"
 
 extern void ObjCullRegister(TObj *o);
 extern void ObjFreeDup(TObj *o);
-extern void func_8011AA04(TObj *o);
+extern void stepAreaSwitch(TObj *o);
 
-void func_8011AB44(TObj *o)
+void updateAreaMechanisms(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -19,7 +19,7 @@ void func_8011AB44(TObj *o)
         ObjCullRegister(o);
         switch (o->subtype) {
         case 0:
-            func_8011AA04(o);
+            stepAreaSwitch(o);
             break;
         case 1:
             switch (o->state) {
