@@ -28,8 +28,8 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 31 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17; left: o->f load reg, x+w temp reg, uv sched |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 294 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps; left: s1 var in s5, in-place v1 temps |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 14 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | SPAD.b1d2 block fixed (t bump + w=v global); left: v a1 vs game v1 in the a->wb0 block |
-| FAR | x001 | func_80127074 | 80127074 | 1544 | 314 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e pinned; left: regalloc of abs/k/fx/fy temps |
-| FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 232 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
+| FAR | x001 | func_80127074 | 80127074 | 1544 | 223 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e/ax/ay/k pinned, no c copy; left: box temps, s-reg permutation |
+| FAR | x010 | func_8011EAE8 | 8011EAE8 | 1200 | 92 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B wip (see 8011E990) |
 | FAR | x010 | func_8011752C | 8011752C | 1020 | 80 | src/x010/wip/func_8011752C.c (gcc-2.7.2-psx) | loop 1 b shifted out of place + pins; left: which sra fills the delay slot, loops 2-4 same pattern |
 | FAR | main0 | func_800402ec | 800402EC | 880 | 82 | src/wip/func_800402EC.c (gcc-2.7.2-psx) | x/ys/cnt unpinned, (x-1)-sx order fixed; left: bs/d regs, b sext in place, xm copy to t1, branch-1 tail cross-jump |
 | FAR | x010 | func_8011E358 | 8011E358 | 856 | 16 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
@@ -39,7 +39,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | main0 | func_80069ce8 | 80069CE8 | 528 | no wip | gcc-2.7.2-psx default | no wip; ObjAlloc-style game code (2 calls, 0x28 frame), never attempted |
 | FAR | x006 | func_8011D5F4 | 8011D5F4 | 492 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x010 | func_8011E1A4 | 8011E1A4 | 436 | 16 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
-| FAR | x010 | func_8011E990 | 8011E990 | 344 | 232 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B (with EAE8); abs var s needs s0, a/dx/dy regs differ |
+| FAR | x010 | func_8011E990 | 8011E990 | 344 | 92 | src/x010/wip/func_8011E990.c (gcc-2.7.2-psx) | piece of 1544 B (with EAE8); left: cx/s7 s-regs swapped, abs sra (game moves raw dx), mode-switch case 0 placement, k reg |
 | FAR | x006 | func_8011D4E0 | 8011D4E0 | 276 | no wip | gcc-2.7.2-psx default | no wip; D4E0..DBF4 is one 1812 B sprite-draw function (5 csv pieces), untouched |
 | FAR | x006 | func_8011DAE0 | 8011DAE0 | 276 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x006 | func_8011D7E0 | 8011D7E0 | 228 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
