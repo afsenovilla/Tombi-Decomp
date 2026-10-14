@@ -116,7 +116,7 @@ void func_8011B47C(TObj *o)
         if (D_8009D670[0] & 0x40)
             q->animFrame = y | 2;
         o->b9c = 0;
-        U8(o, 0xac) = 0;
+        (*(unsigned char*)&o->wac) = 0;
         o->step = 0x3e;
         o->state = 0;
         break;

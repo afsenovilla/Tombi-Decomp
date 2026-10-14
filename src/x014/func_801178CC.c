@@ -40,7 +40,7 @@ void func_801178CC(TObj *o, short dx, short dy, short dz)
         n->wb6 = 0;
         n->wb8 = 0;
         n->wbc = 8;
-        S16(n, 0xbe) = 0;
+        (*(short*)&n->bbe) = 0;
         S16(n, 0xc0) = 0;
         S16(n, 0xc4) = 0;
         S16(n, 0xc6) = 0;

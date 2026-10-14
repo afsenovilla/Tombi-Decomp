@@ -45,9 +45,9 @@ void func_801163BC(TObj *o)
         o->subtype = 0;
         o->step++;
         if (GAME.selectedSection == 7) {
-            U8(o, 0x6d) = 1;
-            U8(o, 0x6e) = 2;
-            U8(o, 0x6f) = 10;
+            (*(unsigned char*)((char*)&o->box0 + 1)) = 1;
+            (*(unsigned char*)&o->box1) = 2;
+            (*(unsigned char*)((char*)&o->box1 + 1)) = 10;
         }
         break;
     }
