@@ -1,6 +1,7 @@
 // FUNC 80067678 2416 MAIN0
 // MATCHING 80067678 2416
 // Portado de psx_tomba (psyq/libcd/c_011.c, StCdInterrupt); licencia MIT del proyecto original.
+#include "gv6.h"
 #define SKIP_ASM
 #include "common.h"
 #include "psyq/libcd.h"
@@ -19,8 +20,6 @@ extern s32 D_8009C914;
 extern void (*D_8009D4F8)(void);
 extern s32 D_8009D5F4;
 extern s32 D_8009D5F8;
-extern s32 D_8009D694;
-extern s32 D_8009D6A0;
 extern s32 D_8009F7E0;
 extern s32 D_800A2264;
 extern s32 D_800A2268;
@@ -46,7 +45,7 @@ void StCdInterrupt(void) {
     u32 var_v1_3;
     u8* var_v1;
 
-    if (D_8009D6A0 == 1) {
+    if (GV6.ia0 == 1) {
         return;
     }
     if ((D_8009C910 != 0) && (*D_8009706C & 0x01000000)) {
@@ -110,7 +109,7 @@ void StCdInterrupt(void) {
         }
         D_800A3CF8 = 0;
     }
-    if ((D_8009BF70[0] != 0x160) || (((D_8009BF70[1] >> 0xA) & 0x1F) != D_8009D694)) {
+    if ((D_8009BF70[0] != 0x160) || (((D_8009BF70[1] >> 0xA) & 0x1F) != GV6.i94)) {
         if (D_800A3CC0 != 0) {
             D_8009F7E0 = 0;
         } else {
@@ -196,7 +195,7 @@ void StCdInterrupt(void) {
         var_t0 = 0x11400100;
     }
     if ((D_8009BF70[3] - 1) == D_8009BF70[2]) {
-        D_8009D6A0 = 1;
+        GV6.ia0 = 1;
         if (D_800A3CC0 != 0) {
             mem2mem(D_800A3F00, D_800A3CC0 + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 1);
             D_8009F7E0++;
@@ -205,7 +204,7 @@ void StCdInterrupt(void) {
         }
         D_8009C90C = 0;
         D_8009C334 = 0;
-        D_8009D694 = D_8009D5F4;
+        GV6.i94 = D_8009D5F4;
     } else {
         if (D_800A3CC0 != 0) {
             mem2mem(D_800A3F00, D_800A3CC0 + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 0);
@@ -217,7 +216,7 @@ void StCdInterrupt(void) {
     *D_80097060 = 0x1325;
     D_8009BF70[0] = 3;
     D_800A2264 += 1;
-    if ((D_800A3CC0 != 0) && (D_8009D6A0 != 0)) {
+    if ((D_800A3CC0 != 0) && (GV6.ia0 != 0)) {
         data_ready_callback();
     }
 }

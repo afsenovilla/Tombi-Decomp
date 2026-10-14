@@ -1,5 +1,6 @@
 // FUNC 800317c0 6188 MAIN0
 // MATCHING 800317c0 6188
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
@@ -49,7 +50,6 @@ extern D600 D_8009D600;
 extern short D_8007A070[], D_8007A072[], D_8007A074[];
 extern short D_8007A04C[], D_8007A04E[];
 extern unsigned char *D_8009F0EC;
-extern unsigned short D_8009D670;
 extern unsigned short D_1F8003C8, D_1F8001F8, D_1F800282;
 extern unsigned char D_8009D2B2;
 extern int D_8009D2E8;
@@ -83,7 +83,7 @@ extern void FUN_800efc04(TObj *);
 
 #define TB(o) ((short)(o->animFrame + o->animFrame * 2))
 
-#define PADOK() ((*(volatile unsigned short *)&D_8009D670 & D_1F8003C8) && PLAYER.b04 == 1 && PLAYER.ba4 == 0)
+#define PADOK() ((*(volatile unsigned short *)&GV6.s70 & D_1F8003C8) && PLAYER.b04 == 1 && PLAYER.ba4 == 0)
 
 void func_800317C0(TObj *o)
 {

@@ -1,5 +1,6 @@
 // FUNC 80038b04 460 MAIN0
 // MATCHING 80038b04 460
+#include "gv6.h"
 typedef struct { short m[4]; short w[64]; } F;
 typedef struct {
     short w[64];
@@ -13,7 +14,6 @@ extern G *SCRIPT_CTX;
 extern unsigned char *SCRIPT_CODE;
 extern int SCRIPT_OBJECTS[64];
 extern char D_80013650[];
-extern int D_8009D69C;
 extern int printf(char *, ...);
 
 void func_80038B04(void)
@@ -41,7 +41,7 @@ void func_80038B04(void)
     s = *src;
     if (*(int *)s.m != 0x530057) {
         printf(D_80013650);
-        D_8009D69C = 0;
+        GV6.i9c = 0;
         return;
     }
     for (j = 0; j < 64; j++) {

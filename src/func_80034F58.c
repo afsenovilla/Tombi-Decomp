@@ -1,8 +1,8 @@
 // FUNC 80034f58 324 MAIN0
 // MATCHING 80034f58 324
+#include "gv2.h"
 #include "TOBJ.H"
 extern unsigned char D_800A60FF;
-extern unsigned char D_8009D2B2[];
 extern signed char D_800A611B;
 void FUN_8003509c(TObj *o, int n);
 void ObjCullRegister(TObj *o);
@@ -20,7 +20,7 @@ void func_80034F58(TObj *o)
     case 0:
         if (o->state == 0) {
             o->w22 = 0;
-            FUN_8003509c(o, D_8009D2B2[0] - 5);
+            FUN_8003509c(o, ((unsigned char*)&GV2.bb2)[0] - 5);
         }
         o->b04++;
         break;
