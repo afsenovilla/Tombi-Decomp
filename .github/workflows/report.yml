@@ -174,6 +174,7 @@ jobs:
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
           mkdir -p "$RUNNER_TEMP/objdiff"
           curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
           chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"

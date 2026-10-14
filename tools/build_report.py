@@ -45,6 +45,104 @@ def run(cmd, **kw):
 JPDEMO = {"slpm80165": "SLPM_801.65", "x00": "X00.BIN (SYSTEM)"}
 
 
+def jpdemo_sources(progs):
+    """{(prog, demo addr): (src path, demo name)}: the C that builds each demo function.
+
+    By default a demo function reuses the PAL file that matches the PAL function tools/xmatch.py paired it with: the
+    `PAL <module> <address>` comment of config/jpdemo/symbol_addrs_<prog>.txt is looked up by address among the src
+    files (tools/units.py), so PAL renames do not break it; the file must cover exactly the demo function's size.
+    config/jpdemo/reuse.txt overrides or adds pairs, one per line: `<prog> <demo addr> <PAL module> <PAL addr>` or
+    `<prog> <demo addr> <path>` (demo-specific C, under src/jpdemo/, with a `// JPDEMO <addr> <size>` header).
+    """
+    import units as U
+    pal = {}
+    for p, us in U.units().items():
+        for u in us:
+            if u.file: pal[(p.lower(), u.addr)] = u
+    out, names = {}, {}
+    for prog in progs:
+        for l in open("config/jpdemo/symbol_addrs_%s.txt" % prog):
+            m = re.match(r"(\w+) = 0x([0-9A-Fa-f]+); // type:func size:0x([0-9A-Fa-f]+)\s+PAL (\w+) 0x([0-9A-Fa-f]+)", l)
+            if not m: continue
+            a = int(m.group(2), 16)
+            names[(prog, a)] = (m.group(1), int(m.group(3), 16))
+            u = pal.get((m.group(4), int(m.group(5), 16)))
+            if u and u.size == int(m.group(3), 16): out[(prog, a)] = (u.file, m.group(1))
+    if os.path.exists("config/jpdemo/reuse.txt"):
+        for l in open("config/jpdemo/reuse.txt"):
+            f = l.split("#")[0].split()
+            if not f: continue
+            prog, a = f[0], int(f[1], 16)
+            nm = names.get((prog, a), ("func_%08X" % a, 0))[0]
+            if len(f) == 4:
+                u = pal.get((f[2].lower(), int(f[3], 16)))
+                if u: out[(prog, a)] = (u.file, nm)
+                else: print("reuse.txt: no PAL src at", f[2], f[3])
+            elif f[2] == "-": out.pop((prog, a), None)
+            else: out[(prog, a)] = (os.path.join(ROOT, f[2]), nm)
+    return out
+
+
+def _jpdemo_compile(job):
+    src, out, name, inc = job
+    NC = _jpdemo_compile.__dict__.setdefault("nc", {})
+    if not NC:
+        s = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
+        NC.update({"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"})
+        exec(compile(s, "ncheck", "exec"), NC)
+    t = open(src, errors="replace").read()
+    fm = re.search(r"//\s*FLAGS\s+(.*)", t)
+    flags = fm.group(1).strip() if fm else "-O2 -G0"
+    d = tempfile.mkdtemp()
+    try:
+        NC["build"](src, flags, d, inc)
+        # the function at .text offset 0 takes the demo name, so objdiff pairs it with the target symbol
+        syms = subprocess.run(["mipsel-linux-gnu-nm", d + "/a.o"], capture_output=True, text=True).stdout
+        first = sorted((l.split()[1] == "t", l.split()[2]) for l in syms.splitlines()
+                       if re.match(r"0+ [Tt] [\w$]+$", l) and l.split()[2] != "gcc2_compiled")
+        first = [n for _, n in first]
+        if not first: return "no global function at .text 0"
+        if first[0] != name:
+            subprocess.run(["mipsel-linux-gnu-objcopy", "--redefine-sym", "%s=%s" % (name, name + "_pal"),
+                            "--redefine-sym", "%s=%s" % (first[0], name), d + "/a.o"], check=True)
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        shutil.copy(d + "/a.o", out)
+        return None
+    except subprocess.CalledProcessError as e:
+        return str(e.stderr)[-200:]
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def jpdemo_base(progs, units, out_dir):
+    """Compiles the C of every demo unit that has one (jpdemo_sources) into build/jpdemo/base/; sets base_path."""
+    from multiprocessing import Pool
+    srcs = jpdemo_sources(progs)
+    inc = tempfile.mkdtemp()
+    for f in os.listdir("include"):
+        s = os.path.join("include", f)
+        if os.path.isdir(s): shutil.copytree(s, os.path.join(inc, f)); continue
+        for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
+    shutil.rmtree(out_dir + "/base", ignore_errors=True)
+    jobs, want = [], []
+    for u in units:
+        prog, name = u["name"].split("/", 1)
+        a = u.get("addr")
+        if a is None or (prog, a) not in srcs: continue
+        src, _ = srcs[(prog, a)]
+        out = "%s/base/%s/%s.o" % (out_dir, prog, name)
+        jobs.append((src, out, name, inc)); want.append((u, out))
+    with Pool(os.cpu_count() or 4) as pool:
+        res = pool.map(_jpdemo_compile, jobs)
+    n = 0
+    for (u, out), r, j in zip(want, res, jobs):
+        if r is None: u["base_path"] = out; n += 1
+        else: print("jpdemo base compile failed:", u["name"], os.path.relpath(j[0], ROOT), r)
+    shutil.rmtree(inc, ignore_errors=True)
+    for u in units: u.pop("addr", None)
+    return n
+
+
 def jpdemo_main():
     os.chdir(ROOT)
     progs = [p for p in JPDEMO if os.path.exists("config/jpdemo/%s.yaml" % p)]
@@ -75,17 +173,21 @@ def jpdemo_main():
                 print("target asm failed:", prog, name, e.stderr[:120]); continue
             finally:
                 os.unlink(t.name)
-            units.append({"name": "%s/%s" % (prog, name), "target_path": out,
+            am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open(os.path.join(fdir, fn)).read())
+            units.append({"name": "%s/%s" % (prog, name), "target_path": out, "addr": int(am.group(1), 16) if am else None,
                           "metadata": {"progress_categories": [prog]}})
+    nbase = jpdemo_base(progs, units, out_dir)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": p, "name": JPDEMO[p]} for p in progs],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
     # objdiff reads objdiff.json from the project dir: keep the demo project in build/jpdemo/ apart from the PAL one
-    for u in units: u["target_path"] = os.path.relpath(u["target_path"], out_dir)
+    for u in units:
+        for k in ("target_path", "base_path"):
+            if k in u: u[k] = os.path.relpath(u[k], out_dir)
     json.dump(cfg, open(out_dir + "/objdiff.json", "w"), indent=1)
-    print("jpdemo units %d" % len(units))
+    print("jpdemo units %d, base objects %d" % (len(units), nbase))
     subprocess.run([OBJDIFF, "report", "generate", "-p", out_dir, "-o", out_dir + "/report.json"], check=True)
     print("wrote %s/report.json" % out_dir)
 
