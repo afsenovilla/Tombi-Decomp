@@ -2,6 +2,7 @@
 // MATCHING 801198f0 3660
 /* Real start 801198F0 (3660 B) covers csv pieces 8011A0B4 and 8011A448. Case 2 clamp written as `if (r <= d) y += r - d` (leaves the game's dead copy of y). */
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct {
     short a;     /* 0xb4 */
@@ -32,7 +33,7 @@ extern short D_1F8000E2, D_1F8000E6, D_1F8000EA, D_1F8000EE[];
 extern int D_1F8000EC[], D_1F800190, D_1F8000F4;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172;
 extern unsigned short D_1F8001FC, D_1F8003C6;
-extern unsigned char D_8009C964, D_8009C93A[], D_8009C93E, D_8009C93F[], D_8009C942;
+extern unsigned char D_8009C93A[], D_8009C93E, D_8009C93F[], D_8009C942;
 extern short D_8009CFE2;
 extern int D_8009C948;
 extern int Rand(void);
@@ -176,7 +177,7 @@ void func_801198F0(TObj *o)
         D_1F80016A[0] = o->a.p.whole;
         D_1F80016E[0] = o->y.p.whole;
         D_1F800172 = o->b.p.whole;
-        D_8009C964 = 0;
+        GAME.selectedPlane = 0;
         func_801183F0(o);
         t->d0 = 0x80;
         t->ce = 0x1e;

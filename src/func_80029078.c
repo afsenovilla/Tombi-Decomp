@@ -1,5 +1,6 @@
 // FUNC 80029078 3132 MAIN0
 // MATCHING 80029078 3132
+#include "gamestate.h"
 typedef struct {
     char p0[0x20];
     int spd;
@@ -19,8 +20,6 @@ typedef struct {
 extern G PLAYER;
 extern unsigned char D_800A60D8;
 extern unsigned char D_8009C93A, D_8009C93F;
-extern unsigned char D_8009C964, D_8009C965;
-extern unsigned short D_8009C960;
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1f8001fc;
 extern short D_1f8001c8;
@@ -252,7 +251,7 @@ void func_80029078(S *o)
         clamp(o);
         if (g->a0.b[3] != 0) break;
         if ((g->a0.b[0] & 0x10) && (D_8009D670[0] & 0x40)) goto zero;
-        if (D_8009C964 > D_8009C965) goto zero;
+        if (GAME.selectedPlane > GAME.area00_fogControl) goto zero;
         o->b6c = 7;
         o->b6d = 0;
         o->b6e = 0;
@@ -297,11 +296,11 @@ void func_80029078(S *o)
     case 10:
         if (D_8009C93F != 0) break;
         if (D_1f8001c8 == 0) {
-            if (D_8009C964 <= D_8009C965) {
+            if (GAME.selectedPlane <= GAME.area00_fogControl) {
                 o->b6c = 0;
                 break;
             }
-        } else if (D_8009C964 >= D_8009C965) {
+        } else if (GAME.selectedPlane >= GAME.area00_fogControl) {
             goto zero;
         }
         o->b6d = 1;
@@ -317,7 +316,7 @@ void func_80029078(S *o)
         break;
     }
     loadSectionHeight(o);
-    switch (D_8009C960) {
+    switch (GAME.selectedArea) {
     case 0:
         FUN_80116758(o);
         break;

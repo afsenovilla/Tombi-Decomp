@@ -2,11 +2,11 @@
 // MATCHING 80101d74 924
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern unsigned char *D_800A611C;
 extern int D_8009C934;
-extern int D_8009C960;
 extern unsigned char D_8009C93A[];
 extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
@@ -35,9 +35,9 @@ void func_80101D74(TObj *o)
     switch (o->step) {
     case 1:
         if (--o->timer > 0) goto common;
-        if (D_8009C960 == 0x40000) {
+        if ((*(int*)&GAME.selectedArea) == 0x40000) {
             S8(o, 0xf) = 8;
-        } else if (D_8009C960 == 0x50000) {
+        } else if ((*(int*)&GAME.selectedArea) == 0x50000) {
             S8(o, 0xf) = -5;
         } else {
             S8(o, 0xf) = -8;

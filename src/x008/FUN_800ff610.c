@@ -2,12 +2,12 @@
 // MATCHING 800ff610 2228
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *D_8009C330;
 extern AnimTbl D_800E8404;
-extern unsigned short D_8009C960, D_8009C962, D_8009C982;
-extern unsigned char D_8009D2C3, D_8009C93F, D_8009CFFB, D_8009CDAC, D_8009C990;
+extern unsigned char D_8009C93F, D_8009CFFB, D_8009CDAC;
 extern short D_8009C944, D_8009C946;
 extern unsigned char D_1F8001A4, D_8009C942, D_8009C938;
 extern unsigned char D_8009C970A[];
@@ -26,9 +26,9 @@ static __inline__ short calc(void)
     short c = D_8009CFFB != 0;
     if (D_8009CDAC == 0xff)
         c++;
-    if (D_8009C960 == 0 && D_8009C962 < 2)
+    if (GAME.selectedArea == 0 && GAME.selectedSection < 2)
         c = 0;
-    if (D_8009C990 == 1)
+    if (GAME.displayExpBar == 1)
         c = 0;
     return c;
 }
@@ -50,7 +50,7 @@ void FUN_800ff610(TObj *o, int arg)
         return;
     switch (U8(o, 0xa1)) {
     case 1:
-        switch (D_8009C960) {
+        switch (GAME.selectedArea) {
         case 0:
             if (o->d->p.whole == 0x5a) {
                 if (o->h->p.whole < 0x641)
@@ -64,7 +64,7 @@ void FUN_800ff610(TObj *o, int arg)
             }
             break;
         case 1:
-            if (D_8009C962 != 3)
+            if (GAME.selectedSection != 3)
                 break;
             SET(0x4c7, -0x210);
         case 3:
@@ -81,14 +81,14 @@ void FUN_800ff610(TObj *o, int arg)
             U8(o, 0xa1) = 0;
             return;
         case 9:
-            if (D_8009C962 != 0)
+            if (GAME.selectedSection != 0)
                 break;
             SET(0xed4, -0x1fb);
         case 10:
-            switch (D_8009C962) {
+            switch (GAME.selectedSection) {
             case 0:
             case 4:
-                if (D_8009C982 == 3) {
+                if (GAME.selectedSpawnPoint == 3) {
                     if (o->d->p.whole == 0x5a) {
                         if (o->h->p.whole >= 0xadd) SET(0xafa, -0xc8)
                         else SET(0xa24, -0x58)
@@ -102,7 +102,7 @@ void FUN_800ff610(TObj *o, int arg)
                 break;
             case 3:
             case 7:
-                if (!(D_8009D2C3 & 0x40))
+                if (!(GAME.purifiedAreas & 0x40))
                     goto kill;
                 {
                     short v = o->h->p.whole;
@@ -115,7 +115,7 @@ void FUN_800ff610(TObj *o, int arg)
             }
             break;
         case 14:
-            if (D_8009C962 == 2)
+            if (GAME.selectedSection == 2)
                 break;
             if (D_8009C93F)
                 return;
@@ -139,19 +139,19 @@ void FUN_800ff610(TObj *o, int arg)
         if (flag)
             break;
         U8(o, 0xd1) = 2;
-        switch (D_8009C960) {
+        switch (GAME.selectedArea) {
         case 0:
-            if (D_8009C962 == 5) SET(0xd2, -0x12f)
+            if (GAME.selectedSection == 5) SET(0xd2, -0x12f)
             if (o->d->p.whole == 0x5a) {
                 if (o->h->p.whole < 0x641) SET(0x4b2, -0x114)
             } else SET(0x4b2, -0xeb)
             break;
         case 1:
-            if (D_8009C962 != 2)
+            if (GAME.selectedSection != 2)
                 break;
             SET(0x572, -0x110);
         case 4:
-            switch (D_8009C962) {
+            switch (GAME.selectedSection) {
             case 6: SET(0x6f, -0x74);
             case 7: SET(0x88, -0x54);
             case 8: SET(0x8f, -0xbc);
@@ -160,7 +160,7 @@ void FUN_800ff610(TObj *o, int arg)
             }
             break;
         case 10:
-            switch (D_8009C962) {
+            switch (GAME.selectedSection) {
             case 3:
             case 7:
                 SET(0x5f, -0x40c);
@@ -172,7 +172,7 @@ void FUN_800ff610(TObj *o, int arg)
         }
         break;
     case 3:
-        switch (D_8009C960) {
+        switch (GAME.selectedArea) {
         case 4:
             break;
         case 14:

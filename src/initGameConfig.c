@@ -1,11 +1,11 @@
 // FUNC 8001783c 776 MAIN0
 // MATCHING 8001783c 776
 #include "globals.h"
-/* Game-state init. No volatile: the store `*(unsigned short *)D_8009C960 = 0` through the memset pointer (kept in s0)
-   is a varying NON-struct store, which sched2 orders against every fixed store (a barrier); D_8009C980 = 3 placed
+#include "gamestate.h"
+/* Game-state init. No volatile: the store `*(unsigned short *)((char*)&GAME.selectedArea) = 0` through the memset pointer (kept in s0)
+   is a varying NON-struct store, which sched2 orders against every fixed store (a barrier); GAME.playerLives = 3 placed
    inside the 0xff stores' range makes the 255 pseudo overlap the 3 pseudo so it gets v1; sched2 then emits the
    free stores in source order (ties by luid). */
-extern char D_8009C960[];
 extern char D_8009C930[];
 extern char D_1F8000C0[];
 extern unsigned short D_8009F3DC;
@@ -21,21 +21,14 @@ extern short DAT_1f8000e2;
 extern short DAT_1f8000e6;
 extern short DAT_1f8000f6;
 extern unsigned char DAT_1f8003d3;
-extern int D_8009C96C;
-extern unsigned char D_8009C977;
 extern unsigned char D_8009D090;
-extern unsigned char D_8009C980;
 extern unsigned char D_8009C972;
-extern unsigned char D_8009C971;
-extern unsigned char D_8009C970;
 extern short D_8009CFD0;
 extern short D_8009CFD2;
 extern unsigned char DAT_1f8003ce;
 extern short DAT_1f8001c8;
 extern unsigned char DAT_1f8003d1;
 extern short D_8009F838;
-extern short D_8009C962;
-extern unsigned char D_8009CDA3;
 extern unsigned char D_8009C973;
 extern unsigned char D_8009CEAF;
 extern unsigned char SCRIPT_FLAGS;
@@ -74,7 +67,7 @@ extern void getBaseMatrix(void *);
 
 void initGameConfig(void)
 {
-    memset(D_8009C960, 0, 0x988);
+    memset(((char*)&GAME.selectedArea), 0, 0x988);
     memset(D_8009C930, 0, 0x2c);
     getBaseMatrix(D_1F8000C0);
     DAT_1f8000ea = -544;
@@ -86,24 +79,24 @@ void initGameConfig(void)
     DAT_1f8000f6 = 0;
     LOADED_LIST_FILE_SYM = 255;
     DAT_1f8003d3 = 255;
-    D_8009C96C = 0;
-    *(unsigned short *)D_8009C960 = 0;
-    D_8009C980 = 3;
-    D_8009C977 = 255;
+    (*(int*)&GAME.playerAP) = 0;
+    *(unsigned short *)((char*)&GAME.selectedArea) = 0;
+    GAME.playerLives = 3;
+    GAME.saveSlot = 255;
     D_8009D090 = 255;
     D_8009CF1C = D_8009F3DC;
     DAT_1f8003ce = 0;
     DAT_1f8001c8 = 0;
     DAT_1f8003d1 = 0;
     D_8009F838 = 0;
-    D_8009C962 = 0;
-    D_8009CDA3 = 0;
+    (*(short*)&GAME.selectedSection) = 0;
+    GAME.inventoryScreen = 0;
     D_8009C973 = 1;
     D_8009CEAF = 1;
     SCRIPT_FLAGS = 1;
     D_8009C972 = 9;
-    D_8009C971 = 4;
-    D_8009C970 = 4;
+    GAME.playerHealthDisplayed = 4;
+    GAME.playerHealth = 4;
     D_8009CFD0 = 1498;
     D_8009CFD2 = 1593;
     D_8009CFD4 = 1681;

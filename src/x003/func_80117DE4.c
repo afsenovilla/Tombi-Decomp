@@ -3,6 +3,7 @@
 /* Loops written as macros on ONE function-scope `short i` shared by all four loops: the shared loop variable is
    what keeps i in a1 (it conflicts with k in a0 in cases 2/3) and makes cse extend i rather than a before the loop.
    Covers csv pieces 80117F98/80118040/801180AC. */
+#include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct {
     unsigned char p0[3];
@@ -10,10 +11,8 @@ typedef struct {
     int items[0x58];
     unsigned char b164;
 } L;
-extern unsigned short D_8009C962;
 extern int D_800A4574;
 extern short D_1F800176;
-extern unsigned char D_8009D2C3;
 extern int getScrollOffsetX(void);
 extern void FUN_8005f488(RECT *, int, int);
 extern void func_80118284(L *);
@@ -44,7 +43,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
     int k;
     RECT r;
 
-    switch (D_8009C962) {
+    switch (GAME.selectedSection) {
     case 0:
     case 4:
         if (D_800A4574 == 0) {
@@ -78,7 +77,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
         func_80118284(o);
         break;
     case 3:
-        if ((D_8009D2C3 & 2) && o->b164 == 0) {
+        if ((GAME.purifiedAreas & 2) && o->b164 == 0) {
             r.x = 0xa0;
             r.y = 0x1e0;
             r.w = 0x10;

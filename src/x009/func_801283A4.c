@@ -3,8 +3,9 @@
 /* D_800A6047 is the b0f field of the player TObj PLAYER (struct access keeps it after the anim store);
    the case-1 tails goto the shared `clr: o->b9d = 0` after case 2's step switch. */
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned char D_8009C942, D_8009C964;
+extern unsigned char D_8009C942;
 extern TObj PLAYER;
 extern void *D_8012EE9C[];
 extern int ObjCullRegister(TObj *);
@@ -43,7 +44,7 @@ void func_801283A4(TObj *o)
             ObjCullRegister(o);
             break;
         }
-        if (D_8009C964 == 0x20) break;
+        if (GAME.selectedPlane == 0x20) break;
         if (o->b9e == 0) {
             switch (o->step) {
             case 0:
@@ -118,7 +119,7 @@ void func_801283A4(TObj *o)
         goto clr;
     case 2:
         o->b6a = 0;
-        if (D_8009C964 == 0x20) break;
+        if (GAME.selectedPlane == 0x20) break;
         if (o->ba7 == 1 && (unsigned char)(o->step - 4) >= 2) {
             o->step = 4;
             o->state = 0;

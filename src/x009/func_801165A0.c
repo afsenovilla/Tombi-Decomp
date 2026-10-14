@@ -1,5 +1,6 @@
 // FUNC 801165a0 1584 X009
 // MATCHING 801165a0 1584
+#include "gamestate.h"
 typedef struct { short s0, s2; } S2;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -14,8 +15,7 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 extern PL PLAYER;
 extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
-extern unsigned char D_8009C93A, D_8009C93C, D_8009C975, D_8009CDC0, D_800A60DA;
-extern unsigned short D_8009C962, D_8009C982;
+extern unsigned char D_8009C93A, D_8009C93C, D_8009CDC0, D_800A60DA;
 extern short D_800A457C;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
@@ -39,9 +39,9 @@ void func_801165A0(O *o)
         break;
     case 1:
         D_80079AB4[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
-            switch (D_8009C982) {
+            switch (GAME.selectedSpawnPoint) {
             case 0:
                 if (D_1F80016A >= 0x4b1 && D_1F80016E >= -0x59) {
                     o->state = 0;
@@ -53,19 +53,19 @@ void func_801165A0(O *o)
                     if (D_1F80016A < 0x348) {
                         o->state++;
                         D_8009C93C = 0;
-                        D_8009C975 = 3;
+                        GAME.fadeScreenControl = 3;
                     }
                     if (o->p34->s2 < 0x3bc) o->p34->s2 = 0x3bc;
                     break;
                 case 1:
                     if (o->p34->s2 < 0x3bc) o->p34->s2 = 0x3bc;
-                    if (D_8009C975 == 1) o->state++;
+                    if (GAME.fadeScreenControl == 1) o->state++;
                     break;
                 case 2:
                     if (D_1F80016A < 0x276) {
                         o->state++;
                         D_8009C93C = 0;
-                        D_8009C975 = 4;
+                        GAME.fadeScreenControl = 4;
                     }
                     if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
                     break;
@@ -78,7 +78,7 @@ void func_801165A0(O *o)
                             o->state++;
                         } else {
                             o->state = 0;
-                            D_8009C982 = 1;
+                            GAME.selectedSpawnPoint = 1;
                         }
                     }
                     if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
@@ -111,7 +111,7 @@ void func_801165A0(O *o)
                             o->state = 0;
                             o->w4a = 0;
                             setEventStarted(0x1c, 0, 1);
-                            D_8009C982 = 1;
+                            GAME.selectedSpawnPoint = 1;
                         }
                     }
                     break;
@@ -122,12 +122,12 @@ void func_801165A0(O *o)
                 if (D_800A60DA == 2) {
                     if (D_1F80016A >= 0x71) {
                         stepPlayerXToward(0x90);
-                        D_8009C982 = 1;
+                        GAME.selectedSpawnPoint = 1;
                     } else {
                         stepPlayerXToward(0x48);
-                        D_8009C982 = 2;
+                        GAME.selectedSpawnPoint = 2;
                     }
-                    if (D_1F800172 >= 0x3d) tryStartItemInteraction(o, 1, D_8009C982);
+                    if (D_1F800172 >= 0x3d) tryStartItemInteraction(o, 1, GAME.selectedSpawnPoint);
                 }
                 if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
                 break;

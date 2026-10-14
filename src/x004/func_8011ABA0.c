@@ -1,10 +1,10 @@
 // FUNC 8011aba0 388 X004
 // MATCHING 8011aba0 388
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern int D_1F8002D4[];
 extern void *D_80134D24[];
-extern unsigned short D_8009C962;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001f9e0(void);
 extern void playSFX(int);
@@ -26,7 +26,7 @@ void func_8011ABA0(TObj *o)
             FUN_8001fe6c(o);
             o->timer = FUN_8001f9e0() & 3;
             if ((o->animFrame >> 1) & 1) {
-                if (D_8009C962 < 4) {
+                if (GAME.selectedSection < 4) {
                     playSFX(0x7d);
                 } else {
                     playSFX(0x85);

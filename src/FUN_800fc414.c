@@ -2,6 +2,7 @@
 // MATCHING 800fc414 3908
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 
 typedef struct {
     unsigned char b0;
@@ -16,10 +17,8 @@ typedef struct {
 
 extern P800FC414 *D_8009C330;
 extern unsigned char D_8009C938;
-extern int D_8009C960;
 extern unsigned char D_8009C960b[];
 extern unsigned char D_8009CF06;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CE3D;
 extern unsigned char D_801152E8[];
 extern char D_80077CF4[];
@@ -234,13 +233,13 @@ void FUN_800fc414(TObj *o)
                 U8(o, 0xd1) = 0;
                 S16(o, 0xb2) = 0;
                 o->b04 = 1;
-                if (D_8009C960 == 0x2000e) {
+                if ((*(int*)&GAME.selectedArea) == 0x2000e) {
                     o->step = 0x3e;
                     o->state = 0;
                     o->substep = 0;
-                } else if ((D_8009C960 & 0x3ffff) == 0x3000a) {
+                } else if (((*(int*)&GAME.selectedArea) & 0x3ffff) == 0x3000a) {
                     r = 0;
-                    if (D_8009D2C3 & 0x40) {
+                    if (GAME.purifiedAreas & 0x40) {
                         if (o->y.p.whole > -0x8c) {
                             r = 1;
                             o->w56 = -0x8c;

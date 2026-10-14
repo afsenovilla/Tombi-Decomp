@@ -1,10 +1,10 @@
 // FUNC 80123d18 436 X010
 // MATCHING 80123d18 436
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern void *D_80131DC0;
 extern unsigned char D_8009C959;
-extern unsigned short D_8009C960;
 extern unsigned char D_8009CF0A;
 extern unsigned char D_8009CFC8;
 void ObjCullRegister(TObj *o);
@@ -42,7 +42,7 @@ void func_80123D18(TObj *o)
                 AnimLoadDuration(o);
                 D_8009C959--;
                 addItemToInventory(0x10, 1, 1);
-                if (D_8009C960 == 1) {
+                if (GAME.selectedArea == 1) {
                     D_8009CF0A++;
                     o->b04 = 3;
                     o->step = 0;

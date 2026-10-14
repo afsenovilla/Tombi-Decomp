@@ -1,11 +1,10 @@
 // FUNC 80116b08 2140 X010
 // MATCHING 80116b08 2140
 /* size 2140: real start 80116B08 (missing from csv); includes the csv piece 80116D50. */
+#include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p[3]; unsigned char n; int e[0x58]; char pad; unsigned char f165; } Q;
 
-extern unsigned short D_8009C962;
-extern unsigned char D_8009C964;
 extern int D_800A4574, D_800A4570;
 extern short D_1F800176, D_1F800186;
 extern unsigned short D_1F8001F8;
@@ -20,7 +19,7 @@ void func_80116B08(Q *q, unsigned char *base)
     unsigned char cnt = base[0];
     int *off = (int *)(base + 4);
 
-    switch (D_8009C962) {
+    switch (GAME.selectedSection) {
     case 0:
     case 4:
         if (D_800A4574 == 0) {
@@ -42,7 +41,7 @@ void func_80116B08(Q *q, unsigned char *base)
             if (a < 0x2c) a = 0x2c;
             if (b >= cnt) b = cnt - 1;
         }
-        if (D_8009C964 == 0) {
+        if (GAME.selectedPlane == 0) {
             for (i = lo; i <= hi; i++) {
                 q->e[q->n] = (int)base + off[i];
                 q->n++;

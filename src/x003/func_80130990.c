@@ -1,9 +1,9 @@
 // FUNC 80130990 1196 X003
 // MATCHING 80130990 1196
 #include "TOBJ.H"
+#include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_8009D2C3, D_1F8001A4, D_8009C93A, D_8009C93F;
-extern unsigned short D_8009C962;
+extern unsigned char D_1F8001A4, D_8009C93A, D_8009C93F;
 extern short D_8009C944, D_8009C946;
 extern unsigned short D_80135EC0[], D_80135EC8[];
 extern int FUN_8001f9e0(void);
@@ -19,9 +19,9 @@ void func_80130990(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D2C3 & 2)
+        if (GAME.purifiedAreas & 2)
             o->b04 = 2;
-        else if (D_8009C962 < 2)
+        else if (GAME.selectedSection < 2)
             o->b04++;
         else
             o->b04 = 3;
@@ -61,7 +61,7 @@ void func_80130990(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            if (D_8009C962 < 4) {
+            if (GAME.selectedSection < 4) {
                 o->b04 = 3;
             } else {
                 o->w08 = 0;

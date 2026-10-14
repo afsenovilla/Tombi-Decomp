@@ -1,6 +1,7 @@
 // FUNC 8011ccd8 2332 X010
 // MATCHING 8011ccd8 2332
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     char pad0[2];
     short w02;
@@ -11,7 +12,6 @@ extern TObj *D_8009F0EC;
 extern unsigned short D_8009D670;
 extern unsigned short D_1F8001F8, D_1F8001FC, D_1F8003C4, D_1F8003C6;
 extern unsigned char D_8009D2B0;
-extern int D_8009C984[];
 extern unsigned char D_801152E8[];
 extern int AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
@@ -207,7 +207,7 @@ void func_8011CCD8(TObj *o)
         {
             Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 0x10 : v - 0x10;
         }
-        if (D_8009C984[0] & 0x40) {
+        if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
             if (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4) o->ba7 = 1;
         }
         o->step = 2;

@@ -1,13 +1,13 @@
 // FUNC 800452ac 152 MAIN0
 // MATCHING 800452ac 152
-extern unsigned short D_8009C960;
+#include "gamestate.h"
 void func_801257F4(void);
 void func_801240A8(void);
 void func_8011F8CC(void);
 void func_8011EFA4(void);
 void dispatchAreaActorInit(void)
 {
-    switch (D_8009C960) {
+    switch (GAME.selectedArea) {
     case 0: func_801257F4(); break;
     case 1: func_801240A8(); break;
     case 3: func_8011F8CC(); break;

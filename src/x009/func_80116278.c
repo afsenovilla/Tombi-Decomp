@@ -1,5 +1,6 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+#include "gamestate.h"
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
     char p08[0x30 - 8];
@@ -10,10 +11,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009CDA2[];
 extern unsigned char D_8009C93A, D_8009C93D, D_8009CFEE, D_800A60DA;
-extern unsigned short D_8009C982;
-extern unsigned short D_8009C962;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern unsigned int stepScrollReturnY(O *);
@@ -30,14 +28,14 @@ void func_80116278(O *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CDA2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
+        if (((unsigned char*)&GAME.disableSelectMenu)[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         o->subtype = 0;
         o->step++;
         D_8009C93D = 1;
-        if (D_8009C962 == 0 && D_8009C982 == 5)
+        if (GAME.selectedSection == 0 && GAME.selectedSpawnPoint == 5)
             D_8009C93A = 1;
         break;
     case 1:

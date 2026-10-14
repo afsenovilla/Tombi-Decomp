@@ -1,8 +1,8 @@
 // FUNC 8011d2b8 652 X004
 // MATCHING 8011d2b8 652
 #include "TOBJ.H"
+#include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned short D_8009C982[];
 extern unsigned char D_8009C93F, D_8009C93A;
 extern void FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
@@ -25,7 +25,7 @@ void func_8011D2B8(TObj *o)
         o->box3 = 0x10;
         o->b69 = 0;
         o->velH = 0;
-        if (D_8009C982[0] != 0xb)
+        if (((unsigned short*)&GAME.selectedSpawnPoint)[0] != 0xb)
             o->b04 = 3;
         else
             D_8009C93F = 1;

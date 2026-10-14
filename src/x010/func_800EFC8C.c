@@ -1,6 +1,7 @@
 // FUNC 800efc8c 656 X010
 // MATCHING 800efc8c 656
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { TObj o; char p0[6]; unsigned char c6, c7; char p1[0xe3 - 0xc8]; unsigned char e3; } TObjX;
 extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
@@ -8,7 +9,6 @@ extern int D_8009C934;
 extern unsigned char *D_8009C330;
 extern TObj *D_8009F0EC;
 extern char D_80010C0C[];
-extern unsigned short D_8009C960;
 extern void AnimLoadDuration(TObjX *o);
 extern void SfxPlay2(int a, int b);
 extern void SfxPlay3(int a, int b);
@@ -79,7 +79,7 @@ void func_800EFC8C(TObjX *x, short f)
         else { x->o.step = 0x25; x->o.state = 0; }
         break;
     case 7:
-        if (D_8009C960 != 10) { x->o.step = 0x22; x->o.state = 0; }
+        if (GAME.selectedArea != 10) { x->o.step = 0x22; x->o.state = 0; }
         else { x->o.step = 0x46; x->o.state = 0; }
         break;
     case 8:

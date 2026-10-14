@@ -1,7 +1,7 @@
 // FUNC 80136164 824 X001
 // MATCHING 80136164 824
 #include "TOBJ.H"
-extern unsigned short D_8009C960, D_8009C962;
+#include "gamestate.h"
 extern Fix16 *D_800A6078;
 extern unsigned char D_8009C942[], D_8009C93F[], D_8009C93E[];
 extern void *D_8013DE2C, *D_8013DDC8, *D_8013DE0C, *D_8013DDB0;
@@ -22,7 +22,7 @@ void func_80136164(TObj *o)
         }
         func_80135B48(o);
         o->active = 4;
-        if (D_8009C960 == 1 && D_8009C962 < 2) o->anim = D_8013DE2C;
+        if (GAME.selectedArea == 1 && GAME.selectedSection < 2) o->anim = D_8013DE2C;
         else o->anim = D_8013DDC8;
         AnimLoadDuration(o);
         o->animFrame = o->h->p.whole > D_800A6078->p.whole;
@@ -41,7 +41,7 @@ void func_80136164(TObj *o)
         break;
     case 3:
         o->active = 4;
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 1:
         case 4:
@@ -53,7 +53,7 @@ void func_80136164(TObj *o)
             o->animFrame = 1;
             break;
         }
-        if (D_8009C960 == 1 && D_8009C962 < 2) o->anim = D_8013DE0C;
+        if (GAME.selectedArea == 1 && GAME.selectedSection < 2) o->anim = D_8013DE0C;
         else o->anim = D_8013DDB0;
         AnimLoadDuration(o);
         o->velX = (o->animFrame & 1) ? -0x200 : 0x200;

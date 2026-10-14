@@ -1,11 +1,11 @@
 // FUNC 80049cdc 1096 MAIN0
 // MATCHING 80049cdc 1096
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char p[0x4c]; short w4c; short w4e; } G4;
 extern TObj PLAYER;
 extern short D_1F800176;
-extern unsigned char D_8009C93C, D_8009C975, D_8009CFF9, D_8009D2C3;
-extern int D_8009C960;
+extern unsigned char D_8009C93C, D_8009CFF9;
 extern G4 *TASK_C;
 extern int AnimAdvance(TObj *);
 extern void func_800EEA7C(TObj *, int, int);
@@ -92,7 +92,7 @@ void func_80049CDC(TObj *o)
         if (--o->timer == -1) {
             o->state++;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
         }
         o->velV += 0x20;
         if (o->velV > 0x600)
@@ -106,9 +106,9 @@ void func_80049CDC(TObj *o)
             o->velV = 0x600;
         o->y.raw -= o->velV << 8;
         pl->y.raw -= o->velV << 8;
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             D_8009CFF9 = 1;
-            if (D_8009C960 == 0x7000E && D_8009D2C3 == 0xff) {
+            if ((*(int*)&GAME.selectedArea) == 0x7000E && GAME.purifiedAreas == 0xff) {
                 o->state++;
             } else {
                 TASK_C->w4c = 7;

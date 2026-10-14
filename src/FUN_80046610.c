@@ -1,6 +1,7 @@
 // FUNC 80046610 1864 MAIN0
 // MATCHING 80046610 1864
 #include "TOBJ.H"
+#include "gamestate.h"
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
@@ -8,7 +9,6 @@ extern short DAT_1f80019e;
 extern unsigned short DAT_1f800244;
 extern short DAT_1f80024c;
 extern unsigned short DAT_1f80024cu;
-extern unsigned short D_8009C960;
 extern TObj **DAT_1f800218;
 extern TObj **DAT_1f800224;
 extern int FUN_800425c4(TObj *, TObj *);
@@ -141,7 +141,7 @@ void FUN_80046610(void)
                 func_800447C0(a, b);
                 break;
             case 4:
-                if (D_8009C960 == 0) {
+                if (GAME.selectedArea == 0) {
             case 2:
                     func_80125984(a, b);
                     break;

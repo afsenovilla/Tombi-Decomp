@@ -2,12 +2,11 @@
 // MATCHING 80116818 1276
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
 extern G6038 PLAYER;
-extern unsigned short D_8009C962;
 extern unsigned char D_8009C938, D_8009C966, D_8009D095, D_8009C933, D_8009C93F, D_8009C942;
-extern unsigned char D_8009D2B0, D_8009C930, D_8009C93E, D_8009C975[], D_8009C93C[];
-extern int D_8009C984;
+extern unsigned char D_8009D2B0, D_8009C930, D_8009C93E, D_8009C93C[];
 extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern void FUN_80029cb4(TObj *);
@@ -53,7 +52,7 @@ void func_80116818(TObj *o)
     switch (o->state) {
     case 0:
         FUN_80029cb4(o);
-        if (D_8009C962 != 0) break;
+        if (GAME.selectedSection != 0) break;
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
         if (D_8009C938 != 0) break;
         if (g->w12 < 0x49e) break;
@@ -81,7 +80,7 @@ void func_80116818(TObj *o)
         FUN_80029cb4(o);
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
         if (D_8009C938 != 0) break;
-        if ((D_8009C984 & 1) && D_8009C930 == 3) {
+        if ((GAME.area00_eventControl & 1) && D_8009C930 == 3) {
             g->w2e = 0;
             o->animFrame = 0x52e;
             o->y.raw = 0x10000;
@@ -128,7 +127,7 @@ void func_80116818(TObj *o)
         if (o->w48 != 0) {
             if (--o->w48 < 80) slide(o);
             if (o->w48 == 60) {
-                D_8009C975[0] = 3;
+                ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
                 D_8009C93C[0] = 1;
             }
         } else {
@@ -148,7 +147,7 @@ void func_80116818(TObj *o)
             D_1F8001C6 = 0;
             *(int *)o->d34 = 0x52e0000;
             o->y.raw = 0;
-            D_8009C975[0] = 4;
+            ((unsigned char*)&GAME.fadeScreenControl)[0] = 4;
             D_8009C93C[0] = 0;
             o->state = 2;
             o->animTimer = 0x4c0;

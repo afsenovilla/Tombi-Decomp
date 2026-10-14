@@ -5,12 +5,12 @@
    animFrame per leaf (game reloads it afterwards). */
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned short D_8009D670;
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
 extern unsigned short D_1F8001FC, D_1F8003C6, D_1F8003C4;
-extern int D_8009C984;
 extern unsigned char D_8009C93A;
 extern unsigned char D_1F8001A4;
 extern void FUN_800f1478(TObj *);
@@ -189,7 +189,7 @@ void func_80100788(TObj *o, int p2)
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
-            if ((D_8009C984 & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009D670 & D_1F8003C4))
                 o->ba7 = 1;
             o->step = 2;
             o->state = 0;

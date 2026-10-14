@@ -1,14 +1,14 @@
 // FUNC 8013af10 484 X001
 // MATCHING 8013af10 484
 #include "TOBJ.H"
+#include "gamestate.h"
 extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern unsigned short D_800A6066x[]; /* second name for D_800A6066: forces the reloads after the store */
 extern TObj *D_800A60C8[];
 extern Fix16 *D_800A6078;
-extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009C975, D_8009CE59, D_8009CEDE, D_8009CEDF;
+extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CE59, D_8009CEDE, D_8009CEDF;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern unsigned short D_8009C960, D_8009C962, D_8009CD94, D_8009CD96, D_8009CDA0;
 extern char D_80010748[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 extern SC *TASK_C;
@@ -42,18 +42,18 @@ void func_8013AF10(TObj *o)
         p = D_800A60C8[0];
         if (p->b04 == 2) {
             p->b04 = 3;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
         }
         break;
     case 2:
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             D_8009CE59 = 1;
-            D_8009CD94 = D_8009C960;
+            GAME.nextArea = GAME.selectedArea;
             D_8009CEDE = 0;
             D_8009CEDF = 0;
-            D_8009CDA0 = 0;
-            D_8009CD96 = D_8009C962;
+            GAME.nextSpawnPoint = 0;
+            GAME.nextSection = GAME.selectedSection;
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

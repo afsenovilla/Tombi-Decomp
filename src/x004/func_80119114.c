@@ -1,9 +1,9 @@
 // FUNC 80119114 792 X004
 // MATCHING 80119114 792
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_8009C938;
-extern unsigned short D_8009C962;
 extern unsigned short D_1F800176;
 extern short D_1F800186;
 extern void FUN_80018d2c(TObj *);
@@ -30,7 +30,7 @@ void func_80119114(TObj *o)
         switch (o->subtype) {
         case 0:
             if (D_8009C938) goto set2;
-            k = D_8009C962;
+            k = GAME.selectedSection;
             if (k == 0 && (unsigned short)(D_1F800176 - 0x1d5) < 0x191) break;
             if (k == 1 && (unsigned short)(D_1F800176 - 0x191) < 0x207 && D_1F800186 < -0xa0) break;
             o->visible = 1;
@@ -39,7 +39,7 @@ void func_80119114(TObj *o)
             break;
         case 1:
             if (D_8009C938) goto set2;
-            k = D_8009C962;
+            k = GAME.selectedSection;
             if (k == 0 && (short)D_1F800176 < 0x30c) break;
             if (k == 1 && (short)D_1F800176 >= 0x201) break;
             o->visible = 1;

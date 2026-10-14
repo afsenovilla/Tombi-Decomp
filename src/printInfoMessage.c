@@ -1,5 +1,6 @@
 // FUNC 8004d620 1324 MAIN0
 // MATCHING 8004d620 1324
+#include "gamestate.h"
 typedef struct O {
     unsigned char f00;
     char pad0[1];
@@ -56,7 +57,6 @@ typedef struct O {
 typedef struct G { short n, f2, f4, f6; } G;
 extern G MESSAGE_SLOTS[];
 extern unsigned char D_8009C943;
-extern unsigned short D_8009C960;
 extern unsigned char *D_8007DD34[];
 extern unsigned char *D_8007DE38[];
 extern unsigned char D_8007DD0C[];
@@ -119,11 +119,11 @@ O *printInfoMessage(int a, int b)
     if (b == 1 || b == 4) playSFX(0xc);
     if ((unsigned)(b - 2) < 2) {
         s1 = D_8007DD34[a];
-        s1 += D_8009C960 * 2;
+        s1 += GAME.selectedArea * 2;
         if (*s1 == 0xff)
-            { s1 = D_8007DD0C; s1 += D_8009C960 * 2; }
+            { s1 = D_8007DD0C; s1 += GAME.selectedArea * 2; }
     } else {
-        s5 = D_8007DE38[D_8009C960];
+        s5 = D_8007DE38[GAME.selectedArea];
         s5 += a;
     }
     flag = 0;
@@ -171,9 +171,9 @@ O *printInfoMessage(int a, int b)
             q = (unsigned short *)(s1[0] * 2 + (int)base); FC8 = q[8] + s1[1];
         } else {
             short c = *s5;
-            q = (unsigned short *)(base + (D_8007DE24[D_8009C960] * 2 + 0x10));
+            q = (unsigned short *)(base + (D_8007DE24[GAME.selectedArea] * 2 + 0x10));
             if ((unsigned char)c == 0xff) {
-                s1 = D_8007DD0C + D_8009C960 * 2;
+                s1 = D_8007DD0C + GAME.selectedArea * 2;
                 q = (unsigned short *)(s1[0] * 2 + (int)base); FC8 = q[8] + s1[1];
             } else {
                 FC8 = c + *q;

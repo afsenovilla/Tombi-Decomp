@@ -1,5 +1,6 @@
 // FUNC 80117494 2352 X003
 // MATCHING 80117494 2352
+#include "gamestate.h"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
     char p08[0x16 - 8];
@@ -18,11 +19,8 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern unsigned char D_8009CDA2[];
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C975;
+extern unsigned char D_8009C93A, D_8009C93F;
 extern unsigned char D_8009CEF0, D_8009CDC8, D_8009CDC3, D_8009CDC5, D_8009CDC7;
-extern unsigned short D_8009C982;
-extern unsigned short D_8009C962;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern short D_1F8001C6;
@@ -48,8 +46,8 @@ void func_80117494(O *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CDA2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
+        if (((unsigned char*)&GAME.disableSelectMenu)[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -63,10 +61,10 @@ void func_80117494(O *o)
         break;
     case 2:
         D_80079A98[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 0:
         case 4: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             switch (*p) {
             case 0:
                 if (D_1F80016A < 0x14 && D_1F80016E >= -0x59) {
@@ -88,7 +86,7 @@ void func_80117494(O *o)
                 *p = 0;
                 break;
             default:
-                D_8009C982 = 0;
+                GAME.selectedSpawnPoint = 0;
                 break;
             }
             break;
@@ -96,7 +94,7 @@ void func_80117494(O *o)
         case 1:
         case 5: {
             unsigned char *c;
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p != 0) goto clr;
             if (PLAYER.ba2 != 0) {
                 if ((unsigned)(XU - 0xcac) < 0x60) stepPlayerXToward(0xcdc);
@@ -131,7 +129,7 @@ void func_80117494(O *o)
                 keyOffActiveSfxVoices();
                 stopBgm(1);
                 o->step = 4;
-                D_8009C975 = 3;
+                GAME.fadeScreenControl = 3;
                 D_8009C93F = 1;
                 break;
             }
@@ -159,7 +157,7 @@ void func_80117494(O *o)
             break;
         }
         case 2: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             if (*p == 0) {
                 if (D_1F80016A < 0x22) {
                     if ((unsigned short)(ZU + 0x16d) < 0x20) tryStartItemInteraction(o, 1, 0);
@@ -178,7 +176,7 @@ void func_80117494(O *o)
             break;
         }
         case 3: {
-            unsigned short *p = &D_8009C982;
+            unsigned short *p = &GAME.selectedSpawnPoint;
             switch (*p) {
             case 0:
                 if (D_1F80016A < 0x20 && (unsigned short)(ZU + 0x268) < 0x20) tryStartItemInteraction(o, 1, 0);
@@ -195,7 +193,7 @@ void func_80117494(O *o)
         D_80079A98[o->subtype](o);
         break;
     case 4:
-        if (D_8009C975 != 1) break;
+        if (GAME.fadeScreenControl != 1) break;
         o->step++;
         D_1F8001CC = 1;
         D_1F8001CD = 6;
@@ -207,8 +205,8 @@ void func_80117494(O *o)
         if (D_1F8001CC != 0) break;
         o->subtype = 1;
         o->step = 3;
-        D_8009C982 = 3;
-        D_8009CDA2[0] = 1;
+        GAME.selectedSpawnPoint = 3;
+        ((unsigned char*)&GAME.disableSelectMenu)[0] = 1;
         break;
     case 6:
         PLAYER.yw -= 2;

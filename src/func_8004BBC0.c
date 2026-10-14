@@ -1,5 +1,6 @@
 // FUNC 8004bbc0 1060 MAIN0
 // MATCHING 8004bbc0 1060
+#include "gamestate.h"
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct { char p0[4]; unsigned short s4; } A;
 typedef struct {
@@ -15,7 +16,6 @@ extern int D_1F8003C0;
 extern short D_1F80019E;
 extern unsigned short D_1F800254, D_1F800250;
 extern unsigned char **D_1F800268, **D_1F800260;
-extern unsigned short D_8009C960;
 extern short FUN_80041ca8(TO *, short, short);
 extern void func_801269D0(TO *, unsigned char *), func_8004B454(TO *, unsigned char *), func_80126940(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
 extern void func_80126FE4(TO *, unsigned char *), func_80126A64(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
@@ -70,7 +70,7 @@ int func_8004BBC0(TO *o, unsigned char f)
                 func_8004B454(o, e);
                 break;
             case 4:
-                if (D_8009C960 == 0) {
+                if (GAME.selectedArea == 0) {
             case 2:
                     func_80126940(o, e);
                 } else {

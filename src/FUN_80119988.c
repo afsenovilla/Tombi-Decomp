@@ -1,6 +1,7 @@
 // FUNC 80119988 1984 X000
 // MATCHING 80119988 1984
 #include "TOBJ.H"
+#include "gamestate.h"
 struct V3 { int x, y, z; };
 typedef struct {
     TObj o;
@@ -33,7 +34,6 @@ extern unsigned char D_800A603DA[];
 #define D_800A603D D_800A603DA[0]
 extern unsigned char D_800A603EA[];
 #define D_800A603E D_800A603EA[0]
-extern int D_8009C984;
 
 #define o (&e->o)
 void FUN_80119988(TObjE *e)
@@ -159,7 +159,7 @@ void FUN_80119988(TObjE *e)
             break;
         case 10:
             k = 6;
-            if (D_8009C984 & 1) {
+            if (GAME.area00_eventControl & 1) {
                 o->wbc = 2;
                 e->cc = 0x80;
                 o->wba = k;

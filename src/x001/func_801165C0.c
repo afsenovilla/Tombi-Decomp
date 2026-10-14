@@ -2,21 +2,21 @@
 // MATCHING 801165c0 976
 /* The csv entry 8011658C starts with 13 data words; the code starts at 801165C0 and also covers the
    csv piece 80116920. */
+#include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct {
     char p00[0x30];
     short w30, w32;
     FP *p34;
 } O;
-extern unsigned short D_8009C962;
-extern unsigned char D_8009D2C3, D_8009CE3D;
+extern unsigned char D_8009CE3D;
 
 void func_801165C0(O *o)
 {
     unsigned short x = o->p34->whole;
     short v;
 
-    if (D_8009C962 == 0) {
+    if (GAME.selectedSection == 0) {
         if ((short)x < 0x6a1) o->w32 = (short)x * 0xaa / 0x6a0 - 0xaa;
         else if ((short)x < 0xa44) o->w32 = 0;
         else if ((short)x < 0xaa8) {
@@ -24,9 +24,9 @@ void func_801165C0(O *o)
             x = -(v * 0x122) / 99;
             o->w32 = x;
         } else o->w32 = -0x122;
-    } else if (D_8009C962 == 1) {
-        if (D_8009D2C3 & 1) o->w32 = -0xed;
-    } else if (D_8009C962 == 2) {
+    } else if (GAME.selectedSection == 1) {
+        if (GAME.purifiedAreas & 1) o->w32 = -0xed;
+    } else if (GAME.selectedSection == 2) {
         if (D_8009CE3D == 0xff) {
             if ((short)x < 0x118) o->w32 = -0x102;
             else if ((short)x < 0x140) {
@@ -38,7 +38,7 @@ void func_801165C0(O *o)
                 o->w32 = -(v * 0xd0) / 0x21 - 0x32;
             } else o->w32 = -0x102;
         }
-    } else if (D_8009C962 == 3) {
+    } else if (GAME.selectedSection == 3) {
         if ((short)x < 0x384) o->w32 = -0x1a2;
         else if ((short)x < 0x475) {
             v = x - 0x384;
@@ -55,7 +55,7 @@ void func_801165C0(O *o)
             v = x - 0x942;
             o->w32 = v * 0x1c / 0x186 - 0x21c;
         }
-    } else if (D_8009C962 == 4) {
+    } else if (GAME.selectedSection == 4) {
         if ((short)x < 0x6e1) o->w32 = -0x2c6;
         else if ((short)x < 0x8a8) {
             v = x - 0x6e0;

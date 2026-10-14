@@ -1,11 +1,12 @@
 // FUNC 801274fc 1560 X004
 // MATCHING 801274fc 1560
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
 extern unsigned char D_8009CEFC[], D_8009CEFB, D_80131168[];
-extern unsigned short D_8009C962, D_1F8001F8;
+extern unsigned short D_1F8001F8;
 extern int FUN_800202b4(TObj *);
 extern void func_8011EC78(TObj *);
 extern void FUN_8001e4f0(int);
@@ -103,7 +104,7 @@ void func_801274FC(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C962 < 4)
+        if (GAME.selectedSection < 4)
             func_8011EC78(o);
         else
             FUN_800202b4(o);
@@ -111,7 +112,7 @@ void func_801274FC(TObj *o)
             goto sparkle;
         break;
     case 2:
-        if (D_8009C962 < 4)
+        if (GAME.selectedSection < 4)
             func_8011EC78(o);
         else
             FUN_800202b4(o);

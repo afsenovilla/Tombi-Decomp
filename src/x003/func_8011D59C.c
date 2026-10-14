@@ -1,6 +1,7 @@
 // FUNC 8011d59c 688 X003
 // MATCHING 8011d59c 688
 #include "TOBJ.H"
+#include "gamestate.h"
 extern unsigned char PLAYER[];
 extern unsigned char D_800A6039[];
 extern unsigned char D_800A603C[];
@@ -12,10 +13,6 @@ extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F800190;
 extern int D_1F80018C;
-extern short D_8009CD94;
-extern short D_8009CD96;
-extern short D_8009CDA0;
-extern unsigned char D_8009C975[];
 extern unsigned char D_8009C93C;
 extern unsigned char D_1F8003D1;
 extern TObj *TASK_C;
@@ -49,14 +46,14 @@ void func_8011D59C(TObj *o)
             D_800A603D[0] = 0x40;
             o->timer = 0x14;
             o->state++;
-            D_8009CD94 = 0xe;
-            D_8009CD96 = 6;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 0xe;
+            (*(short*)&GAME.nextSection) = 6;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
         }
         break;
     case 2:
         if (o->timer == 0) {
-            D_8009C975[0] = 3;
+            ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
             D_8009C93C = 1;
             D_1F8003D1 = 1;
             o->state++;
@@ -78,7 +75,7 @@ void func_8011D59C(TObj *o)
         }
         o->w76 = o->w74;
         o->w78 = o->w74;
-        if (D_8009C975[0] == 1) {
+        if (((unsigned char*)&GAME.fadeScreenControl)[0] == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
             D_8009E375[0] = 0xff;

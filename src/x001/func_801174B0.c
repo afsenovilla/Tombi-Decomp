@@ -1,9 +1,8 @@
 // FUNC 801174b0 1828 X001
 // MATCHING 801174b0 1828
+#include "gamestate.h"
 typedef struct { char p[3]; unsigned char n; int e[1]; } Q;
 
-extern unsigned short D_8009C962;
-extern unsigned char D_8009CDA2;
 extern int D_800A4574, D_800A4570;
 extern short D_1F800176, D_1F80017A, D_1F8000E6, D_1F80016A;
 extern int getScrollOffsetX(void);
@@ -14,9 +13,9 @@ void func_801174B0(Q *q, unsigned char *base)
     int cnt = base[0];
     int *off = (int *)(base + 4);
 
-    switch (D_8009C962) {
+    switch (GAME.selectedSection) {
     case 0:
-        if (D_8009CDA2) {
+        if (GAME.disableSelectMenu) {
             lo = (D_1F800176 + 0x50) / 80;
             hi = lo + 8;
         } else if (D_800A4574 == 0) {
@@ -28,7 +27,7 @@ void func_801174B0(Q *q, unsigned char *base)
         }
         break;
     case 1:
-        if (D_8009CDA2) {
+        if (GAME.disableSelectMenu) {
             lo = (D_1F800176 - 0x50) / 80;
             hi = lo + 8;
         } else if (D_800A4574 == 0) {
@@ -86,7 +85,7 @@ void func_801174B0(Q *q, unsigned char *base)
         }
         break;
     case 3:
-        if (D_8009CDA2) {
+        if (GAME.disableSelectMenu) {
             lo = D_1F800176 / 80;
             hi = lo + 9;
         } else if (D_800A4574 == 0) {
@@ -98,7 +97,7 @@ void func_801174B0(Q *q, unsigned char *base)
         }
         break;
     case 4:
-        if (D_8009CDA2) {
+        if (GAME.disableSelectMenu) {
             if (D_1F80016A >= 0xf3d) {
                 lo = (D_1F800176 - 0x5dc) / 80;
                 hi = lo + 8;

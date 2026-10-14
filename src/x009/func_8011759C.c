@@ -1,11 +1,12 @@
 // FUNC 8011759c 604 X009
 // MATCHING 8011759c 604
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short vx, vy, vz, pad; } SVEC;
 
 extern TObj *D_8009C948, *D_8009C94C[];
-extern unsigned char D_8009C964, D_8009C93A, D_8009C940, D_8009C941, D_8009D07E;
+extern unsigned char D_8009C93A, D_8009C940, D_8009C941, D_8009D07E;
 extern void FUN_800201ac(TObj *, int);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVEC *, void *);
@@ -53,7 +54,7 @@ void func_8011759C(TObj *o)
         }
         break;
     case 1:
-        if (D_8009C964 == 0x20 || D_8009C93A != 1) {
+        if (GAME.selectedPlane == 0x20 || D_8009C93A != 1) {
             FUN_800201ac(o, 0xa0);
             func_801177F8(o);
             func_801178B0(o);

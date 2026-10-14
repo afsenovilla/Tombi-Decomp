@@ -1,6 +1,7 @@
 // FUNC 801163b8 516 X006
 // MATCHING 801163b8 516
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { char pad[0x2c]; unsigned short w2c; } PL;
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern PL *D_8009C94C;
@@ -8,11 +9,7 @@ extern unsigned char D_8009C93A;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C958;
-extern short D_8009CD94;
-extern short D_8009CD96;
-extern short D_8009CDA0;
 extern unsigned char D_8009C93C;
-extern unsigned char D_8009C975;
 extern SC *TASK_C;
 extern void func_8011610C(TObj *);
 extern void func_80116254(TObj *);
@@ -66,15 +63,15 @@ void func_801163B8(TObj *o)
     case 6:
         if (--o->w4a == -1) {
             o->step++;
-            D_8009CD94 = 6;
-            D_8009CD96 = 1;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 6;
+            (*(short*)&GAME.nextSection) = 1;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
         }
         goto call;
     case 7:
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

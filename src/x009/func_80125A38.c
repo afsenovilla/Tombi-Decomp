@@ -1,6 +1,7 @@
 // FUNC 80125a38 1684 X009
 // MATCHING 80125a38 1684
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short x, y; } P2;
 extern void *D_8012EE80[], *D_8012EE84[], *D_8012EEB0[], *D_8012EEB4[], *D_8012EEB8[], *D_8012EEBC[];
@@ -11,7 +12,6 @@ extern unsigned short *D_800A6078;
 extern unsigned short D_800A604E;
 extern unsigned char D_800A603E;
 extern short D_800A6066;
-extern unsigned char D_8009C970;
 extern unsigned short D_1F80016A, D_1F80016E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -190,7 +190,7 @@ void func_80125A38(TObj *o)
         o->box3 = 0x20;
         break;
     }
-    if (D_8009C970 == 0 && o->b6a == 2) {
+    if (GAME.playerHealth == 0 && o->b6a == 2) {
         { unsigned char *c = &D_800A603E; *c = *c + 1; }
         D_800A6066 = o->animFrame;
         o->b6a = 0;

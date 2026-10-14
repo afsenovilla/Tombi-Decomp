@@ -3,8 +3,8 @@
 /* Whole function (covers csv pieces 80122C10, 80122CBC, 80122F14). Case 3 compares (unsigned char)t so CSE does
    not propagate t == 1 into the PLAYER.animFrame subtraction (game keeps subtype in a0). */#include "TOBJ.H"
 
+#include "gamestate.h"
 extern TObj PLAYER;
-extern unsigned char D_8009C970;
 extern void *D_80131CC8;
 
 void func_80122BB4(TObj *o)
@@ -64,7 +64,7 @@ void func_80122BB4(TObj *o)
         if (o->w22 >= 3) o->state = 3;
         break;
     case 3:
-        if (D_8009C970 == 0) {
+        if (GAME.playerHealth == 0) {
             o->state = 6;
             PLAYER.state++;
             break;

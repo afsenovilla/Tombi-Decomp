@@ -2,6 +2,7 @@
 // MATCHING 8011a114 7316
 /* Whole function: the csv splits it into 8011A114, 8011A448, 8011B170, 8011B330, 8011B47C and 8011B7D4. */
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short v[6]; } V6;
 typedef struct {
@@ -17,7 +18,7 @@ typedef struct {
 
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
-extern unsigned char D_8009C93A, D_8009C942[], D_8009C93F[], D_8009D2B0, D_8009C975, D_8009C93C;
+extern unsigned char D_8009C93A, D_8009C942[], D_8009C93F[], D_8009D2B0, D_8009C93C;
 extern unsigned char D_8009CFEA, D_8009C93E[], D_8009CE15, D_8009CDBB, D_8009D0B2;
 extern unsigned short D_1F8001F8;
 extern short D_1F8001C6;
@@ -105,7 +106,7 @@ void func_8011A114(Ctl *o)
         break;
     case 5:
         RING(o);
-        if (!D_8009C975) {
+        if (!GAME.fadeScreenControl) {
             D_8009C93C = 1;
             func_80116928(d, 0, 0);
             o->w0a = 200;
@@ -160,7 +161,7 @@ void func_8011A114(Ctl *o)
         }
         break;
     case 11:
-        if (--o->w08 <= 0 && !D_8009C975) {
+        if (--o->w08 <= 0 && !GAME.fadeScreenControl) {
             D_8009C93C = 1;
             o->w08 = 0x80;
             o->state++;

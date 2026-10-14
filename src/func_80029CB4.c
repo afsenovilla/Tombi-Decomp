@@ -1,5 +1,6 @@
 // FUNC 80029cb4 616 MAIN0
 // MATCHING 80029cb4 616
+#include "gamestate.h"
 typedef struct { unsigned char b0; char p0[0x15]; short w16; char p1[0x16]; unsigned short w2e; char p2[0x79]; unsigned char ba9; } S;
 typedef struct { short w0; short w2; } P;
 typedef struct {
@@ -9,7 +10,6 @@ typedef struct {
 extern S PLAYER;
 extern P *D_800A6078;
 extern P *D_800A607C;
-extern int D_8009C960;
 extern unsigned short D_8009C960h;
 extern unsigned char D_8009C939;
 extern unsigned char D_800A60D6;
@@ -34,7 +34,7 @@ static __inline__ void Clamp(O *o)
             if (t < D_800A6078->w2)
                 D_800A6078->w2 = t;
         }
-        if (D_8009C960 == 0x2000E) {
+        if ((*(int*)&GAME.selectedArea) == 0x2000E) {
             if (s->w16 < o->w30 - 0x5c)
                 s->w16 = o->w30 - 0x5c;
         } else {

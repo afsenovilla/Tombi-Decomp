@@ -1,9 +1,8 @@
 // FUNC 80123b94 1244 X004
 // MATCHING 80123b94 1244
 #include "TOBJ.H"
+#include "gamestate.h"
 
-extern unsigned char D_8009D2C3;
-extern unsigned short D_8009C962;
 extern void *D_80134D38[];
 extern unsigned short D_80131108[];
 extern unsigned char PLAYER;
@@ -33,7 +32,7 @@ void func_80123B94(TObj *o)
 
     switch (k) {
     case 0:
-        if (!(D_8009D2C3 & 8) && D_8009C962 < 4) {
+        if (!(GAME.purifiedAreas & 8) && GAME.selectedSection < 4) {
             if (!func_8012747C(o->b0c)) break;
             o->step = 4;
             o->state = 0;
@@ -78,7 +77,7 @@ void func_80123B94(TObj *o)
         o->b0f = o->w7a;
         break;
     case 1:
-        if (D_8009C962 < 4) func_8011EC78(o);
+        if (GAME.selectedSection < 4) func_8011EC78(o);
         else ObjCullRegister(o);
         if (o->step == 0) {
             r = nearCam(o);

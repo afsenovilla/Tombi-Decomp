@@ -1,16 +1,15 @@
 // FUNC 8012ed60 1108 X000
 // MATCHING 8012ed60 1108
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     short p0, x, p4, y, p8, z;
 } Pos8012ED60;
 
-extern unsigned char D_8009D07B;
 extern void *D_8013B224[];
 extern unsigned short D_80139208[];
 extern unsigned char D_800A6047;
 extern TObj *D_8009C948;
-extern int D_8009C984;
 extern unsigned char PLAYER;
 extern void FUN_80123b64(Pos8012ED60 *);
 extern int ObjCullRegister(TObj *);
@@ -48,11 +47,11 @@ void func_8012ED60(TObj *o)
     case 0:
         o->w1e = 12;
         if (o->b0c == 1) {
-            if (D_8009D07B == 2) {
+            if (GAME.bittingPlantFlowerState == 2) {
                 o->b04 = 3;
                 break;
             }
-            if (D_8009D07B == 1) {
+            if (GAME.bittingPlantFlowerState == 1) {
                 if (o->subtype != 0) {
                     o->b04 = 3;
                     break;
@@ -110,7 +109,7 @@ void func_8012ED60(TObj *o)
                 }
                 r = nearCam(o);
                 if (r) {
-                    if (!(D_8009C984 & 2) && PLAYER == 1) {
+                    if (!(GAME.area00_eventControl & 2) && PLAYER == 1) {
                         o->step = 1;
                         o->state = 0;
                     }

@@ -4,6 +4,7 @@
 /* volatile first o->d3c read and volatile D_164V load pin the game load order (debt); -fno-expensive-optimizations gives the second la of D_1F8000C0 (was a second extern name).
    Tried without volatiles: all 720 orders of the e/s/n/q/p/tp statements (best 59): the d3c reload needs an uncached first read. */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     unsigned int tag;
     unsigned char r0, g0, b0, code;
@@ -16,7 +17,6 @@ typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 extern char *DAT_1f800164;
 extern char *volatile D_164V;
 extern char *DAT_1f8001e0;
-extern int D_8009C960;
 extern C4C *TASK_C;
 extern short D_1F800060[];
 extern short D_1F800062, D_1F800064;
@@ -59,7 +59,7 @@ void func_800544C8(TObj *o)
 
     D_1F800060[0] = o->a.p.whole;
     D_1F800062 = o->y.p.whole;
-    if (D_8009C960 == 0x10005 && TASK_C->w4c != 3)
+    if ((*(int*)&GAME.selectedArea) == 0x10005 && TASK_C->w4c != 3)
         D_1F800064 = o->b.p.whole >> 2;
     else
         D_1F800064 = o->b.p.whole;
