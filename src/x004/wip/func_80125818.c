@@ -1,21 +1,21 @@
 // FUNC 80125818 3148 X004
 #include "spad.h"
 #include "player.h"
-/* score 204 (draft, 3156 of 3148 B): substep AI with 11 cases; logic complete incl. the near() player-range inline
-   (used twice) and the per-case wbc tick. o35: case 4's k test is `switch (k) { case 0: ... case 1: ... }` (439->222).
-   opusG: case 5 selects p/q per branch and subtracts after the join, case 8 as -d + U16(whole) into t2 (222->204).
-   Structural leads that are right locally but raise the score until the size is fixed (ours is 4-8 B long):
-   - case 4: `if (k != 1) { if (k >= 2) break; if (k != 0) break; <case 0> } else { <case 1> }` gives the game's
-     beq 1 / slti 2 / bnez test exactly;
-   - case 5: `t = U16(o->wba) - q + p` keeps the subu after the join (only p/wba regs swapped);
-   - case 10: the player test is `if (d == pd) { dy = PY - U16(o->y); if (h-range && (u16)(dy + 0x30) < 0xf8) ... }`
-     (game computes dy before the h test; ours sinks the subu).
-   opusO: applying all three gives 786 instrs (one short, score 289); case 10 dy as int t with asm("" : "=r"(t) : "0"(t))
-   after it and U16(o->y) gives exactly 787 instrs/3148 B but scores 340 (game: lw a0 o->h hoisted before the PLAYER.h
-   load, dy subu in place in v1 then addiu v1,v1,48; ours keeps dy in a0/a1 and loads PLAYER.h first). Other dy types
-   (t2/u/d/k/p, with/without the asm) 311-416.
-   Remaining: near() keeps its result in a0 and copies s to v1 (tried nested inlines, result var: no gain);
-   lbu substep scheduled after the li in several setanim+substep++ tails. */
+/* score 159 (opusS, was 204; 3152 of 3148 B, one fake nop): substep AI with 11 cases. opusS applied the three
+   deferred size fixes below plus: near() ends in `return chk(s, dy);` with static inline
+   chk(int a, unsigned short dy) { if (a != 1) return 0; return dy < 0xf8; } (no v0 copy of the result); case 9 tests
+   `d = e + 8` where e is a block-local `wc4/wc8 - U16(o->h)` (game's lhu, a3 temp) and `if (a.x > b.x)` (game loads a.x
+   first); case 10 h test written `-o->h->p.whole + PLAYER.h + 0x80`. That is exactly 787 instrs (41 differing lines,
+   but scores 328 from the shifted j targets: we lack the game's two `move v1,s0` s copies in near() and have one extra
+   nop in case 5 and one extra insn in case 10). The `asm("");` in case 4 (found by itbrute) only adds a nop that
+   realigns the code around near() so the score drops to 159; remove it once the s copy is found.
+   Left: near(): game result in a0, dy+0x30 in a1 and a copy of s into v1 before the `li v0,1; bne` (tried result
+   var, nested inlines returning/modifying the param, NEAR(r) macro: no copy); case 10: game keeps dy in v1
+   (subu in place) and loads o->h (a0) before the PLAYER.h load; case 5 p/q regs; case 8 u temp in v1; lbu substep
+   scheduled after the li in the setanim+substep++ tails; sh s0,0xbc in the mult shadow in case 3.
+   Earlier: o35: case 4's k test is `switch (k)`; opusG: case 5 selects p/q per branch, case 8 as -d + U16(whole).
+   The three size fixes (all applied here): case 4 `if (k != 1) { if (k >= 2) break; if (k != 0) break; ... } else`;
+   case 5 `t = U16(o->wba) - q + p`; case 10 dy computed before the h test with asm("" : "=r"(t) : "0"(t)). */
 #include "TOBJ.H"
 typedef struct { short x, y; } P2;
 typedef struct {
@@ -41,6 +41,7 @@ extern short FUN_80041ebc(TObj *, short, short);
 #define TICK if (--U16(o->wbc) == 0) { o->wbc = 0x28; if (X(o)->wca) SfxPlay(0x12); }
 #define SETANIM(a) do { o->anim = (a); AnimLoadDuration(o); } while (0);
 
+static __inline__ int chk(int a, unsigned short dy) { if (a != 1) return 0; return dy < 0xf8; }
 static __inline__ int near(TObj *o)
 {
     int s;
@@ -52,8 +53,7 @@ static __inline__ int near(TObj *o)
         ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6))
         s = 1;
     dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30;
-    if (s != 1) return 0;
-    return dy < 0xf8;
+    return chk(s, dy);
 }
 
 void func_80125818(TObj *o)
@@ -139,6 +139,7 @@ void func_80125818(TObj *o)
         }
         if (o->w22 != 0xb4 && o->w22 != 0x3c) break;
         if (near(o)) {
+            asm("");
             o->step = 1;
             o->state = 0;
             o->substep = 0;
@@ -148,8 +149,9 @@ void func_80125818(TObj *o)
         o->d34 = o->y.p.whole;
         o->d38 = o->b.p.whole;
         k = D_80131148[Rand() & 0xf];
-        switch (k) {
-        case 0:
+        if (k != 1) {
+            if (k >= 2) break;
+            if (k != 0) break;
             o->animFrame = 1;
             o->wba = ((Rand() & 1) << 5) + 0x20;
             o->wbc = 0x38;
@@ -158,8 +160,7 @@ void func_80125818(TObj *o)
             SETANIM(D_801345CC)
             o->w22 = 0xb4;
             o->substep++;
-            break;
-        case 1:
+        } else {
             o->animFrame = 0;
             o->wba = ((Rand() & 1) << 5) + 0x20;
             o->wbc = 0x38;
@@ -168,7 +169,6 @@ void func_80125818(TObj *o)
             SETANIM(D_801345CC)
             o->w22 = 0xb4;
             o->substep++;
-            break;
         }
         break;
     case 5:
@@ -181,7 +181,7 @@ void func_80125818(TObj *o)
             q = o->d30;
             p = o->a.p.whole;
         }
-        t = p - q + U16(o->wba);
+        t = U16(o->wba) - q + p;
         if (--o->w22 == 0 || (unsigned short)t < U16(o->wba) * 2 || X(o)->wc0 != (*(short*)&SPAD.s1c8) ||
             FUN_800411cc(o, o->h->p.whole + d, o->y.p.whole + 0x18)) {
             o->w22 = 0x28;
@@ -241,11 +241,15 @@ void func_80125818(TObj *o)
         applyAnimVelocityX(o, o->animFrame);
         break;
     case 9:
+        {
+        int e;
         if ((*(short*)&SPAD.s1c8) == 0)
-            t = X(o)->wc4 - o->h->p.whole;
+            e = X(o)->wc4 - U16(o->h->p.whole);
         else
-            t = X(o)->wc8 - o->h->p.whole;
-        if ((unsigned short)(t + 8) < 0x10) {
+            e = X(o)->wc8 - U16(o->h->p.whole);
+        d = e + 8;
+        }
+        if ((unsigned short)d < 0x10) {
             o->timer = 300;
             o->substep++;
             break;
@@ -257,7 +261,7 @@ void func_80125818(TObj *o)
             b.x = X(o)->wc8;
         a.y = o->y.p.whole;
         b.y = X(o)->wc6 - 0x38;
-        if (b.x < a.x) {
+        if (a.x > b.x) {
             o->animFrame = 1;
             o->h->p.whole -= 2;
         } else {
@@ -278,11 +282,14 @@ void func_80125818(TObj *o)
                 o->wb4 = 0;
                 o->state = D_80131128[Rand() & 0xf];
                 o->substep = 0;
-                if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole &&
-                    (unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 &&
-                    (unsigned short)((*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30) < 0xf8) {
-                    o->state = 4;
-                    o->substep = 0;
+                if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
+                    t = (*(unsigned short*)&PLAYER.obj.y.p.whole) - U16(o->y.p.whole);
+                    asm("" : "=r"(t) : "0"(t));
+                    if ((unsigned short)(-o->h->p.whole + (*(Fix16 **)&PLAYER.obj.h)->p.whole + 0x80) < 0x100 &&
+                        (unsigned short)(t + 0x30) < 0xf8) {
+                        o->state = 4;
+                        o->substep = 0;
+                    }
                 }
                 break;
             }

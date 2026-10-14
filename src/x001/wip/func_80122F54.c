@@ -1,11 +1,15 @@
 #include "spad.h"
 #include "gv2.h"
-/* score 411 (was 516): o pinned s3 (param o_ copied to register asm("$19")), s0/s1/s2/s4 pinned s0/s1/s2/s4; the
-   !animFrame ladders test s4 <= 0x800 first (BLKA branch first, as in the game); TR split into "x = f(); x <<= 3; x >>= 12"
-   (game shifts in place in the s reg). Left: game sets the rsin arg (move a0,s0) before the rcos TR and computes
-   s1 -= (s4+0x800)&0xfff in a v1 temp (ours updates s4 in place), BLKB cross-jumps into the BLKA tail in the game,
-   case-1 g->d8c handling (s2 sll/sra placement), a0/a1/v1 choices around DAT_8009f0ec loads. Tried 9 BLKA orderings
-   (411-427). Sibling of X009 func_8011E688 (matched). */
+/* score 294 (opusS, was 411): BLKA/BLKB use block-local temps for the two TR(rcos/rsin, s0) results (with pinned
+   s-regs gcc set the rsin arg after the TR; temps give the game's "move a0,s0; sll; jal; sra" order), BLKB reads
+   the old s2 for C before the rsin TR lands (game semantics) and now has the same shape as BLKA, so its tail
+   cross-jumps into the shared BLKA tail as in the game; s1 no longer pinned (390 -> 298; gcc puts it in s5 and the
+   TR temps in s1, so one extra s5 save); `s2 = x;` before the BLKA rcos NTR (294). Left: s1 var in s5 instead of s1
+   (+ the s5 save), in-place temps where the game uses v1/v0: `(s4 + 0x800) & 0xfff` and `s2 & 0xfff` (ours reuse the
+   dying s4/s2), `s4 = (short)s2` via v0, top-of-case a0/a1/v1 choices, case-1 sll/sra placement.
+   Previous: o pinned s3 (param o_ copied to register asm("$19")), s0/s1/s2/s4 pinned s0/s1/s2/s4; the
+   !animFrame ladders test s4 <= 0x800 first (BLKA branch first, as in the game); TR split into "x = f(); x <<= 3; x >>= 12".
+   Tried 9 BLKA orderings (411-427); -fno-schedule-insns 396; unpinning s2/s4 382-436. Sibling of X009 func_8011E688. */
 // FUNC 80122f54 2192 X001
 /* whole function: includes the csv piece 801231F4 */
 #include "TOBJ.H"
@@ -33,17 +37,15 @@ extern int func_8012767C(TObj *, TObj *);
     s0 &= 0xfff; \
     s1 = 0x1000; \
     s0 = s1 - s0; \
-    s2 = rcos(s0); s2 <<= 3; s0 = rsin(s0); s2 >>= 12; s0 <<= 3; s0 >>= 12; \
+    { int x = TR(rcos, s0); int y = TR(rsin, s0); \
     s1 -= (s4 + 0x800) & 0xfff; \
-    s4 = s2 + NTR(rcos, s1); \
-    s0 = s0 + NTR(rsin, s1); \
+    s2 = x; s4 = s2 + NTR(rcos, s1); \
+    s0 = y + NTR(rsin, s1); } \
 }
 #define BLKB(C) { \
-    s2 = rsin(s0) << 3; s2 >>= 12; \
-    s0 = rcos(s0) << 3; s0 >>= 12; \
-    s1 = C; \
+    { int x = TR(rcos, s0); int y = TR(rsin, s0); s1 = C; s0 = x; \
     s4 = s0 + NTR(rcos, s1); \
-    s0 = s2 + NTR(rsin, s1); \
+    s0 = y + NTR(rsin, s1); } \
 }
 
 void func_80122F54(TObj *o_)
@@ -52,7 +54,7 @@ void func_80122F54(TObj *o_)
     TObj *g;
     int a;
     register int s0 asm("$16");
-    register int s1 asm("$17");
+    int s1;
     register int s2 asm("$18");
     register int s4 asm("$20");
     short v;

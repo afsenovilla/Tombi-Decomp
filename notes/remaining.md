@@ -24,9 +24,9 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | DATA | x016 | func_8011B170 | 8011B170 | 448 | n/a | - | KEPT: pointer table (112 words) but func_80100788 (shared player step 0x47) jals it from X016 itself (80101634); step 0x47 is only set by X014 code, not provable dead |
 | DATA | x002 | func_8011E688 | 8011E688 | 40 | n/a | - | KEPT: 10 words of s16 offset pairs (anim data, pointed to from 8011EFDC) but func_80100788 step 0x25 jals it from X002 itself (801011BC); not provable dead |
 | NEAR | x001 | func_80127700 | 80127700 | 396 | 2 | src/x001/wip/func_80127700.c (gcc-2.7.2-psx) | one operand-order diff: addu v1,a0,v1 vs v1,v1,a0 (permuter 100k+ iters, ~250 forms tried) |
-| FAR | x004 | func_80125818 | 80125818 | 3148 | 204 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3156/3148 B; see header for case 4/5/10 leads; near() a0/v1 regs |
+| FAR | x004 | func_80125818 | 80125818 | 3148 | 159 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI, 787-instr form + 1 fake nop; left: near() s copy to v1 / result a0, case 10 dy in v1 |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 31 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17; left: o->f load reg, x+w temp reg, uv sched |
-| FAR | x001 | func_80122F54 | 80122F54 | 2192 | 411 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | o/s0-s4 pinned, BLKA-first ladders; left: rsin arg/TR order, BLKB cross-jump, s1 temp |
+| FAR | x001 | func_80122F54 | 80122F54 | 2192 | 294 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | TR temps fix arg order, BLKB cross-jumps; left: s1 var in s5, in-place v1 temps |
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 72 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | rebuilt from 244A0 top; negated forms fix reassociation; left: s-reg permutation, box0 temp, abs(cy) test |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 314 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | 278C0-style rewrite, p/e pinned; left: regalloc of abs/k/fx/fy temps |
