@@ -1,5 +1,6 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
 typedef struct { short x, y; } XY;
@@ -26,7 +27,7 @@ extern PL PLAYER;
 extern CMD *D_801181FC[];
 extern XY D_80118200[];
 extern unsigned char D_8009D088[];
-extern unsigned char D_8009C93A, D_8009C93F, D_8009C975x[];
+extern unsigned char D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
@@ -91,8 +92,8 @@ void func_80116FE0(O *o)
             switch (o->step) {
             case 0:
                 if (*(unsigned short *)&p->b04 != 0x6505) break;
-                D_8009C93A = 1;
-                D_8009C93F = 1;
+                GVARS.b3a = 1;
+                GVARS.b3f = 1;
                 o->timer = 1;
                 o->step++;
                 break;

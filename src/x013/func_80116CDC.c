@@ -1,9 +1,8 @@
 // FUNC 80116cdc 772 X013
 // MATCHING 80116cdc 772
+#include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C940[];
-extern unsigned char D_8009C941;
 extern unsigned short D_8009C960[];
 extern void *D_8013B0D8;
 extern void *D_80134D84;
@@ -25,9 +24,9 @@ void func_80116CDC(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if (D_8009C940[0] != 0) {
-                if ((v = D_8009C941) == 0x7e) {
-                    D_8009C940[0] = 0;
+            if (((unsigned char*)&GVARS.b40)[0] != 0) {
+                if ((v = GVARS.b41) == 0x7e) {
+                    ((unsigned char*)&GVARS.b40)[0] = 0;
                     v = 8;
                     o->box0 = v;
                     o->box1 = 0x10;

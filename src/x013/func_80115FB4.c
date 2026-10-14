@@ -1,5 +1,6 @@
 // FUNC 80115fb4 640 X013
 // MATCHING 80115fb4 640
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -7,7 +8,6 @@
 typedef void (*Fn)(TObj *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009C93A, D_8009C93C;
 extern short D_1F800172;
 extern int D_1F8000F0;
 extern unsigned int stepScrollReturnY(TObj *);
@@ -30,7 +30,7 @@ void func_80115FB4(TObj *o)
         o->step++;
         break;
     case 1:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS.b3a != 0) o->step++;
         FUN_80027c74(o);
         func_8002795C(o);
         syncObjectTargetY(o);
@@ -60,7 +60,7 @@ void func_80115FB4(TObj *o)
             (*(short*)&GAME.nextArea) = 1;
             (*(short*)&GAME.nextSection) = 4;
             (*(short*)&GAME.nextSpawnPoint) = 4;
-            D_8009C93C = 0;
+            GVARS.b3c = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }
