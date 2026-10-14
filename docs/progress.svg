@@ -4,22 +4,22 @@
 <text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-14 &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0.EXE: matching C</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="98" width="440.6" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">97.9 %</text>
+<rect x="330" y="98" width="450.0" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="113" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.0 %</text>
 <text x="28" y="148" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">X000.BIN: matching C</text>
 <rect x="330" y="134" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="134" width="449.8" height="18" rx="9" fill="#16a34a"/>
+<rect x="330" y="134" width="450.0" height="18" rx="9" fill="#16a34a"/>
 <text x="796" y="149" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.0 %</text>
 <text x="28" y="184" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">X001..X019.BIN: matching C</text>
 <rect x="330" y="170" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="170" width="425.9" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">94.6 %</text>
+<rect x="330" y="170" width="450.0" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.0 %</text>
 <text x="28" y="220" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#1e293b">Whole game: matching C</text>
 <rect x="330" y="206" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="206" width="434.6" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">96.57 %</text>
+<rect x="330" y="206" width="450.0" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.00 %</text>
 <text x="28" y="256" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="242" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="242" width="67.2" height="18" rx="9" fill="#22c55e"/>
-<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">14.9 %</text>
+<rect x="330" y="242" width="70.5" height="18" rx="9" fill="#22c55e"/>
+<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">15.7 %</text>
 </svg>

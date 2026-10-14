@@ -4,29 +4,29 @@ _Generated with `python tools/progress.py` (2026-10-14). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 96.57 % of the game's code matches byte for byte** (1281412 of 1326864 bytes).
+**Whole game: 100.00 % of the game's code matches byte for byte** (1327848 of 1327888 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 278408 B | 272564 B | 97.9 % `[#######################.]` |
-| X000.BIN: AREA00 + object code reused by all areas | 310848 B | 310736 B | 100.0 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 737608 B | 698112 B | 94.6 % `[#######################.]` |
-| **Whole game** | **1326864 B** | **1281412 B** | **96.57 %** `[#######################.]` |
+| MAIN0.EXE: engine, shared by every area | 279180 B | 279180 B | 100.0 % `[########################]` |
+| X000.BIN: AREA00 + object code reused by all areas | 312228 B | 312228 B | 100.0 % `[########################]` |
+| X001..X019.BIN: code specific to the other areas | 736480 B | 736440 B | 100.0 % `[########################]` |
+| **Whole game** | **1327888 B** | **1327848 B** | **100.00 %** `[########################]` |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99644 B) is not counted: 67736 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99096 B) is not counted: 67188 B of it (67.8 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 98.7 %).
-- Also tracked for MAIN0 + X000: 14.9 % of the code named by us, 76.1 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
+- Also tracked for MAIN0 + X000: 15.7 % of the code named by us, 76.0 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
-Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99644 bytes (908 functions).
+Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99096 bytes (902 functions).
 
 ## Breakdown by program
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 227676 B (509 f) | 34.0 % | 56.8 % | 97.4 % (1136 f) | 99604 B | 67696 B (68.0 %) |
-| X000.BIN (AREA00 overlay) | 297744 B (526 f) | 0.3 % | 90.8 % | 100.0 % (522 f) | 40 B | 40 B (100.0 %) |
+| MAIN0.EXE (game core) | 228224 B (515 f) | 35.7 % | 56.7 % | 100.0 % (1141 f) | 99056 B | 67148 B (67.8 %) |
+| X000.BIN (AREA00 overlay) | 297744 B (526 f) | 0.3 % | 90.8 % | 100.0 % (523 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019)
 
@@ -40,23 +40,23 @@ in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../not
 
 | Overlay | Areas | Code | Functions | Matching | Pending: x000 | dup | piece | new |
 |---|---|---|---|---|---|---|---|---|
-| X001.BIN | AREA01, AREA07 | 329308 B | 600 | 95.7 % (588 f) | 0 B | 0 B | 400 B | 13748 B (11 f) |
+| X001.BIN | AREA01, AREA07 | 329308 B | 600 | 99.9 % (599 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X002.BIN | AREA02, AREA19 (alt.) | 200304 B | 364 | 99.8 % (362 f) | 0 B | 0 B | 400 B | 40 B (1 f) |
 | X003.BIN | AREA03 | 297232 B | 582 | 99.9 % (581 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X004.BIN | AREA04, AREA12 | 280208 B | 567 | 98.4 % (563 f) | 0 B | 0 B | 400 B | 4152 B (3 f) |
+| X004.BIN | AREA04, AREA12 | 280208 B | 567 | 99.9 % (566 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X005.BIN | AREA05 | 180916 B | 328 | 99.8 % (327 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X006.BIN | AREA06 | 210924 B | 395 | 95.5 % (373 f) | 0 B | 0 B | 400 B | 9160 B (21 f) |
+| X006.BIN | AREA06 | 210924 B | 395 | 99.8 % (394 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X008.BIN | AREA08 | 175004 B | 306 | 99.8 % (305 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X009.BIN | AREA09 | 257776 B | 504 | 99.2 % (502 f) | 0 B | 0 B | 400 B | 1560 B (1 f) |
-| X010.BIN | AREA10 | 274380 B | 531 | 96.5 % (516 f) | 0 B | 1212 B | 400 B | 8064 B (13 f) |
-| X011.BIN | AREA11 | 190292 B | 354 | 99.4 % (351 f) | 0 B | 0 B | 400 B | 668 B (2 f) |
+| X009.BIN | AREA09 | 257776 B | 504 | 99.8 % (503 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X010.BIN | AREA10 | 274380 B | 531 | 99.4 % (529 f) | 0 B | 1212 B | 400 B | 0 B (0 f) |
+| X011.BIN | AREA11 | 190292 B | 354 | 99.8 % (353 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X013.BIN | AREA13 | 182232 B | 327 | 99.8 % (326 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X014.BIN | AREA14 | 236716 B | 490 | 99.4 % (488 f) | 0 B | 0 B | 400 B | 976 B (1 f) |
-| X016.BIN | AREA16 | 186436 B | 358 | 99.5 % (356 f) | 0 B | 0 B | 400 B | 448 B (1 f) |
+| X014.BIN | AREA14 | 236716 B | 490 | 99.8 % (489 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X016.BIN | AREA16 | 185988 B | 357 | 99.8 % (356 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X017.BIN | AREA17 | 188428 B | 348 | 99.8 % (347 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X018.BIN | AREA18 | 192308 B | 353 | 99.4 % (351 f) | 0 B | 0 B | 400 B | 680 B (1 f) |
+| X018.BIN | AREA18 | 191628 B | 352 | 99.8 % (351 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X019.BIN | AREA19 | 175124 B | 306 | 99.8 % (305 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| **Total** | | 3557588 B | 6713 | 98.7 % (6641 f) | 0 B | 1212 B | 6400 B | 39496 B (55 f) |
+| **Total** | | 3556460 B | 6711 | 99.8 % (6693 f) | 0 B | 1212 B | 6400 B | 40 B (1 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.

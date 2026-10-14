@@ -13,19 +13,19 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Progress
 
 <!-- progress:start -->
-**Whole game: 96.57 % of the game's code matches byte for byte** (1281412 of 1326864 bytes).
+**Whole game: 100.00 % of the game's code matches byte for byte** (1327848 of 1327888 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 278408 B | 272564 B | 97.9 % `[#######################.]` |
-| X000.BIN: AREA00 + object code reused by all areas | 310848 B | 310736 B | 100.0 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 737608 B | 698112 B | 94.6 % `[#######################.]` |
-| **Whole game** | **1326864 B** | **1281412 B** | **96.57 %** `[#######################.]` |
+| MAIN0.EXE: engine, shared by every area | 279180 B | 279180 B | 100.0 % `[########################]` |
+| X000.BIN: AREA00 + object code reused by all areas | 312228 B | 312228 B | 100.0 % `[########################]` |
+| X001..X019.BIN: code specific to the other areas | 736480 B | 736440 B | 100.0 % `[########################]` |
+| **Whole game** | **1327888 B** | **1327848 B** | **100.00 %** `[########################]` |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99644 B) is not counted: 67736 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99096 B) is not counted: 67188 B of it (67.8 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 98.7 %).
-- Also tracked for MAIN0 + X000: 14.9 % of the code named by us, 76.1 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
+- Also tracked for MAIN0 + X000: 15.7 % of the code named by us, 76.0 % typed with the TObj structure.
 <!-- progress:end -->
 
 ![Progress](docs/progress.svg)

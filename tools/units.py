@@ -44,8 +44,10 @@ _BLOBS = {}
 # while this overlay is loaded.  Verified per overlay; the same address is real code in other overlays (X005, X008,
 # X019 ...), which are not listed.  Second batch (X000 80116258/801162B8, X001 8011658C, X003 80116D50, X005/X013
 # 801188FC, X005/X008 80117CAC): same checks; their jals are other areas' dispatcher cases, the MAIN0 pointers are slots of
-# other areas' tables.  NOT listed on purpose: X002 8011E688, X016 8011B170, X018 8011C758: the player-step code in
-# the overlay itself jals them (steps 0x25 / 0x47, step 0x48 with object kind 0xE).  A row that starts with such a table has the table cut off (the code follows).
+# other areas' tables.  Third batch: X016 8011B170 and X018 8011C758 (pointer tables jal'd by the shared player-step code,
+# step 0x47 / step 0x48 with object kind 0xE): proved unreachable while that overlay is loaded (0x47 is written only by
+# X014 code and PLAYER is cleared on every area entry; no object of type 0xE exists in AREA18).  NOT listed on purpose:
+# X002 8011E688 (step 0x25 comes from generic terrain-driven climbing code, not provably absent in AREA02).  A row that starts with such a table has the table cut off (the code follows).
 # Never counted as code: the ranges are subtracted from the csv rows (so a regenerated csv stays correct) and
 # tools/gen_symbols.py gives them no symbol (splat emits them as .word data).
 DATA = [
@@ -92,12 +94,14 @@ DATA = [
     ("X013", 0x801188FC, 20),
     ("X016", 0x80115EC4, 96),
     ("X016", 0x80115F24, 100),
+    ("X016", 0x8011B170, 448),
     ("X017", 0x80115EC4, 96),
     ("X017", 0x80115F24, 504),
     ("X018", 0x80115EC4, 96),
     ("X018", 0x80115F24, 820),
     ("X018", 0x80116258, 96),
     ("X018", 0x801162B8, 32),
+    ("X018", 0x8011C758, 680),
 ]
 
 
