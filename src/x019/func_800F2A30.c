@@ -1,12 +1,12 @@
 // FUNC 800f2a30 360 X019
 // MATCHING 800f2a30 360
+#include "gcd.h"
 #include "plx.h"
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; char r[0x2e - 0x22]; short w2e; } G;
 extern G *D_8009C330;
 extern TObj *D_8009D2E8;
 extern unsigned char D_801152E8[];
-extern unsigned char D_8009CF06[], D_8009CE61;
 void SfxPlay3(int, int);
 void setEventComplete(int, int);
 void func_800F2A30(TObj *o)
@@ -36,8 +36,8 @@ void func_800F2A30(TObj *o)
     o->d8c = D_801152E8[o->wb0];
     o->ba5 = 0;
     D_8009C330->w20 = 0;
-    if (D_8009CF06[0] && o->subtype != 1) {
+    if (((unsigned char*)&GCD.bcf06)[0] && o->subtype != 1) {
         o->subtype = 1;
-        if (D_8009CE61 != 0xff) setEventComplete(0xbd, 1);
+        if (GCD.bce61 != 0xff) setEventComplete(0xbd, 1);
     }
 }
