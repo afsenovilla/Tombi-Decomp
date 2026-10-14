@@ -1,5 +1,6 @@
 // FUNC 80116a60 1016 X016
 // MATCHING 80116a60 1016
+#include "gvars.h"
 /* size 1016: includes the csv piece 80116D50 (264 B). */
 #include "TOBJ.H"
 
@@ -8,7 +9,6 @@ extern int LoadImage(RECT *, void *);
 extern unsigned char D_8009D0CB;
 extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CF0D[];
-extern unsigned char D_8009C93A;
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
 extern char D_80118C54[];
@@ -21,7 +21,7 @@ extern void func_801167B0(TObj *o);
 
 static __inline__ int onScreen(TObj *o)
 {
-    if (D_8009C93A == 0) return 0;
+    if (GVARS.b3a == 0) return 0;
     if ((unsigned short)(o->h->p.whole - D_1F800176) >= 0x12d) return 0;
     return (unsigned short)(D_1F800186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

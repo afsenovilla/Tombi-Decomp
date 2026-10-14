@@ -1,13 +1,11 @@
 // FUNC 80108338 976 X016
 // MATCHING 80108338 976
+#include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned short D_8009C960[];
 extern unsigned short D_8009C962;
-extern short D_8009C944[];
-extern short D_8009C946[];
 extern char *D_8009C330;
-extern unsigned char D_8009C93A;
 extern unsigned char D_8009D2B0;
 void func_800EEC40(TObj *o);
 void AnimAdvance(TObj *o);
@@ -48,7 +46,7 @@ void func_80108338(TObj *o)
                 o->substep = 0;
                 o->timer = 0;
                 D_8009D2B0 = 0;
-                D_8009C93A = 1;
+                GVARS.b3a = 1;
                 return;
             }
             o->velX = 0;
@@ -70,8 +68,8 @@ void func_80108338(TObj *o)
     case 1:
         func_800EEC40(o);
         AnimAdvance(o);
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -96,8 +94,8 @@ void func_80108338(TObj *o)
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        o->h->raw += D_8009C944[0] << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -121,7 +119,7 @@ void func_80108338(TObj *o)
         o->state = 0;
         o->substep = 0;
         o->timer = 0;
-        D_8009C93A = 1;
+        GVARS.b3a = 1;
         break;
     }
 }
