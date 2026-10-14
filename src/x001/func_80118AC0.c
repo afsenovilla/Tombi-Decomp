@@ -1,10 +1,10 @@
 // FUNC 80118ac0 348 X001
 // MATCHING 80118ac0 348
+#include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
 
 extern void *D_8013E694[];
-extern int D_1F8002D4;
 extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);
@@ -21,7 +21,7 @@ void func_80118AC0(TObj *o)
             o->w1e = 10;
         }
         o->b0d = 0;
-        o->d3c = D_1F8002D4;
+        o->d3c = SPAD.i2d4;
         o->anim = D_8013E694[o->subtype];
         h = (*(unsigned char*)&o->box0) >> 4;
         o->b04 = o->b04 + 1;

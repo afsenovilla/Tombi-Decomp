@@ -1,10 +1,10 @@
 // FUNC 801174b0 1828 X001
 // MATCHING 801174b0 1828
+#include "spad.h"
 #include "gamestate.h"
 typedef struct { char p[3]; unsigned char n; int e[1]; } Q;
 
 extern int D_800A4574, D_800A4570;
-extern short D_1F800176, D_1F80017A, D_1F8000E6, D_1F80016A;
 extern int getScrollOffsetX(void);
 
 void func_801174B0(Q *q, unsigned char *base)
@@ -16,35 +16,35 @@ void func_801174B0(Q *q, unsigned char *base)
     switch (GAME.selectedSection) {
     case 0:
         if (GAME.disableSelectMenu) {
-            lo = (D_1F800176 + 0x50) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x50) / 80;
             hi = lo + 8;
         } else if (D_800A4574 == 0) {
-            lo = (D_1F800176 + 0x78) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x78) / 80;
             hi = lo + 9;
         } else {
-            lo = (D_1F800176 + getScrollOffsetX() - 0x28) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() - 0x28) / 80;
             hi = lo + 0xc;
         }
         break;
     case 1:
         if (GAME.disableSelectMenu) {
-            lo = (D_1F800176 - 0x50) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x50) / 80;
             hi = lo + 8;
         } else if (D_800A4574 == 0) {
-            lo = (D_1F800176 + 0x64) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x64) / 80;
             hi = lo + 9;
         } else {
-            lo = (D_1F800176 + getScrollOffsetX() + 0x64) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() + 0x64) / 80;
             hi = lo + 0xa;
         }
         break;
     case 2:
         if (D_800A4574 == 0) {
-            lo = (D_1F800176 - 0x78) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x78) / 80;
             hi = lo + 0x11;
             if (lo < 0) lo = 0;
             if (hi >= 0x21) hi = 0x20;
-            t = (D_1F800176 - 0x50) / 80;
+            t = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x50) / 80;
             a = t + 0x21;
             b = t + 0x2c;
             if (a < 0x21) a = 0x21;
@@ -54,7 +54,7 @@ void func_801174B0(Q *q, unsigned char *base)
                 q->n++;
             }
         } else {
-            short *px = &D_1F800176;
+            short *px = &(*(short*)((char*)&SPAD.i174 + 2));
             { int u = getScrollOffsetX() - 0x118;
             lo = (*px + u) / 80; }
             hi = lo + 0x12;
@@ -70,11 +70,11 @@ void func_801174B0(Q *q, unsigned char *base)
                 q->n++;
             }
         }
-        if (D_1F80017A + D_1F8000E6 < -0x59) {
+        if ((*(short*)&SPAD.s17a) + SPAD.se6 < -0x59) {
             if (D_800A4570 >= 0) break;
-            if (D_1F80017A < -0x77) break;
+            if ((*(short*)&SPAD.s17a) < -0x77) break;
         }
-        t = (D_1F800176 - 0xdc) / 80;
+        t = ((*(short*)((char*)&SPAD.i174 + 2)) - 0xdc) / 80;
         a = t + 0x3f;
         b = t + 0x46;
         if (a < 0x3f) a = 0x3f;
@@ -86,30 +86,30 @@ void func_801174B0(Q *q, unsigned char *base)
         break;
     case 3:
         if (GAME.disableSelectMenu) {
-            lo = D_1F800176 / 80;
+            lo = (*(short*)((char*)&SPAD.i174 + 2)) / 80;
             hi = lo + 9;
         } else if (D_800A4574 == 0) {
-            lo = D_1F800176 / 80;
+            lo = (*(short*)((char*)&SPAD.i174 + 2)) / 80;
             hi = lo + 9;
         } else {
-            lo = (D_1F800176 + getScrollOffsetX()) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX()) / 80;
             hi = lo + 9;
         }
         break;
     case 4:
         if (GAME.disableSelectMenu) {
-            if (D_1F80016A >= 0xf3d) {
-                lo = (D_1F800176 - 0x5dc) / 80;
+            if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0xf3d) {
+                lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x5dc) / 80;
                 hi = lo + 8;
             } else {
-                hi = (D_1F800176 - 0x384) / 80;
+                hi = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x384) / 80;
                 lo = hi - 0x12;
             }
         } else if (D_800A4574 == 0) {
-            lo = (D_1F800176 - 0x636) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x636) / 80;
             hi = lo + 9;
         } else {
-            lo = (D_1F800176 + getScrollOffsetX() - 0x65e) / 80;
+            lo = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() - 0x65e) / 80;
             hi = lo + 0xa;
         }
         break;
