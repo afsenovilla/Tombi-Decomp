@@ -2,6 +2,7 @@
 // MATCHING 80119f5c 1356
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 
 typedef struct {
     short w0, w2;
@@ -24,7 +25,6 @@ extern unsigned char PLAYER[];
 extern int D_1F8000EC[], D_1F8000F0[], D_1F8000F4[];
 extern short D_1F800256;
 extern TObj **D_1F80026C;
-extern TObj *TASK_C;
 extern unsigned char D_8009C93C;
 extern void func_80119D2C(TObj *);
 extern void func_80119E4C(TObj *);
@@ -140,8 +140,8 @@ void func_80119F5C(TObj *o)
             ADVANCE(o, x);
         }
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         break;
     }

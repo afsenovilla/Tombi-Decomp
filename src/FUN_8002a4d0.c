@@ -3,12 +3,12 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
+#include "gametask.h"
 
 extern unsigned char D_8009C938;
 extern unsigned char D_8009C93C;
 extern int *D_80079A48[];
 extern short D_1F8000E6;
-extern TObj *TASK_C;
 extern TObj PLAYER;
 extern void func_80029CB4(void);
 extern int func_800271B8(TObj *);
@@ -201,8 +201,8 @@ void FUN_8002a4d0(TObj *o)
         if (GAME.fadeScreenControl != 1)
             break;
     case 4:
-        TASK_C->w4c = 7;
-        TASK_C->w4e = 0;
+        TASK_C->mode = 7;
+        TASK_C->step = 0;
         break;
     }
 }

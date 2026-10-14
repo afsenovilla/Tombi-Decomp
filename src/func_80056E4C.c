@@ -7,6 +7,7 @@
    keep both loads; it is not the first insn so reorg can still steal li a1,1 for the bnez slot. */
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -26,7 +27,6 @@ extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern char D_1F8000C0[];
 extern char D_1F8000C0b[];
-extern TObj *TASK_C;
 extern PolyFT4 *DAT_1f800164;
 extern int DAT_1f8001e0;
 extern void SetRotMatrix(void *);
@@ -75,7 +75,7 @@ void func_80056E4C(TObj *o)
 
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
-    if ((*(int*)&GAME.selectedArea) == 0x10005 && *(unsigned short *)&TASK_C->w4c != 3)
+    if ((*(int*)&GAME.selectedArea) == 0x10005 && *(unsigned short *)&TASK_C->mode != 3)
         D_1F800060.vz = o->b.p.whole >> 2;
     else
         D_1F800060.vz = o->b.p.whole;

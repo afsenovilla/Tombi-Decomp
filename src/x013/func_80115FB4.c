@@ -2,6 +2,7 @@
 // MATCHING 80115fb4 640
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 typedef void (*Fn)(TObj *);
 
 extern Fn D_80079A98[];
@@ -10,7 +11,6 @@ extern unsigned char D_800A603C, D_800A6039, D_800A603D, D_800A603E;
 extern short D_800A60B6;
 extern short D_1F800172;
 extern int D_1F8000F0;
-extern TObj *TASK_C;
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
@@ -73,8 +73,8 @@ void func_80115FB4(TObj *o)
             { int *g = &D_1F8000F0; *g += *k << 8; }
         }
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         break;
     }

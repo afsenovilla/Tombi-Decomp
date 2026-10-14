@@ -2,6 +2,7 @@
 // MATCHING 8013af10 484
 #include "TOBJ.H"
 #include "gamestate.h"
+#include "gametask.h"
 extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern unsigned short D_800A6066x[]; /* second name for D_800A6066: forces the reloads after the store */
@@ -11,7 +12,6 @@ extern unsigned char D_8009C93F, D_8009C93E, D_8009C942, D_8009CE59, D_8009CEDE,
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern char D_80010748[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
-extern SC *TASK_C;
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 
@@ -54,8 +54,8 @@ void func_8013AF10(TObj *o)
             D_8009CEDF = 0;
             GAME.nextSpawnPoint = 0;
             GAME.nextSection = GAME.selectedSection;
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         break;
     }

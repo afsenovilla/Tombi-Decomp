@@ -3,6 +3,7 @@
 /* The csv entry 80115F24 starts with 126 data words (jump tables of other functions); the code starts at
    8011611C and covers the csv pieces 80116258 and 801162B8 too. */
 #include "gamestate.h"
+#include "gametask.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -34,7 +35,6 @@ extern unsigned char D_8009D001[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
-extern Q *TASK_C;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void stepPlayerXToward(int);
@@ -141,8 +141,8 @@ void func_8011611C(O *o)
         }
     case 6:
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         D_1F8000F2[0]++;
         if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;

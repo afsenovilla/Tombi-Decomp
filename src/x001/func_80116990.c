@@ -2,6 +2,7 @@
 // MATCHING 80116990 2816
 // FLAGS -O2 -G0 -fno-cse-skip-blocks
 #include "gamestate.h"
+#include "gametask.h"
 typedef struct { short s0, s2; } S2;
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 typedef struct O {
@@ -29,7 +30,6 @@ extern S2 *D_800A6078x[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2;
 extern int D_1F8000F0;
-extern SC *TASK_C;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void FUN_80027c74(O *);
@@ -292,8 +292,8 @@ void func_80116990(O *o)
     case 10: {
         short *q;
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         q = &D_1F8000F2;
         *q -= 2;

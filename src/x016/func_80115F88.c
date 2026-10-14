@@ -1,6 +1,7 @@
 // FUNC 80115f88 840 X016
 // MATCHING 80115f88 840
 #include "gamestate.h"
+#include "gametask.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -24,7 +25,6 @@ extern unsigned char D_8009D000[];
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
-extern Q *TASK_C;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void FUN_8002a4d0(O *);
@@ -104,8 +104,8 @@ void func_80115F88(O *o)
         }
     case 6:
         if (GAME.fadeScreenControl == 1) {
-            TASK_C->w4c = 7;
-            TASK_C->w4e = 0;
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
         }
         D_1F8000F2[0] += 2;
         if (o->w32 < D_1F8000F2[0]) D_1F8000F0 = o->w32 << 16;
