@@ -1,9 +1,9 @@
 // FUNC 80120890 828 X000
 // MATCHING 80120890 828
+#include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern short D_8007A5F0[];
-extern unsigned char D_8009C93F, D_8009C942, D_8009C93E;
 extern void FUN_800eea7c(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 void func_80120890(TObj *o)
@@ -76,9 +76,9 @@ void func_80120890(TObj *o)
                 o->state = 0;
                 o->substep = 0;
                 o->step++;
-                D_8009C93F = 0;
-                D_8009C942 = 0;
-                D_8009C93E = 0;
+                GVARS.b3f = 0;
+                GVARS.b42 = 0;
+                GVARS.b3e = 0;
             }
             break;
         }

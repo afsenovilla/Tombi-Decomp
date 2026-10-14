@@ -1,5 +1,6 @@
 // FUNC 800f44b0 2488 X001
 // MATCHING 800f44b0 2488
+#include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -20,8 +21,6 @@ typedef struct {
 extern P800F44B0 *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *D_800A611C;
-extern short D_8009C944;
-extern short D_8009C946[];
 extern unsigned short D_8009D670;
 extern unsigned char D_8009D2B0;
 extern unsigned char D_8009D2B2;
@@ -179,8 +178,8 @@ void FUN_800f44b0(TObj *o)
         else o->wb6 = 0;
         FUN_80110fdc(o);
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8001fce4(o);
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
@@ -233,8 +232,8 @@ void FUN_800f44b0(TObj *o)
     case 2:
         FUN_80110fdc(o);
         FUN_8010f0f4(o);
-        o->h->raw += D_8009C944 << 8;
-        o->y.raw += D_8009C946[0] << 8;
+        o->h->raw += GVARS.s44 << 8;
+        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8001fce4(o);
         FUN_8001fd94(o);
         FUN_8001fec0(o);

@@ -1,11 +1,11 @@
 // FUNC 800efc8c 656 X001
 // MATCHING 800efc8c 656
+#include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { TObj o; char p0[6]; unsigned char c6, c7; char p1[0xe3 - 0xc8]; unsigned char e3; } TObjX;
 extern TObj *D_800A611C;
 extern TObj *D_8009D2E8;
-extern int D_8009C934;
 extern unsigned char *D_8009C330;
 extern TObj *D_8009F0EC;
 extern char D_80010C0C[];
@@ -23,7 +23,7 @@ void func_800EFC8C(TObjX *x, short f)
         D_8009D2E8->state = 0;
     }
     *(unsigned char *)&x->o.wac = 0;
-    D_8009C934 = 0;
+    GVARS.i34 = 0;
     x->c7 = 1;
     x->o.b9d = 0;
     x->c6 = 0;

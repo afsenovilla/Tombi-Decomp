@@ -1,12 +1,12 @@
 // FUNC 8001783c 776 MAIN0
 // MATCHING 8001783c 776
+#include "gvars.h"
 #include "globals.h"
 #include "gamestate.h"
 /* Game-state init. No volatile: the store `*(unsigned short *)((char*)&GAME.selectedArea) = 0` through the memset pointer (kept in s0)
    is a varying NON-struct store, which sched2 orders against every fixed store (a barrier); GAME.playerLives = 3 placed
    inside the 0xff stores' range makes the 255 pseudo overlap the 3 pseudo so it gets v1; sched2 then emits the
    free stores in source order (ties by luid). */
-extern char D_8009C930[];
 extern char D_1F8000C0[];
 extern unsigned short D_8009F3DC;
 extern unsigned char DAT_1f8001b3;
@@ -68,7 +68,7 @@ extern void getBaseMatrix(void *);
 void initGameConfig(void)
 {
     memset(((char*)&GAME.selectedArea), 0, 0x988);
-    memset(D_8009C930, 0, 0x2c);
+    memset(((char*)&GVARS.b30), 0, 0x2c);
     getBaseMatrix(D_1F8000C0);
     DAT_1f8000ea = -544;
     DAT_1f8000ee = 160;
