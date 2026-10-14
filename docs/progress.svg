@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="282" viewBox="0 0 900 282" role="img" aria-label="Decompilation progress">
 <rect width="900" height="282" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
 <text x="28" y="44" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>
-<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-13 &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>
+<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-14 &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0.EXE: matching C</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="98" width="436.0" height="18" rx="9" fill="#16a34a"/>
@@ -12,12 +12,12 @@
 <text x="796" y="149" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">99.9 %</text>
 <text x="28" y="184" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">X001..X019.BIN: matching C</text>
 <rect x="330" y="170" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="170" width="418.6" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">93.0 %</text>
+<rect x="330" y="170" width="425.5" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">94.6 %</text>
 <text x="28" y="220" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#1e293b">Whole game: matching C</text>
 <rect x="330" y="206" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="206" width="429.4" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">95.43 %</text>
+<rect x="330" y="206" width="433.3" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">96.30 %</text>
 <text x="28" y="256" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="242" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="242" width="67.2" height="18" rx="9" fill="#22c55e"/>

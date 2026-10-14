@@ -5,7 +5,7 @@ that docs/PROGRESS.md and the objdiff report (decomp.dev) count exactly the same
 A unit is a contiguous range of machine code of one program:
   - every src file with a `// MATCHING addr size` marker is one unit (its exact range, whatever the csv says);
   - the parts of notes/functions_*.csv rows that no such file covers are units too (whole rows, or the
-    uncovered remainder of a row that a file cuts);
+    uncovered remainder of a row that a file cuts), except the ranges listed in DATA (jump tables, not code);
 Each unit knows its program, address, size, name, the src file (if any), whether it is Psy-Q library code
 (same rule as progress.py: names csv comment "Psy-Q", or a real name given by Ghidra) and, for the area
 overlays, whether it is a twin (a copy of code counted in MAIN0, X000 or an earlier overlay).  The headline
@@ -36,6 +36,58 @@ BINS = {"MAIN0": ("game/MAIN0.EXE", 0x80010000 - 0x800), "X000": ("game/AREA00/X
 for _p in OVERLAYS:
     BINS[_p] = ("game/AREA" + _p[2:] + "/" + _p + ".BIN", 0x800E8028)
 _BLOBS = {}
+
+# Per-area jump / pointer tables that Ghidra exported as "functions" (the csv rows func_80115EC4, func_80115F24,
+# func_80116258, func_801162B8, func_8011658C, ... of the area overlays).  They are DATA: every word is a pointer into
+# the overlay / MAIN0 (or a zero / flag constant), and the only jal that names them is a case of the area dispatchers
+# (FUN_800e9f74 and the one before it) for an area id that has no overlay or is another overlay's, never reached
+# while this overlay is loaded.  Verified per overlay; the same address is real code in other overlays (X005, X008,
+# X019 ...), which are not listed.  A row that starts with such a table has the table cut off (the code follows).
+# Never counted as code: the ranges are subtracted from the csv rows (so a regenerated csv stays correct) and
+# tools/gen_symbols.py gives them no symbol (splat emits them as .word data).
+DATA = [
+    ("X001", 0x80115EC4, 96),
+    ("X001", 0x80116258, 96),
+    ("X001", 0x801162B8, 724),
+    ("X002", 0x80115EC4, 96),
+    ("X002", 0x80116258, 96),
+    ("X002", 0x801162B8, 160),
+    ("X003", 0x80115EC4, 96),
+    ("X003", 0x80115F24, 820),
+    ("X003", 0x80116258, 96),
+    ("X003", 0x801162B8, 724),
+    ("X003", 0x8011658C, 916),
+    ("X003", 0x80116920, 156),
+    ("X003", 0x801169BC, 916),
+    ("X004", 0x80115EC4, 96),
+    ("X004", 0x80115F24, 820),
+    ("X004", 0x80116258, 96),
+    ("X004", 0x801162B8, 724),
+    ("X004", 0x8011658C, 472),
+    ("X005", 0x80115EC4, 32),
+    ("X006", 0x80115EC4, 96),
+    ("X006", 0x80115F24, 488),
+    ("X008", 0x8011832C, 276),
+    ("X009", 0x80115EC4, 96),
+    ("X009", 0x80115F24, 820),
+    ("X009", 0x80116258, 32),
+    ("X010", 0x80115EC4, 96),
+    ("X010", 0x80116258, 96),
+    ("X010", 0x801162B8, 724),
+    ("X010", 0x8011658C, 84),
+    ("X011", 0x80115EC4, 96),
+    ("X011", 0x80115F24, 156),
+    ("X013", 0x80115EC4, 96),
+    ("X013", 0x80115F24, 144),
+    ("X016", 0x80115EC4, 96),
+    ("X016", 0x80115F24, 100),
+    ("X017", 0x80115EC4, 96),
+    ("X017", 0x80115F24, 504),
+    ("X018", 0x80115EC4, 96),
+    ("X018", 0x80115F24, 820),
+    ("X018", 0x80116258, 96),
+    ("X018", 0x801162B8, 32),
+]
 
 
 def word(prog, addr):
@@ -133,6 +185,14 @@ def units():
         # csv rows: the parts not covered by a file
         for a, size, name, tw in rows:
             pieces = [(a, a + size)]
+            for dp, da, ds in DATA:
+                if dp != prog: continue
+                nxt = []
+                for s, e in pieces:
+                    if da + ds <= s or da >= e: nxt.append((s, e)); continue
+                    if s < da: nxt.append((s, da))
+                    if da + ds < e: nxt.append((da + ds, e))
+                pieces = nxt
             for u in out:
                 if u.file is None: continue
                 fa, fb = u.addr, u.addr + u.size
