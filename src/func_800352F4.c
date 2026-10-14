@@ -3,7 +3,6 @@
 #include "player.h"
 extern unsigned char *D_8009C338;
 extern unsigned char D_800A6100;
-extern unsigned char *D_800A6078;
 extern int D_8009C934;
 void playSFX(int id);
 int abs(int);
@@ -18,7 +17,7 @@ void func_800352F4(unsigned char *o)
     D_800A6100 = 1;
     PLAYER.obj.d30 = *(short *)(*(unsigned char **)(o + 0x40) + 2);
     PLAYER.obj.d34 = *(short *)(o + 0x16) + 4;
-    dx = *(short *)(*(unsigned char **)(o + 0x40) + 2) - *(short *)(D_800A6078 + 2);
+    dx = *(short *)(*(unsigned char **)(o + 0x40) + 2) - *(short *)((*(unsigned char **)&PLAYER.obj.h) + 2);
     dx = abs(dx);
     dy = *(short *)(o + 0x16) - PLAYER.obj.y.p.whole;
     dy = abs(dy);

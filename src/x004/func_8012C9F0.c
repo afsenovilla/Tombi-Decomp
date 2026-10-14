@@ -1,11 +1,10 @@
 // FUNC 8012c9f0 1960 X004
 // MATCHING 8012c9f0 1960
+#include "player.h"
 #include "TOBJ.H"
 
 extern unsigned char D_8009CE62, D_8009CE63, D_8009D086[], D_8009C940, D_8009C941;
 extern unsigned char D_8009C93F[], D_8009C942[];
-extern unsigned char D_800A60E2, D_800A60D6;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern unsigned short D_800A6066;
 extern short D_1F80016E;
 extern void *D_8013577C[], *D_80135784[];
@@ -43,7 +42,7 @@ void func_8012C9F0(TObj *o)
     case 1:
         if (D_8009C940 != 0 && D_8009C941 != 0x90) break;
         y = D_1F80016E;
-        if (!((y < -0x40b && (D_800A60E2 || D_800A60D6)) || y == -0x450)) break;
+        if (!((y < -0x40b && ((*(unsigned char*)&PLAYER.obj.waa) || PLAYER.obj.b9e)) || y == -0x450)) break;
         o->state++;
         D_8009D086[0] = 1;
         D_8009C93F[0] = 1;
@@ -91,9 +90,9 @@ void func_8012C9F0(TObj *o)
         D_8009D086[0] = 1;
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->d90 = showMessageBoxDirect(3, 0, &o->a);
         o->wac = 2;
         o->animFrame = o->b68 & 1;
@@ -108,9 +107,9 @@ void func_8012C9F0(TObj *o)
         p->b04 = 3;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 0;
         o->anim = D_8013577C[0];
         o->state = 0;
@@ -123,9 +122,9 @@ void func_8012C9F0(TObj *o)
         o->d90 = showMessageBoxDirect(3, 1, &o->a);
         D_8009C93F[0] = 1;
         D_8009C942[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 2;
         o->animFrame = ~D_800A6066 & 1;
         o->anim = D_80135784[0];
@@ -243,11 +242,11 @@ void func_8012C9F0(TObj *o)
         if (o->velV < 0x400) o->velV += o->velY;
         break;
     case 20:
-        D_800A603C[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         D_8009C93F[0] = 0;
         D_8009C942[0] = 0;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         D_8009D086[0] = 2;
         o->state = 0;
         break;

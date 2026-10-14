@@ -1,10 +1,10 @@
 // FUNC 8003f200 804 MAIN0
 // MATCHING 8003f200 804
+#include "player.h"
 #include "gamestate.h"
 typedef struct { short x, y; } XY;
 extern short D_800A457C, D_800A457E;
 extern unsigned short D_8009C960h;
-extern short *D_800A607C;
 extern char D_8007B5DC[];
 extern XY *D_8007B460[];
 extern XY D_8007B450[];
@@ -38,7 +38,7 @@ char *getCollisionPlaneAt(short x, short y)
         t = &D_8007B450[GAME.selectedSection];
         b = D_1F800308[D_1F8001C8 & 1];
     } else if (M960 == 3 && (GAME.selectedSection == 1 || GAME.selectedSection == 5)) {
-        if (D_800A607C[1] < 0) {
+        if ((*(short **)&PLAYER.obj.d)[1] < 0) {
             b = D_1F80030C;
             t = D_8007B44C;
             y += 0x5a;

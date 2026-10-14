@@ -1,10 +1,8 @@
 // FUNC 801317e4 492 X000
 // MATCHING 801317e4 492
+#include "player.h"
 #include "TOBJ.H"
 extern void *D_8013AD64[];
-extern Fix16 *D_800A607C;
-extern Fix16 *D_800A6078;
-extern unsigned short D_800A604E;
 extern unsigned short D_80139240[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -15,17 +13,17 @@ static __inline__ int check(TObj *o)
     short r;
     unsigned short d;
     int x;
-    if (o->d->p.whole != D_800A607C->p.whole) {
+    if (o->d->p.whole != (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
         x = 0;
     } else {
         r = 0;
-        if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 12) {
+        if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x40) < 0x80 && (Rand() & 0xf) < 12) {
             r = 1;
-        } else if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6) {
+        } else if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x80) < 0x100 && (Rand() & 0xf) < 6) {
             r = 1;
         }
         x = 0;
-        d = D_800A604E - o->y.p.whole + 0x30;
+        d = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30;
         if (r == 1)
             x = d < 0xf8;
         else

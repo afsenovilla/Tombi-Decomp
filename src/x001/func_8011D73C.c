@@ -1,5 +1,6 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
@@ -8,7 +9,7 @@ extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_8009C93F, D_8009CE40, D_8009D093, D_8009D092;
 extern unsigned char D_1F8001CC, D_1F8001CD, D_1F8003D0;
-extern short D_1F8001C6, D_800A60EA;
+extern short D_1F8001C6;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *);
 extern void FUN_8001f110(int);
@@ -96,7 +97,7 @@ void func_8011D73C(TObj *o)
                 o->state++;
             case 1:
                 if (GAME.fadeScreenControl) break;
-                D_800A60EA = 0;
+                PLAYER.obj.wb2 = 0;
                 D_8009C93F = 0;
                 setEventComplete(0x16, 0);
                 o->step = 0;

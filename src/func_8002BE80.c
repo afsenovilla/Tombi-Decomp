@@ -1,11 +1,10 @@
 // FUNC 8002be80 472 MAIN0
 // MATCHING 8002be80 472
+#include "player.h"
 #include "TOBJ.H"
 extern void *D_80012034[];
 extern void *D_80012268;
 extern unsigned char D_80079D3C[];
-extern unsigned short D_800A6066;
-extern Fix16 *D_800A6078;
 extern unsigned short D_800A604E[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
@@ -44,8 +43,8 @@ void func_8002BE80(TObj *o)
         if (o->subtype == 2) {
             o->visible = 1;
             ObjListPush_1F800220(o);
-            if (D_800A6066 & 1) d = -14; else d = 14;
-            o->h->p.whole = D_800A6078->p.whole + d;
+            if (PLAYER.obj.animFrame & 1) d = -14; else d = 14;
+            o->h->p.whole = (*(Fix16 **)&PLAYER.obj.h)->p.whole + d;
             o->y.p.whole = D_800A604E[0] - 14;
             if (AnimAdvance(o)) {
                 o->b04++;

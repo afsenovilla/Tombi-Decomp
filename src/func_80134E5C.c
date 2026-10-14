@@ -1,5 +1,6 @@
 // FUNC 80134e5c 3248 X000
 // MATCHING 80134e5c 3248
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char pad[0x4c]; short w4c; short w4e; } C4C;
@@ -21,9 +22,7 @@ extern void *D_8013B2CC[], *D_8013B2D0[], *D_8013B2D4[], *D_8013B2D8[], *D_8013B
 extern void *D_1F8002D4;
 extern char D_80077CDC[];
 extern short *D_801396A0[];
-extern Fix16 *D_800A6078;
 extern unsigned short D_1F8003C4, D_1F8001FC;
-extern unsigned char D_800A60A1;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
 extern unsigned char D_800A603D_[];
@@ -49,7 +48,6 @@ extern short D_8009CDA0_[];
 #define D_8009CDA0 D_8009CDA0_[0]
 extern short D_8009CD96_[];
 #define D_8009CD96 D_8009CD96_[0]
-extern unsigned short D_800A604A;
 extern short D_800A60D2_[];
 #define D_800A60D2 D_800A60D2_[0]
 extern short D_800A60D0_[];
@@ -154,11 +152,11 @@ void func_80134E5C(TObj *o)
                 break;
             case 1:
                 if (D_8009D2B0 == 3) break;
-                if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 32) >= 64) break;
+                if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
                 if (!(D_1F8001FC & D_1F8003C4)) break;
-                if (D_800A60A1 == 0) break;
+                if (PLAYER.obj.b69 == 0) break;
                 if (D_800A603C != 1) break;
-                if (D_800A6078->p.whole - o->h->p.whole > 0) o->animFrame = 0;
+                if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;
                 else o->animFrame = 1;
                 D_800A603C = 5;
                 D_800A603D = 0;
@@ -177,11 +175,11 @@ void func_80134E5C(TObj *o)
             break;
         case 3:
             if (D_8009D2B0 == 3) break;
-            if ((unsigned short)(D_800A6078->p.whole - o->h->p.whole + 32) >= 64) break;
+            if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
             if (!(D_1F8001FC & D_1F8003C4)) break;
-            if (D_800A60A1 == 0) break;
+            if (PLAYER.obj.b69 == 0) break;
             if (D_800A603C != 1) break;
-            if (D_800A6078->p.whole - o->h->p.whole > 0) o->animFrame = 0;
+            if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;
             else o->animFrame = 1;
             D_800A603C = 5;
             D_800A603D = 0;
@@ -201,7 +199,7 @@ void func_80134E5C(TObj *o)
                 if (o->h->p.whole >= 161) o->animFrame = 1;
                 applyAnimVelocityX(o, o->animFrame);
                 {
-                    Fix16 *p = D_800A6078;
+                    Fix16 *p = (*(Fix16 **)&PLAYER.obj.h);
                     if (p->p.whole >= 180 && D_800A603C != 1) break;
                     p->p.whole = 180;
                 }
@@ -295,7 +293,7 @@ void func_80134E5C(TObj *o)
             D_800A603D = 0;
             D_800A603E = 0;
             {
-                short t = D_800A6078->p.whole > o->h->p.whole;
+                short t = (*(Fix16 **)&PLAYER.obj.h)->p.whole > o->h->p.whole;
                 D_8009C93F = 1;
                 D_800A6066 = t;
             }
@@ -394,7 +392,7 @@ void func_80134E5C(TObj *o)
                 break;
             case 2:
                 applyAnimVelocityX(o, 0);
-                if ((unsigned short)(D_800A604A - o->h->p.whole) < 32) o->step++;
+                if ((unsigned short)((*(unsigned short*)&PLAYER.obj.a.p.whole) - o->h->p.whole) < 32) o->step++;
                 break;
             case 3:
                 if (--o->y.p.whole < -56) {

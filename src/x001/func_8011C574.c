@@ -1,5 +1,6 @@
 // FUNC 8011c574 2388 X001
 // MATCHING 8011c574 2388
+#include "player.h"
 #include "TOBJ.H"
 
 typedef struct {
@@ -23,9 +24,7 @@ extern Seg D_8013C498[];
 extern char D_8013C490[];
 extern Ctx D_800A64C0;
 extern short D_800A64C6[];
-extern Fix16 *D_800A6078;
 extern short D_800A604E;
-extern unsigned char D_800A60D4;
 extern int MulCos(int, short);
 extern int MulNegSinScaled(int, short);
 extern TObj *allocObjectLayer4(void);
@@ -140,7 +139,7 @@ void func_8011C574(TObj *o)
             for (c = (TObj *)o->d94; c != 0; c = (TObj *)c->d94) {
                 if (c->b69 == 0) {
                     if (c->subtype < 4) continue;
-                    if (D_800A6078->p.whole < 0x5b0) continue;
+                    if ((*(Fix16 **)&PLAYER.obj.h)->p.whole < 0x5b0) continue;
                 }
                 if (c->b0c < 3) continue;
                 if (D_800A4470[c->subtype].n - c->b0c < 4) continue;
@@ -181,8 +180,8 @@ void func_8011C574(TObj *o)
                     if (X(o)->wba == 0) playSFX(0x4d); else playSFX(0x4e);
                     X(o)->wba ^= 1;
                 }
-                if (D_800A60D4 == 0) {
-                    *(short *)((char *)D_800A6078 + 2) += dx;
+                if (PLAYER.obj.b9c == 0) {
+                    *(short *)((char *)(*(Fix16 **)&PLAYER.obj.h) + 2) += dx;
                     D_800A604E += dy;
                 }
                 o->b69 = 0;

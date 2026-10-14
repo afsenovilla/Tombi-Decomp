@@ -1,11 +1,9 @@
 // FUNC 80136bc0 288 X000
 // MATCHING 80136bc0 288
+#include "player.h"
 typedef struct Q { char p0[0x16]; short y; } Q;
 typedef struct R { char p0[2]; unsigned short w2; } R;
 typedef struct O { char p0[0x1c]; unsigned short w1c; char p1[2]; Q *q; } O;
-extern unsigned char D_800A603C;
-extern short D_800A604E;
-extern R *D_800A6078;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC, D_1F8003C4;
 extern char D_800A60F8;
@@ -14,19 +12,19 @@ int func_80136BC0(O *o)
 {
     int r = 0;
     if (o->q->y < -500) {
-        if (D_800A604E != -0x2e3)
+        if (PLAYER.obj.y.p.whole != -0x2e3)
             goto end;
-        if ((short)D_800A6078->w2 < 0xbf9)
+        if ((short)(*(R **)&PLAYER.obj.h)->w2 < 0xbf9)
             goto end;
         if (o->w1c) {
             r = 1; goto end2;
         }
     } else {
-        if (D_800A603C == 5)
+        if (PLAYER.obj.b04 == 5)
             goto end;
-        if (D_800A604E < -0x12b)
+        if (PLAYER.obj.y.p.whole < -0x12b)
             goto end;
-        if ((unsigned short)(D_800A6078->w2 - 0xa1a) >= 0x28)
+        if ((unsigned short)((*(R **)&PLAYER.obj.h)->w2 - 0xa1a) >= 0x28)
             goto end;
         if (o->w1c) {
             r = 1;

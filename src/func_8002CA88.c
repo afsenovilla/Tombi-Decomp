@@ -1,11 +1,10 @@
 // FUNC 8002ca88 604 MAIN0
 // MATCHING 8002ca88 604
+#include "player.h"
 #include "TOBJ.H"
 extern void *D_800121F4[];
-extern unsigned short D_800A604A[];
 extern unsigned short D_800A604E[];
 extern unsigned short D_800A6052[];
-extern unsigned char D_800A6047;
 extern void AnimLoadDuration(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -17,10 +16,10 @@ void func_8002CA88(TObj *o)
         if (o->step == 0) {
             o->anim = (D_800121F4 + o->subtype)[o->b0c];
             AnimLoadDuration(o);
-            o->a.p.whole = D_800A604A[0];
+            o->a.p.whole = ((unsigned short*)&PLAYER.obj.a.p.whole)[0];
             o->y.p.whole = D_800A604E[0] - 8;
             *(short *)((char *)o + 0x1a) = D_800A6052[0];
-            { unsigned char t = D_800A6047;
+            { unsigned char t = PLAYER.obj.b0f;
             o->b04 = 1;
             o->step = 0;
             o->b0f = t - 1; }

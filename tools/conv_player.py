@@ -38,12 +38,17 @@ def lval(off, sig, ctype):
 
 
 DIRECT = "--direct" in sys.argv
+ONLY = None  # dict token name -> direct-only flag (None = all, DIRECT global)
 
 
 def direct_ok(off, btype, st, ar):
     if st: return False
     b = base_of(off)
     return b is not None and b[2] == 0 and FSIGN.get(b[1]) == SCAL.get(btype)
+
+
+def tokens(path):
+    return sorted(set(re.findall(r"\bD_800A60[0-9A-F]{2}\b", open(path, errors='surrogateescape').read())))
 
 
 def conv(path):
@@ -68,7 +73,7 @@ def conv(path):
                 for st, nm, ar in parsed:
                     mm = re.fullmatch(r"D_800A60([0-9A-F]{2})", nm)
                     off = 0x800A6000 + int(mm.group(1), 16) - BASE if mm else -1
-                    if mm and 0 <= off < 0xC0 and (btype in SCAL or st) and not (st and ar) and (not DIRECT or direct_ok(off, btype, st, ar)):
+                    if mm and (ONLY is None or nm in ONLY) and 0 <= off < 0xC0 and (btype in SCAL or st) and not (st and ar) and (not (DIRECT if ONLY is None else ONLY.get(nm, False)) or direct_ok(off, btype, st, ar)):
                         decl[nm] = (btype + (" " + st if st else ""), ar is not None, SCAL.get(btype) if not st else None, off)
                     else:
                         keep.append((st, nm, ar))

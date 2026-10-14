@@ -1,11 +1,9 @@
 // FUNC 80137458 864 X000
 // MATCHING 80137458 864
+#include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char D_8009CE4A;
-extern short D_800A604E;
-extern unsigned char D_800A60A1;
-extern unsigned short *D_800A6078;
 extern short *D_800A6078s;
 extern signed char D_8009D2B0;
 extern unsigned short D_1F8003C4;
@@ -16,7 +14,6 @@ extern unsigned char D_8009C942[];
 extern unsigned char D_800A60F8;
 extern unsigned char D_8009D0A7;
 extern unsigned char D_8009CEBD;
-extern unsigned char D_800A60E4;
 extern unsigned char *D_800A611C;
 extern unsigned char D_8009D00D;
 extern unsigned char D_8009CFFB;
@@ -28,7 +25,7 @@ short func_80137458(TObj *o)
 
     if (GAME.selectedSection == 0) {
         if (D_8009CE4A != 0xff) {
-            if (D_800A604E < -0x122 && D_800A60A1 != 0 && (unsigned short)(D_800A6078[1] - 0x148) < 0x10 &&
+            if (PLAYER.obj.y.p.whole < -0x122 && PLAYER.obj.b69 != 0 && (unsigned short)((*(unsigned short **)&PLAYER.obj.h)[1] - 0x148) < 0x10 &&
                 D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4) != 0 && D_8009C940 == 0) {
                 D_800A60F8 = 1;
                 D_8009C942[0] = 0;
@@ -37,8 +34,8 @@ short func_80137458(TObj *o)
             }
             if (D_8009D0A7 != 0) {
                 if (D_8009CEBD == 0) {
-                    if (D_800A604E < -0x110) {
-                        if (D_800A60E4 == 3)
+                    if (PLAYER.obj.y.p.whole < -0x110) {
+                        if ((*(unsigned char*)&PLAYER.obj.wac) == 3)
                             goto l6ac;
                         if (D_8009C940 == 0)
                             return n;
@@ -50,7 +47,7 @@ short func_80137458(TObj *o)
                         }
                     }
                 } else {
-                    if (D_800A604E < -0x110 && D_800A6078s[1] < 0x17c && D_800A60A1 != 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && D_800A6078s[1] < 0x17c && PLAYER.obj.b69 != 0) {
                         D_8009C942[0] = 0;
                         D_800A60F8 = 0;
                         *(short *)&o->anim = 0;
@@ -64,7 +61,7 @@ short func_80137458(TObj *o)
                 }
             } else {
                 if (D_8009CEBD == 0) {
-                    if (D_800A604E < -0x110 && D_800A60E4 == 3) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && (*(unsigned char*)&PLAYER.obj.wac) == 3) {
                     l6ac:
                         if (D_800A611C[2] == 0x15) {
                             n++;
@@ -75,7 +72,7 @@ short func_80137458(TObj *o)
                         }
                     }
                 } else {
-                    if (D_800A604E < -0x110 && D_800A6078s[1] < 0x17c && D_800A60A1 != 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && D_800A6078s[1] < 0x17c && PLAYER.obj.b69 != 0) {
                         n++;
                         D_8009C942[0] = 0;
                         D_800A60F8 = 0;
