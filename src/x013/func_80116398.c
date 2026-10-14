@@ -1,13 +1,14 @@
 // FUNC 80116398 840 X013
 // MATCHING 80116398 840
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     TObj t;
     unsigned char pad[0xf2 - 0xc0];
     short wf2;
 } PL;
 extern PL PLAYER;
-extern unsigned char D_8009CFF9, D_8009C975;
+extern unsigned char D_8009CFF9;
 extern signed char D_8009D2B0;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -85,7 +86,7 @@ void func_80116398(TObj *o)
         p->t.state = 0;
         break;
     case 7:
-        if (D_8009C975 == 1) o->b04 = 3;
+        if (GAME.fadeScreenControl == 1) o->b04 = 3;
         break;
     }
 }

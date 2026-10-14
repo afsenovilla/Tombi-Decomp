@@ -1,5 +1,6 @@
 // FUNC 80115fc0 444 X011
 // MATCHING 80115fc0 444
+#include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -10,7 +11,6 @@ typedef void (*Fn)(O *);
 
 extern Fn D_80079AD0[];
 extern unsigned char D_8009C93A;
-extern unsigned short D_8009C962;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
@@ -26,7 +26,7 @@ void func_80115FC0(O *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
             if (D_1F80016A < 0x14 && D_1F80016E >= -0x3b) {
                 tryStartItemInteraction(o, 1, 0);

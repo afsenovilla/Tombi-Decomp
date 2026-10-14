@@ -2,11 +2,11 @@
 // MATCHING 800fa01c 832
 #include "TOBJ.H"
 #include "raw7.h"
+#include "gamestate.h"
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
 extern unsigned char *D_800A611C;
 extern int D_8009C934;
-extern int D_8009C960;
 extern unsigned short D_1f8001fc, D_1f8003c6;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
@@ -69,7 +69,7 @@ void func_800FA01C(TObj *o)
         o->state++;
     case 1:
         AnimAdvance(o);
-        if (D_8009C960 == 0x30000) break;
+        if ((*(int*)&GAME.selectedArea) == 0x30000) break;
         if (D_1f8001fc & D_1f8003c6) {
             U8(D_8009C330, 9) = 0;
             setanim(o, 9);

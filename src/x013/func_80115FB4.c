@@ -1,14 +1,12 @@
 // FUNC 80115fb4 640 X013
 // MATCHING 80115fb4 640
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef void (*Fn)(TObj *);
 
 extern Fn D_80079A98[];
-extern unsigned char D_8009CDA2[];
-extern unsigned char D_8009C93A, D_800A60DA, D_8009C93C, D_8009C975;
+extern unsigned char D_8009C93A, D_800A60DA, D_8009C93C;
 extern unsigned char D_800A603C, D_800A6039, D_800A603D, D_800A603E;
-extern unsigned short D_8009C982;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern short D_800A60B6;
 extern short D_1F800172;
 extern int D_1F8000F0;
@@ -25,8 +23,8 @@ void func_80115FB4(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009CDA2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) D_8009CDA2[0] = 0;
+        if (((unsigned char*)&GAME.disableSelectMenu)[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) ((unsigned char*)&GAME.disableSelectMenu)[0] = 0;
             break;
         }
         o->subtype = 0;
@@ -38,7 +36,7 @@ void func_80115FB4(TObj *o)
         func_8002795C(o);
         syncObjectTargetY(o);
         func_80029078(o);
-        D_8009C982 = 0;
+        GAME.selectedSpawnPoint = 0;
         break;
     case 2:
         D_80079A98[o->subtype](o);
@@ -60,11 +58,11 @@ void func_80115FB4(TObj *o)
         break;
     case 4:
         if (--o->w48 == -1) {
-            D_8009CD94 = 1;
-            D_8009CD96 = 4;
-            D_8009CDA0 = 4;
+            (*(short*)&GAME.nextArea) = 1;
+            (*(short*)&GAME.nextSection) = 4;
+            (*(short*)&GAME.nextSpawnPoint) = 4;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
         }
     case 5:
@@ -74,7 +72,7 @@ void func_80115FB4(TObj *o)
             if (*k > 0x500) *k = 0x500;
             { int *g = &D_1F8000F0; *g += *k << 8; }
         }
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

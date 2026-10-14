@@ -2,6 +2,7 @@
 // MATCHING 801162d0 200
 /* debt: second extern name D_1F8000F0_b for the clamp stores (game reloads lui per access, no CSE of the address) */
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct {
     char pad[0x2c];
     short xmin, xmax, ymin, ymax;
@@ -10,14 +11,13 @@ typedef struct {
 extern TObj PLAYER;
 extern Fix16 D_1F8000F0;
 extern int D_1F8000F0_b;
-extern unsigned short D_8009C962;
 extern void func_80115FB4(Cam *);
 
 void func_801162D0(Cam *c)
 {
     TObj *pl;
 
-    if (D_8009C962 == 0) {
+    if (GAME.selectedSection == 0) {
         func_80115FB4(c);
         return;
     }
