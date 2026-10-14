@@ -41,8 +41,8 @@ void func_801161D4(TObj *o)
             break;
         c4:
             t = p->animFrame & 1;
-            if (t != U16(o, 0x58)) {
-                U16(o, 0x58) = t;
+            if (t != o->w58) {
+                o->w58 = t;
                 U8(o, 0x3d) = 0;
                 U8(o, 0x3c) = 0;
             }
@@ -52,8 +52,8 @@ void func_801161D4(TObj *o)
             break;
         case 3:
             t = p->animFrame & 1;
-            if (t != U16(o, 0x58)) {
-                U16(o, 0x58) = t;
+            if (t != o->w58) {
+                o->w58 = t;
                 U8(o, 0x3d) = 0;
             }
             goto f0;
@@ -61,8 +61,8 @@ void func_801161D4(TObj *o)
         case 2:
         case 5:
             t = p->animFrame & 1;
-            if (t != U16(o, 0x58)) {
-                U16(o, 0x58) = t;
+            if (t != o->w58) {
+                o->w58 = t;
                 U8(o, 0x3d) = 0;
                 U8(o, 0x3c) = 0;
             }

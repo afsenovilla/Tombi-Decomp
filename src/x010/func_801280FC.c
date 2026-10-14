@@ -42,7 +42,7 @@ void func_801280FC(TObj *o)
         FUN_800eea7c(&PLAYER, 0x1e, 0);
         PLAYER.y.p.whole = -0xd2;
         o->d34 = 0xff2e0000;
-        U8(o, 0xa7) = 0;
+        o->ba7 = 0;
         o->timer = 0x3c;
         o->state++;
         D_8009D078 = 4;
@@ -69,7 +69,7 @@ void func_801280FC(TObj *o)
     case 5:
         func_801271D8(o, 1);
         FUN_800eea7c(&PLAYER, 0x47, 0);
-        U8(o, 0xa7) = 0;
+        o->ba7 = 0;
         PLAYER.y.p.whole = -0xe2;
         PLAYER.animFrame = 0;
         o->d34 = PLAYER.y.raw;

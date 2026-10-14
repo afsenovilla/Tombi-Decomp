@@ -53,7 +53,7 @@ void func_80127290(TObj *o)
         break;
     case 1:
         mv(o);
-        if (!U8(o, 0xa7)) {
+        if (!o->ba7) {
             o->timer = 300;
             o->state++;
         }
@@ -61,7 +61,7 @@ void func_80127290(TObj *o)
     case 2:
         mv(o);
         if (--o->timer == -1) o->state++;
-        if (U8(o, 0xa7)) o->state = 1;
+        if (o->ba7) o->state = 1;
         break;
     case 3:
         o->b04 = 1;
