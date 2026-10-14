@@ -29,8 +29,8 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 516 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | first draft; o in s3 and rcos-before-rsin cross-jump in BLKB blocks, s0/s1 swap |
 | FAR | x001 | func_801278C0 | 801278C0 | 1820 | 417 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | draft 1796/1820 B; unexplained 0x80 frame (inlined helper with arrays?), reg choice |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
-| FAR | x001 | func_80136B4C | 80136B4C | 1744 | 242 | src/x001/wip/func_80136B4C.c (gcc-2.7.2-psx) | structure complete; case 3 rewrite, 4 jump tables, regalloc |
-| FAR | x006 | func_8011A87C | 8011A87C | 1644 | 276 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | draft; empty case 2 for k=0 step switch, RotMatrixY arg forms |
+| FAR | x001 | func_80136B4C | 80136B4C | 1744 | 18 | src/x001/wip/func_80136B4C.c (gcc-2.7.2-psx) | only the case 3 head scheduling left |
+| FAR | x006 | func_8011A87C | 8011A87C | 1644 | 179 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | -fno-expensive-optimizations + o pin in $17; prologue copy, a0/a1 choices |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 496 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | first transcription; regalloc and block layout far off |
 | FAR | x010 | func_80125FB4 | 80125FB4 | 1280 | 124 | src/x010/wip/func_80125FB4.c (gcc-2.7.2-psx) | case 5 cross-jumped into case 8 in the game |
 | FAR | x001 | func_801253AC | 801253AC | 1212 | 308 | src/x001/wip/func_801253AC.c (gcc-2.7.2-psx) | first full draft; regalloc and block layout far off |
@@ -59,4 +59,3 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x006 | func_8011D7E0 | 8011D7E0 | 228 | no wip | gcc-2.7.2-psx default | no wip; piece of 1812 B D4E0 function |
 | FAR | x010 | func_8011E000 | 8011E000 | 216 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B (E000,E0D8,E1A4,E358,E6B0); compare-temp trick applied, residual regalloc |
 | FAR | x010 | func_8011E0D8 | 8011E0D8 | 204 | 54 | src/x010/wip/func_8011E000.c (gcc-2.7.2-psx) | piece of 2276 B wip (see 8011E000) |
-| FAR | x000 | func_80117928 | 80117928 | 112 | 212 | src/wip/func_801176D8.c (gcc-2.7.2-psx) | tail piece of 1492 B switch (jtbl 80115EF8, cases 0,1,2,4/5) wip; score is for the whole 801176D8+80117928 wip |
