@@ -23,7 +23,7 @@ static __inline__ int chk(void)
     return GAME.selectedSection == 5 && D_8009CDC5b == 1;
 }
 
-void func_8012C00C(TObj *o)
+void tunnelDiggerTalk(TObj *o)
 {
     V v;
     int f;

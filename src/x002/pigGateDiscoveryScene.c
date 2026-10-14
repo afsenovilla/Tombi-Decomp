@@ -62,7 +62,7 @@ extern void func_80117CEC(TObj *, int, int);
     Spawn(MulCos(o->ang, 0x20) + 0xa0, -(MulNegSinScaled(o->ang, 0x40) + 0x60), 0x12c); \
     Spawn(MulCos(o->ang, 0x40) + 0xa0, -(MulNegSinScaled(o->ang, 0x20) + 0x60), 0x12c);
 
-void func_8011A114(Ctl *o)
+void pigGateDiscoveryScene(Ctl *o)
 {
     TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;

@@ -7,9 +7,9 @@
 extern void func_801318E4(TObj *);
 extern void func_80131E44(TObj *);
 extern void func_80132214(TObj *);
-extern void func_80131FEC(TObj *);
+extern void phoenixSpiritHintTalkB(TObj *);
 extern void func_80132960(TObj *);
-extern void func_80132D80(TObj *);
+extern void flameBlockedNpcTalk(TObj *);
 extern void FUN_80018980(TObj *);
 
 void func_801332CC(TObj *o)
@@ -30,13 +30,13 @@ void func_801332CC(TObj *o)
                 func_80132214(o);
                 break;
             case 2:
-                func_80131FEC(o);
+                phoenixSpiritHintTalkB(o);
                 break;
             }
         } else if (GAME.selectedSection == 1) {
             if (o->step == 0) func_80132960(o);
         } else {
-            func_80132D80(o);
+            flameBlockedNpcTalk(o);
         }
         break;
     case 2:

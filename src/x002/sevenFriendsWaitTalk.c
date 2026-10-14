@@ -19,7 +19,7 @@ extern int AnimAdvance(TObj *);
 extern void setEventStarted(int, int, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
-void func_80117D70(TO2 *o)
+void sevenFriendsWaitTalk(TO2 *o)
 {
     V6 v;
     TObj *p;

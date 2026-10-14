@@ -6,7 +6,7 @@
 
 extern TObj *allocObjectLayer2(void);
 extern short func_80139B2C(TObj *);
-extern void func_80139C50(TObj *);
+extern void lostSeedKidTalk(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8013B984(TObj *o)
@@ -35,7 +35,7 @@ void func_8013B984(TObj *o)
         o->b04 = 1;
         break;
     case 1:
-        if (func_80139B2C(o)) func_80139C50(o);
+        if (func_80139B2C(o)) lostSeedKidTalk(o);
         break;
     case 2:
         o->b04 = 3;

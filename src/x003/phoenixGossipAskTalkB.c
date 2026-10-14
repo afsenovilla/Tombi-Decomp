@@ -11,7 +11,7 @@ extern TObj *showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 
-void func_801304B8(TObj *o)
+void phoenixGossipAskTalkB(TObj *o)
 {
     switch (o->state) {
     case 0:

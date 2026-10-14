@@ -14,7 +14,7 @@ extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void func_801289C8(TObj *, int, int);
 
-void func_80132D80(TObj *o)
+void flameBlockedNpcTalk(TObj *o)
 {
     TObj *p = SCRIPT_OBJECTS;
     TObj *q;

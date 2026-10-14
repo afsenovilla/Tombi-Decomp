@@ -14,13 +14,13 @@ extern int FUN_800202b4(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void freeObjectLayer2(TObj *);
 extern void func_8012C97C(TObj *);
-extern void func_8012CDC0(TObj *);
-extern void func_8012CFE0(TObj *);
-extern void func_8012CC10(TObj *);
+extern void windblownMonkeyAskTrousers(TObj *);
+extern void windblownMonkeyGiveUmbrella(TObj *);
+extern void windblownMonkeyRepeatTalk(TObj *);
 
 #define SET_ANIM(o, a) do { (o)->anim = (a); AnimLoadDuration(o); } while (0)
 
-void func_8012D280(TObj *o)
+void updateWindblownMonkey(TObj *o)
 {
     TObj *p;
 
@@ -87,13 +87,13 @@ void func_8012D280(TObj *o)
             break;
         }
         case 2:
-            func_8012CDC0(o);
+            windblownMonkeyAskTrousers(o);
             break;
         case 3:
-            func_8012CFE0(o);
+            windblownMonkeyGiveUmbrella(o);
             break;
         case 4:
-            func_8012CC10(o);
+            windblownMonkeyRepeatTalk(o);
             break;
         }
         break;

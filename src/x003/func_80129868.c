@@ -10,7 +10,7 @@ extern void func_80128C08(TObj *);
 extern void func_80128FA0(TObj *);
 extern void func_80129240(TObj *);
 extern void func_80129430(TObj *);
-extern void func_8012962C(TObj *);
+extern void phoenixSpiritHintTalk(TObj *);
 extern int FUN_8001fec0(TObj *);
 
 void func_80129868(TObj *o)
@@ -57,7 +57,7 @@ void func_80129868(TObj *o)
         case 0:
             goto anim;
         case 1:
-            func_8012962C(o);
+            phoenixSpiritHintTalk(o);
             break;
         }
         break;

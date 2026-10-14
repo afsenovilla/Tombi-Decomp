@@ -1,37 +1,47 @@
-// FUNC 80130644 364 X003
-// MATCHING 80130644 364
+// FUNC 8012cc10 432 X003
+// MATCHING 8012cc10 432
+#include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
+typedef struct { char c[12]; } B12;
 
-extern void *D_8013A3B4[], *D_8013A3A8[];
-extern TObj *showMessageBoxDirect(int, int, Fix16 *);
+extern void *D_801399CC[], *D_801399BC[];
+extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 
-void func_80130644(TObj *o)
+void windblownMonkeyRepeatTalk(TObj *o)
 {
+    B12 v;
     TObj *p;
 
+    v = *(B12 *)&o->a;
     switch (o->state) {
     case 0:
+        o->animFrame = 1;
         o->b68 = 0;
+        o->wac = 9;
         o->state++;
+        o->anim = D_801399CC[0];
+        FUN_8001fe6c(o);
         break;
     case 1:
+        FUN_8001fec0(o);
         if (o->b68 == 0)
             break;
-        o->state++;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        o->d90 = (int)showMessageBoxDirect(2, 0xe, &o->a);
-        o->wac = 3;
+        o->wac = 5;
+        o->state++;
         o->animFrame = o->b68 & 1;
-        o->anim = D_8013A3B4[0];
+        o->anim = D_801399BC[0];
         FUN_8001fe6c(o);
+        ((unsigned char*)&GCD.bcf03)[0] = 2;
+        o->d90 = (int)showMessageBoxDirect(6, 5, &v);
         break;
     case 2:
         FUN_8001fec0(o);
@@ -39,14 +49,9 @@ void func_80130644(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        ((unsigned char*)&GVARS.b3f)[0] = 0;
-        ((unsigned char*)&GVARS.b42)[0] = 0;
-        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
-        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
-        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        o->wac = 0;
-        o->anim = D_8013A3A8[0];
-        o->state = 0;
+        o->step = 2;
+        o->state = 1;
+        o->b68 = 1;
         break;
     }
 }

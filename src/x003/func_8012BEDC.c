@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void func_8012BD5C(TObj *);
-extern void func_8012B66C(TObj *);
+extern void treasureChestGuardTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
@@ -29,7 +29,7 @@ void func_8012BEDC(TObj *o)
                 }
                 break;
             case 1:
-                func_8012B66C(o);
+                treasureChestGuardTalk(o);
                 break;
             }
         }

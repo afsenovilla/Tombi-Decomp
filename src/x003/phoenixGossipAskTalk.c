@@ -17,7 +17,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_801301C0(TObj *o)
+void phoenixGossipAskTalk(TObj *o)
 {
     TObj *p;
     unsigned char *k;

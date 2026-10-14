@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void func_8012B66C(TObj *);
+extern void treasureChestGuardTalk(TObj *);
 
 void func_8012BCB8(TObj *o)
 {
@@ -18,7 +18,7 @@ void func_8012BCB8(TObj *o)
         o->state = 0x46;
         break;
     case 1:
-        func_8012B66C(o);
+        treasureChestGuardTalk(o);
         break;
     }
 }

@@ -12,10 +12,10 @@ extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_801301C0(TObj *);
-extern void func_8013034C(TObj *);
-extern void func_801304B8(TObj *);
-extern void func_80130644(TObj *);
+extern void phoenixGossipAskTalk(TObj *);
+extern void phoenixGossipLavaHint(TObj *);
+extern void phoenixGossipAskTalkB(TObj *);
+extern void phoenixGossipLavaHintB(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -23,7 +23,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_801307B0(TObj *o)
+void updatePhoenixGossipNpc(TObj *o)
 {
     unsigned char t = o->b04;
     switch (t) {
@@ -58,11 +58,11 @@ void func_801307B0(TObj *o)
         AnimAdvance(o);
         ObjCullRegister(o);
         if (!(GV2.bc3 & 0x10)) {
-            if (GCD.bcdd9 == 0) func_801301C0(o);
-            else func_8013034C(o);
+            if (GCD.bcdd9 == 0) phoenixGossipAskTalk(o);
+            else phoenixGossipLavaHint(o);
         } else {
-            if (GCD.bcdd9 == 0) func_801304B8(o);
-            else func_80130644(o);
+            if (GCD.bcdd9 == 0) phoenixGossipAskTalkB(o);
+            else phoenixGossipLavaHintB(o);
         }
         break;
     case 2:

@@ -11,7 +11,7 @@ extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern void func_8013946C(TObj *);
-extern void func_80139770(TObj *);
+extern void flowerTowerKeeperTalk(TObj *);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 {
@@ -21,7 +21,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void func_80139914(TObj *o)
+void updateFlowerTowerKeeper(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -50,7 +50,7 @@ void func_80139914(TObj *o)
         if (o->b6b == 0)
             func_8013946C(o);
         else
-            func_80139770(o);
+            flowerTowerKeeperTalk(o);
         break;
     case 2:
         break;

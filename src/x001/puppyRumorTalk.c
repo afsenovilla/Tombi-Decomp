@@ -14,7 +14,7 @@ extern unsigned char D_800A60F8;
 extern void AnimLoadDuration(TObj *o);
 extern TObj *showMessageBox(int, int, int, int);
 
-void func_8013A2D8(TObj *o)
+void puppyRumorTalk(TObj *o)
 {
     TObj *p = *(TObj **)&o->category;
     int v;

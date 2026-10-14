@@ -20,7 +20,7 @@ extern void func_80116928(void *, int, int);
 extern void setEventComplete(int, int);
 extern void FUN_800eea7c(TObj *, int, int);
 
-void func_8011BDA8(TObj *o)
+void pigGateSevenFriendsScene(TObj *o)
 {
     TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;

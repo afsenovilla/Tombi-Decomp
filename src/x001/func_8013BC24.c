@@ -5,10 +5,10 @@
 
 void func_8013A4B0(TObj *o);
 short func_8013A664(TObj *o);
-void func_8013A8CC(TObj *o);
-void func_8013AF10(TObj *o);
-void func_8013B0F4(TObj *o);
-void func_8013AAB8(TObj *o);
+void raceStartCountdown(TObj *o);
+void raceOfferRematch(TObj *o);
+void raceStartRematch(TObj *o);
+void raceResult(TObj *o);
 void PoolFree_1F800210(TObj *o);
 
 void func_8013BC24(TObj *o)
@@ -23,25 +23,25 @@ void func_8013BC24(TObj *o)
             case 1:
                 switch (GCD.bcede) {
                 case 0:
-                    func_8013A8CC(o);
+                    raceStartCountdown(o);
                     break;
                 case 1:
-                    func_8013AAB8(o);
+                    raceResult(o);
                     break;
                 }
                 break;
             case 2:
                 if (GCD.bcede == 0) {
-                    func_8013AF10(o);
+                    raceOfferRematch(o);
                 }
                 break;
             case 3:
                 if (GCD.bcede == 0) {
-                    func_8013B0F4(o);
+                    raceStartRematch(o);
                 }
                 break;
             case 0xff:
-                func_8013AAB8(o);
+                raceResult(o);
                 break;
             }
         }

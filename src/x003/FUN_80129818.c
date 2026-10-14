@@ -2,7 +2,7 @@
 // MATCHING 80129818 80
 #include "TOBJ.H"
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8012962c(TObj *);
+extern void phoenixSpiritHintTalk(TObj *);
 
 void FUN_80129818(TObj *o)
 {
@@ -11,7 +11,7 @@ void FUN_80129818(TObj *o)
         FUN_8001fec0(o);
         break;
     case 1:
-        FUN_8012962c(o);
+        phoenixSpiritHintTalk(o);
         break;
     }
 }

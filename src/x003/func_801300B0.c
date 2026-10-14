@@ -7,7 +7,7 @@ extern void *D_80138FD8[];
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void func_8012FCAC(TObj *);
+extern void lostBossItemNpcTalk(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void func_801300B0(TObj *o)
@@ -30,7 +30,7 @@ void func_801300B0(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        func_8012FCAC(o);
+        lostBossItemNpcTalk(o);
         break;
     case 2:
         break;

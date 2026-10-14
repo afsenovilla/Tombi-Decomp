@@ -11,7 +11,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V12 *);
 
-void func_8012962C(TObj *o)
+void phoenixSpiritHintTalk(TObj *o)
 {
     V12 b;
     TObj *p;

@@ -15,7 +15,7 @@ void func_80136B4C(TObj *o);
 void addItemToInventory(int a, int b, int c);
 void freeObjectLayer2(TObj *o);
 
-void func_8013721C(TObj *o)
+void updatePuppyBaron(TObj *o)
 {
     int v;
 

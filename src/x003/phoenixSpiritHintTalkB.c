@@ -15,7 +15,7 @@ extern void setEventComplete(int, int);
 extern void AnimAdvance(TObj *);
 extern void func_801289C8(TObj *, int, int);
 
-void func_80131FEC(TObj *o)
+void phoenixSpiritHintTalkB(TObj *o)
 {
     TObj *p = D_8009F2E0;
     TObj *q;

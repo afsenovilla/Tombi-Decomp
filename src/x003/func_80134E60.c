@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void func_80134CF8(TObj *);
-extern void func_801346C8(TObj *);
+extern void hidingSonTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
@@ -24,7 +24,7 @@ void func_80134E60(TObj *o)
             }
             break;
         case 1:
-            func_801346C8(o);
+            hidingSonTalk(o);
             break;
         }
         break;

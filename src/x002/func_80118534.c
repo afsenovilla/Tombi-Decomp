@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern void func_8011836C(TObj *);
-extern void func_80117D70(TObj *);
+extern void sevenFriendsWaitTalk(TObj *);
 extern void func_80118028(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -39,7 +39,7 @@ void func_80118534(TObj *o)
             }
             break;
         case 1:
-            func_80117D70(o);
+            sevenFriendsWaitTalk(o);
             break;
         case 2:
             func_80118028(o);

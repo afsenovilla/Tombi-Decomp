@@ -29,7 +29,7 @@ static __inline__ int chk(void)
     return GCD.bd0c8 && D_8009CE58[5] != 0xff;
 }
 
-void func_8012B66C(TObj *o)
+void treasureChestGuardTalk(TObj *o)
 {
     V6 v;
     TObj *p;

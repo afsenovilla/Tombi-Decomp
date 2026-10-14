@@ -9,7 +9,7 @@ extern TObj *showMessageBoxDirect(int, int, Fix16 *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 
-void func_80139770(TObj *o)
+void flowerTowerKeeperTalk(TObj *o)
 {
     TObj *p;
 

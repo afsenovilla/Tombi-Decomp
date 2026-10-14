@@ -2,7 +2,7 @@
 // MATCHING 8012c858 292
 #include "TOBJ.H"
 extern void func_8012C68C(TObj *);
-extern void func_8012C00C(TObj *);
+extern void tunnelDiggerTalk(TObj *);
 extern void ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -23,7 +23,7 @@ void func_8012C858(TObj *o)
                 }
                 break;
             case 1:
-                func_8012C00C(o);
+                tunnelDiggerTalk(o);
                 break;
             }
         }

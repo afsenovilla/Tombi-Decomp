@@ -16,7 +16,7 @@ typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 
-void func_8013AF10(TObj *o)
+void raceOfferRematch(TObj *o)
 {
     TObj *e = *(TObj **)&o->category;
     TObj *p;

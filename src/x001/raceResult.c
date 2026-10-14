@@ -21,7 +21,7 @@ extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void setEventComplete(int, int);
 
-void func_8013AAB8(O *o)
+void raceResult(O *o)
 {
     TObj *p = o->p1c;
     TObj *t;

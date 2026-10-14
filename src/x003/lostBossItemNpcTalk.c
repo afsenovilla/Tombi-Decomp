@@ -19,7 +19,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_8012FCAC(TObj *o)
+void lostBossItemNpcTalk(TObj *o)
 {
     int m, n;
     Fix16 *q;

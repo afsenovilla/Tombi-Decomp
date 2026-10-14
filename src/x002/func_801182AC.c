@@ -2,7 +2,7 @@
 // MATCHING 801182ac 192
 #include "TOBJ.H"
 
-extern void func_80117D70(TObj *);
+extern void sevenFriendsWaitTalk(TObj *);
 extern void func_80118028(TObj *);
 
 void func_801182AC(TObj *o)
@@ -30,7 +30,7 @@ void func_801182AC(TObj *o)
         }
         break;
     case 1:
-        func_80117D70(o);
+        sevenFriendsWaitTalk(o);
         break;
     case 2:
         func_80118028(o);

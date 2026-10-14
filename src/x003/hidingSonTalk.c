@@ -20,7 +20,7 @@ extern short FUN_80040278(TObj *, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void setEventComplete(int, int);
 
-void func_801346C8(TObj *o)
+void hidingSonTalk(TObj *o)
 {
     V6 v;
     unsigned char s;

@@ -5,8 +5,8 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void func_8011A114(TObj *);
-extern void func_8011BDA8(TObj *);
+extern void pigGateDiscoveryScene(TObj *);
+extern void pigGateSevenFriendsScene(TObj *);
 
 void func_8011C4EC(TObj *o)
 {
@@ -27,10 +27,10 @@ void func_8011C4EC(TObj *o)
         }
         break;
     case 1:
-        func_8011A114(o);
+        pigGateDiscoveryScene(o);
         break;
     case 2:
-        func_8011BDA8(o);
+        pigGateSevenFriendsScene(o);
         break;
     case 3:
         if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x92) < 0x20) {

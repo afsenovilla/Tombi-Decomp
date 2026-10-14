@@ -10,7 +10,7 @@ extern unsigned short D_1F8001FC;
 extern unsigned short D_1F8003C4;
 extern unsigned char D_800A60F8;
 extern void func_8013A0D8(TObj *);
-extern void func_8013A2D8(TObj *);
+extern void puppyRumorTalk(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
 static __inline__ short check(TObj *o)
@@ -38,7 +38,7 @@ void func_8013BAB0(TObj *o)
         func_8013A0D8(o);
         break;
     case 1:
-        if (check(o)) func_8013A2D8(o);
+        if (check(o)) puppyRumorTalk(o);
         break;
     case 2:
         o->b04 = 3;

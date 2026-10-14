@@ -23,7 +23,7 @@ extern void setEventStarted(int, int, int);
 extern void playJingle(int);
 extern void FUN_800187e4(TObj *);
 
-void func_801176B0(TObj *o)
+void updateMotocrossRaceStarter(TObj *o)
 {
     TObj *pl = (*(TObj **)&GVARS.p4c);
     char *p;

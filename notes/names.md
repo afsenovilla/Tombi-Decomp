@@ -133,3 +133,30 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x010 8012c8a0 updateParrot` - strips show a red/yellow parrot standing, walking and flying
 - `x001 8012b2d4 updatePurplePig` - layer 2 type 0 (11 placements, AREA01/07): strips show a purple pig walking, turning and falling
 - `x001 80138d4c updateCeilingDrip` - layer 2 type 34: strips show water gathering on the ceiling, forming a drop, falling and splashing
+- `x001 80139914 updateFlowerTowerKeeper` - layer 2 type 0x23 (5 placements, section 5): talks through flowerTowerKeeperTalk; strips show a red horned figure
+- `x001 80139770 flowerTowerKeeperTalk` - MFNT010S 2/126-127: "...te he asustado? ... la torre ... para que la Torre de flores no se seque"
+- `x001 8013721c updatePuppyBaron` - layer 2 type 0x17: strips show a white puppy; subtype 1 calls addItemToInventory(10) and sets a flag (X002 2/7-7 "el pequeño cachorro que salvaste en el Bosque de enanos ... Barón")
+- `x001 8013a2d8 puppyRumorTalk` - MFNT010S 2/31-33: heard a puppy barking near the spores, it is hurt
+- `x001 80139c50 lostSeedKidTalk` - MFNT010S 2/10-11: crying, cannot get down, was looking for flower seeds, "take me home?"
+- `x001 8013b254 stepRaceEvent` - script-state switch (GCD.bce59/bcede) over the four race functions below
+- `x001 8013a8cc raceStartCountdown` - MFNT010S 2/25 "Listo...ya!" (state 1 step 0, first race)
+- `x001 8013aab8 raceResult` - MFNT010S 2/26-29: lost/won the race, "the treasure is yours", rematch offer
+- `x001 8013af10 raceOfferRematch` - MFNT010S 2/30 "Una revancha? Vale! Vamos abajo." (state 2)
+- `x001 8013b0f4 raceStartRematch` - MFNT010S 2/25 countdown again (state 3, after the rematch offer)
+- `x002 8011a114 pigGateDiscoveryScene` - MFNT020S 7/3-8: another evil-pig bag and gate found, seven people on seven pedestals, gives Baron
+- `x002 8011bda8 pigGateSevenFriendsScene` - MFNT020S 3/3-4, 7/9-10: the gate opens, "we still need one more... Baron!"
+- `x002 80117d70 sevenFriendsWaitTalk` - MFNT020S 7/6, 7/11: "I'll wait here, tell your friends to come", gate left open
+- `x003 8012d280 updateWindblownMonkey` - layer 2 handler, strips show a monkey with a bag and a striped umbrella; MFNT030S 6/4 "the wind caught me and brought me here"
+- `x003 8012cc10 windblownMonkeyRepeatTalk` - MFNT030S 6/5 (repeat of the wind / torn trousers line)
+- `x003 8012cdc0 windblownMonkeyAskTrousers` - MFNT030S 6/6: lost the other trousers in the wind, "find them"
+- `x003 8012cfe0 windblownMonkeyGiveUmbrella` - MFNT030S 6/7-9: thanks for the trousers, gives the umbrella (explains gliding)
+- `x003 8012c00c tunnelDiggerTalk` - MFNT030S 2/0-3: "I'm digging a tunnel, nobody digs like me"
+- `x003 8012b66c treasureChestGuardTalk` - MFNT030S 4/0-1: guards the millennium treasure chest until the millennium key holder comes
+- `x003 8012fcac lostBossItemNpcTalk` - MFNT030S 8/1-4: lost something important of his boss, asks you to find it (same character as x004 8012c9f0)
+- `x003 801307b0 updatePhoenixGossipNpc` - layer 2 type 0x5A handler (2 placements), calls the four phoenix gossip lines below
+- `x003 801301c0 / 801304b8 phoenixGossipAskTalk / phoenixGossipAskTalkB` - MFNT030S 2/13 "Quieres ver al Fénix?" (two copies)
+- `x003 8013034c / 80130644 phoenixGossipLavaHint / phoenixGossipLavaHintB` - MFNT030S 2/14: fell from the phoenix, lava caves need a hook (two copies)
+- `x003 8012962c / 80131fec phoenixSpiritHintTalk / phoenixSpiritHintTalkB` - MFNT030S 2/15: "you just felt the evil spirit of Phoenix Mountain" (two copies)
+- `x003 80132d80 flameBlockedNpcTalk` - MFNT030S 7/0-3: cannot go further because of the flames, gives an item found on the way
+- `x003 801346c8 hidingSonTalk` - MFNT030S 5/0-2: hide-and-seek son, food basket from his father
+- `x006 801176b0 updateMotocrossRaceStarter` - layer 3 type 0x55 (1 placement): MFNT060S 2/0-1, 2/11 race start / retry; strips show a straw-hat farmer

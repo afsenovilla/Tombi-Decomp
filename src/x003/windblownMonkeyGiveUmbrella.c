@@ -13,7 +13,7 @@ extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
-void func_8012CFE0(TObj *o)
+void windblownMonkeyGiveUmbrella(TObj *o)
 {
     V6 v;
     TObj *p;

@@ -20,7 +20,7 @@ extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void printInfoMessage(int, int);
 
-void func_80139C50(TObj *o)
+void lostSeedKidTalk(TObj *o)
 {
     TObj *e = *(TObj **)&o->category;
     TObj *p;

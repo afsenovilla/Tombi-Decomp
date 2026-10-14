@@ -4,9 +4,9 @@
 #include "gamestate.h"
 extern void func_80131E44(TObj *);
 extern void func_80132214(TObj *);
-extern void func_80131FEC(TObj *);
+extern void phoenixSpiritHintTalkB(TObj *);
 extern void func_80132960(TObj *);
-extern void func_80132D80(TObj *);
+extern void flameBlockedNpcTalk(TObj *);
 
 void func_801331FC(TObj *o)
 {
@@ -19,12 +19,12 @@ void func_801331FC(TObj *o)
             func_80132214(o);
             break;
         case 2:
-            func_80131FEC(o);
+            phoenixSpiritHintTalkB(o);
             break;
         }
     } else if (GAME.selectedSection == 1) {
         if (o->step == 0) func_80132960(o);
     } else {
-        func_80132D80(o);
+        flameBlockedNpcTalk(o);
     }
 }

@@ -16,7 +16,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     AnimLoadDuration(o);
 }
 
-void func_8013034C(TObj *o)
+void phoenixGossipLavaHint(TObj *o)
 {
     TObj *p;
 

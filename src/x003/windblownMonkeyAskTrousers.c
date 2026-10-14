@@ -19,7 +19,7 @@ static __inline__ void setAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void func_8012CDC0(TObj *o)
+void windblownMonkeyAskTrousers(TObj *o)
 {
     V6 v;
     TObj *p;
