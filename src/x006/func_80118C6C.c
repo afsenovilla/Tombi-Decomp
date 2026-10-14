@@ -1,5 +1,6 @@
 // FUNC 80118c6c 1204 X006
 // MATCHING 80118c6c 1204
+#include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -17,7 +18,6 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern volatile unsigned short D_8009D670[];
 extern char D_8011FEA0[], D_8011F3F8[];
 extern void *D_801229D0[], *D_801229A8[];
 extern int Rand(void);
@@ -35,7 +35,7 @@ static __inline__ void upd(TObj *o, Sub *t)
     switch (SUB(o)->c8) {
     case 0:
         if (o->animTimer < 0x40) {
-            if (o->animTimer >= 0x3e && (D_8009D670[0] & 0x10)) {
+            if (o->animTimer >= 0x3e && (((volatile unsigned short*)&GV6.s70)[0] & 0x10)) {
                 *(char **)&o->wa8 = D_8011FEA0;
                 SUB(o)->c8 = 2;
                 o->animTimer -= 0x3e;

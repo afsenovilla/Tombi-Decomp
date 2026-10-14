@@ -1,9 +1,9 @@
 // FUNC 80117ddc 1320 X006
 // MATCHING 80117ddc 1320
+#include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern int D_1F8002D4[];
 extern void *D_80122DF4[], *D_80122E04[], *D_80122DC4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -25,7 +25,7 @@ void func_80117DDC(TObj *o)
         o->b0d = 0;
         o->w1e = 7;
         o->b0f = 0;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         switch (o->subtype) {
         case 0:
         case 1:

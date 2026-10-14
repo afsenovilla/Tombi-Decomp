@@ -1,11 +1,11 @@
 // FUNC 8011e54c 1668 X006
 // MATCHING 8011e54c 1668
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 extern unsigned char SCRIPT_FLAGS[];
-extern void *D_1F8002D4;
 extern void *D_80122C14[], *D_80122C18[], *D_80122C1C[];
 extern char D_80077CDC[];
 extern short *D_8012037C[];
@@ -57,7 +57,7 @@ void func_8011E54C(TObj *o)
         o->b0d = 1;
         o->w08 = FUN_8005e420(0x90, 0x1e0);
         {
-            int d = (int)D_1F8002D4;
+            int d = (int)(*(void **)&SPAD.i2d4);
             void *a = D_80122C14[0];
             o->d3c = d;
             o->anim = a;

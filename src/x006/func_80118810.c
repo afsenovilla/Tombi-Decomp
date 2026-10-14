@@ -1,5 +1,6 @@
 // FUNC 80118810 1116 X006
 // MATCHING 80118810 1116
+#include "gv6.h"
 #include "gvars.h"
 
 typedef struct {
@@ -26,7 +27,6 @@ typedef struct {
     short wd0;                /* 0xd0 */
 } O;
 
-extern volatile unsigned short D_8009D670[];
 extern void playSFX(int);
 extern void FUN_80025f40(int, int, int, int);
 
@@ -67,10 +67,10 @@ void func_80118810(O *o)
     if (o->b9c) t = 0;
     switch (t) {
     case 0:
-        if (D_8009D670[0] & 0x20) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             o->sub.b += 8;
             if (o->sub.b > 0x500) o->sub.b = 0x500;
-        } else if (D_8009D670[0] & 0x80) {
+        } else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) {
             o->sub.b -= 0xc;
         } else {
             o->sub.b -= 8;
@@ -78,11 +78,11 @@ void func_80118810(O *o)
         break;
     case 1:
         if (o->sub.b != 0) FUN_80025f40(0, 0, 0x60, 5);
-        if (D_8009D670[0] & 0x20) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u + 6;
             else o->sub.b = u - 0x10;
-        } else if (D_8009D670[0] & 0x80) {
+        } else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u - 0x18;
             else o->sub.b = u - 0x14;
@@ -92,11 +92,11 @@ void func_80118810(O *o)
         break;
     case 2:
         if (o->sub.b != 0) FUN_80025f40(0, 0, 0x48, 5);
-        if (D_8009D670[0] & 0x20) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u + 4;
             else o->sub.b = u - 0x14;
-        } else if (D_8009D670[0] & 0x80) {
+        } else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) {
             short u = o->sub.b;
             if (u < 0x200) o->sub.b = u - 0x18;
             else o->sub.b = u - 0x14;
@@ -106,11 +106,11 @@ void func_80118810(O *o)
         break;
     case 3:
         if (o->sub.b != 0) FUN_80025f40(0, 0, 0x70, 5);
-        if (D_8009D670[0] & 0x20) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) {
             short u = o->sub.b;
             if (u < 0x100) o->sub.b = u + 4;
             else o->sub.b = u - 0x18;
-        } else if (D_8009D670[0] & 0x80) {
+        } else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) {
             short u = o->sub.b;
             if (u < 0x100) o->sub.b = u - 0x1c;
             else s->b -= 0x18;
@@ -121,8 +121,8 @@ void func_80118810(O *o)
     }
     if (s->b < 0) s->b = 0;
     if (o->b9c) {
-        if (D_8009D670[0] & 0x20) o->d8c += s->b >> 8;
-        else if (D_8009D670[0] & 0x80) o->d8c -= s->b >> 6;
+        if (((volatile unsigned short*)&GV6.s70)[0] & 0x20) o->d8c += s->b >> 8;
+        else if (((volatile unsigned short*)&GV6.s70)[0] & 0x80) o->d8c -= s->b >> 6;
         else if (o->b9c == 1) o->d8c -= s->b >> 6;
         else o->d8c += s->b >> 7;
         o->d8c &= 0xfff;

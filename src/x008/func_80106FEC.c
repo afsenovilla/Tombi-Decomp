@@ -1,12 +1,12 @@
 // FUNC 80106fec 784 X008
 // MATCHING 80106fec 784
+#include "gv2.h"
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char p[0x2c]; unsigned short w2c; unsigned short w2e; } G;
 extern G *D_8009C330;
-extern unsigned char D_8009D2B0[];
 void ObjSetAnimFromTable(TObj *o);
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
@@ -67,7 +67,7 @@ void func_80106FEC(TObj *o)
             o->state = 0;
         }
         if (SPAD.s1fc & SPAD.s3c6) {
-            D_8009D2B0[0] = 0;
+            ((unsigned char*)&GV2.bb0)[0] = 0;
             o->b9c = 1;
             if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;

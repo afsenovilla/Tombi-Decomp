@@ -1,5 +1,6 @@
 // FUNC 800fe98c 1768 X008
 // MATCHING 800fe98c 1768
+#include "spad.h"
 #include "plx.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -18,8 +19,6 @@ typedef struct {
 extern P800FE98C *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *D_8009F0EC;
-extern unsigned char D_1F8001A4[];
-extern unsigned char D_1F8001F8;
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
@@ -44,7 +43,7 @@ extern void FUN_800fc414(TObj *);
 
 #define BLINK() \
     if (D_8009C330->b8 == 0) \
-        o->visible = D_1F8001F8 & 1;
+        o->visible = (*(unsigned char*)&SPAD.s1f8) & 1;
 
 static __inline__ void move(TObj *o)
 {
@@ -121,7 +120,7 @@ void FUN_800fe98c(TObj *o)
         o->b69 = 0;
         o->velV = 0;
         o->state++;
-        if (D_1F8001A4[0] == 0 && o->w9a != o->w98) {
+        if (((unsigned char*)&SPAD.b1a4)[0] == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
             D_8009C330->b8 = 1;
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;

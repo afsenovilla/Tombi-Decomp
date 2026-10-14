@@ -1,14 +1,12 @@
 // FUNC 801176b0 1836 X006
 // MATCHING 801176b0 1836
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern char *TASK_C;
 extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
-extern short D_1F80016A;
-extern int D_1F8002D0[];
-extern unsigned short D_1F8001FC;
 extern void *D_80122FB0, *D_80122FB4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -42,7 +40,7 @@ void func_801176B0(TObj *o)
         o->b0a = 0;
         o->b0c = 3;
         o->b04++;
-        o->d3c = D_1F8002D0[0];
+        o->d3c = ((int*)&SPAD.i2d0)[0];
         o->anim = D_80122FB0;
         AnimLoadDuration(o);
         GVARS.b3e = 1;
@@ -55,7 +53,7 @@ void func_801176B0(TObj *o)
         case 0:
             if (GVARS.b3a == 0)
                 break;
-            if (D_1F80016A < 0x177)
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x177)
                 break;
             ((unsigned char*)&GVARS.b58)[0] = 0;
             queueSfxKeyOff(o->d30);
@@ -181,7 +179,7 @@ void func_801176B0(TObj *o)
             o->step++;
             break;
         case 4:
-            k = D_1F8001FC;
+            k = SPAD.s1fc;
             if (k & 0x4000) {
                 o->step = 6;
                 FUN_8001e560(10, 10);

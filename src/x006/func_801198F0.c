@@ -1,5 +1,6 @@
 // FUNC 801198f0 3660 X006
 // MATCHING 801198f0 3660
+#include "spad.h"
 #include "gvars.h"
 /* Real start 801198F0 (3660 B) covers csv pieces 8011A0B4 and 8011A448. Case 2 clamp written as `if (r <= d) y += r - d` (leaves the game's dead copy of y). */
 #include "TOBJ.H"
@@ -29,10 +30,9 @@ extern char D_8011FEA0[], D_8011F3F8[];
 extern E D_8011F3F8e[];
 extern unsigned short D_8011F3E8[];
 extern void *D_801229A8[], *D_801229CC[], *D_801229E0[];
-extern short D_1F8000E2, D_1F8000E6, D_1F8000EA, D_1F8000EE[];
-extern int D_1F8000EC[], D_1F800190, D_1F8000F4;
-extern short D_1F80016A[], D_1F80016E[], D_1F800172;
-extern unsigned short D_1F8001FC, D_1F8003C6;
+extern short D_1F8000EE[];
+extern int D_1F800190;
+extern short D_1F80016A[], D_1F80016E[];
 extern short D_8009CFE2;
 extern int Rand(void);
 extern int rsin(int);
@@ -155,11 +155,11 @@ void func_801198F0(TObj *o)
         o->b9c = 0;
         o->state = 0;
         o->step++;
-        D_1F8000E6 = -0x1e;
-        D_1F8000E2 = 0x50;
+        SPAD.se6 = -0x1e;
+        (*(short*)((char*)&SPAD.ie0 + 2)) = 0x50;
         g[8] = 0x80;
         g[31] = -0xf00;
-        D_1F8000EA = -0x2a8;
+        SPAD.sea = -0x2a8;
         o->b69 = 1;
         t->b = 0;
         t->a = 0;
@@ -174,7 +174,7 @@ void func_801198F0(TObj *o)
         o->b.p.whole = D_8011F3F8e[o->animTimer].z;
         D_1F80016A[0] = o->a.p.whole;
         D_1F80016E[0] = o->y.p.whole;
-        D_1F800172 = o->b.p.whole;
+        (*(short*)((char*)&SPAD.i170 + 2)) = o->b.p.whole;
         GAME.selectedPlane = 0;
         func_801183F0(o);
         t->d0 = 0x80;
@@ -193,7 +193,7 @@ void func_801198F0(TObj *o)
         pos(o);
         func_8011866C(o);
         if (o->b69) {
-            if (GVARS.b3e == 0 && t->cc == 0 && (D_1F8001FC & D_1F8003C6)) {
+            if (GVARS.b3e == 0 && t->cc == 0 && (SPAD.s1fc & SPAD.s3c6)) {
                 short vv = -0x300;
                 p->anim = D_801229CC[0];
                 AnimLoadDuration(p);
@@ -300,8 +300,8 @@ void func_801198F0(TObj *o)
     o->velH += o->velX;
     if (D_1F8000EE[0] < D_800A457E) {
         D_1F800190 = o->y.raw;
-        D_1F8000EC[0] = o->a.raw;
-        D_1F8000F4 = o->b.raw;
+        ((int*)&SPAD.iec)[0] = o->a.raw;
+        SPAD.if4 = o->b.raw;
     }
     if (o->b69) o->d8c = turn(o->d8c, (unsigned short)t->ba);
     o->d88 = turn(o->d88, 0x1000 - (unsigned short)t->ang);
