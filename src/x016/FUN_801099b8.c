@@ -1,10 +1,10 @@
 // FUNC 801099b8 1176 X016
 // MATCHING 801099b8 1176
+#include "gv2.h"
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char *D_8009C330;
-extern unsigned char D_8009D2B0;
 extern unsigned char D_801152E8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -126,7 +126,7 @@ void FUN_801099b8(TObj *o)
         break;
     }
     if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-        D_8009D2B0 = 0;
+        GV2.bb0 = 0;
         o->b9c = 1;
         *(unsigned char *)&o->waa = 0;
         o->b9e = 0;

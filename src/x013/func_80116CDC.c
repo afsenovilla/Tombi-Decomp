@@ -1,5 +1,6 @@
 // FUNC 80116cdc 772 X013
 // MATCHING 80116cdc 772
+#include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -8,7 +9,6 @@ extern unsigned short D_8009C960[];
 extern void *D_8013B0D8;
 extern void *D_80134D84;
 extern void *D_80131CE0;
-extern int D_1F8002D4[];
 extern unsigned char D_800B146C[], D_800B1474[], D_800B1470[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -42,21 +42,21 @@ void func_80116CDC(TObj *o)
                         o->w1e = 6;
                         o->w08 = 0x7c0f;
                         o->anim = D_8013B0D8;
-                        o->d3c = D_1F8002D4[0];
+                        o->d3c = ((int*)&SPAD.i2d4)[0];
                         break;
                     case 4:
                         o->b0d = 1;
                         o->w1e = 9;
                         o->w08 = 0x7a0e;
                         o->anim = D_80134D84;
-                        o->d3c = D_1F8002D4[0];
+                        o->d3c = ((int*)&SPAD.i2d4)[0];
                         break;
                     case 10:
                         o->b0d = 1;
                         o->w1e = 0xc;
                         o->w08 = 0x7acc;
                         o->anim = D_80131CE0;
-                        o->d3c = D_1F8002D4[0];
+                        o->d3c = ((int*)&SPAD.i2d4)[0];
                         break;
                     }
                     FUN_8001fe6c(o);
@@ -79,7 +79,7 @@ void func_80116CDC(TObj *o)
             o->w1e = 6;
             o->w08 = 0x7c0f;
             o->anim = D_8013B0D8;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             FUN_8001fe6c(o);
             break;
         }

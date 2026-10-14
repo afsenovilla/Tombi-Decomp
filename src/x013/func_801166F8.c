@@ -1,10 +1,10 @@
 // FUNC 801166f8 1508 X013
 // MATCHING 801166f8 1508
+#include "spad.h"
 #include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
-extern int D_1F8002D4[], D_1F8002DC[], D_1F8002E0[], D_1F8002E4[];
-extern short D_1F800176[], D_1F800186[];
+extern short D_1F800186[];
 extern void *D_8011A8D8, *D_8011A8DC, *D_8011A8E0[], *D_8011A8EC, *D_8011A8F0, *D_8011A8F4[], *D_8011A8F8;
 extern void *D_8011A8FC, *D_8011A904, *D_8011A924, *D_8011A92C, *D_8011A934, *D_8011A93C, *D_8011A944, *D_8011A94C;
 extern void AnimLoadDuration(TObj *);
@@ -30,7 +30,7 @@ void func_801166F8(TObj *o)
         o->b0f = 0;
         o->d30 = o->a.p.whole;
         o->d34 = o->y.p.whole;
-        o->d3c = D_1F8002D4[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
         switch (o->subtype) {
         case 0:
             o->anim = D_8011A8D8;
@@ -83,28 +83,28 @@ void func_801166F8(TObj *o)
             o->animFrame = 0;
             o->w08 = GetClut(0xc0, 0x1e0);
             o->anim = D_8011A8FC;
-            o->d3c = D_1F8002D4[0];
+            o->d3c = ((int*)&SPAD.i2d4)[0];
             break;
         case 9:
             o->b0d = 0;
             o->anim = D_8011A924;
             o->w1e = 9;
             o->animFrame = 1;
-            o->d3c = D_1F8002DC[0];
+            o->d3c = ((int*)&SPAD.i2dc)[0];
             break;
         case 10:
             o->b0d = 0;
             o->anim = D_8011A934;
             o->w1e = 10;
             o->animFrame = 1;
-            o->d3c = D_1F8002E0[0];
+            o->d3c = ((int*)&SPAD.i2e0)[0];
             break;
         case 11:
             o->b0d = 0;
             o->anim = D_8011A944;
             o->w1e = 0xc;
             o->animFrame = 1;
-            o->d3c = D_1F8002E4[0];
+            o->d3c = ((int*)&SPAD.i2e4)[0];
             break;
         }
         AnimLoadDuration(o);
@@ -113,7 +113,7 @@ void func_801166F8(TObj *o)
         f = &GCD.bd088;
         if (*f == 0xff) break;
         o->visible = 1;
-        o->a.p.whole = o->d30 - D_1F800176[0];
+        o->a.p.whole = o->d30 - ((short*)((char*)&SPAD.i174 + 2))[0];
         o->y.p.whole = o->d34 - D_1F800186[0];
         ObjListPush_1F800220(o);
         k = *f & 0xf;

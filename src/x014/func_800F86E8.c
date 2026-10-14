@@ -14,7 +14,6 @@ typedef struct O {
 } O;
 extern P *D_8009C330;
 extern unsigned char D_801152E8[];
-extern unsigned char D_8009C93F;
 extern char D_80010CA0[];
 extern void *D_8009D2E8;
 extern void AnimJump(O *, int);
@@ -91,8 +90,8 @@ void func_800F86E8(O *o)
                 o->active = 3;
             if (((unsigned char*)&GVARS.b42)[0] != 0)
                 ((unsigned char*)&GVARS.b42)[0] = 0;
-            if (D_8009C93F != 0)
-                D_8009C93F = 0;
+            if (GVARS.b3f != 0)
+                GVARS.b3f = 0;
             D_8009D2E8 = o->de4;
             o->b0f = -8;
             D_8009C330->b8 = 0;
@@ -132,8 +131,8 @@ void func_800F86E8(O *o)
         if (AnimAdvance(o) != 0) {
             if (((unsigned char*)&GVARS.b42)[0] != 0)
                 ((unsigned char*)&GVARS.b42)[0] = 0;
-            if (D_8009C93F != 0)
-                D_8009C93F = 0;
+            if (GVARS.b3f != 0)
+                GVARS.b3f = 0;
             o->b0f = -8;
             if (o->he0 != 0)
                 o->active = 3;

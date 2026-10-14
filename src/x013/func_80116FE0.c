@@ -1,5 +1,6 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+#include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -32,9 +33,6 @@ extern unsigned char D_8009C975x[];
 #define D_8009C975 D_8009C975x[0]
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
-extern unsigned short D_1F8001FC;
-extern unsigned char D_1F8001CC, D_1F8001CD;
-extern short D_1F8001C6;
 extern char D_8001D6A4[];
 extern void FUN_800eea7c(PL *, int, int);
 extern O *showMessageBox(int, int, int, int);
@@ -150,9 +148,9 @@ void func_80116FE0(O *o)
             o->wb6++;
             break;
         case 13:
-            D_1F8001CC = 1;
-            D_1F8001CD = 0x14;
-            D_1F8001C6 = 2;
+            SPAD.b1cc = 1;
+            SPAD.b1cd = 0x14;
+            SPAD.s1c6 = 2;
             stopBgm(0);
             ThreadCreate(1, D_8001D6A4);
             o->wb6++;
@@ -209,7 +207,7 @@ void func_80116FE0(O *o)
                 o->step++;
             case 1:
                 func_801179B4(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
-                if (!(D_1F8001FC & 0x6008)) break;
+                if (!(SPAD.s1fc & 0x6008)) break;
                 if (GCD.bce48 == 0xff && GCD.bcdcb == 0xff && GV2.sda != 0 && GCD.bce0b == 0xff) {
                     D_8009C975 = 3;
                     o->step = 0xb;

@@ -1,12 +1,12 @@
 // FUNC 801177b0 192 X016
 // MATCHING 801177b0 192
+#include "spad.h"
 #include "gcd.h"
 #include "gv6.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern unsigned short D_1F8001FC;
 
 void func_801177B0(TObj *o)
 {
@@ -16,7 +16,7 @@ void func_801177B0(TObj *o)
     if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
         o->step = 2;
         o->state = 0;
-    } else if ((*(volatile unsigned short *)&GV6.s70 & 0x10) && (D_1F8001FC & 0x2000)) {
+    } else if ((*(volatile unsigned short *)&GV6.s70 & 0x10) && (SPAD.s1fc & 0x2000)) {
         GVARS.b3e = 1;
         o->step = 1;
         o->state = 0;
