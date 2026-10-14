@@ -1,9 +1,9 @@
 // FUNC 8012415c 704 X014
 // MATCHING 8012415c 704
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern unsigned char D_801266F0[];
-extern unsigned short D_8009C962;
 extern unsigned char D_8009C942;
 extern int D_1F8002DC;
 extern void *D_80129FA4[];
@@ -16,7 +16,7 @@ extern void func_80123D64(TObj *);
 extern void func_80123AAC(TObj *);
 extern void func_80123730(TObj *);
 
-#define SFX() do { int c = 0xda; if (D_8009C962 == 7) c = 0xf2; playSFX(c); } while (0)
+#define SFX() do { int c = 0xda; if (GAME.selectedSection == 7) c = 0xf2; playSFX(c); } while (0)
 
 void func_8012415C(TObj *o)
 {

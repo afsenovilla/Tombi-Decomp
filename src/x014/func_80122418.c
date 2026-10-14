@@ -1,13 +1,13 @@
 // FUNC 80122418 936 X014
 // MATCHING 80122418 936
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { void *a[3]; } AT;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern AT D_80129FCC[];
 extern int D_1F8002DC[];
 extern int D_1F800334;
-extern unsigned short D_8009C962;
 extern unsigned char D_8009C942, D_8009C93F;
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -50,7 +50,7 @@ void func_80122418(TObj *o)
             int *pp = &D_1F800334;
             int *q = (int *)*pp;
             q += 1;
-            if (D_8009C962 == 7) o->da0 = *pp + q[4];
+            if (GAME.selectedSection == 7) o->da0 = *pp + q[4];
             else o->da0 = *pp + q[1];
             o->active = 2;
             o->ba4 = 1;
@@ -81,7 +81,7 @@ void func_80122418(TObj *o)
             int *pp = &D_1F800334;
             int *q = (int *)*pp;
             q += 1;
-            if (D_8009C962 == 7) o->da0 = *pp + q[3];
+            if (GAME.selectedSection == 7) o->da0 = *pp + q[3];
             else o->da0 = *pp + q[0];
             o->active = 2;
             o->ba4 = 1;

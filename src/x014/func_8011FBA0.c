@@ -1,12 +1,12 @@
 // FUNC 8011fba0 628 X014
 // MATCHING 8011fba0 628
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { short a, b, c, d; } E8;
 
 extern int AnimAdvance(TObj *);
 extern unsigned int FUN_8001f9e0(void);
-extern unsigned short D_8009C962;
 extern unsigned char D_80126110[];
 extern void func_8011D88C(TObj *, int);
 extern void func_8011F850(void);
@@ -23,7 +23,7 @@ void func_8011FBA0(TObj *o)
 
     switch (o->substep) {
     case 0:
-        if (o->d38 < 0x80 && D_8009C962 != 7) {
+        if (o->d38 < 0x80 && GAME.selectedSection != 7) {
             q[5] = D_80126110[FUN_8001f9e0() & 0xf];
             if (q[5] == 0)
                 q[4] = 2;

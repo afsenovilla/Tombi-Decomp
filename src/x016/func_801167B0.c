@@ -1,15 +1,15 @@
 // FUNC 801167b0 688 X016
 // MATCHING 801167b0 688
 #include "TOBJ.H"
+#include "gamestate.h"
 
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern TObj PLAYER;
-extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[], D_8009C93C[], D_8009C975[];
+extern unsigned char D_8009C93F[], D_8009C93E[], D_8009C942[], D_8009C93C[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F800190, D_1F80018C;
 extern unsigned char D_800A603C[], D_800A603D[];
-extern short D_8009CD94[], D_8009CD96[], D_8009CDA0[];
 extern unsigned char D_1F8003D1[];
 extern SC *TASK_C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
@@ -44,15 +44,15 @@ void func_801167B0(TObj *o)
             D_800A603D[0] = 0x40;
             o->timer = 0x14;
             o->state++;
-            D_8009CD94[0] = 0xe;
-            D_8009CD96[0] = 2;
-            D_8009CDA0[0] = 0;
+            ((short*)&GAME.nextArea)[0] = 0xe;
+            ((short*)&GAME.nextSection)[0] = 2;
+            ((short*)&GAME.nextSpawnPoint)[0] = 0;
         }
         break;
     case 2:
         t = o->timer;
         if (t == 0) {
-            D_8009C975[0] = 3;
+            ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
             D_8009C93C[0] = 1;
             D_1F8003D1[0] = 1;
             o->state++;
@@ -74,7 +74,7 @@ void func_801167B0(TObj *o)
         }
         o->w76 = o->w74;
         o->w78 = o->w74;
-        if (D_8009C975[0] == 1) {
+        if (((unsigned char*)&GAME.fadeScreenControl)[0] == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
             D_8009E375[0] = 0xff;

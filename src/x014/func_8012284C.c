@@ -1,10 +1,10 @@
 // FUNC 8012284c 608 X014
 // MATCHING 8012284c 608
 #include "TOBJ.H"
+#include "gamestate.h"
 typedef struct { short x, y, w4, w6; } PT;
 
 extern unsigned char D_8009C942;
-extern unsigned short D_8009C962;
 extern PT D_801265D4[], D_80126654[];
 extern unsigned short D_1F8000EE, D_1F8000F2;
 extern int Rand(void);
@@ -20,7 +20,7 @@ void func_8012284C(TObj *o)
 
     if (D_8009C942 == 1) return;
     p = D_801265D4;
-    if (D_8009C962 == 7) p = D_80126654;
+    if (GAME.selectedSection == 7) p = D_80126654;
     o->wb0 = 0;
     n = 0;
     k = 0;
@@ -55,7 +55,7 @@ loop:
         o->wae = 0;
     }
     p = D_801265D4;
-    if (D_8009C962 == 7) p = D_80126654;
+    if (GAME.selectedSection == 7) p = D_80126654;
     p += o->wae;
     o->a.p.whole = o->velX = p->x;
     o->velY = p->y;
@@ -75,6 +75,6 @@ loop:
         }
     }
     func_80118314(p->x, p->y, 0);
-    if (D_8009C962 == 7) playSFX(0xf5);
+    if (GAME.selectedSection == 7) playSFX(0xf5);
     else playSFX(0xe9);
 }

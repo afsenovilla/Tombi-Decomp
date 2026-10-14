@@ -1,5 +1,6 @@
 // FUNC 80115f88 840 X016
 // MATCHING 80115f88 840
+#include "gamestate.h"
 typedef struct { unsigned short frac; short whole; } FP;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -18,10 +19,8 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern unsigned char D_8009C93A, D_8009C93C, D_8009C975;
+extern unsigned char D_8009C93A, D_8009C93C;
 extern unsigned char D_8009D000[];
-extern unsigned short D_8009C962;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000F2[];
 extern int D_1F8000F0;
@@ -42,7 +41,7 @@ void func_80115F88(O *o)
         break;
     case 1:
         D_80079AD0[o->subtype](o);
-        switch (D_8009C962) {
+        switch (GAME.selectedSection) {
         case 1:
         case 4:
             if (D_1F800172 >= 0xc9) {
@@ -96,15 +95,15 @@ void func_80115F88(O *o)
         break;
     case 5:
         if (--o->w48 == -1) {
-            D_8009CD94 = 0x10;
-            D_8009CD96 = 5;
-            D_8009CDA0 = 0;
+            (*(short*)&GAME.nextArea) = 0x10;
+            (*(short*)&GAME.nextSection) = 5;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
             D_8009C93C = 0;
-            D_8009C975 = 3;
+            GAME.fadeScreenControl = 3;
             o->step++;
         }
     case 6:
-        if (D_8009C975 == 1) {
+        if (GAME.fadeScreenControl == 1) {
             TASK_C->w4c = 7;
             TASK_C->w4e = 0;
         }

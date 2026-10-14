@@ -2,12 +2,12 @@
 // MATCHING 80122fa0 1784
 /* covers csv entries 80122fa0 (596 B) and 801231f4 (1188 B): one function cut at a jump into the middle */
 #include "TOBJ.H"
+#include "gamestate.h"
 
 extern TObj PLAYER;
 extern int D_1F8002DC[];
 extern void *D_80129F9C[];
 
-extern unsigned short D_8009C962[];
 extern unsigned char D_8009C942;
 extern unsigned char D_8009C958;
 extern short D_800A457C;
@@ -22,7 +22,7 @@ void freeObjectLayer2(TObj *o);
 
 #define SFX(o) \
     if ((o->w22 & 0x7f) == 0) { \
-        playSFX(D_8009C962[0] == 7 ? 0xef : 0xca); \
+        playSFX(((unsigned short*)&GAME.selectedSection)[0] == 7 ? 0xef : 0xca); \
     } \
     o->w22++;
 
@@ -73,7 +73,7 @@ void func_80122FA0(TObj *o)
         o->timer = 0x14;
         o->velH = 0x180;
         o->w22 = 0;
-        playSFX(D_8009C962[0] == 7 ? 0xef : 0xca);
+        playSFX(((unsigned short*)&GAME.selectedSection)[0] == 7 ? 0xef : 0xca);
         o->w22++;
         break;
     case 1:
