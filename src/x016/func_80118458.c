@@ -1,5 +1,6 @@
 // FUNC 80118458 972 X016
 // MATCHING 80118458 972
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -7,7 +8,6 @@ typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
 extern AT D_80118D34[];
-extern unsigned char D_8009D2B0;
 extern short D_1F8001C6;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -25,7 +25,7 @@ void func_80118458(TObj *o)
     case 0:
         v = *(V6 *)&o->a;
         GVARS.b42 = 1;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

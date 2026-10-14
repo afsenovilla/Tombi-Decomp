@@ -1,12 +1,12 @@
 // FUNC 80117b40 500 X016
 // MATCHING 80117b40 500
+#include "gv2.h"
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80118D1C[];
-extern unsigned char D_8009D2B0;
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -26,7 +26,7 @@ void func_80117B40(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
-        D_8009D2B0 = 2;
+        GV2.bb0 = 2;
         o->wbc = o->animFrame;
         o->anim = D_80118D1C[o->subtype].anims[2];
         AnimLoadDuration(o);

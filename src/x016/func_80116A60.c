@@ -1,5 +1,6 @@
 // FUNC 80116a60 1016 X016
 // MATCHING 80116a60 1016
+#include "gv2.h"
 #include "gvars.h"
 /* size 1016: includes the csv piece 80116D50 (264 B). */
 #include "TOBJ.H"
@@ -7,7 +8,6 @@
 typedef struct { short x, y, w, h; } RECT;
 extern int LoadImage(RECT *, void *);
 extern unsigned char D_8009D0CB;
-extern unsigned char D_8009D2C3;
 extern unsigned char D_8009CF0D[];
 extern unsigned short D_1F800176;
 extern unsigned short D_1F800186;
@@ -35,7 +35,7 @@ void func_80116A60(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (D_8009D0CB == 0 || (D_8009D2C3 & 0x40)) {
+        if (D_8009D0CB == 0 || (GV2.bc3 & 0x40)) {
             o->b04 = 3;
             break;
         }
