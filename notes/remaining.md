@@ -27,7 +27,7 @@ Reclassified as data (second batch, `DATA` in `tools/units.py`, 884 B): x000 801
 | FAR | x004 | func_80125818 | 80125818 | 3148 | 204 | src/x004/wip/func_80125818.c (gcc-2.7.2-psx) | 11-case substep AI draft 3156/3148 B; see header for case 4/5/10 leads; near() a0/v1 regs |
 | FAR | main0 | func_80056420 | 80056420 | 2604 | 35 | src/wip/drawBalloonFrame.c (gcc-2.7.2-psx) | drawBalloonFrame; o pinned $17; left: prologue order, o->f load reg, x+w temp reg, uv sched |
 | FAR | x001 | func_80122F54 | 80122F54 | 2192 | 516 | src/x001/wip/func_80122F54.c (gcc-2.7.2-psx) | first draft; o in s3 and rcos-before-rsin cross-jump in BLKB blocks, s0/s1 swap |
-| FAR | x001 | func_801278C0 | 801278C0 | 1820 | 417 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | draft 1796/1820 B; unexplained 0x80 frame (inlined helper with arrays?), reg choice |
+| FAR | x001 | func_801278C0 | 801278C0 | 1820 | 345 | src/x001/wip/func_801278C0.c (gcc-2.7.2-psx) | size matches; left: (ky+4)/(kx+12) reassociation, regalloc |
 | FAR | x001 | func_801244A0 | 801244A0 | 1800 | 52 | src/x001/wip/func_801244A0.c (gcc-2.7.2-psx) | close; remaining regalloc/load-order diffs after ported by-temp trick |
 | FAR | x006 | func_8011A87C | 8011A87C | 1644 | 179 | src/x006/wip/func_8011A87C.c (gcc-2.7.2-psx) | -fno-expensive-optimizations + o pin in $17; prologue copy, a0/a1 choices |
 | FAR | x001 | func_80127074 | 80127074 | 1544 | 496 | src/x001/wip/func_80127074.c (gcc-2.7.2-psx) | first transcription; regalloc and block layout far off |
