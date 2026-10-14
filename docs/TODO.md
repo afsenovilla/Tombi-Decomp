@@ -18,3 +18,8 @@
   letters from the text itself (centred lines, a gap per space, `{NL}` breaks, tile animation kept) instead
   of the fixed per-title layout lists in the overlays; build a modified MAIN0 and let the text editor put it
   in the ISO. Then titles can have any length. Same idea for other text limits once more code is clean.
+- **Japanese version (Ore no Tomba).** Next project: a matching decomp of the Japanese release reusing the PAL work.
+  Split its executable(s), then auto-match functions against the PAL sources by masked byte hashes (as done for the
+  overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
+  (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image
+  (kept out of the repo like the PAL one). Adapting the text editor to Japanese is a separate, larger task.
