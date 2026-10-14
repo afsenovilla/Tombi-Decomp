@@ -305,6 +305,7 @@ address,name,confidence,comment
 8003869c,scriptOpPopVars,alta,psx_tomba #21 (por bytes)
 800386f4,scriptOpCompareVar,alta,names batch (see notes/names.md)
 800387e0,scriptOpUnaryVar,alta,names batch (see notes/names.md)
+800388d4,scriptOpBinaryVar,alta,"script ops 0x1c..0x2b from execCoreOpcode: var[idx] = var[idx] (+ - * / % & | ^) var or 4-byte immediate (odd "
 80038ac4,scriptOpWait,alta,psx_tomba #21 (por bytes)
 80038cd0,execCoreOpcode,alta,psx_tomba #24 (por bytes)
 80039150,scriptRunOpcode,alta,psx_tomba #21 (por bytes)

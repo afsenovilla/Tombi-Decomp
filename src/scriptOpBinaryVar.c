@@ -5,7 +5,7 @@ extern unsigned char *SCRIPT_CTX;
 extern int SCRIPT_CODE;
 
 typedef struct { char pad[0x1090]; int v[1]; } VS;
-void FUN_800388d4(unsigned char op)
+void scriptOpBinaryVar(unsigned char op)
 {
     int tmp;
     unsigned char *o = SCRIPT_CTX;
