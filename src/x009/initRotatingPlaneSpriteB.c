@@ -1,5 +1,10 @@
 // FUNC 80118bf8 520 X009
 // MATCHING 80118bf8 520
+// VERSION SLPS_01144 x09 80117EA8 520
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x09/nonmatchings/x09", func_80117EA8_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -85,3 +90,4 @@ void initRotatingPlaneSpriteB(TObj *o)
         e->anim = a;
     }
 }
+#endif

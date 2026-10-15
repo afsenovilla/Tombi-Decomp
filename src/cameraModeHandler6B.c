@@ -1,5 +1,10 @@
 // FUNC 80027810 332 MAIN0
 // MATCHING 80027810 332
+// VERSION SLPS_01144 slps01144 80028620 332
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80028620_slps01144);
+#else
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct {
@@ -45,3 +50,4 @@ void cameraModeHandler6B(S *o)
         }
     }
 }
+#endif

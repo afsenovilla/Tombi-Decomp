@@ -1,5 +1,10 @@
 // FUNC 80116254 356 X006
 // MATCHING 80116254 356
+// VERSION SLPS_01144 x06 80115508 356
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x06/nonmatchings/x06", func_80115508_slps01144);
+#else
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
 typedef struct { unsigned short frac; short whole; } FP;
 typedef union { int raw; FP p; } FX;
@@ -35,3 +40,4 @@ void func_80116254(O *o)
     CAMP->m.t[1] += DAT_1f800068.vy;
     CAMP->m.t[2] += DAT_1f800068.vz;
 }
+#endif

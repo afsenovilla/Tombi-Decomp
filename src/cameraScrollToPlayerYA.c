@@ -1,5 +1,10 @@
 // FUNC 80028754 368 MAIN0
 // MATCHING 80028754 368
+// VERSION SLPS_01144 slps01144 80029564 368
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80029564_slps01144);
+#else
 /* char *base copy of o (no hard-reg preference on a pseudo used only via raw offsets) lets n take a0 and o go to t0 like the game. */
 typedef struct { char p[0x32]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
@@ -53,3 +58,4 @@ void cameraScrollToPlayerYA(TObj *o)
     if (F2 + E2 > *(short *)(b + 0x32))
         E2 = *(short *)(b + 0x32) - F2;
 }
+#endif

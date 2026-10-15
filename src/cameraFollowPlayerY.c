@@ -1,5 +1,10 @@
 // FUNC 8002795c 792 MAIN0
 // MATCHING 8002795c 792
+// VERSION SLPS_01144 slps01144 8002876C 792
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8002876C_slps01144);
+#else
 typedef struct O { char p0[0x18]; int b; char p1[0x30-0x1c]; short h30; short h32; char p2[0x3d-0x34];
   unsigned char b3d; unsigned char b3e; char p3[0x44-0x3f]; unsigned short h44; } O;
 typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c; char p2; unsigned char f9e;
@@ -122,3 +127,4 @@ void cameraFollowPlayerY(O *o)
         o->h44 |= 4;
     }
 }
+#endif

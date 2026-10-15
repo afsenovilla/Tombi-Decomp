@@ -1,3 +1,8 @@
+// VERSION SLPS_01144 x06 80115A54 540
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x06/nonmatchings/x06", func_80115A54_slps01144);
+#else
 #include "gvars.h"
 /* Debt: nested do{}while(0) around the clamp (loop-weighted refs so cnt outranks offs in global alloc) and the dead `i = n` at the end (n must outlive e: cse's canonical reg of a copy pair is the longer-lived one, so the clamp compare reads n like the game instead of e). */
 // MATCHING 801167a0 540
@@ -59,3 +64,4 @@ void area6ScriptOp(L801167A0 *l, unsigned char *bank)
     }
     i = n;
 }
+#endif

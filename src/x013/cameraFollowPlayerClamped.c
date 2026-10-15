@@ -1,5 +1,10 @@
 // FUNC 80116234 156 X013
 // MATCHING 80116234 156
+// VERSION SLPS_01144 x13 80115530 156
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x13/nonmatchings/x13", func_80115530_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct {
     char pad[0x2c];
@@ -27,3 +32,4 @@ void cameraFollowPlayerClamped(Cam *c)
         D_1F8000F0.raw = c->ymin << 16;
     }
 }
+#endif

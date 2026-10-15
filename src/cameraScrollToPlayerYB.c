@@ -1,5 +1,10 @@
 // FUNC 800285ec 360 MAIN0
 // MATCHING 800285ec 360
+// VERSION SLPS_01144 slps01144 800293FC 360
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_800293FC_slps01144);
+#else
 typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
@@ -51,4 +56,4 @@ void cameraScrollToPlayerYB(TObj *o)
     if (F2 + E2 < o->y)
         E2 = o->y - F2;
 }
-
+#endif

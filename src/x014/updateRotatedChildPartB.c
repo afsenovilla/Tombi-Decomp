@@ -1,5 +1,10 @@
 // FUNC 8011aedc 352 X014
 // MATCHING 8011aedc 352
+// VERSION SLPS_01144 x14 80118420 352
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_80118420_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct { short vx, vy, vz, pad; } SVEC;
 extern char D_1F800000[];
@@ -55,3 +60,4 @@ void updateRotatedChildPartB(TObj *o)
         break;
     }
 }
+#endif

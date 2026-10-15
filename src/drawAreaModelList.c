@@ -1,5 +1,10 @@
 // FUNC 80057d04 248 MAIN0
 // MATCHING 80057d04 248
+// VERSION SLPS_01144 slps01144 8004B140 248
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004B140_slps01144);
+#else
 extern char DAT_1f8000c0[];
 extern int DAT_8009c960;
 extern int DAT_1f8001e0;
@@ -40,3 +45,4 @@ void drawAreaModelList(void)
         }
     }
 }
+#endif

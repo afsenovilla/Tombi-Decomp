@@ -1,5 +1,10 @@
 // FUNC 80116bd0 512 X009
 // MATCHING 80116bd0 512
+// VERSION SLPS_01144 x09 80115E8C 512
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x09/nonmatchings/x09", func_80115E8C_slps01144);
+#else
 #include "spad.h"
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
 typedef struct { unsigned short frac; short whole; } FP;
@@ -43,3 +48,4 @@ void scrollFollowRotatingPlane(O *o)
     CAMP->m.t[1] += DAT_1f800068.vy;
     CAMP->m.t[2] += DAT_1f800068.vz;
 }
+#endif

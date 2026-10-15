@@ -1,6 +1,11 @@
 // FUNC 80126d2c 352 X001
 // MATCHING 80126d2c 352
+// VERSION SLPS_01144 x01 80125670 352
 // FLAGS -O2 -G0 -fno-expensive-optimizations
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x01/nonmatchings/x01", func_80125670_slps01144);
+#else
 #include "spad.h"
 /* Debt: -fno-expensive-optimizations stops local-alloc's optimize_reg_copy_1 from folding the
    `t2 = s` copy (game: lh v0; move t0,v0; slt v0,v0,v1). The dead `s = 0` (after the compare) and
@@ -55,3 +60,4 @@ void swingingRopeGrabProbe(P *o, TObj *e)
     }
     s = 1;
 }
+#endif

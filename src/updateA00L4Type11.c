@@ -1,5 +1,14 @@
 // FUNC 8011f288 896 X000
 // MATCHING 8011f288 896
+// VERSION SLPS_01144 x00 8011E2FC 896
+// VERSION SLPM_80165 x00 80117F48 632
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x00/nonmatchings/x00", func_8011E2FC_slps01144);
+#elif defined(VERSION_SLPM_80165)
+#include "include_asm.h"
+INCLUDE_ASM_V("x00/nonmatchings/x00", func_80117F48_slpm80165);
+#else
 #include "gcd.h"
 /* Holds 3 functions merged by splat: updateA00L4Type11, func_8011F500, func_8011F580. */
 #include "TOBJ.H"
@@ -119,3 +128,4 @@ void func_8011F580(TObj *o)
         break;
     }
 }
+#endif

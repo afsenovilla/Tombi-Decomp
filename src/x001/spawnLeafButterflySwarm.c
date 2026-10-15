@@ -1,5 +1,10 @@
 // FUNC 8013b344 448 X001
 // MATCHING 8013b344 448
+// VERSION SLPS_01144 x01 80139854 448
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x01/nonmatchings/x01", func_80139854_slps01144);
+#else
 #include "gcd.h"
 #include "TOBJ.H"
 
@@ -70,3 +75,4 @@ void spawnLeafButterflySwarm(TObj *o)
     if (n > 30) n = 30;
     for (i = 0; i < n; i++) spawnDebrisObjectB(e, 2, e->a.p.whole, e->y.p.whole, 0x87c);
 }
+#endif

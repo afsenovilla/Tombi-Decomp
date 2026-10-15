@@ -1,5 +1,10 @@
 // FUNC 80126e8c 216 X001
 // MATCHING 80126e8c 216
+// VERSION SLPS_01144 x01 801257D0 216
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x01/nonmatchings/x01", func_801257D0_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct {
@@ -24,3 +29,4 @@ void bendingBranchGrabProbe(P *o, TObj *e)
         (*(TObj **)&SPAD.p3c0) = e;
     }
 }
+#endif

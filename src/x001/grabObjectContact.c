@@ -1,5 +1,10 @@
 // FUNC 80124410 144 X001
 // MATCHING 80124410 144
+// VERSION SLPS_01144 x01 80122F84 144
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x01/nonmatchings/x01", func_80122F84_slps01144);
+#else
 #include "TOBJ.H"
 
 typedef struct {
@@ -26,3 +31,4 @@ void grabObjectContact(P *a, TObj *b)
         spawnImpactEffect(2, a->o.a.p.whole, a->o.y.p.whole, a->o.b.p.whole);
     }
 }
+#endif

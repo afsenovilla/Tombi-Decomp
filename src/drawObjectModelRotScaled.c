@@ -1,5 +1,10 @@
 // FUNC 800577b8 496 MAIN0
 // MATCHING 800577b8 496
+// VERSION SLPS_01144 slps01144 8004ABF4 496
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004ABF4_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { long vx, vy, vz, pad; } VECTOR;
@@ -57,3 +62,4 @@ void drawObjectModelRotScaled(TObj *o)
     FUN_80063e6c(&DAT_1f800000);
     drawModel(o->da0, DAT_1f8001e0 + ((signed char)o->b0f * 4 + 0x10), o, o->ba4);
 }
+#endif

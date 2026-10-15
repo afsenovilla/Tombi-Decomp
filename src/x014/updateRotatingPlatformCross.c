@@ -1,6 +1,11 @@
 // FUNC 80119344 716 X014
 // MATCHING 80119344 716
+// VERSION SLPS_01144 x14 801168B0 716
 // FLAGS -O2 -G0 -fno-expensive-optimizations
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_801168B0_slps01144);
+#else
 #include "TOBJ.H"
 
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
@@ -98,3 +103,4 @@ void updateRotatingPlatformCross(TObj *o)
         break;
     }
 }
+#endif

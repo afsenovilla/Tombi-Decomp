@@ -1,6 +1,43 @@
 // FUNC 80026e0c 320 MAIN0
 // MATCHING 80026e0c 320
+// VERSION SLPM_80165 slpm80165 80026940 296
 // Portado de psx_tomba (inventory.c, removeItemFromInventory); licencia MIT del proyecto original.
+#if defined(VERSION_SLPM_80165)
+// Demo version of PAL main0 80026E0C (removeItemFromInventory.c): does not clear the item count when removing the slot.
+// Portado de psx_tomba (inventory.c, removeItemFromInventory); licencia MIT del proyecto original.
+#define SKIP_ASM
+#include "common.h"
+#include "game.h"
+//INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/game/inventory", removeItemFromInventory);
+
+int removeItemFromInventory(ITEM id, int qty)
+{
+    int i;
+    for (i = 0; i < GAME.inventory.counter; i++) {
+        if (GAME.inventory.slots[i] == id) {
+            if (qty == -1) {
+                while (i < GAME.inventory.counter - 1) {
+                    GAME.inventory.slots[i] = GAME.inventory.slots[i+1];
+                    i++;
+                }
+                GAME.inventory.counter -= 1;
+                return 0;
+            }
+            GAME.item[id] = GAME.item[id] - qty;
+            if (GAME.item[id] == 0) {
+                while (i < GAME.inventory.counter - 1) {
+                    GAME.inventory.slots[i] = GAME.inventory.slots[i+1];
+                    i++;
+                }
+                GAME.inventory.counter -= 1;
+                return 0;
+            }
+            return GAME.item[id];
+        }
+    }
+    return -1;
+}
+#else
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -35,3 +72,4 @@ int removeItemFromInventory(ITEM id, int qty)
     }
     return -1;
 }
+#endif

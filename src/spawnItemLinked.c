@@ -1,5 +1,33 @@
 // FUNC 8003f024 288 MAIN0
 // MATCHING 8003f024 288
+// VERSION SLPM_80165 slpm80165 8003C3D0 272
+#if defined(VERSION_SLPM_80165)
+// Demo version of PAL main0 8003F024 (spawnItemLinked.c): animation set byte from the 20-byte item table.
+#include "TOBJ.H"
+typedef struct { int x, y, z; } V3;
+extern TObj *allocObjectLayer5();
+extern unsigned char D_8006DDEF[];
+extern unsigned char *D_8007B14C[];
+void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short vv)
+{
+    TObj *n = allocObjectLayer5();
+    if (n != 0) {
+        n->active = 4;
+        n->type = 3;
+        n->subtype = type;
+        n->b0c = sub | 0x80;
+        n->b0f = D_8006DDEF[type * 20];
+        n->animFrame = 0;
+        n->h->raw = pos[1] << 16;
+        n->y.raw = pos[3] << 16;
+        n->d->raw = pos[5] << 16;
+        *(V3 *)&n->d30 = *(V3 *)&n->a;
+        n->velH = vh;
+        n->velV = vv;
+        o->d94 = (int)n;
+    }
+}
+#else
 #include "TOBJ.H"
 typedef struct { int x, y, z; } V3;
 extern TObj *allocObjectLayer5();
@@ -24,3 +52,4 @@ void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short
         o->d94 = (int)n;
     }
 }
+#endif

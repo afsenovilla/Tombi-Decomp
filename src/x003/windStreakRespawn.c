@@ -1,5 +1,10 @@
 // FUNC 80118df8 324 X003
 // MATCHING 80118df8 324
+// VERSION SLPS_01144 x03 80117FF4 324
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x03/nonmatchings/x03", func_80117FF4_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -43,3 +48,4 @@ void windStreakRespawn(TObj *o)
         break;
     }
 }
+#endif

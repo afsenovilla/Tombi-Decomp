@@ -1,5 +1,10 @@
 // FUNC 8004b7c4 740 MAIN0
 // MATCHING 8004b7c4 740
+// VERSION SLPS_01144 slps01144 80056874 740
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80056874_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
@@ -78,3 +83,4 @@ int probeGrabObjectBox(PO *o, TObj *e)
     (*(TObj **)&SPAD.p3c0) = e;
     return 1;
 }
+#endif

@@ -1,5 +1,10 @@
 // FUNC 8011d3f8 260 X014
 // MATCHING 8011d3f8 260
+// VERSION SLPS_01144 x14 8011A7E4 260
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011A7E4_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct {
@@ -36,3 +41,4 @@ void rotatedChildPartGrabProbe(P *o, TObj *e)
         }
     }
 }
+#endif

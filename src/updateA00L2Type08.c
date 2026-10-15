@@ -1,5 +1,10 @@
 // FUNC 80132174 1856 X000
 // MATCHING 80132174 1856
+// VERSION SLPS_01144 x00 80130E14 1856
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x00/nonmatchings/x00", func_80130E14_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct { TObj o; unsigned short c0, c2, c4, c6, c8, ca, cc, ce, d0; short d2; } E;
 #define EX(o) ((E *)(o))
@@ -240,3 +245,4 @@ void updateA00L2Type08(TObj *o)
         draw(EX(o)->c4, EX(o)->c6);
     }
 }
+#endif

@@ -1,5 +1,10 @@
 // FUNC 80021fac 152 MAIN0
 // MATCHING 80021fac 152
+// VERSION SLPS_01144 slps01144 80022940 152
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", initLighting);
+#else
 #include "TOBJ.H"
 typedef struct B32 { int w[8]; } B32;
 extern B32 DAT_1f8000f8;
@@ -19,3 +24,4 @@ void initLighting(TObj *o)
     *((char *)&o->h + 2) = 0xc0;
     applyLighting();
 }
+#endif

@@ -1,5 +1,10 @@
 // FUNC 80020eac 104 MAIN0
 // MATCHING 80020eac 104
+// VERSION SLPS_01144 slps01144 80021DF4 104
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", loadCollisionBounds);
+#else
 typedef struct { unsigned short a, b, c, d; } E;
 extern short IDX;
 extern E T[];
@@ -13,3 +18,4 @@ void loadCollisionBounds(void)
     S3C8 = T[i].c;
     S3CA = T[i].d;
 }
+#endif

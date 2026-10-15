@@ -1,5 +1,10 @@
 // FUNC 80122418 936 X014
 // MATCHING 80122418 936
+// VERSION SLPS_01144 x14 8011F720 936
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011F720_slps01144);
+#else
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -141,3 +146,4 @@ void updateFlowerForestPigShot(TObj *o)
         break;
     }
 }
+#endif

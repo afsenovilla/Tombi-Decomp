@@ -1,5 +1,10 @@
 // FUNC 80118284 740 X003
 // MATCHING 80118284 740
+// VERSION SLPS_01144 x03 80117480 740
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x03/nonmatchings/x03", func_80117480_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
@@ -148,3 +153,4 @@ void loadArea3ClutRows(TObj *o)
         if (++B(o, 0x168) >= 0x14) B(o, 0x168) = 0;
     }
 }
+#endif

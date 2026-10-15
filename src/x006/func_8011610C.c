@@ -1,5 +1,10 @@
 // FUNC 8011610c 328 X006
 // MATCHING 8011610c 328
+// VERSION SLPS_01144 x06 801153C0 328
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x06/nonmatchings/x06", func_801153C0_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 extern volatile int D_1F800190;
@@ -54,3 +59,4 @@ void func_8011610C(TObj *o)
     }
     *(volatile int *)&SPAD.if0 += o->b.raw;
 }
+#endif

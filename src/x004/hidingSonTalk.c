@@ -1,5 +1,10 @@
 // FUNC 8012fbf4 1352 X004
 // MATCHING 8012fbf4 1352
+// VERSION SLPS_01144 x04 8012E394 1352
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x04/nonmatchings/x04", hidingSonTalk);
+#else
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
@@ -140,3 +145,4 @@ void hidingSonTalk(TObj *o)
         break;
     }
 }
+#endif

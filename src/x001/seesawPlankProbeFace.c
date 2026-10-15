@@ -1,5 +1,10 @@
 // FUNC 80127074 1544 X001
 // MATCHING 80127074 1544
+// VERSION SLPS_01144 x01 801259B8 1544
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x01/nonmatchings/x01", func_801259B8_slps01144);
+#else
 #include "spad.h"
 /* Matched (opusAD): two `asm("" :: "r"(cx))` use pairs (one at the top after the declarations, one before the
    first k-odd wba/wb8 store) raise cx's ref count so global alloc orders it ahead of dy and the slope: cx s5,
@@ -197,3 +202,4 @@ asm("" :: "r"(cx)); asm("" :: "r"(cx));
         return 1;
     }
 }
+#endif

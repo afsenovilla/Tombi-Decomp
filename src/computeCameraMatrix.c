@@ -1,5 +1,10 @@
 // FUNC 8002757c 416 MAIN0
 // MATCHING 8002757c 416
+// VERSION SLPS_01144 slps01144 80028398 416
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", computeCameraMatrix);
+#else
 typedef struct { short m[3][3]; short pad; int t[3]; } MAT;
 typedef struct { unsigned short frac; short whole; } FP;
 typedef union { int raw; FP p; } FX;
@@ -35,3 +40,4 @@ void computeCameraMatrix(O *o)
     CAMP->m.t[1] += DAT_1f800068.vy;
     CAMP->m.t[2] += DAT_1f800068.vz;
 }
+#endif

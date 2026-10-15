@@ -1,5 +1,10 @@
 // FUNC 8004b6a0 292 MAIN0
 // MATCHING 8004b6a0 292
+// VERSION SLPS_01144 slps01144 80056750 292
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80056750_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
 extern short D_1f8003bc;
@@ -26,3 +31,4 @@ int probeGrabPointInBoxB(PO *o, TObj *e)
         D_1f8003bc = e->box1 - e->box0;
     return 1;
 }
+#endif

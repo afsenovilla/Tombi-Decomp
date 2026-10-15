@@ -1,5 +1,10 @@
 // FUNC 80116278 808 X009
 // MATCHING 80116278 808
+// VERSION SLPS_01144 x09 80115534 808
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x09/nonmatchings/x09", func_80115534_slps01144);
+#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -74,3 +79,4 @@ void updateAreaScroll(O *o)
         break;
     }
 }
+#endif

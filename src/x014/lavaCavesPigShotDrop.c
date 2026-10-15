@@ -1,5 +1,10 @@
 // FUNC 80123d64 1016 X014
 // MATCHING 80123d64 1016
+// VERSION SLPS_01144 x14 8012103C 1016
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_8012103C_slps01144);
+#else
 #include "spad.h"
 #include "TOBJ.H"
 extern char D_8012A2FC[];
@@ -127,3 +132,4 @@ void lavaCavesPigShotDrop(TObj *o)
         break;
     }
 }
+#endif

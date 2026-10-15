@@ -1,5 +1,10 @@
 // FUNC 80022044 272 MAIN0
 // MATCHING 80022044 272
+// VERSION SLPS_01144 slps01144 800229D8 272
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", applyLighting);
+#else
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { int vx, vy, vz; } VECTOR;
@@ -43,3 +48,4 @@ void applyLighting(OB *o)
     o->m.m[2][2] = 0;
     FUN_800635e8(0x118, 0x220);
 }
+#endif

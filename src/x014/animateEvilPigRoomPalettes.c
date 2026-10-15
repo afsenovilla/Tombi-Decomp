@@ -1,5 +1,10 @@
 // FUNC 80116a10 512 X014
 // MATCHING 80116a10 512
+// VERSION SLPS_01144 x14 80115C18 512
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x14/nonmatchings/x14", func_80115C18_slps01144);
+#else
 #include "spad.h"
 #include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
@@ -91,3 +96,4 @@ void animateEvilPigRoomPalettes(G *g, char *s)
     g->pc = (int)s + *q;
     g->b3 = 1;
 }
+#endif

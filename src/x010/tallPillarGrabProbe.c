@@ -1,5 +1,10 @@
 // FUNC 801212d4 284 X010
 // MATCHING 801212d4 284
+// VERSION SLPS_01144 x10 8011F794 284
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x10/nonmatchings/x10", func_8011F794_slps01144);
+#else
 #include "spad.h"
 /* Player vs. slope-table object collision (X000 family: probeGrabObjectBoxOffset / probeGrabObjectBox).
    Shape notes (all needed): `h` is used (via d) between the table lhu and the d30 store so combine
@@ -58,3 +63,4 @@ void tallPillarGrabProbe(P *o, TObj *e)
     (*(TObj **)&SPAD.p3c0) = e;
     o->t.wba = oy - s;
 }
+#endif

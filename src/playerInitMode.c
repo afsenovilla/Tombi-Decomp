@@ -1,5 +1,10 @@
 // FUNC 800f0490 1740 X000
 // MATCHING 800f0490 1740
+// VERSION SLPS_01144 x00 800F05C0 1740
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x00/nonmatchings/x00", func_800F05C0_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0;
@@ -277,3 +282,4 @@ void playerInitMode(TObj *o)
         break;
     }
 }
+#endif

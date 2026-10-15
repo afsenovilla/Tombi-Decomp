@@ -1,5 +1,10 @@
 // FUNC 8004bbc0 1060 MAIN0
 // MATCHING 8004bbc0 1060
+// VERSION SLPS_01144 slps01144 80056C34 1060
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80056C34_slps01144);
+#else
 #include "spad.h"
 #include "gamestate.h"
 typedef struct { char p0[2]; unsigned short s2; } H;
@@ -142,3 +147,4 @@ int playerProbeGrab(TO *o, unsigned char f)
     }
     return D_1F8003C0;
 }
+#endif

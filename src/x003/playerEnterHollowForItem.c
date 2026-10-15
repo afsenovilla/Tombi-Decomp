@@ -1,5 +1,10 @@
 // FUNC 8011dd48 1116 X003
 // MATCHING 8011dd48 1116
+// VERSION SLPS_01144 x03 8011CC30 1116
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("x03/nonmatchings/x03", func_8011CC30_slps01144);
+#else
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -245,3 +250,4 @@ void playerEnterHollowForItem(TP *o)
         break;
     }
 }
+#endif

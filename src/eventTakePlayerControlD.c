@@ -1,5 +1,10 @@
 // FUNC 8004a9c8 1204 MAIN0
 // MATCHING 8004a9c8 1204
+// VERSION SLPS_01144 slps01144 80055A78 1204
+#if defined(VERSION_SLPS_01144)
+#include "include_asm.h"
+INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80055A78_slps01144);
+#else
 #include "TOBJ.H"
 typedef struct { TObj o; char pad[0x32]; short wf2; } BigObj;
 extern unsigned char PLAYER[];
@@ -104,3 +109,4 @@ void eventTakePlayerControlD(TObj *o)
         break;
     }
 }
+#endif
