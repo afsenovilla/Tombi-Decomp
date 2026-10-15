@@ -13,7 +13,7 @@ extern int FUN_8001fe0c(short, short);
 extern int FUN_8001fdac(short, short);
 extern int FUN_8001fddc(short, short);
 extern unsigned FUN_8001f9e0(void);
-extern void FUN_800ec5f4(TObj *o, int a, int b, int c);
+extern void spawnWeaponTrailSpark(TObj *o, int a, int b, int c);
 
 void weaponTrailOrbitStep(TObj *o)
 {
@@ -95,13 +95,13 @@ void weaponTrailOrbitStep(TObj *o)
             o->y.p.whole = v + (q->y.p.whole + o->velV);
             o->d->p.whole = q->d->p.whole;
             o->animTimer = 6;
-            FUN_800ec5f4(o, 0, 0, 0);
+            spawnWeaponTrailSpark(o, 0, 0, 0);
             if (q->wa8 < 0x600) {
                 o->animTimer = 6;
                 if (FUN_8001f9e0() & 1)
-                    FUN_800ec5f4(o, 4, 4, 0);
+                    spawnWeaponTrailSpark(o, 4, 4, 0);
                 else
-                    FUN_800ec5f4(o, -4, -4, 0);
+                    spawnWeaponTrailSpark(o, -4, -4, 0);
             }
             break;
         case 7:

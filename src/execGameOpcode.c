@@ -23,7 +23,7 @@ extern unsigned char D_8009C970[];
 extern void FUN_800399c4(void);
 extern void FUN_80039e54(void);
 extern void FUN_8003a89c(void);
-extern void func_80113754(TObj *);
+extern void objSetAnimFromSubtypeTable(TObj *);
 extern void func_800ECBBC(TObj *);
 extern void func_800E8348(TObj *);
 extern void FUN_800202b4(TObj *);
@@ -50,7 +50,7 @@ static __inline__ int op81(void)
         o->w76 = b;
         switch (o->type & 0x7f) {
         case 0x18:
-            func_80113754(o);
+            objSetAnimFromSubtypeTable(o);
             break;
         case 0x19:
             func_800ECBBC(o);

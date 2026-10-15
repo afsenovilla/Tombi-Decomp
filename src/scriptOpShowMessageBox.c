@@ -9,7 +9,7 @@ typedef struct { short v[6]; } V6;
 extern TObj *SCRIPT_OBJECTS[];
 extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
 extern int showMessageBoxDirect(int, int, V6 *);
-extern void func_80113754(TObj *);
+extern void objSetAnimFromSubtypeTable(TObj *);
 extern void func_800ECBBC(TObj *);
 
 void scriptOpShowMessageBox(void)
@@ -58,7 +58,7 @@ void scriptOpShowMessageBox(void)
             case 0x18:
                 o->w74 = s->arg[4];
                 o->w76 = 0;
-                func_80113754(o);
+                objSetAnimFromSubtypeTable(o);
                 GV2.bb0 = 2;
                 GVARS.b3f = 1;
                 PLAYER.obj.b04 = 5;

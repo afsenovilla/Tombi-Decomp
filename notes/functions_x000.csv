@@ -3,7 +3,7 @@ address,name,size,typed
 800ea168,updatePoolType04Object,184,1
 800ea220,FUN_800ea220,100,1
 800ea284,updatePoolType05Object,704,1
-800ea544,FUN_800ea544,312,1
+800ea544,spawnPoolType05Ring,312,1
 800ea67c,updateGroundDebris,1936,1
 800eae0c,spawnGroundDebris,496,0
 800eaffc,spawnWeaponHitDebris,204,0
@@ -20,7 +20,7 @@ address,name,size,typed
 800ebf68,weaponTrailOrbitStep,1040,1
 800ec378,updateWeaponTrailObjectAlt,168,1
 800ec420,updateWeaponTrailObject,468,1
-800ec5f4,FUN_800ec5f4,284,1
+800ec5f4,spawnWeaponTrailSpark,284,1
 800ec710,spawnWeaponTrailObjects,316,0
 800ec84c,FUN_800ec84c,372,0
 800ec9c0,updateColorBurstParticle,968,1
@@ -74,7 +74,7 @@ address,name,size,typed
 800f1d44,FUN_800f1d44,2280,1
 800f262c,FUN_800f262c,248,0
 800f2724,FUN_800f2724,380,1
-800f28a0,FUN_800f28a0,316,1
+800f28a0,playerJumpArea3Float,316,1
 800f2a30,playerLandFromJump,360,1
 800f2b98,FUN_800f2b98,2632,1
 800f35e0,FUN_800f35e0,188,1
@@ -101,7 +101,7 @@ address,name,size,typed
 800f8b7c,playerFlipOntoObjectPlace,432,1
 800f8d2c,playerStepFlipOntoObject,2076,1
 800f9548,playerFlipPlaceAndAccelerate,316,1
-800f9684,FUN_800f9684,548,1
+800f9684,playerPerchFlipLandCheck,548,1
 800f98a8,playerStepFlipOntoPerch,1908,1
 800fa01c,playerStepPerchIdle,832,1
 800fa35c,playerHurtTumbleGetUp,1472,1
@@ -138,7 +138,7 @@ address,name,size,typed
 80102f40,playerBiteHoldType03,700,1
 801031fc,FUN_801031fc,148,1
 80103290,playerBiteHoldType0B,920,1
-80103628,FUN_80103628,332,1
+80103628,playerBiteHoldAttach,332,1
 80103774,FUN_80103774,100,1
 801037d8,playerBiteHoldGeneric,1252,1
 80103cbc,FUN_80103cbc,132,1
@@ -157,7 +157,7 @@ address,name,size,typed
 80105bcc,playerBittenJumpType03,2308,1
 801064d0,playerBittenJumpType0E,500,1
 801066c4,FUN_801066c4,852,1
-80106a18,FUN_80106a18,312,1
+80106a18,playerStep48ByArea,312,1
 80106b50,playerStepItemReactionA,608,1
 80106db0,playerStepItemReactionB,488,1
 80106f98,FUN_80106f98,84,0
@@ -194,7 +194,7 @@ address,name,size,typed
 8010c7b0,playerClimbFollowObject,292,1
 8010c8d4,playerClimbJumpOff,324,1
 8010ca18,playerStepClimbObject,912,1
-8010cda8,FUN_8010cda8,520,1
+8010cda8,playerSwimDirFromPadB,520,1
 8010d048,playerSwimDirFromPad,568,1
 8010d280,playerSwimMove,272,1
 8010d390,FUN_8010d390,1120,1
@@ -225,7 +225,7 @@ address,name,size,typed
 80111714,FUN_80111714,364,1
 80111880,FUN_80111880,156,1
 8011191c,updateL1Type0AObject,308,1
-80111a50,FUN_80111a50,144,0
+80111a50,spawnL1Type0AObject,144,0
 80111b40,spawnItemDropsFromTable,648,1
 80111dc8,FUN_80111dc8,400,1
 80111f58,FUN_80111f58,684,1
@@ -240,7 +240,7 @@ address,name,size,typed
 80113034,FUN_80113034,900,1
 801133b8,FUN_801133b8,204,1
 80113484,updateL2Type0EObject,720,1
-80113754,FUN_80113754,72,1
+80113754,objSetAnimFromSubtypeTable,72,1
 8011379c,FUN_8011379c,32,0
 801137bc,FUN_801137bc,204,1
 80113888,FUN_80113888,300,1

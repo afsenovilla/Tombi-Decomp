@@ -15,7 +15,7 @@ extern unsigned char DAT_8009cffb;
 extern unsigned short DAT_8009c960, DAT_8009c962;
 extern unsigned short DAT_8009d670;
 extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
-extern void FUN_8010cda8(TObj *);
+extern void playerSwimDirFromPadB(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -30,7 +30,7 @@ void playerStepSwim(TObj *o)
     short w;
     unsigned short h;
 
-    FUN_8010cda8(o);
+    playerSwimDirFromPadB(o);
     switch (o->state) {
     case 0:
         o->b9e = 0;

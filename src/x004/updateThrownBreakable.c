@@ -8,7 +8,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void thrownBreakableFly(TObj *);
 extern void FUN_8001e4f0(int);
-extern void FUN_800ea544(TObj *, short, short, short);
+extern void spawnPoolType05Ring(TObj *, short, short, short);
 extern void freeObjectLayer1(TObj *);
 
 void updateThrownBreakable(TObj *o)
@@ -36,7 +36,7 @@ void updateThrownBreakable(TObj *o)
     case 2:
         if (FUN_800202b4(o)) {
             FUN_8001e4f0(0x34);
-            FUN_800ea544(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnPoolType05Ring(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             { unsigned char *c = &GV2.bae; *c |= 1 << o->subtype; }
             o->b04 = 3;
         }

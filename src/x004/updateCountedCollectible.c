@@ -11,7 +11,7 @@ extern unsigned char D_80131168[];
 extern int FUN_800202b4(TObj *);
 extern void cullObjectPerspective(TObj *);
 extern void FUN_8001e4f0(int);
-extern void FUN_800ea544(TObj *, short, short, short);
+extern void spawnPoolType05Ring(TObj *, short, short, short);
 extern unsigned int FUN_8001f9e0(void);
 extern void freeObjectLayer2(TObj *);
 
@@ -136,7 +136,7 @@ void updateCountedCollectible(TObj *o)
                 break;
             }
             FUN_8001e4f0(0xf7);
-            FUN_800ea544(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnPoolType05Ring(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             c = &GCD.bcefb;
             *c = *c + 1;
             n = o->subtype;

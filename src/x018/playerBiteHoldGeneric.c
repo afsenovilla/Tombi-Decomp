@@ -13,7 +13,7 @@ extern unsigned short DAT_8009d670;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
-extern void FUN_80103628(O *);
+extern void playerBiteHoldAttach(O *);
 extern void playerSetSlopeTilt(O *, int);
 extern short FUN_8003fd78(O *, int, int);
 
@@ -43,17 +43,17 @@ void playerBiteHoldGeneric(O *o)
             o->h->s2 -= 8;
             if (o->h->s2 <= DAT_8009d2e8->h->s2) {
                 o->h->s2 = DAT_8009d2e8->h->s2;
-                if (flag) FUN_80103628(o);
+                if (flag) playerBiteHoldAttach(o);
             }
         } else {
             o->h->s2 += 8;
             if (o->h->s2 >= DAT_8009d2e8->h->s2) {
                 o->h->s2 = DAT_8009d2e8->h->s2;
-                if (flag) FUN_80103628(o);
+                if (flag) playerBiteHoldAttach(o);
             }
         }
         if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70 + (DAT_8009d2e8->s72 - DAT_8009d2e8->s70)), 1) || o->s20 > 10) {
-            FUN_80103628(o);
+            playerBiteHoldAttach(o);
         }
         return;
     case 2:

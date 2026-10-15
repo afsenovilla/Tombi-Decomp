@@ -20,7 +20,7 @@ extern void updateCameraFollow(O *);
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int FUN_80028a80(O *);
 extern int func_80116764(O *);
-extern void FUN_80020828(void);
+extern void setPlayerAxisPointers(void);
 
 void func_80116934(O *o)
 {
@@ -46,7 +46,7 @@ void func_80116934(O *o)
         GAME.disableSelectMenu = 0;
         if (o->b3f == 0) D_1F8001C8 = (D_1F8001C8 + 1) & 1;
         else D_1F8001C8 = (D_1F8001C8 - 1) & 1;
-        FUN_80020828();
+        setPlayerAxisPointers();
         o->d7c = D_1F8001C8 * 0x5a00;
         o->anim = 0;
         o->subtype = 0;

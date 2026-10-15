@@ -193,6 +193,18 @@ One line per name: `address name (old file) - justification`.
 - `8002fc98 playerEffect4EDispatchB` (was FUN_8002fc98) - second dispatcher over the same step functions (called by updatePlayerEffect4E)
 - `8002cd20 spawnPlayerPoolType13Object` (was FUN_8002cd20) - spawns a pool type 0x13 object copying the source position/facing (playerInitMode, playerEventStepDropIn)
 - `80025d90 playerDecodePadInput` (was FUN_80025d90) - updatePlayer: decodes the pad / analog bytes into the 4-way direction bits (D_8009D670) and the press/release masks
+- `800498f4 dispatchAreaNpcHandler` (was func_800498F4) - layer 2 type 0x32 handler (MAIN0 table slot 80077E64): switch on area/section calling the area overlay's NPC handler (updateBacoTownNpc, updateRaftReturnNpc, ...)
+- `8003e960 updateL5Type09Item` (was func_8003E960) - layer 5 type 9 handler (slot 8007B334): item object (initItemObject), falls with TileCollideAt, sets its section flag when taken
+- `8003edb0 updateL5Type0AItem` (was func_8003EDB0) - layer 5 type 0xA handler (slot 8007B338): item object variant (active 4, optional launch velocity)
+- `8002b0bc updateL8Type01Object` (was func_8002B0BC) - layer 8 type 1 handler (slot 80079B8C): sprite slot, event start, movement l8Type01MoveStep, category 8 list
+- `8002eb34 updatePoolType32Object` (was func_8002EB34) - pool type 0x32 handler (slot 80079C74): spawns random type 0x32 children (initPoolType32Object)
+- `8002ca88 updatePoolType68Object` (was func_8002CA88) - handler at pool table slot 80079D4C (index 0x68): anim from D_800121F4 by subtype, placed at the player
+- `80020828 setPlayerAxisPointers` (was func_80020828) (no caller found) - sets the player horizontal/depth pointers D_800A6078/7C to +0x10/+0x18 or swapped by 1F8001C8 bit 0, same for two other object lists
+- `80041480 probeSlopeFloorAt` (was func_80041480, US func_80044694) - slope/floor probe over the collision plane segments of getCollisionPlaneAt
+- `8004cfd8 updateSectionFadeController` (was func_8004CFD8) (uncertain) - unlayered handler next to updateSectionSpawnManager (slot 8007BF38): sets the fade mode D_8009C975 = 1 and runs the per-area table D_8007C178
+- `800480d4 pushObjectOutOfObjectBoxD` (was func_800480D4) - another box push-out variant (depth within 0x2D)
+- `8002e4b4 updatePoolType20Object` (was func_8002E4B4) - pool type 0x20 handler (slot 80079C2C)
+- `8002b3c8 l8Type01MoveStep` (was FUN_8002b3c8) - updateL8Type01Object movement: timed move toward +0xC4 with Rand wobble
 
 # X000 function names (shared overlay code)
 
@@ -395,6 +407,15 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80113484 updateL2Type0EObject` (was FUN_80113484) - shared layer 2 type 0xE handler (slot 80077DD4; bite holder playerBiteHoldType0E)
 - `80114890 updateL2Type1FObject` (was FUN_80114890) - shared layer 2 type 0x1F handler (slot 80077E18): thunk to the area's own code
 - `8011191c updateL1Type0AObject` (was FUN_8011191c) - layer 1 type 10 handler (slot 8007A134): subtype 0/1 steps, short hit flash via +0x22/+0x6A
+- `800f9684 playerPerchFlipLandCheck` (was FUN_800f9684) - playerStepFlipOntoPerch helper: probes the landing (probeCollisionAtDepthC, side tile response) and sets the landing anim
+- `80103628 playerBiteHoldAttach` (was FUN_80103628) - playerBiteHoldGeneric helper: snaps the player onto the bitten object D_8009D2E8 (x, y - height +0x70), anim 0xD, per bitten type setup
+- `8010cda8 playerSwimDirFromPadB` (was FUN_8010cda8) - playerStepSwim helper: swim direction +0x76 / angle +0xB6 from the pad bits D_8009D670 (when D_8009CE3D != 0xFF)
+- `800ec5f4 spawnWeaponTrailSpark` (was FUN_800ec5f4) - weaponTrailOrbitStep helper: spawns a pool type 0x5C subtype 9 object at the trail object plus an offset
+- `80111a50 spawnL1Type0AObject` (was FUN_80111a50) - allocates a layer 1 type 10 object (updateL1Type0AObject) at the player with subtype/slot/state from the arguments (spawnPlayerPowerEffect)
+- `800f28a0 playerJumpArea3Float` (was FUN_800f28a0) (uncertain) - playerStepJump helper: in area 3 with D_8009C944 set, anim 0x35 and pad-driven velX / velY (setVelXFromPadLR, adjustVelYFromPadDown)
+- `80106a18 playerStep48ByArea` (was FUN_80106a18) - player step 0x48: per-area handlers (overlay code at 8011B47C / 8011C758 / 8011D5F4), like playerStep2EByArea
+- `800ea544 spawnPoolType05Ring` (was FUN_800ea544) - spawns 6 pool type 5 objects (updatePoolType05Object) at offsets D_80114A80 around x/y/z (layer-1 type 2 reward handler)
+- `80113754 objSetAnimFromSubtypeTable` (was FUN_80113754) - sets the anim from PTR_80115DF0[subtype][+0x74] and jumps to frame +0x76 (script ops and execGameOpcode)
 
 # Area overlay function names (X001..X019)
 

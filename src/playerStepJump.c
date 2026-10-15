@@ -51,7 +51,7 @@ extern void FUN_8001fd94(TObj *);
 extern void playerAirSpinToFall(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void FUN_80040278(TObj *, short, short);
-extern void FUN_800f28a0(TObj *);
+extern void playerJumpArea3Float(TObj *);
 extern void playerUpdateFall(TObj *);
 extern void playerLandFromJump(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
@@ -186,7 +186,7 @@ void playerStepJump(TObj *o)
         o->h->raw += DAT_8009c944 << 8;
         o->y.raw += DAT_8009c946[0] << 8;
         FUN_8001fec0(o);
-        if (X(o)->c9 != 0) FUN_800f28a0(o);
+        if (X(o)->c9 != 0) playerJumpArea3Float(o);
         else playerUpdateFall(o);
         playerUpdateSpeedFromPad(o);
         DAT_8009c330->b8 = 1;

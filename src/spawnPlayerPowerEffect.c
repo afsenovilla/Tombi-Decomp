@@ -6,7 +6,7 @@ typedef struct { int a, y, b; } P3;
 extern P3 D_800A6048;
 extern unsigned char PLAYER;
 extern TObj *ObjAlloc(void);
-extern void func_80111A50(int a, int b, int c);
+extern void spawnL1Type0AObject(int a, int b, int c);
 
 static __inline__ void spawn(short sub, int idx)
 {
@@ -29,11 +29,11 @@ void spawnPlayerPowerEffect(short n)
     PLX.b6104 = 2;
     switch (n) {
     case 0:
-        func_80111A50(0, 0, 0);
+        spawnL1Type0AObject(0, 0, 0);
         spawn(n, 1);
         break;
     case 1:
-        func_80111A50(1, 0, 0);
+        spawnL1Type0AObject(1, 0, 0);
         spawn(n, 5);
         spawn(n, 6);
         spawn(n, 7);

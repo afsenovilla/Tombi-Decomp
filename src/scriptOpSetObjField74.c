@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "scriptctx.h"
 extern TObj *SCRIPT_OBJECTS[];
-extern void func_80113754(o);
+extern void objSetAnimFromSubtypeTable(o);
 extern void func_800ECBBC(o);
 extern void func_800E8348(o);
 
@@ -20,7 +20,7 @@ void scriptOpSetObjField74(void)
         o->w76 = b;
         switch (o->type & 0x7f) {
         case 0x18:
-            func_80113754(o);
+            objSetAnimFromSubtypeTable(o);
             break;
         case 0x19:
             func_800ECBBC(o);

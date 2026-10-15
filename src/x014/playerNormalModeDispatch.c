@@ -78,7 +78,7 @@ extern void playerStepSwimSpin(TObj *);
 extern void playerStepSuperJump(TObj *);
 extern void FUN_8011beac(TObj *);
 extern void FUN_8011b170(TObj *);
-extern void FUN_80106a18(TObj *);
+extern void playerStep48ByArea(TObj *);
 extern void objCollideSideWalls(TObj *);
 extern void playerHandleHazardContact(TObj *, int);
 extern void probeTileShapeThreePoints(TObj *, int);
@@ -419,7 +419,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_8011b170(o);
         break;
     case 0x48:
-        FUN_80106a18(o);
+        playerStep48ByArea(o);
         break;
     case 0x49:
     case 0x16:

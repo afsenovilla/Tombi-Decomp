@@ -16,7 +16,7 @@ extern TObj *allocObjectLayer1(void);
 extern void SfxPlay2(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playerPlaceBittenObject(TObj *);
-extern void FUN_80103628(TObj *);
+extern void playerBiteHoldAttach(TObj *);
 extern void FUN_80103774(TObj *);
 
 void func_8011D5F4(TObj *o)
@@ -41,7 +41,7 @@ void func_8011D5F4(TObj *o)
             if (D_8009D2E8->h->p.whole >= o->h->p.whole) {
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
-                    FUN_80103628(o);
+                    playerBiteHoldAttach(o);
                     FUN_80103774(o);
                 }
             }
@@ -50,13 +50,13 @@ void func_8011D5F4(TObj *o)
             if (o->h->p.whole >= D_8009D2E8->h->p.whole) {
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
-                    FUN_80103628(o);
+                    playerBiteHoldAttach(o);
                     FUN_80103774(o);
                 }
             }
         }
         if (o->timer >= 0xb) {
-            FUN_80103628(o);
+            playerBiteHoldAttach(o);
             FUN_80103774(o);
         }
         break;

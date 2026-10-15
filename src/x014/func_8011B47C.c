@@ -7,7 +7,7 @@ extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
-extern void FUN_80103628(TObj *);
+extern void playerBiteHoldAttach(TObj *);
 extern void FUN_80103774(TObj *);
 extern void FUN_8003facc(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
@@ -42,7 +42,7 @@ void func_8011B47C(TObj *o)
             if (o->h->p.whole <= D_8009D2E8->h->p.whole) {
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
-                    FUN_80103628(o);
+                    playerBiteHoldAttach(o);
                     FUN_80103774(o);
                 }
             }
@@ -51,13 +51,13 @@ void func_8011B47C(TObj *o)
             if (o->h->p.whole >= D_8009D2E8->h->p.whole) {
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
-                    FUN_80103628(o);
+                    playerBiteHoldAttach(o);
                     FUN_80103774(o);
                 }
             }
         }
         if (o->timer >= 0xb) {
-            FUN_80103628(o);
+            playerBiteHoldAttach(o);
             FUN_80103774(o);
         }
         break;
