@@ -6,9 +6,18 @@
 extern int cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern unsigned short D_8007A3F0[];
-extern short D_8013C6D0[];
-extern short D_8013C6FC[];
-extern short D_8013C714[];
+static short D_8013C6D0[22] = {
+    0x8a, 0x8a, 0x46, 0x46, 0x22, 0x22, 0xbe, 0xbe,
+    0x4e, 0x4e, 0x76, 0x76, 0x50, 0x50, 0x12, 0x12,
+    0x2e, 0x2e, 0x7e, 0x7e, 0x30, 0x30,
+};
+static short D_8013C6FC[12] = {
+    0x70, 0x28, 8, 0xa0, 0x28, 0x50, 0x38, 0, 8, 0x60, 0x10,
+};
+static short D_8013C714[10] = {
+    7, 7, 7, 8, 8, 8, 9, 9,
+    9, 9,
+};
 
 static __inline__ short wave(TObj *o, int vx, short tm, int vy)
 {

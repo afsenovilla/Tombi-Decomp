@@ -4,7 +4,13 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern void *D_80138EA0[];
+extern char D_80139030[];
+extern char D_8013905C[];
+extern char D_80139028[];
+extern char D_80139054[];
+static void *D_80138EA0[4] = {
+    D_80139030, D_8013905C, D_80139028, D_80139054,
+};
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);

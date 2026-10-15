@@ -5,7 +5,9 @@
 #include "gamestate.h"
 
 extern unsigned short D_80126590[];
-extern short D_801265A0[];
+static short D_801265A0[8] = {
+    0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xa0, 0xe0, 0xc0,
+};
 extern short DAT_8007a1f0[];
 extern short DAT_8007a5f0[];
 extern int Rand(void);

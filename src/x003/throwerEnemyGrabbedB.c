@@ -5,7 +5,14 @@
 
 extern TObj PLAYER;
 extern char D_80077CD0[];
-extern void *D_8013A6C0[], *D_8013A6C4[];
+extern void *D_8013A6C0[];
+extern char D_8013A89C[];
+extern char D_8013A8A4[];
+extern char D_8013A8E4[];
+extern char D_8013A8F4[];
+static void *D_8013A6C4[4] = {
+    D_8013A89C, D_8013A8A4, D_8013A8E4, D_8013A8F4,
+};
 extern unsigned short D_8007A3F0[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);

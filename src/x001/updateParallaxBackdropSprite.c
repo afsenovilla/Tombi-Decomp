@@ -3,7 +3,15 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013E6B0[];
+extern char D_8013EC18[];
+extern char D_8013EB28[];
+extern char D_8013EB30[];
+extern char D_8013EB38[];
+extern char D_8013EB40[];
+static void *D_8013E6B0[5] = {
+    D_8013EC18, D_8013EB28, D_8013EB30, D_8013EB38,
+    D_8013EB40,
+};
 void func_80018DA4(TObj *o);
 void freeObjectLayer7(TObj *o);
 

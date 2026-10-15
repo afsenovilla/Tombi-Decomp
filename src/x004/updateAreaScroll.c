@@ -44,7 +44,33 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern E8 *D_801305DC[];
+extern char D_80130424[];
+extern char D_80130484[];
+extern char D_801304B4[];
+extern char D_80130514[];
+extern char D_80130544[];
+extern char D_8013054C[];
+extern char D_80130554[];
+extern char D_8013055C[];
+extern char D_80130564[];
+extern char D_8013056C[];
+extern char D_80130574[];
+extern char D_8013057C[];
+extern char D_8013058C[];
+extern char D_80130594[];
+extern char D_801305A4[];
+extern char D_801305B4[];
+extern char D_801305BC[];
+extern char D_801305C4[];
+extern char D_801305CC[];
+extern char D_801305D4[];
+static E8 *D_801305DC[20] = {
+    (E8 *)D_80130424, (E8 *)D_80130484, (E8 *)D_801304B4, (E8 *)D_80130514,
+    (E8 *)D_80130544, (E8 *)D_8013054C, (E8 *)D_80130554, (E8 *)D_8013055C,
+    (E8 *)D_80130564, (E8 *)D_8013056C, (E8 *)D_80130574, (E8 *)D_8013057C,
+    (E8 *)D_8013058C, (E8 *)D_80130594, (E8 *)D_801305A4, (E8 *)D_801305B4,
+    (E8 *)D_801305BC, (E8 *)D_801305C4, (E8 *)D_801305CC, (E8 *)D_801305D4,
+};
 extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
 extern unsigned char D_8009C982b;

@@ -13,7 +13,16 @@ extern int D_1F80018C;
 extern int D_1F800190;
 extern char D_80077CF4[], D_80077CDC[];
 extern B D_80135B30[];
-extern A *D_801386F8[];
+extern char D_80138A0C[];
+extern char D_80138A8C[];
+extern char D_80138B1C[];
+extern char D_80138BAC[];
+extern char D_80138BD4[];
+extern char D_80138BFC[];
+static A *D_801386F8[6] = {
+    (A *)D_80138A0C, (A *)D_80138A8C, (A *)D_80138B1C, (A *)D_80138BAC,
+    (A *)D_80138BD4, (A *)D_80138BFC,
+};
 extern int D_1F80018C, D_1F800190;
 extern TObj *ObjAlloc(void);
 extern int komaPigCheckLanded(TObj *);

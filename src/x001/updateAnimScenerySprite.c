@@ -4,7 +4,17 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern void *D_8013E694[];
+extern char D_8013E8DC[];
+extern char D_8013E8E4[];
+extern char D_8013EA2C[];
+extern char D_8013EA34[];
+extern char D_8013EA3C[];
+extern char D_8013EA44[];
+extern char D_8013EA4C[];
+static void *D_8013E694[7] = {
+    D_8013E8DC, D_8013E8E4, D_8013EA2C, D_8013EA34,
+    D_8013EA3C, D_8013EA44, D_8013EA4C,
+};
 extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);

@@ -4,7 +4,13 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern void *D_80138EB0[];
+extern char D_80139080[];
+extern char D_80139088[];
+extern char D_80139090[];
+extern char D_80139098[];
+static void *D_80138EB0[4] = {
+    D_80139080, D_80139088, D_80139090, D_80139098,
+};
 extern void windStreakRespawn(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);

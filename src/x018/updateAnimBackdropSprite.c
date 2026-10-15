@@ -3,7 +3,28 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8011CA8C[];
+extern char D_8011CBF0[];
+extern char D_8011CC10[];
+extern char D_8011CC18[];
+extern char D_8011CC4C[];
+extern char D_8011CC54[];
+extern char D_8011CC68[];
+extern char D_8011CC98[];
+extern char D_8011CCA0[];
+extern char D_8011CCB0[];
+extern char D_8011CCD8[];
+extern char D_8011CCE0[];
+extern char D_8011CCFC[];
+extern char D_8011CD34[];
+extern char D_8011CD3C[];
+extern char D_8011CD44[];
+extern char D_8011CD4C[];
+static void *D_8011CA8C[16] = {
+    D_8011CBF0, D_8011CC10, D_8011CC18, D_8011CC4C,
+    D_8011CC54, D_8011CC68, D_8011CC98, D_8011CCA0,
+    D_8011CCB0, D_8011CCD8, D_8011CCE0, D_8011CCFC,
+    D_8011CD34, D_8011CD3C, D_8011CD44, D_8011CD4C,
+};
 extern unsigned short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);

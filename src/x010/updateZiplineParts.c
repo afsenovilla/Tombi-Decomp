@@ -4,7 +4,18 @@
 #include "TOBJ.H"
 typedef void (*Fn)(TObj *);
 
-extern void *D_80131C8C[];
+extern char D_80131E2C[];
+extern char D_80131E3C[];
+extern char D_80131E44[];
+extern char D_80131E4C[];
+extern char D_80131E34[];
+extern char D_80131E54[];
+extern char D_80131E5C[];
+extern char D_80131ED8[];
+static void *D_80131C8C[8] = {
+    D_80131E2C, D_80131E3C, D_80131E44, D_80131E4C,
+    D_80131E34, D_80131E54, D_80131E5C, D_80131ED8,
+};
 extern Fn D_8012F298[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);

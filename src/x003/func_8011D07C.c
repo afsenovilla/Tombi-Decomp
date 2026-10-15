@@ -4,7 +4,26 @@
 
 extern int DAT_1f8002e0[];
 extern unsigned char D_80135A88[];
-extern void *D_80139880[];
+extern char D_80139938[];
+extern char D_80139940[];
+extern char D_80139948[];
+extern char D_80139950[];
+extern char D_80139958[];
+extern char D_80139960[];
+extern char D_80139968[];
+extern char D_80139970[];
+extern char D_80139978[];
+extern char D_80139980[];
+extern char D_80139988[];
+extern char D_80139990[];
+extern char D_80139998[];
+extern char D_801399A0[];
+static void *D_80139880[14] = {
+    D_80139938, D_80139940, D_80139948, D_80139950,
+    D_80139958, D_80139960, D_80139968, D_80139970,
+    D_80139978, D_80139980, D_80139988, D_80139990,
+    D_80139998, D_801399A0,
+};
 extern short D_8007A1F0[], D_8007A5F0[];
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_80018ca4(TObj *);

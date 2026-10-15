@@ -1,7 +1,9 @@
 // FUNC 801125e8 636 X002
 // MATCHING 801125e8 636
 #include "TOBJ.H"
-extern char DAT_80115d28[];
+static char DAT_80115d28[20] = {
+    3, 7, -0x80, 4, 0, 0, 3, 7, -0x80, 5, 0, 0, -1,
+};
 extern void **DAT_80115a08[];
 extern void **PTR_PTR_80115948[];
 extern int DAT_8009c960[];

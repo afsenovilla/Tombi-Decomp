@@ -19,7 +19,15 @@ extern unsigned char DAT_8009cda3[];
 extern ENT D_8008037c[], D_8008039c[], D_800803bc[], D_800803dc[];
 extern UV D_80080300[];
 extern XY D_80080404[];
-extern short *D_80012284[];
+extern char D_80012940[];
+extern char D_80012948[];
+extern char D_80012950[];
+extern char D_80012958[];
+extern char D_80012960[];
+static short *D_80012284[5] = {
+    (short *)D_80012940, (short *)D_80012948, (short *)D_80012950, (short *)D_80012958,
+    (short *)D_80012960,
+};
 extern void SetSemiTrans(void *, int);
 extern void AddPrim(void *, void *);
 extern void SetDrawMode(void *, int, int, int, void *);

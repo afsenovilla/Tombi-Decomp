@@ -14,7 +14,14 @@ typedef struct {
     short wd2;
 } S;
 extern unsigned short D_1F8001C8;
-extern void *D_80134608[], *D_801345F4[], *D_80134610[], *D_80134614[];
+extern void *D_80134608[], *D_80134610[], *D_80134614[];
+extern char D_801348F8[];
+extern char D_8013490C[];
+extern char D_80134950[];
+extern char D_801349AC[];
+static void *D_801345F4[4] = {
+    D_801348F8, D_8013490C, D_80134950, D_801349AC,
+};
 extern char D_80077CDC[], D_80077D90[];
 extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);

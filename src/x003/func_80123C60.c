@@ -4,7 +4,14 @@
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; } SB;
 extern char D_80077CF4[];
-extern unsigned short *D_8013878C[], *D_80138790[], *D_801387A4[];
+extern unsigned short *D_8013878C[], *D_80138790[];
+extern char D_80138E10[];
+extern char D_801389CC[];
+extern char D_80138E30[];
+extern char D_80138E60[];
+static unsigned *D_801387A4[4] = {
+    (unsigned *)D_80138E10, (unsigned *)D_801389CC, (unsigned *)D_80138E30, (unsigned *)D_80138E60,
+};
 extern unsigned char D_80135B30[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);

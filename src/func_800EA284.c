@@ -4,7 +4,16 @@
 #include "gamestate.h"
 
 typedef struct { short x, y; } V2;
-extern void *D_8013B0EC[];
+extern char D_8013B728[];
+extern char D_8013B730[];
+extern char D_8013B738[];
+extern char D_8013B740[];
+extern char D_8013B748[];
+extern char D_8013B750[];
+static void *D_8013B0EC[6] = {
+    D_8013B728, D_8013B730, D_8013B738, D_8013B740,
+    D_8013B748, D_8013B750,
+};
 extern void *D_80134CF4[];
 extern V2 D_80114A68[];
 void AnimLoadDuration(TObj *o);

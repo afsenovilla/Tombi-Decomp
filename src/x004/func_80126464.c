@@ -3,7 +3,14 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void *D_801345BC[], *D_801345D0[];
+extern void *D_801345D0[];
+extern char D_801346A8[];
+extern char D_801346EC[];
+extern char D_801346F8[];
+extern char D_80134704[];
+static void *D_801345BC[4] = {
+    D_801346A8, D_801346EC, D_801346F8, D_80134704,
+};
 extern unsigned short D_80131128[];
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);

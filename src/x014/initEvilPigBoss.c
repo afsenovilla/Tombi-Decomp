@@ -8,7 +8,10 @@ typedef struct {
     unsigned char bbe, bbf;
     short wc0, wc2, wc4, wc6;
 } SB;
-extern int D_80125CC4[], D_80125CE4[], D_80125D04[];
+extern int D_80125CC4[], D_80125CE4[];
+static int D_80125D04[7] = {
+    7, 6, 8, 9, 8, 100729856, 328450,
+};
 extern unsigned char SCRIPT_FLAGS[];
 #define S16(o, x) (*(short *)((char *)(o) + (x)))
 #define S32(o, x) (*(int *)((char *)(o) + (x)))

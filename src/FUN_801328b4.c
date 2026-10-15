@@ -6,7 +6,18 @@
 typedef struct { unsigned char b[8]; } V801328B4;
 
 extern V801328B4 D_801392EC[][4];
-extern void *D_8013B24C[];
+extern char D_8013BD78[];
+extern char D_8013BD80[];
+extern char D_8013BD88[];
+extern char D_8013BD90[];
+extern char D_8013BD98[];
+extern char D_8013BDA0[];
+extern char D_8013BDA8[];
+extern char D_8013BDB0[];
+static void *D_8013B24C[8] = {
+    D_8013BD78, D_8013BD80, D_8013BD88, D_8013BD90,
+    D_8013BD98, D_8013BDA0, D_8013BDA8, D_8013BDB0,
+};
 extern void (*D_801392E0[])(TObj *);
 extern unsigned short FUN_8005e420(int, int);
 extern int ObjCullRegister(TObj *);

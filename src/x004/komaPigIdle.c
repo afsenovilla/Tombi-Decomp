@@ -9,7 +9,16 @@ extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 FUN_80129fb4) */
 extern unsigned short *D_80133B5C[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 */
 extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 FUN_80129fb4) */
-extern unsigned short *D_80133B5C[], *D_80133B74[], *D_80133B78[], *D_80133B84[];
+extern unsigned short *D_80133B5C[], *D_80133B74[], *D_80133B78[];
+extern char D_80133D68[];
+extern char D_80133D8C[];
+extern char D_80133DB0[];
+extern char D_801341E0[];
+extern char D_80134398[];
+static unsigned *D_80133B84[5] = {
+    (unsigned *)D_80133D68, (unsigned *)D_80133D8C, (unsigned *)D_80133DB0, (unsigned *)D_801341E0,
+    (unsigned *)D_80134398,
+};
 extern int FUN_8001f9e0(void);
 extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);

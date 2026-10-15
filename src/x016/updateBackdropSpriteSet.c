@@ -4,7 +4,14 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_8011B3F4[], *D_8011B404[], *D_8011B410[];
+extern void *D_8011B404[], *D_8011B410[];
+extern char D_8011B468[];
+extern char D_8011B470[];
+extern char D_8011B478[];
+extern char D_8011B480[];
+static void *D_8011B3F4[4] = {
+    D_8011B468, D_8011B470, D_8011B478, D_8011B480,
+};
 extern int DAT_1f8002d4;
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);

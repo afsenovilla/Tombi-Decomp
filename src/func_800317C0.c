@@ -48,7 +48,12 @@ extern Fix16 *D_800A6078;
 extern G330 *D_8009C330;
 extern G338 *D_8009C338;
 extern D600 D_8009D600;
-extern short D_8007A070[], D_8007A072[], D_8007A074[];
+extern short D_8007A070[], D_8007A072[];
+static short D_8007A074[22] = {
+    0, 0x40, -0x10, 0x7f, 0x40, 0x10, 0, 0x40,
+    -0x10, 0x7f, 0x60, 0x10, 0x20, 0x20, -0x10, 0x60,
+    0x70, 0x10, 0x40, 0x10, -0x10, 0x40,
+};
 extern short D_8007A04C[], D_8007A04E[];
 extern unsigned char *D_8009F0EC;
 extern unsigned char D_8009D2B2;

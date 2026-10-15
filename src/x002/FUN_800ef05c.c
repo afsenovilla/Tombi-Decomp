@@ -5,7 +5,10 @@ extern short FUN_800eef0c(void);
 extern TObj *FUN_80018448(void);
 extern short DAT_1f800238;
 extern unsigned short DAT_1f8001f8;
-extern short DAT_801151e0[];
+static short DAT_801151e0[32] = {
+    0, -6, -6, 0, 0, 6, 6, 0, -4, -4, -4, 4, 4, 4, 4, -4,
+    0, -3, -3, 0, 0, 3, 3, 0, 0, -3, -3, 0, 0, 3, 3,
+};
 void FUN_800ef05c(unsigned int a, short x, short y, short z)
 {
     TObj *p;

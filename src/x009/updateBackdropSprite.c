@@ -4,7 +4,17 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_8012DAF4[];
+extern char D_8012DBB4[];
+extern char D_8012DC28[];
+extern char D_8012DBA4[];
+extern char D_8012DBAC[];
+extern char D_8012DC9C[];
+extern char D_8012DD10[];
+extern char D_8012DDA4[];
+static void *D_8012DAF4[7] = {
+    D_8012DBB4, D_8012DC28, D_8012DBA4, D_8012DBAC,
+    D_8012DC9C, D_8012DD10, D_8012DDA4,
+};
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);

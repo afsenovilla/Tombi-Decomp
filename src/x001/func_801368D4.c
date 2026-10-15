@@ -4,7 +4,14 @@
 #include "TOBJ.H"
 
 extern unsigned short D_8009C960[], D_8009C962;
-extern void *D_8013DE3C[], *D_8013DDE4[];
+extern void *D_8013DDE4[];
+extern char D_8013E004[];
+extern char D_8013E00C[];
+extern char D_8013E02C[];
+extern char D_8013E034[];
+static void *D_8013DE3C[4] = {
+    D_8013E004, D_8013E00C, D_8013E02C, D_8013E034,
+};
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 

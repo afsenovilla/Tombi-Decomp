@@ -3,7 +3,17 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_8011FB60[];
+extern char D_8011FC08[];
+extern char D_8011FC10[];
+extern char D_8011FC18[];
+extern char D_8011FC20[];
+extern char D_8011FC28[];
+extern char D_8011FC30[];
+extern char D_8011FC38[];
+static void *D_8011FB60[7] = {
+    D_8011FC08, D_8011FC10, D_8011FC18, D_8011FC20,
+    D_8011FC28, D_8011FC30, D_8011FC38,
+};
 extern void *D_8009F32C[];
 extern void FUN_8001fe6c(TObj *);
 extern void sevenFriendsMemberSetAnim(void *, int, int);

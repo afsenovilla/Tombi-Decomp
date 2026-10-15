@@ -7,7 +7,13 @@ extern TObj *allocObjectLayer2(void);
 extern unsigned short DAT_1f8001f8;
 extern unsigned short DAT_1f800172;
 extern unsigned short DAT_1f80016a;
-extern void *DAT_8013b214[];
+extern char D_8013BA48[];
+extern char D_8013BA80[];
+extern char D_8013BA88[];
+extern char D_8013BA90[];
+static void *DAT_8013b214[4] = {
+    D_8013BA48, D_8013BA80, D_8013BA88, D_8013BA90,
+};
 
 void FUN_8011a418(TObj *o)
 {

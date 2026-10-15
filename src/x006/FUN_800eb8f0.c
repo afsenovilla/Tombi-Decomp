@@ -14,7 +14,9 @@ typedef struct N {
     char pad20[0x1c];
     int w3c;
 } N;
-extern short DAT_80114c08[];
+static short DAT_80114c08[12] = {
+    -6, -0x10, -0xc, -8, 0, 0, -0x10, 8, 0x10, 8, 0x93,
+};
 extern N *FUN_80018448(void);
 
 void FUN_800eb8f0(N *o, short x, short y, short z)

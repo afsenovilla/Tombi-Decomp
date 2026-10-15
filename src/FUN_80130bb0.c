@@ -20,7 +20,10 @@ extern unsigned short DAT_800a604e;
 extern void *DAT_8013ad38[];
 extern void *DAT_8013ad5c[];
 extern void *DAT_8013ad6c[];
-extern short DAT_80139260[];
+static short DAT_80139260[16] = {
+    0, 0, 0, 0, 0, 1, 1, 1,
+    1, 1, 2, 2, 2, 2, 2, 2,
+};
 extern unsigned short DAT_80139240[];
 extern short *DAT_80139234[];
 extern char D_80077cdc[];

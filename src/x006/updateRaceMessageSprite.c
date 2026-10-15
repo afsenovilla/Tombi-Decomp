@@ -4,7 +4,24 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_80122DF4[], *D_80122E04[], *D_80122DC4[];
+extern void *D_80122DF4[], *D_80122E04[];
+extern char D_80122ED8[];
+extern char D_80122EE0[];
+extern char D_80122EE8[];
+extern char D_80122EF0[];
+extern char D_80122EF8[];
+extern char D_80122F00[];
+extern char D_80122F08[];
+extern char D_80122F10[];
+extern char D_80122F18[];
+extern char D_80122F20[];
+extern char D_80122F28[];
+extern char D_80122F30[];
+static void *D_80122DC4[12] = {
+    D_80122ED8, D_80122EE0, D_80122EE8, D_80122EF0,
+    D_80122EF8, D_80122F00, D_80122F08, D_80122F10,
+    D_80122F18, D_80122F20, D_80122F28, D_80122F30,
+};
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void ObjListPush_1F800220(TObj *);

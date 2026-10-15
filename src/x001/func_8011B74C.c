@@ -5,7 +5,13 @@
 
 typedef struct { short x, y, z, pad; } V8011B74C;
 
-extern void *D_8013E5BC[];
+extern char D_8013E7D8[];
+extern char D_8013E7E0[];
+extern char D_8013E7F0[];
+extern char D_8013E7E8[];
+static void *D_8013E5BC[4] = {
+    D_8013E7D8, D_8013E7E0, D_8013E7F0, D_8013E7E8,
+};
 
 void func_8011B74C(TObj *o)
 {

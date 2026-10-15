@@ -11,7 +11,19 @@ extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
-extern void (*D_801390F8[])(TObj *);
+extern void func_8012B5D0();
+extern void FUN_8012ba94();
+extern void func_8012C2C8();
+extern void func_8012C598();
+extern void func_8012C8EC();
+extern void FUN_8012cae4();
+extern void FUN_8012d7fc();
+extern void FUN_8012d918();
+static void (*D_801390F8[11])(TObj *) = {
+    func_8012B5D0, func_8012B5D0, FUN_8012ba94, func_8012C2C8,
+    func_8012C598, func_8012C8EC, FUN_8012cae4, FUN_8012d7fc,
+    func_8012B5D0, FUN_8012d918, func_8012C2C8,
+};
 extern int isObjectInView(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);

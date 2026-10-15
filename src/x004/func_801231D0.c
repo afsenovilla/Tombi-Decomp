@@ -5,7 +5,16 @@ typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned shor
 typedef struct B { unsigned char c[4]; } B;
 extern char D_80077CF4[];
 extern unsigned char D_801310E8[];
-extern A *D_80133B5C[];
+extern char D_80133EBC[];
+extern char D_80133F3C[];
+extern char D_80133FCC[];
+extern char D_8013405C[];
+extern char D_80134084[];
+extern char D_801340AC[];
+static A *D_80133B5C[6] = {
+    (A *)D_80133EBC, (A *)D_80133F3C, (A *)D_80133FCC, (A *)D_8013405C,
+    (A *)D_80134084, (A *)D_801340AC,
+};
 extern B D_80130FD4[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);

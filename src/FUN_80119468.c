@@ -2,7 +2,11 @@
 // MATCHING 80119468 284
 typedef struct P { char p[0x24]; void *anim; char q[0x3c - 0x28]; int w3c; } P;
 extern int DAT_1f8002d4;
-extern char DAT_8013b810[];
+static char DAT_8013b810[40] = {
+    -0x7e, 0, 0, 0, 0, 0, 3, 0, -0x7d, 0, 0, 0, 0, 0, 3, 0,
+    -0x7c, 0, 0, 0, 0, 0, 3, 0, -0x7b, 0, 0, 0, 0, 0, 3, 0,
+    -0x7a, 0, 0, 0, 0, 0, 3, -0x80,
+};
 extern int FUN_800202b4(char *);
 extern void despawnObjectOffscreen(char *);
 extern int FUN_8001fec0(char *);

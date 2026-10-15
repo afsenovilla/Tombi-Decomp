@@ -4,7 +4,30 @@
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; } SB;
 extern char D_80077CF4[];
-extern unsigned short *D_80133C10[], *D_80133C1C[], *D_80133C64[];
+extern unsigned short *D_80133C10[], *D_80133C64[];
+extern char D_801342CC[];
+extern char D_801342F0[];
+extern char D_80134304[];
+extern char D_80133E84[];
+extern char D_80133E98[];
+extern char D_801341A8[];
+extern char D_801341BC[];
+extern char D_80134574[];
+extern char D_80134328[];
+extern char D_8013434C[];
+extern char D_8013445C[];
+extern char D_801341D0[];
+extern char D_80133D58[];
+extern char D_80133D60[];
+extern char D_8013456C[];
+extern char D_80134370[];
+static unsigned *D_80133C1C[18] = {
+    (unsigned *)D_801342CC, (unsigned *)D_801342F0, (unsigned *)D_80134304, (unsigned *)D_80133E84,
+    (unsigned *)D_80133E98, (unsigned *)D_801341A8, (unsigned *)D_801341BC, (unsigned *)D_80134574,
+    (unsigned *)D_801341BC, (unsigned *)D_80134328, (unsigned *)D_8013434C, (unsigned *)D_8013434C,
+    (unsigned *)D_8013445C, (unsigned *)D_801341D0, (unsigned *)D_80133D58, (unsigned *)D_80133D60,
+    (unsigned *)D_8013456C, (unsigned *)D_80134370,
+};
 extern unsigned char D_80130FD4[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);

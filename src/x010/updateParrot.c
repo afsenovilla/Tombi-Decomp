@@ -5,7 +5,18 @@
 #include "TOBJ.H"
 typedef struct { short x, y, w, h; } RECT;
 
-extern void *D_801322E8[], *D_801322F4[];
+extern void *D_801322E8[];
+extern char D_801324C8[];
+extern char D_801323AC[];
+extern char D_801323B4[];
+extern char D_801323F4[];
+extern char D_80132404[];
+extern char D_8013240C[];
+extern char D_8013241C[];
+static void *D_801322F4[7] = {
+    D_801324C8, D_801323AC, D_801323B4, D_801323F4,
+    D_80132404, D_8013240C, D_8013241C,
+};
 extern short D_8007A3F0[];
 extern void MoveImage(RECT *, int, int);
 extern void AnimLoadDuration(TObj *);

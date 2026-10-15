@@ -2,7 +2,11 @@
 // MATCHING 800f809c 148
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fe94(void *, int);
-extern char DAT_801152e8[];
+static char DAT_801152e8[36] = {
+    0, 0, 0, -2, -4, -6, -8, -0xc, -0x10, -0x14, -0x18, -0x1c, -0x20, -0x24, -0x28, -0x2c,
+    -0x30, 0, 0, 0, 0x60, 0x58, 0x50, 0x48, 0x40, 0x38, 0x30, 0x28, 0x20, 0x18, 0x10, 0xc,
+    8, 4,
+};
 extern char LAB_80010c50[];
 
 void FUN_800f809c(char *o)

@@ -4,7 +4,13 @@
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void startPadVibration(int, int, int, int);
-extern char *PTR_80079d58[];
+extern char D_80012228[];
+extern char D_80012240[];
+extern char D_80012260[];
+static char *PTR_80079d58[7] = {
+    (char *)D_80012228, (char *)19, (char *)4, (char *)D_80012240,
+    (char *)19, (char *)4, (char *)D_80012260,
+};
 extern unsigned short DAT_1f8001f8;
 extern unsigned char DAT_800a6039, DAT_800a6047;
 extern char PLAYER, DAT_800a6104;

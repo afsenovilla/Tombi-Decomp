@@ -7,7 +7,12 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
 extern unsigned short D_8009C962[];
-extern short D_80125C40[], D_80125C50[];
+static short D_80125C40[8] = {
+    0xc8, 0xcd, 0xd2, 0xd8, 0xdd, 0xe2, 0xe7, 0xe7,
+};
+static short D_80125C50[8] = {
+    0xc9, 0xce, 0xd3, 0xd9, 0xde, 0xe3, 0xe8, 0xe8,
+};
 extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;

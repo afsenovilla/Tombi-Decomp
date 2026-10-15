@@ -5,7 +5,16 @@
 
 typedef struct { short x, y; } V2;
 extern void *D_8013B0EC[];
-extern void *D_80134CF4[];
+extern char D_80134EC4[];
+extern char D_80134ECC[];
+extern char D_80134ED4[];
+extern char D_80134EDC[];
+extern char D_80134EE4[];
+extern char D_80134EF4[];
+static void *D_80134CF4[6] = {
+    D_80134EC4, D_80134ECC, D_80134ED4, D_80134EDC,
+    D_80134EE4, D_80134EF4,
+};
 extern V2 D_80114A68[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);

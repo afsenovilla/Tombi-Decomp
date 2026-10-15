@@ -31,7 +31,11 @@ extern void DecDCTvlc(u_long *bs, u_long *buf);
 extern void CdMix(void *vol);
 extern void startBgmTrack(int);
 extern unsigned char DAT_1f8001cd;
-extern short DAT_80077f10[];
+static short DAT_80077f10[22] = {
+    0x586, 0x16e, 0x13c, 0x1d3, 0x6e, 0x98, 0xb5, 0xb5,
+    0xb6, 0xe3, 0xe6, 0xe3, 0x9d, 0xe7, 0xe8, 0xe8,
+    0xe8, 0xe8, 0xe8, 0x13c, 0x3b6, 0x5e,
+};
 extern char DAT_80077f0c[];
 
 static __inline__ u_long *strNext(DECENV *dec)

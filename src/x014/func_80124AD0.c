@@ -4,7 +4,9 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_80126718[];
+static short D_80126718[8] = {
+    0x100, -0x380, 0x180, -0x580, 0x200, -0x480, 0x80, -0x300,
+};
 extern short D_1F80027E;
 extern int func_8012491C(TObj *o);
 extern int func_801249D0(TObj *o);

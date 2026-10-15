@@ -3,8 +3,33 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_80132C3C[];
-extern void *D_80132C54[];
+extern char D_80132C94[];
+extern char D_80132C9C[];
+extern char D_80132CA4[];
+extern char D_80132CAC[];
+extern char D_80132CB4[];
+extern char D_80132CBC[];
+static void *D_80132C3C[6] = {
+    D_80132C94, D_80132C9C, D_80132CA4, D_80132CAC,
+    D_80132CB4, D_80132CBC,
+};
+extern char D_80132CC4[];
+extern char D_80132CCC[];
+extern char D_80132CD4[];
+extern char D_80132CDC[];
+extern char D_80132CE4[];
+extern char D_80132CEC[];
+extern char D_80132CF4[];
+extern char D_80132D18[];
+extern char D_80132D3C[];
+extern char D_80132D60[];
+extern char D_80132D84[];
+extern char D_80132DA8[];
+static void *D_80132C54[12] = {
+    D_80132CC4, D_80132CCC, D_80132CD4, D_80132CDC,
+    D_80132CE4, D_80132CEC, D_80132CF4, D_80132D18,
+    D_80132D3C, D_80132D60, D_80132D84, D_80132DA8,
+};
 extern unsigned short D_1F800186;
 extern unsigned short GetClut(int, int);
 extern int Rand(void);

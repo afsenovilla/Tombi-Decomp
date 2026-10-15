@@ -4,7 +4,9 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_80125C80[];
+static short D_80125C80[8] = {
+    0, 0x80, 0, 0, 0, 0, 0x80, 0x80,
+};
 extern unsigned short D_80125C70[];
 extern short D_80125C9C, D_80125C9E;
 extern void *D_80129F78;

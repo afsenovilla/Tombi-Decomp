@@ -4,7 +4,17 @@
 #include "TOBJ.H"
 typedef struct { short a, b; } S2;
 extern S2 D_8013C9C0[];
-extern void *D_8013E6E4[];
+extern char D_8013EB48[];
+extern char D_8013EB50[];
+extern char D_8013EB58[];
+extern char D_8013EB60[];
+extern char D_8013EB68[];
+extern char D_8013EB70[];
+extern char D_8013EB78[];
+static void *D_8013E6E4[7] = {
+    D_8013EB48, D_8013EB50, D_8013EB58, D_8013EB60,
+    D_8013EB68, D_8013EB70, D_8013EB78,
+};
 extern char D_80077CF4[];
 extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);

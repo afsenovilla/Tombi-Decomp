@@ -4,7 +4,19 @@
 extern char D_80077CDC[];
 extern unsigned char D_801390EC[];
 extern void *D_8013A160[];
-extern void *D_8013A224[];
+extern char D_8013A8F4[];
+extern char D_8013A908[];
+extern char D_8013A488[];
+extern char D_8013A49C[];
+extern char D_8013A7AC[];
+extern char D_8013A7C0[];
+extern char D_8013AB78[];
+extern char D_8013A92C[];
+static void *D_8013A224[9] = {
+    D_8013A8F4, D_8013A908, D_8013A488, D_8013A49C,
+    D_8013A7AC, D_8013A7C0, D_8013AB78, D_8013A7C0,
+    D_8013A92C,
+};
 extern void *D_8013A268[];
 extern unsigned char D_80138FD8[];
 extern int AnimAdvanceWithBox(TObj *);

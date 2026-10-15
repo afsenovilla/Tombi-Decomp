@@ -10,7 +10,13 @@ extern int DAT_8009c984;
 extern unsigned char DAT_8009d00dA[];
 extern unsigned char *DAT_8009c330;
 extern void *PTR_8013ac14, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
-extern char DAT_801396ca[];
+static char DAT_801396ca[98] = {
+    8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 1, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1, 0, 0, 0, 0,
+    0x68, 0, 0, 1, -0x80, 0, -1, 1, 0, 0, -0x79, 0, 0, 0, 0, 1,
+    0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
+    0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
+};
 extern char D_80010748[];
 extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);

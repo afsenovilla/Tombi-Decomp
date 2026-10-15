@@ -5,7 +5,20 @@
 extern char D_80077D0C[];
 extern void *D_80122FB8[];
 extern void *D_80122FBC;
-extern void *D_80122FC4[];
+extern char D_8012302C[];
+extern char D_8012303C[];
+extern char D_80123070[];
+extern char D_80123084[];
+extern char D_801230A8[];
+extern char D_801230CC[];
+extern char D_801230F0[];
+extern char D_80123118[];
+extern char D_80123134[];
+static void *D_80122FC4[9] = {
+    D_8012302C, D_8012303C, D_80123070, D_80123084,
+    D_801230A8, D_801230CC, D_801230F0, D_80123118,
+    D_80123134,
+};
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);

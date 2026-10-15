@@ -7,8 +7,12 @@
 
 typedef void (*SndSsMarkCallbackProc)(short seq_no, short sep_no, short data);
 extern SndSsMarkCallbackProc _SsMarkCallback[32][16];
-extern short D_80098280[];
-extern short D_80098290[];
+static short D_80098280[8] = {
+    0, 0, 0x1000, 0x3000, 0xbf,
+};
+static short D_80098290[16] = {
+    0x3fff, 0x3fff,
+};
 
 void _SsInit(void) {
     u16* var_a2;

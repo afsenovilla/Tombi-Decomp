@@ -21,7 +21,21 @@ extern void *D_80134DB4[], *D_80134DB8[], *D_80134DBC[], *D_80134DC0[];
 extern void *D_1F8002D4_[];
 #define D_1F8002D4 D_1F8002D4_[0]
 extern char D_80077CDC[];
-extern short *D_80131370[];
+extern char D_801311E0[];
+extern char D_80131230[];
+extern char D_8013124C[];
+extern char D_801312B4[];
+extern char D_801312CC[];
+static char D_8013133C[52] = {
+    4, 0, 0, 0, 0x11, 0, 0, 0, 5, 0, 9, 0, 7, 0, 0, 0,
+    0x17, 0, 0, 0, 0x19, 0, 0, 0, 0x12, 0, 0, 0, 4, 0, 0, 0,
+    0x11, 0, 0, 0, 5, 0, 8, 0, 7, 0, 0, 0, 0x1a, 0, 0, 0,
+    0x18,
+};
+static short *D_80131370[6] = {
+    (short *)D_801311E0, (short *)D_80131230, (short *)D_8013124C, (short *)D_801312B4,
+    (short *)D_801312CC, (short *)D_8013133C,
+};
 extern Fix16 *D_800A6078;
 extern unsigned short D_1F8003C4, D_1F8001FC;
 extern TObj PLAYER;

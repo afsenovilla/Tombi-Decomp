@@ -3,7 +3,13 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_80138EC8[];
+extern char D_801391E0[];
+extern char D_801391E8[];
+extern char D_80139158[];
+extern char D_80139150[];
+static void *D_80138EC8[4] = {
+    D_801391E0, D_801391E8, D_80139158, D_80139150,
+};
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);

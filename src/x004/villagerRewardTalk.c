@@ -4,7 +4,22 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void *D_80135784[];
+extern char D_80135908[];
+extern char D_8013591C[];
+extern char D_80135924[];
+extern char D_8013592C[];
+extern char D_80135934[];
+extern char D_8013593C[];
+extern char D_8013596C[];
+extern char D_80135974[];
+extern char D_80135984[];
+extern char D_8013598C[];
+extern char D_8013599C[];
+static void *D_80135784[11] = {
+    D_80135908, D_8013591C, D_80135924, D_8013592C,
+    D_80135934, D_8013593C, D_8013596C, D_80135974,
+    D_80135984, D_8013598C, D_8013599C,
+};
 extern void *D_8013577C[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);

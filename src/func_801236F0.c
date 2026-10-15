@@ -14,7 +14,10 @@ extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *D_8009C948[];
 extern short D_80138F8C[];
-extern short D_80138F8E[];
+static short D_80138F8E[13] = {
+    -0x100, -0x80, -0x100, 0, -0x100, 0, 1, 2,
+    0, 0x100, 0x200, 1, 2,
+};
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern unsigned char D_8007A7F0[];

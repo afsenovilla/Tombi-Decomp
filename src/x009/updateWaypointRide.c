@@ -7,7 +7,14 @@
 #include "gamestate.h"
 extern TObj PLAYER;
 extern unsigned long *D_8012B1A0, *D_8012B1B4;
-extern unsigned long *D_8012B190[], *D_8012B1A4[];
+extern unsigned long *D_8012B190[];
+extern char D_8012B0F0[];
+extern char D_8012B110[];
+extern char D_8012B130[];
+extern char D_8012B150[];
+static unsigned *D_8012B1A4[4] = {
+    (unsigned *)D_8012B0F0, (unsigned *)D_8012B110, (unsigned *)D_8012B130, (unsigned *)D_8012B150,
+};
 extern void *D_8013105C;
 extern void loadImageRect(unsigned long *, short, short, short, short);
 extern void AnimLoadDuration(TObj *);

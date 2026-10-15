@@ -4,7 +4,13 @@
 extern short DAT_80138690[];
 extern short DAT_80138698[];
 extern unsigned short DAT_801386a0[];
-extern void **PTR_80138680[];
+extern char D_8013BF48[];
+extern char D_8013BF4C[];
+extern char D_8013BF50[];
+extern char D_8013BF54[];
+static void **PTR_80138680[4] = {
+    (void **)D_8013BF48, (void **)D_8013BF4C, (void **)D_8013BF50, (void **)D_8013BF54,
+};
 extern int DAT_1f8002e4[];
 extern short FUN_8005e420(int, int);
 extern void cullObjectToDrawList(TObj *, int);

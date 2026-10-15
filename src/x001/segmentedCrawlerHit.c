@@ -7,7 +7,28 @@
 
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
-extern void *D_8013F1BC[];
+extern char D_8013F210[];
+extern char D_8013F218[];
+extern char D_8013F220[];
+extern char D_8013F228[];
+extern char D_8013F230[];
+extern char D_8013F238[];
+extern char D_8013F240[];
+extern char D_8013F248[];
+extern char D_8013F250[];
+extern char D_8013F258[];
+extern char D_8013F260[];
+extern char D_8013F268[];
+extern char D_8013F270[];
+extern char D_8013F278[];
+extern char D_8013F280[];
+extern char D_8013F288[];
+static void *D_8013F1BC[16] = {
+    D_8013F210, D_8013F218, D_8013F220, D_8013F228,
+    D_8013F230, D_8013F238, D_8013F240, D_8013F248,
+    D_8013F250, D_8013F258, D_8013F260, D_8013F268,
+    D_8013F270, D_8013F278, D_8013F280, D_8013F288,
+};
 extern void *D_8013F200[], *D_8013F204[], *D_8013F208[], *D_8013F20C[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);

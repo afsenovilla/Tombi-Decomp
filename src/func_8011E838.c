@@ -25,8 +25,14 @@ typedef struct E {
     short c0, c2;
     int c4, c8, cc;
 } E;
-extern short D_80138BAC[];
-extern short D_80138BC8[];
+static short D_80138BAC[14] = {
+    -0x14, -0x11, -0xf, -0xc, -0xa, -5, -5, 5,
+    5, 5, -5, -0xa, -0x14, -0x14,
+};
+static short D_80138BC8[16] = {
+    0x1000, 0x1096, 0x112c, 0x11c2, 0x1258, 0x11c2, 0x112c, 0x1096,
+    0x1000, 0xf6a, 0xed4, 0xe3e, 0xda8, 0xe3e, 0xed4, 0xf6a,
+};
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern VECTOR *ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
 extern int ObjCullRegister(E *);

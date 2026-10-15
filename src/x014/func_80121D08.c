@@ -7,7 +7,20 @@ extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void *D_80129FCC[];
+extern char D_8012A344[];
+extern char D_8012A35C[];
+extern char D_8012A364[];
+extern char D_8012A34C[];
+extern char D_8012A370[];
+extern char D_8012A378[];
+extern char D_8012A354[];
+extern char D_8012A384[];
+extern char D_8012A38C[];
+static void *D_80129FCC[9] = {
+    D_8012A344, D_8012A35C, D_8012A364, D_8012A34C,
+    D_8012A370, D_8012A378, D_8012A354, D_8012A384,
+    D_8012A38C,
+};
 extern short D_801265C4[];
 extern short D_8007A5F0[], D_8007A1F0[];
 extern unsigned short D_1F8001F8;

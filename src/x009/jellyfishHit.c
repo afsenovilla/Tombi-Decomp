@@ -2,7 +2,14 @@
 // MATCHING 80126890 1104
 #include "TOBJ.H"
 
-extern void *D_8012EE84[], *D_8012EE94[], *D_8012EE80[];
+extern void *D_8012EE94[], *D_8012EE80[];
+extern char D_8012EEF0[];
+extern char D_8012EF10[];
+extern char D_8012EF30[];
+extern char D_8012EF54[];
+static void *D_8012EE84[4] = {
+    D_8012EEF0, D_8012EF10, D_8012EF30, D_8012EF54,
+};
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001e4f0(int);

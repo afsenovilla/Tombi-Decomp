@@ -2,7 +2,22 @@
 // MATCHING 8012e6b0 1148
 #include "TOBJ.H"
 extern unsigned char D_80135E90[], D_80135E80[], D_80135E78[];
-extern void *D_8013A6D4[];
+extern char D_8013A904[];
+extern char D_8013A914[];
+extern char D_8013A924[];
+extern char D_8013A934[];
+extern char D_8013A93C[];
+extern char D_8013A944[];
+extern char D_8013A94C[];
+extern char D_8013A954[];
+extern char D_8013A95C[];
+extern char D_8013A964[];
+extern char D_8013A96C[];
+static void *D_8013A6D4[11] = {
+    D_8013A904, D_8013A914, D_8013A924, D_8013A934,
+    D_8013A93C, D_8013A944, D_8013A94C, D_8013A954,
+    D_8013A95C, D_8013A964, D_8013A96C,
+};
 extern void *D_8013A698[];
 extern unsigned short D_8007A3F0[];
 extern int FUN_8001f9e0(void);

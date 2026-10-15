@@ -7,7 +7,13 @@ extern int D_1f800198;
 extern int DAT_1f8002d4[];
 extern void *DAT_8013b1a4[];
 extern void *DAT_8013e584[];
-extern void *DAT_8012e02c[];
+extern char D_8012E65C[];
+extern char D_8012E664[];
+extern char D_8012E66C[];
+extern char D_8012E674[];
+static void *DAT_8012e02c[4] = {
+    D_8012E65C, D_8012E664, D_8012E66C, D_8012E674,
+};
 extern short DAT_80114a98[];
 extern short DAT_80114aa8[];
 extern TObj *FUN_80018448(void);

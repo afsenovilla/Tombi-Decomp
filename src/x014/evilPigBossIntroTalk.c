@@ -7,7 +7,9 @@
 
 typedef struct { short v[6]; } V6;
 extern unsigned char TALK_POSE;
-extern short D_80125E20[];
+static short D_80125E20[8] = {
+    0, 6, 5, 2, 4, 3, 1, 7,
+};
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);

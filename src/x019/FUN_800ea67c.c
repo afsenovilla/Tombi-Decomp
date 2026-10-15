@@ -8,8 +8,12 @@ extern int DAT_1f8002d4[];
 extern void *DAT_8013b1a4[];
 extern void *DAT_8013e584[];
 extern void *DAT_8012e02c[];
-extern short DAT_80114a98[];
-extern short DAT_80114aa8[];
+static short DAT_80114a98[8] = {
+    -0xc0, 0xa0, -0x80, 0x60, -0x40, 0x40, -0x20,
+};
+static short DAT_80114aa8[8] = {
+    -0x160, -0x180, -0x1a0, -0x1c0, -0x1e0, -0x200, -0x220, -0x240,
+};
 extern TObj *FUN_80018448(void);
 extern unsigned FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);

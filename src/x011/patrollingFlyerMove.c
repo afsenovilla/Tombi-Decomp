@@ -4,7 +4,32 @@
 
 extern short D_8007A5F0[];
 extern char D_80077CD0[];
-extern void *D_8011C420[];
+extern char D_8011C46C[];
+extern char D_8011C490[];
+extern char D_8011C4B0[];
+extern char D_8011C4D0[];
+extern char D_8011C4F4[];
+extern char D_8011C518[];
+extern char D_8011C630[];
+extern char D_8011C654[];
+extern char D_8011C678[];
+extern char D_8011C680[];
+extern char D_8011C6A0[];
+extern char D_8011C6B0[];
+extern char D_8011C540[];
+extern char D_8011C590[];
+extern char D_8011C5C0[];
+extern char D_8011C600[];
+extern char D_8011C568[];
+extern char D_8011C5A8[];
+extern char D_8011C5E0[];
+static void *D_8011C420[19] = {
+    D_8011C46C, D_8011C490, D_8011C4B0, D_8011C4D0,
+    D_8011C4F4, D_8011C518, D_8011C630, D_8011C654,
+    D_8011C678, D_8011C680, D_8011C6A0, D_8011C6B0,
+    D_8011C540, D_8011C590, D_8011C5C0, D_8011C600,
+    D_8011C568, D_8011C5A8, D_8011C5E0,
+};
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fe6c(TObj *);

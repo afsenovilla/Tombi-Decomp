@@ -24,7 +24,32 @@ extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
 extern unsigned short D_8009F838;
-extern short *D_80077A8C[];
+extern char D_80077968[];
+extern char D_80077974[];
+extern char D_80077980[];
+extern char D_8007798C[];
+extern char D_80077998[];
+extern char D_800779C4[];
+extern char D_800779CC[];
+extern char D_800779D4[];
+extern char D_800779E0[];
+extern char D_800779E8[];
+extern char D_800779F4[];
+extern char D_80077A08[];
+extern char D_80077A14[];
+extern char D_80077A40[];
+extern char D_80077A44[];
+extern char D_80077A54[];
+extern char D_80077A64[];
+extern char D_80077A7C[];
+extern char D_80077A84[];
+static short *D_80077A8C[20] = {
+    (short *)D_80077968, (short *)D_80077974, (short *)D_80077980, (short *)D_8007798C,
+    (short *)D_80077998, (short *)D_800779C4, (short *)D_800779CC, (short *)D_800779D4,
+    (short *)D_800779E0, (short *)D_800779E8, (short *)D_800779F4, (short *)D_80077A08,
+    (short *)D_80077A14, (short *)D_80077A40, (short *)D_80077A44, (short *)D_80077968,
+    (short *)D_80077A54, (short *)D_80077A64, (short *)D_80077A7C, (short *)D_80077A84,
+};
 extern void SetDispMask(int);
 extern int StoreImage(RECT *, unsigned long *);
 extern int LoadImage(RECT *, unsigned long *);

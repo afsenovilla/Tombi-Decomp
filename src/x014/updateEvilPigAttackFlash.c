@@ -6,7 +6,13 @@
 
 extern unsigned short D_80125B70[];
 extern void *D_80125C00[];
-extern char D_8012A1B0[];
+static char D_8012A1B0[72] = {
+    0x31, 0, 0, 0, 0, 0, 2, 0, 0x32, 0, 0, 0, 0, 0, 3, 0,
+    0x33, 0, 0, 0, 0, 0, 4, 0, 0x34, 0, 0, 0, 0, 0, 4, 0,
+    0x35, 0, 0, 0, 0, 0, 4, 0, 0x36, 0, 0, 0, 0, 0, 4, 0,
+    0x37, 0, 0, 0, 0, 0, 4, 0, 0x38, 0, 0, 0, 0, 0, 3, 0,
+    0x39, 0, 0, 0, 0, 0, 2, -0x80,
+};
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);

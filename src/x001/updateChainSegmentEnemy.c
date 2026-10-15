@@ -7,7 +7,12 @@ typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims;
 typedef struct { Fix16 a, y, b; } FV;
 extern E20 D_8013C928[];
 extern int SPR_DATA[];
-extern char D_8013C94A[];
+static char D_8013C94A[50] = {
+    0, 0, -0x24, -0x1b, 0x13, -0x80, 1, 1, 0, 0x10, 0, 0, 1, 1, 0, 0x10,
+    0, 0, 1, 1, 0, 0x11, 0, 0, 1, 1, 0, 0x12, 0, 0, 1, 1,
+    0, 0x13, 0, 0, 1, 1, 0, 0x14, 0, 0, 1, 1, 0, 0x15, 0, 0,
+    -0x7d,
+};
 extern char D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);

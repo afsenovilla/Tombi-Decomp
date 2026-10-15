@@ -3,8 +3,22 @@
 #include "TOBJ.H"
 
 extern short D_8007A5F0[], D_8007A3F0[];
-extern void *D_8013F034[];
-extern void *D_8013F064[];
+extern char D_8013F604[];
+extern char D_8013F918[];
+extern char D_8013F904[];
+extern char D_8013F8F0[];
+extern char D_8013F800[];
+extern char D_8013F814[];
+extern char D_8013F828[];
+extern char D_8013F83C[];
+static void *D_8013F034[12] = {
+    D_8013F604, D_8013F918, D_8013F904, D_8013F8F0,
+    D_8013F8F0, D_8013F904, D_8013F918, D_8013F604,
+    D_8013F800, D_8013F814, D_8013F828, D_8013F83C,
+};
+static void *D_8013F064[4] = {
+    D_8013F83C, D_8013F828, D_8013F814, D_8013F800,
+};
 extern void AnimLoadDuration(TObj *);
 extern void func_80132A3C(TObj *);
 

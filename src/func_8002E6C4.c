@@ -1,7 +1,22 @@
 // FUNC 8002e6c4 376 MAIN0
 // MATCHING 8002e6c4 376
 #include "TOBJ.H"
-extern void *D_80012150[];
+extern char D_800126D0[];
+extern char D_80012680[];
+extern char D_80012688[];
+extern char D_80012690[];
+extern char D_80012698[];
+extern char D_800126A0[];
+extern char D_800126A8[];
+extern char D_800126B0[];
+extern char D_800126B8[];
+extern char D_800126C0[];
+extern char D_800126C8[];
+static void *D_80012150[11] = {
+    D_800126D0, D_80012680, D_80012688, D_80012690,
+    D_80012698, D_800126A0, D_800126A8, D_800126B0,
+    D_800126B8, D_800126C0, D_800126C8,
+};
 extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);

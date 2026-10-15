@@ -4,7 +4,30 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_8011A42C[];
+extern char D_8011A470[];
+extern char D_8011A478[];
+extern char D_8011A480[];
+extern char D_8011A488[];
+extern char D_8011A490[];
+extern char D_8011A498[];
+extern char D_8011A4A0[];
+extern char D_8011A4A8[];
+extern char D_8011A4B0[];
+extern char D_8011A4F0[];
+extern char D_8011A508[];
+extern char D_8011A52C[];
+extern char D_8011A550[];
+extern char D_8011A570[];
+extern char D_8011A578[];
+extern char D_8011A5E8[];
+extern char D_8011A5F8[];
+static void *D_8011A42C[17] = {
+    D_8011A470, D_8011A478, D_8011A480, D_8011A488,
+    D_8011A490, D_8011A498, D_8011A4A0, D_8011A4A8,
+    D_8011A4B0, D_8011A4F0, D_8011A508, D_8011A52C,
+    D_8011A550, D_8011A570, D_8011A578, D_8011A5E8,
+    D_8011A5F8,
+};
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);

@@ -4,7 +4,12 @@
 extern unsigned short DAT_800a6066;
 extern int SPR_DATA[];
 extern char DAT_80114c20[];
-extern char DAT_80114c24[];
+static char DAT_80114c24[52] = {
+    0x78, 0x22, 1, -0x80, -0x6d, 0, 0, 0, 4, 0, 0, 0, 0x7c, 0x22, 1, -0x80,
+    -0x6d, 0, 0, 0, 4, 0, 0, 0, -0x80, 0x22, 1, -0x80, -0x6d, 0, 0, 0,
+    4, 0, 0, 0, 0x74, 0x22, 1, -0x80, -0x6d, 0, 0, 0, 4, 0, 0, 0,
+    0x70, 0x22, 1, -0x80,
+};
 extern void FUN_8001fe6c(TObj *);
 
 void FUN_800ebc64(TObj *o)

@@ -7,7 +7,14 @@ typedef struct { short w0, w2, w4, w6, w8; } X;
 extern short D_8007A5F0[], D_8007A1F0[];
 extern unsigned char D_8013C7C8[], D_8013C7D8[];
 extern char D_80077CE8[], D_80077CF4[];
-extern void *D_8013FC74[], *D_8013FCA0[];
+extern void *D_8013FC74[];
+extern char D_8013FE68[];
+extern char D_8013FE94[];
+extern char D_8013FEAC[];
+extern char D_8013FEB4[];
+static void *D_8013FCA0[4] = {
+    D_8013FE68, D_8013FE94, D_8013FEAC, D_8013FEB4,
+};
 extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);

@@ -4,7 +4,25 @@
 #include "TOBJ.H"
 extern short D_8013C428[];
 extern short D_8013C404[];
-extern void **D_8013C3C4[];
+extern char D_8013E788[];
+extern char D_8013E78C[];
+extern char D_8013E790[];
+extern char D_8013E760[];
+extern char D_8013E764[];
+extern char D_8013E768[];
+extern char D_8013E76C[];
+extern char D_8013E770[];
+extern char D_8013E774[];
+extern char D_8013E778[];
+extern char D_8013E77C[];
+extern char D_8013E780[];
+extern char D_8013E784[];
+static void **D_8013C3C4[16] = {
+    (void **)D_8013E788, (void **)D_8013E78C, (void **)D_8013E790, 0,
+    0, 0, (void **)D_8013E760, (void **)D_8013E764,
+    (void **)D_8013E768, (void **)D_8013E76C, (void **)D_8013E770, (void **)D_8013E774,
+    (void **)D_8013E778, (void **)D_8013E77C, (void **)D_8013E780, (void **)D_8013E784,
+};
 extern short FUN_8005e420(int, int);
 extern int cullObjectToDrawList(TObj *, int);
 extern void ObjFree(TObj *);

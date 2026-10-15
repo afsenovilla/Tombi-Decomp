@@ -10,7 +10,16 @@ typedef struct {
     short wb8;              /* 0xb8 */
 } Sub;
 
-extern AH *D_8013DB10[], *D_8013DAF8[], *D_8013DAFC[], *D_8013DB14[], *D_8013DB18[], *D_8013DB1C[];
+extern AH *D_8013DB10[], *D_8013DAF8[], *D_8013DAFC[], *D_8013DB14[], *D_8013DB18[];
+extern char D_8013DCC4[];
+extern char D_8013DBF0[];
+extern char D_8013DCE8[];
+extern char D_8013DCF0[];
+extern char D_8013DD18[];
+static AH *D_8013DB1C[5] = {
+    (AH *)D_8013DCC4, (AH *)D_8013DBF0, (AH *)D_8013DCE8, (AH *)D_8013DCF0,
+    (AH *)D_8013DD18,
+};
 extern unsigned char D_8013C800[];
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern void playSFX(int);

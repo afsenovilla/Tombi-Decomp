@@ -10,7 +10,110 @@ typedef struct {
 } Desc;
 typedef struct { short x, y, p0, p1; } ClutPos;
 extern unsigned char DAT_8007b084[];
-extern Desc *DAT_8007b14c[];
+extern char D_8007A8F0[];
+extern char D_8007A904[];
+extern char D_8007A918[];
+extern char D_8007A92C[];
+extern char D_8007A940[];
+extern char D_8007A954[];
+extern char D_8007A968[];
+extern char D_8007A97C[];
+extern char D_8007A990[];
+extern char D_8007A9A4[];
+extern char D_8007A9B8[];
+extern char D_8007A9CC[];
+extern char D_8007A9E0[];
+extern char D_8007A9F4[];
+extern char D_8007AA08[];
+extern char D_8007AA1C[];
+extern char D_8007AA30[];
+extern char D_8007AA44[];
+extern char D_8007AA58[];
+extern char D_8007AA6C[];
+extern char D_8007AA80[];
+extern char D_8007AA94[];
+extern char D_8007AAA8[];
+extern char D_8007AABC[];
+extern char D_8007AAD0[];
+extern char D_8007AAE4[];
+extern char D_8007AAF8[];
+extern char D_8007AB0C[];
+extern char D_8007AB20[];
+extern char D_8007AB34[];
+extern char D_8007AB48[];
+extern char D_8007AB5C[];
+extern char D_8007AB70[];
+extern char D_8007AB84[];
+extern char D_8007AB98[];
+extern char D_8007ABAC[];
+extern char D_8007ABC0[];
+extern char D_8007ABD4[];
+extern char D_8007ABE8[];
+extern char D_8007ABFC[];
+extern char D_8007AC10[];
+extern char D_8007AC24[];
+extern char D_8007AC38[];
+extern char D_8007AC4C[];
+extern char D_8007AC60[];
+extern char D_8007AC74[];
+extern char D_8007AC88[];
+extern char D_8007AC9C[];
+extern char D_8007ACB0[];
+extern char D_8007ACC4[];
+extern char D_8007ACD8[];
+extern char D_8007ACEC[];
+extern char D_8007AD00[];
+extern char D_8007AD14[];
+extern char D_8007AD28[];
+extern char D_8007AD3C[];
+extern char D_8007AD50[];
+extern char D_8007AD64[];
+extern char D_8007AD78[];
+extern char D_8007AD8C[];
+extern char D_8007ADA0[];
+extern char D_8007ADB4[];
+extern char D_8007ADC8[];
+extern char D_8007ADDC[];
+extern char D_8007ADF0[];
+extern char D_8007AE04[];
+extern char D_8007AE18[];
+extern char D_8007AE2C[];
+extern char D_8007AE40[];
+extern char D_8007AE54[];
+extern char D_8007AE68[];
+extern char D_8007AE7C[];
+extern char D_8007AE90[];
+extern char D_8007AEA4[];
+extern char D_8007AEB8[];
+extern char D_8007AECC[];
+extern char D_8007AEE0[];
+extern char D_8007AEF4[];
+extern char D_8007AF08[];
+extern char D_8007AF1C[];
+extern char D_8007AF30[];
+static Desc *DAT_8007b14c[81] = {
+    (Desc *)D_8007A8F0, (Desc *)D_8007A904, (Desc *)D_8007A918, (Desc *)D_8007A92C,
+    (Desc *)D_8007A940, (Desc *)D_8007A954, (Desc *)D_8007A968, (Desc *)D_8007A97C,
+    (Desc *)D_8007A990, (Desc *)D_8007A9A4, (Desc *)D_8007A9B8, (Desc *)D_8007A9CC,
+    (Desc *)D_8007A9E0, (Desc *)D_8007A9F4, (Desc *)D_8007AA08, (Desc *)D_8007AA1C,
+    (Desc *)D_8007AA30, (Desc *)D_8007AA44, (Desc *)D_8007AA58, (Desc *)D_8007AA6C,
+    (Desc *)D_8007AA80, (Desc *)D_8007AA94, (Desc *)D_8007AAA8, (Desc *)D_8007AABC,
+    (Desc *)D_8007AAD0, (Desc *)D_8007AAE4, (Desc *)D_8007AAF8, (Desc *)D_8007AB0C,
+    (Desc *)D_8007AB20, (Desc *)D_8007AB34, (Desc *)D_8007AB48, (Desc *)D_8007AB5C,
+    (Desc *)D_8007AB70, (Desc *)D_8007AB84, (Desc *)D_8007AB98, (Desc *)D_8007ABAC,
+    (Desc *)D_8007ABC0, (Desc *)D_8007ABD4, (Desc *)D_8007ABE8, (Desc *)D_8007ABFC,
+    (Desc *)D_8007AC10, (Desc *)D_8007AC24, (Desc *)D_8007AC38, (Desc *)D_8007AC4C,
+    (Desc *)D_8007AC60, (Desc *)D_8007AC74, (Desc *)D_8007AC88, (Desc *)D_8007AC9C,
+    (Desc *)D_8007ACB0, (Desc *)D_8007ACC4, (Desc *)D_8007ACD8, (Desc *)D_8007ACEC,
+    (Desc *)D_8007AD00, (Desc *)D_8007AD14, (Desc *)D_8007AD28, (Desc *)D_8007AD3C,
+    (Desc *)D_8007AD50, (Desc *)D_8007AD64, (Desc *)D_8007AD78, (Desc *)D_8007AD8C,
+    (Desc *)D_8007ADA0, (Desc *)D_8007ADB4, (Desc *)D_8007ADC8, (Desc *)D_8007ADDC,
+    (Desc *)D_8007ADF0, (Desc *)D_8007AE04, (Desc *)D_8007AE18, (Desc *)D_8007AE2C,
+    (Desc *)D_8007AE40, (Desc *)D_8007AE54, (Desc *)D_8007AE68, (Desc *)D_8007AE7C,
+    (Desc *)D_8007AE90, (Desc *)D_8007AEA4, (Desc *)D_8007AEB8, (Desc *)D_8007AECC,
+    (Desc *)D_8007AEE0, (Desc *)D_8007AEF4, (Desc *)D_8007AF08, (Desc *)D_8007AF1C,
+    (Desc *)D_8007AF30,
+};
 extern ClutPos DAT_8007b2d4[];
 extern unsigned char DAT_8009ce5b;
 extern unsigned char DAT_8009d0c1;

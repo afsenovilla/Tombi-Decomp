@@ -5,7 +5,38 @@
 typedef struct { short h; short v; } VT;
 extern VT D_8007B374[];
 extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern void rewardNone();
+extern void rewardItem();
+extern void rewardHeart();
+extern void rewardEffectOnly();
+extern void rewardBakedYam();
+extern void rewardDirtyMirror();
+extern void rewardVitalityMaxUp();
+extern void rewardWoodBoomerang();
+extern void rewardStoneBoomerang();
+extern void rewardIronBoomerang();
+extern void rewardOneUp();
+extern void rewardGoldenBowl();
+extern void rewardBitingPlantFlower();
+extern void rewardGrapple();
+extern void rewardGrappleJack();
+extern void rewardCrystalBalls();
+extern void rewardMysteriousMushroom();
+extern void rewardFlowerSeeds();
+extern void rewardPigBag();
+extern void rewardConditionalItem();
+extern void rewardJewel();
+extern void rewardSafeMushroom();
+extern void rewardAnimalDash();
+extern void rewardPants();
+static void (*D_8007A890[24])(TObj *) = {
+    rewardNone, rewardItem, rewardHeart, rewardEffectOnly,
+    rewardBakedYam, rewardDirtyMirror, rewardVitalityMaxUp, rewardWoodBoomerang,
+    rewardStoneBoomerang, rewardIronBoomerang, rewardOneUp, rewardGoldenBowl,
+    rewardBitingPlantFlower, rewardGrapple, rewardGrappleJack, rewardCrystalBalls,
+    rewardMysteriousMushroom, rewardFlowerSeeds, rewardPigBag, rewardConditionalItem,
+    rewardJewel, rewardSafeMushroom, rewardAnimalDash, rewardPants,
+};
 extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);

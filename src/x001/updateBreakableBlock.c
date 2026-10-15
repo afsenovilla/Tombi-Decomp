@@ -5,7 +5,13 @@
 #include "TOBJ.H"
 
 typedef struct { Fix16 x, y, z; } V3;
-extern void *D_8013E5CC[];
+extern char D_8013EBF8[];
+extern char D_8013EC00[];
+extern char D_8013EC08[];
+extern char D_8013EC10[];
+static void *D_8013E5CC[4] = {
+    D_8013EBF8, D_8013EC00, D_8013EC08, D_8013EC10,
+};
 extern char D_8013C760[];
 void ObjCullRegister(TObj *o);
 void func_80118998(short x, short y, short z);

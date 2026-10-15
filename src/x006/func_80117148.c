@@ -10,7 +10,20 @@ extern MAT D_1F800000, D_1F800020;
 extern SVEC D_1F800060;
 extern int D_1F8002E0[];
 extern int D_1F800168[], D_1F80016C[], D_1F800170[];
-extern void *D_801229A8[];
+extern char D_80122A08[];
+extern char D_80122A1C[];
+extern char D_80122A30[];
+extern char D_80122A44[];
+extern char D_80122A98[];
+extern char D_80122AA0[];
+extern char D_80122A4C[];
+extern char D_80122AA8[];
+extern char D_80122AB0[];
+static void *D_801229A8[9] = {
+    D_80122A08, D_80122A1C, D_80122A30, D_80122A44,
+    D_80122A98, D_80122AA0, D_80122A4C, D_80122AA8,
+    D_80122AB0,
+};
 extern void *D_8011F2DC, *D_8011F2F0, *D_8011F2CC[], *D_8011F2E0[];
 extern unsigned char PLAYER[];
 extern short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];

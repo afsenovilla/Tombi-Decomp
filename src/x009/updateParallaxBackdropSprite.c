@@ -2,7 +2,13 @@
 // MATCHING 8011d17c 440
 #include "spad.h"
 #include "TOBJ.H"
-extern void *D_8012E03C[];
+extern char D_8012E67C[];
+extern char D_8012E684[];
+extern char D_8012E68C[];
+extern char D_8012E694[];
+static void *D_8012E03C[4] = {
+    D_8012E67C, D_8012E684, D_8012E68C, D_8012E694,
+};
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 

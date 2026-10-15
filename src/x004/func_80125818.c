@@ -29,7 +29,10 @@ typedef struct {
 #define U16(f) (*(unsigned short *)&(f))
 extern void *D_801345B8, *D_8013460C, *D_80134610, *D_801345CC, *D_801345D0;
 extern char D_80077CDC[], D_80077D0C[], D_80077D84[];
-extern short D_80131148[];
+static short D_80131148[16] = {
+    0, 0, 0, 0, 0, 1, 1, 1,
+    1, 1, 2, 2, 2, 2, 2, 2,
+};
 extern unsigned short D_80131128[];
 extern int Rand(void);
 extern void SfxPlay(int);

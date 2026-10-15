@@ -3,7 +3,11 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern short D_80135D8E[];
+static short D_80135D8E[21] = {
+    2, -0x5cb0, -0x7fed, 0x180c, 0x2010, 6, 7, -0x65e0,
+    -0x7fed, 0x180c, 0x2010, 0xa, 2, -0x5c98, -0x7fed, 0x180c,
+    0x2010, 6, 8, -0x7048, -0x7fed,
+};
 extern int SPR_DATA[];
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);

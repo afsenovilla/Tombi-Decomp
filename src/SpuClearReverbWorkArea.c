@@ -7,7 +7,9 @@
 
 void WaitEvent(s32);
 s32 _SpuIsInAllocateArea_(u32);
-extern s32 D_800984DC[];
+static s32 D_800984DC[256] = {
+    0,
+};
 
 s32 SpuClearReverbWorkArea(u32 rev_mode) {
     volatile s32 callback;

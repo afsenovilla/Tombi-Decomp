@@ -3,7 +3,10 @@
 #include "TOBJ.H"
 
 extern short D_8007A3F0[];
-extern short D_80135E40[];
+static short D_80135E40[16] = {
+    0x78, 0x3c, 0x78, 0xb4, 0xb4, 0, 0x78, 0x3c,
+    0xb4, 0x78, 0xb4, 0x78, 0x78, 0x3c, 0x78, 0xb4,
+};
 extern void *D_8013A708;
 extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);

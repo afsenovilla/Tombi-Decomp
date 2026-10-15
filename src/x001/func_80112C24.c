@@ -7,7 +7,48 @@
 extern int D_8009C960[];
 extern unsigned short D_8009C960h[];
 extern int *D_80115A08[];
-extern int *D_80115948[];
+extern char D_8013B2F4[];
+extern char D_8013B32C[];
+extern char D_8013B310[];
+extern char D_8013B348[];
+extern char D_8013E600[];
+extern char D_8013E638[];
+extern char D_8013E61C[];
+extern char D_8013E654[];
+extern char D_80138EF8[];
+extern char D_80138F30[];
+extern char D_80138F14[];
+extern char D_80138F4C[];
+extern char D_80134DCC[];
+extern char D_80134E04[];
+extern char D_80134DE8[];
+extern char D_80134E20[];
+extern char D_8011A060[];
+extern char D_8011A098[];
+extern char D_8011A07C[];
+extern char D_8011A0B4[];
+extern char D_8012DF90[];
+extern char D_8012DFAC[];
+extern char D_8012DFC8[];
+extern char D_8012DFE4[];
+extern char D_80131D4C[];
+extern char D_80131D84[];
+extern char D_80131D68[];
+extern char D_80131DA0[];
+static int *D_80115948[48] = {
+    (int *)D_8013B2F4, (int *)D_8013B32C, (int *)D_8013B310, (int *)D_8013B348,
+    (int *)D_8013E600, (int *)D_8013E638, (int *)D_8013E61C, (int *)D_8013E654,
+    (int *)D_8013B2F4, (int *)D_8013B310, (int *)D_8013B2F4, (int *)D_8013B348,
+    (int *)D_80138EF8, (int *)D_80138F30, (int *)D_80138F14, (int *)D_80138F4C,
+    (int *)D_80134DCC, (int *)D_80134E04, (int *)D_80134DE8, (int *)D_80134E20,
+    (int *)D_8011A060, (int *)D_8011A098, (int *)D_8011A07C, (int *)D_8011A0B4,
+    (int *)D_8013B2F4, (int *)D_8013B310, (int *)D_8013B2F4, (int *)D_8013B348,
+    (int *)D_8013E600, (int *)D_8013E61C, (int *)D_8013E638, (int *)D_8013E654,
+    (int *)D_8013B2F4, (int *)D_8013B310, (int *)D_8013B2F4, (int *)D_8013B348,
+    (int *)D_8012DF90, (int *)D_8012DFAC, (int *)D_8012DFC8, (int *)D_8012DFE4,
+    (int *)D_80131D4C, (int *)D_80131D84, (int *)D_80131D68, (int *)D_80131DA0,
+    (int *)D_80131D4C, (int *)D_80131D84, (int *)D_80131D68, (int *)D_80131DA0,
+};
 void ObjCullRegister(TObj *o);
 void printInfoMessage(int a, int b);
 void FUN_80111b40(TObj *o);

@@ -61,7 +61,30 @@ extern unsigned int DAT_8009c960i;
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982;
 extern signed char DAT_8009d2b0;
-extern E **DAT_80115190[];
+extern char D_80114FC4[];
+extern char D_80114FDC[];
+extern char D_80114FF0[];
+extern char D_80115008[];
+extern char D_80115020[];
+extern char D_80115070[];
+extern char D_80115080[];
+extern char D_801150A0[];
+extern char D_801150B0[];
+extern char D_801150CC[];
+extern char D_801150F0[];
+extern char D_80115108[];
+extern char D_80115110[];
+extern char D_80115130[];
+extern char D_8011514C[];
+extern char D_80115178[];
+extern char D_80115184[];
+static E **DAT_80115190[20] = {
+    (E **)D_80114FC4, (E **)D_80114FDC, (E **)D_80114FF0, (E **)D_80115008,
+    (E **)D_80115020, (E **)D_80115070, (E **)D_80115080, (E **)D_80114FDC,
+    (E **)D_801150A0, (E **)D_801150B0, (E **)D_801150CC, (E **)D_801150F0,
+    (E **)D_80115020, (E **)D_80115108, (E **)D_80115110, (E **)D_80115110,
+    (E **)D_80115130, (E **)D_8011514C, (E **)D_80115178, (E **)D_80115184,
+};
 extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 

@@ -33,8 +33,23 @@ typedef struct E {
 
 extern short D_801389B8[], D_801389BC[], D_801389DC[];
 extern short D_80138A10[], D_80138A64[], D_80138A30[], D_80138A84[];
-extern short D_8013884C[], D_8013886C[], D_80138848[];
-extern char D_801388C8[], D_80138908[], D_80138948[];
+extern short D_80138848[];
+static short D_8013884C[16] = {
+    0xf, 0x1e, 0x28, 0x32, 0x37, 0x3c, 0x41, 0x46,
+    0x46, 0x41, 0x3c, 0x37, 0x32, 0x28, 0x1e, 0xf,
+};
+static short D_8013886C[46] = {
+    0, -0xf, -0x1e, -0x28, -0x32, -0x37, -0x3c, -0x41, -0x46, -0x46, -0x41, -0x3c, -0x37, -0x32, -0x28, -0x1e,
+    -0xf, 0, 5, 0xa, 0xf, 0x14, 0x19, 0x1e, 0x1e, 0x19, 0x14, 0xf, 0xa, 5, 0, -5,
+    -0xa, -0xf, -0x14, -0x19, -0x1e, -0x1e, -0x19, -0x14, -0xf, -0xa, -5, 0, -0x8000,
+};
+extern char D_80138908[], D_80138948[];
+static char D_801388C8[64] = {
+    2, 0, 2, 0, 1, 0, 1, 0, 2, 0, 2, 0, 1, 0, 1, 0,
+    0xa, 0, 2, 0, 2, 0, 1, 0, 0xa, 0, 2, 0, 2, 0, 1, 0,
+    0xa, 0, 2, 0, 2, 0, 1, 0, 0xa, 0, 2, 0, 2, 0, 1, 0,
+    0xa, 0, 2, 0, 2, 0, 1, 0, 2, 0, 2, 0, 1, 0, 1,
+};
 extern short D_80138988[], D_8013898A[], D_8013898C[];
 extern E *allocObjectLayer2(void);
 extern void ObjCullRegister(E *);

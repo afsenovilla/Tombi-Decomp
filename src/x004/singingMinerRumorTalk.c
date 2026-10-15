@@ -6,7 +6,15 @@
 #include "TOBJ.H"
 
 extern void *D_801357B0[];
-extern void *D_801357B8[];
+extern char D_801359DC[];
+extern char D_801359F0[];
+extern char D_801359F8[];
+extern char D_80135A00[];
+extern char D_80135A08[];
+static void *D_801357B8[5] = {
+    D_801359DC, D_801359F0, D_801359F8, D_80135A00,
+    D_80135A08,
+};
 extern void *D_801357CC[];
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);

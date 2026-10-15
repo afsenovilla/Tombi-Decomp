@@ -13,9 +13,31 @@ extern unsigned char DAT_80115a54[];
 extern unsigned char DAT_80115a18[];
 extern void **DAT_80115a08[];
 extern void **DAT_80115948[];
-extern ObjFn DAT_80115d90[];
-extern ObjFn DAT_80115dac[];
-extern ObjFn DAT_80115dc8[];
+extern void func_80112864();
+extern void func_80112898();
+extern void func_8011287C();
+static ObjFn DAT_80115d90[7] = {
+    (ObjFn)func_80112864, (ObjFn)func_80112898, (ObjFn)func_8011287C, (ObjFn)func_80112864,
+    (ObjFn)func_80112864, (ObjFn)func_80112864, (ObjFn)func_80112864,
+};
+extern void FUN_801128f8();
+extern void FUN_80111f58();
+extern void FUN_80112918();
+extern void FUN_801129d0();
+extern void FUN_80112520();
+static ObjFn DAT_80115dac[7] = {
+    (ObjFn)FUN_801128f8, (ObjFn)FUN_80111f58, (ObjFn)FUN_80112918, (ObjFn)FUN_801129d0,
+    (ObjFn)FUN_80112520, (ObjFn)FUN_801128f8, (ObjFn)FUN_801128f8,
+};
+extern void func_80112C24();
+extern void func_80112204();
+extern void func_80113034();
+extern void FUN_801133b8();
+extern void FUN_801125e8();
+static ObjFn DAT_80115dc8[7] = {
+    (ObjFn)func_80112C24, (ObjFn)func_80112204, (ObjFn)func_80113034, (ObjFn)FUN_801133b8,
+    (ObjFn)FUN_801125e8, (ObjFn)func_80113034, (ObjFn)func_80112C24,
+};
 extern void FUN_8001fe6c(TObj *);
 extern void freeObjectLayer2(TObj *);
 

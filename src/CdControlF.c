@@ -5,7 +5,13 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern int D_80096C00[];
+static int D_80096C00[34] = {
+    0, 0, 0, 1, 0, 0, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 1, 0,
+    0, 0, 0, 1, 0, 0, 0, 0,
+    201618256, 3643866,
+};
 extern CdlCB CD_CBSYNC;
 extern s32 CD_DEBUG;
 extern CdlCB CD_CBREADY;

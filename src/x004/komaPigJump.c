@@ -4,7 +4,15 @@
 typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; short w0c; short w0e; } X;
 extern char D_80077CDC[];
 extern unsigned char D_80130FD4[];
-extern unsigned short *D_80133BB4[], *D_80133BB8[];
+extern unsigned short *D_80133BB4[];
+extern char D_801344F8[];
+extern char D_80134508[];
+extern char D_80134520[];
+extern char D_80134530[];
+static unsigned *D_80133BB8[6] = {
+    (unsigned *)D_801344F8, (unsigned *)D_80134508, (unsigned *)D_80134520, (unsigned *)D_80134530,
+    (unsigned *)D_80134530, (unsigned *)D_80134530,
+};
 extern TObj *ObjAlloc(void);
 extern void applyFrameVelocityX(TObj *);
 extern int komaPigCheckLanded(TObj *);

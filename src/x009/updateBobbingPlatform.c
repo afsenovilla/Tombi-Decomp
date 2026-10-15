@@ -11,7 +11,13 @@ extern unsigned char *D_8009C330;
 extern signed char D_8009D2B0;
 extern short *D_800A6078[];
 extern P3 D_8012B26C[];
-extern void *D_8012DB94[];
+extern char D_8012DD84[];
+extern char D_8012DD8C[];
+extern char D_8012DD94[];
+extern char D_8012DD9C[];
+static void *D_8012DB94[4] = {
+    D_8012DD84, D_8012DD8C, D_8012DD94, D_8012DD9C,
+};
 extern int D_1F8002D4[];
 extern short D_8007A3F0[];
 extern void AnimLoadDuration(TObj *);

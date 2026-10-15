@@ -4,7 +4,61 @@
 
 #define Q ((TObj *)o->d90)
 
-extern void *D_8013F034[], *D_8013F074[];
+extern void *D_8013F034[];
+extern char D_8013F290[];
+extern char D_8013F308[];
+extern char D_8013F300[];
+extern char D_8013F2F8[];
+extern char D_8013F298[];
+extern char D_8013F2A0[];
+extern char D_8013F2A8[];
+extern char D_8013F2B0[];
+extern char D_8013F410[];
+extern char D_8013F424[];
+extern char D_8013F438[];
+extern char D_8013F44C[];
+extern char D_8013F460[];
+extern char D_8013F474[];
+extern char D_8013F488[];
+extern char D_8013F49C[];
+extern char D_8013F4B0[];
+extern char D_8013F4C4[];
+extern char D_8013F4D8[];
+extern char D_8013F4EC[];
+extern char D_8013F500[];
+extern char D_8013F514[];
+extern char D_8013F528[];
+extern char D_8013F53C[];
+extern char D_8013F550[];
+extern char D_8013F564[];
+extern char D_8013F578[];
+extern char D_8013F58C[];
+extern char D_8013F5A0[];
+extern char D_8013F5B4[];
+extern char D_8013F5C8[];
+extern char D_8013F5DC[];
+extern char D_8013F634[];
+extern char D_8013F648[];
+extern char D_8013F65C[];
+extern char D_8013F670[];
+extern char D_8013F684[];
+extern char D_8013F698[];
+extern char D_8013F6AC[];
+extern char D_8013F6C0[];
+static void *D_8013F074[48] = {
+    D_8013F290, D_8013F308, D_8013F300, D_8013F2F8,
+    D_8013F2F8, D_8013F300, D_8013F308, D_8013F290,
+    D_8013F298, D_8013F2A0, D_8013F2A8, D_8013F2B0,
+    D_8013F2B0, D_8013F2A8, D_8013F2A0, D_8013F298,
+    D_8013F410, D_8013F424, D_8013F438, D_8013F44C,
+    D_8013F460, D_8013F474, D_8013F488, D_8013F49C,
+    D_8013F4B0, D_8013F4C4, D_8013F4D8, D_8013F4EC,
+    D_8013F500, D_8013F514, D_8013F528, D_8013F53C,
+    D_8013F550, D_8013F564, D_8013F578, D_8013F58C,
+    D_8013F5A0, D_8013F5B4, D_8013F5C8, D_8013F5DC,
+    D_8013F634, D_8013F648, D_8013F65C, D_8013F670,
+    D_8013F684, D_8013F698, D_8013F6AC, D_8013F6C0,
+};
 extern short D_8007A5F0[], D_8007A3F0[];
 extern void FUN_8001e4f0(int);
 

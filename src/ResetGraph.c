@@ -72,8 +72,12 @@ typedef struct QueueItem {
 extern s32 D_800918F0;
 extern GPU* D_80091930;
 extern DEBUG GPU_INFO;
-extern s32 D_800919B8[];
-extern s32 D_800919CC[];
+static s32 D_800919B8[5] = {
+    1024, 1024, 1024, 1024, 1024,
+};
+static s32 D_800919CC[7] = {
+    512, 1024, 1024, 512, 1024, 83886079, -2147483648,
+};
 extern u32 D_80090D4C[];
 extern volatile s32 D_80090D58;
 extern volatile s32* GPU_DATA;

@@ -5,7 +5,16 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void *D_8013E570[], *D_8013E700;
+extern void *D_8013E700;
+extern char D_8013EA8C[];
+extern char D_8013EAB0[];
+extern char D_8013EAB8[];
+extern char D_8013EAC0[];
+extern char D_8013EAC8[];
+static void *D_8013E570[5] = {
+    D_8013EA8C, D_8013EAB0, D_8013EAB8, D_8013EAC0,
+    D_8013EAC8,
+};
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 int ObjCullRegister(TObj *o);

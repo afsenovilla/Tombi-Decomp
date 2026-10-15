@@ -6,7 +6,10 @@
 typedef struct { short x, y, z, pad; int lim; } SB;
 typedef struct { Fix16 x, y, z; } V3;
 extern char D_80077CDC[];
-extern short D_8013C984[];
+static short D_8013C984[16] = {
+    0x20, 0x18, 0x10, 0x10, 0x10, 8, 8, 4,
+    0, -4, -8, -8, -0x10, -0x10, -0x10, -0x18,
+};
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short D_1F80017A[];
 extern TObj *allocObjectLayer8(void);

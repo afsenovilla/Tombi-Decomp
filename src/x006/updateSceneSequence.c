@@ -6,7 +6,18 @@
 #include "player.h"
 #include "TOBJ.H"
 extern unsigned char SCRIPT_FLAGS[];
-extern void *D_80122C14[], *D_80122C18[], *D_80122C1C[];
+extern void *D_80122C14[], *D_80122C18[];
+extern char D_80122D30[];
+extern char D_80122D44[];
+extern char D_80122D58[];
+extern char D_80122D6C[];
+extern char D_80122D7C[];
+extern char D_80122D94[];
+extern char D_80122D9C[];
+static void *D_80122C1C[7] = {
+    D_80122D30, D_80122D44, D_80122D58, D_80122D6C,
+    D_80122D7C, D_80122D94, D_80122D9C,
+};
 extern char D_80077CDC[];
 extern short *D_8012037C[];
 extern int func_8011E364(void);

@@ -18,7 +18,31 @@ extern unsigned short D_8009C960[];
 extern unsigned short D_8009C962;
 extern unsigned short D_8009C982;
 extern S4 *D_80078B7C[];
-extern short **D_80079474[];
+extern char D_800792BC[];
+extern char D_800792D4[];
+extern char D_800792E8[];
+extern char D_80079300[];
+extern char D_80079318[];
+extern char D_80079368[];
+extern char D_80079378[];
+extern char D_80079384[];
+extern char D_80079394[];
+extern char D_800793B0[];
+extern char D_800793D4[];
+extern char D_800793EC[];
+extern char D_800793F4[];
+extern char D_80079414[];
+extern char D_80079430[];
+extern char D_8007945C[];
+extern char D_80079468[];
+static short **D_80079474[24] = {
+    (short **)D_800792BC, (short **)D_800792D4, (short **)D_800792E8, (short **)D_80079300,
+    (short **)D_80079318, (short **)D_80079368, (short **)D_80079378, (short **)D_800792D4,
+    (short **)D_80079384, (short **)D_80079394, (short **)D_800793B0, (short **)D_800793D4,
+    (short **)D_80079318, (short **)D_800793EC, (short **)D_800793F4, (short **)D_800793F4,
+    (short **)D_80079414, (short **)D_80079430, (short **)D_8007945C, (short **)D_80079468,
+    (short **)D_80079430, (short **)D_8007945C, (short **)D_80079468, (short **)D_800792BC,
+};
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern int *D_800A4584, *D_800A4588;
 extern O *TASK_C;

@@ -3,7 +3,15 @@
 #include "spad.h"
 /* Whole function (the csv piece 8011D5F4 is its loop tail): builds a 19-link chain sorted with insertionSortU32. */
 #include "TOBJ.H"
-extern void *D_8013E6C4[];
+extern char D_8013EB08[];
+extern char D_8013EB10[];
+extern char D_8013EB18[];
+extern char D_8013EB20[];
+extern char D_8013EB00[];
+static void *D_8013E6C4[5] = {
+    D_8013EB08, D_8013EB10, D_8013EB18, D_8013EB20,
+    D_8013EB00,
+};
 extern TObj *allocObjectLayer4(void);
 extern void insertionSortU32(int, TObj **);
 extern int FUN_800202b4(TObj *);

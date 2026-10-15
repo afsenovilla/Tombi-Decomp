@@ -5,7 +5,20 @@
 #include "gamestate.h"
 
 extern void *D_80131CAC;
-extern void *D_80131C64[];
+extern char D_80131F54[];
+extern char D_80131F5C[];
+extern char D_80131F64[];
+extern char D_80131F74[];
+extern char D_80131F7C[];
+extern char D_80131F84[];
+extern char D_80131F8C[];
+extern char D_80131F94[];
+extern char D_80131F6C[];
+static void *D_80131C64[9] = {
+    D_80131F54, D_80131F5C, D_80131F64, D_80131F74,
+    D_80131F7C, D_80131F84, D_80131F8C, D_80131F94,
+    D_80131F6C,
+};
 extern int D_800A4570[];
 extern int D_800A4574[];
 extern void FUN_8001fe6c(TObj *);

@@ -4,7 +4,15 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern void *D_80134D24[];
+extern char D_80134F4C[];
+extern char D_80134F80[];
+extern char D_80134FAC[];
+extern char D_80134FEC[];
+extern char D_80135008[];
+static void *D_80134D24[5] = {
+    D_80134F4C, D_80134F80, D_80134FAC, D_80134FEC,
+    D_80135008,
+};
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001f9e0(void);
 extern void playSFX(int);

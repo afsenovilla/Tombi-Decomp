@@ -2,7 +2,15 @@
 // MATCHING 8002be80 472
 #include "player.h"
 #include "TOBJ.H"
-extern void *D_80012034[];
+extern char D_800125D8[];
+extern char D_800122F8[];
+extern char D_80012338[];
+extern char D_80012628[];
+extern char D_800124B8[];
+static void *D_80012034[5] = {
+    D_800125D8, D_800122F8, D_80012338, D_80012628,
+    D_800124B8,
+};
 extern void *D_80012268;
 extern unsigned char D_80079D3C[];
 extern unsigned short D_800A604E[];

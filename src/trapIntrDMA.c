@@ -13,7 +13,9 @@ void DMA_memclr(int* ptr, int size);
 extern char* D_800162A8[];
 extern char* D_800162C4[];
 extern volatile unsigned long* D_80098178;
-extern Callback D_8009817C[8];
+static Callback D_8009817C[8] = {
+    0,
+};
 extern unsigned long* D_8009819C;
 
 void* startIntrDMA(void);

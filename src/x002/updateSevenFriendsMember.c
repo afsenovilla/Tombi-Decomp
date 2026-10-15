@@ -4,7 +4,17 @@
 #include "TOBJ.H"
 
 extern int DAT_1f8002d0[];
-extern void *D_8011FB7C[];
+extern char D_8011FC40[];
+extern char D_8011FC48[];
+extern char D_8011FC50[];
+extern char D_8011FC58[];
+extern char D_8011FC60[];
+extern char D_8011FC68[];
+extern char D_8011FC70[];
+static void *D_8011FB7C[7] = {
+    D_8011FC40, D_8011FC48, D_8011FC50, D_8011FC58,
+    D_8011FC60, D_8011FC68, D_8011FC70,
+};
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void stepSevenFriendsMember(TObj *);

@@ -3,7 +3,22 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8011F260[];
+extern char D_8011F28C[];
+extern char D_8011F294[];
+extern char D_8011F29C[];
+extern char D_8011F2A4[];
+extern char D_8011F2DC[];
+extern char D_8011F2E4[];
+extern char D_8011F2EC[];
+extern char D_8011F2F4[];
+extern char D_8011F2FC[];
+extern char D_8011F304[];
+extern char D_8011F30C[];
+static void *D_8011F260[11] = {
+    D_8011F28C, D_8011F294, D_8011F29C, D_8011F2A4,
+    D_8011F2DC, D_8011F2E4, D_8011F2EC, D_8011F2F4,
+    D_8011F2FC, D_8011F304, D_8011F30C,
+};
 extern void *D_8011F184;
 extern unsigned short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);

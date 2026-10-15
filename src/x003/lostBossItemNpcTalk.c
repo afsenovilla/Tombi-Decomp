@@ -5,7 +5,24 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void *D_80138FC8[], *D_80138FD8[];
+extern char D_80139464[];
+extern char D_80139478[];
+extern char D_80139480[];
+extern char D_80139488[];
+static void *D_80138FC8[4] = {
+    D_80139464, D_80139478, D_80139480, D_80139488,
+};
+extern char D_80139490[];
+extern char D_80139498[];
+extern char D_801394C8[];
+extern char D_801394D0[];
+extern char D_801394E0[];
+extern char D_801394E8[];
+extern char D_801394F8[];
+static void *D_80138FD8[7] = {
+    D_80139490, D_80139498, D_801394C8, D_801394D0,
+    D_801394E0, D_801394E8, D_801394F8,
+};
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);

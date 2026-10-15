@@ -2,7 +2,13 @@
 // MATCHING 8002ca88 604
 #include "player.h"
 #include "TOBJ.H"
-extern void *D_800121F4[];
+extern char D_8001289C[];
+extern char D_800126FC[];
+extern char D_80012724[];
+extern char D_8001273C[];
+static void *D_800121F4[4] = {
+    D_8001289C, D_800126FC, D_80012724, D_8001273C,
+};
 extern unsigned short D_800A604E[];
 extern unsigned short D_800A6052[];
 extern void AnimLoadDuration(TObj *);

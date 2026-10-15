@@ -24,7 +24,9 @@ extern char *SEQ_DATA[];
 extern char *D_1f8002b8[];
 extern char *WFM3_DATA[];
 extern char D_800e8028[];
-extern char D_80098c44[];
+static char D_80098c44[844] = {
+    4,
+};
 extern RelLog CD_QUEUE[];
 extern int D_1f80029c;
 extern char *LOAD_NEXT_ADDR;

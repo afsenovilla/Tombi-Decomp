@@ -3,7 +3,15 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013E5E8[];
+extern char D_8013E810[];
+extern char D_8013E818[];
+extern char D_8013E820[];
+extern char D_8013E828[];
+extern char D_8013E830[];
+static void *D_8013E5E8[6] = {
+    D_8013E810, D_8013E810, D_8013E818, D_8013E820,
+    D_8013E828, D_8013E830,
+};
 extern void AnimLoadDuration(TObj *);
 extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);

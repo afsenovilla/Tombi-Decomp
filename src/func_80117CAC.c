@@ -12,7 +12,20 @@ typedef struct { short a, b, c, d, e, f, g, h, i; } T;
 extern G LOAD_BUFFER[];
 extern G2 D_800A4058[];
 extern T D_801384B6[];
-extern short *D_80138630[];
+extern char D_80138510[];
+extern char D_80138558[];
+extern char D_801385A0[];
+static char D_801385E8[72] = {
+    -0x64, -1, 0, 0, -0x64, -1, 0, 0, -0x64, -1, 0, 0, -0x64, -1, -0x64, -1,
+    -0x64, -1, 0, 0, 0x38, -1, -0x64, -1, 0x38, -1, 0, 0, 0x38, -1, -0x64, -1,
+    0x38, -1, 0, 0, 0x38, -1, -0x64, -1, 0x38, -1, 0, 0, 0x38, -1, -0x64, -1,
+    0x38, -1, 0, 0, -0x2c, -2, -0x64, -1, -0x2c, -2, 0x38, -1, 0x70, -2, 0x38, -1,
+    0x70, -2, 0x38, -1, -0xc, 1, -0x70, 1,
+};
+static short *D_80138630[5] = {
+    (short *)D_80138510, (short *)D_80138558, (short *)D_801385A0, (short *)D_801385E8,
+    (short *)D_801385E8,
+};
 extern int ObjCullRegister(TObj *);
 extern void FUN_800187e4(TObj *);
 

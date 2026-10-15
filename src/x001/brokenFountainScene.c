@@ -5,7 +5,18 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern void *D_8013FA90[];
+extern char D_8013FAD4[];
+extern char D_8013FADC[];
+extern char D_8013FAE4[];
+extern char D_8013FAEC[];
+extern char D_8013FAF4[];
+extern char D_8013FAFC[];
+extern char D_8013FB04[];
+extern char D_8013FB0C[];
+static void *D_8013FA90[8] = {
+    D_8013FAD4, D_8013FADC, D_8013FAE4, D_8013FAEC,
+    D_8013FAF4, D_8013FAFC, D_8013FB04, D_8013FB0C,
+};
 extern void *D_8013FAB8[], *D_8013FABC[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);

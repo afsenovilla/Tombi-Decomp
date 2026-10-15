@@ -8,7 +8,11 @@ extern unsigned char DAT_8009d2c3;
 extern unsigned char DAT_1f8003d3;
 extern char DAT_80077c9c[];
 extern char DAT_80077ca4[];
-extern char DAT_80077cb0[];
+static char DAT_80077cb0[44] = {
+    0x32, 0x32, 0x32, 0x32, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33,
+    0x33, 0x33, 0x33, 0x33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0x20, 0, 0, 3, -0x20, -1, 0, 3,
+};
 extern void loadSoundSet(int);
 extern void SoundStopAll(void);
 extern void keyOffActiveSfxVoices(void);

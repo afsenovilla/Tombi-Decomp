@@ -5,7 +5,13 @@ extern unsigned short DAT_8009c960;
 extern unsigned short D_1f8001f8;
 extern int D_1f800198;
 extern int DAT_1f8002d4[];
-extern void *DAT_8013b1a4[];
+extern char D_8013B700[];
+extern char D_8013B708[];
+extern char D_8013B710[];
+extern char D_8013B718[];
+static void *DAT_8013b1a4[4] = {
+    D_8013B700, D_8013B708, D_8013B710, D_8013B718,
+};
 extern void *DAT_8013e584[];
 extern void *DAT_8012e02c[];
 extern short DAT_80114a98[];

@@ -2,7 +2,13 @@
 // MATCHING 80117114 456
 #include "spad.h"
 #include "TOBJ.H"
-extern void *D_80129FF4[];
+extern char D_8012A214[];
+extern char D_8012A26C[];
+extern char D_8012A290[];
+extern char D_8012A2B4[];
+static void *D_80129FF4[4] = {
+    D_8012A214, D_8012A26C, D_8012A290, D_8012A2B4,
+};
 extern unsigned short D_80125C20[], D_80125C28[];
 extern int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);

@@ -2,7 +2,10 @@
 // MATCHING 80132698 200
 #include "TOBJ.H"
 
-extern short D_8013C9A4[];
+static short D_8013C9A4[14] = {
+    -0x10, -8, -8, -8, -8, 8, 0, 0,
+    8, -8, 8, 8, 0x10, 8,
+};
 extern TObj *ObjAlloc(void);
 
 void func_80132698(short x, short y, short z)

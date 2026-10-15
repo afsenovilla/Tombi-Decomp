@@ -4,7 +4,10 @@ extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
 extern short probeCollisionAtDepthB(unsigned char *, int, int);
 extern unsigned short DAT_8009c960;
 extern int DAT_8013b104, DAT_80134d0c;
-extern char DAT_80077d54[];
+static char DAT_80077d54[24] = {
+    0, 4, 0, 6, 0, -4, 0, 6, 0, 0, 0, 0, -0x80, 4, 0, 7,
+    -0x80, -5, 0, 7,
+};
 
 void FUN_8003c338(unsigned char *o)
 {

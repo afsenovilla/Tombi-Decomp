@@ -21,7 +21,24 @@ extern signed char D_8009D2B0_[];
 extern void *D_8013B2CC[], *D_8013B2D0[], *D_8013B2D4[], *D_8013B2D8[], *D_8013B2DC[], *D_8013B2E0[], *D_8013B2EC[];
 extern void *D_1F8002D4;
 extern char D_80077CDC[];
-extern short *D_801396A0[];
+extern char D_801393EC[];
+extern char D_80139434[];
+extern char D_8013947C[];
+extern char D_8013953C[];
+extern char D_8013955C[];
+extern char D_8013957C[];
+extern char D_80139614[];
+extern char D_8013963C[];
+static char D_80139678[40] = {
+    0x16, 0, 0, 0, 2, 0, 0, 0, 0x1b, 0, 0, 0, 0x11, 0, 0, 0,
+    6, 0, 0x10, 0, 8, 0, 0, 0, 0x12, 0, 0, 0, 3, 0, 0, 0,
+    0x1c,
+};
+static short *D_801396A0[9] = {
+    (short *)D_801393EC, (short *)D_80139434, (short *)D_8013947C, (short *)D_8013953C,
+    (short *)D_8013955C, (short *)D_8013957C, (short *)D_80139614, (short *)D_8013963C,
+    (short *)D_80139678,
+};
 extern unsigned short D_1F8003C4, D_1F8001FC;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]

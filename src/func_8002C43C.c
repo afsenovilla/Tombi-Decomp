@@ -1,7 +1,10 @@
 // FUNC 8002c43c 316 MAIN0
 // MATCHING 8002c43c 316
 #include "TOBJ.H"
-extern char D_80014744[];
+static char D_80014744[32] = {
+    0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 2, 0,
+    2, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 2, -0x80,
+};
 extern char D_8001473C[];
 extern void AnimLoadDuration(TObj *);
 extern void ObjCullRegister(TObj *);

@@ -3,7 +3,20 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_80122E2C[];
+extern char D_80122F68[];
+extern char D_80122F70[];
+extern char D_80122F78[];
+extern char D_80122F80[];
+extern char D_80122F88[];
+extern char D_80122F90[];
+extern char D_80122F98[];
+extern char D_80122FA0[];
+extern char D_80122FA8[];
+static void *D_80122E2C[9] = {
+    D_80122F68, D_80122F70, D_80122F78, D_80122F80,
+    D_80122F88, D_80122F90, D_80122F98, D_80122FA0,
+    D_80122FA8,
+};
 extern int D_800A4570[];
 extern int D_800A4574[];
 void ObjListPush_1F80022C(TObj *o);

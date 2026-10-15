@@ -4,7 +4,13 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern void *D_80134D50[];
+extern char D_801350C0[];
+extern char D_801350C8[];
+extern char D_801350D0[];
+extern char D_801350D8[];
+static void *D_80134D50[4] = {
+    D_801350C0, D_801350C8, D_801350D0, D_801350D8,
+};
 extern int D_800A4570;
 extern int D_800A4574;
 extern void stormBackdropCycleClut(TObj *);

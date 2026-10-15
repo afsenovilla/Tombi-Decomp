@@ -2,7 +2,34 @@
 // MATCHING 8004c848 696
 typedef struct { signed char f0; char p1; unsigned char f2; char p3[0xc]; unsigned char ff; } R;
 extern unsigned short DAT_8009c960, DAT_8009c962;
-extern R ***DAT_8007b908[];
+extern char D_8007B720[];
+extern char D_8007B73C[];
+extern char D_8007B754[];
+extern char D_8007B770[];
+extern char D_8007B78C[];
+extern char D_8007B7CC[];
+extern char D_8007B7E0[];
+extern char D_8007B7F0[];
+extern char D_8007B804[];
+extern char D_8007B828[];
+extern char D_8007B850[];
+extern char D_8007B868[];
+extern char D_8007B874[];
+extern char D_8007B898[];
+extern char D_8007B8B8[];
+static char D_8007B8E8[16] = {
+    0x58, 3, -0x80, 0x1f, 0x5c, 3, -0x80, 0x1f, 0x60, 3, -0x80, 0x1f, 0x64, 3, -0x80, 0x1f,
+};
+static char D_8007B8F8[16] = {
+    0x58, 3, -0x80, 0x1f, 0x5c, 3, -0x80, 0x1f, 0x60, 3, -0x80, 0x1f, 0x64, 3, -0x80, 0x1f,
+};
+static R ***DAT_8007b908[20] = {
+    (R ***)D_8007B720, (R ***)D_8007B73C, (R ***)D_8007B754, (R ***)D_8007B770,
+    (R ***)D_8007B78C, (R ***)D_8007B7CC, (R ***)D_8007B7E0, (R ***)D_8007B73C,
+    (R ***)D_8007B7F0, (R ***)D_8007B804, (R ***)D_8007B828, (R ***)D_8007B850,
+    (R ***)D_8007B78C, (R ***)D_8007B868, (R ***)D_8007B874, (R ***)D_8007B898,
+    (R ***)D_8007B898, (R ***)D_8007B8B8, (R ***)D_8007B8E8, (R ***)D_8007B8F8,
+};
 extern short DAT_80078790[];
 extern int testAreaFlagBit(int);
 extern void FUN_8004cb00(R *, int);

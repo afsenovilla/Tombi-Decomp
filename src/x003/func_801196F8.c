@@ -4,7 +4,17 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern void *D_80138EDC[];
+extern char D_8013924C[];
+extern char D_80139254[];
+extern char D_80139160[];
+extern char D_80139168[];
+extern char D_8013925C[];
+extern char D_80139200[];
+extern char D_801391F0[];
+static void *D_80138EDC[7] = {
+    D_8013924C, D_80139254, D_80139160, D_80139168,
+    D_8013925C, D_80139200, D_801391F0,
+};
 extern void ObjListPush_1F800220(TObj *);
 extern void func_801191C4(TObj *);
 extern void func_801193D0(TObj *);

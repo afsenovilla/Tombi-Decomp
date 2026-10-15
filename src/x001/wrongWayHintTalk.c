@@ -10,7 +10,13 @@ typedef struct { signed char a; unsigned char b; unsigned char c; signed char d;
 extern TObj PLAYER;
 extern E4 D_80011DD8[];
 extern signed char D_80011EB4[];
-extern void *D_8013DE4C[];
+extern char D_8013E054[];
+extern char D_8013E05C[];
+extern char D_8013E064[];
+extern char D_8013E06C[];
+static void *D_8013DE4C[4] = {
+    D_8013E054, D_8013E05C, D_8013E064, D_8013E06C,
+};
 extern void *D_8013DDF8[];
 extern unsigned short D_8009C960, D_8009C962;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;

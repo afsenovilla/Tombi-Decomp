@@ -3,7 +3,15 @@
 #include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern void *D_8013B168[];
+extern char D_8013BBDC[];
+extern char D_8013BBE4[];
+extern char D_8013BBEC[];
+extern char D_8013BBF4[];
+extern char D_8013BBFC[];
+static void *D_8013B168[5] = {
+    D_8013BBDC, D_8013BBE4, D_8013BBEC, D_8013BBF4,
+    D_8013BBFC,
+};
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
 

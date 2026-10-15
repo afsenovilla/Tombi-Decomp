@@ -15,7 +15,9 @@ typedef struct P {
     unsigned short ba, bc, be, c0, c2, c4, c6, c8, ca, cc;
 } P;
 extern P *FUN_80018448(void);
-extern int DAT_8013b1bc[];
+static int DAT_8013b1bc[4] = {
+    -2146191672, -2146191664, -2146191656, -2146191648,
+};
 
 void FUN_8011a2f8(P *s, unsigned char t)
 {

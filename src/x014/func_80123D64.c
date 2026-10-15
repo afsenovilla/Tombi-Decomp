@@ -2,7 +2,20 @@
 // MATCHING 80123d64 1016
 #include "spad.h"
 #include "TOBJ.H"
-extern void *D_80129FA8[];
+extern char D_8012A2FC[];
+extern char D_8012A304[];
+extern char D_8012A30C[];
+extern char D_8012A314[];
+extern char D_8012A31C[];
+extern char D_8012A324[];
+extern char D_8012A32C[];
+extern char D_8012A334[];
+extern char D_8012A33C[];
+static void *D_80129FA8[9] = {
+    D_8012A2FC, D_8012A304, D_8012A30C, D_8012A314,
+    D_8012A31C, D_8012A324, D_8012A32C, D_8012A334,
+    D_8012A33C,
+};
 extern unsigned short D_801266E0[];
 extern unsigned short D_1F800172[], D_1F80016E[];
 extern short D_8007A5F0[], D_8007A1F0[];

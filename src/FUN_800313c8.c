@@ -1,7 +1,12 @@
 // FUNC 800313c8 224 MAIN0
 // MATCHING 800313c8 224
 extern char DAT_80010ef8[], DAT_80010f00[], DAT_80010f08[];
-extern char DAT_80010f88[], DAT_80010f90[], DAT_80010f98[];
+extern char DAT_80010f88[], DAT_80010f90[];
+static char DAT_80010f98[36] = {
+    -0x58, 0, 0, 0, 0, 0, 0x3c, -0x80, -0x55, 0, 0xb, 0, 0, 0, 2, 0,
+    -0x57, 0, 0xb, 0, 0, 0, 4, 0, -0x56, 0, 0xb, 0, 0, 0, 4, 0,
+    -0x55, 0, 0xb,
+};
 extern char *DAT_800a605c;
 
 void FUN_800313c8(unsigned char *o)

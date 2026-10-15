@@ -5,7 +5,13 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern void *D_8013A368[];
+extern char D_8013A558[];
+extern char D_8013A560[];
+extern char D_8013A594[];
+extern char D_8013A5C8[];
+static void *D_8013A368[4] = {
+    D_8013A558, D_8013A560, D_8013A594, D_8013A5C8,
+};
 extern void *D_8013A3A8[];
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);

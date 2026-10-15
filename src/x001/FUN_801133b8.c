@@ -3,7 +3,13 @@
 #include "TOBJ.H"
 extern int DAT_8009c960[];
 extern unsigned short DAT_8009c960_u[];
-extern int *DAT_80115a08[];
+extern char D_8012E084[];
+extern char D_8012E0BC[];
+extern char D_8012E0A0[];
+extern char D_8012E0D8[];
+static int *DAT_80115a08[4] = {
+    (int *)D_8012E084, (int *)D_8012E0BC, (int *)D_8012E0A0, (int *)D_8012E0D8,
+};
 extern int *DAT_80115948[];
 extern void FUN_800202b4();
 extern void FUN_8001fe6c(TObj *);

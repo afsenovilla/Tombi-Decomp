@@ -7,7 +7,17 @@
 #include "gamestate.h"
 
 extern int DAT_1f8002d4[];
-extern void *D_8012E004[];
+extern char D_8012E6E0[];
+extern char D_8012E6E8[];
+extern char D_8012E6F0[];
+extern char D_8012E6F8[];
+extern char D_8012E740[];
+extern char D_8012E834[];
+extern char D_8012E83C[];
+static void *D_8012E004[7] = {
+    D_8012E6E0, D_8012E6E8, D_8012E6F0, D_8012E6F8,
+    D_8012E740, D_8012E834, D_8012E83C,
+};
 extern int FUN_800202b4(TObj *);
 extern void func_801174C4(TObj *);
 extern void setEventComplete(int, int);
