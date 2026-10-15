@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
-extern void FUN_80104dc8(TObj *);
+extern void playerBittenCarryAirStep(TObj *);
 extern void func_80104F2C(TObj *);
 extern void FUN_800ef490(TObj *);
 extern void ObjGravityStep(TObj *);
@@ -25,7 +25,7 @@ void func_8011D3EC(TObj *o)
     switch (o->substep) {
     case 0:
         D_8009D2E8->d8c = o->d88 - 0xc0;
-        FUN_80104dc8(o);
+        playerBittenCarryAirStep(o);
         func_80104F2C(o);
         break;
     case 1:

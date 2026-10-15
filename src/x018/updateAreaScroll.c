@@ -12,7 +12,7 @@ extern TObj PLAYER;
 extern Fn D_80079AD0[];
 extern unsigned char D_800A60E0;
 extern short D_800A604A, D_800A604E;
-extern void FUN_80027810(TObj *);
+extern void cameraModeHandler6B(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void stepPlayerXToward(int);
 extern void cameraEventScrollHandler(TObj *);
@@ -25,7 +25,7 @@ void updateAreaScroll(TObj *o)
     case 0:
         if (GVARS.b3a) o->step++;
         *(short *)((char *)o->d38 + 2) = 0;
-        FUN_80027810(o);
+        cameraModeHandler6B(o);
         break;
     case 1:
         D_80079AD0[o->subtype](o);

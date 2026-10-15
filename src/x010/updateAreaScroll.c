@@ -24,7 +24,7 @@ extern void cameraFollowPlayerX(O *);
 extern void cameraFollowPlayerY(O *);
 extern void syncObjectTargetY(O *);
 extern void updateCameraScroll(O *);
-extern void func_80027810(O *);
+extern void cameraModeHandler6B(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
 extern void cameraEventScrollHandler(O *);
@@ -53,7 +53,7 @@ void updateAreaScroll(O *o)
         updateCameraScroll(o);
         break;
     case 2:
-        if (GAME.selectedSection == 8) func_80027810(o);
+        if (GAME.selectedSection == 8) cameraModeHandler6B(o);
         else D_80079A98[o->subtype](o);
         switch (GAME.selectedSection) {
         case 0:

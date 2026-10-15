@@ -11,7 +11,7 @@ extern void FUN_8001fec0(TObj *);
 extern void setVelXFromPadLR(TObj *);
 extern void adjustVelYFromPadDown(TObj *);
 extern void FUN_8001fd94(TObj *);
-extern void FUN_800ee6d0(TObj *);
+extern void playerFloatDirFromPad(TObj *);
 
 void playerJumpArea3Float(TObj *o)
 {
@@ -42,5 +42,5 @@ void playerJumpArea3Float(TObj *o)
         adjustVelYFromPadDown(o);
         FUN_8001fd94(o);
     }
-    FUN_800ee6d0(o);
+    playerFloatDirFromPad(o);
 }

@@ -7,7 +7,7 @@ extern TObj *D_8009C330;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
-extern void FUN_800fc02c(TObj *);
+extern void playerReleaseBittenAirborne(TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern int AnimAdvance(TObj *);
 extern void playerSetFallLean(TObj *);
@@ -48,7 +48,7 @@ void playerStepLaunched(TObj *o)
         PlayerSetAnimIfChanged(o, 0x39);
         SfxPlay2(0x23, 0x24);
         playSFX(0x1f);
-        FUN_800fc02c(o);
+        playerReleaseBittenAirborne(o);
         o->animFrame ^= 1;
         *(unsigned char *)&D_8009C330->w08 = ((unsigned char*)&GVARS.b38)[0];
         spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);

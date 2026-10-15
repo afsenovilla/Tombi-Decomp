@@ -1,5 +1,5 @@
 // JP slps01144 8002D314 484
-// Japanese version of PAL main0 8002C73C (func_8002C73C.c): -40 -> -36.
+// Japanese version of PAL main0 8002C73C (updatePoolType66Object.c): -40 -> -36.
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80014764[];
@@ -8,7 +8,7 @@ extern Fix16 *D_800A6078[];
 extern void AnimLoadDuration(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
-void func_8002C73C(TObj *o)
+void updatePoolType66Object(TObj *o)
 {
     unsigned char s = o->b04;
     short t;

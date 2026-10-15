@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern void (*D_80079AD0[])(TObj *);
-extern void func_80027810(TObj *);
+extern void cameraModeHandler6B(TObj *);
 extern int tryStartItemInteraction(TObj *, int, int);
 extern void cameraEventScrollHandler(TObj *);
 
@@ -16,7 +16,7 @@ void updateAreaScroll(TObj *o)
     case 0:
         if (GVARS.b3a) o->step++;
         ((Fix16 *)o->d38)->p.whole = 0;
-        func_80027810(o);
+        cameraModeHandler6B(o);
         break;
     case 1:
         D_80079AD0[o->subtype](o);

@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern void (*D_80079AD0[])(TObj *);
-extern void func_80027810(TObj *);
+extern void cameraModeHandler6B(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void cameraEventScrollHandler(TObj *);
 
@@ -19,7 +19,7 @@ void updateAreaScroll(TObj *o)
             o->subtype = 0;
         }
         ((short *)o->d38)[1] = 0;
-        func_80027810(o);
+        cameraModeHandler6B(o);
         break;
     case 1:
         D_80079AD0[o->subtype](o);

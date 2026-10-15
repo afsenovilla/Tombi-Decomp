@@ -7,7 +7,7 @@ extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
-extern void FUN_800fc02c(TObj *);
+extern void playerReleaseBittenAirborne(TObj *);
 extern int AnimAdvance(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
 extern void playerSetAnimIfChangedAt(TObj *, int, int);
@@ -30,7 +30,7 @@ void func_80122C10(TObj *o)
         PlayerSetAnimIfChanged(o, 0x37);
         SfxPlay2(0x23, 0x24);
         playSFX(0x1f);
-        FUN_800fc02c(o);
+        playerReleaseBittenAirborne(o);
         break;
     case 2:
         AnimAdvance(o);

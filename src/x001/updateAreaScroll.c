@@ -41,7 +41,7 @@ extern int tryStartItemInteraction(O *, int, unsigned char);
 extern void FUN_800eea7c(PL *, int, int);
 extern void AnimAdvance(PL *);
 extern void setEventComplete(int, int);
-extern void FUN_8002a3d4(O *);
+extern void cameraModeHandler6(O *);
 
 #define XU (*(unsigned short *)&D_1F80016A)
 #define ZU (*(unsigned short *)&D_1F80016E)
@@ -238,7 +238,7 @@ void updateAreaScroll(O *o)
                 o->step++;
             }
         }
-        FUN_8002a3d4(o);
+        cameraModeHandler6(o);
         break;
     }
     case 5:
@@ -249,7 +249,7 @@ void updateAreaScroll(O *o)
             setEventComplete(0x18, 0);
             o->w4a = 0x154;
         }
-        FUN_8002a3d4(o);
+        cameraModeHandler6(o);
         break;
     case 6: {
         PL *pl;
@@ -262,7 +262,7 @@ void updateAreaScroll(O *o)
                 FUN_800eea7c(pl, 0, 0);
                 o->w4a = 0x3c;
             }
-            FUN_8002a3d4(o);
+            cameraModeHandler6(o);
         } else {
             o->w4a--;
         }

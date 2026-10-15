@@ -16,7 +16,7 @@ extern int DAT_8009f0ec;
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_800ef05c(int, int, int, int);
+extern void spawnPlayerSplashEffect(int, int, int, int);
 extern void FUN_800ee680(TObj *);
 extern void playerAirSpinToFall(TObj *);
 extern void FUN_8003facc(TObj *);
@@ -48,7 +48,7 @@ void playerStepWaterJumpOut(TObj *o)
         o->y.raw += DAT_8009c944[1] << 8;
         FUN_8001fec0(o);
         if (o->ba7)
-            FUN_800ef05c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnPlayerSplashEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         FUN_800ee680(o);
         if (o->velY >= -0x383)
             playerAirSpinToFall(o);

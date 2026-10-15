@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { TObj b; char pad[0xe8 - 0xc0]; short e8, ea; } OX;
 extern TObj *DAT_8009f0ec;
-extern TObj *FUN_8004baa8(TObj *, TObj *);
+extern TObj *probeClimbGrabObject(TObj *, TObj *);
 extern void playerSetFallLean(TObj *);
 
 void playerClimbFollowObject(TObj *o)
@@ -19,7 +19,7 @@ void playerClimbFollowObject(TObj *o)
         ((OX *)o)->e8 = t1;
     }
     ((OX *)o)->ea = o->y.p.whole - 8;
-    n = FUN_8004baa8(o, DAT_8009f0ec);
+    n = probeClimbGrabObject(o, DAT_8009f0ec);
     if (n == 0) {
         *(signed char *)&o->b0f = -8;
         p = o->h;

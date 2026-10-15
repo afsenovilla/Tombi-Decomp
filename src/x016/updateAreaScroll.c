@@ -23,7 +23,7 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079AD0[];
-extern void func_80027810(O *);
+extern void cameraModeHandler6B(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void cameraEventScrollHandler(O *);
 
@@ -34,7 +34,7 @@ void updateAreaScroll(O *o)
     switch (o->step) {
     case 0:
         if (GVARS.b3a != 0) o->step++;
-        func_80027810(o);
+        cameraModeHandler6B(o);
         o->p38->whole = 0;
         break;
     case 1:

@@ -12,7 +12,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079AD0[];
-extern void func_80027810(O *);
+extern void cameraModeHandler6B(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void cameraEventScrollHandler(O *);
 
@@ -22,7 +22,7 @@ void updateAreaScroll(O *o)
     case 0:
         if (GVARS.b3a != 0) o->step++;
         o->p38->whole = 0;
-        func_80027810(o);
+        cameraModeHandler6B(o);
         break;
     case 1:
         D_80079AD0[o->subtype](o);

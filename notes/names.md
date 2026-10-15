@@ -205,6 +205,17 @@ One line per name: `address name (old file) - justification`.
 - `800480d4 pushObjectOutOfObjectBoxD` (was func_800480D4) - another box push-out variant (depth within 0x2D)
 - `8002e4b4 updatePoolType20Object` (was func_8002E4B4) - pool type 0x20 handler (slot 80079C2C)
 - `8002b3c8 l8Type01MoveStep` (was FUN_8002b3c8) - updateL8Type01Object movement: timed move toward +0xC4 with Rand wobble
+- `80029f1c cameraModeHandler2` (was func_80029F1C) - camera controller tables (7 slots per group at 80079A9C/AB8/AD4, X000 80138424; slot 0 = cameraEventScrollHandler): slot 2, decays the X speed and follows the target Y (cameraFollowTargetY/YB)
+- `8002a0fc cameraModeHandler3` (was func_8002A0FC) - camera controller slot 3: cameraFollowPlayerX/Y
+- `8002a258 cameraModeHandler5` (was func_8002A258) - camera controller slot 5: target Y follow (cameraFollowTargetY/YB)
+- `8002a3d4 cameraModeHandler6` (was FUN_8002a3d4) - camera controller slot 6 of the first group: cameraFollowPlayerX/Y then clamps to the player for player modes < 4 or 7
+- `80027810 cameraModeHandler6B` (was func_80027810) - slot 6 of the second group (80079AD0)
+- `8002c73c updatePoolType66Object` (was func_8002C73C) - pool handler at table slot 80079D44 (index 0x66): anim D_80014764 placed at the player
+- `8002c920 updatePoolType67Object` (was func_8002C920) - pool handler at slot 80079D48 (index 0x67): anim D_800121F4[subtype]
+- `8002e6c4 updatePoolType22Object` (was func_8002E6C4) - pool type 0x22 handler (slot 80079C34): render kind 7, category 3 list
+- `8004baa8 probeClimbGrabObject` (was FUN_8004baa8) - playerClimbFollowObject helper: probeGrabObjectBox over the list 1F800254; result in 1F8003C0
+- `80041d20 probeSlopeAngleAt` (was func_80041D20) (no caller found) - collision plane probe returning the slope angle (angleFromDelta)
+- `8002f060 playerEffect4EStepE` (was func_8002F060) (no caller found) - another pool type 0x4E effect step (anim from D_80079D58, follows the player's visibility)
 
 # X000 function names (shared overlay code)
 
@@ -416,6 +427,19 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80106a18 playerStep48ByArea` (was FUN_80106a18) - player step 0x48: per-area handlers (overlay code at 8011B47C / 8011C758 / 8011D5F4), like playerStep2EByArea
 - `800ea544 spawnPoolType05Ring` (was FUN_800ea544) - spawns 6 pool type 5 objects (updatePoolType05Object) at offsets D_80114A80 around x/y/z (layer-1 type 2 reward handler)
 - `80113754 objSetAnimFromSubtypeTable` (was FUN_80113754) - sets the anim from PTR_80115DF0[subtype][+0x74] and jumps to frame +0x76 (script ops and execGameOpcode)
+- `800ee6d0 playerFloatDirFromPad` (was FUN_800ee6d0) - playerJumpArea3Float helper: direction +0x76 from the pad bits D_8009D670 (Left 0xF0, Down sets 8) and a MulCosDup speed
+- `800ef05c spawnPlayerSplashEffect` (was FUN_800ef05c) - when spawnPlayerFootstepEffect spawned nothing: pool type 0x31 subtype 1 object at x/y/z (playerStepWaterJumpOut)
+- `800fc02c playerReleaseBittenAirborne` (was FUN_800fc02c) - sets +0x9C = 1 and releases the held object like playerReleaseBitten (D_8009D2E8 = PLX.p611c bytes 4/5/6 = 2,2,0)
+- `8010f254 playerSpinReleaseSpeedKind` (was func_8010F254) - playerStepSpinRelease helper: classifies |speed +0xB2| by the spin counter D_8009C330->w20
+- `8010e97c playerDecelerateIfFlag` (was func_8010E97C) (no caller found) - when +0xC1 bit 0: decelerates +0xB2 by 0x20 above 0x200, stops near 0
+- `8010b784 playerRestoreClingObjectActive` (was func_8010B784) (no caller found) - restores the active byte of the clung object D_8009F0EC by type (the switch of playerReleaseClingObject)
+- `80105ae4 playerBittenJumpReleaseFall` (was FUN_80105ae4) (no caller found) - drops the bitten object and enters the fall (jump counter 0xE, playerSetFallLean)
+- `800ebc64 initWeaponTrailSprite` (was FUN_800ebc64) (no caller found) - sprite/anim of a weapon trail object from D_80114C20/24 by subtype and slot
+- `800ef388 playerResetOnLanding` (was FUN_800ef388) (no caller found) - on landing (+0x69): sfx 0x1C and clears the jump/attack/grab flags
+- `800f66e4 playerSetFallAnimLoop` (was FUN_800f66e4) (no caller found) - sets player anim 4 (fall) at frame 1 when not already playing
+- `80104dc8 playerBittenCarryAirStep` (was FUN_80104dc8) (no caller found) - air step carrying the bitten object on top (x = player, y + box2), gravity and head collision
+- `800ee2a4 updateL4Type3EObject` (was FUN_800ee2a4) - layer 4 type 0x3E handler (MAIN0 table slot 80079E6C): tall invisible box (4..8 x 0xAA..0x154 by +0x0C)
+- `800ee18c updateL4Type13Object` (was FUN_800ee18c) - layer 4 type 0x13 handler (slot 80079DC0)
 
 # Area overlay function names (X001..X019)
 

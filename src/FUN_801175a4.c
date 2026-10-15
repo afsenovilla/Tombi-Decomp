@@ -6,7 +6,7 @@ extern unsigned char DAT_8009c93a;
 extern short DAT_1f80016e, DAT_1f80016a;
 extern void FUN_80116d14(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
-extern void FUN_8002a3d4(TObj *);
+extern void cameraModeHandler6(TObj *);
 extern void cameraEventScrollHandler(TObj *);
 
 void FUN_801175a4(TObj *o)
@@ -15,12 +15,12 @@ void FUN_801175a4(TObj *o)
         switch (o->step) {
         case 0:
             if (DAT_8009c93a != 0) o->step++;
-            FUN_8002a3d4(o);
+            cameraModeHandler6(o);
             break;
         case 1:
             if (DAT_1f80016e < -0xdb && DAT_1f80016a >= 0x12b) tryStartItemInteraction(o, 2, 1);
             else if (DAT_1f80016a >= 0x157 && DAT_1f80016e >= -0x38) tryStartItemInteraction(o, 2, 0);
-            FUN_8002a3d4(o);
+            cameraModeHandler6(o);
             break;
         case 2:
             cameraEventScrollHandler(o);

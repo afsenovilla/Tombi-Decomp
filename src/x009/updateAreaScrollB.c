@@ -21,7 +21,7 @@ extern unsigned char D_800A60DA;
 extern short D_800A457C;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
-extern void FUN_8002a3d4(O *);
+extern void cameraModeHandler6(O *);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
 extern void setEventStarted(int, int, int);
@@ -37,7 +37,7 @@ void updateAreaScrollB(O *o)
             o->state = 0;
             o->subtype = 0;
         }
-        FUN_8002a3d4(o);
+        cameraModeHandler6(o);
         break;
     case 1:
         D_80079AB4[o->subtype](o);

@@ -10,7 +10,7 @@ int playerProbeGrab(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void playerSetFallLean(TObj *o);
-void FUN_800fc02c(TObj *o);
+void playerReleaseBittenAirborne(TObj *o);
 void SfxPlay2(int a, int b);
 int ObjCheckHeadCollision(TObj *o);
 int AnimAdvance(TObj *o);
@@ -38,7 +38,7 @@ void playerStepSpringBounce(TObj *o)
         }
         PlayerSetAnimIfChanged(o, 0x39);
         SfxPlay2(0x23, 0x24);
-        FUN_800fc02c(o);
+        playerReleaseBittenAirborne(o);
         break;
     case 2:
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;

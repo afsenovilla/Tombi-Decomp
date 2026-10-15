@@ -18,7 +18,7 @@ extern P *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *allocObjectLayer1(void);
 extern void playerAirAccelerateX(TObj *);
-extern void FUN_80104dc8(TObj *);
+extern void playerBittenCarryAirStep(TObj *);
 extern void func_80104EA0(TObj *);
 extern void FUN_800ef490(TObj *);
 extern void ObjMotionStep(TObj *);
@@ -45,7 +45,7 @@ void func_801213D0(TObj *o)
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
-        FUN_80104dc8(o);
+        playerBittenCarryAirStep(o);
         func_80104EA0(o);
         break;
     case 1:

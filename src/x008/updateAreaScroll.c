@@ -6,7 +6,7 @@
 typedef void (*Fn)(TObj *);
 
 extern Fn D_80079AB4[];
-extern void FUN_8002a3d4(TObj *);
+extern void cameraModeHandler6(TObj *);
 extern int tryStartItemInteraction(TObj *, int, int);
 extern void cameraEventScrollHandler(TObj *);
 
@@ -15,7 +15,7 @@ void updateAreaScroll(TObj *o)
     switch (o->step) {
     case 0:
         if (GVARS.b3a != 0) o->step++;
-        FUN_8002a3d4(o);
+        cameraModeHandler6(o);
         break;
     case 1:
         D_80079AB4[o->subtype](o);

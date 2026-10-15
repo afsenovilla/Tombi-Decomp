@@ -10,7 +10,7 @@ extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
-extern void func_8010F254(TObj *);
+extern void playerSpinReleaseSpeedKind(TObj *);
 extern void applyObjectAltSpeedXY(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 extern TObj *playerProbeGrab(TObj *, int);
@@ -91,7 +91,7 @@ void playerStepSpinRelease(TObj *o)
     case 1:
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        func_8010F254(o);
+        playerSpinReleaseSpeedKind(o);
         applyObjectAltSpeedXY(o);
         AnimAdvance(o);
         if (ObjCheckHeadCollision(o)) {

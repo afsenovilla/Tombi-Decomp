@@ -16,7 +16,7 @@ extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_800f00ac(TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, int, int, int);
-extern void func_8010E97C(TObj *);
+extern void playerDecelerateIfFlag(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void ObjApplyVelocity(TObj *);
 extern void playerSetSlopeTilt(TObj *, short);
@@ -89,7 +89,7 @@ void func_801237E4(TObj *o)
         }
         break;
     case 2:
-        func_8010E97C(o);
+        playerDecelerateIfFlag(o);
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
         ObjApplyVelocity(o);
         if (o->wb2 == 0) {
