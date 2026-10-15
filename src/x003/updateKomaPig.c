@@ -11,10 +11,10 @@ extern void func_80123B20();
 extern void func_80123C60();
 extern void func_80123EA8();
 extern void func_801241C0();
-extern void func_801243B8();
+extern void komaPigDropInIntro();
 static Fn D_80135C64[5] = {
     (Fn)func_80123B20, (Fn)func_80123C60, (Fn)func_80123EA8, (Fn)func_801241C0,
-    (Fn)func_801243B8,
+    (Fn)komaPigDropInIntro,
 };
 extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);
