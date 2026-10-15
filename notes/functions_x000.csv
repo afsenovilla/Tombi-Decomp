@@ -1,7 +1,7 @@
 address,name,size,typed
 800e9f74,awardAPByArea,500,1
 800ea168,updatePoolType04Object,184,1
-800ea220,FUN_800ea220,100,1
+800ea220,initPoolType04Sprite,100,1
 800ea284,updatePoolType05Object,704,1
 800ea544,spawnPoolType05Ring,312,1
 800ea67c,updateGroundDebris,1936,1
@@ -46,7 +46,7 @@ address,name,size,typed
 800eea7c,FUN_800eea7c,104,0
 800eeae4,FUN_800eeae4,120,0
 800eeb5c,PlayerSetAnimIfChanged,104,0
-800eebc4,FUN_800eebc4,124,0
+800eebc4,playerSetIdleAnimByArea,124,0
 800eec40,playerAirSpinToFall,512,1
 800eee90,playerReleaseBittenAndClearFlags,124,0
 800eef0c,spawnPlayerFootstepEffect,336,0
@@ -64,7 +64,7 @@ address,name,size,typed
 800eff1c,FUN_800eff1c,400,1
 800f00ac,FUN_800f00ac,712,1
 800f0374,FUN_800f0374,220,1
-800f0450,FUN_800f0450,64,0
+800f0450,objectSinkAndProbe,64,0
 800f0490,playerInitMode,1740,1
 800f0b5c,playerIdleFidgetAllowed,204,0
 800f0c28,playerIdlePickFidgetAnim,596,1
@@ -80,7 +80,7 @@ address,name,size,typed
 800f35e0,FUN_800f35e0,188,1
 800f36e0,FUN_800f36e0,2060,1
 800f3f3c,playerStepAttackJump,1040,1
-800f434c,FUN_800f434c,132,1
+800f434c,playerLandResumeWalk,132,1
 800f44b0,FUN_800f44b0,2488,1
 800f4ed0,playerSpinPlaceAndAccelerate,324,1
 800f5014,FUN_800f5014,100,0
@@ -139,7 +139,7 @@ address,name,size,typed
 801031fc,FUN_801031fc,148,1
 80103290,playerBiteHoldType0B,920,1
 80103628,playerBiteHoldAttach,332,1
-80103774,FUN_80103774,100,1
+80103774,playerResetSlopeState,100,1
 801037d8,playerBiteHoldGeneric,1252,1
 80103cbc,FUN_80103cbc,132,1
 80103d40,playerBiteHoldType0E,768,1
@@ -200,7 +200,7 @@ address,name,size,typed
 8010d390,FUN_8010d390,1120,1
 8010d888,playerStepSwimUnderwater,644,1
 8010db0c,playerStepWaterJumpOut,568,1
-8010dd44,FUN_8010dd44,72,1
+8010dd44,playerEnterStep3E,72,1
 8010dd8c,playerStepSwimSpin,504,1
 8010df84,playerEventWalk,400,1
 8010e114,playerTryTalkToNpc,532,0
@@ -235,13 +235,13 @@ address,name,size,typed
 801128f8,l2Type0EActiveIdle,32,0
 80112918,l2Type0EActive2,184,1
 801129d0,l2Type0EActive3,528,1
-80112be0,FUN_80112be0,68,0
+80112be0,l2Type0ECheckAreaFlag,68,0
 80112c24,l2Type0EHit0,1040,1
 80113034,l2Type0EHit2,900,1
 801133b8,l2Type0EHit3,204,1
 80113484,updateL2Type0EObject,720,1
 80113754,objSetAnimFromSubtypeTable,72,1
-8011379c,FUN_8011379c,32,0
+8011379c,animAdvanceThunk,32,0
 801137bc,FUN_801137bc,204,1
 80113888,FUN_80113888,300,1
 801139b4,FUN_801139b4,216,1
@@ -250,7 +250,7 @@ address,name,size,typed
 80113cc8,FUN_80113cc8,624,1
 80113f38,l2Type18Active,904,1
 801142c0,l2Type18Hit,924,1
-8011465c,FUN_8011465c,48,1
+8011465c,l2Type18HitIfStep0,48,1
 8011468c,updateL2Type18Object,516,1
 80114890,updateL2Type1FObject,64,0
 801148d0,FUN_801148d0,152,0
@@ -369,7 +369,7 @@ address,name,size,typed
 80121790,FUN_80121790,44,0
 80121870,updateA00L4Type26,492,1
 80121a5c,spawnPoolType44Object,132,0
-80121ae0,FUN_80121ae0,72,1
+80121ae0,a00L4Type26ReleaseParts,72,1
 80121b28,FUN_80121b28,48,1
 80121b58,thunk_FUN_80121e38,12,0
 80121d6c,FUN_80121d6c,116,0
@@ -383,8 +383,8 @@ address,name,size,typed
 801224c0,updateA00L7Type01,612,1
 80122724,updateA00L7Type02,408,1
 801228bc,FUN_801228bc,212,1
-80122990,FUN_80122990,72,0
-801229d8,FUN_801229d8,64,0
+80122990,playerSetSpawnTimerArea0Sec3,72,0
+801229d8,playerHitAnimWithImpact,64,0
 80122a18,playerBiteHoldType15,504,1
 80122c10,FUN_80122c10,656,1
 80122cbc,FUN_80122cbc,116,0

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
 extern void playerBittenCarryAirStep(TObj *);
-extern void func_80104F2C(TObj *);
+extern void playerCheckJumpPressedB(TObj *);
 extern void FUN_800ef490(TObj *);
 extern void ObjGravityStep(TObj *);
 extern void ObjAddVelY7E(TObj *);
@@ -26,7 +26,7 @@ void func_8011D3EC(TObj *o)
     case 0:
         D_8009D2E8->d8c = o->d88 - 0xc0;
         playerBittenCarryAirStep(o);
-        func_80104F2C(o);
+        playerCheckJumpPressedB(o);
         break;
     case 1:
         FUN_800ef490(o);

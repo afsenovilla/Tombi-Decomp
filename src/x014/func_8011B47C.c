@@ -8,7 +8,7 @@ extern TObj *D_8009C330;
 extern volatile unsigned short D_8009D670[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
 extern void playerBiteHoldAttach(TObj *);
-extern void FUN_80103774(TObj *);
+extern void playerResetSlopeState(TObj *);
 extern void FUN_8003facc(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -43,7 +43,7 @@ void func_8011B47C(TObj *o)
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
-                    FUN_80103774(o);
+                    playerResetSlopeState(o);
                 }
             }
         } else {
@@ -52,13 +52,13 @@ void func_8011B47C(TObj *o)
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
-                    FUN_80103774(o);
+                    playerResetSlopeState(o);
                 }
             }
         }
         if (o->timer >= 0xb) {
             playerBiteHoldAttach(o);
-            FUN_80103774(o);
+            playerResetSlopeState(o);
         }
         break;
     case 2:

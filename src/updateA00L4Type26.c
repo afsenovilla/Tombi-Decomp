@@ -6,7 +6,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_80121124(TObj *);
 extern void setEventStarted(int, int, int);
 extern int setEventComplete(int, int);
-extern void FUN_80121ae0(TObj *);
+extern void a00L4Type26ReleaseParts(TObj *);
 extern void FUN_8012160c(TObj *);
 extern void FUN_8012171c(TObj *);
 extern void FUN_80018838(TObj *);
@@ -54,7 +54,7 @@ void updateA00L4Type26(TObj *o)
                     o->b04 = 2;
                     o->step = 0;
                     if (o->b0c == 0)
-                        FUN_80121ae0(o);
+                        a00L4Type26ReleaseParts(o);
                 }
                 break;
             }

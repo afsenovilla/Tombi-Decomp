@@ -19,7 +19,7 @@ extern TObj *D_8009D2E8;
 extern TObj *allocObjectLayer1(void);
 extern void playerAirAccelerateX(TObj *);
 extern void playerBittenCarryAirStep(TObj *);
-extern void func_80104EA0(TObj *);
+extern void playerCheckJumpPressedA(TObj *);
 extern void FUN_800ef490(TObj *);
 extern void ObjMotionStep(TObj *);
 extern int AnimAdvance(TObj *);
@@ -46,7 +46,7 @@ void playerBittenJumpCrawler(TObj *o)
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         playerBittenCarryAirStep(o);
-        func_80104EA0(o);
+        playerCheckJumpPressedA(o);
         break;
     case 1:
         FUN_800ef490(o);

@@ -1,7 +1,7 @@
 // FUNC 80121124 344 X000
 // MATCHING 80121124 344
 extern int spawnPoolType44Object(int, int, int, int);
-extern void FUN_80121ae0(void *);
+extern void a00L4Type26ReleaseParts(void *);
 
 void FUN_80121124(unsigned char *o)
 {
@@ -20,7 +20,7 @@ void FUN_80121124(unsigned char *o)
     case 1:
         *(short *)(o + 0x22) = *(short *)(o + 0x22) - 1;
         if (*(short *)(o + 0x22) == -1) {
-            FUN_80121ae0(o);
+            a00L4Type26ReleaseParts(o);
             *(short *)(o + 0x22) = 0x1e;
             o[6] = o[6] + 1;
         }

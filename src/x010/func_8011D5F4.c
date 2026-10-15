@@ -17,7 +17,7 @@ extern void SfxPlay2(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playerPlaceBittenObject(TObj *);
 extern void playerBiteHoldAttach(TObj *);
-extern void FUN_80103774(TObj *);
+extern void playerResetSlopeState(TObj *);
 
 void func_8011D5F4(TObj *o)
 {
@@ -42,7 +42,7 @@ void func_8011D5F4(TObj *o)
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
-                    FUN_80103774(o);
+                    playerResetSlopeState(o);
                 }
             }
         } else {
@@ -51,13 +51,13 @@ void func_8011D5F4(TObj *o)
                 o->h->p.whole = D_8009D2E8->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
-                    FUN_80103774(o);
+                    playerResetSlopeState(o);
                 }
             }
         }
         if (o->timer >= 0xb) {
             playerBiteHoldAttach(o);
-            FUN_80103774(o);
+            playerResetSlopeState(o);
         }
         break;
     case 2:
