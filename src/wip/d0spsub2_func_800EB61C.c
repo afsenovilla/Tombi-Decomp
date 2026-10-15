@@ -109,6 +109,6 @@ void func_800EB61C(int pri, int mode)
             break;
         }
     }
-    if (D_1F8003D4 < w) D_1F8003D4 = w;
+    if (w > D_1F8003D4) D_1F8003D4 = w;
     AddDrawMode(D_800F70D8.w, pri);
 }
