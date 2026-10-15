@@ -1,0 +1,69 @@
+// FUNC 8012f9a0 548 X003
+// MATCHING 8012f9a0 548
+#include "spad.h"
+#include "TOBJ.H"
+
+extern void *D_8013A698[];
+extern signed char D_80135EA0[], D_80135EB0[];
+extern short D_8007A5F0[], D_8007A3F0[];
+extern void AnimLoadDuration(TObj *);
+extern int AnimAdvance(TObj *);
+extern int ObjCullRegister(TObj *);
+extern void freeObjectLayer2(TObj *);
+
+void updateThrowerEnemyShot(TObj *o)
+{
+    TObj *p;
+    signed char *t;
+
+    switch (o->b04) {
+    case 0:
+        o->box0 = 8;
+        o->box1 = 0x10;
+        o->box2 = 8;
+        o->box3 = 0x10;
+        o->animFrame = 1;
+        o->w1e = 1;
+        o->b04++;
+        o->d3c = ((int*)&SPAD.i2dc)[0];
+        *(signed char *)&o->b0f = -10;
+        o->b0d = 0x80;
+        o->b0a = 0;
+        o->d30 = 0;
+        o->d34 = 0;
+        if (o->subtype == 0) {
+            o->velH = 0x80;
+            o->wac = 0x19;
+        } else {
+            o->active = 1;
+            o->velH = 0x480;
+            o->wac = 0x12;
+        }
+        o->anim = D_8013A698[o->wac];
+        AnimLoadDuration(o);
+        break;
+    case 1:
+        p = (TObj *)o->d90;
+        if (p->animFrame) t = D_80135EB0 + ((o->d8c >> 4) & 0xe);
+        else t = D_80135EA0 + ((o->d8c >> 4) & 0xe);
+        {
+            int i, x, y, tx, ty;
+            i = o->d8c & 0xf0;
+            x = o->velH * D_8007A5F0[i];
+            y = o->velH * D_8007A3F0[i];
+            tx = t[0] << 16;
+            ty = t[1] << 16;
+            o->d30 += x >> 4;
+            o->d34 += y >> 4;
+            o->a.raw = p->a.raw + o->d30 + tx;
+            o->y.raw = p->y.raw + o->d34 + ty;
+        }
+        if (AnimAdvance(o)) o->b04++;
+        ObjCullRegister(o);
+        break;
+    case 2:
+    case 3:
+        freeObjectLayer2(o);
+        break;
+    }
+}

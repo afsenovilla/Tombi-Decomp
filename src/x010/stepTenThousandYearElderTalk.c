@@ -2,7 +2,7 @@
 // MATCHING 80126ea0 168
 #include "TOBJ.H"
 
-extern void func_80125E00(TObj *);
+extern void selectTenThousandYearElderTalkStep(TObj *);
 extern void tenThousandYearElderTalk(TObj *);
 extern void tenThousandYearElderBeadsTalk(TObj *);
 extern void powerFishCollectorTalk(TObj *);
@@ -12,7 +12,7 @@ void stepTenThousandYearElderTalk(TObj *o)
 {
     switch (o->step) {
     case 0:
-        func_80125E00(o);
+        selectTenThousandYearElderTalkStep(o);
         break;
     case 1:
         tenThousandYearElderTalk(o);

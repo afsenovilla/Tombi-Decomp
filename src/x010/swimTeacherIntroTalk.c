@@ -35,7 +35,7 @@ extern void playSFX(int);
 extern void ObjSetFacingToPlayer(TObj *);
 extern void FUN_800eea7c(TObj *, int, int);
 extern void startPadVibration(int, int, int, int);
-extern void func_801271D8(TObj *, int);
+extern void swimTeacherFloatPlayer(TObj *, int);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *showMessageBoxDirect(int, int, void *);
 extern void setEventStarted(int, int, int);
@@ -90,11 +90,11 @@ void swimTeacherIntroTalk(TObj *o)
             ObjSetFacingToPlayer(o);
             SETANIM(7);
         } else if (o->timer < 0x1e) {
-            func_801271D8(o, 1);
+            swimTeacherFloatPlayer(o, 1);
         }
         break;
     case 3:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         AnimAdvance(o);
         o->h->raw += o->velH << 8;
         o->y.raw += o->velV << 8;
@@ -107,7 +107,7 @@ void swimTeacherIntroTalk(TObj *o)
         o->timer--;
         break;
     case 4:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         AnimAdvance(o);
         o->h->raw += o->velH << 8;
         o->y.raw += o->velV << 8;
@@ -125,7 +125,7 @@ void swimTeacherIntroTalk(TObj *o)
         }
         break;
     case 5:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         if (--o->timer == -1) {
             { int h, s, k; unsigned char s2;
             s = o->state;

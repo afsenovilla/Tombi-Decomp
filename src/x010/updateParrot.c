@@ -19,7 +19,7 @@ extern void nobleTreeRestoredTalk(TObj *);
 extern void nobleTreeGrandpaMessage(TObj *);
 extern void nobleTreeGoldenItemsAsk(TObj *);
 extern void nobleTreeGoldenItemsHint(TObj *);
-extern void func_8012C6EC(TObj *);
+extern void parrotPushBackAndSelectTalk(TObj *);
 
 void updateParrot(TObj *o)
 {
@@ -95,7 +95,7 @@ void updateParrot(TObj *o)
         break;
     case 2:
         ObjCullRegister(o);
-        func_8012C6EC(o);
+        parrotPushBackAndSelectTalk(o);
         break;
     case 3:
         freeObjectLayer2(o);

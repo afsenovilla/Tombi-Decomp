@@ -10,7 +10,7 @@ extern void func_8011B6F4(TObj *);
 extern void func_8011B870(TObj *);
 extern void func_8011BA34(TObj *);
 extern void func_8011BCC8(TObj *);
-extern void func_8011C050(TObj *);
+extern void playerLauncherThrow(TObj *);
 extern void func_8011C3D8(TObj *);
 
 void func_8011CA70(TObj *o)
@@ -29,7 +29,7 @@ void func_8011CA70(TObj *o)
         func_8011BCC8(o);
         break;
     case 4:
-        func_8011C050(o);
+        playerLauncherThrow(o);
         break;
     case 5:
         switch (o->state) {

@@ -18,7 +18,7 @@ extern int AnimAdvance(TObj *);
 extern void FUN_800eea7c(TObj *, int, int);
 extern int showMessageBoxDirect(int, int, void *);
 extern void setEventComplete(int, int);
-extern void func_801271D8(TObj *, int);
+extern void swimTeacherFloatPlayer(TObj *, int);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
@@ -49,18 +49,18 @@ void swimTeacherFloatTalk(TObj *o)
         GCD.bd078 = 4;
         break;
     case 2:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         if (--o->timer == -1) o->state++;
         break;
     case 3:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         o->anim = ANIMS(o)[5];
         AnimLoadDuration(o);
         m = 2;
         n = 0x19;
         goto talk;
     case 4:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         AnimAdvance(o);
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
@@ -68,7 +68,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         break;
     case 5:
-        func_801271D8(o, 1);
+        swimTeacherFloatPlayer(o, 1);
         FUN_800eea7c(&PLAYER, 0x47, 0);
         o->ba7 = 0;
         PLAYER.y.p.whole = -0xe2;
@@ -79,7 +79,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->d90 = showMessageBoxDirect(2, 0x1a, &o->a);
         break;
     case 6:
-        func_801271D8(o, 4);
+        swimTeacherFloatPlayer(o, 4);
         AnimAdvance(o);
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
@@ -87,12 +87,12 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         break;
     case 7:
-        func_801271D8(o, 2);
+        swimTeacherFloatPlayer(o, 2);
         o->state++;
         o->d90 = showMessageBoxDirect(2, D_8012F3C8[GCD.bcf1c], &o->a);
         break;
     case 8:
-        func_801271D8(o, 2);
+        swimTeacherFloatPlayer(o, 2);
         AnimAdvance(o);
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
@@ -100,12 +100,12 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         break;
     case 9:
-        func_801271D8(o, 3);
+        swimTeacherFloatPlayer(o, 3);
         m = 2;
         n = 0x23;
         goto talk;
     case 10:
-        func_801271D8(o, 3);
+        swimTeacherFloatPlayer(o, 3);
         AnimAdvance(o);
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
@@ -113,7 +113,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         break;
     case 11:
-        func_801271D8(o, 2);
+        swimTeacherFloatPlayer(o, 2);
         m = 2;
         n = 0x24;
     talk:
@@ -121,7 +121,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->d90 = showMessageBoxDirect(m, n, &o->a);
         break;
     case 12:
-        func_801271D8(o, 2);
+        swimTeacherFloatPlayer(o, 2);
         AnimAdvance(o);
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
@@ -129,14 +129,14 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         break;
     case 13:
-        func_801271D8(o, 3);
+        swimTeacherFloatPlayer(o, 3);
         ((int*)&GAME.area00_eventControl)[0] |= 8;
         setEventComplete(8, 0);
         o->timer = 0x168;
         o->state++;
         break;
     case 14:
-        func_801271D8(o, 3);
+        swimTeacherFloatPlayer(o, 3);
         if (--o->timer == -1) {
             (*(short*)&GAME.nextArea) = 10;
             (*(short*)&GAME.nextSpawnPoint) = 3;
@@ -147,7 +147,7 @@ void swimTeacherFloatTalk(TObj *o)
         }
         break;
     case 15:
-        func_801271D8(o, 4);
+        swimTeacherFloatPlayer(o, 4);
         if (GAME.fadeScreenControl == 1) {
             TASK_C->mode = 7;
             TASK_C->step = 0;

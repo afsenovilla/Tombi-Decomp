@@ -59,8 +59,8 @@ extern void FUN_80102a08(TObj *);
 extern void FUN_800ffec4(TObj *);
 extern void playerStepWalkIntoDepth(TObj *);
 extern void playerStepRopeSwing(TObj *);
-extern void FUN_8011e358(TObj *);
-extern void FUN_8011e6b0(TObj *);
+extern void playerStepSpringBounce(TObj *);
+extern void playerStepLaunched(TObj *);
 extern void FUN_80122c10(TObj *);
 extern void FUN_8011eae8(TObj *);
 extern void playerStepRopeJumpOff(TObj *, int);
@@ -357,10 +357,10 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepRopeSwing(o);
         break;
     case 0x33:
-        FUN_8011e358(o);
+        playerStepSpringBounce(o);
         break;
     case 0x34:
-        FUN_8011e6b0(o);
+        playerStepLaunched(o);
         break;
     case 0x35:
         FUN_80122c10(o);

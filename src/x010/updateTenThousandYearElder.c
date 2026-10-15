@@ -2,7 +2,7 @@
 // MATCHING 801270ac 300
 #include "TOBJ.H"
 extern void initTenThousandYearElder(TObj *);
-extern void func_80125E00(TObj *);
+extern void selectTenThousandYearElderTalkStep(TObj *);
 extern void tenThousandYearElderTalk(TObj *);
 extern void tenThousandYearElderBeadsTalk(TObj *);
 extern void powerFishCollectorTalk(TObj *);
@@ -22,7 +22,7 @@ void updateTenThousandYearElder(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            func_80125E00(o);
+            selectTenThousandYearElderTalkStep(o);
             break;
         case 1:
             tenThousandYearElderTalk(o);

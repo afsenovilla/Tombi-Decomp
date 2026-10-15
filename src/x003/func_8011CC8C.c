@@ -4,7 +4,7 @@
 extern TObj PLAYER;
 extern void *D_80139870[];
 extern void func_8011B6F4(TObj *), func_8011B870(TObj *), func_8011BA34(TObj *), func_8011BCC8(TObj *);
-extern void func_8011C050(TObj *), func_8011C7FC(TObj *);
+extern void playerLauncherThrow(TObj *), func_8011C7FC(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 
@@ -24,7 +24,7 @@ void func_8011CC8C(TObj *o)
         func_8011BCC8(o);
         break;
     case 4:
-        func_8011C050(o);
+        playerLauncherThrow(o);
         break;
     case 5:
     case 6:

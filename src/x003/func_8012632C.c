@@ -8,7 +8,7 @@ extern int AnimAdvance(TObj *);
 extern int Rand(void);
 extern short isObjectBelowGround(TObj *);
 extern void applyFrameVelocityXY(TObj *);
-extern int func_801256F4(TObj *, short);
+extern int hornedEnemyCheckWall(TObj *, short);
 extern void *D_80139500[];
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D54[], D_80135D4C[];
@@ -121,7 +121,7 @@ void func_8012632C(TObj *o)
         applyFrameVelocityXY(o);
         AnimAdvance(o);
         slope(o);
-        if (func_801256F4(o, o->animFrame)) {
+        if (hornedEnemyCheckWall(o, o->animFrame)) {
             go3(o, 0x3c, 0x1d);
         } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
             go3(o, 0x1e, 0x1d);
@@ -175,7 +175,7 @@ void func_8012632C(TObj *o)
         applyFrameVelocityXY(o);
         AnimAdvance(o);
         slope(o);
-        if (func_801256F4(o, o->animFrame)) {
+        if (hornedEnemyCheckWall(o, o->animFrame)) {
             o->w22 = 0x3c;
             o->substep++;
         } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {

@@ -699,3 +699,27 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   spawnRaceMessage` (ObjAlloc layer 3 type 0x56 objects from the letter table D_8011F3CC[sub]) -> `80117ddc updateRaceMessageSprite` (per-subtype timers
   0x32 / 0x78; uncertain), `8011ba3c updateItemPickup` (layer 5 type 0x10, the same as x009's), `8011ebd0 cullObjectWideWindow` (visible within depth
   +-0x190, x -0xC8..+0x2BC, y window 0x231 around the camera, then pushes the object on its category list)
+- x003 (Phoenix Mountain) objects: `80124ffc updateSpringPad` (layer 2 type 0x1D, 22 placements: plays its bounce anim with sfx 0x73 when b69 is set)
+  with `8011fd20 springPadContact` (landing on it from above (contact result 3): pad vibration, player b04 1 step 0x33 with velY -0x600 (subtype 0)
+  or -0x980) -> `8011e358 playerStepSpringBounce` (the x003 code at the player step 0x33 address of MAIN0 playerNormalModeDispatch: anim 0x39,
+  sfx 0x23/0x24, flies up until the head hits or it falls); `8011ce24 updatePlayerLauncher` (layer 4 type 0x2E, kind uncertain: SPR_DATA[6],
+  allocates a layer 3 type 0x38 part below itself; b0c & 8 starts it in a scripted state when GV2.bc2) whose `8011c050 playerLauncherThrow` (sfx 0x72)
+  puts the player in step 0x34 with velX +-0x400 -> `8011e6b0 playerStepLaunched`; `801202e4 playerLauncherObjectCollision` (FUN_80046610 type 0x2E)
+- x003 thrower enemy (layer 2 type 0x38, 13 placements, kind uncertain; SPR_DATA[3], anim table D_8013A698): `8012f524 updateThrowerEnemy`,
+  `8012e6b0 throwerEnemyThrow` (subtype 1 state 3: spawns layer 2 type 0x39 shots), `8012f9a0 updateThrowerEnemyShot` (type 0x39: semi-transparent,
+  speed 0x80 (subtype 0) or 0x480), `8011f508 throwerEnemyShotContact` (2 points of damage), `8011f634 throwerEnemyContact`; b04 2 steps:
+  `8012eb2c throwerEnemyHit` (subtype 1 step 0), `8012f234 throwerEnemyGrabbed` / `8012ef3c throwerEnemyGrabbedB` (step 1 of subtype 0 / 1,
+  spawnItemNotification(1, 6)), `8012f3b0 throwerEnemyDefeated`
+- x003 `801281fc updateHornedEnemy` (layer 2 type 0x28, 12 placements; "horned" only from the badly composed strips, uncertain): b04 2 step 0
+  `8012748c hornedEnemyHit`, step 1 `80127d48 hornedEnemyGrabbed` (spawnItemNotification(2, 6), counts the shakes in wb6), step 2 `80128060
+  hornedEnemyDefeated`; `80120140 hornedEnemyContact` (FUN_80047484 type 0x28), `801256f4 hornedEnemyCheckWall` (wall / floor probe 0x18 ahead
+  along the slope d8c)
+- x001 `80134c00 updateSegmentedCrawler` (layer 2 type 0x13, spawned (not placed), kind uncertain: `80134ee8 initSegmentedCrawler` allocates 3 or 5 more
+  layer 2 objects (needs that many free, else frees itself and decrements the spawner count GVARS.p48[5]) and links them as body segments (b0c != 0,
+  d90/d94) that `80133a24 segmentedCrawlerFollowParent` keeps behind the head at the angle d84; the head moves with `80132b64 segmentedCrawlerMove`;
+  freed when GV2.bc3 & 1); b04 2 = `80134944 stepSegmentedCrawlerHurt`: step 0 `80133ba4 segmentedCrawlerHit`, 1 `80134070 segmentedCrawlerGrabbed`,
+  2 `801344fc segmentedCrawlerDefeated` (fly-off), 3/4 free the whole chain; `80126564 segmentedCrawlerContact` (FUN_80047484 type 0x13)
+- x010 talk helpers: `80125e00 selectTenThousandYearElderTalkStep` (talk step from event 0x7E and the ten math bead flags GCD.bd0e7[0..9], events
+  0x40/0x74/0x7F and the five golden item flags), `801271d8 swimTeacherFloatPlayer` (bobs the player on a sine around d34 during the swim lesson,
+  sfx 0x0E), `8012c6ec parrotPushBackAndSelectTalk` (pushes the player back (b04 6 step 5, velX +-0xC0), then picks the parrot's talk step from
+  events 0x3F / 0x3E / 0x7F; uncertain)
