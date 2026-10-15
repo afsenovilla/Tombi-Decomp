@@ -1056,3 +1056,18 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   and jumps; uncertain), `8012a5cc purplePigDrop`, `8012a794 purplePigCrawlWall` (uncertain); `80128110 purplePigChooseStep` (next step from the distance
   to home/player); `80123b30 updateFallingSparkleItem` (item that falls leaving type 0x31 sparkles; uncertain), `80123e50 spawnItemEffectFlyingItem`
   (applyItemEffect case 6: layer 5 type 6 subtype 0x13 with velH)
+- x001 race rival (layer 2 type 0x0D, the opponent of the race event GCD.bce59; kind uncertain): `801312f8 updateRaceRival` with the steps
+  `80130298 raceRivalWaitStart`, `80130420 raceRivalRun`, `801305d0 raceRivalRunCourse`, `80130dc4 raceRivalTurn`, `80130f4c raceRivalFall`,
+  `8013109c raceRivalFinish` (sets GCD.bcedf) and, for subtype 0, `8012ff4c raceRivalIdleWander`, `80130114 raceRivalHopAway` (step names uncertain)
+- x001 misc: `80131904 updateAnimProp` (layer 2 type 0x10, 2 placements: a culled looping animation; uncertain kind), `80132698
+  spawnRollingBarrelDebris` (rollingBarrelWeaponHit: 7 type 0x21 pieces) -> `80132760 updateBarrelDebrisPiece` (uncertain), segmented crawler
+  `80132964 segmentedCrawlerCheckWall`, `80132a3c segmentedCrawlerWiggle` (head angle sway), `801334dc segmentedCrawlerWander` (uncertain),
+  `80134674 segmentedCrawlerHurtFlyOff` (stepSegmentedCrawlerHurt: the head and body pieces fly off; uncertain), `801319c8 updateParentFollowModel` (layer 8
+  model that copies the d90 parent's position/angle; uncertain), `801368d4 spawnCaughtForestDwarf` / `801374c0 spawnHeldPuppyBaron` (playerInitAreaHook:
+  type 0x16 / 0x17 objects already in the caught step 3), `801369f8 initPuppyRumorNpc` (while GCD.bceab is 1..2), `8013a1f4
+  checkPuppyRumorNpcTalk`, `80136aac playPuppyBarkNearby` (random sfx 0x41 near x 0x8AE..0xAAE, louder higher up), `80139a80 spawnLostSeedKidDwarf`
+  (type 0x16 at 0x105B,-0x506 while GCD.bcdb2 < 2; uncertain), `80138550 stepCeilingDripDrop` (updateCeilingDrip subtype 0), `80138c4c
+  updateOneShotAnimEffect` (uncertain), `80138e7c brokenFountainPoseA` / `80139174 brokenFountainPoseB` (brokenFountainScene step 6 by b0c;
+  uncertain), `8013bda0 updateLeafButterflySwarm` (runs while event 0xB2 Leaf Butterflies (GCD.bce56) is open: `8013b344
+  spawnLeafButterflySwarm`, `8013b51c stepLeafButterflySwarm`, `8013b504 isLeafButterflyEventOpen`; uncertain), `8013be48 updateKomaPigSpawner`
+  (type 2 objects near x 1000..0x885 while GCD.bcdb5), `8013c028 updateSegmentedCrawlerSpawner` (type 0x13, at most 2)

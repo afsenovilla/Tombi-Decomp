@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_8013E72C[];
-extern void func_80138550(TObj *);
+extern void stepCeilingDripDrop(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -14,7 +14,7 @@ void updateCeilingDrip(TObj *o)
 {
     switch (o->subtype) {
     case 0:
-        func_80138550(o);
+        stepCeilingDripDrop(o);
         break;
     case 1:
         switch (o->b04) {

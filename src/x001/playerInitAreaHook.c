@@ -4,20 +4,20 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern TObj *D_8009F0EC;
-extern void func_801374C0(int, int, int, int);
-extern void func_801368D4(int, int, int);
+extern void spawnHeldPuppyBaron(int, int, int, int);
+extern void spawnCaughtForestDwarf(int, int, int);
 extern void FUN_80026e0c(int, int);
 
 void playerInitAreaHook(TObj *o)
 {
     D_8009F0EC = 0;
     if (GAME.baronState == 3)
-        func_801374C0(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnHeldPuppyBaron(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     if (GCD.bcdb2 != 0xff) {
         if (!(GAME.area00_eventControl & 0x100))
             goto clr;
         if (GAME.selectedSection == 3 || GAME.selectedSection == 1)
-            func_801368D4(o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnCaughtForestDwarf(o->a.p.whole, o->y.p.whole, o->b.p.whole);
     } else {
         if (!(GAME.area00_eventControl & 0x100))
             goto clr;

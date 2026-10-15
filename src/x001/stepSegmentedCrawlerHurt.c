@@ -11,7 +11,7 @@ extern void segmentedCrawlerFollowParent(TObj *);
 extern void segmentedCrawlerHit(TObj *);
 extern void segmentedCrawlerGrabbed(TObj *);
 extern void segmentedCrawlerDefeated(TObj *);
-extern void func_80134674(TObj *);
+extern void segmentedCrawlerHurtFlyOff(TObj *);
 
 void stepSegmentedCrawlerHurt(TObj *o)
 {
@@ -71,7 +71,7 @@ void stepSegmentedCrawlerHurt(TObj *o)
                 (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
             }
         } else {
-            func_80134674(o);
+            segmentedCrawlerHurtFlyOff(o);
         }
         break;
     }

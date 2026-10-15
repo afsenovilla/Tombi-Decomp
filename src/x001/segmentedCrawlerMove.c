@@ -6,8 +6,8 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern void *D_8013F034[];
 extern void *D_8013F064[];
 extern void AnimLoadDuration(TObj *);
-extern void func_80132A3C(TObj *);
-extern int func_80132964(TObj *);
+extern void segmentedCrawlerWiggle(TObj *);
+extern int segmentedCrawlerCheckWall(TObj *);
 
 #define MOVE() \
     o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
@@ -86,7 +86,7 @@ void segmentedCrawlerMove(TObj *o)
         }
         break;
     case 1:
-        func_80132A3C(o);
+        segmentedCrawlerWiggle(o);
         MOVE();
         break;
     case 2:
@@ -99,14 +99,14 @@ void segmentedCrawlerMove(TObj *o)
         o->timer = -0x1000;
         o->state++;
     case 5:
-        func_80132A3C(o);
+        segmentedCrawlerWiggle(o);
         MOVE();
         if (o->h->p.whole >= 0x551) {
             if (o->y.p.whole < -0x140) o->state = 0x15;
             else o->state = 0x1b;
             o->substep = 0;
         }
-        r = func_80132964(o);
+        r = segmentedCrawlerCheckWall(o);
         if (r == 1) {
             o->state = 6;
             o->substep = 0;
@@ -126,7 +126,7 @@ void segmentedCrawlerMove(TObj *o)
         o->timer = -0x1000;
         o->state++;
     case 9:
-        func_80132A3C(o);
+        segmentedCrawlerWiggle(o);
         MOVE();
         if (o->y.p.whole < -0x140) {
             o->state = 0x12;
@@ -143,7 +143,7 @@ void segmentedCrawlerMove(TObj *o)
         o->timer = -0x1000;
         o->state++;
     case 13:
-        func_80132A3C(o);
+        segmentedCrawlerWiggle(o);
         MOVE();
         if (o->y.p.whole < -0x140) {
             o->state++;
@@ -160,14 +160,14 @@ void segmentedCrawlerMove(TObj *o)
         o->timer = -0x1000;
         o->state++;
     case 17:
-        func_80132A3C(o);
+        segmentedCrawlerWiggle(o);
         MOVE();
         if (o->h->p.whole < 0x118) {
             if (o->y.p.whole < -0x140) o->state = 0x18;
             else o->state = 0x12;
             o->substep = 0;
         }
-        r = func_80132964(o);
+        r = segmentedCrawlerCheckWall(o);
         if (r == 1) {
             o->state = 0xa;
             o->substep = 0;

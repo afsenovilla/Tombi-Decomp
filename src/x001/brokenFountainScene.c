@@ -21,8 +21,8 @@ extern void *D_8013FAB8[], *D_8013FABC[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void setEventComplete(int, int);
-extern void func_80138E7C(TObj *);
-extern void func_80139174(TObj *);
+extern void brokenFountainPoseA(TObj *);
+extern void brokenFountainPoseB(TObj *);
 
 void brokenFountainScene(TObj *o)
 {
@@ -90,10 +90,10 @@ void brokenFountainScene(TObj *o)
             o->step++;
             break;
         case 1:
-            func_80138E7C(o);
+            brokenFountainPoseA(o);
             break;
         case 2:
-            func_80139174(o);
+            brokenFountainPoseB(o);
             break;
         }
         break;
