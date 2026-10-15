@@ -1,0 +1,311 @@
+// DATA 8011530c 1676 X009
+// Data of X009 that no C function defines (yet): one array per address something points to; animation scripts
+// with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
+#include "anim.h"
+
+extern unsigned int data_8011530C[];
+extern unsigned int data_80115388[];
+extern unsigned int data_801153C0[];
+extern unsigned int data_801153C8[];
+extern unsigned int data_801153D4[];
+extern unsigned int data_8011545C[];
+extern unsigned int data_80115460[];
+extern unsigned int data_80115464[];
+extern unsigned int data_80115468[];
+extern unsigned int data_8011546C[];
+extern unsigned int data_80115510[];
+extern unsigned int data_80115514[];
+extern unsigned int data_80115518[];
+extern unsigned int data_8011551C[];
+extern unsigned int data_80115520[];
+extern unsigned int data_80115524[];
+extern unsigned int data_80115528[];
+extern unsigned int data_8011552C[];
+extern unsigned int data_80115530[];
+extern unsigned int data_80115534[];
+extern unsigned int data_80115538[];
+extern unsigned int data_8011553C[];
+extern unsigned int data_80115540[];
+extern unsigned int data_80115544[];
+extern unsigned int data_80115548[];
+extern unsigned int data_8011554C[];
+extern unsigned int data_80115550[];
+extern unsigned int data_80115554[];
+extern unsigned int data_80115558[];
+extern unsigned int data_8011555C[];
+extern unsigned int data_80115560[];
+extern unsigned int data_80115564[];
+extern unsigned int data_80115568[];
+extern unsigned int data_8011556C[];
+extern unsigned int data_80115570[];
+extern unsigned int data_80115574[];
+extern unsigned int data_80115578[];
+extern unsigned int data_8011557C[];
+extern unsigned int data_80115580[];
+extern unsigned int data_80115924[];
+extern unsigned int data_80115928[];
+extern unsigned int data_8011592C[];
+extern unsigned int data_80115948[];
+
+unsigned int data_8011530C[31] = {
+    0xFC000000, 0xE8F0F4F8, 0xC8D0D8E0, 0xA8B0B8C0,
+    0xA0, 0x100008, 0x280014, 0x100008,
+    0x240010, 0x100008, 0x240016, 0x100008,
+    0x180008, 0x100008, 0x2C0012, 0x100008,
+    0x1A000C, 0x100008, 0x1C0010, 0x100008,
+    0x14000A, 0x100008, 0x1C0014, 0xC0006,
+    0x240014, 0xC0006, 0x240014, 0xC0006,
+    0x240014, 0x18000C, 0x180008,
+};
+
+unsigned int data_80115388[14] = {
+    0x4040404, 0x4040404, 0x4040404, 0x2020204,
+    0x2020202, 0x2020202, 0x3030302, 0x3030303,
+    0x4030303, 0x4040404, 0x4, 0x0,
+    0x0, 0x0,
+};
+
+unsigned int data_801153C0[2] = {
+    0x4040400, 0x4040404,
+};
+
+unsigned int data_801153C8[3] = {
+    0x0, 0x0, 0x0,
+};
+
+unsigned int data_801153D4[34] = {
+    0x2A0F880, 0x2C002B0, 0x2E002D0, 0xF9A002F0,
+    0x3900380, 0x3B003A0, 0x3F003C8, 0x280FB00,
+    0x2A00290, 0x2C002B0, 0x1C002D0, 0x1100100,
+    0x1300120, 0x1500140, 0x2800440, 0x2A00290,
+    0x2C002B0, 0x1C002D0, 0x3900380, 0x3B003A0,
+    0x3F003C8, 0x2A0FB00, 0x2C002B0, 0x2E002D0,
+    0xF9A002F0, 0x2F002E0, 0x3100300, 0x3300320,
+    0xFAC0, 0x7900790, 0x790, 0x1900000,
+    0x5900390, 0x390,
+};
+
+unsigned int data_8011545C[1] = {
+    0x2D00290,
+};
+
+unsigned int data_80115460[1] = {
+    0x60030,
+};
+
+unsigned int data_80115464[1] = {
+    0x6800010,
+};
+
+unsigned int data_80115468[1] = {
+    0xFC100040,
+};
+
+unsigned int data_8011546C[41] = {
+    0xFC30, 0x3500310, 0x60032, 0x6800010,
+    0xFBD00040, 0xFBF0, 0x3D00390, 0x60034,
+    0x6800010, 0xFB900040, 0xFBB0, 0x3500410,
+    0x60036, 0x6800010, 0xFB500040, 0xFB70,
+    0x4500490, 0x60036, 0x6800010, 0xFA900060,
+    0xFAB0, 0x4D00490, 0x60038, 0x6800010,
+    0xFA500060, 0xFA70, 0x5500510, 0x6003A,
+    0x6800010, 0xFA100060, 0xFA30, 0x5D00590,
+    0x6003C, 0x6800010, 0xF9D00060, 0xF9F0,
+    0x6500610, 0x6003A, 0x6800010, 0xFA900060,
+    0xFAB0,
+};
+
+unsigned int data_80115510[1] = {
+    0x1440084,
+};
+
+unsigned int data_80115514[1] = {
+    0x5000200,
+};
+
+unsigned int data_80115518[1] = {
+    0x440040,
+};
+
+unsigned int data_8011551C[1] = {
+    0x780050,
+};
+
+unsigned int data_80115520[1] = {
+    0x18000C,
+};
+
+unsigned int data_80115524[1] = {
+    0x4C0050,
+};
+
+unsigned int data_80115528[1] = {
+    0x200054,
+};
+
+unsigned int data_8011552C[1] = {
+    0x240050,
+};
+
+unsigned int data_80115530[1] = {
+    0x200028,
+};
+
+unsigned int data_80115534[1] = {
+    0x600050,
+};
+
+unsigned int data_80115538[1] = {
+    0x600050,
+};
+
+unsigned int data_8011553C[1] = {
+    0x100004,
+};
+
+unsigned int data_80115540[1] = {
+    0x200040,
+};
+
+unsigned int data_80115544[1] = {
+    0x280024,
+};
+
+unsigned int data_80115548[1] = {
+    0x120010,
+};
+
+unsigned int data_8011554C[1] = {
+    0x480016,
+};
+
+unsigned int data_80115550[1] = {
+    0x200004,
+};
+
+unsigned int data_80115554[1] = {
+    0x260022,
+};
+
+unsigned int data_80115558[1] = {
+    0x100088,
+};
+
+unsigned int data_8011555C[1] = {
+    0x200020,
+};
+
+unsigned int data_80115560[1] = {
+    0x180010,
+};
+
+unsigned int data_80115564[1] = {
+    0x30001C,
+};
+
+unsigned int data_80115568[1] = {
+    0x180020,
+};
+
+unsigned int data_8011556C[1] = {
+    0x200028,
+};
+
+unsigned int data_80115570[1] = {
+    0x120010,
+};
+
+unsigned int data_80115574[1] = {
+    0x500014,
+};
+
+unsigned int data_80115578[1] = {
+    0x54004C,
+};
+
+unsigned int data_8011557C[1] = {
+    0x4C0050,
+};
+
+unsigned int data_80115580[233] = {
+    0x200054, 0x1440084, 0x6400280, 0x480044,
+    0x780054, 0x1C0010, 0x500054, 0x240058,
+    0x240030, 0x200028, 0x640054, 0x640054,
+    0x100004, 0x240030, 0x200028, 0x120010,
+    0x480016, 0x200004, 0x260022, 0x100088,
+    0x100020, 0xC0008, 0x28000E, 0x140018,
+    0x200020, 0x120010, 0x540014, 0x580050,
+    0x500054, 0x240058, 0x1440084, 0x7800300,
+    0x4C0048, 0x780058, 0x200014, 0x540058,
+    0x28005C, 0x280034, 0x24002C, 0x680058,
+    0x680058, 0x140008, 0x280034, 0x24002C,
+    0x120010, 0x480016, 0x200004, 0x260022,
+    0x200088, 0x500040, 0x400050, 0x600040,
+    0x500050, 0x200050, 0x120010, 0x580014,
+    0x5C0054, 0x540058, 0x28005C, 0x1440084,
+    0x7800380, 0x50004C, 0x78005C, 0x240018,
+    0x58005C, 0x2C0060, 0x2C0038, 0x280030,
+    0x6C005C, 0x6C005C, 0x18000C, 0x2C0038,
+    0x280030, 0x120010, 0x480016, 0x200004,
+    0x260022, 0x200088, 0x700040, 0x600070,
+    0x800060, 0x700070, 0x200070, 0x120010,
+    0x5C0014, 0x600058, 0x58005C, 0x2C0060,
+    0x1440084, 0x7800380, 0x50004C, 0x78005C,
+    0x240018, 0x58005C, 0x2C0060, 0x2C0038,
+    0x280030, 0x6C005C, 0x6C006C, 0x18000C,
+    0x2C0038, 0x280030, 0x120010, 0x480016,
+    0x200004, 0x260022, 0x200088, 0x500040,
+    0x400050, 0x600040, 0x500050, 0x200050,
+    0x120010, 0x5C0014, 0x600058, 0x58005C,
+    0x2C0060, 0x1440084, 0x7800400, 0x540050,
+    0x7C0060, 0x28001C, 0x5C0060, 0x300064,
+    0x30003C, 0x2C0034, 0x700060, 0x700070,
+    0x1C0010, 0x30003C, 0x2C0034, 0x120010,
+    0x480016, 0x200004, 0x260022, 0x200088,
+    0x100040, 0xC0008, 0x60000E, 0x500050,
+    0x600050, 0x64005C, 0x5C0060, 0x300064,
+    0x0, 0x0, 0x1440084, 0x7800480,
+    0x580054, 0x800064, 0x2C0020, 0x600064,
+    0x340068, 0x340040, 0x300038, 0x740064,
+    0x740074, 0x200014, 0x340040, 0x300038,
+    0x120010, 0x480016, 0x200004, 0x260022,
+    0x200088, 0x100040, 0xC0008, 0x60000E,
+    0x500050, 0x200050, 0x120010, 0x640014,
+    0x680060, 0x600064, 0x340068, 0x1440084,
+    0x7800500, 0x5C0058, 0x800068, 0x300024,
+    0x640068, 0x38006C, 0x380044, 0x34003C,
+    0x780068, 0x780078, 0x240018, 0x380044,
+    0x34003C, 0x120010, 0x480016, 0x200004,
+    0x260022, 0x200088, 0x700040, 0x600070,
+    0x800060, 0x600060, 0x200060, 0x120010,
+    0x680014, 0x6C0064, 0x640068, 0x38006C,
+    0x1440084, 0x7800580, 0x60005C, 0x80006C,
+    0x340028, 0x68006C, 0x3C0070, 0x3C0048,
+    0x380040, 0x7C006C, 0x7C007C, 0x28001C,
+    0x3C0048, 0x380040, 0x120010, 0x480016,
+    0x200004, 0x260022, 0x200088, 0x800040,
+    0x700080, 0x900070, 0x700070, 0x200070,
+    0x120010, 0x6C0014, 0x700068, 0x68006C,
+    0x3C0070,
+};
+
+unsigned int data_80115924[1] = {
+    0x13,
+};
+
+unsigned int data_80115928[1] = {
+    0x4,
+};
+
+unsigned int data_8011592C[7] = {
+    0x80012228, 0x13, 0x4, 0x80012240,
+    0x13, 0x4, 0x80012260,
+};
+
+unsigned int data_80115948[20] = {
+    0x8013B2F4, 0x8013B32C, 0x8013B310, 0x8013B348,
+    0x8013E600, 0x8013E638, 0x8013E61C, 0x8013E654,
+    0x8013B2F4, 0x8013B310, 0x8013B2F4, 0x8013B348,
+    0x80138EF8, 0x80138F30, 0x80138F14, 0x80138F4C,
+    0x80134DCC, 0x80134E04, 0x80134DE8, 0x80134E20,
+};

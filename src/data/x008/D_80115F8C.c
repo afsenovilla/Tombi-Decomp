@@ -1,0 +1,1624 @@
+// DATA 80115f8c 9768 X008
+// Data of X008 that no C function defines (yet): one array per address something points to; animation scripts
+// with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
+#include "anim.h"
+
+extern unsigned int data_80115F8C[];
+extern unsigned int data_80115FE0[];
+extern unsigned int data_8011600C[];
+extern unsigned int data_8011602C[];
+extern unsigned int data_80116074[];
+extern unsigned int data_801160C8[];
+extern unsigned int data_801160F8[];
+extern unsigned int data_80116130[];
+extern unsigned int data_8011615C[];
+extern unsigned int data_8011617C[];
+extern unsigned int data_80116198[];
+extern unsigned int data_801161A8[];
+extern unsigned int data_801161D8[];
+extern unsigned int data_80116204[];
+extern unsigned int data_8011623C[];
+extern unsigned int data_80116274[];
+extern unsigned int data_801162C0[];
+extern unsigned int data_801162D0[];
+extern unsigned int data_80116308[];
+extern unsigned int data_80116334[];
+extern unsigned int data_80116394[];
+extern unsigned int data_801163E4[];
+extern unsigned int data_80116424[];
+extern unsigned int data_80116474[];
+extern unsigned int data_801164A0[];
+extern unsigned int data_801164D0[];
+extern unsigned int data_801164F4[];
+extern unsigned int data_80116530[];
+extern unsigned int data_8011657C[];
+extern unsigned int data_8011658C[];
+extern unsigned int data_801165A8[];
+extern unsigned int data_801165C4[];
+extern unsigned int data_801165DC[];
+extern unsigned int data_80116610[];
+extern unsigned int data_80116664[];
+extern unsigned int data_801166AC[];
+extern unsigned int data_801166E0[];
+extern unsigned int data_801166F0[];
+extern unsigned int data_801166F8[];
+extern unsigned int data_80116718[];
+extern unsigned int data_80116750[];
+extern unsigned int data_80116764[];
+extern unsigned int data_8011678C[];
+extern unsigned int data_801167A0[];
+extern unsigned int data_801167BC[];
+extern unsigned int data_801167C0[];
+extern unsigned int data_801167F8[];
+extern unsigned int data_8011683C[];
+extern unsigned int data_80116890[];
+extern unsigned int data_801168A0[];
+extern unsigned int data_801168F0[];
+extern unsigned int data_80116930[];
+extern unsigned int data_80116934[];
+extern unsigned int data_80116984[];
+extern unsigned int data_801169B4[];
+extern unsigned int data_801169C0[];
+extern unsigned int data_80116A10[];
+extern unsigned int data_80116A68[];
+extern unsigned int data_80116A94[];
+extern unsigned int data_80116AC0[];
+extern unsigned int data_80116AE8[];
+extern unsigned int data_80116AFC[];
+extern unsigned int data_80116B08[];
+extern unsigned int data_80116B44[];
+extern unsigned int data_80116B58[];
+extern unsigned int data_80116B88[];
+extern unsigned int data_80116BD0[];
+extern unsigned int data_80116C2C[];
+extern unsigned int data_80116C64[];
+extern unsigned int data_80116CA4[];
+extern unsigned int data_80116CF0[];
+extern unsigned int data_80116D14[];
+extern unsigned int data_80116D18[];
+extern unsigned int data_80116D1C[];
+extern unsigned int data_80116D30[];
+extern unsigned int data_80116D68[];
+extern unsigned int data_80116D90[];
+extern unsigned int data_80116DD0[];
+extern unsigned int data_80116DE0[];
+extern unsigned int data_80116E18[];
+extern unsigned int data_80116E4C[];
+extern unsigned int data_80116E64[];
+extern unsigned int data_80116E9C[];
+extern unsigned int data_80116EC0[];
+extern unsigned int data_80116EF8[];
+extern unsigned int data_80116EFC[];
+extern unsigned int data_80116F28[];
+extern unsigned int data_80116F68[];
+extern unsigned int data_80116FA8[];
+extern unsigned int data_80116FBC[];
+extern unsigned int data_80116FE0[];
+extern unsigned int data_80117008[];
+extern unsigned int data_8011704C[];
+extern unsigned int data_80117068[];
+extern unsigned int data_80117088[];
+extern unsigned int data_801170C8[];
+extern unsigned int data_80117114[];
+extern unsigned int data_80117118[];
+extern unsigned int data_80117148[];
+extern unsigned int data_8011716C[];
+extern unsigned int data_80117190[];
+extern unsigned int data_801171B0[];
+extern unsigned int data_80117200[];
+extern unsigned int data_80117248[];
+extern unsigned int data_8011728C[];
+extern unsigned int data_801172C8[];
+extern unsigned int data_801172DC[];
+extern unsigned int data_80117304[];
+extern unsigned int data_8011733C[];
+extern unsigned int data_80117364[];
+extern unsigned int data_80117380[];
+extern unsigned int data_801173C8[];
+extern unsigned int data_801173EC[];
+extern unsigned int data_80117404[];
+extern unsigned int data_80117408[];
+extern unsigned int data_80117450[];
+extern unsigned int data_80117468[];
+extern unsigned int data_80117490[];
+extern unsigned int data_80117498[];
+extern unsigned int data_801174B0[];
+extern unsigned int data_801174D8[];
+extern unsigned int data_80117518[];
+extern unsigned int data_8011755C[];
+extern unsigned int data_80117590[];
+extern unsigned int data_8011759C[];
+extern unsigned int data_801175A0[];
+extern unsigned int data_801175A4[];
+extern unsigned int data_801175C4[];
+extern unsigned int data_80117608[];
+extern unsigned int data_8011762C[];
+extern unsigned int data_8011765C[];
+extern unsigned int data_801176A0[];
+extern unsigned int data_801176B0[];
+extern unsigned int data_801176D8[];
+extern unsigned int data_801176DC[];
+extern unsigned int data_80117710[];
+extern unsigned int data_80117728[];
+extern unsigned int data_80117754[];
+extern unsigned int data_801177B0[];
+extern unsigned int data_801177C4[];
+extern unsigned int data_80117800[];
+extern unsigned int data_80117848[];
+extern unsigned int data_801178A0[];
+extern unsigned int data_801178D4[];
+extern unsigned int data_80117908[];
+extern unsigned int data_80117958[];
+extern unsigned int data_8011798C[];
+extern unsigned int data_801179A4[];
+extern unsigned int data_801179C8[];
+extern unsigned int data_80117A10[];
+extern unsigned int data_80117A64[];
+extern unsigned int data_80117AAC[];
+extern unsigned int data_80117AE0[];
+extern unsigned int data_80117AE8[];
+extern unsigned int data_80117B2C[];
+extern unsigned int data_80117B74[];
+extern unsigned int data_80117BB4[];
+extern unsigned int data_80117BD4[];
+extern unsigned int data_80117BF8[];
+extern unsigned int data_80117C44[];
+extern unsigned int data_80117C88[];
+extern unsigned int data_80117CC8[];
+extern unsigned int data_80117D18[];
+extern unsigned int data_80117D54[];
+extern unsigned int data_80117DA8[];
+extern unsigned int data_80117DC4[];
+extern unsigned int data_80117DDC[];
+extern unsigned int data_80117DE0[];
+extern unsigned int data_80117DE4[];
+extern unsigned int data_80117DF0[];
+extern unsigned int data_80117E38[];
+extern unsigned int data_80117E78[];
+extern unsigned int data_80117EB4[];
+extern unsigned int data_80117EE8[];
+extern unsigned int data_80117F28[];
+extern unsigned int data_80117F74[];
+extern unsigned int data_80117FC8[];
+extern unsigned int data_80118018[];
+extern unsigned int data_80118060[];
+extern unsigned int data_80118090[];
+extern unsigned int data_801180B0[];
+extern unsigned int data_801180B4[];
+extern unsigned int data_801180F8[];
+extern unsigned int data_80118100[];
+extern unsigned int data_8011812C[];
+extern unsigned int data_80118168[];
+extern unsigned int data_80118188[];
+extern void *ptrs_801181A4[];
+extern void *ptrs_801182F8[];
+extern void *ptrs_80118438[];
+extern unsigned int data_801184C8[];
+extern AnimWord anim_801184DC[];
+
+unsigned int data_80115F8C[21] = {
+    0x26, 0x0, 0xE00100, 0x1FE0080,
+    0x270001, 0x100, 0x400000, 0x8000E0,
+    0x101FE, 0x82, 0x0, 0xE00100,
+    0x1FF0080, 0x840000, 0x100, 0x400000,
+    0x8000E0, 0x1FF, 0x84, 0x400068,
+    0x7800C0,
+};
+
+unsigned int data_80115FE0[11] = {
+    0x1FF0080, 0x840000, 0x6800C0, 0x807840,
+    0x800078, 0x1FF, 0x7FFF, 0x0,
+    0x0, 0x0, 0x0,
+};
+
+unsigned int data_8011600C[8] = {
+    0x4, 0x64, 0x1010004, 0x64,
+    0x2020004, 0x64, 0x3030004, 0x64,
+};
+
+unsigned int data_8011602C[18] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0300, 0x3FE0500,
+    0x3FE0700, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0xFF,
+};
+
+unsigned int data_80116074[21] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0xF500, 0x100F700,
+    0x100F900, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x3000500, 0x3000700, 0x3000900,
+    0xFF,
+};
+
+unsigned int data_801160C8[12] = {
+    0xF400, 0xF600, 0x8000F800, 0x8100FA00,
+    0x8200FC00, 0x8300FF00, 0x84000100, 0x85000300,
+    0x3000600, 0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_801160F8[14] = {
+    0xF200, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FB00, 0x8200FD00, 0x8300FF00, 0x84000200,
+    0x85000400, 0x3000600, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_80116130[11] = {
+    0xF500, 0x100F700, 0x8000F900, 0x8100FB00,
+    0x8200FE00, 0x83000000, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_8011615C[8] = {
+    0xF100, 0xF300, 0xF500, 0x100F700,
+    0x8000F900, 0x8100FC00, 0x8200FE00, 0x83000000,
+};
+
+unsigned int data_8011617C[7] = {
+    0x84000200, 0x85000400, 0x3000600, 0x3000900,
+    0x4000B00, 0x4000D00, 0xFF,
+};
+
+unsigned int data_80116198[4] = {
+    0xF100, 0xF300, 0xF500, 0x100F700,
+};
+
+unsigned int data_801161A8[12] = {
+    0x8000F900, 0x8100FB00, 0x8200FD00, 0x8300FF00,
+    0x84000100, 0x85000400, 0x3000600, 0x3000800,
+    0x4000A00, 0x4000C00, 0x4000E00, 0xFF,
+};
+
+unsigned int data_801161D8[11] = {
+    0xF500, 0x100F700, 0x8000F900, 0x8100FC00,
+    0x8200FE00, 0x83000000, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_80116204[14] = {
+    0xF200, 0xF400, 0xF600, 0x8000F800,
+    0x8100FB00, 0x8200FD00, 0x8300FF00, 0x84000200,
+    0x85000400, 0x3000700, 0x3000900, 0x4000B00,
+    0x4000D00, 0xFF,
+};
+
+unsigned int data_8011623C[14] = {
+    0xF200, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FB00, 0x8200FD00, 0x83000000, 0x84000200,
+    0x85000400, 0x3000600, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_80116274[19] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100F700, 0x100F900, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000200, 0x2000400,
+    0x3000600, 0x3000800, 0xFF,
+};
+
+unsigned int data_801162C0[4] = {
+    0xFEF600, 0x80FEF800, 0x81FEFA00, 0x82FEFC00,
+};
+
+unsigned int data_801162D0[14] = {
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000100, 0x2000300, 0x3000500,
+    0x3000700, 0xFF,
+};
+
+unsigned int data_80116308[11] = {
+    0xF600, 0x100F800, 0x8000FA00, 0x8100FC00,
+    0x8200FE00, 0x83000100, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_80116334[24] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0xF300, 0xF500,
+    0x100F700, 0x100F900, 0x100FB00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0x3000600,
+    0x3000800, 0x4000A00, 0x4000C00, 0xFF,
+};
+
+unsigned int data_80116394[20] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0300,
+    0x3FE0500, 0x3FE0700, 0x3FE0900, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_801163E4[16] = {
+    0xF100, 0xF300, 0xF500, 0x100F700,
+    0x8000FA00, 0x8100FC00, 0x8200FE00, 0x83000000,
+    0x84000200, 0x85000400, 0x3000600, 0x3000800,
+    0x4000A00, 0x4000C00, 0x4000E00, 0xFF,
+};
+
+unsigned int data_80116424[20] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100F700, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000400, 0x3000600, 0x3000800, 0xFF,
+};
+
+unsigned int data_80116474[11] = {
+    0xF500, 0x100F800, 0x8000FA00, 0x8100FC00,
+    0x8200FE00, 0x83000100, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_801164A0[12] = {
+    0xF500, 0x100F700, 0x8000F900, 0x8100FB00,
+    0x8200FD00, 0x8300FF00, 0x84000200, 0x85000400,
+    0x3000600, 0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_801164D0[9] = {
+    0x100F700, 0x8000F900, 0x8100FB00, 0x8200FE00,
+    0x83000000, 0x84000300, 0x85000500, 0x3000700,
+    0xFF,
+};
+
+unsigned int data_801164F4[15] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FEFF00,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80116530[19] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0300, 0x85FE0500, 0x3FE0700,
+    0xF200, 0xF400, 0xF600, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0x3000700,
+};
+
+unsigned int data_8011657C[4] = {
+    0x3000900, 0x4000B00, 0x4000D00, 0xFF,
+};
+
+unsigned int data_8011658C[7] = {
+    0xF200, 0xF400, 0xF600, 0x8000F900,
+    0x8100FB00, 0x8200FD00, 0x8300FF00,
+};
+
+unsigned int data_801165A8[7] = {
+    0x84000200, 0x85000400, 0x3000600, 0x3000900,
+    0x4000B00, 0x4000D00, 0xFF,
+};
+
+unsigned int data_801165C4[6] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEFA00,
+    0x81FEFC00, 0x82FEFE00,
+};
+
+unsigned int data_801165DC[13] = {
+    0x83FE0100, 0x84FE0300, 0x85FE0500, 0x3FE0700,
+    0x3FE0900, 0x4FE0B00, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_80116610[21] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0xF500, 0x100F700, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0x3000700, 0x3000900,
+    0xFF,
+};
+
+unsigned int data_80116664[18] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_801166AC[13] = {
+    0xF300, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FC00, 0x8200FE00, 0x83000000, 0x84000300,
+    0x85000500, 0x3000700, 0x3000900, 0x4000B00,
+    0xFF,
+};
+
+unsigned int data_801166E0[4] = {
+    0xF200, 0xF500, 0x100F700, 0x8000F900,
+};
+
+unsigned int data_801166F0[2] = {
+    0x8100FB00, 0x8200FD00,
+};
+
+unsigned int data_801166F8[8] = {
+    0x83000000, 0x84000200, 0x85000400, 0x3000600,
+    0x3000800, 0x4000A00, 0x4000C00, 0xFF,
+};
+
+unsigned int data_80116718[14] = {
+    0xF200, 0xF400, 0xF600, 0x8000F800,
+    0x8100FB00, 0x8200FD00, 0x8300FF00, 0x84000200,
+    0x85000400, 0x3000600, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_80116750[5] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFF00,
+    0x83FE0100,
+};
+
+unsigned int data_80116764[10] = {
+    0x84FE0300, 0x85FE0500, 0x3FE0700, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_8011678C[5] = {
+    0xF300, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FC00,
+};
+
+unsigned int data_801167A0[7] = {
+    0x8200FE00, 0x83000000, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0x4000B00,
+};
+
+unsigned int data_801167BC[1] = {
+    0xFF,
+};
+
+unsigned int data_801167C0[14] = {
+    0xF200, 0xF400, 0xF600, 0x8000F800,
+    0x8100FA00, 0x8200FC00, 0x8300FF00, 0x84000100,
+    0x85000300, 0x3000500, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_801167F8[17] = {
+    0xFEF500, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_8011683C[21] = {
+    0xFEF400, 0xFEF600, 0x1FEF800, 0x80FEFA00,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0300,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100F800, 0x100FA00, 0x200FC00, 0x200FF00,
+    0x2000100, 0x2000300, 0x3000500, 0x3000700,
+    0xFF,
+};
+
+unsigned int data_80116890[4] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+};
+
+unsigned int data_801168A0[20] = {
+    0x83FEFF00, 0x84FE0100, 0x85FE0300, 0x3FE0500,
+    0x3FE0700, 0xF200, 0xF400, 0xF600,
+    0x100F800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x3000500, 0x3000700,
+    0x3000900, 0x4000B00, 0x4000D00, 0xFF,
+};
+
+unsigned int data_801168F0[16] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FEFF00,
+    0x84FE0100, 0x85FE0300, 0x3FE0500, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80116930[1] = {
+    0xFEF500,
+};
+
+unsigned int data_80116934[20] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0xF600, 0x100F800, 0x100FA00,
+    0x200FC00, 0x200FF00, 0x2000100, 0x2000300,
+    0x3000500, 0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_80116984[12] = {
+    0xF400, 0xF600, 0x8000F800, 0x8100FA00,
+    0x8200FD00, 0x8300FF00, 0x84000200, 0x85000400,
+    0x3000600, 0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_801169B4[3] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900,
+};
+
+unsigned int data_801169C0[20] = {
+    0x81FEFB00, 0x82FEFD00, 0x83FEFF00, 0x84FE0100,
+    0x85FE0300, 0x3FE0500, 0x3FE0800, 0x4FE0A00,
+    0xF500, 0x100F700, 0x100F900, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80116A10[22] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEFA00,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0200,
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x4FE0A00,
+    0x4FE0C00, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0xFF,
+};
+
+unsigned int data_80116A68[11] = {
+    0xF600, 0x100F800, 0x8000FA00, 0x8100FC00,
+    0x8200FF00, 0x83000100, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0xFF,
+};
+
+unsigned int data_80116A94[11] = {
+    0xF400, 0xF600, 0x8000F800, 0x8100FB00,
+    0x8200FE00, 0x83000000, 0x84000200, 0x85000400,
+    0x3000700, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80116AC0[10] = {
+    0xF100, 0xF400, 0xF600, 0x100F800,
+    0x8000FA00, 0x8100FD00, 0x8200FF00, 0x83000100,
+    0x84000300, 0x85000500,
+};
+
+unsigned int data_80116AE8[5] = {
+    0x3000700, 0x3000900, 0x4000B00, 0x4000D00,
+    0xFF,
+};
+
+unsigned int data_80116AFC[3] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900,
+};
+
+unsigned int data_80116B08[15] = {
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0200,
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x4FE0A00,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0xFF,
+};
+
+unsigned int data_80116B44[5] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFC00,
+    0x82FEFE00,
+};
+
+unsigned int data_80116B58[12] = {
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x4FE0A00, 0x100FB00, 0x200FD00,
+    0x200FF00, 0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_80116B88[18] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0xFF,
+};
+
+unsigned int data_80116BD0[23] = {
+    0xFEF100, 0xFEF300, 0xFEF500, 0x1FEF700,
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FEFF00,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x3FE0800,
+    0x4FE0A00, 0x4FE0C00, 0x4FE0E00, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80116C2C[14] = {
+    0xFEF500, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x200FD00, 0x200FF00,
+    0x2000100, 0xFF,
+};
+
+unsigned int data_80116C64[16] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FEFF00,
+    0x84FE0100, 0x85FE0300, 0x3FE0500, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80116CA4[19] = {
+    0xFEF600, 0x80FEF800, 0x81FEFA00, 0x82FEFC00,
+    0x83FEFE00, 0x84FE0100, 0x85FE0300, 0x3FE0500,
+    0x3FE0800, 0x100F700, 0x100F900, 0x100FB00,
+    0x200FD00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0x3000800, 0xFF,
+};
+
+unsigned int data_80116CF0[9] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800,
+};
+
+unsigned int data_80116D14[1] = {
+    0x100FA00,
+};
+
+unsigned int data_80116D18[1] = {
+    0x200FC00,
+};
+
+unsigned int data_80116D1C[5] = {
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_80116D30[14] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x200FD00, 0x200FF00,
+    0x2000100, 0xFF,
+};
+
+unsigned int data_80116D68[10] = {
+    0x100F700, 0x8000F900, 0x8100FB00, 0x8200FD00,
+    0x83000000, 0x84000200, 0x85000400, 0x3000600,
+    0x3000800, 0xFF,
+};
+
+unsigned int data_80116D90[16] = {
+    0xFEF400, 0xFEF600, 0x80FEF800, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0300,
+    0x3FE0500, 0x3FE0800, 0x4FE0A00, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FF00, 0x2000100,
+};
+
+unsigned int data_80116DD0[4] = {
+    0x2000300, 0x3000500, 0x3000700, 0xFF,
+};
+
+unsigned int data_80116DE0[14] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FEFF00,
+    0x84FE0100, 0x85FE0300, 0x3FE0600, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_80116E18[13] = {
+    0xFEF400, 0xFEF600, 0x80FEF800, 0x81FEFA00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100F900,
+    0x100FB00,
+};
+
+unsigned int data_80116E4C[6] = {
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0x3000500, 0xFF,
+};
+
+unsigned int data_80116E64[14] = {
+    0xF300, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FB00, 0x8200FD00, 0x8300FF00, 0x84000100,
+    0x85000400, 0x3000600, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_80116E9C[9] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0xF200,
+};
+
+unsigned int data_80116EC0[14] = {
+    0xF400, 0xF600, 0x100F800, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000300,
+    0x3000500, 0x3000700, 0x3000900, 0x4000B00,
+    0x4000D00, 0xFF,
+};
+
+unsigned int data_80116EF8[1] = {
+    0xF500,
+};
+
+unsigned int data_80116EFC[11] = {
+    0x100F700, 0x8000F900, 0x8100FB00, 0x8200FD00,
+    0x8300FF00, 0x84000100, 0x85000400, 0x3000600,
+    0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80116F28[16] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100FB00, 0x200FD00,
+    0x200FF00, 0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_80116F68[16] = {
+    0xFEF400, 0xFEF600, 0x1FEF800, 0x80FEFB00,
+    0x81FEFD00, 0x82FEFF00, 0x83FE0100, 0x84FE0300,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100F800, 0x100FA00, 0x200FC00, 0x200FE00,
+};
+
+unsigned int data_80116FA8[5] = {
+    0x2000000, 0x2000200, 0x2000400, 0x3000600,
+    0xFF,
+};
+
+unsigned int data_80116FBC[9] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEF900,
+    0x81FEFB00, 0x82FEFE00, 0x83FE0100, 0x84FE0300,
+    0x85FE0500,
+};
+
+unsigned int data_80116FE0[10] = {
+    0x3FE0700, 0x3FE0900, 0x4FE0B00, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_80117008[17] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FE0000, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0900, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_8011704C[7] = {
+    0x8000FA00, 0x8100FC00, 0x8200FE00, 0x83000000,
+    0x84000200, 0x85000400, 0xFF,
+};
+
+unsigned int data_80117068[8] = {
+    0x8000F900, 0x8100FB00, 0x8200FD00, 0x83000000,
+    0x84000200, 0x85000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80117088[16] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0xFF,
+};
+
+unsigned int data_801170C8[19] = {
+    0xFEF200, 0xFEF400, 0xFEF600, 0x80FEF900,
+    0x81FEFB00, 0x82FEFD00, 0x83FE0000, 0x84FE0200,
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x4FE0A00,
+    0x4FE0C00, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400,
+};
+
+unsigned int data_80117114[1] = {
+    0xFF,
+};
+
+unsigned int data_80117118[12] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0xF600, 0x100F800,
+};
+
+unsigned int data_80117148[9] = {
+    0x100FA00, 0x200FC00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0x3000700, 0x3000900,
+    0xFF,
+};
+
+unsigned int data_8011716C[9] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700,
+};
+
+unsigned int data_80117190[8] = {
+    0x3FE0900, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0xFF,
+};
+
+unsigned int data_801171B0[20] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEFA00,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0200,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100F900, 0x100FB00, 0x200FD00, 0x2000000,
+    0x2000200, 0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80117200[18] = {
+    0xFEF600, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0xFF,
+};
+
+unsigned int data_80117248[17] = {
+    0x80FEFA00, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0300, 0x85FE0500, 0xF600, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000300, 0x3000500, 0x3000700, 0x3000900,
+    0xFF,
+};
+
+unsigned int data_8011728C[15] = {
+    0xFEF600, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_801172C8[5] = {
+    0xFEF400, 0xFEF600, 0x80FEF800, 0x81FEFB00,
+    0x82FEFD00,
+};
+
+unsigned int data_801172DC[10] = {
+    0x83FEFF00, 0x84FE0100, 0x85FE0300, 0x3FE0600,
+    0x3FE0800, 0x4FE0A00, 0x200FD00, 0x200FF00,
+    0x2000100, 0xFF,
+};
+
+unsigned int data_80117304[14] = {
+    0xF300, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FB00, 0x8200FD00, 0x83000000, 0x84000200,
+    0x85000400, 0x3000600, 0x3000800, 0x4000A00,
+    0x4000C00, 0xFF,
+};
+
+unsigned int data_8011733C[10] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFD00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900,
+};
+
+unsigned int data_80117364[7] = {
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000100,
+    0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80117380[18] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFD00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100F900, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0x3000500, 0xFF,
+};
+
+unsigned int data_801173C8[9] = {
+    0xFEF600, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0400, 0x3FE0600,
+    0x3FE0800,
+};
+
+unsigned int data_801173EC[6] = {
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000300, 0xFF,
+};
+
+unsigned int data_80117404[1] = {
+    0xFEF400,
+};
+
+unsigned int data_80117408[18] = {
+    0xFEF600, 0x80FEF800, 0x81FEFA00, 0x82FEFC00,
+    0x83FEFE00, 0x84FE0000, 0x85FE0200, 0x3FE0500,
+    0x3FE0700, 0x4FE0A00, 0x100F900, 0x100FB00,
+    0x200FD00, 0x2000000, 0x2000200, 0x2000400,
+    0x3000600, 0xFF,
+};
+
+unsigned int data_80117450[6] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0300,
+};
+
+unsigned int data_80117468[10] = {
+    0x85FE0500, 0x3FE0700, 0x100F700, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000200,
+    0x2000400, 0x3000600,
+};
+
+unsigned int data_80117490[2] = {
+    0x3000800, 0xFF,
+};
+
+unsigned int data_80117498[6] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200,
+};
+
+unsigned int data_801174B0[10] = {
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_801174D8[16] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000100, 0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80117518[17] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FE0000,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x100F700,
+    0x100F900, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000400, 0x3000600, 0x3000800,
+    0xFF,
+};
+
+unsigned int data_8011755C[13] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FE0000,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0xFF,
+};
+
+unsigned int data_80117590[3] = {
+    0xF400, 0xF600, 0x100F800,
+};
+
+unsigned int data_8011759C[1] = {
+    0x8000FA00,
+};
+
+unsigned int data_801175A0[1] = {
+    0x8100FD00,
+};
+
+unsigned int data_801175A4[8] = {
+    0x8200FF00, 0x83000100, 0x84000300, 0x85000500,
+    0x3000700, 0x3000900, 0x4000B00, 0xFF,
+};
+
+unsigned int data_801175C4[17] = {
+    0xFEF500, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0xFF,
+};
+
+unsigned int data_80117608[9] = {
+    0x80FCFA00, 0x81FCFC00, 0x82FCFE00, 0x83FC0000,
+    0x84FC0300, 0x85FC0500, 0x1FEF700, 0x1FEF900,
+    0x1FEFB00,
+};
+
+unsigned int data_8011762C[12] = {
+    0x2FEFD00, 0x2FEFF00, 0x2FE0100, 0x2FE0300,
+    0x3FE0500, 0x3FE0700, 0x100FB00, 0x200FD00,
+    0x200FF00, 0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_8011765C[17] = {
+    0xFEF500, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0100, 0x84FE0400, 0x85FE0600,
+    0x3FE0800, 0x4FE0A00, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_801176A0[4] = {
+    0xF100, 0xF300, 0xF600, 0x100F800,
+};
+
+unsigned int data_801176B0[10] = {
+    0x8000FA00, 0x8100FC00, 0x8200FF00, 0x83000100,
+    0x84000300, 0x85000500, 0x3000700, 0x3000900,
+    0x4000B00, 0x4000D00,
+};
+
+unsigned int data_801176D8[1] = {
+    0xFF,
+};
+
+unsigned int data_801176DC[13] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0300, 0x85FE0500, 0x3FE0700,
+    0xF600, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FE00,
+};
+
+unsigned int data_80117710[6] = {
+    0x2000100, 0x2000300, 0x3000500, 0x3000700,
+    0x3000900, 0xFF,
+};
+
+unsigned int data_80117728[11] = {
+    0xF500, 0x100F800, 0x8000FA00, 0x8100FC00,
+    0x8200FE00, 0x83000100, 0x84000400, 0x85000600,
+    0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80117754[23] = {
+    0xFEF100, 0xFEF300, 0xFEF500, 0x1FEF800,
+    0x80FEFA00, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x3FE0800,
+    0x4FE0A00, 0x4FE0C00, 0x4FE0E00, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_801177B0[5] = {
+    0xFEF200, 0xFEF400, 0xFEF600, 0x80FEF900,
+    0x81FEFB00,
+};
+
+unsigned int data_801177C4[15] = {
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0300,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x4FE0C00,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000100,
+    0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80117800[18] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100F800, 0x100FA00, 0x200FC00,
+    0x200FF00, 0x2000100, 0x2000300, 0x3000500,
+    0x3000700, 0xFF,
+};
+
+unsigned int data_80117848[22] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0xF600,
+    0x100F800, 0x100FA00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000300, 0x3000500, 0x3000700,
+    0x3000900, 0xFF,
+};
+
+unsigned int data_801178A0[13] = {
+    0xF300, 0xF500, 0x100F700, 0x8000F900,
+    0x8100FC00, 0x8200FE00, 0x83000000, 0x84000300,
+    0x85000500, 0x3000700, 0x3000900, 0x4000B00,
+    0xFF,
+};
+
+unsigned int data_801178D4[13] = {
+    0xF300, 0xF500, 0x100F700, 0x8000FA00,
+    0x8100FC00, 0x8200FE00, 0x83000000, 0x84000300,
+    0x85000500, 0x3000700, 0x3000900, 0x4000B00,
+    0xFF,
+};
+
+unsigned int data_80117908[20] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEFA00,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0200,
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x4FE0A00,
+    0x4FE0C00, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000100, 0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80117958[13] = {
+    0xF400, 0xF600, 0x100F800, 0x8000FA00,
+    0x8100FC00, 0x8200FF00, 0x83000100, 0x84000300,
+    0x85000500, 0x3000700, 0x3000900, 0x4000B00,
+    0xFF,
+};
+
+unsigned int data_8011798C[6] = {
+    0xFEF600, 0x80FEF800, 0x81FEFA00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0200,
+};
+
+unsigned int data_801179A4[9] = {
+    0x85FE0400, 0x3FE0600, 0x3FE0800, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0xFF,
+};
+
+unsigned int data_801179C8[18] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FE0000, 0x84FE0200, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100F900, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0x3000500, 0xFF,
+};
+
+unsigned int data_80117A10[21] = {
+    0xFEF400, 0xFEF600, 0x1FEF800, 0x80FEFB00,
+    0x81FEFD00, 0x82FEFF00, 0x83FE0100, 0x84FE0300,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100F800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0x3000600,
+    0xFF,
+};
+
+unsigned int data_80117A64[18] = {
+    0x80FEFA00, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0200, 0x85FE0400, 0xF500, 0x100F700,
+    0x100F900, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000300, 0x3000500, 0x3000700,
+    0x3000900, 0xFF,
+};
+
+unsigned int data_80117AAC[13] = {
+    0xF100, 0xF300, 0xF500, 0x100F700,
+    0x8000F900, 0x8100FB00, 0x8200FE00, 0x83000000,
+    0x84000200, 0x85000400, 0x3000700, 0x3000900,
+    0x4000B00,
+};
+
+unsigned int data_80117AE0[2] = {
+    0x4000D00, 0xFF,
+};
+
+unsigned int data_80117AE8[17] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFC00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100FA00, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_80117B2C[18] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFE00,
+    0x83FE0000, 0x84FE0200, 0x85FE0500, 0x3FE0700,
+    0x100F700, 0x100F900, 0x100FB00, 0x200FD00,
+    0x2000000, 0x2000200, 0x2000400, 0x3000600,
+    0x3000800, 0xFF,
+};
+
+unsigned int data_80117B74[16] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFC00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x100FB00, 0x200FD00,
+    0x200FF00, 0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_80117BB4[8] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFC00,
+    0x82FEFE00, 0x83FE0000, 0x84FE0200, 0x85FE0400,
+};
+
+unsigned int data_80117BD4[9] = {
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000100, 0x2000300,
+    0xFF,
+};
+
+unsigned int data_80117BF8[19] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEF900,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0300,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0xFF,
+};
+
+unsigned int data_80117C44[17] = {
+    0x1FEF800, 0x80FEFA00, 0x81FEFC00, 0x82FEFF00,
+    0x83FE0100, 0x84FE0300, 0x85FE0500, 0x3FE0700,
+    0x100F800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0x3000600,
+    0xFF,
+};
+
+unsigned int data_80117C88[16] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0200, 0x85FE0400, 0x3FE0600,
+    0x3FE0800, 0x100FA00, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0x2000400, 0xFF,
+};
+
+unsigned int data_80117CC8[20] = {
+    0xFEF300, 0xFEF500, 0x1FEF700, 0x80FEF900,
+    0x81FEFC00, 0x82FEFE00, 0x83FE0000, 0x84FE0300,
+    0x85FE0500, 0x3FE0700, 0x3FE0900, 0x4FE0B00,
+    0x100F900, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000300, 0x3000500, 0xFF,
+};
+
+unsigned int data_80117D18[15] = {
+    0xFEF600, 0x80FEF800, 0x81FEFA00, 0x82FEFC00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0300, 0x3FE0600,
+    0x3FE0800, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000100, 0x2000300, 0xFF,
+};
+
+unsigned int data_80117D54[21] = {
+    0x1FEF700, 0x80FEF900, 0x81FEFB00, 0x82FEFD00,
+    0x83FEFF00, 0x84FE0100, 0x85FE0300, 0x3FE0500,
+    0x3FE0700, 0xF500, 0x100F700, 0x100F900,
+    0x100FB00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000400, 0x3000600, 0x3000800, 0x4000A00,
+    0xFF,
+};
+
+unsigned int data_80117DA8[7] = {
+    0x80FEF900, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0200, 0x85FE0500, 0xF500,
+};
+
+unsigned int data_80117DC4[6] = {
+    0x100F700, 0x100F900, 0x100FB00, 0x200FD00,
+    0x200FF00, 0x2000200,
+};
+
+unsigned int data_80117DDC[1] = {
+    0x2000400,
+};
+
+unsigned int data_80117DE0[1] = {
+    0x3000600,
+};
+
+unsigned int data_80117DE4[3] = {
+    0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80117DF0[18] = {
+    0x80FEF900, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0200, 0x85FE0500, 0xF500, 0x100F700,
+    0x100F900, 0x100FB00, 0x200FD00, 0x200FF00,
+    0x2000200, 0x2000400, 0x3000600, 0x3000800,
+    0x4000A00, 0xFF,
+};
+
+unsigned int data_80117E38[16] = {
+    0x80FEF900, 0x81FEFC00, 0x82FEFE00, 0x83FE0000,
+    0x84FE0200, 0x85FE0500, 0x100F700, 0x100F900,
+    0x100FB00, 0x200FD00, 0x2000000, 0x2000200,
+    0x2000400, 0x3000600, 0x3000800, 0xFF,
+};
+
+unsigned int data_80117E78[15] = {
+    0xFEF600, 0x1FEF800, 0x80FEFA00, 0x81FEFD00,
+    0x82FEFF00, 0x83FE0100, 0x84FE0300, 0x85FE0500,
+    0x3FE0700, 0x3FE0900, 0x200FC00, 0x200FE00,
+    0x2000000, 0x2000200, 0xFF,
+};
+
+unsigned int data_80117EB4[13] = {
+    0x80FEF900, 0x81FEFB00, 0x82FEFD00, 0x83FE0000,
+    0x84FE0200, 0x85FE0400, 0x3FE0600, 0x100FB00,
+    0x200FE00, 0x2000000, 0x2000200, 0x2000400,
+    0xFF,
+};
+
+unsigned int data_80117EE8[16] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0300,
+    0x3FE0500, 0x3FE0700, 0x3FE0900, 0x200FC00,
+    0x200FE00, 0x2000000, 0x2000200, 0xFF,
+};
+
+unsigned int data_80117F28[19] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100F900,
+    0x100FB00, 0x200FD00, 0x2000000, 0x2000200,
+    0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80117F74[21] = {
+    0x80FEF800, 0x81FEFA00, 0x82FEFC00, 0x83FEFF00,
+    0x84FE0100, 0x85FE0300, 0x3FE0500, 0xF300,
+    0xF500, 0x100F700, 0x100F900, 0x100FB00,
+    0x200FD00, 0x200FF00, 0x2000200, 0x2000400,
+    0x3000600, 0x3000800, 0x4000A00, 0x4000C00,
+    0xFF,
+};
+
+unsigned int data_80117FC8[20] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FEFF00, 0x84FE0100, 0x85FE0300,
+    0x3FE0500, 0x3FE0700, 0x3FE0900, 0x100F800,
+    0x100FA00, 0x200FC00, 0x200FE00, 0x2000000,
+    0x2000200, 0x2000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_80118018[18] = {
+    0xFEF500, 0x1FEF700, 0x80FEF900, 0x81FEFB00,
+    0x82FEFD00, 0x83FE0000, 0x84FE0200, 0x85FE0400,
+    0x3FE0600, 0x3FE0800, 0x4FE0A00, 0x100FA00,
+    0x200FC00, 0x200FE00, 0x2000000, 0x2000200,
+    0x2000400, 0xFF,
+};
+
+unsigned int data_80118060[12] = {
+    0xF400, 0xF600, 0x8000F800, 0x8100FB00,
+    0x8200FD00, 0x83000000, 0x84000200, 0x85000400,
+    0x3000600, 0x3000800, 0x4000A00, 0xFF,
+};
+
+unsigned int data_80118090[8] = {
+    0x8000F900, 0x8100FB00, 0x8200FD00, 0x8300FF00,
+    0x84000200, 0x85000400, 0x3000600, 0xFF,
+};
+
+unsigned int data_801180B0[1] = {
+    0x80FEFA00,
+};
+
+unsigned int data_801180B4[17] = {
+    0x81FEFC00, 0x82FEFE00, 0x83FE0100, 0x84FE0300,
+    0x85FE0500, 0xF400, 0xF600, 0x100F800,
+    0x100FA00, 0x200FD00, 0x200FF00, 0x2000100,
+    0x2000400, 0x3000600, 0x3000800, 0x4000A00,
+    0xFF,
+};
+
+unsigned int data_801180F8[2] = {
+    0xF400, 0xF600,
+};
+
+unsigned int data_80118100[11] = {
+    0x100F800, 0x8000FA00, 0x8100FC00, 0x8200FF00,
+    0x83000100, 0x84000300, 0x85000500, 0x3000700,
+    0x3000900, 0x4000B00, 0xFF,
+};
+
+unsigned int data_8011812C[15] = {
+    0xF100, 0xF300, 0xF500, 0x100F800,
+    0x8000FA00, 0x8100FC00, 0x8200FE00, 0x83000100,
+    0x84000300, 0x85000500, 0x3000700, 0x4000A00,
+    0x4000C00, 0x4000E00, 0xFF,
+};
+
+unsigned int data_80118168[8] = {
+    0xF100, 0xF300, 0xF500, 0x100F800,
+    0x8000FA00, 0x8100FC00, 0x8200FE00, 0x83000000,
+};
+
+unsigned int data_80118188[7] = {
+    0x84000200, 0x85000500, 0x3000700, 0x3000900,
+    0x4000B00, 0x4000D00, 0xFF,
+};
+
+void *ptrs_801181A4[85] = {
+    data_8011602C,
+    data_80116074,
+    data_801160C8,
+    data_80116130,
+    data_80116198,
+    data_801161D8,
+    data_8011602C,
+    data_80116204,
+    data_8011623C,
+    data_80116274,
+    data_801162C0,
+    data_801171B0,
+    data_80116308,
+    data_80116334,
+    data_80116474,
+    data_801164A0,
+    data_801164D0,
+    data_801164F4,
+    data_8011602C,
+    data_801166AC,
+    data_80116718,
+    data_80116750,
+    data_8011678C,
+    data_801167F8,
+    data_80116984,
+    data_801169B4,
+    data_80116610,
+    data_80116B88,
+    data_80116BD0,
+    data_80116C2C,
+    data_80116C64,
+    data_80116CA4,
+    data_8011602C,
+    data_80116CF0,
+    data_80116D68,
+    data_80116D90,
+    data_80116DE0,
+    data_80116EF8,
+    data_80116F28,
+    data_80116FBC,
+    data_80117008,
+    data_8011704C,
+    data_80117068,
+    data_80117088,
+    data_801170C8,
+    data_8011602C,
+    data_80117118,
+    data_8011716C,
+    data_8011602C,
+    data_80117200,
+    data_80117248,
+    data_8011728C,
+    data_8011602C,
+    data_801172C8,
+    data_80117380,
+    data_801173C8,
+    data_80117404,
+    data_80117450,
+    data_80117498,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_80117608,
+    data_8011755C,
+    data_801175C4,
+    data_8011765C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_801176A0,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_80117754,
+    data_80117590,
+    data_80117848,
+    data_801165C4,
+    data_80117C44,
+    data_80118060,
+    data_8011602C,
+    data_8011602C,
+};
+
+void *ptrs_801182F8[80] = {
+    data_80117518,
+    data_8011683C,
+    data_80116890,
+    data_80116930,
+    data_8011602C,
+    data_80117AE8,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_801176DC,
+    data_801178D4,
+    data_801178A0,
+    data_80117728,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_80117304,
+    data_80117A10,
+    data_801168F0,
+    data_80117CC8,
+    data_80116AC0,
+    data_801179C8,
+    data_8011602C,
+    data_801177B0,
+    data_80117AAC,
+    data_80117C88,
+    data_80117D54,
+    data_8011602C,
+    data_80117908,
+    data_80117958,
+    data_80117E78,
+    data_8011798C,
+    data_80117B74,
+    data_80117EE8,
+    data_80118018,
+    data_8011602C,
+    data_8011602C,
+    data_80117D18,
+    data_80117DA8,
+    data_80117DF0,
+    data_80117E38,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_80117F28,
+    data_80117EB4,
+    data_80117F74,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_80117800,
+    data_80118090,
+    data_8011602C,
+    data_80117A64,
+    data_8011602C,
+    data_8011602C,
+    data_80117B2C,
+    data_801180F8,
+    data_8011602C,
+    data_801180B0,
+    data_8011812C,
+    data_80117FC8,
+    data_8011602C,
+    data_8011602C,
+    data_80118168,
+};
+
+void *ptrs_80118438[36] = {
+    data_8011602C,
+    data_801160F8,
+    data_8011615C,
+    data_8011658C,
+    data_80116664,
+    data_80116E18,
+    data_80116F68,
+    data_80116D30,
+    data_80116E64,
+    data_8011733C,
+    data_80116AFC,
+    data_80116B44,
+    data_80116394,
+    data_801163E4,
+    data_80116424,
+    data_80116530,
+    data_801167C0,
+    data_801166E0,
+    data_801174D8,
+    data_8011602C,
+    data_80116E9C,
+    data_8011602C,
+    data_80116A10,
+    data_80116A68,
+    data_80116A94,
+    data_80117BB4,
+    data_80117BF8,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    data_8011602C,
+    ptrs_801181A4,
+};
+
+unsigned int data_801184C8[5] = {
+    (unsigned int)anim_801184DC, 0x0, 0x803C0000, 0x1,
+    0x803C0000,
+};
+
+AnimWord anim_801184DC[54] = {
+    ANIM_STOP(2, 0, 0, 60),
+    ANIM_STOP(3, 0, 0, 60),
+    ANIM_STOP(4, 0, 0, 60),
+    ANIM_STOP(24, 0, 0, 60),
+    ANIM_STOP(25, 0, 0, 60),
+    ANIM(26, 0, 0, 3),
+    ANIM(27, 0, 0, 3),
+    ANIM(28, 0, 0, 3),
+    ANIM(29, 0, 0, 3),
+    ANIM(28, 0, 0, 3),
+    ANIM(27, 0, 0, 3),
+    ANIM_STOP(26, 0, 0, 3),
+    ANIM(30, 0, 0, 60),
+    ANIM(31, 0, 0, 8),
+    ANIM(32, 0, 0, 8),
+    ANIM_STOP(33, 0, 0, 8),
+    ANIM_STOP(34, 0, 0, 60),
+    ANIM_STOP(35, 0, 0, 60),
+    ANIM_STOP(13, 0, 0, 60),
+    ANIM_STOP(14, 0, 0, 60),
+    ANIM_STOP(15, 0, 0, 60),
+    ANIM_STOP(0, 0, 0, 60),
+    ANIM_STOP(1, 0, 0, 60),
+    ANIM_STOP(2, 0, 0, 60),
+    ANIM_STOP(3, 0, 0, 60),
+    ANIM_STOP(4, 0, 0, 60),
+    ANIM_STOP(5, 0, 0, 60),
+};
