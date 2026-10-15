@@ -1,4 +1,5 @@
 // FUNC 800ee79c 256 I0NFO
+// MATCHING 800ee79c 256
 #include "TOBJ.H"
 #include "spad.h"
 #include "raw7.h"
@@ -9,22 +10,22 @@ extern void func_80018790(TObj *o);
 extern void *D_8001219C;
 void func_800EE79C(TObj *o)
 {
+    TObj *p;
     unsigned char s = o->b04;
     switch (s) {
     case 0: {
         int t;
-//PERM{
         o->w1e = 0x15;
         t = SPAD.i2d8;
+        p = o;
+        o->b0d = 0;
         o->box0 = 4;
         o->box1 = 8;
         o->box2 = 8;
-        o->b0d = 0;
         *(signed char *)&o->b0f = -0xB;
-        o->box3 = 0x20;
+        p->box3 = 0x20;
         o->d3c = t;
         o->anim = D_8001219C;
-//PERM}
         func_8001FE6C(o, t);
         o->b68 = 0;
         o->b69 = 0;
