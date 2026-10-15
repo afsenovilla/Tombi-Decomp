@@ -4,23 +4,6 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-short D_80077728[0x16] = {
-    1414, 366, 316, 467, 110, 152, 181, 181,
-    182, 227, 230, 227, 157, 231, 232, 232,
-    232, 232, 232, 316, 943, 94
-};
-
-CdlATV D_80077754 = { 0x7F, 0, 0x7F, 0 };
-
-CdlATV D_80077758 = { 0, 0, 0, 0 };
-
-u_char D_8007775C[0x18] = {
-    2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
-    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x15, 0x15
-};
-
-
-extern short D_80077728[];
 
 typedef struct {
     u_long* vlcbuf[2];

@@ -4,14 +4,6 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-u_long _ramsize = 0x00200000;
-u_long _stacksize = 0x00000400;
-
-
-
-
-
-
 
 //INCLUDE_ASM("asm/scus_942.36/nonmatchings/main/main", initDisplay);
 
