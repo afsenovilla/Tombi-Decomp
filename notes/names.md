@@ -80,6 +80,10 @@ One line per name: `address name (old file) - justification`.
 - `8003f7cc objCollideSideWalls` (was func_8003F7CC) - after every player step: probeWallAt 8 px ahead (three heights from box2) and behind; a hit on the facing side sets +0xA6 = 2/3 (wall contact used by the steps)
 - `8004065c probeWallAt` (was func_8004065C) - getCollisionPlaneAt for x and the object's depth into 1F800278, then pushOutOfWallSegments with the side flag
 - `800402ec pushOutOfWallSegments` (was func_800402EC) - walks the wall segments of the collision plane; on overlap moves the object's x out by the penetration and stores the segment flags in 1F800282/1F800284
+- `8004fed4 getObjectRenderKind` (was func_80045D0C, US name) - drawObject's switch value: the object's render kind +0x0A, remapped for kinds < 4 except in the area/section combinations listed (D_8009BCCA)
+- `800597bc drawPauseMenu` (was FUN_800597bc) - drawGameplayScene while the object lists are frozen (1F8001C6 == 1): dark semi-transparent full-screen tile plus the menu text entries chosen by 1F8003CD
+- `80058168 drawScreenSpriteObject` (was FUN_80058168) - drawCategory7Objects render kind 1: draws the object's sprite frame parts as SPRTs at its screen x/y (priority +0x0F or +0x0E), with draw-mode wrappers
+- `8005840c drawLetterboxOverlay` (was FUN_8005840c) - drawCategory7Objects render kind 2: the sprite list PTR_DAT_80080258[subtype] plus black 16-px bars at the top and bottom of the screen
 
 # X000 function names (shared overlay code)
 
@@ -216,6 +220,9 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8010c8d4 playerClimbJumpOff` (was FUN_8010c8d4) - jump button while climbing an object: releases it, steps 0x10 sideways by Left/Right (or turns), then jump step 2
 - `8010db0c playerStepWaterJumpOut` (was FUN_8010db0c) - player step 0x43: leaps out of the water (velY -0x780, jump sfx 2/4 and splash sfx 0xE), can grab objects on the way, falls into step 2 state 3
 - `8010bd08 playerReleaseClingObject` (was func_8010BD08) - lets go of the clung object D_8009F0EC: restores its active byte (per type, chained objects via +0x94) and moves the player 0x10 away
+- `800f0490 playerInitMode` (was FUN_800f0490) - updatePlayer mode 0: loads the weapon TIM (weapons 7/8/9), health from GAME (+0x98/+0x9A), sprite data, per-area init, then the entry step from the spawn data (mode 5 event steps or mode 1)
+- `800fe88c playerExitHurtToFall` (was func_800FE88C) (uncertain, no caller found) - invulnerability +0xE0 = 0x8C, lean +0x88 by facing and mode 1 step 2 state 3 (falling)
+- `800fa35c playerHurtTumbleGetUp` (was FUN_800fa35c) (uncertain, no caller found) - substep variant of playerHurtLandRecover: tumble (anim 0x10) until landing, anim 0x2F then get-up anim 0x30, back to mode 1 step 0
 
 # Area overlay function names (X001..X019)
 

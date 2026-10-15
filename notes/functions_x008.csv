@@ -76,7 +76,7 @@ address,size,name,twin
 800f00ac,712,playerCheckGroundAndFall,X000:800f00ac
 800f0374,220,playerFallIfUnsupported,X000:800f0374
 800f0450,64,FUN_800f0450,X000:800f0450
-800f0490,1740,FUN_800f0490,X000:800f0490
+800f0490,1740,playerInitMode,X000:800f0490
 800f0b5c,204,FUN_800f0b5c,X000:800f0b5c
 800f0c28,596,FUN_800f0c28,X000:800f0c28
 800f0e7c,1164,func_800F0E7C,X000:800f0e7c
@@ -122,7 +122,7 @@ address,size,name,twin
 800f9684,548,FUN_800f9684,X000:800f9684
 800f98a8,1908,playerStepFlipOntoPerch,X000:800f98a8
 800fa01c,832,playerStepPerchIdle,X000:800fa01c
-800fa35c,1472,FUN_800fa35c,X000:800fa35c
+800fa35c,1472,playerHurtTumbleGetUp,X000:800fa35c
 800fa91c,1232,playerStepGrabbedStruggle,X000:800fa91c
 800fadec,680,playerRopeCheckRelease,X000:800fadec
 800fb094,44,func_800FB094,X000:800fb094
@@ -142,7 +142,7 @@ address,size,name,twin
 800fdb7c,1472,playerStepHurtStun,X000:800fdb7c
 800fe13c,1568,playerStepHazardRespawn,X000:800fe13c
 800fe75c,304,playerStepDie,X000:800fe75c
-800fe88c,108,func_800FE88C,X000:800fe88c
+800fe88c,108,playerExitHurtToFall,X000:800fe88c
 800fe8f8,148,playerHurtMoveAndBlink,X000:800fe8f8
 800fe98c,1768,playerStepHurtSpin,X000:800fe98c
 800ff074,116,func_800FF074,X000:800ff074

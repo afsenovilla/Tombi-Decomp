@@ -65,7 +65,7 @@ address,name,size,typed
 800f00ac,FUN_800f00ac,712,1
 800f0374,FUN_800f0374,220,1
 800f0450,FUN_800f0450,64,0
-800f0490,FUN_800f0490,1740,1
+800f0490,playerInitMode,1740,1
 800f0b5c,FUN_800f0b5c,204,0
 800f0c28,FUN_800f0c28,596,1
 800f0e7c,FUN_800f0e7c,1164,1
@@ -104,7 +104,7 @@ address,name,size,typed
 800f9684,FUN_800f9684,548,1
 800f98a8,playerStepFlipOntoPerch,1908,1
 800fa01c,playerStepPerchIdle,832,1
-800fa35c,FUN_800fa35c,1472,1
+800fa35c,playerHurtTumbleGetUp,1472,1
 800fa91c,playerStepGrabbedStruggle,1232,1
 800fadec,playerRopeCheckRelease,680,1
 800fb0c0,playerRopeAdjustLength,448,0

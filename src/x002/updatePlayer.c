@@ -18,7 +18,7 @@ extern unsigned short D_8007A034, D_8007A036;
 extern signed char D_8009D2B0;
 extern void *memcpy(void *, void *, int);
 extern void FUN_80025d90(void);
-extern void FUN_800f0490(TObj *);
+extern void playerInitMode(TObj *);
 extern void playerNormalModeDispatch(TObj *);
 extern void playerEventModeDispatch(TObj *);
 extern void playerStepHurtKnockback(TObj *);
@@ -116,7 +116,7 @@ void updatePlayer(TObj *o)
     }
     switch (o->b04) {
     case 0:
-        FUN_800f0490(o);
+        playerInitMode(o);
         break;
     case 1:
         tp = t;

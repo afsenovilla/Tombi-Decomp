@@ -7,7 +7,7 @@ extern short DAT_1f800252, DAT_1f80024a;
 extern TObj **DAT_1f800220, **DAT_1f800264;
 extern unsigned char DAT_800a603a;
 
-int FUN_8004fed4(TObj *o);
+int getObjectRenderKind(TObj *o);
 void FUN_8005296c(TObj *o);
 void FUN_800532fc(TObj *o);
 void FUN_80055618(TObj *o);
@@ -44,7 +44,7 @@ void drawCategory3Objects(void)
         while (n != 0) {
             o = *p++;
             n--;
-            switch (FUN_8004fed4(o)) {
+            switch (getObjectRenderKind(o)) {
             case 0: FUN_8005296c(o); break;
             case 2: FUN_800532fc(o); break;
             case 4: FUN_80055618(o); break;
@@ -80,7 +80,7 @@ void drawCategory3Objects(void)
             o = *DAT_1f800220++;
             DAT_1f80024a--;
             if (o->visible) {
-                switch (FUN_8004fed4(o)) {
+                switch (getObjectRenderKind(o)) {
                 case 0: FUN_8005296c(o); break;
                 case 2: FUN_800532fc(o); break;
                 case 4: FUN_80055618(o); break;

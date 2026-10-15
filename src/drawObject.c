@@ -5,7 +5,7 @@
 #include "gamestate.h"
 #include "player.h"
 extern unsigned short D_8009C960s;
-int func_80045D0C(TObj *o);
+int getObjectRenderKind(TObj *o);
 void func_8011CEF0(TObj *o);
 void func_8011D1BC(TObj *o);
 void func_8011D4E0(TObj *o);
@@ -56,7 +56,7 @@ void drawObject(TObj *o)
         }
         return;
     }
-    switch (func_80045D0C(o)) {
+    switch (getObjectRenderKind(o)) {
     case 0: func_8005296C(o); break;
     case 1: func_80052DB8(o); break;
     case 2: func_800532FC(o); break;

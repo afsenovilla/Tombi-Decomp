@@ -3,7 +3,7 @@
 extern void FUN_80063e0c(void *);
 extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(void), drawCategory3Objects(void);
 extern void drawCategory4Objects(void), drawCategory5Objects(void), drawAreaModelList(void), drawCategory8Objects(void);
-extern void drawCategory7Objects(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudIfShown(void);
+extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void), drawHudIfShown(void);
 extern void drawScreenFade(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
@@ -24,7 +24,7 @@ void drawGameplayScene(void)
     drawCategory8Objects();
     drawCategory7Objects();
     if (DAT_1f8001c6 == 1)
-        FUN_800597bc();
+        drawPauseMenu();
     switch (DAT_8009c975) {
     case 1:
     case 4:

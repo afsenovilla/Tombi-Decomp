@@ -9,8 +9,8 @@ extern TObj **DAT_1f80022c;
 extern unsigned char DAT_800a603a;
 extern unsigned short DAT_8009c960[];
 extern void FUN_800544c8(TObj *);
-extern void FUN_80058168(TObj *);
-extern void FUN_8005840c(TObj *);
+extern void drawScreenSpriteObject(TObj *);
+extern void drawLetterboxOverlay(TObj *);
 extern void FUN_800eb044(TObj *);
 extern void FUN_800ec710(TObj *);
 extern void FUN_8011e778(TObj *);
@@ -33,10 +33,10 @@ void drawCategory7Objects(void)
                 FUN_800544c8(o);
                 break;
             case 1:
-                FUN_80058168(o);
+                drawScreenSpriteObject(o);
                 break;
             case 2:
-                FUN_8005840c(o);
+                drawLetterboxOverlay(o);
                 break;
             case 3:
                 if (DAT_800a603a & 2)
@@ -63,10 +63,10 @@ void drawCategory7Objects(void)
                 FUN_800544c8(o);
                 break;
             case 1:
-                FUN_80058168(o);
+                drawScreenSpriteObject(o);
                 break;
             case 2:
-                FUN_8005840c(o);
+                drawLetterboxOverlay(o);
                 break;
             case 3:
                 if (DAT_800a603a & 2)
