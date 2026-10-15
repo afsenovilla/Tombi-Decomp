@@ -22,7 +22,8 @@ jobs:
           fetch-depth: 0
       - id: c
         run: |
-          n=$(git log --since='25 hours ago' --oneline -- src config include tools notes | wc -l)
+          h=25; [ "$(date -u +%u)" = 1 ] && h=73   # Monday: include the weekend
+          n=$(git log --since="$h hours ago" --oneline -- src config include tools notes | wc -l)
           if [ "$n" -gt 0 ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then c=true; else c=false; fi
           echo "changed=$c" >> "$GITHUB_OUTPUT"
 
