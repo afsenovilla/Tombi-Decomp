@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), area overlay X11.BIN (copies in SYSTEM/ and AREA11/ are identical).
+# The first 0x2B680 bytes are the X00.BIN code every overlay repeats (split in config/slps01144/x00.yaml); the area part
+# starts at 0x2B680 (ID word + entry table, then code), load address 0x800E9AF8 for the whole file.
+name: X11.BIN
+sha1: 9ec2628e76ff4689408ed19400ec0851637e665f
+options:
+  basename: x11
+  target_path: game_jp/SYSTEM/X11.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/x11
+  src_path: build/slps01144/splat_src/x11
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/x11.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_x11.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.x11.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.x11.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - [0x0, bin, x11_shared]
+  - name: x11
+    type: code
+    start: 0x2B680
+    vram: 0x80115178
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x2B680, c, x11]
+  - [0x2F4B4]

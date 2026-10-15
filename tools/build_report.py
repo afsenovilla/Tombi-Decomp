@@ -18,7 +18,8 @@ Steps (all output under build/ and asm/, both ignored by git):
   5. objdiff-cli writes build/report.json.
 
 Usage: python3 tools/build_report.py [--no-split] [--with-sdk] [--objdiff /path/to/objdiff-cli]
-       python3 tools/build_report.py --version jpdemo|jp [--objdiff ...]   (Japanese demo / retail disc, see jpdemo_main)
+       python3 tools/build_report.py --version slps01144|slpm80165 [--objdiff ...]   (Japanese retail / demo disc,
+       see jpdemo_main; the old names jp / jpdemo are accepted too; sces01331 / pal is the default PAL report)
 By default the Psy-Q library functions are left out, so the report (and the decomp.dev headline) measures game code only,
 like docs/PROGRESS.md; --with-sdk adds them under the "sdk" category. Overlay functions that are twins of X000 (or of an
 earlier overlay) are left out too, so shared code is counted once and the total equals the whole-game figure of PROGRESS.md.
@@ -51,22 +52,39 @@ def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
 
 
-# Non-PAL versions (tools/versions.py): jpdemo = Japanese demo disc (SLPM-80165, decomp.dev version SLPM_801.65),
-# jp = Japanese retail (SLPS-01144, version SLPS_011.44). config/<v>/<prog>.yaml splits the version's game dir; one
-# unit per function, C reused from PAL or from src/<v>/. Output: build/<v>/report.json.
-from versions import VERSIONS
-JPDEMO = {p: v[0] for p, v in VERSIONS["jpdemo"]["progs"].items()}
+# Non-PAL versions (tools/versions.py): slpm80165 = Japanese demo disc (SLPM-80165, decomp.dev version SLPM_801.65),
+# slps01144 = Japanese retail (SLPS-01144, version SLPS_011.44). config/<v>/<prog>.yaml splits the version's game dir;
+# one unit per function, built from the shared src/ tree compiled with -DVERSION_<SERIAL>. Output: build/<v>/report.json.
+from versions import VERSIONS, REFERENCE, canon
 
 
-def jpdemo_sources(progs, ver="jpdemo"):
+def version_lines(serial):
+    """{(prog, addr): (src path, size)} of the `// VERSION <SERIAL> <prog> <addr> <size>` lines of the shared src tree:
+    the file whose `#if defined(VERSION_<SERIAL>)` branch (or whole guarded body) builds that version function."""
+    out = {}
+    rx = re.compile(r"^//\s*VERSION\s+" + serial + r"\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", re.M)
+    for dp, dirs, fs in os.walk(os.path.join(ROOT, "src")):
+        dirs[:] = [d for d in dirs if d != "wip"]
+        for fn in sorted(fs):
+            if not fn.endswith(".c"): continue
+            path = os.path.join(dp, fn)
+            t = open(path, errors="replace").read()
+            if "VERSION" not in t: continue
+            for m in rx.finditer(t):
+                out[(m.group(1), int(m.group(2), 16))] = (path, int(m.group(3)))
+    return out
+
+
+def jpdemo_sources(progs, ver="slpm80165"):
     """{(prog, demo addr): (src path, demo name)}: the C that builds each demo function.
 
     By default a demo function reuses the PAL file that matches the PAL function tools/xmatch.py paired it with: the
-    `PAL <module> <address>` comment of config/jpdemo/symbol_addrs_<prog>.txt is looked up by address among the src
+    `PAL <module> <address>` comment of config/<ver>/symbol_addrs_<prog>.txt is looked up by address among the src
     files (tools/units.py), so PAL renames do not break it; the file must cover exactly the demo function's size.
-    config/jpdemo/reuse.txt overrides or adds pairs, one per line: `<prog> <demo addr> <PAL module> <PAL addr>` or
-    `<prog> <demo addr> -` (no C). Demo versions of PAL functions live in src/jpdemo/<prog>/*.c with a
-    `// JPDEMO <prog> <demo addr> <size>` header (and no FUNC/MATCHING marker, so PAL progress ignores them).
+    config/<ver>/reuse.txt overrides or adds pairs, one per line: `<prog> <demo addr> <PAL module> <PAL addr>` or
+    `<prog> <demo addr> -` (no C). A function that differs from PAL is built from the shared file that carries a
+    `// VERSION <SERIAL> <prog> <addr> <size>` line (its `#if defined(VERSION_<SERIAL>)` branch: version C, or
+    INCLUDE_ASM, which compiles to nothing here, so the unit gets no base object; see tools/version_share.py).
     """
     import units as U
     pal = {}
@@ -93,25 +111,34 @@ def jpdemo_sources(progs, ver="jpdemo"):
                 if u: out[(prog, a)] = (u.file, nm)
                 else: print("reuse.txt: no PAL src at", f[2], f[3])
             elif f[2] == "-": out.pop((prog, a), None)
-    tag = VERSIONS[ver]["tag"]  # version files: `// JPDEMO <prog> <addr> <size>` (jp: `// JP ...`)
-    for dp, _, fs in os.walk(os.path.join(ROOT, "src", ver)):
-        for fn in sorted(fs):
-            if not fn.endswith(".c"): continue
-            path = os.path.join(dp, fn)
-            m = re.search(r"^//\s*" + tag + r"\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", open(path, errors="replace").read(400), re.M)
-            if not m or m.group(1) not in progs: continue
-            a = int(m.group(2), 16)
-            out[(m.group(1), a)] = (path, names.get((m.group(1), a), ("func_%08X" % a, 0))[0])
+    for (prog, a), (path, _) in version_lines(VERSIONS[ver]["serial"]).items():
+        if prog in progs: out[(prog, a)] = (path, names.get((prog, a), ("func_%08X" % a, 0))[0])
+    return out
+
+
+def version_source(src, serial, tmpdir):
+    """Copy of a shared src file for building version <serial>: a `// D.<SERIAL> value` directive (D = FLAGS, CC,
+    HEADERS, AS) replaces the file's `// D` line (value `default`: no such line), so a version branch can use other
+    compiler options than the PAL code of the same file."""
+    t = open(src, errors="replace").read()
+    for d in ("FLAGS", "CC", "HEADERS", "AS"):
+        m = re.search(r"^//\s*%s\.%s\s+(.*)$" % (d, serial), t, re.M)
+        if not m: continue
+        t = re.sub(r"(?m)^//\s*%s\s.*\n?" % d, "", t)
+        val = m.group(1).strip()
+        t = re.sub(r"(?m)^//\s*%s\.%s\s.*$" % (d, serial), "" if val == "default" else "// %s %s" % (d, val), t)
+    out = os.path.join(tmpdir, os.path.basename(src))
+    open(out, "w").write(t)
     return out
 
 
 def _jpdemo_spad_set(text):
-    """`.set` lines that make PAL scratchpad symbols (config/jpdemo/spad.txt) constants, since the demo target keeps
-    every scratchpad address literal (config/jpdemo/symbol_addrs_manual.txt). Demo C may also name any scratchpad
+    """`.set` lines that make PAL scratchpad symbols (config/slpm80165/spad.txt) constants, since the demo target keeps
+    every scratchpad address literal (config/slpm80165/symbol_addrs_manual.txt). Demo C may also name any scratchpad
     address D_1F80xxxx."""
     S = _jpdemo_spad_set.__dict__
     if "tab" not in S:
-        p = os.path.join(ROOT, "config", "jpdemo", "spad.txt")
+        p = os.path.join(ROOT, "config", "slpm80165", "spad.txt")
         S["tab"] = [l.split()[:2] for l in open(p) if l.strip() and not l.startswith("#")] if os.path.exists(p) else []
     tab = dict(S["tab"])
     tab.update((n, n[2:]) for n in re.findall(r"\bD_1F80[0-9A-F]{4}\b", text))
@@ -119,17 +146,21 @@ def _jpdemo_spad_set(text):
 
 
 def _jpdemo_compile(job):
-    src, out, name, inc = job
+    src, out, name, inc, serial = job
     NC = _jpdemo_compile.__dict__.setdefault("nc", {})
     if not NC:
         s = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
         NC.update({"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"})
         exec(compile(s, "ncheck", "exec"), NC)
+    # the shared src file, compiled for this version: VERSION_<SERIAL> picks its branch; SKIP_ASM makes an INCLUDE_ASM
+    # branch compile to nothing (that function is not matched by C in this version, so the unit gets no base object)
+    NC["EXTRA_CPP"] = ["-DVERSION_" + serial, "-DSKIP_ASM"]
+    d = tempfile.mkdtemp()
+    src = version_source(src, serial, d)
     t = open(src, errors="replace").read()
     NC["EXTRA_AS"] = _jpdemo_spad_set(t)
     fm = re.search(r"//\s*FLAGS\s+(.*)", t)
     flags = fm.group(1).strip() if fm else "-O2 -G0"
-    d = tempfile.mkdtemp()
     try:
         NC["build"](src, flags, d, inc)
         # the function at .text offset 0 takes the demo name, so objdiff pairs it with the target symbol
@@ -138,7 +169,7 @@ def _jpdemo_compile(job):
         text = e.idx.get(".text")
         funcs = [y for y in e.syms if y["type"] == 2 and y["shndx"] == text]
         first = sorted((y["size"] == 0, y["bind"] != 1, y["name"]) for y in funcs if y["value"] == 0)
-        if not first: return "no function at .text 0"
+        if not first: return "INCLUDE_ASM"  # no C for this function in this version
         first = first[0][2]
         if first != name:
             subprocess.run(["mipsel-linux-gnu-objcopy", "--redefine-sym", "%s=%s" % (name, name + "_pal"),
@@ -157,8 +188,8 @@ def _jpdemo_compile(job):
         shutil.rmtree(d, ignore_errors=True)
 
 
-def jpdemo_base(progs, units, out_dir, ver="jpdemo"):
-    """Compiles the C of every demo unit that has one (jpdemo_sources) into build/jpdemo/base/; sets base_path."""
+def jpdemo_base(progs, units, out_dir, ver="slpm80165"):
+    """Compiles the C of every version unit that has one (jpdemo_sources) into build/<ver>/base/; sets base_path."""
     from multiprocessing import Pool
     srcs = jpdemo_sources(progs, ver)
     inc = tempfile.mkdtemp()
@@ -174,19 +205,21 @@ def jpdemo_base(progs, units, out_dir, ver="jpdemo"):
         if a is None or (prog, a) not in srcs: continue
         src, _ = srcs[(prog, a)]
         out = "%s/base/%s/%s.o" % (out_dir, prog, name)
-        jobs.append((src, out, name, inc)); want.append((u, out))
+        jobs.append((src, out, name, inc, VERSIONS[ver]["serial"])); want.append((u, out))
     with Pool(os.cpu_count() or 4) as pool:
         res = pool.map(_jpdemo_compile, jobs)
-    n = 0
+    n = nasm = 0
     for (u, out), r, j in zip(want, res, jobs):
         if r is None: u["base_path"] = out; n += 1
+        elif r == "INCLUDE_ASM": nasm += 1
         else: print(ver, "base compile failed:", u["name"], os.path.relpath(j[0], ROOT), r)
+    print("%s: %d units left to INCLUDE_ASM by their shared src file" % (ver, nasm))
     shutil.rmtree(inc, ignore_errors=True)
     for u in units: u.pop("addr", None)
     return n
 
 
-def jpdemo_data(progs, units, addrs, out_dir, ver="jpdemo"):
+def jpdemo_data(progs, units, addrs, out_dir, ver="slpm80165"):
     """Data sections of the demo report, as for PAL (tools/report_data.py): claimed sections on the units with C,
     the other non-code bytes of each program in a target-only <prog>/data unit."""
     import report_data as RD
@@ -233,7 +266,7 @@ def jpdemo_data(progs, units, addrs, out_dir, ver="jpdemo"):
     shutil.rmtree(dtmp, ignore_errors=True)
 
 
-def jpdemo_main(ver="jpdemo"):
+def jpdemo_main(ver="slpm80165"):
     os.chdir(ROOT)
     names = {p: v[0] for p, v in VERSIONS[ver]["progs"].items()}
     progs = [p for p in names if os.path.exists("config/%s/%s.yaml" % (ver, p))]
@@ -278,7 +311,7 @@ def jpdemo_main(ver="jpdemo"):
            "progress_categories": [{"id": p, "name": names[p]} for p in progs],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
-    # objdiff reads objdiff.json from the project dir: keep the demo project in build/jpdemo/ apart from the PAL one
+    # objdiff reads objdiff.json from the project dir: keep each version's project in build/<ver>/ apart from the PAL one
     for u in units:
         for k in ("target_path", "base_path"):
             if k in u: u[k] = os.path.relpath(u[k], out_dir)
@@ -290,9 +323,8 @@ def jpdemo_main(ver="jpdemo"):
 
 def main():
     if "--version" in ARGS:
-        v = ARGS[ARGS.index("--version") + 1]
-        if v in VERSIONS: return jpdemo_main(v)
-        sys.exit("unknown version %r (known: %s)" % (v, ", ".join(VERSIONS)))
+        v = canon(ARGS[ARGS.index("--version") + 1])
+        if v != REFERENCE: return jpdemo_main(v)
     os.chdir(ROOT)
     import units as U
     # base objects first: compile every src/*.c and src/x0nn/*.c with the native pipeline (tools/gen_symbols.py

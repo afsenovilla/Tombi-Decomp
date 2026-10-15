@@ -84,7 +84,7 @@ jobs:
 
   # Japanese release (Ore! Tomba, SLPS-01144). Same repo, separate decomp.dev version: artifact SLPS_011.44_report.
   # The disc image comes from the GAME_FILES_URL_JP secret (raw .bin disc image, 2352-byte sectors, or a zip with the
-  # extracted disc; never committed). Skipped when the secret or config/jp/ is missing. See docs/JP.md.
+  # extracted disc; never committed). Skipped when the secret or config/slps01144/ is missing. See docs/JP.md.
   report-jp:
     runs-on: ubuntu-24.04
     steps:
@@ -103,8 +103,8 @@ jobs:
             echo "::notice::GAME_FILES_URL_JP secret not set; skipping the Japanese report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          if [ ! -f config/jp/slps01144.yaml ]; then
-            echo "::notice::config/jp not set up; Japanese report skipped."
+          if [ ! -f config/slps01144/slps01144.yaml ]; then
+            echo "::notice::config/slps01144 not set up; Japanese report skipped."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
@@ -143,18 +143,18 @@ jobs:
 
       - name: Build Japanese report
         if: steps.fetch.outputs.ok == 'true'
-        run: python3 tools/build_report.py --version jp --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+        run: python3 tools/build_report.py --version slps01144 --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
 
       - name: Upload Japanese report
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: SLPS_011.44_report
-          path: build/jp/report.json
+          path: build/slps01144/report.json
 
   # Japanese demo disc (SLPM-80165, "Ore! Tomba" taikenban). Separate decomp.dev version named after its boot
   # executable: artifact SLPM_801.65_report. The image comes from the GAME_FILES_URL_JP_DEMO secret (raw .bin disc
-  # image or a zip with SLPM_801.65 and SYSTEM/X00.BIN; never committed). Skipped when the secret or config/jpdemo/ is
+  # image or a zip with SLPM_801.65 and SYSTEM/X00.BIN; never committed). Skipped when the secret or config/slpm80165/ is
   # missing. See docs/JPDEMO.md.
   report-jpdemo:
     runs-on: ubuntu-24.04
@@ -174,8 +174,8 @@ jobs:
             echo "::notice::GAME_FILES_URL_JP_DEMO secret not set; skipping the demo report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          if [ ! -f config/jpdemo/slpm80165.yaml ]; then
-            echo "::notice::config/jpdemo not set up; demo report skipped."
+          if [ ! -f config/slpm80165/slpm80165.yaml ]; then
+            echo "::notice::config/slpm80165 not set up; demo report skipped."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           URL="$(printf '%s' "$GAME_FILES_URL_JP_DEMO" | tr -d '\r\n"'"'"' ')"
@@ -213,11 +213,11 @@ jobs:
 
       - name: Build demo report
         if: steps.fetch.outputs.ok == 'true'
-        run: python3 tools/build_report.py --version jpdemo --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+        run: python3 tools/build_report.py --version slpm80165 --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
 
       - name: Upload demo report
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: SLPM_801.65_report
-          path: build/jpdemo/report.json
+          path: build/slpm80165/report.json

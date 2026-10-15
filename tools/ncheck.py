@@ -18,6 +18,9 @@ GCC = os.environ.get("OLDGCC", "/opt/oldgcc/gcc-2.7.2-psx")  # compiler of the f
 OLDGCC_ROOT = os.environ.get("OLDGCC_ROOT", "/opt/oldgcc")
 MASPSX = os.environ.get("MASPSX", "/opt/maspsx/maspsx.py")
 ASPSX_VER = os.environ.get("ASPSX_VER", "2.86")
+# preprocessor defines of the version being built (tools/versions.py; build_report sets VERSION_<SERIAL> for the
+# other versions). The reference PAL build defines VERSION_SCES_01331.
+EXTRA_CPP = ["-DVERSION_SCES_01331"]
 EXTRA_AS = ""  # assembler lines put before the code (tools/build_report.py jpdemo: `.set` of scratchpad symbols)
 
 
@@ -61,7 +64,7 @@ def build(src, flags, d, inc):
     inc = headers_for(src, d, inc)
     if not os.path.exists(GCC + "/cc1"):
         raise subprocess.CalledProcessError(1, GCC, stderr=("compiler %s not installed (tools/setup_native.sh)" % GCC).encode())
-    subprocess.run([GCC + "/cpp", "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + inc, "-I" + inc + "/tomba", "-D_LANGUAGE_C", src, d + "/a.i"],
+    subprocess.run([GCC + "/cpp", "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + inc, "-I" + inc + "/tomba", "-D_LANGUAGE_C"] + EXTRA_CPP + [src, d + "/a.i"],
                    check=True, capture_output=True)
     subprocess.run([GCC + "/cc1", "-quiet", "-w", "-funsigned-char"] + flags.split() + [d + "/a.i", "-o", d + "/a.s"],
                    check=True, capture_output=True)

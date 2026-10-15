@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Writes config/jpdemo/reuse.txt: which PAL C function builds each demo function (Japanese demo, docs/JPDEMO.md).
+"""Writes config/slpm80165/reuse.txt: which PAL C function builds each demo function (Japanese demo, docs/JPDEMO.md).
 
-For every demo function (the target objects of `tools/build_report.py --version jpdemo`, build/jpdemo/target/) the PAL
+For every demo function (the target objects of `tools/build_report.py --version slpm80165`, build/slpm80165/target/) the PAL
 functions that have C (src files of tools/units.py, whole-file range) and the same size are compared word by word,
 ignoring only the bits the demo object relocates (jal targets, %hi/%lo halves). Immediates such as struct offsets and
 constants must be equal, unlike tools/xmatch.py, whose looser mask can pair a demo function with the wrong PAL twin.
@@ -9,12 +9,12 @@ One line per pair, by address so PAL file renames do not matter:
 
     <demo prog> <demo addr> <PAL module> <PAL addr>   # demo name = PAL file stem
 
-build_report reads this file first and falls back to the PAL pairing in config/jpdemo/symbol_addrs_*.txt.
+build_report reads this file first and falls back to the PAL pairing in config/slpm80165/symbol_addrs_*.txt.
 Needs the PAL game files (game/) and a previous demo report build; the output is committed, so CI does not.
 
-  python3 tools/build_report.py --version jpdemo && python3 tools/jpdemo_reuse.py && python3 tools/build_report.py --version jpdemo --no-split
+  python3 tools/build_report.py --version slpm80165 && python3 tools/jpdemo_reuse.py && python3 tools/build_report.py --version slpm80165 --no-split
 
-Japanese retail (docs/JP.md): the same with --version jp on all three commands (writes config/jp/reuse.txt).
+Japanese retail (docs/JP.md): the same with --version slps01144 on all three commands (writes config/slps01144/reuse.txt).
 """
 import collections, os, re, struct, subprocess, sys, tempfile
 
@@ -66,7 +66,7 @@ def main():
 
 
 def spad():
-    """--spad: writes config/jpdemo/spad.txt, the PAL scratchpad symbols (0x1F80xxxx PROVIDEs of a PAL
+    """--spad: writes config/slpm80165/spad.txt, the PAL scratchpad symbols (0x1F80xxxx PROVIDEs of a PAL
     tools/build_full.py link, build/full/*.full.ld). build_report assembles them as constants for the demo."""
     os.chdir(ROOT)
     tab = {}
@@ -76,8 +76,8 @@ def spad():
                 if "__" not in n: tab[n] = a  # name__ADDR: a name build_full split by address
     hdr = ("# PAL scratchpad symbols (name, address) from build/full/*.full.ld, written by tools/jpdemo_reuse.py --spad: the demo\n"
            "# report assembles them as constants, since the demo target keeps scratchpad addresses literal.\n")
-    open("config/jpdemo/spad.txt", "w").write(hdr + "".join("%s %s\n" % (n, tab[n]) for n in sorted(tab)))
-    print("config/jpdemo/spad.txt: %d symbols" % len(tab))
+    open("config/slpm80165/spad.txt", "w").write(hdr + "".join("%s %s\n" % (n, tab[n]) for n in sorted(tab)))
+    print("config/slpm80165/spad.txt: %d symbols" % len(tab))
 
 
 if __name__ == "__main__":

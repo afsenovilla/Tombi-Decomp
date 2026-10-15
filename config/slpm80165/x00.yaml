@@ -1,0 +1,37 @@
+# Japanese demo disc (SLPM-80165), shared overlay SYSTEM/X00.BIN (= AREA00/X00.BIN). Split like config/x000.yaml.
+# The load address 0x800E7698 is estimated from jal targets (docs/JPDEMO.md), not yet confirmed in an emulator.
+name: X00.BIN
+sha1: fb7cbf02470e8bcbf700414dd7fada0d19578852
+options:
+  basename: x00
+  target_path: game_jpdemo/SYSTEM/X00.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slpm80165/x00
+  src_path: build/slpm80165/splat_src/x00
+  build_path: build/slpm80165
+  ld_script_path: build/slpm80165/x00.ld
+  symbol_addrs_path:
+    - config/slpm80165/symbol_addrs_x00.txt
+    - config/slpm80165/symbol_addrs_manual.txt
+  undefined_funcs_auto_path: build/slpm80165/undefined_funcs_auto.x00.txt
+  undefined_syms_auto_path: build/slpm80165/undefined_syms_auto.x00.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x00
+    type: code
+    start: 0x0
+    vram: 0x800E7698
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x00]
+  - [0x478BC]

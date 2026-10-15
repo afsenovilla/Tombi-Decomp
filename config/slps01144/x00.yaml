@@ -1,0 +1,37 @@
+# Japanese retail release (SLPS-01144), shared overlay X00.BIN (AREA00; SYSTEM/X00.BIN is the same file).
+# Load address 0x800E9AF8 from jal targets on prologues (PAL X000: 0x800E8028). Whole file, like config/x000.yaml.
+name: X00.BIN
+sha1: 64984e216f4729629cbdd0cf8598f982ba798e75
+options:
+  basename: x00
+  target_path: game_jp/SYSTEM/X00.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/x00
+  src_path: build/slps01144/splat_src/x00
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/x00.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_x00.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.x00.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.x00.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x00
+    type: code
+    start: 0x0
+    vram: 0x800E9AF8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x00]
+  - [0x500E4]

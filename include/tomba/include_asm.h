@@ -1,6 +1,18 @@
 #ifndef _INCLUDE_ASM_H
 #define _INCLUDE_ASM_H
 
+/* Version being built (tools/versions.py): the build defines VERSION_<SERIAL>; PAL SCES-01331 is the reference.
+ * INCLUDE_ASM_V(SUB, NAME) includes asm resolved against that version's asm dir: asm/<SUB>/NAME.s for PAL,
+ * asm/slps01144/<SUB>/NAME.s for the Japanese retail release, asm/slpm80165/<SUB>/NAME.s for the Japanese demo. */
+#if defined(VERSION_SLPS_01144)
+#define VERSION_ASM_DIR "asm/slps01144"
+#elif defined(VERSION_SLPM_80165)
+#define VERSION_ASM_DIR "asm/slpm80165"
+#else
+#define VERSION_ASM_DIR "asm"
+#endif
+#define INCLUDE_ASM_V(SUB, NAME) INCLUDE_ASM(VERSION_ASM_DIR "/" SUB, NAME)
+
 #if !defined(SPLAT) && !defined(M2CTX) && !defined(PERMUTER) && !defined(SKIP_ASM)
 
         #ifndef BIOS_STUB

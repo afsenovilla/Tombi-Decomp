@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Writes config/<version>/symbol_addrs_<prog>.txt (PAL names at demo/JP addresses) from a tools/xmatch.py csv.
-Version jpdemo (default) or jp (--version jp); programs and bases come from tools/versions.py.
+Version slpm80165 (the demo, default) or slps01144 (--version slps01144; old aliases jpdemo / jp work too);
+programs and bases come from tools/versions.py. PAL names are kept; a function without a PAL name gets the
+version-only name func_<addr>_<serial>, like the shared src tree.
 
-  python3 -I tools/xmatch.py game_jpdemo/SLPM_801.65 game_jpdemo/SYSTEM/X00.BIN --csv build/jpdemo/xmatch.csv
-  python3 -I tools/jpdemo_syms.py build/jpdemo/xmatch.csv
-  python3 -I tools/xmatch.py game_jp/SLPS_011.44 game_jp/SYSTEM/X*.BIN --csv build/jp/xmatch.csv
-  python3 -I tools/jpdemo_syms.py build/jp/xmatch.csv --version jp
+  python3 -I tools/xmatch.py game_jpdemo/SLPM_801.65 game_jpdemo/SYSTEM/X00.BIN --csv build/slpm80165/xmatch.csv
+  python3 -I tools/jpdemo_syms.py build/slpm80165/xmatch.csv
+  python3 -I tools/xmatch.py game_jp/SLPS_011.44 game_jp/SYSTEM/X*.BIN --csv build/slps01144/xmatch.csv
+  python3 -I tools/jpdemo_syms.py build/slps01144/xmatch.csv --version slps01144
 
 Needs the PAL files and symbols only to run xmatch; the generated symbol files are committed, so the demo report
-(tools/build_report.py --version jpdemo) runs from the demo disc alone. See docs/JPDEMO.md.
+(tools/build_report.py --version slpm80165) runs from the demo disc alone. See docs/JPDEMO.md.
 """
 import csv, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from versions import VERSIONS, version_arg
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # demo file (as passed to xmatch) -> (symbol file, vram of xmatch offset 0)
@@ -34,10 +38,10 @@ def main():
     for mod, rows in out.items():
         seen, lines = set(), []
         for a, name, size, pm, pa, ident in sorted(rows):
-            if re.fullmatch(r"\w+_OBJ_[0-9A-F]+", name) and a < GAME_END[mod]:
+            if re.fullmatch(r"\w+_OBJ_[0-9A-F]+", name) and a < GAME_END.get(mod, 0xFFFFFFFF):
                 continue
             # generic PAL names (func_/FUN_<PAL address>) would clash with splat's names at demo addresses
-            n = "func_%08X" % a if re.fullmatch(r"(func|FUN)_[0-9A-Fa-f]{8}", name) else name
+            n = "func_%08X_%s" % (a, ver) if re.fullmatch(r"(func|FUN)_[0-9A-Fa-f]{8}", name) else name
             while n in seen: n += "_"
             seen.add(n)
             lines.append("%s = 0x%08X; // type:func size:0x%X  PAL %s %s%s" % (n, a, size, pm, pa, " identical" if ident == "1" else ""))

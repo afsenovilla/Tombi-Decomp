@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), area overlay X18.BIN (copies in SYSTEM/ and AREA18/ are identical).
+# The first 0x2B680 bytes are the X00.BIN code every overlay repeats (split in config/slps01144/x00.yaml); the area part
+# starts at 0x2B680 (ID word + entry table, then code), load address 0x800E9AF8 for the whole file.
+name: X18.BIN
+sha1: 494a89b493678f338ba2b6479d7698115d8a13dc
+options:
+  basename: x18
+  target_path: game_jp/SYSTEM/X18.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/x18
+  src_path: build/slps01144/splat_src/x18
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/x18.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_x18.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.x18.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.x18.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - [0x0, bin, x18_shared]
+  - name: x18
+    type: code
+    start: 0x2B680
+    vram: 0x80115178
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x2B680, c, x18]
+  - [0x2FDA4]

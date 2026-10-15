@@ -1,0 +1,1 @@
+func_8011517C_slps01144 = 0x8011517C; // type:func size:0xE4  PAL x008 0x80115EA8

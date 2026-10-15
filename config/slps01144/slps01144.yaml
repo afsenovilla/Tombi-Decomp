@@ -1,0 +1,45 @@
+# Japanese retail release Ore! Tomba (SLPS-01144), boot executable. See docs/JP.md.
+# Text range 0x80015D1C..0x8007142C (main, then up to the end of SpuGetAllKeysStatus), like config/main0.yaml.
+name: SLPS_011.44
+sha1: 07d577698ad31ec1a69b9d7b80a7c3f90b650888
+options:
+  basename: slps01144
+  target_path: game_jp/SLPS_011.44
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/slps01144
+  src_path: build/slps01144/splat_src/slps01144
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/slps01144.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_slps01144.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.slps01144.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.slps01144.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: slps01144
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x800, rodata, slps01144_rodata]
+      - [0x551C, c, slps01144]
+      - [0x61C2C, data, slps01144_data]
+  - [0x8E800]
