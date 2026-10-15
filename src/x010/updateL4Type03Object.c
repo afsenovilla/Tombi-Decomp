@@ -2,8 +2,8 @@
 // MATCHING 800edf94 504
 #include "TOBJ.H"
 extern void FUN_800202b4(TObj *);
-extern void FUN_800eddfc(TObj *);
-extern void FUN_800edc14(TObj *);
+extern void l4Type03StepB(TObj *);
+extern void l4Type03Step(TObj *);
 extern void FUN_80018838(TObj *);
 extern unsigned short DAT_8009c960;
 
@@ -49,7 +49,7 @@ void updateL4Type03Object(TObj *o)
         FUN_800202b4(o);
         switch (o->b0c) {
         case 1:
-            FUN_800eddfc(o);
+            l4Type03StepB(o);
             break;
         case 0:
         case 2:
@@ -69,7 +69,7 @@ void updateL4Type03Object(TObj *o)
                     }
                     break;
                 case 1:
-                    FUN_800edc14(o);
+                    l4Type03Step(o);
                     break;
                 }
             }

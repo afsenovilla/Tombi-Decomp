@@ -1,7 +1,7 @@
 // FUNC 80053b5c 2412 MAIN0
 // MATCHING 80053b5c 2412
 #include "spad.h"
-/* Scaled+rotated FT4 sprite strip (MAIN0 twin of X000 FUN_80123fd0): same macro loop body (SN/CS, short x = xy,
+/* Scaled+rotated FT4 sprite strip (MAIN0 twin of X000 drawObjectSpriteRotatedFT4): same macro loop body (SN/CS, short x = xy,
    u/w temps) with drawObjectSpriteScaled prologue (proj inline, k scale, SetSemiTrans call, otadd inline) and the global
    D_1F800078 counter; q (uv source) and fp = q + 12 are two pointers. */
 // FLAGS -O2 -G0 -fno-strength-reduce

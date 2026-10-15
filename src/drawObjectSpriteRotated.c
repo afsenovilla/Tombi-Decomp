@@ -2,7 +2,7 @@
 // MATCHING 800532fc 2144
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
-/* Rotated FT4 sprite strip without scale (MAIN0 twin of drawObjectSpriteRotScaled / X000 FUN_80123fd0): same macro loop body
+/* Rotated FT4 sprite strip without scale (MAIN0 twin of drawObjectSpriteRotScaled / X000 drawObjectSpriteRotatedFT4): same macro loop body
    with A/B/C/D read straight from the frame (short C/D: D spills as sh/lhu) and f = DAT_1f800164 read before C/D so
    the lw s0 schedules above their lbu. */
 #include "TOBJ.H"

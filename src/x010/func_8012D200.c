@@ -7,7 +7,7 @@
 
 extern short D_8012F4EC[];
 extern unsigned short Rand(void);
-extern void FUN_80114968(TObj *, int, int, int, int);
+extern void spawnGroundDebrisPiece(TObj *, int, int, int, int);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012D200(TObj *o)
@@ -31,7 +31,7 @@ void func_8012D200(TObj *o)
         if (((unsigned char*)&GCD.bd0b4)[0] + t < 0x1e) {
             t = 5 - GCD.bcfc8;
             if (t > 0 && GVARS.b59 < t && (Rand() & 3) == 0)
-                FUN_80114968(o, 0, *p, (short)((*(short*)((char*)&SPAD.i16c + 2)) + 0x14), (*(short*)((char*)&SPAD.i170 + 2)));
+                spawnGroundDebrisPiece(o, 0, *p, (short)((*(short*)((char*)&SPAD.i16c + 2)) + 0x14), (*(short*)((char*)&SPAD.i170 + 2)));
         } else {
             o->b04++;
         }

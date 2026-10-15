@@ -5,7 +5,7 @@
 
 extern int *D_1F800338[];
 extern TObj *allocObjectLayer8(void);
-extern void FUN_801148d0(TObj *, char, int, int, short);
+extern void spawnDebrisObjectB(TObj *, char, int, int, short);
 
 void spawnLeafButterflySwarm(TObj *o)
 {
@@ -68,5 +68,5 @@ void spawnLeafButterflySwarm(TObj *o)
     f->d90 = (int)e;
     n = ((unsigned char*)&GCD.bceaf)[0];
     if (n > 30) n = 30;
-    for (i = 0; i < n; i++) FUN_801148d0(e, 2, e->a.p.whole, e->y.p.whole, 0x87c);
+    for (i = 0; i < n; i++) spawnDebrisObjectB(e, 2, e->a.p.whole, e->y.p.whole, 0x87c);
 }

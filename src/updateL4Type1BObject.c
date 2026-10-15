@@ -16,7 +16,7 @@ void func_800346A8(u8* self);
 void updateL4Type1BObject(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-        func_80120d04();
+        l4Type1BArea0Update();
     } else if (GAME.selectedArea == AREA06_DIRTMOTOCROSS) {
         func_8011A87C();
     } else if (GAME.selectedArea == AREA11_VILLAGEOFCIVILIZATION){

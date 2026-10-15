@@ -13,7 +13,7 @@ extern short D_800A604E[];
 extern TObj *D_8009F2EC[];
 extern TObj *TASK_C;
 extern int FUN_8001f9e0(void);
-extern void FUN_801148d0(TObj *, char, int, int, short);
+extern void spawnDebrisObjectB(TObj *, char, int, int, short);
 extern void FUN_8001fe6c(void *);
 extern int FUN_8001fdac(int, int);
 
@@ -37,7 +37,7 @@ void stepLeafButterflySwarm(TObj *o)
             for (i = 0; i < n; i++) {
                 a = FUN_8001f9e0() & 3;
                 b = FUN_8001f9e0() & 3;
-                FUN_801148d0(e, 1, (short)(D_800A604A[0] + a), (short)(D_800A604A[2] - b), (short)(D_800A604A[4] - 0x10));
+                spawnDebrisObjectB(e, 1, (short)(D_800A604A[0] + a), (short)(D_800A604A[2] - b), (short)(D_800A604A[4] - 0x10));
             }
             GCD.bcee1 = 1;
             GCD.bcee2 = 0;

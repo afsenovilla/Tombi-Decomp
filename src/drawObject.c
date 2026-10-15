@@ -18,7 +18,7 @@ void drawObjectSpriteQuad(TObj *o);
 void func_800EAB58(TObj *o);
 void func_800EC148(TObj *o);
 void func_800EB77C(TObj *o);
-void func_80123FD0(TObj *o);
+void drawObjectSpriteRotatedFT4(TObj *o);
 void func_8011EBC0(TObj *o);
 void func_8011F240(TObj *o);
 void func_8011B830(TObj *o);
@@ -69,7 +69,7 @@ void drawObject(TObj *o)
         case 3: func_800EB77C(o); break;
         }
         break;
-    case 6: func_80123FD0(o); break;
+    case 6: drawObjectSpriteRotatedFT4(o); break;
     case 7: func_8011EBC0(o); break;
     case 8: func_8011F240(o); break;
     case 9: func_8011B830(o); break;
