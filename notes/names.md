@@ -723,3 +723,40 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   0x40/0x74/0x7F and the five golden item flags), `801271d8 swimTeacherFloatPlayer` (bobs the player on a sine around d34 during the swim lesson,
   sfx 0x0E), `8012c6ec parrotPushBackAndSelectTalk` (pushes the player back (b04 6 step 5, velX +-0xC0), then picks the parrot's talk step from
   events 0x3F / 0x3E / 0x7F; uncertain)
+- x010 zipline (uncertain kind, from the code): `80118a78 updateZiplinePulley` (layer 4 type 0x1D, 18 placements: when the player hangs on it (b6a)
+  `801186e0 ziplinePulleySlide` accelerates it diagonally with a per-b0c velocity ratio (b0c 8: 0x180/0x400) that matches the slope of the cable quads
+  of `80119f58 ziplineCableInit` (cable 4: dx 0x149, dy 0x76); b0c 8 arriving at x >= 0xAC9 sets GVARS.b58 += 1 and locks the scroll, then it resets);
+  `8011a0c0 updateZiplineParts` (layer 4 type 0x35, 42 placements, subtype table D_8012F298: 0 `80119dd4 wobbleWhenStoodOn` (toggles the frame while
+  b69), 2 `8011a1e0 followParentWithOffset`, 3 ziplineCableInit); `80118e2c updateSinkingLedge` / `80118cd4 sinkingLedgeCheckPlayer` (uncertain:
+  sinks 0x30 when the player stands at depth 0x5A in an x window, or when GVARS.b58 == 1; sfx 0xA3); `8012b6e8 updateSpearPigDroppedSpear` (layer 3
+  type 0x48, allocated by updateSpearPig when its hit points reach 0: flies up and falls rocking)
+- Layer 8 background models with texture-UV animation (`updateUvAnimBgModel`: x004 80119114 (type 3), x010 80117364 (type 8); the u/v of the model's
+  FT3/FT4/GT3/GT4 faces flip by +-0x30/0x60 every 10 ticks, frozen while GVARS.b38): x004 `8011942c uvAnimBgModelFlip`, `80119648 uvAnimBgModelStepB`,
+  `80119a04 uvAnimBgModelStepC`; x010 `8011752c uvAnimBgModelFlip`
+- Backdrop sprites (camera-relative screen sprites, named like x001's): `updateParallaxBackdropSprite` (layer 7, position scaled >> 1..3 by section)
+  x006 8011b8a4, x009 8011d17c, x010 8011afd8 (subtype 99 hidden once GAME.purifiedAreas & 0x40), x014 8011b03c; x010 `8011b1f8
+  updateParallaxBackdropSpriteB`; `updateBackdropSprite` (layer 3, unscaled) x002 801167bc, x006 80117468, x009 801198dc, `80119bac updateBackdropSpriteB`;
+  x010 `80118188 updateScreenDecorSprite` (subtype 2 sways with MulNegSin, uncertain); `updateAnimDecorSprite` (culled looping animated sprite)
+  x002 801165dc, x010 801180b4, x014 801175a0; x009 `8011976c updateScenerySprite` (scale/rotation from the box0 nibbles as x001's); x009 `80118838
+  updateOneShotEffect` (frees itself when the anim ends); `updateSceneryModel` (culled static model) x006 8011aee8, x010 8011af20; x014 `80119610
+  updateStaticSolid`
+- x014 evil pig rooms (uncertain kinds): `8011a5fc updateBossRoomPlatform` (layer 4 type 0x3A, one per section: rotation/orbit mode by section, section 2
+  orbits GVARS.p54), `8011a9e0 updateBossRoomVortex` (type 0x3C, section 2: stores itself in GVARS.p54, spins and pushes the player through
+  GVARS.s44/s46 within 0xA0), `80119344 updateRotatingPlatformCross` (type 0x2A: spawns four subtype 1 children that follow its rotation matrix),
+  `8011ac9c updateBossRoomPillar` (type 0x3D, box height per b0c), `8011ad78 / 8011aedc updateRotatedChildPart / B` (follow the parent d90 matrix),
+  `80117114 updateRisingEffect` (layer 3 type 0x23: subtypes 1-3 rise for a random time and vanish)
+- x009 `8011a4a8 updateWaypointRide` (layer 3 type 0x40, section 6: hides the player (active 5), `80119f5c waypointRideStep` carries it along the 3D
+  waypoint path D_8012AC88 turning the camera, then warps to area 9 section 0 spawn 2; vehicle uncertain), `8011a7e0 updateBluePowderSprinkle`
+  (layer 3 type 0x42: item 0x75 "Blue Powder" used next to the parent -> after 30 ticks sets the parent to step 8, subtype |= 0x80; uncertain)
+- x002 `80116928 sevenFriendsMemberSetAnim` (table D_8011C6DC; callers stepSevenFriendsMember and the pig gate scenes), `8011836c initSevenFriendsNpc`
+  (box/w1e/SPR/anim from D_8011C770[subtype]), `80118ff0 sevenFriendsWaitGateOpen` (step helper: waits for GCD.bcfea == 2; unreferenced),
+  `80119f40 spawnSparkleNear` (layer 3 type 0x31 subtype 1 at an offset from D_80115FF4; uncertain)
+- x013 ending stats screen (run by updateSceneSequence with the values it computes): `801179b4 drawGameStats` (AP, play time, events started (flag != 0),
+  events completed (flag 0xFF)), `80117b4c drawStatsLabelGlyph`, `80117c10 drawStatsNumber`, `80117e14 drawStatsPlayTime` (h:mm, glyph 10 = ':'),
+  `80118028 drawStatsDigit`; `linkAreaModelBlock` (x013 801166e0, x018 8011657c section 1 only) - entries 13 / 18 of the MAIN0 per-area table
+  PTR_DAT_80079b3c that FUN_8002af10 calls with the WMD data: points a->d4 at the block b + b->d4 and sets a->b3 (uncertain)
+- x006 motocross bike (MAIN0 func_80033F50 calls `8011a87c updateMotocrossBike` in AREA06_DIRTMOTOCROSS; stores itself in GVARS.p4c, b0c 0 = body
+  (allocates the rider type 0x3B -> GVARS.p50), 1..5 = parts following its matrix, wheels turning by velH): `801198f0 motocrossBikeRide` (body steps:
+  follows the path D_8011F3F8, jump on the button), `801183f0 motocrossFindPathSegment` / `801184f0 motocrossAdvanceAlongPath` (walk the path points
+  by distance, heading/pitch with ratan2), `80118810 motocrossBikeSetSpeed` (speed by GVARS.b58 / input; uncertain), `8011a73c motocrossBikeBob`
+  (sine bob + jump/land morphs; uncertain)

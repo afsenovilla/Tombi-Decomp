@@ -25,8 +25,8 @@ extern int rsin(int);
 extern int rcos(int);
 extern void AnimLoadDuration(TObj *);
 extern void startPadVibration(int, int, int, int);
-extern void func_80118810(TObj *);
-extern void func_801184F0(TObj *);
+extern void motocrossBikeSetSpeed(TObj *);
+extern void motocrossAdvanceAlongPath(TObj *);
 
 #define SUB(o) ((Sub *)((char *)(o) + 0xb4))
 
@@ -66,9 +66,9 @@ static __inline__ void pos(TObj *o)
     E *e;
     short d;
 
-    func_80118810(o);
+    motocrossBikeSetSpeed(o);
     upd(o, SUB(o));
-    func_801184F0(o);
+    motocrossAdvanceAlongPath(o);
     s = SUB(o);
     e = *(E **)&o->wa8;
     e += o->animTimer;

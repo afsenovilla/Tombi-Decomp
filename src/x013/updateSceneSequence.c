@@ -41,7 +41,7 @@ extern void setEventComplete(int, int);
 extern void stopBgm(int);
 extern void ThreadCreate(int, char *);
 extern void startAreaBgm(void);
-extern void func_801179B4(int, int, int, int);
+extern void drawGameStats(int, int, int, int);
 extern void freeObjectLayer2(O *);
 
 void updateSceneSequence(O *o)
@@ -206,7 +206,7 @@ void updateSceneSequence(O *o)
                 }
                 o->step++;
             case 1:
-                func_801179B4(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
+                drawGameStats(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
                 if (!(SPAD.s1fc & 0x6008)) break;
                 if (GCD.bce48 == 0xff && GCD.bcdcb == 0xff && GV2.sda != 0 && GCD.bce0b == 0xff) {
                     D_8009C975 = 3;
@@ -289,7 +289,7 @@ void updateSceneSequence(O *o)
                 o->step++;
                 break;
             case 11:
-                func_801179B4(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
+                drawGameStats(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
             case 10:
                 if (D_8009C975 != 1) break;
                 o->wb6++;

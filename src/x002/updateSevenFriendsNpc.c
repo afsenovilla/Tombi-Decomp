@@ -2,7 +2,7 @@
 // MATCHING 80118534 336
 #include "TOBJ.H"
 
-extern void func_8011836C(TObj *);
+extern void initSevenFriendsNpc(TObj *);
 extern void sevenFriendsWaitTalk(TObj *);
 extern void sevenFriendsGoodLuckTalk(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -12,7 +12,7 @@ void updateSevenFriendsNpc(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8011836C(o);
+        initSevenFriendsNpc(o);
         break;
     case 1:
         ObjCullRegister(o);

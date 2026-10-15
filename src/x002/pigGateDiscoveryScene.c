@@ -32,7 +32,7 @@ extern void drawScreenFade(short);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
 extern int AnimAdvance(void *);
-extern void func_80116928(TObj *, int, int);
+extern void sevenFriendsMemberSetAnim(TObj *, int, int);
 extern void sevenFriendsSetAnim(TObj *, int, int);
 
 #define Spawn(X, Y, Z) { \
@@ -109,7 +109,7 @@ void pigGateDiscoveryScene(Ctl *o)
         RING(o);
         if (!GAME.fadeScreenControl) {
             GVARS.b3c = 1;
-            func_80116928(d, 0, 0);
+            sevenFriendsMemberSetAnim(d, 0, 0);
             o->w0a = 200;
             o->state++;
         }
@@ -129,7 +129,7 @@ void pigGateDiscoveryScene(Ctl *o)
         drawScreenFade(o->w08);
         if (o->w08 <= 0) {
             o->w08 = 0x78;
-            func_80116928(d, 1, 0);
+            sevenFriendsMemberSetAnim(d, 1, 0);
             o->state = 8;
         }
         break;
@@ -207,7 +207,7 @@ void pigGateDiscoveryScene(Ctl *o)
         if (--o->w08 <= 0) {
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
-            func_80116928(d, 3, 0);
+            sevenFriendsMemberSetAnim(d, 3, 0);
             a->d90 = (int)showMessageBoxDirect(7, 4, &v);
             sevenFriendsSetAnim(a, 2, 0);
             o->state++;

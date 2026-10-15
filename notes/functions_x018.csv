@@ -304,7 +304,7 @@ address,size,name,twin
 80114968,160,FUN_80114968,X000:80114968
 80114a08,64,FUN_80114a08,X000:80114a08
 801162d8,676,updateAreaScroll,
-8011657c,44,func_8011657C,
+8011657c,44,linkAreaModelBlock,
 8011658c,28,func_8011658C,
 801165a8,328,updateAnimBackdropSprite,
 801166f0,432,updateDriftingCloud,

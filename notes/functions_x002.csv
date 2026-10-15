@@ -305,10 +305,10 @@ address,size,name,twin
 80114a08,64,FUN_80114a08,X000:80114a08
 80116358,564,updateAreaScroll,
 8011658c,80,func_8011658C,
-801165dc,480,func_801165DC,
-801167bc,356,func_801167BC,
+801165dc,480,updateAnimDecorSprite,
+801167bc,356,updateBackdropSprite,
 80116920,8,func_80116920,MAIN0:80022154
-80116928,148,func_80116928,
+80116928,148,sevenFriendsMemberSetAnim,
 801169bc,4,func_801169BC,
 801169c0,912,updateSevenFriendsBackdropSprite,
 80116d50,1616,func_80116D50,
@@ -329,7 +329,7 @@ address,size,name,twin
 801182ac,128,stepSevenFriendsTalk,
 8011832c,48,func_8011832C,
 8011835c,16,func_8011835C,X000:8011de74
-8011836c,212,func_8011836C,
+8011836c,212,initSevenFriendsNpc,
 80118440,244,func_80118440,
 80118534,52,updateSevenFriendsNpc,
 80118568,260,func_80118568,
@@ -337,7 +337,7 @@ address,size,name,twin
 80118684,632,updateSceneSequence,
 801188fc,20,func_801188FC,
 80118910,1760,func_80118910,
-80118ff0,152,func_80118FF0,
+80118ff0,152,sevenFriendsWaitGateOpen,
 80119088,240,func_80119088,
 80119178,440,stepSevenFriendsMember,
 80119330,380,updateSevenFriendsMember,
@@ -347,7 +347,7 @@ address,size,name,twin
 80119908,12,func_80119908,X001:8013a0cc
 80119914,264,updateFlowerGardenEvent,
 80119a1c,1316,spawnPigGateSceneNpcs,
-80119f40,360,func_80119F40,
+80119f40,360,spawnSparkleNear,
 8011a0a8,108,selectSevenFriendsSceneStep,
 8011a0b4,96,func_8011A0B4,
 8011a114,820,pigGateDiscoveryScene,
