@@ -1,9 +1,9 @@
 name: Progress report
 
 on:
-  # At most one decomp.dev update a day (saves Actions minutes); run by hand from the Actions tab if needed.
+  # At most one decomp.dev update a day, Monday to Friday (saves Actions minutes); run by hand from the Actions tab if needed.
   schedule:
-    - cron: '47 2 * * *'
+    - cron: '47 2 * * 1-5'
   workflow_dispatch:
 
 concurrency:
