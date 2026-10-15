@@ -5,7 +5,7 @@
 extern int func_80044424(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_80125AE4(TObj *a, TObj *b)
+void springVineObjectCollision(TObj *a, TObj *b)
 {
     int r;
     short s;

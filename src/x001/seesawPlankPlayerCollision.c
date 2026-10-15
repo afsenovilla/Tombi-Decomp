@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void func_801244A0(TObj *, TObj *, int, int);
 
-void func_80124BA8(TObj *a, TObj *b)
+void seesawPlankPlayerCollision(TObj *a, TObj *b)
 {
     if (b->subtype == 0) {
         func_801244A0(a, b, 0, b->d8c);

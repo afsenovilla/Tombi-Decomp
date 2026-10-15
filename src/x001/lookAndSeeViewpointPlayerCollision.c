@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short boxesOverlap(TObj *, TObj *);
 
-void func_80124058(TObj *a, TObj *b)
+void lookAndSeeViewpointPlayerCollision(TObj *a, TObj *b)
 {
     b->b69 = 0;
     if (boxesOverlap(a, b)) {

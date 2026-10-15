@@ -4,7 +4,7 @@
 
 extern void func_80124E34(TObj *, TObj *);
 
-void func_8012538C(TObj *o, TObj *p)
+void ropeChainsPlayerCollision(TObj *o, TObj *p)
 {
     p->b69 = 0;
     func_80124E34(o, p);

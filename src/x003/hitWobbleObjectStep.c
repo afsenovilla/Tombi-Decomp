@@ -2,7 +2,7 @@
 // MATCHING 8011b0b8 440
 #include "TOBJ.H"
 
-void func_8011B0B8(TObj *o)
+void hitWobbleObjectStep(TObj *o)
 {
     unsigned char s = o->step;
 

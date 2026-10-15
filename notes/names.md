@@ -648,3 +648,20 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   trickVillagePigShotBContact` (0x4F), `8011c8c0 deepJunglePigShotContact` (0x50). (x009 deathFruitCatchContact and x001 burningFireContact are the
   type 0x1A / 0x0F entries.)
 - x004 koma pig helpers: `8011fef0 komaPigCheckWall` (csv twin of x003 8012080c), `8011fdd4 komaPigCheckLanded` (called by every x004 komaPig state)
+- Layer 4 collision callbacks (MAIN0 dispatchers by the layer 4 type, table 0x80079D74; named `<handler>PlayerCollision` / `ObjectCollision` /
+  `EnemyCollision` after the layer 4 handler of that type in the same overlay):
+  `func_80046D58` (player vs layer 4): x001 `80125044 springVinePlayerCollision` (5), `80124ba8 seesawPlankPlayerCollision` (0x14), `801251b0
+  bendingBranchPlayerCollision` (0x0E), `8012538c ropeChainsPlayerCollision` (0x0F), `80124058 lookAndSeeViewpointPlayerCollision` (0x12); x003
+  `8011f310 hitWobbleObjectPlayerCollision` (0x24), `8011f3f8 knockDownObjectPlayerCollision` (0x22); x004 `8011f5b8 healingSpotPlayerCollision` (0x25),
+  `8011f4dc shuttlePlatformPlayerCollision` (0x1F), `8011f3cc blockingWallPlayerCollision` (0x1E); x010 `8011f644 solidSceneryPlayerCollision` (0x28);
+  `FUN_80046610` (layer 1 objects (category list 1F800218: thrown objects such as updateThrownBreakable) vs layer 4): x001 `80125ae4
+  springVineObjectCollision`, `801258e4 flowerTowerBlockerObjectCollision` (0x0B/0x0C), `80125868 seesawPlankObjectCollision`; x003 `8011f418
+  knockDownObjectCollision`, `8011f330 hitWobbleObjectCollision`; x004 `8011f568 shuttlePlatformObjectCollision`, `8011f41c blockingWallObjectCollision`
+  (hit result 7 on subtype 0 breaks the wall: b04 2, sfx 7); x010 `8011f5b4 solidSceneryObjectCollision`;
+  `func_800491F0` (layer 2 enemies vs layer 4): x001 `801280dc ropeChainsEnemyCollision`, `80127fdc seesawPlankEnemyCollision` (csv twin of
+  80124ba8), `80128054 breakableBlockEnemyCollision` (0x21); x003 `801203d0 knockDownObjectEnemyCollision`; x004 `8011fa74
+  shuttlePlatformEnemyCollision`, `8011fae8 blockingWallEnemyCollision`; x010 `801210b4 solidSceneryEnemyCollision`
+- x003 layer 4 objects (3D models, kinds uncertain): `8011afc8 updateKnockDownObject` (type 0x22: `8011add4 knockDownObjectStep` wobbles when touched
+  (b69: spin velH 0x400, bounce), pad vibration, then falls away with sfx 0x7C), `8011b270 updateHitWobbleObject` (type 0x24: `8011b0b8
+  hitWobbleObjectStep` swings with a decaying oscillation after a hit (b68))
+- x010 `80118b40 updateSolidScenery` (layer 4 type 0x28, 44 placements: a culled model with a collision box per subtype (13 sizes); kind uncertain)

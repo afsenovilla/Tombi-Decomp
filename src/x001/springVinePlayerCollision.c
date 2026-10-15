@@ -4,7 +4,7 @@
 
 extern int func_800439F4(TObj *a, TObj *b);
 
-void func_80125044(TObj *a, TObj *b)
+void springVinePlayerCollision(TObj *a, TObj *b)
 {
     if (b->subtype == 0)
         func_800439F4(a, b);

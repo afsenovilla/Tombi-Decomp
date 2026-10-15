@@ -4,10 +4,10 @@
 typedef struct { unsigned char a, b, c; } T3;
 extern T3 D_80135A6C[];
 extern int ObjCullRegister(TObj *);
-extern void func_8011ADD4(TObj *);
+extern void knockDownObjectStep(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_8011AFC8(TObj *o)
+void updateKnockDownObject(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -18,7 +18,7 @@ void func_8011AFC8(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        func_8011ADD4(o);
+        knockDownObjectStep(o);
         o->b69 = 0;
         break;
     case 2:

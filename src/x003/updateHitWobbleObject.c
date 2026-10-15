@@ -2,10 +2,10 @@
 // MATCHING 8011b270 180
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
-extern void func_8011B0B8(TObj *);
+extern void hitWobbleObjectStep(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011B270(TObj *o)
+void updateHitWobbleObject(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -18,7 +18,7 @@ void func_8011B270(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        func_8011B0B8(o);
+        hitWobbleObjectStep(o);
         o->b68 = 0;
         break;
     case 2:

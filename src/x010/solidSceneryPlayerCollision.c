@@ -23,7 +23,7 @@ extern void playSFX(int);
     else if (a->step == 10) { a->step = 4; a->state = 3; } \
     else a->step = 0x3f;
 
-void func_8011F644(TObj *a, TObj *b)
+void solidSceneryPlayerCollision(TObj *a, TObj *b)
 {
     short w, dx, dy, h, pw, ph, d, k;
 

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern int func_800482EC(TObj *, TObj *);
 
-void func_801210B4(TObj *o, TObj *p)
+void solidSceneryEnemyCollision(TObj *o, TObj *p)
 {
     if (func_800482EC(o, p)) SPAD.s19e = 0;
 }

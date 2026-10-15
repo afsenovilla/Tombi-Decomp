@@ -5,7 +5,7 @@
 void startPadVibration(int a, int b, int c, int d);
 void FUN_8001e4f0(int a);
 
-void func_8011ADD4(TObj *o)
+void knockDownObjectStep(TObj *o)
 {
     switch (o->step) {
     case 0:

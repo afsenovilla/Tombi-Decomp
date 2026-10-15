@@ -49,7 +49,7 @@ static __inline__ void coll(TObj *a, TObj *b)
     if (a->velY < 0) a->velY = 0;
 }
 
-void func_801251B0(TObj *o, TObj *e)
+void bendingBranchPlayerCollision(TObj *o, TObj *e)
 {
     if (o->active != 4 && e->subtype == 6) coll(o, e);
 }

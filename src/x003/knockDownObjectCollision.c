@@ -5,7 +5,7 @@ extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
 extern short D_1F80019E;
 
-void func_8011F418(TObj *o, TObj *p)
+void knockDownObjectCollision(TObj *o, TObj *p)
 {
     if (boxesOverlapSigned(o, p) >= 0) {
         resolveHitResultA(o, p);

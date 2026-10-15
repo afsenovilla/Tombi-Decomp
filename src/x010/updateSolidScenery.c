@@ -5,7 +5,7 @@
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_80118B40(TObj *o)
+void updateSolidScenery(TObj *o)
 {
     switch (o->b04) {
     case 0:

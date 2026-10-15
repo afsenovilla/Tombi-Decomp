@@ -4,7 +4,7 @@
 extern short D_1F80019E;
 extern short func_800482EC(TObj *, TObj *);
 
-void func_8011FA74(TObj *o, TObj *e)
+void shuttlePlatformEnemyCollision(TObj *o, TObj *e)
 {
     if (func_800482EC(o, e)) {
         D_1F80019E = 0;

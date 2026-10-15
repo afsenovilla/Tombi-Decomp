@@ -7,7 +7,7 @@ extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void FUN_8001f96c(int, short, short, short);
 
-void func_8011F41C(TObj *o, TObj *e)
+void blockingWallObjectCollision(TObj *o, TObj *e)
 {
     int r;
     if (boxesOverlapSide(o, e) >= 0) {

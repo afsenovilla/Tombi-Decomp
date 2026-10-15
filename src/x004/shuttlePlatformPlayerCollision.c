@@ -4,7 +4,7 @@
 extern short D_1F80019E;
 extern short func_80043260(TObj *, TObj *);
 
-void func_8011F4DC(TObj *o, TObj *e)
+void shuttlePlatformPlayerCollision(TObj *o, TObj *e)
 {
     if (o->b9e == 0) {
         e->b69 = 0;

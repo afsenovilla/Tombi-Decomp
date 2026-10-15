@@ -4,7 +4,7 @@
 extern short func_800482EC(TObj *, TObj *);
 extern void playSFX(int);
 
-void func_80128054(TObj *o, TObj *e)
+void breakableBlockEnemyCollision(TObj *o, TObj *e)
 {
     if (o->type == 0 && o->b0c == 1 && func_800482EC(o, e)) {
         o->active = 2;

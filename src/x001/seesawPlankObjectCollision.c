@@ -4,7 +4,7 @@
 
 extern int func_801253AC(TObj *, TObj *, int, int);
 
-void func_80125868(TObj *a, TObj *b)
+void seesawPlankObjectCollision(TObj *a, TObj *b)
 {
     if (b->subtype == 0) {
         func_801253AC(a, b, 0, b->d8c);
