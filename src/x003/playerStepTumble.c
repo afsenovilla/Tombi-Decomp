@@ -4,7 +4,7 @@
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerReleaseBittenAirborne(TObj *);
 
-void func_8011EAE8(TObj *o)
+void playerStepTumble(TObj *o)
 {
     int t, u;
 

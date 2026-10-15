@@ -15,7 +15,7 @@ extern T8012A6D8 D_80135DB8[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
-void func_8012A6D8(TObj *o)
+void initMasterOfTheSkiesEventObj(TObj *o)
 {
     o->box0 = D_80135DB8[o->subtype].b0;
     o->box1 = D_80135DB8[o->subtype].b1;

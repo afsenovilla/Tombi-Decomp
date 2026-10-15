@@ -5,7 +5,7 @@
 extern short FUN_8004b57c(TObj *, TObj *);
 extern short D_1F8003BC;
 
-void func_8011F38C(TObj *o, TObj *p)
+void hitWobbleObjectGrabProbe(TObj *o, TObj *p)
 {
     p->b6a = 0;
     if (FUN_8004b57c(o, p)) {

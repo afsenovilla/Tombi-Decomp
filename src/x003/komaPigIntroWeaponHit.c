@@ -5,7 +5,7 @@
 
 extern short FUN_8004461c(TObj *a, TObj *b);
 
-void func_8011FA6C(TObj *o, TObj *p)
+void komaPigIntroWeaponHit(TObj *o, TObj *p)
 {
     if (FUN_8004461c(o, p) != -1) {
         if (GCD.bcdc3 != 0) {

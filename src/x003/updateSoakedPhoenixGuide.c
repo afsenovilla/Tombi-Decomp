@@ -5,10 +5,10 @@
 #include "gamestate.h"
 
 extern void spawnSoakedPhoenixGuideNpcs(TObj *);
-extern void func_80131E44(TObj *);
+extern void soakedPhoenixGuideIntroScene(TObj *);
 extern void soakedPhoenixGuideTalk(TObj *);
 extern void phoenixSpiritHintTalkB(TObj *);
-extern void func_80132960(TObj *);
+extern void soakedPhoenixGuideSection1Scene(TObj *);
 extern void flameBlockedNpcTalk(TObj *);
 extern void FUN_80018980(TObj *);
 
@@ -24,7 +24,7 @@ void updateSoakedPhoenixGuide(TObj *o)
         if (GAME.selectedSection == 0) {
             switch (o->step) {
             case 0:
-                func_80131E44(o);
+                soakedPhoenixGuideIntroScene(o);
                 break;
             case 1:
                 soakedPhoenixGuideTalk(o);
@@ -34,7 +34,7 @@ void updateSoakedPhoenixGuide(TObj *o)
                 break;
             }
         } else if (GAME.selectedSection == 1) {
-            if (o->step == 0) func_80132960(o);
+            if (o->step == 0) soakedPhoenixGuideSection1Scene(o);
         } else {
             flameBlockedNpcTalk(o);
         }

@@ -13,7 +13,7 @@ extern void ObjSetFacingToPlayer(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void freeObjectLayer2(TObj *);
-extern void func_8012C97C(TObj *);
+extern void windblownMonkeyIdle(TObj *);
 extern void windblownMonkeyAskTrousers(TObj *);
 extern void windblownMonkeyGiveUmbrella(TObj *);
 extern void windblownMonkeyRepeatTalk(TObj *);
@@ -58,7 +58,7 @@ void updateWindblownMonkey(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            func_8012C97C(o);
+            windblownMonkeyIdle(o);
             break;
         case 1: {
             V6 v;

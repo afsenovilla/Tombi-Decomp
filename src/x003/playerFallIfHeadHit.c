@@ -13,7 +13,7 @@ static __inline__ void fall(TObj *o)
     o->state = 3;
 }
 
-void func_8011E2D0(TObj *o)
+void playerFallIfHeadHit(TObj *o)
 {
     if (ObjCheckHeadCollision(o)) {
         fall(o);

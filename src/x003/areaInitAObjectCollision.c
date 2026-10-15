@@ -5,7 +5,7 @@
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_8011FEC8(TObj *o, TObj *e)
+void areaInitAObjectCollision(TObj *o, TObj *e)
 {
     if (e->d94 == 0 && boxesOverlapSigned(o, e) >= 0) {
         resolveHitResultA(o, e);

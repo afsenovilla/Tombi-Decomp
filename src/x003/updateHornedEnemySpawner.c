@@ -56,7 +56,7 @@ static __inline__ void spawn2(TObj *o, unsigned short *q)
     o->step++;
 }
 
-void func_8013123C(TObj *o)
+void updateHornedEnemySpawner(TObj *o)
 {
     TObj *p = &PLAYER;
     switch (o->b04) {

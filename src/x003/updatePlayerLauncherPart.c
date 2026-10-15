@@ -29,7 +29,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_8011D07C(TObj *o)
+void updatePlayerLauncherPart(TObj *o)
 {
     TObj *p;
     int a, v, x;

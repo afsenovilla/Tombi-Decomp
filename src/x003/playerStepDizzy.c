@@ -8,7 +8,7 @@ extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void playerSetAngleFromSlope(TObj *);
 
-void func_8011E1A4(TObj *o)
+void playerStepDizzy(TObj *o)
 {
     unsigned char one;
 

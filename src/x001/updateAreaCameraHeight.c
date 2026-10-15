@@ -11,7 +11,7 @@ typedef struct {
     FP *p34;
 } O;
 
-void func_801165C0(O *o)
+void updateAreaCameraHeight(O *o)
 {
     unsigned short x = o->p34->whole;
     short v;

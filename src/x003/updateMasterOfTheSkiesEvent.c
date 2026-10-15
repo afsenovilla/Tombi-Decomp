@@ -17,7 +17,7 @@ extern void cdSeekStream(int);
 extern void stopBgm(int);
 extern void ThreadCreate(int, void *);
 extern void removeItemFromInventory(int, int);
-extern void func_8012A6D8(TObj *o);
+extern void initMasterOfTheSkiesEventObj(TObj *o);
 extern void masterOfTheSkiesScene(TObj *o);
 
 static __inline__ int chk(void)
@@ -31,7 +31,7 @@ void updateMasterOfTheSkiesEvent(TObj *o)
 
     switch (o->b04) {
     case 0:
-        func_8012A6D8(o);
+        initMasterOfTheSkiesEventObj(o);
         break;
     case 1:
         ObjCullRegister(o);

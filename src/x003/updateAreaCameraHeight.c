@@ -6,7 +6,7 @@ typedef struct { unsigned short frac; short whole; } FP;
 typedef struct { char pad[0x32]; short y; FP *p; } S;
 
 
-void func_80116F74(S *o)
+void updateAreaCameraHeight(S *o)
 {
     short x = o->p->whole;
 

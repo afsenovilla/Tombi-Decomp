@@ -2,7 +2,7 @@
 // MATCHING 8011fbb8 204
 #include "TOBJ.H"
 
-void func_8011FBB8(TObj *o, TObj *p)
+void areaMechanismsPlayerCollision(TObj *o, TObj *p)
 {
     unsigned char v;
     short d;

@@ -8,7 +8,7 @@ extern int resolveHitResultD(TObj *, TObj *);
 extern int FUN_80042d5c(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
 
-void func_8011FF64(TObj *o, TObj *p)
+void hornedEnemyWeaponHit(TObj *o, TObj *p)
 {
     int r;
 

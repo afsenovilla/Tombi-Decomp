@@ -1096,3 +1096,17 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   by b0c), `80123c60 komaPigWaitForPlayer`, `801241c0 komaPigWaitForPlayerB`, `80123ea8 komaPigSceneEntry`; `801196f8
   updateTranslucentAnimSprite` (layer 3 type 0x36, ~50 placements: semi-transparent animated sprite, drifting by section through `801191c4
   translucentSpriteDrift` / `801193d0 translucentSpriteDriftB`; uncertain kind)
+- x003 callbacks: func_8004BBC0 grab probes `8011f474 knockDownObjectGrabProbe` (0x22), `8011f38c hitWobbleObjectGrabProbe` (0x24); FUN_80045f00
+  `8011ff64 hornedEnemyWeaponHit` (0x28), `8011f7ec throwerEnemyWeaponHit` (0x38), `8011fa6c komaPigIntroWeaponHit` (FUN_80044d54 for the area 3
+  subtype 4 koma pig: removed once GCD.bcdc3); `8011fbb8 areaMechanismsPlayerCollision` (func_80046D58 type 7 in area 3 by subtype), `8011fec8
+  areaInitAObjectCollision` (FUN_80046610 type 4 outside area 0; uncertain)
+- `updateAreaCameraHeight` (x001 801165c0, x003 80116f74) - MAIN0 FUN_80029078 per-area tail after loadSectionHeight (area 0 X000 80116758):
+  camera height offset +0x32 by section and the camera x (piecewise linear ramps)
+- x003 more: `8011e1a4 playerStepDizzy` (playerStep3CByArea area 3: anim 0x42, sfx 0x20, 0x78 + 0x3C frames; uncertain), `8011e2d0
+  playerFallIfHeadHit`, `8011eae8 playerStepTumble` (step 0x36: anim 0x37 then 0x10 with a turning d8c; uncertain), `8011d07c
+  updatePlayerLauncherPart` (the layer 3 type 0x38 part: anim from the launcher's angle), `8012fbc4 updateThrowerEnemyPuff` (one-shot anim;
+  uncertain), `8012a6d8 initMasterOfTheSkiesEventObj` (box/sprites per subtype from D_80135DB8, anim by GCD.bcdc7), `8012c97c windblownMonkeyIdle`
+  (step 0; uncertain), `80131e44 soakedPhoenixGuideIntroScene` (section 0 step 0: locks the player at x 0x1B8), `80132960
+  soakedPhoenixGuideSection1Scene` (section 1, GCD.bd00a 1 -> 2), `80130990 updateWindPush` (pushes the player with GVARS.s44 in sections 0/1
+  until GAME.purifiedAreas & 2), spawners `80130e3c updatePlayerLauncherSpawner` (layer 4 type 0x2E per section), `8013123c
+  updateHornedEnemySpawner` (type 0x28), `801315b0 updateKomaPigSpawner` (type 2)

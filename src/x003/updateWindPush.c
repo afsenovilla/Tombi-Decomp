@@ -12,7 +12,7 @@ extern void FUN_80018980(TObj *);
 #define W1C(o) (*(short *)((char *)(o) + 0x1c))
 #define U8(o, n) (*(unsigned char *)((char *)(o) + (n)))
 
-void func_80130990(TObj *o)
+void updateWindPush(TObj *o)
 {
     TObj *pl = &PLAYER;
     short v;

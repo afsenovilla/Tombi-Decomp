@@ -10,7 +10,7 @@ extern TObj *D_8009F3D4;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
 extern void FUN_800eeae4(TObj *, int, int);
 
-void func_80132960(TObj *o)
+void soakedPhoenixGuideSection1Scene(TObj *o)
 {
     TObj *e = D_8009F3D4;
 

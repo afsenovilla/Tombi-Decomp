@@ -5,7 +5,7 @@
 extern short FUN_8004b6a0(TObj *, TObj *);
 extern short D_1F80019E;
 
-void func_8011F474(TObj *o, TObj *p)
+void knockDownObjectGrabProbe(TObj *o, TObj *p)
 {
     TObj *q;
     if (FUN_8004b6a0(o, p)) {

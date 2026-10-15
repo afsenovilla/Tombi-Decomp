@@ -28,7 +28,7 @@ static __inline__ TObj *spawn(R *r, TObj *link)
     return 0;
 }
 
-void func_80130E3C(TObj *o)
+void updatePlayerLauncherSpawner(TObj *o)
 {
     TObj *p;
     R *r;

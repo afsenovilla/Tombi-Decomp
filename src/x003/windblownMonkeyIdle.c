@@ -18,7 +18,7 @@ static __inline__ int hit(TObj *o)
     return TileCollideAt(o, o->h->p.whole - 8, o->y.p.whole + 0x10) != 0;
 }
 
-void func_8012C97C(TObj *o)
+void windblownMonkeyIdle(TObj *o)
 {
     int k;
     switch (o->state) {

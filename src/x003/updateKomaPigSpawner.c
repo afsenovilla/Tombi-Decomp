@@ -13,7 +13,7 @@ extern void FUN_80018980(TObj *);
 
 #define W1C(o) (*(unsigned short *)((char *)(o) + 0x1c))
 
-void func_801315B0(TObj *o)
+void updateKomaPigSpawner(TObj *o)
 {
     TObj *pl = &PLAYER;
     TObj *e;

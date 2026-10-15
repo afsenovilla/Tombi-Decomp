@@ -11,7 +11,7 @@ extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
 void npcSetAnim(int a, int b, int c);
 
-void func_80131E44(TObj *o)
+void soakedPhoenixGuideIntroScene(TObj *o)
 {
     int a = SCRIPT_OBJECTS;
     int b = D_8009F2DC;
