@@ -309,7 +309,7 @@ address,size,name,twin
 8011658c,916,func_8011658C,X000:80117cac
 80116920,156,func_80116920,
 801169bc,860,func_801169BC,
-80116d18,56,func_80116D18,
+80116d18,56,updateBackdropSpriteSet,
 80116d50,1152,func_80116D50,
 801171d0,84,func_801171D0,
 80117224,672,ironCastleMachineRoomTalk,

@@ -15,7 +15,7 @@ void initLeafButterfly(TObj *o);
 void leafButterflyFlutter(TObj *o);
 void leafButterflyEventStart(TObj *o);
 void leafButterflyReleased(TObj *o);
-void func_80137D8C(TObj *o);
+void leafButterflyRoam(TObj *o);
 
 void updateLeafButterfly(TObj *o)
 {
@@ -59,7 +59,7 @@ void updateLeafButterfly(TObj *o)
             leafButterflyReleased(o);
             break;
         case 4:
-            func_80137D8C(o);
+            leafButterflyRoam(o);
             break;
         }
         break;

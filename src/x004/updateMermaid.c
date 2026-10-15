@@ -1,7 +1,7 @@
 // FUNC 80129524 168 X004
 // MATCHING 80129524 168
 #include "TOBJ.H"
-extern void func_801293A0(TObj *);
+extern void initMermaid(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void stepMermaidTalk(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -10,7 +10,7 @@ void updateMermaid(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_801293A0(o);
+        initMermaid(o);
         break;
     case 1:
         FUN_800202b4(o);

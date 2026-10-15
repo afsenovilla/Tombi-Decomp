@@ -306,7 +306,7 @@ address,size,name,twin
 80115f88,720,updateAreaScroll,
 80116258,96,func_80116258,
 801162b8,24,func_801162B8,X000:80121e38
-801162d0,572,func_801162D0,
+801162d0,572,updateBackdropSpriteSet,
 8011650c,128,func_8011650C,
 8011658c,148,func_8011658C,
 80116620,400,func_80116620,X001:801205f0
@@ -331,7 +331,7 @@ address,size,name,twin
 801174b8,12,brokenStoneGearsTalk,
 801174c4,440,func_801174C4,
 8011767c,308,brokenStoneGearsRepair,
-801177b0,192,func_801177B0,
+801177b0,192,checkStoneGearsTrigger,
 80117870,296,stepBrokenStoneGearsTalk,
 80117928,112,func_80117928,
 80117998,12,func_80117998,X001:8013a0cc

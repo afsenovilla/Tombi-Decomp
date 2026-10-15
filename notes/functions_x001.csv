@@ -416,7 +416,7 @@ address,size,name,twin
 80120e24,296,func_80120E24,
 80120f4c,412,updateBackdropSprite,
 801210e8,440,updateParallaxBackdropSprite,
-801212a0,304,func_801212A0,
+801212a0,304,playerInitAreaHook,
 801213d0,932,func_801213D0,
 80121774,28,func_80121774,X000:8011b7d4
 80121790,640,func_80121790,
@@ -565,7 +565,7 @@ address,size,name,twin
 80137714,596,leafButterflyFlutter,
 80137968,404,leafButterflyEventStart,
 80137afc,656,leafButterflyReleased,
-80137d8c,1552,func_80137D8C,
+80137d8c,1552,leafButterflyRoam,
 8013839c,436,updateLeafButterfly,
 80138550,1788,func_80138550,
 80138c4c,256,func_80138C4C,

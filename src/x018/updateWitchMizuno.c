@@ -5,7 +5,7 @@
 extern void initWitchMizuno(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_8011A038(TObj *);
+extern void selectWitchMizunoTalkStep(TObj *);
 extern void witchMizunoIntroTalk(TObj *);
 extern void witchMizunoLostCrystalBallsTalk(TObj *);
 extern void witchMizunoCrystalBallsFoundTalk(TObj *);
@@ -27,7 +27,7 @@ void updateWitchMizuno(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            func_8011A038(o);
+            selectWitchMizunoTalkStep(o);
             break;
         case 1:
             witchMizunoIntroTalk(o);

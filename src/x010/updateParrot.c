@@ -12,7 +12,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_8012B8C0(TObj *);
+extern void parrotPumpRocksClutFlash(TObj *);
 extern void nobleTreeBiteTalk(TObj *);
 extern void nobleTreeAccordionRocksHint(TObj *);
 extern void nobleTreeRestoredTalk(TObj *);
@@ -51,7 +51,7 @@ void updateParrot(TObj *o)
         AnimLoadDuration(o);
         break;
     case 1:
-        func_8012B8C0(o);
+        parrotPumpRocksClutFlash(o);
         ObjCullRegister(o);
         AnimAdvance(o);
         switch (o->step) {

@@ -40,7 +40,7 @@ extern void FUN_801228bc(TObj *);
 extern void FUN_801212a0(TObj *);
 extern void FUN_8011dc4c(TObj *);
 extern void FUN_8011d8c4(TObj *);
-extern void FUN_8011d334(TObj *);
+extern void playerInitAreaHook(TObj *);
 extern PL *DAT_8009c330;
 extern unsigned char DAT_8009d2b2[];
 extern unsigned char DAT_8009cff8;
@@ -131,7 +131,7 @@ void playerInitMode(TObj *o)
         case 1: case 7: FUN_801212a0(o); break;
         case 3: FUN_8011dc4c(o); break;
         case 4: case 12: FUN_8011d8c4(o); break;
-        case 9: FUN_8011d334(o); break;
+        case 9: playerInitAreaHook(o); break;
         }
         switch (DAT_8009d2b0) {
         case 3:

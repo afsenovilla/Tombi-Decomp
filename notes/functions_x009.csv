@@ -383,7 +383,7 @@ address,size,name,twin
 8011ccd8,172,func_8011CCD8,
 8011cd84,1016,func_8011CD84,
 8011d17c,440,func_8011D17C,
-8011d334,68,func_8011D334,
+8011d334,68,playerInitAreaHook,
 8011d378,116,func_8011D378,
 8011d3ec,520,func_8011D3EC,
 8011d5f4,112,func_8011D5F4,

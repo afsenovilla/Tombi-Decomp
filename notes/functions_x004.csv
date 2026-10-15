@@ -369,7 +369,7 @@ address,size,name,twin
 8011d5f4,492,func_8011D5F4,
 8011d7e0,36,func_8011D7E0,
 8011d804,192,stormBackdropCycleClut,
-8011d8c4,224,func_8011D8C4,
+8011d8c4,224,playerInitAreaHook,
 8011d9a4,316,func_8011D9A4,
 8011dae0,300,func_8011DAE0,X003:8011e1a4
 8011dc0c,64,func_8011DC0C,
@@ -479,7 +479,7 @@ address,size,name,twin
 8012866c,2856,mermaidDivingLesson,
 80129194,188,func_80129194,
 80129250,336,stepMermaidTalk,
-801293a0,388,func_801293A0,
+801293a0,388,initMermaid,
 80129524,168,updateMermaid,
 801295cc,132,func_801295CC,X002:80117cec
 80129650,652,scaredGoldVolunteerTalk,
@@ -501,7 +501,7 @@ address,size,name,twin
 8012a8b8,344,updateTownHallWorker,
 8012aa10,2048,carriedGuideFollowPlayer,
 8012b210,376,updateCarriedGuide,
-8012b388,176,func_8012B388,
+8012b388,176,spawnCarriedGuide,
 8012b438,2848,updateSceneSequence,
 8012bf58,172,func_8012BF58,
 8012c004,420,cableOwnerThanksTalk,
@@ -531,14 +531,14 @@ address,size,name,twin
 8012e1f0,20,func_8012E1F0,X000:8011a628
 8012e204,564,smallKeyHoleScene,
 8012e438,20,func_8012E438,X000:8011a628
-8012e44c,264,func_8012E44C,
+8012e44c,264,checkKeyHolesTrigger,
 8012e554,368,stepKeyHoles,
 8012e6c4,12,func_8012E6C4,X001:8013a0cc
 8012e6d0,128,updateKeyHoles,
-8012e750,196,func_8012E750,
+8012e750,196,spawnMermaidForMathBeads,
 8012e814,8,func_8012E814,
 8012e81c,12,func_8012E81C,X001:8013a0cc
-8012e828,296,func_8012E828,
+8012e828,296,updateMermaidSpawner,
 8012e950,204,func_8012E950,
 8012ea1c,8,func_8012EA1C,
 8012ea24,12,func_8012EA24,X001:8013a0cc
@@ -547,7 +547,7 @@ address,size,name,twin
 8012eca0,192,func_8012ECA0,
 8012ed60,180,func_8012ED60,
 8012ee14,640,func_8012EE14,
-8012f094,120,func_8012F094,
+8012f094,120,checkBigKeyPaintingPanels,
 8012f10c,340,paintingBigKeyReward,
 8012f260,20,func_8012F260,X000:8011a628
 8012f274,220,func_8012F274,

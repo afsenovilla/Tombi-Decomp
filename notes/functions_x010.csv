@@ -440,13 +440,13 @@ address,size,name,twin
 80122c10,172,func_80122C10,
 80122cbc,600,func_80122CBC,
 80122f14,52,func_80122F14,
-80122f48,12,func_80122F48,
+80122f48,12,initLeafButterfly,
 80122f54,380,func_80122F54,
-801230d0,292,func_801230D0,
+801230d0,292,leafButterflyFlutter,
 801231f4,316,func_801231F4,
 80123330,408,leafButterflyEventStart,
-801234c8,576,func_801234C8,
-80123708,220,func_80123708,
+801234c8,576,leafButterflyReleased,
+80123708,220,leafButterflyRoam,
 801237e4,944,func_801237E4,
 80123b94,388,func_80123B94,
 80123d18,436,updateLeafButterfly,X001:8013839c
@@ -484,7 +484,7 @@ address,size,name,twin
 8012aae4,356,spearPigDefeated,
 8012ac48,2720,updateSpearPig,
 8012b6e8,472,func_8012B6E8,
-8012b8c0,388,func_8012B8C0,
+8012b8c0,388,parrotPumpRocksClutFlash,
 8012ba44,928,nobleTreeBiteTalk,
 8012bde4,320,nobleTreeAccordionRocksHint,
 8012bf24,440,nobleTreeRestoredTalk,
@@ -523,7 +523,7 @@ address,size,name,twin
 8012e9d4,12,func_8012E9D4,X001:8013a0cc
 8012e9e0,388,func_8012E9E0,
 8012eb64,24,func_8012EB64,X004:8012f4f0
-8012eb7c,36,func_8012EB7C,
+8012eb7c,36,checkUnderwaterPigBagTrigger,
 8012eba0,292,underwaterPigBagEventStart,
 8012ecc4,20,func_8012ECC4,X000:8011a628
 8012ecd8,96,stepUnderwaterPigBagStart,

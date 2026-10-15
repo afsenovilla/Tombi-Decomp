@@ -347,7 +347,7 @@ address,size,name,twin
 801191dc,760,witchMizunoCuredTalk,
 801194d4,616,witchMizunoHuntPigsTalk,
 8011973c,2300,witchMizunoCandyRecipeTalk,
-8011a038,124,func_8011A038,
+8011a038,124,selectWitchMizunoTalkStep,
 8011a0b4,256,func_8011A0B4,
 8011a1b4,376,initWitchMizuno,
 8011a32c,284,updateWitchMizuno,
