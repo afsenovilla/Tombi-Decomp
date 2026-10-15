@@ -7,10 +7,11 @@ int func_800ECD94(char *name, void *buf, int len, int blocks)
 {
     int retry = 3;
     int fd;
+    int err;
 again:
     fd = open(name, (blocks << 16) | 0x200);
+    err = fd;
     if (fd == -1) {
-        int err = fd;
         fd = open(name, 2);
         if (fd == err) goto next;
         if (write(fd, buf, len) != err) {
@@ -20,6 +21,7 @@ again:
     }
     close(fd);
 next:
-    if (--retry > 0) goto again;
+    retry--;
+    if (retry > 0) goto again;
     return -1;
 }

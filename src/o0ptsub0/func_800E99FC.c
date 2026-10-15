@@ -1,4 +1,5 @@
 // FUNC 800e99fc 780 O0PTSUB0
+// MATCHING 800e99fc 780
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -34,7 +35,7 @@ void func_800E99FC(MenuItem *m, int pri, int wrap, int pal)
     DR_MODE *dm;
     short *s;
     unsigned short x, y;
-    unsigned short c;
+    short c;
 
     s = m->str;
     x = m->x;
@@ -57,7 +58,7 @@ void func_800E99FC(MenuItem *m, int pri, int wrap, int pal)
             }
             break;
         default:
-            f = &font[(short)c];
+            f = (Glyph *)((short)c * 5 + (int)font);
             g[0] = f->u;
             g[1] = f->v;
             g[2] = f->w;
@@ -67,22 +68,23 @@ void func_800E99FC(MenuItem *m, int pri, int wrap, int pal)
                 break;
             }
             g[4] = f->big;
+            sp->len = 4;
             sp->code = 0x64;
             sp->r0 = 0x80;
             sp->g0 = 0x80;
             sp->b0 = 0x80;
             sp->x0 = x;
             if (g[4] == 0) {
-            sp->len = 4;
                 sp->x0 = x;
                 sp->y0 = y;
-                x += g[2];
                 sp->u0 = g[0];
+                x += g[2];
+                sp->v0 = g[1];
             } else {
                 sp->x0 = x - 10;
                 sp->y0 = y - 10;
                 sp->u0 = g[0];
-            sp->v0 = g[1];
+                sp->v0 = g[1];
             }
             sp->w = g[2];
             sp->h = g[3];

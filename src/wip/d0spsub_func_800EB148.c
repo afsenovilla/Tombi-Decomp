@@ -16,7 +16,7 @@ void func_800EB148(Menu *m, int i)
     D_8011113C.x = s->x;
     D_8011113C.y = s->y;
     D_80111142 = 0x7C15;
-    D_80111140 = m->w10 + s->dw;
+    D_8011113C.p4[0] = m->w10 + s->dw;
     D_8011113C.img = m->p58[s->idx];
     func_800EB2F4(1);
     pct = (60 - D_8009CD9C[i]) * 100 / 60;
