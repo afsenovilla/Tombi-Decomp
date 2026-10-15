@@ -36,8 +36,8 @@ extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern void ObjListPush_1F80021C(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void FUN_80133254(TObj *);
-extern void func_80132F80(TObj *);
+extern void frogStep0(TObj *);
+extern void frogHop(TObj *);
 extern void playerSetAnim(TObj *, int, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -85,10 +85,10 @@ void updateFrog(TObj *o)
         if (ObjCullRegister(o)) {
             switch (o->step) {
             case 0:
-                FUN_80133254(o);
+                frogStep0(o);
                 break;
             case 1:
-                func_80132F80(o);
+                frogHop(o);
                 break;
             }
         }

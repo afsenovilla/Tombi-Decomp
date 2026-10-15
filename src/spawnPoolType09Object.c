@@ -25,7 +25,7 @@ typedef struct {
     short cc;
 } OX;
 extern OX *FUN_80018448(void);
-extern void FUN_8011a2f8(OX *, int);
+extern void spawnPoolType09Child(OX *, int);
 extern unsigned char DAT_8009c966;
 extern void *PTR_DAT_8013b1b8[];
 extern void *PTR_DAT_8013b1b4;
@@ -77,7 +77,7 @@ void spawnPoolType09Object(int x, int y, int z, unsigned char sub)
                 o->d94 = p;
                 p->d90 = o;
             }
-            FUN_8011a2f8(o, 4);
+            spawnPoolType09Child(o, 4);
         }
     }
 }

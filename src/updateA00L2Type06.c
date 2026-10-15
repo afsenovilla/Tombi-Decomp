@@ -11,7 +11,7 @@ extern int ObjCullRegister(TObj *);
 extern void spawnItemDropAtPos(int, int, short *, int, int);
 extern void AnimJump(TObj *, int);
 extern int Rand(void);
-extern void FUN_80119584(TObj *, short, short, short);
+extern void a00L2Type06SpawnChild(TObj *, short, short, short);
 extern void playSFX(int);
 extern void setAreaFlagBit(int);
 extern void AnimAdvance(TObj *);
@@ -87,7 +87,7 @@ void updateA00L2Type06(TObj *o)
         if (U(o->wb8) != 0) {
             if (--U(o->wb6) == 0) {
                 s = (Rand() & 0x1f) + D_8013913C[o->subtype][U(o->wb4)];
-                FUN_80119584(o, o->a.p.whole - s, o->y.p.whole - (Rand() & 0x3f), o->b.p.whole);
+                a00L2Type06SpawnChild(o, o->a.p.whole - s, o->y.p.whole - (Rand() & 0x3f), o->b.p.whole);
                 if ((U(o->wb8) & 3) == 0)
                     playSFX(0x33);
                 U(o->wb6) = (Rand() & 1) + 1;

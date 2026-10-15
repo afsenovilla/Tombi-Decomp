@@ -30,7 +30,7 @@ extern void func_8011F508(TObj *, unsigned char *);
 extern void func_8011F634(TObj *, unsigned char *);
 extern void func_8011F6C8(TObj *, unsigned char *);
 extern void func_8011F8CC(TObj *, unsigned char *);
-extern void func_8011F9E0(TObj *, unsigned char *);
+extern void a00L4Type18Active(TObj *, unsigned char *);
 extern void func_8011FAD4(TObj *, unsigned char *);
 extern void func_8011FC84(TObj *, unsigned char *);
 extern void func_8011FD20(TObj *, unsigned char *);
@@ -179,7 +179,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 func_80120140(o, q);
                 break;
             case 0x29:
-                func_8011F9E0(o, q);
+                a00L4Type18Active(o, q);
                 break;
             case 0x2b:
                 playerContactCat2Type2B(o, q);

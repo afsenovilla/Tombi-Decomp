@@ -3,12 +3,12 @@
 #include "TOBJ.H"
 extern unsigned int DAT_8009c96c;
 extern int FUN_800202b4(TObj *);
-extern void FUN_80121124(TObj *);
+extern void a00L4Type26Step(TObj *);
 extern void setEventStarted(int, int, int);
 extern int setEventComplete(int, int);
 extern void a00L4Type26ReleaseParts(TObj *);
-extern void FUN_8012160c(TObj *);
-extern void FUN_8012171c(TObj *);
+extern void a00L4Type26SpawnParts(TObj *);
+extern void a00L4Type26Reward(TObj *);
 extern void FUN_80018838(TObj *);
 
 void updateA00L4Type26(TObj *o)
@@ -39,7 +39,7 @@ void updateA00L4Type26(TObj *o)
     case 1:
         FUN_800202b4(o);
         if (o->b0c == 0) {
-            FUN_80121124(o);
+            a00L4Type26Step(o);
             switch (o->step) {
             case 0:
                 if (o->b69 == 1)
@@ -60,15 +60,15 @@ void updateA00L4Type26(TObj *o)
             }
             o->b69 = 0;
         } else {
-            FUN_8012160c(o);
+            a00L4Type26SpawnParts(o);
             o->b04 = ((TObj *)o->d90)->b04;
         }
         break;
     case 2:
         FUN_800202b4(o);
         if (o->b0c != 0)
-            FUN_8012160c(o);
-        FUN_8012171c(o);
+            a00L4Type26SpawnParts(o);
+        a00L4Type26Reward(o);
         break;
     case 3:
         FUN_80018838(o);

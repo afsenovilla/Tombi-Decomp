@@ -9,7 +9,7 @@ extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
 extern int FUN_800202b4(TObj *o);
 extern void FUN_8001e4f0(int id);
-extern void FUN_80118d8c(TObj *o, int x, int y, int z);
+extern void a00L2Type01SpawnChild(TObj *o, int x, int y, int z);
 extern void freeObjectLayer2(TObj *o);
 
 void updateA00L2Type01(TObj *o)
@@ -72,7 +72,7 @@ void updateA00L2Type01(TObj *o)
         o->b04++;
         if (o->b6a != 0)
             FUN_8001e4f0(0x31);
-        FUN_80118d8c(o, (short)(o->a.p.whole + 8), (short)(o->y.p.whole - 6), o->b.p.whole);
+        a00L2Type01SpawnChild(o, (short)(o->a.p.whole + 8), (short)(o->y.p.whole - 6), o->b.p.whole);
         break;
     case 3:
         freeObjectLayer2(o);

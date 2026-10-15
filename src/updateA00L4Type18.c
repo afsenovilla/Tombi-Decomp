@@ -10,7 +10,7 @@ typedef struct O {
 extern int G_1f8002d4;
 extern int D_8013b150;
 extern O *FUN_80018448(void);
-extern void FUN_8001fe6c(O *), FUN_800202b4(O *), FUN_80120164(O *), FUN_80018838(O *);
+extern void FUN_8001fe6c(O *), FUN_800202b4(O *), a00L4Type18Step(O *), FUN_80018838(O *);
 
 void updateA00L4Type18(O *o)
 {
@@ -63,7 +63,7 @@ void updateA00L4Type18(O *o)
         break;
     case 1:
         FUN_800202b4(o);
-        if (o->vis != 0) FUN_80120164(o);
+        if (o->vis != 0) a00L4Type18Step(o);
         break;
     case 2:
         o->state = 3;

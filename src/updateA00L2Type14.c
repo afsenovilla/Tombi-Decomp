@@ -8,7 +8,7 @@ void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 short GetClut(int, int);
-void FUN_80134190(TObj *o);
+void a00L2Type14Step(TObj *o);
 void freeObjectLayer2(TObj *o);
 void updateA00L2Type14(TObj *o)
 {
@@ -41,9 +41,9 @@ void updateA00L2Type14(TObj *o)
         ObjCullRegister(o);
         if (GCD.bcda9 == 0xff) {
             if (!o->visible) o->b04 = 3;
-            FUN_80134190(o);
+            a00L2Type14Step(o);
         } else if (o->visible) {
-            FUN_80134190(o);
+            a00L2Type14Step(o);
         }
         break;
     case 2:

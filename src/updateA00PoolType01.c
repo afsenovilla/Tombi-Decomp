@@ -8,8 +8,8 @@ extern void *DAT_8013b23c[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f80017e;
 short FUN_8005e420(int a, int b);
-void FUN_80118638(TObj *o);
-void FUN_8011899c(TObj *o);
+void a00PoolType01Init(TObj *o);
+void a00PoolType01Step(TObj *o);
 void FUN_800187e4(TObj *o);
 
 void updateA00PoolType01(TObj *o)
@@ -41,11 +41,11 @@ void updateA00PoolType01(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            FUN_80118638(o);
+            a00PoolType01Init(o);
             break;
         case 1:
             o->d->p.whole = DAT_1f80017e;
-            FUN_8011899c(o);
+            a00PoolType01Step(o);
             break;
         }
         break;

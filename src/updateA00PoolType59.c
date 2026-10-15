@@ -7,7 +7,7 @@ extern unsigned char DAT_8009c93e;
 extern short DAT_1f80016a, DAT_1f800176, DAT_1f80016e, DAT_1f80017a;
 extern TObj *showMessageBox(int a, int b, int c, int d);
 extern void FUN_800187e4(TObj *o);
-extern void FUN_8011b5dc(TObj *o);
+extern void a00PoolType59Talk(TObj *o);
 
 void updateA00PoolType59(TObj *o)
 {
@@ -30,6 +30,6 @@ void updateA00PoolType59(TObj *o)
             }
         }
     } else {
-        FUN_8011b5dc(o);
+        a00PoolType59Talk(o);
     }
 }

@@ -7,8 +7,8 @@ extern int DAT_1f8002d4;
 extern unsigned char DAT_8009c930;
 extern unsigned char DAT_800a6047;
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_80119988(TObj *);
-extern void FUN_80119864(TObj *);
+extern void a00PoolType09Step(TObj *);
+extern void a00PoolType09SubStep(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void FUN_80026e0c(int, int);
@@ -73,13 +73,13 @@ void updateA00PoolType09(TObj *o)
         break;
     case 1:
         if (o->subtype != 4) {
-            FUN_80119988(o);
+            a00PoolType09Step(o);
             if (o->subtype == 1)
                 o->b0f = DAT_800a6047 + 10;
             else
                 o->b0f = DAT_800a6047 - 2;
         } else {
-            FUN_80119864(o);
+            a00PoolType09SubStep(o);
             o->b0f = DAT_800a6047;
         }
         FUN_8001fec0(o);

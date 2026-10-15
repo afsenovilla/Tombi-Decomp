@@ -19,13 +19,13 @@ extern unsigned FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);
 extern short FUN_8005e420(int, int);
 extern void freeObjectLayer2(TObj *);
-extern void FUN_801307a0(TObj *);
-extern void FUN_801308d8(TObj *);
-extern void FUN_80130a38(TObj *);
-extern void FUN_80130bb0(TObj *);
-extern void FUN_801317e4(TObj *);
-extern void FUN_801319d0(TObj *);
-extern void FUN_801320a8(TObj *);
+extern void a00L2Type08Step0(TObj *);
+extern void a00L2Type08Step1(TObj *);
+extern void a00L2Type08Step2(TObj *);
+extern void a00L2Type08Step3(TObj *);
+extern void a00L2Type08Step4(TObj *);
+extern void a00L2Type08Step1B(TObj *);
+extern void a00L2Type08Step1C(TObj *);
 extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -94,24 +94,24 @@ void updateA00L2Type08(TObj *o)
             case 0:
                 switch (o->state) {
                 case 0:
-                    FUN_801307a0(o);
+                    a00L2Type08Step0(o);
                     break;
                 case 1:
-                    FUN_801308d8(o);
+                    a00L2Type08Step1(o);
                     break;
                 case 2:
-                    FUN_80130a38(o);
+                    a00L2Type08Step2(o);
                     break;
                 case 3:
-                    FUN_80130bb0(o);
+                    a00L2Type08Step3(o);
                     break;
                 case 4:
-                    FUN_801317e4(o);
+                    a00L2Type08Step4(o);
                     break;
                 }
                 break;
             case 1:
-                FUN_801319d0(o);
+                a00L2Type08Step1B(o);
                 break;
             }
         } else if (o->b9f == 0) {
@@ -194,7 +194,7 @@ void updateA00L2Type08(TObj *o)
                 EX(o)->ca = 0;
             break;
         case 1:
-            FUN_801320a8(o);
+            a00L2Type08Step1C(o);
             if (FUN_800202b4(o)) {
                 FUN_8001fec0(o);
                 EX(o)->ca = 1;

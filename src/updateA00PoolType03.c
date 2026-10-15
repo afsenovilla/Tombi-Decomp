@@ -5,7 +5,7 @@ extern int FUN_8005efe4(void);
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void FUN_80118e70(TObj *);
+extern void a00PoolType03Step(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_800187e4(TObj *);
 extern int DAT_1f8002d4[];
@@ -47,7 +47,7 @@ void updateA00PoolType03(TObj *o)
                 o->wba++;
             }
         }
-        if (o->subtype == 1 && o->b0c == 1) FUN_80118e70(o);
+        if (o->subtype == 1 && o->b0c == 1) a00PoolType03Step(o);
         if (FUN_8001fec0(o)) o->b04++;
         break;
     case 2:

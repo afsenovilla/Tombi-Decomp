@@ -2,7 +2,7 @@
 // MATCHING 8011a63c 264
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
-extern void FUN_8011a418(TObj *);
+extern void a00PoolType0AStep(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800187e4(TObj *);
 extern void *PTR_DAT_8013b214[];
@@ -25,7 +25,7 @@ void updateA00PoolType0A(TObj *o)
         break;
     case 1:
         if (FUN_800202b4(o) != 0 && o->subtype == 0)
-            FUN_8011a418(o);
+            a00PoolType0AStep(o);
         break;
     case 2:
         break;

@@ -1,7 +1,7 @@
 // FUNC 80136090 340 X000
 // MATCHING 80136090 340
-extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), freeObjectLayer2(unsigned char *), FUN_80135db0(unsigned char *);
-extern void FUN_80135b0c(unsigned char *);
+extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), freeObjectLayer2(unsigned char *), a00L2Type57Move(unsigned char *);
+extern void a00L2Type57Aim(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char DAT_8009cdac;
 extern int DAT_1f8002d4;
@@ -44,9 +44,9 @@ void updateA00L2Type57(unsigned char *o)
         FUN_800202b4(o);
         if (o[3] == 0) {
             FUN_8001fec0(o);
-            FUN_80135b0c(o);
+            a00L2Type57Aim(o);
         } else
-            FUN_80135db0(o);
+            a00L2Type57Move(o);
         break;
     case 2:
         break;
