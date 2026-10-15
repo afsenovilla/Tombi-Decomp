@@ -10,8 +10,8 @@ extern Ent5de4 DAT_80115de4[];
 extern int SPR_DATA[];
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800202b4(TObj *);
-extern void FUN_80113f38(TObj *);
-extern void FUN_801142c0(TObj *);
+extern void l2Type18Active(TObj *);
+extern void l2Type18Hit(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateL2Type18Object(TObj *o)
@@ -47,12 +47,12 @@ void updateL2Type18Object(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        FUN_80113f38(o);
+        l2Type18Active(o);
         break;
     case 2:
         FUN_800202b4(o);
         if (o->step == 0)
-            FUN_801142c0(o);
+            l2Type18Hit(o);
         break;
     case 3:
         freeObjectLayer2(o);
