@@ -140,7 +140,7 @@ Plan:
   port. Until then the title/options/menu screens cannot run natively. The prototype stops right there. A stopgap
   is a tiny MIPS interpreter for just these overlays (calls back into native code through `funcmap`), but
   decompiling them is cleaner.
-- **O0PTSUB0 (title / options), first split done:** `config/o0ptsub0.yaml` (not used by the matching build) splits
+- **O0PTSUB0 (title / options), first split done:** `config/o0ptsub0.yaml` (now part of the matching build, see tools/sysovl.py) splits
   it with `python3 -m splat split config/o0ptsub0.yaml --disassemble-all` into `asm/o0ptsub0/`. It is small:
   a 0x50-byte header (0x34 followed by 18 handler addresses into the overlay), then **27 functions, about
   3,300 instructions** (`func_800E8078` .. `func_800E9F5C`). MAIN0 reaches it through `func_800E8A14`,

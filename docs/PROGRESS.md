@@ -1,22 +1,23 @@
 # Tombi! decompilation progress (PAL Spanish, SCES_013.31)
 
-_Generated with `python tools/progress.py` (2026-10-14). Do not edit by hand._
+_Generated with `python tools/progress.py` (2026-10-15). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 100.00 % of the game's code matches byte for byte** (1327860 of 1327860 bytes).
+**Whole game: 87.96 % of the game's code matches byte for byte** (1338136 of 1521276 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 279192 B | 279192 B | 100.0 % `[########################]` |
 | X000.BIN: AREA00 + object code reused by all areas | 312228 B | 312228 B | 100.0 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| **Whole game** | **1327860 B** | **1327860 B** | **100.00 %** `[########################]` |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193416 B | 10276 B | 5.3 % `[#.......................]` |
+| **Whole game** | **1521276 B** | **1338136 B** | **87.96 %** `[#####################...]` |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99084 B) is not counted: 67176 B of it (67.8 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
-- Also tracked for MAIN0 + X000: 26.9 % of the code named by us, 76.0 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 94.6 %).
+- Also tracked for MAIN0 + X000: 93.1 % of the code named by us, 76.0 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
 Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99084 bytes (901 functions).
@@ -25,10 +26,10 @@ Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 9908
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 228236 B (516 f) | 42.5 % | 56.6 % | 100.0 % (1141 f) | 99044 B | 67136 B (67.8 %) |
-| X000.BIN (AREA00 overlay) | 297744 B (526 f) | 14.9 % | 90.8 % | 100.0 % (523 f) | 40 B | 40 B (100.0 %) |
+| MAIN0.EXE (game core) | 228236 B (516 f) | 98.9 % | 56.6 % | 100.0 % (1141 f) | 99044 B | 67136 B (67.8 %) |
+| X000.BIN (AREA00 overlay) | 297744 B (526 f) | 88.7 % | 90.8 % | 100.0 % (523 f) | 40 B | 40 B (100.0 %) |
 
-## Area overlays (X001..X019)
+## Area overlays (X001..X019) and SYSTEM overlays
 
 Raw code blobs loaded at `0x800E8028` like X000 ([notes/overlays.md](../notes/overlays.md)). Boundaries come from
 `tools/areas.py bounds` (`notes/functions_x0nn.csv`); about 173 KB of object code is shared by all of them (and X000)
@@ -36,27 +37,36 @@ at the same addresses, so most of it is matched by copying the X000/MAIN0 twin (
 in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../notes/todo_areas.csv) by status:
 *x000* = identical to an X000 function not matched yet, *dup* = identical to a function of an earlier overlay,
 *piece* = identical to a Ghidra piece of a larger matched X000 range (needs its own C),
-*new* = no twin anywhere (the real new work).
+*new* = no twin anywhere (the real new work). The SYSTEM overlays (`tools/sysovl.py`: O0PTSUB0, D0SPSUB*, G0OVER,
+I0NFO*, also at `0x800E8028`, sources in `src/<name>/`) are linked from source by `tools/build_full.py`.
 
 | Overlay | Areas | Code | Functions | Matching | Pending: x000 | dup | piece | new |
 |---|---|---|---|---|---|---|---|---|
-| X001.BIN | AREA01, AREA07 | 329308 B | 600 | 99.9 % (599 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X002.BIN | AREA02, AREA19 (alt.) | 200264 B | 363 | 99.8 % (362 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X003.BIN | AREA03 | 297232 B | 582 | 99.9 % (581 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X004.BIN | AREA04, AREA12 | 280208 B | 567 | 99.9 % (566 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X001.BIN | AREA01, AREA07 | 331348 B | 602 | 99.9 % (601 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X002.BIN | AREA02, AREA19 (alt.) | 200372 B | 364 | 99.8 % (363 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X003.BIN | AREA03 | 298416 B | 583 | 99.9 % (582 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X004.BIN | AREA04, AREA12 | 280788 B | 569 | 99.9 % (568 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
 | X005.BIN | AREA05 | 180916 B | 328 | 99.8 % (327 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X006.BIN | AREA06 | 210924 B | 395 | 99.8 % (394 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X008.BIN | AREA08 | 175004 B | 306 | 99.8 % (305 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X009.BIN | AREA09 | 257776 B | 504 | 99.8 % (503 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X010.BIN | AREA10 | 274380 B | 531 | 99.4 % (529 f) | 0 B | 1212 B | 400 B | 0 B (0 f) |
+| X006.BIN | AREA06 | 211464 B | 396 | 99.8 % (395 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X008.BIN | AREA08 | 175232 B | 307 | 99.8 % (306 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X009.BIN | AREA09 | 258240 B | 506 | 99.8 % (505 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X010.BIN | AREA10 | 277512 B | 535 | 99.4 % (533 f) | 0 B | 1212 B | 400 B | 0 B (0 f) |
 | X011.BIN | AREA11 | 190292 B | 354 | 99.8 % (353 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X013.BIN | AREA13 | 182232 B | 327 | 99.8 % (326 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X014.BIN | AREA14 | 236716 B | 490 | 99.8 % (489 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X016.BIN | AREA16 | 185988 B | 357 | 99.8 % (356 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X017.BIN | AREA17 | 188428 B | 348 | 99.8 % (347 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X018.BIN | AREA18 | 191628 B | 352 | 99.8 % (351 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| X019.BIN | AREA19 | 175124 B | 306 | 99.8 % (305 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
-| **Total** | | 3556420 B | 6710 | 99.8 % (6693 f) | 0 B | 1212 B | 6400 B | 0 B (0 f) |
+| X013.BIN | AREA13 | 184736 B | 330 | 99.8 % (329 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X014.BIN | AREA14 | 237812 B | 494 | 99.8 % (493 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X016.BIN | AREA16 | 186504 B | 359 | 99.8 % (358 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X017.BIN | AREA17 | 189712 B | 351 | 99.8 % (350 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X018.BIN | AREA18 | 191672 B | 353 | 99.8 % (352 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| X019.BIN | AREA19 | 175472 B | 307 | 99.8 % (306 f) | 0 B | 0 B | 400 B | 0 B (0 f) |
+| O0PTSUB0.BIN | SYSTEM | 8544 B | 27 | 77.4 % (24 f) | 0 B | 0 B | 0 B | 1932 B (3 f) |
+| D0SPSUB.BIN | SYSTEM | 37156 B | 59 | 1.4 % (12 f) | 0 B | 984 B | 0 B | 35660 B (43 f) |
+| D0SPSUB2.BIN | SYSTEM | 20004 B | 31 | 0.0 % (0 f) | 0 B | 220 B | 0 B | 19784 B (29 f) |
+| D0SPSUB3.BIN | SYSTEM | 25324 B | 46 | 0.0 % (0 f) | 0 B | 19404 B | 0 B | 5920 B (10 f) |
+| G0OVER.BIN | SYSTEM | 3152 B | 7 | 100.0 % (7 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
+| I0NFO.BIN | SYSTEM | 26248 B | 53 | 0.1 % (1 f) | 0 B | 368 B | 20 B | 25828 B (49 f) |
+| I0NFO2.BIN | SYSTEM | 90280 B | 196 | 0.1 % (2 f) | 0 B | 14692 B | 48 B | 75460 B (154 f) |
+| I0NFO3.BIN | SYSTEM | 26692 B | 55 | 0.0 % (0 f) | 0 B | 8096 B | 40 B | 18556 B (39 f) |
+| **Total** | | 3807888 B | 7212 | 93.8 % (6767 f) | 0 B | 44976 B | 6508 B | 183140 B (327 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.
@@ -65,7 +75,8 @@ figure in the summary counts each function once.
 
 - `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.
 - `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.
-- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages.
+- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages, and so are the
+  SYSTEM overlays of the variants 1..8 (D1SPSUB ... I8NFO3; only the variant 0 of MAIN0 is counted).
 - Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified
   (172 MAIN0 targets at `0x800E8000+` do not fall in X000).
 - Functions outside the code (`479` bytes of Ghidra false positives in RAM with no contents).
@@ -87,21 +98,21 @@ figure in the summary counts each function once.
 
 | Size | Address | Program |
 |---|---|---|
-| 6188 B | `800317c0` | MAIN0.EXE |
-| 5708 B | `8003566c` | MAIN0.EXE |
-| 5056 B | `80033b44` | MAIN0.EXE |
-| 4360 B | `80051088` | MAIN0.EXE |
-| 4088 B | `80100788` | X000.BIN |
-| 3908 B | `800fc414` | X000.BIN |
-| 3248 B | `80134e5c` | X000.BIN |
-| 3152 B | `80133474` | X000.BIN |
-| 3132 B | `80029078` | MAIN0.EXE |
-| 3124 B | `80130bb0` | X000.BIN |
-| 2672 B | `8010f400` | X000.BIN |
-| 2412 B | `80053b5c` | MAIN0.EXE |
 | 2328 B | `8005aa74` | MAIN0.EXE |
-| 2308 B | `80105bcc` | X000.BIN |
-| 2252 B | `800fb420` | X000.BIN |
+| 1936 B | `801377b8` | X000.BIN |
+| 1676 B | `80136ce0` | X000.BIN |
+| 1600 B | `801363e4` | X000.BIN |
+| 1272 B | `800ed258` | X000.BIN |
+| 1212 B | `800ed750` | X000.BIN |
+| 1036 B | `8011e30c` | X000.BIN |
+| 864 B | `80137458` | X000.BIN |
+| 796 B | `8011ccd8` | X000.BIN |
+| 772 B | `80123344` | X000.BIN |
+| 768 B | `8012d9fc` | X000.BIN |
+| 744 B | `8012ff0c` | X000.BIN |
+| 732 B | `80117cbc` | X000.BIN |
+| 728 B | `8011ca00` | X000.BIN |
+| 672 B | `80122f54` | X000.BIN |
 
 ## How it is measured
 
