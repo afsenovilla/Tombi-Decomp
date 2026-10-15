@@ -452,6 +452,8 @@ def emulated_init(area, handler, rows, reader=None):
 
 def build_owners(area=None, reader=None, rows=None):
     """[owner dict] for every placed object handler (per area) that selects animation scripts.  No rendering here."""
+    if reader:
+        O.READER = reader
     rows = rows if rows is not None else O.build(area)
     groups = collections.OrderedDict()
     for r in rows:

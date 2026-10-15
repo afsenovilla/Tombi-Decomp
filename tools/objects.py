@@ -194,6 +194,9 @@ def collect(area=None):
 _seq_cache = {}
 
 
+READER = None    # set by animobj.build_owners when reading from a disc image
+
+
 def seq_events(ovl):
     """{sequence index: {'start': [ids], 'complete': [ids]}} of the scene-sequence tables of overlay ovl."""
     if ovl in _seq_cache:
@@ -201,7 +204,12 @@ def seq_events(ovl):
     out = {}
     if ovl in SEQ_TABLES:
         tab, n, sops, cops, smap = SEQ_TABLES[ovl]
-        d = open(os.path.join(A.FS, "AREA%02d" % ovl, "X0%02d.BIN" % ovl), "rb").read()
+        rel = "AREA%02d/X0%02d.BIN" % (ovl, ovl)
+        try:    # the graphics editor reads the disc through READER (no extracted overlay on disk)
+            d = READER(rel) if READER else open(os.path.join(A.FS, rel), "rb").read()
+        except (OSError, KeyError):
+            _seq_cache[ovl] = out
+            return out
         for i in range(n):
             p = struct.unpack_from("<I", d, tab + 4 * i - BASE)[0]
             if not BASE <= p < BASE + len(d):

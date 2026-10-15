@@ -682,7 +682,7 @@ class Core:
             if owner == "tombi":
                 c[owner] = (anim.tombi_owner(self.disc.raw), anim.Sprites())
             else:
-                ow = next(o for o in anim.object_owners(None, int(owner[1:3])) if o["owner"] == owner)
+                ow = next(o for o in anim.object_owners(self.disc.raw, int(owner[1:3])) if o["owner"] == owner)
                 c[owner] = (ow, anim.owner_source(ow))
         return c[owner]
 
@@ -699,7 +699,7 @@ class Core:
         def area_kids(area):
             import labels
             out = []
-            for ow in anim.object_owners(None, area):
+            for ow in anim.object_owners(self.disc.raw, area):
                 kids = [a for a in ow["animations"] if a.get("renderable", True)]
                 if kids:
                     out.append(N("%s  (%s, %d)" % (ow["name"], ",".join(ow["types"]), len(kids)), lazy=lambda o=ow["owner"]: owner_kids(o), id="animowner:" + ow["owner"]))
@@ -845,7 +845,7 @@ class Core:
         man, files, frames = self.wpp(nm)
         out = []
         for k in sorted(frames):
-            n = int(k.split("_")[1][:4])
+            n = int(k.split("frame_")[1][:4])
             w, h = struct.unpack_from("<HH", frames[k])
             out.append(dict(text="#%d  (%dx%d)" % (n, w * 4, h), item=("wppframe", nm, n), children=[], lazy=None, id="wpp:%s:frame:%d" % (nm, n)))
         return out
