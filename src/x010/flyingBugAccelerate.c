@@ -2,7 +2,7 @@
 // MATCHING 8012418c 484
 #include "TOBJ.H"
 
-void func_8012418C(TObj *o)
+void flyingBugAccelerate(TObj *o)
 {
     switch (o->subtype) {
     case 0:

@@ -1134,3 +1134,13 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   type 0x1C), `8012030c areaMechanismsPlayerCollision` (func_80046D58 type 7 subtype 9); `8011759c updateRotatingPlane` (layer 8 model whose
   children follow its rotation; `80117d48 spawnRotatingPlaneObjects` per subtype -> `80117ec0 spawnRotatingPlaneChild` (layer 2 type 0x1C from
   D_8012A878), `801178b0 rotatingPlanePlaySfx`; uncertain)
+- x010 spear pig b04 1 steps (updateSpearPig; uncertain): subtype 0 `80128d78 spearPigWatch` / `80129f7c spearPigJumpAttack` (velV -0x900),
+  subtype 1 `80129048 spearPigInitB` / `801291c4 spearPigWanderB` / `801297d8 spearPigChargeB`, subtype 3 `80128764 spearPigActC`; b04 2 step 0
+  `8012a664 spearPigHitFall`; `80120564 spearPigWeaponHit` (FUN_80045f00 type 0x3A), `8011ddc0 flyingBugWeaponHit` (0x27), `8012418c
+  flyingBugAccelerate` (flyingBugWander speed ramps by subtype)
+- x010 layer 4: `80118fe4 updateTallPillar` (type 0x31, 4 placements: 0x20 x 0x1B0 box, culled; kind uncertain) with `801210e4
+  tallPillarPlayerCollision`, `801212d4 tallPillarGrabProbe`, `801213f0 tallPillarObjectCollision`; `8011df8c ziplinePulleyGrabProbe` (func_8004BBC0
+  0x1D); `80119374 rotatingWheelSpinStep`, `80119648 turningPlankTurnStep`, `801198f8 turningPlankPurifiedStep` (the GV2.bc3 & 0x40 branch)
+- x010 player: `8011ca00 turningPlankSwingPivot` (playerSwingUpdatePivot type 0x34), `8011ccd8 playerStepRideTurningPlank` (playerStep2EByArea area
+  10), `8011beac playerStepClingRotating` (step 0x46, like x001's step 0x22; `8011bd5c playerClingJumpRelease`); `8012e9e0 updateWaterCurrent`
+  (GVARS.s44/s46 push, level by section / GAME.purifiedAreas & 0x40; uncertain)

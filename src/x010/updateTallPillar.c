@@ -4,7 +4,7 @@
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
-void func_80118FE4(TObj *o)
+void updateTallPillar(TObj *o)
 {
     switch (o->b04) {
     case 0:

@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0
 extern unsigned short DAT_8009c960;
 extern void FUN_80122f54(void);
-extern void FUN_8011ccd8(void);
+extern void playerStepRideTurningPlank(void);
 
 void FUN_80102a08(void)
 {
@@ -12,7 +12,7 @@ void FUN_80102a08(void)
         FUN_80122f54();
         break;
     case 10:
-        FUN_8011ccd8();
+        playerStepRideTurningPlank();
         break;
     }
 }

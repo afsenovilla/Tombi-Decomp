@@ -46,7 +46,7 @@ static __inline__ int blocked(TObj *o, short f)
     return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
 }
 
-void func_801291C4(TObj *o)
+void spearPigWanderB(TObj *o)
 {
     short yy;
     int r;

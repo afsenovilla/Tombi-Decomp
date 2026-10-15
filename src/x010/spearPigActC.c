@@ -42,7 +42,7 @@ static __inline__ short land(TObj *o)
     return 0;
 }
 
-void func_80128764(TObj *o)
+void spearPigActC(TObj *o)
 {
     int n;
     short t;

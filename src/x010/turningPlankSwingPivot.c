@@ -10,7 +10,7 @@ extern int rsin(int);
     o->wb8 = rcos(a) * (D_8009F0EC->box0 - 12) >> 12;               \
     o->wba = -(rsin(a) * (D_8009F0EC->box0 - 12)) >> 12
 
-short func_8011CA00(TObj *o)
+short turningPlankSwingPivot(TObj *o)
 {
     TObj *p = D_8009F0EC;
     short a = p->d30;

@@ -5,7 +5,7 @@
 
 extern unsigned short D_8012F284[];
 extern void cullObjectToDrawList(TObj *, int);
-extern void func_80119374(TObj *);
+extern void rotatingWheelSpinStep(TObj *);
 extern void ObjFreeDup(TObj *);
 
 void updateRotatingWheel(TObj *o)
@@ -34,7 +34,7 @@ void updateRotatingWheel(TObj *o)
     case 1:
         cullObjectToDrawList(o, 0x88);
         if (GAME.purifiedAreas & 0x40) {
-            func_80119374(o);
+            rotatingWheelSpinStep(o);
         } else if (o->subtype < 2) {
             o->d8c = (o->d8c - 2) & 0xfff;
         }

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short D_8012F2F8[];
 
-void func_801210E4(TObj *a, TObj *b)
+void tallPillarPlayerCollision(TObj *a, TObj *b)
 {
     short dz, k, n, dx, off;
     unsigned short t;

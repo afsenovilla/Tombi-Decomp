@@ -5,8 +5,8 @@
 
 extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
-extern void func_801198F8(TObj *);
-extern void func_80119648(TObj *);
+extern void turningPlankPurifiedStep(TObj *);
+extern void turningPlankTurnStep(TObj *);
 
 #define SET(a, b, c, k, v) r[0] = a; r[1] = b; o->d38 = c; o->subtype = k; o->d34 = 0; o->d30 = (o->d38 >> 8) & 0xfff; o->d8c = (v - o->d30) & 0xfff; break;
 
@@ -58,7 +58,7 @@ void updateTurningPlank(TObj *o)
     case 1:
         cullObjectToDrawList(o, 0x88);
         if (((unsigned char*)&GV2.bc3)[0] & 0x40) {
-            func_801198F8(o);
+            turningPlankPurifiedStep(o);
             break;
         }
         switch (o->step) {
@@ -83,7 +83,7 @@ void updateTurningPlank(TObj *o)
             }
             break;
         }
-        if (o->velH) func_80119648(o);
+        if (o->velH) turningPlankTurnStep(o);
         break;
     case 2:
         break;

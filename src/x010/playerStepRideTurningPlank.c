@@ -38,7 +38,7 @@ extern int probeTiltedBarObject(TObj *, TObj *);
         y = s1 + (-(rsin(a2) * 8) >> 12);           \
     }
 
-void func_8011CCD8(TObj *o)
+void playerStepRideTurningPlank(TObj *o)
 {
     TObj *p;
     short x, y, t;

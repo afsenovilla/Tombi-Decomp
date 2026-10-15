@@ -24,13 +24,13 @@ extern short probeWallAt(TObj *, short, short, short);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e4f0(int);
 extern int isObjectInView(TObj *);
-extern void func_80128D78(TObj *);
-extern void func_80129F7C(TObj *);
-extern void func_80129048(TObj *);
-extern void func_801291C4(TObj *);
-extern void func_801297D8(TObj *);
-extern void func_80128764(TObj *);
-extern void func_8012A664(TObj *);
+extern void spearPigWatch(TObj *);
+extern void spearPigJumpAttack(TObj *);
+extern void spearPigInitB(TObj *);
+extern void spearPigWanderB(TObj *);
+extern void spearPigChargeB(TObj *);
+extern void spearPigActC(TObj *);
+extern void spearPigHitFall(TObj *);
 extern void spearPigDefeated(TObj *);
 
 static __inline__ int onscreen(TObj *o)
@@ -132,23 +132,23 @@ void updateSpearPig(TObj *o)
             case 0:
                 switch (o->step) {
                 case 0:
-                    func_80128D78(o);
+                    spearPigWatch(o);
                     break;
                 case 1:
-                    func_80129F7C(o);
+                    spearPigJumpAttack(o);
                     break;
                 }
                 break;
             case 1:
                 switch (o->step) {
                 case 0:
-                    func_80129048(o);
+                    spearPigInitB(o);
                     break;
                 case 1:
-                    func_801291C4(o);
+                    spearPigWanderB(o);
                     break;
                 case 2:
-                    func_801297D8(o);
+                    spearPigChargeB(o);
                     break;
                 }
                 break;
@@ -176,7 +176,7 @@ void updateSpearPig(TObj *o)
                 }
                 break;
             case 3:
-                func_80128764(o);
+                spearPigActC(o);
                 break;
             }
             if (!onscreen(o)) o->b04 = 3;
@@ -281,7 +281,7 @@ void updateSpearPig(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            func_8012A664(o);
+            spearPigHitFall(o);
             if (!onscreen(o)) o->b04 = 3;
             break;
         case 1:

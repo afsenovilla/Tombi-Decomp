@@ -7,7 +7,7 @@
 extern TObj PLAYER;
 void PoolFree_1F800210(TObj *o);
 
-void func_8012E9E0(TObj *o)
+void updateWaterCurrent(TObj *o)
 {
     switch (o->b04) {
     case 0:

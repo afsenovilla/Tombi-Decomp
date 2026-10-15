@@ -38,7 +38,7 @@ static __inline__ int near(TObj *o)
     return t <= lim + 0x70;
 }
 
-void func_801297D8(TObj *o)
+void spearPigChargeB(TObj *o)
 {
     int r;
 

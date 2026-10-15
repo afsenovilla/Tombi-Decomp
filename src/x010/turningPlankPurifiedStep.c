@@ -2,9 +2,9 @@
 // MATCHING 801198f8 372
 #include "TOBJ.H"
 
-extern void func_80119648(TObj *);
+extern void turningPlankTurnStep(TObj *);
 
-void func_801198F8(TObj *o)
+void turningPlankPurifiedStep(TObj *o)
 {
     o->animFrame = 2;
     if (o->b69 != 0) {
@@ -43,5 +43,5 @@ void func_801198F8(TObj *o)
         break;
     }
     if (o->velH != 0)
-        func_80119648(o);
+        turningPlankTurnStep(o);
 }

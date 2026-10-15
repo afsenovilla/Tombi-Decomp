@@ -9,7 +9,7 @@
 extern TObj *D_8009F0EC;
 extern TObj *D_8009C330;
 
-void func_8011BD5C(TObj *o)
+void playerClingJumpRelease(TObj *o)
 {
     int e;
     Fix16 *h;

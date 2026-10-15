@@ -17,7 +17,7 @@ typedef struct {
 } P;
 extern unsigned short D_8012F2F8[];
 
-void func_801212D4(P *o, TObj *e)
+void tallPillarGrabProbe(P *o, TObj *e)
 {
     int d;
     int h;

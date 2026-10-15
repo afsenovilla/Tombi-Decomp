@@ -5,7 +5,7 @@
 
 extern short FUN_8004b57c(TObj *, TObj *);
 
-void func_8011DF8C(TObj *o, TObj *e)
+void ziplinePulleyGrabProbe(TObj *o, TObj *e)
 {
     e->b6a = 0;
     if (FUN_8004b57c(o, e)) {

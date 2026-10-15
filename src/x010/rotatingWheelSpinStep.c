@@ -2,7 +2,7 @@
 // MATCHING 80119374 364
 #include "TOBJ.H"
 
-void func_80119374(TObj *o)
+void rotatingWheelSpinStep(TObj *o)
 {
     char pad;
 

@@ -37,7 +37,7 @@ extern TObj *playerProbeGrab(TObj *, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerSetFallLean(TObj *);
 extern void playerTryAttack(TObj *, int);
-extern void func_8011BD5C(TObj *);
+extern void playerClingJumpRelease(TObj *);
 
 #define ORBIT(o) { \
     int a = (D_8009F0EC->d8c + 0x400) & 0xfff; \
@@ -47,7 +47,7 @@ extern void func_8011BD5C(TObj *);
     o->y.p.whole = D_8009F0EC->y.p.whole + (y >> 12); \
 }
 
-void func_8011BEAC(TObj *o)
+void playerStepClingRotating(TObj *o)
 {
     short tbl[12] = { 1, 1, 2, 2, 3, 3, 3, 3, 2, 2, 1, 1 };
     unsigned short *pad;
@@ -89,7 +89,7 @@ void func_8011BEAC(TObj *o)
     case 2:
         ORBIT(o);
         if (--o->timer == 0) o->state++;
-        func_8011BD5C(o);
+        playerClingJumpRelease(o);
         break;
     case 3:
         AnimAdvance(o);
@@ -176,7 +176,7 @@ void func_8011BEAC(TObj *o)
         ORBIT(o);
         o->d88 = 0;
         playerTryAttack(o, 2);
-        func_8011BD5C(o);
+        playerClingJumpRelease(o);
         break;
     case 4:
         AnimAdvance(o);

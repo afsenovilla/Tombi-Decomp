@@ -2,7 +2,7 @@
 // MATCHING 800f6e28 272
 extern char *DAT_8009f0ec;
 extern int FUN_80122cbc(void);
-extern int FUN_8011ca00(void);
+extern int turningPlankSwingPivot(void);
 
 short playerSwingUpdatePivot(char *o)
 {
@@ -20,7 +20,7 @@ short playerSwingUpdatePivot(char *o)
         r = FUN_80122cbc();
         break;
     case 0x34:
-        r = FUN_8011ca00();
+        r = turningPlankSwingPivot();
         break;
     case 0x1f:
         if (*(unsigned char *)(e + 0x6a) != 0) {

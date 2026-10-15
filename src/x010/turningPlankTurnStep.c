@@ -33,7 +33,7 @@ static __inline__ void mv(TObj *o)
     }
 }
 
-void func_80119648(TObj *o)
+void turningPlankTurnStep(TObj *o)
 {
     switch (o->subtype) {
     case 0:

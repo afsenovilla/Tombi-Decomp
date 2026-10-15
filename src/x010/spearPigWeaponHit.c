@@ -10,7 +10,7 @@ extern void resolveHitResultG(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
 extern void spawnImpactEffect(int, int, int, int);
 
-void func_80120564(TObj *o, TObj *p)
+void spearPigWeaponHit(TObj *o, TObj *p)
 {
     int r;
     unsigned short t;

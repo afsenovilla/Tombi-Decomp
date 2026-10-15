@@ -7,7 +7,7 @@ extern short FUN_8004461c(TObj *a, TObj *b);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
 
-void func_8011DDC0(TObj *o, TObj *p)
+void flyingBugWeaponHit(TObj *o, TObj *p)
 {
     if (FUN_8004461c(o, p) == -1) return;
     if (resolveHitResultD(o, p)) {

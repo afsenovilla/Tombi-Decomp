@@ -46,7 +46,7 @@ static __inline__ short land(TObj *o)
     return 0;
 }
 
-void func_8012A664(TObj *o)
+void spearPigHitFall(TObj *o)
 {
     switch (o->state) {
     case 0:

@@ -53,7 +53,7 @@ static __inline__ int near(TObj *o)
     t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x60;
     return !(k < t);
 }
-void func_80129F7C(TObj *o)
+void spearPigJumpAttack(TObj *o)
 {
     FUN_8001f8e4(o);
     switch (o->state) {

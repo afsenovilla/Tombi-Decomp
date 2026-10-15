@@ -26,7 +26,7 @@ static __inline__ void setanim(TObj *p, void *a)
     AnimLoadDuration(p);
 }
 
-void func_80128D78(TObj *o)
+void spearPigWatch(TObj *o)
 {
     switch (o->state) {
     case 0:

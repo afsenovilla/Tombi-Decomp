@@ -5,7 +5,7 @@
 extern unsigned short D_8012F2F8[];
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_801213F0(TObj *a, TObj *b)
+void tallPillarObjectCollision(TObj *a, TObj *b)
 {
     short dz, k, n;
     unsigned short t;

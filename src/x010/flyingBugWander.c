@@ -10,7 +10,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int flyingBugProbeBlocked(TObj *, int);
-extern void func_8012418C(TObj *);
+extern void flyingBugAccelerate(TObj *);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
@@ -89,7 +89,7 @@ void flyingBugWander(TObj *o)
             o->step++;
         }
         if (((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) o->velX = Rand() & 3;
-        func_8012418C(o);
+        flyingBugAccelerate(o);
         break;
     case 2:
         AnimAdvance(o);

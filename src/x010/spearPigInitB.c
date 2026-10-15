@@ -10,7 +10,7 @@ extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 
-void func_80129048(TObj *o)
+void spearPigInitB(TObj *o)
 {
     int b0, b1, b2, b3;
 
