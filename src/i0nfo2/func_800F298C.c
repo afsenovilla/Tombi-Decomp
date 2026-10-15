@@ -1,0 +1,5 @@
+// FUNC 800f298c 8 I0NFO2
+// MATCHING 800f298c 8
+void func_800F298C(void)
+{
+}
