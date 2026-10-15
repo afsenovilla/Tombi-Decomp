@@ -1,0 +1,6 @@
+// FUNC 80132bb0 8 X000
+// MATCHING 80132bb0 8
+
+void FUN_80132bb0(void)
+{
+}

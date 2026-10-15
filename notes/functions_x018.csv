@@ -1,4 +1,6 @@
 address,size,name,twin
+800e9dc0,216,FUN_800e9dc0,X000:800e9dc0
+800e9e98,220,FUN_800e9e98,X000:800e9e98
 800e9f74,500,awardAPByArea,X000:800e9f74
 800ea168,184,updatePoolType04Object,X000:800ea168
 800ea220,100,initPoolType04Sprite,X000:800ea220
