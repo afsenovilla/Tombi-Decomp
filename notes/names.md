@@ -216,6 +216,12 @@ One line per name: `address name (old file) - justification`.
 - `8004baa8 probeClimbGrabObject` (was FUN_8004baa8) - playerClimbFollowObject helper: probeGrabObjectBox over the list 1F800254; result in 1F8003C0
 - `80041d20 probeSlopeAngleAt` (was func_80041D20) (no caller found) - collision plane probe returning the slope angle (angleFromDelta)
 - `8002f060 playerEffect4EStepE` (was func_8002F060) (no caller found) - another pool type 0x4E effect step (anim from D_80079D58, follows the player's visibility)
+- `8003c550 updateL1Type02Reward` (was func_8003F9A4) - layer 1 type 0x2 handler (MAIN0 table slot 8007A114); psx_tomba reward.c; spawns spawnPoolType05Ring
+- `8003bcd0 updateL2Type30Object` (was func_8003F124) - layer 2 type 0x30 handler (MAIN0 table slot 80077E5C)
+- `8004985c updateL2Type02Object` (was func_8004985C) - layer 2 type 0x2 handler (MAIN0 table slot 80077DA4)
+- `80030afc updateL4Type1BObject` (was func_80033F50) - layer 4 type 0x1B handler (MAIN0 table slot 80079DE0)
+- `80030404 updateL4Type08Object` (was func_80030404) - layer 4 type 0x8 handler (MAIN0 table slot 80079D94)
+- `8002b0b4 updateL8Type07Object` (was func_8002B0B4) - layer 8 type 0x7 handler (MAIN0 table slot 80079BA4)
 
 # X000 function names (shared overlay code)
 
@@ -440,6 +446,57 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80104dc8 playerBittenCarryAirStep` (was FUN_80104dc8) (no caller found) - air step carrying the bitten object on top (x = player, y + box2), gravity and head collision
 - `800ee2a4 updateL4Type3EObject` (was FUN_800ee2a4) - layer 4 type 0x3E handler (MAIN0 table slot 80079E6C): tall invisible box (4..8 x 0xAA..0x154 by +0x0C)
 - `800ee18c updateL4Type13Object` (was FUN_800ee18c) - layer 4 type 0x13 handler (slot 80079DC0)
+- `80134e5c updateA00L2Type34` (was func_80134E5C) - AREA00-only object handler: layer 2 type 0x34 slot (MAIN0 table 80077E6C) while AREA00 (X000) is loaded
+- `80116d14 updateA00L5Type11` (was FUN_80116d14) - AREA00-only object handler: layer 5 type 0x11 slot (MAIN0 table 8007B354) while AREA00 (X000) is loaded
+- `8011bf68 updateA00L4Type02` (was func_8011BF68) - AREA00-only object handler: layer 4 type 0x2 slot (MAIN0 table 80079D7C) while AREA00 (X000) is loaded
+- `801288b8 updateA00L2Type2C` (was func_801288B8) - AREA00-only object handler: layer 2 type 0x2C slot (MAIN0 table 80077E4C) while AREA00 (X000) is loaded
+- `80132174 updateA00L2Type08` (was FUN_80132174) - AREA00-only object handler: layer 2 type 0x8 slot (MAIN0 table 80077DBC) while AREA00 (X000) is loaded
+- `8011b8c0 updateA00L4Type01` (was FUN_8011b8c0) - AREA00-only object handler: layer 4 type 0x1 slot (MAIN0 table 80079D78) while AREA00 (X000) is loaded
+- `8012d294 updateA00L2Type2B` (was FUN_8012d294) - AREA00-only object handler: layer 2 type 0x2B slot (MAIN0 table 80077E48) while AREA00 (X000) is loaded
+- `8011ec68 updateA00L4Type0A` (was FUN_8011ec68) - AREA00-only object handler: layer 4 type 0xA slot (MAIN0 table 80079D9C) while AREA00 (X000) is loaded
+- `8012e8c4 updateA00L2Type06` (was func_8012E8C4) - AREA00-only object handler: layer 2 type 0x6 slot (MAIN0 table 80077DB4) while AREA00 (X000) is loaded
+- `8011e838 updateA00L4Type09` (was func_8011E838) - AREA00-only object handler: layer 4 type 0x9 slot (MAIN0 table 80079D98) while AREA00 (X000) is loaded
+- `8012e4c4 updateA00L2Type05` (was func_8012E4C4) - AREA00-only object handler: layer 2 type 0x5 slot (MAIN0 table 80077DB0) while AREA00 (X000) is loaded
+- `8011f288 updateA00L4Type11` (was func_8011F288) - AREA00-only object handler: layer 4 type 0x11 slot (MAIN0 table 80079DB8) while AREA00 (X000) is loaded
+- `8011ad98 updateA00PoolType14` (was func_8011AD98) - AREA00-only object handler: pool type 0x14 slot (MAIN0 table 80079BFC) while AREA00 (X000) is loaded
+- `801236f0 updateA00L5Type0B` (was func_801236F0) - AREA00-only object handler: layer 5 type 0xB slot (MAIN0 table 8007B33C) while AREA00 (X000) is loaded
+- `8012e1c0 updateA00L2Type04` (was FUN_8012e1c0) - AREA00-only object handler: layer 2 type 0x4 slot (MAIN0 table 80077DAC) while AREA00 (X000) is loaded
+- `801328b4 updateA00L2Type09` (was FUN_801328b4) - AREA00-only object handler: layer 2 type 0x9 slot (MAIN0 table 80077DC0) while AREA00 (X000) is loaded
+- `8011a744 updateA00PoolType0B` (was func_8011A744) - AREA00-only object handler: pool type 0xB slot (MAIN0 table 80079BD8) while AREA00 (X000) is loaded
+- `80134404 updateA00L2Type14` (was func_80134404) - AREA00-only object handler: layer 2 type 0x14 slot (MAIN0 table 80077DEC) while AREA00 (X000) is loaded
+- `801195f4 updateA00PoolType09` (was FUN_801195f4) - AREA00-only object handler: pool type 0x9 slot (MAIN0 table 80079BD0) while AREA00 (X000) is loaded
+- `801224c0 updateA00L7Type01` (was func_801224C0) - AREA00-only object handler: layer 7 type 0x1 slot (MAIN0 table 80079FE8) while AREA00 (X000) is loaded
+- `80134c20 updateA00L2Type15` (was FUN_80134c20) - AREA00-only object handler: layer 2 type 0x15 slot (MAIN0 table 80077DF0) while AREA00 (X000) is loaded
+- `800ed024 updateL4Type00Object` (was FUN_800ed024) - layer 4 type 0x0 handler (MAIN0 table slot 80079D74)
+- `80126fec updateA00L2Type01` (was FUN_80126fec) - AREA00-only object handler: layer 2 type 0x1 slot (MAIN0 table 80077DA0) while AREA00 (X000) is loaded
+- `80118f90 updateA00PoolType03` (was FUN_80118f90) - AREA00-only object handler: pool type 0x3 slot (MAIN0 table 80079BB8) while AREA00 (X000) is loaded
+- `80118438 updateA00PoolType01` (was FUN_80118438) - AREA00-only object handler: pool type 0x1 slot (MAIN0 table 80079BB0) while AREA00 (X000) is loaded
+- `800edf94 updateL4Type03Object` (was FUN_800edf94) - layer 4 type 0x3 handler (MAIN0 table slot 80079D80)
+- `8011d010 updateA00L4Type06` (was FUN_8011d010) - AREA00-only object handler: layer 4 type 0x6 slot (MAIN0 table 80079D8C) while AREA00 (X000) is loaded
+- `801202a4 updateA00L4Type18` (was FUN_801202a4) - AREA00-only object handler: layer 4 type 0x18 slot (MAIN0 table 80079DD4) while AREA00 (X000) is loaded
+- `80121870 updateA00L4Type26` (was FUN_80121870) - AREA00-only object handler: layer 4 type 0x26 slot (MAIN0 table 80079E0C) while AREA00 (X000) is loaded
+- `8012dedc updateA00L2Type03` (was func_8012DEDC) - AREA00-only object handler: layer 2 type 0x3 slot (MAIN0 table 80077DA8) while AREA00 (X000) is loaded
+- `80118bc0 updateA00PoolType02` (was FUN_80118bc0) - AREA00-only object handler: pool type 0x2 slot (MAIN0 table 80079BB4) while AREA00 (X000) is loaded
+- `8011b2e8 updateA00PoolType24` (was func_8011B2E8) - AREA00-only object handler: pool type 0x24 slot (MAIN0 table 80079C3C) while AREA00 (X000) is loaded
+- `80122724 updateA00L7Type02` (was func_80122724) - AREA00-only object handler: layer 7 type 0x2 slot (MAIN0 table 80079FEC) while AREA00 (X000) is loaded
+- `8011f608 updateA00L4Type17` (was FUN_8011f608) - AREA00-only object handler: layer 4 type 0x17 slot (MAIN0 table 80079DD0) while AREA00 (X000) is loaded
+- `801191b0 updateA00PoolType27` (was FUN_801191b0) - AREA00-only object handler: pool type 0x27 slot (MAIN0 table 80079C48) while AREA00 (X000) is loaded
+- `8012236c updateA00L7Type00` (was FUN_8012236c) - AREA00-only object handler: layer 7 type 0x0 slot (MAIN0 table 80079FE4) while AREA00 (X000) is loaded
+- `80136090 updateA00L2Type57` (was FUN_80136090) - AREA00-only object handler: layer 2 type 0x57 slot (MAIN0 table 80077EF8) while AREA00 (X000) is loaded
+- `8011ab10 updateA00PoolType11` (was FUN_8011ab10) - AREA00-only object handler: pool type 0x11 slot (MAIN0 table 80079BF0) while AREA00 (X000) is loaded
+- `80123a1c updateA00L5Type0C` (was FUN_80123a1c) - AREA00-only object handler: layer 5 type 0xC slot (MAIN0 table 8007B340) while AREA00 (X000) is loaded
+- `80119468 updateA00PoolType08` (was FUN_80119468) - AREA00-only object handler: pool type 0x8 slot (MAIN0 table 80079BCC) while AREA00 (X000) is loaded
+- `8011b6e0 updateA00PoolType59` (was FUN_8011b6e0) - AREA00-only object handler: pool type 0x59 slot (MAIN0 table 80079D10) while AREA00 (X000) is loaded
+- `8011935c updateA00PoolType07` (was FUN_8011935c) - AREA00-only object handler: pool type 0x7 slot (MAIN0 table 80079BC8) while AREA00 (X000) is loaded
+- `8011b0d4 updateA00PoolType16` (was FUN_8011b0d4) - AREA00-only object handler: pool type 0x16 slot (MAIN0 table 80079C04) while AREA00 (X000) is loaded
+- `8011b1e0 updateA00PoolType17` (was FUN_8011b1e0) - AREA00-only object handler: pool type 0x17 slot (MAIN0 table 80079C08) while AREA00 (X000) is loaded
+- `8011a63c updateA00PoolType0A` (was FUN_8011a63c) - AREA00-only object handler: pool type 0xA slot (MAIN0 table 80079BD4) while AREA00 (X000) is loaded
+- `8011926c updateA00PoolType06` (was FUN_8011926c) - AREA00-only object handler: pool type 0x6 slot (MAIN0 table 80079BC4) while AREA00 (X000) is loaded
+- `8011b7f0 updateA00PoolType5A` (was func_8011B7F0) - AREA00-only object handler: pool type 0x5A slot (MAIN0 table 80079D14) while AREA00 (X000) is loaded
+- `8011f1d0 updateA00L4Type0D` (was func_8011F1D0) - AREA00-only object handler: layer 4 type 0xD slot (MAIN0 table 80079DA8) while AREA00 (X000) is loaded
+- `80111ae0 updateL2Type07Object` (was func_80111AE0) - layer 2 type 0x7 handler (MAIN0 table slot 80077DB8)
+- `800ee25c updateL4Type38Object` (was func_800EE25C) - layer 4 type 0x38 handler (MAIN0 table slot 80079E54)
+- `80114a08 updateL2Type55Object` (was FUN_80114a08) - layer 2 type 0x55 handler (MAIN0 table slot 80077EF0)
 
 # Area overlay function names (X001..X019)
 

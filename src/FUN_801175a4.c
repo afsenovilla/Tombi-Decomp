@@ -4,7 +4,7 @@
 extern unsigned short DAT_8009c962;
 extern unsigned char DAT_8009c93a;
 extern short DAT_1f80016e, DAT_1f80016a;
-extern void FUN_80116d14(TObj *);
+extern void updateA00L5Type11(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void cameraModeHandler6(TObj *);
 extern void cameraEventScrollHandler(TObj *);
@@ -27,6 +27,6 @@ void FUN_801175a4(TObj *o)
             break;
         }
     } else {
-        FUN_80116d14(o);
+        updateA00L5Type11(o);
     }
 }

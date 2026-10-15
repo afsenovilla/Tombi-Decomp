@@ -32,7 +32,7 @@ extern void FUN_80129fb4(TObj *);
 extern void func_80129BB0(TObj *);
 extern void FUN_801294fc(TObj *);
 extern void FUN_80128fac(TObj *);
-extern void FUN_801288b8(TObj *);
+extern void updateA00L2Type2C(TObj *);
 extern void FUN_80128190(TObj *);
 extern void FUN_80127eb0(TObj *);
 extern void FUN_80127820(TObj *);
@@ -125,7 +125,7 @@ void FUN_8012ccf8(TObj *o)
                     FUN_80128fac(o);
                     break;
                 case 4:
-                    FUN_801288b8(o);
+                    updateA00L2Type2C(o);
                     break;
                 case 5:
                     FUN_80128190(o);
