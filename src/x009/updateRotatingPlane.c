@@ -12,11 +12,11 @@ extern void cullObjectToDrawListMargin(TObj *, int);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVEC *, void *);
 extern void freeObjectLayer8(TObj *);
-extern void func_80117D48(TObj *);
+extern void spawnRotatingPlaneObjects(TObj *);
 extern void func_801177F8(TObj *);
-extern void func_801178B0(TObj *);
+extern void rotatingPlanePlaySfx(TObj *);
 
-void func_8011759C(TObj *o)
+void updateRotatingPlane(TObj *o)
 {
     TObj *e;
     SVEC v;
@@ -51,14 +51,14 @@ void func_8011759C(TObj *o)
             (*(TObj **)&GVARS.p48)->d94 = (int)o;
             D_8009C94C[0]->d94 = (int)o;
         } else {
-            func_80117D48(o);
+            spawnRotatingPlaneObjects(o);
         }
         break;
     case 1:
         if (GAME.selectedPlane == 0x20 || GVARS.b3a != 1) {
             cullObjectToDrawListMargin(o, 0xa0);
             func_801177F8(o);
-            func_801178B0(o);
+            rotatingPlanePlaySfx(o);
             getBaseMatrix(&o->w48);
             v.vx = o->d84;
             v.vy = o->d88;

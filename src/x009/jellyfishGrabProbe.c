@@ -6,7 +6,7 @@ extern short DAT_1f8003bc;
 extern short DAT_1f80019e;
 extern TObj *DAT_1f8003c0;
 
-void func_80121254(TObj *a, TObj *b)
+void jellyfishGrabProbe(TObj *a, TObj *b)
 {
     if (func_8004b57c() != 0) {
         a->b9e = 4;

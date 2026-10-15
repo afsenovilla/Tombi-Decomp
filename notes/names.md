@@ -1123,3 +1123,14 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   `8011d9a4 playerStepDizzy` (step 0x3B: anim 0x41, sfx 0x25; uncertain), `8011e154 updateArea4ItemObj` (MAIN0 dispatchAreaItemInit area 4;
   uncertain), `8012a740 initTownHallWorker` (box/sprites per subtype from D_801311C8 while GCD.bcf2d == 0), `80129e14
   paintingSlotHintNpcMoveTo` (moves toward velX/velY targets; uncertain)
+- x009 jellyfish steps (updateJellyfish; uncertain): b04 1 step 0 `80124e04 jellyfishFloat`, step 2 `80125438 jellyfishSwimB` (sfx 0x97), step 3 of
+  a child (b0c) `801260cc jellyfishChildFollow`, step 4 `801261c0 jellyfishSink`, step 5 `80126460 jellyfishGrabPlayer`; b04 2 step 2 `80126ce0
+  jellyfishHurtFall`, step 4 `80127290 jellyfishGrabbedB`; `80120ba0 jellyfishWeaponHit` (FUN_80045f00 type 0x21), `80121254 jellyfishGrabProbe`
+  (func_8004BBC0 enemy list type 0x21)
+- x009 red flower b04 1 states (updateRedFlower; uncertain): 0 `80121a58 redFlowerBud`, 1 `80121d2c redFlowerLand`, 2 `80121e5c redFlowerHop`, 3
+  `801220cc redFlowerTurnToPlayer`, 4 `801225bc redFlowerWalk`, 5 `801229ac redFlowerWalkB`, 6 `80122f08 redFlowerChase`, 7 `80123294
+  redFlowerFall`; `80121964 redFlowerCheckEdge`, `801224ac redFlowerChooseState`; `80120a2c redFlowerWeaponHit` (FUN_80045f00 type 0x0A)
+- x009 flower platform / plane: `801212c4 flowerPlatformGrabProbe` (func_8004BBC0 type 0x1C), `80121934 flowerPlatformPushOut` (func_80048E68
+  type 0x1C), `8012030c areaMechanismsPlayerCollision` (func_80046D58 type 7 subtype 9); `8011759c updateRotatingPlane` (layer 8 model whose
+  children follow its rotation; `80117d48 spawnRotatingPlaneObjects` per subtype -> `80117ec0 spawnRotatingPlaneChild` (layer 2 type 0x1C from
+  D_8012A878), `801178b0 rotatingPlanePlaySfx`; uncertain)

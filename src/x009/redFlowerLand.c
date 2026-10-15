@@ -23,7 +23,7 @@ static __inline__ short land(TObj *o)
     return 0;
 }
 
-void func_80121D2C(TObj *o)
+void redFlowerLand(TObj *o)
 {
     switch (o->state) {
     case 0:

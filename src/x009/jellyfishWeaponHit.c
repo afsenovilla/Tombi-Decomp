@@ -7,7 +7,7 @@ extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultC(TObj *, TObj *);
 
-void func_80120BA0(TObj *o, TObj *e)
+void jellyfishWeaponHit(TObj *o, TObj *e)
 {
     if (boxesOverlapSigned(o, e) == -1) return;
     if (resolveHitResultC(o, e)) {

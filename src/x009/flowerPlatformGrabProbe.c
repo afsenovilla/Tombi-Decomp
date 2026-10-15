@@ -6,7 +6,7 @@
 
 extern short func_80121540(TObj *, short, short, int);
 
-void func_801212C4(TObj *o, TObj *p)
+void flowerPlatformGrabProbe(TObj *o, TObj *p)
 {
     int dx;
     short r;

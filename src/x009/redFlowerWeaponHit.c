@@ -8,7 +8,7 @@ extern int resolveHitResultD(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
 extern TObj *allocObjectLayer2(void);
 
-void func_80120A2C(TObj *o, TObj *p)
+void redFlowerWeaponHit(TObj *o, TObj *p)
 {
     int r;
     unsigned short t;

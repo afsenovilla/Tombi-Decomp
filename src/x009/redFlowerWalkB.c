@@ -10,10 +10,10 @@ extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
-extern void func_80121964(TObj *);
+extern void redFlowerCheckEdge(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern void ObjSetFacingToPlayer(TObj *);
-extern void func_801224AC(TObj *);
+extern void redFlowerChooseState(TObj *);
 extern int Rand(void);
 
 static __inline__ int Ground(TObj *o)
@@ -29,7 +29,7 @@ static __inline__ int Ground(TObj *o)
     return 0;
 }
 
-void func_801229AC(TObj *o)
+void redFlowerWalkB(TObj *o)
 {
     int r;
     unsigned short f;
@@ -54,7 +54,7 @@ void func_801229AC(TObj *o)
             if (f & 1) d = -0x10;
             probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f);
         }
-        func_80121964(o);
+        redFlowerCheckEdge(o);
         AnimAdvance(o);
         o->velV += 0x30;
         o->y.raw += o->velV << 8;
@@ -88,7 +88,7 @@ void func_801229AC(TObj *o)
             if (f & 1) d = -0x10;
             probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f);
         }
-        func_80121964(o);
+        redFlowerCheckEdge(o);
         AnimAdvance(o);
         o->velV += 0x30;
         if (o->velV > 0x600) o->velV = 0x600;
@@ -148,7 +148,7 @@ void func_801229AC(TObj *o)
         if (AnimAdvance(o)) {
             ObjSetFacingToPlayer(o);
             o->state = 0;
-            func_801224AC(o);
+            redFlowerChooseState(o);
         }
         break;
     }

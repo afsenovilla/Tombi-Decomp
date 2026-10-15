@@ -14,7 +14,7 @@ extern int ObjCullRegister(TObj *);
 extern int isObjectInView(TObj *);
 extern void playSFX(int);
 
-void func_80121A58(TObj *o)
+void redFlowerBud(TObj *o)
 {
     TObj *p;
 

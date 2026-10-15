@@ -29,7 +29,7 @@ static __inline__ void setanim(TObj *o, void *a)
     AnimLoadDuration(o);
 }
 
-void func_80126CE0(TObj *o)
+void jellyfishHurtFall(TObj *o)
 {
     switch (o->state) {
     case 0:

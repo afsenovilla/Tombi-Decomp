@@ -32,7 +32,7 @@ static __inline__ void mv(TObj *o)
     AnimAdvance(o);
 }
 
-void func_80127290(TObj *o)
+void jellyfishGrabbedB(TObj *o)
 {
     switch (o->state) {
     case 0:

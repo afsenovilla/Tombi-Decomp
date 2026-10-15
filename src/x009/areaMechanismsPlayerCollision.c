@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 
-void func_8012030C(TObj *o, TObj *e)
+void areaMechanismsPlayerCollision(TObj *o, TObj *e)
 {
     if (e->subtype != 0) return;
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x3c) >= 0x79) return;

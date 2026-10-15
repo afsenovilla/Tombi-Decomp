@@ -29,7 +29,7 @@ static __inline__ short ground(TObj *o)
     return 0;
 }
 
-void func_801220CC(TObj *o)
+void redFlowerTurnToPlayer(TObj *o)
 {
     short *p = &o->wb4;
     int t;

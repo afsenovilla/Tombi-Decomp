@@ -24,7 +24,7 @@ static __inline__ int Blocked(TObj *o)
     return (short)probeWallAt(o, (short)(o->h->p.whole + d), (short)(o->y.p.whole + 0x30), af);
 }
 
-void func_80126460(TObj *o)
+void jellyfishGrabPlayer(TObj *o)
 {
     short s;
     short c;

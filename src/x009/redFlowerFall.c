@@ -22,7 +22,7 @@ static __inline__ int Ground(TObj *o)
     return 0;
 }
 
-void func_80123294(TObj *o)
+void redFlowerFall(TObj *o)
 {
     switch (o->state) {
     case 0:

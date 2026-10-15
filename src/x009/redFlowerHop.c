@@ -24,7 +24,7 @@ static __inline__ short ground(TObj *o)
     return 0;
 }
 
-void func_80121E5C(TObj *o)
+void redFlowerHop(TObj *o)
 {
     switch (o->state) {
     case 0:

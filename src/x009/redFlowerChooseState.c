@@ -19,7 +19,7 @@ static __inline__ int Near(TObj *o)
     return (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x50) < 0xc9;
 }
 
-void func_801224AC(TObj *o)
+void redFlowerChooseState(TObj *o)
 {
     if (Other(o)) {
         o->step = 3;

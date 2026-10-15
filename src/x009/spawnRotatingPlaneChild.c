@@ -8,7 +8,7 @@ typedef struct {
 extern E D_8012A878[];
 extern TObj *allocObjectLayer2(void);
 
-TObj *func_80117EC0(TObj *o, int idx)
+TObj *spawnRotatingPlaneChild(TObj *o, int idx)
 {
     TObj *p = allocObjectLayer2();
 

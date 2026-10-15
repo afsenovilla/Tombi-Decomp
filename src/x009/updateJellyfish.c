@@ -15,16 +15,16 @@ extern void AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void freeObjectLayer2(TObj *);
 extern void initJellyfish(TObj *);
-extern void func_80124E04(TObj *);
+extern void jellyfishFloat(TObj *);
 extern void jellyfishSwim(TObj *);
-extern void func_80125438(TObj *);
+extern void jellyfishSwimB(TObj *);
 extern void jellyfishSpawnChild(TObj *);
-extern void func_801260CC(TObj *);
-extern void func_801261C0(TObj *);
-extern void func_80126460(TObj *);
+extern void jellyfishChildFollow(TObj *);
+extern void jellyfishSink(TObj *);
+extern void jellyfishGrabPlayer(TObj *);
 extern void jellyfishHit(TObj *);
-extern void func_80126CE0(TObj *);
-extern void func_80127290(TObj *);
+extern void jellyfishHurtFall(TObj *);
+extern void jellyfishGrabbedB(TObj *);
 extern void jellyfishDefeated(TObj *);
 
 #define WD2(o) (*(unsigned short *)((char *)(o) + 0xd2))
@@ -50,7 +50,7 @@ void updateJellyfish(TObj *o)
             case 0:
                 if (o->b0c) goto set3;
                 ObjCullRegister(o);
-                func_80124E04(o);
+                jellyfishFloat(o);
                 break;
             case 1:
                 if (o->b0c) goto set3;
@@ -60,7 +60,7 @@ void updateJellyfish(TObj *o)
             case 2:
                 if (o->b0c) goto set3;
                 ObjCullRegister(o);
-                func_80125438(o);
+                jellyfishSwimB(o);
                 break;
             case 3:
                 if (o->b0c == 0) {
@@ -68,18 +68,18 @@ void updateJellyfish(TObj *o)
                     jellyfishSpawnChild(o);
                 } else {
                     ObjCullRegister(o);
-                    func_801260CC(o);
+                    jellyfishChildFollow(o);
                 }
                 break;
             case 4:
                 if (o->b0c) goto set3;
                 ObjCullRegister(o);
-                func_801261C0(o);
+                jellyfishSink(o);
                 break;
             case 5:
                 if (o->b0c) goto set3;
                 ObjCullRegister(o);
-                func_80126460(o);
+                jellyfishGrabPlayer(o);
                 break;
             set3:
                 o->b04 = 3;
@@ -153,12 +153,12 @@ void updateJellyfish(TObj *o)
         case 2:
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
-            func_80126CE0(o);
+            jellyfishHurtFall(o);
             break;
         case 4:
             if (o->b0c) goto set3b;
             ObjCullRegister(o);
-            func_80127290(o);
+            jellyfishGrabbedB(o);
             break;
         case 5:
             if (o->b0c) goto set3b;

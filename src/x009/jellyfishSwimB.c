@@ -31,7 +31,7 @@ extern short FUN_80040278(TObj *, short, short);
 
 #define PAR(o) (*(TObj **)&(o)->wa8)
 
-void func_80125438(TObj *o)
+void jellyfishSwimB(TObj *o)
 {
     unsigned char t;
     unsigned short af;

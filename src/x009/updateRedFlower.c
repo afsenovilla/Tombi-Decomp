@@ -15,14 +15,14 @@ extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 extern void despawnObjectOffscreen(TObj *);
-extern void func_80121A58(TObj *);
-extern void func_80121D2C(TObj *);
-extern void func_80121E5C(TObj *);
-extern void func_801220CC(TObj *);
-extern void func_801225BC(TObj *);
-extern void func_801229AC(TObj *);
-extern void func_80122F08(TObj *);
-extern void func_80123294(TObj *);
+extern void redFlowerBud(TObj *);
+extern void redFlowerLand(TObj *);
+extern void redFlowerHop(TObj *);
+extern void redFlowerTurnToPlayer(TObj *);
+extern void redFlowerWalk(TObj *);
+extern void redFlowerWalkB(TObj *);
+extern void redFlowerChase(TObj *);
+extern void redFlowerFall(TObj *);
 extern void redFlowerHit(TObj *);
 extern void redFlowerGrabbed(TObj *);
 extern void redFlowerDefeated(TObj *);
@@ -85,28 +85,28 @@ void updateRedFlower(TObj *o)
         if (o->b9e == 0) {
             switch (o->step) {
             case 0:
-                func_80121A58(o);
+                redFlowerBud(o);
                 break;
             case 1:
-                func_80121D2C(o);
+                redFlowerLand(o);
                 break;
             case 2:
-                func_80121E5C(o);
+                redFlowerHop(o);
                 goto chk;
             case 3:
-                func_801220CC(o);
+                redFlowerTurnToPlayer(o);
                 goto chk;
             case 4:
-                func_801225BC(o);
+                redFlowerWalk(o);
                 goto chk;
             case 5:
-                func_801229AC(o);
+                redFlowerWalkB(o);
                 goto chk;
             case 6:
-                func_80122F08(o);
+                redFlowerChase(o);
                 goto chk;
             case 7:
-                func_80123294(o);
+                redFlowerFall(o);
                 goto chk;
             case 8:
                 switch (o->state) {

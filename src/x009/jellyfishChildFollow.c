@@ -7,7 +7,7 @@ extern void *D_8012EEC8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 
-void func_801260CC(TObj *o)
+void jellyfishChildFollow(TObj *o)
 {
     o->h->raw = ((TObj *)o->d90)->h->raw;
     o->y.raw = ((TObj *)o->d90)->y.raw;

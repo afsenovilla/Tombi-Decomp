@@ -20,7 +20,7 @@ static __inline__ int left(TObj *o, short h, short t)
     return 0;
 }
 
-int func_80121964(TObj *o)
+int redFlowerCheckEdge(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
     int r;

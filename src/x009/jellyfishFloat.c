@@ -27,7 +27,7 @@ static __inline__ int blocked(TObj *o)
     }
 }
 
-void func_80124E04(TObj *o)
+void jellyfishFloat(TObj *o)
 {
     P a, b;
     short r;

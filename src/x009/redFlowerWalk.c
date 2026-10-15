@@ -7,8 +7,8 @@ extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void playObjectSfx(TObj *, int);
-extern void func_80121964(TObj *);
-extern void func_801224AC(TObj *);
+extern void redFlowerCheckEdge(TObj *);
+extern void redFlowerChooseState(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern void *D_8012E9F8[];
@@ -38,7 +38,7 @@ static __inline__ short ground(TObj *o)
     return 0;
 }
 
-void func_801225BC(TObj *o)
+void redFlowerWalk(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -59,7 +59,7 @@ void func_801225BC(TObj *o)
     case 1:
         applyFrameVelocityX(o);
         blocked(o);
-        func_80121964(o);
+        redFlowerCheckEdge(o);
         AnimAdvance(o);
         o->velV += 0x38;
         o->y.raw += o->velV << 8;
@@ -72,7 +72,7 @@ void func_801225BC(TObj *o)
     case 2:
         applyFrameVelocityX(o);
         blocked(o);
-        func_80121964(o);
+        redFlowerCheckEdge(o);
         AnimAdvance(o);
         o->velV += 0x38;
         if (o->velV > 0x600) {
@@ -95,14 +95,14 @@ void func_801225BC(TObj *o)
         if (AnimAdvance(o)) {
             o->state = 0;
         }
-        func_801224AC(o);
+        redFlowerChooseState(o);
         break;
     case 4:
         AnimAdvance(o);
         if (o->visible && !ground(o)) {
             applyFrameVelocityY(o);
         }
-        func_801224AC(o);
+        redFlowerChooseState(o);
         break;
     }
     if (o->timer) {

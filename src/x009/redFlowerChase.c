@@ -8,8 +8,8 @@ extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern void applyFrameVelocityY(TObj *);
-extern void func_80121964(TObj *);
-extern void func_801224AC(TObj *);
+extern void redFlowerCheckEdge(TObj *);
+extern void redFlowerChooseState(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern void playSFX(int);
@@ -36,7 +36,7 @@ static __inline__ short leave(TObj *o)
     return o->wb4 != GV2.bb1;
 }
 
-void func_80122F08(TObj *o)
+void redFlowerChase(TObj *o)
 {
     short f;
     int t;
@@ -58,7 +58,7 @@ void func_80122F08(TObj *o)
         } else {
             applyFrameVelocityY(o);
         }
-        func_80121964(o);
+        redFlowerCheckEdge(o);
         f = o->animFrame;
         ObjSetFacingToPlayer(o);
         if (f != o->animFrame) {
@@ -98,7 +98,7 @@ void func_80122F08(TObj *o)
         break;
     case 3:
         o->state = 0;
-        func_801224AC(o);
+        redFlowerChooseState(o);
         break;
     case 4:
         ObjSetFacingToPlayer(o);

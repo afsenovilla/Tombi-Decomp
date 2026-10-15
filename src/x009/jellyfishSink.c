@@ -12,7 +12,7 @@ extern short probeWallAt(TObj *, short, short, short);
 
 #define LINK(o) (*(TObj **)((char *)(o) + 0xa8))
 
-void func_801261C0(TObj *o)
+void jellyfishSink(TObj *o)
 {
     unsigned char t = o->state;
     short d;

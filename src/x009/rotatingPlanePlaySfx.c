@@ -6,7 +6,7 @@ extern void func_8011792C(TObj *);
 extern void func_80117A9C(TObj *);
 extern void func_80117BF0(TObj *);
 
-void func_801178B0(TObj *o)
+void rotatingPlanePlaySfx(TObj *o)
 {
     switch (o->step) {
     case 0:
