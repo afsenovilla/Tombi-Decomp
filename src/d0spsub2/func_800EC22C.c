@@ -1,4 +1,5 @@
 // FUNC 800ec22c 728 D0SPSUB2
+// MATCHING 800ec22c 728
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -31,10 +32,10 @@ void func_800EC22C(int n, short x, short y, int force)
     dg[1] = n % 10;
     dg[0] = n / 10 % 10;
     for (q = dg, k = 0, i = 0; i < 2; i++, q++) {
+        int cd = 0x65;
         if (i == 0 && *q == 0 && !force) continue;
         S->len = 4;
-        S->code = 0x64;
-        S->code |= 1;
+        S->code = cd;
         S->r0 = 0x80;
         S->g0 = 0x80;
         S->b0 = 0x80;

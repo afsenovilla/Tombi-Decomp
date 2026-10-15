@@ -1,4 +1,5 @@
 // FUNC 800e8078 516 O0PTSUB0
+// MATCHING 800e8078 516
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -23,18 +24,19 @@ extern unsigned long *DAT_1f8001e0;
 extern unsigned short GetClut(int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
 
-void func_800E8078(SprRec *r, int x, int y, int dfe)
+void func_800E8078(SprRec *r, int x, short y, int dfe)
 {
     SPRT *p;
     DR_MODE *m;
     SPRT *SP = (SPRT *)0x1F800000;
     while (r->x != -1) {
+        int cd = 0x65;
+        SP->len = 4;
+        SP->code = cd;
         SP->r0 = 0x80;
         SP->g0 = 0x80;
         SP->b0 = 0x80;
         SP->x0 = r->x + x;
-        SP->code = 0x65;
-        SP->len = 4;
         SP->y0 = r->y + y;
         SP->u0 = r->u;
         SP->v0 = r->v;
