@@ -98,37 +98,40 @@ for the demo need the X00 symbol mapping from `tools/xmatch.py --csv` first.
 
 ## Making the demo a second matching target
 
-**Status:** `config/jpdemo/slpm80165.yaml` and `config/jpdemo/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)
-and X00 (whole file at the estimated base 0x800E7698). `config/jpdemo/symbol_addrs_*.txt` are committed, generated
+**Status:** `config/slpm80165/slpm80165.yaml` and `config/slpm80165/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)
+and X00 (whole file at the estimated base 0x800E7698). `config/slpm80165/symbol_addrs_*.txt` are committed, generated
 by `tools/xmatch.py --csv` + `tools/jpdemo_syms.py` (PAL names at demo addresses). `python3 tools/build_report.py
---version jpdemo` writes `build/jpdemo/report.json` (one unit per demo function, no C yet, so 0 %), and the
+--version slpm80165` writes `build/slpm80165/report.json` (one unit per demo function), and the
 `report-jpdemo` CI job uploads it as `SLPM_801.65_report` for decomp.dev, from the `GAME_FILES_URL_JP_DEMO` secret.
 
 **C reuse (39.6 % of demo code, 1034 of 1832 functions):** the demo report compiles C for demo functions with the
 PAL toolchain (`tools/ncheck.py` build: same compiler, `// FLAGS`, `// CC`, `// AS gnu`, `// HEADERS` per file) and
 renames the object's function to the demo symbol, so objdiff matches it (relocations ignored; objects are not
 linked). Sources, by priority:
-- `src/jpdemo/<prog>/*.c`: demo versions of PAL functions (changed constants, struct offsets, pad bits), each with
-  a `// JPDEMO <prog> <demo addr> <size>` header and no FUNC/MATCHING marker, so PAL progress ignores them.
+- the shared `src/` tree (README, "How the versions share code"), compiled with `-DVERSION_SLPM_80165`: demo
+  versions of PAL functions (changed constants, struct offsets, pad bits) are `#if defined(VERSION_SLPM_80165)`
+  branches of the PAL file with a `// VERSION SLPM_80165 <prog> <demo addr> <size>` line (167 of them), and
+  demo-only functions are `src/<name>_slpm80165.c` files guarded the same way (119); 2 more PAL files carry an `INCLUDE_ASM_V` demo branch. They were the files of the
+  former `src/jpdemo/`, folded in by `tools/version_share.py fold slpm80165`.
   Common demo differences: d-pad bits shifted left by 8, `PlayerSetAnimIfChanged` written inline, a 20-byte item
   table instead of PAL's per-item pointers, `GetClut` inlined, object fields at +0xd0/+0xcf where PAL has
   +0xe4/+0xe3, no per-object +0x8c table, area switches cut down to the demo's areas 0-2. Small demo-only
   functions (stubs, setters, wrappers) are written from the demo code with a `// Demo-only ...` comment.
-- `config/jpdemo/reuse.txt`: demo addr -> PAL module + address, written by `tools/jpdemo_reuse.py` (exact compare
+- `config/slpm80165/reuse.txt`: demo addr -> PAL module + address, written by `tools/jpdemo_reuse.py` (exact compare
   except relocated bits; needs `game/` and a previous demo build). The PAL file is found by address through
   `tools/units.py`, so PAL renames do not break it.
 - fallback: the xmatch pairing in `symbol_addrs_*.txt` (same lookup by PAL address).
-- Scratchpad: `config/jpdemo/symbol_addrs_manual.txt` tells splat never to symbolize 0x1F800000-0x1F8003FF (and
+- Scratchpad: `config/slpm80165/symbol_addrs_manual.txt` tells splat never to symbolize 0x1F800000-0x1F8003FF (and
   the task table words at 0x801FD800), so the demo target always has literal addresses there. The C side keeps PAL
-  names: build_report assembles every PAL scratchpad symbol (`config/jpdemo/spad.txt`, from `tools/jpdemo_reuse.py
+  names: build_report assembles every PAL scratchpad symbol (`config/slpm80165/spad.txt`, from `tools/jpdemo_reuse.py
   --spad` after a PAL `build_full.py`) and any `D_1F80xxxx` named in a demo file as a `.set` constant. This also
   exposes demo functions that only matched because a different scratchpad address hid behind a relocation.
 - `tools/jpdemo_syms.py` drops tiny PAL library labels (`*_OBJ_<offset>`) that xmatch pairs with an epilogue inside
   demo game code: they cut the real function short (14 such rows).
-- `config/jpdemo/symbol_addrs_manual.txt` also names 31 X00 functions that splat merged into the previous one
+- `config/slpm80165/symbol_addrs_manual.txt` also names 31 X00 functions that splat merged into the previous one
   (`jr ra`, then a new stack frame; reached only through pointer tables).
 
-- **Plumbing (1-2 days):** add `config/jpdemo/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
+- **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
   `symbol_addrs_*` from `tools/xmatch.py --csv` (PAL names at demo addresses). Then extend `tools/build_full.py` and
   `build_report.py` with a version switch, as planned for retail JP in `docs/JP.md`.

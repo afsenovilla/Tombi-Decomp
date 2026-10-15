@@ -170,11 +170,46 @@ offsets and the function or splat range that produced them.
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | SLPS-01144 | split + reused PAL C, 52.6 % of code (objdiff), see [docs/JP.md](docs/JP.md) |
-| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split only (asm, 0 %), see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 50.5 % of code (objdiff), see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
-`<serial>_report` artifact per version. Matched C is shared; only the functions that differ get a version-specific file.
+`<serial>_report` artifact per version.
+
+### How the versions share code
+
+The repository follows the usual PS1 multi-version layout (as in sotn-decomp and psx_tomba): **one `src/` tree is
+compiled for every version**, and each version has its own splat configs, symbol tables and asm.
+
+| Version | `--version` (old alias) | Macro | splat configs / symbols | asm | report |
+|---------|------------------------|-------|-------------------------|-----|--------|
+| SCES-01331 (PAL, reference) | `sces01331` (default) | `VERSION_SCES_01331` | `config/*.yaml` | `asm/<prog>/` | `build/report.json` |
+| SLPS-01144 (Japan) | `slps01144` (`jp`) | `VERSION_SLPS_01144` | `config/slps01144/` | `asm/slps01144/<prog>/` | `build/slps01144/report.json` |
+| SLPM-80165 (Japan demo) | `slpm80165` (`jpdemo`) | `VERSION_SLPM_80165` | `config/slpm80165/` | `asm/slpm80165/<prog>/` | `build/slpm80165/report.json` |
+
+- The C keeps the PAL names. `config/<serial>/symbol_addrs_<prog>.txt` maps PAL names to that version's addresses
+  (`tools/jpdemo_syms.py`); names that only exist in a version carry the serial (`func_8011F5AC_slps01144`).
+- The build defines the version macro (`tools/ncheck.py` `EXTRA_CPP`; `tools/build_report.py --version <v>` sets it).
+  `INCLUDE_ASM_V("<prog>/nonmatchings/<prog>", name)` (`include/tomba/include_asm.h`) resolves against the asm dir
+  of the version being built.
+- A version function the PAL C matches as is just reuses the PAL file (pairing from the symbol tables and
+  `config/<serial>/reuse.txt`). A function that differs gets a branch in the PAL file, plus a
+  `// VERSION <SERIAL> <prog> <addr> <size>` header line (and optional `// FLAGS.<SERIAL>` / `// CC.<SERIAL>` lines):
+  ```c
+  // FUNC 800ef490 84 X000
+  // MATCHING 800ef490 84
+  // VERSION SLPS_01144 x00 800EF5FC 84
+  #if defined(VERSION_SLPS_01144)
+  ... Japanese C, or INCLUDE_ASM_V(...) while it is not matched ...
+  #else
+  ... PAL C ...
+  #endif
+  ```
+- Version-only functions (the demo's stubs and debug code, JP-only helpers) live in the shared tree too, next to
+  the PAL files of the same program, as `<name>_<serial>.c` whose whole body is inside `#if defined(VERSION_...)`.
+- `tools/version_share.py` writes these blocks: `fold <version> <file.c>` folds a standalone version file into the
+  shared tree, `asm <version>` adds the INCLUDE_ASM branches for the PAL files whose version counterpart is not
+  matched yet. The PAL build is unaffected (it never defines the other macros).
 
 ## Progress report (objdiff / decomp.dev)
 
@@ -209,9 +244,8 @@ config/         splat configurations for MAIN0.EXE and the X0nn.BIN overlays
 .github/        CI workflow that publishes the objdiff report
 tools/          checkers, progress report, analysis helpers, setup scripts
 game/           your own game files (ignored by git)
-game_jp/        your own Japanese disc files (ignored by git)
-config/jp/      splat configuration of the Japanese executables (planned)
-src/jp/         Japanese-only or differing functions (planned)
+game_jp/        your own Japanese disc files (ignored by git; game_jpdemo/ for the demo)
+config/slps01144/  splat configs and symbol tables of the Japanese release (config/slpm80165/: the demo)
 ```
 
 ## Tools
