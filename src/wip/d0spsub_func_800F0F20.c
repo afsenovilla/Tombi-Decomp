@@ -18,9 +18,11 @@ void func_800F0F20(Menu *m, int i, int j)
     D_8011113E = 0xE8;
     if (D_8009C960 == 0xE) D_8011114C = D_80108DDC[D_8009C962];
     else D_8011114C = D_80108F8C[i][j];
+//PERM{
     if (D_80111124 == 0xC) D_8011114C = D_80108F94->c;
     D_80111142 = 0x7B92;
     D_80111150 = D_800FFD98;
     D_80111140 = m->w10 + 1;
+//PERM}
     func_800EBCB8(5, 0);
 }
