@@ -38,7 +38,7 @@ static __inline__ void setup(TObj *q, int y, int d)
     q->d38 = d;
 }
 
-void func_8011E0D4(TObj *o)
+void updateSwingingRope(TObj *o)
 {
     short *p;
     short x;

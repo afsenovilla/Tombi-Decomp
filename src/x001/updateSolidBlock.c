@@ -4,7 +4,7 @@
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C274(TObj *o)
+void updateSolidBlock(TObj *o)
 {
     switch (o->b04) {
     case 0:

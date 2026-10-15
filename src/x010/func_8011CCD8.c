@@ -22,7 +22,7 @@ extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerSetFallLean(TObj *);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short TileCollideAt(TObj *, short, short);
-extern int func_8011E000(TObj *, TObj *, unsigned char, int);
+extern int collidePlayerWithTiltedBar(TObj *, TObj *, unsigned char, int);
 extern int probeTiltedBarObject(TObj *, TObj *);
 
 #define HEIGHT(a) y = (unsigned)(rsin(a) * (D_8009F0EC->box0 - 0x24)) >> 12
@@ -104,10 +104,10 @@ void func_8011CCD8(TObj *o)
         if (p->subtype != 3) {
             switch (p->w7a) {
             case 1:
-                func_8011E000(o, p, 2, (p->d30 + 0x400) & 0xfff);
+                collidePlayerWithTiltedBar(o, p, 2, (p->d30 + 0x400) & 0xfff);
                 break;
             case 2:
-                func_8011E000(o, p, 1, p->d30);
+                collidePlayerWithTiltedBar(o, p, 1, p->d30);
                 break;
             }
         }

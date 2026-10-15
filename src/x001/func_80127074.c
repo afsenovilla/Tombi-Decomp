@@ -37,7 +37,7 @@
    ax asm barrier / c copy orders (no change). Left: the extra c copy in the abs block (game ax = cx in a0, negu a0,a0),
    k/ax/ay regs (a1/a2/a3 vs a3/a0/a2), case 2/3 return-2 jumps to epilogue with li v0,2 in delay, fx/fy s-regs.
    Previous: */
-/* score 314 (was 496; 1536 of 1544 B). Rewritten in the style of the sibling x001 func_801278C0 wip: dx/dy unsigned
+/* score 314 (was 496; 1536 of 1544 B). Rewritten in the style of the sibling x001 collideEnemyWithTiltedBar wip: dx/dy unsigned
    short tested as (short), cx/cy int products, ax/ay/m short with `ax = cx; if (ax < 0) ax = -ax;`, quadrant base copied
    to b, p/e pinned to $17/$18 through register copies of the parameters, r short. Left: t is kept in a stack slot in the
    game (sb $6,16(sp) / lbu) and ours matches that, but abs temps and k/fx/fy regs differ (k $7, fx $23, fy $30,

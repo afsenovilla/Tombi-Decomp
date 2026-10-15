@@ -7,7 +7,7 @@ extern short func_800439F4(TObj *, TObj *);
 extern short func_80124C20(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_801250A4(TObj *a, TObj *b)
+void swingingRopePlayerCollision(TObj *a, TObj *b)
 {
     short r;
 

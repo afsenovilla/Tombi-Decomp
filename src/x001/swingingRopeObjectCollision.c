@@ -6,7 +6,7 @@
 extern unsigned short *D_8013C6A4[];
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_80125994(TObj *a, TObj *b)
+void swingingRopeObjectCollision(TObj *a, TObj *b)
 {
     short dz, n;
     unsigned short t;

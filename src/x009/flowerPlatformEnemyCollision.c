@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern short func_801215C0(TObj *, short, short, unsigned char);
 
-void func_801216A0(TObj *o, TObj *e)
+void flowerPlatformEnemyCollision(TObj *o, TObj *e)
 {
     short t;
     short u;

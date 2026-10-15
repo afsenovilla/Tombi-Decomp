@@ -3,7 +3,7 @@
 #include "gvars.h"
 extern short func_8004306C();
 
-void func_8011DEE8(void *o)
+void collapsingBridgePlayerCollision(void *o)
 {
     if (func_8004306C(o)) GVARS.b3f = 1;
 }

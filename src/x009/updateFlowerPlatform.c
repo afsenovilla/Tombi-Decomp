@@ -10,9 +10,9 @@ extern B4 D_8012B1B8[];
 extern void cullObjectToDrawList(TObj *, short);
 extern void ObjFreeDup(TObj *o);
 extern void func_801174C4(TObj *o);
-extern void func_8011AE94(TObj *o);
+extern void spawnFlowerPlatformRedFlower(TObj *o);
 
-void func_8011ACCC(TObj *o)
+void updateFlowerPlatform(TObj *o)
 {
     short d;
 
@@ -35,7 +35,7 @@ void func_8011ACCC(TObj *o)
             *(int *)&o->w5c = o->a.p.whole;
             o->d60 = o->y.p.whole;
             o->d64 = o->b.p.whole;
-            func_8011AE94(o);
+            spawnFlowerPlatformRedFlower(o);
             break;
         }
         break;

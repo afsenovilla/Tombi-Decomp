@@ -5,7 +5,7 @@ typedef struct { unsigned char b0; signed char b1, b2, b3; } T4;
 extern T4 D_8012B218[];
 extern TObj *allocObjectLayer2(void);
 
-TObj *func_8011AF18(TObj *o, int k)
+TObj *spawnRedFlowerOnPlatform(TObj *o, int k)
 {
     unsigned char s;
     TObj *n = allocObjectLayer2();

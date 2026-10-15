@@ -6,7 +6,7 @@
 extern short func_80121630(TObj *, short, short, unsigned char);
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_801208C4(TObj *o, TObj *e)
+void flowerPlatformObjectCollision(TObj *o, TObj *e)
 {
     short t;
     short u;

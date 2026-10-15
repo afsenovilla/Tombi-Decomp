@@ -5,10 +5,10 @@
 #include "TOBJ.H"
 
 extern int FUN_800202b4(TObj *);
-extern void func_8011AB70(TObj *);
+extern void collapsingBridgePlankFall(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011AD54(TObj *o)
+void updateCollapsingBridge(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -46,11 +46,11 @@ void func_8011AD54(TObj *o)
         }
         o->b69 = 0;
         if (o->w98 != 0)
-            func_8011AB70(o);
+            collapsingBridgePlankFall(o);
         if (o->subtype == 1 && o->w98 == 0 && (*(short*)((char*)&SPAD.i168 + 2)) >= 0xc81 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x27) {
             o->w98 = 1;
             o->b6b = 1;
-            func_8011AB70(o);
+            collapsingBridgePlankFall(o);
         }
         break;
     case 2:

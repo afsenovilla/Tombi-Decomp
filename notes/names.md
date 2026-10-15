@@ -665,3 +665,23 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   (b69: spin velH 0x400, bounce), pad vibration, then falls away with sfx 0x7C), `8011b270 updateHitWobbleObject` (type 0x24: `8011b0b8
   hitWobbleObjectStep` swings with a decaying oscillation after a hit (b68))
 - x010 `80118b40 updateSolidScenery` (layer 4 type 0x28, 44 placements: a culled model with a collision box per subtype (13 sizes); kind uncertain)
+- (The `*EnemyCollision` callbacks above are also the ones MAIN0 func_80049524 calls for the category 5 objects (list 1F800228) against layer 4.)
+- Rotated-bar collision helpers (one per kind of colliding object; mode 0 = one face, 1/2 = the faces of a two-sided bar, angle `ang`): x001
+  `801244a0 collidePlayerWithTiltedBar` (seesawPlankPlayerCollision), `801278c0 collideEnemyWithTiltedBar` (seesawPlankEnemyCollision), `801253ac
+  collideObjectWithTiltedBar` (seesawPlankObjectCollision; csv twin x010 8011f05c); x010 `8011e000 collidePlayerWithTiltedBar` (same source as the x001
+  one per its header note), `80121534 collideEnemyWithTiltedBar`, `8011f05c collideObjectWithTiltedBar`
+- x010 `80119a6c updateTurningPlank` (layer 4 type 0x34, 30 placements: 0xEC wide solid plank like the seesaw; when touched it turns by a quarter
+  (velH +-0x1200, d34 = d38 +- 0x40000 within the subtype limits); with GV2.bc3 & 0x40 it runs 801198F8 instead; kind uncertain) with
+  `8011e8e4 turningPlankPlayerCollision`, `80121994 turningPlankEnemyCollision`, `8011f518 turningPlankObjectCollision`; `801194e0 updateRotatingWheel`
+  (type 0x33: round solid (radius box0) that turns slowly (subtypes 0/1), section 7 sets GAME.purifiedAreas |= 0x40; uncertain) with `80120c88
+  rotatingWheelPlayerCollision` (circle test with SquareRoot0 / ratan2, pushes the player out along the radius), `80120fc0 rotatingWheelObjectCollision`,
+  `80121a40 rotatingWheelEnemyCollision`; `8011ad54 updateCollapsingBridge` (type 0x3B, 30 placements: linked planks (d90 / d94 neighbours) that, once
+  stepped on (b69), shake and drop one after the other (`8011ab70 collapsingBridgePlankFall`: falls 3 px per tick with a random tilt, then tells the
+  neighbours); the subtype 0 anchor swings down; gone once GCD.bd078 is set) with `8011dee8 collapsingBridgePlayerCollision`
+- x001 `8011c274 updateSolidBlock` (layer 4 type 0x0C: culled model with a 0x10 x 0x60 or 0x30 x 0x50 box) with `80125074 solidBlockPlayerCollision`
+  (csv twin of 80125044); `8011e0d4 updateSwingingRope` (type 0x15, 13 placements, uncertain kind: 0x18 wide, per-subtype height; swings like a pendulum
+  (wave table D_8013C714) after a hit (b68)) with `801250a4 swingingRopePlayerCollision`, `80125994 swingingRopeObjectCollision`
+- x009 `8011accc updateFlowerPlatform` (layer 4 type 0x1C, 12 placements, uncertain kind: a solid model (box per subtype D_8012B1B8, transformed by
+  801174C4 with the plane rotation) that carries red flowers: `8011ae94 spawnFlowerPlatformRedFlower` maps subtypes 1/2/5..9 to entries of D_8012B218 and
+  `8011af18 spawnRedFlowerOnPlatform` allocates the layer 2 type 0x0A (updateRedFlower) object at the entry's offset with d90 = the platform) with
+  `8012047c flowerPlatformPlayerCollision`, `801208c4 flowerPlatformObjectCollision`, `801216a0 flowerPlatformEnemyCollision`

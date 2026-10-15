@@ -4,7 +4,7 @@
 extern int SquareRoot0(int);
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_80120FC0(TObj *o, TObj *p)
+void rotatingWheelObjectCollision(TObj *o, TObj *p)
 {
     short dx, dy;
 

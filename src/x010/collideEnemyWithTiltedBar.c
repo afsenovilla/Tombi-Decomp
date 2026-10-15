@@ -7,7 +7,7 @@
 extern int FUN_80063548(int);
 extern int FUN_8006347c(int);
 
-short func_80121534(TObj *o, TObj *e, unsigned char mode, int ang)
+short collideEnemyWithTiltedBar(TObj *o, TObj *e, unsigned char mode, int ang)
 {
     short dx;
     short dy;

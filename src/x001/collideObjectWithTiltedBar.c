@@ -19,7 +19,7 @@ extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void FUN_8001f96c(int, int, int, int);
 
-int func_801253AC(TObj *a, TObj *b, unsigned char k, int ang)
+int collideObjectWithTiltedBar(TObj *a, TObj *b, unsigned char k, int ang)
 {
     short dx, dy, c, s, ac, as;
     int q, r;

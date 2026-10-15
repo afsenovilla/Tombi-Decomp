@@ -10,7 +10,7 @@ extern void func_80119648(TObj *);
 
 #define SET(a, b, c, k, v) r[0] = a; r[1] = b; o->d38 = c; o->subtype = k; o->d34 = 0; o->d30 = (o->d38 >> 8) & 0xfff; o->d8c = (v - o->d30) & 0xfff; break;
 
-void func_80119A6C(TObj *o)
+void updateTurningPlank(TObj *o)
 {
     int *r = (int *)&o->wb4;
 

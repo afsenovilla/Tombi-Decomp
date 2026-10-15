@@ -28,7 +28,7 @@ extern short func_801214D0(O *, short, short, unsigned char);
 extern short func_801215C0(O *, short, short, int);
 extern void applyCollisionTileResponse(O *);
 
-void func_8012047C(O *o, O *e)
+void flowerPlatformPlayerCollision(O *o, O *e)
 {
     unsigned short a, b, d;
     int l, r, t;

@@ -20,7 +20,7 @@ extern int rcos(int);
         o->velY = 0;     \
     }
 
-void func_80120C88(TObj *o, TObj *e)
+void rotatingWheelPlayerCollision(TObj *o, TObj *e)
 {
     short dx, dy;
     int x, y;

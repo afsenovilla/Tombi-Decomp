@@ -6,7 +6,7 @@ extern int ratan2(int, int);
 extern int rsin(int);
 extern int rcos(int);
 
-void func_80121A40(TObj *o, TObj *e)
+void rotatingWheelEnemyCollision(TObj *o, TObj *e)
 {
     unsigned short dx, dy;
     short x, y, a;

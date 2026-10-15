@@ -4,7 +4,7 @@
 
 int Rand(void);
 
-void func_8011AB70(TObj *o)
+void collapsingBridgePlankFall(TObj *o)
 {
     if (o->subtype == 0) {
         if (o->step == 0) {

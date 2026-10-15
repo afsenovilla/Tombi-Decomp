@@ -8,7 +8,7 @@ extern void cullObjectToDrawList(TObj *, int);
 extern void func_80119374(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_801194E0(TObj *o)
+void updateRotatingWheel(TObj *o)
 {
     unsigned short *p;
 

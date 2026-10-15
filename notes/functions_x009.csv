@@ -356,10 +356,10 @@ address,size,name,twin
 8011a7e0,548,func_8011A7E0,
 8011aa04,320,stepAreaSwitch,
 8011ab44,392,updateAreaMechanisms,
-8011accc,456,func_8011ACCC,
-8011ae94,116,func_8011AE94,
+8011accc,456,updateFlowerPlatform,
+8011ae94,116,spawnFlowerPlatformRedFlower,
 8011af08,16,func_8011AF08,X000:8011de74
-8011af18,260,func_8011AF18,
+8011af18,260,spawnRedFlowerOnPlatform,
 8011b01c,340,tearJarHeld,
 8011b170,448,func_8011B170,
 8011b330,120,func_8011B330,
@@ -415,8 +415,8 @@ address,size,name,twin
 80120280,140,func_80120280,
 8012030c,192,func_8012030C,
 801203cc,176,deathFruitCatchContact,
-8012047c,1096,func_8012047C,
-801208c4,360,func_801208C4,
+8012047c,1096,flowerPlatformPlayerCollision,
+801208c4,360,flowerPlatformObjectCollision,
 80120a2c,372,func_80120A2C,
 80120ba0,200,func_80120BA0,
 80120c68,716,redFlowerContact,
@@ -431,7 +431,7 @@ address,size,name,twin
 80121540,128,func_80121540,
 801215c0,112,func_801215C0,X009:801214d0
 80121630,112,func_80121630,X009:801214d0
-801216a0,240,func_801216A0,
+801216a0,240,flowerPlatformEnemyCollision,
 80121790,104,func_80121790,
 801217f8,316,func_801217F8,
 80121934,48,func_80121934,

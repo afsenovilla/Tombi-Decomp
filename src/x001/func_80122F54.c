@@ -22,7 +22,7 @@ extern int rcos(int);
 extern int probeCollisionAtDepthA(TObj *, int, int);
 extern short TileCollideAt(TObj *, int, int);
 extern void playerSetFallLean(TObj *);
-extern void func_801244A0(TObj *, TObj *, int, int);
+extern void collidePlayerWithTiltedBar(TObj *, TObj *, int, int);
 extern int func_8012767C(TObj *, TObj *);
 
 #define TR(f, x) ((f(x) << 3) >> 12)
@@ -125,10 +125,10 @@ void func_80122F54(TObj *o)
         g = DAT_8009f0ec;
         switch (g->w7a) {
         case 1:
-            func_801244A0(o, g, 2, (g->d8c + 0x400) & 0xfff);
+            collidePlayerWithTiltedBar(o, g, 2, (g->d8c + 0x400) & 0xfff);
             break;
         case 2:
-            func_801244A0(o, g, 1, g->d8c);
+            collidePlayerWithTiltedBar(o, g, 1, g->d8c);
             break;
         }
         if (o->b69 || (a = o->h->p.whole, TileCollideAt(o, (short)((o->animFrame & 1) ? a + 9 : a - 9), (short)(o->y.p.whole + 0x10)))) {

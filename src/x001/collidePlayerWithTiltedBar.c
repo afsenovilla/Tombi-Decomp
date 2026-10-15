@@ -57,7 +57,7 @@ static __inline__ short sabs(short x)
     return r;
 }
 
-int func_801244A0(TObj *a, TObj *b, unsigned char mode, int ang)
+int collidePlayerWithTiltedBar(TObj *a, TObj *b, unsigned char mode, int ang)
 {
     short dx, dy, cx, cy, ax, ay, s2, s7;
     short kind;
