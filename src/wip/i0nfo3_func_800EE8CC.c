@@ -26,12 +26,12 @@ short func_800EE8CC(void)
         }
     }
     z = &D_800EEDB0[k];
-    if ((r = z->x0 < (short)x) && (r = (short)x < z->x1) && (r = z->y0 < (short)y) && (r = (short)y < z->y1)) {
-        r = 1;
-        D_800A60B6 = (short)D_800A612A < (short)D_800A604E;
-        D_800A60B4 = (short)D_800A6126 < D_800A6078[1];
+    if (z->x0 < (short)x && (short)x < z->x1 && z->y0 < (short)y && (short)y < z->y1) {
         D_800A6126 = z->a;
         D_800A612A = z->b;
+        D_800A60B6 = (short)D_800A612A < (short)D_800A604E;
+        D_800A60B4 = (short)D_800A6126 < D_800A6078[1];
+        return 1;
     }
-    return r;
+    return 0;
 }

@@ -11,20 +11,20 @@ void func_800E88E4(PtrList *l, int *base)
 {
     short i, s, end;
     int *tbl;
-    int off;
+    register int off asm("$2");
     if (D_8009C962 == 3) {
         tbl = base + 1;
         if (D_800A60A3 != 0) {
-            switch (D_800A60A3) {
-            case 0 ... 2:
-                off = base[0x5C / 4];
-                break;
-            case 3:
-                off = base[0x60 / 4];
-                break;
-            default:
-                goto def;
-            }
+            int v = D_800A60A3;
+            if (v < 3) goto lo;
+            if (v == 3) goto hi;
+            goto def;
+        lo:
+            off = base[0x5C / 4];
+            goto set;
+        hi:
+            off = base[0x60 / 4];
+        set:
             l->n = 1;
             l->p[0] = (char *)base + off;
             return;

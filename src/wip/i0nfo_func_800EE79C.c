@@ -9,19 +9,22 @@ extern void func_80018790(TObj *o);
 extern void *D_8001219C;
 void func_800EE79C(TObj *o)
 {
-    switch (o->b04) {
+    unsigned char s = o->b04;
+    switch (s) {
     case 0: {
         int t;
+//PERM{
         o->w1e = 0x15;
         t = SPAD.i2d8;
         o->box0 = 4;
         o->box1 = 8;
         o->box2 = 8;
         o->b0d = 0;
-        S8(o, 0xF) = -0xB;
+        *(signed char *)&o->b0f = -0xB;
         o->box3 = 0x20;
         o->d3c = t;
         o->anim = D_8001219C;
+//PERM}
         func_8001FE6C(o, t);
         o->b68 = 0;
         o->b69 = 0;
@@ -35,7 +38,7 @@ void func_800EE79C(TObj *o)
         func_800EE5E4(o);
         break;
     case 2:
-        o->b04++;
+        o->b04 = s + 1;
         break;
     case 3:
         func_80018790(o);
