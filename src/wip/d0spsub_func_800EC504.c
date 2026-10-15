@@ -3,22 +3,27 @@ typedef struct { char p[0x12]; short mode; short page; short cursor; } Menu;
 extern unsigned short D_1F8001FC;
 extern void playSFX(int id);
 
-static inline int fixCursor(Menu *m)
+static inline int fixCursor(Menu *m, short c)
 {
-    if (m->cursor < 4) {
+    if (c < 4) {
         switch (m->mode) {
         case 0:
-            m->cursor += 4;
+            m->cursor = c + 4;
             return 1;
         case 1:
-            if (m->cursor >= 3) {
+            if (c >= 3) {
                 m->cursor = 2;
                 return 1;
             }
             break;
         case 2:
+            if (c > 0) {
+                m->cursor = 0;
+                return 1;
+            }
+            break;
         case 3:
-            if (m->cursor > 0) {
+            if (c > 0) {
                 m->cursor = 0;
                 return 1;
             }
@@ -30,10 +35,12 @@ static inline int fixCursor(Menu *m)
 
 int func_800EC504(Menu *m, int sound)
 {
-    if (m->cursor < 4) {
+    short c = m->cursor;
+    if (c < 4) {
         if (D_1F8001FC & 0x10) {
             if (sound) playSFX(8);
-            if (--m->cursor < 0) {
+            c = --m->cursor;
+            if (c < 0) {
                 switch (m->mode) {
                 case 0:
                     m->cursor = 6;
@@ -49,22 +56,15 @@ int func_800EC504(Menu *m, int sound)
                     break;
                 }
             } else {
-                fixCursor(m);
+                fixCursor(m, c);
             }
             return 1;
         }
         if (D_1F8001FC & 0x40) {
-            switch (m->cursor) {
-            case 0:
-            case 1:
-            case 2:
-            case 4:
-            case 5:
-            case 6:
-                m->cursor++;
-                if (fixCursor(m)) return 1;
+            if ((c >= 0 && c < 3) || (c >= 4 && c < 7)) {
+                m->cursor = c + 1;
+                if (fixCursor(m, m->cursor)) return 1;
                 if (sound) goto sfx;
-                return 1;
             }
             return 1;
         }
@@ -73,6 +73,8 @@ int func_800EC504(Menu *m, int sound)
             case 0:
                 m->cursor = 5;
                 break;
+            case 1:
+                break;
             case 2:
                 m->cursor = 4;
                 break;
@@ -80,7 +82,7 @@ int func_800EC504(Menu *m, int sound)
                 m->cursor = 6;
                 break;
             }
-            fixCursor(m);
+            fixCursor(m, m->cursor);
             if (m->mode == 1) return 0;
             goto sfx;
         }
@@ -96,13 +98,13 @@ int func_800EC504(Menu *m, int sound)
                 m->cursor = 6;
                 break;
             }
-            fixCursor(m);
+            fixCursor(m, m->cursor);
             if (m->mode == 3) return 0;
             goto sfx;
         }
         return 0;
     }
-    if (m->cursor < 8) {
+    if (c < 8) {
         if (D_1F8001FC & 0x80) {
             switch (m->cursor) {
             case 5:
