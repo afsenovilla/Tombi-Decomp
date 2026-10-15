@@ -5,7 +5,7 @@
 typedef struct { short a, b; } P2;
 extern P2 D_80125C90[];
 
-void func_8011A498(TObj *o)
+void bossRoomPlatformDescend(TObj *o)
 {
     char pad;
 

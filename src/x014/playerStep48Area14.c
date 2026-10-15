@@ -17,7 +17,7 @@ extern void SfxPlay2(int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerPlaceBittenObject(TObj *);
 
-void func_8011B47C(TObj *o)
+void playerStep48Area14(TObj *o)
 {
     TObj *q;
     volatile unsigned short *k;

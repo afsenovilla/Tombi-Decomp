@@ -4,7 +4,7 @@
 extern int func_800205D8(int, int);
 extern int FUN_800638cc(int);
 
-int func_80119A4C(TObj *o, TObj *p)
+int bossCaptureBossInReach(TObj *o, TObj *p)
 {
     unsigned char a;
     int dx, dy;

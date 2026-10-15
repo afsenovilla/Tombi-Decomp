@@ -33,7 +33,7 @@ extern void AddPrim(void *, void *);
 
 #define gte_avsz3() __asm__ volatile ("nop;nop;.word 0x4b58002d")
 
-void func_801189EC(TObj *o)
+void drawEvilPigEffectKind20(TObj *o)
 {
     int m;
     char *vb4;

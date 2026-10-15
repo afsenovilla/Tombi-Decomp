@@ -14,7 +14,7 @@ extern void FUN_800eeb5c(O *, int);
 extern void playerReleaseBittenAndClearFlags(O *);
 extern void FUN_8011c758(O *);
 extern void FUN_8011d5f4(O *);
-extern void FUN_8011b47c(O *);
+extern void playerStep48Area14(O *);
 
 void playerStep48ByArea(O *o)
 {
@@ -43,7 +43,7 @@ void playerStep48ByArea(O *o)
             FUN_8011d5f4(o);
             break;
         case 0x3d:
-            FUN_8011b47c(o);
+            playerStep48Area14(o);
             break;
         default:
             playerReleaseBittenAndClearFlags(o);

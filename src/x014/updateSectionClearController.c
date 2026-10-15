@@ -10,15 +10,15 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } PL;
 typedef void (*Fn)(TObj *);
 
 extern PL PLAYER;
-extern void func_801161D4();
+extern void sectionClearCameraFollow();
 extern void FUN_8002a4d0();
 extern char D_80116934[];
-extern void func_801168C0();
+extern void sectionClearCameraReturn();
 extern void func_8002A0FC();
 extern void updateLookScroll();
 extern void func_8002A258();
 static Fn D_8012568C[7] = {
-    (Fn)func_801161D4, (Fn)FUN_8002a4d0, (Fn)D_80116934, (Fn)func_801168C0,
+    (Fn)sectionClearCameraFollow, (Fn)FUN_8002a4d0, (Fn)D_80116934, (Fn)sectionClearCameraReturn,
     (Fn)func_8002A0FC, (Fn)updateLookScroll, (Fn)func_8002A258,
 };
 static short D_801256A8[8] = {

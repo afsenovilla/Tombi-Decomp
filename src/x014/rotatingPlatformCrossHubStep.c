@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 
-void func_801190D0(TObj *o)
+void rotatingPlatformCrossHubStep(TObj *o)
 {
     switch (o->state) {
     case 0:

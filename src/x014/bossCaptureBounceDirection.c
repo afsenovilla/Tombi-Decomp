@@ -11,7 +11,7 @@ static __inline__ int add(int a, int b)
     return a + b;
 }
 
-unsigned char func_801196A4(TObj *o, int d)
+unsigned char bossCaptureBounceDirection(TObj *o, int d)
 {
     int t;
     int r;

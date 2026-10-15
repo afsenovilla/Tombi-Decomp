@@ -15,8 +15,8 @@ extern short D_8007A5F0[], D_8007A1F0[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
-extern void func_8011A498(TObj *);
-extern void func_80119B58(TObj *);
+extern void bossRoomPlatformDescend(TObj *);
+extern void bossRoomPlatformCaptureBoss(TObj *);
 
 void updateBossRoomPlatform(TObj *o)
 {
@@ -81,7 +81,7 @@ void updateBossRoomPlatform(TObj *o)
         case 5:
             if (!o->b6a) {
                 o->d8c = (o->d8c + 1) & 0xff;
-                func_8011A498(o);
+                bossRoomPlatformDescend(o);
             }
             break;
         case 6:
@@ -113,12 +113,12 @@ void updateBossRoomPlatform(TObj *o)
             break;
         case 1:
         case 7:
-            if (!o->b6a) func_8011A498(o);
+            if (!o->b6a) bossRoomPlatformDescend(o);
             break;
         default:
             return;
         }
-        func_80119B58(o);
+        bossRoomPlatformCaptureBoss(o);
         break;
     case 2:
         break;

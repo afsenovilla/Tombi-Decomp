@@ -6,7 +6,7 @@ extern int FUN_800202b4(TObj *);
 
 #define E(i) (((E8 *)&o->wb4)[i])
 
-void func_80117D94(TObj *o)
+void evilPigEffectSubtype1Step(TObj *o)
 {
     E8 *p0 = &E(0);
     E8 *p1 = &E(1);

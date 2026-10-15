@@ -10,7 +10,7 @@ typedef struct {
     unsigned char b164, b165, b166;
 } G;
 extern int LoadImage(RECT *, void *);
-extern void func_80116900(short, short);
+extern void loadEvilPigRoomClutRow(short, short);
 extern unsigned short D_80125978[];
 extern unsigned short D_80125B64[];
 extern char D_80125984[], D_80125A24[], D_80125AC4[];
@@ -47,7 +47,7 @@ static char D_80125898[224] = {
     -0x31, 0x35, -0x30, 0x3d, -0xf, 0x3d, 0x31, 0x42, 0x54, 0x4e, 0x75, 0x52, -0x49, 0x5a, -7, 0x66,
 };
 
-void func_80116A10(G *g, char *s)
+void animateEvilPigRoomPalettes(G *g, char *s)
 {
     RECT r;
     int *q = (int *)(s + 4);
@@ -56,10 +56,10 @@ void func_80116A10(G *g, char *s)
 
     if (GAME.selectedSection == 6) {
         if (g->b164 == 0) {
-            func_80116900(0, 0);
-            func_80116900(1, 0);
-            func_80116900(2, 0);
-            func_80116900(3, 0);
+            loadEvilPigRoomClutRow(0, 0);
+            loadEvilPigRoomClutRow(1, 0);
+            loadEvilPigRoomClutRow(2, 0);
+            loadEvilPigRoomClutRow(3, 0);
             g->b165 = 0x3c;
             g->b164++;
         }

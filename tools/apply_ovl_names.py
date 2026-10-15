@@ -53,7 +53,7 @@ for o, lst in sorted(by_ovl.items()):
             if '"%s"' % ko in labels:
                 labels = labels.replace('"%s"' % ko, '"%s"' % kn); labels_changed = True
     open(csvp, "w").write("\n".join(lines) + "\n")
-    for f in glob.glob(os.path.join(d, "*.c")):
+    for f in glob.glob(os.path.join(d, "*.[ch]")) + glob.glob(os.path.join(ROOT, "src", "data", "x%03d" % o, "*.[ch]")):
         t = open(f, errors="surrogateescape").read(); u = t
         for rx, n in subs: u = rx.sub(n, u)
         if u != t: open(f, "w", errors="surrogateescape").write(u)

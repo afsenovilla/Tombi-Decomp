@@ -6,7 +6,7 @@
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
 
-void func_80118544(TObj *o)
+void evilPigEffectSubtype6Step(TObj *o)
 {
     const short a[4] = { -90, 0, 90, 180 };
     const short b[8] = { 0, 45, 90, 135, 180, 225, 270, 315 };

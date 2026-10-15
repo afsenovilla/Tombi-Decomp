@@ -77,7 +77,7 @@ extern void playerStepWaterJumpOut(TObj *);
 extern void playerStepSwimSpin(TObj *);
 extern void playerStepSuperJump(TObj *);
 extern void FUN_8011beac(TObj *);
-extern void FUN_8011b170(TObj *);
+extern void playerStepVortexLaunch(TObj *);
 extern void playerStep48ByArea(TObj *);
 extern void objCollideSideWalls(TObj *);
 extern void playerHandleHazardContact(TObj *, int);
@@ -416,7 +416,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_8011beac(o);
         break;
     case 0x47:
-        FUN_8011b170(o);
+        playerStepVortexLaunch(o);
         break;
     case 0x48:
         playerStep48ByArea(o);

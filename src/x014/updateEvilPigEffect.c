@@ -5,11 +5,11 @@
 
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
-extern void func_80117AA8(TObj *);
-extern void func_80117D94(TObj *);
-extern void func_80118048(TObj *);
-extern void func_80118390(TObj *);
-extern void func_80118544(TObj *);
+extern void evilPigEffectSubtype0Step(TObj *);
+extern void evilPigEffectSubtype1Step(TObj *);
+extern void evilPigEffectSubtype2Step(TObj *);
+extern void evilPigEffectSubtype4Step(TObj *);
+extern void evilPigEffectSubtype6Step(TObj *);
 
 void updateEvilPigEffect(TObj *o)
 {
@@ -23,13 +23,13 @@ void updateEvilPigEffect(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            func_80117AA8(o);
+            evilPigEffectSubtype0Step(o);
             break;
         case 1:
-            func_80117D94(o);
+            evilPigEffectSubtype1Step(o);
             break;
         case 2:
-            func_80118048(o);
+            evilPigEffectSubtype2Step(o);
             break;
         case 3:
             if (--o->timer == -1) {
@@ -50,7 +50,7 @@ void updateEvilPigEffect(TObj *o)
             }
             break;
         case 4:
-            func_80118390(o);
+            evilPigEffectSubtype4Step(o);
             break;
         case 5:
             switch (o->step) {
@@ -77,7 +77,7 @@ void updateEvilPigEffect(TObj *o)
             }
             break;
         case 6:
-            func_80118544(o);
+            evilPigEffectSubtype6Step(o);
             break;
         }
         break;

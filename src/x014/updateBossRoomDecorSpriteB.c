@@ -8,7 +8,7 @@ extern int AnimAdvance(TObj *);
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_801177C4(TObj *o)
+void updateBossRoomDecorSpriteB(TObj *o)
 {
     unsigned char b = o->b04;
 

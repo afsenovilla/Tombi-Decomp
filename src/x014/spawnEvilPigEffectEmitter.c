@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
 
-void func_80118314(short x, short y, short z)
+void spawnEvilPigEffectEmitter(short x, short y, short z)
 {
     TObj *n = ObjAlloc();
     if (n != 0) {

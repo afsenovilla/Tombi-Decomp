@@ -9,7 +9,7 @@ typedef struct { short x, y, w4, w6; } PT;
 extern PT D_801265D4[], D_80126654[];
 extern int Rand(void);
 extern TObj *FUN_80018448(void);
-extern void func_80118314(int, int, int);
+extern void spawnEvilPigEffectEmitter(int, int, int);
 extern void playSFX(int);
 
 void func_8012284C(TObj *o)
@@ -74,7 +74,7 @@ loop:
             e->b.raw = 0;
         }
     }
-    func_80118314(p->x, p->y, 0);
+    spawnEvilPigEffectEmitter(p->x, p->y, 0);
     if (GAME.selectedSection == 7) playSFX(0xf5);
     else playSFX(0xe9);
 }

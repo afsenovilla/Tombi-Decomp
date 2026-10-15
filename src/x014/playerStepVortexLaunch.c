@@ -23,7 +23,7 @@ extern void applyAnimVelocityX(TObj *, int);
 extern int FUN_8003facc(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
 
-void func_8011B170(TObj *o)
+void playerStepVortexLaunch(TObj *o)
 {
     switch (o->state) {
     case 0:

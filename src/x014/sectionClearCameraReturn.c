@@ -6,7 +6,7 @@ extern void FUN_80028548(TObj *);
 extern void cameraFollowTargetY(TObj *);
 extern void cameraFollowTargetYB(TObj *);
 
-void func_801168C0(TObj *o)
+void sectionClearCameraReturn(TObj *o)
 {
     stepScrollReturnY(o);
     FUN_80028548(o);

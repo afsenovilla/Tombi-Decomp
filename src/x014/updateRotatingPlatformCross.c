@@ -12,8 +12,8 @@ extern signed char D_80125C38[][2];
 extern TObj *allocObjectLayer4(void);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
-extern void func_801190D0(TObj *);
-extern void func_8011920C(TObj *);
+extern void rotatingPlatformCrossHubStep(TObj *);
+extern void rotatingPlatformCrossArmStep(TObj *);
 extern void getBaseMatrix(MATRIX *);
 extern void RotMatrix(SVECTOR *, MATRIX *);
 extern void RotMatrixX(int, MATRIX *);
@@ -66,14 +66,14 @@ void updateRotatingPlatformCross(TObj *o)
     case 1:
         ObjCullRegister(o);
         if (o->subtype == 0) {
-            func_801190D0(o);
+            rotatingPlatformCrossHubStep(o);
             getBaseMatrix(M(o));
             sv.vx = o->d84;
             sv.vy = o->d88;
             sv.vz = o->d8c;
             RotMatrix(&sv, M(o));
         } else {
-            func_8011920C(o);
+            rotatingPlatformCrossArmStep(o);
             p = (TObj *)o->d90;
             getBaseMatrix(&D_1F800000);
             RotMatrixX(o->d84, &D_1F800000);

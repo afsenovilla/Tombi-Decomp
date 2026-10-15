@@ -7,8 +7,8 @@ extern unsigned short D_1F8001F8;
 extern TObj *ObjAlloc(void);
 extern int func_800202B4(TObj *);
 extern void playSFX(int);
-extern void func_80118314(int, int, int);
-extern void func_80116900(int, int);
+extern void spawnEvilPigEffectEmitter(int, int, int);
+extern void loadEvilPigRoomClutRow(int, int);
 
 void func_80122AAC(TObj *o)
 {
@@ -51,7 +51,7 @@ void func_80122AAC(TObj *o)
                         n->b.raw = o->b.raw;
                     }
                 }
-                func_80118314(o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnEvilPigEffectEmitter(o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 if (GAME.selectedSection == 7) playSFX(0xf6);
                 else playSFX(0xea);
             }
@@ -73,13 +73,13 @@ void func_80122AAC(TObj *o)
             o->subtype = 1;
             o->visible = 1;
             o->da0 = 0;
-            if (D_1F8001F8 & 1) func_80116900(o->wac, 0);
-            else func_80116900(o->wac, 1);
+            if (D_1F8001F8 & 1) loadEvilPigRoomClutRow(o->wac, 0);
+            else loadEvilPigRoomClutRow(o->wac, 1);
             if (--o->timer == 0) o->state++;
             break;
         case 5:
             o->visible = 0;
-            if (GAME.selectedSection != 7) func_80116900(o->wac, 0);
+            if (GAME.selectedSection != 7) loadEvilPigRoomClutRow(o->wac, 0);
             o->active = 2;
             o->step = 0;
             o->b04++;

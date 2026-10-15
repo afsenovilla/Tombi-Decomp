@@ -6,7 +6,7 @@ extern int Rand(void);
 
 #define S16(o, off) (*(short *)((char *)(o) + (off)))
 
-void func_801178CC(TObj *o, short dx, short dy, short dz)
+void spawnBossCaptureEffectRing(TObj *o, short dx, short dy, short dz)
 {
     short t[6] = { -0xc8, -0xb4, -0xbe, -0xc8, -0xb4, -0xbe };
     TObj *n;

@@ -7,7 +7,7 @@ extern short D_8007A5F0[];
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
-int func_80119914(TObj *o, TObj *t)
+int bossCapturePullBoss(TObj *o, TObj *t)
 {
     int dx, dy, a, b;
 

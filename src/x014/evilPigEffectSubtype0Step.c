@@ -7,7 +7,7 @@ extern int ObjCullRegister(TObj *);
 
 #define I32(p, off) (*(int *)((char *)(p) + (off)))
 
-void func_80117AA8(TObj *o)
+void evilPigEffectSubtype0Step(TObj *o)
 {
     TObj *p = (TObj *)o->d90;
     SB *s, *t;

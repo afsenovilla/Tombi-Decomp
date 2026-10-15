@@ -11,7 +11,7 @@ extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
-extern void func_8011709C(TObj *, int);
+extern void spawnRisingEffect(TObj *, int);
 extern int FUN_8001f9e0(void);
 extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void freeObjectLayer2(TObj *);
@@ -66,7 +66,7 @@ void updateTrickVillagePigShotB(TObj *o)
             o->velH = 0x80;
             o->velX = 8;
             o->step++;
-            if (GAME.selectedSection != 7) func_8011709C(o, 1);
+            if (GAME.selectedSection != 7) spawnRisingEffect(o, 1);
             o->timer = 6;
             break;
         case 1:
@@ -75,7 +75,7 @@ void updateTrickVillagePigShotB(TObj *o)
                 r = FUN_8001f9e0() & 3;
                 k = r;
                 if (r == 0) k = 2;
-                if (GAME.selectedSection != 7) func_8011709C(o, k);
+                if (GAME.selectedSection != 7) spawnRisingEffect(o, k);
             }
             a = o->d8c;
             v = o->velH;
@@ -100,7 +100,7 @@ void updateTrickVillagePigShotB(TObj *o)
         AnimAdvance(o);
         break;
     case 2:
-        func_8011709C(o, 0);
+        spawnRisingEffect(o, 0);
         o->b04++;
         ObjCullRegister(o);
         break;

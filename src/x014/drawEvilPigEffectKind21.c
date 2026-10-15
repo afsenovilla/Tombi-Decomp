@@ -30,7 +30,7 @@ extern void AddPrim(void *, void *);
 #define gte_stotz(r0) __asm__ volatile ("swc2 $7, 0( %0 )" : : "r"(r0) : "memory")
 #define gte_stsxy(r0) __asm__ volatile ("swc2 $14, 0( %0 )" : : "r"(r0) : "memory")
 
-void func_80118DDC(TObj *o)
+void drawEvilPigEffectKind21(TObj *o)
 {
     int m;
     char *vb4;

@@ -1208,3 +1208,22 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x010 player: `8011ca00 turningPlankSwingPivot` (playerSwingUpdatePivot type 0x34), `8011ccd8 playerStepRideTurningPlank` (playerStep2EByArea area
   10), `8011beac playerStepClingRotating` (step 0x46, like x001's step 0x22; `8011bd5c playerClingJumpRelease`); `8012e9e0 updateWaterCurrent`
   (GVARS.s44/s46 push, level by section / GAME.purifiedAreas & 0x40; uncertain)
+- x014 section controller / room code: `801161d4 sectionClearCameraFollow` / `801168c0 sectionClearCameraReturn` (camera sub-handlers of the
+  updateSectionClearController table D_8012568C; uncertain roles), `80116a10 animateEvilPigRoomPalettes` (area 14 entry of the MAIN0 per-area script
+  op table data_80079B3C: section 6 flashes the CLUT rows at 0x120,0x1E0 by the D_80125978 timings, section 3 cycles 0x130,0x1F0 (lava glow, uncertain)),
+  `80116900 loadEvilPigRoomClutRow` (LoadImage of one 16-colour row at 0x130,0x1E0+n), `8011709c spawnRisingEffect` (layer 3 type 0x23 ->
+  updateRisingEffect), `801172dc updateHauntedMansionPigShotTrail` (layer 3 type 0x25, spawned by the haunted mansion shot: slides 0x28 ticks; uncertain),
+  `80117710 updateBossRoomDecorSprite` (layer 3 type 0x51) / `801177c4 updateBossRoomDecorSpriteB` (type 0x52, anim per subtype) (uncertain kinds)
+- x014 evil pig effect (type 0x61, updateEvilPigEffect) per subtype: `80117aa8 evilPigEffectSubtype0Step` (follows the parent d90),
+  `80117d94 evilPigEffectSubtype1Step`, `80118048 evilPigEffectSubtype2Step`, `80118390 evilPigEffectSubtype4Step`, `80118544 evilPigEffectSubtype6Step`
+  (falls from the clear effect); `80118314 spawnEvilPigEffectEmitter` (subtype 3, emits subtype 4), `801178cc spawnBossCaptureEffectRing` (12 subtype 0
+  objects around the capturing platform); MAIN0 drawCategory3Objects render kinds 20 / 21: `801189ec drawEvilPigEffectKind20` (triangles, rtpt),
+  `80118ddc drawEvilPigEffectKind21` (quads)
+- x014 boss room platform (updateBossRoomPlatform): `80119b58 bossRoomPlatformCaptureBoss` (once the defeated boss GVARS.p48 is in front and in reach
+  (`80119a4c bossCaptureBossInReach`) it pulls it in (`80119914 bossCapturePullBoss`), spins bouncing off the screen edges (`801196a4
+  bossCaptureBounceDirection`, sfx 7), flies to the room centre, sets the GV2.bc3 bit of the section and the clear event; the platform may be the
+  evil pig bag, uncertain), `8011a498 bossRoomPlatformDescend` (sections 1/5/7: moves down to the D_80125C90 height; uncertain);
+  updateRotatingPlatformCross steps `801190d0 rotatingPlatformCrossHubStep` (stores itself in GVARS.p54, spins and reverses), `8011920c
+  rotatingPlatformCrossArmStep` (arms tilt d84 0 <-> 0x800 when the hub stops)
+- x014 player steps: `8011b170 playerStepVortexLaunch` (playerNormalModeDispatch step 0x47: thrown up, pushed by GVARS.s44/s46 until landing;
+  uncertain), `8011b47c playerStep48Area14` (playerStep48ByArea area 14 handler)

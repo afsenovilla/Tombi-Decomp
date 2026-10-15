@@ -6,7 +6,7 @@ extern void *D_8012A018;
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80117710(TObj *o)
+void updateBossRoomDecorSprite(TObj *o)
 {
     unsigned char b = o->b04;
 

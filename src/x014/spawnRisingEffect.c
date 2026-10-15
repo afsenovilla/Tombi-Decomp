@@ -5,7 +5,7 @@
 extern TObj *ObjAlloc(void);
 
 /* implicit int return (no value): keeps v0 live at the exit, so the delay slot stays empty */
-int func_8011709C(TObj *o, unsigned char n)
+int spawnRisingEffect(TObj *o, unsigned char n)
 {
     TObj *e = ObjAlloc();
     if (e) {

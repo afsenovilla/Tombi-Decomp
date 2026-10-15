@@ -9,7 +9,7 @@ extern int AnimAdvance(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_801172DC(TObj *o)
+void updateHauntedMansionPigShotTrail(TObj *o)
 {
     switch (o->b04) {
     case 0:

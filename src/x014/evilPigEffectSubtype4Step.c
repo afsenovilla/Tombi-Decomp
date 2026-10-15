@@ -4,7 +4,7 @@
 extern int FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);
 
-void func_80118390(TObj *o)
+void evilPigEffectSubtype4Step(TObj *o)
 {
     switch (o->step) {
     case 0:

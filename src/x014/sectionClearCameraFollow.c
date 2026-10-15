@@ -18,7 +18,7 @@ extern void cameraScrollInputStep(TObj *, int);
 extern void FUN_800274e4(TObj *);
 extern void cameraClampAroundTarget(TObj *);
 
-void func_801161D4(TObj *o)
+void sectionClearCameraFollow(TObj *o)
 {
     TObj *p = &PLAYER;
     int t;

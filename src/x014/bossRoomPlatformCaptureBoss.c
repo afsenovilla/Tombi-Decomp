@@ -19,10 +19,10 @@ extern unsigned char D_800A4555;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
 extern short D_8007A1F0[], D_8007A5F0[];
 extern int D_1F800190;
-extern int func_80119A4C(TObj *, S8 *);
-extern int func_80119914(TObj *, S8 *);
-extern int func_801196A4(TObj *, unsigned char);
-extern void func_801178CC(TObj *, int, int, int);
+extern int bossCaptureBossInReach(TObj *, S8 *);
+extern int bossCapturePullBoss(TObj *, S8 *);
+extern int bossCaptureBounceDirection(TObj *, unsigned char);
+extern void spawnBossCaptureEffectRing(TObj *, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -58,7 +58,7 @@ static __inline__ void setAnim(TObj *p, void *a)
     o->h->raw += o->velX << 8;                                      \
     o->y.raw += o->velY << 8;
 
-#define ROT(o) o->wb0 = (unsigned char)func_801196A4(o, (unsigned short)o->wb0 >> 4) << 4
+#define ROT(o) o->wb0 = (unsigned char)bossCaptureBounceDirection(o, (unsigned short)o->wb0 >> 4) << 4
 
 #define MSG(o)                      \
     if (D_800A60D6) {               \
@@ -68,7 +68,7 @@ static __inline__ void setAnim(TObj *p, void *a)
         PLAYER.obj.state = 0;             \
     }
 
-void func_80119B58(TObj *o)
+void bossRoomPlatformCaptureBoss(TObj *o)
 {
     S8 *s = (*(S8 **)&GVARS.p48);
     int v;
@@ -76,7 +76,7 @@ void func_80119B58(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (!func_80119A4C(o, s)) break;
+        if (!bossCaptureBossInReach(o, s)) break;
         FUN_8001e4f0(D_80125C40[D_8009C962[0]]);
         o->velH = 0x500;
         o->state++;
@@ -89,7 +89,7 @@ void func_80119B58(TObj *o)
         break;
     case 1:
         turn(o, *(unsigned char *)&o->d38);
-        if (!func_80119914(o, s)) break;
+        if (!bossCapturePullBoss(o, s)) break;
         o->b0b = 1;
         o->b0f = 4;
         o->state++;
@@ -181,7 +181,7 @@ void func_80119B58(TObj *o)
             o->ba6 = 0;
             o->ba7 = 1;
             o->state++;
-            func_801178CC(o, 0, 0, 0);
+            spawnBossCaptureEffectRing(o, 0, 0, 0);
         }
         D_1F800190 = o->y.raw;
         SPAD.i18c = o->h->raw;

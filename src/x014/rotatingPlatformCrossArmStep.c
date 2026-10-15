@@ -4,7 +4,7 @@
 
 extern short D_80125C30[];
 
-void func_8011920C(TObj *o)
+void rotatingPlatformCrossArmStep(TObj *o)
 {
     TObj *p;
 
