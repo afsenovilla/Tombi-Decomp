@@ -21,7 +21,6 @@ int func_800E9308(void)
     Menu *m = &D_800A45D8;
     Card *c;
     int i;
-    short *q;
     switch (D_800A45D9) {
     case 0:
         m->card = 0;
