@@ -18,14 +18,16 @@ extern unsigned char D_8009D2B0;
 void func_800EAC60(TObj *o)
 {
     TObj *n;
+    P330 *p;
     switch (o->state) {
     case 0:
         o->active = 4;
         func_8002171C(o);
         S8(o, 0xF) = -0xC;
         o->d8c = 0;
-        D_8009C330->b8 = 0;
-        S16(D_8009C330, 0x20) = 0;
+        p = D_8009C330;
+        p->b8 = 0;
+        p->w20 = 0;
         D_8009C330->w2e = 0xFFFF;
         D_8009C330->w28 = 0xFFFF;
         D_8009C330->w2a = 0xFFFF;
@@ -78,7 +80,7 @@ void func_800EAC60(TObj *o)
         break;
     case 2:
         o->active = 1;
-        o->b0f = -8;
+        S8(o, 0xF) = -8;
         o->velX = 0;
         o->velY = 0;
         o->b04 = 1;
