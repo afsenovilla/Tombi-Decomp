@@ -1,14 +1,16 @@
 // FUNC 800e9308 1408 D0SPSUB2
+// MATCHING 800e9308 1408
 typedef struct { unsigned char state, sub, b2, b3; short timer; short x6; char p8[0x10]; short card; short x1A; short x1C; } Menu;
 typedef struct { char p0[0x140]; short status, prev, p144, type; char p148[0x12]; } Card;
 extern Menu D_800A45D8;
 extern unsigned char D_800A45D9;
 extern Card D_800F7200[];
 extern short D_800F713C[];
-extern int D_800F714C, D_800F7150, D_800F7154, D_800F7158;
+extern int D_800F714C[2];
+extern int D_800F7154, D_800F7158;
 extern short D_800F70F0, D_800F70F4, D_800F70F8;
 extern unsigned short D_1F8001FC;
-extern short func_800EC77C(Card *c, int n);
+extern int func_800EC77C(Card *c, int n);
 extern int func_800E82A4(Menu *m, Card *c);
 extern int func_800E90D4(Menu *m, Card *c);
 extern void playSFX(int id);
@@ -19,16 +21,16 @@ int func_800E9308(void)
     Menu *m = &D_800A45D8;
     Card *c;
     int i;
-    int *pp;
     short *q;
     switch (D_800A45D9) {
     case 0:
         m->card = 0;
-        for (i = 0, c = D_800F7200, q = D_800F713C; i < 2; i++, c++, q++) {
+        for (i = 0; i < 2; i++) {
+            c = &D_800F7200[i];
             c->type = 0;
             c->status = -3;
             c->prev = -3;
-            *q = 0;
+            D_800F713C[i] = 0;
         }
         D_800F7154 = 0;
         D_800F7158 = 0;
@@ -40,25 +42,24 @@ int func_800E9308(void)
         break;
     case 1:
         if (--m->timer == 0) {
-            pp = &D_800F7150;
             D_800F7158 = 1;
             m->timer = 0x1E;
             for (i = 1; i >= 0; i--) {
                 c = &D_800F7200[i];
-                if ((c->status = func_800EC77C(c, i)) != c->prev) {
+                c->status = func_800EC77C(c, i);
+                if (c->status != c->prev) {
                     c->prev = c->status;
                     if (c->type == 1 || c->type == -1) {
-                        *pp = 1;
+                        D_800F714C[i] = 1;
                         D_800F7154 = i + 1;
                     } else {
-                        *pp = 0;
+                        D_800F714C[i] = 0;
                     }
                 }
-                pp--;
             }
         }
-        if (D_800F714C) {
-            if (D_800F7150) {
+        if (D_800F714C[0]) {
+            if (D_800F714C[1]) {
                 if ((D_1F8001FC & 0x80) && D_800F7154 == 2) {
                     D_800F7154 = 1;
                     playSFX(8);
@@ -69,7 +70,7 @@ int func_800E9308(void)
             } else {
                 D_800F7154 = 1;
             }
-        } else if (D_800F7150) {
+        } else if (D_800F714C[1]) {
             D_800F7154 = 2;
         } else {
             D_800F7154 = 0;
@@ -92,7 +93,8 @@ int func_800E9308(void)
         c = &D_800F7200[m->card];
         if (--m->timer == 0) {
             m->timer = 0x5A;
-            if ((c->status = func_800EC77C(c, m->card)) != c->prev) {
+            c->status = func_800EC77C(c, m->card);
+            if (c->status != c->prev) {
                 c->prev = c->status;
                 m->b2 = 0;
             }
