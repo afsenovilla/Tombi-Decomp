@@ -1,15 +1,16 @@
-// FUNC 800e8a98 712 I0NFO
+// FUNC 800e940c 712 I0NFO3
+// MATCHING 800e940c 712
 #include "TOBJ.H"
 extern void func_8001FE6C(TObj *o);
 extern void *D_800106B4, *D_800106B8, *D_800106BC, *D_800106C0, *D_800106C4, *D_800106C8, *D_800106CC, *D_800106D0;
 extern void *D_800106D4, *D_800106D8, *D_800106DC, *D_800106E0, *D_800106E4, *D_800106E8, *D_800106EC;
 
-void func_800E8A98(TObj *o, short mode, int dir)
+void func_800E940C(TObj *o, short mode, int dir)
 {
-    int d = dir;
+    char d = dir;
     switch (mode) {
     case 0:
-        switch (dir & 7) {
+        switch (dir &= 7) {
         case 0: o->anim = D_800106BC; break;
         case 1: o->anim = D_800106B8; break;
         case 2: o->anim = D_800106B4; break;
@@ -20,7 +21,7 @@ void func_800E8A98(TObj *o, short mode, int dir)
         }
         break;
     case 1:
-        switch (dir & 7) {
+        switch (dir &= 7) {
         case 0: o->anim = D_800106D0; break;
         case 1: o->anim = D_800106CC; break;
         case 2: o->anim = D_800106C8; break;
@@ -32,7 +33,7 @@ void func_800E8A98(TObj *o, short mode, int dir)
         }
         break;
     case 2:
-        switch (dir & 7) {
+        switch (dir &= 7) {
         case 0: o->anim = D_800106E4; break;
         case 1: o->anim = D_800106E0; break;
         case 2: o->anim = D_800106DC; break;
