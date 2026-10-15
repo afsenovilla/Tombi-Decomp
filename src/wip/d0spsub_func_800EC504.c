@@ -35,8 +35,8 @@ static inline int fixCursor(Menu *m, short c)
 
 int func_800EC504(Menu *m, int sound)
 {
-    short c = m->cursor;
-    if (c < 4) {
+    short c;
+    if (m->cursor < 4) {
         if (D_1F8001FC & 0x10) {
             if (sound) playSFX(8);
             c = --m->cursor;
@@ -61,6 +61,7 @@ int func_800EC504(Menu *m, int sound)
             return 1;
         }
         if (D_1F8001FC & 0x40) {
+            c = m->cursor;
             if ((c >= 0 && c < 3) || (c >= 4 && c < 7)) {
                 m->cursor = c + 1;
                 if (fixCursor(m, m->cursor)) return 1;
@@ -84,7 +85,8 @@ int func_800EC504(Menu *m, int sound)
             }
             fixCursor(m, m->cursor);
             if (m->mode == 1) return 0;
-            goto sfx;
+            playSFX(8);
+            return 1;
         }
         if (D_1F8001FC & 0x20) {
             switch (m->mode) {
@@ -100,41 +102,37 @@ int func_800EC504(Menu *m, int sound)
             }
             fixCursor(m, m->cursor);
             if (m->mode == 3) return 0;
-            goto sfx;
+            playSFX(8);
+            return 1;
         }
         return 0;
     }
+    c = m->cursor;
     if (c < 8) {
+        short v;
         if (D_1F8001FC & 0x80) {
-            switch (m->cursor) {
-            case 5:
-            case 6:
-            case 7:
-                m->cursor--;
-                goto moved;
+            if (c >= 5 && c < 8) {
+                v = c - 1;
+                goto set;
             }
             return 1;
         }
         if (D_1F8001FC & 0x20) {
-            switch (m->cursor) {
-            case 4:
-            case 5:
-            case 6:
-                m->cursor++;
-                goto moved;
+            if (c >= 4 && c < 7) {
+                v = c + 1;
+                goto set;
             }
             return 1;
         }
         if (D_1F8001FC & 0x10) {
-            m->cursor = 8;
-        moved:
+            v = 8;
+        set:
+            m->cursor = v;
             if (sound) goto sfx;
             return 1;
         }
         if (D_1F8001FC & 0x40) {
-            switch (m->mode) {
-            case 1:
-            case 2:
+            if ((unsigned short)(m->mode - 1) < 2) {
                 m->cursor = 0;
                 if (sound) goto sfx;
                 return 1;
