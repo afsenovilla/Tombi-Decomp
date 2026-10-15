@@ -1,4 +1,5 @@
 // FUNC 800eb044 832 I0NFO
+// MATCHING 800eb044 832
 #include "TOBJ.H"
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -40,16 +41,15 @@ void func_800EB044(TObj *o)
         i = 0;
         do {
             p = (SPRT *)D_1F800164;
-            ((P_TAG *)p)->len = 4;
+            *((u8 *)p + 3) = 4;
             p->code = 0x65;
             e = &D_800EE8D0[i];
             p->x0 = e->x + x;
             p->y0 = e->y + y;
             p->u0 = e->u;
             p->v0 = e->v;
-            dm = (DR_MODE *)(*(char * volatile *)&D_1F800164 + 0x14);
+            dm = (DR_MODE *)(D_1F800164 += 0x14);
             p->w = e->w;
-            D_1F800164 = (char *)dm;
             p->h = e->h;
             switch (i) {
             case 0:
