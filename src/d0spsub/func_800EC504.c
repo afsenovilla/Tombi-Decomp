@@ -1,4 +1,5 @@
 // FUNC 800ec504 1316 D0SPSUB
+// MATCHING 800ec504 1316
 typedef struct { char p[0x12]; short mode; short page; short cursor; } Menu;
 extern unsigned short D_1F8001FC;
 extern void playSFX(int id);
@@ -35,7 +36,7 @@ static inline int fixCursor(Menu *m, short c)
 
 int func_800EC504(Menu *m, int sound)
 {
-    short c;
+    short c = m->cursor;
     if (m->cursor < 4) {
         if (D_1F8001FC & 0x10) {
             if (sound) playSFX(8);
@@ -61,11 +62,11 @@ int func_800EC504(Menu *m, int sound)
             return 1;
         }
         if (D_1F8001FC & 0x40) {
-            c = m->cursor;
             if ((c >= 0 && c < 3) || (c >= 4 && c < 7)) {
                 m->cursor = c + 1;
                 if (fixCursor(m, m->cursor)) return 1;
-                if (sound) goto sfx;
+                if (sound == 0) return 1;
+                playSFX(8);
             }
             return 1;
         }
@@ -107,7 +108,6 @@ int func_800EC504(Menu *m, int sound)
         }
         return 0;
     }
-    c = m->cursor;
     if (c < 8) {
         short v;
         if (D_1F8001FC & 0x80) {
