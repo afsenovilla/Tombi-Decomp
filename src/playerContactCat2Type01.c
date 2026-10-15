@@ -3,7 +3,7 @@
 extern short boxesOverlap(void);
 extern int *DAT_8009c330;
 
-void FUN_80125f30(unsigned char *o, unsigned char *p)
+void playerContactCat2Type01(unsigned char *o, unsigned char *p)
 {
     unsigned short u;
 

@@ -2,7 +2,7 @@
 // MATCHING 80124fd4 32
 extern void pushObjectOutOfObjectBoxC(void);
 
-void FUN_80124fd4(void)
+void playerContactCat4Type0A(void)
 {
     pushObjectOutOfObjectBoxC();
 }

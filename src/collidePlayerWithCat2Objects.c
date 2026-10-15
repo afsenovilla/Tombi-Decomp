@@ -47,14 +47,14 @@ extern void func_80124348(TObj *, unsigned char *);
 extern void func_801243D4(TObj *, unsigned char *);
 extern void func_80124410(TObj *, unsigned char *);
 extern void func_8012555C(TObj *, unsigned char *);
-extern void func_801257F4(TObj *, unsigned char *);
-extern void func_80125F30(TObj *, unsigned char *);
-extern void func_80126010(TObj *, unsigned char *);
-extern void func_801260F8(TObj *, unsigned char *);
-extern void func_80126198(TObj *, unsigned char *);
+extern void playerContactCat2Type00(TObj *, unsigned char *);
+extern void playerContactCat2Type01(TObj *, unsigned char *);
+extern void playerContactCat2Type2B(TObj *, unsigned char *);
+extern void playerContactCat2Type12(TObj *, unsigned char *);
+extern void playerContactCat2Type15(TObj *, unsigned char *);
 extern void func_80126240(TObj *, unsigned char *);
 extern void func_801262F8(TObj *, unsigned char *);
-extern void func_80126464(TObj *, unsigned char *);
+extern void playerContactCat2Type08(TObj *, unsigned char *);
 extern void func_80126564(TObj *, unsigned char *);
 extern void func_80126698(TObj *, unsigned char *);
 extern void func_8012687C(TObj *, unsigned char *);
@@ -80,11 +80,11 @@ void collidePlayerWithCat2Objects(TObj *o)
                 func_801262F8(o, q);
                 break;
             case 1:
-                func_80125F30(o, q);
+                playerContactCat2Type01(o, q);
                 break;
             case 2:
                 switch (GAME.selectedArea) {
-                case 0: func_801257F4(o, q); break;
+                case 0: playerContactCat2Type00(o, q); break;
                 case 1: func_801240A8(o, q); break;
                 case 3: func_8011F8CC(o, q); break;
                 case 4: func_8011EFA4(o, q); break;
@@ -108,7 +108,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 break;
             case 3:
             case 0x12:
-                func_801260F8(o, q);
+                playerContactCat2Type12(o, q);
                 break;
             case 6:
                 func_80126240(o, q);
@@ -121,7 +121,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 }
                 break;
             case 8:
-                func_80126464(o, q);
+                playerContactCat2Type08(o, q);
                 break;
             case 0x1f:
                 if (GAME.selectedArea == 1) func_80124410(o, q);
@@ -146,7 +146,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 func_80126BBC(o, q);
                 break;
             case 0x15:
-                func_80126198(o, q);
+                playerContactCat2Type15(o, q);
                 break;
             case 0x13:
                 func_80126564(o, q);
@@ -182,7 +182,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 func_8011F9E0(o, q);
                 break;
             case 0x2b:
-                func_80126010(o, q);
+                playerContactCat2Type2B(o, q);
                 break;
             case 0x24:
                 func_8011FC84(o, q);

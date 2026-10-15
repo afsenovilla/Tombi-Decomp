@@ -8,7 +8,7 @@ extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern unsigned char DAT_1f8001a4;
 
-void FUN_801257f4(unsigned char *a, unsigned char *b)
+void playerContactCat2Type00(unsigned char *a, unsigned char *b)
 {
     short r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)

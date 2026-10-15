@@ -33,9 +33,9 @@ extern void func_801213F0(TObj *, TObj *);
 extern void func_80125868(TObj *, TObj *);
 extern void func_801258E4(TObj *, TObj *);
 extern void func_8012593C(TObj *, TObj *);
-extern void func_80125984(TObj *, TObj *);
+extern void weaponHitCat4Type02(TObj *, TObj *);
 extern void func_80125994(TObj *, TObj *);
-extern void func_80125A28(TObj *, TObj *);
+extern void weaponHitCat4Type01(TObj *, TObj *);
 extern void func_80125AE4(TObj *, TObj *);
 extern void func_80125FBC(TObj *, TObj *);
 
@@ -135,7 +135,7 @@ void collideWeaponsWithCat4Objects(void)
                 weaponHitCat4Type00(a, b);
                 break;
             case 1:
-                func_80125A28(a, b);
+                weaponHitCat4Type01(a, b);
                 break;
             case 3:
                 weaponHitCat4Type03(a, b);
@@ -143,7 +143,7 @@ void collideWeaponsWithCat4Objects(void)
             case 4:
                 if (GAME.selectedArea == 0) {
             case 2:
-                    func_80125984(a, b);
+                    weaponHitCat4Type02(a, b);
                     break;
                 }
                 func_8011FEC8(a, b);

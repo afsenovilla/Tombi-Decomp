@@ -11,12 +11,12 @@
 extern short D_1F80019E;
 extern unsigned char D_8007B63C[];
 void pushObjectOutOfObjectFacing(TObj *o);
-void func_80126B50(TObj *o);
-void func_80126C60(TObj *o);
-void func_80126CA4(TObj *o);
+void pushObjectOutOfCat4Type01(TObj *o);
+void pushObjectOutOfCat4Type02(TObj *o);
+void pushCat2ObjectOutOfCat4Type00(TObj *o);
 void func_8012032C(TObj *o);
 void func_80126D7C(TObj *o);
-void func_80126D48(TObj *o);
+void pushCat2ObjectOutOfCat4Type0A(TObj *o);
 void func_801280DC(TObj *o);
 void func_80127FDC(TObj *o);
 void func_801216A0(TObj *o);
@@ -55,16 +55,16 @@ void collideCat2WithCat4Objects(void)
             if (!(e->active & 1)) continue;
             switch (e->type) {
             case 0: two = 2; pushObjectOutOfObjectFacing(o); break;
-            case 1: func_80126B50(o); break;
-            case 2: func_80126C60(o); break;
+            case 1: pushObjectOutOfCat4Type01(o); break;
+            case 2: pushObjectOutOfCat4Type02(o); break;
             case 4:
                 switch (GAME.selectedArea) {
-                case 0: func_80126CA4(o); break;
+                case 0: pushCat2ObjectOutOfCat4Type00(o); break;
                 case 3: func_8012032C(o); break;
                 }
                 break;
             case 6: func_80126D7C(o); break;
-            case 10: func_80126D48(o); break;
+            case 10: pushCat2ObjectOutOfCat4Type0A(o); break;
             case 15: func_801280DC(o); break;
             case 20: func_80127FDC(o); break;
             case 28: func_801216A0(o); break;

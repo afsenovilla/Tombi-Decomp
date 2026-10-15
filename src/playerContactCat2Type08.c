@@ -8,7 +8,7 @@ extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
-void FUN_80126464(TObj *a, TObj *b)
+void playerContactCat2Type08(TObj *a, TObj *b)
 {
     short r;
 

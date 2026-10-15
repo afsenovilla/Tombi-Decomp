@@ -6,9 +6,9 @@
 
 extern short D_1F80019E;
 void pushObjectOutOfObjectFacing(TObj *o, TObj *e);
-void func_80126B50(TObj *o, TObj *e);
-void func_80126C60(TObj *o, TObj *e);
-void func_80126D04(TObj *o, TObj *e);
+void pushObjectOutOfCat4Type01(TObj *o, TObj *e);
+void pushObjectOutOfCat4Type02(TObj *o, TObj *e);
+void pushCat5ObjectOutOfCat4Type00(TObj *o, TObj *e);
 void func_8012038C(TObj *o, TObj *e);
 void func_80126D7C(TObj *o, TObj *e);
 void func_801280DC(TObj *o, TObj *e);
@@ -56,11 +56,11 @@ void collideCat5WithCat4Objects(void)
                 continue;
             switch (e->type) {
             case 0: pushObjectOutOfObjectFacing(o, e); break;
-            case 1: func_80126B50(o, e); break;
-            case 2: func_80126C60(o, e); break;
+            case 1: pushObjectOutOfCat4Type01(o, e); break;
+            case 2: pushObjectOutOfCat4Type02(o, e); break;
             case 4:
                 switch (GAME.selectedArea) {
-                case 0: func_80126D04(o, e); break;
+                case 0: pushCat5ObjectOutOfCat4Type00(o, e); break;
                 case 3: func_8012038C(o, e); break;
                 }
                 break;

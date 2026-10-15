@@ -8,7 +8,7 @@ extern void awardAPByArea(int, int, int, int);
 extern unsigned char PLAYER, DAT_800a603c, DAT_800a603d, DAT_800a603e;
 extern short DAT_1f80019e;
 
-void FUN_80125c84(TObj *a, TObj *o)
+void weaponHitCat2Type08(TObj *a, TObj *o)
 {
     int r;
     unsigned short t;

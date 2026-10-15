@@ -2,7 +2,7 @@
 // MATCHING 80126d48 52
 extern short pushObjectOutOfObjectBoxB();
 
-void FUN_80126d48(void)
+void pushCat2ObjectOutOfCat4Type0A(void)
 {
     if (pushObjectOutOfObjectBoxB() != 0)
         *(short *)0x1f80019e = 0;

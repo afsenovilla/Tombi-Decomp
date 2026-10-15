@@ -12,7 +12,7 @@ typedef struct O {
 extern short objectsOverlap();
 extern short DAT_1f80019e;
 
-void FUN_80126f68(O *o, unsigned char *p)
+void collideCat2Type7Cat5Type0BPair(O *o, unsigned char *p)
 {
     O *a, *b;
     if (objectsOverlap(o) != 0) {

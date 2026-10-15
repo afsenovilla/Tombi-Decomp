@@ -2,7 +2,7 @@
 // MATCHING 80124a84 312
 #include "TOBJ.H"
 
-int FUN_80124a84(TObj *a, TObj *b)
+int landOnSlopedBoxTop(TObj *a, TObj *b)
 {
     unsigned short u5; int u6; int w;
     short d; short e; short s; short t;

@@ -4,7 +4,7 @@
 extern unsigned char DAT_1f8001a4;
 extern void decreaseObjectTimer(TObj *, int);
 
-void FUN_80126770(TObj *o)
+void collideArea0Section2Slope(TObj *o)
 {
     short v;
     short r;

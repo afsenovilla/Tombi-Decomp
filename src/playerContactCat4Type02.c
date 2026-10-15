@@ -1,7 +1,7 @@
 // FUNC 80124f3c 104 X000
 // MATCHING 80124f3c 104
 extern short pushObjectOutOfObjectBoxC(void);
-void FUN_80124f3c(int a, char *o)
+void playerContactCat4Type02(int a, char *o)
 {
     short s;
     short v;

@@ -4,7 +4,7 @@ extern short pushObjectOutOfObjectBoxB(void);
 extern short pushObjectOutOfObjectX(unsigned char *, unsigned char *);
 extern short DAT_1f80019e;
 
-void FUN_80126b50(unsigned char *a, unsigned char *b)
+void pushObjectOutOfCat4Type01(unsigned char *a, unsigned char *b)
 {
     short r;
     unsigned char *c;

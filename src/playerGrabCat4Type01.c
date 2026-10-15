@@ -6,7 +6,7 @@ extern short DAT_1f8003bc;
 extern short DAT_1f80019e;
 extern TObj *DAT_1f8003c0;
 
-void FUN_801269d0(TObj *o, TObj *t)
+void playerGrabCat4Type01(TObj *o, TObj *t)
 {
     if (*(int *)((char *)t + 0x94) == 0 && probeGrabPointInBoxB() != 0) {
         TObj *m;

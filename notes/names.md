@@ -541,6 +541,13 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80111ae0 updateL2Type07Object` (was func_80111AE0) - layer 2 type 0x7 handler (MAIN0 table slot 80077DB8)
 - `800ee25c updateL4Type38Object` (was func_800EE25C) - layer 4 type 0x38 handler (MAIN0 table slot 80079E54)
 - `80114a08 updateL2Type55Object` (was FUN_80114a08) - layer 2 type 0x55 handler (MAIN0 table slot 80077EF0)
+- Collision pass callbacks named by the pass and the object type of their switch case (like playerContactCat4Type0B / weaponHitCat2Type07):
+  collidePlayerWithCat4Objects `80124ebc playerContactCat4Type01` (push-out unless linked +0x94), `80124f3c playerContactCat4Type02` (sets the facing +0x2E from the push side), `80124fa4 playerContactCat4Type04`, `80124d10 playerContactCat4Type09` (sloped boxes by b0c: `80124bbc pushOutOfSlopedBoxSide` / `80124a84 landOnSlopedBoxTop`, player step 0x17 on contact), `80124fd4 playerContactCat4Type0A`, `80124efc playerContactCat4Type17`, `80124f1c playerContactCat4Type18`;
+  collidePlayerWithCat2Objects `801257f4 playerContactCat2Type00`, `80125f30 playerContactCat2Type01`, `80126464 playerContactCat2Type08`, `801260f8 playerContactCat2Type12`, `80126198 playerContactCat2Type15`, `80126010 playerContactCat2Type2B`;
+  collideWeaponsWithCat4Objects `80125a28 weaponHitCat4Type01`, `80125984 weaponHitCat4Type02`; collideWeaponsWithCat2Objects `80125aac weaponHitCat2Type01`, `80125da4 weaponHitCat2Type06`, `80125c84 weaponHitCat2Type08`, `80125c1c weaponHitCat2Type12`;
+  collideCat2/Cat5WithCat4Objects `80126ca4 pushCat2ObjectOutOfCat4Type00` (also the area-0 hook of dispatchAreaCollisionHookA), `80126d04 pushCat5ObjectOutOfCat4Type00` (area-0 hook B), `80126b50 pushObjectOutOfCat4Type01`, `80126c60 pushObjectOutOfCat4Type02`, `80126d48 pushCat2ObjectOutOfCat4Type0A`;
+  `80126f68 collideCat2Type7Cat5Type0BPair` (collideCat2Type7WithCat5Type0B on overlap: both parents freed); playerProbeGrab `801269d0 playerGrabCat4Type01` (b9e = 1) / `80126940 playerGrabCat4Type02` (b9e = 4)
+- `80126770 collideArea0Section2Slope` (was FUN_80126770) - processObjectCollisions in area 0 section 2: hard-coded slope line at depth 0xB4 and wall at x 0xC35
 
 # Area overlay function names (X001..X019)
 

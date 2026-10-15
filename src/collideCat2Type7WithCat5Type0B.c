@@ -6,7 +6,7 @@ extern unsigned char **DAT_1f80021c;
 extern unsigned short DAT_1f800248;
 extern unsigned char **DAT_1f800228;
 extern short DAT_1f80019e;
-extern void FUN_80126f68(unsigned char *a, unsigned char *b);
+extern void collideCat2Type7Cat5Type0BPair(unsigned char *a, unsigned char *b);
 
 void collideCat2Type7WithCat5Type0B(void)
 {
@@ -25,7 +25,7 @@ void collideCat2Type7WithCat5Type0B(void)
                     e = *qq++;
                     DAT_1f80019e--;
                     if ((e[0] & 3) && e[2] == 0xb) {
-                        FUN_80126f68(o, e);
+                        collideCat2Type7Cat5Type0BPair(o, e);
                         break;
                     }
                 }

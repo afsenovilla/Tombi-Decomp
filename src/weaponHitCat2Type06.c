@@ -4,7 +4,7 @@ extern short FUN_8004461c(void *, void *);
 extern void spawnImpactEffect(int, int, int, int);
 extern short DAT_1f80019e;
 
-void FUN_80125da4(unsigned char *o, unsigned char *p)
+void weaponHitCat2Type06(unsigned char *o, unsigned char *p)
 {
     unsigned t;
     if (*p & 2)

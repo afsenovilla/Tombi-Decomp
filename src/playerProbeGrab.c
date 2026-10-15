@@ -16,7 +16,7 @@ typedef struct {
 extern int D_1F8003C0;
 extern short D_1F80019E;
 extern short probeCollisionAtDepthC(TO *, short, short);
-extern void func_801269D0(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), func_80126940(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
+extern void playerGrabCat4Type01(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), playerGrabCat4Type02(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
 extern void func_80126FE4(TO *, unsigned char *), func_80126A64(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
 extern void func_8011DF8C(TO *, unsigned char *), func_8012767C(TO *, unsigned char *), func_8011EF98(TO *, unsigned char *), probeGrabObjectBox(TO *, unsigned char *);
 extern void func_8011F5D8(TO *, unsigned char *), func_8011F474(TO *, unsigned char *), func_801212D4(TO *, unsigned char *), func_8011D3F8(TO *, unsigned char *), func_8011F38C(TO *, unsigned char *);
@@ -63,7 +63,7 @@ int playerProbeGrab(TO *o, unsigned char f)
         if (*e & 1) {
             switch (e[2]) {
             case 1:
-                func_801269D0(o, e);
+                playerGrabCat4Type01(o, e);
                 break;
             case 3:
                 probeGrabObjectBoxOffset(o, e);
@@ -71,7 +71,7 @@ int playerProbeGrab(TO *o, unsigned char f)
             case 4:
                 if (GAME.selectedArea == 0) {
             case 2:
-                    func_80126940(o, e);
+                    playerGrabCat4Type02(o, e);
                 } else {
                     func_8011FE38(o, e);
                 }

@@ -3,7 +3,7 @@
 extern short boxesOverlapSideB();
 extern int FUN_800428c0(int, int);
 
-void FUN_80125a28(char *a, char *b)
+void weaponHitCat4Type01(char *a, char *b)
 {
     char *t;
     unsigned short u;

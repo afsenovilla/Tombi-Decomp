@@ -3,7 +3,7 @@
 extern short pushObjectOutOfObjectBoxA(void);
 extern void spawnImpactEffect(int, int, int, int);
 
-void FUN_80126198(char *o, char *p)
+void playerContactCat2Type15(char *o, char *p)
 {
     short r = pushObjectOutOfObjectBoxA();
     if (r != 0) {

@@ -5,7 +5,7 @@ extern short FUN_8004461c(TObj *a, TObj *b);
 extern void spawnImpactEffect(int a, int b, int c, int d);
 extern short DAT_1f80019e;
 
-void FUN_80125aac(TObj *o, TObj *p)
+void weaponHitCat2Type01(TObj *o, TObj *p)
 {
     if (FUN_8004461c(o, p) == -1)
         return;

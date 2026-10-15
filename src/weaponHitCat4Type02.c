@@ -4,7 +4,7 @@
 extern short FUN_8004461c(char *, char *);
 extern void FUN_800428c0(char *, char *);
 extern short DAT_1f80019e;
-void FUN_80125984(char *a, char *b)
+void weaponHitCat4Type02(char *a, char *b)
 {
     if (S32(b, 0x94) == 0 && FUN_8004461c(a, b) >= 0) {
         unsigned short v;

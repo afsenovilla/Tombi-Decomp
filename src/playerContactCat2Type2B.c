@@ -2,7 +2,7 @@
 // MATCHING 80126010 232
 extern short objectBoxOverlapSide(void);
 
-void FUN_80126010(unsigned char *o, unsigned char *s)
+void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
 {
     short r;
     r = objectBoxOverlapSide();

@@ -18,7 +18,7 @@ extern signed char D_8009D2B0;
 extern C *TASK_C;
 extern short D_800A4582;
 extern void func_8011E514(void), collideCat2Type7WithCat5Type0B(void), collideCat2ObjectsPairwise(void), collideCat2WithCat4Objects(void);
-extern void collidePlayerWithCat4Objects(TO *), collidePlayerWithCat5Object(TO *, unsigned char *), collidePlayerWithCat2Objects(TO *), func_80126770(TO *);
+extern void collidePlayerWithCat4Objects(TO *), collidePlayerWithCat5Object(TO *, unsigned char *), collidePlayerWithCat2Objects(TO *), collideArea0Section2Slope(TO *);
 extern void collideWeaponsWithCat2Objects(void), collideWeaponsWithCat5Objects(void), collideWeaponsWithCat4Objects(void), collideCat5WithCat4Objects(void);
 
 static __inline__ void collide(TO *p)
@@ -81,7 +81,7 @@ void processObjectCollisions(void)
     }
 dflt:
     if (!(GVARS.b42 | GVARS.b3f) && D_8009C960_h == 0 && GAME.selectedSection == 2)
-        func_80126770(p);
+        collideArea0Section2Slope(p);
 tail:
     collideWeaponsWithCat2Objects();
     collideWeaponsWithCat5Objects();

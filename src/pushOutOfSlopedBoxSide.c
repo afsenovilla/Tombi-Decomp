@@ -2,7 +2,7 @@
 // MATCHING 80124bbc 340
 #include "TOBJ.H"
 
-int FUN_80124bbc(TObj *o, TObj *p)
+int pushOutOfSlopedBoxSide(TObj *o, TObj *p)
 {
     short dy;
     short e;
