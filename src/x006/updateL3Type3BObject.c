@@ -37,7 +37,7 @@ extern void getBaseMatrix(MAT *);
 extern void MulMatrix0(MAT *, MAT *, MAT *);
 extern void ApplyRotMatrix(SVEC *, int *);
 
-void func_80117148(TObj *o)
+void updateL3Type3BObject(TObj *o)
 {
     TObj *p;
 

@@ -10,7 +10,7 @@ typedef struct {
 
 extern void *D_8013E5BC;
 
-void func_8011BADC(TObj *o)
+void springVineRopeStep4(TObj *o)
 {
 
     switch (o->state) {

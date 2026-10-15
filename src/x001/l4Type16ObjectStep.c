@@ -40,7 +40,7 @@ extern void func_8011EEC0(O *);
 
 #define DV ((short)o->w82 >> 8)
 
-void func_8011E524(O *o, short n)
+void l4Type16ObjectStep(O *o, short n)
 {
     int *q = o->da0;
     short cnt;

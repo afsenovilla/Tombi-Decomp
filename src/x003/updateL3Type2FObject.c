@@ -10,7 +10,7 @@ extern int FUN_800202b4(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_800187e4(TObj *);
 
-void func_801287F8(TObj *o)
+void updateL3Type2FObject(TObj *o)
 {
     int t;
 

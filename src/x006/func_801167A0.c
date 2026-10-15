@@ -15,7 +15,7 @@ typedef struct {
 
 extern unsigned char D_8011EFDC[];
 
-void func_801167A0(L801167A0 *l, unsigned char *bank)
+void area6ScriptOp(L801167A0 *l, unsigned char *bank)
 {
     int *offs = (int *)(bank + 4);
     unsigned char cnt = bank[0];

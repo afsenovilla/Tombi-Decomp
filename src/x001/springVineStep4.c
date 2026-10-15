@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short D_8007A5F0[];
 
-void func_8011B958(TObj *o)
+void springVineStep4(TObj *o)
 {
     switch (o->state) {
     case 0:

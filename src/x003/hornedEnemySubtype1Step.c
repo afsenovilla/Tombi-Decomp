@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 
-void func_80126E24(TObj *o)
+void hornedEnemySubtype1Step(TObj *o)
 {
     unsigned char *p;
 

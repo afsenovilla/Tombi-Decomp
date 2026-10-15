@@ -8,12 +8,12 @@ typedef struct { short a, b, x, y, z; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 typedef void (*Fn)(TObj *);
 
-extern void func_80126D18();
-extern void func_80126E24();
-extern void func_80126F38();
-extern void func_8012724C();
+extern void hornedEnemySubtype0Step();
+extern void hornedEnemySubtype1Step();
+extern void hornedEnemySubtype2Step();
+extern void hornedEnemySubtype3Step();
 static Fn D_80135D6C[4] = {
-    (Fn)func_80126D18, (Fn)func_80126E24, (Fn)func_80126F38, (Fn)func_8012724C,
+    (Fn)hornedEnemySubtype0Step, (Fn)hornedEnemySubtype1Step, (Fn)hornedEnemySubtype2Step, (Fn)hornedEnemySubtype3Step,
 };
 extern unsigned short D_80135D3C[];
 extern int ObjCullRegister(TObj *);

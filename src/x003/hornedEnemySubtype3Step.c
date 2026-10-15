@@ -14,7 +14,7 @@ extern void applyFrameVelocityX(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short isObjectBelowGround(TObj *);
 
-void func_8012724C(TObj *o)
+void hornedEnemySubtype3Step(TObj *o)
 {
     unsigned char *b;
 

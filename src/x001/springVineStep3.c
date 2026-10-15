@@ -15,7 +15,7 @@ extern short D_8007A5F0[];
     (o)->d88 = 0; \
     (o)->w74 = 0;
 
-void func_8011B624(TObj *o)
+void springVineStep3(TObj *o)
 {
     switch (o->state) {
     case 0:

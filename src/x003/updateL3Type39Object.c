@@ -10,7 +10,7 @@ extern int FUN_800202b4(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80119838(TObj *o)
+void updateL3Type39Object(TObj *o)
 {
     switch (o->b04) {
     case 0:

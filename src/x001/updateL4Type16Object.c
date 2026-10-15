@@ -4,9 +4,9 @@
 #include "TOBJ.H"
 extern void FUN_80018cf0(TObj *);
 extern void ObjFreeDup(TObj *);
-extern void func_8011E524(TObj *, short);
+extern void l4Type16ObjectStep(TObj *, short);
 
-void func_8011E40C(TObj *o)
+void updateL4Type16Object(TObj *o)
 {
     unsigned char *p;
     short n;
@@ -31,7 +31,7 @@ void func_8011E40C(TObj *o)
             o->visible = 1;
             FUN_80018cf0(o);
         }
-        func_8011E524(o, (short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->a.p.whole) >> 4);
+        l4Type16ObjectStep(o, (short)((*(unsigned short*)((char*)&SPAD.i168 + 2)) - o->a.p.whole) >> 4);
         o->b68 = 0;
         break;
     case 2:

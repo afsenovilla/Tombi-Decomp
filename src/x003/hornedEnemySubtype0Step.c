@@ -8,7 +8,7 @@ extern void *D_80139578;
 extern void AnimLoadDuration(TObj *);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 
-void func_80126D18(TObj *o)
+void hornedEnemySubtype0Step(TObj *o)
 {
     unsigned char *p;
 

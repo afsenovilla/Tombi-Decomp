@@ -7,7 +7,7 @@ typedef struct { char p[3]; unsigned char n; int e[1]; } Q;
 extern int D_800A4574, D_800A4570;
 extern int getScrollOffsetX(void);
 
-void func_801174B0(Q *q, unsigned char *base)
+void selectArea1VisibleModels(Q *q, unsigned char *base)
 {
     short lo, hi, a, b, i, t;
     int cnt = base[0];

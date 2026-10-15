@@ -3,9 +3,9 @@
 // with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
 #include "anim.h"
 
-extern void func_8011B164();
-extern void func_8011B624();
-extern void func_8011B958();
+extern void springVineStep2();
+extern void springVineStep3();
+extern void springVineStep4();
 extern void springVineGrabbed();
 extern void springVineIdle();
 extern unsigned int data_8013C404[];
@@ -27,7 +27,7 @@ unsigned int data_8013C428[9] = {
 void *ptrs_8013C44C[5] = {
     springVineIdle,
     springVineGrabbed,
-    func_8011B164,
-    func_8011B624,
-    func_8011B958,
+    springVineStep2,
+    springVineStep3,
+    springVineStep4,
 };

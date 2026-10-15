@@ -7,7 +7,7 @@ typedef struct { short x, y, z, pad; } SV;
 #define V(o) ((SV *)((char *)(o) + 0xb4))
 extern void *D_8013E5BC;
 
-void func_8011B498(TObj *o)
+void springVineRopeStep2(TObj *o)
 {
     switch (o->state) {
     case 0:

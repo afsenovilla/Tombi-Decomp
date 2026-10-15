@@ -5,7 +5,7 @@
 extern void cullObjectToDrawList(TObj *, int);
 extern void freeObjectLayer8(TObj *);
 
-void func_80117DE0(TObj *o)
+void updateL8Type06Object(TObj *o)
 {
     TObj *p;
 

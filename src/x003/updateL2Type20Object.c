@@ -6,7 +6,7 @@ extern void AnimLoadDuration(TObj *);
 extern int func_800202B4(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801251C4(TObj *o)
+void updateL2Type20Object(TObj *o)
 {
     switch (o->b04) {
     case 0:

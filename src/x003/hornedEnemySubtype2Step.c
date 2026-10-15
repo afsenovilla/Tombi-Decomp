@@ -14,7 +14,7 @@ extern void applyFrameVelocityX(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
-void func_80126F38(TObj *o)
+void hornedEnemySubtype2Step(TObj *o)
 {
     unsigned char *b;
     int v;

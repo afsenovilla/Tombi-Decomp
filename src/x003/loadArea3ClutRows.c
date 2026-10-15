@@ -99,7 +99,7 @@ extern void LoadImage(RECT *, void *);
 
 #define B(o, n) (((unsigned char *)(o))[n])
 
-void func_80118284(TObj *o)
+void loadArea3ClutRows(TObj *o)
 {
     RECT r;
 

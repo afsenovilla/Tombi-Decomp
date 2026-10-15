@@ -15,7 +15,7 @@ typedef struct {
 extern int D_800A4574;
 extern int getScrollOffsetX(void);
 extern void FUN_8005f488(RECT *, int, int);
-extern void func_80118284(L *);
+extern void loadArea3ClutRows(L *);
 
 #define FILL() \
     for (i = a; i <= b; i++) { \
@@ -33,7 +33,7 @@ extern void func_80118284(L *);
         } \
     }
 
-void func_80117DE4(L *o, unsigned char *tbl)
+void animateArea3Palettes(L *o, unsigned char *tbl)
 {
     unsigned char n = tbl[0];
     int *list = (int *)(tbl + 4);
@@ -74,7 +74,7 @@ void func_80117DE4(L *o, unsigned char *tbl)
     case 2:
         base = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX()) / 80;
         ADDRANGE();
-        func_80118284(o);
+        loadArea3ClutRows(o);
         break;
     case 3:
         if ((GAME.purifiedAreas & 2) && o->b164 == 0) {

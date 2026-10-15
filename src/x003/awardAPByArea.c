@@ -4,7 +4,7 @@
 extern unsigned short DAT_8009c960;
 extern void FUN_80118040(TObj *, short, short, short, int);
 extern void FUN_8011832c(TObj *, short, short, short, int);
-extern void FUN_801188fc(TObj *, short, short, short, int);
+extern void spawnApAwardNumber(TObj *, short, short, short, int);
 extern void FUN_8011a448(TObj *, short, short, short, int);
 extern void FUN_80116d50(TObj *, short, short, short, int);
 extern void FUN_80116258(TObj *, short, short, short, int);
@@ -18,7 +18,7 @@ void awardAPByArea(TObj *o, short x, short y, short z)
     switch (DAT_8009c960) {
     case 0: FUN_80118040(o, x, y, z, 1); break;
     case 1: FUN_8011832c(o, x, y, z, 1); break;
-    case 3: FUN_801188fc(o, x, y, z, 1); break;
+    case 3: spawnApAwardNumber(o, x, y, z, 1); break;
     case 4: FUN_8011a448(o, x, y, z, 1); break;
     case 6: FUN_80116d50(o, x, y, z, 1); break;
     case 7: FUN_80116258(o, x, y, z, 1); break;

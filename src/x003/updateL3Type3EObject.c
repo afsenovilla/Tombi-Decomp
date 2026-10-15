@@ -17,7 +17,7 @@ int ObjCullRegister(TObj *o);
 void FUN_80018ca4(TObj *o);
 void FUN_800187e4(TObj *o);
 
-void func_8011992C(TObj *o)
+void updateL3Type3EObject(TObj *o)
 {
     switch (o->b04) {
     case 0:

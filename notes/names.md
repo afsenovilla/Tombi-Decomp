@@ -1283,3 +1283,10 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   table slot (kinds unknown) `80119838 updateL3Type39Object`, `8011992c updateL3Type3EObject` (22 placements), `801287f8 updateL3Type2FObject`,
   `801251c4 updateL2Type20Object`; updateHornedEnemy subtype table D_80135D6C: `80126d18 hornedEnemySubtype0Step`, `80126e24
   hornedEnemySubtype1Step`, `80126f38 hornedEnemySubtype2Step` (walks with sfx 0x76), `8012724c hornedEnemySubtype3Step`
+- x001: spring vine step tables (stepSpringVine; roles uncertain): own D_8013C44C (src/data/x001/D_8013C404.c ptrs_8013C44C) steps 2-4 `8011b164
+  springVineStep2`, `8011b624 springVineStep3`, `8011b958 springVineStep4`; rope D_8013C460 steps 1-4 `8011aefc springVineRopeStep1`, `8011b498
+  springVineRopeStep2`, `8011b74c springVineRopeStep3`, `8011badc springVineRopeStep4`; `801174b0 selectArea1VisibleModels` (areas 1/7 entry of
+  MAIN0 data_80079B3C: picks the model column range lo..hi (80 px columns) around the scroll position per section into the list q->e; so the
+  data_80079B3C entries are per-area script ops, the x003/x009/x010/x014 ones mostly upload CLUTs), `80117de0 updateL8Type06Object` (layer 8 table
+  slot 6), `8011832c spawnApAwardNumber`, `8011e40c updateL4Type16Object` (layer 4 type 0x16; `8011e524 l4Type16ObjectStep`)
+- x006: `801167a0 area6ScriptOp` (area 6 entry of data_80079B3C), `80117148 updateL3Type3BObject`

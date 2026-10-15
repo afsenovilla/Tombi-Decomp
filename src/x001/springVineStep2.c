@@ -7,7 +7,7 @@ extern short D_8007A3F0[];
 extern short D_8007A5F0[];
 extern void FUN_8001e4f0(int);
 
-void func_8011B164(TObj *o)
+void springVineStep2(TObj *o)
 {
     int s;
     int c;
