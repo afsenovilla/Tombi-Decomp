@@ -3,7 +3,19 @@ name: Progress report
 on:
   push:
     branches: [master]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - 'include/**'
+      - 'tools/**'
+      - 'notes/functions_*.csv'
+      - '.github/workflows/report.yml'
   workflow_dispatch:
+
+# Several pushes in a row: only the newest report matters (saves Actions minutes).
+concurrency:
+  group: report
+  cancel-in-progress: true
 
 jobs:
   report:
