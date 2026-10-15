@@ -17,7 +17,7 @@ extern int rcos(int);
 extern int rsin(int);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 int collideObjectWithTiltedBar(TObj *a, TObj *b, unsigned char k, int ang)
 {
@@ -105,7 +105,7 @@ int collideObjectWithTiltedBar(TObj *a, TObj *b, unsigned char k, int ang)
             else b->velH -= 0x200;
         }
         playSFX(5);
-        FUN_8001f96c(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
+        spawnImpactEffect(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
     }
     SPAD.s19e = 0;
     return 1;

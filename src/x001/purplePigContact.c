@@ -5,7 +5,7 @@
 
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
 extern short func_8012614C(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
 #define BAC(o) (*(unsigned char *)&(o)->wac)
@@ -34,7 +34,7 @@ void purplePigContact(TObj *o, TObj *p)
             p->animFrame = o->animFrame & 1;
             PE4(o) = p;
             BAC(o) = 2;
-            FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             break;
         }
     case 0:

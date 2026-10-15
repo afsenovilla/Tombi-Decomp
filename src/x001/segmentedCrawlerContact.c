@@ -10,7 +10,7 @@ typedef struct {
 } P;
 
 extern short func_800435E0(P *, TObj *);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 extern void decreaseObjectTimer(P *, int);
 
 void segmentedCrawlerContact(P *o, TObj *e)
@@ -56,7 +56,7 @@ void segmentedCrawlerContact(P *o, TObj *e)
             }
             o->e4 = e;
             *(unsigned char *)&o->o.wac = 2;
-            FUN_8001f96c(2, o->o.a.p.whole, o->o.y.p.whole, o->o.b.p.whole);
+            spawnImpactEffect(2, o->o.a.p.whole, o->o.y.p.whole, o->o.b.p.whole);
             break;
         }
     case 0:

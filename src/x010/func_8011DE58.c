@@ -7,7 +7,7 @@ typedef struct {
     char pad[0xe4 - 0xad]; TObj *de4;
 } PL;
 extern short func_800435E0(PL *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void func_8011DE58(PL *p, TObj *o)
 {
@@ -20,6 +20,6 @@ void func_8011DE58(PL *p, TObj *o)
         o->b69 = 0;
         p->de4 = o;
         p->bac = 2;
-        FUN_8001f96c(2, p->x, p->y, p->z);
+        spawnImpactEffect(2, p->x, p->y, p->z);
     }
 }

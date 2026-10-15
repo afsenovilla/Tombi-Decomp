@@ -5,7 +5,7 @@
 extern short boxesOverlapSide(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 
 void blockingWallObjectCollision(TObj *o, TObj *e)
 {
@@ -19,10 +19,10 @@ void blockingWallObjectCollision(TObj *o, TObj *e)
                 e->step = 0;
                 e->state = 0;
                 playSFX(7);
-                FUN_8001f96c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnImpactEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             } else {
                 playSFX(5);
-                FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             }
         }
         SPAD.s19e = 0;

@@ -5,7 +5,7 @@
    case 4/5/10 tail written out in full (cross-jumping merges it; the extra o refs make o outrank p in global-alloc). */
 #include "TOBJ.H"
 extern int func_800425C4(TObj *a, TObj *b);
-extern void FUN_8001f96c(int a, int b, int c, int d);
+extern void spawnImpactEffect(int a, int b, int c, int d);
 extern void playSFX(int a);
 
 static __inline__ short side(TObj *a, TObj *b)
@@ -58,7 +58,7 @@ static __inline__ int touch(TObj *o, TObj *p)
         r = 0;
     } else {
         int s;
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         s = 7;
         if ((p->category & 0x7f) == 4) s = 6;
         playSFX(s);

@@ -5,7 +5,7 @@ typedef struct { unsigned short x, y; } P2;
 extern P2 DAT_8007b610[];
 extern short DAT_1f80019e;
 extern int FUN_800425c4(TObj *, TObj *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
 void FUN_800447c0(TObj *o, TObj *q)
@@ -57,7 +57,7 @@ void FUN_800447c0(TObj *o, TObj *q)
         break;
     }
     if (n >= 0) {
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         s = 7;
         if ((q->category & 0x7f) == 4) s = 6;
         SfxPlay(s);

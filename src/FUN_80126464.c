@@ -5,7 +5,7 @@
 extern unsigned char D_1f8001a4;
 extern unsigned char PLAYER[];
 extern short FUN_800435e0(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
 void FUN_80126464(TObj *a, TObj *b)
@@ -26,7 +26,7 @@ void FUN_80126464(TObj *a, TObj *b)
             b->animFrame = a->animFrame & 1;
             S32(a, 0xe4) = (int)b;
             (*(unsigned char*)&a->wac) = 2;
-            FUN_8001f96c(2, a->a.p.whole, a->y.p.whole, a->b.p.whole);
+            spawnImpactEffect(2, a->a.p.whole, a->y.p.whole, a->b.p.whole);
             break;
         }
     case 0:

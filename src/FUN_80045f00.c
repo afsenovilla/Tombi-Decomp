@@ -11,7 +11,7 @@ extern unsigned short DAT_1f800246u;
 extern TObj **DAT_1f800218;
 extern TObj **DAT_1f80021c;
 extern int FUN_800425c4(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_80125f04(TObj *, TObj *);
 extern void FUN_80125aac(TObj *, TObj *);
@@ -97,7 +97,7 @@ static __inline__ void col(TObj *a, TObj *b)
             break;
         }
         if (r >= 0) {
-            FUN_8001f96c(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
+            spawnImpactEffect(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
             if ((b->category & 0x7f) == 4)
                 FUN_8001e4f0(6);
             else

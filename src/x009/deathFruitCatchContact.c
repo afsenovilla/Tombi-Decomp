@@ -8,7 +8,7 @@ typedef struct {
     TObj *de4;
 } TObjX;
 extern short func_80043260(TObjX *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void deathFruitCatchContact(TObjX *o, TObj *e)
 {
@@ -23,6 +23,6 @@ void deathFruitCatchContact(TObjX *o, TObj *e)
         e->b0f = o->o.b0f + 1;
         o->de4 = e;
         *(unsigned char *)&o->o.wac = 2;
-        FUN_8001f96c(2, o->o.a.p.whole, o->o.y.p.whole, o->o.b.p.whole);
+        spawnImpactEffect(2, o->o.a.p.whole, o->o.y.p.whole, o->o.b.p.whole);
     }
 }

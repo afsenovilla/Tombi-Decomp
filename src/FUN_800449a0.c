@@ -6,7 +6,7 @@
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern unsigned short DAT_1f80019e;
 extern int FUN_800425c4(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
 static __inline__ short hit(TObj *a, TObj *b)
@@ -49,7 +49,7 @@ static __inline__ int react(TObj *a, TObj *b)
         b->b9f = 0;
         break;
     }
-    FUN_8001f96c(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
+    spawnImpactEffect(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
     SfxPlay((b->category & 0x7f) == 4 ? 6 : 7);
     return r;
 }

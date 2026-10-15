@@ -10,10 +10,10 @@ extern void playerSetJumpRiseVelocity(TObj *);
 extern void setFacingFromPad(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerJumpRiseUpdate(TObj *);
-extern void func_80104F88(TObj *);
-extern void func_80105BCC(TObj *);
-extern void func_80105694(TObj *);
-extern void FUN_801064d0(TObj *);
+extern void playerBittenJumpGeneric(TObj *);
+extern void playerBittenJumpType03(TObj *);
+extern void playerBittenJumpType04(TObj *);
+extern void playerBittenJumpType0E(TObj *);
 extern void func_8011D3EC(TObj *);
 extern void func_801213D0(TObj *);
 
@@ -91,21 +91,21 @@ void playerStepBittenJump(TObj *o)
         switch (D_8009C330->b9) {
         case 0: case 2: case 8: case 10: case 11: case 30: case 33: case 40:
         case 56: case 58: case 59: case 60: case 61: case 62: case 63: case 64: case 65: case 66:
-            func_80104F88(o);
+            playerBittenJumpGeneric(o);
             break;
         case 3: case 18: case 28: case 31: case 43:
-            func_80105BCC(o);
+            playerBittenJumpType03(o);
             break;
         case 41:
             if (D_8009D2E8->b6a == 1) {
-                FUN_801064d0(o);
+                playerBittenJumpType0E(o);
                 break;
             }
         case 4:
-            func_80105694(o);
+            playerBittenJumpType04(o);
             break;
         case 14:
-            FUN_801064d0(o);
+            playerBittenJumpType0E(o);
             break;
         case 26:
             func_8011D3EC(o);

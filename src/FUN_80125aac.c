@@ -2,7 +2,7 @@
 // MATCHING 80125aac 368
 #include "TOBJ.H"
 extern short FUN_8004461c(TObj *a, TObj *b);
-extern void FUN_8001f96c(int a, int b, int c, int d);
+extern void spawnImpactEffect(int a, int b, int c, int d);
 extern short DAT_1f80019e;
 
 void FUN_80125aac(TObj *o, TObj *p)
@@ -61,6 +61,6 @@ void FUN_80125aac(TObj *o, TObj *p)
         p->b04 = 2;
         p->step = 0;
         p->state = 0;
-        FUN_8001f96c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     }
 }

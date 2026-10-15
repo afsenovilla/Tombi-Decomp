@@ -9,7 +9,7 @@ typedef struct {
 } P;
 
 extern short FUN_800435e0(P *, TObj *);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 
 void func_80124410(P *a, TObj *b)
 {
@@ -23,6 +23,6 @@ void func_80124410(P *a, TObj *b)
         b->b69 = 0;
         a->e4 = b;
         *(unsigned char *)&a->o.wac = 2;
-        FUN_8001f96c(2, a->o.a.p.whole, a->o.y.p.whole, a->o.b.p.whole);
+        spawnImpactEffect(2, a->o.a.p.whole, a->o.y.p.whole, a->o.b.p.whole);
     }
 }

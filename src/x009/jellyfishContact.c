@@ -5,7 +5,7 @@
 #include "raw7.h"
 
 extern short func_80043464(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
 void jellyfishContact(TObj *o, TObj *p)
@@ -26,7 +26,7 @@ void jellyfishContact(TObj *o, TObj *p)
             p->b6a = 0;
             PTR(o, 0xe4) = p;
             (*(unsigned char*)&o->wac) = 2;
-            FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             break;
         }
     case 0:

@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char pc0[0xd0 - 0xc0]; short wd0; } TD;
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 static __inline__ int ovl(TObj *a, TObj *b)
 {
@@ -30,7 +30,7 @@ void pitchforkPigContact(TObj *o, TObj *e)
         e->step = 0;
         e->state = 0;
         e->animFrame = eh < oh;
-        FUN_8001f96c(0, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+        spawnImpactEffect(0, e->a.p.whole, e->y.p.whole, e->b.p.whole);
         p = (*(TD **)&GVARS.p4c);
         p->t.step = 4;
         p->t.state = 0;

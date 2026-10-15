@@ -3,14 +3,14 @@
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void FUN_80104040(TObj *o)
 {
     TObj *p;
     o->timer = 0;
     PlayerSetAnimIfChanged(o, 0xd);
-    FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+    spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     *(char *)((char *)o + 0xac) = 3;
     o->b9c = 0;
     p = DAT_8009d2e8;

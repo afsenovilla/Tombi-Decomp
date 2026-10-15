@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern int FUN_800425c4();
 extern void SfxPlay(int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 int resolveHitResultE(TObj *o, unsigned char *q, int c)
 {
@@ -23,14 +23,14 @@ int resolveHitResultE(TObj *o, unsigned char *q, int c)
     M:
         *(short *)(q + 0x98) = 0;
     L:
-        FUN_8001f96c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         return r;
     case 2: case 8:
         r = 0;
         q[0x68] = 0;
         q[0x9e] = 1;
         q[0x9f] = 0;
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         SfxPlay(6);
         break;
     }

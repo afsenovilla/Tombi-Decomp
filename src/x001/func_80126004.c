@@ -6,7 +6,7 @@ extern short boxesOverlapSide(TObj *, TObj *);
 extern void resolveHitResultA(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void func_80132698(int, int, int);
 extern void FUN_8002ee50(int, int, int, int);
 
@@ -29,7 +29,7 @@ void func_80126004(TObj *o, TObj *e)
         if (r != 6) {
             playSFX(5);
         }
-        FUN_8001f96c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         e->active = 2;
         e->b04 = 2;
         e->step = 0;
@@ -40,12 +40,12 @@ void func_80126004(TObj *o, TObj *e)
     if (r == 2) {
         e->w98 = 0;
         playSFX(5);
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     } else {
         if (--e->w98 <= 0) {
             e->w98 = 0;
         }
         playSFX(5);
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     }
 }

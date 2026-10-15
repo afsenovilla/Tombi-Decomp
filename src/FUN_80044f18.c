@@ -6,7 +6,7 @@ typedef struct O { unsigned char b0; char p0[0x10-1]; FP a; FP y; FP b; unsigned
   short box0, box1, box2, box3; char p5[42]; unsigned char b9e, b9f; char p6[0xa8-0xa0]; short wa8; } O;
 extern short DAT_1f80019e;
 extern int FUN_800425c4(O *, O *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
 static __inline__ short hit(O *a, O *b)
@@ -64,6 +64,6 @@ void FUN_80044f18(O *a, O *b)
     }
     if (r < 0)
         return;
-    FUN_8001f96c(1, a->a.whole, a->y.whole, a->b.whole);
+    spawnImpactEffect(1, a->a.whole, a->y.whole, a->b.whole);
     SfxPlay((b->b1c & 0x7f) == 4 ? 6 : 7);
 }

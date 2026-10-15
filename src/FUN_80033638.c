@@ -5,7 +5,7 @@ extern short MulCos(int, int);
 extern short MulNegSinScaled(int, int);
 extern void ObjApplyVelocity(TObj *);
 extern short probeCollisionAtDepthB(TObj *, int, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void SfxPlay(int);
 extern void playerSelectGroundAnim(TObj *);
@@ -39,7 +39,7 @@ int FUN_80033638(TObj *o)
     o->velV = MulNegSinScaled((unsigned char)o->waa, o->wa8);
     ObjApplyVelocity(o);
     if (o->active == 1 && probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole) != 0) {
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         u = DAT_1f800282;
         m = u >> 5 & 0xf;
         if ((u & 0x3000) == 0 && m < 4 && m != 0)

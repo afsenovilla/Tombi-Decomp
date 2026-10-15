@@ -6,7 +6,7 @@
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
 extern short FUN_800435e0(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern unsigned char DAT_1f8001a4;
 
 void blackCrowContact(unsigned char *a, unsigned char *b)
@@ -24,7 +24,7 @@ void blackCrowContact(unsigned char *a, unsigned char *b)
             U16(b, 0x2e) = U16(a, 0x2e) & 1;
             PTR(a, 0xe4) = b;
             U8(a, 0xac) = 2;
-            FUN_8001f96c(2, S16(a, 0x12), S16(a, 0x16), S16(a, 0x1a));
+            spawnImpactEffect(2, S16(a, 0x12), S16(a, 0x16), S16(a, 0x1a));
             break;
         }
     case 0:

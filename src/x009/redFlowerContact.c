@@ -7,7 +7,7 @@ typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
 extern short func_80043260(TObj *, TObj *);
 extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 
 static __inline__ void hit(TObj *o, TObj *e)
 {
@@ -61,7 +61,7 @@ void redFlowerContact(TObj *o, TObj *e)
             e->animFrame = o->animFrame & 1;
             ((TObjX *)o)->e4 = e;
             *(unsigned char *)&o->wac = 2;
-            FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             break;
         }
     case 0:

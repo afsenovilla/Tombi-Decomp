@@ -35,7 +35,7 @@ extern unsigned char D_801152E8[];
 extern char D_80010A04[];
 extern char D_800116B8[];
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void startPadVibration(int, int, int, int);
 extern void FUN_8001fce4(TObj *);
@@ -126,7 +126,7 @@ void playerStepHazardRespawn(TObj *o)
         D_8009C330->w2e = 0x10;
         o->anim = D_80010A04;
         FUN_8001fe94(o, 0);
-        FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         FUN_8001e560(0x23, 0x24);
         startPadVibration(0, 0x81, 0x81, 0x3c);
         o->state = 1;

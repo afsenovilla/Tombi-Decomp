@@ -2,7 +2,7 @@
 // MATCHING 80042b98 216
 #include "TOBJ.H"
 extern int FUN_800425c4(TObj *, char *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 int resolveHitResultD(TObj *o, char *q, int r)
 {
@@ -27,7 +27,7 @@ int resolveHitResultD(TObj *o, char *q, int r)
     case 10:
         SfxPlay(7);
     L:
-        FUN_8001f96c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     case 2:
     case 8:
@@ -35,7 +35,7 @@ int resolveHitResultD(TObj *o, char *q, int r)
         q[0x68] = 0;
         q[0x9e] = 1;
         q[0x9f] = 0;
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         SfxPlay(6);
         break;
     }

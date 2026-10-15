@@ -3,7 +3,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void windblownMonkeyContact(char *a, char *b)
 {
@@ -15,5 +15,5 @@ void windblownMonkeyContact(char *a, char *b)
         return;
     b[0] = 2;
     b[0x6a] = 1;
-    FUN_8001f96c(1, S16(a, 0x12), S16(a, 0x16), S16(a, 0x1a));
+    spawnImpactEffect(1, S16(a, 0x12), S16(a, 0x16), S16(a, 0x1a));
 }

@@ -13,7 +13,7 @@ extern void applyFrameVelocityX(TObj *);
 extern int evilPigBossCheckLanded(TObj *);
 extern int evilPigBossDefeatedCheckWall(TObj *);
 extern void evilPigBossCheckWall(TObj *);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void spawnEvilPigHitStars(TObj *);
@@ -52,7 +52,7 @@ void evilPigBossDefeated(TObj *o)
             if (r) {
                 o->b6a = 0;
                 o->state++;
-                FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 playSFX(6);
             }
         } else {
@@ -61,7 +61,7 @@ void evilPigBossDefeated(TObj *o)
             if (r) {
                 o->b6a = 0;
                 o->state++;
-                FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 playSFX(6);
             }
         }

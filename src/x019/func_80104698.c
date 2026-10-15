@@ -12,11 +12,11 @@ typedef struct S {
 extern S *D_8009C330;
 extern S *D_8009D2E8;
 extern void ObjCheckHeadCollision(S *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void PlayerSetAnimIfChanged(S *, int);
 extern void startPadVibration(int, int, int, int);
-extern void func_80102AC0(S *), func_80102F40(S *), func_801040D0(S *), func_801037D8(S *), func_80103290(S *);
-extern void FUN_80103d40(S *), FUN_80122a18(S *), FUN_80104454(S *);
+extern void playerBiteHoldType02(S *), playerBiteHoldType03(S *), playerBiteHoldType04(S *), playerBiteHoldGeneric(S *), playerBiteHoldType0B(S *);
+extern void playerBiteHoldType0E(S *), FUN_80122a18(S *), playerBiteHoldType18(S *);
 void func_80104698(S *o)
 {
     if (o->state == 0) {
@@ -47,7 +47,7 @@ void func_80104698(S *o)
             D_8009D2E8->d8c = 0;
             o->b69 = 0;
             D_8009D2E8->b0f = o->b0f + 1;
-            FUN_8001f96c(2, o->x, (short)o->y, o->z);
+            spawnImpactEffect(2, o->x, (short)o->y, o->z);
             break;
         case 0x4: case 0x29:
             o->d8c = 0;
@@ -80,34 +80,34 @@ void func_80104698(S *o)
     } else {
         switch (D_8009D2E8->type) {
         case 0x2: case 0x21:
-            func_80102AC0(o);
+            playerBiteHoldType02(o);
             break;
         case 0x3: case 0x12: case 0x2b:
-            func_80102F40(o);
+            playerBiteHoldType03(o);
             break;
         case 0x29:
             if (D_8009D2E8->b6a == 1) {
-                FUN_80103d40(o);
+                playerBiteHoldType0E(o);
                 break;
             }
         case 0x4:
-            func_801040D0(o);
+            playerBiteHoldType04(o);
             break;
         case 0x0: case 0x8: case 0xa: case 0x13: case 0x1a: case 0x1e: case 0x1f: case 0x27: case 0x28:
         case 0x38: case 0x3a: case 0x3b: case 0x3c: case 0x3d: case 0x3e: case 0x3f: case 0x40: case 0x41: case 0x42:
-            func_801037D8(o);
+            playerBiteHoldGeneric(o);
             break;
         case 0xb: case 0x1c:
-            func_80103290(o);
+            playerBiteHoldType0B(o);
             break;
         case 0xe:
-            FUN_80103d40(o);
+            playerBiteHoldType0E(o);
             break;
         case 0x15:
             FUN_80122a18(o);
             break;
         case 0x18:
-            FUN_80104454(o);
+            playerBiteHoldType18(o);
             break;
         }
     }

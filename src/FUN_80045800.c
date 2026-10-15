@@ -4,7 +4,7 @@
 extern unsigned char DAT_8009cdc7;
 extern short DAT_1f80019e;
 extern short FUN_80043260(TObj *, TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 #define B(o, n) (((unsigned char *)(o))[n])
 
 void FUN_80045800(TObj *o, TObj *e)
@@ -39,7 +39,7 @@ void FUN_80045800(TObj *o, TObj *e)
             e->b69 = 0;
             *(TObj **)((char *)o + 0xe4) = e;
             B(o, 0xac) = 2;
-            FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         }
         DAT_1f80019e = 0;
     } else {

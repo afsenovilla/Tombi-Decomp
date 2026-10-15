@@ -4,9 +4,9 @@ typedef struct { char p0[6]; unsigned char step; char p1[0x20 - 7]; short timer;
 extern short DAT_8007a074[];
 extern char PLAYER[];
 extern int DAT_800a60c4;
-extern void FUN_800312e8(void);
+extern void weaponSetPlayerAnimB(void);
 extern void AnimJump(char *, int);
-extern short FUN_800331c4(O *);
+extern short weaponFindNearestTarget(O *);
 
 void FUN_80033834(O *o)
 {
@@ -16,7 +16,7 @@ void FUN_80033834(O *o)
     short t;
     f = o->af;
     f = f * 3;
-    FUN_800312e8();
+    weaponSetPlayerAnimB();
     AnimJump(PLAYER, 0);
     o->wac = DAT_8007a074[(short)f];
     switch (o->af & 7) {
@@ -42,7 +42,7 @@ void FUN_80033834(O *o)
     r = 0;
     o->w7a = 2;
     DAT_800a60c4 = 0;
-    s = FUN_800331c4(o);
+    s = weaponFindNearestTarget(o);
     switch (s) {
     case 0:
     case 1:

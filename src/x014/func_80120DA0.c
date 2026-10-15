@@ -10,7 +10,7 @@
 extern TObj *allocObjectLayer2(void);
 extern short func_80041240(TObj *, short, short);
 extern short func_80041EBC(TObj *, short, short);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8002ee50(int, short, short, short);
 
 typedef struct { short a, b; } AB;
@@ -123,7 +123,7 @@ int func_80120DA0(TObj *o)
         r = func_80041240(o, o->h->p.whole + dx, o->y.p.whole);
         if (r != 0 && m == r && SPAD.s284 == 0) {
             o->d38 = (0x80 - o->d38) & 0xff;
-            FUN_8001f96c(1, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
+            spawnImpactEffect(1, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
             debris(o, m);
             FUN_8002ee50(0, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
             o->velV -= o->velV >> 2;

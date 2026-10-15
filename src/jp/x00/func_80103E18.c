@@ -9,13 +9,13 @@ extern unsigned short DAT_1f8001fc;
 extern void func_8010EAF8(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 #define LAND(o)                                                         \
     do {                                                                \
         o->timer = 0;                                                   \
         PlayerSetAnimIfChanged(o, 0xd);                                 \
-        FUN_8001f96c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);      \
+        spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);      \
         B(o, 0xac) = 3;                                                 \
         o->b9c = 0;                                                     \
         o->velX = 0;                                                    \

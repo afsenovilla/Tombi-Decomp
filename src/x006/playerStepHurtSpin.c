@@ -23,7 +23,7 @@ extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
 extern void playJingle(int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
@@ -132,7 +132,7 @@ void playerStepHurtSpin(TObj *o)
             }
         }
         D_8009C330->b8 = GVARS.b38;
-        FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         startPadVibration(0, 0x81, 0x81, 0x3c);
         break;
     case 2:

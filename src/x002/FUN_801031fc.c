@@ -27,7 +27,7 @@ typedef struct O {
 } O;
 extern O *DAT_8009d2e8;
 extern void FUN_800eeb5c();
-extern void FUN_8001f96c();
+extern void spawnImpactEffect();
 
 void FUN_801031fc(O *o)
 {
@@ -35,7 +35,7 @@ void FUN_801031fc(O *o)
     unsigned short s1, s2, s3;
     o->timer = 0;
     FUN_800eeb5c(o, 0xd);
-    FUN_8001f96c(2, o->a, o->y, o->b);
+    spawnImpactEffect(2, o->a, o->y, o->b);
     o->wac = 3;
     o->b9c = 0;
     p = DAT_8009d2e8;

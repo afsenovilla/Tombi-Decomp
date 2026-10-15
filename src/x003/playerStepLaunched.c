@@ -8,7 +8,7 @@ extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
 extern void FUN_800fc02c(TObj *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern int AnimAdvance(TObj *);
 extern void playerSetFallLean(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
@@ -51,7 +51,7 @@ void playerStepLaunched(TObj *o)
         FUN_800fc02c(o);
         o->animFrame ^= 1;
         *(unsigned char *)&D_8009C330->w08 = ((unsigned char*)&GVARS.b38)[0];
-        FUN_8001f96c(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     case 2:
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;

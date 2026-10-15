@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void FUN_800eaffc(short, short, short, unsigned char);
-extern void FUN_8001f96c(int, short, short, short);
+extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8001e4f0(int);
 extern short FUN_80041ebc(void *, short, short);
 extern void FUN_800352f4(TObj *);
@@ -40,7 +40,7 @@ int FUN_80035428(TObj *o)
                 break;
             }
         }
-        FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         FUN_8001e4f0(5);
         o->wa8 = 0x4ff;
     }

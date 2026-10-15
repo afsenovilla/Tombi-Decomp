@@ -8,7 +8,7 @@ extern int resolveHitResultD(TObj *, TObj *);
 extern int resolveHitResultB(TObj *, TObj *);
 extern void resolveHitResultG(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void func_80120564(TObj *o, TObj *p)
 {
@@ -31,7 +31,7 @@ void func_80120564(TObj *o, TObj *p)
                 p->state = 0;
             } else if (p->b9c) {
                 p->b68 = 0;
-                FUN_8001f96c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             } else {
             hit:
                 t = o->animFrame;

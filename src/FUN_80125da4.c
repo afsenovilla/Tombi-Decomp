@@ -1,7 +1,7 @@
 // FUNC 80125da4 396 X000
 // MATCHING 80125da4 396
 extern short FUN_8004461c(void *, void *);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 extern short DAT_1f80019e;
 
 void FUN_80125da4(unsigned char *o, unsigned char *p)
@@ -52,7 +52,7 @@ void FUN_80125da4(unsigned char *o, unsigned char *p)
         o[0x69] = 0;
         o[0xa5] = 0;
         *(short *)(o + 0xa8) = 0x4ff;
-        FUN_8001f96c(1, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
+        spawnImpactEffect(1, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
         break;
     default:
         goto dflt;
@@ -62,6 +62,6 @@ dflt:
     if (t != 8) {
         *p = 3;
         p[0x68] = 1;
-        FUN_8001f96c(0, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
+        spawnImpactEffect(0, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
     }
 }

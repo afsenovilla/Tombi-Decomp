@@ -84,6 +84,26 @@ One line per name: `address name (old file) - justification`.
 - `800597bc drawPauseMenu` (was FUN_800597bc) - drawGameplayScene while the object lists are frozen (1F8001C6 == 1): dark semi-transparent full-screen tile plus the menu text entries chosen by 1F8003CD
 - `80058168 drawScreenSpriteObject` (was FUN_80058168) - drawCategory7Objects render kind 1: draws the object's sprite frame parts as SPRTs at its screen x/y (priority +0x0F or +0x0E), with draw-mode wrappers
 - `8005840c drawLetterboxOverlay` (was FUN_8005840c) - drawCategory7Objects render kind 2: the sprite list PTR_DAT_80080258[subtype] plus black 16-px bars at the top and bottom of the screen
+- `8001c688 gameEndScreenState` (was func_8001D2F0) (uncertain) - gameStateDispatcher state 2 (state 3 is gameOverScreenState): loads system list 0x5D like the game-over screen but runs its other entry (800E8B08) for 0xF0 frames (skippable while > 0x3C), stopBgm at 0x3C, then SoundStopAll and back to titleSequenceTask
+- `8001f96c spawnImpactEffect` (was FUN_8001f96c) - allocates a type 0xF object with subtype = arg 0 at the given x/y/z; called by the hit resolvers, weapon wall hits and the hurt/bite player steps (50 call sites)
+- `80033040 weapon0ObjTick` (was func_80033040) - layer-1 handler of type 0 (table 8007A10C[0]; weapon objects use the equipped weapon D_8009D2B2 as type): init weapon0Init, then weapon0Swing for steps 0..2, release counter D_800A611B on exit
+- `800317c0 weapon0Swing` (was func_800317C0) - weapon type 0 state machine: weapon head positioned from the player anim frame (D_8007A04C offsets), launched at 0x1400/0x1900 by D_8009C330->b0, drives the player anim (AnimJump/AnimAdvance), wall hits spawn spawnImpactEffect
+- `80031664 weapon0Init` (was FUN_80031664) - weapon type 0 init: D_8009C338 = &o->wac, CLUTs (0x80,0x1EF/0x1F0), D_8009D600 = 0xF/8/0x5A, position at the player
+- `80032fec weapon0SwingByStep` (was func_80032FEC) (no caller found) - switch on step 0..2 calling weapon0Swing (the inner switch of weapon0ObjTick as a separate function)
+- `80034f58 weapon5to7ObjTick` (was func_80034F58) - layer-1 handler of types 5, 6, 7 (8007A120..28): weapon5to7Init(weapon - 5), then weapon5to7Swing
+- `80033b44 weapon5to7Swing` (was FUN_80033b44) - weapon types 5..7 state machine (same launch as weapon0Swing plus extra states 7/8 that spin the player anim), uses weaponFindNearestTarget
+- `8003509c weapon5to7Init` (was FUN_8003509c, US func_800384F0) - sets the weapon object's sprite data from table 1F800340[n] and copies the player position
+- `80033188 weapon5to7InitIfNew` (was func_800365DC, US name) (no caller found) - state 0: clears +0x22 and calls weapon5to7Init(D_8009C61A - 5)
+- `800370a4 weapon8to9ObjTick` (was func_800370A4) - layer-1 handler of types 8, 9 (8007A12C/30): weapon8to9Init, then weapon8to9Update
+- `80035198 weapon8to9Init` (was FUN_80035198) - weapon types 8/9 init (same CLUT/D_8009D600 setup as weapon0Init)
+- `80036f30 weapon8to9Update` (was FUN_80036f30) - per step: weapon8to9Swing and the direction +0x8C by anim frame; steps 3/4 weapon8to9FollowTarget
+- `8003566c weapon8to9Swing` (was FUN_8003566c) - weapon types 8/9 swing state machine (same helpers as weapon0Swing)
+- `80036cb8 weapon8to9FollowTarget` (was FUN_80036cb8) - moves the weapon with its target object +0x90 (8 px lower for category 2)
+- `800331c4 weaponFindNearestTarget` (was FUN_800331c4) - scans the object list 1F800260 for the nearest hittable object inside a 0x80 x 0x90 window around the weapon
+- `800314a8 weaponSetPlayerAnimA` (was FUN_800314a8) - sets the player anim script (800A605C = PLAYER+0x24) from tables 80010E80.. by step and facing frame
+- `800312e8 weaponSetPlayerAnimB` (was FUN_800312e8) - same with a second set of player anim tables
+- `800313c8 weaponSetPlayerAnimC` (was FUN_800313c8) - same with a third set (80010EF8..)
+- `80031588 weaponCalcBentOffset` (was FUN_80031588) - x/y offset of a weapon link from angle and length (MulCos/MulSin) plus a bend term mirrored around p[2]
 
 # X000 function names (shared overlay code)
 
@@ -223,6 +243,26 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800f0490 playerInitMode` (was FUN_800f0490) - updatePlayer mode 0: loads the weapon TIM (weapons 7/8/9), health from GAME (+0x98/+0x9A), sprite data, per-area init, then the entry step from the spawn data (mode 5 event steps or mode 1)
 - `800fe88c playerExitHurtToFall` (was func_800FE88C) (uncertain, no caller found) - invulnerability +0xE0 = 0x8C, lean +0x88 by facing and mode 1 step 2 state 3 (falling)
 - `800fa35c playerHurtTumbleGetUp` (was FUN_800fa35c) (uncertain, no caller found) - substep variant of playerHurtLandRecover: tumble (anim 0x10) until landing, anim 0x2F then get-up anim 0x30, back to mode 1 step 0
+- `80102ac0 playerBiteHoldType02` (was func_80102AC0) - playerStepBitten holder for bitten objects (D_8009D2E8) of type 2 / 0x21
+- `80102f40 playerBiteHoldType03` (was func_80102F40) - playerStepBitten holder for types 3 / 0x12 / 0x2B
+- `80103d40 playerBiteHoldType0E` (was FUN_80103d40) - playerStepBitten holder for type 0xE (and 0x29 when its +0x6A == 1)
+- `801040d0 playerBiteHoldType04` (was func_801040D0) - playerStepBitten holder for types 4 / 0x29
+- `801037d8 playerBiteHoldGeneric` (was func_801037D8) - playerStepBitten holder shared by types 0, 8, 0xA, 0x13, 0x1A, 0x1E, 0x1F, 0x27, 0x28, 0x38..0x42
+- `80103290 playerBiteHoldType0B` (was func_80103290) - playerStepBitten holder for types 0xB / 0x1C
+- `80122a18 playerBiteHoldType15` (was FUN_80122a18) - playerStepBitten holder for type 0x15
+- `80104454 playerBiteHoldType18` (was FUN_80104454) - playerStepBitten holder for type 0x18
+- `80104f88 playerBittenJumpGeneric` (was func_80104F88) - playerStepBittenJump state 2 for the generic bitten types (0, 2, 8, 0xA, 0xB, 0x1E, 0x21, 0x28, 0x38..0x42)
+- `80105bcc playerBittenJumpType03` (was FUN_80105bcc) - playerStepBittenJump state 2 for types 3, 0x12, 0x1C, 0x1F, 0x2B
+- `801064d0 playerBittenJumpType0E` (was FUN_801064d0) - playerStepBittenJump state 2 for type 0xE (and 0x29)
+- `80105694 playerBittenJumpType04` (was func_80105694) - playerStepBittenJump state 2 for type 4
+- `800f3f3c playerStepAttackJump` (was func_800F3F3C) (uncertain) - player step 10: jump with hold-to-extend (playerSetJumpRiseVelocity, sfx 2/4) and air control; at the apex or on a head hit goes to step 4 state 3 (playerStepAirWeaponAttack), to step 0xE when it bites (wac == 2)
+- `80106fec playerStepSkidStop` (was func_80106FEC) (uncertain) - player step 0x13 (entered from the slide steps when contact flags +0xBE bit 1): anim 0x1A (0x2A with the area flag 0x40 and button 3C4), moves on the slope, back to walk/idle by pad and frame, jump allowed
+- `80109e50 playerStepRiseToCeiling` (was FUN_80109e50) (uncertain) - player step 0x15: anim 0x1B, then rises 1.5 px/frame (falls with gravity in state 3) until probeFlaggedSegmentA finds flag 2 above, then mode 1 step 0x16
+- `80122f14 playerStepSlideDownSurface` (was func_80122F14) - player step 0x17: slides downhill on a surface flagged in +0xBE (anim 0x11, playerAccelerateDownhill), leaves to step 0 when the flag clears, 0x13 on bit 1, falls when unsupported
+- `80107c00 playerStepSlideSteer` (was func_80107C00) - player step 0x1B: slide on a +0xBE surface with Left/Right turning (anim 8 or 0x11 by facing vs slope), can grab an object (func_8004BBC0) when it ends, else falls (step 2 state 3)
+- `80106b50 playerStepItemReactionA` (was FUN_80106b50) (uncertain) - player step 0x2A, set by playerStepUseItem for item 0x82 when D_8009D2B1 == 1: anim 0x28, sfx 0x20, timed (0x3C frames hidden with +0xAB bit 7, else 0x28), decelerates, back to step 0
+- `80106db0 playerStepItemReactionB` (was FUN_80106db0) (uncertain) - player step 0x2B (item 0x82, D_8009D2B1 == 2): anim 0x29/0x36, sfx 0x25, pushed at 0x280 against the facing for 0x1E frames, back to step 0
+- `800ffec4 playerStepUseItem` (was FUN_800ffec4) - player step 0x30: switch on the used item id (removeItemFromInventory, spawnColorBurst for items 0x62..0x64, item 0x82 -> steps 0x2A/0x2B, others set events/steps 5/0x3E)
 
 # Area overlay function names (X001..X019)
 

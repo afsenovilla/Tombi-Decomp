@@ -1,7 +1,7 @@
 // JP x00 80124EE0 168
 // Japanese version of PAL x000 80126198 (FUN_80126198.c): 228 -> 212.
 extern short FUN_80043260(void);
-extern void FUN_8001f96c(int, int, int, int);
+extern void spawnImpactEffect(int, int, int, int);
 
 void FUN_80126198(char *o, char *p)
 {
@@ -17,7 +17,7 @@ void FUN_80126198(char *o, char *p)
             p[0x69] = 0;
             *(char **)(o + 0xd4) = p;
             o[0xac] = 2;
-            FUN_8001f96c(2, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
+            spawnImpactEffect(2, *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
         }
     }
 }
