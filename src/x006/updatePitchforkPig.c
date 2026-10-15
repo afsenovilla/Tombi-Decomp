@@ -10,7 +10,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void freeObjectLayer2(TObj *);
-extern void func_8011EBD0(TObj *);
+extern void cullObjectWideWindow(TObj *);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 {
@@ -38,11 +38,11 @@ void updatePitchforkPig(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        func_8011EBD0(o);
+        cullObjectWideWindow(o);
         FUN_8001fec0(o);
         break;
     case 2:
-        func_8011EBD0(o);
+        cullObjectWideWindow(o);
         switch (o->step) {
         case 0:
             o->b0b = 1;

@@ -13,7 +13,7 @@ extern void drawSpriteFrameParts(TObj *, short, short, unsigned short);
 extern void AddDrawMode(int, int);
 extern void addTilePrim(RECT *, int, int, int);
 
-void func_8011CC18(TObj *a, int b, short x, short y)
+void drawRaceHudGauge(TObj *a, int b, short x, short y)
 {
     G *g = (*(G **)&GVARS.p4c);
     RECT r;

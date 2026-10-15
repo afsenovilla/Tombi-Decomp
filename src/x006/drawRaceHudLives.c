@@ -6,7 +6,7 @@ extern unsigned short D_800124F8;
 extern void drawSpriteFrame(void *, int, int, int);
 extern void AddDrawMode(int, int);
 
-void func_8011CD78(void *o, short x, short y)
+void drawRaceHudLives(void *o, short x, short y)
 {
     int n;
     if (((unsigned char*)&GAME.playerLives)[0] - 1 >= 10) {

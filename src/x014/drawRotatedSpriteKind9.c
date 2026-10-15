@@ -33,7 +33,7 @@ int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 #define a0 (ang & 0xff)
 #define CS(i) D_8007A3F0[i]
 
-void func_8011B830(TObj *o)
+void drawRotatedSpriteKind9(TObj *o)
 {
     short *e;
     unsigned char *q;

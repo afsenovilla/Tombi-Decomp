@@ -12,7 +12,7 @@ extern void ObjFree(TObj *);
 
 #define S(x) ((short)(x))
 
-void func_80117DDC(TObj *o)
+void updateRaceMessageSprite(TObj *o)
 {
     short t;
     short d;

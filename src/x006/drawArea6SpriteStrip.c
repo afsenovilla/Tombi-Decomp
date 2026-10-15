@@ -48,7 +48,7 @@ static __inline__ int otB(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-void func_8011D1BC(TObj *o)
+void drawArea6SpriteStrip(TObj *o)
 {
     int s;
     int n;

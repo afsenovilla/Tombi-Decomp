@@ -29,7 +29,7 @@ extern void func_801198F0(TObj *);
 extern void func_8011A73C(TObj *);
 extern void func_8011AF84(TObj *);
 extern int func_8011B238(TObj *);
-extern void func_80118304(int, int, int);
+extern void spawnRaceMessage(int, int, int);
 
 #define TAIL { \
     v.vx = W32(o); \
@@ -219,7 +219,7 @@ void func_8011A87C(TObj *o_)
                 o->step = t + 1;
                 e3->anim = D_801229A4[0];
                 AnimLoadDuration(e3);
-                func_80118304(6, 0x64, 0x64);
+                spawnRaceMessage(6, 0x64, 0x64);
                 break;
             case 1:
                 break;

@@ -390,7 +390,7 @@ address,size,name,twin
 8011e688,40,func_8011E688,
 8011e6b0,1080,func_8011E6B0,
 8011eae8,216,func_8011EAE8,
-8011ebc0,1872,func_8011EBC0,
+8011ebc0,1872,drawRotatedSpriteKind7,
 8011f310,32,hitWobbleObjectPlayerCollision,MAIN0:80068fc4
 8011f330,92,hitWobbleObjectCollision,
 8011f38c,108,func_8011F38C,

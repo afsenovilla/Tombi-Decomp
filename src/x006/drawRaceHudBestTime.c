@@ -2,7 +2,7 @@
 // MATCHING 8011bd40 1900
 #include "gcd.h"
 /* Play-time display (6 label SPRT_8 + h:mm:ss.cc digits), whole function incl. csv piece 8011BEAC. Twin of
-   func_8011C4AC (same helpers; time read once from GCD.scfe2). */
+   drawRaceHudLapTime (same helpers; time read once from GCD.scfe2). */
 typedef struct {
     unsigned int tag;
     unsigned char r0, g0, b0, code;
@@ -45,7 +45,7 @@ static __inline__ void digit2(short xa, short xb, short y, short d0, short d1)
     SPRN(xb, y, d1 * 8, 0x18);
 }
 
-void func_8011BD40(int unused, int x, short y)
+void drawRaceHudBestTime(int unused, int x, short y)
 {
     short t = (*(unsigned short*)&GCD.scfe2);
     short n;

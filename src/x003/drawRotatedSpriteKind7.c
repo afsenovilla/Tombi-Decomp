@@ -1,8 +1,9 @@
-// FUNC 8011c00c 2048 X014
-// MATCHING 8011c00c 2048
+// FUNC 8011ebc0 1872 X003
+// MATCHING 8011ebc0 1872
 #include "spad.h"
-/* Non-semitrans twin of func_8011B830 (same file, scale doubled `(unsigned char)sc << 1`, code 0x2c, rgb from velX written
-   as `f->r = f->g = f->b = ...` to get the b,g,r store order, call result tested per branch). See func_8011B830.c for the keys. */
+/* X003 twin of x014/func_8011C00C (rotated sprite, no semitrans): no anim check, byte scale `s = (unsigned char)sc` (no ba7),
+   C/D int (`(C + u)`, `(D + w)` operand order), code 0x2d/0x2f via `sc = 0x2d; f->code = sc;` (li v1), no rgb copy,
+   OT call result ignored. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -31,7 +32,7 @@ int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 #define a0 (ang & 0xff)
 #define CS(i) D_8007A3F0[i]
 
-void func_8011C00C(TObj *o)
+void drawRotatedSpriteKind7(TObj *o)
 {
     short *e;
     unsigned char *q;
@@ -41,14 +42,14 @@ void func_8011C00C(TObj *o)
     unsigned int s;
     int d;
     int ang;
-    short A, B, C, D;
+    short A, B;
+    int C, D;
     short u, w;
     int c;
     unsigned char cv;
     short sc;
     PFT4_8011C00C *f;
 
-    if (o->anim == 0) return;
     projectActorPosition(o, &LZ_FILE_CTRL, &SPAD.i74);
     xy = LZ_FILE_CTRL;
     x = xy;
@@ -64,12 +65,7 @@ void func_8011C00C(TObj *o)
         c = (signed char)o->ba5;
         sc = (signed char)c;
         if (sc != 0) {
-            if (o->ba7 != 0) {
-                s = 0x100 - ((unsigned char)sc << 1);
-                if (s == 0) goto next;
-            } else {
-                s = ((unsigned char)sc << 1) + 0x100;
-            }
+            s = (unsigned char)sc;
             A = (((signed char *)q)[14] * s) >> 8;
             C = (q[10] * s) >> 8;
         } else {
@@ -79,12 +75,7 @@ void func_8011C00C(TObj *o)
         c = (signed char)o->ba6;
         sc = (signed char)c;
         if (sc != 0) {
-            if (o->ba7 != 0) {
-                s = 0x100 - ((unsigned char)sc << 1);
-                if (s == 0) goto next;
-            } else {
-                s = ((unsigned char)sc << 1) + 0x100;
-            }
+            s = (unsigned char)sc;
             B = (((signed char *)q)[15] * s) >> 8;
             D = (q[11] * s) >> 8;
         } else {
@@ -96,38 +87,38 @@ void func_8011C00C(TObj *o)
             w = B;
             f->x0 = x + ((-u * SN(a1)) >> 12) + ((-w * SN((a1 + 0xc0) & 0xff)) >> 12);
             f->y0 = y + ((-u * CS(a1)) >> 12) + ((-w * CS((a1 + 0xc0) & 0xff)) >> 12);
-            f->x1 = x + (((u + C) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
-            f->y1 = y + (((u + C) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
-            f->x2 = x + ((-u * SN(a1)) >> 12) + (((w + D) * SN((a1 + 0x40) & 0xff)) >> 12);
-            f->y2 = y + ((-u * CS(a1)) >> 12) + (((w + D) * CS((a1 + 0x40) & 0xff)) >> 12);
-            f->x3 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
-            f->y3 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
+            f->x1 = x + (((C + u) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
+            f->y1 = y + (((C + u) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
+            f->x2 = x + ((-u * SN(a1)) >> 12) + (((D + w) * SN((a1 + 0x40) & 0xff)) >> 12);
+            f->y2 = y + ((-u * CS(a1)) >> 12) + (((D + w) * CS((a1 + 0x40) & 0xff)) >> 12);
+            f->x3 = x + (((C + u) * SN(a0)) >> 12) + (((D + w) * SN((a0 + 0xc0) & 0xff)) >> 12);
+            f->y3 = y + (((C + u) * CS(a0)) >> 12) + (((D + w) * CS((a0 + 0xc0) & 0xff)) >> 12);
         } else {
             u = -(A + C);
             w = B;
             f->x1 = x + ((-u * SN(a1)) >> 12) + ((-w * SN((a1 + 0xc0) & 0xff)) >> 12);
             f->y1 = y + ((-u * CS(a1)) >> 12) + ((-w * CS((a1 + 0xc0) & 0xff)) >> 12);
-            f->x0 = x + (((u + C) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
-            f->y0 = y + (((u + C) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
-            f->x3 = x + ((-u * SN(a1)) >> 12) + (((w + D) * SN((a1 + 0x40) & 0xff)) >> 12);
-            f->y3 = y + ((-u * CS(a1)) >> 12) + (((w + D) * CS((a1 + 0x40) & 0xff)) >> 12);
-            f->x2 = x + (((u + C) * SN(a0)) >> 12) + (((w + D) * SN((a0 + 0xc0) & 0xff)) >> 12);
-            f->y2 = y + (((u + C) * CS(a0)) >> 12) + (((w + D) * CS((a0 + 0xc0) & 0xff)) >> 12);
+            f->x0 = x + (((C + u) * SN(a0)) >> 12) + ((-w * SN((a0 + 0x40) & 0xff)) >> 12);
+            f->y0 = y + (((C + u) * CS(a0)) >> 12) + ((-w * CS((a0 + 0x40) & 0xff)) >> 12);
+            f->x3 = x + ((-u * SN(a1)) >> 12) + (((D + w) * SN((a1 + 0x40) & 0xff)) >> 12);
+            f->y3 = y + ((-u * CS(a1)) >> 12) + (((D + w) * CS((a1 + 0x40) & 0xff)) >> 12);
+            f->x2 = x + (((C + u) * SN(a0)) >> 12) + (((D + w) * SN((a0 + 0xc0) & 0xff)) >> 12);
+            f->y2 = y + (((C + u) * CS(a0)) >> 12) + (((D + w) * CS((a0 + 0xc0) & 0xff)) >> 12);
         }
         if (isQuadOnScreen(f)) {
-            f->code = 0x2c;
-            setSemiTrans(f, o->b0d >> 7);
+            sc = 0x2d;
+            f->code = sc;
+            if (o->b0d >> 7) f->code = 0x2f;
             f->uv0 = *(int *)q;
             f->uv1 = *(int *)(q + 4);
             f->uv2 = *(unsigned short *)(q + 8);
             f->uv3 = *(unsigned short *)(q + 12);
             *(unsigned short *)((char *)f + 0x16) += o->w1e;
             if (o->b0d & 1) *(unsigned short *)((char *)f + 0xe) = o->w08;
-            f->r = f->g = f->b = *(unsigned char *)&o->velX;
             if (o->b0b != 0) {
-                if (insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
+                insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             } else {
-                if (insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
+                insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             }
             D_1F800164 = (PFT4_8011C00C *)((char *)D_1F800164 + 0x28);
         }

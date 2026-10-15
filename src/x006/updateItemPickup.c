@@ -5,11 +5,11 @@
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
 extern void initItemObject(TObj *o);
-extern int func_8011EBD0(TObj *o);
+extern int cullObjectWideWindow(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void freeObjectLayer5(TObj *o);
 
-void func_8011BA3C(TObj *o)
+void updateItemPickup(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -18,7 +18,7 @@ void func_8011BA3C(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (func_8011EBD0(o) != 0) {
+        if (cullObjectWideWindow(o) != 0) {
             AnimAdvance(o);
         }
         break;

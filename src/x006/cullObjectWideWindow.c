@@ -7,7 +7,7 @@ extern void ObjListPush_1F800218(TObj *), ObjListPush_1F80021C(TObj *),
     ObjListPush_1F800228(TObj *), ObjListPush_1F80022C(TObj *),
     ObjListPush_1F800230(TObj *);
 
-int func_8011EBD0(TObj *o)
+int cullObjectWideWindow(TObj *o)
 {
     if (o->active == 0) return 0;
     o->visible = 0;

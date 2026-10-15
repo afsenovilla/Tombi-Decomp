@@ -41,7 +41,7 @@ static __inline__ int ot(unsigned *a, int b, int c, int z, unsigned e)
     return 0;
 }
 
-void func_8011CEF0(TObj *o)
+void drawArea6SpriteQuad(TObj *o)
 {
     short *f;
     int n;

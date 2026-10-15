@@ -407,7 +407,7 @@ address,size,name,twin
 8011ecc8,392,func_8011ECC8,
 8011ee50,728,updateFallingDeathFruit,
 8011f128,280,updateItemPickup,
-8011f240,1836,func_8011F240,
+8011f240,1836,drawRotatedSpriteKind8,
 8011f96c,480,func_8011F96C,
 8011fb4c,632,func_8011FB4C,
 8011fdc4,540,func_8011FDC4,

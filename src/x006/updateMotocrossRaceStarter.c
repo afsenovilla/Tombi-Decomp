@@ -11,7 +11,7 @@ extern void *D_80122FB0, *D_80122FB4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void cullObjectToDrawList(TObj *, int);
-extern void func_80118304(int, int, int);
+extern void spawnRaceMessage(int, int, int);
 extern int FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
 extern void FUN_8001f110(int);
@@ -105,7 +105,7 @@ void updateMotocrossRaceStarter(TObj *o)
             AnimLoadDuration(o);
             break;
         case 10:
-            func_80118304(o->b0c, 0xa0, 0x50);
+            spawnRaceMessage(o->b0c, 0xa0, 0x50);
             FUN_8001e4f0(o->b0c == 0 ? 0x100 : 0xff);
             o->timer = 0x3c;
             o->step++;
@@ -143,7 +143,7 @@ void updateMotocrossRaceStarter(TObj *o)
         switch (o->step) {
         case 0:
             if (pl->animTimer > 0xc0) {
-                func_80118304(4, 0x64, 0x78);
+                spawnRaceMessage(4, 0x64, 0x78);
                 o->b04 = 3;
                 break;
             }

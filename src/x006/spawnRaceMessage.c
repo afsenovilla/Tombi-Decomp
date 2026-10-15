@@ -5,7 +5,7 @@ typedef struct { short k, dx, dy, pad; } E8;
 extern E8 *D_8011F3CC[];
 extern TObj *ObjAlloc(void);
 
-void func_80118304(short sub, short x, short y)
+void spawnRaceMessage(short sub, short x, short y)
 {
     E8 *e = D_8011F3CC[sub];
     TObj *o;

@@ -2,7 +2,7 @@
 // MATCHING 8011d4e0 1812
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
-/* Rotated FT4 sprite strip; whole function incl. csv pieces D5F4/D7E0/D8C4/DAE0. Built from x006 func_8011D1BC
+/* Rotated FT4 sprite strip; whole function incl. csv pieces D5F4/D7E0/D8C4/DAE0. Built from x006 drawArea6SpriteStrip
    (same loop/OT insert, base+q pointers) and x009 func_8011F240 (rotation formulas). */
 #include "TOBJ.H"
 
@@ -57,7 +57,7 @@ static __inline__ int otB(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-void func_8011D4E0(TObj *o)
+void drawArea6RotatedSpriteStrip(TObj *o)
 {
     int xy;
     short x, y;

@@ -685,3 +685,17 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   801174C4 with the plane rotation) that carries red flowers: `8011ae94 spawnFlowerPlatformRedFlower` maps subtypes 1/2/5..9 to entries of D_8012B218 and
   `8011af18 spawnRedFlowerOnPlatform` allocates the layer 2 type 0x0A (updateRedFlower) object at the entry's offset with d90 = the platform) with
   `8012047c flowerPlatformPlayerCollision`, `801208c4 flowerPlatformObjectCollision`, `801216a0 flowerPlatformEnemyCollision`
+- Area names: the MAIN0 sources use the constants AREA01_DWARFFOREST, AREA02_DWARFVILLAGE, AREA03_PHOENIXMOUNTAIN, AREA04_HAUNTEDMANSION,
+  AREA05_BACCUSVILLAGE, AREA06_DIRTMOTOCROSS, AREA08_BACCUSLAKE, AREA09_MUSHROOMVILLAGE, AREA10_DEEPJUNGLE, AREA11_VILLAGEOFCIVILIZATION,
+  AREA13_PIGISLAND, AREA14_EVILPIGS, AREA16..19 (clock tower, iron tower, Y crossing, purified village of civilization).
+- drawObject render kinds 6..10 call fixed overlay addresses (rotated / scaled FT4 sprite strips): kind 7 `x003 8011ebc0 drawRotatedSpriteKind7`,
+  kind 8 `x009 8011f240 drawRotatedSpriteKind8`, kind 9 `x014 8011b830 drawRotatedSpriteKind9`, kind 10 `x014 8011c00c drawRotatedSpriteKind10`
+  (kind 6 = X000 80123FD0); in area 6 kinds 0..3 go to x006 `8011cef0 drawArea6SpriteQuad`, `8011d1bc drawArea6SpriteStrip`, `8011d4e0
+  drawArea6RotatedSpriteStrip`, `8011dbf4 drawArea6ScaledRotatedSpriteStrip` (from their header notes)
+- x006 (Dirt Motocross) race HUD, drawn by MAIN0 drawGameplayScene through `8011bc34 drawRaceHudIfActive` (D_800B1410 timer and flag) ->
+  `8011bcac drawRaceHud`: `8011bd40 drawRaceHudBestTime` (label sprites + m'ss"cc of GCD.scfe2 at 0x10,0x10), `8011c4ac drawRaceHudLapTime` (the same
+  layout for D_8009CFD0 at 0x10,0x1A; which time is which is a guess), `8011cc18 drawRaceHudGauge` (blinking icon + a yellow bar of width g->wd0 out of
+  0x80 over a grey one, g = GVARS.p4c), `8011cd78 drawRaceHudLives` (one or two digits of GAME.playerLives - 1 under the icon); `80118304
+  spawnRaceMessage` (ObjAlloc layer 3 type 0x56 objects from the letter table D_8011F3CC[sub]) -> `80117ddc updateRaceMessageSprite` (per-subtype timers
+  0x32 / 0x78; uncertain), `8011ba3c updateItemPickup` (layer 5 type 0x10, the same as x009's), `8011ebd0 cullObjectWideWindow` (visible within depth
+  +-0x190, x -0xC8..+0x2BC, y window 0x231 around the camera, then pushes the object on its category list)

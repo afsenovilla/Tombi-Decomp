@@ -8,7 +8,7 @@ typedef struct { char pad[0x2c]; unsigned short w2c; } PL;
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern void func_8011610C(TObj *);
 extern void func_80116254(TObj *);
-extern void func_80118304(int, int, int);
+extern void spawnRaceMessage(int, int, int);
 extern void playSFX(int);
 
 void func_801163B8(TObj *o)
@@ -40,7 +40,7 @@ void func_801163B8(TObj *o)
         goto call;
     case 4:
         if (p->w2c >= 0xc1) {
-            func_80118304(5, 100, 0x46);
+            spawnRaceMessage(5, 100, 0x46);
             playSFX(0x103);
             o->step++;
             GVARS.b3f = 1;

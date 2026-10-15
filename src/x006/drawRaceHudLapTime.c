@@ -1,7 +1,7 @@
 // FUNC 8011c4ac 1900 X006
 // MATCHING 8011c4ac 1900
 /* Timer HUD (6 label SPRT_8 + h:mm:ss.cc digits), whole function incl. csv pieces 8011C5CC/8011C758/8011CA00.
-   Twin of func_8011BD40. Keys: inline spr() with unsigned char u/v, fresh D_1F800164 pointer per sprite, digit2()
+   Twin of drawRaceHudBestTime. Keys: inline spr() with unsigned char u/v, fresh D_1F800164 pointer per sprite, digit2()
    taking both digits as short params, `d * 8` (not `<< 3`). */
 typedef struct {
     unsigned int tag;
@@ -46,7 +46,7 @@ static __inline__ void digit2(short xa, short xb, short y, short d0, short d1)
     SPRN(xb, y, d1 * 8, 0x18);
 }
 
-void func_8011C4AC(int unused, short x, short y)
+void drawRaceHudLapTime(int unused, short x, short y)
 {
     short n;
     short a;

@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
 /* Scaled rotated FT4 sprite strip; whole function incl. csv pieces DC0C/DC4C/DE64/E0D8/E1A4/E358. Sibling of
-   func_8011D4E0 (same code plus the d64>>4 scale); key: `u + C` / `w + D` operand order. */
+   drawArea6RotatedSpriteStrip (same code plus the d64>>4 scale); key: `u + C` / `w + D` operand order. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -57,7 +57,7 @@ static __inline__ int otB(unsigned *a, char *b, int c, int d, unsigned e)
     return 0;
 }
 
-void func_8011DBF4(TObj *o)
+void drawArea6ScaledRotatedSpriteStrip(TObj *o)
 {
     int xy;
     short x, y;

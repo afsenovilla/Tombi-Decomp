@@ -9,14 +9,14 @@ typedef struct {
 } S;
 
 extern S D_800B1410;
-extern void func_8011BCAC(S *);
+extern void drawRaceHud(S *);
 
-void func_8011BC34(void)
+void drawRaceHudIfActive(void)
 {
     S *p = &D_800B1410;
 
     if (GVARS.b3a) {
         if (GVARS.b3f) D_800B1410.w8 = 0x78;
-        if (D_800B1410.w8 == 0 && (p->b0 & 1)) func_8011BCAC(p);
+        if (D_800B1410.w8 == 0 && (p->b0 & 1)) drawRaceHud(p);
     }
 }
