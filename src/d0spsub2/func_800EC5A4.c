@@ -1,4 +1,5 @@
 // FUNC 800ec5a4 472 D0SPSUB2
+// MATCHING 800ec5a4 472
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -26,8 +27,9 @@ void func_800EC5A4(int n, short x, short y)
     SPRT *S = (SPRT *)0x1F800000;
     SPRT *p;
     DR_MODE *d;
-    S->code = 0x65;
     S->len = 4;
+    S->code = 0x64;
+    S->code |= 1;
     S->r0 = 0x80;
     S->g0 = 0x80;
     S->b0 = 0x80;

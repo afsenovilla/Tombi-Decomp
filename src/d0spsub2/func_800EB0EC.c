@@ -1,4 +1,5 @@
 // FUNC 800eb0ec 368 D0SPSUB2
+// MATCHING 800eb0ec 368
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -15,7 +16,7 @@ typedef struct {
 #define S ((SPRT *)0x1F800000)
 extern SPRT *D_1F800164;
 extern unsigned long *D_1F8001E0;
-extern short D_800F70DC;
+extern short D_800F70DC[];
 extern unsigned short GetClut(int x, int y);
 extern void AddDrawMode(int a, int b);
 
@@ -24,10 +25,11 @@ void func_800EB0EC(int no, int pri, short x, short y)
     SPRT *p;
     SPRT *s = (SPRT *)0x1F800000;
     S->len = 4;
+    S->code = 0x64;
+    S->code |= 1;
     S->r0 = 0x80;
     S->g0 = 0x80;
     S->b0 = 0x80;
-    S->code = 0x65;
     S->code &= ~2;
     S->x0 = x;
     S->y0 = y;
@@ -45,5 +47,5 @@ void func_800EB0EC(int no, int pri, short x, short y)
     *p = *s;
     addPrim(D_1F8001E0 + pri, p);
     D_1F800164++;
-    AddDrawMode(D_800F70DC, pri);
+    AddDrawMode(D_800F70DC[0], pri);
 }

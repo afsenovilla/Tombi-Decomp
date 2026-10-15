@@ -13,8 +13,8 @@ void func_800EAF28(Menu *m, int n)
     for (s = D_80109C10; s->x != -1; s++) {
         D_8011113C.x = s->x;
         D_8011113C.y = s->y;
-        D_8011113C.attr = 0x7C15;
         D_8011113C.w = m->w10 + s->dw;
+        D_8011113C.attr = 0x7C15;
         switch (s->idx) {
         case -1:
             if ((m->page + 1) / 10 != 0) {
