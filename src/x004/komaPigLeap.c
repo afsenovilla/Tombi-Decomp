@@ -38,7 +38,7 @@ static __inline__ void wall(TObj *o)
         o->movetab = 0;
 }
 
-void func_80120A7C(TObj *o)
+void komaPigLeap(TObj *o)
 {
     unsigned char *q = (unsigned char *)&o->wb4;
 

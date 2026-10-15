@@ -16,7 +16,7 @@ extern B D_80135B30[];
 extern A *D_801386F8[];
 extern int D_1F80018C, D_1F800190;
 extern TObj *ObjAlloc(void);
-extern int func_801206F0(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern void func_80120438(TObj *);
 extern void setEventStarted(int, int, int);
 
@@ -42,7 +42,7 @@ extern void setEventStarted(int, int, int);
         } \
     }
 
-void func_801243B8(TObj *o)
+void komaPigDropInIntro(TObj *o)
 {
     X *x = (X *)&o->wb4;
 
@@ -81,7 +81,7 @@ void func_801243B8(TObj *o)
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        if (func_801206F0(o)) {
+        if (komaPigCheckLanded(o)) {
             DUST();
             o->b69 = 0;
             x->wc = 0x100;
@@ -110,7 +110,7 @@ void func_801243B8(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
             o->b9c = 2;
-            if (func_801206F0(o)) {
+            if (komaPigCheckLanded(o)) {
                 DUST();
                 o->timer = 2;
                 o->wac = 0x16;
@@ -149,7 +149,7 @@ void func_801243B8(TObj *o)
         }
         if (o->velV > 0) {
             o->b9c = 2;
-            if (func_801206F0(o)) {
+            if (komaPigCheckLanded(o)) {
                 DUST();
                 ((unsigned char*)&GVARS.b3f)[0] = 0;
                 ((unsigned char*)&GVARS.b42)[0] = 0;

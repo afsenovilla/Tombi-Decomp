@@ -6,7 +6,7 @@ extern short D_1F80027E;
 extern unsigned short D_1F800282;
 extern short FUN_80040278(TObj *, int, int);
 
-int func_801206F0(TObj *o)
+int komaPigCheckLanded(TObj *o)
 {
     short v;
 

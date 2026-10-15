@@ -4,14 +4,14 @@
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
 extern void applyFrameVelocityX(TObj *);
 extern void func_80120438(TObj *);
-extern int func_801206F0(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern TObj *FUN_80018448(void);
 extern char D_80077CDC[];
 extern unsigned char D_80135B30[];
 extern unsigned short *D_80138734[];
 extern unsigned short *D_80138738[];
 
-void func_801210A8(TObj *o)
+void komaPigJump(TObj *o)
 {
     EX *x = (EX *)((char *)o + 0xb4);
     unsigned char *p;
@@ -35,7 +35,7 @@ void func_801210A8(TObj *o)
         goto common;
     case 2:
         applyFrameVelocityX(o);
-        func_8012080C(o);
+        komaPigCheckWall(o);
         func_80120438(o);
         o->velV += 0x20;
         o->y.raw += o->velV << 8;
@@ -47,13 +47,13 @@ void func_801210A8(TObj *o)
     case 3:
         if (o->velV < 0x400) {
             applyFrameVelocityX(o);
-            func_8012080C(o);
+            komaPigCheckWall(o);
         }
         func_80120438(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        if (func_801206F0(o)) {
+        if (komaPigCheckLanded(o)) {
             if (!(o->b69 & 8)) {
                 q = FUN_80018448();
                 if (q != 0) {

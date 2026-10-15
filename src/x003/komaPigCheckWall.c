@@ -13,7 +13,7 @@ typedef struct O {
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short probeWallAt(O *, int, int, int);
 
-int func_8012080C(O *o)
+int komaPigCheckWall(O *o)
 {
     unsigned short a, b;
     P *p = &o->p;

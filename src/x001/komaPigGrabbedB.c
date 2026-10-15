@@ -55,7 +55,7 @@ static __inline__ int land2(TObj *o)
     return 0;
 }
 
-void func_8012CB78(TObj *o)
+void komaPigGrabbedB(TObj *o)
 {
     Sub *s = (Sub *)&o->wb4;
     unsigned char *p0, *p1, *p2, *p3;

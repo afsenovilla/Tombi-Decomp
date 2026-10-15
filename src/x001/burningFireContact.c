@@ -10,7 +10,7 @@ extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void setEventStarted(int, int, int);
 extern void decreaseObjectTimer(unsigned char *, int);
 
-void func_80126A70(unsigned char *a, unsigned char *b)
+void burningFireContact(unsigned char *a, unsigned char *b)
 {
     unsigned char *c;
 

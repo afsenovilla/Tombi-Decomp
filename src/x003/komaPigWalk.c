@@ -15,8 +15,8 @@ extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern int Rand(void);
 extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
-extern int func_801206F0(TObj *);
-extern int func_8012080C(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 
 #define SETANIM(k) \
     o->anim = D_801386F8[k]; \
@@ -30,7 +30,7 @@ extern int func_8012080C(TObj *);
 static __inline__ void fall(TObj *q)
 {
     q->y.p.whole += 2;
-    func_801206F0(q);
+    komaPigCheckLanded(q);
 }
 
 static __inline__ unsigned char inrange(TObj *o)
@@ -41,7 +41,7 @@ static __inline__ unsigned char inrange(TObj *o)
     return 0;
 }
 
-void func_80121FD0(TObj *o)
+void komaPigWalk(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 
@@ -75,14 +75,14 @@ void func_80121FD0(TObj *o)
     case 2:
         AnimAdvanceWithBox(o);
         applyFrameVelocityXY(o);
-        if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (--o->timer == -1 || func_8012080C(o)) {
+        if (--o->timer == -1 || komaPigCheckWall(o)) {
             o->timer = 0x3c;
             o->wac = 10;
             o->substep++;
@@ -109,7 +109,7 @@ void func_80121FD0(TObj *o)
         unsigned char c;
         AnimAdvanceWithBox(o);
         applyAnimVelocityXY(o, 1 - o->animFrame);
-        if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;

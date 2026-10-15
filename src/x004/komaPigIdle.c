@@ -20,7 +20,7 @@ extern int func_8011FEF0(TObj *);
 extern unsigned char FUN_8011ffdc(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
-void func_80121D44(TObj *o)
+void komaPigIdle(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
     unsigned char *p;

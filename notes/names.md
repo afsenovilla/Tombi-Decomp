@@ -471,3 +471,17 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   GCD.bcdb5 += 1 with printInfoMessage(count - 1, 2), GCD.bcec1..7 flags), `80135a14 forestDwarfAssignSlot` (uncertain: picks a free slot of
   GCD.bcec1[0..6]); `80137afc leafButterflyReleased` (b04 2 step 3 of updateLeafButterfly: after item 0x10 is used, flutters inside the box of
   the parent d90; uncertain)
+- Koma pig (layer 2 type 2; MAIN0 `func_8004985C` calls the area's handler: area 0 X000 8012CCF8, area 1 x001 `8012efc4 updateKomaPig`, area 3
+  x003 `80124b78 updateKomaPig`, area 4 x004 `80123750 updateKomaPig`). The identity is uncertain (the rendered strips are not readable): the
+  handlers draw from SPR_DATA[2] with w1e 1, the pig sprite table of updatePurplePig / updateSpearPig, and type 2 is placed in the first room of
+  area 0. Same template as the other enemies: b04 2 step 0 `komaPigHit`, step 1 `komaPigGrabbed` (spawnItemNotification(0, 6), the bite hold),
+  step 2 `komaPigDefeated` (velV -0x400, movetab D_80077D0C, flies off): x001 8012df98 / 8012d4ac / 8012ca08 (+ step 3 `8012cb78 komaPigGrabbedB`,
+  also notification 0), x003 8012338c / 80122db4 / 80122c44, x004 80122a54 / 8012247c / 8012230c. The b04 1 step 1 states (x003 / x004, same
+  order; names from the anims and velocities, uncertain): state 0 `komaPigIdle` (random anim from D_80135B20, timers 0x38/0x60) 801226a0 / 80121d44,
+  1-2 `komaPigWalk` 80121fd0 / 801216b4, 3 `komaPigRest` (anims 8, 0xC..0xE, 0x20 with timers) 80121a88 / 8012116c, 4 `komaPigLeap` (sfx 7,
+  velV -0x400, movetab D_80077D0C) 80121398 / 80120a7c, 5-6 `komaPigJump` (velV -0x280) 801210a8 / 8012078c, 7 `komaPigFall` (bounces with dust
+  spawns until landed) 801209f8 / 801200dc. x003 helpers `801206f0 komaPigCheckLanded` (floor probe FUN_80040278, slope -> d8c, deadly tile
+  class >= 0xE -> w98 = 0), `8012080c komaPigCheckWall`; `801243b8 komaPigDropInIntro` (subtype 4 entry of the subtype table D_80135C64: locks the
+  player, the camera follows the pig falling in with bounces and dust, then starts event 0x1F "Where did I Come From?")
+- `x001 80126a70 burningFireContact` - MAIN0 FUN_80047484 contact case type 0xF (updateBurningFire in area 1): on touching it the first time starts
+  event 0xB1 "Something's Cookin'?" (flag GCD.bcecc) and knocks the object into b04 2

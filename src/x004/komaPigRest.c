@@ -40,7 +40,7 @@ static __inline__ short past(TObj *o)
     return 0;
 }
 
-void func_8012116C(TObj *o)
+void komaPigRest(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 

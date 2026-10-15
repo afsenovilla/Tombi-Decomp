@@ -9,8 +9,8 @@ extern char D_80077CF4[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern void applyFrameVelocityX(TObj *);
-extern void func_8012080C(TObj *);
-extern int func_801206F0(TObj *);
+extern void komaPigCheckWall(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern TObj *ObjAlloc(void);
 
@@ -35,7 +35,7 @@ extern TObj *ObjAlloc(void);
         e->b.p.whole = o->b.p.whole; \
     } }
 
-void func_801209F8(TObj *o)
+void komaPigFall(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 
@@ -54,7 +54,7 @@ void func_801209F8(TObj *o)
         break;
     case 1:
         applyFrameVelocityX(o);
-        func_8012080C(o);
+        komaPigCheckWall(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
@@ -68,13 +68,13 @@ void func_801209F8(TObj *o)
         break;
     case 2:
         applyFrameVelocityX(o);
-        func_8012080C(o);
+        komaPigCheckWall(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
         x->wC += 5;
         if (x->wC >= 0x100) x->wC = 0x100;
-        if (!func_801206F0(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         if (!(o->b69 & 8)) SPAWN();
         o->b69 = 0;
         x->wC = 0x100;
@@ -97,13 +97,13 @@ void func_801209F8(TObj *o)
         break;
     case 4:
         applyFrameVelocityX(o);
-        func_8012080C(o);
+        komaPigCheckWall(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (!func_801206F0(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         if (!(o->b69 & 8)) SPAWN();
         o->timer = 2;
         o->wac = 0x16;
@@ -123,7 +123,7 @@ void func_801209F8(TObj *o)
         break;
     case 6:
         applyFrameVelocityX(o);
-        func_8012080C(o);
+        komaPigCheckWall(o);
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
@@ -141,7 +141,7 @@ void func_801209F8(TObj *o)
         }
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (!func_801206F0(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         if (!(o->b69 & 8)) SPAWN();
         o->b69 = 0;
         x->wC = 0;

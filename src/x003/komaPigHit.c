@@ -11,7 +11,7 @@ extern unsigned char D_80135B30[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
-extern int func_801206F0(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern void cloneItemPickupObject(TObj *);
 
@@ -46,7 +46,7 @@ extern void cloneItemPickupObject(TObj *);
         o->y.raw += o->velV << 8;                                                \
     }
 
-void func_8012338C(TObj *o)
+void komaPigHit(TObj *o)
 {
     Q *q = (Q *)&o->wb4;
     unsigned char t;
@@ -73,7 +73,7 @@ void func_8012338C(TObj *o)
         break;
     case 2:
         MOVE(o, 0x40);
-        if (func_801206F0(o)) {
+        if (komaPigCheckLanded(o)) {
             unsigned char one;
             one = 1;
             if (o->movetab == 0) {
@@ -105,7 +105,7 @@ void func_8012338C(TObj *o)
         MOVE(o, 0x30);
         if (o->velV > 0) {
             o->b9c = 2;
-            if (func_801206F0(o)) {
+            if (komaPigCheckLanded(o)) {
                 if (o->movetab == 0) {
                     o->d8c = q->b6;
                     o->state = 4;
@@ -142,7 +142,7 @@ void func_8012338C(TObj *o)
             SETANIM(o, D_80138780);
         }
         o->y.p.whole += 2;
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 5:
         if (AnimAdvanceWithBox(o)) {
@@ -152,7 +152,7 @@ void func_8012338C(TObj *o)
             SETANIM(o, D_80138784);
         }
         o->y.p.whole += 2;
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 6:
         AnimAdvanceWithBox(o);
@@ -163,7 +163,7 @@ void func_8012338C(TObj *o)
             SETANIM(o, D_80138788);
         }
         o->y.p.whole += 2;
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 7:
         AnimAdvanceWithBox(o);
@@ -179,7 +179,7 @@ void func_8012338C(TObj *o)
             o->b9c = 0;
         }
         o->y.p.whole += 2;
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

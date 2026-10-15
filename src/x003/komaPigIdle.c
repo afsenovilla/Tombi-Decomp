@@ -15,8 +15,8 @@ extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern void func_801205A4(TObj *);
-extern int func_801206F0(TObj *);
-extern int func_8012080C(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 extern unsigned char FUN_801208f8(TObj *);
 
 #define SETANIM(k) \
@@ -37,7 +37,7 @@ extern unsigned char FUN_801208f8(TObj *);
         k = AnimAdvanceWithBox(o); \
     }
 
-void func_801226A0(TObj *o)
+void komaPigIdle(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
     unsigned char r;
@@ -71,14 +71,14 @@ void func_801226A0(TObj *o)
         }
         func_801205A4(o);
         o->y.p.whole += 4;
-        if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (func_8012080C(o) != 0) {
+        if (komaPigCheckWall(o) != 0) {
             o->substep = 8;
             break;
         }
@@ -102,7 +102,7 @@ void func_801226A0(TObj *o)
         break;
     case 4:
         applyFrameVelocityY(o);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         STEP(k);
         if (k == 0) break;
         if (x->b0 == 0) {
@@ -124,7 +124,7 @@ void func_801226A0(TObj *o)
         break;
     case 5:
         applyFrameVelocityY(o);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         STEP(k);
         if (k == 0) break;
         r = FUN_801208f8(o);
@@ -155,7 +155,7 @@ void func_801226A0(TObj *o)
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 8:
         o->substep++;
@@ -168,7 +168,7 @@ void func_801226A0(TObj *o)
             o->substep++;
         }
         applyFrameVelocityY(o);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 10:
         o->timer = 0x3c;
@@ -187,7 +187,7 @@ void func_801226A0(TObj *o)
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

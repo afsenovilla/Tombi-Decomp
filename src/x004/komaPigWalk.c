@@ -36,7 +36,7 @@ static __inline__ int inRange(TObj *o)
     return (unsigned short)(o->h->p.whole - *(unsigned short *)0x1F80016A + 128) < 257;
 }
 
-void func_801216B4(TObj *o)
+void komaPigWalk(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 

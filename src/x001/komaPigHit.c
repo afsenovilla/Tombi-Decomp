@@ -68,7 +68,7 @@ static __inline__ void blk(TObj *o)
     if (probeWallAt(o, o->h->p.whole + s->wb8, o->y.p.whole, 1 - o->animFrame)) o->movetab = 0;
 }
 
-void func_8012DF98(TObj *o)
+void komaPigHit(TObj *o)
 {
     Sub *t = (Sub *)&o->wb4;
     unsigned char c;

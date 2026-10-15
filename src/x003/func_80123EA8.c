@@ -8,7 +8,7 @@ extern B D_80135B30[];
 extern A *D_801386F8[];
 extern unsigned char D_80135C5C[];
 extern int func_80120438(TObj *);
-extern int func_801206F0(TObj *);
+extern int komaPigCheckLanded(TObj *);
 
 #define SETANIM(k) \
     o->anim = D_801386F8[k]; \
@@ -69,7 +69,7 @@ void func_80123EA8(TObj *o)
         o->velV += 0x30;
         if (o->velV > 0x800) o->velV = 0x800;
         o->y.raw += o->velV << 8;
-        if (func_801206F0(o)) {
+        if (komaPigCheckLanded(o)) {
             o->b9c = 0;
             o->state++;
         }

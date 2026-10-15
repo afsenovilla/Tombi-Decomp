@@ -1,5 +1,5 @@
-// FUNC 80124b78 1156 X003
-// MATCHING 80124b78 1156
+// FUNC 80123750 1092 X004
+// MATCHING 80123750 1092
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -7,22 +7,22 @@ typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
 extern short D_800A4582;
-extern Fn D_80135C64[];
+extern Fn D_801310EC[];
 extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001f9e0(void);
 extern void freeObjectLayer2(TObj *);
-extern void func_801226A0(TObj *);
-extern void func_80121FD0(TObj *);
-extern void func_80121A88(TObj *);
-extern void func_80121398(TObj *);
-extern void func_801210A8(TObj *);
-extern void func_801209F8(TObj *);
-extern void func_8012338C(TObj *);
-extern void func_80122DB4(TObj *);
-extern void func_80122C44(TObj *);
+extern void komaPigIdle(TObj *);
+extern void komaPigWalk(TObj *);
+extern void komaPigRest(TObj *);
+extern void komaPigLeap(TObj *);
+extern void komaPigJump(TObj *);
+extern void komaPigFall(TObj *);
+extern void komaPigHit(TObj *);
+extern void komaPigGrabbed(TObj *);
+extern void komaPigDefeated(TObj *);
 
-void func_80124B78(TObj *o)
+void updateKomaPig(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 
@@ -47,7 +47,6 @@ void func_80124B78(TObj *o)
             o->b68 = 0;
             *(signed char *)&o->b0f = -9;
             x->b1 = 0;
-            o->anim = 0;
             o->d8c = 0;
             o->w98 = 3;
             o->step++;
@@ -61,7 +60,7 @@ void func_80124B78(TObj *o)
         }
         break;
     case 1:
-        if (GVARS.b42 != 0 && o->subtype != 4) {
+        if (GVARS.b42 != 0) {
             FUN_800202b4(o);
             break;
         }
@@ -70,31 +69,31 @@ void func_80124B78(TObj *o)
             case 0:
                 if (FUN_800202b4(o) == 0)
                     break;
-                D_80135C64[o->subtype](o);
+                D_801310EC[o->subtype](o);
                 goto chk;
             case 1:
                 if (FUN_800202b4(o) == 0)
                     break;
                 switch (o->state) {
                 case 0:
-                    func_801226A0(o);
+                    komaPigIdle(o);
                     break;
                 case 1:
                 case 2:
-                    func_80121FD0(o);
+                    komaPigWalk(o);
                     break;
                 case 3:
-                    func_80121A88(o);
+                    komaPigRest(o);
                     break;
                 case 4:
-                    func_80121398(o);
+                    komaPigLeap(o);
                     break;
                 case 5:
                 case 6:
-                    func_801210A8(o);
+                    komaPigJump(o);
                     break;
                 case 7:
-                    func_801209F8(o);
+                    komaPigFall(o);
                     break;
                 case 8:
                 case 9:
@@ -133,7 +132,7 @@ void func_80124B78(TObj *o)
                 FUN_800202b4(o);
                 break;
             }
-            func_8012338C(o);
+            komaPigHit(o);
             FUN_800202b4(o);
             if (o->w98 == 0) {
                 o->active = 2;
@@ -145,23 +144,18 @@ void func_80124B78(TObj *o)
                 o->b04 = 3;
             break;
         case 1:
-            func_80122DB4(o);
+            komaPigGrabbed(o);
             FUN_800202b4(o);
             break;
         case 2:
-            func_80122C44(o);
+            komaPigDefeated(o);
             if (FUN_800202b4(o) == 0)
                 o->b04 = 3;
             break;
         }
         break;
     case 3:
-        if (o->subtype >= 2) {
-            (*(short *)o->d90)--;
-            freeObjectLayer2(o);
-        } else {
-            freeObjectLayer2(o);
-        }
+        freeObjectLayer2(o);
         break;
     }
 }

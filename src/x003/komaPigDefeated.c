@@ -1,14 +1,14 @@
-// FUNC 8012230c 368 X004
-// MATCHING 8012230c 368
+// FUNC 80122c44 368 X003
+// MATCHING 80122c44 368
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern char D_80077D0C[];
-extern B D_80130FD4[];
-extern A *D_80133BF4[];
+extern B D_80135B30[];
+extern A *D_80138774[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
-void func_8012230C(TObj *o)
+void komaPigDefeated(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -17,10 +17,10 @@ void func_8012230C(TObj *o)
         o->active = 2;
         o->velV = -0x400;
         o->movetab = D_80077D0C;
-        o->wac = 0x26;
+        o->wac = 0x1f;
         o->state++;
-        o->anim = D_80133BF4[0];
-        { unsigned char *p; { B *t = D_80130FD4; p = t[((A *)o->anim)->w2].c; }
+        o->anim = D_80138774[0];
+        { unsigned char *p; { B *t = D_80135B30; p = t[((A *)o->anim)->w2].c; }
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

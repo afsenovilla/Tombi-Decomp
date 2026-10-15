@@ -31,7 +31,7 @@ extern unsigned short *D_80133BD4[], *D_80133BD0[], *D_80133BD8[], *D_80133BB8[]
     if (o->velV > 0x500) o->velV = 0x500;               \
     o->y.raw += o->velV << 8;
 
-void func_801200DC(TObj *o)
+void komaPigFall(TObj *o)
 {
     EX *x = (EX *)((char *)o + 0xb4);
     unsigned char *p;

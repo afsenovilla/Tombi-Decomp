@@ -20,7 +20,7 @@ static __inline__ void SETBOX(TObj *o, int idx)
     o->box3 = b[1];
 }
 
-void func_8012078C(TObj *o)
+void komaPigJump(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
     unsigned short *a;

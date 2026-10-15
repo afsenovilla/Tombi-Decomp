@@ -1,26 +1,54 @@
-// FUNC 8012247c 1496 X004
-// MATCHING 8012247c 1496
-#include "spad.h"
+// FUNC 8012d4ac 2796 X001
+// MATCHING 8012d4ac 2796
 #include "player.h"
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern char D_80077CF4[];
-extern B D_80130FD4[];
-extern A *D_80133B5C[];
+extern B D_8013C800[];
+extern A *D_8013DAE8[];
 extern unsigned char D_800A60E4[];
 extern short D_1F80027E;
-extern unsigned short D_1F800282;
+extern short D_1F800284;
 extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *FUN_80018448(void);
 extern short probeWallAt(TObj *, short, short, short);
-extern int func_8011FDD4(TObj *);
+extern short FUN_80040278(TObj *, short, short);
+
+static __inline__ int land(TObj *o)
+{
+    short t;
+    short w;
+
+    if (o->b69 == 1) {
+        o->d8c = 0;
+        o->wb2 = 0;
+        o->b69 = 0;
+        o->wae = -1;
+        o->b9c = 0;
+        return 1;
+    }
+    if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
+        t = D_1F80027E;
+        if (t < 0) t = -t;
+        if (t >= 9) t = 8;
+        if (D_1F80027E < 0) t = -t;
+        o->d8c = -t & 0xff;
+        o->wb2 = t;
+        w = D_1F800284;
+        o->wb6 = (-t << 2) & 0xff;
+        o->b9c = 0;
+        o->wae = w;
+        return 1;
+    }
+    return 0;
+}
 
 #define SETANIM(k) \
-    o->anim = D_80133B5C[k]; \
-    { unsigned char *p; { B *t = D_80130FD4; p = t[((A *)o->anim)->w2].c; } \
+    o->anim = D_8013DAE8[k]; \
+    { unsigned char *p; { B *t = D_8013C800; p = t[((A *)o->anim)->w2].c; } \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \
@@ -29,12 +57,13 @@ extern int func_8011FDD4(TObj *);
 
 #define COMMON() \
     applyFrameVelocityY(o); \
-    probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0); \
-    probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1); \
-    func_8011FDD4(o);
+    probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0); \
+    probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1); \
+    land(o);
 
-void func_8012247C(TObj *o)
+void komaPigGrabbed(TObj *o)
 {
+    short *e = &o->wb4;
     TObj *n;
     short v;
     int d;
@@ -53,24 +82,24 @@ void func_8012247C(TObj *o)
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0);
-        probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
-        if (func_8011FDD4(o)) o->velV = 0;
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        if (land(o)) o->velV = 0;
         break;
     case 2:
         PLAYER.obj.state = 2;
         o->timer = 4;
-        o->wac = 0x23;
+        o->wac = 6;
         o->state++;
-        SETANIM(0x23);
+        SETANIM(6);
         COMMON();
         break;
     case 3:
         if (--o->timer == -1) {
             o->timer = 8;
-            o->wac = 0x24;
+            o->wac = 7;
             o->state++;
-            SETANIM(0x24);
+            SETANIM(7);
             n = FUN_80018448();
             if (n) {
                 n->active = 1;
@@ -88,8 +117,8 @@ void func_8012247C(TObj *o)
         break;
     case 4:
         if (--o->timer == -1) {
-            o->wac = 0x25;
-            SETANIM(0x25);
+            o->wac = 8;
+            SETANIM(8);
             o->state++;
             o->timer = 0xe;
         }
@@ -98,9 +127,9 @@ void func_8012247C(TObj *o)
     case 5:
         applyFrameVelocityX(o);
         o->y.p.whole += 3;
-        probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0);
-        probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
-        if (func_8011FDD4(o)) {
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        if (land(o)) {
             v = D_1F80027E;
             if (v < 0) v = -v;
             if (v > 8) v = 8;
@@ -108,25 +137,39 @@ void func_8012247C(TObj *o)
             o->wb2 = v;
             o->d8c = -v & 0xff;
             o->wb6 = (-v << 2) & 0xff;
-            o->wae = (*(unsigned short*)&SPAD.s284);
+            o->wae = D_1F800284;
             o->b9c = 0;
-            if ((short)((D_1F800282 >> 5) & 0xf) >= 0xd) o->w98 = 0;
+            if (o->animFrame) {
+                if (o->wb2 < 0) {
+                    o->velH = 0x200;
+                    o->step = 3;
+                    o->state = 1;
+                    e[8] = 1;
+                    break;
+                }
+            } else if (o->wb2 >= 2) {
+                o->velH = 0x200;
+                o->step = 3;
+                o->state = 1;
+                e[8] = 0;
+                break;
+            }
         }
         if (--o->timer == -1) {
             D_800A60E4[0] = 3;
-            o->wac = 0x23;
-            SETANIM(0x23);
+            o->wac = 6;
+            SETANIM(6);
             o->state++;
         }
         break;
     case 6:
-        o->wac = 0x23;
-        SETANIM(0x23);
+        o->wac = 6;
+        SETANIM(6);
         COMMON();
         break;
     case 7:
-        o->wac = 0x26;
-        SETANIM(0x26);
+        o->wac = 9;
+        SETANIM(9);
         o->state++;
         break;
     case 8:

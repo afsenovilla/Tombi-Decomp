@@ -16,13 +16,13 @@ extern void despawnObjectOffscreenMargin(TObj *, int);
 extern void func_8012C8EC(TObj *);
 extern void func_8012C0EC(TObj *);
 extern void func_8012BD6C(TObj *);
-extern void func_8012DF98(TObj *);
-extern void func_8012D4AC(TObj *);
-extern void func_8012CA08(TObj *);
-extern void func_8012CB78(TObj *);
+extern void komaPigHit(TObj *);
+extern void komaPigGrabbed(TObj *);
+extern void komaPigDefeated(TObj *);
+extern void komaPigGrabbedB(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_8012EFC4(TObjX *e)
+void updateKomaPig(TObjX *e)
 {
     TObj *o = &e->o;
     unsigned char *q = (unsigned char *)&o->wb4;
@@ -127,22 +127,22 @@ void func_8012EFC4(TObjX *e)
                 FUN_800202b4(o);
                 break;
             }
-            func_8012DF98(o);
+            komaPigHit(o);
             FUN_800202b4(o);
             if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:
-            func_8012D4AC(o);
+            komaPigGrabbed(o);
             FUN_800202b4(o);
             break;
         case 2:
-            func_8012CA08(o);
+            komaPigDefeated(o);
             if (FUN_800202b4(o) == 0)
                 o->b04 = 3;
             break;
         case 3:
-            func_8012CB78(o);
+            komaPigGrabbedB(o);
             FUN_800202b4(o);
             break;
         }

@@ -11,8 +11,8 @@ extern A *D_801386F8[];
 extern void FUN_8001f8e4(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
-extern int func_801206F0(TObj *);
-extern int func_8012080C(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 
 #define SETANIM(k) \
     o->anim = D_801386F8[k]; \
@@ -26,7 +26,7 @@ extern int func_8012080C(TObj *);
 static __inline__ void fall(TObj *q)
 {
     q->y.p.whole += 2;
-    func_801206F0(q);
+    komaPigCheckLanded(q);
 }
 
 static __inline__ short near(TObj *o)
@@ -39,7 +39,7 @@ static __inline__ short near(TObj *o)
     return 0;
 }
 
-void func_80121A88(TObj *o)
+void komaPigRest(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
 
@@ -53,7 +53,7 @@ void func_80121A88(TObj *o)
         o->timer = 0x28;
         o->wac = 8;
         SETANIM(8);
-        func_801206F0(o);
+        komaPigCheckLanded(o);
         break;
     case 1:
         AnimAdvanceWithBox(o);
@@ -74,8 +74,8 @@ void func_80121A88(TObj *o)
         applyFrameVelocityY(o);
         if (o->animFrame) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
-        if (func_801206F0(o) == 0 && x->w0e++ >= 4) goto fail;
-        if (func_8012080C(o)) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) goto fail;
+        if (komaPigCheckWall(o)) {
             o->state = 4;
             o->substep = 0;
             break;
@@ -98,8 +98,8 @@ void func_80121A88(TObj *o)
         applyFrameVelocityY(o);
         if (o->animFrame) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
-        func_8012080C(o);
-        if (func_801206F0(o) == 0 && x->w0e++ >= 4) {
+        komaPigCheckWall(o);
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) {
         fail:
             x->b0b = 6;
             x->b0a = 0;

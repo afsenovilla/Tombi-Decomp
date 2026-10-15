@@ -1,23 +1,14 @@
-// FUNC 8012ca08 368 X001
-// MATCHING 8012ca08 368
+// FUNC 8012230c 368 X004
+// MATCHING 8012230c 368
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
-extern B D_8013C800[];
-extern A *D_8013DAE8[];
 extern char D_80077D0C[];
+extern B D_80130FD4[];
+extern A *D_80133BF4[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
-#define SETANIM(k) \
-    o->anim = D_8013DAE8[k]; \
-    { unsigned char *p; { B *t = D_8013C800; p = t[((A *)o->anim)->w2].c; } \
-    o->box0 = *p++; \
-    o->box1 = *p++; \
-    o->box2 = *p; \
-    o->box3 = p[1]; } \
-    o->animTimer = ((A *)o->anim)->w6 & 0x3fff;
-
-void func_8012CA08(TObj *o)
+void komaPigDefeated(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -26,14 +17,21 @@ void func_8012CA08(TObj *o)
         o->active = 2;
         o->velV = -0x400;
         o->movetab = D_80077D0C;
-        o->wac = 9;
+        o->wac = 0x26;
         o->state++;
-        SETANIM(9);
+        o->anim = D_80133BF4[0];
+        { unsigned char *p; { B *t = D_80130FD4; p = t[((A *)o->anim)->w2].c; }
+        o->box0 = *p++;
+        o->box1 = *p++;
+        o->box2 = *p;
+        o->box3 = p[1]; }
+        o->animTimer = ((A *)o->anim)->w6 & 0x3fff;
         break;
     case 1:
         applyAnimVelocityX(o, 1 - o->animFrame);
         o->velV += 0x40;
-        if (o->velV > 0x400) o->velV = 0x400;
+        if (o->velV > 0x400)
+            o->velV = 0x400;
         o->y.raw += o->velV << 8;
         break;
     }
