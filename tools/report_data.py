@@ -18,6 +18,8 @@ the same name: bytes equal and relocations equal.  So:
   - all other bytes of each program that are not code (every unit of tools/units.py is code; everything else in the
     retail file: MAIN0 .rodata/.data, jump tables and tables inside the overlays, padding) go into one target-only
     unit per program, `<prog>/data`, which has no base and so counts as unmatched.
+  - data-only files (src/data/<prog>/*.c with a `// DATA addr size PROG` header: tables only other data points to, such
+    as animation scripts) are one data-only unit each, <prog>/data/<name>, compared the same way (claim_data).
   So total_data = the whole non-code part of every reported program, matched_data = the bytes C really reproduces.
   .bss is not counted (it is not in the retail files).
 """
@@ -41,6 +43,20 @@ def claim(src, obj, addr, size, game, vram, hdr):
     if not place: return None
     syms = {n: next(iter(v)) for n, v in u["syms"].items() if len(v) == 1}
     return dict(place=place, all_place=u["place"], syms=syms)
+
+
+def claim_data(src, obj, addr, size, prog, game, vram, hdr):
+    """Same as claim() for a data-only file (src/data/<prog>/*.c, `// DATA addr size PROG`, see build_full.data_files):
+    its single data section at addr, checked like build_full does. Returns info or None."""
+    u = dict(src=src, obj=obj, addr=addr, size=size, prog=prog.lower(), data=True)
+    import io, contextlib
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        ok = BF.analyse(u, game, vram, hdr)
+    if not ok:
+        print(out.getvalue().strip()); return None
+    syms = {n: next(iter(v)) for n, v in u["syms"].items()}
+    return dict(place=dict(u["place"]), all_place=u["place"], syms=syms)
 
 
 def patch_base(obj, out, info):

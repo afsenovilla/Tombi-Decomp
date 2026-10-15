@@ -316,6 +316,21 @@ def main():
             except subprocess.CalledProcessError:
                 print("base compile failed:", u.file)
             shutil.rmtree(d, ignore_errors=True)
+    # data-only files (src/data/<prog>/*.c, see tools/build_full.py data_files)
+    import build_full as BFM
+    dfiles = {}
+    for prog in PROGS:
+        for path, stem, addr, size in BFM.data_files(prog):
+            d = tempfile.mkdtemp()
+            try:
+                NC["build"](path, "-O2 -G0", d, inc)
+                out = "build/base/%s/data/%s.o" % (prog, stem)
+                os.makedirs(os.path.dirname(out), exist_ok=True)
+                shutil.copy(d + "/a.o", out); nb += 1
+                dfiles.setdefault(prog, []).append((path, stem, addr, size, out))
+            except subprocess.CalledProcessError:
+                print("base compile failed:", path)
+            shutil.rmtree(d, ignore_errors=True)
     shutil.rmtree(inc, ignore_errors=True)
     run([sys.executable, "tools/gen_symbols.py"])
     if "--no-split" not in ARGS:
@@ -383,6 +398,26 @@ def main():
                     "metadata": {"progress_categories": [prog, "sdk" if u.lib else "game"]}}
             if (P, u.addr) in base: unit["base_path"] = dbase or base[(P, u.addr)]
             units.append(unit)
+        for path, stem, addr, size, obj in dfiles.get(prog, []):
+            info = RD.claim_data(path, obj, addr, size, prog, game, gbase, 0)
+            if not info: continue
+            if any(addr < d and c < addr + size for c, d in code + claimed):
+                print("data file %s overlaps code or data claimed by another unit: not reported" % path); continue
+            out = "build/target/%s/data/%s.o" % (prog, stem)
+            dbase = "build/base_data/%s/data/%s.o" % (prog, stem)
+            for f in (out, dbase): os.makedirs(os.path.dirname(f), exist_ok=True)
+            dclaims = RD.patch_base(obj, dbase, info)
+            with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + RD.target_asm(dclaims, game, gbase, 0, dtmp))
+            try:
+                run(AS + [t.name, "-o", out]); nt += 1
+            except subprocess.CalledProcessError as e:
+                print("target asm failed:", path, e.stderr[:120]); continue
+            finally:
+                os.unlink(t.name)
+            claimed += [(a, a + n) for a, n in dclaims.values()]
+            units.append({"name": "%s/data/%s" % (prog, stem), "target_path": out, "base_path": dbase,
+                          "metadata": {"progress_categories": [prog, "game"]}})
         # every other non-code byte of the program: one target-only unit (unmatched until C claims it)
         rest = "build/target/%s/data.o" % prog
         n = RD.rest_object(rest, game, gbase, 0, code, claimed, AS)

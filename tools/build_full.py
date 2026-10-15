@@ -23,6 +23,10 @@ How it works (all output under build/full/, ignored by git):
   4. All remaining splat lines go into one assembly file per program, cut into one section per
      contiguous range (`.org` keeps every line at its address); a linker script puts these sections and
      the C objects in address order.
+     Data-only files, src/data/<prog>/*.c with a `// DATA addr size PROG` header instead of `// FUNC` (tables no
+     code of ours references, e.g. animation scripts reached through other tables): the one data section the file
+     defines is placed at addr, with the same checks (retail bytes, relocations resolved from the retail words); an
+     extern it names must be that address: a D_/func_<addr> name, or a symbol of config/symbol_addrs_*.txt there.
   5. ld + objcopy produce build/full/MAIN0.EXE (with the PS-X EXE header) and build/full/X000.BIN,
      copied to build/MAIN0.EXE and build/X000.BIN, and compared with the retail files.
 
@@ -197,6 +201,52 @@ def read_auto_syms(p):
 NC = {}
 
 
+DATA_HDR = re.compile(r"^//\s*DATA\s+([0-9a-fA-F]+)\s+(\d+)[ \t]+(MAIN0|X0\d\d)\s*$", re.M)
+
+
+def data_header(path):
+    """(addr, size, PROG) of a data-only file's `// DATA addr size PROG` header, or None."""
+    m = DATA_HDR.search(open(path, errors="replace").read(400))
+    return (int(m.group(1), 16), int(m.group(2)), m.group(3)) if m else None
+
+
+def data_files(prog):
+    """[(path, stem, addr, size)] of the data-only files of a program (src/data/<prog>/*.c)."""
+    d = os.path.join(ROOT, "src", "data", prog.lower())
+    out = []
+    for f in sorted(os.listdir(d)) if os.path.isdir(d) else ():
+        if not f.endswith(".c"): continue
+        h = data_header(os.path.join(d, f))
+        if h and h[2].lower() == prog.lower():
+            out.append((os.path.join(d, f), f[:-2], h[0], h[1]))
+    return out
+
+
+_NAMES = {}
+
+
+def symbol_names(prog):
+    """{name: address} that an extern of a data-only file of `prog` may use: config/symbol_addrs of MAIN0 and of prog."""
+    key = prog.lower()
+    if key not in _NAMES:
+        names = {}
+        for p in ("main0", key):
+            f = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % p)
+            if not os.path.exists(f): continue
+            for l in open(f):
+                m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);", l)
+                if m: names.setdefault(m.group(1), int(m.group(2), 16))
+        _NAMES[key] = names
+    return _NAMES[key]
+
+
+def name_ok(prog, name, addr):
+    """True when an extern `name` of a data-only file can stand for `addr`."""
+    m = re.match(r"(?:D|func|FUN|DAT|LAB|jtbl)_([0-9A-Fa-f]{8})$", name)
+    if m: return int(m.group(1), 16) == addr
+    return symbol_names(prog).get(name) == addr
+
+
 def _init_nc():
     src = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
     NC.update({"__file__": os.path.join(ROOT, "tools", "ncheck.py"), "__name__": "ncheck_mod"})
@@ -236,6 +286,12 @@ def compile_all():
         obj = os.path.join(OUT, "obj", f[:-2] + ".o")
         units.append(dict(name=f[:-2], src="src/" + f, addr=addr, size=size, prog=prog.lower(), obj=obj))
         jobs.append((path, flags, obj, inc))
+    for p in PROGS:
+        for path, stem, addr, size in data_files(p):
+            obj = os.path.join(OUT, "obj", "data_%s_%s.o" % (p, stem))
+            units.append(dict(name="data/%s/%s" % (p, stem), src=os.path.relpath(path, ROOT), addr=addr, size=size,
+                              prog=p, obj=obj, data=True))
+            jobs.append((path, "-O2 -G0", obj, inc))
     with Pool(JOBS) as pool:
         res = pool.map(_compile, jobs)
     ok = []
@@ -256,6 +312,7 @@ def analyse(u, game, vram, hdr):
     e = Elf(u["obj"])
     u["elf"] = e
     gb = lambda a, n: game[hdr + a - vram: hdr + a - vram + n]
+    if u.get("data"): return analyse_data(u, e, gb, vram, len(game) - hdr)
     if e.size(".text") != u["size"]:
         print("WARN %s: .text is %d bytes, FUNC says %d: kept as asm" % (u["src"], e.size(".text"), u["size"])); return False
     u["place"] = {".text": u["addr"]}
@@ -366,6 +423,46 @@ def analyse(u, game, vram, hdr):
         if ours != ret:
             k = next(i for i in range(len(ours)) if ours[i] != ret[i])
             problems.append("%s bytes differ from the game at %08x" % (sec, b + k))
+    if problems:
+        print("WARN %s: kept as asm: %s" % (u["src"], "; ".join(problems[:4]))); return False
+    return True
+
+
+def analyse_data(u, e, gb, vram, n):
+    """Places a data-only object (see data_files): its single data section at the DATA address."""
+    secs = [s for s in e.idx if e.size(s) and e.sh[e.idx[s]][2] & 2 and s not in (".reginfo", ".pdr", ".MIPS.abiflags")]  # allocated sections with bytes
+    problems = []
+    if len(secs) != 1 or secs[0] not in DATA_SECS or e.sh[e.idx[secs[0]]][1] == 8:
+        problems.append("needs exactly one initialized data section, has %s" % secs)
+    elif e.size(secs[0]) != u["size"]:
+        problems.append("%s is %d bytes, DATA says %d" % (secs[0], e.size(secs[0]), u["size"]))
+    elif not (vram <= u["addr"] and u["addr"] + u["size"] <= vram + n):
+        problems.append("outside the program")
+    if not problems:
+        sec, a = secs[0], u["addr"]
+        u["place"], u["syms"] = {sec: a}, {}
+        ours, ret = e.data(sec), gb(a, u["size"])
+        rel = e.relocs(sec)
+        for off, ty, sym in rel:
+            if ty != 2: problems.append("relocation type %d at %s+%x" % (ty, sec, off)); continue
+            t = (W(ret, off) - W(ours, off)) & 0xFFFFFFFF  # address the retail word gives the symbol (or section)
+            if sym["shndx"] == 0:
+                if not name_ok(u["prog"], sym["name"], t):
+                    problems.append("%s at %s+%x would be %08x" % (sym["name"], sec, off, t))
+                u["syms"].setdefault(sym["name"], set()).add(t)
+            elif sym["shndx"] == e.idx[sec]:
+                if (t - (sym["value"] if sym["type"] != 3 else 0)) & 0xFFFFFFFF != a:
+                    problems.append("pointer at %s+%x does not point where the retail one does" % (sec, off))
+            else:
+                problems.append("relocation against another section at %s+%x" % (sec, off))
+        mask = bytearray(ours), bytearray(ret)
+        for off, ty, _ in rel:
+            for buf in mask: struct.pack_into("<I", buf, off, 0)
+        if mask[0] != mask[1]:
+            k = next(i for i in range(len(ours)) if mask[0][i] != mask[1][i])
+            problems.append("%s bytes differ from the game at %08x" % (sec, a + k))
+        for nm, v in u["syms"].items():
+            if len(v) > 1: problems.append("symbol %s resolves to %s" % (nm, sorted(map(hex, v))))
     if problems:
         print("WARN %s: kept as asm: %s" % (u["src"], "; ".join(problems[:4]))); return False
     return True
@@ -523,7 +620,8 @@ def build_prog(p, units):
     open(out, "wb").write(body)
     shutil.copy(out, os.path.join(ROOT, "build", P["out"]))
     ncfun = sum(1 for it in order if it[2] == "c" and it[3][1] == ".text")
-    return out, game, order, ncfun, len(units)
+    ndata = sum(1 for it in order if it[2] == "c" and it[3][0].get("data"))
+    return out, game, order, (ncfun, ndata), sum(1 for u in units if not u.get("data"))
 
 
 def report(p, out, game, order, ncfun, nunits):
@@ -531,7 +629,9 @@ def report(p, out, game, order, ncfun, nunits):
     data = open(out, "rb").read()
     sha = hashlib.sha1(data).hexdigest()
     ok = sha == P["sha1"]
-    print("%-9s %s  %s  (%d of %d src files linked, the rest kept as asm)" % (P["out"], sha, "OK" if ok else "FAIL", ncfun, nunits))
+    ncfun, ndata = ncfun
+    print("%-9s %s  %s  (%d of %d src files linked, the rest kept as asm; %d data files)"
+          % (P["out"], sha, "OK" if ok else "FAIL", ncfun, nunits, ndata))
     if ok: return True
     if len(data) != len(game): print("   size %d, retail %d" % (len(data), len(game)))
     diffs = [i for i in range(min(len(data), len(game))) if data[i] != game[i]]
