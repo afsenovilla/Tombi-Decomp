@@ -1,0 +1,38 @@
+name: D0SPSUB2.BIN
+sha1: 6da6b0721a263baefa9f070f5138fc8f080a961c
+options:
+  basename: d0spsub2
+  target_path: game/disc/fs/SYSTEM/D0SPSUB2.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/d0spsub2
+  src_path: build/splat_src/d0spsub2
+  build_path: build
+  ld_script_path: build/d0spsub2.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_d0spsub2.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.d0spsub2.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.d0spsub2.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: d0spsub2
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, data, d0spsub2_header]
+      - [0x27C, c, d0spsub2]
+      - [0x50A0, data, d0spsub2_data]
+  - [0xF6E8]

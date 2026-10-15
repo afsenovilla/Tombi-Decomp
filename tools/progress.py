@@ -36,6 +36,10 @@ def read_csv(path):
 
 
 OVERLAYS = ["X%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+import sysovl as _SO
+SYSOVL = [p for p, (path, sha, code) in _SO.SYSOVL.items()
+          if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "game", path))]
 OVL_AREAS = {"X001": "AREA01, AREA07", "X002": "AREA02, AREA19 (alt.)", "X004": "AREA04, AREA12"}
 _RANGES = {}
 
@@ -48,7 +52,7 @@ def src_ranges():
         for fn in files:
             if not fn.endswith(".c"): continue
             t = open(os.path.join(dp, fn), errors="replace").read()
-            h = re.search(r"//\s*FUNC\s+[0-9a-fA-F]+\s+\d+[ \t]*(MAIN0|X0\d\d)?", t)
+            h = re.search(r"//\s*FUNC\s+[0-9a-fA-F]+\s+\d+[ \t]*(MAIN0|X0\d\d|%s)?(?!\w)" % _SO.PROG_RE, t)
             prog = (h.group(1) if h else None) or "MAIN0"
             for m in re.finditer(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", t):
                 _RANGES.setdefault(prog, []).append((int(m.group(1), 16), int(m.group(2))))
@@ -194,7 +198,7 @@ def overlays():
     def is_matched(prog, a, size):
         return sum(max(0, min(a + size, s + n) - max(a, s)) for s, n in src_ranges().get(prog, [])) >= size
     out, todo = {}, []
-    for p in OVERLAYS:
+    for p in OVERLAYS + SYSOVL:
         rows = read_csv(N("notes", "functions_%s.csv" % p.lower()))
         d = dict(game=0, n=len(rows), matched=0, n_matched=0, piece=0, x000=0, dup=0, new=0, n_new=0,
                  uniq=0, uniq_matched=0, n_uniq=0, n_uniq_matched=0)
@@ -210,7 +214,7 @@ def overlays():
             tw = r.get("twin") or ""
             if tw[:5] in ("MAIN0", "X000:") and is_matched(tw.split(":")[0], int(tw.split(":")[1], 16), size): st = "piece"
             elif tw.startswith("X000:"): st = "x000"
-            elif tw.startswith("X0"): st = "dup"
+            elif tw: st = "dup"
             else: st = "new"; d["n_new"] += 1
             d[st] += size - cov
             todo.append((size, p, r["address"], r["name"], st, tw))
@@ -233,9 +237,12 @@ def summary_lines(res, cov, ovl, tot, matching):
     T_ = U.totals()
     m0, x0 = T_["MAIN0"], T_["X000"]
     ou, om, onu, onm = (sum(T_[p][i] for p in U.OVERLAYS) for i in (0, 1, 2, 3))
+    su, sm, snu, snm = (sum(T_[p][i] for p in U.SYSOVL if p in T_) for i in (0, 1, 2, 3))
     rows = [("MAIN0.EXE: engine, shared by every area", m0[0], m0[2], m0[1], m0[3]),
             ("X000.BIN: AREA00 + object code reused by all areas", x0[0], x0[2], x0[1], x0[3]),
             ("X001..X019.BIN: code specific to the other areas", ou, onu, om, onm)]
+    if su:
+        rows.append(("SYSTEM/*.BIN: options, sub-screens, game over, info screens", su, snu, sm, snm))
     T = sum(r[1] for r in rows); M = sum(r[3] for r in rows); F = sum(r[2] for r in rows); FM = sum(r[4] for r in rows)
     summary_lines.whole, summary_lines.areas, summary_lines.rows = (M, T), (om, ou), rows
     L = ["**Whole game: %.2f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
@@ -300,19 +307,20 @@ def main():
             pct(cov[k.split(".")[0]], r["game"]), md.get(k.split(".")[0], [0, 0])[1], r["lib"],
             libcov[k.split(".")[0]], pct(libcov[k.split(".")[0]], r["lib"])))
     w("")
-    w("## Area overlays (X001..X019)\n")
+    w("## Area overlays (X001..X019) and SYSTEM overlays\n")
     w("Raw code blobs loaded at `0x800E8028` like X000 ([notes/overlays.md](../notes/overlays.md)). Boundaries come from")
     w("`tools/areas.py bounds` (`notes/functions_x0nn.csv`); about 173 KB of object code is shared by all of them (and X000)")
     w("at the same addresses, so most of it is matched by copying the X000/MAIN0 twin (`tools/areas.py twins`, sources")
     w("in `src/x0nn/`). Unmatched functions are listed in [notes/todo_areas.csv](../notes/todo_areas.csv) by status:")
     w("*x000* = identical to an X000 function not matched yet, *dup* = identical to a function of an earlier overlay,")
     w("*piece* = identical to a Ghidra piece of a larger matched X000 range (needs its own C),")
-    w("*new* = no twin anywhere (the real new work).\n")
+    w("*new* = no twin anywhere (the real new work). The SYSTEM overlays (`tools/sysovl.py`: O0PTSUB0, D0SPSUB*, G0OVER,")
+    w("I0NFO*, also at `0x800E8028`, sources in `src/<name>/`) are linked from source by `tools/build_full.py`.\n")
     w("| Overlay | Areas | Code | Functions | Matching | Pending: x000 | dup | piece | new |")
     w("|---|---|---|---|---|---|---|---|---|")
     for p, d in ovl.items():
         w("| %s.BIN | %s | %d B | %d | %.1f %% (%d f) | %d B | %d B | %d B | %d B (%d f) |" % (
-            p, OVL_AREAS.get(p, "AREA" + p[2:]), d["game"], d["n"], pct(d["matched"], d["game"]), d["n_matched"],
+            p, OVL_AREAS.get(p, "SYSTEM" if p in SYSOVL else "AREA" + p[2:]), d["game"], d["n"], pct(d["matched"], d["game"]), d["n_matched"],
             d["x000"], d["dup"], d["piece"], d["new"], d["n_new"]))
     w("| **Total** | | %d B | %d | %.1f %% (%d f) | %d B | %d B | %d B | %d B (%d f) |" % (
         og, sum(d["n"] for d in ovl.values()), pct(om, og), on, sum(d["x000"] for d in ovl.values()),
@@ -323,7 +331,8 @@ def main():
     w("## What is NOT counted (the real denominator is larger)\n")
     w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
     w("- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.")
-    w("- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages.")
+    w("- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages, and so are the")
+    w("  SYSTEM overlays of the variants 1..8 (D1SPSUB ... I8NFO3; only the variant 0 of MAIN0 is counted).")
     w("- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified")
     w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
     w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])

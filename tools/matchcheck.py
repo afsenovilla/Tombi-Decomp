@@ -34,6 +34,13 @@ OVERLAYS = ["X%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17
 for _p in OVERLAYS:
     IMAGES[_p] = ("AREA%s/%s.BIN" % (_p[2:], _p), "raw")
     RAW_BASE[_p] = 0x800E8028
+# SYSTEM code overlays (tools/sysovl.py): O0PTSUB0, D0SPSUB*, G0OVER, I0NFO* at 0x800E8028; sources in src/<prog lower>/
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import sysovl as _SO
+for _p, (_path, _sha, _code) in _SO.SYSOVL.items():
+    IMAGES[_p] = (_path, "raw")
+    RAW_BASE[_p] = _SO.BASE
+OVERLAYS = OVERLAYS + _SO.PROGS
 
 
 def game_bytes(prog, addr, size):
@@ -102,7 +109,7 @@ def mask(code, relocs):
 
 def header(src):
     txt = open(src).read()
-    m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(MAIN0|X0\d\d)?", txt)
+    m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(MAIN0|X0\d\d|%s)?(?!\w)" % _SO.PROG_RE, txt)
     f = re.search(r"//\s*FLAGS\s+(.*)", txt)
     if not m: return None
     return int(m.group(1), 16), int(m.group(2)), m.group(3) or "MAIN0", (f.group(1).strip() if f else "-O2 -G0")

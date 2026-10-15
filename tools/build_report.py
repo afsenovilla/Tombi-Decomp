@@ -3,7 +3,7 @@
 
 Steps (all output under build/ and asm/, both ignored by git):
   1. splat splits the retail binaries (config/main0.yaml, config/x000.yaml, config/x0nn.yaml for the area
-     overlays) into one .s per function,
+     overlays, config/<sysovl>.yaml for the SYSTEM overlays of tools/sysovl.py) into one .s per function,
      named after our C functions (tools/gen_symbols.py writes the symbol files first).
   2. Each retail function is assembled into a *target* object  -> build/target/<prog>/<func>.o
   3. Each src/*.c and src/x0nn/*.c is compiled with the native toolchain (tools/ncheck.py) -> build/base/<prog>/<func>.o
@@ -38,6 +38,11 @@ OVERLAYS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17
 OVERLAYS = [p for p in OVERLAYS if os.path.exists(os.path.join(ROOT, "game", "AREA" + p[2:], p.upper() + ".BIN"))]
 PROGS.update({p: p.upper() for p in OVERLAYS})
 PROGS_VRAM = {"MAIN0": 0x80010000}  # first byte after the file header (U.BINS gives the address of file offset 0)
+# SYSTEM code overlays (tools/sysovl.py): src/<prog lower>/, linked by tools/build_full.py like MAIN0 / X000
+import sysovl as _SO
+SYSOVL = [p.lower() for p, (path, sha, code) in _SO.SYSOVL.items() if os.path.exists(os.path.join(ROOT, "game", path))]
+PROGS.update({p: p.upper() for p in SYSOVL})
+LINKED = LINKED + tuple(SYSOVL)
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
 
@@ -432,7 +437,8 @@ def main():
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": "game", "name": "Game code"}, {"id": "sdk", "name": "Psy-Q SDK"},
                                    {"id": "main0", "name": "MAIN0.EXE"}, {"id": "x000", "name": "X000.BIN (AREA00)"}]
-                                  + [{"id": p, "name": "%s.BIN (AREA%s)" % (p.upper(), p[2:])} for p in OVERLAYS],
+                                  + [{"id": p, "name": "%s.BIN (AREA%s)" % (p.upper(), p[2:])} for p in OVERLAYS]
+                                  + [{"id": p, "name": "%s.BIN (SYSTEM)" % p.upper()} for p in SYSOVL],
            "options": {"functionRelocDiffs": "none"},
            "units": units}
     json.dump(cfg, open("objdiff.json", "w"), indent=1)
@@ -440,7 +446,7 @@ def main():
     gen = lambda: subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
     gen()
     # "complete" (decomp.dev "fully linked"): a unit counts only when its object is really linked into the executable
-    # by tools/build_full.py (src file of MAIN0 / X000; the area overlays are not linked from source yet) and matches
+    # by tools/build_full.py (src file of MAIN0 / X000 / the SYSTEM overlays; the area overlays are not linked from source yet) and matches
     # 100 % of its code and of the data sections it claims (tools/report_data.py: the ones build_full places at their
     # retail address; data the C does not define still comes from splat and stays in <prog>/data). Needs the first pass.
     rep = {u["name"]: u for u in json.load(open("build/report.json"))["units"]}

@@ -1,0 +1,38 @@
+name: I0NFO2.BIN
+sha1: 43b1ce474711d299c0a4bb7c5add80e745b67f77
+options:
+  basename: i0nfo2
+  target_path: game/disc/fs/SYSTEM/I0NFO2.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/i0nfo2
+  src_path: build/splat_src/i0nfo2
+  build_path: build
+  ld_script_path: build/i0nfo2.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_i0nfo2.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.i0nfo2.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.i0nfo2.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: i0nfo2
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, data, i0nfo2_header]
+      - [0xB00, c, i0nfo2]
+      - [0x16BA8, data, i0nfo2_data]
+  - [0x218DC]

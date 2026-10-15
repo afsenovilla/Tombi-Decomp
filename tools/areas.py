@@ -24,8 +24,20 @@ OVERLAYS = {"X000": "AREA00/X000.BIN"}
 for _n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
     OVERLAYS["X%03d" % _n] = "AREA%02d/X%03d.BIN" % (_n, _n)
 NEW = [p for p in OVERLAYS if p != "X000"]
+# SYSTEM code overlays (tools/sysovl.py): same base, code starts after their header table
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import sysovl as _SO
+FIRST = {}
+for _p, (_path, _sha, _code) in _SO.SYSOVL.items():
+    OVERLAYS[_p] = _path
+    FIRST[_p] = _code
 ENTRY_STUBS = (0x800E9ECC, 0x800E9F74)  # header pointer targets: jal/j stubs + shared epilogue (not a C function)
 JR_RA = 0x03E00008
+
+
+def first_code(prog):
+    """Address of the first function of an overlay (after the header table and its entry stubs)."""
+    return FIRST.get(prog, ENTRY_STUBS[1])
 
 
 def path(prog):
@@ -205,11 +217,16 @@ def rehex(name, addr):
 
 
 def src_functions():
-    """Matched src/*.c (MAIN0 and X000): [(stem, prog, addr, size, path)]."""
+    """Matched src/*.c (MAIN0 and X000) and src/<sysovl>/*.c: [(stem, prog, addr, size, path)].
+    (The SYSTEM overlays share code with each other, so their matched files are twin sources too.)"""
     out = []
-    for f in sorted(os.listdir(os.path.join(ROOT, "src"))):
+    paths = [os.path.join(ROOT, "src", f) for f in sorted(os.listdir(os.path.join(ROOT, "src")))]
+    for sp in _SO.PROGS:
+        d = os.path.join(ROOT, "src", sp.lower())
+        if os.path.isdir(d): paths += [os.path.join(d, f) for f in sorted(os.listdir(d))]
+    for p in paths:
+        f = os.path.basename(p)
         if not f.endswith(".c"): continue
-        p = os.path.join(ROOT, "src", f)
         t = open(p, errors="replace").read()
         m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s*(\w+)?", t)
         if not m or "// MATCHING" not in t: continue
@@ -260,9 +277,11 @@ def analyse(progs):
         for kind, pats in (("src", pats_src), ("x000", pats_gh)):
             for (stem, tp, ta, ts, path), P in pats:
                 if ts < 8 or len(P) * 4 != ts: continue
+                if tp in _SO.SYSOVL and (prog not in _SO.SYSOVL or _SO.PROGS.index(tp) >= _SO.PROGS.index(prog)):
+                    continue  # a SYSTEM overlay file is a twin source only for the later SYSTEM overlays
                 if kind == "x000" and not (len(P) >= 2 and P[-2] == JR_RA): continue  # Ghidra fragment, not a function
                 for c in im.find(P):
-                    if c < (ENTRY_STUBS[1] - BASE) // 4: continue
+                    if c < (first_code(prog) - BASE) // 4: continue
                     claim(c, len(P), (kind, tp, ta, stem, path))
         fixed = {BASE + 4 * c: 4 * (e - c) for c, (e, _) in taken.items()}
         fl = functions(prog, fixed)
@@ -326,7 +345,7 @@ def functions(prog, fixed=None):
             if lo <= t < lo + 4 * n: im_calls.add((t - lo) // 4)
     datarefs = {(w - lo) // 4 for w in W if lo <= w < lo + 4 * n and w % 4 == 0}
     fx = {(a - lo) // 4: (a - lo + s) // 4 for a, s in fixed.items()}
-    first = (ENTRY_STUBS[1] - lo) // 4
+    first = (first_code(prog) - lo) // 4
     seedset = {s for s in im_calls if s >= first} | set(fx)
     out = {}
     pend = sorted(seedset)
@@ -499,7 +518,7 @@ def sym_map(code, rels, tb, ob):
 
 def cmd_twins(progs):
     import shutil, subprocess
-    res = analyse(NEW)
+    res = analyse(progs)
     NC = _nc(); inc = _inc()
     cache = {}
     report = {}

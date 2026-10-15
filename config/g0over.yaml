@@ -1,0 +1,38 @@
+name: G0OVER.BIN
+sha1: 5d3110197fb899bf9048b20657107c5c1bd3c0e5
+options:
+  basename: g0over
+  target_path: game/disc/fs/SYSTEM/G0OVER.BIN
+  base_path: ..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/g0over
+  src_path: build/splat_src/g0over
+  build_path: build
+  ld_script_path: build/g0over.ld
+  symbol_addrs_path:
+    - config/symbol_addrs_g0over.txt
+    - config/symbol_addrs_main0.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.g0over.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.g0over.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: g0over
+    type: code
+    start: 0x0
+    vram: 0x800E8028
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, data, g0over_header]
+      - [0x1C, c, g0over]
+      - [0xC6C, data, g0over_data]
+  - [0xCAC]

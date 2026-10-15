@@ -30,7 +30,9 @@ How it works (all output under build/full/, ignored by git):
   5. ld + objcopy produce build/full/MAIN0.EXE (with the PS-X EXE header) and build/full/X000.BIN,
      copied to build/MAIN0.EXE and build/X000.BIN, and compared with the retail files.
 
-Usage: python3 tools/build_full.py [--no-split] [-j N] [--asm-only] [--keep-going]
+Also links the SYSTEM code overlays of tools/sysovl.py (src/<prog>/*.c + splat), each checked by its sha1.
+
+Usage: python3 tools/build_full.py [--no-split] [-j N] [--asm-only] [--keep-going] [--only prog,prog]
   --no-split   reuse the previous splat output in build/full/asm
   --asm-only   ignore src/ (pure splat assembly: checks the asm path alone)
 Requirements: the same as tools/ncheck.py (tools/setup_native.sh) and splat 0.35.2 (tools/requirements.txt).
@@ -50,6 +52,16 @@ PROGS = {
     "x000": dict(name="X000", game="game/AREA00/X000.BIN", vram=0x800E8028, size=0x53F50, header=0,
                  sha1="ce168475f667f2ca8842eabad2aec829e301c5c5", out="X000.BIN"),
 }
+# SYSTEM code overlays (tools/sysovl.py), linked from src/<prog lower>/*.c + splat, each checked by its sha1
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import sysovl as _SO
+for _p, (_path, _sha, _code) in _SO.SYSOVL.items():
+    _f = os.path.join(ROOT, "game", _path)
+    PROGS[_p.lower()] = dict(name=_p, game="game/" + _path, vram=_SO.BASE, size=os.path.getsize(_f) if os.path.exists(_f) else 0,
+                             header=0, sha1=_sha, out=_p + ".BIN", src="src/" + _p.lower())
+if "--only" in ARGS:  # --only g0over,i0nfo: build just these programs (quick iteration)
+    _keep = ARGS[ARGS.index("--only") + 1].lower().split(",")
+    PROGS = {k: v for k, v in PROGS.items() if k in _keep}
 DATA_SECS = (".rodata", ".data", ".bss", ".sdata", ".sbss", ".rdata")
 
 
@@ -277,14 +289,20 @@ def compile_all():
         for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
     os.makedirs(os.path.join(OUT, "obj"), exist_ok=True); os.makedirs(os.path.join(OUT, "tmp"), exist_ok=True)
     units, jobs = [], []
-    for f in sorted(os.listdir(os.path.join(ROOT, "src"))):
+    files = [("src", f) for f in sorted(os.listdir(os.path.join(ROOT, "src")))]
+    for P in PROGS.values():
+        if P.get("src") and os.path.isdir(os.path.join(ROOT, P["src"])):
+            files += [(P["src"], f) for f in sorted(os.listdir(os.path.join(ROOT, P["src"])))]
+    for sd, f in files:
         if not f.endswith(".c"): continue
-        path = os.path.join(ROOT, "src", f)
+        path = os.path.join(ROOT, sd, f)
         h = NC["M"]["header"](path)
         if not h: continue
         addr, size, prog, flags = h
-        obj = os.path.join(OUT, "obj", f[:-2] + ".o")
-        units.append(dict(name=f[:-2], src="src/" + f, addr=addr, size=size, prog=prog.lower(), obj=obj))
+        if prog.lower() not in PROGS: continue
+        stem = f[:-2] if sd == "src" else "%s__%s" % (prog.lower(), f[:-2])
+        obj = os.path.join(OUT, "obj", stem + ".o")
+        units.append(dict(name=stem, src=sd + "/" + f, addr=addr, size=size, prog=prog.lower(), obj=obj))
         jobs.append((path, flags, obj, inc))
     for p in PROGS:
         for path, stem, addr, size in data_files(p):
@@ -651,8 +669,10 @@ def report(p, out, game, order, ncfun, nunits):
 
 def main():
     os.chdir(ROOT)
-    for p, P in PROGS.items():
-        if not os.path.exists(P["game"]): sys.exit("missing %s (put your own game files in game/)" % P["game"])
+    for p, P in list(PROGS.items()):
+        if not os.path.exists(P["game"]):
+            if p in ("main0", "x000"): sys.exit("missing %s (put your own game files in game/)" % P["game"])
+            print("skip %s: missing %s (extracted disc tree game/disc/fs)" % (P["out"], P["game"])); del PROGS[p]
     if "--no-split" not in ARGS: split()
     units = [] if "--asm-only" in ARGS else compile_all()
     allok = True

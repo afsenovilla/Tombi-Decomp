@@ -35,6 +35,15 @@ PROGS = ["MAIN0", "X000"] + OVERLAYS
 BINS = {"MAIN0": ("game/MAIN0.EXE", 0x80010000 - 0x800), "X000": ("game/AREA00/X000.BIN", 0x800E8028)}
 for _p in OVERLAYS:
     BINS[_p] = ("game/AREA" + _p[2:] + "/" + _p + ".BIN", 0x800E8028)
+# SYSTEM code overlays (tools/sysovl.py): code range = header table end .. end of the file
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sysovl as _SO
+SYSOVL = _SO.PROGS
+for _p, (_path, _sha, _code) in _SO.SYSOVL.items():
+    _f = N("game", _path)
+    RANGES[_p] = (_code, _SO.BASE + (os.path.getsize(_f) if os.path.exists(_f) else 0x30000))
+    BINS[_p] = ("game/" + _path, _SO.BASE)
+PROGS = PROGS + SYSOVL
 _BLOBS = {}
 
 # Per-area jump / pointer tables that Ghidra exported as "functions" (the csv rows func_80115EC4, func_80115F24,
@@ -133,7 +142,7 @@ def src_files():
             if not fn.endswith(".c"): continue
             path = os.path.join(dp, fn)
             t = open(path, errors="replace").read()
-            h = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)[ \t]*(MAIN0|X0\d\d)?", t)
+            h = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)[ \t]*(MAIN0|X0\d\d|%s)?(?!\w)" % _SO.PROG_RE, t)
             m = re.search(r"//\s*MATCHING\s+([0-9a-fA-F]+)\s+(\d+)", t)
             if not h or not m: continue
             prog = (h.group(3) or "MAIN0").upper()
