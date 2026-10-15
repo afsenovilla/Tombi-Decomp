@@ -8,7 +8,7 @@ extern void *D_8012EEA8[], *D_8012EEAC[], *D_8012EEA4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern int func_801276CC(TObj *);
 extern void spawnItemDropAtPos(int, int, Fix16 *, int, int);
@@ -24,7 +24,7 @@ static __inline__ int wall(TObj *o, unsigned short d)
     v = 0x10;
     if (s)
         v = -0x10;
-    return func_8004065C(o, o->h->p.whole + v, o->y.p.whole + 0x30, s);
+    return probeWallAt(o, o->h->p.whole + v, o->y.p.whole + 0x30, s);
 }
 
 #define BOUNCE(o) \

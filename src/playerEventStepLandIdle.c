@@ -28,7 +28,7 @@ extern void SfxPlay3(int, int);
 extern void ObjGravityStep(O *);
 extern void ObjAddVelY7E(O *);
 extern void ObjSetAnimFromTable(O *);
-extern void func_800EEC40(O *);
+extern void playerAirSpinToFall(O *);
 extern void playerAnimateTalkPose(O *);
 
 static __inline__ void land(O *o)
@@ -105,7 +105,7 @@ void playerEventStepLandIdle(O *o)
         }
         break;
     case 1:
-        func_800EEC40(o);
+        playerAirSpinToFall(o);
         AnimAdvance(o);
         D_8009C330->b8 = 1;
         o->b9e = 0;

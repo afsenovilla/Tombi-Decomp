@@ -421,10 +421,13 @@ address,name,confidence,comment
 8003f200,getCollisionPlaneAt,alta,name from psx_tomba (US)
 8003f524,readCollisionTileShape,alta,psx_tomba #21 (por bytes)
 8003f598,probeTileShapeThreePoints,alta,name from psx_tomba (US)
+8003f7cc,objCollideSideWalls,alta,names batch (see notes/names.md)
 8003facc,ObjCheckHeadCollision,media,limita Y al techo (DAT_800A4580-0x90) y prueba colision a x+-4 / y-0x15
 8003fb90,applyCollisionTileResponse,alta,psx_tomba #21 (por bytes)
 8003fd78,ObjTileCollide,media,carga hitbox (+0x6C..+0x72) de tabla segun anim y prueba colision con el mapa
 80040278,TileCollideAt,media,prepara 1F800278 y llama a la comprobacion de colision en (x y)
+800402ec,pushOutOfWallSegments,alta,names batch (see notes/names.md)
+8004065c,probeWallAt,alta,names batch (see notes/names.md)
 800408d8,probeCollisionAtDepthA,alta,names batch (see notes/names.md)
 8004094c,testCollisionSegment,alta,names batch (see notes/names.md)
 800411cc,probeCollisionAtDepthB,alta,names batch (see notes/names.md)

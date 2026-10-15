@@ -14,7 +14,7 @@ extern unsigned short *D_8013A210[];
 extern unsigned char D_80138FD8[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int FUN_801274cc(TObj *);
 extern void cloneItemPickupObject(TObj *);
@@ -45,7 +45,7 @@ static __inline__ void move(TObj *o)
     }
     if (o->animFrame == 1) p->w4 = 0x10;
     else p->w4 = -0x10;
-    if (func_8004065C(o, o->h->p.whole + p->w4, o->y.p.whole, 1 - o->animFrame)) {
+    if (probeWallAt(o, o->h->p.whole + p->w4, o->y.p.whole, 1 - o->animFrame)) {
         o->movetab = 0;
     }
 }

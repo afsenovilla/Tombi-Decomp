@@ -5,7 +5,7 @@
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityXY(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern char D_80077D3C[];
 extern void *D_8013E74C[];
@@ -37,7 +37,7 @@ void func_80130420(TObj *o)
         AnimAdvance(o);
         applyFrameVelocityXY(o);
         d = (o->animFrame & 1) ? -16 : 16;
-        if (func_8004065C(o, o->h->p.whole + d, o->y.p.whole, o->animFrame)) {
+        if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame)) {
             w[1] = 0;
             o->step = 2;
             o->state = 0;

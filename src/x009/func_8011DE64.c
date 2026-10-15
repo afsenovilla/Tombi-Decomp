@@ -13,7 +13,7 @@ extern int AnimAdvance(TObj *o);
 extern void playerReleaseBittenAndClearFlags(TObj *o);
 extern void SfxPlay3(int, int);
 extern void PlayerSetAnimIfChanged(TObj *o, int);
-extern void FUN_800ef1ac(TObj *o);
+extern void playerCheckPerchLanding(TObj *o);
 
 void func_8011DE64(TObj *o)
 {
@@ -69,5 +69,5 @@ void func_8011DE64(TObj *o)
         }
         break;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short D_800A4582;
 extern short FUN_80040278(TObj *, short, short);
-extern short FUN_8004065c(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 
 int func_8011D7B0(TObj *o)
 {
@@ -16,7 +16,7 @@ int func_8011D7B0(TObj *o)
         return 1;
     }
     if (D_800A4582 + 0x80 < o->y.p.whole) return 1;
-    if (FUN_8004065c(o, o->h->p.whole - 0x10, o->y.p.whole, 1)) return 0;
-    FUN_8004065c(o, o->h->p.whole + 0x10, o->y.p.whole, 0);
+    if (probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole, 1)) return 0;
+    probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole, 0);
     return 0;
 }

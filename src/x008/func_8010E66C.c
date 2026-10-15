@@ -15,7 +15,7 @@ extern void func_8010EAF8(TObj *);
 extern void ObjMotionStep(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void ObjTileCollide(TObj *, int, int);
-extern void func_800EEC40(TObj *);
+extern void playerAirSpinToFall(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 
 void func_8010E66C(TObj *o)
@@ -76,7 +76,7 @@ void func_8010E66C(TObj *o)
     }
     ObjTileCollide(o, 0, 0);
     if (o->velY >= -0x383)
-        func_800EEC40(o);
+        playerAirSpinToFall(o);
     if (ObjCheckHeadCollision(o) || o->velY > 0) {
         o->d84 = 0;
         v = 0x10;

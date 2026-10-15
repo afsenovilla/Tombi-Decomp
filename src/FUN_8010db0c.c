@@ -18,7 +18,7 @@ extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800ef05c(int, int, int, int);
 extern void FUN_800ee680(TObj *);
-extern void FUN_800eec40(TObj *);
+extern void playerAirSpinToFall(TObj *);
 extern void FUN_8003facc(TObj *);
 extern void playerSetAnim(TObj *, int, int);
 extern int FUN_8004bbc0(TObj *, int);
@@ -51,7 +51,7 @@ void FUN_8010db0c(TObj *o)
             FUN_800ef05c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         FUN_800ee680(o);
         if (o->velY >= -0x383)
-            FUN_800eec40(o);
+            playerAirSpinToFall(o);
         FUN_8003facc(o);
         if (o->velY > 0) {
             DAT_8009c330->w2c = 4;

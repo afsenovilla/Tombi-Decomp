@@ -7,7 +7,7 @@ extern A *D_80133BDC[], *D_80133BE0[], *D_80133BE4[], *D_80133C04[], *D_80133C08
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_8011FDD4(TObj *);
 
@@ -34,7 +34,7 @@ static __inline__ void wall(TObj *o)
         *(short *)(q + 4) = 0x10;
     else
         *(short *)(q + 4) = -0x10;
-    if (FUN_8004065c(o, o->h->p.whole + *(short *)(q + 4), o->y.p.whole, 1 - o->animFrame))
+    if (probeWallAt(o, o->h->p.whole + *(short *)(q + 4), o->y.p.whole, 1 - o->animFrame))
         o->movetab = 0;
 }
 

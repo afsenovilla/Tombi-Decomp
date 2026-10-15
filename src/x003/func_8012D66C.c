@@ -2,7 +2,7 @@
 // MATCHING 8012d66c 212
 #include "TOBJ.H"
 
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 int func_8012D66C(TObj *o)
 {
@@ -14,7 +14,7 @@ int func_8012D66C(TObj *o)
         d = -0xe;
     else
         d = 0xe;
-    if (func_8004065C(o, o->h->p.whole + d, o->y.p.whole, o->animFrame) == 0)
-        return func_8004065C(o, o->h->p.whole + d, o->y.p.whole - 4, o->animFrame) != 0;
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame) == 0)
+        return probeWallAt(o, o->h->p.whole + d, o->y.p.whole - 4, o->animFrame) != 0;
     return 1;
 }

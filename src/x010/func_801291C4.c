@@ -11,7 +11,7 @@ extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern int Rand(void);
 extern short FUN_80040278(TObj *, int, int);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 #define SETA(K)                                  \
     {                                            \
@@ -43,7 +43,7 @@ static __inline__ int blocked(TObj *o, short f)
     short d;
     if (f & 1) d = -0x10;
     else d = 0x10;
-    return FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
 }
 
 void func_801291C4(TObj *o)

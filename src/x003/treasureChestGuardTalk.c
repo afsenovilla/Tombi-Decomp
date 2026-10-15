@@ -13,7 +13,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 #define WC2(o) (*(unsigned short *)((char *)(o) + 0xc2))
@@ -96,14 +96,14 @@ void treasureChestGuardTalk(TObj *o)
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
-        FUN_8004065c(o, o->h->p.whole, o->y.p.whole, o->animFrame);
+        probeWallAt(o, o->h->p.whole, o->y.p.whole, o->animFrame);
         if (o->velY > 0) o->state = 0x48;
         goto vis;
     case 0x48:
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
-        FUN_8004065c(o, o->h->p.whole, o->y.p.whole, o->animFrame);
+        probeWallAt(o, o->h->p.whole, o->y.p.whole, o->animFrame);
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole)) o->state = 0x46;
     vis:
         if (!o->visible) o->state = 0x49;

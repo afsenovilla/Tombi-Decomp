@@ -8,7 +8,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern void *D_8012EE98[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 static __inline__ void mv(TObj *o)
@@ -18,10 +18,10 @@ static __inline__ void mv(TObj *o)
     o->d84 = (o->d84 + 1) & 0xff;
     if ((*(short*)((char*)&o->d30 + 2)) > 0) {
         if (!(o->b9d & 2) || o->animFrame != (o->b9d & 1))
-            FUN_8004065c(o, o->h->p.whole - 0x10, o->y.p.whole + 0x30, 1);
+            probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 0x30, 1);
     } else {
         if (!(o->b9d & 2) || o->animFrame != (o->b9d & 1))
-            FUN_8004065c(o, o->h->p.whole + 0x10, o->y.p.whole + 0x30, 0);
+            probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 0x30, 0);
     }
     {
         int v = D_8007A3F0[(*(unsigned char*)&o->d88)] * o->velV;

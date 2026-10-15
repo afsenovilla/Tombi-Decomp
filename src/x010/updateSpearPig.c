@@ -20,7 +20,7 @@ extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 extern TObj *ObjAlloc(void);
 extern short FUN_80040278(TObj *, int, int);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e4f0(int);
 extern int isObjectInView(TObj *);
@@ -44,7 +44,7 @@ static __inline__ int blocked(TObj *o, short f)
     short d;
     if (f & 1) d = -0x10;
     else d = 0x10;
-    return FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
 }
 
 void updateSpearPig(TObj *o)

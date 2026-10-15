@@ -37,7 +37,7 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern short playerSwingUpdatePivot(TObj *);
 extern void playerSwingPlaceOnCircle(TObj *, int);
 extern void playerSwingHandlePad(TObj *);
-extern void FUN_800ef1ac(TObj *);
+extern void playerCheckPerchLanding(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
@@ -228,5 +228,5 @@ void playerStepSwingFromObject(TObj *o)
         playerSwingHandlePad(o);
         break;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

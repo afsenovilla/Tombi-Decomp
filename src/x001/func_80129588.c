@@ -12,7 +12,7 @@ extern void *D_8013FC74;
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern short FUN_8004065c(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 
 #define SET_ANIM(o, a) do { (o)->anim = (a); AnimLoadDuration(o); } while (0)
@@ -30,7 +30,7 @@ static __inline__ short chk(TObj *o)
     f = o->animFrame & 1;
     if ((unsigned short)f) d = -0x10;
     else d = 0x10;
-    if (FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f)) {
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f)) {
         q->w6 = 0;
         return 1;
     }

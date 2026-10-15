@@ -11,7 +11,7 @@ extern short D_800A45AC[];
 extern int D_1F80018C, D_1F800190;
 extern int ObjCullRegister(TObj *);
 extern short FUN_80040278(TObj *, short, short);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern void setAreaFlagBit(int);
 extern void playSFXWithPitchSlide(int, int, int, int);
 extern void FUN_8001e560(int, int);
@@ -51,7 +51,7 @@ void func_8012F988(TObj *o)
                 else o->h->p.whole++;
             }
             o->y.p.whole += 2;
-            func_8004065C(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
+            probeWallAt(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
             if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) o->d8c = (-SPAD.s27e << 6) & 0xfc0;
             if (o->h->p.whole >= 0x2d0) break;
             setAreaFlagBit(*(unsigned short *)&o->wb4);
@@ -98,7 +98,7 @@ void func_8012F988(TObj *o)
             o->velV += 0x10;
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
-            func_8004065C(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
+            probeWallAt(o, o->h->p.whole + 0x20, o->y.p.whole, 0);
             if (o->b69 || FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x18)) {
                 FUN_8001e560(5, 0);
                 o->step++;

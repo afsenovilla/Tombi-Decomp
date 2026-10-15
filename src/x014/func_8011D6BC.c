@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_800A457C, D_800A457E;
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 int func_8011D6BC(TObj *o)
@@ -23,7 +23,7 @@ int func_8011D6BC(TObj *o)
             return 1;
         }
     }
-    if (func_8004065C(o, o->h->p.whole + d, o->y.p.whole, o->animFrame & 1) == 0) {
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame & 1) == 0) {
         return TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x12) != 0;
     }
     return 1;

@@ -2,7 +2,7 @@
 // MATCHING 80123ecc 492
 #include "TOBJ.H"
 
-extern short FUN_8004065c(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
@@ -15,7 +15,7 @@ int func_80123ECC(TObj *o, unsigned char dir)
     case 1:
     case 2:
     case 3:
-        if (FUN_8004065c(o, o->h->p.whole + 0x10, o->y.p.whole, 0))
+        if (probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole, 0))
             r = 1;
         if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10))
             r |= 8;
@@ -35,7 +35,7 @@ int func_80123ECC(TObj *o, unsigned char dir)
     case 5:
     case 6:
     case 7:
-        if (FUN_8004065c(o, o->h->p.whole - 0x10, o->y.p.whole, 1))
+        if (probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole, 1))
             r = 2;
         if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10))
             r |= 8;
@@ -48,7 +48,7 @@ int func_80123ECC(TObj *o, unsigned char dir)
     case 9:
     case 10:
     case 11:
-        if (FUN_8004065c(o, o->h->p.whole - 0x10, o->y.p.whole, 1))
+        if (probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole, 1))
             r = 2;
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10))
             r |= 4;
@@ -57,7 +57,7 @@ int func_80123ECC(TObj *o, unsigned char dir)
     case 13:
     case 14:
     case 15:
-        if (FUN_8004065c(o, o->h->p.whole + 0x10, o->y.p.whole, 0))
+        if (probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole, 0))
             r = 1;
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10))
             r |= 4;

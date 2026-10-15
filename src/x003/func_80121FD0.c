@@ -13,7 +13,7 @@ extern void FUN_8001f8e4(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern int Rand(void);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_801206F0(TObj *);
 extern int func_8012080C(TObj *);
@@ -120,7 +120,7 @@ void func_80121FD0(TObj *o)
         if ((c & 2) && o->animFrame != (c & 1)) o->timer = 0;
         if (o->animFrame == 1) x->w04 = 0x10;
         else x->w04 = -0x10;
-        if (func_8004065C(o, o->h->p.whole + x->w04, o->y.p.whole, (1 - o->animFrame) & 1)) o->timer = 0;
+        if (probeWallAt(o, o->h->p.whole + x->w04, o->y.p.whole, (1 - o->animFrame) & 1)) o->timer = 0;
         if (--o->timer == -1) {
             o->substep++;
             FUN_8001f8e4(o);

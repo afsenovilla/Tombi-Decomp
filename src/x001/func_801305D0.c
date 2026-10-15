@@ -11,7 +11,7 @@ extern char D_80077CE8[];
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 extern void FUN_8001fb84(TObj *, char *);
-extern short FUN_8004065c(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 
@@ -41,7 +41,7 @@ static __inline__ short side(TObj *o)
         f = 0;
         p = o;
     }
-    return FUN_8004065c(p, o->h->p.whole + d, o->y.p.whole, f);
+    return probeWallAt(p, o->h->p.whole + d, o->y.p.whole, f);
 }
 static __inline__ int land(TObj *o)
 {

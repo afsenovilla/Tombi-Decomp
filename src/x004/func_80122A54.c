@@ -11,7 +11,7 @@ extern B D_80130FD4[];
 extern A *D_80133B5C[];
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
 extern int func_8011FDD4(TObj *);
 extern void cloneItemPickupObject(TObj *);
@@ -41,7 +41,7 @@ extern void cloneItemPickupObject(TObj *);
         } else { \
             x->w4 = -0x10; \
         } \
-        if (func_8004065C(o, o->h->p.whole + x->w4, o->y.p.whole, 1 - o->animFrame)) { \
+        if (probeWallAt(o, o->h->p.whole + x->w4, o->y.p.whole, 1 - o->animFrame)) { \
             o->movetab = 0; \
         } \
     }

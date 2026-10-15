@@ -9,7 +9,7 @@ extern short D_1F80027E;
 extern int func_8012491C(TObj *o);
 extern int func_801249D0(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
-extern short func_8004065C(TObj *o, short x, short y, int k);
+extern short probeWallAt(TObj *o, short x, short y, int k);
 
 static __inline__ int land(TObj *o)
 {
@@ -18,8 +18,8 @@ static __inline__ int land(TObj *o)
         o->wb2 = D_1F80027E;
         return 1;
     }
-    if (func_8004065C(o, o->h->p.whole - 8, o->y.p.whole, 1)) return 0;
-    func_8004065C(o, o->h->p.whole + 8, o->y.p.whole, 0);
+    if (probeWallAt(o, o->h->p.whole - 8, o->y.p.whole, 1)) return 0;
+    probeWallAt(o, o->h->p.whole + 8, o->y.p.whole, 0);
     return 0;
 }
 

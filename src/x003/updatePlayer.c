@@ -31,7 +31,7 @@ extern void playerStepForcedHold(TObj *);
 extern void playerStepForcedJump(TObj *);
 extern void playerStepForcedLaunch(TObj *);
 extern void playerStepTossed(TObj *);
-extern void FUN_8003f7cc(TObj *);
+extern void objCollideSideWalls(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 
 #define RESET(o) \
@@ -169,7 +169,7 @@ void updatePlayer(TObj *o)
             f = o->step == 0x40;
             if (o->step == 0x65) f++;
         }
-        if (f == 0) FUN_8003f7cc(o);
+        if (f == 0) objCollideSideWalls(o);
         break;
     case 3:
         o->b04 = 1;
@@ -230,7 +230,7 @@ void updatePlayer(TObj *o)
         }
         (*(unsigned char*)&o->wa8) = 0;
         o->ba6 = 0;
-        if (o->b9e == 0) FUN_8003f7cc(o);
+        if (o->b9e == 0) objCollideSideWalls(o);
         break;
     }
     D_1F80016A[0] = o->h->p.whole;

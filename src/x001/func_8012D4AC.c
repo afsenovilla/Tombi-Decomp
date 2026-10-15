@@ -14,7 +14,7 @@ extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *FUN_80018448(void);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ int land(TObj *o)
@@ -57,8 +57,8 @@ static __inline__ int land(TObj *o)
 
 #define COMMON() \
     applyFrameVelocityY(o); \
-    func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0); \
-    func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1); \
+    probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0); \
+    probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1); \
     land(o);
 
 void func_8012D4AC(TObj *o)
@@ -82,8 +82,8 @@ void func_8012D4AC(TObj *o)
         o->velV += 0x40;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
-        func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
         if (land(o)) o->velV = 0;
         break;
     case 2:
@@ -127,8 +127,8 @@ void func_8012D4AC(TObj *o)
     case 5:
         applyFrameVelocityX(o);
         o->y.p.whole += 3;
-        func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
-        func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
         if (land(o)) {
             v = D_1F80027E;
             if (v < 0) v = -v;

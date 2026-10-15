@@ -17,7 +17,7 @@ extern void FUN_8001e5f4(int, int);
 extern void probeCollisionAtDepthC(TObj *, int, int);
 extern void playerFlipPlaceAndAccelerate(TObj *, int, int);
 extern void FUN_800f9684(TObj *);
-extern void FUN_800ef1ac(TObj *);
+extern void playerCheckPerchLanding(TObj *);
 
 typedef struct { unsigned char b0; char p1; short w2; char p4[8]; short wc; short we; char p10[0x28 - 0x10]; unsigned short w28, w2a; } PL;
 
@@ -171,5 +171,5 @@ void playerStepFlipOntoPerch(TObj *o)
         }
         break;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

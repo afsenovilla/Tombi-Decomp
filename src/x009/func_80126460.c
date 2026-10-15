@@ -11,7 +11,7 @@ extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, int);
-extern int func_8004065C(TObj *, int, int, int);
+extern int probeWallAt(TObj *, int, int, int);
 extern short TileCollideAt(TObj *, int, int);
 
 static __inline__ int Blocked(TObj *o)
@@ -21,7 +21,7 @@ static __inline__ int Blocked(TObj *o)
     if ((o->b9d & 2) && o->animFrame == (o->b9d & 1)) return 1;
     if (af) d = -0x10;
     else d = 0x10;
-    return (short)func_8004065C(o, (short)(o->h->p.whole + d), (short)(o->y.p.whole + 0x30), af);
+    return (short)probeWallAt(o, (short)(o->h->p.whole + d), (short)(o->y.p.whole + 0x30), af);
 }
 
 void func_80126460(TObj *o)

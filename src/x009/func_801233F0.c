@@ -9,7 +9,7 @@ extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001fe6c(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ short coll(TObj *o)
@@ -21,7 +21,7 @@ static __inline__ short coll(TObj *o)
     if (f & 1) {
         v = -0x10;
     }
-    return func_8004065C(o, o->h->p.whole + v, o->y.p.whole, f);
+    return probeWallAt(o, o->h->p.whole + v, o->y.p.whole, f);
 }
 #define COLL() coll(o)
 

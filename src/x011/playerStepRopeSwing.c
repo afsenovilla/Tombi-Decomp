@@ -19,7 +19,7 @@ extern unsigned short DAT_1f8001fc;
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e560(int, int);
 extern short playerRopeGetSwingSpeed(void);
-extern void FUN_8003f7cc(TObj *);
+extern void objCollideSideWalls(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void playerRopeAdjustLength(TObj *);
 extern void playerRopeCheckRelease(TObj *);
@@ -193,7 +193,7 @@ void playerStepRopeSwing(TObj *o)
             o->d88 = (short)FUN_8001fe3c((unsigned char)o->d84, DAT_80115268[o->wb2][0]);
             o->h->p.whole = FUN_8001fe3c((o->d88 + 0xc0) & 0xff, o->wb4) + o->d30;
             o->y.p.whole = FUN_8001fe0c((o->d88 + 0xc0) & 0xff, o->wb4) + o->d34;
-            FUN_8003f7cc(o);
+            objCollideSideWalls(o);
             if (o->ba6 == 0) f = FUN_8003facc(o) == 0;
             if ((f << 16) == 0) {
                 DAT_8009c330->b0a = 1;

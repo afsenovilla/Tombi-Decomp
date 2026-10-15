@@ -10,7 +10,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern short FUN_80040278(TObj *, short, short);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int FUN_8001f9e0(void);
 extern void FUN_8001e4f0(int);
 
@@ -110,7 +110,7 @@ void func_80123828(TObj *o)
             short dx;
             if (o->animFrame & 1) dx = -0x10;
             else dx = 0x10;
-            d = FUN_8004065c(o, o->h->p.whole + dx, o->y.p.whole, o->animFrame) != 0;
+            d = probeWallAt(o, o->h->p.whole + dx, o->y.p.whole, o->animFrame) != 0;
         }
         if (d) o->animFrame = (o->animFrame + 1) & 1;
         if (land(o)) {

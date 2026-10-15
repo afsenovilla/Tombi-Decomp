@@ -11,7 +11,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern short probeCollisionAtDepthA(TObj *, short, short);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 void func_80129DAC(TObj *o)
 {
@@ -103,7 +103,7 @@ void func_80129DAC(TObj *o)
                 d = -0x10;
             else
                 d = 0x10;
-            if (FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, af)) {
+            if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, af)) {
                 r[3] = 0;
                 f = 1;
             } else

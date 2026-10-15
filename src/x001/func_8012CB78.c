@@ -18,7 +18,7 @@ extern unsigned char D_8013C800[];
 extern unsigned short D_8013C8E8[];
 extern char D_80077CF4[];
 extern void spawnItemNotification(int, int);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern TObj *FUN_80018448(void);
 extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
@@ -80,8 +80,8 @@ void func_8012CB78(TObj *o)
         o->box2 = *p0++;
         o->box3 = *p0;
         o->animTimer = ((AH *)o->anim)->w6 & 0x3fff;
-        func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
-        func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
         n = FUN_80018448();
         if (n) {
             n->active = 1;
@@ -111,8 +111,8 @@ void func_8012CB78(TObj *o)
         o->y.raw += d << 8;
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        func_8004065C(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
-        func_8004065C(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
+        probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
+        probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
         if (land2(o)) {
             o->velV = 0;
             o->d8c = (unsigned short)s->b;
@@ -150,7 +150,7 @@ void func_8012CB78(TObj *o)
         } else {
             if (s->c4) s->wb8 = -0x10;
             else s->wb8 = 0x10;
-            if (func_8004065C(o, o->h->p.whole + s->wb8, o->y.p.whole + 8, s->c4)) o->velH = 0;
+            if (probeWallAt(o, o->h->p.whole + s->wb8, o->y.p.whole + 8, s->c4)) o->velH = 0;
         }
         if (o->velH < 0x150) {
             o->wac = 8;

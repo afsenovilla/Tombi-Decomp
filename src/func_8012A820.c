@@ -12,7 +12,7 @@ extern void *D_8013A1F8[];
 extern unsigned char D_80138FD8[];
 extern void setAreaFlagBit(int);
 extern void spawnItemNotification(int, int);
-extern void func_8004065C(TObj *, short, short, int);
+extern void probeWallAt(TObj *, short, short, int);
 extern int FUN_801274cc(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -30,8 +30,8 @@ extern short DAT_1f80027e;
 #define ANIMT(o) o->animTimer = ((unsigned short *)o->anim)[3] & 0x3fff
 
 #define COLLIDE(o) \
-    func_8004065C(o, o->h->p.whole + 8, o->y.p.whole + 8, 0); \
-    func_8004065C(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
+    probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0); \
+    probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
 
 void func_8012A820(TObj *o)
 {

@@ -12,7 +12,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void applyFrameVelocityY(TObj *);
-extern short func_8004065C(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 extern void awardAPByArea(int, short, short, short);
@@ -32,7 +32,7 @@ static __inline__ short wall(TObj *o)
     f = o->w7a & 1;
     if (f) d = -0x10;
     else d = 0x10;
-    if (func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f)) {
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f)) {
         o->wba = 0;
         return 1;
     }

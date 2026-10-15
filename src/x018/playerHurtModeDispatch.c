@@ -11,7 +11,7 @@ typedef struct O {
     char pad3;
     unsigned char wa8;
 } O;
-extern void playerStepHurtKnockback(), playerStepHurtStun(), playerStepHazardRespawn(), playerStepDie(), playerStepHurtSpin(), FUN_8003f7cc();
+extern void playerStepHurtKnockback(), playerStepHurtStun(), playerStepHazardRespawn(), playerStepDie(), playerStepHurtSpin(), objCollideSideWalls();
 
 void playerHurtModeDispatch(O *o)
 {
@@ -32,5 +32,5 @@ void playerHurtModeDispatch(O *o)
             r++;
     }
     if (!r)
-        FUN_8003f7cc(o);
+        objCollideSideWalls(o);
 }

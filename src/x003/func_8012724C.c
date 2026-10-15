@@ -11,7 +11,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short isObjectBelowGround(TObj *);
 
 void func_8012724C(TObj *o)
@@ -39,7 +39,7 @@ void func_8012724C(TObj *o)
         AnimAdvance(o);
         if (o->visible && ((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) playSFX(0x76);
         applyFrameVelocityX(o);
-        if (func_8004065C(o, o->h->p.whole + 0x18, o->y.p.whole, 0)) {
+        if (probeWallAt(o, o->h->p.whole + 0x18, o->y.p.whole, 0)) {
             o->b9c = 2;
             o->state++;
         }
@@ -48,7 +48,7 @@ void func_8012724C(TObj *o)
         if (o->visible && ((SPAD.s1f8 + SPAD.i198) & 0x1f) == 0) playSFX(0x76);
         AnimAdvance(o);
         o->y.p.whole++;
-        func_8004065C(o, o->h->p.whole + 0x18, o->y.p.whole, 0);
+        probeWallAt(o, o->h->p.whole + 0x18, o->y.p.whole, 0);
         if (o->y.p.whole > D_800A4582 + 0xa0) o->b04 = 3;
         break;
     }

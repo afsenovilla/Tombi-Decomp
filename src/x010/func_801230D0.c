@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 extern short D_8007A3F0[];
 extern int AnimAdvance(TObj *);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ int OnScreen(TObj *o)
@@ -34,7 +34,7 @@ void func_801230D0(TObj *o)
         o->h->raw += o->velH << 8;
         o->y.raw = o->y.raw + ((D_8007A3F0[o->d84] * o->velH) >> 4) - 0x8000;
         o->d84 = (o->d84 + 2) & 0xff;
-        FUN_8004065c(o, o->h->p.whole, o->y.p.whole + 0x10, o->animFrame);
+        probeWallAt(o, o->h->p.whole, o->y.p.whole + 0x10, o->animFrame);
         FUN_80040278(o, o->h->p.whole, o->y.p.whole + 8);
         if (o->d84 == 0 && --o->timer == -1) {
             o->timer = 8;

@@ -15,7 +15,7 @@ extern unsigned char D_8013C800[];
 extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern void func_8002B920(TObj *);
 extern int func_8012BB18(TObj *);
@@ -65,7 +65,7 @@ static __inline__ void blk(TObj *o)
     if ((o->b9d & 2) && o->animFrame != (o->b9d & 1)) o->movetab = 0;
     if (o->animFrame == 1) s->wb8 = 0x10;
     else s->wb8 = -0x10;
-    if (func_8004065C(o, o->h->p.whole + s->wb8, o->y.p.whole, 1 - o->animFrame)) o->movetab = 0;
+    if (probeWallAt(o, o->h->p.whole + s->wb8, o->y.p.whole, 1 - o->animFrame)) o->movetab = 0;
 }
 
 void func_8012DF98(TObj *o)

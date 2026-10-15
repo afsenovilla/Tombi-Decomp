@@ -11,7 +11,7 @@ extern unsigned char D_801152E8[];
 void FUN_8010f328(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void SfxPlay2(int a, int b);
-void func_800EEC40(TObj *o);
+void playerAirSpinToFall(TObj *o);
 void AnimAdvance(TObj *o);
 void ObjGravityStep(TObj *o);
 void ObjAddVelY7E(TObj *o);
@@ -55,7 +55,7 @@ void playerStepForcedJump(TObj *o)
             }
         }
     case 2:
-        func_800EEC40(o);
+        playerAirSpinToFall(o);
         AnimAdvance(o);
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
@@ -76,7 +76,7 @@ void playerStepForcedJump(TObj *o)
         o->b69 = 0;
         break;
     case 3:
-        func_800EEC40(o);
+        playerAirSpinToFall(o);
         AnimAdvance(o);
         B(o, 0x9e) = 0;
         o->wb0 = 0;

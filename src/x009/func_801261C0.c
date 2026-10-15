@@ -8,7 +8,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 extern short FUN_80040278(TObj *, short, short);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 #define LINK(o) (*(TObj **)((char *)(o) + 0xa8))
 
@@ -54,7 +54,7 @@ void func_801261C0(TObj *o)
             sa = a;
             if (sa) d = -0x10;
             else d = 0x10;
-            func_8004065C(o, o->h->p.whole + d, o->y.p.whole + 0x30, sa);
+            probeWallAt(o, o->h->p.whole + d, o->y.p.whole + 0x30, sa);
         }
         if (o->w74 == 0) o->y.raw -= o->velV << 8;
         else o->y.raw += o->velV << 8;

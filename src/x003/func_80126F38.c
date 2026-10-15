@@ -11,7 +11,7 @@ extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityX(TObj *);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 void func_80126F38(TObj *o)
@@ -43,7 +43,7 @@ void func_80126F38(TObj *o)
             v = -0x18;
         else
             v = 0x18;
-        if (FUN_8004065c(o, o->h->p.whole + v, o->y.p.whole, o->animFrame)
+        if (probeWallAt(o, o->h->p.whole + v, o->y.p.whole, o->animFrame)
             || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0xe)
             || (unsigned short)(v = (unsigned short)(*(short*)((char*)&SPAD.i168 + 2)) - (unsigned short)o->h->p.whole + 0x40) < 0x80) {
             o->b9c = 2;
@@ -58,7 +58,7 @@ void func_80126F38(TObj *o)
             v = -0x18;
         else
             v = 0x18;
-        FUN_8004065c(o, o->h->p.whole + v, o->y.p.whole, o->animFrame);
+        probeWallAt(o, o->h->p.whole + v, o->y.p.whole, o->animFrame);
         if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0xe)) {
             o->d8c = (-SPAD.s27e << 2) & 0xff;
             o->state = 1;

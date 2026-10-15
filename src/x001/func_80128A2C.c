@@ -18,7 +18,7 @@ extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short func_8004065C(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern void func_80128110(TObj *);
@@ -46,7 +46,7 @@ static __inline__ short chk(TObj *o)
         q->w6 = 1;
         return 1;
     }
-    if (func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f)) {
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f)) {
         q->w6 = 0;
         return 1;
     }

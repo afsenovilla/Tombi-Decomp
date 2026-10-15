@@ -12,21 +12,21 @@ extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
 extern char D_80010748[];
 extern void playerEventStepLandIdle(TObj *);
-extern void FUN_80109494(TObj *);
+extern void playerEventStepLaneJumpBack(TObj *);
 extern void FUN_801231f4(TObj *);
-extern void func_8010A9F4(TObj *);
-extern void FUN_8010ac90(TObj *);
-extern void func_80108168(TObj *);
-extern void func_80108338(TObj *);
-extern void FUN_80108dbc(TObj *);
+extern void playerEventStepDropIn(TObj *);
+extern void playerEventStepRiseFadeOut(TObj *);
+extern void playerEventStepDepthShift(TObj *);
+extern void playerEventStepJumpIn(TObj *);
+extern void playerEventStepWalkIntoDepth(TObj *);
 extern void func_8011DD48(TObj *);
-extern void FUN_8010ae94(TObj *);
+extern void playerEventStepRiseUp(TObj *);
 extern void playerAnimateTalkPose(TObj *);
 extern void FUN_8010df84(TObj *);
 extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
-extern void func_8003F7CC(TObj *);
+extern void objCollideSideWalls(TObj *);
 void playerEventModeDispatch(TObj *o)
 {
     short c;
@@ -51,29 +51,29 @@ void playerEventModeDispatch(TObj *o)
         ((unsigned char*)&GVARS.b3a)[0] = 1;
         break;
     case 2:
-        FUN_80109494(o);
+        playerEventStepLaneJumpBack(o);
         break;
     case 3:
         FUN_801231f4(o);
         break;
     case 4:
-        func_8010A9F4(o);
+        playerEventStepDropIn(o);
         break;
     case 5:
-        FUN_8010ac90(o);
+        playerEventStepRiseFadeOut(o);
         break;
     case 0:
     case 6:
         playerEventStepLandIdle(o);
         break;
     case 7:
-        func_80108168(o);
+        playerEventStepDepthShift(o);
         break;
     case 8:
-        func_80108338(o);
+        playerEventStepJumpIn(o);
         break;
     case 9:
-        FUN_80108dbc(o);
+        playerEventStepWalkIntoDepth(o);
         break;
     case 10:
         if (--o->timer <= 0) goto anim;
@@ -108,7 +108,7 @@ void playerEventModeDispatch(TObj *o)
         func_8011DD48(o);
         break;
     case 12:
-        FUN_8010ae94(o);
+        playerEventStepRiseUp(o);
         break;
     case 0x40:
         o->visible = 0;
@@ -147,5 +147,5 @@ void playerEventModeDispatch(TObj *o)
         if (o->step == 0x41) c++;
         if (o->step == 0x65) c++;
     }
-    if (c == 0) func_8003F7CC(o);
+    if (c == 0) objCollideSideWalls(o);
 }

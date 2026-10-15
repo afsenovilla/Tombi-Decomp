@@ -11,7 +11,7 @@ typedef struct O {
     char p5[0xb4 - 0x9e]; P p;
 } O;
 extern short DAT_8007a1f0[], DAT_8007a5f0[];
-extern short FUN_8004065c(O *, int, int, int);
+extern short probeWallAt(O *, int, int, int);
 
 int FUN_801275e4(O *o)
 {
@@ -33,5 +33,5 @@ int FUN_801275e4(O *o)
         a = 0;
         b = p->w4;
     }
-    return FUN_8004065c(o, (short)(o->h->x + b), (short)(o->y + a), (short)o->af) != 0;
+    return probeWallAt(o, (short)(o->h->x + b), (short)(o->y + a), (short)o->af) != 0;
 }

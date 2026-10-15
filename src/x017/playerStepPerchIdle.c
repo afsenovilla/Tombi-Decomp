@@ -13,7 +13,7 @@ extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void SfxPlay3(int, int);
 extern void probeCollisionAtDepthC(TObj *, int, int);
-extern void FUN_800ef1ac(TObj *);
+extern void playerCheckPerchLanding(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
@@ -94,5 +94,5 @@ void playerStepPerchIdle(TObj *o)
         }
         break;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

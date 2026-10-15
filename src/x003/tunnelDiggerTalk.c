@@ -16,7 +16,7 @@ extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 static __inline__ int chk(void)
 {
@@ -97,7 +97,7 @@ void tunnelDiggerTalk(TObj *o)
         break;
     case 71:
         o->h->raw += o->velX << 8;
-        if (func_8004065C(o, o->h->p.whole, o->y.p.whole, o->animFrame) == 2) {
+        if (probeWallAt(o, o->h->p.whole, o->y.p.whole, o->animFrame) == 2) {
             o->state = 0x48;
         }
         break;

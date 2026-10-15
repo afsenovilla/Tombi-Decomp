@@ -10,7 +10,7 @@ extern void applyFrameVelocityXY(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void func_80121964(TObj *);
 extern void func_801224AC(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern void playSFX(int);
 extern int Rand(void);
@@ -25,7 +25,7 @@ static __inline__ short blocked(TObj *o)
         return 1;
     }
     d = (o->animFrame & 1) ? -16 : 16;
-    return func_8004065C(o, o->h->p.whole + d, o->y.p.whole, o->animFrame) != 0;
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame) != 0;
 }
 
 static __inline__ short leave(TObj *o)

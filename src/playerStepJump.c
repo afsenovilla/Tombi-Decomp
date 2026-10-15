@@ -48,7 +48,7 @@ extern void FUN_8010f400(TObj *);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
-extern void FUN_800eec40(TObj *);
+extern void playerAirSpinToFall(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void FUN_80040278(TObj *, short, short);
 extern void FUN_800f28a0(TObj *);
@@ -150,7 +150,7 @@ void playerStepJump(TObj *o)
         o->h->raw += o->velX << 8;
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
-        if (o->velY >= -899) FUN_800eec40(o);
+        if (o->velY >= -899) playerAirSpinToFall(o);
         if (o->velY > 0) {
             { int e;
             DAT_8009c330->b8 = 1;

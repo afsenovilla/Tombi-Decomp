@@ -9,7 +9,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern void func_80121964(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern void ObjSetFacingToPlayer(TObj *);
@@ -52,7 +52,7 @@ void func_801229AC(TObj *o)
             f = o->animFrame;
             d = 0x10;
             if (f & 1) d = -0x10;
-            func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f);
+            probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f);
         }
         func_80121964(o);
         AnimAdvance(o);
@@ -86,7 +86,7 @@ void func_801229AC(TObj *o)
             f = o->animFrame;
             d = 0x10;
             if (f & 1) d = -0x10;
-            func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f);
+            probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f);
         }
         func_80121964(o);
         AnimAdvance(o);

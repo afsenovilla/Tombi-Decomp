@@ -15,7 +15,7 @@ extern TObj *ObjAlloc(void);
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, int);
 extern void applyFrameVelocityY(TObj *);
-extern int func_8004065C(TObj *, int, int, int);
+extern int probeWallAt(TObj *, int, int, int);
 extern int probeCollisionAtDepthA(TObj *, int, int);
 extern int TileCollideAt(TObj *, int, int);
 
@@ -25,7 +25,7 @@ static __inline__ int Side(TObj *o)
     int d;
     if (w & 1) d = -0x18;
     else d = 0x18;
-    return func_8004065C(o, (short)(o->h->p.whole + d), o->y.p.whole, (short)w);
+    return probeWallAt(o, (short)(o->h->p.whole + d), o->y.p.whole, (short)w);
 }
 
 static __inline__ int Ground(TObj *o)

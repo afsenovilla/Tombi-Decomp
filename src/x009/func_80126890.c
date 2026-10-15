@@ -6,7 +6,7 @@ extern void *D_8012EE84[], *D_8012EE94[], *D_8012EE80[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001e4f0(int);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 #define WALLCHK(o, r)                                                       \
@@ -21,7 +21,7 @@ extern short FUN_80040278(TObj *, short, short);
                 d = -0x10;                                                  \
             else                                                            \
                 d = 0x10;                                                   \
-            r = FUN_8004065c(o, (o)->h->p.whole + d, (o)->y.p.whole + 0x30, f); \
+            r = probeWallAt(o, (o)->h->p.whole + d, (o)->y.p.whole + 0x30, f); \
         }                                                                   \
     }
 

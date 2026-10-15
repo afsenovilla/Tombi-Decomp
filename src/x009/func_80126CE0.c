@@ -5,7 +5,7 @@
 extern void *D_8012EEA0[], *D_8012EEA4[], *D_8012EE80[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 static __inline__ int wall(TObj *o)
@@ -20,7 +20,7 @@ static __inline__ int wall(TObj *o)
     v = 0x10;
     if (s)
         v = -0x10;
-    return func_8004065C(o, o->h->p.whole + v, o->y.p.whole + 0x30, s);
+    return probeWallAt(o, o->h->p.whole + v, o->y.p.whole + 0x30, s);
 }
 
 static __inline__ void setanim(TObj *o, void *a)

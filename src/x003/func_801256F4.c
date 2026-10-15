@@ -8,7 +8,7 @@ typedef struct O {
     char p5[0x9d - 0x90]; unsigned char b9d;
 } O;
 extern short D_8007A1F0[], D_8007A5F0[];
-extern short func_8004065C(O *, int, int, int);
+extern short probeWallAt(O *, int, int, int);
 extern short probeCollisionAtDepthB(O *, short, short);
 
 int func_801256F4(O *o, short k)
@@ -29,7 +29,7 @@ int func_801256F4(O *o, short k)
         a = 0;
         b = v;
     }
-    if (func_8004065C(o, (short)(o->h->x + b), (short)(o->y + a), k) == 0)
+    if (probeWallAt(o, (short)(o->h->x + b), (short)(o->y + a), k) == 0)
         return probeCollisionAtDepthB(o, (short)(o->h->x + b), (short)(a + o->y + 0x22)) == 0;
     return 1;
 }

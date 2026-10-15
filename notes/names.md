@@ -77,6 +77,9 @@ One line per name: `address name (old file) - justification`.
 - `80027c74 cameraFollowPlayerX` (was FUN_80027c74) - camera horizontal follow: target = player +-0x10 by facing, speed ramps to 4 px/frame, clamped to the section bounds +0x2C/+0x2E (flags +0x44 bits 1/2)
 - `8002795c cameraFollowPlayerY` (was func_8002795C) - camera vertical follow of the player with dead zone and ramp, clamped to +0x32 (flag +0x44 bit 8)
 - `80029cb4 updateCameraFollow` (was func_80029CB4) - camera tick: by camera mode D_800A60D6 calls cameraFollowPlayerX/Y, then the scroll/angle steps and Clamp
+- `8003f7cc objCollideSideWalls` (was func_8003F7CC) - after every player step: probeWallAt 8 px ahead (three heights from box2) and behind; a hit on the facing side sets +0xA6 = 2/3 (wall contact used by the steps)
+- `8004065c probeWallAt` (was func_8004065C) - getCollisionPlaneAt for x and the object's depth into 1F800278, then pushOutOfWallSegments with the side flag
+- `800402ec pushOutOfWallSegments` (was func_800402EC) - walks the wall segments of the collision plane; on overlap moves the object's x out by the penetration and stores the segment flags in 1F800282/1F800284
 
 # X000 function names (shared overlay code)
 
@@ -192,6 +195,15 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800f86e8 playerStepVerticalJump` (was func_800F86E8) (uncertain) - player steps 0x16/0x49: straight-up jump (velY -0x340, -0x580 for 0x49) with anim 0x1F, lands or bites (step 0xE)
 - `8010ca18 playerStepClimbObject` (was FUN_8010ca18) - player steps 0x23/0x2F: attached to the object D_8009F0EC (anim 80011148); Up/Down climb (anims 0x26/0x27), Left/Right swaps sides (anim 0x38), jump button lets go
 - `80108ad0 playerStepWalkIntoDepth` (was func_80108AD0) - player step 0x31: anim 0x2C while the depth coordinate moves 2 per frame for 0xB4 frames (area/section specific timings), e.g. walking through a passage into the background
+- `80109494 playerEventStepLaneJumpBack` (was FUN_80109494) - event step 2: jump (anim 0x19, velY -0x570) moving the depth coordinate back to the lane +0xF6; in area 0 with a pitch-slide sfx and startAreaBgm; lands into mode 1
+- `80108168 playerEventStepDepthShift` (was func_80108168) - event step 7: event copy of playerStepDepthShift (anim 0x2B, waits for D_8009CDA2 == 0, depth +5 per frame for 0x5A/5 frames)
+- `80108dbc playerEventStepWalkIntoDepth` (was FUN_80108dbc) - event step 9: event copy of playerStepWalkIntoDepth (anim 0x2C, depth +-2 per frame for 0x5A/2 frames), then mode 1
+- `8010ac90 playerEventStepRiseFadeOut` (was FUN_8010ac90) - event step 5: releases what is held, rises (velY -= 0x30) for 0x1E frames, starts the fade (D_8009C975 = 3) and after 0x3C frames sets the task mode 7
+- `8010ae94 playerEventStepRiseUp` (was FUN_8010ae94) - event step 12: rises with anim 4 until y < -0x20C, completes event 0xA4 and goes to event step 2
+- `8010a9f4 playerEventStepDropIn` (was func_8010A9F4) - event step 4: falls in from above (velY 0x1000 slowing to 0x200) until y reaches +0xF2, lands (sfx 0x1C) and returns to mode 1
+- `80108338 playerEventStepJumpIn` (was func_80108338) (uncertain) - event step 8: entrance jump (velY -0xA00, velX +-0x100) in areas 2/0x13 section 1 (area 4: in place), anim 4, lands into mode 1; other areas go straight to falling
+- `800eec40 playerAirSpinToFall` (was func_800EEC40) - airborne helper: turns +0x8C 4 per frame back toward upright (anims 0xFA..0xFC rock +-0x20 instead) and switches to the fall anim 80010AE8 once upright
+- `800ef1ac playerCheckPerchLanding` (was FUN_800ef1ac) (uncertain) - perch/climb/swing helper: on landing (+0x69) goes to step 0, or to the slope step 0x1B with anim 8/0x11 when +0xBE bit 3 is set; landing sfx 0x1C
 
 # Area overlay function names (X001..X019)
 

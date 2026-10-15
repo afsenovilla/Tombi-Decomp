@@ -79,7 +79,7 @@ extern void FUN_8010e66c(TObj *);
 extern void FUN_8011beac(TObj *);
 extern void FUN_8011b170(TObj *);
 extern void FUN_80106a18(TObj *);
-extern void FUN_8003f7cc(TObj *);
+extern void objCollideSideWalls(TObj *);
 extern void playerHandleHazardContact(TObj *, int);
 extern void probeTileShapeThreePoints(TObj *, int);
 
@@ -452,7 +452,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         if (o->step == 0x41) c++;
         if (o->step == 0x65) c++;
     }
-    if (c == 0) FUN_8003f7cc(o);
+    if (c == 0) objCollideSideWalls(o);
     if (SPAD.b1a4 == 0) playerHandleHazardContact(o, 1);
     probeTileShapeThreePoints(o, 4);
 }

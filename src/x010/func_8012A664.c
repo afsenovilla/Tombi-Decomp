@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void applyFrameVelocityY(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 #define SETANIM(k) \
@@ -29,7 +29,7 @@ static __inline__ short wall(TObj *o)
     short d;
     if (f & 1) d = -0x10;
     else d = 0x10;
-    return func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f);
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f);
 }
 #define WALL() wall(o)
 

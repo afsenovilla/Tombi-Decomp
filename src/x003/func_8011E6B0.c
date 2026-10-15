@@ -12,7 +12,7 @@ extern void FUN_8001f96c(int, int, int, int);
 extern int AnimAdvance(TObj *);
 extern void playerSetFallLean(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
-extern void func_8003F7CC(TObj *);
+extern void objCollideSideWalls(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
 extern void playerHurtLandRecover(TObj *);
 
@@ -95,7 +95,7 @@ void func_8011E6B0(TObj *o)
         if (o->velY > 0x680) {
             o->velY = 0x680;
         }
-        func_8003F7CC(o);
+        objCollideSideWalls(o);
         if (o->b69 || ObjTileCollide(o, 0, 0)) {
             o->b9c = 0;
             o->substep = 0;

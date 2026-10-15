@@ -10,7 +10,7 @@ extern void *D_8012EE80[];
 extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
 static __inline__ int blocked(TObj *o)
@@ -23,7 +23,7 @@ static __inline__ int blocked(TObj *o)
     {
         short g = f;
         d = g ? -16 : 16;
-        return func_8004065C(o, o->h->p.whole + d, o->y.p.whole + 0x30, g);
+        return probeWallAt(o, o->h->p.whole + d, o->y.p.whole + 0x30, g);
     }
 }
 

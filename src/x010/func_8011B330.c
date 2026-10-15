@@ -35,7 +35,7 @@ extern void AnimLoadDuration(S *);
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(S *);
 extern void func_8010F400(S *);
-extern void func_800EEC40(S *);
+extern void playerAirSpinToFall(S *);
 extern int ObjCheckHeadCollision(S *);
 extern short TileCollideAt(S *, short, short);
 extern void func_80030034(int);
@@ -106,7 +106,7 @@ void func_8011B330(S *s)
         s->o.y.raw += s->o.velY << 8;
         s->o.velY += 0x40;
         func_8010F400(s);
-        if (s->o.velY >= -0x383) func_800EEC40(s);
+        if (s->o.velY >= -0x383) playerAirSpinToFall(s);
         if (s->o.velY > 0) {
             w = 0x10;
             s->o.d84 = 0;

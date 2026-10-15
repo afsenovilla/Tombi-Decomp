@@ -15,7 +15,7 @@ extern short probeCollisionAtDepthC(TObj *, short, int);
 extern void applyCollisionTileResponse(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void playerSetFallLean(TObj *);
-extern void FUN_800ef1ac(TObj *);
+extern void playerCheckPerchLanding(TObj *);
 
 #define DIR(o, a, b) (o->h->p.whole + ((o->animFrame & 1) ? (a) : (b)))
 
@@ -139,5 +139,5 @@ void playerStepClimb(TObj *o)
         o->step = 2;
         o->state = 0;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

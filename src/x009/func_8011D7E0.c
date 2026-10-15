@@ -24,7 +24,7 @@ extern char D_80011108[];
 extern void playerAdvanceSpinAngle(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerReleaseBittenAndClearFlags(TObj *);
-extern void FUN_800ef1ac(TObj *);
+extern void playerCheckPerchLanding(TObj *);
 extern void SfxPlay3(int, int);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -181,5 +181,5 @@ void func_8011D7E0(TObj *o)
         }
         break;
     }
-    FUN_800ef1ac(o);
+    playerCheckPerchLanding(o);
 }

@@ -10,7 +10,7 @@ extern unsigned short *D_8013877C[], *D_80138764[], *D_80138760[], *D_80138780[]
 extern unsigned char D_80135B30[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern short FUN_8004065c(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern int func_801206F0(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 extern void cloneItemPickupObject(TObj *);
@@ -40,7 +40,7 @@ extern void cloneItemPickupObject(TObj *);
             r->b8 = 0x10;                                                        \
         else                                                                     \
             r->b8 = -0x10;                                                       \
-        if (FUN_8004065c(o, o->h->p.whole + r->b8, o->y.p.whole, 1 - o->animFrame)) \
+        if (probeWallAt(o, o->h->p.whole + r->b8, o->y.p.whole, 1 - o->animFrame)) \
             o->movetab = 0;                                                      \
         o->velV += dv;                                                           \
         o->y.raw += o->velV << 8;                                                \

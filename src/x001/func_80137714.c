@@ -6,7 +6,7 @@
 
 extern short D_8007A3F0[];
 extern int AnimAdvance(TObj *);
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ int inView(TObj *o)
@@ -30,7 +30,7 @@ void func_80137714(TObj *o)
         o->h->raw += o->velH << 8;
         o->y.raw = o->y.raw + (D_8007A3F0[o->d84] * o->velH >> 4) - 0x8000;
         o->d84 = (o->d84 + 2) & 0xff;
-        func_8004065C(o, o->h->p.whole, o->y.p.whole, o->animFrame);
+        probeWallAt(o, o->h->p.whole, o->y.p.whole, o->animFrame);
         FUN_80040278(o, o->h->p.whole, o->y.p.whole + 8);
         if (o->d84 == 0) {
             if (--o->timer == -1) {

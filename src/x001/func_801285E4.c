@@ -17,7 +17,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void SfxPlay(int);
 extern void applyFrameVelocityXY(TObj *);
-extern short FUN_8004065c(TObj *, short, short, int);
+extern short probeWallAt(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern void func_80128110(TObj *);
 
@@ -34,7 +34,7 @@ static __inline__ short chk(TObj *o)
     f = o->animFrame & 1;
     if ((unsigned short)f) d = -0x10;
     else d = 0x10;
-    if (FUN_8004065c(o, o->h->p.whole + d, o->y.p.whole, f)) {
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f)) {
         q->w6 = 0;
         return 1;
     }

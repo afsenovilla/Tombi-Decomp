@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_800A457C, D_800A457E;
-extern short func_8004065C(TObj *, short, short, short);
+extern short probeWallAt(TObj *, short, short, short);
 
 int func_8012491C(TObj *o)
 {
@@ -25,5 +25,5 @@ int func_8012491C(TObj *o)
             return 1;
         }
     }
-    return func_8004065C(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f) != 0;
 }
