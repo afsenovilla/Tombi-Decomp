@@ -121,6 +121,8 @@ linked). Sources, by priority:
   exposes demo functions that only matched because a different scratchpad address hid behind a relocation.
 - `tools/jpdemo_syms.py` drops tiny PAL library labels (`*_OBJ_<offset>`) that xmatch pairs with an epilogue inside
   demo game code: they cut the real function short (14 such rows).
+- `config/jpdemo/symbol_addrs_manual.txt` also names 31 X00 functions that splat merged into the previous one
+  (`jr ra`, then a new stack frame; reached only through pointer tables).
 
 - **Plumbing (1-2 days):** add `config/jpdemo/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
