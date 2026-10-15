@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 
-void func_80123698(TObj *o)
+void spawnLavaCavesPigShot(TObj *o)
 {
     TObj *e = allocObjectLayer2();
     short d;

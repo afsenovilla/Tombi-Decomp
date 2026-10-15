@@ -11,12 +11,12 @@ extern char D_80077D6C[], D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern int evilPigBossCheckLanded(TObj *);
-extern int func_8011D6BC(TObj *);
+extern int evilPigBossDefeatedCheckWall(TObj *);
 extern void evilPigBossCheckWall(TObj *);
 extern void FUN_8001f96c(int, short, short, short);
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern void func_80116C10(TObj *);
+extern void spawnEvilPigHitStars(TObj *);
 
 #define setbox(o, q) { unsigned char *p_; p_ = (unsigned char *)o->d90; p_ += (q); (o)->box0 = *p_++; (o)->box1 = *p_++; (o)->box2 = *p_; (o)->box3 = p_[1]; }
 
@@ -57,7 +57,7 @@ void evilPigBossDefeated(TObj *o)
             }
         } else {
             applyFrameVelocityX(o);
-            r = func_8011D6BC(o);
+            r = evilPigBossDefeatedCheckWall(o);
             if (r) {
                 o->b6a = 0;
                 o->state++;
@@ -109,7 +109,7 @@ void evilPigBossDefeated(TObj *o)
         D_1F80018C = o->h->raw;
         D_1F800190 = o->y.raw;
         D_800A4553[0] = 6;
-        func_80116C10(o);
+        spawnEvilPigHitStars(o);
         break;
     case 5:
         if (--o->timer == -1) {

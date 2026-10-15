@@ -18,7 +18,7 @@ extern void func_80123730(TObj *);
 
 #define SFX() do { int c = 0xda; if (GAME.selectedSection == 7) c = 0xf2; playSFX(c); } while (0)
 
-void func_8012415C(TObj *o)
+void updateLavaCavesPigShot(TObj *o)
 {
     unsigned char *t;
     int a;

@@ -11,7 +11,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void FUN_8001f8e4(TObj *);
-extern void func_80117C50(short, short, short, short);
+extern void spawnEvilPigEffectRing(short, short, short, short);
 
 #define DA8(o) (*(void ***)((char *)(o) + 0xa8))
 #define SETBOX(k) \
@@ -73,7 +73,7 @@ void evilPigBossTeleport(TObj *o)
         }
         o->ba7 = n;
         o->state++;
-        func_80117C50(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnEvilPigEffectRing(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     }
     case 1:
@@ -132,7 +132,7 @@ void evilPigBossTeleport(TObj *o)
             o->wac = 4;
             o->anim = DA8(o)[4];
             AnimLoadDuration(o);
-            func_80117C50(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnEvilPigEffectRing(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             o->timer = 0x3c;
             FUN_8001f8e4(o);
         }

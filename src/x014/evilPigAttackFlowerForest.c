@@ -11,9 +11,9 @@ extern int AnimAdvance(TObj *o);
 extern void ObjSetFacingToPlayer(TObj *o);
 extern void evilPigSetAnimBox(TObj *o, int n);
 extern void evilPigSetBoxByDirection(TObj *o);
-extern void func_80116C9C(TObj *o);
-extern void func_8011F850(void);
-extern void func_8011F888(void);
+extern void spawnEvilPigAttackFlash(TObj *o);
+extern void evilPigPlayAttackSfx(void);
+extern void evilPigPlayAttackSfxB(void);
 extern void spawnFlowerForestPigShot(TObj *o, unsigned char k);
 
 void evilPigAttackFlowerForest(TObj *o)
@@ -26,7 +26,7 @@ void evilPigAttackFlowerForest(TObj *o)
         q->k = 0;
         evilPigSetAnimBox(o, 0x14);
         o->substep++;
-        func_8011F850();
+        evilPigPlayAttackSfx();
         break;
     case 1:
         if (AnimAdvance(o)) {
@@ -39,9 +39,9 @@ void evilPigAttackFlowerForest(TObj *o)
             ObjSetFacingToPlayer(o);
             spawnFlowerForestPigShot(o, q->k);
             evilPigSetBoxByDirection(o);
-            func_80116C9C(o);
+            spawnEvilPigAttackFlash(o);
             o->substep++;
-            func_8011F888();
+            evilPigPlayAttackSfxB();
         }
         break;
     case 3:

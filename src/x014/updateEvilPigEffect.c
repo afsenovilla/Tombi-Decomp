@@ -11,7 +11,7 @@ extern void func_80118048(TObj *);
 extern void func_80118390(TObj *);
 extern void func_80118544(TObj *);
 
-void func_80118760(TObj *o)
+void updateEvilPigEffect(TObj *o)
 {
     TObj *n;
     int i;

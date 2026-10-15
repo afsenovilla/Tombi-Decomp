@@ -7,11 +7,11 @@ typedef struct { short a, b, c, d; } E8;
 extern int AnimAdvance(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern void evilPigSetAnimBox(TObj *, int);
-extern void func_8011F850(void);
-extern void func_8011F888(void);
-extern void func_80124848(TObj *, int, unsigned char);
+extern void evilPigPlayAttackSfx(void);
+extern void evilPigPlayAttackSfxB(void);
+extern void spawnDeepJunglePigShot(TObj *, int, unsigned char);
 extern void evilPigSetBoxByDirection(TObj *);
-extern void func_80116C9C(TObj *);
+extern void spawnEvilPigAttackFlash(TObj *);
 
 void evilPigAttackDeepJungle(TObj *o)
 {
@@ -23,7 +23,7 @@ void evilPigAttackDeepJungle(TObj *o)
         q[5] = FUN_8001f9e0() & 3;
         evilPigSetAnimBox(o, 0x14);
         o->substep++;
-        func_8011F850();
+        evilPigPlayAttackSfx();
         break;
     case 1:
         if (AnimAdvance(o)) {
@@ -33,11 +33,11 @@ void evilPigAttackDeepJungle(TObj *o)
         break;
     case 2:
         if (AnimAdvance(o)) {
-            func_80124848(o, 1, q[5]);
+            spawnDeepJunglePigShot(o, 1, q[5]);
             evilPigSetBoxByDirection(o);
-            func_80116C9C(o);
+            spawnEvilPigAttackFlash(o);
             o->substep++;
-            func_8011F888();
+            evilPigPlayAttackSfxB();
         }
         break;
     case 3:

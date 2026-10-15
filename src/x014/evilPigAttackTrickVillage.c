@@ -9,13 +9,13 @@ extern int AnimAdvance(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern unsigned char D_80126110[];
 extern void evilPigSetAnimBox(TObj *, int);
-extern void func_8011F850(void);
-extern void func_8011F888(void);
+extern void evilPigPlayAttackSfx(void);
+extern void evilPigPlayAttackSfxB(void);
 extern void FUN_8001f8e4(TObj *);
-extern void func_8012441C(TObj *, unsigned char);
+extern void spawnTrickVillagePigShotB(TObj *, unsigned char);
 extern void spawnTrickVillagePigShot(TObj *);
 extern void evilPigSetBoxByDirection(TObj *);
-extern void func_80116C9C(TObj *);
+extern void spawnEvilPigAttackFlash(TObj *);
 
 void evilPigAttackTrickVillage(TObj *o)
 {
@@ -36,7 +36,7 @@ void evilPigAttackTrickVillage(TObj *o)
         q[3] = (unsigned char)o->d38;
         evilPigSetAnimBox(o, 0x14);
         o->substep++;
-        func_8011F850();
+        evilPigPlayAttackSfx();
         break;
     case 1:
         if (AnimAdvance(o)) {
@@ -48,13 +48,13 @@ void evilPigAttackTrickVillage(TObj *o)
         if (AnimAdvance(o)) {
             FUN_8001f8e4(o);
             if (q[5] == 0)
-                func_8012441C(o, q[3]);
+                spawnTrickVillagePigShotB(o, q[3]);
             else
                 spawnTrickVillagePigShot(o);
             evilPigSetBoxByDirection(o);
-            func_80116C9C(o);
+            spawnEvilPigAttackFlash(o);
             o->substep++;
-            func_8011F888();
+            evilPigPlayAttackSfxB();
         }
         break;
     case 3:

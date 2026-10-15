@@ -572,3 +572,22 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - Leaf butterfly steps of x010 updateLeafButterfly (twin layout of x001): `80122f48 initLeafButterfly`, `801230d0 leafButterflyFlutter`,
   `801234c8 leafButterflyReleased` (b04 2 steps 1-3), `80123708 leafButterflyRoam` (step 4: random flight patterns D_8012F398 inside the box of the parent
   d90; uncertain); x001 `80137d8c leafButterflyRoam` the same step 4
+- x014 evil pig boss effects and shots (ObjAlloc objects are layer 3 (ObjAlloc sets +0x1C = 3), handlers from the MAIN0 layer 3 table 0x80079BAC):
+  `80116c10 spawnEvilPigHitStars` (from updateEvilPigBoss / evilPigBossHit / evilPigBossDefeated: layer 3 type 0x15, b0c = the boss step) ->
+  `80116d1c updateEvilPigHitStars` (MAIN0 anim D_8001226C from SPR_DATA[1], kept above the boss's head (dy -0x10 / -0x20) while the boss stays in b04 2 at
+  that step; uncertain that they are stars), `80116c9c spawnEvilPigAttackFlash` (called by every evilPigAttack*: type 0x60) -> `80116ec0
+  updateEvilPigAttackFlash` (semi-transparent anim D_8012A1B0 with the section's palette D_80125B70, placed at the boss offset table D_80125C00 by facing;
+  uncertain), `80117c50 spawnEvilPigEffectRing` (evilPigBossTeleport: 24 type 0x61 objects in a ring, given subtype) / `801184cc spawnSectionClearEffect`
+  (updateSectionClearController: type 0x61 subtype 5 at the top of the screen) -> `80118760 updateEvilPigEffect` (type 0x61, per subtype step functions
+  80117AA8 / 80117D94 / 80118048, subtype 3 emits subtype 4 particles), `80117428 spawnRealEvilPigEffect` (realEvilPigChooseAttack: type 0x4F) ->
+  `80117490 updateRealEvilPigEffect` (semi-transparent anim D_8012A014 for 0x78 ticks), `8011d6bc evilPigBossDefeatedCheckWall` (room bounds +-0x90 and
+  wall / floor probe, used by evilPigBossDefeated), `8011f850 evilPigPlayAttackSfx` / `8011f888 evilPigPlayAttackSfxB` (FUN_8001e4f0 of the section's
+  sound D_80125E30 / D_80125E50; called by the attacks);
+  shot spawns (allocObjectLayer2) and their layer 2 handlers: `80122f18 spawnPhoenixMountainPigShot` (evilPigAttackPhoenixMountain, type 0x49 ->
+  `80122fa0 updatePhoenixMountainPigShot`, sfx 0xCA / 0xEF in section 7), `80123698 spawnLavaCavesPigShot` (evilPigAttackLavaCaves, type 0x4B -> `8012415c
+  updateLavaCavesPigShot`), `8012441c spawnTrickVillagePigShotB` (evilPigAttackTrickVillage, its second shot kind, type 0x4F -> `801244d0
+  updateTrickVillagePigShotB`), `80124848 spawnDeepJunglePigShot` (evilPigAttackDeepJungle, type 0x50 -> `801251b4 updateDeepJunglePigShot`)
+- x010 `80125040 updateFlyingBug` (layer 2 type 0x27, 30 placements in areas 10; kind uncertain: SPR_DATA[3], 16 x 16 box, moves freely along the angle d38
+  (any direction, below the ceiling y -0x398), gone once GV2.bc3 & 0x40): step 0 `80124370 flyingBugWander`, step 1 `80124a00 flyingBugChase` (while the
+  player is near, speed velH 0x100..0x200, turning), b04 2 `80124f0c flyingBugDefeated` (velV -0x400 fly-off), `80123ecc flyingBugProbeBlocked` (wall /
+  floor / ceiling probes by the direction octant, returns blocked bits)

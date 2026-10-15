@@ -4,7 +4,7 @@
 
 extern TObj *ObjAlloc(void);
 
-int func_80117428(TObj *o)
+int spawnRealEvilPigEffect(TObj *o)
 {
     TObj *p = ObjAlloc();
     if (p != 0) {

@@ -46,7 +46,7 @@ static __inline__ void sp2(TObj *o, unsigned char st)
     fin(o, st, 3);
 }
 
-void func_801251B4(TObj *o)
+void updateDeepJunglePigShot(TObj *o)
 {
     switch (o->b04) {
     case 0:

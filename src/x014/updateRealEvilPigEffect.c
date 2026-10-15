@@ -9,7 +9,7 @@ extern int AnimAdvance(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
 
-void func_80117490(TObj *o)
+void updateRealEvilPigEffect(TObj *o)
 {
     switch (o->b04) {
     case 0:

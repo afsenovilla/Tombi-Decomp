@@ -10,7 +10,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern int angleFromDelta(int, int);
-extern int func_80123ECC(TObj *o, unsigned char a);
+extern int flyingBugProbeBlocked(TObj *o, unsigned char a);
 
 static __inline__ int turn(TObj *o)
 {
@@ -40,7 +40,7 @@ static __inline__ int near(TObj *o)
     return (unsigned short)(PLAYER.y.p.whole - o->y.p.whole + 0x50) < 0xa1;
 }
 
-void func_80124A00(TObj *o)
+void flyingBugChase(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -61,7 +61,7 @@ void func_80124A00(TObj *o)
             o->y.raw += (short)(s >> 12) << 8;
         }
         turn(o);
-        if (func_80123ECC(o, o->d38)) {
+        if (flyingBugProbeBlocked(o, o->d38)) {
             o->wac = 2;
             o->anim = (*(void ***)&o->wa8)[2];
             AnimLoadDuration(o);
@@ -117,7 +117,7 @@ void func_80124A00(TObj *o)
             o->h->raw += (short)(c >> 12) << 8;
             o->y.raw += (short)(s >> 12) << 8;
         }
-        func_80123ECC(o, o->d38);
+        flyingBugProbeBlocked(o, o->d38);
         break;
     }
 }

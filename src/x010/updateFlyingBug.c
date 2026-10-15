@@ -13,9 +13,9 @@ extern void freeObjectLayer2(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int isObjectInView(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void func_80124370(TObj *);
-extern void func_80124A00(TObj *);
-extern void func_80124F0C(TObj *);
+extern void flyingBugWander(TObj *);
+extern void flyingBugChase(TObj *);
+extern void flyingBugDefeated(TObj *);
 
 #define TBL(o) (*(void ***)((char *)(o) + 0xa8))
 
@@ -27,7 +27,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void func_80125040(TObj *o)
+void updateFlyingBug(TObj *o)
 {
     short *sv = &o->wb4;
     void **t;
@@ -64,10 +64,10 @@ void func_80125040(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            func_80124370(o);
+            flyingBugWander(o);
             break;
         case 1:
-            func_80124A00(o);
+            flyingBugChase(o);
             break;
         }
         if ((unsigned)((o->d38 - 0x40) & 0xff) < 0x80) {
@@ -103,7 +103,7 @@ void func_80125040(TObj *o)
             break;
         case 0:
         case 2:
-            func_80124F0C(o);
+            flyingBugDefeated(o);
             if (!o->visible) o->b04 = 3;
             break;
         }

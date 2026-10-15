@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 
-int func_80122F18(TObj *o)
+int spawnPhoenixMountainPigShot(TObj *o)
 {
     TObj *p = allocObjectLayer2();
 

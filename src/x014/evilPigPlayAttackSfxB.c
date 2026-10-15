@@ -4,7 +4,7 @@
 extern int D_80125E50[];
 extern void FUN_8001e4f0(int);
 
-void func_8011F888(void)
+void evilPigPlayAttackSfxB(void)
 {
     FUN_8001e4f0(D_80125E50[GAME.selectedSection]);
 }

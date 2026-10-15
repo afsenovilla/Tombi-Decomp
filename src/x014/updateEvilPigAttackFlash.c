@@ -12,7 +12,7 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80116EC0(TObj *o)
+void updateEvilPigAttackFlash(TObj *o)
 {
     unsigned char t = o->b04;
     TObj *p;

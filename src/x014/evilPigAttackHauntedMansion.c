@@ -7,9 +7,9 @@ typedef struct { int a; short t; short b; } E8;
 extern int AnimAdvance(TObj *o);
 extern void evilPigSetAnimBox(TObj *o, int n);
 extern void evilPigSetBoxByDirection(TObj *o);
-extern void func_80116C9C(TObj *o);
-extern void func_8011F850(void);
-extern void func_8011F888(void);
+extern void spawnEvilPigAttackFlash(TObj *o);
+extern void evilPigPlayAttackSfx(void);
+extern void evilPigPlayAttackSfxB(void);
 extern void spawnHauntedMansionPigShot(TObj *o);
 
 void evilPigAttackHauntedMansion(TObj *o)
@@ -18,7 +18,7 @@ void evilPigAttackHauntedMansion(TObj *o)
     case 0:
         evilPigSetAnimBox(o, 0x14);
         o->substep++;
-        func_8011F850();
+        evilPigPlayAttackSfx();
         spawnHauntedMansionPigShot(o);
         break;
     case 1:
@@ -30,10 +30,10 @@ void evilPigAttackHauntedMansion(TObj *o)
     case 2:
         if (AnimAdvance(o)) {
             evilPigSetBoxByDirection(o);
-            func_80116C9C(o);
+            spawnEvilPigAttackFlash(o);
             o->timer = 0x14;
             o->substep++;
-            func_8011F888();
+            evilPigPlayAttackSfxB();
         }
         break;
     case 3:

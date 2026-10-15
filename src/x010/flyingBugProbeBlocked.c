@@ -6,7 +6,7 @@ extern short probeWallAt(TObj *, short, short, int);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short FUN_80040278(TObj *, short, short);
 
-int func_80123ECC(TObj *o, unsigned char dir)
+int flyingBugProbeBlocked(TObj *o, unsigned char dir)
 {
     int r = 0;
 

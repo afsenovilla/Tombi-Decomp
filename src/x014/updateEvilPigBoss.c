@@ -7,7 +7,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_80116C10(TObj *);
+extern void spawnEvilPigHitStars(TObj *);
 extern void initEvilPigBoss(TObj *);
 extern void evilPigBossIntroTalk(TObj *);
 extern void evilPigBossTeleport(TObj *);
@@ -88,7 +88,7 @@ void updateEvilPigBoss(TObj *o)
         case 2:
             switch (o->state) {
             case 0:
-                func_80116C10(o);
+                spawnEvilPigHitStars(o);
                 o->d8c = 0;
                 o->state++;
                 setanim(o, 0xe);

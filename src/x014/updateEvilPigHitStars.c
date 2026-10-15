@@ -9,7 +9,7 @@ extern void AnimAdvance(TObj *);
 extern void FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80116D1C(TObj *o)
+void updateEvilPigHitStars(TObj *o)
 {
     TObj *q;
     int dx, dy;

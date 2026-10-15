@@ -26,7 +26,7 @@ extern void SoundStopAll(void);
 extern void ThreadCreate(int, void (*)(void));
 extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
-extern void func_801184CC(void);
+extern void spawnSectionClearEffect(void);
 
 void updateSectionClearController(TObj *o)
 {
@@ -133,7 +133,7 @@ void updateSectionClearController(TObj *o)
         S16(o, 0x54) = D_1F8000F2x[0];
         o->step++;
         o->w48 = 0x78;
-        func_801184CC();
+        spawnSectionClearEffect();
         break;
     case 13:
         if (--o->w48 == -1) {

@@ -7,7 +7,7 @@ extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int evilPigBossCheckWall(TObj *);
 extern int evilPigBossCheckLanded(TObj *);
-extern void func_80116C10(TObj *);
+extern void spawnEvilPigHitStars(TObj *);
 
 #define TBL(o) (*(void ***)&(o)->wa8)
 static __inline__ void SetAnim(TObj *o, int k)
@@ -91,7 +91,7 @@ void evilPigBossHit(TObj *o)
                 o->animFrame &= 1;
                 o->state++;
                 SetAnim(o, 13);
-                func_80116C10(o);
+                spawnEvilPigHitStars(o);
             }
         }
         break;

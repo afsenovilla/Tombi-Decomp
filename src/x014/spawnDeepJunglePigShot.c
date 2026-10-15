@@ -1,27 +1,28 @@
-// FUNC 8012441c 180 X014
-// MATCHING 8012441c 180
+// FUNC 80124848 212 X014
+// MATCHING 80124848 212
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer2(void);
 
-int func_8012441C(TObj *o, unsigned char k)
+int spawnDeepJunglePigShot(TObj *o, unsigned char sub, unsigned char k)
 {
     TObj *n = allocObjectLayer2();
     int x;
 
     if (n != 0) {
         n->active = 1;
-        n->type = 0x4f;
-        n->subtype = 0;
+        n->type = 0x50;
+        n->subtype = sub;
         n->b0c = 0;
+        n->wb4 = k;
         if (o->animFrame & 1) {
-            x = o->a.p.whole - 0x10;
+            x = o->a.p.whole - 0x20;
         } else {
-            x = o->a.p.whole + 0x10;
+            x = o->a.p.whole + 0x20;
         }
         n->a.raw = x << 16;
         n->y.raw = (o->y.p.whole - 4) << 16;
         n->b.raw = o->b.p.whole << 16;
-        n->d8c = k;
+        n->animFrame = o->animFrame & 1;
     }
 }

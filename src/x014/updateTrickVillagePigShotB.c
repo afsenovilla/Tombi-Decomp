@@ -32,7 +32,7 @@ static __inline__ short out(TObj *o)
     return o->y.p.whole < D_800A4580 - 0x80;
 }
 
-void func_801244D0(TObj *o)
+void updateTrickVillagePigShotB(TObj *o)
 {
     unsigned char t = o->b04;
     int r;

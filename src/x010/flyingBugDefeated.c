@@ -6,7 +6,7 @@ extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 #define DA8(o) (*(void ***)((char *)(o) + 0xa8))
 
-void func_80124F0C(TObj *o)
+void flyingBugDefeated(TObj *o)
 {
     switch (o->state) {
     case 0:

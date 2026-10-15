@@ -41,7 +41,7 @@ static __inline__ short clamp(TObj *o)
     return 0;
 }
 
-void func_80122FA0(TObj *o)
+void updatePhoenixMountainPigShot(TObj *o)
 {
     TObj *p = &PLAYER;
     short dx, dy;

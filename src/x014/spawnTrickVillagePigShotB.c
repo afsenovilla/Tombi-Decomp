@@ -1,28 +1,27 @@
-// FUNC 80124848 212 X014
-// MATCHING 80124848 212
+// FUNC 8012441c 180 X014
+// MATCHING 8012441c 180
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer2(void);
 
-int func_80124848(TObj *o, unsigned char sub, unsigned char k)
+int spawnTrickVillagePigShotB(TObj *o, unsigned char k)
 {
     TObj *n = allocObjectLayer2();
     int x;
 
     if (n != 0) {
         n->active = 1;
-        n->type = 0x50;
-        n->subtype = sub;
+        n->type = 0x4f;
+        n->subtype = 0;
         n->b0c = 0;
-        n->wb4 = k;
         if (o->animFrame & 1) {
-            x = o->a.p.whole - 0x20;
+            x = o->a.p.whole - 0x10;
         } else {
-            x = o->a.p.whole + 0x20;
+            x = o->a.p.whole + 0x10;
         }
         n->a.raw = x << 16;
         n->y.raw = (o->y.p.whole - 4) << 16;
         n->b.raw = o->b.p.whole << 16;
-        n->animFrame = o->animFrame & 1;
+        n->d8c = k;
     }
 }

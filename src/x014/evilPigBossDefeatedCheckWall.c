@@ -6,7 +6,7 @@ extern short D_800A457C, D_800A457E;
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
-int func_8011D6BC(TObj *o)
+int evilPigBossDefeatedCheckWall(TObj *o)
 {
     short d;
 

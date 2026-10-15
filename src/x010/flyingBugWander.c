@@ -9,7 +9,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern int func_80123ECC(TObj *, int);
+extern int flyingBugProbeBlocked(TObj *, int);
 extern void func_8012418C(TObj *);
 
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
@@ -51,7 +51,7 @@ static __inline__ int near(TObj *o)
     return (unsigned short)((*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x50) < 0xa1;
 }
 
-void func_80124370(TObj *o)
+void flyingBugWander(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -79,7 +79,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = 0x80;
         }
-        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
+        if (flyingBugProbeBlocked(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -103,7 +103,7 @@ void func_80124370(TObj *o)
             else
                 o->d30 = Rand() & 0x80;
         }
-        if (func_80123ECC(o, (*(unsigned char*)&o->d38))) {
+        if (flyingBugProbeBlocked(o, (*(unsigned char*)&o->d38))) {
             o->wac = 2;
             o->anim = ANIMS(o)[2];
             AnimLoadDuration(o);
@@ -131,7 +131,7 @@ void func_80124370(TObj *o)
             o->timer = Rand() & 0xbf;
         }
         mv(o);
-        func_80123ECC(o, (*(unsigned char*)&o->d38));
+        flyingBugProbeBlocked(o, (*(unsigned char*)&o->d38));
         break;
     }
 }

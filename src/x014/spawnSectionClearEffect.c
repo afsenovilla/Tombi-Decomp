@@ -5,7 +5,7 @@
 
 extern TObj *ObjAlloc(void);
 
-void func_801184CC(void)
+void spawnSectionClearEffect(void)
 {
     TObj *n = ObjAlloc();
 

@@ -4,7 +4,7 @@
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 
-void func_80117C50(short sub, short x, short y, short z)
+void spawnEvilPigEffectRing(short sub, short x, short y, short z)
 {
     int i;
     TObj *o;
