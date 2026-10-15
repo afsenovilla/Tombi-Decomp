@@ -27,7 +27,7 @@ static __inline__ int inrange(TObj *o)
     return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x10) < 0x101;
 }
 
-void func_8011DC5C(TObj *o)
+void evilPigBossTeleport(TObj *o)
 {
     X *x = (X *)((char *)o + 0xb4);
     int i;

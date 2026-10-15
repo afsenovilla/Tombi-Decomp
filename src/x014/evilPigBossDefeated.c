@@ -10,9 +10,9 @@ extern int D_800A4568[];
 extern char D_80077D6C[], D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityX(TObj *);
-extern int func_8011D7B0(TObj *);
+extern int evilPigBossCheckLanded(TObj *);
 extern int func_8011D6BC(TObj *);
-extern void func_8011D604(TObj *);
+extern void evilPigBossCheckWall(TObj *);
 extern void FUN_8001f96c(int, short, short, short);
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -22,7 +22,7 @@ extern void func_80116C10(TObj *);
 
 typedef struct { char pad[0xa8]; void **tbl; } TB;
 
-void func_8011EE50(TObj *o)
+void evilPigBossDefeated(TObj *o)
 {
     unsigned char *p;
     int r;
@@ -48,7 +48,7 @@ void func_8011EE50(TObj *o)
     case 1:
         if (o->animFrame & 2) {
             o->y.raw += 0x48000;
-            r = func_8011D7B0(o);
+            r = evilPigBossCheckLanded(o);
             if (r) {
                 o->b6a = 0;
                 o->state++;
@@ -83,13 +83,13 @@ void func_8011EE50(TObj *o)
         if (o->w7a) o->d8c = (unsigned char)(o->d8c + 0x14);
         else o->d8c = (unsigned char)(o->d8c - 0x14);
         applyAnimVelocityX(o, o->w7a);
-        func_8011D604(o);
+        evilPigBossCheckWall(o);
         o->velV += 0x40;
         if (o->velV > 0x400) o->velV = 0x400;
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
             o->b9c = 2;
-            if (func_8011D7B0(o)) {
+            if (evilPigBossCheckLanded(o)) {
                 o->b9c = 0;
                 o->d8c = 0;
                 o->state++;

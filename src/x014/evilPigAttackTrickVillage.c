@@ -8,16 +8,16 @@ typedef struct { short a, b, c, d; } E8;
 extern int AnimAdvance(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern unsigned char D_80126110[];
-extern void func_8011D88C(TObj *, int);
+extern void evilPigSetAnimBox(TObj *, int);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
 extern void FUN_8001f8e4(TObj *);
 extern void func_8012441C(TObj *, unsigned char);
-extern void func_80120638(TObj *);
-extern void func_8011D948(TObj *);
+extern void spawnTrickVillagePigShot(TObj *);
+extern void evilPigSetBoxByDirection(TObj *);
 extern void func_80116C9C(TObj *);
 
-void func_8011FBA0(TObj *o)
+void evilPigAttackTrickVillage(TObj *o)
 {
     unsigned short *q = (unsigned short *)&o->wb4;
 
@@ -34,13 +34,13 @@ void func_8011FBA0(TObj *o)
             q[4] = 2;
         }
         q[3] = (unsigned char)o->d38;
-        func_8011D88C(o, 0x14);
+        evilPigSetAnimBox(o, 0x14);
         o->substep++;
         func_8011F850();
         break;
     case 1:
         if (AnimAdvance(o)) {
-            func_8011D88C(o, 0x15);
+            evilPigSetAnimBox(o, 0x15);
             o->substep++;
         }
         break;
@@ -50,8 +50,8 @@ void func_8011FBA0(TObj *o)
             if (q[5] == 0)
                 func_8012441C(o, q[3]);
             else
-                func_80120638(o);
-            func_8011D948(o);
+                spawnTrickVillagePigShot(o);
+            evilPigSetBoxByDirection(o);
             func_80116C9C(o);
             o->substep++;
             func_8011F888();
@@ -66,13 +66,13 @@ void func_8011FBA0(TObj *o)
                 else
                     q[3] = (o->d38 - 0x10) & 0xff;
                 o->substep = 2;
-                func_8011D88C(o, 0x15);
+                evilPigSetAnimBox(o, 0x15);
             } else {
                 E8 *t = (E8 *)o->d94;
                 o->substep++;
                 t += o->wae;
                 o->timer = t->c;
-                func_8011D88C(o, 0x12);
+                evilPigSetAnimBox(o, 0x12);
             }
         }
         break;

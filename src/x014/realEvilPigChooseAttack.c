@@ -42,7 +42,7 @@ static __inline__ int chk(TObj *o)
     return 1;
 }
 
-void func_8011E1F0(TObj *o)
+void realEvilPigChooseAttack(TObj *o)
 {
     Sub *s = (Sub *)&o->wb4;
     unsigned char *t;

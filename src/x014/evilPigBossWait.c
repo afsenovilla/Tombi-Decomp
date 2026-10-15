@@ -25,7 +25,7 @@ static __inline__ int check(T2 *o)
     return 1;
 }
 
-void func_8011DB10(T2 *o)
+void evilPigBossWait(T2 *o)
 {
     E8 *t;
 

@@ -6,7 +6,7 @@
 extern short D_1F80017A[];
 extern TObj *allocObjectLayer2(void);
 
-int func_801227C0(TObj *o)
+int spawnHauntedMansionPigShot(TObj *o)
 {
     TObj *n = allocObjectLayer2();
 

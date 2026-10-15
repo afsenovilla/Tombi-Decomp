@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void AnimLoadDuration(TObj *);
 
-void func_8011D88C(TObj *o, short n)
+void evilPigSetAnimBox(TObj *o, short n)
 {
     unsigned char *p = (unsigned char *)o->d90 + n * 4;
     o->box0 = *p++;

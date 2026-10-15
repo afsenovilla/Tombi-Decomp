@@ -8,7 +8,7 @@ extern void func_8012284C(TObj *);
 extern void func_80122AAC(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_80122DE8(TObj *o)
+void updateHauntedMansionPigShot(TObj *o)
 {
     switch (o->b04) {
     case 0: {

@@ -5,7 +5,7 @@ extern short D_800A4582;
 extern short FUN_80040278(TObj *, short, short);
 extern short probeWallAt(TObj *, short, short, int);
 
-int func_8011D7B0(TObj *o)
+int evilPigBossCheckLanded(TObj *o)
 {
     if (o->b69 == 1) {
         o->b69 = 0;

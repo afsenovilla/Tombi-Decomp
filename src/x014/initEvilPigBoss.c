@@ -33,7 +33,7 @@ static __inline__ void setRank(SB *s)
     s->wc4 = i;
 }
 
-void func_8011D9D0(TObj *t)
+void initEvilPigBoss(TObj *t)
 {
     S16(t, 0xc0) = 0;
     S16(t, 0xc2) = 0;

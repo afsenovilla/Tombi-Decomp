@@ -28,7 +28,7 @@ static __inline__ void SetAnim(TObj *o, short n)
     AnimLoadDuration(o);
 }
 
-void func_8011F218(TObj *o)
+void evilPigBossIntroTalk(TObj *o)
 {
     V6 v;
     TObj *e;

@@ -5,7 +5,7 @@ extern TObj *allocObjectLayer2(void);
 extern int angleFromDelta(int, int);
 extern unsigned short D_1F80016A[], D_1F80016E[];
 
-int func_8012176C(TObj *p, int sub)
+int spawnFlowerForestPigShot(TObj *p, int sub)
 {
     TObj *o = allocObjectLayer2();
     short dx, dy;

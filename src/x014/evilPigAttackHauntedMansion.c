@@ -5,31 +5,31 @@
 typedef struct { int a; short t; short b; } E8;
 
 extern int AnimAdvance(TObj *o);
-extern void func_8011D88C(TObj *o, int n);
-extern void func_8011D948(TObj *o);
+extern void evilPigSetAnimBox(TObj *o, int n);
+extern void evilPigSetBoxByDirection(TObj *o);
 extern void func_80116C9C(TObj *o);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
-extern void func_801227C0(TObj *o);
+extern void spawnHauntedMansionPigShot(TObj *o);
 
-void func_80120330(TObj *o)
+void evilPigAttackHauntedMansion(TObj *o)
 {
     switch (o->substep) {
     case 0:
-        func_8011D88C(o, 0x14);
+        evilPigSetAnimBox(o, 0x14);
         o->substep++;
         func_8011F850();
-        func_801227C0(o);
+        spawnHauntedMansionPigShot(o);
         break;
     case 1:
         if (AnimAdvance(o)) {
-            func_8011D88C(o, 0x15);
+            evilPigSetAnimBox(o, 0x15);
             o->substep++;
         }
         break;
     case 2:
         if (AnimAdvance(o)) {
-            func_8011D948(o);
+            evilPigSetBoxByDirection(o);
             func_80116C9C(o);
             o->timer = 0x14;
             o->substep++;
@@ -42,7 +42,7 @@ void func_80120330(TObj *o)
             o->substep++;
             e += o->wae;
             o->timer = e->t;
-            func_8011D88C(o, 0x12);
+            evilPigSetAnimBox(o, 0x12);
         }
         break;
     case 4:

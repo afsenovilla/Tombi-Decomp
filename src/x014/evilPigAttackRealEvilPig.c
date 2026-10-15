@@ -8,14 +8,14 @@ typedef struct { int a; short t; short b; } E8;
 typedef struct { short w[8]; } B4;
 
 extern int AnimAdvance(TObj *o);
-extern void func_8011D88C(TObj *o, int n);
-extern void func_8011D948(TObj *o);
+extern void evilPigSetAnimBox(TObj *o, int n);
+extern void evilPigSetBoxByDirection(TObj *o);
 extern void func_80116C9C(TObj *o);
 extern void func_80117428(TObj *o);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
 
-void func_8012049C(TObj *o)
+void evilPigAttackRealEvilPig(TObj *o)
 {
     B4 *b = (B4 *)&o->wb4;
 
@@ -25,13 +25,13 @@ void func_8012049C(TObj *o)
         GV2.bb0 = 0;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
-        func_8011D88C(o, 0x14);
+        evilPigSetAnimBox(o, 0x14);
         o->substep++;
         func_8011F850();
         break;
     case 1:
         if (AnimAdvance(o)) {
-            func_8011D88C(o, 0x15);
+            evilPigSetAnimBox(o, 0x15);
             o->substep++;
         }
         break;
@@ -39,7 +39,7 @@ void func_8012049C(TObj *o)
         if (AnimAdvance(o)) {
             func_80117428(o);
             GVARS.b58 = 0;
-            func_8011D948(o);
+            evilPigSetBoxByDirection(o);
             func_80116C9C(o);
             o->substep++;
             func_8011F888();
@@ -51,7 +51,7 @@ void func_8012049C(TObj *o)
             o->substep++;
             e += o->wae;
             o->timer = e->t;
-            func_8011D88C(o, 0x12);
+            evilPigSetAnimBox(o, 0x12);
         }
         break;
     case 4:

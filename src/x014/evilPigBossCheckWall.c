@@ -5,7 +5,7 @@
 extern short D_800A457C, D_800A457E;
 extern short probeWallAt(TObj *, short, short, short);
 
-int func_8011D604(TObj *o)
+int evilPigBossCheckWall(TObj *o)
 {
     short d;
 

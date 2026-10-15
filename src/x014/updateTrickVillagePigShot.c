@@ -32,7 +32,7 @@ static __inline__ int out(TObj *o)
     return o->y.p.whole < D_800A4580 - 0x80;
 }
 
-void func_801206C0(TObj *o)
+void updateTrickVillagePigShot(TObj *o)
 {
     TObj *p = &PLAYER;
     short d, v;

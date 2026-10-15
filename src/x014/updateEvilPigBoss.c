@@ -8,14 +8,14 @@ extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern void func_80116C10(TObj *);
-extern void func_8011D9D0(TObj *);
-extern void func_8011F218(TObj *);
-extern void func_8011DC5C(TObj *);
-extern void func_8011E550(TObj *);
-extern void func_8011DB10(TObj *);
-extern void func_8011E76C(TObj *);
-extern void func_8011EB08(TObj *);
-extern void func_8011EE50(TObj *);
+extern void initEvilPigBoss(TObj *);
+extern void evilPigBossIntroTalk(TObj *);
+extern void evilPigBossTeleport(TObj *);
+extern void evilPigBossAttack(TObj *);
+extern void evilPigBossWait(TObj *);
+extern void evilPigBossHit(TObj *);
+extern void evilPigBossStunned(TObj *);
+extern void evilPigBossDefeated(TObj *);
 
 #define WC2(o) (*(unsigned short *)((char *)(o) + 0xc2))
 
@@ -33,7 +33,7 @@ static __inline__ void setanim(TObj *o, short k)
     FUN_8001fe6c(o);
 }
 
-void func_8011F4E0(TObj *o)
+void updateEvilPigBoss(TObj *o)
 {
     unsigned char *p;
 
@@ -42,7 +42,7 @@ void func_8011F4E0(TObj *o)
         switch (o->step) {
         case 0:
             FUN_8001f8e4(o);
-            func_8011D9D0(o);
+            initEvilPigBoss(o);
             if (o->subtype == 0) {
                 setanim(o, 0);
             } else {
@@ -52,7 +52,7 @@ void func_8011F4E0(TObj *o)
             o->step++;
             break;
         case 1:
-            if (GVARS.b3a) func_8011F218(o);
+            if (GVARS.b3a) evilPigBossIntroTalk(o);
             break;
         }
         break;
@@ -60,13 +60,13 @@ void func_8011F4E0(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            func_8011DC5C(o);
+            evilPigBossTeleport(o);
             break;
         case 1:
-            func_8011E550(o);
+            evilPigBossAttack(o);
             break;
         case 2:
-            func_8011DB10(o);
+            evilPigBossWait(o);
             break;
         }
         o->wb4++;
@@ -80,10 +80,10 @@ void func_8011F4E0(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            func_8011E76C(o);
+            evilPigBossHit(o);
             break;
         case 1:
-            func_8011EB08(o);
+            evilPigBossStunned(o);
             break;
         case 2:
             switch (o->state) {
@@ -106,7 +106,7 @@ void func_8011F4E0(TObj *o)
             }
             break;
         case 3:
-            func_8011EE50(o);
+            evilPigBossDefeated(o);
             break;
         case 4:
             if (o->state == 1) o->visible = 0;

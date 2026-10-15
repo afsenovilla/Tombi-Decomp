@@ -14,7 +14,7 @@ extern void decreaseObjectTimer(void *, int);
 #define setBox(o, i) { unsigned char *b = (unsigned char *)(o)->d90; b += (i) * 4; \
     (o)->box0 = *b++; (o)->box1 = *b++; (o)->box2 = b[0]; (o)->box3 = b[1]; (o)->wac = (i); }
 
-void func_8011EB08(TObj *o)
+void evilPigBossStunned(TObj *o)
 {
     unsigned char *q;
 

@@ -431,3 +431,21 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x001 others: 80136b4c stepPuppyBaron (step switch of updatePuppyBaron), 80139b2c checkLostSeedKidTalk (player standing at the kid's ledge pressing the talk
   button), 8013a0d8 spawnPuppyRumorNpcs (case 0 of updatePuppyRumorNpc: spawns the layer 2 type 0x16 objects while GCD.bceab is 1..2), 8013759c initLeafButterfly,
   80137714 leafButterflyFlutter (sine flight, 4 cycles); x009 80128180 initJellyfish (case 0 of updateJellyfish)
+- x014 evil pig bosses (AREA14 = the evil pig rooms; one boss per section, layer 2 types 0x3B..0x42 = 0x3B + section, all handled by
+  `8011f4e0 updateEvilPigBoss`, which stores itself in GVARS.p48). The section -> boss mapping comes from the event each section completes on clear
+  (D_801256A8, see updateSectionClearController / objects.py AREA14_BOSS_EVENT) and its CFNT999 title: 0 "Phoenix Mountain", 1 "Baccus Village",
+  2 "Trick Village", 3 "Lava Caves", 4 "The 100 Flower Forest", 5 "The Deep Jungle Pig", 6 "The Haunted Mansion", 7 "The Real Evil Pig"; the intro
+  lines (MFNT140S group 2, index D_80125E20[section]) are the "Cerdiablo" speeches (section 7: "Soy el último Cerdiablo, el que creó los otros").
+  `8011f218 evilPigBossIntroTalk` (showMessageBoxDirect of that line), `8011d9d0 initEvilPigBoss` (anim/box/point tables D_80125CC4/CE4/D04 by type;
+  setRank in section 7), b04 1 steps: `8011dc5c evilPigBossTeleport` (picks one of 16 points of the d94 table that is on screen, flickers out, reappears there),
+  `8011e550 evilPigBossAttack` (aims at the player, picks by the fight timer wb4 from D_80125CA8/CB8/CC8 and runs the section attack D_80125CD8[section];
+  section 7 goes through `8011e1f0 realEvilPigChooseAttack`, which runs the attack of a chosen other section), `8011db10 evilPigBossWait`; b04 2 steps:
+  `8011e76c evilPigBossHit`, `8011eb08 evilPigBossStunned` (anims 11/12 with timers, uncertain), `8011ee50 evilPigBossDefeated` (locks player and scroll,
+  anim 15, falls to the floor); helpers `8011d604 evilPigBossCheckWall` (room bounds D_800A457C/E +- 0x90, wall probe), `8011d7b0 evilPigBossCheckLanded`,
+  `8011d88c evilPigSetAnimBox` (box + anim number n from the boss tables), `8011d948 evilPigSetBoxByDirection` (box from wb8)
+- The attack table D_80125CD8 (indexed by section): 8011f8c0 evilPigAttackPhoenixMountain, 8011fa34 evilPigAttackBaccusVillage, 8011fba0
+  evilPigAttackTrickVillage, 8011fe14 evilPigAttackLavaCaves, 8011ff80 evilPigAttackFlowerForest, 80120160 evilPigAttackDeepJungle, 80120330
+  evilPigAttackHauntedMansion, 8012049c evilPigAttackRealEvilPig. Their projectile spawns (allocObjectLayer2 + type) and the handlers of those types
+  (MAIN0 layer 2 table 0x80077D9C): 80120638 spawnTrickVillagePigShot (type 0x43 -> 801206c0 updateTrickVillagePigShot), 80121170
+  spawnBaccusVillagePigShot (0x46 -> 801215b0 updateBaccusVillagePigShot), 8012176c spawnFlowerForestPigShot (0x47, aimed at the player ->
+  80122418 updateFlowerForestPigShot, also placed twice in section 4), 801227c0 spawnHauntedMansionPigShot (0x48 -> 80122de8 updateHauntedMansionPigShot)

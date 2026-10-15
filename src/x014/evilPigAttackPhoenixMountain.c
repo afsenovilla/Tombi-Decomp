@@ -6,24 +6,24 @@
 typedef struct { short a, b, c, d; } E8;
 
 extern int AnimAdvance(TObj *);
-extern void func_8011D88C(TObj *, int);
+extern void evilPigSetAnimBox(TObj *, int);
 extern void func_8011F850(void);
 extern void func_8011F888(void);
 extern int func_80122F18(TObj *);
-extern void func_8011D948(TObj *);
+extern void evilPigSetBoxByDirection(TObj *);
 extern void func_80116C9C(TObj *);
 
-void func_8011F8C0(TObj *o)
+void evilPigAttackPhoenixMountain(TObj *o)
 {
     switch (o->substep) {
     case 0:
-        func_8011D88C(o, 0x14);
+        evilPigSetAnimBox(o, 0x14);
         o->substep++;
         func_8011F850();
         break;
     case 1:
         if (AnimAdvance(o)) {
-            func_8011D88C(o, 0x15);
+            evilPigSetAnimBox(o, 0x15);
             o->substep++;
         }
         break;
@@ -31,7 +31,7 @@ void func_8011F8C0(TObj *o)
         if (AnimAdvance(o)) {
             func_80122F18(o);
             GVARS.b58 = 0;
-            func_8011D948(o);
+            evilPigSetBoxByDirection(o);
             func_80116C9C(o);
             o->timer = 0x14;
             o->substep++;
@@ -44,7 +44,7 @@ void func_8011F8C0(TObj *o)
             o->substep++;
             t += o->wae;
             o->timer = t->c;
-            func_8011D88C(o, 0x12);
+            evilPigSetAnimBox(o, 0x12);
         }
         break;
     case 4:

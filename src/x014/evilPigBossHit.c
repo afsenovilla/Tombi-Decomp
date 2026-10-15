@@ -5,8 +5,8 @@ extern char D_80077CF4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern int func_8011D604(TObj *);
-extern int func_8011D7B0(TObj *);
+extern int evilPigBossCheckWall(TObj *);
+extern int evilPigBossCheckLanded(TObj *);
 extern void func_80116C10(TObj *);
 
 #define TBL(o) (*(void ***)&(o)->wa8)
@@ -27,7 +27,7 @@ static __inline__ void SetAnim(TObj *o, int k)
     AnimLoadDuration(o);
 }
 
-void func_8011E76C(TObj *o)
+void evilPigBossHit(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -42,7 +42,7 @@ void func_8011E76C(TObj *o)
     case 1:
         AnimAdvance(o);
         applyAnimVelocityX(o, o->w7a);
-        func_8011D604(o);
+        evilPigBossCheckWall(o);
         o->velV += 0x30;
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
@@ -58,8 +58,8 @@ void func_8011E76C(TObj *o)
             o->velV = 0x400;
         o->y.raw += o->velV << 8;
         applyAnimVelocityX(o, o->w7a);
-        func_8011D604(o);
-        if (func_8011D7B0(o)) {
+        evilPigBossCheckWall(o);
+        if (evilPigBossCheckLanded(o)) {
             o->b9c = 1;
             o->velV = -0x200;
             o->velH = 0x180;
@@ -75,7 +75,7 @@ void func_8011E76C(TObj *o)
             o->h->raw += o->velH << 8;
             o->d8c = (o->d8c - 0x14) & 0xff;
         }
-        if (func_8011D604(o))
+        if (evilPigBossCheckWall(o))
             o->velH = 0;
         o->velV += 0x20;
         if (o->velV > 0x400)
@@ -83,7 +83,7 @@ void func_8011E76C(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
             o->b9c = 2;
-            if (func_8011D7B0(o)) {
+            if (evilPigBossCheckLanded(o)) {
                 o->timer = 0xf0;
                 o->b9c = 0;
                 o->d8c = 0;

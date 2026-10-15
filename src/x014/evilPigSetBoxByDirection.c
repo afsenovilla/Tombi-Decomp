@@ -16,7 +16,7 @@ static __inline__ void setbox(TObj *o, short k)
     AnimLoadDuration(o);
 }
 
-void func_8011D948(TObj *o)
+void evilPigSetBoxByDirection(TObj *o)
 {
     setbox(o, D_80125CF8[(o->wb8 >> 1) & 7]);
 }

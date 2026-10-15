@@ -10,13 +10,13 @@ extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
 extern void (*D_80125CD8[])(TObj *);
-extern void func_8011E1F0(TObj *);
+extern void realEvilPigChooseAttack(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern int angleFromDelta(int, int);
 
-void func_8011E550(TObj *o)
+void evilPigBossAttack(TObj *o)
 {
     unsigned char *t;
     int x;
@@ -25,7 +25,7 @@ void func_8011E550(TObj *o)
         o->state = 0;
         o->step++;
     } else if (((unsigned short*)&GAME.selectedSection)[0] == 7) {
-        func_8011E1F0(o);
+        realEvilPigChooseAttack(o);
     } else switch (o->state) {
     case 0:
         ObjSetFacingToPlayer(o);

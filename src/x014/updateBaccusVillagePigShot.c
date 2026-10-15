@@ -10,7 +10,7 @@ extern void func_801211F0(TObj *);
 extern void func_801213F4(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801215B0(TObj *o)
+void updateBaccusVillagePigShot(TObj *o)
 {
     switch (o->b04) {
     case 0:

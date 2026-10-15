@@ -4,7 +4,7 @@
 
 extern TObj *allocObjectLayer2(void);
 
-int func_80120638(TObj *o)
+int spawnTrickVillagePigShot(TObj *o)
 {
     TObj *n = allocObjectLayer2();
 

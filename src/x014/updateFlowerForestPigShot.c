@@ -20,7 +20,7 @@ extern void func_80121B4C(TObj *);
 extern void func_80121D08(TObj *);
 extern void func_80121F90(TObj *);
 
-void func_80122418(TObj *o)
+void updateFlowerForestPigShot(TObj *o)
 {
     unsigned char s = o->b04;
     TObj *e;

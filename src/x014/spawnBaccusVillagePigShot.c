@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 
-int func_80121170(TObj *o)
+int spawnBaccusVillagePigShot(TObj *o)
 {
     TObj *n = allocObjectLayer2();
     if (n) {
