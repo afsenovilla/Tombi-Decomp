@@ -13,6 +13,8 @@ the same name: bytes equal and relocations equal.  So:
               placed sections, or the extern symbol address inferred from the retail code like build_full does)
               and then dropped, plus the same symbol D_<addr>.
     objdiff then compares the final bytes of the C data with the retail bytes: matched only when they are equal.
+    A unit whose code is not counted (twin of an earlier program's function, Psy-Q without --with-sdk) still claims
+    the data its C places in this program, as a data-only unit <prog>/<name>.data (target without .text).
   - all other bytes of each program that are not code (every unit of tools/units.py is code; everything else in the
     retail file: MAIN0 .rodata/.data, jump tables and tables inside the overlays, padding) go into one target-only
     unit per program, `<prog>/data`, which has no base and so counts as unmatched.

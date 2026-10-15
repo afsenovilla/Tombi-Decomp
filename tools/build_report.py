@@ -11,7 +11,9 @@ Steps (all output under build/ and asm/, both ignored by git):
   4. objdiff.json is written with one unit per unit of tools/units.py (categories: game / sdk, main0 / x000 / x0nn):
      the same list docs/PROGRESS.md counts, so both figures agree by construction.
      Data (tools/report_data.py): each unit also carries the data sections its C object would get placed at their
-     retail address (bytes compared after relocation), and one target-only unit <prog>/data holds every other
+     retail address (bytes compared after relocation; a unit left out of the code figures, a twin or a Psy-Q
+     function without --with-sdk, still reports that data as a data-only unit <prog>/<name>.data, since those bytes
+     are this program's own), and one target-only unit <prog>/data holds every other
      non-code byte of the program, so matched_data / total_data is the share of the retail data C really reproduces.
   5. objdiff-cli writes build/report.json.
 
@@ -346,7 +348,10 @@ def main():
             if m: asm[int(m.group(1), 16)] = body
         addrs = sorted(asm)
         for u in U.units()[P]:
-            if not (U.counted(u) or (u.lib and not u.twin and WITH_SDK)): continue
+            # a unit left out of the code figures (twin of an earlier program's function, or Psy-Q without --with-sdk)
+            # still owns the data its C places in *this* program: reported as a data-only unit (no .text in the target)
+            data_only = not (U.counted(u) or (u.lib and not u.twin and WITH_SDK))
+            if data_only and (P, u.addr) not in base: continue
             parts = [asm[a] for a in addrs if u.addr <= a < u.addr + u.size]
             if not parts: continue  # data (zero words) or a range splat merged elsewhere
             out = "build/target/%s/%s.o" % (prog, u.name)
@@ -362,6 +367,9 @@ def main():
                         os.makedirs(os.path.dirname(dbase), exist_ok=True)
                         dclaims = RD.patch_base(base[(P, u.addr)], dbase, info)
                         extra = RD.target_asm(dclaims, game, gbase, 0, dtmp)
+            if data_only:
+                if not dclaims: continue
+                parts = []
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
                 t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + "\n".join(parts) + extra)
             try:
@@ -371,7 +379,7 @@ def main():
             finally:
                 os.unlink(t.name)
             claimed += [(a, a + n) for a, n in dclaims.values()]
-            unit = {"name": "%s/%s" % (prog, u.name), "target_path": out,
+            unit = {"name": "%s/%s%s" % (prog, u.name, ".data" if data_only else ""), "target_path": out,
                     "metadata": {"progress_categories": [prog, "sdk" if u.lib else "game"]}}
             if (P, u.addr) in base: unit["base_path"] = dbase or base[(P, u.addr)]
             units.append(unit)

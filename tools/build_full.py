@@ -14,8 +14,10 @@ How it works (all output under build/full/, ignored by git):
        - sections referenced through the section symbol (string literals, jump tables, static data) are
          placed at their original address, which is derived from the retail bytes of the relocated
          instructions (lui/addiu pairs); the splat lines of that range are dropped;
-       - sections that only define globals (data a ported header/file defines again) are dropped and
-         their symbols turned into undefined references, so the real data from splat is used.
+       - sections that only define globals: placed at their retail address when the code's uses of those
+         globals all agree on one section address and the section has the retail bytes there (data moved
+         into C); otherwise (data a ported header/file defines again) dropped and their symbols turned into
+         undefined references, so the real data from splat is used.
      Every undefined symbol of a C object gets its address from the retail bytes too (checked for
      consistency, and against the splat label of the same name).
   4. All remaining splat lines go into one assembly file per program, cut into one section per
@@ -250,6 +252,7 @@ def analyse(u, game, vram, hdr):
     """Places the C object: .text at FUNC addr, referenced data sections at their retail address.
     Returns False (keep asm) when the object cannot be placed."""
     if u.get("failed"): return False
+    for k in ("gplaced", "grefs", "bases", "drop"): u.pop(k, None)
     e = Elf(u["obj"])
     u["elf"] = e
     gb = lambda a, n: game[hdr + a - vram: hdr + a - vram + n]
@@ -287,8 +290,36 @@ def analyse(u, game, vram, hdr):
                 b = (val - add - (sym["value"] if sym["type"] != 3 else 0)) & 0xFFFFFFFF
                 u.setdefault("bases", {}).setdefault(tsec, set()).add(b)
 
+    def masked_equal(sec, b):
+        ours, ret = bytearray(e.data(sec)), bytearray(gb(b, e.size(sec)))
+        for off, ty, _ in e.relocs(sec):
+            m = {2: 0xFFFFFFFF, 4: 0x3FFFFFF, 5: 0xFFFF, 6: 0xFFFF}.get(ty, 0)
+            for buf in (ours, ret):
+                struct.pack_into("<I", buf, off, W(buf, off) & ~m & 0xFFFFFFFF)
+        return ours == ret
+
+    def gref_place(sec):
+        """A data section only reached through the globals it defines: placed when every use of them by .text gives
+        the same section address, inside the program, and the section has the retail bytes there (else dropped)."""
+        if e.sh[e.idx[sec]][1] == 8: return False
+        bs = {(a - s["value"]) & 0xFFFFFFFF for s, a in u.get("grefs", []) if s["shndx"] == e.idx[sec]}
+        if len(bs) != 1: return False
+        b = next(iter(bs))
+        if not (vram <= b and b + e.size(sec) <= vram + len(game) - hdr) or not masked_equal(sec, b): return False
+        keep = (len(problems), {k: set(v) for k, v in u["syms"].items()}, list(u.get("grefs", [])),
+                {k: set(v) for k, v in u.get("bases", {}).items()})
+        infer(sec, b, gb(b, e.size(sec)))
+        if (len(problems) != keep[0] or any(len(v) > 1 for v in u["syms"].values())
+                or any(k not in u["place"] or v != {u["place"][k]} for k, v in u.get("bases", {}).items())):
+            del problems[keep[0]:]; u["syms"], u["grefs"] = keep[1], keep[2]
+            u.setdefault("bases", {}).clear(); u["bases"].update(keep[3])
+            return False
+        u["place"][sec] = b
+        u.setdefault("gplaced", []).append(sec)
+        return True
+
     infer(".text", u["addr"], gb(u["addr"], u["size"]))
-    bases = u.get("bases", {})
+    bases = u.setdefault("bases", {})
     if bases.get(".text", {u["addr"]}) != {u["addr"]}:
         problems.append(".text relocations point elsewhere")
     for sec in DATA_SECS:
@@ -303,6 +334,8 @@ def analyse(u, game, vram, hdr):
             if e.sh[e.idx[sec]][1] == 8:
                 problems.append("%s is NOBITS" % sec); continue
             infer(sec, b, gb(b, e.size(sec)))
+        elif sec not in u.get("nogref", ()) and gref_place(sec):
+            pass  # globals this file defines, used by its code at their retail address with the retail bytes
         else:
             for s in e.syms:  # data this file defines again: use the real one (splat) instead
                 if s["shndx"] == e.idx[sec] and s["bind"] in (1, 2):
@@ -339,6 +372,32 @@ def analyse(u, game, vram, hdr):
 
 
 # ------------------------------------------------------------------------------------------- linking
+def place_ranges(u, addrs, end, game, vram, hdr, bisect):
+    """(start, end, section, zero padding) of each placed section of a unit."""
+    ranges = []
+    for s, a in u["place"].items():
+        b = a + u["elf"].size(s)
+        nxt = addrs[bisect.bisect_left(addrs, b)] if bisect.bisect_left(addrs, b) < len(addrs) else end
+        # data ending inside a splat line (unaligned strings): zero padding up to the next line
+        pad = nxt - b if (s != ".text" and nxt - b < 8 and not any(game[hdr + b - vram:hdr + nxt - vram])) else 0
+        ranges.append((a, b + pad, s, pad))
+    return ranges
+
+
+def place_bad(u, addrs, end, items, game, vram, hdr, bisect):
+    """Why a unit's placed sections cannot be linked (None: they can)."""
+    bad = None
+    for a, b, s, _ in place_ranges(u, addrs, end, game, vram, hdr, bisect):
+        if not (vram <= a and b <= end): bad = "%s outside the program" % s
+        elif bisect.bisect_left(addrs, a) == len(addrs) or addrs[bisect.bisect_left(addrs, a)] != a:
+            bad = "%s starts at %08x, inside a splat line" % (s, a)
+        elif b != end and (bisect.bisect_left(addrs, b) == len(addrs) or addrs[bisect.bisect_left(addrs, b)] != b):
+            bad = "%s ends at %08x, inside a splat line" % (s, b)
+        for it in items:
+            if a < it[1] and it[0] < b: bad = "%s overlaps %s" % (s, it[3][0]["src"])
+    return bad
+
+
 def build_prog(p, units):
     P = PROGS[p]
     vram, end = P["vram"], P["vram"] + P["size"]
@@ -350,22 +409,11 @@ def build_prog(p, units):
     items = []   # (start, end, kind, payload)
     for u in sorted(units, key=lambda u: u["addr"]):
         if not analyse(u, game, vram, P["header"]): continue
-        ranges = []
-        for s, a in u["place"].items():
-            b = a + u["elf"].size(s)
-            nxt = addrs[bisect.bisect_left(addrs, b)] if bisect.bisect_left(addrs, b) < len(addrs) else end
-            # data ending inside a splat line (unaligned strings): zero padding up to the next line
-            pad = nxt - b if (s != ".text" and nxt - b < 8 and not any(game[P["header"] + b - vram:P["header"] + nxt - vram])) else 0
-            ranges.append((a, b + pad, s, pad))
-        bad = None
-        for a, b, s, _ in ranges:
-            if not (vram <= a and b <= end): bad = "%s outside the program" % s
-            elif bisect.bisect_left(addrs, a) == len(addrs) or addrs[bisect.bisect_left(addrs, a)] != a:
-                bad = "%s starts at %08x, inside a splat line" % (s, a)
-            elif b != end and (bisect.bisect_left(addrs, b) == len(addrs) or addrs[bisect.bisect_left(addrs, b)] != b):
-                bad = "%s ends at %08x, inside a splat line" % (s, b)
-            for it in items:
-                if a < it[1] and it[0] < b: bad = "%s overlaps %s" % (s, it[3][0]["src"])
+        if u.get("gplaced") and place_bad(u, addrs, end, items, game, vram, P["header"], bisect):
+            u["nogref"] = set(u["gplaced"])  # its globals' sections cannot go at their address: back to splat data
+            if not analyse(u, game, vram, P["header"]): continue
+        ranges = place_ranges(u, addrs, end, game, vram, P["header"], bisect)
+        bad = place_bad(u, addrs, end, items, game, vram, P["header"], bisect)
         if bad:
             print("WARN %s: kept as asm: %s" % (u["src"], bad)); continue
         for a, b, s, pad in ranges:
