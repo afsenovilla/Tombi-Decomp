@@ -1,5 +1,5 @@
 // JPDEMO x00 8010E0D8 880
-// Demo version of PAL x000 80113F38 (func_80113F38.c): the player is released only when GVARS.b3f is clear.
+// Demo version of PAL x000 80113F38 (l2Type18Active.c): the player is released only when GVARS.b3f is clear.
 #include "gvars.h"
 #include "player.h"
 typedef struct P { short x; short y; } P;
@@ -17,9 +17,9 @@ extern extern unsigned char D_8009A7EA; /* GVARS.b3a */
 extern unsigned short D_800A57CE; /* PLAYER y */
 extern P *D_800A57F8; /* PLAYER.obj.h */
 void TileCollideAt(S *, int, int);
-extern void FUN_80113888(S *), FUN_80113b6c(S *), FUN_80113cc8(S *);
+extern void l2Type18State2(S *), l2Type18State5(S *), l2Type18State7(S *);
 extern S *showMessageBoxDirectTimed(int, int, V *, int);
-void func_80113F38(S *o)
+void l2Type18Active(S *o)
 {
     V v;
     int f;
@@ -56,7 +56,7 @@ void func_80113F38(S *o)
         }
         break;
     case 2:
-        FUN_80113888(o);
+        l2Type18State2(o);
         break;
     case 3:
         if (o->b01 == 0)
@@ -105,10 +105,10 @@ void func_80113F38(S *o)
         }
         break;
     case 5:
-        FUN_80113b6c(o);
+        l2Type18State5(o);
         break;
     case 7:
-        FUN_80113cc8(o);
+        l2Type18State7(o);
         break;
     }
 }

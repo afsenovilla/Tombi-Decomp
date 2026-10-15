@@ -1,6 +1,6 @@
 // FUNC 80116924 564 X011
 // MATCHING 80116924 564
-/* Debt: register asm("$3") on q, as in the X000 sibling func_80120494 (global-alloc puts it in $6 otherwise). */
+/* Debt: register asm("$3") on q, as in the X000 sibling l4Type1BDeformModel (global-alloc puts it in $6 otherwise). */
 typedef struct {
     char p0[5];
     unsigned char step;

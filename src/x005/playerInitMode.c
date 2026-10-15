@@ -35,7 +35,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void spawnPlayerPoolType12Object(void);
 extern void spawnPlayerPoolType13Object(TObj *, int, int);
 extern void FUN_80118910(void);
-extern void FUN_80122990(TObj *);
+extern void playerSetSpawnTimerArea0Sec3(TObj *);
 extern void FUN_801228bc(TObj *);
 extern void FUN_801212a0(TObj *);
 extern void FUN_8011dc4c(TObj *);
@@ -219,7 +219,7 @@ void playerInitMode(TObj *o)
         o->step = c;
         o->state = 0;
         o->substep = 0;
-        if (DAT_8009c960 == 0) FUN_80122990(o);
+        if (DAT_8009c960 == 0) playerSetSpawnTimerArea0Sec3(o);
         switch (o->step) {
         case 2:
             { unsigned short t2 = o->h->p.whole;

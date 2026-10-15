@@ -1,6 +1,6 @@
 // FUNC 8011b560 836 X006
 // MATCHING 8011b560 836
-/* Sibling of X000 func_80120494. Debt: register asm("$3") on q (same as the sibling); raw-offset wac store in RET8 keeps the scalar loads after it. */
+/* Sibling of X000 l4Type1BDeformModel. Debt: register asm("$3") on q (same as the sibling); raw-offset wac store in RET8 keeps the scalar loads after it. */
 typedef struct {
     char p0[7];
     unsigned char substep;

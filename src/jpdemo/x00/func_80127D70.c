@@ -1,5 +1,5 @@
 // JPDEMO x00 80127D70 204
-// Demo version of PAL x000 801320A8 (FUN_801320a8.c): notification 1 (PAL 0).
+// Demo version of PAL x000 801320A8 (a00L2Type08Step1C.c): notification 1 (PAL 0).
 #include "TOBJ.H"
 extern void spawnItemNotification(int, int);
 extern void FUN_8001fe6c(TObj *);
@@ -14,7 +14,7 @@ static __inline__ void set_box(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void FUN_801320a8(TObj *o)
+void a00L2Type08Step1C(TObj *o)
 {
     switch (o->state) {
     case 0: {

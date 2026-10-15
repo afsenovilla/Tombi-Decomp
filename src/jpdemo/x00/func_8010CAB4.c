@@ -1,10 +1,10 @@
 // JPDEMO x00 8010CAB4 200
-// Demo version of PAL x000 80112520 (FUN_80112520.c): no active=1 on landing.
+// Demo version of PAL x000 80112520 (l2Type0EActive4.c): no active=1 on landing.
 #include "TOBJ.H"
 extern void func_800202b4(void);
 extern short func_80040278(TObj *o, int a, int b);
 
-void FUN_80112520(TObj *o)
+void l2Type0EActive4(TObj *o)
 {
     func_800202b4();
     switch (o->step) {

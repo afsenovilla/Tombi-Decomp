@@ -1,11 +1,11 @@
 // JPDEMO x00 8011CEA0 540
-// Demo version of PAL x000 80126D7C (func_80126D7C.c): clears scratchpad 0x1F80019E on a hit.
+// Demo version of PAL x000 80126D7C (pushObjectOutOfCat4Type06.c): clears scratchpad 0x1F80019E on a hit.
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
 short pushObjectOutOfObjectFacingB(TObj *o, TObj *e);
 
 extern short D_1F80019E;
-void func_80126D7C(TObj *o, TObj *e)
+void pushObjectOutOfCat4Type06(TObj *o, TObj *e)
 {
     short sx, dx, w, a, t; int dy; int d; unsigned short u;
     if (e->subtype != 2) {

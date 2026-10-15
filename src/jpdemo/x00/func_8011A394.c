@@ -1,5 +1,5 @@
 // JPDEMO x00 8011A394 1964
-// Demo version of PAL x000 80123FD0 (FUN_80123fd0.c): No off-screen early exit, texture rows from v 0 (PAL 0xa0), then func_8003F160.
+// Demo version of PAL x000 80123FD0 (drawObjectSpriteRotatedFT4.c): No off-screen early exit, texture rows from v 0 (PAL 0xa0), then func_8003F160.
 #include "spad.h"
 /* Rotated FT4 sprite strip. Keys: short x = xy (keeps the move s3,a0 copy), and the Psy-Q setSemiTrans macro
    form (if/else |= 2 / &= ~2 after f->code = 0x2d): cse folds both branches to constants and deletes the dead else
@@ -34,7 +34,7 @@ int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
 extern void func_8003F160(TObj *, int);
 extern int D_1F800070;
-void FUN_80123fd0(TObj *o)
+void drawObjectSpriteRotatedFT4(TObj *o)
 {
     short *e;
     unsigned char *q;

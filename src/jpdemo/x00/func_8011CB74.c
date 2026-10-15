@@ -1,5 +1,5 @@
 // JPDEMO x00 8011CB74 236
-// Demo version of PAL x000 80126A64 (func_80126A64.c): fields at +0xd4/+0xd6 (PAL +0xe8/+0xea).
+// Demo version of PAL x000 80126A64 (playerGrabCat4Type06.c): fields at +0xd4/+0xd6 (PAL +0xe8/+0xea).
 #include "TOBJ.H"
 typedef struct {
     TObj t;
@@ -8,7 +8,7 @@ typedef struct {
     unsigned short ea;
 } P80126A64;
 
-void func_80126A64(P80126A64 *o, TObj *p)
+void playerGrabCat4Type06(P80126A64 *o, TObj *p)
 {
     if (p->b0c == 0 && p->subtype != 2
         && (unsigned short)(o->t.d->p.whole - p->d->p.whole + 45) < 91

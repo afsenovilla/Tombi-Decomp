@@ -1,8 +1,8 @@
 // JP x00 80124D58 232
-// Japanese version of PAL x000 80126010 (FUN_80126010.c): 228 -> 212.
+// Japanese version of PAL x000 80126010 (playerContactCat2Type2B.c): 228 -> 212.
 extern short objectBoxOverlapSide(void);
 
-void FUN_80126010(unsigned char *o, unsigned char *s)
+void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
 {
     short r;
     r = objectBoxOverlapSide();

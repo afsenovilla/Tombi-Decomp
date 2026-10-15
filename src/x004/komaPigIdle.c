@@ -6,9 +6,9 @@ extern char D_80077CF4[];
 extern unsigned char D_80130FB4[];
 extern unsigned char D_80130FC4[];
 extern unsigned char D_80130FD4[];
-extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 FUN_80129fb4) */
+extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
 extern unsigned short *D_80133B5C[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 */
-extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 FUN_80129fb4) */
+extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
 extern unsigned short *D_80133B5C[], *D_80133B74[], *D_80133B78[];
 extern char D_80133D68[];
 extern char D_80133D8C[];

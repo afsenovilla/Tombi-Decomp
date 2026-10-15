@@ -1,7 +1,7 @@
 // JP x00 8010E0B0 68
-// Japanese version of PAL x000 8010E5E4 (func_8010E5E4.c): -16 -> -80.
+// Japanese version of PAL x000 8010E5E4 (playerAccelerateUpCapped.c): -16 -> -80.
 #include "TOBJ.H"
-void func_8010E5E4(TObj *o)
+void playerAccelerateUpCapped(TObj *o)
 {
     o->velY -= 0x50;
     if (o->velY < -0x800) {

@@ -10,11 +10,11 @@ extern char D_8013B7F0[];
 extern char D_8013B7F8[];
 extern char D_8013B800[];
 extern char D_8013B808[];
-extern void FUN_8012f1b4();
+extern void l2Type07Sub0();
 extern void FUN_8012f380();
-extern void FUN_8012fb3c();
-extern void FUN_8012fe98();
-extern void FUN_801302a0();
+extern void l2Type07Sub2();
+extern void l2Type07Sub3();
+extern void l2Type07Sub4();
 extern unsigned int data_80139124[];
 extern unsigned int data_80139134[];
 extern unsigned int data_8013913C[];
@@ -84,11 +84,11 @@ void *ptrs_801391E4[9] = {
     data_8013919C,
     data_801391B4,
     data_801391CC,
-    FUN_8012f1b4,
+    l2Type07Sub0,
     FUN_8012f380,
-    FUN_8012fb3c,
-    FUN_8012fe98,
-    FUN_801302a0,
+    l2Type07Sub2,
+    l2Type07Sub3,
+    l2Type07Sub4,
 };
 
 unsigned int data_80139208[8] = {

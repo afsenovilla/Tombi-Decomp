@@ -1,7 +1,7 @@
 // JPDEMO x00 8011C298 160
-// Demo version of PAL x000 801260F8 (FUN_801260f8.c): attached object at +0xd0 (PAL +0xe4).
+// Demo version of PAL x000 801260F8 (playerContactCat2Type12.c): attached object at +0xd0 (PAL +0xe4).
 extern short objectBoxOverlapSide(char *, unsigned char *);
-void FUN_801260f8(char *o, unsigned char *p)
+void playerContactCat2Type12(char *o, unsigned char *p)
 {
     short s;
     if (p[2] == 0x12 && p[4] == 0)

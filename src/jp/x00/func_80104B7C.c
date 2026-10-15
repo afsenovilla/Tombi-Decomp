@@ -1,9 +1,9 @@
 // JP x00 80104B7C 140
-// Japanese version of PAL x000 80104EA0 (func_80104EA0.c): 64 -> 16384.
+// Japanese version of PAL x000 80104EA0 (playerCheckJumpPressedA.c): 64 -> 16384.
 #include "gv6.h"
 #include "TOBJ.H"
 extern TObj *D_8009C330;
-void func_80104EA0(TObj *o)
+void playerCheckJumpPressedA(TObj *o)
 {
     unsigned short m = *(unsigned short *)0x1f8001fc;
     if ((m & *(unsigned short *)0x1f8003c8) || (m & *(unsigned short *)0x1f8003c6)) {

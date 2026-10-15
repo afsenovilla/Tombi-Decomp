@@ -1,7 +1,7 @@
 // FUNC 8011f240 1836 X009
 // MATCHING 8011f240 1836
 #include "spad.h"
-/* Rotated FT4 sprite strip (family of FUN_80123fd0). All element reads go through the one pointer q: loop.c then
+/* Rotated FT4 sprite strip (family of drawObjectSpriteRotatedFT4). All element reads go through the one pointer q: loop.c then
    combines the 7 address givs into a reduced reg based on the LAST one (q+12 = uv3), which is the game's s2;
    a separate f = q+12 pointer gets reduced to q+8 instead. p = D_1F800164 is read between the A/B and C/D bytes. */
 #include "TOBJ.H"

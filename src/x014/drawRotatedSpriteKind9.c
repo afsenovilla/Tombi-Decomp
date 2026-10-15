@@ -1,7 +1,7 @@
 // FUNC 8011b830 2012 X014
 // MATCHING 8011b830 2012
 #include "spad.h"
-/* Rotated/scaled FT4 sprite strip (X014 twin of FUN_80123fd0; csv said 1660 B, real function 2012 B).
+/* Rotated/scaled FT4 sprite strip (X014 twin of drawObjectSpriteRotatedFT4; csv said 1660 B, real function 2012 B).
    Keys: per-axis scale from ba5/ba6 as `c = (signed char)o->ba5; short sc = (signed char)c; if (sc) ... (unsigned char)sc`
    (the folded QI sign-extension leaves two dead combine USEs = the 16 B frame gap at sp+0x20); single frame pointer q with
    q[10..15]/q+4/q+8/q+12 offsets so strength reduction makes the q+12 giv (s2) itself and keeps q on the stack. */

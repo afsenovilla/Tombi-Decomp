@@ -1,9 +1,9 @@
 // JP x00 80124EE0 168
-// Japanese version of PAL x000 80126198 (FUN_80126198.c): 228 -> 212.
+// Japanese version of PAL x000 80126198 (playerContactCat2Type15.c): 228 -> 212.
 extern short pushObjectOutOfObjectBoxA(void);
 extern void spawnImpactEffect(int, int, int, int);
 
-void FUN_80126198(char *o, char *p)
+void playerContactCat2Type15(char *o, char *p)
 {
     short r = pushObjectOutOfObjectBoxA();
     if (r != 0) {

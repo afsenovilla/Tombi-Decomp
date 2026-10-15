@@ -1,11 +1,11 @@
 // JPDEMO x00 8010CE18 164
-// Demo version of PAL x000 80112918 (FUN_80112918.c): does not store the position at +0x30/+0x34.
+// Demo version of PAL x000 80112918 (l2Type0EActive2.c): does not store the position at +0x30/+0x34.
 #include "TOBJ.H"
 extern short DAT_1f80027e;
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_800202b4(TObj *);
 
-void FUN_80112918(TObj *o)
+void l2Type0EActive2(TObj *o)
 {
     short yy;
     switch (o->step) {

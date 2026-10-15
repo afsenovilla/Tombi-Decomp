@@ -19,7 +19,7 @@ extern TObj *D_8009D2E8;
 extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_80104dc8(TObj *);
-extern void func_80104EA0(TObj *);
+extern void playerCheckJumpPressedA(TObj *);
 extern void FUN_800ef490(TObj *);
 extern void ObjMotionStep(TObj *);
 extern int AnimAdvance(TObj *);
@@ -46,7 +46,7 @@ void func_801213D0(TObj *o)
         FUN_8010eaf8(o);
         o->h->raw += o->velX << 8;
         FUN_80104dc8(o);
-        func_80104EA0(o);
+        playerCheckJumpPressedA(o);
         break;
     case 1:
         FUN_800ef490(o);

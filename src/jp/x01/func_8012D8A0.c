@@ -13,7 +13,7 @@ extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern void despawnObjectOffscreenMargin(TObj *, int);
-extern void func_8012C8EC(TObj *);
+extern void komaPigSubtype05Step(TObj *);
 extern void func_8012C0EC(TObj *);
 extern void func_8012BD6C(TObj *);
 extern void func_8012DF98(TObj *);
@@ -78,7 +78,7 @@ void func_8012EFC4(TObjX *e)
                 FUN_800202b4(o);
                 switch (o->state) {
                 case 0:
-                    func_8012C8EC(o);
+                    komaPigSubtype05Step(o);
                     break;
                 case 1:
                 case 2:

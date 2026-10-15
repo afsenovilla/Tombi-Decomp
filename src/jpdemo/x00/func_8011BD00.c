@@ -1,11 +1,11 @@
 // JPDEMO x00 8011BD00 160
-// Demo version of PAL x000 80125A28 (FUN_80125a28.c): no second hit test; spawns a hit effect and plays sound 5.
+// Demo version of PAL x000 80125A28 (weaponHitCat4Type01.c): no second hit test; spawns a hit effect and plays sound 5.
 extern short boxesOverlapSideB();
 extern int FUN_800428c0(int, int);
 
 extern void func_80020054(int, int, int, int);
 extern void func_8001E3D8(int);
-void FUN_80125a28(char *a, char *b)
+void weaponHitCat4Type01(char *a, char *b)
 {
     char *t;
     unsigned short u;

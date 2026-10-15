@@ -28,7 +28,7 @@ extern void playerCheckPerchLanding(TObj *);
 extern void SfxPlay3(int, int);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
-extern void func_800F4E9C(TObj *);
+extern void playerSetAnimPairB(TObj *);
 extern void func_8011D680(TObj *, short, short);
 extern void func_80121540(TObj *, short, short, int);
 
@@ -97,7 +97,7 @@ void func_8011D7E0(TObj *o)
         playerAdvanceSpinAngle(o);
         if (o->wb6 == 0 && D_8009C330->w0e > 0) {
             o->wb2--;
-            func_800F4E9C(o);
+            playerSetAnimPairB(o);
         }
         s1 = o->wb6 >> 4;
         p = D_8009C330;
@@ -112,7 +112,7 @@ void func_8011D7E0(TObj *o)
             p = D_8009C330;
             if (p->w0e > 0) {
                 o->wb2--;
-                func_800F4E9C(o);
+                playerSetAnimPairB(o);
             } else {
                 p->b09 = 1;
             }

@@ -1,5 +1,5 @@
 // JPDEMO x00 801214B4 1116
-// Demo version of PAL x000 8012B5D0 (func_8012B5D0.c): State 6 asks FUN_80127720 instead of the inline range test.
+// Demo version of PAL x000 8012B5D0 (komaPigSubtype00Step.c): State 6 asks FUN_80127720 instead of the inline range test.
 #include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
@@ -33,7 +33,7 @@ static __inline__ short InRange(TObj *o)
     return (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x80) < 0x101;
 }
 
-void func_8012B5D0(TObj *o)
+void komaPigSubtype00Step(TObj *o)
 {
     short *q = &o->wb4;
     int r;

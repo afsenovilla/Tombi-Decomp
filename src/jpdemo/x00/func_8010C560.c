@@ -1,14 +1,14 @@
 // JPDEMO x00 8010C560 684
-// Demo version of PAL x000 80111F58 (FUN_80111f58.c): last step 5 (PAL 7).
+// Demo version of PAL x000 80111F58 (l2Type0EActive1.c): last step 5 (PAL 7).
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
-extern void FUN_80111dc8(TObj *);
+extern void l2Type0ESharedStep(TObj *);
 extern short DAT_1f80016a;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
 extern short DAT_8007a5f0[];
 
-void FUN_80111f58(TObj *o)
+void l2Type0EActive1(TObj *o)
 {
     TObj *p = (TObj *)o->d90;
     unsigned char d;
@@ -50,7 +50,7 @@ void FUN_80111f58(TObj *o)
         o->velV = v * DAT_8007a1f0[o->w78] >> 12;
         o->velH = v * DAT_8007a5f0[o->w78] >> 12;
     case 3:
-        FUN_80111dc8(o);
+        l2Type0ESharedStep(o);
         if (o->y.p.whole >= -0xae) {
             o->timer = 10;
             o->active = 2;

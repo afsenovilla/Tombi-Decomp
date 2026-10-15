@@ -20,14 +20,14 @@ static ObjFn DAT_80115d90[7] = {
     (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype1, (ObjFn)l2Type0EInitSubtype2, (ObjFn)l2Type0EInitSubtype0,
     (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype0,
 };
-extern void FUN_801128f8();
+extern void l2Type0EActiveIdle();
 extern void l2Type0EActive1();
 extern void l2Type0EActive2();
 extern void l2Type0EActive3();
 extern void l2Type0EActive4();
 static ObjFn DAT_80115dac[7] = {
-    (ObjFn)FUN_801128f8, (ObjFn)l2Type0EActive1, (ObjFn)l2Type0EActive2, (ObjFn)l2Type0EActive3,
-    (ObjFn)l2Type0EActive4, (ObjFn)FUN_801128f8, (ObjFn)FUN_801128f8,
+    (ObjFn)l2Type0EActiveIdle, (ObjFn)l2Type0EActive1, (ObjFn)l2Type0EActive2, (ObjFn)l2Type0EActive3,
+    (ObjFn)l2Type0EActive4, (ObjFn)l2Type0EActiveIdle, (ObjFn)l2Type0EActiveIdle,
 };
 extern void l2Type0EHit0();
 extern void l2Type0EHit1();

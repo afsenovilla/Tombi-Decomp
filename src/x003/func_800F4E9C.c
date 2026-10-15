@@ -5,7 +5,7 @@ typedef struct { char p0[2]; short a; char p1[0xa]; short b; } G;
 extern G *D_8009C330;
 extern unsigned char D_80115228[];
 
-void func_800F4E9C(TObj *o)
+void playerSetAnimPairB(TObj *o)
 {
     unsigned char *p = &D_80115228[o->wb2 * 2];
     G *g = D_8009C330;

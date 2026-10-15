@@ -1,10 +1,10 @@
 // JPDEMO x00 8011C19C 252
-// Demo version of PAL x000 80126010 (FUN_80126010.c): attached object at +0xd0 (PAL +0xe4); the grab also needs
+// Demo version of PAL x000 80126010 (playerContactCat2Type2B.c): attached object at +0xd0 (PAL +0xe4); the grab also needs
 // scratchpad byte 0x1F8001A4 clear.
 extern short FUN_80043464(void);
 extern unsigned char D_1F8001A4;
 
-void FUN_80126010(unsigned char *o, unsigned char *s)
+void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
 {
     short r;
     r = FUN_80043464();

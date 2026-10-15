@@ -21,7 +21,7 @@ extern void dispatchSectionInput();
 extern void dispatchSectionScroll();
 extern void dispatchSectionSelect();
 extern void dispatchSectionUpdate();
-extern void func_8002B018();
+extern void stubNop8002B018();
 extern void updateCameraFollow();
 extern void updateImpactEffect();
 extern void updateInfoMessage();
@@ -489,10 +489,10 @@ unsigned int data_80079AEC[20] = {
 
 unsigned int data_80079B3C[19] = {
     0x801176D8, 0x801174B0, 0x800E88E4, 0x80117DE4,
-    0x80118BFC, (unsigned int)func_8002B018, 0x801167A0, 0x801174B0,
-    (unsigned int)func_8002B018, 0x80116E4C, 0x80116B08, (unsigned int)func_8002B018,
-    0x80118BFC, 0x801166E0, 0x80116A10, (unsigned int)func_8002B018,
-    (unsigned int)func_8002B018, (unsigned int)func_8002B018, 0x8011657C,
+    0x80118BFC, (unsigned int)stubNop8002B018, 0x801167A0, 0x801174B0,
+    (unsigned int)stubNop8002B018, 0x80116E4C, 0x80116B08, (unsigned int)stubNop8002B018,
+    0x80118BFC, 0x801166E0, 0x80116A10, (unsigned int)stubNop8002B018,
+    (unsigned int)stubNop8002B018, (unsigned int)stubNop8002B018, 0x8011657C,
 };
 
 unsigned int data_80079B88[9] = {

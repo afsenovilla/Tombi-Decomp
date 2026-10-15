@@ -1,7 +1,7 @@
 // FUNC 8011b238 808 X006
 // MATCHING 8011b238 808
 #include "gvars.h"
-/* Sibling of func_8011B560 / X000 func_80120494. Debt: register asm("$3") on q (as in the siblings). */
+/* Sibling of func_8011B560 / X000 l4Type1BDeformModel. Debt: register asm("$3") on q (as in the siblings). */
 #include "gamestate.h"
 typedef struct {
     char p0[7];

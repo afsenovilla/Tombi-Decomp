@@ -1,5 +1,5 @@
 // JPDEMO x00 80126728 3124
-// Demo version of PAL x000 80130BB0 (FUN_80130bb0.c): target at +0xce/+0xd0 (PAL +0xbe/+0xc0).
+// Demo version of PAL x000 80130BB0 (a00L2Type08Step3.c): target at +0xce/+0xd0 (PAL +0xbe/+0xc0).
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short x, y; } P;
@@ -71,7 +71,7 @@ static __inline__ int check(TObj *o)
     return x;
 }
 
-void FUN_80130bb0(TObj *o)
+void a00L2Type08Step3(TObj *o)
 {
     P a, b;
     int dx;

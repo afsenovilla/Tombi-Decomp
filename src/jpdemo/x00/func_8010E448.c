@@ -1,5 +1,5 @@
 // JPDEMO x00 8010E448 924
-// Demo version of PAL x000 801142C0 (func_801142C0.c): message groups 59/62 (PAL 2), box 0x40 higher, also stops the
+// Demo version of PAL x000 801142C0 (l2Type18Hit.c): message groups 59/62 (PAL 2), box 0x40 higher, also stops the
 // player.
 #include "gcd.h"
 #include "TOBJ.H"
@@ -15,7 +15,7 @@ void TileCollideAt(TObj *o, short x, short y);
 void AnimAdvance(TObj *o);
 void printInfoMessage(int a, int b);
 
-void func_801142C0(TObj *o)
+void l2Type18Hit(TObj *o)
 {
     P6 pos;
     unsigned short *p;

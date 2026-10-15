@@ -1,5 +1,5 @@
 // JP x03 8011FF80 736
-// Japanese version of PAL x000 80127EB0 (FUN_80127eb0.c): 23 -> 16, 22 -> 15.
+// Japanese version of PAL x000 80127EB0 (komaPigState6.c): 23 -> 16, 22 -> 15.
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
 extern void applyFrameVelocityX(TObj *);
@@ -11,7 +11,7 @@ extern unsigned char DAT_80138fd8[];
 extern unsigned short *PTR_DAT_8013a1b8[];
 extern unsigned short *PTR_DAT_8013a1bc[];
 
-void FUN_80127eb0(TObj *o)
+void komaPigState6(TObj *o)
 {
     EX *x = (EX *)((char *)o + 0xb4);
     unsigned char *p;

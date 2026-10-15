@@ -1,11 +1,11 @@
 // JPDEMO x00 8011CDB4 116
-// Demo version of PAL x000 80126CA4 (FUN_80126ca4.c): clears scratchpad 0x1F80019E on a hit.
+// Demo version of PAL x000 80126CA4 (pushCat2ObjectOutOfCat4Type00.c): clears scratchpad 0x1F80019E on a hit.
 typedef struct A { char pad[2]; unsigned char b; char pad2[0x1c-3]; unsigned char c; } A;
 typedef struct B { char pad[0x94]; int f; } B;
 extern short pushObjectOutOfObjectFacingB(void);
 extern short FUN_800482ec(void);
 extern short D_1F80019E;
-void FUN_80126ca4(A *a, B *b)
+void pushCat2ObjectOutOfCat4Type00(A *a, B *b)
 {
     short r;
     if (b->f == 0) {

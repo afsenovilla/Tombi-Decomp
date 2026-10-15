@@ -1,8 +1,8 @@
 // JPDEMO x00 80125448 352
-// Demo version of PAL x000 8012F864 (FUN_8012f864.c): step 3 does nothing, step 4 also clears +0x6a.
+// Demo version of PAL x000 8012F864 (l2Type07Sub1StepB.c): step 3 does nothing, step 4 also clears +0x6a.
 #include "TOBJ.H"
 
-void FUN_8012f864(TObj *o)
+void l2Type07Sub1StepB(TObj *o)
 {
     int v;
     short w;

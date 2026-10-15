@@ -1,5 +1,5 @@
 // JPDEMO x00 8011BC38 200
-// Demo version of PAL x000 80125984 (FUN_80125984.c): also flags the target, spawns a hit effect and plays sound 5;
+// Demo version of PAL x000 80125984 (weaponHitCat4Type02.c): also flags the target, spawns a hit effect and plays sound 5;
 // no type 10 exception.
 #include "raw7.h"
 extern short FUN_8004461c(char *, char *);
@@ -7,7 +7,7 @@ extern void FUN_800428c0(char *, char *);
 extern short DAT_1f80019e;
 extern void func_80020054(int, int, int, int);
 extern void func_8001E3D8(int);
-void FUN_80125984(char *a, char *b)
+void weaponHitCat4Type02(char *a, char *b)
 {
     if (S32(b, 0x94) == 0 && FUN_8004461c(a, b) >= 0) {
         FUN_800428c0(a, b);
