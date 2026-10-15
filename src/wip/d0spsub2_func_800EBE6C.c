@@ -29,11 +29,11 @@ void func_800EBE6C(int t, short x, short y, int bright)
     int i, k, h, m;
     h = t / 180000 % 1000;
     m = t / 3000 - t / 180000 * 60;
-    dg[4] = m % 10;
-    dg[1] = h / 10 - h / 100 * 10;
-    dg[2] = h % 10;
-    dg[3] = m / 10 % 10;
     dg[0] = h / 100 % 10;
+    dg[4] = m % 10;
+    dg[2] = h % 10;
+    dg[1] = h / 10 - h / 100 * 10;
+    dg[3] = m / 10 % 10;
     for (q = dg, k = 0, i = 0; i < 6; i++, q++) {
         if (i != 2 && *q == 0 && k == 0) continue;
         S->len = 4;
