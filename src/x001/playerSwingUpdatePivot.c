@@ -1,7 +1,7 @@
 // FUNC 800f6e28 272 X001
 // MATCHING 800f6e28 272
 extern char *DAT_8009f0ec;
-extern int FUN_80122cbc(void);
+extern int seesawPlankSwingPivot(void);
 extern int FUN_8011ca00(void);
 
 short playerSwingUpdatePivot(char *o)
@@ -17,7 +17,7 @@ short playerSwingUpdatePivot(char *o)
         *(short *)(o + 0xba) = *(int *)(e + 0x34) - *(unsigned short *)(e + 0x16);
         break;
     case 0x14:
-        r = FUN_80122cbc();
+        r = seesawPlankSwingPivot();
         break;
     case 0x34:
         r = FUN_8011ca00();

@@ -1,9 +1,9 @@
 // FUNC 801280dc 52 X001
 // MATCHING 801280dc 52
-extern short FUN_80127700();
+extern short landOnSlopedBox();
 
 void ropeChainsEnemyCollision(void)
 {
-    if (FUN_80127700() != 0)
+    if (landOnSlopedBox() != 0)
         *(short *)0x1f80019e = 0;
 }

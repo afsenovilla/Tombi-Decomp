@@ -19,7 +19,7 @@ extern void SfxPlay(int);
 extern void applyFrameVelocityXY(TObj *);
 extern short probeWallAt(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
-extern void func_80128110(TObj *);
+extern void purplePigChooseStep(TObj *);
 
 static __inline__ short chk(TObj *o)
 {
@@ -130,7 +130,7 @@ void purplePigWalk(TObj *o)
         }
         break;
     case 2:
-        func_80128110(o);
+        purplePigChooseStep(o);
         o->state = 0;
         o->ba7 = 0;
         break;

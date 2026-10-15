@@ -1037,3 +1037,22 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x004 `8011c890 updateHangingRope` (layer 4 type 0x37: strip shows a knotted hanging rope, 0xA0 x 0xC4 box), `8012bf58 updateAnimDecorSprite`
   (layer 2 type 0x36); x003 `8011910c updateAnimDecorSprite` (layer 3 type 0x35); x009 `8011b8e0 updateSwingingPendulum` (layer 4 type 0x2C, uncertain
   kind: subtype 0 swings d8c from a growing phase, subtype 1 hangs 0x4C from its parent at the parent's angle)
+- x001 area player steps (the x001 copies of the playerNormalModeDispatch targets, mostly uncertain): `801237e4 playerStepSlopeSlideB` (step 0x1E,
+  slides with playerSlopeSlideUpdateAnim while the contact bits +0xBE hold), `80121b58 playerStepContactStop` (step 0x1F: sfx 0x3E + pad vibration,
+  slows to a stop; `80121a10 playerContactStopCheckJump` its jump/leave check), `80121790 playerStepRideSlopeContact` (step 0x21: falls along the
+  slope angle while +0xBE is set; uncertain), `80122410 playerStepClingRotating` (step 0x22: clings to the rotating D_8009F0EC object;
+  `80122214 playerClingPlaceOnRotation` places the player on its angle, `801222c4 playerClingJumpRelease` jump button lets go and releases the chain),
+  `80121d6c playerStepRiseToLedge` (step 0x28: moves up until probeFlaggedSegmentA bit 2, then step 0x16), `80122044 playerStepSinkToGround` (step
+  0x29: sinks 1 px per frame until a tile), `80122f54 playerStepRideSeesaw` (playerStep2EByArea area 1: stands on the tilted seesaw plank), `80122cbc
+  seesawPlankSwingPivot` (playerSwingUpdatePivot type 0x14 callback), `801213d0 playerBittenJumpCrawler` (playerStepBittenJump bitten type 0x13)
+- x001 contact callbacks: MAIN0 FUN_80045f00 (weapon/attack object vs layer 2 by the enemy type) `80125f04 purplePigWeaponHit` (0),
+  `80126004 rollingBarrelWeaponHit` (0x11), `80125b88 segmentedCrawlerWeaponHit` (0x13); MAIN0 func_8004BBC0 (player grab probe vs layer 4, sets
+  the contact kind +0x9E) `80126fe4 springVineGrabProbe` (5), `80126f64 flowerTowerBlockerGrabProbe` (0xB), `80126e8c bendingBranchGrabProbe` (0xE),
+  `8012767c seesawPlankGrabProbe` (0x14; `80127074 seesawPlankProbeFace` tests one face), `80126d2c swingingRopeGrabProbe` (0x15); `8012f988
+  updateRollingBoulder` (layer 4 type 0x23 body, via the 8012f968 thunk: rolls down the slope, sets an area flag and turns into type 0xC; uncertain kind)
+  with `80126cc4 rollingBoulderPlayerCollision`, `80125fbc rollingBoulderObjectCollision`; `80124410 grabObjectContact` (FUN_80047484 type 0x1F in
+  area 1: holds the touching object; uncertain); `80127700 landOnSlopedBox` (stand-on test for a sloped box; uncertain)
+- x001 purple pig steps 4..8: `80129b2c purplePigFall`, `80129dac purplePigRun` (random movetab/timer), `8012a290 purplePigCarryPlayer` (holds the player
+  and jumps; uncertain), `8012a5cc purplePigDrop`, `8012a794 purplePigCrawlWall` (uncertain); `80128110 purplePigChooseStep` (next step from the distance
+  to home/player); `80123b30 updateFallingSparkleItem` (item that falls leaving type 0x31 sparkles; uncertain), `80123e50 spawnItemEffectFlyingItem`
+  (applyItemEffect case 6: layer 5 type 6 subtype 0x13 with velH)

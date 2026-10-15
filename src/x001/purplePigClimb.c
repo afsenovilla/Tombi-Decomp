@@ -21,7 +21,7 @@ extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, int);
 extern short FUN_80040278(TObj *, short, short);
 extern short probeCollisionAtDepthA(TObj *, short, short);
-extern void func_80128110(TObj *);
+extern void purplePigChooseStep(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -171,7 +171,7 @@ void purplePigClimb(TObj *o)
         }
         if (--o->timer == -1) {
             o->timer = 0x80;
-            func_80128110(o);
+            purplePigChooseStep(o);
             if (o->step == 1) {
                 o->step = 2;
                 o->ba7 = 0;

@@ -40,18 +40,18 @@ extern void playerStepClingWeaponAttack(TObj *);
 extern void playerStepSlideSteer(TObj *);
 extern void FUN_801097ec(TObj *);
 extern void playerStepPerchIdle(TObj *);
-extern void FUN_801237e4(TObj *);
-extern void FUN_80121b58(TObj *);
+extern void playerStepSlopeSlideB(TObj *);
+extern void playerStepContactStop(TObj *);
 extern void playerStepDepthShift(TObj *);
-extern void FUN_80121790(TObj *);
-extern void FUN_80122410(TObj *);
+extern void playerStepRideSlopeContact(TObj *);
+extern void playerStepClingRotating(TObj *);
 extern void playerStepClimbObject(TObj *);
 extern void FUN_8011d7e0(TObj *);
 extern void FUN_8011e688(TObj *);
 extern void FUN_8011de64(TObj *);
 extern void FUN_8011e0d8(TObj *);
-extern void FUN_80121d6c(TObj *);
-extern void FUN_80122044(TObj *);
+extern void playerStepRiseToLedge(TObj *);
+extern void playerStepSinkToGround(TObj *);
 extern void playerStepItemReactionA(TObj *);
 extern void playerStepItemReactionB(TObj *);
 extern void FUN_800f00ac(TObj *);
@@ -296,21 +296,21 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepPerchIdle(o);
         break;
     case 0x1e:
-        FUN_801237e4(o);
+        playerStepSlopeSlideB(o);
         break;
     case 0x1f:
         D_8009D2B0[0] = 1;
-        FUN_80121b58(o);
+        playerStepContactStop(o);
         playerTryAttack(o, 0);
         break;
     case 0x20:
         playerStepDepthShift(o);
         break;
     case 0x21:
-        FUN_80121790(o);
+        playerStepRideSlopeContact(o);
         break;
     case 0x22:
-        FUN_80122410(o);
+        playerStepClingRotating(o);
         break;
     case 0x24:
         FUN_8011d7e0(o);
@@ -325,10 +325,10 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_8011e0d8(o);
         break;
     case 0x28:
-        FUN_80121d6c(o);
+        playerStepRiseToLedge(o);
         break;
     case 0x29:
-        FUN_80122044(o);
+        playerStepSinkToGround(o);
         break;
     case 0x2a:
         playerStepItemReactionA(o);

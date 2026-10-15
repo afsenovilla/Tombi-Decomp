@@ -22,11 +22,11 @@ extern void purplePigIdle(TObj *);
 extern void purplePigWalk(TObj *);
 extern void purplePigClimb(TObj *);
 extern void purplePigJump(TObj *);
-extern void func_80129B2C(TObj *);
-extern void func_80129DAC(TObj *);
-extern void func_8012A290(TObj *);
-extern void func_8012A5CC(TObj *);
-extern void func_8012A794(TObj *);
+extern void purplePigFall(TObj *);
+extern void purplePigRun(TObj *);
+extern void purplePigCarryPlayer(TObj *);
+extern void purplePigDrop(TObj *);
+extern void purplePigCrawlWall(TObj *);
 extern void purplePigHit(TObj *);
 extern void purplePigDefeated(TObj *);
 
@@ -126,11 +126,11 @@ void updatePurplePig(BX *b)
             case 1: purplePigWalk(o); break;
             case 2: purplePigClimb(o); break;
             case 3: purplePigJump(o); break;
-            case 4: func_80129B2C(o); break;
-            case 5: func_80129DAC(o); break;
-            case 6: func_8012A290(o); break;
-            case 7: func_8012A5CC(o); break;
-            case 8: func_8012A794(o); break;
+            case 4: purplePigFall(o); break;
+            case 5: purplePigRun(o); break;
+            case 6: purplePigCarryPlayer(o); break;
+            case 7: purplePigDrop(o); break;
+            case 8: purplePigCrawlWall(o); break;
             }
             if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) {
                 if (o->y.p.whole > D_800A4582 + 0xa0 ||
