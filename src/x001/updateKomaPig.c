@@ -8,11 +8,11 @@ typedef struct { TObj o; char pc0[0x12]; unsigned short d2; } TObjX;
 typedef void (*Fn)(TObj *);
 
 extern int DAT_1f8002d0[];
-extern void func_8012EAE8();
+extern void komaPigDropIn();
 static Fn D_8013C8FC[11] = {
-    (Fn)func_8012EAE8, (Fn)func_8012EAE8, (Fn)func_8012EAE8, (Fn)func_8012EAE8,
-    (Fn)func_8012EAE8, (Fn)func_8012EAE8, (Fn)func_8012EAE8, (Fn)func_8012EAE8,
-    (Fn)func_8012EAE8, (Fn)func_8012EAE8, (Fn)func_8012EAE8,
+    (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn,
+    (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn,
+    (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn,
 };
 extern short D_800A4582;
 extern int FUN_800202b4(TObj *);

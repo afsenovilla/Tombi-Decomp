@@ -15,7 +15,7 @@ static void *D_8013E594[6] = {
     D_8013EAD0, D_8013EAD8, D_8013EAE0, D_8013EAE8,
     D_8013EAF0, D_8013EAF8,
 };
-extern void func_80120E24(TObj *);
+extern void updateBackdropSpritePos(TObj *);
 extern void freeObjectLayer7(TObj *);
 
 void updateBackdropSprite(TObj *o)
