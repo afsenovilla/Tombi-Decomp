@@ -8,7 +8,7 @@ extern short func_80043464(TObj *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_80120F34(TObj *o, TObj *p)
+void jellyfishContact(TObj *o, TObj *p)
 {
     short r;
     int t;

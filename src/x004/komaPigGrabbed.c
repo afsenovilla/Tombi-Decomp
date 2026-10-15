@@ -16,7 +16,7 @@ extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *FUN_80018448(void);
 extern short probeWallAt(TObj *, short, short, short);
-extern int func_8011FDD4(TObj *);
+extern int komaPigCheckLanded(TObj *);
 
 #define SETANIM(k) \
     o->anim = D_80133B5C[k]; \
@@ -31,7 +31,7 @@ extern int func_8011FDD4(TObj *);
     applyFrameVelocityY(o); \
     probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0); \
     probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1); \
-    func_8011FDD4(o);
+    komaPigCheckLanded(o);
 
 void komaPigGrabbed(TObj *o)
 {
@@ -55,7 +55,7 @@ void komaPigGrabbed(TObj *o)
         o->y.raw += o->velV << 8;
         probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0);
         probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
-        if (func_8011FDD4(o)) o->velV = 0;
+        if (komaPigCheckLanded(o)) o->velV = 0;
         break;
     case 2:
         PLAYER.obj.state = 2;
@@ -100,7 +100,7 @@ void komaPigGrabbed(TObj *o)
         o->y.p.whole += 3;
         probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0);
         probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
-        if (func_8011FDD4(o)) {
+        if (komaPigCheckLanded(o)) {
             v = D_1F80027E;
             if (v < 0) v = -v;
             if (v > 8) v = 8;

@@ -10,7 +10,7 @@ typedef struct {
 #define BAC(o) (*(unsigned char *)&(o)->o.wac)
 extern short func_8004306C(PL *, TObj *);
 
-void func_8011F9E0(PL *o, TObj *p)
+void countedCollectibleContact(PL *o, TObj *p)
 {
     short r;
     if (p->b0c != 0) return;

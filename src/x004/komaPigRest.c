@@ -8,8 +8,8 @@ extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133B80[], *D_80133BA0[], *D_80133BA4[], *D_80133BA8[], *D_80133BF8[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
-extern int func_8011FDD4(TObj *);
-extern int func_8011FEF0(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 #define SETANIM(o, T) \
@@ -54,7 +54,7 @@ void komaPigRest(TObj *o)
         o->timer = 0x28;
         o->wac = 9;
         SETANIM(o, D_80133B80);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 1:
         AnimAdvanceWithBox(o);
@@ -69,7 +69,7 @@ void komaPigRest(TObj *o)
             break;
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 2:
         AnimAdvanceWithBox(o);
@@ -79,14 +79,14 @@ void komaPigRest(TObj *o)
         } else {
             o->h->raw += o->velH << 8;
         }
-        if (func_8011FDD4(o) == 0 && x->w0e++ > 3) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ > 3) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (func_8011FEF0(o)) {
+        if (komaPigCheckWall(o)) {
             o->state = 4;
             o->substep = 0;
             break;
@@ -114,8 +114,8 @@ void komaPigRest(TObj *o)
         } else {
             o->h->raw += o->velH << 8;
         }
-        func_8011FEF0(o);
-        if (func_8011FDD4(o) == 0 && x->w0e++ > 3) {
+        komaPigCheckWall(o);
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ > 3) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
@@ -139,7 +139,7 @@ void komaPigRest(TObj *o)
             SETANIM(o, D_80133BF8);
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 6:
         AnimAdvanceWithBox(o);
@@ -149,7 +149,7 @@ void komaPigRest(TObj *o)
             o->animFrame = 1 - o->animFrame;
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

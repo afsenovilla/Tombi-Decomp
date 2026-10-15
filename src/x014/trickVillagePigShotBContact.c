@@ -5,7 +5,7 @@
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8011CF2C(TObj *o, TObj *e)
+void trickVillagePigShotBContact(TObj *o, TObj *e)
 {
     if (*(unsigned char *)&o->wac != 2 && !(o->active & 2) && boxesOverlap(o, e) && SPAD.b1a4 == 0) {
         int oh, eh;

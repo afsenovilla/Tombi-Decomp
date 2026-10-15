@@ -387,7 +387,7 @@ address,size,name,twin
 8011e1a4,436,func_8011E1A4,
 8011e358,12,func_8011E358,
 8011e364,80,func_8011E364,
-8011e3b4,352,func_8011E3B4,
+8011e3b4,352,pitchforkPigContact,
 8011e514,56,func_8011E514,
 8011e54c,316,updateSceneSequence,
 8011e688,40,func_8011E688,

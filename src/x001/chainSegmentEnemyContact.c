@@ -8,7 +8,7 @@ extern short func_80043260(TObj *, TObj *);
 extern short pushOutOfBoxX(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8012687C(TObj *o, TObj *p)
+void chainSegmentEnemyContact(TObj *o, TObj *p)
 {
     short r;
 

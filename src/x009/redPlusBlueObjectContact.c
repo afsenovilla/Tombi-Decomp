@@ -11,7 +11,7 @@ typedef struct {
 } PL;
 extern short func_8004306C(PL *, TObj *);
 
-void func_80121180(PL *p, TObj *o)
+void redPlusBlueObjectContact(PL *p, TObj *o)
 {
     short r = func_8004306C(p, o);
     if (r == 0)

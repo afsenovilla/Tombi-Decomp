@@ -15,8 +15,8 @@ extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e560(int, int);
 extern void func_8011FC88(TObj *);
-extern int func_8011FDD4(TObj *);
-extern int func_8011FEF0(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 extern unsigned char FUN_8011ffdc(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
@@ -53,14 +53,14 @@ void komaPigIdle(TObj *o)
         if (--o->timer == -1) o->substep++;
         func_8011FC88(o);
         o->y.p.whole += 4;
-        if (func_8011FDD4(o) == 0 && x->w0e++ > 3) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ > 3) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (func_8011FEF0(o)) {
+        if (komaPigCheckWall(o)) {
             o->substep = 8;
             break;
         }
@@ -85,7 +85,7 @@ void komaPigIdle(TObj *o)
         goto common;
     case 4:
         applyFrameVelocityY(o);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
             s = ((unsigned short *)o->anim)[2];
@@ -111,7 +111,7 @@ void komaPigIdle(TObj *o)
         goto common;
     case 5:
         applyFrameVelocityY(o);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
             s = ((unsigned short *)o->anim)[2];
@@ -148,7 +148,7 @@ void komaPigIdle(TObj *o)
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 8:
         o->wac = 6;
@@ -165,7 +165,7 @@ void komaPigIdle(TObj *o)
         }
         if (k != 0) o->substep++;
         applyFrameVelocityY(o);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 10:
         o->timer = 0x3c;
@@ -192,7 +192,7 @@ void komaPigIdle(TObj *o)
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

@@ -13,7 +13,7 @@ extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
-extern int func_8011FDD4(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern void cloneItemPickupObject(TObj *);
 
 #define SETANIM(k) \
@@ -77,7 +77,7 @@ void komaPigHit(TObj *o)
         COLL();
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (func_8011FDD4(o) == 0) break;
+        if (komaPigCheckLanded(o) == 0) break;
         if (o->movetab == 0) {
             o->d8c = x2->w2;
             o->state = 4;
@@ -105,7 +105,7 @@ void komaPigHit(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (func_8011FDD4(o) == 0) break;
+        if (komaPigCheckLanded(o) == 0) break;
         if (o->movetab == 0) {
             o->d8c = x2->w2;
             o->state = 4;
@@ -138,7 +138,7 @@ void komaPigHit(TObj *o)
             SETANIM(0x2a);
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 5:
         if (AnimAdvanceWithBox(o)) {
@@ -148,7 +148,7 @@ void komaPigHit(TObj *o)
             SETANIM(0x2b);
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 6:
         AnimAdvanceWithBox(o);
@@ -159,7 +159,7 @@ void komaPigHit(TObj *o)
             SETANIM(0x2c);
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 7:
         AnimAdvanceWithBox(o);
@@ -175,7 +175,7 @@ void komaPigHit(TObj *o)
             o->b9c = 0;
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

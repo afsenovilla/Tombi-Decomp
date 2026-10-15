@@ -8,7 +8,7 @@
 extern short func_80043260(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_80126BBC(TObj *o, TObj *p)
+void rollingBarrelContact(TObj *o, TObj *p)
 {
     p->b6a = 0;
     if (func_80043260(o, p) == 0) return;

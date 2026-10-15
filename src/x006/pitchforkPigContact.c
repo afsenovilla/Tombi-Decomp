@@ -17,7 +17,7 @@ static __inline__ int ovl(TObj *a, TObj *b)
     return (unsigned short)(a->y.p.whole - b->y.p.whole + (a->box2 + b->box2)) <= a->box3 + b->box3;
 }
 
-void func_8011E3B4(TObj *o, TObj *e)
+void pitchforkPigContact(TObj *o, TObj *e)
 {
     TD *p;
 

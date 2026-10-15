@@ -11,7 +11,7 @@ extern void decreaseObjectTimer(TObj *, int);
 #define BAC(o) (*(unsigned char *)&(o)->wac)
 #define PE4(o) (*(TObj **)((char *)(o) + 0xe4))
 
-void func_801262F8(TObj *o, TObj *p)
+void purplePigContact(TObj *o, TObj *p)
 {
     short r;
     unsigned char k;

@@ -15,7 +15,7 @@ extern short DAT_1f80027e;
 extern unsigned short DAT_1f800282, DAT_1f800284;
 extern short FUN_80040278(O *, int, int);
 
-int func_8011FDD4(O *o)
+int komaPigCheckLanded(O *o)
 {
     short v;
     int r;

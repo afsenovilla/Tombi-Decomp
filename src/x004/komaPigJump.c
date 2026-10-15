@@ -7,8 +7,8 @@ extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133BB4[], *D_80133BB8[];
 extern TObj *ObjAlloc(void);
 extern void applyFrameVelocityX(TObj *);
-extern int func_8011FDD4(TObj *);
-extern int func_8011FEF0(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 static __inline__ void SETBOX(TObj *o, int idx)
@@ -46,7 +46,7 @@ void komaPigJump(TObj *o)
         break;
     case 2:
         applyFrameVelocityX(o);
-        func_8011FEF0(o);
+        komaPigCheckWall(o);
         AnimAdvanceWithBox(o);
         o->velV += 0x20;
         o->y.raw += o->velV << 8;
@@ -58,13 +58,13 @@ void komaPigJump(TObj *o)
     case 3:
         if (o->velV < 0x400) {
             applyFrameVelocityX(o);
-            func_8011FEF0(o);
+            komaPigCheckWall(o);
         }
         AnimAdvanceWithBox(o);
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        if (func_8011FDD4(o)) {
+        if (komaPigCheckLanded(o)) {
             if (!(o->b69 & 8)) {
                 e = ObjAlloc();
                 if (e) {

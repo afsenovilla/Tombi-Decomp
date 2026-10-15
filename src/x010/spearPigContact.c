@@ -8,7 +8,7 @@ extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_8001f96c(int, int, int, int);
 
-void func_801206F4(TObj *o, TObj *e)
+void spearPigContact(TObj *o, TObj *e)
 {
     short r;
 

@@ -4,7 +4,7 @@
 extern short func_800435E0(TObj *, TObj *);
 extern void printInfoMessage(int, int);
 
-void func_80124348(TObj *p, TObj *o)
+void puppyBaronContact(TObj *p, TObj *o)
 {
     short r = func_800435E0(p, o);
     if (r != -1 && r < 3) {

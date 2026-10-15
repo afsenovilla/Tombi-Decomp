@@ -5,7 +5,7 @@
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8011CE64(TObj *o, TObj *e)
+void lavaCavesPigShotContact(TObj *o, TObj *e)
 {
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;

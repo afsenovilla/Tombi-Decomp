@@ -1,34 +1,34 @@
-// FUNC 8011cd6c 248 X014
-// MATCHING 8011cd6c 248
+// FUNC 8011c8c0 220 X014
+// MATCHING 8011c8c0 220
 #include "spad.h"
 #define U8(p, o) (*(unsigned char *)((p) + (o)))
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
+#define S16(p, o) (*(short *)((p) + (o)))
+#define PTR(p, o) (*(unsigned char **)((p) + (o)))
 extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
-extern void FUN_800eea7c(unsigned char *, int, int);
 
-void func_8011CD6C(unsigned char *a, unsigned char *b)
+void deepJunglePigShotContact(unsigned char *a, unsigned char *b)
 {
-    if (SPAD.b1a4 != 0) return;
     if (U8(a, 0xac) == 2) return;
     if (a[0] & 2) return;
     if (boxesOverlap(a, b) == 0) return;
-    if (U8(a, 0xac) >= 2) {
+    if (SPAD.b1a4 != 0) return;
+    if (b[3] == 1) {
+        b[0] = 2;
+        b[4] = 2;
+        b[5] = 0;
+        b[6] = 0;
+    } else {
+        int ah, bh;
         a[0] = 2;
-        U16(a, 0x2e) = 1;
+        bh = S16(PTR(b, 0x40), 2);
+        ah = S16(PTR(a, 0x40), 2);
         a[4] = 2;
         a[5] = 0;
         a[6] = 0;
+        U16(a, 0x2e) = ah < bh;
         decreaseObjectTimer(a, 1);
-    } else {
-        U8(a, 0xac) = 0;
-        b[0] = 2;
-        b[0x6a] = 1;
-        FUN_800eea7c(a, 0x10, 0);
-        a[0] = 6;
-        a[4] = 5;
-        a[5] = 0x65;
-        a[6] = 0;
     }
     SPAD.s19e = 0;
 }

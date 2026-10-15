@@ -7,7 +7,7 @@ typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
 extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8011F8CC(TObj *o, TObj *e)
+void komaPigContact(TObj *o, TObj *e)
 {
     short r;
 

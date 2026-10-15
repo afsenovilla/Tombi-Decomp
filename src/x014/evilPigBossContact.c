@@ -9,7 +9,7 @@ extern short func_800435E0(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void FUN_8001f96c(int, int, int, int);
 
-void func_8011D138(unsigned char *a, unsigned char *b)
+void evilPigBossContact(unsigned char *a, unsigned char *b)
 {
     short r = func_800435E0(a, b);
     if (r == -1)

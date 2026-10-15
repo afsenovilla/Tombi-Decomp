@@ -8,7 +8,7 @@ extern unsigned char *D_8009C330[];
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8011CA60(TObj *a, TObj *b)
+void flowerForestPigShotContact(TObj *a, TObj *b)
 {
     short v;
 

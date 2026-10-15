@@ -11,8 +11,8 @@ extern void applyFrameVelocityXY(TObj *);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern unsigned FUN_8001f9e0(void);
 extern short FUN_80041240(TObj *, short, short);
-extern int func_8011FDD4(TObj *);
-extern int func_8011FEF0(TObj *);
+extern int komaPigCheckLanded(TObj *);
+extern int komaPigCheckWall(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 #define SETANIM(o, T) \
@@ -66,19 +66,19 @@ void komaPigWalk(TObj *o)
             }
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 2:
         AnimAdvanceWithBox(o);
         applyFrameVelocityXY(o);
-        if (func_8011FDD4(o) == 0 && x->w0e++ > 3) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ > 3) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (--o->timer == -1 || func_8011FEF0(o) != 0) {
+        if (--o->timer == -1 || komaPigCheckWall(o) != 0) {
             o->timer = 0x3c;
             o->wac = 0xf;
             o->substep++;
@@ -100,12 +100,12 @@ void komaPigWalk(TObj *o)
             }
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 4:
         AnimAdvanceWithBox(o);
         applyAnimVelocityXY(o, 1 - o->animFrame);
-        if (func_8011FDD4(o) == 0 && x->w0e++ > 3) {
+        if (komaPigCheckLanded(o) == 0 && x->w0e++ > 3) {
             x->b0b = 6;
             x->b0a = 0;
             o->state = 7;
@@ -135,11 +135,11 @@ void komaPigWalk(TObj *o)
             o->substep = 0;
         }
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     case 6:
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         if (x->b01 != 2) {
             if (D_80130FA4[FUN_8001f9e0() & 0xf] != 0) goto ok;
         }

@@ -635,3 +635,16 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   x016 801167b0: when `evilPigBagPortalCheckPlayer` (x001 801204dc, x002 801173a0, x003 8011d2f8, x004 8011c96c, x009 8011c830, x010 8011a224, x016
   8011650c: player box overlaps it within +-0x2D in depth and is free to act) says the player walked in, hides the player and warps to area 14 (the evil pig
   rooms) section x001 0 / x002 4 / x003 6 / x004 3 / x009 5 / x010 1 / x016 2, spawn 0)
+- Player contact callbacks: MAIN0 `FUN_80047484` walks the layer 2 objects touching the player and calls a callback by the object's type (q[2]); the
+  callbacks live in the overlay that has the type, so each is named `<handler>Contact` after the layer 2 handler of that type in the same overlay
+  (MAIN0 table 0x80077D9C): x001 `801262f8 purplePigContact` (type 0), `801240a8 komaPigContact` (type 2, area 1 branch), `8012687c
+  chainSegmentEnemyContact` (0x0B), `80126bbc rollingBarrelContact` (0x11), `80124348 puppyBaronContact` (0x17), `801242c0 forestDwarfContact` (0x16),
+  `801243d4 ceilingDripContact` (0x22); x003 `8011f8cc komaPigContact` (2, area 3), `8011fc84 swayingHopPlantContact` (0x24), `8011fad4
+  windblownMonkeyContact` (0x37); x004 `8011efa4 komaPigContact` (2, area 4), `8011f6c8 blackCrowContact` (0x1E), `8011f9e0 countedCollectibleContact`
+  (0x29); x009 `80120c68 redFlowerContact` (0x0A), `80121180 redPlusBlueObjectContact` (0x1C), `80120f34 jellyfishContact` (0x21); x010 `801206f4
+  spearPigContact` (0x3A), `8011dc34 flyingBugContact` (0x27); x006 `8011e3b4 pitchforkPigContact` (0x53); x014 `8011d138 evilPigBossContact` (0x3B..0x42),
+  `8011d040 trickVillagePigShotContact` (0x43), `8011c80c baccusVillagePigShotContact` (0x46), `8011ca60 flowerForestPigShotContact` (0x47), `8011cc1c
+  hauntedMansionPigShotContact` (0x48), `8011cd6c phoenixMountainPigShotContact` (0x49), `8011ce64 lavaCavesPigShotContact` (0x4B), `8011cf2c
+  trickVillagePigShotBContact` (0x4F), `8011c8c0 deepJunglePigShotContact` (0x50). (x009 deathFruitCatchContact and x001 burningFireContact are the
+  type 0x1A / 0x0F entries.)
+- x004 koma pig helpers: `8011fef0 komaPigCheckWall` (csv twin of x003 8012080c), `8011fdd4 komaPigCheckLanded` (called by every x004 komaPig state)

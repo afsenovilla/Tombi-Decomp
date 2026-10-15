@@ -4,7 +4,7 @@
 
 extern short FUN_800435e0(TObj *, TObj *);
 
-void func_801242C0(TObj *a, TObj *b)
+void forestDwarfContact(TObj *a, TObj *b)
 {
     short r;
 

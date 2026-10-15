@@ -7,7 +7,7 @@ extern short probeCollisionAtDepthB(TObj *, short, short);
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
-void func_8011CC1C(TObj *o, TObj *e)
+void hauntedMansionPigShotContact(TObj *o, TObj *e)
 {
     if (*(unsigned char *)&o->wac == 2) return;
     if (o->active & 2) return;

@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
 extern void applyFrameVelocityX(TObj *);
-extern void func_8011FEF0(TObj *);
-extern int func_8011FDD4(TObj *);
+extern void komaPigCheckWall(TObj *);
+extern int komaPigCheckLanded(TObj *);
 extern void func_8011FB1C(TObj *);
 extern TObj *FUN_80018448(void);
 extern char D_80077CF4[], D_80077CDC[];
@@ -26,7 +26,7 @@ extern unsigned short *D_80133BD4[], *D_80133BD0[], *D_80133BD8[], *D_80133BB8[]
 
 #define FALL(dv)                                        \
     applyFrameVelocityX(o);                                    \
-    func_8011FEF0(o);                                   \
+    komaPigCheckWall(o);                                   \
     o->velV += dv;                                      \
     if (o->velV > 0x500) o->velV = 0x500;               \
     o->y.raw += o->velV << 8;
@@ -65,7 +65,7 @@ void komaPigFall(TObj *o)
         FALL(0x20)
         x->wc += 5;
         if (x->wc >= 0x100) x->wc = 0x100;
-        if (!func_8011FDD4(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         SPAWN()
         o->b69 = 0;
         x->wc = 0x100;
@@ -90,7 +90,7 @@ void komaPigFall(TObj *o)
         FALL(0x40)
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (!func_8011FDD4(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         SPAWN()
         o->timer = 2;
         o->wac = 0x1d;
@@ -134,7 +134,7 @@ void komaPigFall(TObj *o)
         }
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (!func_8011FDD4(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         SPAWN()
         o->b69 = 0;
         x->wc = 0;

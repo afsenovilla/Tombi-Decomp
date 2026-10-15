@@ -21,7 +21,7 @@ static __inline__ void hit(TObj *o, TObj *e)
     decreaseObjectTimer(o, 1);
 }
 
-void func_80120C68(TObj *o, TObj *e)
+void redFlowerContact(TObj *o, TObj *e)
 {
     short q;
     short w;

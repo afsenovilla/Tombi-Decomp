@@ -9,7 +9,7 @@ extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
-extern int func_8011FDD4(TObj *);
+extern int komaPigCheckLanded(TObj *);
 
 static __inline__ void setanimbox(TObj *o, A *a)
 {
@@ -67,7 +67,7 @@ void komaPigLeap(TObj *o)
         wall(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (!func_8011FDD4(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         if (o->movetab == 0) {
             unsigned short w = *(unsigned short *)(q + 2);
             o->substep = 4;
@@ -96,7 +96,7 @@ void komaPigLeap(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV <= 0) break;
         o->b9c = 2;
-        if (!func_8011FDD4(o)) break;
+        if (!komaPigCheckLanded(o)) break;
         if (o->movetab == 0) {
             unsigned short w = *(unsigned short *)(q + 2);
             o->substep = 4;
@@ -157,7 +157,7 @@ void komaPigLeap(TObj *o)
         }
     tail:
         o->y.p.whole += 2;
-        func_8011FDD4(o);
+        komaPigCheckLanded(o);
         break;
     }
 }

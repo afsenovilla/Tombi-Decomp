@@ -5,7 +5,7 @@
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern void FUN_8001f96c(int, int, int, int);
 
-void func_8011FAD4(char *a, char *b)
+void windblownMonkeyContact(char *a, char *b)
 {
     if ((unsigned short)(U16(PTR(a, 0x44), 2) - U16(PTR(b, 0x44), 2) + 0x2d) >= 0x5b)
         return;

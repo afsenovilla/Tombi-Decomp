@@ -8,7 +8,7 @@ extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133B98[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
-extern int func_8011FDD4(TObj *);
+extern int komaPigCheckLanded(TObj *);
 
 void func_80123558(TObj *o)
 {
@@ -34,7 +34,7 @@ void func_80123558(TObj *o)
     case 1:
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        if (func_8011FDD4(o)) {
+        if (komaPigCheckLanded(o)) {
             o->timer = 0;
             o->state++;
         }

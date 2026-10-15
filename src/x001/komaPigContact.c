@@ -9,7 +9,7 @@ extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_8001e4f0(int);
 extern void awardAPByArea(int, int, int, int);
 
-void func_801240A8(TObj *o, TObj *e)
+void komaPigContact(TObj *o, TObj *e)
 {
     short r;
 

@@ -7,7 +7,7 @@ extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void FUN_800eea7c(TObj *, int, int);
 
-void func_8011D040(TObj *o, TObj *e)
+void trickVillagePigShotContact(TObj *o, TObj *e)
 {
     if (SPAD.b1a4 != 0) return;
     if (*(unsigned char *)&o->wac == 2) return;

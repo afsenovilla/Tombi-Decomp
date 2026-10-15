@@ -6,7 +6,7 @@
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int, int);
 
-void func_8011FC84(TObj *o, TObj *p)
+void swayingHopPlantContact(TObj *o, TObj *p)
 {
     int v;
 
