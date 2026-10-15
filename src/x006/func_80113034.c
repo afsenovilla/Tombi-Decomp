@@ -9,7 +9,7 @@ extern void **D_80115948[];
 extern unsigned short DAT_1f8001f8;
 extern void ObjCullRegister(TObj *);
 extern void printInfoMessage(int, int);
-extern void FUN_80111b40(TObj *);
+extern void spawnItemDropsFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
 extern void despawnObjectOffscreen(TObj *);
@@ -50,7 +50,7 @@ void func_80113034(TObj *o)
         break;
     case 1:
         if (chk(o)) {
-            FUN_80111b40(o);
+            spawnItemDropsFromTable(o);
             o->step = 3;
             o->timer = 10;
             o->wac = 1;

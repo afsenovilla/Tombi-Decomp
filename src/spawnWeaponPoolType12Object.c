@@ -1,0 +1,38 @@
+// FUNC 8002c578 220 MAIN0
+// MATCHING 8002c578 220
+// FLAGS -O2 -G0 -fno-schedule-insns
+#include "TOBJ.H"
+extern TObj *ObjAlloc(void);
+extern short *DAT_8009c338;
+extern int DAT_1f8002cc;
+
+void spawnWeaponPoolType12Object(TObj *p, int x, int y, int z)
+{
+    TObj *o = ObjAlloc();
+    if (o != 0) {
+        short *t;
+        unsigned short w;
+        short w2;
+        int d;
+        o->active = 1;
+        o->type = 0x12;
+        w = p->animFrame;
+        t = DAT_8009c338;
+        o->a.raw = x << 16;
+        o->y.raw = y << 16;
+        o->b.raw = z << 16;
+        o->animFrame = w;
+        o->w1e = t[4];
+        w2 = t[5];
+        o->b0a = 8;
+        *(signed char *)&o->b0f = -28;
+        o->b0d = 1;
+        o->subtype = 0;
+        o->w08 = w2;
+        d = DAT_1f8002cc;
+        o->category |= 0x80;
+        o->b1d = 0x4d;
+        *(TObj **)((char *)o + 0x90) = p;
+        o->d3c = d;
+    }
+}

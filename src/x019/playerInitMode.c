@@ -32,8 +32,8 @@ typedef struct { unsigned short a, b; } T2;
 extern int FUN_8005efe4(void);
 extern void loadCompressedTIM(int);
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_8002c654(void);
-extern void FUN_8002cd20(TObj *, int, int);
+extern void spawnPlayerPoolType12Object(void);
+extern void spawnPlayerPoolType13Object(TObj *, int, int);
 extern void FUN_80118910(void);
 extern void FUN_80122990(TObj *);
 extern void FUN_801228bc(TObj *);
@@ -147,7 +147,7 @@ void playerInitMode(TObj *o)
         o->step++;
         if (DAT_8009cef8) {
             X(o)->bc9 = 1;
-            FUN_8002c654();
+            spawnPlayerPoolType12Object();
         }
         switch (DAT_8009c960) {
         case 0: FUN_801228bc(o); break;
@@ -205,7 +205,7 @@ void playerInitMode(TObj *o)
             o->state = 0;
             break;
         }
-        if (o->animFrame & 0x80) FUN_8002cd20(o, 0, 0);
+        if (o->animFrame & 0x80) spawnPlayerPoolType13Object(o, 0, 0);
         if (o->animFrame & 0x40) {
             o->w22 = 0x3c;
             if ((c & 0xff) == 7 || (c & 0xff) == 9) o->w22 = 1;

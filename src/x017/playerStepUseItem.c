@@ -38,7 +38,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800ec84c(int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80030b9c(int, int, int, int);
-extern void FUN_8002c654(void);
+extern void spawnPlayerPoolType12Object(void);
 
 #define SETANIM_IF(n) \
     DAT_8009c330->w2c = n; \
@@ -232,7 +232,7 @@ void playerStepUseItem(TObj *o)
             DAT_8009c940[0] = 0;
             break;
         case 0x14:
-            FUN_8002c654();
+            spawnPlayerPoolType12Object();
             goto c3f;
         case 0x8d:
             DAT_8009c940[0] = 0;

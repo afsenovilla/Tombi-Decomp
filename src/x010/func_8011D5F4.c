@@ -15,7 +15,7 @@ extern int AnimAdvance(TObj *);
 extern TObj *allocObjectLayer1(void);
 extern void SfxPlay2(int, int);
 extern void FUN_800eeb5c(TObj *, int);
-extern void FUN_80104cd8(TObj *);
+extern void playerPlaceBittenObject(TObj *);
 extern void FUN_80103628(TObj *);
 extern void FUN_80103774(TObj *);
 
@@ -117,7 +117,7 @@ void func_8011D5F4(TObj *o)
             o->d8c = 0x200;
             o->state = 4;
         } else {
-            FUN_80104cd8(o);
+            playerPlaceBittenObject(o);
         }
         break;
     case 4:

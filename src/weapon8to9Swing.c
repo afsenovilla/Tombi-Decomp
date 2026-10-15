@@ -45,7 +45,7 @@ extern int AnimAdvance(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short weapon8to9HitWall(TObj *);
 extern short angleBetweenPoints(P, P);
-extern void FUN_8002c578(TObj *, int, int, int);
+extern void spawnWeaponPoolType12Object(TObj *, int, int, int);
 extern void spawnWeaponTrailObjects(int, TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void weaponCalcBentOffset(short *, int, short *, short *);
@@ -229,7 +229,7 @@ void weapon8to9Swing(TObj *o)
                 U8(D_8009C338, 0xc) = 2;
                 D_8009C338->we = 0;
                 if (o->visible) {
-                    FUN_8002c578(o, (short)(o->a.p.whole + ((o->animFrame & 1) ? -0x10 : 0x10)), o->y.p.whole, o->b.p.whole);
+                    spawnWeaponPoolType12Object(o, (short)(o->a.p.whole + ((o->animFrame & 1) ? -0x10 : 0x10)), o->y.p.whole, o->b.p.whole);
                 }
                 o->state = 4;
             }

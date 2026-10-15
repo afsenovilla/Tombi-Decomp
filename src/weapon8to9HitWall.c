@@ -2,7 +2,7 @@
 // MATCHING 80035428 580
 #include "TOBJ.H"
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern void FUN_800eaffc(short, short, short, unsigned char);
+extern void spawnWeaponHitDebris(short, short, short, unsigned char);
 extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8001e4f0(int);
 extern short probeFloorPlaneAt(void *, short, short);
@@ -36,7 +36,7 @@ int weapon8to9HitWall(TObj *o)
             case 1:
             case 2:
             case 3:
-                FUN_800eaffc(o->h->p.whole, o->y.p.whole, o->d->p.whole, o->animFrame);
+                spawnWeaponHitDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, o->animFrame);
                 break;
             }
         }

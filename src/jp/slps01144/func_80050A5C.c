@@ -1,5 +1,5 @@
 // JP slps01144 80050A5C 380
-// Japanese version of PAL main0 80045684 (FUN_80045684.c): 228 -> 212.
+// Japanese version of PAL main0 80045684 (playerTouchCat2Type0E.c): 228 -> 212.
 extern short pushObjectOutOfObjectBoxA(unsigned char *, unsigned char *);
 extern void spawnImpactEffect(int, int, int, int);
 extern short DAT_1f80019e;
@@ -18,7 +18,7 @@ static __inline__ short HIT(unsigned char *a, unsigned char *b)
     return 1;
 }
 
-void FUN_80045684(unsigned char *a, unsigned char *b)
+void playerTouchCat2Type0E(unsigned char *a, unsigned char *b)
 {
     short r;
     int h;

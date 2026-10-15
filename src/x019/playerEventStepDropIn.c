@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_8002cd20(TObj *, int, int);
+extern void spawnPlayerPoolType13Object(TObj *, int, int);
 extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fd94(TObj *);
@@ -55,7 +55,7 @@ void playerEventStepDropIn(TObj *o)
         FUN_8001fe94(o, 3);
         DAT_8009c942 = 1;
         DAT_8009c93f = 1;
-        if (DAT_8009c960[0] == 0x30000) FUN_8002cd20(o, 0, 0);
+        if (DAT_8009c960[0] == 0x30000) spawnPlayerPoolType13Object(o, 0, 0);
         o->state++;
         if (DAT_8009cff9 != 0) {
             p = allocObjectLayer2();

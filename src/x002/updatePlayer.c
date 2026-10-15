@@ -17,7 +17,7 @@ extern unsigned char D_8009F7F0;
 extern unsigned short D_8007A034, D_8007A036;
 extern signed char D_8009D2B0;
 extern void *memcpy(void *, void *, int);
-extern void FUN_80025d90(void);
+extern void playerDecodePadInput(void);
 extern void playerInitMode(TObj *);
 extern void playerNormalModeDispatch(TObj *);
 extern void playerEventModeDispatch(TObj *);
@@ -67,7 +67,7 @@ void updatePlayer(TObj *o)
     }
     if (D_8009F7F0 == 0 && GV6.s10 == 7) {
         unsigned char a, b, c;
-        FUN_80025d90();
+        playerDecodePadInput();
         a = U8(o, 0xd6);
         b = U8(o, 0xd5);
         c = o->bbf;

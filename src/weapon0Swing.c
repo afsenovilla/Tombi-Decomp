@@ -70,8 +70,8 @@ extern void weaponSetPlayerAnimB(TObj *);
 extern void weaponSetPlayerAnimC(TObj *);
 extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void spawnImpactEffect(int, int, int, int);
-extern void FUN_800eaffc(int, int, int, int);
-extern void FUN_8002c578(TObj *, int, int, int);
+extern void spawnWeaponHitDebris(int, int, int, int);
+extern void spawnWeaponPoolType12Object(TObj *, int, int, int);
 extern short angleBetweenPoints(XY, XY);
 extern void spawnWeaponTrailObjects(int, TObj *);
 extern void startPadVibration(int, int, int, int);
@@ -234,7 +234,7 @@ void weapon0Swing(TObj *o)
             u = SPAD.s282;
             m = u >> 5 & 0xf;
             if ((u & 0x3000) == 0 && m < 4 && m != 0)
-                FUN_800eaffc(o->h->p.whole, o->y.p.whole, o->d->p.whole, (unsigned char)o->animFrame);
+                spawnWeaponHitDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, (unsigned char)o->animFrame);
             SfxPlay(5);
             o->wa8 = 0x4ff;
         }
@@ -254,7 +254,7 @@ void weapon0Swing(TObj *o)
         }
         if (o->visible) {
             int x = o->a.p.whole;
-            FUN_8002c578(o, (short)((o->animFrame & 1) ? x - 16 : x + 16), o->y.p.whole, o->b.p.whole);
+            spawnWeaponPoolType12Object(o, (short)((o->animFrame & 1) ? x - 16 : x + 16), o->y.p.whole, o->b.p.whole);
         }
         o->state++;
         break;

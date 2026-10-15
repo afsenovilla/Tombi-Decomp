@@ -7,7 +7,7 @@ extern int Rand(void);
 extern int ObjCullRegister(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void ObjFree(TObj *o);
-extern void FUN_8002eddc(TObj *o);
+extern void initPoolType32Object(TObj *o);
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 
@@ -60,12 +60,12 @@ void func_8002EB34(TObj *o)
                 n->h->raw += (D_8007A5F0[i] * s) >> 4;
                 n->y.raw += (D_8007A3F0[i] * s) >> 4;
                 n->b04 = 1;
-                FUN_8002eddc(n);
+                initPoolType32Object(n);
             }
             break;
         case 1:
             o->b04 = 1;
-            FUN_8002eddc(o);
+            initPoolType32Object(o);
             break;
         }
         break;

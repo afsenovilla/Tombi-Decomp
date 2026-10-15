@@ -9,8 +9,8 @@
 #include "gamestate.h"
 extern short D_1F80019E;
 extern short playerPushOutOfObjectBox(TObj *, unsigned char *);
-extern void FUN_80045684(TObj *, unsigned char *);
-extern void FUN_80045800(TObj *, unsigned char *);
+extern void playerTouchCat2Type0E(TObj *, unsigned char *);
+extern void playerTouchCat2Type59(TObj *, unsigned char *);
 extern void pushObjectOutOfObjectBoxA(TObj *, unsigned char *);
 extern void func_8011C80C(TObj *, unsigned char *);
 extern void func_8011C8C0(TObj *, unsigned char *);
@@ -137,7 +137,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 func_8012687C(o, q);
                 break;
             case 0xe:
-                FUN_80045684(o, q);
+                playerTouchCat2Type0E(o, q);
                 break;
             case 0xf:
                 func_80126A70(o, q);
@@ -235,7 +235,7 @@ void collidePlayerWithCat2Objects(TObj *o)
             case 0x58:
             case 0x59:
             case 0x5a:
-                FUN_80045800(o, q);
+                playerTouchCat2Type59(o, q);
                 break;
             case 0x4f:
                 func_8011CF2C(o, q);

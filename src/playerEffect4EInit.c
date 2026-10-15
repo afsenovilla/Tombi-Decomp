@@ -1,0 +1,27 @@
+// FUNC 8002ef20 320 MAIN0
+// MATCHING 8002ef20 320
+typedef struct T { unsigned short w; short p0; short i; short p1; int *a; } T;
+extern T DAT_80079d50[];
+extern int SPR_DATA[];
+extern void FUN_8001fe6c(void *);
+
+void playerEffect4EInit(unsigned char *o)
+{
+    if (o[3] != 9) {
+        *(unsigned short *)(o + 0x1e) = DAT_80079d50[o[3]].w;
+        *(int *)(o + 0x3c) = SPR_DATA[DAT_80079d50[o[3]].i];
+        *(int *)(o + 0x24) = DAT_80079d50[o[3]].a[o[0xc]];
+    } else {
+        *(unsigned short *)(o + 0x1e) = DAT_80079d50[0].w;
+        *(int *)(o + 0x3c) = SPR_DATA[DAT_80079d50[0].i];
+        *(int *)(o + 0x24) = *DAT_80079d50[0].a;
+    }
+    FUN_8001fe6c(o);
+    o[0xa] = 0xd;
+    o[0xd] = 0x80;
+    *(signed char *)(o + 0xf) = -7;
+    *(int *)(o + 0x8c) = 0;
+    o[0x6b] = 0;
+    o[0x1c] |= 0x80;
+    o[4]++;
+}

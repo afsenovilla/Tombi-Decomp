@@ -24,7 +24,7 @@ void FUN_800eab58(TObj *o);
 void FUN_800ec148(TObj *o);
 void FUN_800eb77c(TObj *o);
 void FUN_80056e4c(TObj *o);
-void FUN_800544c8(TObj *o);
+void drawObjectSprtWithMode(TObj *o);
 void FUN_80124780(TObj *o);
 void FUN_8011c00c(TObj *o);
 void FUN_800ecd88(TObj *o);
@@ -64,7 +64,7 @@ void drawCategory3Objects(void)
                 case 3: FUN_800eb77c(o); break;
                 }
             case 14: FUN_80056e4c(o); break;
-            case 16: FUN_800544c8(o); break;
+            case 16: drawObjectSprtWithMode(o); break;
             case 17: FUN_80124780(o); break;
             case 18: FUN_8011c00c(o); break;
             case 19: FUN_800ecd88(o); break;
@@ -101,7 +101,7 @@ void drawCategory3Objects(void)
                     }
                     break;
                 case 14: FUN_80056e4c(o); break;
-                case 16: FUN_800544c8(o); break;
+                case 16: drawObjectSprtWithMode(o); break;
                 case 17: FUN_80124780(o); break;
                 case 18: FUN_8011c00c(o); break;
                 case 19: FUN_800ecd88(o); break;

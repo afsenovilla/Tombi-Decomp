@@ -3,8 +3,8 @@
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
 extern unsigned short DAT_8009d670;
-extern void FUN_800285ec(char *, int);
-extern void FUN_80028754(char *, int);
+extern void cameraScrollToPlayerYB(char *, int);
+extern void cameraScrollToPlayerYA(char *, int);
 
 static __inline__ void decay(void)
 {
@@ -32,13 +32,13 @@ void cameraScrollInputStep(char *o, int a)
     k = &DAT_8009d670;
     if (*k & 0x1000) {
         if (a != 0 || *(int *)(o + 0x20) < -0x9ff) {
-            FUN_800285ec(o, a);
+            cameraScrollToPlayerYB(o, a);
             return;
         }
         decay();
     } else if (*k & 0x4000) {
         if (a != 0 || *(int *)(o + 0x20) >= 0xa00) {
-            FUN_80028754(o, a);
+            cameraScrollToPlayerYA(o, a);
             return;
         }
         decay();

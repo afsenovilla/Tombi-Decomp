@@ -26,7 +26,7 @@ extern void ObjSetAnimFromTable(TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
-extern void FUN_80104cd8(TObj *o);
+extern void playerPlaceBittenObject(TObj *o);
 extern void playerSetFallLean(TObj *o);
 extern TObj *playerProbeGrab(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
@@ -146,7 +146,7 @@ void playerBittenJumpType03(TObj *o)
             D_8009C330->animTimer = 0x1d;
             o->substep = 3;
         } else {
-            FUN_80104cd8(o);
+            playerPlaceBittenObject(o);
         }
         break;
     case 3:

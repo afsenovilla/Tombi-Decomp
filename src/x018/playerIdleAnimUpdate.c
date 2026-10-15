@@ -13,8 +13,8 @@ typedef struct {
 } Q800F0E7C;
 
 extern Q800F0E7C *D_8009C330;
-extern short FUN_800f0b5c();
-extern short FUN_800f0c28(TObj *);
+extern short playerIdleFidgetAllowed();
+extern short playerIdlePickFidgetAnim(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 
@@ -46,10 +46,10 @@ short playerIdleAnimUpdate(TObj *o)
             switch (B(o, 0xa0) & 0xf) {
             case 1:
                 B(o, 0xa2) = 1;
-                if (FUN_800f0b5c()) {
+                if (playerIdleFidgetAllowed()) {
                     SETANIM(0x49);
                     if (B(o, 0xa8)) {
-                        r = FUN_800f0c28(o);
+                        r = playerIdlePickFidgetAnim(o);
                     } else {
                         r = 3;
                         D_8009C330->b1e++;

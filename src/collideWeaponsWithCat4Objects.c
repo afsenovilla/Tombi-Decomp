@@ -15,9 +15,9 @@ extern int weaponOnHitGetResult(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e4f0(int);
 
-extern void FUN_800449a0(TObj *, TObj *);
-extern void FUN_800450e8(TObj *, TObj *);
-extern void func_800447C0(TObj *, TObj *);
+extern void weaponHitCat4Type00(TObj *, TObj *);
+extern void weaponHitCat4Type39(TObj *, TObj *);
+extern void weaponHitCat4Type03(TObj *, TObj *);
 extern void func_8011DF3C(TObj *, TObj *);
 extern void func_8011F330(TObj *, TObj *);
 extern void func_8011F418(TObj *, TObj *);
@@ -132,13 +132,13 @@ void collideWeaponsWithCat4Objects(void)
                 continue;
             switch (b->type) {
             case 0:
-                FUN_800449a0(a, b);
+                weaponHitCat4Type00(a, b);
                 break;
             case 1:
                 func_80125A28(a, b);
                 break;
             case 3:
-                func_800447C0(a, b);
+                weaponHitCat4Type03(a, b);
                 break;
             case 4:
                 if (GAME.selectedArea == 0) {
@@ -203,7 +203,7 @@ void collideWeaponsWithCat4Objects(void)
                 func_8011F518(a, b);
                 break;
             case 0x39:
-                FUN_800450e8(a, b);
+                weaponHitCat4Type39(a, b);
                 break;
             case 0x31:
                 func_801213F0(a, b);

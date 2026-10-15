@@ -15,7 +15,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_80104cd8(TObj *);
+extern void playerPlaceBittenObject(TObj *);
 
 void func_8011B47C(TObj *o)
 {
@@ -104,7 +104,7 @@ void func_8011B47C(TObj *o)
             o->d8c = 0x200;
             o->state = 4;
         } else
-            FUN_80104cd8(o);
+            playerPlaceBittenObject(o);
         break;
     case 4:
         D_8009D2E8->b04 = 2;

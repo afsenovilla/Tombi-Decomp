@@ -5,7 +5,7 @@ extern short G244, G248, G19e;
 extern unsigned short G19eu;
 extern O **G218;
 extern unsigned char **G228;
-extern void FUN_80044b80(O *, unsigned char *);
+extern void weaponHitCat5Object(O *, unsigned char *);
 
 void collideWeaponsWithCat5Objects(void)
 {
@@ -32,11 +32,11 @@ void collideWeaponsWithCat5Objects(void)
                     switch (s2) {
                     case 0:
                         if ((b[0] & 1) && (b[3] == 0 || b[3] == 2))
-                            FUN_80044b80(o, b);
+                            weaponHitCat5Object(o, b);
                         break;
                     case 1:
                         if (b[0] != 5 && (b[0] & 3))
-                            FUN_80044b80(o, b);
+                            weaponHitCat5Object(o, b);
                         break;
                     }
                 } while (G19e != 0);

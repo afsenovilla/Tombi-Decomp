@@ -8,7 +8,7 @@ extern short DAT_1f800240;
 extern TObj **DAT_1f80022c;
 extern unsigned char DAT_800a603a;
 extern unsigned short DAT_8009c960[];
-extern void FUN_800544c8(TObj *);
+extern void drawObjectSprtWithMode(TObj *);
 extern void drawScreenSpriteObject(TObj *);
 extern void drawLetterboxOverlay(TObj *);
 extern void FUN_800eb044(TObj *);
@@ -30,7 +30,7 @@ void drawCategory7Objects(void)
             n--;
             switch (o->b0a) {
             case 0:
-                FUN_800544c8(o);
+                drawObjectSprtWithMode(o);
                 break;
             case 1:
                 drawScreenSpriteObject(o);
@@ -60,7 +60,7 @@ void drawCategory7Objects(void)
             DAT_1f800240--;
             switch (o->b0a) {
             case 0:
-                FUN_800544c8(o);
+                drawObjectSprtWithMode(o);
                 break;
             case 1:
                 drawScreenSpriteObject(o);

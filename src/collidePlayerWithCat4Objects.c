@@ -8,7 +8,7 @@ extern short D_1F80019E;
 void playerPushOutOfObjectBox(TObj *o, TObj *e);
 void func_80124EBC(TObj *o, TObj *e);
 void func_80124F3C(TObj *o, TObj *e);
-void func_80043EBC(TObj *o, TObj *e);
+void playerContactCat4Kind3(TObj *o, TObj *e);
 void func_80124FA4(TObj *o, TObj *e);
 void func_8011FE08(TObj *o, TObj *e);
 void func_80125044(TObj *o, TObj *e);
@@ -19,7 +19,7 @@ void func_8011EEC0(TObj *o, TObj *e);
 void func_8012030C(TObj *o, TObj *e);
 void func_80124D10(TObj *o, TObj *e);
 void func_80124FD4(TObj *o, TObj *e);
-void func_80043D80(TObj *o, TObj *e);
+void playerContactCat4Type0B(TObj *o, TObj *e);
 void func_80125074(TObj *o, TObj *e);
 void func_80124BA8(TObj *o, TObj *e);
 void func_801250A4(TObj *o, TObj *e);
@@ -73,7 +73,7 @@ void collidePlayerWithCat4Objects(TObj *o)
         case 0: playerPushOutOfObjectBox(o, e); break;
         case 1: func_80124EBC(o, e); break;
         case 2: func_80124F3C(o, e); break;
-        case 3: func_80043EBC(o, e); break;
+        case 3: playerContactCat4Kind3(o, e); break;
         case 4:
             if (GAME.selectedArea == 0)
                 func_80124FA4(o, e);
@@ -92,7 +92,7 @@ void collidePlayerWithCat4Objects(TObj *o)
             break;
         case 9: func_80124D10(o, e); break;
         case 10: func_80124FD4(o, e); break;
-        case 0xb: func_80043D80(o, e); break;
+        case 0xb: playerContactCat4Type0B(o, e); break;
         case 0xc: func_80125074(o, e); break;
         case 0x14: func_80124BA8(o, e); break;
         case 0x15: func_801250A4(o, e); break;

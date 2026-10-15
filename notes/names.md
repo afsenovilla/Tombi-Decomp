@@ -160,6 +160,39 @@ One line per name: `address name (old file) - justification`.
 - `8002fe78 updatePlayerEffect4E` (was func_8002FE78) - pool type 0x4E handler (80079CE4): the effects spawned by spawnPlayerPowerEffect and spawnPlayerFootstepEffect
 - `8002b8c4 updatePoolType5DObject` (was func_8002B8C4) - pool type 0x5D handler (80079D20)
 - `8002c43c updatePoolType12Object` (was func_8002C43C) - pool type 0x12 handler (80079BF4)
+- `80044d54 weaponHitCat2Type02` (was FUN_80044d54) - collideWeaponsWithCat2Objects pair handler for category 2 type 2 (resolveHitResultE, awardAPByArea)
+- `80044f18 weaponHitCat2Type0E` (was FUN_80044f18) - pair handler for category 2 type 0xE (weaponOnHitGetResult, impact effect, sfx)
+- `80045344 weaponHitCat2Type07` (was func_80045344) - pair handler for category 2 type 7
+- `800449a0 weaponHitCat4Type00` (was FUN_800449a0) - collideWeaponsWithCat4Objects pair handler for category 4 type 0
+- `800447c0 weaponHitCat4Type03` (was FUN_800447c0) - pair handler for category 4 type 3
+- `800450e8 weaponHitCat4Type39` (was FUN_800450e8) - pair handler for category 4 type 0x39
+- `80044b80 weaponHitCat5Object` (was FUN_80044b80) - collideWeaponsWithCat5Objects pair handler (box test, resolveHitResultD, spawns a pool object)
+- `80045684 playerTouchCat2Type0E` (was FUN_80045684) - collidePlayerWithCat2Objects handler for type 0xE (push-out + impact effect)
+- `80045800 playerTouchCat2Type59` (was FUN_80045800) - collidePlayerWithCat2Objects handler for types 0x59/0x5A
+- `80043d80 playerContactCat4Type0B` (was FUN_80043d80) - collidePlayerWithCat4Objects handler for type 0xB
+- `80043ebc playerContactCat4Kind3` (was func_80043EBC) - collidePlayerWithCat4Objects contact kind 3 (inner switch, next to playerPushOutOfObjectBox for kind 0)
+- `800544c8 drawObjectSprtWithMode` (was func_800544C8) - category 3 render kind 16 / category 7: frame parts as SPRT primitives wrapped in SetDrawMode (like drawObjectSprtTinted)
+- `80047f3c pushCat2ObjectOutOfType04` (was func_80047F3C) - collideCat2ObjectsPairwise handler for solid type 4
+- `80048500 pushCat2ObjectOutOfType07` (was func_80048500) - collideCat2ObjectsPairwise handler for solid type 7
+- `8002c654 spawnPlayerPoolType12Object` (was FUN_8002c654) - when D_8009CEF8 != 0 spawns a pool type 0x12 object at the player (CLUT 0x80,499); called by playerInitMode and playerStepUseItem
+- `8002c578 spawnWeaponPoolType12Object` (was FUN_8002c578) - spawns a pool type 0x12 object at x/y/z with the weapon's facing and D_8009C338 sprite data (weapon0Swing, weapon8to9Swing)
+- `800339a4 weapon5to7UpdatePlayerStep` (was FUN_800339a4) - weapon5to7Swing helper: for camera modes 4/7 forces player step 0x18, else switches on the player step
+- `80033834 weapon5to7StartSpin` (was FUN_80033834) - weapon5to7Swing helper: player anim (weaponSetPlayerAnimB), launch angle by frame, weaponFindNearestTarget
+- `80033638 weapon5to7HitWall` (was FUN_80033638) - weapon5to7Swing helper: terrain hit, impact effect and sfx (like weapon8to9HitWall)
+- `8002809c cameraFollowTargetYB` (was FUN_8002809c) - second camera Y follow (dead zone 1, ramp 0x8000) used by two camera controllers
+- `80028250 lookScrollStepX` (was FUN_80028250) - updateLookScroll helper: ramps the scroll speed and calls stepScrollApproachX
+- `80028754 cameraScrollToPlayerYA` (was FUN_80028754) - cameraScrollInputStep helper: Y offset of the player (camera mode 3 uses 800A606C - 0x14)
+- `800285ec cameraScrollToPlayerYB` (was func_800285EC) - same calculation, second variant
+- `8002eddc initPoolType32Object` (was FUN_8002eddc) - sets an object up as pool type 0x32 (anim PTR_80012208[+0xAC], sprite data 1F8002D8)
+- `8002ef20 playerEffect4EInit` (was FUN_8002ef20) - updatePlayerEffect4E init: sprite/anim from D_80079D50 by subtype and slot +0x0C
+- `8002f16c playerEffect4EStepA` (was func_8002F16C) - pool type 0x4E effect variant (0xB4 frames)
+- `8002f384 playerEffect4EStepB` (was FUN_8002f384) - pool type 0x4E effect variant (0x3C frames)
+- `8002f4e0 playerEffect4EStepC` (was func_8002F4E0) - pool type 0x4E effect variant (slots 5..8 at fixed angles)
+- `8002f960 playerEffect4EStepD` (was FUN_8002f960) - pool type 0x4E effect variant (slots 0..2 at angles 0/0x56/0xAB)
+- `8002fbc8 playerEffect4EDispatchA` (was func_8002FBC8) - switch on the 0x4E subtype over the step functions above
+- `8002fc98 playerEffect4EDispatchB` (was FUN_8002fc98) - second dispatcher over the same step functions (called by updatePlayerEffect4E)
+- `8002cd20 spawnPlayerPoolType13Object` (was FUN_8002cd20) - spawns a pool type 0x13 object copying the source position/facing (playerInitMode, playerEventStepDropIn)
+- `80025d90 playerDecodePadInput` (was FUN_80025d90) - updatePlayer: decodes the pad / analog bytes into the 4-way direction bits (D_8009D670) and the press/release masks
 
 # X000 function names (shared overlay code)
 
@@ -352,6 +385,16 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80110fdc playerAttackDecelerate` (was func_80110FDC) - weapon attack steps 3/4: decelerates +0xB2 with the attack columns of the D_80115510 table (row by weapon and floor kind)
 - `80104a04 playerBittenJumpAirMove` (was func_80104A04) - bitten-jump helper: air motion, re-bite (wac == 2) and grab probe (playerProbeGrab) while carrying the bitten object
 - `8011a148 spawnPoolType09Object` (was FUN_8011a148) - spawns a pool type 9 object (sub = arg) at x/y/z when fewer than 3 exist
+- `800eaffc spawnWeaponHitDebris` (was FUN_800eaffc) - weapon terrain hits (weapon0Swing, weapon5to7HitWall, weapon8to9HitWall): in area 1 sections 0/1 spawns a pool type 0xC subtype 2 object (ground debris) at the hit
+- `80104cd8 playerPlaceBittenObject` (was FUN_80104cd8) - bitten-jump helper: places the bitten object D_8009D2E8 around the player by the angle +0x88 (mirrored by facing) and its height +0x70
+- `800ef760 playerGroundAnimTransition` (was func_800EF760) - playerSelectGroundAnim helper: picks/continues the ground anim by kind k (idle anim 80010748 for 0) from the current anim id
+- `800f0c28 playerIdlePickFidgetAnim` (was FUN_800f0c28) - playerIdleAnimUpdate helper: idle fidget anim id by +0xA8 / item D_8009D2B1 and area (0xFF = none)
+- `800f0b5c playerIdleFidgetAllowed` (was FUN_800f0b5c) - returns 1 when idle fidgets may play (area 1 / 9 special cases by section and flags)
+- `80111b40 spawnItemDropsFromTable` (was FUN_80111b40) - spawns the drops of table T_80115A58[+0x6A] at the object position (spawnItemFromEntry, random entry when marked 0xFF)
+- `8011468c updateL2Type18Object` (was FUN_8011468c) - shared layer 2 type 0x18 handler (MAIN0 table slot 80077DFC; bite holder playerBiteHoldType18): box/sprite/anim from D_80115DE4 by subtype, steps func_80113F38 / func_801142C0
+- `80113484 updateL2Type0EObject` (was FUN_80113484) - shared layer 2 type 0xE handler (slot 80077DD4; bite holder playerBiteHoldType0E)
+- `80114890 updateL2Type1FObject` (was FUN_80114890) - shared layer 2 type 0x1F handler (slot 80077E18): thunk to the area's own code
+- `8011191c updateL1Type0AObject` (was FUN_8011191c) - layer 1 type 10 handler (slot 8007A134): subtype 0/1 steps, short hit flash via +0x22/+0x6A
 
 # Area overlay function names (X001..X019)
 

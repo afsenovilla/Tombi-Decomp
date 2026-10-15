@@ -6,7 +6,7 @@ extern Cam2c *DAT_8009c330;
 extern int DAT_8009c984;
 extern unsigned short DAT_8009d670;
 extern unsigned short DAT_1f8003c4;
-extern void FUN_800ef760(TObj *o, int v);
+extern void playerGroundAnimTransition(TObj *o, int v);
 
 void FUN_800efa80(TObj *o)
 {
@@ -35,7 +35,7 @@ void FUN_800efa80(TObj *o)
             DAT_8009c330->cur = 0x21;
     }
     if (DAT_8009c330->prev != DAT_8009c330->cur) {
-        FUN_800ef760(o, DAT_8009c330->cur);
+        playerGroundAnimTransition(o, DAT_8009c330->cur);
         DAT_8009c330->prev = DAT_8009c330->cur;
     }
 }

@@ -51,7 +51,7 @@ static int *D_80115948[48] = {
 };
 void ObjCullRegister(TObj *o);
 void printInfoMessage(int a, int b);
-void FUN_80111b40(TObj *o);
+void spawnItemDropsFromTable(TObj *o);
 void AnimLoadDuration(TObj *o);
 void SfxPlay2(int a, int b);
 void setEventComplete(int a, int b);
@@ -84,7 +84,7 @@ void func_80112C24(TObj *o)
         break;
     case 1:
         if (check(o)) {
-            FUN_80111b40(o);
+            spawnItemDropsFromTable(o);
             o->step = 3;
             o->timer = 10;
             o->wac = 1;

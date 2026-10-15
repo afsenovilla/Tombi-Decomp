@@ -15,7 +15,7 @@ extern short ObjTileCollide(TObj *o, int a, int b);
 extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
 extern TObj *allocObjectLayer1(void);
-extern void FUN_80104cd8(TObj *o);
+extern void playerPlaceBittenObject(TObj *o);
 extern void playerBittenJumpAirMove(TObj *o);
 
 void playerBittenJumpType04(TObj *o)
@@ -93,7 +93,7 @@ void playerBittenJumpType04(TObj *o)
             o->velY = 0;
             o->substep = 3;
         } else {
-            FUN_80104cd8(o);
+            playerPlaceBittenObject(o);
         }
         break;
     case 3:

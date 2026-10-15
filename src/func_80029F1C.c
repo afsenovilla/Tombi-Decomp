@@ -6,7 +6,7 @@ typedef struct S {
 } S;
 extern short D_1F8000E6;
 extern void cameraFollowTargetY(S *);
-extern void func_8002809C(S *);
+extern void cameraFollowTargetYB(S *);
 void func_80029F1C(S *o)
 {
     int f1, f2;
@@ -43,5 +43,5 @@ void func_80029F1C(S *o)
         o->b6f = 0;
     }
     cameraFollowTargetY(o);
-    func_8002809C(o);
+    cameraFollowTargetYB(o);
 }

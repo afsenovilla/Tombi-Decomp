@@ -32,12 +32,12 @@ extern void weaponSetPlayerAnimA(TObj *);
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern void spawnWeaponTrailObjects(int, TObj *);
-extern void FUN_80033834(TObj *);
+extern void weapon5to7StartSpin(TObj *);
 extern short weaponFindNearestTarget(TObj *);
-extern short FUN_80033638(TObj *);
+extern short weapon5to7HitWall(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short angleBetweenPoints(V2, V2);
-extern void FUN_800339a4(TObj *);
+extern void weapon5to7UpdatePlayerStep(TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void weaponCalcBentOffset(D600 *, int, short *, short *);
 
@@ -170,10 +170,10 @@ void weapon5to7Swing(TObj *o)
         o->waa += DAT_8007a072[k];
         if (o->animFrame & 1) {
             int x = (short)o->waa, y = DAT_8007a072[k + 1] + 0x40;
-            if (x < y) FUN_80033834(o);
+            if (x < y) weapon5to7StartSpin(o);
         } else {
             int y = (short)o->waa, x = DAT_8007a072[k + 1] + 0xc0;
-            if (x < y) FUN_80033834(o);
+            if (x < y) weapon5to7StartSpin(o);
         }
         break;
     case 2:
@@ -211,7 +211,7 @@ void weapon5to7Swing(TObj *o)
             }
             o->state = g ? 3 : 2;
         }
-        if (FUN_80033638(o) == 0) break;
+        if (weapon5to7HitWall(o) == 0) break;
         if (o->animFrame & 1)
             o->waa = (o->waa - 0x40) & 0xff;
         else
@@ -255,7 +255,7 @@ void weapon5to7Swing(TObj *o)
             }
             o->state = g ? 3 : 2;
         }
-        if (FUN_80033638(o) == 0) break;
+        if (weapon5to7HitWall(o) == 0) break;
         if (o->animFrame & 1)
             o->waa = (o->waa + 0x40) & 0xff;
         else
@@ -315,7 +315,7 @@ void weapon5to7Swing(TObj *o)
                 o->step = 0;
                 o->state = 0;
             } else {
-                FUN_800339a4(o);
+                weapon5to7UpdatePlayerStep(o);
             }
         }
         break;

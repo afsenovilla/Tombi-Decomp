@@ -4,9 +4,9 @@
 extern short IDX;
 #define LST (*(unsigned char ***)0x1f80021c)
 extern unsigned char DAT_8007b6a4[];
-extern short func_80047F3C(void *, void *);
+extern short pushCat2ObjectOutOfType04(void *, void *);
 extern short pushObjectOutOfObjectX(void *, void *);
-extern short func_80048500(void *, void *);
+extern short pushCat2ObjectOutOfType07(void *, void *);
 extern short pushObjectOutOfObjectBoxB(void *, void *);
 extern void func_80121934(void *);
 extern void func_801217F8(void *);
@@ -35,7 +35,7 @@ void collideCat2ObjectsPairwise(void)
                 if (q[0] != 2) {
                     switch (q[2]) {
                     case 4:
-                        v = func_80047F3C(o, q);
+                        v = pushCat2ObjectOutOfType04(o, q);
                         if (v != 0) IDX = 0;
                         break;
                     case 6:
@@ -43,7 +43,7 @@ void collideCat2ObjectsPairwise(void)
                         if (v != 0) IDX = 0;
                         break;
                     case 7:
-                        v = func_80048500(o, q);
+                        v = pushCat2ObjectOutOfType07(o, q);
                         if (v != 0) IDX = 0;
                         break;
                     case 0xe:

@@ -1,5 +1,5 @@
 // JP slps01144 80050BD8 472
-// Japanese version of PAL main0 80045800 (FUN_80045800.c): 228 -> 212.
+// Japanese version of PAL main0 80045800 (playerTouchCat2Type59.c): 228 -> 212.
 #include "TOBJ.H"
 extern unsigned char DAT_8009cdc7;
 extern short DAT_1f80019e;
@@ -7,7 +7,7 @@ extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 #define B(o, n) (((unsigned char *)(o))[n])
 
-void FUN_80045800(TObj *o, TObj *e)
+void playerTouchCat2Type59(TObj *o, TObj *e)
 {
     short r;
     if (o->b9e != 0 || B(o, 0xc8) != 0)

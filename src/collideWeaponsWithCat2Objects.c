@@ -15,12 +15,12 @@ extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_80125f04(TObj *, TObj *);
 extern void FUN_80125aac(TObj *, TObj *);
-extern void FUN_80044d54(TObj *, TObj *);
+extern void weaponHitCat2Type02(TObj *, TObj *);
 extern void FUN_80120a2c(TObj *, TObj *);
-extern void FUN_80044f18(TObj *, TObj *);
+extern void weaponHitCat2Type0E(TObj *, TObj *);
 extern void FUN_80125c1c(TObj *, TObj *);
 extern void FUN_80125da4(TObj *, TObj *);
-extern void FUN_80045344(TObj *, TObj *);
+extern void weaponHitCat2Type07(TObj *, TObj *);
 extern void FUN_80125c84(TObj *, TObj *);
 extern void FUN_8011f844(TObj *, TObj *);
 extern void FUN_8011ddc0(TObj *, TObj *);
@@ -134,7 +134,7 @@ void collideWeaponsWithCat2Objects(void)
                 FUN_80125aac(a, b);
                 break;
             case 2:
-                FUN_80044d54(a, b);
+                weaponHitCat2Type02(a, b);
                 break;
             case 10:
                 FUN_80120a2c(a, b);
@@ -146,7 +146,7 @@ void collideWeaponsWithCat2Objects(void)
                 col(a, b);
                 break;
             case 14:
-                FUN_80044f18(a, b);
+                weaponHitCat2Type0E(a, b);
                 break;
             case 18:
                 FUN_80125c1c(a, b);
@@ -155,7 +155,7 @@ void collideWeaponsWithCat2Objects(void)
                 FUN_80125da4(a, b);
                 break;
             case 7:
-                FUN_80045344(a, b);
+                weaponHitCat2Type07(a, b);
                 break;
             case 8:
                 FUN_80125c84(a, b);

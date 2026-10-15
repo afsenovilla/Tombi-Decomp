@@ -29,7 +29,7 @@ extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void FUN_80104cd8(TObj *);
+extern void playerPlaceBittenObject(TObj *);
 extern void playerBittenJumpAirMove(TObj *);
 
 void func_801213D0(TObj *o)
@@ -93,7 +93,7 @@ void func_801213D0(TObj *o)
             o->d8c = 0x200;
             o->substep = 3;
         } else {
-            FUN_80104cd8(o);
+            playerPlaceBittenObject(o);
         }
         break;
     case 3:
