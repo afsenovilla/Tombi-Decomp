@@ -1,4 +1,5 @@
 // FUNC 800ea37c 1484 D0SPSUB2
+// MATCHING 800ea37c 1484
 typedef struct { unsigned char state, sub, b2, b3; short timer; short x6; char p8[0xE]; short cursor; short card; short x1A; short x1C; } Menu;
 typedef struct { char p0[0x140]; short status, prev, p144, type; char p148[0x10]; short x158; char p15a[0]; } Card;
 typedef struct { short icon, a, b, c; int d, e; short p10, f; } Info;
@@ -13,7 +14,6 @@ extern short D_800F70FC[][16];
 extern Info D_800F74B8[][15];
 extern Pos D_800F6A44[];
 extern Text D_800F70D8;
-extern short D_800F70DC;
 extern short D_800F70F4, D_800F70F8;
 extern int D_800EDC18;
 extern int D_800F714C, D_800F7150, D_800F7154, D_800F7158;
@@ -39,7 +39,9 @@ void func_800EA37C(void)
     D_800F70D8.w = 1;
     func_800EB0EC(D_800A45F4, 2, 0x10, 0x20);
     m = &D_800A45D8;
-    switch ((short)D_800A45D9) {
+    switch (D_800A45D9) {
+    case 0:
+        break;
     case 1:
         if (D_800F7158 == 0) n = 1;
         else if (D_800F7154 == 0) n = 2;
@@ -123,16 +125,16 @@ void func_800EA37C(void)
                 if (f->a == -1) {
                     if (m->x1C) {
                         D_800F70D8.x = D_800F6A44[k].x;
+                        D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
                         D_800F70D8.w = 1;
                         D_800F70D8.img = D_800EDC18;
-                        D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
                         func_800EAC90(1, 3, f->icon, k == m->cursor);
                     }
                 } else {
                     D_800F70D8.x = D_800F6A44[k].x;
+                    D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
                     D_800F70D8.w = 1;
                     D_800F70D8.img = D_800EDC18;
-                    D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
                     sel = k == m->cursor;
                     func_800EAC90(0, 3, f->icon, sel);
                     func_800EB948(f->d, D_800F70D8.x + 0xC0, D_800F70D8.y + 3, sel);
