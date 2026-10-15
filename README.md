@@ -55,23 +55,23 @@ The table above is regenerated with `python3 tools/progress.py`.
 |------|-------------|-------|
 | `SCES_013.31` | Boot executable (PAL, Spanish) | `f6c383514e5d8367d2eed06400315cf6dd57ef6b` |
 | `EXE/MAIN0.EXE` | Game core, loaded at `0x80010000` | `bec8dc5f4116f5e497f2337eef8c523ff6dee8fc` |
-| `AREA00/X000.BIN` | Area overlay, loaded at `0x800E8028` | `ce168475f667f2ca8842eabad2aec829e301c5c5` |
+| `AREA00/X000.BIN` | Area overlay, AREA00 (Village of All Beginnings), loaded at `0x800E8028` | `ce168475f667f2ca8842eabad2aec829e301c5c5` |
 | `AREA01/X001.BIN` | Area overlay, AREA01 (also AREA07), loaded at `0x800E8028` | `923f812dcfd7da18ee0f7017e5b45a5e38ee3015` |
 | `AREA02/X002.BIN` | Area overlay, AREA02 (AREA19 ships a copy), loaded at `0x800E8028` | `646aa8b5ad97f70b299b982b3260f9f731a142bb` |
-| `AREA03/X003.BIN` | Area overlay, AREA03, loaded at `0x800E8028` | `440ae76f5012e3778b908743d7d030c350caf7d3` |
+| `AREA03/X003.BIN` | Area overlay, AREA03 (Phoenix Mountain), loaded at `0x800E8028` | `440ae76f5012e3778b908743d7d030c350caf7d3` |
 | `AREA04/X004.BIN` | Area overlay, AREA04 (also AREA12), loaded at `0x800E8028` | `f01c882217efee45bf76aba54ee4fadfa6c25665` |
-| `AREA05/X005.BIN` | Area overlay, AREA05, loaded at `0x800E8028` | `0d2778c0d4b3e5b5dfc40fc46053e46d9d785b17` |
-| `AREA06/X006.BIN` | Area overlay, AREA06, loaded at `0x800E8028` | `1bd5b648feb75a580c14db6715e057cb035c1db1` |
-| `AREA08/X008.BIN` | Area overlay, AREA08, loaded at `0x800E8028` | `5e098dccfd123af09967ca778c83223e8a21716d` |
-| `AREA09/X009.BIN` | Area overlay, AREA09, loaded at `0x800E8028` | `1b44ea24890128c3d3789b0badb252135ba4dec1` |
-| `AREA10/X010.BIN` | Area overlay, AREA10, loaded at `0x800E8028` | `5093e40399319f5987668bfb1d042713216d356e` |
-| `AREA11/X011.BIN` | Area overlay, AREA11, loaded at `0x800E8028` | `016559470c5a253deb5a38f685ff312c39c2cb46` |
-| `AREA13/X013.BIN` | Area overlay, AREA13, loaded at `0x800E8028` | `a4e8668eca85a32d6d0cdfa05ddffd6ad40bfbb0` |
-| `AREA14/X014.BIN` | Area overlay, AREA14, loaded at `0x800E8028` | `4ee916eb3215ccae64773e1a9a547ab8dbcd1ff5` |
-| `AREA16/X016.BIN` | Area overlay, AREA16, loaded at `0x800E8028` | `7c93915bc943e8d9d8fa5d5efbd02f7e563650e4` |
-| `AREA17/X017.BIN` | Area overlay, AREA17, loaded at `0x800E8028` | `59c5964cbb4536bc62b1a65262d963fab1ad3d33` |
-| `AREA18/X018.BIN` | Area overlay, AREA18, loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
-| `AREA19/X019.BIN` | Area overlay, AREA19, loaded at `0x800E8028` | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
+| `AREA05/X005.BIN` | Area overlay, AREA05 (Baccus Village), loaded at `0x800E8028` | `0d2778c0d4b3e5b5dfc40fc46053e46d9d785b17` |
+| `AREA06/X006.BIN` | Area overlay, AREA06 (Dirt Motocross), loaded at `0x800E8028` | `1bd5b648feb75a580c14db6715e057cb035c1db1` |
+| `AREA08/X008.BIN` | Area overlay, AREA08 (Baccus Lake), loaded at `0x800E8028` | `5e098dccfd123af09967ca778c83223e8a21716d` |
+| `AREA09/X009.BIN` | Area overlay, AREA09 (Mushroom Village), loaded at `0x800E8028` | `1b44ea24890128c3d3789b0badb252135ba4dec1` |
+| `AREA10/X010.BIN` | Area overlay, AREA10 (Deep Jungle), loaded at `0x800E8028` | `5093e40399319f5987668bfb1d042713216d356e` |
+| `AREA11/X011.BIN` | Area overlay, AREA11 (Village of Civilization), loaded at `0x800E8028` | `016559470c5a253deb5a38f685ff312c39c2cb46` |
+| `AREA13/X013.BIN` | Area overlay, AREA13 (Pig Island), loaded at `0x800E8028` | `a4e8668eca85a32d6d0cdfa05ddffd6ad40bfbb0` |
+| `AREA14/X014.BIN` | Area overlay, AREA14 (Evil Pigs), loaded at `0x800E8028` | `4ee916eb3215ccae64773e1a9a547ab8dbcd1ff5` |
+| `AREA16/X016.BIN` | Area overlay, AREA16 (Village of Civilization: Clock Tower), loaded at `0x800E8028` | `7c93915bc943e8d9d8fa5d5efbd02f7e563650e4` |
+| `AREA17/X017.BIN` | Area overlay, AREA17 (Village of Civilization: Iron Tower), loaded at `0x800E8028` | `59c5964cbb4536bc62b1a65262d963fab1ad3d33` |
+| `AREA18/X018.BIN` | Area overlay, AREA18 (Village of Civilization: Y Crossing), loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
+| `AREA19/X019.BIN` | Area overlay, AREA19 (Village of Civilization (purified)), loaded at `0x800E8028` | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
 
 The 17 area overlays (`X0nn.BIN`, Spanish; `X1nn`..`X8nn` are the other languages) are raw code blobs, all
 loaded at `0x800E8028`. Their first 188 KB (`0x800E8028`..`0x80115EA4`: header, ~300 shared object handlers and
