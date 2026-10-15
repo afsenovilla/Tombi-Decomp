@@ -1,6 +1,6 @@
 // FUNC 80036ebc 116 MAIN0
 // MATCHING 80036ebc 116
-void func_80036EBC(unsigned char *o)
+void setAngleFromDir8(unsigned char *o)
 {
     if ((unsigned char)(o[6] - 6) < 2) return;
     switch (*(unsigned short *)(o + 0x2e)) {

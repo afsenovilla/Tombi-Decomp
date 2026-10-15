@@ -16,7 +16,7 @@ extern int SCRIPT_OBJECTS[64];
 extern char D_80013650[];
 extern int printf(char *, ...);
 
-void func_80038B04(void)
+void scriptLoadHeader(void)
 {
     G *g = SCRIPT_CTX;
     unsigned char *t = SCRIPT_CODE;

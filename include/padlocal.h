@@ -126,27 +126,27 @@ int SysEnqIntRP(int, void*);
 void bzero(void*, int);
 
 /* PAL function names (address-named, see notes/names_main0.csv). */
-int func_80069610(void);                        /* vsync handler (US func_80069058) */
+int _padVsyncHandler(void);                        /* vsync handler (US func_80069058) */
 void _padStartCom(void);                        /* _padStartCom */
 int _padInitSioMode(padPort*);                    /* _padInitSioMode */
 void padCommandStep(padPort*);                    /* one command step */
 int _padSioRW(padPort*, int);               /* _padSioRW */
-int func_80069EF8(padPort*, int);               /* byte exchange with ack wait */
+int _padSioExchangeByte(padPort*, int);               /* byte exchange with ack wait */
 int _padClrIntSio0(void);                        /* _padClrIntSio0 */
 void sioWaitRxReady(void);                       /* wait SIO tx ready */
 void padQueueActInfoCmd(padPort*);                   /* per-step handlers stored in fn_14 / fn_18 */
 int func_8006A718(padPort*);
 void padQueueMainModeCmd(padPort*);
-int func_8006AD48(padPort*);
+int _padChkMainModeDone(padPort*);
 void _padSetVsyncParam(void);                        /* _padSetVsyncParam */
-void FUN_8006bac4(void);                        /* _padInitDirSeq */
+void _padInitDirSeq(void);                        /* _padInitDirSeq */
 int func_8006B62C(int);                         /* completion (D_800981AC) */
 void padResetPortState(padPort*);                   /* reset object (D_800981B0) */
 int padGetSendByte(padPort*, int);               /* payload byte (D_800981B4) */
 void func_8006B7EC(padPort*);                   /* actuator map (D_800981B8) */
 int padGetPortId(padPort*);                    /* channel of object (D_800981BC) */
 padPort* padGetPortBuffer(int);                    /* object of channel (D_800981C0) */
-void FUN_8006b720(padPort*);                    /* swap command (D_800981D0) */
+void _padLatchId(padPort*);                    /* swap command (D_800981D0) */
 void setRC2wait(int);                         /* setRC2wait */
 int chkRC2wait(void);                         /* chkRC2wait */
 

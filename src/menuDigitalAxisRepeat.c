@@ -1,12 +1,12 @@
 // FUNC 80025c60 100 MAIN0
 // MATCHING 80025c60 100
-// Ported from psx_tomba (ui.c, func_80028794); MIT licence of the original project.
+// Ported from psx_tomba (ui.c, menuDigitalAxisRepeat); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
 
 
-s16 func_80028794(u8* p, s16 mode)
+s16 menuDigitalAxisRepeat(u8* p, s16 mode)
 {
     u8  v = *p;
     s32 a;

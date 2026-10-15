@@ -4,7 +4,7 @@
 #include "player.h"
 extern TObj *ObjAlloc();
 
-void func_8002FFB0(int a, int b)
+void spawnPlayerEffect4EStep1(int a, int b)
 {
     TObj *o = ObjAlloc();
     if (o) {

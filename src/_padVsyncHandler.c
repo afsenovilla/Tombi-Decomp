@@ -19,7 +19,7 @@ extern int D_800981F4;
 extern void (*D_800981AC)(int);
 int _padInitSioMode(E *e);
 void padCommandStep(E *e);
-int func_80069610(void)
+int _padVsyncHandler(void)
 {
     int t;
     if (D_80098210->a & 2) {

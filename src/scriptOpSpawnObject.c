@@ -8,7 +8,7 @@ extern TObj *allocObjectLayer4(void);
 extern TObj *ObjAlloc(void);
 extern void func_800EDFB8(TObj *o, int n);
 
-void func_800399C4(void)
+void scriptOpSpawnObject(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     int k = g->arg[1];

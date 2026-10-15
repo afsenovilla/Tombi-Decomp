@@ -3,7 +3,7 @@
 #include "scriptctx.h"
 extern unsigned char *SCRIPT_OBJECTS[];
 void func_800EDFB8(unsigned char *a, int b);
-void func_8003ABC0(void)
+void scriptOpReleaseType19(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     unsigned char *p = SCRIPT_OBJECTS[g->arg[0]];

@@ -1,7 +1,7 @@
 // FUNC 80025cc4 204 MAIN0
 // MATCHING 80025cc4 204
 
-short func_80025CC4(unsigned char *p, short mode)
+short menuAnalogAxisRepeat(unsigned char *p, short mode)
 {
     unsigned char v = *p;
     short hi, lo, r;

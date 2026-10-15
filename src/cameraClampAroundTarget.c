@@ -7,7 +7,7 @@ typedef struct { char p0[0x30]; short w30; short w32; P *d34; } O;
 extern S PLAYER;
 extern P *D_800A6078;
 
-void func_8002771C(O *o)
+void cameraClampAroundTarget(O *o)
 {
     S *s = &PLAYER;
     char pad;

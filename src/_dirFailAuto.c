@@ -4,7 +4,7 @@
 // FLAGS -O2 -G8
 extern void (*DAT_800981b0)(unsigned char *);
 
-void FUN_8006be6c(unsigned char *o)
+void _dirFailAuto(unsigned char *o)
 {
     int s = o[0x46];
     unsigned int t;

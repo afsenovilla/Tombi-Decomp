@@ -249,6 +249,23 @@ One line per name: `address name (old file) - justification`.
 - `8003a89c scriptOpSetPlayerStateEx` (was FUN_8003a89c) - the script player-state op that follows scriptOpSetPlayerState (extra 9/8,9 toggles of 8009C93E)
 - `8003c338 hopSpinFallStep` (was FUN_8003c338) (no caller found) - hop up (velY -0x200), spin d8c by 0x14 and fall until probeCollisionAtDepthB hits
 - `80024e58 modelDrawFT4WithG4Lit` (was FUN_80024e58) (no caller found) - modelDrawFT4 followed by modelDrawG4Lit on the result
+- libpad internals without a psx_tomba name (behaviour names, underscore like the library): `8006bac4 _padInitDirSeq` (was FUN_8006bac4) - installs the three direct-sequence callbacks (psx_tomba padseqd.c _padInitDirSeq); `8006be6c _dirFailAuto` (was FUN_8006be6c) - padseqd.c _dirFailAuto with the PAL retry limit 10; `8006bf4c _dirChkSeqDone` (was func_8006BF4C) - third padseqd callback (US func_8006B494): 0 once the sequence step is 0xFF; `8006b720 _padLatchId` (was FUN_8006b720) - copies port +0x37 to +0x38 and clears it; `800695a8 _padChkSioIrq` (was func_800695A8) - both SIO IRQ bits set -> runs the D_800981D4 hook; `80069610 _padVsyncHandler` (was func_80069610) - US func_80069058, polls both ports; `80069ef8 _padSioExchangeByte` (was func_80069EF8) - waits for SIO ready, writes the control byte and waits for the ack with the RC2 timeout; `8006ad48 _padChkMainModeDone` (was func_8006AD48); `8006ae54 _padIfSioRW` (was func_8006AE54) - US padif.c func_8006A40C; `8006b020 _padSendCmdByte` (was func_8006B020)
+- `8002ac68 updateCameraController` (was func_8002AC68) - updateInventoryOverlay's camera object tick: init (geometry screen 0x220, area 6 / 9-6 special cases), then the controller D_80079AEC[mode] and computeCameraMatrix, copies the camera position to 1F800174..
+- `8002771c cameraClampAroundTarget` (was func_8002771C) (no caller found) - clamps the camera X to +-0x90 of its target and the player Y (0x5C in area 0x2000E) for player modes < 4 or 7
+- `80017798 resetCameraScratchDefaults` (was func_80017798) (no caller found) - base matrix to 1F800BC0, default camera offsets -0x220/0xA0/-0x80 and scratch flags
+- `80025cc4 menuAnalogAxisRepeat` / `80025c60 menuDigitalAxisRepeat` (was func_80025CC4 / func_80028794) (no caller found) - map an analog axis byte (dead zone 0x50..0xAF) / digital 0 or 0xFF to the menu repeat values of the mode
+- `8002eaac spawnPoolType31At` (was func_8002EAAC), `8002ffb0 spawnPlayerEffect4EStep1` (was func_8002FFB0) (no caller found) - pool spawn helpers (type 0x31 timer 0x20; type 0x4E at the player, step 1)
+- `800352f4 weapon8to9AttachAnchor` (was func_800352F4) - weapon8to9HitWall: sfx 0x26, anchors the player swing at the hit object (distance wb4 >= 0x28, angle w7a)
+- `800337c0 weaponCheckNearestTarget` (was func_80036C14, psx_tomba objlogic.c) - weaponFindNearestTarget result 2 -> 1; `80034f04 weapon5to7SwingStep` (was func_80034F04) (no caller found) - calls weapon5to7Swing for states 0..2
+- `8003395c isPlayerStateRestricted` (was func_80036DB0, psx_tomba objlogic.c) (uncertain) - 1 for the player states D_800A539D in a fixed list (5..69)
+- `80036ebc setAngleFromDir8` (was func_80036EBC) (no caller found) - d8c from the direction index +0x2E (0/0x20/0xE0/0x40/0xC0) unless step is 6/7
+- `800371b0 setUnusedGlobal8007A108` (was func_800371B0) (no caller found) - only writes D_8007A108 (read nowhere)
+- `80038b04 scriptLoadHeader` (was func_80038B04) - clears the 64 script objects, checks the "WS" magic 0x530057 of the script block and copies its 64 header words
+- `800399c4 scriptOpSpawnObject` (was func_800399C4) - execGameOpcode 0x80: allocates a layer-2 (kinds 2/9/10 -> types 0x18/0x19) or layer-4 (kind 4 -> type 0x1E) object at x/y/z and stores it in SCRIPT_OBJECTS[idx]
+- `8003abc0 scriptOpReleaseType19` (was func_8003ABC0) (no caller found) - script object of type 0x19: release its +0x94 link or func_800EDFB8(o, 1)
+- `8003af70 scriptOpReadResultBCD4` (was func_8003E3C4, psx_tomba scriptop.c) - stores D_8009BCD4 into the script argument +0x1190
+- `8004d20c initSectionSpawnerAlt` (was func_8005B1A4, psx_tomba objpool.c) - first tick: records area/section, then spawnSectionObjectsAlt
+- `8002b018 stubNop8002B018`, `8004f344 stubReturnZero8004F344` (was func_8002B018 / func_8004F344) (no caller found) - empty / return 0
 
 # X000 function names (shared overlay code)
 

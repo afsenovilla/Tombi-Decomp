@@ -1,12 +1,12 @@
 // FUNC 8003395c 72 MAIN0
 // MATCHING 8003395c 72
-// Ported from psx_tomba (objlogic.c, func_80036DB0); MIT licence of the original project.
+// Ported from psx_tomba (objlogic.c, isPlayerStateRestricted); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
 
 
-s16 func_80036DB0(void)
+s16 isPlayerStateRestricted(void)
 {
     s16 r = 0;
 

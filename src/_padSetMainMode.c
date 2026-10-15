@@ -21,7 +21,7 @@ int _padSetMainMode(padPort *obj, int byte1, int byte2) {
     flag = 1;
     obj->sequenceStep = flag;
     obj->fn_14 = (void (*)(void *))padQueueMainModeCmd;
-    obj->fn_18 = func_8006AD48;
+    obj->fn_18 = _padChkMainModeDone;
     obj->requestedModeIndex = byte1;
     obj->requestedModeLock = byte2;
     flag = (compareByte & 0xFF) ^ obj->currentModeIndex;

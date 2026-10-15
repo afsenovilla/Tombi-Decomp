@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *ObjAlloc();
 
-void func_8002EAAC(int a, int b, int c)
+void spawnPoolType31At(int a, int b, int c)
 {
     TObj *o = ObjAlloc();
     if (o != 0) {

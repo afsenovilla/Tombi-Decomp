@@ -4,7 +4,7 @@
 extern short D_8009F838;
 extern void getBaseMatrix();
 
-void func_80017798(void)
+void resetCameraScratchDefaults(void)
 {
     getBaseMatrix(((char*)&SPAD.bc0));
     *(short *)0x1F8000EA = -0x220;

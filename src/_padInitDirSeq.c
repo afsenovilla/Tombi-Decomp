@@ -6,7 +6,7 @@
    C equivalent: DAT_800981c4 = LAB_8006baf8; DAT_800981c8 = LAB_8006bf4c; DAT_800981cc = LAB_8006bc08; */
 extern void *DAT_800981c4, *DAT_800981c8, *DAT_800981cc;
 extern char LAB_8006baf8[], LAB_8006bf4c[], LAB_8006bc08[];
-__asm__(".text\n.align 2\n.globl FUN_8006bac4\n.ent FUN_8006bac4\nFUN_8006bac4:\n"
+__asm__(".text\n.align 2\n.globl _padInitDirSeq\n.ent _padInitDirSeq\n_padInitDirSeq:\n"
         ".set noreorder\n.set noat\n"
         "lui $2,%hi(LAB_8006baf8)\naddiu $2,$2,%lo(LAB_8006baf8)\n"
         "lui $1,%hi(DAT_800981c4)\nsw $2,%lo(DAT_800981c4)($1)\n"
@@ -14,4 +14,4 @@ __asm__(".text\n.align 2\n.globl FUN_8006bac4\n.ent FUN_8006bac4\nFUN_8006bac4:\
         "lui $1,%hi(DAT_800981c8)\nsw $2,%lo(DAT_800981c8)($1)\n"
         "lui $2,%hi(LAB_8006bc08)\naddiu $2,$2,%lo(LAB_8006bc08)\n"
         "lui $1,%hi(DAT_800981cc)\njr $31\nsw $2,%lo(DAT_800981cc)($1)\n"
-        ".set at\n.set reorder\n.end FUN_8006bac4\n");
+        ".set at\n.set reorder\n.end _padInitDirSeq\n");

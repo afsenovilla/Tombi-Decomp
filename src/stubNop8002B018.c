@@ -1,5 +1,5 @@
 // FUNC 8002b018 8 MAIN0
 // MATCHING 8002b018 8
-void func_8002B018(void)
+void stubNop8002B018(void)
 {
 }

@@ -8,7 +8,7 @@ void playSFX(int id);
 int abs(int);
 int csqrt(int x);
 short angleToPlayer(unsigned char *o);
-void func_800352F4(unsigned char *o)
+void weapon8to9AttachAnchor(unsigned char *o)
 {
     int dx, dy, d, n;
 

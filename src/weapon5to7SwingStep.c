@@ -2,7 +2,7 @@
 // MATCHING 80034f04 84
 typedef struct S { char p[5]; unsigned char t; } S;
 extern void weapon5to7Swing(void);
-void func_80034F04(S *o)
+void weapon5to7SwingStep(S *o)
 {
     switch (o->t) {
     case 0:

@@ -16,7 +16,7 @@ extern void cameraFollowRampStep(TObj *);
 extern void stepScrollApproachX(TObj *);
 extern void cameraScrollInputStep(TObj *, int);
 extern void FUN_800274e4(TObj *);
-extern void FUN_8002771c(TObj *);
+extern void cameraClampAroundTarget(TObj *);
 
 void func_801161D4(TObj *o)
 {
@@ -81,5 +81,5 @@ void func_801161D4(TObj *o)
         cameraScrollInputStep(o, 1);
     FUN_800274e4(o);
     if ((*(short*)((char*)&SPAD.if0 + 2)) > (*(short*)((char*)&o->d30 + 2))) SPAD.if0 = (*(short*)((char*)&o->d30 + 2)) << 16;
-    FUN_8002771c(o);
+    cameraClampAroundTarget(o);
 }

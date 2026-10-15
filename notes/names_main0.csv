@@ -22,6 +22,7 @@ address,name,confidence,comment
 800174fc,loadTIM,alta,psx_tomba (por bytes)
 800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
 80017678,resetDrawLists,alta,psx_tomba (por bytes)
+80017798,resetCameraScratchDefaults,alta,behaviour name (see notes/names.md)
 8001783c,initGameConfig,alta,name from psx_tomba (US)
 80017b44,initHud,alta,psx_tomba (por bytes)
 80017d04,clearPlayerObject,alta,psx_tomba #21 (por bytes)
@@ -231,6 +232,8 @@ address,name,confidence,comment
 80025aa8,copyModelPrimGroups,alta,names batch (see notes/names.md)
 80025b98,setAnalogPadMode,alta,names batch (see notes/names.md)
 80025bf4,joypadInit,alta,psx_tomba #21 (por bytes)
+80025c60,menuDigitalAxisRepeat,alta,behaviour name (see notes/names.md)
+80025cc4,menuAnalogAxisRepeat,alta,behaviour name (see notes/names.md)
 80025d90,playerDecodePadInput,alta,names batch (see notes/names.md)
 80025f40,startPadVibration,alta,names batch (see notes/names.md)
 80026000,updatePadVibration,alta,names batch (see notes/names.md)
@@ -251,6 +254,7 @@ address,name,confidence,comment
 800271b8,cameraEventScrollStep,alta,names batch (see notes/names.md)
 800274e4,dispatchAreaItemHandler,alta,psx_tomba #21 (por bytes)
 8002757c,computeCameraMatrix,alta,names batch (see notes/names.md)
+8002771c,cameraClampAroundTarget,alta,behaviour name (see notes/names.md)
 800277f8,syncObjectTargetY,alta,psx_tomba (por bytes)
 80027810,cameraModeHandler6B,alta,names batch (see notes/names.md)
 8002795c,cameraFollowPlayerY,alta,names batch (see notes/names.md)
@@ -287,10 +291,12 @@ address,name,confidence,comment
 8002ab80,dispatchSectionSelect,alta,psx_tomba #21 (por bytes)
 8002abbc,dispatchSectionClose,alta,psx_tomba #21 (por bytes)
 8002abf8,dispatchSectionConfirm,alta,psx_tomba #21 (por bytes)
+8002ac68,updateCameraController,alta,behaviour name (see notes/names.md)
 8002ae48,getScrollOffsetX,alta,psx_tomba #21 (por bytes)
 8002aeb8,getScrollOffsetY,alta,psx_tomba #21 (por bytes)
 8002af10,callAreaModelLinkHook,alta,behaviour name (see notes/names.md)
 8002b010,stubInventory1,alta,psx_tomba #24 (por bytes)
+8002b018,stubNop8002B018,alta,behaviour name (see notes/names.md)
 8002b020,updateObjectsLayer8,alta,psx_tomba (por bytes)
 8002b0ac,stubInventory2,alta,psx_tomba #24 (por bytes)
 8002b0b4,updateL8Type07Object,alta,names batch (see notes/names.md)
@@ -320,6 +326,7 @@ address,name,confidence,comment
 8002e34c,freeMessageGlyphs,alta,name from psx_tomba (US)
 8002e4b4,updatePoolType20Object,alta,names batch (see notes/names.md)
 8002e6c4,updatePoolType22Object,alta,names batch (see notes/names.md)
+8002eaac,spawnPoolType31At,alta,behaviour name (see notes/names.md)
 8002eb34,updatePoolType32Object,alta,names batch (see notes/names.md)
 8002eddc,initPoolType32Object,alta,names batch (see notes/names.md)
 8002ee50,spawnPoolType32At,alta,behaviour name (see notes/names.md)
@@ -333,6 +340,7 @@ address,name,confidence,comment
 8002fc98,playerEffect4EDispatchB,alta,names batch (see notes/names.md)
 8002fe78,updatePlayerEffect4E,alta,names batch (see notes/names.md)
 8002ff20,spawnPlayerEffect4E,alta,behaviour name (see notes/names.md)
+8002ffb0,spawnPlayerEffect4EStep1,alta,behaviour name (see notes/names.md)
 80030034,spawnPlayerPowerEffect,alta,names batch (see notes/names.md)
 80030404,updateL4Type08Object,alta,names batch (see notes/names.md)
 8003040c,dispatchAreaInitA,alta,psx_tomba #21 (por bytes)
@@ -359,9 +367,11 @@ address,name,confidence,comment
 80033568,isPlayerInRange,alta,psx_tomba #21 (por bytes)
 800335d4,angleToPlayer,alta,name from psx_tomba (US)
 80033638,weapon5to7HitWall,alta,names batch (see notes/names.md)
+800337c0,weaponCheckNearestTarget,alta,behaviour name (see notes/names.md)
 80033834,weapon5to7StartSpin,alta,names batch (see notes/names.md)
 80033860,dispatchAreaInitA,alta,name from psx_tomba (US)
 800338a8,dispatchAreaInitB,alta,name from psx_tomba (US)
+8003395c,isPlayerStateRestricted,alta,behaviour name (see notes/names.md)
 800339a4,weapon5to7UpdatePlayerStep,alta,names batch (see notes/names.md)
 80033b44,weapon5to7Swing,alta,names batch (see notes/names.md)
 80033fb0,dispatchEffectByVariant,alta,name from psx_tomba (US)
@@ -369,15 +379,19 @@ address,name,confidence,comment
 800340fc,dispatchAreaEffectB,alta,name from psx_tomba (US)
 800341ac,updateEffectHitbox,alta,name from psx_tomba (US)
 80034420,updateScrollAnchoredEffect,alta,name from psx_tomba (US)
+80034f04,weapon5to7SwingStep,alta,behaviour name (see notes/names.md)
 80034f58,weapon5to7ObjTick,alta,names batch (see notes/names.md)
 8003509c,weapon5to7Init,alta,names batch (see notes/names.md)
 8003511c,getDistanceToPlayer,alta,names batch (see notes/names.md)
 80035198,weapon8to9Init,alta,names batch (see notes/names.md)
+800352f4,weapon8to9AttachAnchor,alta,behaviour name (see notes/names.md)
 80035428,weapon8to9HitWall,alta,names batch (see notes/names.md)
 8003566c,weapon8to9Swing,alta,names batch (see notes/names.md)
 80036cb8,weapon8to9FollowTarget,alta,names batch (see notes/names.md)
+80036ebc,setAngleFromDir8,alta,behaviour name (see notes/names.md)
 80036f30,weapon8to9Update,alta,names batch (see notes/names.md)
 800370a4,weapon8to9ObjTick,alta,names batch (see notes/names.md)
+800371b0,setUnusedGlobal8007A108,alta,behaviour name (see notes/names.md)
 800371c0,unpackSpriteFrame,alta,name from psx_tomba (US)
 80037454,fillBytesUnrolled,alta,psx_tomba #21 (por bytes)
 80037c80,uploadSpriteFrameToVram,alta,names batch (see notes/names.md)
@@ -403,12 +417,14 @@ address,name,confidence,comment
 800387e0,scriptOpUnaryVar,alta,names batch (see notes/names.md)
 800388d4,scriptOpBinaryVar,alta,"script ops 0x1c..0x2b from execCoreOpcode: var[idx] = var[idx] (+ - * / % & | ^) var or 4-byte immediate (odd "
 80038ac4,scriptOpWait,alta,psx_tomba #21 (por bytes)
+80038b04,scriptLoadHeader,alta,behaviour name (see notes/names.md)
 80038cd0,execCoreOpcode,alta,psx_tomba #24 (por bytes)
 80039150,scriptRunOpcode,alta,psx_tomba #21 (por bytes)
 800391b0,runScript,alta,psx_tomba #21 (por bytes)
 8003926c,runScriptContext,alta,psx_tomba #21 (por bytes)
 80039338,loadAreaSoundBank,alta,psx_tomba #21 (por bytes)
 80039580,tickAreaScript,alta,"per-frame from gameplayTick/areaMode2Tick/areaMode4Tick: in areas 0, 1, 2 and 0x13 (listed sections) runs the "
+800399c4,scriptOpSpawnObject,alta,behaviour name (see notes/names.md)
 80039c90,scriptOpSetObjField74,media,"script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler"
 80039db8,scriptOpSetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e08,scriptOpGetPlayerPosition,alta,psx_tomba #21 (por bytes)
@@ -440,6 +456,7 @@ address,name,confidence,comment
 8003ab34,scriptOpShowMessage,alta,psx_tomba #21 (por bytes)
 8003ab78,scriptOpGetPlayerTouchFlag,alta,psx_tomba #21 (por bytes)
 8003ab9c,scriptOpGetPlayerHitFlag,alta,psx_tomba #21 (por bytes)
+8003abc0,scriptOpReleaseType19,alta,behaviour name (see notes/names.md)
 8003ac50,scriptOpShowMessage2,alta,psx_tomba #21 (por bytes)
 8003ac94,scriptOpSetFadeEffect,alta,psx_tomba #21 (por bytes)
 8003acd8,scriptOpGiveItem,alta,name from psx_tomba (US)
@@ -450,6 +467,7 @@ address,name,confidence,comment
 8003ae94,scriptOpGetAreaId,alta,psx_tomba #21 (por bytes)
 8003aeb8,scriptOpGetPlayerFieldE2,alta,psx_tomba #21 (por bytes)
 8003aedc,scriptOpHealPlayer,alta,names batch (see notes/names.md)
+8003af70,scriptOpReadResultBCD4,alta,behaviour name (see notes/names.md)
 8003af94,opNop,alta,psx_tomba #21 (por bytes)
 8003afb4,execGameOpcode,alta,name from psx_tomba (US)
 8003bafc,lzDecompress,alta,psx_tomba (por bytes)
@@ -625,6 +643,7 @@ address,name,confidence,comment
 8004c848,spawnSectionObjectsWithPrevious,alta,names batch (see notes/names.md)
 8004cb00,spawnObjectFromRecord,alta,names batch (see notes/names.md)
 8004cfd8,updateSectionFadeController,alta,names batch (see notes/names.md)
+8004d20c,initSectionSpawnerAlt,alta,behaviour name (see notes/names.md)
 8004d260,spawnSectionObjectsAlt,alta,names batch (see notes/names.md)
 8004d3b8,dispatchUnlayeredByVariant,alta,psx_tomba #21 (por bytes)
 8004d3f4,updateInfoMessage,alta,name from psx_tomba (US)
@@ -638,6 +657,7 @@ address,name,confidence,comment
 8004e41c,loopTitleScreen,alta,name from psx_tomba (US)
 8004e914,optsubScreenState,alta,name from psx_tomba (US)
 8004eb08,cdLoadTask,alta,psx_tomba #24 (por bytes)
+8004f344,stubReturnZero8004F344,alta,behaviour name (see notes/names.md)
 8004f34c,enqueueCdRead,alta,psx_tomba #21 (por bytes)
 8004f38c,loadWssFile,alta,name from psx_tomba (US)
 8004f3bc,startSoundTask,alta,psx_tomba (por bytes)
@@ -984,12 +1004,15 @@ address,name,confidence,comment
 800693c8,PadSetMainMode,alta,names batch (see notes/names.md)
 80069410,PadSetAct,alta,names batch (see notes/names.md)
 8006957c,_padSetVsyncParam,alta,names batch (see notes/names.md)
+800695a8,_padChkSioIrq,alta,behaviour name (see notes/names.md)
+80069610,_padVsyncHandler,alta,behaviour name (see notes/names.md)
 800697a0,_padChkVsync,alta,names batch (see notes/names.md)
 800697b4,_padStartCom,alta,names batch (see notes/names.md)
 80069880,_padStopCom,alta,names batch (see notes/names.md)
 800698c4,_padInitSioMode,alta,names batch (see notes/names.md)
 80069bf8,padCommandStep,alta,"libpad driver: runs the next step function from D_80098230[D_800981F0], arms setRC2wait(60) and reports errors"
 80069ce8,_padSioRW,alta,names batch (see notes/names.md)
+80069ef8,_padSioExchangeByte,alta,behaviour name (see notes/names.md)
 8006a170,_padClrIntSio0,alta,names batch (see notes/names.md)
 8006a200,sioWaitRxReady,alta,"spins until SIO0 status (+4) bit 1 (RX FIFO not empty) is set"
 8006a254,_padSetAct,alta,names batch (see notes/names.md)
@@ -1004,17 +1027,24 @@ address,name,confidence,comment
 8006ab94,padResolveActAlign,alta,"libpad, called from _padSetActAlign: for each actuator counts the alignment slots that use it against its tabl"
 8006ac5c,_padSetMainMode,alta,names batch (see notes/names.md)
 8006acf4,padQueueMainModeCmd,alta,"libpad, called from _padSetMainMode: stage 2 queues command 0x44 (set main mode, 2 bytes at +0x51), stage 3 co"
+8006ad48,_padChkMainModeDone,alta,behaviour name (see notes/names.md)
 8006ada8,padSetCmdConfigMode,alta,"libpad: queues controller command 0x43 (enter/exit config mode) with a one-byte parameter at port+0x24"
 8006adc8,padSetCmdQueryModel,alta,"libpad: queues controller command 0x45 (query model/status) with no parameters"
 8006addc,padSetCmdQueryMode,alta,"libpad: queues controller command 0x4c (query mode table entry) with a one-byte index"
 8006adfc,padSetCmdQueryAct,alta,"libpad: queues controller command 0x46 (query actuator info) with a one-byte index"
 8006ae1c,padSetCmdQueryComb,alta,"libpad: queues controller command 0x47 (query actuator combination) with a one-byte index"
 8006ae3c,padSetCmd4B,media,"libpad: queues controller command 0x4b with no parameters (command role unknown)"
+8006ae54,_padIfSioRW,alta,behaviour name (see notes/names.md)
+8006b020,_padSendCmdByte,alta,behaviour name (see notes/names.md)
 8006b464,PadInitDirect,alta,names batch (see notes/names.md)
 8006b5c4,padResetPortState,alta,"libpad, called from PadInitDirect: when the port is flagged (+0x49) clears its state, counters and pointers an"
+8006b720,_padLatchId,alta,behaviour name (see notes/names.md)
 8006b730,padGetSendByte,alta,"libpad: returns the payload byte to transmit for the current command at payload_index-3 (actuator slots for co"
 8006ba68,padGetPortId,alta,"returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise"
 8006baa0,padGetPortBuffer,alta,"inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0"
+8006bac4,_padInitDirSeq,alta,behaviour name (see notes/names.md)
+8006be6c,_dirFailAuto,alta,behaviour name (see notes/names.md)
+8006bf4c,_dirChkSeqDone,alta,behaviour name (see notes/names.md)
 8006bf84,setRC2wait,alta,names batch (see notes/names.md)
 8006bfa4,chkRC2wait,alta,names batch (see notes/names.md)
 8006c1d4,_SsClose,alta,"Psy-Q (psx_tomba, por bytes)"

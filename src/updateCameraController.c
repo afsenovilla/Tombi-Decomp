@@ -30,7 +30,7 @@ extern int DAT_1f8000e4;
 extern void SetGeomScreen(int);
 extern void computeCameraMatrix(S *);
 
-void func_8002AC68(S *o)
+void updateCameraController(S *o)
 {
     unsigned short w;
     int t;

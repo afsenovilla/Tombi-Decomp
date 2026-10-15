@@ -5,7 +5,7 @@
 /* US func_8006A40C (libpad/padif.c) plus the PAL `*response = 0` store. */
 #include "padlocal.h"
 
-int func_8006AE54(padPort *port) {
+int _padIfSioRW(padPort *port) {
     D_8009822C = D_800981C4(port);
     *port->response_3c = 0;
     return _padSioRW(port, -2);

@@ -20,7 +20,7 @@ extern short D_800A60D0[];
 extern unsigned char D_8009C971;
 extern short D_800A60D2[];
 extern unsigned char D_8009C970[];
-extern void FUN_800399c4(void);
+extern void scriptOpSpawnObject(void);
 extern void FUN_80039e54(void);
 extern void scriptOpSetPlayerStateEx(void);
 extern void objSetAnimFromSubtypeTable(TObj *);
@@ -499,7 +499,7 @@ int execGameOpcode(unsigned char op)
     case 0xab:
         r = opab();
         break;
-    case 0x80: FUN_800399c4(); r = 1; break;
+    case 0x80: scriptOpSpawnObject(); r = 1; break;
     case 0x81: r = op81(); break;
     case 0x82: r = op82(); break;
     case 0x83: r = op83(); break;

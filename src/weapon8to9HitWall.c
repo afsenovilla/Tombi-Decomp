@@ -6,7 +6,7 @@ extern void spawnWeaponHitDebris(short, short, short, unsigned char);
 extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8001e4f0(int);
 extern short probeFloorPlaneAt(void *, short, short);
-extern void FUN_800352f4(TObj *);
+extern void weapon8to9AttachAnchor(TObj *);
 extern unsigned char DAT_800a60d6;
 extern unsigned short DAT_1f800282;
 extern unsigned short DAT_1f800282b;
@@ -63,7 +63,7 @@ int weapon8to9HitWall(TObj *o)
         break;
     }
     if (n == 0) {
-        FUN_800352f4(o);
+        weapon8to9AttachAnchor(o);
         return 1;
     }
     return 0;

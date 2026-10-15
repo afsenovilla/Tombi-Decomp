@@ -24,7 +24,7 @@ extern unsigned int D_800A0A18;
 extern void setRC2wait(int);
 extern int chkRC2wait(void);
 
-int func_80069EF8(S *s, int c)
+int _padSioExchangeByte(S *s, int c)
 {
     int r;
     short v;

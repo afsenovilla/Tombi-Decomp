@@ -8,14 +8,14 @@ typedef struct {
     unsigned char *p3c;
 } S;
 extern int (*D_800981B4)(S *, int);
-extern int func_80069EF8(S *, int);
+extern int _padSioExchangeByte(S *, int);
 
-int func_8006B020(S *s)
+int _padSendCmdByte(S *s)
 {
     int r;
     int a = 0;
     if ((*s->p3c >> 4) == 8) a = s->b37 == 0;
-    r = func_80069EF8(s, (unsigned char)D_800981B4(s, a));
+    r = _padSioExchangeByte(s, (unsigned char)D_800981B4(s, a));
     if (r == 0x5a || r == 0 || r < 0) return r;
     return -4;
 }
