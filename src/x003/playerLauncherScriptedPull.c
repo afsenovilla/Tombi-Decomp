@@ -12,7 +12,7 @@ extern int angleFromDelta(int, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
 
-void func_8011C7FC(TObj *o)
+void playerLauncherScriptedPull(TObj *o)
 {
     TObj *p = &PLAYER;
     int a, dy, d;

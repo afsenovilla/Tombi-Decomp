@@ -9,7 +9,7 @@ extern unsigned char D_800A60E4;
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
-int func_8011B460(TObj *o)
+int playerLauncherCheckCatch(TObj *o)
 {
     int dx, dy;
     int a;

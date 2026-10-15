@@ -7,7 +7,7 @@ extern TObj PLAYER;
 extern unsigned char D_80135A78[];
 extern int angleFromDelta(int, int);
 
-int func_8011B588(TObj *o, int mode, int target)
+int playerLauncherTurnToward(TObj *o, int mode, int target)
 {
     int t;
     int cur;

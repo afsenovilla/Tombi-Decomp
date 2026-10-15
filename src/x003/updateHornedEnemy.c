@@ -20,11 +20,11 @@ extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern short FUN_80040278(TObj *, int, int);
 extern int hornedEnemyCheckWall(TObj *, int);
-extern void func_80125834(TObj *);
-extern void func_801259AC(TObj *);
-extern void func_80125CF8(TObj *);
-extern void func_8012632C(TObj *);
-extern void func_80126B68(TObj *);
+extern void hornedEnemyLand(TObj *);
+extern void hornedEnemyIdle(TObj *);
+extern void hornedEnemyWalk(TObj *);
+extern void hornedEnemyRun(TObj *);
+extern void hornedEnemyTurnToPlayer(TObj *);
 extern void hornedEnemyHit(TObj *);
 extern void hornedEnemyGrabbed(TObj *);
 extern void hornedEnemyDefeated(TObj *);
@@ -77,19 +77,19 @@ void updateHornedEnemy(TObj *o)
             case 1:
                 switch (o->state) {
                 case 0:
-                    func_80125834(o);
+                    hornedEnemyLand(o);
                     break;
                 case 1:
-                    func_801259AC(o);
+                    hornedEnemyIdle(o);
                     break;
                 case 2:
-                    func_80125CF8(o);
+                    hornedEnemyWalk(o);
                     break;
                 case 3:
-                    func_8012632C(o);
+                    hornedEnemyRun(o);
                     break;
                 case 4:
-                    func_80126B68(o);
+                    hornedEnemyTurnToPlayer(o);
                     break;
                 }
                 break;

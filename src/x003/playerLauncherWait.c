@@ -6,7 +6,7 @@ extern unsigned char PLAYER;
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
 extern void FUN_8001fe6c(TObj *);
-extern void func_8011B588(TObj *, int, int);
+extern void playerLauncherTurnToward(TObj *, int, int);
 
 static __inline__ int near(TObj *o, short x, short w)
 {
@@ -21,7 +21,7 @@ static __inline__ int near(TObj *o, short x, short w)
     return (d & 0xffff) < 0xaf;
 }
 
-void func_8011B6F4(TObj *o)
+void playerLauncherWait(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -33,7 +33,7 @@ void func_8011B6F4(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        func_8011B588(o, 1, 0);
+        playerLauncherTurnToward(o, 1, 0);
         if (near(o, 0x60, 0xc0)) {
             o->state = 0;
             o->step++;

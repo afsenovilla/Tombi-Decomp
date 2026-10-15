@@ -8,8 +8,8 @@ extern unsigned short D_8007A1F0[];
 extern unsigned char PLAYER[], D_800A603C[], D_800A603D[], D_800A603E[];
 extern signed char D_8009D2B0[];
 extern void AnimLoadDuration(TObj *);
-extern void func_8011B588(TObj *, int, int);
-extern int func_8011B460(TObj *);
+extern void playerLauncherTurnToward(TObj *, int, int);
+extern int playerLauncherCheckCatch(TObj *);
 
 static __inline__ int near(TObj *o)
 {
@@ -24,7 +24,7 @@ static __inline__ int near(TObj *o)
     return t <= lim - 0x10;
 }
 
-void func_8011B870(TObj *o)
+void playerLauncherAim(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -37,8 +37,8 @@ void func_8011B870(TObj *o)
         o->ba7 += 2;
         if (o->ba7 > 0x80) o->ba7 = 0;
         { short t = (short)D_8007A1F0[o->ba7] >> 6; o->ba6 = t; }
-        func_8011B588(o, 0, 0);
-        if (func_8011B460(o)) {
+        playerLauncherTurnToward(o, 0, 0);
+        if (playerLauncherCheckCatch(o)) {
             o->b0a = 2;
             o->velH = 0x80;
             D_800A603C[0] = 1;

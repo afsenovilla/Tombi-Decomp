@@ -10,8 +10,8 @@ extern TObj *ObjAlloc(void);
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void FUN_80018838(TObj *);
-extern void func_8011CA70(TObj *);
-extern void func_8011CC8C(TObj *);
+extern void stepPlayerLauncher(TObj *);
+extern void stepPlayerLauncherScripted(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -84,10 +84,10 @@ void updatePlayerLauncher(TObj *o)
         { int k = o->subtype & 4;
         switch (k != 0) {
         case 0:
-            func_8011CA70(o);
+            stepPlayerLauncher(o);
             break;
         case 1:
-            func_8011CC8C(o);
+            stepPlayerLauncherScripted(o);
             break;
         }}
         break;

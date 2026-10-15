@@ -10,7 +10,7 @@ extern void *D_8013A698[];
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern int func_8012D66C(TObj *);
+extern int throwerEnemyCheckWall(TObj *);
 
 #define WOBBLE() \
     o->ba7 += 2; \
@@ -26,9 +26,9 @@ static __inline__ short chk2(TObj *o)
     return 0;
 }
 
-#define chk(o) (func_8012D66C(o) || chk2(o))
+#define chk(o) (throwerEnemyCheckWall(o) || chk2(o))
 
-void func_8012DDD4(TObj *o)
+void throwerEnemyWander(TObj *o)
 {
     switch (o->state) {
     case 0:

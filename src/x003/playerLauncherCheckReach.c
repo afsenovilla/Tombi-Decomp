@@ -9,7 +9,7 @@ extern int *D_800A6078;
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
-int func_8011B324(TObj *o)
+int playerLauncherCheckReach(TObj *o)
 {
     int dx, dy;
     int a;

@@ -71,7 +71,7 @@ static __inline__ int near(TObj *o)
     return t <= lim + 0xa0;
 }
 
-void func_8012632C(TObj *o)
+void hornedEnemyRun(TObj *o)
 {
     short *w = &o->wb4;
 

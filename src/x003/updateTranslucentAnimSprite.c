@@ -16,11 +16,11 @@ static void *D_80138EDC[7] = {
     D_8013925C, D_80139200, D_801391F0,
 };
 extern void ObjListPush_1F800220(TObj *);
-extern void func_801191C4(TObj *);
-extern void func_801193D0(TObj *);
+extern void translucentSpriteDrift(TObj *);
+extern void translucentSpriteDriftB(TObj *);
 extern void ObjFree(TObj *);
 
-void func_801196F8(TObj *o)
+void updateTranslucentAnimSprite(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -40,8 +40,8 @@ void func_801196F8(TObj *o)
     case 1:
         o->visible = 1;
         ObjListPush_1F800220(o);
-        if (GAME.selectedSection != 3 && GAME.selectedSection < 4) func_801191C4(o);
-        else func_801193D0(o);
+        if (GAME.selectedSection != 3 && GAME.selectedSection < 4) translucentSpriteDrift(o);
+        else translucentSpriteDriftB(o);
         break;
     case 2:
         break;

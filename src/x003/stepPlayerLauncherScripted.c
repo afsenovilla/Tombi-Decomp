@@ -3,25 +3,25 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern void *D_80139870[];
-extern void func_8011B6F4(TObj *), func_8011B870(TObj *), func_8011BA34(TObj *), func_8011BCC8(TObj *);
-extern void playerLauncherThrow(TObj *), func_8011C7FC(TObj *);
+extern void playerLauncherWait(TObj *), playerLauncherAim(TObj *), playerLauncherGrab(TObj *), playerLauncherSwing(TObj *);
+extern void playerLauncherThrow(TObj *), playerLauncherScriptedPull(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 
-void func_8011CC8C(TObj *o)
+void stepPlayerLauncherScripted(TObj *o)
 {
     switch (o->step) {
     case 0:
-        func_8011B6F4(o);
+        playerLauncherWait(o);
         break;
     case 1:
-        func_8011B870(o);
+        playerLauncherAim(o);
         break;
     case 2:
-        func_8011BA34(o);
+        playerLauncherGrab(o);
         break;
     case 3:
-        func_8011BCC8(o);
+        playerLauncherSwing(o);
         break;
     case 4:
         playerLauncherThrow(o);
@@ -47,7 +47,7 @@ void func_8011CC8C(TObj *o)
         }
         break;
     case 8:
-        func_8011C7FC(o);
+        playerLauncherScriptedPull(o);
         break;
     }
     if (o->w74 & 2) {

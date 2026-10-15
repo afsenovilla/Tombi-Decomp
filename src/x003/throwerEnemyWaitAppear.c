@@ -14,7 +14,7 @@ static __inline__ int inview(TObj *o)
     return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x80) < 0x1e1;
 }
 
-void func_8012D740(TObj *o)
+void throwerEnemyWaitAppear(TObj *o)
 {
     TObj *e;
 

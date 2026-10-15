@@ -8,8 +8,8 @@ extern short D_8007A1F0[], D_8007A5F0[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001e4f0(int);
-extern void func_8011B588(TObj *, int, int);
-extern int func_8011B324(TObj *);
+extern void playerLauncherTurnToward(TObj *, int, int);
+extern int playerLauncherCheckReach(TObj *);
 
 static __inline__ void move(TObj *o)
 {
@@ -23,14 +23,14 @@ static __inline__ void move(TObj *o)
     o->y.raw += o->velY << 8;
 }
 
-void func_8011BA34(TObj *o)
+void playerLauncherGrab(TObj *o)
 {
     short v;
 
     switch (o->state) {
     case 0:
-        func_8011B588(o, 0, 0);
-        if (func_8011B324(o)) {
+        playerLauncherTurnToward(o, 0, 0);
+        if (playerLauncherCheckReach(o)) {
             o->state++;
             PLAYER[0] = 5;
             D_800A603C[0] = 5;

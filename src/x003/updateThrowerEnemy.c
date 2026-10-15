@@ -10,12 +10,12 @@ typedef struct { short f0, f1, f2, f3, f4, f5; } XS;
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern void despawnObjectOffscreen(TObj *);
-extern void func_8012D740(TObj *);
-extern void func_8012D914(TObj *);
-extern void func_8012DA68(TObj *);
-extern void func_8012DCAC(TObj *);
-extern void func_8012DDD4(TObj *);
-extern void func_8012E378(TObj *);
+extern void throwerEnemyWaitAppear(TObj *);
+extern void throwerEnemyRise(TObj *);
+extern void throwerEnemyFlyAcross(TObj *);
+extern void throwerEnemyRiseB(TObj *);
+extern void throwerEnemyWander(TObj *);
+extern void throwerEnemyChase(TObj *);
 extern void throwerEnemyThrow(TObj *);
 extern void throwerEnemyGrabbed(TObj *);
 extern void throwerEnemyHit(TObj *);
@@ -58,7 +58,7 @@ void updateThrowerEnemy(TObj *o)
             break;
         case 1:
             if (GVARS.b42 == 0) {
-                func_8012D740(o);
+                throwerEnemyWaitAppear(o);
             }
             break;
         }
@@ -74,23 +74,23 @@ void updateThrowerEnemy(TObj *o)
             case 0:
                 switch (o->step) {
                 case 0:
-                    func_8012D914(o);
+                    throwerEnemyRise(o);
                     break;
                 case 1:
-                    func_8012DA68(o);
+                    throwerEnemyFlyAcross(o);
                     break;
                 }
                 break;
             case 1:
                 switch (o->step) {
                 case 0:
-                    func_8012DCAC(o);
+                    throwerEnemyRiseB(o);
                     break;
                 case 1:
-                    func_8012DDD4(o);
+                    throwerEnemyWander(o);
                     break;
                 case 2:
-                    func_8012E378(o);
+                    throwerEnemyChase(o);
                     break;
                 case 3:
                     throwerEnemyThrow(o);

@@ -9,7 +9,7 @@ extern short D_8007A5F0[];
 extern short isObjectBelowGround(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
-extern int func_8012D518(TObj *o);
+extern int throwerEnemyCheckCollide(TObj *o);
 
 static __inline__ int side(TObj *o)
 {
@@ -18,7 +18,7 @@ static __inline__ int side(TObj *o)
     return (short)d > o->y.p.whole ? 6 : 2;
 }
 
-void func_8012E378(TObj *o)
+void throwerEnemyChase(TObj *o)
 {
     int r;
     int i;
@@ -83,7 +83,7 @@ void func_8012E378(TObj *o)
         s = sp * (short)D_8007A3F0[i];
         o->a.raw += (short)(c >> 12) << 8;
         o->y.raw += (short)(s >> 12) << 8;
-        if (func_8012D518(o)) o->timer = 0;
+        if (throwerEnemyCheckCollide(o)) o->timer = 0;
         o->velH += 0x20;
         if (o->velH > 0x180) o->velH = 0x180;
         if (--o->timer == -1) {

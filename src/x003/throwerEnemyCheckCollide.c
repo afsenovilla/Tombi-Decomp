@@ -18,7 +18,7 @@ static __inline__ int land(TObj *o)
     return 0;
 }
 
-int func_8012D518(TObj *o)
+int throwerEnemyCheckCollide(TObj *o)
 {
     switch (o->velX & 7) {
     case 1:

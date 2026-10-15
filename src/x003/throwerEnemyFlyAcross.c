@@ -4,7 +4,7 @@
 
 extern unsigned short D_8007A3F0[];
 extern void AnimAdvance(TObj *);
-extern int func_8012D66C(TObj *);
+extern int throwerEnemyCheckWall(TObj *);
 extern TObj *FUN_80018448(void);
 
 static __inline__ short past(TObj *o)
@@ -18,7 +18,7 @@ static __inline__ short past(TObj *o)
     return 0;
 }
 
-void func_8012DA68(TObj *o)
+void throwerEnemyFlyAcross(TObj *o)
 {
     TObj *e;
 
@@ -38,7 +38,7 @@ void func_8012DA68(TObj *o)
         o->ba7 += 2;
         o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
         AnimAdvance(o);
-        if (func_8012D66C(o) || past(o)) o->animFrame = 1 - o->animFrame;
+        if (throwerEnemyCheckWall(o) || past(o)) o->animFrame = 1 - o->animFrame;
         break;
     case 3:
         if (o->visible) {

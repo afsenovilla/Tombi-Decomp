@@ -5,7 +5,7 @@
 extern void *D_80139870[];
 extern void AnimLoadDuration(TObj *);
 
-void func_8011BCC8(TObj *o)
+void playerLauncherSwing(TObj *o)
 {
     unsigned char c;
 

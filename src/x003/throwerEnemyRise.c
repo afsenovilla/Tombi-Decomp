@@ -13,7 +13,7 @@ extern void FUN_8001f8e4(TObj *);
 extern int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 
-void func_8012D914(TObj *o)
+void throwerEnemyRise(TObj *o)
 {
     switch (o->state) {
     case 0:

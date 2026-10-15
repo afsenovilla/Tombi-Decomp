@@ -34,7 +34,7 @@ static __inline__ void fall(TObj *o)
     }
 }
 
-void func_801259AC(TObj *o)
+void hornedEnemyIdle(TObj *o)
 {
     short *w = &o->wb4;
 

@@ -9,7 +9,7 @@ extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int komaPigCheckLanded(TObj *);
 
-void func_801241C0(TObj *o)
+void komaPigWaitForPlayerB(TObj *o)
 {
     unsigned short *a;
     unsigned short dx, dz;

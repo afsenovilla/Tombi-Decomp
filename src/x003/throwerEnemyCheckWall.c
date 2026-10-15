@@ -4,7 +4,7 @@
 
 extern short probeWallAt(TObj *, short, short, short);
 
-int func_8012D66C(TObj *o)
+int throwerEnemyCheckWall(TObj *o)
 {
     short d;
 

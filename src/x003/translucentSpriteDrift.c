@@ -12,7 +12,7 @@ extern short D_8013589C[];
 extern short D_1F800176[];
 extern int Rand(void);
 
-void func_801191C4(TObj *o)
+void translucentSpriteDrift(TObj *o)
 {
     E *e = (E *)o;
 

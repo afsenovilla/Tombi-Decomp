@@ -29,7 +29,7 @@ extern int komaPigCheckLanded(TObj *);
         } \
     } }
 
-void func_80123EA8(TObj *o)
+void komaPigSceneEntry(TObj *o)
 {
     switch (o->state) {
     case 0:

@@ -1083,3 +1083,16 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   (layer 3 type 0x57, 18 placements; animation by b0c, uncertain kind), `8011a72c springVineSwayStep` (springVineGrabbed: decaying sway),
   `801200ec updateEventHitSwitch` (layer 4 type 0x2F, 14 placements: subtype 0 hit (b68) starts event 0x18 and spawns a type 0x3D effect, subtypes
   1..3 move with GCD.bcdf1; uncertain kind)
+- x003 player launcher steps (updatePlayerLauncher b04 1: `8011ca70 stepPlayerLauncher`, subtype & 4 -> `8011cc8c stepPlayerLauncherScripted`;
+  step names uncertain): 0 `8011b6f4 playerLauncherWait` (until the player is near), 1 `8011b870 playerLauncherAim` (follows the player; `8011b460
+  playerLauncherCheckCatch`), 2 `8011ba34 playerLauncherGrab` (lunges at velV 0xE00; `8011b324 playerLauncherCheckReach`), 3 `8011bcc8
+  playerLauncherSwing`, 4 playerLauncherThrow, 6 `8011c3d8 playerLauncherPullPlayer`, scripted step 5/7 `8011c7fc playerLauncherScriptedPull`
+  (GV2.bc2 == 2); `8011b588 playerLauncherTurnToward` (turns d38 toward the player / a fixed side / a target angle)
+- x003 thrower enemy b04 1 steps (uncertain): `8012d740 throwerEnemyWaitAppear` (random delay while on screen, picks the subtype), subtype 0:
+  `8012d914 throwerEnemyRise`, `8012da68 throwerEnemyFlyAcross` (spawns type 0x43); subtype 1: `8012dcac throwerEnemyRiseB`, `8012ddd4
+  throwerEnemyWander`, `8012e378 throwerEnemyChase`; `8012d518 throwerEnemyCheckCollide`, `8012d66c throwerEnemyCheckWall`
+- x003 horned enemy b04 1 states (uncertain): `80125834 hornedEnemyLand`, `801259ac hornedEnemyIdle`, `80125cf8 hornedEnemyWalk`, `8012632c
+  hornedEnemyRun`, `80126b68 hornedEnemyTurnToPlayer`; x003 koma pig subtype entries (D_80135C64; uncertain): `80123b20 komaPigStandPose` (anim
+  by b0c), `80123c60 komaPigWaitForPlayer`, `801241c0 komaPigWaitForPlayerB`, `80123ea8 komaPigSceneEntry`; `801196f8
+  updateTranslucentAnimSprite` (layer 3 type 0x36, ~50 placements: semi-transparent animated sprite, drifting by section through `801191c4
+  translucentSpriteDrift` / `801193d0 translucentSpriteDriftB`; uncertain kind)

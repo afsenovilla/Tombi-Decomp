@@ -52,7 +52,7 @@ static __inline__ short near(TObj *o)
     return (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x40) <= lim - 0x40;
 }
 
-void func_80125CF8(TObj *o)
+void hornedEnemyWalk(TObj *o)
 {
     short *w = &o->wb4;
     int t;

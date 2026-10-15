@@ -10,7 +10,7 @@ extern void *D_8013987C[];
 extern void AnimLoadDuration(TObj *);
 extern int func_800205D8(int, int);
 
-void func_8011C3D8(TObj *o)
+void playerLauncherPullPlayer(TObj *o)
 {
     TObj *pl = &PLAYER;
     TObj *q = (TObj *)o->d90;

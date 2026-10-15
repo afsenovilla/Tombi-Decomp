@@ -21,7 +21,7 @@ extern void applyAnimVelocityX(TObj *, int);
 extern void applyFrameVelocityX(TObj *);
 extern int TileCollideAt(TObj *, int, int);
 extern void probeCollisionAtDepthA(TObj *, int, int);
-extern void func_8012D66C(TObj *);
+extern void throwerEnemyCheckWall(TObj *);
 
 void throwerEnemyGrabbedB(TObj *o)
 {
@@ -60,7 +60,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        func_8012D66C(o);
+        throwerEnemyCheckWall(o);
         break;
     case 4:
         o->velV -= 0x20;
@@ -73,7 +73,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        func_8012D66C(o);
+        throwerEnemyCheckWall(o);
         break;
     case 5:
         o->ba7 += 2;
@@ -81,7 +81,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        func_8012D66C(o);
+        throwerEnemyCheckWall(o);
         break;
     case 6:
         o->animFrame = PLAYER.animFrame & 1;

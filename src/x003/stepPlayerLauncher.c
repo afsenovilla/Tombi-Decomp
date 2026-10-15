@@ -6,27 +6,27 @@ extern void *D_80139878[];
 extern unsigned short D_800A604E;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void func_8011B6F4(TObj *);
-extern void func_8011B870(TObj *);
-extern void func_8011BA34(TObj *);
-extern void func_8011BCC8(TObj *);
+extern void playerLauncherWait(TObj *);
+extern void playerLauncherAim(TObj *);
+extern void playerLauncherGrab(TObj *);
+extern void playerLauncherSwing(TObj *);
 extern void playerLauncherThrow(TObj *);
-extern void func_8011C3D8(TObj *);
+extern void playerLauncherPullPlayer(TObj *);
 
-void func_8011CA70(TObj *o)
+void stepPlayerLauncher(TObj *o)
 {
     switch (o->step) {
     case 0:
-        func_8011B6F4(o);
+        playerLauncherWait(o);
         break;
     case 1:
-        func_8011B870(o);
+        playerLauncherAim(o);
         break;
     case 2:
-        func_8011BA34(o);
+        playerLauncherGrab(o);
         break;
     case 3:
-        func_8011BCC8(o);
+        playerLauncherSwing(o);
         break;
     case 4:
         playerLauncherThrow(o);
@@ -59,7 +59,7 @@ void func_8011CA70(TObj *o)
         }
         break;
     case 6:
-        func_8011C3D8(o);
+        playerLauncherPullPlayer(o);
         break;
     }
     if (o->w74 & 2) {
