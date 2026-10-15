@@ -7,13 +7,13 @@
 extern short D_8007A5F0[];
 extern char D_8013C474[];
 extern void playSFX(int);
-extern int func_8011A72C(TObj *o);
-extern void func_801191E4(int x, int y, int z);
+extern int springVineSwayStep(TObj *o);
+extern void spawnSpringVineLeafBurst(int x, int y, int z);
 extern TObj *spawnForestDwarfAt(short k, short d, short n, short x, short y, short z);
 extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
 
 #define BURST() \
-    func_801191E4(o->h->p.whole, o->y.p.whole, o->d->p.whole); \
+    spawnSpringVineLeafBurst(o->h->p.whole, o->y.p.whole, o->d->p.whole); \
     o->b6b = 1; \
     if (((unsigned short*)&GAME.selectedSection)[0] == 0) playSFX(0x44); else playSFX(0x49);
 
@@ -58,7 +58,7 @@ void springVineGrabbed(TObj *o)
         break;
     case 1:
         if (!o->b6a) goto next;
-        if ((o->animFrame >> 1) != 2 && func_8011A72C(o)) o->animFrame = 4;
+        if ((o->animFrame >> 1) != 2 && springVineSwayStep(o)) o->animFrame = 4;
         {
             unsigned char v = ((unsigned char *)&o->d88)[1];
             if (v > 0x80) o->y.raw += (D_8007A5F0[v] * (o->velV - 0x100)) >> 4;

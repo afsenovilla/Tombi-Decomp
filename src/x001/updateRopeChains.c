@@ -31,8 +31,8 @@ extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern int isObjectInView(TObj *);
 extern int angleBetweenPoints(P, P);
-extern void func_8011CEC8(Ctx *);
-extern void func_8011D28C(TObj *);
+extern void ropeChainsComputeLinkPos(Ctx *);
+extern void ropeChainsRaiseLower(TObj *);
 extern void playSFX(int);
 extern void ObjFreeDup(TObj *);
 
@@ -71,7 +71,7 @@ void updateRopeChains(TObj *o)
                         s1->f4 = 0;
                         s1->f6 = -1;
                         s1->f8 = 0;
-                        func_8011CEC8(s1);
+                        ropeChainsComputeLinkPos(s1);
                         o->a.raw = (D_800A4470[0].x4 + s1->fe) << 16;
                         o->y.raw = (D_800A4470[0].x2 + s1->fc) << 16;
                         o->b.raw = (D_800A4470[0].x0 + s1->fa) << 16;
@@ -100,7 +100,7 @@ void updateRopeChains(TObj *o)
                         s1->f4 = j;
                         s1->f6 = -1;
                         s1->f8 = 0;
-                        func_8011CEC8(s1);
+                        ropeChainsComputeLinkPos(s1);
                         c->a.raw = (D_800A4470[j].x4 + s1->fe) << 16;
                         c->y.raw = (D_800A4470[j].x2 + s1->fc) << 16;
                         c->b.raw = (D_800A4470[j].x0 + s1->fa) << 16;
@@ -149,7 +149,7 @@ void updateRopeChains(TObj *o)
                     }
                 }
                 s1->f8 = c->b0c;
-                func_8011D28C(c);
+                ropeChainsRaiseLower(c);
                 break;
             }
             X(o)->wc2 = s1->f6;
@@ -161,7 +161,7 @@ void updateRopeChains(TObj *o)
         s1->f0 = o->b0c;
         s1->f2 = D_800A4470[o->subtype].n;
         s1->f4 = o->subtype;
-        func_8011CEC8(s1);
+        ropeChainsComputeLinkPos(s1);
         X(o)->wb6 = D_800A4470[o->subtype].x2 + s1->fc;
         if (X(o)->wb4 != X(o)->wb6) {
             X(o)->wb4 += (X(o)->wb6 - X(o)->wb4) >> 2;

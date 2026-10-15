@@ -9,7 +9,7 @@ extern int FUN_8001f9e0(void);
 extern int ObjCullRegister(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80118DA8(TObj *o)
+void updateLeafBurst(TObj *o)
 {
     TObj *e;
     int t;

@@ -12,7 +12,7 @@ extern TObj *ObjAlloc(void);
 extern void setEventStarted(int, int, int);
 extern void FUN_80018838(TObj *);
 
-void func_801200EC(TObj *o)
+void updateEventHitSwitch(TObj *o)
 {
     unsigned char s;
     TObj *e;

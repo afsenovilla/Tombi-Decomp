@@ -13,7 +13,7 @@ typedef struct {
     unsigned short s48; short s4a; char p4c[2]; unsigned short s4e; short s50;
 } TB;
 
-int func_8012614C(TO *a, TB *b)
+int purplePigOverlapTest(TO *a, TB *b)
 {
     short k, sw, dx, dy, sh, dxs, dys, ex, ey;
 

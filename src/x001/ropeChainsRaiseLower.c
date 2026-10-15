@@ -10,7 +10,7 @@ extern void playSFX(int);
 extern int rcos(int);
 extern int rsin(int);
 
-void func_8011D28C(TObj *o)
+void ropeChainsRaiseLower(TObj *o)
 {
     D22 *e;
 

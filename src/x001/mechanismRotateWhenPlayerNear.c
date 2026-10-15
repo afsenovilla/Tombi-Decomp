@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-void func_8011BC6C(TObj *o)
+void mechanismRotateWhenPlayerNear(TObj *o)
 {
     switch (o->state) {
     case 0:

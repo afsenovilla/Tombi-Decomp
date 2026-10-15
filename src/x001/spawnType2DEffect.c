@@ -4,7 +4,7 @@
 
 extern TObj *ObjAlloc(void);
 
-void func_8011935C(unsigned char sub, int x, int y, int z)
+void spawnType2DEffect(unsigned char sub, int x, int y, int z)
 {
     TObj *n = ObjAlloc();
 

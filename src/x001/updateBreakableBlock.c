@@ -14,7 +14,7 @@ static void *D_8013E5CC[4] = {
 };
 extern char D_8013C760[];
 void ObjCullRegister(TObj *o);
-void func_80118998(short x, short y, short z);
+void spawnBreakableBlockDebris(short x, short y, short z);
 void FUN_8002ee50(int a, int x, int y, int z);
 void applyItemEffect(char *, V3 *, int, int, int);
 void setAreaFlagBit(int a);
@@ -44,7 +44,7 @@ void updateBreakableBlock(TObj *o)
         case 0:
             o->step++;
             ObjCullRegister(o);
-            func_80118998(o->h->p.whole, o->y.p.whole, o->d->p.whole);
+            spawnBreakableBlockDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole);
             FUN_8002ee50(2, o->h->p.whole, o->y.p.whole, o->d->p.whole);
             v.x.p.whole = o->h->p.whole;
             v.y.p.whole = o->y.p.whole;

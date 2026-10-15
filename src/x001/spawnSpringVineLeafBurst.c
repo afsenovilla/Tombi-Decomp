@@ -4,7 +4,7 @@
 
 extern TObj *ObjAlloc(void);
 
-void func_801191E4(int x, int y, int z)
+void spawnSpringVineLeafBurst(int x, int y, int z)
 {
     TObj *e = ObjAlloc();
     if (e) {

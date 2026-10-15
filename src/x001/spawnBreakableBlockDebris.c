@@ -5,7 +5,7 @@ extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 extern TObj *FUN_80018448(void);
 
-void func_80118998(short x, short y, int z)
+void spawnBreakableBlockDebris(short x, short y, int z)
 {
     int i;
     TObj *e;

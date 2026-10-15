@@ -44,7 +44,7 @@ static __inline__ int land2(TObj *o)
     return 0;
 }
 
-void func_8012BD6C(TObj *o)
+void komaPigLeapAtPlayer(TObj *o)
 {
     unsigned char *p1, *p2;
     int r;

@@ -8,9 +8,9 @@ extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
-extern void func_801196E0(TObj *);
+extern void initRisingParticle(TObj *);
 
-void func_801193E4(TObj *o)
+void updateRisingParticles(TObj *o)
 {
     TObj *e;
 
@@ -32,12 +32,12 @@ void func_801193E4(TObj *o)
                 e->h->raw = o->h->raw + 0x100000;
                 e->y.raw = o->y.raw - 0x180000;
                 e->d->raw = o->d->raw;
-                func_801196E0(e);
+                initRisingParticle(e);
             }
             break;
         case 1:
             o->b04 = 1;
-            func_801196E0(o);
+            initRisingParticle(o);
             o->animFrame = (D_1F8001F8 + D_1F800198) & 1;
             o->a.p.whole += (Rand() & 3) << 3;
             o->y.p.whole += (Rand() & 3) * 12;

@@ -18,9 +18,9 @@ extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern void despawnObjectOffscreenMargin(TObj *, int);
-extern void func_8012C8EC(TObj *);
-extern void func_8012C0EC(TObj *);
-extern void func_8012BD6C(TObj *);
+extern void komaPigIdle(TObj *);
+extern void komaPigMove(TObj *);
+extern void komaPigLeapAtPlayer(TObj *);
 extern void komaPigHit(TObj *);
 extern void komaPigGrabbed(TObj *);
 extern void komaPigDefeated(TObj *);
@@ -83,7 +83,7 @@ void updateKomaPig(TObjX *e)
                 FUN_800202b4(o);
                 switch (o->state) {
                 case 0:
-                    func_8012C8EC(o);
+                    komaPigIdle(o);
                     break;
                 case 1:
                 case 2:
@@ -93,10 +93,10 @@ void updateKomaPig(TObjX *e)
                 case 6:
                 case 7:
                 case 8:
-                    func_8012C0EC(o);
+                    komaPigMove(o);
                     break;
                 case 9:
-                    func_8012BD6C(o);
+                    komaPigLeapAtPlayer(o);
                     break;
                 }
                 if (o->b0c == 0) {

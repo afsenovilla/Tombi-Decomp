@@ -4,7 +4,7 @@
 
 extern unsigned short *D_8013C6A4[];
 
-int func_80124C20(TObj *a, TObj *b)
+int swingingRopeOverlapTest(TObj *a, TObj *b)
 {
     short dx, off, n, k;
     int d;

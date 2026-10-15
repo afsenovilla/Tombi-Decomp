@@ -5,7 +5,7 @@
 extern void *D_8013E754[];
 extern void AnimLoadDuration(TObj *);
 
-void func_801196E0(TObj *o)
+void initRisingParticle(TObj *o)
 {
     o->active = 1;
     o->type = 0x3d;

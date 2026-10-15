@@ -16,7 +16,7 @@ extern int rcos(int);
 extern int rsin(int);
 extern int MulCosDup(int, int);
 
-void func_8011CEC8(Ctx *c)
+void ropeChainsComputeLinkPos(Ctx *c)
 {
     Seg *s = &D_800A4470[c->f4];
     Seg *n;

@@ -5,11 +5,11 @@
 #include "raw7.h"
 
 extern void *D_8013E5CC[];
-extern void func_8011886C(TObj *);
+extern void blockDebrisFly(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 
-void func_80118724(TObj *o)
+void updateBlockDebris(TObj *o)
 {
     short t;
 
@@ -43,7 +43,7 @@ void func_80118724(TObj *o)
     case 1:
         switch (o->subtype) {
         case 1:
-            func_8011886C(o);
+            blockDebrisFly(o);
             break;
         case 2:
             ObjCullRegister(o);

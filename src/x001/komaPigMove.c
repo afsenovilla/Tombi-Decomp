@@ -71,7 +71,7 @@ static __inline__ int land2(TObj *o)
     o->y.raw += o->velV << 8; \
 }
 
-void func_8012C0EC(TObj *o)
+void komaPigMove(TObj *o)
 {
     Sub *s = (Sub *)&o->wb4;
     unsigned char *p0, *p1;

@@ -5,7 +5,7 @@
 
 extern void ObjListPush_1F80022C(TObj *);
 
-void func_80120E24(TObj *o)
+void updateBackdropSpritePos(TObj *o)
 {
     switch (o->b0c) {
     case 0:

@@ -18,7 +18,7 @@ extern int Rand(void);
 extern void applyFrameVelocityX(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_80119EEC(TObj *o)
+void updateAmbientCritter(TObj *o)
 {
     int v;
     int d;

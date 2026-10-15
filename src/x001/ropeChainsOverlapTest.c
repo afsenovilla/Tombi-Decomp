@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-int func_80124E34(TObj *o, TObj *e)
+int ropeChainsOverlapTest(TObj *o, TObj *e)
 {
     unsigned short dy0;
     short dx, dx2;

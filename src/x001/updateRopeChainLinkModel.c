@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 
 extern int cullObjectToDrawListMargin(TObj *o, int x);
-extern short func_8011D264(unsigned char n);
+extern short getRopeChainLinkAngle(unsigned char n);
 extern void freeObjectLayer8(TObj *o);
 
-void func_80117BD4(TObj *o)
+void updateRopeChainLinkModel(TObj *o)
 {
     short a;
 
@@ -20,7 +20,7 @@ void func_80117BD4(TObj *o)
         break;
     case 1:
         if (cullObjectToDrawListMargin(o, 0x50)) {
-            a = func_8011D264(o->subtype);
+            a = getRopeChainLinkAngle(o->subtype);
             if (a < 0x800)
                 o->d8c = a * 3 / 4;
             else

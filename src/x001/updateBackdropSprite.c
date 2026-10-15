@@ -42,7 +42,7 @@ void updateBackdropSprite(TObj *o)
         switch (o->step) {
         case 0:
             if ((*(short*)((char*)&SPAD.i174 + 2)) >= 0x42d) o->step++;
-            func_80120E24(o);
+            updateBackdropSpritePos(o);
             break;
         case 1:
             if ((*(short*)((char*)&SPAD.i174 + 2)) < 0x42c) {

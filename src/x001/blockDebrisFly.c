@@ -7,7 +7,7 @@ extern short D_8007A3F0[];
 extern short D_8007A5F0[];
 extern int ObjCullRegister(TObj *);
 
-void func_8011886C(TObj *o)
+void blockDebrisFly(TObj *o)
 {
     int n;
     int amp;

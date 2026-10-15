@@ -73,7 +73,7 @@ static __inline__ int land2(TObj *o)
     return 0;
 }
 
-void func_8012EAE8(TObj *o)
+void komaPigDropIn(TObj *o)
 {
     short *q = &o->wb4;
     unsigned char *p;

@@ -8,7 +8,7 @@ extern int AnimAdvance(char *);
 extern void AnimLoadDuration(char *);
 extern void ObjFree(char *);
 
-void func_80119268(char *o)
+void updateOneShotSpriteEffect(char *o)
 {
     unsigned char s = o[4];
     switch (s) {

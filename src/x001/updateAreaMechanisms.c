@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern int ObjCullRegister(TObj *);
-extern void func_8011BC6C(TObj *);
+extern void mechanismRotateWhenPlayerNear(TObj *);
 extern void ObjFreeDup(TObj *);
 
 void updateAreaMechanisms(TObj *o)
@@ -45,7 +45,7 @@ void updateAreaMechanisms(TObj *o)
             o->b0f = o->b6b - 4;
             break;
         case 1:
-            func_8011BC6C(o);
+            mechanismRotateWhenPlayerNear(o);
             break;
         case 2:
             switch (o->state) {

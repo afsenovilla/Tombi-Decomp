@@ -1071,3 +1071,15 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   uncertain), `8013bda0 updateLeafButterflySwarm` (runs while event 0xB2 Leaf Butterflies (GCD.bce56) is open: `8013b344
   spawnLeafButterflySwarm`, `8013b51c stepLeafButterflySwarm`, `8013b504 isLeafButterflyEventOpen`; uncertain), `8013be48 updateKomaPigSpawner`
   (type 2 objects near x 1000..0x885 while GCD.bcdb5), `8013c028 updateSegmentedCrawlerSpawner` (type 0x13, at most 2)
+- x001 more: koma pig b04 1 states of this overlay's layout `8012c8ec komaPigIdle` (state 0), `8012c0ec komaPigMove` (states 1..8), `8012bd6c
+  komaPigLeapAtPlayer` (state 9), `8012eae8 komaPigDropIn` (uncertain), `8012bc84 komaPigCheckWall`; overlap tests `8012614c purplePigOverlapTest`
+  (purplePigContact), `80124c20 swingingRopeOverlapTest` (per-height x offsets D_8013C6A4), `80124e34 ropeChainsOverlapTest`; rope chains
+  (updateRopeChains, links in D_800A4470): `8011cec8 ropeChainsComputeLinkPos`, `8011d28c ropeChainsRaiseLower` (sfx 0x4B/0x4C), `8011d264
+  getRopeChainLinkAngle` -> `80117bd4 updateRopeChainLinkModel` (layer 8, 3/4 of the link angle; uncertain); `80120e24 updateBackdropSpritePos`
+  (updateBackdropSprite: scroll/parallax by b0c); `8011bc6c mechanismRotateWhenPlayerNear` (updateAreaMechanisms subtype 1; uncertain);
+  `80118998 spawnBreakableBlockDebris` (32 type 0xE pieces) -> `80118724 updateBlockDebris` (layer 3 type 0xE; `8011886c blockDebrisFly`);
+  `801191e4 spawnSpringVineLeafBurst` (type 0x1F) -> `80118da8 updateLeafBurst` (uncertain); `801193e4 updateRisingParticles` / `801196e0
+  initRisingParticle` (type 0x3D; uncertain), `8011935c spawnType2DEffect`, `80119268 updateOneShotSpriteEffect`, `80119eec updateAmbientCritter`
+  (layer 3 type 0x57, 18 placements; animation by b0c, uncertain kind), `8011a72c springVineSwayStep` (springVineGrabbed: decaying sway),
+  `801200ec updateEventHitSwitch` (layer 4 type 0x2F, 14 placements: subtype 0 hit (b68) starts event 0x18 and spawns a type 0x3D effect, subtypes
+  1..3 move with GCD.bcdf1; uncertain kind)

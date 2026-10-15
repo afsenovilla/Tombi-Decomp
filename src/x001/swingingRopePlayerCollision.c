@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern short pushObjectOutOfObjectBoxC(TObj *, TObj *);
-extern short func_80124C20(TObj *, TObj *);
+extern short swingingRopeOverlapTest(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
 void swingingRopePlayerCollision(TObj *a, TObj *b)
@@ -13,7 +13,7 @@ void swingingRopePlayerCollision(TObj *a, TObj *b)
 
     if (a->step == 0x22) return;
     if (b->subtype == 7) r = pushObjectOutOfObjectBoxC(a, b);
-    else r = func_80124C20(a, b);
+    else r = swingingRopeOverlapTest(a, b);
     if (r == 1 && !SPAD.b1a4 && !(a->active & 2) && !(b->active & 2)) {
         a->active = 2;
         if (b->h->p.whole > a->h->p.whole) a->animFrame = 1;

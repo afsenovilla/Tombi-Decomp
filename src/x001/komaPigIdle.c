@@ -16,7 +16,7 @@ extern int AnimAdvanceWithBox(TObj *);
     o->box3 = p[1]; } \
     o->animTimer = ((A *)o->anim)->w6 & 0x3fff;
 
-void func_8012C8EC(TObj *o)
+void komaPigIdle(TObj *o)
 {
     switch (o->substep) {
     case 0:

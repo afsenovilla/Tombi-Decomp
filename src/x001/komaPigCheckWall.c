@@ -13,7 +13,7 @@ typedef struct O {
 extern short D_8007A1F0[], D_8007A5F0[];
 extern short func_80041240(O *, short, short);
 
-int func_8012BC84(O *o)
+int komaPigCheckWall(O *o)
 {
     unsigned short a, b;
     short c;

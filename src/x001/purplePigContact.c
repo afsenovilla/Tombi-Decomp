@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
-extern short func_8012614C(TObj *, TObj *);
+extern short purplePigOverlapTest(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -17,7 +17,7 @@ void purplePigContact(TObj *o, TObj *p)
     unsigned char k;
     short s;
 
-    r = func_8012614C(o, p);
+    r = purplePigOverlapTest(o, p);
     if (r == -1) return;
     k = BAC(o);
     if (k == 2) s = k;
