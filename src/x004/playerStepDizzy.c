@@ -10,7 +10,7 @@ extern void playerSetAngleFromSlope(TObj *);
 
 #define B(o, n) (((unsigned char *)(o))[n])
 
-void func_8011D9A4(TObj *o)
+void playerStepDizzy(TObj *o)
 {
     switch (o->state) {
     case 0:

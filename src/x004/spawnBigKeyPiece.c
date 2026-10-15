@@ -7,7 +7,7 @@ extern E D_8013145C[];
 extern unsigned short D_800A604E[];
 extern TObj *allocObjectLayer2(void);
 
-void func_8012EB78(short i, short flag)
+void spawnBigKeyPiece(short i, short flag)
 {
     E *p = &D_8013145C[i];
     TObj *n = allocObjectLayer2();

@@ -21,7 +21,7 @@ extern char *D_1F800164;
 extern OTB *D_1F8001E0;
 extern void SetDrawMode(DR_MODE *, int, int, int, void *);
 
-void func_8011E778(TObj *o)
+void drawArea4Kind4Sprites(TObj *o)
 {
     int i;
     int n;

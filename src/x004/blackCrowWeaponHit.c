@@ -10,7 +10,7 @@ extern short resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
 extern void awardAPByArea(int, int, int, int);
 
-void func_8011F844(TObj *a, TObj *o)
+void blackCrowWeaponHit(TObj *a, TObj *o)
 {
     short r;
     int one;

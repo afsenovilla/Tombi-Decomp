@@ -5,7 +5,7 @@
 extern short boxesOverlapSide(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
 
-void func_8011F978(TObj *o, TObj *p)
+void countedCollectibleWeaponHit(TObj *o, TObj *p)
 {
     if (p->b0c == 0 && boxesOverlapSide(o, p) != -1) {
         resolveHitResultA(o, p);

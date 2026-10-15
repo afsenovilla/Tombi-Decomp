@@ -2,15 +2,15 @@
 // MATCHING 8012f274 220
 #include "gcd.h"
 #include "TOBJ.H"
-extern void func_8012EE14(TObj *);
+extern void bigKeyPaintingCheckPiece(TObj *);
 extern void paintingBigKeyReward(TObj *);
 
-void func_8012F274(TObj *o)
+void stepBigKeyPainting(TObj *o)
 {
     short i;
     switch (o->step) {
     case 0:
-        func_8012EE14(o);
+        bigKeyPaintingCheckPiece(o);
         break;
     case 1:
         if (o->state == 0) {

@@ -7,14 +7,14 @@
 extern int AnimAdvance(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void townHallWorkerTalk(TObj *o);
-extern void func_8012A740(TObj *o);
+extern void initTownHallWorker(TObj *o);
 extern void freeObjectLayer2(TObj *o);
 
 void updateTownHallWorker(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012A740(o);
+        initTownHallWorker(o);
         break;
     case 1:
         ObjCullRegister(o);

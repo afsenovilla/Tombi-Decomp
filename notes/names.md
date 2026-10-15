@@ -1110,3 +1110,16 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   soakedPhoenixGuideSection1Scene` (section 1, GCD.bd00a 1 -> 2), `80130990 updateWindPush` (pushes the player with GVARS.s44 in sections 0/1
   until GAME.purifiedAreas & 2), spawners `80130e3c updatePlayerLauncherSpawner` (layer 4 type 0x2E per section), `8013123c
   updateHornedEnemySpawner` (type 0x28), `801315b0 updateKomaPigSpawner` (type 2)
+- x004 black crow perched states (blackCrowPerched state switch; uncertain): 0 `80125420 blackCrowPerchIdle`, 1 `80125554 blackCrowPerchLook`, 2
+  `801256a8 blackCrowPerchCaw` (sfx 0x13), 3 `80125818 blackCrowFlyAround`, 4 `80126464 blackCrowWatchPlayer` (entered when the player is within
+  +-0x80 on the same depth); callbacks `8011f844 blackCrowWeaponHit` (FUN_80045f00 type 0x1E), `8011f978 countedCollectibleWeaponHit` (0x29),
+  `8011f5d8 shuttlePlatformGrabProbe` (func_8004BBC0 type 0x1F), `8011eec0 areaInitAPlayerCollision` (func_80046D58 type 4)
+- x004 big key painting (layer 2 type 0x32 objects; the five pieces GCD.bcf24[0..4]): `8012eca0 spawnBigKeyPaintingPieces` (the painting plus
+  the collected pieces), `8012eb78 spawnBigKeyPiece` (entry i of D_8013145C, placed or flying from the player), `8012ee14
+  bigKeyPaintingCheckPiece` (uncertain), `8012f274 stepBigKeyPainting` (-> paintingBigKeyReward once all five are set), `8012e950
+  spawnHauntedPaintingObj` / `8012ea30 updateHauntedPaintingSpawner` (type 0x32 from D_8013144C while GCD.bcf2d == 0; uncertain), `8012f69c
+  updateHauntedPigBagEvent` (runs hauntedPigBagEventStart until GV2.bc3 & 8)
+- x004 more: `8011e778 drawArea4Kind4Sprites` (drawCategory7Objects render kind 4 in area 4: semi-transparent SPRT list; uncertain),
+  `8011d9a4 playerStepDizzy` (step 0x3B: anim 0x41, sfx 0x25; uncertain), `8011e154 updateArea4ItemObj` (MAIN0 dispatchAreaItemInit area 4;
+  uncertain), `8012a740 initTownHallWorker` (box/sprites per subtype from D_801311C8 while GCD.bcf2d == 0), `80129e14
+  paintingSlotHintNpcMoveTo` (moves toward velX/velY targets; uncertain)

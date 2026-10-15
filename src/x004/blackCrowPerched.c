@@ -4,11 +4,11 @@
 #include "TOBJ.H"
 typedef struct { char pad[0xc4]; unsigned short wc4, wc6, wc8; } X4;
 
-extern void func_80125420(TObj *);
-extern void func_80125554(TObj *);
-extern void func_801256A8(TObj *);
-extern void func_80125818(TObj *);
-extern void func_80126464(TObj *);
+extern void blackCrowPerchIdle(TObj *);
+extern void blackCrowPerchLook(TObj *);
+extern void blackCrowPerchCaw(TObj *);
+extern void blackCrowFlyAround(TObj *);
+extern void blackCrowWatchPlayer(TObj *);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
 static __inline__ void approach(TObj *o, unsigned short t)
@@ -30,13 +30,13 @@ void blackCrowPerched(TObj *o)
 {
     switch (o->state) {
     case 0:
-        func_80125420(o);
+        blackCrowPerchIdle(o);
         goto common;
     case 1:
-        func_80125554(o);
+        blackCrowPerchLook(o);
         goto common;
     case 2:
-        func_801256A8(o);
+        blackCrowPerchCaw(o);
     common:
         if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x18) == 0) {
             o->state = 3;
@@ -44,10 +44,10 @@ void blackCrowPerched(TObj *o)
         }
         break;
     case 3:
-        func_80125818(o);
+        blackCrowFlyAround(o);
         break;
     case 4:
-        func_80126464(o);
+        blackCrowWatchPlayer(o);
         break;
     }
     if ((*(short*)&SPAD.s1c8) == 0) {

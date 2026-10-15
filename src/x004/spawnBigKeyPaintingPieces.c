@@ -8,7 +8,7 @@ extern F D_801314A4;
 extern E D_8013145C[];
 extern TObj *allocObjectLayer2(void);
 
-void func_8012ECA0(void)
+void spawnBigKeyPaintingPieces(void)
 {
     TObj *n;
     short i;

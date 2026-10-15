@@ -5,7 +5,7 @@
 #include "raw7.h"
 
 
-void func_8011F5D8(TObj *o, TObj *p)
+void shuttlePlatformGrabProbe(TObj *o, TObj *p)
 {
     short d;
     int t;

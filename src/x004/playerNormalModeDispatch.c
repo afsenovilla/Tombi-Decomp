@@ -65,7 +65,7 @@ extern void FUN_80122c10(TObj *);
 extern void FUN_8011eae8(TObj *);
 extern void playerStepRopeJumpOff(TObj *, int);
 extern void FUN_8011dc0c(TObj *);
-extern void FUN_8011d9a4(TObj *);
+extern void playerStepDizzy(TObj *);
 extern void FUN_80106f98(TObj *);
 extern void FUN_8010d390(TObj *);
 extern void playerSwimDirFromPad(TObj *);
@@ -376,7 +376,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_8011dc0c(o);
         break;
     case 0x3b:
-        FUN_8011d9a4(o);
+        playerStepDizzy(o);
         break;
     case 0x3c:
         FUN_80106f98(o);

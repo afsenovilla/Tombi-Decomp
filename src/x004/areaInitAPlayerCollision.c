@@ -2,7 +2,7 @@
 // MATCHING 8011eec0 228
 #include "TOBJ.H"
 
-void func_8011EEC0(TObj *o, TObj *e)
+void areaInitAPlayerCollision(TObj *o, TObj *e)
 {
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x3c) >= 0x79) return;
     if ((unsigned short)(o->h->p.whole - e->h->p.whole) >= 0x41) return;

@@ -2,7 +2,7 @@
 // MATCHING 80129f10 184
 #include "TOBJ.H"
 extern void paintingSlotHintTalk(TObj *);
-extern void func_80129E14(TObj *);
+extern void paintingSlotHintNpcMoveTo(TObj *);
 extern void AnimAdvance(TObj *);
 
 void stepPaintingSlotHintTalk(TObj *o)
@@ -22,7 +22,7 @@ void stepPaintingSlotHintTalk(TObj *o)
         }
         break;
     case 1:
-        func_80129E14(o);
+        paintingSlotHintNpcMoveTo(o);
         break;
     }
 }

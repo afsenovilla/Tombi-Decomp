@@ -57,7 +57,7 @@ static __inline__ int chk(int a, unsigned short dy) { return a == 1 && dy < 0xf8
     dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30; \
     r_ = s == 1 && dy < 0xf8; } r_; })
 
-void func_80125818(TObj *o)
+void blackCrowFlyAround(TObj *o)
 {
     P2 a, b;
     short d;

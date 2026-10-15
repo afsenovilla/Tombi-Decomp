@@ -9,7 +9,7 @@ extern T D_8013144C;
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012EA30(TObj *o)
+void updateHauntedPaintingSpawner(TObj *o)
 {
     TObj *n;
 

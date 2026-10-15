@@ -4,8 +4,8 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern void func_8012ECA0(TObj *);
-extern void func_8012EE14(TObj *);
+extern void spawnBigKeyPaintingPieces(TObj *);
+extern void bigKeyPaintingCheckPiece(TObj *);
 extern void paintingBigKeyReward(TObj *);
 extern void FUN_80018980(TObj *);
 
@@ -19,7 +19,7 @@ void updateBigKeyPainting(TObj *o)
         } else if (GCD.bcddc == 0xff) {
             o->b04 = 3;
         } else {
-            func_8012ECA0(o);
+            spawnBigKeyPaintingPieces(o);
             o->step = 0;
             o->state = 0;
             o->b04++;
@@ -28,7 +28,7 @@ void updateBigKeyPainting(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            func_8012EE14(o);
+            bigKeyPaintingCheckPiece(o);
             break;
         case 1:
             if (o->state == 0) {

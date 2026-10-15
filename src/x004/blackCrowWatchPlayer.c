@@ -15,7 +15,7 @@ extern unsigned short D_80131128[];
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 
-void func_80126464(TObj *o)
+void blackCrowWatchPlayer(TObj *o)
 {
     int r;
     short t;

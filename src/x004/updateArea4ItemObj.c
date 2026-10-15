@@ -18,7 +18,7 @@ extern int ObjCullRegister(TObj *);
 extern void playSFX(int);
 extern void freeObjectLayer5(TObj *);
 
-void func_8011E154(TObj *o)
+void updateArea4ItemObj(TObj *o)
 {
     TObj *p;
     Ent *t;

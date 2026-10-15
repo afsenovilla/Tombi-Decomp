@@ -34,7 +34,7 @@ static __inline__ void movey(TObj *o, short v)
     }
 }
 
-void func_80129E14(TObj *o)
+void paintingSlotHintNpcMoveTo(TObj *o)
 {
     if (*(int *)&o->velH == 0) return;
     if (o->velH) moveh(o, o->velH);

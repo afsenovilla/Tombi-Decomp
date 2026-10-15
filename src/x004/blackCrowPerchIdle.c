@@ -8,7 +8,7 @@ extern unsigned short D_80131128[];
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 
-void func_80125420(TObj *o)
+void blackCrowPerchIdle(TObj *o)
 {
     unsigned short dy;
 

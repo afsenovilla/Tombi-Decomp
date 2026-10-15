@@ -5,7 +5,7 @@
 extern void hauntedPigBagEventStart(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012F69C(TObj *o)
+void updateHauntedPigBagEvent(TObj *o)
 {
     switch (o->b04) {
     case 0:

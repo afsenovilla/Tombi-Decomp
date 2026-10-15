@@ -10,7 +10,7 @@ extern unsigned short D_800A604E[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
 
-void func_8012EE14(TObj *o)
+void bigKeyPaintingCheckPiece(TObj *o)
 {
     switch (o->state) {
     case 0: {

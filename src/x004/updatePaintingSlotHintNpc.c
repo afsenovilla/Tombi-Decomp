@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void initPaintingSlotHintNpc(TObj *);
 extern void paintingSlotHintTalk(TObj *);
-extern void func_80129E14(TObj *);
+extern void paintingSlotHintNpcMoveTo(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -31,7 +31,7 @@ void updatePaintingSlotHintNpc(TObj *o)
             }
             break;
         case 1:
-            func_80129E14(o);
+            paintingSlotHintNpcMoveTo(o);
             break;
         }
         break;

@@ -6,7 +6,7 @@ typedef struct { unsigned short anim, sub, b0c, x, y, z; } Spawn;
 extern Spawn D_8013144C;
 extern TObj *allocObjectLayer2(void);
 
-void func_8012E950(TObj *o)
+void spawnHauntedPaintingObj(TObj *o)
 {
     TObj *p;
 

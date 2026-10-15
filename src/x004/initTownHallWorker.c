@@ -8,7 +8,7 @@ extern E D_801311C8[];
 extern int SPR_DATA[];
 extern void FUN_8001fe6c(TObj *);
 
-void func_8012A740(TObj *o)
+void initTownHallWorker(TObj *o)
 {
     if (GCD.bcf2d == 0) {
         o->box0 = D_801311C8[o->subtype].b0;
