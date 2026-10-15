@@ -46,17 +46,17 @@ extern void func_801242C0(TObj *, unsigned char *);
 extern void func_80124348(TObj *, unsigned char *);
 extern void func_801243D4(TObj *, unsigned char *);
 extern void func_80124410(TObj *, unsigned char *);
-extern void func_8012555C(TObj *, unsigned char *);
-extern void playerContactCat2Type00(TObj *, unsigned char *);
+extern void playerContactCat2Type07(TObj *, unsigned char *);
+extern void komaPigContact(TObj *, unsigned char *);
 extern void playerContactCat2Type01(TObj *, unsigned char *);
 extern void playerContactCat2Type2B(TObj *, unsigned char *);
 extern void playerContactCat2Type12(TObj *, unsigned char *);
 extern void playerContactCat2Type15(TObj *, unsigned char *);
-extern void func_80126240(TObj *, unsigned char *);
+extern void playerContactCat2Type06(TObj *, unsigned char *);
 extern void func_801262F8(TObj *, unsigned char *);
 extern void playerContactCat2Type08(TObj *, unsigned char *);
 extern void func_80126564(TObj *, unsigned char *);
-extern void func_80126698(TObj *, unsigned char *);
+extern void playerContactCat2Type09(TObj *, unsigned char *);
 extern void func_8012687C(TObj *, unsigned char *);
 extern void func_80126A70(TObj *, unsigned char *);
 extern void func_80126BBC(TObj *, unsigned char *);
@@ -84,7 +84,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 break;
             case 2:
                 switch (GAME.selectedArea) {
-                case 0: playerContactCat2Type00(o, q); break;
+                case 0: komaPigContact(o, q); break;
                 case 1: func_801240A8(o, q); break;
                 case 3: func_8011F8CC(o, q); break;
                 case 4: func_8011EFA4(o, q); break;
@@ -111,11 +111,11 @@ void collidePlayerWithCat2Objects(TObj *o)
                 playerContactCat2Type12(o, q);
                 break;
             case 6:
-                func_80126240(o, q);
+                playerContactCat2Type06(o, q);
                 break;
             case 7:
                 switch (GAME.selectedArea) {
-                case 0: func_8012555C(o, q); break;
+                case 0: playerContactCat2Type07(o, q); break;
                 case 4: func_8011F134(o, q); break;
                 case 10: func_8012095C(o, q); break;
                 }
@@ -128,7 +128,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                 else func_8011DE58(o, q);
                 break;
             case 9:
-                func_80126698(o, q);
+                playerContactCat2Type09(o, q);
                 break;
             case 10:
                 func_80120C68(o, q);

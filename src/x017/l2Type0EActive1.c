@@ -2,7 +2,7 @@
 // MATCHING 80111f58 684
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
-extern void FUN_80111dc8(TObj *);
+extern void l2Type0ESharedStep(TObj *);
 extern short DAT_1f80016a;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
@@ -50,7 +50,7 @@ void l2Type0EActive1(TObj *o)
         o->velV = v * DAT_8007a1f0[o->w78] >> 12;
         o->velH = v * DAT_8007a5f0[o->w78] >> 12;
     case 3:
-        FUN_80111dc8(o);
+        l2Type0ESharedStep(o);
         if (o->y.p.whole >= -0xae) {
             o->timer = 10;
             o->active = 2;

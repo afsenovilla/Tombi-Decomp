@@ -1,27 +1,27 @@
 // FUNC 8011191c 308 X019
 // MATCHING 8011191c 308
 extern unsigned char PLAYER;
-extern void FUN_8011145c(void *);
+extern void l1Type0AInit(void *);
 extern void FUN_800202b4(void *);
-extern void FUN_80111590(void *);
-extern void FUN_80111714(void *);
+extern void l1Type0AStepSub0(void *);
+extern void l1Type0AStepSub1(void *);
 extern void freeObjectLayer1(void *);
 
 void updateL1Type0AObject(unsigned char *o)
 {
     switch (o[4]) {
     case 0:
-        FUN_8011145c(o);
+        l1Type0AInit(o);
         break;
     case 1:
         if ((unsigned)(PLAYER - 4) >= 2) {
             FUN_800202b4(o);
             switch (o[3]) {
             case 0:
-                FUN_80111590(o);
+                l1Type0AStepSub0(o);
                 break;
             case 1:
-                FUN_80111714(o);
+                l1Type0AStepSub1(o);
                 break;
             }
             if (*(short *)(o + 0x22) != 0) {

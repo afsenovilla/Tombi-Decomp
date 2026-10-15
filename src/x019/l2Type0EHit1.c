@@ -34,7 +34,7 @@ extern void setSectionFlagBit(int n);
 extern void spawnItemFromEntry(char *a, Fix16 *v, int b, int c, TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern void despawnObjectOffscreen(TObj *o);
-extern void func_80111DC8(TObj *o);
+extern void l2Type0ESharedStep(TObj *o);
 extern void spawnBreakPieces(TObj *o, int x, int y, int z);
 
 void l2Type0EHit1(TObj *o)
@@ -92,7 +92,7 @@ void l2Type0EHit1(TObj *o)
             break;
         }
         despawnObjectOffscreen(o);
-        func_80111DC8(o);
+        l2Type0ESharedStep(o);
         if (o->y.p.whole < -0xae) break;
         o->timer = 10;
         o->active = 2;

@@ -14,7 +14,7 @@ typedef struct S {
 extern int D_800A6094;
 extern int AnimAdvance(S *);
 extern void TileCollideAt(S *, int, int);
-extern void FUN_80113888(S *), FUN_80113b6c(S *), FUN_80113cc8(S *);
+extern void l2Type18State2(S *), l2Type18State5(S *), l2Type18State7(S *);
 extern S *showMessageBoxDirectTimed(int, int, V *, int);
 void l2Type18Active(S *o)
 {
@@ -53,7 +53,7 @@ void l2Type18Active(S *o)
         }
         break;
     case 2:
-        FUN_80113888(o);
+        l2Type18State2(o);
         break;
     case 3:
         if (o->b01 == 0)
@@ -104,10 +104,10 @@ void l2Type18Active(S *o)
         }
         break;
     case 5:
-        FUN_80113b6c(o);
+        l2Type18State5(o);
         break;
     case 7:
-        FUN_80113cc8(o);
+        l2Type18State7(o);
         break;
     }
 }

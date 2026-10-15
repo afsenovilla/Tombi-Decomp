@@ -12,7 +12,7 @@ void playerContactCat4Kind3(TObj *o, TObj *e);
 void playerContactCat4Type04(TObj *o, TObj *e);
 void func_8011FE08(TObj *o, TObj *e);
 void func_80125044(TObj *o, TObj *e);
-void func_801252B8(TObj *o, TObj *e);
+void playerContactCat4Type06(TObj *o, TObj *e);
 void func_8011FBB8(TObj *o, TObj *e);
 void func_801249E0(TObj *o, TObj *e);
 void func_8011EEC0(TObj *o, TObj *e);
@@ -81,7 +81,7 @@ void collidePlayerWithCat4Objects(TObj *o)
                 func_8011FE08(o, e);
             break;
         case 5: func_80125044(o, e); break;
-        case 6: func_801252B8(o, e); break;
+        case 6: playerContactCat4Type06(o, e); break;
         case 7:
             switch (GAME.selectedArea) {
             case 0: func_801249E0(o, e); break;

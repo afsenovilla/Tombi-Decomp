@@ -10,7 +10,7 @@ void dispatchAreaActorUpdate(void)
 {
     switch (GAME.selectedArea) {
     case AREA00_VILLAGEOFALLBEGINNINGS:
-        func_8012555C();
+        playerContactCat2Type07();
         break;
     case AREA04_HAUNTEDMANSION:
         func_8011F134();

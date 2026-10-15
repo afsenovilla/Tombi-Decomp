@@ -17,7 +17,7 @@ extern int D_1F8003C0;
 extern short D_1F80019E;
 extern short probeCollisionAtDepthC(TO *, short, short);
 extern void playerGrabCat4Type01(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), playerGrabCat4Type02(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
-extern void func_80126FE4(TO *, unsigned char *), func_80126A64(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
+extern void func_80126FE4(TO *, unsigned char *), playerGrabCat4Type06(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
 extern void func_8011DF8C(TO *, unsigned char *), func_8012767C(TO *, unsigned char *), func_8011EF98(TO *, unsigned char *), probeGrabObjectBox(TO *, unsigned char *);
 extern void func_8011F5D8(TO *, unsigned char *), func_8011F474(TO *, unsigned char *), func_801212D4(TO *, unsigned char *), func_8011D3F8(TO *, unsigned char *), func_8011F38C(TO *, unsigned char *);
 extern void func_80126F64(TO *, unsigned char *), func_80121254(TO *, unsigned char *);
@@ -80,7 +80,7 @@ int playerProbeGrab(TO *o, unsigned char f)
                 func_80126FE4(o, e);
                 break;
             case 6:
-                func_80126A64(o, e);
+                playerGrabCat4Type06(o, e);
                 break;
             case 0x15:
                 func_80126D2C(o, e);
