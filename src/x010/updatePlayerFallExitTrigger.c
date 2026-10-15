@@ -1,17 +1,17 @@
 // FUNC 8012d858 140 X010
 // MATCHING 8012d858 140
 #include "TOBJ.H"
-extern void func_8012D678(TObj *);
+extern void stepPlayerFallExitScene(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012D858(TObj *o)
+void updatePlayerFallExitTrigger(TObj *o)
 {
     switch (o->b04) {
     case 0:
         o->b04++;
         break;
     case 1:
-        func_8012D678(o);
+        stepPlayerFallExitScene(o);
         break;
     case 2:
         o->b04 = 3;

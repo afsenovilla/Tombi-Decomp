@@ -40,7 +40,7 @@ extern int ObjCheckHeadCollision(S *);
 extern short TileCollideAt(S *, short, short);
 extern void spawnPlayerPowerEffect(int);
 
-void func_8011B330(S *s)
+void playerStep3FArea10(S *s)
 {
     TObj *n;
     P *p;

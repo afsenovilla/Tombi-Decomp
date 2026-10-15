@@ -3,7 +3,7 @@
 #include "gamestate.h"
 extern void l2Type07Update(void);
 extern void func_80123B94(void);
-extern void func_80121BAC(void);
+extern void updateArea10Type07Object(void);
 void updateL2Type07Object(void)
 {
     unsigned short m = GAME.selectedArea;
@@ -12,6 +12,6 @@ void updateL2Type07Object(void)
     } else if (m == 4) {
         func_80123B94();
     } else if (m == 10) {
-        func_80121BAC();
+        updateArea10Type07Object();
     }
 }

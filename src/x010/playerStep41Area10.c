@@ -15,7 +15,7 @@ extern short TileCollideAt(TObj *o, short x, short y);
 extern int ObjCheckHeadCollision(TObj *o);
 extern void PlayerSetAnimIfChanged(TObj *o, int);
 
-void func_8011B7D4(TObj *o)
+void playerStep41Area10(TObj *o)
 {
     G *g;
     int v;

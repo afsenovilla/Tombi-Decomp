@@ -6,7 +6,7 @@
 extern TObj PLAYER;
 extern void FUN_800eea7c(TObj *, int, int);
 
-void func_8012D678(TObj *o)
+void stepPlayerFallExitScene(TObj *o)
 {
     switch (o->state) {
     case 0:

@@ -3,7 +3,7 @@
 #include "tobj.h"
 extern void playSFX(int);
 #define P ((TObj *)o->d90)
-void func_801226A8(TObj *o)
+void area10Type07StepBPart(TObj *o)
 {
     unsigned int u;
     int i;

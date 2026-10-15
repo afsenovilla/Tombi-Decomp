@@ -10,7 +10,7 @@ extern unsigned short Rand(void);
 extern void spawnGroundDebrisPiece(TObj *, int, int, int, int);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012D200(TObj *o)
+void updateRandomEnemySpawner(TObj *o)
 {
     int t;
     short *p;

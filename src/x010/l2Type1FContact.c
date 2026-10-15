@@ -9,7 +9,7 @@ typedef struct {
 extern short objectBoxOverlapSideFacing(PL *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 
-void func_8011DE58(PL *p, TObj *o)
+void l2Type1FContact(PL *p, TObj *o)
 {
     short r = objectBoxOverlapSideFacing(p, o);
     if (r != -1 && r < 3 && p->bac == 1) {

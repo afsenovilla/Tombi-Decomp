@@ -11,7 +11,7 @@ extern unsigned char D_8012F088[];
 extern int getScrollOffsetX(void);
 extern int LoadImage(RECT *, void *);
 
-void func_80116B08(Q *q, unsigned char *base)
+void animateArea10Palettes(Q *q, unsigned char *base)
 {
     RECT r;
     short lo, hi, a, b, i, j;

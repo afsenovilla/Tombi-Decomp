@@ -19,7 +19,7 @@ extern void playerPlaceBittenObject(TObj *);
 extern void playerBiteHoldAttach(TObj *);
 extern void playerResetSlopeState(TObj *);
 
-void func_8011D5F4(TObj *o)
+void playerStep48Area10B(TObj *o)
 {
     TObj *p;
     TObj *q;

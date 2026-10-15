@@ -7,7 +7,7 @@
 extern TObj PLAYER;
 extern void *D_80131CC8;
 
-void func_80122BB4(TObj *o)
+void area10Type07StepDPart(TObj *o)
 {
     int t;
 

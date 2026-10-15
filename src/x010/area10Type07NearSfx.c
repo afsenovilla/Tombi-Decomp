@@ -17,7 +17,7 @@ static __inline__ int nearCam(TObj *o)
     return (unsigned short)(o->h->p.whole - *(unsigned short *)0x1F80016A + 16) < 33;
 }
 
-void func_801220F8(TObj *o)
+void area10Type07NearSfx(TObj *o)
 {
     V801220F8 *a = (V801220F8 *)&o->wb4;
     V801220F8 *b = (V801220F8 *)&o->wbc;

@@ -12,8 +12,8 @@ extern P *DAT_8009c330;
 extern K *DAT_8009d2e8;
 extern void FUN_800eeb5c(O *, int);
 extern void playerReleaseBittenAndClearFlags(O *);
-extern void FUN_8011c758(O *);
-extern void FUN_8011d5f4(O *);
+extern void playerStep48Area10(O *);
+extern void playerStep48Area10B(O *);
 extern void FUN_8011b47c(O *);
 
 void playerStep48ByArea(O *o)
@@ -37,10 +37,10 @@ void playerStep48ByArea(O *o)
     } else {
         switch (DAT_8009d2e8->k) {
         case 0xe:
-            FUN_8011c758(o);
+            playerStep48Area10(o);
             break;
         case 0x27:
-            FUN_8011d5f4(o);
+            playerStep48Area10B(o);
             break;
         case 0x3d:
             FUN_8011b47c(o);

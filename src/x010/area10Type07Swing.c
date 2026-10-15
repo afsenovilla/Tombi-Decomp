@@ -61,7 +61,7 @@ static __inline__ void swing(TObj *o)
     }
 }
 
-void func_80122878(TObj *o)
+void area10Type07Swing(TObj *o)
 {
     swing(o);
 }

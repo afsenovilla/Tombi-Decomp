@@ -1269,3 +1269,17 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   entries 3-6 `801242b0 area4Type07StepA`, `80124954 area4Type07StepB`, `80124b4c area4Type07StepC`, `80124e88 area4Type07StepD` (also run by
   `80123b94 updateArea4Type07Object`, the area 4 branch of MAIN0 updateL2Type07Object); `8012747c testGcdFlagBitBcefc`, `801274b0
   setScriptGlobalFlagBit` (SCRIPT_GLOBALS[0x58 + n / 8] |= bit)
+- x010 (roles uncertain unless noted): `80116b08 animateArea10Palettes` (area 10 entry of MAIN0 data_80079B3C, LoadImage CLUT rows),
+  `80117cbc spawnApAwardNumber`, player steps `8011b330 playerStep3FArea10`, `8011b7d4 playerStep41Area10` (playerNormalModeDispatch 0x3F / 0x41),
+  `8011c758 playerStep48Area10` / `8011d5f4 playerStep48Area10B` (playerStep48ByArea handlers); collidePlayerWithCat2Objects callbacks `8011de58
+  l2Type1FContact` (type 0x1F outside area 1), `8012095c l2Type07Contact` (type 7, area 10); `80121bac updateArea10Type07Object` (area 10 branch of
+  updateL2Type07Object) with helpers `801220f8 area10Type07NearSfx`, `801226a8 area10Type07StepBPart`, `80122878 area10Type07Swing`, `80122bb4
+  area10Type07StepDPart`; unlayered objects `8012d1bc updateSpearPigAmbushSpawner` (subtype 0, section 0: `8012cfcc spearPigAmbushSpawnStep` waits
+  for GVARS.b38, then allocates 8 layer 2 type 0x3A spear pigs from D_8012F4AC), `8012d200 updateRandomEnemySpawner` (FUN_80114968 at random
+  intervals until GCD.bceaf + bd0b4 reach 0x1E), `8012d858 updatePlayerFallExitTrigger` (variant 0x26: `8012d678 stepPlayerFallExitScene` walks the
+  player left off a ledge), `8012eee0 spawnL2Type32Object` (variant 0x18, one layer 2 type 0x32 object from D_8012F598) / `8012ee18
+  spawnL2Type32ObjectB` (unreferenced)
+- x003: `80117de4 animateArea3Palettes` (area 3 entry of data_80079B3C; `80118284 loadArea3ClutRows`), `801188fc spawnApAwardNumber`, handlers named by
+  table slot (kinds unknown) `80119838 updateL3Type39Object`, `8011992c updateL3Type3EObject` (22 placements), `801287f8 updateL3Type2FObject`,
+  `801251c4 updateL2Type20Object`; updateHornedEnemy subtype table D_80135D6C: `80126d18 hornedEnemySubtype0Step`, `80126e24
+  hornedEnemySubtype1Step`, `80126f38 hornedEnemySubtype2Step` (walks with sfx 0x76), `8012724c hornedEnemySubtype3Step`

@@ -11,7 +11,7 @@ extern P4 D_8012F4AC[];
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012CFCC(TObj *o)
+void spearPigAmbushSpawnStep(TObj *o)
 {
     TObj *e;
     int i;

@@ -19,7 +19,7 @@ extern short FUN_8003fd78(O *, int, int);
 
 #define PADCHK() { volatile unsigned short *pad = &DAT_8009d670; if (*pad & 0x80) o->w2e = 1; if (*pad & 0x20) o->w2e = 0; }
 
-void func_8011C758(O *o)
+void playerStep48Area10(O *o)
 {
     short flag;
     O *p;

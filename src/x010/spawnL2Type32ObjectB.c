@@ -6,7 +6,7 @@ typedef struct { unsigned short f, sub, c, x, y, z; } SP;
 extern SP D_8012F598;
 extern TObj *allocObjectLayer2(void);
 
-void func_8012EE18(TObj *o)
+void spawnL2Type32ObjectB(TObj *o)
 {
     TObj *n = allocObjectLayer2();
 

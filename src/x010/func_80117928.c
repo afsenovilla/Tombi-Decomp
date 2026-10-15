@@ -1,6 +1,6 @@
 // FUNC 80117928 916 X010
 // MATCHING 80117928 916
-/* Covers splat entries func_80117928 (prologue) + func_80117CBC (body). */
+/* Covers splat entries func_80117928 (prologue) + spawnApAwardNumber (body). */
 #include "TOBJ.H"
 
 typedef struct { char pad[0xc6]; unsigned short wc6; } XC;

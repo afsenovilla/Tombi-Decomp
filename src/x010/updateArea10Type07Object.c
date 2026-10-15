@@ -22,7 +22,7 @@ static __inline__ int nearCam(TObj *o)
     return (unsigned short)(o->h->p.whole - *(unsigned short *)0x1F80016A + 16) < 33;
 }
 
-void func_80121BAC(TObj *o)
+void updateArea10Type07Object(TObj *o)
 {
     unsigned short *b;
     int r;

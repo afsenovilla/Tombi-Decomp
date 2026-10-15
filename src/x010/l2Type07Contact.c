@@ -6,7 +6,7 @@
 short func_80043C74();
 void decreaseObjectTimer(TObj *o, int n);
 
-void func_8012095C(TObj *o, TObj *p)
+void l2Type07Contact(TObj *o, TObj *p)
 {
     short d, w, t, e0, e1, sx, c;
     int dy, dd;

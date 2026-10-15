@@ -70,9 +70,9 @@ extern void FUN_80106f98(TObj *);
 extern void FUN_8010d390(TObj *);
 extern void playerSwimDirFromPad(TObj *);
 extern void playerStepSwimUnderwater(TObj *);
-extern void FUN_8011b330(TObj *);
+extern void playerStep3FArea10(TObj *);
 extern void playerStepGrabbedStruggle(TObj *);
-extern void FUN_8011b7d4(TObj *);
+extern void playerStep41Area10(TObj *);
 extern void playerStepWaterJumpOut(TObj *);
 extern void playerStepSwimSpin(TObj *);
 extern void playerStepSuperJump(TObj *);
@@ -392,14 +392,14 @@ void playerNormalModeDispatch(TObj *o, int p2)
         break;
     case 0x3f:
         dirA(o);
-        FUN_8011b330(o);
+        playerStep3FArea10(o);
         break;
     case 0x40:
         playerStepGrabbedStruggle(o);
         break;
     case 0x41:
         dirD(o);
-        FUN_8011b7d4(o);
+        playerStep41Area10(o);
         break;
     case 0x43:
         dirA(o);

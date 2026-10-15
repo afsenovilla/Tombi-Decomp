@@ -7,7 +7,7 @@ extern SP D_8012F598;
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
 
-void func_8012EEE0(TObj *o)
+void spawnL2Type32Object(TObj *o)
 {
     TObj *e;
 
