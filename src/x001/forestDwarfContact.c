@@ -2,14 +2,14 @@
 // MATCHING 801242c0 136
 #include "TOBJ.H"
 
-extern short FUN_800435e0(TObj *, TObj *);
+extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 
 void forestDwarfContact(TObj *a, TObj *b)
 {
     short r;
 
     if (b->subtype) {
-        r = FUN_800435e0(a, b);
+        r = objectBoxOverlapSideFacing(a, b);
         if (r != -1 && r < 3) {
             b->active = 2;
             b->b04 = 2;

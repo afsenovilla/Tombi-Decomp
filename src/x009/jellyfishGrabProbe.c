@@ -1,14 +1,14 @@
 // FUNC 80121254 112 X009
 // MATCHING 80121254 112
 #include "TOBJ.H"
-extern short func_8004b57c(void);
+extern short probeGrabPointInBoxA(void);
 extern short DAT_1f8003bc;
 extern short DAT_1f80019e;
 extern TObj *DAT_1f8003c0;
 
 void jellyfishGrabProbe(TObj *a, TObj *b)
 {
-    if (func_8004b57c() != 0) {
+    if (probeGrabPointInBoxA() != 0) {
         a->b9e = 4;
         a->wba = 0;
         a->velY = 0;

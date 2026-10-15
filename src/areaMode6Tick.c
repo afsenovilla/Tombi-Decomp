@@ -5,7 +5,7 @@ extern short G1f4, G1c6;
 extern unsigned short G1f8;
 extern unsigned int G164;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec26c(void);
-extern void updateInventoryOverlay(void), FUN_8002af10(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
+extern void updateInventoryOverlay(void), callAreaModelLinkHook(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
 extern void resetDrawLists(void), drawGameplayScene(void), FUN_8001dbdc(void);
 
 void areaMode6Tick(void)
@@ -24,7 +24,7 @@ void areaMode6Tick(void)
     if (G1c6 != 1)
         updateInventoryOverlay();
     if (G1c6 == 0) {
-        FUN_8002af10();
+        callAreaModelLinkHook();
         updateObjectsLayer8();
         if (G1c6 == 0)
             updateObjectsLayer7();

@@ -5,7 +5,7 @@
 
 typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
 extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
-extern short func_800435E0(TObj *, TObj *);
+extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void spawnImpactEffect(int, short, short, short);
 
@@ -49,7 +49,7 @@ void redFlowerContact(TObj *o, TObj *e)
         return;
         return;
     }
-    r = func_800435E0(o, e);
+    r = objectBoxOverlapSideFacing(o, e);
     if (r == -1) return;
     switch (*(unsigned char *)&o->wac) {
     case 1:

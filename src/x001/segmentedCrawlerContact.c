@@ -9,13 +9,13 @@ typedef struct {
     TObj *e4;
 } P;
 
-extern short func_800435E0(P *, TObj *);
+extern short objectBoxOverlapSideFacing(P *, TObj *);
 extern void spawnImpactEffect(int, short, short, short);
 extern void decreaseObjectTimer(P *, int);
 
 void segmentedCrawlerContact(P *o, TObj *e)
 {
-    short r = func_800435E0(o, e);
+    short r = objectBoxOverlapSideFacing(o, e);
     TObj *q;
 
     if (r == -1) return;

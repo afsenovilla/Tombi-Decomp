@@ -2,7 +2,7 @@
 // MATCHING 8011d4fc 264
 #include "TOBJ.H"
 
-extern void FUN_8002ee50(int, int, int, int);
+extern void spawnPoolType32At(int, int, int, int);
 
 void func_8011D4FC(TObj *o, TObj *p)
 {
@@ -14,5 +14,5 @@ void func_8011D4FC(TObj *o, TObj *p)
     o->b04 = 2;
     o->step = 0;
     o->state = 0;
-    FUN_8002ee50(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+    spawnPoolType32At(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
 }

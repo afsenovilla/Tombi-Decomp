@@ -11,7 +11,7 @@ extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern unsigned FUN_8001f9e0(void);
-extern short FUN_80041240(TObj *, short, short);
+extern short probeSlopeWallSideAt(TObj *, short, short);
 extern int enemyProbeGround(TObj *);
 extern int enemyCheckWallAhead(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
@@ -121,7 +121,7 @@ void FUN_801294fc(TObj *o)
         }
         if (o->animFrame == 1) x->w04 = 0x10;
         else x->w04 = -0x10;
-        if (FUN_80041240(o, o->h->p.whole + x->w04, o->y.p.whole) != 0) o->timer = 0;
+        if (probeSlopeWallSideAt(o, o->h->p.whole + x->w04, o->y.p.whole) != 0) o->timer = 0;
         if (--o->timer == -1) {
             o->substep++;
             ObjSetFacingToPlayer(o);

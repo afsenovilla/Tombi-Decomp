@@ -1,5 +1,5 @@
 // JPDEMO slpm80165 8003ECD4 540
-// Demo version of PAL main0 8004211C (func_8004211C.c): returns 0 for a negative column first.
+// Demo version of PAL main0 8004211C (probeFloorSegmentBelow.c): returns 0 for a negative column first.
 /* Matched (was score 28). Keys: `short lo` (not int/unsigned short: no andi 0xffff and the sign-extended m temp
    no longer out-ranks lo for v1); n as `int` loaded through a short temp `nn` (`nn = *q; n = nn; if (nn == 0)`),
    which drops n to 7 weighted refs so y0 (6 refs/37 insns) is allocated before it (t0/t1); y0 as a copy of the
@@ -62,7 +62,7 @@ take:
     return 0;
 }
 
-int func_8004211C(TObj *o, short a, int b)
+int probeFloorSegmentBelow(TObj *o, short a, int b)
 {
     char pad[0x18];
     return check(o, a, b);

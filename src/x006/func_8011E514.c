@@ -2,13 +2,13 @@
 // MATCHING 8011e514 56
 
 extern char PLAYER[];
-extern void func_80047A3C(void *);
+extern void collidePlayerWithCat5Objects(void *);
 extern void collidePlayerWithCat2Objects(void *);
 
 void func_8011E514(void)
 {
     char *p = PLAYER;
 
-    func_80047A3C(p);
+    collidePlayerWithCat5Objects(p);
     collidePlayerWithCat2Objects(p);
 }

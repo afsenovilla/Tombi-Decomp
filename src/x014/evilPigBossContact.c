@@ -5,13 +5,13 @@
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
-extern short func_800435E0(unsigned char *, unsigned char *);
+extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void spawnImpactEffect(int, int, int, int);
 
 void evilPigBossContact(unsigned char *a, unsigned char *b)
 {
-    short r = func_800435E0(a, b);
+    short r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)
         return;
     switch (U8(a, 0xac)) {

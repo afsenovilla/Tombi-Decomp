@@ -19,7 +19,7 @@ extern void updateObjectsLayer7(void);
 extern void updateObjectsUnlayered(void);
 extern void processObjectCollisions(void);
 extern void updateInventoryOverlay(void);
-extern void FUN_8002af10(void);
+extern void callAreaModelLinkHook(void);
 extern void updateObjectsLayer8(void);
 extern void resetDrawLists(void);
 extern void drawGameplayScene(void);
@@ -56,7 +56,7 @@ void gameplayTick(void)
     if (DAT_1f8001c6 != 1)
         updateInventoryOverlay();
     if (DAT_1f8001c6 == 0) {
-        FUN_8002af10();
+        callAreaModelLinkHook();
         updateObjectsLayer8();
     }
     if (DAT_1f8001c6 != 2)

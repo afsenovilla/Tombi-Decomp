@@ -1,12 +1,12 @@
 // JPDEMO slpm80165 80039F64 484
-// Demo version of PAL main0 8003C338 (FUN_8003c338.c): one animation (no area split), ground probe at y (PAL y+20).
+// Demo version of PAL main0 8003C338 (hopSpinFallStep.c): one animation (no area split), ground probe at y (PAL y+20).
 extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
 extern short probeCollisionAtDepthB(unsigned char *, int, int);
 extern unsigned short DAT_8009c960;
 extern int DAT_8013b104, DAT_80134d0c;
 extern char DAT_80077d54[];
 
-void FUN_8003c338(unsigned char *o)
+void hopSpinFallStep(unsigned char *o)
 {
     unsigned x;
     short v, w;

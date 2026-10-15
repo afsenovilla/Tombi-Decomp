@@ -9,8 +9,8 @@ extern char D_8001473C[];
 extern void AnimLoadDuration(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
-extern void FUN_8002c0e0(TObj *);
-extern void FUN_8002c238(TObj *);
+extern void poolType12DirectionalStep(TObj *);
+extern void poolType12FollowPlayerStep(TObj *);
 
 void updatePoolType12Object(TObj *o)
 {
@@ -37,10 +37,10 @@ void updatePoolType12Object(TObj *o)
         ObjCullRegister(o);
         switch (o->subtype) {
         case 0:
-            FUN_8002c0e0(o);
+            poolType12DirectionalStep(o);
             break;
         case 1:
-            FUN_8002c238(o);
+            poolType12FollowPlayerStep(o);
             break;
         }
         break;

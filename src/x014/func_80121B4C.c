@@ -5,12 +5,12 @@
 extern short DAT_8007a5f0[];
 extern short D_8007A3F0[];
 extern short D_800A457C, D_800A457E, D_800A4582;
-extern short FUN_80041240(TObj *, short, short);
+extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
 static __inline__ short hitWall(TObj *o, short r)
 {
-    short v = FUN_80041240(o, o->h->p.whole, o->y.p.whole);
+    short v = probeSlopeWallSideAt(o, o->h->p.whole, o->y.p.whole);
     if (v != 0) {
         if (r != v) return 0;
         return 1;

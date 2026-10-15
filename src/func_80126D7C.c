@@ -2,13 +2,13 @@
 // MATCHING 80126d7c 492
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
-void FUN_8004886c(TObj *o, TObj *e);
+void pushObjectOutOfObjectFacingB(TObj *o, TObj *e);
 
 void func_80126D7C(TObj *o, TObj *e)
 {
     short sx, dx, w, a, t; int dy; int d; unsigned short u;
     if (e->subtype != 2) {
-        FUN_8004886c(o, e);
+        pushObjectOutOfObjectFacingB(o, e);
         return;
     }
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)

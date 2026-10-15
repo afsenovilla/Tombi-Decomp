@@ -22,7 +22,7 @@ extern short D_800A60D2[];
 extern unsigned char D_8009C970[];
 extern void FUN_800399c4(void);
 extern void FUN_80039e54(void);
-extern void FUN_8003a89c(void);
+extern void scriptOpSetPlayerStateEx(void);
 extern void objSetAnimFromSubtypeTable(TObj *);
 extern void func_800ECBBC(TObj *);
 extern void func_800E8348(TObj *);
@@ -487,7 +487,7 @@ static __inline__ int opab(void)
 static __inline__ int op97(void)
 {
     if (GVARS.b3a == 0) return 0;
-    FUN_8003a89c();
+    scriptOpSetPlayerStateEx();
     return 1;
 }
 

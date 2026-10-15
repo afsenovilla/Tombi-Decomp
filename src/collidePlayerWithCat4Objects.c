@@ -43,7 +43,7 @@ void func_801210E4(TObj *o, TObj *e);
 void func_8011D370(TObj *o, TObj *e);
 void func_8011C99C(TObj *o, TObj *e);
 short pushObjectOutOfObjectBoxA(TObj *o, TObj *e);
-void func_80045BAC(TObj *o, TObj *e);
+void landObjectOnObjectBox(TObj *o, TObj *e);
 void func_80043C74(TObj *o, TObj *e);
 void func_8011F3CC(TObj *o, TObj *e);
 
@@ -149,7 +149,7 @@ void collidePlayerWithCat4Objects(TObj *o)
             switch (e->b0c) {
             case 3:
                 if (GAME.selectedArea == 1 || (GAME.purifiedAreas & 0x40))
-                    func_80045BAC(o, e);
+                    landObjectOnObjectBox(o, e);
                 break;
             case 4:
                 func_80043C74(o, e);

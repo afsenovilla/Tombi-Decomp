@@ -4,7 +4,7 @@
    which flips local-alloc's priority order (box/sum/andi chain before lim/slt and o-val/d) and gives the game's
    registers (box+d in v0, d tied to o-val in v1, e-ptr/e-val in a0). The dead `two = 2` in case 0 is debt: it makes
    `two` multi-set so loop.c does not combine the stores' constant 2 with the compare's and hoist it (flow deletes
-   the dead store). Body of case 32 copied from the matched twin func_80048C24. */
+   the dead store). Body of case 32 copied from the matched twin captureCat2ByCat4Box. */
 #include "TOBJ.H"
 #include "gamestate.h"
 

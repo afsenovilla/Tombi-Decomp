@@ -5,7 +5,7 @@
 
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
-extern void FUN_8002ee50(int, int, int, int);
+extern void spawnPoolType32At(int, int, int, int);
 
 void func_8011CBA0(TObj *o, TObj *e)
 {
@@ -15,7 +15,7 @@ void func_8011CBA0(TObj *o, TObj *e)
             e->b04 = 2;
             e->step = 0;
             e->state = 0;
-            FUN_8002ee50(0, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+            spawnPoolType32At(0, e->a.p.whole, e->y.p.whole, e->b.p.whole);
         }
         SPAD.s19e = 0;
     }

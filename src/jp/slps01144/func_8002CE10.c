@@ -1,5 +1,5 @@
 // JP slps01144 8002CE10 516
-// Japanese version of PAL main0 8002C238 (FUN_8002c238.c): 71 -> 85.
+// Japanese version of PAL main0 8002C238 (poolType12FollowPlayerStep.c): 71 -> 85.
 #include "TOBJ.H"
 extern unsigned char DAT_800a6039;
 extern unsigned char DAT_800a603d;
@@ -20,7 +20,7 @@ extern unsigned char DAT_80011dad[];
 extern unsigned char DAT_800a6101[];
 extern void FUN_8001fe6c(TObj *);
 
-void FUN_8002c238(TObj *o)
+void poolType12FollowPlayerStep(TObj *o)
 {
     int d;
     o->d8c = 0;

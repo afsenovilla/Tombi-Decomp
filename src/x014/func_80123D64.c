@@ -26,7 +26,7 @@ extern void AnimLoadDuration(TObj *);
 extern int FUN_8001f9e0(void);
 extern int angleFromDelta(short, short);
 extern TObj *allocObjectLayer2(void);
-extern short FUN_80041240(TObj *, int, int);
+extern short probeSlopeWallSideAt(TObj *, int, int);
 extern short probeFloorPlaneAt(TObj *, int, int);
 
 static __inline__ short Out(TObj *o)
@@ -38,7 +38,7 @@ static __inline__ short Out(TObj *o)
 
 static __inline__ int Chk(TObj *o, short k)
 {
-    short r = FUN_80041240(o, o->h->p.whole, o->y.p.whole);
+    short r = probeSlopeWallSideAt(o, o->h->p.whole, o->y.p.whole);
     int n = k;
     if (r != 0 && n == r && SPAD.s284 == 0)
         n++;

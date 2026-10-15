@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
-extern short func_800435E0(TObj *, TObj *);
+extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void spawnImpactEffect(int, int, int, int);
 
@@ -12,7 +12,7 @@ void spearPigContact(TObj *o, TObj *e)
 {
     short r;
 
-    r = func_800435E0(o, e);
+    r = objectBoxOverlapSideFacing(o, e);
     if (r == -1) return;
     if (*(unsigned short *)&e->wb4 == 0 && e->subtype < 2) {
         if (e->active & 2) return;

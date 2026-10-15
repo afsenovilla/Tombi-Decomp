@@ -4,11 +4,11 @@
 #include "TOBJ.H"
 
 extern short D_1F8003BC;
-extern short FUN_8004b57c(TObj *, TObj *);
+extern short probeGrabPointInBoxA(TObj *, TObj *);
 
 void flowerTowerBlockerGrabProbe(TObj *o, TObj *e)
 {
-    if (e->subtype && FUN_8004b57c(o, e)) {
+    if (e->subtype && probeGrabPointInBoxA(o, e)) {
         o->b9e = 4;
         o->wba = 0;
         o->velY = 0;

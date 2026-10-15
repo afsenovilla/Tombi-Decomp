@@ -1,6 +1,6 @@
 // JPDEMO x00 8011BD00 160
 // Demo version of PAL x000 80125A28 (FUN_80125a28.c): no second hit test; spawns a hit effect and plays sound 5.
-extern short FUN_80044424();
+extern short boxesOverlapSideB();
 extern int FUN_800428c0(int, int);
 
 extern void func_80020054(int, int, int, int);
@@ -9,7 +9,7 @@ void FUN_80125a28(char *a, char *b)
 {
     char *t;
     unsigned short u;
-    if (FUN_80044424(a, b) >= 0) {
+    if (boxesOverlapSideB(a, b) >= 0) {
         t = b;
         if (*(unsigned short *)(b + 0x2c) != 0)
             t = *(char **)(b + 0x28);

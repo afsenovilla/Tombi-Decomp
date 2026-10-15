@@ -222,6 +222,33 @@ One line per name: `address name (old file) - justification`.
 - `80030afc updateL4Type1BObject` (was func_80033F50) - layer 4 type 0x1B handler (MAIN0 table slot 80079DE0)
 - `80030404 updateL4Type08Object` (was func_80030404) - layer 4 type 0x8 handler (MAIN0 table slot 80079D94)
 - `8002b0b4 updateL8Type07Object` (was func_8002B0B4) - layer 8 type 0x7 handler (MAIN0 table slot 80079BA4)
+- `80055618 drawObjectMultiPartSprite3D` (was FUN_80055618) - drawCategory3Objects render kind 4: GTE-projected object position, up to 7 FT4 parts from the row table by WC6(o), part frames picked by o->wb4[i]
+- `80055cb8 drawObjectSpriteParts` (was func_80055CB8) - render kind 7: screen-space FT4 parts at o->x/y + entry offsets (mirrored by animFrame bit 0), semi-trans from b0d
+- `80052190 drawObjectSpritePartsRotated3D` (was func_80052190) - render kind 8: projected FT4 parts rotated by d8c through the sine table D_8007A3F0
+- `80056e4c drawObjectSpriteScaled3D` (was func_80056E4C) - render kind 14: one projected FT4 scaled by wb8/100, grey tint wb4
+- `80040f78 testCollisionSegmentList` (was func_80040F78) - walks the segment list at 1F800278 and dispatches by kind (1 testCollisionSegment, 2/4/8 below, 0x10 wall); stores the hit word in 1F800282
+- `80040d30 testCollisionSegmentStep` (was FUN_80040d30) - segment kind 2 (stepped height h + k*((x-lo)%n)/n); `80040ac0 testCollisionSegmentSlopeA` / `80040bfc testCollisionSegmentSlopeB` (was func_80040AC0 / FUN_80040bfc) - kinds 4 / 8 (rising/falling slopes)
+- `80040ea8 testCollisionSegmentWall` (was func_80040EA8) (no caller found) - kind 0x10 test that testCollisionSegmentList inlines
+- `80041240 probeSlopeWallSideAt` (was func_80041240) - plane probe over the kind 4/8 segments: 1 = blocked by a kind-4 side, 2 = kind-8 side
+- `8004211c probeFloorSegmentBelow` (was func_8004211C) (no caller found) - plane probe over kind 2 (non-wall) segments: 1 when the floor height at x is at or below y
+- `800435e0 objectBoxOverlapSideFacing` (was func_800435E0) - objectBoxOverlapSide variant using b's facing (s2e bit 0); -1 none, 0/1 side, 2 top, 3 bottom
+- `800437e0 pushObjectOutOfObjectBoxE` (was func_800437E0) - another push-out/land variant (lands a on b's top when within 0xC)
+- `80044424 boxesOverlapSideB` (was func_80044424) - box overlap returning -1 / 0,1 (side by sign of dx) / 2,3 (above/below)
+- `80045bac landObjectOnObjectBox` (was FUN_80045bac) (no caller found) - lands a on top of b (clears velY, sets b69 on both) or pushes it below; returns 1 / 3
+- `8004886c pushObjectOutOfObjectFacingB` (was FUN_8004886c) - facing-aware vertical push-out (called by the X000 area-0/3 collision hooks)
+- `8004b57c probeGrabPointInBoxA` / `8004b6a0 probeGrabPointInBoxB` (was FUN_8004b57c / FUN_8004b6a0) - identical grab tests of the point we8/wea against a box, write the hang offset to 1F8003BC (X000 callers)
+- `8004b454 probeGrabObjectBoxOffset` (was func_8004B454) - playerProbeGrab case: grab box offset by D_8007B5E4[b0c]; sets b9e = 3 and 1F8003C0 = the object
+- `80048c24 captureCat2ByCat4Box` (was func_80048C24) - cat-2 types 0x22/0x2C inside a cat-4 box are removed and the cat-4 object's state advances
+- `80048cec dispatchAreaCollisionHookA` / `80048d3c dispatchAreaCollisionHookB` (was func_80048CEC / func_80048D3C) (no caller found) - area 0 / 3 overlay collision callbacks
+- `80047a3c collidePlayerWithCat5Objects` (was func_80047A3C) (no caller found) - loops the cat-5 list calling collidePlayerWithCat5Object
+- `80044290 playerPushOutOfObjectBoxThunk` (was func_80044290) (no caller found) - just calls playerPushOutOfObjectBox
+- `8002c0e0 poolType12DirectionalStep` / `8002c238 poolType12FollowPlayerStep` (was FUN_8002c0e0 / FUN_8002c238) - updatePoolType12Object subtype 0 (placed at one of 8 directions around the d90 parent) / subtype 1 (follows the player, anim by player mode)
+- `8002ee50 spawnPoolType32At` (was FUN_8002ee50) - allocates a pool type 0x32 object at x/y/z with size 0x10/0x18/0x20 by kind
+- `8002ff20 spawnPlayerEffect4E` (was FUN_8002ff20) - allocates a pool type 0x4E effect at the player position
+- `8002af10 callAreaModelLinkHook` (was FUN_8002af10) - calls the per-area PTR_DAT_80079b3c entry with the WMD data (area/section exceptions); see linkAreaModelBlock
+- `8003a89c scriptOpSetPlayerStateEx` (was FUN_8003a89c) - the script player-state op that follows scriptOpSetPlayerState (extra 9/8,9 toggles of 8009C93E)
+- `8003c338 hopSpinFallStep` (was FUN_8003c338) (no caller found) - hop up (velY -0x200), spin d8c by 0x14 and fall until probeCollisionAtDepthB hits
+- `80024e58 modelDrawFT4WithG4Lit` (was FUN_80024e58) (no caller found) - modelDrawFT4 followed by modelDrawG4Lit on the result
 
 # X000 function names (shared overlay code)
 

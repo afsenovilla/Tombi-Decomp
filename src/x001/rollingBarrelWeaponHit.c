@@ -8,7 +8,7 @@ extern int resolveHitResultB(TObj *, TObj *);
 extern void playSFX(int);
 extern void spawnImpactEffect(int, int, int, int);
 extern void spawnRollingBarrelDebris(int, int, int);
-extern void FUN_8002ee50(int, int, int, int);
+extern void spawnPoolType32At(int, int, int, int);
 
 void rollingBarrelWeaponHit(TObj *o, TObj *e)
 {
@@ -34,7 +34,7 @@ void rollingBarrelWeaponHit(TObj *o, TObj *e)
         e->b04 = 2;
         e->step = 0;
         spawnRollingBarrelDebris(e->h->p.whole, e->y.p.whole, e->d->p.whole);
-        FUN_8002ee50(0, e->h->p.whole, e->y.p.whole, e->d->p.whole);
+        spawnPoolType32At(0, e->h->p.whole, e->y.p.whole, e->d->p.whole);
         return;
     }
     if (r == 2) {

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
-extern short func_800435E0(TObj *, TObj *);
+extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
 void komaPigContact(TObj *o, TObj *e)
@@ -12,7 +12,7 @@ void komaPigContact(TObj *o, TObj *e)
     short r;
 
     if (e->subtype == 4) return;
-    r = func_800435E0(o, e);
+    r = objectBoxOverlapSideFacing(o, e);
     if (r == -1) return;
     switch (*(unsigned char *)&o->wac) {
     case 1:

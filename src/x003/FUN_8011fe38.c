@@ -1,14 +1,14 @@
 // FUNC 8011fe38 144 X003
 // MATCHING 8011fe38 144
 #include "TOBJ.H"
-extern short func_8004b57c(void);
+extern short probeGrabPointInBoxA(void);
 extern short DAT_1f8003bc;
 extern short DAT_1f80019e;
 extern TObj *DAT_1f8003c0;
 
 void FUN_8011fe38(TObj *a, TObj *b)
 {
-    if (b->d94 == 0 && func_8004b57c() != 0) {
+    if (b->d94 == 0 && probeGrabPointInBoxA() != 0) {
         a->b9e = 4;
         a->wba = -3;
         a->velY = 0;

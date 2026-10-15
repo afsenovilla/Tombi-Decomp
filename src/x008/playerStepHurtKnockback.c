@@ -33,7 +33,7 @@ extern short playerHurtCheckFastFall(TObj *);
 extern void playerHurtLandRecover(TObj *);
 
 extern char D_80077D24[];
-extern void FUN_8002ff20(int, int, int);
+extern void spawnPlayerEffect4E(int, int, int);
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, int);
 
@@ -114,7 +114,7 @@ void playerStepHurtKnockback(TObj *o)
         switch (U8(o, 0xd1)) {
         case 1:
             SETANIM_IF(0x53);
-            FUN_8002ff20(9, 0, 0);
+            spawnPlayerEffect4E(9, 0, 0);
             break;
         case 3:
             SETANIM_IF(0x50);

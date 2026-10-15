@@ -8,12 +8,12 @@ typedef struct {
     TObj *e4;
 } P;
 
-extern short FUN_800435e0(P *, TObj *);
+extern short objectBoxOverlapSideFacing(P *, TObj *);
 extern void spawnImpactEffect(int, short, short, short);
 
 void grabObjectContact(P *a, TObj *b)
 {
-    short r = FUN_800435e0(a, b);
+    short r = objectBoxOverlapSideFacing(a, b);
 
     if (r != -1 && r < 3 && *(unsigned char *)&a->o.wac == 1) {
         b->active = 2;

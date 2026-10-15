@@ -10,11 +10,11 @@ extern unsigned char DAT_800a603a;
 int getObjectRenderKind(TObj *o);
 void drawObjectSprite(TObj *o);
 void drawObjectSpriteRotated(TObj *o);
-void FUN_80055618(TObj *o);
+void drawObjectMultiPartSprite3D(TObj *o);
 void FUN_80123e04(TObj *o);
 void drawObjectSpriteQuad(TObj *o);
-void FUN_80055cb8(TObj *o);
-void FUN_80052190(TObj *o);
+void drawObjectSpriteParts(TObj *o);
+void drawObjectSpritePartsRotated3D(TObj *o);
 void drawObjectSpriteScaled(TObj *o);
 void drawMessageBox(TObj *o);
 void drawObjectSpriteRotScaled(TObj *o);
@@ -23,7 +23,7 @@ void drawObjectSprtTinted(TObj *o);
 void FUN_800eab58(TObj *o);
 void FUN_800ec148(TObj *o);
 void FUN_800eb77c(TObj *o);
-void FUN_80056e4c(TObj *o);
+void drawObjectSpriteScaled3D(TObj *o);
 void drawObjectSprtWithMode(TObj *o);
 void FUN_80124780(TObj *o);
 void FUN_8011c00c(TObj *o);
@@ -47,11 +47,11 @@ void drawCategory3Objects(void)
             switch (getObjectRenderKind(o)) {
             case 0: drawObjectSprite(o); break;
             case 2: drawObjectSpriteRotated(o); break;
-            case 4: FUN_80055618(o); break;
+            case 4: drawObjectMultiPartSprite3D(o); break;
             case 5: FUN_80123e04(o); break;
             case 6: drawObjectSpriteQuad(o); break;
-            case 7: FUN_80055cb8(o); break;
-            case 8: FUN_80052190(o); break;
+            case 7: drawObjectSpriteParts(o); break;
+            case 8: drawObjectSpritePartsRotated3D(o); break;
             case 1: case 9: drawObjectSpriteScaled(o); break;
             case 10: drawMessageBox(o); break;
             case 3: case 11: drawObjectSpriteRotScaled(o); break;
@@ -63,7 +63,7 @@ void drawCategory3Objects(void)
                 case 2: FUN_800ec148(o); break;
                 case 3: FUN_800eb77c(o); break;
                 }
-            case 14: FUN_80056e4c(o); break;
+            case 14: drawObjectSpriteScaled3D(o); break;
             case 16: drawObjectSprtWithMode(o); break;
             case 17: FUN_80124780(o); break;
             case 18: FUN_8011c00c(o); break;
@@ -83,11 +83,11 @@ void drawCategory3Objects(void)
                 switch (getObjectRenderKind(o)) {
                 case 0: drawObjectSprite(o); break;
                 case 2: drawObjectSpriteRotated(o); break;
-                case 4: FUN_80055618(o); break;
+                case 4: drawObjectMultiPartSprite3D(o); break;
                 case 5: FUN_80123e04(o); break;
                 case 6: drawObjectSpriteQuad(o); break;
-                case 7: FUN_80055cb8(o); break;
-                case 8: FUN_80052190(o); break;
+                case 7: drawObjectSpriteParts(o); break;
+                case 8: drawObjectSpritePartsRotated3D(o); break;
                 case 1: case 9: drawObjectSpriteScaled(o); break;
                 case 10: drawMessageBox(o); break;
                 case 3: case 11: drawObjectSpriteRotScaled(o); break;
@@ -100,7 +100,7 @@ void drawCategory3Objects(void)
                     case 3: FUN_800eb77c(o); break;
                     }
                     break;
-                case 14: FUN_80056e4c(o); break;
+                case 14: drawObjectSpriteScaled3D(o); break;
                 case 16: drawObjectSprtWithMode(o); break;
                 case 17: FUN_80124780(o); break;
                 case 18: FUN_8011c00c(o); break;

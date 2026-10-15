@@ -6,12 +6,12 @@ typedef struct {
     char p1c[0xac - 0x1c]; unsigned char bac;
     char pad[0xe4 - 0xad]; TObj *de4;
 } PL;
-extern short func_800435E0(PL *, TObj *);
+extern short objectBoxOverlapSideFacing(PL *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 
 void func_8011DE58(PL *p, TObj *o)
 {
-    short r = func_800435E0(p, o);
+    short r = objectBoxOverlapSideFacing(p, o);
     if (r != -1 && r < 3 && p->bac == 1) {
         o->active = 2;
         o->b04 = 2;

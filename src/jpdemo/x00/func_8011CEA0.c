@@ -2,14 +2,14 @@
 // Demo version of PAL x000 80126D7C (func_80126D7C.c): clears scratchpad 0x1F80019E on a hit.
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
-short FUN_8004886c(TObj *o, TObj *e);
+short pushObjectOutOfObjectFacingB(TObj *o, TObj *e);
 
 extern short D_1F80019E;
 void func_80126D7C(TObj *o, TObj *e)
 {
     short sx, dx, w, a, t; int dy; int d; unsigned short u;
     if (e->subtype != 2) {
-        if (FUN_8004886c(o, e)) D_1F80019E = 0;
+        if (pushObjectOutOfObjectFacingB(o, e)) D_1F80019E = 0;
         return;
     }
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)

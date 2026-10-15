@@ -4,13 +4,13 @@
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
-extern short FUN_800435e0(unsigned char *, unsigned char *);
+extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern unsigned char DAT_1f8001a4;
 
 void flyingBugContact(unsigned char *a, unsigned char *b)
 {
-    short r = FUN_800435e0(a, b);
+    short r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)
         return;
     switch (U8(a, 0xac)) {

@@ -2,7 +2,7 @@
 // MATCHING 80125ae4 164
 #include "spad.h"
 #include "TOBJ.H"
-extern int func_80044424(TObj *, TObj *);
+extern int boxesOverlapSideB(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
 
 void springVineObjectCollision(TObj *a, TObj *b)
@@ -11,7 +11,7 @@ void springVineObjectCollision(TObj *a, TObj *b)
     short s;
 
     if (b->subtype == 0) {
-        r = func_80044424(a, b);
+        r = boxesOverlapSideB(a, b);
         s = r;
         if (s >= 0) {
             b->w9a = (short)resolveHitResultA(a, b) >> 1;

@@ -8,10 +8,10 @@
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer2(void);
-extern short func_80041240(TObj *, short, short);
+extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 extern void spawnImpactEffect(int, short, short, short);
-extern void FUN_8002ee50(int, short, short, short);
+extern void spawnPoolType32At(int, short, short, short);
 
 typedef struct { short a, b; } AB;
 extern AB D_801265B0[];
@@ -120,12 +120,12 @@ int func_80120DA0(TObj *o)
         dx = 0x24;
     }
     if (o->d38 != 0xc0) {
-        r = func_80041240(o, o->h->p.whole + dx, o->y.p.whole);
+        r = probeSlopeWallSideAt(o, o->h->p.whole + dx, o->y.p.whole);
         if (r != 0 && m == r && SPAD.s284 == 0) {
             o->d38 = (0x80 - o->d38) & 0xff;
             spawnImpactEffect(1, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
             debris(o, m);
-            FUN_8002ee50(0, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
+            spawnPoolType32At(0, o->a.p.whole + dx, o->y.p.whole, o->b.p.whole);
             o->velV -= o->velV >> 2;
         }
     }
@@ -135,6 +135,6 @@ int func_80120DA0(TObj *o)
     debris2(o, 5, af);
     af = 1;
     debris2(o, 6, af);
-    FUN_8002ee50(2, o->a.p.whole, o->y.p.whole + 0x24, o->b.p.whole);
+    spawnPoolType32At(2, o->a.p.whole, o->y.p.whole + 0x24, o->b.p.whole);
     return 1;
 }

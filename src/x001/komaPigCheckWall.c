@@ -11,7 +11,7 @@ typedef struct O {
     char p5[0xb4 - 0x9e]; P p;
 } O;
 extern short D_8007A1F0[], D_8007A5F0[];
-extern short func_80041240(O *, short, short);
+extern short probeSlopeWallSideAt(O *, short, short);
 
 int komaPigCheckWall(O *o)
 {
@@ -33,5 +33,5 @@ int komaPigCheckWall(O *o)
         a = 0;
         b = p->w4;
     }
-    return func_80041240(o, (short)(o->h->x + b), (short)(o->y + a)) != 0;
+    return probeSlopeWallSideAt(o, (short)(o->h->x + b), (short)(o->y + a)) != 0;
 }

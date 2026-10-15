@@ -2,13 +2,13 @@
 // MATCHING 8011f38c 108
 #include "spad.h"
 #include "TOBJ.H"
-extern short FUN_8004b57c(TObj *, TObj *);
+extern short probeGrabPointInBoxA(TObj *, TObj *);
 extern short D_1F8003BC;
 
 void hitWobbleObjectGrabProbe(TObj *o, TObj *p)
 {
     p->b6a = 0;
-    if (FUN_8004b57c(o, p)) {
+    if (probeGrabPointInBoxA(o, p)) {
         o->b9e = 4;
         o->wba = 0;
         o->velY = 0;

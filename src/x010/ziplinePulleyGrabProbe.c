@@ -3,12 +3,12 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern short FUN_8004b57c(TObj *, TObj *);
+extern short probeGrabPointInBoxA(TObj *, TObj *);
 
 void ziplinePulleyGrabProbe(TObj *o, TObj *e)
 {
     e->b6a = 0;
-    if (FUN_8004b57c(o, e)) {
+    if (probeGrabPointInBoxA(o, e)) {
         o->b9e = 4;
         o->wba = 0;
         o->velY = 0;

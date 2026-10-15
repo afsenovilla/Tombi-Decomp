@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern unsigned char D_1f8001a4;
 extern unsigned char PLAYER[];
-extern short FUN_800435e0(TObj *, TObj *);
+extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -12,7 +12,7 @@ void FUN_80126464(TObj *a, TObj *b)
 {
     short r;
 
-    r = FUN_800435e0(a, b);
+    r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)
         return;
     switch ((*(unsigned char*)&a->wac)) {

@@ -4,14 +4,14 @@
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
-extern short FUN_800435e0(unsigned char *, unsigned char *);
+extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern unsigned char DAT_1f8001a4;
 
 void hornedEnemyContact(unsigned char *a, unsigned char *b)
 {
-    short r = FUN_800435e0(a, b);
+    short r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)
         return;
     if (U16(b, 0xb4) == 0)

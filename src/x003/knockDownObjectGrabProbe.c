@@ -2,13 +2,13 @@
 // MATCHING 8011f474 148
 #include "spad.h"
 #include "TOBJ.H"
-extern short FUN_8004b6a0(TObj *, TObj *);
+extern short probeGrabPointInBoxB(TObj *, TObj *);
 extern short D_1F80019E;
 
 void knockDownObjectGrabProbe(TObj *o, TObj *p)
 {
     TObj *q;
-    if (FUN_8004b6a0(o, p)) {
+    if (probeGrabPointInBoxB(o, p)) {
         o->b9e = 1;
         o->wb8 = SPAD.s3bc;
         o->wba = -((short)(unsigned short)p->box2 >> 1);

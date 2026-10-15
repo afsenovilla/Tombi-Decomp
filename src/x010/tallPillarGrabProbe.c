@@ -1,7 +1,7 @@
 // FUNC 801212d4 284 X010
 // MATCHING 801212d4 284
 #include "spad.h"
-/* Player vs. slope-table object collision (X000 family: func_8004B454 / probeGrabObjectBox).
+/* Player vs. slope-table object collision (X000 family: probeGrabObjectBoxOffset / probeGrabObjectBox).
    Shape notes (all needed): `h` is used (via d) between the table lhu and the d30 store so combine
    cannot fold the lhu into an lh; `s` is a scratch variable reused for (short)h, box1, the compare
    flag and e->y (multi-set: lh not hoisted, flag lands in the same register); `d2 = s` before the
