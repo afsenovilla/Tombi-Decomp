@@ -113,7 +113,9 @@ int func_800EC504(Menu *m, int sound)
         if (D_1F8001FC & 0x80) {
             if (c >= 5 && c < 8) {
                 v = c - 1;
-                goto set;
+            set:
+                m->cursor = v;
+                if (sound) playSFX(8);
             }
             return 1;
         }
@@ -126,15 +128,12 @@ int func_800EC504(Menu *m, int sound)
         }
         if (D_1F8001FC & 0x10) {
             v = 8;
-        set:
-            m->cursor = v;
-            if (sound) goto sfx;
-            return 1;
+            goto set;
         }
         if (D_1F8001FC & 0x40) {
             if ((unsigned short)(m->mode - 1) < 2) {
                 m->cursor = 0;
-                if (sound) goto sfx;
+                if (sound) playSFX(8);
                 return 1;
             }
         }
