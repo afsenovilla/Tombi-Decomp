@@ -63,6 +63,12 @@ jobs:
             if [ -n "$f" ]; then mkdir -p "game/AREA$a"; cp "$f" "game/AREA$a/X0$a.BIN"; fi
           done
           ls game/AREA*/X0*.BIN | wc -l
+          # SYSTEM code overlays (tools/sysovl.py reads them from game/disc/fs/SYSTEM)
+          mkdir -p game/disc/fs/SYSTEM
+          for s in O0PTSUB0 D0SPSUB D0SPSUB2 D0SPSUB3 G0OVER I0NFO I0NFO2 I0NFO3; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*SYSTEM/$s.BIN" | head -1)"
+            if [ -n "$f" ]; then cp "$f" "game/disc/fs/SYSTEM/$s.BIN"; else echo "::error::SYSTEM/$s.BIN missing"; exit 1; fi
+          done
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Build report
