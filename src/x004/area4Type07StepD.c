@@ -7,7 +7,7 @@
 extern unsigned char D_800A6066A[]; /* byte view of (*(short*)&PLAYER.obj.animFrame) (debt) */
 extern void *D_80134D38;
 
-void func_80124E88(TObj *o)
+void area4Type07StepD(TObj *o)
 {
     unsigned char *k;
 

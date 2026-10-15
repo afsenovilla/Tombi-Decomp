@@ -14,9 +14,9 @@ extern void playSFX(int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern int stepAreaSwitch(TObj *);
-extern int func_8011B218(TObj *);
-extern void func_8011B138(TObj *);
-extern void func_8011B438(TObj *);
+extern int stepAreaSwitchB(TObj *);
+extern void stepAreaRotatingPart(TObj *);
+extern void stepAreaEventDoor(TObj *);
 
 void updateAreaMechanisms(TObj *o)
 {
@@ -89,13 +89,13 @@ void updateAreaMechanisms(TObj *o)
         case 17:
         case 19:
         case 21:
-            func_8011B138(o);
+            stepAreaRotatingPart(o);
             break;
         case 0:
             if (D_1F8001C8 & 1) break;
             p = &(*(short*)((char*)&SPAD.i170 + 2));
             if (*p >= 0x384) break;
-            r = func_8011B218(o);
+            r = stepAreaSwitchB(o);
             if (r == 1 && *p == 0x32a) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 1) {
                     if (GCD.bcdcd == 0xff) break;
@@ -112,7 +112,7 @@ void updateAreaMechanisms(TObj *o)
             break;
         case 10:
             if (!(D_1F8001C8 & 1)) break;
-            r = func_8011B218(o);
+            r = stepAreaSwitchB(o);
             if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 2) {
                     if (GCD.bcdce == 0xff) break;
@@ -129,7 +129,7 @@ void updateAreaMechanisms(TObj *o)
             break;
         case 8:
             if (D_1F8001C8 & 1) break;
-            r = func_8011B218(o);
+            r = stepAreaSwitchB(o);
             if (GCD.bd0d9) {
                 if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
                     if (GCD.bcddb == 0xff) {
@@ -152,7 +152,7 @@ void updateAreaMechanisms(TObj *o)
             break;
         case 12:
             if (D_1F8001C8 & 1) break;
-            if (func_8011B218(o) == 2) playSFX(0x7f);
+            if (stepAreaSwitchB(o) == 2) playSFX(0x7f);
             break;
         case 1:
         case 9:
@@ -186,7 +186,7 @@ void updateAreaMechanisms(TObj *o)
             break;
         case 22:
         case 23:
-            func_8011B438(o);
+            stepAreaEventDoor(o);
             break;
         }
         switch (o->substep) {

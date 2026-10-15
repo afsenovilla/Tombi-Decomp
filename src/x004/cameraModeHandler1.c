@@ -19,10 +19,10 @@ extern short D_1F8001C8;
 extern void updateCameraFollow(O *);
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int FUN_80028a80(O *);
-extern int func_80116764(O *);
+extern int cameraModeHandler1Step(O *);
 extern void setPlayerAxisPointers(void);
 
-void func_80116934(O *o)
+void cameraModeHandler1(O *o)
 {
     if (GVARS.b38) {
         updateCameraFollow(o);
@@ -40,7 +40,7 @@ void func_80116934(O *o)
         GAME.disableSelectMenu = 1;
         break;
     case 2:
-        if (func_80116764(o)) o->state++;
+        if (cameraModeHandler1Step(o)) o->state++;
         break;
     case 3:
         GAME.disableSelectMenu = 0;

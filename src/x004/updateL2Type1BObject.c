@@ -10,7 +10,7 @@ extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer1(void);
 extern void freeObjectLayer2(TObj *);
 
-void func_80125248(TObj *o)
+void updateL2Type1BObject(TObj *o)
 {
     TObj *n;
 

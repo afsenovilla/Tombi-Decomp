@@ -8,11 +8,11 @@ extern int DAT_1f8002d4[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void func_80127B14(TObj *);
-extern void func_80127D54(TObj *);
+extern void l2Type31StepA(TObj *);
+extern void l2Type31StepB(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_80127EC4(TObj *o)
+void updateL2Type31Object(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -52,10 +52,10 @@ void func_80127EC4(TObj *o)
             }
             break;
         case 1:
-            func_80127B14(o);
+            l2Type31StepA(o);
             break;
         case 2:
-            func_80127D54(o);
+            l2Type31StepB(o);
             break;
         }
         break;

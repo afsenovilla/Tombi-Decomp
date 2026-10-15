@@ -19,7 +19,7 @@ static __inline__ int nearCam(TObj *o)
     return (unsigned short)(o->h->p.whole - *(unsigned short *)0x1F80016A + 16) < 33;
 }
 
-void func_801242B0(TObj *o)
+void area4Type07StepA(TObj *o)
 {
     V3S *a = (V3S *)&o->wb4;
     V3S *b = (V3S *)&o->wbc;

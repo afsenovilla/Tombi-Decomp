@@ -19,7 +19,7 @@ typedef struct {
     short w62;             /* 0x62 */
 } S;
 
-int func_80116764(S *o)
+int cameraModeHandler1Step(S *o)
 {
     int r = 0;
 

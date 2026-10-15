@@ -6,7 +6,7 @@ extern void *D_80134D84;
 void FUN_8001fe6c(TObj *o);
 int FUN_8001fec0(TObj *o);
 
-void func_80127D54(TObj *o)
+void l2Type31StepB(TObj *o)
 {
     switch (o->state) {
     case 0:

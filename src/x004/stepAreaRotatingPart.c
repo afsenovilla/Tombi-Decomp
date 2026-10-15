@@ -2,7 +2,7 @@
 // MATCHING 8011b138 224
 #include "TOBJ.H"
 
-void func_8011B138(TObj *o)
+void stepAreaRotatingPart(TObj *o)
 {
     switch (o->state) {
     case 0:

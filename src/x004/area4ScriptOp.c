@@ -13,12 +13,12 @@ extern E3 D_8013062C[];
 extern E3 D_801308FC[];
 extern void SetRotMatrix(MAT *);
 extern void SetTransMatrix(MAT *);
-extern void func_80118720(short, int);
+extern void area4ScriptOpSetQuad(short, int);
 extern void getBaseMatrix(MAT *);
 extern void ApplyRotMatrix(SVEC *, int *);
-extern int func_801188F0(int *);
+extern int area4ScriptOpPointInside(int *);
 
-void func_80118BFC(L *o, unsigned char *a)
+void area4ScriptOp(L *o, unsigned char *a)
 {
     GS *gs = &D_8009C962;
     unsigned char cnt = a[0];
@@ -56,8 +56,8 @@ void func_80118BFC(L *o, unsigned char *a)
         break;
     }
     if (D_8009C962.f) i = 0x21c;
-    func_80118720(m, 0);
-    func_80118720(i, 1);
+    area4ScriptOpSetQuad(m, 0);
+    area4ScriptOpSetQuad(i, 1);
     for (i = 0; i < cnt; i++) {
         if (o->n >= 0x58) return;
         switch (D_8009C962.g) {
@@ -99,7 +99,7 @@ void func_80118BFC(L *o, unsigned char *a)
         v.vy = y;
         v.vz = z;
         ApplyRotMatrix(&v, mt.t);
-        if (func_801188F0(mt.t)) {
+        if (area4ScriptOpPointInside(mt.t)) {
             o->list[o->n] = (int)(a + tab[k]);
             o->n++;
         }

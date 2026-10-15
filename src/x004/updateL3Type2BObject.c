@@ -20,7 +20,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_8011ABA0(TObj *o)
+void updateL3Type2BObject(TObj *o)
 {
     switch (o->b04) {
     case 0:

@@ -6,7 +6,7 @@ extern VEC D_80133B1C[4];
 
 #define XAT(i) (D_80133ADC[i].vx + (D_80133ADC[i].vx - D_80133B1C[i].vx) * (p->vz - D_80133ADC[i].vz) / (D_80133ADC[i].vz - D_80133B1C[i].vz))
 
-int func_801188F0(VEC *p)
+int area4ScriptOpPointInside(VEC *p)
 {
     VEC v;
 

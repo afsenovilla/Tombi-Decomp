@@ -17,7 +17,7 @@ static __inline__ short Blocked(void)
     return 1;
 }
 
-void func_80116C0C(TObj *o)
+void checkScrollItemDoorB(TObj *o)
 {
     if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x78 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
         if (tryStartItemInteraction(o, 1, 0)) {

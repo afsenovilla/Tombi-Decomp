@@ -3,7 +3,7 @@
 
 
 #include "globals.h"
-void func_801274B0(int n)
+void setScriptGlobalFlagBit(int n)
 {
     int q = n / 8;
     int i = q + 0x58;

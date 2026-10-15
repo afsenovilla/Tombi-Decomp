@@ -6,7 +6,7 @@
 extern void *D_80134D38[];
 extern unsigned short D_80131108[];
 extern unsigned char PLAYER;
-extern int func_8012747C(int);
+extern int testGcdFlagBitBcefc(int);
 extern void cullObjectPerspective(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void FUN_80124070(TObj *);
@@ -24,7 +24,7 @@ static __inline__ int nearCam(TObj *o)
     return (unsigned short)(o->h->p.whole - *(unsigned short *)0x1F80016A + 16) < 33;
 }
 
-void func_80123B94(TObj *o)
+void updateArea4Type07Object(TObj *o)
 {
     unsigned short *b;
     int r;
@@ -33,7 +33,7 @@ void func_80123B94(TObj *o)
     switch (k) {
     case 0:
         if (!(GAME.purifiedAreas & 8) && GAME.selectedSection < 4) {
-            if (!func_8012747C(o->b0c)) break;
+            if (!testGcdFlagBitBcefc(o->b0c)) break;
             o->step = 4;
             o->state = 0;
             o->b04++;

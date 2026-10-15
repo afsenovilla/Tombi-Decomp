@@ -91,8 +91,8 @@ extern void loadSectionBounds(O *);
 extern void AnimAdvance(PL *);
 extern void FUN_800eea7c(PL *, int, int);
 extern void FUN_800eeae4(PL *, int, int);
-extern void func_80116C0C(O *);
-extern void func_80116AE0(O *);
+extern void checkScrollItemDoorB(O *);
+extern void checkScrollItemDoorA(O *);
 
 #define XU (*(unsigned short *)&D_1F80016Ax[0])
 #define ZU (*(unsigned short *)&D_1F80016Ex[0])
@@ -242,7 +242,7 @@ void updateAreaScroll(O *o)
         case 1:
             F6047();
             if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
-                func_80116C0C(o);
+                checkScrollItemDoorB(o);
                 break;
             }
             if (D_1F80016A >= 0x653 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x4ec && D_1F80016E >= -0x225
@@ -304,7 +304,7 @@ void updateAreaScroll(O *o)
         case 2:
             F6047();
             if (!(GAME.purifiedAreas & 8) && GCD.bcdd5 != 0xff) {
-                func_80116AE0(o);
+                checkScrollItemDoorA(o);
                 break;
             }
             if ((*(short*)((char*)&SPAD.i170 + 2)) == 0x276 && (unsigned short)(ZU + 0x415) < 0xc && (unsigned)(XU - 0x3d3) < 0x12) {

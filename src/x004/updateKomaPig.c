@@ -7,15 +7,15 @@ typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
 extern short D_800A4582;
-extern void func_801231D0();
-extern void func_80123310();
-extern void func_80123558();
+extern void komaPigSubtype0Step();
+extern void komaPigSubtype1Step();
+extern void komaPigSubtype2Step();
 extern void FUN_80124070();
 extern void FUN_8012423c();
 extern void FUN_80124ad8();
 extern void FUN_80124e14();
 static Fn D_801310EC[7] = {
-    (Fn)func_801231D0, (Fn)func_80123310, (Fn)func_80123558, (Fn)FUN_80124070,
+    (Fn)komaPigSubtype0Step, (Fn)komaPigSubtype1Step, (Fn)komaPigSubtype2Step, (Fn)FUN_80124070,
     (Fn)FUN_8012423c, (Fn)FUN_80124ad8, (Fn)FUN_80124e14,
 };
 extern int isObjectInView(TObj *);

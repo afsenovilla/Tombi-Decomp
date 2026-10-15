@@ -1257,3 +1257,15 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   D_8009F0EC; roles uncertain); collision-column wrappers `80121434 columnPushOutOfWall`, `801214d0 columnProbeA`, `80121540 columnProbeB`
 - x009 section 6 model drawing (drawAreaModelList): `80120280 drawArea9SectionModel` -> `8011f96c drawArea9ModelFT3`, `8011fb4c drawArea9ModelFT4`,
   `8011fdc4 drawArea9ModelGT3`, `8011ffe0 drawArea9ModelGT4`
+- x004 (mostly structural names, roles uncertain): `80116934 cameraModeHandler1` (camera mode 1 slot of the MAIN0 per-area camera mode tables,
+  areas 4/12; `80116764 cameraModeHandler1Step`), `80116ae0 checkScrollItemDoorA` / `80116c0c checkScrollItemDoorB` (updateAreaScroll: at fixed
+  player positions tryStartItemInteraction(o, 1, 7 / 0) and lock the game), `80118bfc area4ScriptOp` (areas 4 and 12 entry of MAIN0 data_80079B3C;
+  `80118720 area4ScriptOpSetQuad`, `801188f0 area4ScriptOpPointInside`), `8011a448 spawnApAwardNumber` (awardAPByArea), `8011aba0
+  updateL3Type2BObject`, `8011ad24 updateL3Type3CObject`, `80125248 updateL2Type1BObject` (spawns a layer 1 type 2 object), `80127ec4
+  updateL2Type31Object` (`80127b14 l2Type31StepA`, `80127d54 l2Type31StepB`); updateAreaMechanisms subtypes `8011b218 stepAreaSwitchB` (subtypes
+  8/10/0xC: player box + da0+2 like stepAreaSwitch), `8011b138 stepAreaRotatingPart` (17/19/21: copies the parent state, turns d88 by 0x600),
+  `8011b438 stepAreaEventDoor` (moves once D_800A4555 reaches the subtype's values); `8011dc0c playerStep3AArea4` (playerNormalModeDispatch step
+  0x3A); D_801310EC subtype table of updateKomaPig: `801231d0 komaPigSubtype0Step`, `80123310 komaPigSubtype1Step`, `80123558 komaPigSubtype2Step`,
+  entries 3-6 `801242b0 area4Type07StepA`, `80124954 area4Type07StepB`, `80124b4c area4Type07StepC`, `80124e88 area4Type07StepD` (also run by
+  `80123b94 updateArea4Type07Object`, the area 4 branch of MAIN0 updateL2Type07Object); `8012747c testGcdFlagBitBcefc`, `801274b0
+  setScriptGlobalFlagBit` (SCRIPT_GLOBALS[0x58 + n / 8] |= bit)

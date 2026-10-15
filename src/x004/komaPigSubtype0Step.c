@@ -20,7 +20,7 @@ extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int komaPigCheckLanded(TObj *);
 
-void func_801231D0(TObj *o)
+void komaPigSubtype0Step(TObj *o)
 {
     unsigned char *p;
 

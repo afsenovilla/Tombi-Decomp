@@ -5,7 +5,7 @@
 
 extern void playSFX(int);
 
-void func_80124954(TObj *o)
+void area4Type07StepB(TObj *o)
 {
     o->y.raw = ((TObj *)o->d90)->y.raw;
     switch (o->state) {

@@ -19,7 +19,7 @@ static __inline__ int near(TObj *o)
     return (unsigned short)(o->h->p.whole - (*(short*)((char*)&SPAD.i168 + 2)) + 0x10) <= 0x20;
 }
 
-void func_80127B14(TObj *o)
+void l2Type31StepA(TObj *o)
 {
     P a, b;
 

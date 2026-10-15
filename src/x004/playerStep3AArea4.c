@@ -12,7 +12,7 @@ extern void FUN_800eea7c(TObj *, int, int);
 extern short FUN_8003fd78(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 
-void func_8011DC0C(TObj *o)
+void playerStep3AArea4(TObj *o)
 {
     switch (o->state) {
     case 0:

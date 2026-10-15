@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char D_800A4555;
 
-void func_8011B438(TObj *o)
+void stepAreaEventDoor(TObj *o)
 {
     switch (o->step) {
     case 0:

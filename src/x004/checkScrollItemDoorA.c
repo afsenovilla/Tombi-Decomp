@@ -18,7 +18,7 @@ static __inline__ short busy(void)
     return 1;
 }
 
-void func_80116AE0(TObj *o)
+void checkScrollItemDoorA(TObj *o)
 {
     if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x6d0 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
         if (tryStartItemInteraction(o, 1, 7)) {

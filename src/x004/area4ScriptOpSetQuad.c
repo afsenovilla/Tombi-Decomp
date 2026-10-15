@@ -30,7 +30,7 @@ static __inline__ void put(V4 *p, V3 *v)
     *(int *)((char *)p + 4) = v->y - SPAD.id8;
     *(int *)((char *)p + 8) = v->z - SPAD.idc;
 }
-void func_80118720(short z0, int idx)
+void area4ScriptOpSetQuad(short z0, int idx)
 {
     V3 v;
     int pad[3];
