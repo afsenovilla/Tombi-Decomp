@@ -2,7 +2,7 @@
 // MATCHING 801184fc 224
 #include "TOBJ.H"
 
-extern void func_80118388(TObj *);
+extern void initRaftReturnNpc(TObj *);
 extern void raftReturnTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -12,7 +12,7 @@ void updateRaftReturnNpc(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80118388(o);
+        initRaftReturnNpc(o);
         break;
     case 1:
         ObjCullRegister(o);

@@ -315,7 +315,7 @@ address,size,name,twin
 80116bdc,372,juiceManJoinFightTalk,
 80116d50,508,func_80116D50,
 80116f4c,48,FUN_80116f4c,X000:8011465c
-80116f7c,376,func_80116F7C,
+80116f7c,376,initJuiceManJoinFight,
 801170f4,184,updateJuiceManJoinFight,
 801171ac,556,func_801171AC,
 801173d8,8,func_801173D8,
@@ -348,6 +348,6 @@ address,size,name,twin
 8011973c,2300,witchMizunoCandyRecipeTalk,
 8011a038,124,func_8011A038,
 8011a0b4,256,func_8011A0B4,
-8011a1b4,376,func_8011A1B4,
+8011a1b4,376,initWitchMizuno,
 8011a32c,284,updateWitchMizuno,
 8011a448,88,func_8011A448,

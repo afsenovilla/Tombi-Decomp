@@ -1,7 +1,7 @@
 // FUNC 8012c858 292 X003
 // MATCHING 8012c858 292
 #include "TOBJ.H"
-extern void func_8012C68C(TObj *);
+extern void initTunnelDigger(TObj *);
 extern void tunnelDiggerTalk(TObj *);
 extern void ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
@@ -11,7 +11,7 @@ void updateTunnelDigger(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012C68C(o);
+        initTunnelDigger(o);
         break;
     case 1:
         ObjCullRegister(o);

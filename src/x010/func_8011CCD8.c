@@ -23,7 +23,7 @@ extern void playerSetFallLean(TObj *);
 extern short probeCollisionAtDepthA(TObj *, short, short);
 extern short TileCollideAt(TObj *, short, short);
 extern int func_8011E000(TObj *, TObj *, unsigned char, int);
-extern int func_8011EF98(TObj *, TObj *);
+extern int probeTiltedBarObject(TObj *, TObj *);
 
 #define HEIGHT(a) y = (unsigned)(rsin(a) * (D_8009F0EC->box0 - 0x24)) >> 12
 #define HEIGHTN(a) y = (unsigned)(-(rsin(a) * (D_8009F0EC->box0 - 0x24))) >> 12
@@ -176,7 +176,7 @@ void func_8011CCD8(TObj *o)
         ((PObj *)o)->e8 = o->h->p.whole + x;
         ((PObj *)o)->ea = o->y.p.whole + y;
         p = D_8009F0EC;
-        if (func_8011EF98(o, p) == 0) {
+        if (probeTiltedBarObject(o, p) == 0) {
             {
                 Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 4 : v - 4;
             }

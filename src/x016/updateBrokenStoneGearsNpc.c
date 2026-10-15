@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 
 extern void brokenStoneGearsTalk(TObj *);
-extern void func_8011767C(TObj *);
+extern void brokenStoneGearsRepair(TObj *);
 extern void FUN_80018980(TObj *);
 
 void updateBrokenStoneGearsNpc(TObj *o)
@@ -40,7 +40,7 @@ void updateBrokenStoneGearsNpc(TObj *o)
             brokenStoneGearsTalk(o);
             break;
         case 2:
-            func_8011767C(o);
+            brokenStoneGearsRepair(o);
             break;
         }
         break;

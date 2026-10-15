@@ -1,7 +1,7 @@
 // FUNC 80129a9c 200 X004
 // MATCHING 80129a9c 200
 #include "TOBJ.H"
-extern void func_80129914(TObj *);
+extern void initScaredGoldVolunteer(TObj *);
 extern void scaredGoldVolunteerTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -10,7 +10,7 @@ void updateScaredGoldVolunteer(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80129914(o);
+        initScaredGoldVolunteer(o);
         break;
     case 1:
         ObjCullRegister(o);

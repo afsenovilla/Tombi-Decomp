@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
-extern void func_80117E04(TObj *);
+extern void initClockTowerRestoredNpc(TObj *);
 extern void clockTowerRestoredTalk(TObj *);
 extern int func_800202B4(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -13,7 +13,7 @@ void updateClockTowerRestoredNpc(TObj *o)
 
     switch (o->b04) {
     case 0:
-        func_80117E04(o);
+        initClockTowerRestoredNpc(o);
         break;
     case 1:
         func_800202B4(o);

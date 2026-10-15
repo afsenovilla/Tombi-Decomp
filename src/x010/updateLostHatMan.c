@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_8009C941;
-extern void func_80125AE0(TObj *);
+extern void initLostHatMan(TObj *);
 extern void lostHatManTalk(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -18,7 +18,7 @@ void updateLostHatMan(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80125AE0(o);
+        initLostHatMan(o);
         break;
     case 1:
         FUN_800202b4(o);

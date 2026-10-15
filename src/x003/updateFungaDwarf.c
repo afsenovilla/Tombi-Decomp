@@ -5,7 +5,7 @@
 
 extern unsigned char D_8009C941;
 extern unsigned char D_8009D003;
-extern void func_8012B2E4(TObj *);
+extern void initFungaDwarf(TObj *);
 extern void fungaDwarfTalk(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -20,7 +20,7 @@ void updateFungaDwarf(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012B2E4(o);
+        initFungaDwarf(o);
         break;
     case 1:
         FUN_800202b4(o);

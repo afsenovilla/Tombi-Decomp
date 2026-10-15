@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void func_8012BD5C(TObj *);
+extern void initTreasureChestGuard(TObj *);
 extern void treasureChestGuardTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -12,7 +12,7 @@ void updateTreasureChestGuard(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012BD5C(o);
+        initTreasureChestGuard(o);
         break;
     case 1:
         ObjCullRegister(o);

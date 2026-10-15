@@ -320,7 +320,7 @@ address,size,name,twin
 80116cf8,88,safeMushroomHintTalk,
 80116d50,296,func_80116D50,
 80116e78,472,stepBacoTownNpcTalk,
-80117050,340,func_80117050,
+80117050,340,initBacoTownNpc,
 801171a4,168,updateBacoTownNpc,X004:80129524
 8011724c,632,func_8011724C,
 801174c4,340,func_801174C4,

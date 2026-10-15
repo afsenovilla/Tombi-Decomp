@@ -581,8 +581,8 @@ address,size,name,twin
 8013a1f4,228,func_8013A1F4,
 8013a2d8,460,puppyRumorTalk,
 8013a4a4,12,func_8013A4A4,X001:8013a0cc
-8013a4b0,436,func_8013A4B0,
-8013a664,616,func_8013A664,
+8013a4b0,436,initRaceEventObj,
+8013a664,616,checkRaceEventTrigger,
 8013a8cc,492,raceStartCountdown,
 8013aab8,1112,raceResult,
 8013af10,484,raceOfferRematch,
@@ -595,7 +595,7 @@ address,size,name,twin
 8013b978,12,func_8013B978,X001:8013a0cc
 8013b984,300,updateLostSeedKid,
 8013bab0,372,updatePuppyRumorNpc,
-8013bc24,380,func_8013BC24,
+8013bc24,380,updateRaceEventObj,
 8013bda0,168,func_8013BDA0,
 8013be48,480,func_8013BE48,
 8013c028,396,func_8013C028,

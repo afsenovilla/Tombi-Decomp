@@ -1,7 +1,7 @@
 // FUNC 801270ac 300 X010
 // MATCHING 801270ac 300
 #include "TOBJ.H"
-extern void func_80126F48(TObj *);
+extern void initTenThousandYearElder(TObj *);
 extern void func_80125E00(TObj *);
 extern void tenThousandYearElderTalk(TObj *);
 extern void tenThousandYearElderBeadsTalk(TObj *);
@@ -16,7 +16,7 @@ void updateTenThousandYearElder(TObj *o)
 
     switch (b) {
     case 0:
-        func_80126F48(o);
+        initTenThousandYearElder(o);
         break;
     case 1:
         FUN_800202b4(o);

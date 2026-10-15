@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8009D12F;
-extern void func_80118974(TObj *);
+extern void initJuiceSeller(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void juiceSellerTalk(TObj *);
 extern void juiceSellerSqueezeTalk(TObj *);
@@ -14,7 +14,7 @@ void updateJuiceSeller(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80118974(o);
+        initJuiceSeller(o);
         break;
     case 1:
         FUN_800202b4(o);

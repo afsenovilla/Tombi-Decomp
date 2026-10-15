@@ -1,7 +1,7 @@
 // FUNC 801170f4 184 X018
 // MATCHING 801170f4 184
 #include "TOBJ.H"
-extern void func_80116F7C(TObj *);
+extern void initJuiceManJoinFight(TObj *);
 extern void juiceManJoinFightTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -10,7 +10,7 @@ void updateJuiceManJoinFight(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80116F7C(o);
+        initJuiceManJoinFight(o);
         break;
     case 1:
         ObjCullRegister(o);

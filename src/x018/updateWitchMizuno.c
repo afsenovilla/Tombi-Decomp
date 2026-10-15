@@ -2,7 +2,7 @@
 // MATCHING 8011a32c 372
 #include "TOBJ.H"
 
-extern void func_8011A1B4(TObj *);
+extern void initWitchMizuno(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern void func_8011A038(TObj *);
@@ -21,7 +21,7 @@ void updateWitchMizuno(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8011A1B4(o);
+        initWitchMizuno(o);
         break;
     case 1:
         ObjCullRegister(o);

@@ -346,7 +346,7 @@ address,size,name,twin
 80119034,488,powerPlantElevatorHintTalk,
 8011921c,636,gratefulHelperTalk,
 80119498,740,stepFactoryNpcTalk,
-8011977c,452,func_8011977C,
+8011977c,452,initFactoryNpc,
 80119940,168,updateFactoryNpc,X004:80129524
 801199e8,8,func_801199E8,
 801199f0,420,func_801199F0,

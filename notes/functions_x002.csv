@@ -357,8 +357,8 @@ address,size,name,twin
 8011b7d4,1492,func_8011B7D4,
 8011bda8,260,pigGateSevenFriendsScene,
 8011beac,1600,func_8011BEAC,
-8011c4ec,224,func_8011C4EC,
+8011c4ec,224,stepPigGateScene,
 8011c5cc,80,func_8011C5CC,
 8011c61c,12,func_8011C61C,X001:8013a0cc
-8011c628,168,func_8011C628,
+8011c628,168,updatePigGateScene,
 8011c6d0,8,func_8011C6D0,

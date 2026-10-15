@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void func_80134CF8(TObj *);
+extern void initHidingSon(TObj *);
 extern void hidingSonTalk(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -12,7 +12,7 @@ void updateHidingSon(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80134CF8(o);
+        initHidingSon(o);
         break;
     case 1:
         ObjCullRegister(o);

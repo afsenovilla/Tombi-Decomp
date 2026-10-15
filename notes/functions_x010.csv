@@ -392,9 +392,9 @@ address,size,name,twin
 8011e688,40,func_8011E688,
 8011e6b0,564,func_8011E6B0,
 8011e8e4,172,func_8011E8E4,
-8011e990,344,func_8011E990,
+8011e990,344,probeTiltedBarContact,
 8011eae8,1200,func_8011EAE8,
-8011ef98,196,func_8011EF98,
+8011ef98,196,probeTiltedBarObject,
 8011f05c,1212,func_8011F05C,X001:801253ac
 8011f518,156,func_8011F518,
 8011f5b4,72,func_8011F5B4,X001:80125fbc
@@ -455,7 +455,7 @@ address,size,name,twin
 80124f0c,308,func_80124F0C,
 80125040,876,func_80125040,
 801253ac,1844,lostHatManTalk,
-80125ae0,368,func_80125AE0,
+80125ae0,368,initLostHatMan,
 80125c50,348,updateLostHatMan,
 80125dac,84,func_80125DAC,X003:801289c8
 80125e00,436,func_80125E00,
@@ -463,7 +463,7 @@ address,size,name,twin
 801264b4,1056,powerFishCollectorTalk,
 801268d4,1484,tenThousandYearElderTalk,
 80126ea0,168,stepTenThousandYearElderTalk,
-80126f48,356,func_80126F48,
+80126f48,356,initTenThousandYearElder,
 801270ac,300,updateTenThousandYearElder,
 801271d8,404,func_801271D8,
 8012736c,2060,swimTeacherIntroTalk,
@@ -507,7 +507,7 @@ address,size,name,twin
 8012d858,140,func_8012D858,
 8012d8e4,1352,hidingSonTalk,
 8012de2c,116,stepHidingSonTalk,X003:80134c84
-8012dea0,368,func_8012DEA0,X004:801301b0
+8012dea0,368,initHidingSon,X004:801301b0
 8012e010,260,updateHidingSon,X003:80134e60
 8012e114,532,func_8012E114,
 8012e328,352,func_8012E328,

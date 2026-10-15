@@ -367,3 +367,21 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   x011 80119940 updateFactoryNpc; x016 801179a4 updateBrokenStoneGearsNpc, 80117d80 stepClockTowerRestoredTalk, 80117f60 updateClockTowerRestoredNpc,
   80118ae8 updateJuiceSeller; x017 80117c84 stepWaterfallHintNpcTalk (machine room / pig gate favor / elder hint lines), 801184fc updateRaftReturnNpc,
   80118338 stepRaftReturnTalk, 8011974c updateWaterfallElderHintSceneObj; x018 801170f4 updateJuiceManJoinFight
+- NPC init helpers (pattern `init<Npc>`: called only from case 0 of `update<Npc>`; loads box0..3, w1e, the sprite set and the anim from the NPC's
+  per-subtype table, AnimLoadDuration, b04++): x003 8012b2e4 initFungaDwarf, 8012bd5c initTreasureChestGuard, 8012c68c initTunnelDigger,
+  80134cf8 initHidingSon, 80129a2c initPhoenixSpiritHintNpc; x004 80129914 initScaredGoldVolunteer, 80129fc8 initPaintingSlotHintNpc,
+  8012f9f4 initUnbendingCableNpc, 801301b0 initHidingSon; x005 80117050 initBacoTownNpc; x010 8012dea0 initHidingSon (twin of x004 801301b0),
+  80125ae0 initLostHatMan, 80126f48 initTenThousandYearElder; x011 8011977c initFactoryNpc; x016 80117e04 initClockTowerRestoredNpc,
+  80118974 initJuiceSeller; x017 80118388 initRaftReturnNpc, 80117e9c initWaterfallHintNpc; x018 80116f7c initJuiceManJoinFight, 8011a1b4 initWitchMizuno
+- Talk object handlers (same `switch (o->b04)` init/active/free shape): x003 80129be4 updatePhoenixSpiritHintNpc (runs stepPhoenixSpiritHintTalk),
+  x004 80129524 updateMermaid (stepMermaidTalk), x009 801294b4 updateFlowerTearsSeeker (stepFlowerTearsSeekerTalk; twin of x004 80129524),
+  x017 80118014 updateWaterfallHintNpc (stepWaterfallHintNpcTalk)
+- `x016 80117870 stepBrokenStoneGearsTalk` - step switch of updateBrokenStoneGearsNpc: case 0 waits for the player at the gears (or a used item 0x3e), 1 brokenStoneGearsTalk, 2 brokenStoneGearsRepair
+- `x016 8011767c brokenStoneGearsRepair` - locks the player, setEventComplete(0x61) and removeItemFromInventory(0x3e) (the item given for the gears), waits 200 ticks, releases
+- `x016 80118898 stepJuiceSellerTalk` - step switch: case 0 talk / used item 3 (bananas, D_8009D12F == 0), 1 juiceSellerTalk, 2 juiceSellerSqueezeTalk
+- `x001 8013bc24 updateRaceEventObj` - unlayered object variant 5 (MAIN0 dispatchUnlayeredByVariant table D_8007C1C8[5]): runs the race functions by GCD.bce59/bcede
+  (raceStartCountdown/raceResult/raceOfferRematch/raceStartRematch); `8013a4b0 initRaceEventObj` spawns the race partner object, `8013a664 checkRaceEventTrigger` the per-state start condition (player x >= 0x19B, ...)
+- `x002 8011c628 updatePigGateScene` - unlayered variant 0x23 (b04 shape: spawn table, step, free); `8011c4ec stepPigGateScene` - its step switch over pigGateDiscoveryScene / pigGateSevenFriendsScene
+- `x014 801168a0 callSectionClearController` - one-line thunk to updateSectionClearController
+- `x010 8011e990 probeTiltedBarContact` (uncertain role) - contact test of the player (a) against a rotated bar object (b) at angle `ang`: box prefilter, rcos/rsin of the angle times b->box0,
+  then either hang contact (a->b9e = 9, a->wb8/wba offsets) or side contact (b9e = 8); sets SPAD.p3c0 = b, b->w7a = mode; `8011ef98 probeTiltedBarObject` - calls it by b->subtype (one or two sides, angle d30, d30+0x400), only when GV2.bc3 & 0x40

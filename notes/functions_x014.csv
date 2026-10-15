@@ -307,7 +307,7 @@ address,size,name,twin
 801162b8,260,func_801162B8,
 801163bc,464,updateSectionClearController,
 8011658c,788,func_8011658C,
-801168a0,32,FUN_801168a0,MAIN0:80068fc4
+801168a0,32,callSectionClearController,MAIN0:80068fc4
 801168c0,64,func_801168C0,
 80116900,32,func_80116900,
 80116920,156,func_80116920,

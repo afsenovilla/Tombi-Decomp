@@ -1,7 +1,7 @@
 // FUNC 8012a124 328 X004
 // MATCHING 8012a124 328
 #include "TOBJ.H"
-extern void func_80129FC8(TObj *);
+extern void initPaintingSlotHintNpc(TObj *);
 extern void paintingSlotHintTalk(TObj *);
 extern void func_80129E14(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -12,7 +12,7 @@ void updatePaintingSlotHintNpc(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80129FC8(o);
+        initPaintingSlotHintNpc(o);
         break;
     case 1:
         ObjCullRegister(o);
