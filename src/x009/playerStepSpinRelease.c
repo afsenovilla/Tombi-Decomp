@@ -15,7 +15,7 @@ extern void applyObjectAltSpeedXY(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
 extern TObj *func_8004BBC0(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
-extern void func_8010E328(TObj *, int);
+extern void playerTryAttack(TObj *, int);
 
 static __inline__ void setanim(TObj *o, unsigned short anim, int j)
 {
@@ -114,6 +114,6 @@ void playerStepSpinRelease(TObj *o)
         playerEnterGrabStep(o, D_8009F0EC == (TObj *)1);
     }
     if ((*(unsigned char*)&o->wac) != 2 && o->step == 9 && o->b9e == 0) {
-        func_8010E328(o, 1);
+        playerTryAttack(o, 1);
     }
 }

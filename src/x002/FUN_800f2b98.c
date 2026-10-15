@@ -45,7 +45,7 @@ extern void FUN_8001fec0(TObj *);
 extern short FUN_800eef0c(void);
 extern TObj *FUN_80018448(void);
 extern void FUN_8010f400(TObj *);
-extern void FUN_8010eaf8(TObj *);
+extern void playerAirAccelerateX(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void playerAirSpinToFall(TObj *);
@@ -146,7 +146,7 @@ void FUN_800f2b98(TObj *o)
             }
         }
         FUN_8010f400(o);
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         FUN_8010f0f4(o);
         FUN_8001fd94(o);

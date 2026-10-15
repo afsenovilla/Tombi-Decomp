@@ -36,7 +36,7 @@ extern int rsin(int);
 extern TObj *func_8004BBC0(TObj *, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerSetFallLean(TObj *);
-extern void func_8010E328(TObj *, int);
+extern void playerTryAttack(TObj *, int);
 extern void func_8011BD5C(TObj *);
 
 #define ORBIT(o) { \
@@ -175,7 +175,7 @@ void func_8011BEAC(TObj *o)
         D_8009F0EC = e;
         ORBIT(o);
         o->d88 = 0;
-        func_8010E328(o, 2);
+        playerTryAttack(o, 2);
         func_8011BD5C(o);
         break;
     case 4:

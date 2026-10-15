@@ -22,7 +22,7 @@ extern void playerEventStepWalkIntoDepth(TObj *);
 extern void func_8011DD48(TObj *);
 extern void playerEventStepRiseUp(TObj *);
 extern void FUN_800f1308(TObj *);
-extern void FUN_8010df84(TObj *);
+extern void playerEventWalk(TObj *);
 extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern short ObjTileCollide(TObj *, int, int);
@@ -97,7 +97,7 @@ void playerEventModeDispatch(TObj *o)
             v = -0x128;
         }
         o->wb2 = v;
-        FUN_8010df84(o);
+        playerEventWalk(o);
         if (o->b69 != 0) {
             o->y.p.whole += 2;
         }

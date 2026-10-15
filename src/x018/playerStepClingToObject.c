@@ -29,8 +29,8 @@ extern void FUN_80010dac();
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001e560(int, int);
-extern void FUN_8010bd08(TObj *);
-extern void FUN_8010e328(TObj *, int);
+extern void playerReleaseClingObject(TObj *);
+extern void playerTryAttack(TObj *, int);
 
 #define SETPOS(o) \
     o->h->p.whole = DAT_8009f0ec->h->p.whole + o->wb8; \
@@ -43,7 +43,7 @@ static __inline__ short chk(TObj *o)
 
     if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
         DAT_8009d2b0 = 0;
-        FUN_8010bd08(o);
+        playerReleaseClingObject(o);
         if (DAT_8009c984 & 0x40) {
             if (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1F8003C4) {
                 o->ba7 = 1;
@@ -144,7 +144,7 @@ void playerStepClingToObject(TObj *o)
         case 0x21:
             o->y.p.whole = DAT_8009f0ec->y.p.whole + o->wba;
             if (DAT_8009f0ec->w98 == 0 || *(unsigned short *)&DAT_8009f0ec->b04 == 0x502) {
-                FUN_8010bd08(o);
+                playerReleaseClingObject(o);
                 o->b9c = 2;
                 o->step = 2;
                 o->state = 3;
@@ -161,7 +161,7 @@ void playerStepClingToObject(TObj *o)
             turn(o);
         }
     tail:
-        if (!chk(o)) FUN_8010e328(o, 2);
+        if (!chk(o)) playerTryAttack(o, 2);
         break;
     case 3:
         FUN_8001fec0(o);

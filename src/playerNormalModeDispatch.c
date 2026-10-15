@@ -14,7 +14,7 @@ extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
 extern void playerStepIdle(TObj *);
 extern void playerStepWalk(TObj *);
-extern void FUN_8010e328(TObj *, int);
+extern void playerTryAttack(TObj *, int);
 extern void playerStepJump(TObj *);
 extern void playerStepWeaponAttack(TObj *);
 extern void playerStepAirWeaponAttack(TObj *);
@@ -68,13 +68,13 @@ extern void FUN_8011dc0c(TObj *);
 extern void FUN_8011d9a4(TObj *);
 extern void playerStep3CByArea(TObj *);
 extern void playerStepSwim(TObj *);
-extern void FUN_8010d048(TObj *);
-extern void FUN_8010d888(TObj *);
+extern void playerSwimDirFromPad(TObj *);
+extern void playerStepSwimUnderwater(TObj *);
 extern void FUN_8011b330(TObj *);
 extern void playerStepGrabbedStruggle(TObj *);
 extern void FUN_8011b7d4(TObj *);
-extern void FUN_8010db0c(TObj *);
-extern void FUN_8010dd8c(TObj *);
+extern void playerStepWaterJumpOut(TObj *);
+extern void playerStepSwimSpin(TObj *);
 extern void FUN_8010e66c(TObj *);
 extern void FUN_8011beac(TObj *);
 extern void FUN_8011b170(TObj *);
@@ -161,7 +161,7 @@ static __inline__ void turn(TObj *o)
 
 #define chk(o, n) \
     if ((*(unsigned char*)&o->wac) != 2 && o->step == n) { \
-        if (o->b9e == 0) FUN_8010e328(o, 1); \
+        if (o->b9e == 0) playerTryAttack(o, 1); \
     }
 
 void playerNormalModeDispatch(TObj *o, int p2)
@@ -193,7 +193,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
             o->step = 2;
             o->state = 0;
         }
-        FUN_8010e328(o, 0);
+        playerTryAttack(o, 0);
         turn(o);
         playerCheckGroundAndFall(o);
         break;
@@ -288,7 +288,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
             o->step = 2;
             o->state = 0;
         }
-        FUN_8010e328(o, 0);
+        playerTryAttack(o, 0);
         turn(o);
         playerCheckGroundAndFall(o);
         break;
@@ -301,7 +301,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
     case 0x1f:
         D_8009D2B0[0] = 1;
         FUN_80121b58(o);
-        FUN_8010e328(o, 0);
+        playerTryAttack(o, 0);
         break;
     case 0x20:
         playerStepDepthShift(o);
@@ -387,8 +387,8 @@ void playerNormalModeDispatch(TObj *o, int p2)
         break;
     case 0x3e:
         D_8009D2B0[0] = 1;
-        FUN_8010d048(o);
-        FUN_8010d888(o);
+        playerSwimDirFromPad(o);
+        playerStepSwimUnderwater(o);
         break;
     case 0x3f:
         dirA(o);
@@ -403,11 +403,11 @@ void playerNormalModeDispatch(TObj *o, int p2)
         break;
     case 0x43:
         dirA(o);
-        FUN_8010db0c(o);
+        playerStepWaterJumpOut(o);
         chk(o, 0x43);
         break;
     case 0x44:
-        FUN_8010dd8c(o);
+        playerStepSwimSpin(o);
         break;
     case 0x45:
         FUN_8010e66c(o);

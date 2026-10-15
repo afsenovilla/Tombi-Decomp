@@ -6,7 +6,7 @@
 extern TObj *D_8009D2E8;
 extern unsigned short DAT_1f8003c6;
 extern unsigned short DAT_1f8001fc;
-extern void func_8010EAF8(TObj *);
+extern void playerAirAccelerateX(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8001f96c(int, int, int, int);
@@ -32,7 +32,7 @@ void func_801040D0(TObj *o)
     switch (o->state) {
     case 1:
         o->timer++;
-        func_8010EAF8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         o->velY += 8;
         if (o->velY > 0x680)

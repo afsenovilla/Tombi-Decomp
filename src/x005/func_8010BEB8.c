@@ -4,7 +4,7 @@
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern void func_8010BD08();
+extern void playerReleaseClingObject();
 
 short func_8010BEB8(TObj *o)
 {
@@ -12,7 +12,7 @@ short func_8010BEB8(TObj *o)
 
     if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
         GV2.bb0 = 0;
-        func_8010BD08();
+        playerReleaseClingObject();
         if (GAME.area00_eventControl & 0x40) {
             if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C4) {
                 o->ba7 = 1;

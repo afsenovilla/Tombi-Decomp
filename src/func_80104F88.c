@@ -7,7 +7,7 @@
 #include "gamestate.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
-extern void FUN_8010eaf8(TObj *o);
+extern void playerAirAccelerateX(TObj *o);
 extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
@@ -35,7 +35,7 @@ void func_80104F88(TObj *o)
     case 0:
         D_8009D2E8->animFrame = o->animFrame & 1;
         D_8009D2E8->d8c = o->d88 - 0xc0;
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         D_8009D2E8->h->p.whole = o->h->p.whole;
         D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;

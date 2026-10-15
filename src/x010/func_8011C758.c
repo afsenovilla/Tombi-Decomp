@@ -11,7 +11,7 @@ typedef struct O {
 extern O *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
 extern unsigned short D_1f8003c6, D_1f8001fc;
-extern void FUN_8010eaf8(O *);
+extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103cbc(O *);
 extern void PlayerSetAnimIfChanged(O *, int);
@@ -27,7 +27,7 @@ void func_8011C758(O *o)
     switch (o->b6) {
     case 1:
         o->s20++;
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         *(int *)o->h += o->vx << 8;
         o->vy += 8;
         if (o->vy > 0x680) o->vy = 0x680;

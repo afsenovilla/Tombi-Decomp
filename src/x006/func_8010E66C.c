@@ -11,7 +11,7 @@ extern void SfxPlay2(int a, int b);
 extern void func_80030034(int);
 extern int AnimAdvance(TObj *);
 extern void func_8010F400(TObj *);
-extern void func_8010EAF8(TObj *);
+extern void playerAirAccelerateX(TObj *);
 extern void ObjMotionStep(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void ObjTileCollide(TObj *, int, int);
@@ -55,7 +55,7 @@ void func_8010E66C(TObj *o)
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         AnimAdvance(o);
         func_8010F400(o);
-        func_8010EAF8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         o->velY -= 0x10;
         if (o->velY < -0x800)

@@ -11,7 +11,7 @@ typedef struct O {
 extern O *DAT_8009d2e8;
 extern unsigned short DAT_8009d670;
 extern unsigned short D_1f8003c6, D_1f8001fc;
-extern void FUN_8010eaf8(O *);
+extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103628(O *);
 extern void playerSetSlopeTilt(O *, int);
@@ -31,7 +31,7 @@ void FUN_801037d8(O *o)
     case 1:
         o->s20++;
         FUN_8001fd94(o);
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         *(int *)o->h += o->vx << 8;
         flag = 0;
         o->y16 += 8;

@@ -17,7 +17,7 @@ typedef struct {
 extern P *D_8009C330;
 extern TObj *D_8009D2E8;
 extern TObj *allocObjectLayer1(void);
-extern void FUN_8010eaf8(TObj *);
+extern void playerAirAccelerateX(TObj *);
 extern void FUN_80104dc8(TObj *);
 extern void func_80104EA0(TObj *);
 extern void FUN_800ef490(TObj *);
@@ -43,7 +43,7 @@ void func_801213D0(TObj *o)
         D_8009D2E8->d84 = o->d88 - 0xc0;
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         FUN_80104dc8(o);
         func_80104EA0(o);

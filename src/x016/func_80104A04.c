@@ -19,7 +19,7 @@ short ObjTileCollide(TObj *, int, int);
 void playerSetFallLean(TObj *o);
 int func_8004BBC0(TObj *o, int);
 void playerEnterGrabStep(TObj *o, int);
-void func_8010E328(TObj *o, int);
+void playerTryAttack(TObj *o, int);
 void func_80104A04(TObj *o)
 {
     o->h->raw += GVARS.s44 << 8;
@@ -100,5 +100,5 @@ void func_80104A04(TObj *o)
             playerEnterGrabStep(o, D_8009F0EC_r == 1);
         }
     }
-    if (o->step == 0xf && !o->b9e) func_8010E328(o, 1);
+    if (o->step == 0xf && !o->b9e) playerTryAttack(o, 1);
 }

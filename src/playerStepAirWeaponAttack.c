@@ -34,7 +34,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern TObj *allocObjectLayer1(void);
 extern void playerSetJumpRiseVelocity(TObj *);
 extern void FUN_80110fdc(TObj *);
-extern void FUN_8010eaf8(TObj *);
+extern void playerAirAccelerateX(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void FUN_80040278(TObj *, short, short);
@@ -147,7 +147,7 @@ void playerStepAirWeaponAttack(TObj *o)
         *(int *)o->h += D_8009C944 << 8;
         o->y.raw += D_8009C946 << 8;
         FUN_80110fdc(o);
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
@@ -225,7 +225,7 @@ void playerStepAirWeaponAttack(TObj *o)
                 FUN_8001fd94(o);
             }
         } else {
-            FUN_8010eaf8(o);
+            playerAirAccelerateX(o);
             o->h->raw += o->velX << 8;
             FUN_8010f0f4(o);
             FUN_8001fd94(o);

@@ -32,7 +32,7 @@ extern int D_8009D2E8;
 extern void FUN_8010f328(P800F3F3C *);
 extern void SfxPlay2(int, int);
 extern void func_8010F400(P800F3F3C *);
-extern void func_8010EAF8(P800F3F3C *);
+extern void playerAirAccelerateX(P800F3F3C *);
 extern void ObjGravityStep(P800F3F3C *);
 extern void ObjAddVelY7E(P800F3F3C *);
 extern short TileCollideAt(P800F3F3C *, int, int);
@@ -86,7 +86,7 @@ void func_800F3F3C(P800F3F3C *o)
         o->t.h->raw += GVARS.s44 << 8;
         o->t.y.raw += ((short*)&GVARS.s46)[0] << 8;
         func_8010F400(o);
-        func_8010EAF8(o);
+        playerAirAccelerateX(o);
         o->t.h->raw += o->t.velX << 8;
         ObjGravityStep(o);
         ObjAddVelY7E(o);

@@ -204,6 +204,18 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80108338 playerEventStepJumpIn` (was func_80108338) (uncertain) - event step 8: entrance jump (velY -0xA00, velX +-0x100) in areas 2/0x13 section 1 (area 4: in place), anim 4, lands into mode 1; other areas go straight to falling
 - `800eec40 playerAirSpinToFall` (was func_800EEC40) - airborne helper: turns +0x8C 4 per frame back toward upright (anims 0xFA..0xFC rock +-0x20 instead) and switches to the fall anim 80010AE8 once upright
 - `800ef1ac playerCheckPerchLanding` (was FUN_800ef1ac) (uncertain) - perch/climb/swing helper: on landing (+0x69) goes to step 0, or to the slope step 0x1B with anim 8/0x11 when +0xBE bit 3 is set; landing sfx 0x1C
+- `8010e328 playerTryAttack` (was func_8010E328) - on the attack button (1F8003C8): weapon object limit D_8007A038[weapon], then by caller mode 0 ground attack step 3 (or 0x2A/0x2B), 1 air attack step 4, 2 cling attack step 0x18; first tries playerTryTalkToNpc
+- `8010e114 playerTryTalkToNpc` (was func_8010E114) (uncertain) - on button 1F8003C4 scans the category 2 draw list for talkable types (0x18, 0x23, 0x32, 0x37, 0x4D, 0x55, 0x58..0x5A) in range and facing; sets their +0x68 to 4/5 and returns it
+- `8010eaf8 playerAirAccelerateX` (was FUN_8010eaf8) - airborne horizontal control: accelerate/limit velX by the speed table D_8011545C per direction bits in +0x2E, wall contact +0xA6 blocks, otherwise decelerate
+- `8010d888 playerStepSwimUnderwater` (was func_8010D888) - player step 0x3E: 8-direction swimming (anim 0x44, stroke 0x45 on button 1F8003C4 = speed 0x400), jump button -> step 0x44, reaching the surface (+0x56) -> surface swim step 0x3D
+- `8010d048 playerSwimDirFromPad` (was FUN_8010d048) - turns the pad bits into the 8-way swim direction code +0x76 (bit 3 = idle after 10 frames), snapping the heading +0xB6 when reversing
+- `8010d280 playerSwimMove` (was FUN_8010d280) - clamps the swim speed +0xB2 to 0..0x400, applies the current GVARS.s44/s46 and the heading velocity, then the tile collision probes
+- `8010dd8c playerStepSwimSpin` (was FUN_8010dd8c) - player step 0x44: underwater spin (anim 0x1D, +0x8C rotating, velY 0x300 decaying) for 0x78 frames, biting goes to step 0x48, then back to step 0x3E
+- `8010df84 playerEventWalk` (was FUN_8010df84) - event step 1/10 helper: walks with the ground anim (playerSelectGroundAnim/playerMoveByAngleSpeed), footstep sfx every 8 frames; on +0xAF >= 2 picks the door anims and returns to step 0
+- `8010c7b0 playerClimbFollowObject` (was FUN_8010c7b0) - playerStepClimbObject helper: looks up the climbable object at hand height (FUN_8004baa8) and sticks to it (offset +0xB8/+0xBA); none -> lets go into the fall state; contact 11 -> step 11
+- `8010c8d4 playerClimbJumpOff` (was FUN_8010c8d4) - jump button while climbing an object: releases it, steps 0x10 sideways by Left/Right (or turns), then jump step 2
+- `8010db0c playerStepWaterJumpOut` (was FUN_8010db0c) - player step 0x43: leaps out of the water (velY -0x780, jump sfx 2/4 and splash sfx 0xE), can grab objects on the way, falls into step 2 state 3
+- `8010bd08 playerReleaseClingObject` (was func_8010BD08) - lets go of the clung object D_8009F0EC: restores its active byte (per type, chained objects via +0x94) and moves the player 0x10 away
 
 # Area overlay function names (X001..X019)
 

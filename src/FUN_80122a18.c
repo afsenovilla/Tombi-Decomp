@@ -8,7 +8,7 @@ typedef struct O {
     char p7[0x9c - 0x80]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
 } O;
 extern O *DAT_8009d2e8;
-extern void FUN_8010eaf8(void);
+extern void playerAirAccelerateX(void);
 extern void FUN_8001fd94(O *);
 extern void FUN_800eeb5c(O *, int);
 extern void FUN_8001f96c(int, int, int, int);
@@ -19,7 +19,7 @@ void FUN_80122a18(O *o)
     short flag;
     O *p;
     if (o->b6 != 1) return;
-    FUN_8010eaf8();
+    playerAirAccelerateX();
     *(int *)o->h += o->vx << 8;
     o->vy += 8;
     if (o->vy > 0x680) o->vy = 0x680;

@@ -27,8 +27,8 @@ extern short func_800F0E7C(TObj *);
 extern void FUN_8010f400(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
-extern int func_8010E114(void);
-extern void func_8010E328(TObj *, short);
+extern int playerTryTalkToNpc(void);
+extern void playerTryAttack(TObj *, short);
 
 typedef struct { unsigned char pad[0x28]; unsigned short w28, w2a, w2c, w2e; } Q;
 #define PL ((Q *)DAT_8009c330)
@@ -187,8 +187,8 @@ void FUN_800f1478(TObj *o)
         }
         break;
     default:
-        if (func_8010E114() == 0)
-            func_8010E328(o, 0);
+        if (playerTryTalkToNpc() == 0)
+            playerTryAttack(o, 0);
         break;
     }
 

@@ -19,7 +19,7 @@ extern void FUN_8010cda8(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8001fec0(TObj *);
-extern void FUN_8010d280(TObj *);
+extern void playerSwimMove(TObj *);
 extern void playerSetAnim(TObj *, int, int);
 
 void playerStepSwim(TObj *o)
@@ -106,7 +106,7 @@ void playerStepSwim(TObj *o)
             o->wb2 = 0x400;
         }
     }
-    FUN_8010d280(o);
+    playerSwimMove(o);
     if (o->y.p.whole < o->w56)
         o->y.p.whole = o->w56;
     w = o->w56;

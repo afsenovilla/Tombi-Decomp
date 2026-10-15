@@ -27,11 +27,11 @@ extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
 extern char DAT_80011148[];
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_8010c7b0(TObj *);
+extern void playerClimbFollowObject(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001e560(int, int);
-extern void FUN_8010c8d4(TObj *);
+extern void playerClimbJumpOff(TObj *);
 
 void playerStepClimbObject(TObj *o)
 {
@@ -68,7 +68,7 @@ void playerStepClimbObject(TObj *o)
         o->timer = 10;
         o->state++;
     case 1:
-        FUN_8010c7b0(o);
+        playerClimbFollowObject(o);
         if (--o->timer == 0)
             o->state = 2;
         break;
@@ -91,7 +91,7 @@ void playerStepClimbObject(TObj *o)
             *(signed char *)&o->b0f = 1;
         else
             *(signed char *)&o->b0f = -8;
-        FUN_8010c7b0(o);
+        playerClimbFollowObject(o);
         if (DAT_8009c960 == 0x30000)
             break;
         if (o->animFrame & 1)
@@ -126,6 +126,6 @@ void playerStepClimbObject(TObj *o)
     }
     if (DAT_1f8001fc & DAT_1f8003c6) {
         DAT_8009d2b0 = 0;
-        FUN_8010c8d4(o);
+        playerClimbJumpOff(o);
     }
 }

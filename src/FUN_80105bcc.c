@@ -12,7 +12,7 @@ extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
 extern unsigned char D_8009D2B1;
 extern unsigned char D_801152E8[];
-extern void FUN_8010eaf8(TObj *o);
+extern void playerAirAccelerateX(TObj *o);
 extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
@@ -30,7 +30,7 @@ extern void FUN_80104cd8(TObj *o);
 extern void playerSetFallLean(TObj *o);
 extern TObj *FUN_8004bbc0(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
-extern void func_8010E328(TObj *, int);
+extern void playerTryAttack(TObj *, int);
 
 #define LAND() \
     o->d8c = D_801152E8[o->wb0]; \
@@ -88,7 +88,7 @@ void FUN_80105bcc(TObj *o)
         D_8009D2E8->state = 6;
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         if (D_8009D2E8->type != 0x1c)
             o->h->raw += o->velX << 8;
         p = D_8009D2E8;
@@ -126,7 +126,7 @@ void FUN_80105bcc(TObj *o)
         p->d8c = o->d88 - 0xc0;
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        FUN_8010eaf8(o);
+        playerAirAccelerateX(o);
         if (D_8009D2E8->type != 0x1c)
             o->h->raw += o->velX << 8;
         ObjGravityStep(o);
@@ -245,7 +245,7 @@ void FUN_80105bcc(TObj *o)
             }
         }
         if (o->step == 0xf && o->b9e == 0)
-            func_8010E328(o, 1);
+            playerTryAttack(o, 1);
         break;
     }
 }
