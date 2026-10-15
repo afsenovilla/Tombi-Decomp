@@ -28,24 +28,22 @@ extern int MulNegSin(int a, int b);
 extern int MulCosDup(int a, int b);
 extern int GetGraphType(void);
 
-void func_800E9F5C(c, ang, off, pal)
-    unsigned short c, ang;
-    int off;
-    unsigned char pal;
+void func_800E9F5C(int c, int ang, int off, unsigned char pal)
 {
     POLY_FT4 *p;
     Glyph *tbl = D_800EA1D8;
-#define ch c
-#define an ang
+    short ch = c;
+    short an = ang;
     int a = (ang + off) & 0xFF;
     int x0, x1;
     if (a > 0x40 && a < 0xC0) return;
     if ((short)off == -1) {
-        x0 = tbl[(short)c].w * (short)ang - MulNegSin(0xE0, 0x5A);
-        x1 = tbl[(short)c].w + x0;
+        a = tbl[(short)c].w;
+        c = a * (short)ang - MulNegSin(0xE0, 0x5A);
+        a += c;
     } else {
-        x0 = -MulNegSin(ang & 0xFF, 0x5A);
-        x1 = -MulNegSin(a, 0x5A);
+        c = -MulNegSin(ang & 0xFF, 0x5A);
+        a = -MulNegSin(a, 0x5A);
     }
     MulCosDup(an & 0xFF, 0xFF);
     p = D_1F800164;
@@ -54,8 +52,8 @@ void func_800E9F5C(c, ang, off, pal)
     p->r0 = 0x80;
     p->g0 = 0x80;
     p->b0 = 0x80;
-    p->x0 = x0 + 0xA0;
-    p->x1 = x1 + 0xA0;
+    p->x0 = c + 0xA0;
+    p->x1 = a + 0xA0;
     p->y0 = 0xB8;
     p->y1 = 0xB8;
     p->code &= ~2;
