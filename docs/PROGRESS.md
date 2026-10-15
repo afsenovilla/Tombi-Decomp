@@ -4,19 +4,19 @@ _Generated with `python tools/progress.py` (2026-10-15). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 91.42 % of the game's code matches byte for byte** (1397968 of 1529228 bytes).
+**Whole game: 93.31 % of the game's code matches byte for byte** (1426848 of 1529228 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
 | X000.BIN: AREA00 + object code reused by all areas | 312708 B | 312708 B | 100.0 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193436 B | 62176 B | 32.1 % `[########................]` |
-| **Whole game** | **1529228 B** | **1397968 B** | **91.42 %** `[######################..]` |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193436 B | 91056 B | 47.1 % `[###########.............]` |
+| **Whole game** | **1529228 B** | **1426848 B** | **93.31 %** `[######################..]` |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100816 B) is not counted: 67176 B of it (66.6 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 96.3 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 97.0 %).
 - Also tracked for MAIN0 + X000: 91.8 % of the code named by us, 74.9 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
@@ -63,10 +63,10 @@ I0NFO*, also at `0x800E8028`, sources in `src/<name>/`) are linked from source b
 | D0SPSUB2.BIN | SYSTEM | 20004 B | 31 | 53.5 % (25 f) | 0 B | 0 B | 0 B | 9300 B (6 f) |
 | D0SPSUB3.BIN | SYSTEM | 25324 B | 46 | 49.8 % (38 f) | 0 B | 8288 B | 0 B | 4420 B (3 f) |
 | G0OVER.BIN | SYSTEM | 3152 B | 7 | 100.0 % (7 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
-| I0NFO.BIN | SYSTEM | 26248 B | 53 | 28.9 % (29 f) | 0 B | 0 B | 0 B | 18652 B (24 f) |
-| I0NFO2.BIN | SYSTEM | 90280 B | 196 | 22.4 % (100 f) | 0 B | 8256 B | 28 B | 61816 B (86 f) |
-| I0NFO3.BIN | SYSTEM | 26692 B | 55 | 21.4 % (21 f) | 0 B | 5252 B | 20 B | 15720 B (27 f) |
-| **Total** | | 3814864 B | 7244 | 95.8 % (7044 f) | 0 B | 23008 B | 6448 B | 131260 B (161 f) |
+| I0NFO.BIN | SYSTEM | 26248 B | 53 | 36.3 % (33 f) | 0 B | 0 B | 0 B | 16708 B (20 f) |
+| I0NFO2.BIN | SYSTEM | 90280 B | 196 | 49.5 % (150 f) | 0 B | 5948 B | 28 B | 39584 B (40 f) |
+| I0NFO3.BIN | SYSTEM | 26692 B | 55 | 40.9 % (32 f) | 0 B | 4748 B | 20 B | 11016 B (17 f) |
+| **Total** | | 3814864 B | 7244 | 96.6 % (7109 f) | 0 B | 20196 B | 6448 B | 102380 B (101 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.

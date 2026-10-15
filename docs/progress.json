@@ -374,47 +374,47 @@
     "I0NFO": {
       "game": 26248,
       "n": 53,
-      "matched": 7596,
-      "n_matched": 29,
+      "matched": 9540,
+      "n_matched": 33,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 18652,
-      "n_new": 24,
+      "new": 16708,
+      "n_new": 20,
       "uniq": 25828,
-      "uniq_matched": 7176,
+      "uniq_matched": 9120,
       "n_uniq": 49,
-      "n_uniq_matched": 25
+      "n_uniq_matched": 29
     },
     "I0NFO2": {
       "game": 90280,
       "n": 196,
-      "matched": 20180,
-      "n_matched": 100,
+      "matched": 44720,
+      "n_matched": 150,
       "piece": 28,
       "x000": 0,
-      "dup": 8256,
-      "new": 61816,
-      "n_new": 86,
+      "dup": 5948,
+      "new": 39584,
+      "n_new": 40,
       "uniq": 75460,
-      "uniq_matched": 13644,
+      "uniq_matched": 35876,
       "n_uniq": 154,
-      "n_uniq_matched": 68
+      "n_uniq_matched": 114
     },
     "I0NFO3": {
       "game": 26692,
       "n": 55,
-      "matched": 5700,
-      "n_matched": 21,
+      "matched": 10908,
+      "n_matched": 32,
       "piece": 20,
       "x000": 0,
-      "dup": 5252,
-      "new": 15720,
-      "n_new": 27,
+      "dup": 4748,
+      "new": 11016,
+      "n_new": 17,
       "uniq": 18556,
-      "uniq_matched": 2836,
+      "uniq_matched": 7540,
       "n_uniq": 39,
-      "n_uniq_matched": 12
+      "n_uniq_matched": 22
     }
   }
 }
