@@ -19,7 +19,7 @@ extern int MoveImage(RECT *, int, int);
     q->e[q->n] = (int)base + off[i];            \
     q->n++;
 
-void func_80116E4C(Q *q, unsigned char *base)
+void animateArea9Palettes(Q *q, unsigned char *base)
 {
     RECT r;
     short lo, hi, a, i;

@@ -46,10 +46,10 @@ extern void playerStepDepthShift(TObj *);
 extern void FUN_80121790(TObj *);
 extern void FUN_80122410(TObj *);
 extern void playerStepClimbObject(TObj *);
-extern void FUN_8011d7e0(TObj *);
-extern void FUN_8011e688(TObj *);
-extern void FUN_8011de64(TObj *);
-extern void FUN_8011e0d8(TObj *);
+extern void playerStep24Area9(TObj *);
+extern void playerStep25Area9(TObj *);
+extern void playerStep26Area9(TObj *);
+extern void playerStep27Area9(TObj *);
 extern void FUN_80121d6c(TObj *);
 extern void FUN_80122044(TObj *);
 extern void playerStepItemReactionA(TObj *);
@@ -313,16 +313,16 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_80122410(o);
         break;
     case 0x24:
-        FUN_8011d7e0(o);
+        playerStep24Area9(o);
         break;
     case 0x25:
-        FUN_8011e688(o);
+        playerStep25Area9(o);
         break;
     case 0x26:
-        FUN_8011de64(o);
+        playerStep26Area9(o);
         break;
     case 0x27:
-        FUN_8011e0d8(o);
+        playerStep27Area9(o);
         break;
     case 0x28:
         FUN_80121d6c(o);

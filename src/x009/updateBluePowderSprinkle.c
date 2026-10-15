@@ -8,7 +8,7 @@ extern void *D_8012E060[];
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern int func_8011A6A0(TObj *);
+extern int bluePowderFindRedFlower(TObj *);
 extern void FUN_800187e4(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
@@ -36,7 +36,7 @@ void updateBluePowderSprinkle(TObj *o)
         case 0:
             if (GVARS.b40 == 0) break;
             if (GVARS.b41 != 0x75) break;
-            if (func_8011A6A0(o)) {
+            if (bluePowderFindRedFlower(o)) {
                 o->timer = 0x1e;
                 o->step++;
             }

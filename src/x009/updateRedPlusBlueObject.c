@@ -19,10 +19,10 @@ static void *D_8012E004[7] = {
     D_8012E740, D_8012E834, D_8012E83C,
 };
 extern int FUN_800202b4(TObj *);
-extern void func_801174C4(TObj *);
+extern void followParentRotation(TObj *);
 extern void setEventComplete(int, int);
 extern void FUN_80026c50(int, int, int);
-extern void func_80124C70(TObj *);
+extern void redPlusBlueObjectRespawn(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateRedPlusBlueObject(TObj *o)
@@ -69,7 +69,7 @@ void updateRedPlusBlueObject(TObj *o)
         if (GAME.selectedPlane != 0x20 && GVARS.b3a == 1)
             break;
         if (o->ba7 == 1)
-            func_801174C4(o);
+            followParentRotation(o);
         FUN_800202b4(o);
         break;
     case 2:
@@ -92,7 +92,7 @@ void updateRedPlusBlueObject(TObj *o)
         case 0:
             FUN_800202b4(o);
             if (o->ba7 == 1)
-                func_801174C4(o);
+                followParentRotation(o);
             break;
         case 1:
             FUN_800202b4(o);
@@ -123,7 +123,7 @@ void updateRedPlusBlueObject(TObj *o)
                 break;
             }
             if (GAME.selectedPlane != 0x21)
-                func_80124C70(o);
+                redPlusBlueObjectRespawn(o);
             break;
         }
         break;

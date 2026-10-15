@@ -4,7 +4,7 @@
 #include "gamestate.h"
 extern void updateAreaScroll(void);
 extern void updateAreaScrollB(void);
-extern void func_80116BD0(void);
+extern void scrollFollowRotatingPlane(void);
 
 void dispatchAreaScroll(void)
 {
@@ -20,7 +20,7 @@ void dispatchAreaScroll(void)
         updateAreaScrollB();
         break;
     case 6:
-        func_80116BD0();
+        scrollFollowRotatingPlane();
         break;
     }
 }

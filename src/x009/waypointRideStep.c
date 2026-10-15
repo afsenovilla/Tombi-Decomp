@@ -24,8 +24,8 @@ typedef struct {
 extern C80119F5C D_800A4550;
 extern P80119F5C D_8012AC88[];
 extern unsigned char PLAYER[];
-extern void func_80119D2C(TObj *);
-extern void func_80119E4C(TObj *);
+extern void waypointRideAdvanceSegment(TObj *);
+extern void waypointRidePlace(TObj *);
 
 static __inline__ int turn(unsigned short tgt, int cur)
 {
@@ -71,9 +71,9 @@ static __inline__ int turn(unsigned short tgt, int cur)
     if (x->dc < x->d8) {                                 \
         x->d8 -= x->dc;                                  \
         x->w0++;                                         \
-        func_80119D2C(o);                                \
+        waypointRideAdvanceSegment(o);                                \
     }                                                    \
-    func_80119E4C(o);
+    waypointRidePlace(o);
 
 void waypointRideStep(TObj *o)
 {
@@ -93,7 +93,7 @@ void waypointRideStep(TObj *o)
 
         o->y.p.whole = D_8012AC88[x->w0].y - 8;
         o->b.p.whole = D_8012AC88[x->w0].z;
-        func_80119D2C(o);
+        waypointRideAdvanceSegment(o);
         break;
     found:
         e->active = 6;

@@ -2,21 +2,21 @@
 // MATCHING 801178b0 124
 #include "TOBJ.H"
 
-extern void func_8011792C(TObj *);
-extern void func_80117A9C(TObj *);
-extern void func_80117BF0(TObj *);
+extern void rotatingPlaneLevelStep(TObj *);
+extern void rotatingPlaneRaisedStep(TObj *);
+extern void rotatingPlaneLoweredStep(TObj *);
 
 void rotatingPlanePlaySfx(TObj *o)
 {
     switch (o->step) {
     case 0:
-        func_8011792C(o);
+        rotatingPlaneLevelStep(o);
         break;
     case 1:
-        func_80117A9C(o);
+        rotatingPlaneRaisedStep(o);
         break;
     case 2:
-        func_80117BF0(o);
+        rotatingPlaneLoweredStep(o);
         break;
     }
 }

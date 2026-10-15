@@ -6,7 +6,7 @@ typedef struct { char p[0xb4]; TObj *c[6]; } TX;
 extern unsigned char D_8009D136;
 extern char D_8012B27C[];
 extern int ObjCullRegister(TObj *);
-extern void func_8011BFD8(TObj *);
+extern void apBoxOpenStep(TObj *);
 extern void stepApBoxEvent(TObj *);
 extern void func_8011C494(TObj *);
 extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
@@ -44,7 +44,7 @@ void updateApBox(TObj *o)
     case 1:
         ObjCullRegister(o);
         if (o->b0c == 0) {
-            func_8011BFD8(o);
+            apBoxOpenStep(o);
             stepApBoxEvent(o);
             o->b69 = 0;
         } else {

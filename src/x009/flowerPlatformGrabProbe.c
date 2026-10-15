@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short func_80121540(TObj *, short, short, int);
+extern short columnProbeB(TObj *, short, short, int);
 
 void flowerPlatformGrabProbe(TObj *o, TObj *p)
 {
@@ -29,7 +29,7 @@ void flowerPlatformGrabProbe(TObj *o, TObj *p)
     {
         short a = x - (ph - p->box0);
         short b = y - (py + (p->box3 - p->box2));
-        r = func_80121540(o, a, b, p->subtype);
+        r = columnProbeB(o, a, b, p->subtype);
     }
     if (r == 0) return;
     if (r == 2) {

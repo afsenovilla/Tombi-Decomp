@@ -23,8 +23,8 @@ typedef struct O {
 } O;
 
 extern short D_1F80019E;
-extern short func_80121434(O *, short, short, int, unsigned char);
-extern short func_801214D0(O *, short, short, unsigned char);
+extern short columnPushOutOfWall(O *, short, short, int, unsigned char);
+extern short columnProbeA(O *, short, short, unsigned char);
 extern short func_801215C0(O *, short, short, int);
 extern void applyCollisionTileResponse(O *);
 
@@ -61,18 +61,18 @@ void flowerPlatformPlayerCollision(O *o, O *e)
     case 0:
         return;
     case 1:
-        if (c && func_80121434(o, x1, d2 + 8, 0, e->subtype)) o->ba6 = 2;
+        if (c && columnPushOutOfWall(o, x1, d2 + 8, 0, e->subtype)) o->ba6 = 2;
         {
             short sx = a;
-            if (func_801214D0(o, sx, d - 0xc, e->subtype)) goto hit;
+            if (columnProbeA(o, sx, d - 0xc, e->subtype)) goto hit;
             if (!func_801215C0(o, sx, d + o->box2, e->subtype)) return;
             goto hit2;
         }
     case 2:
-        if (c && func_80121434(o, x2, d2 + 8, 1, e->subtype)) o->ba6 = 3;
+        if (c && columnPushOutOfWall(o, x2, d2 + 8, 1, e->subtype)) o->ba6 = 3;
         {
             short sx = b;
-            if (func_801214D0(o, sx, d - 0xc, e->subtype)) goto hit;
+            if (columnProbeA(o, sx, d - 0xc, e->subtype)) goto hit;
             if (!func_801215C0(o, sx, d + o->box2, e->subtype)) return;
             goto hit2;
         }
@@ -81,12 +81,12 @@ void flowerPlatformPlayerCollision(O *o, O *e)
             short sx, sy;
             if (c) {
                 sy = d2 + 8;
-                if (func_80121434(o, x1, sy, 0, e->subtype)) o->ba6 = 2;
-                else if (func_80121434(o, x2, sy, 1, e->subtype)) o->ba6 = 3;
+                if (columnPushOutOfWall(o, x1, sy, 0, e->subtype)) o->ba6 = 2;
+                else if (columnPushOutOfWall(o, x2, sy, 1, e->subtype)) o->ba6 = 3;
             }
             sx = a;
             sy = d - 0xc;
-            if (func_801214D0(o, sx, sy, e->subtype) || func_801214D0(o, sx, sy, e->subtype)) {
+            if (columnProbeA(o, sx, sy, e->subtype) || columnProbeA(o, sx, sy, e->subtype)) {
             hit:
                 if (o->velY < 0) o->velY = 0;
                 D_1F80019E = 0;

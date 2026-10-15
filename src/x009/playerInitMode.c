@@ -34,7 +34,7 @@ extern void loadCompressedTIM(int);
 extern void FUN_8001fe6c(TObj *);
 extern void spawnPlayerPoolType12Object(void);
 extern void spawnPlayerPoolType13Object(TObj *, int, int);
-extern void FUN_80118910(void);
+extern void spawnArea9OneShotEffect(void);
 extern void playerSetSpawnTimerArea0Sec3(TObj *);
 extern void FUN_801228bc(TObj *);
 extern void FUN_801212a0(TObj *);
@@ -235,7 +235,7 @@ void playerInitMode(TObj *o)
             DAT_8009c93aA[0] = 1;
             break;
         case 3:
-            FUN_80118910();
+            spawnArea9OneShotEffect();
             t = o->h->p.whole;
             X(o)->wf2 = o->y.p.whole;
             d = o->d;

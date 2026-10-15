@@ -9,7 +9,7 @@ typedef struct { short b0, b1, b2, b3; } B4;
 extern B4 D_8012B1B8[];
 extern void cullObjectToDrawList(TObj *, short);
 extern void ObjFreeDup(TObj *o);
-extern void func_801174C4(TObj *o);
+extern void followParentRotation(TObj *o);
 extern void spawnFlowerPlatformRedFlower(TObj *o);
 
 void updateFlowerPlatform(TObj *o)
@@ -41,7 +41,7 @@ void updateFlowerPlatform(TObj *o)
         break;
     case 1:
         if (GAME.selectedPlane == 0x20 || GVARS.b3a != 1) {
-            func_801174C4(o);
+            followParentRotation(o);
             d = o->box1 - o->box0;
             if (d < o->box0) d = o->box0 + 0x10;
             cullObjectToDrawList(o, d);

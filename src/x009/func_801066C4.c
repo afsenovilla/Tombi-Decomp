@@ -14,7 +14,7 @@ extern void playerBittenJumpGeneric(TObj *);
 extern void playerBittenJumpType03(TObj *);
 extern void playerBittenJumpType04(TObj *);
 extern void playerBittenJumpType0E(TObj *);
-extern void func_8011D3EC(TObj *);
+extern void playerBittenJumpType1A(TObj *);
 extern void func_801213D0(TObj *);
 
 void func_801066C4(TObj *o)
@@ -108,7 +108,7 @@ void func_801066C4(TObj *o)
             playerBittenJumpType0E(o);
             break;
         case 26:
-            func_8011D3EC(o);
+            playerBittenJumpType1A(o);
             break;
         case 19:
             func_801213D0(o);

@@ -1238,3 +1238,22 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   `8012284c hauntedMansionPigShotPickPoint` (random on-screen point of 16), `80122aac hauntedMansionPigShotAttack`; lava caves `80123d64
   lavaCavesPigShotDrop`, `80123aac lavaCavesPigShotFragmentArc`, `80123730 spawnLavaCavesPigShotFragments`; deep jungle `80124ad0
   deepJunglePigShotHop`, `8012491c deepJunglePigShotCheckWall`, `801249d0 deepJunglePigShotPickHop`, `80124f28 deepJunglePigShotSubtype2Step`
+- x009 rotating plane (uncertain step roles): `801177f8 rotatingPlaneSway`, steps of rotatingPlanePlaySfx (which is really the lift step switch on
+  GV2.bb1 / b6a) `8011792c rotatingPlaneLevelStep`, `80117a9c rotatingPlaneRaisedStep`, `80117bf0 rotatingPlaneLoweredStep`; `801174c4
+  followParentRotation` (child position from the parent d90 matrix), `80117464 objSetRotMatrixFromAngles`, `80117fe4 spawnRotatingPlaneChildAt`
+  (unreferenced); `80116bd0 scrollFollowRotatingPlane` (dispatchAreaScroll camera hook); `801191b0 updateRotatingPlaneSprite` (layer 3 type 0x27,
+  follows the plane; `80118a80 initRotatingPlaneSprite` / `80118bf8 initRotatingPlaneSpriteB` (animFrame & 0x80), `8011934c rotatingPlaneSpriteStep`
+  (anim by the linked switch b6a), `80118f7c rotatingPlaneSpriteBStep` (GCD.bd07e, removes an item), `80118e00 rotatingPlaneSpriteSpawnPetals` (two
+  layer 2 type 0x2C), `80118970 rotatingPlaneSpriteSetQuad`); `801288b8 updateDriftingPetal` (layer 2 type 0x2C, kind uncertain)
+- x009 others: `80116e4c animateArea9Palettes` (area 9 entry of MAIN0 data_80079B3C), `80118440 spawnApAwardNumber` (awardAPByArea: digit sprite of the
+  AP amount; same code at 80118440 in x001/x003/x004/x011/x018), `80118910 spawnArea9OneShotEffect` (playerInitMode: layer 3 type 0x26 at a fixed
+  point), `80119d2c waypointRideAdvanceSegment` / `80119e4c waypointRidePlace`, `8011a6a0 bluePowderFindRedFlower` (red flower type 0x0A near the
+  player), `8011bfd8 apBoxOpenStep` (updateApBox, spawns type 0x44 objects; uncertain), `8011ecc8 deathFruitFindFlowerPlatform`, `80124c70
+  redPlusBlueObjectRespawn` (hidden 0x4B0 ticks, then rises back), `80129b70 updatePlayerWalkInTrigger` (unlayered variant 8: `80129acc
+  checkPlayerWalkInTrigger`, `80129914 stepPlayerWalkInScene` walks the locked player to x 0x1068 then into the depth; uncertain),
+  `801217f8 jellyfishCollideObjects` (collideCat2ObjectsPairwise type 0x21)
+- x009 player: `8011d3ec playerBittenJumpType1A` (playerStepBittenJump type 26), playerNormalModeDispatch steps `8011d7e0 playerStep24Area9`
+  (with `8011d680 playerStep24PlaceOnCircle`), `8011e688 playerStep25Area9`, `8011de64 playerStep26Area9`, `8011e0d8 playerStep27Area9` (all ride
+  D_8009F0EC; roles uncertain); collision-column wrappers `80121434 columnPushOutOfWall`, `801214d0 columnProbeA`, `80121540 columnProbeB`
+- x009 section 6 model drawing (drawAreaModelList): `80120280 drawArea9SectionModel` -> `8011f96c drawArea9ModelFT3`, `8011fb4c drawArea9ModelFT4`,
+  `8011fdc4 drawArea9ModelGT3`, `8011ffe0 drawArea9ModelGT4`
