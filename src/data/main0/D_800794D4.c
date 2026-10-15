@@ -5,8 +5,12 @@
 
 extern char D_80012024[];
 extern char D_80012028[];
-extern void FUN_8002a3d4();
-extern void FUN_8002a4d0();
+extern void cameraEventScrollHandler();
+extern void cameraModeHandler2();
+extern void cameraModeHandler3();
+extern void cameraModeHandler5();
+extern void cameraModeHandler6();
+extern void cameraModeHandler6B();
 extern void dispatchAreaDialogInit();
 extern void dispatchMsgBoxHandler();
 extern void dispatchSectionClose();
@@ -17,26 +21,22 @@ extern void dispatchSectionInput();
 extern void dispatchSectionScroll();
 extern void dispatchSectionSelect();
 extern void dispatchSectionUpdate();
-extern void func_80027810();
-extern void func_80029F1C();
-extern void func_8002A0FC();
-extern void func_8002A258();
 extern void func_8002B018();
-extern void func_8002B0B4();
-extern void func_8002B0BC();
-extern void func_8002B8C4();
-extern void func_8002BE80();
-extern void func_8002C43C();
-extern void func_8002C73C();
-extern void func_8002C920();
-extern void func_8002CA88();
-extern void func_8002E4B4();
-extern void func_8002E6C4();
-extern void func_8002EB34();
-extern void func_8002FE78();
 extern void updateCameraFollow();
+extern void updateImpactEffect();
 extern void updateInfoMessage();
+extern void updateL8Type01Object();
+extern void updateL8Type07Object();
 extern void updateLookScroll();
+extern void updatePlayerEffect4E();
+extern void updatePoolType12Object();
+extern void updatePoolType20Object();
+extern void updatePoolType22Object();
+extern void updatePoolType32Object();
+extern void updatePoolType5DObject();
+extern void updatePoolType66Object();
+extern void updatePoolType67Object();
+extern void updatePoolType68Object();
 extern unsigned int data_800794D4[];
 extern unsigned int data_800794E0[];
 extern unsigned int data_800794EC[];
@@ -471,12 +471,12 @@ unsigned int data_80079A48[41] = {
     (unsigned int)ptrs_800798A4, 0x8012A83C, 0x8012F064, (unsigned int)ptrs_800798DC,
     0x801305DC, 0x80118100, 0x80125664, 0x80125664,
     (unsigned int)ptrs_80079930, (unsigned int)ptrs_800799A4, (unsigned int)ptrs_80079A08, (unsigned int)ptrs_80079A3C,
-    (unsigned int)updateCameraFollow, (unsigned int)FUN_8002a4d0, 0x80116934, (unsigned int)func_80029F1C,
-    (unsigned int)func_8002A0FC, (unsigned int)updateLookScroll, (unsigned int)func_8002A258, (unsigned int)FUN_8002a3d4,
-    (unsigned int)FUN_8002a4d0, 0x80116934, (unsigned int)func_80029F1C, (unsigned int)func_8002A0FC,
-    (unsigned int)updateLookScroll, (unsigned int)func_8002A258, (unsigned int)func_80027810, (unsigned int)FUN_8002a4d0,
-    0x80116934, (unsigned int)func_80029F1C, (unsigned int)func_8002A0FC, (unsigned int)updateLookScroll,
-    (unsigned int)func_8002A258,
+    (unsigned int)updateCameraFollow, (unsigned int)cameraEventScrollHandler, 0x80116934, (unsigned int)cameraModeHandler2,
+    (unsigned int)cameraModeHandler3, (unsigned int)updateLookScroll, (unsigned int)cameraModeHandler5, (unsigned int)cameraModeHandler6,
+    (unsigned int)cameraEventScrollHandler, 0x80116934, (unsigned int)cameraModeHandler2, (unsigned int)cameraModeHandler3,
+    (unsigned int)updateLookScroll, (unsigned int)cameraModeHandler5, (unsigned int)cameraModeHandler6B, (unsigned int)cameraEventScrollHandler,
+    0x80116934, (unsigned int)cameraModeHandler2, (unsigned int)cameraModeHandler3, (unsigned int)updateLookScroll,
+    (unsigned int)cameraModeHandler5,
 };
 
 unsigned int data_80079AEC[20] = {
@@ -496,8 +496,8 @@ unsigned int data_80079B3C[19] = {
 };
 
 unsigned int data_80079B88[9] = {
-    0x800E9DC0, (unsigned int)func_8002B0BC, 0x8011759C, 0x80119114,
-    0x80117BD4, 0x801319C8, 0x80117DE0, (unsigned int)func_8002B0B4,
+    0x800E9DC0, (unsigned int)updateL8Type01Object, 0x8011759C, 0x80119114,
+    0x80117BD4, 0x801319C8, 0x80117DE0, (unsigned int)updateL8Type07Object,
     0x80117364,
 };
 
@@ -505,27 +505,27 @@ unsigned int data_80079BAC[98] = {
     0x800E9E98, 0x80118438, 0x80118BC0, 0x80118F90,
     0x800EA168, 0x800EA284, 0x8011926C, 0x8011935C,
     0x80119468, 0x801195F4, 0x8011A63C, 0x8011A744,
-    0x800EA67C, 0x8002B9B0, 0x80118724, (unsigned int)func_8002BE80,
-    0x800EB0C8, 0x8011AB10, (unsigned int)func_8002C43C, (unsigned int)dispatchMsgBoxHandler,
+    0x800EA67C, 0x8002B9B0, 0x80118724, (unsigned int)updateImpactEffect,
+    0x800EB0C8, 0x8011AB10, (unsigned int)updatePoolType12Object, (unsigned int)dispatchMsgBoxHandler,
     0x8011AD98, 0x80116D1C, 0x8011B0D4, 0x8011B1E0,
     0x80118AC0, 0x80118C1C, 0x8002CF40, 0x800EB394,
     (unsigned int)updateInfoMessage, (unsigned int)dispatchAreaDialogInit, 0x800EB6AC, 0x80118DA8,
-    (unsigned int)func_8002E4B4, 0x80132760, (unsigned int)func_8002E6C4, 0x80117114,
+    (unsigned int)updatePoolType20Object, 0x80132760, (unsigned int)updatePoolType22Object, 0x80117114,
     0x8011B2E8, 0x801172DC, 0x80118838, 0x801191B0,
     0x80118CF4, 0x80118F3C, 0x8011AA3C, 0x8011ABA0,
     0x801165DC, 0x80119268, 0x800E8420, 0x801287F8,
-    0x80115FE0, 0x8002E83C, (unsigned int)func_8002EB34, 0x8011976C,
+    0x80115FE0, 0x8002E83C, (unsigned int)updatePoolType32Object, 0x8011976C,
     0x801198DC, 0x8011910C, 0x801196F8, 0x80119BAC,
     0x8011D07C, 0x80119838, 0x800E94AC, 0x80117148,
     0x8011AD24, 0x801193E4, 0x8011992C, 0x801180B4,
     0x8011A4A8, 0x8011AE9C, 0x8011A7E0, 0x8012FBC4,
     0x800EB9F0, 0x8011617C, 0x801162D0, 0x80116D18,
     0x8012B6E8, 0x80118188, 0x80117468, 0x801167BC,
-    0x801169C0, 0x801165A8, (unsigned int)func_8002FE78, 0x80117490,
+    0x801169C0, 0x801165A8, (unsigned int)updatePlayerEffect4E, 0x80117490,
     0x801175A0, 0x80117710, 0x801177C4, 0x80119874,
     0x80119BF4, 0x801176B0, 0x80117DDC, 0x80119EEC,
     0x801166F8, 0x8011B6E0, 0x8011B7F0, 0x800EBB48,
-    0x800EC420, (unsigned int)func_8002B8C4, 0x801166F0, 0x800EC9C0,
+    0x800EC420, (unsigned int)updatePoolType5DObject, 0x801166F0, 0x800EC9C0,
     0x80116EC0, 0x80118760,
 };
 
@@ -539,9 +539,9 @@ unsigned int data_80079D3C[2] = {
 };
 
 void *ptrs_80079D44[3] = {
-    func_8002C73C,
-    func_8002C920,
-    func_8002CA88,
+    updatePoolType66Object,
+    updatePoolType67Object,
+    updatePoolType68Object,
 };
 
 unsigned int data_80079D50[1] = {

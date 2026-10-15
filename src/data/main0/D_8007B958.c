@@ -4,8 +4,8 @@
 #include "anim.h"
 
 extern void dispatchUnlayeredByVariant();
-extern void func_8004C1EC();
-extern void func_8004CFD8();
+extern void updateSectionFadeController();
+extern void updateSectionSpawnManager();
 extern unsigned int data_8007B958[];
 extern unsigned int data_8007B970[];
 extern unsigned int data_8007B97C[];
@@ -687,7 +687,7 @@ void *ptrs_8007BEE4[20] = {
 };
 
 unsigned int data_8007BF34[14] = {
-    (unsigned int)func_8004C1EC, (unsigned int)func_8004CFD8, 0x8004D20C, 0x8013BE48,
+    (unsigned int)updateSectionSpawnManager, (unsigned int)updateSectionFadeController, 0x8004D20C, 0x8013BE48,
     (unsigned int)dispatchUnlayeredByVariant, 0x80130990, 0x801194AC, 0x8013C028,
     0x80130E3C, 0x8013123C, 0x801315B0, 0x8012D1BC,
     0x8012D200, 0x80138218,

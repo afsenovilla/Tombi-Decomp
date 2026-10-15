@@ -5,8 +5,8 @@
 
 extern void dispatchAreaItemDraw();
 extern void dispatchAreaItemInit();
-extern void func_8003E960();
-extern void func_8003EDB0();
+extern void updateL5Type09Item();
+extern void updateL5Type0AItem();
 extern unsigned int data_8007B328[];
 extern unsigned int data_8007B35C[];
 extern unsigned int data_8007B368[];
@@ -65,8 +65,8 @@ extern unsigned int data_8007B898[];
 extern unsigned int data_8007B8B8[];
 
 unsigned int data_8007B328[13] = {
-    0x80123B30, (unsigned int)dispatchAreaItemInit, 0x8003DD28, (unsigned int)func_8003E960,
-    (unsigned int)func_8003EDB0, 0x801236F0, 0x80123A1C, 0x80123F24,
+    0x80123B30, (unsigned int)dispatchAreaItemInit, 0x8003DD28, (unsigned int)updateL5Type09Item,
+    (unsigned int)updateL5Type0AItem, 0x801236F0, 0x80123A1C, 0x80123F24,
     0x8011F128, 0x80116B58, 0x8011BA3C, 0x80116D14,
     (unsigned int)dispatchAreaItemDraw,
 };

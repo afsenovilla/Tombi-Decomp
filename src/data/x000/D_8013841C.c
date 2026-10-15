@@ -3,10 +3,10 @@
 // with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
 #include "anim.h"
 
-extern void FUN_8002a4d0();
-extern void func_80029F1C();
-extern void func_8002A0FC();
-extern void func_8002A258();
+extern void cameraEventScrollHandler();
+extern void cameraModeHandler2();
+extern void cameraModeHandler3();
+extern void cameraModeHandler5();
 extern void func_80116818();
 extern void updateCameraFollow();
 extern void updateLookScroll();
@@ -26,11 +26,11 @@ extern unsigned int data_801385A0[];
 void *ptrs_8013841C[7] = {
     updateCameraFollow,
     func_80116818,
-    FUN_8002a4d0,
-    func_80029F1C,
-    func_8002A0FC,
+    cameraEventScrollHandler,
+    cameraModeHandler2,
+    cameraModeHandler3,
     updateLookScroll,
-    func_8002A258,
+    cameraModeHandler5,
 };
 
 unsigned int data_80138438[6] = {

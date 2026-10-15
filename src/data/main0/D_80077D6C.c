@@ -3,8 +3,9 @@
 // with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
 #include "anim.h"
 
-extern void func_8004985C();
-extern void func_800498F4();
+extern void dispatchAreaNpcHandler();
+extern void updateL2Type02Object();
+extern void updateL2Type30Object();
 extern unsigned int data_80077D6C[];
 extern unsigned int data_80077D9C[];
 extern unsigned int data_80077F08[];
@@ -17,7 +18,7 @@ unsigned int data_80077D6C[12] = {
 };
 
 unsigned int data_80077D9C[91] = {
-    0x8012B2D4, 0x80126FEC, (unsigned int)func_8004985C, 0x8012DEDC,
+    0x8012B2D4, 0x80126FEC, (unsigned int)updateL2Type02Object, 0x8012DEDC,
     0x8012E1C0, 0x8012E4C4, 0x8012E8C4, 0x80111AE0,
     0x80132174, 0x801328B4, 0x80123E24, 0x8012F448,
     0x8012F988, 0x801312F8, 0x80113484, 0x801315DC,
@@ -29,7 +30,7 @@ unsigned int data_80077D9C[91] = {
     0x8012552C, 0x800EE4C0, 0x800EE79C, 0x80125040,
     0x801281FC, 0x801274FC, 0x80116FA8, 0x8012D294,
     0x801288B8, 0x800EE748, 0x800EEAC8, 0x801161A8,
-    0x8003BCD0, 0x80127EC4, (unsigned int)func_800498F4, 0x8012B210,
+    (unsigned int)updateL2Type30Object, 0x80127EC4, (unsigned int)dispatchAreaNpcHandler, 0x8012B210,
     0x80134E5C, 0x8012B438, 0x8012BF58, 0x8012D280,
     0x8012F524, 0x8012F9A0, 0x8012AC48, 0x8011F4E0,
     0x8011F4E0, 0x8011F4E0, 0x8011F4E0, 0x8011F4E0,
