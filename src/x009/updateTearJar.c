@@ -8,10 +8,10 @@ extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void func_8011B508(TObj *);
+extern void stepTearJar(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_8011B6BC(TObj *o)
+void updateTearJar(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -31,7 +31,7 @@ void func_8011B6BC(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        func_8011B508(o);
+        stepTearJar(o);
         break;
     case 2:
         ObjCullRegister(o);

@@ -54,7 +54,7 @@ static __inline__ int is16(TObj *o)
     return 0;
 }
 
-void func_801274FC(TObj *o)
+void updateCountedCollectible(TObj *o)
 {
     int n, m, k;
     unsigned char *c;

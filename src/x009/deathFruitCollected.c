@@ -9,7 +9,7 @@ void AnimLoadDuration(TObj *o);
 void printInfoMessage(int a, int b);
 void applyAnimVelocityX(TObj *o, unsigned short v);
 
-void func_8012455C(TObj *o)
+void deathFruitCollected(TObj *o)
 {
     switch (o->state) {
     case 0:

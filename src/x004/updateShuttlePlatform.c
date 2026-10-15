@@ -10,7 +10,7 @@ extern void queueSfxKeyOff(int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011C1B8(TObj *o)
+void updateShuttlePlatform(TObj *o)
 {
     unsigned char b = o->b04;
     P *q;

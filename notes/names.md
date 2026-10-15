@@ -513,3 +513,32 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   cdSeekStream(7), fade, thread); `8011dd48 playerEnterHollowForItem` (uncertain: a playerEventModeDispatch mode: the player walks into the depth
   (z += 1 per tick, invisible), receives the item of the spot w7a (0x25 "Red Evil Pig Bag" + event 0x1D "A Stormy Pig Bag" completed / 0x1E "Phoenix
   Mountain" started, 0x07 "Charity Wings", 0x1F "Large Lunch Box", 0x67 "Molasses", 0x37 "Cheese", once each by GCD flags) and walks back out)
+- x004 objects: `801274fc updateCountedCollectible` (layer 2 type 0x29, 219 placements in areas 4/12, kind uncertain: b0c 0 objects are skipped when
+  their persistent bit (subtype) is set; collecting one plays sfx 0xF7, bursts (FUN_800ea544), GCD.bcefb += 1 and sets bit subtype of
+  SCRIPT_GLOBALS[0x58 + subtype / 8]; subtype 0x16 sparkles and palette-cycles until bcefb reaches 0x16; updateSceneSequence checks bcefb >= 0x17),
+  `8011d544 updateStormBackdrop` (layer 7 type 9: backdrop sprite; subtype != 0 also flashes lightning (drawScreenFade 0x80 -> 0, sfx 0x82 every
+  0x17C ticks) until area 4 is purified (GAME.purifiedAreas & 8); `8011d804 stormBackdropCycleClut` loads one of 7 palette rows (LoadImage to
+  0xD0,0x1E0) on a timer), `8011aa3c updateSmokeEmitter` (layer 3 type 0x2A, uncertain: subtype 0 spawns a subtype 1 copy every 64 ticks;
+  `8011a840 smokePuffRise` rises, grows (d64 += 0x20) and changes anim twice before freeing itself), `8011c540 updateHealingSpot` (layer 4 type 0x25:
+  standing in the subtype 0 box restores one vitality point every 0x3C ticks, sfx 9), `8011bf10 updateBlockingWall` (type 0x1E, uncertain: 0x82..0xA0
+  high box, removed when GCD.bd091 is set (then the camera bound D_800A457E is widened by 0x140); subtype 1 shrinks away when bd091 becomes 1),
+  `8011c1b8 updateShuttlePlatform` (type 0x1F: 0x4E wide platform; when stepped on it travels between the two points D_80130CCC with a looping
+  sfx 0x83, keyed off on arrival), `8011d2b8 updateRaftArrival` (type 0x44: only at spawn point 11 (where updateRaft of area 10 sends the player):
+  carries the player in to x 0xB0, then gives control back (player step 0x12)), `8011c708 updateSceneryModel` (type 0x30, uncertain: model drawn by
+  FUN_80018cf0 with fixed rotations per subtype, section dependent visibility), `8012b210 updateCarriedGuide` (layer 2 type 0x33, kind uncertain:
+  held at the player's hand like the bucket; `8012aa10 carriedGuideFollowPlayer` keeps the player inside allowed x ranges per depth lane and shows
+  MFNT040 dialogue 2/10 "Hey, hey! Not that way!" at the limits), `8011dff8 updateThrownBreakable` (layer 1 type 3, uncertain kind:
+  `8011de60 thrownBreakableFly` spins up (velV -0x200 / +0x200) and falls until it hits the floor, then b04 2 bursts it (sfx 0x34) and sets
+  bit subtype of GV2.bae)
+- Event flag bytes: GCD + 0x8009CDA4 + id is the progress byte of event `id` (0xFF = completed; e.g. x001 Look and See 0x16 = GCD.bcdba, x003 0x1D =
+  bcdc1, 0x1F = bcdc3, 0x23 = bcdc7), which ties several objects to their event:
+  x009 Death Fruit (event 0x26 "Death Fruit Juice", flag GCD.bcdca; collected count GCD.bcef6 shown with printInfoMessage(0x29 + count, 2), per-fruit flag
+  GCD.bcfe5[b0c]): `801246d0 updateDeathFruit` (layer 2 type 0x1A, 5 placements, gone when its flag is set or the event is completed; b04 2 step 2 =
+  `8012455c deathFruitCollected`: counts it and flies off spinning), `8011ee50 updateFallingDeathFruit` (layer 1 type 4: same anim D_8012E04C, falls
+  spinning 5 px per tick; on the floor awards 500 AP and is counted the same way), `801203cc deathFruitCatchContact` (contact callback: while the event
+  runs (bcdca == 1) and the player state wac == 1, the touched fruit goes to b04 2 and is kept in o->de4; uncertain);
+  x009 `8011b6bc updateTearJar` (the held object of MAIN0 dispatchEffectByVariant in area 9, like updateBucket in area 1; kind uncertain: the code only
+  shows the event): `8011b508 stepTearJar`, `8011b01c tearJarHeld` (follows the player's hand, freed when another item 5/7/0x0E/0x7C/0x97/0x98 is used;
+  completes event 0x28 "Tears from a Flower"); `801248d4 updateRedPlusBlueObject` (layer 2 type 0x1C, uncertain kind: subtype 4 completes event 0xBD
+  "Red+Blue=?" and sets PLAYER.obj.subtype = 1); `8011bb0c updateBobbingPlatform` (layer 4 type 0x36, uncertain: only when GCD.bcdac (event 0x08 "I Can't
+  Swim...") is set; a 0x40 wide platform bobbing on a sine at one of two spots D_8012B26C)

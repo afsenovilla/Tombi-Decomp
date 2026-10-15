@@ -7,7 +7,7 @@
 extern void *D_80134D50[];
 extern int D_800A4570;
 extern int D_800A4574;
-extern void func_8011D804(TObj *);
+extern void stormBackdropCycleClut(TObj *);
 extern void drawScreenFade(short);
 extern void playSFX(int);
 extern void ObjListPush_1F80022C(TObj *);
@@ -42,7 +42,7 @@ static __inline__ void place(TObj *o)
     ObjListPush_1F80022C(o);
 }
 
-void func_8011D544(TObj *o)
+void updateStormBackdrop(TObj *o)
 {
     unsigned char t;
     int pa;
@@ -69,7 +69,7 @@ void func_8011D544(TObj *o)
         break;
     case 1:
         if (!(GAME.purifiedAreas & 8) && o->subtype) {
-            func_8011D804(o);
+            stormBackdropCycleClut(o);
             switch (o->step) {
             case 0:
                 if (GAME.fadeScreenControl == 0) {

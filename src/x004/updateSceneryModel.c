@@ -7,7 +7,7 @@
 extern void FUN_80018cf0(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011C708(TObj *o)
+void updateSceneryModel(TObj *o)
 {
     switch (o->b04) {
     case 0:

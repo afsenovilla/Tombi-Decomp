@@ -6,12 +6,12 @@
 extern void *D_8013B104[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void func_8011DE60(TObj *);
+extern void thrownBreakableFly(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800ea544(TObj *, short, short, short);
 extern void freeObjectLayer1(TObj *);
 
-void func_8011DFF8(TObj *o)
+void updateThrownBreakable(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -31,7 +31,7 @@ void func_8011DFF8(TObj *o)
         FUN_8001fe6c(o);
         break;
     case 1:
-        if (FUN_800202b4(o)) func_8011DE60(o);
+        if (FUN_800202b4(o)) thrownBreakableFly(o);
         break;
     case 2:
         if (FUN_800202b4(o)) {

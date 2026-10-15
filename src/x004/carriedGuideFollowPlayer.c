@@ -21,7 +21,7 @@ extern int showMessageBox(int, int, int, int);
 #define TRIG() \
     { GVARS.b42 = 1; D_800A603C = 5; D_800A603D = 0; D_800A603E = 0; o->state = 1; }
 
-void func_8012AA10(TObj *o)
+void carriedGuideFollowPlayer(TObj *o)
 {
     E4 *e;
     short ang;

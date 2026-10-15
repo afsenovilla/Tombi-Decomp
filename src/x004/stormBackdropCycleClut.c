@@ -8,7 +8,7 @@ extern unsigned char D_80130EFC[], D_80130F04[];
 extern CL D_80130D1C[];
 extern int LoadImage(RECT *, void *);
 
-void func_8011D804(TObj *o)
+void stormBackdropCycleClut(TObj *o)
 {
     RECT r;
     int i;

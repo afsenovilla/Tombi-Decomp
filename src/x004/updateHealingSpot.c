@@ -8,7 +8,7 @@ extern int ObjCullRegister(TObj *);
 extern void playSFX(int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C540(TObj *o)
+void updateHealingSpot(TObj *o)
 {
     short *p;
 

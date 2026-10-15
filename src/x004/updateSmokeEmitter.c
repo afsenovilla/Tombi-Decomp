@@ -7,9 +7,9 @@ extern void *D_80134D18;
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
 extern void func_8011EC78(TObj *);
-extern void func_8011A840(TObj *);
+extern void smokePuffRise(TObj *);
 
-void func_8011AA3C(TObj *o)
+void updateSmokeEmitter(TObj *o)
 {
     TObj *p;
     char one;
@@ -44,7 +44,7 @@ void func_8011AA3C(TObj *o)
         break;
     case 1:
         func_8011EC78(o);
-        func_8011A840(o);
+        smokePuffRise(o);
         break;
     case 2:
         break;

@@ -8,7 +8,7 @@ extern TObj *FUN_80018448(void);
 extern void FUN_80018838(TObj *);
 extern int ObjCullRegister(TObj *);
 
-void func_8011BF10(TObj *o)
+void updateBlockingWall(TObj *o)
 {
     TObj *e;
 

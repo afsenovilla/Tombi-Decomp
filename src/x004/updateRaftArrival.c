@@ -7,7 +7,7 @@ extern TObj PLAYER;
 extern void FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011D2B8(TObj *o)
+void updateRaftArrival(TObj *o)
 {
     TObj *pl = &PLAYER;
     unsigned char b = o->b04;

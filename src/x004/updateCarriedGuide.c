@@ -7,9 +7,9 @@ extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_8012AA10(TObj *);
+extern void carriedGuideFollowPlayer(TObj *);
 
-void func_8012B210(TObj *o)
+void updateCarriedGuide(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -45,7 +45,7 @@ void func_8012B210(TObj *o)
             o->b04 = 3;
             break;
         case 3:
-            func_8012AA10(o);
+            carriedGuideFollowPlayer(o);
             break;
         case 4:
             if (o->visible == 0) o->b04 = 3;

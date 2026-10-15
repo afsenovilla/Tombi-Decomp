@@ -18,7 +18,7 @@ extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void ObjFreeDup(TObj *);
 
-void func_8011BB0C(TObj *o)
+void updateBobbingPlatform(TObj *o)
 {
     TObj *pl = &PLAYER;
     int i;

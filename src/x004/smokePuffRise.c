@@ -7,7 +7,7 @@ extern void *D_80134D1C[];
 extern void *D_80134D20[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
-void func_8011A840(TObj *o)
+void smokePuffRise(TObj *o)
 {
     char pad;
 

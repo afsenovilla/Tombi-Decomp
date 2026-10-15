@@ -5,7 +5,7 @@
 
 extern TObj PLAYER;
 extern void *D_8012E024;
-extern void func_8011B01C(TObj *);
+extern void tearJarHeld(TObj *);
 
 static __inline__ int vdiv(int a, int b)
 {
@@ -35,7 +35,7 @@ static __inline__ void start(TObj *o)
     o->state++;
 }
 
-void func_8011B508(TObj *o)
+void stepTearJar(TObj *o)
 {
     char pad[16];
 
@@ -45,7 +45,7 @@ void func_8011B508(TObj *o)
     case 0:
         break;
     case 1:
-        func_8011B01C(o);
+        tearJarHeld(o);
         break;
     case 2:
         if (o->state != 0)

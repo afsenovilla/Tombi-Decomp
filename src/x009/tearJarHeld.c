@@ -18,7 +18,7 @@ extern void FUN_80026e0c(int, int);
 extern void FUN_80026c50(int, int, int);
 extern void setEventComplete(int, int);
 
-void func_8011B01C(TObj *o)
+void tearJarHeld(TObj *o)
 {
     P4 *p;
     short a, dx, dy;

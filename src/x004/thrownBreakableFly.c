@@ -5,7 +5,7 @@ extern short probeCollisionAtDepthB(unsigned char *, int, int);
 extern int DAT_8013b104;
 extern char DAT_80077d54[];
 
-void func_8011DE60(unsigned char *o)
+void thrownBreakableFly(unsigned char *o)
 {
     short v;
     switch (o[5]) {

@@ -10,7 +10,7 @@ typedef struct {
 extern short func_80043260(TObjX *, TObj *);
 extern void FUN_8001f96c(int, int, int, int);
 
-void func_801203CC(TObjX *o, TObj *e)
+void deathFruitCatchContact(TObjX *o, TObj *e)
 {
     short r = func_80043260(o, e);
 

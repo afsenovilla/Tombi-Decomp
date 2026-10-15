@@ -15,7 +15,7 @@ extern void FUN_80026c50(int, int, int);
 extern void func_80124C70(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801248D4(TObj *o)
+void updateRedPlusBlueObject(TObj *o)
 {
     unsigned char s;
 

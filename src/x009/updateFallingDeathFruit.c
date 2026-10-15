@@ -24,7 +24,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void func_8011EE50(TObj *o)
+void updateFallingDeathFruit(TObj *o)
 {
     unsigned char *c;
 

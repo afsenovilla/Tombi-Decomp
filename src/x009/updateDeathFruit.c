@@ -11,10 +11,10 @@ extern void *D_8012E04C;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void func_8012455C(TObj *);
+extern void deathFruitCollected(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801246D0(TObj *o)
+void updateDeathFruit(TObj *o)
 {
     int t = o->b04;
     int s;
@@ -60,7 +60,7 @@ void func_801246D0(TObj *o)
             if (o->state == 0) AnimAdvance(o);
             break;
         case 2:
-            func_8012455C(o);
+            deathFruitCollected(o);
             if (o->visible == 0) o->b04 = 3;
             break;
         }
