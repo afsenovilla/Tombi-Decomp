@@ -27,7 +27,7 @@ extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
 extern void syncObjectTargetY(O *);
-extern void func_80029078(O *);
+extern void updateCameraScroll(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
 extern void setEventComplete(int, int);
@@ -55,7 +55,7 @@ void updateAreaScroll(O *o)
         if (GVARS.b3a != 0) o->step++;
         cameraFollowPlayerX(o);
         syncObjectTargetY(o);
-        func_80029078(o);
+        updateCameraScroll(o);
         break;
     case 2:
         D_80079A98[o->subtype](o);

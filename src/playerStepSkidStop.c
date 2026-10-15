@@ -12,7 +12,7 @@ void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void setFacingAndUpDownFromPad(TObj *o);
 void playerSetAngleFromSlope(TObj *o);
-void func_8010FE70(TObj *o);
+void playerSkidDecelerate(TObj *o);
 void playerMoveByAngleSpeed(TObj *o);
 void playerStickToGround(TObj *o);
 void playerCheckGroundAndFall(TObj *o);
@@ -43,10 +43,10 @@ void playerStepSkidStop(TObj *o)
     case 1:
         setFacingAndUpDownFromPad(o);
         playerSetAngleFromSlope(o);
-        func_8010FE70(o);
+        playerSkidDecelerate(o);
         if (o->b69 & 2) {
             AnimAdvance(o);
-            func_8010FE70(o);
+            playerSkidDecelerate(o);
             o->b69 = 1;
         }
         playerMoveByAngleSpeed(o);

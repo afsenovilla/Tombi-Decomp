@@ -73,7 +73,7 @@ extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_800eaffc(int, int, int, int);
 extern void FUN_8002c578(TObj *, int, int, int);
 extern short angleBetweenPoints(XY, XY);
-extern void FUN_800ec710(int, TObj *);
+extern void spawnWeaponTrailObjects(int, TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void weaponCalcBentOffset(D600 *, int, short *, short *);
 extern void FUN_800efc04(TObj *);
@@ -354,7 +354,7 @@ void weapon0Swing(TObj *o)
                 if (PLAYER.b9e == 4 || PLAYER.b9e == 7)
                     *(unsigned char *)o->d94 = D_8009C330->b6;
                 if (PADOK() && PLAYER.bac < 2 && GVARS.b3f == 0) {
-                    FUN_800ec710(D_8009D2B2, o);
+                    spawnWeaponTrailObjects(D_8009D2B2, o);
                     PLAYER.b9d = 0;
                     D_8009C338->w0e = 0;
                     o->waa -= 0x40;
@@ -379,7 +379,7 @@ void weapon0Swing(TObj *o)
                 o->step = 0;
                 o->state = 0;
             } else {
-                FUN_800ec710(D_8009D2B2, o);
+                spawnWeaponTrailObjects(D_8009D2B2, o);
                 PLAYER.b9d = 0;
                 D_8009C338->w0e = 0;
                 o->waa += 0x40;

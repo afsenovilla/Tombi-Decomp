@@ -75,7 +75,7 @@ static __inline__ int addprim(unsigned e, unsigned *a, char *b, int c, int d)
    the constant `li a1` first in the join block and reorg steals it into the beqz delay slot; the game has a nop
    there because a trapping load cannot be stolen). The loop note chains the first insn after it to the lh, so the
    inline's tag constant is its first parameter to make that pinned insn the `li` (game: lh, lui a1, lb, lw).
-   volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim as in FUN_80052db8. */
+   volatile x3/y3 stores + volatile y0 read fix the onscreen block; addprim as in drawObjectSpriteScaled. */
 void func_80055CB8(O *o)
 {
     PolyFT4 *p;

@@ -46,7 +46,7 @@ extern void ObjApplyVelocity(TObj *);
 extern short FUN_80035428(TObj *);
 extern short angleBetweenPoints(P, P);
 extern void FUN_8002c578(TObj *, int, int, int);
-extern void FUN_800ec710(int, TObj *);
+extern void spawnWeaponTrailObjects(int, TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void weaponCalcBentOffset(short *, int, short *, short *);
 extern void FUN_800efc04(TObj *);
@@ -311,7 +311,7 @@ void weapon8to9Swing(TObj *o)
                     o->state = 0;
                     GVARS.i34 = 0;
                 } else {
-                    FUN_800ec710(D_8009D2B2, o);
+                    spawnWeaponTrailObjects(D_8009D2B2, o);
                     o->waa += (o->animFrame & 1) ? -0x40 : 0x40;
                     o->state = 6;
                 }

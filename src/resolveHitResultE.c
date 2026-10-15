@@ -1,7 +1,7 @@
 // FUNC 80042c70 236 MAIN0
 // MATCHING 80042c70 236
 #include "TOBJ.H"
-extern int FUN_800425c4();
+extern int weaponOnHitGetResult();
 extern void SfxPlay(int);
 extern void spawnImpactEffect(int, int, int, int);
 
@@ -10,7 +10,7 @@ int resolveHitResultE(TObj *o, unsigned char *q, int c)
     int r = 1;
     q[0x68] = 1;
     q[0x9e] = 0;
-    switch (FUN_800425c4(o, q, c)) {
+    switch (weaponOnHitGetResult(o, q, c)) {
     case 0:
         r = 2;
         goto M;

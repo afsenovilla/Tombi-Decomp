@@ -7,12 +7,12 @@ typedef struct {
     unsigned char pad[0xd4 - 0xc0];
     TObj *de4;
 } TObjX;
-extern short func_80043260(TObjX *, TObj *);
+extern short pushObjectOutOfObjectBoxA(TObjX *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 
 void func_801203CC(TObjX *o, TObj *e)
 {
-    short r = func_80043260(o, e);
+    short r = pushObjectOutOfObjectBoxA(o, e);
 
     if (r != 0 && GCD.bcdca == 1 && r < 3 && *(unsigned char *)&o->o.wac == 1) {
         e->active = 2;

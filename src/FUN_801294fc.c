@@ -12,8 +12,8 @@ extern void applyFrameVelocityXY(TObj *);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern unsigned FUN_8001f9e0(void);
 extern short FUN_80041240(TObj *, short, short);
-extern int FUN_801274cc(TObj *);
-extern int FUN_801275e4(TObj *);
+extern int enemyProbeGround(TObj *);
+extern int enemyCheckWallAhead(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 #define SETANIM(o, T) \
@@ -69,19 +69,19 @@ void FUN_801294fc(TObj *o)
             }
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 2:
         AnimAdvanceWithBox(o);
         applyFrameVelocityXY(o);
-        if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
+        if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (--o->timer == -1 || FUN_801275e4(o) != 0) {
+        if (--o->timer == -1 || enemyCheckWallAhead(o) != 0) {
             o->timer = 0x3c;
             o->wac = 0xf;
             o->substep++;
@@ -103,12 +103,12 @@ void FUN_801294fc(TObj *o)
             }
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 4:
         AnimAdvanceWithBox(o);
         applyAnimVelocityXY(o, 1 - o->animFrame);
-        if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
+        if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
             o->state = 7;
@@ -139,11 +139,11 @@ void FUN_801294fc(TObj *o)
             o->substep = 0;
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 6:
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         c = x->b01;
         if (c != 2) {
             t = D_80138FA8;

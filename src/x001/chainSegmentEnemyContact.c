@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short func_80043260(TObj *, TObj *);
+extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern short pushOutOfBoxX(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -15,7 +15,7 @@ void chainSegmentEnemyContact(TObj *o, TObj *p)
     if (o->b9e) return;
     if (p->active == 5) return;
     if (!(p->active & 2)) {
-        r = func_80043260(o, p);
+        r = pushObjectOutOfObjectBoxA(o, p);
         if (r == 0) return;
         if (r == 1) {
             if ((*(unsigned char*)&o->wac) != 1) {

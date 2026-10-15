@@ -4,7 +4,7 @@ extern unsigned char DAT_800a6039[];
 extern unsigned char DAT_800a603a[];
 extern unsigned char PLAYER[];
 extern void FUN_800ea124(void *);
-extern void FUN_800505f0(void *);
+extern void drawPlayerSpriteDefault(void *);
 extern void FUN_800eb714(void *);
 extern void FUN_800ead48(void *);
 void drawPlayer(void)
@@ -13,7 +13,7 @@ void drawPlayer(void)
     if (DAT_800a6039[0] != 0) {
         switch (DAT_800a603a[0]) {
         case 0:
-            FUN_800505f0(p);
+            drawPlayerSpriteDefault(p);
             break;
         case 1:
             FUN_800ea124(p);

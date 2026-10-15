@@ -31,7 +31,7 @@ extern void SfxPlay2(int, int);
 extern void weaponSetPlayerAnimA(TObj *);
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
-extern void FUN_800ec710(int, TObj *);
+extern void spawnWeaponTrailObjects(int, TObj *);
 extern void FUN_80033834(TObj *);
 extern short weaponFindNearestTarget(TObj *);
 extern short FUN_80033638(TObj *);
@@ -152,7 +152,7 @@ void weapon5to7Swing(TObj *o)
         o->state++;
         o->waa += 0x80;
         DAT_8009c330->w2e = 0xffff;
-        FUN_800ec710(DAT_8009d2b2[0], o);
+        spawnWeaponTrailObjects(DAT_8009d2b2[0], o);
         break;
     case 1:
         SPIN(o);

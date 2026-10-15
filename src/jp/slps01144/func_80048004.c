@@ -1,5 +1,5 @@
 // JP slps01144 80048004 796
-// Japanese version of PAL main0 80054C38 (func_80054C38.c): 320 -> 321, 256 -> 241.
+// Japanese version of PAL main0 80054C38 (drawObjectSpriteQuad.c): 320 -> 321, 256 -> 241.
 /* c loaded before an empty loop (its notes split the scheduling block) so the e constant lands after lw c, as in the game (debt). */
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
@@ -64,7 +64,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     return 0;
 }
 
-void func_80054C38(TObj *o)
+void drawObjectSpriteQuad(TObj *o)
 {
     PolyFT4 *p;
     Face *f;

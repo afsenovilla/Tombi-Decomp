@@ -33,7 +33,7 @@ extern void SfxPlay2(int, int);
 extern void SfxPlay3(int, int);
 extern int rcos(int);
 extern int rsin(int);
-extern TObj *func_8004BBC0(TObj *, int);
+extern TObj *playerProbeGrab(TObj *, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerSetFallLean(TObj *);
 extern void playerTryAttack(TObj *, int);
@@ -145,7 +145,7 @@ void func_8011BEAC(TObj *o)
             }
         }
         o->b9e = 0;
-        e = func_8004BBC0(o, 0);
+        e = playerProbeGrab(o, 0);
         if (e == 0) {
             TObj *q;
             ((unsigned char *)&o->wa8)[1] = 0;

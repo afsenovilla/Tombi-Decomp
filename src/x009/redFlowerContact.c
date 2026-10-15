@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 typedef struct { TObj o; char pad[0x24]; TObj *e4; } TObjX;
-extern short func_80043260(TObj *, TObj *);
+extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern short func_800435E0(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void spawnImpactEffect(int, short, short, short);
@@ -28,7 +28,7 @@ void redFlowerContact(TObj *o, TObj *e)
     short r;
 
     if (e->b6a) {
-        q = func_80043260(o, e);
+        q = pushObjectOutOfObjectBoxA(o, e);
         if (q == 0) return;
         e->b69 = 0;
         if (SPAD.b1a4) return;

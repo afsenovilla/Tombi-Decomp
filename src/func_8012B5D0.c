@@ -10,9 +10,9 @@ extern unsigned char D_80138FD8[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityXY(TObj *);
-extern int FUN_801274cc(TObj *);
-extern int FUN_801275e4(TObj *);
-extern int FUN_80127720(TObj *);
+extern int enemyProbeGround(TObj *);
+extern int enemyCheckWallAhead(TObj *);
+extern int enemyPickActionByPlayerDistance(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 
 static __inline__ void SetBox(TObj *o)
@@ -51,7 +51,7 @@ void func_8012B5D0(TObj *o)
     case 1:
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             int t = (unsigned short)q[1];
             o->timer = 0;
             o->d8c = t;
@@ -82,7 +82,7 @@ void func_8012B5D0(TObj *o)
         AnimAdvanceWithBox(o);
         if (--o->timer == -1) {
             if (o->subtype) {
-                r = FUN_80127720(o);
+                r = enemyPickActionByPlayerDistance(o);
                 if ((unsigned char)r == 0xff) {
                     o->state = 2;
                     o->wac = D_801390EC[o->subtype];
@@ -107,9 +107,9 @@ void func_8012B5D0(TObj *o)
     case 5:
         AnimAdvanceWithBox(o);
         applyFrameVelocityXY(o);
-        if (FUN_801275e4(o))
+        if (enemyCheckWallAhead(o))
             o->timer = 0;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         if (--o->timer == -1) {
             *(short *)((char *)o + 0x20) = 0x3c;
             *(short *)((char *)o + 0xac) = 0x30;
@@ -140,7 +140,7 @@ void func_8012B5D0(TObj *o)
             ObjSetFacingToPlayer(o);
             o->state = 0;
             o->substep = 0;
-            r = FUN_80127720(o);
+            r = enemyPickActionByPlayerDistance(o);
             if ((unsigned char)r != 0xff)
                 o->state = r;
         }

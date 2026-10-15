@@ -4,7 +4,7 @@
 typedef struct { unsigned char _p[0xa]; unsigned char ba, bb; short wc, we; } EX;
 extern void applyFrameVelocityX(TObj *);
 extern void FUN_80127214(TObj *);
-extern int FUN_801274cc(TObj *);
+extern int enemyProbeGround(TObj *);
 extern TObj *FUN_80018448(void);
 extern char DAT_80077cdc[];
 extern unsigned char DAT_80138fd8[];
@@ -49,7 +49,7 @@ void FUN_80127eb0(TObj *o)
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->y.raw += o->velV << 8;
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             if (!(o->b69 & 8)) {
                 q = FUN_80018448();
                 if (q != 0) {

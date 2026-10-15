@@ -23,7 +23,7 @@ extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
 extern void cameraFollowPlayerY(O *);
 extern void syncObjectTargetY(O *);
-extern void func_80029078(O *);
+extern void updateCameraScroll(O *);
 extern void func_80027810(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
@@ -50,7 +50,7 @@ void updateAreaScroll(O *o)
         cameraFollowPlayerX(o);
         cameraFollowPlayerY(o);
         syncObjectTargetY(o);
-        func_80029078(o);
+        updateCameraScroll(o);
         break;
     case 2:
         if (GAME.selectedSection == 8) func_80027810(o);

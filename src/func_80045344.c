@@ -4,7 +4,7 @@
 /* side() as a real static inline (direct returns give bgez; li 1; move zero instead of jump.c's store-flag) and the
    case 4/5/10 tail written out in full (cross-jumping merges it; the extra o refs make o outrank p in global-alloc). */
 #include "TOBJ.H"
-extern int func_800425C4(TObj *a, TObj *b);
+extern int weaponOnHitGetResult(TObj *a, TObj *b);
 extern void spawnImpactEffect(int a, int b, int c, int d);
 extern void playSFX(int a);
 
@@ -25,7 +25,7 @@ static __inline__ int touch(TObj *o, TObj *p)
     r = 1;
     p->b68 = 1;
     p->b9e = 0;
-    switch (func_800425C4(o, p)) {
+    switch (weaponOnHitGetResult(o, p)) {
     case 1: case 7:
         r = 1;
         break;

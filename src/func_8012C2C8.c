@@ -12,7 +12,7 @@ extern unsigned short DAT_1f80016a;
 extern unsigned short DAT_1f800172;
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
-extern int FUN_801274cc(TObj *);
+extern int enemyProbeGround(TObj *);
 
 static __inline__ void SetBox(TObj *o)
 {
@@ -41,7 +41,7 @@ void func_8012C2C8(TObj *o)
     case 1:
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             o->d8c = w[1];
             o->timer = 0;
             o->state++;

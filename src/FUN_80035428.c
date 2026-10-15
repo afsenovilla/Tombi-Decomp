@@ -5,7 +5,7 @@ extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void FUN_800eaffc(short, short, short, unsigned char);
 extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8001e4f0(int);
-extern short FUN_80041ebc(void *, short, short);
+extern short probeFloorPlaneAt(void *, short, short);
 extern void FUN_800352f4(TObj *);
 extern unsigned char DAT_800a60d6;
 extern unsigned short DAT_1f800282;
@@ -49,14 +49,14 @@ int FUN_80035428(TObj *o)
     switch ((signed char)DAT_8009c330->substep) {
     case 0:
     case 2:
-        if (FUN_80041ebc(PLAYER, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (probeFloorPlaneAt(PLAYER, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }
         break;
     case 1:
     case 3:
-        if (FUN_80041ebc(PLAYER, DAT_800a6078[1] - 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (probeFloorPlaneAt(PLAYER, DAT_800a6078[1] - 0x10, DAT_800a604e + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }

@@ -16,7 +16,7 @@ extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
 extern int AnimAdvanceWithBox(TObj *);
-extern int FUN_801274cc(TObj *);
+extern int enemyProbeGround(TObj *);
 extern void cloneItemPickupObject(TObj *);
 
 #define SETBOX(o, A) \
@@ -53,7 +53,7 @@ static __inline__ void move(TObj *o)
 static __inline__ void fin(TObj *t)
 {
     t->y.p.whole += 2;
-    FUN_801274cc(t);
+    enemyProbeGround(t);
 }
 
 static __inline__ void fin2(TObj *t)
@@ -96,7 +96,7 @@ void FUN_8012ae1c(TObj *o)
         move(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             if (o->movetab == 0) {
                 { unsigned short u = p->w2; o->state = 4; o->timer = 0x168; o->wac = 0x22; o->d8c = u; SETBOX(o, D_8013A1E8[0]); fin2(o); }
             } else {
@@ -126,7 +126,7 @@ void FUN_8012ae1c(TObj *o)
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
             o->b9c = 2;
-            if (FUN_801274cc(o)) {
+            if (enemyProbeGround(o)) {
                 if (o->movetab == 0) {
                     { unsigned short u = p->w2; o->state = 4; o->timer = 0x168; o->wac = 0x22; o->d8c = u; SETBOX(o, D_8013A1E8[0]); fin2(o); }
                 } else if (t = p->b1, p->b1 = t + 0xff, t != 0) {

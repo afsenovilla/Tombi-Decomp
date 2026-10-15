@@ -22,7 +22,7 @@ typedef struct {
 } O;
 extern H *D_1F80031C[];
 extern char D_800E3E28[];
-extern void FUN_80025aa8(int, int);
+extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
 int func_8011AFB4(O *o)
@@ -45,7 +45,7 @@ int func_8011AFB4(O *o)
         }
         o->dc4 = (int)D_800E3E28;
         o->da8 = (int)D_800E3E28;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         return 0;
     case 1:
         o->w76 += o->w74;
@@ -88,7 +88,7 @@ int func_8011AFB4(O *o)
         }
     common:
         o->wcc = o->w76;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 4:

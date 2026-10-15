@@ -8,7 +8,7 @@ extern unsigned short DAT_1f800246;
 extern short DAT_1f800246s;
 extern TObj **DAT_1f80021c;
 extern unsigned char DAT_800a603a;
-extern void FUN_80054868(TObj *);
+extern void drawObjectSprtTinted(TObj *);
 extern void FUN_800eab58(TObj *);
 extern void FUN_800ec148(TObj *);
 extern void FUN_800eb77c(TObj *);
@@ -27,7 +27,7 @@ void drawCategory2Objects(void)
             n--;
             if (o->b0a == 0xd) {
                 switch (DAT_800a603a) {
-                case 0: FUN_80054868(o); break;
+                case 0: drawObjectSprtTinted(o); break;
                 case 1: FUN_800eab58(o); break;
                 case 2: FUN_800ec148(o); break;
                 case 3: FUN_800eb77c(o); break;
@@ -47,7 +47,7 @@ void drawCategory2Objects(void)
             if (o->visible) {
                 if (o->b0a == 0xd) {
                     switch (DAT_800a603a) {
-                    case 0: FUN_80054868(o); break;
+                    case 0: drawObjectSprtTinted(o); break;
                     case 1: FUN_800eab58(o); break;
                     case 2: FUN_800ec148(o); break;
                     case 3: FUN_800eb77c(o); break;

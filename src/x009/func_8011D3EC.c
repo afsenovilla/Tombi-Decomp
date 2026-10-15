@@ -9,7 +9,7 @@ extern void FUN_800ef490(TObj *);
 extern void ObjGravityStep(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern int AnimAdvance(TObj *);
-extern short func_80041EBC(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 extern short ObjTileCollide(TObj *, int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
@@ -37,7 +37,7 @@ void func_8011D3EC(TObj *o)
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
-        if (o->b69 == 0 && !func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x40)
+        if (o->b69 == 0 && !probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x40)
             && !(SPAD.s1fc & SPAD.s3c8) && !(SPAD.s1fc & SPAD.s3c6) && !ObjTileCollide(o, 4, 0)) {
             break;
         }

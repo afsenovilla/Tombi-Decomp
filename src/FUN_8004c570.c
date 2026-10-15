@@ -5,7 +5,7 @@ extern unsigned short DAT_8009c960;
 extern unsigned short DAT_8009c962;
 extern E **DAT_8007b908[];
 extern short DAT_80078790[];
-extern void FUN_8004cb00(E *, int);
+extern void spawnObjectFromRecord(E *, int);
 extern int testAreaFlagBit(int);
 
 void FUN_8004c570(void)
@@ -18,7 +18,7 @@ void FUN_8004c570(void)
     char pad;
     unsigned b;
     for (p = *tab[DAT_8009c962 & 7]; p->type < 0xff; p++)
-        FUN_8004cb00(p, -1);
+        spawnObjectFromRecord(p, -1);
     n = DAT_80078790[DAT_8009c960];
     if (n > 15) n = 15;
     p = *tab[n];
@@ -28,7 +28,7 @@ void FUN_8004c570(void)
         r = testAreaFlagBit(b);
         if (r == 0) {
             if (p->active == DAT_8009c962 || p->active == ~DAT_8009c962)
-                FUN_8004cb00(p, b);
+                spawnObjectFromRecord(p, b);
         }
         q += 16;
         p++;

@@ -8,13 +8,13 @@ typedef struct {
     TObj *de4;
 } PL;
 #define BAC(o) (*(unsigned char *)&(o)->o.wac)
-extern short func_8004306C(PL *, TObj *);
+extern short playerPushOutOfObjectBox(PL *, TObj *);
 
 void func_8011F9E0(PL *o, TObj *p)
 {
     short r;
     if (p->b0c != 0) return;
-    r = func_8004306C(o, p);
+    r = playerPushOutOfObjectBox(o, p);
     if (r == 0) return;
     if (BAC(o) == 1 && r == 1) {
         p->active = 2;

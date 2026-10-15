@@ -5,7 +5,7 @@ typedef struct O { unsigned char b0; char p0[0x10-1]; FP a; FP y; FP b; unsigned
   FP *h; FP *d; char p2[0x68-0x48]; unsigned char b68; char p3; unsigned char b6a; char p4;
   short box0, box1, box2, box3; char p5[42]; unsigned char b9e, b9f; char p6[0xa8-0xa0]; short wa8; } O;
 extern short DAT_1f80019e;
-extern int FUN_800425c4(O *, O *);
+extern int weaponOnHitGetResult(O *, O *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
@@ -33,7 +33,7 @@ void FUN_80044f18(O *a, O *b)
     r = 1;
     b->b68 = 1;
     b->b9e = 0;
-    switch (FUN_800425c4(a, b)) {
+    switch (weaponOnHitGetResult(a, b)) {
     case 1: case 7:
         r = 1;
         break;

@@ -15,7 +15,7 @@ extern int AnimAdvance(TObj *o);
 extern void TileCollideAt(TObj *o, int x, int y);
 extern int ObjCheckHeadCollision(TObj *o);
 extern void ObjMotionStep(TObj *o);
-extern short func_80041EBC(TObj *o, int x, int y);
+extern short probeFloorPlaneAt(TObj *o, int x, int y);
 extern short ObjTileCollide(TObj *o, int a, int b);
 extern void ObjSetAnimFromTable(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -78,7 +78,7 @@ void playerBittenJumpGeneric(TObj *o)
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
-        if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
+        if (o->b69 != 0 || probeFloorPlaneAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
             (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             if (*(volatile unsigned short *)&GV6.s70 & 0x40) {
                 D_8009C330->animTimer = 0xf;

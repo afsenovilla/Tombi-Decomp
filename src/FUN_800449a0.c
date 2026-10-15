@@ -5,7 +5,7 @@
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern unsigned short DAT_1f80019e;
-extern int FUN_800425c4(TObj *, TObj *);
+extern int weaponOnHitGetResult(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
@@ -30,7 +30,7 @@ static __inline__ int react(TObj *a, TObj *b)
     int r = 1;
     b->b68 = 1;
     b->b9e = 0;
-    switch (FUN_800425c4(a, b)) {
+    switch (weaponOnHitGetResult(a, b)) {
     case 1: case 4: case 5: case 7: case 10:
         r = 1;
         break;

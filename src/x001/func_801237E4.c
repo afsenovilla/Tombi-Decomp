@@ -15,7 +15,7 @@ extern void FUN_80110760(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_800f00ac(TObj *);
 extern void startPadVibration(int, int, int, int);
-extern void FUN_800eae0c(int, int, int, int);
+extern void spawnGroundDebris(int, int, int, int);
 extern void func_8010E97C(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void ObjApplyVelocity(TObj *);
@@ -84,7 +84,7 @@ void func_801237E4(TObj *o)
                 startPadVibration(0, 0, 0xff, 2);
             }
             if ((D_1F8001F8 & 7) == 0) {
-                FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+                spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
             }
         }
         break;

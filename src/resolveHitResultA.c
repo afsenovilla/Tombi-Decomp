@@ -3,7 +3,7 @@
 // tamano real 272 (Ghidra corta en 188). Con register asm("$17") da MATCH; sin el, r/o intercambian s0/s1.
 // Debt pass: -dg o 8 refs/39, r 10/47, p 8/42 (need o > r > p); tried return 0 in r<0 (regs ok, shape differs), dropping redundant r=1 sets, r types, p[0x68]=r=1.
 #include "TOBJ.H"
-extern int func_800425C4(TObj *a, char *b);
+extern int weaponOnHitGetResult(TObj *a, char *b);
 extern void spawnImpactEffect(int a, int b, int c, int d);
 extern void playSFX(int a);
 
@@ -13,7 +13,7 @@ int resolveHitResultA(TObj *o, char *p)
     r = 1;
     p[0x68] = 1;
     p[0x9e] = 0;
-    switch (func_800425C4(o, p)) {
+    switch (weaponOnHitGetResult(o, p)) {
     case 1: case 7:
         r = 1;
         break;

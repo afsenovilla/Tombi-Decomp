@@ -75,7 +75,7 @@ extern void playerStepGrabbedStruggle(TObj *);
 extern void FUN_8011b7d4(TObj *);
 extern void playerStepWaterJumpOut(TObj *);
 extern void playerStepSwimSpin(TObj *);
-extern void FUN_8010e66c(TObj *);
+extern void playerStepSuperJump(TObj *);
 extern void FUN_8011beac(TObj *);
 extern void FUN_8011b170(TObj *);
 extern void FUN_80106a18(TObj *);
@@ -410,7 +410,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepSwimSpin(o);
         break;
     case 0x45:
-        FUN_8010e66c(o);
+        playerStepSuperJump(o);
         break;
     case 0x46:
         FUN_8011beac(o);

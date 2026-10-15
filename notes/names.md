@@ -104,6 +104,35 @@ One line per name: `address name (old file) - justification`.
 - `800312e8 weaponSetPlayerAnimB` (was FUN_800312e8) - same with a second set of player anim tables
 - `800313c8 weaponSetPlayerAnimC` (was FUN_800313c8) - same with a third set (80010EF8..)
 - `80031588 weaponCalcBentOffset` (was FUN_80031588) - x/y offset of a weapon link from angle and length (MulCos/MulSin) plus a bend term mirrored around p[2]
+- `8005296c drawObjectSprite` (was func_8005296C) - drawObject render kind 0 (also category 3 kind 0): the object's sprite frame as textured quads at its projected position
+- `80052db8 drawObjectSpriteScaled` (was FUN_80052db8) - render kind 1 (category 3 kinds 1/9): as kind 0 with the quad size scaled by +0x64 (and by depth)
+- `800532fc drawObjectSpriteRotated` (was FUN_800532fc) - render kind 2 (category 1/3 kind 2): sprite quads rotated by the angle +0x8C
+- `80053b5c drawObjectSpriteRotScaled` (was func_80053B5C) - render kind 3 (category 3 kinds 3/11): rotated by +0x8C and scaled by +0x64
+- `80054c38 drawObjectSpriteQuad` (was func_80054C38) - render kind 4 (category 3 kind 6): one textured quad from the four vertices at +0xB4/+0xBC/+0xC4/+0xCC through the base matrix
+- `80054868 drawObjectSprtTinted` (was func_80054868) - render kind 13: the frame parts as SPRT primitives (SetSprt) with colour = brightness +0x6B, culled to the 0x140 x 0x100 screen
+- `8004432c collidePlayerWithCat5Object` (was FUN_8004432c) - processObjectCollisions: box test of the player against a category 5 object (1F800228 list); on contact sets player +0x6A (hit) and frees the object (active 4, +4 = 2); type 0xB with +0xB4 == 1 excluded
+- `800490ac collideCat2Type7WithCat5Type0B` (was FUN_800490ac) - only for D_8009C960 == 0x10000: category 2 objects of type 7 (subtype != 0) against category 5 objects of type 0xB (FUN_80126f68)
+- `80048e68 collideCat2ObjectsPairwise` (was func_80048E68) - every category 2 object (types enabled in D_8007B6A4) against the solid category 2 objects of types 4/6/7/0xE/0x10 (push-out helpers), 0x1C/0x21 area hooks
+- `800491f0 collideCat2WithCat4Objects` (was func_800491F0) - category 2 objects (types enabled in D_8007B63C) against category 4 objects (1F800224), per category 4 type and area
+- `80046d58 collidePlayerWithCat4Objects` (was func_80046D58) - player (when not holding, b9e 0/5/6) against category 4 objects, per type and area handlers
+- `80047484 collidePlayerWithCat2Objects` (was FUN_80047484) - player against category 2 objects (1F80021C), per type and area handlers
+- `80045f00 collideWeaponsWithCat2Objects` (was FUN_80045f00) - category 1 objects (weapons, layer-1 pool) against category 2 objects: weaponOnHitGetResult then the resolveHitResult* handlers
+- `80045d98 collideWeaponsWithCat5Objects` (was FUN_80045d98) - category 1 objects with +0xA5 set against category 5 objects (weapons 5..7 test every active one, others only subtypes 0/2), FUN_80044b80
+- `80046610 collideWeaponsWithCat4Objects` (was FUN_80046610) - category 1 objects against category 4 objects (weaponOnHitGetResult, per type handlers)
+- `80049524 collideCat5WithCat4Objects` (was func_80049524) - category 5 objects against category 4 objects, per type and area
+- `800425c4 weaponOnHitGetResult` (was func_800425C4) - switch on the weapon object type (0, 1, 4, 5..7, 8, 10): marks it as hit (active 2, recoil +0xA8 = 0x4FF ...) and returns the hit result kind the resolvers switch on
+- `80030034 spawnPlayerPowerEffect` (was func_80030034) (uncertain) - spawns 1..6 type 0x4E objects at the player (sub = n, +0x0C = slot) after FUN_80111a50(n); called by playerTryAttack and playerStepSuperJump (n = 2)
+- `80051088 drawWeaponObject` (was func_80051088) - category 1 render kind 0: draws the weapon head and its chain quads (weaponBuildChainBoxes from the D_8009C338 weapon state)
+- `8005a014 weaponBuildChainBoxes` (was FUN_8005a014) - fills the D_8009C338 weapon state with the chain link boxes for the given dx/dy (MulCos/MulNegSinScaled)
+- `8004cb00 spawnObjectFromRecord` (was FUN_8004cb00) - allocates and initialises one object from a 16-byte placement record (layer allocator by b1 & 0x7F, type/subtype/position/flags; see tools/objects.py)
+- `800505f0 drawPlayerSpriteDefault` (was FUN_800505f0) - drawPlayer renderer for the default player type: uploads the sprite frame to VRAM (uploadSpriteFrameToVram) and draws it
+- `8004bbc0 playerProbeGrab` (was func_8004BBC0) - probe for something to grab/bite ahead of the player: objects (per type/area callbacks) or terrain (b9e 5/6); the result D_1F8003C0 is what the jump/climb steps store in D_8009F0EC
+- `80043260 pushObjectOutOfObjectBoxA` (was func_80043260) - box overlap of two objects (depth within 0x2D) and push of the first out along the shallower axis; 10 callers (contact handlers)
+- `8004306c playerPushOutOfObjectBox` (was func_8004306C) - same push-out for the player: sets the wall-contact byte +0xA6 (2/3) on a side push, lands on top otherwise
+- `800482ec pushObjectOutOfObjectBoxB` (was func_800482EC) - variant of the push-out used by collideCat2ObjectsPairwise for types 0xE/0x10 and area hooks
+- `80041ebc probeFloorPlaneAt` (was func_80041EBC) - walks the collision plane list of getCollisionPlaneAt for the column and returns the floor (flags bit 0) height below y
+- `80025aa8 copyModelPrimGroups` (was FUN_80025aa8) - copies the 8 primitive groups of a model (count words x per-group sizes 0x20..0x54) into the destination buffer
+- `80029078 updateCameraScroll` (was func_80029078) - camera scroll step after the follow logic (ramped speed, look scroll input, section height); called by updateCameraFollow and two X000 section controllers
 
 # X000 function names (shared overlay code)
 
@@ -263,6 +292,16 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80106b50 playerStepItemReactionA` (was FUN_80106b50) (uncertain) - player step 0x2A, set by playerStepUseItem for item 0x82 when D_8009D2B1 == 1: anim 0x28, sfx 0x20, timed (0x3C frames hidden with +0xAB bit 7, else 0x28), decelerates, back to step 0
 - `80106db0 playerStepItemReactionB` (was FUN_80106db0) (uncertain) - player step 0x2B (item 0x82, D_8009D2B1 == 2): anim 0x29/0x36, sfx 0x25, pushed at 0x280 against the facing for 0x1E frames, back to step 0
 - `800ffec4 playerStepUseItem` (was FUN_800ffec4) - player step 0x30: switch on the used item id (removeItemFromInventory, spawnColorBurst for items 0x62..0x64, item 0x82 -> steps 0x2A/0x2B, others set events/steps 5/0x3E)
+- `8010e66c playerStepSuperJump` (was func_8010E66C) - player step 0x45: launches upward (velY accelerating to -0x800, sfx 2/4, spawnPlayerPowerEffect(2)) with air control, then falls (step 2 state 3) on a head hit or when velY turns positive
+- `801274cc enemyProbeGround` (was FUN_801274cc) - AREA00 enemy helper (38 calls): floor probe at y+0x10, sets the slope angle +0x8C / speed +0xB2 from the probe, returns 1 when supported
+- `801275e4 enemyCheckWallAhead` (was FUN_801275e4) - AREA00 enemy helper: probeWallAt 0x10 px ahead along the slope direction; 2 for subtype 9 at a fixed spot
+- `80127720 enemyPickActionByPlayerDistance` (was FUN_80127720) - returns 0xFF when the player is out of range, else a random entry (Rand & 0xF) of one of three action tables by horizontal distance
+- `8010f400 playerUpdateSpeedFromPad` (was FUN_8010f400) - ground speed +0xB2 from the pad with the per-mode acceleration table D_80115510 (0x74-byte rows): accelerate, decelerate, turn; used by idle/walk/jump/push steps
+- `800eef0c spawnPlayerFootstepEffect` (was FUN_800eef0c) - by the floor kind D_8009C990 spawns a type 0x4E effect at the player's feet (sub = kind - 1); returns the effect kind
+- `800eae0c spawnGroundDebris` (was FUN_800eae0c) (uncertain) - spawns a type 0xC object at x/y/z (areas 0/1/9), sometimes a random drop through FUN_80114968
+- `800ec710 spawnWeaponTrailObjects` (was FUN_800ec710) - by weapon type (0, 5..9) spawns 1..4 type 0x5C objects linked to the weapon (+0x90); called from the weapon swings
+- `8010fe70 playerSkidDecelerate` (was FUN_8010fe70) - deceleration of +0xB2 by the D_80115510 table plus the per-frame move used by playerStepSkidStop
+- `80133474 updateFrog` (was func_80133474) - layer 2 type 0x12 handler in AREA00 (MAIN0 table slot 80077DE4): its animation strips show a green frog (tools/anim.py export, a00_func_80133474)
 
 # Area overlay function names (X001..X019)
 

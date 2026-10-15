@@ -3,11 +3,11 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj o; char p[0xd0 - 0xc0]; TObj *e4; } TObjX;
-extern short func_8004306C(TObjX *o, TObj *p);
+extern short playerPushOutOfObjectBox(TObjX *o, TObj *p);
 
 void tryAttachObjectOnOverlap(TObjX *o, TObj *p)
 {
-    short r = func_8004306C(o, p);
+    short r = playerPushOutOfObjectBox(o, p);
     if (r != 0) {
         if (*(unsigned char *)&o->o.wac == 1 && r == 1) {
             p->active = 2;

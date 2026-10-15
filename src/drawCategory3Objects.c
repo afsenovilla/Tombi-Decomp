@@ -8,18 +8,18 @@ extern TObj **DAT_1f800220, **DAT_1f800264;
 extern unsigned char DAT_800a603a;
 
 int getObjectRenderKind(TObj *o);
-void FUN_8005296c(TObj *o);
-void FUN_800532fc(TObj *o);
+void drawObjectSprite(TObj *o);
+void drawObjectSpriteRotated(TObj *o);
 void FUN_80055618(TObj *o);
 void FUN_80123e04(TObj *o);
-void FUN_80054c38(TObj *o);
+void drawObjectSpriteQuad(TObj *o);
 void FUN_80055cb8(TObj *o);
 void FUN_80052190(TObj *o);
-void FUN_80052db8(TObj *o);
+void drawObjectSpriteScaled(TObj *o);
 void drawMessageBox(TObj *o);
-void FUN_80053b5c(TObj *o);
+void drawObjectSpriteRotScaled(TObj *o);
 void drawMessageBoxFrame(TObj *o);
-void FUN_80054868(TObj *o);
+void drawObjectSprtTinted(TObj *o);
 void FUN_800eab58(TObj *o);
 void FUN_800ec148(TObj *o);
 void FUN_800eb77c(TObj *o);
@@ -45,20 +45,20 @@ void drawCategory3Objects(void)
             o = *p++;
             n--;
             switch (getObjectRenderKind(o)) {
-            case 0: FUN_8005296c(o); break;
-            case 2: FUN_800532fc(o); break;
+            case 0: drawObjectSprite(o); break;
+            case 2: drawObjectSpriteRotated(o); break;
             case 4: FUN_80055618(o); break;
             case 5: FUN_80123e04(o); break;
-            case 6: FUN_80054c38(o); break;
+            case 6: drawObjectSpriteQuad(o); break;
             case 7: FUN_80055cb8(o); break;
             case 8: FUN_80052190(o); break;
-            case 1: case 9: FUN_80052db8(o); break;
+            case 1: case 9: drawObjectSpriteScaled(o); break;
             case 10: drawMessageBox(o); break;
-            case 3: case 11: FUN_80053b5c(o); break;
+            case 3: case 11: drawObjectSpriteRotScaled(o); break;
             case 12: drawMessageBoxFrame(o); break;
             case 13:
                 switch (DAT_800a603a) {
-                case 0: FUN_80054868(o); break;
+                case 0: drawObjectSprtTinted(o); break;
                 case 1: FUN_800eab58(o); break;
                 case 2: FUN_800ec148(o); break;
                 case 3: FUN_800eb77c(o); break;
@@ -81,20 +81,20 @@ void drawCategory3Objects(void)
             DAT_1f80024a--;
             if (o->visible) {
                 switch (getObjectRenderKind(o)) {
-                case 0: FUN_8005296c(o); break;
-                case 2: FUN_800532fc(o); break;
+                case 0: drawObjectSprite(o); break;
+                case 2: drawObjectSpriteRotated(o); break;
                 case 4: FUN_80055618(o); break;
                 case 5: FUN_80123e04(o); break;
-                case 6: FUN_80054c38(o); break;
+                case 6: drawObjectSpriteQuad(o); break;
                 case 7: FUN_80055cb8(o); break;
                 case 8: FUN_80052190(o); break;
-                case 1: case 9: FUN_80052db8(o); break;
+                case 1: case 9: drawObjectSpriteScaled(o); break;
                 case 10: drawMessageBox(o); break;
-                case 3: case 11: FUN_80053b5c(o); break;
+                case 3: case 11: drawObjectSpriteRotScaled(o); break;
                 case 12: drawMessageBoxFrame(o); break;
                 case 13:
                     switch (DAT_800a603a) {
-                    case 0: FUN_80054868(o); break;
+                    case 0: drawObjectSprtTinted(o); break;
                     case 1: FUN_800eab58(o); break;
                     case 2: FUN_800ec148(o); break;
                     case 3: FUN_800eb77c(o); break;

@@ -17,7 +17,7 @@ static char DAT_80114c7c[148] = {
     1, -1, 0x41, 0x3c,
 };
 extern char D_800E3E28[];
-extern void FUN_80025aa8(int, char *);
+extern void copyModelPrimGroups(int, char *);
 extern void FUN_80024ea0(char *, int, int);
 extern void applyItemEffect(void *d, void *arg, short x, short y, int flag);
 
@@ -58,7 +58,7 @@ void FUN_800ed750(TObj *o)
         }
         e->b8 = D_800E3E28 + o->b0c * 0x1600;
         *(char **)&o->wa8 = e->b8;
-        FUN_80025aa8(o->da0, e->b8);
+        copyModelPrimGroups(o->da0, e->b8);
         o->state = 1;
         if (o->b68 == 2) o->w98 = 1;
         o->b68 = 0;
@@ -82,7 +82,7 @@ void FUN_800ed750(TObj *o)
             o->b68 = 0;
             INIT(o, b);
         }
-        FUN_80025aa8(o->da0, e->b8);
+        copyModelPrimGroups(o->da0, e->b8);
         for (i = 0; i < e->n; i++) {
             if ((&o->timer)[i] >= 0) {
                 if (b->cnt[i] < 4) {

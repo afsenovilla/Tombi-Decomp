@@ -1,5 +1,5 @@
 // JP slps01144 800525F0 1464
-// Japanese version of PAL main0 80047484 (FUN_80047484.c): 228 -> 212.
+// Japanese version of PAL main0 80047484 (collidePlayerWithCat2Objects.c): 228 -> 212.
 #include "spad.h"
 #include "gvars.h"
 /* Debt: register asm("$20") on r (s3/s4 priority: hoisted const 2 has its live length doubled as a REG_EQUIV constant, so it loses to r).
@@ -8,10 +8,10 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern short D_1F80019E;
-extern short func_8004306C(TObj *, unsigned char *);
+extern short playerPushOutOfObjectBox(TObj *, unsigned char *);
 extern void FUN_80045684(TObj *, unsigned char *);
 extern void FUN_80045800(TObj *, unsigned char *);
-extern void func_80043260(TObj *, unsigned char *);
+extern void pushObjectOutOfObjectBoxA(TObj *, unsigned char *);
 extern void func_8011C80C(TObj *, unsigned char *);
 extern void func_8011C8C0(TObj *, unsigned char *);
 extern void func_8011CA60(TObj *, unsigned char *);
@@ -61,7 +61,7 @@ extern void func_8012687C(TObj *, unsigned char *);
 extern void func_80126A70(TObj *, unsigned char *);
 extern void func_80126BBC(TObj *, unsigned char *);
 
-void FUN_80047484(TObj *o)
+void collidePlayerWithCat2Objects(TObj *o)
 {
     register unsigned char **r asm("$20");
     unsigned char *q;
@@ -92,7 +92,7 @@ void FUN_80047484(TObj *o)
                 break;
             case 4:
             case 0x1b:
-                v = func_8004306C(o, q);
+                v = playerPushOutOfObjectBox(o, q);
                 if (v != 0) {
                     if (*(unsigned char *)&o->wac == 1 && v == 1) {
                         q[0] = 2;
@@ -250,7 +250,7 @@ void FUN_80047484(TObj *o)
                 func_8011DC34(o, q);
                 break;
             case 0x57:
-                func_80043260(o, q);
+                pushObjectOutOfObjectBoxA(o, q);
                 break;
             }
         }

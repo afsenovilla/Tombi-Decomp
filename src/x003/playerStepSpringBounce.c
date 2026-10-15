@@ -6,7 +6,7 @@
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern unsigned char *D_8009C330;
 extern int D_8009F0EC;
-int func_8004BBC0(TObj *o, int a);
+int playerProbeGrab(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void playerSetFallLean(TObj *o);
@@ -91,7 +91,7 @@ void playerStepSpringBounce(TObj *o)
     }
     if (--o->timer <= 0) {
         o->timer = 0;
-        D_8009F0EC = func_8004BBC0(o, 0);
+        D_8009F0EC = playerProbeGrab(o, 0);
         if (o->b9e != 0) {
             D_8009C330[8] = 0;
             *(short *)(D_8009C330 + 0x20) = 0;

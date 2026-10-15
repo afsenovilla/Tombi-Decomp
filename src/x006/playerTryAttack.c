@@ -17,7 +17,7 @@ extern unsigned short DAT_1f8001fc;
 extern short D_8007A038[];
 extern P *D_8009C330;
 extern TObj *D_8009F0EC;
-extern void func_80030034(int);
+extern void spawnPlayerPowerEffect(int);
 extern short playerTryTalkToNpc(void);
 
 void playerTryAttack(S *s, short mode)
@@ -32,11 +32,11 @@ void playerTryAttack(S *s, short mode)
     s->bce = 0;
     switch (GAME.displayExpBar) {
     case 1:
-        if (s->bcc == 1) func_80030034(0);
+        if (s->bcc == 1) spawnPlayerPowerEffect(0);
         playerTryTalkToNpc();
         return;
     case 2:
-        if (s->bcc == 1) func_80030034(1);
+        if (s->bcc == 1) spawnPlayerPowerEffect(1);
         playerTryTalkToNpc();
         return;
     }

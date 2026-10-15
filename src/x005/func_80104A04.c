@@ -17,7 +17,7 @@ void ObjSetAnimFromTable(TObj *o);
 void AnimJump(TObj *o, short n);
 short ObjTileCollide(TObj *, int, int);
 void playerSetFallLean(TObj *o);
-int func_8004BBC0(TObj *o, int);
+int playerProbeGrab(TObj *o, int);
 void playerEnterGrabStep(TObj *o, int);
 void playerTryAttack(TObj *o, int);
 void func_80104A04(TObj *o)
@@ -90,7 +90,7 @@ void func_80104A04(TObj *o)
         }
     }
     if (*(unsigned char *)&o->wac < 2) {
-        if ((D_8009F0EC = func_8004BBC0(o, 0)) != 0) {
+        if ((D_8009F0EC = playerProbeGrab(o, 0)) != 0) {
             D_8009C330->b8 = 0;
             D_8009C330->w20 = 0;
             *(unsigned char *)&o->wac = 0;

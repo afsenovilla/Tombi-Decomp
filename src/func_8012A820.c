@@ -13,7 +13,7 @@ extern unsigned char D_80138FD8[];
 extern void setAreaFlagBit(int);
 extern void spawnItemNotification(int, int);
 extern void probeWallAt(TObj *, short, short, int);
-extern int FUN_801274cc(TObj *);
+extern int enemyProbeGround(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *ObjAlloc();
@@ -60,7 +60,7 @@ void func_8012A820(TObj *o)
         }
         COLLIDE(o);
         o->y.raw += o->velV << 8;
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             o->velV = 0;
         }
         break;
@@ -93,7 +93,7 @@ void func_8012A820(TObj *o)
         }
         applyFrameVelocityY(o);
         COLLIDE(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 4:
         if (--o->timer == -1) {
@@ -106,13 +106,13 @@ void func_8012A820(TObj *o)
         }
         applyFrameVelocityY(o);
         COLLIDE(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 5:
         applyFrameVelocityX(o);
         o->y.p.whole += 3;
         COLLIDE(o);
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             a = SPAD.s27e;
             if (a < 0) a = -a;
             if (a > 8) a = 8;
@@ -143,7 +143,7 @@ void func_8012A820(TObj *o)
         ANIMT(o);
         applyFrameVelocityY(o);
         COLLIDE(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 7:
         o->wac = 0x26;

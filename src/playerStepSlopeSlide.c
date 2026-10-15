@@ -14,7 +14,7 @@ extern void playerSlopeSlideAccelerate(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void playerCheckGroundAndFall(TObj *);
 extern void FUN_80025f40(int, int, int, int);
-extern void FUN_800eae0c(int, int, int, int);
+extern void spawnGroundDebris(int, int, int, int);
 extern void applyFrameVelocityX(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
@@ -97,7 +97,7 @@ void playerStepSlopeSlide(TObj *o)
         }
         if (o->ba4) {
             if ((D_1F8001F8 & 3) == 0) startPadVibration(0, 0, 0xff, 2);
-            if ((D_1F8001F8 & 0xf) == 0) FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+            if ((D_1F8001F8 & 0xf) == 0) spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
         }
         break;
     case 2:

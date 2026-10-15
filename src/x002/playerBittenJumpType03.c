@@ -20,7 +20,7 @@ extern int AnimAdvance(TObj *o);
 extern void TileCollideAt(TObj *o, int x, int y);
 extern int ObjCheckHeadCollision(TObj *o);
 extern void ObjMotionStep(TObj *o);
-extern short func_80041EBC(TObj *o, int x, int y);
+extern short probeFloorPlaneAt(TObj *o, int x, int y);
 extern short ObjTileCollide(TObj *o, int a, int b);
 extern void ObjSetAnimFromTable(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -28,7 +28,7 @@ extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
 extern void FUN_80104cd8(TObj *o);
 extern void playerSetFallLean(TObj *o);
-extern TObj *FUN_8004bbc0(TObj *, int);
+extern TObj *playerProbeGrab(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
 extern void playerTryAttack(TObj *, int);
 
@@ -132,7 +132,7 @@ void playerBittenJumpType03(TObj *o)
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
-        if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
+        if (o->b69 != 0 || probeFloorPlaneAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
             (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             o->velY = 0;
             o->substep = 2;
@@ -233,7 +233,7 @@ void playerBittenJumpType03(TObj *o)
             }
         }
         if ((*(unsigned char*)&o->wac) < 2) {
-            D_8009F0EC = FUN_8004bbc0(o, 0);
+            D_8009F0EC = playerProbeGrab(o, 0);
             if (D_8009F0EC) {
                 (*(unsigned char*)&D_8009C330->w08) = 0;
                 D_8009C330->timer = 0;

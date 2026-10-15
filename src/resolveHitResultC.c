@@ -1,7 +1,7 @@
 // FUNC 80042aac 236 MAIN0
 // MATCHING 80042aac 236
 #include "TOBJ.H"
-extern int func_800425C4();
+extern int weaponOnHitGetResult();
 extern void spawnImpactEffect(int, int, int, int);
 extern void playSFX(int);
 
@@ -10,7 +10,7 @@ int resolveHitResultC(TObj *a, TObj *b)
     int r = 1;
     b->b68 = 1;
     b->b9e = 0;
-    switch (func_800425C4()) {
+    switch (weaponOnHitGetResult()) {
     case 1: case 4: case 5: case 7: case 10:
         r = 1;
         break;

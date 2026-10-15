@@ -6,7 +6,7 @@ extern unsigned short D_801266D4[];
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern void FUN_800202b4(TObj *);
 extern short FUN_80041240(TObj *, int, int);
-extern short FUN_80041ebc(TObj *, int, int);
+extern short probeFloorPlaneAt(TObj *, int, int);
 
 static __inline__ short Out(TObj *o)
 {
@@ -21,7 +21,7 @@ static __inline__ int Chk(TObj *o, short k)
     int n = k;
     if (r != 0 && n == r && SPAD.s284 == 0)
         n++;
-    else if (FUN_80041ebc(o, o->h->p.whole, o->y.p.whole) == 0)
+    else if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole) == 0)
         n = 0;
     else
         n = SPAD.s284 == 0;

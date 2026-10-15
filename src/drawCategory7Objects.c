@@ -12,7 +12,7 @@ extern void FUN_800544c8(TObj *);
 extern void drawScreenSpriteObject(TObj *);
 extern void drawLetterboxOverlay(TObj *);
 extern void FUN_800eb044(TObj *);
-extern void FUN_800ec710(TObj *);
+extern void spawnWeaponTrailObjects(TObj *);
 extern void FUN_8011e778(TObj *);
 extern void FUN_80116fb8(TObj *);
 
@@ -40,7 +40,7 @@ void drawCategory7Objects(void)
                 break;
             case 3:
                 if (DAT_800a603a & 2)
-                    FUN_800ec710(o);
+                    spawnWeaponTrailObjects(o);
                 else
                     FUN_800eb044(o);
                 break;
@@ -70,7 +70,7 @@ void drawCategory7Objects(void)
                 break;
             case 3:
                 if (DAT_800a603a & 2)
-                    FUN_800ec710(o);
+                    spawnWeaponTrailObjects(o);
                 else
                     FUN_800eb044(o);
                 break;

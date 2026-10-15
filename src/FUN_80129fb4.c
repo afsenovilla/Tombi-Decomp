@@ -17,9 +17,9 @@ extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e560(int, int);
 extern void FUN_80127380(TObj *);
-extern int FUN_801274cc(TObj *);
-extern int FUN_801275e4(TObj *);
-extern unsigned char FUN_80127720(TObj *);
+extern int enemyProbeGround(TObj *);
+extern int enemyCheckWallAhead(TObj *);
+extern unsigned char enemyPickActionByPlayerDistance(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 void FUN_80129fb4(TObj *o)
@@ -56,14 +56,14 @@ void FUN_80129fb4(TObj *o)
         if (--o->timer == -1) o->substep++;
         FUN_80127380(o);
         o->y.p.whole += 4;
-        if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
+        if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        k = FUN_801275e4(o);
+        k = enemyCheckWallAhead(o);
         if (k != 0) {
             if (k == 1) {
                 o->substep = 8;
@@ -79,7 +79,7 @@ void FUN_80129fb4(TObj *o)
             a = D_8013A200[0];
             goto common;
         }
-        r = FUN_80127720(o);
+        r = enemyPickActionByPlayerDistance(o);
         if (r != 0xff) {
             o->state = r;
             o->substep = 0;
@@ -100,7 +100,7 @@ void FUN_80129fb4(TObj *o)
         goto common;
     case 4:
         applyFrameVelocityY(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
             s = ((unsigned short *)o->anim)[2];
@@ -110,7 +110,7 @@ void FUN_80129fb4(TObj *o)
         }
         if (k == 0) break;
         if (x->b0 == 0) {
-            r = FUN_80127720(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r != 0xff) {
                 o->state = r;
                 o->substep = 0;
@@ -126,7 +126,7 @@ void FUN_80129fb4(TObj *o)
         goto common;
     case 5:
         applyFrameVelocityY(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         if (o->animTimer == 1) {
             k = AnimAdvanceWithBox(o);
             s = ((unsigned short *)o->anim)[2];
@@ -135,7 +135,7 @@ void FUN_80129fb4(TObj *o)
             k = AnimAdvanceWithBox(o);
         }
         if (k == 0) break;
-        r = FUN_80127720(o);
+        r = enemyPickActionByPlayerDistance(o);
         if (r != 0xff) {
             o->state = r;
             o->substep = 0;
@@ -151,13 +151,13 @@ void FUN_80129fb4(TObj *o)
             FUN_8001f8e4(o);
             o->state = 0;
             o->substep = 0;
-            r = FUN_80127720(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r == 0xff) break;
             o->state = r;
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 8:
         o->wac = 6;
@@ -174,7 +174,7 @@ void FUN_80129fb4(TObj *o)
         }
         if (k != 0) o->substep++;
         applyFrameVelocityY(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 10:
         t = 0x3c;
@@ -196,14 +196,14 @@ void FUN_80129fb4(TObj *o)
     case 11:
         if (--o->timer == -1) {
             o->substep = 12;
-            r = FUN_80127720(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r == 0xff) break;
             o->state = r;
             o->substep = 0;
         }
         AnimAdvanceWithBox(o);
         applyFrameVelocityY(o);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 13:
         AnimAdvanceWithBox(o);

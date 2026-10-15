@@ -42,7 +42,7 @@ extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fdac(int, int);
 extern int angleBetweenPoints(P2, P2);
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern short FUN_80041ebc(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 
 #define TICK if (--U16(o->wbc) == 0) { o->wbc = 0x28; if (X(o)->wca) SfxPlay(0x12); }
 #define SETANIM(a) do { o->anim = (a); AnimLoadDuration(o); } while (0);
@@ -283,7 +283,7 @@ void func_80125818(TObj *o)
             if (X(o)->wca) SfxPlay(0x12);
         }
         if ((unsigned short)(X(o)->wc6 - o->y.p.whole + 2) < 4) {
-            if (FUN_80041ebc(o, o->h->p.whole, o->y.p.whole + 0x18)) {
+            if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x18)) {
                 o->wb4 = 0;
                 o->state = D_80131128[Rand() & 0xf];
                 o->substep = 0;

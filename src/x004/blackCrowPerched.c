@@ -9,7 +9,7 @@ extern void func_80125554(TObj *);
 extern void func_801256A8(TObj *);
 extern void func_80125818(TObj *);
 extern void func_80126464(TObj *);
-extern short func_80041EBC(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 
 static __inline__ void approach(TObj *o, unsigned short t)
 {
@@ -38,7 +38,7 @@ void blackCrowPerched(TObj *o)
     case 2:
         func_801256A8(o);
     common:
-        if (func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x18) == 0) {
+        if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x18) == 0) {
             o->state = 3;
             o->substep = 0;
         }

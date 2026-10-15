@@ -13,7 +13,7 @@ extern void SfxPlay2(int, int);
 extern void func_8010F254(TObj *);
 extern void applyObjectAltSpeedXY(TObj *);
 extern int ObjCheckHeadCollision(TObj *);
-extern TObj *func_8004BBC0(TObj *, int);
+extern TObj *playerProbeGrab(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
 extern void playerTryAttack(TObj *, int);
 
@@ -102,7 +102,7 @@ void playerStepSpinRelease(TObj *o)
         }
         break;
     }
-    D_8009F0EC = func_8004BBC0(o, 0);
+    D_8009F0EC = playerProbeGrab(o, 0);
     if (o->b9e != 0) {
         (*(unsigned char*)&D_8009C330->w08) = 0;
         D_8009C330->timer = 0;

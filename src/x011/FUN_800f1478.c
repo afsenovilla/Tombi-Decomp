@@ -24,7 +24,7 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_800efa80(TObj *);
 extern void FUN_800f1308(TObj *);
 extern short func_800F0E7C(TObj *);
-extern void FUN_8010f400(TObj *);
+extern void playerUpdateSpeedFromPad(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern int playerTryTalkToNpc(void);
@@ -117,7 +117,7 @@ void FUN_800f1478(TObj *o)
                 else
                     o->wb6 = 0;
             }
-            FUN_8010f400(o);
+            playerUpdateSpeedFromPad(o);
             if (o->velY > 0x400) {
                 (*(unsigned char*)&o->wac) = 1;
                 DAT_8009c330[0x1e] = 0;

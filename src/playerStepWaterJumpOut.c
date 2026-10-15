@@ -21,9 +21,9 @@ extern void FUN_800ee680(TObj *);
 extern void playerAirSpinToFall(TObj *);
 extern void FUN_8003facc(TObj *);
 extern void playerSetAnim(TObj *, int, int);
-extern int FUN_8004bbc0(TObj *, int);
+extern int playerProbeGrab(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
-extern void FUN_800eef0c(void);
+extern void spawnPlayerFootstepEffect(void);
 
 void playerStepWaterJumpOut(TObj *o)
 {
@@ -70,7 +70,7 @@ void playerStepWaterJumpOut(TObj *o)
         }
         break;
     }
-    DAT_8009f0ec = FUN_8004bbc0(o, 0);
+    DAT_8009f0ec = playerProbeGrab(o, 0);
     if (o->b9e) {
         DAT_8009c330->b8 = 0;
         DAT_8009c330->w20 = 0;
@@ -81,5 +81,5 @@ void playerStepWaterJumpOut(TObj *o)
         o->wb2 = 0;
         playerEnterGrabStep(o, DAT_8009f0ec == 1);
     }
-    FUN_800eef0c();
+    spawnPlayerFootstepEffect();
 }

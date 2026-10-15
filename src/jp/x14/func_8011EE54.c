@@ -6,7 +6,7 @@ extern short DAT_8007a5f0[];
 extern short D_8007A3F0[];
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern short FUN_80041240(TObj *, short, short);
-extern short func_80041EBC(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 
 static __inline__ short hitWall(TObj *o, short r)
 {
@@ -15,7 +15,7 @@ static __inline__ short hitWall(TObj *o, short r)
         if (r != v) return 0;
         return 1;
     }
-    if (func_80041EBC(o, o->h->p.whole, o->y.p.whole) != 0) return 1;
+    if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole) != 0) return 1;
     return 0;
 }
 

@@ -2,7 +2,7 @@
 // MATCHING 80052190 2012
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
-/* Rotated FT4 sprite strip with per-object colour (MAIN0 twin of func_8005296C / func_80053B5C family): macro loop
+/* Rotated FT4 sprite strip with per-object colour (MAIN0 twin of drawObjectSprite / drawObjectSpriteRotScaled family): macro loop
    body (SN/CS, short x/y, u/w, short A/B/C/D, normal case first since the game branches with bnez), colour stores
    written in full per branch (cross-jumped tail, constant in v0), SPAD.i74 read as an array element so its lw
    stays after the uv stores, and `e = (short *)o->d3c; e += ...` (multi-set pointer) so the d3c load is not

@@ -11,7 +11,7 @@ void playerSetAngleFromSlope(TObj *o);
 void playerSetAnim(TObj *o, int a, int b);
 void playerAccelerateDownhill(TObj *o);
 void playerMoveByAngleSpeed(TObj *o);
-int func_8004BBC0(TObj *o, int a);
+int playerProbeGrab(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void playerSetFallLean(TObj *o);
@@ -77,7 +77,7 @@ void playerStepSlideSteer(TObj *o)
         }
         if (o->bbe == 0) {
             if (*(unsigned short *)(D_8009C330 + 0x2c) == 8 && B(o, 0xac) < 2) {
-                D_8009F0EC = func_8004BBC0(o, 1);
+                D_8009F0EC = playerProbeGrab(o, 1);
                 if (D_8009F0EC) {
                     D_8009C330[8] = 0;
                     *(short *)(D_8009C330 + 0x20) = 0;

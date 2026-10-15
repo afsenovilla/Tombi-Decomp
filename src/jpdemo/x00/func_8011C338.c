@@ -1,11 +1,11 @@
 // JPDEMO x00 8011C338 168
 // Demo version of PAL x000 80126198 (FUN_80126198.c): attached object at +0xd0 (PAL +0xe4).
-extern short FUN_80043260(void);
+extern short pushObjectOutOfObjectBoxA(void);
 extern void spawnImpactEffect(int, int, int, int);
 
 void FUN_80126198(char *o, char *p)
 {
-    short r = FUN_80043260();
+    short r = pushObjectOutOfObjectBoxA();
     if (r != 0) {
         if (o[0xa6] & 2)
             o[0xa6] = o[0xa6] + 2;

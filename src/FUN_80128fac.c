@@ -8,8 +8,8 @@ extern unsigned char D_80138FD8[];
 extern unsigned short *D_8013A184[], *D_8013A1A4[], *D_8013A1A8[], *D_8013A1AC[], *D_8013A1FC[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
-extern int FUN_801274cc(TObj *);
-extern int FUN_801275e4(TObj *);
+extern int enemyProbeGround(TObj *);
+extern int enemyCheckWallAhead(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 #define SETANIM(o, T) \
@@ -50,7 +50,7 @@ void FUN_80128fac(TObj *o)
         o->timer = 0x28;
         o->wac = 9;
         SETANIM(o, D_8013A184);
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 1:
         AnimAdvanceWithBox(o);
@@ -65,7 +65,7 @@ void FUN_80128fac(TObj *o)
             break;
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 2:
         AnimAdvanceWithBox(o);
@@ -74,14 +74,14 @@ void FUN_80128fac(TObj *o)
             o->h->raw = o->h->raw - (o->velH << 8);
         else
             o->h->raw = o->h->raw + (o->velH << 8);
-        if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
+        if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
             o->state = 7;
             o->substep = 0;
             break;
         }
-        if (FUN_801275e4(o) != 0) {
+        if (enemyCheckWallAhead(o) != 0) {
             o->state = 4;
             o->substep = 0;
             break;
@@ -106,8 +106,8 @@ void FUN_80128fac(TObj *o)
             o->h->raw = o->h->raw - (o->velH << 8);
         else
             o->h->raw = o->h->raw + (o->velH << 8);
-        FUN_801275e4(o);
-        if (FUN_801274cc(o) == 0 && x->w0e++ > 3) {
+        enemyCheckWallAhead(o);
+        if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;
             x->b0b = 2;
             o->state = 7;
@@ -131,7 +131,7 @@ void FUN_80128fac(TObj *o)
             SETANIM(o, D_8013A1FC);
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     case 6:
         AnimAdvanceWithBox(o);
@@ -141,7 +141,7 @@ void FUN_80128fac(TObj *o)
             o->animFrame = 1 - o->animFrame;
         }
         o->y.p.whole += 2;
-        FUN_801274cc(o);
+        enemyProbeGround(o);
         break;
     }
 }

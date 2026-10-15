@@ -4,7 +4,7 @@
 typedef struct { unsigned short x, y; } P2;
 extern P2 DAT_8007b610[];
 extern short DAT_1f80019e;
-extern int FUN_800425c4(TObj *, TObj *, int);
+extern int weaponOnHitGetResult(TObj *, TObj *, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
 
@@ -27,7 +27,7 @@ void FUN_800447c0(TObj *o, TObj *q)
     if ((unsigned short)(o->y.p.whole - (q->y.p.whole + ty) - 4 + (q->box2 + o->box2)) > o->box3 + q->box3 - 4) return;
     q->b68 = 1;
     q->b9e = 0;
-    switch (FUN_800425c4(o, q, b0)) {
+    switch (weaponOnHitGetResult(o, q, b0)) {
     case 1: case 7:
         n = 1;
         break;

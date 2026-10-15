@@ -32,7 +32,7 @@ static R ***DAT_8007b908[20] = {
 };
 extern short DAT_80078790[];
 extern int testAreaFlagBit(int);
-extern void FUN_8004cb00(R *, int);
+extern void spawnObjectFromRecord(R *, int);
 
 void FUN_8004c848(signed char *o)
 {
@@ -42,12 +42,12 @@ void FUN_8004c848(signed char *o)
     int s;
     tbl = DAT_8007b908[DAT_8009c960];
     for (r = *tbl[DAT_8009c962 & 7]; r->f2 < 0xff; r++)
-        if (r->f0 >= 0) FUN_8004cb00(r, -1);
+        if (r->f0 >= 0) spawnObjectFromRecord(r, -1);
     i = DAT_80078790[DAT_8009c960];
     if (DAT_80078790[DAT_8009c960] >= 16) i = 15;
     for (r = *tbl[i]; r->f2 < 0xff; r++) {
         s = r->ff >> 2;
-        if (!testAreaFlagBit(s) && r->f0 == DAT_8009c962) FUN_8004cb00(r, s);
+        if (!testAreaFlagBit(s) && r->f0 == DAT_8009c962) spawnObjectFromRecord(r, s);
     }
     if (o[0xe] > 0) {
         R ***tbl;
@@ -56,12 +56,12 @@ void FUN_8004c848(signed char *o)
         int s;
         tbl = DAT_8007b908[DAT_8009c960];
         for (r = *tbl[(DAT_8009c962 - 1) & 7]; r->f2 < 0xff; r++)
-            if (r->f0 < 0) FUN_8004cb00(r, -1);
+            if (r->f0 < 0) spawnObjectFromRecord(r, -1);
         i = DAT_80078790[DAT_8009c960];
         if (DAT_80078790[DAT_8009c960] >= 16) i = 15;
         for (r = *tbl[i]; r->f2 < 0xff; r++) {
             s = r->ff >> 2;
-            if (!testAreaFlagBit(s) && r->f0 == -DAT_8009c962) FUN_8004cb00(r, s);
+            if (!testAreaFlagBit(s) && r->f0 == -DAT_8009c962) spawnObjectFromRecord(r, s);
         }
     }
 }

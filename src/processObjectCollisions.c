@@ -17,9 +17,9 @@ extern TO PLAYER;
 extern signed char D_8009D2B0;
 extern C *TASK_C;
 extern short D_800A4582;
-extern void func_8011E514(void), FUN_800490ac(void), func_80048E68(void), func_800491F0(void);
-extern void func_80046D58(TO *), FUN_8004432c(TO *, unsigned char *), func_80047484(TO *), func_80126770(TO *);
-extern void func_80045F00(void), FUN_80045d98(void), func_80046610(void), func_80049524(void);
+extern void func_8011E514(void), collideCat2Type7WithCat5Type0B(void), collideCat2ObjectsPairwise(void), collideCat2WithCat4Objects(void);
+extern void collidePlayerWithCat4Objects(TO *), collidePlayerWithCat5Object(TO *, unsigned char *), collidePlayerWithCat2Objects(TO *), func_80126770(TO *);
+extern void collideWeaponsWithCat2Objects(void), collideWeaponsWithCat5Objects(void), collideWeaponsWithCat4Objects(void), collideCat5WithCat4Objects(void);
 
 static __inline__ void collide(TO *p)
 {
@@ -31,7 +31,7 @@ static __inline__ void collide(TO *p)
             e = *q;
             SPAD.s19e--;
             q++;
-            if (*e & 3) FUN_8004432c(p, e);
+            if (*e & 3) collidePlayerWithCat5Object(p, e);
         }
     }
 }
@@ -51,9 +51,9 @@ void processObjectCollisions(void)
     D_800A60A6 = *t++;
     D_800A60A8 = *t++;
     D_800A60AA = *t++;
-    FUN_800490ac();
-    func_80048E68();
-    func_800491F0();
+    collideCat2Type7WithCat5Type0B();
+    collideCat2ObjectsPairwise();
+    collideCat2WithCat4Objects();
     p = &PLAYER;
     switch (p->b0) {
     case 0: case 5:
@@ -62,11 +62,11 @@ void processObjectCollisions(void)
     case 1: case 2: case 3: case 7:
         switch (p->b9e) {
         case 0: case 5: case 6:
-            func_80046D58(p);
+            collidePlayerWithCat4Objects(p);
         }
         collide(p);
         if (GVARS.b42 | GVARS.b3f) goto tail;
-        func_80047484(p);
+        collidePlayerWithCat2Objects(p);
         break;
     case 4: case 6:
         collide(p);
@@ -83,8 +83,8 @@ dflt:
     if (!(GVARS.b42 | GVARS.b3f) && D_8009C960_h == 0 && GAME.selectedSection == 2)
         func_80126770(p);
 tail:
-    func_80045F00();
-    FUN_80045d98();
-    func_80046610();
-    func_80049524();
+    collideWeaponsWithCat2Objects();
+    collideWeaponsWithCat5Objects();
+    collideWeaponsWithCat4Objects();
+    collideCat5WithCat4Objects();
 }

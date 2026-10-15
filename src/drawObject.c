@@ -10,11 +10,11 @@ void func_8011CEF0(TObj *o);
 void func_8011D1BC(TObj *o);
 void func_8011D4E0(TObj *o);
 void func_8011DBF4(TObj *o);
-void func_8005296C(TObj *o);
-void func_80052DB8(TObj *o);
-void func_800532FC(TObj *o);
-void func_80053B5C(TObj *o);
-void func_80054C38(TObj *o);
+void drawObjectSprite(TObj *o);
+void drawObjectSpriteScaled(TObj *o);
+void drawObjectSpriteRotated(TObj *o);
+void drawObjectSpriteRotScaled(TObj *o);
+void drawObjectSpriteQuad(TObj *o);
 void func_800EAB58(TObj *o);
 void func_800EC148(TObj *o);
 void func_800EB77C(TObj *o);
@@ -23,7 +23,7 @@ void func_8011EBC0(TObj *o);
 void func_8011F240(TObj *o);
 void func_8011B830(TObj *o);
 void func_8011C00C(TObj *o);
-void func_80054868(TObj *o);
+void drawObjectSprtTinted(TObj *o);
 void drawObjectModelNoRot(TObj *o);
 void drawObjectModelRotated(TObj *o);
 void drawObjectModelRotatedVtx(TObj *o);
@@ -57,11 +57,11 @@ void drawObject(TObj *o)
         return;
     }
     switch (getObjectRenderKind(o)) {
-    case 0: func_8005296C(o); break;
-    case 1: func_80052DB8(o); break;
-    case 2: func_800532FC(o); break;
-    case 3: func_80053B5C(o); break;
-    case 4: func_80054C38(o); break;
+    case 0: drawObjectSprite(o); break;
+    case 1: drawObjectSpriteScaled(o); break;
+    case 2: drawObjectSpriteRotated(o); break;
+    case 3: drawObjectSpriteRotScaled(o); break;
+    case 4: drawObjectSpriteQuad(o); break;
     case 5:
         switch (PLAYER.obj.type) {
         case 1: func_800EAB58(o); break;
@@ -74,7 +74,7 @@ void drawObject(TObj *o)
     case 8: func_8011F240(o); break;
     case 9: func_8011B830(o); break;
     case 10: func_8011C00C(o); break;
-    case 13: func_80054868(o); break;
+    case 13: drawObjectSprtTinted(o); break;
     case 0x10: c10: drawObjectModelNoRot(o); break;
     case 0x11: c11: drawObjectModelRotated(o); break;
     case 0x12: c12: drawObjectModelRotatedVtx(o); break;

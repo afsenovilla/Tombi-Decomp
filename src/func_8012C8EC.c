@@ -6,7 +6,7 @@ extern unsigned short *DAT_8013a1c0[];
 extern unsigned short *DAT_8013a1c4[];
 extern unsigned char DAT_80138fd8[];
 extern void FUN_80127214(TObj *);
-extern int FUN_801274cc(TObj *);
+extern int enemyProbeGround(TObj *);
 
 static __inline__ void SetBox(TObj *o)
 {
@@ -45,7 +45,7 @@ void func_8012C8EC(TObj *o)
         if (o->velV > 0x800)
             o->velV = 0x800;
         o->y.raw += o->velV << 8;
-        if (FUN_801274cc(o))
+        if (enemyProbeGround(o))
             o->state++;
         break;
     case 3:

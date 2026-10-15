@@ -1,6 +1,6 @@
 // FUNC 80045684 380 MAIN0
 // MATCHING 80045684 380
-extern short FUN_80043260(unsigned char *, unsigned char *);
+extern short pushObjectOutOfObjectBoxA(unsigned char *, unsigned char *);
 extern void spawnImpactEffect(int, int, int, int);
 extern short DAT_1f80019e;
 
@@ -30,7 +30,7 @@ void FUN_80045684(unsigned char *a, unsigned char *b)
             b[5] = 7;
         }
     } else {
-        r = FUN_80043260(a, b);
+        r = pushObjectOutOfObjectBoxA(a, b);
         if (r != 0 && r == 1 && a[0xac] == 1 && b[0] != 3) {
             b[0] = 6;
             b[4] = 2;

@@ -34,11 +34,11 @@ extern void ObjSetAnimFromTable(S *);
 extern void AnimLoadDuration(S *);
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(S *);
-extern void func_8010F400(S *);
+extern void playerUpdateSpeedFromPad(S *);
 extern void playerAirSpinToFall(S *);
 extern int ObjCheckHeadCollision(S *);
 extern short TileCollideAt(S *, short, short);
-extern void func_80030034(int);
+extern void spawnPlayerPowerEffect(int);
 
 void func_8011B330(S *s)
 {
@@ -105,7 +105,7 @@ void func_8011B330(S *s)
         s->o.h->raw += s->o.velX << 8;
         s->o.y.raw += s->o.velY << 8;
         s->o.velY += 0x40;
-        func_8010F400(s);
+        playerUpdateSpeedFromPad(s);
         if (s->o.velY >= -0x383) playerAirSpinToFall(s);
         if (s->o.velY > 0) {
             w = 0x10;
@@ -139,10 +139,10 @@ void func_8011B330(S *s)
         if ((SPAD.s1fc & SPAD.s3c8) == 0) break;
         switch (GAME.displayExpBar) {
         case 1:
-            if (s->bcc == 1) func_80030034(0);
+            if (s->bcc == 1) spawnPlayerPowerEffect(0);
             return;
         case 2:
-            if (s->bcc == 1) func_80030034(1);
+            if (s->bcc == 1) spawnPlayerPowerEffect(1);
             return;
         }
         s->bc3 = 0;

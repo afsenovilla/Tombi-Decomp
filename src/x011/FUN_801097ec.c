@@ -9,7 +9,7 @@ extern void FUN_8001e560(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void playerSetAngleFromSlope(TObj *);
-extern void FUN_8010f400(TObj *);
+extern void playerUpdateSpeedFromPad(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void playerStickToGround(TObj *);
 
@@ -35,7 +35,7 @@ void FUN_801097ec(TObj *o)
         case 1:
             FUN_8001fec0(o);
             playerSetAngleFromSlope(o);
-            FUN_8010f400(o);
+            playerUpdateSpeedFromPad(o);
             playerMoveByAngleSpeed(o);
             playerStickToGround(o);
             if (o->ba6 == 0) {

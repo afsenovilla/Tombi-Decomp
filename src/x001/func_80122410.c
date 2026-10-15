@@ -31,7 +31,7 @@ extern int AnimAdvance(TObj *);
 extern int rcos(int);
 extern int rsin(int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern TObj *func_8004BBC0(TObj *, int);
+extern TObj *playerProbeGrab(TObj *, int);
 extern void playerSetFallLean(TObj *);
 extern void playerTryAttack(TObj *, int);
 extern void func_801222C4(TObj *);
@@ -171,7 +171,7 @@ void func_80122410(TObj *o)
             }
         }
         o->b9e = 0;
-        r = func_8004BBC0(o, 0);
+        r = playerProbeGrab(o, 0);
         if (r == 0) {
             L *q, *n;
             ((unsigned char *)&o->wa8)[1] = 0;

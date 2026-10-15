@@ -7,10 +7,10 @@ extern void applyFrameVelocityX(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern int FUN_80127214(TObj *);
-extern int FUN_801274cc(TObj *);
-extern int FUN_801275e4(TObj *);
-extern unsigned char FUN_80127720(TObj *);
-extern void FUN_800eae0c(short, short, short, unsigned char);
+extern int enemyProbeGround(TObj *);
+extern int enemyCheckWallAhead(TObj *);
+extern unsigned char enemyPickActionByPlayerDistance(TObj *);
+extern void spawnGroundDebris(short, short, short, unsigned char);
 extern char DAT_80077cdc[];
 extern char DAT_80077d30[];
 extern unsigned char DAT_80138fd8[];
@@ -32,7 +32,7 @@ extern unsigned short *PTR_DAT_8013a1a4[];
 static __inline__ void fin(TObj *t)
 {
     t->y.p.whole += 2;
-    FUN_801274cc(t);
+    enemyProbeGround(t);
 }
 
 void FUN_80128190(TObj *o)
@@ -72,8 +72,8 @@ void FUN_80128190(TObj *o)
         applyFrameVelocityY(o);
         if (o->animFrame != 0) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
-        if (!FUN_801274cc(o)) goto fall;
-        if (FUN_801275e4(o)) {
+        if (!enemyProbeGround(o)) goto fall;
+        if (enemyCheckWallAhead(o)) {
             o->state = 4;
             o->substep = 0;
         }
@@ -99,7 +99,7 @@ void FUN_80128190(TObj *o)
             o->b69 = 0;
             o->substep++;
         }
-        if (!FUN_801275e4(o)) break;
+        if (!enemyCheckWallAhead(o)) break;
         o->state = 4;
         o->substep = 0;
         break;
@@ -108,17 +108,17 @@ void FUN_80128190(TObj *o)
         applyFrameVelocityX(o);
         o->velV += 0x40;
         o->y.raw += o->velV << 8;
-        if (FUN_801274cc(o)) {
+        if (enemyProbeGround(o)) {
             o->d8c = x->w2;
             if (o->visible) {
                 if (o->animFrame) x->w4 = -0x10;
                 else x->w4 = 0x10;
-                FUN_800eae0c(o->a.p.whole + x->w4, o->y.p.whole, o->b.p.whole, 1);
+                spawnGroundDebris(o->a.p.whole + x->w4, o->y.p.whole, o->b.p.whole, 1);
             }
             o->timer = 0xf;
             o->substep++;
         }
-        if (!FUN_801275e4(o)) break;
+        if (!enemyCheckWallAhead(o)) break;
         o->state = 4;
         o->substep = 0;
         break;
@@ -126,13 +126,13 @@ void FUN_80128190(TObj *o)
         if (--o->timer == -1) o->substep++;
         FUN_80127214(o);
         applyFrameVelocityXY(o);
-        if (!FUN_801274cc(o)) goto fall;
+        if (!enemyProbeGround(o)) goto fall;
         if (o->wb2 != 0) {
             int g = (o->wb2 > 0);
             g ^= o->animFrame;
             if (g) o->timer = 0xf;
         }
-        if (!FUN_801275e4(o)) break;
+        if (!enemyCheckWallAhead(o)) break;
         o->state = 4;
         o->substep = 0;
         break;
@@ -145,8 +145,8 @@ void FUN_80128190(TObj *o)
         applyFrameVelocityY(o);
         if (o->animFrame != 0) o->h->raw -= o->velH << 8;
         else o->h->raw += o->velH << 8;
-        FUN_801275e4(o);
-        if (FUN_801274cc(o)) {
+        enemyCheckWallAhead(o);
+        if (enemyProbeGround(o)) {
             s = o->wb2;
             if (s != 0) {
                 int g = (s > 0);
@@ -189,7 +189,7 @@ void FUN_80128190(TObj *o)
         if (--o->timer == -1) {
             o->state = 0;
             o->substep = 0;
-            r = FUN_80127720(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r == 0xff) break;
             o->state = r;
         }

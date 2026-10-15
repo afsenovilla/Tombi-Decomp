@@ -14,7 +14,7 @@ extern unsigned int stepScrollClearX(TObj *);
 extern void cameraFollowPlayerX(TObj *);
 extern void cameraFollowPlayerY(TObj *);
 extern void syncObjectTargetY(TObj *);
-extern void func_80029078(TObj *);
+extern void updateCameraScroll(TObj *);
 extern int stepPlayerXToward(int);
 
 void updateAreaScroll(TObj *o)
@@ -33,7 +33,7 @@ void updateAreaScroll(TObj *o)
         cameraFollowPlayerX(o);
         cameraFollowPlayerY(o);
         syncObjectTargetY(o);
-        func_80029078(o);
+        updateCameraScroll(o);
         GAME.selectedSpawnPoint = 0;
         break;
     case 2:

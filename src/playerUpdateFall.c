@@ -8,7 +8,7 @@ extern unsigned short DAT_1f8001f8;
 extern XY DAT_801151e0[];
 extern void FUN_800efc04(TObj *, TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern short FUN_800eef0c(void);
+extern short spawnPlayerFootstepEffect(void);
 extern TObj *FUN_80018448(void);
 extern void playerAirSpinToFall(TObj *);
 extern void playerAirAccelerateX(TObj *);
@@ -32,7 +32,7 @@ void playerUpdateFall(TObj *o)
         x = o->a.p.whole;
         y = o->y.p.whole;
         z = o->b.p.whole;
-        if (FUN_800eef0c() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+        if (spawnPlayerFootstepEffect() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
             q->active = 1;
             q->type = 0x31;
             q->subtype = 1;

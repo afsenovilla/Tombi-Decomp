@@ -9,7 +9,7 @@ extern unsigned int D_8009C984[];
 extern volatile unsigned short D_8009D670[];
 extern void FUN_800efa80(PL *);
 extern void playSFX(int);
-extern void FUN_800eae0c(int, int, int, int);
+extern void spawnGroundDebris(int, int, int, int);
 
 void func_80121A10(PL *o)
 {
@@ -27,8 +27,8 @@ void func_80121A10(PL *o)
     if (SPAD.s1fc & SPAD.s3c6) {
         GV2.bb0 = 0;
         playSFX(0x3e);
-        FUN_800eae0c(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
-        FUN_800eae0c(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
+        spawnGroundDebris(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
+        spawnGroundDebris(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
         o->o.b9c = 1;
         o->o.b04 = 1;
         o->o.y.p.whole -= 8;

@@ -31,7 +31,7 @@ extern Q800F3F3C *D_8009C330;
 extern int D_8009D2E8;
 extern void FUN_8010f328(P800F3F3C *);
 extern void SfxPlay2(int, int);
-extern void func_8010F400(P800F3F3C *);
+extern void playerUpdateSpeedFromPad(P800F3F3C *);
 extern void playerAirAccelerateX(P800F3F3C *);
 extern void ObjGravityStep(P800F3F3C *);
 extern void ObjAddVelY7E(P800F3F3C *);
@@ -85,7 +85,7 @@ void playerStepAttackJump(P800F3F3C *o)
     common:
         o->t.h->raw += GVARS.s44 << 8;
         o->t.y.raw += ((short*)&GVARS.s46)[0] << 8;
-        func_8010F400(o);
+        playerUpdateSpeedFromPad(o);
         playerAirAccelerateX(o);
         o->t.h->raw += o->t.velX << 8;
         ObjGravityStep(o);

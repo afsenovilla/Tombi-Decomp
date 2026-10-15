@@ -22,7 +22,7 @@ typedef struct {
 typedef struct { int d0; int b8; int bc; } E;
 extern char D_800E3E28[];
 extern int P_1F800334[], P_1F800318[], P_1F800314[], P_1F800310[];
-extern void FUN_80025aa8(int, int);
+extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
 
 int func_80116688(S *o)
@@ -67,7 +67,7 @@ int func_80116688(S *o)
         o->dbc = d + p[1];
         o->db8 = (int)D_800E3E28;
         o->da8 = o->db8;
-        FUN_80025aa8(a, o->db8);
+        copyModelPrimGroups(a, o->db8);
         return 0;
     case 5:
         o->velV += o->velH;
@@ -93,7 +93,7 @@ int func_80116688(S *o)
         }
     tail:
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->db8);
+        copyModelPrimGroups(o->da0, o->db8);
         FUN_80024ea0(o->db8, o->dbc, o->wcc);
         return 0;
     case 8:

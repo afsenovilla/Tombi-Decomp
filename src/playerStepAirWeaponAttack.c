@@ -45,7 +45,7 @@ extern void setVelXFromPadLR(TObj *);
 extern void adjustVelYFromPadDown(TObj *);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e4f0(int);
-extern void FUN_800eae0c(int, short, int, int);
+extern void spawnGroundDebris(int, short, int, int);
 
 #define SETANIM_IF(n) \
     D_8009C330->w2c = n; \
@@ -258,8 +258,8 @@ void playerStepAirWeaponAttack(TObj *o)
             o->d8c = D_801152E8[o->wb0];
             if (o->bbe & 0x20) {
                 FUN_8001e4f0(0x3e);
-                FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
-                FUN_800eae0c(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+                spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+                spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
             }
             break;
         }

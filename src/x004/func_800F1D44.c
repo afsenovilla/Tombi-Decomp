@@ -29,13 +29,13 @@ extern char D_80010DE0[], D_80010E2C[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8010f400(TObj *);
+extern void playerUpdateSpeedFromPad(TObj *);
 extern void FUN_800efa80(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8001e4f0(int);
 extern int FUN_8005bdec(void);
-extern short FUN_800eef0c(void);
+extern short spawnPlayerFootstepEffect(void);
 extern TObj *FUN_80018448(void);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
@@ -58,7 +58,7 @@ static __inline__ void dust(TObj *o)
     x = o->a.p.whole;
     y = o->y.p.whole;
     z = o->b.p.whole;
-    if (FUN_800eef0c() == 0 && D_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+    if (spawnPlayerFootstepEffect() == 0 && D_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
         q->active = 1;
         q->type = 0x31;
         q->subtype = 1;
@@ -113,7 +113,7 @@ void func_800F1D44(TObj *o)
                 if (w > 0) o->wb6 = t & 0xff;
                 else o->wb6 = 0;
             }
-            FUN_8010f400(o);
+            playerUpdateSpeedFromPad(o);
             FUN_800efa80(o);
             setObjectSpeedPolar2(o, o->wb6, o->wb2);
             o->h->raw += ((short*)&GVARS.s44)[0] << 8;
@@ -249,5 +249,5 @@ void func_800F1D44(TObj *o)
         o->step = 0;
         o->state = 0;
     }
-    FUN_800eef0c();
+    spawnPlayerFootstepEffect();
 }

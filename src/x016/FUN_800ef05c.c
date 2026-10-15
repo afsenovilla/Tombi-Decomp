@@ -1,7 +1,7 @@
 // FUNC 800ef05c 244 X016
 // MATCHING 800ef05c 244
 #include "TOBJ.H"
-extern short FUN_800eef0c(void);
+extern short spawnPlayerFootstepEffect(void);
 extern TObj *FUN_80018448(void);
 extern short DAT_1f800238;
 extern unsigned short DAT_1f8001f8;
@@ -13,7 +13,7 @@ void FUN_800ef05c(unsigned int a, short x, short y, short z)
 {
     TObj *p;
     short *t;
-    if (FUN_800eef0c() == 0 && DAT_1f800238 > 5 && (p = FUN_80018448()) != 0) {
+    if (spawnPlayerFootstepEffect() == 0 && DAT_1f800238 > 5 && (p = FUN_80018448()) != 0) {
         p->active = 1;
         p->type = 0x31;
         p->subtype = 1;

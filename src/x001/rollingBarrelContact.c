@@ -5,13 +5,13 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short func_80043260(TObj *, TObj *);
+extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
 void rollingBarrelContact(TObj *o, TObj *p)
 {
     p->b6a = 0;
-    if (func_80043260(o, p) == 0) return;
+    if (pushObjectOutOfObjectBoxA(o, p) == 0) return;
     if (GCD.bceb0 != 0) return;
     if (p->w98 != 0) {
         if (SPAD.b1a4 != 0) return;

@@ -6,7 +6,7 @@ extern signed char D_8009D2B0;
 extern short D_1f80019e;
 extern unsigned short D_1f800248;
 extern unsigned char **D_1f800228;
-extern void FUN_8004432c(TObj *o, unsigned char *p);
+extern void collidePlayerWithCat5Object(TObj *o, unsigned char *p);
 void func_80047A3C(TObj *o)
 {
     unsigned char **pp;
@@ -19,7 +19,7 @@ void func_80047A3C(TObj *o)
         p = *pp++;
         D_1f80019e -= 1;
         if (*p & 3) {
-            FUN_8004432c(o, p);
+            collidePlayerWithCat5Object(o, p);
         }
     }
 }

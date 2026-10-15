@@ -9,11 +9,11 @@ typedef struct {
     char pb2[0xbe - 0xb2]; unsigned char bbe;
     char pbf[0xd4 - 0xbf]; TObj *de4;
 } PL;
-extern short func_8004306C(PL *, TObj *);
+extern short playerPushOutOfObjectBox(PL *, TObj *);
 
 void func_80121180(PL *p, TObj *o)
 {
-    short r = func_8004306C(p, o);
+    short r = playerPushOutOfObjectBox(p, o);
     if (r == 0)
         return;
     if (p->bac == 1 && r == 1) {

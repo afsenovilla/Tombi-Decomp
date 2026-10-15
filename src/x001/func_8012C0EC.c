@@ -17,7 +17,7 @@ extern char D_80077D30[];
 extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
 extern short TileCollideAt(TObj *o, short x, short y);
-extern void FUN_800eae0c(short, int, int, int);
+extern void spawnGroundDebris(short, int, int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001e4f0(int);
 extern void func_8012BB18(TObj *o);
@@ -56,8 +56,8 @@ static __inline__ int land2(TObj *o)
         o->active = 2; \
         o->b04 = 3; \
         if (o->visible) { \
-            FUN_800eae0c(o->h->p.whole + 10, 0x2e, o->d->p.whole, 1); \
-            FUN_800eae0c(o->h->p.whole - 10, 0x2e, o->d->p.whole, 1); \
+            spawnGroundDebris(o->h->p.whole + 10, 0x2e, o->d->p.whole, 1); \
+            spawnGroundDebris(o->h->p.whole - 10, 0x2e, o->d->p.whole, 1); \
         } \
     }
 
@@ -111,7 +111,7 @@ void func_8012C0EC(TObj *o)
             if (o->visible) {
                 if (o->animFrame) s->wb8 = -0x10;
                 else s->wb8 = 0x10;
-                FUN_800eae0c(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
+                spawnGroundDebris(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
                 FUN_8001e4f0(0x3f);
             }
             o->timer = 0xf;
@@ -128,7 +128,7 @@ void func_8012C0EC(TObj *o)
                 if (o->visible) {
                     if (o->animFrame) s->wb8 = -0x10;
                     else s->wb8 = 0x10;
-                    FUN_800eae0c(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
+                    spawnGroundDebris(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
                     FUN_8001e4f0(0x3f);
                 }
                 o->timer = 0xf;

@@ -28,7 +28,7 @@ extern int DAT_1f800314;
 extern int *DAT_1f800310p;
 extern int DAT_1f800310;
 extern char D_800E3E28[];
-extern void FUN_80025aa8(int, int);
+extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
 #define RET(w, n) { o->velV = 0x1000; o->wac = w; o->da0 = DAT_1f800334 + DAT_1f800334p[n]; o->b0a = 0x15; o->substep = 0; return 1; }
@@ -66,7 +66,7 @@ int func_8011B560(S *o)
             RET(2, 3);
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 3:
@@ -84,7 +84,7 @@ int func_8011B560(S *o)
             RET(1, 2);
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 5:
@@ -100,7 +100,7 @@ int func_8011B560(S *o)
         o->dc4 = (int)D_800E3E28;
         o->da8 = (int)D_800E3E28;
         o->dc8 = q;
-        FUN_80025aa8(a, o->dc4);
+        copyModelPrimGroups(a, o->dc4);
         return 0;
     case 6:
         o->velV += o->velH;
@@ -109,7 +109,7 @@ int func_8011B560(S *o)
             o->substep++;
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 7:
@@ -119,7 +119,7 @@ int func_8011B560(S *o)
             o->substep++;
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     case 8:
@@ -128,7 +128,7 @@ int func_8011B560(S *o)
             RET8;
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->dc4);
+        copyModelPrimGroups(o->da0, o->dc4);
         subtractScaledVertices(o->dc4, o->dc8, o->wcc);
         return 0;
     }

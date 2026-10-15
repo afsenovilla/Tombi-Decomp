@@ -22,7 +22,7 @@ extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
 extern void cameraFollowPlayerX(TObj *);
 extern void syncObjectTargetY(TObj *);
-extern void FUN_80029078(TObj *);
+extern void updateCameraScroll(TObj *);
 extern void setEventComplete(int, int);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(TObj *, int, int);
@@ -70,7 +70,7 @@ void FUN_80116d14(TObj *o)
         cameraFollowPlayerX(o);
         *(unsigned char *)&o->d3c = 0;
         syncObjectTargetY(o);
-        FUN_80029078(o);
+        updateCameraScroll(o);
         break;
     case 3:
         {

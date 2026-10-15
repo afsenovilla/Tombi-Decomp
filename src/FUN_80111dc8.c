@@ -1,7 +1,7 @@
 // FUNC 80111dc8 400 X000
 // MATCHING 80111dc8 400
 // FLAGS -O2 -G0 -fno-cse-skip-blocks
-/* Debt: -fno-cse-skip-blocks (precedent: FUN_8010f400). The velX update is written in both arms of
+/* Debt: -fno-cse-skip-blocks (precedent: playerUpdateSpeedFromPad). The velX update is written in both arms of
    `if (r == 0)`: at sched2 each copy ends its basic block, so `sh velX` is scheduled right after the
    addu (negu/lh follow); jump2 then cross-jumps the two copies into one tail. With the default flags
    cse follows the `if (velX < 0)` skip and turns the then-arm's lhu into an andi of the compare's lh,

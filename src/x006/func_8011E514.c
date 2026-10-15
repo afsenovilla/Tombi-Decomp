@@ -3,12 +3,12 @@
 
 extern char PLAYER[];
 extern void func_80047A3C(void *);
-extern void FUN_80047484(void *);
+extern void collidePlayerWithCat2Objects(void *);
 
 void func_8011E514(void)
 {
     char *p = PLAYER;
 
     func_80047A3C(p);
-    FUN_80047484(p);
+    collidePlayerWithCat2Objects(p);
 }

@@ -12,7 +12,7 @@ extern unsigned char D_8009C966, D_8009C933;
 extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern void updateCameraFollow(TObj *);
-extern void FUN_80029078(TObj *);
+extern void updateCameraScroll(TObj *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern unsigned char *allocObjectUnlayered(void);
@@ -104,7 +104,7 @@ void func_80116818(TObj *o)
             break;
         }
         slide(o);
-        FUN_80029078(o);
+        updateCameraScroll(o);
         if (o->y.raw != 0) break;
         if (o->visible == 0) {
             GVARS.b30 = 4;

@@ -10,7 +10,7 @@ extern G *D_8009C330;
 extern int D_8009D2E8;
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(TObj *o);
-extern void FUN_8010f400(TObj *o);
+extern void playerUpdateSpeedFromPad(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern int ObjCheckHeadCollision(TObj *o);
 extern void PlayerSetAnimIfChanged(TObj *o, int);
@@ -44,7 +44,7 @@ void func_8011B7D4(TObj *o)
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
-        FUN_8010f400(o);
+        playerUpdateSpeedFromPad(o);
         if ((*(unsigned char*)&o->wac) == 2) {
             D_8009D2E8 = S32(o, 0xe4);
             D_8009C330->b8 = 0;

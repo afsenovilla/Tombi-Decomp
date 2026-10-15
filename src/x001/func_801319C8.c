@@ -18,7 +18,7 @@ typedef struct {
 extern char D_80077CDC[];
 extern P40 D_800E3E28[];
 extern void FUN_80018d2c(TObj *);
-extern void FUN_80025aa8(int, P40 *);
+extern void copyModelPrimGroups(int, P40 *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer8(TObj *);
 
@@ -57,7 +57,7 @@ void func_801319C8(TObj *o)
             o->d8c = 0;
             *(P40 **)&o->wa8 = D_800E3E28;
             o->velV = -0x400;
-            FUN_80025aa8(o->da0, D_800E3E28);
+            copyModelPrimGroups(o->da0, D_800E3E28);
             o->timer = 60;
             o->step++;
         case 1:

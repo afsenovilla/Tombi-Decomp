@@ -37,7 +37,7 @@ extern int DAT_8009c978A[];
 extern unsigned char DAT_8009d079;
 extern int *DAT_80114c64[];
 extern char D_800E3E28[];
-extern void FUN_80025aa8(int, int);
+extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
 extern short FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
@@ -68,7 +68,7 @@ void FUN_800ed258(S *o)
         e->bc = (int)p;
         e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);
         o->da8 = e->b8;
-        FUN_80025aa8(o->da0, e->b8);
+        copyModelPrimGroups(o->da0, e->b8);
         o->state = 1;
         o->b69 = 0;
         o->b0a = 0x12;
@@ -77,7 +77,7 @@ void FUN_800ed258(S *o)
         if (o->visible == 0)
             goto set4;
         if (o->velV < 0x1000) {
-            FUN_80025aa8(o->da0, e->b8);
+            copyModelPrimGroups(o->da0, e->b8);
             r = o->velV;
             w = r;
             if (r < 0x1000) {
@@ -144,7 +144,7 @@ void FUN_800ed258(S *o)
             o->state = 4;
             break;
         }
-        FUN_80025aa8(o->da0, e->b8);
+        copyModelPrimGroups(o->da0, e->b8);
         v = o->velV;
         if (o->velV < 0)
             v = 0;

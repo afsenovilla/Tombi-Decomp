@@ -14,7 +14,7 @@ extern unsigned int stepScrollClearX(TObj *);
 extern void FUN_80027c74(TObj *);
 extern void func_8002795C(TObj *);
 extern void syncObjectTargetY(TObj *);
-extern void func_80029078(TObj *);
+extern void updateCameraScroll(TObj *);
 extern int stepPlayerXToward(int);
 
 void func_80115FB4(TObj *o)
@@ -33,7 +33,7 @@ void func_80115FB4(TObj *o)
         FUN_80027c74(o);
         func_8002795C(o);
         syncObjectTargetY(o);
-        func_80029078(o);
+        updateCameraScroll(o);
         GAME.selectedSpawnPoint = 0;
         break;
     case 2:

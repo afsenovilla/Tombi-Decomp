@@ -13,7 +13,7 @@ extern void ObjSetFacingToPlayer(TObj *o);
 extern void applyFrameVelocityXY(TObj *o);
 extern void func_8012BB18(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
-extern void FUN_800eae0c(short, int, int, int);
+extern void spawnGroundDebris(short, int, int, int);
 
 static __inline__ int land2(TObj *o)
 {
@@ -93,8 +93,8 @@ void func_8012BD6C(TObj *o)
             o->active = 2;
             o->b04 = 3;
             if (o->visible) {
-                FUN_800eae0c(o->h->p.whole + 10, 0x2e, o->d->p.whole, 1);
-                FUN_800eae0c(o->h->p.whole - 10, 0x2e, o->d->p.whole, 1);
+                spawnGroundDebris(o->h->p.whole + 10, 0x2e, o->d->p.whole, 1);
+                spawnGroundDebris(o->h->p.whole - 10, 0x2e, o->d->p.whole, 1);
             }
         }
         if (o->animFrame) {

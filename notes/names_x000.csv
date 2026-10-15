@@ -1,5 +1,7 @@
 address,name,confidence,comment
 800e9f74,awardAPByArea,alta,names batch (see notes/names.md)
+800eae0c,spawnGroundDebris,alta,names batch (see notes/names.md)
+800ec710,spawnWeaponTrailObjects,alta,names batch (see notes/names.md)
 800ec84c,spawnColorBurst,alta,names batch (see notes/names.md)
 800ee428,playerSetFallLean,alta,names batch (see notes/names.md)
 800ee454,playerTiltTowardSlope,alta,names batch (see notes/names.md)
@@ -17,6 +19,7 @@ address,name,confidence,comment
 800eec40,playerAirSpinToFall,alta,names batch (see notes/names.md)
 800eee40,playerReleaseBitten,alta,names batch (see notes/names.md)
 800eee90,playerReleaseBittenAndClearFlags,alta,names batch (see notes/names.md)
+800eef0c,spawnPlayerFootstepEffect,alta,names batch (see notes/names.md)
 800ef150,playerResetStep,alta,names batch (see notes/names.md)
 800ef1ac,playerCheckPerchLanding,alta,names batch (see notes/names.md)
 800ef460,objApplyDepthVelocity,alta,names batch (see notes/names.md)
@@ -146,10 +149,13 @@ address,name,confidence,comment
 8010e114,playerTryTalkToNpc,alta,names batch (see notes/names.md)
 8010e328,playerTryAttack,alta,names batch (see notes/names.md)
 8010e628,playerStartFall,alta,names batch (see notes/names.md)
+8010e66c,playerStepSuperJump,alta,names batch (see notes/names.md)
 8010e918,playerGetSpeedTableIndex,alta,names batch (see notes/names.md)
 8010eaf8,playerAirAccelerateX,alta,names batch (see notes/names.md)
 8010f0f4,ObjGravityStep,media,velY += valor de tabla (80115468, 10 shorts por modo) y limita al maximo
 8010f328,playerSetJumpRiseVelocity,alta,names batch (see notes/names.md)
+8010f400,playerUpdateSpeedFromPad,alta,names batch (see notes/names.md)
+8010fe70,playerSkidDecelerate,alta,names batch (see notes/names.md)
 801102b4,playerSlopeSlideAccelerate,media,names batch (see notes/names.md)
 80110eec,playerAccelerateDownhill,media,names batch (see notes/names.md)
 8011116c,playerDecelerateSpeed,alta,names batch (see notes/names.md)
@@ -158,3 +164,7 @@ address,name,confidence,comment
 80122a18,playerBiteHoldType15,alta,names batch (see notes/names.md)
 80122f14,playerStepSlideDownSurface,alta,names batch (see notes/names.md)
 80127214,AnimAdvanceWithBox,media,como AnimAdvance pero ademas carga la caja de colision (box0..) desde una tabla
+801274cc,enemyProbeGround,alta,names batch (see notes/names.md)
+801275e4,enemyCheckWallAhead,alta,names batch (see notes/names.md)
+80127720,enemyPickActionByPlayerDistance,alta,names batch (see notes/names.md)
+80133474,updateFrog,alta,names batch (see notes/names.md)

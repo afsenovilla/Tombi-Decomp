@@ -9,7 +9,7 @@
 
 extern TObj *allocObjectLayer2(void);
 extern short func_80041240(TObj *, short, short);
-extern short func_80041EBC(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 extern void spawnImpactEffect(int, short, short, short);
 extern void FUN_8002ee50(int, short, short, short);
 
@@ -129,7 +129,7 @@ int func_80120DA0(TObj *o)
             o->velV -= o->velV >> 2;
         }
     }
-    if (func_80041EBC(o, o->h->p.whole, o->y.p.whole + 0x24) == 0) return 0;
+    if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x24) == 0) return 0;
     if (SPAD.s284) return 0;
     af = 0;
     debris2(o, 5, af);

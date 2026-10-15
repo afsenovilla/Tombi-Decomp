@@ -1,6 +1,6 @@
 // FUNC 80126b50 272 X000
 // MATCHING 80126b50 272
-extern short FUN_800482ec(void);
+extern short pushObjectOutOfObjectBoxB(void);
 extern short pushObjectOutOfObjectX(unsigned char *, unsigned char *);
 extern short DAT_1f80019e;
 
@@ -10,7 +10,7 @@ void FUN_80126b50(unsigned char *a, unsigned char *b)
     unsigned char *c;
     unsigned x;
     if (*(int *)(b + 0x94) == 0) {
-        r = FUN_800482ec();
+        r = pushObjectOutOfObjectBoxB();
         if (r == 0)
             return;
         if (r == 2) {

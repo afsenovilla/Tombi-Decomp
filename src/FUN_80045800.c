@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char DAT_8009cdc7;
 extern short DAT_1f80019e;
-extern short FUN_80043260(TObj *, TObj *);
+extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 #define B(o, n) (((unsigned char *)(o))[n])
 
@@ -23,7 +23,7 @@ void FUN_80045800(TObj *o, TObj *e)
         B(o, 0xa8) = 9;
         return;
     }
-    r = FUN_80043260(o, e);
+    r = pushObjectOutOfObjectBoxA(o, e);
     if (r == 0)
         return;
     if (o->ba6 & 2)

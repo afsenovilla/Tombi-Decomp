@@ -39,7 +39,7 @@ extern int *DAT_1f800310pA[];
 extern int DAT_1f800310A[];
 #define DAT_1f800310 DAT_1f800310A[0]
 extern char D_800E3E28[];
-extern void FUN_80025aa8(int, int);
+extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
 #define SETUP(o, n, w, v, P, Q) \
@@ -79,7 +79,7 @@ int func_80116924(S *o)
         o->db8 = (int)D_800E3E28;
         o->da8 = (int)D_800E3E28;
         o->dbc = q;
-        FUN_80025aa8(a, o->db8);
+        copyModelPrimGroups(a, o->db8);
         return 0;
     case 1:
     case 3:
@@ -90,7 +90,7 @@ int func_80116924(S *o)
             o->substep++;
         }
         o->wcc = o->velV;
-        FUN_80025aa8(o->da0, o->db8);
+        copyModelPrimGroups(o->da0, o->db8);
         subtractScaledVertices(o->db8, o->dbc, o->wcc);
         return 0;
     case 6:

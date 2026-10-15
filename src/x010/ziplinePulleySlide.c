@@ -5,7 +5,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern void playSFX(int);
-extern short func_80041EBC(TObj *, short, short);
+extern short probeFloorPlaneAt(TObj *, short, short);
 
 void ziplinePulleySlide(TObj *o)
 {
@@ -63,7 +63,7 @@ void ziplinePulleySlide(TObj *o)
             if (o->b0c == 8) {
                 if (o->a.p.whole >= 0xa6f) {
                     o->y.raw += o->velV << 8;
-                    if (func_80041EBC(o, o->h->p.whole, o->y.p.whole + 8)) {
+                    if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                         o->step++;
                     }
                     break;
@@ -94,7 +94,7 @@ void ziplinePulleySlide(TObj *o)
         }
         o->h->raw += o->velH << 8;
         o->y.raw += o->velV << 8;
-        if (func_80041EBC(o, o->h->p.whole, o->y.p.whole + 8)) {
+        if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 8)) {
             o->active = 2;
             o->step++;
         }

@@ -34,7 +34,7 @@ extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
 extern void syncObjectTargetY(O *);
-extern void FUN_80029078(O *);
+extern void updateCameraScroll(O *);
 extern void markSectionVisited(void);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
@@ -64,7 +64,7 @@ void updateAreaScroll(O *o)
         cameraFollowPlayerX(o);
         o->b3c = 0;
         syncObjectTargetY(o);
-        FUN_80029078(o);
+        updateCameraScroll(o);
         break;
     case 2:
         D_80079A98[o->subtype](o);

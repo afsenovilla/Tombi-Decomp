@@ -42,9 +42,9 @@ extern void playerSetJumpRiseVelocity(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001fec0(TObj *);
-extern short FUN_800eef0c(void);
+extern short spawnPlayerFootstepEffect(void);
 extern TObj *FUN_80018448(void);
-extern void FUN_8010f400(TObj *);
+extern void playerUpdateSpeedFromPad(TObj *);
 extern void playerAirAccelerateX(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
@@ -55,7 +55,7 @@ extern void FUN_800f28a0(TObj *);
 extern void playerUpdateFall(TObj *);
 extern void playerLandFromJump(TObj *);
 extern short FUN_8003fd78(TObj *, int, int);
-extern int FUN_8004bbc0(TObj *, int);
+extern int playerProbeGrab(TObj *, int);
 extern void playerEnterGrabStep(TObj *, int);
 
 void playerStepJump(TObj *o)
@@ -132,7 +132,7 @@ void playerStepJump(TObj *o)
         if (o->ba7 != 0) {
             short a = o->a.p.whole, y = o->y.p.whole, b = o->b.p.whole;
             TObj *q;
-            if (FUN_800eef0c() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+            if (spawnPlayerFootstepEffect() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
                 short *t;
                 q->active = 1;
                 q->type = 0x31;
@@ -145,7 +145,7 @@ void playerStepJump(TObj *o)
                 q->y.p.whole += t[1];
             }
         }
-        FUN_8010f400(o);
+        playerUpdateSpeedFromPad(o);
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         FUN_8010f0f4(o);
@@ -188,7 +188,7 @@ void playerStepJump(TObj *o)
         FUN_8001fec0(o);
         if (X(o)->c9 != 0) FUN_800f28a0(o);
         else playerUpdateFall(o);
-        FUN_8010f400(o);
+        playerUpdateSpeedFromPad(o);
         DAT_8009c330->b8 = 1;
         o->b9e = 0;
         o->wb0 = 0;
@@ -315,7 +315,7 @@ void playerStepJump(TObj *o)
         if (o->velY > 0) o->b9c = 2;
         break;
     }
-    if (*(unsigned char *)&o->wac < 2 && (DAT_8009f0ec = FUN_8004bbc0(o, 0)) != 0) {
+    if (*(unsigned char *)&o->wac < 2 && (DAT_8009f0ec = playerProbeGrab(o, 0)) != 0) {
         DAT_8009c330->b8 = 0;
         DAT_8009c330->w20 = 0;
         *(unsigned char *)&o->wac = 0;
@@ -324,5 +324,5 @@ void playerStepJump(TObj *o)
         o->wb2 = 0;
         playerEnterGrabStep(o, DAT_8009f0ec == 1);
     }
-    FUN_800eef0c();
+    spawnPlayerFootstepEffect();
 }

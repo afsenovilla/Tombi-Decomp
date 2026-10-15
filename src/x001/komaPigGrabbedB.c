@@ -23,7 +23,7 @@ extern TObj *FUN_80018448(void);
 extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
 extern short TileCollideAt(TObj *o, short x, short y);
-extern void FUN_800eae0c(short, int, int, int);
+extern void spawnGroundDebris(short, int, int, int);
 extern void applyFrameVelocityY(TObj *);
 
 static __inline__ int land2(TObj *o)
@@ -119,7 +119,7 @@ void komaPigGrabbedB(TObj *o)
             if (o->visible) {
                 if (o->animFrame) s->wb8 = -0x10;
                 else s->wb8 = 0x10;
-                FUN_800eae0c(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
+                spawnGroundDebris(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
             }
             o->state = 3;
             o->velH = 0x200;
@@ -131,7 +131,7 @@ void komaPigGrabbedB(TObj *o)
             if (o->visible) {
                 if (o->animFrame) s->wb8 = -0x10;
                 else s->wb8 = 0x10;
-                FUN_800eae0c(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
+                spawnGroundDebris(o->a.p.whole + s->wb8, o->y.p.whole, o->b.p.whole, 1);
             }
             o->timer = 0x1e;
         }

@@ -26,7 +26,7 @@ extern void FUN_8001e560(int, int);
 extern void func_8011FC88(TObj *);
 extern int komaPigCheckLanded(TObj *);
 extern int komaPigCheckWall(TObj *);
-extern unsigned char FUN_8011ffdc(TObj *);
+extern unsigned char enemyPickActionByPlayerDistance(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
 
 void komaPigIdle(TObj *o)
@@ -73,7 +73,7 @@ void komaPigIdle(TObj *o)
             o->substep = 8;
             break;
         }
-        r = FUN_8011ffdc(o);
+        r = enemyPickActionByPlayerDistance(o);
         if (r != 0xff) {
             o->state = r;
             o->substep = 0;
@@ -104,7 +104,7 @@ void komaPigIdle(TObj *o)
         }
         if (k == 0) break;
         if (x->b0 == 0) {
-            r = FUN_8011ffdc(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r != 0xff) {
                 o->state = r;
                 o->substep = 0;
@@ -129,7 +129,7 @@ void komaPigIdle(TObj *o)
             k = AnimAdvanceWithBox(o);
         }
         if (k == 0) break;
-        r = FUN_8011ffdc(o);
+        r = enemyPickActionByPlayerDistance(o);
         if (r != 0xff) {
             o->state = r;
             o->substep = 0;
@@ -151,7 +151,7 @@ void komaPigIdle(TObj *o)
             FUN_8001f8e4(o);
             o->state = 0;
             o->substep = 0;
-            r = FUN_8011ffdc(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r == 0xff) break;
             o->state = r;
         }
@@ -194,7 +194,7 @@ void komaPigIdle(TObj *o)
     case 11:
         if (--o->timer == -1) {
             o->substep = 12;
-            r = FUN_8011ffdc(o);
+            r = enemyPickActionByPlayerDistance(o);
             if (r == 0xff) break;
             o->state = r;
             o->substep = 0;

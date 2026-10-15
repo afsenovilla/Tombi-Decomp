@@ -10,7 +10,7 @@ extern void ObjAddVelY7E(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void TileCollideAt(TObj *o, int x, int y);
 extern int ObjCheckHeadCollision(TObj *o);
-extern short func_80041EBC(TObj *o, int x, int y);
+extern short probeFloorPlaneAt(TObj *o, int x, int y);
 extern short ObjTileCollide(TObj *o, int a, int b);
 extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
@@ -60,7 +60,7 @@ void playerBittenJumpType04(TObj *o)
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
-        if (o->b69 != 0 || func_80041EBC(o, o->h->p.whole, (short)(o->y.p.whole + 0x40)) != 0 ||
+        if (o->b69 != 0 || probeFloorPlaneAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x40)) != 0 ||
             (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             o->b9c = 0;
             o->velY = 0;
