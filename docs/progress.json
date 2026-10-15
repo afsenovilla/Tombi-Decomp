@@ -299,17 +299,17 @@
     "O0PTSUB0": {
       "game": 8544,
       "n": 27,
-      "matched": 7392,
-      "n_matched": 25,
+      "matched": 7908,
+      "n_matched": 26,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 1152,
-      "n_new": 2,
+      "new": 636,
+      "n_new": 1,
       "uniq": 8544,
-      "uniq_matched": 7392,
+      "uniq_matched": 7908,
       "n_uniq": 27,
-      "n_uniq_matched": 25
+      "n_uniq_matched": 26
     },
     "D0SPSUB": {
       "game": 37156,
@@ -329,17 +329,17 @@
     "D0SPSUB2": {
       "game": 20004,
       "n": 31,
-      "matched": 10704,
-      "n_matched": 25,
+      "matched": 11432,
+      "n_matched": 26,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 9300,
-      "n_new": 6,
+      "new": 8572,
+      "n_new": 5,
       "uniq": 19784,
-      "uniq_matched": 10484,
+      "uniq_matched": 11212,
       "n_uniq": 29,
-      "n_uniq_matched": 23
+      "n_uniq_matched": 24
     },
     "D0SPSUB3": {
       "game": 25324,
@@ -374,47 +374,47 @@
     "I0NFO": {
       "game": 26248,
       "n": 53,
-      "matched": 9540,
-      "n_matched": 33,
+      "matched": 17288,
+      "n_matched": 43,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 16708,
-      "n_new": 20,
+      "new": 8960,
+      "n_new": 10,
       "uniq": 25828,
-      "uniq_matched": 9120,
+      "uniq_matched": 16868,
       "n_uniq": 49,
-      "n_uniq_matched": 29
+      "n_uniq_matched": 39
     },
     "I0NFO2": {
       "game": 90280,
       "n": 196,
-      "matched": 44720,
-      "n_matched": 150,
-      "piece": 28,
+      "matched": 54752,
+      "n_matched": 166,
+      "piece": 0,
       "x000": 0,
-      "dup": 5948,
-      "new": 39584,
-      "n_new": 40,
+      "dup": 4932,
+      "new": 30596,
+      "n_new": 27,
       "uniq": 75460,
-      "uniq_matched": 35876,
+      "uniq_matched": 44864,
       "n_uniq": 154,
-      "n_uniq_matched": 114
+      "n_uniq_matched": 127
     },
     "I0NFO3": {
       "game": 26692,
       "n": 55,
-      "matched": 10908,
-      "n_matched": 32,
-      "piece": 20,
+      "matched": 17380,
+      "n_matched": 44,
+      "piece": 0,
       "x000": 0,
-      "dup": 4748,
-      "new": 11016,
-      "n_new": 17,
+      "dup": 3148,
+      "new": 6164,
+      "n_new": 9,
       "uniq": 18556,
-      "uniq_matched": 7540,
+      "uniq_matched": 12392,
       "n_uniq": 39,
-      "n_uniq_matched": 22
+      "n_uniq_matched": 30
     }
   }
 }

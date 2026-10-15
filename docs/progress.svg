@@ -16,12 +16,12 @@
 <text x="796" y="185" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">100.0 %</text>
 <text x="28" y="220" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">SYSTEM/*.BIN: matching C</text>
 <rect x="330" y="206" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="206" width="211.8" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">47.1 %</text>
+<rect x="330" y="206" width="265.0" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="221" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">58.9 %</text>
 <text x="28" y="256" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#1e293b">Whole game: matching C</text>
 <rect x="330" y="242" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="242" width="419.9" height="18" rx="9" fill="#16a34a"/>
-<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">93.31 %</text>
+<rect x="330" y="242" width="426.6" height="18" rx="9" fill="#16a34a"/>
+<text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">94.80 %</text>
 <text x="28" y="292" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="278" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="278" width="412.9" height="18" rx="9" fill="#22c55e"/>
