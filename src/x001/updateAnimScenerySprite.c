@@ -9,7 +9,7 @@ extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);
 
-void func_80118AC0(TObj *o)
+void updateAnimScenerySprite(TObj *o)
 {
     unsigned char h;
 

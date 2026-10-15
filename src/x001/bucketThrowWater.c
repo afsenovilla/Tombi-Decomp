@@ -45,7 +45,7 @@ static __inline__ void start(TObj *o)
     o->state++;
 }
 
-void func_8011F6C4(TObj *o)
+void bucketThrowWater(TObj *o)
 {
     TObj *n;
     FV v;

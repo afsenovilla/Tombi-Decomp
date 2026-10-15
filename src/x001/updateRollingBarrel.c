@@ -20,7 +20,7 @@ extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern short FUN_80040278(TObj *, short, short);
 
-void func_80131CA4(TObj *o)
+void updateRollingBarrel(TObj *o)
 {
     SB *sb = (SB *)&o->wb4;
     TObj *p;

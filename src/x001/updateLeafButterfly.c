@@ -14,7 +14,7 @@ void freeObjectLayer2(TObj *o);
 void initLeafButterfly(TObj *o);
 void leafButterflyFlutter(TObj *o);
 void leafButterflyEventStart(TObj *o);
-void func_80137AFC(TObj *o);
+void leafButterflyReleased(TObj *o);
 void func_80137D8C(TObj *o);
 
 void updateLeafButterfly(TObj *o)
@@ -56,7 +56,7 @@ void updateLeafButterfly(TObj *o)
             }
             break;
         case 3:
-            func_80137AFC(o);
+            leafButterflyReleased(o);
             break;
         case 4:
             func_80137D8C(o);

@@ -17,7 +17,7 @@ extern void FUN_800171b8(int, char *);
 extern void setEventComplete(int, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011D73C(TObj *o)
+void updateLookAndSeeViewpoint(TObj *o)
 {
     switch (o->b04) {
     case 0:

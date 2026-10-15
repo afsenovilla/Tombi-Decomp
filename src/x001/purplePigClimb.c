@@ -73,7 +73,7 @@ static __inline__ int land(TObj *o)
     return 0;
 }
 
-void func_80128A2C(TObj *o)
+void purplePigClimb(TObj *o)
 {
     S *p = (S *)&o->wb4;
     int dy, dx;

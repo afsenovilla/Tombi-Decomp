@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern void *D_8013DE2C, *D_8013DDC8, *D_8013DE0C, *D_8013DDB0;
-extern void func_80135B48(TObj *);
+extern void forestDwarfCountCatch(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -20,7 +20,7 @@ void forestDwarfCaught(TObj *o)
             ((TObj *)o->d94)->b04 = 3;
             break;
         }
-        func_80135B48(o);
+        forestDwarfCountCatch(o);
         o->active = 4;
         if (GAME.selectedArea == 1 && GAME.selectedSection < 2) o->anim = D_8013DE2C;
         else o->anim = D_8013DDC8;

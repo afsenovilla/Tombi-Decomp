@@ -20,8 +20,8 @@ extern void spawnItemNotification(int, int);
 extern short FUN_80040278(TObj *, short, short);
 extern void purplePigIdle(TObj *);
 extern void purplePigWalk(TObj *);
-extern void func_80128A2C(TObj *);
-extern void func_80129588(TObj *);
+extern void purplePigClimb(TObj *);
+extern void purplePigJump(TObj *);
 extern void func_80129B2C(TObj *);
 extern void func_80129DAC(TObj *);
 extern void func_8012A290(TObj *);
@@ -124,8 +124,8 @@ void updatePurplePig(BX *b)
             switch (o->step) {
             case 0: purplePigIdle(o); break;
             case 1: purplePigWalk(o); break;
-            case 2: func_80128A2C(o); break;
-            case 3: func_80129588(o); break;
+            case 2: purplePigClimb(o); break;
+            case 3: purplePigJump(o); break;
             case 4: func_80129B2C(o); break;
             case 5: func_80129DAC(o); break;
             case 6: func_8012A290(o); break;

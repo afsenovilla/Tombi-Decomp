@@ -42,7 +42,7 @@ static __inline__ unsigned char below(TObj *o)
     return o->y.p.whole <= o->wb6;
 }
 
-void func_80129588(TObj *o)
+void purplePigJump(TObj *o)
 {
     S *p = (S *)&o->wb4;
     int t;

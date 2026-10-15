@@ -13,10 +13,10 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
-extern void func_8011F2B0(TObj *);
-extern void func_8011F6C4(TObj *);
+extern void bucketFillWithWater(TObj *);
+extern void bucketThrowWater(TObj *);
 
-void func_8011FB10(TObj *o)
+void updateBucket(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -41,10 +41,10 @@ void func_8011FB10(TObj *o)
             case 0:
                 break;
             case 1:
-                func_8011F2B0(o);
+                bucketFillWithWater(o);
                 break;
             case 2:
-                func_8011F6C4(o);
+                bucketThrowWater(o);
                 break;
             }
         }

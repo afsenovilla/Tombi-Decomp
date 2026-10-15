@@ -12,7 +12,7 @@ extern TObj *allocObjectLayer2(void);
 extern void FUN_8003e300(int, int, Fix16 *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801315DC(TObj *o)
+void updateBurningFire(TObj *o)
 {
     Fix16 v[3];
     TObj *n;

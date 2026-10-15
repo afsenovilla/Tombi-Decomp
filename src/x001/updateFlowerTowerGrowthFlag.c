@@ -6,7 +6,7 @@
 extern void cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011FFBC(TObj *o)
+void updateFlowerTowerGrowthFlag(TObj *o)
 {
     switch (o->b04) {
     case 0:

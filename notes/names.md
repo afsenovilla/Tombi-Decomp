@@ -449,3 +449,25 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   (MAIN0 layer 2 table 0x80077D9C): 80120638 spawnTrickVillagePigShot (type 0x43 -> 801206c0 updateTrickVillagePigShot), 80121170
   spawnBaccusVillagePigShot (0x46 -> 801215b0 updateBaccusVillagePigShot), 8012176c spawnFlowerForestPigShot (0x47, aimed at the player ->
   80122418 updateFlowerForestPigShot, also placed twice in section 4), 801227c0 spawnHauntedMansionPigShot (0x48 -> 80122de8 updateHauntedMansionPigShot)
+- x001 Dwarf Forest objects (item names: printInfoMessage table D_8007DE38 + MFNT; event titles: D_80080410 -> CFNT999):
+  `80119bf4 updateFlowerTearsThrow` (layer 3 type 0x54: when item 0x0D "Flower Tears" is used, a tear flies from the player to x 0xB5E, sets
+  GCD.bd081 = 1 and removes the item; `80119ad0 spawnFlowerTearsSparkle` its trail, uncertain), `80119874 updateFlowerTowerSprout` (type 0x53:
+  waits for GCD.bd081 == 2 (brokenFountainScene), plays the sprout growth, fade + thread LAB_8001d6a4 (the tower scene), bd081 = 4, starts event
+  0xA4 "The Flower Tower"; `80119750 spawnFlowerTowerSproutSparkle` (uncertain) the type 0x31 sparkles around it), `8011c158 updateFlowerTowerBlocker`
+  (layer 4 type 0x0B: box from D_8013C484, freed when bd081 >= 4 or GCD.bce48; uncertain role), `8011ffbc updateFlowerTowerGrowthFlag` (type 0x2D:
+  sets bd081 4 -> 5; uncertain);
+  `8011d73c updateLookAndSeeViewpoint` (layer 4 type 0x12: pressing up on it fades out and runs the scene thread D_8001D6A4 (b1cd 5 / 8 by
+  GCD.bce40), then completes event 0x16 "Look and See?!"), `80123f24 updateLookAndSeeEventStart` (layer 5 type 0x0D: on contact starts event 0x16);
+  `8011fb10 updateBucket` (the bucket object of MAIN0 dispatchEffectByVariant; `8011faa8 stepBucket` unreferenced copy of its step switch):
+  `8011f2b0 bucketFillWithWater` (held under the drip, GCD.bcead counts the fills, printInfoMessage 0xD/0xE, then removeItemFromInventory(0x0A
+  "Bucket") + addItemToInventory(0x12 "Bucket of Water")), `8011f6c4 bucketThrowWater` (flies to x 0x79B, spawns layer 2 type 0x22 (updateCeilingDrip
+  subtype 1) and sets GCD.bce55 = 2); `801315dc updateBurningFire` (layer 2 type 0x0F: animates until GCD.bce55 == 2 (the thrown water), then
+  becomes the charred subtype 1); `80131ca4 updateRollingBarrel` (layer 2 type 0x11: pushed by hits (velX from the hit angle table D_8013C984),
+  rolls down; starts / completes event 0xB4 "Where The Barrel Rolls...", GCD.bceb0 = progress);
+  `80118ac0 updateAnimScenerySprite` / `80118c1c updateScenerySprite` (layer 3 types 0x18 / 0x19, 35 / 170 placements: decoration sprites, scale
+  d64 and rotation d8c from the two nibbles of box0, the first animated, the second static with an optional palette D_8013C404/428);
+  purple pig steps (uncertain): `80128a2c purplePigClimb` (step 2: turns d8c +-0x40 and moves 0x300/0x80 per tick along a wall, sfx 0x5E),
+  `80129588 purplePigJump` (step 3: velV -0x400 / -0x500 hops); forest dwarf: `80135b48 forestDwarfCountCatch` (sets the GV2.sc0 bit of b0c,
+  GCD.bcdb5 += 1 with printInfoMessage(count - 1, 2), GCD.bcec1..7 flags), `80135a14 forestDwarfAssignSlot` (uncertain: picks a free slot of
+  GCD.bcec1[0..6]); `80137afc leafButterflyReleased` (b04 2 step 3 of updateLeafButterfly: after item 0x10 is used, flutters inside the box of
+  the parent d90; uncertain)

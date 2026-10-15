@@ -28,7 +28,7 @@ extern void playSFX(int);
 extern void removeItemFromInventory(int, int);
 extern void addItemToInventory(int, int, int);
 
-void func_8011F2B0(TObj *o)
+void bucketFillWithWater(TObj *o)
 {
     E4 *e;
     short c;

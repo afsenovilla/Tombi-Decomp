@@ -9,7 +9,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void FUN_80026e0c(int, int);
 
-void func_80137AFC(TObj *o)
+void leafButterflyReleased(TObj *o)
 {
     TObj *p = (TObj *)o->d90;
     unsigned short t;

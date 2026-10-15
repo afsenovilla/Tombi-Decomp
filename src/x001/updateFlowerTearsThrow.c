@@ -13,9 +13,9 @@ extern short D_8007A5F0[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 extern void FUN_80026e0c(int, int);
-extern void func_80119AD0(TObj *);
+extern void spawnFlowerTearsSparkle(TObj *);
 
-void func_80119BF4(TObj *o)
+void updateFlowerTearsThrow(TObj *o)
 {
 
     switch (o->b04) {
@@ -65,7 +65,7 @@ void func_80119BF4(TObj *o)
                 o->d8c += 4;
             else
                 o->d8c -= 4;
-            func_80119AD0(o);
+            spawnFlowerTearsSparkle(o);
             if (--o->timer == -1)
                 o->step++;
             break;

@@ -9,7 +9,7 @@ extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void freeObjectLayer5(TObj *);
 
-void func_80123F24(TObj *o)
+void updateLookAndSeeEventStart(TObj *o)
 {
     switch (o->b04) {
     case 0:

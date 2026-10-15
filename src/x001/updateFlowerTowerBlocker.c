@@ -7,7 +7,7 @@ extern unsigned short D_8013C484[], D_8013C486[], D_8013C488[], D_8013C48A[];
 extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C158(TObj *o)
+void updateFlowerTowerBlocker(TObj *o)
 {
 
     switch (o->b04) {

@@ -5,7 +5,7 @@
 
 extern int Rand(void);
 
-void func_80135A14(TObj *o)
+void forestDwarfAssignSlot(TObj *o)
 {
     short i;
     char pad[16];

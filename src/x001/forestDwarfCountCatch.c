@@ -5,9 +5,9 @@
 #include "TOBJ.H"
 
 extern void *printInfoMessage(int, int);
-extern void func_80135A14(TObj *);
+extern void forestDwarfAssignSlot(TObj *);
 
-void func_80135B48(TObj *o)
+void forestDwarfCountCatch(TObj *o)
 {
     if (o->b0c != 0) {
         unsigned short *f = &GV2.sc0;
@@ -42,5 +42,5 @@ void func_80135B48(TObj *o)
         GCD.bcec7 = 1;
         break;
     }
-    func_80135A14(o);
+    forestDwarfAssignSlot(o);
 }

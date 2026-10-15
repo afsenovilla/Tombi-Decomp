@@ -10,14 +10,14 @@ extern char LAB_8001d6a4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int FUN_800202b4(TObj *);
-extern int func_80119750(TObj *);
+extern int spawnFlowerTowerSproutSparkle(TObj *);
 extern void MusicStopOrFadeIn(int);
 extern void ThreadCreate(int, void *);
 extern void startAreaBgm(void);
 extern void setEventStarted(int, int, int);
 extern void ObjFree(TObj *);
 
-void func_80119874(TObj *o)
+void updateFlowerTowerSprout(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -49,7 +49,7 @@ void func_80119874(TObj *o)
             FUN_800202b4(o);
             break;
         case 2:
-            if (func_80119750(o)) {
+            if (spawnFlowerTowerSproutSparkle(o)) {
                 GCD.bd081 = 3;
                 o->step++;
             }

@@ -8,7 +8,7 @@ extern unsigned short D_8009C960[], D_8009C962[];
 extern char D_80077CDC[];
 extern void *D_8013DE0C, *D_8013DDB0, *D_8013DE2C, *D_8013DDC8;
 extern void AnimLoadDuration(TObj *);
-extern void func_80135B48(TObj *);
+extern void forestDwarfCountCatch(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 
@@ -25,7 +25,7 @@ void forestDwarfFlee(TObj *o)
         case 3:
             ((TObj *)o->d94)->b04 = 3;
         }
-        func_80135B48(o);
+        forestDwarfCountCatch(o);
         o->active = 4;
         o->movetab = D_80077CDC;
         if (D_8009C960[0] == 1 && D_8009C962[0] < 2) o->anim = D_8013DE0C;

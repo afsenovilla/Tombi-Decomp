@@ -1,5 +1,5 @@
-// FUNC 80119ad0 292 X001
-// MATCHING 80119ad0 292
+// FUNC 80119750 292 X001
+// MATCHING 80119750 292
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -7,7 +7,7 @@ extern short D_8007A5F0[], D_8007A3F0[];
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 
-int func_80119AD0(TObj *o)
+int spawnFlowerTowerSproutSparkle(TObj *o)
 {
     TObj *n;
     int r, s, i;
@@ -28,7 +28,7 @@ int func_80119AD0(TObj *o)
             n->h->raw += (D_8007A5F0[i] * s) >> 4;
             n->y.raw += (D_8007A3F0[i] * s) >> 4;
         }
-        return ++o->timer > 0x77;
+        return ++o->timer > 0x59;
     }
     return 0;
 }

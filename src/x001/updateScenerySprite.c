@@ -9,7 +9,7 @@ extern short FUN_8005e420(int, int);
 extern int cullObjectToDrawList(TObj *, int);
 extern void ObjFree(TObj *);
 
-void func_80118C1C(TObj *o)
+void updateScenerySprite(TObj *o)
 {
     unsigned char v;
 
