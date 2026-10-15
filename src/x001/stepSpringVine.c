@@ -6,7 +6,7 @@ extern void (*D_8013C44C[])(TObj *);
 extern void (*D_8013C460[])(TObj *);
 extern void ObjListPush_1F800224(TObj *o);
 
-void func_8011A528(TObj *o)
+void stepSpringVine(TObj *o)
 {
     TObj *p;
 

@@ -5,11 +5,11 @@
 #include "TOBJ.H"
 
 extern void *D_80138EB0[];
-extern void func_80118DF8(TObj *);
+extern void windStreakRespawn(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 
-void func_80118F3C(TObj *o)
+void updateWindStreak(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -28,7 +28,7 @@ void func_80118F3C(TObj *o)
         switch (o->step) {
         case 0:
             o->step++;
-            func_80118DF8(o);
+            windStreakRespawn(o);
             break;
         case 1:
             switch (o->subtype) {

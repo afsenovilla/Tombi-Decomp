@@ -9,7 +9,7 @@ extern char D_8013C474[];
 extern void playSFX(int);
 extern int func_8011A72C(TObj *o);
 extern void func_801191E4(int x, int y, int z);
-extern TObj *func_8013675C(short k, short d, short n, short x, short y, short z);
+extern TObj *spawnForestDwarfAt(short k, short d, short n, short x, short y, short z);
 extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
 
 #define BURST() \
@@ -17,7 +17,7 @@ extern TObj *spawnLayer2ObjectUnlessFlagged(void *);
     o->b6b = 1; \
     if (((unsigned short*)&GAME.selectedSection)[0] == 0) playSFX(0x44); else playSFX(0x49);
 
-void func_8011A85C(TObj *o)
+void springVineGrabbed(TObj *o)
 {
 
     switch (o->state) {
@@ -110,7 +110,7 @@ void func_8011A85C(TObj *o)
             case 3:
             case 4:
                 if (o->w98 == 0) {
-                    o->d90 = (int)func_8013675C(0, 0, o->b0c, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+                    o->d90 = (int)spawnForestDwarfAt(0, 0, o->b0c, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                     o->w98 = 1;
                     if (o->d90) {
                         BURST();

@@ -7,7 +7,7 @@ typedef struct { char p[0xb4]; SV v[4]; } TX;
 
 extern void *D_8013E5BC;
 
-void func_8011A5DC(TObj *o)
+void springVineIdle(TObj *o)
 {
     TObj *p;
     short dx, dy;

@@ -18,7 +18,7 @@ extern void applyItemEffect(char *, FV *, int, int, int);
 extern void applyAnimVelocityX(TObj *, int);
 extern void freeObjectLayer2(TObj *);
 
-void func_8012F448(TObj *o)
+void updateChainSegmentEnemy(TObj *o)
 {
     TObj *p;
     FV v;

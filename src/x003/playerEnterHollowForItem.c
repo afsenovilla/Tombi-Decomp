@@ -102,7 +102,7 @@ extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
 extern void FUN_8001e4f0(int);
 
-void func_8011DD48(TP *o)
+void playerEnterHollowForItem(TP *o)
 {
     unsigned char *p;
 

@@ -18,14 +18,14 @@ extern void stopBgm(int);
 extern void ThreadCreate(int, void *);
 extern void removeItemFromInventory(int, int);
 extern void func_8012A6D8(TObj *o);
-extern void func_80129CC0(TObj *o);
+extern void masterOfTheSkiesScene(TObj *o);
 
 static __inline__ int chk(void)
 {
     return GVARS.b40 == 1 && D_8009C941 == 0x42;
 }
 
-void func_8012A890(TObj *o)
+void updateMasterOfTheSkiesEvent(TObj *o)
 {
     TObj *p;
 
@@ -46,7 +46,7 @@ void func_8012A890(TObj *o)
             }
             break;
         case 1:
-            func_80129CC0(o);
+            masterOfTheSkiesScene(o);
             break;
         }
         break;

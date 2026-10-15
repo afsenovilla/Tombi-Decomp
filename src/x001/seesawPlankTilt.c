@@ -2,7 +2,7 @@
 // MATCHING 8011db5c 568
 #include "TOBJ.H"
 
-void func_8011DB5C(TObj *o)
+void seesawPlankTilt(TObj *o)
 {
     o->animFrame = 2;
     if (o->b69 != 0) {

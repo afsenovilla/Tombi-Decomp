@@ -10,7 +10,7 @@ extern short MulCosDup(int, int);
 extern short MulNegSin(int, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C354(TObj *o)
+void updateBendingBranch(TObj *o)
 {
     switch (o->b04) {
     case 0:

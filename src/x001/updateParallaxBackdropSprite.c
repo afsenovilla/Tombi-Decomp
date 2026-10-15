@@ -7,7 +7,7 @@ extern void *D_8013E6B0[];
 void func_80018DA4(TObj *o);
 void freeObjectLayer7(TObj *o);
 
-void func_801210E8(TObj *o)
+void updateParallaxBackdropSprite(TObj *o)
 {
     switch (o->b04) {
     case 0: {

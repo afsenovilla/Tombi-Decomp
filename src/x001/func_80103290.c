@@ -9,7 +9,7 @@ void ObjMotionStep(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void FUN_8001f96c(int, int, int, int);
 short ObjTileCollide(TObj *, int, int);
-int func_8013675C(short, short, short, short, short, short);
+int spawnForestDwarfAt(short, short, short, short, short, short);
 #define BLOCK()                                                                     \
     {                                                                               \
         o->timer = 0;                                                               \
@@ -70,7 +70,7 @@ void func_80103290(TObj *o)
             e = D_8009D2E8;
             if (e->type == 0xb) {
                 if (e->b0c)
-                    *(int *)((char *)o + 0x90) = func_8013675C(6, 0, e->b0c, e->a.p.whole, e->y.p.whole, e->b.p.whole);
+                    *(int *)((char *)o + 0x90) = spawnForestDwarfAt(6, 0, e->b0c, e->a.p.whole, e->y.p.whole, e->b.p.whole);
                 D_8009D2E8->state = 1;
             }
             o->step = 0xf;

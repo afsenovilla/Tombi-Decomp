@@ -9,7 +9,7 @@ extern void *D_8013E594[];
 extern void func_80120E24(TObj *);
 extern void freeObjectLayer7(TObj *);
 
-void func_80120F4C(TObj *o)
+void updateBackdropSprite(TObj *o)
 {
     switch (o->b04) {
     case 0:

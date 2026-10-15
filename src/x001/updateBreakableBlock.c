@@ -14,7 +14,7 @@ void applyItemEffect(char *, V3 *, int, int, int);
 void setAreaFlagBit(int a);
 void ObjFreeDup(TObj *o);
 
-void func_8011FD7C(TObj *o)
+void updateBreakableBlock(TObj *o)
 {
     V3 v;
 

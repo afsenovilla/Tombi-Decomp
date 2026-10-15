@@ -36,7 +36,7 @@ extern void func_8011D28C(TObj *);
 extern void playSFX(int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C574(TObj *o)
+void updateRopeChains(TObj *o)
 {
     Ctx *s1;
     TObj *c;

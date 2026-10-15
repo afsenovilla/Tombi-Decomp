@@ -2,7 +2,7 @@
 // MATCHING 8012526c 324
 #include "TOBJ.H"
 
-void func_8012526C(TObj *o)
+void swayingHopPlantSway(TObj *o)
 {
     switch (o->state) {
     case 0:

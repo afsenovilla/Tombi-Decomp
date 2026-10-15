@@ -6,7 +6,7 @@ extern void *D_80138E94;
 extern void *D_80138E98;
 extern void *D_80138E9C;
 
-void func_801253B0(TObj *o)
+void swayingHopPlantHop(TObj *o)
 {
     switch (o->state) {
     case 0:

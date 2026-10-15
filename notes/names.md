@@ -485,3 +485,31 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   player, the camera follows the pig falling in with bounces and dust, then starts event 0x1F "Where did I Come From?")
 - `x001 80126a70 burningFireContact` - MAIN0 FUN_80047484 contact case type 0xF (updateBurningFire in area 1): on touching it the first time starts
   event 0xB1 "Something's Cookin'?" (flag GCD.bcecc) and knocks the object into b04 2
+- x001 platforms and scenery (identities from the code; the rendered strips are not readable, so object kinds marked uncertain are guesses):
+  `8011dd94 updateSeesawPlank` (layer 4 type 0x14, 7 placements: a 0xEC-0xEE wide, 8 high solid box (b0a 0x11) whose angle d8c = d38 >> 8 is driven by
+  `8011db5c seesawPlankTilt` from the rider's velX (b69 contact), clamped +-0x38E00 (subtype 0, pivot in the middle) or 0..0x80000 (subtype 1, hinged);
+  b0c 1 planks take part in the purple pig scene GCD.bceae), `8011d4d0 updateHangingVine` (type 0x10: allocates 18 more layer 4 objects and links them
+  as a chain of segments 0x10 apart, d90/d94 parent/child), `8011c354 updateBendingBranch` (type 0x0E, uncertain: bends down (d8c -= wb4 >> 8, sfx 0x4B)
+  while stood on), `8011f1a8 updateClimbPole` (type 0x19, uncertain: 0x10 x 0x72 box), `8011fd7c updateBreakableBlock` (type 0x21, uncertain: on hit
+  spawns debris and an applyItemEffect burst, sets GCD.bceae = 4, frees itself and its partner d94 and sets both area flag bits),
+  `8011c574 updateRopeChains` (type 0x0F, uncertain: builds six chains of layer 4 segments from the table D_8013C498 copied to D_800A4470),
+  `80120f4c updateBackdropSprite` / `801210e8 updateParallaxBackdropSprite` (layer 7 types 4 / 7: screen-space backdrop sprites positioned from the
+  camera SPAD.i174 / s186), `8012f448 updateChainSegmentEnemy` (layer 2 type 0x0B, 22 placements, uncertain kind: each part follows the root of its d90
+  chain at a fixed offset rotated by the root's d8c; biting (b04 2, subtype 0 shows spawnItemNotification(0, 6)) frees the chain, then the part flies off
+  like a defeated enemy (movetab D_80077D0C));
+  `8011a1c0 updateSpringVine` (layer 4 type 5, 29 placements, uncertain kind: subtype 0 = the handle, subtype 2 = the rope quad drawn to the parent d90;
+  step functions D_8013C44C[step] for itself and D_8013C460[step] for the rope, run by `8011a528 stepSpringVine`): `8011a5dc springVineIdle` (step 0),
+  `8011a85c springVineGrabbed` (step 1 when the player hangs on it (b6a): stretches down and springs back with sfx 0x42/0x43 (section 0) or 0x47/0x48;
+  b0c 1 releases the object D_8013C474 (spawnLayer2ObjectUnlessFlagged), b0c 3/4 a forest dwarf); `8013675c spawnForestDwarfAt` (allocObjectLayer2
+  type 0x16 = updateForestDwarf at x/y/z, b0c = dwarf number, skipped when its GV2.sc0 bit is set)
+- x003 (the windy mountain area: GV2.bc3 & 2 = the wind has died, see updateWindDiesEvent): `80118f3c updateWindStreak` (layer 3 type 0x29, 92 placements,
+  uncertain: semi-transparent sprites that cross the screen to the right and respawn at the left edge (`80118df8 windStreakRespawn`, random height and
+  depth); freed once the wind has died), `80118cf4 updateWindSwayDecor` (type 0x28, 74 placements, uncertain: animated decoration that switches to its
+  calm animation (subtype + 2) after the wind dies), `8012552c updateSwayingHopPlant` (layer 2 type 0x24, 82 placements, uncertain kind:
+  `8012526c swayingHopPlantSway` rocks d8c while idle; when the player comes within x +-0x2D and 0xB0 below, `801253b0 swayingHopPlantHop` jumps up
+  (velV 0x200, -0x20 per tick) and falls back to its spawn height);
+  `8012a890 updateMasterOfTheSkiesEvent` (run by MAIN0 func_800498F4 in area 3 section 3: when GCD.bd004 is set (or the check passes) removes 5 x item
+  0x42 "Bunk Flower" and runs `80129cc0 masterOfTheSkiesScene`, which starts / completes event 0x23 "The Master of the Skies"; b04 2 = the movie part:
+  cdSeekStream(7), fade, thread); `8011dd48 playerEnterHollowForItem` (uncertain: a playerEventModeDispatch mode: the player walks into the depth
+  (z += 1 per tick, invisible), receives the item of the spot w7a (0x25 "Red Evil Pig Bag" + event 0x1D "A Stormy Pig Bag" completed / 0x1E "Phoenix
+  Mountain" started, 0x07 "Charity Wings", 0x1F "Large Lunch Box", 0x67 "Molasses", 0x37 "Cheese", once each by GCD flags) and walks back out)

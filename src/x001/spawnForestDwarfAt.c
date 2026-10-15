@@ -9,7 +9,7 @@ extern void *D_8013DE08, *D_8013DD50;
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 
-TObj *func_8013675C(short k, short d, short n, short x, short y, short z)
+TObj *spawnForestDwarfAt(short k, short d, short n, short x, short y, short z)
 {
     TObj *o;
 

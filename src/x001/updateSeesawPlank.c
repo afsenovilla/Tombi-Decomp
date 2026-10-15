@@ -6,11 +6,11 @@
 typedef struct { Fix16 x, y, z; } V3;
 extern char D_8013C564[];
 extern void cullObjectToDrawList(TObj *, int);
-extern void func_8011DB5C(TObj *);
+extern void seesawPlankTilt(TObj *);
 extern void applyItemEffect(char *, V3 *, int, int, int);
 extern void FUN_80018838(TObj *);
 
-void func_8011DD94(TObj *o)
+void updateSeesawPlank(TObj *o)
 {
     unsigned char b = o->b04;
     V3 v;
@@ -72,12 +72,12 @@ void func_8011DD94(TObj *o)
         cullObjectToDrawList(o, 0x78);
         if (o->b0c == 0) {
             if (GVARS.b42 == 0)
-                func_8011DB5C(o);
+                seesawPlankTilt(o);
             break;
         }
         switch (o->step) {
         case 0:
-            func_8011DB5C(o);
+            seesawPlankTilt(o);
             if (((unsigned char*)&GCD.bceae)[0] == 1) {
                 o->d8c = 0;
                 o->velH = 0;

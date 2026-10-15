@@ -21,7 +21,7 @@ extern void setEventComplete(int, int);
 #define P PLAYER
 #define ANIM(k) D_80135DC0[o->subtype].p[k]
 
-void func_80129CC0(TObj *o)
+void masterOfTheSkiesScene(TObj *o)
 {
     TObj *q;
     int v;

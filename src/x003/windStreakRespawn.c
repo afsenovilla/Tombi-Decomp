@@ -5,7 +5,7 @@
 
 extern int Rand(void);
 
-void func_80118DF8(TObj *o)
+void windStreakRespawn(TObj *o)
 {
     short *p = &(*(short*)&SPAD.s186);
 

@@ -7,12 +7,12 @@ typedef struct { short x, y, z, pad; } E8;
 extern unsigned char D_8013C47C[];
 extern void *D_8013E5AC, *D_8013E5BC;
 extern int cullObjectToDrawListMargin(TObj *, int);
-extern void func_8011A528(TObj *);
+extern void stepSpringVine(TObj *);
 extern void FUN_80018838(TObj *);
 
 #define E(i) (((E8 *)&o->wb4)[i])
 
-void func_8011A1C0(TObj *o)
+void updateSpringVine(TObj *o)
 {
     TObj *p;
     short dx, dy;
@@ -114,7 +114,7 @@ void func_8011A1C0(TObj *o)
         } else {
             cullObjectToDrawListMargin(o, 0x40);
         }
-        func_8011A528(o);
+        stepSpringVine(o);
     clear:
         o->b68 = 0;
         o->b69 = 0;

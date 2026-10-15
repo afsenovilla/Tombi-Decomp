@@ -9,7 +9,7 @@ extern void insertionSortU32(int, TObj **);
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011D4D0(TObj *o)
+void updateHangingVine(TObj *o)
 {
     TObj *list[20];
     TObj *p, *q;

@@ -19,7 +19,7 @@ extern void playerEventStepRiseFadeOut(TObj *);
 extern void playerEventStepDepthShift(TObj *);
 extern void playerEventStepJumpIn(TObj *);
 extern void playerEventStepWalkIntoDepth(TObj *);
-extern void func_8011DD48(TObj *);
+extern void playerEnterHollowForItem(TObj *);
 extern void playerEventStepRiseUp(TObj *);
 extern void FUN_800f1308(TObj *);
 extern void playerEventWalk(TObj *);
@@ -105,7 +105,7 @@ void playerEventModeDispatch(TObj *o)
         o->d8c = D_801152E8[o->wb0];
         break;
     case 11:
-        func_8011DD48(o);
+        playerEnterHollowForItem(o);
         break;
     case 12:
         playerEventStepRiseUp(o);

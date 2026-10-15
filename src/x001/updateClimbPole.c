@@ -8,7 +8,7 @@ extern void AnimLoadDuration(TObj *);
 extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011F1A8(TObj *o)
+void updateClimbPole(TObj *o)
 {
     switch (o->b04) {
     case 0:

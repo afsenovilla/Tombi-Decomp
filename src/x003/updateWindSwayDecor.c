@@ -10,7 +10,7 @@ extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjFree(TObj *);
 
-void func_80118CF4(TObj *o)
+void updateWindSwayDecor(TObj *o)
 {
     switch (o->b04) {
     case 0:

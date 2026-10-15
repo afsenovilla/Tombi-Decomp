@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 extern void *D_80138E94;
 extern int FUN_800202b4(TObj *);
-extern void func_8012526C(TObj *);
-extern void func_801253B0(TObj *);
+extern void swayingHopPlantSway(TObj *);
+extern void swayingHopPlantHop(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 static __inline__ int near(TObj *o)
@@ -15,7 +15,7 @@ static __inline__ int near(TObj *o)
     return (unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x10) < 0x21;
 }
 
-void func_8012552C(TObj *o)
+void updateSwayingHopPlant(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -45,11 +45,11 @@ void func_8012552C(TObj *o)
                     o->step = 1;
                     o->state = 0;
                 } else {
-                    func_8012526C(o);
+                    swayingHopPlantSway(o);
                 }
                 break;
             case 1:
-                func_801253B0(o);
+                swayingHopPlantHop(o);
                 break;
             }
         }
