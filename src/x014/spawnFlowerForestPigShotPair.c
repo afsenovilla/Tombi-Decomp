@@ -18,7 +18,7 @@ extern TObj *allocObjectLayer4(void);
         e->d90 = (int)o; \
     } }
 
-void func_8012194C(TObj *o, short n)
+void spawnFlowerForestPigShotPair(TObj *o, short n)
 {
     TObj *e;
 

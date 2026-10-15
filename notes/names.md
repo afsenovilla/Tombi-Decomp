@@ -1227,3 +1227,14 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   rotatingPlatformCrossArmStep` (arms tilt d84 0 <-> 0x800 when the hub stops)
 - x014 player steps: `8011b170 playerStepVortexLaunch` (playerNormalModeDispatch step 0x47: thrown up, pushed by GVARS.s44/s46 until landing;
   uncertain), `8011b47c playerStep48Area14` (playerStep48ByArea area 14 handler)
+- x014 collision callbacks (MAIN0 dispatchers): `8011d2dc evilPigBossWeaponHit` (collideWeaponsWithCat2Objects types 0x3B..0x42), `8011cba0
+  flowerForestPigShotWeaponHit` (type 0x47); layer 4 types 0x42 / 0x43 (updateRotatedChildPart / B): `8011d370 rotatedChildPartPlayerCollision`,
+  `8011c99c rotatedChildPartBPlayerCollision` (grabs the player), `8011d3f8 rotatedChildPartGrabProbe` (playerProbeGrab 0x42), `8011d4fc
+  rotatedChildPartEnemyCollision` (collideCat2WithCat4Objects 66/67); `8011d8f8 evilPigPointOnScreen` (unreferenced, uncertain)
+- x014 pig shot helpers (uncertain step names): baccus village `801211f0 baccusVillagePigShotFall` (subtype 0: falls from the top of the screen
+  spinning), `80120da0 baccusVillagePigShotCheckLanded` (floor probe, debris, spawns the pieces), `80120c54 spawnBaccusVillagePigShotPieces` (3 type
+  0x46 objects; inlined copy), `801213f4 baccusVillagePigShotPieceStep`; flower forest `8012194c spawnFlowerForestPigShotPair`, `80121d08
+  flowerForestPigShotScatter` / `8012185c spawnFlowerForestPigShotPieces` (6 type 0x47 pieces), `80121f90 flowerForestPigShotSlide`; haunted mansion
+  `8012284c hauntedMansionPigShotPickPoint` (random on-screen point of 16), `80122aac hauntedMansionPigShotAttack`; lava caves `80123d64
+  lavaCavesPigShotDrop`, `80123aac lavaCavesPigShotFragmentArc`, `80123730 spawnLavaCavesPigShotFragments`; deep jungle `80124ad0
+  deepJunglePigShotHop`, `8012491c deepJunglePigShotCheckWall`, `801249d0 deepJunglePigShotPickHop`, `80124f28 deepJunglePigShotSubtype2Step`

@@ -7,7 +7,7 @@ extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultD(TObj *, TObj *);
 extern void spawnPoolType32At(int, int, int, int);
 
-void func_8011CBA0(TObj *o, TObj *e)
+void flowerForestPigShotWeaponHit(TObj *o, TObj *e)
 {
     if (boxesOverlapSigned(o, e) >= 0) {
         if (resolveHitResultD(o, e)) {

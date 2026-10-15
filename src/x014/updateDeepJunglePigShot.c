@@ -9,8 +9,8 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_80124AD0(TObj *);
-extern void func_80124F28(TObj *);
+extern void deepJunglePigShotHop(TObj *);
+extern void deepJunglePigShotSubtype2Step(TObj *);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 {
@@ -92,13 +92,13 @@ void updateDeepJunglePigShot(TObj *o)
             sp2(o, 2);
             goto anim;
         case 1:
-            if (GVARS.b42 != 1) func_80124AD0(o);
+            if (GVARS.b42 != 1) deepJunglePigShotHop(o);
             goto anim;
         case 2:
             if (GVARS.b42 == 1) {
                 if (o->visible == 1) FUN_800202b4(o);
             } else {
-                func_80124F28(o);
+                deepJunglePigShotSubtype2Step(o);
                 if (o->visible == 1) goto anim;
             }
             break;

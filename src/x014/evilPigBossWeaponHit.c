@@ -6,7 +6,7 @@ extern short boxesOverlapFlipAware(TObj *, TObj *);
 extern void resolveHitResultA(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 
-void func_8011D2DC(TObj *o, TObj *p)
+void evilPigBossWeaponHit(TObj *o, TObj *p)
 {
     if (boxesOverlapFlipAware(o, p) == -1) return;
     resolveHitResultA(o, p);

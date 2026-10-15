@@ -8,8 +8,8 @@ static short D_80126718[8] = {
     0x100, -0x380, 0x180, -0x580, 0x200, -0x480, 0x80, -0x300,
 };
 extern short D_1F80027E;
-extern int func_8012491C(TObj *o);
-extern int func_801249D0(TObj *o);
+extern int deepJunglePigShotCheckWall(TObj *o);
+extern int deepJunglePigShotPickHop(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
 extern short probeWallAt(TObj *o, short x, short y, int k);
 
@@ -25,7 +25,7 @@ static __inline__ int land(TObj *o)
     return 0;
 }
 
-void func_80124AD0(TObj *o)
+void deepJunglePigShotHop(TObj *o)
 {
     short *e;
     short v;
@@ -44,7 +44,7 @@ void func_80124AD0(TObj *o)
         break;
     case 1:
         o->a.raw += o->velH << 8;
-        if (func_8012491C(o)) o->velH = 0;
+        if (deepJunglePigShotCheckWall(o)) o->velH = 0;
         o->velV += 0x20;
         o->y.raw += o->velV << 8;
         if (o->velV > 0) {
@@ -64,13 +64,13 @@ void func_80124AD0(TObj *o)
         }
     case 2:
         o->a.raw += o->velH << 8;
-        if (func_8012491C(o)) o->velH = 0;
+        if (deepJunglePigShotCheckWall(o)) o->velH = 0;
         o->velV += 0x20;
         if (o->velV > 0x500) o->velV = 0x500;
         o->wb2 = 0;
         o->y.raw += o->velV << 8;
         if (land(o)) {
-            if (o->wae == 1 || func_801249D0(o)) {
+            if (o->wae == 1 || deepJunglePigShotPickHop(o)) {
                 o->active = 2;
                 o->b04 = 2;
                 o->step = 0;
@@ -101,7 +101,7 @@ void func_80124AD0(TObj *o)
                 }
             }
             o->a.raw += o->velH << 8;
-            if (func_8012491C(o)) o->velH = 0;
+            if (deepJunglePigShotCheckWall(o)) o->velH = 0;
         } else {
             o->step = 4;
             o->y.p.whole -= 3;

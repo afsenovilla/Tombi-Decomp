@@ -18,7 +18,7 @@ static __inline__ void grab(TObj *o, TObj *p)
     decreaseObjectTimer(o, 2);
 }
 
-void func_8011C99C(TObj *o, TObj *p)
+void rotatedChildPartBPlayerCollision(TObj *o, TObj *p)
 {
     if (GVARS.b3f) return;
     if (*(unsigned char *)&o->wac == 2) return;

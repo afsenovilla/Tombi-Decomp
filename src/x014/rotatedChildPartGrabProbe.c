@@ -9,7 +9,7 @@ typedef struct {
     unsigned short ea;
 } P;
 
-void func_8011D3F8(P *o, TObj *e)
+void rotatedChildPartGrabProbe(P *o, TObj *e)
 {
     short d;
     unsigned short x;

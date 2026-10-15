@@ -20,7 +20,7 @@ extern TObj *allocObjectLayer2(void);
         e->b.p.whole = o->b.p.whole;      \
     }
 
-void func_80123730(TObj *o)
+void spawnLavaCavesPigShotFragments(TObj *o)
 {
     TObj *e;
     int i, j, k, l, m, n;

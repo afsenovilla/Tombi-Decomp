@@ -7,7 +7,7 @@ typedef struct { short a, b; } AB;
 extern AB D_801265B0[];
 extern TObj *allocObjectLayer2(void);
 
-void func_80120C54(TObj *o, int k)
+void spawnBaccusVillagePigShotPieces(TObj *o, int k)
 {
     TObj *n;
     AB *p;

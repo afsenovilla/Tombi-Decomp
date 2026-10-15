@@ -15,10 +15,10 @@ extern void freeObjectLayer2(TObj *);
 extern void getBaseMatrix(void *);
 extern void RotMatrix(SVECTOR *, void *);
 extern void cullObjectToDrawList(TObj *, int);
-extern void func_8012194C(TObj *, int);
+extern void spawnFlowerForestPigShotPair(TObj *, int);
 extern void func_80121B4C(TObj *);
-extern void func_80121D08(TObj *);
-extern void func_80121F90(TObj *);
+extern void flowerForestPigShotScatter(TObj *);
+extern void flowerForestPigShotSlide(TObj *);
 
 void updateFlowerForestPigShot(TObj *o)
 {
@@ -59,7 +59,7 @@ void updateFlowerForestPigShot(TObj *o)
             o->box3 = 0xa0;
             o->b0a = 0x11;
             o->b0c = 0;
-            func_8012194C(o, 0);
+            spawnFlowerForestPigShotPair(o, 0);
             e = allocObjectLayer4();
             if (e) {
                 e->type = 0x42;
@@ -90,7 +90,7 @@ void updateFlowerForestPigShot(TObj *o)
             o->box3 = 0x70;
             o->b0a = 0x11;
             o->b0c = 0;
-            func_8012194C(o, 1);
+            spawnFlowerForestPigShotPair(o, 1);
             *(signed char *)&o->b0f = 0;
             break;
         }
@@ -122,7 +122,7 @@ void updateFlowerForestPigShot(TObj *o)
             v.vz = o->d8c;
             RotMatrix(&v, m);
             cullObjectToDrawList(o, o->box0);
-            if (GVARS.b3f != 1) func_80121F90(o);
+            if (GVARS.b3f != 1) flowerForestPigShotSlide(o);
             break;
         }
         }
@@ -132,7 +132,7 @@ void updateFlowerForestPigShot(TObj *o)
         case 0:
         case 1:
         case 2:
-            func_80121D08(o);
+            flowerForestPigShotScatter(o);
             break;
         }
         break;

@@ -12,9 +12,9 @@ extern short DAT_8007a1f0[];
 extern short DAT_8007a5f0[];
 extern int Rand(void);
 extern void FUN_8001e4f0(int);
-extern int func_80120DA0(TObj *);
+extern int baccusVillagePigShotCheckLanded(TObj *);
 
-void func_801211F0(TObj *o)
+void baccusVillagePigShotFall(TObj *o)
 {
     switch (o->step) {
     case 0:
@@ -43,7 +43,7 @@ void func_801211F0(TObj *o)
             o->d8c = (o->d8c + 0x40) & 0xfff;
         else
             o->d8c = (o->d8c - 0x40) & 0xfff;
-        if (func_80120DA0(o))
+        if (baccusVillagePigShotCheckLanded(o))
             o->step++;
         break;
     case 2:

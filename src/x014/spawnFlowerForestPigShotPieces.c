@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 
-void func_8012185C(TObj *o, int sub)
+void spawnFlowerForestPigShotPieces(TObj *o, int sub)
 {
     int i;
     TObj *e;

@@ -4,7 +4,7 @@
 
 extern void spawnPoolType32At(int, int, int, int);
 
-void func_8011D4FC(TObj *o, TObj *p)
+void rotatedChildPartEnemyCollision(TObj *o, TObj *p)
 {
     if (o->type == 0x47 && o->subtype >= 3) return;
     if ((unsigned short)(o->d->p.whole - p->d->p.whole + 0x2d) >= 0x5b) return;

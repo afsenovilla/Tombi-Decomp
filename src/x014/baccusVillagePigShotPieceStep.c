@@ -7,7 +7,7 @@ extern unsigned char D_801265BC[];
 extern int Rand(void);
 extern void FUN_800202b4(TObj *);
 
-void func_801213F4(TObj *o)
+void baccusVillagePigShotPieceStep(TObj *o)
 {
     short v;
 

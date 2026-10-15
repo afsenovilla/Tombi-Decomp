@@ -28,7 +28,7 @@ static __inline__ int Chk(TObj *o, short k)
     return n;
 }
 
-void func_80123AAC(TObj *o)
+void lavaCavesPigShotFragmentArc(TObj *o)
 {
     short v, w, s;
 

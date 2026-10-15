@@ -12,9 +12,9 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_80123D64(TObj *);
-extern void func_80123AAC(TObj *);
-extern void func_80123730(TObj *);
+extern void lavaCavesPigShotDrop(TObj *);
+extern void lavaCavesPigShotFragmentArc(TObj *);
+extern void spawnLavaCavesPigShotFragments(TObj *);
 
 #define SFX() do { int c = 0xda; if (GAME.selectedSection == 7) c = 0xf2; playSFX(c); } while (0)
 
@@ -70,10 +70,10 @@ void updateLavaCavesPigShot(TObj *o)
                 SFX();
             }
             o->w22++;
-            func_80123D64(o);
+            lavaCavesPigShotDrop(o);
             break;
         case 2:
-            func_80123AAC(o);
+            lavaCavesPigShotFragmentArc(o);
             break;
         }
         break;
@@ -92,7 +92,7 @@ void updateLavaCavesPigShot(TObj *o)
         } else {
             o->b04++;
             ((TObj *)o->d94)->b04 = 2;
-            func_80123730(o);
+            spawnLavaCavesPigShotFragments(o);
         }
         break;
     case 3:

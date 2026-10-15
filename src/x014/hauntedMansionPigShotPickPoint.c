@@ -12,7 +12,7 @@ extern TObj *FUN_80018448(void);
 extern void spawnEvilPigEffectEmitter(int, int, int);
 extern void playSFX(int);
 
-void func_8012284C(TObj *o)
+void hauntedMansionPigShotPickPoint(TObj *o)
 {
     PT *p;
     int i, n, in, k;

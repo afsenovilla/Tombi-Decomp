@@ -49,7 +49,7 @@ static __inline__ int Chk(TObj *o, short k)
     return n;
 }
 
-void func_80123D64(TObj *o)
+void lavaCavesPigShotDrop(TObj *o)
 {
     TObj *n;
     TObj *p;

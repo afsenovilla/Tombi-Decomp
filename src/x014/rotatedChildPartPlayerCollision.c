@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 
-void func_8011D370(TObj *o, TObj *p)
+void rotatedChildPartPlayerCollision(TObj *o, TObj *p)
 {
     short r = pushObjectOutOfObjectBoxA(o, p);
     if (r != 0 && r == 1) {

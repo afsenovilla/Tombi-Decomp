@@ -6,8 +6,8 @@
 #include "gamestate.h"
 
 extern int FUN_800202b4(TObj *);
-extern void func_801211F0(TObj *);
-extern void func_801213F4(TObj *);
+extern void baccusVillagePigShotFall(TObj *);
+extern void baccusVillagePigShotPieceStep(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateBaccusVillagePigShot(TObj *o)
@@ -50,9 +50,9 @@ void updateBaccusVillagePigShot(TObj *o)
             FUN_800202b4(o);
         } else if (o->subtype == 0) {
             FUN_800202b4(o);
-            func_801211F0(o);
+            baccusVillagePigShotFall(o);
         } else {
-            func_801213F4(o);
+            baccusVillagePigShotPieceStep(o);
         }
         break;
     case 2:

@@ -2,7 +2,7 @@
 // MATCHING 80120da0 976
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
-/* Loop 1 is func_80120C54 (matched sibling) inlined with k = m; loops 2/3 are the same body with a stepped y
+/* Loop 1 is spawnBaccusVillagePigShotPieces (matched sibling) inlined with k = m; loops 2/3 are the same body with a stepped y
    pointer and af passed in. The asm("" : "=r"(t) : "0"(t)) keeps the la/move form of the table pointer; the $21
    clobber keeps the constant 2 from being hoisted into s5 in loop 3. */
 #include "TOBJ.H"
@@ -107,7 +107,7 @@ static __inline__ void debris2(TObj *o, int k, short f)
     }
 }
 
-int func_80120DA0(TObj *o)
+int baccusVillagePigShotCheckLanded(TObj *o)
 {
     short dx, af, r;
     int m;

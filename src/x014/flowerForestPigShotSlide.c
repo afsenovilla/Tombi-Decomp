@@ -11,7 +11,7 @@ extern short D_800A6066;
 extern short D_800A457C, D_800A457E;
 extern short func_80040278(TObj *, short, short);
 
-void func_80121F90(TObj *o)
+void flowerForestPigShotSlide(TObj *o)
 {
     TObj *pl;
     switch (o->step) {

@@ -26,7 +26,7 @@ extern short D_8007A5F0[], D_8007A1F0[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 
-void func_80121D08(TObj *o)
+void flowerForestPigShotScatter(TObj *o)
 {
     TObj *e;
     int i;

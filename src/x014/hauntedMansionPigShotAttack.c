@@ -10,7 +10,7 @@ extern void playSFX(int);
 extern void spawnEvilPigEffectEmitter(int, int, int);
 extern void loadEvilPigRoomClutRow(int, int);
 
-void func_80122AAC(TObj *o)
+void hauntedMansionPigShotAttack(TObj *o)
 {
     int i;
     TObj *n;

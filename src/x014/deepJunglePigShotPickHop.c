@@ -12,7 +12,7 @@ static __inline__ int Near(TObj *o, int r, short lim)
     return (unsigned short)(o->y.p.whole - (*(unsigned short*)((char*)&SPAD.i16c + 2)) + r) <= lim;
 }
 
-int func_801249D0(TObj *o)
+int deepJunglePigShotPickHop(TObj *o)
 {
     if (Near(o, 0x40, 0x80)) return D_801266F8[Rand() & 0xf];
     if (Near(o, 0x80, 0x100)) return D_80126708[Rand() & 0xf];

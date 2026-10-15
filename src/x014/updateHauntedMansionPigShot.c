@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern void func_8012284C(TObj *);
-extern void func_80122AAC(TObj *);
+extern void hauntedMansionPigShotPickPoint(TObj *);
+extern void hauntedMansionPigShotAttack(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateHauntedMansionPigShot(TObj *o)
@@ -34,10 +34,10 @@ void updateHauntedMansionPigShot(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            func_8012284C(o);
+            hauntedMansionPigShotPickPoint(o);
             break;
         case 1:
-            func_80122AAC(o);
+            hauntedMansionPigShotAttack(o);
             break;
         }
         break;

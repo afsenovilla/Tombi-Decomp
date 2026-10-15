@@ -11,7 +11,7 @@ extern B D_80126728[];
 extern void playSFX(int);
 extern int AnimAdvance(TObj *o);
 
-void func_80124F28(TObj *o)
+void deepJunglePigShotSubtype2Step(TObj *o)
 {
     unsigned int v;
     unsigned short *p;
