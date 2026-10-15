@@ -10,7 +10,7 @@ extern void *D_8013FA90[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
-extern void func_8013946C(TObj *);
+extern void brokenFountainScene(TObj *);
 extern void flowerTowerKeeperTalk(TObj *);
 
 static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
@@ -48,7 +48,7 @@ void updateFlowerTowerKeeper(TObj *o)
     case 1:
         FUN_800202b4(o);
         if (o->b6b == 0)
-            func_8013946C(o);
+            brokenFountainScene(o);
         else
             flowerTowerKeeperTalk(o);
         break;

@@ -10,7 +10,7 @@ extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
-extern int func_801276CC(TObj *);
+extern int checkMonsterHuntComplete(TObj *);
 extern void spawnItemDropAtPos(int, int, Fix16 *, int, int);
 
 static __inline__ int wall(TObj *o, unsigned short d)
@@ -187,7 +187,7 @@ void func_8012781C(TObj *o)
         o->b0f = 0;
         break;
     case 10:
-        if (func_801276CC(o)) {
+        if (checkMonsterHuntComplete(o)) {
             if (o->subtype == 0) {
                 if (!(GV2.bc3 & 1)) {
                     spawnItemDropAtPos(0x8a, 0, &o->a, 0, 0);

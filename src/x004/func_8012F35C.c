@@ -6,7 +6,7 @@
 
 extern void func_8012ECA0(TObj *);
 extern void func_8012EE14(TObj *);
-extern void func_8012F10C(TObj *);
+extern void paintingBigKeyReward(TObj *);
 extern void FUN_80018980(TObj *);
 
 void func_8012F35C(TObj *o)
@@ -43,7 +43,7 @@ void func_8012F35C(TObj *o)
             }
             break;
         case 2:
-            func_8012F10C(o);
+            paintingBigKeyReward(o);
             break;
         }
         break;

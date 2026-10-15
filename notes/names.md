@@ -385,3 +385,30 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x014 801168a0 callSectionClearController` - one-line thunk to updateSectionClearController
 - `x010 8011e990 probeTiltedBarContact` (uncertain role) - contact test of the player (a) against a rotated bar object (b) at angle `ang`: box prefilter, rcos/rsin of the angle times b->box0,
   then either hang contact (a->b9e = 9, a->wb8/wba offsets) or side contact (b9e = 8); sets SPAD.p3c0 = b, b->w7a = mode; `8011ef98 probeTiltedBarObject` - calls it by b->subtype (one or two sides, angle d30, d30+0x400), only when GV2.bc3 & 0x40
+- `updateAreaScroll` (x001 80116990, x002 80116358, x003 80117494, x004 80116d3c, x005 80115ee4, x006 801165bc, x008 80115ea8, x009 80116278, x010 801165e0,
+  x011 80115fc0, x013 80115fb4, x016 80115f88, x017 8011611c, x018 801162d8, x019 80115ea8) - the area's scroll/section controller: waits for GVARS.b3a, runs the
+  scroll mode of `o->subtype` from the MAIN0 tables D_80079A98 / D_80079AD0 / D_80079AB4 (camera follow functions FUN_80029cb4, FUN_8002a4d0 ...), then per
+  GAME.selectedSection compares the player position with the section borders (markSectionVisited + selectedSection change, tryStartItemInteraction exits,
+  nextArea warps). x016's is the address MAIN0 `dispatchSectionScroll` calls for sections != 0. x009 has two: `801165a0 updateAreaScrollB` (sections 1-5, tables
+  A98/AB4) chosen by `80116dd0 dispatchAreaScroll` (section 0 -> updateAreaScroll, 1-5 -> B, 6 -> 80116bd0). `callAreaScroll` (x001 80117490, x003 80117dc4,
+  x004 80118700) - one-line thunks to it, entries 0x16/0x18/0x19/0x1c of the D_80079A98 table (the csv "twin" PadStartCom is only the masked jal)
+- `updateMightyFishFood` (x004 8011e594, x010 8011da50, x013 80116cdc) - appears when item 0x7E is used (GVARS.b40 / b41 == 0x7E), floats with an rcos sway;
+  the same item completes event 0x77 "Mighty Fish Food" (title table, CFNT999)
+- Event objects named after the event title they start/complete (`setEventStarted/Complete(id)`, title = CFNT999 entry D_80080410[id]); `update*` = unlayered
+  object of MAIN0 dispatchUnlayeredByVariant (table D_8007C1C8, variant = index) unless noted, `step*` its step switch, `*Scene` the locked-player sequence:
+  x004 8012e6d0 updateKeyHoles (variant 0x13; b04 0 jumps straight to free), 8012e554 stepKeyHoles (player standing at x 0x370/y -0x1D6 or 0x3C8/-0x2E4),
+  8012dfbc largeKeyHoleScene (event 0x37 "A Large Key Hole!"), 8012e204 smallKeyHoleScene (0x33 "A Small Key Hole!"); 8012f10c paintingBigKeyReward (completes
+  0x38 "Painting of a Big Key?", addItemToInventory(0x35)); 8012f508 hauntedPigBagEventStart (starts 0xAE "The Haunted Pig Bag");
+  x010 8012eba0 underwaterPigBagEventStart (starts 0x7B "The Underwater Pig Bag"), 8012ed44 updateUnderwaterPigBagStart (variant 0x17), 8012ecd8
+  stepUnderwaterPigBagStart (unreferenced copy of its step switch); 8012e328 junglePigBagEventStart (starts 0xB7 "The Jungle Pig Bag"), 8012e494
+  updateJunglePigBagStart (variant 0x1D), 8012e728 updateJunglePigBagComplete (variant 0x33, completes 0xB7); 801190bc updateRaft (layer 4 type 0x32:
+  item 0x5C used -> player step 0x12, on contact completes 0x96 "Let's Ride the Raft!", accelerates right and warps to area 4 spawn 11);
+  x002 80119914 updateFlowerGardenEvent (variant 0x24: spawns object 0x5F when AP >= D_8009C98C), 80119788 flowerGardenCompleteScene (completes 0x27
+  "Plant a Flower Garden"); x003 80133a2c updateWindDiesEvent (variant 0x28), 80133938 stepWindDiesEvent (same step logic, unreferenced copy), 801337b4
+  windDiesEventScene (starts/completes 0xAA "When the Wind Dies..."); 80133df4 updatePhoenixFavoriteEvent (variant 0x2C), 80133cb4 stepPhoenixFavoriteEvent
+  (counter GCD.bd0e6 >= 5 -> completes 0xAB "The Phoenix's Favorite"), 80133bdc phoenixFavoriteCompleteScene (unreferenced copy of the completion states);
+  x009 8011c5cc updateApBox (called from 800ee25c), 8011c30c stepApBoxEvent (AP <= 149,999 starts event 0x10 "The AP Box", more completes it),
+  801276cc checkMonsterHuntComplete (called from the jellyfish step 8012781c; completes 0x25 "Monster Hunt");
+  x001 8013946c brokenFountainScene (step switch run by updateFlowerTowerKeeper: fountain animation, completes 0x1B "The Broken Fountain")
+- `updateLeafButterfly` (x001 8013839c, x010 80123d18, twins) - leaf butterfly object: collected with addItemToInventory(0x10); `leafButterflyEventStart`
+  (x001 80137968, x010 80123330) - its first-contact state: locks the player and starts event 0xB2 "Leaf Butterflies"

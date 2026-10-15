@@ -11,14 +11,14 @@ typedef struct {
 extern TObj PLAYER;
 extern Fix16 D_1F8000F0;
 extern int D_1F8000F0_b;
-extern void func_80115FB4(Cam *);
+extern void updateAreaScroll(Cam *);
 
 void func_801162D0(Cam *c)
 {
     TObj *pl;
 
     if (GAME.selectedSection == 0) {
-        func_80115FB4(c);
+        updateAreaScroll(c);
         return;
     }
     pl = &PLAYER;

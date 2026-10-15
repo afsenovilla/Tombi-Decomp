@@ -2,7 +2,7 @@
 // MATCHING 8012f69c 192
 #include "gv2.h"
 #include "TOBJ.H"
-extern void func_8012F508(TObj *);
+extern void hauntedPigBagEventStart(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
 void func_8012F69C(TObj *o)
@@ -18,7 +18,7 @@ void func_8012F69C(TObj *o)
         o->state = 0;
         break;
     case 1:
-        if (o->step == 0) func_8012F508(o);
+        if (o->step == 0) hauntedPigBagEventStart(o);
         break;
     case 2:
         o->b04 = 3;

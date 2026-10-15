@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 extern void func_8012EE14(TObj *);
-extern void func_8012F10C(TObj *);
+extern void paintingBigKeyReward(TObj *);
 
 void func_8012F274(TObj *o)
 {
@@ -25,7 +25,7 @@ void func_8012F274(TObj *o)
         }
         break;
     case 2:
-        func_8012F10C(o);
+        paintingBigKeyReward(o);
         break;
     }
 }
