@@ -304,7 +304,7 @@ address,size,name,twin
 80114968,160,FUN_80114968,X000:80114968
 80114a08,64,FUN_80114a08,X000:80114a08
 80115fc0,444,updateAreaScroll,
-8011617c,220,func_8011617C,
+8011617c,220,updateBackdropSpriteSet,
 80116258,96,func_80116258,
 801162b8,284,func_801162B8,
 801163d4,440,updateFoodForFuelObject,
@@ -314,11 +314,11 @@ address,size,name,twin
 80116920,4,func_80116920,
 80116924,152,func_80116924,
 801169bc,412,func_801169BC,
-80116b58,444,func_80116B58,
+80116b58,444,updateTossedItem,
 80116d14,60,updateRaftPickup,
 80116d50,260,func_80116D50,
-80116e54,340,func_80116E54,
-80116fa8,228,func_80116FA8,
+80116e54,340,patrollingFlyerMove,
+80116fa8,228,updatePatrollingFlyer,
 8011708c,1080,goGoCarMechanicTalk,
 801174c4,156,func_801174C4,
 80117560,636,goGoCarFuelTalk,

@@ -26,7 +26,7 @@ static __inline__ void approach(TObj *o, unsigned short t)
     }
 }
 
-void func_80126D04(TObj *o)
+void blackCrowPerched(TObj *o)
 {
     switch (o->state) {
     case 0:

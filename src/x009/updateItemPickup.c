@@ -11,7 +11,7 @@ extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void freeObjectLayer5(TObj *);
 
-void func_8011F128(TObj *o)
+void updateItemPickup(TObj *o)
 {
     switch (o->b04) {
     case 0:

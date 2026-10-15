@@ -9,7 +9,7 @@ extern int DAT_1f8002d4[];
 extern void *D_80134D0C[];
 extern unsigned char D_80131168[];
 extern int FUN_800202b4(TObj *);
-extern void func_8011EC78(TObj *);
+extern void cullObjectPerspective(TObj *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800ea544(TObj *, short, short, short);
 extern unsigned int FUN_8001f9e0(void);
@@ -106,7 +106,7 @@ void updateCountedCollectible(TObj *o)
         break;
     case 1:
         if (GAME.selectedSection < 4)
-            func_8011EC78(o);
+            cullObjectPerspective(o);
         else
             FUN_800202b4(o);
         if (o->subtype == 0x16)
@@ -114,7 +114,7 @@ void updateCountedCollectible(TObj *o)
         break;
     case 2:
         if (GAME.selectedSection < 4)
-            func_8011EC78(o);
+            cullObjectPerspective(o);
         else
             FUN_800202b4(o);
         switch (o->step) {

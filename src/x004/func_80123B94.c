@@ -7,7 +7,7 @@ extern void *D_80134D38[];
 extern unsigned short D_80131108[];
 extern unsigned char PLAYER;
 extern int func_8012747C(int);
-extern void func_8011EC78(TObj *);
+extern void cullObjectPerspective(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void FUN_80124070(TObj *);
 extern void FUN_8012423c(TObj *);
@@ -77,7 +77,7 @@ void func_80123B94(TObj *o)
         o->b0f = o->w7a;
         break;
     case 1:
-        if (GAME.selectedSection < 4) func_8011EC78(o);
+        if (GAME.selectedSection < 4) cullObjectPerspective(o);
         else ObjCullRegister(o);
         if (o->step == 0) {
             r = nearCam(o);

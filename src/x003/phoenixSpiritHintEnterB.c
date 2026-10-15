@@ -8,7 +8,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *o, short x, short y);
 
-void func_80128C08(TObj *o)
+void phoenixSpiritHintEnterB(TObj *o)
 {
     unsigned char *c;
 

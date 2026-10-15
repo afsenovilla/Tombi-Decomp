@@ -9,7 +9,7 @@ void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 short TileCollideAt(TObj *o, int x, int y);
 
-void func_80128A1C(TObj *o)
+void phoenixSpiritHintEnterA(TObj *o)
 {
     unsigned char *c;
 

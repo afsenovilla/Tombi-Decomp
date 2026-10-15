@@ -27,7 +27,7 @@ static __inline__ short wall(TObj *o)
 }
 
 #define o (&b->t)
-void func_80126688(BX *b)
+void blackCrowSwoop(BX *b)
 {
     P2 p, q;
 

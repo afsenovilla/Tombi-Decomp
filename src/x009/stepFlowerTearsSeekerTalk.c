@@ -8,7 +8,7 @@ typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012B2E4[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
-extern void func_80128ECC(TObj *);
+extern void flowerTearsSeekerPace(TObj *);
 extern void flowerTearsSeekerTalk(TObj *);
 
 static __inline__ void pushL(short x, short w)
@@ -59,7 +59,7 @@ void stepFlowerTearsSeekerTalk(TObj *o)
     } else {
         switch (o->step) {
         case 0:
-            func_80128ECC(o);
+            flowerTearsSeekerPace(o);
             break;
         case 1:
             flowerTearsSeekerTalk(o);

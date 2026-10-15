@@ -608,3 +608,20 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   spawnItemDropAtPos), b04 1 step 3 `80125a38 jellyfishSpawnChild` (allocObjectLayer2 type 0x21 = another jellyfish with b0c 1, which copies the parent's
   b04/step/state), step 1 `8012516c jellyfishSwim` (velV 0x100 strokes with sfx 0x97; uncertain); x009 red flower b04 2 step 1 `80123828
   redFlowerGrabbed` (between redFlowerHit and redFlowerDefeated; drives PLAYER.state / wac while held; uncertain)
+- x004: `8011ec78 cullObjectPerspective` / `8011ea30 cullObjectPerspectiveWide` (cullObjectToDrawList with the screen box scaled by the object's depth
+  relative to the camera (s17e), depth window +0x5A / +0xB4 out of 0x277, then pushes the object on the draw list of its category); black crow
+  (updateBlackCrow) steps: b04 1 step 0 `80126d04 blackCrowPerched` (state switch over 80125420 / 80125554 / 801256A8 / 80125818 / 80126464; uncertain),
+  step 1 `80126688 blackCrowSwoop` (velV -0x400 hops, flight angle from angleBetweenPoints, sfx 0x13; uncertain), b04 2 step 1 `80126c50 blackCrowGrabbed`
+  (spawnItemNotification(2, 6))
+- x003 phoenix spirit hint NPC group (stepPhoenixSpiritHintTalk by wba 0/1/2; all uncertain): `80128a1c phoenixSpiritHintEnterA` / `80128c08
+  phoenixSpiritHintEnterB` (fall in from the right to x 0x1F4, GCD.bceef counts the arrivals, step 1 when all four are in), `80128df8
+  phoenixSpiritHintLeaveA` / `80128fa0 phoenixSpiritHintLeaveB` (run off left at velX -0x300), `80129240 phoenixSpiritHintWalkC` / `80129430
+  phoenixSpiritHintLeaveC` (wba 2 walk / leave); `80129148 stepPhoenixSpiritHintGroupA`, `801291c4 ...GroupB`, `801295b0 ...GroupC` (unreferenced copies of
+  the per-wba step switches)
+- x009 flower tears seeker: `80129344 initFlowerTearsSeeker` (case 0 of updateFlowerTearsSeeker: box / SPR / anim from D_8012B2DC), `80128ecc
+  flowerTearsSeekerPace` (walks between x 0x708 and 0x780 until talked to; freed off screen once event 0x28 is completed), `80128b4c
+  flowerTearsSeekerWalkOff` (walks left until off screen, unreferenced; uncertain); `8011f128 updateItemPickup` (layer 5 type 0x0E: initItemObject item,
+  gone when D_8009D119 or GCD.bcf06 is set; b04 2 runs the MAIN0 item effect D_8007A890[D_8007A7F0[subtype]])
+- x011: `8011617c updateBackdropSpriteSet` (layer 3 type 0x45), `80116b58 updateTossedItem` (layer 5 type 0x0F: initItemObject item thrown in an arc
+  from 0x3C,-0x50 for 0x3C ticks, collectable once falling), `80116fa8 updatePatrollingFlyer` (layer 2 type 0x2A, 1 placement, kind uncertain: 32 x 32
+  box, palette 0x7952; `80116e54 patrollingFlyerMove` moves along its facing with a sine bob for one d88 cycle, hovers one cycle, then turns)

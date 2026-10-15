@@ -20,10 +20,10 @@ extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
-extern int func_8011EC78(TObj *);
-extern void func_80126D04(TObj *);
-extern void func_80126688(TObj *);
-extern void func_80126C50(TObj *);
+extern int cullObjectPerspective(TObj *);
+extern void blackCrowPerched(TObj *);
+extern void blackCrowSwoop(TObj *);
+extern void blackCrowGrabbed(TObj *);
 extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void applyAnimVelocityXY(TObj *, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -74,16 +74,16 @@ void updateBlackCrow(TObj *o)
         break;
     case 1:
         if (GVARS.b42) {
-            func_8011EC78(o);
+            cullObjectPerspective(o);
             break;
         }
         if (!o->b9e) {
             switch (o->step) {
             case 0:
-                func_80126D04(o);
+                blackCrowPerched(o);
                 break;
             case 1:
-                func_80126688(o);
+                blackCrowSwoop(o);
                 break;
             }
         } else if (!o->b9f) {
@@ -96,7 +96,7 @@ void updateBlackCrow(TObj *o)
                 o->h->p.whole = X(o)->wd2;
             }
         }
-        if (func_8011EC78(o)) {
+        if (cullObjectPerspective(o)) {
             AnimAdvance(o);
             X(o)->wca = 1;
         } else {
@@ -108,7 +108,7 @@ void updateBlackCrow(TObj *o)
         break;
     case 2:
         if (GVARS.b42) {
-            func_8011EC78(o);
+            cullObjectPerspective(o);
             break;
         }
         switch (o->step) {
@@ -157,7 +157,7 @@ void updateBlackCrow(TObj *o)
                 }
                 break;
             }
-            if (func_8011EC78(o)) {
+            if (cullObjectPerspective(o)) {
                 AnimAdvance(o);
                 X(o)->wca = 1;
             } else {
@@ -165,8 +165,8 @@ void updateBlackCrow(TObj *o)
             }
             break;
         case 1:
-            func_80126C50(o);
-            if (func_8011EC78(o)) {
+            blackCrowGrabbed(o);
+            if (cullObjectPerspective(o)) {
                 AnimAdvance(o);
                 X(o)->wca = 1;
             } else {
@@ -194,7 +194,7 @@ void updateBlackCrow(TObj *o)
             }
             if (o->animFrame & 1) o->d8c = (unsigned char)(o->d8c + 0x14);
             else o->d8c = (unsigned char)(o->d8c - 0x14);
-            if (!func_8011EC78(o)) o->b04 = 3;
+            if (!cullObjectPerspective(o)) o->b04 = 3;
             AnimAdvance(o);
             break;
         }

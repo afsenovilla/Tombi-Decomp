@@ -4,12 +4,12 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void func_80128A1C(TObj *);
-extern void func_80128DF8(TObj *);
-extern void func_80128C08(TObj *);
-extern void func_80128FA0(TObj *);
-extern void func_80129240(TObj *);
-extern void func_80129430(TObj *);
+extern void phoenixSpiritHintEnterA(TObj *);
+extern void phoenixSpiritHintLeaveA(TObj *);
+extern void phoenixSpiritHintEnterB(TObj *);
+extern void phoenixSpiritHintLeaveB(TObj *);
+extern void phoenixSpiritHintWalkC(TObj *);
+extern void phoenixSpiritHintLeaveC(TObj *);
 extern void phoenixSpiritHintTalk(TObj *);
 extern int FUN_8001fec0(TObj *);
 
@@ -19,24 +19,24 @@ void stepPhoenixSpiritHintTalk(TObj *o)
     case 0:
         switch (o->step) {
         case 0:
-            func_80128A1C(o);
+            phoenixSpiritHintEnterA(o);
             break;
         case 1:
             goto anim;
         case 2:
-            func_80128DF8(o);
+            phoenixSpiritHintLeaveA(o);
             break;
         }
         break;
     case 1:
         switch (o->step) {
         case 0:
-            func_80128C08(o);
+            phoenixSpiritHintEnterB(o);
             break;
         case 1:
             goto anim;
         case 2:
-            func_80128FA0(o);
+            phoenixSpiritHintLeaveB(o);
             break;
         }
         break;
@@ -45,10 +45,10 @@ void stepPhoenixSpiritHintTalk(TObj *o)
         case 0:
             goto anim;
         case 1:
-            func_80129240(o);
+            phoenixSpiritHintWalkC(o);
             break;
         case 2:
-            func_80129430(o);
+            phoenixSpiritHintLeaveC(o);
             break;
         }
         break;

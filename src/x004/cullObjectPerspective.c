@@ -1,5 +1,5 @@
-// FUNC 8011ea30 584 X004
-// MATCHING 8011ea30 584
+// FUNC 8011ec78 584 X004
+// MATCHING 8011ec78 584
 #include "spad.h"
 extern void ObjListPush_1F800218(unsigned char *), ObjListPush_1F80021C(unsigned char *),
     ObjListPush_1F800220(unsigned char *), ObjListPush_1F800224(unsigned char *),
@@ -8,7 +8,7 @@ extern void ObjListPush_1F800218(unsigned char *), ObjListPush_1F80021C(unsigned
 
 #define DZ(o) (((short *)*(int *)((o) + 0x44))[1])
 
-int func_8011EA30(unsigned char *o)
+int cullObjectPerspective(unsigned char *o)
 {
     int k, h;
 
@@ -19,7 +19,7 @@ int func_8011EA30(unsigned char *o)
         k = (*(short*)&SPAD.s17e) - DZ(o);
     else
         k = DZ(o) - (*(short*)&SPAD.s17e);
-    k += 0xb4;
+    k += 0x5a;
     if ((unsigned)k >= 0x277)
         return 0;
     if ((*(short*)&SPAD.s1c8))

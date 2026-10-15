@@ -8,7 +8,7 @@ extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 
-void func_80128ECC(TObj *o)
+void flowerTearsSeekerPace(TObj *o)
 {
     switch (o->state) {
     case 0:

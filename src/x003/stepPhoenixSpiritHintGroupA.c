@@ -2,21 +2,21 @@
 // MATCHING 80129148 124
 #include "TOBJ.H"
 
-extern void func_80128A1C(TObj *);
+extern void phoenixSpiritHintEnterA(TObj *);
 extern int AnimAdvance(TObj *);
-extern void func_80128DF8(TObj *);
+extern void phoenixSpiritHintLeaveA(TObj *);
 
-void func_80129148(TObj *o)
+void stepPhoenixSpiritHintGroupA(TObj *o)
 {
     switch (o->step) {
     case 0:
-        func_80128A1C(o);
+        phoenixSpiritHintEnterA(o);
         break;
     case 1:
         AnimAdvance(o);
         break;
     case 2:
-        func_80128DF8(o);
+        phoenixSpiritHintLeaveA(o);
         break;
     }
 }

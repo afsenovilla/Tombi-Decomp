@@ -13,7 +13,7 @@ static __inline__ void set_box(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void func_80126C50(TObj *o)
+void blackCrowGrabbed(TObj *o)
 {
     switch (o->state) {
     case 0:

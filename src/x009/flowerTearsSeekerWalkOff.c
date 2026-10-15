@@ -6,7 +6,7 @@ extern AT D_8012B2E4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 
-void func_80128B4C(TObj *o)
+void flowerTearsSeekerWalkOff(TObj *o)
 {
     switch (o->state) {
     case 0:

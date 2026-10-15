@@ -1,15 +1,14 @@
-// FUNC 80128df8 424 X003
-// MATCHING 80128df8 424
+// FUNC 80128fa0 424 X003
+// MATCHING 80128fa0 424
 #include "TOBJ.H"
 
-typedef struct { void **p; int a; int b; } T12;
-
+typedef struct { void **p; int a, b; } T12;
 extern T12 D_80135D84[];
-extern int AnimAdvance(TObj *o);
-extern void AnimLoadDuration(TObj *o);
-extern short TileCollideAt(TObj *, short, short);
+extern short FUN_80040278(TObj *, int, int);
+extern void AnimLoadDuration(TObj *);
+extern void AnimAdvance(TObj *);
 
-void func_80128DF8(TObj *o)
+void phoenixSpiritHintLeaveB(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -24,8 +23,8 @@ void func_80128DF8(TObj *o)
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
-        if (!TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-            o->velX = -0x80;
+        if (!FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {
+            o->velX = -0x100;
             o->velY = 0;
             o->state++;
         }
@@ -35,7 +34,7 @@ void func_80128DF8(TObj *o)
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
-        if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
+        if (FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {
             o->velX = -0x300;
             o->velY = 0x400;
             o->state = 1;

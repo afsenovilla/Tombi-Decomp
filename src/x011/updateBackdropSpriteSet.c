@@ -10,7 +10,7 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void func_8011617C(TObj *o)
+void updateBackdropSpriteSet(TObj *o)
 {
     switch (o->b04) {
     case 0:

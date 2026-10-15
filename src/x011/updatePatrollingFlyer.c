@@ -6,7 +6,7 @@
 extern void *D_8011C420;
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void func_80116E54(TObj *);
+extern void patrollingFlyerMove(TObj *);
 extern void freeObjectLayer2(TObj *);
 static __inline__ void setanim(TObj *p)
 {
@@ -23,7 +23,7 @@ static __inline__ void setbox(TObj *p, short a, short b, short c, short d)
     p->box3 = d;
 }
 
-void func_80116FA8(TObj *o)
+void updatePatrollingFlyer(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -36,7 +36,7 @@ void func_80116FA8(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        func_80116E54(o);
+        patrollingFlyerMove(o);
         break;
     case 2:
     case 3:

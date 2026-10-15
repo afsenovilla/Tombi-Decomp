@@ -406,7 +406,7 @@ address,size,name,twin
 8011eae8,480,func_8011EAE8,
 8011ecc8,392,func_8011ECC8,
 8011ee50,728,updateFallingDeathFruit,
-8011f128,280,func_8011F128,
+8011f128,280,updateItemPickup,
 8011f240,1836,func_8011F240,
 8011f96c,480,func_8011F96C,
 8011fb4c,632,func_8011FB4C,
@@ -488,11 +488,11 @@ address,size,name,twin
 801283a4,1300,updateJellyfish,
 801288b8,576,func_801288B8,
 80128af8,84,npcSetAnim,X003:801289c8
-80128b4c,248,func_80128B4C,
+80128b4c,248,flowerTearsSeekerWalkOff,
 80128c44,648,flowerTearsSeekerTalk,
-80128ecc,552,func_80128ECC,
+80128ecc,552,flowerTearsSeekerPace,
 801290f4,592,stepFlowerTearsSeekerTalk,
-80129344,368,func_80129344,
+80129344,368,initFlowerTearsSeeker,
 801294b4,168,updateFlowerTearsSeeker,X004:80129524
 8012955c,932,updateBoatman,
 80129900,20,func_80129900,

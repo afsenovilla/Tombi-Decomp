@@ -8,7 +8,7 @@ extern int SPR_DATA[];
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
 
-void func_80129240(TObj *o)
+void phoenixSpiritHintWalkC(TObj *o)
 {
     switch (o->state) {
     case 0:

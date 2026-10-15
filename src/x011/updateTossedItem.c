@@ -6,7 +6,7 @@ extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer5(TObj *);
 
-void func_80116B58(TObj *o)
+void updateTossedItem(TObj *o)
 {
     unsigned char t = o->b04;
 

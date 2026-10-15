@@ -14,7 +14,7 @@ extern int SPR_DATA[];
 
 extern void AnimLoadDuration(TObj *);
 
-void func_80129344(TObj *o)
+void initFlowerTearsSeeker(TObj *o)
 {
     o->box0 = D_8012B2DC[o->subtype].b0;
     o->box1 = D_8012B2DC[o->subtype].b1;

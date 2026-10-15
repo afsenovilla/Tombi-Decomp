@@ -6,7 +6,7 @@
 extern void *D_80134D18;
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
-extern void func_8011EC78(TObj *);
+extern void cullObjectPerspective(TObj *);
 extern void smokePuffRise(TObj *);
 
 void updateSmokeEmitter(TObj *o)
@@ -43,7 +43,7 @@ void updateSmokeEmitter(TObj *o)
         }
         break;
     case 1:
-        func_8011EC78(o);
+        cullObjectPerspective(o);
         smokePuffRise(o);
         break;
     case 2:

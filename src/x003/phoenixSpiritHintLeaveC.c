@@ -11,7 +11,7 @@ void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
 
-void func_80129430(TObj *o)
+void phoenixSpiritHintLeaveC(TObj *o)
 {
     switch (o->state) {
     case 0:
