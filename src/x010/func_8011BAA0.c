@@ -8,7 +8,7 @@ extern TObj *D_8009C330;
 extern int D_8009D2E8;
 extern void playerSetFallLean(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern void func_80110FDC(TObj *);
+extern void playerAttackDecelerate(TObj *);
 
 void func_8011BAA0(TObj *o)
 {
@@ -33,7 +33,7 @@ void func_8011BAA0(TObj *o)
     case 2:
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
-        func_80110FDC(o);
+        playerAttackDecelerate(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;

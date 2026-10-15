@@ -20,7 +20,7 @@ extern unsigned short DAT_1f80016e;
 extern int DAT_1f80018c;
 extern int DAT_1f800190;
 extern unsigned char D_8009C966;
-void FUN_80027ed8(S8002A258 *o);
+void cameraFollowTargetY(S8002A258 *o);
 void func_8002809C(S8002A258 *o);
 
 void func_8002A258(S8002A258 *o)
@@ -39,7 +39,7 @@ void func_8002A258(S8002A258 *o)
     }
     DAT_1f80018c = DAT_1f800168;
     DAT_1f800190 = DAT_1f80016c;
-    FUN_80027ed8(o);
+    cameraFollowTargetY(o);
     func_8002809C(o);
     if ((unsigned short)(o->p34[1] - DAT_1f80016a + 0x40) < 0x80 || (o->w44 & 3)) {
         if ((unsigned short)(DAT_1f8000f2 - DAT_1f80016e + 0x5a) < 0xb4 || (o->w44 & 0xc)) {

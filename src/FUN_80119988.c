@@ -16,7 +16,7 @@ extern void FUN_80026c50(int, int, int);
 extern short FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
 extern int FUN_8001f9e0(void);
-extern void FUN_8011a148(int, int, int, int);
+extern void spawnPoolType09Object(int, int, int, int);
 extern struct V3 D_1F800168;
 extern struct V3 D_800A6048;
 extern Fix16 *D_800A607C;
@@ -130,9 +130,9 @@ void FUN_80119988(TObjE *e)
                 goto snd;
             break;
         case 6:
-            FUN_8011a148(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
-            FUN_8011a148(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
-            FUN_8011a148(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnPoolType09Object(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnPoolType09Object(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnPoolType09Object(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
         snd:
             e->ce = FUN_8001e4f0(0x36);
             o->step++;

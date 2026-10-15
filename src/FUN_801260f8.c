@@ -1,12 +1,12 @@
 // FUNC 801260f8 160 X000
 // MATCHING 801260f8 160
-extern short FUN_80043464(char *, unsigned char *);
+extern short objectBoxOverlapSide(char *, unsigned char *);
 void FUN_801260f8(char *o, unsigned char *p)
 {
     short s;
     if (p[2] == 0x12 && p[4] == 0)
         return;
-    s = FUN_80043464(o, p);
+    s = objectBoxOverlapSide(o, p);
     if (s == -1)
         return;
     if (s == 3 && o[0xac] == 1) {

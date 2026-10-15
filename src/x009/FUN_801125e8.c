@@ -13,7 +13,7 @@ extern int FUN_80040278(TObj *o, int x, int y);
 extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
 extern void FUN_8001fe6c(TObj *o);
 extern void despawnObjectOffscreen(TObj *o);
-extern void FUN_800eb8f0(TObj *o, int x, int y, int z);
+extern void spawnBreakPieces(TObj *o, int x, int y, int z);
 
 void FUN_801125e8(TObj *o)
 {
@@ -60,7 +60,7 @@ void FUN_801125e8(TObj *o)
         despawnObjectOffscreen(o);
         break;
     case 7:
-        FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->b04++;
         break;
     }

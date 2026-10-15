@@ -29,7 +29,7 @@ extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char D_801152E8[];
 extern void FUN_8001fe94(TObj *, int);
 extern TObj *allocObjectLayer1(void);
-extern void FUN_80110fdc(TObj *);
+extern void playerAttackDecelerate(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
 extern void FUN_8010f0f4(TObj *);
@@ -176,7 +176,7 @@ void playerStepWeaponAttack(TObj *o)
         if (w < 0) { x <<= 2; x += 0x100; o->wb6 = x & 0xff; }
         else if (w > 0) { x <<= 2; o->wb6 = x & 0xff; }
         else o->wb6 = 0;
-        FUN_80110fdc(o);
+        playerAttackDecelerate(o);
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
@@ -230,7 +230,7 @@ void playerStepWeaponAttack(TObj *o)
         YADJ();
         break;
     case 2:
-        FUN_80110fdc(o);
+        playerAttackDecelerate(o);
         FUN_8010f0f4(o);
         o->h->raw += GVARS.s44 << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;

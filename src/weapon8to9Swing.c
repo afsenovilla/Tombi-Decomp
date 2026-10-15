@@ -43,7 +43,7 @@ extern void weaponSetPlayerAnimC(TObj *);
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern void ObjApplyVelocity(TObj *);
-extern short FUN_80035428(TObj *);
+extern short weapon8to9HitWall(TObj *);
 extern short angleBetweenPoints(P, P);
 extern void FUN_8002c578(TObj *, int, int, int);
 extern void spawnWeaponTrailObjects(int, TObj *);
@@ -219,7 +219,7 @@ void weapon8to9Swing(TObj *o)
         o->velH = MulCos(o->waa, o->wa8);
         o->velV = MulNegSinScaled(o->waa, o->wa8);
         ObjApplyVelocity(o);
-        if (FUN_80035428(o) == 0) {
+        if (weapon8to9HitWall(o) == 0) {
             G.d8c = 0;
             if (o->wa8 < 0x500) {
                 o->waa = TB(2);
@@ -263,10 +263,10 @@ void weapon8to9Swing(TObj *o)
                 o->state++;
             }
         }
-        FUN_80035428(o);
+        weapon8to9HitWall(o);
         break;
     case 5:
-        if (FUN_80035428(o) == 0) {
+        if (weapon8to9HitWall(o) == 0) {
             D_8009C338->bd = 0;
             o->wa8 = 0x2000;
             D_8009C338->w30 += 0x20;

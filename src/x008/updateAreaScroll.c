@@ -8,7 +8,7 @@ typedef void (*Fn)(TObj *);
 extern Fn D_80079AB4[];
 extern void FUN_8002a3d4(TObj *);
 extern int tryStartItemInteraction(TObj *, int, int);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 
 void updateAreaScroll(TObj *o)
 {
@@ -22,7 +22,7 @@ void updateAreaScroll(TObj *o)
         if ((*(short*)((char*)&SPAD.i170 + 2)) < -0x59) tryStartItemInteraction(o, 1, 0);
         break;
     case 2:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     }
 }

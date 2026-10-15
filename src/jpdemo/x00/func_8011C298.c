@@ -1,12 +1,12 @@
 // JPDEMO x00 8011C298 160
 // Demo version of PAL x000 801260F8 (FUN_801260f8.c): attached object at +0xd0 (PAL +0xe4).
-extern short FUN_80043464(char *, unsigned char *);
+extern short objectBoxOverlapSide(char *, unsigned char *);
 void FUN_801260f8(char *o, unsigned char *p)
 {
     short s;
     if (p[2] == 0x12 && p[4] == 0)
         return;
-    s = FUN_80043464(o, p);
+    s = objectBoxOverlapSide(o, p);
     if (s == -1)
         return;
     if (s == 3 && o[0xac] == 1) {

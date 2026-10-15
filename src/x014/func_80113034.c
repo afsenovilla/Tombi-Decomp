@@ -14,7 +14,7 @@ extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
 extern void despawnObjectOffscreen(TObj *);
 extern int Rand(void);
-extern void FUN_800eb8f0(TObj *, int, int, int);
+extern void spawnBreakPieces(TObj *, int, int, int);
 
 static __inline__ short chk(TObj *o)
 {
@@ -100,7 +100,7 @@ void func_80113034(TObj *o)
             o->step = 5;
             o->timer = 10;
         } else {
-            FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             o->b04++;
         }
         break;

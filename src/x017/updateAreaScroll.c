@@ -36,7 +36,7 @@ extern Fn D_80079AD0[];
 extern void func_80027810(O *);
 extern int tryStartItemInteraction(O *, int, int);
 extern void stepPlayerXToward(int);
-extern void FUN_8002a4d0(O *);
+extern void cameraEventScrollHandler(O *);
 
 void updateAreaScroll(O *o)
 {
@@ -112,7 +112,7 @@ void updateAreaScroll(O *o)
         }
         break;
     case 2:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     case 3:
         ((short*)((char*)&SPAD.if0 + 2))[0]--;

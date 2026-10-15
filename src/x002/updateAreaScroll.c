@@ -8,7 +8,7 @@
 extern void (*D_80079AD0[])(TObj *);
 extern void func_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 
 void updateAreaScroll(TObj *o)
 {
@@ -50,7 +50,7 @@ void updateAreaScroll(TObj *o)
         }
         break;
     case 2:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     }
 }

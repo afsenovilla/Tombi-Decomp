@@ -56,7 +56,7 @@ void AnimLoadDuration(TObj *o);
 void SfxPlay2(int a, int b);
 void setEventComplete(int a, int b);
 short TileCollideAt(TObj *o, int x, int y);
-void FUN_800eb8f0(TObj *o, int a, int b, int c);
+void spawnBreakPieces(TObj *o, int a, int b, int c);
 void despawnObjectOffscreen(TObj *o);
 int Rand(void);
 
@@ -116,7 +116,7 @@ void func_80112C24(TObj *o)
         }
         o->y.raw += o->velV << 8;
         if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {
-            FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             o->b04 = 3;
         } else {
             despawnObjectOffscreen(o);
@@ -144,7 +144,7 @@ void func_80112C24(TObj *o)
             o->timer = 0x14;
             break;
         }
-        FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->b04++;
         break;
     }

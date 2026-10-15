@@ -1,5 +1,5 @@
 // JP slps01144 800296D4 444
-// Japanese version of PAL main0 800288C4 (FUN_800288c4.c): 64 -> 16384, 16 -> 4096.
+// Japanese version of PAL main0 800288C4 (cameraScrollInputStep.c): 64 -> 16384, 16 -> 4096.
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
 extern unsigned short DAT_8009d670;
@@ -21,7 +21,7 @@ static __inline__ void decay(void)
     }
 }
 
-void FUN_800288c4(char *o, int a)
+void cameraScrollInputStep(char *o, int a)
 {
     volatile unsigned short *k;
     

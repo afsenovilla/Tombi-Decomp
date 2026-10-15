@@ -5,7 +5,7 @@
 #include "gamestate.h"
 
 extern short D_1F80019E;
-void func_800489D8(TObj *o, TObj *e);
+void pushObjectOutOfObjectFacing(TObj *o, TObj *e);
 void func_80126B50(TObj *o, TObj *e);
 void func_80126C60(TObj *o, TObj *e);
 void func_80126D04(TObj *o, TObj *e);
@@ -55,7 +55,7 @@ void collideCat5WithCat4Objects(void)
             if (!(e->active & 1))
                 continue;
             switch (e->type) {
-            case 0: func_800489D8(o, e); break;
+            case 0: pushObjectOutOfObjectFacing(o, e); break;
             case 1: func_80126B50(o, e); break;
             case 2: func_80126C60(o, e); break;
             case 4:

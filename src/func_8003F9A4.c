@@ -541,7 +541,7 @@ unk_8007E868 D_8007E868_data[8] asm("D_8007E868") = {
 asm(".globl D_8007E86C\nD_8007E86C = D_8007E868 + 4");
 asm(".globl D_8007E86E\nD_8007E86E = D_8007E868 + 6");
 
-void func_8003F3D4(u8* self);
+void updateThrownObject(u8* self);
 
 void func_8003F78C(u8* self);
 

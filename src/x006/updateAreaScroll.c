@@ -10,7 +10,7 @@ typedef void (*Fn)(TObj *);
 extern Fn D_80079AD0[];
 extern void FUN_80027810(TObj *);
 extern int tryStartItemInteraction(TObj *, int, unsigned char);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 
 void updateAreaScroll(TObj *o)
 {
@@ -40,7 +40,7 @@ void updateAreaScroll(TObj *o)
         }
         break;
     case 2:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     }
 }

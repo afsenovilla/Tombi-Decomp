@@ -15,7 +15,7 @@ extern short D_800A604A, D_800A604E;
 extern void FUN_80027810(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void stepPlayerXToward(int);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 
 void updateAreaScroll(TObj *o)
 {
@@ -58,7 +58,7 @@ void updateAreaScroll(TObj *o)
         }
         break;
     case 2:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     }
 }

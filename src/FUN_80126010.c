@@ -1,11 +1,11 @@
 // FUNC 80126010 232 X000
 // MATCHING 80126010 232
-extern short FUN_80043464(void);
+extern short objectBoxOverlapSide(void);
 
 void FUN_80126010(unsigned char *o, unsigned char *s)
 {
     short r;
-    r = FUN_80043464();
+    r = objectBoxOverlapSide();
     if (r != -1) {
         if (r == 3 && o[0xac] == 1) {
             s[0] = 2;

@@ -1,11 +1,11 @@
 // FUNC 800442b0 124 MAIN0
 // MATCHING 800442b0 124
 #include "TOBJ.H"
-short FUN_80043464(TObj *o, TObj *e);
+short objectBoxOverlapSide(TObj *o, TObj *e);
 
 void tryAttachObjectOnResult3(TObj *o, TObj *e)
 {
-    short r = FUN_80043464(o, e);
+    short r = objectBoxOverlapSide(o, e);
     if (r != -1 && r == 3 && *(unsigned char *)&o->wac == 1) {
         e->active = 2;
         e->b04 = 2;

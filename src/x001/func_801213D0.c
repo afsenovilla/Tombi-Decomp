@@ -30,7 +30,7 @@ extern void AnimLoadDuration(TObj *);
 extern void SfxPlay2(int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_80104cd8(TObj *);
-extern void func_80104A04(TObj *);
+extern void playerBittenJumpAirMove(TObj *);
 
 void func_801213D0(TObj *o)
 {
@@ -108,7 +108,7 @@ void func_801213D0(TObj *o)
         o->substep = 4;
         break;
     case 4:
-        func_80104A04(o);
+        playerBittenJumpAirMove(o);
         break;
     }
 }

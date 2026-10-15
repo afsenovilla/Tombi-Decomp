@@ -2,7 +2,7 @@
 // MATCHING 8011fd20 232
 #include "spad.h"
 #include "TOBJ.H"
-extern short func_80043464(TObj *, TObj *);
+extern short objectBoxOverlapSide(TObj *, TObj *);
 extern void startPadVibration(int, int, int, int);
 
 void springPadContact(TObj *p, TObj *o)
@@ -12,7 +12,7 @@ void springPadContact(TObj *p, TObj *o)
         return;
     if (p->b9e != 0)
         return;
-    if (func_80043464(p, o) != 3)
+    if (objectBoxOverlapSide(p, o) != 3)
         return;
     if (SPAD.b1a4 != 0)
         return;

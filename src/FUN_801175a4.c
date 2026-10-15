@@ -7,7 +7,7 @@ extern short DAT_1f80016e, DAT_1f80016a;
 extern void FUN_80116d14(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void FUN_8002a3d4(TObj *);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 
 void FUN_801175a4(TObj *o)
 {
@@ -23,7 +23,7 @@ void FUN_801175a4(TObj *o)
             FUN_8002a3d4(o);
             break;
         case 2:
-            FUN_8002a4d0(o);
+            cameraEventScrollHandler(o);
             break;
         }
     } else {

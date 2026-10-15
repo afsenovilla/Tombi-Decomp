@@ -1,5 +1,5 @@
 // JP slps01144 800551D4 936
-// Japanese version of PAL main0 8004A124 (FUN_8004a124.c): 242 -> 226.
+// Japanese version of PAL main0 8004A124 (eventCarryPlayerB.c): 242 -> 226.
 #include "gcd.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -10,7 +10,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 
-void FUN_8004a124(TObj *o)
+void eventCarryPlayerB(TObj *o)
 {
     TObj *s = &PLAYER;
 

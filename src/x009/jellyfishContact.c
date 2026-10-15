@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short func_80043464(TObj *, TObj *);
+extern short objectBoxOverlapSide(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -14,7 +14,7 @@ void jellyfishContact(TObj *o, TObj *p)
     int t;
 
     if (o->b9e) return;
-    r = func_80043464(o, p);
+    r = objectBoxOverlapSide(o, p);
     if (r == -1) return;
     switch ((*(unsigned char*)&o->wac)) {
     case 1:

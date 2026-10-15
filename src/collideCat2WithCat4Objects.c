@@ -10,7 +10,7 @@
 
 extern short D_1F80019E;
 extern unsigned char D_8007B63C[];
-void func_800489D8(TObj *o);
+void pushObjectOutOfObjectFacing(TObj *o);
 void func_80126B50(TObj *o);
 void func_80126C60(TObj *o);
 void func_80126CA4(TObj *o);
@@ -54,7 +54,7 @@ void collideCat2WithCat4Objects(void)
             D_1F80019E--;
             if (!(e->active & 1)) continue;
             switch (e->type) {
-            case 0: two = 2; func_800489D8(o); break;
+            case 0: two = 2; pushObjectOutOfObjectFacing(o); break;
             case 1: func_80126B50(o); break;
             case 2: func_80126C60(o); break;
             case 4:

@@ -5,7 +5,7 @@ typedef struct S {
     unsigned char b6e, b6f, b70, b71, b72, b73;
 } S;
 extern short D_1F8000E6;
-extern void FUN_80027ed8(S *);
+extern void cameraFollowTargetY(S *);
 extern void func_8002809C(S *);
 void func_80029F1C(S *o)
 {
@@ -42,6 +42,6 @@ void func_80029F1C(S *o)
         o->b6e = 0;
         o->b6f = 0;
     }
-    FUN_80027ed8(o);
+    cameraFollowTargetY(o);
     func_8002809C(o);
 }

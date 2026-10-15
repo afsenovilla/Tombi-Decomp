@@ -23,7 +23,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void playerSelectGroundAnim(TObj *);
 extern void playerAnimateTalkPose(TObj *);
-extern short func_800F0E7C(TObj *);
+extern short playerIdleAnimUpdate(TObj *);
 extern void playerUpdateSpeedFromPad(TObj *);
 extern void setObjectSpeedPolar2(TObj *, int, int);
 extern void FUN_8001fce4(TObj *);
@@ -102,7 +102,7 @@ void playerStepIdle(TObj *o)
             if (TALK_POSE) {
                 playerAnimateTalkPose(o);
             } else {
-                c = func_800F0E7C(o);
+                c = playerIdleAnimUpdate(o);
                 if (!c)
                     playerSelectGroundAnim(o);
                 if (*(unsigned short *)o->anim || (!DAT_8009c93f && !DAT_1f8003ce))

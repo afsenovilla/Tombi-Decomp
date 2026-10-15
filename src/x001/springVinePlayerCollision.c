@@ -2,10 +2,10 @@
 // MATCHING 80125044 48
 #include "TOBJ.H"
 
-extern int func_800439F4(TObj *a, TObj *b);
+extern int pushObjectOutOfObjectBoxC(TObj *a, TObj *b);
 
 void springVinePlayerCollision(TObj *a, TObj *b)
 {
     if (b->subtype == 0)
-        func_800439F4(a, b);
+        pushObjectOutOfObjectBoxC(a, b);
 }

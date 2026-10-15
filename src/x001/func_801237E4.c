@@ -11,7 +11,7 @@ extern unsigned char D_8009D2B0[];
 extern unsigned short D_1F8001F8;
 extern void func_801072FC(TObj *);
 extern void playerSlopeSlideUpdateAnim(TObj *);
-extern void FUN_80110760(TObj *);
+extern void playerDecelerateSpeedB(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_800f00ac(TObj *);
 extern void startPadVibration(int, int, int, int);
@@ -28,7 +28,7 @@ void func_801237E4(TObj *o)
         func_801072FC(o);
     case 1:
         playerSlopeSlideUpdateAnim(o);
-        FUN_80110760(o);
+        playerDecelerateSpeedB(o);
         playerMoveByAngleSpeed(o);
         if (o->bbe == 0) {
             if (*(unsigned char *)&D_8009C330->w08 == o->animFrame) {

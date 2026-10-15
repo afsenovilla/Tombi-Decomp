@@ -28,7 +28,7 @@ extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(TObj *, int, int);
 extern void markSectionVisited(void);
 extern void updateCameraFollow(TObj *);
-extern void FUN_8002a4d0(TObj *);
+extern void cameraEventScrollHandler(TObj *);
 extern void FUN_8001f110(int);
 extern void FUN_8001f4bc(void);
 extern void FUN_800171b8(int, char *);
@@ -170,7 +170,7 @@ void FUN_80116d14(TObj *o)
         o->step--;
         break;
     case 8:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     case 9:
         DAT_8013841c[o->subtype](o);

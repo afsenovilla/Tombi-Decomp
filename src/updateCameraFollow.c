@@ -16,7 +16,7 @@ extern unsigned short D_8009C960h;
 extern unsigned char D_800A60D6;
 extern void cameraFollowPlayerX(O *);
 extern void cameraFollowPlayerY(O *);
-extern void func_80028BE0(O *);
+extern void cameraFollowRampStep(O *);
 extern void updateCameraScroll(O *);
 
 static __inline__ void Clamp(O *o)
@@ -96,7 +96,7 @@ void updateCameraFollow(O *o)
         }
         o->d38->w2 = D_800A607C->w2;
     }
-    func_80028BE0(o);
+    cameraFollowRampStep(o);
     updateCameraScroll(o);
     SPAD.s286 = -o->d24 >> 6;
     Clamp(o);

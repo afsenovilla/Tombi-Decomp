@@ -38,6 +38,6 @@ void updateLookScroll(u8* self)
         self[0x72] = 0;
         self[0x73] = 0;
     }
-    func_80027ED8(self);
+    cameraFollowTargetY(self);
     func_80028250(self);
 }

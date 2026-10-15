@@ -27,7 +27,7 @@ extern void updateCameraScroll(O *);
 extern void func_80027810(O *);
 extern int stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, int);
-extern void FUN_8002a4d0(O *);
+extern void cameraEventScrollHandler(O *);
 
 #define XU (*(unsigned short *)&D_1F80016A)
 #define ZU (*(unsigned short *)&D_1F80016E)
@@ -133,7 +133,7 @@ void updateAreaScroll(O *o)
         }
         break;
     case 3:
-        FUN_8002a4d0(o);
+        cameraEventScrollHandler(o);
         break;
     }
 }

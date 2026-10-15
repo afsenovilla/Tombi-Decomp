@@ -35,7 +35,7 @@ extern void spawnItemFromEntry(char *a, Fix16 *v, int b, int c, TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern void despawnObjectOffscreen(TObj *o);
 extern void func_80111DC8(TObj *o);
-extern void FUN_800eb8f0(TObj *o, int x, int y, int z);
+extern void spawnBreakPieces(TObj *o, int x, int y, int z);
 
 void func_80112204(TObj *o)
 {
@@ -99,12 +99,12 @@ void func_80112204(TObj *o)
         o->step = 7;
         break;
     case 5:
-        FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         setSectionFlagBit(o->b6b);
         o->b04++;
         break;
     case 7:
-        FUN_800eb8f0(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+        spawnBreakPieces(o, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->b04++;
         break;
     }

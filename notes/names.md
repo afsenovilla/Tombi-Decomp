@@ -133,6 +133,33 @@ One line per name: `address name (old file) - justification`.
 - `80041ebc probeFloorPlaneAt` (was func_80041EBC) - walks the collision plane list of getCollisionPlaneAt for the column and returns the floor (flags bit 0) height below y
 - `80025aa8 copyModelPrimGroups` (was FUN_80025aa8) - copies the 8 primitive groups of a model (count words x per-group sizes 0x20..0x54) into the destination buffer
 - `80029078 updateCameraScroll` (was func_80029078) - camera scroll step after the follow logic (ramped speed, look scroll input, section height); called by updateCameraFollow and two X000 section controllers
+- `8004c1ec updateSectionSpawnManager` (was func_8004C1EC) - the unlayered section manager object (tools/objects.py): on entry spawnSectionObjects, on section change despawnOtherSectionObjects and the scroll spawners
+- `8004c570 spawnSectionObjects` (was FUN_8004c570) - spawns the placement records of slot (section & 7) and the area-wide slot (min(sections,15), records whose b0 == section or ~section and whose persistent flag is clear) with spawnObjectFromRecord
+- `8004c848 spawnSectionObjectsWithPrevious` (was FUN_8004c848) - as spawnSectionObjects for records with b0 >= 0, plus the negative-b0 records of the previous section when +0x0E > 0
+- `8004c6c8 spawnScrollBackObjects` (was FUN_8004c6c8) - when D_8009C981 == 1 and +0x0E > 0: spawns the previous section's records with b0 < 0 / b0 == -section
+- `8004d260 spawnSectionObjectsAlt` (was FUN_8004d260) - same body as spawnSectionObjects, called from func_8005B1A4
+- `8004c418 despawnOtherSectionObjects` (was FUN_8004c418) - marks every object of the three pools (200 at 800A6610, 0x2D at 800B1828, 10 at 800A49A8) not in the current section (flag +0x0F bit 7 clear) for removal (active 2, +4 = 3)
+- `8003bf80 updateThrownObject` (was func_8003F3D4, US name) (uncertain) - layer-1 type 1 handler (8007A110): 14 subtypes with box/sprite/anim from D_8007A148, spins (+0x8C) and flies by facing; category 1, so weaponOnHitGetResult treats it like a weapon (case 1)
+- `80035428 weapon8to9HitWall` (was FUN_80035428) - weapon8to9Swing helper: on a terrain hit marks the weapon hit, impact effect (spawnImpactEffect / FUN_800eaffc by surface) and sfx
+- `80028be0 cameraFollowRampStep` (was func_80028BE0) - updateCameraFollow helper: ramps the camera speed +0x24 by 0x80 toward the target (+0x73) and decays it
+- `80019244 bootStartupTask` (was func_80019244) (no caller found; task pointer) - boot task: display init, boot logo, debug text, CD seek, analog pad mode, then the next task
+- `80049cdc eventTakePlayerControlA` (was func_80049CDC) - scripted event object (jump table at 8004B3C0): when the player is in mode 1 step 0x30 state 2 takes it over (mode 5, step 0x41) and plays its anims
+- `8004a124 eventCarryPlayerB` (was FUN_8004a124) - event object (jump table 8004B3D0): when the player is in step 4 state 3 mode 5, puts the player on it (y - 0x14, anim 0x2C, step 0x41) and moves with it
+- `8004a4cc eventTakePlayerControlC` (was FUN_8004a4cc) - event object (8004B404): takes the player over like eventTakePlayerControlA and calls 800E8A98/96E8/940C by +0x6A
+- `8004a9c8 eventTakePlayerControlD` (was FUN_8004a9c8) - event object (8004B414): same pattern as eventTakePlayerControlC
+- `8004b7c4 probeGrabObjectBox` (was func_8004B7C4) - playerProbeGrab helper: tests the grab point (+0xE8/+0xEA) against an object's box (depth within 0x2D), per object type result
+- `80027ed8 cameraFollowTargetY` (was FUN_80027ed8) - moves the camera Y toward the target 1F80018C with a 2..4 px dead zone and ramped speed
+- `800288c4 cameraScrollInputStep` (was FUN_800288c4) - updateCameraScroll helper: look-scroll input (D_800A60D4) and the decay of 1F8000E6
+- `800439f4 pushObjectOutOfObjectBoxC` (was func_800439F4) - another box push-out variant (two area hooks call it)
+- `800489d8 pushObjectOutOfObjectFacing` (was func_800489D8) - box push-out where the first object's box is mirrored by its facing (animFrame bit 0)
+- `80043464 objectBoxOverlapSide` (was FUN_80043464) - box overlap test returning -1 (no overlap) or the side of the overlap
+- `8003ff48 tileCollideColumnAt` (was func_8003FF48) - TileCollideAt helper: walks one column's collision entries (D_8009BD70 count) for the floor/wall under the object
+- `800271b8 cameraEventScrollStep` (was func_800271B8) - cameraEventScrollHandler helper: scripted camera pan steps (offsets +0x4C/+0x50 from 1F8000EE/F6)
+- `8002a4d0 cameraEventScrollHandler` (was FUN_8002a4d0) - camera controller in the tables at 80079A9C.. and X000 80138424: scripted scroll back to the player with stopBgm; falls back to updateCameraFollow while GVARS.b38
+- `8002be80 updateImpactEffect` (was func_8002BE80) - ObjAlloc-pool handler of type 0xF (pool type table 80079BAC[0xF]); the objects spawnImpactEffect creates: anim, sfx, category 3 list, freed at the end
+- `8002fe78 updatePlayerEffect4E` (was func_8002FE78) - pool type 0x4E handler (80079CE4): the effects spawned by spawnPlayerPowerEffect and spawnPlayerFootstepEffect
+- `8002b8c4 updatePoolType5DObject` (was func_8002B8C4) - pool type 0x5D handler (80079D20)
+- `8002c43c updatePoolType12Object` (was func_8002C43C) - pool type 0x12 handler (80079BF4)
 
 # X000 function names (shared overlay code)
 
@@ -302,6 +329,29 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800ec710 spawnWeaponTrailObjects` (was FUN_800ec710) - by weapon type (0, 5..9) spawns 1..4 type 0x5C objects linked to the weapon (+0x90); called from the weapon swings
 - `8010fe70 playerSkidDecelerate` (was FUN_8010fe70) - deceleration of +0xB2 by the D_80115510 table plus the per-frame move used by playerStepSkidStop
 - `80133474 updateFrog` (was func_80133474) - layer 2 type 0x12 handler in AREA00 (MAIN0 table slot 80077DE4): its animation strips show a green frog (tools/anim.py export, a00_func_80133474)
+- `800ec420 updateWeaponTrailObject` (was FUN_800ec420) - pool type 0x5C handler (80079D1C): the objects spawnWeaponTrailObjects attaches to the weapon (+0x90); weaponTrailFollowStep / weaponTrailOrbitStep by subtype
+- `800ec378 updateWeaponTrailObjectAlt` (was FUN_800ec378) (no caller found) - same dispatch as updateWeaponTrailObject without the init/free
+- `800ebd40 weaponTrailFollowStep` (was FUN_800ebd40) - weapon trail object: copies the weapon position (+0x90) by the player state 800A6066
+- `800ebf68 weaponTrailOrbitStep` (was FUN_800ebf68) - weapon trail object: orbits/swings around the weapon by angle (MulCos/MulNegSin, Rand)
+- `800ec9c0 updateColorBurstParticle` (was FUN_800ec9c0) - pool type 0x5F handler (80079D28): the particles spawnColorBurst creates (four vertices +-4 at +0xB4..)
+- `800ea67c updateGroundDebris` (was FUN_800ea67c) - pool type 0xC handler (80079BDC): subtype 0 keeps spawning subtype-1 type 0xC children at random intervals (the objects spawnGroundDebris creates)
+- `800eb394 updatePoolType1BEffect` (was FUN_800eb394) - pool type 0x1B handler (80079C18): anim + sfx, freed when done
+- `800eb50c spawnPoolType1BEffect` (was FUN_800eb50c) - spawns a pool type 0x1B object at x/y/z with the per-area sprite/anim table D_80114AE4 (subtype = arg)
+- `800eb6ac updateBreakPiece` (was FUN_800eb6ac) - pool type 0x1E handler (80079C24): the pieces spawnBreakPieces creates, moved by applyAnimVelocityX
+- `800eb8f0 spawnBreakPieces` (was FUN_800eb8f0) - spawns pool type 0x1E pieces at x/y offsets from D_80114C08, copying sprite/flags of the source object
+- `800eb9f0 updatePoolType44Object` (was FUN_800eb9f0) - pool type 0x44 handler (80079CBC)
+- `80121a5c spawnPoolType44Object` (was FUN_80121a5c) - allocates a pool type 0x44 object at x/y/z with +0x0C = arg
+- `800ea168 updatePoolType04Object` (was FUN_800ea168) - pool type 4 handler (80079BBC)
+- `800ea284 updatePoolType05Object` (was func_800EA284) - pool type 5 handler (80079BC0): falls until probeCollisionAtDepthB, despawned offscreen
+- `800eb0c8 updatePoolType10Object` (was FUN_800eb0c8) - pool type 0x10 handler (80079BEC)
+- `800ebb48 updatePoolType5BObject` (was FUN_800ebb48) - pool type 0x5B handler (80079D18)
+- `8010a518 playerSpinAimDir8B` (was FUN_8010a518) - playerStepSpinOnObject helper: 8-way direction (D_8009C330+0xB, 8 = none) from the pad, mirrored by facing
+- `8010a168 playerSpinAimDir8A` (was func_8010A168) - same 8-way pad direction with another table
+- `800f0e7c playerIdleAnimUpdate` (was func_800F0E7C) - playerStepIdle helper: picks the idle/fidget animation (FUN_800f0b5c / FUN_800f0c28) and restarts it when it changed
+- `80110760 playerDecelerateSpeedB` (was FUN_80110760) (no caller found) - deceleration of +0xB2 by the D_80115510 table (same pattern as playerSkidDecelerate)
+- `80110fdc playerAttackDecelerate` (was func_80110FDC) - weapon attack steps 3/4: decelerates +0xB2 with the attack columns of the D_80115510 table (row by weapon and floor kind)
+- `80104a04 playerBittenJumpAirMove` (was func_80104A04) - bitten-jump helper: air motion, re-bite (wac == 2) and grab probe (playerProbeGrab) while carrying the bitten object
+- `8011a148 spawnPoolType09Object` (was FUN_8011a148) - spawns a pool type 9 object (sub = arg) at x/y/z when fewer than 3 exist
 
 # Area overlay function names (X001..X019)
 

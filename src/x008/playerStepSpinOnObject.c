@@ -19,8 +19,8 @@ extern void FUN_8001e5f4(int, int);
 extern void startPadVibration(int, int, int, int);
 extern void FUN_8001e560(int, int);
 extern void playerSpinPlaceAndAccelerate(TObj *, int, short);
-extern void FUN_8010a168(TObj *);
-extern void FUN_8010a518(TObj *);
+extern void playerSpinAimDir8A(TObj *);
+extern void playerSpinAimDir8B(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
@@ -185,7 +185,7 @@ void playerStepSpinOnObject(TObj *o)
             GV2.bb0 = 0;
             o->b9c = 1;
             (*(unsigned char*)&o->wac) = 0;
-            FUN_8010a168(o);
+            playerSpinAimDir8A(o);
             o->h->p.whole += (o->animFrame & 1) ? 16 : -16;
             (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
@@ -244,7 +244,7 @@ void playerStepSpinOnObject(TObj *o)
         playerSpinPlaceAndAccelerate(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
             GV2.bb0 = 0;
-            FUN_8010a518(o);
+            playerSpinAimDir8B(o);
             if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
             else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->state = 3;
@@ -334,7 +334,7 @@ void playerStepSpinOnObject(TObj *o)
         QBLK(o);
         swing(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
-            FUN_8010a168(o);
+            playerSpinAimDir8A(o);
             if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
             else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
             o->state = 5;

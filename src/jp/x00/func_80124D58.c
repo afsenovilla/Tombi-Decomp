@@ -1,11 +1,11 @@
 // JP x00 80124D58 232
 // Japanese version of PAL x000 80126010 (FUN_80126010.c): 228 -> 212.
-extern short FUN_80043464(void);
+extern short objectBoxOverlapSide(void);
 
 void FUN_80126010(unsigned char *o, unsigned char *s)
 {
     short r;
-    r = FUN_80043464();
+    r = objectBoxOverlapSide();
     if (r != -1) {
         if (r == 3 && o[0xac] == 1) {
             s[0] = 2;

@@ -1,5 +1,5 @@
 // JPDEMO slpm80165 800287BC 444
-// Demo version of PAL main0 800288C4 (FUN_800288c4.c): pad bits 0x1000/0x4000 (PAL 0x10/0x40).
+// Demo version of PAL main0 800288C4 (cameraScrollInputStep.c): pad bits 0x1000/0x4000 (PAL 0x10/0x40).
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
 extern unsigned short DAT_8009d670;
@@ -21,7 +21,7 @@ static __inline__ void decay(void)
     }
 }
 
-void FUN_800288c4(char *o, int a)
+void cameraScrollInputStep(char *o, int a)
 {
     volatile unsigned short *k;
     

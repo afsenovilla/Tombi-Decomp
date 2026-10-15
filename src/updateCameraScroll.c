@@ -27,7 +27,7 @@ extern short D_1f8000e6;
 extern short D_1f8000f2;
 extern int D_1f8000f0;
 extern int handleLookScrollInput(S *);
-extern void FUN_800288c4(S *, int);
+extern void cameraScrollInputStep(S *, int);
 extern void loadSectionHeight(S *);
 extern void FUN_80116758(S *);
 extern void FUN_801165c0(S *);
@@ -123,7 +123,7 @@ void updateCameraScroll(S *o)
                         o->b6e = 2;
                         o->b6f = 10;
                     }
-                    FUN_800288c4(o, 0);
+                    cameraScrollInputStep(o, 0);
                 } else if ((unsigned char)c == 0x12) {
                     if (handleLookScrollInput(o) == 0) break;
                     decay();
@@ -193,7 +193,7 @@ void updateCameraScroll(S *o)
                 }
             } else if (D_8009D670[0] & 0xc00) {
                 handleLookScrollInput(o);
-                FUN_800288c4(o, 0);
+                cameraScrollInputStep(o, 0);
             } else {
                 decay();
             }
@@ -220,7 +220,7 @@ void updateCameraScroll(S *o)
         case 12:
             break;
         default:
-            if ((g->a0.b[0] & 0x12) || (D_8009D670[0] & 0xc00)) FUN_800288c4(o, 1);
+            if ((g->a0.b[0] & 0x12) || (D_8009D670[0] & 0xc00)) cameraScrollInputStep(o, 1);
             else decay();
             break;
         }
@@ -273,7 +273,7 @@ void updateCameraScroll(S *o)
         if (b) o->b6c = 10;
         break;
     case 7:
-        FUN_800288c4(o, 0);
+        cameraScrollInputStep(o, 0);
         if (ramp(o)) o->b6c = 0;
         break;
     case 8:

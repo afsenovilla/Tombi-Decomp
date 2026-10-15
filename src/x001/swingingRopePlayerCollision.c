@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern short func_800439F4(TObj *, TObj *);
+extern short pushObjectOutOfObjectBoxC(TObj *, TObj *);
 extern short func_80124C20(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -12,7 +12,7 @@ void swingingRopePlayerCollision(TObj *a, TObj *b)
     short r;
 
     if (a->step == 0x22) return;
-    if (b->subtype == 7) r = func_800439F4(a, b);
+    if (b->subtype == 7) r = pushObjectOutOfObjectBoxC(a, b);
     else r = func_80124C20(a, b);
     if (r == 1 && !SPAD.b1a4 && !(a->active & 2) && !(b->active & 2)) {
         a->active = 2;

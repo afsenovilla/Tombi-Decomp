@@ -23,7 +23,7 @@ extern void PlayerSetAnimIfChanged(TObj *o, int n);
 extern void SfxPlay2(int a, int b);
 extern TObj *allocObjectLayer1(void);
 extern void FUN_80104cd8(TObj *o);
-extern void func_80104A04(TObj *o);
+extern void playerBittenJumpAirMove(TObj *o);
 
 void playerBittenJumpGeneric(TObj *o)
 {
@@ -218,7 +218,7 @@ int c = o->animFrame & 1; Fix16 *h = q->h; int w = h->p.whole; int r;
         o->substep = 4;
         break; }
     case 4:
-        func_80104A04(o);
+        playerBittenJumpAirMove(o);
         break;
     }
 }

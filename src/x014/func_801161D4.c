@@ -12,9 +12,9 @@ extern unsigned char D_800A60D6;
 extern void cameraFollowPlayerX(TObj *);
 extern void cameraFollowPlayerY(TObj *);
 extern void syncObjectTargetY(TObj *);
-extern void FUN_80028be0(TObj *);
+extern void cameraFollowRampStep(TObj *);
 extern void stepScrollApproachX(TObj *);
-extern void FUN_800288c4(TObj *, int);
+extern void cameraScrollInputStep(TObj *, int);
 extern void FUN_800274e4(TObj *);
 extern void FUN_8002771c(TObj *);
 
@@ -75,10 +75,10 @@ void func_801161D4(TObj *o)
         }
         syncObjectTargetY(o);
     }
-    FUN_80028be0(o);
+    cameraFollowRampStep(o);
     stepScrollApproachX(o);
     if (GVARS.b3f == 0 && p->b9e == 0 && (*(volatile unsigned short *)&GV6.s70 & 0xc00))
-        FUN_800288c4(o, 1);
+        cameraScrollInputStep(o, 1);
     FUN_800274e4(o);
     if ((*(short*)((char*)&SPAD.if0 + 2)) > (*(short*)((char*)&o->d30 + 2))) SPAD.if0 = (*(short*)((char*)&o->d30 + 2)) << 16;
     FUN_8002771c(o);
