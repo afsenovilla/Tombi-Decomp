@@ -14,7 +14,7 @@ extern Fix16 *D_800A6078;
 extern short D_800A60EA[];
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void FUN_800eea7c(TObj *, short, short);
-extern void func_80128AF8(TObj *, int, int);
+extern void npcSetAnim(TObj *, int, int);
 extern void playSFX(int);
 extern void SfxPlay2(int, int);
 extern void setEventStarted(int, int, int);
@@ -62,7 +62,7 @@ void aspiringActorGuardTalk(TObj *o)
     case 2:
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 0, &v);
-        func_80128AF8(p, 0x20, 0);
+        npcSetAnim(p, 0x20, 0);
         FUN_800eea7c(&PLAYER, 0, 0);
         o->state++;
         break;
@@ -84,7 +84,7 @@ void aspiringActorGuardTalk(TObj *o)
             o->w08 = 0xc8;
             o->state = 0x12;
         }
-        func_80128AF8(p, 0x14, 0);
+        npcSetAnim(p, 0x14, 0);
         break;
     }
     case 4:
@@ -93,7 +93,7 @@ void aspiringActorGuardTalk(TObj *o)
         FUN_800eea7c(&PLAYER, 0, 0);
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 1, &v);
-        func_80128AF8(p, 0x20, 0);
+        npcSetAnim(p, 0x20, 0);
         o->state++;
         break;
     case 5: {
@@ -105,13 +105,13 @@ void aspiringActorGuardTalk(TObj *o)
         setEventComplete(0xaf, 0);
         o->w08 = 0x12c;
         o->state = 0x14;
-        func_80128AF8(p, 0x14, 0);
+        npcSetAnim(p, 0x14, 0);
         break;
     }
     case 6:
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 2, &v);
-        func_80128AF8(p, 0x20, 0);
+        npcSetAnim(p, 0x20, 0);
         o->state++;
         break;
     case 7: {
@@ -132,7 +132,7 @@ void aspiringActorGuardTalk(TObj *o)
             o->w08 = 0xc8;
             o->state = 0x13;
         }
-        func_80128AF8(p, 0x14, 0);
+        npcSetAnim(p, 0x14, 0);
         break;
     }
     case 8:
@@ -142,7 +142,7 @@ void aspiringActorGuardTalk(TObj *o)
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 3, &v);
         o->state++;
-        func_80128AF8(p, 0x20, 0);
+        npcSetAnim(p, 0x20, 0);
         break;
     case 9: {
         TObj *q = (TObj *)p->d90;
@@ -153,7 +153,7 @@ void aspiringActorGuardTalk(TObj *o)
         setEventComplete(0xb0, 0);
         o->w08 = 0x78;
         o->state++;
-        func_80128AF8(p, 0x14, 0);
+        npcSetAnim(p, 0x14, 0);
         break;
     }
     case 10:
@@ -173,7 +173,7 @@ void aspiringActorGuardTalk(TObj *o)
         p->animFrame = 0;
         p->step = 0;
         p->state = 0;
-        func_80128AF8(p, 0x20, 0);
+        npcSetAnim(p, 0x20, 0);
         o->state++;
         break;
     case 12: {

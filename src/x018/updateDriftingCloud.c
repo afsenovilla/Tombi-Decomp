@@ -11,7 +11,7 @@ extern void FUN_800187e4(TObj *);
 
 #define PT(o) ((P4 *)((char *)(o) + 0xb4))
 
-void func_801166F0(TObj *o)
+void updateDriftingCloud(TObj *o)
 {
     unsigned char t = o->b04;
     unsigned char u;

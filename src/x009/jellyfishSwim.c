@@ -23,7 +23,7 @@ static __inline__ int Blocked(TObj *o)
     return (short)probeWallAt(o, (short)(o->h->p.whole + d), (short)(o->y.p.whole + 0x30), af);
 }
 
-void func_8012516C(TObj *o)
+void jellyfishSwim(TObj *o)
 {
     short s;
     short c;

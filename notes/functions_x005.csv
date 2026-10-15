@@ -305,7 +305,7 @@ address,size,name,twin
 80114a08,64,FUN_80114a08,X000:80114a08
 80115ee4,64,updateAreaScroll,
 80115f24,188,func_80115F24,
-80115fe0,456,func_80115FE0,
+80115fe0,456,updateBackdropSpriteSet,
 801161a8,176,func_801161A8,
 80116258,92,func_80116258,
 801162b4,4,wineMerchantTalk,

@@ -13,7 +13,7 @@ extern void ObjFree(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern unsigned short GetClut(int, int);
 
-void func_801166F8(TObj *o)
+void updateBackdropSpriteSet(TObj *o)
 {
     unsigned char *f;
     unsigned char k;

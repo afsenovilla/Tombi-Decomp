@@ -9,7 +9,7 @@ typedef struct {
 extern TObj PLAYER;
 extern Fix16 D_1F8000F0;
 
-void func_80116234(Cam *c)
+void cameraFollowPlayerClamped(Cam *c)
 {
     TObj *pl = &PLAYER;
     Fix16 *q;

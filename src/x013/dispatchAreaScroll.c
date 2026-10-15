@@ -13,7 +13,7 @@ extern Fix16 D_1F8000F0;
 extern int D_1F8000F0_b;
 extern void updateAreaScroll(Cam *);
 
-void func_801162D0(Cam *c)
+void dispatchAreaScroll(Cam *c)
 {
     TObj *pl;
 

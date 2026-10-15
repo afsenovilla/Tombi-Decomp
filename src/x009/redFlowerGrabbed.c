@@ -27,7 +27,7 @@ static __inline__ short land(TObj *o)
     return 0;
 }
 
-void func_80123828(TObj *o)
+void redFlowerGrabbed(TObj *o)
 {
     short *e = &o->wb4;
     unsigned char m;

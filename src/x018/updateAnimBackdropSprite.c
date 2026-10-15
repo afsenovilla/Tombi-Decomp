@@ -10,7 +10,7 @@ extern void ObjListPush_1F800220(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjFree(TObj *);
 
-void func_801165A8(TObj *o)
+void updateAnimBackdropSprite(TObj *o)
 {
     switch (o->b04) {
     case 0:

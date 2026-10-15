@@ -24,7 +24,7 @@ extern void func_801229AC(TObj *);
 extern void func_80122F08(TObj *);
 extern void func_80123294(TObj *);
 extern void redFlowerHit(TObj *);
-extern void func_80123828(TObj *);
+extern void redFlowerGrabbed(TObj *);
 extern void redFlowerDefeated(TObj *);
 
 void updateRedFlower(TObj *o)
@@ -161,7 +161,7 @@ void updateRedFlower(TObj *o)
             if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) despawnObjectOffscreen(o);
             break;
         case 1:
-            func_80123828(o);
+            redFlowerGrabbed(o);
             ObjCullRegister(o);
             break;
         case 2:

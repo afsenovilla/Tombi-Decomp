@@ -9,7 +9,7 @@ extern TObj PLAYER;
 extern short *D_800A6078;
 extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
-void func_801289C8(int a, int b, int c);
+void npcSetAnim(int a, int b, int c);
 
 void func_80131E44(TObj *o)
 {
@@ -34,8 +34,8 @@ void func_80131E44(TObj *o)
     case 1:
         if (PLAYER.b69) {
             GCD.bceef = 1;
-            func_801289C8(a, 0, 0);
-            func_801289C8(b, 0, 0);
+            npcSetAnim(a, 0, 0);
+            npcSetAnim(b, 0, 0);
             o->state++;
         }
         break;

@@ -591,3 +591,20 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   (any direction, below the ceiling y -0x398), gone once GV2.bc3 & 0x40): step 0 `80124370 flyingBugWander`, step 1 `80124a00 flyingBugChase` (while the
   player is near, speed velH 0x100..0x200, turning), b04 2 `80124f0c flyingBugDefeated` (velV -0x400 fly-off), `80123ecc flyingBugProbeBlocked` (wall /
   floor / ceiling probes by the direction octant, returns blocked bits)
+- NPC anim setters `o->anim = TABLE[o->subtype].anims[n]; AnimJump(o, k)` (one copy after each NPC's code, named after the talk functions that use
+  the same table; several copies are unreferenced): x002 `80117cec sevenFriendsSetAnim` (D_8011C778, also skips when n == wd2), x003 `801289c8
+  npcSetAnim` (D_80135D84: flame blocked / soaked phoenix / phoenix spirit NPCs), x004 `801280c0 mermaidSetAnim` (D_8013117C), `801295cc
+  scaredGoldVolunteerSetAnim` (D_80131188), `80129b64 paintingSlotHintNpcSetAnim` (D_801311B8), `8012a26c townHallWorkerSetAnim` (D_801311D0), x009
+  `80128af8 npcSetAnim` (D_8012B2E4: flower tears seeker, aspiring actor guard), x010 `80125dac tenThousandYearElderSetAnim` (D_8012F3C4), x018
+  `80116b58 juiceManSetAnim` (D_8011A4B8), `8011774c witchMizunoSetAnim` (D_8011A564)
+- x010 updateShieldSpearPig steps: `8012cb50 shieldSpearPigFungaShout` (step 0: showMessageBoxDirect(2, 2) = MFNT100 2/2 "Funga!"), `8012cce8
+  shieldSpearPigHongagaaaShout` (step 1: 2/3 "Hongagaaa!")
+- Camera-fixed backdrop sprites (b0a 7, CLUT 0x80,0x1FF, drawn at d30/d34 minus the camera): `updateBackdropSpriteSet` x005 80115fe0 (layer 3 type 0x30),
+  x013 801166f8 (type 0x58, 15 placements); x018 `801165a8 updateAnimBackdropSprite` (type 0x4D, animated); x018 `801166f0 updateDriftingCloud` (type
+  0x5E, uncertain: semi-transparent quad that drifts right 0xC000 per tick and wraps from x 0x1E1 to -0x78)
+- x013 camera: `801162d0 dispatchAreaScroll` (section 0 -> updateAreaScroll, other sections follow the player clamped to the camera box),
+  `80116234 cameraFollowPlayerClamped` (the same clamp as a separate function)
+- x009 jellyfish (updateJellyfish) helpers: b04 2 step 0 `80126890 jellyfishHit`, step 5 `8012781c jellyfishDefeated` (checkMonsterHuntComplete,
+  spawnItemDropAtPos), b04 1 step 3 `80125a38 jellyfishSpawnChild` (allocObjectLayer2 type 0x21 = another jellyfish with b0c 1, which copies the parent's
+  b04/step/state), step 1 `8012516c jellyfishSwim` (velV 0x100 strokes with sfx 0x97; uncertain); x009 red flower b04 2 step 1 `80123828
+  redFlowerGrabbed` (between redFlowerHit and redFlowerDefeated; drives PLAYER.state / wac while held; uncertain)

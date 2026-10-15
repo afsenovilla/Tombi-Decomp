@@ -15,7 +15,7 @@ extern short D_800A604E[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
-extern void func_80117CEC(TObj *, int, int);
+extern void sevenFriendsSetAnim(TObj *, int, int);
 extern void func_80116928(void *, int, int);
 extern void setEventComplete(int, int);
 extern void FUN_800eea7c(TObj *, int, int);
@@ -47,7 +47,7 @@ void pigGateSevenFriendsScene(TObj *o)
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
         a->d90 = (int)showMessageBoxDirect(7, 9, &v);
-        func_80117CEC(a, 2, 0);
+        sevenFriendsSetAnim(a, 2, 0);
         o->state++;
         break;
     case 2:
@@ -59,7 +59,7 @@ void pigGateSevenFriendsScene(TObj *o)
             }
             p->b04 = 3;
         }
-        func_80117CEC(a, 1, 0);
+        sevenFriendsSetAnim(a, 1, 0);
         o->w08 = 0x3c;
         o->state++;
         break;
@@ -78,7 +78,7 @@ void pigGateSevenFriendsScene(TObj *o)
             y = b->y.p.whole;
             b->velY = (-0x46 - y) << 2;
         }
-        func_80117CEC(b, 4, 0);
+        sevenFriendsSetAnim(b, 4, 0);
         o->w08 = 0x40;
         o->state++;
         break;
@@ -91,7 +91,7 @@ void pigGateSevenFriendsScene(TObj *o)
             break;
         }
         b->b0f = 4;
-        func_80117CEC(b, 0, 0);
+        sevenFriendsSetAnim(b, 0, 0);
         func_80116928(d, 3, 0);
         o->w08 = 0x3c;
         ((unsigned char*)&GCD.bcfdb)[0] = 1;
@@ -115,7 +115,7 @@ void pigGateSevenFriendsScene(TObj *o)
         v = *(V6 *)&a->a;
         v.v[3] -= 0x50;
         a->d90 = (int)showMessageBoxDirect(7, 10, &v);
-        func_80117CEC(a, 2, 0);
+        sevenFriendsSetAnim(a, 2, 0);
         o->state++;
         break;
     case 7:
@@ -194,7 +194,7 @@ void pigGateSevenFriendsScene(TObj *o)
             b->velX = (0xa0 - x) << 2;
             b->velV = -0x200;
         }
-        func_80117CEC(b, 4, 0);
+        sevenFriendsSetAnim(b, 4, 0);
         o->w08 = 0x40;
         o->state++;
         break;

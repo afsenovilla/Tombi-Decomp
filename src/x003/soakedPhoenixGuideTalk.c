@@ -7,7 +7,7 @@ typedef struct { char c[12]; } B12;
 
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC;
 extern TObj *showMessageBoxDirect(int, int, void *);
-extern void func_801289C8(TObj *, int, int);
+extern void npcSetAnim(TObj *, int, int);
 extern void setEventStarted(int, int, int);
 extern int Rand(void);
 
@@ -24,7 +24,7 @@ void soakedPhoenixGuideTalk(TObj *o)
     switch (o->state) {
     case 0:
         SPAWN(b, 4);
-        func_801289C8(a, 0, 0);
+        npcSetAnim(a, 0, 0);
         o->state++;
         break;
     case 1:
@@ -37,8 +37,8 @@ void soakedPhoenixGuideTalk(TObj *o)
     case 2:
         if (--o->w08 <= 0) {
             SPAWN(a, 5);
-            func_801289C8(a, 3, 0);
-            func_801289C8(b, 0, 0);
+            npcSetAnim(a, 3, 0);
+            npcSetAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -46,8 +46,8 @@ void soakedPhoenixGuideTalk(TObj *o)
         if (DONE(a)) {
             KILL(a);
             SPAWN(b, 6);
-            func_801289C8(a, 0, 0);
-            func_801289C8(b, 3, 0);
+            npcSetAnim(a, 0, 0);
+            npcSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -55,8 +55,8 @@ void soakedPhoenixGuideTalk(TObj *o)
         if (DONE(b)) {
             KILL(b);
             SPAWN(a, 7);
-            func_801289C8(a, 3, 0);
-            func_801289C8(b, 0, 0);
+            npcSetAnim(a, 3, 0);
+            npcSetAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -64,8 +64,8 @@ void soakedPhoenixGuideTalk(TObj *o)
         if (DONE(a)) {
             KILL(a);
             SPAWN(b, 8);
-            func_801289C8(a, 0, 0);
-            func_801289C8(b, 3, 0);
+            npcSetAnim(a, 0, 0);
+            npcSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -73,8 +73,8 @@ void soakedPhoenixGuideTalk(TObj *o)
         if (DONE(b)) {
             KILL(b);
             SPAWN(a, 9);
-            func_801289C8(a, 3, 0);
-            func_801289C8(b, 0, 0);
+            npcSetAnim(a, 3, 0);
+            npcSetAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -91,8 +91,8 @@ void soakedPhoenixGuideTalk(TObj *o)
         a->y.p.whole = a->d34 + (Rand() & 1);
         if (--o->w08 <= 0) {
             SPAWN(a, 0xa);
-            func_801289C8(a, 3, 0);
-            func_801289C8(b, 0, 0);
+            npcSetAnim(a, 3, 0);
+            npcSetAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -108,7 +108,7 @@ void soakedPhoenixGuideTalk(TObj *o)
     case 10:
         if (!a->visible) {
             SPAWN(b, 0xb);
-            func_801289C8(b, 3, 0);
+            npcSetAnim(b, 3, 0);
             a->b04 = 3;
             o->state++;
         }
@@ -133,7 +133,7 @@ void soakedPhoenixGuideTalk(TObj *o)
     case 13:
         if (--o->w08 <= 0) {
             SPAWN(b, 0xc);
-            func_801289C8(b, 3, 0);
+            npcSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -162,7 +162,7 @@ void soakedPhoenixGuideTalk(TObj *o)
     case 16:
         if (--o->w08 <= 0) {
             o->w08 = 0x3c;
-            func_801289C8(a, 0, 0);
+            npcSetAnim(a, 0, 0);
             a->d30 = a->h->p.whole;
             a->d34 = a->y.p.whole;
             o->state = 8;

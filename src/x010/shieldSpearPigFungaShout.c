@@ -10,7 +10,7 @@ extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 
-void func_8012CB50(TObj *o)
+void shieldSpearPigFungaShout(TObj *o)
 {
     TObj *p;
 

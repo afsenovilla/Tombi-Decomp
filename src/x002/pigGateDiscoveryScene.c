@@ -33,7 +33,7 @@ extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
 extern int AnimAdvance(void *);
 extern void func_80116928(TObj *, int, int);
-extern void func_80117CEC(TObj *, int, int);
+extern void sevenFriendsSetAnim(TObj *, int, int);
 
 #define Spawn(X, Y, Z) { \
     unsigned short x = X, y = Y, z = Z; \
@@ -139,7 +139,7 @@ void pigGateDiscoveryScene(Ctl *o)
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
             a->d90 = (int)showMessageBoxDirect(7, 3, &v);
-            func_80117CEC(a, 2, 0);
+            sevenFriendsSetAnim(a, 2, 0);
             o->state++;
         }
         break;
@@ -147,7 +147,7 @@ void pigGateDiscoveryScene(Ctl *o)
         AnimAdvance(a);
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_80117CEC(a, 1, 0);
+            sevenFriendsSetAnim(a, 1, 0);
             o->w08 = 0x40;
             o->state++;
         }
@@ -209,14 +209,14 @@ void pigGateDiscoveryScene(Ctl *o)
             v.v[3] -= 0x50;
             func_80116928(d, 3, 0);
             a->d90 = (int)showMessageBoxDirect(7, 4, &v);
-            func_80117CEC(a, 2, 0);
+            sevenFriendsSetAnim(a, 2, 0);
             o->state++;
         }
         break;
     case 18:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_80117CEC(a, 1, 0);
+            sevenFriendsSetAnim(a, 1, 0);
             o->w08 = 8;
             o->state++;
         }
@@ -225,7 +225,7 @@ void pigGateDiscoveryScene(Ctl *o)
         AnimAdvance(a);
         a->h->p.whole++;
         if (--o->w08 <= 0) {
-            func_80117CEC(a, 0, 0);
+            sevenFriendsSetAnim(a, 0, 0);
             ((unsigned char*)&GVARS.b3e)[0] = 1;
             setEventStarted(0x9d, 0, 0);
             o->w08 = 200;
@@ -237,7 +237,7 @@ void pigGateDiscoveryScene(Ctl *o)
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
             a->d90 = (int)showMessageBoxDirect(7, 5, &v);
-            func_80117CEC(a, 2, 0);
+            sevenFriendsSetAnim(a, 2, 0);
             o->state++;
         }
         break;
@@ -245,22 +245,22 @@ void pigGateDiscoveryScene(Ctl *o)
         AnimAdvance(o);
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_80117CEC(a, 0, 0);
+            sevenFriendsSetAnim(a, 0, 0);
             if (GCD.bce15 == 0xff) {
                 a->d90 = (int)showMessageBoxDirect(7, 6, &v);
-                func_80117CEC(a, 2, 0);
+                sevenFriendsSetAnim(a, 2, 0);
                 o->state = 0x19;
             } else if (GCD.bcdbb) {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
                 a->d90 = (int)showMessageBoxDirect(7, 7, &v);
-                func_80117CEC(a, 2, 0);
+                sevenFriendsSetAnim(a, 2, 0);
                 o->state = 0x16;
             } else {
                 v = *(V6 *)&a->a;
                 v.v[3] -= 0x50;
                 a->d90 = (int)showMessageBoxDirect(7, 8, &v);
-                func_80117CEC(a, 2, 0);
+                sevenFriendsSetAnim(a, 2, 0);
                 o->state = 0x16;
             }
         }
@@ -268,10 +268,10 @@ void pigGateDiscoveryScene(Ctl *o)
     case 22:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_80117CEC(a, 0, 0);
+            sevenFriendsSetAnim(a, 0, 0);
             *(signed char *)&b->b0f = -8;
             b->animFrame = 1;
-            func_80117CEC(b, 3, 0);
+            sevenFriendsSetAnim(b, 3, 0);
             o->w08 = b->h->p.whole - PLAYER.h->p.whole;
             o->state++;
         }
@@ -291,7 +291,7 @@ void pigGateDiscoveryScene(Ctl *o)
             v = *(V6 *)&a->a;
             v.v[3] -= 0x50;
             a->d90 = (int)showMessageBoxDirect(7, 6, &v);
-            func_80117CEC(a, 2, 0);
+            sevenFriendsSetAnim(a, 2, 0);
             o->state = 0x19;
         }
         break;

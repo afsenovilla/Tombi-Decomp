@@ -13,7 +13,7 @@ extern TObj *showMessageBoxDirect(int, int, Fix16 *);
 /* do-while(0) macro: its loop notes end the sched block, so the a0 copy stays after the stores */
 #define SET_ANIM(o, a) do { (o)->anim = (a); AnimLoadDuration(o); } while (0)
 
-void func_8012CCE8(TObj *o)
+void shieldSpearPigHongagaaaShout(TObj *o)
 {
     TObj *p;
 

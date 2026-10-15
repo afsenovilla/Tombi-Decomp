@@ -25,7 +25,7 @@ extern short FUN_80040278(TObj *, short, short);
         }                                                                   \
     }
 
-void func_80126890(TObj *o)
+void jellyfishHit(TObj *o)
 {
     unsigned char t;
     unsigned short af;

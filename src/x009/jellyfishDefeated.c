@@ -41,7 +41,7 @@ static __inline__ int wall(TObj *o, unsigned short d)
             o->velH = t - o->velX; \
     }
 
-void func_8012781C(TObj *o)
+void jellyfishDefeated(TObj *o)
 {
     switch (o->state) {
     case 0:

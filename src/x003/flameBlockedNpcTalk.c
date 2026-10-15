@@ -12,7 +12,7 @@ extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
-extern void func_801289C8(TObj *, int, int);
+extern void npcSetAnim(TObj *, int, int);
 
 void flameBlockedNpcTalk(TObj *o)
 {
@@ -52,14 +52,14 @@ void flameBlockedNpcTalk(TObj *o)
         if (GCD.bcffc == 0) break;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(7, 2, &v);
-        func_801289C8(p, 3, 0);
+        npcSetAnim(p, 3, 0);
         o->state = 17;
         break;
     case 11:
         p->animFrame = 1;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(7, 0, &v);
-        func_801289C8(p, 3, 0);
+        npcSetAnim(p, 3, 0);
         o->state++;
         break;
     case 12:
@@ -68,7 +68,7 @@ void flameBlockedNpcTalk(TObj *o)
         q->b04 = 3;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(7, 1, &v);
-        func_801289C8(p, 3, 0);
+        npcSetAnim(p, 3, 0);
         o->state++;
         break;
     case 13:
@@ -78,7 +78,7 @@ void flameBlockedNpcTalk(TObj *o)
         p->animFrame = 0;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(7, 2, &v);
-        func_801289C8(p, 3, 0);
+        npcSetAnim(p, 3, 0);
         o->state++;
         break;
     case 14:
@@ -86,7 +86,7 @@ void flameBlockedNpcTalk(TObj *o)
         TObj *q = (TObj *)p->d90;
         if (q->b04 != 2) break;
         q->b04 = 3;
-        func_801289C8(p, 0, 0);
+        npcSetAnim(p, 0, 0);
         o->w08 = 8;
         o->state++;
         }
@@ -96,7 +96,7 @@ void flameBlockedNpcTalk(TObj *o)
         p->animFrame = 1;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(7, 3, &v);
-        func_801289C8(p, 3, 0);
+        npcSetAnim(p, 3, 0);
         o->state++;
         break;
     case 16:
@@ -130,7 +130,7 @@ void flameBlockedNpcTalk(TObj *o)
         D_800A603C = 1;
         D_800A603D = 0;
         D_800A603E = 0;
-        func_801289C8(p, 0, 0);
+        npcSetAnim(p, 0, 0);
         o->state = 0;
         break;
     }

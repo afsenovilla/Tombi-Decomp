@@ -13,7 +13,7 @@ extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 extern void AnimAdvance(TObj *);
-extern void func_801289C8(TObj *, int, int);
+extern void npcSetAnim(TObj *, int, int);
 
 void phoenixSpiritHintTalkB(TObj *o)
 {
@@ -47,7 +47,7 @@ void phoenixSpiritHintTalkB(TObj *o)
         if (--o->w08 > 0) break;
         v = *(V6 *)&p->a;
         p->d90 = showMessageBoxDirect(2, 0xf, &v);
-        func_801289C8(p, 9, 0);
+        npcSetAnim(p, 9, 0);
         o->state++;
         break;
     case 3:
@@ -55,7 +55,7 @@ void phoenixSpiritHintTalkB(TObj *o)
         q = (TObj *)p->d90;
         if (q->b04 != 2) break;
         q->b04 = 3;
-        func_801289C8(p, 0, 0);
+        npcSetAnim(p, 0, 0);
         setEventComplete(0x1a, 0);
         o->w08 = 200;
         o->state = 15;

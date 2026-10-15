@@ -320,7 +320,7 @@ address,size,name,twin
 80117928,900,func_80117928,
 80117cac,16,func_80117CAC,
 80117cbc,48,func_80117CBC,
-80117cec,132,func_80117CEC,
+80117cec,132,sevenFriendsSetAnim,
 80117d70,552,sevenFriendsWaitTalk,
 80117f98,144,func_80117F98,
 80118028,24,sevenFriendsGoodLuckTalk,

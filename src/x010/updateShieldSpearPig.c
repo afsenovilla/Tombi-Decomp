@@ -8,8 +8,8 @@ extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void func_8012CB50(TObj *);
-extern void func_8012CCE8(TObj *);
+extern void shieldSpearPigFungaShout(TObj *);
+extern void shieldSpearPigHongagaaaShout(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateShieldSpearPig(TObj *o)
@@ -35,10 +35,10 @@ void updateShieldSpearPig(TObj *o)
         ObjCullRegister(o);
         switch (o->b6b) {
         case 0:
-            func_8012CB50(o);
+            shieldSpearPigFungaShout(o);
             break;
         case 1:
-            func_8012CCE8(o);
+            shieldSpearPigHongagaaaShout(o);
             break;
         }
         break;

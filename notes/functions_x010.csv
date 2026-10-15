@@ -460,7 +460,7 @@ address,size,name,twin
 801253ac,1844,lostHatManTalk,
 80125ae0,368,initLostHatMan,
 80125c50,348,updateLostHatMan,
-80125dac,84,func_80125DAC,X003:801289c8
+80125dac,84,tenThousandYearElderSetAnim,X003:801289c8
 80125e00,436,func_80125E00,
 80125fb4,1280,tenThousandYearElderBeadsTalk,
 801264b4,1056,powerFishCollectorTalk,
@@ -493,8 +493,8 @@ address,size,name,twin
 8012c5ac,320,nobleTreeGoldenItemsHint,
 8012c6ec,436,func_8012C6EC,
 8012c8a0,688,updateParrot,
-8012cb50,408,func_8012CB50,
-8012cce8,408,func_8012CCE8,
+8012cb50,408,shieldSpearPigFungaShout,
+8012cce8,408,shieldSpearPigHongagaaaShout,
 8012ce80,332,updateShieldSpearPig,
 8012cfcc,496,func_8012CFCC,
 8012d1bc,68,func_8012D1BC,
