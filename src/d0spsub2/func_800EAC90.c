@@ -1,4 +1,5 @@
 // FUNC 800eac90 684 D0SPSUB2
+// MATCHING 800eac90 684
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -36,13 +37,13 @@ void func_800EAC90(int big, int pri, int pal, int lit)
         s = D_800F6C58;
     } else {
         short x, y;
-        s = D_800F6CA8;
         D_800F70DC[0] = 4;
         x = D_800F70D8.x;
         y = D_800F70DA;
         D_800F70D8.x = x + 0x10;
         D_800F70DA = y + 0x10;
         D_800F70DE = GetClut(0x150, 0x1F0);
+        s = D_800F6CA8;
         D_800F70EC = D_800EDC7C;
         D_800F70E8 = D_800F6ABC;
         func_800EB61C(6, 0);

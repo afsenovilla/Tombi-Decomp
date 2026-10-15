@@ -1,4 +1,5 @@
-// FUNC 800ebcb8 636 D0SPSUB
+// FUNC 800ebc10 636 D0SPSUB3
+// MATCHING 800ebc10 636
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -22,16 +23,16 @@ typedef struct { unsigned char u, v, w, h, flag; } Glyph;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern short D_8011113C, D_8011113E, D_80111140;
-extern unsigned short D_80111142;
-extern unsigned short *D_8011114C;
-extern Glyph *D_80111150;
+extern short D_80100B70, D_80100B72, D_80100B74;
+extern unsigned short D_80100B76;
+extern unsigned short *D_80100B80;
+extern Glyph *D_80100B84;
 extern SPRT *D_1F800164;
 extern unsigned long *D_1F8001E0;
 extern DRAWENV *GetDrawEnv(DRAWENV *env);
 extern void AddDrawMode(int tpage, int pri);
 
-void func_800EBCB8(int pri, int multiline)
+void func_800EBC10(int pri, int multiline)
 {
     DRAWENV env;
     Glyph g;
@@ -44,10 +45,10 @@ void func_800EBCB8(int pri, int multiline)
     Glyph *gp;
     GetDrawEnv(&env);
     AddDrawMode(env.tpage, pri);
-    font = D_80111150;
-    str = D_8011114C;
-    y = D_8011113E;
-    x = D_8011113C;
+    font = D_80100B84;
+    str = D_80100B80;
+    x = D_80100B70;
+    y = D_80100B72;
     while ((short)(c = *str++) != -1) {
         switch ((short)c) {
         case -7:
@@ -59,8 +60,8 @@ void func_800EBCB8(int pri, int multiline)
             break;
         case -3:
             if (multiline) {
-                x = D_8011113C;
                 y += 8;
+                x = D_80100B70;
             }
             break;
         default:
@@ -90,7 +91,7 @@ void func_800EBCB8(int pri, int multiline)
             }
             s->w = g.w;
             s->h = g.h;
-            s->clut = D_80111142;
+            s->clut = D_80100B76;
             p = D_1F800164;
             *p = *s;
             addPrim(D_1F8001E0 + pri, p);
@@ -98,5 +99,5 @@ void func_800EBCB8(int pri, int multiline)
             break;
         }
     }
-    AddDrawMode(D_80111140, pri);
+    AddDrawMode(D_80100B74, pri);
 }
