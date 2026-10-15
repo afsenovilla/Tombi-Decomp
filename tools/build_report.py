@@ -181,14 +181,14 @@ def jpdemo_base(progs, units, out_dir, ver="jpdemo"):
     return n
 
 
-def jpdemo_data(progs, units, addrs, out_dir):
+def jpdemo_data(progs, units, addrs, out_dir, ver="jpdemo"):
     """Data sections of the demo report, as for PAL (tools/report_data.py): claimed sections on the units with C,
     the other non-code bytes of each program in a target-only <prog>/data unit."""
     import report_data as RD
     dtmp = tempfile.mkdtemp()
     shutil.rmtree(out_dir + "/base_data", ignore_errors=True)
     for prog in progs:
-        y = open("config/jpdemo/%s.yaml" % prog).read()
+        y = open("config/%s/%s.yaml" % (ver, prog)).read()
         game = open(re.search(r"target_path:\s*(\S+)", y).group(1), "rb").read()
         vram = int(re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", y).group(1), 16)
         hdr = 0x800 if "type: header" in y else 0
@@ -228,7 +228,7 @@ def jpdemo_data(progs, units, addrs, out_dir):
     shutil.rmtree(dtmp, ignore_errors=True)
 
 
-def jpdemo_main():
+def jpdemo_main(ver="jpdemo"):
     os.chdir(ROOT)
     names = {p: v[0] for p, v in VERSIONS[ver]["progs"].items()}
     progs = [p for p in names if os.path.exists("config/%s/%s.yaml" % (ver, p))]
@@ -266,8 +266,8 @@ def jpdemo_main():
                           "size": int(sm.group(1), 16) if sm else 0, "asm": body,
                           "metadata": {"progress_categories": [prog]}})
     addrs = {u["name"]: (u["addr"], u["size"]) for u in units}
-    nbase = jpdemo_base(progs, units, out_dir)
-    jpdemo_data(progs, units, addrs, out_dir)
+    nbase = jpdemo_base(progs, units, out_dir, ver)
+    jpdemo_data(progs, units, addrs, out_dir, ver)
     cfg = {"$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
            "build_base": False, "build_target": False,
            "progress_categories": [{"id": p, "name": names[p]} for p in progs],
