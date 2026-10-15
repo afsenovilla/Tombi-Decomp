@@ -1,4 +1,5 @@
 // FUNC 800f1bac 220 I0NFO2
+// MATCHING 800f1bac 220
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
@@ -14,11 +15,11 @@ int func_800F1BAC(TObj *o)
         if (D_8009CFA9 == 0) {
             S32(o, 0x90) = func_8002DCC8(2, 4, &p);
             D_8009CFA9 = D_8009CFA9 + 1;
-            return 1;
-        }
+        } else {
         S32(o, 0x90) = func_8002DCC8(2, 5, &p);
         o->state = 2;
         o->wac = 0x4F;
+ }
     } else {
         S32(o, 0x90) = func_8002DCC8(2, 5, &p);
     }
