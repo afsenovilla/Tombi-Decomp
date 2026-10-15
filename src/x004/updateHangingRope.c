@@ -8,7 +8,7 @@ extern void AnimLoadDuration(TObj *);
 extern int cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
-void func_8011C890(TObj *o)
+void updateHangingRope(TObj *o)
 {
     switch (o->b04) {
     case 0:

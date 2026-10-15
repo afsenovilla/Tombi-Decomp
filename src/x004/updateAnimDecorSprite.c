@@ -7,7 +7,7 @@ extern int AnimAdvance(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_8012BF58(TObj *o)
+void updateAnimDecorSprite(TObj *o)
 {
     switch (o->b04) {
     case 0:

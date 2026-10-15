@@ -8,7 +8,7 @@ extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
 
-void func_8011910C(TObj *o)
+void updateAnimDecorSprite(TObj *o)
 {
     switch (o->b04) {
     case 0:

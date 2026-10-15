@@ -323,7 +323,7 @@ address,size,name,twin
 80118cf4,260,updateWindSwayDecor,
 80118df8,324,windStreakRespawn,
 80118f3c,464,updateWindStreak,
-8011910c,184,func_8011910C,
+8011910c,184,updateAnimDecorSprite,
 801191c4,524,func_801191C4,
 801193d0,808,func_801193D0,
 801196f8,320,func_801196F8,

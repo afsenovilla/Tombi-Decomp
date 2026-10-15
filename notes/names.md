@@ -760,3 +760,6 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   follows the path D_8011F3F8, jump on the button), `801183f0 motocrossFindPathSegment` / `801184f0 motocrossAdvanceAlongPath` (walk the path points
   by distance, heading/pitch with ratan2), `80118810 motocrossBikeSetSpeed` (speed by GVARS.b58 / input; uncertain), `8011a73c motocrossBikeBob`
   (sine bob + jump/land morphs; uncertain)
+- x004 `8011c890 updateHangingRope` (layer 4 type 0x37: strip shows a knotted hanging rope, 0xA0 x 0xC4 box), `8012bf58 updateAnimDecorSprite`
+  (layer 2 type 0x36); x003 `8011910c updateAnimDecorSprite` (layer 3 type 0x35); x009 `8011b8e0 updateSwingingPendulum` (layer 4 type 0x2C, uncertain
+  kind: subtype 0 swings d8c from a growing phase, subtype 1 hangs 0x4C from its parent at the parent's angle)

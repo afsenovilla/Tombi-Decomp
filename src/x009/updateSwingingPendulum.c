@@ -12,7 +12,7 @@ extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
 
-void func_8011B8E0(TObj *o)
+void updateSwingingPendulum(TObj *o)
 {
     TObj *e;
     int r;

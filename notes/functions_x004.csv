@@ -355,7 +355,7 @@ address,size,name,twin
 8011c5cc,316,func_8011C5CC,
 8011c708,80,updateSceneryModel,
 8011c758,312,func_8011C758,
-8011c890,220,func_8011C890,
+8011c890,220,updateHangingRope,
 8011c96c,148,evilPigBagPortalCheckPlayer,
 8011ca00,128,func_8011CA00,
 8011ca80,400,evilPigBagPortalOpen,X001:801205f0
@@ -503,7 +503,7 @@ address,size,name,twin
 8012b210,376,updateCarriedGuide,
 8012b388,176,spawnCarriedGuide,
 8012b438,2848,updateSceneSequence,
-8012bf58,172,func_8012BF58,
+8012bf58,172,updateAnimDecorSprite,
 8012c004,420,cableOwnerThanksTalk,
 8012c1a8,552,singingMinerRumorTalk,
 8012c3d0,420,homeSweetHomeTalk,

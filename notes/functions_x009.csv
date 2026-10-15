@@ -368,7 +368,7 @@ address,size,name,twin
 8011b508,436,stepTearJar,
 8011b6bc,280,updateTearJar,
 8011b7d4,268,func_8011B7D4,
-8011b8e0,556,func_8011B8E0,
+8011b8e0,556,updateSwingingPendulum,
 8011bb0c,928,updateBobbingPlatform,
 8011beac,300,func_8011BEAC,
 8011bfd8,820,func_8011BFD8,
