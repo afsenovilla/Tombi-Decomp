@@ -1,24 +1,34 @@
 name: Progress report
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'src/**'
-      - 'config/**'
-      - 'include/**'
-      - 'tools/**'
-      - 'notes/functions_*.csv'
-      - '.github/workflows/report.yml'
+  # At most one decomp.dev update a day (saves Actions minutes); run by hand from the Actions tab if needed.
+  schedule:
+    - cron: '47 2 * * *'
   workflow_dispatch:
 
-# Several pushes in a row: only the newest report matters (saves Actions minutes).
 concurrency:
   group: report
   cancel-in-progress: true
 
 jobs:
+  # Skip the daily run when no code changed in the last day.
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      changed: ${{ steps.c.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: c
+        run: |
+          n=$(git log --since='25 hours ago' --oneline -- src config include tools notes | wc -l)
+          if [ "$n" -gt 0 ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then c=true; else c=false; fi
+          echo "changed=$c" >> "$GITHUB_OUTPUT"
+
   report:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -98,6 +108,8 @@ jobs:
   # The disc image comes from the GAME_FILES_URL_JP secret (raw .bin disc image, 2352-byte sectors, or a zip with the
   # extracted disc; never committed). Skipped when the secret or config/slps01144/ is missing. See docs/JP.md.
   report-jp:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -169,6 +181,8 @@ jobs:
   # image or a zip with SLPM_801.65 and SYSTEM/X00.BIN; never committed). Skipped when the secret or config/slpm80165/ is
   # missing. See docs/JPDEMO.md.
   report-jpdemo:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
