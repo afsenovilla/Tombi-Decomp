@@ -356,12 +356,12 @@ address,size,name,twin
 8011c708,80,updateSceneryModel,
 8011c758,312,func_8011C758,
 8011c890,220,func_8011C890,
-8011c96c,148,func_8011C96C,
+8011c96c,148,evilPigBagPortalCheckPlayer,
 8011ca00,128,func_8011CA00,
-8011ca80,400,func_8011CA80,X001:801205f0
-8011cc10,200,func_8011CC10,
+8011ca80,400,evilPigBagPortalOpen,X001:801205f0
+8011cc10,200,evilPigBagPortalEnter,
 8011ccd8,488,func_8011CCD8,
-8011cec0,1016,func_8011CEC0,
+8011cec0,1016,updateEvilPigBagPortal,
 8011d2b8,124,updateRaftArrival,
 8011d334,184,func_8011D334,
 8011d3ec,344,func_8011D3EC,

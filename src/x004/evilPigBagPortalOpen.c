@@ -1,5 +1,5 @@
-// FUNC 8011a338 400 X010
-// MATCHING 8011a338 400
+// FUNC 8011ca80 400 X004
+// MATCHING 8011ca80 400
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -8,7 +8,7 @@ extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F800190;
 
-void func_8011A338(TObj *o)
+void evilPigBagPortalOpen(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -47,7 +47,7 @@ void func_8011A338(TObj *o)
             o->state = 0;
             o->step++;
             D_800A4553[0] = 6;
-            GCD.bcf0c = 1;
+            GCD.bcf11 = 1;
         }
         break;
     }

@@ -1,18 +1,18 @@
-// FUNC 8011d84c 1016 X003
-// MATCHING 8011d84c 1016
+// FUNC 80120a2c 1016 X001
+// MATCHING 80120a2c 1016
 #include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern char D_80135AA8[];
-extern short D_80135AE8[];
+extern char D_8013C768[];
+extern short D_8013C7A8[];
 extern void FUN_8005f3c0(short *, char *);
 extern void FUN_80018cf0(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
-extern void func_8011D40C(TObj *);
-extern void func_8011D59C(TObj *);
+extern void evilPigBagPortalOpen(TObj *);
+extern void evilPigBagPortalEnter(TObj *);
 
 static __inline__ int onscreen(TObj *o)
 {
@@ -21,7 +21,7 @@ static __inline__ int onscreen(TObj *o)
     return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
-void func_8011D84C(TObj *o)
+void updateEvilPigBagPortal(TObj *o)
 {
     short buf[4];
     TObj *p;
@@ -29,7 +29,7 @@ void func_8011D84C(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (GCD.bd0cf == 0 || (GV2.bc3 & 8)) {
+        if (GCD.bd0c9 == 0 || (GV2.bc3 & 2)) {
             o->b04 = 3;
             break;
         }
@@ -42,7 +42,7 @@ void func_8011D84C(TObj *o)
             buf[1] = 0x1fe;
             buf[2] = 0x10;
             buf[3] = 2;
-            FUN_8005f3c0(buf, D_80135AA8);
+            FUN_8005f3c0(buf, D_8013C768);
             o->box0 = 0x18;
             o->box1 = 0x30;
             o->box2 = 0x18;
@@ -54,9 +54,9 @@ void func_8011D84C(TObj *o)
             o->box3 = 0x36;
         }
         o->d84 = 0;
-        o->d88 = D_80135AE8[o->b0c];
+        o->d88 = D_8013C7A8[o->b0c];
         o->d8c = 0;
-        if (((unsigned char*)&GCD.bcf0e)[0] == 0) {
+        if (((unsigned char*)&GCD.bcf0b)[0] == 0) {
             o->step = 0;
             o->w74 = 0x800;
             o->w76 = 0x800;
@@ -117,10 +117,10 @@ void func_8011D84C(TObj *o)
                 if (onscreen(o)) o->step++;
                 break;
             case 1:
-                func_8011D40C(o);
+                evilPigBagPortalOpen(o);
                 break;
             case 2:
-                func_8011D59C(o);
+                evilPigBagPortalEnter(o);
                 break;
             }
         }

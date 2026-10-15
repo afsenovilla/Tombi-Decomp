@@ -1,11 +1,11 @@
-// FUNC 801173a0 276 X002
-// MATCHING 801173a0 276
+// FUNC 8011c830 276 X009
+// MATCHING 8011c830 276
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern TObj PLAYER;
 
-int func_801173A0(TObj *o)
+int evilPigBagPortalCheckPlayer(TObj *o)
 {
     if (GVARS.b3a == 0) goto ret0;
     if (GVARS.b3f | GVARS.b40) return 0;

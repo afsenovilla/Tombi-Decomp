@@ -1,63 +1,61 @@
-// FUNC 801167b0 688 X016
-// MATCHING 801167b0 688
+// FUNC 8011d59c 688 X003
+// MATCHING 8011d59c 688
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 #include "gametask.h"
-
-typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
-extern TObj PLAYER;
+extern unsigned char PLAYER[];
+extern unsigned char D_800A6039[];
+extern unsigned char D_800A603C[];
+extern unsigned char D_800A603D[];
 extern unsigned char D_800A4553[];
 extern int D_800A4568[];
-extern int D_1F800190, D_1F80018C;
-extern unsigned char D_800A603C[], D_800A603D[];
+extern int D_1F800190;
+extern int D_1F80018C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
-extern int func_8011650C(TObj *);
+extern int evilPigBagPortalCheckPlayer(TObj *);
 
-void func_801167B0(TObj *o)
+void evilPigBagPortalEnter(TObj *o)
 {
-    short t;
-
     switch (o->state) {
     case 0:
-        if (o->visible == 0) break;
-        if (func_8011650C(o) == 0) break;
-        o->state++;
-        PLAYER.active = 2;
-        ((unsigned char*)&GVARS.b3f)[0] = 1;
-        ((unsigned char*)&GVARS.b3e)[0] = 1;
-        ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_800A4553[0] = 3;
-        D_800A4568[0] = 0;
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
-        o->timer = 10;
+        if (o->visible && evilPigBagPortalCheckPlayer(o)) {
+            o->state++;
+            PLAYER[0] = 2;
+            ((unsigned char*)&GVARS.b3f)[0] = 1;
+            ((unsigned char*)&GVARS.b3e)[0] = 1;
+            ((unsigned char*)&GVARS.b42)[0] = 1;
+            D_800A4553[0] = 3;
+            D_800A4568[0] = 0;
+            D_1F800190 = o->y.raw;
+            D_1F80018C = o->h->raw;
+            o->timer = 10;
+        }
         break;
     case 1:
         if (--o->timer == -1) {
-            PLAYER.active = 5;
+            PLAYER[0] = 5;
             D_800A603C[0] = 5;
             ((unsigned char*)&GVARS.b3e)[0] = 0;
-            PLAYER.visible = 0;
+            D_800A6039[0] = 0;
             D_800A603D[0] = 0x40;
             o->timer = 0x14;
             o->state++;
-            ((short*)&GAME.nextArea)[0] = 0xe;
-            ((short*)&GAME.nextSection)[0] = 2;
-            ((short*)&GAME.nextSpawnPoint)[0] = 0;
+            (*(short*)&GAME.nextArea) = 0xe;
+            (*(short*)&GAME.nextSection) = 6;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
         }
         break;
     case 2:
-        t = o->timer;
-        if (t == 0) {
+        if (o->timer == 0) {
             ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
-            ((unsigned char*)&GVARS.b3c)[0] = 1;
-            ((unsigned char*)&SPAD.b3d1)[0] = 1;
+            GVARS.b3c = 1;
+            SPAD.b3d1 = 1;
             o->state++;
         } else {
-            o->timer = t - 1;
+            o->timer--;
         }
         o->w74 += 0x80;
         if (o->w74 > 0x4000) {

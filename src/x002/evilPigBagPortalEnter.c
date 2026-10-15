@@ -1,5 +1,5 @@
-// FUNC 8011cad4 688 X009
-// MATCHING 8011cad4 688
+// FUNC 80117644 688 X002
+// MATCHING 80117644 688
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -14,16 +14,16 @@ extern int D_1F800190, D_1F80018C;
 extern unsigned char D_800A603C[], D_800A603D[];
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
-extern int func_8011C830(TObj *);
+extern int evilPigBagPortalCheckPlayer(TObj *);
 
-void func_8011CAD4(TObj *o)
+void evilPigBagPortalEnter(TObj *o)
 {
     short t;
 
     switch (o->state) {
     case 0:
         if (o->visible == 0) break;
-        if (func_8011C830(o) == 0) break;
+        if (evilPigBagPortalCheckPlayer(o) == 0) break;
         o->state++;
         PLAYER.active = 2;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
@@ -45,7 +45,7 @@ void func_8011CAD4(TObj *o)
             o->timer = 0x14;
             o->state++;
             ((short*)&GAME.nextArea)[0] = 0xe;
-            ((short*)&GAME.nextSection)[0] = 5;
+            ((short*)&GAME.nextSection)[0] = 4;
             ((short*)&GAME.nextSpawnPoint)[0] = 0;
         }
         break;

@@ -312,11 +312,11 @@ address,size,name,twin
 801169bc,4,func_801169BC,
 801169c0,912,updateSevenFriendsBackdropSprite,
 80116d50,1616,func_80116D50,
-801173a0,276,func_801173A0,X001:801204dc
-801174b4,16,func_801174B4,
+801173a0,276,evilPigBagPortalCheckPlayer,X001:801204dc
+801174b4,16,evilPigBagPortalOpen,
 801174c4,384,func_801174C4,
-80117644,688,func_80117644,
-801178f4,52,func_801178F4,
+80117644,688,evilPigBagPortalEnter,
+801178f4,52,updateEvilPigBagPortal,
 80117928,900,func_80117928,
 80117cac,16,func_80117CAC,
 80117cbc,48,func_80117CBC,

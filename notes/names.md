@@ -625,3 +625,13 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x011: `8011617c updateBackdropSpriteSet` (layer 3 type 0x45), `80116b58 updateTossedItem` (layer 5 type 0x0F: initItemObject item thrown in an arc
   from 0x3C,-0x50 for 0x3C ticks, collectable once falling), `80116fa8 updatePatrollingFlyer` (layer 2 type 0x2A, 1 placement, kind uncertain: 32 x 32
   box, palette 0x7952; `80116e54 patrollingFlyerMove` moves along its facing with a sine bob for one d88 cycle, hovers one cycle, then turns)
+- Evil pig bag portal (one copy per area overlay, same code; "bag" is a guess from the evil pig bag events, the code only shows the gate): the handler
+  `updateEvilPigBagPortal` (x001 80120a2c, x002 801178f4, x003 8011d84c, x004 8011cec0, x009 8011cd84, x010 8011a778, x016 80116a60) exists only while the
+  area's gate flag GCD.bd0c9 / bd0cd / bd0cf / bd0cc / bd0ce / bd0ca / bd0cb (x001, x002, x003, x004, x009, x010, x016) is set and the boss bit of GV2.bc3 (2 / 1 / 8 / 4 / 0x20 / 0x10 / 0x40) is
+  clear; b0c 0 is the body (box 0x18 x 0x32, palette row loaded to 0x80,0x1FC), b0c 1/2 the two halves that follow it with the body's scale w74 and swing
+  open (d88 to +-0x638) once told to (b6a); GCD.bcf0d/bcf0f remember it open. Steps of the body: on screen -> `evilPigBagPortalOpen` (x001 801205f0,
+  x002 801174b4, x003 8011d40c, x004 8011ca80, x009 8011c944, x010 8011a338, x016 80116620: locks the player, centres the camera on it, grows w74 0x800 ->
+  0x1000, then opens the halves) -> `evilPigBagPortalEnter` (x001 80120780, x002 80117644, x003 8011d59c, x004 8011cc10, x009 8011cad4, x010 8011a4c8,
+  x016 801167b0: when `evilPigBagPortalCheckPlayer` (x001 801204dc, x002 801173a0, x003 8011d2f8, x004 8011c96c, x009 8011c830, x010 8011a224, x016
+  8011650c: player box overlaps it within +-0x2D in depth and is free to act) says the player walked in, hides the player and warps to area 14 (the evil pig
+  rooms) section x001 0 / x002 4 / x003 6 / x004 3 / x009 5 / x010 1 / x016 2, spawn 0)

@@ -376,12 +376,12 @@ address,size,name,twin
 8011c494,312,FUN_8011c494,X000:80121fe0
 8011c5cc,396,updateApBox,
 8011c758,216,func_8011C758,
-8011c830,276,func_8011C830,X001:801204dc
-8011c944,188,func_8011C944,
+8011c830,276,evilPigBagPortalCheckPlayer,X001:801204dc
+8011c944,188,evilPigBagPortalOpen,
 8011ca00,212,func_8011CA00,
-8011cad4,516,func_8011CAD4,
+8011cad4,516,evilPigBagPortalEnter,
 8011ccd8,172,func_8011CCD8,
-8011cd84,1016,func_8011CD84,
+8011cd84,1016,updateEvilPigBagPortal,
 8011d17c,440,func_8011D17C,
 8011d334,68,playerInitAreaHook,
 8011d378,116,func_8011D378,

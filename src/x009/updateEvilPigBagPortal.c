@@ -1,5 +1,5 @@
-// FUNC 801178f4 1016 X002
-// MATCHING 801178f4 1016
+// FUNC 8011cd84 1016 X009
+// MATCHING 8011cd84 1016
 #include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
@@ -7,45 +7,49 @@
 #include "TOBJ.H"
 
 typedef struct { short x, y, w, h; } RECT;
-extern int LoadImage(RECT *, void *);
-extern char D_8011C728[];
-extern short D_8011C768[];
-extern void ObjListPush_1F800224(TObj *o);
-extern void ObjCullRegister(TObj *o);
-extern void ObjFreeDup(TObj *o);
-extern void func_801174B4(TObj *o);
-extern void func_80117644(TObj *o);
+extern char D_8012B284[];
+extern short D_8012B2C4[];
+extern void LoadImage(RECT *, char *);
+extern int ObjCullRegister(TObj *);
+extern void ObjListPush_1F800224(TObj *);
+extern void ObjFreeDup(TObj *);
+extern void evilPigBagPortalOpen(TObj *);
+extern void evilPigBagPortalEnter(TObj *);
 
-static __inline__ int onScreen(TObj *o)
+#define W32(o) (((short *)&(o)->d30)[1])
+#define W36(o) (((short *)&(o)->d34)[1])
+
+static __inline__ int Near(TObj *o)
 {
     if (GVARS.b3a == 0) return 0;
     if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
     return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
-void func_801178F4(TObj *o)
+void updateEvilPigBagPortal(TObj *o)
 {
-    RECT r;
-    TObj *p;
+    unsigned char s = o->b04;
+    TObj *e;
     short v;
-    int m1, m2;
+    int a, b;
 
-    switch (o->b04) {
+    switch (s) {
     case 0:
-        if (GCD.bd0cd == 0 || (GV2.bc3 & 1)) {
+        if (GCD.bd0ce == 0 || (GV2.bc3 & 0x20)) {
             o->b04 = 3;
             break;
         }
-        o->b04++;
+        o->b04 = s + 1;
         o->b0a = 0x13;
         o->b6a = 0;
         o->active = 2;
         if (o->b0c == 0) {
+            RECT r;
             r.x = 0x80;
             r.y = 0x1fc;
             r.w = 0x10;
             r.h = 2;
-            LoadImage(&r, D_8011C728);
+            LoadImage(&r, D_8012B284);
             o->box0 = 0x18;
             o->box1 = 0x30;
             o->box2 = 0x18;
@@ -57,9 +61,9 @@ void func_801178F4(TObj *o)
             o->box3 = 0x36;
         }
         o->d84 = 0;
-        o->d88 = D_8011C768[o->b0c];
+        o->d88 = D_8012B2C4[o->b0c];
         o->d8c = 0;
-        if (((unsigned char*)&GCD.bcf0f)[0] == 0) {
+        if (((unsigned char*)&GCD.bcf10)[0] == 0) {
             o->step = 0;
             v = 0x800;
         } else {
@@ -77,16 +81,16 @@ void func_801178F4(TObj *o)
         o->w78 = v;
         break;
     case 1:
-        if (o->b0c != 0) {
-            p = (TObj *)o->d90;
-            if (p->visible == 0) break;
-            o->w74 = p->w74;
-            o->w76 = p->w76;
-            o->w78 = p->w78;
-            m1 = *(short *)((char *)o + 0x32) * o->w74;
-            m2 = *(short *)((char *)o + 0x36) * o->w74;
-            o->h->raw = p->h->raw + (m1 << 4);
-            o->y.raw = p->y.raw + (m2 << 4);
+        if (o->b0c) {
+            e = (TObj *)o->d90;
+            if (e->visible == 0) break;
+            o->w74 = e->w74;
+            o->w76 = e->w76;
+            o->w78 = e->w78;
+            a = W32(o) * o->w74;
+            b = W36(o) * o->w74;
+            o->h->raw = e->h->raw + (a << 4);
+            o->y.raw = e->y.raw + (b << 4);
             o->visible = 1;
             ObjListPush_1F800224(o);
             switch (o->step) {
@@ -116,13 +120,13 @@ void func_801178F4(TObj *o)
             ObjCullRegister(o);
             switch (o->step) {
             case 0:
-                if (onScreen(o)) o->step++;
+                if (Near(o)) o->step++;
                 break;
             case 1:
-                func_801174B4(o);
+                evilPigBagPortalOpen(o);
                 break;
             case 2:
-                func_80117644(o);
+                evilPigBagPortalEnter(o);
                 break;
             }
         }

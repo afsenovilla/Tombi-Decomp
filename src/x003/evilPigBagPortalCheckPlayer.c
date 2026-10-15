@@ -8,7 +8,7 @@ extern Fix16 *D_800A607C, *D_800A6078;
 extern unsigned short D_800A604E;
 extern short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 
-int func_8011D2F8(TObj *o)
+int evilPigBagPortalCheckPlayer(TObj *o)
 {
     if (GVARS.b3a == 0) goto ret0;
     if (GVARS.b3f | GVARS.b40) return 0;

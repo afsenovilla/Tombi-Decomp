@@ -1,46 +1,40 @@
-// FUNC 8011cec0 1016 X004
-// MATCHING 8011cec0 1016
+// FUNC 8011a778 1016 X010
+// MATCHING 8011a778 1016
 #include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
 #include "TOBJ.H"
+
 typedef struct { short x, y, w, h; } RECT;
-extern char D_80130CD4[];
-extern short D_80130D14[];
-extern void FUN_8005f3c0(RECT *, void *);
+
+extern char D_8012F2A8[];
+extern short D_8012F2E8[];
+extern void FUN_8005f3c0(RECT *, char *);
 extern void FUN_80018cf0(TObj *);
 extern int FUN_800202b4(TObj *);
+extern void evilPigBagPortalOpen(TObj *);
+extern void evilPigBagPortalEnter(TObj *);
 extern void FUN_80018838(TObj *);
-extern void func_8011CA80(TObj *);
-extern void func_8011CC10(TObj *);
 
-static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
+static __inline__ int near(TObj *o)
 {
-    o->box0 = a;
-    o->box1 = b;
-    o->box2 = c;
-    o->box3 = d;
-}
-
-static __inline__ int inview(TObj *o)
-{
-    if (!GVARS.b3a) return 0;
-    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
+    if (GVARS.b3a == 0)
+        return 0;
+    if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d)
+        return 0;
     return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }
 
-void func_8011CEC0(TObj *o)
+void updateEvilPigBagPortal(TObj *o)
 {
-    TObj *p;
-    short k;
     RECT r;
-    int x, y;
-    short m;
+    TObj *p;
+    int dx, dy;
 
     switch (o->b04) {
     case 0:
-        if (!GCD.bd0cc || (GV2.bc3 & 4)) {
+        if (GCD.bd0ca == 0 || (GV2.bc3 & 0x10)) {
             o->b04 = 3;
             break;
         }
@@ -53,17 +47,25 @@ void func_8011CEC0(TObj *o)
             r.y = 0x1fe;
             r.w = 0x10;
             r.h = 2;
-            FUN_8005f3c0(&r, D_80130CD4);
-            setbox(o, 0x18, 0x30, 0x18, 0x32);
+            FUN_8005f3c0(&r, D_8012F2A8);
+            o->box0 = 0x18;
+            o->box1 = 0x30;
+            o->box2 = 0x18;
+            o->box3 = 0x32;
         } else {
-            setbox(o, 10, 0x14, 0xe, 0x36);
+            o->box0 = 0xa;
+            o->box1 = 0x14;
+            o->box2 = 0xe;
+            o->box3 = 0x36;
         }
         o->d84 = 0;
-        o->d88 = D_80130D14[o->b0c];
+        o->d88 = D_8012F2E8[o->b0c];
         o->d8c = 0;
-        if (((unsigned char*)&GCD.bcf11)[0] == 0) {
+        if (((unsigned char*)&GCD.bcf0c)[0] == 0) {
             o->step = 0;
-            k = 0x800;
+            o->w74 = 0x800;
+            o->w76 = 0x800;
+            o->w78 = 0x800;
         } else {
             if (o->b0c == 0) {
                 o->step = 2;
@@ -72,29 +74,29 @@ void func_8011CEC0(TObj *o)
                 o->step = 1;
                 o->active = 2;
             }
-            k = 0x1000;
+            o->w74 = 0x1000;
+            o->w76 = 0x1000;
+            o->w78 = 0x1000;
         }
-        o->w74 = k;
-        o->w76 = k;
-        o->w78 = k;
         break;
     case 1:
-        if (o->b0c) {
+        if (o->b0c != 0) {
             p = (TObj *)o->d90;
-            if (!p->visible) break;
-            *(volatile short *)&o->w74 = p->w74;
-            m = o->w74;
-            x = ((Fix16 *)&o->d30)->p.whole * m;
+            if (p->visible == 0)
+                break;
+            o->w74 = p->w74;
             o->w76 = p->w76;
-            y = ((Fix16 *)&o->d34)->p.whole * m;
             o->w78 = p->w78;
-            o->h->raw = p->h->raw + (x << 4);
-            o->y.raw = p->y.raw + (y << 4);
+            dx = ((Fix16 *)&o->d30)->p.whole * o->w74;
+            dy = ((Fix16 *)&o->d34)->p.whole * o->w74;
+            o->h->raw = p->h->raw + (dx << 4);
+            o->y.raw = p->y.raw + (dy << 4);
             o->visible = 1;
             FUN_80018cf0(o);
             switch (o->step) {
             case 0:
-                if (o->b6a) o->step++;
+                if (o->b6a)
+                    o->step++;
                 break;
             case 1:
                 if (o->b0c == 2) {
@@ -105,7 +107,7 @@ void func_8011CEC0(TObj *o)
                     }
                 } else {
                     o->d88 += 0x20;
-                    if (o->d88 >= 0x639) {
+                    if (o->d88 > 0x638) {
                         o->d88 = 0x638;
                         o->step++;
                     }
@@ -119,13 +121,14 @@ void func_8011CEC0(TObj *o)
             FUN_800202b4(o);
             switch (o->step) {
             case 0:
-                if (inview(o)) o->step++;
+                if (near(o))
+                    o->step++;
                 break;
             case 1:
-                func_8011CA80(o);
+                evilPigBagPortalOpen(o);
                 break;
             case 2:
-                func_8011CC10(o);
+                evilPigBagPortalEnter(o);
                 break;
             }
         }

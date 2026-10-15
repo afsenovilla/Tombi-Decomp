@@ -8,7 +8,7 @@ extern unsigned char D_800A4553[];
 extern int D_800A4568[];
 extern int D_1F800190;
 
-void func_8011D40C(TObj *o)
+void evilPigBagPortalOpen(TObj *o)
 {
     switch (o->state) {
     case 0:
