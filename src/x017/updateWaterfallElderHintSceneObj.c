@@ -2,7 +2,7 @@
 // MATCHING 8011974c 192
 #include "gcd.h"
 #include "TOBJ.H"
-extern void func_80118C6C(TObj *);
+extern void spawnWaterfallElderHintSceneNpcs(TObj *);
 extern void waterfallElderHintScene(TObj *);
 extern void FUN_80018980(TObj *);
 
@@ -10,7 +10,7 @@ void updateWaterfallElderHintSceneObj(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80118C6C(o);
+        spawnWaterfallElderHintSceneNpcs(o);
         o->b04++;
         if (GCD.bcdbc == 0xff) o->b04 = 3;
         break;

@@ -1,0 +1,128 @@
+// FUNC 80119a1c 1316 X002
+// MATCHING 80119a1c 1316
+#include "gcd.h"
+#include "gv2.h"
+#include "TOBJ.H"
+typedef struct {
+    short flags;
+    short frame;
+    short wb4;
+    short w74, w76, w78, w7a;
+    short wba, wb8;
+    short x, y, z;
+    short subtype;
+    short b0c;
+} E;
+typedef struct { short x, y, z, sub; } E8;
+
+extern E D_8011C984[], D_8011CA9C[];
+extern E8 D_8011C93C[];
+extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
+extern TObj *allocObjectLayer2(void);
+extern TObj *FUN_80018448(void);
+
+void spawnPigGateSceneNpcs(TObj *o)
+{
+    E *e;
+    E8 *f;
+    short i;
+    TObj *p;
+    TObj *q;
+
+    for (i = 0, e = D_8011C984; e->flags != 0xff; e = &D_8011C984[++i]) {
+        p = allocObjectLayer2();
+        if (p == 0) continue;
+        p->active = 3;
+        if (p->subtype) p->active = 2;
+        p->type = 0x32;
+        p->b0a = 0;
+        p->animFrame = e->frame;
+        p->subtype = e->subtype;
+        p->b0c = e->b0c;
+        p->a.p.whole = e->x;
+        p->y.p.whole = e->y;
+        p->b.p.whole = e->z;
+        p->wb4 = e->wb4;
+        p->wb8 = e->wb8;
+        p->wba = e->wba;
+        p->w74 = e->w74;
+        p->w76 = e->w76;
+        p->w78 = e->w78;
+        p->w7a = e->w7a;
+        p->b68 = 0;
+        SCRIPT_OBJECTS[i] = p;
+        p->d90 = (int)o;
+        if (i == 0 && GV2.bc3 != 0x7f) p->b04 = 2;
+    }
+    for (i = 0; i < 6; i++) {
+        if (((unsigned char*)&GCD.bcfdc)[i] == 0) {
+            p = D_8009F2E0[i];
+            p->y.p.whole -= 0x140;
+        }
+    }
+    if (GCD.bce41 == 0xff) {
+        for (i = 0; i < 6; i++) D_8009F2E0[i]->y.p.whole -= 0x140;
+    }
+    if (GCD.bce41 == 0) {
+        for (i = 0, e = D_8011CA9C; e->flags != 0xff; e = &D_8011CA9C[++i]) {
+            p = allocObjectLayer2();
+            if (p == 0) continue;
+            p->active = 2;
+            p->type = 0x52;
+            p->b0a = 0;
+            p->animFrame = e->frame;
+            p->subtype = e->subtype;
+            p->b0c = e->b0c;
+            p->a.p.whole = e->x;
+            p->y.p.whole = e->y;
+            p->b.p.whole = e->z;
+            p->wb4 = e->wb4;
+            p->wb8 = e->wb8;
+            p->wba = e->wba;
+            p->w74 = e->w74;
+            p->w76 = e->w76;
+            p->w78 = e->w78;
+            p->w7a = e->w7a;
+            D_8009F378[i] = p;
+            p->d90 = (int)o;
+            switch (i) {
+            case 0:
+                if (!(GV2.bc3 & 1)) p->y.p.whole -= 0xf0;
+                break;
+            case 1:
+                if (!(GV2.bc3 & 2)) p->y.p.whole -= 0x12c;
+                break;
+            case 2:
+                if (!(GV2.bc3 & 4)) p->y.p.whole -= 0x140;
+                break;
+            case 3:
+                if (!(GV2.bc3 & 8)) p->y.p.whole -= 0x12c;
+                break;
+            case 4:
+                if (!(GV2.bc3 & 0x10)) p->y.p.whole -= 0x140;
+                break;
+            case 5:
+                if (!(GV2.bc3 & 0x40)) p->y.p.whole -= 0x12c;
+                break;
+            case 6:
+                if (!(GV2.bc3 & 0x20)) p->y.p.whole -= 0x12c;
+                break;
+            }
+        }
+    }
+    for (i = 0; (f = &D_8011C93C[i])->x != 0xff; i++) {
+        unsigned short t;
+        q = FUN_80018448();
+        if (q == 0) continue;
+        q->active = 1;
+        q->type = 0x4c;
+        t = f->sub;
+        q->b0c = 0;
+        q->_pad0e[0] = 0;
+        q->subtype = t;
+        D_8009F328[i] = q;
+        q->a.p.whole = f->x;
+        q->y.p.whole = f->y;
+        q->b.p.whole = f->z;
+    }
+}

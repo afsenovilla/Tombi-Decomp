@@ -11,7 +11,7 @@ void AnimAdvance(TObj *o);
 int ObjCullRegister(TObj *o);
 int Rand(void);
 void FUN_8001e5f4(int a, int b);
-void func_80136B4C(TObj *o);
+void stepPuppyBaron(TObj *o);
 void addItemToInventory(int a, int b, int c);
 void freeObjectLayer2(TObj *o);
 
@@ -81,7 +81,7 @@ void updatePuppyBaron(TObj *o)
         ObjCullRegister(o);
         switch (o->subtype) {
         case 0:
-            func_80136B4C(o);
+            stepPuppyBaron(o);
             break;
         case 1:
             addItemToInventory(10, 1, 1);

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern void func_801318E4(TObj *);
+extern void spawnSoakedPhoenixGuideNpcs(TObj *);
 extern void func_80131E44(TObj *);
 extern void soakedPhoenixGuideTalk(TObj *);
 extern void phoenixSpiritHintTalkB(TObj *);
@@ -16,7 +16,7 @@ void updateSoakedPhoenixGuide(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_801318E4(o);
+        spawnSoakedPhoenixGuideNpcs(o);
         o->b04++;
         if (GAME.selectedSection == 0 && GCD.bcdc1 == 0) o->step = 2;
         break;

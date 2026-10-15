@@ -478,7 +478,7 @@ address,size,name,twin
 801297d8,1956,func_801297D8,
 80129f7c,1768,func_80129F7C,
 8012a664,1152,func_8012A664,
-8012aae4,356,func_8012AAE4,
+8012aae4,356,spearPigDefeated,
 8012ac48,2720,updateSpearPig,
 8012b6e8,472,func_8012B6E8,
 8012b8c0,388,func_8012B8C0,
@@ -496,11 +496,11 @@ address,size,name,twin
 8012cfcc,496,func_8012CFCC,
 8012d1bc,68,func_8012D1BC,
 8012d200,440,func_8012D200,
-8012d3b8,244,func_8012D3B8,
+8012d3b8,244,spawnNpcSet21,
 8012d4ac,280,func_8012D4AC,
 8012d5c4,8,func_8012D5C4,
 8012d5cc,12,func_8012D5CC,X001:8013a0cc
-8012d5d8,152,func_8012D5D8,X003:80133668
+8012d5d8,152,updateNpcSet21,X003:80133668
 8012d670,8,func_8012D670,
 8012d678,468,func_8012D678,
 8012d84c,12,func_8012D84C,X001:8013a0cc
@@ -509,11 +509,11 @@ address,size,name,twin
 8012de2c,116,stepHidingSonTalk,X003:80134c84
 8012dea0,368,initHidingSon,X004:801301b0
 8012e010,260,updateHidingSon,X003:80134e60
-8012e114,532,func_8012E114,
+8012e114,532,spawnJunglePigBagStartNpcs,
 8012e328,352,junglePigBagEventStart,
 8012e488,12,func_8012E488,X001:8013a0cc
 8012e494,188,updateJunglePigBagStart,
-8012e550,472,func_8012E550,X003:80133e94
+8012e550,472,spawnJunglePigBagCompleteNpcs,X003:80133e94
 8012e728,416,updateJunglePigBagComplete,
 8012e8c8,80,func_8012E8C8,
 8012e918,188,func_8012E918,

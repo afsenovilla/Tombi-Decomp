@@ -4,7 +4,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern void func_8012E550(TObj *);
+extern void spawnJunglePigBagCompleteNpcs(TObj *);
 extern void setEventComplete(int, int);
 extern void PoolFree_1F800210(TObj *);
 
@@ -12,7 +12,7 @@ void updateJunglePigBagComplete(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012E550(o);
+        spawnJunglePigBagCompleteNpcs(o);
         o->b04++;
         break;
     case 1:

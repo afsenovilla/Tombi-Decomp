@@ -5,7 +5,7 @@
 #include "gamestate.h"
 
 extern TObj *allocObjectLayer2(void);
-extern short func_80139B2C(TObj *);
+extern short checkLostSeedKidTalk(TObj *);
 extern void lostSeedKidTalk(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -35,7 +35,7 @@ void updateLostSeedKid(TObj *o)
         o->b04 = 1;
         break;
     case 1:
-        if (func_80139B2C(o)) lostSeedKidTalk(o);
+        if (checkLostSeedKidTalk(o)) lostSeedKidTalk(o);
         break;
     case 2:
         o->b04 = 3;

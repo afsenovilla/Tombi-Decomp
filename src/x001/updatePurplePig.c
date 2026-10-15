@@ -18,8 +18,8 @@ extern int Rand(void);
 extern int isObjectInView(TObj *);
 extern void spawnItemNotification(int, int);
 extern short FUN_80040278(TObj *, short, short);
-extern void func_801282D0(TObj *);
-extern void func_801285E4(TObj *);
+extern void purplePigIdle(TObj *);
+extern void purplePigWalk(TObj *);
 extern void func_80128A2C(TObj *);
 extern void func_80129588(TObj *);
 extern void func_80129B2C(TObj *);
@@ -27,8 +27,8 @@ extern void func_80129DAC(TObj *);
 extern void func_8012A290(TObj *);
 extern void func_8012A5CC(TObj *);
 extern void func_8012A794(TObj *);
-extern void func_8012AB64(TObj *);
-extern void func_8012B184(TObj *);
+extern void purplePigHit(TObj *);
+extern void purplePigDefeated(TObj *);
 
 static __inline__ void setAnim(TObj *o, void *a)
 {
@@ -122,8 +122,8 @@ void updatePurplePig(BX *b)
         ObjCullRegister(o);
         if (o->b9e == 0) {
             switch (o->step) {
-            case 0: func_801282D0(o); break;
-            case 1: func_801285E4(o); break;
+            case 0: purplePigIdle(o); break;
+            case 1: purplePigWalk(o); break;
             case 2: func_80128A2C(o); break;
             case 3: func_80129588(o); break;
             case 4: func_80129B2C(o); break;
@@ -156,7 +156,7 @@ void updatePurplePig(BX *b)
     case 2:
         switch (o->step) {
         case 0:
-            func_8012AB64(o);
+            purplePigHit(o);
             ObjCullRegister(o);
             break;
         case 1:
@@ -183,7 +183,7 @@ void updatePurplePig(BX *b)
             ObjCullRegister(o);
             break;
         case 2:
-            func_8012B184(o);
+            purplePigDefeated(o);
             if (!ObjCullRegister(o)) o->b04 = 3;
             break;
         }

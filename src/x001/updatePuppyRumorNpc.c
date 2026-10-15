@@ -9,7 +9,7 @@ extern signed char D_8009D2B0;
 extern unsigned short D_1F8001FC;
 extern unsigned short D_1F8003C4;
 extern unsigned char D_800A60F8;
-extern void func_8013A0D8(TObj *);
+extern void spawnPuppyRumorNpcs(TObj *);
 extern void puppyRumorTalk(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -35,7 +35,7 @@ void updatePuppyRumorNpc(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8013A0D8(o);
+        spawnPuppyRumorNpcs(o);
         break;
     case 1:
         if (check(o)) puppyRumorTalk(o);

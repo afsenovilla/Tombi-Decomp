@@ -1,7 +1,7 @@
 // FUNC 8011c628 168 X002
 // MATCHING 8011c628 168
 #include "TOBJ.H"
-extern void func_80119A1C(TObj *);
+extern void spawnPigGateSceneNpcs(TObj *);
 extern void stepPigGateScene(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -9,7 +9,7 @@ void updatePigGateScene(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_80119A1C(o);
+        spawnPigGateSceneNpcs(o);
         o->b04++;
         break;
     case 1:

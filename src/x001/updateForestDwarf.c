@@ -8,11 +8,11 @@ extern void *D_8013DE3C[], *D_8013DDE4[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void func_801356C0(TObj *);
-extern void func_80135850(TObj *);
+extern void initForestDwarf(TObj *);
+extern void stepForestDwarfWander(TObj *);
 extern void wrongWayHintTalk(TObj *);
-extern void func_80135C90(TObj *);
-extern void func_80136164(TObj *);
+extern void forestDwarfFlee(TObj *);
+extern void forestDwarfCaught(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateForestDwarf(TObj *o)
@@ -37,14 +37,14 @@ void updateForestDwarf(TObj *o)
         FUN_8001fe6c(o);
         o->b04++;
         } else {
-            func_801356C0(o);
+            initForestDwarf(o);
         }
         break;
     case 1:
         if (FUN_800202b4(o) == 0)
             break;
         if (o->subtype == 0) {
-            func_80135850(o);
+            stepForestDwarfWander(o);
             break;
         }
         if (*(int *)D_8009C960 == 0x20001)
@@ -93,11 +93,11 @@ void updateForestDwarf(TObj *o)
             break;
         case 1:
         case 2:
-            func_80135C90(o);
+            forestDwarfFlee(o);
             break;
         case 3:
         case 4:
-            func_80136164(o);
+            forestDwarfCaught(o);
             break;
         }
         break;

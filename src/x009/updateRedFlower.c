@@ -23,9 +23,9 @@ extern void func_801225BC(TObj *);
 extern void func_801229AC(TObj *);
 extern void func_80122F08(TObj *);
 extern void func_80123294(TObj *);
-extern void func_801233F0(TObj *);
+extern void redFlowerHit(TObj *);
 extern void func_80123828(TObj *);
-extern void func_80123CE8(TObj *);
+extern void redFlowerDefeated(TObj *);
 
 void updateRedFlower(TObj *o)
 {
@@ -155,7 +155,7 @@ void updateRedFlower(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            func_801233F0(o);
+            redFlowerHit(o);
             if (ObjCullRegister(o)) break;
         chk:
             if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) despawnObjectOffscreen(o);
@@ -165,7 +165,7 @@ void updateRedFlower(TObj *o)
             ObjCullRegister(o);
             break;
         case 2:
-            func_80123CE8(o);
+            redFlowerDefeated(o);
             if (ObjCullRegister(o) == 0) o->b04 = 3;
             break;
         case 3:

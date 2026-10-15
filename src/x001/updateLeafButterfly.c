@@ -11,8 +11,8 @@ void ObjCullRegister(TObj *o);
 void AnimLoadDuration(TObj *o);
 void addItemToInventory(int a, int b, int c);
 void freeObjectLayer2(TObj *o);
-void func_8013759C(TObj *o);
-void func_80137714(TObj *o);
+void initLeafButterfly(TObj *o);
+void leafButterflyFlutter(TObj *o);
 void leafButterflyEventStart(TObj *o);
 void func_80137AFC(TObj *o);
 void func_80137D8C(TObj *o);
@@ -21,12 +21,12 @@ void updateLeafButterfly(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8013759C(o);
+        initLeafButterfly(o);
         break;
     case 1:
         ObjCullRegister(o);
         if (o->step == 0) {
-            func_80137714(o);
+            leafButterflyFlutter(o);
         }
         break;
     case 2:

@@ -412,3 +412,22 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   x001 8013946c brokenFountainScene (step switch run by updateFlowerTowerKeeper: fountain animation, completes 0x1B "The Broken Fountain")
 - `updateLeafButterfly` (x001 8013839c, x010 80123d18, twins) - leaf butterfly object: collected with addItemToInventory(0x10); `leafButterflyEventStart`
   (x001 80137968, x010 80123330) - its first-contact state: locks the player and starts event 0xB2 "Leaf Butterflies"
+- Section NPC sets: unlayered objects (MAIN0 dispatchUnlayeredByVariant, D_8007C1C8[variant]) whose only work is case 0: a spawn function walks a table of
+  0x1C-byte records (flag 0x80 -> layer 4 type 0x1A object, else layer 2 type 0x32 talk NPC with subtype/b0c/wb4/wb8/wba/w74..w7a from the record, d90 = the set);
+  then idle until freed (code twin of x003 80133668). Named `updateNpcSet<variant>` / `spawnNpcSet<variant>` (variant = global table index, so the same
+  suffix never means two different objects): x005 8011762c/8011724c (09), x017 80118b8c/8011890c (12; also clears D_8009C330->b1e near x 0x100..0x190 until
+  GCD.bcfd6), x004 8012dc5c/8012da60 (1B), x016 80117408/80117228 (1C), x011 80119ba8/801199f0 (1E), x004 8012df14/8012dcf4 (1F), x003 80133668/80133448 (20),
+  x010 8012d5d8/8012d3b8 (21), x016 80117190/80116f88 (22), x004 8012d9c8/8012d788 (25), x003 8013433c/80134118 (29), 80134630/801343d4 (2A),
+  80134080/80133e94 (2B), x018 8011765c/80117484 (38), 801173ec/801171ac (39). The same spawn step of already named objects: x003 801318e4
+  spawnSoakedPhoenixGuideNpcs, x009 80129c98 spawnAspiringActorGuardNpcs, x010 8012e114 spawnJunglePigBagStartNpcs, 8012e550 spawnJunglePigBagCompleteNpcs
+  (twin of x003 80133e94), x002 80119a1c spawnPigGateSceneNpcs, x017 80118c6c spawnWaterfallElderHintSceneNpcs
+- `x004 8012f35c updateBigKeyPainting` - variant 0x14: until the five flags GCD.bcf24[0..4] are set, then runs paintingBigKeyReward
+- Enemy helpers (step functions of a named enemy handler; b04 1 = active steps, b04 2 = after being hit: step 0 `*Hit` starts with velV -0x400, facing
+  1 - w7a (awardAPByArea when the hit points w98 reach 0), the last step `*Defeated` = active 2, b0b 1, b0f 4, velV -0x400, movetab D_80077D0C: the enemy flies off
+  the screen): x001 801282d0 purplePigIdle (step 0: waits 0xC0/0x180 ticks, then turns to the player), 801285e4 purplePigWalk (step 1: walk anim, sfx 0x5E,
+  movetab), 8012ab64 purplePigHit, 8012b184 purplePigDefeated; x009 801233f0 redFlowerHit, 80123ce8 redFlowerDefeated; x010 8012aae4 spearPigDefeated
+- x001 forest dwarf (updateForestDwarf): 801356c0 initForestDwarf (box, anims per section/subtype), 80135850 stepForestDwarfWander (subtype 0: walk 0x3C ticks, turn),
+  80135c90 forestDwarfFlee (b04 2, subtypes 1/2: hops away with velX +-0x120), 80136164 forestDwarfCaught (b04 2, subtypes 3/4: locks the player, plays the caught anim)
+- x001 others: 80136b4c stepPuppyBaron (step switch of updatePuppyBaron), 80139b2c checkLostSeedKidTalk (player standing at the kid's ledge pressing the talk
+  button), 8013a0d8 spawnPuppyRumorNpcs (case 0 of updatePuppyRumorNpc: spawns the layer 2 type 0x16 objects while GCD.bceab is 1..2), 8013759c initLeafButterfly,
+  80137714 leafButterflyFlutter (sine flight, 4 cycles); x009 80128180 initJellyfish (case 0 of updateJellyfish)

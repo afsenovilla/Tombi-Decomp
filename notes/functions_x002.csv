@@ -346,7 +346,7 @@ address,size,name,twin
 80119788,384,flowerGardenCompleteScene,
 80119908,12,func_80119908,X001:8013a0cc
 80119914,264,updateFlowerGardenEvent,
-80119a1c,1316,func_80119A1C,
+80119a1c,1316,spawnPigGateSceneNpcs,
 80119f40,360,func_80119F40,
 8011a0b4,96,func_8011A0B4,
 8011a114,820,pigGateDiscoveryScene,

@@ -14,7 +14,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void freeObjectLayer2(TObj *);
-extern void func_80128180(TObj *);
+extern void initJellyfish(TObj *);
 extern void func_80124E04(TObj *);
 extern void func_8012516C(TObj *);
 extern void func_80125438(TObj *);
@@ -37,7 +37,7 @@ void updateJellyfish(TObj *o)
 
     switch (o->b04) {
     case 0:
-        func_80128180(o);
+        initJellyfish(o);
         break;
     case 1:
         if (GVARS.b42 && o->b6a != 2) {

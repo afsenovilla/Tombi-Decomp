@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern void func_8012E114(TObj *);
+extern void spawnJunglePigBagStartNpcs(TObj *);
 extern void junglePigBagEventStart(TObj *);
 extern void PoolFree_1F800210(TObj *);
 
@@ -11,7 +11,7 @@ void updateJunglePigBagStart(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        func_8012E114(o);
+        spawnJunglePigBagStartNpcs(o);
         o->b04++;
         break;
     case 1:

@@ -31,7 +31,7 @@ extern void func_801291C4(TObj *);
 extern void func_801297D8(TObj *);
 extern void func_80128764(TObj *);
 extern void func_8012A664(TObj *);
-extern void func_8012AAE4(TObj *);
+extern void spearPigDefeated(TObj *);
 
 static __inline__ int onscreen(TObj *o)
 {
@@ -314,7 +314,7 @@ void updateSpearPig(TObj *o)
             }
             break;
         case 2:
-            func_8012AAE4(o);
+            spearPigDefeated(o);
             if (!o->visible) o->b04 = 3;
             break;
         }
