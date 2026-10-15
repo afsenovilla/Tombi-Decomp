@@ -542,3 +542,33 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   completes event 0x28 "Tears from a Flower"); `801248d4 updateRedPlusBlueObject` (layer 2 type 0x1C, uncertain kind: subtype 4 completes event 0xBD
   "Red+Blue=?" and sets PLAYER.obj.subtype = 1); `8011bb0c updateBobbingPlatform` (layer 4 type 0x36, uncertain: only when GCD.bcdac (event 0x08 "I Can't
   Swim...") is set; a 0x40 wide platform bobbing on a sine at one of two spots D_8012B26C)
+- `playerInitAreaHook` (x001 801212a0, x003 8011dc4c, x004 8011d8c4, x009 8011d334) - the per-area call of MAIN0 playerInitMode (`switch (selectedArea)`:
+  1/7, 3, 4/12, 9; area 0 calls X000 801228bc): clears D_8009F0EC, puts the player into a scripted entry state for some spawn points (b04 5 step 9 ...);
+  the area 4 one also respawns the carried guide (`x004 8012b388 spawnCarriedGuide`, layer 2 type 0x33 = updateCarriedGuide at the player's hand)
+  while event 0x32 "Road to Baccus Lake" is in progress (GCD.bcdd6 == 1) or after it with 0x31 "A Drink for Grownups" (bcdd5) running
+- Event trigger checks (set o->step / o->state of their event object; no static caller, so reached through data or a computed call): x003
+  `80133708 checkWindDiesEventTrigger` (player on the ground at x 0xC8E..0xCB5, y -0x7BB; event 0xAA progress GCD.bce4e, GV2.bc3 & 2),
+  `80133b9c checkPhoenixFavoriteTrigger` (GCD.bd0e6 >= 5 while event 0xAB is open), `8012b5dc preciousChestCheckOpened` (hit (b68) or event 0xB9
+  "Precious Treasure Chest?" completed), `8012b63c isPreciousChestEventActive` (GCD.bd0c8 set and 0xB9 not completed); x004 `8012e44c checkKeyHolesTrigger`
+  (the two key hole spots of stepKeyHoles; events 0x37 / 0x33 flags GCD.bcddb / bcdd7), `8012f094 checkBigKeyPaintingPanels` (the five GCD.bcf24 flags while
+  event 0x38 is open); x010 `8012eb7c checkUnderwaterPigBagTrigger` (event 0x7B not started); x016 `801177b0 checkStoneGearsTrigger` (player at x 0x82..0xA9,
+  y -0x3D while event 0x61 is open: item 0x3E "Iron Wheel" used -> step 2 (brokenStoneGearsRepair), else the up button -> step 1);
+  x018 `8011a038 selectWitchMizunoTalkStep` (talk step from events 0x84 / 0x74 / 0x78 / 0x72 / 0x67 and GCD.bcfd9 / bcfda); x002
+  `8011a0a8 selectSevenFriendsSceneStep` (event 0x9D "Seven Friends": completed -> 3, GCD.bcff7 == 6 -> 2, all seven GV2.bc3 bits -> 1)
+- x002: `80119330 updateSevenFriendsMember` (layer 2 type 0x52, uncertain: subtypes 0..6 with start timers 120/180/60/240/30/0/150 until event 0x9D
+  starts; `80119178 stepSevenFriendsMember`), `801169c0 updateSevenFriendsBackdropSprite` (layer 3 type 0x4C: camera-fixed backdrop sprite (b0a 7,
+  CLUT 0x80,0x1FF) whose subtypes 2..8 pick their frame from the seven GV2.bc3 bits / GCD.bcfdb..bcfe1; uncertain), `80119710 spawnGoldenFlowerIfAffordable`
+  (spawns object 0x5F at 0xB0,-0x38 when AP >= D_8009C98C, event 0x27 "Plant a Flower Garden" started and no golden flower yet), `801194ac
+  updateLightsOutDarkness` (sets the room fade colour from D_8007C178[area][section]; keeps the screen dimmed (fade amount 0xC0) while event 0xB3 "Where'd
+  the Lights Go?" is in progress and fades back in once it is completed)
+- `updateBackdropSpriteSet` (x016 801162d0 layer 3 type 0x46, x017 80116d18 type 0x47): camera-fixed backdrop sprites (b0a 7, CLUT 0x80,0x1FF, position
+  d30/d34 minus the camera) with per-subtype animations (x017 subtype 0 changes with GCD.bcfd6)
+- x004 `801293a0 initMermaid` (case 0 of updateMermaid, only once event 0x7E "The 10 Math Beads" is open (GCD.bce22)), `8012e828 updateMermaidSpawner`
+  (unlayered: spawns layer 2 type 0x32 = the MAIN0 func_800498F4 section dispatcher that runs updateMermaid, from D_8013143C, while 0x7E is open;
+  `8012e750 spawnMermaidForMathBeads` the same spawn as a one-shot step); x010 `8012b8c0 parrotPumpRocksClutFlash` (updateParrot helper: after event 0x3F
+  "The Pump Rocks" is completed, cycles palette rows at 0x120,0x1E0 with MoveImage 12 times; uncertain); x011 `80116d14 updateRaftPickup` (layer 5 type
+  0x11: while event 0x96 "Let's Ride the Raft!" is open, touching it gives item 0x5C "Raft"), `801163d4 updateFoodForFuelObject` (event 0x68 "Food for
+  Fuel?" (GCD.bce0c), uncertain kind: b0c 1 is hit, the others roll away (velX -0x180) when GCD.bd082 reaches 4)
+- Leaf butterfly steps of x010 updateLeafButterfly (twin layout of x001): `80122f48 initLeafButterfly`, `801230d0 leafButterflyFlutter`,
+  `801234c8 leafButterflyReleased` (b04 2 steps 1-3), `80123708 leafButterflyRoam` (step 4: random flight patterns D_8012F398 inside the box of the parent
+  d90; uncertain); x001 `80137d8c leafButterflyRoam` the same step 4
