@@ -373,7 +373,7 @@ def fit_unused(v, blocks):
     return outside / touched if touched else 1.0
 
 
-def score_candidate(v, ps, base):
+def score_candidate(v, ps, base, relaxed=False):
     """Share of the sampled parts whose texture rectangle lies completely in loaded page data (4 bpp parts: pages that are not paired with
     a 256 colour CLUT, so not 8 bpp room backgrounds)."""
     ok = tot = 0
@@ -382,7 +382,7 @@ def score_candidate(v, ps, base):
         tot += 1
         if x1 >= VW or y1 >= VH or mode > 2:
             continue
-        mask = v.m4 if mode == 0 else v.m_any
+        mask = v.m4 if mode == 0 and not relaxed else v.m_any
         if all(0 not in mask[y * VW + x0:y * VW + x1 + 1] for y in {y0, y1, (y0 + y1) // 2}):
             ok += 1
     return ok / max(tot, 1)
@@ -437,12 +437,12 @@ def _ring_cut(v, parts, base, cap=300):
     return cut / len(rects), nz / max(tl, 1)
 
 
-def covered(v, p, base):
+def covered(v, p, base, relaxed=False):
     """The texture rectangle of part p (offset `base`) lies completely in loaded page data (every row checked)."""
     mode, x0, y0, x1, y1 = rect_words(p, base)
     if x1 >= VW or y1 >= VH or mode > 2:
         return False
-    mask = v.m4 if mode == 0 else v.m_any
+    mask = v.m4 if mode == 0 and not relaxed else v.m_any
     return all(0 not in mask[y * VW + x0:y * VW + x1 + 1] for y in range(y0, y1 + 1))
 
 

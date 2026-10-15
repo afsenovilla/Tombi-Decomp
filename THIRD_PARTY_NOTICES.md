@@ -12,6 +12,12 @@ Used here:
 - `notes/names_main0.csv` entries whose comment mentions `psx_tomba` — function names, mapped onto the PAL
   executable either by matching compiled bytes or by address alignment.
 
+## TombaEdit — https://github.com/SiergiejW/TombaEdit
+MIT licensed (Python/PyQt6 asset viewer for Tomba!/Tombi!). Used here as a reference, not vendored:
+- `docs/FORMATS.md` — summary of the WMD, SPR, WPP, GRPX, CLM, WHM, WFM, WSS, APD and archive layouts, taken from its `docs/formats.md` and `docs/collision.md`.
+- `tools/objinit.py` — the idea of resolving an object's texture page offset, CLUT and SPR bank by running its init code on an object
+  filled from the placement record, and the PAL routine addresses it stubs (from `formats/level/runtime.py`, `game/builds.py`); the code is ours.
+
 ## Toolchain (not redistributed, downloaded by the setup scripts)
 - decompals/old-gcc (`gcc-2.7.2-psx`), mkst/maspsx, GNU binutils.
 

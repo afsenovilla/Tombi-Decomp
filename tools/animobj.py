@@ -328,7 +328,7 @@ class SprFrames:
     """The frames of one SPR table rendered like tools/vram.py export_spr (same context/offset inference), kept as PIL images.
     frame(i) -> (RGBA image, (dx, dy)) with (dx, dy) = top-left of the image relative to the object position, or None for an empty frame."""
 
-    def __init__(self, ld, idx, kind, bases=()):
+    def __init__(self, ld, idx, kind, bases=(), clut=None):
         import vram
         from PIL import Image
         self.Image = Image
@@ -358,12 +358,14 @@ class SprFrames:
             else:
                 cs = vram.candidates(ld, idx)
             res = vram.infer_base(cs, parts) if parts else None
-            if res is not None and bases and res[1] not in bases:
-                # the handler sets TObj.w1e (the tpage offset): choose among those, context by best coverage of the part rectangles
+            if parts and bases:
+                # TObj.w1e as the handler really sets it (tools/objinit.py): only the context is searched.  A part page the handler names may hold
+                # 4 bpp art although the load lists pair it with a 256 colour CLUT (AREA03 horned enemy, w1e 11), so any loaded data counts.  Among equal fits the
+                # list's own pages (context 0) win over the SYS atlas lists, which can hold other art in the same VRAM area (AREA03 thrower).
                 ps = vram.sample_parts(parts, 150)
-                best = max(((vram.score_candidate(cv, ps, b), -ci, b) for ci, (_, cv) in enumerate(cs) for b in bases), default=None)
+                best = max(((round(vram.score_candidate(cv, ps, b, True), 2), ci == 0, res is not None and res[0] == ci, -ci, b) for ci, (_, cv) in enumerate(cs) for b in bases), default=None)
                 if best and best[0] >= 0.25:
-                    res = (-best[1], best[2], dict(res[2], alt_offsets=[b for b in bases if b != best[2]], ties=[[0, best[2]]]))
+                    res = (-best[3], best[4], dict(res[2] if res else dict(ties=[[0, best[2]]]), alt_offsets=[b for b in bases if b != best[4]]))
             if res is None:
                 self.info = {"error": "no loaded page data covers the part rectangles"}
                 return
@@ -375,11 +377,13 @@ class SprFrames:
             fbase = base
             if planes is None and alts:
                 live = [p for p in parts if p[8] and p[9]]
-                if live and not all(vram.covered(v, p, base) for p in live):
-                    fbase = next((a for a in alts if all(vram.covered(v, p, a) for p in live)), base)
+                if live and not all(vram.covered(v, p, base, True) for p in live):
+                    fbase = next((a for a in alts if all(vram.covered(v, p, a, True) for p in live)), base)
             for p in parts:
                 if p[8] == 0 or p[9] == 0:
                     continue
+                if clut is not None:        # o->b0d & 1: the object's CLUT replaces the one of the part
+                    p = (p[0], p[1], clut) + tuple(p[3:])
                 w, h, png, rgba, blank, note = vram.render_part(v, p, fbase, planes[fi] if planes else None)
                 if not blank:
                     items.append((p[12], p[13], w, h, rgba))
@@ -396,10 +400,10 @@ class SprFrames:
 _sprc = {}
 
 
-def spr_frames(ld, idx, kind, bases=()):
-    k = (ld, idx, kind, tuple(bases))
+def spr_frames(ld, idx, kind, bases=(), clut=None):
+    k = (ld, idx, kind, tuple(bases), clut)
     if k not in _sprc:
-        _sprc[k] = SprFrames(ld, idx, kind, bases)
+        _sprc[k] = SprFrames(ld, idx, kind, bases, clut)
     return _sprc[k]
 
 
@@ -432,6 +436,20 @@ def owner_id(area, hname):
     return "a%02d_%s" % (area, re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_"))
 
 
+def emulated_init(area, handler, rows, reader=None):
+    """[dict(w1e, clut, slot, b0d)] (most placed first) from running the handler on its placement records; [] when it sets no SPR bank.
+    Records that differ only in position give the same answer, so each distinct one is run once."""
+    import objinit
+    seen = {}
+    for r in rows:
+        raw = bytes.fromhex(r["raw"])
+        seen.setdefault(raw[:6] + raw[12:], raw)
+    try:
+        return [i for i, _ in objinit.owner_inits(area, handler, list(seen.values()), reader)]
+    except Exception:
+        return []
+
+
 def build_owners(area=None, reader=None, rows=None):
     """[owner dict] for every placed object handler (per area) that selects animation scripts.  No rendering here."""
     rows = rows if rows is not None else O.build(area)
@@ -449,6 +467,9 @@ def build_owners(area=None, reader=None, rows=None):
         if not ov.inside(h, 4):
             continue
         scripts, sprs, w1e = handler_scripts(ov, h, a)
+        init = emulated_init(a, h, g["rows"], reader)
+        if init:    # the values the handler really sets (tools/objinit.py) replace the guess read from its immediates
+            w1e, sprs = [i["w1e"] for i in init if i["w1e"] < 32], sorted({0x30 + i["slot"] for i in init})
         if not scripts:
             continue
         anims = []
@@ -461,7 +482,7 @@ def build_owners(area=None, reader=None, rows=None):
         rooms = collections.Counter(r["list"] for r in g["rows"])
         types = sorted({(r["layer"], r["type"]) for r in g["rows"]})
         out.append(dict(owner=owner_id(a, handler_label(g["name"], h)), handler=handler_label(g["name"], h), handler_addr="%08X" % h, area=a,
-                        types=["L%d/%02X" % t for t in types], placements=len(g["rows"]), rooms=dict(rooms), sprs=sprs, w1e=w1e, animations=anims))
+                        types=["L%d/%02X" % t for t in types], placements=len(g["rows"]), rooms=dict(rooms), sprs=sprs, w1e=w1e, init=init, animations=anims))
     return out
 
 
@@ -470,5 +491,5 @@ def resolve_sources(owners):
     for ow in owners:
         idx, kind, alts = pick_source("AR%02d" % ow["area"], {int(k): v for k, v in ow["rooms"].items()}, ow["sprs"],
                                       [a["frames"] for a in ow["animations"]])
-        ow["spr"] = None if idx is None else dict(list=idx, kind="0x%02X" % kind, w1e=ow["w1e"], alternatives=["list %d kind 0x%02X" % x for x in alts])
+        ow["spr"] = None if idx is None else dict(list=idx, kind="0x%02X" % kind, w1e=ow["w1e"], clut=next((i["clut"] for i in ow.get("init", ()) if i["slot"] == kind - 0x30 and i["clut"] is not None), None), alternatives=["list %d kind 0x%02X" % x for x in alts])
     return owners

@@ -274,7 +274,7 @@ def owner_source(ow):
     if not ow.get("spr"):
         return None
     import animobj
-    return animobj.spr_frames("AR%02d" % ow["area"], ow["spr"]["list"], int(ow["spr"]["kind"], 16), ow["spr"].get("w1e", ()))
+    return animobj.spr_frames("AR%02d" % ow["area"], ow["spr"]["list"], int(ow["spr"]["kind"], 16), ow["spr"].get("w1e", ()), ow["spr"].get("clut"))
 
 
 def anim_json(ow, an):
