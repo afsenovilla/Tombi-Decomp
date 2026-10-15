@@ -1,23 +1,24 @@
 // FUNC 800ee79c 256 I0NFO
 #include "TOBJ.H"
+#include "spad.h"
+#include "raw7.h"
 extern void func_8001FE6C(TObj *o, int a);
 extern void func_800202B4(TObj *o);
 extern void func_800EE5E4(TObj *o);
 extern void func_80018790(TObj *o);
 extern void *D_8001219C;
-
 void func_800EE79C(TObj *o)
 {
     switch (o->b04) {
     case 0: {
         int t;
         o->w1e = 0x15;
-        t = *(int *)0x1F8002D8;
+        t = SPAD.i2d8;
         o->box0 = 4;
         o->box1 = 8;
         o->box2 = 8;
         o->b0d = 0;
-        *(signed char *)&o->b0f = -0xB;
+        S8(o, 0xF) = -0xB;
         o->box3 = 0x20;
         o->d3c = t;
         o->anim = D_8001219C;
