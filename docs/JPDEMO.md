@@ -104,12 +104,16 @@ by `tools/xmatch.py --csv` + `tools/jpdemo_syms.py` (PAL names at demo addresses
 --version jpdemo` writes `build/jpdemo/report.json` (one unit per demo function, no C yet, so 0 %), and the
 `report-jpdemo` CI job uploads it as `SLPM_801.65_report` for decomp.dev, from the `GAME_FILES_URL_JP_DEMO` secret.
 
-**C reuse (28.1 % of demo code, 774 of 1806 functions):** the demo report compiles C for demo functions with the
+**C reuse (39.6 % of demo code, 1034 of 1832 functions):** the demo report compiles C for demo functions with the
 PAL toolchain (`tools/ncheck.py` build: same compiler, `// FLAGS`, `// CC`, `// AS gnu`, `// HEADERS` per file) and
 renames the object's function to the demo symbol, so objdiff matches it (relocations ignored; objects are not
 linked). Sources, by priority:
 - `src/jpdemo/<prog>/*.c`: demo versions of PAL functions (changed constants, struct offsets, pad bits), each with
   a `// JPDEMO <prog> <demo addr> <size>` header and no FUNC/MATCHING marker, so PAL progress ignores them.
+  Common demo differences: d-pad bits shifted left by 8, `PlayerSetAnimIfChanged` written inline, a 20-byte item
+  table instead of PAL's per-item pointers, `GetClut` inlined, object fields at +0xd0/+0xcf where PAL has
+  +0xe4/+0xe3, no per-object +0x8c table, area switches cut down to the demo's areas 0-2. Small demo-only
+  functions (stubs, setters, wrappers) are written from the demo code with a `// Demo-only ...` comment.
 - `config/jpdemo/reuse.txt`: demo addr -> PAL module + address, written by `tools/jpdemo_reuse.py` (exact compare
   except relocated bits; needs `game/` and a previous demo build). The PAL file is found by address through
   `tools/units.py`, so PAL renames do not break it.
