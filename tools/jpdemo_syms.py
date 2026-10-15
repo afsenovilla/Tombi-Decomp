@@ -13,8 +13,11 @@ Needs the PAL files and symbols only to run xmatch; the generated symbol files a
 import csv, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "tools"))
-from versions import VERSIONS, version_arg
+# demo file (as passed to xmatch) -> (symbol file, vram of xmatch offset 0)
+TARGETS = {"SLPM_801.65": ("slpm80165", 0x80010000), "X00.BIN": ("x00", 0x800E7698)}
+# Below these addresses the code is game code, where a tiny library piece (`*_OBJ_<offset>`, an inner label of a PAL
+# library object) can only be a false pairing with a function epilogue; such rows would cut the real function short.
+GAME_END = {"slpm80165": 0x80051000, "x00": 0xFFFFFFFF}
 
 
 def main():
@@ -31,6 +34,8 @@ def main():
     for mod, rows in out.items():
         seen, lines = set(), []
         for a, name, size, pm, pa, ident in sorted(rows):
+            if re.fullmatch(r"\w+_OBJ_[0-9A-F]+", name) and a < GAME_END[mod]:
+                continue
             # generic PAL names (func_/FUN_<PAL address>) would clash with splat's names at demo addresses
             n = "func_%08X" % a if re.fullmatch(r"(func|FUN)_[0-9A-Fa-f]{8}", name) else name
             while n in seen: n += "_"

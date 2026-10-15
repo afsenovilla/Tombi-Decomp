@@ -1,0 +1,86 @@
+// JPDEMO x00 8010E448 924
+// Demo version of PAL x000 801142C0 (func_801142C0.c): message groups 59/62 (PAL 2), box 0x40 higher, also stops the
+// player.
+#include "gcd.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+#include "player.h"
+
+typedef struct { short s[6]; } P6;
+extern int D_8009C960_w;
+extern unsigned char *D_8009C330;
+extern void *SCRIPT_OBJECTS[];
+int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
+void TileCollideAt(TObj *o, short x, short y);
+void AnimAdvance(TObj *o);
+void printInfoMessage(int a, int b);
+
+void func_801142C0(TObj *o)
+{
+    P6 pos;
+    unsigned short *p;
+    switch (o->state) {
+    case 0:
+        o->timer = 60;
+        o->state++;
+    case 1:
+        if (--o->timer > 0) break;
+        o->timer = 0;
+        pos = *(P6 *)&o->a;
+        pos.s[3] -= 0x40;
+        o->b68 = 0;
+        o->b6a = 1;
+        if (GAME.selectedArea == 2) {
+            switch (GCD.bcdb1) {
+            case 1: o->d90 = showMessageBoxDirectTimed(59, 0, &pos, 0x78); break;
+            case 2: o->d90 = showMessageBoxDirectTimed(59, 1, &pos, 0x78); break;
+            case 3: o->d90 = showMessageBoxDirectTimed(59, 1, &pos, 0x78); break;
+            case 4: o->d90 = showMessageBoxDirectTimed(59, 2, &pos, 0x78); break;
+            }
+        } else {
+            switch (GCD.bcdb1) {
+            case 1: o->d90 = showMessageBoxDirectTimed(62, 0, &pos, 0x78); break;
+            case 2: o->d90 = showMessageBoxDirectTimed(62, 1, &pos, 0x78); break;
+            case 3: o->d90 = showMessageBoxDirectTimed(62, 1, &pos, 0x78); break;
+            case 4: o->d90 = showMessageBoxDirectTimed(62, 2, &pos, 0x78); break;
+            }
+        }
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 6;
+        ((unsigned char*)&PLAYER.obj.b04)[1] = 5;
+        ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
+        D_8009C330[9] = 10;
+        PLAYER.obj.wb2 = 0;
+        PLAYER.obj.velH = 0;
+        PLAYER.obj.velV = 0;
+        if (D_8009C960_w == 0x10002) {
+            (*(short*)&PLAYER.obj.animFrame) = 1;
+            PLAYER.obj.velX = 0xc0;
+        } else {
+            (*(short*)&PLAYER.obj.animFrame) = 0;
+            PLAYER.obj.velX = -0xc0;
+        }
+        PLAYER.obj.b69 = 0;
+        o->state++;
+        break;
+    case 2:
+        if (GAME.selectedArea == 1) o->h->p.whole += 4;
+        else if (GAME.selectedArea == 2) o->h->p.whole -= 4;
+        o->y.raw += 0x80000;
+        TileCollideAt(o, o->h->p.whole, o->y.p.whole + o->box3 - o->box2);
+        AnimAdvance(o);
+        if (PLAYER.obj.b69) {
+            if (GAME.selectedArea == 2) {
+                if (GCD.bcdb1 == 4) printInfoMessage(8, 3);
+            } else if (GCD.bcdb1 != 0xff) {
+                printInfoMessage(GCD.bcdb1 + 7, 2);
+            }
+            o->b6a = 0;
+            SCRIPT_OBJECTS[o->b0c] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+            ((unsigned char*)&PLAYER.obj.b04)[1] = 0;
+            ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
+            o->b04 = 3;
+        }
+        break;
+    }
+}
