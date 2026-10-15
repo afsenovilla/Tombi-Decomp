@@ -1064,3 +1064,13 @@ func_801284CC = 0x801284CC; // type:func  after func_80127D70
 func_80128F9C = 0x80128F9C; // type:func  after func_80128D94
 func_80129C94 = 0x80129C94; // type:func  after func_80129BA0
 func_8012A424 = 0x8012A424; // type:func  after func_8012A208
+// Leaf functions and stubs after a function's jr ra that no label points to (also merged by splat).
+func_80110A24 = 0x80110A24; // type:func  after func_80110968
+func_8011D0B4 = 0x8011D0B4; // type:func  after func_8011CEA0
+func_801287C0 = 0x801287C0; // type:func  after func_801284CC
+func_801287C8 = 0x801287C8; // type:func  after func_801284CC
+func_801289E0 = 0x801289E0; // type:func  after func_801284CC
+func_8012ACE8 = 0x8012ACE8; // type:func  after func_8012A668
+func_8012B548 = 0x8012B548; // type:func  after func_8012AF20
+func_8012B554 = 0x8012B554; // type:func  after func_8012AF20
+func_8012BFBC = 0x8012BFBC; // type:func  after func_8012B8C8
