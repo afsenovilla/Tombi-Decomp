@@ -1,5 +1,5 @@
 // FUNC 800e9f5c 636 O0PTSUB0
-// wip score 6: only the (w*ang - sin) temp register: game keeps it in v0 then c=s2, a=s1=w+v0
+// MATCHING 800e9f5c 636
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -29,7 +29,7 @@ extern int MulNegSin(int a, int b);
 extern int MulCosDup(int a, int b);
 extern int GetGraphType(void);
 
-void func_800E9F5C(int c, int ang, int off, int pal)
+void func_800E9F5C(short c, int ang, int off, int pal)
 {
     POLY_FT4 *p;
     Glyph *tbl;
@@ -43,9 +43,9 @@ void func_800E9F5C(int c, int ang, int off, int pal)
         int r = MulNegSin(0xE0, 0x5A);
         int s = (short)ang;
         int w = tbl[(short)c].w;
-        a = w * s - r;
-        c = a;
-        a = w + a;
+        r = w * s - r;
+        c = r;
+        a = w + r;
     } else {
         c = -MulNegSin(ang & 0xFF, 0x5A);
         a = -MulNegSin((ang + off) & 0xFF, 0x5A);
