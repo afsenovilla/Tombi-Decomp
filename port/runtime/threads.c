@@ -11,6 +11,7 @@ typedef struct { int used; unsigned long *sp; void (*fn)(void); } Th;
 static Th th[MAX_TH + 1];                 /* [0] = main thread (handle 0xFF000000) */
 static unsigned long stacks[MAX_TH][STACK_WORDS] __attribute__((aligned(16)));
 static int cur;
+int port_thread_current(void) { return cur; }     /* 0 = main thread (save states are taken there) */
 
 void port_ctx_switch(unsigned long **save, unsigned long *to);
 __asm__(".text\n.globl port_ctx_switch\nport_ctx_switch:\n"

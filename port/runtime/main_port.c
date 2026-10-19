@@ -84,6 +84,7 @@ static void game_main(void) {
     EnableEvent(SPAD32(0x1D8));
     SetDispMask(1);
     port_printf("[port] game main: init done, entering the main loop\n");
+    { extern int port_in_main_loop; port_in_main_loop = 1; }      /* save states: taken / restored in this loop */
 
     for (;;) {
         SPAD16(0x1E8) = 0;
@@ -150,12 +151,22 @@ static void load_exe(const char *path) {
     port_printf("[port] %s: %u bytes at %08x (entry %08x)\n", path, t_size, t_addr, pc);
 }
 
-int port_main(int argc, char **argv) {
-    const char *exe = "game/MAIN0.EXE", *disc = "game/disc/Tombi.bin";
+int port_argc; char **port_argv;
+static const char *exe = "game/MAIN0.EXE", *disc = "game/disc/Tombi.bin";
+/* Parses the command line.  Also run again after a save state is restored (runtime/state.c): the restored
+   image carries the saving run's options, so the lists are cleared and this run's values applied. */
+static int parse_options(int argc, char **argv) {
+    { extern void port_pad_script_reset(void), port_poke_reset(void), port_save_reset(void);
+      port_pad_script_reset(); port_poke_reset(); port_save_reset(); }
+    port_max_frames = 0; port_dump_dir = 0; port_dump_vram = 0; port_verbose = 0;
+    { extern int port_dump_packets; port_dump_packets = 0; }
+    { extern const char *port_load_path; port_load_path = 0; }
     for (int i = 1; i < argc; i++) {
         if (streq(argv[i], "--exe") && i + 1 < argc) exe = argv[++i];
         else if (streq(argv[i], "--disc") && i + 1 < argc) disc = argv[++i];
         else if (streq(argv[i], "--frames") && i + 1 < argc) port_max_frames = atoi_(argv[++i]);
+        else if (streq(argv[i], "--save") && i + 1 < argc) { extern void port_save_add(const char *); port_save_add(argv[++i]); }
+        else if (streq(argv[i], "--load") && i + 1 < argc) { extern const char *port_load_path; port_load_path = argv[++i]; }
         else if (streq(argv[i], "--realtime")) port_realtime = 1;
         else if (streq(argv[i], "--autostart") && i + 1 < argc) { extern int port_autostart; port_autostart = atoi_(argv[++i]); }
         else if (streq(argv[i], "--pad-script") && i + 1 < argc) { extern void port_pad_script(const char *); port_pad_script(argv[++i]); }
@@ -194,10 +205,21 @@ int port_main(int argc, char **argv) {
                         "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
                         "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
-                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), 50 Hz\n", argv[0]);
+                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), 50 Hz\n"
+                        "       [--save FRAME:PATH] [--load PATH]   save state at a vblank / continue from one (same binary)\n", argv[0]);
             return 2;
         }
     }
+    return 0;
+}
+void port_reparse_options(void) {
+    parse_options(port_argc, port_argv);
+    { extern const char *port_load_path; port_load_path = 0; }   /* restored once */
+}
+
+int port_main(int argc, char **argv) {
+    port_argc = argc; port_argv = argv;
+    if (parse_options(argc, argv)) return 2;
     port_setup_memory();
     { extern int port_window; extern void port_window_start(const char *); if (port_window) port_window_start(argv[0]); }
     { extern int port_low_mem; if (port_verbose) port_printf("[port] BIOS kernel area mapped from %x (-1: not mapped)\n", port_low_mem); }

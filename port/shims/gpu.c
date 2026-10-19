@@ -531,6 +531,8 @@ static void pipe_frame(void) {
 }
 static int window_fd = -1;
 void port_pipe_video_fd(int fd) { window_fd = fd; }
+void port_gpu_fds_get(int *win, int *pipe) { *win = window_fd; *pipe = pipe_fd; }   /* save states keep this run's fds */
+void port_gpu_fds_set(int win, int pipe) { window_fd = win; pipe_fd = pipe; }
 void port_gpu_vblank(void) {
     if (port_pipe_path) pipe_frame();
     if (window_fd >= 0) {
@@ -540,8 +542,7 @@ void port_gpu_vblank(void) {
         port_window_frame(frame_rgb, w, h);
     }
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
-    static int made;
-    if (!made) { port_mkdir(port_dump_dir); made = 1; }
+    port_mkdir(port_dump_dir);       /* every time (cheap): a "made" flag would be restored by --load */
     char path[512]; int w, h;
     port_gpu_frame(frame_rgb, &w, &h);
     path_for(path, "frame_");

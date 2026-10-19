@@ -65,7 +65,13 @@ static void dump_ram(void) {
     port_write(fd, (const void *)0x1F800000u, 0x400);
     port_close(fd);
 }
+/* save states (runtime/state.c): host-side values that a restored image must not change */
+void port_realtime_reset(void) { next_vblank_us = 0; }
+void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; }
+int port_cd_fd_get(void);
+void port_cd_fd_set(int fd);
 void port_vblank(void) {
+    { extern void port_state_vblank(void); port_state_vblank(); }
     if (port_realtime) {
         unsigned long long now = port_time_us();
         if (!next_vblank_us) next_vblank_us = now;
@@ -328,6 +334,8 @@ int RotTransPers(SVECTOR *v, s32 *sxy, s32 *p, s32 *flag) {
 
 /* ================================================================== libcd (reads the user's disc image) */
 static int cd_fd = -1, cd_raw;
+int port_cd_fd_get(void) { return cd_fd; }
+void port_cd_fd_set(int fd) { cd_fd = fd; }
 static int cd_pos;                     /* next LBA */
 static void *cd_ready_cb, *cd_sync_cb, *cd_read_cb;
 static u8 cd_mode = 0x80;

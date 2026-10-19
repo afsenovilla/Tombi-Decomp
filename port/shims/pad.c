@@ -18,6 +18,7 @@ int port_autostart;            /* headless test input: tap Start (and Cross) eve
 #define MAX_SCRIPT 64
 static struct { int frame, len, count, period; u16 mask; } script[MAX_SCRIPT];
 static int n_script;
+void port_pad_script_reset(void) { n_script = 0; port_autostart = 0; }   /* before the command line is parsed again (--load) */
 static const struct { const char *n; u16 m; } pad_names[] = {
     {"select", 0x0001}, {"start", 0x0008}, {"up", 0x0010}, {"right", 0x0020}, {"down", 0x0040}, {"left", 0x0080},
     {"l2", 0x0100}, {"r2", 0x0200}, {"l1", 0x0400}, {"r1", 0x0800}, {"triangle", 0x1000}, {"circle", 0x2000},

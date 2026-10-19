@@ -46,6 +46,10 @@ void port_window_start(const char *argv0) {
     port_printf("[port] viewer %s started (pid %d)\n", path, viewer_pid);
 }
 
+/* save states keep this run's viewer */
+void port_window_fds_get(int *v, int *a, int *p) { *v = fd_video; *a = fd_audio; *p = fd_pad; }
+void port_window_fds_set(int v, int a, int p) { fd_video = v; fd_audio = a; fd_pad = p; }
+
 /* called by gpu.c with the displayed frame */
 void port_window_frame(const u8 *rgb, int w, int h) {
     if (fd_video < 0) return;
