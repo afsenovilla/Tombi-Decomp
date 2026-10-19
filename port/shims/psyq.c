@@ -49,6 +49,22 @@ void port_poke_add(const char *s) {
     pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
     n_pokes++;
 }
+/* --dump-ram FRAME:PATH: write the 2 MB of RAM, then the 1 KB scratchpad, at the start of vblank FRAME */
+static int dump_ram_frame; static const char *dump_ram_path;
+void port_dump_ram_add(const char *s) {
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    dump_ram_frame = f; dump_ram_path = s;
+}
+static void dump_ram(void) {
+    extern int port_create(const char *); extern int port_write(int, const void *, int); extern void port_close(int);
+    int fd = port_create(dump_ram_path);
+    if (fd < 0) { port_printf("[port] cannot write %s\n", dump_ram_path); return; }
+    for (u32 a = 0; a < 0x200000; a += 0x10000) port_write(fd, (const void *)(0x80000000u + a), 0x10000);
+    port_write(fd, (const void *)0x1F800000u, 0x400);
+    port_close(fd);
+}
 void port_vblank(void) {
     if (port_realtime) {
         unsigned long long now = port_time_us();
@@ -62,6 +78,7 @@ void port_vblank(void) {
             u32 a = pokes[i].addr, v = pokes[i].value;
             if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
         }
+    if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     { extern void port_pad_vblank(void); port_pad_vblank(); }
     if (vsync_event_fn) call_psx(vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);

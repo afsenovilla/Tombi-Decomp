@@ -69,7 +69,9 @@ static void swr(u32 a, u32 rt) {
     *p = (*p & (0x00FFFFFFu >> (24 - s * 8))) | (rt << (s * 8));
 }
 
+u32 port_mips_cur_pc, port_mips_cur_entry;   /* for the fault report */
 u32 port_mips_call(u32 entry, const u32 *args) {
+    u32 saved_pc = port_mips_cur_pc, saved_entry = port_mips_cur_entry;
     u32 stack[MIPS_STACK_WORDS];
     u32 r[32], hi = 0, lo = 0, pc = entry, npc = entry + 4;
     for (int i = 0; i < 32; i++) r[i] = 0;
@@ -83,6 +85,7 @@ u32 port_mips_call(u32 entry, const u32 *args) {
         if (pc == RA_SENTINEL) break;
         u32 ins = *(u32 *)pc;
         u32 cur = pc;
+        port_mips_cur_pc = cur; port_mips_cur_entry = entry;
         pc = npc; npc += 4;
         u32 op = ins >> 26, rs = (ins >> 21) & 31, rt = (ins >> 16) & 31, rd = (ins >> 11) & 31;
         u32 sh = (ins >> 6) & 31, fn = ins & 63;
@@ -253,6 +256,7 @@ u32 port_mips_call(u32 entry, const u32 *args) {
             pc = save_pc; npc = tgt;
         }
     }
+    port_mips_cur_pc = saved_pc; port_mips_cur_entry = saved_entry;
     return r[2] | 0;   /* v0 (v1 is lost for native callers: no game C reads a 64-bit result from here) */
 }
 

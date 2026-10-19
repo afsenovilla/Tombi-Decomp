@@ -162,6 +162,7 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--dump-frames") && i + 1 < argc) port_dump_dir = argv[++i];
         else if (streq(argv[i], "--dump-every") && i + 1 < argc) port_dump_every = atoi_(argv[++i]);
         else if (streq(argv[i], "--dump-vram")) port_dump_vram = 1;
+        else if (streq(argv[i], "--dump-ram") && i + 1 < argc) { extern void port_dump_ram_add(const char *); port_dump_ram_add(argv[++i]); }
         else if (streq(argv[i], "--dump-packets") && i + 1 < argc) { extern int port_dump_packets; port_dump_packets = atoi_(argv[++i]); }
         else if (streq(argv[i], "--play-movies")) { extern int port_play_movies; port_play_movies = 1; }
         else if (streq(argv[i], "--no-interp")) port_interp = 0;
@@ -187,7 +188,8 @@ int port_main(int argc, char **argv) {
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
-                        "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n", argv[0]);
+                        "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
+                        "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n", argv[0]);
             return 2;
         }
     }

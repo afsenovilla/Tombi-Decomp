@@ -243,7 +243,7 @@ def area_signatures(progs):
     return out
 
 
-def area_plan(U, areas):
+def area_plan(U, areas, ovls=()):
     """Which code of each area overlay the port compiles, and the dispatch table per area.
     A function of X000 is *shared* with area P when P's file has the same bytes over its whole range (same address,
     so the same jal targets and data addresses): P then runs X000's native code.  Everything else of P that has C
@@ -266,6 +266,12 @@ def area_plan(U, areas):
     vary = {}
     for a, u in x0.items():
         if any(not same(p, a, u.size) for p in areas): vary[a] = u.name
+    # a SYSTEM overlay function starting at the same address: MAIN0 calls it by the X000 name while that overlay is
+    # resident (drawCategory7Objects -> 0x800EC710 is I0NFO2's own function in AREA05/AREA08 section 0), so those
+    # calls must dispatch too
+    ovl_starts = set(u.addr for p in ovls for u in U[p])
+    for a, u in x0.items():
+        if a in ovl_starts: vary[a] = u.name
     compiled, amap = [], []
     for a, u in x0.items():
         if a in vary: amap.append(("X000", a, None))
@@ -316,7 +322,7 @@ def sources(outdir, progs, ovls=(), areas=()):
                 picked.append((prog, u, stem, defined_name(u.file, stem)))
         ovl_names[prog] = names
     # area overlays X001..X019: their own code (not shared with X000) under the prefix X0nn_ (area_plan)
-    vary, area_units, areamap = area_plan(U, areas) if areas else ({}, [], [])
+    vary, area_units, areamap = area_plan(U, areas, ovls) if areas else ({}, [], [])
     area_own = {}                      # prog -> {addr: native name}
     for prog, u in area_units:
         stem = os.path.basename(u.file)[:-2]

@@ -279,6 +279,8 @@ static void on_segv(int sig, void *info, void *uc) {
             if (sp[i] >= (unsigned long)__executable_start && sp[i] < (unsigned long)etext) { port_printf(" %08lx", sp[i]); n++; }
         port_printf("\n");
     }
+    { extern unsigned port_mips_cur_pc, port_mips_cur_entry;
+      if (port_mips_cur_pc) port_printf("[port] in the MIPS interpreter: pc %08x (function %08x)\n", port_mips_cur_pc, port_mips_cur_entry); }
     port_fatal("signal %d: eip=%08lx fault address=%08lx (frame %d, [esp]=%08lx)", sig, eip, fault, port_frame, ret);
 }
 
