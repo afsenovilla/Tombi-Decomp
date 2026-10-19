@@ -1,5 +1,5 @@
 // FUNC 800ee9ac 2956 D0SPSUB
-// wip score 95: case 0 load scheduling (anim/d3c/P344 loads), loop anim store
+// wip score 40: loop anim store scheduling, P344[1] load timing (D_8009C960 as struct fixes alias order)
 typedef struct { short x, y, z, pad; } Pt;
 typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { short x, y; } XY;
@@ -46,7 +46,8 @@ extern unsigned short D_1F8001FC;
 extern int D_1F8002EC;
 extern char *D_1F800344;
 #define P344 (*(char * volatile *)&D_1F800344)
-extern unsigned short D_8009C960, D_8009C962;
+typedef struct { unsigned short room, sub; } RS;
+extern RS D_8009C960;
 extern unsigned short D_8009D2C4[];
 extern void *D_800FECB8;
 extern void *D_800FECDC[];
@@ -91,16 +92,16 @@ int func_800EE9AC(Menu *m)
     switch (m->state) {
     case 0:
         D_8010A1C8 = D_1F8000C0;
-        D_8010A2D4[2].w08 = 0x7A52;
-        D_8010A2D4[2].b0f = -0xA;
         D_8010A2D4[2].w1e = 1;
         D_8010A2D4[2].b0d = 1;
+        D_8010A2D4[2].w08 = 0x7A52;
+        D_8010A2D4[2].b0f = -0xA;
         D_8010A2D4[2].b0a = 1;
         D_8010A2D4[2].w2e = 1;
         D_8010A2D4[2].anim = D_800FECB8;
         D_8010A2D4[2].d3c = D_1F8002EC;
         {
-            Pt *t = &D_800FD3C8[D_8009C960][D_8009C962];
+            Pt *t = &D_800FD3C8[D_8009C960.room][D_8009C960.sub];
             D_8010A2D4[2].p.s.x = t->x << 16;
             D_8010A2D4[2].p.s.y = (t->y - 0x14) << 16;
             D_8010A2D4[2].p.s.z = (t->z - 0x14) << 16;
@@ -131,9 +132,9 @@ int func_800EE9AC(Menu *m)
             o->w2e = 1;
             o->w08 = 0x7A92;
             o->anim = D_800FECDC[i];
-            o->b0f = 0xA;
             o->b0a = 1;
             o->d3c = D_1F8002EC;
+            o->b0f = 0xA;
             o->p.s.x = D_8010A050[i].x << 16;
             o->p.s.y = D_8010A050[i].y << 16;
             o->p.s.z = 0;
@@ -146,8 +147,8 @@ int func_800EE9AC(Menu *m)
         D_801110FC = 0;
         D_80111104 = 0x30E;
         D_80111108 = 0x64;
-        D_801110F8 = D_800FCED8[D_8009C960][0];
-        D_80111100 = D_800FCED8[D_8009C960][1];
+        D_801110F8 = D_800FCED8[D_8009C960.room][0];
+        D_80111100 = D_800FCED8[D_8009C960.room][1];
         m->w1e = 0;
         m->state++;
         break;
@@ -208,7 +209,7 @@ int func_800EE9AC(Menu *m)
     case 2:
         m->w1e = 0;
         if (D_1F8001FC & 0x2000) goto cancel;
-        if (D_8009C960 == 14) break;
+        if (D_8009C960.room == 14) break;
         l = &D_800FDAB4[D_80111124];
         r = func_800EE6B4();
         if (r == l->e) {
@@ -251,7 +252,7 @@ int func_800EE9AC(Menu *m)
             m->state = 1;
             return 0;
         }
-        if (D_8009C960 == 14) break;
+        if (D_8009C960.room == 14) break;
         p = D_800FDE50[s->wb4];
         r = func_800EE6B4();
         if (p[0] != 0xFF) {
