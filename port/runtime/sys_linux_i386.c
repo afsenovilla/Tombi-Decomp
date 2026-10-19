@@ -160,6 +160,7 @@ void *port_lookup(u32p a) {
         if (port_funcmap[m].addr == a) return port_funcmap[m].fn;
         if (port_funcmap[m].addr < a) lo = m + 1; else hi = m - 1;
     }
+    for (const PortFunc *e = port_extra_funcs; e->fn; e++) if (e->addr == a) return e->fn;
     return 0;
 }
 
