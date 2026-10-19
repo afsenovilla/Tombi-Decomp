@@ -7,9 +7,9 @@ extern signed char D_800A6047;
 #define LI(n) (*(TObj **)((char *)list + ((n) << 2)))
 #define PI_TOTAL asm("t0")
 #define PI_I 
-#define PI_J asm("a2")
+#define PI_J
 #define PI_S 
-#define PI_BY 
+#define PI_BY asm("a1")
 #define PI_C asm("a1")
 #define PI_K1 asm("a1")
 #define PI_PP1 
@@ -41,7 +41,7 @@ void func_800ED4D0(void)
     register TObj *o PI_O1;
     k = total = *(unsigned short *)0x1F800246;
     pp = *(TObj ***)0x1F80021C;
-    while (k != 0) {
+    if (total != 0) do {
         o = *pp++;
         k--;
         if (o->type != 0x30 && (unsigned int)(o->type - 0x2D) >= 2) {
@@ -61,7 +61,7 @@ void func_800ED4D0(void)
         } else {
             LI(i++) = o;
         }
-    }
+    } while (k != 0);
     }
     {
     register short k PI_K2;
