@@ -1,4 +1,5 @@
 // FUNC 800e82a4 3632 D0SPSUB2
+// MATCHING 800e82a4 3632
 typedef struct { unsigned char state, b1, sub, b3; short w4; short timer; char p8[0xE]; short cursor; short card; short msg; short x1C; } Menu;
 typedef struct { char name[0x14]; } Entry;
 typedef struct { Entry e[16]; short status, prev, n144, w146; signed char slot[16]; short w158; } Card;
@@ -214,7 +215,7 @@ int func_800E82A4(Menu *m, Card *c)
         if (erase(D_800F7098)) {
             m->timer = 1;
             m->sub++;
-            return;
+            break;
         }
         c->w146 = 0;
         m->sub = 1;
@@ -251,8 +252,8 @@ int func_800E82A4(Menu *m, Card *c)
         m->sub++;
         break;
     case 10:
-        tries = 3;
         strcpy(D_800F7098, D_800F6A3C[m->card]);
+        tries = 3;
         strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
         do {
             if (func_800ECCC8(D_800F7098, D_800E1E28, 0, 0xC00) == 0 && (func_800EA118(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
@@ -296,7 +297,16 @@ int func_800E82A4(Menu *m, Card *c)
             }
             break;
         }
-        goto c15b;
+        if (D_1F8001FC & 0x80) {
+            D_800F7148 = 0;
+            playSFX(8);
+            return 0;
+        }
+        if (D_1F8001FC & 0x6000) {
+            SfxPlay2(0x1B, 0x1C);
+            m->sub = 2;
+        }
+        break;
     case 12:
     case 14:
         m->msg = 14;
@@ -324,11 +334,10 @@ int func_800E82A4(Menu *m, Card *c)
             }
             return 0;
         }
-    c15b:
         if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
-            return 0;
+            break;
         }
         if (D_1F8001FC & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
