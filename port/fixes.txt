@@ -12,3 +12,23 @@ src/initTasks.c | int r = *(int *)0x110; | int r = (int)port_bios_tcb_table();
 src/startTask.c | extern void setTaskEntry(void *); | extern void setTaskEntry(void *, int);
 src/startTask.c | void startTask(int i) | void startTask(int i, int fn)
 src/startTask.c | setTaskEntry((void *)(k + 0x801fd80c)); | setTaskEntry((void *)(k + 0x801fd80c), fn);
+#
+# Register-carried arguments where $a0 is not the caller's own argument (gen_port.py forwards the rest)
+src/updateAreaScreenEffect.c | dispatchScreenEffect(); | dispatchScreenEffect((char *)p);
+src/updateAreaScreenEffect.c | extern void dispatchScreenEffect(void); | extern void dispatchScreenEffect();
+# a TIM without CLUT: ReadTIM leaves crect NULL and the game writes x/y to address 0 (BIOS RAM on the PS1)
+src/loadTIM.c | im.crect->x = c; | if (im.crect) im.crect->x = c;
+src/loadTIM.c | im.crect->y = d; | if (im.crect) im.crect->y = d;
+# collision callbacks: $a1 holds the cat-4 object e
+src/collideCat2WithCat4Objects.c | pushObjectOutOfObjectFacing(o); | pushObjectOutOfObjectFacing(o, e);
+src/collideCat2WithCat4Objects.c | void pushObjectOutOfObjectFacing(TObj *o); | void pushObjectOutOfObjectFacing();
+src/collideCat2WithCat4Objects.c | pushObjectOutOfCat4Type01(o); | pushObjectOutOfCat4Type01(o, e);
+src/collideCat2WithCat4Objects.c | void pushObjectOutOfCat4Type01(TObj *o); | void pushObjectOutOfCat4Type01();
+src/collideCat2WithCat4Objects.c | pushObjectOutOfCat4Type02(o); | pushObjectOutOfCat4Type02(o, e);
+src/collideCat2WithCat4Objects.c | void pushObjectOutOfCat4Type02(TObj *o); | void pushObjectOutOfCat4Type02();
+src/collideCat2WithCat4Objects.c | pushCat2ObjectOutOfCat4Type04(o); | pushCat2ObjectOutOfCat4Type04(o, e);
+src/collideCat2WithCat4Objects.c | void pushCat2ObjectOutOfCat4Type04(TObj *o); | void pushCat2ObjectOutOfCat4Type04();
+src/collideCat2WithCat4Objects.c | pushObjectOutOfCat4Type06(o); | pushObjectOutOfCat4Type06(o, e);
+src/collideCat2WithCat4Objects.c | void pushObjectOutOfCat4Type06(TObj *o); | void pushObjectOutOfCat4Type06();
+src/collideCat2WithCat4Objects.c | pushCat2ObjectOutOfCat4Type0A(o); | pushCat2ObjectOutOfCat4Type0A(o, e);
+src/collideCat2WithCat4Objects.c | void pushCat2ObjectOutOfCat4Type0A(TObj *o); | void pushCat2ObjectOutOfCat4Type0A();

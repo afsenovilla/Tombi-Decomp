@@ -158,6 +158,7 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--frames") && i + 1 < argc) port_max_frames = atoi_(argv[++i]);
         else if (streq(argv[i], "--realtime")) port_realtime = 1;
         else if (streq(argv[i], "--autostart") && i + 1 < argc) { extern int port_autostart; port_autostart = atoi_(argv[++i]); }
+        else if (streq(argv[i], "--pad-script") && i + 1 < argc) { extern void port_pad_script(const char *); port_pad_script(argv[++i]); }
         else if (streq(argv[i], "--dump-frames") && i + 1 < argc) port_dump_dir = argv[++i];
         else if (streq(argv[i], "--dump-every") && i + 1 < argc) port_dump_every = atoi_(argv[++i]);
         else if (streq(argv[i], "--dump-vram")) port_dump_vram = 1;
@@ -165,7 +166,8 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"
-                        "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n", argv[0]);
+                        "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
+                        "       [--pad-script FRAME:BUTTONS[:LEN],...]   e.g. 1000:start,1100:cross:6\n", argv[0]);
             return 2;
         }
     }

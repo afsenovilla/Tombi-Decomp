@@ -12,4 +12,7 @@ unsigned long port_gte_cfc2(int reg);
 void port_gte_unsupported(const char *ins);
 /* BIOS kernel area replacements (port/runtime/threads.c) */
 void *port_bios_tcb_table(void);
+/* register-carried arguments (gen_port.py forward_short_calls): the caller's incoming argument i, i.e. what
+   $a0-$a3 held on entry to the caller */
+#define PORT_ARG(i) (((int *)__builtin_frame_address(0))[2 + (i)])
 #endif

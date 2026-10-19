@@ -212,6 +212,14 @@ static void on_segv(int sig, void *info, void *uc) {
         return;
     }
     unsigned long ret = *(unsigned long *)UC_ESP(uc);
+    {   /* stack scan: words that look like native return addresses (resolve with addr2line -f -e tombi) */
+        extern char __executable_start[], etext[];
+        unsigned long *sp = (unsigned long *)UC_ESP(uc);
+        port_printf("[port] eax=%08lx edx=%08lx; stack:", UC_EAX(uc), UC_EDX(uc));
+        for (int i = 0, n = 0; i < 256 && n < 16; i++)
+            if (sp[i] >= (unsigned long)__executable_start && sp[i] < (unsigned long)etext) { port_printf(" %08lx", sp[i]); n++; }
+        port_printf("\n");
+    }
     port_fatal("signal %d: eip=%08lx fault address=%08lx (frame %d, [esp]=%08lx)", sig, eip, fault, port_frame, ret);
 }
 

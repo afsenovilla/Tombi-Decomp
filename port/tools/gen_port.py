@@ -232,6 +232,7 @@ def sources(outdir, progs, ovls=()):
     for p in allp:
         for n, a in prov[p].items(): canon.setdefault(n, a)
     ovlmap = []
+    out_texts = {}
     renamed = {}
     for prog, u, stem, name in picked:
         dst = os.path.join(outdir, "src", prog.lower(), stem + ".c")
@@ -257,14 +258,18 @@ def sources(outdir, progs, ovls=()):
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
-        if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:
-            open(dst, "w").write(txt)
+        out_texts[dst] = txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
         (files24 if hm else files).append(dst)
         if ovl:
             if name not in dropped: ovlmap.append((prog, u.addr, prog + "_" + name))
         elif name not in dropped: fmap.append((u.addr, name))
+    nfwd = forward_short_calls(out_texts)
+    for dst, txt in out_texts.items():
+        if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:
+            open(dst, "w").write(txt)
+    print("gen_port: %d short calls get the caller's incoming arguments (PORT_ARG)" % nfwd)
     with open(os.path.join(outdir, "sources.cmake"), "w") as f:
         f.write("set(PORT_GAME_SOURCES\n%s)\n" % "".join("  %s\n" % p for p in files))
         f.write("set(PORT_GAME_SOURCES_T24\n%s)\n" % "".join("  %s\n" % p for p in files24))
@@ -313,6 +318,86 @@ def sources(outdir, progs, ovls=()):
         for a, e in sorted(code): f.write("%08X %08X\n" % (a, e))
     print("gen_port: %d sources (%s), %d mapped functions, %d per-file renames"
           % (len(files) + len(files24), " ".join(progs), len(fmap), len(renamed)))
+
+
+def _blank(s):
+    """comments and string/char literals replaced by spaces (positions kept)"""
+    sp = lambda m: re.sub(r"[^\n]", " ", m.group(0))
+    s = re.sub(r"/\*.*?\*/", sp, s, flags=re.S)
+    s = re.sub(r"//[^\n]*", sp, s)
+    s = re.sub(r'"(?:[^"\\\n]|\\.)*"', lambda m: '"' + " " * (len(m.group(0)) - 2) + '"', s)
+    return re.sub(r"'(?:[^'\\\n]|\\.)*'", lambda m: "'" + " " * (len(m.group(0)) - 2) + "'", s)
+
+
+def _nparams(p):
+    p = p.strip()
+    if p in ("", "void"): return 0
+    if "..." in p: return -1
+    depth, n = 0, 1
+    for c in p:
+        if c == "(": depth += 1
+        elif c == ")": depth -= 1
+        elif c == "," and depth == 0: n += 1
+    return n
+
+
+_DECL_PRE = re.compile(r"\s*(?:extern\s+|static\s+)?(?:const\s+|volatile\s+)*[A-Za-z_]\w*(?:\s+\w+)*[\s\*]+$")
+_KEYWORDS = ("return", "else", "case", "do", "goto")
+
+
+def forward_short_calls(texts):
+    """Register-carried arguments (see port/tools/arity_check.py): a call that passes fewer arguments than the
+    callee's definition takes relies on $a0-$a3 still holding a value, most often the caller's own incoming
+    argument.  Each missing argument i becomes PORT_ARG(i), the caller's incoming stack argument i (on i386 the
+    slot exists even when the caller declares fewer parameters: it is what *its* caller pushed, so pass-through
+    chains of dispatchers keep working).  The file's prototypes of the callee become unprototyped `f()`."""
+    blank = {f: _blank(t) for f, t in texts.items()}
+    gdefs, ldefs = {}, {}
+    for f, t in blank.items():
+        ldefs[f] = {}
+        for m in re.finditer(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\(([^;{)]*(?:\([^)]*\)[^;{)]*)*)\)\s*\{", t, re.M):
+            if m.group(1) in ("if", "while", "for", "switch", "return"): continue
+            ldefs[f].setdefault(m.group(1), _nparams(m.group(2)))
+            if not m.group(0).lstrip().startswith("static"): gdefs.setdefault(m.group(1), _nparams(m.group(2)))
+    total = 0
+    for f, t in blank.items():
+        defs = dict(gdefs); defs.update(ldefs[f])
+        edits, protos = [], set()
+        macros = set(re.findall(r"^\s*#\s*define\s+(\w+)", t, re.M))
+        for m in re.finditer(r"(?<![\w.>])(\w+)\s*\(", t):
+            n = m.group(1)
+            if defs.get(n, 0) <= 0 or n in macros: continue
+            ls = t.rfind("\n", 0, m.start()) + 1
+            pre = t[ls:m.start()]
+            if (_DECL_PRE.match(pre) and pre.split()[0] not in _KEYWORDS) or re.match(r"\s*(extern|typedef)\b", pre):
+                le = t.find("\n", m.start())
+                if t[m.start():le if le >= 0 else len(t)].rstrip().endswith(";"): protos.add(n)
+                continue
+            i = m.end() - 1
+            depth, k, empty, end = 0, 1, True, None
+            for j in range(i, min(len(t), i + 4000)):
+                c = t[j]
+                if c == "(": depth += 1
+                elif c == ")":
+                    depth -= 1
+                    if depth == 0: end = j; break
+                elif c == "," and depth == 1: k += 1
+                elif not c.isspace() and depth >= 1 and j > i: empty = False
+            if end is None: continue
+            k = 0 if empty else k
+            if k >= defs[n]: continue
+            edits.append((end, ("" if k == 0 else ", ") + ", ".join("PORT_ARG(%d)" % a for a in range(k, defs[n]))))
+            protos.add(n)
+        if not edits: continue
+        total += len(edits)
+        txt = texts[f]
+        for pos, ins in sorted(edits, reverse=True):
+            txt = txt[:pos] + ins + txt[pos:]
+        for n in protos:
+            txt = re.sub(r"(^[ \t]*(?:extern\s+)?[A-Za-z_][\w \t\*]*\b%s\s*)\([^;{()]*(?:\([^)]*\)[^;{()]*)*\)(\s*;)" % re.escape(n),
+                         r"\1()\2", txt, flags=re.M)
+        texts[f] = txt
+    return total
 
 
 def handwritten_ovl_funcs():

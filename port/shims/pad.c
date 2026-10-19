@@ -12,7 +12,55 @@ u16 port_pad_buttons[2];       /* active high, PSX bit order: 0 Select,3 Start,4
                                   8 L2,9 R2,10 L1,11 R1,12 Triangle,13 Circle,14 Cross,15 Square */
 int port_autostart;            /* headless test input: tap Start (and Cross) every autostart frames */
 
+/* --pad-script "FRAME:BUTTONS[:LEN],...": hold BUTTONS (names joined by '+': start select up down left right
+   cross circle square triangle l1 r1 l2 r2, or a hex mask) from vblank FRAME for LEN vblanks (default 4). */
+#define MAX_SCRIPT 64
+static struct { int frame, len; u16 mask; } script[MAX_SCRIPT];
+static int n_script;
+static const struct { const char *n; u16 m; } pad_names[] = {
+    {"select", 0x0001}, {"start", 0x0008}, {"up", 0x0010}, {"right", 0x0020}, {"down", 0x0040}, {"left", 0x0080},
+    {"l2", 0x0100}, {"r2", 0x0200}, {"l1", 0x0400}, {"r1", 0x0800}, {"triangle", 0x1000}, {"circle", 0x2000},
+    {"cross", 0x4000}, {"square", 0x8000}, {0, 0}};
+static int num(const char **p, int base) {
+    int v = 0;
+    for (;;) {
+        char c = **p; int d;
+        if (c >= '0' && c <= '9') d = c - '0';
+        else if (base == 16 && (c | 32) >= 'a' && (c | 32) <= 'f') d = (c | 32) - 'a' + 10;
+        else return v;
+        v = v * base + d; (*p)++;
+    }
+}
+void port_pad_script(const char *s) {
+    while (*s && n_script < MAX_SCRIPT) {
+        int f = num(&s, 10), len = 4; u16 m = 0;
+        if (*s == ':') s++;
+        while (*s && *s != ':' && *s != ',') {
+            if (s[0] == '0' && s[1] == 'x') { s += 2; m |= num(&s, 16); }
+            else {
+                int k, hit = 0;
+                for (k = 0; pad_names[k].n; k++) {
+                    const char *a = pad_names[k].n, *b = s;
+                    while (*a && *a == (*b | 32)) { a++; b++; }
+                    if (!*a && (*b == '+' || *b == ':' || *b == ',' || !*b)) { m |= pad_names[k].m; s = b; hit = 1; break; }
+                }
+                if (!hit) port_fatal("--pad-script: unknown button at \"%s\"", s);
+            }
+            if (*s == '+') s++;
+        }
+        if (*s == ':') { s++; len = num(&s, 10); }
+        if (*s == ',') s++;
+        script[n_script].frame = f; script[n_script].len = len; script[n_script].mask = m; n_script++;
+    }
+}
+
 void port_pad_vblank(void) {
+    if (n_script) {
+        u16 m = 0;
+        for (int i = 0; i < n_script; i++)
+            if (port_frame >= script[i].frame && port_frame < script[i].frame + script[i].len) m |= script[i].mask;
+        port_pad_buttons[0] = m;
+    }
     if (port_autostart && port_frame % port_autostart < 4)
         port_pad_buttons[0] = (port_frame / port_autostart) & 1 ? 0x4000 : 0x0008;
     else if (port_autostart)
