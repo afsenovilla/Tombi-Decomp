@@ -1,5 +1,7 @@
 // FUNC 800ef538 1388 D0SPSUB
 // wip: 10 differing insns (case -6 x/y update scheduling); do{}while(0) around switch(o->wait) fixes reg alloc
+// note: game evaluates (o->x + ow) + o->ba and ((o->y + oh) + 0x30) + o->bc (that form gives the right insns,
+// score 26) but then local-alloc gives ow a1 / new-h a0 instead of a0 / a1; `o->x += ow + o->ba` gets ow=a0 (score 18)
 typedef struct {
     char p0[4];
     unsigned char state, wait;

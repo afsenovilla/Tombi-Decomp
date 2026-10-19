@@ -1,5 +1,6 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip: 11 differing insns, case-3 confirm block only (volatile 0x8009/0x800A globals keep store order; const 3/14 placement, andi from char readback)
+// wip: score 50, case-3 confirm block only: t[0]/t[1] through int locals a,b (no andi; D_80111138 stored late next to
+// D_8009CD96) is right; left: game loads D_80111128 into a0 before the t lbus (t[1] in a1), ours loads it into v1 after them
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -315,10 +316,9 @@ int func_800ED0C4(Menu *m)
                 int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
                 t = D_800FFC3C[i1] + i2 * 2;
                 {
-                int a, b;
-                D_80111134 = t[0];
-                D_80111138 = t[1];
-                D_8009CD94 = D_80111134;
+                int a = t[0], b = t[1];
+                D_80111134 = a;
+                D_8009CD94 = a;
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
                 D_8009D2B0 = 3;
@@ -327,7 +327,8 @@ int func_800ED0C4(Menu *m)
                 D_800A6038 = 3;
                 D_8009C940 = 1;
                 D_8009C941 = D_80111128;
-                D_8009CD96 = D_80111138;
+                D_80111138 = b;
+                D_8009CD96 = b;
                 }
                 if (D_80111128 == 14) {
                     Obj *o = allocObjectLayer2();
