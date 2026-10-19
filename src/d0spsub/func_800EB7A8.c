@@ -1,4 +1,5 @@
 // FUNC 800eb7a8 1296 D0SPSUB
+// MATCHING 800eb7a8 1296
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -64,10 +65,10 @@ void func_800EB7A8(int n, int sel, int flag, int nocheck)
         unsigned short id;
         short *ent;
         id = *D_80111144;
-        ent = (short *)(BANK + id * 4);
-        e = (unsigned char *)BANK;
-        e += ent[1];
+        ent = (short *)BANK;
+        ent += id * 2;
         *idx = id;
+        e = ent[1] + (unsigned char *)BANK;
         S->len = 4;
         S->code = 0x65;
         S->r0 = 0x80;
