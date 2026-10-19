@@ -55,7 +55,7 @@ void func_800F0A5C(void)
                 func_800F0930(sxy1, otz - 10);
                 break;
             case 1: {
-                Quad *q;
+                register Quad *q asm("$4");
                 POLY_F4 *p;
                 unsigned long *ot;
                 a = e->a;
