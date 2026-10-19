@@ -1,4 +1,5 @@
 // FUNC 800e962c 580 I0NFO
+// MATCHING 800e962c 580
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -47,7 +48,7 @@ void func_800E962C(TObj *o)
         o->velY = 0x1000;
         D_8009C330->w20 = 0;
         o->visible = 1;
-        o->animFrame = 0xE;
+        { int t = 0xE; o->animFrame = t; }
         o->wb2 = 0;
         o->velX = 0;
         o->d8c = 0;
