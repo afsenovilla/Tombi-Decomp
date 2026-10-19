@@ -1,4 +1,5 @@
 // FUNC 800fa670 476 I0NFO2
+// MATCHING 800fa670 476
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -14,8 +15,6 @@ extern SpawnA *D_800FFE20;
 #define PI_LP asm("s5")
 #define PI_ONE asm("s6")
 #define PI_P asm("s0")
-#define PI_N asm("a0")
-#define PI_I 
 #define PI_K asm("s1")
 void func_800FA670(TObj *o0)
 {
@@ -24,10 +23,13 @@ void func_800FA670(TObj *o0)
     register TObj **lp PI_LP;
     register int one PI_ONE;
     register SpawnA *p PI_P;
-    register TObj *n PI_N;
-    register short i PI_I;
     register int k PI_K;
+    TObj *n;
+    short i;
 
+    /* n lives in a0: seeded from the parameter and handed back to the
+       (argument-less) allocator, so neither copy costs an instruction. */
+    n = o0;
     tbl = D_800FFE20;
     o->b04 = 1;
     if (D_8009CFC9 != 0) {
@@ -42,9 +44,10 @@ void func_800FA670(TObj *o0)
     for (; p->type != 0xFF; p = &tbl[++i]) {
         k = i;
         if (k == one && D_8009CF01 != 0) continue;
-        n = func_800183B8();
+        n = func_800183B8(n);
         if (n != 0) {
             n->active = one;
+            do { } while (0);  /* keeps the active store ahead of the others */
             n->type = 0x30;
             n->b0a = 0xD;
             n->animFrame = p->frame;
