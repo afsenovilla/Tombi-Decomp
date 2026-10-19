@@ -314,17 +314,17 @@
     "D0SPSUB": {
       "game": 37156,
       "n": 59,
-      "matched": 22912,
-      "n_matched": 53,
+      "matched": 24208,
+      "n_matched": 54,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 14244,
-      "n_new": 6,
+      "new": 12948,
+      "n_new": 5,
       "uniq": 36172,
-      "uniq_matched": 21928,
+      "uniq_matched": 23224,
       "n_uniq": 55,
-      "n_uniq_matched": 49
+      "n_uniq_matched": 50
     },
     "D0SPSUB2": {
       "game": 20004,
@@ -344,11 +344,11 @@
     "D0SPSUB3": {
       "game": 25324,
       "n": 46,
-      "matched": 14156,
-      "n_matched": 41,
+      "matched": 15452,
+      "n_matched": 42,
       "piece": 0,
       "x000": 0,
-      "dup": 7744,
+      "dup": 6448,
       "new": 3424,
       "n_new": 1,
       "uniq": 5920,
