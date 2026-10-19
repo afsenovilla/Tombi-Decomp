@@ -14,13 +14,15 @@ void func_800EE260(TObj *o)
     short i;
     TObj *n;
     TObj **tbl;
-    short ff = 0xFF;
+    char ff = 0xFF;
     e = base->s;
     i = 0;
-    if (e[0] != 0xFF) { tbl = D_8009F2D8; do {
-        if (e[8] < 6) if (e[8] >= 4) if (D_8009CE34 != 0) goto next;
-        n = func_800183B8();
-        if (n != 0) {
+    if (e[0] != 0xFF) {
+        tbl = D_8009F2D8;
+        do {
+            if (e[8] < 6) if (e[8] >= 4) if (D_8009CE34 != 0) continue;
+            n = func_800183B8();
+            if (n == 0) continue;
             n->active = 1;
             n->type = 0x45;
             n->b0a = 0xD;
@@ -41,9 +43,6 @@ void func_800EE260(TObj *o)
             S16(n, 0x7A) = e[7];
             tbl[i] = n;
             n->d90 = (int)o;
-        }
-    next:
-        i++;
-        e = base[i].s;
-    } while (e[0] != ff); }
+        } while (e = base[++i].s, e[0] != ff);
+    }
 }

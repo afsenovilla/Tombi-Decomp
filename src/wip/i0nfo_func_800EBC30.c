@@ -25,9 +25,8 @@ void func_800EBC30(void)
     while (k != 0) {
         TObj *o = *pp++;
         k--;
-        if ((o->type == 0x19 || (unsigned int)(o->type - 0x25) < 2) && o->_pad0e[0] == 0) goto add1;
-        total--; continue;
-    add1:
+        if (!(o->type == 0x19 || (unsigned int)(o->type - 0x25) < 2)) { total--; continue; }
+        if (o->_pad0e[0] != 0) { total--; continue; }
         LST(i++) = o;
     }
     k = *(unsigned short *)0x1F80024A;
@@ -36,9 +35,8 @@ void func_800EBC30(void)
     while (k != 0) {
         TObj *o = *pp++;
         k--;
-        if ((o->type == 0x2E || o->type == 0x1D) && o->_pad0e[0] == 0) goto add2;
-        total--; continue;
-    add2:
+        if (!(o->type == 0x2E || o->type == 0x1D)) { total--; continue; }
+        if (o->_pad0e[0] != 0) { total--; continue; }
         LST(i++) = o;
     }
     if (D_8009D2B0 != 3) {
