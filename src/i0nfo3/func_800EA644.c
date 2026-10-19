@@ -1,4 +1,5 @@
 // FUNC 800ea644 1344 I0NFO3
+// MATCHING 800ea644 1344
 #include "TOBJ.H"
 extern void func_8001FEC0(TObj *o);
 extern void func_800E9214(TObj *o);
@@ -39,7 +40,7 @@ extern TObj D_800A6038;
 void func_800EA644(TObj *o)
 {
     short i;
-    short *e;
+short *e; int d; unsigned short w;
     *((unsigned char *)o + 0xE2) = 0;
     switch (o->step) {
     case 0:
@@ -128,8 +129,8 @@ void func_800EA644(TObj *o)
         i = 0;
         e = D_800EECC8[0];
         if (e[0] != 0xFF) do {
-            if ((unsigned short)(D_800A6038.h->p.whole - e[0]) <= (short)(e[2] - e[0])
-                && (unsigned short)(D_800A6038.y.p.whole - e[1]) <= (short)(e[3] - e[1])) {
+            if ((d = (unsigned short)D_800A6038.h->p.whole - (unsigned short)e[0], w = e[2] - e[0], (unsigned short)d <= (short)w)
+                && (d = (unsigned short)D_800A6038.y.p.whole - (unsigned short)e[1], w = e[3] - e[1], (unsigned short)d <= (short)w)) {
                 o->b6b = i + 1;
                 return;
             }
