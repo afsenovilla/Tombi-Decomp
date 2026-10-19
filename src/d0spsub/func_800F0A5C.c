@@ -1,4 +1,5 @@
 // FUNC 800f0a5c 944 D0SPSUB
+// MATCHING 800f0a5c 944
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -55,7 +56,7 @@ void func_800F0A5C(void)
                 func_800F0930(sxy1, otz - 10);
                 break;
             case 1: {
-                register Quad *q asm("$4");
+                Quad *q;
                 POLY_F4 *p;
                 unsigned long *ot;
                 a = e->a;
@@ -85,8 +86,7 @@ void func_800F0A5C(void)
                 p->y2 = q->y[2] + (sxy1 >> 16);
                 p->x3 = q->x[3] + sxy0;
                 p->y3 = q->y[3] + (sxy0 >> 16);
-                ot = D_1F8001E0 + otz;
-                addPrim(ot, p);
+                addPrim(D_1F8001E0 + otz, p);
                 D_1F800164++;
                 break;
             }
