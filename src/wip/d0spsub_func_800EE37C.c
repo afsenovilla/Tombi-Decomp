@@ -1,48 +1,69 @@
 // FUNC 800ee37c 516 D0SPSUB
+// wip: 24 differing insns (Pt load order/regs, *e reload placement). D_8010A2D4-> (not [0].) avoids CSE related-value base
 typedef struct { unsigned short x, y, z, pad; } Pt;
-typedef struct { unsigned char a, b, c, d; short pad; } Link;
+typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { int x, y, z; } Vec;
-extern char D_8010A2D4[];
-extern short D_8010A2DC, D_8010A2F2, D_8010A302, D_8010A38A, D_8010A38C, D_8010A38E;
-extern short D_8010A388[];
-extern unsigned char D_8010A2DE, D_8010A2E1;
-extern signed char D_8010A2E3;
-extern int D_8010A2E4, D_8010A2E8, D_8010A2EC;
-extern Vec D_8010A304;
-extern int D_8010A2F8, D_8010A310;
-extern int D_800FECE4;
-extern int D_1F8002EC;
-extern unsigned short D_8009C960, D_8009C962;
+typedef struct {
+    unsigned char b00, p01, b02, b03;
+    char p04[4];
+    short w08;
+    unsigned char b0a, p0b, b0c, b0d, p0e;
+    signed char b0f;
+    union { struct { int x, y, z; } s; Vec v; } p;
+    char p1c[2];
+    short w1e;
+    char p20[4];
+    void *anim;
+    char p28[6];
+    short w2e;
+    union { struct { int x, y, z; } s; Vec v; } q;
+    int d3c;
+    char p40[0x60];
+    char *da0;
+    unsigned char ba4;
+    char pa5[0xF];
+    unsigned short wb4;
+    short wb6, wb8, wba;
+    char pbc[0x18];
+} Sprite;
+typedef struct { unsigned short room, sub; } RS;
+extern Sprite D_8010A2D4[];
+extern volatile int D_1F8002EC;
+extern RS D_8009C960;
+extern void *D_800FECE4;
 extern short *D_800FE064[];
 extern Link D_800FDAB4[];
 extern Pt D_800FD418[];
 extern int D_80111124;
 
-char *func_800EE37C(void)
+Sprite *func_800EE37C(void)
 {
     short *e;
     Link *l;
-    int a, b;
-    D_8010A2F2 = 1;
-    D_8010A2E1 = 1;
-    D_8010A2DC = 0x78D2;
-    D_8010A2E3 = -0x1E;
-    D_8010A2DE = 1;
-    D_8010A302 = 1;
-    D_8010A2F8 = D_800FECE4;
-    D_8010A310 = D_1F8002EC;
-    e = &D_800FE064[D_8009C960][D_8009C962];
+    D_8010A2D4->w1e = 1;
+    D_8010A2D4->b0d = 1;
+    D_8010A2D4->w08 = 0x78D2;
+    D_8010A2D4->b0f = -0x1E;
+    D_8010A2D4->b0a = 1;
+    D_8010A2D4->w2e = 1;
+    D_8010A2D4->anim = D_800FECE4;
+    D_8010A2D4->d3c = D_1F8002EC;
+    e = &D_800FE064[D_8009C960.room][D_8009C960.sub];
     l = &D_800FDAB4[*e];
-    a = l->a;
-    b = l->b;
-    D_8010A2E4 = ((short)(D_800FD418[a].x + 8) + (short)(D_800FD418[b].x + 8)) / 2 << 16;
-    D_8010A2E8 = ((short)(D_800FD418[a].y + 2) + (short)(D_800FD418[b].y + 2)) / 2 << 16;
-    D_8010A2EC = ((short)D_800FD418[a].z + (short)D_800FD418[b].z) / 2 << 16;
-    D_8010A304 = *(Vec *)&D_8010A2E4;
-    D_8010A388[0] = 0;
+    {
+        int a = l->a, b = l->b;
+        short xa = D_800FD418[a].x + 8, xb = D_800FD418[b].x + 8;
+        short ya = D_800FD418[a].y + 2, yb = D_800FD418[b].y + 2;
+        unsigned short za = D_800FD418[a].z, zb = D_800FD418[b].z;
+        D_8010A2D4->p.s.x = (xa + xb) / 2 << 16;
+        D_8010A2D4->p.s.y = (ya + yb) / 2 << 16;
+        D_8010A2D4->p.s.z = ((short)za + (short)zb) / 2 << 16;
+    }
+    D_8010A2D4->q.v = D_8010A2D4->p.v;
+    D_8010A2D4->wb4 = 0;
     D_80111124 = *e;
-    D_8010A38A = l->c;
-    D_8010A38C = l->d;
-    D_8010A38E = 1;
+    D_8010A2D4->wb6 = l->c;
+    D_8010A2D4->wb8 = l->d;
+    D_8010A2D4->wba = 1;
     return D_8010A2D4;
 }
