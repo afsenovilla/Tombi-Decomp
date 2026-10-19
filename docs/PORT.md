@@ -17,6 +17,8 @@ build/port/tombi --frames 500                   # from the repo root; reads game
 #   options: --exe PATH --disc PATH(.bin raw 2352 or .iso) --frames N --realtime (50 Hz) --autostart N -v [-v]
 #            --pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...  --dump-frames DIR --dump-every N --pipe-frames FIFO
 #            --no-interp --interp ADDR --trace-interp
+#            --window [--viewer PATH]   SDL2 window + keyboard/controller (needs build/port/tombi-view)
+#            --save FRAME:PATH --load PATH   save states (same binary)
 build/port/tombi --frames 3600 --dump-frames shots --dump-every 100 \
     --pad-script 1000:start,1300:cross:3x45/30,3200:right:400   # title -> new game -> intro dialogue -> walk
 ```
@@ -119,14 +121,33 @@ ffplay -f rawvideo -pixel_format rgb24 -video_size 320x256 -framerate 50 /tmp/to
 build/port/tombi --realtime --pipe-frames /tmp/tombi.rgb --pad-script 1000:start
 ```
 
-**Why no SDL window yet:** this host has the i386 `libSDL2-2.0.so.0` runtime but no 32-bit libc/crt or SDL
-headers, and the runtime is freestanding (no dynamic loader). Installing `libsdl2-dev:i386 gcc-multilib` is
-possible from the Ubuntu archive, but apt wants to remove 32 packages to do it on this machine, so it was not
-done. Options, in order of cost: (a) on a host with
-`gcc-multilib` + `libsdl2-dev:i386`, drop `-ffreestanding -nostdlib`, link SDL2 and upload
-`port_gpu_frame()`'s RGB buffer to an `SDL_Texture` each vblank (≈80 lines; input goes into `port_pad_vblank`);
-(b) without 32-bit dev libs, a 64-bit viewer process that maps a shared-memory frame buffer written by the
-i386 binary (memfd + `--display-fd`), which also isolates the host toolkit from the 32-bit game process.
+**The window (M1, done): `--window`.** The game binary is i386 and freestanding (this host has the i386
+`libSDL2-2.0.so.0` runtime but no 32-bit libc/crt or SDL headers), so the window is a separate host-native
+process, `port/tools/view/tombi_view.c`, built as `tombi-view` when CMake finds SDL2 (`libsdl2-dev`); without
+SDL2 the game still builds headless. `tombi --window` forks the viewer with three pipes: every displayed frame
+(`"TBFR"`, width, height, RGB24 of the DISPENV area) on its stdin, the s16le 44.1 kHz audio stream on fd 3
+(played through `SDL_QueueAudio`), and one u16 pad state per frame back on fd 4 (non-blocking, merged with a
+`--pad-script` if any). `--window` implies `--realtime` (50 Hz); closing the window ends the game. Keys:
+arrows, X/Z/S/D = Cross/Square/Triangle/Circle, Q/W/A/E = L1/R1/L2/R2, Return = Start, Backspace = Select,
+F = 2x/3x, Escape = quit; an `SDL_GameController` maps to the same buttons. Verified under Xvfb (title screen,
+Start and Cross through xdotool). `--viewer PATH` names another viewer binary.
+
+```
+build/port/tombi --window                    # title -> new game with the keyboard
+build/port/tombi --window --load s.state     # from a save state
+```
+
+**Save states: `--save FRAME:PATH`, `--load PATH`** (`runtime/state.c`). A state is PS1 RAM, the scratchpad and
+every writable mapping of the static binary (the runtime's globals, software VRAM, SPU, GTE and the coroutine
+stacks of `threads.c`), taken and restored only from the main loop's vblank wait on the main thread, where the
+process stack holds the same frames in every run. After the copy the command line is parsed again and this
+run's file descriptors (disc, pipes, viewer) are put back; the vblank count continues from the saved frame,
+so pad scripts of a continued run use the same frame numbers as the run that saved it. A hash of the
+executable refuses states of another build (a state restored into a rebuilt binary put variables at the wrong
+addresses). States are 16 MB. They make experiments cheap: a 300-frame probe from a state takes a few
+seconds instead of replaying the minutes of boot, title and loading, and `-v -v` logs the player every 10
+frames.
+
 The GL backend (VRAM as a texture, CLUT lookup in the shader) is step 2 and reuses the same GP0 decoder.
 
 ### How the prototype is built (`port/`)
@@ -421,7 +442,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 |---|---|---|---|
 | M0 | Headless prototype (**done**) | All MAIN0+X000 C compiled for the host, retail-image data model, thunks, coroutine tasks, software GTE, CD reads, pad buffers; boots to the title overlay | done |
 | M1a | Title + AREA00 (**done**) | SYSTEM overlay set with dispatch, MIPS interpreter fallback, automatic register-carried arguments, scripted pad, raw-video pipe; title screen, new game, first room, dialogue, walking | done |
-| M1 | Window + input + pacing | multilib or a Windows 32-bit build, SDL2 window, VRAM viewer, keyboard and gamepad, 50/60 Hz pacing, `.cue`/`.iso` parsing, memory card files | 1 week |
+| M1 | Window + input + pacing (**done** except `.cue` parsing and memory card files) | SDL2 window in a host-native viewer process (`--window`), keyboard and game controller, 50 Hz pacing, audio through SDL; save states (`--save`/`--load`); still to do: `.cue` parsing, memory card files, 60 Hz option | done |
 | M2 | Software renderer | GP0 decoder + rasteriser (textured/gouraud/semi-transparent/dither), display area from DISPENV; the boot logo and AREA00 visible | 2–3 weeks |
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
@@ -513,9 +534,39 @@ Pending:
   3600:right:100,3750:cross:25,3760:right:30,3850:square:5x20/40,3900:cross:25x10/50,4450:right:400
   ```
   The door transition loads AREA02 section 3 at frame 4563 (its I0NFO3 overlay, the same files as the debug select)
-  and shows the "CLEAR 2000" event banner. Without the poke: exit 0 of sec1 (x>=0xA46 at ground level) is behind the
-  hollow, the upper path leads into sec2, and in sec0 a purple bush at x=1100 blocks the way to the right; the
-  elder's house exit 1 (to AREA01, high up) needs the house entered from outside after the event.
+  and shows the "CLEAR 2000" event banner.
+- **Why the hollow needs the flag (checked, no poke-free way through it).** `0x8009CFED` is written in one place,
+  I0NFO3 `func_800E86AC`, the section handler of AREA02 section 3: that room is the underground tunnel network
+  (I0NFO3 is its overlay: no jumping, the pad walks Tombi along the tunnels, a mine cart at the east end). Its
+  five exits are position tests on the player (`D_800A6038`): exit 0 at x 0x448..0x478, y -0x474..-0x460
+  (-> AREA02 sec 4), exit 1 at x<0x99, y -0x4FE..-0x47E (-> AREA02 sec 5), **exit 2 at x<0x99, y -0x2E8..-0x268
+  sets the flag and leads to AREA00 sec 1 spawn 2, i.e. out of the hollow**, exit 3 at x 0x65F..0x6A7, y
+  -0x2D0..-0x2BC (-> AREA01 sec 3), exit 4 at x 0x667..0x6AF, y -0x4B0..-0x497 (-> AREA04 sec 11). So the hollow
+  is a one-way shortcut that the game opens from the tunnel side, later in the story. The tunnels to exits 1/2/4
+  are themselves gated by event flags in I0NFO3 `func_800E847C` (`D_8009CE21`, `D_8009CE24`, `D_8009CE34`: one-way
+  slopes at x 0x2FC..0x36F, 0x3B6..0x3E9, 0x510..0x5AB), so from the debug select only exit 3 is open. The
+  spawn/exit tables are `D_80079A48[area][section]` (8 bytes: x, y, type, next area, section, spawn;
+  `python3 port/tools/exits.py AREA [X0nn.BIN]` prints them); AREA00's are in X000 at 0x801384A8.
+- **AREA00's other exits, measured in the port** (all three with the debug select only, `--poke 900:1F8001B4:1`):
+  sec 1 exit 0 (x>=0xA46 at ground level, -> AREA00 sec 5 -> AREA10) is behind the hollow wall: walking right
+  stops at x=2360 (`hollow0` run). sec 0 exit 0 (x>=0x4A2, -> sec 4, the white tower) is behind the purple bushes
+  at x=1100 and the "fog" villager at x~1000 (his dialogue triggers on contact). The way up to sec 1 (x>=0x4ED,
+  y<-0x95) is the hut: running jump from x~965 onto the lower bush (1100,-99), jump onto the balcony with the
+  pink villager (1095,-147); the next ledge is the collision plane-1 floor at x 1096..1176, y -212 (player y
+  -232), 7 px above Tombi's jump (peak -225 from the balcony); not solved (grab, bush bounce or another object).
+  sec 2 (above sec 1, reached by the trunk at x~2290 and the ledge with the white egg) has no static floor between
+  y -500 and the house platform at -1360 (x 2064..2688): the climb is on objects (stone pillars at (2909,-432),
+  a beam at (3040..3125,-619), a net, a vine); thorns at x>=3119 hurt; not solved either. `port/tools/colmap.py`
+  draws a section's static floors from a `--dump-ram` image (per depth plane; objects are not in it).
+- **Walking AREA02 -> AREA01 (no progress flag poked):** from the debug select into AREA02 section 3, the tunnels
+  lead to exit 3 and AREA01 section 3 at frame 2747:
+  ```
+  build/port/tombi --frames 3400 -v --poke 900:1F8001B4:1 --poke 1250:8009C960:2:2 --poke 1250:8009C962:3:2 \
+      --pad-script 1000:start,1300:circle:3,1600:right:500,2110:up+left:340,2455:up+right:300
+  ```
+  AREA01 sec 3 (autumn village behind the hut) continues right to a cliff at x=2014 that Tombi climbs to y=-939;
+  its exit 1 (x>=0x7FC, y>=-0x293, -> AREA01 sec 4) and exit 2 (x>=0xB4B after x>=0x821, -> AREA09) are beyond it;
+  not reached yet.
 - Talk button crash fixed on the way: `playerTryTalkToNpc` reads its counter through a second name of the same
   address (`D_1F80019Es`), which gcc kept in a register; such names are now declared volatile by the generator.
 - Sound: reverb, libsnd details (voice priorities, NRPN loop counts); an SDL audio callback once there is a window.
