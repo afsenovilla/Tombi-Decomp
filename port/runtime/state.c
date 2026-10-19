@@ -63,8 +63,24 @@ static int regions(Region *r, int max) {
     return n;
 }
 
+/* identity of this build: FNV-1a over the executable itself plus the region list (the layout of .data/.bss
+   changes with almost any rebuild, and a mismatch restores variables at the wrong addresses) */
 static u32 layout_hash(const Region *r, int n) {
-    u32 h = 2166136261u;
+    static u32 exe_hash;
+    if (!exe_hash) {
+        static u8 chunk[65536];
+        u32 h = 2166136261u;
+        int fd = port_open("/proc/self/exe");
+        if (fd < 0) port_fatal("cannot read /proc/self/exe");
+        for (;;) {
+            int k = port_read(fd, chunk, sizeof chunk);
+            if (k <= 0) break;
+            for (int i = 0; i < k; i++) h = (h ^ chunk[i]) * 16777619u;
+        }
+        port_close(fd);
+        exe_hash = h ? h : 1;
+    }
+    u32 h = exe_hash;
     for (int i = 0; i < n; i++) { h = (h ^ r[i].start) * 16777619u; h = (h ^ r[i].end) * 16777619u; }
     return h;
 }
