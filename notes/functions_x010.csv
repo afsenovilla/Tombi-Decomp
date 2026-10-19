@@ -304,7 +304,7 @@ address,size,name,twin
 80114890,64,updateL2Type1FObject,X000:80114890
 801148d0,152,spawnDebrisObjectB,X000:801148d0
 80114968,160,spawnGroundDebrisPiece,X000:80114968
-80114a08,64,updateL2Type55Object,X000:80114a08
+80114a08,64,updateVillagerNpc,X000:80114a08
 801165e0,832,updateAreaScroll,
 80116920,156,func_80116920,
 801169bc,300,func_801169BC,

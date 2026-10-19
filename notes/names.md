@@ -490,7 +490,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80104dc8 playerBittenCarryAirStep` (was FUN_80104dc8) (no caller found) - air step carrying the bitten object on top (x = player, y + box2), gravity and head collision
 - `800ee2a4 updateL4Type3EObject` (was FUN_800ee2a4) - layer 4 type 0x3E handler (MAIN0 table slot 80079E6C): tall invisible box (4..8 x 0xAA..0x154 by +0x0C)
 - `800ee18c updateL4Type13Object` (was FUN_800ee18c) - layer 4 type 0x13 handler (slot 80079DC0)
-- `80134e5c updateA00L2Type34` (was func_80134E5C) - AREA00-only object handler: layer 2 type 0x34 slot (MAIN0 table 80077E6C) while AREA00 (X000) is loaded
+- `80134e5c updateHoodedOldMan` (was func_80134E5C) - AREA00-only object handler: layer 2 type 0x34 slot (MAIN0 table 80077E6C) while AREA00 (X000) is loaded
 - `80116d14 updateA00L5Type11` (was FUN_80116d14) - AREA00-only object handler: layer 5 type 0x11 slot (MAIN0 table 8007B354) while AREA00 (X000) is loaded
 - `8011bf68 updateA00L4Type02` (was func_8011BF68) - AREA00-only object handler: layer 4 type 0x2 slot (MAIN0 table 80079D7C) while AREA00 (X000) is loaded
 - `801288b8 updateA00L2Type2C` (was func_801288B8) - AREA00-only object handler: layer 2 type 0x2C slot (MAIN0 table 80077E4C) while AREA00 (X000) is loaded
@@ -540,7 +540,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8011f1d0 updateA00L4Type0D` (was func_8011F1D0) - AREA00-only object handler: layer 4 type 0xD slot (MAIN0 table 80079DA8) while AREA00 (X000) is loaded
 - `80111ae0 updateL2Type07Object` (was func_80111AE0) - layer 2 type 0x7 handler (MAIN0 table slot 80077DB8)
 - `800ee25c updateL4Type38Object` (was func_800EE25C) - layer 4 type 0x38 handler (MAIN0 table slot 80079E54)
-- `80114a08 updateL2Type55Object` (was FUN_80114a08) - layer 2 type 0x55 handler (MAIN0 table slot 80077EF0)
+- `80114a08 updateVillagerNpc` (was FUN_80114a08) - layer 2 type 0x55 handler (MAIN0 table slot 80077EF0)
 - Collision pass callbacks named by the pass and the object type of their switch case (like playerContactCat4Type0B / weaponHitCat2Type07):
   collidePlayerWithCat4Objects `80124ebc playerContactCat4Type01` (push-out unless linked +0x94), `80124f3c playerContactCat4Type02` (sets the facing +0x2E from the push side), `80124fa4 playerContactCat4Type04`, `80124d10 playerContactCat4Type09` (sloped boxes by b0c: `80124bbc pushOutOfSlopedBoxSide` / `80124a84 landOnSlopedBoxTop`, player step 0x17 on contact), `80124fd4 playerContactCat4Type0A`, `80124efc playerContactCat4Type17`, `80124f1c playerContactCat4Type18`;
   collidePlayerWithCat2Objects `80125f30 playerContactCat2Type01`, `80126464 playerContactCat2Type08`, `801260f8 playerContactCat2Type12`, `80126198 playerContactCat2Type15`, `80126010 playerContactCat2Type2B`;
@@ -577,7 +577,7 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x010 8012ac48 updateSpearPig` - handler whose strips show the blue pig with a spear (labels.json animowner a10)
 - `x010 8012ce80 updateShieldSpearPig` - strips show the same blue spear pig holding a round wooden shield, then throwing the spear
 - `x010 8012c8a0 updateParrot` - strips show a red/yellow parrot standing, walking and flying
-- `x001 8012b2d4 updatePurplePig` - layer 2 type 0 (11 placements, AREA01/07): strips show a purple pig walking, turning and falling
+- `x001 8012b2d4 updatePurpleCrawler` - layer 2 type 0 (11 placements, AREA01/07): (was updatePurplePig) old strips read as a purple pig; the draw capture shows a purple many-legged crawler, see "Draw captures"
 - `x001 80138d4c updateCeilingDrip` - layer 2 type 34: strips show water gathering on the ceiling, forming a drop, falling and splashing
 - `x001 80139914 updateFlowerTowerKeeper` - layer 2 type 0x23 (5 placements, section 5): talks through flowerTowerKeeperTalk; strips show a red horned figure
 - `x001 80139770 flowerTowerKeeperTalk` - MFNT010S 2/126-127: "...te he asustado? ... la torre ... para que la Torre de flores no se seque"
@@ -762,8 +762,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - `x004 8012f35c updateBigKeyPainting` - variant 0x14: until the five flags GCD.bcf24[0..4] are set, then runs paintingBigKeyReward
 - Enemy helpers (step functions of a named enemy handler; b04 1 = active steps, b04 2 = after being hit: step 0 `*Hit` starts with velV -0x400, facing
   1 - w7a (awardAPByArea when the hit points w98 reach 0), the last step `*Defeated` = active 2, b0b 1, b0f 4, velV -0x400, movetab D_80077D0C: the enemy flies off
-  the screen): x001 801282d0 purplePigIdle (step 0: waits 0xC0/0x180 ticks, then turns to the player), 801285e4 purplePigWalk (step 1: walk anim, sfx 0x5E,
-  movetab), 8012ab64 purplePigHit, 8012b184 purplePigDefeated; x009 801233f0 redFlowerHit, 80123ce8 redFlowerDefeated; x010 8012aae4 spearPigDefeated
+  the screen): x001 801282d0 purpleCrawlerIdle (step 0: waits 0xC0/0x180 ticks, then turns to the player), 801285e4 purpleCrawlerWalk (step 1: walk anim, sfx 0x5E,
+  movetab), 8012ab64 purpleCrawlerHit, 8012b184 purpleCrawlerDefeated; x009 801233f0 redFlowerHit, 80123ce8 redFlowerDefeated; x010 8012aae4 spearPigDefeated
 - x001 forest dwarf (updateForestDwarf): 801356c0 initForestDwarf (box, anims per section/subtype), 80135850 stepForestDwarfWander (subtype 0: walk 0x3C ticks, turn),
   80135c90 forestDwarfFlee (b04 2, subtypes 1/2: hops away with velX +-0x120), 80136164 forestDwarfCaught (b04 2, subtypes 3/4: locks the player, plays the caught anim)
 - x001 others: 80136b4c stepPuppyBaron (step switch of updatePuppyBaron), 80139b2c checkLostSeedKidTalk (player standing at the kid's ledge pressing the talk
@@ -804,14 +804,14 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   rolls down; starts / completes event 0xB4 "Where The Barrel Rolls...", GCD.bceb0 = progress);
   `80118ac0 updateAnimScenerySprite` / `80118c1c updateScenerySprite` (layer 3 types 0x18 / 0x19, 35 / 170 placements: decoration sprites, scale
   d64 and rotation d8c from the two nibbles of box0, the first animated, the second static with an optional palette D_8013C404/428);
-  purple pig steps (uncertain): `80128a2c purplePigClimb` (step 2: turns d8c +-0x40 and moves 0x300/0x80 per tick along a wall, sfx 0x5E),
-  `80129588 purplePigJump` (step 3: velV -0x400 / -0x500 hops); forest dwarf: `80135b48 forestDwarfCountCatch` (sets the GV2.sc0 bit of b0c,
+  purple crawler steps (uncertain): `80128a2c purpleCrawlerClimb` (step 2: turns d8c +-0x40 and moves 0x300/0x80 per tick along a wall, sfx 0x5E),
+  `80129588 purpleCrawlerJump` (step 3: velV -0x400 / -0x500 hops); forest dwarf: `80135b48 forestDwarfCountCatch` (sets the GV2.sc0 bit of b0c,
   GCD.bcdb5 += 1 with printInfoMessage(count - 1, 2), GCD.bcec1..7 flags), `80135a14 forestDwarfAssignSlot` (uncertain: picks a free slot of
   GCD.bcec1[0..6]); `80137afc leafButterflyReleased` (b04 2 step 3 of updateLeafButterfly: after item 0x10 is used, flutters inside the box of
   the parent d90; uncertain)
 - Koma pig (layer 2 type 2; MAIN0 `func_8004985C` calls the area's handler: area 0 X000 8012CCF8, area 1 x001 `8012efc4 updateKomaPig`, area 3
   x003 `80124b78 updateKomaPig`, area 4 x004 `80123750 updateKomaPig`). The identity is uncertain (the rendered strips are not readable): the
-  handlers draw from SPR_DATA[2] with w1e 1, the pig sprite table of updatePurplePig / updateSpearPig, and type 2 is placed in the first room of
+  handlers draw from SPR_DATA[2] with w1e 1, the pig sprite table of updatePurpleCrawler / updateSpearPig, and type 2 is placed in the first room of
   area 0. Same template as the other enemies: b04 2 step 0 `komaPigHit`, step 1 `komaPigGrabbed` (spawnItemNotification(0, 6), the bite hold),
   step 2 `komaPigDefeated` (velV -0x400, movetab D_80077D0C, flies off): x001 8012df98 / 8012d4ac / 8012ca08 (+ step 3 `8012cb78 komaPigGrabbedB`,
   also notification 0), x003 8012338c / 80122db4 / 80122c44, x004 80122a54 / 8012247c / 8012230c. The b04 1 step 1 states (x003 / x004, same
@@ -826,7 +826,7 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x001 platforms and scenery (identities from the code; the rendered strips are not readable, so object kinds marked uncertain are guesses):
   `8011dd94 updateSeesawPlank` (layer 4 type 0x14, 7 placements: a 0xEC-0xEE wide, 8 high solid box (b0a 0x11) whose angle d8c = d38 >> 8 is driven by
   `8011db5c seesawPlankTilt` from the rider's velX (b69 contact), clamped +-0x38E00 (subtype 0, pivot in the middle) or 0..0x80000 (subtype 1, hinged);
-  b0c 1 planks take part in the purple pig scene GCD.bceae), `8011d4d0 updateHangingVine` (type 0x10: allocates 18 more layer 4 objects and links them
+  b0c 1 planks take part in the purple crawler scene GCD.bceae), `8011d4d0 updateHangingVine` (type 0x10: allocates 18 more layer 4 objects and links them
   as a chain of segments 0x10 apart, d90/d94 parent/child), `8011c354 updateBendingBranch` (type 0x0E, uncertain: bends down (d8c -= wb4 >> 8, sfx 0x4B)
   while stood on), `8011f1a8 updateClimbPole` (type 0x19, uncertain: 0x10 x 0x72 box), `8011fd7c updateBreakableBlock` (type 0x21, uncertain: on hit
   spawns debris and an applyItemEffect burst, sets GCD.bceae = 4, frees itself and its partner d94 and sets both area flag bits),
@@ -975,7 +975,7 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   rooms) section x001 0 / x002 4 / x003 6 / x004 3 / x009 5 / x010 1 / x016 2, spawn 0)
 - Player contact callbacks: MAIN0 `FUN_80047484` walks the layer 2 objects touching the player and calls a callback by the object's type (q[2]); the
   callbacks live in the overlay that has the type, so each is named `<handler>Contact` after the layer 2 handler of that type in the same overlay
-  (MAIN0 table 0x80077D9C): x001 `801262f8 purplePigContact` (type 0), `801240a8 komaPigContact` (type 2, area 1 branch), `8012687c
+  (MAIN0 table 0x80077D9C): x001 `801262f8 purpleCrawlerContact` (type 0), `801240a8 komaPigContact` (type 2, area 1 branch), `8012687c
   chainSegmentEnemyContact` (0x0B), `80126bbc rollingBarrelContact` (0x11), `80124348 puppyBaronContact` (0x17), `801242c0 forestDwarfContact` (0x16),
   `801243d4 ceilingDripContact` (0x22); x003 `8011f8cc komaPigContact` (2, area 3), `8011fc84 swayingHopPlantContact` (0x24), `8011fad4
   windblownMonkeyContact` (0x37); x004 `8011efa4 komaPigContact` (2, area 4), `8011f6c8 blackCrowContact` (0x1E), `8011f9e0 countedCollectibleContact`
@@ -1109,15 +1109,15 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   `80121d6c playerStepRiseToLedge` (step 0x28: moves up until probeFlaggedSegmentA bit 2, then step 0x16), `80122044 playerStepSinkToGround` (step
   0x29: sinks 1 px per frame until a tile), `80122f54 playerStepRideSeesaw` (playerStep2EByArea area 1: stands on the tilted seesaw plank), `80122cbc
   seesawPlankSwingPivot` (playerSwingUpdatePivot type 0x14 callback), `801213d0 playerBittenJumpCrawler` (playerStepBittenJump bitten type 0x13)
-- x001 contact callbacks: MAIN0 FUN_80045f00 (weapon/attack object vs layer 2 by the enemy type) `80125f04 purplePigWeaponHit` (0),
+- x001 contact callbacks: MAIN0 FUN_80045f00 (weapon/attack object vs layer 2 by the enemy type) `80125f04 purpleCrawlerWeaponHit` (0),
   `80126004 rollingBarrelWeaponHit` (0x11), `80125b88 segmentedCrawlerWeaponHit` (0x13); MAIN0 func_8004BBC0 (player grab probe vs layer 4, sets
   the contact kind +0x9E) `80126fe4 springVineGrabProbe` (5), `80126f64 flowerTowerBlockerGrabProbe` (0xB), `80126e8c bendingBranchGrabProbe` (0xE),
   `8012767c seesawPlankGrabProbe` (0x14; `80127074 seesawPlankProbeFace` tests one face), `80126d2c swingingRopeGrabProbe` (0x15); `8012f988
   updateRollingBoulder` (layer 4 type 0x23 body, via the 8012f968 thunk: rolls down the slope, sets an area flag and turns into type 0xC; uncertain kind)
   with `80126cc4 rollingBoulderPlayerCollision`, `80125fbc rollingBoulderObjectCollision`; `80124410 grabObjectContact` (FUN_80047484 type 0x1F in
   area 1: holds the touching object; uncertain); `80127700 landOnSlopedBox` (stand-on test for a sloped box; uncertain)
-- x001 purple pig steps 4..8: `80129b2c purplePigFall`, `80129dac purplePigRun` (random movetab/timer), `8012a290 purplePigCarryPlayer` (holds the player
-  and jumps; uncertain), `8012a5cc purplePigDrop`, `8012a794 purplePigCrawlWall` (uncertain); `80128110 purplePigChooseStep` (next step from the distance
+- x001 purple crawler steps 4..8: `80129b2c purpleCrawlerFall`, `80129dac purpleCrawlerRun` (random movetab/timer), `8012a290 purpleCrawlerCarryPlayer` (holds the player
+  and jumps; uncertain), `8012a5cc purpleCrawlerDrop`, `8012a794 purpleCrawlerCrawlWall` (uncertain); `80128110 purpleCrawlerChooseStep` (next step from the distance
   to home/player); `80123b30 updateFallingSparkleItem` (item that falls leaving type 0x31 sparkles; uncertain), `80123e50 spawnItemEffectFlyingItem`
   (applyItemEffect case 6: layer 5 type 6 subtype 0x13 with velH)
 - x001 race rival (layer 2 type 0x0D, the opponent of the race event GCD.bce59; kind uncertain): `801312f8 updateRaceRival` with the steps
@@ -1136,8 +1136,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   spawnLeafButterflySwarm`, `8013b51c stepLeafButterflySwarm`, `8013b504 isLeafButterflyEventOpen`; uncertain), `8013be48 updateKomaPigSpawner`
   (type 2 objects near x 1000..0x885 while GCD.bcdb5), `8013c028 updateSegmentedCrawlerSpawner` (type 0x13, at most 2)
 - x001 more: koma pig b04 1 states of this overlay's layout `8012c8ec komaPigIdle` (state 0), `8012c0ec komaPigMove` (states 1..8), `8012bd6c
-  komaPigLeapAtPlayer` (state 9), `8012eae8 komaPigDropIn` (uncertain), `8012bc84 komaPigCheckWall`; overlap tests `8012614c purplePigOverlapTest`
-  (purplePigContact), `80124c20 swingingRopeOverlapTest` (per-height x offsets D_8013C6A4), `80124e34 ropeChainsOverlapTest`; rope chains
+  komaPigLeapAtPlayer` (state 9), `8012eae8 komaPigDropIn` (uncertain), `8012bc84 komaPigCheckWall`; overlap tests `8012614c purpleCrawlerOverlapTest`
+  (purpleCrawlerContact), `80124c20 swingingRopeOverlapTest` (per-height x offsets D_8013C6A4), `80124e34 ropeChainsOverlapTest`; rope chains
   (updateRopeChains, links in D_800A4470): `8011cec8 ropeChainsComputeLinkPos`, `8011d28c ropeChainsRaiseLower` (sfx 0x4B/0x4C), `8011d264
   getRopeChainLinkAngle` -> `80117bd4 updateRopeChainLinkModel` (layer 8, 3/4 of the link angle; uncertain); `80120e24 updateBackdropSpritePos`
   (updateBackdropSprite: scroll/parallax by b0c); `8011bc6c mechanismRotateWhenPlayerNear` (updateAreaMechanisms subtype 1; uncertain);
@@ -1336,3 +1336,30 @@ neighbours whose addresses are known on both sides. Imported names are listed ab
   playerStepHurtStun (playerHurtBitten), playerStepHazardRespawn (playerFallInWater), playerNormalModeDispatch
   (updatePlayerActive). Their PlayerState / PlayerHurtType / PlayerSubState enums are in include/tomba/game.h.
 - X000 area 0: updateMushroomCluster (theirs updateEvilGrass, 80126fec): to check against the strip.
+
+# Draw captures (tools/objdraw.py, Oct 2026)
+
+tools/objdraw.py spawns a placement record in a running room (debug area select, MAIN0 spawnObjectFromRecord), lets the game update
+it and captures the primitives its category draw routine puts in the ordering table (method of TombaEdit formats/level/draw.py: a
+draw list holding only the object, a camera on the object). Objects drawn from several parts, children or their own primitives now
+come out as the game shows them, where the init-only strips (tools/objinit.py / tools/animobj.py) were unreadable.
+
+- X000 `80134e5c updateHoodedOldMan` (was updateA00L2Type34; layer 2 type 0x34, area 0 room 3): an old man with white hair, bent
+  over in a long tan hooded robe (5 frames of a slow sway).
+- X000 `80114a08 updateVillagerNpc` and its 16 twins (was updateL2Type55Object; layer 2 type 0x55): area 3 -> updateLostBossItemNpc,
+  else x00n updateFreedVillager. Captured in area 12 room 0: subtype 7 a bearded sailor in a red coat and blue shirt, subtype 0 a
+  blond villager in a blue tunic - the freed villagers.
+- x001 `8012b2d4 updatePurpleCrawler` and its 16 helpers purpleCrawler* (were updatePurplePig / purplePig*; layer 2 type 0, area 1
+  room 3): not a pig. The capture is a purple dome-shaped creature with many purple legs and a green top with two frog-like eyes,
+  walking and turning; it fits the climb / wall crawl / carry-player steps of the code. (The old strip was the SPR table shared
+  with the pigs, read with the wrong frames.)
+- Koma pig (layer 2 type 2, the area handlers updateKomaPig): area 1 room 0 subtype 8 captures a pink pig with a red mohawk lying
+  down and snoring, so the koma pig handlers are pigs (Koma Pigs are the game's pig enemies); names kept.
+- Pending (draw captures not finished): area-0 L2/05 (invisible trigger: hit box -> sfx 0x39, spawns pool type 0x16; draws nothing
+  itself), L2/06, L2/57 (nothing drawn in room 5), pool types 07 (subtype 0 = small yellow chick-like sprite, anim by subtype) / 0x11 /
+  0x14 / 0x39 / 0x3C, L4/0A/0D/11; type 07 in areas 0/4 (area 0 L2/07 subtype 0 draws a green wavy stem); x004 L2/1B, L2/31 (no
+  placements in areas 4/12: need their spawner).
+- Open conflicts: loadCollisionBounds -> theirs loadButtonConfig is right (copies T[1F80019E] into 1F8003C4..CA, the button masks the
+  player code tests, e.g. talk = 1F8003C4); not renamed because its caller in src/o0ptsub0 is on hold. dispatchAreaCollisionHookA/B:
+  ours kept (area 0 calls pushCat2/Cat5ObjectOutOfCat4Type04, area 3 their x003 twins: collision passes, not enemy init/update).
+  updateMushroomCluster vs updateEvilGrass: not captured yet.

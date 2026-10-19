@@ -1,0 +1,137 @@
+// FUNC 8012a794 976 X001
+// MATCHING 8012a794 976
+#include "spad.h"
+#include "TOBJ.H"
+typedef struct { short w0, w2, w4, w6, w8; } X;
+
+extern short D_8007A5F0[], D_8007A1F0[];
+extern unsigned char D_8013C7C8[], D_8013C7D8[];
+extern char D_80077CE8[], D_80077CF4[];
+extern void *D_8013FC74[];
+extern char D_8013FE68[];
+extern char D_8013FE94[];
+extern char D_8013FEAC[];
+extern char D_8013FEB4[];
+static void *D_8013FCA0[4] = {
+    D_8013FE68, D_8013FE94, D_8013FEAC, D_8013FEB4,
+};
+extern void playSFX(int);
+extern int AnimAdvance(TObj *);
+extern void AnimLoadDuration(TObj *);
+extern int Rand(void);
+extern void applyFrameVelocityX(TObj *);
+extern short probeWallAt(TObj *, short, short, short);
+extern short probeCollisionAtDepthA(TObj *, short, short);
+extern void purpleCrawlerChooseStep(TObj *);
+
+static __inline__ short wall(TObj *o)
+{
+    X *x = (X *)((char *)o + 0xb4);
+    int f;
+    short d;
+
+    if ((o->b9d & 2) && o->animFrame == (o->b9d & 1)) {
+        o->wba = 1;
+        return 1;
+    }
+    f = o->animFrame & 1;
+    if ((unsigned short)f) d = -0x10;
+    else d = 0x10;
+    if (probeWallAt(o, o->h->p.whole + d, o->y.p.whole, f)) {
+        x->w6 = 0;
+        return 1;
+    }
+    return 0;
+}
+
+static __inline__ void mv(TObj *o, int a, short sp)
+{
+    a &= 0xff;
+    o->h->raw += (D_8007A5F0[a] * sp) >> 4;
+    o->y.raw += (D_8007A1F0[a] * sp) >> 4;
+}
+
+void purpleCrawlerCrawlWall(TObj *o)
+{
+    X *x = (X *)((char *)o + 0xb4);
+    short d;
+
+    switch (o->state) {
+    case 0:
+        o->b9c = 0;
+        o->wbc = 1;
+        o->wac = 1;
+        o->state++;
+        o->anim = D_8013FC74[0];
+        AnimLoadDuration(o);
+        break;
+    case 1:
+        if (o->visible && !((SPAD.s1f8 + SPAD.i198) & 0xf)) playSFX(0x5e);
+        AnimAdvance(o);
+        if (x->w6) {
+            {
+            short sp;
+            short a;
+            d = o->d8c;
+            sp = *(short *)o->movetab;
+            a = d;
+            if (!o->animFrame) a = d + 0x80;
+            mv(o, a, sp);
+            }
+            o->y.p.whole -= 2;
+        } else {
+            applyFrameVelocityX(o);
+            o->y.p.whole -= 3;
+        }
+        if (wall(o)) {
+            x->w8 = 1;
+            o->step = 2;
+            o->state = 0;
+            o->wb0 = 1;
+            break;
+        }
+        if (o->b69 == 4) {
+            x->w6 = 1;
+            o->b69 = 0;
+        } else if (!probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
+            x->w8 = 1;
+            o->step = 2;
+            o->state = 0;
+            o->wb0 = 0;
+            break;
+        } else {
+            o->b69 = 0;
+            o->d8c = (-SPAD.s27e * 4 + 0x80) & 0xff;
+            x->w6 = 0;
+        }
+        if (--o->timer == -1) {
+            o->timer = 0x80;
+            o->state++;
+        }
+        break;
+    case 2:
+        purpleCrawlerChooseStep(o);
+        o->state = 0;
+        if (o->step == 1) {
+            if (D_8013C7C8[Rand() & 0xf]) o->movetab = D_80077CE8;
+            else o->movetab = D_80077CF4;
+            if (D_8013C7D8[Rand() & 7]) {
+                o->timer = 300;
+                o->ba7 = 0;
+            } else {
+                o->timer = 200;
+                o->ba7 = 1;
+            }
+            o->step = 8;
+            o->state = 1;
+        } else if (o->step == 3) {
+            o->step = 4;
+            o->velV = 0;
+            o->state = 0;
+            o->wac = 0xc;
+            o->anim = D_8013FCA0[0];
+            AnimLoadDuration(o);
+        }
+        break;
+    }
+}

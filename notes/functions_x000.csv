@@ -257,7 +257,7 @@ address,name,size,typed
 80114890,updateL2Type1FObject,64,0
 801148d0,spawnDebrisObjectB,152,0
 80114968,spawnGroundDebrisPiece,160,0
-80114a08,updateL2Type55Object,64,0
+80114a08,updateVillagerNpc,64,0
 80116818,FUN_80116818,336,1
 80116920,FUN_80116920,84,0
 801169bc,FUN_801169bc,184,0
@@ -513,7 +513,7 @@ address,name,size,typed
 801346c0,a00L2Type15Step3,704,1
 80134980,a00L2Type15Step1,672,1
 80134c20,updateNpcCharles,572,1
-80134e5c,updateA00L2Type34,3248,1
+80134e5c,updateHoodedOldMan,3248,1
 80135b0c,a00L2Type57Aim,676,1
 80135db0,a00L2Type57Move,736,1
 80136090,updateA00L2Type57,340,1
