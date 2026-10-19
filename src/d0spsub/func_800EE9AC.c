@@ -1,5 +1,5 @@
 // FUNC 800ee9ac 2956 D0SPSUB
-// wip: 4 differing insns (loop: anim store vs b0a store scheduling)
+// MATCHING 800ee9ac 2956
 typedef struct { short x, y, z, pad; } Pt;
 typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { short x, y; } XY;
@@ -43,7 +43,7 @@ extern Sprite D_8010A2D4[];
 extern Sprite D_80110F50[];
 extern Save D_8010A1C8, D_1F8000C0;
 extern unsigned short D_1F8001FC;
-extern int D_1F8002EC;
+extern volatile int D_1F8002EC;
 extern char *D_1F800344;
 extern unsigned char D_8010A44C;
 extern int D_8010A3B8, D_8010A3BC, D_8010A3C0;
@@ -132,10 +132,10 @@ int func_800EE9AC(Menu *m)
             o->b0d = 1;
             o->w2e = 1;
             o->w08 = 0x7A92;
-            o->anim = D_800FECDC[i];
-            o->b0a = 1;
+            *(void * volatile *)&o->anim = D_800FECDC[i];
             o->d3c = D_1F8002EC;
             o->b0f = 0xA;
+            o->b0a = 1;
             o->p.s.x = D_8010A050[i].x << 16;
             o->p.s.y = D_8010A050[i].y << 16;
             o->p.s.z = 0;
