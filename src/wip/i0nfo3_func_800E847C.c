@@ -38,7 +38,7 @@ void func_800E847C(TObj *o)
       if (((unsigned short) t) < 0x5B)
       {
         n = -(o->a.p.whole + 0x5C);
-        if (n < y)
+        if (y > n)
         {
           t = n + 10;
           if (y < t)
@@ -81,8 +81,9 @@ void func_800E847C(TObj *o)
         t = y + 0x359;
         if (((unsigned short) t) < 0x65)
         {
-          t = -(o->a.p.whole - 0x208);
-          if (t < y)
+          t = o->a.p.whole - 0x208;
+          t = -t;
+          if (y > t)
           {
             o->y.p.whole = t;
           }

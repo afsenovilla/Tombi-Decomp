@@ -25,7 +25,7 @@ static __inline__ short usingItem(unsigned char *p)
 void func_800EE414(TObj *o)
 {
     BoxXY b;
-    register unsigned char *u asm("$6");
+    unsigned char *u;
     switch (o->state) {
     case 0:
         u = D_8009C940;
@@ -34,9 +34,10 @@ void func_800EE414(TObj *o)
             b.y = 0x40;
             D_800A603D = 2;
             D_800A603E = 0;
-            u[-1] = 1;
+            u--;
+            u[0] = 1;
             D_8009C942 = 1;
-            u[0] = 0;
+            u[1] = 0;
             D_800A60C8 = (TObj *)func_8002DCC8(6, 0, &b);
             o->state++;
             break;

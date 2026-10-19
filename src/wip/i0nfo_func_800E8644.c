@@ -26,6 +26,7 @@ extern unsigned short D_800A60FC[];
 void func_800E8644(TObj *o)
 {
     TObj *p;
+    int pad[2];
     D_8009C330 = (TObj *)((char *)o + 0xF8);
     if (o->step == 0) {
         o->anim = D_80011790;

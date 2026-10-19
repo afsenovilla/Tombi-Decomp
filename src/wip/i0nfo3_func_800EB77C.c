@@ -111,7 +111,8 @@ void func_800EB77C(TObj *o)
             && (p->x0 < 0x141 || p->x1 < 0x141 || p->x2 < 0x141 || p->x3 < 0x141)) {
             q = (PolyFT4 *)D_1F800164;
             *q = *p;
-            slot = (unsigned long *)(((*otz - 4) << 2) + (int)&D_1F8001E0->ot[(signed char)o->b0f]);
+            slot = (unsigned long *)((*otz << 2) - 0x10);
+            slot = (unsigned long *)((int)slot + ((signed char)o->b0f << 2) + 0x10 + (int)D_1F8001E0);
             tmp->v = *slot;
             *slot = (unsigned long)q;
             tmp->v |= *code;

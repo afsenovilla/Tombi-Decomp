@@ -16,25 +16,24 @@ extern void func_800EC7AC(TObj *o, short x, short y);
 extern short D_800EECC8[][4];
 extern TObj D_800A6038;
 
-static __inline__ void setDir(TObj *o)
-{
-    D_8009D2B0[0] = 1;
-    o->animFrame &= 7;
-    if (D_8009D670[0] & 0x10) {
-        if (D_8009D670[0] & 0x20) o->animFrame = 1;
-        else if (D_8009D670[0] & 0x80) o->animFrame = 3;
-        else o->animFrame = 2;
-    } else if (D_8009D670[0] & 0x40) {
-        if (D_8009D670[0] & 0x20) o->animFrame = 7;
-        else if (D_8009D670[0] & 0x80) o->animFrame = 5;
-        else o->animFrame = 6;
-    } else if (D_8009D670[0] & 0x80) {
-        o->animFrame = 4;
-    } else if (D_8009D670[0] & 0x20) {
-        o->animFrame = 0;
-    } else {
-        o->animFrame |= 8;
-    }
+#define setDir(o) { \
+    D_8009D2B0[0] = 1; \
+    o->animFrame &= 7; \
+    if (D_8009D670[0] & 0x10) { \
+        if (D_8009D670[0] & 0x20) o->animFrame = 1; \
+        else if (D_8009D670[0] & 0x80) o->animFrame = 3; \
+        else o->animFrame = 2; \
+    } else if (D_8009D670[0] & 0x40) { \
+        if (D_8009D670[0] & 0x20) o->animFrame = 7; \
+        else if (D_8009D670[0] & 0x80) o->animFrame = 5; \
+        else o->animFrame = 6; \
+    } else if (D_8009D670[0] & 0x80) { \
+        o->animFrame = 4; \
+    } else if (D_8009D670[0] & 0x20) { \
+        o->animFrame = 0; \
+    } else { \
+        o->animFrame |= 8; \
+    } \
 }
 
 void func_800EA644(TObj *o)
@@ -128,15 +127,14 @@ void func_800EA644(TObj *o)
     if (o->b68 != 0) {
         i = 0;
         e = D_800EECC8[0];
-        while (e[0] != 0xFF) {
+        if (e[0] != 0xFF) do {
             if ((unsigned short)(D_800A6038.h->p.whole - e[0]) <= (short)(e[2] - e[0])
                 && (unsigned short)(D_800A6038.y.p.whole - e[1]) <= (short)(e[3] - e[1])) {
                 o->b6b = i + 1;
                 return;
             }
-            i++;
-            e = D_800EECC8[i];
-        }
+            e = D_800EECC8[++i];
+        } while (e[0] != 0xFF);
     } else {
         o->b6b = 0;
     }

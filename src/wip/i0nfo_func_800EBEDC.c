@@ -5,14 +5,17 @@ extern short D_800B1320[];
 
 void func_800EBEDC(TObj *o)
 {
-    int x;
+    int xt, yt; short x;
     short y, r, k, t;
-    unsigned int d = o->d34;
-    x = (short)(o->d30 >> 5);
-    if (x > 0) x--;
-    y = d >> 5;
+    unsigned int d;
+    d = o->d34;
+    xt = (short)(o->d30 >> 5);
+    if (xt > 0) xt--;
+    x = xt;
+    yt = (short)(d >> 5);
     k = 0;
-    if (y > 0) y--;
+    if (yt > 0) yt--;
+    y = yt;
     r = 0;
     do {
         t = x + (y + r) * D_800A4678[0];
