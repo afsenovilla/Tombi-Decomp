@@ -3,7 +3,7 @@
 extern unsigned char DAT_a, DAT_b, DAT_c;
 extern unsigned char *allocObjectLayer2(void);
 extern short FUN_80137458(void *);
-extern void FUN_801377b8(void *);
+extern void updateCharlesTalkScene(void *);
 extern void FUN_80018980(void *);
 
 void FUN_801380b8(unsigned char *o)
@@ -41,7 +41,7 @@ void FUN_801380b8(unsigned char *o)
         break;
     case 1:
         if (FUN_80137458(o) != 0)
-            FUN_801377b8(o);
+            updateCharlesTalkScene(o);
         break;
     case 2:
         o[4] = 3;

@@ -2,7 +2,7 @@
 // MATCHING 800e9e98 220
 #include "TOBJ.H"
 extern unsigned short DAT_8009c960;
-extern void func_80117CAC(TObj *);
+extern void updatePointsBalloon(TObj *);
 extern void FUN_80117f98(TObj *);
 extern void FUN_80118568(TObj *);
 extern void FUN_8011a0b4(TObj *);
@@ -16,7 +16,7 @@ extern void FUN_8011658c(TObj *);
 void FUN_800e9e98(TObj *o)
 {
     switch (DAT_8009c960) {
-    case 0: func_80117CAC(o); break;
+    case 0: updatePointsBalloon(o); break;
     case 1: FUN_80117f98(o); break;
     case 3: FUN_80118568(o); break;
     case 4: FUN_8011a0b4(o); break;

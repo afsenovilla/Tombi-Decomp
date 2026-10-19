@@ -4,7 +4,7 @@ address,size,name,twin
 800e9f74,500,awardAPByArea,X000:800e9f74
 800ea168,184,updatePoolType04Object,X000:800ea168
 800ea220,100,initPoolType04Sprite,X000:800ea220
-800ea284,704,updatePoolType05Object,X000:800ea284
+800ea284,704,updateEggShellPiece,X000:800ea284
 800ea544,312,spawnPoolType05Ring,X000:800ea544
 800ea67c,1936,updateGroundDebris,X000:800ea67c
 800eae0c,496,spawnGroundDebris,X000:800eae0c
@@ -287,7 +287,7 @@ address,size,name,twin
 80112c24,1040,l2Type0EHit0,X000:80112c24
 80113034,900,l2Type0EHit2,X000:80113034
 801133b8,204,l2Type0EHit3,X000:801133b8
-80113484,720,updateL2Type0EObject,X000:80113484
+80113484,720,updateTreasureChest,X000:80113484
 80113754,72,objSetAnimFromSubtypeTable,X000:80113754
 8011379c,32,FUN_8011379c,MAIN0:80068fc4
 801137bc,204,FUN_801137bc,X000:801137bc
@@ -333,7 +333,7 @@ address,size,name,twin
 8011942c,540,uvAnimBgModelFlip,
 80119648,956,uvAnimBgModelStepB,
 80119a04,1712,uvAnimBgModelStepC,
-8011a0b4,916,func_8011A0B4,X000:80117cac
+8011a0b4,916,updatePointsBalloon,X000:80117cac
 8011a448,1016,spawnApAwardNumber,
 8011a840,508,smokePuffRise,
 8011aa3c,356,updateSmokeEmitter,

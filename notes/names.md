@@ -344,7 +344,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80102214 updatePlayer` (was FUN_80102214) - player tick: pad/flag prologue then switch on the mode byte +0x04 (0 init FUN_800f0490, 1 normal steps func_80100788, 2 hurt steps, 5 event steps, 6 forced steps); game over (GVARS.b38) forces mode 2 step 2 state 2
 - `80101780 playerHurtModeDispatch` (was FUN_80101780) - standalone copy of updatePlayer's mode 2 block: step 0..4 -> the five hurt/death steps below, then the collision pass FUN_8003f7cc
 - `80101d74 playerEventModeDispatch` (was func_80101D74) - updatePlayer mode 5: event steps (0x40 hidden during area exits, 0x61..0x65 talk poses with playerAnimateTalkPose, step 1 timer back to mode 1 step 0)
-- `80102110 playerForcedModeDispatch` (was FUN_80102110) - copy of updatePlayer mode 6 (entered from scripted NPCs like FUN_801377b8 with a preset velX): steps 0,3,4,5,6,7 without pad control
+- `80102110 playerForcedModeDispatch` (was FUN_80102110) - copy of updatePlayer mode 6 (entered from scripted NPCs like updateCharlesTalkScene with a preset velX): steps 0,3,4,5,6,7 without pad control
 - `800fd358 playerStepHurtKnockback` (was FUN_800fd358) - hurt step 0: velY -0x500, hurt anim 0x39/0x53/0x50, pad vibration, health update (death jingle at 0), blink while flying back, lands into playerHurtLandRecover
 - `800fdb7c playerStepHurtStun` (was FUN_800fdb7c) - hurt step 1 (damage type 4 in func_800425C4): holds the hurt pose 0x1E until state 2 is set from outside, then bounces off (velY -0x400, velX +-0x200)
 - `800fe13c playerStepHazardRespawn` (was FUN_800fe13c) - hurt step 2: spins up (velY -0x800) and is put back at the saved spot +0xEC/+0xF0 with invulnerability +0xE0 = 0x8C; on game over plays the 180-frame death pose (anim 0x3C) and sets GVARS.b38 = 2
@@ -366,7 +366,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800fa01c playerStepPerchIdle` (was func_800FA01C) - player step 0x1D: standing on a perch (anim 7); jump/Up -> playerStepPerchLeap (11), Down -> climb step 13, like the end of steps 7/12
 - `800fa91c playerStepGrabbedStruggle` (was func_800FA91C) - player step 0x40: held in pose 0x1E; more than 10 pad presses break free (state 3, jump sfx); damage while held goes to hurt/die
 - `8010b444 playerStepForcedJump` (was func_8010B444) - forced-mode step 4: jump without pad control (anim 4, jump sfx, playerSetJumpRiseVelocity for 5 frames), lands into the idle anim
-- `8010b050 playerStepForcedLaunch` (was func_8010B050) - forced-mode steps 5/7: same rise as playerStepForcedJump with anim 0x2E and the preset velX (set by FUN_801377b8)
+- `8010b050 playerStepForcedLaunch` (was func_8010B050) - forced-mode steps 5/7: same rise as playerStepForcedJump with anim 0x2E and the preset velX (set by updateCharlesTalkScene)
 - `80109920 playerStepForcedHold` (was FUN_80109920) - forced-mode step 3: clears motion and holds pose 0x1E
 - `800f8130 playerStepTossed` (was FUN_800f8130) - forced-mode step 6: follows the anim offset until frame 0x87, then flies off (velY -0x300) rotating, lands (sfx 0x1C) and waits in event step 1
 - `8010c034 playerStepClingToObject` (was FUN_8010c034) - player step 8: kept at offset +0xB8/+0xBA of the object D_8009F0EC (anim 80010D68), turning walks round it; per-type release
@@ -448,7 +448,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800eb9f0 updatePoolType44Object` (was FUN_800eb9f0) - pool type 0x44 handler (80079CBC)
 - `80121a5c spawnPoolType44Object` (was FUN_80121a5c) - allocates a pool type 0x44 object at x/y/z with +0x0C = arg
 - `800ea168 updatePoolType04Object` (was FUN_800ea168) - pool type 4 handler (80079BBC)
-- `800ea284 updatePoolType05Object` (was func_800EA284) - pool type 5 handler (80079BC0): falls until probeCollisionAtDepthB, despawned offscreen
+- `800ea284 updateEggShellPiece` (was updatePoolType05Object; psx_tomba name) - pool type 5 handler (80079BC0): falls until probeCollisionAtDepthB, despawned offscreen
 - `800eb0c8 updatePoolType10Object` (was FUN_800eb0c8) - pool type 0x10 handler (80079BEC)
 - `800ebb48 updatePoolType5BObject` (was FUN_800ebb48) - pool type 0x5B handler (80079D18)
 - `8010a518 playerSpinAimDir8B` (was FUN_8010a518) - playerStepSpinOnObject helper: 8-way direction (D_8009C330+0xB, 8 = none) from the pad, mirrored by facing
@@ -465,7 +465,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `800f0b5c playerIdleFidgetAllowed` (was FUN_800f0b5c) - returns 1 when idle fidgets may play (area 1 / 9 special cases by section and flags)
 - `80111b40 spawnItemDropsFromTable` (was FUN_80111b40) - spawns the drops of table T_80115A58[+0x6A] at the object position (spawnItemFromEntry, random entry when marked 0xFF)
 - `8011468c updateL2Type18Object` (was FUN_8011468c) - shared layer 2 type 0x18 handler (MAIN0 table slot 80077DFC; bite holder playerBiteHoldType18): box/sprite/anim from D_80115DE4 by subtype, steps func_80113F38 / func_801142C0
-- `80113484 updateL2Type0EObject` (was FUN_80113484) - shared layer 2 type 0xE handler (slot 80077DD4; bite holder playerBiteHoldType0E)
+- `80113484 updateTreasureChest` (was updateL2Type0EObject; psx_tomba name) - shared layer 2 type 0xE handler (slot 80077DD4; bite holder playerBiteHoldType0E)
 - `80114890 updateL2Type1FObject` (was FUN_80114890) - shared layer 2 type 0x1F handler (slot 80077E18): thunk to the area's own code
 - `8011191c updateL1Type0AObject` (was FUN_8011191c) - layer 1 type 10 handler (slot 8007A134): subtype 0/1 steps, short hit flash via +0x22/+0x6A
 - `800f9684 playerPerchFlipLandCheck` (was FUN_800f9684) - playerStepFlipOntoPerch helper: probes the landing (probeCollisionAtDepthC, side tile response) and sets the landing anim
@@ -475,7 +475,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80111a50 spawnL1Type0AObject` (was FUN_80111a50) - allocates a layer 1 type 10 object (updateL1Type0AObject) at the player with subtype/slot/state from the arguments (spawnPlayerPowerEffect)
 - `800f28a0 playerJumpArea3Float` (was FUN_800f28a0) (uncertain) - playerStepJump helper: in area 3 with D_8009C944 set, anim 0x35 and pad-driven velX / velY (setVelXFromPadLR, adjustVelYFromPadDown)
 - `80106a18 playerStep48ByArea` (was FUN_80106a18) - player step 0x48: per-area handlers (overlay code at 8011B47C / 8011C758 / 8011D5F4), like playerStep2EByArea
-- `800ea544 spawnPoolType05Ring` (was FUN_800ea544) - spawns 6 pool type 5 objects (updatePoolType05Object) at offsets D_80114A80 around x/y/z (layer-1 type 2 reward handler)
+- `800ea544 spawnPoolType05Ring` (was FUN_800ea544) - spawns 6 pool type 5 objects (updateEggShellPiece) at offsets D_80114A80 around x/y/z (layer-1 type 2 reward handler)
 - `80113754 objSetAnimFromSubtypeTable` (was FUN_80113754) - sets the anim from PTR_80115DF0[subtype][+0x74] and jumps to frame +0x76 (script ops and execGameOpcode)
 - `800ee6d0 playerFloatDirFromPad` (was FUN_800ee6d0) - playerJumpArea3Float helper: direction +0x76 from the pad bits D_8009D670 (Left 0xF0, Down sets 8) and a MulCosDup speed
 - `800ef05c spawnPlayerSplashEffect` (was FUN_800ef05c) - when spawnPlayerFootstepEffect spawned nothing: pool type 0x31 subtype 1 object at x/y/z (playerStepWaterJumpOut)
@@ -504,13 +504,13 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8011f288 updateA00L4Type11` (was func_8011F288) - AREA00-only object handler: layer 4 type 0x11 slot (MAIN0 table 80079DB8) while AREA00 (X000) is loaded
 - `8011ad98 updateA00PoolType14` (was func_8011AD98) - AREA00-only object handler: pool type 0x14 slot (MAIN0 table 80079BFC) while AREA00 (X000) is loaded
 - `801236f0 updateA00L5Type0B` (was func_801236F0) - AREA00-only object handler: layer 5 type 0xB slot (MAIN0 table 8007B33C) while AREA00 (X000) is loaded
-- `8012e1c0 updateA00L2Type04` (was FUN_8012e1c0) - AREA00-only object handler: layer 2 type 0x4 slot (MAIN0 table 80077DAC) while AREA00 (X000) is loaded
+- `8012e1c0 updateEgg` (was updateA00L2Type04; psx_tomba name) - AREA00-only object handler: layer 2 type 0x4 slot (MAIN0 table 80077DAC) while AREA00 (X000) is loaded
 - `801328b4 updateA00L2Type09` (was FUN_801328b4) - AREA00-only object handler: layer 2 type 0x9 slot (MAIN0 table 80077DC0) while AREA00 (X000) is loaded
 - `8011a744 updateA00PoolType0B` (was func_8011A744) - AREA00-only object handler: pool type 0xB slot (MAIN0 table 80079BD8) while AREA00 (X000) is loaded
 - `80134404 updateA00L2Type14` (was func_80134404) - AREA00-only object handler: layer 2 type 0x14 slot (MAIN0 table 80077DEC) while AREA00 (X000) is loaded
 - `801195f4 updateA00PoolType09` (was FUN_801195f4) - AREA00-only object handler: pool type 0x9 slot (MAIN0 table 80079BD0) while AREA00 (X000) is loaded
 - `801224c0 updateA00L7Type01` (was func_801224C0) - AREA00-only object handler: layer 7 type 0x1 slot (MAIN0 table 80079FE8) while AREA00 (X000) is loaded
-- `80134c20 updateA00L2Type15` (was FUN_80134c20) - AREA00-only object handler: layer 2 type 0x15 slot (MAIN0 table 80077DF0) while AREA00 (X000) is loaded
+- `80134c20 updateNpcCharles` (was updateA00L2Type15; psx_tomba name) - AREA00-only object handler: layer 2 type 0x15 slot (MAIN0 table 80077DF0) while AREA00 (X000) is loaded
 - `800ed024 updateL4Type00Object` (was FUN_800ed024) - layer 4 type 0x0 handler (MAIN0 table slot 80079D74)
 - `80126fec updateMushroomCluster` (was FUN_80126fec) - AREA00-only object handler: layer 2 type 0x1 slot (MAIN0 table 80077DA0) while AREA00 (X000) is loaded
 - `80118f90 updateA00PoolType03` (was FUN_80118f90) - AREA00-only object handler: pool type 0x3 slot (MAIN0 table 80079BB8) while AREA00 (X000) is loaded
@@ -519,7 +519,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8011d010 updateA00L4Type06` (was FUN_8011d010) - AREA00-only object handler: layer 4 type 0x6 slot (MAIN0 table 80079D8C) while AREA00 (X000) is loaded
 - `801202a4 updateA00L4Type18` (was FUN_801202a4) - AREA00-only object handler: layer 4 type 0x18 slot (MAIN0 table 80079DD4) while AREA00 (X000) is loaded
 - `80121870 updateA00L4Type26` (was FUN_80121870) - AREA00-only object handler: layer 4 type 0x26 slot (MAIN0 table 80079E0C) while AREA00 (X000) is loaded
-- `8012dedc updateA00L2Type03` (was func_8012DEDC) - AREA00-only object handler: layer 2 type 0x3 slot (MAIN0 table 80077DA8) while AREA00 (X000) is loaded
+- `8012dedc updateChick` (was updateA00L2Type03; psx_tomba name) - AREA00-only object handler: layer 2 type 0x3 slot (MAIN0 table 80077DA8) while AREA00 (X000) is loaded
 - `80118bc0 updateA00PoolType02` (was FUN_80118bc0) - AREA00-only object handler: pool type 0x2 slot (MAIN0 table 80079BB4) while AREA00 (X000) is loaded
 - `8011b2e8 updateA00PoolType24` (was func_8011B2E8) - AREA00-only object handler: pool type 0x24 slot (MAIN0 table 80079C3C) while AREA00 (X000) is loaded
 - `80122724 updateA00L7Type02` (was func_80122724) - AREA00-only object handler: layer 7 type 0x2 slot (MAIN0 table 80079FEC) while AREA00 (X000) is loaded
@@ -529,7 +529,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80136090 updateA00L2Type57` (was FUN_80136090) - AREA00-only object handler: layer 2 type 0x57 slot (MAIN0 table 80077EF8) while AREA00 (X000) is loaded
 - `8011ab10 updateA00PoolType11` (was FUN_8011ab10) - AREA00-only object handler: pool type 0x11 slot (MAIN0 table 80079BF0) while AREA00 (X000) is loaded
 - `80123a1c updateA00L5Type0C` (was FUN_80123a1c) - AREA00-only object handler: layer 5 type 0xC slot (MAIN0 table 8007B340) while AREA00 (X000) is loaded
-- `80119468 updateA00PoolType08` (was FUN_80119468) - AREA00-only object handler: pool type 0x8 slot (MAIN0 table 80079BCC) while AREA00 (X000) is loaded
+- `80119468 updateBubbleDroplet` (was updateA00PoolType08; psx_tomba name) - AREA00-only object handler: pool type 0x8 slot (MAIN0 table 80079BCC) while AREA00 (X000) is loaded
 - `8011b6e0 updateA00PoolType59` (was FUN_8011b6e0) - AREA00-only object handler: pool type 0x59 slot (MAIN0 table 80079D10) while AREA00 (X000) is loaded
 - `8011935c updateA00PoolType07` (was FUN_8011935c) - AREA00-only object handler: pool type 0x7 slot (MAIN0 table 80079BC8) while AREA00 (X000) is loaded
 - `8011b0d4 updateA00PoolType16` (was FUN_8011b0d4) - AREA00-only object handler: pool type 0x16 slot (MAIN0 table 80079C04) while AREA00 (X000) is loaded
@@ -549,7 +549,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
   `80126f68 collideCat2Type7Cat5Type0BPair` (collideCat2Type7WithCat5Type0B on overlap: both parents freed); playerProbeGrab `801269d0 playerGrabCat4Type01` (b9e = 1) / `80126940 playerGrabCat4Type02` (b9e = 4)
 - `80126770 collideArea0Section2Slope` (was FUN_80126770) - processObjectCollisions in area 0 section 2: hard-coded slope line at depth 0xB4 and wall at x 0xC35
 - Koma pig, area 0 (X000 `8012ccf8 updateKomaPig` (was FUN_8012ccf8), called by MAIN0 dispatchAreaEnemyDraw for area 0; same template as the x001/x003/x004 handlers): b04 1 step 0 runs the subtype table D_801390F8 (`8012b5d0 komaPigSubtype00Step` for subtypes 0/1/8, `8012ba94 komaPigSubtype02Step`, `8012c2c8 komaPigSubtype03Step` (3/10), `8012c598 komaPigSubtype04Step`, `8012c8ec komaPigSubtype05Step`, `8012cae4 komaPigSubtype06Step`, `8012d7fc komaPigSubtype07Step`, `8012d918 komaPigSubtype09Step`); step 1 runs the state functions `80129fb4 komaPigState0`, `80129bb0 komaPigState1`, `801294fc komaPigState2`, `80128fac komaPigState3`, (state 4 = updateA00L2Type2C), `80128190 komaPigState5`, `80127eb0 komaPigState6`, `80127820 komaPigState7` (numbered by state: the X000 bodies differ from the x003/x004 idle/walk/rest/leap/jump/fall functions, so the roles are not carried over); b04 2 steps `8012ae1c komaPigHit`, `8012a820 komaPigGrabbed`, `8012a6a4 komaPigDefeated`
-- updateL2Type0EObject per-subtype tables (kind of object unknown): b04 0 D_80115D90 `80112864 l2Type0EInitSubtype0` (subtypes 0, 3..6), `80112898 l2Type0EInitSubtype1`, `8011287c l2Type0EInitSubtype2`; b04 1 D_80115DAC `801128f8 l2Type0EActiveIdle` (0, 5, 6), `80111f58 l2Type0EActive1`, `80112918 l2Type0EActive2`, `801129d0 l2Type0EActive3`, `80112520 l2Type0EActive4`; b04 2 D_80115DC8 `80112c24 l2Type0EHit0` (0, 6), `80112204 l2Type0EHit1`, `80113034 l2Type0EHit2` (2, 5), `801133b8 l2Type0EHit3`, `801125e8 l2Type0EHit4`
+- updateTreasureChest per-subtype tables (kind of object unknown): b04 0 D_80115D90 `80112864 l2Type0EInitSubtype0` (subtypes 0, 3..6), `80112898 l2Type0EInitSubtype1`, `8011287c l2Type0EInitSubtype2`; b04 1 D_80115DAC `801128f8 l2Type0EActiveIdle` (0, 5, 6), `80111f58 l2Type0EActive1`, `80112918 l2Type0EActive2`, `801129d0 l2Type0EActive3`, `80112520 l2Type0EActive4`; b04 2 D_80115DC8 `80112c24 l2Type0EHit0` (0, 6), `80112204 l2Type0EHit1`, `80113034 l2Type0EHit2` (2, 5), `801133b8 l2Type0EHit3`, `801125e8 l2Type0EHit4`
 - updateL2Type18Object steps: `80113f38 l2Type18Active` (b04 1), `801142c0 l2Type18Hit` (b04 2 step 0)
 - Small player/object helpers, mostly with no caller (dead code, named by what they do): `800ee3d4 playerResetMotionState` (clears the D_8009C330 step state and the player velocities/angles), `800ee920 playerShiftDown7C` (y += 0x7C unless +0xAD), `800f29dc playerEnterRecoilA` / `800f369c playerEnterRecoilB` / `800f3eec playerEnterRecoilStep4` (b9c 2, timer 10, state 3, angle 0x10/0xF0 by facing), `800f4e68 playerSetAnimPairA` / `800f4e9c playerSetAnimPairB` (two anim bytes from D_80115220/D_80115228 by wb2 into D_8009C330), `800fb094 playerSetMoveAngleFromW7A`, `800fb414 copyD88ToD8C`, `800fc18c playerClampClimbTop` (top -0x8C or -0x3C0 by GV2.bc3 & 0x40; 2 when GCD.bce3d == 0xFF), `800ff074 getHudExpBarMode` (0..2 from GCD.bcffb / bcdac, 0 in area 0 sections 0-1 or with the exp bar shown), `801049c0 playerResetToStep0`, `80104ea0 playerCheckJumpPressedA` / `80104f2c playerCheckJumpPressedB` (jump/attack button -> substep 2), `80107590 playerEnterStep10Fall`, `80108fe0 playerResetAfterEvent`, `8010e5e4 playerAccelerateUpCapped` (velY -= 0x10 to -0x800), `801128f0 clearObjectB0A`, `801363c4 isPlayerPastX0D8`, `800edc0c stubNop800EDC0C`, `80113cc0 stubNop80113CC0`, `8011379c animAdvanceThunk`
 - `800ea220 initPoolType04Sprite` (sprite/anim PTR_8013B110[subtype]), `800eebc4 playerSetIdleAnimByArea`, `800f0450 objectSinkAndProbe` (y += 2 while b69, then func_8003FD78), `800f434c playerLandResumeWalk` (sfx 0x1C, step 1 or 0x1F by bbe & 0x20), `80103774 playerResetSlopeState`, `8010dd44 playerEnterStep3E` (anim 0x44), `801229d8 playerHitAnimWithImpact` (anim 0xD + spawnImpactEffect 2), `80122990 playerSetSpawnTimerArea0Sec3` (+0x20 = 0x8C in section 3 when the 8009CDA5 flag is set), `80112be0 l2Type0ECheckAreaFlag`, `8011465c l2Type18HitIfStep0`, `80121ae0 a00L4Type26ReleaseParts` (sets b04 2 on the six part objects +0xB4..0xC8)

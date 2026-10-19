@@ -4,7 +4,7 @@ address,name,size,typed
 800e9f74,awardAPByArea,500,1
 800ea168,updatePoolType04Object,184,1
 800ea220,initPoolType04Sprite,100,1
-800ea284,updatePoolType05Object,704,1
+800ea284,updateEggShellPiece,704,1
 800ea544,spawnPoolType05Ring,312,1
 800ea67c,updateGroundDebris,1936,1
 800eae0c,spawnGroundDebris,496,0
@@ -241,7 +241,7 @@ address,name,size,typed
 80112c24,l2Type0EHit0,1040,1
 80113034,l2Type0EHit2,900,1
 801133b8,l2Type0EHit3,204,1
-80113484,updateL2Type0EObject,720,1
+80113484,updateTreasureChest,720,1
 80113754,objSetAnimFromSubtypeTable,72,1
 8011379c,animAdvanceThunk,32,0
 801137bc,FUN_801137bc,204,1
@@ -266,7 +266,7 @@ address,name,size,typed
 801174c4,FUN_801174c4,120,0
 801175a4,FUN_801175a4,308,1
 80117928,FUN_80117928,112,0
-80117cac,FUN_80117cac,16,1
+80117cac,updatePointsBalloon,16,1
 80117cbc,FUN_80117cbc,732,0
 80117f98,FUN_80117f98,60,0
 80118040,FUN_80118040,108,0
@@ -287,7 +287,7 @@ address,name,size,typed
 801191b0,updateA00PoolType27,188,0
 8011926c,updateA00PoolType06,240,1
 8011935c,updateA00PoolType07,268,1
-80119468,updateA00PoolType08,284,1
+80119468,updateBubbleDroplet,284,1
 80119584,a00L2Type06SpawnChild,112,0
 801195f4,updateA00PoolType09,624,1
 80119864,a00PoolType09SubStep,292,1
@@ -471,9 +471,9 @@ address,name,size,typed
 8012d9fc,FUN_8012d9fc,768,1
 8012dcfc,FUN_8012dcfc,400,1
 8012de8c,FUN_8012de8c,80,1
-8012dedc,updateA00L2Type03,476,1
+8012dedc,updateChick,476,1
 8012e0b8,FUN_8012e0b8,264,0
-8012e1c0,updateA00L2Type04,772,1
+8012e1c0,updateEgg,772,1
 8012e4c4,updateA00L2Type05,1024,1
 8012e8c4,updateA00L2Type06,1180,1
 8012ed60,l2Type07Update,1108,1
@@ -512,7 +512,7 @@ address,name,size,typed
 80134404,updateA00L2Type14,700,1
 801346c0,a00L2Type15Step3,704,1
 80134980,a00L2Type15Step1,672,1
-80134c20,updateA00L2Type15,572,1
+80134c20,updateNpcCharles,572,1
 80134e5c,updateA00L2Type34,3248,1
 80135b0c,a00L2Type57Aim,676,1
 80135db0,a00L2Type57Move,736,1
@@ -527,7 +527,7 @@ address,name,size,typed
 8013736c,FUN_8013736c,12,0
 80137378,FUN_80137378,224,0
 80137458,FUN_80137458,864,1
-801377b8,FUN_801377b8,1936,1
+801377b8,updateCharlesTalkScene,1936,1
 80137f48,FUN_80137f48,12,0
 80137f54,FUN_80137f54,180,1
 80138008,FUN_80138008,176,1
