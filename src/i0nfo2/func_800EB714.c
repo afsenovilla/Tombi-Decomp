@@ -1,4 +1,5 @@
-// FUNC 800ea124 2612 I0NFO
+// FUNC 800eb714 2612 I0NFO2
+// MATCHING 800eb714 2612
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -36,7 +37,7 @@ extern void func_8004FD6C(void *, int, long, int, unsigned long);
 #define C e[0xA]
 #define D e[0xB]
 
-void func_800EA124(TObj *o)
+void func_800EB714(TObj *o)
 {
     PolyFT4 *P = (PolyFT4 *)0x1F800000;
     SVec *v = (SVec *)0x1F800028;
@@ -52,11 +53,12 @@ void func_800EA124(TObj *o)
     unsigned short *n = (unsigned short *)0x1F80004C;
     long otz;
     short *h;
-    short k;
     unsigned short n0;
     unsigned char *e;
     register unsigned char *pe asm("a1");
     PolyFT4 *q;
+    unsigned short w0;
+    int d, d2, ki;
     short *sn;
     short *cs;
 
@@ -74,12 +76,16 @@ void func_800EA124(TObj *o)
     *frm = *(unsigned short *)o->anim;
     h = (short *)(o->d3c + *frm * 4);
     n0 = h[0];
-    k = h[1];
-    pe = (unsigned char *)(*(volatile int *)&o->d3c + k);
-    e = pe;
+    ki = h[1];
+    d = *(volatile int *)&o->d3c;
     *n = n0;
-    if (D_8009C330->w28[*(short *)0x1F8001F4] != *frm) {
-        func_80037C80(o, pe, k);
+    w0 = D_8009C330->w28[*(short *)0x1F8001F4];
+    /* identity; the fake dependence on w0 keeps the pointer add after the table compare */
+    __asm__("" : "=r"(d2) : "0"(d), "r"(w0));
+    pe = (unsigned char *)(d2 + ki);
+    e = pe;
+    if (w0 != *frm) {
+        func_80037C80(o, pe, ki);
     }
     sn = D_8007A5F0;
     cs = D_8007A3F0;
