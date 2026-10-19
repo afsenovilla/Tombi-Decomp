@@ -8,7 +8,7 @@ extern int AnimAdvance(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 
-void updateThrowerEnemyPuff(TObj *o)
+void updateWingedForkPigPuff(TObj *o)
 {
     unsigned char b = o->b04;
 

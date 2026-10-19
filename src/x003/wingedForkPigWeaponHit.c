@@ -6,7 +6,7 @@ extern short boxesOverlapSigned(TObj *, TObj *);
 extern int func_80042B98(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
 
-void throwerEnemyWeaponHit(TObj *p, TObj *o)
+void wingedForkPigWeaponHit(TObj *p, TObj *o)
 {
     int r;
 

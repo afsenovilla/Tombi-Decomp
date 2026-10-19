@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern void decreaseObjectTimer(TObj *, int);
 
-void throwerEnemyShotContact(TObj *o, TObj *e)
+void wingedForkPigShotContact(TObj *o, TObj *e)
 {
     if (o->active & 2) return;
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b) return;

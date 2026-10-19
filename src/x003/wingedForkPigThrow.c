@@ -41,7 +41,7 @@ static __inline__ void spawn(TObj *o, int sub)
     }
 }
 
-void throwerEnemyThrow(TObj *o)
+void wingedForkPigThrow(TObj *o)
 {
     TObj *n;
     unsigned int d;

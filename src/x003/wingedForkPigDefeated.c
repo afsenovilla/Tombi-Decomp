@@ -6,7 +6,7 @@ extern void AnimLoadDuration(TObj *);
 extern char DAT_80077d0c[];
 extern void *D_8013A698[];
 
-void throwerEnemyDefeated(TObj *o)
+void wingedForkPigDefeated(TObj *o)
 {
     int x;
 

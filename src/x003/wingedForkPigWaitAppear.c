@@ -14,7 +14,7 @@ static __inline__ int inview(TObj *o)
     return (unsigned short)(SPAD.s186 - o->y.p.whole + 0x80) < 0x1e1;
 }
 
-void throwerEnemyWaitAppear(TObj *o)
+void wingedForkPigWaitAppear(TObj *o)
 {
     TObj *e;
 

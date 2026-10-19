@@ -27,7 +27,7 @@ static __inline__ int hit(TObj *o)
     return 0;
 }
 
-void throwerEnemyHit(TObj *o)
+void wingedForkPigHit(TObj *o)
 {
     int k;
 

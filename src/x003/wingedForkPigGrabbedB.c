@@ -21,9 +21,9 @@ extern void applyAnimVelocityX(TObj *, int);
 extern void applyFrameVelocityX(TObj *);
 extern int TileCollideAt(TObj *, int, int);
 extern void probeCollisionAtDepthA(TObj *, int, int);
-extern void throwerEnemyCheckWall(TObj *);
+extern void wingedForkPigCheckWall(TObj *);
 
-void throwerEnemyGrabbedB(TObj *o)
+void wingedForkPigGrabbedB(TObj *o)
 {
     switch (o->state) {
     case 0:
@@ -60,7 +60,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        throwerEnemyCheckWall(o);
+        wingedForkPigCheckWall(o);
         break;
     case 4:
         o->velV -= 0x20;
@@ -73,7 +73,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        throwerEnemyCheckWall(o);
+        wingedForkPigCheckWall(o);
         break;
     case 5:
         o->ba7 += 2;
@@ -81,7 +81,7 @@ void throwerEnemyGrabbedB(TObj *o)
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);
-        throwerEnemyCheckWall(o);
+        wingedForkPigCheckWall(o);
         break;
     case 6:
         o->animFrame = PLAYER.animFrame & 1;

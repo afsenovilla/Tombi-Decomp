@@ -195,19 +195,19 @@ typedef struct { short f0, f1, f2, f3, f4, f5; } XS;
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern void despawnObjectOffscreen(TObj *);
-extern void throwerEnemyWaitAppear(TObj *);
-extern void throwerEnemyRise(TObj *);
-extern void throwerEnemyFlyAcross(TObj *);
-extern void throwerEnemyRiseB(TObj *);
-extern void throwerEnemyWander(TObj *);
-extern void throwerEnemyChase(TObj *);
-extern void throwerEnemyThrow(TObj *);
-extern void throwerEnemyGrabbed(TObj *);
-extern void throwerEnemyHit(TObj *);
-extern void throwerEnemyGrabbedB(TObj *);
-extern void throwerEnemyDefeated(TObj *);
+extern void wingedForkPigWaitAppear(TObj *);
+extern void wingedForkPigRise(TObj *);
+extern void wingedForkPigFlyAcross(TObj *);
+extern void wingedForkPigRiseB(TObj *);
+extern void wingedForkPigWander(TObj *);
+extern void wingedForkPigChase(TObj *);
+extern void wingedForkPigThrow(TObj *);
+extern void wingedForkPigGrabbed(TObj *);
+extern void wingedForkPigHit(TObj *);
+extern void wingedForkPigGrabbedB(TObj *);
+extern void wingedForkPigDefeated(TObj *);
 
-void updateThrowerEnemy(TObj *o)
+void updateWingedForkPig(TObj *o)
 {
     XS *x = (XS *)((char *)o + 0xb4);
 
@@ -243,7 +243,7 @@ void updateThrowerEnemy(TObj *o)
             break;
         case 1:
             if (GVARS.b42 == 0) {
-                throwerEnemyWaitAppear(o);
+                wingedForkPigWaitAppear(o);
             }
             break;
         }
@@ -259,26 +259,26 @@ void updateThrowerEnemy(TObj *o)
             case 0:
                 switch (o->step) {
                 case 0:
-                    throwerEnemyRise(o);
+                    wingedForkPigRise(o);
                     break;
                 case 1:
-                    throwerEnemyFlyAcross(o);
+                    wingedForkPigFlyAcross(o);
                     break;
                 }
                 break;
             case 1:
                 switch (o->step) {
                 case 0:
-                    throwerEnemyRiseB(o);
+                    wingedForkPigRiseB(o);
                     break;
                 case 1:
-                    throwerEnemyWander(o);
+                    wingedForkPigWander(o);
                     break;
                 case 2:
-                    throwerEnemyChase(o);
+                    wingedForkPigChase(o);
                     break;
                 case 3:
-                    throwerEnemyThrow(o);
+                    wingedForkPigThrow(o);
                     break;
                 }
                 break;
@@ -309,12 +309,12 @@ void updateThrowerEnemy(TObj *o)
         case 0:
             switch (o->step) {
             case 1:
-                throwerEnemyGrabbed(o);
+                wingedForkPigGrabbed(o);
                 ObjCullRegister(o);
                 break;
             case 0:
             case 2:
-                throwerEnemyDefeated(o);
+                wingedForkPigDefeated(o);
                 if (!ObjCullRegister(o)) {
                     o->b04 = 3;
                 }
@@ -324,15 +324,15 @@ void updateThrowerEnemy(TObj *o)
         case 1:
             switch (o->step) {
             case 0:
-                throwerEnemyHit(o);
+                wingedForkPigHit(o);
                 ObjCullRegister(o);
                 break;
             case 1:
-                throwerEnemyGrabbedB(o);
+                wingedForkPigGrabbedB(o);
                 ObjCullRegister(o);
                 break;
             case 2:
-                throwerEnemyDefeated(o);
+                wingedForkPigDefeated(o);
                 if (!ObjCullRegister(o)) {
                     o->b04 = 3;
                 }

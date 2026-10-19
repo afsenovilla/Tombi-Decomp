@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void initFactoryNpc(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void updateFactoryNpc(TObj *);
+extern void stepFactoryNpcTalk(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateFactoryNpc(TObj *o)
@@ -14,7 +14,7 @@ void updateFactoryNpc(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        updateFactoryNpc(o);
+        stepFactoryNpcTalk(o);
         break;
     case 2:
         o->b04++;

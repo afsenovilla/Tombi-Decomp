@@ -11,7 +11,7 @@ extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void updateThrowerEnemyShot(TObj *o)
+void updateWingedForkPigShot(TObj *o)
 {
     TObj *p;
     signed char *t;

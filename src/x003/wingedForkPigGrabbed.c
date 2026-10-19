@@ -16,7 +16,7 @@ static __inline__ short land(TObj *o)
     return 0;
 }
 
-void throwerEnemyGrabbed(TObj *o)
+void wingedForkPigGrabbed(TObj *o)
 {
     switch (o->state) {
     case 0:

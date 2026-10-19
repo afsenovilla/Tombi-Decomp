@@ -8,7 +8,7 @@ extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 extern void spawnImpactEffect(int, short, short, short);
 
-void throwerEnemyContact(TObj *o, TObj *e)
+void wingedForkPigContact(TObj *o, TObj *e)
 {
     short r;
 

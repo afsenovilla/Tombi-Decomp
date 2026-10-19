@@ -18,7 +18,7 @@ static __inline__ int land(TObj *o)
     return 0;
 }
 
-int throwerEnemyCheckCollide(TObj *o)
+int wingedForkPigCheckCollide(TObj *o)
 {
     switch (o->velX & 7) {
     case 1:

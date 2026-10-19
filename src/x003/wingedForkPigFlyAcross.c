@@ -4,7 +4,7 @@
 
 extern unsigned short D_8007A3F0[];
 extern void AnimAdvance(TObj *);
-extern int throwerEnemyCheckWall(TObj *);
+extern int wingedForkPigCheckWall(TObj *);
 extern TObj *FUN_80018448(void);
 
 static __inline__ short past(TObj *o)
@@ -18,7 +18,7 @@ static __inline__ short past(TObj *o)
     return 0;
 }
 
-void throwerEnemyFlyAcross(TObj *o)
+void wingedForkPigFlyAcross(TObj *o)
 {
     TObj *e;
 
@@ -38,7 +38,7 @@ void throwerEnemyFlyAcross(TObj *o)
         o->ba7 += 2;
         o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
         AnimAdvance(o);
-        if (throwerEnemyCheckWall(o) || past(o)) o->animFrame = 1 - o->animFrame;
+        if (wingedForkPigCheckWall(o) || past(o)) o->animFrame = 1 - o->animFrame;
         break;
     case 3:
         if (o->visible) {

@@ -4,7 +4,7 @@
 
 extern short probeWallAt(TObj *, short, short, short);
 
-int throwerEnemyCheckWall(TObj *o)
+int wingedForkPigCheckWall(TObj *o)
 {
     short d;
 

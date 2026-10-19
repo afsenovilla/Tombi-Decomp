@@ -7,7 +7,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
 
-void throwerEnemyRiseB(TObj *o)
+void wingedForkPigRiseB(TObj *o)
 {
     switch (o->state) {
     case 0:

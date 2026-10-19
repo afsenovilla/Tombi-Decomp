@@ -40,7 +40,7 @@ static inline void SetAnim(TObj *o, void *a)
     FUN_8001fe6c(o);
 }
 
-void patrollingFlyerMove(TObj *o)
+void flyingOctopusMove(TObj *o)
 {
     switch (o->state) {
     case 0:

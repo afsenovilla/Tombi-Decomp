@@ -961,8 +961,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   flowerTearsSeekerWalkOff` (walks left until off screen, unreferenced; uncertain); `8011f128 updateItemPickup` (layer 5 type 0x0E: initItemObject item,
   gone when D_8009D119 or GCD.bcf06 is set; b04 2 runs the MAIN0 item effect D_8007A890[D_8007A7F0[subtype]])
 - x011: `8011617c updateBackdropSpriteSet` (layer 3 type 0x45), `80116b58 updateTossedItem` (layer 5 type 0x0F: initItemObject item thrown in an arc
-  from 0x3C,-0x50 for 0x3C ticks, collectable once falling), `80116fa8 updatePatrollingFlyer` (layer 2 type 0x2A, 1 placement, kind uncertain: 32 x 32
-  box, palette 0x7952; `80116e54 patrollingFlyerMove` moves along its facing with a sine bob for one d88 cycle, hovers one cycle, then turns)
+  from 0x3C,-0x50 for 0x3C ticks, collectable once falling), `80116fa8 updateFlyingOctopus` (layer 2 type 0x2A, 1 placement, kind uncertain: 32 x 32
+  box, palette 0x7952; `80116e54 flyingOctopusMove` moves along its facing with a sine bob for one d88 cycle, hovers one cycle, then turns)
 - Evil pig bag portal (one copy per area overlay, same code; "bag" is a guess from the evil pig bag events, the code only shows the gate): the handler
   `updateEvilPigBagPortal` (x001 80120a2c, x002 801178f4, x003 8011d84c, x004 8011cec0, x009 8011cd84, x010 8011a778, x016 80116a60) exists only while the
   area's gate flag GCD.bd0c9 / bd0cd / bd0cf / bd0cc / bd0ce / bd0ca / bd0cb (x001, x002, x003, x004, x009, x010, x016) is set and the boss bit of GV2.bc3 (2 / 1 / 8 / 4 / 0x20 / 0x10 / 0x40) is
@@ -1043,11 +1043,11 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   sfx 0x23/0x24, flies up until the head hits or it falls); `8011ce24 updatePlayerLauncher` (layer 4 type 0x2E, kind uncertain: SPR_DATA[6],
   allocates a layer 3 type 0x38 part below itself; b0c & 8 starts it in a scripted state when GV2.bc2) whose `8011c050 playerLauncherThrow` (sfx 0x72)
   puts the player in step 0x34 with velX +-0x400 -> `8011e6b0 playerStepLaunched`; `801202e4 playerLauncherObjectCollision` (FUN_80046610 type 0x2E)
-- x003 thrower enemy (layer 2 type 0x38, 13 placements, kind uncertain; SPR_DATA[3], anim table D_8013A698): `8012f524 updateThrowerEnemy`,
-  `8012e6b0 throwerEnemyThrow` (subtype 1 state 3: spawns layer 2 type 0x39 shots), `8012f9a0 updateThrowerEnemyShot` (type 0x39: semi-transparent,
-  speed 0x80 (subtype 0) or 0x480), `8011f508 throwerEnemyShotContact` (2 points of damage), `8011f634 throwerEnemyContact`; b04 2 steps:
-  `8012eb2c throwerEnemyHit` (subtype 1 step 0), `8012f234 throwerEnemyGrabbed` / `8012ef3c throwerEnemyGrabbedB` (step 1 of subtype 0 / 1,
-  spawnItemNotification(1, 6)), `8012f3b0 throwerEnemyDefeated`
+- x003 thrower enemy (layer 2 type 0x38, 13 placements, kind uncertain; SPR_DATA[3], anim table D_8013A698): `8012f524 updateWingedForkPig`,
+  `8012e6b0 wingedForkPigThrow` (subtype 1 state 3: spawns layer 2 type 0x39 shots), `8012f9a0 updateWingedForkPigShot` (type 0x39: semi-transparent,
+  speed 0x80 (subtype 0) or 0x480), `8011f508 wingedForkPigShotContact` (2 points of damage), `8011f634 wingedForkPigContact`; b04 2 steps:
+  `8012eb2c wingedForkPigHit` (subtype 1 step 0), `8012f234 wingedForkPigGrabbed` / `8012ef3c wingedForkPigGrabbedB` (step 1 of subtype 0 / 1,
+  spawnItemNotification(1, 6)), `8012f3b0 wingedForkPigDefeated`
 - x003 `801281fc updateSpikyLizard` (layer 2 type 0x28, 12 placements; "horned" only from the badly composed strips, uncertain): b04 2 step 0
   `8012748c spikyLizardHit`, step 1 `80127d48 spikyLizardGrabbed` (spawnItemNotification(2, 6), counts the shakes in wb6), step 2 `80128060
   spikyLizardDefeated`; `80120140 spikyLizardContact` (FUN_80047484 type 0x28), `801256f4 spikyLizardCheckWall` (wall / floor probe 0x18 ahead
@@ -1152,23 +1152,23 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   playerLauncherCheckCatch`), 2 `8011ba34 playerLauncherGrab` (lunges at velV 0xE00; `8011b324 playerLauncherCheckReach`), 3 `8011bcc8
   playerLauncherSwing`, 4 playerLauncherThrow, 6 `8011c3d8 playerLauncherPullPlayer`, scripted step 5/7 `8011c7fc playerLauncherScriptedPull`
   (GV2.bc2 == 2); `8011b588 playerLauncherTurnToward` (turns d38 toward the player / a fixed side / a target angle)
-- x003 thrower enemy b04 1 steps (uncertain): `8012d740 throwerEnemyWaitAppear` (random delay while on screen, picks the subtype), subtype 0:
-  `8012d914 throwerEnemyRise`, `8012da68 throwerEnemyFlyAcross` (spawns type 0x43); subtype 1: `8012dcac throwerEnemyRiseB`, `8012ddd4
-  throwerEnemyWander`, `8012e378 throwerEnemyChase`; `8012d518 throwerEnemyCheckCollide`, `8012d66c throwerEnemyCheckWall`
+- x003 thrower enemy b04 1 steps (uncertain): `8012d740 wingedForkPigWaitAppear` (random delay while on screen, picks the subtype), subtype 0:
+  `8012d914 wingedForkPigRise`, `8012da68 wingedForkPigFlyAcross` (spawns type 0x43); subtype 1: `8012dcac wingedForkPigRiseB`, `8012ddd4
+  wingedForkPigWander`, `8012e378 wingedForkPigChase`; `8012d518 wingedForkPigCheckCollide`, `8012d66c wingedForkPigCheckWall`
 - x003 spiky lizard b04 1 states (uncertain): `80125834 spikyLizardLand`, `801259ac spikyLizardIdle`, `80125cf8 spikyLizardWalk`, `8012632c
   spikyLizardRun`, `80126b68 spikyLizardTurnToPlayer`; x003 koma pig subtype entries (D_80135C64; uncertain): `80123b20 komaPigStandPose` (anim
   by b0c), `80123c60 komaPigWaitForPlayer`, `801241c0 komaPigWaitForPlayerB`, `80123ea8 komaPigSceneEntry`; `801196f8
   updateTranslucentAnimSprite` (layer 3 type 0x36, ~50 placements: semi-transparent animated sprite, drifting by section through `801191c4
   translucentSpriteDrift` / `801193d0 translucentSpriteDriftB`; uncertain kind)
 - x003 callbacks: func_8004BBC0 grab probes `8011f474 knockDownObjectGrabProbe` (0x22), `8011f38c hitWobbleObjectGrabProbe` (0x24); FUN_80045f00
-  `8011ff64 spikyLizardWeaponHit` (0x28), `8011f7ec throwerEnemyWeaponHit` (0x38), `8011fa6c komaPigIntroWeaponHit` (FUN_80044d54 for the area 3
+  `8011ff64 spikyLizardWeaponHit` (0x28), `8011f7ec wingedForkPigWeaponHit` (0x38), `8011fa6c komaPigIntroWeaponHit` (FUN_80044d54 for the area 3
   subtype 4 koma pig: removed once GCD.bcdc3); `8011fbb8 areaMechanismsPlayerCollision` (func_80046D58 type 7 in area 3 by subtype), `8011fec8
   areaInitAObjectCollision` (FUN_80046610 type 4 outside area 0; uncertain)
 - `updateAreaCameraHeight` (x001 801165c0, x003 80116f74) - MAIN0 FUN_80029078 per-area tail after loadSectionHeight (area 0 X000 80116758):
   camera height offset +0x32 by section and the camera x (piecewise linear ramps)
 - x003 more: `8011e1a4 playerStepDizzy` (playerStep3CByArea area 3: anim 0x42, sfx 0x20, 0x78 + 0x3C frames; uncertain), `8011e2d0
   playerFallIfHeadHit`, `8011eae8 playerStepTumble` (step 0x36: anim 0x37 then 0x10 with a turning d8c; uncertain), `8011d07c
-  updatePlayerLauncherPart` (the layer 3 type 0x38 part: anim from the launcher's angle), `8012fbc4 updateThrowerEnemyPuff` (one-shot anim;
+  updatePlayerLauncherPart` (the layer 3 type 0x38 part: anim from the launcher's angle), `8012fbc4 updateWingedForkPigPuff` (one-shot anim;
   uncertain), `8012a6d8 initMasterOfTheSkiesEventObj` (box/sprites per subtype from D_80135DB8, anim by GCD.bcdc7), `8012c97c windblownMonkeyIdle`
   (step 0; uncertain), `80131e44 soakedPhoenixGuideIntroScene` (section 0 step 0: locks the player at x 0x1B8), `80132960
   soakedPhoenixGuideSection1Scene` (section 1, GCD.bd00a 1 -> 2), `80130990 updateWindPush` (pushes the player with GVARS.s44 in sections 0/1
@@ -1299,3 +1299,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
     `80118d8c spawnMushroomClusterDebris` (was a00L2Type01SpawnChild) spawns 6 pool objects, the single mushroom stalks of the strip.
   - x003 `801281fc updateSpikyLizard` and its 16 helpers (were updateHornedEnemy / hornedEnemy*, layer 2 type 0x28): the strip is a blue lizard
     with a spiked brown/gold shell on its back that walks on all fours, rears up on its hind legs and curls up; "horned" was a guess from the code.
+  - x003 `8012f524 updateWingedForkPig` and its 18 helpers (were updateThrowerEnemy / throwerEnemy*, layer 2 type 0x38): the strip is a pig in a
+    dark tunic with small blue bat wings carrying a trident: flying, hovering, throwing the trident (the "shot" object), tumbling when hit.
+  - x011 `80116fa8 updateFlyingOctopus` / `80116e54 flyingOctopusMove` (were updatePatrollingFlyer / patrollingFlyerMove): the strip is a pink
+    one-eyed octopus that floats with dangling tentacles and lashes them out.
+  - fix: x011 updateFactoryNpc called itself in the C (ncheck DIFF); the callee at 80119498 is stepFactoryNpcTalk (also fixed in config/symbol_addrs_x011.txt).
