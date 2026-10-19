@@ -145,6 +145,13 @@ static void mix(s16 *out, int n) {
 
 /* ------------------------------------------------------------------------------------- audio output */
 const char *port_audio_path;          /* --dump-audio PATH */
+const char *port_audio_pipe;          /* --pipe-audio PATH: raw s16le stereo 44100 Hz per vblank (FIFO -> ffplay/aplay) */
+static int audio_pipe_fd = -1;
+void port_pipe_audio_open(void) {     /* opening a FIFO blocks until the player has opened it */
+    if (!port_audio_pipe || audio_pipe_fd >= 0) return;
+    audio_pipe_fd = port_open_pipe(port_audio_pipe);
+    if (audio_pipe_fd < 0) { port_printf("[port] cannot open %s\n", port_audio_pipe); port_audio_pipe = 0; }
+}
 static int audio_fd = -1;
 static u32 audio_bytes;
 static void wav_header(u8 *h, u32 data) {
@@ -456,4 +463,10 @@ void port_sound_vblank(void) {
         u8 h[44]; wav_header(h, 0); port_write(audio_fd, h, 44);
     }
     if (audio_fd >= 0) { port_write(audio_fd, out, n * 4); audio_bytes += n * 4; }
+    if (port_audio_pipe) {
+        port_pipe_audio_open();
+        if (audio_pipe_fd >= 0 && port_write(audio_pipe_fd, out, n * 4) != n * 4) {
+            port_printf("[port] audio pipe closed\n"); port_audio_pipe = 0;
+        }
+    }
 }

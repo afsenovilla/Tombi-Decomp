@@ -505,10 +505,16 @@ static void path_for(char *buf, const char *kind) {
 const char *port_pipe_path;
 static int pipe_fd = -1;
 static u8 pipe_rgb[320 * 256 * 3];
+void port_pipe_video_open(void) {          /* also called before the audio pipe is opened (FIFO open order) */
+    if (port_pipe_path && pipe_fd < 0) {
+        pipe_fd = port_open_pipe(port_pipe_path);
+        if (pipe_fd < 0) { port_printf("[gpu] cannot open %s\n", port_pipe_path); port_pipe_path = 0; }
+    }
+}
 static void pipe_frame(void) {
     int w, h;
     if (pipe_fd < 0) {
-        pipe_fd = port_create(port_pipe_path);
+        pipe_fd = port_open_pipe(port_pipe_path);
         if (pipe_fd < 0) { port_printf("[gpu] cannot open %s\n", port_pipe_path); port_pipe_path = 0; return; }
     }
     port_gpu_frame(frame_rgb, &w, &h);

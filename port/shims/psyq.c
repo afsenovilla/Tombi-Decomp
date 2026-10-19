@@ -79,11 +79,19 @@ void port_vblank(void) {
             if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
         }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
+    {   /* FIFOs: open the video pipe, then the audio pipe, before anything is written (a player such as ffmpeg
+           opens its inputs in that order and would wait forever on the second one) */
+        extern void port_pipe_video_open(void), port_pipe_audio_open(void);
+        static int opened;
+        if (!opened) { opened = 1; port_pipe_video_open(); port_pipe_audio_open(); }
+    }
     { extern void port_pad_vblank(void); port_pad_vblank(); }
     if (vsync_event_fn) call_psx(vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
-    port_gpu_vblank();
+    /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
+       audio of this vblank already buffered while it reads the (larger) video frame */
     { extern void port_sound_vblank(void); port_sound_vblank(); }
+    port_gpu_vblank();
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;
         int cur = *(u16 *)0x8009C960u << 16 | *(u16 *)0x8009C962u;

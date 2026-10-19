@@ -180,6 +180,7 @@ int port_main(int argc, char **argv) {
             for (; *h; h++) v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
             port_check_addr = v;
         }
+        else if (streq(argv[i], "--pipe-audio") && i + 1 < argc) { extern const char *port_audio_pipe; port_audio_pipe = argv[++i]; }
         else if (streq(argv[i], "--dump-audio") && i + 1 < argc) { extern const char *port_audio_path; port_audio_path = argv[++i]; }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
         else if (streq(argv[i], "-v")) port_verbose++;
@@ -189,7 +190,8 @@ int port_main(int argc, char **argv) {
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
                         "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
-                        "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n", argv[0]);
+                        "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
+                        "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n", argv[0]);
             return 2;
         }
     }

@@ -62,6 +62,7 @@ int port_read(int fd, void *buf, int n);
 int port_pread(int fd, void *buf, int n, long long off);
 void port_close(int fd);
 int port_create(const char *path);              /* write-only, truncates */
+int port_open_pipe(const char *path);           /* read-write (a FIFO opens without waiting for the reader) */
 int port_write(int fd, const void *buf, int n);
 int port_pwrite(int fd, const void *buf, int n, long long off);
 int port_mkdir(const char *path);

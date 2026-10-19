@@ -104,6 +104,13 @@ void port_fatal(const char *f, ...) {
 int port_open(const char *p) { long r = sys3(SYS_open, (long)p, 0 /* O_RDONLY */, 0); return r < 0 ? -1 : (int)r; }
 int port_read(int fd, void *b, int n) { return (int)sys3(SYS_read, fd, (long)b, n); }
 int port_create(const char *p) { long r = sys3(SYS_open, (long)p, 0x241 /* O_WRONLY|O_CREAT|O_TRUNC */, 0644); return r < 0 ? -1 : (int)r; }
+/* a pipe for a player: O_RDWR on a FIFO never blocks in open() (so players that open their inputs one after the
+   other cannot deadlock against us); a regular file is created / truncated */
+int port_open_pipe(const char *p) {
+    long r = sys3(SYS_open, (long)p, 0x242 /* O_RDWR|O_CREAT|O_TRUNC */, 0644);
+    if (r >= 0) sys3(55 /* fcntl */, r, 1031 /* F_SETPIPE_SZ */, 1 << 20);   /* a FIFO: 1 MB of slack (fails harmlessly on files) */
+    return r < 0 ? -1 : (int)r;
+}
 int port_write(int fd, const void *b, int n) { return (int)sys3(SYS_write, fd, (long)b, n); }
 int port_mkdir(const char *p) { return (int)sys3(39 /* SYS_mkdir */, (long)p, 0755, 0); }
 void port_close(int fd) { sys3(SYS_close, fd, 0, 0); }
@@ -365,6 +372,10 @@ void port_setup_memory(void) {
     install(11, (void *)on_segv);   /* SIGSEGV */
     install(8, (void *)on_fpe);     /* SIGFPE */
     install(7, (void *)on_segv);    /* SIGBUS */
+    {   /* SIGPIPE ignored: a video/audio pipe whose player quit reports EPIPE instead of killing the game */
+        struct ksigaction sa = { (void *)1 /* SIG_IGN */, 0x04000000, (void *)port_sigreturn, { 0, 0 } };
+        sys5(SYS_rt_sigaction, 13, (long)&sa, 0, 8, 0);
+    }
 }
 
 __attribute__((used, noreturn)) static void cstart(unsigned long *sp) {
