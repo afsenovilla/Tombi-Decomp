@@ -164,12 +164,20 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--dump-vram")) port_dump_vram = 1;
         else if (streq(argv[i], "--play-movies")) { extern int port_play_movies; port_play_movies = 1; }
         else if (streq(argv[i], "--no-interp")) port_interp = 0;
+        else if (streq(argv[i], "--interp") && i + 1 < argc) {
+            extern u32 port_force_interp[8]; const char *h = argv[++i]; u32 v = 0;
+            if (h[0] == '0' && h[1] == 'x') h += 2;
+            for (; *h; h++) v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
+            for (int k = 0; k < 8; k++) if (!port_force_interp[k]) { port_force_interp[k] = v; break; }
+        }
+        else if (streq(argv[i], "--pipe-frames") && i + 1 < argc) { extern const char *port_pipe_path; port_pipe_path = argv[++i]; }
         else if (streq(argv[i], "--trace-interp")) { extern int port_mips_trace; port_mips_trace = 1; }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
-                        "       [--pad-script FRAME:BUTTONS[:LEN],...]   e.g. 1000:start,1100:cross:6\n", argv[0]);
+                        "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
+                        "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n", argv[0]);
             return 2;
         }
     }

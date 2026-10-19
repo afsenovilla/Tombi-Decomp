@@ -479,7 +479,33 @@ static void path_for(char *buf, const char *kind) {
     for (int k = 0; num[k]; k++) buf[i++] = num[k];
     buf[i++] = '.'; buf[i++] = 'p'; buf[i++] = 'n'; buf[i++] = 'g'; buf[i] = 0;
 }
+/* --pipe-frames PATH: every vblank, the displayed frame as raw RGB24 on a fixed 320x256 canvas (wider modes are
+   halved, the rest is cropped / padded), for a live view without a GUI toolkit in this binary:
+     mkfifo /tmp/tombi.rgb && ffplay -f rawvideo -pixel_format rgb24 -video_size 320x256 -framerate 50 /tmp/tombi.rgb &
+     build/port/tombi --realtime --pipe-frames /tmp/tombi.rgb */
+const char *port_pipe_path;
+static int pipe_fd = -1;
+static u8 pipe_rgb[320 * 256 * 3];
+static void pipe_frame(void) {
+    int w, h;
+    if (pipe_fd < 0) {
+        pipe_fd = port_create(port_pipe_path);
+        if (pipe_fd < 0) { port_printf("[gpu] cannot open %s\n", port_pipe_path); port_pipe_path = 0; return; }
+    }
+    port_gpu_frame(frame_rgb, &w, &h);
+    int step = w >= 512 ? 2 : 1;
+    for (int y = 0; y < 256; y++) for (int x = 0; x < 320; x++) {
+        u8 *o = pipe_rgb + (y * 320 + x) * 3;
+        int sx = x * step;
+        if (y < h && sx < w) { const u8 *i = frame_rgb + (y * w + sx) * 3; o[0] = i[0]; o[1] = i[1]; o[2] = i[2]; }
+        else o[0] = o[1] = o[2] = 0;
+    }
+    if (port_write(pipe_fd, pipe_rgb, sizeof pipe_rgb) != (int)sizeof pipe_rgb) {
+        port_printf("[gpu] frame pipe closed\n"); port_pipe_path = 0;
+    }
+}
 void port_gpu_vblank(void) {
+    if (port_pipe_path) pipe_frame();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
     static int made;
     if (!made) { port_mkdir(port_dump_dir); made = 1; }

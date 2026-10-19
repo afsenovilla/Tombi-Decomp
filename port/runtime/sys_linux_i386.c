@@ -144,8 +144,10 @@ const char *port_resident_overlay(void) {
     for (const PortOvl *o = port_ovls; o->name; o++) if (o->id == id) return o->name;
     return "X000";
 }
+u32p port_force_interp[8];      /* --interp ADDR: run that function in the MIPS interpreter (checks translations) */
 void *port_lookup(u32p a) {
     int lo = 0, hi = port_funcmap_count - 1;
+    for (int i = 0; i < 8 && port_force_interp[i]; i++) if (port_force_interp[i] == a) return 0;
     if (a >= PORT_OVL_BASE && a < PORT_OVL_END) {
         u32p id = *(volatile u32p *)PORT_OVL_BASE;
         if (is_ovl_id(id)) {           /* a SYSTEM overlay is resident: only its functions live here */
