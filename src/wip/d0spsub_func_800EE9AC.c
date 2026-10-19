@@ -1,5 +1,5 @@
 // FUNC 800ee9ac 2956 D0SPSUB
-// wip score 238: case 0 store/load scheduling, playSFX tail store order (B4/B6 vs BA)
+// wip score 95: case 0 load scheduling (anim/d3c/P344 loads), loop anim store
 typedef struct { short x, y, z, pad; } Pt;
 typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { short x, y; } XY;
@@ -87,6 +87,7 @@ int func_800EE9AC(Menu *m)
     unsigned char *p;
     int r;
     int i;
+    unsigned char t;
     switch (m->state) {
     case 0:
         D_8010A1C8 = D_1F8000C0;
@@ -118,7 +119,7 @@ int func_800EE9AC(Menu *m)
         D_8010A2D4[1].p.s.x = 0;
         D_8010A2D4[1].p.s.y = 0;
         D_8010A2D4[1].p.s.z = 0;
-        D_8010A2D4[1].da0 = P344 + ((int *)P344)[1];
+        D_8010A2D4[1].da0 = *(char **)0x1F800344 + ((int *)D_1F800344)[1];
         D_8010A2D4[1].q.v = D_8010A2D4[1].p.v;
         D_8010A2D4[1].b0c = 0;
         D_8010A2D4[1].wb4 = 0;
@@ -214,8 +215,9 @@ int func_800EE9AC(Menu *m)
             s->q.s.x = (((D_800FD418[l->a].x + 8) << 16) - s->p.s.x) / 4;
             s->q.s.y = (((D_800FD418[l->a].y + 2) << 16) - s->p.s.y) / 4;
             s->q.s.z = ((D_800FD418[l->a].z << 16) - s->p.s.z) / 4;
+            t = l->a;
             s->wba = 1;
-            s->wb4 = l->a;
+            s->wb4 = t;
             m->w4 = 4;
             playSFX(8);
             m->state++;
@@ -223,8 +225,9 @@ int func_800EE9AC(Menu *m)
             s->q.s.x = (((D_800FD418[l->b].x + 8) << 16) - s->p.s.x) / 4;
             s->q.s.y = (((D_800FD418[l->b].y + 2) << 16) - s->p.s.y) / 4;
             s->q.s.z = ((D_800FD418[l->b].z << 16) - s->p.s.z) / 4;
+            t = l->b;
             s->wba = 1;
-            s->wb4 = l->b;
+            s->wb4 = t;
             m->w4 = 4;
             playSFX(8);
             m->state++;
@@ -260,8 +263,9 @@ int func_800EE9AC(Menu *m)
                 s->q.s.y = ((((D_800FD418[l->a].y + 2 + D_800FD418[l->b].y + 2) / 2) << 16) - s->p.s.y) / 4;
                 s->q.s.z = ((((D_800FD418[l->a].z + D_800FD418[l->b].z) / 2) << 16) - s->p.s.z) / 4;
                 s->wb6 = l->c;
+                t = l->d;
                 s->wba = 1;
-                s->wb8 = l->d;
+                s->wb8 = t;
                 m->w4 = 4;
                 playSFX(8);
                 m->state++;
