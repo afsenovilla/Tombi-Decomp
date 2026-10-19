@@ -30,20 +30,20 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Status
 
 <!-- progress:start -->
-**Whole game: 94.99 % of the game's code matches byte for byte** (1452588 of 1529276 bytes).
+**Whole game: 95.30 % of the game's code matches byte for byte** (1457436 of 1529276 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
 | X000.BIN: AREA00 + object code reused by all areas | 312708 B | 312708 B | 100.0 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 116796 B | 60.4 % `[##############..........]` |
-| **Whole game** | **1529276 B** | **1452588 B** | **94.99 %** `[#######################.]` |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 121644 B | 62.9 % `[###############.........]` |
+| **Whole game** | **1529276 B** | **1457436 B** | **95.30 %** `[#######################.]` |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100816 B) is not counted: 67176 B of it (66.6 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 97.7 %).
-- Also tracked for MAIN0 + X000: 91.8 % of the code named by us, 74.9 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 97.9 %).
+- Also tracked for MAIN0 + X000: 92.4 % of the code named by us, 74.9 % typed with the TObj structure.
 <!-- progress:end -->
 
 Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
