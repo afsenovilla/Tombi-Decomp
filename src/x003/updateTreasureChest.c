@@ -13,30 +13,30 @@ extern unsigned char DAT_80115a54[];
 extern unsigned char DAT_80115a18[];
 extern void **DAT_80115a08[];
 extern void **DAT_80115948[];
-extern void l2Type0EInitSubtype0();
-extern void l2Type0EInitSubtype1();
-extern void l2Type0EInitSubtype2();
+extern void treasureChestInitStatic();
+extern void treasureChestInitCarried();
+extern void treasureChestInitDropped();
 static ObjFn DAT_80115d90[7] = {
-    (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype1, (ObjFn)l2Type0EInitSubtype2, (ObjFn)l2Type0EInitSubtype0,
-    (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype0, (ObjFn)l2Type0EInitSubtype0,
+    (ObjFn)treasureChestInitStatic, (ObjFn)treasureChestInitCarried, (ObjFn)treasureChestInitDropped, (ObjFn)treasureChestInitStatic,
+    (ObjFn)treasureChestInitStatic, (ObjFn)treasureChestInitStatic, (ObjFn)treasureChestInitStatic,
 };
-extern void l2Type0EActiveIdle();
-extern void l2Type0EActive1();
-extern void l2Type0EActive2();
-extern void l2Type0EActive3();
-extern void l2Type0EActive4();
+extern void treasureChestIdle();
+extern void treasureChestFollowCarrier();
+extern void treasureChestSettleOnGround();
+extern void treasureChestWaitForFlag();
+extern void treasureChestFall();
 static ObjFn DAT_80115dac[7] = {
-    (ObjFn)l2Type0EActiveIdle, (ObjFn)l2Type0EActive1, (ObjFn)l2Type0EActive2, (ObjFn)l2Type0EActive3,
-    (ObjFn)l2Type0EActive4, (ObjFn)l2Type0EActiveIdle, (ObjFn)l2Type0EActiveIdle,
+    (ObjFn)treasureChestIdle, (ObjFn)treasureChestFollowCarrier, (ObjFn)treasureChestSettleOnGround, (ObjFn)treasureChestWaitForFlag,
+    (ObjFn)treasureChestFall, (ObjFn)treasureChestIdle, (ObjFn)treasureChestIdle,
 };
-extern void l2Type0EHit0();
-extern void l2Type0EHit1();
-extern void l2Type0EHit2();
-extern void l2Type0EHit3();
-extern void l2Type0EHit4();
+extern void treasureChestOpenLocked();
+extern void treasureChestOpenCarried();
+extern void treasureChestOpenLockedStatic();
+extern void treasureChestOpenAnimOnly();
+extern void treasureChestOpenFalling();
 static ObjFn DAT_80115dc8[7] = {
-    (ObjFn)l2Type0EHit0, (ObjFn)l2Type0EHit1, (ObjFn)l2Type0EHit2, (ObjFn)l2Type0EHit3,
-    (ObjFn)l2Type0EHit4, (ObjFn)l2Type0EHit2, (ObjFn)l2Type0EHit0,
+    (ObjFn)treasureChestOpenLocked, (ObjFn)treasureChestOpenCarried, (ObjFn)treasureChestOpenLockedStatic, (ObjFn)treasureChestOpenAnimOnly,
+    (ObjFn)treasureChestOpenFalling, (ObjFn)treasureChestOpenLockedStatic, (ObjFn)treasureChestOpenLocked,
 };
 extern void FUN_8001fe6c(TObj *);
 extern void freeObjectLayer2(TObj *);

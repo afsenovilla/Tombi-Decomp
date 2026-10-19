@@ -2,7 +2,7 @@
 // MATCHING 801128f8 32
 extern void FUN_800202b4(void);
 
-void l2Type0EActiveIdle(void)
+void treasureChestIdle(void)
 {
     FUN_800202b4();
 }

@@ -1384,3 +1384,61 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
   (names_x000.csv), 30 stale functions_x000.csv rows fixed, 595 src/x0nn files renamed to the function they hold (content too). Twins
   whose X000 name is already used by another function of the same overlay (identical code at two addresses, e.g. x0nn 800f4e9c ->
   X000 800f4e68 playerSetAnimPairA, 8010d7f0 setAngleSpeedFromDir8B) keep their generic name.
+
+# Behaviour names, round 4 (Oct 2026): shared X000 handlers and area-0 objects
+
+Names from code reading (draw captures where noted); the X000 name is applied to every overlay twin row that carried it (a second
+twin of the same function at another address of an overlay keeps its generic name, e.g. x004 FUN_8012f660 = scriptActorLeaveSceneIfIdle).
+- `8011468c updateScriptActor` (was updateL2Type18Object; layer 2 type 0x18, allocated only by MAIN0 scriptOpSpawnObject kinds 2 / 10: the
+  sprite / model actors of the script cutscenes, SCRIPT_OBJECTS[idx]). Steps: `80113f38 scriptActorRun` (was l2Type18Active: step 0 animate,
+  1 walk timed, 3 message box showMessageBoxDirectTimed(0xd..), 4 release the player when the box closes), `80113888 scriptActorWalk`
+  (State2: velX walk clamped in area 2, TileCollideAt), `80113b6c scriptActorJump` (State5: velX/velY arc, lands on TileCollideAt),
+  `80113cc8 scriptActorLaneJump` (State7: the arc also moves the depth to the next 90-unit lane), `801142c0 scriptActorLeaveScene` (was
+  l2Type18Hit; b04 2: message box 2/x by GCD.bcdb1, puts the player in mode 6 and walks off until the player b69, printInfoMessage, frees
+  itself), `8011465c scriptActorLeaveSceneIfIdle` (HitIfStep0).
+- updateTreasureChest helpers (layer 2 type 0xE; subtype = chest kind: 0 static, 1 carried by the parent object d90, 2 dropped onto the
+  ground, 3 waits for a flag, 4 falls, 5/6 static variants; b0c & 0x7F = chest colour, opened only with the matching key GCD.bd0aa/bd0c8/
+  bd0d0/bd0d1 else printInfoMessage(0, 2) and a shake): `80112864 treasureChestInitStatic`, `80112898 treasureChestInitCarried`,
+  `8011287c treasureChestInitDropped`, `801128f8 treasureChestIdle`, `80111f58 treasureChestFollowCarrier` (follows d90, thrown off when
+  the carrier passes the camera), `80112918 treasureChestSettleOnGround`, `801129d0 treasureChestWaitForFlag` (active 4 until
+  DAT_8009c93b), `80112520 treasureChestFall`, `80111dc8 treasureChestTossMove` (was l2Type0ESharedStep: knocked along the hit angle w78,
+  else gravity), `80112c24 treasureChestOpenLocked` (Hit0: key check, spawnItemDropsFromTable, open anim, sfx 0x18/8, falls and
+  spawnBreakPieces; subtype 6 completes event 0x19), `80112204 treasureChestOpenCarried` (Hit1: two spawnItemFromEntry items, tossed),
+  `80113034 treasureChestOpenLockedStatic` (Hit2), `801133b8 treasureChestOpenAnimOnly` (Hit3), `801125e8 treasureChestOpenFalling`
+  (Hit4: two D_80115D28 items), `80112be0 treasureChestCheckAreaFlag`.
+- `8011191c updatePlayerPowerAura` (was updateL1Type0AObject; layer 1 type 0xA made by `80111a50 spawnPlayerPowerAura` (was
+  spawnL1Type0AObject) from MAIN0 spawnPlayerPowerEffect at the player): a sprite glued to the player (TBL8011[subtype] anim, b0a 13, alpha
+  b6b ramps up 8/frame then down for 0xB4 frames, hit flash via w22/b6a); `8011145c playerPowerAuraInit`, `80111880 playerPowerAuraStep`,
+  `80111590 playerPowerAuraFacingStep` (subtype 0: x = player x -/+ 2 by facing, y - 8), `80111714 playerPowerAuraHiddenStep` (subtype 1:
+  visible = 0, same timing).
+- `800ee25c updateApBoxByArea` (was updateL4Type38Object): layer 4 type 0x38 = area 0 `80122118 updateA00ApBox100k` (was l4Type38Update:
+  room 5, b0c 0 the box (0x13 model scaled 0xC00), other b0c parts copy its state; `80121b28 a00ApBox100kShowRequiredAp` (StepA: while the
+  player holds it, six digit sprites "100000" at 0xA3C/-0x15E), `80121e50 a00ApBox100kCheckAp` (StepB: AP (DAT_8009c96c) < 100000 starts
+  event 0x10 "The AP Box", else completes it), `80121fe0 a00ApBox100kOpenAnim` (StepC: lid rotations d84/d8c, then spawnItemFromEntry
+  D_80138F04)), area 9 x009 updateApBox.
+- `80121870 updateA00ApBox50k` (was updateA00L4Type26; room 2, same event 0x10 with 50,000 AP): `80121124 a00ApBox50kShowRequiredAp`
+  (Step: digits "50000" at 0xA78../-0x4D8 for 0x78 frames), `8012160c a00ApBox50kSparkle` (SpawnParts: a type 0x31 sparkle every 8 frames
+  on a circle D_80138EF4), `8012171c a00ApBox50kReward` (two D_80138D6C items, blink out), `80121ae0 a00ApBox50kHideDigits` (ReleaseParts).
+- `800eb9f0 updateDigitSprite` / `80121a5c spawnDigitSprite` (were updatePoolType44Object / spawnPoolType44Object): pool type 0x44, one
+  digit b0c of the MAIN0 digit table TBL_80012150 (the "50000" / "100000" of the AP boxes), freed 0x1E frames after b04 2.
+- `800ebb48 updateWeaponCarryLink` (was updatePoolType5BObject): pool 0x5B made by MAIN0 weaponHitCat5Object: d90 = the weapon, d94 = the
+  hit category-5 object (active 5); copies the weapon position into it while the weapon is in states 2..6, then releases it (b68 = 1,
+  animFrame 2).
+- `8011b6e0 updateA00TutorialHint` (was updateA00PoolType59): with DAT_8009d005 == 1 the box MFNT000S 9/0 "you can swing hanging from a tree
+  branch", else `8011b5dc a00TutorialHintJumpMessage` (was a00PoolType59Talk): 9/1.. "press X to jump..." by the button configuration
+  D_801386A8[D_8009F3DC]; freed when the box closes.
+- area 0 layer 7 backdrops: `8012236c updateA00FarBackdropWest` (was updateA00L7Type00: drawn at (d30 - camera x) / 8 while the camera is
+  left of x 0x71A), `80122724 updateA00FarBackdropEast` (L7Type02: the same for x >= 0x719, b0c 0 wraps the 12-bit x), `801224c0
+  updateA00ColorCyclingBackdrop` (L7Type01: parallax 1/2 with the CLUT 0xC0/0x1E7 cycled +-0x40 every 15 frames).
+- `80116d14 updateA00ScrollController` (was updateA00L5Type11): the area-0 camera object (stepScrollReturnY / stepScrollClearX,
+  cameraFollowPlayerX, syncObjectTargetY, updateCameraScroll; DAT_8009c966 intro state).
+- `8011f1d0 updateA00FlagGatedModel` (was updateA00L4Type0D: room 5, draws nothing itself; with GCD.bcdac == 0xFF takes model 12 of the
+  SPAD.i334 table and is pushed to the layer 4 draw list) and `8011b7f0 updateA00FlagGatedSprite` (was updateA00PoolType5A: sprite
+  D_8013B168[b0c] while GCD.bcdac == 0xFF, else freed).
+- `8011a744 updateA00TouchSpark` (was updateA00PoolType0B): the three sparks of spawnTouchSparkTriggerSparks (D_8013B244[b0c], four
+  subtype velocity sets, rotates d8c, freed off screen).
+- `8011a63c updateA00KomaPigSpawner` / `8011a418 a00KomaPigSpawnerStep` (were updateA00PoolType0A / a00PoolType0AStep): subtype 0, when the
+  camera is within 0xC0 x / 0x2D z, spawns a layer 2 type 2 subtype 5 Koma pig at its position (depth 0x5A) every 2000 frames, 10 at most
+  (w98), the pig's d94 points back at its w9a counter.
+- `801191b0 spawnA00PoolType03Pair` (was updateA00PoolType27: not a handler; makes two pool type 3 objects (b0a 5, subtype 0 / 1, b0c =
+  a == 0) at x/y/z).
