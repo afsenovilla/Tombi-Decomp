@@ -8,7 +8,11 @@
       "Glob",
       "Grep",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Agent",
+      "SendMessage",
+      "SendUserFile",
+      "mcp__github"
     ]
   }
 }
