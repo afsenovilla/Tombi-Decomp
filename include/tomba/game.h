@@ -789,12 +789,48 @@ typedef enum {
 typedef enum {
     MSG_ANIMALDASH_ACQUIRED    = 0x0C,
     MSG_EFFECT_NOTICE          = 0x0F,
+    MSG_FROG_RAN_AWAY          = 0x10,
     MSG_ONEUP_ACQUIRED         = 0x14,
     MSG_VITALITYMAXUP_ACQUIRED = 0x15,
     MSG_LOSTANDFOUND_STARTED   = 0x16,
     MSG_LOSTANDFOUND_PROGRESS  = 0x17,
     MSG_ITS_LOCKED             = 0x26,
 } INFO_MESSAGE;
+
+/* Player state values (from psx_tomba include/game/object.h; their handler names in brackets).
+   PLAYER.state (+0x04) selects what updatePlayer runs. */
+typedef enum PlayerState {
+    PLAYER_INIT = 0,       /* playerInitMode [initPlayer] */
+    PLAYER_ACTIVE = 1,     /* playerNormalModeDispatch [updatePlayerActive], by PlayerSubState */
+    PLAYER_HURT = 2,       /* by PlayerHurtType */
+    PLAYER_SCRIPTED = 5,   /* no control while a scene runs: respawn, item get, reading a sign */
+} PlayerState;
+
+/* PLAYER.subState (+0x05) while PLAYER_HURT (updatePlayer: 3 = playerStepDie, 4 = playerStepHurtSpin). */
+typedef enum PlayerHurtType {
+    PLAYER_HURT_NORMAL = 0,  /* playerStepHurtKnockback [playerHurt]: enemies, spikes */
+    PLAYER_HURT_BITTEN = 1,  /* playerStepHurtStun [playerHurtBitten]: caught and spat out (Biting Plant Flower) */
+    PLAYER_HURT_WATER = 2,   /* playerStepHazardRespawn [playerFallInWater]: the section reloads */
+} PlayerHurtType;
+
+/* PLAYER.subState while PLAYER_SCRIPTED (only this one identified). */
+#define PLAYER_READ_MESSAGE 0x61
+
+/* PLAYER.subState while PLAYER_ACTIVE (the jump table of playerNormalModeDispatch has 0x64 entries). */
+typedef enum PlayerSubState {
+    PLAYER_IDLE = 0x00,               /* playerStepIdle */
+    PLAYER_WALK = 0x01,               /* playerStepWalk [playerWalk] */
+    PLAYER_JUMP = 0x02,               /* playerStepJump [playerJump] */
+    PLAYER_ATTACK = 0x03,             /* playerStepWeaponAttack [playerAttack] */
+    PLAYER_AIR_ATTACK = 0x04,         /* playerStepAirWeaponAttack */
+    PLAYER_GRAB_LEDGE = 0x06,         /* playerStepSwingFromObject [playerGrabLedge] */
+    PLAYER_CLIMB_OVER_LEDGE = 0x0B,   /* playerStepPerchLeap [playerClimbOverLedge] */
+    PLAYER_CLING = 0x0D,              /* playerStepClimb [playerCling]: on a vine or a wall */
+    PLAYER_HOLD_ENEMY = 0x0E,         /* playerStepBitten [playerHoldEnemy] */
+    PLAYER_THROW_ENEMY = 0x0F,        /* playerStepBittenJump [playerThrowEnemy] */
+    PLAYER_JUMP_PLANE = 0x12,         /* playerStepLaneJump [playerJumpPlane]: to the next depth plane */
+    PLAYER_CLIMB = 0x1D,              /* playerStepPerchIdle [playerClimb] */
+} PlayerSubState;
 
 typedef enum {
     MSG_TYPE_ITEM   = 0,

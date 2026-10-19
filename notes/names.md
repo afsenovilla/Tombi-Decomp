@@ -1304,3 +1304,35 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   - x011 `80116fa8 updateFlyingOctopus` / `80116e54 flyingOctopusMove` (were updatePatrollingFlyer / patrollingFlyerMove): the strip is a pink
     one-eyed octopus that floats with dangling tentacles and lashes them out.
   - fix: x011 updateFactoryNpc called itself in the C (ncheck DIFF); the callee at 80119498 is stepFactoryNpcTalk.
+
+# psx_tomba import (Oct 2026, upstream fb3b367): name conflicts kept as ours
+
+Source: psx_tomba `symbols/sces_013.31/main0_symbol_addrs.txt` (US names at PAL addresses) for MAIN0; for X000 the US
+`src/overlays/x00/engine*.c` / `x00*.c` function order, placed by a constant US->PAL delta (0xCA0 / 0xCB0 / 0xCBC) between
+neighbours whose addresses are known on both sides. Imported names are listed above with "psx_tomba name". Not imported:
+- their map is 8 bytes off at 8002b018 / 8002b0b4 / 8002b8c4 (gives stubInventory1..3, which we already have at 8002b010 /
+  8002b0ac / 8002b8bc); 8006eb00 / 8006eed8 also disagree (SsQuit / SsStart there vs our SsStart / SpuInitHot).
+- their per-overlay `updatePointsBalloon = 0x80117CAC` in x01..x18 is the area-0 address used by the X000 dispatcher; the
+  overlay function at 80117cac (16 bytes) is something else. The real copies are the X000 twins (now updatePointsBalloon).
+- MAIN0, ours kept (theirs): ThreadTableRun (dispatchTasks), ThreadCreate (openTask), ThreadWaitFrames (sleepTask),
+  InitSubsystems (initObjectPools), resetCameraScratchDefaults (resetCamera), ObjAlloc (allocObjectLayer3), ObjFree
+  (freeObjectLayer3), ObjFreeDup (freeObjectLayer4), PoolFree_1F800210 (freeObjectUnlayered), ObjListPush_1F800218/21C/220/224/
+  230/228/22C (pushDrawListLayer1/Main/Capped/Layer4/Layer8/Layer5/Layer7), SoundUpdate (updateSound), SoundFindFreeVoice
+  (allocSfxVoice), SfxPlay (playSFX), SfxPlay2 (playSFXWithNote), SfxPlay3 (playSFXWithVolume), MusicStopOrFadeIn (stopBgm),
+  SoundStopAll (stopAllSound), MusicMute/MusicUnmute (muteBgm/unmuteBgm), SfxStopAll (keyOffSfxAll), SoundInit
+  (shutdownSound), SoundShutdown (sndQuit), Rand (nextRandom), ObjApplyVelocity (applyObjectSpeedXY), MulNegSinScaled /
+  MulCos / MulNegSin / MulCosDup (fixedMulSin / fixedMulCos / fixedMulSin2 / fixedMulCos2), AnimLoadDuration
+  (readAnimFrameCount), AnimJump (advanceAnimFrame), AnimAdvance (tickAnimation), loadCollisionBounds (loadButtonConfig:
+  disagree, to check), drawDebugText (fontDebugPrintf), markSectionVisited (setSpawnAreaFlag), updateCameraController
+  (updateCameraScroll), getDistanceToPlayer (distanceToPlayer), uploadSpriteFrameToVram (uploadSpriteFrame),
+  ObjSpawnType0/1/5/8 (spawnItem / spawnItemDrop / spawnItemFixed / spawnItemChest), ObjCheckHeadCollision
+  (clampToCeilingAndProbeSides), ObjTileCollide (probeSidesAndApplyTileResponse), TileCollideAt (probeCollisionAtDepthA),
+  dispatchAreaCollisionHookA/B (dispatchAreaEnemyInit / dispatchAreaEnemyUpdate: disagree, to check), isQuadOnScreen
+  (isPolyFT4OnScreen), AddDrawMode (addDrawModePrim), start (__SN_ENTRY_POINT).
+- X000 player steps, ours kept (theirs): playerInitMode (initPlayer), playerStepWalk (playerWalk), playerStepJump (playerJump),
+  playerStepWeaponAttack (playerAttack), playerStepSwingFromObject (playerGrabLedge), playerStepPerchLeap
+  (playerClimbOverLedge), playerStepPerchIdle (playerClimb), playerStepClimb (playerCling), playerStepBitten (playerHoldEnemy),
+  playerStepBittenJump (playerThrowEnemy), playerStepLaneJump (playerJumpPlane), playerStepHurtKnockback (playerHurt),
+  playerStepHurtStun (playerHurtBitten), playerStepHazardRespawn (playerFallInWater), playerNormalModeDispatch
+  (updatePlayerActive). Their PlayerState / PlayerHurtType / PlayerSubState enums are in include/tomba/game.h.
+- X000 area 0: updateMushroomCluster (theirs updateEvilGrass, 80126fec): to check against the strip.
