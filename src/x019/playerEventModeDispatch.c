@@ -21,7 +21,7 @@ extern void playerEventStepJumpIn(TObj *);
 extern void playerEventStepWalkIntoDepth(TObj *);
 extern void func_8011DD48(TObj *);
 extern void playerEventStepRiseUp(TObj *);
-extern void FUN_800f1308(TObj *);
+extern void playerAnimateTalkPose(TObj *);
 extern void playerEventWalk(TObj *);
 extern void AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -132,7 +132,7 @@ void playerEventModeDispatch(TObj *o)
         o->d8c = 0;
     case 0x65:
         if (TALK_POSE != 0) {
-            FUN_800f1308(o);
+            playerAnimateTalkPose(o);
         } else if (D_1f8003ce == 0 || *(unsigned short *)o->anim != 0) {
         anim:
             AnimAdvance(o);

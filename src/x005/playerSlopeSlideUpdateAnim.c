@@ -66,8 +66,8 @@ void playerSlopeSlideUpdateAnim(TObj *o)
             FUN_8001e560(a, 2);
         }
     } else {
-        FUN_800efa80(o);
-        FUN_800ef4e4(o);
+        playerSelectGroundAnim(o);
+        setFacingAndUpDownFromPad(o);
         DAT_8009c330->b08 = 0;
         o->b9c = 0;
         o->d88 = 0;

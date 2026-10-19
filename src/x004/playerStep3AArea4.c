@@ -7,8 +7,8 @@
 typedef struct { char p0[6]; unsigned char b6; char p7[2]; unsigned char b9; char pa[0x20 - 0xa]; short w20; } PL;
 extern PL *D_8009C330;
 extern unsigned char D_801152E8[];
-extern void FUN_800eeae4(TObj *, int, int);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern short FUN_8003fd78(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 
@@ -35,7 +35,7 @@ void playerStep3AArea4(TObj *o)
         o->w76 = 0;
         o->velV = 0x1e6;
         o->animFrame &= 1;
-        FUN_800eeae4(o, 0x19, 1);
+        playerSetAnimIfChangedAt(o, 0x19, 1);
         o->state++;
     case 1:
         if (SPAD.s1c8 & 1) {
@@ -48,12 +48,12 @@ void playerStep3AArea4(TObj *o)
         o->velY -= 3;
         if (o->velX <= 0) {
             o->state = 9;
-            FUN_800eea7c(o, 0x19, 2);
+            playerSetAnim(o, 0x19, 2);
             if (FUN_8003fd78(o, o->w74, o->w76) && ((*(unsigned char*)&o->da0) >> 4) == 4) {
                 o->velX = 0x5a;
                 o->velY = 0x5a;
                 o->state = 1;
-                FUN_800eea7c(o, 0x19, 1);
+                playerSetAnim(o, 0x19, 1);
             }
         }
         break;

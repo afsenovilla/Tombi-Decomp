@@ -8,7 +8,7 @@ extern TObj PLAYER;
 #define P PLAYER
 extern TObj *D_8009F3D4;
 extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
-extern void FUN_800eeae4(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
 
 void soakedPhoenixGuideSection1Scene(TObj *o)
 {
@@ -38,14 +38,14 @@ void soakedPhoenixGuideSection1Scene(TObj *o)
         o->state++;
     case 2:
         if (GCD.bcef0 == 1) {
-            FUN_800eeae4(&P, 0x14, 0);
+            playerSetAnimIfChangedAt(&P, 0x14, 0);
             o->w08 = 0x14;
             o->state++;
         }
         break;
     case 3:
         if (--o->w08 <= 0) {
-            FUN_800eeae4(&P, 0x15, 0);
+            playerSetAnimIfChangedAt(&P, 0x15, 0);
             if (e->h->p.whole < P.h->p.whole) P.velX = -0x200;
             else P.velX = 0x200;
             P.velY = -0x200;
@@ -82,7 +82,7 @@ void soakedPhoenixGuideSection1Scene(TObj *o)
             if (e->h->p.whole < P.h->p.whole) P.h->p.whole = e->h->p.whole;
         }
         if (e->y.p.whole - 0x10 < P.y.p.whole) {
-            FUN_800eeae4(&P, 0xd, 0);
+            playerSetAnimIfChangedAt(&P, 0xd, 0);
             P.animFrame = 0;
             P.h->p.whole = e->h->p.whole;
             P.y.p.whole = e->y.p.whole;

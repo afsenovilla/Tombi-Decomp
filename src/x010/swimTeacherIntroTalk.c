@@ -33,7 +33,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void ObjSetFacingToPlayer(TObj *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void startPadVibration(int, int, int, int);
 extern void swimTeacherFloatPlayer(TObj *, int);
 extern short TileCollideAt(TObj *, short, short);
@@ -64,7 +64,7 @@ void swimTeacherIntroTalk(TObj *o)
             D_800A603C = 5;
             D_800A603D = 100;
             D_800A603E = 0;
-            FUN_800eea7c(&PLAYER, 0x1e, 0);
+            playerSetAnim(&PLAYER, 0x1e, 0);
             D_800A604E[0] = -0x1e;
             o->d34 = -0x1e0000;
             o->timer = 0x3c;

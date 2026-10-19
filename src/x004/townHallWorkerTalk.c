@@ -13,7 +13,7 @@ extern short D_800A6066;
 extern Fix16 *D_800A6078[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
-extern void FUN_800eea7c(void *, int, int);
+extern void playerSetAnim(void *, int, int);
 extern void FUN_8003e300(int, int, V3 *);
 
 void townHallWorkerTalk(TObj *o)
@@ -55,7 +55,7 @@ void townHallWorkerTalk(TObj *o)
             PLAYER[4] = 5;
             D_800A603D = 0x64;
             D_800A603E = 0;
-            FUN_800eea7c(PLAYER, 2, 0);
+            playerSetAnim(PLAYER, 2, 0);
             D_800A6066 = 1;
             o->state++;
             break;
@@ -71,7 +71,7 @@ void townHallWorkerTalk(TObj *o)
         D_800A6078[0]->p.whole--;
         if (D_800A6078[0]->p.whole < 0xa0) {
             D_800A6078[0]->p.whole = 0xa0;
-            FUN_800eea7c(PLAYER, 0, 0);
+            playerSetAnim(PLAYER, 0, 0);
             D_800A603C = 5;
             D_800A603D = 0;
             D_800A603E = 0;

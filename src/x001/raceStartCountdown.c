@@ -7,7 +7,7 @@ extern TObj PLAYER;
 extern TObj *D_800A60C8;
 extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
 extern TObj *showMessageBox(int, int, int, int);
-extern void FUN_800eeae4(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
 extern void FUN_8003fd78(TObj *, int, int);
 
 void raceStartCountdown(TObj *o)
@@ -23,7 +23,7 @@ void raceStartCountdown(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 100;
         PLAYER.state = 0;
-        FUN_800eeae4(&PLAYER, 2, 0);
+        playerSetAnimIfChangedAt(&PLAYER, 2, 0);
         o->step++;
     case 1:
         PLAYER.h->raw += 0x10000;
@@ -32,7 +32,7 @@ void raceStartCountdown(TObj *o)
         if (PLAYER.h->p.whole >= 0x279) {
             e->animFrame = 0;
             D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
-            FUN_800eeae4(&PLAYER, 0, 0);
+            playerSetAnimIfChangedAt(&PLAYER, 0, 0);
             o->step++;
         }
         break;

@@ -7,7 +7,7 @@
 extern TObj PLAYER;
 extern void *D_80131DC0;
 void AnimLoadDuration(TObj *o);
-void FUN_800eea7c(TObj *o, short a, short c);
+void playerSetAnim(TObj *o, short a, short c);
 void setEventStarted(int a, int b, int c);
 
 void leafButterflyEventStart(TObj *o)
@@ -27,7 +27,7 @@ void leafButterflyEventStart(TObj *o)
             GVARS.b42 = 1;
             GVARS.b3e = 1;
             o->animFrame = PLAYER.animFrame & 1;
-            FUN_800eea7c(&PLAYER, 0xd, 0);
+            playerSetAnim(&PLAYER, 0xd, 0);
             PLAYER.d8c = 0;
             PLAYER.h->p.whole = o->h->p.whole;
             o->y.p.whole = PLAYER.y.p.whole + 8;

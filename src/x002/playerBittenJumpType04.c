@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
-extern void FUN_800ef490(TObj *o);
+extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -27,7 +27,7 @@ void playerBittenJumpType04(TObj *o)
         p->d8c = o->d88 - 0xc0;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
@@ -52,7 +52,7 @@ void playerBittenJumpType04(TObj *o)
         }
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         p = D_8009D2E8;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;

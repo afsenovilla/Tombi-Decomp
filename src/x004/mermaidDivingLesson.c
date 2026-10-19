@@ -14,7 +14,7 @@ extern void AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void FUN_8003e300(int, int, Fix16 *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void setEventStarted(int, int, int);
 
 void mermaidDivingLesson(TObj *o)
@@ -41,7 +41,7 @@ void mermaidDivingLesson(TObj *o)
         PLAYER.animFrame = 0;
         PLAYER.state = 0;
         PLAYER.timer = 0x64;
-        FUN_800eea7c(&PLAYER, 0x47, 0);
+        playerSetAnim(&PLAYER, 0x47, 0);
         o->timer = 0x3c;
         o->state++;
         break;
@@ -69,7 +69,7 @@ void mermaidDivingLesson(TObj *o)
             e->b04 = 3;
             o->anim = D_8013117C[o->subtype].anims[0];
             AnimJump(o, 0);
-            FUN_800eea7c(&PLAYER, 0x44, 0);
+            playerSetAnim(&PLAYER, 0x44, 0);
             o->timer = 0x14;
             o->state++;
         }
@@ -127,7 +127,7 @@ void mermaidDivingLesson(TObj *o)
     case 9:
         PLAYER.h->p.whole += 1;
         if (--o->timer <= 0) {
-            FUN_800eea7c(&PLAYER, 0x45, 0);
+            playerSetAnim(&PLAYER, 0x45, 0);
             o->timer = 0x14;
             o->state++;
         }
@@ -135,7 +135,7 @@ void mermaidDivingLesson(TObj *o)
     case 10:
         PLAYER.h->p.whole += 2;
         if (--o->timer <= 0) {
-            FUN_800eea7c(&PLAYER, 0x44, 0);
+            playerSetAnim(&PLAYER, 0x44, 0);
             o->state++;
         }
         break;
@@ -157,7 +157,7 @@ void mermaidDivingLesson(TObj *o)
     case 13:
         PLAYER.h->p.whole -= 1;
         if (--o->timer <= 0) {
-            FUN_800eea7c(&PLAYER, 0x45, 0);
+            playerSetAnim(&PLAYER, 0x45, 0);
             o->timer = 0x14;
             o->state++;
         }
@@ -165,7 +165,7 @@ void mermaidDivingLesson(TObj *o)
     case 14:
         PLAYER.h->p.whole -= 2;
         if (--o->timer <= 0) {
-            FUN_800eea7c(&PLAYER, 0x44, 0);
+            playerSetAnim(&PLAYER, 0x44, 0);
             o->state++;
         }
         break;
@@ -193,7 +193,7 @@ void mermaidDivingLesson(TObj *o)
         if (--PLAYER.d8c < 0) {
             PLAYER.d8c = 0;
             o->timer = 0x3c;
-            FUN_800eea7c(&PLAYER, 0x47, 0);
+            playerSetAnim(&PLAYER, 0x47, 0);
             o->state++;
         }
         break;

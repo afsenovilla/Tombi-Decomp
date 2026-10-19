@@ -5,7 +5,7 @@
 extern TObj *D_8009D2E8;
 extern void playerBittenCarryAirStep(TObj *);
 extern void playerCheckJumpPressedB(TObj *);
-extern void FUN_800ef490(TObj *);
+extern void setFacingFromPad(TObj *);
 extern void ObjGravityStep(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern int AnimAdvance(TObj *);
@@ -29,7 +29,7 @@ void playerBittenJumpType1A(TObj *o)
         playerCheckJumpPressedB(o);
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         p = D_8009D2E8;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;

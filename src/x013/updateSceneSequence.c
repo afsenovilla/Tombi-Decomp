@@ -34,7 +34,7 @@ extern unsigned char D_8009C975x[];
 extern unsigned char SCRIPT_FLAGS[];
 extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
 extern char D_8001D6A4[];
-extern void FUN_800eea7c(PL *, int, int);
+extern void playerSetAnim(PL *, int, int);
 extern O *showMessageBox(int, int, int, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -100,7 +100,7 @@ void updateSceneSequence(O *o)
                 PLAYER.step = 0x64;
                 PLAYER.state = 0;
                 PLAYER.animFrame = 1;
-                FUN_800eea7c(p, 0, 0);
+                playerSetAnim(p, 0, 0);
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -163,13 +163,13 @@ void updateSceneSequence(O *o)
             switch (o->step) {
             case 0:
                 PLAYER.animFrame = 0;
-                FUN_800eea7c(p, 1, 0);
+                playerSetAnim(p, 1, 0);
                 o->step++;
                 break;
             case 1:
                 if (++PLAYER.xw < 0x105) break;
                 PLAYER.animFrame = 1;
-                FUN_800eea7c(p, 0, 0);
+                playerSetAnim(p, 0, 0);
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -179,7 +179,7 @@ void updateSceneSequence(O *o)
             switch (o->step) {
             case 0:
                 PLAYER.animFrame = 0;
-                FUN_800eea7c(p, 1, 0);
+                playerSetAnim(p, 1, 0);
                 o->step++;
                 break;
             case 1:

@@ -2,7 +2,7 @@
 // MATCHING 80104dc8 216
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
-extern void FUN_800ef490(TObj *);
+extern void setFacingFromPad(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -15,7 +15,7 @@ void playerBittenCarryAirStep(TObj *o)
 
     p->h->p.whole = o->h->p.whole;
     p->y.p.whole = o->y.p.whole + p->box2;
-    FUN_800ef490(o);
+    setFacingFromPad(o);
     FUN_8010f0f4(o);
     FUN_8001fd94(o);
     FUN_8001fec0(o);

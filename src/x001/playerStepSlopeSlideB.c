@@ -13,7 +13,7 @@ extern void func_801072FC(TObj *);
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerDecelerateSpeedB(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
-extern void FUN_800f00ac(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, int, int, int);
 extern void playerDecelerateIfFlag(TObj *);
@@ -59,7 +59,7 @@ void playerStepSlopeSlideB(TObj *o)
             o->step = 0x1e;
             o->state = 2;
         }
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             if (o->wb2 > 0x200) {
@@ -112,7 +112,7 @@ void playerStepSlopeSlideB(TObj *o)
             o->b6b = 0;
             o->state = 1;
         }
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     }
     playerSetSlopeTilt(o, 1);

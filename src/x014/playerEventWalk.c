@@ -48,7 +48,7 @@ void playerEventWalk(O *o)
             o->anim = (int)A0e2c;
             o->da3 = 1;
         } else {
-            FUN_800efa80(o);
+            playerSelectGroundAnim(o);
         }
         o->step = 0;
         o->state = 0;

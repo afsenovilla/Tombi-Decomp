@@ -1363,3 +1363,7 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
   button masks the player code tests, e.g. talk = 1F8003C4; callers bootStartupTask, o0ptsub0 func_800E8618). dispatchAreaCollisionHookA/B:
   ours kept (area 0 calls pushCat2/Cat5ObjectOutOfCat4Type04, area 3 their x003 twins: collision passes, not enemy init/update).
   updateMushroomCluster vs updateEvilGrass: not captured yet.
+- Twin sync (Oct 2026): 434 twin rows in notes/functions_x0nn.csv that still held FUN_/func_ names now carry their X000 twin's name
+  (names_x000.csv), 30 stale functions_x000.csv rows fixed, 595 src/x0nn files renamed to the function they hold (content too). Twins
+  whose X000 name is already used by another function of the same overlay (identical code at two addresses, e.g. x0nn 800f4e9c ->
+  X000 800f4e68 playerSetAnimPairA, 8010d7f0 setAngleSpeedFromDir8B) keep their generic name.

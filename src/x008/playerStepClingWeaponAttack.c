@@ -24,7 +24,7 @@ extern PO *D_8009C330;
 extern char D_80010F10[], D_80010F30[], D_80010F50[], D_80010D68[];
 extern void setWeaponAimFromPadKeepFacing(void);
 extern void AnimLoadDuration(TO *);
-extern void FUN_800ee948(TO *, int);
+extern void spawnWeaponObject(TO *, int);
 extern void AnimJump(TO *, int);
 
 static __inline__ void attach(TO *o)
@@ -67,7 +67,7 @@ void playerStepClingWeaponAttack(TO *o)
             break;
         }
         AnimLoadDuration(o);
-        FUN_800ee948(o, 1);
+        spawnWeaponObject(o, 1);
         attach(o);
         switch (D_8009F0EC->b2) {
         case 0xb: case 0x15:

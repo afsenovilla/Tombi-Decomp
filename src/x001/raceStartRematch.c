@@ -10,7 +10,7 @@ extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
-extern void FUN_800eeae4(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
 
 void raceStartRematch(TObj *o)
 {
@@ -27,7 +27,7 @@ void raceStartRematch(TObj *o)
         e->animFrame = 0;
         D_800A6066 = 0;
         D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
-        FUN_800eeae4(&PLAYER, 0, 0);
+        playerSetAnimIfChangedAt(&PLAYER, 0, 0);
         o->step++;
         break;
     case 1:

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 
 void stepPlayerFallExitScene(TObj *o)
 {
@@ -14,7 +14,7 @@ void stepPlayerFallExitScene(TObj *o)
             *(signed char *)&PLAYER.b0f = 8;
             GVARS.b3f = 1;
             PLAYER.y.p.whole = -0xe8;
-            FUN_800eea7c(&PLAYER, 0x1e, 0);
+            playerSetAnim(&PLAYER, 0x1e, 0);
             PLAYER.b04 = 5;
             PLAYER.d8c = 0;
             PLAYER.step = 0x65;

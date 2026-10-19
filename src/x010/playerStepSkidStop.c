@@ -15,7 +15,7 @@ void playerSetAngleFromSlope(TObj *o);
 void playerSkidDecelerate(TObj *o);
 void playerMoveByAngleSpeed(TObj *o);
 void playerStickToGround(TObj *o);
-void FUN_800f00ac(TObj *o);
+void playerCheckGroundAndFall(TObj *o);
 void ObjAddVelY7E(TObj *o);
 short ObjTileCollide(TObj *, int, int);
 void playerTryAttack(TObj *o, int);
@@ -51,7 +51,7 @@ void playerStepSkidStop(TObj *o)
         }
         playerMoveByAngleSpeed(o);
         playerStickToGround(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         if (AnimAdvance(o)) goto stop;
         if ((o->animFrame & 1) && o->wb2 < 0) {
             o->step = 1;

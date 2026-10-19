@@ -15,7 +15,7 @@ extern short D_1F8000F2, D_1F80016E;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern int showMessageBoxDirect(int, int, void *);
 extern void setEventComplete(int, int);
 extern void swimTeacherFloatPlayer(TObj *, int);
@@ -40,7 +40,7 @@ void swimTeacherFloatTalk(TObj *o)
         D_800A603C = 5;
         D_800A603D = 0x64;
         D_800A603E = 0;
-        FUN_800eea7c(&PLAYER, 0x1e, 0);
+        playerSetAnim(&PLAYER, 0x1e, 0);
         PLAYER.y.p.whole = -0xd2;
         o->d34 = 0xff2e0000;
         o->ba7 = 0;
@@ -69,7 +69,7 @@ void swimTeacherFloatTalk(TObj *o)
         break;
     case 5:
         swimTeacherFloatPlayer(o, 1);
-        FUN_800eea7c(&PLAYER, 0x47, 0);
+        playerSetAnim(&PLAYER, 0x47, 0);
         o->ba7 = 0;
         PLAYER.y.p.whole = -0xe2;
         PLAYER.animFrame = 0;

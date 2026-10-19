@@ -12,9 +12,9 @@ extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, short, int, int);
 extern void func_80110CAC(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
-extern void FUN_800f00ac(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
 extern void playerContactStopCheckJump(TObj *);
-extern void FUN_800ef4e4(TObj *);
+extern void setFacingAndUpDownFromPad(TObj *);
 extern void AnimLoadDuration(TObj *);
 
 void playerStepContactStop(TObj *o)
@@ -35,7 +35,7 @@ void playerStepContactStop(TObj *o)
     case 2:
         func_80110CAC(o);
         playerMoveByAngleSpeed(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         playerContactStopCheckJump(o);
         if (o->wb2 == 0) {
             o->state = 3;
@@ -55,7 +55,7 @@ void playerStepContactStop(TObj *o)
         o->velV = 0;
         o->state++;
     case 4:
-        FUN_800ef4e4(o);
+        setFacingAndUpDownFromPad(o);
         if (DAT_1f8001fc & 0xa0) {
             FUN_8001e4f0(0x3e);
         }

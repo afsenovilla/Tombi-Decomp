@@ -23,7 +23,7 @@ extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_80104dc8(TObj *);
 extern void playerCheckJumpPressedA(TObj *);
-extern void FUN_800ef490(TObj *);
+extern void setFacingFromPad(TObj *);
 extern void ObjMotionStep(TObj *);
 extern int AnimAdvance(TObj *);
 extern short probeFloorPlaneAt(TObj *, short, short);
@@ -52,7 +52,7 @@ void func_801213D0(TObj *o)
         playerCheckJumpPressedA(o);
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         e = D_8009D2E8;
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
@@ -136,7 +136,7 @@ extern TObj *allocObjectLayer1(void);
 extern void playerAirAccelerateX(TObj *);
 extern void playerBittenCarryAirStep(TObj *);
 extern void playerCheckJumpPressedA(TObj *);
-extern void FUN_800ef490(TObj *);
+extern void setFacingFromPad(TObj *);
 extern void ObjMotionStep(TObj *);
 extern int AnimAdvance(TObj *);
 extern short probeFloorPlaneAt(TObj *, short, short);
@@ -165,7 +165,7 @@ void playerBittenJumpCrawler(TObj *o)
         playerCheckJumpPressedA(o);
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         e = D_8009D2E8;
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;

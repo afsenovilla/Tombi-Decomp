@@ -13,7 +13,7 @@ extern unsigned char *D_8009C330;
 extern char D_80010814[];
 extern void FUN_8001d6a4();
 extern void FUN_8001fe6c(TObj *);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void cdSeekStream(int);
 extern void FUN_8001f110(int);
 extern void FUN_800171b8(int, void *);
@@ -47,7 +47,7 @@ void waterfallElderHintScene(TObj *o)
     case 1:
         PLAYER.h->raw -= 0x12800;
         if (PLAYER.h->p.whole < 0x4a) {
-            FUN_800eea7c(&PLAYER, 0, 0);
+            playerSetAnim(&PLAYER, 0, 0);
             o->w08 = 0x14;
             o->state++;
         }
@@ -73,7 +73,7 @@ void waterfallElderHintScene(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0x64;
         PLAYER.state = 0;
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         o->w08 = 0x1e;
         o->state++;
         break;
@@ -90,7 +90,7 @@ void waterfallElderHintScene(TObj *o)
     case 5:
         PLAYER.h->raw += 0x12800;
         if (PLAYER.h->p.whole >= 0x79) {
-            FUN_800eea7c(&PLAYER, 0, 0);
+            playerSetAnim(&PLAYER, 0, 0);
             o->w08 = 0x1e;
             o->state++;
         }

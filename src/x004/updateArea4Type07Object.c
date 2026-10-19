@@ -9,8 +9,8 @@ extern unsigned char PLAYER;
 extern int testGcdFlagBitBcefc(int);
 extern void cullObjectPerspective(TObj *);
 extern int ObjCullRegister(TObj *);
-extern void FUN_80124070(TObj *);
-extern void FUN_8012423c(TObj *);
+extern void l2Type07Sub0(TObj *);
+extern void l2Type07Sub1(TObj *);
 extern void FUN_80124ad8(TObj *);
 extern void FUN_80124e14(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -93,11 +93,11 @@ void updateArea4Type07Object(TObj *o)
         }
         switch (o->step) {
         case 0:
-            FUN_80124070(o);
+            l2Type07Sub0(o);
             if (o->b0c == 7 && o->subtype == 0) o->visible = 0;
             break;
         case 1:
-            FUN_8012423c(o);
+            l2Type07Sub1(o);
             break;
         case 2:
             FUN_80124ad8(o);

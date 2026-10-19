@@ -8,7 +8,7 @@
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 extern void playerAirAccelerateX(TObj *o);
-extern void FUN_800ef490(TObj *o);
+extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
 extern void ObjAddVelY7E(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -39,7 +39,7 @@ void playerBittenJumpGeneric(TObj *o)
         o->h->raw += o->velX << 8;
         D_8009D2E8->h->p.whole = o->h->p.whole;
         D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
@@ -68,7 +68,7 @@ void playerBittenJumpGeneric(TObj *o)
         }
         break;
     case 1:
-        FUN_800ef490(o);
+        setFacingFromPad(o);
         p = D_8009D2E8;
         p->animFrame = o->animFrame & 1;
         p->h->p.whole = o->h->p.whole;

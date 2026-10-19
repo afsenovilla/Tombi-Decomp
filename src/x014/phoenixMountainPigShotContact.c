@@ -5,7 +5,7 @@
 #define U16(p, o) (*(unsigned short *)((p) + (o)))
 extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
-extern void FUN_800eea7c(unsigned char *, int, int);
+extern void playerSetAnim(unsigned char *, int, int);
 
 void phoenixMountainPigShotContact(unsigned char *a, unsigned char *b)
 {
@@ -24,7 +24,7 @@ void phoenixMountainPigShotContact(unsigned char *a, unsigned char *b)
         U8(a, 0xac) = 0;
         b[0] = 2;
         b[0x6a] = 1;
-        FUN_800eea7c(a, 0x10, 0);
+        playerSetAnim(a, 0x10, 0);
         a[0] = 6;
         a[4] = 5;
         a[5] = 0x65;

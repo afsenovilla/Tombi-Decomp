@@ -38,7 +38,7 @@ extern void updateCameraScroll(O *);
 extern void markSectionVisited(void);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
-extern void FUN_800eea7c(PL *, int, int);
+extern void playerSetAnim(PL *, int, int);
 extern void AnimAdvance(PL *);
 extern void setEventComplete(int, int);
 extern void cameraModeHandler6(O *);
@@ -226,7 +226,7 @@ void updateAreaScroll(O *o)
     case 4: {
         unsigned char *f = &PLAYER.b6;
         if (*f == 2) {
-            FUN_800eea7c(&PLAYER, 1, 0);
+            playerSetAnim(&PLAYER, 1, 0);
             D_800A603C = 5;
             D_800A603D = 0x41;
             *f = 0;
@@ -259,7 +259,7 @@ void updateAreaScroll(O *o)
             D_800A6078->s2--;
             if (D_800A6078->s2 < 0x67c) {
                 o->step++;
-                FUN_800eea7c(pl, 0, 0);
+                playerSetAnim(pl, 0, 0);
                 o->w4a = 0x3c;
             }
             cameraModeHandler6(o);

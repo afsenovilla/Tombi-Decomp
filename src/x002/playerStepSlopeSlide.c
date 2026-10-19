@@ -12,7 +12,7 @@ extern unsigned char D_801152E8[];
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerSlopeSlideAccelerate(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
-extern void FUN_800f00ac(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, int, int, int);
 extern void applyFrameVelocityX(TObj *);
@@ -77,7 +77,7 @@ void playerStepSlopeSlide(TObj *o)
             o->step = 0x10;
             o->state = 2;
         }
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
             D_8009D2B0[0] = 0;
             if (o->wb2 > 0x200) o->wb2 = 0x200;

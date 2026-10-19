@@ -5,7 +5,7 @@
 
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 
 void trickVillagePigShotContact(TObj *o, TObj *e)
 {
@@ -24,7 +24,7 @@ void trickVillagePigShotContact(TObj *o, TObj *e)
         e->active = 2;
         e->b6a = 1;
         *(unsigned char *)&o->wac = 0;
-        FUN_800eea7c(o, 0x10, 0);
+        playerSetAnim(o, 0x10, 0);
         o->active = 6;
         o->b04 = 5;
         o->step = 0x65;

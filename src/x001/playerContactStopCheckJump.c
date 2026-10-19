@@ -7,14 +7,14 @@ typedef struct { TObj o; char pc0[6]; unsigned char bc6; } PL;
 extern TObj *D_8009C330;
 extern unsigned int D_8009C984[];
 extern volatile unsigned short D_8009D670[];
-extern void FUN_800efa80(PL *);
+extern void playerSelectGroundAnim(PL *);
 extern void playSFX(int);
 extern void spawnGroundDebris(int, int, int, int);
 
 void playerContactStopCheckJump(PL *o)
 {
     if (D_8009C330->active == 0 && o->bc6 == 0) {
-        FUN_800efa80(o);
+        playerSelectGroundAnim(o);
         o->o.b9d = 0;
         if (o->o.bbe & 0x20) {
             o->o.step = 0x1f;

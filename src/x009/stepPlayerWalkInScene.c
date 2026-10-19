@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern void FUN_800eeae4(TObj *, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
 
 void stepPlayerWalkInScene(TObj *o)
 {
@@ -17,7 +17,7 @@ void stepPlayerWalkInScene(TObj *o)
         PLAYER.step = 0;
         PLAYER.state = 0;
         PLAYER.visible = 1;
-        FUN_800eeae4(&PLAYER, 2, 0);
+        playerSetAnimIfChangedAt(&PLAYER, 2, 0);
         PLAYER.b69 = 0;
         *(signed char *)&PLAYER.b0f = -8;
         o->step++;
@@ -27,7 +27,7 @@ void stepPlayerWalkInScene(TObj *o)
             PLAYER.step = 100;
             PLAYER.state = 0;
             PLAYER.y.p.whole = -0x1d0;
-            FUN_800eeae4(&PLAYER, 2, 0);
+            playerSetAnimIfChangedAt(&PLAYER, 2, 0);
             o->step++;
         }
         break;
@@ -35,7 +35,7 @@ void stepPlayerWalkInScene(TObj *o)
         PLAYER.h->raw -= 0x10000;
         if (PLAYER.h->p.whole < 0x1068) {
             PLAYER.h->p.whole = 0x1068;
-            FUN_800eeae4(&PLAYER, 0x2c, 0);
+            playerSetAnimIfChangedAt(&PLAYER, 0x2c, 0);
             o->step++;
         }
         break;

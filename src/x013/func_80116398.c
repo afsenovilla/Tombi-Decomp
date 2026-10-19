@@ -15,7 +15,7 @@ extern PL PLAYER;
 extern signed char D_8009D2B0;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
-extern void FUN_800eea7c(TObj *, short, short);
+extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80049ca4(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
@@ -37,7 +37,7 @@ void func_80116398(TObj *o)
         p->t.b04 = 5;
         p->t.step = 0x41;
         p->t.state = 0;
-        FUN_800eea7c(&p->t, 0x2c, 0);
+        playerSetAnim(&p->t, 0x2c, 0);
         FUN_80049ca4(o, 1);
         o->velV = 0x500;
         o->state++;
@@ -66,7 +66,7 @@ void func_80116398(TObj *o)
     case 4:
         o->timer = 0x1e;
         p->t.animFrame = 1;
-        FUN_800eea7c(&p->t, 1, 0);
+        playerSetAnim(&p->t, 1, 0);
         o->state++;
         GCD.bcff9 = 0;
         o->active = 2;
@@ -78,7 +78,7 @@ void func_80116398(TObj *o)
         o->timer = 0x1e;
         o->state++;
         p->t.animFrame = 1;
-        FUN_800eea7c(&p->t, 0, 0);
+        playerSetAnim(&p->t, 0, 0);
         break;
     case 6:
         if (--o->timer != -1) break;
@@ -106,7 +106,7 @@ extern PL PLAYER;
 extern signed char D_8009D2B0;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
-extern void FUN_800eea7c(TObj *, short, short);
+extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80049ca4(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
@@ -128,7 +128,7 @@ void func_80116398(TObj *o)
         p->t.b04 = 5;
         p->t.step = 0x41;
         p->t.state = 0;
-        FUN_800eea7c(&p->t, 0x2c, 0);
+        playerSetAnim(&p->t, 0x2c, 0);
         FUN_80049ca4(o, 1);
         o->velV = 0x500;
         o->state++;
@@ -157,7 +157,7 @@ void func_80116398(TObj *o)
     case 4:
         o->timer = 0x1e;
         p->t.animFrame = 1;
-        FUN_800eea7c(&p->t, 1, 0);
+        playerSetAnim(&p->t, 1, 0);
         o->state++;
         GCD.bcff9 = 0;
         o->active = 2;
@@ -169,7 +169,7 @@ void func_80116398(TObj *o)
         o->timer = 0x1e;
         o->state++;
         p->t.animFrame = 1;
-        FUN_800eea7c(&p->t, 0, 0);
+        playerSetAnim(&p->t, 0, 0);
         break;
     case 6:
         if (--o->timer != -1) break;

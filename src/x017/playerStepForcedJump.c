@@ -8,7 +8,7 @@
 extern unsigned char *D_8009C330;
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
-void FUN_8010f328(TObj *o);
+void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void SfxPlay2(int a, int b);
 void playerAirSpinToFall(TObj *o);
@@ -34,7 +34,7 @@ void playerStepForcedJump(TObj *o)
         G[8] = 0;
         *(short *)(G + 0x20) = 0;
         B(o, 0xac) = 0;
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
         PlayerSetAnimIfChanged(o, 4);
         SfxPlay2(2, 4);
         o->state = 1;
@@ -42,7 +42,7 @@ void playerStepForcedJump(TObj *o)
         if (--G[9] != 0) {
             if (G[8] == 0) {
                 (*(unsigned short *)(G + 0x20))++;
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         } else {
             G[8] = 1;
@@ -51,7 +51,7 @@ void playerStepForcedJump(TObj *o)
                 o->state = 2;
             } else {
                 (*(unsigned short *)(G + 0x20))++;
-                FUN_8010f328(o);
+                playerSetJumpRiseVelocity(o);
             }
         }
     case 2:

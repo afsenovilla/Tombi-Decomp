@@ -29,7 +29,7 @@ typedef struct {
 
 extern Q800F3F3C *D_8009C330;
 extern int D_8009D2E8;
-extern void FUN_8010f328(P800F3F3C *);
+extern void playerSetJumpRiseVelocity(P800F3F3C *);
 extern void SfxPlay2(int, int);
 extern void playerUpdateSpeedFromPad(P800F3F3C *);
 extern void playerAirAccelerateX(P800F3F3C *);
@@ -57,7 +57,7 @@ void playerStepAttackJump(P800F3F3C *o)
         o->t.velX = 0;
         D_8009C330->w20 = 0;
         D_8009C330->b8 = 0;
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
         o->t.y.p.whole -= 4;
         SfxPlay2(2, 4);
         o->t.state = 1;
@@ -80,7 +80,7 @@ void playerStepAttackJump(P800F3F3C *o)
             }
             D_8009C330->w20++;
         }
-        FUN_8010f328(o);
+        playerSetJumpRiseVelocity(o);
     case 2:
     common:
         o->t.h->raw += GVARS.s44 << 8;

@@ -9,7 +9,7 @@ extern void FUN_8001e4f0(int);
 extern void playerSetAngleFromSlope(TObj *);
 extern void playerSetFallLean(TObj *);
 extern void playerStickToGround(TObj *);
-extern void FUN_8011116c(TObj *);
+extern void playerDecelerateSpeed(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_8001fec0(TObj *);
 
@@ -42,7 +42,7 @@ void playerStepItemReactionA(TObj *o)
             o->state = 3;
         }
         playerStickToGround(o);
-        FUN_8011116c(o);
+        playerDecelerateSpeed(o);
         playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {
@@ -79,7 +79,7 @@ void playerStepItemReactionA(TObj *o)
             o->state = 3;
         }
         playerStickToGround(o);
-        FUN_8011116c(o);
+        playerDecelerateSpeed(o);
         playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {

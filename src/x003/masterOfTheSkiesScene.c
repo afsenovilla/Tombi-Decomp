@@ -13,7 +13,7 @@ extern unsigned char D_800A60D4[];
 extern short D_800A60EA[];
 extern int AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -42,10 +42,10 @@ void masterOfTheSkiesScene(TObj *o)
         break;
     case 1:
         if (GCD.bcdc7 != 0xff) {
-            FUN_800eea7c(&P, 0x14, 0);
+            playerSetAnim(&P, 0x14, 0);
             o->timer = 0x78;
         } else {
-            FUN_800eea7c(&P, 0x14, 0);
+            playerSetAnim(&P, 0x14, 0);
             o->timer = 0x3c;
         }
         o->state = 2;
@@ -66,7 +66,7 @@ void masterOfTheSkiesScene(TObj *o)
         P.y.raw += P.velY << 8;
         P.velY += 0x20;
         if (--o->timer > 0) break;
-        FUN_800eea7c(&P, 0xd, 0);
+        playerSetAnim(&P, 0xd, 0);
         P.h->p.whole = o->h->p.whole;
         P.y.p.whole = o->y.p.whole - 0x10;
         P.velY = 0;
@@ -85,7 +85,7 @@ void masterOfTheSkiesScene(TObj *o)
             *py = u - 0x10;
             P.h->p.whole = o->h->p.whole;
             *py = o->y.p.whole - 0x10;
-            FUN_800eea7c(&P, 0xd, 0);
+            playerSetAnim(&P, 0xd, 0);
         }
         o->state = 10;
         break;

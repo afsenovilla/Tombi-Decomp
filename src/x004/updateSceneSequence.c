@@ -70,7 +70,7 @@ extern void FUN_8001d6a4();
 extern void startAreaBgm(void);
 extern void dispatchAreaItemUpdate(TObj *, Pos *, int);
 extern void FUN_8003fd78(TObj *, int, int);
-extern void FUN_800eea7c(TObj *, short, short);
+extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80026c50(int, int, int);
 extern void FUN_8001e4f0(int);
 extern int FUN_800202b4(TObj *);

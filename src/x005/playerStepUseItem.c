@@ -35,7 +35,7 @@ extern unsigned char DAT_801152e8[];
 extern char DAT_80010748[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
-extern void FUN_800ec84c(int);
+extern void spawnColorBurst(int);
 extern void FUN_80026e0c(int, int);
 extern void FUN_80030b9c(int, int, int, int);
 extern void spawnPlayerPoolType12Object(void);
@@ -123,7 +123,7 @@ void playerStepUseItem(TObj *o)
         k = X(o)->d3;
         o->d8c = DAT_801152e8[o->wb0];
         if (k < 0x65) if (k >= 0x62) {
-            FUN_800ec84c(k - 0x62);
+            spawnColorBurst(k - 0x62);
             X(o)->d3 = 0;
             if (*((unsigned char *)&o->da0 + 1) == 2) {
                 *((unsigned char *)&o->da0 + 1) = 0;

@@ -13,7 +13,7 @@ extern unsigned short D_800A6066[];
 extern Fix16 *D_800A6078;
 extern short D_800A60EA[];
 extern TObj *showMessageBoxDirect(int, int, V *);
-extern void FUN_800eea7c(TObj *, short, short);
+extern void playerSetAnim(TObj *, short, short);
 extern void npcSetAnim(TObj *, int, int);
 extern void playSFX(int);
 extern void SfxPlay2(int, int);
@@ -41,11 +41,11 @@ void aspiringActorGuardTalk(TObj *o)
         D_800A603D[0] = 0x64;
         D_800A603E[0] = 0;
         p = &PLAYER;
-        FUN_800eea7c(p, 0, 0);
+        playerSetAnim(p, 0, 0);
         o->state++;
         if (((unsigned char*)&GCD.bce53)[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 1) {
             playSFX(0x20);
-            FUN_800eea7c(p, 0x28, 0);
+            playerSetAnim(p, 0x28, 0);
             o->w08 = 0x78;
             o->state = 4;
         }
@@ -53,7 +53,7 @@ void aspiringActorGuardTalk(TObj *o)
             o->state = 6;
             if (((unsigned char*)&GCD.bce54)[0] == 1 && ((unsigned char*)&GV2.bb1)[0] == 2) {
                 SfxPlay2(0x25, 0x28);
-                FUN_800eea7c(&PLAYER, 0x29, 0);
+                playerSetAnim(&PLAYER, 0x29, 0);
                 o->w08 = 0x78;
                 o->state = 8;
             }
@@ -63,7 +63,7 @@ void aspiringActorGuardTalk(TObj *o)
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 0, &v);
         npcSetAnim(p, 0x20, 0);
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         o->state++;
         break;
     case 3: {
@@ -80,7 +80,7 @@ void aspiringActorGuardTalk(TObj *o)
         o->state = 0x14;
         if (((unsigned char*)&GV2.bb1)[0] == 1) {
             playSFX(0x20);
-            FUN_800eea7c(&PLAYER, 0x28, 0);
+            playerSetAnim(&PLAYER, 0x28, 0);
             o->w08 = 0xc8;
             o->state = 0x12;
         }
@@ -90,7 +90,7 @@ void aspiringActorGuardTalk(TObj *o)
     case 4:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 1, &v);
         npcSetAnim(p, 0x20, 0);
@@ -128,7 +128,7 @@ void aspiringActorGuardTalk(TObj *o)
         o->state = 0x14;
         if (((unsigned char*)&GV2.bb1)[0] == 2) {
             SfxPlay2(0x25, 0x28);
-            FUN_800eea7c(&PLAYER, 0x29, 0);
+            playerSetAnim(&PLAYER, 0x29, 0);
             o->w08 = 0xc8;
             o->state = 0x13;
         }
@@ -138,7 +138,7 @@ void aspiringActorGuardTalk(TObj *o)
     case 8:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         v = *(V *)&p->a;
         p->d90 = (int)showMessageBoxDirect(2, 3, &v);
         o->state++;
@@ -197,14 +197,14 @@ void aspiringActorGuardTalk(TObj *o)
     case 18:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         o->w08 = 100;
         o->state = 4;
         break;
     case 19:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&PLAYER, 0, 0);
+        playerSetAnim(&PLAYER, 0, 0);
         o->w08 = 100;
         o->state = 8;
         break;

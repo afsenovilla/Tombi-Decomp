@@ -18,7 +18,7 @@ extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void sevenFriendsSetAnim(TObj *, int, int);
 extern void sevenFriendsMemberSetAnim(void *, int, int);
 extern void setEventComplete(int, int);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 
 void pigGateSevenFriendsScene(TObj *o)
 {
@@ -166,7 +166,7 @@ void pigGateSevenFriendsScene(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0x64;
         PLAYER.state = 0;
-        FUN_800eea7c(&PLAYER, 1, 0);
+        playerSetAnim(&PLAYER, 1, 0);
         o->w08 = PLAYER.h->p.whole - 0xa0;
         o->state = 20;
         break;
@@ -175,7 +175,7 @@ void pigGateSevenFriendsScene(TObj *o)
         if (--o->w08 > 0) {
             break;
         }
-        FUN_800eea7c(&PLAYER, 0x2b, 0);
+        playerSetAnim(&PLAYER, 0x2b, 0);
         D_1F8001C6 = 0;
         o->w08 = 0x50;
         o->state++;

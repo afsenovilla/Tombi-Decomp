@@ -12,7 +12,7 @@
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned char *D_8009C330;
 extern unsigned char D_801152E8[];
-extern void FUN_800f1478(TObj *);
+extern void playerStepIdle(TObj *);
 extern void FUN_800f1d44(TObj *);
 extern void playerTryAttack(TObj *, int);
 extern void playerStepJump(TObj *);
@@ -38,7 +38,7 @@ extern void playerStepVerticalJump(TObj *);
 extern void FUN_80122f14(TObj *);
 extern void playerStepClingWeaponAttack(TObj *);
 extern void playerStepSlideSteer(TObj *);
-extern void FUN_801097ec(TObj *);
+extern void playerStepPush(TObj *);
 extern void playerStepPerchIdle(TObj *);
 extern void FUN_801237e4(TObj *);
 extern void FUN_80121b58(TObj *);
@@ -54,8 +54,8 @@ extern void FUN_80121d6c(TObj *);
 extern void FUN_80122044(TObj *);
 extern void playerStepItemReactionA(TObj *);
 extern void playerStepItemReactionB(TObj *);
-extern void FUN_800f00ac(TObj *);
-extern void FUN_80102a08(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
+extern void playerStep2EByArea(TObj *);
 extern void playerStepUseItem(TObj *);
 extern void playerStepWalkIntoDepth(TObj *);
 extern void playerStepRopeSwing(TObj *);
@@ -66,8 +66,8 @@ extern void FUN_8011eae8(TObj *);
 extern void playerStepRopeJumpOff(TObj *, int);
 extern void FUN_8011dc0c(TObj *);
 extern void FUN_8011d9a4(TObj *);
-extern void FUN_80106f98(TObj *);
-extern void FUN_8010d390(TObj *);
+extern void playerStep3CByArea(TObj *);
+extern void playerStepSwim(TObj *);
 extern void playerSwimDirFromPad(TObj *);
 extern void playerStepSwimUnderwater(TObj *);
 extern void FUN_8011b330(TObj *);
@@ -173,9 +173,9 @@ void playerNormalModeDispatch(TObj *o, int p2)
         D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
-        FUN_800f1478(o);
+        playerStepIdle(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 1:
         D_8009D2B0[0] = 1;
@@ -195,24 +195,24 @@ void playerNormalModeDispatch(TObj *o, int p2)
         }
         playerTryAttack(o, 0);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 2:
         dirA(o);
-        FUN_800f2b98(o);
+        playerStepJump(o);
         chk(o, 2);
         break;
     case 3:
-        FUN_800f44b0(o);
+        playerStepWeaponAttack(o);
         turn(o);
-        if ((*(unsigned char*)&o->wac) < 2) FUN_800f00ac(o);
+        if ((*(unsigned char*)&o->wac) < 2) playerCheckGroundAndFall(o);
         break;
     case 4:
         if (o->b9d == 0) {
             dirC(o);
             D_8009C330[7] = o->animFrame;
         }
-        FUN_800f36e0(o);
+        playerStepAirWeaponAttack(o);
         turn(o);
         break;
     case 5:
@@ -241,7 +241,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepFlipOntoPerch(o);
         break;
     case 13:
-        FUN_801099b8(o);
+        playerStepClimb(o);
         break;
     case 14:
         FUN_80104698(o);
@@ -280,7 +280,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         D_8009D2B0[0] = 1;
         dirA(o);
         dirF(o);
-        FUN_801097ec(o);
+        playerStepPush(o);
         if (SPAD.s1fc & SPAD.s3c6) {
             D_8009D2B0[0] = 0;
             o->b9c = 1;
@@ -290,7 +290,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         }
         playerTryAttack(o, 0);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x1d:
         playerStepPerchIdle(o);
@@ -333,15 +333,15 @@ void playerNormalModeDispatch(TObj *o, int p2)
     case 0x2a:
         playerStepItemReactionA(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x2b:
         playerStepItemReactionB(o);
         turn(o);
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     case 0x2e:
-        FUN_80102a08(o);
+        playerStep2EByArea(o);
         break;
     case 0x23:
     case 0x2f:
@@ -379,11 +379,11 @@ void playerNormalModeDispatch(TObj *o, int p2)
         FUN_8011d9a4(o);
         break;
     case 0x3c:
-        FUN_80106f98(o);
+        playerStep3CByArea(o);
         break;
     case 0x3d:
         D_8009D2B0[0] = 1;
-        FUN_8010d390(o);
+        playerStepSwim(o);
         break;
     case 0x3e:
         D_8009D2B0[0] = 1;

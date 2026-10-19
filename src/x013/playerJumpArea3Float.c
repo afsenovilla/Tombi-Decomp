@@ -8,8 +8,8 @@ extern char DAT_80010ae8[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
-extern void FUN_8011133c(TObj *);
-extern void FUN_801113bc(TObj *);
+extern void setVelXFromPadLR(TObj *);
+extern void adjustVelYFromPadDown(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void playerFloatDirFromPad(TObj *);
 
@@ -34,12 +34,12 @@ void playerJumpArea3Float(TObj *o)
     FUN_8001fec0(o);
     *(volatile int *)&o->h->raw += DAT_8009c944 * 0x80;
     o->y.raw += DAT_8009c946 * 0x80;
-    FUN_8011133c(o);
+    setVelXFromPadLR(o);
     o->h->raw += o->velX * 0x100;
     o->timer--;
     if ((short)o->timer <= 0) {
         o->timer = 0;
-        FUN_801113bc(o);
+        adjustVelYFromPadDown(o);
         FUN_8001fd94(o);
     }
     playerFloatDirFromPad(o);

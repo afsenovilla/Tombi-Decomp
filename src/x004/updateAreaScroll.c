@@ -89,8 +89,8 @@ extern int tryStartItemInteraction(O *, int, int);
 extern void markSectionVisited(void);
 extern void loadSectionBounds(O *);
 extern void AnimAdvance(PL *);
-extern void FUN_800eea7c(PL *, int, int);
-extern void FUN_800eeae4(PL *, int, int);
+extern void playerSetAnim(PL *, int, int);
+extern void playerSetAnimIfChangedAt(PL *, int, int);
 extern void checkScrollItemDoorB(O *);
 extern void checkScrollItemDoorA(O *);
 
@@ -529,7 +529,7 @@ void updateAreaScroll(O *o)
         p->step = 0x41;
         p->state = 0;
         }
-        FUN_800eeae4(p, 0, 0);
+        playerSetAnimIfChangedAt(p, 0, 0);
         if (stepPlayerXToward(o->w5a)) o->step++;
         break;
     case 5:
@@ -556,7 +556,7 @@ void updateAreaScroll(O *o)
         o->w30 = -100;
         o->step++;
         PLAYER.yw = -0x22;
-        FUN_800eea7c(&PLAYER, 1, 0);
+        playerSetAnim(&PLAYER, 1, 0);
         PLAYER.animFrame = 1;
         break;
     case 9:
@@ -576,7 +576,7 @@ void updateAreaScroll(O *o)
     case 10:
         if (PLAYER.state != 2) break;
         o->step++;
-        FUN_800eea7c(&PLAYER, 1, 0);
+        playerSetAnim(&PLAYER, 1, 0);
         PLAYER.b04 = 5;
         PLAYER.step = 0x65;
         PLAYER.state = 0;
@@ -597,7 +597,7 @@ void updateAreaScroll(O *o)
         o->w30 = -0x3ac;
         o->step++;
         PLAYER.yw = -0x36a;
-        FUN_800eea7c(&PLAYER, 1, 0);
+        playerSetAnim(&PLAYER, 1, 0);
         PLAYER.animFrame = 1;
         break;
     case 13:

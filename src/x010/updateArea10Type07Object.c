@@ -7,8 +7,8 @@ extern unsigned short D_8012F378[];
 extern unsigned char D_800A6047;
 extern unsigned char PLAYER;
 extern int ObjCullRegister(TObj *);
-extern void FUN_80121eb8(TObj *);
-extern void FUN_80122084(TObj *);
+extern void l2Type07Sub0(TObj *);
+extern void l2Type07Sub1(TObj *);
 extern void FUN_80122804(TObj *);
 extern void FUN_80122b40(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -81,10 +81,10 @@ void updateArea10Type07Object(TObj *o)
         }
         switch (o->step) {
         case 0:
-            FUN_80121eb8(o);
+            l2Type07Sub0(o);
             break;
         case 1:
-            FUN_80122084(o);
+            l2Type07Sub1(o);
             break;
         case 2:
             FUN_80122804(o);

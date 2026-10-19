@@ -9,7 +9,7 @@ extern void AnimAdvance(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playerSetAngleFromSlope(TObj *);
 extern void playerSetFallLean(TObj *);
-extern void FUN_800f00ac(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
 
 static __inline__ short inc(unsigned char x)
 {
@@ -82,7 +82,7 @@ void playerStepRideSlopeContact(TObj *o)
             o->step = 0x13;
             o->state = 0;
         }
-        FUN_800f00ac(o);
+        playerCheckGroundAndFall(o);
         break;
     }
 }

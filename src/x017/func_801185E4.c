@@ -12,7 +12,7 @@ extern unsigned char D_800A603CA[], D_800A603DA[], D_800A603EA[], TALK_POSE[], D
 extern short D_1F8000EEA[], D_1F8000F2A[];
 extern void FUN_8001e5f4(int, int);
 extern unsigned int FUN_8001f9e0(void);
-extern void FUN_800eea7c(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
 extern void FUN_800eeb5c(TObj *, int);
 
 void func_801185E4(TObj *o)
@@ -70,7 +70,7 @@ void func_801185E4(TObj *o)
     case 4:
         if (--o->w08 > 0)
             break;
-        FUN_800eea7c(&PLAYER, 0x24, 0);
+        playerSetAnim(&PLAYER, 0x24, 0);
         o->w08 = 60;
         o->state++;
         break;

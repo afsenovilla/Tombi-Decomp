@@ -55,7 +55,7 @@ extern void FUN_8001d6a4();
 extern void startAreaBgm(void);
 extern void dispatchAreaItemUpdate(TObj *, Pos *, int);
 extern void FUN_8003fd78(TObj *, int, int);
-extern void FUN_800eea7c(TObj *, short, short);
+extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80026c50(int, int, int);
 extern void FUN_8001e4f0(int);
 extern int FUN_800202b4(TObj *);
@@ -123,7 +123,7 @@ void updateSceneSequence(TObj *o)
                 q->state = 0;
                 q->animFrame = 0;
                 q->velY = 0x400;
-                FUN_800eea7c(q, 1, 0);
+                playerSetAnim(q, 1, 0);
                 o->step++;
             case 1:
                 if (o->h->p.whole < 200) o->animFrame = 0;
