@@ -341,6 +341,17 @@ int StoreImage(RECT *r, u32 *p) {
     for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) *d++ = vram[(r->y + j) & 511][(r->x + i) & 1023];
     return 0;
 }
+/* libgpu LoadClut / LoadClut2: upload a 256- / 16-entry CLUT row and return its CLUT id (GetClut) */
+u16 LoadClut(u32 *clut, int x, int y) {
+    RECT r; r.x = x; r.y = y; r.w = 256; r.h = 1;
+    LoadImage(&r, clut);
+    return (u16)((y << 6) | ((x >> 4) & 0x3F));
+}
+u16 LoadClut2(u32 *clut, int x, int y) {
+    RECT r; r.x = x; r.y = y; r.w = 16; r.h = 1;
+    LoadImage(&r, clut);
+    return (u16)((y << 6) | ((x >> 4) & 0x3F));
+}
 int MoveImage(RECT *r, int x, int y) {
     for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++)
         vram[(y + j) & 511][(x + i) & 1023] = vram[(r->y + j) & 511][(r->x + i) & 1023];
@@ -362,6 +373,7 @@ u32 *ClearOTag(u32 *ot, int n) {
     ot[n - 1] = 0xFFFFFF;
     return ot;
 }
+int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn in that vblank */
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
 void DrawOTag(u32 *ot) {
     u32 *p = ot; int n = 0;
@@ -369,7 +381,14 @@ void DrawOTag(u32 *ot) {
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
-        if (len) packet(p + 1, len);
+        if (len) {
+            if (port_dump_packets && port_frame == port_dump_packets) {
+                port_printf("PK@%08x", (u32)p);
+                for (u32 k = 1; k <= len; k++) port_printf(" %08x", p[k]);
+                port_printf("\n");
+            }
+            packet(p + 1, len);
+        }
         if (next == 0xFFFFFF) break;
         p = (u32 *)(0x80000000u | next);
     }

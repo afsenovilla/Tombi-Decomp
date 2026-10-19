@@ -162,6 +162,7 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--dump-frames") && i + 1 < argc) port_dump_dir = argv[++i];
         else if (streq(argv[i], "--dump-every") && i + 1 < argc) port_dump_every = atoi_(argv[++i]);
         else if (streq(argv[i], "--dump-vram")) port_dump_vram = 1;
+        else if (streq(argv[i], "--dump-packets") && i + 1 < argc) { extern int port_dump_packets; port_dump_packets = atoi_(argv[++i]); }
         else if (streq(argv[i], "--play-movies")) { extern int port_play_movies; port_play_movies = 1; }
         else if (streq(argv[i], "--no-interp")) port_interp = 0;
         else if (streq(argv[i], "--interp") && i + 1 < argc) {
