@@ -658,6 +658,8 @@ def link(outdir, nm, objlist):
     def addr_of(n):
         if n in syms: return syms[n]
         m = re.match(r"(?:func|FUN|D|DAT|jtbl|LAB|PTR|PTR_DAT)_([0-9A-Fa-f]{8})$", n)
+        if not m:   # typed aliases of an address in the area C: D_1F8002DCx, DAT_1f800310p, D_8009C960A ...
+            m = re.match(r"(?:D|DAT)_([0-9A-Fa-f]{8})[A-Za-z_]\w*$", n)
         return int(m.group(1), 16) if m else None
     for n in sorted(undefined):
         if n.startswith(("port_", "__", "_GLOBAL_OFFSET")): continue
