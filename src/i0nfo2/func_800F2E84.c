@@ -1,4 +1,5 @@
 // FUNC 800f2e84 468 I0NFO2
+// MATCHING 800f2e84 468
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
@@ -21,19 +22,19 @@ short func_800F2E84(TObj *o)
     switch (U16(o, 0xBA)) {
     case 8: {
         Pos6 q;
-        int x;
-        q = *(Pos6 *)&o->a;
-        x = 2;
-        if (D_8009CDE2 == 0) {
-            x = 0;
-            if (D_8009CDE1 != 0) goto inc;
+        unsigned char c;
+        c = D_8009CDE2;
+        do { q = *(Pos6 *)&o->a; } while (0);
+        if (c != 0) {
+            S32(o, 0x90) = func_8002DCC8(2, 2, &q);
+            r = 1;
+        } else if (D_8009CDE1 == 0) {
+            S32(o, 0x90) = func_8002DCC8(2, 0, &q);
+            r = 1;
+        } else {
+            D_8009CFAA++;
+            r = 0;
         }
-        S32(o, 0x90) = func_8002DCC8(2, x, &q);
-        r = 1;
-        break;
-    inc:
-        D_8009CFAA++;
-        r = 0;
         break;
     }
     case 9:
