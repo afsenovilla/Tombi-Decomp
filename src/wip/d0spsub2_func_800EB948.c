@@ -45,9 +45,9 @@ void func_800EB948(int n, short x, short y, int bright)
         S->code &= ~2;
         S->y0 = y;
         S->u0 = D_800F6D18[i].u;
+        S->v0 = D_800F6D18[i].v;
         S->w = 8;
         S->h = 8;
-        S->v0 = D_800F6D18[i].v;
         S->clut = GetClut(0x170, 0x1F0);
         p = D_1F800164;
         *p = *S;
@@ -55,12 +55,12 @@ void func_800EB948(int n, short x, short y, int bright)
         D_1F800164++;
     }
     dg[0] = n / 10000000 % 10;
-    dg[1] = n / 1000000 % 10;
-    dg[2] = n / 100000 % 10;
-    dg[3] = n / 10000 % 10;
-    dg[4] = n / 1000 % 10;
-    dg[5] = n / 100 % 10;
-    dg[6] = n / 10 % 10;
+    dg[1] = n / 1000000 - n / 10000000 * 10;
+    dg[2] = n / 100000 - n / 1000000 * 10;
+    dg[3] = n / 10000 - n / 100000 * 10;
+    dg[4] = n / 1000 - n / 10000 * 10;
+    dg[5] = n / 100 - n / 1000 * 10;
+    dg[6] = n / 10 - n / 100 * 10;
     dg[7] = n % 10;
     if (dg[0] != 0 || dg[1] != 0) j = 0;
     else j = 1;
