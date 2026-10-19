@@ -178,27 +178,25 @@ int func_800E82A4(Menu *m, Card *c)
         break;
     case 5:
         if (D_800F7148 == 0) {
-            btn = D_1F8001FC;
-            if (btn & 0x20) {
+            if (D_1F8001FC & 0x20) {
                 D_800F7148 = 1;
                 goto snd5;
             }
-            if (btn & 0x2000) goto cancel5;
-            if (btn & 0x4000) {
+            if (D_1F8001FC & 0x2000) goto cancel5;
+            if (D_1F8001FC & 0x4000) {
                 SfxPlay2(0xA, 0xA);
                 m->msg = 6;
                 m->sub++;
             }
             break;
         }
-        btn = D_1F8001FC;
-        if (btn & 0x80) {
+        if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
         snd5:
             playSFX(8);
             return 0;
         }
-        if (btn & 0x6000) {
+        if (D_1F8001FC & 0x6000) {
         cancel5:
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
@@ -294,16 +292,7 @@ int func_800E82A4(Menu *m, Card *c)
             }
             break;
         }
-        if (D_1F8001FC & 0x80) {
-            D_800F7148 = 0;
-            playSFX(8);
-            break;
-        }
-        if (D_1F8001FC & 0x6000) {
-            SfxPlay2(0x1B, 0x1C);
-            m->sub = 2;
-        }
-        break;
+        goto c15b;
     case 12:
     case 14:
         m->msg = 14;
@@ -331,6 +320,7 @@ int func_800E82A4(Menu *m, Card *c)
             }
             return 0;
         }
+    c15b:
         if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
