@@ -1,4 +1,5 @@
 // FUNC 800f3058 564 I0NFO2
+// MATCHING 800f3058 564
 #include "TOBJ.H"
 #include "raw7.h"
 extern void func_8001FE94(TObj *o, int n);
@@ -14,10 +15,11 @@ extern unsigned short D_800A6066[];
 extern unsigned char D_800A60E4[];
 extern void **D_800FEEFC[][3];
 
-static inline void setAnim0(TObj *o)
+static inline void setAnimF(TObj *p, int f)
 {
-    o->anim = D_800FEEFC[o->subtype][0][U16(o, 0x2E)];
-    func_8001FE94(o, 0);
+    p->animFrame = f;
+    p->anim = D_800FEEFC[p->subtype][0][*(volatile unsigned short *)&p->animFrame];
+    func_8001FE94(p, 0);
 }
 
 void func_800F3058(TObj *o)
@@ -69,8 +71,7 @@ void func_800F3058(TObj *o)
             o->b6a = 0;
             o->step = 0;
             o->state = 0;
-            o->animFrame = o->wb0;
-            setAnim0(o);
+            setAnimF(o, U16(o, 0xB0));
         }
         break;
     }
