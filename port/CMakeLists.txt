@@ -13,7 +13,8 @@ set(GEN ${CMAKE_CURRENT_BINARY_DIR}/gen)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # 1. pick + filter the game sources (MAIN0 and X000 for now) into ${GEN}/src; re-run on every configure
-set(PORT_PROGS MAIN0 X000 O0PTSUB0 G0OVER D0SPSUB D0SPSUB2 D0SPSUB3 I0NFO I0NFO2 I0NFO3 CACHE STRING "programs whose C is compiled into the port")
+set(PORT_PROGS MAIN0 X000 O0PTSUB0 G0OVER D0SPSUB D0SPSUB2 D0SPSUB3 I0NFO I0NFO2 I0NFO3
+    X001 X002 X003 X004 X005 X006 X008 X009 X010 X011 X013 X014 X016 X017 X018 X019 CACHE STRING "programs whose C is compiled into the port")
 execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_port.py sources ${GEN} ${PORT_PROGS}
                 RESULT_VARIABLE gen_rc)
 if(gen_rc)

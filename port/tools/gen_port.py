@@ -125,6 +125,8 @@ def filter_src(text, dropped=None):
             continue
         # register variables pinned to MIPS registers: drop the pin
         line = re.sub(r'\s*(?:__asm__|\basm)\s*\(\s*"\$?(?:[atvsk]\d|zero|at|gp|sp|fp|ra|\d+)"\s*\)(?=\s*[;=,])', "", line)
+        # empty asm statements with operands or clobbers inside a line (register allocation hints for the old gcc)
+        line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*""\s*:(?:[^()]|\([^()]*\))*\)\s*;', ";", line)
         # asm statements with MIPS instructions or register clobbers (empty barriers asm("") are harmless)
         if re.match(r'\s*(__asm__|asm)\s*(volatile\s*)?\(\s*"[^"]', line) or \
            re.match(r'\s*(__asm__|asm)\s*(volatile\s*)?\(\s*""\s*:', line):
@@ -193,7 +195,95 @@ FIXES = {}
 ASM_ALIASES = {}
 
 
-def sources(outdir, progs, ovls=()):
+OVL_BASE, OVL_END = 0x800E8028, 0x80140000
+
+
+def area_syms(prog):
+    """{name: address} of an area overlay X0nn, as tools/ncheck.py resolves the names of src/x0nn/*.c: MAIN0's
+    symbol files plus the overlay's own (config/symbol_addrs_x0nn.txt, notes/names_x0nn.csv, the names of
+    notes/functions_x0nn.csv and the functions src/x0nn/ defines)."""
+    syms, names = {}, {}
+    for f in ("main0", prog.lower()):
+        p = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)
+        for l in (open(p) if os.path.exists(p) else ()):
+            m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
+            if m: syms[m.group(1)] = int(m.group(2), 16)
+        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f,) if f != "main0" else ()):
+            p = os.path.join(ROOT, "notes", csvf)
+            for l in (open(p) if os.path.exists(p) else ()):
+                m = re.match(r"([0-9a-fA-F]{8}),(?:\d+,)?(\w+)", l)
+                if m:
+                    a = int(m.group(1), 16)
+                    if names.setdefault(m.group(2), a) != a: names[m.group(2)] = None
+    d = os.path.join(ROOT, "src", prog.lower())
+    for f in (sorted(os.listdir(d)) if os.path.isdir(d) else ()):
+        if not f.endswith(".c"): continue
+        m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)", open(os.path.join(d, f), errors="replace").read(300))
+        if m: syms[f[:-2]] = int(m.group(1), 16)
+    for k, a in names.items():
+        if a is not None: syms.setdefault(k, a)
+    return syms
+
+
+def area_signatures(progs):
+    """{prog: [(addr, word)] * 2}: two words of the area's own code that no other listed overlay has at that address,
+    so the runtime can tell which area file is in RAM (all of them share X000's header word)."""
+    import units as UN
+    d = {p: open(os.path.join(ROOT, UN.BINS[p][0]), "rb").read() for p in progs}
+    out = {}
+    for p in progs:
+        got = []
+        for o in range(0x80115EA4 - OVL_BASE, len(d[p]) - 3, 4):
+            w = d[p][o:o + 4]
+            if w != b"\0\0\0\0" and all(d[q][o:o + 4] != w for q in progs if q != p):
+                got.append((OVL_BASE + o, int.from_bytes(w, "little")))
+                if len(got) == 2: break
+        if len(got) < 2: sys.exit("gen_port: no signature words for " + p)
+        out[p] = got
+    return out
+
+
+def area_plan(U, areas):
+    """Which code of each area overlay the port compiles, and the dispatch table per area.
+    A function of X000 is *shared* with area P when P's file has the same bytes over its whole range (same address,
+    so the same jal targets and data addresses): P then runs X000's native code.  Everything else of P that has C
+    is compiled with the prefix P_.  X000 functions that some area does not share are `varying`: their definition
+    is renamed X000_<name> and every call by name goes through a dispatch thunk (port_resolve_call), which picks
+    the native code of the area resident in RAM.
+    Returns (vary {addr: X000 name}, compiled [(prog, unit)], areamap [(prog, addr, native name)])."""
+    import units as UN
+    blob = {}
+    def data(p):
+        if p not in blob:
+            fn = os.path.join(ROOT, UN.BINS[p][0])
+            blob[p] = open(fn, "rb").read() if os.path.exists(fn) else None
+        return blob[p]
+    def same(p, a, n):
+        x, y = data("X000"), data(p)
+        o = a - OVL_BASE
+        return x is not None and y is not None and o + n <= len(y) and x[o:o + n] == y[o:o + n]
+    x0 = {u.addr: u for u in U["X000"] if not u.lib}
+    vary = {}
+    for a, u in x0.items():
+        if any(not same(p, a, u.size) for p in areas): vary[a] = u.name
+    compiled, amap = [], []
+    for a, u in x0.items():
+        if a in vary: amap.append(("X000", a, None))
+    for p in areas:
+        if data(p) is None: sys.exit("gen_port: %s missing (game/%s)" % (p, UN.BINS[p][0]))
+        for u in U[p]:
+            if u.lib or not (OVL_BASE <= u.addr < OVL_END): continue
+            xu = x0.get(u.addr)
+            if xu and xu.size == u.size and same(p, u.addr, u.size):
+                if u.addr in vary: amap.append((p, u.addr, None))      # X000's native code (renamed X000_)
+                continue
+            if u.file and u.file.endswith(".c"):
+                compiled.append((p, u)); amap.append((p, u.addr, p + "_" + u.name))
+    return vary, compiled, amap
+
+
+
+def sources(outdir, progs, ovls=(), areas=()):
     FIXES.update(load_fixes())
     from units import units, defined_name
     U = units()
@@ -225,14 +315,24 @@ def sources(outdir, progs, ovls=()):
                 names.add(defined_name(u.file, stem))
                 picked.append((prog, u, stem, defined_name(u.file, stem)))
         ovl_names[prog] = names
-    refs = object_refs([(p[0].lower() + "__" + p[2]) if p[0] in ovl_names else p[2] for p in picked])
+    # area overlays X001..X019: their own code (not shared with X000) under the prefix X0nn_ (area_plan)
+    vary, area_units, areamap = area_plan(U, areas) if areas else ({}, [], [])
+    area_own = {}                      # prog -> {addr: native name}
+    for prog, u in area_units:
+        stem = os.path.basename(u.file)[:-2]
+        area_own.setdefault(prog, {})[u.addr] = prog + "_" + defined_name(u.file, stem)
+        picked.append((prog, u, stem, defined_name(u.file, stem)))
+    asyms = {p: area_syms(p) for p in areas}
+    x000_native = {}                   # varying X000 functions: addr -> X000_<name>
+    refs = object_refs([(p[0].lower() + "__" + p[2]) if p[0] in ovl_names else p[2] for p in picked
+                        if p[0] not in asyms])
     allp = list(progs) + [p for p in ovls if p not in progs]
     prov = {p: provides(p) for p in allp}
     canon = {}                         # name -> address everybody agrees on (MAIN0 first)
     for p in allp:
         for n, a in prov[p].items(): canon.setdefault(n, a)
     ovlmap = []
-    out_texts = {}
+    out_texts, area_texts = {}, {}
     renamed = {}
     for prog, u, stem, name in picked:
         dst = os.path.join(outdir, "src", prog.lower(), stem + ".c")
@@ -247,25 +347,44 @@ def sources(outdir, progs, ovls=()):
             print("gen_port: %s is MIPS asm only: needs a port shim" % name)
         # names that mean another address in this file than in the rest of the game: rename them in this file
         ovl = prog in ovl_names
-        ren = dict(refs.get((prog.lower() + "__" + stem) if ovl else stem, {}))
-        for n, a in prov[prog].items():
-            if canon.get(n) != a and re.search(r"\b%s\b" % re.escape(n), src): ren.setdefault(n, a)
+        area = prog in asyms
+        defs = ""
+        if area:
+            ren = {}
+            local = set(re.findall(r"^static\b[^;=(]*?\b(\w+)\s*\(", src, re.M))   # file-local helpers
+            for n in set(re.findall(r"\b[A-Za-z_]\w*\b", src)):
+                a = asyms[prog].get(n)
+                if a is None or n in local: continue
+                if a in area_own[prog]: defs += "#define %s %s\n" % (n, area_own[prog][a])
+                elif canon.get(n) != a: ren[n] = a
+        else:
+            ren = dict(refs.get((prog.lower() + "__" + stem) if ovl else stem, {}))
+            for n, a in prov[prog].items():
+                if canon.get(n) != a and re.search(r"\b%s\b" % re.escape(n), src): ren.setdefault(n, a)
         if ovl:
             for n in ovl_names[prog]: ren.pop(n, None)
-        defs = "".join("#define %s %s__%08X\n" % (n, n, a) for n, a in sorted(ren.items()))
+        defs += "".join("#define %s %s__%08X\n" % (n, n, a) for n, a in sorted(ren.items()))
         for n, a in ren.items(): renamed["%s__%08X" % (n, a)] = a
+        if prog == "X000" and u.addr in vary:      # varying: callers go through the dispatch thunk of `name`
+            x000_native[u.addr] = "X000_" + name
+            defs += "#define %s X000_%s\n" % (name, name)
         if ovl:
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
-        out_texts[dst] = txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
         (files24 if hm else files).append(dst)
         if ovl:
             if name not in dropped: ovlmap.append((prog, u.addr, prog + "_" + name))
+        elif area or u.addr in x000_native: pass
         elif name not in dropped: fmap.append((u.addr, name))
-    nfwd = forward_short_calls(out_texts)
+        if area: area_texts.setdefault(prog, {})[dst] = txt
+        else: out_texts[dst] = txt
+    nfwd, gdefs = forward_short_calls(out_texts)
+    for prog, t in area_texts.items():              # each area resolves names among its own definitions first
+        nfwd += forward_short_calls(t, gdefs)[0]
+        out_texts.update(t)
     for dst, txt in out_texts.items():
         if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:
             open(dst, "w").write(txt)
@@ -297,11 +416,30 @@ def sources(outdir, progs, ovls=()):
         f.write("  {0, 0, 0, 0}\n};\nconst int port_ovlmap_count = %d;\n" % len(ovlmap))
         f.write("const PortOvl port_ovls[] = {\n%s  {0, 0}\n};\n" % "".join(
             "  {0x%02X, \"%s\"},\n" % (ids[p], p) for p in ovls))
+        # area overlays: the area resident in RAM is recognised by signature words (area_signatures); per area
+        # the native code of every varying address (port_lookup)
+        alist = ["X000"] + list(areas) if areas else []
+        ents = sorted(set((alist.index(p), a, n or x000_native.get(a)) for p, a, n in areamap
+                          if (n or x000_native.get(a))))
+        for n in sorted(set(e[2] for e in ents)): f.write("extern void %s(void);\n" % n)
+        f.write("const PortAreaFunc port_areamap[] = {\n%s  {0, 0, 0}\n};\nconst int port_areamap_count = %d;\n" % (
+            "".join("  {%d, 0x%08X, (void *)%s},\n" % e for e in ents), len(ents)))
+        sigs = area_signatures(alist) if alist else {}
+        f.write("const PortArea port_areas[] = {\n%s  {0, 0, {{0, 0}}}\n};\nconst int port_areas_count = %d;\n" % (
+            "".join("  {%d, \"%s\", {%s}},\n" % (i, p, ", ".join("{0x%08X, 0x%08X}" % w for w in sigs[p]))
+                    for i, p in enumerate(alist)), len(alist)))
+        va = sorted(vary) + sorted(set(a for p, a, n in areamap))
+        f.write("const unsigned int port_vary_addrs[] = {\n%s  0};\nconst int port_vary_count = %d;\n" % (
+            "".join("  0x%08X,\n" % a for a in sorted(set(va))), len(set(va))))
+    with open(os.path.join(outdir, "vary.txt"), "w") as f:
+        for a in sorted(set(vary) | set(a for p, a, n in areamap)): f.write("%08X\n" % a)
     # symbol -> address table for the link step
     with open(os.path.join(outdir, "symaddr.txt"), "w") as f:
         for n, a in sorted(canon.items()): f.write("%s %08X\n" % (n, a))
         for n, a in sorted(renamed.items()): f.write("%s %08X\n" % (n, a))
         for prog in ovls:
+            for u in U[prog]: f.write("%s_%s %08X\n" % (prog, u.name, u.addr))
+        for prog in areas:
             for u in U[prog]: f.write("%s_%s %08X\n" % (prog, u.name, u.addr))
     with open(os.path.join(outdir, "asm_aliases.txt"), "w") as f:
         for n, e in sorted(ASM_ALIASES.items()): f.write("%s %s\n" % (n, e))
@@ -313,7 +451,7 @@ def sources(outdir, progs, ovls=()):
             for u in U[prog]:
                 if u.lib: f.write("%08X\n" % u.addr)
     with open(os.path.join(outdir, "ovl_funcnames.txt"), "w") as f:
-        for prog in ovls:
+        for prog in list(ovls) + list(areas):
             for u in U[prog]: f.write("%s\n" % u.name)
     code = []
     for prog in ("MAIN0", "X000"):
@@ -321,7 +459,10 @@ def sources(outdir, progs, ovls=()):
     with open(os.path.join(outdir, "code_ranges.txt"), "w") as f:
         for a, e in sorted(code): f.write("%08X %08X\n" % (a, e))
     print("gen_port: %d sources (%s), %d mapped functions, %d overlay-set functions, %d per-file renames"
-          % (len(files) + len(files24), " ".join(list(progs) + list(ovls)), len(fmap), len(ovlmap), len(renamed)))
+          % (len(files) + len(files24), " ".join(list(progs) + list(ovls) + list(areas)), len(fmap), len(ovlmap), len(renamed)))
+    if areas:
+        print("gen_port: areas: %d varying X000 functions, %d area functions compiled, %d area dispatch entries"
+              % (len(vary), len(area_units), len(areamap)))
 
 
 def _blank(s):
@@ -349,7 +490,7 @@ _DECL_PRE = re.compile(r"\s*(?:extern\s+|static\s+)?(?:const\s+|volatile\s+)*[A-
 _KEYWORDS = ("return", "else", "case", "do", "goto")
 
 
-def forward_short_calls(texts):
+def forward_short_calls(texts, base_defs=None):
     """Register-carried arguments (see port/tools/arity_check.py): a call that passes fewer arguments than the
     callee's definition takes relies on $a0-$a3 still holding a value, most often the caller's own incoming
     argument.  Each missing argument i becomes PORT_ARG(i), the caller's incoming stack argument i (on i386 the
@@ -357,17 +498,23 @@ def forward_short_calls(texts):
     chains of dispatchers keep working).  The file's prototypes of the callee become unprototyped `f()`."""
     blank = {f: _blank(t) for f, t in texts.items()}
     gdefs, ldefs = {}, {}
+    own = {}
     for f, t in blank.items():
         ldefs[f] = {}
         for m in re.finditer(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\(([^;{)]*(?:\([^)]*\)[^;{)]*)*)\)\s*\{", t, re.M):
             if m.group(1) in ("if", "while", "for", "switch", "return"): continue
             ldefs[f].setdefault(m.group(1), _nparams(m.group(2)))
-            if not m.group(0).lstrip().startswith("static"): gdefs.setdefault(m.group(1), _nparams(m.group(2)))
+            if not m.group(0).lstrip().startswith("static"): own.setdefault(m.group(1), _nparams(m.group(2)))
+    gdefs = dict(base_defs or {}); gdefs.update(own)
     total = 0
     for f, t in blank.items():
         defs = dict(gdefs); defs.update(ldefs[f])
         edits, protos = [], set()
-        macros = set(re.findall(r"^\s*#\s*define\s+(\w+)", t, re.M))
+        macros = set(re.findall(r"^\s*#\s*define\s+(\w+)", t[max(0, t.find("#line 1 ")):], re.M))
+        # the port's renames: a per-file address rename or a SYSTEM overlay prefix hides the definition the call
+        # means; an area prefix (X0nn_) does not (texts of one area are forwarded together)
+        macros |= set(m.group(1) for m in re.finditer(r"^#define (\w+) (\w+)$", t[:max(0, t.find("#line 1 "))], re.M)
+                      if not re.match(r"X0\d\d_", m.group(2)))
         for m in re.finditer(r"(?<![\w.>])(\w+)\s*\(", t):
             n = m.group(1)
             if defs.get(n, 0) <= 0 or n in macros: continue
@@ -401,7 +548,7 @@ def forward_short_calls(texts):
             txt = re.sub(r"(^[ \t]*(?:extern\s+)?[A-Za-z_][\w \t\*]*\b%s\s*)\([^;{()]*(?:\([^)]*\)[^;{()]*)*\)(\s*;)" % re.escape(n),
                          r"\1()\2", txt, flags=re.M)
         texts[f] = txt
-    return total
+    return total, gdefs
 
 
 def handwritten_ovl_funcs():
@@ -452,7 +599,10 @@ def link(outdir, nm, objlist):
     funcnames = set(unitname.values()) | set(l.strip() for l in open(os.path.join(outdir, "ovl_funcnames.txt")))
     is_func_name = lambda n: n in funcnames or n.split("__")[0] in funcnames
     import sysovl
-    ovl_re = re.compile(r"(?:%s)_\w" % sysovl.PROG_RE)
+    ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
+    vp = os.path.join(outdir, "vary.txt")
+    vary = set(int(l, 16) for l in open(vp) if l.strip()) if os.path.exists(vp) else set()
+    data_name = lambda n: re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl)_", n)
     asm_alias = dict(l.rstrip("\n").split(" ", 1) for l in open(os.path.join(outdir, "asm_aliases.txt")) if l.strip())
 
     def addr_of(n):
@@ -465,6 +615,8 @@ def link(outdir, nm, objlist):
         if n in asm_alias:
             ld.append("%s = %s;" % (n, asm_alias[n])); continue
         if ovl_re.match(n):                # overlay-set function without native code: dispatch at call time
+            thunks.append((n, a)); continue
+        if a in vary and not data_name(n):  # a function that differs between the area overlays: dispatch
             thunks.append((n, a)); continue
         if a is not None and a in native_by_addr and native_by_addr[a] in defined:
             ld.append("%s = %s;" % (n, native_by_addr[a]))
@@ -511,7 +663,9 @@ if __name__ == "__main__":
         a[1] = os.path.abspath(a[1]); os.makedirs(a[1], exist_ok=True)
         import sysovl
         ps = [p.upper() for p in a[2:]] or ["MAIN0", "X000"]
-        sources(a[1], [p for p in ps if p not in sysovl.SYSOVL], [p for p in ps if p in sysovl.SYSOVL])
+        isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
+        sources(a[1], [p for p in ps if p not in sysovl.SYSOVL and not isarea(p)], [p for p in ps if p in sysovl.SYSOVL],
+                [p for p in ps if isarea(p)])
     elif a and a[0] == "link":
         link(a[1], a[2], a[3])
     else:

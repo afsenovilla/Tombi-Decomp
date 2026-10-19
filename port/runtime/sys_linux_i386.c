@@ -142,7 +142,31 @@ static int is_ovl_id(u32p id) {
 const char *port_resident_overlay(void) {
     u32p id = *(volatile u32p *)PORT_OVL_BASE;
     for (const PortOvl *o = port_ovls; o->name; o++) if (o->id == id) return o->name;
-    return "X000";
+    int ar = port_areas_count ? port_current_area() : 0;
+    return ar >= 0 && port_areas_count ? port_areas[ar].name : ar >= 0 ? "X000" : "?";
+}
+static int is_vary(u32p a) {
+    int l = 0, h = port_vary_count - 1;
+    while (l <= h) {
+        int m = (l + h) / 2;
+        if (port_vary_addrs[m] == a) return 1;
+        if (port_vary_addrs[m] < a) l = m + 1; else h = m - 1;
+    }
+    return 0;
+}
+static int area_matches(int i) {
+    const PortArea *r = &port_areas[i];
+    return *(volatile u32p *)r->sig[0][0] == r->sig[0][1] && *(volatile u32p *)r->sig[1][0] == r->sig[1][1];
+}
+static int cur_area = -1;
+int port_current_area(void) {
+    if (cur_area >= 0 && area_matches(cur_area)) return cur_area;
+    int prev = cur_area;
+    cur_area = -1;
+    for (int i = 0; i < port_areas_count; i++) if (area_matches(i)) { cur_area = i; break; }
+    if (cur_area != prev && cur_area >= 0 && port_verbose)
+        port_printf("[port] area overlay %s resident (frame %d)\n", port_areas[cur_area].name, port_frame);
+    return cur_area;
 }
 u32p port_force_interp[8];      /* --interp ADDR: run that function in the MIPS interpreter (checks translations) */
 void *port_lookup(u32p a) {
@@ -155,9 +179,21 @@ void *port_lookup(u32p a) {
                 if (port_ovlmap[i].id == id && port_ovlmap[i].addr == a) return port_ovlmap[i].fn;
             return 0;
         }
-        /* an area overlay X0nn other than X000 (same header): its own code (from 0x80115EA4) differs from
-           X000's, so run what is loaded; the shared prefix stays native.  GAME.selectedArea names the area. */
-        if (a >= PORT_AREA_OWN_CODE && *(volatile unsigned short *)0x8009C960u != 0) return 0;
+        /* an area overlay: code that differs between the areas is looked up in the resident area's table */
+        if (port_areas_count == 0) {
+            if (a >= PORT_AREA_OWN_CODE && *(volatile unsigned short *)0x8009C960u != 0) return 0;
+        } else if (is_vary(a)) {
+            int ar = port_current_area();
+            if (ar < 0) return 0;
+            int l = 0, h = port_areamap_count - 1;
+            while (l <= h) {
+                int m = (l + h) / 2;
+                const PortAreaFunc *e = &port_areamap[m];
+                if (e->area == ar && e->addr == a) return e->fn;
+                if (e->area < ar || (e->area == ar && e->addr < a)) l = m + 1; else h = m - 1;
+            }
+            return 0;                  /* no C for it in this area: the interpreter runs the loaded code */
+        }
     }
     (void)funcs_sorted;
     while (lo <= hi) {

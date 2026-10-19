@@ -32,6 +32,16 @@ extern const PortOvl port_ovls[];
 #define PORT_OVL_END  0x80140000u
 #define PORT_AREA_OWN_CODE 0x80115EA4u   /* X0nn: first per-area function (the 188 KB before it are shared) */
 const char *port_resident_overlay(void);
+/* area overlays X000..X019 (all share X000's header word): told apart by two signature words of their own code */
+typedef struct { int area; u32p addr; void *fn; } PortAreaFunc;      /* sorted by (area, addr) */
+typedef struct { int idx; const char *name; u32p sig[2][2]; } PortArea;
+extern const PortAreaFunc port_areamap[];
+extern const int port_areamap_count;
+extern const PortArea port_areas[];
+extern const int port_areas_count;
+extern const unsigned int port_vary_addrs[];   /* sorted: addresses whose code differs between areas */
+extern const int port_vary_count;
+int port_current_area(void);                   /* index into port_areas, -1 if none matches (SYSTEM overlay, loading) */
 
 /* PS1 address space emulated in the process: RAM (2 MB, mirrored nowhere) and the scratchpad + I/O page */
 #define PSX_RAM_BASE   0x80000000u
