@@ -284,7 +284,10 @@ def area_plan(U, areas, ovls=()):
                 if u.addr in vary: amap.append((p, u.addr, None))      # X000's native code (renamed X000_)
                 continue
             if u.file and u.file.endswith(".c"):
-                compiled.append((p, u)); amap.append((p, u.addr, p + "_" + u.name))
+                # the name the file defines (func_801167A0.c defines area6ScriptOp): X0nn_<unit name> would be the
+                # thunk itself, and the dispatch would loop forever
+                nm = UN.defined_name(u.file, os.path.basename(u.file)[:-2])
+                compiled.append((p, u)); amap.append((p, u.addr, p + "_" + nm))
     return vary, compiled, amap
 
 
