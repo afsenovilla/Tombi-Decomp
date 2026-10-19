@@ -1,20 +1,22 @@
 // FUNC 800ebc5c 624 I0NFO3
+// MATCHING 800ebc5c 624
 #include "TOBJ.H"
 extern signed char D_8009D2B0;
 extern TObj D_800A6038;
 
+#define LST(i) (*(TObj **)((int)list + ((i) << 2)))
 void func_800EBC5C(void)
 {
     TObj *list[64];
     TObj **pp;
-    TObj *o, *t;
+    TObj *o;
     TObj *q;
     short i, j, n, best, by;
     short cnt;
     short k, m;
     unsigned char b;
 
-    for (i = 0; i < 64; i++) list[i] = 0;
+    for (i = 0; i < 64; i++) LST(i) = 0;
     i = 0;
     cnt = *(unsigned short *)0x1F800246;
     pp = *(TObj ***)0x1F80021C;
@@ -40,28 +42,28 @@ void func_800EBC5C(void)
             *(signed char *)&o->b0f = -1;
             goto fail;
         c0:
-            list[i++] = o;
+            LST(i++) = o;
         } while (k != 0);
     }
     if (D_8009D2B0 != 3) {
         cnt++;
-        list[i] = &D_800A6038;
+        LST(i) = &D_800A6038;
     }
     for (m = 0; m < cnt; m++) {
         best = m;
-        by = list[m]->y.p.whole;
+        by = LST(m)->y.p.whole;
         for (j = m; j < cnt; j++) {
-            if (by < list[j]->y.p.whole) {
+            if (LST(j)->y.p.whole > by) {
                 best = j;
-                by = list[j]->y.p.whole;
+                by = LST(j)->y.p.whole;
             }
         }
-        t = list[m];
+        q = list[m];
         list[m] = list[best];
-        list[best] = t;
+        list[best] = q;
     }
-    for (i = 0; list[i] != 0; i++) {
-        o = list[i];
+    for (i = 0; LST(i) != 0; i++) {
+        o = LST(i);
         q = (TObj *)o->d94;
         *(signed char *)&o->b0f = i - 10;
         if (q != 0) *(signed char *)&q->b0f = i - 9;
