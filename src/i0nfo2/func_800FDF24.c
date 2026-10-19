@@ -1,4 +1,5 @@
 // FUNC 800fdf24 1260 I0NFO2
+// MATCHING 800fdf24 1260
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -41,7 +42,6 @@ void func_800FDF24(TObj *parent0)
     register short i PI_I;
     register int k PI_K;
     register int i1 PI_I1;
-    int j;
     short t;
 
     tbl = D_80100B00;
@@ -52,12 +52,12 @@ void func_800FDF24(TObj *parent0)
     ff = 0xFF;
     d = 0xD;
     lp = D_8009F2D8;
-    do {
+    for (; p->type != ff; p = &tbl[++i]) {
         k = i;
-        if (k == 5 && D_8009CFCA != 4) goto next;
-        if (k == 7 && (ce[0] == ff || ce[0x179] == 0)) goto next;
-        if (k == 8 && D_8009CE56[0] == ff) goto next;
-        if (k == 9 && (ce[0] == ff || ce[0x179] == 0)) goto next;
+        if (k == 5 && D_8009CFCA != 4) continue;
+        if (k == 7 && (ce[0] == ff || ce[0x179] == 0)) continue;
+        if (k == 8 && D_8009CE56[0] == ff) continue;
+        if (k == 9 && (ce[0] == ff || ce[0x179] == 0)) continue;
         n = func_800183B8();
         if (n != 0) {
             n->active = 1;
@@ -109,7 +109,7 @@ void func_800FDF24(TObj *parent0)
             n->w7a = p->wE;
             lp[k] = n;
             n->d90 = (int)parent;
-            goto next;
+            continue;
         plain:
                 n->type = 0x30;
                 n->b0a = d;
@@ -135,12 +135,9 @@ void func_800FDF24(TObj *parent0)
                         n->active = 2;
                     }
                 }
-                goto next;
+                continue;
         }
-    next:
-        i++;
-        p = &tbl[i];
-    } while (p->type != ff);
+    }
     }
     for (i = 0; (e = &D_801008DC[i])->type != 0xFF; i++) {
         o = func_80018448();
