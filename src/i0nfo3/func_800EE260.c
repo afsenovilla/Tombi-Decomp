@@ -1,4 +1,5 @@
 // FUNC 800ee260 436 I0NFO3
+// MATCHING 800ee260 436
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *func_800183B8(void);
@@ -9,15 +10,16 @@ extern EntE260 *D_800EEF30;
 
 void func_800EE260(TObj *o)
 {
-    EntE260 *base = D_800EEF30;
+    register EntE260 *base asm("s3") = D_800EEF30;
     short *e;
     short i;
     TObj *n;
     TObj **tbl;
-    char ff = 0xFF;
+    char ff;
     e = base->s;
-    if (e[0] != 0xFF) {
     i = 0;
+    if (e[0] != 0xFF) {
+    ff = 0xFF;
     for (; e[0] != ff; e = base[++i].s) {
         tbl = D_8009F2D8;
         if (e[8] < 6) if (e[8] >= 4) if (D_8009CE34 != 0) continue;
