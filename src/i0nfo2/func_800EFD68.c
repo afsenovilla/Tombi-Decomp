@@ -37,7 +37,7 @@ void func_800EFD68(TObj *o)
         D_800A603E = 0;
         D_800A60E4 = 3;
         D_8009C93F[0] = 1;
-        *(unsigned short *)((char *)&D_800A6038 + 0x2E) |= 8;
+        U16(&D_800A6038, 0x2E) |= 8;
         S16(o, 0xB0) = U16(o, 0x2E);
         k = U8(o, 0x69) + 7;
         U16(o, 0x2E) = U8(o, 0x69) - 1;
