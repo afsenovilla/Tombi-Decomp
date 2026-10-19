@@ -380,6 +380,7 @@ def sources(outdir, progs, ovls=(), areas=()):
         if ovl:
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
+        txt = volatile_aliases(txt)
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
@@ -502,6 +503,36 @@ def sources(outdir, progs, ovls=(), areas=()):
     if areas:
         print("gen_port: areas: %d varying X000 functions, %d area functions compiled, %d area dispatch entries"
               % (len(vary), len(area_units), len(areamap)))
+
+
+def volatile_aliases(txt):
+    """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es): gcc assumes distinct
+    globals never alias, so a loop that decrements one and tests the other keeps the test in a register forever
+    (playerTryTalkToNpc).  Every extern declaration of such names becomes volatile (both names, so the accesses keep
+    their order)."""
+    groups = {}
+    for full, addr in re.findall(r"\b((?:D|DAT)_([0-9A-Fa-f]{8})\w*)\b", txt):
+        if "__" in full: continue
+        groups.setdefault(addr.upper(), set()).add(full)
+    names = set(n for g in groups.values() if len(g) > 1 for n in g)
+    if not names: return txt
+    def fix(m):
+        decl = m.group(0)
+        hit = [n for n in names if re.search(r"\b%s\b" % re.escape(n), decl)]
+        if not hit: return decl
+        if "," in decl:     # several declarators: one declaration each (`extern T *a, b[];` -> `extern T *a; extern T b[];`)
+            parts = decl.rstrip().rstrip(";").split(",")
+            m0 = re.search(r"(\**\s*)\b\w+\s*(?:\[[^\]]*\]\s*)*$", parts[0])
+            if not m0: return decl
+            spec = parts[0][:m0.start()]
+            return " ".join(fix1(spec.rstrip() + " " + d.strip() + ";", hit) for d in [parts[0][m0.start():]] + parts[1:])
+        return fix1(decl, hit)
+    def fix1(decl, hit):
+        for n in hit:
+            decl = re.sub(r"(?<![\w*])(\*?\s*)\b(%s)\b(?=\s*(?:\[[^\]]*\])*\s*[;,=])" % re.escape(n),
+                          lambda k: k.group(1) + "volatile " + k.group(2), decl)
+        return decl
+    return re.sub(r"^[ \t]*extern\b[^;{(]*;", fix, txt, flags=re.M)
 
 
 def _blank(s):
