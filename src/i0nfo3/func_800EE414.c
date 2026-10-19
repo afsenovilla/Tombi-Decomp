@@ -1,4 +1,5 @@
 // FUNC 800ee414 400 I0NFO3
+// MATCHING 800ee414 400
 #include "TOBJ.H"
 typedef struct { short a, x, b, y, c, d; } BoxXY;
 extern int func_8002DCC8(int a, int b, BoxXY *p);
@@ -26,10 +27,12 @@ void func_800EE414(TObj *o)
 {
     BoxXY b;
     unsigned char *u;
+    unsigned char *v;
     switch (o->state) {
     case 0:
         u = D_8009C940;
-        if (usingItem(u)) {
+        v = u;
+        if (usingItem(v)) {
             b.x = 0x90;
             b.y = 0x40;
             D_800A603D = 2;
