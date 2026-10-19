@@ -454,10 +454,11 @@ int SpuGetAllKeysStatus(u8 *st) {
 void port_sound_vblank(void) {
     static s16 out[2 * 1024];
     static int frac;
-    int n = RATE / 50;                       /* PAL */
-    frac += RATE % 50;
-    if (frac >= 50) { frac -= 50; n++; }
-    for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_frame(i, &seqs[i], 20000);
+    extern int port_hz;                      /* 50 (PAL) or 60: samples and sequencer time per vblank follow it */
+    int n = RATE / port_hz;
+    frac += RATE % port_hz;
+    if (frac >= port_hz) { frac -= port_hz; n++; }
+    for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_frame(i, &seqs[i], 1000000u / (u32)port_hz);
     mix(out, n);
     if (port_audio_path && audio_fd == -2) return;
     if (port_audio_path && audio_fd < 0) {

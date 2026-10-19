@@ -18,7 +18,8 @@ static void (*vsync_cb)(void);
 int port_frame;
 int port_max_frames;
 static unsigned long long next_vblank_us;
-int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = 50 Hz pacing */
+int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
+int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
 static void call_psx(void *fn) {
     void (*f)(void) = (void (*)(void))fn;
@@ -102,7 +103,7 @@ void port_vblank(void) {
     if (port_realtime) {
         unsigned long long now = port_time_us();
         if (!next_vblank_us) next_vblank_us = now;
-        next_vblank_us += 20000;                     /* PAL: 50 Hz */
+        next_vblank_us += 1000000ull / (unsigned)port_hz;   /* PAL: 50 Hz (20 ms); --hz 60: 16.67 ms */
         if (next_vblank_us > now) port_sleep_us(next_vblank_us - now);
     }
     port_frame++;

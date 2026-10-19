@@ -170,6 +170,11 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--save") && i + 1 < argc) { extern void port_save_add(const char *); port_save_add(argv[++i]); }
         else if (streq(argv[i], "--load") && i + 1 < argc) { extern const char *port_load_path; port_load_path = argv[++i]; }
         else if (streq(argv[i], "--realtime")) port_realtime = 1;
+        else if (streq(argv[i], "--hz") && i + 1 < argc) {
+            extern int port_hz; int hz = atoi_(argv[++i]);
+            if (hz != 50 && hz != 60) { port_printf("--hz takes 50 (PAL) or 60\n"); return 2; }
+            port_hz = hz;
+        }
         else if (streq(argv[i], "--autostart") && i + 1 < argc) { extern int port_autostart; port_autostart = atoi_(argv[++i]); }
         else if (streq(argv[i], "--pad-script") && i + 1 < argc) { extern void port_pad_script(const char *); port_pad_script(argv[++i]); }
         else if (streq(argv[i], "--dump-frames") && i + 1 < argc) port_dump_dir = argv[++i];
@@ -201,7 +206,7 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--viewer") && i + 1 < argc) { extern const char *port_window_viewer; port_window_viewer = argv[++i]; }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
-            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime]\n"
+            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime] [--hz 50|60]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
@@ -209,7 +214,7 @@ static int parse_options(int argc, char **argv) {
                         "       [--menu FRAME:N]   open menu screen N at a vblank during gameplay (4 = save, 5 = load)\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
                         "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
-                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), 50 Hz\n"
+                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), paced\n"
                         "       [--save FRAME:PATH] [--load PATH]   save state at a vblank / continue from one (same binary)\n"
                         "       [--save-dir DIR]   memory cards tombi_mc0.mcd / tombi_mc1.mcd (128 KB raw; default: next to the disc)\n", argv[0]);
             return 2;
