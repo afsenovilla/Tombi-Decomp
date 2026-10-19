@@ -2,7 +2,7 @@
 // MATCHING 8006e048 36
 typedef struct { char pad[0x24]; } S24;
 void SsUtSetReverbDelay(short);
-void sndCmdSetReverbDelayA(int a, int b, int c, S24 s, unsigned char x)
+void _SsSetNrpnVabAttr18(int a, int b, int c, S24 s, unsigned char x)
 {
     SsUtSetReverbDelay(x);
 }

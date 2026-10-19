@@ -2,7 +2,7 @@
 // MATCHING 8002e4b4 528
 // VERSION SLPM_80165 slpm80165 8002E120 524
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL main0 8002E4B4 (func_8002E4B4.c): inline GetClut, z written to +0x1a directly.
+// Demo version of PAL main0 8002E4B4 (updateGrabSnout.c): inline GetClut, z written to +0x1a directly.
 #include "spad.h"
 #include "TOBJ.H"
 extern int GetGraphType(void);
@@ -16,7 +16,7 @@ extern void ObjListPush_1F800220(TObj *o);
 extern short MulNegSin(short a, short b);
 extern void ObjFree(TObj *o);
 
-void func_8002E4B4(TObj *o)
+void updateGrabSnout(TObj *o)
 {
     short v;
     switch (o->b04) {
@@ -76,7 +76,7 @@ extern void ObjListPush_1F800220(TObj *o);
 extern short MulNegSin(short a, short b);
 extern void ObjFree(TObj *o);
 
-void updatePoolType20Object(TObj *o)
+void updateGrabSnout(TObj *o)
 {
     short v;
     switch (o->b04) {

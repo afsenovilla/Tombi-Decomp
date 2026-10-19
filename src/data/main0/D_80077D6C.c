@@ -4,7 +4,7 @@
 #include "anim.h"
 
 extern void dispatchAreaNpcHandler();
-extern void updateL2Type02Object();
+extern void dispatchAreaEnemyDraw();
 extern void updateL2Type30Object();
 extern unsigned int data_80077D6C[];
 extern unsigned int data_80077D9C[];
@@ -18,7 +18,7 @@ unsigned int data_80077D6C[12] = {
 };
 
 unsigned int data_80077D9C[91] = {
-    0x8012B2D4, 0x80126FEC, (unsigned int)updateL2Type02Object, 0x8012DEDC,
+    0x8012B2D4, 0x80126FEC, (unsigned int)dispatchAreaEnemyDraw, 0x8012DEDC,
     0x8012E1C0, 0x8012E4C4, 0x8012E8C4, 0x80111AE0,
     0x80132174, 0x801328B4, 0x80123E24, 0x8012F448,
     0x8012F988, 0x801312F8, 0x80113484, 0x801315DC,

@@ -135,6 +135,7 @@ address,name,confidence,comment
 8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
 8001f1c0,restoreAreaBgmVolume,alta,name from psx_tomba (US)
 8001f2ec,playJingle,alta,name from psx_tomba (US)
+8001f3fc,queueSoundCommand,alta,name from psx_tomba (US)
 8001f4bc,SoundStopAll,alta,para secuencias y apaga todas las voces
 8001f5b8,setReverbMode,alta,psx_tomba (por bytes)
 8001f620,MusicMute,alta,flag + SsSeqSetVol a 0
@@ -306,6 +307,7 @@ address,name,confidence,comment
 8002b8c4,updatePoolType5DObject,alta,names batch (see notes/names.md)
 8002b8cc,spawnItemPickupObject,alta,psx_tomba (por bytes)
 8002b920,cloneItemPickupObject,alta,psx_tomba (por bytes)
+8002b9b0,updateItemGetIcon,alta,name from psx_tomba (US)
 8002be80,updateImpactEffect,alta,names batch (see notes/names.md)
 8002c0e0,poolType12DirectionalStep,alta,behaviour name (see notes/names.md)
 8002c238,poolType12FollowPlayerStep,alta,behaviour name (see notes/names.md)
@@ -324,8 +326,8 @@ address,name,confidence,comment
 8002dd1c,openMessageBox,alta,name from psx_tomba (US)
 8002df70,loadMessageGlyph,alta,name from psx_tomba (US)
 8002e34c,freeMessageGlyphs,alta,name from psx_tomba (US)
-8002e4b4,updatePoolType20Object,alta,names batch (see notes/names.md)
-8002e6c4,updatePoolType22Object,alta,names batch (see notes/names.md)
+8002e4b4,updateGrabSnout,alta,name from psx_tomba (US)
+8002e6c4,updateEventCube,alta,name from psx_tomba (US)
 8002eaac,spawnPoolType31At,alta,behaviour name (see notes/names.md)
 8002eb34,updatePoolType32Object,alta,names batch (see notes/names.md)
 8002eddc,initPoolType32Object,alta,names batch (see notes/names.md)
@@ -619,7 +621,7 @@ address,name,confidence,comment
 800490ac,collideCat2Type7WithCat5Type0B,alta,names batch (see notes/names.md)
 800491f0,collideCat2WithCat4Objects,alta,names batch (see notes/names.md)
 80049524,collideCat5WithCat4Objects,alta,names batch (see notes/names.md)
-8004985c,updateL2Type02Object,alta,names batch (see notes/names.md)
+8004985c,dispatchAreaEnemyDraw,alta,name from psx_tomba (US)
 800498f4,dispatchAreaNpcHandler,alta,names batch (see notes/names.md)
 80049cdc,eventTakePlayerControlA,alta,names batch (see notes/names.md)
 8004a124,eventCarryPlayerB,alta,names batch (see notes/names.md)
@@ -982,7 +984,7 @@ address,name,confidence,comment
 8006897c,stopIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068a28,restartIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ab0,memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
-80068ae4,CdRemove,alta,"BIOS A0 function 0x72 trampoline, which is CdRemove in the BIOS table"
+80068ae4,_96_remove,alta,name from psx_tomba (US)
 80068c04,trapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068c7c,setIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ca8,VSync_memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -1061,9 +1063,9 @@ address,name,confidence,comment
 8006d410,_SsContResetAll,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d7f4,_SsUtResolveADSR,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d850,_SsUtBuildADSR,alta,"Psy-Q (psx_tomba, por bytes)"
-8006e024,sndCmdSetReverbFeedback,media,"sound command handler: calls SsUtSetReverbFeedback with the byte at stack arg +0x24"
-8006e048,sndCmdSetReverbDelayA,media,"sound command handler: calls SsUtSetReverbDelay with the fifth argument"
-8006e06c,sndCmdSetReverbDelayB,media,"sound command handler: calls SsUtSetReverbDelay with the byte at stack arg +0x24"
+8006e024,_SsSetNrpnVabAttr17,alta,name from psx_tomba (US)
+8006e048,_SsSetNrpnVabAttr18,alta,name from psx_tomba (US)
+8006e06c,_SsSetNrpnVabAttr19,alta,name from psx_tomba (US)
 8006e090,_SsSetPitchBend,alta,"Psy-Q (psx_tomba, por bytes)"
 8006e648,_SsSetProgramChange,alta,"Psy-Q (psx_tomba, por bytes)"
 8006e6c0,_SsReadDeltaValue,alta,"Psy-Q (psx_tomba, por bytes)"

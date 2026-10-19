@@ -30,8 +30,8 @@ extern void updateL8Type07Object();
 extern void updateLookScroll();
 extern void updatePlayerEffect4E();
 extern void updatePoolType12Object();
-extern void updatePoolType20Object();
-extern void updatePoolType22Object();
+extern void updateGrabSnout();
+extern void updateEventCube();
 extern void updatePoolType32Object();
 extern void updatePoolType5DObject();
 extern void updatePoolType66Object();
@@ -510,7 +510,7 @@ unsigned int data_80079BAC[98] = {
     0x8011AD98, 0x80116D1C, 0x8011B0D4, 0x8011B1E0,
     0x80118AC0, 0x80118C1C, 0x8002CF40, 0x800EB394,
     (unsigned int)updateInfoMessage, (unsigned int)dispatchAreaDialogInit, 0x800EB6AC, 0x80118DA8,
-    (unsigned int)updatePoolType20Object, 0x80132760, (unsigned int)updatePoolType22Object, 0x80117114,
+    (unsigned int)updateGrabSnout, 0x80132760, (unsigned int)updateEventCube, 0x80117114,
     0x8011B2E8, 0x801172DC, 0x80118838, 0x801191B0,
     0x80118CF4, 0x80118F3C, 0x8011AA3C, 0x8011ABA0,
     0x801165DC, 0x80119268, 0x800E8420, 0x801287F8,

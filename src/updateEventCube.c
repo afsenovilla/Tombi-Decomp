@@ -21,7 +21,7 @@ extern void AnimLoadDuration(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);
 
-void updatePoolType22Object(TObj *o)
+void updateEventCube(TObj *o)
 {
     switch (o->b04) {
     case 0:

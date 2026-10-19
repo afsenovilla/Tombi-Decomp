@@ -8,7 +8,7 @@ extern unsigned short VAB_IDS[];
 extern short VOICE_SFX_ID[];
 extern void SsUtKeyOffV(int);
 extern int SoundFindFreeVoice(unsigned);
-extern int FUN_8001f3fc(unsigned, int);
+extern int queueSoundCommand(unsigned, int);
 
 int playSFXWithPitchSlide(unsigned p1, unsigned p2, unsigned p3, unsigned p4)
 {
@@ -39,11 +39,11 @@ int playSFXWithPitchSlide(unsigned p1, unsigned p2, unsigned p3, unsigned p4)
     PITCH_SLIDE_OLD_NOTE = t;
     r = SoundFindFreeVoice(p1);
     if (r == -1) return -1;
-    if (FUN_8001f3fc(p1 & 0x3ff, r) == -1) return -1;
-    if (FUN_8001f3fc(p2 & 0xff | 0xa000, r) == -1) return -1;
-    if (FUN_8001f3fc(p3 & 0xff | 0xa100, r) == -1) return -1;
-    if (FUN_8001f3fc(p4 & 0xff | 0xa200, r) == -1) return -1;
-    if (FUN_8001f3fc(0xa300, r) != -1)
+    if (queueSoundCommand(p1 & 0x3ff, r) == -1) return -1;
+    if (queueSoundCommand(p2 & 0xff | 0xa000, r) == -1) return -1;
+    if (queueSoundCommand(p3 & 0xff | 0xa100, r) == -1) return -1;
+    if (queueSoundCommand(p4 & 0xff | 0xa200, r) == -1) return -1;
+    if (queueSoundCommand(0xa300, r) != -1)
         VOICE_SFX_ID[r] = sv;
     return r;
 }

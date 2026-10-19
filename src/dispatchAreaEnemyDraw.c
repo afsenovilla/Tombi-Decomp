@@ -6,7 +6,7 @@ extern void func_8012EFC4(void);
 extern void func_80124B78(void);
 extern void func_80123750(void);
 
-void updateL2Type02Object(void)
+void dispatchAreaEnemyDraw(void)
 {
     switch (GAME.selectedArea) {
     case 0:

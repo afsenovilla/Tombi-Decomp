@@ -7,7 +7,7 @@ typedef struct {
 
 extern void SsUtSetReverbFeedback();
 
-void sndCmdSetReverbFeedback(int a, int b, int c, S8006E024 s)
+void _SsSetNrpnVabAttr17(int a, int b, int c, S8006E024 s)
 {
     SsUtSetReverbFeedback(s.fb);
 }

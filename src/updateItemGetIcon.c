@@ -38,7 +38,7 @@ typedef struct P {
     short wac;
 } P;
 
-void FUN_8002b9b0(TObj *o)
+void updateItemGetIcon(TObj *o)
 {
     P *p;
     int dx;
