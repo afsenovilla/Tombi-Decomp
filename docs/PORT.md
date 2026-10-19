@@ -6,14 +6,19 @@ the matching build's outputs, and it never ships game data. The player supplies 
 
 ## 1. Status of the prototype (milestone M0)
 
-`port/` holds a CMake project. It compiles **all MAIN0 and X000 game C (1323 files)** for x86 (i386) Linux. It
-links them with a small runtime and Psy-Q replacements, and the result runs headless:
+`port/` holds a CMake project. It compiles **all MAIN0 and X000 game C plus the SYSTEM overlays (1724 files)** for
+x86 (i386) Linux. It links them with a small runtime and Psy-Q replacements, and the result runs headless from boot
+through the title screen into gameplay in AREA00 (see "Milestone M1" below):
 
 ```
 python3 tools/build_full.py -j 4                # once: the port takes retail addresses from it
 cmake -S port -B build/port -G Ninja && cmake --build build/port -j 8
 build/port/tombi --frames 500                   # from the repo root; reads game/MAIN0.EXE + game/disc/Tombi.bin
 #   options: --exe PATH --disc PATH(.bin raw 2352 or .iso) --frames N --realtime (50 Hz) --autostart N -v [-v]
+#            --pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...  --dump-frames DIR --dump-every N --pipe-frames FIFO
+#            --no-interp --interp ADDR --trace-interp
+build/port/tombi --frames 3600 --dump-frames shots --dump-every 100 \
+    --pad-script 1000:start,1300:cross:3x45/30,3200:right:400   # title -> new game -> intro dialogue -> walk
 ```
 
 What it does today, measured on the PAL Spanish disc:
@@ -31,10 +36,66 @@ What it does today, measured on the PAL Spanish disc:
    frame number is past the end, so `moviePlayerTask` takes its own "movie finished" path (`CdMix`,
    `StUnSetRing`, `exitTask`). The four boot movies are skipped this way (`--play-movies` restores the old
    wait-forever behaviour, for MDEC work).
-6. **It stops in the title screen at frame ~760.** `titleSequenceTask` loads `SYSTEM/O0PTSUB0.BIN` and the title
-   textures (the TOMBI! logo is in VRAM, see the dumps), then calls into the overlay (`func_800E8A14`,
-   `func_800E8A2C`, `func_800E8A5C`, `func_800E8A94`, `func_800E972C`, `func_800E9D08`), which is not decompiled
-   (§2.2). Those calls are stubs, so the task idles in step 4.3 on a black screen.
+6. **The title screen runs natively** (frame ~800): `titleSequenceTask` loads `SYSTEM/O0PTSUB0.BIN` and calls
+   its entry points, which are now the overlay's own C (overlay set, §2.2). M0 stopped here.
+7. **Start** (`--pad-script 1000:start`) starts a new game: `gameMainTask` loads AREA00 (`X000.BIN` and the area
+   data, ~1100 sectors), the first room renders at frame ~1150 with its animated objects, the intro dialogue
+   ("Hey, you with the pink hair!") runs and advances with Cross, the HUD appears, and the pad moves Tombi
+   (walking right scrolls the camera). The run is deterministic (same inputs, same frames).
+
+### Milestone M1: title screen and AREA00 gameplay
+
+What made it work (all in `port/`, `src/` untouched, the matching build stays byte-identical):
+
+- **Overlay set** (`gen_port.py`): `PORT_PROGS` now also lists `O0PTSUB0 G0OVER D0SPSUB D0SPSUB2 D0SPSUB3 I0NFO
+  I0NFO2 I0NFO3` (tools/sysovl.py). Their C is compiled with every function the file defines renamed
+  `<PROG>_<name>` (they overlap X000's addresses) and listed in `port_ovlmap` with the overlay's header id (the
+  first word of the file: 0x31..0x38; X000 and all area files have 0x1D). `port_lookup` dispatches a call into
+  0x800E8028..0x80140000 to the resident SYSTEM overlay's table when that id is at 0x800E8028, else to X000.
+  MAIN0's calls into the overlay region are call thunks, so they dispatch with no change to MAIN0 code.
+  Asm-only overlay functions can be written by hand as `<PROG>_<name>` in `port/runtime/ovl_*.c` (they join
+  the table automatically): `O0PTSUB0_func_800E9F5C` (title menu glyphs) is the first.
+- **MIPS interpreter fallback** (`runtime/mips_interp.c`, ~300 lines): any retail code address without native
+  code (asm-only MAIN0 functions, unmatched overlay functions, per-area code of X001..X019) runs as the retail
+  machine code where it lies in RAM. A jal to native code calls it with cdecl ($a0-$a3 plus four stack words);
+  Psy-Q code without a shim is never interpreted (it would poke hardware) but stubbed. In the AREA00 run it
+  handles `func_800416B8` (wall probe, ~300 calls per 3,000 frames). `--interp ADDR` forces an address through
+  it, which checks a hand translation (the title glyphs render identically both ways); `--no-interp` turns it
+  off. Overlay code that the game loaded is interpreted correctly by construction, so this is also the
+  fallback for area overlays until their own C is compiled in (see "Missing" below).
+- **Hand translations of hot asm-only MAIN0 functions** (`runtime/main0_handwritten.c`, from m2c drafts checked
+  against the asm): `func_8002CF40` (message box object, 0xD10 bytes) and `func_800406E8` (floor probe).
+  Remaining asm-only MAIN0 code: `func_800416B8` (1520 bytes), `func_8004AE7C` (1496), `func_80038184` (180),
+  plus a few library-side ones (`func_8006A718`, `func_8006BAF8`, `func_8006BC08`).
+- **Register-carried arguments, automatic** (`gen_port.py forward_short_calls`): a call passing fewer arguments
+  than the callee's definition gets `PORT_ARG(i)` = the caller's own incoming argument i (110 call sites). This
+  is what the R3000 code does when the caller leaves $aN untouched, and it works through chains of dispatchers
+  because on i386 the slot is what the caller's caller pushed. Where $aN holds something else the fix goes in
+  `port/fixes.txt` first (the pass then sees a full call): `updateAreaScreenEffect` (passes `&PLAYER`) and the
+  cat-2/cat-4 collision callbacks of `collideCat2WithCat4Objects` ($a1 = the other object). Other wrong guesses
+  will show up as crashes in other areas; the SIGSEGV handler now prints the native return addresses on the stack
+  (`addr2line -f -e build/port/tombi ...`).
+- Generator fixes uncovered by the newer src/: symbol assignments in top-level asm (`FILE_LINK_SIZES =
+  FILE_LINKS + 4`), address-named `static` tables (moved into C by the data work) bound to their retail address,
+  data names inside the overlay region, a GTE macro temp-name clash; `loadTIM` writes through a NULL CLUT rect
+  (address 0 on the PS1; fixes.txt).
+- `--pad-script` scripted pad input; `--pipe-frames` live raw-video output (below).
+
+Screenshots of this run (PNG dumps): the title (frame 1000), the first room (1500), the intro dialogue (1300,
+1800), the HUD (3000) and Tombi after walking right (3500).
+
+**Missing / next:**
+
+- **Sound**: libsnd/libspu are stubs (`SsSeqPlay`, `SsUtKeyOnV`, `SpuSetKey`, reverb ...), so no audio; nothing
+  waits on sound status in AREA00, so gameplay is unaffected.
+- **Area overlays other than X000**: per-area code (0x80115EA4..) runs in the interpreter when
+  `GAME.selectedArea != 0` (calls dispatched through `port_lookup`). Native X000 shared-prefix code that calls a
+  per-area function by name is still linked straight to X000's copy; the full fix is the plan below (compile
+  each X0nn's own functions with an `X0nn_` prefix, route those names through thunks, track the resident area,
+  e.g. from the load record or `GAME.selectedArea`).
+- The decompiled-but-asm-only functions above (interpreted today), MDEC movies (skipped), memory card (stub).
+- The rest of the register-carried audit: `port/tools/arity_check.py` still lists the call sites; each guess
+  that is wrong in some area needs a fixes.txt line.
 
 **Video (M2 step 1, done):** `shims/gpu.c` is a software GPU. `DrawOTag` walks the OT like GPU DMA and decodes
 every GP0 packet into an emulated 1024×512 VRAM: flat/gouraud/textured triangles and quads (top-left fill rule),
@@ -49,8 +110,19 @@ build/port/tombi --frames 900 --dump-frames shots --dump-every 25 [--dump-vram] 
 The boot logo ("Sony Computer Entertainment Europe / Presents") renders correctly, including its fade in/out.
 The PNG writer is self-contained (stored deflate) because the runtime has no libc/zlib.
 
-**Why no window yet:** this host has the i386 `libSDL2-2.0.so.0` runtime but no 32-bit libc/crt or SDL headers,
-and the runtime is freestanding (no dynamic loader). Options, in order of cost: (a) on a host with
+**Live view without a window toolkit:** `--pipe-frames PATH` writes every displayed frame as raw RGB24 on a
+fixed 320x256 canvas, so any raw-video player is the window:
+
+```
+mkfifo /tmp/tombi.rgb
+ffplay -f rawvideo -pixel_format rgb24 -video_size 320x256 -framerate 50 /tmp/tombi.rgb &
+build/port/tombi --realtime --pipe-frames /tmp/tombi.rgb --pad-script 1000:start
+```
+
+**Why no SDL window yet:** this host has the i386 `libSDL2-2.0.so.0` runtime but no 32-bit libc/crt or SDL
+headers, and the runtime is freestanding (no dynamic loader). Installing `libsdl2-dev:i386 gcc-multilib` is
+possible from the Ubuntu archive, but apt wants to remove 32 packages to do it on this machine, so it was not
+done. Options, in order of cost: (a) on a host with
 `gcc-multilib` + `libsdl2-dev:i386`, drop `-ffreestanding -nostdlib`, link SDL2 and upload
 `port_gpu_frame()`'s RGB buffer to an `SDL_Texture` each vblank (≈80 lines; input goes into `port_pad_vblank`);
 (b) without 32-bit dev libs, a 64-bit viewer process that maps a shared-memory frame buffer written by the
@@ -134,7 +206,7 @@ Plan:
   without touching MAIN0 code.
 - The overlay's data must still come from the file. The game's own CD load copies the overlay to 0x800E8028, so
   its data (tables, strings) lands where the native code expects it. The code bytes in RAM simply go unused.
-- **Not decompiled yet (blocker):** `SYSTEM/O?PTSUB0.BIN` (options, 13 KB), `D?SPSUB*.BIN` (sub-screens),
+- **Status (M1): done for the PAL variant-0 files.** The SYSTEM overlays are now split, largely matched and compiled into the port as an overlay set with per-overlay dispatch (§1 "Milestone M1"); the paragraphs below are the original plan. **Was the blocker:** `SYSTEM/O?PTSUB0.BIN` (options, 13 KB), `D?SPSUB*.BIN` (sub-screens),
   `G?OVER.BIN`, `I?NFO*.BIN` (inventory/info), plus the X1nn..X8nn language variants. These are about 91 MAIN0
   call targets. They need the same splat + matching treatment as the areas, or at least non-matching C for the
   port. Until then the title/options/menu screens cannot run natively. The prototype stops right there. A stopgap
@@ -348,6 +420,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 | # | Milestone | Content | Effort |
 |---|---|---|---|
 | M0 | Headless prototype (**done**) | All MAIN0+X000 C compiled for the host, retail-image data model, thunks, coroutine tasks, software GTE, CD reads, pad buffers; boots to the title overlay | done |
+| M1a | Title + AREA00 (**done**) | SYSTEM overlay set with dispatch, MIPS interpreter fallback, automatic register-carried arguments, scripted pad, raw-video pipe; title screen, new game, first room, dialogue, walking | done |
 | M1 | Window + input + pacing | multilib or a Windows 32-bit build, SDL2 window, VRAM viewer, keyboard and gamepad, 50/60 Hz pacing, `.cue`/`.iso` parsing, memory card files | 1 week |
 | M2 | Software renderer | GP0 decoder + rasteriser (textured/gouraud/semi-transparent/dither), display area from DISPENV; the boot logo and AREA00 visible | 2–3 weeks |
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
@@ -358,9 +431,10 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 
 **Main blockers today:**
 
-- The SYSTEM overlays (title/options/menus) are not decompiled.
+- The SYSTEM overlays are compiled in (O0PTSUB0 25/27 matched, the rest largely); their missing functions run
+  in the MIPS interpreter.
 - MDEC/movies, SPU and the renderer are not written yet.
-- The register-carried argument calls must be audited.
+- The register-carried argument calls are forwarded automatically; wrong guesses must be fixed per area.
 - The 32-bit pointer model rules out arm64 until phase 2.
 
 ## 7. Lessons from other projects
