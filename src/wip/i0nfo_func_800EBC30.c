@@ -5,6 +5,7 @@ extern signed char D_8009D2B0;
 extern TObj D_800A6038;
 extern signed char D_800A6047;
 
+#define LST(i) (*(TObj **)((int)list + ((i) << 2)))
 void func_800EBC30(void)
 {
     short k;
@@ -16,7 +17,7 @@ void func_800EBC30(void)
     TObj *c;
 
     for (i = 0; i < 0x40; i++) {
-        list[i] = 0;
+        LST(i) = 0;
     }
     i = 0;
     total = k = *(unsigned short *)0x1F800246;
@@ -27,7 +28,7 @@ void func_800EBC30(void)
         if ((o->type == 0x19 || (unsigned int)(o->type - 0x25) < 2) && o->_pad0e[0] == 0) goto add1;
         total--; continue;
     add1:
-        list[i++] = o;
+        LST(i++) = o;
     }
     k = *(unsigned short *)0x1F80024A;
     pp = *(TObj ***)0x1F800220;
@@ -38,27 +39,27 @@ void func_800EBC30(void)
         if ((o->type == 0x2E || o->type == 0x1D) && o->_pad0e[0] == 0) goto add2;
         total--; continue;
     add2:
-        list[i++] = o;
+        LST(i++) = o;
     }
     if (D_8009D2B0 != 3) {
         total++;
-        list[i] = &D_800A6038;
+        LST(i) = &D_800A6038;
     }
     for (m = 0; m < (short)total; m++) {
         best = m;
-        by = list[m]->y.p.whole;
+        by = LST(m)->y.p.whole;
         for (j = m; j < (short)total; j++) {
-            if ((short)by < list[j]->y.p.whole) {
+            if (LST(j)->y.p.whole > (short)by) {
                 best = j;
-                by = list[j]->y.p.whole;
+                by = LST(j)->y.p.whole;
             }
         }
-        o = list[m];
+        c = list[m];
         list[m] = list[best];
-        list[best] = o;
+        list[best] = c;
     }
-    for (i = 0; list[i] != 0; i++) {
-        o = list[i];
+    for (i = 0; LST(i) != 0; i++) {
+        o = LST(i);
         c = (TObj *)PTR(o, 0x94);
         o->b0f = i - 10;
         if (c != 0) {
