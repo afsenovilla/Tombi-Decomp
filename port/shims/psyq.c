@@ -133,7 +133,7 @@ void port_vblank(void) {
         u32 hp = *(u32 *)(0x800A6038u + 0x40);
         int px = (hp >= 0x80000000u && hp < 0x80200000u) ? *(s16 *)(hp + 2) : -1;
         int py = *(s16 *)(0x800A6038u + 0x16);
-        if (port_verbose && (cur != last || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
+        if (port_verbose && (cur != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
             port_printf("[port] frame %d: area %d section %d, player at %d,%d%s\n", port_frame, cur >> 16, cur & 0xFFFF,
                         px, py, cur != last ? " (changed)" : "");
         last = cur;
