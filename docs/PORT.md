@@ -468,6 +468,36 @@ Done:
 - The BIOS kernel area (KUSEG 0..0xFFFF) is mapped to the RAM object (page 0 needs root / mmap_min_addr 0), so NULL
   reads see zeros as on a PS1 (fixes area 0 section 3).
 
+- **Every room of the disc runs from the debug select** (96 of 96: all `ROOM_COUNTS` sections minus the 13 empty-load-list
+  rooms, which crash in the real game too, see tools/psxemu/rooms.py `DOOR_ROOMS`). Contact sheet of frame 2000 of each
+  run: the sweep script pokes `GAME.selectedArea/Section` (0x8009C960/2) at frame 1250 and presses Circle at 1300.
+  Some sections are redirected by the game itself (AREA19 sections 0/1 load AREA02 0/1, as in tools/psxemu; 4:5, 4:12,
+  4:17, 9:6 continue into another section). What was wrong, all in the generator/runtime:
+  - AREA02 section 0 and AREA05/08 section 0 really load `I0NFO.BIN` / `I0NFO2.BIN` at the overlay base (the
+    emulator does the same). MAIN0 calls those overlays' functions by the X000 name of the same address
+    (`drawCategory7Objects` -> 0x800EC710), so X000 functions that share a start address with any SYSTEM overlay
+    function are now "varying" and dispatched (gen_port.py `area_plan`).
+  - `LoadClut`/`LoadClut2` were stubs (AREA02 backdrop drawn with CLUT 0).
+  - Typed data aliases in area C (`D_1F8002DCx`, `DAT_1f800310p`, 41 names) were linked as call thunks; they now
+    resolve to their address (AREA14).
+  - The forwarding pass dropped forwarded arguments on `else f(...)` / `return f(...)` lines (its prototype rewrite
+    took them for declarations), and per-file renamed callees (`#define fa fa__8013839C`) now get the arity of their
+    address (AREA10 `updateL2Type1FObject` -> leaf butterfly).
+  - Area dispatch entries named `X0nn_<unit name>` instead of the name the C file defines (`func_801167A0.c` defines
+    `area6ScriptOp`): the thunk resolved to itself and looped forever (AREA06 hang).
+  - Data that area C defines inside the overlay region is now bound to its retail address like MAIN0 data (X004's
+    6-entry koma pig animation table was indexed past its end: garbage frames, a runaway sprite loop wrote 450 KB of
+    primitives over the overlay; AREA04 sections 5, 6, 11).
+- **Real-time audio**: `--pipe-audio FIFO` writes raw s16le stereo 44.1 kHz per vblank. FIFOs are opened read-write
+  (no open-order deadlock with players) with 1 MB buffers, SIGPIPE is ignored, and audio is produced before video
+  each vblank. Live: `ffplay -f s16le -ar 44100 -ac 2 a.fifo` next to the video `ffplay`; with `--realtime` the game
+  is paced at 50 Hz, without it a blocking audio player paces the game. One ffmpeg process reading both FIFOs
+  deadlocks (it interleaves inputs by timestamp and blocks on audio while the video FIFO is full), so use one
+  consumer per FIFO (recording: two ffmpeg processes, then mux).
+- Debug helpers: `--dump-ram FRAME:PATH` (2 MB RAM + 1 KB scratchpad, same layout as a tools/psxemu dump, for RAM
+  diffs against the emulator), `--dump-packets FRAME` (every GP0 packet of that vblank), and the fault report names
+  the interpreted function and pc.
+
 Pending:
 - Walking AREA00 -> next area with --pad-script not achieved yet. Findings: sections 0/1/2 of AREA00 are one map
   (updateA00L5Type11: sec0 -> sec1 at x>=0x4ED,y<-0x95; sec1 exit 1 at x>=0x938,y>=-0x64 -> AREA02; sec1 -> sec2 at
@@ -475,6 +505,4 @@ Pending:
   From the house: `1000:start,1200:down,1220:right:2x3/8,1350:circle,1900:cross:3x40/30,2300:cross:3x40/30,
   2700:right:400,3100:cross+right:30x8/60,3600:right:1500` with `--poke 900:1F8001B4:1` reaches sec1 x=2239, where a
   blue egg blocks the way to the AREA02 exit.
-- Debug-select sweep crashes to fix (fixes.txt candidates): areas 8, 10, 14 (segfaults), 11/16/17/18 (interpreter hits
-  garbage / NULL+2), 6 hangs; areas 2 and 5 load I0NFO/I0NFO2 at the overlay base from the debug select (not X002/X005).
-- Sound: reverb, real-time output, libsnd details (voice priorities, NRPN loop counts).
+- Sound: reverb, libsnd details (voice priorities, NRPN loop counts); an SDL audio callback once there is a window.
