@@ -1,4 +1,5 @@
 // FUNC 800ed4d0 796 I0NFO2
+// MATCHING 800ed4d0 796
 #include "TOBJ.H"
 #include "raw7.h"
 extern signed char D_8009D2B0;
@@ -67,31 +68,33 @@ void func_800ED4D0(void)
     register short k PI_K2;
     register TObj **pp PI_PP2;
     register TObj *o PI_O2;
+    short n;
     k = *(unsigned short *)0x1F80024A;
     pp = *(TObj ***)0x1F800220;
     total += k;
-    while (k != 0) {
+    if (k != 0) do {
         o = *pp++;
         k--;
-        if (o->type != 0x1D) {
+        if (o->type == 0x1D) goto sw2;
         fail2:
             total--;
             continue;
-        }
-        switch (o->_pad0e[0]) {
-        default:
-            goto fail2;
-        case 1:
-            S8(o, 0xF) = -0xC;
-            goto fail2;
-        case 2:
-            S8(o, 0xF) = 0xC;
-            goto fail2;
-        case 0:
-            LI(i++) = o;
-            break;
-        }
-    }
+        sw2:
+        n = o->_pad0e[0];
+        if (n == 0) goto d0;
+        if (n == 1) goto d1;
+        if (n < 2) goto fail2;
+        if (n == 2) goto d2;
+        goto fail2;
+    d1:
+        S8(o, 0xF) = -0xC;
+        goto fail2;
+    d2:
+        S8(o, 0xF) = 0xC;
+        goto fail2;
+    d0:
+        LI(i++) = o;
+    } while (k != 0);
     }
     if (D_8009D2B0 != 3) {
         total++;
@@ -104,7 +107,7 @@ void func_800ED4D0(void)
         best = s;
         by = LI(s)->y.p.whole;
         for (j = s; j < (short)cnt; j++) {
-            if ((short)by < LI(j)->y.p.whole) {
+            if (LI(j)->y.p.whole > (short)by) {
                 best = j;
                 by = LI(j)->y.p.whole;
             }
