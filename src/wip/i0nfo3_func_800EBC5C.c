@@ -11,17 +11,17 @@ void func_800EBC5C(void)
     TObj *q;
     short i, j, n, best, by;
     short cnt;
-    short k;
+    short k, m;
     unsigned char b;
 
     for (i = 0; i < 64; i++) list[i] = 0;
-    n = 0;
+    i = 0;
     cnt = *(unsigned short *)0x1F800246;
     pp = *(TObj ***)0x1F80021C;
     k = cnt;
     if (k != 0) {
         do {
-            o = *pp++;
+            TObj *o = *pp++;
             k--;
             if (o->type == 0x44 || o->type == 0x45 || o->type == 0x4C) goto sw;
         fail:
@@ -40,24 +40,24 @@ void func_800EBC5C(void)
             *(signed char *)&o->b0f = -1;
             goto fail;
         c0:
-            list[n++] = o;
+            list[i++] = o;
         } while (k != 0);
     }
     if (D_8009D2B0 != 3) {
         cnt++;
-        list[n] = &D_800A6038;
+        list[i] = &D_800A6038;
     }
-    for (i = 0; i < cnt; i++) {
-        best = i;
-        by = list[i]->y.p.whole;
-        for (j = i; j < cnt; j++) {
+    for (m = 0; m < cnt; m++) {
+        best = m;
+        by = list[m]->y.p.whole;
+        for (j = m; j < cnt; j++) {
             if (by < list[j]->y.p.whole) {
                 best = j;
                 by = list[j]->y.p.whole;
             }
         }
-        t = list[i];
-        list[i] = list[best];
+        t = list[m];
+        list[m] = list[best];
         list[best] = t;
     }
     for (i = 0; list[i] != 0; i++) {
