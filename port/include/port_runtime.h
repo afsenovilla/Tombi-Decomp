@@ -30,6 +30,7 @@ extern const int port_ovlmap_count;
 extern const PortOvl port_ovls[];
 #define PORT_OVL_BASE 0x800E8028u
 #define PORT_OVL_END  0x80140000u
+#define PORT_AREA_OWN_CODE 0x80115EA4u   /* X0nn: first per-area function (the 188 KB before it are shared) */
 const char *port_resident_overlay(void);
 
 /* PS1 address space emulated in the process: RAM (2 MB, mirrored nowhere) and the scratchpad + I/O page */

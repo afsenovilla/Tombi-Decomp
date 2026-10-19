@@ -155,6 +155,9 @@ void *port_lookup(u32p a) {
                 if (port_ovlmap[i].id == id && port_ovlmap[i].addr == a) return port_ovlmap[i].fn;
             return 0;
         }
+        /* an area overlay X0nn other than X000 (same header): its own code (from 0x80115EA4) differs from
+           X000's, so run what is loaded; the shared prefix stays native.  GAME.selectedArea names the area. */
+        if (a >= PORT_AREA_OWN_CODE && *(volatile unsigned short *)0x8009C960u != 0) return 0;
     }
     (void)funcs_sorted;
     while (lo <= hi) {
