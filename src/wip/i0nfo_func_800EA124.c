@@ -1,5 +1,4 @@
 // FUNC 800ea124 2612 I0NFO
-// FLAGS -O2 -G0 -fno-strength-reduce
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -34,8 +33,8 @@ extern void func_8004FD6C(void *, int, long, int, unsigned long);
 
 #define SN(i) sn[i]
 #define CS(i) cs[i]
-#define C f[-1]
-#define D f[0]
+#define C e[0xA]
+#define D e[0xB]
 
 void func_800EA124(TObj *o)
 {
@@ -54,8 +53,9 @@ void func_800EA124(TObj *o)
     long otz;
     short *h;
     short k;
+    unsigned short n0;
     unsigned char *e;
-    unsigned char *f;
+    register unsigned char *pe asm("a1");
     PolyFT4 *q;
     short *sn;
     short *cs;
@@ -73,30 +73,31 @@ void func_800EA124(TObj *o)
     *y = *sxy >> 16;
     *frm = *(unsigned short *)o->anim;
     h = (short *)(o->d3c + *frm * 4);
+    n0 = h[0];
     k = h[1];
-    e = (unsigned char *)(*(volatile int *)&o->d3c + k);
-    *n = h[0];
+    pe = (unsigned char *)(*(volatile int *)&o->d3c + k);
+    e = pe;
+    *n = n0;
     if (D_8009C330->w28[*(short *)0x1F8001F4] != *frm) {
-        func_80037C80(o, e, k);
+        func_80037C80(o, pe, k);
     }
     sn = D_8007A5F0;
     cs = D_8007A3F0;
     *a0 = (unsigned char)o->d8c;
-    f = e + 0xB;
     *a1 = (o->d8c + 0x80) & 0xFF;
     do {
-        *u = (signed char)f[3];
-        *w = (signed char)f[4];
+        *u = (signed char)e[0xE];
+        *w = (signed char)e[0xF];
         P->code = 0x2D;
         P->u0 = e[0] + (*(unsigned char *)0x1F8001F4 << 6) + 4;
-        P->v0 = f[-10] + 4;
+        P->v0 = e[1] + 4;
+        P->u1 = P->u0 + C;
         P->u2 = P->u0;
         P->v1 = P->v0;
-        P->u1 = P->u0 + C;
         P->v2 = P->v0 + D;
         P->u3 = P->u0 + C;
-        *s40 = 0;
         P->v3 = P->v0 + D;
+        *s40 = 0;
         D_8009C330->w18 = *x;
         D_8009C330->w1a = *y;
         P->tpage = o->w1e;
@@ -126,9 +127,8 @@ void func_800EA124(TObj *o)
         }
         q = (PolyFT4 *)D_1F800164;
         *q = *P;
-        f += 0x10;
-        e += 0x10;
         func_8004FD6C(q, D_1F8001E0 + 0x10, otz, (signed char)o->b0f, 0x09000000);
+        e += 0x10;
         D_1F800164 += 0x28;
     } while (--*n);
 }
