@@ -1,10 +1,12 @@
 // FUNC 800ed0c4 3488 D0SPSUB
+// wip score 717: k=0 placement in mode-cycle rebuild, mode addr/value regs, printInfoMessage chain, state 2/4 cross-jump direction, case 3 sub 2
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
 typedef struct { unsigned char b0, b1, b2, b3; } Obj;
 extern unsigned short D_1F8001FC;
 extern Inv D_8009D1A4;
+extern unsigned short D_8009D2A4;
 extern unsigned char D_8009D0A4[];
 extern unsigned char D_8009D0E6;
 extern unsigned short D_8009D2C4[];
@@ -77,9 +79,9 @@ int func_800ED0C4(Menu *m)
                 }
                 break;
             case 2:
-                k = 0;
                 if (D_8009D1A4.mode & 0x8000) {
                     D_8009D1A4.mode &= 0x7FFF;
+                    k = 0;
                     {
                         unsigned char *q = D_800FFD84[D_8009D1A4.mode];
                         for (j = 0; j < 5; j++) {
@@ -91,12 +93,12 @@ int func_800ED0C4(Menu *m)
                             }
                         }
                     }
-                    for (i = 0; i < D_8009D1A4.count; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
+                    for (i = 0; i < D_8009D2A4; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
                 } else {
                     if (++D_8009D1A4.mode >= 4) {
                         D_8009D1A4.mode = 0;
-                        k = 0;
                     }
+                    k = 0;
                     {
                         unsigned char *q = D_800FFD84[D_8009D1A4.mode];
                         for (j2 = 0; j2 < 5; j2++) {
@@ -108,7 +110,7 @@ int func_800ED0C4(Menu *m)
                             }
                         }
                     }
-                    for (i = 0; i < D_8009D1A4.count; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
+                    for (i = 0; i < D_8009D2A4; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
                 }
                 break;
             case 4:
@@ -199,6 +201,8 @@ int func_800ED0C4(Menu *m)
                             printInfoMessage(D_80111128, 1);
                         }
                         return 1;
+                    case 2:
+                        break;
                     case 3:
                         printInfoMessage(0x1E, 2);
                         return 1;
@@ -212,20 +216,21 @@ int func_800ED0C4(Menu *m)
                 }
             } else {
                 short *q;
+                int x = D_80111128;
                 for (q = D_80109D88; *q != -1; q++) {
-                    if (D_80111128 == *q) {
+                    if (x == *q) {
                         k = 0;
                         goto found;
                     }
                 }
                 for (q = D_80109D98; *q != -1; q++) {
-                    if (D_80111128 == *q) {
+                    if (x == *q) {
                         k = 1;
                         goto found;
                     }
                 }
                 for (q = D_80109DB0; *q != -1; q++) {
-                    if (D_80111128 == *q) {
+                    if (x == *q) {
                         if (D_8009D0E6 < 5) k = 3;
                         else k = 2;
                         goto found;
