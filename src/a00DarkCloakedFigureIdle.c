@@ -7,7 +7,7 @@ extern void FUN_8001fec0(TObj *o);
 extern void *PTR_DAT_8013b270;
 extern void *PTR_DAT_8013b274;
 
-void a00L2Type14Step(TObj *o)
+void a00DarkCloakedFigureIdle(TObj *o)
 {
     switch (o->step) {
     case 0:

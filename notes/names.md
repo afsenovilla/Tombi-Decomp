@@ -1453,8 +1453,8 @@ twin of the same function at another address of an overlay keeps its generic nam
   way), `8011899c a00FogCloudClearStep` (subtype 1, at the camera depth: DAT_8009c966 1 = drift left 1.5 px/frame wrapping at x 0x4D9,
   2 = come back, 3 or DAT_8009cda6 == 0xFF = freed: the "Clear the Fog" scene), `8011880c a00FogCloudWobble` (SubStep: corner x +-1 per
   frame between -0x50..0x50).
-- biting plant (layer 2 type 7: three placed parts linked by d94, subtype 0 the head, 1 / 2 the stem segments; area 0
-  GAME.bittingPlantFlowerState; capture 2/07:0 in room 1: a green wavy stalk): `80111ae0 updateBitingPlantByArea` (was updateL2Type07Object:
+- biting plant (layer 2 type 7: three placed parts linked by d94; captures in room 1: subtype 0 a green wavy stalk,
+  subtypes 1 / 2 the two white toothed jaw halves on a green base; area 0 GAME.bittingPlantFlowerState): `80111ae0 updateBitingPlantByArea` (was updateL2Type07Object:
   area 0 / 4 / 10 thunk), `8012ed60 updateA00BitingPlant` (was l2Type07Update), x004 `80123b94 updateA04BitingPlant`, x010 `80121bac
   updateA10BitingPlant` (were updateArea4/10Type07Object), x010 `8012095c bitingPlantPlayerContact` (was l2Type07Contact). Steps:
   `8012f1b4 bitingPlantSway` / `8012f228 bitingPlantSwayStep` (velH 0x80 pendulum into d8c) / `8012f36c bitingPlantCopyParentAngle` (step 0),
@@ -1497,3 +1497,11 @@ twin of the same function at another address of an overlay keeps its generic nam
 - Captures with nothing new: P/44:0:5 draws the digit "5" (updateDigitSprite confirmed), 2/0E:0 a golden treasure chest, P/0A:0 / P/0A:1 one
   screen-sized black quad, L4/0A part 3 (record 00040a02..) a small pink two-lobed shape and part 1 a vertical brown pole: not identified,
   L4/0A stays generic; 4/06:1 one brown wooden plank model (the segments of updateA00L4Type06, role unknown).
+- `8011926c updateA00SplashDroplets` (was updateA00PoolType06; capture P/06: blue droplets spraying up, sfx 0x30, one-shot anim
+  D_8013B1F0): spawned by updateL4Type00Object subtype 0 at anim frame 4 of its stretch.
+- `80134404 updateA00DarkCloakedFigure` / `80134190 a00DarkCloakedFigureIdle` (were updateA00L2Type14 / a00L2Type14Step; capture 2/14
+  synthetic in room 1: a dark hooded figure with a scarf standing and gesturing; made by FUN_80136a98 at 0xA38/-0x124 or, with
+  DAT_8009c984 bits 8|0x10, subtype 1 at 0xC29/-0x2E3): random idle anims D_8013B270 / D_8013B274 (step by subtype), when GCD.bcda9 ==
+  0xFF it leaps off (velX 0x200, velY -0x400) and is freed off screen (identity of the character unknown).
+- Captures with nothing: 4/18 and 4/17 (synthetic, draw nothing without their scene), 4/1B (room 4), 7/01 / 7/02 (nothing drawn),
+  P/5A (flag-gated), P/10:1 / P/17 / 4/01 / P/16 / P/04 hit the cap.

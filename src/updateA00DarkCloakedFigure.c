@@ -11,7 +11,7 @@ void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 short GetClut(int, int);
-void a00L2Type14Step(TObj *o);
+void a00DarkCloakedFigureIdle(TObj *o);
 void freeObjectLayer2(TObj *o);
 void func_80134404(TObj *o)
 {
@@ -44,9 +44,9 @@ void func_80134404(TObj *o)
         ObjCullRegister(o);
         if (GCD.bcda9 == 0xff) {
             if (!o->visible) o->b04 = 3;
-            a00L2Type14Step(o);
+            a00DarkCloakedFigureIdle(o);
         } else if (o->visible) {
-            a00L2Type14Step(o);
+            a00DarkCloakedFigureIdle(o);
         }
         break;
     case 2:
@@ -97,9 +97,9 @@ void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
 short GetClut(int, int);
-void a00L2Type14Step(TObj *o);
+void a00DarkCloakedFigureIdle(TObj *o);
 void freeObjectLayer2(TObj *o);
-void updateA00L2Type14(TObj *o)
+void updateA00DarkCloakedFigure(TObj *o)
 {
     int t;
     void *a;
@@ -130,9 +130,9 @@ void updateA00L2Type14(TObj *o)
         ObjCullRegister(o);
         if (GCD.bcda9 == 0xff) {
             if (!o->visible) o->b04 = 3;
-            a00L2Type14Step(o);
+            a00DarkCloakedFigureIdle(o);
         } else if (o->visible) {
-            a00L2Type14Step(o);
+            a00DarkCloakedFigureIdle(o);
         }
         break;
     case 2:

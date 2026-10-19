@@ -285,7 +285,7 @@ address,name,size,typed
 80118e70,a00SporeCloudStunPigs,288,0
 80118f90,updateA00SporeCloud,544,1
 801191b0,spawnA00SporeCloudPair,188,0
-8011926c,updateA00PoolType06,240,1
+8011926c,updateA00SplashDroplets,240,1
 8011935c,updateYellowChick,268,1
 80119468,updateBubbleDroplet,284,1
 80119584,a00L2Type06SpawnChild,112,0
@@ -507,9 +507,9 @@ address,name,size,typed
 80133254,frogStep0,544,1
 80133474,updateFrog,3152,1
 801340c4,FUN_801340c4,204,0
-80134190,a00L2Type14Step,376,1
+80134190,a00DarkCloakedFigureIdle,376,1
 80134308,FUN_80134308,252,1
-80134404,updateA00L2Type14,700,1
+80134404,updateA00DarkCloakedFigure,700,1
 801346c0,npcCharlesHopAway,704,1
 80134980,npcCharlesHopToSpot,672,1
 80134c20,updateNpcCharles,572,1

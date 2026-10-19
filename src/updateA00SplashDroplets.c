@@ -52,7 +52,7 @@ extern void FUN_8001fe6c(char *);
 extern void FUN_8001e4f0(int);
 extern void FUN_800187e4(char *);
 
-void updateA00PoolType06(char *o)
+void updateA00SplashDroplets(char *o)
 {
     unsigned char s = o[4];
     switch (s) {
