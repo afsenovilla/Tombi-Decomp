@@ -1,5 +1,5 @@
 // FUNC 800ee37c 516 D0SPSUB
-// wip: 24 differing insns (Pt load order/regs, *e reload placement). D_8010A2D4-> (not [0].) avoids CSE related-value base
+// MATCHING 800ee37c 516
 typedef struct { unsigned short x, y, z, pad; } Pt;
 typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { int x, y, z; } Vec;
@@ -52,16 +52,21 @@ Sprite *func_800EE37C(void)
     l = &D_800FDAB4[*e];
     {
         int a = l->a, b = l->b;
-        short xa = D_800FD418[a].x + 8, xb = D_800FD418[b].x + 8;
-        short ya = D_800FD418[a].y + 2, yb = D_800FD418[b].y + 2;
-        unsigned short za = D_800FD418[a].z, zb = D_800FD418[b].z;
+        short xa, xb, ya, yb;
+        unsigned short za, zb;
+        xa = D_800FD418[a].x + 8;
+        xb = D_800FD418[b].x + 8;
+        ya = D_800FD418[a].y + 2;
+        za = D_800FD418[a].z;
+        yb = D_800FD418[b].y + 2;
+        zb = D_800FD418[b].z;
         D_8010A2D4->p.s.x = (xa + xb) / 2 << 16;
         D_8010A2D4->p.s.y = (ya + yb) / 2 << 16;
         D_8010A2D4->p.s.z = ((short)za + (short)zb) / 2 << 16;
     }
     D_8010A2D4->q.v = D_8010A2D4->p.v;
-    D_8010A2D4->wb4 = 0;
     D_80111124 = *e;
+    D_8010A2D4->wb4 = 0;
     D_8010A2D4->wb6 = l->c;
     D_8010A2D4->wb8 = l->d;
     D_8010A2D4->wba = 1;
