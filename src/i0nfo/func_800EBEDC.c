@@ -1,4 +1,5 @@
 // FUNC 800ebedc 424 I0NFO
+// MATCHING 800ebedc 424
 #include "TOBJ.H"
 extern unsigned short D_800A4678[];
 extern short D_800B1320[];
@@ -9,10 +10,13 @@ void func_800EBEDC(TObj *o)
     short y, r, k, t;
     unsigned int d;
     d = o->d34;
-    xt = (short)(o->d30 >> 5);
+    yt = o->d30;
+    d >>= 5;
+    xt = (short)(yt >> 5);
     if (xt > 0) xt--;
     x = xt;
-    yt = (short)(d >> 5);
+    do { } while (0);
+    yt = (short)d;
     k = 0;
     if (yt > 0) yt--;
     y = yt;
