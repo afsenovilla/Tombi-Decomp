@@ -374,17 +374,17 @@
     "I0NFO": {
       "game": 26248,
       "n": 53,
-      "matched": 22952,
-      "n_matched": 51,
+      "matched": 23636,
+      "n_matched": 52,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 3296,
-      "n_new": 2,
+      "new": 2612,
+      "n_new": 1,
       "uniq": 25828,
-      "uniq_matched": 22532,
+      "uniq_matched": 23216,
       "n_uniq": 49,
-      "n_uniq_matched": 47
+      "n_uniq_matched": 48
     },
     "I0NFO2": {
       "game": 90280,
@@ -404,17 +404,17 @@
     "I0NFO3": {
       "game": 26692,
       "n": 55,
-      "matched": 23324,
-      "n_matched": 52,
+      "matched": 24080,
+      "n_matched": 54,
       "piece": 0,
       "x000": 0,
       "dup": 2612,
-      "new": 756,
-      "n_new": 2,
+      "new": 0,
+      "n_new": 0,
       "uniq": 18556,
-      "uniq_matched": 17800,
+      "uniq_matched": 18556,
       "n_uniq": 39,
-      "n_uniq_matched": 37
+      "n_uniq_matched": 39
     }
   }
 }
