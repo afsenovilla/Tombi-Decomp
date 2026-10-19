@@ -320,8 +320,8 @@ def sources(outdir, progs, ovls=()):
         for u in U[prog]: code.append((u.addr, u.addr + u.size))
     with open(os.path.join(outdir, "code_ranges.txt"), "w") as f:
         for a, e in sorted(code): f.write("%08X %08X\n" % (a, e))
-    print("gen_port: %d sources (%s), %d mapped functions, %d per-file renames"
-          % (len(files) + len(files24), " ".join(progs), len(fmap), len(renamed)))
+    print("gen_port: %d sources (%s), %d mapped functions, %d overlay-set functions, %d per-file renames"
+          % (len(files) + len(files24), " ".join(list(progs) + list(ovls)), len(fmap), len(ovlmap), len(renamed)))
 
 
 def _blank(s):
