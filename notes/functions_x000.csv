@@ -11,8 +11,8 @@ address,name,size,typed
 800eaffc,spawnWeaponHitDebris,204,0
 800eb0c8,updateKomaPigDustPuff,468,1
 800eb29c,FUN_800eb29c,248,1
-800eb394,updatePoolType1BEffect,376,1
-800eb50c,spawnPoolType1BEffect,416,0
+800eb394,updateFlashEffect,376,1
+800eb50c,spawnFlashEffect,416,0
 800eb6ac,updateBreakPiece,580,1
 800eb8f0,spawnBreakPieces,256,1
 800eb9f0,updateDigitSprite,344,1
@@ -395,7 +395,7 @@ address,name,size,typed
 801231f4,FUN_801231f4,336,1
 80123344,FUN_80123344,772,1
 80123648,FUN_80123648,168,0
-801236f0,updateA00L5Type0B,616,1
+801236f0,updateA00BitingPlantBait,616,1
 801237e4,FUN_801237e4,196,0
 80123a1c,updateA00L5Type0C,328,1
 80123b64,FUN_80123b64,188,1
@@ -463,7 +463,7 @@ address,name,size,typed
 8012c8ec,komaPigSubtype05Step,504,1
 8012cae4,komaPigSubtype06Step,532,1
 8012ccf8,updateKomaPig,1436,1
-8012d294,updateA00L2Type2B,1344,1
+8012d294,updateA00PinkPiglet,1344,1
 8012d4ac,thunk_FUN_8012d7e0,12,0
 8012d7e0,FUN_8012d7e0,28,0
 8012d7fc,komaPigSubtype07Step,284,1
@@ -501,7 +501,7 @@ address,name,size,typed
 801319d0,redBirdStep1B,1752,1
 801320a8,redBirdStep1C,204,1
 80132174,updateRedBird,1856,1
-801328b4,updateA00L2Type09,764,1
+801328b4,updateA00WoodenBranch,764,1
 80132bb0,FUN_80132bb0,8,0
 80132f80,frogHop,724,1
 80133254,frogStep0,544,1
@@ -510,8 +510,8 @@ address,name,size,typed
 80134190,a00L2Type14Step,376,1
 80134308,FUN_80134308,252,1
 80134404,updateA00L2Type14,700,1
-801346c0,a00L2Type15Step3,704,1
-80134980,a00L2Type15Step1,672,1
+801346c0,npcCharlesHopAway,704,1
+80134980,npcCharlesHopToSpot,672,1
 80134c20,updateNpcCharles,572,1
 80134e5c,updateHoodedOldMan,3248,1
 80135b0c,a00RoamingFlyerSteer,676,1

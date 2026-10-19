@@ -9,8 +9,8 @@ extern unsigned char DAT_8009ce4a;
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_800202b4(TObj *);
-extern void a00L2Type15Step1(TObj *);
-extern void a00L2Type15Step3(TObj *);
+extern void npcCharlesHopToSpot(TObj *);
+extern void npcCharlesHopAway(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 void updateNpcCharles(TObj *o)
@@ -40,7 +40,7 @@ void updateNpcCharles(TObj *o)
     case 1:
         if (o->subtype == 0x63) {
             FUN_800202b4(o);
-            a00L2Type15Step1(o);
+            npcCharlesHopToSpot(o);
             break;
         }
         if (DAT_8009ce4a == 0xff) {
@@ -77,7 +77,7 @@ void updateNpcCharles(TObj *o)
             o->b04 = 3;
             return;
         case 3:
-            a00L2Type15Step3(o);
+            npcCharlesHopAway(o);
             return;
         case 4:
             break;

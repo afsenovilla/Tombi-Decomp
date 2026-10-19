@@ -11,8 +11,8 @@ address,size,name,twin
 800eaffc,204,spawnWeaponHitDebris,X000:800eaffc
 800eb0c8,468,updateKomaPigDustPuff,X000:800eb0c8
 800eb29c,248,FUN_800eb29c,X000:800eb29c
-800eb394,376,updatePoolType1BEffect,X000:800eb394
-800eb50c,416,spawnPoolType1BEffect,X000:800eb50c
+800eb394,376,updateFlashEffect,X000:800eb394
+800eb50c,416,spawnFlashEffect,X000:800eb50c
 800eb6ac,580,updateBreakPiece,X000:800eb6ac
 800eb8f0,256,spawnBreakPieces,X000:800eb8f0
 800eb9f0,344,updateDigitSprite,X000:800eb9f0

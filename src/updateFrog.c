@@ -47,7 +47,7 @@ extern void showMessageBox(int, int, int, int);
 extern int MulCos(short a, int b);
 extern int MulNegSinScaled(short a, int b);
 extern void ObjSpawnType5(int, int, void *);
-extern void spawnPoolType1BEffect(int, int, int, int);
+extern void spawnFlashEffect(int, int, int, int);
 extern void despawnObjectOffscreen(TObj *);
 extern void printInfoMessage(int, int);
 extern short TileCollideAt(TObj *, short, short);
@@ -224,7 +224,7 @@ void updateFrog(TObj *o)
                 ObjSpawnType5(0x10, 0, &v);
                 ObjSpawnType5(0x10, 0, &v);
                 setEventComplete(3, 0);
-                spawnPoolType1BEffect(1, o->a.p.whole, (short)(o->y.p.whole - 0x20), o->b.p.whole);
+                spawnFlashEffect(1, o->a.p.whole, (short)(o->y.p.whole - 0x20), o->b.p.whole);
                 D_8009C984 = (D_8009C984 | 4) & ~2;
                 o->timer = 300;
                 o->state++;

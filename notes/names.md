@@ -1480,3 +1480,20 @@ twin of the same function at another address of an overlay keeps its generic nam
   sprite tables DAT_80114AB8 / AC0 / AC8.
 - Captures with nothing to name: P/0A:0 (updateA00KomaPigSpawner draws one black screen-sized quad), P/09:0 / P/01:1 nothing drawn; 4/03,
   4/00, P/11, P/04 and 2/06 in room 4 hit the 10-minute cap without output.
+- updateNpcCharles steps: `80134980 npcCharlesHopToSpot` (was a00L2Type15Step1: when the player comes within 0xA0 it hops (velX 0xC0, velY
+  -0x480) and glides to x 0x138 / y -0x11C), `801346c0 npcCharlesHopAway` (Step3: hops left, lands (active 4, anim D_8013AC30), hops again
+  away from its facing).
+- `801236f0 updateA00BitingPlantBait` (was updateA00L5Type0B; room 1 layer 5 item object initItemObject): on contact it is thrown along its
+  facing (velH/velV from D_80138F8C), the camera follows it when GCD.bce4d == 0 (D_8009C948 = this object, GVARS.b3f/b3e/b42), lands with
+  a bounce; bitingPlantEatBaitStep frees it when the plant swallows it.
+- `8012d294 updateA00PinkPiglet` (was updateA00L2Type2B; capture 2/2B synthetic in room 1: a small pink piglet; made by updateKomaPig state 3
+  for the pig with the b6b flag, camera on it): falls from the spawn point (velV), wanders with four random walk / idle / turn states, and
+  when its b04 is set to 2 starts event 0xA7, addItemToInventory(0x23) and sets its area flag (uncertain which pig / item).
+- `801328b4 updateA00WoodenBranch` (was updateA00L2Type09; captures 2/09:0 / 2/09:1: wooden branch pieces with leaves, D_8013B24C[b0c]
+  anims, CLUT 0x90/0x1E6): box 0x20 x 0x40, subtype step table D_801392E0, per-b0c vectors D_801392EC (uncertain role).
+- `800eb394 updateFlashEffect` / `800eb50c spawnFlashEffect` (were updatePoolType1BEffect / spawnPoolType1BEffect; capture P/1B:1: a large
+  white jagged flash): pool 0x1B with the per-area sprite table D_80114AE4; subtype 1 sfx (0xE, 4), subtype 2 sfx (0xE, 0), subtype 0 is
+  remembered in D_800A611C; made by updateFrog (event 3) and the area-0 scene code FUN_801363e4.
+- Captures with nothing new: P/44:0:5 draws the digit "5" (updateDigitSprite confirmed), 2/0E:0 a golden treasure chest, P/0A:0 / P/0A:1 one
+  screen-sized black quad, L4/0A part 3 (record 00040a02..) a small pink two-lobed shape and part 1 a vertical brown pole: not identified,
+  L4/0A stays generic; 4/06:1 one brown wooden plank model (the segments of updateA00L4Type06, role unknown).
