@@ -1,4 +1,5 @@
 // FUNC 800eb61c 812 D0SPSUB2
+// MATCHING 800eb61c 812
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -36,8 +37,9 @@ void func_800EB61C(int pri, int mode)
     Glyph g;
     SPRT *s = (SPRT *)0x1F800000;
     SPRT *p;
-    unsigned short *str;
-    unsigned short x, y;
+    register unsigned short *str asm("$8");
+    register unsigned short x asm("$7");
+    unsigned short y;
     short w;
     unsigned short c;
     Glyph *font;
@@ -54,7 +56,8 @@ void func_800EB61C(int pri, int mode)
     while ((short)(c = *str++) != -1) {
         if (mode == 2 && (short)c == 0xA8) {
             x = D_800F70D8.x = 0x50;
-            y = D_800F70D8.y += 0x10;
+            D_800F70D8.y += 0x10;
+            y = D_800F70D8.y;
         }
         switch ((short)c) {
         case -7:
@@ -92,7 +95,7 @@ void func_800EB61C(int pri, int mode)
                 else s->y0 = y;
                 s->u0 = g.u;
                 s->v0 = g.v;
-                x += g.w;
+                { int t = g.w; x += t; }
             } else {
                 s->x0 = x - 0xB;
                 s->y0 = y - 0xA;
