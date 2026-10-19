@@ -1435,8 +1435,9 @@ twin of the same function at another address of an overlay keeps its generic nam
 - `8011f1d0 updateA00FlagGatedModel` (was updateA00L4Type0D: room 5, draws nothing itself; with GCD.bcdac == 0xFF takes model 12 of the
   SPAD.i334 table and is pushed to the layer 4 draw list) and `8011b7f0 updateA00FlagGatedSprite` (was updateA00PoolType5A: sprite
   D_8013B168[b0c] while GCD.bcdac == 0xFF, else freed).
-- `8011a744 updateA00TouchSpark` (was updateA00PoolType0B): the three sparks of spawnTouchSparkTriggerSparks (D_8013B244[b0c], four
-  subtype velocity sets, rotates d8c, freed off screen).
+- `8011a744 updateA00FallingLeaf` (was updateA00PoolType0B; capture P/0B:0 in room 1: a green leaf): the three leaves that
+  `8011aa30 spawnLeafShakeLeaves` (was spawnTouchSparkTriggerSparks) drops when the player touches `8012e4c4 updateA00LeafShakeTrigger`
+  (was updateA00TouchSparkTrigger / updateA00L2Type05): D_8013B244[b0c], four subtype velocity sets, rotates d8c, freed off screen.
 - `8011a63c updateA00KomaPigSpawner` / `8011a418 a00KomaPigSpawnerStep` (were updateA00PoolType0A / a00PoolType0AStep): subtype 0, when the
   camera is within 0xC0 x / 0x2D z, spawns a layer 2 type 2 subtype 5 Koma pig at its position (depth 0x5A) every 2000 frames, 10 at most
   (w98), the pig's d94 points back at its w9a counter.
@@ -1447,3 +1448,35 @@ twin of the same function at another address of an overlay keeps its generic nam
   player's box overlap puts the butterfly in b04 2 and the player's de4 / bac 2 "caught" state, spawnImpactEffect).
 - `800ee18c updateStaticDecorModel` (was updateL4Type13Object): layer 4 type 0x13, no collision (active 2, b0a 0x10 model); in areas 4 / 12
   it is pushed straight to the draw list, elsewhere culled with ObjCullRegister.
+- `80118438 updateA00FogCloud` (was updateA00PoolType01; capture P/01:0: a wide undulating cloud, b0a 0x11 quad with four corner vectors
+  v[0..3] from D_80138644[subtype]): `80118638 a00FogCloudDrift` (subtype 0: bobs on velH/w7c, corners move in and out for 0x140 frames each
+  way), `8011899c a00FogCloudClearStep` (subtype 1, at the camera depth: DAT_8009c966 1 = drift left 1.5 px/frame wrapping at x 0x4D9,
+  2 = come back, 3 or DAT_8009cda6 == 0xFF = freed: the "Clear the Fog" scene), `8011880c a00FogCloudWobble` (SubStep: corner x +-1 per
+  frame between -0x50..0x50).
+- biting plant (layer 2 type 7: three placed parts linked by d94, subtype 0 the head, 1 / 2 the stem segments; area 0
+  GAME.bittingPlantFlowerState; capture 2/07:0 in room 1: a green wavy stalk): `80111ae0 updateBitingPlantByArea` (was updateL2Type07Object:
+  area 0 / 4 / 10 thunk), `8012ed60 updateA00BitingPlant` (was l2Type07Update), x004 `80123b94 updateA04BitingPlant`, x010 `80121bac
+  updateA10BitingPlant` (were updateArea4/10Type07Object), x010 `8012095c bitingPlantPlayerContact` (was l2Type07Contact). Steps:
+  `8012f1b4 bitingPlantSway` / `8012f228 bitingPlantSwayStep` (velH 0x80 pendulum into d8c) / `8012f36c bitingPlantCopyParentAngle` (step 0),
+  `8012f380 bitingPlantLunge` (step 1, when the player is within 33 x / 91 z / above: `8012f3f4 bitingPlantLungeHead` springs up with velV
+  -0x800 as a stretched quad (b0a 4, corners wb4..d0), `8012f864 bitingPlantLungeStemA` / `8012f9e0 bitingPlantLungeStemB` follow with
+  their d8c angle), `8012fb3c bitingPlantHitWobble` / `8012fbb0 bitingPlantHitWobbleStep` / `8012fe84 bitingPlantHitCopyParent` (step 2 on
+  b68: damped sideways wobble), `8012fe98 bitingPlantStep3` (step 3 after b69 == 1, sfx 0x2C), `801302a0 bitingPlantEatBait` /
+  `80130314 bitingPlantEatBaitStep` (step 4 after b69 == 2: GCD.bd07b = 1 or frees the thrown bait object D_8009C948, three swallow swings).
+- `801195f4 updateA00Tornado` (was updateA00PoolType09; uncertain - the draw of P/09:0 is empty because the anim comes from the spawner):
+  `8011a148 spawnA00Tornado` (makes the pair subtype n / n+1 with the models D_8013B1B8 / D_8013B1B4 plus `8011a2f8 spawnA00TornadoOrbiters`,
+  four subtype-4 parts orbiting on sines), `80119988 a00TornadoStep` (rises toward the camera target D_1F800168 with pad vibration, sets the
+  player mode 4/5 and D_800A6048 to its position (carries the player), sfx 0x36, scale d64 shakes, FUN_80026c50(4,1,1) when done; step 10
+  waits for GAME.area00_eventControl & 1), `80119864 a00TornadoOrbitStep` (subtype 4: position = parent + sin/cos of wb4..wb8).
+- `80118bc0 updateMushroomClusterDebris` (was updateA00PoolType02; capture P/02:0: a purple bulb flung in an arc; six made by
+  spawnMushroomClusterDebris): jumps with velY -0x400 and the movetab by subtype parity, freed when it lands.
+- `80118f90 updateA00SporeCloud` (was updateA00PoolType03; capture P/03:0: a purple cloud of puffs that grows): CLUT 0xE0/0x1E0, grows
+  wb8/wba every 0x38 frames; `80118e70 a00SporeCloudStunPigs` (subtype 1 b0c 1: a layer 2 type 2 Koma pig in its box is put in state 2);
+  `801191b0 spawnA00SporeCloudPair` (was updateA00PoolType27); made by `8011bf68 updateA00SporeBranch` (was updateA00L4Type02: a chain of
+  segments, the tip has the hit box; shaken (wb4 1..6 sway tables by the hit facing) it releases a spore pair at the tip every 0x78 frames
+  with sfx 0x32).
+- `800eb0c8 updateKomaPigDustPuff` (was updatePoolType10Object; capture P/10:0: a white puff that expands and fades): pool 0x10 made by
+  komaPigGrabbed (subtype 0, sfx 0x10, drifts 0x5A frames) and the pig landing code of komaPigState6/7 (subtype 1, sfx 0x27); per-area
+  sprite tables DAT_80114AB8 / AC0 / AC8.
+- Captures with nothing to name: P/0A:0 (updateA00KomaPigSpawner draws one black screen-sized quad), P/09:0 / P/01:1 nothing drawn; 4/03,
+  4/00, P/11, P/04 and 2/06 in room 4 hit the 10-minute cap without output.

@@ -10,11 +10,11 @@ extern char D_8013B7F0[];
 extern char D_8013B7F8[];
 extern char D_8013B800[];
 extern char D_8013B808[];
-extern void l2Type07Sub0();
+extern void bitingPlantSway();
 extern void FUN_8012f380();
-extern void l2Type07Sub2();
-extern void l2Type07Sub3();
-extern void l2Type07Sub4();
+extern void bitingPlantHitWobble();
+extern void bitingPlantStep3();
+extern void bitingPlantEatBait();
 extern unsigned int data_80139124[];
 extern unsigned int data_80139134[];
 extern unsigned int data_8013913C[];
@@ -84,11 +84,11 @@ void *ptrs_801391E4[9] = {
     data_8013919C,
     data_801391B4,
     data_801391CC,
-    l2Type07Sub0,
+    bitingPlantSway,
     FUN_8012f380,
-    l2Type07Sub2,
-    l2Type07Sub3,
-    l2Type07Sub4,
+    bitingPlantHitWobble,
+    bitingPlantStep3,
+    bitingPlantEatBait,
 };
 
 unsigned int data_80139208[8] = {

@@ -173,13 +173,13 @@ extern short D_800A4582;
 extern void komaPigSubtype0Step();
 extern void komaPigSubtype1Step();
 extern void komaPigSubtype2Step();
-extern void l2Type07Sub0();
-extern void l2Type07Sub1();
+extern void bitingPlantSway();
+extern void bitingPlantLunge();
 extern void FUN_80124ad8();
 extern void FUN_80124e14();
 static Fn D_801310EC[7] = {
-    (Fn)komaPigSubtype0Step, (Fn)komaPigSubtype1Step, (Fn)komaPigSubtype2Step, (Fn)l2Type07Sub0,
-    (Fn)l2Type07Sub1, (Fn)FUN_80124ad8, (Fn)FUN_80124e14,
+    (Fn)komaPigSubtype0Step, (Fn)komaPigSubtype1Step, (Fn)komaPigSubtype2Step, (Fn)bitingPlantSway,
+    (Fn)bitingPlantLunge, (Fn)FUN_80124ad8, (Fn)FUN_80124e14,
 };
 extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);

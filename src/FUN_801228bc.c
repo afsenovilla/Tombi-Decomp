@@ -7,7 +7,7 @@ extern unsigned char DAT_8009cda6;
 extern unsigned char DAT_8009d2af;
 extern int DAT_8009f0ec;
 extern void FUN_801340c4(int, int, int);
-extern void spawnPoolType09Object(int, int, int, int);
+extern void spawnA00Tornado(int, int, int, int);
 
 void FUN_801228bc(TObj *o)
 {
@@ -19,7 +19,7 @@ void FUN_801228bc(TObj *o)
     if ((DAT_8009c984 & 2) != 0)
         FUN_801340c4(o->a.p.whole, o->y.p.whole, o->b.p.whole);
     if (DAT_8009cda6 != 0xff)
-        spawnPoolType09Object(0, 0, 0, 6);
+        spawnA00Tornado(0, 0, 0, 6);
     if (DAT_8009d2af == 0) {
         o->b04 = 5;
         o->step = 0;

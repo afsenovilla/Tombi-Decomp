@@ -30,7 +30,7 @@ extern int DAT_8009c984b[];
 extern unsigned char DAT_8009c938a[];
 extern unsigned char DAT_8009c938;
 extern int FUN_8001f9e0(void);
-extern void spawnPoolType09Object(int, int, int, int);
+extern void spawnA00Tornado(int, int, int, int);
 extern void setEventStarted(int, int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
@@ -71,7 +71,7 @@ void updateA00L4Type0A(S *o)
                     q->wc0 = 0;
                     q->b0f = 0;
                     if (!(DAT_8009c984a[0] & 1))
-                        spawnPoolType09Object(q->a.p.whole, q->y.p.whole, q->b.p.whole, 0);
+                        spawnA00Tornado(q->a.p.whole, q->y.p.whole, q->b.p.whole, 0);
                     break;
                 case 0:
                     q->active = 2;
