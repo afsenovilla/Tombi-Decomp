@@ -1,4 +1,5 @@
 // FUNC 800eb77c 1248 I0NFO3
+// MATCHING 800eb77c 1248
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "TOBJ.H"
 typedef struct {
@@ -44,7 +45,7 @@ void func_800EB77C(TObj *o)
     unsigned short cl;
     PolyFT4 *q;
     unsigned long *slot;
-    int k;
+int k, j;
 
     if (o->b6b == 0) return;
     gte_SetRotMatrix(D_1F8000C0);
@@ -112,10 +113,10 @@ void func_800EB77C(TObj *o)
             && (p->x0 < 0x141 || p->x1 < 0x141 || p->x2 < 0x141 || p->x3 < 0x141)) {
             q = (PolyFT4 *)D_1F800164;
             *q = *p;
-            slot = (unsigned long *)((*otz << 2) - 0x10);
-            k = (signed char)o->b0f;
+            k = *otz; slot = (unsigned long *)((k << 2) - 0x10);
+            j = (signed char)o->b0f;
             do { } while (0);
-            slot = (unsigned long *)((int)slot + (int)&D_1F8001E0->ot[k]);
+            slot = (unsigned long *)((int)slot + (int)&D_1F8001E0->ot[j]);
             tmp->v = *slot;
             *slot = (unsigned long)q;
             tmp->v |= *code;
@@ -124,5 +125,5 @@ void func_800EB77C(TObj *o)
         }
         f += 0x10;
         e += 0x10;
-    } while (--*cnt);
+    k = *cnt - 1; *cnt = k; } while (k);
 }
