@@ -1,17 +1,20 @@
 // FUNC 800ee580 308 D0SPSUB
+// MATCHING 800ee580 308
+// FLAGS -O2 -G0 -fno-schedule-insns
 typedef struct { short x, y, z, id; } Spawn;
+typedef struct { int x, y, z; } Vec;
 typedef struct {
     char p0[8];
     short w08;
     unsigned char b0a, p0b, p0c, b0d, p0e, b0f;
-    int x, y, z;
+    union { struct { int x, y, z; } s; Vec v; } p;
     char p1c[2];
     short w1e;
     char p20[4];
     void *anim;
     char p28[6];
     short w2e;
-    int x0, y0, z0;
+    Vec p0v;
     int d3c;
     char p40[0x94];
 } Sprite;
@@ -29,25 +32,22 @@ void func_800EE580(void)
         if (D_8009D2C4[i] == 0) {
             Spawn *s = D_8010A02C[i];
             if (s->id != -1) {
-                Sprite *o = &D_8010A550[n];
                 do {
+                    Sprite *o = &D_8010A550[n];
                     o->w1e = 5;
                     o->b0d = 1;
                     o->w2e = 1;
                     o->w08 = 0x7FC8;
                     o->anim = D_800FECB8[s->id];
+                    o->d3c = D_1F8002EC;
                     o->b0f = 0;
                     o->b0a = 1;
-                    o->d3c = D_1F8002EC;
-                    n++;
-                    o->x = s->x << 16;
-                    o->y = s->y << 16;
-                    o->z = s->z << 16;
-                    o->x0 = o->x;
-                    o->y0 = o->y;
-                    o->z0 = o->z;
+                    o->p.s.x = s->x << 16;
+                    o->p.s.y = s->y << 16;
+                    o->p.s.z = s->z << 16;
+                    o->p0v = o->p.v;
                     s++;
-                    o++;
+                    n++;
                 } while (s->id != -1);
             }
         }
