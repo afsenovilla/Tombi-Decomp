@@ -44,6 +44,7 @@ void func_800EB77C(TObj *o)
     unsigned short cl;
     PolyFT4 *q;
     unsigned long *slot;
+    int k;
 
     if (o->b6b == 0) return;
     gte_SetRotMatrix(D_1F8000C0);
@@ -112,7 +113,9 @@ void func_800EB77C(TObj *o)
             q = (PolyFT4 *)D_1F800164;
             *q = *p;
             slot = (unsigned long *)((*otz << 2) - 0x10);
-            slot = (unsigned long *)((int)slot + ((signed char)o->b0f << 2) + 0x10 + (int)D_1F8001E0);
+            k = (signed char)o->b0f;
+            do { } while (0);
+            slot = (unsigned long *)((int)slot + (int)&D_1F8001E0->ot[k]);
             tmp->v = *slot;
             *slot = (unsigned long)q;
             tmp->v |= *code;

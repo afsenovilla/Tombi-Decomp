@@ -63,9 +63,9 @@ void func_800E8644(TObj *o)
             o->subtype = 2;
         }
         S16(o, 0x9A) = D_8009C970;
+        o->anim = D_800106B4;
         *(signed char *)&o->b0f = -8;
         o->w98 = D_8009C970;
-        o->anim = D_800106B4;
         o->d3c = *(int *)0x1F8002F0;
         func_8001FE6C(o);
         func_800EDFB8(o, 1);
