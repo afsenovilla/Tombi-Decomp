@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip score 222
+// wip score 286 (26 differing insns)
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -41,7 +41,7 @@ extern void SfxPlay2(int a, int b);
 int func_800ED0C4(Menu *m)
 {
     int pages;
-    int i, j, j2, k;
+    int i, j, j2, k; int z, n; int i2;
     unsigned short md;
     switch (m->state) {
     case 0:
@@ -89,9 +89,8 @@ int func_800ED0C4(Menu *m)
                     md &= 0x7FFF;
                     D_8009D1A4.mode = md;
                     {
-                        unsigned char *q = D_800FFD84[md];
                         for (j = 0; j < 5; j++) {
-                            unsigned char c = q[j];
+                            unsigned char c = D_800FFD84[md][j];
                             for (i = 0; i < 0x11E; i += 2) {
                                 if (D_800FFC64[i] == c && D_8009D0A4[D_800FFC64[i + 1]]) {
                                     D_8009D1A4.items[k++] = D_800FFC64[i + 1];
@@ -106,12 +105,12 @@ int func_800ED0C4(Menu *m)
                     }
                     k = 0;
                     {
-                        unsigned char *q = D_800FFD84[D_8009D1A4.mode];
+                        md = D_8009D1A4.mode;
                         for (j2 = 0; j2 < 5; j2++) {
-                            unsigned char c = q[j2];
-                            for (i = 0; i < 0x11E; i += 2) {
-                                if (D_800FFC64[i] == c && D_8009D0A4[D_800FFC64[i + 1]]) {
-                                    D_8009D1A4.items[k++] = D_800FFC64[i + 1];
+                            unsigned char c = D_800FFD84[md][j2];
+                            for (i2 = 0; i2 < 0x11E; i2 += 2) {
+                                if (D_800FFC64[i2] == c && D_8009D0A4[D_800FFC64[i2 + 1]]) {
+                                    D_8009D1A4.items[k++] = D_800FFC64[i2 + 1];
                                 }
                             }
                         }
@@ -200,14 +199,19 @@ int func_800ED0C4(Menu *m)
                 } else {
                     switch (func_800E89F8(D_80111128)) {
                     case 1:
-                        if (D_80111128 == 0x14 || D_80111128 == 0x15 || D_80111128 == 0x16 || D_80111128 == 0x17
-                            || D_80111128 == 0x1B || D_80111128 == 0x21 || D_80111128 == 0x22 || D_80111128 == 0x20
-                            || D_80111128 == 0x1C || D_80111128 == 0x1D) {
-                            printInfoMessage(D_80111128, 4);
-                        } else if (D_80111128 == 0x18) {
-                            printInfoMessage(D_80111128, 4);
-                        } else {
-                            printInfoMessage(D_80111128, 1);
+                        {
+                            int n = 4;
+                            int a = D_80111128;
+                            if (a != 0x14 && a != 0x15 && a != 0x16 && a != 0x17
+                                && a != 0x1B && a != 0x21 && a != 0x22 && a != 0x20
+                                && a != 0x1C && a != 0x1D) {
+                                n = 1;
+                                if (a == 0x18) {
+                                    a = *(volatile int *)&D_80111128;
+                                    n = 4;
+                                }
+                            }
+                            printInfoMessage(a, n);
                         }
                         return 1;
                     case 2:
@@ -226,28 +230,29 @@ int func_800ED0C4(Menu *m)
             } else {
                 short *q;
                 int x = D_80111128;
+                int w;
                 for (q = D_80109D88; *q != -1; q++) {
                     if (x == *q) {
-                        k = 0;
+                        w = 0;
                         goto found;
                     }
                 }
                 for (q = D_80109D98; *q != -1; q++) {
                     if (x == *q) {
-                        k = 1;
+                        w = 1;
                         goto found;
                     }
                 }
                 for (q = D_80109DB0; *q != -1; q++) {
                     if (x == *q) {
-                        if (D_8009D0E6 < 5) k = 3;
-                        else k = 2;
+                        if (D_8009D0E6 < 5) w = 3;
+                        else w = 2;
                         goto found;
                     }
                 }
-                k = 2;
+                w = 2;
             found:
-                func_800EDE64(0, k, 2);
+                func_800EDE64(0, w, 2);
                 D_8010A204 = 0;
                 SfxPlay2(10, 10);
                 m->state = 6;
@@ -276,13 +281,13 @@ int func_800ED0C4(Menu *m)
                 m->state--;
             } else if (D_1F8001FC & 0x4008) {
                 unsigned short bits;
-                k = 0;
+                z = 0;
                 bits = D_8009D2C4[D_8010A068[D_8010A058]];
-                for (i = 0; i < 9; i++) {
-                    if (bits & 1) D_8010A088[k++] = i;
+                for (n = 0; n < 9; n++) {
+                    if (bits & 1) D_8010A088[z++] = n;
                     bits >>= 1;
                 }
-                D_8010A064 = k;
+                D_8010A064 = z;
                 D_8010A060 = 0;
                 SfxPlay2(10, 10);
                 m->sub++;
