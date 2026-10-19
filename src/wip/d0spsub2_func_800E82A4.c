@@ -211,7 +211,7 @@ int func_800E82A4(Menu *m, Card *c)
         if (erase(D_800F7098)) {
             m->timer = 1;
             m->sub++;
-            break;
+            return;
         }
         c->w146 = 0;
         m->sub = 1;
@@ -297,7 +297,7 @@ int func_800E82A4(Menu *m, Card *c)
         if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
-            return 0;
+            break;
         }
         if (D_1F8001FC & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
