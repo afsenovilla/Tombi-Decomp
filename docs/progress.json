@@ -389,17 +389,17 @@
     "I0NFO2": {
       "game": 90280,
       "n": 196,
-      "matched": 78512,
-      "n_matched": 184,
+      "matched": 81948,
+      "n_matched": 188,
       "piece": 0,
       "x000": 0,
       "dup": 2612,
-      "new": 9156,
-      "n_new": 11,
+      "new": 5720,
+      "n_new": 7,
       "uniq": 75460,
-      "uniq_matched": 66304,
+      "uniq_matched": 69740,
       "n_uniq": 154,
-      "n_uniq_matched": 143
+      "n_uniq_matched": 147
     },
     "I0NFO3": {
       "game": 26692,
