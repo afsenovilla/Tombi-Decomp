@@ -124,7 +124,7 @@ def filter_src(text, dropped=None):
             else: out.append(translate_gte_define(line))
             continue
         # register variables pinned to MIPS registers: drop the pin
-        line = re.sub(r'\s*(?:__asm__|\basm)\s*\(\s*"\$?(?:[atvsk]\d|zero|at|gp|sp|fp|ra|\d+)"\s*\)(?=\s*[;=,])', "", line)
+        line = re.sub(r'\s*(?:__asm__|\basm)\s*\(\s*"\$?(?:[atvsk]\d|zero|at|gp|sp|fp|ra|\d+)"\s*\)(?=\s*[;=,]|\s*$)', "", line)
         # empty asm statements with operands or clobbers inside a line (register allocation hints for the old gcc)
         line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*""\s*:(?:[^()]|\([^()]*\))*\)\s*;', ";", line)
         # asm statements with MIPS instructions or register clobbers (empty barriers asm("") are harmless)
