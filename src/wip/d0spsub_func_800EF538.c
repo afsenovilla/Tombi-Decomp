@@ -1,4 +1,5 @@
 // FUNC 800ef538 1388 D0SPSUB
+// wip: 11 differing insns (case -6 x/y update scheduling); do{}while(0) around switch(o->wait) fixes reg alloc
 typedef struct {
     char p0[4];
     unsigned char state, wait;
@@ -40,7 +41,7 @@ void func_800EF538(Msg *o, int bank)
         return;
     case 1:
         if (++o->blink >= 60) o->blink = 0;
-        switch (o->wait) {
+        do { switch (o->wait) {
         case 0:
             if (*(volatile unsigned short *)&D_8009D670 & 0x4008) o->timer = 1;
             two = 2;
@@ -89,7 +90,7 @@ void func_800EF538(Msg *o, int bank)
                     o->ba = -(o->w >> 1);
                     o->bc = -o->h - 0x30;
                     o->x = o->x + ow + o->ba;
-                    o->y = o->y + oh + (o->bc + 0x30);
+                    o->y = o->y + oh + o->bc + 0x30;
                     break;
                 }
                 case -10:
@@ -144,7 +145,7 @@ void func_800EF538(Msg *o, int bank)
         case 1:
             if (D_1F8001FC & 0x6008) o->wait = 0;
             break;
-        }
+        } } while (0);
         D_800A464C[o->slot].n = o->x;
         D_800A464E[o->slot].n = o->y;
         if (D_800A4648[o->slot].n != -1) drawMessageBox(D_8010A200);
