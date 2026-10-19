@@ -560,11 +560,20 @@ def forward_short_calls(texts, base_defs=None, fallback=None):
         # means; an area prefix (X0nn_) does not (texts of one area are forwarded together)
         macros |= set(m.group(1) for m in re.finditer(r"^#define (\w+) (\w+)$", t[:max(0, t.find("#line 1 "))], re.M)
                       if not re.match(r"X0\d\d_", m.group(2)))
+        # per-file address renames (`#define fa fa__8013839C`): the arity of what that address is
+        by_addr = dict((m.group(1), int(m.group(2), 16)) for m in
+                       re.finditer(r"^#define (\w+) \1__([0-9A-F]{8})$", t[:max(0, t.find("#line 1 "))], re.M))
         for m in re.finditer(r"(?<![\w.>])(\w+)\s*\(", t):
             n = m.group(1)
             if fallback and n not in ldefs[f] and n not in macros:
                 fb = fallback(n)
                 if fb > defs.get(n, 0): defs[n] = fb
+            if fallback and n in by_addr and n not in ldefs[f]:
+                fb = fallback("func_%08X" % by_addr[n])
+                if fb > 0:
+                    if defs.get(n, 0) <= 0 or n in macros: defs[n] = 0
+                    defs[n] = max(defs[n], fb)
+                    macros.discard(n)
             if defs.get(n, 0) <= 0 or n in macros: continue
             ls = t.rfind("\n", 0, m.start()) + 1
             pre = t[ls:m.start()]
@@ -593,7 +602,8 @@ def forward_short_calls(texts, base_defs=None, fallback=None):
         for pos, ins in sorted(edits, reverse=True):
             txt = txt[:pos] + ins + txt[pos:]
         for n in protos:
-            txt = re.sub(r"(^[ \t]*(?:extern\s+)?[A-Za-z_][\w \t\*]*\b%s\s*)\([^;{()]*(?:\([^)]*\)[^;{()]*)*\)(\s*;)" % re.escape(n),
+            # (not a statement: `else f(...);` / `return f(...);` would look like a declaration)
+            txt = re.sub(r"(^[ \t]*(?!(?:else|return|case|do|goto)\b)(?:extern\s+)?[A-Za-z_][\w \t\*]*\b%s\s*)\([^;{()]*(?:\([^)]*\)[^;{()]*)*\)(\s*;)" % re.escape(n),
                          r"\1()\2", txt, flags=re.M)
             # declarations with several declarators: `extern void a(T *), n(T *);`
             txt = re.sub(r"^([ \t]*extern\b[^;={]*?[,\s\*]%s\s*)\([^;{()]*\)(?=[^;{]*;)" % re.escape(n), r"\1()", txt, flags=re.M)
