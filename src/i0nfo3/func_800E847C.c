@@ -1,4 +1,5 @@
 // FUNC 800e847c 560 I0NFO3
+// MATCHING 800e847c 560
 #include "TOBJ.H"
 extern unsigned char D_8009CE21;
 extern unsigned char D_8009CE24;
@@ -13,6 +14,7 @@ void func_800E847C(TObj *o)
   short y;
   short t;
   short n;
+  unsigned short xx, yy;
   if (D_8009D2B0 != 3)
   {
     if (((D_8009CE21 != 0xFF) && (o->a.p.whole >= 0x3B6)) && (o->a.p.whole < 0x3E9))
@@ -31,27 +33,31 @@ void func_800E847C(TObj *o)
         }
       }
     }
-    if (((D_8009CE24 != 0xFF) && (o->a.p.whole >= 0x30C)) && (o->a.p.whole < 0x32B))
+    if (D_8009CE24 != 0xFF)
     {
-      y = o->y.p.whole;
-      t = y + 0x3A4;
-      if (((unsigned short) t) < 0x5B)
+      xx = o->a.p.whole;
+      if ((unsigned short)(xx - 0x30C) < 0x1F)
       {
-        n = -(o->a.p.whole + 0x5C);
-        if (y > n)
+        yy = o->y.p.whole;
+        t = yy + 0x3A4;
+        if (((unsigned short) t) < 0x5B)
         {
-          t = n + 10;
-          if (y < t)
+          n = -(xx + 0x5C);
+          if ((short)yy > n)
           {
-            o->y.p.whole = t;
+            t = n + 10;
+            if ((short)yy < t)
+            {
+              o->y.p.whole = t;
+            }
           }
-        }
-        else
-        {
-          t = n - 0x14;
-          if (t < y)
+          else
           {
-            o->y.p.whole = t;
+            t = n - 0x14;
+            if (t < (short)yy)
+            {
+              o->y.p.whole = t;
+            }
           }
         }
       }
@@ -60,9 +66,7 @@ void func_800E847C(TObj *o)
     {
       if ((o->a.p.whole >= 0x2FC) && (o->a.p.whole < 0x36F))
       {
-        y = o->y.p.whole;
-        t = y;
-        t = t + 0x1E4;
+        t = o->y.p.whole + 0x1E4;
         if (((unsigned short) t) < 0x8B)
         {
           if (o->a.p.whole < 0x336)
