@@ -4,6 +4,8 @@ typedef struct { char name[0x14]; } Entry;
 typedef struct { Entry e[16]; short status, prev, n144, w146; signed char slot[16]; short w158; } Card;
 typedef struct { short x6; char r[0x12]; } Info;
 typedef struct { char d[0x988]; } BGame;
+typedef struct { char p0[0x10]; unsigned char f10, f11; char p12[0x5BC - 0x12]; unsigned char f5bc; char p5bd[0x988 - 0x5BD]; } GS;
+extern GS D_8009C960g;
 extern unsigned short D_1F8001FC;
 extern short D_1F8003D8;
 extern unsigned char D_8009C977[];
@@ -180,9 +182,14 @@ int func_800E82A4(Menu *m, Card *c)
         if (D_800F7148 == 0) {
             if (D_1F8001FC & 0x20) {
                 D_800F7148 = 1;
-                goto snd5;
+                playSFX(8);
+                return 0;
             }
-            if (D_1F8001FC & 0x2000) goto cancel5;
+            if (D_1F8001FC & 0x2000) {
+                SfxPlay2(0x1B, 0x1C);
+                m->sub = 2;
+                break;
+            }
             if (D_1F8001FC & 0x4000) {
                 SfxPlay2(0xA, 0xA);
                 m->msg = 6;
@@ -192,12 +199,10 @@ int func_800E82A4(Menu *m, Card *c)
         }
         if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
-        snd5:
             playSFX(8);
             return 0;
         }
         if (D_1F8001FC & 0x6000) {
-        cancel5:
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
         }
@@ -246,15 +251,14 @@ int func_800E82A4(Menu *m, Card *c)
         m->sub++;
         break;
     case 10:
-        g = &D_8009CF1C;
         tries = 3;
         strcpy(D_800F7098, D_800F6A3C[m->card]);
         strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
         do {
             if (func_800ECCC8(D_800F7098, D_800E1E28, 0, 0xC00) == 0 && (func_800EA118(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
-                *(BGame *)D_8009C960 = *(BGame *)(D_800E1E28 + 0x200);
-                g[0] = D_8009F3DC;
-                g[-0x5AC] = g[-0x5AB];
+                D_8009C960g = *(GS *)(D_800E1E28 + 0x200);
+                D_8009C960g.f5bc = D_8009F3DC;
+                D_8009C960g.f10 = D_8009C960g.f11;
                 m->msg = 15;
                 m->sub = 17;
                 m->timer = 0x28;
