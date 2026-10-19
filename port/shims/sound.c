@@ -152,6 +152,7 @@ void port_pipe_audio_open(void) {     /* opening a FIFO blocks until the player 
     audio_pipe_fd = port_open_pipe(port_audio_pipe);
     if (audio_pipe_fd < 0) { port_printf("[port] cannot open %s\n", port_audio_pipe); port_audio_pipe = 0; }
 }
+void port_pipe_audio_fd(int fd) { audio_pipe_fd = fd; port_audio_pipe = "(viewer)"; }   /* --window */
 static int audio_fd = -1;
 static u32 audio_bytes;
 static void wav_header(u8 *h, u32 data) {

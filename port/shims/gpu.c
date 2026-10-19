@@ -529,8 +529,16 @@ static void pipe_frame(void) {
         port_printf("[gpu] frame pipe closed\n"); port_pipe_path = 0;
     }
 }
+static int window_fd = -1;
+void port_pipe_video_fd(int fd) { window_fd = fd; }
 void port_gpu_vblank(void) {
     if (port_pipe_path) pipe_frame();
+    if (window_fd >= 0) {
+        extern void port_window_frame(const u8 *rgb, int w, int h);
+        int w, h;
+        port_gpu_frame(frame_rgb, &w, &h);
+        port_window_frame(frame_rgb, w, h);
+    }
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
     static int made;
     if (!made) { port_mkdir(port_dump_dir); made = 1; }

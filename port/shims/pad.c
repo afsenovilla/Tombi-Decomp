@@ -68,6 +68,11 @@ void port_pad_vblank(void) {
         }
         port_pad_buttons[0] = m;
     }
+    {   /* --window: the viewer's keyboard / game controller state (merged with a script, if any) */
+        extern int port_window_poll_pad(u16 *out);
+        u16 w;
+        if (port_window_poll_pad(&w)) { if (n_script) port_pad_buttons[0] |= w; else port_pad_buttons[0] = w; }
+    }
     if (port_autostart && port_frame % port_autostart < 4)
         port_pad_buttons[0] = (port_frame / port_autostart) & 1 ? 0x4000 : 0x0008;
     else if (port_autostart)

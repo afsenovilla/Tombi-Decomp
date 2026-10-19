@@ -183,6 +183,8 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--pipe-audio") && i + 1 < argc) { extern const char *port_audio_pipe; port_audio_pipe = argv[++i]; }
         else if (streq(argv[i], "--dump-audio") && i + 1 < argc) { extern const char *port_audio_path; port_audio_path = argv[++i]; }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
+        else if (streq(argv[i], "--window")) { extern int port_window; port_window = 1; }
+        else if (streq(argv[i], "--viewer") && i + 1 < argc) { extern const char *port_window_viewer; port_window_viewer = argv[++i]; }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"
@@ -191,11 +193,13 @@ int port_main(int argc, char **argv) {
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
                         "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
-                        "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n", argv[0]);
+                        "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
+                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), 50 Hz\n", argv[0]);
             return 2;
         }
     }
     port_setup_memory();
+    { extern int port_window; extern void port_window_start(const char *); if (port_window) port_window_start(argv[0]); }
     { extern int port_low_mem; if (port_verbose) port_printf("[port] BIOS kernel area mapped from %x (-1: not mapped)\n", port_low_mem); }
     load_exe(exe);
     if (port_cd_open(disc) < 0) port_printf("[port] warning: no disc image at %s: CD reads will fail\n", disc);

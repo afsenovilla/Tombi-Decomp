@@ -54,6 +54,18 @@ add_custom_command(OUTPUT ${GEN}/syms.ld ${GEN}/thunks.S
                    COMMENT "Resolving game symbols against the retail image")
 set_source_files_properties(${GEN}/thunks.S PROPERTIES GENERATED TRUE COMPILE_OPTIONS "-m32")
 
+# 4. the window: a separate host-native SDL2 process (tombi --window forks it); the headless game needs no SDL
+find_package(SDL2 QUIET)
+if(SDL2_FOUND)
+  add_executable(tombi-view tools/view/tombi_view.c)
+  target_include_directories(tombi-view PRIVATE ${SDL2_INCLUDE_DIRS})
+  target_link_libraries(tombi-view PRIVATE ${SDL2_LIBRARIES})
+  target_compile_options(tombi-view PRIVATE -O2 -Wall)
+  message(STATUS "SDL2 found: building tombi-view (tombi --window)")
+else()
+  message(STATUS "SDL2 not found: no tombi-view; the game still builds (headless, --pipe-frames)")
+endif()
+
 add_executable(tombi ${GEN}/thunks.S $<TARGET_OBJECTS:game> $<TARGET_OBJECTS:game24> $<TARGET_OBJECTS:portrt>)
 set_target_properties(tombi PROPERTIES LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
 target_link_options(tombi PRIVATE -m32 -nostdlib -static -no-pie -Wl,--build-id=none -Wl,-z,noexecstack

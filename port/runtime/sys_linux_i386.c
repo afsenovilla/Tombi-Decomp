@@ -112,6 +112,43 @@ int port_open_pipe(const char *p) {
     return r < 0 ? -1 : (int)r;
 }
 int port_write(int fd, const void *b, int n) { return (int)sys3(SYS_write, fd, (long)b, n); }
+/* --window: pipes to a viewer process.  port_spawn runs PATH with ARGV; its stdin is the read end of a pipe we
+   write (fd 0 in the child), ARGV may name more fds.  fds[0] = our write end for the child's stdin (video),
+   fds[1] = our write end for the child's fd 3 (audio), fds[2] = our read end of the child's fd 4 (pad), made
+   non-blocking.  Returns the child's pid or -1. */
+extern char **port_envp;
+int port_spawn(const char *path, char *const argv[], int fds[3]) {
+    int v[2], a[2], p[2];
+    if (sys3(42 /* pipe */, (long)v, 0, 0) < 0 || sys3(42, (long)a, 0, 0) < 0 || sys3(42, (long)p, 0, 0) < 0) return -1;
+    long pid = sys3(2 /* fork */, 0, 0, 0);
+    if (pid < 0) return -1;
+    if (pid == 0) {
+        /* our ends first (they are not 0/3/4: the pipe fds are all above the disc image's fd) */
+        sys3(SYS_close, v[1], 0, 0); sys3(SYS_close, a[1], 0, 0); sys3(SYS_close, p[0], 0, 0);
+        sys3(63 /* dup2 */, v[0], 0, 0); sys3(63, a[0], 3, 0); sys3(63, p[1], 4, 0);
+        int orig[3] = { v[0], a[0], p[1] };
+        for (int i = 0; i < 3; i++) if (orig[i] > 4) sys3(SYS_close, orig[i], 0, 0);
+        sys3(11 /* execve */, (long)path, (long)argv, (long)port_envp);
+        port_puts("[port] cannot exec the viewer\n");
+        sys3(SYS_exit_group, 127, 0, 0);
+    }
+    sys3(SYS_close, v[0], 0, 0); sys3(SYS_close, a[0], 0, 0); sys3(SYS_close, p[1], 0, 0);
+    sys3(55 /* fcntl */, v[1], 1031 /* F_SETPIPE_SZ */, 1 << 20);
+    sys3(55, a[1], 1031, 1 << 20);
+    sys3(55, p[0], 4 /* F_SETFL */, 04000 /* O_NONBLOCK */);
+    fds[0] = v[1]; fds[1] = a[1]; fds[2] = p[0];
+    return (int)pid;
+}
+int port_write_all(int fd, const void *b, int n) {   /* a pipe write may be short when a signal arrives */
+    const char *c = b; int left = n;
+    while (left > 0) {
+        long r = sys3(SYS_write, fd, (long)c, left);
+        if (r == -4 /* EINTR */) continue;
+        if (r <= 0) return n - left;
+        c += r; left -= r;
+    }
+    return n;
+}
 int port_mkdir(const char *p) { return (int)sys3(39 /* SYS_mkdir */, (long)p, 0755, 0); }
 void port_close(int fd) { sys3(SYS_close, fd, 0, 0); }
 int port_pwrite(int fd, const void *b, int n, long long off) {
@@ -343,6 +380,7 @@ long long __moddi3(long long a, long long b) {
 
 /* ------------------------------------------------------------------------------------------- entry */
 int port_verbose;
+char **port_envp;
 extern int port_main(int argc, char **argv);
 
 static void map_shared(int fd, unsigned addr, unsigned size, unsigned off) {
@@ -381,6 +419,7 @@ void port_setup_memory(void) {
 __attribute__((used, noreturn)) static void cstart(unsigned long *sp) {
     int argc = (int)sp[0];
     char **argv = (char **)(sp + 1);
+    port_envp = argv + argc + 1;
     port_exit(port_main(argc, argv));
 }
 __asm__(".text\n.globl _start\n_start:\n\txorl %ebp, %ebp\n\tmovl %esp, %eax\n\tandl $-16, %esp\n"
