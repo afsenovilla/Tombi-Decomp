@@ -96,6 +96,8 @@ void PadStopCom(void) { if (port_verbose) port_printf("[port] PadStopCom frame %
 int PadChkVsync(void) { return 0; }
 int PadGetState(int port) { return port == 0 ? 6 /* PadStateStable */ : 0 /* PadStateDiscon */; }
 int PadInfoMode(int port, int term, int offs) {
+    if (port_verbose > 1 && port == 0 && buf[0])
+        port_printf("[pad] frame %d: game reads %04x\n", port_frame, (~(buf[0][2] | buf[0][3] << 8)) & 0xFFFF);
     if (term == 1) return 4;      /* InfoModeCurID: standard digital pad */
     return 0;                      /* no analog modes, no actuators */
 }

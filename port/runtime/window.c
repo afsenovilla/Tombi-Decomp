@@ -60,16 +60,19 @@ void port_window_frame(const u8 *rgb, int w, int h) {
     }
 }
 
-/* called by pad.c each vblank: drains what the viewer sent, keeps the last state */
+/* called by pad.c each vblank: drains what the viewer sent and keeps the last state.  Every sample the viewer
+   sent since the last vblank counts as pressed this vblank (the samples are ORed), so a press that is sampled
+   once is seen by the game once even when two samples arrive in the same vblank. */
 int port_window_poll_pad(u16 *out) {
     if (fd_pad < 0) return 0;
-    u16 v[64];
+    u16 v[64], seen = 0;
     int n = port_read(fd_pad, v, sizeof v);
     while (n > 0) {
+        for (int i = 0; i + 1 < n; i += 2) seen |= v[i / 2];
         if (n >= 2) port_window_pad = v[n / 2 - 1];
         n = port_read(fd_pad, v, sizeof v);
     }
     if (n == 0) { port_printf("[port] viewer closed: exiting\n"); port_exit(0); }   /* EOF */
-    *out = port_window_pad;
+    *out = port_window_pad | seen;
     return 1;
 }

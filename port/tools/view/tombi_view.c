@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
     SDL_GameController *ctrl = NULL;
     for (int i = 0; i < SDL_NumJoysticks(); i++) if (SDL_IsGameController(i)) { ctrl = SDL_GameControllerOpen(i); break; }
 
-    Uint16 keys = 0, buttons = 0;
+    Uint16 keys = 0, buttons = 0, tapped = 0;   /* tapped: pressed since the last sample, so a tap shorter than a frame is still sent once */
     unsigned char *rgb = NULL; size_t rgb_cap = 0;
     int running = 1;
     while (running) {
@@ -112,10 +112,10 @@ int main(int argc, char **argv) {
                 else if (e.key.keysym.scancode == SDL_SCANCODE_F && !e.key.repeat) {
                     scale = scale == 2 ? 3 : 2;
                     SDL_SetWindowSize(win, (tw ? tw : 320) * scale, (th ? th : 256) * scale);
-                } else keys |= key_mask(e.key.keysym.scancode);
+                } else { keys |= key_mask(e.key.keysym.scancode); tapped |= key_mask(e.key.keysym.scancode); }
                 break;
             case SDL_KEYUP: keys &= ~key_mask(e.key.keysym.scancode); break;
-            case SDL_CONTROLLERBUTTONDOWN: buttons |= ctrl_mask(e.cbutton.button); break;
+            case SDL_CONTROLLERBUTTONDOWN: buttons |= ctrl_mask(e.cbutton.button); tapped |= ctrl_mask(e.cbutton.button); break;
             case SDL_CONTROLLERBUTTONUP: buttons &= ~ctrl_mask(e.cbutton.button); break;
             case SDL_CONTROLLERAXISMOTION:
                 if (e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) { if (e.caxis.value > 16000) buttons |= P_L2; else buttons &= ~P_L2; }
@@ -155,7 +155,8 @@ int main(int argc, char **argv) {
         SDL_RenderCopy(ren, tex, NULL, NULL);
         SDL_RenderPresent(ren);
         if (pad_fd >= 0) {
-            Uint16 p = keys | buttons;
+            Uint16 p = keys | buttons | tapped;
+            tapped = 0;
             if (write(pad_fd, &p, 2) != 2 && errno != EAGAIN) break;
         }
     }
