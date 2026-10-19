@@ -1,4 +1,5 @@
 // FUNC 800f0e84 1000 I0NFO2
+// MATCHING 800f0e84 1000
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { short a, b, c; } Lim;
@@ -95,12 +96,12 @@ void func_800F0E84(TObj *o)
         }
         break;
     case 0xF:
-        if (U16(o, 0xB4) != (unsigned short)(D_8009CFA1 + 0xD)) {
-            U16(o, 0xB4) = D_8009CFA1 + 0xD;
+        { register int dd asm("a1"); dd = D_8009CFA1; if (U16(o, 0xB4) != (unsigned short)(dd + 0xD)) {
+            { register int m asm("v1"); m = dd + 0xD; U16(o, 0xB4) = m; }
             PTR(o, 0x24) = (void *)D_800FEE0C[U8(o, 0x3)].anims[U16(o, 0xB4)];
-            AnimLoadDuration(o, D_8009CFA1);
+            AnimLoadDuration(o, dd);
         }
-        break;
+        } break;
     }
     if (D_800A60A3 != 0) {
         if (D_800A60A3 == U8(o, 0xB6)) {
