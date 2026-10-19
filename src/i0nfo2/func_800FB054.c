@@ -1,4 +1,5 @@
 // FUNC 800fb054 700 I0NFO2
+// MATCHING 800fb054 700
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -73,7 +74,7 @@ void func_800FB054(TObj *parent0)
             n->d90 = (int)parent;
         }
         i1 = j;
-    } while ((p = &tbl[(short)j])->type != ff);
+    { register int m asm("v0"); m = (short)j * 28; p = (SpawnA *)((char *)tbl + m); } } while (p->type != ff);
     if (D_8009CDF1 == 0) {
         D_8009F2D8[1]->a.p.whole = -0xC8;
     }
