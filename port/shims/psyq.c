@@ -97,6 +97,7 @@ void port_vblank(void) {
         extern void port_stub_report(void);
         port_printf("[port] reached %d frames, stopping\n", port_frame);
         port_stub_report();
+        { extern void port_check_report(void); port_check_report(); }
         port_exit(0);
     }
 }

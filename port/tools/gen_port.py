@@ -388,15 +388,23 @@ def sources(outdir, progs, ovls=(), areas=()):
         for n, k in _global_defs(t).items():
             a = asyms[prog].get(n)
             if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
-    def fallback(n):
+    # ... and of every MAIN0/X000 definition by address, for calls through another name of the same function
+    # (FUN_800efc04() -> ObjSetAnimFromTable(o))
+    base = {f: t for f, t in out_texts.items() if re.search(r"/src/(main0|x000)/", f)}
+    for n, k in _global_defs(base).items():
         a = canon.get(n)
-        if a is None:
-            m = re.match(r"(?:func|FUN)_([0-9A-Fa-f]{8})$", n)
-            a = int(m.group(1), 16) if m else None
-        return arity_addr.get(a, 0) if a in vary or a in arity_addr else 0
-    nfwd, gdefs = forward_short_calls(out_texts, None, fallback)
+        if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+    def fallback_for(table):
+        def fb(n):
+            a = table.get(n)
+            if a is None:
+                m = re.match(r"(?:func|FUN)_([0-9A-Fa-f]{8})$", n)
+                a = int(m.group(1), 16) if m else None
+            return arity_addr.get(a, 0)
+        return fb
+    nfwd, gdefs = forward_short_calls(out_texts, None, fallback_for(canon))
     for prog, t in area_texts.items():              # each area resolves names among its own definitions first
-        nfwd += forward_short_calls(t, gdefs)[0]
+        nfwd += forward_short_calls(t, gdefs, fallback_for(asyms[prog]))[0]
         out_texts.update(t)
     for dst, txt in out_texts.items():
         if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:

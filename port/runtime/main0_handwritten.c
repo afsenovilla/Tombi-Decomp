@@ -318,7 +318,245 @@ int func_800406E8(void *o, int x, int y) {
     return 0;
 }
 
+/* func_800416B8 (0x5F0 bytes): wall probe against the slope list at *(u16 **)0x1F800278 (count, then records of
+ * 4 halfwords: flags, y, dy, (rise << 8) | (span << 4) | start), for an object moving left (animFrame even: flags
+ * 0x14 / 0x4004) or right (odd: 0x18 / 0x4008).  A wall record whose height covers y switches to the plane list
+ * of the neighbouring column (getCollisionPlaneAt, or the per-object table D_8007B5AC[mode] when mode != -1; at
+ * most 7 hops).  A slope record pushes o->h (x) back onto the slope, sets the slope angle 0x1F80027C, and with a
+ * rise (flags & 0xFF00) also steps o->y up by up to 8 pixels.  Returns 0 (clear), 1 (pushed) or 2 (stepped). */
+extern char *getCollisionPlaneAt(short x, short y);
+extern int angleFromDelta(int a, int b);
+extern u8 *D_8007B5AC[];
+static u16 *probe_column(void *o, int x, int mode, u8 *tbl) {
+    if (mode != -1) {
+        u8 *b = tbl + *(u16 *)(tbl + 8);
+        int c = (s16)x;
+        if (c < 0) c += 7;
+        return (u16 *)(b + *(u16 *)(b + (c >> 3) * 2));
+    }
+    return (u16 *)getCollisionPlaneAt((s16)x, S16(F32(o, 0x44), 2));
+}
+int func_800416B8(void *o, int x, int y, int mode) {
+    u16 *p = SPAD(u16 *, 0x278);
+    int n = (s16)*p;
+    u16 yy = (u16)y, x0 = (u16)x;
+    u8 *tbl = D_8007B5AC[mode & 0xFF];
+    int hops = 0;
+    mode = (s16)mode;
+    SPAD(u16 *, 0x278) = p + 1;
+    if (n == 0) return 0;
+    for (;;) {
+        u16 *r = SPAD(u16 *, 0x278);
+        u16 fl = r[0], ry = r[1], dy = r[2], w = r[3];
+        int start, span, sub, d;
+        SPAD(u16 *, 0x278) = r + 4;
+        n--;
+        if ((s16)dy == 0) goto next;
+        start = w & 0xF;
+        span = (w >> 4) & 0xF;
+        d = (s16)(yy - ry);
+        if ((s16)dy < 0) {
+            if (d < (s16)dy) goto next;
+            if (d > 0) return 0;
+        } else {
+            if ((s16)dy < d) return 0;
+            if (d < 0) goto next;
+        }
+        sub = x & 7;
+        if (F16(o, 0x2E) & 1) {                     /* moving right */
+            if ((fl & 0x18) == 0x18) {
+                x = x + ((start + span) - sub);
+                if ((s16)++hops >= 8) return 0;
+                goto column;
+            }
+            if ((fl & 0x4008) != 0x4008 || start + span < sub) goto next;
+        } else {                                    /* moving left */
+            if ((fl & 0x14) == 0x14) {
+                x = (x - 1) - (sub - start);
+                if ((s16)++hops >= 8) return 0;
+                goto column;
+            }
+            if ((fl & 0x4004) != 0x4004 || sub < start) goto next;
+        }
+        {
+            int q = (sub - start) - (span * ((s16)yy - (s16)ry)) / (s16)dy;
+            u16 a, dh;
+            if (F16(o, 0x2E) & 1) { if ((s16)q > 0) return 0; }
+            else if ((s16)q < 0) return 0;
+            x -= q;
+            a = angleFromDelta(span, (s16)dy);
+            SPAD(u16, 0x27C) = a;
+            if ((s16)a < 0x40) SPAD(u16, 0x27C) = a + 0xC0;
+            else if ((s16)a >= 0xC1) SPAD(u16, 0x27C) = a - 0xC0;
+            F16(F32(o, 0x40), 2) -= (u16)(x0 - x);
+            sub -= q;
+            if ((w & 0xFF00) == 0) return 1;
+            dh = (s16)dy > 0 ? (u16)(yy - ry) : (u16)(yy - ry - dy);
+            if (dh >= 9) return 1;
+            F16(o, 0x16) -= dh;
+            if (span == 0) return 2;
+            if ((s16)dy > 0) F16(F32(o, 0x40), 2) += start - sub;
+            else F16(F32(o, 0x40), 2) += (start + span) - sub;
+            return 2;
+        }
+    column:
+        r = probe_column(o, x, mode, tbl);
+        SPAD(u16 *, 0x278) = r + 1;
+        n = (s16)*r;
+        if (n == 0) return 0;
+        continue;
+    next:
+        if ((s16)n == 0) return 0;
+    }
+}
+
+/* func_80038184 (0xB4 bytes): script opcode "set variable": the record at script context +0x8A (an offset into
+ * the script at D_8009D60C) is [op, dst, src...]; flag 0 copies variable src (a byte) to variable dst, flag 1
+ * stores the 32-bit immediate that follows.  The variables are words at context +0x1090; the cursor advances 3
+ * or 6 bytes. */
+extern u8 *D_8009F0F0;
+extern u32 D_8009D60C;
+void func_80038184(int imm) {
+    u8 *ctx = D_8009F0F0;
+    u8 *rec = (u8 *)(F16(ctx, 0x8A) + D_8009D60C);
+    u8 dst = rec[1];
+    u8 *q = rec + 2;
+    u32 v;
+    if ((imm & 0xFF) == 0) v = F32(ctx, 0x1090 + q[0] * 4);
+    else v = q[0] | q[1] << 8 | q[2] << 16 | (u32)q[3] << 24;
+    F32(ctx, 0x1090 + dst * 4) = v;
+    F16(ctx, 0x8A) += (imm & 0xFF) ? 6 : 3;
+}
+
+/* func_8004AE7C (0x5D8 bytes): layer-2 object handler (MAIN0 table D_80077D6C slot 0x60): the event actor that
+ * carries / walks the player in cutscenes.  Init picks its sprite (+0x1E) and animation script (+0xA8, one of
+ * four in MAIN0 .rodata) by area and section, plus the event kind +0x6A (0: eventTakePlayerControlA/
+ * eventCarryPlayerB, 1..3: eventTakePlayerControlC/D, chosen by D_8009CFF9).  Subtype 1 starts on the player. */
+extern void AnimLoadDuration(void *);
+extern int AnimAdvance(void *);
+extern void ObjCullRegister(void *);
+extern void freeObjectLayer2(void *);
+extern void eventTakePlayerControlA(void *), eventCarryPlayerB(void *);
+extern void eventTakePlayerControlC(void *), eventTakePlayerControlD(void *);
+extern void func_80116398(void *);                 /* AREA13 overlay: dispatched by the call thunk */
+extern u8 D_8009CFF9;
+#define ANIM_28 0x80015028u
+#define ANIM_40 0x80015040u
+#define ANIM_54 0x80015054u
+#define ANIM_6C 0x8001506Cu
+static void evactor_pick(u8 *o) {
+    int area = *(volatile u16 *)0x8009C960u, sec = *(volatile u16 *)0x8009C962u;
+    int t = -1, kind = -1;                        /* -1: leave +0x1E / +0x6A as they are */
+    u32 anim = ANIM_28;
+    switch (area) {
+    case 0: t = 0xE; anim = ANIM_40; break;
+    case 1: anim = ANIM_40; if (sec < 2) t = 0xB; else if (sec < 5) t = 6; break;
+    case 2:
+        switch (sec) {
+        case 0: t = 0xF; anim = ANIM_6C; kind = 1; break;
+        case 1: case 2: t = 0xE; break;
+        case 3: t = 0x10; anim = ANIM_54; kind = 3; break;
+        case 4: case 5: t = 0x11; break;
+        default: return;
+        }
+        break;
+    case 3: if (sec < 7) t = (sec == 0 || sec == 4) ? 0xD : 5; break;
+    case 4: t = 0x10; break;
+    case 5:
+        if (sec == 0 || sec == 2) { t = 0xF; anim = ANIM_6C; kind = 2; }
+        else if (sec == 1 || sec == 3) t = 0xB;
+        else return;
+        break;
+    case 6: t = 0xF; break;
+    case 8:
+        if (sec == 0 || sec == 2) { t = 0xF; anim = ANIM_6C; kind = 2; }
+        else if (sec == 1 || sec == 3) t = 0xE;
+        else return;
+        break;
+    case 9:
+        switch (sec) {
+        case 0: t = 0xC; anim = ANIM_40; break;
+        case 1: t = 0x12; break;
+        case 2: t = 0x11; break;
+        case 3: t = 0xB; break;
+        case 4: case 5: t = 0xF; break;
+        default: return;
+        }
+        break;
+    case 10: if (sec < 8) t = 7; else if (sec == 8) t = 0xC; break;
+    case 11: case 13: t = 0xD; break;
+    case 14: t = 0xA; break;
+    case 16: if (sec < 4 || sec >= 7) return; t = 0xF; break;
+    case 17: t = 0xB; break;
+    case 18: if (sec == 1) t = 0xA; else if (sec == 2) t = 9; break;
+    case 19:
+        if (sec == 0) { t = 0xF; anim = ANIM_6C; kind = 1; }
+        else if (sec == 1) t = 0xE;
+        else if (sec == 2) { t = 0x12; anim = ANIM_54; kind = 2; }
+        else return;
+        break;
+    default: return;
+    }
+    if (t >= 0) F16(o, 0x1E) = t;
+    F32(o, 0xA8) = anim;
+    if (kind >= 0) F8(o, 0x6A) = kind;
+}
+void func_8004AE7C(u8 *o) {
+    u8 *pl = D_800A6038;
+    switch (F8(o, 4)) {
+    case 0:
+        if (F8(o, 3) == 0) { F8(o, 4) = 3; return; }
+        F8(o, 0x6A) = 0;
+        evactor_pick(o);
+        F8(o, 0x1C) |= 0x80;
+        F8(o, 4)++;
+        F8(o, 0xA) = 2;
+        F16(o, 0x6E) = 0x20;
+        F16(o, 0x72) = 0x20;
+        F16(o, 0x2E) = 0;
+        F32(o, 0x84) = 0;
+        F32(o, 0x88) = 0;
+        F32(o, 0x8C) = 0;
+        F16(o, 0x6C) = 0x10;
+        F16(o, 0x70) = 0x10;
+        F8(o, 0xD) = 0x81;
+        F8(o, 0xF) = F8(pl, 0xF) + 1;
+        F16(o, 8) = GetClut(0x80, 0x1F9);
+        F16(o, 0xAC) = 3;
+        F32(o, 0x3C) = SPAD(u32, 0x304);
+        F32(o, 0x24) = F32(F32(o, 0xA8), 0xC);
+        AnimLoadDuration(o);
+        if (F8(o, 3) == 1) {
+            F16(o, 0x12) = F16(pl, 0x12);
+            F16(o, 0x16) = F16(pl, 0x16);
+            F16(o, 0x1A) = F16(pl, 0x1A);
+        }
+        if (*(volatile u32 *)0x8009C960u == 0x1000D) F8(o, 4) = 4;   /* AREA13 section 1 */
+        return;
+    case 1:
+        ObjCullRegister(o);
+        if (F8(o, 3) == 0) { AnimAdvance(o); return; }
+        if (F8(o, 0x6A) == 0) {
+            if (D_8009CFF9 == 0) eventTakePlayerControlA(o);
+            else if (D_8009CFF9 == 1) eventCarryPlayerB(o);
+        } else if (F8(o, 0x6A) < 4) {
+            if (D_8009CFF9 == 0) eventTakePlayerControlC(o);
+            else if (D_8009CFF9 == 1) eventTakePlayerControlD(o);
+        }
+        return;
+    case 2: case 3:
+        freeObjectLayer2(o);
+        return;
+    case 4:
+        func_80116398(o);
+        return;
+    }
+}
+
 const PortFunc port_extra_funcs[] = {
+    {0x8004AE7C, (void *)func_8004AE7C, "func_8004AE7C"},
+    {0x800416B8, (void *)func_800416B8, "func_800416B8"},
+    {0x80038184, (void *)func_80038184, "func_80038184"},
     {0x800406E8, (void *)func_800406E8, "func_800406E8"},
     {0x8002CF40, (void *)func_8002CF40, "func_8002CF40"},
     {0, 0, 0},

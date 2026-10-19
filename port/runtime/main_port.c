@@ -172,6 +172,12 @@ int port_main(int argc, char **argv) {
         }
         else if (streq(argv[i], "--pipe-frames") && i + 1 < argc) { extern const char *port_pipe_path; port_pipe_path = argv[++i]; }
         else if (streq(argv[i], "--trace-interp")) { extern int port_mips_trace; port_mips_trace = 1; }
+        else if (streq(argv[i], "--check") && i + 1 < argc) {
+            extern u32 port_check_addr; const char *h = argv[++i]; u32 v = 0;
+            if (h[0] == '0' && h[1] == 'x') h += 2;
+            for (; *h; h++) v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
+            port_check_addr = v;
+        }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
