@@ -390,6 +390,15 @@ def sources(outdir, progs, ovls=(), areas=()):
             if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
     # ... and of every MAIN0/X000 definition by address, for calls through another name of the same function
     # (FUN_800efc04() -> ObjSetAnimFromTable(o))
+    for prog in ovls:                               # SYSTEM overlays (their own names, by address)
+        addr_of_name = {}
+        for u in U[prog]:
+            addr_of_name[u.name] = u.addr
+            if u.file and u.file.endswith(".c"): addr_of_name[defined_name(u.file, os.path.basename(u.file)[:-2])] = u.addr
+        texts = {f: t for f, t in out_texts.items() if "/src/%s/" % prog.lower() in f}
+        for n, k in _global_defs(texts).items():
+            a = addr_of_name.get(n)
+            if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
     base = {f: t for f, t in out_texts.items() if re.search(r"/src/(main0|x000)/", f)}
     for n, k in _global_defs(base).items():
         a = canon.get(n)

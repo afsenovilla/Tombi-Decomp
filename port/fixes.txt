@@ -32,3 +32,6 @@ src/collideCat2WithCat4Objects.c | pushObjectOutOfCat4Type06(o); | pushObjectOut
 src/collideCat2WithCat4Objects.c | void pushObjectOutOfCat4Type06(TObj *o); | void pushObjectOutOfCat4Type06();
 src/collideCat2WithCat4Objects.c | pushCat2ObjectOutOfCat4Type0A(o); | pushCat2ObjectOutOfCat4Type0A(o, e);
 src/collideCat2WithCat4Objects.c | void pushCat2ObjectOutOfCat4Type0A(TObj *o); | void pushCat2ObjectOutOfCat4Type0A();
+# a NULL animation pointer reads BIOS RAM at address 6 on the PS1 (X003 initFungaDwarf calls this before setting
+# o->anim; AnimJump then sets the duration again): read 0 instead
+src/AnimLoadDuration.c | o->dur = o->a->v & 0x3fff; | o->dur = o->a ? o->a->v & 0x3fff : 0;

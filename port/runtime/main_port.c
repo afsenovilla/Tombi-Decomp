@@ -178,6 +178,7 @@ int port_main(int argc, char **argv) {
             for (; *h; h++) v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
             port_check_addr = v;
         }
+        else if (streq(argv[i], "--dump-audio") && i + 1 < argc) { extern const char *port_audio_path; port_audio_path = argv[++i]; }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {

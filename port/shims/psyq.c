@@ -66,6 +66,7 @@ void port_vblank(void) {
     if (vsync_event_fn) call_psx(vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
     port_gpu_vblank();
+    { extern void port_sound_vblank(void); port_sound_vblank(); }
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;
         int cur = *(u16 *)0x8009C960u << 16 | *(u16 *)0x8009C962u;
@@ -98,6 +99,7 @@ void port_vblank(void) {
         port_printf("[port] reached %d frames, stopping\n", port_frame);
         port_stub_report();
         { extern void port_check_report(void); port_check_report(); }
+        { extern void port_audio_close(void); port_audio_close(); }
         port_exit(0);
     }
 }
@@ -384,10 +386,5 @@ void *DecDCToutCallback(void *f) { return 0; }
 int DecDCTvlc(void *a, void *b) { return 0; }
 
 /* ================================================================== sound: silent for now */
-int SpuIsTransferCompleted(int f) { return 1; }
-void SpuSetTransferStartAddr(u32 a) {}
-int SpuRead(void *p, u32 n) { return n; }
-int SpuGetAllKeysStatus(u8 *s) { for (int i = 0; i < 24; i++) s[i] = 0; return 0; }
 void SpuQuit(void) {}
 int SpuSetReverb(int on) { return on; }
-int SsIsEos(int a, int b) { return 0; }

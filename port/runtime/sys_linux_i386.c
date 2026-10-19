@@ -107,6 +107,9 @@ int port_create(const char *p) { long r = sys3(SYS_open, (long)p, 0x241 /* O_WRO
 int port_write(int fd, const void *b, int n) { return (int)sys3(SYS_write, fd, (long)b, n); }
 int port_mkdir(const char *p) { return (int)sys3(39 /* SYS_mkdir */, (long)p, 0755, 0); }
 void port_close(int fd) { sys3(SYS_close, fd, 0, 0); }
+int port_pwrite(int fd, const void *b, int n, long long off) {
+    return (int)sys5(181 /* SYS_pwrite64 */, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));
+}
 int port_pread(int fd, void *b, int n, long long off) {
     return (int)sys5(SYS_pread64, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));
 }
