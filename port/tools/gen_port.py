@@ -381,7 +381,20 @@ def sources(outdir, progs, ovls=(), areas=()):
         elif name not in dropped: fmap.append((u.addr, name))
         if area: area_texts.setdefault(prog, {})[dst] = txt
         else: out_texts[dst] = txt
-    nfwd, gdefs = forward_short_calls(out_texts)
+    # arity of the area functions by address: a call from shared code (MAIN0, X000) to an address whose code differs
+    # per area forwards as many arguments as the widest definition there takes
+    arity_addr = {}
+    for prog, t in area_texts.items():
+        for n, k in _global_defs(t).items():
+            a = asyms[prog].get(n)
+            if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+    def fallback(n):
+        a = canon.get(n)
+        if a is None:
+            m = re.match(r"(?:func|FUN)_([0-9A-Fa-f]{8})$", n)
+            a = int(m.group(1), 16) if m else None
+        return arity_addr.get(a, 0) if a in vary or a in arity_addr else 0
+    nfwd, gdefs = forward_short_calls(out_texts, None, fallback)
     for prog, t in area_texts.items():              # each area resolves names among its own definitions first
         nfwd += forward_short_calls(t, gdefs)[0]
         out_texts.update(t)
@@ -490,7 +503,16 @@ _DECL_PRE = re.compile(r"\s*(?:extern\s+|static\s+)?(?:const\s+|volatile\s+)*[A-
 _KEYWORDS = ("return", "else", "case", "do", "goto")
 
 
-def forward_short_calls(texts, base_defs=None):
+def _global_defs(texts):
+    out = {}
+    for f, t in texts.items():
+        for m in re.finditer(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\(([^;{)]*(?:\([^)]*\)[^;{)]*)*)\)\s*\{", _blank(t), re.M):
+            if m.group(1) in ("if", "while", "for", "switch", "return") or m.group(0).lstrip().startswith("static"): continue
+            out.setdefault(m.group(1), _nparams(m.group(2)))
+    return out
+
+
+def forward_short_calls(texts, base_defs=None, fallback=None):
     """Register-carried arguments (see port/tools/arity_check.py): a call that passes fewer arguments than the
     callee's definition takes relies on $a0-$a3 still holding a value, most often the caller's own incoming
     argument.  Each missing argument i becomes PORT_ARG(i), the caller's incoming stack argument i (on i386 the
@@ -517,6 +539,9 @@ def forward_short_calls(texts, base_defs=None):
                       if not re.match(r"X0\d\d_", m.group(2)))
         for m in re.finditer(r"(?<![\w.>])(\w+)\s*\(", t):
             n = m.group(1)
+            if fallback and n not in ldefs[f] and n not in macros:
+                fb = fallback(n)
+                if fb > defs.get(n, 0): defs[n] = fb
             if defs.get(n, 0) <= 0 or n in macros: continue
             ls = t.rfind("\n", 0, m.start()) + 1
             pre = t[ls:m.start()]
@@ -547,6 +572,8 @@ def forward_short_calls(texts, base_defs=None):
         for n in protos:
             txt = re.sub(r"(^[ \t]*(?:extern\s+)?[A-Za-z_][\w \t\*]*\b%s\s*)\([^;{()]*(?:\([^)]*\)[^;{()]*)*\)(\s*;)" % re.escape(n),
                          r"\1()\2", txt, flags=re.M)
+            # declarations with several declarators: `extern void a(T *), n(T *);`
+            txt = re.sub(r"^([ \t]*extern\b[^;={]*?[,\s\*]%s\s*)\([^;{()]*\)(?=[^;{]*;)" % re.escape(n), r"\1()", txt, flags=re.M)
         texts[f] = txt
     return total, gdefs
 

@@ -26,6 +26,29 @@ static void call_psx(void *fn) {
     f();
 }
 
+/* --poke FRAME:ADDR:VALUE[:SIZE]: write RAM at the start of vblank FRAME (test setups, e.g. the debug area select
+   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1) */
+static struct { int frame, size; u32 addr, value; } pokes[16];
+static int n_pokes;
+static u32 hexval(const char **p) {
+    u32 v = 0; const char *h = *p;
+    if (h[0] == '0' && (h[1] | 32) == 'x') h += 2;
+    for (; (*h >= '0' && *h <= '9') || ((*h | 32) >= 'a' && (*h | 32) <= 'f'); h++)
+        v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
+    *p = h; return v;
+}
+void port_poke_add(const char *s) {
+    if (n_pokes == 16) return;
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    pokes[n_pokes].frame = f;
+    pokes[n_pokes].addr = hexval(&s);
+    if (*s++ != ':') return;
+    pokes[n_pokes].value = hexval(&s);
+    pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
+    n_pokes++;
+}
 void port_vblank(void) {
     if (port_realtime) {
         unsigned long long now = port_time_us();
@@ -34,10 +57,26 @@ void port_vblank(void) {
         if (next_vblank_us > now) port_sleep_us(next_vblank_us - now);
     }
     port_frame++;
+    for (int i = 0; i < n_pokes; i++)
+        if (pokes[i].frame == port_frame) {
+            u32 a = pokes[i].addr, v = pokes[i].value;
+            if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
+        }
     { extern void port_pad_vblank(void); port_pad_vblank(); }
     if (vsync_event_fn) call_psx(vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
     port_gpu_vblank();
+    {   /* -v: report area / section changes and (every 50 frames) where the player is */
+        static int last = -1;
+        int cur = *(u16 *)0x8009C960u << 16 | *(u16 *)0x8009C962u;
+        u32 hp = *(u32 *)(0x800A6038u + 0x40);
+        int px = (hp >= 0x80000000u && hp < 0x80200000u) ? *(s16 *)(hp + 2) : -1;
+        int py = *(s16 *)(0x800A6038u + 0x16);
+        if (port_verbose && (cur != last || port_frame % 50 == 0))
+            port_printf("[port] frame %d: area %d section %d, player at %d,%d%s\n", port_frame, cur >> 16, cur & 0xFFFF,
+                        px, py, cur != last ? " (changed)" : "");
+        last = cur;
+    }
     if (port_frame % 100 == 0) {
         extern int port_cd_stats(int *);
         extern int port_gpu_lists(void), port_gpu_packets(void);

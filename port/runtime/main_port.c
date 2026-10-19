@@ -172,12 +172,14 @@ int port_main(int argc, char **argv) {
         }
         else if (streq(argv[i], "--pipe-frames") && i + 1 < argc) { extern const char *port_pipe_path; port_pipe_path = argv[++i]; }
         else if (streq(argv[i], "--trace-interp")) { extern int port_mips_trace; port_mips_trace = 1; }
+        else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
-                        "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n", argv[0]);
+                        "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
+                        "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n", argv[0]);
             return 2;
         }
     }
