@@ -612,7 +612,7 @@ slps01144 8001EA38 main0 8001EACC  # keyOffActiveSfxVoices
 slps01144 8001E0CC main0 8001E228  # keyOffSfxVoice
 slps01144 8001DE90 main0 8001DFEC  # keyOnQueuedSfx
 slps01144 8003A124 main0 80039338  # loadAreaSoundBank
-slps01144 80021DF4 main0 80020EAC  # loadCollisionBounds
+slps01144 80021DF4 main0 80020EAC  # loadButtonConfig
 slps01144 80038C04 main0 80037E18  # loadCompressedTIM
 slps01144 80016B94 main0 800174C0  # loadImageRect
 slps01144 8002E6E0 main0 8002DF70  # loadMessageGlyph

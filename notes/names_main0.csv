@@ -192,7 +192,7 @@ address,name,confidence,comment
 80020cb0,insertionSortU32,alta,psx_tomba #21 (por bytes)
 80020d20,spawnLayer3Object,alta,name from psx_tomba (US)
 80020d98,spawnLayer2ObjectUnlessFlagged,alta,"tests the section flag bit (same indexing as setSectionFlagBit over D_8009CB94) for the entry"
-80020eac,loadCollisionBounds,alta,psx_tomba (por bytes)
+80020eac,loadButtonConfig,alta,psx_tomba (por bytes)
 80020f14,drawDebugText,alta,names batch (see notes/names.md)
 80021150,drawLoadingSprites,alta,name from psx_tomba (US)
 800212b4,drawNowLoading,alta,psx_tomba (por bytes)

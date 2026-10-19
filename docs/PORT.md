@@ -219,7 +219,7 @@ Plan:
   `func_800E8A2C`, `func_800E8A5C`, `func_800E8A94`, `func_800E972C` and `func_800E9D08`. Its outgoing calls are
   only MAIN0 helpers that the port already has natively (`playSFX`, `playSFXAndSetNote`, `keyOnSFX`,
   `updateSound`, `GetTPage`, `GetClut`, `SetDrawMode`, `addTilePrim`, `MulNegSin`/`MulCosDup`, `PadGetState`,
-  `PadInfoAct`, `SsSetStereo/Mono`, `loadCollisionBounds`) plus its own two most-called helpers `func_800E97F4`
+  `PadInfoAct`, `SsSetStereo/Mono`, `loadButtonConfig`) plus its own two most-called helpers `func_800E97F4`
   (25 calls) and `func_800E9798` (19). Next steps: (1) add it to the X-overlay workflow (symbol file
   `config/symbol_addrs_o0ptsub0.txt`, `[0x50, c, ...]` subsegments per function, m2c drafts, matching against
   `O0PTSUB0.BIN`; the language variants O1..O8 differ only in text, ±100 bytes); (2) for the port it only needs

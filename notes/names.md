@@ -1359,7 +1359,7 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
   itself), L2/06, L2/57 (nothing drawn in room 5), pool types 07 (subtype 0 = small yellow chick-like sprite, anim by subtype) / 0x11 /
   0x14 / 0x39 / 0x3C, L4/0A/0D/11; type 07 in areas 0/4 (area 0 L2/07 subtype 0 draws a green wavy stem); x004 L2/1B, L2/31 (no
   placements in areas 4/12: need their spawner).
-- Open conflicts: loadCollisionBounds -> theirs loadButtonConfig is right (copies T[1F80019E] into 1F8003C4..CA, the button masks the
-  player code tests, e.g. talk = 1F8003C4); not renamed because its caller in src/o0ptsub0 is on hold. dispatchAreaCollisionHookA/B:
+- Open conflicts: loadCollisionBounds -> loadButtonConfig (renamed: theirs is right, copies T[1F80019E] into 1F8003C4..CA, the
+  button masks the player code tests, e.g. talk = 1F8003C4; callers bootStartupTask, o0ptsub0 func_800E8618). dispatchAreaCollisionHookA/B:
   ours kept (area 0 calls pushCat2/Cat5ObjectOutOfCat4Type04, area 3 their x003 twins: collision passes, not enemy init/update).
   updateMushroomCluster vs updateEvilGrass: not captured yet.

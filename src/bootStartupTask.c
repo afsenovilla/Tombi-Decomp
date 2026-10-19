@@ -22,7 +22,7 @@ extern unsigned char D_8009F0E8;
 extern char D_80010000[];
 extern char D_80010008[];
 extern void titleSequenceTask(void);
-void loadCollisionBounds(void);
+void loadButtonConfig(void);
 void SetDispMask(int);
 void loadSoundSet(int);
 void queueSystemLoadList(int, int);
@@ -51,7 +51,7 @@ void bootStartupTask(void)
     D_8009F3DC = 0;
     D_8009D67C = 1;
     D_8009F0E8 = 0;
-    loadCollisionBounds();
+    loadButtonConfig();
     P->w48 = 9;
     P->w4a = 0;
     P->w4c = 0;
