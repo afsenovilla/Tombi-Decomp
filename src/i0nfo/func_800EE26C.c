@@ -1,4 +1,5 @@
 // FUNC 800ee26c 596 I0NFO
+// MATCHING 800ee26c 596
 #include "TOBJ.H"
 #include "raw7.h"
 extern void func_8001FE6C(TObj *o);
@@ -22,10 +23,10 @@ void func_800EE26C(TObj *o)
     o->b6b = 0;
     a = &D_800EE93C[o->b0c];
     if (a->on != 0) {
-        unsigned short *hp = (unsigned short *)D_800A6078;
+        unsigned short *hp = (unsigned short *)D_800A6078; int d;
         do { } while (0);
-        if ((unsigned short)(hp[1] - a->x) < a->w
-            && (unsigned short)(D_800A604E - a->y) < a->h) {
+        if ((unsigned short)(d = hp[1] - a->x) < a->w
+            && (unsigned short)(d = D_800A604E - a->y) < a->h) {
             o->b6b = 1;
             o->visible = 1;
         }
