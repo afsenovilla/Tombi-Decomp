@@ -1442,3 +1442,8 @@ twin of the same function at another address of an overlay keeps its generic nam
   (w98), the pig's d94 points back at its w9a counter.
 - `801191b0 spawnA00PoolType03Pair` (was updateA00PoolType27: not a handler; makes two pool type 3 objects (b0a 5, subtype 0 / 1, b0c =
   a == 0) at x/y/z).
+- `80114890 updateLeafButterflyByArea` (was updateL2Type1FObject): the layer 2 type 0x1F thunk jumps to x001 8013839c / x010 80123d18
+  updateLeafButterfly (jal targets read from the X001 / X010 binaries); x010 `8011de58 leafButterflyContact` (was l2Type1FContact: the
+  player's box overlap puts the butterfly in b04 2 and the player's de4 / bac 2 "caught" state, spawnImpactEffect).
+- `800ee18c updateStaticDecorModel` (was updateL4Type13Object): layer 4 type 0x13, no collision (active 2, b0a 0x10 model); in areas 4 / 12
+  it is pushed straight to the draw list, elsewhere culled with ObjCullRegister.

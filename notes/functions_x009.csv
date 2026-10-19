@@ -15,7 +15,7 @@ address,size,name,twin
 800eb50c,416,spawnPoolType1BEffect,X000:800eb50c
 800eb6ac,580,updateBreakPiece,X000:800eb6ac
 800eb8f0,256,spawnBreakPieces,X000:800eb8f0
-800eb9f0,344,updatePoolType44Object,X000:800eb9f0
+800eb9f0,344,updateDigitSprite,X000:800eb9f0
 800ebb48,284,updateWeaponCarryLink,X000:800ebb48
 800ebc64,220,initWeaponTrailSprite,X000:800ebc64
 800ebd40,552,weaponTrailFollowStep,X000:800ebd40
@@ -34,7 +34,7 @@ address,size,name,twin
 800edc14,488,l4Type03Step,X000:800edc14
 800eddfc,408,l4Type03StepB,X000:800eddfc
 800edf94,504,updateL4Type03Object,X000:800edf94
-800ee18c,208,updateL4Type13Object,X000:800ee18c
+800ee18c,208,updateStaticDecorModel,X000:800ee18c
 800ee25c,72,updateApBoxByArea,X000:800ee25c
 800ee2a4,304,updateL4Type3EObject,X000:800ee2a4
 800ee3d4,84,playerResetMotionState,X000:800ee3d4
@@ -301,7 +301,7 @@ address,size,name,twin
 801142c0,924,scriptActorLeaveScene,X000:801142c0
 8011465c,48,scriptActorLeaveSceneIfIdle,X000:8011465c
 8011468c,516,updateScriptActor,X000:8011468c
-80114890,64,updateL2Type1FObject,X000:80114890
+80114890,64,updateLeafButterflyByArea,X000:80114890
 801148d0,152,spawnDebrisObjectB,X000:801148d0
 80114968,160,spawnGroundDebrisPiece,X000:80114968
 80114a08,64,updateVillagerNpc,X000:80114a08
@@ -375,7 +375,7 @@ address,size,name,twin
 8011beac,300,func_8011BEAC,
 8011bfd8,820,apBoxOpenStep,
 8011c30c,392,stepApBoxEvent,
-8011c494,312,a00ApBoxOpenAnim,X000:80121fe0
+8011c494,312,a00ApBox100kOpenAnim,X000:80121fe0
 8011c5cc,396,updateApBox,
 8011c758,216,func_8011C758,
 8011c830,276,evilPigBagPortalCheckPlayer,X001:801204dc

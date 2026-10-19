@@ -332,7 +332,7 @@ extern signed char D_80138830[];
 extern signed char D_80138838[];
 extern signed char D_80138840[];
 extern unsigned char D_800A60D6;
-extern void updateA00PoolType27(short, short, short, short);
+extern void spawnA00PoolType03Pair(short, short, short, short);
 extern void FUN_8001e4f0(int);
 extern short FUN_8001fe0c(short, int);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
@@ -514,7 +514,7 @@ void updateA00L4Type02(E *o)
         }
         for (;;) {
             if (flag == 2 && e->next == 0 && o->timer == 0) {
-                updateA00PoolType27(o->subtype, e->a.p.whole + 0x10, e->y.p.whole + 0x20, e->b.p.whole);
+                spawnA00PoolType03Pair(o->subtype, e->a.p.whole + 0x10, e->y.p.whole + 0x20, e->b.p.whole);
                 FUN_8001e4f0(0x32);
                 o->timer = 0x78;
             }
