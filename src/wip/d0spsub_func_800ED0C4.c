@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip score 717: k=0 placement in mode-cycle rebuild, mode addr/value regs, printInfoMessage chain, state 2/4 cross-jump direction, case 3 sub 2
+// wip score 340
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -297,8 +297,7 @@ int func_800ED0C4(Menu *m)
             } else if (D_1F8001FC & 0x4008) {
                 unsigned char *t = D_800FFC3C[D_8010A068[D_8010A058]] + D_8010A088[D_8010A060] * 2;
                 int n;
-                D_80111134 = t[0];
-                D_8009CD94 = t[0];
+                D_8009CD94 = D_80111134 = t[0];
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
                 D_8009D2B0 = 3;
@@ -307,8 +306,7 @@ int func_800ED0C4(Menu *m)
                 D_800A6038 = 3;
                 D_8009C940 = 1;
                 D_8009C941 = D_80111128;
-                D_80111138 = t[1];
-                D_8009CD96 = t[1];
+                D_8009CD96 = D_80111138 = t[1];
                 n = 7;
                 if (D_80111128 == 14) {
                     Obj *o = allocObjectLayer2();
@@ -326,7 +324,7 @@ int func_800ED0C4(Menu *m)
             }
             break;
         }
-        return 0;
+        break;
     case 4:
         if (func_800ECBF0(m, D_8009D1A4.count)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
@@ -353,7 +351,7 @@ int func_800ED0C4(Menu *m)
             SfxPlay2(10, 10);
             m->state++;
         }
-        return 0;
+        break;
     case 5:
         func_800EF538(D_8010A200, 2);
         if (D_8010A204 == 2) m->state = 4;
