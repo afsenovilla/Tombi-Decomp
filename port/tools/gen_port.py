@@ -54,7 +54,10 @@ def translate_gte_define(d):
     for sec in parts[1:3]:
         ops += [o.strip() for o in re.findall(r'"[^"]*"\s*\(([^)]*)\)', sec)]
     arg = lambda t: "(%s)" % ops[int(t.strip()[1:])]
-    c, tmp = [], {}
+    c, tmp, cnt = [], {}, [0]
+    def newtmp(r):
+        tmp[r] = "_t%d" % cnt[0]; cnt[0] += 1
+        return tmp[r]
     for ins in re.split(r"[;\n]", code.replace("\\n", "\n")):
         ins = ins.strip()
         if not ins or ins == "nop": continue
@@ -72,10 +75,10 @@ def translate_gte_define(d):
         elif op == "ctc2":
             src = arg(a[0]) if a[0].startswith("%") else tmp[a[0]]
             c.append("port_gte_ctc2(%d, (unsigned long)%s);" % (reg(a[1]), src))
-        elif op == "mfc2": tmp[a[0]] = "_t%d" % len(tmp); c.append("long %s = port_gte_mfc2(%d);" % (tmp[a[0]], reg(a[1])))
-        elif op == "cfc2": tmp[a[0]] = "_t%d" % len(tmp); c.append("long %s = port_gte_cfc2(%d);" % (tmp[a[0]], reg(a[1])))
+        elif op == "mfc2": c.append("long %s = port_gte_mfc2(%d);" % (newtmp(a[0]), reg(a[1])))
+        elif op == "cfc2": c.append("long %s = port_gte_cfc2(%d);" % (newtmp(a[0]), reg(a[1])))
         elif op == "lw":
-            tmp[a[0]] = "_t%d" % len(tmp); c.append("long %s = *(long *)%s;" % (tmp[a[0]], addr(a[1])))
+            ad = addr(a[1]); c.append("long %s = *(long *)%s;" % (newtmp(a[0]), ad))
         elif op == "sra": c.append("%s = %s >> %s;" % (tmp[a[0]], tmp[a[1]], a[2]))
         elif op == "sw": c.append("*(long *)%s = %s;" % (addr(a[1]), tmp[a[0]]))
         else:
@@ -89,9 +92,11 @@ def filter_src(text, dropped=None):
     out, pend, toplevel = [], None, None
     for line in text.split("\n"):
         if toplevel is not None:      # inside a top-level asm block
-            toplevel += line
+            toplevel += "\n" + line
             if line.rstrip().endswith(");"):
                 if dropped is not None: dropped += re.findall(r"\.globl\s+(\w+)", toplevel)
+                for a, e in re.findall(r"(?:^|[\"\s;])(\w+)\s*=\s*([\w\s+\-]+?)\s*(?:\"|;|$)", toplevel):
+                    ASM_ALIASES[a] = e       # symbol assignment in top-level asm, e.g. FILE_LINK_SIZES = FILE_LINKS + 4
                 toplevel = None
             continue
         if re.match(r'(__asm__|asm)\s*\(\s*"', line):
@@ -103,6 +108,9 @@ def filter_src(text, dropped=None):
             continue
         # old gcc accepts `static` after an extern declaration from a header; modern gcc does not
         line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:%s)\s*\()" % "|".join(STATIC_AFTER_EXTERN), "", line)
+        # address-named static tables (initialized copies of retail data): make them global so the link step
+        # binds the name to the retail address (the retail image is the one copy the game reads and writes)
+        line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:D|DAT|PTR|PTR_DAT)_[0-9A-Fa-f]{8}\s*(?:\[[^\]]*\]\s*)*=)", "", line)
         # old-gcc lvalue cast `(T *)x = v;`
         line = re.sub(r"^(\s*)\(\s*(\w+\s*\*+)\s*\)\s*(\w+)\s*=(?!=)", r"\1*(\2 *)&\3 =", line)
         if pend is not None:
@@ -182,9 +190,10 @@ def load_fixes():
 
 
 FIXES = {}
+ASM_ALIASES = {}
 
 
-def sources(outdir, progs):
+def sources(outdir, progs, ovls=()):
     FIXES.update(load_fixes())
     from units import units, defined_name
     U = units()
@@ -203,11 +212,26 @@ def sources(outdir, progs):
                 continue
             seen_names[name] = u.addr
             picked.append((prog, u, stem, name))
-    refs = object_refs([p[2] for p in picked])
-    prov = {p: provides(p) for p in progs}
+    # overlay set: SYSTEM overlays (tools/sysovl.py) loaded at the same address as X000.  Every function such a
+    # file defines (or that the overlay has as asm only) is renamed <PROG>_<name>, and the runtime dispatches
+    # calls into the overlay region to that table while the overlay is resident (its header id at 0x800E8028).
+    ovl_names = {}
+    for prog in ovls:
+        names = set()
+        for u in U[prog]:
+            names.add(u.name)
+            if u.file and u.file.endswith(".c"):
+                stem = os.path.basename(u.file)[:-2]
+                names.add(defined_name(u.file, stem))
+                picked.append((prog, u, stem, defined_name(u.file, stem)))
+        ovl_names[prog] = names
+    refs = object_refs([(p[0].lower() + "__" + p[2]) if p[0] in ovl_names else p[2] for p in picked])
+    allp = list(progs) + [p for p in ovls if p not in progs]
+    prov = {p: provides(p) for p in allp}
     canon = {}                         # name -> address everybody agrees on (MAIN0 first)
-    for p in progs:
+    for p in allp:
         for n, a in prov[p].items(): canon.setdefault(n, a)
+    ovlmap = []
     renamed = {}
     for prog, u, stem, name in picked:
         dst = os.path.join(outdir, "src", prog.lower(), stem + ".c")
@@ -221,18 +245,26 @@ def sources(outdir, progs):
         if name in dropped:
             print("gen_port: %s is MIPS asm only: needs a port shim" % name)
         # names that mean another address in this file than in the rest of the game: rename them in this file
-        ren = dict(refs.get(stem, {}))
+        ovl = prog in ovl_names
+        ren = dict(refs.get((prog.lower() + "__" + stem) if ovl else stem, {}))
         for n, a in prov[prog].items():
             if canon.get(n) != a and re.search(r"\b%s\b" % re.escape(n), src): ren.setdefault(n, a)
+        if ovl:
+            for n in ovl_names[prog]: ren.pop(n, None)
         defs = "".join("#define %s %s__%08X\n" % (n, n, a) for n, a in sorted(ren.items()))
         for n, a in ren.items(): renamed["%s__%08X" % (n, a)] = a
+        if ovl:
+            defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
+                            if re.search(r"\b%s\b" % re.escape(n), src))
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
         if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:
             open(dst, "w").write(txt)
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
         (files24 if hm else files).append(dst)
-        if name not in dropped: fmap.append((u.addr, name))
+        if ovl:
+            if name not in dropped: ovlmap.append((prog, u.addr, prog + "_" + name))
+        elif name not in dropped: fmap.append((u.addr, name))
     with open(os.path.join(outdir, "sources.cmake"), "w") as f:
         f.write("set(PORT_GAME_SOURCES\n%s)\n" % "".join("  %s\n" % p for p in files))
         f.write("set(PORT_GAME_SOURCES_T24\n%s)\n" % "".join("  %s\n" % p for p in files24))
@@ -242,13 +274,38 @@ def sources(outdir, progs):
         f.write("const PortFunc port_funcmap[] = {\n")
         for a, n in sorted(fmap): f.write("  {0x%08X, (void *)%s, \"%s\"},\n" % (a, n, n))
         f.write("};\nconst int port_funcmap_count = %d;\n" % len(fmap))
+        # overlay set: header id (first word of the file, at 0x800E8028 while resident) and the functions
+        import sysovl
+        ids = {}
+        for prog in ovls:
+            fn = os.path.join(ROOT, "game", sysovl.SYSOVL[prog][0])
+            ids[prog] = int.from_bytes(open(fn, "rb").read(4), "little") if os.path.exists(fn) else 0
+        hand = handwritten_ovl_funcs()
+        for prog in ovls:                  # asm-only overlay functions translated by hand in port/runtime
+            for u in U[prog]:
+                n = prog + "_" + u.name
+                if n in hand and not any(e[2] == n for e in ovlmap): ovlmap.append((prog, u.addr, n))
+        for _, _, n in ovlmap: f.write("extern void %s(void);\n" % n)
+        f.write("const PortOvlFunc port_ovlmap[] = {\n")
+        for prog, a, n in sorted(ovlmap, key=lambda e: (ids[e[0]], e[1])):
+            f.write("  {0x%02X, 0x%08X, (void *)%s, \"%s\"},\n" % (ids[prog], a, n, n))
+        f.write("  {0, 0, 0, 0}\n};\nconst int port_ovlmap_count = %d;\n" % len(ovlmap))
+        f.write("const PortOvl port_ovls[] = {\n%s  {0, 0}\n};\n" % "".join(
+            "  {0x%02X, \"%s\"},\n" % (ids[p], p) for p in ovls))
     # symbol -> address table for the link step
     with open(os.path.join(outdir, "symaddr.txt"), "w") as f:
         for n, a in sorted(canon.items()): f.write("%s %08X\n" % (n, a))
         for n, a in sorted(renamed.items()): f.write("%s %08X\n" % (n, a))
+        for prog in ovls:
+            for u in U[prog]: f.write("%s_%s %08X\n" % (prog, u.name, u.addr))
+    with open(os.path.join(outdir, "asm_aliases.txt"), "w") as f:
+        for n, e in sorted(ASM_ALIASES.items()): f.write("%s %s\n" % (n, e))
     with open(os.path.join(outdir, "unitnames.txt"), "w") as f:
         for prog in progs:
             for u in U[prog]: f.write("%08X %s\n" % (u.addr, u.name))
+    with open(os.path.join(outdir, "ovl_funcnames.txt"), "w") as f:
+        for prog in ovls:
+            for u in U[prog]: f.write("%s\n" % u.name)
     code = []
     for prog in ("MAIN0", "X000"):
         for u in U[prog]: code.append((u.addr, u.addr + u.size))
@@ -256,6 +313,16 @@ def sources(outdir, progs):
         for a, e in sorted(code): f.write("%08X %08X\n" % (a, e))
     print("gen_port: %d sources (%s), %d mapped functions, %d per-file renames"
           % (len(files) + len(files24), " ".join(progs), len(fmap), len(renamed)))
+
+
+def handwritten_ovl_funcs():
+    """Overlay functions the port defines by hand (port/runtime/ovl_*.c): <PROG>_<name>(...) definitions."""
+    out = set()
+    d = os.path.join(ROOT, "port", "runtime")
+    for f in os.listdir(d):
+        if f.startswith("ovl_") and f.endswith(".c"):
+            out |= set(re.findall(r"^\w[\w \t\*]*?\b([A-Z0-9]+_\w+)\s*\([^;]*$", open(os.path.join(d, f)).read(), re.M))
+    return out
 
 
 def link(outdir, nm, objlist):
@@ -293,6 +360,11 @@ def link(outdir, nm, objlist):
         elif t in "DBRCGS": data_defined.add(n)
     undefined -= defined
     ld, thunks = [], []
+    funcnames = set(unitname.values()) | set(l.strip() for l in open(os.path.join(outdir, "ovl_funcnames.txt")))
+    is_func_name = lambda n: n in funcnames or n.split("__")[0] in funcnames
+    import sysovl
+    ovl_re = re.compile(r"(?:%s)_\w" % sysovl.PROG_RE)
+    asm_alias = dict(l.rstrip("\n").split(" ", 1) for l in open(os.path.join(outdir, "asm_aliases.txt")) if l.strip())
 
     def addr_of(n):
         if n in syms: return syms[n]
@@ -301,11 +373,17 @@ def link(outdir, nm, objlist):
     for n in sorted(undefined):
         if n.startswith(("port_", "__", "_GLOBAL_OFFSET")): continue
         a = addr_of(n)
+        if n in asm_alias:
+            ld.append("%s = %s;" % (n, asm_alias[n])); continue
+        if ovl_re.match(n):                # overlay-set function without native code: dispatch at call time
+            thunks.append((n, a)); continue
         if a is not None and a in native_by_addr and native_by_addr[a] in defined:
             ld.append("%s = %s;" % (n, native_by_addr[a]))
         elif a is not None and unitname.get(a) in defined and unitname[a] != n:   # e.g. FUN_80063ffc -> SetGeomScreen shim
             ld.append("%s = %s;" % (n, unitname[a]))
-        elif a is not None and not is_code(a) and not (0x800E8028 <= a < 0x80140000 and n.startswith(("func_", "FUN_"))):
+        elif a is not None and (not is_code(a) or (0x800E8028 <= a < 0x80140000 and not is_func_name(n))) and \
+                not (0x800E8028 <= a < 0x80140000 and n.startswith(("func_", "FUN_"))):
+            # (inside the overlay region a name is data unless it names a function: the overlays share the region)
             ld.append("%s = 0x%08X;" % (n, a))
         else:
             thunks.append((n, a))
@@ -334,7 +412,9 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if a and a[0] == "sources":
         a[1] = os.path.abspath(a[1]); os.makedirs(a[1], exist_ok=True)
-        sources(a[1], [p.upper() for p in a[2:]] or ["MAIN0", "X000"])
+        import sysovl
+        ps = [p.upper() for p in a[2:]] or ["MAIN0", "X000"]
+        sources(a[1], [p for p in ps if p not in sysovl.SYSOVL], [p for p in ps if p in sysovl.SYSOVL])
     elif a and a[0] == "link":
         link(a[1], a[2], a[3])
     else:

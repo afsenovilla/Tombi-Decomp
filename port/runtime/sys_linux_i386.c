@@ -135,8 +135,25 @@ static void *map_fixed(unsigned addr, unsigned size) {
 
 /* ------------------------------------------------------------------------------------------- calls to retail addresses */
 static int funcs_sorted;
+static int is_ovl_id(u32p id) {
+    for (const PortOvl *o = port_ovls; o->name; o++) if (o->id == id) return 1;
+    return 0;
+}
+const char *port_resident_overlay(void) {
+    u32p id = *(volatile u32p *)PORT_OVL_BASE;
+    for (const PortOvl *o = port_ovls; o->name; o++) if (o->id == id) return o->name;
+    return "X000";
+}
 void *port_lookup(u32p a) {
     int lo = 0, hi = port_funcmap_count - 1;
+    if (a >= PORT_OVL_BASE && a < PORT_OVL_END) {
+        u32p id = *(volatile u32p *)PORT_OVL_BASE;
+        if (is_ovl_id(id)) {           /* a SYSTEM overlay is resident: only its functions live here */
+            for (int i = 0; i < port_ovlmap_count; i++)
+                if (port_ovlmap[i].id == id && port_ovlmap[i].addr == a) return port_ovlmap[i].fn;
+            return 0;
+        }
+    }
     (void)funcs_sorted;
     while (lo <= hi) {
         int m = (lo + hi) / 2;
