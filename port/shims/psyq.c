@@ -1,7 +1,7 @@
 /* Psy-Q library replacements for the port prototype (headless).
  * Grouped like the Psy-Q libraries: libapi (BIOS: events, threads, critical sections), libetc (VSync,
  * callbacks), libgpu (VRAM transfers, ordering tables, environments), libgte (matrix helpers on the software
- * GTE), libcd (sector reads from the user's disc image), libspu/libsnd/libpress/memory card (silent stubs).
+ * GTE), libcd (sector reads from the user's disc image), libspu/libsnd/libpress (silent stubs; the memory card is card.c).
  * Every function here overrides the weak call thunk that port/tools/gen_port.py generates for its name. */
 #include "port_runtime.h"
 
@@ -13,12 +13,13 @@ typedef struct { s32 vx, vy, vz, pad; } VECTOR;
 typedef struct { s16 vx, vy, vz, pad; } SVECTOR;
 
 /* ================================================================== libapi / libetc */
-static void *vsync_event_fn;        /* OpenEvent(RCntCNT3 / VBlank, ...) handler: the game's vblankHandler */
+void *port_vsync_event_fn;          /* OpenEvent(RCntCNT3 / VBlank, ...) handler: the game's vblankHandler (set in card.c) */
 static void (*vsync_cb)(void);
 int port_frame;
 int port_max_frames;
 static unsigned long long next_vblank_us;
-int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = 50 Hz pacing */
+int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
+int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
 static void call_psx(void *fn) {
     void (*f)(void) = (void (*)(void))fn;
@@ -75,7 +76,7 @@ void port_vblank(void) {
     if (port_realtime) {
         unsigned long long now = port_time_us();
         if (!next_vblank_us) next_vblank_us = now;
-        next_vblank_us += 20000;                     /* PAL: 50 Hz */
+        next_vblank_us += 1000000ull / (unsigned)port_hz;   /* PAL: 50 Hz (20 ms); --hz 60: 16.67 ms */
         if (next_vblank_us > now) port_sleep_us(next_vblank_us - now);
     }
     port_frame++;
@@ -92,7 +93,7 @@ void port_vblank(void) {
         if (!opened) { opened = 1; port_pipe_video_open(); port_pipe_audio_open(); }
     }
     { extern void port_pad_vblank(void); port_pad_vblank(); }
-    if (vsync_event_fn) call_psx(vsync_event_fn);
+    if (port_vsync_event_fn) call_psx(port_vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
        audio of this vblank already buffered while it reads the (larger) video frame */
@@ -137,17 +138,10 @@ void port_vblank(void) {
 
 int EnterCriticalSection(void) { return 1; }
 void ExitCriticalSection(void) {}
-int OpenEvent(u32 desc, int spec, int mode, void *func) {
-    if (port_verbose) port_printf("[port] OpenEvent(%08x, %x, %x, %p)\n", desc, spec, mode, func);
-    if (desc == 0xF2000003u && func) vsync_event_fn = func;      /* RCntCNT3 = vertical blank */
-    return 0xF1000000 | (desc & 0xFF);
-}
+/* OpenEvent/CloseEvent/TestEvent/DeliverEvent: shims/card.c (the memory card is the only event source) */
 int EnableEvent(int ev) { return 1; }
 int DisableEvent(int ev) { return 1; }
-int CloseEvent(int ev) { return 1; }
-int TestEvent(int ev) { return 0; }
 int WaitEvent(int ev) { return 1; }
-void DeliverEvent(u32 a, u32 b) {}
 int OpenTh(void *fn, u32 sp, u32 gp) { return port_thread_open(fn); }
 int ChangeTh(int h) { port_thread_change(h); return 1; }
 int CloseTh(int h) { port_thread_close(h); return 1; }
@@ -183,13 +177,7 @@ int VSync(int mode) {
     return r;
 }
 
-/* memory card: no card inserted */
-void InitCARD(int v) {}
-int StartCARD(void) { return 1; }
-int StopCARD2(void) { return 1; }
-void _bu_init(void) {}
-void _patch_card2(void) {}
-void _patch_card(void) {}
+/* memory card: shims/card.c */
 
 /* ================================================================== libgpu: see gpu.c */
 
@@ -339,7 +327,45 @@ void port_cd_fd_set(int fd) { cd_fd = fd; }
 static int cd_pos;                     /* next LBA */
 static void *cd_ready_cb, *cd_sync_cb, *cd_read_cb;
 static u8 cd_mode = 0x80;
+/* A `.cue` names the data track's `.bin` (FILE "name" BINARY, relative to the cue): resolve it, else
+   the path is the image itself. */
+static char cd_bin_path[1024];
+static const char *cd_resolve_cue(const char *path) {
+    int n = 0; while (path[n]) n++;
+    if (n < 4 || (path[n - 4] != '.') || ((path[n - 3] | 32) != 'c') || ((path[n - 2] | 32) != 'u') ||
+        ((path[n - 1] | 32) != 'e')) return path;
+    int fd = port_open(path);
+    if (fd < 0) return path;
+    static char cue[8192];
+    int len = port_read(fd, cue, sizeof cue - 1);
+    port_close(fd);
+    if (len < 0) len = 0;
+    cue[len] = 0;
+    /* first FILE "..." line (the data track is track 1) */
+    for (int i = 0; i + 5 < len; i++) {
+        if ((i == 0 || cue[i - 1] == '\n' || cue[i - 1] == ' ' || cue[i - 1] == '\t') &&
+            (cue[i] | 32) == 'f' && (cue[i + 1] | 32) == 'i' && (cue[i + 2] | 32) == 'l' && (cue[i + 3] | 32) == 'e' &&
+            (cue[i + 4] == ' ' || cue[i + 4] == '\t')) {
+            int j = i + 5; while (cue[j] == ' ' || cue[j] == '\t') j++;
+            char name[512]; int k = 0;
+            if (cue[j] == '"') { j++; while (cue[j] && cue[j] != '"' && k < 511) name[k++] = cue[j++]; }
+            else while (cue[j] && cue[j] != ' ' && cue[j] != '\t' && cue[j] != '\r' && cue[j] != '\n' && k < 511) name[k++] = cue[j++];
+            name[k] = 0;
+            if (!k) break;
+            int dir = n; while (dir > 0 && path[dir - 1] != '/') dir--;    /* directory of the cue */
+            int o = 0;
+            if (name[0] != '/') for (int q = 0; q < dir && o < 1000; q++) cd_bin_path[o++] = path[q];
+            for (int q = 0; name[q] && o < 1020; q++) cd_bin_path[o++] = name[q];
+            cd_bin_path[o] = 0;
+            port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path);
+            return cd_bin_path;
+        }
+    }
+    port_printf("[port] %s: no FILE line found in the cue sheet\n", path);
+    return path;
+}
 int port_cd_open(const char *path) {
+    path = cd_resolve_cue(path);
     cd_fd = port_open(path);
     if (cd_fd < 0) return -1;
     long long n = port_filesize(cd_fd);
