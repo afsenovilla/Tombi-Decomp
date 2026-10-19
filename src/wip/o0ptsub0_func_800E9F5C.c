@@ -30,6 +30,7 @@ extern int GetGraphType(void);
 
 void func_800E9F5C(int c, int ang, int off, int pal0)
 {
+  unsigned char new_var;
   unsigned char pal;
   POLY_FT4 *p;
   Glyph *tbl;
@@ -44,7 +45,7 @@ void func_800E9F5C(int c, int ang, int off, int pal0)
   tbl = D_800EA1D8;
   if (((short) off) == (-1))
   {
-    a = (short)ang * tbl[ch].w - MulNegSin(0xE0, 0x5A);
+    a = (((short) ang) * tbl[ch].w) - MulNegSin(0xE0, 0x5A);
     c = a;
     a += tbl[ch].w;
   }
@@ -61,8 +62,8 @@ void func_800E9F5C(int c, int ang, int off, int pal0)
   p->g0 = 0x80;
   p->b0 = 0x80;
   p->x0 = c + 0xA0;
-  p->x1 = a + 0xA0;
   p->y0 = 0xB8;
+  p->x1 = a + 0xA0;
   p->y1 = 0xB8;
   p->code &= ~2;
   p->x2 = p->x0;
@@ -78,7 +79,7 @@ void func_800E9F5C(int c, int ang, int off, int pal0)
   p->clut = ((pal + 0x1E0) << 6) | 0x15;
   p->u3 = p->u1;
   p->v3 = p->v2;
-  p->tpage = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x86 : 0x26;
+  p->tpage = ((GetGraphType() == 1) || (GetGraphType() == 2)) ? (0x86) : (0x26);
   ((P_TAG *) p)->addr = (unsigned long) ((unsigned long) ((P_TAG *) DAT_1f8001e0)->addr), ((P_TAG *) DAT_1f8001e0)->addr = (unsigned long) p;
   D_1F800164++;
 }
