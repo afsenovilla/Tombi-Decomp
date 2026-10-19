@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip: 16 differing insns (else k=0 dup, 0x18 reload, t[1]/3 regs, 0xE arg)
+// wip: 15 differing insns, all in case-3 confirm block (const 3 / 14 / t[1] regs + store order)
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -42,7 +42,7 @@ int func_800ED0C4(Menu *m)
 {
     int pages;
     int i, j, j2, k;
-    int c14; int z, n; int i2;
+    int z, n; int i2;
     unsigned short md;
     switch (m->state) {
     case 0:
@@ -84,9 +84,9 @@ int func_800ED0C4(Menu *m)
                 }
                 break;
             case 2:
-                k = 0;
                 md = D_8009D1A4.mode;
                 if (md & 0x8000) {
+                    k = 0;
                     md &= 0x7FFF;
                     D_8009D1A4.mode = md;
                     {
@@ -183,8 +183,7 @@ int func_800ED0C4(Menu *m)
                 else c++;
             }
             if (r) {
-                c14 = 14;
-                if (D_80111128 == 7 || D_80111128 == c14) {
+                if (D_80111128 == 7 || D_80111128 == 14) {
                     D_8010A058 = 0;
                     {
                     int n, z;
@@ -209,7 +208,7 @@ int func_800ED0C4(Menu *m)
                                 && a != 0x1C && a != 0x1D) {
                                 n = 1;
                                 if (a == 0x18) {
-                                    a = *(volatile int *)&D_80111128;
+                                    a = *(int *)((char *)&D_80111128 + 0);
                                     n = 4;
                                 }
                             }
@@ -330,7 +329,7 @@ int func_800ED0C4(Menu *m)
                 D_8009C941 = D_80111128;
                 D_8009CD96 = D_80111138 = b;
                 }
-                if (D_80111128 == c14) {
+                if (D_80111128 == 14) {
                     Obj *o = allocObjectLayer2();
                     if (o) {
                         o->b0 = 1;
