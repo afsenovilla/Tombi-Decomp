@@ -284,7 +284,42 @@ void func_8002CF40(void *o) {
     }
 }
 
+/* func_800406E8 (0x1F0 bytes): floor probe against the slope list at *(u16 **)0x1F800278 (count, then records of
+ * 4 halfwords: flags, y, dy, (span << 4) | start).  On a hit below the probe it snaps o->y (+0x16) onto it,
+ * records the slope in 0x1F80027E..82 and returns 1. */
+int func_800406E8(void *o, int x, int y) {
+    u16 *p = SPAD(u16 *, 0x278);
+    s16 n = (s16)*p;
+    int t3 = x & 7, t4 = (s16)x, t5 = (s16)y;
+    SPAD(u16 *, 0x278) = p + 1;
+    if (n == 0) return 0;
+    do {
+        u16 *r = SPAD(u16 *, 0x278);
+        u16 fl = r[0];
+        n--;
+        SPAD(u16 *, 0x278) = r + 4;
+        if ((fl & 2) && !(fl & 0x10)) {
+            u16 a3 = r[1], t2 = r[2], w = r[3];
+            int start = w & 0xF, span = (w >> 4) & 0xF;
+            if (span != 0 && t5 >= (s16)a3 - 0x10 && t3 >= start && start + span >= t3) {
+                int v = (s16)t2 == 0 ? a3 : a3 + ((s16)t2 * ((t4 - start) % span)) / span;
+                int d = v - y;
+                if ((s16)d > 0) {
+                    S16(o, 0x14) = 0;
+                    SPAD(u16, 0x27E) = t2;
+                    SPAD(u16, 0x280) = a3;
+                    SPAD(u16, 0x282) = fl;
+                    F16(o, 0x16) += d;
+                    return 1;
+                }
+            }
+        }
+    } while (n != 0);
+    return 0;
+}
+
 const PortFunc port_extra_funcs[] = {
+    {0x800406E8, (void *)func_800406E8, "func_800406E8"},
     {0x8002CF40, (void *)func_8002CF40, "func_8002CF40"},
     {0, 0, 0},
 };

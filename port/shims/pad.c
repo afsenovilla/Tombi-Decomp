@@ -12,10 +12,11 @@ u16 port_pad_buttons[2];       /* active high, PSX bit order: 0 Select,3 Start,4
                                   8 L2,9 R2,10 L1,11 R1,12 Triangle,13 Circle,14 Cross,15 Square */
 int port_autostart;            /* headless test input: tap Start (and Cross) every autostart frames */
 
-/* --pad-script "FRAME:BUTTONS[:LEN],...": hold BUTTONS (names joined by '+': start select up down left right
-   cross circle square triangle l1 r1 l2 r2, or a hex mask) from vblank FRAME for LEN vblanks (default 4). */
+/* --pad-script "FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...": hold BUTTONS (names joined by '+': start select up down
+   left right cross circle square triangle l1 r1 l2 r2, or a hex mask) from vblank FRAME for LEN vblanks (default
+   4); with xCOUNT/PERIOD the press repeats COUNT times, every PERIOD vblanks. */
 #define MAX_SCRIPT 64
-static struct { int frame, len; u16 mask; } script[MAX_SCRIPT];
+static struct { int frame, len, count, period; u16 mask; } script[MAX_SCRIPT];
 static int n_script;
 static const struct { const char *n; u16 m; } pad_names[] = {
     {"select", 0x0001}, {"start", 0x0008}, {"up", 0x0010}, {"right", 0x0020}, {"down", 0x0040}, {"left", 0x0080},
@@ -48,17 +49,23 @@ void port_pad_script(const char *s) {
             }
             if (*s == '+') s++;
         }
+        int count = 1, period = 0;
         if (*s == ':') { s++; len = num(&s, 10); }
+        if (*s == 'x') { s++; count = num(&s, 10); if (*s == '/') { s++; period = num(&s, 10); } }
+        if (*s && *s != ',') port_fatal("--pad-script: bad entry at \"%s\"", s);
         if (*s == ',') s++;
-        script[n_script].frame = f; script[n_script].len = len; script[n_script].mask = m; n_script++;
+        script[n_script].frame = f; script[n_script].len = len; script[n_script].mask = m;
+        script[n_script].count = count; script[n_script].period = period > 0 ? period : (len > 0 ? len : 1); n_script++;
     }
 }
 
 void port_pad_vblank(void) {
     if (n_script) {
         u16 m = 0;
-        for (int i = 0; i < n_script; i++)
-            if (port_frame >= script[i].frame && port_frame < script[i].frame + script[i].len) m |= script[i].mask;
+        for (int i = 0; i < n_script; i++) {
+            int d = port_frame - script[i].frame;
+            if (d >= 0 && d / script[i].period < script[i].count && d % script[i].period < script[i].len) m |= script[i].mask;
+        }
         port_pad_buttons[0] = m;
     }
     if (port_autostart && port_frame % port_autostart < 4)
@@ -74,9 +81,12 @@ void port_pad_vblank(void) {
     }
 }
 
-void PadInitDirect(u8 *a, u8 *b) { buf[0] = a; buf[1] = b; if (a) a[0] = 0xFF; if (b) b[0] = 0xFF; }
-void PadStartCom(void) { started = 1; }
-void PadStopCom(void) { started = 0; }
+void PadInitDirect(u8 *a, u8 *b) {
+    if (port_verbose) port_printf("[port] PadInitDirect(%p, %p) frame %d\n", a, b, port_frame);
+    buf[0] = a; buf[1] = b; if (a) a[0] = 0xFF; if (b) b[0] = 0xFF;
+}
+void PadStartCom(void) { if (port_verbose) port_printf("[port] PadStartCom frame %d\n", port_frame); started = 1; }
+void PadStopCom(void) { if (port_verbose) port_printf("[port] PadStopCom frame %d\n", port_frame); started = 0; }
 int PadChkVsync(void) { return 0; }
 int PadGetState(int port) { return port == 0 ? 6 /* PadStateStable */ : 0 /* PadStateDiscon */; }
 int PadInfoMode(int port, int term, int offs) {

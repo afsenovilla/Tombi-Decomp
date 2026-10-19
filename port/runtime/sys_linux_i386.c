@@ -178,13 +178,21 @@ void port_stub(const char *name, u32p addr) {
         port_printf("[port] stub %s (%08x) frame %d\n", name, addr, port_frame);
 }
 void port_stub_report(void) {
+    port_printf("[port] %d calls ran in the MIPS interpreter (code without C)\n", port_mips_calls());
     port_printf("[port] %d distinct stubbed functions were called:\n", n_stub_seen);
     for (int i = 0; i < n_stub_seen; i++) port_printf("  %6d  %s\n", stub_count[i], stub_seen[i]);
 }
 
+static int interpretable(u32p a) {
+    return port_interp && a >= 0x80010000u && a < 0x80200000u && !(a & 3) && !port_is_lib_addr(a);
+}
 void *port_resolve_call(u32p addr, const char *name) {
     void *f = addr ? port_lookup(addr) : 0;
     if (f) return f;
+    if (interpretable(addr)) {            /* no C for it: run the retail machine code */
+        port_mips_pending = addr;
+        return (void *)port_mips_entry;
+    }
     port_stub(name ? name : "?", addr);
     return (void *)stub_ret0;
 }
@@ -208,6 +216,11 @@ static void on_segv(int sig, void *info, void *uc) {
     if (eip == fault && (eip & 0x5FFFFFFFul) < 0x00200000ul) {   /* KUSEG / KSEG0 / KSEG1 RAM address */
         void *f = port_lookup((u32p)(0x80000000ul | (eip & 0x1FFFFFul)));
         if (f) { UC_EIP(uc) = (unsigned long)f; return; }
+        if (interpretable((u32p)(0x80000000ul | (eip & 0x1FFFFFul)))) {
+            port_mips_pending = (u32p)(0x80000000ul | (eip & 0x1FFFFFul));
+            UC_EIP(uc) = (unsigned long)port_mips_entry;
+            return;
+        }
         port_stub("<retail address without native code>", (u32p)eip);
         UC_EIP(uc) = (unsigned long)stub_ret0;
         return;

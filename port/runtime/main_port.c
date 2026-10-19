@@ -163,6 +163,8 @@ int port_main(int argc, char **argv) {
         else if (streq(argv[i], "--dump-every") && i + 1 < argc) port_dump_every = atoi_(argv[++i]);
         else if (streq(argv[i], "--dump-vram")) port_dump_vram = 1;
         else if (streq(argv[i], "--play-movies")) { extern int port_play_movies; port_play_movies = 1; }
+        else if (streq(argv[i], "--no-interp")) port_interp = 0;
+        else if (streq(argv[i], "--trace-interp")) { extern int port_mips_trace; port_mips_trace = 1; }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"

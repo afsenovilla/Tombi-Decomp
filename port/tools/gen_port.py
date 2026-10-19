@@ -308,6 +308,10 @@ def sources(outdir, progs, ovls=()):
     with open(os.path.join(outdir, "unitnames.txt"), "w") as f:
         for prog in progs:
             for u in U[prog]: f.write("%08X %s\n" % (u.addr, u.name))
+    with open(os.path.join(outdir, "libaddrs.txt"), "w") as f:      # Psy-Q code (hardware access): never interpreted
+        for prog in progs:
+            for u in U[prog]:
+                if u.lib: f.write("%08X\n" % u.addr)
     with open(os.path.join(outdir, "ovl_funcnames.txt"), "w") as f:
         for prog in ovls:
             for u in U[prog]: f.write("%s\n" % u.name)
@@ -487,7 +491,15 @@ def link(outdir, nm, objlist):
         for i, (n, a) in enumerate(thunks):
             f.write(".weak %s\n.type %s,@function\n%s:\n  pushl $.Lname%d\n  pushl $0x%08X\n"
                     "  call port_resolve_call\n  addl $8, %%esp\n  jmp *%%eax\n" % (n, n, n, i, a or 0))
-        f.write(".section .rodata\n")
+        # retail address -> native function for every unit the port defines by its own name (game C and shims):
+        # the MIPS interpreter (runtime/mips_interp.c) calls these natively
+        libmap = sorted((a, n) for a, n in unitname.items() if n in defined)
+        f.write(".section .rodata\n.globl port_libmap\n.p2align 2\nport_libmap:\n")
+        for a, n in libmap: f.write("  .long 0x%08X, %s\n" % (a, n))
+        f.write(".globl port_libmap_count\nport_libmap_count: .long %d\n" % len(libmap))
+        libs = sorted(int(l, 16) for l in open(os.path.join(outdir, "libaddrs.txt")) if l.strip())
+        f.write(".globl port_libaddrs\nport_libaddrs:\n%s" % "".join("  .long 0x%08X\n" % a for a in libs))
+        f.write(".globl port_libaddrs_count\nport_libaddrs_count: .long %d\n" % len(libs))
         for i, (n, a) in enumerate(thunks):
             f.write('.Lname%d: .asciz "%s"\n' % (i, n + (" [%s]" % unitname[a] if a in unitname and unitname[a] != n else "")))
     print("gen_port: %d retail addresses/aliases, %d call thunks" % (len(ld), len(thunks)))
