@@ -341,15 +341,23 @@ static void map_shared(int fd, unsigned addr, unsigned size, unsigned off) {
     if ((unsigned long)r != addr) port_fatal("cannot map PS1 RAM mirror at %08x (got %lx)", addr, r);
 }
 
+int port_low_mem = -1;          /* lowest mapped address of the KUSEG kernel area (0 or 0x1000), -1: none */
 void port_setup_memory(void) {
     /* One 2 MB RAM object seen at KSEG0 0x80000000 (what the game uses), KUSEG 0x00000000 (the game masks
        addresses with 0xFFFFFF, e.g. compactOrderingTable) and KSEG1 0xA0000000.  The first 64 KB of KUSEG
-       (BIOS kernel area) cannot be mapped by a Linux process (vm.mmap_min_addr) and is left out. */
+       (BIOS kernel area) is mapped as far as vm.mmap_min_addr allows: game code reads it through NULL pointers
+       (WMD_DATA of a room without a model, an animation pointer before it is set) and sees the zeroed kernel
+       area of the RAM object, as on a PS1.  Page 0 needs vm.mmap_min_addr = 0. */
     long fd = sys3(356 /* memfd_create */, (long)"psx-ram", 0, 0);
     if (fd < 0) port_fatal("memfd_create failed (%ld)", fd);
     sys3(93 /* ftruncate */, fd, PSX_RAM_SIZE, 0);
     map_shared((int)fd, PSX_RAM_BASE, PSX_RAM_SIZE, 0);
     map_shared((int)fd, 0x00010000u, PSX_RAM_SIZE - 0x10000u, 0x10000u);
+    {
+        long r = sys6(SYS_mmap2, 0, 0x10000u, 3, 0x01 | 0x100000, fd, 0);
+        if (r != 0) r = sys6(SYS_mmap2, 0x1000u, 0xF000u, 3, 0x01 | 0x100000, fd, 1);
+        port_low_mem = r == 0 ? 0 : (unsigned long)r == 0x1000u ? 0x1000 : -1;
+    }
     map_shared((int)fd, 0xA0000000u, PSX_RAM_SIZE, 0);
     map_fixed(PSX_SPAD_BASE, PSX_SPAD_SIZE);
     install(11, (void *)on_segv);   /* SIGSEGV */

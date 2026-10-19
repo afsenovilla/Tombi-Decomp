@@ -191,6 +191,7 @@ int port_main(int argc, char **argv) {
         }
     }
     port_setup_memory();
+    { extern int port_low_mem; if (port_verbose) port_printf("[port] BIOS kernel area mapped from %x (-1: not mapped)\n", port_low_mem); }
     load_exe(exe);
     if (port_cd_open(disc) < 0) port_printf("[port] warning: no disc image at %s: CD reads will fail\n", disc);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */

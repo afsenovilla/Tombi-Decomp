@@ -450,3 +450,31 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 
 No third-party code is copied into this repository. Any of these libraries would be fetched at configure time
 under its own licence (PsyCross is MIT).
+
+## Milestone M2 (in progress)
+
+Done:
+- **Area overlays native**: `gen_port.py area_plan` compiles X001..X019 (prefix `X0nn_`); functions whose bytes equal
+  X000's run X000's code; X000 functions that differ in some area are renamed `X000_<name>` and reached through
+  dispatch thunks. The resident area is recognised by two signature words (`port_areas`), looked up in
+  `port_areamap`. Short calls are forwarded by the callee's address and by the widest definition across areas /
+  SYSTEM overlays. AREA01 (debug select) runs with 0 interpreted calls; AREA00 frames unchanged.
+- **Asm-only MAIN0 functions** `func_800416B8`, `func_8004AE7C`, `func_80038184` in C (`runtime/main0_handwritten.c`).
+  `--check ADDR` runs each call interpreted and native on the same state and compares RAM/scratchpad/return
+  (func_800416B8: 1182 calls, 0 differences; the other two are not reached in the tested runs, 80038184 has no caller).
+- **Sound, first step**: `shims/sound.c` software SPU (ADPCM, ADSR, pitch, 24 voices) + high-level libsnd (VAB from
+  SsVabFakeHead, SEQ sequencer, SsUtKeyOnV effects); `--dump-audio out.wav`. Title music matches tools/audio.py in pitch.
+- `--poke FRAME:ADDR:VALUE[:SIZE]` (debug area select: `--poke 900:1F8001B4:1`), `-v` prints area/section/player x,y.
+- The BIOS kernel area (KUSEG 0..0xFFFF) is mapped to the RAM object (page 0 needs root / mmap_min_addr 0), so NULL
+  reads see zeros as on a PS1 (fixes area 0 section 3).
+
+Pending:
+- Walking AREA00 -> next area with --pad-script not achieved yet. Findings: sections 0/1/2 of AREA00 are one map
+  (updateA00L5Type11: sec0 -> sec1 at x>=0x4ED,y<-0x95; sec1 exit 1 at x>=0x938,y>=-0x64 -> AREA02; sec1 -> sec2 at
+  x>=0x9DD,y<-0x18F); sec3 (elder's house, FUN_801175a4) exit 1 at x>=0x12B,y<-0xDB -> AREA01, right side -> sec2.
+  From the house: `1000:start,1200:down,1220:right:2x3/8,1350:circle,1900:cross:3x40/30,2300:cross:3x40/30,
+  2700:right:400,3100:cross+right:30x8/60,3600:right:1500` with `--poke 900:1F8001B4:1` reaches sec1 x=2239, where a
+  blue egg blocks the way to the AREA02 exit.
+- Debug-select sweep crashes to fix (fixes.txt candidates): areas 8, 10, 14 (segfaults), 11/16/17/18 (interpreter hits
+  garbage / NULL+2), 6 hangs; areas 2 and 5 load I0NFO/I0NFO2 at the overlay base from the debug select (not X002/X005).
+- Sound: reverb, real-time output, libsnd details (voice priorities, NRPN loop counts).
