@@ -1,5 +1,5 @@
 // FUNC 800ef538 1388 D0SPSUB
-// wip: 11 differing insns (case -6 x/y update scheduling); do{}while(0) around switch(o->wait) fixes reg alloc
+// wip: 10 differing insns (case -6 x/y update scheduling); do{}while(0) around switch(o->wait) fixes reg alloc
 typedef struct {
     char p0[4];
     unsigned char state, wait;
@@ -89,7 +89,7 @@ void func_800EF538(Msg *o, int bank)
                     o->timer = one;
                     o->ba = -(o->w >> 1);
                     o->bc = -o->h - 0x30;
-                    o->x = o->x + ow + o->ba;
+                    o->x = ow + o->x + o->ba;
                     o->y = o->y + oh + o->bc + 0x30;
                     break;
                 }
