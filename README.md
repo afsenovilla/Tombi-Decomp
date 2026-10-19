@@ -30,19 +30,19 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Status
 
 <!-- progress:start -->
-**Whole game: 98.37 % of the game's code matches byte for byte** (1504392 of 1529276 bytes).
+**Whole game: 98.57 % of the game's code matches byte for byte** (1507480 of 1529276 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
 | X000.BIN: AREA00 + object code reused by all areas | 312708 B | 312708 B | 100.0 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 168600 B | 87.1 % `[#####################...]` |
-| **Whole game** | **1529276 B** | **1504392 B** | **98.37 %** `[########################]` |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 171688 B | 88.7 % `[#####################...]` |
+| **Whole game** | **1529276 B** | **1507480 B** | **98.57 %** `[########################]` |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100816 B) is not counted: 67176 B of it (66.6 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.0 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.1 %).
 - Also tracked for MAIN0 + X000: 92.4 % of the code named by us, 74.9 % typed with the TObj structure.
 <!-- progress:end -->
 
