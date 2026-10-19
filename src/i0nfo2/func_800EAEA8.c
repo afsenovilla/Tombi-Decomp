@@ -1,4 +1,5 @@
 // FUNC 800eaea8 1056 I0NFO2
+// MATCHING 800eaea8 1056
 #include "TOBJ.H"
 extern void func_8001FEC0(TObj *o);
 extern void func_800E9C7C(TObj *o);
@@ -13,7 +14,7 @@ extern unsigned char D_8009D00F;
 extern unsigned char D_8009D2B0[];
 extern volatile unsigned short D_8009D670[];
 extern void func_800EE440(TObj *o, short x, short y);
-extern volatile short (*D_800FEC9C[])[4];
+extern short (*D_800FEC9C[])[4];
 #include "gamestate.h"
 extern TObj D_800A6038;
 
@@ -22,8 +23,12 @@ extern void func_800EA44C(TObj *o);
 void func_800EAEA8(TObj *o)
 {
     short i;
-    volatile short *e;
-    volatile short (*tb)[4];
+    short *e;
+    short (*tb)[4];
+    short *py;
+    short px;
+    unsigned short d;
+    short l;
     int k = 0;
     *((unsigned char *)o + 0xE2) = 0;
     switch (o->step) {
@@ -119,18 +124,28 @@ void func_800EAEA8(TObj *o)
         case 0x11: k = 3; break;
         case 0x13: k = 4; break;
         }
-        tb = D_800FEC9C[k];
         i = 0;
-        e = tb[0];
-        while (e[0] != 0xFF) {
-            if ((unsigned short)(D_800A6038.h->p.whole - e[0]) <= (short)(e[2] - e[0])
-                && (unsigned short)(D_800A6038.y.p.whole - e[1]) <= (short)(e[3] - e[1])) {
-                o->b6b = i + 1;
-                return;
+        e = D_800FEC9C[k][0];
+        if (e[0] != 0xFF) {
+            py = &D_800A6038.y.p.whole;
+            px = D_800A6038.h->p.whole;
+            tb = (void *)e;
+        loop:
+            d = px - e[0];
+            l = e[2] - e[0];
+            if ((unsigned short)d <= (short)l
+                && (d = *py - e[1], l = e[3] - e[1], (unsigned short)d <= (short)l)) {
+                goto found;
             }
             i++;
             e = tb[i];
+            if (e[0] == 0xFF) return;
+            goto loop;
         }
+        return;
+    found:
+        o->b6b = i + 1;
+        return;
     } else {
         o->b6b = 0;
     }
