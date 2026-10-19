@@ -1,4 +1,5 @@
 // FUNC 800ee8b0 536 I0NFO2
+// MATCHING 800ee8b0 536
 #include "TOBJ.H"
 #include "raw7.h"
 extern int func_8002DC50(int a, int b, int x, int y);
@@ -14,36 +15,31 @@ extern unsigned char D_800A60A3;
 extern unsigned char D_800A60F8;
 extern short D_800FED54[][4];
 
-static __inline__ short startTalk(TObj *o)
-{
-    short r = 0;
-    short pad[4];
-
-    int a = D_800A60A1;
-    if (a == 2 && (D_800A6066 & 7) == a) {
-        S32(o, 0x90) = func_8002DC50(D_800FED54[o->subtype][0], D_800FED54[o->subtype][1], 0xA0, 0x8C);
-        D_8009D2B0 = 2;
-        D_8009C942 = 1;
-        D_8009C93F = 1;
-        D_800A603C = 4;
-        *(short *)0x1F8001C6 = 0;
-        D_800A60F8 = 0;
-        D_800A603D = 6;
-        D_800A603E = 0;
-        o->state++;
-        r = 1;
-    }
-    return r;
-}
-
 void func_800EE8B0(TObj *o)
 {
     TObj *p;
+    short r;
+    short pad[4];
     o->visible = D_800A60A3 == 0;
     switch (o->state) {
     case 0:
+        r = 0;
         if (o->b68 != 0) {
-            if (!startTalk(o)) {
+            int a = D_800A60A1;
+            if (a == 2 && (D_800A6066 & 7) == a) {
+                S32(o, 0x90) = func_8002DC50(D_800FED54[o->subtype][0], D_800FED54[o->subtype][1], 0xA0, 0x8C);
+                D_8009D2B0 = 2;
+                D_8009C942 = 1;
+                D_8009C93F = 1;
+                D_800A603C = 4;
+                *(short *)0x1F8001C6 = 0;
+                D_800A60F8 = 0;
+                D_800A603D = 6;
+                D_800A603E = 0;
+                o->state++;
+                r = 1;
+            }
+            if (!r) {
                 o->state = 2;
             }
         }
