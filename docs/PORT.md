@@ -14,11 +14,14 @@ through the title screen into gameplay in AREA00 (see "Milestone M1" below):
 python3 tools/build_full.py -j 4                # once: the port takes retail addresses from it
 cmake -S port -B build/port -G Ninja && cmake --build build/port -j 8
 build/port/tombi --frames 500                   # from the repo root; reads game/MAIN0.EXE + game/disc/Tombi.bin
-#   options: --exe PATH --disc PATH(.bin raw 2352 or .iso) --frames N --realtime (50 Hz) --autostart N -v [-v]
+#   options: --exe PATH --disc PATH(.bin raw 2352, .cue naming the .bin, or .iso) --frames N
+#            --realtime [--hz 50|60] (paced; 50 = PAL default, 60 = NTSC timing) --autostart N -v [-v]
 #            --pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...  --dump-frames DIR --dump-every N --pipe-frames FIFO
 #            --no-interp --interp ADDR --trace-interp
 #            --window [--viewer PATH]   SDL2 window + keyboard/controller (needs build/port/tombi-view)
 #            --save FRAME:PATH --load PATH   save states (same binary)
+#            --save-dir DIR   memory cards tombi_mc0.mcd / tombi_mc1.mcd (default: next to the disc image)
+#            --menu FRAME:N   debug: open menu screen N during gameplay (4 = save screen, 5 = load screen)
 build/port/tombi --frames 3600 --dump-frames shots --dump-every 100 \
     --pad-script 1000:start,1300:cross:3x45/30,3200:right:400   # title -> new game -> intro dialogue -> walk
 ```
@@ -95,7 +98,7 @@ Screenshots of this run (PNG dumps): the title (frame 1000), the first room (150
   per-area function by name is still linked straight to X000's copy; the full fix is the plan below (compile
   each X0nn's own functions with an `X0nn_` prefix, route those names through thunks, track the resident area,
   e.g. from the load record or `GAME.selectedArea`).
-- The decompiled-but-asm-only functions above (interpreted today), MDEC movies (skipped), memory card (stub).
+- The decompiled-but-asm-only functions above (interpreted today), MDEC movies (skipped).
 - The rest of the register-carried audit: `port/tools/arity_check.py` still lists the call sites; each guess
   that is wrong in some area needs a fixes.txt line.
 
@@ -137,6 +140,25 @@ build/port/tombi --window                    # title -> new game with the keyboa
 build/port/tombi --window --load s.state     # from a save state
 ```
 
+**Memory cards (M1, done): `shims/card.c`.** Two 128 KB raw card images, `tombi_mc0.mcd` and `tombi_mc1.mcd`
+(the layout every emulator reads: 16 blocks of 8 KB, block 0 = header + directory), kept in memory and written
+through to `--save-dir` (default: the directory of the disc image). A missing file starts as a formatted card.
+The save/load screen (`D0SPSUB2`) uses the BIOS card file system, so the shim provides the BIOS event table
+(`OpenEvent`/`TestEvent`/`DeliverEvent`, the card being the only event source), `_card_info`/`_card_load`/
+`_card_clear` that complete at once by raising the "I/O end" event of both the SwCARD and HwCARD classes, and
+`open`/`read`/`write`/`lseek`/`close`/`erase`/`format`/`firstfile`/`nextfile` on `bu00:` / `bu10:` (create must fail
+when the file exists: the game's writer creates, closes, then reopens for writing). The game saves at save
+points (`openMenuScreen(4)` from the "¿Guardar DATOS?" message box); `--menu FRAME:N` opens that screen at a
+vblank for tests. Verified headless: a save written from the save screen
+(`--menu 2000:4 --pad-script 1000:start,1300:cross:3x45/30,2200:cross:3,2300:left,2400:cross:3`) creates
+`BESCES-01331TOMBA-00` (1 block, "SC" title frame), and the title's Continue (`--pad-script
+1000:right,1050:cross,1450:cross:3`) lists it as "Lv.1 Village of All Beginnings".
+
+**Pacing: `--realtime`, `--hz 50|60`.** One vblank every 1/hz s from the host clock (default 50, PAL; 60 gives
+NTSC timing: the game logic runs 20% faster, as on an NTSC console). The audio mix takes 44100/hz samples per
+vblank and the sequencer 1/hz s, so music keeps its tempo. `--window` implies `--realtime` and honours `--hz`.
+Measured: 600 frames take 12.0 s at 50 and 10.0 s at 60.
+
 **Save states: `--save FRAME:PATH`, `--load PATH`** (`runtime/state.c`). A state is PS1 RAM, the scratchpad and
 every writable mapping of the static binary (the runtime's globals, software VRAM, SPU, GTE and the coroutine
 stacks of `threads.c`), taken and restored only from the main loop's vblank wait on the main thread, where the
@@ -161,7 +183,7 @@ The GL backend (VRAM as a texture, CLUT lookup in the shader) is step 2 and reus
 | `runtime/gte.c` | Software GTE: register file, RTPS/RTPT/NCLIP/AVSZ3/4/NCCS/NCCT/MVMVA, flags. |
 | `runtime/main_port.c` | A C translation of `main()` (0x800163F4). It is the only game function still in asm, because Ghidra named it like library code. It also contains the loader and the command line. |
 | `shims/gpu.c` | libgpu and a software GPU: OT walk, GP0 decoder and rasteriser into emulated VRAM, display readout, PNG frame dumps (`--dump-frames`). |
-| `shims/psyq.c`, `pad.c`, `libc.c` | libapi/libetc (events, VSync pacing, callbacks), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), and the libc subset. Sound, MDEC (movies are skipped) and the memory card are silent stubs. |
+| `shims/psyq.c`, `pad.c`, `card.c`, `libc.c` | libapi/libetc (VSync pacing, callbacks), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.cue/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), the memory card (BIOS events and card file system on two .mcd images), and the libc subset. MDEC (movies are skipped) is a silent stub; sound is `sound.c`. |
 | `tools/inventory.py`, `tools/arity_check.py` | The inventory below and the list of "register-carried argument" calls. |
 
 The prototype is i386 because the game's structures hold 32-bit pointers. The build machine has no 32-bit libc,
@@ -268,8 +290,8 @@ Plan:
 The game runs its logic in tasks woken by `ThreadTableRun` once per main-loop pass. The pass waits on the
 VBlank counter (`0x1F8001E8 < 0x1F8001EA`), so on PAL it runs at 50 Hz or 25 Hz.
 
-1. **M1: correct pacing.** Run the main loop at 50 Hz (PAL) or 60 Hz (NTSC timing option) from a host timer
-   (`--realtime`), with input sampled per VBlank. The game logic stays untouched.
+1. **M1: correct pacing (done).** Run the main loop at 50 Hz (PAL) or 60 Hz (NTSC timing option) from a host timer
+   (`--realtime --hz 50|60`), with input sampled per VBlank. The game logic stays untouched.
 2. **M5: interpolated rendering at the display rate.** Keep the simulation at its native tick and render extra
    frames in between:
    - Snapshot what the renderer needs after each logic tick. These are object positions and rotations (TObj
@@ -442,7 +464,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 |---|---|---|---|
 | M0 | Headless prototype (**done**) | All MAIN0+X000 C compiled for the host, retail-image data model, thunks, coroutine tasks, software GTE, CD reads, pad buffers; boots to the title overlay | done |
 | M1a | Title + AREA00 (**done**) | SYSTEM overlay set with dispatch, MIPS interpreter fallback, automatic register-carried arguments, scripted pad, raw-video pipe; title screen, new game, first room, dialogue, walking | done |
-| M1 | Window + input + pacing (**done** except `.cue` parsing and memory card files) | SDL2 window in a host-native viewer process (`--window`), keyboard and game controller, 50 Hz pacing, audio through SDL; save states (`--save`/`--load`); still to do: `.cue` parsing, memory card files, 60 Hz option | done |
+| M1 | Window + input + pacing (**done**) | SDL2 window in a host-native viewer process (`--window`), keyboard and game controller, 50/60 Hz pacing (`--hz`), audio through SDL; save states (`--save`/`--load`); `.cue` sheets as `--disc`; memory cards as 128 KB `.mcd` files | done |
 | M2 | Software renderer | GP0 decoder + rasteriser (textured/gouraud/semi-transparent/dither), display area from DISPENV; the boot logo and AREA00 visible | 2–3 weeks |
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
