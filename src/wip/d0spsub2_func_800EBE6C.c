@@ -55,8 +55,8 @@ void func_800EBE6C(int t, short x, short y, int bright)
             S->u0 = 0x50;
             S->v0 = 0x18;
         } else {
-            S->v0 = 0x18;
             S->u0 = *q * 8;
+            S->v0 = 0x18;
         }
         S->w = 8;
         S->h = 8;
