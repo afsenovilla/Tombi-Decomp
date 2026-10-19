@@ -1,5 +1,5 @@
 // FUNC 800e89f8 4280 D0SPSUB
-// wip: 24 differing insns (0x84 load order, tbl index add order, 0xB add order)
+// wip: 11 differing insns (case 0x84 tail sched, base+index addu operand order x4)
 typedef struct { unsigned short a, b; } Pal;
 typedef struct {
     unsigned char b0, p1, b2, b3;
@@ -247,8 +247,8 @@ int func_800E89F8(int item)
             D_8009CD9D = 0x3C;
             D_8009CD9E = 0x3C;
             D_8009C984 |= 0x40;
-            PLAYER.w08 = D_8007A024[GAME.b30].a;
             PLAYER.wc4 = D_8007A024[D_8009D2B0[3]].b;
+            PLAYER.w08 = D_8007A024[GAME.b30].a;
             GCD.bcffb = 1;
             playSFX(0x19);
             return 1;
