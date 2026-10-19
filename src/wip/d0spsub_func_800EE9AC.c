@@ -1,5 +1,5 @@
 // FUNC 800ee9ac 2956 D0SPSUB
-// wip score 40: loop anim store scheduling, P344[1] load timing (D_8009C960 as struct fixes alias order)
+// wip: 4 differing insns (loop: anim store vs b0a store scheduling)
 typedef struct { short x, y, z, pad; } Pt;
 typedef struct { unsigned char a, b, c, d, e, f; } Link;
 typedef struct { short x, y; } XY;
@@ -45,6 +45,8 @@ extern Save D_8010A1C8, D_1F8000C0;
 extern unsigned short D_1F8001FC;
 extern int D_1F8002EC;
 extern char *D_1F800344;
+extern unsigned char D_8010A44C;
+extern int D_8010A3B8, D_8010A3BC, D_8010A3C0;
 #define P344 (*(char * volatile *)&D_1F800344)
 typedef struct { unsigned short room, sub; } RS;
 extern RS D_8009C960;
@@ -66,9 +68,8 @@ extern int D_8010A4B8;
 extern Vec D_8010A48C, D_8010A4AC;
 extern int D_8010A490, D_8010A494;
 extern short D_8010A3B0, D_8010A3C6, D_8010A3D6, D_8010A45C;
-extern unsigned char D_8010A3A8, D_8010A3AA, D_8010A3AB, D_8010A3B5, D_8010A3B7, D_8010A44C, D_8010A3B4;
-extern Vec D_8010A3B8, D_8010A3D8;
-extern int D_8010A3BC, D_8010A3C0;
+extern unsigned char D_8010A3A8, D_8010A3AA, D_8010A3AB, D_8010A3B5, D_8010A3B7, D_8010A3B4;
+extern Vec D_8010A3D8;
 extern char *D_8010A448;
 extern short D_8011110C, D_80111110, D_80111114, D_801110FC, D_80111104, D_80111108;
 extern unsigned short D_801110F8, D_80111100;
@@ -116,10 +117,10 @@ int func_800EE9AC(Menu *m)
         D_8010A2D4[1].b0d = 1;
         D_8010A2D4[1].b0f = 0;
         D_8010A2D4[1].w2e = 1;
-        D_8010A2D4[1].ba4 = 1;
-        D_8010A2D4[1].p.s.x = 0;
-        D_8010A2D4[1].p.s.y = 0;
-        D_8010A2D4[1].p.s.z = 0;
+        D_8010A44C = 1;
+        D_8010A3B8 = 0;
+        D_8010A3BC = 0;
+        D_8010A3C0 = 0;
         D_8010A2D4[1].da0 = *(char **)0x1F800344 + ((int *)D_1F800344)[1];
         D_8010A2D4[1].q.v = D_8010A2D4[1].p.v;
         D_8010A2D4[1].b0c = 0;
