@@ -22,7 +22,9 @@ void func_800EE26C(TObj *o)
     o->b6b = 0;
     a = &D_800EE93C[o->b0c];
     if (a->on != 0) {
-        if ((unsigned short)(U16(D_800A6078, 2) - a->x) < a->w
+        unsigned short *hp = (unsigned short *)D_800A6078;
+        do { } while (0);
+        if ((unsigned short)(hp[1] - a->x) < a->w
             && (unsigned short)(D_800A604E - a->y) < a->h) {
             o->b6b = 1;
             o->visible = 1;
