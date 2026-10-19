@@ -22,6 +22,7 @@ build/port/tombi --frames 500                   # from the repo root; reads game
 #            --save FRAME:PATH --load PATH   save states (same binary)
 #            --save-dir DIR   memory cards tombi_mc0.mcd / tombi_mc1.mcd (default: next to the disc image)
 #            --menu FRAME:N   debug: open menu screen N during gameplay (4 = save screen, 5 = load screen)
+#            -v -v prints every pad read ("[pad] frame F: game reads MASK"), -v -v -v the player x,y every vblank
 build/port/tombi --frames 3600 --dump-frames shots --dump-every 100 \
     --pad-script 1000:start,1300:cross:3x45/30,3200:right:400   # title -> new game -> intro dialogue -> walk
 ```
@@ -576,6 +577,8 @@ Pending:
   y<-0x95) is the hut: running jump from x~965 onto the lower bush (1100,-99), jump onto the balcony with the
   pink villager (1095,-147); the next ledge is the collision plane-1 floor at x 1096..1176, y -212 (player y
   -232), 7 px above Tombi's jump (peak -225 from the balcony); not solved (grab, bush bounce or another object).
+  **The 7 px are not a port bug** (checked this round, see "Pad input and jump arc" below): the port's jump arc is
+  the emulator's frame by frame, so the real game cannot reach the ledge with a plain jump either.
   sec 2 (above sec 1, reached by the trunk at x~2290 and the ledge with the white egg) has no static floor between
   y -500 and the house platform at -1360 (x 2064..2688): the climb is on objects (stone pillars at (2909,-432),
   a beam at (3040..3125,-619), a net, a vine); thorns at x>=3119 hurt; not solved either. `port/tools/colmap.py`
@@ -592,3 +595,40 @@ Pending:
 - Talk button crash fixed on the way: `playerTryTalkToNpc` reads its counter through a second name of the same
   address (`D_1F80019Es`), which gcc kept in a register; such names are now declared volatile by the generator.
 - Sound: reverb, libsnd details (voice priorities, NRPN loop counts); an SDL audio callback once there is a window.
+
+### Pad input and jump arc (checked)
+
+- **Scripted pad delivery is exact.** `readPadPort` runs once per vblank from `updatePadInput` (the game's main task,
+  `ThreadWaitFrames(1)`), and `port_pad_vblank` fills the PadInitDirect buffer before the vsync callback of the same
+  vblank, as the libpad driver does in the vblank interrupt. `-v -v` prints each read; a press held N vblanks is read N
+  times in the title menu, in the memory card slot screen (title -> LOAD -> slot) and in the in-game save screen:
+  ```
+  build/port/tombi --frames 1700 -v -v --pad-script 1000:right:3,1050:start:3,1300:right:3,1400:left:1,1500:right:8,1600:left:8
+  build/port/tombi --frames 2100 -v -v --menu 1700:4 --pad-script 1000:start:3,1300:cross:3,1600:cross:3,1800:right:3,1900:left:1,2000:right:8
+  ```
+  Right/Left of 3, 1 and 8 vblanks each move the slot cursor (frame dumps checked). The earlier observation (a 3-frame
+  press not registering in the save prompt) was not reproducible; the one real hole was in `--window`: the viewer
+  sampled the key state once per frame, so a tap shorter than a frame was never sent, and the game kept only the last
+  sample drained in a vblank. Now the viewer latches a key or controller button pressed since its last sample
+  (`tapped`), and `port_window_poll_pad` ORs every sample drained in the vblank into that vblank's state. Checked under
+  Xvfb with xdotool (`Xvfb :77 &`, `DISPLAY=:77 build/port/tombi --window --realtime -v -v ...`, then `xdotool key Right`,
+  `xdotool keydown Left; sleep 0.2; xdotool keyup Left`): a 12 ms tap is read once, a 200 ms hold 10 times, a 30 ms
+  tap 3 times.
+- **Jump arc = emulator.** `python3 port/tools/jumpcheck.py out.txt` plays, in tools/psxemu, a new game, the opening
+  dialogue (`capture.TALK`) and three jumps in AREA00 sec 0 (standing; running; Cross held 30 vblanks) and logs the
+  player x,y per frame. The same inputs in the port (Start at vblank 1000, the emulator's script offsets added):
+  ```
+  build/port/tombi --frames 3340 -v -v -v --pad-script 1000:start:4,1504:cross:3x4/33,1736:select:3,1859:cross:3x18/43,\
+      2693:cross:3x4/33,2915:cross:3,3008:right:40,3048:right+cross:3,3051:right:90,3171:right:40,3211:right+cross:30,3241:right:60
+  ```
+  Both give y = -52,-56,-60,-63,-67,-70,-74,-77,-79,-82,-84,-86,-88,-90,-91,-92,-93,-94 (4 frames) ... -51,-52 for the
+  standing jump (peak 42 px, 37 vblanks in the air), the identical running arc (-48 -> -90, x 123 -> 221), and with Cross
+  held 66 px (-53 -> -118) onto the first tree at x 242; the emulator's trace only differs by single-frame glitches of
+  its own (it slices vblanks by instruction count). So the port's physics (software GTE, fixed point, vblank pacing)
+  match, and the sec0 hut ledge (85 px above the balcony vs the 78 px full jump) is not reachable by jumping in the
+  real game either; the legit AREA00 route still needs another mechanic (a grab, a bounce or an object) or the sec2
+  object climb. Not solved this round.
+- Observation, not fixed: a run continued from a `--save` state taken in sec 0 (frame 3160, Tombi idle at x 227) does not
+  replay like the uninterrupted run: holding Right from 3180 leaves Tombi at 227, caught by the pig that charges at the
+  tree, while the fresh run walks on. Something the pig's behaviour depends on (a random seed or a counter) is probably
+  held in native static memory outside the state; worth checking before trusting state-based probes.
