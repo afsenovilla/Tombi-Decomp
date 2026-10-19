@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-15",
+  "date": "2026-10-19",
   "totals": {
     "lib": 100816,
     "named": 489900,
@@ -314,47 +314,47 @@
     "D0SPSUB": {
       "game": 37156,
       "n": 59,
-      "matched": 16956,
-      "n_matched": 46,
+      "matched": 18136,
+      "n_matched": 48,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 20200,
-      "n_new": 13,
+      "new": 19020,
+      "n_new": 11,
       "uniq": 36172,
-      "uniq_matched": 15972,
+      "uniq_matched": 17152,
       "n_uniq": 55,
-      "n_uniq_matched": 42
+      "n_uniq_matched": 44
     },
     "D0SPSUB2": {
       "game": 20004,
       "n": 31,
-      "matched": 11432,
-      "n_matched": 26,
+      "matched": 12244,
+      "n_matched": 27,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 8572,
-      "n_new": 5,
+      "new": 7760,
+      "n_new": 4,
       "uniq": 19784,
-      "uniq_matched": 11212,
+      "uniq_matched": 12024,
       "n_uniq": 29,
-      "n_uniq_matched": 24
+      "n_uniq_matched": 25
     },
     "D0SPSUB3": {
       "game": 25324,
       "n": 46,
-      "matched": 12616,
-      "n_matched": 38,
+      "matched": 13164,
+      "n_matched": 39,
       "piece": 0,
       "x000": 0,
       "dup": 8288,
-      "new": 4420,
-      "n_new": 3,
+      "new": 3872,
+      "n_new": 2,
       "uniq": 5920,
-      "uniq_matched": 1500,
+      "uniq_matched": 2048,
       "n_uniq": 10,
-      "n_uniq_matched": 7
+      "n_uniq_matched": 8
     },
     "G0OVER": {
       "game": 3152,
@@ -389,17 +389,17 @@
     "I0NFO2": {
       "game": 90280,
       "n": 196,
-      "matched": 54752,
-      "n_matched": 166,
+      "matched": 55072,
+      "n_matched": 167,
       "piece": 0,
       "x000": 0,
       "dup": 4932,
-      "new": 30596,
-      "n_new": 27,
+      "new": 30276,
+      "n_new": 26,
       "uniq": 75460,
-      "uniq_matched": 44864,
+      "uniq_matched": 45184,
       "n_uniq": 154,
-      "n_uniq_matched": 127
+      "n_uniq_matched": 128
     },
     "I0NFO3": {
       "game": 26692,
