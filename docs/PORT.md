@@ -499,10 +499,23 @@ Done:
   the interpreted function and pc.
 
 Pending:
-- Walking AREA00 -> next area with --pad-script not achieved yet. Findings: sections 0/1/2 of AREA00 are one map
-  (updateA00L5Type11: sec0 -> sec1 at x>=0x4ED,y<-0x95; sec1 exit 1 at x>=0x938,y>=-0x64 -> AREA02; sec1 -> sec2 at
-  x>=0x9DD,y<-0x18F); sec3 (elder's house, FUN_801175a4) exit 1 at x>=0x12B,y<-0xDB -> AREA01, right side -> sec2.
-  From the house: `1000:start,1200:down,1220:right:2x3/8,1350:circle,1900:cross:3x40/30,2300:cross:3x40/30,
-  2700:right:400,3100:cross+right:30x8/60,3600:right:1500` with `--poke 900:1F8001B4:1` reaches sec1 x=2239, where a
-  blue egg blocks the way to the AREA02 exit.
+- **Walking AREA00 -> AREA02 (with one progress flag poked).** Sections 0/1/2 of AREA00 are one map
+  (updateA00L5Type11: sec0 -> sec1 at x>=0x4ED,y<-0x95; sec1 exit 0 at x>=0xA46,y>=-0x122; sec1 exit 1 (the tree
+  hollow) at x>=0x938,y>=-0x64 only when `0x8009CFED == 1`; sec1 -> sec2 at x>=0x9DD,y<-0x18F; sec2 exit 1 at
+  y<-0x559,x<0x88C on plane 0x1C2); sec3 (elder's house, FUN_801175a4) exit 1 at x>=0x12B,y<-0xDB, exit 0 at
+  x>=0x157,y>=-0x38. The exits fire as soon as the position test passes (tryStartItemInteraction needs no button).
+  This run starts in the elder's house from the debug select, plays the elder's dialogue and event (the game drops
+  Tombi into sec2), walks down to the blue egg in sec1, climbs the trunk, grabs the egg (lands on it) and throws it,
+  and walks into the hollow; the hollow's flag (set by I0NFO3 `func_800E86AC`, i.e. later in the game) is poked:
+  ```
+  build/port/tombi --frames 6500 -v --poke 900:1F8001B4:1 --poke 4000:8009CFED:1 --pad-script 1000:start,1200:down,\
+  1220:right:2x3/8,1350:circle,1900:cross:3x40/30,2300:cross:3x40/30,2700:right:400,3100:cross+right:30x8/60,\
+  3600:right:100,3750:cross:25,3760:right:30,3850:square:5x20/40,3900:cross:25x10/50,4450:right:400
+  ```
+  The door transition loads AREA02 section 3 at frame 4563 (its I0NFO3 overlay, the same files as the debug select)
+  and shows the "CLEAR 2000" event banner. Without the poke: exit 0 of sec1 (x>=0xA46 at ground level) is behind the
+  hollow, the upper path leads into sec2, and in sec0 a purple bush at x=1100 blocks the way to the right; the
+  elder's house exit 1 (to AREA01, high up) needs the house entered from outside after the event.
+- Talk button crash fixed on the way: `playerTryTalkToNpc` reads its counter through a second name of the same
+  address (`D_1F80019Es`), which gcc kept in a register; such names are now declared volatile by the generator.
 - Sound: reverb, libsnd details (voice priorities, NRPN loop counts); an SDL audio callback once there is a window.
