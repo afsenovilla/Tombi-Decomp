@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip score 286 (26 differing insns)
+// wip score 282 (22 differing insns): else-branch k=0 dup, printInfoMessage(0x18) reload, t[1]/3 regs, alloc arg 0xE placement
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -90,7 +90,7 @@ int func_800ED0C4(Menu *m)
                     D_8009D1A4.mode = md;
                     {
                         for (j = 0; j < 5; j++) {
-                            unsigned char c = D_800FFD84[md][j];
+                            int c = D_800FFD84[md][j];
                             for (i = 0; i < 0x11E; i += 2) {
                                 if (D_800FFC64[i] == c && D_8009D0A4[D_800FFC64[i + 1]]) {
                                     D_8009D1A4.items[k++] = D_800FFC64[i + 1];
@@ -107,7 +107,7 @@ int func_800ED0C4(Menu *m)
                     {
                         md = D_8009D1A4.mode;
                         for (j2 = 0; j2 < 5; j2++) {
-                            unsigned char c = D_800FFD84[md][j2];
+                            int c = D_800FFD84[md][j2];
                             for (i2 = 0; i2 < 0x11E; i2 += 2) {
                                 if (D_800FFC64[i2] == c && D_8009D0A4[D_800FFC64[i2 + 1]]) {
                                     D_8009D1A4.items[k++] = D_800FFC64[i2 + 1];
