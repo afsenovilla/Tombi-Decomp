@@ -40,8 +40,9 @@ extern char *strncpy(char *d, const char *s, int n);
 int func_800E82A4(Menu *m, Card *c)
 {
     int i, j, n;
-    short t;
+    int t;
     int tries;
+    unsigned char *g;
     short y;
     unsigned short btn;
     switch (m->sub) {
@@ -247,14 +248,15 @@ int func_800E82A4(Menu *m, Card *c)
         m->sub++;
         break;
     case 10:
+        g = &D_8009CF1C;
         tries = 3;
         strcpy(D_800F7098, D_800F6A3C[m->card]);
         strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
         do {
             if (func_800ECCC8(D_800F7098, D_800E1E28, 0, 0xC00) == 0 && (func_800EA118(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
                 *(BGame *)D_8009C960 = *(BGame *)(D_800E1E28 + 0x200);
-                D_8009CF1C = D_8009F3DC;
-                D_8009C970 = D_8009C971;
+                g[0] = D_8009F3DC;
+                g[-0x5AC] = g[-0x5AB];
                 m->msg = 15;
                 m->sub = 17;
                 m->timer = 0x28;
