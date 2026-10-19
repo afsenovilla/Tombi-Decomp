@@ -1,4 +1,5 @@
 // FUNC 800edf08 548 D0SPSUB3
+// MATCHING 800edf08 548
 typedef struct {
     unsigned char state, b1, b2, b3;
     char p4[0xc];
@@ -31,6 +32,7 @@ void func_800EDF08(void)
     Menu *m = &D_800A45D8;
     int pages;
     Slot *s;
+    short end;
     func_800E9DF8(m);
     if (D_80100918 >= 0) func_800EBE8C(m);
     pages = (D_8009D2A4 + 9) / 10;
@@ -48,13 +50,14 @@ void func_800EDF08(void)
                 D_80100B76 = 0x7C15;
                 D_80100B74[0] = m->w10 + s->dw;
                 D_80100B78 = m->icons[s->idx];
-                s++;
                 func_800EB24C(1);
+                s++;
             }
         }
     }
+    end = -1;
     D_80100B76 = 0x7812;
-    for (s = D_801007BC; s->x != -1; s++) {
+    for (s = D_801007BC; s->x != end; s++) {
         D_80100B70[0] = s->x;
         D_80100B72[0] = s->y;
         D_80100B74[0] = m->w10 + s->dw;
