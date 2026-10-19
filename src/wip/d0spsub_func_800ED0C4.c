@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip score 294
+// wip score 222
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -42,11 +42,15 @@ int func_800ED0C4(Menu *m)
 {
     int pages;
     int i, j, j2, k;
+    unsigned short md;
     switch (m->state) {
     case 0:
         m->cursor = 0;
         m->page = 0;
-        for (i = 0; i < D_8009D1A4.count; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
+        {
+            int n;
+            for (n = 0; n < D_8009D1A4.count; n++) D_8010A0C8[n] = D_8009D1A4.items[n];
+        }
         m->state++;
     case 1:
         if (func_800EC504(m, 1)) return 0;
@@ -79,11 +83,13 @@ int func_800ED0C4(Menu *m)
                 }
                 break;
             case 2:
-                if (D_8009D1A4.mode & 0x8000) {
-                    D_8009D1A4.mode &= 0x7FFF;
-                    k = 0;
+                k = 0;
+                md = D_8009D1A4.mode;
+                if (md & 0x8000) {
+                    md &= 0x7FFF;
+                    D_8009D1A4.mode = md;
                     {
-                        unsigned char *q = D_800FFD84[D_8009D1A4.mode];
+                        unsigned char *q = D_800FFD84[md];
                         for (j = 0; j < 5; j++) {
                             unsigned char c = q[j];
                             for (i = 0; i < 0x11E; i += 2) {
@@ -93,7 +99,7 @@ int func_800ED0C4(Menu *m)
                             }
                         }
                     }
-                    for (i = 0; i < D_8009D2A4; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
+                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
                 } else {
                     if (++D_8009D1A4.mode >= 4) {
                         D_8009D1A4.mode = 0;
@@ -110,7 +116,7 @@ int func_800ED0C4(Menu *m)
                             }
                         }
                     }
-                    for (i = 0; i < D_8009D2A4; i++) D_8010A0C8[i] = D_8009D1A4.items[i];
+                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
                 }
                 break;
             case 4:
@@ -179,11 +185,14 @@ int func_800ED0C4(Menu *m)
             if (r) {
                 if (D_80111128 == 7 || D_80111128 == 14) {
                     D_8010A058 = 0;
-                    k = 0;
-                    for (i = 0; i < 9; i++) {
-                        if (D_8009D2C4[i]) D_8010A068[k++] = i;
+                    {
+                    int n, z;
+                    z = 0;
+                    for (n = 0; n < 9; n++) {
+                        if (D_8009D2C4[n]) D_8010A068[z++] = n;
                     }
-                    D_8010A05C = k;
+                    D_8010A05C = z;
+                    }
                     D_8010A060 = -1;
                     SfxPlay2(10, 10);
                     m->sub = 0;
