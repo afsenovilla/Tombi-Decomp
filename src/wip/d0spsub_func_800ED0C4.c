@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip: 15 differing insns, all in case-3 confirm block (const 3 / 14 / t[1] regs + store order)
+// wip: 11 differing insns, case-3 confirm block only (volatile 0x8009/0x800A globals keep store order; const 3/14 placement, andi from char readback)
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -23,9 +23,9 @@ extern short D_8010A068[], D_8010A088[];
 extern unsigned char D_8010A200[];
 extern unsigned char D_8010A204;
 extern int D_80111128;
-extern unsigned char D_80111134, D_80111138;
-extern short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern unsigned char D_8009D2B0, D_800A6038, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
+extern char D_80111134, D_80111138;
+extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
+extern volatile unsigned char D_8009D2B0, D_800A6038, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
 extern int func_800EC504(Menu *m, int n);
 extern int func_800ECA28(Menu *m);
 extern int func_800ECBF0(Menu *m, int n);
@@ -42,7 +42,7 @@ int func_800ED0C4(Menu *m)
 {
     int pages;
     int i, j, j2, k;
-    int z, n; int i2;
+    int c14; int z, n; int i2;
     unsigned short md;
     switch (m->state) {
     case 0:
@@ -316,9 +316,9 @@ int func_800ED0C4(Menu *m)
                 t = D_800FFC3C[i1] + i2 * 2;
                 {
                 int a, b;
-                D_80111134 = a = t[0];
-                b = t[1];
-                D_8009CD94 = a;
+                D_80111134 = t[0];
+                D_80111138 = t[1];
+                D_8009CD94 = D_80111134;
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
                 D_8009D2B0 = 3;
@@ -327,7 +327,7 @@ int func_800ED0C4(Menu *m)
                 D_800A6038 = 3;
                 D_8009C940 = 1;
                 D_8009C941 = D_80111128;
-                D_8009CD96 = D_80111138 = b;
+                D_8009CD96 = D_80111138;
                 }
                 if (D_80111128 == 14) {
                     Obj *o = allocObjectLayer2();
