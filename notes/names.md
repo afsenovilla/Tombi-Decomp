@@ -1303,4 +1303,4 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
     dark tunic with small blue bat wings carrying a trident: flying, hovering, throwing the trident (the "shot" object), tumbling when hit.
   - x011 `80116fa8 updateFlyingOctopus` / `80116e54 flyingOctopusMove` (were updatePatrollingFlyer / patrollingFlyerMove): the strip is a pink
     one-eyed octopus that floats with dangling tentacles and lashes them out.
-  - fix: x011 updateFactoryNpc called itself in the C (ncheck DIFF); the callee at 80119498 is stepFactoryNpcTalk (also fixed in config/symbol_addrs_x011.txt).
+  - fix: x011 updateFactoryNpc called itself in the C (ncheck DIFF); the callee at 80119498 is stepFactoryNpcTalk.
