@@ -61,7 +61,7 @@ static __inline__ void spawn2(TObj *o, unsigned short *q)
     o->step++;
 }
 
-void updateHornedEnemySpawner(TObj *o)
+void updateSpikyLizardSpawner(TObj *o)
 {
     TObj *p = &PLAYER;
     switch (o->b04) {

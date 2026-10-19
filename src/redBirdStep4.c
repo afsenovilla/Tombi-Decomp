@@ -32,7 +32,7 @@ static __inline__ int check(TObj *o)
     return x;
 }
 
-void a00L2Type08Step4(TObj *o)
+void redBirdStep4(TObj *o)
 {
     switch (o->substep) {
     case 0:

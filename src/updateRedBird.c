@@ -24,13 +24,13 @@ extern unsigned FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);
 extern short FUN_8005e420(int, int);
 extern void freeObjectLayer2(TObj *);
-extern void a00L2Type08Step0(TObj *);
-extern void a00L2Type08Step1(TObj *);
-extern void a00L2Type08Step2(TObj *);
-extern void a00L2Type08Step3(TObj *);
-extern void a00L2Type08Step4(TObj *);
-extern void a00L2Type08Step1B(TObj *);
-extern void a00L2Type08Step1C(TObj *);
+extern void redBirdStep0(TObj *);
+extern void redBirdStep1(TObj *);
+extern void redBirdStep2(TObj *);
+extern void redBirdStep3(TObj *);
+extern void redBirdStep4(TObj *);
+extern void redBirdStep1B(TObj *);
+extern void redBirdStep1C(TObj *);
 extern short probeCollisionAtDepthB(TObj *, short, short);
 extern void applyAnimVelocityXY(TObj *, unsigned short);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -50,7 +50,7 @@ static __inline__ void draw(int a, int b)
     loadTIM(DAT_800d7e28, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
 }
 
-void updateA00L2Type08(TObj *o)
+void updateRedBird(TObj *o)
 {
     int d;
 
@@ -99,24 +99,24 @@ void updateA00L2Type08(TObj *o)
             case 0:
                 switch (o->state) {
                 case 0:
-                    a00L2Type08Step0(o);
+                    redBirdStep0(o);
                     break;
                 case 1:
-                    a00L2Type08Step1(o);
+                    redBirdStep1(o);
                     break;
                 case 2:
-                    a00L2Type08Step2(o);
+                    redBirdStep2(o);
                     break;
                 case 3:
-                    a00L2Type08Step3(o);
+                    redBirdStep3(o);
                     break;
                 case 4:
-                    a00L2Type08Step4(o);
+                    redBirdStep4(o);
                     break;
                 }
                 break;
             case 1:
-                a00L2Type08Step1B(o);
+                redBirdStep1B(o);
                 break;
             }
         } else if (o->b9f == 0) {
@@ -199,7 +199,7 @@ void updateA00L2Type08(TObj *o)
                 EX(o)->ca = 0;
             break;
         case 1:
-            a00L2Type08Step1C(o);
+            redBirdStep1C(o);
             if (FUN_800202b4(o)) {
                 FUN_8001fec0(o);
                 EX(o)->ca = 1;

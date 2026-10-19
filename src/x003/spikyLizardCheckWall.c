@@ -11,7 +11,7 @@ extern short D_8007A1F0[], D_8007A5F0[];
 extern short probeWallAt(O *, int, int, int);
 extern short probeCollisionAtDepthB(O *, short, short);
 
-int hornedEnemyCheckWall(O *o, short k)
+int spikyLizardCheckWall(O *o, short k)
 {
     unsigned short a, b;
     short v;

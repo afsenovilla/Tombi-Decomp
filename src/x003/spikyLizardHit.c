@@ -78,7 +78,7 @@ static __inline__ int Ground(TObj *o)
     } \
 }
 
-void hornedEnemyHit(TObj *o)
+void spikyLizardHit(TObj *o)
 {
     X *x = XS(o);
 

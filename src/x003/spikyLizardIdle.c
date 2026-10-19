@@ -34,7 +34,7 @@ static __inline__ void fall(TObj *o)
     }
 }
 
-void hornedEnemyIdle(TObj *o)
+void spikyLizardIdle(TObj *o)
 {
     short *w = &o->wb4;
 

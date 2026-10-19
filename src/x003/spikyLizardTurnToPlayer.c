@@ -12,7 +12,7 @@ extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001fe6c(TObj *);
 
-void hornedEnemyTurnToPlayer(TObj *o)
+void spikyLizardTurnToPlayer(TObj *o)
 {
     switch (o->substep) {
     case 0:

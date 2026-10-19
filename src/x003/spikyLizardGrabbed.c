@@ -147,7 +147,7 @@ static __inline__ void fall(TObj *o)
     }
 }
 
-void hornedEnemyGrabbed(TObj *o)
+void spikyLizardGrabbed(TObj *o)
 {
     short *w = &o->wb4;
     unsigned char t;

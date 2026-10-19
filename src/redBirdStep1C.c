@@ -2,7 +2,7 @@
 // MATCHING 801320a8 204
 // VERSION SLPM_80165 x00 80127D70 204
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL x000 801320A8 (a00L2Type08Step1C.c): notification 1 (PAL 0).
+// Demo version of PAL x000 801320A8 (redBirdStep1C.c): notification 1 (PAL 0).
 #include "TOBJ.H"
 extern void spawnItemNotification(int, int);
 extern void FUN_8001fe6c(TObj *);
@@ -17,7 +17,7 @@ static __inline__ void set_box(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void a00L2Type08Step1C(TObj *o)
+void redBirdStep1C(TObj *o)
 {
     switch (o->state) {
     case 0: {
@@ -57,7 +57,7 @@ static __inline__ void set_box(TObj *o, short a, short b, short c, short d)
     o->box3 = d;
 }
 
-void a00L2Type08Step1C(TObj *o)
+void redBirdStep1C(TObj *o)
 {
     switch (o->state) {
     case 0: {

@@ -8,7 +8,7 @@ extern void *D_80139500[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8001fe6c(TObj *);
 
-void hornedEnemyDefeated(TObj *o)
+void spikyLizardDefeated(TObj *o)
 {
     switch (o->state) {
     case 0:

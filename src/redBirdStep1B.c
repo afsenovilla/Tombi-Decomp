@@ -39,7 +39,7 @@ static __inline__ short hit(TObj *o)
     return 0;
 }
 
-void a00L2Type08Step1B(TObj *o)
+void redBirdStep1B(TObj *o)
 {
     P a, b;
     short *t;

@@ -72,7 +72,7 @@ extern void applyFrameVelocityX(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short isObjectBelowGround(TObj *);
 
-void hornedEnemySubtype3Step(TObj *o)
+void spikyLizardSubtype3Step(TObj *o)
 {
     unsigned char *b;
 

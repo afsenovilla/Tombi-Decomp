@@ -9,7 +9,7 @@ extern void FUN_8001e4f0(int);
 extern unsigned FUN_8001f9e0(void);
 extern void FUN_8001fec0(void *);
 
-void a00L2Type08Step2(unsigned char *o)
+void redBirdStep2(unsigned char *o)
 {
     unsigned short a;
     switch (o[7]) {

@@ -2,7 +2,7 @@
 // MATCHING 80118d8c 228
 extern char *FUN_80018448(void);
 
-void a00L2Type01SpawnChild(char *o, short b, short c, int d)
+void spawnMushroomClusterDebris(char *o, short b, short c, int d)
 {
     int i = 0;
     int cc = c;

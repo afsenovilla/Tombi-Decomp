@@ -8,31 +8,31 @@ typedef struct { short a, b, x, y, z; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 typedef void (*Fn)(TObj *);
 
-extern void hornedEnemySubtype0Step();
-extern void hornedEnemySubtype1Step();
-extern void hornedEnemySubtype2Step();
-extern void hornedEnemySubtype3Step();
+extern void spikyLizardSubtype0Step();
+extern void spikyLizardSubtype1Step();
+extern void spikyLizardSubtype2Step();
+extern void spikyLizardSubtype3Step();
 static Fn D_80135D6C[4] = {
-    (Fn)hornedEnemySubtype0Step, (Fn)hornedEnemySubtype1Step, (Fn)hornedEnemySubtype2Step, (Fn)hornedEnemySubtype3Step,
+    (Fn)spikyLizardSubtype0Step, (Fn)spikyLizardSubtype1Step, (Fn)spikyLizardSubtype2Step, (Fn)spikyLizardSubtype3Step,
 };
 extern unsigned short D_80135D3C[];
 extern int ObjCullRegister(TObj *);
 extern int Rand(void);
 extern short FUN_80040278(TObj *, int, int);
-extern int hornedEnemyCheckWall(TObj *, int);
-extern void hornedEnemyLand(TObj *);
-extern void hornedEnemyIdle(TObj *);
-extern void hornedEnemyWalk(TObj *);
-extern void hornedEnemyRun(TObj *);
-extern void hornedEnemyTurnToPlayer(TObj *);
-extern void hornedEnemyHit(TObj *);
-extern void hornedEnemyGrabbed(TObj *);
-extern void hornedEnemyDefeated(TObj *);
+extern int spikyLizardCheckWall(TObj *, int);
+extern void spikyLizardLand(TObj *);
+extern void spikyLizardIdle(TObj *);
+extern void spikyLizardWalk(TObj *);
+extern void spikyLizardRun(TObj *);
+extern void spikyLizardTurnToPlayer(TObj *);
+extern void spikyLizardHit(TObj *);
+extern void spikyLizardGrabbed(TObj *);
+extern void spikyLizardDefeated(TObj *);
 extern void despawnObjectOffscreen(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern int isObjectInView(TObj *);
 
-void updateHornedEnemy(TObj *o)
+void updateSpikyLizard(TObj *o)
 {
     Q *q = (Q *)&o->wb4;
     short yy;
@@ -77,19 +77,19 @@ void updateHornedEnemy(TObj *o)
             case 1:
                 switch (o->state) {
                 case 0:
-                    hornedEnemyLand(o);
+                    spikyLizardLand(o);
                     break;
                 case 1:
-                    hornedEnemyIdle(o);
+                    spikyLizardIdle(o);
                     break;
                 case 2:
-                    hornedEnemyWalk(o);
+                    spikyLizardWalk(o);
                     break;
                 case 3:
-                    hornedEnemyRun(o);
+                    spikyLizardRun(o);
                     break;
                 case 4:
-                    hornedEnemyTurnToPlayer(o);
+                    spikyLizardTurnToPlayer(o);
                     break;
                 }
                 break;
@@ -115,7 +115,7 @@ void updateHornedEnemy(TObj *o)
                     if (o->wac != 0x1e && q->b == 0) {
                         if (o->w7a) o->d30--;
                         else o->d30++;
-                        if (hornedEnemyCheckWall(o, o->w7a)) {
+                        if (spikyLizardCheckWall(o, o->w7a)) {
                             if (o->w7a) o->d30++;
                             else o->d30--;
                         }
@@ -149,14 +149,14 @@ void updateHornedEnemy(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            hornedEnemyHit(o);
+            spikyLizardHit(o);
             if (!o->visible) despawnObjectOffscreen(o);
             break;
         case 1:
-            hornedEnemyGrabbed(o);
+            spikyLizardGrabbed(o);
             break;
         case 2:
-            hornedEnemyDefeated(o);
+            spikyLizardDefeated(o);
             if (!o->visible) o->b04 = 3;
             break;
         }

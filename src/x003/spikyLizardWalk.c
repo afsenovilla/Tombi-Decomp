@@ -8,7 +8,7 @@ extern int AnimAdvance(TObj *);
 extern int Rand(void);
 extern short isObjectBelowGround(TObj *);
 extern void applyFrameVelocityXY(TObj *);
-extern int hornedEnemyCheckWall(TObj *, short);
+extern int spikyLizardCheckWall(TObj *, short);
 extern void *D_80139500[];
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D54[], D_80135D4C[];
@@ -52,7 +52,7 @@ static __inline__ short near(TObj *o)
     return (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x40) <= lim - 0x40;
 }
 
-void hornedEnemyWalk(TObj *o)
+void spikyLizardWalk(TObj *o)
 {
     short *w = &o->wb4;
     int t;
@@ -110,7 +110,7 @@ void hornedEnemyWalk(TObj *o)
         applyFrameVelocityXY(o);
         AnimAdvance(o);
         SLOPE(o, (short)(o->y.p.whole + 0xe));
-        if (hornedEnemyCheckWall(o, o->animFrame)) {
+        if (spikyLizardCheckWall(o, o->animFrame)) {
             o->substep++;
             if (*w) o->wac = 0xf;
             else o->wac = 0x1e;

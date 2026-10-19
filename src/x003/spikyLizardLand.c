@@ -7,7 +7,7 @@ extern void AnimLoadDuration(TObj *);
 extern void *D_80139578;
 extern unsigned char D_80135CB0[];
 
-void hornedEnemyLand(TObj *o)
+void spikyLizardLand(TObj *o)
 {
     unsigned char *p;
     short yy;

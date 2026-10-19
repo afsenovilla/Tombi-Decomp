@@ -9,7 +9,7 @@ extern void decreaseObjectTimer(unsigned char *, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern unsigned char DAT_1f8001a4;
 
-void hornedEnemyContact(unsigned char *a, unsigned char *b)
+void spikyLizardContact(unsigned char *a, unsigned char *b)
 {
     short r = objectBoxOverlapSideFacing(a, b);
     if (r == -1)

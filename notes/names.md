@@ -494,7 +494,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `80116d14 updateA00L5Type11` (was FUN_80116d14) - AREA00-only object handler: layer 5 type 0x11 slot (MAIN0 table 8007B354) while AREA00 (X000) is loaded
 - `8011bf68 updateA00L4Type02` (was func_8011BF68) - AREA00-only object handler: layer 4 type 0x2 slot (MAIN0 table 80079D7C) while AREA00 (X000) is loaded
 - `801288b8 updateA00L2Type2C` (was func_801288B8) - AREA00-only object handler: layer 2 type 0x2C slot (MAIN0 table 80077E4C) while AREA00 (X000) is loaded
-- `80132174 updateA00L2Type08` (was FUN_80132174) - AREA00-only object handler: layer 2 type 0x8 slot (MAIN0 table 80077DBC) while AREA00 (X000) is loaded
+- `80132174 updateRedBird` (was FUN_80132174) - AREA00-only object handler: layer 2 type 0x8 slot (MAIN0 table 80077DBC) while AREA00 (X000) is loaded
 - `8011b8c0 updateA00L4Type01` (was FUN_8011b8c0) - AREA00-only object handler: layer 4 type 0x1 slot (MAIN0 table 80079D78) while AREA00 (X000) is loaded
 - `8012d294 updateA00L2Type2B` (was FUN_8012d294) - AREA00-only object handler: layer 2 type 0x2B slot (MAIN0 table 80077E48) while AREA00 (X000) is loaded
 - `8011ec68 updateA00L4Type0A` (was FUN_8011ec68) - AREA00-only object handler: layer 4 type 0xA slot (MAIN0 table 80079D9C) while AREA00 (X000) is loaded
@@ -512,7 +512,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `801224c0 updateA00L7Type01` (was func_801224C0) - AREA00-only object handler: layer 7 type 0x1 slot (MAIN0 table 80079FE8) while AREA00 (X000) is loaded
 - `80134c20 updateA00L2Type15` (was FUN_80134c20) - AREA00-only object handler: layer 2 type 0x15 slot (MAIN0 table 80077DF0) while AREA00 (X000) is loaded
 - `800ed024 updateL4Type00Object` (was FUN_800ed024) - layer 4 type 0x0 handler (MAIN0 table slot 80079D74)
-- `80126fec updateA00L2Type01` (was FUN_80126fec) - AREA00-only object handler: layer 2 type 0x1 slot (MAIN0 table 80077DA0) while AREA00 (X000) is loaded
+- `80126fec updateMushroomCluster` (was FUN_80126fec) - AREA00-only object handler: layer 2 type 0x1 slot (MAIN0 table 80077DA0) while AREA00 (X000) is loaded
 - `80118f90 updateA00PoolType03` (was FUN_80118f90) - AREA00-only object handler: pool type 0x3 slot (MAIN0 table 80079BB8) while AREA00 (X000) is loaded
 - `80118438 updateA00PoolType01` (was FUN_80118438) - AREA00-only object handler: pool type 0x1 slot (MAIN0 table 80079BB0) while AREA00 (X000) is loaded
 - `800edf94 updateL4Type03Object` (was FUN_800edf94) - layer 4 type 0x3 handler (MAIN0 table slot 80079D80)
@@ -553,7 +553,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - updateL2Type18Object steps: `80113f38 l2Type18Active` (b04 1), `801142c0 l2Type18Hit` (b04 2 step 0)
 - Small player/object helpers, mostly with no caller (dead code, named by what they do): `800ee3d4 playerResetMotionState` (clears the D_8009C330 step state and the player velocities/angles), `800ee920 playerShiftDown7C` (y += 0x7C unless +0xAD), `800f29dc playerEnterRecoilA` / `800f369c playerEnterRecoilB` / `800f3eec playerEnterRecoilStep4` (b9c 2, timer 10, state 3, angle 0x10/0xF0 by facing), `800f4e68 playerSetAnimPairA` / `800f4e9c playerSetAnimPairB` (two anim bytes from D_80115220/D_80115228 by wb2 into D_8009C330), `800fb094 playerSetMoveAngleFromW7A`, `800fb414 copyD88ToD8C`, `800fc18c playerClampClimbTop` (top -0x8C or -0x3C0 by GV2.bc3 & 0x40; 2 when GCD.bce3d == 0xFF), `800ff074 getHudExpBarMode` (0..2 from GCD.bcffb / bcdac, 0 in area 0 sections 0-1 or with the exp bar shown), `801049c0 playerResetToStep0`, `80104ea0 playerCheckJumpPressedA` / `80104f2c playerCheckJumpPressedB` (jump/attack button -> substep 2), `80107590 playerEnterStep10Fall`, `80108fe0 playerResetAfterEvent`, `8010e5e4 playerAccelerateUpCapped` (velY -= 0x10 to -0x800), `801128f0 clearObjectB0A`, `801363c4 isPlayerPastX0D8`, `800edc0c stubNop800EDC0C`, `80113cc0 stubNop80113CC0`, `8011379c animAdvanceThunk`
 - `800ea220 initPoolType04Sprite` (sprite/anim PTR_8013B110[subtype]), `800eebc4 playerSetIdleAnimByArea`, `800f0450 objectSinkAndProbe` (y += 2 while b69, then func_8003FD78), `800f434c playerLandResumeWalk` (sfx 0x1C, step 1 or 0x1F by bbe & 0x20), `80103774 playerResetSlopeState`, `8010dd44 playerEnterStep3E` (anim 0x44), `801229d8 playerHitAnimWithImpact` (anim 0xD + spawnImpactEffect 2), `80122990 playerSetSpawnTimerArea0Sec3` (+0x20 = 0x8C in section 3 when the 8009CDA5 flag is set), `80112be0 l2Type0ECheckAreaFlag`, `8011465c l2Type18HitIfStep0`, `80121ae0 a00L4Type26ReleaseParts` (sets b04 2 on the six part objects +0xB4..0xC8)
-- AREA00-only handler steps, named after their updateA00* handler (structural names; the object kinds are not identified): `80118638 a00PoolType01Init` / `8011899c a00PoolType01Step` (with `8011880c a00PoolType01SubStep`), `80118e70 a00PoolType03Step`, `80119988 a00PoolType09Step` / `80119864 a00PoolType09SubStep`, `8011a2f8 spawnPoolType09Child` (spawnPoolType09Object), `8011a418 a00PoolType0AStep`, `8011ac58 a00PoolType14Step4`, `8011b5dc a00PoolType59Talk` (showMessageBox), `80118d8c a00L2Type01SpawnChild` / `80119584 a00L2Type06SpawnChild` (pool allocations), `8011aa30 a00L2Type05Init`, updateA00L2Type08 steps `801307a0 a00L2Type08Step0`, `801308d8 a00L2Type08Step1`, `801319d0 a00L2Type08Step1B`, `801320a8 a00L2Type08Step1C` (box + spawnItemNotification), `80130a38 a00L2Type08Step2`, `80130bb0 a00L2Type08Step3`, `801317e4 a00L2Type08Step4`; `80134190 a00L2Type14Step`, `80134980 a00L2Type15Step1`, `801346c0 a00L2Type15Step3`, `80135b0c a00L2Type57Aim` (angleBetweenPoints) / `80135db0 a00L2Type57Move`; updateA00L4Type18 `80120164 a00L4Type18Step` -> `8011f79c a00L4Type18Idle` / `8011f9e0 a00L4Type18Active` (also collidePlayerWithCat2Objects case 0x29); updateA00L4Type26 `80121124 a00L4Type26Step`, `8012160c a00L4Type26SpawnParts`, `8012171c a00L4Type26Reward` (spawnItemFromEntry); updateFrog `80133254 frogStep0`, `80132f80 frogHop` (AnimJump + applyFrameVelocityX, wall probe)
+- AREA00-only handler steps, named after their updateA00* handler (structural names; the object kinds are not identified): `80118638 a00PoolType01Init` / `8011899c a00PoolType01Step` (with `8011880c a00PoolType01SubStep`), `80118e70 a00PoolType03Step`, `80119988 a00PoolType09Step` / `80119864 a00PoolType09SubStep`, `8011a2f8 spawnPoolType09Child` (spawnPoolType09Object), `8011a418 a00PoolType0AStep`, `8011ac58 a00PoolType14Step4`, `8011b5dc a00PoolType59Talk` (showMessageBox), `80118d8c spawnMushroomClusterDebris` / `80119584 a00L2Type06SpawnChild` (pool allocations), `8011aa30 a00L2Type05Init`, updateRedBird steps `801307a0 redBirdStep0`, `801308d8 redBirdStep1`, `801319d0 redBirdStep1B`, `801320a8 redBirdStep1C` (box + spawnItemNotification), `80130a38 redBirdStep2`, `80130bb0 redBirdStep3`, `801317e4 redBirdStep4`; `80134190 a00L2Type14Step`, `80134980 a00L2Type15Step1`, `801346c0 a00L2Type15Step3`, `80135b0c a00L2Type57Aim` (angleBetweenPoints) / `80135db0 a00L2Type57Move`; updateA00L4Type18 `80120164 a00L4Type18Step` -> `8011f79c a00L4Type18Idle` / `8011f9e0 a00L4Type18Active` (also collidePlayerWithCat2Objects case 0x29); updateA00L4Type26 `80121124 a00L4Type26Step`, `8012160c a00L4Type26SpawnParts`, `8012171c a00L4Type26Reward` (spawnItemFromEntry); updateFrog `80133254 frogStep0`, `80132f80 frogHop` (AnimJump + applyFrameVelocityX, wall probe)
 - `801257f4 komaPigContact` (was FUN_801257f4) - collidePlayerWithCat2Objects type 2 in area 0, the X000 counterpart of the x001/x003/x004 komaPigContact (x004 twin of this one)
 - More collision callbacks (type = the case of the pass; area 0 where the pass switches on the area): `801252b8 playerContactCat4Type06` (with `80124ff4 playerContactCat4Type06Land`), `80126240 playerContactCat2Type06`, `8012555c playerContactCat2Type07` (area 0), `80126698 playerContactCat2Type09`, `80126a64 playerGrabCat4Type06`, `80126d7c pushObjectOutOfCat4Type06` (collideCat2/Cat5WithCat4Objects)
 - updateL1Type0AObject: `8011145c l1Type0AInit`, `80111880 l1Type0AStep` (by subtype: `80111590 l1Type0AStepSub0`, `80111714 l1Type0AStepSub1`); l2Type18Active states `80113888 l2Type18State2`, `80113b6c l2Type18State5`, `80113cc8 l2Type18State7`; `80111dc8 l2Type0ESharedStep` (used by l2Type0EActive1 and l2Type0EHit1)
@@ -1048,9 +1048,9 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   speed 0x80 (subtype 0) or 0x480), `8011f508 throwerEnemyShotContact` (2 points of damage), `8011f634 throwerEnemyContact`; b04 2 steps:
   `8012eb2c throwerEnemyHit` (subtype 1 step 0), `8012f234 throwerEnemyGrabbed` / `8012ef3c throwerEnemyGrabbedB` (step 1 of subtype 0 / 1,
   spawnItemNotification(1, 6)), `8012f3b0 throwerEnemyDefeated`
-- x003 `801281fc updateHornedEnemy` (layer 2 type 0x28, 12 placements; "horned" only from the badly composed strips, uncertain): b04 2 step 0
-  `8012748c hornedEnemyHit`, step 1 `80127d48 hornedEnemyGrabbed` (spawnItemNotification(2, 6), counts the shakes in wb6), step 2 `80128060
-  hornedEnemyDefeated`; `80120140 hornedEnemyContact` (FUN_80047484 type 0x28), `801256f4 hornedEnemyCheckWall` (wall / floor probe 0x18 ahead
+- x003 `801281fc updateSpikyLizard` (layer 2 type 0x28, 12 placements; "horned" only from the badly composed strips, uncertain): b04 2 step 0
+  `8012748c spikyLizardHit`, step 1 `80127d48 spikyLizardGrabbed` (spawnItemNotification(2, 6), counts the shakes in wb6), step 2 `80128060
+  spikyLizardDefeated`; `80120140 spikyLizardContact` (FUN_80047484 type 0x28), `801256f4 spikyLizardCheckWall` (wall / floor probe 0x18 ahead
   along the slope d8c)
 - x001 `80134c00 updateSegmentedCrawler` (layer 2 type 0x13, spawned (not placed), kind uncertain: `80134ee8 initSegmentedCrawler` allocates 3 or 5 more
   layer 2 objects (needs that many free, else frees itself and decrements the spawner count GVARS.p48[5]) and links them as body segments (b0c != 0,
@@ -1155,13 +1155,13 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
 - x003 thrower enemy b04 1 steps (uncertain): `8012d740 throwerEnemyWaitAppear` (random delay while on screen, picks the subtype), subtype 0:
   `8012d914 throwerEnemyRise`, `8012da68 throwerEnemyFlyAcross` (spawns type 0x43); subtype 1: `8012dcac throwerEnemyRiseB`, `8012ddd4
   throwerEnemyWander`, `8012e378 throwerEnemyChase`; `8012d518 throwerEnemyCheckCollide`, `8012d66c throwerEnemyCheckWall`
-- x003 horned enemy b04 1 states (uncertain): `80125834 hornedEnemyLand`, `801259ac hornedEnemyIdle`, `80125cf8 hornedEnemyWalk`, `8012632c
-  hornedEnemyRun`, `80126b68 hornedEnemyTurnToPlayer`; x003 koma pig subtype entries (D_80135C64; uncertain): `80123b20 komaPigStandPose` (anim
+- x003 spiky lizard b04 1 states (uncertain): `80125834 spikyLizardLand`, `801259ac spikyLizardIdle`, `80125cf8 spikyLizardWalk`, `8012632c
+  spikyLizardRun`, `80126b68 spikyLizardTurnToPlayer`; x003 koma pig subtype entries (D_80135C64; uncertain): `80123b20 komaPigStandPose` (anim
   by b0c), `80123c60 komaPigWaitForPlayer`, `801241c0 komaPigWaitForPlayerB`, `80123ea8 komaPigSceneEntry`; `801196f8
   updateTranslucentAnimSprite` (layer 3 type 0x36, ~50 placements: semi-transparent animated sprite, drifting by section through `801191c4
   translucentSpriteDrift` / `801193d0 translucentSpriteDriftB`; uncertain kind)
 - x003 callbacks: func_8004BBC0 grab probes `8011f474 knockDownObjectGrabProbe` (0x22), `8011f38c hitWobbleObjectGrabProbe` (0x24); FUN_80045f00
-  `8011ff64 hornedEnemyWeaponHit` (0x28), `8011f7ec throwerEnemyWeaponHit` (0x38), `8011fa6c komaPigIntroWeaponHit` (FUN_80044d54 for the area 3
+  `8011ff64 spikyLizardWeaponHit` (0x28), `8011f7ec throwerEnemyWeaponHit` (0x38), `8011fa6c komaPigIntroWeaponHit` (FUN_80044d54 for the area 3
   subtype 4 koma pig: removed once GCD.bcdc3); `8011fbb8 areaMechanismsPlayerCollision` (func_80046D58 type 7 in area 3 by subtype), `8011fec8
   areaInitAObjectCollision` (FUN_80046610 type 4 outside area 0; uncertain)
 - `updateAreaCameraHeight` (x001 801165c0, x003 80116f74) - MAIN0 FUN_80029078 per-area tail after loadSectionHeight (area 0 X000 80116758):
@@ -1173,7 +1173,7 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   (step 0; uncertain), `80131e44 soakedPhoenixGuideIntroScene` (section 0 step 0: locks the player at x 0x1B8), `80132960
   soakedPhoenixGuideSection1Scene` (section 1, GCD.bd00a 1 -> 2), `80130990 updateWindPush` (pushes the player with GVARS.s44 in sections 0/1
   until GAME.purifiedAreas & 2), spawners `80130e3c updatePlayerLauncherSpawner` (layer 4 type 0x2E per section), `8013123c
-  updateHornedEnemySpawner` (type 0x28), `801315b0 updateKomaPigSpawner` (type 2)
+  updateSpikyLizardSpawner` (type 0x28), `801315b0 updateKomaPigSpawner` (type 2)
 - x004 black crow perched states (blackCrowPerched state switch; uncertain): 0 `80125420 blackCrowPerchIdle`, 1 `80125554 blackCrowPerchLook`, 2
   `801256a8 blackCrowPerchCaw` (sfx 0x13), 3 `80125818 blackCrowFlyAround`, 4 `80126464 blackCrowWatchPlayer` (entered when the player is within
   +-0x80 on the same depth); callbacks `8011f844 blackCrowWeaponHit` (FUN_80045f00 type 0x1E), `8011f978 countedCollectibleWeaponHit` (0x29),
@@ -1281,8 +1281,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   spawnL2Type32ObjectB` (unreferenced)
 - x003: `80117de4 animateArea3Palettes` (area 3 entry of data_80079B3C; `80118284 loadArea3ClutRows`), `801188fc spawnApAwardNumber`, handlers named by
   table slot (kinds unknown) `80119838 updateL3Type39Object`, `8011992c updateL3Type3EObject` (22 placements), `801287f8 updateL3Type2FObject`,
-  `801251c4 updateL2Type20Object`; updateHornedEnemy subtype table D_80135D6C: `80126d18 hornedEnemySubtype0Step`, `80126e24
-  hornedEnemySubtype1Step`, `80126f38 hornedEnemySubtype2Step` (walks with sfx 0x76), `8012724c hornedEnemySubtype3Step`
+  `801251c4 updateL2Type20Object`; updateSpikyLizard subtype table D_80135D6C: `80126d18 spikyLizardSubtype0Step`, `80126e24
+  spikyLizardSubtype1Step`, `80126f38 spikyLizardSubtype2Step` (walks with sfx 0x76), `8012724c spikyLizardSubtype3Step`
 - x001: spring vine step tables (stepSpringVine; roles uncertain): own D_8013C44C (src/data/x001/D_8013C404.c ptrs_8013C44C) steps 2-4 `8011b164
   springVineStep2`, `8011b624 springVineStep3`, `8011b958 springVineStep4`; rope D_8013C460 steps 1-4 `8011aefc springVineRopeStep1`, `8011b498
   springVineRopeStep2`, `8011b74c springVineRopeStep3`, `8011badc springVineRopeStep4`; `801174b0 selectArea1VisibleModels` (areas 1/7 entry of
@@ -1290,3 +1290,12 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   data_80079B3C entries are per-area script ops, the x003/x009/x010/x014 ones mostly upload CLUTs), `80117de0 updateL8Type06Object` (layer 8 table
   slot 6), `8011832c spawnApAwardNumber`, `8011e40c updateL4Type16Object` (layer 4 type 0x16; `8011e524 l4Type16ObjectStep`)
 - x006: `801167a0 area6ScriptOp` (area 6 entry of data_80079B3C), `80117148 updateL3Type3BObject`
+- Strip-identified renames (tools/anim.py strips of each handler, rendered with the emulated init of tools/objinit.py):
+  - X000 `80132174 updateRedBird` (was updateA00L2Type08, layer 2 type 8, 9 placements in area 0): every animation of the handler draws a red bird
+    with a yellow belly and beak (perched, flapping, gliding, landing; SPR 0x35); its steps `801307a0..801320a8 redBirdStep0..4 / Step1B / Step1C`
+    keep the step numbers (roles not traced).
+  - X000 `80126fec updateMushroomCluster` (was updateA00L2Type01, layer 2 type 1, 108 placements): idle anim D_8013B1CC is a clump of purple
+    mushrooms, D_8013B1D0 (while the player stands on it, b69 == 1, sfx 0x2E/0x2F) the same clump bouncing; when destroyed (b04 2, sfx 0x31)
+    `80118d8c spawnMushroomClusterDebris` (was a00L2Type01SpawnChild) spawns 6 pool objects, the single mushroom stalks of the strip.
+  - x003 `801281fc updateSpikyLizard` and its 16 helpers (were updateHornedEnemy / hornedEnemy*, layer 2 type 0x28): the strip is a blue lizard
+    with a spiked brown/gold shell on its back that walks on all fours, rears up on its hind legs and curls up; "horned" was a guess from the code.
