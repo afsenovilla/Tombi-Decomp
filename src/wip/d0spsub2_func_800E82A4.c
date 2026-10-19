@@ -40,6 +40,7 @@ extern char *strncpy(char *d, const char *s, int n);
 int func_800E82A4(Menu *m, Card *c)
 {
     int i, j, n;
+    short t;
     int tries;
     short y;
     unsigned short btn;
@@ -52,10 +53,9 @@ int func_800E82A4(Menu *m, Card *c)
             break;
         }
         if (m->cursor >= D_800F713C[m->card]) m->cursor = D_800F713C[m->card] - 1;
-        y = m->cursor * 0x28;
-        D_800F70F0 = y;
-        D_800F70F4 = y;
-        D_800F70F8 = y - 0x28;
+        D_800F70F0 = m->cursor * 0x28;
+        D_800F70F4 = D_800F70F0;
+        D_800F70F8 = D_800F70F0 - 0x28;
         if (D_800F70F8 < 0) D_800F70F8 = 0;
         D_8009C977[0] = c->slot[D_800F70FC[m->card][m->cursor]];
         m->sub = 2;
@@ -81,11 +81,10 @@ int func_800E82A4(Menu *m, Card *c)
         D_800F713C[m->card] = n;
         for (i = 0; i < D_800F713C[m->card] - 1; i++) {
             for (j = i + 1; j < D_800F713C[m->card]; j++) {
-                short a = D_800F70FC[m->card][i];
-                short b = D_800F70FC[m->card][j];
-                if ((unsigned char)c->slot[b] < (unsigned char)c->slot[a]) {
-                    D_800F70FC[m->card][i] = b;
-                    D_800F70FC[m->card][j] = a;
+                if ((unsigned char)c->slot[D_800F70FC[m->card][i]] > (unsigned char)c->slot[D_800F70FC[m->card][j]]) {
+                    t = D_800F70FC[m->card][i];
+                    D_800F70FC[m->card][i] = D_800F70FC[m->card][j];
+                    D_800F70FC[m->card][j] = t;
                 }
             }
         }
@@ -110,10 +109,9 @@ int func_800E82A4(Menu *m, Card *c)
                 }
             }
         }
-        y = m->cursor * 0x28;
-        D_800F70F0 = y;
-        D_800F70F4 = y;
-        D_800F70F8 = y - 0x28;
+        D_800F70F0 = m->cursor * 0x28;
+        D_800F70F4 = D_800F70F0;
+        D_800F70F8 = D_800F70F0 - 0x28;
         if (D_800F70F8 < 0) D_800F70F8 = 0;
         D_8009C977[0] = c->slot[D_800F70FC[m->card][m->cursor]];
         m->sub++;
@@ -182,9 +180,9 @@ int func_800E82A4(Menu *m, Card *c)
             btn = D_1F8001FC;
             if (btn & 0x20) {
                 D_800F7148 = 1;
-                goto snd;
+                goto snd5;
             }
-            if (btn & 0x2000) goto cancel;
+            if (btn & 0x2000) goto cancel5;
             if (btn & 0x4000) {
                 SfxPlay2(0xA, 0xA);
                 m->msg = 6;
@@ -192,10 +190,19 @@ int func_800E82A4(Menu *m, Card *c)
             }
             break;
         }
-    else5:
         btn = D_1F8001FC;
-        if (btn & 0x80) goto clr;
-        goto chk;
+        if (btn & 0x80) {
+            D_800F7148 = 0;
+        snd5:
+            playSFX(8);
+            return 0;
+        }
+        if (btn & 0x6000) {
+        cancel5:
+            SfxPlay2(0x1B, 0x1C);
+            m->sub = 2;
+        }
+        break;
     case 6:
         strcpy(D_800F7098, D_800F6A3C[m->card]);
         strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
@@ -267,13 +274,17 @@ int func_800E82A4(Menu *m, Card *c)
         break;
     case 13:
         if (D_800F7148 == 0) {
-            btn = D_1F8001FC;
-            if (btn & 0x20) {
+            if (D_1F8001FC & 0x20) {
                 D_800F7148 = 1;
-                goto snd;
+                playSFX(8);
+                return 0;
             }
-            if (btn & 0x2000) goto cancel;
-            if (btn & 0x4000) {
+            if (D_1F8001FC & 0x2000) {
+                SfxPlay2(0x1B, 0x1C);
+                m->sub = 2;
+                break;
+            }
+            if (D_1F8001FC & 0x4000) {
                 m->msg = 10;
                 m->timer = 4;
                 SfxPlay2(0xA, 0xA);
@@ -281,7 +292,16 @@ int func_800E82A4(Menu *m, Card *c)
             }
             break;
         }
-        goto else5;
+        if (D_1F8001FC & 0x80) {
+            D_800F7148 = 0;
+            playSFX(8);
+            return 0;
+        }
+        if (D_1F8001FC & 0x6000) {
+            SfxPlay2(0x1B, 0x1C);
+            m->sub = 2;
+        }
+        break;
     case 12:
     case 14:
         m->msg = 14;
@@ -289,13 +309,17 @@ int func_800E82A4(Menu *m, Card *c)
         break;
     case 15:
         if (D_800F7148 == 0) {
-            btn = D_1F8001FC;
-            if (btn & 0x20) {
+            if (D_1F8001FC & 0x20) {
                 D_800F7148 = 1;
-                goto snd;
+                playSFX(8);
+                return 0;
             }
-            if (btn & 0x2000) goto cancel;
-            if (btn & 0x4000) {
+            if (D_1F8001FC & 0x2000) {
+                SfxPlay2(0x1B, 0x1C);
+                m->sub = 2;
+                break;
+            }
+            if (D_1F8001FC & 0x4000) {
                 sprintf(D_800F70B8, D_800E810C, (unsigned char)c->slot[D_800F70FC[m->card][m->cursor]]);
                 m->msg = 6;
                 m->timer = 4;
@@ -305,17 +329,12 @@ int func_800E82A4(Menu *m, Card *c)
             }
             return 0;
         }
-        btn = D_1F8001FC;
-        if (btn & 0x80) {
-        clr:
+        if (D_1F8001FC & 0x80) {
             D_800F7148 = 0;
-        snd:
             playSFX(8);
             return 0;
         }
-    chk:
-        if (btn & 0x6000) {
-        cancel:
+        if (D_1F8001FC & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
         }

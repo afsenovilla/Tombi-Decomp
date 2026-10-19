@@ -37,8 +37,7 @@ void func_800E9F5C(int c, int ang, int off, int pal0)
   short an = ang;
   int a;
   pal = pal0;
-  a = (ang + off) & 0xFF;
-  if ((a > 0x40) && (a < 0xC0))
+  if ((((ang + off) & 0xFF) > 0x40) && (((ang + off) & 0xFF) < 0xC0))
   {
     return;
   }
@@ -52,7 +51,7 @@ void func_800E9F5C(int c, int ang, int off, int pal0)
   else
   {
     c = -MulNegSin(ang & 0xFF, 0x5A);
-    a = -MulNegSin(a, 0x5A);
+    a = -MulNegSin((ang + off) & 0xFF, 0x5A);
   }
   MulCosDup(an & 0xFF, 0xFF);
   p = D_1F800164;
