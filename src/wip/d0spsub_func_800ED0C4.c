@@ -1,5 +1,5 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip score 340
+// wip score 294
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -295,9 +295,15 @@ int func_800ED0C4(Menu *m)
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
             } else if (D_1F8001FC & 0x4008) {
-                unsigned char *t = D_800FFC3C[D_8010A068[D_8010A058]] + D_8010A088[D_8010A060] * 2;
+                unsigned char *t;
                 int n;
-                D_8009CD94 = D_80111134 = t[0];
+                int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
+                t = D_800FFC3C[i1] + i2 * 2;
+                {
+                int a, b;
+                D_80111134 = a = t[0];
+                b = t[1];
+                D_8009CD94 = a;
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
                 D_8009D2B0 = 3;
@@ -306,8 +312,8 @@ int func_800ED0C4(Menu *m)
                 D_800A6038 = 3;
                 D_8009C940 = 1;
                 D_8009C941 = D_80111128;
-                D_8009CD96 = D_80111138 = t[1];
-                n = 7;
+                D_8009CD96 = D_80111138 = b;
+                }
                 if (D_80111128 == 14) {
                     Obj *o = allocObjectLayer2();
                     if (o) {
@@ -315,9 +321,10 @@ int func_800ED0C4(Menu *m)
                         o->b2 = 0x54;
                         o->b3 = 1;
                     }
-                    n = 14;
+                    printInfoMessage(14, 1);
+                } else {
+                    printInfoMessage(7, 1);
                 }
-                printInfoMessage(n, 1);
                 D_8010A058 = -1;
                 SfxPlay2(10, 10);
                 return 1;
