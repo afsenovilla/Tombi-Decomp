@@ -1,4 +1,5 @@
 // FUNC 800e9f5c 636 O0PTSUB0
+// wip score 6: only the (w*ang - sin) temp register: game keeps it in v0 then c=s2, a=s1=w+v0
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -34,9 +35,9 @@ void func_800E9F5C(int c, int ang, int off, int pal)
     Glyph *tbl;
     short ch = c;
     short an = ang;
+    unsigned char pl = pal;
     int a;
-    a = (ang + off) & 0xFF;
-    if (a > 0x40 && a < 0xC0) return;
+    if (((ang + off) & 0xFF) > 0x40 && ((ang + off) & 0xFF) < 0xC0) return;
     tbl = D_800EA1D8;
     if ((short)off == -1) {
         int r = MulNegSin(0xE0, 0x5A);
@@ -47,18 +48,18 @@ void func_800E9F5C(int c, int ang, int off, int pal)
         a = w + a;
     } else {
         c = -MulNegSin(ang & 0xFF, 0x5A);
-        a = -MulNegSin(a, 0x5A);
+        a = -MulNegSin((ang + off) & 0xFF, 0x5A);
     }
     MulCosDup(an & 0xFF, 0xFF);
     p = D_1F800164;
+    p->len = 9;
     p->code = 0x2C;
     p->r0 = 0x80;
     p->g0 = 0x80;
     p->b0 = 0x80;
     p->x0 = c + 0xA0;
-    p->x1 = a + 0xA0;
     p->y0 = 0xB8;
-    p->len = 9;
+    p->x1 = a + 0xA0;
     p->y1 = 0xB8;
     p->code &= ~2;
     p->x2 = p->x0;
@@ -71,12 +72,10 @@ void func_800E9F5C(int c, int ang, int off, int pal)
     p->u2 = p->u0;
     p->v1 = p->v0;
     p->v2 = p->v0 + tbl[(short)ch].h;
-    p->clut = (((unsigned char)pal + 0x1E0) << 6) | 0x15;
+    p->clut = ((pl + 0x1E0) << 6) | 0x15;
     p->u3 = p->u1;
     p->v3 = p->v2;
-    if (GetGraphType() == 1) p->tpage = 0x86;
-    else if (GetGraphType() == 2) p->tpage = 0x86;
-    else p->tpage = 0x26;
+    p->tpage = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x86 : 0x26;
     addPrim(DAT_1f8001e0, p);
     D_1F800164++;
 }
