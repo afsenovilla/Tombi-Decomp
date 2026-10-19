@@ -1,4 +1,5 @@
 // FUNC 800fc1c0 680 I0NFO2
+// MATCHING 800fc1c0 680
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct {
@@ -22,7 +23,6 @@ extern SpawnA *D_80100784;
 void func_800FC1C0(TObj *parent0)
 {
     register TObj *parent asm("s1") = parent0;
-//PERM{
     SpawnA *tbl;
     SpawnA *p;
     SpawnB *e;
@@ -35,7 +35,6 @@ void func_800FC1C0(TObj *parent0)
     int ff;
     int ty;
     TObj **lp;
-//PERM}
 
     if (D_8009CE0A != 0) {
         m = 1;
@@ -77,7 +76,7 @@ void func_800FC1C0(TObj *parent0)
             n->d90 = (int)parent;
         }
         i1 = j;
-    } while ((p = &tbl[(short)j])->type != ff);
+    { register int m asm("v0"); m = (short)j * 28; p = (SpawnA *)((char *)tbl + m); } } while (p->type != ff);
     i = 0;
     for (e = D_80100368; e->type != 0xFF; e++) {
         o = func_80018448();
