@@ -1,4 +1,5 @@
 // FUNC 800f6f20 1760 I0NFO2
+// MATCHING 800f6f20 1760
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -200,20 +201,18 @@ void func_800F6F20(TObj *parent0)
     if (D_8009CDD5 == 0xFF) {
         n = func_800183B8();
         if (n != 0) {
-            register int th asm("v1");
             n->active = 1;
             n->type = 0x30;
-            th = 3;
             n->b0a = 0xD;
+            n->animFrame = 3;
             n->subtype = 5;
-            n->a.p.whole = 0x12C;
-            n->y.p.whole = 0x7C;
-            n->wb6 = 2;
-            n->animFrame = th;
             n->b0c = 0;
             n->_pad0e[0] = 0;
+            n->a.p.whole = 0x12C;
+            n->y.p.whole = 0x7C;
             n->b.p.whole = 0;
-            n->wb4 = th;
+            n->wb4 = 3;
+            n->wb6 = 2;
             n->wb8 = 0;
             n->wba = 0x14;
             n->w74 = 0;
