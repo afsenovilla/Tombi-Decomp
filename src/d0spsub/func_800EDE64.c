@@ -1,5 +1,5 @@
 // FUNC 800ede64 452 D0SPSUB
-// wip score 9: remaining `sll a2` placement and first *tb load register (v0 vs a0)
+// MATCHING 800ede64 452
 typedef struct { short p0[4]; unsigned short off8; short pa[3]; unsigned short ids[1]; } Bank;
 extern unsigned char D_8010A200;
 extern unsigned char D_8010A202, D_8010A20A, D_8010A20C, D_8010A20F;
@@ -22,6 +22,7 @@ unsigned char *func_800EDE64(int kind, int add, int bank)
     for (; i < 4; i++) {
         if (D_800A4648[i][0] == -1) {
             char *b;
+            Bank **base;
             *o = 1;
             D_8010A202 = 0x1A;
             D_8010A20A = 0xA;
@@ -49,12 +50,16 @@ unsigned char *func_800EDE64(int kind, int add, int bank)
             D_8010A2D2 = 0xFFFF;
             D_8010A220 = 1;
             D_8010A222 = 0;
+            base = D_1F800398;
             D_800A4648[i][0] = 0;
-            tb = &D_1F800398[bank];
+            tb = &base[bank];
             off = kind * 2 + 0x10;
-            D_8010A2C8 = *(unsigned short *)((char *)*tb + off) + add;
-            b = (char *)*tb + (*tb)->off8;
-            D_8010A294 = b + *(unsigned short *)(b + ((unsigned short)D_8010A2C8 << 1));
+            b = (char *)*tb;
+            D_8010A2C8 = *(unsigned short *)(b + off) + add;
+            b = (char *)*tb;
+            b = b + ((Bank *)b)->off8;
+            b += *(unsigned short *)(b + ((unsigned short)D_8010A2C8 << 1));
+            D_8010A294 = b;
             return o;
         }
     }
