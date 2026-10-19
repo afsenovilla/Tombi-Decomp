@@ -3,7 +3,7 @@
 #include "raw7.h"
 extern char *alloc();
 extern int rnd();
-void a00L2Type05Init(short x, short y, short z)
+void spawnTouchSparkTriggerSparks(short x, short y, short z)
 {
     int i;
     char *o;

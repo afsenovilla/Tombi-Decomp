@@ -286,7 +286,7 @@ address,name,size,typed
 80118f90,updateA00PoolType03,544,1
 801191b0,updateA00PoolType27,188,0
 8011926c,updateA00PoolType06,240,1
-8011935c,updateA00PoolType07,268,1
+8011935c,updateYellowChick,268,1
 80119468,updateBubbleDroplet,284,1
 80119584,a00L2Type06SpawnChild,112,0
 801195f4,updateA00PoolType09,624,1
@@ -300,10 +300,10 @@ address,name,size,typed
 8011a628,FUN_8011a628,20,0
 8011a63c,updateA00PoolType0A,264,1
 8011a744,updateA00PoolType0B,748,1
-8011aa30,a00L2Type05Init,224,0
+8011aa30,spawnTouchSparkTriggerSparks,224,0
 8011ab10,updateA00PoolType11,328,1
-8011ac58,a00PoolType14Step4,320,1
-8011ad98,updateA00PoolType14,828,1
+8011ac58,a00BackdropSpritesStep4,320,1
+8011ad98,updateA00BackdropSprites,828,1
 8011b0d4,updateA00PoolType16,228,1
 8011b170,FUN_8011b170,40,0
 8011b1e0,updateA00PoolType17,264,1
@@ -474,7 +474,7 @@ address,name,size,typed
 8012dedc,updateChick,476,1
 8012e0b8,FUN_8012e0b8,264,0
 8012e1c0,updateEgg,772,1
-8012e4c4,updateA00L2Type05,1024,1
+8012e4c4,updateA00TouchSparkTrigger,1024,1
 8012e8c4,updateA00L2Type06,1180,1
 8012ed60,l2Type07Update,1108,1
 8012f1b4,l2Type07Sub0,116,1
@@ -514,9 +514,9 @@ address,name,size,typed
 80134980,a00L2Type15Step1,672,1
 80134c20,updateNpcCharles,572,1
 80134e5c,updateHoodedOldMan,3248,1
-80135b0c,a00L2Type57Aim,676,1
-80135db0,a00L2Type57Move,736,1
-80136090,updateA00L2Type57,340,1
+80135b0c,a00RoamingFlyerSteer,676,1
+80135db0,a00RoamingFlyerBob,736,1
+80136090,updateA00RoamingFlyer,340,1
 801361e4,FUN_801361e4,480,1
 801363e4,FUN_801363e4,1600,1
 8013675c,FUN_8013675c,104,0

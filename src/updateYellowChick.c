@@ -52,7 +52,7 @@ extern void FUN_8001fec0(char *);
 extern void FUN_8001fe6c(char *);
 extern void FUN_800187e4(char *);
 
-void updateA00PoolType07(char *o)
+void updateYellowChick(char *o)
 {
     unsigned char s = o[4];
 

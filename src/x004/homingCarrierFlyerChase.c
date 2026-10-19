@@ -19,7 +19,7 @@ static __inline__ int near(TObj *o)
     return (unsigned short)(o->h->p.whole - (*(short*)((char*)&SPAD.i168 + 2)) + 0x10) <= 0x20;
 }
 
-void l2Type31StepA(TObj *o)
+void homingCarrierFlyerChase(TObj *o)
 {
     P a, b;
 

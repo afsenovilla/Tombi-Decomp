@@ -7,7 +7,7 @@ extern unsigned char DAT_8009cdae;
 extern unsigned char DAT_800a603c_b;
 extern short DAT_800a6066, DAT_800a604e;
 
-void a00PoolType14Step4(TObj *o)
+void a00BackdropSpritesStep4(TObj *o)
 {
     switch (o->step) {
     case 1:

@@ -6,7 +6,7 @@ extern int AnimAdvance(TObj *);
 extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);
 extern unsigned short GetClut(int, int);
-extern void a00PoolType14Step4(TObj *);
+extern void a00BackdropSpritesStep4(TObj *);
 extern void *D_8013B2A4;
 extern void *D_8013B2A8;
 extern void *D_8013B2AC[];
@@ -16,7 +16,7 @@ extern void *D_8013B2C0;
 extern void *D_8013B2C4a[]; /* array: keeps its load after the field store (case 6 schedules differently from case 5) */
 extern void *D_8013B2C8;
 
-void updateA00PoolType14(TObj *o)
+void updateA00BackdropSprites(TObj *o)
 {
     int x;
 
@@ -110,7 +110,7 @@ void updateA00PoolType14(TObj *o)
             }
             break;
         case 4:
-            a00PoolType14Step4(o);
+            a00BackdropSpritesStep4(o);
             break;
         }
         AnimAdvance(o);

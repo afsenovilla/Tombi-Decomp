@@ -500,9 +500,9 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8011ec68 updateA00L4Type0A` (was FUN_8011ec68) - AREA00-only object handler: layer 4 type 0xA slot (MAIN0 table 80079D9C) while AREA00 (X000) is loaded
 - `8012e8c4 updateA00L2Type06` (was func_8012E8C4) - AREA00-only object handler: layer 2 type 0x6 slot (MAIN0 table 80077DB4) while AREA00 (X000) is loaded
 - `8011e838 updateA00L4Type09` (was func_8011E838) - AREA00-only object handler: layer 4 type 0x9 slot (MAIN0 table 80079D98) while AREA00 (X000) is loaded
-- `8012e4c4 updateA00L2Type05` (was func_8012E4C4) - AREA00-only object handler: layer 2 type 0x5 slot (MAIN0 table 80077DB0) while AREA00 (X000) is loaded
+- `8012e4c4 updateA00TouchSparkTrigger` (was func_8012E4C4) - AREA00-only object handler: layer 2 type 0x5 slot (MAIN0 table 80077DB0) while AREA00 (X000) is loaded
 - `8011f288 updateA00L4Type11` (was func_8011F288) - AREA00-only object handler: layer 4 type 0x11 slot (MAIN0 table 80079DB8) while AREA00 (X000) is loaded
-- `8011ad98 updateA00PoolType14` (was func_8011AD98) - AREA00-only object handler: pool type 0x14 slot (MAIN0 table 80079BFC) while AREA00 (X000) is loaded
+- `8011ad98 updateA00BackdropSprites` (was func_8011AD98) - AREA00-only object handler: pool type 0x14 slot (MAIN0 table 80079BFC) while AREA00 (X000) is loaded
 - `801236f0 updateA00L5Type0B` (was func_801236F0) - AREA00-only object handler: layer 5 type 0xB slot (MAIN0 table 8007B33C) while AREA00 (X000) is loaded
 - `8012e1c0 updateEgg` (was updateA00L2Type04; psx_tomba name) - AREA00-only object handler: layer 2 type 0x4 slot (MAIN0 table 80077DAC) while AREA00 (X000) is loaded
 - `801328b4 updateA00L2Type09` (was FUN_801328b4) - AREA00-only object handler: layer 2 type 0x9 slot (MAIN0 table 80077DC0) while AREA00 (X000) is loaded
@@ -526,12 +526,12 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `8011f608 updateA00L4Type17` (was FUN_8011f608) - AREA00-only object handler: layer 4 type 0x17 slot (MAIN0 table 80079DD0) while AREA00 (X000) is loaded
 - `801191b0 updateA00PoolType27` (was FUN_801191b0) - AREA00-only object handler: pool type 0x27 slot (MAIN0 table 80079C48) while AREA00 (X000) is loaded
 - `8012236c updateA00L7Type00` (was FUN_8012236c) - AREA00-only object handler: layer 7 type 0x0 slot (MAIN0 table 80079FE4) while AREA00 (X000) is loaded
-- `80136090 updateA00L2Type57` (was FUN_80136090) - AREA00-only object handler: layer 2 type 0x57 slot (MAIN0 table 80077EF8) while AREA00 (X000) is loaded
+- `80136090 updateA00RoamingFlyer` (was FUN_80136090) - AREA00-only object handler: layer 2 type 0x57 slot (MAIN0 table 80077EF8) while AREA00 (X000) is loaded
 - `8011ab10 updateA00PoolType11` (was FUN_8011ab10) - AREA00-only object handler: pool type 0x11 slot (MAIN0 table 80079BF0) while AREA00 (X000) is loaded
 - `80123a1c updateA00L5Type0C` (was FUN_80123a1c) - AREA00-only object handler: layer 5 type 0xC slot (MAIN0 table 8007B340) while AREA00 (X000) is loaded
 - `80119468 updateBubbleDroplet` (was updateA00PoolType08; psx_tomba name) - AREA00-only object handler: pool type 0x8 slot (MAIN0 table 80079BCC) while AREA00 (X000) is loaded
 - `8011b6e0 updateA00PoolType59` (was FUN_8011b6e0) - AREA00-only object handler: pool type 0x59 slot (MAIN0 table 80079D10) while AREA00 (X000) is loaded
-- `8011935c updateA00PoolType07` (was FUN_8011935c) - AREA00-only object handler: pool type 0x7 slot (MAIN0 table 80079BC8) while AREA00 (X000) is loaded
+- `8011935c updateYellowChick` (was FUN_8011935c) - AREA00-only object handler: pool type 0x7 slot (MAIN0 table 80079BC8) while AREA00 (X000) is loaded
 - `8011b0d4 updateA00PoolType16` (was FUN_8011b0d4) - AREA00-only object handler: pool type 0x16 slot (MAIN0 table 80079C04) while AREA00 (X000) is loaded
 - `8011b1e0 updateA00PoolType17` (was FUN_8011b1e0) - AREA00-only object handler: pool type 0x17 slot (MAIN0 table 80079C08) while AREA00 (X000) is loaded
 - `8011a63c updateA00PoolType0A` (was FUN_8011a63c) - AREA00-only object handler: pool type 0xA slot (MAIN0 table 80079BD4) while AREA00 (X000) is loaded
@@ -553,7 +553,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - updateL2Type18Object steps: `80113f38 l2Type18Active` (b04 1), `801142c0 l2Type18Hit` (b04 2 step 0)
 - Small player/object helpers, mostly with no caller (dead code, named by what they do): `800ee3d4 playerResetMotionState` (clears the D_8009C330 step state and the player velocities/angles), `800ee920 playerShiftDown7C` (y += 0x7C unless +0xAD), `800f29dc playerEnterRecoilA` / `800f369c playerEnterRecoilB` / `800f3eec playerEnterRecoilStep4` (b9c 2, timer 10, state 3, angle 0x10/0xF0 by facing), `800f4e68 playerSetAnimPairA` / `800f4e9c playerSetAnimPairB` (two anim bytes from D_80115220/D_80115228 by wb2 into D_8009C330), `800fb094 playerSetMoveAngleFromW7A`, `800fb414 copyD88ToD8C`, `800fc18c playerClampClimbTop` (top -0x8C or -0x3C0 by GV2.bc3 & 0x40; 2 when GCD.bce3d == 0xFF), `800ff074 getHudExpBarMode` (0..2 from GCD.bcffb / bcdac, 0 in area 0 sections 0-1 or with the exp bar shown), `801049c0 playerResetToStep0`, `80104ea0 playerCheckJumpPressedA` / `80104f2c playerCheckJumpPressedB` (jump/attack button -> substep 2), `80107590 playerEnterStep10Fall`, `80108fe0 playerResetAfterEvent`, `8010e5e4 playerAccelerateUpCapped` (velY -= 0x10 to -0x800), `801128f0 clearObjectB0A`, `801363c4 isPlayerPastX0D8`, `800edc0c stubNop800EDC0C`, `80113cc0 stubNop80113CC0`, `8011379c animAdvanceThunk`
 - `800ea220 initPoolType04Sprite` (sprite/anim PTR_8013B110[subtype]), `800eebc4 playerSetIdleAnimByArea`, `800f0450 objectSinkAndProbe` (y += 2 while b69, then func_8003FD78), `800f434c playerLandResumeWalk` (sfx 0x1C, step 1 or 0x1F by bbe & 0x20), `80103774 playerResetSlopeState`, `8010dd44 playerEnterStep3E` (anim 0x44), `801229d8 playerHitAnimWithImpact` (anim 0xD + spawnImpactEffect 2), `80122990 playerSetSpawnTimerArea0Sec3` (+0x20 = 0x8C in section 3 when the 8009CDA5 flag is set), `80112be0 l2Type0ECheckAreaFlag`, `8011465c l2Type18HitIfStep0`, `80121ae0 a00L4Type26ReleaseParts` (sets b04 2 on the six part objects +0xB4..0xC8)
-- AREA00-only handler steps, named after their updateA00* handler (structural names; the object kinds are not identified): `80118638 a00PoolType01Init` / `8011899c a00PoolType01Step` (with `8011880c a00PoolType01SubStep`), `80118e70 a00PoolType03Step`, `80119988 a00PoolType09Step` / `80119864 a00PoolType09SubStep`, `8011a2f8 spawnPoolType09Child` (spawnPoolType09Object), `8011a418 a00PoolType0AStep`, `8011ac58 a00PoolType14Step4`, `8011b5dc a00PoolType59Talk` (showMessageBox), `80118d8c spawnMushroomClusterDebris` / `80119584 a00L2Type06SpawnChild` (pool allocations), `8011aa30 a00L2Type05Init`, updateRedBird steps `801307a0 redBirdStep0`, `801308d8 redBirdStep1`, `801319d0 redBirdStep1B`, `801320a8 redBirdStep1C` (box + spawnItemNotification), `80130a38 redBirdStep2`, `80130bb0 redBirdStep3`, `801317e4 redBirdStep4`; `80134190 a00L2Type14Step`, `80134980 a00L2Type15Step1`, `801346c0 a00L2Type15Step3`, `80135b0c a00L2Type57Aim` (angleBetweenPoints) / `80135db0 a00L2Type57Move`; updateA00L4Type18 `80120164 a00L4Type18Step` -> `8011f79c a00L4Type18Idle` / `8011f9e0 a00L4Type18Active` (also collidePlayerWithCat2Objects case 0x29); updateA00L4Type26 `80121124 a00L4Type26Step`, `8012160c a00L4Type26SpawnParts`, `8012171c a00L4Type26Reward` (spawnItemFromEntry); updateFrog `80133254 frogStep0`, `80132f80 frogHop` (AnimJump + applyFrameVelocityX, wall probe)
+- AREA00-only handler steps, named after their updateA00* handler (structural names; the object kinds are not identified): `80118638 a00PoolType01Init` / `8011899c a00PoolType01Step` (with `8011880c a00PoolType01SubStep`), `80118e70 a00PoolType03Step`, `80119988 a00PoolType09Step` / `80119864 a00PoolType09SubStep`, `8011a2f8 spawnPoolType09Child` (spawnPoolType09Object), `8011a418 a00PoolType0AStep`, `8011ac58 a00BackdropSpritesStep4`, `8011b5dc a00PoolType59Talk` (showMessageBox), `80118d8c spawnMushroomClusterDebris` / `80119584 a00L2Type06SpawnChild` (pool allocations), `8011aa30 spawnTouchSparkTriggerSparks`, updateRedBird steps `801307a0 redBirdStep0`, `801308d8 redBirdStep1`, `801319d0 redBirdStep1B`, `801320a8 redBirdStep1C` (box + spawnItemNotification), `80130a38 redBirdStep2`, `80130bb0 redBirdStep3`, `801317e4 redBirdStep4`; `80134190 a00L2Type14Step`, `80134980 a00L2Type15Step1`, `801346c0 a00L2Type15Step3`, `80135b0c a00RoamingFlyerSteer` (angleBetweenPoints) / `80135db0 a00RoamingFlyerBob`; updateA00L4Type18 `80120164 a00L4Type18Step` -> `8011f79c a00L4Type18Idle` / `8011f9e0 a00L4Type18Active` (also collidePlayerWithCat2Objects case 0x29); updateA00L4Type26 `80121124 a00L4Type26Step`, `8012160c a00L4Type26SpawnParts`, `8012171c a00L4Type26Reward` (spawnItemFromEntry); updateFrog `80133254 frogStep0`, `80132f80 frogHop` (AnimJump + applyFrameVelocityX, wall probe)
 - `801257f4 komaPigContact` (was FUN_801257f4) - collidePlayerWithCat2Objects type 2 in area 0, the X000 counterpart of the x001/x003/x004 komaPigContact (x004 twin of this one)
 - More collision callbacks (type = the case of the pass; area 0 where the pass switches on the area): `801252b8 playerContactCat4Type06` (with `80124ff4 playerContactCat4Type06Land`), `80126240 playerContactCat2Type06`, `8012555c playerContactCat2Type07` (area 0), `80126698 playerContactCat2Type09`, `80126a64 playerGrabCat4Type06`, `80126d7c pushObjectOutOfCat4Type06` (collideCat2/Cat5WithCat4Objects)
 - updateL1Type0AObject: `8011145c l1Type0AInit`, `80111880 l1Type0AStep` (by subtype: `80111590 l1Type0AStepSub0`, `80111714 l1Type0AStepSub1`); l2Type18Active states `80113888 l2Type18State2`, `80113b6c l2Type18State5`, `80113cc8 l2Type18State7`; `80111dc8 l2Type0ESharedStep` (used by l2Type0EActive1 and l2Type0EHit1)
@@ -1261,8 +1261,8 @@ placed object runs (`tools/objects.py`: handler table[layer][type]); enemy names
   areas 4/12; `80116764 cameraModeHandler1Step`), `80116ae0 checkScrollItemDoorA` / `80116c0c checkScrollItemDoorB` (updateAreaScroll: at fixed
   player positions tryStartItemInteraction(o, 1, 7 / 0) and lock the game), `80118bfc area4ScriptOp` (areas 4 and 12 entry of MAIN0 data_80079B3C;
   `80118720 area4ScriptOpSetQuad`, `801188f0 area4ScriptOpPointInside`), `8011a448 spawnApAwardNumber` (awardAPByArea), `8011aba0
-  updateL3Type2BObject`, `8011ad24 updateL3Type3CObject`, `80125248 updateL2Type1BObject` (spawns a layer 1 type 2 object), `80127ec4
-  updateL2Type31Object` (`80127b14 l2Type31StepA`, `80127d54 l2Type31StepB`); updateAreaMechanisms subtypes `8011b218 stepAreaSwitchB` (subtypes
+  updateL3Type2BObject`, `8011ad24 updateL3Type3CObject`, `80125248 updateDeferredLayer1Type2Spawn` (spawns a layer 1 type 2 object), `80127ec4
+  updateHomingCarrierFlyer` (`80127b14 homingCarrierFlyerChase`, `80127d54 homingCarrierFlyerReturn`); updateAreaMechanisms subtypes `8011b218 stepAreaSwitchB` (subtypes
   8/10/0xC: player box + da0+2 like stepAreaSwitch), `8011b138 stepAreaRotatingPart` (17/19/21: copies the parent state, turns d88 by 0x600),
   `8011b438 stepAreaEventDoor` (moves once D_800A4555 reaches the subtype's values); `8011dc0c playerStep3AArea4` (playerNormalModeDispatch step
   0x3A); D_801310EC subtype table of updateKomaPig: `801231d0 komaPigSubtype0Step`, `80123310 komaPigSubtype1Step`, `80123558 komaPigSubtype2Step`,
@@ -1355,10 +1355,27 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
   with the pigs, read with the wrong frames.)
 - Koma pig (layer 2 type 2, the area handlers updateKomaPig): area 1 room 0 subtype 8 captures a pink pig with a red mohawk lying
   down and snoring, so the koma pig handlers are pigs (Koma Pigs are the game's pig enemies); names kept.
-- Pending (draw captures not finished): area-0 L2/05 (invisible trigger: hit box -> sfx 0x39, spawns pool type 0x16; draws nothing
-  itself), L2/06, L2/57 (nothing drawn in room 5), pool types 07 (subtype 0 = small yellow chick-like sprite, anim by subtype) / 0x11 /
-  0x14 / 0x39 / 0x3C, L4/0A/0D/11; type 07 in areas 0/4 (area 0 L2/07 subtype 0 draws a green wavy stem); x004 L2/1B, L2/31 (no
-  placements in areas 4/12: need their spawner).
+- X000 `8011935c updateYellowChick` (was updateA00PoolType07, pool type 7): captured in area 0 room 1 (P/07:0, P/07:1): a round yellow
+  fluffy chick with red spots (subtype 0 small, subtype 1 larger with brown legs), anim by subtype, CLUT direction from b0c; static otherwise.
+- X000 `80126fec updateMushroomCluster` (theirs updateEvilGrass): area 0 room 3 capture of L2/01 is a clump of purple bulbs on stalks;
+  ours kept (a mushroom clump, bounces when stood on, breaks into single stalks).
+- Named by behaviour (no picture):
+  - X000 `8012e4c4 updateA00TouchSparkTrigger` (was updateA00L2Type05): draws nothing; when the player (or, on alternate frames, one of the 4
+    objects of the 800B1478 table) enters its hit box: `8011aa30 spawnTouchSparkTriggerSparks` (was a00L2Type05Init) spawns 3 pool type 0xB
+    sparks at the contact point, SfxPlay2 0x39, two pool type 0x16 one-shot effects at fixed spots (by subtype), then a 120-tick cooldown.
+  - X000 `80136090 updateA00RoamingFlyer` (was updateA00L2Type57, only while 8009CDAC == -1; nothing drawn in room 5): subtype 0
+    `80135b0c a00RoamingFlyerSteer` (was a00L2Type57Aim) turns toward a target point every 120 ticks and flies inside a box, else back to
+    0x1EC,-0x87; subtype 1 `80135db0 a00RoamingFlyerBob` (was a00L2Type57Move) bobs on a sine.
+  - X000 `8011ad98 updateA00BackdropSprites` (was updateA00PoolType14) / `8011ac58 a00BackdropSpritesStep4`: camera-fixed sprites (b0a 7,
+    drawn at d30/d34 minus the camera), CLUT flicker by subtype, as the other areas' updateBackdropSpriteSet.
+  - x004 `80127ec4 updateHomingCarrierFlyer` (was updateL2Type31Object; the player clings to type 0x31): bobs until the player is past
+    x 0x83, `80127b14 homingCarrierFlyerChase` (was l2Type31StepA) flies at the player and holds it, `80127d54 homingCarrierFlyerReturn`
+    (was l2Type31StepB) flies off and returns to its spawn point. Spawner still not found (no placement or record in X004).
+  - x004 `80125248 updateDeferredLayer1Type2Spawn` (was updateL2Type1BObject): hit box only; when another object sets step 2 it spawns a
+    layer 1 type 2 object with its position / subtype / b0c / b6b and frees itself. Spawner not found.
+- Pool types 0x39 / 0x3C in area 0: no area-0 handler; the MAIN0 table slots hold x003 updateL3Type39Object / x004 updateL3Type3CObject.
+- Still pending: L2/06 (code: a multi-hit breakable, each hit changes stage/anim/box and spawns pool type 8 debris with sfx 0x33, removed
+  after the last stage), pool type 0x11, L4/0A, L4/0D (draws nothing), L4/11, type 07 in area 4.
 - Open conflicts: loadCollisionBounds -> loadButtonConfig (renamed: theirs is right, copies T[1F80019E] into 1F8003C4..CA, the
   button masks the player code tests, e.g. talk = 1F8003C4; callers bootStartupTask, o0ptsub0 func_800E8618). dispatchAreaCollisionHookA/B:
   ours kept (area 0 calls pushCat2/Cat5ObjectOutOfCat4Type04, area 3 their x003 twins: collision passes, not enemy init/update).

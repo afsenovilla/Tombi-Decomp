@@ -7,7 +7,7 @@ extern int angleBetweenPoints(P a, P b);
 extern short D_8007A5F0[];
 extern short D_8007A3F0[];
 
-void a00L2Type57Aim(TObj *o)
+void a00RoamingFlyerSteer(TObj *o)
 {
     P a, b;
     unsigned d;

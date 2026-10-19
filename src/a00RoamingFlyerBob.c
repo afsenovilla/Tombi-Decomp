@@ -9,7 +9,7 @@ extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
 
-void a00L2Type57Move(TObj *o)
+void a00RoamingFlyerBob(TObj *o)
 {
     switch (o->step) {
     case 0:

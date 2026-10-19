@@ -8,11 +8,11 @@ extern int DAT_1f8002d4[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
-extern void l2Type31StepA(TObj *);
-extern void l2Type31StepB(TObj *);
+extern void homingCarrierFlyerChase(TObj *);
+extern void homingCarrierFlyerReturn(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void updateL2Type31Object(TObj *o)
+void updateHomingCarrierFlyer(TObj *o)
 {
     switch (o->b04) {
     case 0:
@@ -52,10 +52,10 @@ void updateL2Type31Object(TObj *o)
             }
             break;
         case 1:
-            l2Type31StepA(o);
+            homingCarrierFlyerChase(o);
             break;
         case 2:
-            l2Type31StepB(o);
+            homingCarrierFlyerReturn(o);
             break;
         }
         break;

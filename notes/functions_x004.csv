@@ -458,7 +458,7 @@ address,size,name,twin
 80124e00,20,FUN_80124e00,X000:8012f36c
 80124e14,116,FUN_80124e14,X000:8012f1b4
 80124e88,960,area4Type07StepD,
-80125248,472,updateL2Type1BObject,
+80125248,472,updateDeferredLayer1Type2Spawn,
 80125420,308,blackCrowPerchIdle,
 80125554,340,blackCrowPerchLook,
 801256a8,368,blackCrowPerchCaw,
@@ -472,9 +472,9 @@ address,size,name,twin
 8012747c,52,testGcdFlagBitBcefc,
 801274b0,76,setScriptGlobalFlagBit,
 801274fc,1560,updateCountedCollectible,
-80127b14,576,l2Type31StepA,
-80127d54,368,l2Type31StepB,
-80127ec4,508,updateL2Type31Object,
+80127b14,576,homingCarrierFlyerChase,
+80127d54,368,homingCarrierFlyerReturn,
+80127ec4,508,updateHomingCarrierFlyer,
 801280c0,84,mermaidSetAnim,X003:801289c8
 80128114,496,mermaidNecklaceTalk,
 80128304,872,mermaidDivingOfferTalk,

@@ -7,7 +7,7 @@ extern TObj PLAYER;
 extern E D_800B1478[];
 extern short D_1F80019C;
 extern int isObjectInView(TObj *);
-extern void a00L2Type05Init(int, int, int);
+extern void spawnTouchSparkTriggerSparks(int, int, int);
 extern void SfxPlay2(int, int);
 extern void spawnLayer3Object(int, int, int, int);
 extern void freeObjectLayer2(TObj *);
@@ -37,7 +37,7 @@ static __inline__ void Act(TObj *o)
     o->step++;
 }
 
-void updateA00L2Type05(TObj *o)
+void updateA00TouchSparkTrigger(TObj *o)
 {
     TObj *pl;
     E *e;
@@ -57,14 +57,14 @@ void updateA00L2Type05(TObj *o)
                 break;
             if ((SPAD.s1f8 + SPAD.i198) & 1) {
                 if (Hit(o, pl)) {
-                    a00L2Type05Init(pl->a.p.whole, (short)(pl->y.p.whole - 0x10), pl->b.p.whole);
+                    spawnTouchSparkTriggerSparks(pl->a.p.whole, (short)(pl->y.p.whole - 0x10), pl->b.p.whole);
                     Act(o);
                 }
             } else {
                 e = D_800B1478;
                 for (D_1F80019C = 0; D_1F80019C < 4; D_1F80019C++, e++) {
                     if (e->t.active == 1 && Hit(o, &e->t)) {
-                        a00L2Type05Init(e->t.a.p.whole, e->t.y.p.whole, e->t.b.p.whole);
+                        spawnTouchSparkTriggerSparks(e->t.a.p.whole, e->t.y.p.whole, e->t.b.p.whole);
                         Act(o);
                         break;
                     }

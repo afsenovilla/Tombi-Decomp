@@ -1,13 +1,13 @@
 // FUNC 80136090 340 X000
 // MATCHING 80136090 340
-extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), freeObjectLayer2(unsigned char *), a00L2Type57Move(unsigned char *);
-extern void a00L2Type57Aim(unsigned char *);
+extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), freeObjectLayer2(unsigned char *), a00RoamingFlyerBob(unsigned char *);
+extern void a00RoamingFlyerSteer(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char DAT_8009cdac;
 extern int DAT_1f8002d4;
 extern unsigned char *PTR_8013b15c, *PTR_8013b19c;
 
-void updateA00L2Type57(unsigned char *o)
+void updateA00RoamingFlyer(unsigned char *o)
 {
     unsigned char s;
     int t, w;
@@ -44,9 +44,9 @@ void updateA00L2Type57(unsigned char *o)
         FUN_800202b4(o);
         if (o[3] == 0) {
             FUN_8001fec0(o);
-            a00L2Type57Aim(o);
+            a00RoamingFlyerSteer(o);
         } else
-            a00L2Type57Move(o);
+            a00RoamingFlyerBob(o);
         break;
     case 2:
         break;
