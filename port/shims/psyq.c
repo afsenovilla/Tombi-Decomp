@@ -18,8 +18,7 @@ static void (*vsync_cb)(void);
 int port_frame;
 int port_max_frames;
 static unsigned long long next_vblank_us;
-int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
-int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
+int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = 50 Hz pacing */
 
 static void call_psx(void *fn) {
     void (*f)(void) = (void (*)(void))fn;
@@ -68,7 +67,34 @@ static void dump_ram(void) {
 }
 /* save states (runtime/state.c): host-side values that a restored image must not change */
 void port_realtime_reset(void) { next_vblank_us = 0; }
-void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; }
+/* --menu FRAME:N (debug): open the in-game menu screen N at that vblank as the save point / pause menu would
+   (4 = save, 5 = load), if the game task is in plain gameplay then */
+static int menu_frame, menu_id;
+void port_menu_add(const char *s) {
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    menu_frame = f; menu_id = 0;
+    while (*s >= '0' && *s <= '9') menu_id = menu_id * 10 + *s++ - '0';
+}
+static void menu_open(void) {
+    extern void openMenuScreen(short), gameMainTask(void);
+    u32 task = 0;
+    for (int i = 0; i < 3; i++) {                   /* the task table: the entry running gameMainTask */
+        u8 *t = (u8 *)(0x801FD800u + i * 0x70);
+        u32 entry = *(u32 *)(t + 0xC);
+        if (entry == (u32)gameMainTask || port_lookup(entry) == (void *)gameMainTask) { task = (u32)t; break; }
+    }
+    if (!task) { port_printf("[port] --menu: gameMainTask is not running\n"); return; }
+    u16 *w = (u16 *)(task + 0x48);
+    if (w[0] != 1 || w[1] != 1 || w[2] == 3) { port_printf("[port] --menu: task state %d/%d/%d is not gameplay, skipped\n", w[0], w[1], w[2]); return; }
+    u32 saved = *(u32 *)0x1F8001D4u;                /* TASK_C: openMenuScreen works on the current task */
+    *(u32 *)0x1F8001D4u = task;
+    openMenuScreen((short)menu_id);
+    *(u32 *)0x1F8001D4u = saved;
+    port_printf("[port] frame %d: menu screen %d opened\n", port_frame, menu_id);
+}
+void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; }
 int port_cd_fd_get(void);
 void port_cd_fd_set(int fd);
 void port_vblank(void) {
@@ -76,7 +102,7 @@ void port_vblank(void) {
     if (port_realtime) {
         unsigned long long now = port_time_us();
         if (!next_vblank_us) next_vblank_us = now;
-        next_vblank_us += 1000000ull / (unsigned)port_hz;   /* PAL: 50 Hz (20 ms); --hz 60: 16.67 ms */
+        next_vblank_us += 20000;                     /* PAL: 50 Hz */
         if (next_vblank_us > now) port_sleep_us(next_vblank_us - now);
     }
     port_frame++;
@@ -86,6 +112,7 @@ void port_vblank(void) {
             if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
         }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
+    if (menu_frame && port_frame == menu_frame) menu_open();
     {   /* FIFOs: open the video pipe, then the audio pipe, before anything is written (a player such as ffmpeg
            opens its inputs in that order and would wait forever on the second one) */
         extern void port_pipe_video_open(void), port_pipe_audio_open(void);

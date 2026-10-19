@@ -153,6 +153,7 @@ static void load_exe(const char *path) {
 
 int port_argc; char **port_argv;
 static const char *exe = "game/MAIN0.EXE", *disc = "game/disc/Tombi.bin";
+const char *port_disc_path = "game/disc/Tombi.bin";    /* shims/card.c: the memory cards live next to the disc */
 /* Parses the command line.  Also run again after a save state is restored (runtime/state.c): the restored
    image carries the saving run's options, so the lists are cleared and this run's values applied. */
 static int parse_options(int argc, char **argv) {
@@ -163,7 +164,8 @@ static int parse_options(int argc, char **argv) {
     { extern const char *port_load_path; port_load_path = 0; }
     for (int i = 1; i < argc; i++) {
         if (streq(argv[i], "--exe") && i + 1 < argc) exe = argv[++i];
-        else if (streq(argv[i], "--disc") && i + 1 < argc) disc = argv[++i];
+        else if (streq(argv[i], "--disc") && i + 1 < argc) disc = port_disc_path = argv[++i];
+        else if (streq(argv[i], "--save-dir") && i + 1 < argc) { extern const char *port_save_dir; port_save_dir = argv[++i]; }
         else if (streq(argv[i], "--frames") && i + 1 < argc) port_max_frames = atoi_(argv[++i]);
         else if (streq(argv[i], "--save") && i + 1 < argc) { extern void port_save_add(const char *); port_save_add(argv[++i]); }
         else if (streq(argv[i], "--load") && i + 1 < argc) { extern const char *port_load_path; port_load_path = argv[++i]; }
@@ -194,19 +196,22 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--pipe-audio") && i + 1 < argc) { extern const char *port_audio_pipe; port_audio_pipe = argv[++i]; }
         else if (streq(argv[i], "--dump-audio") && i + 1 < argc) { extern const char *port_audio_path; port_audio_path = argv[++i]; }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
+        else if (streq(argv[i], "--menu") && i + 1 < argc) { extern void port_menu_add(const char *); port_menu_add(argv[++i]); }
         else if (streq(argv[i], "--window")) { extern int port_window; port_window = 1; }
         else if (streq(argv[i], "--viewer") && i + 1 < argc) { extern const char *port_window_viewer; port_window_viewer = argv[++i]; }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
-            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.iso] [--frames N] [--realtime]\n"
+            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
                         "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
+                        "       [--menu FRAME:N]   open menu screen N at a vblank during gameplay (4 = save, 5 = load)\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
                         "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
                         "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), 50 Hz\n"
-                        "       [--save FRAME:PATH] [--load PATH]   save state at a vblank / continue from one (same binary)\n", argv[0]);
+                        "       [--save FRAME:PATH] [--load PATH]   save state at a vblank / continue from one (same binary)\n"
+                        "       [--save-dir DIR]   memory cards tombi_mc0.mcd / tombi_mc1.mcd (128 KB raw; default: next to the disc)\n", argv[0]);
             return 2;
         }
     }
