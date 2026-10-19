@@ -5,22 +5,41 @@ extern signed char D_8009D2B0;
 extern TObj D_800A6038;
 extern signed char D_800A6047;
 #define LI(n) (*(TObj **)((char *)list + ((n) << 2)))
+#define PI_TOTAL asm("t0")
+#define PI_I 
+#define PI_J asm("a2")
+#define PI_S 
+#define PI_BY 
+#define PI_C asm("a1")
+#define PI_K1 asm("a1")
+#define PI_PP1 
+#define PI_O1 
+#define PI_K2 asm("a1")
+#define PI_PP2 
+#define PI_O2 
+#define PI_O3 
+#define PI_O4 
 
 void func_800ED4D0(void)
 {
-    short k;
     TObj *list[64];
-    TObj *o;
-    unsigned short total, by;
-    short i, j, best, s;
-    TObj **pp;
-    TObj *c;
+    register unsigned short total PI_TOTAL;
+    register short i PI_I;
+    register short j PI_J;
+    short best;
+    register short s PI_S;
+    register unsigned short by PI_BY;
+    register TObj *c PI_C;
 
     for (i = 0; i < 0x40; i++) {
         *(TObj **)((char *)list + (i << 2)) = 0;
     }
     i = 0;
-    total = k = *(unsigned short *)0x1F800246;
+    {
+    register short k PI_K1;
+    register TObj **pp PI_PP1;
+    register TObj *o PI_O1;
+    k = total = *(unsigned short *)0x1F800246;
     pp = *(TObj ***)0x1F80021C;
     while (k != 0) {
         o = *pp++;
@@ -43,6 +62,11 @@ void func_800ED4D0(void)
             LI(i++) = o;
         }
     }
+    }
+    {
+    register short k PI_K2;
+    register TObj **pp PI_PP2;
+    register TObj *o PI_O2;
     k = *(unsigned short *)0x1F80024A;
     pp = *(TObj ***)0x1F800220;
     total += k;
@@ -68,14 +92,18 @@ void func_800ED4D0(void)
             break;
         }
     }
+    }
     if (D_8009D2B0 != 3) {
         total++;
         LI(i) = &D_800A6038;
     }
-    for (s = 0; s < (short)total; s++) {
+    {
+    unsigned short cnt = total;
+    register TObj *o PI_O3;
+    for (s = 0; s < (short)cnt; s++) {
         best = s;
         by = LI(s)->y.p.whole;
-        for (j = s; j < (short)total; j++) {
+        for (j = s; j < (short)cnt; j++) {
             if ((short)by < LI(j)->y.p.whole) {
                 best = j;
                 by = LI(j)->y.p.whole;
@@ -85,6 +113,9 @@ void func_800ED4D0(void)
         list[s] = list[best];
         list[best] = o;
     }
+    }
+    {
+    register TObj *o PI_O4;
     for (i = 0; LI(i) != 0; i++) {
         o = LI(i);
         c = (TObj *)PTR(o, 0x94);
@@ -92,6 +123,7 @@ void func_800ED4D0(void)
         if (c != 0) {
             S8(c, 0xF) = i - 9;
         }
+    }
     }
     if (D_8009D2B0 == 3) {
         D_800A6047 = -0xC;
