@@ -1,4 +1,5 @@
 // FUNC 800e8644 604 I0NFO
+// MATCHING 800e8644 604
 #include "TOBJ.H"
 #include "raw7.h"
 extern void func_8001FE6C(TObj *o);
@@ -11,6 +12,7 @@ typedef struct { unsigned short a, b; } Pair7A;
 extern Pair7A D_8007A024[];
 extern TObj *D_8009C330;
 extern unsigned char D_8009C970;
+typedef struct { unsigned char c; } C970S; typedef struct { int v; } SPV;
 extern unsigned short D_8009C982[];
 extern unsigned char D_8009C990[];
 extern unsigned char D_8009CEAB;
@@ -26,6 +28,7 @@ extern unsigned short D_800A60FC[];
 void func_800E8644(TObj *o)
 {
     TObj *p;
+    void *an;
     int pad[2];
     D_8009C330 = (TObj *)((char *)o + 0xF8);
     if (o->step == 0) {
@@ -63,10 +66,11 @@ void func_800E8644(TObj *o)
             o->subtype = 2;
         }
         S16(o, 0x9A) = D_8009C970;
-        o->anim = D_800106B4;
+        o->w98 = ((C970S *)&D_8009C970)->c;
         *(signed char *)&o->b0f = -8;
-        o->w98 = D_8009C970;
-        o->d3c = *(int *)0x1F8002F0;
+        an = D_800106B4;
+        o->d3c = ((SPV *)0x1F8002F0)->v;
+        o->anim = an;
         func_8001FE6C(o);
         func_800EDFB8(o, 1);
         if (D_8009CEAB == 3) {
