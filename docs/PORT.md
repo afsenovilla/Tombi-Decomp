@@ -689,3 +689,101 @@ Pending:
   `--poke 900:1F8001B4:1 --poke 1250:8009C960:2:2 --poke 1250:8009C962:3:2 --pad-script 1000:start,1300:circle:3`
   against the emulator (`capture.base_state`, area 2 section 3, +140 vblanks): Tombi drawn at the same place; the
   jumpcheck trace in AREA00 is unchanged.
+
+## Windows build (tombi.exe, tombi-view.exe, tombi-port.exe)
+
+The same freestanding i386 binary, cross-compiled with mingw-w64 on the Win32 API; `port/runtime/sys_win32_i386.c`
+is the counterpart of `sys_linux_i386.c` (same `port_*` interface, picked by `port/CMakeLists.txt` from the platform).
+
+```
+sudo apt-get install gcc-mingw-w64-i686                 # cross compiler (Ubuntu); wine32 to try the result
+curl -LO https://github.com/libsdl-org/SDL/releases/download/release-2.30.11/SDL2-devel-2.30.11-mingw.tar.gz && tar xzf SDL2-devel-2.30.11-mingw.tar.gz
+cmake -S port -B build/port-win -G Ninja -DCMAKE_TOOLCHAIN_FILE=$PWD/port/cmake/mingw-i686.cmake \
+      -DPORT_SDL2_MINGW=$PWD/SDL2-2.30.11/i686-w64-mingw32
+ninja -C build/port-win                                  # -> build/port-win/tombi.exe, tombi-view.exe (needs SDL2.dll next to it)
+wine build/port-win/tombi.exe --frames 600 --exe game/MAIN0.EXE --disc game/disc/Tombi.bin
+python3 tools/port_launcher.py                          # the launcher (Tk, tools/i18n.py); uses build/port-win/*.exe on Windows
+```
+
+- **Symbols.** The game is compiled with `-fno-leading-underscore -mno-ms-bitfields` so the generated tables (`syms.ld`,
+  `thunks.S`, `funcmap.c`) are identical on both hosts; the few kernel32/winmm imports are declared in the runtime with
+  their decorated names (`_CreateFileA@28`). `gen_port.py link` skips those undefined names and, for mingw, emits the call
+  thunks as plain globals linked last (a COFF weak symbol with a body is not a definition for the mingw ld) and no `.type`.
+- **Memory.** One 2 MB pagefile-backed section (`CreateFileMapping`) mapped with `MapViewOfFileEx` at 0x80000000 and
+  0xA0000000 (the image is linked `--large-address-aware` and based at 0x10000000), the scratchpad/I/O page with
+  `VirtualAlloc` at 0x1F800000. The KUSEG mirror at 0x00010000 is mapped whole when Windows left the range free, else
+  every free 64 KB block of it (the rest reads the host's own data there: a warning says how much is missing). Page 0
+  cannot be mapped on Windows: accesses below 0x200000 that fault are emulated in the exception handler by copying the
+  instruction into an executable scratch page with its memory operand rewritten to the KSEG0 address of the same byte
+  (one exception per access, so only the stray NULL-pointer reads go this way).
+- **Calls to retail addresses.** The RAM is `PAGE_READWRITE` and the image `--nxcompat`, so a call into it is an access
+  violation with EIP = the PS1 address; `AddVectoredExceptionHandler` rewrites EIP to the native function (the same
+  trampoline as the Linux SIGSEGV handler); `EXCEPTION_INT_DIVIDE_BY_ZERO` gets the R3000 result. `__chkstk_ms` (stack
+  probes for frames over 4 KB) is provided in asm; `port/runtime/sys_common.c` holds the printf and the 64-bit division
+  helpers shared by both runtimes. The coroutines of `threads.c` are plain stack-switching asm and work unchanged.
+- **The viewer.** `tombi_view.c` builds for both: on Windows it reads the frames from `GetStdHandle(STD_INPUT_HANDLE)`
+  and gets the audio/pad pipe handles as `--audio-handle N --pad-handle N` (fds 3 and 4 cannot be inherited by number);
+  `port_spawn` in the Win32 runtime makes the three pipes with `CreatePipe` and runs it with `CreateProcess`. New viewer
+  options, passed through `tombi --viewer-arg X` (repeatable): `--scale 1..6`, `--fullscreen` (F11 toggles it), `--keys
+  up=Up,cross=X,...` (SDL key names per PS1 button). The pad pipe is read with `PeekNamedPipe` (non-blocking).
+- **Files.** `port_open/create/pread/pwrite/filesize` on `CreateFile/ReadFile/WriteFile` (OVERLAPPED offsets); the FIFO
+  options (`--pipe-frames`, `--pipe-audio`) write plain files on Windows (use `--window`). `timeBeginPeriod(1)` + `Sleep`
+  + a spin for the last millisecond pace the vblanks; `QueryPerformanceCounter` is the clock.
+- **Status (checked under wine32 9.0).** The exe boots, maps the memory, loads MAIN0.EXE and the disc and runs the first
+  frame; under wine the KUSEG range 0x10000-0x110000 is wine's own reserved area, so the title screen's
+  `queueLoadList(NULL)` scan (which on Linux walks the zero kernel area into the EXE image through the mirror until it
+  meets a -1) reads wine's data instead and the load queue never completes (`sleepTask` loop at frame 1). On real
+  Windows that range is normally free (unverified: no Windows machine here); if it is not, the warning line names the
+  missing blocks and the same stall is expected. The Linux build is unchanged (`cmake -S port -B build/port` as before).
+- **CI.** `.github/workflows/port-exe.yml`: job `game` (ubuntu, mingw) fetches the player's disc image from the
+  `GAME_FILES_URL` secret like report.yml, runs `tools/build_full.py`, cross-compiles `tombi.exe`/`tombi-view.exe` and
+  uploads them with `SDL2.dll`; job `launcher` (windows-latest) packs them with PyInstaller into `tombi-port.exe`
+  (`--onefile --windowed`), uploads the artifact `tombi-port-windows` and commits `dist/windows/tombi-port.exe`;
+  `zip-exe.yml` adds it to `tombi-tools.zip`. No game data is in any artifact (SDL2 licence: THIRD_PARTY_NOTICES.md).
+
+### The launcher (tools/port_launcher.py, tombi-port.exe)
+
+Tk window with the same style/i18n as tombi-gfx/tombi-text. *Play* tab: disc image (.bin/.cue/.iso; `EXE/MAIN0.EXE` is
+read from its ISO9660 directory into the launcher's folder and checked against the SCES-01331 sha1
+`bec8dc5f...`), save folder (`--save-dir`), window scale 1x/2x/3x, fullscreen, 50/60 Hz, "start a new game
+automatically", a Play button (runs `tombi.exe --exe MAIN0.EXE --disc ... --window --viewer-arg --scale N ...` with the
+game's stderr in `tombi-port.log` next to the exe, shown in the window) and the exact command line. *Mods* and
+*Controls* tabs: see "Mods". Settings are saved in `tombi-port.json` next to the exe. From a checkout it runs
+`build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
+`tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
+
+## Mods (tools/port_mods.py)
+
+Every mod is a set of options of the port binary, assembled by the launcher (the *Mods* tab shows each one with its
+description; the list, labels and the arguments live in `tools/port_mods.py`). Frames: the title screen is up before
+vblank 1000 (`--pad-script 1000:start`), `initGameConfig` has run by 1100, the debug select is poked at 1250 and
+confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 0x8009C960 (include/tomba/game.h).
+
+| Mod | Port options | Notes |
+|---|---|---|
+| Skip intro logos/movies (default on) | nothing / `--play-movies` when off | the port skips them by default |
+| 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise) |
+| Area select | `--poke 900:1F8001B4:1 --poke 1250:8009C960:A:2 --poke 1250:8009C962:S:2 --pad-script 1000:start,1300:circle:3` | area/section pickers from `ROOM_COUNTS` (names from README); rooms of `DOOR_ROOMS` are not offered |
+| Start with N AP | `--poke 1100:8009C96C:N:4` | `GAME.playerAP` (drawHudAP) |
+| Start with N lives | `--poke 1100:8009C980:N:1` | `GAME.playerLives` (drawHudLives) |
+| Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
+| Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
+| Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
+| Custom keys | `--viewer-arg --keys --viewer-arg up=Up,cross=X,...` | *Controls* tab: one SDL key name per PS1 button |
+
+Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
+without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
+the SYSTEM overlay read at lba 176314) with and without the mods, and also with the port as committed before this work,
+so it is an environment/regression question of the base port, not of the mods (left open; see the report of this work).
+
+### Left to do
+
+- Run `tombi.exe` on real Windows (the KUSEG mirror and the viewer's pipes are untested outside wine; wine's reserved
+  low range breaks the NULL load-list scan, see "Status").
+- The *button prompts* mod (PlayStation / Xbox / keyboard glyphs): not done. Plan: a `--patch-tex FILE` option in
+  `port/shims/gpu.c` that re-applies a manifest of VRAM rects after every `LoadImage` overlapping them, replacement glyphs
+  drawn with Pillow into `port/assets/prompts/` (same 4-bpp size and palette-index count as the originals, rendered from
+  the current key mapping for "Keyboard"); the glyph rects have to be located first (the tutorial hints
+  `updateA00TutorialHint` / `a00TutorialHintJumpMessage` print MFNT text by button configuration; the HUD page entries of
+  `tools/ui_cluts.py` and the `UiSpriteDef` table of MAIN0 are where to look).
+- The stall at vblank ~443 noted above.
