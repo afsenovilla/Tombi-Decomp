@@ -41,6 +41,13 @@ IMPORT(BOOL, PeekNamedPipe, (HANDLE, void *, DWORD, DWORD *, DWORD *, DWORD *), 
 IMPORT(BOOL, CreateProcessA, (const char *, char *, void *, void *, BOOL, DWORD, void *, const char *, void *, void *), "_CreateProcessA@40");
 IMPORT(unsigned, timeBeginPeriod, (unsigned), "_timeBeginPeriod@4");
 IMPORT(unsigned, VirtualQuery, (const void *, void *, unsigned), "_VirtualQuery@12");
+IMPORT(void *, VirtualAllocEx, (HANDLE, void *, unsigned, DWORD, DWORD), "_VirtualAllocEx@20");
+IMPORT(BOOL, VirtualFree, (void *, unsigned, DWORD), "_VirtualFree@12");
+IMPORT(DWORD, ResumeThread, (HANDLE), "_ResumeThread@4");
+IMPORT(DWORD, WaitForSingleObject, (HANDLE, DWORD), "_WaitForSingleObject@8");
+IMPORT(BOOL, GetExitCodeProcess, (HANDLE, DWORD *), "_GetExitCodeProcess@8");
+IMPORT(DWORD, GetEnvironmentVariableA, (const char *, char *, DWORD), "_GetEnvironmentVariableA@12");
+IMPORT(BOOL, SetEnvironmentVariableA, (const char *, const char *), "_SetEnvironmentVariableA@8");
 
 #define INVALID_HANDLE ((HANDLE)-1)
 
@@ -196,14 +203,20 @@ int port_spawn(const char *path, char *const argv[], int out_fds[3]) {
 /* ------------------------------------------------------------------------------------------- PS1 memory */
 /* i386 CONTEXT offsets: Edi 0x9C Esi 0xA0 Ebx 0xA4 Edx 0xA8 Ecx 0xAC Eax 0xB0 Ebp 0xB4 Eip 0xB8 Esp 0xC4 */
 #define CTX(ctx, off) (*(unsigned long *)((char *)(ctx) + (off)))
+#define C_EDI 0x9C
+#define C_ESI 0xA0
+#define C_EBX 0xA4
 #define C_EDX 0xA8
+#define C_ECX 0xAC
 #define C_EAX 0xB0
+#define C_EBP 0xB4
 #define C_EIP 0xB8
 #define C_ESP 0xC4
 static unsigned char *scratch;        /* PAGE_EXECUTE_READWRITE */
 #define PAGE_READWRITE 4
 #define FILE_MAP_ALL_ACCESS 0xF001F
 int port_low_mem = -1;
+static int kuseg_child;   /* this process was started by relaunch_reserved below */
 void port_setup_memory(void) {
     HANDLE m = CreateFileMappingA(INVALID_HANDLE, 0, PAGE_READWRITE, 0, PSX_RAM_SIZE, 0);
     if (!m) port_fatal("CreateFileMapping failed (%lu)", GetLastError());
@@ -214,7 +227,23 @@ void port_setup_memory(void) {
     /* KUSEG mirror (the game masks some addresses with 0xFFFFFF, and walks NULL-based tables into it): the whole
        range when the loader left 0x10000..0x1FFFFF free, else every free 64 KB block of it (a block that is in
        use reads the host's data there, as the warning says; Wine keeps its own data in this range) */
-    if (MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0x10000, PSX_RAM_SIZE - 0x10000, (void *)0x00010000u) != (void *)0x00010000u) {
+    if (kuseg_child) {   /* the parent reserved the blocks in this process before its heap existed (see start) */
+        unsigned n = 0;
+        for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
+            unsigned long mbi[7] = { 0 };
+            VirtualQuery((void *)a, mbi, sizeof mbi);
+            if (mbi[1] == a && mbi[4] == 0x2000 /* MEM_RESERVE */ && mbi[3] == 0x10000 && VirtualFree((void *)a, 0, 0x8000 /* MEM_RELEASE */)) n++;
+        }
+        if (port_verbose) port_printf("[port] KUSEG range: %u blocks of 64 KB reserved by the parent process, released for the mirror\n", n);
+    }
+    if (port_kuseg_strict == 2) {   /* --no-kuseg: nothing mapped, every access faults into low_access and is logged */
+        port_printf("[port] --no-kuseg: the KUSEG mirror is not mapped; every access below 0x200000 is emulated and logged\n");
+        for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) VirtualAlloc((void *)a, 0x10000, 0x2000 /* MEM_RESERVE */, 0x01 /* PAGE_NOACCESS */);
+    } else if (port_kuseg_strict == 3) {   /* --fake-kuseg: what a block in use by Windows does to the game */
+        port_printf("[port] --fake-kuseg: private memory instead of the mirror (simulates blocks the host owns)\n");
+        for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) VirtualAlloc((void *)a, 0x10000, 0x3000, 0x04);
+    }
+    else if (MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0x10000, PSX_RAM_SIZE - 0x10000, (void *)0x00010000u) != (void *)0x00010000u) {
         unsigned mapped = 0, missing = 0;
         port_printf("[port] warning: KUSEG mirror 00010000-001FFFFF partly in use by Windows; blocks missing:");
         for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
@@ -224,13 +253,13 @@ void port_setup_memory(void) {
                 MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, a, 0x10000, (void *)a) == (void *)a) mapped += 0x10000;
             else { missing += 0x10000; port_printf(" %05x(%s)", a, mbi[4] == 0x10000 ? "free" : mbi[4] == 0x2000 ? "reserved" : "committed"); }
         }
-        port_printf("\n[port] %u KB mapped, %u KB missing: a game access to a missing block reads the host's own data there\n",
+        port_printf("\n[port] %u KB mapped, %u KB missing: a game access to a missing block reads and writes the host's own data there\n",
                     mapped >> 10, missing >> 10);
         if (port_kuseg_strict)
             port_fatal("--kuseg-strict: the KUSEG mirror could not be placed whole");
-        port_printf("[port] (the load lists are read through KSEG0 (fixes.txt, queueLoadList), so this is normally harmless; "
-                    "--kuseg-strict stops here)\n");
-    }
+        port_printf("[port] (the game draws through KUSEG pointers into 00090000-000CFFFF: missing blocks there corrupt the "
+                    "host and the picture; --kuseg-strict stops here)\n");
+    } else if (port_verbose) port_printf("[port] KUSEG mirror 00010000-001FFFFF mapped whole%s\n", kuseg_child ? " (relaunched)" : "");
     if (VirtualAlloc((void *)PSX_SPAD_BASE, PSX_SPAD_SIZE, 0x3000 /* MEM_COMMIT|MEM_RESERVE */, PAGE_READWRITE) != (void *)PSX_SPAD_BASE)
         port_fatal("cannot map the scratchpad at %08x (%lu)", PSX_SPAD_BASE, GetLastError());
     scratch = VirtualAlloc(0, 0x1000, 0x3000, 0x40 /* PAGE_EXECUTE_READWRITE */);
@@ -332,10 +361,11 @@ static int interpretable(u32p a) {
 }
 void *port_resolve_call(u32p addr, const char *name) {
     void *f = addr ? port_lookup(addr) : 0;
-    if (f) return f;
-    if (interpretable(addr)) { port_mips_pending = addr; return (void *)port_mips_entry; }
+    port_last_resolve_addr = addr; port_last_resolve_name = name;
+    if (f) return port_last_resolve_fn = f;
+    if (interpretable(addr)) { port_mips_pending = addr; return port_last_resolve_fn = (void *)port_mips_entry; }
     port_stub(name ? name : "?", addr);
-    return (void *)stub_ret0;
+    return port_last_resolve_fn = (void *)stub_ret0;
 }
 
 /* Memory accesses below 0x200000 that Windows cannot map: page 0 (the BIOS kernel area, read by the game through
@@ -383,7 +413,7 @@ static int low_access(void *ctx, unsigned long eip, unsigned long fault) {
     for (int j = 0; j < imm; j++) o[k++] = immp[j];
     unsigned long next = eip + i, rel = next - ((unsigned long)o + k + 5);
     o[k++] = 0xE9; o[k++] = rel; o[k++] = rel >> 8; o[k++] = rel >> 16; o[k++] = rel >> 24;
-    { static int n; if (n < 200 && port_verbose > 2) { n++; port_printf("[port] low access at %08lx -> %08lx: %02x%s len %d (frame %d)\n", eip, fault, op[0], nop == 2 ? "(0F)" : "", i, port_frame); } }
+    { static int n; if (port_kuseg_strict == 2 || (n < 200 && port_verbose > 2)) { n++; port_printf("[port] low access at %08lx -> %08lx: %02x%s len %d (frame %d)\n", eip, fault, op[0], nop == 2 ? "(0F)" : "", i, port_frame); } }
     CTX(ctx, C_EIP) = (unsigned long)o;
     return 1;
 }
@@ -432,14 +462,21 @@ static long WINAPI on_exception(void **ep) {
         return EXCEPTION_CONTINUE_EXECUTION;
     }
     unsigned long *sp = (unsigned long *)CTX(ctx, C_ESP);
-    port_printf("[port] eax=%08lx edx=%08lx; stack:", CTX(ctx, C_EAX), CTX(ctx, C_EDX));
-    for (int i = 0, n = 0; i < 256 && n < 16; i++)
-        if (sp[i] >= 0x10000000ul && sp[i] < 0x18000000ul) { port_printf(" %08lx", sp[i]); n++; }   /* image base 0x10000000 */
-    port_printf("\n");
-    { extern unsigned port_mips_cur_pc, port_mips_cur_entry;
-      if (port_mips_cur_pc) port_printf("[port] in the MIPS interpreter: pc %08x (function %08x)\n", port_mips_cur_pc, port_mips_cur_entry); }
-    port_fatal("access violation: eip=%08lx fault address=%08lx (%s, frame %d, [esp]=%08lx)", eip, fault,
-               rec[5] ? "write" : "read", port_frame, sp[0]);
+    {   /* stack scan: words inside the image (wherever the loader put it), with the nearest native function
+           (sys_common.c port_dump_stack); the symbols in the image are at <image base> + the offsets of
+           i686-w64-mingw32-nm tombi.exe - 0x10000000 */
+        extern char __ImageBase[] __asm__("___ImageBase");
+        unsigned long base = (unsigned long)__ImageBase, off; const char *nm = port_sym_near(eip, &off);
+        port_printf("[port] eax=%08lx edx=%08lx ecx=%08lx ebx=%08lx esi=%08lx edi=%08lx ebp=%08lx esp=%08lx (image base %08lx, thread %d)\n",
+                    CTX(ctx, C_EAX), CTX(ctx, C_EDX), CTX(ctx, C_ECX), CTX(ctx, C_EBX), CTX(ctx, C_ESI), CTX(ctx, C_EDI), CTX(ctx, C_EBP),
+                    (unsigned long)sp, base, port_thread_current());
+        if (nm) port_printf("[port] eip in %s+0x%lx\n", nm, off);
+        port_printf("[port] stack:");
+        port_dump_stack(sp, base, base + 0x01000000ul);
+    }
+    port_fatal("access violation: eip=%08lx fault address=%08lx (%s, frame %d, [esp]=%08lx)%s", eip, fault,
+               rec[5] == 8 ? "execute" : rec[5] ? "write" : "read", port_frame, sp[0],   /* ExceptionInformation[0] */
+               eip == fault ? ": a jump to a bogus address (a function pointer or return address read from memory)" : "");
 }
 
 /* gcc probes the stack of frames over 4 KB through this (Windows grows the stack one guard page at a time) */
@@ -475,12 +512,53 @@ static int split_args(char *s, char **argv, int max) {
     return argc;
 }
 
+/* The KUSEG mirror needs 0x10000..0x1FFFFF free, and Windows puts its own early allocations there (the process
+   parameters, the default heap, sometimes a thread stack): the game draws through KUSEG pointers (masked with
+   0xFFFFFF: the ordering tables and primitive buffers at 0x80090000-0x800CFFFF), so a block in use by Windows
+   means the game writes its packets over the heap and reads them back from the KSEG0 view (garbage picture, then
+   a crash into a wild pointer).  When the range is not free, the exe starts itself again suspended, reserves every
+   free 64 KB block of the range in the child before its loader runs (no heap yet), resumes it and waits; the child
+   (PORT_KUSEG_CHILD=1) releases the reservations in port_setup_memory and maps the mirror there. */
+static int kuseg_free(void) {
+    for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
+        unsigned long mbi[7] = { 0 };
+        VirtualQuery((void *)a, mbi, sizeof mbi);
+        if (mbi[4] != 0x10000 /* MEM_FREE */) return 0;
+    }
+    return 1;
+}
+static void relaunch_reserved(void) {
+    struct startupinfo si; struct procinfo pi;
+    for (unsigned i = 0; i < sizeof si; i++) ((char *)&si)[i] = 0;
+    si.cb = sizeof si; si.flags = 0x100 /* STARTF_USESTDHANDLES */;
+    si.in = fds[0] ? fds[0] : INVALID_HANDLE; si.out = fds[1] ? fds[1] : INVALID_HANDLE; si.err = fds[2] ? fds[2] : INVALID_HANDLE;
+    SetEnvironmentVariableA("PORT_KUSEG_CHILD", "1");
+    cmdline[0] = 0; cat(GetCommandLineA());
+    if (!CreateProcessA(0, cmdline, 0, 0, 1, 4 /* CREATE_SUSPENDED */, 0, 0, &si, &pi)) {
+        port_printf("[port] relaunch with the KUSEG range reserved failed (%lu): continuing in this process\n", GetLastError());
+        SetEnvironmentVariableA("PORT_KUSEG_CHILD", 0);
+        return;
+    }
+    unsigned n = 0;
+    for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000)
+        if (VirtualAllocEx(pi.process, (void *)a, 0x10000, 0x2000 /* MEM_RESERVE */, 0x01 /* PAGE_NOACCESS */) == (void *)a) n++;
+    if (port_verbose) port_printf("[port] KUSEG range 00010000-001FFFFF not free in this process: relaunched with %u of 31 blocks reserved (pid %lu)\n", n, pi.pid);
+    ResumeThread(pi.thread);
+    WaitForSingleObject(pi.process, (DWORD)-1);
+    DWORD code = 1;
+    GetExitCodeProcess(pi.process, &code);
+    port_exit((int)code);
+}
+
 __attribute__((used, noreturn)) void start(void) {
     fds[0] = GetStdHandle((DWORD)-10); fds[1] = GetStdHandle((DWORD)-11); fds[2] = GetStdHandle((DWORD)-12);
     if (fds[2] == INVALID_HANDLE) fds[2] = 0;
     const char *c = GetCommandLineA();
     int n = 0; while (c[n] && n < (int)sizeof cmd_copy - 1) { cmd_copy[n] = c[n]; n++; } cmd_copy[n] = 0;
     int argc = split_args(cmd_copy, argv_buf, 64);
+    for (int i = 1; i < argc; i++) if (argv_buf[i][0] == '-' && argv_buf[i][1] == 'v' && !argv_buf[i][2]) port_verbose++;
+    { char b[4]; kuseg_child = GetEnvironmentVariableA("PORT_KUSEG_CHILD", b, sizeof b) > 0; }
+    if (!kuseg_child && !kuseg_free()) relaunch_reserved();
     timeBeginPeriod(1);
     AddVectoredExceptionHandler(1, (void *)on_exception);
     port_exit(port_main(argc, argv_buf));

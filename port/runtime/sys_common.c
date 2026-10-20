@@ -60,6 +60,55 @@ void port_fatal(const char *f, ...) {
     port_exit(1);
 }
 
+/* ------------------------------------------------------------------------------------------- fault diagnostics */
+/* Nearest native function at or below a host address, from the tables gen_port.py generates (funcmap, ovlmap,
+   areamap, the hand-written extras: every native function the port knows by its retail address); the fault
+   handlers print it for each stack word that looks like a return address.  Sorted by native address on first use. */
+#define SYM_MAX 8192
+static struct { unsigned long a; const char *n; } syms[SYM_MAX];
+static int nsyms = -1;
+static void sym_add(void *fn, const char *n) { if (nsyms < SYM_MAX && fn) { syms[nsyms].a = (unsigned long)fn; syms[nsyms].n = n; nsyms++; } }
+static void sym_init(void) {
+    nsyms = 0;
+    for (int i = 0; i < port_funcmap_count; i++) sym_add(port_funcmap[i].fn, port_funcmap[i].name);
+    for (int i = 0; i < port_ovlmap_count; i++) sym_add(port_ovlmap[i].fn, port_ovlmap[i].name);
+    for (int i = 0; i < port_areamap_count; i++)   /* (no name in the table: the area overlay's) */
+        sym_add(port_areamap[i].fn, port_areamap[i].area < port_areas_count ? port_areas[port_areamap[i].area].name : "area");
+    for (const PortFunc *e = port_extra_funcs; e->fn; e++) sym_add(e->fn, e->name);
+    for (int i = 0; i < port_libmap_count; i++) sym_add(port_libmap[i].fn, port_libmap[i].name);   /* shims too */
+    for (int gap = nsyms / 2; gap > 0; gap /= 2)   /* shell sort */
+        for (int i = gap; i < nsyms; i++) {
+            unsigned long a = syms[i].a; const char *n = syms[i].n; int j = i;
+            while (j >= gap && syms[j - gap].a > a) { syms[j] = syms[j - gap]; j -= gap; }
+            syms[j].a = a; syms[j].n = n;
+        }
+}
+const char *port_sym_near(unsigned long a, unsigned long *off) {
+    if (nsyms < 0) sym_init();
+    int lo = 0, hi = nsyms - 1, best = -1;
+    while (lo <= hi) { int m = (lo + hi) / 2; if (syms[m].a <= a) { best = m; lo = m + 1; } else hi = m - 1; }
+    if (best < 0 || a - syms[best].a > 0x4000) return 0;   /* (runtime functions are in no table: a far offset is one of those) */
+    if (off) *off = a - syms[best].a;
+    return syms[best].n;
+}
+/* the last call thunk resolved (thunks.S: a call to a function without native code asks port_resolve_call):
+   when EIP is a bogus address the resolver's answer is the first suspect */
+u32p port_last_resolve_addr; const char *port_last_resolve_name; void *port_last_resolve_fn;
+void port_dump_stack(const unsigned long *sp, unsigned long lo, unsigned long hi) {
+    for (int i = 0, n = 0; i < 256 && n < 16; i++)
+        if (sp[i] >= lo && sp[i] < hi) {
+            unsigned long off; const char *nm = port_sym_near(sp[i], &off);
+            if (nm) port_printf(" %08lx(%s+0x%lx)", sp[i], nm, off); else port_printf(" %08lx", sp[i]);
+            n++;
+        }
+    port_printf("\n");
+    if (port_last_resolve_addr)
+        port_printf("[port] last call thunk resolved: %s (%08x) -> %p\n", port_last_resolve_name ? port_last_resolve_name : "?",
+                    port_last_resolve_addr, port_last_resolve_fn);
+    { extern unsigned port_mips_cur_pc, port_mips_cur_entry;
+      if (port_mips_cur_pc) port_printf("[port] in the MIPS interpreter: pc %08x (function %08x)\n", port_mips_cur_pc, port_mips_cur_entry); }
+}
+
 /* ------------------------------------------------------------------------------------------- 64-bit helpers (no libgcc) */
 static unsigned long long udivmod(unsigned long long n, unsigned long long d, unsigned long long *rem) {
     unsigned long long q = 0, r = 0;

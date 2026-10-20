@@ -238,13 +238,14 @@ static int interpretable(u32p a) {
 }
 void *port_resolve_call(u32p addr, const char *name) {
     void *f = addr ? port_lookup(addr) : 0;
-    if (f) return f;
+    port_last_resolve_addr = addr; port_last_resolve_name = name;
+    if (f) return port_last_resolve_fn = f;
     if (interpretable(addr)) {            /* no C for it: run the retail machine code */
         port_mips_pending = addr;
-        return (void *)port_mips_entry;
+        return port_last_resolve_fn = (void *)port_mips_entry;
     }
     port_stub(name ? name : "?", addr);
-    return (void *)stub_ret0;
+    return port_last_resolve_fn = (void *)stub_ret0;
 }
 
 /* SIGSEGV: execution reached a retail address (function pointer from retail data or from a table the game
@@ -276,16 +277,12 @@ static void on_segv(int sig, void *info, void *uc) {
         return;
     }
     unsigned long ret = *(unsigned long *)UC_ESP(uc);
-    {   /* stack scan: words that look like native return addresses (resolve with addr2line -f -e tombi) */
+    {   /* stack scan: words that look like native return addresses, with the nearest native function
+           (sys_common.c port_dump_stack; exact lines: addr2line -f -e tombi) */
         extern char __executable_start[], etext[];
-        unsigned long *sp = (unsigned long *)UC_ESP(uc);
         port_printf("[port] eax=%08lx edx=%08lx; stack:", UC_EAX(uc), UC_EDX(uc));
-        for (int i = 0, n = 0; i < 256 && n < 16; i++)
-            if (sp[i] >= (unsigned long)__executable_start && sp[i] < (unsigned long)etext) { port_printf(" %08lx", sp[i]); n++; }
-        port_printf("\n");
+        port_dump_stack((const unsigned long *)UC_ESP(uc), (unsigned long)__executable_start, (unsigned long)etext);
     }
-    { extern unsigned port_mips_cur_pc, port_mips_cur_entry;
-      if (port_mips_cur_pc) port_printf("[port] in the MIPS interpreter: pc %08x (function %08x)\n", port_mips_cur_pc, port_mips_cur_entry); }
     port_fatal("signal %d: eip=%08lx fault address=%08lx (frame %d, [esp]=%08lx)", sig, eip, fault, port_frame, ret);
 }
 
