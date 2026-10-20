@@ -1,5 +1,10 @@
 // FUNC 800ef538 1388 D0SPSUB
-// wip: 10 differing insns (case -6 x/y update scheduling); do{}while(0) around switch(o->wait) fixes reg alloc
+// wip: score 16, 10 differing insns, all in case -6 (x/y update): the game computes (o->x + ow) + o->ba and
+// ((o->y + oh) + 0x30) + o->bc with x+ow FIRST in the addu (ours: ba + xow), loads x right after `sh ba` and y right
+// after `sh bc` (ours hoists both loads), and allocates ow=a0 / new h=a1 / oh=a2. Tried (no gain): every statement
+// order in the case, int/short/unsigned temps, accumulator forms (`x += ow; x += ba` gives xow first but lh/hoisted),
+// volatile reads, (short)/(unsigned short) casts, ba/bc as unsigned short, `o->x += ow + o->ba` (18).
+// do{}while(0) around switch(o->wait) fixes reg alloc
 // note: game evaluates (o->x + ow) + o->ba and ((o->y + oh) + 0x30) + o->bc (that form gives the right insns,
 // score 26) but then local-alloc gives ow a1 / new-h a0 instead of a0 / a1; `o->x += ow + o->ba` gets ow=a0 (score 18)
 typedef struct {

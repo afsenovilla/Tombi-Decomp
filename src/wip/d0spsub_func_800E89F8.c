@@ -1,5 +1,10 @@
 // FUNC 800e89f8 4280 D0SPSUB
-// wip: 11 differing insns (case 0x84 tail sched, base+index addu operand order x4)
+// wip: score 22 (was 31): case 0x84 tail = 8 insns (game: lhu[GAME.b30] in v1, lhu D_8007A024+14 in v0, sh wc4,
+// li 1, sb GCD, sh w08; ours allocates v0/v1/a1 and puts li/sb before both sh), plus base+index addu operand
+// order at the 3 `t += D_8009D2B0[3]` sites (game addu base,idx) and the P334 + [9] addu (game base first;
+// (int)P334 + ((int *)P334)[9] made it worse). In case 0x84 the game keeps `sw D_8009C984` before the
+// D_8007A024 loads: an in-struct store (`D_8009C984_a[0] = D_8009C984 | 0x40`) and the order |=, w08, GCD=1, wc4
+// got it; a temp for w08 or any other statement order is worse (54+).
 typedef struct { unsigned short a, b; } Pal;
 typedef struct {
     unsigned char b0, p1, b2, b3;
@@ -58,7 +63,7 @@ extern unsigned char D_8009D090;
 extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009D089, D_8009D08A, D_8009D08B, D_8009D08C, D_8009D08D, D_8009D08E, D_8009D08F;
 extern unsigned char D_8009CD98, D_8009CD99, D_8009CD9A, D_8009CD9C, D_8009CD9D, D_8009CD9E, D_8009CD9F;
-extern int D_8009C984;
+extern int D_8009C984, D_8009C984_a[];
 extern unsigned char D_800B146C, D_800B146D, D_800B146E, D_800B1470, D_800B1471, D_800B1472;
 extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern unsigned char D_8009CDBA;
@@ -246,10 +251,10 @@ int func_800E89F8(int item)
             D_8009D2B0[3] = 3;
             D_8009CD9D = 0x3C;
             D_8009CD9E = 0x3C;
-            D_8009C984 |= 0x40;
-            PLAYER.wc4 = D_8007A024[D_8009D2B0[3]].b;
+            D_8009C984_a[0] = D_8009C984 | 0x40;
             PLAYER.w08 = D_8007A024[GAME.b30].a;
             GCD.bcffb = 1;
+            PLAYER.wc4 = D_8007A024[D_8009D2B0[3]].b;
             playSFX(0x19);
             return 1;
         }
