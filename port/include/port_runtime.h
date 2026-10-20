@@ -26,6 +26,13 @@ const char *port_sym_near(unsigned long a, unsigned long *off);
 void port_dump_stack(const unsigned long *sp, unsigned long lo, unsigned long hi);
 extern u32p port_last_resolve_addr; extern const char *port_last_resolve_name; extern void *port_last_resolve_fn;
 void port_note_resolve(u32p addr, const char *name, void *fn);
+/* accesses below 0x200000 the host cannot map (sys_common.c): PORT_LOW_JUMP = continue at *neweip (a rewritten copy
+   of the instruction in the executable `scratch` page), PORT_LOW_REGS = a string instruction: the caller moves
+   ESI/EDI below 0x200000 to KSEG0 and restarts it; 0 = not handled */
+#define PORT_LOW_JUMP 1
+#define PORT_LOW_REGS 2
+int port_low_emulate(unsigned long eip, unsigned long fault, unsigned char *scratch, unsigned long *neweip);
+void port_low_report(void);
 /* asm-only MAIN0 functions translated by hand (port/runtime/main0_handwritten.c), {0} terminated */
 extern const PortFunc port_extra_funcs[];
 /* overlay set (SYSTEM overlays at 0x800E8028): resident while the header word at 0x800E8028 equals id */

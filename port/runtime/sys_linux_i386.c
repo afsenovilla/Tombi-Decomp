@@ -265,6 +265,9 @@ __asm__(".text\n.globl port_sigreturn\nport_sigreturn:\n\tmovl $173, %eax\n\tint
 #define UC_EAX(uc) (((unsigned long *)(uc))[5 + 11])
 #define UC_EDX(uc) (((unsigned long *)(uc))[5 + 9])
 #define UC_CR2(uc) (((unsigned long *)(uc))[5 + 21])
+#define UC_EDI(uc) (((unsigned long *)(uc))[5 + 4])
+#define UC_ESI(uc) (((unsigned long *)(uc))[5 + 5])
+static unsigned char *low_scratch;   /* executable page for port_low_emulate (port_setup_memory) */
 
 static void on_segv(int sig, void *info, void *uc) {
     unsigned long eip = UC_EIP(uc);
@@ -280,6 +283,16 @@ static void on_segv(int sig, void *info, void *uc) {
         port_stub("<retail address without native code>", (u32p)eip);
         UC_EIP(uc) = (unsigned long)stub_ret0;
         return;
+    }
+    if (eip != fault && fault < 0x00200000ul && low_scratch) {   /* page 0 or an unmapped KUSEG mirror (--no-kuseg) */
+        unsigned long neweip;
+        int r = port_low_emulate(eip, fault, low_scratch, &neweip);
+        if (r == PORT_LOW_JUMP) { UC_EIP(uc) = neweip; return; }
+        if (r == PORT_LOW_REGS) {
+            if (UC_ESI(uc) < 0x00200000ul) UC_ESI(uc) |= 0x80000000ul;
+            if (UC_EDI(uc) < 0x00200000ul) UC_EDI(uc) |= 0x80000000ul;
+            return;
+        }
     }
     unsigned long ret = *(unsigned long *)UC_ESP(uc);
     {   /* stack scan: words that look like native return addresses, with the nearest native function
@@ -338,7 +351,12 @@ void port_setup_memory(void) {
     if (fd < 0) port_fatal("memfd_create failed (%ld)", fd);
     sys3(93 /* ftruncate */, fd, PSX_RAM_SIZE, 0);
     map_shared((int)fd, PSX_RAM_BASE, PSX_RAM_SIZE, 0);
-    map_shared((int)fd, 0x00010000u, PSX_RAM_SIZE - 0x10000u, 0x10000u);
+    if (port_kuseg_strict == 2)   /* --no-kuseg: no mirror, every masked access faults into port_low_emulate and is tallied */
+        port_printf("[port] --no-kuseg: the KUSEG mirror 0x10000-0x1FFFFF is not mapped; accesses there are emulated and counted\n");
+    else
+        map_shared((int)fd, 0x00010000u, PSX_RAM_SIZE - 0x10000u, 0x10000u);
+    low_scratch = (unsigned char *)sys6(SYS_mmap2, 0, 0x1000, 7 /* RWX */, 0x22 /* MAP_PRIVATE|MAP_ANONYMOUS */, -1, 0);
+    if ((unsigned long)low_scratch > 0xFFFFF000ul) port_fatal("cannot map the instruction scratch page");
     {
         long r = sys6(SYS_mmap2, 0, 0x10000u, 3, 0x01 | 0x100000, fd, 0);
         if (r != 0) r = sys6(SYS_mmap2, 0x1000u, 0xF000u, 3, 0x01 | 0x100000, fd, 1);

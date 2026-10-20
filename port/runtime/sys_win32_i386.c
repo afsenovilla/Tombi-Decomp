@@ -374,53 +374,19 @@ void *port_resolve_call(u32p addr, const char *name) {
 }
 
 /* Memory accesses below 0x200000 that Windows cannot map: page 0 (the BIOS kernel area, read by the game through
-   NULL pointers; see port_setup_memory in sys_linux_i386.c) and, when the KUSEG mirror could not be placed, the
-   masked RAM addresses 0x10000..0x1FFFFF.  The faulting instruction is copied into an executable scratch page with
-   its memory operand rewritten to the absolute KSEG0 address of the same byte, followed by a jump back, and
-   execution continues there (slow: one exception per access, so only the stray accesses go this way).  Only ModRM-addressed instructions (the ones gcc
-   emits for loads and stores) are handled. */
+   NULL pointers) and, when the KUSEG mirror could not be placed, the masked RAM addresses 0x10000..0x1FFFFF
+   (port_low_emulate, sys_common.c; the game's own masks are rewritten to KSEG0 by gen_port.py, so this is a
+   fallback, tallied by port_low_report) */
 static int low_access(void *ctx, unsigned long eip, unsigned long fault) {
-    const unsigned char *p = (const unsigned char *)eip;
-    int i = 0, opsize16 = 0;
-    unsigned char pre[4]; int npre = 0;
-    while (i < 4 && (p[i] == 0x66 || p[i] == 0xF2 || p[i] == 0xF3 || p[i] == 0x2E || p[i] == 0x3E || p[i] == 0x26 || p[i] == 0x36 || p[i] == 0x64 || p[i] == 0x65)) {
-        if (p[i] == 0x66) opsize16 = 1;
-        pre[npre++] = p[i++];
+    unsigned long neweip;
+    int r = port_low_emulate(eip, fault, scratch, &neweip);
+    if (r == PORT_LOW_JUMP) { CTX(ctx, C_EIP) = neweip; return 1; }
+    if (r == PORT_LOW_REGS) {
+        if (CTX(ctx, C_ESI) < 0x00200000ul) CTX(ctx, C_ESI) |= 0x80000000ul;
+        if (CTX(ctx, C_EDI) < 0x00200000ul) CTX(ctx, C_EDI) |= 0x80000000ul;
+        return 1;
     }
-    unsigned char op[2]; int nop = 1;
-    op[0] = p[i++];
-    if (op[0] == 0x0F) { op[1] = p[i++]; nop = 2; }
-    if (op[0] >= 0xA4 && op[0] <= 0xAF && nop == 1) return 0;            /* string instructions: no ModRM */
-    unsigned char modrm = p[i++];
-    int mod = modrm >> 6, reg = (modrm >> 3) & 7, rm = modrm & 7;
-    if (mod == 3) return 0;
-    if (rm == 4) i++;                                                     /* SIB */
-    if (mod == 1) i += 1; else if (mod == 2) i += 4;
-    else if (mod == 0 && rm == 5) i += 4;
-    else if (mod == 0 && rm == 4 && (p[i - 1] & 7) == 5) i += 4;
-    int imm = 0;
-    if (nop == 1) {
-        switch (op[0]) {
-        case 0x80: case 0x82: case 0x83: case 0xC0: case 0xC1: case 0xC6: case 0x6B: imm = 1; break;
-        case 0x81: case 0x69: case 0xC7: imm = opsize16 ? 2 : 4; break;
-        case 0xF6: imm = reg <= 1 ? 1 : 0; break;
-        case 0xF7: imm = reg <= 1 ? (opsize16 ? 2 : 4) : 0; break;
-        }
-    } else if (op[1] == 0xBA || op[1] == 0xA4 || op[1] == 0xAC || op[1] == 0xC2 || (op[1] >= 0x70 && op[1] <= 0x73)) imm = 1;
-    const unsigned char *immp = p + i;
-    i += imm;
-    unsigned long target = 0x80000000ul + fault;   /* the KSEG0 view of the same byte (page 0 = the kernel area) */
-    unsigned char *o = scratch; int k = 0;
-    for (int j = 0; j < npre; j++) o[k++] = pre[j];
-    for (int j = 0; j < nop; j++) o[k++] = op[j];
-    o[k++] = (unsigned char)((reg << 3) | 5);                             /* mod 00, rm 101: [disp32] */
-    o[k++] = target; o[k++] = target >> 8; o[k++] = target >> 16; o[k++] = target >> 24;
-    for (int j = 0; j < imm; j++) o[k++] = immp[j];
-    unsigned long next = eip + i, rel = next - ((unsigned long)o + k + 5);
-    o[k++] = 0xE9; o[k++] = rel; o[k++] = rel >> 8; o[k++] = rel >> 16; o[k++] = rel >> 24;
-    { static int n; if (port_kuseg_strict == 2 || (n < 200 && port_verbose > 2)) { n++; port_printf("[port] low access at %08lx -> %08lx: %02x%s len %d (frame %d)\n", eip, fault, op[0], nop == 2 ? "(0F)" : "", i, port_frame); } }
-    CTX(ctx, C_EIP) = (unsigned long)o;
-    return 1;
+    return 0;
 }
 
 /* Vectored exception handler.  EXCEPTION_POINTERS = { EXCEPTION_RECORD *, CONTEXT * }; i386 CONTEXT offsets:

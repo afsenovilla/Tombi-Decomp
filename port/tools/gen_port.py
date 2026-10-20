@@ -122,6 +122,28 @@ def retail_definition(line, retail):
     return "%s %s port_copy_%s%s =%s" % (ext, decl.strip(), n, dims, line[m.end():])
 
 
+KUSEG_ASSIGN_RE = re.compile(r"^(\s*[^=;]+?=\s*)(.+?)\s*&\s*(0x(?:00)?[fF]{6})\s*;\s*$")
+KUSEG_LINK_STORE_RE = re.compile(r"^(\s*\*[^=;]*?=\s*)\(\s*(unsigned long|u_long|u32)\s*\)\s*(\w+)\s*;\s*$")
+KUSEG_CAST_RE = re.compile(r"\(\(\s*\(\s*(u_long|unsigned long|unsigned int|u32|int|s32)\s*\)\s*(\w+)\s*\)\s*&\s*(0x(?:00)?[fF]{6})\s*\)")
+def port_kuseg_mask(line):
+    """The game keeps some RAM pointers masked with 0xFFFFFF (KUSEG: the primitive buffer pointer NEXT_PRIM /
+    D_1f800164 computed from LOAD_BUFFER_ALT, compactOrderingTable's `hole`) and dereferences them.  The port maps
+    the KUSEG mirror only when the host leaves 0x10000-0x1FFFFF free (Windows often does not: a block in use by the
+    loader meant the game drew its packets over the host's heap), so for the port the mask is followed by
+    `| 0x80000000`: the same byte through the KSEG0 view, which is always mapped.  Only pointer values are
+    rewritten: an assignment whose right-hand side names LOAD_BUFFER_ALT, and a masked pointer-to-integer cast
+    `(((u_long)p) & 0xFFFFFF)`; a masked integer (`(*(int *)&p->b04 & 0xffffff) == 0x23001`, SPU voice masks)
+    stays as it is."""
+    m = KUSEG_LINK_STORE_RE.match(line)
+    if m:   # `*(unsigned long *)otz = (unsigned long)p;`: an ordering-table link; a KSEG0 pointer stored whole
+            # would put 0x80 in the tag's length byte (a KUSEG pointer had 0 there), so store the 24-bit link
+        return "%s((%s)%s & 0xFFFFFF); /* PORT: 24-bit link */" % (m.group(1), m.group(2), m.group(3))
+    m = KUSEG_ASSIGN_RE.match(line)
+    if m and "LOAD_BUFFER_ALT" in m.group(2):
+        return "%s((%s) & %s) | 0x80000000u; /* PORT: KSEG0 instead of KUSEG */" % (m.group(1), m.group(2), m.group(3))
+    return KUSEG_CAST_RE.sub(r"((((\1)\2) & \3) | 0x80000000u /* PORT: KSEG0 */)", line)
+
+
 def filter_src(text, dropped=None, retail=()):
     """Make matching-oriented C compile natively without changing what it does.  Names of functions whose body is
     top-level MIPS asm are appended to `dropped` (they need a C version in port/shims/).  `retail` names data that
@@ -149,6 +171,7 @@ def filter_src(text, dropped=None, retail=()):
         # binds the name to the retail address (the retail image is the one copy the game reads and writes)
         line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:D|DAT|PTR|PTR_DAT)_[0-9A-Fa-f]{8}\s*(?:\[[^\]]*\]\s*)*=)", "", line)
         line = retail_definition(line, retail)
+        line = port_kuseg_mask(line)
         # old-gcc lvalue cast `(T *)x = v;`
         line = re.sub(r"^(\s*)\(\s*(\w+\s*\*+)\s*\)\s*(\w+)\s*=(?!=)", r"\1*(\2 *)&\3 =", line)
         if pend is not None:

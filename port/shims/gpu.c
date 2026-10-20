@@ -287,8 +287,9 @@ static int gp0(const u32 *p, int n) {
         return n;
     }
     if (cmd >= 0xC0 && cmd < 0xE0) return n;                 /* VRAM -> CPU: nothing to do */
-    if (unknown_cmds++ < 20) port_printf("[gpu] unknown GP0 command %02x\n", cmd);
-    return 0;
+    if (cmd >= 0xE7 || (cmd >= 0x03 && cmd < 0x1F)) return 1; /* E7-FF, 03-1E: the GPU ignores them (one word) */
+    if (unknown_cmds++ < 20) port_printf("[gpu] unknown GP0 command %02x (frame %d)\n", cmd, port_frame);
+    return 0;                                                 /* the rest of the packet is dropped, no state is touched */
 }
 
 static void packet(const u32 *p, int n) {

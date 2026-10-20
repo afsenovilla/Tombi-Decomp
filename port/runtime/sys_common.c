@@ -148,3 +148,83 @@ long long __moddi3(long long a, long long b) {
     return a < 0 ? -(long long)r : (long long)r;
 }
 
+
+/* ------------------------------------------------------------------------------------------- low (KUSEG) accesses
+   An access below 0x200000 that the host cannot serve: page 0 (the BIOS kernel area, read through NULL pointers) and,
+   when the KUSEG mirror at 0x10000 is not mapped (Windows: a 64 KB block in use by the host; --no-kuseg), a RAM address
+   masked with 0xFFFFFF.  The port rewrites the game's masks to KSEG0 (gen_port.py port_kuseg_mask, shims/gpu.c), so
+   this path is for what is left: the faulting instruction is copied into an executable scratch page with its memory
+   operand replaced by the absolute KSEG0 address of the same byte, followed by a jump back (one exception per access).
+   Every ModRM-addressed form (any base/index/SIB/displacement, 8/16/32-bit, any prefix) is covered this way; a
+   string instruction (movs/stos/lods/cmps/scas, with or without rep) is restarted with ESI/EDI moved to KSEG0
+   (PORT_LOW_REGS).  Each site is tallied for port_low_report. */
+#define LOW_SITES 160
+static struct { unsigned long eip; unsigned long n; unsigned long first; } low_sites[LOW_SITES];
+static int low_nsites; static unsigned long low_total, low_other;
+static void low_tally(unsigned long eip, unsigned long fault, int op, int len) {
+    int i;
+    low_total++;
+    for (i = 0; i < low_nsites; i++) if (low_sites[i].eip == eip) break;
+    if (i == low_nsites && low_nsites < LOW_SITES) { low_sites[low_nsites++].eip = eip; low_sites[i].first = fault; }
+    if (i < LOW_SITES) low_sites[i].n++; else low_other++;
+    if (i < LOW_SITES && (low_sites[i].n <= 3 || (port_kuseg_strict == 2 && low_sites[i].n <= 20) || port_verbose > 2)) {
+        unsigned long off; const char *nm = port_sym_near(eip, &off);
+        port_printf("[port] low access at %08lx (%s+0x%lx) -> %08lx: op %02x len %d (frame %d)\n", eip, nm ? nm : "?", nm ? off : 0, fault, op, len, port_frame);
+    }
+}
+void port_low_report(void) {
+    if (!low_total) { if (port_kuseg_strict == 2 || port_verbose) port_printf("[port] 0 emulated accesses below 0x200000\n"); return; }
+    port_printf("[port] %lu emulated accesses below 0x200000 (page 0 / unmapped KUSEG), %d sites%s:\n", low_total, low_nsites, low_other ? " (+more)" : "");
+    for (int i = 0; i < low_nsites; i++) {
+        unsigned long off; const char *nm = port_sym_near(low_sites[i].eip, &off);
+        port_printf("  %10lu  %08lx %s+0x%lx (first address %08lx)\n", low_sites[i].n, low_sites[i].eip, nm ? nm : "?", nm ? off : 0, low_sites[i].first);
+    }
+}
+int port_low_emulate(unsigned long eip, unsigned long fault, unsigned char *scratch, unsigned long *neweip) {
+    const unsigned char *p = (const unsigned char *)eip;
+    int i = 0, opsize16 = 0;
+    unsigned char pre[4]; int npre = 0;
+    while (i < 4 && (p[i] == 0x66 || p[i] == 0xF0 || p[i] == 0xF2 || p[i] == 0xF3 || p[i] == 0x2E || p[i] == 0x3E || p[i] == 0x26 || p[i] == 0x36 || p[i] == 0x64 || p[i] == 0x65)) {
+        if (p[i] == 0x66) opsize16 = 1;
+        pre[npre++] = p[i++];
+    }
+    unsigned char op[2]; int nop = 1;
+    op[0] = p[i++];
+    if (op[0] == 0x0F) { op[1] = p[i++]; nop = 2; }
+    if (nop == 1 && op[0] >= 0xA4 && op[0] <= 0xAF && op[0] != 0xA8 && op[0] != 0xA9) {   /* string instructions: ESI/EDI implicit */
+        low_tally(eip, fault, op[0], i);
+        return PORT_LOW_REGS;
+    }
+    if (nop == 1 && (op[0] >= 0xA0 && op[0] <= 0xA3)) return 0;         /* mov moffs: an absolute address, never low */
+    unsigned char modrm = p[i++];
+    int mod = modrm >> 6, reg = (modrm >> 3) & 7, rm = modrm & 7;
+    if (mod == 3) return 0;
+    if (rm == 4) i++;                                                     /* SIB */
+    if (mod == 1) i += 1; else if (mod == 2) i += 4;
+    else if (mod == 0 && rm == 5) i += 4;
+    else if (mod == 0 && rm == 4 && (p[i - 1] & 7) == 5) i += 4;
+    int imm = 0;
+    if (nop == 1) {
+        switch (op[0]) {
+        case 0x80: case 0x82: case 0x83: case 0xC0: case 0xC1: case 0xC6: case 0x6B: imm = 1; break;
+        case 0x81: case 0x69: case 0xC7: imm = opsize16 ? 2 : 4; break;
+        case 0xF6: imm = reg <= 1 ? 1 : 0; break;
+        case 0xF7: imm = reg <= 1 ? (opsize16 ? 2 : 4) : 0; break;
+        case 0x8D: return 0;                                              /* lea does not access memory */
+        }
+    } else if (op[1] == 0xBA || op[1] == 0xA4 || op[1] == 0xAC || op[1] == 0xC2 || (op[1] >= 0x70 && op[1] <= 0x73)) imm = 1;
+    const unsigned char *immp = p + i;
+    i += imm;
+    unsigned long target = 0x80000000ul + fault;   /* the KSEG0 view of the same byte (page 0 = the kernel area) */
+    unsigned char *o = scratch; int k = 0;
+    for (int j = 0; j < npre; j++) o[k++] = pre[j];
+    for (int j = 0; j < nop; j++) o[k++] = op[j];
+    o[k++] = (unsigned char)((reg << 3) | 5);                             /* mod 00, rm 101: [disp32] */
+    o[k++] = target; o[k++] = target >> 8; o[k++] = target >> 16; o[k++] = target >> 24;
+    for (int j = 0; j < imm; j++) o[k++] = immp[j];
+    unsigned long next = eip + i, rel = next - ((unsigned long)o + k + 5);
+    o[k++] = 0xE9; o[k++] = rel; o[k++] = rel >> 8; o[k++] = rel >> 16; o[k++] = rel >> 24;
+    low_tally(eip, fault, op[nop - 1], i);
+    *neweip = (unsigned long)o;
+    return PORT_LOW_JUMP;
+}
