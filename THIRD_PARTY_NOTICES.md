@@ -24,3 +24,9 @@ MIT licensed (Python/PyQt6 asset viewer for Tomba!/Tombi!). Used here as a refer
 ## mkpsxiso / dumpsxiso — https://github.com/Lameguy64/mkpsxiso
 GPL-2.0. Not stored in the repo: `.github/workflows/text-exe.yml` downloads the v2.30 Windows release and bundles
 `mkpsxiso.exe` and `dumpsxiso.exe`, unmodified, inside `dist/windows/tombi-text.exe` (used by its "Generar ISO"). Source and license at the link above.
+
+## SDL2 — https://github.com/libsdl-org/SDL
+zlib licence. Not stored in the repo: `.github/workflows/port-exe.yml` downloads the `SDL2-devel-2.30.x-mingw` release
+and links `port/tools/view/tombi_view.c` against it; `SDL2.dll`, unmodified, is bundled inside `dist/windows/tombi-port.exe`
+(the native port's launcher, docs/PORT.md) next to our `tombi.exe` / `tombi-view.exe`. Its licence text travels with
+the artifact as `SDL2-LICENSE.txt`. No game data is bundled: the player supplies their own disc image.
