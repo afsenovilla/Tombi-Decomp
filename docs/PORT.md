@@ -245,7 +245,7 @@ Rules:
 | Pointers stored in 32-bit fields (structs, tables in retail data, `int` casts) | pervasive | **Phase 1 (now): a 32-bit host** (i386 Linux/Windows, armeabi-v7a Android), so pointers are 32 bits wide as on the PS1. **Phase 2: 64-bit.** Keep all game memory in a 4 GB arena at a fixed base and replace pointer fields with 32-bit offsets (`PSXPTR(T)` macros in the headers, as PSY-Z does with `OT_TYPE`), or build with `-mx32` / an ILP32 ABI where available. Android Play requires arm64, so phase 2 is needed for the store, not for sideloading. |
 | Hard-coded RAM addresses (`0x80xxxxxx` literals) | 4998 literals (0x8013: 1582, 0x8001: 832, 0x8012: 463, 0x8011: 384 ...); the 1032 `0x803Cxxxx` are constants, not addresses | RAM is mapped at its PS1 address (`MAP_FIXED`), so the literals stay valid. This is free on 32-bit Linux. On Windows use `VirtualAlloc` at 0x80000000 with `/LARGEADDRESSAWARE`. On Android, mmap at a fixed address is allowed but can collide; reserve early in `JNI_OnLoad`. |
 | Scratchpad 0x1F800000 (`SPAD`, `TASK_C`, ...) | 913 literals plus named externs | Mapped at its address (16 KB including the I/O page, which is plain memory). |
-| KUSEG / KSEG1 aliases (`ptr & 0xFFFFFF`, OT links) | e.g. `compactOrderingTable` | The same RAM object is mapped three times (memfd). Addresses below 0x10000 (BIOS area) are impossible, which is why `initTasks` reads the TCB table through `port_bios_tcb_table()` (fixes.txt). |
+| KUSEG / KSEG1 aliases (`ptr & 0xFFFFFF`, OT links) | e.g. `compactOrderingTable` | `gen_port.py` rewrites the game's KUSEG pointer masks to the KSEG0 view (`port_kuseg_mask`, see "Windows build": the mirror at 0x10000 is only a fallback). The same RAM object is mapped three times (memfd). Addresses below 0x10000 (BIOS area) are impossible, which is why `initTasks` reads the TCB table through `port_bios_tcb_table()` (fixes.txt). |
 | Struct layout: `long long` / `double` alignment differs (i386 aligns 8-byte types to 4 inside structs, MIPS to 8) | rare | Audit with `STATIC_ASSERT_SIZEOF` on the shared structs (TObj and others) in the port build. |
 | Semantics of the original compiler | everywhere | `-funsigned-char -fwrapv -fno-strict-aliasing -fno-delete-null-pointer-checks -O1`. Division by zero is trapped and emulated. |
 | **Register-carried arguments**: a call passes fewer arguments than the callee reads, relying on `$a0-$a3` still holding a value | `arity_check.py`: 90 suspicious short calls in 60 files (some false positives, e.g. local names reused) | Fix each in `port/fixes.txt` (already done: `initLighting`→`applyLighting(o)`, `startTask(i, fn)`). This is the most important correctness audit; also check the opposite (callee declares fewer parameters than callers pass, like `startTask`). |
@@ -755,6 +755,30 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   are emulated in the exception handler by copying the instruction into an executable scratch page with its memory
   operand rewritten to the KSEG0 address of the same byte (one exception per access, so only the stray NULL-pointer
   reads and the unmapped KUSEG blocks go this way).
+- **The KUSEG mirror is not load-bearing any more.** On a real Windows 10 machine the relaunch still left blocks of
+  0x10000-0x1FFFFF in use (the loader, a DLL or security software had them before `VirtualAllocEx` ran) and the game
+  died in the title video exactly like `--fake-kuseg` under Wine: the video stuttered (one exception per packet word
+  written through the unmapped blocks), the ordering table held a link `0x80d6a8a8` and `DrawOTag` crashed at frame
+  758 after `[gpu] unknown GP0 command e8` (garbage packets). The fix is at generation time, `gen_port.py
+  port_kuseg_mask` (in `filter_src`, so `src/` is untouched): the game keeps its primitive buffer pointer masked
+  with 0xFFFFFF (`NEXT_PRIM` / `D_1f800164` / `G164` / `SPAD.p164 = (int)(LOAD_BUFFER_ALT + i * 0xc000) & 0xffffff`
+  in 15 files) and `compactOrderingTable` masks the table pointer the same way; the port emits `(... & 0xFFFFFF) |
+  0x80000000`, the same byte through the always-mapped KSEG0 view. Two things relied on the KUSEG pointer's zero top
+  byte and are rewritten with it: the whole-word link store `*(unsigned long *)otz = (unsigned long)p;` (the
+  modelDraw* / drawModelUnlit / otadd idiom, 36 sites: a KSEG0 pointer stored whole would put 0x80 into the tag's
+  length byte, so the port stores the 24-bit link) and `compactOrderingTable`'s walk, which compares links with
+  pointers and follows them (`fixes.txt`: 24-bit comparison, KSEG0 dereference). `DrawOTag` (shims/gpu.c) ORs
+  0x80000000 into every link before following it, as before. Checked with `--no-kuseg` (now on Linux too: no mirror
+  mapped, every access below 0x200000 emulated and tallied per site with its symbol by `port_low_report` at exit):
+  **35,858,034 emulated accesses in 5000 frames (title + AREA00) before, 0 after**, and the 100 frames dumped every
+  50 vblanks are identical to the previous build's; under Wine the exe passes 2500 frames with `--fake-kuseg` and
+  with `--no-kuseg` (0 emulated accesses), same frames. The mirror and the relaunch stay as a fallback for code
+  the rewrite does not know (a new idiom shows up as a non-zero `--no-kuseg` count, or on Windows as a slow
+  game plus the tally in the log). The emulation itself (`port_low_emulate`, sys_common.c, shared by both runtimes)
+  covers every ModRM-addressed instruction (any base/index/SIB/displacement, 8/16/32-bit, `lock`/segment/operand-size
+  prefixes, `lea` excluded) and restarts a string instruction (`movs`/`stos`/`cmps`/`scas`/`lods`, with `rep`) with
+  ESI/EDI moved to KSEG0. GP0 opcodes E7-FF and 03-1E are one-word nops to the GPU and are now skipped without
+  touching state; an unknown command logs its frame and drops the rest of the packet.
 - **Calls to retail addresses.** The RAM is `PAGE_READWRITE` and the image `--nxcompat`, so a call into it is an access
   violation with EIP = the PS1 address; `AddVectoredExceptionHandler` rewrites EIP to the native function (the same
   trampoline as the Linux SIGSEGV handler); `EXCEPTION_INT_DIVIDE_BY_ZERO` gets the R3000 result. `__chkstk_ms` (stack
@@ -814,7 +838,9 @@ Tk window with the same style/i18n as tombi-gfx/tombi-text. *Play* tab: disc ima
 read from its ISO9660 directory into the launcher's folder and checked against the SCES-01331 sha1
 `bec8dc5f...`), save folder (`--save-dir`), window scale 1x/2x/3x, fullscreen, 50/60 Hz, "start a new game
 automatically", a Play button (runs `tombi.exe --exe MAIN0.EXE --disc ... --window --viewer-arg --scale N ...` with the
-game's stderr in `tombi-port.log` next to the exe, shown in the window) and the exact command line. *Mods* and
+game's stderr in `tombi-port.log` next to the exe, shown in the window: the last 8 lines, with any earlier `[port]
+warning` / `FATAL` lines kept above them), a *Copy log* button (the whole log file to the clipboard, for a bug
+report) and the exact command line. *Mods* and
 *Controls* tabs: see "Mods". Settings are saved in `tombi-port.json` next to the exe. From a checkout it runs
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
@@ -860,8 +886,10 @@ so it is an environment/regression question of the base port, not of the mods (l
 
 ### Left to do
 
-- Run `tombi.exe` on real Windows (the KUSEG mirror and the viewer's pipes are untested outside wine; a game access
-  to a missing mirror block other than the load-list walk would read the host's data, see "Status").
+- Run `tombi.exe` on real Windows again after the KUSEG rewrite (the first run on Windows 10 crashed in the title
+  video through the partial mirror, see "The KUSEG mirror is not load-bearing any more"): the log should show no
+  `[port] warning` about the mirror being load-bearing and no emulated-access tally at exit, and the title video
+  should not stutter.
 - The *button prompts* mod: the glyph rects of the manifest (see "Button prompts" above); the art and the
   `--patch-tex` mechanism are done.
 - The stall at vblank ~443 noted above.
