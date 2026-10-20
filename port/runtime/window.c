@@ -60,7 +60,7 @@ void port_window_frame(const u8 *rgb, int w, int h) {
     u32 hdr[3] = { 0x52464254u /* "TBFR" */, (u32)w, (u32)h };
     if (port_write_all(fd_video, hdr, 12) != 12 || port_write_all(fd_video, rgb, w * h * 3) != w * h * 3) {
         port_printf("[port] viewer closed: exiting\n");
-        port_exit(0);
+        port_quit(0);
     }
 }
 
@@ -76,7 +76,7 @@ int port_window_poll_pad(u16 *out) {
         if (n >= 2) port_window_pad = v[n / 2 - 1];
         n = port_read(fd_pad, v, sizeof v);
     }
-    if (n == 0) { port_printf("[port] viewer closed: exiting\n"); port_exit(0); }   /* EOF */
+    if (n == 0) { port_printf("[port] viewer closed: exiting\n"); port_quit(0); }   /* EOF */
     *out = port_window_pad | seen;
     return 1;
 }

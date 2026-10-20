@@ -148,12 +148,24 @@ unsigned long long port_time_us(void) {
 }
 /* sleep until an absolute QPC time: timeBeginPeriod(1) is set at start, so Sleep() wakes within about 1 ms (15.6 ms
    without it); sleep until ~2 ms before the deadline, then spin on the counter */
+static u64 sleep_margin_us = 2000;   /* how early Sleep() must end: the measured worst Sleep(1), at least 2 ms */
+/* Sleep(1) measured at start (timeBeginPeriod(1) set): about 1-2 ms normally, 15.6 ms when the 1 ms timer resolution
+   is not honoured (a power-saving policy, a background-process rule); then the sleep ends that much earlier and the
+   spin takes the rest, so the vblank is on time either way (an overshoot would be late one vblank and early the
+   next: the game then stutters at the right average rate).  The result is in the log. */
+static void sleep_calibrate(void) {
+    u64 worst = 0;
+    for (int i = 0; i < 8; i++) { u64 t = port_time_us(); Sleep(1); u64 d = port_time_us() - t; if (d > worst) worst = d; }
+    sleep_margin_us = worst + 500 > 2000 ? worst + 500 : 2000;
+    port_printf("[port] timer: Sleep(1) takes up to %d.%d ms, sleeping to %d.%d ms before each vblank then spinning\n",
+                (int)(worst / 1000), (int)(worst / 100 % 10), (int)(sleep_margin_us / 1000), (int)(sleep_margin_us / 100 % 10));
+}
 void port_sleep_until_us(unsigned long long deadline) {
     for (;;) {
         u64 now = port_time_us();
         if (now >= deadline) return;
         u64 left = deadline - now;
-        if (left > 2500) Sleep((DWORD)((left - 2000) / 1000));
+        if (left > sleep_margin_us + 500) Sleep((DWORD)((left - sleep_margin_us) / 1000));
         else break;
     }
     while (port_time_us() < deadline) ;
@@ -546,6 +558,7 @@ __attribute__((used, noreturn)) void start(void) {
     { char b[4]; kuseg_child = GetEnvironmentVariableA("PORT_KUSEG_CHILD", b, sizeof b) > 0; }
     if (!kuseg_child && !kuseg_free()) relaunch_reserved();
     timeBeginPeriod(1);
+    sleep_calibrate();
     image_delta = (unsigned long)__ImageBase - PORT_LINK_BASE;
     if (image_delta)
         port_printf("[port] warning: the image was loaded at %08lx instead of its link base %08lx (ASLR or the range in use): "

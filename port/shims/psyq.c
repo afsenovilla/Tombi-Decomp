@@ -20,7 +20,42 @@ int port_max_frames;
 static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is due at epoch + n * 1e6 / hz */
 static unsigned vblank_n;
 int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
-int port_show_fps;                              /* --show-fps: log the measured vblank rate every second */
+int port_show_fps;                              /* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
+static unsigned vb_hist[12];                    /* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
+static unsigned long long vb_last_us, vb_max_us;
+static unsigned long long vb_total_n, vb_total_t0;
+static int vb_bucket(unsigned long long us) {
+    unsigned ms = (unsigned)((us + 500) / 1000);   /* nearest ms */
+    return ms < 10 ? 0 : ms < 15 ? 1 : ms < 18 ? 2 : ms < 20 ? 3 : ms < 22 ? 4 : ms < 25 ? 5 : ms < 30 ? 6 : ms < 40 ? 7 : ms < 60 ? 8 : ms < 100 ? 9 : ms < 200 ? 10 : 11;
+}
+static const char *const vb_names[12] = { "<10", "10-14", "15-17", "18-19", "20-21", "22-24", "25-29", "30-39", "40-59", "60-99", "100-199", ">=200" };
+static void vb_hist_print(const char *when) {
+    char line[320]; int n = 0;
+    for (int i = 0; i < 12; i++) if (vb_hist[i]) {
+        const char *s = vb_names[i]; while (*s && n < 300) line[n++] = *s++;
+        line[n++] = ':';
+        unsigned v = vb_hist[i]; char b[12]; int k = 0; do { b[k++] = '0' + v % 10; v /= 10; } while (v);
+        while (k && n < 300) line[n++] = b[--k];
+        line[n++] = ' ';
+    }
+    line[n] = 0;
+    port_printf("[port] vblank intervals (ms:count) %s: %s max %d.%d ms\n", when, line, (int)(vb_max_us / 1000), (int)(vb_max_us / 100 % 10));
+    for (int i = 0; i < 12; i++) vb_hist[i] = 0;
+    vb_max_us = 0;
+}
+/* the normal exit (frame limit reached, viewer closed): the pacing summary and the tally of emulated low accesses
+   (a non-zero count on Windows means a KUSEG idiom the mask rewrite does not know: see "Windows build" in PORT.md) */
+void port_quit(int code) {
+    extern void port_low_report(void); extern int port_realtime;
+    if (port_realtime && vb_total_n > 1) {
+        unsigned long long t = port_time_us() - vb_total_t0;
+        if (t) port_printf("[port] paced: %llu vblanks in %llu.%03llu s = %llu.%02llu vblank/s overall\n", vb_total_n, t / 1000000ull, t / 1000 % 1000,
+                           vb_total_n * 1000000ull / t, vb_total_n * 100000000ull / t % 100);
+        if (port_show_fps >= 2) vb_hist_print("at exit");
+    }
+    port_low_report();
+    port_exit(code);
+}
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
 int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
@@ -120,6 +155,13 @@ void port_vblank(void) {
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
         if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now; }
         else if (due > now) port_sleep_until_us(due);
+        {
+            unsigned long long t = port_time_us();
+            if (!vb_total_t0) vb_total_t0 = t;
+            vb_total_n++;
+            if (vb_last_us) { unsigned long long d = t - vb_last_us; vb_hist[vb_bucket(d)]++; if (d > vb_max_us) vb_max_us = d; }
+            vb_last_us = t;
+        }
         if (port_show_fps) {
             static unsigned long long t0; static int n0;
             unsigned long long t = port_time_us();
@@ -130,6 +172,7 @@ void port_vblank(void) {
                 port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s)\n",
                             (int)((port_frame - n0) * 100000000ull / (t - t0) / 100), (int)((port_frame - n0) * 100000000ull / (t - t0) % 100),
                             port_frame, smp);
+                if (port_show_fps >= 2) vb_hist_print("this second");
                 t0 = t; n0 = port_frame;
             }
         }
@@ -210,10 +253,9 @@ void port_vblank(void) {
         extern void port_stub_report(void);
         port_printf("[port] reached %d frames, stopping\n", port_frame);
         port_stub_report();
-        port_low_report();
         { extern void port_check_report(void); port_check_report(); }
         { extern void port_audio_close(void); port_audio_close(); }
-        port_exit(0);
+        port_quit(0);
     }
 }
 

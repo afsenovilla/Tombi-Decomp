@@ -381,6 +381,7 @@ class App:
         s = self.s
         exe = game_binary()
         cmd = [exe, "--exe", os.path.join(app_dir(), "MAIN0.EXE"), "--disc", bin_of_cue(s["disc"]), "--window",
+               "--show-fps", "2", "--viewer-arg", "--stats",     # pacing histogram + viewer pipe counters in the log
                "--viewer-arg", "--scale", "--viewer-arg", str(s.get("scale", 2))]
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]

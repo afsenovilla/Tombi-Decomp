@@ -67,6 +67,7 @@ void port_puts(const char *s);
 void port_printf(const char *fmt, ...);
 int port_vsnprintf(char *buf, int n, const char *fmt, __builtin_va_list ap);
 void port_exit(int code) __attribute__((noreturn));
+void port_quit(int code) __attribute__((noreturn));   /* normal exit: pacing summary + low-access tally, then port_exit (shims/psyq.c) */
 void port_fatal(const char *fmt, ...) __attribute__((noreturn));
 
 /* host file access */
