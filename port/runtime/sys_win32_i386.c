@@ -134,14 +134,24 @@ unsigned long long port_time_us(void) {
     long long c = 0;
     if (!qpc_freq) QueryPerformanceFrequency(&qpc_freq);
     QueryPerformanceCounter(&c);
-    return (u64)c * 1000000ull / (u64)qpc_freq;
+    /* split: c * 1000000 overflows 64 bits after 30 minutes of uptime with a 10 MHz counter (the game then ran
+       unpaced: music and banners far too fast) */
+    u64 f = (u64)qpc_freq, q = (u64)c / f, r = (u64)c % f;
+    return q * 1000000ull + r * 1000000ull / f;
 }
-void port_sleep_us(unsigned long long us) {
-    /* timeBeginPeriod(1) is set at start: Sleep() has 1 ms granularity; the last millisecond is spun */
-    u64 end = port_time_us() + us;
-    if (us > 1500) Sleep((DWORD)((us - 1000) / 1000));
-    while (port_time_us() < end) ;
+/* sleep until an absolute QPC time: timeBeginPeriod(1) is set at start, so Sleep() wakes within about 1 ms (15.6 ms
+   without it); sleep until ~2 ms before the deadline, then spin on the counter */
+void port_sleep_until_us(unsigned long long deadline) {
+    for (;;) {
+        u64 now = port_time_us();
+        if (now >= deadline) return;
+        u64 left = deadline - now;
+        if (left > 2500) Sleep((DWORD)((left - 2000) / 1000));
+        else break;
+    }
+    while (port_time_us() < deadline) ;
 }
+void port_sleep_us(unsigned long long us) { port_sleep_until_us(port_time_us() + us); }
 
 /* ------------------------------------------------------------------------------------------- the viewer process */
 /* --window: fds[0] = our write end of the viewer's stdin (video), fds[1] = write end of its audio pipe, fds[2] =

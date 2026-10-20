@@ -17,7 +17,9 @@ void *port_vsync_event_fn;          /* OpenEvent(RCntCNT3 / VBlank, ...) handler
 static void (*vsync_cb)(void);
 int port_frame;
 int port_max_frames;
-static unsigned long long next_vblank_us;
+static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is due at epoch + n * 1e6 / hz */
+static unsigned vblank_n;
+int port_show_fps;                                /* --show-fps: log the measured vblank rate every second */
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
 int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
@@ -72,7 +74,7 @@ static void dump_ram(void) {
     port_close(fd);
 }
 /* save states (runtime/state.c): host-side values that a restored image must not change */
-void port_realtime_reset(void) { next_vblank_us = 0; }
+void port_realtime_reset(void) { vblank_epoch_us = 0; vblank_n = 0; { extern void port_sound_realtime_reset(void); port_sound_realtime_reset(); } }
 /* --menu FRAME:N (debug): open the in-game menu screen N at that vblank as the save point / pause menu would
    (4 = save, 5 = load), if the game task is in plain gameplay then */
 static int menu_frame, menu_id;
@@ -106,10 +108,29 @@ void port_cd_fd_set(int fd);
 void port_vblank(void) {
     { extern void port_state_vblank(void); port_state_vblank(); }
     if (port_realtime) {
-        unsigned long long now = port_time_us();
-        if (!next_vblank_us) next_vblank_us = now;
-        next_vblank_us += 1000000ull / (unsigned)port_hz;   /* PAL: 50 Hz (20 ms); --hz 60: 16.67 ms */
-        if (next_vblank_us > now) port_sleep_us(next_vblank_us - now);
+        /* absolute schedule from one epoch (no relative sleeps: their rounding would accumulate into a faster or
+           slower game).  Late by more than one period (a slow frame, the viewer pipe blocked): the schedule is
+           re-anchored to now, so at most one vblank runs without waiting and the game drops to real time instead of
+           running a burst of fast frames to catch up. */
+        unsigned long long now = port_time_us(), period = 1000000ull / (unsigned)port_hz;
+        if (!vblank_epoch_us) { vblank_epoch_us = now; vblank_n = 0; }
+        vblank_n++;
+        unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
+        if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now; }
+        else if (due > now) port_sleep_until_us(due);
+        if (port_show_fps) {
+            static unsigned long long t0; static int n0;
+            unsigned long long t = port_time_us();
+            if (!t0) { t0 = t; n0 = port_frame; }
+            else if (t - t0 >= 1000000ull) {
+                extern int port_sound_samples_last_second(void);
+                int smp = port_sound_samples_last_second();
+                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s)\n",
+                            (int)((port_frame - n0) * 100000000ull / (t - t0) / 100), (int)((port_frame - n0) * 100000000ull / (t - t0) % 100),
+                            port_frame, smp);
+                t0 = t; n0 = port_frame;
+            }
+        }
     }
     port_frame++;
     for (int i = 0; i < n_pokes; i++)

@@ -44,17 +44,20 @@ static int read_all(pipe_t fd, void *buf, size_t n) {
 
 static pipe_t audio_fd = NO_PIPE;
 static SDL_AudioDeviceID dev;
+/* The game produces samples on its own 44.1 kHz clock (shims/sound.c), so the queue only has to absorb jitter: it is
+   held between about two and four frames (40-80 ms at 50 Hz).  Primed with two frames of silence; when it runs dry
+   SDL plays silence; when it is over the ceiling the thread stops reading, the pipe fills and the game's write
+   blocks, so the game slows down.  Audio is never resampled or dropped: that would change the pitch or the tempo. */
+#define FRAME_BYTES (44100 * 4 / 50)
 static int audio_thread(void *arg) {
     (void)arg;
-    unsigned char buf[4096];
+    unsigned char buf[FRAME_BYTES];
+    if (dev) { memset(buf, 0, sizeof buf); SDL_QueueAudio(dev, buf, sizeof buf); SDL_QueueAudio(dev, buf, sizeof buf); }
     for (;;) {
+        while (dev && SDL_GetQueuedAudioSize(dev) > 4 * FRAME_BYTES) SDL_Delay(2);
         long r = rd(audio_fd, buf, sizeof buf);
         if (r <= 0) break;
-        if (dev) {
-            /* keep the queue short (about 100 ms): the game runs at 50 Hz, SDL's clock drifts slightly */
-            if (SDL_GetQueuedAudioSize(dev) > 44100 * 4 / 10) continue;
-            SDL_QueueAudio(dev, buf, (Uint32)r);
-        }
+        if (dev) SDL_QueueAudio(dev, buf, (Uint32)r);
     }
     return 0;
 }
@@ -138,7 +141,7 @@ int main(int argc, char **argv) {
     if (audio_fd != NO_PIPE) {
         SDL_AudioSpec want, have;
         memset(&want, 0, sizeof want);
-        want.freq = 44100; want.format = AUDIO_S16LSB; want.channels = 2; want.samples = 1024;
+        want.freq = 44100; want.format = AUDIO_S16LSB; want.channels = 2; want.samples = 512;
         dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
         if (dev) SDL_PauseAudioDevice(dev, 0); else fprintf(stderr, "tombi-view: no audio device: %s\n", SDL_GetError());
         SDL_CreateThread(audio_thread, "audio", NULL);

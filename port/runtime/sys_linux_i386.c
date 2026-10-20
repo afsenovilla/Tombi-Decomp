@@ -17,6 +17,7 @@
 #define SYS_rt_sigaction 174
 #define SYS_rt_sigreturn 173
 #define SYS_nanosleep 162
+#define SYS_clock_nanosleep 267
 #define SYS_clock_gettime 265
 #define SYS_llseek 140
 #define SYS_pread64 180
@@ -119,6 +120,17 @@ unsigned long long port_time_us(void) {
 void port_sleep_us(unsigned long long us) {
     struct ts t = { (long)(us / 1000000ull), (long)(us % 1000000ull) * 1000 };
     sys3(SYS_nanosleep, (long)&t, 0, 0);
+}
+/* sleep until an absolute CLOCK_MONOTONIC time (TIMER_ABSTIME: no error accumulates across frames), the last
+   ~200 us spun */
+void port_sleep_until_us(unsigned long long deadline) {
+    unsigned long long now = port_time_us();
+    if (deadline > now + 300) {
+        unsigned long long d = deadline - 200;
+        struct ts t = { (long)(d / 1000000ull), (long)(d % 1000000ull) * 1000 };
+        sys5(SYS_clock_nanosleep, 1 /* MONOTONIC */, 1 /* TIMER_ABSTIME */, (long)&t, 0, 0);
+    }
+    while (port_time_us() < deadline) ;
 }
 
 static void *map_fixed(unsigned addr, unsigned size) {

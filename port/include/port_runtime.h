@@ -71,6 +71,7 @@ long long port_filesize(int fd);
 /* time */
 unsigned long long port_time_us(void);
 void port_sleep_us(unsigned long long us);
+void port_sleep_until_us(unsigned long long deadline);   /* absolute port_time_us() deadline */
 
 /* call resolution: native function for a retail code address (current overlay first) */
 void *port_lookup(u32p addr);

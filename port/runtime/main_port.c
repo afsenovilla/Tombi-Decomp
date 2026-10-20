@@ -171,6 +171,7 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--save") && i + 1 < argc) { extern void port_save_add(const char *); port_save_add(argv[++i]); }
         else if (streq(argv[i], "--load") && i + 1 < argc) { extern const char *port_load_path; port_load_path = argv[++i]; }
         else if (streq(argv[i], "--realtime")) port_realtime = 1;
+        else if (streq(argv[i], "--show-fps")) { extern int port_show_fps; port_show_fps = 1; }
         else if (streq(argv[i], "--hz") && i + 1 < argc) {
             extern int port_hz; int hz = atoi_(argv[++i]);
             if (hz != 50 && hz != 60) { port_printf("--hz takes 50 (PAL) or 60\n"); return 2; }
@@ -215,7 +216,7 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--trace-cd")) { extern int port_trace_cd; port_trace_cd = 1; }
         else if (streq(argv[i], "--kuseg-strict")) port_kuseg_strict = 1;
         else {
-            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime] [--hz 50|60]\n"
+            port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime] [--hz 50|60] [--show-fps]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp] [--trace-cd]\n"

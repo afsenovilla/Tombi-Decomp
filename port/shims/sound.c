@@ -450,16 +450,22 @@ int SpuGetAllKeysStatus(u8 *st) {
     return 0;
 }
 
-/* ---------------------------------------------------------------------------------- per vblank */
-void port_sound_vblank(void) {
-    static s16 out[2 * 1024];
-    static int frac;
-    extern int port_hz;                      /* 50 (PAL) or 60: samples and sequencer time per vblank follow it */
-    int n = RATE / port_hz;
-    frac += RATE % port_hz;
-    if (frac >= port_hz) { frac -= port_hz; n++; }
-    for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_frame(i, &seqs[i], 1000000u / (u32)port_hz);
-    mix(out, n);
+/* ---------------------------------------------------------------------------------- the sample clock */
+/* Audio is produced on its own clock.  The sequencer ticks every 1e6/hz us of *audio time* (RATE/hz samples: the
+   libsnd tick is the vblank timer on the console), so the tempo depends only on the sample count.  Headless the
+   count advances RATE/hz samples per vblank (deterministic dumps); paced (--realtime, --window) it follows the wall
+   clock: each vblank mixes the samples that became due since the previous one, however many vblanks actually ran.
+   A stall longer than four frames (the viewer pipe blocked, a slow load) re-anchors the clock instead of producing a
+   burst that would sit in the player's queue and delay every later sound. */
+static s16 out[2 * 2048];
+static int seq_left;                       /* samples until the next sequencer tick */
+static int seq_frac;                       /* RATE % hz remainder carried between ticks */
+static unsigned long long audio_epoch_us;  /* wall clock when samples_done was 0 */
+static unsigned long long samples_done;    /* samples produced on the wall clock since the epoch */
+static int samples_second;                 /* --show-fps: samples produced since the last report */
+void port_sound_realtime_reset(void) { audio_epoch_us = 0; samples_done = 0; }
+int port_sound_samples_last_second(void) { int n = samples_second; samples_second = 0; return n; }
+static void audio_out(int n) {
     if (port_audio_path && audio_fd == -2) return;
     if (port_audio_path && audio_fd < 0) {
         audio_fd = port_create(port_audio_path);
@@ -473,4 +479,34 @@ void port_sound_vblank(void) {
             port_printf("[port] audio pipe closed\n"); port_audio_pipe = 0;
         }
     }
+}
+static void produce(int n) {
+    extern int port_hz;
+    samples_second += n;
+    while (n > 0) {
+        if (seq_left <= 0) {
+            for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_frame(i, &seqs[i], 1000000u / (u32)port_hz);
+            seq_left += RATE / port_hz;
+            seq_frac += RATE % port_hz;
+            if (seq_frac >= port_hz) { seq_frac -= port_hz; seq_left++; }
+        }
+        int k = n < seq_left ? n : seq_left;
+        if (k > 2048) k = 2048;
+        mix(out, k);
+        audio_out(k);
+        n -= k; seq_left -= k;
+    }
+}
+void port_sound_vblank(void) {
+    extern int port_realtime, port_hz;
+    if (!port_realtime) { produce(RATE / port_hz + (port_frame % port_hz < RATE % port_hz)); return; }
+    unsigned long long now = port_time_us();
+    if (!audio_epoch_us) { audio_epoch_us = now; samples_done = 0; }
+    unsigned long long due = (now - audio_epoch_us) * RATE / 1000000ull;
+    if (due > samples_done + 4u * RATE / port_hz) {        /* stalled: drop to real time, as the vblank schedule does */
+        if (port_verbose) port_printf("[port] frame %d: audio clock re-anchored (%d samples late)\n", port_frame, (int)(due - samples_done));
+        audio_epoch_us = now - samples_done * 1000000ull / RATE;
+        due = samples_done;
+    }
+    if (due > samples_done) { produce((int)(due - samples_done)); samples_done = due; }
 }
