@@ -252,6 +252,7 @@ void port_reparse_options(void) {
 
 int port_main(int argc, char **argv) {
     port_argc = argc; port_argv = argv;
+    { extern const char port_build_id[], port_build_date[]; port_printf("[port] build %s %s\n", port_build_id, port_build_date); }
     if (parse_options(argc, argv)) return 2;
     port_setup_memory();
     { extern int port_window; extern void port_window_start(const char *); if (port_window) port_window_start(argv[0]); }

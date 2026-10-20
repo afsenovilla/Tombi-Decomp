@@ -169,6 +169,21 @@ def extract_main0(image, out):
     return hashlib.sha1(data).hexdigest()
 
 
+def build_id():
+    """Short git sha of the build: build_id.txt bundled by port-exe.yml, else `git rev-parse` of the checkout."""
+    for d in (getattr(sys, "_MEIPASS", None), ROOT):
+        if d and os.path.isfile(os.path.join(d, "build_id.txt")):
+            return open(os.path.join(d, "build_id.txt"), encoding="utf-8", errors="replace").read().strip() or "unknown"
+    try:
+        return subprocess.check_output(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"], text=True,
+                                       stderr=subprocess.DEVNULL).strip() or "unknown"
+    except Exception:
+        return "unknown"
+
+
+BUILD_ID = build_id()
+
+
 def set_icon(root):
     for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(ROOT, "tools", "icons")):
         for name in ("port", "gfx"):
@@ -206,7 +221,7 @@ class App:
 
     def _build(self):
         r = self.root
-        r.title(tr("title"))
+        r.title(tr("title") + "  [build " + BUILD_ID + "]")
         bar = ttk.Frame(r, padding=4)
         bar.pack(fill="x")
         i18n.selector(bar, self.rebuild).pack(side="right")
@@ -389,6 +404,8 @@ class App:
             return
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
+        log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port] build <sha> <date>
+        log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
         self.status.set(tr("s.running"))

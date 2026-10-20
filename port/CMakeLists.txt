@@ -50,7 +50,15 @@ target_compile_options(game24 PRIVATE ${PORT_ARCH_FLAGS} ${PORT_GAME_FLAGS})
 
 file(GLOB PORT_RUNTIME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
 list(REMOVE_ITEM PORT_RUNTIME_SOURCES ${PORT_SYS_EXCLUDE})
-add_library(portrt OBJECT ${PORT_RUNTIME_SOURCES} ${GEN}/funcmap.c)
+# build id (git short sha, "+" when the tree is modified): refreshed on every build, recompiled when it changes
+add_custom_command(OUTPUT ${GEN}/build_id.stamp
+                   COMMAND ${CMAKE_COMMAND} -DSRC=${ROOT} -DOUT=${GEN}/build_id.c -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_id.cmake
+                   COMMAND ${CMAKE_COMMAND} -E touch ${GEN}/build_id.stamp
+                   BYPRODUCTS ${GEN}/build_id.c COMMENT "build id" VERBATIM)
+add_custom_target(port_build_id ALL DEPENDS ${GEN}/build_id.stamp)
+execute_process(COMMAND ${CMAKE_COMMAND} -DSRC=${ROOT} -DOUT=${GEN}/build_id.c -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_id.cmake)
+add_library(portrt OBJECT ${PORT_RUNTIME_SOURCES} ${GEN}/funcmap.c ${GEN}/build_id.c)
+add_dependencies(portrt port_build_id)
 target_include_directories(portrt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(portrt PRIVATE ${PORT_ARCH_FLAGS} -O2 -Wall -Wno-unused-function -Wno-builtin-declaration-mismatch)
 
