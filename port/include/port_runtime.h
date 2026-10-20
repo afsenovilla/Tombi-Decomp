@@ -25,6 +25,7 @@ int port_mips_calls(void);
 const char *port_sym_near(unsigned long a, unsigned long *off);
 void port_dump_stack(const unsigned long *sp, unsigned long lo, unsigned long hi);
 extern u32p port_last_resolve_addr; extern const char *port_last_resolve_name; extern void *port_last_resolve_fn;
+void port_note_resolve(u32p addr, const char *name, void *fn);
 /* asm-only MAIN0 functions translated by hand (port/runtime/main0_handwritten.c), {0} terminated */
 extern const PortFunc port_extra_funcs[];
 /* overlay set (SYSTEM overlays at 0x800E8028): resident while the header word at 0x800E8028 equals id */

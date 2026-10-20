@@ -236,7 +236,7 @@ void port_stub_report(void) {
 static int interpretable(u32p a) {
     return port_interp && a >= 0x80010000u && a < 0x80200000u && !(a & 3) && !port_is_lib_addr(a);
 }
-void *port_resolve_call(u32p addr, const char *name) {
+static void *resolve_call_1(u32p addr, const char *name) {
     void *f = addr ? port_lookup(addr) : 0;
     port_last_resolve_addr = addr; port_last_resolve_name = name;
     if (f) return port_last_resolve_fn = f;
@@ -246,6 +246,11 @@ void *port_resolve_call(u32p addr, const char *name) {
     }
     port_stub(name ? name : "?", addr);
     return port_last_resolve_fn = (void *)stub_ret0;
+}
+void *port_resolve_call(u32p addr, const char *name) {
+    void *f = resolve_call_1(addr, name);
+    port_note_resolve(addr, name, f);   /* the last 8 answers are printed by a fault report */
+    return f;
 }
 
 /* SIGSEGV: execution reached a retail address (function pointer from retail data or from a table the game

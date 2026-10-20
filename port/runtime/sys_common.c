@@ -94,6 +94,13 @@ const char *port_sym_near(unsigned long a, unsigned long *off) {
 /* the last call thunk resolved (thunks.S: a call to a function without native code asks port_resolve_call):
    when EIP is a bogus address the resolver's answer is the first suspect */
 u32p port_last_resolve_addr; const char *port_last_resolve_name; void *port_last_resolve_fn;
+static struct { u32p a; const char *n; void *f; int frame; } resolve_ring[8]; static unsigned resolve_count;
+void port_note_resolve(u32p addr, const char *name, void *fn) {
+    port_last_resolve_addr = addr; port_last_resolve_name = name; port_last_resolve_fn = fn;
+    unsigned i = resolve_count++ & 7;
+    resolve_ring[i].a = addr; resolve_ring[i].n = name; resolve_ring[i].f = fn; resolve_ring[i].frame = port_frame;
+    if (port_verbose > 2) port_printf("[port] call thunk: %s (%08x) -> %p (frame %d)\n", name ? name : "?", addr, fn, port_frame);
+}
 void port_dump_stack(const unsigned long *sp, unsigned long lo, unsigned long hi) {
     for (int i = 0, n = 0; i < 256 && n < 16; i++)
         if (sp[i] >= lo && sp[i] < hi) {
@@ -105,6 +112,14 @@ void port_dump_stack(const unsigned long *sp, unsigned long lo, unsigned long hi
     if (port_last_resolve_addr)
         port_printf("[port] last call thunk resolved: %s (%08x) -> %p\n", port_last_resolve_name ? port_last_resolve_name : "?",
                     port_last_resolve_addr, port_last_resolve_fn);
+    if (resolve_count > 1) {   /* the 8 before it, newest first */
+        port_printf("[port] call thunks before it:");
+        for (unsigned k = 2; k <= 8 && k <= resolve_count; k++) {
+            unsigned i = (resolve_count - k) & 7;
+            port_printf(" %s(%08x)->%p@%d", resolve_ring[i].n ? resolve_ring[i].n : "?", resolve_ring[i].a, resolve_ring[i].f, resolve_ring[i].frame);
+        }
+        port_printf("\n");
+    }
     { extern unsigned port_mips_cur_pc, port_mips_cur_entry;
       if (port_mips_cur_pc) port_printf("[port] in the MIPS interpreter: pc %08x (function %08x)\n", port_mips_cur_pc, port_mips_cur_entry); }
 }

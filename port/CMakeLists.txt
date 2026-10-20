@@ -91,9 +91,13 @@ add_executable(tombi ${GEN}/thunks.S $<TARGET_OBJECTS:game> $<TARGET_OBJECTS:gam
 set_target_properties(tombi PROPERTIES LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
 if(WIN32)
   # large-address-aware: the PS1 RAM is mapped at 0x80000000/0xA0000000; nxcompat: a call into it faults (the
-  # vectored handler redirects it); based at 0x10000000 so the low 256 MB can hold the KUSEG mirror
+  # vectored handler redirects it); based at 0x10000000 so the low 256 MB can hold the KUSEG mirror;
+  # disable-dynamicbase: with ASLR the loader relocates the image and every rel32 `call FUN_800xxxxx` (a syms.ld
+  # absolute address) lands at the retail address + the delta (the "jump to 7f3206e8" crash on Windows 10); the
+  # exception handler undoes the delta as a fallback (sys_win32_i386.c image_delta)
   target_link_options(tombi PRIVATE -m32 -nostdlib -static -Wl,-e,start -Wl,--large-address-aware -Wl,--nxcompat
-                      -Wl,--image-base,0x10000000 -Wl,--stack,16777216 -Wl,--allow-multiple-definition ${GEN}/syms.ld)
+                      -Wl,--disable-dynamicbase -Wl,--image-base,0x10000000 -Wl,--stack,16777216
+                      -Wl,--allow-multiple-definition ${GEN}/syms.ld)
   target_link_libraries(tombi PRIVATE kernel32 winmm)
 else()
   target_link_options(tombi PRIVATE -m32 -nostdlib -static -no-pie -Wl,--build-id=none -Wl,-z,noexecstack

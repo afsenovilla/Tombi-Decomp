@@ -359,13 +359,18 @@ void port_stub_report(void) {
 static int interpretable(u32p a) {
     return port_interp && a >= 0x80010000u && a < 0x80200000u && !(a & 3) && !port_is_lib_addr(a);
 }
-void *port_resolve_call(u32p addr, const char *name) {
+static void *resolve_call_1(u32p addr, const char *name) {
     void *f = addr ? port_lookup(addr) : 0;
     port_last_resolve_addr = addr; port_last_resolve_name = name;
     if (f) return port_last_resolve_fn = f;
     if (interpretable(addr)) { port_mips_pending = addr; return port_last_resolve_fn = (void *)port_mips_entry; }
     port_stub(name ? name : "?", addr);
     return port_last_resolve_fn = (void *)stub_ret0;
+}
+void *port_resolve_call(u32p addr, const char *name) {
+    void *f = resolve_call_1(addr, name);
+    port_note_resolve(addr, name, f);   /* the last 8 answers are printed by a fault report */
+    return f;
 }
 
 /* Memory accesses below 0x200000 that Windows cannot map: page 0 (the BIOS kernel area, read by the game through
@@ -422,6 +427,13 @@ static int low_access(void *ctx, unsigned long eip, unsigned long fault) {
    Edi 0x9C Esi 0xA0 Ebx 0xA4 Edx 0xA8 Ecx 0xAC Eax 0xB0 Ebp 0xB4 Eip 0xB8 Esp 0xC4. */
 #define EXCEPTION_ACCESS_VIOLATION 0xC0000005u
 #define EXCEPTION_INT_DIVIDE_BY_ZERO 0xC0000094u
+/* where the loader put the image minus where it was linked (0x10000000, port/CMakeLists.txt): non-zero means every
+   rel32 call to a syms.ld address misses by this much (see on_exception) */
+extern char __ImageBase[] __asm__("___ImageBase");
+static unsigned long image_delta;
+#ifndef PORT_LINK_BASE
+#define PORT_LINK_BASE 0x10000000ul   /* -Wl,--image-base in port/CMakeLists.txt */
+#endif
 #define EXCEPTION_CONTINUE_EXECUTION (-1)
 #define EXCEPTION_CONTINUE_SEARCH 0
 static long WINAPI on_exception(void **ep) {
@@ -448,9 +460,17 @@ static long WINAPI on_exception(void **ep) {
     if (code != EXCEPTION_ACCESS_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
     unsigned long fault = rec[6];   /* ExceptionInformation[1] */
     if (eip != fault && fault < 0x00200000ul && low_access(ctx, eip, fault)) return EXCEPTION_CONTINUE_EXECUTION;
+    /* a relocated image (the loader did not get the preferred base 0x10000000: ASLR, or the range in use): every
+       `call FUN_800xxxxx` to a syms.ld address is a rel32 computed at link time, so it lands at the retail
+       address + the relocation delta (eip=7f3206e8 for 800406e8 with the image at 0f2e0000); undo the delta */
+    if (eip == fault && image_delta && ((eip - image_delta) & 0x5FFFFFFFul) < 0x00200000ul) {
+        static int n; if (n++ < 8 || port_verbose > 1) port_printf("[port] jump to %08lx = retail %08lx + image delta (relocated image)\n", eip, eip - image_delta);
+        eip -= image_delta; fault = eip;
+    }
     if (eip == fault && (eip & 0x5FFFFFFFul) < 0x00200000ul) {
         u32p a = (u32p)(0x80000000ul | (eip & 0x1FFFFFul));
         void *f = port_lookup(a);
+        if (port_verbose > 1) { static int n; if (n++ < 4000) port_printf("[port] redirect %08lx -> %p%s (frame %d)\n", eip, f, f ? "" : " (no native code)", port_frame); }
         if (f) { CTX(ctx, C_EIP) = (unsigned long)f; return EXCEPTION_CONTINUE_EXECUTION; }
         if (interpretable(a)) {
             port_mips_pending = a;
@@ -465,7 +485,6 @@ static long WINAPI on_exception(void **ep) {
     {   /* stack scan: words inside the image (wherever the loader put it), with the nearest native function
            (sys_common.c port_dump_stack); the symbols in the image are at <image base> + the offsets of
            i686-w64-mingw32-nm tombi.exe - 0x10000000 */
-        extern char __ImageBase[] __asm__("___ImageBase");
         unsigned long base = (unsigned long)__ImageBase, off; const char *nm = port_sym_near(eip, &off);
         port_printf("[port] eax=%08lx edx=%08lx ecx=%08lx ebx=%08lx esi=%08lx edi=%08lx ebp=%08lx esp=%08lx (image base %08lx, thread %d)\n",
                     CTX(ctx, C_EAX), CTX(ctx, C_EDX), CTX(ctx, C_ECX), CTX(ctx, C_EBX), CTX(ctx, C_ESI), CTX(ctx, C_EDI), CTX(ctx, C_EBP),
@@ -560,6 +579,11 @@ __attribute__((used, noreturn)) void start(void) {
     { char b[4]; kuseg_child = GetEnvironmentVariableA("PORT_KUSEG_CHILD", b, sizeof b) > 0; }
     if (!kuseg_child && !kuseg_free()) relaunch_reserved();
     timeBeginPeriod(1);
+    image_delta = (unsigned long)__ImageBase - PORT_LINK_BASE;
+    if (image_delta)
+        port_printf("[port] warning: the image was loaded at %08lx instead of its link base %08lx (ASLR or the range in use): "
+                    "calls to retail addresses are corrected in the exception handler\n", (unsigned long)__ImageBase, PORT_LINK_BASE);
+    else if (port_verbose) port_printf("[port] image at its link base %08lx\n", PORT_LINK_BASE);
     AddVectoredExceptionHandler(1, (void *)on_exception);
     port_exit(port_main(argc, argv_buf));
 }

@@ -766,6 +766,23 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   sys_common.c). `gen_port.py link` lists the retail-named data a game object still defines beside its syms.ld
   address (what `retail_definition` did not rewrite: only the `asm("D_80010000")` build-date strings today), since
   that is the pattern a COFF object binds to its own copy.
+- **The image must not be relocated.** Every `call FUN_800xxxxx` to a function the port has no native symbol
+  for is a rel32 to the syms.ld absolute address, computed at link time against the image base 0x10000000 (data
+  references to those addresses are DIR32 immediates, for which ld emits no base relocation, so they survive). On
+  Windows 10 the loader applied ASLR to the exe (binutils 2.36+ links `--dynamicbase` by default) and put it at
+  0x0F2E0000: the game ran, since its RAM accesses were intact, until the first such direct call, `probeCollisionAtDepthA`
+  → `call 800406e8`, which landed at 0x800406e8 + (0x0F2E0000 − 0x10000000) = `eip=7f3206e8`, outside the range
+  the handler redirects ("a jump to a bogus address", the same registers every time: the same frame of the jump).
+  Wine never relocates, so it never showed. The exe is now linked `--disable-dynamicbase`; as a fallback the handler
+  computes `image_delta = __ImageBase − PORT_LINK_BASE` at start (a warning is printed when it is not zero, `-v`
+  prints "image at its link base") and treats a fault at `eip = retail + delta` as the retail address (logged for the
+  first 8, all with `-v -v`). Checked under Wine with a variant of the exe linked at 0x7F100000 (its end overlaps KUSER_SHARED_DATA at
+  0x7FFE0000, so the loader has to relocate it, to 0x00120000; `sys_win32_i386.c` compiled with
+  `-DPORT_LINK_BASE=0x7f100000ul`): without the fallback it dies in the jump exactly like the report (`eip=800406e8
+  fault address=010606e8`, frame 2111), with it the game plays 3000 frames through the jump and logs
+  `jump to 010606e8 = retail 800406e8 + image delta`. A fault report also lists the 8 call thunks resolved before the last one (`port_note_resolve`, sys_common.c,
+  with the frame of each), and `-v -v -v` logs every thunk resolution; `-v -v` logs every redirect of a jump to a
+  retail address.
 - **The viewer.** `tombi_view.c` builds for both: on Windows it reads the frames from `GetStdHandle(STD_INPUT_HANDLE)`
   and gets the audio/pad pipe handles as `--audio-handle N --pad-handle N` (fds 3 and 4 cannot be inherited by number);
   `port_spawn` in the Win32 runtime makes the three pipes with `CreatePipe` and runs it with `CreateProcess`. New viewer
