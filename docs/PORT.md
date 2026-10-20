@@ -962,3 +962,108 @@ so it is an environment/regression question of the base port, not of the mods (l
 - The *button prompts* mod: the glyph rects of the manifest (see "Button prompts" above); the art and the
   `--patch-tex` mechanism are done.
 - The stall at vblank ~443 noted above.
+
+## M3: native-pointer port (`port2/`)
+
+**Decision.** The fixed-address i386 runtime of `port/` (RAM mapped at 0x80000000, SIGSEGV call trampoline,
+KUSEG mirror, MIPS interpreter) is abandoned as the way forward. The new port compiles the game C as ordinary C with
+**native pointers and ordinary, relocatable global data**: no fixed addresses, no exception-handler tricks, no
+mirror, no interpreter. Only the GTE, GPU, SPU, CD and pad are emulated, linked in-process (the shims of `port/`
+are to be carried over, with SDL2 directly instead of the viewer process). This is the SotN / PsyCross model.
+Phase 1 (this section) is the **generator** and a first build of all of MAIN0 + X000 that compiles and links with
+zero undefined symbols. The area and SYSTEM overlays, the runtime and the shims are the next rounds.
+
+### Design
+
+`port2/tools/gen2.py` works in two steps, like `gen_port.py`, and reuses its source filter (it imports
+`port/tools/gen_port.py` and swaps two functions):
+
+1. **`sources`**: `gen_port.sources()` writes the filtered copies of the 1332 MAIN0+X000 files (GTE macros to C,
+   asm dropped, per-file `name__ADDR` renames, PORT_ARG forwarding, `port/fixes.txt`) into `build/port2/gen/src`.
+   Two of its rewrites are replaced:
+   - *Retail-named data definitions* (`D_xxxxxxxx`, `DAT_`, `PTR_`, and any name the matching build PROVIDEs)
+     become plain `extern` declarations. The one copy of every retail datum is the generated **data image**
+     (below); a C initialiser is kept only as an unused `static port_copy_` so the text stays balanced.
+   - *The OT-link idiom*: `*(u_long *)otz = (u_long)p;` becomes `port_otlink(p)` and `((u_long)p) & 0xFFFFFF`
+     becomes `port_otaddr(p)` (both in `port2/include/port_prelude.h`). The KSEG0 `| 0x80000000` of `port/` is gone.
+
+   Then the **address resolver** runs over every generated source and over copies of the include trees (headers
+   are materialised as real files where they contain literals, never written through to `include/`): each
+   `0x80xxxxxx` / `0xA0xxxxxx` / `0x1F80xxxx` literal outside comments and strings becomes
+   `PORT_ADDR(port_a_<symbol>, offset)`: the native function starting at that address, the data symbol at (or the
+   nearest one before) it, or the data-image blob plus offset. `PORT_ADDR` yields an integer, so the surrounding
+   cast (`(int *)`, `(void (*)(u8 *))`) stays as written, also in static initialisers. `port2_syms.h` declares each
+   symbol as `extern unsigned char port_a_X[] __asm__("X")`, which never conflicts with the game's own typed
+   externs of `X`. Values `>= 0x80200000` (`0x803Cxxxx`) and round values (`0x80020000`) are constants, not
+   addresses; `0x80000000` is the KSEG0 bit. A literal inside a natively compiled function (a handler entry that
+   the matched C has as a label) resolves to the image bytes and is listed in `literals.txt` as a *label*.
+   Scratchpad literals and `D_1F80xxxx` names resolve into `port_scratch[0x400]`; the SPAD/G164-style macros of
+   `include/tomba` are rewritten in the header copies, so no override header is needed.
+
+2. **`link`** (after compiling, from `nm` of all objects):
+   - **Data image** `gen/data.c`, generated at build time from the user's `game/MAIN0.EXE` and `game/AREA00/X000.BIN`
+     (game data: it stays in the build directory). RAM is covered by 9 relocatable arrays that keep the retail
+     layout: `port_bios` (0x80000000, zero), `port_main0_image` (0x80010000, the EXE bytes), `port_main0_bss`,
+     `port_x000_image` (0x800E8028, X000.BIN), `port_x000_bss`, `port_heap` (0x80140000..0x801FD800, the load
+     buffers), `port_hiram` (0x801FD800, the E-table), `port_scratch`, `port_io` (0x1F801000, plain memory until the
+     shims take the registers). Every aligned word of a data range that holds the address of a function start
+     becomes `(unsigned int)&func` and one that holds the address of any RAM byte becomes `PORT_ADDR(region, off)`:
+     relocations, so the image moves with the binary. Words inside code units are kept raw (switch jump tables and
+     the unrolled-loop entries of the matched code, unused natively). One array per region rather than one C
+     definition per symbol because the game's externs disagree on the type and size of the same address and
+     interior pointers (`D_80098C48` into the table at `D_80098C44`) must keep working; peeling single symbols
+     off into typed C definitions is possible later, one at a time.
+   - **Aliases** `gen/syms.ld` (symbol assignments only, no addresses): every retail data name the objects reference
+     becomes `name = port_<region> + offset;`, every renamed or address-named function (`fa__8013839C`,
+     `FUN_80063ffc`) becomes `name = native;`.
+   - **Stubs** `gen/stubs.c`: every function nobody defines (and that the 32-bit libc does not provide) gets
+     `int name() { port_stub_hit("name"); return 0; }`, classified as Psy-Q/BIOS, game-asm (the pad driver files
+     `gen_port` skips), *overlay-target* (an address in 0x800E8028..0x80140000 that is a function start in another
+     overlay but not in X000: MAIN0 dispatches to it by address; the next round makes that an explicit switch on
+     the resident overlay) or label. Nothing is resolved at run time: a function pointer in data is a relocation
+     to the native function, a call through a literal is a call to the symbol.
+   - `gen/report.txt` with the counts, `gen/literals.txt` (unresolved and label literals), `gen/literals_resolved.txt`.
+
+**Pointer width.** Phase 1 is 32-bit (`-m32`, normal glibc, `-funsigned-char -fwrapv -fno-strict-aliasing
+-fno-delete-null-pointer-checks -fno-omit-frame-pointer -O1`), because the game stores pointers in `int`/`u_long`
+fields and in the data image's 32-bit words. The OT links are 24-bit in the GPU tag, and the game masks pointers with
+`0xFFFFFF` when it links primitives: the binary is linked with `-Wl,-Ttext-segment=0x100000`, so the whole data
+image sits below 16 MB and the mask is the identity (checked at start-up by `port_check_layout`; `tombi2` prints
+`layout ok (below 16 MB)`). **64-bit later:** `port_otlink`/`port_otaddr` become an index into a primitive arena
+(or the links stay 32-bit offsets from a base, as PSY-Z's `OT_TYPE`), and the data image needs pointer-holding words
+widened, which means typed definitions for the structures that hold pointers; everything else of the generator is
+width-independent.
+
+### Status and numbers (phase 1)
+
+`cmake -S port2 -B build/port2 -G Ninja && cmake --build build/port2 -j 4` builds `build/port2/tombi2` (1.7 MB) from
+1332 MAIN0+X000 sources + `port/runtime/gte.c` + `port2/runtime/main.c` with **zero undefined symbols and no
+`--allow-multiple-definition`**; `tombi2` only runs the layout check so far (the game's `main` is a stub until
+`port/runtime/main_port.c` is carried over). Needs `gcc-multilib` (32-bit glibc) and `python3 tools/build_full.py`
+run once. `build/port2/gen/report.txt`:
+
+| | |
+|---|---|
+| Address literals in MAIN0+X000 sources and headers | 699 resolved to symbols (15 of them labels inside native functions), **0 unresolved**, 314 non-address constants skipped |
+| Data image | 9 regions; 8020 pointer words to data and 443 to functions emitted as relocations; 2704 words point into the overlay region at addresses where X000 has no function (other overlays' handlers), 2796 into code interiors (jump tables) |
+| Retail data names aliased into the image | 1843 |
+| Function aliases (renames, address names) | 211 |
+| Game objects that still define their own copy of a retail datum | 2 (`D_80010000`, `D_80010008`) |
+| Stubs | 513: Psy-Q/BIOS 202, game-asm 12 (pad driver), overlay-target 296, label 3 |
+| Hand-translated asm still needed | `main` (C in `port/runtime/main_port.c`), the 12 pad-driver functions (`port/shims/pad.c`); no other MAIN0/X000 game unit lacks C |
+
+### Next phase (what blocks running)
+
+1. **Runtime**: carry `port/runtime/main_port.c` (the game's `main`, loader, command line), `threads.c`
+   (coroutines; the i386 context switch works unchanged), and the shims `gpu.c`, `sound.c`, `pad.c`, `card.c`,
+   `psyq.c`, `libc.c` into `port2/`, with the CD reader. Their data accesses through retail addresses become
+   symbol accesses (the shims read e.g. the file table through `port_main0_image + off` or the named symbol).
+   SDL2 window and audio in-process, no viewer pipe.
+2. **Overlay dispatch**: the 296 overlay-target stubs are MAIN0 calls into addresses that are functions of other
+   area/SYSTEM overlays. Generate per-address dispatch functions that switch on the resident overlay (the areas'
+   signature words of `gen_port.area_signatures`), and compile the areas with the `X0nn_` prefix and the SYSTEM
+   overlays with their set prefix as `gen_port` does; their data arrives through the game's own CD load into
+   `port_x000_image` (the overlay region is one array, so the load lands where the native code expects it).
+3. The 15 label literals and the words pointing inside code units are handler entries inside coarse units; they
+   need the functions split out in `notes/functions_x000.csv` (or in the matched C) to get native names.
+4. `-O1` + `PORT_ARG` frame-address trick requires the frame pointer; keep `-fno-omit-frame-pointer`.
