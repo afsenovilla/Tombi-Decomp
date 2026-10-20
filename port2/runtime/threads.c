@@ -27,22 +27,23 @@ __asm__(".text\n.globl " SYM("port_ctx_switch") "\n" SYM("port_ctx_switch") ":\n
 /* Windows keeps the stack bounds of the thread in the TIB (fs:[4] base, fs:[8] limit) and the exception dispatcher
    checks them: on a switch they follow the coroutine's stack (the main thread's are saved on the first switch) */
 static unsigned long tib_base[MAX_TH + 1], tib_limit[MAX_TH + 1];
-static void tib_set(int n) {
-    if (!tib_base[0]) {
-        __asm__ volatile("movl %%fs:4, %0\n\tmovl %%fs:8, %1" : "=r"(tib_base[0]), "=r"(tib_limit[0]));
+static void tib_set(int from, int n) {
+    if (!tib_base[1])
         for (int i = 1; i <= MAX_TH; i++) { tib_limit[i] = (unsigned long)stacks[i - 1]; tib_base[i] = tib_limit[i] + sizeof stacks[0]; }
-    }
+    /* the main thread's limit moves as its stack grows (the kernel commits it a guard page at a time and lowers
+       fs:[8]): take it again on every switch away, never restore a stale one */
+    if (from == 0) __asm__ volatile("movl %%fs:4, %0\n\tmovl %%fs:8, %1" : "=r"(tib_base[0]), "=r"(tib_limit[0]));
     __asm__ volatile("movl %0, %%fs:4\n\tmovl %1, %%fs:8" : : "r"(tib_base[n]), "r"(tib_limit[n]));
 }
 #else
-#define tib_set(n) ((void)0)
+#define tib_set(from, n) ((void)0)
 #endif
 
 static void switch_to(int n) {
     int from = cur;
     if (n == from) return;
     cur = n;
-    tib_set(n);
+    tib_set(from, n);
     port_ctx_switch(&th[from].sp, th[n].sp);
 }
 
@@ -72,6 +73,7 @@ int port_thread_open(void *fn) {
 
 void port_thread_change(int h) {
     int n = h & 0xFF;
+    port_trace("ChangeTh", n);
     if (n > MAX_TH || (n && !th[n].used)) { port_printf("[port] ChangeTh(%08x): no such thread\n", h); return; }
     switch_to(n);
 }
@@ -84,3 +86,29 @@ void port_thread_close(int h) {
 /* The game writes the status register field of the BIOS TCBs (kernel table pointer at 0x110): the zeroed BIOS
    area of the data image serves as the table; the coroutines above do not need it. */
 void *port_bios_tcb_table(void) { return port_bios; }
+
+/* --test-null, second half: the fault handlers from a coroutine stack.  A null read, a null write and a
+   division by zero where the game's tasks do them: ESP inside one of the stacks above, not the main thread's
+   (Windows: the TIB limits must follow the switch, or the exception dispatcher refuses the stack). */
+static volatile int co_result = -1;
+static void co_test(void) {
+    volatile unsigned char *p = (volatile unsigned char *)0x1238; volatile int zero = 0, q, r;
+    volatile unsigned int *w = (volatile unsigned int *)0x1240;
+    ((unsigned char *)port_ram)[0x1238] = 0x33;
+    r = *p;                     /* read: the byte the main-thread test left */
+    *p = 0xA5;                  /* write */
+    *w = 0xDEADBEEF;            /* 32-bit write */
+    q = 7 / zero;               /* R3000: -1 */
+    int ok = r == 0x33 && ((unsigned char *)port_ram)[0x1238] == 0xA5 && *(unsigned int *)((unsigned char *)port_ram + 0x1240) == 0xDEADBEEFu && q == -1;
+    port_printf("[port2] test-null (coroutine %d): read 0x%02X, wrote 0xA5 -> 0x%02X, 32-bit write -> %08X, 7/0 = %d: %s\n",
+                cur, r, ((unsigned char *)port_ram)[0x1238], *(unsigned int *)((unsigned char *)port_ram + 0x1240), q, ok ? "ok" : "FAILED");
+    co_result = !ok;
+    port_thread_change(0xFF000000);
+    port_fatal("test coroutine resumed");
+}
+int port_test_null_coroutine(void) {
+    int h = port_thread_open((void *)co_test);
+    port_thread_change(h);
+    port_thread_close(h);
+    return co_result;
+}
