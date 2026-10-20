@@ -1282,6 +1282,44 @@ the yield site of task 1 names the wait that never ends (a `CdSync`/`CdReadSync`
 task 1 at `ThreadWaitFrames <- queueSystemLoadList <- bootStartupTask`. Under wine the AREA00 route paced at
 50 Hz does not reproduce the freeze; the next real-Windows log names the wait.
 
+### The per-second fps line and the stall line (real-Windows slowdown diagnostics)
+
+The real-Windows run of build 33b3c29 dropped from 50 to ~25 vblank/s once X000 was loaded (39-47 ms frames at
+~600 packets) and then froze with nothing after a normal `fps:` line; under wine the same scene paces at 47-50.
+Two readings were possible (the null-page emulation, which costs tens of µs per fault through a VEH exception,
+or the software rasteriser / the display's vsync), so the `--show-fps` line (the launcher passes `--show-fps 2`)
+now carries a breakdown and the fault count:
+
+```
+[port] fps: 49.99 vblank/s (frame 1211, 44096 audio samples/s) ms/frame: game 0.3 draw 9.8 present 0.0 wait 9.8; lowmem: 0
+```
+
+`ms/frame` is the average over that second: `draw` = inside `DrawOTag` (the OT walk and the rasteriser,
+`shims/gpu.c`), `present` = `port_gpu_vblank` (the VRAM readout, the SDL texture upload and `SDL_RenderPresent`:
+blocks on the display's refresh when the driver honours `PRESENTVSYNC`; wine need not), `wait` =
+the pacing sleep, `game` = everything else (the game's C, the shims, the fault emulation). The four add up to the
+frame period at 50 fps; below 50, `wait` is ~0 and the biggest of the other three is the cause. `lowmem: N` is the
+number of emulated null-page accesses in that second (`runtime/lowmem.c`); when it is not 0 the line continues
+with `top <symbol>+0x<off>-><fault address>:<count>` for the 3 busiest faulting instructions. On Linux the title
+and AREA00 run at `lowmem: 0` every second (0 in 2500 frames), `draw` 0.5-1 ms on the title and 9-10 ms in AREA00
+`game` 0.1-0.3 ms; a Windows line with `draw` at 30 ms says "the rasteriser is 3x slower in
+that build / on that CPU", `present` at 15-30 ms says "the vsync of a 60 Hz display paces a 50 Hz game", `game` at
+20 ms with `lowmem` in the thousands says "the fault emulation". The same count is in the exit tally (`N emulated
+accesses ... (M writes)`) and in both watchdog reports.
+
+The watchdog (`runtime/watchdog.c`) is a host thread with its own 1 s timer; it never depends on the game thread
+ticking. When the vblank counter stops it first prints, by itself, `[port2] watchdog: main thread stuck for N s
+(no vblank since frame F): thread T, last shim call <shim>(<arg>)@<frame>, lowmem N (M writes); task 1 yields
+from <sites>; ...` (the coroutine that runs, the newest `port_trace` entry, where every task last yielded, the
+fault count), and only then suspends the game thread (`SuspendThread` / `SIGUSR1`) for the `no vblank for 3 s at
+frame N: eip=...` line with the stack. Every log line is unbuffered (`setvbuf(stderr, _IONBF)` plus an `fflush`
+per `port_printf`; the launcher writes the exe's stderr straight to `tombi-port.log` and re-reads the file), and
+the watchdog's lines are written with the raw `WriteFile` / `write` syscall on the stderr handle rather than the
+CRT stream (`port_log_direct`, `runtime/main.c`), so a game thread stopped inside its own `fprintf`, in the
+exception handler or in a lock cannot hold the report back. Self-tests: `--headless --realtime --frames 120
+--stall 100:4000` (both stall lines), `--headless --realtime --frames 400 --poke-every 1:1F8001F0:8000:2` (no
+progress), `--headless --test-null` (prints the `lowmem:` field as the fps line would show it).
+
 ### Open points / next
 
 1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse

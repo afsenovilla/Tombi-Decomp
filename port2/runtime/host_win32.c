@@ -13,6 +13,13 @@ unsigned long long port_time_us(void) {
     QueryPerformanceCounter(&c);
     return (unsigned long long)((double)c.QuadPart * 1000000.0 / (double)qpc_freq.QuadPart);
 }
+/* the watchdog's log path (runtime/main.c port_printf): no CRT stream, so a game thread suspended inside fprintf
+   cannot block it */
+int port_log_is_direct(void) { return port_log_direct > 0 || (port_log_direct_tid && GetCurrentThreadId() == port_log_direct_tid); }
+void port_log_write_raw(const char *s, int n) {
+    HANDLE h = GetStdHandle(STD_ERROR_HANDLE); DWORD w;
+    if (h && h != INVALID_HANDLE_VALUE) WriteFile(h, s, (DWORD)n, &w, 0);
+}
 void port_sleep_us(unsigned long long us) {
     unsigned long long t0 = port_time_us();
     if (us > 2000) Sleep((DWORD)((us - 2000) / 1000));

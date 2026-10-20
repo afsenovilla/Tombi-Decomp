@@ -28,6 +28,7 @@ static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is d
 static unsigned vblank_n;
 int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
 int port_show_fps;                              /* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
+unsigned long long port_prof_wait_us, port_prof_present_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
 static unsigned vb_hist[12];                    /* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
 static unsigned long long vb_last_us, vb_max_us;
 static unsigned long long vb_total_n, vb_total_t0;
@@ -148,7 +149,7 @@ void port_vblank(void) {
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
         if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now; }
-        else if (due > now) port_sleep_until_us(due);
+        else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
         {
             unsigned long long t = port_time_us();
             if (!vb_total_t0) vb_total_t0 = t;
@@ -163,9 +164,19 @@ void port_vblank(void) {
             else if (t - t0 >= 1000000ull) {
                 extern int port_sound_samples_last_second(void);
                 int smp = port_sound_samples_last_second();
-                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s)\n",
-                            (int)((port_frame - n0) * 100000000ull / (t - t0) / 100), (int)((port_frame - n0) * 100000000ull / (t - t0) % 100),
-                            port_frame, smp);
+                /* ms per frame: game = everything that is not one of the three timed parts (the game's own code,
+                   the shims, the fault emulation); draw = DrawOTag (gpu.c); present = the frame readout + SDL
+                   upload/present (blocks on the display's vsync when the driver honours PRESENTVSYNC); wait = the
+                   pacing sleep.  lowmem = emulated null-page accesses this second (lowmem.c), top 3 sites when > 0. */
+                int nf = port_frame - n0; if (nf < 1) nf = 1;
+                unsigned long long tot = t - t0, other = port_prof_draw_us + port_prof_wait_us + port_prof_present_us;
+                unsigned long long game = tot > other ? tot - other : 0;
+                char low[256]; port_low_second(low, sizeof low);
+                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu wait %llu.%llu;%s\n",
+                            (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
+                            game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
+                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
+                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = 0;
                 if (port_show_fps >= 2) vb_hist_print("this second");
                 t0 = t; n0 = port_frame;
             }
@@ -188,7 +199,7 @@ void port_vblank(void) {
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
        audio of this vblank already buffered while it reads the (larger) video frame */
     port_sound_vblank();
-    port_gpu_vblank();
+    { unsigned long long t0 = port_time_us(); port_gpu_vblank(); port_prof_present_us += port_time_us() - t0; }
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;
         int cur = *(u16 *)PORT_M0(0x8009C960u) << 16 | *(u16 *)PORT_M0(0x8009C962u);

@@ -23,11 +23,32 @@
 #define PORT_LOW_JUMP 1
 #define PORT_LOW_REGS 2
 #define LOW_SITES 160
-static struct { unsigned long eip; unsigned long n; unsigned long first; } low_sites[LOW_SITES];
+static struct { unsigned long eip; unsigned long n, seen; unsigned long first; } low_sites[LOW_SITES];
 static int low_nsites; static unsigned long low_total, low_other;
+volatile unsigned long port_low_count, port_low_writes;   /* every emulated access so far (reads + writes), the writes */
+/* the per-second line (shims/psyq.c): the accesses since the previous call and the 3 busiest sites of them */
+void port_low_second(char *buf, int size) {
+    static unsigned long last_total; static int inside;
+    unsigned long d = port_low_count - last_total;
+    last_total = port_low_count;
+    int k = snprintf(buf, size, " lowmem: %lu", d);
+    if (!d || inside) return;
+    inside = 1;      /* (a fault inside port_sym_near would recurse here) */
+    for (int t = 0; t < 3 && k < size; t++) {
+        int best = -1; unsigned long bn = 0;
+        for (int i = 0; i < low_nsites; i++) { unsigned long dn = low_sites[i].n - low_sites[i].seen; if (dn > bn) { bn = dn; best = i; } }
+        if (best < 0) break;
+        low_sites[best].seen = low_sites[best].n;
+        unsigned long off; const char *nm = port_sym_near((void *)low_sites[best].eip, &off);
+        k += snprintf(buf + k, size - k, "%s%s+0x%lx->%lx:%lu", t ? " " : " top ", nm, off, low_sites[best].first, bn);
+    }
+    for (int i = 0; i < low_nsites; i++) low_sites[i].seen = low_sites[i].n;
+    inside = 0;
+}
 static void low_tally(unsigned long eip, unsigned long fault, int op, int len) {
     int i;
     low_total++;
+    port_low_count++;
     for (i = 0; i < low_nsites; i++) if (low_sites[i].eip == eip) break;
     if (i == low_nsites && low_nsites < LOW_SITES) { low_sites[low_nsites++].eip = eip; low_sites[i].first = fault; }
     if (i < LOW_SITES) low_sites[i].n++; else low_other++;
@@ -38,7 +59,7 @@ static void low_tally(unsigned long eip, unsigned long fault, int op, int len) {
 }
 void port_low_report(void) {
     if (!low_total) return;
-    port_printf("[port2] %lu emulated accesses to the BIOS kernel area (page 0, through null pointers), %d sites%s:\n", low_total, low_nsites, low_other ? " (+more)" : "");
+    port_printf("[port2] %lu emulated accesses to the BIOS kernel area (page 0, through null pointers; %lu writes), %d sites%s:\n", low_total, port_low_writes, low_nsites, low_other ? " (+more)" : "");
     for (int i = 0; i < low_nsites; i++) {
         unsigned long off; const char *nm = port_sym_near((void *)low_sites[i].eip, &off);
         port_printf("  %10lu  %08lx %s+0x%lx (first address %08lx)\n", low_sites[i].n, low_sites[i].eip, nm, off, low_sites[i].first);
@@ -135,6 +156,7 @@ static LONG WINAPI on_exception(EXCEPTION_POINTERS *ep) {
     if (eip != fault && fault < 0x10000ul && low_scratch) {
         unsigned long neweip;
         int r = port_low_emulate(eip, fault, low_scratch, &neweip);
+        if (r && rec->ExceptionInformation[0] == 1) port_low_writes++;
         if (r == PORT_LOW_JUMP) { c->Eip = neweip; return EXCEPTION_CONTINUE_EXECUTION; }
         if (r == PORT_LOW_REGS) {
             if (c->Esi < 0x10000ul) c->Esi += (unsigned long)port_ram;
@@ -175,6 +197,7 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
     if (eip != fault && fault < 0x10000ul && low_scratch) {
         unsigned long neweip;
         int r = port_low_emulate(eip, fault, low_scratch, &neweip);
+        if (r && (uc->uc_mcontext.gregs[REG_ERR] & 2)) port_low_writes++;     /* page-fault error code bit 1: a write */
         if (r == PORT_LOW_JUMP) { uc->uc_mcontext.gregs[REG_EIP] = neweip; return; }
         if (r == PORT_LOW_REGS) {
             if ((unsigned long)uc->uc_mcontext.gregs[REG_ESI] < 0x10000ul) uc->uc_mcontext.gregs[REG_ESI] += (unsigned long)port_ram;

@@ -17,8 +17,31 @@ typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef
 
 int port_verbose;
 
+/* The log goes to stderr, unbuffered (setvbuf below, and an fflush after every write in case a CRT ignores it),
+   so a hard kill loses nothing.  The watchdog's report must leave the process even when the game thread sits
+   inside an fprintf (suspended there on Windows, or interrupted there by SIGUSR1 on Linux) holding the stream's
+   lock: while port_log_direct is set, or from the thread port_log_direct_tid (Win32), the line is formatted into a
+   local buffer and written with the raw write / WriteFile of port_log_write_raw (host_win32.c on Windows). */
+volatile int port_log_direct;
+unsigned long port_log_direct_tid;
+#ifndef _WIN32
+#include <unistd.h>
+#include <sys/syscall.h>
+static int log_is_direct(void) { return port_log_direct > 0; }
+/* (the raw syscall: `write` is the game's Psy-Q stub in this binary, gen/stubs.c, not libc's) */
+static void port_log_write_raw(const char *s, int n) { while (n > 0) { long w = syscall(SYS_write, 2, s, n); if (w <= 0) break; s += w; n -= w; } }
+#else
+int port_log_is_direct(void); void port_log_write_raw(const char *s, int n);
+#define log_is_direct port_log_is_direct
+#endif
 void port_printf(const char *fmt, ...) {
-    va_list ap; va_start(ap, fmt); vfprintf(stderr, fmt, ap); va_end(ap);
+    va_list ap; va_start(ap, fmt);
+    if (log_is_direct()) {
+        char buf[2048]; int n = vsnprintf(buf, sizeof buf, fmt, ap);
+        if (n > (int)sizeof buf - 1) n = sizeof buf - 1;
+        if (n > 0) port_log_write_raw(buf, n);
+    } else { vfprintf(stderr, fmt, ap); fflush(stderr); }
+    va_end(ap);
 }
 void port_fatal(const char *fmt, ...) {
     va_list ap; va_start(ap, fmt); fputs("[port2] FATAL: ", stderr); vfprintf(stderr, fmt, ap); va_end(ap);
@@ -252,6 +275,7 @@ int main(int argc, char **argv) {
         /* the same from a coroutine stack (the game's tasks fault there, OpenTh/ChangeTh): read, write, division */
         extern int port_test_null_coroutine(void);
         int co = port_test_null_coroutine();
+        { char low[256]; port_low_second(low, sizeof low); port_printf("[port2] test-null: the fps line's field would read \"%s\"\n", low + 1); }
         port_low_report();
         return ((unsigned char *)port_ram)[0x1234] == 0x5A && q == -1 && co == 0 ? 0 : 3;
     }

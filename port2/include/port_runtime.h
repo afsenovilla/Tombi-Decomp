@@ -61,9 +61,15 @@ void port_quit(int code) __attribute__((noreturn));
 void port_stub_hit(const char *name);
 void port_stub_report(void);
 void port_low_report(void);
+extern volatile unsigned long port_low_count, port_low_writes;   /* lowmem.c: emulated null-page accesses so far */
+void port_low_second(char *buf, int size);                       /* " lowmem: N top sym+off->addr:n ..." since the last call */
+extern volatile int port_log_direct;         /* > 0: port_printf writes straight to fd 2 / the stderr handle (no CRT stream lock) */
+extern unsigned long port_log_direct_tid;    /* Win32: the host thread whose port_printf always goes the direct way (the watchdog) */
 void port_dump_stack(unsigned long esp);     /* return addresses into the image found above esp (lowmem.c) */
 void port_flush_log(void);
 void port_trace(const char *what, int arg);  /* the last shim calls, for the watchdog report (watchdog.c) */
+const char *port_trace_last(int *arg, int *frame);   /* the newest one */
+extern unsigned long long port_prof_draw_us, port_prof_wait_us, port_prof_present_us;   /* per-frame breakdown of the fps line */
 void port_watchdog_start(void);
 extern int port_watchdog_seconds;
 int port_check_layout(void);

@@ -421,9 +421,11 @@ u32 *ClearOTag(u32 *ot, int n) {
 }
 int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn in that vblank */
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
+unsigned long long port_prof_draw_us;   /* time spent walking + rasterizing ordering tables (the fps line, shims/psyq.c) */
 void DrawOTag(u32 *ot) {
     u32 *p = ot; int n = 0;
     unsigned h = 2166136261u;
+    unsigned long long t0 = port_time_us();
     gpu_lists++;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
@@ -442,6 +444,7 @@ void DrawOTag(u32 *ot) {
     }
     gpu_prims += n;
     port_ot_signature = h * 31u + (unsigned)n;
+    port_prof_draw_us += port_time_us() - t0;
     if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
 }
 void DrawOTagEnv(u32 *ot, void *env) { PutDrawEnv(env); DrawOTag(ot); }
