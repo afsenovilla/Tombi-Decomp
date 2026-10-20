@@ -35,3 +35,9 @@ src/collideCat2WithCat4Objects.c | void pushCat2ObjectOutOfCat4Type0A(TObj *o); 
 # a NULL animation pointer reads BIOS RAM at address 6 on the PS1 (X003 initFungaDwarf calls this before setting
 # o->anim; AnimJump then sets the duration again): read 0 instead
 src/AnimLoadDuration.c | o->dur = o->a->v & 0x3fff; | o->dur = o->a ? o->a->v & 0x3fff : 0;
+# queueLoadList gets a KUSEG list pointer when a load list is not loaded yet (the table entry reads 0): the walk
+# then runs from the BIOS kernel area into the EXE image until it meets a -1, as on the PS1. The port reads such a
+# list through the KSEG0 view, so the walk needs neither page 0 nor the KUSEG mirror at 0x10000 (Windows cannot
+# always map that range: a partial mirror read the host's own data there and queued a garbage file id, which
+# ended in "CdRead failed at lba 218357")
+src/queueLoadList.c | int pending = 0; | int pending = 0; { extern int port_verbose; extern void port_printf(const char *, ...); if ((unsigned)e < 0x200000u) { if (port_verbose) port_printf("[port] queueLoadList(%p): KUSEG list read through KSEG0\n", e); e = (Rel *)((unsigned)e + 0x80000000u); } }
