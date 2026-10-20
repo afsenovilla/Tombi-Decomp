@@ -506,28 +506,40 @@ def sources(outdir, progs, ovls=(), areas=()):
             if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
     # ... and of every MAIN0/X000 definition by address, for calls through another name of the same function
     # (FUN_800efc04() -> ObjSetAnimFromTable(o))
-    for prog in ovls:                               # SYSTEM overlays (their own names, by address)
+    ovl_texts, ovl_arity = {}, {}                   # SYSTEM overlays (their own names, by address, per overlay)
+    for prog in ovls:
         addr_of_name = {}
         for u in U[prog]:
             addr_of_name[u.name] = u.addr
             if u.file and u.file.endswith(".c"): addr_of_name[defined_name(u.file, os.path.basename(u.file)[:-2])] = u.addr
-        texts = {f: t for f, t in out_texts.items() if "/src/%s/" % prog.lower() in f}
-        for n, k in _global_defs(texts).items():
+        ovl_texts[prog] = {f: t for f, t in out_texts.items() if "/src/%s/" % prog.lower() in f}
+        ovl_arity[prog] = {}
+        for n, k in _global_defs(ovl_texts[prog]).items():
             a = addr_of_name.get(n)
-            if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+            if a is not None and k > 0: ovl_arity[prog][a] = max(ovl_arity[prog].get(a, 0), k)
+        for a, k in ovl_arity[prog].items(): arity_addr[a] = max(arity_addr.get(a, 0), k)
     base = {f: t for f, t in out_texts.items() if re.search(r"/src/(main0|x000)/", f)}
     for n, k in _global_defs(base).items():
         a = canon.get(n)
         if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
-    def fallback_for(table):
+    def fallback_for(table, arity=arity_addr):
         def fb(n):
             a = table.get(n)
             if a is None:
                 m = re.match(r"(?:func|FUN)_([0-9A-Fa-f]{8})$", n)
                 a = int(m.group(1), 16) if m else None
-            return arity_addr.get(a, 0)
+            return arity.get(a, 0)
         return fb
+    # the SYSTEM overlays overlap each other's addresses (and name their functions by address), so each one is
+    # forwarded as its own group after the rest: its calls resolve among its own definitions first (the
+    # `<PROG>_` renames), and an overlay address falls back to that overlay's arity, not another overlay's
+    for prog in ovls:
+        for f in ovl_texts[prog]: out_texts.pop(f)
     nfwd, gdefs = forward_short_calls(out_texts, None, fallback_for(canon))
+    for prog in ovls:
+        ovl_arity[prog].update({a: k for a, k in arity_addr.items() if not (OVL_BASE <= a < OVL_END)})
+        nfwd += forward_short_calls(ovl_texts[prog], gdefs, fallback_for(canon, ovl_arity[prog]), prog + "_")[0]
+        out_texts.update(ovl_texts[prog])
     for prog, t in area_texts.items():              # each area resolves names among its own definitions first
         nfwd += forward_short_calls(t, gdefs, fallback_for(asyms[prog]))[0]
         out_texts.update(t)
@@ -675,7 +687,7 @@ def _global_defs(texts):
     return out
 
 
-def forward_short_calls(texts, base_defs=None, fallback=None):
+def forward_short_calls(texts, base_defs=None, fallback=None, prefix=None):
     """Register-carried arguments (see port/tools/arity_check.py): a call that passes fewer arguments than the
     callee's definition takes relies on $a0-$a3 still holding a value, most often the caller's own incoming
     argument.  Each missing argument i becomes PORT_ARG(i), the caller's incoming stack argument i (on i386 the
@@ -698,8 +710,10 @@ def forward_short_calls(texts, base_defs=None, fallback=None):
         macros = set(re.findall(r"^\s*#\s*define\s+(\w+)", t[max(0, t.find("#line 1 ")):], re.M))
         # the port's renames: a per-file address rename or a SYSTEM overlay prefix hides the definition the call
         # means; an area prefix (X0nn_) does not (texts of one area are forwarded together)
+        # means; an area prefix (X0nn_) does not (texts of one area are forwarded together), nor the prefix of
+        # the SYSTEM overlay whose texts are forwarded as a group (`prefix`)
         macros |= set(m.group(1) for m in re.finditer(r"^#define (\w+) (\w+)$", t[:max(0, t.find("#line 1 "))], re.M)
-                      if not re.match(r"X0\d\d_", m.group(2)))
+                      if not re.match(r"X0\d\d_", m.group(2)) and not (prefix and m.group(2) == prefix + m.group(1)))
         # per-file address renames (`#define fa fa__8013839C`): the arity of what that address is
         by_addr = dict((m.group(1), int(m.group(2), 16)) for m in
                        re.finditer(r"^#define (\w+) \1__([0-9A-F]{8})$", t[:max(0, t.find("#line 1 "))], re.M))
