@@ -95,9 +95,37 @@ def tied_asm_moves(outs, ins):
     return " ".join(stmts) if stmts else ";"
 
 
-def filter_src(text, dropped=None):
+RETAIL_DEF = re.compile(r"^(?!\s|extern\b|static\b|typedef\b|#|//)(?P<decl>(?:(?:const|volatile|unsigned|signed|struct|union|enum)\s+)*\w+(?:\s+\*+|\s+)\**)\s*"
+                        r"(?P<name>\w+)\s*(?P<dims>(?:\[[^\]]*\]\s*)*)(?P<end>=(?!=)|;)")
+RETAIL_NAME = re.compile(r"(?:D|DAT|PTR|PTR_DAT|jtbl)_[0-9A-Fa-f]{8}")
+
+
+def retail_definition(line, retail):
+    """A file-scope definition of a name that lives in the retail image (an initialized copy of retail data, or a
+    variable the asm data defines too) becomes an extern declaration of the retail name plus, when it has an
+    initializer, a copy under another name.  syms.ld binds the retail name to the retail address, which the ELF
+    link also does for the defining object (gas keeps relocations against global symbols); a COFF object resolves
+    references to its own definitions section-relative at assembly time, so the mingw build read and wrote the
+    native copy in the defining file and the retail copy everywhere else (cdLoadTask read SYS/LD0SYS.BIN into
+    queueLoadList's own D_80098c44 while the load-list pointers of the rest of the game named 0x80098C44: the
+    unloaded lists read as 0 and the Windows build queued garbage file ids)."""
+    m = RETAIL_DEF.match(line)
+    if not m or m.group("decl").split()[0] in ("return", "goto", "case", "else", "if", "while", "for", "switch", "do"):
+        return line
+    n = m.group("name")
+    if n in ("main",) or n.startswith("port_"): return line
+    if not (n in retail or RETAIL_NAME.match(n)): return line
+    decl, dims = m.group("decl"), m.group("dims").strip()
+    ext = "extern %s %s%s;" % (decl.strip(), n, dims)
+    if m.group("end") == ";":
+        return ext + " /* PORT: retail copy */" + line[m.end():]
+    return "%s %s port_copy_%s%s =%s" % (ext, decl.strip(), n, dims, line[m.end():])
+
+
+def filter_src(text, dropped=None, retail=()):
     """Make matching-oriented C compile natively without changing what it does.  Names of functions whose body is
-    top-level MIPS asm are appended to `dropped` (they need a C version in port/shims/)."""
+    top-level MIPS asm are appended to `dropped` (they need a C version in port/shims/).  `retail` names data that
+    the retail image holds (see retail_definition)."""
     out, pend, toplevel = [], None, None
     for line in text.split("\n"):
         if toplevel is not None:      # inside a top-level asm block
@@ -120,6 +148,7 @@ def filter_src(text, dropped=None):
         # address-named static tables (initialized copies of retail data): make them global so the link step
         # binds the name to the retail address (the retail image is the one copy the game reads and writes)
         line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:D|DAT|PTR|PTR_DAT)_[0-9A-Fa-f]{8}\s*(?:\[[^\]]*\]\s*)*=)", "", line)
+        line = retail_definition(line, retail)
         # old-gcc lvalue cast `(T *)x = v;`
         line = re.sub(r"^(\s*)\(\s*(\w+\s*\*+)\s*\)\s*(\w+)\s*=(?!=)", r"\1*(\2 *)&\3 =", line)
         if pend is not None:
@@ -361,7 +390,7 @@ def sources(outdir, progs, ovls=(), areas=()):
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         dropped = []
         src = open(u.file, errors="replace").read()
-        txt = filter_src(src, dropped)
+        txt = filter_src(src, dropped, canon)
         for old, new in FIXES.get(os.path.relpath(u.file, ROOT), []):
             if old not in txt: sys.exit("gen_port: port/fixes.txt: %r not found in %s" % (old, u.file))
             txt = txt.replace(old, new)
