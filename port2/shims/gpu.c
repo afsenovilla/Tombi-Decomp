@@ -312,7 +312,7 @@ int SetGraphDebug(int l) { return 0; }
 int ResetGraph(int mode) { return 0; }
 static int disp_mask;
 void SetDispMask(int m) { disp_mask = m; }
-int DrawSync(int mode) { return 0; }
+int DrawSync(int mode) { port_trace("DrawSync", mode); return 0; }
 void *DrawSyncCallback(void *f) { return 0; }
 
 /* DRAWENV: RECT clip; s16 ofs[2]; RECT tw; u16 tpage; u8 dtd, dfe, isbg, r0, g0, b0; DR_ENV dr_env */

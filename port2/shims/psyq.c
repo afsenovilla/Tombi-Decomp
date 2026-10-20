@@ -179,6 +179,7 @@ void port_vblank(void) {
                 { void *p = port_ram_ptr(a); if (!p) continue;
                   if (pokes[i].size == 4) *(u32 *)p = v; else if (pokes[i].size == 2) *(u16 *)p = v; else *(u8 *)p = v; }
         }
+    port_trace("vblank", port_frame);
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
     port_pad_vblank();
@@ -278,6 +279,7 @@ void __main(void) {}   /* crt0 constructor hook: nothing to run */
 
 int VSync(int mode) {
     static int last;
+    port_trace("VSync", mode);
     if (mode < 0) return port_frame;
     if (mode == 1) { int r = port_frame - last; return r; }
     int n = mode == 0 ? 1 : mode;
@@ -553,6 +555,7 @@ static void cd_check_loc(const u8 *param, int lba) {
     else port_printf("the parameter is at %p, not in FILE_LINKS (a corrupt CdlLOC)\n", param);
 }
 int CdControl(u8 com, u8 *param, u8 *result) {
+    port_trace("CdControl", com);
     if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) { cd_pos = loc_to_lba(param); cd_check_loc(param, cd_pos); }
     if (com == 14 /* Setmode */ && param) cd_mode = param[0];
     if (result) result[0] = 0x02;
@@ -568,6 +571,7 @@ void *CdReadCallback(void *f) { void *o = cd_read_cb; cd_read_cb = f; return o; 
 static int cd_reads, cd_sectors;
 int CdRead(int sectors, u32 *buf, int mode) {
     int bytes = (mode & 0x20) ? 2340 : 2048;
+    port_trace("CdRead", sectors);
     if (port_verbose || port_trace_cd) port_printf("[port] CdRead lba %d, %d sectors -> %p (frame %d)\n", cd_pos, sectors, buf, port_frame);
     if ((u8 *)buf == (u8 *)0x80000000u || !buf) buf = (u32 *)port_x000_image;   /* G?OVER's record: addr 0 = the overlay buffer */
     if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame); return 0; }

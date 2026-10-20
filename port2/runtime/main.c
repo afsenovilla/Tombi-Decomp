@@ -40,6 +40,7 @@ void port_stub_report(void) {
     for (int i = 0; i < stub_n; i++) port_printf(" %s=%d", stub_names[i], stub_hits[i]);
     port_printf("\n");
 }
+void port_flush_log(void) { fflush(stderr); }
 void port_quit(int code) {
     port_window_stop();
     exit(code);
@@ -236,19 +237,24 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+    setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
     port_printf("[port2] native pointers, %d-bit: data image %p..%p, scratch %p, layout %s\n", (int)(sizeof(void *) * 8),
                 (void *)port_main0_image, (void *)port_x000_bss, (void *)port_scratch,
                 port_check_layout() ? "ok (below 16 MB)" : "NOT below 16 MB: OT links would truncate");
     if (!port_check_layout()) return 2;
     { extern void port_lowmem_install(void); port_lowmem_install(); }
+    port_watchdog_start();
     if (test_null) {     /* --test-null: the fault handlers (null-page emulation, division by zero) on this host */
         volatile unsigned char *p = (volatile unsigned char *)0x1234; volatile int zero = 0, q;
         *p = 0x5A; q = 100 / zero;
         port_printf("[port2] test-null: wrote 0x5A through 0x1234, port_ram[0x1234] = 0x%02X; 100/0 = %d (R3000: -1)\n",
                     ((unsigned char *)port_ram)[0x1234], q);
+        /* the same from a coroutine stack (the game's tasks fault there, OpenTh/ChangeTh): read, write, division */
+        extern int port_test_null_coroutine(void);
+        int co = port_test_null_coroutine();
         port_low_report();
-        return ((unsigned char *)port_ram)[0x1234] == 0x5A && q == -1 ? 0 : 3;
+        return ((unsigned char *)port_ram)[0x1234] == 0x5A && q == -1 && co == 0 ? 0 : 3;
     }
     if (port_window) { port_window_start(); port_realtime = 1; }
     if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);

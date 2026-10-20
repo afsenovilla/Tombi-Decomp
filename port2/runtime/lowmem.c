@@ -110,7 +110,7 @@ static int div_len(const unsigned char *p) {
 
 #ifdef _WIN32
 extern char __ImageBase[];
-static void dump_stack(unsigned long esp) {
+void port_dump_stack(unsigned long esp) {
     const unsigned long *sp = (const unsigned long *)esp;
     IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(__ImageBase + ((IMAGE_DOS_HEADER *)__ImageBase)->e_lfanew);
     unsigned long base = (unsigned long)__ImageBase, end = base + nt->OptionalHeader.SizeOfImage;
@@ -146,7 +146,7 @@ static LONG WINAPI on_exception(EXCEPTION_POINTERS *ep) {
         unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
         port_printf("[port2] access violation: eip=%08lx (%s+0x%lx) fault address=%08lx (%s, frame %d, thread %d, image base %p); stack:", eip, nm, off, fault,
                     rec->ExceptionInformation[0] == 8 ? "execute" : rec->ExceptionInformation[0] ? "write" : "read", port_frame, port_thread_current(), (void *)__ImageBase);
-        dump_stack(c->Esp);
+        port_dump_stack(c->Esp);
         port_printf("\n");
     }
     port_low_report();
@@ -160,6 +160,15 @@ void port_lowmem_install(void) {
     AddVectoredExceptionHandler(1, on_exception);
 }
 #else
+void port_dump_stack(unsigned long esp) {
+    const unsigned long *sp = (const unsigned long *)esp;
+    extern char __executable_start[], etext[];
+    for (int i = 0, n = 0; i < 512 && n < 12; i++)
+        if (sp[i] >= (unsigned long)__executable_start && sp[i] < (unsigned long)etext) {
+            unsigned long off; const char *nm = port_sym_near((void *)sp[i], &off);
+            port_printf(" %08lx(%s+0x%lx)", sp[i], nm, off); n++;
+        }
+}
 static void on_segv(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv;
     unsigned long eip = uc->uc_mcontext.gregs[REG_EIP], fault = (unsigned long)info->si_addr;
@@ -176,13 +185,7 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
     {
         unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
         port_printf("[port2] signal %d: eip=%08lx (%s+0x%lx) fault address=%08lx (frame %d); stack:", sig, eip, nm, off, fault, port_frame);
-        const unsigned long *sp = (const unsigned long *)uc->uc_mcontext.gregs[REG_ESP];
-        extern char __executable_start[], etext[];
-        for (int i = 0, n = 0; i < 512 && n < 12; i++)
-            if (sp[i] >= (unsigned long)__executable_start && sp[i] < (unsigned long)etext) {
-                nm = port_sym_near((void *)sp[i], &off);
-                port_printf(" %08lx(%s+0x%lx)", sp[i], nm, off); n++;
-            }
+        port_dump_stack(uc->uc_mcontext.gregs[REG_ESP]);
         port_printf("\n");
     }
     port_low_report();

@@ -61,6 +61,11 @@ void port_quit(int code) __attribute__((noreturn));
 void port_stub_hit(const char *name);
 void port_stub_report(void);
 void port_low_report(void);
+void port_dump_stack(unsigned long esp);     /* return addresses into the image found above esp (lowmem.c) */
+void port_flush_log(void);
+void port_trace(const char *what, int arg);  /* the last shim calls, for the watchdog report (watchdog.c) */
+void port_watchdog_start(void);
+extern int port_watchdog_seconds;
 int port_check_layout(void);
 extern int port_verbose;
 
