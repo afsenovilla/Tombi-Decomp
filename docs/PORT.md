@@ -155,10 +155,31 @@ vblank for tests. Verified headless: a save written from the save screen
 `BESCES-01331TOMBA-00` (1 block, "SC" title frame), and the title's Continue (`--pad-script
 1000:right,1050:cross,1450:cross:3`) lists it as "Lv.1 Village of All Beginnings".
 
-**Pacing: `--realtime`, `--hz 50|60`.** One vblank every 1/hz s from the host clock (default 50, PAL; 60 gives
-NTSC timing: the game logic runs 20% faster, as on an NTSC console). The audio mix takes 44100/hz samples per
-vblank and the sequencer 1/hz s, so music keeps its tempo. `--window` implies `--realtime` and honours `--hz`.
-Measured: 600 frames take 12.0 s at 50 and 10.0 s at 60.
+**Pacing: `--realtime`, `--hz 50|60`, `--show-fps`, `--stall FRAME:MS`.** One vblank every 1/hz s from the host
+clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console). `--window`
+implies `--realtime` and honours `--hz`. The schedule is absolute (`port_vblank` in `shims/psyq.c`): vblank n is
+due at `epoch + n/hz`, waited for with `port_sleep_until_us` (Linux: `clock_nanosleep` `TIMER_ABSTIME` to 200 µs
+before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, `Sleep` to 2 ms
+before, then a spin on `QueryPerformanceCounter`), so no rounding accumulates. A vblank more than one period late
+(a slow frame, the viewer's pipe blocked) re-anchors the epoch: one vblank runs without waiting and the game
+drops to real time, it never runs a burst of fast frames to catch up. The Windows `port_time_us` used to compute
+`count * 1e6 / freq` in 64 bits, which overflows after about 30 minutes of uptime with a 10 MHz counter: from then
+on the comparison was garbage and the game ran unpaced (event banners and music far too fast, or right, depending
+on the machine's uptime); it now divides first.
+
+**Audio keeps its own clock** (`shims/sound.c`): paced, each vblank mixes the samples that became due on the wall
+clock since the previous one (44100/s whatever the vblank rate), headless it mixes 44100/hz per vblank; the
+sequencer ticks every 44100/hz samples (1/hz s of *audio* time, the libsnd vblank tick), so the tempo depends on
+the sample count only. A stall over four frames re-anchors the audio clock too (the gap is dropped, not queued).
+The viewer never drops or resamples audio: it primes two frames of silence, queues what the pipe delivers while
+the SDL queue holds under four frames, and otherwise stops reading, so the pipe fills and the game's write blocks.
+`--show-fps` logs the measured vblank rate and audio samples per second every second; `--stall FRAME:MS` sleeps MS
+ms before that vblank (test hook). Measured on Linux, `--realtime --show-fps --dump-audio`: 3000 frames take
+60.03 s and write 2646205 samples (60.005 s); with `--stall 1500:600` they take 60.63 s and write 2646302 samples
+(60.007 s): the rate reads 27.99 vblank/s in the stalled second, 49.99-50.01 before and after, never above 50.
+Under wine, tombi.exe reports 50.00 vblank/s and 44100 samples/s. The event banner (`printEventMessage`, type
+0x22 objects) is advanced once per game frame from `ThreadTableRun`; `vblankHandler` only counts vblanks, no
+`VSyncCallback` is registered (logged with `-v`), so its speed is the pacing alone.
 
 **Save states: `--save FRAME:PATH`, `--load PATH`** (`runtime/state.c`). A state is PS1 RAM, the scratchpad and
 every writable mapping of the static binary (the runtime's globals, software VRAM, SPU, GTE and the coroutine
