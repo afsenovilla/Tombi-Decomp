@@ -235,6 +235,7 @@ void port_vblank(void) {
         port_printf("[port] reached %d frames, stopping\n", port_frame);
         port_stub_report();
         port_pacing_report();
+        { extern void port_low_report(void); port_low_report(); }
         { extern void port_audio_close(void); port_audio_close(); }
         port_quit(0);
     }
@@ -534,10 +535,11 @@ int CdMode(void) { return cd_mode; }
    beyond the image means a garbage record (on Linux the game never asks past lba 178339), so say where the
    parameter lives. */
 extern u8 FILE_LINKS[];
-static int cd_bad_locs;
+static int cd_bad_locs, cd_last_id = -1;       /* the FILE_LINKS id of the last Setloc (-1: not from the table) */
 static void cd_check_loc(const u8 *param, int lba) {
     unsigned off = (unsigned)(param - FILE_LINKS);
     int in_table = off < 1119 * 8 && (off & 7) == 0;
+    cd_last_id = in_table ? (int)(off / 8) : -1;
     if (port_trace_cd) port_printf("[port] cd: Setloc %02x:%02x:%02x -> lba %d (%s %u)\n", param[0], param[1], param[2], lba,
                                    in_table ? "FILE_LINKS id" : "param at", in_table ? off / 8 : (unsigned)(unsigned long)param);
     if (lba >= 0 && lba < cd_sector_count) return;
@@ -566,11 +568,12 @@ int CdRead(int sectors, u32 *buf, int mode) {
     if ((u8 *)buf == (u8 *)0x80000000u || !buf) buf = (u32 *)port_x000_image;   /* G?OVER's record: addr 0 = the overlay buffer */
     if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame); return 0; }
     cd_pos += sectors; cd_reads++; cd_sectors += sectors;
-    {   /* a file read below the heap (a load list into MAIN0's data, an area X0nn or a SYSTEM overlay into the
-           overlay region) carries retail pointers: they become native.  Assets read into the heap / load buffers
-           are left as they are. */
+    {   /* a load list (SYS/LD0SYS.BIN, SYS/LD0ARnn.BIN: FILE_LINKS ids 0..19, read into MAIN0's data) and an
+           overlay (an area X0nn or a SYSTEM file into the overlay region) carry retail pointers: they become
+           native.  Everything else (assets, compressed files in the load buffers) is left as it is. */
         u8 *lo = (u8 *)port_ram, *hi = lo + (0x80140000u - 0x80000000u);
-        if ((u8 *)buf >= lo && (u8 *)buf < hi) {
+        u8 *olo = (u8 *)port_x000_image;
+        if (((u8 *)buf >= lo && (u8 *)buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || (u8 *)buf >= olo)) {
             int n = sectors * bytes; if ((u8 *)buf + n > hi) n = hi - (u8 *)buf;
             port_relocate_overlay(buf, n);
         }

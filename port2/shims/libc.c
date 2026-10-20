@@ -24,3 +24,8 @@ int printf(const char *f, ...) {
 }
 int puts(const char *s) { if (port_verbose) fprintf(stderr, "[game] %s\n", s); return 0; }
 int putchar(int c) { if (port_verbose) fputc(c, stderr); return c; }
+
+/* 0x8005BD24: Psy-Q's bcopy, a forward byte loop; lzDecompress relies on the overlap (dst - off -> dst, n bytes)
+   repeating the pattern, which memmove would not do */
+void bcopy(const void *s, void *d, unsigned int n) { const unsigned char *a = s; unsigned char *b = d; while (n--) *b++ = *a++; }
+void FUN_8005bd24(const void *s, void *d, unsigned int n) { bcopy(s, d, n); }

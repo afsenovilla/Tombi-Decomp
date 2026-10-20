@@ -233,6 +233,7 @@ int main(int argc, char **argv) {
                 (void *)port_main0_image, (void *)port_x000_bss, (void *)port_scratch,
                 port_check_layout() ? "ok (below 16 MB)" : "NOT below 16 MB: OT links would truncate");
     if (!port_check_layout()) return 2;
+    { extern void port_lowmem_install(void); port_lowmem_install(); }
     if (port_window) { port_window_start(); port_realtime = 1; }
     if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
