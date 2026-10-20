@@ -98,8 +98,13 @@ void port_close(int fd) { sys3(SYS_close, fd, 0, 0); }
 int port_pwrite(int fd, const void *b, int n, long long off) {
     return (int)sys5(181 /* SYS_pwrite64 */, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));
 }
+static int last_error;
+int port_last_error(void) { return last_error; }
 int port_pread(int fd, void *b, int n, long long off) {
-    return (int)sys5(SYS_pread64, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));
+    int r = (int)sys5(SYS_pread64, fd, (long)b, n, (long)(unsigned)off, (long)(off >> 32));
+    if (r < 0) { last_error = -r; return -1; }
+    last_error = 0;
+    return r;
 }
 long long port_filesize(int fd) {
     long long res = 0;
@@ -299,7 +304,7 @@ static void install(int sig, void *h) {
 }
 
 /* ------------------------------------------------------------------------------------------- entry */
-int port_verbose;
+int port_verbose, port_kuseg_strict;
 char **port_envp;
 extern int port_main(int argc, char **argv);
 

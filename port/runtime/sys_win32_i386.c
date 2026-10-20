@@ -109,11 +109,14 @@ int port_write_all(int fd, const void *b, int n) {
 void port_close(int fd) { HANDLE h = hof(fd); if (h && fd >= 3) { CloseHandle(h); fds[fd] = 0; } }
 int port_mkdir(const char *p) { return CreateDirectoryA(p, 0) ? 0 : -1; }
 struct overlapped { unsigned long internal, internal_high, off, off_high; HANDLE ev; };
+static int last_error;
+int port_last_error(void) { return last_error; }
 int port_pread(int fd, void *b, int n, long long off) {
     HANDLE h = hof(fd); DWORD got = 0;
     struct overlapped o = { 0, 0, (unsigned long)off, (unsigned long)(off >> 32), 0 };
-    if (!h) return -1;
-    if (!ReadFile(h, b, n, &got, &o)) return GetLastError() == 38 /* ERROR_HANDLE_EOF */ ? (int)got : -1;
+    if (!h) { last_error = 6 /* ERROR_INVALID_HANDLE */; return -1; }
+    last_error = 0;
+    if (!ReadFile(h, b, n, &got, &o)) { last_error = (int)GetLastError(); return last_error == 38 /* ERROR_HANDLE_EOF */ ? (int)got : -1; }
     return (int)got;
 }
 int port_pwrite(int fd, const void *b, int n, long long off) {
@@ -203,15 +206,20 @@ void port_setup_memory(void) {
        use reads the host's data there, as the warning says; Wine keeps its own data in this range) */
     if (MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0x10000, PSX_RAM_SIZE - 0x10000, (void *)0x00010000u) != (void *)0x00010000u) {
         unsigned mapped = 0, missing = 0;
+        port_printf("[port] warning: KUSEG mirror 00010000-001FFFFF partly in use by Windows; blocks missing:");
         for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
             unsigned long mbi[7] = { 0 };
             VirtualQuery((void *)a, mbi, sizeof mbi);
             if (mbi[4] == 0x10000 /* MEM_FREE */ && mbi[0] + mbi[3] >= a + 0x10000 &&
                 MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, a, 0x10000, (void *)a) == (void *)a) mapped += 0x10000;
-            else missing += 0x10000;
+            else { missing += 0x10000; port_printf(" %05x(%s)", a, mbi[4] == 0x10000 ? "free" : mbi[4] == 0x2000 ? "reserved" : "committed"); }
         }
-        port_printf("[port] warning: KUSEG mirror 00010000-001FFFFF partly in use by Windows: %u KB mapped, %u KB missing\n",
+        port_printf("\n[port] %u KB mapped, %u KB missing: a game access to a missing block reads the host's own data there\n",
                     mapped >> 10, missing >> 10);
+        if (port_kuseg_strict)
+            port_fatal("--kuseg-strict: the KUSEG mirror could not be placed whole");
+        port_printf("[port] (the load lists are read through KSEG0 (fixes.txt, queueLoadList), so this is normally harmless; "
+                    "--kuseg-strict stops here)\n");
     }
     if (VirtualAlloc((void *)PSX_SPAD_BASE, PSX_SPAD_SIZE, 0x3000 /* MEM_COMMIT|MEM_RESERVE */, PAGE_READWRITE) != (void *)PSX_SPAD_BASE)
         port_fatal("cannot map the scratchpad at %08x (%lu)", PSX_SPAD_BASE, GetLastError());
@@ -431,7 +439,7 @@ __asm__(".text\n.globl __chkstk_ms\n.globl ___chkstk_ms\n__chkstk_ms:\n___chkstk
         "1:\tsubl %eax, %ecx\n\torl $0, (%ecx)\n\tpopl %eax\n\tpopl %ecx\n\tret\n");
 
 /* ------------------------------------------------------------------------------------------- entry */
-int port_verbose;
+int port_verbose, port_kuseg_strict;
 char **port_envp;
 extern int port_main(int argc, char **argv);
 static char *argv_buf[64];

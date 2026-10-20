@@ -212,11 +212,14 @@ static int parse_options(int argc, char **argv) {
             if (port_viewer_args_count < 16) port_viewer_args[port_viewer_args_count++] = argv[++i]; else i++;
         }
         else if (streq(argv[i], "-v")) port_verbose++;
+        else if (streq(argv[i], "--trace-cd")) { extern int port_trace_cd; port_trace_cd = 1; }
+        else if (streq(argv[i], "--kuseg-strict")) port_kuseg_strict = 1;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime] [--hz 50|60]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
-                        "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
+                        "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp] [--trace-cd]\n"
+                        "       [--kuseg-strict]   (Windows) stop when the KUSEG mirror 0x10000-0x1FFFFF cannot be mapped whole\n"
                         "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4, COUNT consecutive)\n"
                         "       [--poke-every INTERVAL:ADDR:VALUE[:SIZE]]   the same every INTERVAL vblanks\n"
                         "       [--menu FRAME:N]   open menu screen N at a vblank during gameplay (4 = save, 5 = load)\n"

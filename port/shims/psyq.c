@@ -409,9 +409,10 @@ static const char *cd_resolve_cue(const char *path) {
             else while (cue[j] && cue[j] != ' ' && cue[j] != '\t' && cue[j] != '\r' && cue[j] != '\n' && k < 511) name[k++] = cue[j++];
             name[k] = 0;
             if (!k) break;
-            int dir = n; while (dir > 0 && path[dir - 1] != '/') dir--;    /* directory of the cue */
+            int dir = n; while (dir > 0 && path[dir - 1] != '/' && path[dir - 1] != '\\') dir--;    /* directory of the cue */
             int o = 0;
-            if (name[0] != '/') for (int q = 0; q < dir && o < 1000; q++) cd_bin_path[o++] = path[q];
+            int absolute = name[0] == '/' || name[0] == '\\' || (name[0] && name[1] == ':');   /* C:\... on Windows */
+            if (!absolute) for (int q = 0; q < dir && o < 1000; q++) cd_bin_path[o++] = path[q];
             for (int q = 0; name[q] && o < 1020; q++) cd_bin_path[o++] = name[q];
             cd_bin_path[o] = 0;
             port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path);
@@ -421,21 +422,56 @@ static const char *cd_resolve_cue(const char *path) {
     port_printf("[port] %s: no FILE line found in the cue sheet\n", path);
     return path;
 }
+static const char *cd_image_path = "(none)";
+static long long cd_image_size;
+static int cd_sector_count;
+int port_trace_cd;                     /* --trace-cd: every Setloc and read */
+/* The sector size comes from the image itself: a raw (2352) image starts with the 12-byte sync
+   00 FF*10 00, a cooked (2048) ISO has the primary volume descriptor "\1CD001" at 16*2048. The file size
+   alone is ambiguous (an image with a trailing audio track or a cue-less multi-track dump is not a multiple
+   of 2352 and was read as 2048 before, which gives garbage directories and bogus load records). */
 int port_cd_open(const char *path) {
     path = cd_resolve_cue(path);
     cd_fd = port_open(path);
     if (cd_fd < 0) return -1;
-    long long n = port_filesize(cd_fd);
-    cd_raw = (n % 2352) == 0;
-    port_printf("[port] disc image %s: %lld bytes, %s sectors\n", path, n, cd_raw ? "raw 2352" : "2048");
+    cd_image_path = path;
+    long long n = cd_image_size = port_filesize(cd_fd);
+    u8 head[16] = { 0 }, pvd[8] = { 0 };
+    port_pread(cd_fd, head, 16, 0);
+    static const u8 sync[12] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
+    int has_sync = 1;
+    for (int i = 0; i < 12; i++) if (head[i] != sync[i]) has_sync = 0;
+    int has_pvd = port_pread(cd_fd, pvd, 8, 16 * 2048) == 8 && pvd[1] == 'C' && pvd[2] == 'D' && pvd[3] == '0' && pvd[4] == '0' && pvd[5] == '1';
+    /* sizes stay below 2^32 (a CD is at most ~800 MB); the freestanding runtime has no 64-bit division helper */
+    unsigned size32 = n > 0xFFFFFFFFll ? 0xFFFFFFFFu : (unsigned)n;
+    unsigned rest = size32 % 2352;
+    cd_raw = has_sync ? 1 : has_pvd ? 0 : rest == 0;
+    cd_sector_count = (int)(size32 / (cd_raw ? 2352 : 2048));
+    port_printf("[port] disc image %s: %lld bytes, %s sectors (%d), %s\n", path, n, cd_raw ? "raw 2352" : "cooked 2048",
+                cd_sector_count, has_sync ? "sync pattern found" : has_pvd ? "ISO9660 PVD at 16*2048" : cd_raw ? "no sync pattern: size is a multiple of 2352" : "no sync pattern, no PVD: assumed cooked");
+    if (cd_raw && rest) port_printf("[port] warning: %u trailing bytes beyond the last raw sector (several tracks in one file?)\n", rest);
+    /* self-check: sector 16 is the primary volume descriptor */
+    u8 sec[2048];
+    if (port_cd_read_sectors(16, 1, sec, 2048) || sec[0] != 1 || sec[1] != 'C' || sec[2] != 'D' || sec[3] != '0' || sec[4] != '0' || sec[5] != '1')
+        port_printf("[port] warning: sector 16 of %s is not an ISO9660 primary volume descriptor (%02x %02x %02x %02x %02x %02x): "
+                    "wrong sector size or not a data track image\n", path, sec[0], sec[1], sec[2], sec[3], sec[4], sec[5]);
+    else if (port_verbose || port_trace_cd) port_printf("[port] disc self-check: PVD ok, volume \"%.32s\"\n", sec + 40);
     return 0;
 }
 int port_cd_read_sectors(int lba, int count, void *dst, int bytes) {
     u8 *d = dst;
-    if (cd_fd < 0) return -1;
+    if (cd_fd < 0) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;
-        if (port_pread(cd_fd, d, bytes, off) != bytes) return -1;
+        int got = port_pread(cd_fd, d, bytes, off);
+        if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes at offset %lld -> %d%s\n", lba + i, i + 1, count, bytes, off, got,
+                                       got == bytes ? "" : " FAILED");
+        if (got != bytes) {
+            port_printf("[port] CD read failed: lba %d, %d bytes at offset %lld of %s (%lld bytes = %d sectors of %d), got %d (os error %d)%s\n",
+                        lba + i, bytes, off, cd_image_path, cd_image_size, cd_sector_count, cd_raw ? 2352 : 2048, got, port_last_error(),
+                        lba + i >= cd_sector_count ? ": beyond the end of the image" : "");
+            return -1;
+        }
         d += bytes;
     }
     return 0;
@@ -446,8 +482,24 @@ int CdInit(void) { return 1; }
 int CdReset(int m) { return 1; }
 int CdStatus(void) { return 0x02; }
 int CdMode(void) { return cd_mode; }
+/* Setloc parameters come from FILE_LINKS (cdLoadTask: &FILE_LINKS + id * 8, the id of a load record): a position
+   beyond the image means a garbage record (on Linux the game never asks past lba 178339), so say where the
+   parameter lives. */
+extern u8 FILE_LINKS[];
+static int cd_bad_locs;
+static void cd_check_loc(const u8 *param, int lba) {
+    unsigned off = (unsigned)(param - FILE_LINKS);
+    int in_table = off < 1119 * 8 && (off & 7) == 0;
+    if (port_trace_cd) port_printf("[port] cd: Setloc %02x:%02x:%02x -> lba %d (%s %u)\n", param[0], param[1], param[2], lba,
+                                   in_table ? "FILE_LINKS id" : "param at", in_table ? off / 8 : (unsigned)(unsigned long)param);
+    if (lba >= 0 && lba < cd_sector_count) return;
+    if (cd_bad_locs++ > 20) return;
+    port_printf("[port] CD Setloc %02x:%02x:%02x = lba %d is outside the image (%d sectors): ", param[0], param[1], param[2], lba, cd_sector_count);
+    if (in_table) port_printf("FILE_LINKS[%u] (a load record with that file id is garbage: KUSEG/page-0 reads?)\n", off / 8);
+    else port_printf("the parameter is at %p, not in FILE_LINKS (a corrupt CdlLOC)\n", param);
+}
 int CdControl(u8 com, u8 *param, u8 *result) {
-    if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) cd_pos = loc_to_lba(param);
+    if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) { cd_pos = loc_to_lba(param); cd_check_loc(param, cd_pos); }
     if (com == 14 /* Setmode */ && param) cd_mode = param[0];
     if (result) result[0] = 0x02;
     return 1;
@@ -462,8 +514,8 @@ void *CdReadCallback(void *f) { void *o = cd_read_cb; cd_read_cb = f; return o; 
 static int cd_reads, cd_sectors;
 int CdRead(int sectors, u32 *buf, int mode) {
     int bytes = (mode & 0x20) ? 2340 : 2048;
-    if (port_verbose) port_printf("[port] CdRead lba %d, %d sectors -> %p\n", cd_pos, sectors, buf);
-    if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d\n", cd_pos); return 0; }
+    if (port_verbose || port_trace_cd) port_printf("[port] CdRead lba %d, %d sectors -> %p (frame %d)\n", cd_pos, sectors, buf, port_frame);
+    if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame); return 0; }
     cd_pos += sectors; cd_reads++; cd_sectors += sectors;
     return 1;
 }

@@ -87,10 +87,13 @@ void port_vblank(void);          /* one emulated vertical blank: runs the game's
 extern int port_frame;
 extern int port_max_frames;      /* stop after this many vblanks (0 = no limit) */
 extern int port_verbose;
+extern int port_kuseg_strict;    /* --kuseg-strict: Windows, stop when the KUSEG mirror is partly mapped */
 
 /* CD image */
 int port_cd_open(const char *path);
 int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
+extern int port_trace_cd;        /* --trace-cd: log every Setloc and sector read */
+int port_last_error(void);       /* errno / GetLastError of the last port_pread */
 
 /* GPU (shims/gpu.c): software rasteriser into emulated VRAM, frame dumps */
 extern const char *port_dump_dir;    /* --dump-frames DIR: write the displayed frame as PNG */
