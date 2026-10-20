@@ -156,6 +156,15 @@ void port_relocate_overlay(void *dst, int bytes) {
         if (c && in_ranges(c, a)) continue;
         if (0x1F800000u <= v && v < 0x1F800400u) { w[i] = (u32p)port_ram_ptr(v); nd++; continue; }
         if (v < PORT_MAIN0_LOAD || v >= 0x80200000u || (v & 3)) continue;
+        if (c && c->kind == 1 && v >= PORT_OVL_BASE && v < PORT_OVL_END) {
+            /* a SYSTEM overlay's own word pointing into the overlay region: one of its functions (never an X000
+               function or a thunk: X000 is not resident), a label inside one, or its own data (D0SPSUB's icon
+               table at 0x800FE89C holds 0x800FE13C, which is also an X000 function start) */
+            void *fn = ovlmap_find(port_x000_image[0], v);
+            if (fn) { w[i] = (u32p)fn; nfn++; continue; }
+            if (in_ranges(c, v)) { nraw++; continue; }
+            w[i] = (u32p)port_ram_ptr(v); nd++; continue;
+        }
         const PortAddr *e = addr_find(port_addrmap, port_addrmap_count, v);
         if (e) { w[i] = (u32p)e->fn; nfn++; continue; }
         e = addr_find(port_thunkmap, port_thunkmap_count, v);

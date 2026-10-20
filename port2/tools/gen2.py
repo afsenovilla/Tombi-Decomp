@@ -26,7 +26,7 @@ the matching sources is turned into a symbol reference at generation time; nothi
         * code we have no C for (Psy-Q, BIOS, asm-only game functions) -> logging stub in OUTDIR/stubs.c.
       OUTDIR/report.txt sums it all up.
 """
-import bisect, os, re, subprocess, sys
+import bisect, os, re, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
@@ -278,8 +278,109 @@ BU_RE = re.compile(r"(?<![\w.>])(open|close|read|write|lseek|erase|format|firstf
 ASMNAME_RE = re.compile(r"(?<=[\w)\]])\s+(?:__asm__|asm)\s*\(\s*\"(?!(?:[atvsk]\d|zero|at|gp|sp|fp|ra)\")([A-Za-z_]\w*)\"\s*\)")
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# port-only C: a function the decomp has no byte-matched file for gets, for the port only, the near-match draft of
+# src/wip/<prog>_<name>.c, or a copy of its twin's source (a function of another SYSTEM overlay with the same code
+# modulo relocation, notes/functions_<prog>.csv "twin" column or PORT_TWINS) with every address-named symbol
+# (func_/D_/... _XXXXXXXX) renamed to the overlay's own address, read off the two retail images.  Not byte-matched:
+# flagged in report.txt.
+PORT_TWINS = {("D0SPSUB3", 0x800EC89C): ("D0SPSUB", 0x800ED0C4)}     # structural variant: src/wip has the draft
+HEXNAME_RE = re.compile(r"\b((?:PTR_)?(?:D|DAT|FUN|func|LAB|PTR|jtbl))_([0-9A-Fa-f]{8})\b")
+
+
+def reloc_fields(prog, addr, size):
+    """([(word index, address)] of the relocation fields of the retail function (jal targets, lui/lo pairs),
+    [masked words])"""
+    import areas
+    W = areas.prog_words(prog, addr, size)
+    M = areas.masks(W)
+    out, hi = [], {}
+    for i, w in enumerate(W):
+        op, rs, rt = w >> 26, (w >> 21) & 31, (w >> 16) & 31
+        if op in (2, 3): out.append((i, ((w & 0x3FFFFFF) << 2) | 0x80000000))
+        elif op == 15: hi[rt] = (w & 0xFFFF) << 16
+        elif M[i] == 0xFFFF0000 and rs in hi:
+            lo = w & 0xFFFF
+            out.append((i, (hi[rs] + (lo - 0x10000 if lo & 0x8000 else lo)) & 0xFFFFFFFF))
+    return out, [w & m for w, m in zip(W, M)]
+
+
+def twin_map(tp, ta, ts, op, oa, osz):
+    """{address in the twin program: address in the overlay} from the relocation fields of the two retail
+    functions (aligned on the masked instruction words, so a structural variant maps its common parts)"""
+    import difflib
+    tf, tm = reloc_fields(tp, ta, ts); of, om = reloc_fields(op, oa, osz)
+    tfd, ofd = dict(tf), dict(of)
+    mp = {}
+    for a, b, n in difflib.SequenceMatcher(None, tm, om, autojunk=False).get_matching_blocks():
+        for k in range(n):
+            if a + k in tfd and b + k in ofd: mp.setdefault(tfd[a + k], ofd[b + k])
+    return mp
+
+
+def twin_source(text, mp, tname, oname):
+    """the twin's C with its address-named symbols moved by mp (a name with no exact field: the shift of the
+    nearest mapped address above it within 0x400 bytes, i.e. a struct base reached through a field offset)"""
+    keys = sorted(mp)
+    def ren(m):
+        a = int(m.group(2), 16)
+        if a in mp: na = mp[a]
+        else:
+            i = bisect.bisect_left(keys, a)
+            if i < len(keys) and keys[i] - a < 0x400: na = a + mp[keys[i]] - keys[i]
+            elif i > 0 and a - keys[i - 1] < 0x400: na = a + mp[keys[i - 1]] - keys[i - 1]
+            else: return m.group(0)
+        if na == a: return m.group(0)
+        h = "%08X" % na if any(c in "ABCDEF" for c in m.group(2)) or not any(c in "abcdef" for c in m.group(2)) else "%08x" % na
+        return "%s_%s" % (m.group(1), h)
+    return re.sub(r"\b%s\b" % re.escape(tname), oname, HEXNAME_RE.sub(ren, text))
+
+
+def port_only_sources(outdir, progs):
+    """Gives every fileless game function of a SYSTEM overlay a port-only source (units() is patched in place so
+    gen_port picks it like a matched file).  Returns [(prog, name, kind, path)]."""
+    import sysovl, units as UM
+    U = UM.units()
+    out = []
+    pdir = os.path.join(outdir, "portonly")
+    shutil.rmtree(pdir, ignore_errors=True)
+    for prog in progs:
+        if prog not in sysovl.SYSOVL: continue
+        rows = {int(r["address"], 16): r for r in UM.read_csv(UM.N("notes", "functions_%s.csv" % prog.lower()))}
+        for i, u in enumerate(U[prog]):
+            if u.file or u.lib or u.size < 8: continue
+            dst = os.path.join(pdir, prog.lower(), u.name + ".c")
+            wip = os.path.join(ROOT, "src", "wip", "%s_%s.c" % (prog.lower(), u.name))
+            if os.path.exists(wip):
+                txt, kind = open(wip, errors="replace").read(), "draft src/wip/%s_%s.c" % (prog.lower(), u.name)
+            else:
+                tw = (rows.get(u.addr) or {}).get("twin") or ""
+                m = re.match(r"(\w+):([0-9A-Fa-f]{8})$", tw)
+                tp, ta = (m.group(1), int(m.group(2), 16)) if m else PORT_TWINS.get((prog, u.addr), (None, 0))
+                if not tp: continue
+                tu = next((v for v in U[tp] if v.addr == ta), None)
+                if not tu: continue
+                twip = os.path.join(ROOT, "src", "wip", "%s_%s.c" % (tp.lower(), tu.name))
+                src = tu.file if tu.file and "/portonly/" not in tu.file else twip
+                if not os.path.exists(src): continue
+                mp = twin_map(tp, ta, tu.size, prog, u.addr, u.size)
+                txt = twin_source(open(src, errors="replace").read(), mp, tu.name, u.name)
+                txt = re.sub(r"//\s*MATCHING[^\n]*\n", "", txt)
+                txt = re.sub(r"//\s*FUNC\s+[0-9a-fA-F]+\s+\d+[ \t]*\w*", "// FUNC %08x %d %s" % (u.addr, u.size, prog), txt, count=1)
+                kind = "twin of %s %s (%s)" % (tp, tu.name, os.path.relpath(src, ROOT))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            open(dst, "w").write("// PORT-ONLY C (not byte-matched): %s\n" % kind + txt)
+            U[prog][i] = u._replace(file=dst)
+            out.append((prog, u.name, kind, dst))
+    with open(os.path.join(outdir, "portonly.txt"), "w") as f:
+        for prog, n, k, d in out: f.write("%s %s %s\n" % (prog, n, k))
+    if out: print("gen2: %d port-only C functions (not byte-matched): %s" % (len(out), " ".join("%s/%s" % (p, n) for p, n, k, d in out)))
+    return out
+
+
 def sources(outdir, progs):
     import shutil, sysovl
+    port_only_sources(outdir, progs)
     for name in ("inc", "inc24"):          # materialised header copies of the previous run
         shutil.rmtree(os.path.join(outdir, name), ignore_errors=True)
     isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
@@ -573,12 +674,16 @@ def link(outdir, nm, objlist):
         f.write("names with no region (dummy storage): %d\n" % len(dummies))
         f.write("game objects that keep their own copy of retail-named data: %d\n" % len(own_copies))
         f.write("dispatch thunks (overlay-region function starts): %d; names aliased to a thunk: %d\n" % (len(thunks), thunk_aliases))
+        pop = os.path.join(outdir, "portonly.txt")
+        po = [l.rstrip("\n") for l in open(pop) if l.strip()] if os.path.exists(pop) else []
+        f.write("port-only C (not byte-matched: src/wip drafts and twin copies, gen/portonly/): %d\n" % len(po))
         f.write("stubs: %d (psyq/bios %d, game-asm %d, overlay-target %d, label %d, port-runtime %d)\n" % (
             len(stubs), *[sum(1 for s in stubs if s[2] == k) for k in ("psyq/bios", "game-asm", "overlay-target", "label", "port-runtime")]))
         f.write("hand-translated asm still needed: main (0x800163F4, port/runtime/main_port.c has it in C), the game-asm stubs above (pad driver: port/shims/pad.c), %d other MAIN0/X000 game units without C\n\n" % len(asm_only))
         f.write("## unresolved literals\n" + "".join(l + "\n" for l in unres))
         f.write("\n## literals naming a label inside a natively compiled function\n" + "".join(l + "\n" for l in labels))
         f.write("\n## game-asm stubs\n" + "".join("%s 0x%08X\n" % (n, a or 0) for n, a, k in stubs if k == "game-asm"))
+        f.write("\n## port-only C (not byte-matched; functionally the retail logic)\n" + "".join(l + "\n" for l in po))
         f.write("\n## overlay-target stubs (MAIN0 calls into the overlay region; dispatch by resident overlay next round)\n" + "".join("%s 0x%08X\n" % (n, a or 0) for n, a, k in stubs if k == "overlay-target"))
         f.write("\n## label stubs (addresses inside functions)\n" + "".join("%s 0x%08X\n" % (n, a or 0) for n, a, k in stubs if k == "label"))
         f.write("\n## psyq/bios stubs\n" + "".join("%s\n" % n for n, a, k in stubs if k == "psyq/bios"))
