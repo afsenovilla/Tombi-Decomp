@@ -1,8 +1,109 @@
-/* Runtime interface of the native-pointer port (port2/runtime). */
+/* Runtime interface of the native-pointer port (port2/runtime, port2/shims).  Only port2 code includes this. */
 #ifndef PORT2_RUNTIME_H
 #define PORT2_RUNTIME_H
+
+typedef unsigned int u32p;
+
+/* generated tables (build/port2/gen/funcmap.c by port/tools/gen_port.py, addrmap.c by port2/tools/gen2.py) */
+typedef struct { u32p addr; void *fn; const char *name; } PortFunc;          /* MAIN0/X000 function by retail address */
+extern const PortFunc port_funcmap[];
+extern const int port_funcmap_count;
+typedef struct { u32p id; u32p addr; void *fn; const char *name; } PortOvlFunc;   /* SYSTEM overlay set: header id + address */
+typedef struct { u32p id; const char *name; } PortOvl;
+extern const PortOvlFunc port_ovlmap[];
+extern const int port_ovlmap_count;
+extern const PortOvl port_ovls[];
+typedef struct { int area; u32p addr; void *fn; } PortAreaFunc;      /* areas: sorted by (area, addr); area 0 = X000 */
+typedef struct { int idx; const char *name; u32p sig[2][2]; } PortArea;
+extern const PortAreaFunc port_areamap[];
+extern const int port_areamap_count;
+extern const PortArea port_areas[];
+extern const int port_areas_count;
+extern const unsigned int port_vary_addrs[];
+extern const int port_vary_count;
+typedef struct { u32p addr; void *fn; } PortAddr;                    /* sorted by addr */
+extern const PortAddr port_addrmap[];        /* every MAIN0/X000 function (outside the overlay region) with native code */
+extern const int port_addrmap_count;
+extern const PortAddr port_thunkmap[];       /* overlay-region function start -> its dispatch thunk */
+extern const int port_thunkmap_count;
+typedef struct { int kind; u32p key; const char *name; const unsigned int *ranges; int n; } PortOvlCode;   /* kind 0: area index, 1: SYSTEM id */
+extern const PortOvlCode port_ovlcode[];
+extern const int port_ovlcode_count;
+
+/* the data image (build/port2/gen/data.c): the retail RAM layout as relocatable arrays */
+extern unsigned int port_ram[0x80000];     /* the 2 MB of RAM in the retail layout; the regions are offsets into it */
+extern unsigned int port_bios[], port_main0_image[], port_main0_bss[], port_x000_image[], port_x000_bss[], port_heap[],
+    port_hiram[], port_scratch[], port_io[];
+#define PORT_MAIN0_LOAD 0x80010000u
+#define PORT_OVL_BASE 0x800E8028u
+#define PORT_OVL_END 0x80140000u
+#define PORT_AREA_OWN_CODE 0x80115EA4u   /* X0nn: first per-area function (the code before it is shared with X000) */
+/* native pointer for a retail RAM / scratchpad address (runtime and debugging aids only; the game never does this) */
+void *port_ram_ptr(u32p addr);
+int port_is_ram_ptr(const void *p);
+#define PORT_M0(a) ((unsigned char *)port_main0_image + ((a) - PORT_MAIN0_LOAD))
+#define PORT_SPAD(a) ((unsigned char *)port_scratch + (a))
+#define SPAD8(a) (*(volatile unsigned char *)PORT_SPAD(a))
+#define SPAD16(a) (*(volatile unsigned short *)PORT_SPAD(a))
+#define SPAD32(a) (*(volatile unsigned int *)PORT_SPAD(a))
+
+/* overlay dispatch (runtime/ovl.c) */
+void *port_resolve_call(u32p addr);              /* called by the thunks: native code of `addr` in the resident overlay */
+int port_current_area(void);                     /* index into port_areas (0 = X000), -1 if none matches */
+const char *port_resident_overlay(void);
+void port_relocate_overlay(void *dst, int bytes);   /* after a CD read into the overlay region: retail pointers -> native */
+const char *port_sym_near(void *fn, unsigned long *off);
+
+/* logging, exit */
 void port_printf(const char *fmt, ...);
 void port_fatal(const char *fmt, ...) __attribute__((noreturn));
+void port_quit(int code) __attribute__((noreturn));
 void port_stub_hit(const char *name);
+void port_stub_report(void);
 int port_check_layout(void);
+extern int port_verbose;
+
+/* time */
+unsigned long long port_time_us(void);
+void port_sleep_us(unsigned long long us);
+void port_sleep_until_us(unsigned long long deadline);
+
+/* cooperative threads (Psy-Q OpenTh/ChangeTh) */
+int port_thread_open(void *fn);
+void port_thread_change(int handle);
+void port_thread_close(int handle);
+
+/* frame pacing / vblank */
+void port_vblank(void);
+extern int port_frame;
+extern int port_max_frames;
+extern int port_realtime, port_hz;
+
+/* CD image */
+int port_cd_open(const char *path);
+int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
+extern int port_trace_cd;
+extern const char *port_disc_path;
+
+/* GPU (shims/gpu.c) */
+extern const char *port_dump_dir;
+extern int port_dump_every, port_dump_vram;
+void port_gpu_vblank(void);
+int port_gpu_frame(unsigned char *rgb, int *w, int *h);
+
+/* sound (shims/sound.c): the mixer output ring the SDL audio callback drains */
+void port_sound_vblank(void);
+int port_sound_pull(short *out, int frames);     /* stereo frames; zero-filled when the ring is empty */
+
+/* pad (shims/pad.c) */
+void port_pad_vblank(void);
+extern unsigned short port_pad_buttons[2];
+
+/* SDL2 window + audio + input (runtime/sdl.c) */
+extern int port_window;                          /* --window */
+extern int port_window_scale;
+void port_window_start(void);
+void port_window_frame(const unsigned char *rgb, int w, int h);
+int port_window_poll_pad(unsigned short *out);   /* 1 when a window is open */
+void port_window_stop(void);
 #endif

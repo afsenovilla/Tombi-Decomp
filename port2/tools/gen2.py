@@ -85,6 +85,22 @@ class AddrMap:
             n, a = l.split(); a = int(a, 16); self.syms[n] = a
             if a not in self.unit and "__" not in n: self.by_addr.setdefault(a, []).append(n)
         self.data_addrs = sorted(self.by_addr)
+        # every function start of the overlay region, over all overlays (X000, the areas, the SYSTEM set): each
+        # gets a dispatch thunk (port_thunk_<addr>) that picks the native code of the resident overlay at run time
+        from units import units
+        self.U = units()
+        self.ovl_starts = set()
+        for p, us in self.U.items():
+            for u in us:
+                if GP.OVL_BASE <= u.addr < GP.OVL_END: self.ovl_starts.add(u.addr)
+        vp = os.path.join(outdir, "vary.txt")
+        self.vary = set(int(l, 16) for l in open(vp) if l.strip()) if os.path.exists(vp) else set()
+
+    def thunk(self, a):
+        """name of the dispatch thunk for retail address a, or None: an overlay-region function start whose code is
+        not the one native X000 function every overlay shares"""
+        if a in self.ovl_starts and (a in self.vary or a not in self.native): return "port_thunk_%08X" % a
+        return None
 
     def is_code(self, a):
         i = bisect.bisect_right(self.code_starts, a) - 1
@@ -162,7 +178,7 @@ GP.ROOT = ROOT
 
 # ---------------------------------------------------------------------------------------------------------------
 # step 2: the address resolver
-LIT_RE = re.compile(r"(?<![\w.])0[xX](8[0-9A-Fa-f]{7}|[aA]0[0-9A-Fa-f]{6}|1[fF]80[0-9A-Fa-f]{4})(?![\w.])")
+LIT_RE = re.compile(r"(?<![\w.])0[xX](8[0-9A-Fa-f]{7}|[aA]0[0-9A-Fa-f]{6}|1[fF]80[0-9A-Fa-f]{4})[uUlL]{0,3}(?![\w.])")
 
 
 class Resolver:
@@ -187,8 +203,12 @@ class Resolver:
         for m in LIT_RE.finditer(blank):
             a = int(m.group(1), 16)
             if a < 0x80000000 and not (0x1F800000 <= a < 0x1F803000): continue
-            if a == 0x80000000: continue                                # the KSEG0 bit, used as a mask
-            if a >= 0x80200000 or (a < 0x80200000 and (a & 0xFFFF) == 0 and a != 0x80010000):
+            if a == 0x80000000:                                        # the KSEG0 bit: `p | 0x80000000` (an OT
+                before = blank[:m.start()].rstrip()                     # link back to a pointer) is the identity
+                if before.endswith(("|", "+")):                          # on native pointers; as a mask it stays
+                    out.append(txt[pos:m.start()]); out.append("0u /* PORT: KSEG0 */"); pos = m.end()
+                continue
+            if a >= 0x80200000 or (0x80000000 <= a < 0x80200000 and (a & 0xFFFF) == 0 and a != 0x80010000):
                 self.constants += 1; continue                           # 0x803Cxxxx, 0x80020000: values
             line = blank.count("\n", 0, m.start()) + 1
             in_copy = any(s <= m.start() < e for s, e in copies)
@@ -216,6 +236,8 @@ class Resolver:
 
 # files that define their own copy of a function another file defines (gen_port's STATIC_AFTER_EXTERN)
 DUP_DEFS = {"startAreaBgmWithReverb": ["getSfxVabOffset"]}
+# area files whose definition of a function duplicates the one of the file named after it: made weak
+WEAK_DEFS = {"x005/stepBacoTownNpcTalk.c": ["X005_updateBacoTownNpc"], "x011/stepFactoryNpcTalk.c": ["X011_updateFactoryNpc"]}
 
 
 def materialise(d):
@@ -246,11 +268,23 @@ def rewrite_tree(d, res, relroot):
                 open(p, "w").write(new)
 
 
+BU_RE = re.compile(r"(?<![\w.>])(open|close|read|write|lseek|erase|format|firstfile|nextfile|undelete|rename)(\s*\()")
+
+
 def sources(outdir, progs):
-    import shutil
+    import shutil, sysovl
     for name in ("inc", "inc24"):          # materialised header copies of the previous run
         shutil.rmtree(os.path.join(outdir, name), ignore_errors=True)
-    GP.sources(outdir, progs, (), ())
+    isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
+    base = [p for p in progs if p not in sysovl.SYSOVL and not isarea(p)]
+    GP.sources(outdir, base, [p for p in progs if p in sysovl.SYSOVL], [p for p in progs if isarea(p)])
+    # the BIOS memory-card file system (open/read/write/... on "bu00:") must not shadow the host libc's calls
+    # of the same names (SDL, stdio): the game's calls are renamed port_bu_*, which port2/shims/card.c defines
+    for root, dirs, files in os.walk(os.path.join(outdir, "src")):
+        for f in files:
+            pth = os.path.join(root, f); txt = open(pth, errors="replace").read()
+            new = BU_RE.sub(r"port_bu_\1\2", txt)
+            if new != txt: open(pth, "w").write(new)
     amap = AddrMap(outdir)
     res = Resolver(amap)
     for name in ("inc", "inc24"):
@@ -265,6 +299,12 @@ def sources(outdir, progs):
             txt = open(p).read()
             defs = "".join("#define %s %s__%s\n" % (n, stem, n) for n in names)
             if defs not in txt: open(p, "w").write(txt.replace("\n", "\n" + defs, 1))
+    for rel, names in WEAK_DEFS.items():
+        p = os.path.join(outdir, "src", rel)
+        if not os.path.exists(p): continue
+        txt = open(p).read()
+        pr = "".join("#pragma weak %s\n" % n for n in names)
+        if pr not in txt: open(p, "w").write(txt.replace("\n", "\n" + pr, 1))
     with open(os.path.join(outdir, "port2_syms.h"), "w") as f:
         f.write("/* generated by port2/tools/gen2.py: every symbol the address resolver used */\n")
         for s, k in sorted(res.used.items()):
@@ -307,11 +347,17 @@ def emit_data(outdir, amap, needed):
     lines = ["/* generated by port2/tools/gen2.py from the user's MAIN0.EXE / X000.BIN: game data, never commit */",
              "#define PORT_ADDR(a, o) ((unsigned int)((unsigned char *)(a) + (o)))"]
     funcs, nptr, nfunc, ncodein, novl = set(), 0, 0, 0, 0
-    blobs = []
+    thunks_used, nthunk = set(), 0
+    # RAM is ONE array (port_ram, 2 MB, the retail layout) so that a CD read or a memset that crosses a region
+    # boundary (LD0SYS.BIN lands across the end of MAIN0's .data into its .bss) stays contiguous; the region names
+    # are aliases into it (syms.ld).  The scratchpad and the I/O page are their own arrays.
+    blobs, ram_parts = [], []
     for name, s, e, path, foff in amap.regs:
         n = (e - s + 3) // 4
+        in_ram = 0x80000000 <= s < 0x80200000
         if path is None or not os.path.exists(path):
-            blobs.append("unsigned int %s[%d] __attribute__((aligned(16)));" % (name, n)); continue
+            if not in_ram: blobs.append("unsigned int %s[%d] __attribute__((aligned(16)));" % (name, n))
+            continue
         data = open(path, "rb").read()[foff:foff + (e - s)]
         data += b"\0" * (n * 4 - len(data))
         words = []
@@ -321,6 +367,10 @@ def emit_data(outdir, amap, needed):
             if amap.is_code(a) or w < 0x80010000 and not (0x1F800000 <= w < 0x1F800400) or w >= 0x80200000 \
                     or (w & 3) and not (0x1F800000 <= w < 0x1F800400):
                 words.append("0x%X" % w); continue
+            th = amap.thunk(w)
+            if th:
+                thunks_used.add(th); nthunk += 1
+                words.append("(unsigned int)(unsigned long)&%s" % th); continue
             f = amap.func_name(w)
             if f:
                 funcs.add(f); nfunc += 1
@@ -333,13 +383,20 @@ def emit_data(outdir, amap, needed):
                 else: ncodein += 1
             nptr += 1
             words.append("PORT_ADDR(%s, 0x%X)" % (reg, off))
-        blobs.append("unsigned int %s[%d] __attribute__((aligned(16))) = {\n%s\n};" % (
-            name, n, ",\n".join(", ".join(words[j:j + 8]) for j in range(0, n, 8))))
+        body = ",\n".join(", ".join(words[j:j + 8]) for j in range(0, n, 8))
+        if in_ram: ram_parts.append("[0x%X] = %s" % ((s - 0x80000000) // 4, body))
+        else: blobs.append("unsigned int %s[%d] __attribute__((aligned(16))) = {\n%s\n};" % (name, n, body))
+    blobs.append("unsigned int port_ram[0x80000] __attribute__((aligned(4096))) = {\n%s\n};" % ",\n".join(ram_parts))
+    with open(os.path.join(outdir, "regions.ld"), "w") as f:
+        f.write("/* generated by port2/tools/gen2.py: the RAM regions are offsets into port_ram */\n")
+        for name, s, e, _, _ in amap.regs:
+            if 0x80000000 <= s < 0x80200000: f.write("%s = port_ram + 0x%X;\n" % (name, s - 0x80000000))
     for n, s, e, _, _ in amap.regs: lines.append("extern unsigned int %s[];" % n)
-    for f in sorted(funcs): lines.append("extern void %s();" % f)
+    for n, s, e, _, _ in amap.regs: lines.append("const unsigned int %s_size = 0x%X;" % (n, e - s))
+    for f in sorted(funcs | thunks_used): lines.append("extern void %s();" % f)
     lines += blobs
     open(os.path.join(outdir, "data.c"), "w").write("\n".join(lines) + "\n")
-    return nptr, nfunc, funcs, ncodein, novl
+    return nptr, nfunc + nthunk, funcs, ncodein, novl
 
 
 def link(outdir, nm, objlist):
@@ -362,21 +419,31 @@ def link(outdir, nm, objlist):
 
     def addr_of(n):
         if n in amap.syms: return amap.syms[n]
-        m = re.match(r"(?:func|FUN|D|DAT|jtbl|LAB|PTR|PTR_DAT)_([0-9A-Fa-f]{8})$", n)
-        if not m: m = re.match(r"(?:D|DAT)_([0-9A-Fa-f]{8})[A-Za-z_]\w*$", n)
+        m = re.match(r"(?:func|FUN|D|DAT|jtbl|LAB|PTR|PTR_DAT|P)_([0-9A-Fa-f]{8})$", n)
+        if not m: m = re.match(r"(?:D|DAT|P)_([0-9A-Fa-f]{8})[A-Za-z_]\w*$", n)
         return int(m.group(1), 16) if m else None
 
     ld, stubs, data_aliases, dummies = [], [], 0, []
     region_names = set(r[0] for r in amap.regs)
+    import sysovl
+    ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
+    thunk_aliases = 0
     for n in sorted(undefined):
-        if n.startswith(("__", "_GLOBAL_OFFSET")) or n in libc or n in region_names: continue
+        # (SDL_: the host library; port_: the runtime, or the tables this step generates)
+        if n.startswith(("__", "_GLOBAL_OFFSET", "SDL_", "port_")) or n in libc or n in region_names: continue
         if n in asm_alias:
             ld.append("%s = %s;" % (n, asm_alias[n])); continue
         a = addr_of(n)
         f = amap.func_name(a) if a is not None else None
+        is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n)
+        if a is not None and not is_data_name and not (f and f in defined and f != n and a not in amap.vary):
+            th = amap.thunk(a)
+            if th is None and ovl_re.match(n) and GP.OVL_BASE <= a < GP.OVL_END and a in amap.ovl_starts:
+                th = "port_thunk_%08X" % a
+            if th:        # a function of the overlay region: the resident overlay decides at call time
+                ld.append("%s = %s;" % (n, th)); thunk_aliases += 1; continue
         if f and f in defined and f != n:
             ld.append("%s = %s;" % (n, f)); continue
-        is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl)_", n)
         if a is not None and (not amap.is_code(a) or is_data_name):
             # (a data name inside an X000 code unit: another overlay's data, or a table a coarse unit covers)
             e = amap.alias_expr(a)
@@ -384,22 +451,62 @@ def link(outdir, nm, objlist):
                 ld.append("%s = %s;" % (n, e)); data_aliases += 1; continue
             dummies.append((n, a)); continue
         if a is not None and amap.is_code(a) and not f:
-            # inside an X000 unit: a function of another overlay at that address (MAIN0 dispatches by address;
-            # the resident overlay decides) or a label; neither is callable natively yet
+            # inside an X000 unit, not a function start of any overlay: a label; not callable natively
             stubs.append((n, a, "overlay-target" if GP.OVL_BASE <= a < GP.OVL_END else "label")); continue
         unit = amap.unit.get(a) if a is not None else None
         kind = "port-runtime" if n.startswith("port_") else "psyq/bios" if (a is None or GP_islib(a)) else "game-asm"
         stubs.append((n, a, kind))
+    # dispatch thunks (thunks.S): one per overlay-region function start; and the run-time tables (addrmap.c):
+    # retail address -> native function of MAIN0/X000 (for the relocation of a loaded overlay), address -> thunk,
+    # and the code ranges of every overlay (words inside them are instructions, never relocated)
+    thunks = sorted(a for a in amap.ovl_starts if amap.thunk(a))
+    with open(os.path.join(outdir, "thunks.S"), "w") as f:
+        f.write("/* generated by port2/tools/gen2.py: call dispatch into the overlay region */\n.text\n")
+        for a in thunks:
+            f.write(".globl port_thunk_%08X\n.type port_thunk_%08X,@function\nport_thunk_%08X:\n"
+                    "  pushl $0x%08X\n  call port_resolve_call\n  addl $4, %%esp\n  jmp *%%eax\n" % (a, a, a, a))
+        f.write('.section .note.GNU-stack,"",@progbits\n')
+    with open(os.path.join(outdir, "addrmap.c"), "w") as f:
+        f.write("/* generated by port2/tools/gen2.py: run-time address tables */\n#include \"port_runtime.h\"\n")
+        am = sorted((a, n) for a, n in amap.unit.items() if n in defined and not (GP.OVL_BASE <= a < GP.OVL_END))
+        for a, n in sorted(amap.native.items()):
+            if n in defined and not (GP.OVL_BASE <= a < GP.OVL_END) and a not in dict(am): am.append((a, n))
+        am = sorted(dict(am).items())
+        for a, n in am: f.write("extern void %s();\n" % n)
+        for a in thunks: f.write("extern void port_thunk_%08X();\n" % a)
+        f.write("const PortAddr port_addrmap[] = {\n%s  {0, 0}\n};\nconst int port_addrmap_count = %d;\n"
+                % ("".join("  {0x%08X, (void *)%s},\n" % e for e in am), len(am)))
+        f.write("const PortAddr port_thunkmap[] = {\n%s  {0, 0}\n};\nconst int port_thunkmap_count = %d;\n"
+                % ("".join("  {0x%08X, (void *)port_thunk_%08X},\n" % (a, a) for a in thunks), len(thunks)))
+        # code ranges per overlay: areas by their index in port_areas (X000 = 0), SYSTEM overlays by header id
+        alist = ["X000"] + sorted(p for p in amap.U if re.match(r"X0\d\d$", p) and p != "X000")
+        ents = []
+        for p in alist + list(sysovl.PROGS):
+            rs = sorted((u.addr, u.addr + u.size) for u in amap.U[p] if GP.OVL_BASE <= u.addr < GP.OVL_END)
+            merged = []
+            for s, e in rs:
+                if merged and s <= merged[-1][1]: merged[-1][1] = max(merged[-1][1], e)
+                else: merged.append([s, e])
+            if p in sysovl.SYSOVL:
+                fn = os.path.join(ROOT, "game", sysovl.SYSOVL[p][0])
+                kind, key = 1, (int.from_bytes(open(fn, "rb").read(4), "little") if os.path.exists(fn) else 0)
+            else: kind, key = 0, alist.index(p)
+            f.write("static const unsigned int ranges_%s[] = {%s};\n" % (p, ", ".join("0x%08X, 0x%08X" % tuple(r) for r in merged)))
+            ents.append((kind, key, p, len(merged)))
+        f.write("const PortOvlCode port_ovlcode[] = {\n%s  {0, 0, 0, 0, 0}\n};\nconst int port_ovlcode_count = %d;\n"
+                % ("".join("  {%d, 0x%X, \"%s\", ranges_%s, %d},\n" % (k, key, p, p, n) for k, key, p, n in ents), len(ents)))
     # data a game C file still defines by itself (a definition the filter did not rewrite): it keeps its own copy,
     # which is wrong when other files reach the retail bytes through another name; listed in the report
     own_copies = sorted(n for n in data_defined if addr_of(n) is not None and n not in undefined)
     nptr, nfunc, dfuncs, ncodein, novl = emit_data(outdir, amap, undefined)
     # functions the data image points to but nobody defines: stubs as well
     for f in sorted(dfuncs - defined - libc - set(s[0] for s in stubs)):
+        if f.startswith("port_thunk_"): continue
         a = next((a for a, n in amap.unit.items() if n == f), None)
         stubs.append((f, a, "psyq/bios" if a is None or GP_islib(a) else "game-asm"))
     with open(os.path.join(outdir, "syms.ld"), "w") as f:
         f.write("/* generated by port2/tools/gen2.py: aliases into the data image and between function names */\n")
+        f.write("INCLUDE %s\n" % os.path.join(outdir, "regions.ld"))
         f.write("\n".join(ld) + "\n")
         for n, a in dummies: f.write("%s = port_dummy_%s;\n" % (n, n))
     with open(os.path.join(outdir, "stubs.c"), "w") as f:
@@ -429,6 +536,7 @@ def link(outdir, nm, objlist):
         f.write("function aliases (renamed / address-named -> native): %d\n" % sum(1 for l in ld if not re.search(r"port_\w+_image|port_\w+_bss|port_scratch|port_io|port_hiram|port_bios", l)))
         f.write("names with no region (dummy storage): %d\n" % len(dummies))
         f.write("game objects that keep their own copy of retail-named data: %d\n" % len(own_copies))
+        f.write("dispatch thunks (overlay-region function starts): %d; names aliased to a thunk: %d\n" % (len(thunks), thunk_aliases))
         f.write("stubs: %d (psyq/bios %d, game-asm %d, overlay-target %d, label %d, port-runtime %d)\n" % (
             len(stubs), *[sum(1 for s in stubs if s[2] == k) for k in ("psyq/bios", "game-asm", "overlay-target", "label", "port-runtime")]))
         f.write("hand-translated asm still needed: main (0x800163F4, port/runtime/main_port.c has it in C), the game-asm stubs above (pad driver: port/shims/pad.c), %d other MAIN0/X000 game units without C\n\n" % len(asm_only))
@@ -442,8 +550,8 @@ def link(outdir, nm, objlist):
         f.write("\n## dummies\n" + "".join("%s 0x%08X\n" % d for d in dummies))
         f.write("\n## own copies\n" + "".join("%s\n" % n for n in own_copies))
         f.write("\n## asm-only game functions\n" + "".join("%08X %s\n" % e for e in asm_only))
-    print("gen2: %d aliases, %d data aliases, %d stubs, %d dummies; report in %s/report.txt"
-          % (len(ld), data_aliases, len(stubs), len(dummies), outdir))
+    print("gen2: %d aliases (%d to dispatch thunks), %d data aliases, %d thunks, %d stubs, %d dummies; report in %s/report.txt"
+          % (len(ld), thunk_aliases, data_aliases, len(thunks), len(stubs), len(dummies), outdir))
 
 
 _LIB = None
