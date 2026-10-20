@@ -80,7 +80,12 @@ What made it work (all in `port/`, `src/` untouched, the matching build stays by
   `port/fixes.txt` first (the pass then sees a full call): `updateAreaScreenEffect` (passes `&PLAYER`) and the
   cat-2/cat-4 collision callbacks of `collideCat2WithCat4Objects` ($a1 = the other object). Other wrong guesses
   will show up as crashes in other areas; the SIGSEGV handler now prints the native return addresses on the stack
-  (`addr2line -f -e build/port/tombi ...`).
+  (`addr2line -f -e build/port/tombi ...`). The SYSTEM overlays are forwarded one overlay at a time, after
+  MAIN0/X000 (as each area is): their functions are named by address and the overlays overlap, so a call resolves
+  among the overlay's own definitions first (the `<PROG>_` renames must not hide it, which was the title →
+  Options crash: `func_800E8B94()` → `func_800E8E44(sel)` read the cursor tile table with a stack word as
+  `sel`). The first log line is `[port] build <git sha> <date>` (`port/cmake/build_id.cmake`, re-run on every
+  build; the launcher shows the same id in its title and as the log header, from the bundled `build_id.txt`).
 - Generator fixes uncovered by the newer src/: symbol assignments in top-level asm (`FILE_LINK_SIZES =
   FILE_LINKS + 4`), address-named `static` tables (moved into C by the data work) bound to their retail address,
   data names inside the overlay region, a GTE macro temp-name clash; `loadTIM` writes through a NULL CLUT rect
