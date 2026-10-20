@@ -301,6 +301,7 @@ static void on_segv(int sig, void *info, void *uc) {
         port_printf("[port] eax=%08lx edx=%08lx; stack:", UC_EAX(uc), UC_EDX(uc));
         port_dump_stack((const unsigned long *)UC_ESP(uc), (unsigned long)__executable_start, (unsigned long)etext);
     }
+    port_low_report();   /* emulated low accesses so far: a partial KUSEG mirror in use shows here */
     port_fatal("signal %d: eip=%08lx fault address=%08lx (frame %d, [esp]=%08lx)", sig, eip, fault, port_frame, ret);
 }
 

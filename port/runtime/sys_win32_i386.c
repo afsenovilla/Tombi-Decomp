@@ -459,6 +459,7 @@ static long WINAPI on_exception(void **ep) {
         port_printf("[port] stack:");
         port_dump_stack(sp, base, base + 0x01000000ul);
     }
+    port_low_report();   /* emulated low accesses so far: a partial KUSEG mirror in use shows here */
     port_fatal("access violation: eip=%08lx fault address=%08lx (%s, frame %d, [esp]=%08lx)%s", eip, fault,
                rec[5] == 8 ? "execute" : rec[5] ? "write" : "read", port_frame, sp[0],   /* ExceptionInformation[0] */
                eip == fault ? ": a jump to a bogus address (a function pointer or return address read from memory)" : "");
