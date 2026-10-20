@@ -26,7 +26,7 @@ jobs:
       - name: Zip
         run: |
           rm -f dist/windows/tombi-tools.zip
-          cd dist/windows && zip -X -9 tombi-tools.zip tombi-assets.exe tombi-gfx.exe tombi-text.exe $(ls tombi-port.exe 2>/dev/null)
+          cd dist/windows && zip -X -9 tombi-tools.zip tombi-assets.exe tombi-gfx.exe tombi-text.exe
 
       - name: Commit
         run: |
