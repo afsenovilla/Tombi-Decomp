@@ -28,8 +28,10 @@ static void call_psx(void *fn) {
 }
 
 /* --poke FRAME:ADDR:VALUE[:SIZE]: write RAM at the start of vblank FRAME (test setups, e.g. the debug area select
-   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1) */
-static struct { int frame, size; u32 addr, value; } pokes[16];
+   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).
+   --poke-every INTERVAL:ADDR:VALUE[:SIZE]: the same every INTERVAL vblanks (mods: infinite lives / vitality);
+   stored as a negative frame. */
+static struct { int frame, size, count; u32 addr, value; } pokes[32];
 static int n_pokes;
 static u32 hexval(const char **p) {
     u32 v = 0; const char *h = *p;
@@ -38,18 +40,21 @@ static u32 hexval(const char **p) {
         v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
     *p = h; return v;
 }
-void port_poke_add(const char *s) {
-    if (n_pokes == 16) return;
+void port_poke_add_every(const char *s, int every) {
+    if (n_pokes == 32) return;
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    pokes[n_pokes].frame = f;
+    pokes[n_pokes].frame = every ? -(f > 0 ? f : 1) : f;
     pokes[n_pokes].addr = hexval(&s);
     if (*s++ != ':') return;
     pokes[n_pokes].value = hexval(&s);
     pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
+    pokes[n_pokes].count = 1;
+    if (*s == ':') { s += 2; if (*s == 'x') { int c = 0; s++; while (*s >= '0' && *s <= '9') c = c * 10 + *s++ - '0'; if (c > 0) pokes[n_pokes].count = c; } }
     n_pokes++;
 }
+void port_poke_add(const char *s) { port_poke_add_every(s, 0); }
 /* --dump-ram FRAME:PATH: write the 2 MB of RAM, then the 1 KB scratchpad, at the start of vblank FRAME */
 static int dump_ram_frame; static const char *dump_ram_path;
 void port_dump_ram_add(const char *s) {
@@ -108,9 +113,10 @@ void port_vblank(void) {
     }
     port_frame++;
     for (int i = 0; i < n_pokes; i++)
-        if (pokes[i].frame == port_frame) {
+        if (pokes[i].frame == port_frame || (pokes[i].frame < 0 && port_frame % -pokes[i].frame == 0)) {
             u32 a = pokes[i].addr, v = pokes[i].value;
-            if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
+            for (int k = 0; k < pokes[i].count; k++, a += pokes[i].size)   /* SIZExCOUNT: consecutive values */
+                if (pokes[i].size == 4) *(u32 *)a = v; else if (pokes[i].size == 2) *(u16 *)a = v; else *(u8 *)a = v;
         }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();

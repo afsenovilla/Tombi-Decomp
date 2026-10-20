@@ -160,6 +160,7 @@ static int parse_options(int argc, char **argv) {
     { extern void port_pad_script_reset(void), port_poke_reset(void), port_save_reset(void);
       port_pad_script_reset(); port_poke_reset(); port_save_reset(); }
     port_max_frames = 0; port_dump_dir = 0; port_dump_vram = 0; port_verbose = 0;
+    { extern int port_viewer_args_count; port_viewer_args_count = 0; }
     { extern int port_dump_packets; port_dump_packets = 0; }
     { extern const char *port_load_path; port_load_path = 0; }
     for (int i = 1; i < argc; i++) {
@@ -201,20 +202,27 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--pipe-audio") && i + 1 < argc) { extern const char *port_audio_pipe; port_audio_pipe = argv[++i]; }
         else if (streq(argv[i], "--dump-audio") && i + 1 < argc) { extern const char *port_audio_path; port_audio_path = argv[++i]; }
         else if (streq(argv[i], "--poke") && i + 1 < argc) { extern void port_poke_add(const char *); port_poke_add(argv[++i]); }
+        else if (streq(argv[i], "--poke-every") && i + 1 < argc) { extern void port_poke_add_every(const char *, int); port_poke_add_every(argv[++i], 1); }
         else if (streq(argv[i], "--menu") && i + 1 < argc) { extern void port_menu_add(const char *); port_menu_add(argv[++i]); }
         else if (streq(argv[i], "--window")) { extern int port_window; port_window = 1; }
         else if (streq(argv[i], "--viewer") && i + 1 < argc) { extern const char *port_window_viewer; port_window_viewer = argv[++i]; }
+        else if (streq(argv[i], "--viewer-arg") && i + 1 < argc) {
+            extern const char *port_viewer_args[16]; extern int port_viewer_args_count;
+            if (port_viewer_args_count < 16) port_viewer_args[port_viewer_args_count++] = argv[++i]; else i++;
+        }
         else if (streq(argv[i], "-v")) port_verbose++;
         else {
             port_printf("usage: %s [--exe MAIN0.EXE] [--disc Tombi.bin|.cue|.iso] [--frames N] [--realtime] [--hz 50|60]\n"
                         "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--play-movies] [-v]\n"
                         "       [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]   e.g. 1000:start,1300:cross:3x45/30\n"
                         "       [--pipe-frames FIFO] [--no-interp] [--interp ADDR] [--trace-interp]\n"
-                        "       [--poke FRAME:ADDR:VALUE[:SIZE]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4)\n"
+                        "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4, COUNT consecutive)\n"
+                        "       [--poke-every INTERVAL:ADDR:VALUE[:SIZE]]   the same every INTERVAL vblanks\n"
                         "       [--menu FRAME:N]   open menu screen N at a vblank during gameplay (4 = save, 5 = load)\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
                         "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
-                        "       [--window [--viewer PATH]]   SDL2 window + keyboard/controller (tombi-view process), paced\n"
+                        "       [--window [--viewer PATH] [--viewer-arg ARG]...]   SDL2 window + keyboard/controller (tombi-view process), paced\n"
+                        "           viewer args: --scale 1|2|3  --fullscreen  --keys up=Up,cross=X,... (SDL key names)\n"
                         "       [--save FRAME:PATH] [--load PATH]   save state at a vblank / continue from one (same binary)\n"
                         "       [--save-dir DIR]   memory cards tombi_mc0.mcd / tombi_mc1.mcd (128 KB raw; default: next to the disc)\n", argv[0]);
             return 2;

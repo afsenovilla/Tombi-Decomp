@@ -11,6 +11,8 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 const char *port_window_viewer;     /* --viewer PATH (default: tombi-view next to the game binary) */
 int port_window;                    /* --window */
+const char *port_viewer_args[16];   /* --viewer-arg ARG (repeatable): passed to the viewer (--scale N, --fullscreen, --keys ...) */
+int port_viewer_args_count;
 static int fd_video = -1, fd_audio = -1, fd_pad = -1;
 static int viewer_pid;
 u16 port_window_pad;                /* last pad state received from the viewer (port 1) */
@@ -27,7 +29,7 @@ void port_window_start(const char *argv0) {
     const char *path = port_window_viewer;
     if (!path) {
         int n = 0, slash = -1;
-        for (n = 0; argv0[n]; n++) if (argv0[n] == '/') slash = n;
+        for (n = 0; argv0[n]; n++) if (argv0[n] == '/' || argv0[n] == '\\') slash = n;
         int i = 0;
         if (slash >= 0) { for (i = 0; i <= slash; i++) viewer_path[i] = argv0[i]; }
         const char *b = "tombi-view";
@@ -35,7 +37,9 @@ void port_window_start(const char *argv0) {
         viewer_path[i] = 0;
         path = viewer_path;
     }
-    char *argv[] = { (char *)path, 0 };
+    char *argv[18] = { (char *)path };
+    for (int i = 0; i < port_viewer_args_count; i++) argv[i + 1] = (char *)port_viewer_args[i];
+    argv[port_viewer_args_count + 1] = 0;
     int fds[3];
     viewer_pid = port_spawn(path, argv, fds);
     if (viewer_pid < 0) port_fatal("--window: cannot start the viewer %s", path);
