@@ -746,6 +746,9 @@ Pending:
 
 ## Windows build (tombi.exe, tombi-view.exe, tombi-port.exe)
 
+*Superseded: the Windows build of the native-pointer port is "M3: Phase 3" below (tombi2.exe, no fixed addresses);
+this section documents what the fixed-address `port/` needed and why it was abandoned.*
+
 The same freestanding i386 binary, cross-compiled with mingw-w64 on the Win32 API; `port/runtime/sys_win32_i386.c`
 is the counterpart of `sys_linux_i386.c` (same `port_*` interface, picked by `port/CMakeLists.txt` from the platform).
 
@@ -1113,6 +1116,105 @@ Debian's per-architecture `SDL_config.h` is taken from the host's with the point
 the 32-bit library is needed). The game data (`game/`, `game/disc/`) is read at build time (the image) and at
 run time (the disc).
 
+### Phase 3: the Windows build (tombi2.exe, tombi-port.exe)
+
+`port2/` has no fixed addresses, so the Windows build is a plain cross-compile of the same sources with
+mingw-w64 (`i686-w64-mingw32-gcc`), linked against the normal mingw CRT and the SDL2 mingw development
+tarball; nothing of the exception-handler / KUSEG / COFF-binding fights of `port/` ("Windows build" above)
+remains. The user runs `tombi-port.exe` (the launcher) or `tombi2.exe` directly; we test it under wine.
+
+```
+cmake -S port2 -B build/port2-win -G Ninja -DCMAKE_TOOLCHAIN_FILE=port2/cmake/mingw-i686.cmake \
+      -DPORT_SDL2_MINGW=/path/to/SDL2-2.30.11/i686-w64-mingw32 && cmake --build build/port2-win -j 8
+cp /path/to/SDL2-2.30.11/i686-w64-mingw32/bin/SDL2.dll build/port2-win/
+wine build/port2-win/tombi2.exe --headless --frames 4000 --dump-frames out --pad-script 1000:start,1300:cross:3x45/30,3200:right:400
+xvfb-run wine build/port2-win/tombi2.exe --window --frames 2600 --pad-script 1000:start
+```
+
+**Results under wine 9.0.** The 4000-frame headless run dumps 400 frames **byte-identical** to the Linux
+build's (same script, every 10th frame compared); `--window` under Xvfb opens the SDL2 window and shows the
+boot screens, the title and AREA00 gameplay at 50 Hz (the audio device is absent there; SDL reports it and
+the game runs without sound). `--test-null` (below) passes: the null-page write lands in `port_ram` and
+`100/0` gives the R3000's `-1`.
+
+What the cross build needed (`port2/CMakeLists.txt` `if(WIN32)`, `port2/cmake/mingw-i686.cmake`,
+`port2/tools/gen2.py`, `port2/runtime/{lowmem,threads,host_win32,sdl}.c`):
+
+- **Symbol prefix.** Win32 C symbols carry a leading `_`. gen2's link step strips it from `nm` output and
+  adds it back when it writes `syms.ld` / `regions.ld` (`_DAT_8009c971 = _port_main0_bss + 0x3971;`: the PE
+  linker accepts the same symbol-assignment script) and `thunks.S` (`_port_thunk_XXXXXXXX`, `call
+  _port_resolve_call`, no ELF `.type`). The asm-named declarations (`port2_syms.h`'s `port_a_X`, and the
+  nine `extern u8 V asm("DAT_...")` aliases in the game's own sources) go through `PORT2_ASM(X)`, which
+  prepends `__USER_LABEL_PREFIX__`, so one generated tree serves both targets. Stdcall imports (`_Name@N`,
+  `__imp__Name`) are skipped, and the libc set comes from the mingw CRT archives (`libmsvcrt.a`,
+  `libmingwex.a`). `threads.c`'s `port_ctx_switch` uses the same prefix macro for its asm label.
+- **Layout below 16 MB.** The PE image is based at 4 MB with ASLR off (`--image-base 0x400000
+  --disable-dynamicbase`), and the zero regions of the image (`port_scratch`, `port_io`) are emitted with
+  an initialiser so they sit in `.data` right after `port_ram` instead of behind the runtime's 10 MB of
+  `.bss` buffers (VRAM, PNG buffers, SPU RAM); `port_check_layout` prints `layout ok (below 16 MB)` as the
+  second log line. (On Linux the same change moved nothing that matters.)
+- **Fault handlers.** `lowmem.c` keeps one x86 operand decoder; on Windows a vectored exception handler
+  (`AddVectoredExceptionHandler(1, ...)`) does what the SIGSEGV / SIGFPE handlers do: `EXCEPTION_ACCESS_VIOLATION`
+  below 0x10000 re-executes the instruction against `port_ram` from a `VirtualAlloc`'d executable page,
+  `EXCEPTION_INT_DIVIDE_BY_ZERO` yields `LO = rs < 0 ? 1 : -1`. Any other access violation prints the
+  nearest native symbol, the return addresses inside the image and the emulated-access tally, then lets
+  Windows end the process (the launcher shows those lines).
+- **Coroutines.** The stack switching asm is the same; on Windows the TIB's stack base / limit (`fs:[4]`,
+  `fs:[8]`) are set to the coroutine's stack on every switch (the main thread's saved on the first), since
+  the exception dispatcher checks them (the game's tasks fault on null pointers on their own stacks). The
+  stacks are static arrays, so gcc's `___chkstk_ms` probes touch real memory.
+- **Host bits.** `host_win32.c`: `QueryPerformanceCounter` clock, `timeBeginPeriod(1)`, `Sleep()` to 2 ms before
+  the deadline then yield (the vblank schedule of `psyq.c` is absolute, so the rounding does not accumulate);
+  `_mkdir`, `fseeko64/ftello64`, backslashes accepted in the cue sheet and the save folder; `windows.h` is
+  kept out of `main.c` (it claims the Psy-Q names `EnterCriticalSection` / `OpenEvent`). `libc.c`'s quiet
+  `printf` is the CRT name itself (`__USE_MINGW_ANSI_STDIO` is set for the runtime objects only). No SDL2main:
+  `tombi2.exe` is a console program with the plain `main()` (`SDL_SetMainReady`), the launcher runs it with
+  `CREATE_NO_WINDOW` and captures stderr into `tombi-port.log`.
+- **Options for the launcher / mods** (also on Linux): `--scale N`, `--fullscreen` (F11 toggles),
+  `--keys up=Up,cross=X,...` (SDL key names), `--patch-tex FILE` (button prompts), `--show-fps [1|2]`,
+  `--test-null` (fault-handler self-test: exit code 0 when both emulations work on this host). `--poke`,
+  `--poke-every`, `--pad-script`, `--menu` were already there.
+- **Build id.** `port/cmake/build_id.cmake` writes `gen/build_id.c`; the first log line is
+  `[port2] build <sha>[+] <date>` (`+` = modified tree).
+
+**Launcher** (`tools/port_launcher.py`, same window as before: disc `.bin/.cue/.iso`, save folder, scale,
+fullscreen, 50/60 Hz, *Mods* and *Controls* tabs from `tools/port_mods.py`, *Copy log*, build id in the title):
+it runs `tombi2.exe --disc <bin> --window --scale N [--fullscreen] --show-fps 2 [--save-dir DIR]` plus the
+mods' options (`--keys` directly now: there is no viewer process). The disc check (MAIN0.EXE extracted and
+sha1-compared) still runs before the first Play: it is how the launcher tells a wrong image apart.
+
+**CI** `.github/workflows/port2-exe.yml`: job `game` (ubuntu, `gcc-mingw-w64-i686`) fetches the owner's disc
+image like `report.yml`, runs `tools/build_full.py` (the generator takes the retail addresses from the
+matching build), cross-builds `tombi2.exe` and uploads it with `SDL2.dll` (artifact `tombi-port-game`); job
+`launcher` (windows-latest) runs `tombi2.exe --headless --test-null` on a real Windows, packs the launcher
+with PyInstaller into `tombi-port.exe` (artifact `tombi-port-windows`: `tombi-port.exe`, `tombi2.exe`,
+`SDL2.dll`, `THIRD_PARTY_NOTICES.md`) and commits `dist/windows/tombi-port.exe` to master; `zip-exe.yml` adds
+it to `tombi-tools.zip`. No game data is in any artifact (the MAIN0/X000 bytes compiled into `tombi2.exe` come
+from the owner's own disc, as the retail addresses of the matching build do).
+
+**Running on Windows.** Download `tombi-port.exe` (or the `tombi-port-windows` artifact), start it, pick the
+disc image (`.bin` or `.cue` of Tombi! PAL SCES-01331), *Play*. `tombi-port.log` next to the exe (also *Copy
+log*) should begin with:
+
+```
+[launcher] build <sha>
+[port2] build <sha> <date>
+[port2] native pointers, 32-bit: data image 0055a000..00685f78, scratch 00547000, layout ok (below 16 MB)
+[port] disc image C:\...\Tombi.bin: 492370032 bytes, raw 2352 sectors (209341), sync pattern found
+[port2] window 640x512 (scale 2), audio 44.1 kHz
+[port2] game main: init done, entering the main loop
+[port] frame 100: ...
+```
+
+What to look for: `layout NOT below 16 MB` (the loader relocated the image: report the two addresses), a
+`[port2] access violation: eip=... (<symbol>+0x...) fault address=... (read|write, frame N, thread T)` line
+with its stack (the first native-code bug on Windows: the symbol and frame number locate it), `[port2]
+stub: <name>` lines beyond the 13 Psy-Q ones hit at boot, `[port] fps:` lines far from 50.00 (pacing), and
+`emulated accesses to the BIOS kernel area` with a site count in the hundreds (a null-pointer path the
+Linux runs never took). Without a window/audio device the log says so (`no audio device: ...`). To run the
+game directly: `tombi2.exe --disc Tombi.bin --window` from a folder holding `SDL2.dll`; `tombi2.exe --headless
+--test-null` checks the fault handlers alone.
+
 ### Open points / next
 
 1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse
@@ -1124,7 +1226,10 @@ run time (the disc).
    reported with the nearest native symbols and the return addresses on the stack.
 3. The 13 Psy-Q stubs hit at boot are the fog / SPU-init / reverb setters (no effect in the software SPU
    yet); `ScaleMatrix` and the other 69 are unreached.
-4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` +
-   `port_check_layout`); phase 3 replaces `port_otlink/port_otaddr` with an index into a primitive arena and
-   widens the pointer-holding words of the image.
+4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` /
+   `--image-base` + `port_check_layout`); a later phase replaces `port_otlink/port_otaddr` with an index into a
+   primitive arena and widens the pointer-holding words of the image.
+6. Windows: tested under wine only (frames identical, window shows the game); the first real-Windows run is the
+   user's (see "Phase 3: the Windows build", what to look for in the log). The coroutine TIB bounds and the
+   vectored handler are the two places where Windows differs from wine in practice.
 5. Movies (MDEC) are skipped as in `port/`; save states of `port/` (`--save/--load`) are not carried over.
