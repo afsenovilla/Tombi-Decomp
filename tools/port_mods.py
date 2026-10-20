@@ -42,6 +42,7 @@ i18n.add({
         "mod.events": "Desbloquear todos los eventos",
         "mod.events.d": "Marca los %d eventos como completados al empezar (los objetos ligados a eventos desaparecen; útil para explorar)." % EVENT_COUNT,
         "mod.keys": "Teclas personalizadas", "mod.keys.d": "Teclas del visor para cada botón de PS1 (nombres de tecla SDL: X, Return, Space, Left...).",
+        "mod.prompts": "Iconos de botones", "mod.prompts.d": "Los iconos de botones de los tutoriales y menús: PlayStation (originales), Xbox (A/B/X/Y, LB/RB/LT/RT) o Teclado (las teclas configuradas). Dibujados por el port (tools/prompt_glyphs.py) y aplicados sobre la textura al cargarla; solo los iconos localizados en port/assets/prompts/manifest.json cambian.",
     },
     "en": {
         "mod.skipintro": "Skip intro logos and movies",
@@ -58,6 +59,7 @@ i18n.add({
         "mod.events": "Unlock all events",
         "mod.events.d": "Marks all %d events as completed at the start (objects tied to events are gone; for exploring)." % EVENT_COUNT,
         "mod.keys": "Custom keys", "mod.keys.d": "Viewer keys for each PS1 button (SDL key names: X, Return, Space, Left...).",
+        "mod.prompts": "Button prompts", "mod.prompts.d": "The button icons of tutorials and menus: PlayStation (original), Xbox (A/B/X/Y, LB/RB/LT/RT) or Keyboard (the configured keys). Drawn by the port (tools/prompt_glyphs.py) and applied over the texture when the game loads it; only the icons located in port/assets/prompts/manifest.json change.",
     },
 })
 
@@ -104,6 +106,26 @@ def args_events(s):
     return ["--poke", "%d:8009CDA4:FF:1x%d" % (F_NEWGAME, EVENT_COUNT)] if s.get("events") else []
 
 
+PROMPT_SETS = ["playstation", "xbox", "keyboard"]
+
+
+def args_prompts(s, out_dir=None):
+    """--patch-tex FILE: the TBTX of the chosen glyph set, packed next to the launcher (needs Pillow and located rects)."""
+    which = s.get("prompts", "playstation")
+    if which == "playstation" or not out_dir:
+        return []
+    import os
+    try:
+        import prompt_glyphs as P
+        out = os.path.join(out_dir, "prompts-%s.tbtx" % which)
+        keys = s.get("keys") if s.get("keys_on") else None
+        if P.pack(which, out, keys) == 0:
+            return []           # no glyph rect located yet: nothing to patch
+        return ["--patch-tex", out]
+    except Exception:
+        return []
+
+
 def args_keys(s):
     if not s.get("keys_on"):
         return []
@@ -126,11 +148,12 @@ MODS = [
 ]
 
 
-def mod_args(settings):
+def mod_args(settings, out_dir=None):
     """All the port arguments of the enabled mods (a new-game pad script is added when no mod gives one)."""
     out = []
     for _id, _l, _d, _k, fn in MODS:
         out += fn(settings)
+    out += args_prompts(settings, out_dir)
     if "--pad-script" not in out and settings.get("autostart", False):
         out += ["--pad-script", "%d:start" % F_START]
     return out
@@ -139,4 +162,4 @@ def mod_args(settings):
 def default_settings():
     return {"skipintro": True, "hz60": False, "areasel": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
             "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "keys_on": False,
-            "keys": dict(DEFAULT_KEYS), "autostart": False}
+            "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation"}

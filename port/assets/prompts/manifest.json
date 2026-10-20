@@ -1,0 +1,12 @@
+{
+  "_comment": "VRAM rects of the game's button glyph sprites (x, y in VRAM words / rows, w in words = 4 pixels at 4 bpp, h rows) and the CLUT indices our 4 glyph tones map to. null = not located yet (docs/PORT.md 'Mods': button prompts); tools/prompt_glyphs.py pack skips those.",
+  "glyphs": {
+    "cross": {"rect": null, "idx": [0, 1, 2, 3]}, "circle": {"rect": null, "idx": [0, 1, 2, 3]},
+    "square": {"rect": null, "idx": [0, 1, 2, 3]}, "triangle": {"rect": null, "idx": [0, 1, 2, 3]},
+    "l1": {"rect": null, "idx": [0, 1, 2, 3]}, "r1": {"rect": null, "idx": [0, 1, 2, 3]},
+    "l2": {"rect": null, "idx": [0, 1, 2, 3]}, "r2": {"rect": null, "idx": [0, 1, 2, 3]},
+    "start": {"rect": null, "idx": [0, 1, 2, 3]}, "select": {"rect": null, "idx": [0, 1, 2, 3]},
+    "up": {"rect": null, "idx": [0, 1, 2, 3]}, "down": {"rect": null, "idx": [0, 1, 2, 3]},
+    "left": {"rect": null, "idx": [0, 1, 2, 3]}, "right": {"rect": null, "idx": [0, 1, 2, 3]}
+  }
+}

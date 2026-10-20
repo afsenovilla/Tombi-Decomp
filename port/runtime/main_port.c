@@ -205,6 +205,7 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--poke-every") && i + 1 < argc) { extern void port_poke_add_every(const char *, int); port_poke_add_every(argv[++i], 1); }
         else if (streq(argv[i], "--menu") && i + 1 < argc) { extern void port_menu_add(const char *); port_menu_add(argv[++i]); }
         else if (streq(argv[i], "--window")) { extern int port_window; port_window = 1; }
+        else if (streq(argv[i], "--patch-tex") && i + 1 < argc) { extern const char *port_patch_tex_path; port_patch_tex_path = argv[++i]; }
         else if (streq(argv[i], "--viewer") && i + 1 < argc) { extern const char *port_window_viewer; port_window_viewer = argv[++i]; }
         else if (streq(argv[i], "--viewer-arg") && i + 1 < argc) {
             extern const char *port_viewer_args[16]; extern int port_viewer_args_count;
@@ -219,6 +220,7 @@ static int parse_options(int argc, char **argv) {
                         "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]]   write RAM at a vblank (hex ADDR/VALUE, SIZE 1/2/4, COUNT consecutive)\n"
                         "       [--poke-every INTERVAL:ADDR:VALUE[:SIZE]]   the same every INTERVAL vblanks\n"
                         "       [--menu FRAME:N]   open menu screen N at a vblank during gameplay (4 = save, 5 = load)\n"
+                        "       [--patch-tex FILE]   VRAM rects (TBTX, tools/prompt_glyphs.py) re-applied after each overlapping LoadImage\n"
                         "       [--dump-ram FRAME:PATH] [--dump-packets FRAME]   RAM+scratchpad image / GP0 packets of a vblank\n"
                         "       [--pipe-audio FIFO]   raw s16le stereo 44100 Hz (ffplay -f s16le -ar 44100 -ac 2 FIFO)\n"
                         "       [--window [--viewer PATH] [--viewer-arg ARG]...]   SDL2 window + keyboard/controller (tombi-view process), paced\n"

@@ -313,6 +313,13 @@ class App:
             v = self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
             ttk.Entry(grid, textvariable=v, width=14).grid(row=i % 7, column=(i // 7) * 2 + 1, sticky="w", padx=(2, 16))
         ttk.Button(f, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(anchor="w", pady=8)
+        ttk.Separator(f, orient="horizontal").pack(fill="x", pady=8)
+        row = ttk.Frame(f); row.pack(anchor="w")
+        ttk.Label(row, text=tr("mod.prompts") + ":").pack(side="left")
+        pv = self.var("prompts", tk.StringVar, "playstation")
+        for name, label in (("playstation", "PlayStation"), ("xbox", "Xbox"), ("keyboard", tr("tab.controls") + " / Keyboard")):
+            ttk.Radiobutton(row, text=label, variable=pv, value=name).pack(side="left", padx=4)
+        ttk.Label(f, text=tr("mod.prompts.d"), wraplength=680, justify="left", foreground="#555").pack(anchor="w", padx=24, pady=(2, 4))
 
     # ---- actions
     def collect(self):
@@ -362,7 +369,7 @@ class App:
             cmd += ["--save-dir", s["savedir"]]
         if s.get("fullscreen"):
             cmd += ["--viewer-arg", "--fullscreen"]
-        cmd += M.mod_args(s)
+        cmd += M.mod_args(s, app_dir())
         return cmd
 
     def play(self):

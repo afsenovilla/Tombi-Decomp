@@ -770,6 +770,21 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
 | Custom keys | `--viewer-arg --keys --viewer-arg up=Up,cross=X,...` | *Controls* tab: one SDL key name per PS1 button |
+| Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
+
+**Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):
+`port/assets/prompts/{playstation,xbox,keyboard}/<button>.png`, 16x16, 4 palette indices (0 transparent, 1 outline,
+2 fill, 3 mid tone); the keyboard set is rendered from the key mapping (`pack SET OUT --keys up=Up,...`, the launcher
+passes the *Controls* tab's keys). `pack` writes a TBTX file (`"TBTX"`, u32 count, then u16 x, y, w, h in VRAM
+words/rows + w*h words) from the rects of `port/assets/prompts/manifest.json`, and the port's new option
+`--patch-tex FILE` (`port/shims/gpu.c`) re-applies every rect after each `LoadImage` that overlaps it, so the game's
+own upload of the font/HUD page is overwritten 1:1 in VRAM. The launcher packs `prompts-<set>.tbtx` next to itself
+when a set other than PlayStation is chosen. **Open: the rects.** The manifest's rects are all `null` (the mechanism
+is checked with a synthetic manifest: 14 patches applied, no fault); locating the game's glyph sprites — the tutorial
+hints `updateA00TutorialHint` / `a00TutorialHintJumpMessage` (x000, "press X to jump" by button configuration), the
+button-config screen of the SYSTEM overlays, the HUD/font pages of `tools/ui_cluts.py` and the `UiSpriteDef` table —
+and filling in `rect` (x, y, w words, h rows) and `idx` (which CLUT entries are dark/light) per button is what is
+left; `tools/gfx_editor.py` can show the pages. Until then the option changes nothing (pack returns 0 glyphs).
 
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
@@ -780,10 +795,6 @@ so it is an environment/regression question of the base port, not of the mods (l
 
 - Run `tombi.exe` on real Windows (the KUSEG mirror and the viewer's pipes are untested outside wine; wine's reserved
   low range breaks the NULL load-list scan, see "Status").
-- The *button prompts* mod (PlayStation / Xbox / keyboard glyphs): not done. Plan: a `--patch-tex FILE` option in
-  `port/shims/gpu.c` that re-applies a manifest of VRAM rects after every `LoadImage` overlapping them, replacement glyphs
-  drawn with Pillow into `port/assets/prompts/` (same 4-bpp size and palette-index count as the originals, rendered from
-  the current key mapping for "Keyboard"); the glyph rects have to be located first (the tutorial hints
-  `updateA00TutorialHint` / `a00TutorialHintJumpMessage` print MFNT text by button configuration; the HUD page entries of
-  `tools/ui_cluts.py` and the `UiSpriteDef` table of MAIN0 are where to look).
+- The *button prompts* mod: the glyph rects of the manifest (see "Button prompts" above); the art and the
+  `--patch-tex` mechanism are done.
 - The stall at vblank ~443 noted above.

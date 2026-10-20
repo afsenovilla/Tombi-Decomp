@@ -331,9 +331,48 @@ void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); retu
 void *PutDispEnv(void *env) { memcpy(cur_dispenv, env, sizeof cur_dispenv); return env; }
 void *GetDispEnv(void *env) { memcpy(env, cur_dispenv, sizeof cur_dispenv); return env; }
 
+/* --patch-tex FILE (mods: button prompts, docs/PORT.md "Mods"): VRAM rects re-applied after every LoadImage that
+   overlaps them, so a texture the game uploads (a font/HUD page) shows our pixels instead.  File: "TBTX", u32 count,
+   then per entry u16 x, y, w, h (VRAM words) followed by w*h u16 words. */
+const char *port_patch_tex_path;
+static struct { u16 x, y, w, h; const u16 *data; } tex_patches[64];
+static int n_tex_patches, tex_patch_loaded;
+static u8 tex_patch_buf[256 * 1024];
+static void tex_patch_load(void) {
+    tex_patch_loaded = 1;
+    int fd = port_open(port_patch_tex_path);
+    if (fd < 0) { port_printf("[gpu] cannot open %s\n", port_patch_tex_path); return; }
+    int n = port_read(fd, tex_patch_buf, sizeof tex_patch_buf);
+    port_close(fd);
+    if (n < 8 || tex_patch_buf[0] != 'T' || tex_patch_buf[1] != 'B' || tex_patch_buf[2] != 'T' || tex_patch_buf[3] != 'X') { port_printf("[gpu] %s: not a TBTX file\n", port_patch_tex_path); return; }
+    u32 count = *(u32 *)(tex_patch_buf + 4), off = 8;
+    for (u32 i = 0; i < count && n_tex_patches < 64; i++) {
+        if (off + 8 > (u32)n) break;
+        u16 *h = (u16 *)(tex_patch_buf + off);
+        u32 bytes = (u32)h[2] * h[3] * 2;
+        if (off + 8 + bytes > (u32)n) break;
+        tex_patches[n_tex_patches].x = h[0]; tex_patches[n_tex_patches].y = h[1];
+        tex_patches[n_tex_patches].w = h[2]; tex_patches[n_tex_patches].h = h[3];
+        tex_patches[n_tex_patches].data = (const u16 *)(tex_patch_buf + off + 8);
+        n_tex_patches++;
+        off += 8 + bytes;
+    }
+    port_printf("[gpu] %s: %d texture patches\n", port_patch_tex_path, n_tex_patches);
+}
+static void tex_patch_apply(int x, int y, int w, int h) {
+    if (!port_patch_tex_path) return;
+    if (!tex_patch_loaded) tex_patch_load();
+    for (int i = 0; i < n_tex_patches; i++) {
+        int px = tex_patches[i].x, py = tex_patches[i].y, pw = tex_patches[i].w, ph = tex_patches[i].h;
+        if (px >= x + w || px + pw <= x || py >= y + h || py + ph <= y) continue;
+        const u16 *d = tex_patches[i].data;
+        for (int j = 0; j < ph; j++) for (int k = 0; k < pw; k++) vram[(py + j) & 511][(px + k) & 1023] = *d++;
+    }
+}
 int LoadImage(RECT *r, u32 *p) {
     u16 *s = (u16 *)p;
     for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) vram[(r->y + j) & 511][(r->x + i) & 1023] = *s++;
+    tex_patch_apply(r->x, r->y, r->w, r->h);
     return 0;
 }
 int StoreImage(RECT *r, u32 *p) {
