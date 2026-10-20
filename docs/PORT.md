@@ -628,7 +628,24 @@ Pending:
   match, and the sec0 hut ledge (85 px above the balcony vs the 78 px full jump) is not reachable by jumping in the
   real game either; the legit AREA00 route still needs another mechanic (a grab, a bounce or an object) or the sec2
   object climb. Not solved this round.
-- Observation, not fixed: a run continued from a `--save` state taken in sec 0 (frame 3160, Tombi idle at x 227) does not
-  replay like the uninterrupted run: holding Right from 3180 leaves Tombi at 227, caught by the pig that charges at the
-  tree, while the fresh run walks on. Something the pig's behaviour depends on (a random seed or a counter) is probably
-  held in native static memory outside the state; worth checking before trusting state-based probes.
+- **Save states replay exactly (checked).** The earlier observation (a run continued from a `--save` state taken in sec 0
+  at frame 3160, Tombi idle at x 227, "does not walk on" when Right is held from 3180) was a misread, not a bug: the
+  fresh run does not walk on either. At x 227 Tombi stands against the first tree (x 242) after the running jump, so
+  Right alone never moves him; the jumpcheck run gets past it with the Cross-held jump at 3211. Verified with the
+  fresh run (`--save 3160:s.state --dump-ram 3161:fresh.ram`) against `--load s.state --dump-ram 3161:load.ram`, same
+  `--pad-script` (the jumpcheck prefix up to `3051:right:90`, then `3180:right:200`, and again with `3171:right:200`):
+  the 2 MB RAM + scratchpad images at 3161 are byte-identical (`cmp`), and the `-v -v -v` x,y trace and the `-v -v`
+  pad-read trace of frames 3161..3400 are identical (240 lines, `diff` empty). There is nothing game-observable outside
+  the state: every writable mapping of the binary is in it (VRAM, SPU, GTE, coroutine stacks, pad edge state, CD
+  position), and the runtime takes no anonymous mappings besides the PS1 memory.
+- **Player sprite missing in the I0NFO rooms (fixed).** AREA02 sec 3 (underground tunnels) showed no Tombi, and
+  `--dump-packets` had his two textured quads collapsed to a point. The black regions of that room are the room itself
+  (tools/psxemu renders the same black; the rest of the frame, VRAM and the GP0 packet list match packet for packet).
+  Cause in the generator: `gen_port.py` dropped every empty asm with operands as a register-allocation hint, but
+  `asm("" : "=r"(out) : "0"(in))` with two different names is a move (the old gcc's `move`), and I0NFO/I0NFO2/I0NFO3
+  `func_800EAD48` (the overlay's player draw, `drawPlayer` type 1..3) computed its slice table pointer from the
+  uninitialised output. Tied outputs are now emitted as `out = in;` (`tied_asm_moves`); it also gives
+  `func_8006B62C` (control/index) and one `clearObj = obj` their values. Checked: port frame 1800 of
+  `--poke 900:1F8001B4:1 --poke 1250:8009C960:2:2 --poke 1250:8009C962:3:2 --pad-script 1000:start,1300:circle:3`
+  against the emulator (`capture.base_state`, area 2 section 3, +140 vblanks): Tombi drawn at the same place; the
+  jumpcheck trace in AREA00 is unchanged.
