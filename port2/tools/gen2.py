@@ -463,6 +463,7 @@ def link(outdir, nm, objlist):
     for n in sorted(undefined):
         # (SDL_: the host library; port_: the runtime, or the tables this step generates)
         if n.startswith(("__", "_GLOBAL_OFFSET", "SDL_", "port_")) or n in libc or n in region_names: continue
+        if n in ("etext", "edata", "end"): continue          # the linker's own (lowmem.c scans the stack up to etext)
         if n in asm_alias:
             ld.append("%s = %s;" % (n, asm_alias[n])); continue
         a = addr_of(n)
