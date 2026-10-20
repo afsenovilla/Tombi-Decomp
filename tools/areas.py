@@ -217,11 +217,12 @@ def rehex(name, addr):
 
 
 def src_functions():
-    """Matched src/*.c (MAIN0 and X000) and src/<sysovl>/*.c: [(stem, prog, addr, size, path)].
-    (The SYSTEM overlays share code with each other, so their matched files are twin sources too.)"""
+    """Matched src/*.c (MAIN0 and X000), src/<sysovl>/*.c and src/x0nn/*.c: [(stem, prog, addr, size, path)].
+    (The SYSTEM overlays share code with each other, and so do the area overlays (X010's collideObjectWithTiltedBar
+    exists only in X001), so their matched files are twin sources too, for the later overlays: see analyse.)"""
     out = []
     paths = [os.path.join(ROOT, "src", f) for f in sorted(os.listdir(os.path.join(ROOT, "src")))]
-    for sp in _SO.PROGS:
+    for sp in _SO.PROGS + NEW:
         d = os.path.join(ROOT, "src", sp.lower())
         if os.path.isdir(d): paths += [os.path.join(d, f) for f in sorted(os.listdir(d))]
     for p in paths:
@@ -279,6 +280,8 @@ def analyse(progs):
                 if ts < 8 or len(P) * 4 != ts: continue
                 if tp in _SO.SYSOVL and (prog not in _SO.SYSOVL or _SO.PROGS.index(tp) >= _SO.PROGS.index(prog)):
                     continue  # a SYSTEM overlay file is a twin source only for the later SYSTEM overlays
+                if tp in NEW and (prog not in NEW or NEW.index(tp) >= NEW.index(prog)):
+                    continue  # an area overlay file is a twin source only for the later area overlays
                 if kind == "x000" and not (len(P) >= 2 and P[-2] == JR_RA): continue  # Ghidra fragment, not a function
                 for c in im.find(P):
                     if c < (first_code(prog) - BASE) // 4: continue
