@@ -187,7 +187,13 @@ available: `SDL_RenderPresent` then blocks for up to a display period, which mus
 display shows 50 of its 60 presents with a new frame). The earlier viewer read a frame and then presented it, and
 stopped reading audio while SDL held over four frames: both put the game on the display's and the audio device's
 clocks through the pipes (1 MB each on Windows, 64 KB on Linux). `--viewer-arg --stats` logs frames received /
-shown / skipped and the ring fill, drops and padding every second (`tombi-view:` lines). `--show-fps` logs the
+shown / skipped and the ring fill, drops and padding every second (`tombi-view:` lines). Every pipe read in the
+viewer loops until the count is complete (`ReadFile` on an anonymous pipe returns as soon as any bytes are there: a
+245 KB frame arrives in pieces); a header that is not `TBFR` is resynchronised by sliding to the next magic and
+logged (`frame stream out of step`). Test hooks: `PORT_PIPE_CHUNK=N` caps every viewer read at N bytes, and
+`--viewer-arg --dump DIR[:N]` writes every Nth received frame as `DIR/view_NNNNNN.ppm`, numbered like the game's
+`--dump-frames` PNGs (first vblank = frame 1); with `PORT_PIPE_CHUNK=1000` under Xvfb, 1500 frames (Start at 1000)
+give 15 of 15 dumped frames identical between the game and the viewer, on Linux and with the exe under Wine. `--show-fps` logs the
 measured vblank rate and audio samples per second every second, `--show-fps 2` adds a histogram of the inter-vblank
 intervals (`vblank intervals (ms:count) ...: 20-21:50 max 20.3 ms` is right; counts under 15 ms are vblanks run
 without waiting after a late one, counts over 25 ms are the stalls that caused them); the normal exit (`port_quit`:
@@ -822,6 +828,26 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   prefixes, `lea` excluded) and restarts a string instruction (`movs`/`stos`/`cmps`/`scas`/`lods`, with `rep`) with
   ESI/EDI moved to KSEG0. GP0 opcodes E7-FF and 03-1E are one-word nops to the GPU and are now skipped without
   touching state; an unknown command logs its frame and drops the rest of the packet.
+- **The KUSEG range is guarded by default on Windows (no mirror).** A user's Windows 10 log after the mask rewrite
+  showed 0 KUSEG accesses in the tally yet a picture that corrupted slowly: a sprite patch or a pig with a wrong
+  CLUT, a room with every texture page wrong, event banner letters at random positions, then whole frames of garbage
+  polygons; the same build is pixel-identical to Linux under Wine. The tally cannot see it: the warning listed
+  `10000-60000, b0000, c0000` as `committed`, Windows' own memory (process parameters, the default heap), and a
+  game access through a 0x000xxxxx pointer there does not fault, it reads and writes the heap silently (0xB0000-
+  0xCFFFF is where the primitive buffers live). So `port_setup_memory` now maps nothing at 0x10000-0x1FFFFF
+  unless `--kuseg-mirror` is given: every free block is reserved `PAGE_NOACCESS` (the blocks the relaunched parent
+  reserved stay reserved), an access there faults into `low_access`, is served from KSEG0 by `port_low_emulate`
+  and tallied with its site, and the blocks Windows had already committed are named at start (`KUSEG blocks
+  committed by Windows before the game started: ...`, the only ones an unrewritten access could still touch
+  silently). `--kuseg-mirror` is the old behaviour (map the RAM object where the range is free, `--kuseg-strict`
+  needs it whole); `--no-kuseg` only adds logging; `--fake-kuseg` is unchanged. The MIPS interpreter
+  (`runtime/mips_interp.c`), which runs the asm-only functions and the area overlays' code on plain host
+  addresses, now translates every load/store in 0x10000-0x1FFFFF to KSEG0 itself (`port_interp_kuseg`, printed by
+  `port_low_report` when non-zero), so an overlay's own `& 0xFFFFFF` never reaches host memory on any host. On
+  Linux with `--no-kuseg` (the range is unmapped: checked in `/proc/PID/maps`) the 5760-frame AREA00 route, the
+  6500-frame elder's-house / fog-banner run and the AREA02 -> AREA01 debug-select walk all count 0 accesses and 0
+  interpreted translations, so the sites the user hits are off these routes; his next `tombi-port.log` lists them
+  by symbol with the first address instead of corrupting the picture.
 - **Calls to retail addresses.** The RAM is `PAGE_READWRITE` and the image `--nxcompat`, so a call into it is an access
   violation with EIP = the PS1 address; `AddVectoredExceptionHandler` rewrites EIP to the native function (the same
   trampoline as the Linux SIGSEGV handler); `EXCEPTION_INT_DIVIDE_BY_ZERO` gets the R3000 result. `__chkstk_ms` (stack
