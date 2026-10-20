@@ -583,6 +583,46 @@ Pending:
   y -500 and the house platform at -1360 (x 2064..2688): the climb is on objects (stone pillars at (2909,-432),
   a beam at (3040..3125,-619), a net, a vine); thorns at x>=3119 hurt; not solved either. `port/tools/colmap.py`
   draws a section's static floors from a `--dump-ram` image (per depth plane; objects are not in it).
+- **AREA00 sec 0 from a new game, no poke (round 4): the hut ledge is reached, the way on is the "Clear the Fog" event.**
+  Mechanics read in src/ and checked in the port: a bite grab needs Tombi *falling* (`wac`==1, set at the jump's peak
+  in playerStepJump or when velY>0x400) and overlapping the object from above (`objectBoxOverlapSideFacing` < 3):
+  komaPigContact / playerContactCat2Type08 then set `wac`=2, step 14 (playerStepBitten, Tombi rides the object), any
+  other contact with a pig hurts him. Cross while holding = step 15 (playerStepBittenJump, the normal jump table
+  `DAT_80115468[u]`, u = `GV2.bb3` + 4*dash, u=0 here: velY -976 -> 76 px); a *new* Cross/attack press during the jump
+  throws the object (substep 2 freezes Tombi for the throw animation, no height gain; the throw also happens by itself
+  near the floor) and the pig becomes a layer-1 projectile that kills what it hits. Holding without jumping eats the pig
+  after ~30 frames. Type 0x0e objects (cat-2 type 14: the apple on the tree at (853,-236)) give velY -0x600 in
+  playerBittenJumpType0E. The red bird at the hut is cat-2 type 8 (playerContactCat2Type08): touched from the side it
+  grabs Tombi (step 0x40 playerStepGrabbedStruggle) and lifts him 1 px/vblank at x 1181 to y -393, then drops and hurts
+  him; >10 new d-pad presses within 255 vblanks break free (the carry does not pass the x=1200 scroll wall). The hut
+  balcony girl is a koma pig subtype 9 (type 2): she hurts on contact, so she is grabbed and thrown first.
+  The ledge above the balcony (plane 1, y -212) is reached with **Up+Cross** (the lane jump into the background plane)
+  from x 1164: Tombi lands at (1168,-232). Walking right onto the roof reaches x 1182, y -286, and the fog event starts
+  (`func_80116818` state 0: x>=0x49E, y<-0xE7 in section 0 -> `D_8009C966`=1, event 2 started, "CLEAR THE FOG 500"
+  banner, frame 5480). The route (pad script, 50 Hz vblanks; save states replay it exactly, so it was built from
+  states and then run from frame 0):
+  ```
+  build/port/tombi --frames 5760 -v -v -v --pad-script 1000:start:4,1504:cross:3x4/33,1736:select:3,1859:cross:3x18/43,\
+      2700:right:150,2860:right+cross:30,2890:right:60,3010:right+cross:3,3062:cross:15,3080:cross:3,3160:right:300,\
+      3160:cross:30x5/60,3610:right:100,3720:cross:3x40/25,4710:left:120,4840:right:60,4870:cross+right:40,4960:cross:40,\
+      5010:cross:3,5020:right:30,5046:cross:30,5130:right:40,5175:up+cross:30,5210:right:100,5320:right+cross:30,5360:right:300
+  ```
+  Start, opening dialogue; walk to the first tree (x 227) and jump over it with Cross held (2860); fall onto the pig at
+  x 338 (3010: grab at 3056), jump straight up holding it (3062) and throw it right (3080: it clears the pig on the
+  stone pillar at (429,-140)); run right with jumps (the pillar is flipped onto, step 7/11, and the hill after it);
+  the hooded villager's dialogue at x 998 (3720: Cross taps); back to x 929 and a running jump onto the lower bush
+  (4870, swing on the hook, step 6), Cross onto the balcony (4960, Tombi at (1096,-147)); hop onto the girl (5010,
+  grab at 5037), Cross (5046: jump + auto throw), walk to x 1164, Up+Cross (5175) onto the plane-1 ledge (1168,-232),
+  Right+Cross (5320) onto the roof at (1182,-286) -> fog event. `--poke 900:1F8001B4:1` is not a movie skip: it opens
+  the debug area select (the movie is skipped by Start). Sheets: scratchpad `port_r4/route_ledge.png` (grab, throw,
+  balcony, ledge) and `port_r4/route_fog.png` (the event banner).
+  **What gates sec 1:** updateA00ScrollController keeps `subtype`=1 (scroll clamped at x 1200, `animFrame`=0x4B0) until
+  `D_8009C966`==3 or `GCD.bcda6`==0xFF; only then does x>=0x4ED, y<-0x95 switch to section 1. `D_8009C966` becomes 3 at
+  the end of the fog event (`func_80116818` state 4), which waits in state 1 for `GAME.area00_eventControl & 1` and
+  `GVARS.b30`==3; `GVARS.b30`=3 is set by playerStepUseItem when **item 4** is used (`DAT_8009c941`==4), and the tornado
+  (a00TornadoStep, spawned by `FUN_801228bc` while `bcda6`!=0xFF) also needs eventControl bit 1 to leave `b30`=1. No
+  writer of eventControl bit 1 is in src/ (it comes from an overlay / event script), so the item and the flag are the
+  next things to find; the port runs every step of the route without a fault.
 - **Walking AREA02 -> AREA01 (no progress flag poked):** from the debug select into AREA02 section 3, the tunnels
   lead to exit 3 and AREA01 section 3 at frame 2747:
   ```
