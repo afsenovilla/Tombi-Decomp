@@ -2,12 +2,15 @@
  * area) to port_window_frame, which uploads it to a streaming texture; the audio device pulls the sound
  * ring (shims/sound.c) from its callback thread; the keyboard and a game controller feed port 1 of the pad.
  * Keys: arrows = d-pad, X = cross, Z = square, D = circle, S = triangle, Q/W = L1/R1, A/E = L2/R2, Return = start,
- * Backspace = select, Escape = quit.  Closing the window ends the game. */
+ * Backspace = select, F11 = fullscreen, Escape = quit (--keys up=Up,cross=X,... remaps them: SDL key names).
+ * Closing the window ends the game. */
+#include <string.h>
 #include <SDL2/SDL.h>
 #include "port_runtime.h"
 
 int port_window;
 int port_window_scale = 2;
+int port_window_fullscreen;        /* --fullscreen */
 static SDL_Window *win;
 static SDL_Renderer *ren;
 static SDL_Texture *tex;
@@ -19,9 +22,10 @@ static unsigned short keys_down, ctrl_down, seen_since;
 static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
 
 void port_window_start(void) {
+    SDL_SetMainReady();     /* (no SDL2main on Windows: main() is the plain C one, the launcher captures stderr) */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());
     win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320 * port_window_scale,
-                           256 * port_window_scale, SDL_WINDOW_RESIZABLE);
+                           256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
@@ -44,15 +48,33 @@ void port_window_stop(void) {
 
 enum { P_SELECT = 1, P_START = 8, P_UP = 0x10, P_RIGHT = 0x20, P_DOWN = 0x40, P_LEFT = 0x80, P_L2 = 0x100, P_R2 = 0x200,
        P_L1 = 0x400, P_R1 = 0x800, P_TRI = 0x1000, P_CIRCLE = 0x2000, P_CROSS = 0x4000, P_SQUARE = 0x8000 };
+static const char *button_names[14] = { "select", "start", "up", "right", "down", "left", "l2", "r2", "l1", "r1", "triangle", "circle", "cross", "square" };
+static const unsigned short button_bits[14] = { P_SELECT, P_START, P_UP, P_RIGHT, P_DOWN, P_LEFT, P_L2, P_R2, P_L1, P_R1, P_TRI, P_CIRCLE, P_CROSS, P_SQUARE };
+static SDL_Scancode keymap[14][2] = {
+    { SDL_SCANCODE_BACKSPACE, SDL_SCANCODE_RSHIFT }, { SDL_SCANCODE_RETURN, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_UP, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_RIGHT, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_DOWN, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_LEFT, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_A, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_E, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_Q, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_W, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_S, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_D, SDL_SCANCODE_UNKNOWN },
+    { SDL_SCANCODE_X, SDL_SCANCODE_UNKNOWN }, { SDL_SCANCODE_Z, SDL_SCANCODE_UNKNOWN },
+};
 static unsigned short key_mask(SDL_Scancode k) {
-    switch (k) {
-    case SDL_SCANCODE_UP: return P_UP; case SDL_SCANCODE_DOWN: return P_DOWN; case SDL_SCANCODE_LEFT: return P_LEFT;
-    case SDL_SCANCODE_RIGHT: return P_RIGHT; case SDL_SCANCODE_RETURN: return P_START;
-    case SDL_SCANCODE_BACKSPACE: case SDL_SCANCODE_RSHIFT: return P_SELECT;
-    case SDL_SCANCODE_X: return P_CROSS; case SDL_SCANCODE_Z: return P_SQUARE; case SDL_SCANCODE_D: return P_CIRCLE;
-    case SDL_SCANCODE_S: return P_TRI; case SDL_SCANCODE_Q: return P_L1; case SDL_SCANCODE_W: return P_R1;
-    case SDL_SCANCODE_A: return P_L2; case SDL_SCANCODE_E: return P_R2;
-    default: return 0;
+    unsigned short m = 0;
+    if (k == SDL_SCANCODE_UNKNOWN) return 0;
+    for (int i = 0; i < 14; i++) if (keymap[i][0] == k || keymap[i][1] == k) m |= button_bits[i];
+    return m;
+}
+/* --keys up=Up,cross=X,...: SDL key names (SDL_GetScancodeFromName; may run before SDL_Init) */
+void port_window_keys(const char *spec) {
+    char buf[512]; strncpy(buf, spec, sizeof buf - 1); buf[sizeof buf - 1] = 0;
+    for (char *tok = strtok(buf, ","); tok; tok = strtok(NULL, ",")) {
+        char *eq = strchr(tok, '=');
+        if (!eq) continue;
+        *eq = 0;
+        SDL_Scancode sc = SDL_GetScancodeFromName(eq + 1);
+        if (sc == SDL_SCANCODE_UNKNOWN) { port_printf("[port2] --keys: unknown key '%s' for %s\n", eq + 1, tok); continue; }
+        for (int i = 0; i < 14; i++) if (!strcmp(tok, button_names[i])) { keymap[i][0] = sc; keymap[i][1] = SDL_SCANCODE_UNKNOWN; }
     }
 }
 static unsigned short ctrl_mask(int b) {
@@ -73,6 +95,11 @@ static void pump(void) {
         case SDL_QUIT: port_printf("[port2] window closed\n"); port_quit(0);
         case SDL_KEYDOWN:
             if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) { port_printf("[port2] escape\n"); port_quit(0); }
+            if (e.key.keysym.scancode == SDL_SCANCODE_F11 && !e.key.repeat) {
+                port_window_fullscreen = !port_window_fullscreen;
+                SDL_SetWindowFullscreen(win, port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+                break;
+            }
             keys_down |= key_mask(e.key.keysym.scancode); seen_since |= key_mask(e.key.keysym.scancode); break;
         case SDL_KEYUP: keys_down &= ~key_mask(e.key.keysym.scancode); break;
         case SDL_CONTROLLERBUTTONDOWN: ctrl_down |= ctrl_mask(e.cbutton.button); seen_since |= ctrl_mask(e.cbutton.button); break;

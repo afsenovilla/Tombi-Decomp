@@ -1,3 +1,6 @@
+/* (Windows: the shims below are the CRT names themselves, not mingw's inline C99 wrappers) */
+#undef __USE_MINGW_ANSI_STDIO
+#define __USE_MINGW_ANSI_STDIO 0
 /* Psy-Q libc (libc2) replacements on top of the host libc: only what differs from glibc or must stay quiet.
  * rand() is the Psy-Q LCG (the game's behaviour depends on its sequence); printf/puts/putchar of the game print
  * only with -v (they override glibc's for this executable; the runtime logs through fprintf(stderr)). */

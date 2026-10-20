@@ -60,6 +60,7 @@ void port_fatal(const char *fmt, ...) __attribute__((noreturn));
 void port_quit(int code) __attribute__((noreturn));
 void port_stub_hit(const char *name);
 void port_stub_report(void);
+void port_low_report(void);
 int port_check_layout(void);
 extern int port_verbose;
 
@@ -72,6 +73,7 @@ void port_sleep_until_us(unsigned long long deadline);
 int port_thread_open(void *fn);
 void port_thread_change(int handle);
 void port_thread_close(int handle);
+int port_thread_current(void);
 
 /* frame pacing / vblank */
 void port_vblank(void);
@@ -101,7 +103,8 @@ extern unsigned short port_pad_buttons[2];
 
 /* SDL2 window + audio + input (runtime/sdl.c) */
 extern int port_window;                          /* --window */
-extern int port_window_scale;
+extern int port_window_scale, port_window_fullscreen;
+void port_window_keys(const char *spec);          /* --keys up=Up,cross=X,... */
 void port_window_start(void);
 void port_window_frame(const unsigned char *rgb, int w, int h);
 int port_window_poll_pad(unsigned short *out);   /* 1 when a window is open */

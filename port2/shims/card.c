@@ -51,7 +51,7 @@ const char *port_save_dir;                 /* --save-dir; 0 = directory of the d
 static char card_path[2][1024];
 static const char *disc_dir_from(const char *disc, char *buf, int n) {
     int len = 0; while (disc[len]) len++;
-    while (len > 0 && disc[len - 1] != '/') len--;
+    while (len > 0 && disc[len - 1] != '/' && disc[len - 1] != '\\') len--;      /* (C:\... paths on Windows) */
     if (len >= n) len = n - 1;
     memcpy(buf, disc, len); buf[len] = 0;
     return buf;
@@ -86,7 +86,7 @@ static u8 *card(int n) {
         const char *d = port_save_dir ? port_save_dir : disc_dir_from(port_disc_path, dir, sizeof dir);
         int o = 0;
         for (int i = 0; d[i] && o < 1000; i++) card_path[n][o++] = d[i];
-        if (o && card_path[n][o - 1] != '/') card_path[n][o++] = '/';
+        if (o && card_path[n][o - 1] != '/' && card_path[n][o - 1] != '\\') card_path[n][o++] = '/';
         const char *base = n ? "tombi_mc1.mcd" : "tombi_mc0.mcd";
         for (int i = 0; base[i]; i++) card_path[n][o++] = base[i];
         card_path[n][o] = 0;

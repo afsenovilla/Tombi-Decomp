@@ -6,6 +6,10 @@
  * Every function here has the name of the Psy-Q unit it replaces, so gen2.py generates no stub for it. */
 #include <stdio.h>
 #include <errno.h>
+#ifdef _WIN32
+#define fseeko fseeko64
+#define ftello ftello64
+#endif
 #include "port_runtime.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;

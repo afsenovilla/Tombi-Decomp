@@ -14,16 +14,35 @@ static int cur;
 int port_thread_current(void) { return cur; }     /* 0 = main thread (save states are taken there) */
 
 void port_ctx_switch(unsigned long **save, unsigned long *to);
-__asm__(".text\n.globl port_ctx_switch\nport_ctx_switch:\n"
+#define S_(x) #x
+#define S(x) S_(x)
+#define SYM(x) S(__USER_LABEL_PREFIX__) x     /* "_" prefix on Win32 */
+__asm__(".text\n.globl " SYM("port_ctx_switch") "\n" SYM("port_ctx_switch") ":\n"
         "\tmovl 4(%esp), %eax\n\tmovl 8(%esp), %edx\n"
         "\tpushl %ebp\n\tpushl %ebx\n\tpushl %esi\n\tpushl %edi\n"
         "\tmovl %esp, (%eax)\n\tmovl %edx, %esp\n"
         "\tpopl %edi\n\tpopl %esi\n\tpopl %ebx\n\tpopl %ebp\n\tret\n");
 
+#ifdef _WIN32
+/* Windows keeps the stack bounds of the thread in the TIB (fs:[4] base, fs:[8] limit) and the exception dispatcher
+   checks them: on a switch they follow the coroutine's stack (the main thread's are saved on the first switch) */
+static unsigned long tib_base[MAX_TH + 1], tib_limit[MAX_TH + 1];
+static void tib_set(int n) {
+    if (!tib_base[0]) {
+        __asm__ volatile("movl %%fs:4, %0\n\tmovl %%fs:8, %1" : "=r"(tib_base[0]), "=r"(tib_limit[0]));
+        for (int i = 1; i <= MAX_TH; i++) { tib_limit[i] = (unsigned long)stacks[i - 1]; tib_base[i] = tib_limit[i] + sizeof stacks[0]; }
+    }
+    __asm__ volatile("movl %0, %%fs:4\n\tmovl %1, %%fs:8" : : "r"(tib_base[n]), "r"(tib_limit[n]));
+}
+#else
+#define tib_set(n) ((void)0)
+#endif
+
 static void switch_to(int n) {
     int from = cur;
     if (n == from) return;
     cur = n;
+    tib_set(n);
     port_ctx_switch(&th[from].sp, th[n].sp);
 }
 

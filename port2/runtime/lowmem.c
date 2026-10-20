@@ -5,13 +5,19 @@
  * jump back, and resumes there (one fault per access; the sites are tallied for port_low_report).  Every
  * ModRM-addressed form is covered; a string instruction has ESI/EDI moved into the image and is restarted.
  * Carried over from port/runtime/sys_common.c (port_low_emulate) and sys_linux_i386.c (on_segv).
- * SIGFPE: the x86 traps on a division by zero, the R3000 does not: LO = rs < 0 ? 1 : -1, HI = rs. */
+ * SIGFPE: the x86 traps on a division by zero, the R3000 does not: LO = rs < 0 ? 1 : -1, HI = rs.
+ * Windows: the same through a vectored exception handler (EXCEPTION_ACCESS_VIOLATION / INT_DIVIDE_BY_ZERO) with
+ * the scratch page from VirtualAlloc; the operand decoder is shared. */
 #define _GNU_SOURCE
-#include <signal.h>
+#include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <signal.h>
 #include <sys/mman.h>
 #include <ucontext.h>
-#include <execinfo.h>
+#endif
 #include "port_runtime.h"
 
 #define PORT_LOW_JUMP 1
@@ -88,6 +94,72 @@ int port_low_emulate(unsigned long eip, unsigned long fault, unsigned char *scra
 }
 
 static unsigned char *low_scratch;
+/* the length of the `div`/`idiv` at p (F7 /6, F7 /7), 0 if it is something else */
+static int div_len(const unsigned char *p) {
+    int len = 0;
+    if (p[0] == 0xF7) {
+        unsigned char modrm = p[1]; int mod = modrm >> 6, rm = modrm & 7;
+        len = 2;
+        if (mod != 3 && rm == 4) len++;
+        if (mod == 1) len += 1; else if (mod == 2) len += 4;
+        else if (mod == 0 && rm == 5) len += 4;
+        else if (mod == 0 && rm == 4 && (p[2] & 7) == 5) len += 4;
+    }
+    return len;
+}
+
+#ifdef _WIN32
+extern char __ImageBase[];
+static void dump_stack(unsigned long esp) {
+    const unsigned long *sp = (const unsigned long *)esp;
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(__ImageBase + ((IMAGE_DOS_HEADER *)__ImageBase)->e_lfanew);
+    unsigned long base = (unsigned long)__ImageBase, end = base + nt->OptionalHeader.SizeOfImage;
+    for (int i = 0, n = 0; i < 512 && n < 12; i++)
+        if (sp[i] >= base && sp[i] < end) {
+            unsigned long off; const char *nm = port_sym_near((void *)sp[i], &off);
+            port_printf(" %08lx(%s+0x%lx)", sp[i], nm, off); n++;
+        }
+}
+static LONG WINAPI on_exception(EXCEPTION_POINTERS *ep) {
+    CONTEXT *c = ep->ContextRecord; EXCEPTION_RECORD *rec = ep->ExceptionRecord;
+    unsigned long eip = c->Eip;
+    if (rec->ExceptionCode == EXCEPTION_INT_DIVIDE_BY_ZERO) {
+        int len = div_len((const unsigned char *)eip);
+        if (!len) port_fatal("divide by zero at %08lx", eip);
+        long rs = (long)c->Eax;
+        c->Edx = (DWORD)rs; c->Eax = rs < 0 ? 1 : (DWORD)-1; c->Eip += len;
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+    if (rec->ExceptionCode != EXCEPTION_ACCESS_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
+    unsigned long fault = (unsigned long)rec->ExceptionInformation[1];
+    if (eip != fault && fault < 0x10000ul && low_scratch) {
+        unsigned long neweip;
+        int r = port_low_emulate(eip, fault, low_scratch, &neweip);
+        if (r == PORT_LOW_JUMP) { c->Eip = neweip; return EXCEPTION_CONTINUE_EXECUTION; }
+        if (r == PORT_LOW_REGS) {
+            if (c->Esi < 0x10000ul) c->Esi += (unsigned long)port_ram;
+            if (c->Edi < 0x10000ul) c->Edi += (unsigned long)port_ram;
+            return EXCEPTION_CONTINUE_EXECUTION;
+        }
+    }
+    {
+        unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
+        port_printf("[port2] access violation: eip=%08lx (%s+0x%lx) fault address=%08lx (%s, frame %d, thread %d, image base %p); stack:", eip, nm, off, fault,
+                    rec->ExceptionInformation[0] == 8 ? "execute" : rec->ExceptionInformation[0] ? "write" : "read", port_frame, port_thread_current(), (void *)__ImageBase);
+        dump_stack(c->Esp);
+        port_printf("\n");
+    }
+    port_low_report();
+    port_window_stop();
+    fflush(stderr);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+void port_lowmem_install(void) {
+    low_scratch = VirtualAlloc(0, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if (!low_scratch) port_printf("[port2] no executable scratch page: null-pointer accesses will crash\n");
+    AddVectoredExceptionHandler(1, on_exception);
+}
+#else
 static void on_segv(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv;
     unsigned long eip = uc->uc_mcontext.gregs[REG_EIP], fault = (unsigned long)info->si_addr;
@@ -120,15 +192,7 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
 static void on_fpe(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv;
     unsigned char *p = (unsigned char *)uc->uc_mcontext.gregs[REG_EIP];
-    int len = 0;
-    if (p[0] == 0xF7) {
-        unsigned char modrm = p[1]; int mod = modrm >> 6, rm = modrm & 7;
-        len = 2;
-        if (mod != 3 && rm == 4) len++;
-        if (mod == 1) len += 1; else if (mod == 2) len += 4;
-        else if (mod == 0 && rm == 5) len += 4;
-        else if (mod == 0 && rm == 4 && (p[2] & 7) == 5) len += 4;
-    }
+    int len = div_len(p);
     if (!len) port_fatal("SIGFPE at %p", (void *)p);
     long rs = (long)uc->uc_mcontext.gregs[REG_EAX];
     uc->uc_mcontext.gregs[REG_EDX] = rs;
@@ -148,3 +212,4 @@ void port_lowmem_install(void) {
     sa.sa_sigaction = on_fpe; sa.sa_flags = SA_SIGINFO | SA_NODEFER;
     sigaction(SIGFPE, &sa, 0);
 }
+#endif

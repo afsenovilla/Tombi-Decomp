@@ -45,6 +45,7 @@ void port_quit(int code) {
     exit(code);
 }
 
+#ifndef _WIN32    /* (Windows: runtime/host_win32.c) */
 unsigned long long port_time_us(void) {
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
     return (unsigned long long)ts.tv_sec * 1000000ull + ts.tv_nsec / 1000;
@@ -53,6 +54,7 @@ void port_sleep_us(unsigned long long us) {
     struct timespec ts = { us / 1000000ull, (us % 1000000ull) * 1000 };
     while (nanosleep(&ts, &ts) && errno == EINTR) ;
 }
+#endif
 void port_sleep_until_us(unsigned long long deadline) {
     unsigned long long now = port_time_us();
     if (deadline > now) port_sleep_us(deadline - now);
@@ -189,7 +191,8 @@ static void game_main(void) {
 /* ------------------------------------------------------------------ command line */
 const char *port_disc_path = "game/disc/Tombi.bin";
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N]] [--realtime] [--hz 50|60]\n"
+    port_printf("usage: %s [--disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+                "       [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
                 "       [--dump-audio PATH] [--play-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -200,7 +203,7 @@ int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_dump_ram_add(const char *);
     extern const char *port_audio_path, *port_save_dir; extern int port_play_movies, port_show_fps, port_stall_frame, port_stall_ms;
-    int headless = 0;
+    int headless = 0, test_null = 0;
     port_window = 1;
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
@@ -210,7 +213,11 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--window")) headless = 0;
         else if (!strcmp(a, "--scale") && v) port_window_scale = atoi(argv[++i]);
         else if (!strcmp(a, "--realtime")) port_realtime = 1;
-        else if (!strcmp(a, "--show-fps")) port_show_fps = 1;
+        else if (!strcmp(a, "--fullscreen")) port_window_fullscreen = 1;
+        else if (!strcmp(a, "--keys") && v) port_window_keys(argv[++i]);
+        else if (!strcmp(a, "--show-fps")) { port_show_fps = 1; if (v && (*v == '1' || *v == '2') && !v[1]) port_show_fps = atoi(argv[++i]); }
+        else if (!strcmp(a, "--patch-tex") && v) { extern const char *port_patch_tex_path; port_patch_tex_path = argv[++i]; }
+        else if (!strcmp(a, "--test-null")) test_null = 1;
         else if (!strcmp(a, "--hz") && v) { port_hz = atoi(argv[++i]); if (port_hz != 50 && port_hz != 60) return usage(argv[0]); }
         else if (!strcmp(a, "--stall") && v) { port_stall_frame = atoi(argv[++i]); const char *s = strchr(argv[i], ':'); if (s) port_stall_ms = atoi(s + 1); }
         else if (!strcmp(a, "--pad-script") && v) port_pad_script(argv[++i]);
@@ -229,11 +236,20 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+    { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
     port_printf("[port2] native pointers, %d-bit: data image %p..%p, scratch %p, layout %s\n", (int)(sizeof(void *) * 8),
                 (void *)port_main0_image, (void *)port_x000_bss, (void *)port_scratch,
                 port_check_layout() ? "ok (below 16 MB)" : "NOT below 16 MB: OT links would truncate");
     if (!port_check_layout()) return 2;
     { extern void port_lowmem_install(void); port_lowmem_install(); }
+    if (test_null) {     /* --test-null: the fault handlers (null-page emulation, division by zero) on this host */
+        volatile unsigned char *p = (volatile unsigned char *)0x1234; volatile int zero = 0, q;
+        *p = 0x5A; q = 100 / zero;
+        port_printf("[port2] test-null: wrote 0x5A through 0x1234, port_ram[0x1234] = 0x%02X; 100/0 = %d (R3000: -1)\n",
+                    ((unsigned char *)port_ram)[0x1234], q);
+        port_low_report();
+        return ((unsigned char *)port_ram)[0x1234] == 0x5A && q == -1 ? 0 : 3;
+    }
     if (port_window) { port_window_start(); port_realtime = 1; }
     if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */

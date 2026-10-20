@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #include "port_runtime.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
@@ -539,7 +542,11 @@ void port_gpu_vblank(void) {
         port_window_frame(frame_rgb, w, h);
     }
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
+#ifdef _WIN32
+    _mkdir(port_dump_dir);
+#else
     mkdir(port_dump_dir, 0777);
+#endif
     char path[512]; int w, h;
     port_gpu_frame(frame_rgb, &w, &h);
     path_for(path, "frame_");
