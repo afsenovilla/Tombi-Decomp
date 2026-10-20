@@ -7,7 +7,7 @@
  * Return = Start, Backspace or Right Shift = Select, F = toggle 2x/3x window scale, F11 = fullscreen, Escape = quit.
  * A game controller (SDL_GameController) maps to the same buttons.  Can also be used alone on a recording:
  *   build/port/tombi --frames 1200 --pad-script 1000:start | build/port/tombi-view   (no audio / pad pipes).
- * Options (tombi --viewer-arg X passes them through): --scale 1|2|3  --fullscreen
+ * Options (tombi --viewer-arg X passes them through): --scale 1|2|3  --fullscreen  --stats (pipe / audio counters per second)
  *   --keys up=Up,down=Down,left=Left,right=Right,cross=X,square=Z,triangle=S,circle=D,l1=Q,r1=W,l2=A,r2=E,
  *          start=Return,select=Backspace   (SDL key names, SDL_GetScancodeFromName; unnamed buttons keep the default)
  * Windows: the audio and pad pipes cannot be fds 3 and 4; the game passes their handles as
@@ -44,21 +44,87 @@ static int read_all(pipe_t fd, void *buf, size_t n) {
 
 static pipe_t audio_fd = NO_PIPE;
 static SDL_AudioDeviceID dev;
-/* The game produces samples on its own 44.1 kHz clock (shims/sound.c), so the queue only has to absorb jitter: it is
-   held between about two and four frames (40-80 ms at 50 Hz).  Primed with two frames of silence; when it runs dry
-   SDL plays silence; when it is over the ceiling the thread stops reading, the pipe fills and the game's write
-   blocks, so the game slows down.  Audio is never resampled or dropped: that would change the pitch or the tempo. */
+/* Audio: the game produces samples on its own 44.1 kHz clock (shims/sound.c).  The pipe is drained
+   unconditionally by a thread into a ring buffer; the SDL callback pulls from the ring.  The game is never blocked
+   on audio: a blocked write would stall a vblank, and with the absolute schedule a stall every frame makes the game
+   alternate pause and burst (the event banners "bounce" at the wrong speed).  The ring holds half a second; the
+   callback pads silence when it runs dry and the thread drops the oldest samples when it is full (a stall of the
+   player, not of the game).  The ring is kept between about two and four frames behind by letting the callback
+   skip ahead when more than RING_HIGH is queued: audio timing is then a fixed small latency. */
 #define FRAME_BYTES (44100 * 4 / 50)
+#define RING_BYTES (44100 * 4 / 2)
+#define RING_HIGH (6 * FRAME_BYTES)
+static unsigned char ring[RING_BYTES];
+static volatile unsigned ring_r, ring_w;      /* byte positions, modulo RING_BYTES; w - r = fill */
+static SDL_mutex *ring_lock;
+static unsigned audio_dropped, audio_padded;  /* bytes, for --stats */
+static int ring_started;                      /* playing: set once two frames are queued, cleared by an underrun */
+static void audio_cb(void *ud, Uint8 *out, int len) {
+    (void)ud;
+    SDL_LockMutex(ring_lock);
+    unsigned fill = ring_w - ring_r;
+    if (!ring_started) {   /* (re)start: two frames of silence ahead of the data, so the game's 20 ms bursts and its
+                              jitter never drain the ring (the old queue-based viewer primed the same way) */
+        for (unsigned i = 0; i < 2 * FRAME_BYTES; i++) ring[(ring_r + i) % RING_BYTES] = 0;   /* room: the ring holds 25 frames */
+        ring_started = 1;
+    }
+    if (fill < (unsigned)len) ring_started = 0;   /* underrun (the game stalled, or the device's clock runs ahead): re-prime */
+    if (fill > RING_HIGH + (unsigned)len) { audio_dropped += fill - RING_HIGH; ring_r = ring_w - RING_HIGH; fill = RING_HIGH; }
+    unsigned n = fill < (unsigned)len ? fill : (unsigned)len;
+    for (unsigned i = 0; i < n; i++) out[i] = ring[(ring_r + i) % RING_BYTES];
+    ring_r += n;
+    SDL_UnlockMutex(ring_lock);
+    if (n < (unsigned)len) { memset(out + n, 0, len - n); audio_padded += len - n; }
+}
 static int audio_thread(void *arg) {
     (void)arg;
     unsigned char buf[FRAME_BYTES];
-    if (dev) { memset(buf, 0, sizeof buf); SDL_QueueAudio(dev, buf, sizeof buf); SDL_QueueAudio(dev, buf, sizeof buf); }
     for (;;) {
-        while (dev && SDL_GetQueuedAudioSize(dev) > 4 * FRAME_BYTES) SDL_Delay(2);
         long r = rd(audio_fd, buf, sizeof buf);
         if (r <= 0) break;
-        if (dev) SDL_QueueAudio(dev, buf, (Uint32)r);
+        SDL_LockMutex(ring_lock);
+        unsigned fill = ring_w - ring_r;
+        if (fill + (unsigned)r > RING_BYTES) { audio_dropped += fill + (unsigned)r - RING_BYTES; ring_r = ring_w + (unsigned)r - RING_BYTES; }
+        for (long i = 0; i < r; i++) ring[(ring_w + i) % RING_BYTES] = buf[i];
+        ring_w += (unsigned)r;
+        SDL_UnlockMutex(ring_lock);
     }
+    return 0;
+}
+
+/* Video: a thread reads frames from the game and leaves the newest one in a mailbox; the main loop presents it.
+   SDL_RenderPresent with vsync blocks for up to a display period (16.7 ms at 60 Hz), so a loop that reads a frame
+   and then presents it paced the game by the display, not by its own 50 Hz schedule (and a 1 MB pipe only hides
+   that for four frames).  The reader never waits for the presenter: a frame that is not presented in time is
+   replaced by the next one (latest wins). */
+static pipe_t video_fd;
+static SDL_mutex *frame_lock;
+static SDL_sem *frame_sem;
+static unsigned char *mbox_rgb; static size_t mbox_cap; static int mbox_w, mbox_h, mbox_new, video_eof;
+static unsigned frames_in, frames_shown, frames_skipped;
+static int video_thread(void *arg) {
+    (void)arg;
+    unsigned char *rgb = NULL; size_t rgb_cap = 0;
+    for (;;) {
+        Uint32 hdr[3];
+        if (read_all(video_fd, hdr, 12) < 0) break;
+        if (hdr[0] != 0x52464254u || hdr[1] == 0 || hdr[1] > 1024 || hdr[2] == 0 || hdr[2] > 512) {
+            fprintf(stderr, "tombi-view: bad frame header\n"); break;
+        }
+        int w = (int)hdr[1], h = (int)hdr[2];
+        size_t n = (size_t)w * h * 3;
+        if (n > rgb_cap) { rgb = realloc(rgb, n); rgb_cap = n; }
+        if (read_all(video_fd, rgb, n) < 0) break;
+        SDL_LockMutex(frame_lock);
+        if (n > mbox_cap) { mbox_rgb = realloc(mbox_rgb, n); mbox_cap = n; }
+        memcpy(mbox_rgb, rgb, n); mbox_w = w; mbox_h = h;
+        if (mbox_new) frames_skipped++;
+        mbox_new = 1; frames_in++;
+        SDL_UnlockMutex(frame_lock);
+        SDL_SemPost(frame_sem);
+    }
+    video_eof = 1;
+    SDL_SemPost(frame_sem);
     return 0;
 }
 
@@ -108,8 +174,8 @@ static Uint16 ctrl_mask(SDL_GameControllerButton b) {
 }
 
 int main(int argc, char **argv) {
-    int scale = 2, fullscreen = 0;
-    pipe_t pad_fd = NO_PIPE, video_fd;
+    int scale = 2, fullscreen = 0, stats = 0;
+    pipe_t pad_fd = NO_PIPE;
 #ifdef _WIN32
     video_fd = GetStdHandle(STD_INPUT_HANDLE);
 #else
@@ -120,6 +186,7 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--scale") && i + 1 < argc) { scale = atoi(argv[++i]); if (scale < 1) scale = 1; if (scale > 6) scale = 6; }
         else if (!strcmp(argv[i], "--fullscreen")) fullscreen = 1;
+        else if (!strcmp(argv[i], "--stats")) stats = 1;   /* every second: frames received / shown / skipped, audio fill, drops, pads */
         else if (!strcmp(argv[i], "--keys") && i + 1 < argc) parse_keys(argv[++i]);
 #ifdef _WIN32
         else if (!strcmp(argv[i], "--audio-handle") && i + 1 < argc) audio_fd = (HANDLE)(uintptr_t)strtoul(argv[++i], NULL, 10);
@@ -133,25 +200,31 @@ int main(int argc, char **argv) {
     }
     SDL_Window *win = SDL_CreateWindow("Tombi! (port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                        320 * scale, 256 * scale, SDL_WINDOW_RESIZABLE | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+    if (!win) { fprintf(stderr, "tombi-view: SDL_CreateWindow: %s\n", SDL_GetError()); return 1; }
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
-    if (!win || !ren) { fprintf(stderr, "tombi-view: %s\n", SDL_GetError()); return 1; }
+    if (!ren) ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
+    if (!ren) { fprintf(stderr, "tombi-view: SDL_CreateRenderer: %s\n", SDL_GetError()); return 1; }
     SDL_Texture *tex = NULL; int tw = 0, th = 0;
 
     if (audio_fd != NO_PIPE) {
         SDL_AudioSpec want, have;
         memset(&want, 0, sizeof want);
-        want.freq = 44100; want.format = AUDIO_S16LSB; want.channels = 2; want.samples = 512;
+        want.freq = 44100; want.format = AUDIO_S16LSB; want.channels = 2; want.samples = 512; want.callback = audio_cb;
+        ring_lock = SDL_CreateMutex();
         dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
         if (dev) SDL_PauseAudioDevice(dev, 0); else fprintf(stderr, "tombi-view: no audio device: %s\n", SDL_GetError());
-        SDL_CreateThread(audio_thread, "audio", NULL);
+        SDL_CreateThread(audio_thread, "audio", NULL);   /* drains the pipe even without a device */
     }
     SDL_GameController *ctrl = NULL;
     for (int i = 0; i < SDL_NumJoysticks(); i++) if (SDL_IsGameController(i)) { ctrl = SDL_GameControllerOpen(i); break; }
 
     Uint16 keys = 0, buttons = 0, tapped = 0;   /* tapped: pressed since the last sample, so a tap shorter than a frame is still sent once */
+    frame_lock = SDL_CreateMutex(); frame_sem = SDL_CreateSemaphore(0);
+    SDL_CreateThread(video_thread, "video", NULL);
     unsigned char *rgb = NULL; size_t rgb_cap = 0;
     int running = 1;
+    Uint32 stats_t0 = SDL_GetTicks(); unsigned stats_in = 0, stats_shown = 0, stats_skipped = 0;
     while (running) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -186,16 +259,15 @@ int main(int argc, char **argv) {
             }
         }
         if (!running) break;
-        /* one frame from the game (blocks for at most one vblank at 50 Hz) */
-        Uint32 hdr[3];
-        if (read_all(video_fd, hdr, 12) < 0) break;
-        if (hdr[0] != 0x52464254u || hdr[1] == 0 || hdr[1] > 1024 || hdr[2] == 0 || hdr[2] > 512) {
-            fprintf(stderr, "tombi-view: bad frame header\n"); break;
-        }
-        int w = (int)hdr[1], h = (int)hdr[2];
+        /* the newest frame from the reader thread (waits for one: at most one vblank at 50 Hz) */
+        if (SDL_SemWaitTimeout(frame_sem, 100) != 0 && !video_eof) continue;
+        SDL_LockMutex(frame_lock);
+        int w = mbox_w, h = mbox_h, fresh = mbox_new;
         size_t n = (size_t)w * h * 3;
-        if (n > rgb_cap) { rgb = realloc(rgb, n); rgb_cap = n; }
-        if (read_all(video_fd, rgb, n) < 0) break;
+        if (fresh) { if (n > rgb_cap) { rgb = realloc(rgb, n); rgb_cap = n; } memcpy(rgb, mbox_rgb, n); mbox_new = 0; }
+        SDL_UnlockMutex(frame_lock);
+        if (!fresh) { if (video_eof) break; continue; }
+        frames_shown++;
         if (!tex || tw != w || th != h) {
             if (tex) SDL_DestroyTexture(tex);
             tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, w, h);
@@ -211,6 +283,13 @@ int main(int argc, char **argv) {
             Uint16 p = keys | buttons | tapped;
             tapped = 0;
             if (wr(pad_fd, &p, 2) != 2) break;
+        }
+        if (stats && SDL_GetTicks() - stats_t0 >= 1000) {
+            unsigned fill = ring_w - ring_r;
+            fprintf(stderr, "tombi-view: %u frames in, %u shown, %u skipped; audio queued %u ms, dropped %u ms, padded %u ms\n",
+                    frames_in - stats_in, frames_shown - stats_shown, frames_skipped - stats_skipped,
+                    fill / (44100 * 4 / 1000), audio_dropped / (44100 * 4 / 1000), audio_padded / (44100 * 4 / 1000));
+            stats_t0 = SDL_GetTicks(); stats_in = frames_in; stats_shown = frames_shown; stats_skipped = frames_skipped;
         }
     }
     SDL_Quit();
