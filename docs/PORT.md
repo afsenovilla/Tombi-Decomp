@@ -738,16 +738,34 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   kernel area, queued garbage file ids and asked the disc for lba 218357 (`CdRead failed`).
 - **Memory.** One 2 MB pagefile-backed section (`CreateFileMapping`) mapped with `MapViewOfFileEx` at 0x80000000 and
   0xA0000000 (the image is linked `--large-address-aware` and based at 0x10000000), the scratchpad/I/O page with
-  `VirtualAlloc` at 0x1F800000. The KUSEG mirror at 0x00010000 is mapped whole when Windows left the range free, else
-  every free 64 KB block of it (the rest reads the host's own data there: a warning says how much is missing). Page 0
-  cannot be mapped on Windows: accesses below 0x200000 that fault are emulated in the exception handler by copying the
-  instruction into an executable scratch page with its memory operand rewritten to the KSEG0 address of the same byte
-  (one exception per access, so only the stray NULL-pointer reads go this way).
+  `VirtualAlloc` at 0x1F800000. The KUSEG mirror at 0x00010000 is where Windows puts its own early allocations
+  (the process parameters, the default heap, sometimes a thread stack), and the game *draws* through KUSEG pointers:
+  the ordering tables and primitive buffers at 0x80090000-0x800CFFFF are reached masked with 0xFFFFFF (SetSprt,
+  modelDrawFT4/GT3/GT4, drawObjectSpriteScaled, compactOrderingTable: 29 million such accesses in 4300 frames under
+  `--no-kuseg`), so a block of that range in use by Windows meant the game wrote its packets over the host's heap
+  and read them back through the KSEG0 view (garbage picture, then a jump to a wild pointer such as
+  `eip=7fac06e8`, a heap word; Wine keeps its own data at 0x110000-0x1FFFFF, above the game's range, so it never
+  showed). So when the range is not free, `start` runs the exe again with `CREATE_SUSPENDED`, reserves every free
+  64 KB block of 0x10000-0x1FFFFF in the child with `VirtualAllocEx` before its loader has made a heap, resumes it
+  and relays its exit code; the child (`PORT_KUSEG_CHILD=1` in its environment) releases the reservations in
+  `port_setup_memory` and maps the mirror there (`-v` logs both steps). What still cannot be mapped is listed by the
+  warning; `--kuseg-strict` stops there, `--no-kuseg` maps nothing and logs every emulated access (which code uses
+  KUSEG), `--fake-kuseg` gives the game private memory instead of the mirror (reproduces the Windows failure under
+  Wine: garbage packets, crash at frame 758). Page 0 cannot be mapped on Windows: accesses below 0x200000 that fault
+  are emulated in the exception handler by copying the instruction into an executable scratch page with its memory
+  operand rewritten to the KSEG0 address of the same byte (one exception per access, so only the stray NULL-pointer
+  reads and the unmapped KUSEG blocks go this way).
 - **Calls to retail addresses.** The RAM is `PAGE_READWRITE` and the image `--nxcompat`, so a call into it is an access
   violation with EIP = the PS1 address; `AddVectoredExceptionHandler` rewrites EIP to the native function (the same
   trampoline as the Linux SIGSEGV handler); `EXCEPTION_INT_DIVIDE_BY_ZERO` gets the R3000 result. `__chkstk_ms` (stack
   probes for frames over 4 KB) is provided in asm; `port/runtime/sys_common.c` holds the printf and the 64-bit division
-  helpers shared by both runtimes. The coroutines of `threads.c` are plain stack-switching asm and work unchanged.
+  helpers shared by both runtimes. The coroutines of `threads.c` are plain stack-switching asm and work unchanged. A fault prints the registers, the image base, the
+  thread, the nearest native function of EIP and of every stack word inside the image (`port_sym_near`: funcmap,
+  ovlmap, areamap, libmap, so shims too), the last call thunk `port_resolve_call` answered and, for an EIP equal to
+  the fault address, that a bogus pointer was jumped to; the Linux handler prints the same (`port_dump_stack`,
+  sys_common.c). `gen_port.py link` lists the retail-named data a game object still defines beside its syms.ld
+  address (what `retail_definition` did not rewrite: only the `asm("D_80010000")` build-date strings today), since
+  that is the pattern a COFF object binds to its own copy.
 - **The viewer.** `tombi_view.c` builds for both: on Windows it reads the frames from `GetStdHandle(STD_INPUT_HANDLE)`
   and gets the audio/pad pipe handles as `--audio-handle N --pad-handle N` (fds 3 and 4 cannot be inherited by number);
   `port_spawn` in the Win32 runtime makes the three pipes with `CreatePipe` and runs it with `CreateProcess`. New viewer
