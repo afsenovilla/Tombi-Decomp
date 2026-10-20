@@ -25,7 +25,7 @@ i18n.add({
         "l.disc": "Imagen del disco (.bin / .cue / .iso):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
-        "b.play": "Jugar", "b.stop": "Cerrar el juego", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
+        "b.play": "Jugar", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco correcto: MAIN0.EXE verificado (sha1).",
         "s.badsha": "Aviso: MAIN0.EXE no coincide con SCES-01331 (sha1 {0}); el port puede no funcionar.",
         "s.noexe": "No se encuentra EXE/MAIN0.EXE en la imagen: no es un disco de Tombi! PAL.", "s.notiso": "No es una imagen ISO9660: {0}",
@@ -39,7 +39,7 @@ i18n.add({
         "l.disc": "Disc image (.bin / .cue / .iso):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
-        "b.play": "Play", "b.stop": "Close the game", "l.autostart": "Start a new game automatically (presses Start on the title)",
+        "b.play": "Play", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Disc OK: MAIN0.EXE verified (sha1).",
         "s.badsha": "Warning: MAIN0.EXE does not match SCES-01331 (sha1 {0}); the port may not work.",
         "s.noexe": "EXE/MAIN0.EXE not found in the image: not a Tombi! PAL disc.", "s.notiso": "Not an ISO9660 image: {0}",
@@ -191,6 +191,7 @@ class App:
         self.root = root
         self.s = load_settings()
         self.proc = None
+        self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
         self.vars = {}
         set_icon(root)
         root.geometry("760x600")
@@ -257,6 +258,7 @@ class App:
         self.play_btn = ttk.Button(btns, text=tr("b.play"), command=self.play, width=16)
         self.play_btn.pack(side="left")
         ttk.Button(btns, text=tr("b.stop"), command=self.stop).pack(side="left", padx=8)
+        ttk.Button(btns, text=tr("b.copylog"), command=self.copy_log).pack(side="left", padx=8)
         ttk.Label(f, text=tr("l.cmd")).grid(row=9, column=0, sticky="w")
         self.cmd_text = tk.Text(f, height=3, wrap="word")
         self.cmd_text.grid(row=10, column=0, sticky="ew")
@@ -397,9 +399,7 @@ class App:
         if not self.proc:
             return
         try:
-            lines = open(self.log_path, encoding="utf-8", errors="replace").read().splitlines()[-8:]
-            self.log_text.delete("1.0", "end")
-            self.log_text.insert("1.0", "\n".join(lines))
+            self.show_log_tail(open(self.log_path, encoding="utf-8", errors="replace").read().splitlines())
         except OSError:
             pass
         rc = self.proc.poll()
@@ -409,6 +409,24 @@ class App:
         self.status.set(tr("s.ended", rc, self.log_path))
         self.play_btn.state(["!disabled"])
         self.proc = None
+
+    def show_log_tail(self, lines):
+        """The last 8 lines, preceded by the `[port] warning` lines from earlier in the log (a partial KUSEG mirror,
+        a relocated image) so a problem reported at startup stays visible under the FATAL block."""
+        tail = lines[-8:]
+        warn = [l for l in lines[:-8] if "[port] warning" in l or "FATAL" in l][:4]
+        self.log_text.delete("1.0", "end")
+        self.log_text.insert("1.0", "\n".join(warn + (["..."] if warn else []) + tail))
+
+    def copy_log(self):
+        """Whole log file to the clipboard (what to paste in a bug report)."""
+        try:
+            text = open(self.log_path, encoding="utf-8", errors="replace").read() if self.log_path else self.log_text.get("1.0", "end")
+        except OSError:
+            text = self.log_text.get("1.0", "end")
+        self.root.clipboard_clear()
+        self.root.clipboard_append(text)
+        self.status.set(tr("s.copied", len(text.splitlines())))
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
