@@ -709,6 +709,12 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   `thunks.S`, `funcmap.c`) are identical on both hosts; the few kernel32/winmm imports are declared in the runtime with
   their decorated names (`_CreateFileA@28`). `gen_port.py link` skips those undefined names and, for mingw, emits the call
   thunks as plain globals linked last (a COFF weak symbol with a body is not a definition for the mingw ld) and no `.type`.
+  A game C file that *defines* a retail-named datum (`char D_80098c44[844] = {...}`, `fileLink FILE_LINKS[1119]`) is
+  rewritten by `gen_port.py` (`retail_definition`) into `extern` of the retail name plus a copy named `port_copy_<name>`:
+  the ELF link binds the defining object's own references to the `syms.ld` address, but a COFF object resolves them
+  section-relative at assembly time, so before this the Windows build read SYS/LD0SYS.BIN into queueLoadList's native
+  `D_80098c44` while the rest of the game read the (empty) lists at 0x80098C44, walked `queueLoadList(0)` through the
+  kernel area, queued garbage file ids and asked the disc for lba 218357 (`CdRead failed`).
 - **Memory.** One 2 MB pagefile-backed section (`CreateFileMapping`) mapped with `MapViewOfFileEx` at 0x80000000 and
   0xA0000000 (the image is linked `--large-address-aware` and based at 0x10000000), the scratchpad/I/O page with
   `VirtualAlloc` at 0x1F800000. The KUSEG mirror at 0x00010000 is mapped whole when Windows left the range free, else
@@ -729,12 +735,17 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
 - **Files.** `port_open/create/pread/pwrite/filesize` on `CreateFile/ReadFile/WriteFile` (OVERLAPPED offsets); the FIFO
   options (`--pipe-frames`, `--pipe-audio`) write plain files on Windows (use `--window`). `timeBeginPeriod(1)` + `Sleep`
   + a spin for the last millisecond pace the vblanks; `QueryPerformanceCounter` is the clock.
-- **Status (checked under wine32 9.0).** The exe boots, maps the memory, loads MAIN0.EXE and the disc and runs the first
-  frame; under wine the KUSEG range 0x10000-0x110000 is wine's own reserved area, so the title screen's
-  `queueLoadList(NULL)` scan (which on Linux walks the zero kernel area into the EXE image through the mirror until it
-  meets a -1) reads wine's data instead and the load queue never completes (`sleepTask` loop at frame 1). On real
-  Windows that range is normally free (unverified: no Windows machine here); if it is not, the warning line names the
-  missing blocks and the same stall is expected. The Linux build is unchanged (`cmake -S port -B build/port` as before).
+- **Status (checked under wine32 9.0).** The exe boots, maps the memory, loads MAIN0.EXE and the disc, performs the same
+  CD reads as the Linux build over the first 1500 frames and reaches `titleSequenceTask`. Wine keeps its own data in
+  0x110000-0x1FFFFF, so the KUSEG mirror is partial there (the warning lists the missing 64 KB blocks); the load-list
+  walk reads a KUSEG pointer through KSEG0 (`fixes.txt`, queueLoadList), so this is harmless as far as tested;
+  `--kuseg-strict` stops at the warning instead. The Linux build is unchanged (`cmake -S port -B build/port` as before).
+- **Disc diagnostics.** `port_cd_open` tells raw (2352) from cooked (2048) images by the sync pattern `00 FF*10 00` or
+  the ISO9660 PVD (the size alone misleads with a multi-track dump in one file), logs size and sector count, reads
+  sector 16 and checks `CD001`. A failed read prints the file, offset, size, sector count, the OS error and "beyond
+  the end of the image"; a Setloc outside the image names the `FILE_LINKS` id it came from (a garbage load record)
+  or the parameter's address. `--trace-cd` logs every Setloc and sector read. A `.cue` is resolved relative to its
+  own directory with either separator.
 - **CI.** `.github/workflows/port-exe.yml`: job `game` (ubuntu, mingw) fetches the player's disc image from the
   `GAME_FILES_URL` secret like report.yml, runs `tools/build_full.py`, cross-compiles `tombi.exe`/`tombi-view.exe` and
   uploads them with `SDL2.dll`; job `launcher` (windows-latest) packs them with PyInstaller into `tombi-port.exe`
@@ -793,8 +804,8 @@ so it is an environment/regression question of the base port, not of the mods (l
 
 ### Left to do
 
-- Run `tombi.exe` on real Windows (the KUSEG mirror and the viewer's pipes are untested outside wine; wine's reserved
-  low range breaks the NULL load-list scan, see "Status").
+- Run `tombi.exe` on real Windows (the KUSEG mirror and the viewer's pipes are untested outside wine; a game access
+  to a missing mirror block other than the load-list walk would read the host's data, see "Status").
 - The *button prompts* mod: the glyph rects of the manifest (see "Button prompts" above); the art and the
   `--patch-tex` mechanism are done.
 - The stall at vblank ~443 noted above.
