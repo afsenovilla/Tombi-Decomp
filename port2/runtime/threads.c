@@ -39,9 +39,29 @@ static void tib_set(int from, int n) {
 #define tib_set(from, n) ((void)0)
 #endif
 
+/* where each coroutine last yielded (the game call sites above ChangeTh on its stack, newest first): the
+   "no game progress" watchdog report prints them, so a task stuck in a wait that never ends names the wait */
+unsigned long port_thread_yield_site[MAX_TH + 1][4];
+unsigned port_thread_switches;
+static void note_yield(int from) {
+    unsigned long *ebp = __builtin_frame_address(0), lo = (unsigned long)stacks[from - 1], hi = lo + sizeof stacks[0];
+    int k = 0;
+    for (int i = 0; i < 8 && k < 4; i++) {
+        if ((unsigned long)ebp < lo || (unsigned long)ebp >= hi - 8) break;
+        unsigned long ra = ebp[1], *next = (unsigned long *)ebp[0];
+        if (i >= 1) port_thread_yield_site[from][k++] = ra;    /* [0] is port_thread_change's own caller: the ChangeTh shim */
+        if (next <= ebp) break;
+        ebp = next;
+    }
+    while (k < 4) port_thread_yield_site[from][k++] = 0;
+}
+int port_thread_used(int n) { return n >= 1 && n <= MAX_TH && th[n].used; }
+
 static void switch_to(int n) {
     int from = cur;
     if (n == from) return;
+    if (from >= 1 && from <= MAX_TH) note_yield(from);
+    port_thread_switches++;
     cur = n;
     tib_set(from, n);
     port_ctx_switch(&th[from].sp, th[n].sp);

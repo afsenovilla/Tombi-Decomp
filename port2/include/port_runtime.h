@@ -79,6 +79,9 @@ int port_thread_open(void *fn);
 void port_thread_change(int handle);
 void port_thread_close(int handle);
 int port_thread_current(void);
+int port_thread_used(int n);
+extern unsigned long port_thread_yield_site[][4];   /* threads.c: where each coroutine last yielded */
+extern unsigned port_thread_switches, port_ot_signature;
 
 /* frame pacing / vblank */
 void port_vblank(void);

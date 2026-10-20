@@ -24,6 +24,7 @@ typedef struct { s16 x, y, w, h; } RECT;
 static u16 vram[512][1024];
 static int gpu_prims, gpu_lists;
 int port_gpu_packets(void) { return gpu_prims; }
+unsigned port_ot_signature;          /* hash of the packets of the last DrawOTag (watchdog.c) */
 int port_gpu_lists(void) { return gpu_lists; }
 u16 *port_vram(void) { return &vram[0][0]; }
 
@@ -422,6 +423,7 @@ int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn i
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
 void DrawOTag(u32 *ot) {
     u32 *p = ot; int n = 0;
+    unsigned h = 2166136261u;
     gpu_lists++;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
@@ -433,11 +435,13 @@ void DrawOTag(u32 *ot) {
                 port_printf("\n");
             }
             packet(p + 1, len);
+            for (u32 k = 1; k <= len; k++) h = h * 16777619u ^ p[k];     /* the watchdog's "same picture every frame" test */
         }
         if (next == 0xFFFFFF) break;
         p = (u32 *)next;                     /* a native pointer: the whole data image sits below 16 MB */
     }
     gpu_prims += n;
+    port_ot_signature = h * 31u + (unsigned)n;
     if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
 }
 void DrawOTagEnv(u32 *ot, void *env) { PutDrawEnv(env); DrawOTag(ot); }
