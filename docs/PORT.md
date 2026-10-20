@@ -164,8 +164,10 @@ vblank for tests. Verified headless: a save written from the save screen
 clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console). `--window`
 implies `--realtime` and honours `--hz`. The schedule is absolute (`port_vblank` in `shims/psyq.c`): vblank n is
 due at `epoch + n/hz`, waited for with `port_sleep_until_us` (Linux: `clock_nanosleep` `TIMER_ABSTIME` to 200 µs
-before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, `Sleep` to 2 ms
-before, then a spin on `QueryPerformanceCounter`), so no rounding accumulates. A vblank more than one period late
+before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, then `Sleep(1)` is
+measured eight times and the worst case + 0.5 ms (at least 2 ms) is the margin: `Sleep` to that long before the
+deadline, then a spin on `QueryPerformanceCounter`; the log says `timer: Sleep(1) takes up to 1.9 ms` normally, 15-16
+ms where the 1 ms resolution is not honoured, and the spin then covers it), so no rounding accumulates. A vblank more than one period late
 (a slow frame, the viewer's pipe blocked) re-anchors the epoch: one vblank runs without waiting and the game
 drops to real time, it never runs a burst of fast frames to catch up. The Windows `port_time_us` used to compute
 `count * 1e6 / freq` in 64 bits, which overflows after about 30 minutes of uptime with a 10 MHz counter: from then
@@ -176,10 +178,30 @@ on the machine's uptime); it now divides first.
 clock since the previous one (44100/s whatever the vblank rate), headless it mixes 44100/hz per vblank; the
 sequencer ticks every 44100/hz samples (1/hz s of *audio* time, the libsnd vblank tick), so the tempo depends on
 the sample count only. A stall over four frames re-anchors the audio clock too (the gap is dropped, not queued).
-The viewer never drops or resamples audio: it primes two frames of silence, queues what the pipe delivers while
-the SDL queue holds under four frames, and otherwise stops reading, so the pipe fills and the game's write blocks.
-`--show-fps` logs the measured vblank rate and audio samples per second every second; `--stall FRAME:MS` sleeps MS
-ms before that vblank (test hook). Measured on Linux, `--realtime --show-fps --dump-audio`: 3000 frames take
+**The viewer never blocks the game** (`tools/view/tombi_view.c`): an audio thread drains the audio pipe
+unconditionally into a half-second ring buffer that the SDL callback pulls from (two frames of silence are put
+ahead of the data at start and after an underrun; the callback skips ahead when more than six frames are queued and
+the thread drops the oldest samples when the ring is full, so a stalled *player* costs audio, never game time), and
+a video thread reads the frame pipe into a one-frame latest-wins mailbox that the main loop presents (vsync on where
+available: `SDL_RenderPresent` then blocks for up to a display period, which must not reach the game; a 60 Hz
+display shows 50 of its 60 presents with a new frame). The earlier viewer read a frame and then presented it, and
+stopped reading audio while SDL held over four frames: both put the game on the display's and the audio device's
+clocks through the pipes (1 MB each on Windows, 64 KB on Linux). `--viewer-arg --stats` logs frames received /
+shown / skipped and the ring fill, drops and padding every second (`tombi-view:` lines). `--show-fps` logs the
+measured vblank rate and audio samples per second every second, `--show-fps 2` adds a histogram of the inter-vblank
+intervals (`vblank intervals (ms:count) ...: 20-21:50 max 20.3 ms` is right; counts under 15 ms are vblanks run
+without waiting after a late one, counts over 25 ms are the stalls that caused them); the normal exit (`port_quit`:
+frame limit or viewer closed) prints the overall rate (`paced: N vblanks in T s`, from the first paced vblank, so
+loading counts) and the tally of emulated accesses below 0x200000 (see "Windows build"). The launcher passes
+`--show-fps 2 --viewer-arg --stats`, so a user's `tombi-port.log` carries both. `--stall FRAME:MS` sleeps MS ms
+before that vblank (test hook). Measured under Xvfb with SDL's dummy audio device (which consumes about 4 %
+fast: the `padded` counter grows by it), 1500 frames with Start at 1000, histogram per second: old viewer 25x18-19
++ 25x20-21 ms (the 18-19 bucket was 19.9 ms before the buckets rounded to the nearest ms), old viewer with a
+simulated 60 Hz blocking present the same plus one 15-17 and one 22-24 per second, new viewer 50x20-21 with `0
+skipped`; the exe under Wine with `--window` (Win32 `Sleep`/`QueryPerformanceCounter`, `CreatePipe`): 48-50x20-21
+per second, 50.00 vblank/s. So on Linux and under Wine none of the three viewer-side suspects (audio
+back-pressure, `Sleep` rounding, the vsync'd present) moves the vblank rate; on a Windows machine where it still
+does, the histogram in the log says which second and by how much. Measured on Linux, `--realtime --show-fps --dump-audio`: 3000 frames take
 60.03 s and write 2646205 samples (60.005 s); with `--stall 1500:600` they take 60.63 s and write 2646302 samples
 (60.007 s): the rate reads 27.99 vblank/s in the stalled second, 49.99-50.01 before and after, never above 50.
 Under wine, tombi.exe reports 50.00 vblank/s and 44100 samples/s. The event banner (`printEventMessage`, type
@@ -787,7 +809,15 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   50 vblanks are identical to the previous build's; under Wine the exe passes 2500 frames with `--fake-kuseg` and
   with `--no-kuseg` (0 emulated accesses), same frames. The mirror and the relaunch stay as a fallback for code
   the rewrite does not know (a new idiom shows up as a non-zero `--no-kuseg` count, or on Windows as a slow
-  game plus the tally in the log). The emulation itself (`port_low_emulate`, sys_common.c, shared by both runtimes)
+  game plus the tally in the log). The tally is now printed at every normal exit too (`port_quit`: frame limit
+  reached, viewer closed), so a user's `tombi-port.log` ends with `N emulated accesses below 0x200000` and the
+  sites; the full 5760-frame route (fog banner included) gives 0 on Linux with `--no-kuseg`, and under Wine 140 at
+  three sites that are page-0 NULL reads (`playerCheckPerchLanding+0xac` address 3, `playerStepHurtKnockback`),
+  not KUSEG. Blocks the warning lists as `committed` are Windows' own memory: an access there does not fault and
+  is not counted, so a graphic corruption that appears on Windows only is checked with a run under `--no-kuseg`
+  (every low access faults and is counted, with its site) rather than from the tally alone. The 28 frames dumped
+  every 200 vblanks of the route are identical between the Linux build and the exe under Wine at 5760 frames
+  (checked again after the viewer rewrite). The emulation itself (`port_low_emulate`, sys_common.c, shared by both runtimes)
   covers every ModRM-addressed instruction (any base/index/SIB/displacement, 8/16/32-bit, `lock`/segment/operand-size
   prefixes, `lea` excluded) and restarts a string instruction (`movs`/`stos`/`cmps`/`scas`/`lods`, with `rep`) with
   ESI/EDI moved to KSEG0. GP0 opcodes E7-FF and 03-1E are one-word nops to the GPU and are now skipped without
