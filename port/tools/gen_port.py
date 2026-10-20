@@ -86,6 +86,15 @@ def translate_gte_define(d):
     return "#define %s%s do { %s } while (0)" % (name, params, " ".join(c))
 
 
+def tied_asm_moves(outs, ins):
+    """`asm("" : "=r"(a), "=r"(b) : "0"(x), "1"(y), "r"(z))` -> `a = x; b = y;` (the old gcc's register "move";
+    outputs that are not tied to an input have no value in C either and are left alone)."""
+    o = re.findall(r'"=?&?r"\s*\(\s*([^()]*(?:\([^()]*\))?[^()]*)\)', outs)
+    i = re.findall(r'"(\d+)"\s*\(\s*([^()]*(?:\([^()]*\))?[^()]*)\)', ins)
+    stmts = ["%s = %s;" % (o[int(k)].strip(), v.strip()) for k, v in i if int(k) < len(o) and o[int(k)].strip() != v.strip()]
+    return " ".join(stmts) if stmts else ";"
+
+
 def filter_src(text, dropped=None):
     """Make matching-oriented C compile natively without changing what it does.  Names of functions whose body is
     top-level MIPS asm are appended to `dropped` (they need a C version in port/shims/)."""
@@ -125,6 +134,10 @@ def filter_src(text, dropped=None):
             continue
         # register variables pinned to MIPS registers: drop the pin
         line = re.sub(r'\s*(?:__asm__|\basm)\s*\(\s*"\$?(?:[atvsk]\d|zero|at|gp|sp|fp|ra|\d+)"\s*\)(?=\s*[;=,]|\s*$)', "", line)
+        # empty asm statements with outputs tied to inputs ("=r"(out) : "0"(in)): the old gcc's "move": out = in
+        # (dropping them left `out` uninitialised when the two names differ, e.g. I0NFO3 func_800EAD48's player sprite)
+        line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*""\s*:((?:[^():]|\([^()]*\))*):((?:[^():]|\([^()]*\))*)(?::[^()]*)?\)\s*;',
+                      lambda m: tied_asm_moves(m.group(1), m.group(2)), line)
         # empty asm statements with operands or clobbers inside a line (register allocation hints for the old gcc)
         line = re.sub(r'\b(?:__asm__|asm)\s*(?:volatile\s*|__volatile__\s*)?\(\s*""\s*:(?:[^()]|\([^()]*\))*\)\s*;', ";", line)
         # asm statements with MIPS instructions or register clobbers (empty barriers asm("") are harmless)
