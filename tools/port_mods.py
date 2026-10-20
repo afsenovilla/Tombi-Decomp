@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Mods of the native port (docs/PORT.md "Mods"): each one is a set of command-line options of build/port/tombi
-(--poke / --poke-every / --hz / --viewer-arg ...), so the launcher (tools/port_launcher.py) only assembles a command
+"""Mods of the native port (docs/PORT.md "Mods"): each one is a set of command-line options of build/port2/tombi2
+(--poke / --poke-every / --hz / --keys ...), so the launcher (tools/port_launcher.py) only assembles a command
 line.  Every mod has an id, an i18n label/description key and a function settings -> list of arguments.
 
 Addresses (PAL SCES-01331, include/tomba/game.h `gameConfig GAME` at 0x8009C960):
@@ -131,7 +131,7 @@ def args_keys(s):
         return []
     keys = s.get("keys") or {}
     spec = ",".join("%s=%s" % (b, keys.get(b, DEFAULT_KEYS[b])) for b in BUTTONS if keys.get(b, DEFAULT_KEYS[b]))
-    return ["--viewer-arg", "--keys", "--viewer-arg", spec]
+    return ["--keys", spec]
 
 
 # id, label key, description key, kind ("check" | "check+area" | "check+int" | "check+keys"), settings -> args

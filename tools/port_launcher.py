@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Launcher of the native port (tombi-port.exe, docs/PORT.md "Windows build" / "Mods"): a window where the player
-picks their own disc image (.bin/.cue/.iso of Tombi! PAL SCES-01331), a save folder, the window options and the
-mods, and a Play button that runs tombi.exe --window with those options.  Same Tk toolkit and tools/i18n.py catalogs
-as tombi-gfx / tombi-text.  No game data is bundled: MAIN0.EXE is extracted from the player's disc image into the
-launcher's folder (next to tombi-port.json, the saved settings) the first time, and checked by sha1.
+"""Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods"): a window where the
+player picks their own disc image (.bin/.cue/.iso of Tombi! PAL SCES-01331), a save folder, the window options and
+the mods, and a Play button that runs tombi2.exe --window with those options.  Same Tk toolkit and tools/i18n.py
+catalogs as tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
+tombi-port.json, the saved settings, and compared by sha1) before the first run.
 
-  python3 tools/port_launcher.py             # from a checkout: uses build/port-win/*.exe (Windows) or build/port/* (Linux)
-  pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port-exe.yml)
+  python3 tools/port_launcher.py             # from a checkout: uses build/port2-win/tombi2.exe (Windows) or build/port2/tombi2 (Linux)
+  pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port2-exe.yml)
 """
 import hashlib, json, os, struct, subprocess, sys, threading
 import tkinter as tk
@@ -70,16 +70,16 @@ def app_dir():
 
 
 def bin_dir():
-    """Where tombi(.exe) and tombi-view(.exe) live: the PyInstaller bundle, else the build tree."""
+    """Where tombi2(.exe) and SDL2.dll live: the PyInstaller bundle, else the build tree."""
     if getattr(sys, "_MEIPASS", None):
         return sys._MEIPASS
     if os.name == "nt":
-        return os.path.join(ROOT, "build", "port-win")
-    return os.path.join(ROOT, "build", "port")
+        return os.path.join(ROOT, "build", "port2-win")
+    return os.path.join(ROOT, "build", "port2")
 
 
 def game_binary():
-    return os.path.join(bin_dir(), "tombi.exe" if os.name == "nt" else "tombi")
+    return os.path.join(bin_dir(), "tombi2.exe" if os.name == "nt" else "tombi2")
 
 
 def settings_file():
@@ -170,7 +170,7 @@ def extract_main0(image, out):
 
 
 def build_id():
-    """Short git sha of the build: build_id.txt bundled by port-exe.yml, else `git rev-parse` of the checkout."""
+    """Short git sha of the build: build_id.txt bundled by port2-exe.yml, else `git rev-parse` of the checkout."""
     for d in (getattr(sys, "_MEIPASS", None), ROOT):
         if d and os.path.isfile(os.path.join(d, "build_id.txt")):
             return open(os.path.join(d, "build_id.txt"), encoding="utf-8", errors="replace").read().strip() or "unknown"
@@ -380,13 +380,12 @@ class App:
         self.collect()
         s = self.s
         exe = game_binary()
-        cmd = [exe, "--exe", os.path.join(app_dir(), "MAIN0.EXE"), "--disc", bin_of_cue(s["disc"]), "--window",
-               "--show-fps", "2", "--viewer-arg", "--stats",     # pacing histogram + viewer pipe counters in the log
-               "--viewer-arg", "--scale", "--viewer-arg", str(s.get("scale", 2))]
+        cmd = [exe, "--disc", bin_of_cue(s["disc"]), "--window", "--scale", str(s.get("scale", 2)),
+               "--show-fps", "2"]     # the measured vblank rate and its histogram in the log
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
         if s.get("fullscreen"):
-            cmd += ["--viewer-arg", "--fullscreen"]
+            cmd += ["--fullscreen"]
         cmd += M.mod_args(s, app_dir())
         return cmd
 
@@ -397,7 +396,7 @@ class App:
         if not os.path.isfile(cmd[0]):
             messagebox.showerror(tr("title"), tr("s.nobin", cmd[0]))
             return
-        if not os.path.isfile(cmd[2]):
+        if not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE")):
             self.check_disc()
             messagebox.showerror(tr("title"), tr("s.nodisc"))
             return
@@ -405,7 +404,7 @@ class App:
             return
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
-        log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port] build <sha> <date>
+        log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
@@ -429,10 +428,10 @@ class App:
         self.proc = None
 
     def show_log_tail(self, lines):
-        """The last 8 lines, preceded by the `[port] warning` lines from earlier in the log (a partial KUSEG mirror,
-        a relocated image) so a problem reported at startup stays visible under the FATAL block."""
+        """The last 8 lines, preceded by the warning / FATAL / access-violation lines from earlier in the log (a
+        missing disc, a bad layout) so a problem reported at startup stays visible under the final block."""
         tail = lines[-8:]
-        warn = [l for l in lines[:-8] if "[port] warning" in l or "FATAL" in l][:4]
+        warn = [l for l in lines[:-8] if "warning" in l or "FATAL" in l or "access violation" in l][:6]
         self.log_text.delete("1.0", "end")
         self.log_text.insert("1.0", "\n".join(warn + (["..."] if warn else []) + tail))
 
