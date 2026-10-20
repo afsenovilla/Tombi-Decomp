@@ -173,6 +173,7 @@ static void low_tally(unsigned long eip, unsigned long fault, int op, int len) {
     }
 }
 void port_low_report(void) {
+    { extern unsigned long port_interp_kuseg; if (port_interp_kuseg) port_printf("[port] %lu interpreted KUSEG accesses served from KSEG0 (mips_interp)\n", port_interp_kuseg); }
     if (!low_total) { if (port_kuseg_strict == 2 || port_verbose) port_printf("[port] 0 emulated accesses below 0x200000\n"); return; }
     port_printf("[port] %lu emulated accesses below 0x200000 (page 0 / unmapped KUSEG), %d sites%s:\n", low_total, low_nsites, low_other ? " (+more)" : "");
     for (int i = 0; i < low_nsites; i++) {

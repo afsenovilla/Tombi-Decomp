@@ -11,6 +11,12 @@
 
 typedef unsigned int u32; typedef int s32; typedef unsigned short u16; typedef short s16;
 typedef unsigned char u8; typedef signed char s8; typedef unsigned long long u64; typedef long long s64;
+/* A KUSEG RAM address (0x10000-0x1FFFFF: the game's own 0xFFFFFF masks, e.g. in the overlay code it draws with)
+   is served from the KSEG0 view, which is always mapped.  The KUSEG mirror is not (Windows keeps its own memory
+   there), so an interpreted access there must never touch host memory; the count shows in port_low_report. */
+unsigned long port_interp_kuseg;
+static inline u32 ma(u32 a) { if (a - 0x10000u < 0x1F0000u) { port_interp_kuseg++; a |= 0x80000000u; } return a; }
+#define MA(a) ma(a)
 
 void port_gte_op(unsigned long op);
 void port_gte_mtc2(int reg, unsigned long v);
@@ -53,19 +59,19 @@ int port_is_lib_addr(u32 a) {
 static int is_lib_without_shim(u32 a) { return port_is_lib_addr(a) && !native_for(a); }
 
 static u32 lwl(u32 a, u32 rt) {
-    u32 w = *(u32 *)(a & ~3u); int s = a & 3;
+    u32 w = *(u32 *)MA(a & ~3u); int s = a & 3;
     return (rt & (0x00FFFFFFu >> (s * 8))) | (w << (24 - s * 8));
 }
 static u32 lwr(u32 a, u32 rt) {
-    u32 w = *(u32 *)(a & ~3u); int s = a & 3;
+    u32 w = *(u32 *)MA(a & ~3u); int s = a & 3;
     return (rt & (0xFFFFFF00u << (24 - s * 8))) | (w >> (s * 8));
 }
 static void swl(u32 a, u32 rt) {
-    u32 *p = (u32 *)(a & ~3u); int s = a & 3;
+    u32 *p = (u32 *)MA(a & ~3u); int s = a & 3;
     *p = (*p & (0xFFFFFF00u << (s * 8))) | (rt >> (24 - s * 8));
 }
 static void swr(u32 a, u32 rt) {
-    u32 *p = (u32 *)(a & ~3u); int s = a & 3;
+    u32 *p = (u32 *)MA(a & ~3u); int s = a & 3;
     *p = (*p & (0x00FFFFFFu >> (24 - s * 8))) | (rt << (s * 8));
 }
 
@@ -161,20 +167,20 @@ u32 port_mips_call(u32 entry, const u32 *args) {
                 default: port_fatal("[mips] unknown COP2 %08x at %08x", ins, cur);
             }
             break;
-        case 0x20: r[rt] = (u32)(s32)*(s8 *)(r[rs] + imm); break;
-        case 0x21: r[rt] = (u32)(s32)*(s16 *)(r[rs] + imm); break;
+        case 0x20: r[rt] = (u32)(s32)*(s8 *)MA(r[rs] + imm); break;
+        case 0x21: r[rt] = (u32)(s32)*(s16 *)MA(r[rs] + imm); break;
         case 0x22: r[rt] = lwl(r[rs] + imm, r[rt]); break;
-        case 0x23: r[rt] = *(u32 *)(r[rs] + imm); break;
-        case 0x24: r[rt] = *(u8 *)(r[rs] + imm); break;
-        case 0x25: r[rt] = *(u16 *)(r[rs] + imm); break;
+        case 0x23: r[rt] = *(u32 *)MA(r[rs] + imm); break;
+        case 0x24: r[rt] = *(u8 *)MA(r[rs] + imm); break;
+        case 0x25: r[rt] = *(u16 *)MA(r[rs] + imm); break;
         case 0x26: r[rt] = lwr(r[rs] + imm, r[rt]); break;
-        case 0x28: *(u8 *)(r[rs] + imm) = (u8)r[rt]; break;
-        case 0x29: *(u16 *)(r[rs] + imm) = (u16)r[rt]; break;
+        case 0x28: *(u8 *)MA(r[rs] + imm) = (u8)r[rt]; break;
+        case 0x29: *(u16 *)MA(r[rs] + imm) = (u16)r[rt]; break;
         case 0x2A: swl(r[rs] + imm, r[rt]); break;
-        case 0x2B: *(u32 *)(r[rs] + imm) = r[rt]; break;
+        case 0x2B: *(u32 *)MA(r[rs] + imm) = r[rt]; break;
         case 0x2E: swr(r[rs] + imm, r[rt]); break;
-        case 0x32: port_gte_mtc2(rt, *(u32 *)(r[rs] + imm)); break;   /* lwc2 */
-        case 0x3A: *(u32 *)(r[rs] + imm) = port_gte_mfc2(rt); break;  /* swc2 */
+        case 0x32: port_gte_mtc2(rt, *(u32 *)MA(r[rs] + imm)); break;   /* lwc2 */
+        case 0x3A: *(u32 *)MA(r[rs] + imm) = port_gte_mfc2(rt); break;  /* swc2 */
         default: port_fatal("[mips] unknown opcode %08x at %08x", ins, cur);
         }
         r[0] = 0;
@@ -227,14 +233,14 @@ u32 port_mips_call(u32 entry, const u32 *args) {
                         case 0x0D: r[t2] = r[s2] | u2; break;
                         case 0x0E: r[t2] = r[s2] ^ u2; break;
                         case 0x0F: r[t2] = u2 << 16; break;
-                        case 0x20: r[t2] = (u32)(s32)*(s8 *)(r[s2] + i2); break;
-                        case 0x21: r[t2] = (u32)(s32)*(s16 *)(r[s2] + i2); break;
-                        case 0x23: r[t2] = *(u32 *)(r[s2] + i2); break;
-                        case 0x24: r[t2] = *(u8 *)(r[s2] + i2); break;
-                        case 0x25: r[t2] = *(u16 *)(r[s2] + i2); break;
-                        case 0x28: *(u8 *)(r[s2] + i2) = (u8)r[t2]; break;
-                        case 0x29: *(u16 *)(r[s2] + i2) = (u16)r[t2]; break;
-                        case 0x2B: *(u32 *)(r[s2] + i2) = r[t2]; break;
+                        case 0x20: r[t2] = (u32)(s32)*(s8 *)MA(r[s2] + i2); break;
+                        case 0x21: r[t2] = (u32)(s32)*(s16 *)MA(r[s2] + i2); break;
+                        case 0x23: r[t2] = *(u32 *)MA(r[s2] + i2); break;
+                        case 0x24: r[t2] = *(u8 *)MA(r[s2] + i2); break;
+                        case 0x25: r[t2] = *(u16 *)MA(r[s2] + i2); break;
+                        case 0x28: *(u8 *)MA(r[s2] + i2) = (u8)r[t2]; break;
+                        case 0x29: *(u16 *)MA(r[s2] + i2) = (u16)r[t2]; break;
+                        case 0x2B: *(u32 *)MA(r[s2] + i2) = r[t2]; break;
                         default: port_fatal("[mips] delay slot %08x at %08x", dins, save_pc);
                         }
                         r[0] = 0;

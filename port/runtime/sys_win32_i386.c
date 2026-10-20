@@ -236,10 +236,19 @@ void port_setup_memory(void) {
         port_fatal("cannot map PS1 RAM at %08x (%lu): the image must be large-address-aware", PSX_RAM_BASE, GetLastError());
     if (MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0, PSX_RAM_SIZE, (void *)0xA0000000u) != (void *)0xA0000000u)
         port_fatal("cannot map the KSEG1 mirror at A0000000 (%lu)", GetLastError());
-    /* KUSEG mirror (the game masks some addresses with 0xFFFFFF, and walks NULL-based tables into it): the whole
-       range when the loader left 0x10000..0x1FFFFF free, else every free 64 KB block of it (a block that is in
-       use reads the host's data there, as the warning says; Wine keeps its own data in this range) */
-    if (kuseg_child) {   /* the parent reserved the blocks in this process before its heap existed (see start) */
+    /* KUSEG 0x10000-0x1FFFFF.  The game reaches RAM through addresses masked with 0xFFFFFF in a few places
+       (gen_port.py port_kuseg_mask rewrites the known ones to KSEG0; the interpreter translates its own); whatever
+       is left must never touch host memory, because Windows keeps its own early allocations in this range (the
+       process parameters, the default heap, DLLs) and a block in use is read and written silently: the picture
+       corrupts slowly (a texture page or CLUT from the heap, banner letters at heap coordinates) and nothing is
+       logged.  So by default nothing is mapped there: every free block is reserved PAGE_NOACCESS (the blocks the
+       parent reserved before this process had a heap stay reserved), an access faults into low_access, is served
+       from the KSEG0 view and tallied for port_low_report, and the blocks that Windows had already committed
+       (listed below, the only ones that would still read the host's memory) are named in the log.
+       --kuseg-mirror maps the RAM object there where the range is free (the old behaviour; --kuseg-strict needs
+       it whole), --fake-kuseg gives the game private memory instead (reproduces the Windows failure). */
+    int mirror = port_kuseg_strict == 1 || port_kuseg_strict == 4;
+    if (kuseg_child && mirror) {   /* the parent reserved the blocks in this process before its heap existed (see start) */
         unsigned n = 0;
         for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
             unsigned long mbi[7] = { 0 };
@@ -248,12 +257,20 @@ void port_setup_memory(void) {
         }
         if (port_verbose) port_printf("[port] KUSEG range: %u blocks of 64 KB reserved by the parent process, released for the mirror\n", n);
     }
-    if (port_kuseg_strict == 2) {   /* --no-kuseg: nothing mapped, every access faults into low_access and is logged */
-        port_printf("[port] --no-kuseg: the KUSEG mirror is not mapped; every access below 0x200000 is emulated and logged\n");
-        for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) VirtualAlloc((void *)a, 0x10000, 0x2000 /* MEM_RESERVE */, 0x01 /* PAGE_NOACCESS */);
-    } else if (port_kuseg_strict == 3) {   /* --fake-kuseg: what a block in use by Windows does to the game */
+    if (port_kuseg_strict == 3) {   /* --fake-kuseg: what a block in use by Windows does to the game */
         port_printf("[port] --fake-kuseg: private memory instead of the mirror (simulates blocks the host owns)\n");
         for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) VirtualAlloc((void *)a, 0x10000, 0x3000, 0x04);
+    } else if (!mirror) {
+        unsigned guarded = 0, committed = 0;
+        for (unsigned a = 0x10000; a < PSX_RAM_SIZE; a += 0x10000) {
+            unsigned long mbi[7] = { 0 };
+            VirtualQuery((void *)a, mbi, sizeof mbi);
+            if (mbi[4] == 0x1000 /* MEM_COMMIT */) { if (!committed++) port_printf("[port] KUSEG blocks committed by Windows before the game started (an unrewritten access there is silent):"); port_printf(" %05x", a); }
+            else if (mbi[4] == 0x2000 /* MEM_RESERVE */ || VirtualAlloc((void *)a, 0x10000, 0x2000 /* MEM_RESERVE */, 0x01 /* PAGE_NOACCESS */) == (void *)a) guarded++;
+        }
+        if (committed) port_printf("\n");
+        if (port_verbose || port_kuseg_strict == 2)
+            port_printf("[port] KUSEG mirror not mapped: %u of 31 blocks guarded (an access there is served from KSEG0 and counted), %u committed by the host\n", guarded, committed);
     }
     else if (MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0x10000, PSX_RAM_SIZE - 0x10000, (void *)0x00010000u) != (void *)0x00010000u) {
         unsigned mapped = 0, missing = 0;
@@ -267,10 +284,8 @@ void port_setup_memory(void) {
         }
         port_printf("\n[port] %u KB mapped, %u KB missing: a game access to a missing block reads and writes the host's own data there\n",
                     mapped >> 10, missing >> 10);
-        if (port_kuseg_strict)
+        if (port_kuseg_strict == 1)
             port_fatal("--kuseg-strict: the KUSEG mirror could not be placed whole");
-        port_printf("[port] (the game draws through KUSEG pointers into 00090000-000CFFFF: missing blocks there corrupt the "
-                    "host and the picture; --kuseg-strict stops here)\n");
     } else if (port_verbose) port_printf("[port] KUSEG mirror 00010000-001FFFFF mapped whole%s\n", kuseg_child ? " (relaunched)" : "");
     if (VirtualAlloc((void *)PSX_SPAD_BASE, PSX_SPAD_SIZE, 0x3000 /* MEM_COMMIT|MEM_RESERVE */, PAGE_READWRITE) != (void *)PSX_SPAD_BASE)
         port_fatal("cannot map the scratchpad at %08x (%lu)", PSX_SPAD_BASE, GetLastError());
