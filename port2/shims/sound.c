@@ -149,8 +149,10 @@ const char *port_audio_path;          /* --dump-audio PATH */
 static FILE *audio_fd;
 static int audio_failed;
 static u32 audio_bytes;
-/* the output ring the SDL audio thread drains: a quarter second; when the game runs ahead the oldest samples are
-   dropped (headless runs never pull: the ring just wraps) */
+/* the output ring the SDL audio thread drains: a quarter second.  Single producer (the game thread, ring_w) /
+   single consumer (the audio callback, ring_r), each index written by its own thread only: no lock is taken on
+   either side, so neither thread can wait for the other.  A full ring drops the newest samples (headless runs
+   never pull: the ring just stays full). */
 #define RING_FRAMES 16384
 static volatile short ring[RING_FRAMES * 2];
 static volatile unsigned ring_w, ring_r;
@@ -168,7 +170,7 @@ int port_sound_pull(short *out, int frames) {
 }
 static void ring_push(const s16 *s, int n) {
     for (int k = 0; k < n; k++) {
-        if (ring_w - ring_r >= RING_FRAMES) ring_r = ring_w - RING_FRAMES + 1;
+        if (ring_w - ring_r >= RING_FRAMES) return;
         unsigned i = ring_w % RING_FRAMES;
         ring[2 * i] = s[2 * k]; ring[2 * i + 1] = s[2 * k + 1];
         __sync_synchronize();

@@ -244,7 +244,6 @@ int main(int argc, char **argv) {
                 port_check_layout() ? "ok (below 16 MB)" : "NOT below 16 MB: OT links would truncate");
     if (!port_check_layout()) return 2;
     { extern void port_lowmem_install(void); port_lowmem_install(); }
-    port_watchdog_start();
     if (test_null) {     /* --test-null: the fault handlers (null-page emulation, division by zero) on this host */
         volatile unsigned char *p = (volatile unsigned char *)0x1234; volatile int zero = 0, q;
         *p = 0x5A; q = 100 / zero;
@@ -261,6 +260,7 @@ int main(int argc, char **argv) {
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;
+    port_watchdog_start();     /* after SDL_Init: a slow driver start must not count as a hang */
     game_main();
     return 0;
 }

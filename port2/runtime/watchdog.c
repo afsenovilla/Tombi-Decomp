@@ -5,6 +5,7 @@
  * handler reads the ucontext.  --stall FRAME:MS (shims/psyq.c) is the test: a stall longer than 3 s fires it. */
 #define _GNU_SOURCE
 #include <string.h>
+#include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -58,10 +59,12 @@ static DWORD WINAPI wd_main(void *arg) {
         if (++still < port_watchdog_seconds || wd_fired >= 3) continue;
         still = 0; wd_fired++;
         CONTEXT c; memset(&c, 0, sizeof c); c.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
-        if (SuspendThread(game_thread) == (DWORD)-1) { port_printf("[port2] watchdog: SuspendThread failed (%lu)\n", GetLastError()); continue; }
+        _lock_file(stderr);     /* never suspend the game thread inside its own fprintf: the report would wait for its lock */
+        if (SuspendThread(game_thread) == (DWORD)-1) { port_printf("[port2] watchdog: SuspendThread failed (%lu)\n", GetLastError()); _unlock_file(stderr); continue; }
         if (GetThreadContext(game_thread, &c)) report(c.Eip, c.Esp, c.Ebp);
         else port_printf("[port2] watchdog: GetThreadContext failed (%lu)\n", GetLastError());
         ResumeThread(game_thread);
+        _unlock_file(stderr);
     }
     return 0;
 }
