@@ -134,8 +134,31 @@ void port_vblank(void) {
         int px = (hp >= 0x80000000u && hp < 0x80200000u) ? *(s16 *)(hp + 2) : -1;
         int py = *(s16 *)(0x800A6038u + 0x16);
         if (port_verbose && (cur != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
-            port_printf("[port] frame %d: area %d section %d, player at %d,%d%s\n", port_frame, cur >> 16, cur & 0xFFFF,
+            port_printf("[port] frame %d: area %d section %d, player at %d,%d%s", port_frame, cur >> 16, cur & 0xFFFF,
                         px, py, cur != last ? " (changed)" : "");
+        if (port_verbose >= 3) {   /* -v -v -v: mode.step.state, air state (ac), velY, and the held/bitten object */
+            u8 *pl = (u8 *)0x800A6038u;
+            u32 held = *(u32 *)(pl + 0xE4);
+            port_printf(" %d.%d.%d ac=%d vy=%d", pl[4], pl[5], pl[6], pl[0xAC], *(s16 *)(pl + 0x7E));
+            if (pl[0xAC] == 2 && held >= 0x80000000u && held < 0x80200000u) {
+                u32 hh = *(u32 *)(held + 0x40);
+                port_printf(" held=%02x@%d,%d", *(u8 *)(held + 2),
+                            (hh >= 0x80000000u && hh < 0x80200000u) ? *(s16 *)(hh + 2) : -1, *(s16 *)(held + 0x16));
+            }
+        }
+        if (port_verbose >= 3) {   /* ... and the active category-2 type-2 objects (AREA00: koma pigs): x,y mode.step.state ac */
+            u32 lst = 0x800A6610u;   /* the layer list (initLayer1DrawList): entries grow downwards from the base */
+            for (int i = 1; i < 64; i++) {
+                u32 q = *(u32 *)(lst - 4 * i);
+                if (q < 0x80000000u || q >= 0x80200000u) break;
+                u8 *b = (u8 *)q; u32 qh = *(u32 *)(b + 0x40);
+                if ((b[0] & 1) && b[2] == 2)
+                    port_printf(" pig@%d,%d %d.%d.%d ac=%d", (qh >= 0x80000000u && qh < 0x80200000u) ? *(s16 *)(qh + 2) : -1,
+                                *(s16 *)(b + 0x16), b[4], b[5], b[6], b[0xAC]);
+            }
+        }
+        if (port_verbose && (cur != last || port_verbose >= 3 || port_frame % (port_verbose >= 2 ? 10 : 50) == 0))
+            port_printf("\n");
         last = cur;
     }
     if (port_frame % 100 == 0) {
