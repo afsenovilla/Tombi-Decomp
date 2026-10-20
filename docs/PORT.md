@@ -735,7 +735,15 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
   the ELF link binds the defining object's own references to the `syms.ld` address, but a COFF object resolves them
   section-relative at assembly time, so before this the Windows build read SYS/LD0SYS.BIN into queueLoadList's native
   `D_80098c44` while the rest of the game read the (empty) lists at 0x80098C44, walked `queueLoadList(0)` through the
-  kernel area, queued garbage file ids and asked the disc for lba 218357 (`CdRead failed`).
+  kernel area, queued garbage file ids and asked the disc for lba 218357 (`CdRead failed`). `retail_definition`
+  applies at file scope only (`filter_src` tracks the brace depth outside comments and strings): the matching
+  sources also declare locals on unindented lines, and `int *h;` in `ObjMotionStep` (the object's x-position
+  pointer, one line with the body) was rewritten to `extern int *h;` because `x000.full.ld` PROVIDEs the lib
+  aliases `f`, `g`, `h` (`h` = SfxPlay2 at 0x8001E560, native code in the port). The store `h = o->h` then went
+  to SfxPlay2's first bytes, `fault address=10006d5c (write)` at `ObjMotionStep+0x16` the first time the player
+  bit a pig (`playerStepBitten` → `playerBiteHoldType02`). `check_retail_rewrites` stops the generation if a
+  rewrite ever lands inside a block again. Checked: the 28 frames dumped every 200 vblanks of the 5760-frame
+  AREA00 route below (pig grab at 3056) are identical between the Linux build and the exe under Wine.
 - **Memory.** One 2 MB pagefile-backed section (`CreateFileMapping`) mapped with `MapViewOfFileEx` at 0x80000000 and
   0xA0000000 (the image is linked `--large-address-aware` and based at 0x10000000), the scratchpad/I/O page with
   `VirtualAlloc` at 0x1F800000. The KUSEG mirror at 0x00010000 is where Windows puts its own early allocations

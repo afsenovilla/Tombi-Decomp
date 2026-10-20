@@ -144,12 +144,48 @@ def port_kuseg_mask(line):
     return KUSEG_CAST_RE.sub(r"((((\1)\2) & \3) | 0x80000000u /* PORT: KSEG0 */)", line)
 
 
+def brace_depth(line, depth, in_comment):
+    """Brace depth after `line` (braces inside comments, string and character literals do not count)."""
+    i, n = 0, len(line)
+    while i < n:
+        c = line[i]
+        if in_comment:
+            if line.startswith("*/", i): in_comment = False; i += 2; continue
+            i += 1; continue
+        if line.startswith("//", i): break
+        if line.startswith("/*", i): in_comment = True; i += 2; continue
+        if c in "\"'":
+            j = i + 1
+            while j < n and line[j] != c:
+                j += 2 if line[j] == "\\" else 1
+            i = j + 1; continue
+        if c == "{": depth += 1
+        elif c == "}": depth -= 1
+        i += 1
+    return depth, in_comment
+
+
+def check_retail_rewrites(text, path):
+    """A retail_definition rewrite inside a function body turns a local into a store through the retail symbol
+    of the same name (a lib alias such as `h` = SfxPlay2: native code on both hosts, so the Windows build wrote
+    the player's position pointer over SfxPlay2 when the player held a pig).  Stop the generation, since the
+    link cannot tell such a reference from a legitimate one."""
+    depth, in_comment = 0, False
+    for i, line in enumerate(text.split("\n"), 1):
+        if (depth > 0 or in_comment) and ("/* PORT: retail copy */" in line or " port_copy_" in line):
+            sys.exit("gen_port: %s:%d: retail-named definition rewritten inside a block: %s" % (path, i, line.strip()))
+        depth, in_comment = brace_depth(line, depth, in_comment)
+
+
 def filter_src(text, dropped=None, retail=()):
     """Make matching-oriented C compile natively without changing what it does.  Names of functions whose body is
     top-level MIPS asm are appended to `dropped` (they need a C version in port/shims/).  `retail` names data that
     the retail image holds (see retail_definition)."""
     out, pend, toplevel = [], None, None
+    depth, in_comment = 0, False      # brace depth outside comments and strings: 0 is file scope
     for line in text.split("\n"):
+        at_file_scope = depth == 0 and not in_comment
+        depth, in_comment = brace_depth(line, depth, in_comment)
         if toplevel is not None:      # inside a top-level asm block
             toplevel += "\n" + line
             if line.rstrip().endswith(");"):
@@ -169,8 +205,12 @@ def filter_src(text, dropped=None, retail=()):
         line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:%s)\s*\()" % "|".join(STATIC_AFTER_EXTERN), "", line)
         # address-named static tables (initialized copies of retail data): make them global so the link step
         # binds the name to the retail address (the retail image is the one copy the game reads and writes)
-        line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:D|DAT|PTR|PTR_DAT)_[0-9A-Fa-f]{8}\s*(?:\[[^\]]*\]\s*)*=)", "", line)
-        line = retail_definition(line, retail)
+        # (both at file scope only: a local declared on an unindented line, `int *h;` in ObjMotionStep, is a local
+        # even when a retail symbol has its name: x000.full.ld PROVIDEs the lib aliases `f`, `g`, `h`, so the
+        # Windows build wrote the player's x position pointer over SfxPlay2's code when the player held a pig)
+        if at_file_scope:
+            line = re.sub(r"^static\s+(?=[\w\s\*]*\b(?:D|DAT|PTR|PTR_DAT)_[0-9A-Fa-f]{8}\s*(?:\[[^\]]*\]\s*)*=)", "", line)
+            line = retail_definition(line, retail)
         line = port_kuseg_mask(line)
         # old-gcc lvalue cast `(T *)x = v;`
         line = re.sub(r"^(\s*)\(\s*(\w+\s*\*+)\s*\)\s*(\w+)\s*=(?!=)", r"\1*(\2 *)&\3 =", line)
@@ -414,6 +454,7 @@ def sources(outdir, progs, ovls=(), areas=()):
         dropped = []
         src = open(u.file, errors="replace").read()
         txt = filter_src(src, dropped, canon)
+        check_retail_rewrites(txt, u.file)
         for old, new in FIXES.get(os.path.relpath(u.file, ROOT), []):
             if old not in txt: sys.exit("gen_port: port/fixes.txt: %r not found in %s" % (old, u.file))
             txt = txt.replace(old, new)
