@@ -1231,6 +1231,57 @@ as the last shim call and an `emulated accesses` tally that grew = the fault emu
 blocked outside the game thread (the audio callback, the window's message loop). `--stall FRAME:MS` with
 MS >= 3000 is the self-test of the watchdog (`--headless --frames 120 --stall 100:4000`).
 
+### Port-only C: the 12 sub-screen functions the decomp has not matched
+
+The sub-screens (`D0SPSUB` inventory/status, `D0SPSUB2` memory card, `D0SPSUB3` the item menu) kept 12
+functions as asm in the matching build (near-miss drafts in `src/wip/`, scheduling / register-allocation
+differences only). `port/` fell back to the interpreter for them; `port2` has none, so the first real-Windows run
+of the item menu logged `call to 800ec89c: no native code in D0SPSUB3` and showed a wrong, unclosable menu.
+Byte identity is irrelevant for the port, so `gen2.py sources` now gives every fileless game function of a
+SYSTEM overlay a **port-only source** (`port_only_sources`, before `gen_port`'s filter runs; the generated
+file sits in `gen/portonly/<prog>/<name>.c` and `units()` is patched so gen_port picks it like a matched file):
+
+- `src/wip/<prog>_<name>.c` when the draft exists (8 of D0SPSUB/D0SPSUB2, plus `d0spsub3_func_800EC89C.c`);
+- else the **twin's** source (`notes/functions_<prog>.csv` "twin" column, or `PORT_TWINS` in gen2.py), with
+  every address-named symbol (`func_`/`D_`/`DAT_`/`jtbl_`…`_XXXXXXXX`) moved to the overlay's own address. The
+  map is read off the two retail images (`reloc_fields`: jal targets and lui/lo pairs, aligned on the masked
+  instruction words), so no compiler and no notes are needed; a name reached through a field offset takes the
+  shift of the nearest mapped address. D0SPSUB3's E8950 / EA540 / ED7BC are such copies of D0SPSUB's E89F8 /
+  EA5E8 / EF538.
+- `func_800EC89C` is a structural variant of D0SPSUB `func_800ED0C4` (3424 vs 3488 bytes): the relocated draft
+  with the three differences read from the disassembly (state 1 calls `func_800EC3F0(m)`, the confirm mask is
+  0x5008, the cursor switch has no mode cases 4..7). It is committed as `src/wip/d0spsub3_func_800EC89C.c`.
+
+`report.txt` lists them under `port-only C (not byte-matched)` (12). When a draft gets matched and moves to
+`src/<prog>/`, the fallback stops applying by itself. A function still without C would reach
+`port_resolve_call`'s `port_missing` (logs `no native code`, returns 0): none is left in the SYSTEM set.
+
+The same round fixed a relocation ambiguity the drafts exposed: a SYSTEM overlay's own data word that points
+into the overlay region was looked up in the X000 function table first, so D0SPSUB's icon table entry
+`0x800FE13C` became `playerStepHazardRespawn` and `func_800EB2F4` walked off the primitive buffer (crash on the
+Item/Status screen). For a SYSTEM overlay such a word is now one of its own functions (`port_ovlmap`), a label
+inside one, or its data — never an X000 function or a thunk (`port_relocate_overlay`).
+
+Verified (Linux and wine, frames byte-identical): `--menu 1700:0` / `3` (D0SPSUB), `4` (D0SPSUB2), `7`
+(D0SPSUB3) from AREA00 render, close with Circle at 2300 (X000 reloaded), no `no native code` line.
+
+### Watchdog, second test: "no game progress"
+
+The real-Windows run of build 810e31e froze in AREA00 at frame ~1850 with the process alive: fps 47.6 instead
+of 50, exactly 700 packets per frame for thousands of frames (the same ordering table drawn every vblank), the
+task line unchanged, and no watchdog line because `port_frame` kept moving. The watchdog now also compares, once
+a second, a signature of **where every coroutine last yielded** (`threads.c` keeps the return addresses above
+`ChangeTh` on the task's stack at each switch away: `ThreadWaitFrames` <- the waiting game function <- its
+caller) and of **the packets of the last `DrawOTag`** (`gpu.c`, an FNV hash). Unchanged for 3 s while vblanks
+ran: `[port2] watchdog: no game progress for 3 s (frame N: V vblanks ran, S task switches ...); task 1 yields
+from <sites>; task 2 ...; scratch: vbl a/b drawsync c pause p mode m` plus the last shim calls. Read it as:
+the yield site of task 1 names the wait that never ends (a `CdSync`/`CdReadSync` poll, a message box, a
+`DrawSync` loop...); `pad` is what the port delivers and what the game last read (a stuck button shows here); `S = 0` with `pause 8000` = the tasks are not run at all (the debug pause flag, pad bit
+0x400 in debug mode); `vbl a/b` with `a < b` forever = the vblank event stopped counting. Self-test:
+`--headless --realtime --frames 400 --poke-every 1:1F8001F0:8000:2` (the pause flag held) reports at 3 s with
+task 1 at `ThreadWaitFrames <- queueSystemLoadList <- bootStartupTask`. Under wine the AREA00 route paced at
+50 Hz does not reproduce the freeze; the next real-Windows log names the wait.
+
 ### Open points / next
 
 1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse

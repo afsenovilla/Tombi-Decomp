@@ -73,8 +73,9 @@ static void report_progress(int frames, unsigned switches) {
         }
         port_printf(";");
     }
-    port_printf(" scratch: vbl %u/%u drawsync %u pause %04x mode %d\n",
-                SPAD16(0x1E8), SPAD16(0x1EA), SPAD16(0x1EC), SPAD16(0x1F0), (signed char)SPAD8(0x1CC));
+    port_printf(" scratch: vbl %u/%u drawsync %u pause %04x mode %d; pad %04x (game reads %04x)\n",
+                SPAD16(0x1E8), SPAD16(0x1EA), SPAD16(0x1EC), SPAD16(0x1F0), (signed char)SPAD8(0x1CC),
+                port_pad_buttons[0], SPAD16(0x1FC));
     trace_print();
     port_flush_log();
 }
