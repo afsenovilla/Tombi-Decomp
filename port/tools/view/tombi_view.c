@@ -8,6 +8,7 @@
  * A game controller (SDL_GameController) maps to the same buttons.  Can also be used alone on a recording:
  *   build/port/tombi --frames 1200 --pad-script 1000:start | build/port/tombi-view   (no audio / pad pipes).
  * Options (tombi --viewer-arg X passes them through): --scale 1|2|3  --fullscreen  --stats (pipe / audio counters per second)
+ *   --dump DIR[:N]  (test) every Nth received frame as DIR/view_NNNNNN.ppm, to compare with the game's --dump-frames
  *   --keys up=Up,down=Down,left=Left,right=Right,cross=X,square=Z,triangle=S,circle=D,l1=Q,r1=W,l2=A,r2=E,
  *          start=Return,select=Backspace   (SDL key names, SDL_GetScancodeFromName; unnamed buttons keep the default)
  * Windows: the audio and pad pipes cannot be fds 3 and 4; the game passes their handles as
@@ -32,10 +33,14 @@ static long rd(pipe_t fd, void *buf, size_t n) { ssize_t r; do r = read(fd, buf,
 static long wr(pipe_t fd, const void *buf, size_t n) { ssize_t r = write(fd, buf, n); return r < 0 && errno == EAGAIN ? (long)n : (long)r; }
 #endif
 
+/* Every pipe read loops until the count is complete: ReadFile on an anonymous pipe (and read on a Linux pipe)
+   returns as soon as any bytes are there, so a 245 KB frame arrives in pieces.  PORT_PIPE_CHUNK=N (test hook,
+   both ends) caps every read at N bytes to exercise the loops. */
+static size_t pipe_chunk;
 static int read_all(pipe_t fd, void *buf, size_t n) {
     char *c = buf;
     while (n) {
-        long r = rd(fd, c, n);
+        long r = rd(fd, c, pipe_chunk && n > pipe_chunk ? pipe_chunk : n);
         if (r <= 0) return -1;
         c += r; n -= r;
     }
@@ -80,7 +85,7 @@ static int audio_thread(void *arg) {
     (void)arg;
     unsigned char buf[FRAME_BYTES];
     for (;;) {
-        long r = rd(audio_fd, buf, sizeof buf);
+        long r = rd(audio_fd, buf, pipe_chunk && pipe_chunk < sizeof buf ? pipe_chunk : sizeof buf);
         if (r <= 0) break;
         SDL_LockMutex(ring_lock);
         unsigned fill = ring_w - ring_r;
@@ -102,19 +107,43 @@ static SDL_mutex *frame_lock;
 static SDL_sem *frame_sem;
 static unsigned char *mbox_rgb; static size_t mbox_cap; static int mbox_w, mbox_h, mbox_new, video_eof;
 static unsigned frames_in, frames_shown, frames_skipped;
+static const char *dump_dir; static unsigned dump_every = 1;   /* --dump DIR[:N]: every Nth received frame as DIR/view_NNNNNN.ppm */
+static void dump_frame(unsigned idx, const unsigned char *rgb, int w, int h) {
+    char path[1024];
+    snprintf(path, sizeof path, "%s/view_%06u.ppm", dump_dir, idx);
+    FILE *f = fopen(path, "wb");
+    if (!f) { fprintf(stderr, "tombi-view: cannot write %s\n", path); return; }
+    fprintf(f, "P6\n%d %d\n255\n", w, h);
+    fwrite(rgb, 1, (size_t)w * h * 3, f);
+    fclose(f);
+}
 static int video_thread(void *arg) {
     (void)arg;
     unsigned char *rgb = NULL; size_t rgb_cap = 0;
+    unsigned resyncs = 0;
     for (;;) {
         Uint32 hdr[3];
         if (read_all(video_fd, hdr, 12) < 0) break;
-        if (hdr[0] != 0x52464254u || hdr[1] == 0 || hdr[1] > 1024 || hdr[2] == 0 || hdr[2] > 512) {
-            fprintf(stderr, "tombi-view: bad frame header\n"); break;
+        if (hdr[0] != 0x52464254u) {   /* not at a frame boundary: slide byte by byte to the next "TBFR" */
+            unsigned char b[12]; memcpy(b, hdr, 12);
+            long skipped = 0; int eof = 0;
+            while (!(b[0] == 'T' && b[1] == 'B' && b[2] == 'F' && b[3] == 'R')) {
+                memmove(b, b + 1, 11);
+                if (read_all(video_fd, b + 11, 1) < 0) { eof = 1; break; }
+                skipped++;
+            }
+            if (eof) break;
+            memcpy(hdr, b, 12);
+            if (++resyncs <= 10) fprintf(stderr, "tombi-view: frame stream out of step: %ld bytes skipped to the next header\n", skipped);
+        }
+        if (hdr[1] == 0 || hdr[1] > 1024 || hdr[2] == 0 || hdr[2] > 512) {
+            fprintf(stderr, "tombi-view: bad frame header %ux%u\n", hdr[1], hdr[2]); break;
         }
         int w = (int)hdr[1], h = (int)hdr[2];
         size_t n = (size_t)w * h * 3;
         if (n > rgb_cap) { rgb = realloc(rgb, n); rgb_cap = n; }
         if (read_all(video_fd, rgb, n) < 0) break;
+        if (dump_dir && (frames_in + 1) % dump_every == 0) dump_frame(frames_in + 1, rgb, w, h);   /* numbered like the game: its first vblank is frame 1 */
         SDL_LockMutex(frame_lock);
         if (n > mbox_cap) { mbox_rgb = realloc(mbox_rgb, n); mbox_cap = n; }
         memcpy(mbox_rgb, rgb, n); mbox_w = w; mbox_h = h;
@@ -188,12 +217,19 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--fullscreen")) fullscreen = 1;
         else if (!strcmp(argv[i], "--stats")) stats = 1;   /* every second: frames received / shown / skipped, audio fill, drops, pads */
         else if (!strcmp(argv[i], "--keys") && i + 1 < argc) parse_keys(argv[++i]);
+        else if (!strcmp(argv[i], "--dump") && i + 1 < argc) {   /* DIR[:N]: every Nth received frame as DIR/view_NNNNNN.ppm (test: compare with --dump-frames) */
+            static char d[1024]; strncpy(d, argv[++i], sizeof d - 1);
+            char *c = strrchr(d, ':'); if (c && c[1] >= '0' && c[1] <= '9') { dump_every = (unsigned)atoi(c + 1); *c = 0; }
+            if (!dump_every) dump_every = 1;
+            dump_dir = d;
+        }
 #ifdef _WIN32
         else if (!strcmp(argv[i], "--audio-handle") && i + 1 < argc) audio_fd = (HANDLE)(uintptr_t)strtoul(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--pad-handle") && i + 1 < argc) pad_fd = (HANDLE)(uintptr_t)strtoul(argv[++i], NULL, 10);
 #endif
         else fprintf(stderr, "tombi-view: unknown option %s\n", argv[i]);
     }
+    { const char *e = getenv("PORT_PIPE_CHUNK"); if (e) pipe_chunk = (size_t)atol(e); }
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
         fprintf(stderr, "tombi-view: SDL_Init: %s\n", SDL_GetError());
         return 1;
