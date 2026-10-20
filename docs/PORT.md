@@ -1213,7 +1213,23 @@ stub: <name>` lines beyond the 13 Psy-Q ones hit at boot, `[port] fps:` lines fa
 `emulated accesses to the BIOS kernel area` with a site count in the hundreds (a null-pointer path the
 Linux runs never took). Without a window/audio device the log says so (`no audio device: ...`). To run the
 game directly: `tombi2.exe --disc Tombi.bin --window` from a folder holding `SDL2.dll`; `tombi2.exe --headless
---test-null` checks the fault handlers alone.
+--test-null` checks the fault handlers alone (from the main thread and from a coroutine stack: a task's null
+read, byte and dword writes, and a division by zero; exit code 0 when all pass).
+
+**A silent hang** (the first real-Windows run stopped at frame ~3300 with no access-violation report and no
+exit) is what the watchdog (`runtime/watchdog.c`) is for: a host thread that, when the vblank counter has not
+advanced for 3 s, suspends the game thread (`SuspendThread` + `GetThreadContext`; `SIGUSR1` on Linux) and
+prints `[port2] watchdog: no vblank for 3 s at frame N: eip=... (<symbol>+0x...) esp=... thread T; stack:
+...`, then `watchdog: last shim calls (oldest first): vblank(N)@N ChangeTh(1)@N ... VSync/DrawSync/CdControl/
+CdRead`, then the null-page tally, and lets the game run on (at most three reports per run). stderr is
+unbuffered, so the launcher's log is complete up to the hang. What the report tells: `eip` inside a game
+function (`FUN_...`, `player...`) with the same `eip` three times = a spin in game code (a wait loop whose
+condition never comes on Win32: look at the last shim calls); `eip` "outside the game code" with
+`port_sleep_us`/`Sleep` on the stack = the pacing sleep never returns (clock); `thread T` > 0 with a `ChangeTh`
+as the last shim call and an `emulated accesses` tally that grew = the fault emulation on a coroutine stack
+(the TIB-bounds path in `threads.c`); no watchdog line at all while the log stops = the process died or was
+blocked outside the game thread (the audio callback, the window's message loop). `--stall FRAME:MS` with
+MS >= 3000 is the self-test of the watchdog (`--headless --frames 120 --stall 100:4000`).
 
 ### Open points / next
 
@@ -1229,7 +1245,11 @@ game directly: `tombi2.exe --disc Tombi.bin --window` from a folder holding `SDL
 4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` /
    `--image-base` + `port_check_layout`); a later phase replaces `port_otlink/port_otaddr` with an index into a
    primitive arena and widens the pointer-holding words of the image.
-6. Windows: tested under wine only (frames identical, window shows the game); the first real-Windows run is the
-   user's (see "Phase 3: the Windows build", what to look for in the log). The coroutine TIB bounds and the
-   vectored handler are the two places where Windows differs from wine in practice.
+6. Windows: tested under wine only (frames identical, window shows the game); the first real-Windows run
+   (build 2c9db85) booted and played AREA00 and hung silently at frame ~3300 while walking (no fault report,
+   no exit; wine runs 4000 frames). The build after it carries the watchdog (above), re-reads the main thread's
+   TIB stack bounds on every coroutine switch (a stale StackLimit restored after the stack had grown), makes
+   `--test-null` fault from a coroutine stack too, and makes the sound ring strictly single-producer /
+   single-consumer (no index shared for writing between the game thread and the audio callback). The next
+   Windows log says where the game thread is when it stops.
 5. Movies (MDEC) are skipped as in `port/`; save states of `port/` (`--save/--load`) are not carried over.
