@@ -371,7 +371,7 @@ def emit_data(outdir, amap, needed):
             w = int.from_bytes(data[4 * i:4 * i + 4], "little")
             a = s + 4 * i
             if amap.is_code(a) or w < 0x80010000 and not (0x1F800000 <= w < 0x1F800400) or w >= 0x80200000 \
-                    or (w & 3) and not (0x1F800000 <= w < 0x1F800400):
+                    or (w & 3) and not (0x1F800000 <= w < 0x1F800400) or (w & 0xFFFF) == 0:   # (round values: flags, not pointers)
                 words.append("0x%X" % w); continue
             th = amap.thunk(w)
             if th:
