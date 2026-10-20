@@ -172,6 +172,12 @@ static int parse_options(int argc, char **argv) {
         else if (streq(argv[i], "--load") && i + 1 < argc) { extern const char *port_load_path; port_load_path = argv[++i]; }
         else if (streq(argv[i], "--realtime")) port_realtime = 1;
         else if (streq(argv[i], "--show-fps")) { extern int port_show_fps; port_show_fps = 1; }
+        else if (streq(argv[i], "--stall") && i + 1 < argc) {      /* test hook: a slow frame */
+            extern int port_stall_frame, port_stall_ms; const char *s = argv[++i];
+            port_stall_frame = atoi_(s);
+            while (*s && *s != ':') s++;
+            if (*s) port_stall_ms = atoi_(s + 1);
+        }
         else if (streq(argv[i], "--hz") && i + 1 < argc) {
             extern int port_hz; int hz = atoi_(argv[++i]);
             if (hz != 50 && hz != 60) { port_printf("--hz takes 50 (PAL) or 60\n"); return 2; }

@@ -19,7 +19,8 @@ int port_frame;
 int port_max_frames;
 static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is due at epoch + n * 1e6 / hz */
 static unsigned vblank_n;
-int port_show_fps;                                /* --show-fps: log the measured vblank rate every second */
+int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
+int port_show_fps;                              /* --show-fps: log the measured vblank rate every second */
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
 int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
@@ -107,6 +108,7 @@ int port_cd_fd_get(void);
 void port_cd_fd_set(int fd);
 void port_vblank(void) {
     { extern void port_state_vblank(void); port_state_vblank(); }
+    if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
         /* absolute schedule from one epoch (no relative sleeps: their rounding would accumulate into a faster or
            slower game).  Late by more than one period (a slow frame, the viewer pipe blocked): the schedule is
@@ -235,7 +237,7 @@ void InitHeap(void *p, u32 n) {}
 int ResetCallback(void) { return 0; }
 int StopCallback(void) { return 0; }
 int RestartCallback(void) { return 0; }
-int VSyncCallback(void (*f)(void)) { vsync_cb = f; return 0; }
+int VSyncCallback(void (*f)(void)) { if (f && port_verbose) port_printf("[port] VSyncCallback(%p) registered\n", (void *)f); vsync_cb = f; return 0; }
 int VSyncCallbacks(int n, void (*f)(void)) { if (n == 0) vsync_cb = f; return 0; }
 int DMACallback(int ch, void *f) { return 0; }
 int InterruptCallback(int n, void *f) { return 0; }
