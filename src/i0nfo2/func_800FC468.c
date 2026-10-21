@@ -10,7 +10,7 @@ extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CDAB[];
 extern unsigned char D_800A60E4;
-extern void func_800F3E2C(TObj *o, int a, int b);
+extern void topdownA17ActorSetDirAnim(TObj *o, int a, int b);
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void setEventStarted(int, int, int);
 
@@ -34,7 +34,7 @@ void func_800FC468(TObj *o)
         if (--o->w08 == 0) {
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0, &v);
-            func_800F3E2C(a, 8, 0);
+            topdownA17ActorSetDirAnim(a, 8, 0);
             o->state++;
         }
         break;
@@ -43,8 +43,8 @@ void func_800FC468(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 1, &v);
-            func_800F3E2C(b, 8, 0);
-            func_800F3E2C(a, 0, 0);
+            topdownA17ActorSetDirAnim(b, 8, 0);
+            topdownA17ActorSetDirAnim(a, 0, 0);
             o->state++;
         }
         break;
@@ -53,8 +53,8 @@ void func_800FC468(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 2, &v);
-            func_800F3E2C(a, 8, 0);
-            func_800F3E2C(b, 0, 0);
+            topdownA17ActorSetDirAnim(a, 8, 0);
+            topdownA17ActorSetDirAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -63,8 +63,8 @@ void func_800FC468(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 3, &v);
-            func_800F3E2C(b, 8, 0);
-            func_800F3E2C(a, 0, 0);
+            topdownA17ActorSetDirAnim(b, 8, 0);
+            topdownA17ActorSetDirAnim(a, 0, 0);
             o->state++;
         }
         break;
@@ -73,8 +73,8 @@ void func_800FC468(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 4, &v);
-            func_800F3E2C(a, 8, 0);
-            func_800F3E2C(b, 0, 0);
+            topdownA17ActorSetDirAnim(a, 8, 0);
+            topdownA17ActorSetDirAnim(b, 0, 0);
             o->state++;
         }
         break;
@@ -83,7 +83,7 @@ void func_800FC468(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             D_8009CDAB[0]++;
             o->state++;
-            func_800F3E2C(a, 0, 0);
+            topdownA17ActorSetDirAnim(a, 0, 0);
             setEventStarted(0x4C, 0, 0);
         }
         break;

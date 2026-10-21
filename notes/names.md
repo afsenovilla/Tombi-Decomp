@@ -1891,3 +1891,53 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800f0270 topdownActorStep` (was func_800F0270; I0NFO2) - step 0 by the movement kind B8 (0 idle, 1..4 patrols), contact starts the talk step 1; brightness by the zone B6
 - `800f0448 topdownActorInit` (was func_800F0448; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FED7C[subtype], category |= 0x80
 - `800f05b0 topdownActorHandler` (was func_800F05B0; I0NFO2) - actor object: b04 0 init, 1 cull register and topdownActorStep, 3 freeObjectLayer2
+- `800f0658 topdownA05SceneryInit` (was func_800F0658; I0NFO2) - (no caller) AREA05 scenery object init from D_800FEDC4[subtype] (anim by wb4, clut 0x7F48 / 0x7FC8 by the zone wb6, b0f -0xC), inlined in topdownA05SceneryHandler
+- `800f075c topdownA05SceneryUpdate` (was func_800F075C; I0NFO2) - (no caller) zone brightness (wb6 against D_800A60A3), visible, cull register
+- `800f07c0 topdownA05SceneryHandler` (was func_800F07C0; I0NFO2) - AREA05 handler of the per-area object slot MAIN0 80079C20 (dispatchAreaDialogInit): b04 0 init from D_800FEDC4, 1 zone brightness + cull register, 3 freeObjectLayer2
+- `800f0984 topdownA16SceneryInit` (was func_800F0984; I0NFO2) - (no caller) AREA16 scenery init from D_800FEDD0[subtype], inlined in topdownA16SceneryHandler
+- `800f0a88 topdownA16SceneryApplyState` (was func_800F0A88; I0NFO2) - (no caller) by D_8009CFA8 (2 / 3): anim wb4 0xB / 0xC at x -4 / -3, y 0x193
+- `800f0b10 topdownA16SceneryUpdate` (was func_800F0B10; I0NFO2) - objects with wb8 5 follow topdownA16SceneryApplyState, then zone brightness and cull register
+- `800f0c0c topdownA16SceneryHandler` (was func_800F0C0C; I0NFO2) - AREA16 handler of the per-area object slot MAIN0 80079C20: init from D_800FEDD0, update, freeObjectLayer2
+- `800f0d80 topdownA17SceneryInit` (was func_800F0D80; I0NFO2) - (no caller) AREA17 scenery init from D_800FEE04[subtype], inlined in topdownA17SceneryHandler
+- `800f0e84 topdownA17SceneryUpdate` (was func_800F0E84; I0NFO2) - objects with wb8 0xD / 0xE run a state machine over D_8009CF9F[k] / D_8009CFA2[k] (anims D_800FEDF4 / D_800FEE0C), others zone brightness
+- `800f126c topdownA17SceneryHandler` (was func_800F126C; I0NFO2) - AREA17 handler of the per-area object slot MAIN0 80079C20: init from D_800FEE04, update, freeObjectLayer2
+- `800f13e0 topdownA19SceneryInit` (was func_800F13E0; I0NFO2) - AREA19 scenery init from D_800FEE34[subtype] (b0d 0x80 when b0c is set)
+- `800f1500 topdownA19SceneryUpdate` (was func_800F1500; I0NFO2) - (no caller) zone brightness, AnimAdvance, cull register (inlined in topdownA19SceneryHandler)
+- `800f1590 topdownA19SceneryHandler` (was func_800F1590; I0NFO2) - AREA19 handler of the per-area object slot MAIN0 80079C20: init, animated update, freeObjectLayer2
+- `800f16bc topdownA08ActorInit` (was func_800F16BC; I0NFO2) - AREA08 type 0x30 actor init from D_800FEE58[subtype]: anim by BA (1: anim 7, freed when D_8009CF01 is set; 0: anim 1; else dark)
+- `800f18c0 topdownA08ActorHandler` (was func_800F18C0; I0NFO2) - AREA08 type 0x30 handler (updateL2Type30Object): init, cull register + AnimAdvance, freeObjectLayer2
+- `800f1968 topdownA08SceneryInit` (was func_800F1968; I0NFO2) - (no caller) AREA08 scenery init from D_800FEE70 / 74 / 78 (anim by b0c & 0x7F, freed at once when b0c & 0x80), inlined in topdownA08SceneryHandler
+- `800f1a3c topdownA08SceneryUpdate` (was func_800F1A3C; I0NFO2) - (no caller) visible, cull register
+- `800f1a60 topdownA08SceneryHandler` (was func_800F1A60; I0NFO2) - AREA08 handler of the per-area object slot MAIN0 80079C20: init, cull register, freeObjectLayer2
+- `800f1c88 topdownA11ActorOpenDialogue` (was func_800F1C88; I0NFO2) - opens the dialogue of the AREA11 actor by its id BA (func_8002DCC8 with event / item flags); returns 1 when a message was opened
+- `800f1e48 topdownA11ActorSetDirAnim` (was func_800F1E48; I0NFO2) - (no caller) anim D_800FEEC0[subtype][0][animFrame + i], AnimJump(n)
+- `800f1ea4 topdownA11ActorTalkStep` (was func_800F1EA4; I0NFO2) - faces the player, topdownA11ActorOpenDialogue, waits for the message and releases the script flags
+- `800f20cc topdownA11ActorIdleStep` (was func_800F20CC; I0NFO2) - (no caller) as I0NFO3 tunnelActorIdleStep (D_800FEEC0)
+- `800f2164 topdownA11ActorPatrolVStep` (was func_800F2164; I0NFO2) - as I0NFO3 tunnelActorPatrolVStep
+- `800f2350 topdownA11ActorPatrolHStep` (was func_800F2350; I0NFO2) - as I0NFO3 tunnelActorPatrolHStep
+- `800f2538 topdownA11ActorPatrolDiagStepA` (was func_800F2538; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepA
+- `800f2760 topdownA11ActorPatrolDiagStepB` (was func_800F2760; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepB
+- `800f2994 topdownA11ActorStep` (was func_800F2994; I0NFO2) - step 0 by the movement kind B8 (idle / patrols), contact starts topdownA11ActorTalkStep; zone brightness
+- `800f2b50 topdownA11ActorInit` (was func_800F2B50; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEEB8[subtype], category |= 0x80
+- `800f2ca8 topdownA11ActorHandler` (was func_800F2CA8; I0NFO2) - AREA11 type 0x30 handler (updateL2Type30Object): init, cull register + topdownA11ActorStep, freeObjectLayer2
+- `800f2d50 topdownA16ActorSetDirAnim` (was func_800F2D50; I0NFO2) - anim D_800FEEFC[subtype][0][animFrame + i], AnimJump(n), D2 = the index (used by the scene steps)
+- `800f2e84 topdownA16ActorOpenDialogue` (was func_800F2E84; I0NFO2) - opens the dialogue of the AREA16 actor by its id BA (func_8002DCC8 with event / item flags); returns 1 when a message was opened
+- `800f3058 topdownA16ActorTalkStep` (was func_800F3058; I0NFO2) - faces the player, topdownA16ActorOpenDialogue, waits for the message and releases the script flags
+- `800f328c topdownA16ActorPatrolVStep` (was func_800F328C; I0NFO2) - as I0NFO3 tunnelActorPatrolVStep
+- `800f3468 topdownA16ActorPatrolHStep` (was func_800F3468; I0NFO2) - as I0NFO3 tunnelActorPatrolHStep
+- `800f3640 topdownA16ActorPatrolDiagStepA` (was func_800F3640; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepA
+- `800f3858 topdownA16ActorPatrolDiagStepB` (was func_800F3858; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepB
+- `800f3a6c topdownA16ActorStep` (was func_800F3A6C; I0NFO2) - step 0 by the movement kind B8 (idle / patrols), contact starts topdownA16ActorTalkStep; zone brightness
+- `800f3c28 topdownA16ActorInit` (was func_800F3C28; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEEF4[subtype], category |= 0x80
+- `800f3d84 topdownA16ActorHandler` (was func_800F3D84; I0NFO2) - AREA16 type 0x30 handler (updateL2Type30Object): init, cull register + topdownA16ActorStep, freeObjectLayer2
+- `800f3e2c topdownA17ActorSetDirAnim` (was func_800F3E2C; I0NFO2) - anim D_800FEF6C[subtype][0][animFrame + i], AnimJump(n), D2 = the index (used by the scene steps)
+- `800f4110 topdownA17ActorOpenDialogue` (was func_800F4110; I0NFO2) - opens the dialogue of the AREA17 actor by its id BA (func_8002DCC8 with event / item flags); returns 1 when a message was opened
+- `800f443c topdownA17ActorIdleStep` (was func_800F443C; I0NFO2) - (no caller) as I0NFO3 tunnelActorIdleStep (D_800FEF6C)
+- `800f44dc topdownA17ActorPatrolVStep` (was func_800F44DC; I0NFO2) - as I0NFO3 tunnelActorPatrolVStep
+- `800f46d4 topdownA17ActorPatrolHStep` (was func_800F46D4; I0NFO2) - as I0NFO3 tunnelActorPatrolHStep
+- `800f48c8 topdownA17ActorPatrolDiagStepA` (was func_800F48C8; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepA
+- `800f4afc topdownA17ActorPatrolDiagStepB` (was func_800F4AFC; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepB
+- `800f4d3c topdownA17ActorTalkStep` (was func_800F4D3C; I0NFO2) - faces the player, topdownA17ActorOpenDialogue, waits for the message and releases the script flags
+- `800f4f70 topdownA17ActorStep` (was func_800F4F70; I0NFO2) - step 0 by the movement kind B8 (idle / patrols), contact starts topdownA17ActorTalkStep; zone brightness
+- `800f5134 topdownA17ActorInit` (was func_800F5134; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEF64[subtype], category |= 0x80
+- `800f528c topdownA17ActorHandler` (was func_800F528C; I0NFO2) - AREA17 type 0x30 handler (updateL2Type30Object): init, cull register + topdownA17ActorStep, freeObjectLayer2

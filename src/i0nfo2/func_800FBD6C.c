@@ -4,7 +4,7 @@
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern void func_800F2D50(TObj *o, int i, short n);
+extern void topdownA16ActorSetDirAnim(TObj *o, int i, short n);
 extern void func_8005A8A8(int e, int a, int b);
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
@@ -29,7 +29,7 @@ void func_800FBD6C(TObj *o)
         D_8009C93F = 1;
         D_8009C942 = 1;
         S32(n, 0x90) = func_8002DCC8(2, 1, &p);
-        func_800F2D50(n, 8, 0);
+        topdownA16ActorSetDirAnim(n, 8, 0);
         o->state++;
         break;
     case 1:
@@ -49,7 +49,7 @@ void func_800FBD6C(TObj *o)
         }
         break;
     case 3:
-        func_800F2D50(n, 0, 0);
+        topdownA16ActorSetDirAnim(n, 0, 0);
         n->step = 0;
         n->state = 0;
         D_8009C93F = 0;

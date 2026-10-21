@@ -4,7 +4,7 @@
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern void func_800F3E2C(TObj *o, int i, short n);
+extern void topdownA17ActorSetDirAnim(TObj *o, int i, short n);
 extern void func_80026C50(int item, int a, int b);
 extern void func_8005A9A4(int e, int a);
 extern unsigned char D_8009C93E;
@@ -24,7 +24,7 @@ void func_800FD688(TObj *o)
     case 0:
         p = *(Pos6 *)&n->a;
         S32(n, 0x90) = func_8002DCC8(2, 7, &p);
-        func_800F3E2C(n, 8, 0);
+        topdownA17ActorSetDirAnim(n, 8, 0);
         o->state++;
         D_800A603D = 2;
         D_800A603E = 0;
@@ -36,7 +36,7 @@ void func_800FD688(TObj *o)
         if (b->b04 == 2) {
             b->b04 = 3;
             n->animFrame = 1;
-            func_800F3E2C(n, 8, 0);
+            topdownA17ActorSetDirAnim(n, 8, 0);
             o->w08 = 0x3C;
             o->state++;
         }
@@ -45,7 +45,7 @@ void func_800FD688(TObj *o)
         if (--o->w08 <= 0) {
             S32(n, 0x90) = func_8002DCC8(2, 8, &p);
             n->animFrame = 3;
-            func_800F3E2C(n, 8, 0);
+            topdownA17ActorSetDirAnim(n, 8, 0);
             o->state++;
         }
         break;
@@ -54,7 +54,7 @@ void func_800FD688(TObj *o)
         if (b->b04 == 2) {
             b->b04 = 3;
             func_80026C50(0x3E, 1, 1);
-            func_800F3E2C(n, 0, 0);
+            topdownA17ActorSetDirAnim(n, 0, 0);
             o->state++;
             func_8005A9A4(0x62, 1);
         }
