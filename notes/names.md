@@ -1607,3 +1607,57 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800e99fc titleDrawString` (was func_800E99FC; O0PTSUB0) - renders a MenuItem string (-1 end, -3 newline, -6 skips 3 bytes, 0 = space) as SPRTs from the 5-byte glyph table, clut by pal mode, draw mode after
 - `800e9d08 titleDrawMenuCarousel` (was func_800E9D08; O0PTSUB0) - the rotating title menu: each entry of D_800EA5D0 at angle+4*i through titleDrawCarouselGlyph, the front entry flat; then the left/right arrows by sel
 - `800e9f5c titleDrawCarouselGlyph` (was func_800E9F5C; O0PTSUB0) - one title glyph as a POLY_FT4 at y 0xB8 whose x edges come from MulNegSin of the angle (flat when off == -1), hidden on the back half
+- `800e87bc subScreenApplyPendingEquip` (was func_800E87BC; D0SPSUB) - when D_8009D006 is set: D_8009D2B3 = D_8009D090 and the player anim table / D_800A60FC from D_8007A024 by the pants kind D_8009C990 (slot 4 when D_8009CF06 and no pants 1..3), then clears the flag
+- `800e88d4 subScreenApplyPendingGauges` (was func_800E88D4; D0SPSUB) - when D_8009CFFB is set: copies the saved block D_8009D089..D_8009D090 into the three item gauges D_8009CD9C.., the flags D_8009C984 (|0x40 when D_8009D096 or event 0x9A done) and D_8009D2B3, resets the player anim table
+- `800e9ab0 subScreenDrawStatusNotes` (was func_800E9AB0; D0SPSUB) - status strings at the bottom: D_801091A8 when flags D_8009C984 & 0x40, D_801091A4[state] of event 0xD, D_801091BC when event 8 and D_801091C0 when event 0x99 are completed
+- `800e9cb4 subScreenDrawDigitsSprite` (was func_800E9CB4; D0SPSUB) - the 8 digit sprites of o->num (leading zeros skipped) at x-0x3C.. plus the object's own frame parts as semi-transparent SPRTs (AP counter style)
+- `800e9ea0 subScreenDrawTabs` (was func_800E9EA0; D0SPSUB) - the tab row of the sub-screen by mode (slot tables D_8010924C / D_801092C4 / D_80109294, ids D_80109304[mode]): highlighted cursor entry, lit tab of the current mode, the two sprites D_800FE8D0 at the -2 slot
+- `800ea168 subScreenDrawEventIcons` (was func_800EA168; D0SPSUB) - the icons of the 10 events of the page (D_801086F0 order) whose flag D_8009CDA4 is 0xFF (completed), special cluts for the medals / keys
+- `800ea370 subScreenDrawEventList` (was func_800EA370; D0SPSUB) - the 10 event names of the page (D_801093C4[event], D_801096D0 '???' while the flag is 0; green when completed) and the green selection tile
+- `800ea8f4 subScreenDrawItemGrid` (was func_800EA8F4; D0SPSUB) - the 10 item icons of the page from the item list D_8010A0C8 (count D_8009D2A4) through subScreenDrawItemIcon, with the in-use flag of the equipped pants / weapon / pending items
+- `800eac9c subScreenDrawItemNames` (was func_800EAC9C; D0SPSUB) - the item names of the page (D_8010979C[D_801096D4[item]], clut from D_80109AF8, white when selected) and 'x NN' counts D_8009D0A4[item] for the items flagged 0x80
+- `800eaf28 subScreenDrawPageNumber` (was func_800EAF28; D0SPSUB) - the page footer D_80109C10: page+1 and the count n as digit sprites plus the fixed icons
+- `800eb148 subScreenDrawGaugePercent` (was func_800EB148; D0SPSUB) - gauge i of D_80109C40: its icon then (60 - D_8009CD9C[i]) * 100 / 60 as a percentage (100 draws the extra '1')
+- `800eb2f4 subScreenDrawSprite` (was func_800EB2F4; D0SPSUB) - the frame D_80111144 of the sprite bank as SPRTs at D_8011113C (clut override by attr, semi-trans by attr bit 15) into OT+4+pri, draw mode D_80111140
+- `800eb4e8 subScreenDrawSpriteFT4` (was func_800EB4E8; D0SPSUB) - the frame as POLY_FT4s (tpage D_8011113C.w, clut override by attr); the last part one OT level nearer
+- `800eb7a8 subScreenDrawItemIcon` (was func_800EB7A8; D0SPSUB) - item icon n from the 15-column sheet (clut D_80109C88[n]), the in-use overlay frame when flag, and when sel the green selection tile (dark green when the item's condition script D_800FFAF8[D_800FECE8[n]] evaluated through D_800FFBB0 fails)
+- `800ebcb8 subScreenDrawString` (was func_800EBCB8; D0SPSUB) - renders the string D_8011114C with the 5-byte glyph font D_80111150 at D_8011113C (-1 end, -3 newline when multiline, -6 skips 3) as SPRTs with clut D_80111142
+- `800ebf34 subScreenDrawPopupMenu` (was func_800EBF34; D0SPSUB) - the popup list D_8010A068 (strings D_80108FCC, D_8010A05C rows, cursor tile at D_8010A058) in a balloon frame, plus the second-level list D_80109168 when D_8010A060 >= 0
+- `800ec390 subScreenInitMenu` (was func_800EC390; D0SPSUB) - loads the 0x30x0x1F image D_800F18E0 to VRAM (0x120,0x1E0), sets the sprite banks 1F8003A0/A4 and the menu's sprite tables p48..p64, w10 = 1
+- `800ec474 subScreenClampTabCursor` (was func_800EC474; D0SPSUB) - moves a tab cursor < 4 to the first valid tab of the mode (same rule as the inline fixCursor of subScreenMoveTabCursor); returns 1 when changed
+- `800ec504 subScreenMoveTabCursor` (was func_800EC504; D0SPSUB) - d-pad navigation of the tab cursor (0..3 top row, 4..7 mode tabs, 8 list) per mode with sfx 8; returns 1 when handled
+- `800eca28 subScreenMoveGridCursor` (was func_800ECA28; D0SPSUB) - d-pad over a 10-per-page grid: left/right within the row, up/down by 10 (fixed count), updates m->row
+- `800ecbf0 subScreenMoveGridCursorN` (was func_800ECBF0; D0SPSUB) - subScreenMoveGridCursor with the entry count n as argument
+- `800ecd94 subScreenMoveEventCursor` (was func_800ECD94; D0SPSUB) - grid cursor over the event list, count from subScreenCountEvents rounded up to 10
+- `800ecf88 subScreenMainStep` (was func_800ECF88; D0SPSUB) - sub-screen mode 0: tab cursor, cross/circle picks result 1/2/0/3 (tab 7 leaves with 2), triangle leaves with 1
+- `800ede64 subScreenOpenMessage` (was func_800EDE64; D0SPSUB) - allocates the message box D_8010A200 in a free slot of D_800A4648 (geometry 0x1A/0xA/0x14.., kind) with the string = entry (kind*2+0x10 of bank b) + add of the text bank D_1F800398[bank]
+- `800ee028 subScreenEventListStep` (was func_800EE028; D0SPSUB) - sub-screen mode 2 (events): tab row, then the event grid with L1/R1 paging over subScreenCountEvents, cross opens the event text through subScreenOpenMessage (sub 3 runs the message until D_8010A204 == 2)
+- `800ee37c subScreenMapInitMarker` (was func_800EE37C; D0SPSUB) - the player marker sprite D_8010A2D4[0] at the midpoint of the current room's map link (D_800FE064[area][section] -> D_800FDAB4 -> nodes D_800FD418)
+- `800ee580 subScreenMapInitAreaSprites` (was func_800EE580; D0SPSUB) - the map sprites D_8010A550 of the 8 areas whose flag D_8009D2C4[i] is 0 from the spawn lists D_8010A02C[i] (anim D_800FECB8[id])
+- `800ee6b4 subScreenMapReadInput` (was func_800EE6B4; D0SPSUB) - L1/R1 held: d-pad scrolls the map view D_801110F8/D_80111100 by 2 (returns -1); else the pressed direction as 4 (up) 0 (down) 2 (left) 6 (right), -1 none
+- `800ee7b8 subScreenMapScrollToMarker` (was func_800EE7B8; D0SPSUB) - projects the marker and scrolls the view by 2 px when it leaves the 0x30..0x110 x 0x50..0xB0 window, clamped to the bounds D_800FCED0 of the last discovered area
+- `800ee9ac subScreenMapStep` (was func_800EE9AC; D0SPSUB) - sub-screen mode 3 (map): saves the camera 1F8000C0, places the cursor / marker / area sprites / two icons D_80110F50, tab row; tab 7 walks the marker along the map links (D_800FDAB4, D_800FDE50) in 4-frame moves by the pressed direction
+- `800efaa4 subScreenUpdate` (was func_800EFAA4; D0SPSUB) - the sub-screen entry: state 0 loads the image and sprite tables into the menu D_800A45D8, state 1 d-pad auto-repeat then the mode step (subScreenMainStep / func_800ED0C4 / subScreenEventListStep / subScreenMapStep); returns its result
+- `800efd10 subScreenCountEvents` (was func_800EFD10; D0SPSUB) - index+1 of the last entry of the event list D_801086F0 whose flag D_8009CDA3[id] is set
+- `800f0930 subScreenMapDrawNode` (was func_800F0930; D0SPSUB) - an 8x8 textured dot (u 0x70 v 0x90, tpage 0x85) centred at the packed screen position into OT+pri-5
+- `800f0a5c subScreenMapDrawRoutes` (was func_800F0A5C; D0SPSUB) - for every area with D_8009D2C4[i] set the entries of D_800FDA70[i]: type 0 a node dot at the projected node, type 1 a white F4 strip (shape D_800FE0B4[c]) between two projected nodes
+- `800f0e0c subScreenMapDrawAreaName` (was func_800F0E0C; D0SPSUB) - the area name string at (0x10,0xD8): D_80108B78 in area 14, else D_80108BE4[i], overridden for links 0x26/0x27/0x2E (D_80108BCC) and 0xC (D_80108BE0)
+- `800f0f20 subScreenMapDrawRoomName` (was func_800F0F20; D0SPSUB) - the room name string at (0x10,0xE8): D_80108DDC[section] in area 14, else D_80108F8C[i][j] (link 0xC: D_80108F94)
+- `800f100c subScreenCondFalse` (was func_800F100C; D0SPSUB) - item condition script op: always 0
+- `800f1014 subScreenCondTrue` (was func_800F1014; D0SPSUB) - item condition script op: always 1
+- `800f101c subScreenCondPlayerH` (was func_800F101C; D0SPSUB) - condition op: compares PLAYER.h->whole with val by op 0..5 (==, !=, <, <=, >, >=)
+- `800f1124 subScreenCondPlayerY` (was func_800F1124; D0SPSUB) - condition op: compares PLAYER.y.whole (D_800A604E) with val
+- `800f1228 subScreenCondPlayerD` (was func_800F1228; D0SPSUB) - condition op: compares PLAYER.d->whole with val
+- `800f1330 subScreenCondArea` (was func_800F1330; D0SPSUB) - condition op: compares GAME.selectedArea with val
+- `800f1434 subScreenCondSection` (was func_800F1434; D0SPSUB) - condition op: compares GAME.selectedSection with val
+- `800f1538 subScreenCondUnk6Is1` (was func_800F1538; D0SPSUB) - condition op: GAME.unk6 (D_8009C966) == 1
+- `800f1550 subScreenCondFlag100` (was func_800F1550; D0SPSUB) - condition op: bit 0x100 of D_8009C984
+- `800f1568 subScreenCondEventFlag` (was func_800F1568; D0SPSUB) - condition op: compares the event flag D_8009CDA4[i] with val
+- `800f1630 subScreenCondFlag544` (was func_800F1630; D0SPSUB) - condition op: compares the byte D_8009CEA4[i] (GAME+0x544+i) with val
+- `800f16f8 subScreenCondHealthSettled` (was func_800F16F8; D0SPSUB) - condition op: GAME.playerHealth == playerHealthDisplayed
+- `800f1718 subScreenCondNearType0A` (was func_800F1718; D0SPSUB) - condition op: an active type 0xA object (subtype bit 0x80 clear) of the list 1F800260 within 0x5B x 0xC1 x 0x81 of the player
+- `800f182c subScreenCondNoWeapon` (was func_800F182C; D0SPSUB) - condition op: D_8009D2B1 (GAME+0x951) == 0
+- `800f183c subScreenCondRefreshingDrinkSpot` (was func_800F183C; D0SPSUB) - condition op: area 16 section 6, event 0x40 started but not completed, and the player object's w2 within 0x64..0xDC
+- `800f18a8 subScreenCondFlag40` (was func_800F18A8; D0SPSUB) - condition op: bit 0x40 of D_8009C984
+- `800f18c0 subScreenCondVarD0E6Under5` (was func_800F18C0; D0SPSUB) - condition op: D_8009D0E6 (GAME+0x786) < 5
+- `800f18d0 subScreenCondVar6102Set` (was func_800F18D0; D0SPSUB) - condition op: D_800A6102 != 0

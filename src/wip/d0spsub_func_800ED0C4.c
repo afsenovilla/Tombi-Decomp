@@ -27,11 +27,11 @@ extern int D_80111128;
 extern char D_80111134, D_80111138;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern volatile unsigned char D_8009D2B0, D_800A6038, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
-extern int func_800EC504(Menu *m, int n);
-extern int func_800ECA28(Menu *m);
-extern int func_800ECBF0(Menu *m, int n);
+extern int subScreenMoveTabCursor(Menu *m, int n);
+extern int subScreenMoveGridCursor(Menu *m);
+extern int subScreenMoveGridCursorN(Menu *m, int n);
 extern int func_800E89F8(int id);
-extern void func_800EDE64(int kind, int add, int bank);
+extern void subScreenOpenMessage(int kind, int add, int bank);
 extern void func_800EF538(void *o, int a);
 extern Obj *allocObjectLayer2(void);
 extern void printInfoMessage(int id, int kind);
@@ -55,7 +55,7 @@ int func_800ED0C4(Menu *m)
         }
         m->state++;
     case 1:
-        if (func_800EC504(m, 1)) return 0;
+        if (subScreenMoveTabCursor(m, 1)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -152,7 +152,7 @@ int func_800ED0C4(Menu *m)
         }
         return 0;
     case 2:
-        if (func_800ECA28(m)) return 0;
+        if (subScreenMoveGridCursor(m)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -254,7 +254,7 @@ int func_800ED0C4(Menu *m)
                 }
                 w = 2;
             found:
-                func_800EDE64(0, w, 2);
+                subScreenOpenMessage(0, w, 2);
                 D_8010A204 = 0;
                 SfxPlay2(10, 10);
                 m->state = 6;
@@ -349,7 +349,7 @@ int func_800ED0C4(Menu *m)
         }
         break;
     case 4:
-        if (func_800ECBF0(m, D_8009D1A4.count)) return 0;
+        if (subScreenMoveGridCursorN(m, D_8009D1A4.count)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -369,7 +369,7 @@ int func_800ED0C4(Menu *m)
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
         } else if (D_1F8001FC & 0x4008) {
-            func_800EDE64(1, D_8010A0C8[m->sel], 2);
+            subScreenOpenMessage(1, D_8010A0C8[m->sel], 2);
             D_8010A204 = 0;
             SfxPlay2(10, 10);
             m->state++;

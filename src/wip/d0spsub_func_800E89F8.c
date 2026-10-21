@@ -78,8 +78,8 @@ extern void loadCompressedTIM(int n);
 extern void removeItemFromInventory(int id, int n);
 extern void setEventComplete(int a, int b);
 extern Obj *allocObjectLayer4(void);
-extern void func_800E87BC(void);
-extern void func_800E88D4(void);
+extern void subScreenApplyPendingEquip(void);
+extern void subScreenApplyPendingGauges(void);
 
 int func_800E89F8(int item)
 {
@@ -155,8 +155,8 @@ int func_800E89F8(int item)
         playSFX(0x19);
         return 1;
     case 0x18:
-        func_800E87BC();
-        func_800E88D4();
+        subScreenApplyPendingEquip();
+        subScreenApplyPendingGauges();
         D_8009D090 = 0xFF;
         D_8009D2B0[3] = 2;
         if (D_8009CF06) {
@@ -171,8 +171,8 @@ int func_800E89F8(int item)
         playSFX(0x19);
         return 1;
     case 0x1C:
-        func_800E87BC();
-        func_800E88D4();
+        subScreenApplyPendingEquip();
+        subScreenApplyPendingGauges();
         D_8009D090 = 0xFF;
         D_8009D2B0[3] = 3;
         if (D_8009CF06) {
@@ -187,8 +187,8 @@ int func_800E89F8(int item)
         playSFX(0x19);
         return 1;
     case 0x1D:
-        func_800E87BC();
-        func_800E88D4();
+        subScreenApplyPendingEquip();
+        subScreenApplyPendingGauges();
         D_8009D090 = 0xFF;
         D_8009D2B0[3] = 1;
         if (D_8009CF06) {
@@ -203,8 +203,8 @@ int func_800E89F8(int item)
         playSFX(0x19);
         return 1;
     case 0x20:
-        func_800E87BC();
-        func_800E88D4();
+        subScreenApplyPendingEquip();
+        subScreenApplyPendingGauges();
         D_8009D090 = 0xFF;
         D_8009D2B0[3] = 0;
         if (D_8009CF06) {
@@ -221,7 +221,7 @@ int func_800E89F8(int item)
     case 0x60:
         if (GCD.bd006 == 0) {
             if (D_8009D090 == 0xFF) D_8009D090 = D_8009D2B0[3];
-            func_800E88D4();
+            subScreenApplyPendingGauges();
             PLAYER.b03 = 2;
             GCD.bd006 = 1;
             PLAYER.w08 = D_8007A024[4].a;
@@ -229,7 +229,7 @@ int func_800E89F8(int item)
             playSFX(0x19);
             return 1;
         }
-        func_800E87BC();
+        subScreenApplyPendingEquip();
         D_8009D090 = 0xFF;
         playSFX(0x19);
         return 4;
@@ -243,7 +243,7 @@ int func_800E89F8(int item)
             D_8009D08D = D_8009CD9E;
             D_8009D08E = D_8009CD9A;
             D_8009D08F = D_8009C984;
-            func_800E87BC();
+            subScreenApplyPendingEquip();
             D_8009CD98 = 9;
             D_8009CD99 = 9;
             D_8009CD9A = 9;
@@ -258,7 +258,7 @@ int func_800E89F8(int item)
             playSFX(0x19);
             return 1;
         }
-        func_800E88D4();
+        subScreenApplyPendingGauges();
         D_8009D090 = 0xFF;
         GCD.bcffb = 0;
         playSFX(0x19);

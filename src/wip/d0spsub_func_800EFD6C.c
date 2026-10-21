@@ -47,24 +47,24 @@ extern Model D_8010A3A8;
 extern char D_8010A47C[], D_8010A2D4[];
 extern Sprite D_8010A550[];
 extern int D_1F8002B4;
-extern void func_800E9EA0(Menu *m);
+extern void subScreenDrawTabs(Menu *m);
 extern void drawHudVitality(Hud *h, int x, int y, int v);
 extern void drawHudItemGauge(Hud *h, int n, int x, int y, int f);
-extern void func_800EB148(Menu *m, int n);
-extern void func_800E9AB0(Menu *m);
-extern void func_800EBCB8(int a, int b);
-extern void func_800EB2F4(int n);
-extern void func_800E9CB4(Hud *h, int x, int y);
+extern void subScreenDrawGaugePercent(Menu *m, int n);
+extern void subScreenDrawStatusNotes(Menu *m);
+extern void subScreenDrawString(int a, int b);
+extern void subScreenDrawSprite(int n);
+extern void subScreenDrawDigitsSprite(Hud *h, int x, int y);
 extern void drawHudLives(Hud *h, int x, int y);
-extern void func_800EBF34(Menu *m);
-extern void func_800EA8F4(Menu *m);
-extern void func_800EAC9C(Menu *m);
-extern void func_800EAF28(Menu *m, int n);
-extern void func_800EA168(Menu *m, int n, int c);
-extern void func_800EA370(Menu *m);
+extern void subScreenDrawPopupMenu(Menu *m);
+extern void subScreenDrawItemGrid(Menu *m);
+extern void subScreenDrawItemNames(Menu *m);
+extern void subScreenDrawPageNumber(Menu *m, int n);
+extern void subScreenDrawEventIcons(Menu *m, int n, int c);
+extern void subScreenDrawEventList(Menu *m);
 extern void func_800EA5E8(Menu *m);
-extern void func_800F0E0C(Menu *m, int a, int b);
-extern void func_800F0F20(Menu *m, int a, int b);
+extern void subScreenMapDrawAreaName(Menu *m, int a, int b);
+extern void subScreenMapDrawRoomName(Menu *m, int a, int b);
 extern void getBaseMatrix(MATRIX *m);
 extern void RotMatrixZ(int r, MATRIX *m);
 extern void RotMatrixX(int r, MATRIX *m);
@@ -73,7 +73,7 @@ extern void drawObjectModelRotated(Model *o);
 extern void drawObjectSprite(void *o);
 extern void drawObjectSpriteScaled(Sprite *o);
 extern int rsin(int a);
-extern void func_800F0A5C(void);
+extern void subScreenMapDrawRoutes(void);
 
 void func_800EFD6C(void)
 {
@@ -85,7 +85,7 @@ void func_800EFD6C(void)
     switch (m->mode) {
     case 0:
         D_800B1410.w48 = 1;
-        func_800E9EA0(m);
+        subScreenDrawTabs(m);
         drawHudVitality(&D_800B1410, 0xC0, 0x70, D_8009C970);
         D_800B1410.b74 = 0;
         D_800B1410.b75 = 0;
@@ -93,10 +93,10 @@ void func_800EFD6C(void)
         drawHudItemGauge(&D_800B1410, 0, 0xE, 0x5E, 1);
         drawHudItemGauge(&D_800B1410, 1, 0xE, 0x6E, 1);
         drawHudItemGauge(&D_800B1410, 2, 0xE, 0x7E, 1);
-        func_800EB148(m, 0);
-        func_800EB148(m, 1);
-        func_800EB148(m, 2);
-        func_800E9AB0(m);
+        subScreenDrawGaugePercent(m, 0);
+        subScreenDrawGaugePercent(m, 1);
+        subScreenDrawGaugePercent(m, 2);
+        subScreenDrawStatusNotes(m);
         for (s = D_8010922C; s->x != -1; s++) {
             D_8011113Cx = s->x;
             D_8011113C.y = s->y;
@@ -104,7 +104,7 @@ void func_800EFD6C(void)
             D_8011113C.w = m->w10 + s->dw;
             D_8011114C = D_801091C4[s->idx];
             D_8011113C.font = D_800FFD98;
-            func_800EBCB8(5, 1);
+            subScreenDrawString(5, 1);
         }
         D_8011113C.x = 0xE8;
         D_8011113C.y = 0x66;
@@ -112,14 +112,14 @@ void func_800EFD6C(void)
         D_80111142 = 0x7892;
         D_8011113C.w = m->w10 + s->dw;
         D_80111144 = m->p54[D_80109228[D_8009D2B1]];
-        func_800EB2F4(1);
+        subScreenDrawSprite(1);
         D_8011113Cx = s->x;
         D_8011113C.y = s->y;
         D_80111142 = 0x7C15;
         D_8011113C.w = m->w10 + s->dw;
         D_80111144 = m->p58[s->idx];
-        func_800EB2F4(1);
-        func_800E9CB4(&D_800B1410, 0x132, 0x50);
+        subScreenDrawSprite(1);
+        subScreenDrawDigitsSprite(&D_800B1410, 0x132, 0x50);
         drawHudLives(&D_800B1410, 0x120, 0x6A);
         D_8011113C.x = 0x10;
         D_8011113C.y = 0xC8;
@@ -128,21 +128,21 @@ void func_800EFD6C(void)
         if (D_8009C960 == 9) D_8011114C = D_80108BC8[D_8009C962];
         else D_8011114C = D_80108B78[D_8009C960];
         D_8011113C.font = D_800FFD98;
-        func_800EBCB8(5, 0);
+        subScreenDrawString(5, 0);
         D_8011113C.x = 0x10;
         D_8011113C.y = 0xD8;
         D_8011113C.attr = 0x7C15;
         D_8011113C.w = m->w10 + 1;
         D_80111150 = D_800FFD98;
         D_8011114C = D_80108E5C[D_8009C960][D_8009C962];
-        func_800EBCB8(5, 0);
+        subScreenDrawString(5, 0);
         for (s = D_801091D0; s->x != -1; s++) {
             D_8011113Cx = s->x;
             D_8011113C.y = s->y;
             D_80111142 = 0x79D2;
             D_8011113C.w = m->w10 + s->dw;
             D_80111144 = m->p48[s->idx];
-            func_800EB2F4(1);
+            subScreenDrawSprite(1);
         }
         D_80111142 = 0x7812;
         end = -1;
@@ -151,17 +151,17 @@ void func_800EFD6C(void)
             D_8011113C.y = s->y;
             D_8011113C.w = m->w10 + s->dw;
             D_80111144 = D_800FE89C[s->idx];
-            func_800EB2F4(3);
+            subScreenDrawSprite(3);
         }
         return;
     case 1:
-        func_800E9EA0(m);
-        if (D_8010A058 >= 0) func_800EBF34(m);
+        subScreenDrawTabs(m);
+        if (D_8010A058 >= 0) subScreenDrawPopupMenu(m);
         pages = (D_8009D2A4 + 9) / 10;
-        func_800EA8F4(m);
-        func_800EAC9C(m);
+        subScreenDrawItemGrid(m);
+        subScreenDrawItemNames(m);
         if (pages >= 2) {
-            func_800EAF28(m, pages);
+            subScreenDrawPageNumber(m, pages);
             s = D_80109BF8;
             while (s->x != -1) {
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
@@ -172,7 +172,7 @@ void func_800EFD6C(void)
                     D_80111142 = 0x7C15;
                     D_8011113C.w = m->w10 + s->dw;
                     D_80111144 = m->p58[s->idx];
-                    func_800EB2F4(1);
+                    subScreenDrawSprite(1);
                     s++;
                 }
             }
@@ -184,11 +184,11 @@ void func_800EFD6C(void)
             D_8011113C.y = s->y;
             D_8011113C.w = m->w10 + s->dw;
             D_80111144 = D_800FE89C[s->idx];
-            func_800EB2F4(3);
+            subScreenDrawSprite(3);
         }
         break;
     case 2:
-        func_800E9EA0(m);
+        subScreenDrawTabs(m);
         {
         int j;
         last = 0;
@@ -197,11 +197,11 @@ void func_800EFD6C(void)
         }
         }
         pages = (last + 10) / 10;
-        func_800EA168(m, last, 0xFF);
-        func_800EA370(m);
+        subScreenDrawEventIcons(m, last, 0xFF);
+        subScreenDrawEventList(m);
         func_800EA5E8(m);
         if (pages >= 2) {
-            func_800EAF28(m, pages);
+            subScreenDrawPageNumber(m, pages);
             s = D_80109BF8;
             while (s->x != -1) {
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
@@ -212,7 +212,7 @@ void func_800EFD6C(void)
                     D_80111142 = 0x7C15;
                     D_8011113C.w = m->w10 + s->dw;
                     D_80111144 = m->p58[s->idx];
-                    func_800EB2F4(1);
+                    subScreenDrawSprite(1);
                     s++;
                 }
             }
@@ -224,11 +224,11 @@ void func_800EFD6C(void)
             D_8011113C.y = s->y;
             D_8011113C.w = m->w10 + s->dw;
             D_8011113C.img = D_800FE89C[s->idx];
-            func_800EB2F4(3);
+            subScreenDrawSprite(3);
         }
         break;
     case 3:
-        func_800E9EA0(m);
+        subScreenDrawTabs(m);
         D_80111142 = 0x7812;
         end = -1;
         for (s = D_80109C70; s->x != end; s++) {
@@ -236,11 +236,11 @@ void func_800EFD6C(void)
             D_8011113E = s->y;
             D_8011113C.w = m->w10 + s->dw;
             D_8011113C.img = D_800FE89C[s->idx];
-            func_800EB2F4(3);
+            subScreenDrawSprite(3);
         }
         if (D_8010A38E != 0) {
-            func_800F0E0C(m, D_8010A38A, D_8010A38C);
-            func_800F0F20(m, D_8010A38A, D_8010A38C);
+            subScreenMapDrawAreaName(m, D_8010A38A, D_8010A38C);
+            subScreenMapDrawRoomName(m, D_8010A38A, D_8010A38C);
         }
         if (m->b1 != 0) {
             getBaseMatrix(&D_1F8000C0);
@@ -267,7 +267,7 @@ void func_800EFD6C(void)
                 D_8010A550[i].b0a = 0;
                 drawObjectSpriteScaled(&D_8010A550[i]);
             }
-            func_800F0A5C();
+            subScreenMapDrawRoutes();
         }
         break;
     }
