@@ -1782,3 +1782,56 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800ee4c0 overheadItemSpotHandler` (was func_800EE4C0; I0NFO) - item spot object: b04 0 init (box 0x10/0x20/0xD/0x1D, anim D_800F53C0, step from D_8009D064[b0c]), 1 update, 2 taken anim, 3 freeObjectLayer2
 - `800ee5e4 overheadTalkSpotStep` (was func_800EE5E4; I0NFO) - on contact with D_800A60A1 == 2 and the player facing 2: opens showMessageBox(1,1,0xA0,0x8C), playerState 2 and the script flags, waits for the message then releases them
 - `800ee79c overheadTalkSpotHandler` (was func_800EE79C; I0NFO) - talk spot object: b04 0 init (tpage 0x15, box 4/8/8/0x20, anim D_8001219C), 1 cull register and overheadTalkSpotStep, 3 freeObjectLayer2
+- `800e847c tunnelClampPlayerToGates` (was func_800E847C; I0NFO3) - the one-way slopes of the tunnel network (AREA02 section 3, I0NFO3 is its overlay): while events 0x7D / 0x80 are not completed and 0x90 not started, the player is pushed back at x 0x3B6..0x3E9, 0x30C.., 0x2FC..0x36F, 0x510..0x5AB (docs/PORT.md)
+- `800e86ac tunnelSectionStep` (was func_800E86AC; I0NFO3) - section object of AREA02 section 3: step 0 waits D_8009C93A (cameraModeHandler6B), step 1 tunnelClampPlayerToGates, the area handler D_80079AD0[subtype] and the five position exits (exit 2 sets D_8009CFED), step 2 cameraEventScrollHandler
+- `800e88e4 tunnelSelectBackdropPieces` (was func_800E88E4; I0NFO3) - fills the pointer list with the backdrop pieces of section 3: entries 0x5C / 0x60 by D_800A60A3, else the 8 strips around the scroll (1F800176 - 0x78) / 80 of the 22
+- `800e8a14 tunnelGateStepEvent80` (was func_800E8A14; I0NFO3) - gate subtype 2: once event 0x80 is completed and the player is within 0x40 x 0x60, rotates d8c by 0x40 for 16 frames (the linked half b0c != 0 follows the owner's step)
+- `800e8b58 tunnelGateStepOpen` (was func_800E8B58; I0NFO3) - gate subtype 5: opens (d8c rotation for 16 frames) as soon as the player is near; no event gate
+- `800e8c60 tunnelGateStepEvent7D` (was func_800E8C60; I0NFO3) - gate subtype 6: as tunnelGateStepEvent80 once event 0x7D is completed
+- `800e8da4 tunnelGateHandler` (was func_800E8DA4; I0NFO3) - the tunnel gate object: b04 0 init (d8c = animFrame << 9), 1 cull register and the step by subtype 2 / 5 / 6 while D_800A60A3 == 0, 3 ObjFreeDup
+- `800e8ebc tunnelEvent90BlockHandler` (was func_800E8EBC; I0NFO3) - object that exists only while event 0x90 is not started (b04 3 at init otherwise): cull register, ObjFreeDup
+- `800e8f70 tunnelStaticObjHandler` (was func_800E8F70; I0NFO3) - static object: active 2, cull register while D_800A60A3 == 0, ObjFreeDup
+- `800e900c tunnelPlayerInit` (was func_800E900C; I0NFO3) - player init in the tunnels: pose object D_8009C330 at o+0xF8, equips, facing from D_800EECE8[D_8009C982] (4 when a spawn point is set), 8-direction anim D_800106B4, step 0x63, or the event entry (b04 4 step 5) when playerState is 3
+- `800e9214 tunnelPlayerStatusAnim` (was func_800E9214; I0NFO3) - same code as I0NFO overheadPlayerStatusAnim
+- `800e940c tunnelPlayerSetDirAnim` (was func_800E940C; I0NFO3) - same code as I0NFO overheadPlayerSetDirAnim
+- `800e96d4 tunnelPlayerSetMoveAnim` (was func_800E96D4; I0NFO3) - same code as I0NFO overheadPlayerSetMoveAnim
+- `800e9998 tunnelPlayerWalkStep` (was func_800E9998; I0NFO3) - step 1: moves in the facing direction (0x280 running / 0x180 walking) with tunnelCollideMapTile; with event 0x90 started and 0x91 not completed, entering x 0x546..0x5AA / 0x334..0x37A completes event 0x91
+- `800e9bac tunnelPlayerItemUseStep` (was func_800E9BAC; I0NFO3) - step 0x30: the item used D_8009C941 (0xF / 0x11 removed, 9 / 0x9A clear flags, 5 / 0x7C / 0x97 / 0x98 / 7 drop exit, 0x95 removed with message 0x27 and event 0x7D completed, 0xE fall state)
+- `800e9e68 tunnelPlayerDropExitStep` (was func_800E9E68; I0NFO3) - same as I0NFO overheadPlayerDropExitStep (falls, fade, task w4c 7)
+- `800ea010 tunnelPlayerLandStep` (was func_800EA010; I0NFO3) - same as I0NFO overheadPlayerLandStep (drops from above to F2, sfx 0x1C)
+- `800ea258 tunnelPlayerFallExitStep` (was func_800EA258; I0NFO3) - (no caller) variant of tunnelPlayerDropExitStep without the music stop / sfx: falls 0x1E frames, fade, task w4c 7
+- `800ea3bc tunnelPlayerEventStep` (was func_800EA3BC; I0NFO3) - same as I0NFO overheadPlayerEventStep (b04 4 scripted states 0..7)
+- `800ea644 tunnelPlayerMainStep` (was func_800EA644; I0NFO3) - b04 1: step 0 idle with the d-pad direction, 1 walk, 2 talking, 0x30 item use, 0x63 wait for the fade; then tunnelCheckTileTrigger and on a trigger tile b6b = 1 + the index of the rect of D_800EECC8 that contains the player
+- `800eab84 tunnelPlayerHandler` (was func_800EAB84; I0NFO3) - same as I0NFO overheadPlayerHandler (pad swap, equips, b04 dispatch, position to SPAD 0x16A..)
+- `800ead48 tunnelDrawRotatedSprite` (was func_800EAD48; I0NFO3) - same code as I0NFO overheadDrawRotatedSprite
+- `800eb77c tunnelDrawObjectSprite` (was func_800EB77C; I0NFO3) - as I0NFO overheadDrawObjectSprite (FT4 parts by category, brightness b6b) with the clut applied only when b0d is set and a 0xF1 bottom cull
+- `800ebc5c tunnelSortDrawOrder` (was func_800EBC5C; I0NFO3) - collects the types 0x44 / 0x45 / 0x4C of list 21C with layer byte 0 (1 -> b0f -0xC, 2 -> -1) plus the player, sorts by y, b0f = index - 10 (linked objects +1)
+- `800ebecc tunnelMapObjHandler` (was func_800EBECC; I0NFO3) - map object: b04 0 copies the 0x9FF0-byte tile map from 1F800390 (size D_800A4670/72) to 0x80124000, 3 freeObjectLayer7
+- `800ebfd8 tunnelResolveNpcContact` (was func_800EBFD8; I0NFO3) - as I0NFO overheadResolveNpcContact; a type 0x45 actor gets b0f -0xC / -3 when the player is above / below it
+- `800ec26c tunnelPlayerNpcCollision` (was func_800EC26C; I0NFO3) - as I0NFO overheadPlayerNpcCollision for the types 0x44 / 0x45 / 0x4C (box table D_800EECC0)
+- `800ec3dc tunnelResolveCornerTile` (was func_800EC3DC; I0NFO3) - same code as I0NFO overheadResolveCornerTile
+- `800ec50c tunnelCollideMapTile` (was func_800EC50C; I0NFO3) - as I0NFO overheadCollideMapTile on the map at 0x80124000, cell (x >> 3, (y + 0x540) >> 3)
+- `800ec7ac tunnelCheckTileTrigger` (was func_800EC7AC; I0NFO3) - b68 = bit 0x80 of the tile at x / y
+- `800ec820 tunnelItemSpotCheckStep` (was func_800EC820; I0NFO3) - on contact: the required item by b0c (D_8009D0AA / D0C8 / D0D0 / D0D1); subtype 7 gives message 0x4E, 300000 AP and event 0xA1, others addItemToInventory(D_800EECFC[subtype]); setAreaFlagBit(b6b), step 2
+- `800ec9d4 tunnelItemSpotHandler` (was func_800EC9D4; I0NFO3) - item spot object: b04 0 init (box 0x10/0x20/0xD/0x1D, anim D_800F13D0[b0c][0]), 1 cull + check step / taken anim [4], hidden while D_800A60A3, 3 freeObjectLayer2
+- `800ecb88 tunnelActorSetScriptAnim` (was func_800ECB88; I0NFO3) - (no caller) anim D_800EED64[subtype][0][f], AnimJump(n), D2 = f
+- `800ecbfc tunnelActorIdleStep` (was func_800ECBFC; I0NFO3) - (no caller) anim D_800EED64[subtype][0][animFrame] then AnimAdvance
+- `800ecc9c tunnelActorPatrolVStep` (was func_800ECC9C; I0NFO3) - patrol kind 1: moves vertically by +-0x80 (facing bit 2) between y 76..7A, turns at the bounds (anim 8), stops while the contact b69 faces the move
+- `800ece94 tunnelActorPatrolHStep` (was func_800ECE94; I0NFO3) - patrol kind 2: horizontal between x 74..78
+- `800ed088 tunnelActorPatrolDiagStepA` (was func_800ED088; I0NFO3) - patrol kind 3: both axes, turns at the y bounds
+- `800ed2bc tunnelActorPatrolDiagStepB` (was func_800ED2BC; I0NFO3) - patrol kind 4: both axes (x mirrored), turns at the x bounds
+- `800ed4ec tunnelActorOpenDialogue` (was func_800ED4EC; I0NFO3) - opens the dialogue (6, n) of the actor by its id wba 0..10 and the event flags 0x7D / 0x91 / 0xA1 / 0x92 and the AP (showMessageBoxDirect), marking the event to complete in wac; returns 1 when a message was opened
+- `800ed7a8 tunnelActorTalkStep` (was func_800ED7A8; I0NFO3) - faces the player (anim b69 + 3), tunnelActorOpenDialogue, waits for the message; completes the event wac (setEventStarted) or event 0x92, the first time increaseMaxHealth with message 0x15 (D_8009CFEC) and a follow-up message (5, 3)
+- `800edb20 tunnelActorStep` (was func_800EDB20; I0NFO3) - step 0 by the movement kind B8 (0 idle, 1..4 patrols), contact starts the talk step 1; brightness by the zone B6 against D_800A60A3
+- `800edce4 tunnelActorInit` (was func_800EDCE4; I0NFO3) - box / tpage / bank / anim (by B4) from D_800EED5C[subtype], brightness 0x7F, category |= 0x80; freed (b04 3) when event 0x90 is started and BA is 4..5
+- `800ede78 tunnelActorHandler` (was func_800EDE78; I0NFO3) - the type 0x45 actor: b04 0 init, 1 cull register and tunnelActorStep (b0f -4), 3 freeObjectLayer2
+- `800edf28 tunnelTalkSpotStep` (was func_800EDF28; I0NFO3) - as I0NFO overheadTalkSpotStep with the message D_800EED80[subtype] and the zone brightness rule
+- `800ee140 tunnelTalkSpotHandler` (was func_800EE140; I0NFO3) - talk spot object: init (tpage 0x15, box 4/8/8/0x20, anim D_8001219C[D_800EED84[subtype]]), cull + step, freeObjectLayer2
+- `800ee260 tunnelSpawnActors` (was func_800EE260; I0NFO3) - allocates a type 0x45 actor per row of D_800EEF30 (position, facing, zone, patrol kind and bounds, subtype) into D_8009F2D8[i], skipping BA 4..5 once event 0x90 is started
+- `800ee414 tunnelUseItem95Step` (was func_800EE414; I0NFO3) - controller step 1: when item 0x95 is used, consumes it, message (6, 0), then completes event 0x7D and pauses 0xC8 frames
+- `800ee5a4 tunnelStartEvent4FStep` (was func_800EE5A4; I0NFO3) - (no caller) completes event 0x4F with a 0xC8-frame script pause (inlined as step 2 of tunnelControllerStep)
+- `800ee69c tunnelSlidePlayerStep` (was func_800EE69C; I0NFO3) - controller step 3: moves the player 1 px/frame toward D_800A6126 / D_800A612A (directions D_800A60B4 / B6) with playerState 4, then restores control
+- `800ee8cc tunnelCheckSlideZone` (was func_800EE8CC; I0NFO3) - the player inside one of the four zones D_800EEDB0 (y -0x4B0..-0x384, x bands) sets the slide target D_800A6126 / 612A and directions; returns 1
+- `800eea0c tunnelControllerPickStep` (was func_800EEA0C; I0NFO3) - (no caller) step 0 of tunnelControllerStep as a function: slide zone -> 3, event 0x4F not completed -> 2, event 0x7D started -> 1
+- `800eea70 tunnelControllerStep` (was func_800EEA70; I0NFO3) - section controller: step 0 picks (slide zone / event 0x4F / event 0x7D), 1 tunnelUseItem95Step, 2 completes event 0x4F with a pause, 3 tunnelSlidePlayerStep
+- `800eec18 tunnelControllerHandler` (was func_800EEC18; I0NFO3) - section controller object: b04 0 tunnelSpawnActors, 1 tunnelControllerStep, 3 PoolFree_1F800210
