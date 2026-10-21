@@ -1731,3 +1731,54 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800ee9c8 subScreenCondFlag40` (was func_800EE9C8; D0SPSUB3) - same code as D0SPSUB subScreenCondFlag40
 - `800ee9e0 subScreenCondVarD0E6Under5` (was func_800EE9E0; D0SPSUB3) - same code as D0SPSUB subScreenCondVarD0E6Under5
 - `800ee9f0 subScreenCondVar6102Set` (was func_800EE9F0; D0SPSUB3) - same code as D0SPSUB subScreenCondVar6102Set
+- `800e8214 overheadSectionStep` (was func_800E8214; I0NFO) - section object of the top-down AREA02 section 0 (I0NFO is its overlay): step 0 waits D_8009C93A, step 1 the two edge exits by player position (tryStartItemInteraction) then the area handler D_80079AD0[subtype], step 2 cameraEventScrollHandler
+- `800e8348 overheadNpcSetScriptAnim` (was func_800E8348; I0NFO) - game opcode target: anim = D_800EE8A4[subtype][0][w74] and AnimJump(w76) on the NPC
+- `800e8398 overheadNpcUpdateStep` (was func_800E8398; I0NFO) - NPC steps 0..5: cull register (FUN_80020078 with 0x6C for the NPC b0c 0x23) and AnimAdvance when visible
+- `800e8420 overheadNpcHandler` (was func_800E8420; I0NFO) - top-down NPC object: init from D_800EE89C[subtype] (anim by w74, AnimJump w76, clut 0x7F88 for b0c 0x1C/0x22 or 0x23/0x29 once event 0x50 is done), update through overheadNpcUpdateStep, ObjFree at b04 3
+- `800e8644 overheadPlayerInit` (was func_800E8644; I0NFO) - player init in the top-down section: pose object D_8009C330 at o+0xF8, equips from D_8007A024, 8-direction anim D_800106B4, spawns the shadow (overheadSpawnPlayerShadow) and the follower when D_8009CEAB == 3, playerState 3 / 4 entries
+- `800e88a0 overheadPlayerStatusAnim` (was func_800E88A0; I0NFO) - player anim by the status D_8009D00F: 1/5 random blink anim D_800106F0[d], 2/3 D_8001070C[d], 4 D_80010700[d] (d from the facing direction)
+- `800e8a98 overheadPlayerSetDirAnim` (was func_800E8A98; I0NFO) - player anim by mode (0 idle D_800106B4.., 1 walk D_800106C8.., 2 run D_800106DC..) and 8-direction dir
+- `800e8d60 overheadPlayerSetMoveAnim` (was func_800E8D60; I0NFO) - player anim from animFrame 0..15 (0..7 moving, 8..15 standing): run anims while the dash button 1F8003C4 is held, walk anims otherwise; records the anim id in the pose object
+- `800e9024 overheadPlayerWalkStep` (was func_800E9024; I0NFO) - step 1: moves in the facing direction (speed 0x280 running / 0x180 walking) with overheadCollideMapTile, back to step 0 when standing, talk button sets wac 1
+- `800e9188 overheadPlayerItemUseStep` (was func_800E9188; I0NFO) - step 0x30: the item used D_8009C940[1]: 0xF/0x11 removed with an event counter, 9 clears D_8009D2B1, 5/0x7C/0x97/0x98/7 start the drop-exit (b04 4 step 4), 0xE the fall state, others cleared
+- `800e947c overheadPlayerDropExitStep` (was func_800E947C; I0NFO) - b04 4 step 4: the player falls (velY -= 0x30) for 0x1E frames with sfx 0x16, then fade D_8009C975 = 3 and after 0x3C frames the task continues with w4c 7
+- `800e962c overheadPlayerLandStep` (was func_800E962C; I0NFO) - b04 4 step 5: loads the spawn position and drops the player from above until y reaches F2 (sfx 0x1C), then normal control; with D_8009CFF9 spawns a type 0x54 object instead
+- `800e9870 overheadPlayerMainStep` (was func_800E9870; I0NFO) - b04 1: step 0 idle with the d-pad direction (setDir), 1 walk, 2 talking, 0x30 item use, 0x63 wait for the fade
+- `800e9cd8 overheadPlayerEventStep` (was func_800E9CD8; I0NFO) - b04 4 (scripted): 0 idle, 1 timed stand, 2 timed walk with map collision, 3 stand, 4 drop exit, 5 land, 6 show
+- `800e9f60 overheadPlayerHandler` (was func_800E9F60; I0NFO) - the top-down player handler: swaps the pad buffer, equips by subtype, playerDecodePadInput, b04 0 init / 1 main / 4 event steps, stores the position in SPAD 0x16A..0x172
+- `800ea124 overheadDrawRotatedSprite` (was func_800EA124; I0NFO) - draws the object's frame parts as FT4 quads rotated by d8c (D_8007A3F0/5F0 tables), mirrored for directions 3..5, uploads the frame to VRAM when it changed (uploadSpriteFrameToVram), insertPrimWithBias
+- `800eab58 overheadDrawObjectSprite` (was func_800EAB58; I0NFO) - draws the frame parts as FT4s by category: 2/9 flipped when animFrame == 2, 3 with the clut w08 (dark when subtype & 1); brightness b6b, culled to the screen, linked at ot[b0f]
+- `800eb044 overheadDrawMapLayers` (was func_800EB044; I0NFO) - the 5 map SPRTs D_800EE8D0 (cluts / tpages D_800A4668) scrolled by -x/-y, brightness b6b
+- `800eb384 overheadLoadMapTiles` (was func_800EB384; I0NFO) - copies the 0x4000-byte tile map D_800EE8C8 (size D_800A4674/76) from the map data 1F800394, sets the three tpages / cluts D_800A4668..
+- `800eb4c8 overheadBuildMapStrip` (was func_800EB4C8; I0NFO) - copies the 32-px tile columns of the visible tile list D_800B1320[idx] (type 0: 2 columns x 0x100 rows, 1: 1 x 0x100, 2..4: 1 x 0x20) from the map image D_800A4680 into d
+- `800ebc30 overheadSortDrawOrder` (was func_800EBC30; I0NFO) - collects the NPC types 0x19/0x25/0x26 (list 21C) and 0x2E/0x1D (list 220) plus the player, sorts them by y and assigns b0f = index - 10 (shadows +1)
+- `800ebedc overheadBuildVisibleTileList` (was func_800EBEDC; I0NFO) - fills D_800B1320 with 10 rows x 12 tile indices around the scroll d30/d34 >> 5
+- `800ec084 overheadRefreshMap` (was func_800EC084; I0NFO) - map object update: position from the scroll 1F800176/17A, visible tiles, the 5 strips uploaded to VRAM (0x300,0 / 0x380,0 / 0x40,0..0x40), brightness by D_800A60A3
+- `800ec234 overheadMapObjHandler` (was func_800EC234; I0NFO) - the map object: b04 0 overheadLoadMapTiles and init (tpage by GetGraphType), 1 refresh and ObjListPush_1F80022C, 3 freeObjectLayer7
+- `800ec358 overheadResolveNpcContact` (was func_800EC358; I0NFO) - box overlap of a with b: pushes a out on the smaller axis, b69 of both = contact side; with wac 1 and facing the side marks b as the talk target (wac 2, b->b68 = 1, d90 = b)
+- `800ec5e8 overheadPlayerNpcCollision` (was func_800EC5E8; I0NFO) - sets D_800A60A4.. from D_800EE8C0[player type], then overheadResolveNpcContact against the active types 0x19/0x25/0x26 of list 21C
+- `800ec75c overheadResolveCornerTile` (was func_800EC75C; I0NFO) - tile kind 9: moves x/y to the neighbouring 8-px cell by the quadrant inside the tile and the move flag, results in 1F800070/74
+- `800ec88c overheadCollideMapTile` (was func_800EC88C; I0NFO) - tile map cell at ((x+0x80)>>3, (y-0x30)>>3): 0 free, 1..4 diagonal walls, 5..8 straight walls, 9 corner; pushes the object out (x or y by f & 2); returns 1 on a wall
+- `800ecb40 overheadCheckTileTrigger` (was func_800ECB40; I0NFO) - b68 = bit 0x80 of the tile at x/y (trigger tiles)
+- `800ecbbc overheadActorSetScriptAnim` (was func_800ECBBC; I0NFO) - game opcode target for type 0x19 actors: anim = D_800EE914[subtype][0][w74], AnimJump(w76)
+- `800ecc2c overheadActorAdvanceAndCollide` (was func_800ECC2C; I0NFO) - AnimAdvance then overheadCollideMapTile at the actor's position
+- `800ecc70 overheadActorWaitStep` (was func_800ECC70; I0NFO) - stands still for timer frames (velocities cleared) while no script runs
+- `800ecd14 overheadActorWalkStep` (was func_800ECD14; I0NFO) - walks in the direction animFrame at velX (MulCosDup/MulNegSin) with map collision for timer frames, stops moving while the contact b69 faces the direction
+- `800ece34 overheadActorTalkStep` (was func_800ECE34; I0NFO) - opens the message box w98/w9a over the actor for timer frames (showMessageBoxDirectTimed), clears D_8009C93F at the end
+- `800ecf18 overheadActorWaitMessageStep` (was func_800ECF18; I0NFO) - waits for the message object d90 to reach b04 2, then releases the script flags D_8009C942/C93F and the talk state
+- `800ecfd8 overheadActorWalkStepB` (was func_800ECFD8; I0NFO) - same as overheadActorWalkStep (used by step 5)
+- `800ed0f8 overheadActorHide` (was func_800ED0F8; I0NFO) - visible = 0
+- `800ed100 overheadActorWalkToStep` (was func_800ED100; I0NFO) - walks at 0x100 in the direction animFrame & 3 until the target d84 / d88 is reached
+- `800ed2d0 overheadActorStep` (was func_800ED2D0; I0NFO) - type 0x19 actor steps: 0 idle, 1 wait, 2 walk, 3 talk, 4 wait message, 5 walk B, 6 hidden, 9 advance and collide; cull register or ObjListPush_1F80021C by playerState 3
+- `800ed7b0 overheadActorInit` (was func_800ED7B0; I0NFO) - box / tpage / sprite bank / anim (by w74, AnimJump w76) from D_800EE90C[subtype], clut 0x7809, category |= 0x80
+- `800ed910 overheadActorInitSimple` (was func_800ED910; I0NFO) - box / tpage / bank and the first anim of D_800EE90C[subtype] (subtypes 1 and 3)
+- `800eda48 overheadShadowFollowOwner` (was func_800EDA48; I0NFO) - subtype 1 (shadow): position and visibility copied from the owner d90, b0f 0x10
+- `800edad4 overheadFollowerStep` (was func_800EDAD4; I0NFO) - subtype 3: anim D_800EE914[subtype][0][0xD2/0xD3] placed beside the player by its facing direction, drawn in front or behind; released when the player state is 3 or D_8009CEDB == 1
+- `800ede4c overheadActorHandler` (was func_800EDE4C; I0NFO) - type 0x19 object: b04 0 init (simple for subtypes 1/3), 1 shadow follow / follower / actor step by subtype, 3 freeObjectLayer2
+- `800edfb8 overheadSpawnPlayerShadow` (was func_800EDFB8; I0NFO) - allocates a layer-2 type 0x19 object of subtype sub (box 1/2) at o, linked through d90 / d94
+- `800ee07c overheadSpawnFollower` (was func_800EE07C; I0NFO) - allocates a layer-2 type 0x19 subtype 3 object at o
+- `800ee0f0 overheadItemSpotCheckStep` (was func_800EE0F0; I0NFO) - on contact (b68): checks the required item by D_800EE994[b0c] (D_8009D0AA / D0C8 / D0D0 / D0D1 counts); when held marks D_8009D064[b0c] = 2 and addItemToInventory(7,1,1), else printInfoMessage(0, 2)
+- `800ee26c overheadItemSpotUpdate` (was func_800EE26C; I0NFO) - visible while the player is inside the rect D_800EE93C[b0c] (or by D_800A60A3): step 0 check, 1 collected anim D_800F53D0 and the linked object's visibility, 2 done; brightness rules while the player state is 3
+- `800ee4c0 overheadItemSpotHandler` (was func_800EE4C0; I0NFO) - item spot object: b04 0 init (box 0x10/0x20/0xD/0x1D, anim D_800F53C0, step from D_8009D064[b0c]), 1 update, 2 taken anim, 3 freeObjectLayer2
+- `800ee5e4 overheadTalkSpotStep` (was func_800EE5E4; I0NFO) - on contact with D_800A60A1 == 2 and the player facing 2: opens showMessageBox(1,1,0xA0,0x8C), playerState 2 and the script flags, waits for the message then releases them
+- `800ee79c overheadTalkSpotHandler` (was func_800EE79C; I0NFO) - talk spot object: b04 0 init (tpage 0x15, box 4/8/8/0x20, anim D_8001219C), 1 cull register and overheadTalkSpotStep, 3 freeObjectLayer2
