@@ -11,7 +11,7 @@ extern void *D_8013B224[];
 extern unsigned short D_80139208[];
 extern unsigned char D_800A6047;
 extern unsigned char PLAYER;
-extern void FUN_80123b64(Pos8012ED60 *);
+extern void spawnA00L5Type0CObject(Pos8012ED60 *);
 extern int ObjCullRegister(TObj *);
 extern void bitingPlantSway(TObj *);
 extern void bitingPlantLunge(TObj *);
@@ -59,7 +59,7 @@ void updateA00BitingPlant(TObj *o)
                 s.x = o->h->p.whole;
                 s.y = o->y.p.whole - 16;
                 s.z = o->d->p.whole;
-                FUN_80123b64(&s);
+                spawnA00L5Type0CObject(&s);
                 o->b04 = 3;
                 break;
             }

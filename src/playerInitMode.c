@@ -41,7 +41,7 @@ extern void spawnPlayerPoolType12Object(void);
 extern void spawnPlayerPoolType13Object(TObj *, int, int);
 extern void FUN_80118910(void);
 extern void playerSetSpawnTimerArea0Sec3(TObj *);
-extern void FUN_801228bc(TObj *);
+extern void playerInitAreaHook(TObj *);
 extern void FUN_801212a0(TObj *);
 extern void FUN_8011dc4c(TObj *);
 extern void FUN_8011d8c4(TObj *);
@@ -155,7 +155,7 @@ void playerInitMode(TObj *o)
             spawnPlayerPoolType12Object();
         }
         switch (DAT_8009c960) {
-        case 0: FUN_801228bc(o); break;
+        case 0: playerInitAreaHook(o); break;
         case 1: case 7: FUN_801212a0(o); break;
         case 3: FUN_8011dc4c(o); break;
         case 4: case 12: FUN_8011d8c4(o); break;

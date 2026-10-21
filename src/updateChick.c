@@ -6,7 +6,7 @@ typedef struct {
     unsigned short w6c, w6e, w70, w72;
 } O;
 extern int G2d4[], T4d94;
-extern void FUN_8001fe6c(O *), FUN_800202b4(O *), FUN_8012dcfc(O *), FUN_8012d9fc(O *), FUN_8001fec0(O *), setAreaFlagBit(int), freeObjectLayer2(O *);
+extern void FUN_8001fe6c(O *), FUN_800202b4(O *), chickDropToGround(O *), chickWander(O *), FUN_8001fec0(O *), setAreaFlagBit(int), freeObjectLayer2(O *);
 extern int isObjectInView(O *);
 extern void FUN_80026c50(int, int, int);
 
@@ -36,10 +36,10 @@ void updateChick(O *o)
         if (o->vis != 0) {
             switch (o->step) {
             case 0:
-                FUN_8012dcfc(o);
+                chickDropToGround(o);
                 break;
             case 1:
-                FUN_8012d9fc(o);
+                chickWander(o);
                 break;
             }
         }

@@ -320,7 +320,7 @@ Player steps are the cases of the shared dispatcher `func_80100788` (`o->step`).
 - `801102b4 playerSlopeSlideAccelerate` (was func_801102B4) (uncertain) - step 0x10 helper: ramps speed +0xB2 toward the D_80115510 table limits by surface direction (+0xBE bit 0) and facing; table index as playerGetSpeedTableIndex
 - `80110eec playerAccelerateDownhill` (was FUN_80110eec) (uncertain) - adds to speed +0xB2 toward +-0x500 in the direction of surface bit +0xBE&1 (bigger steps near 0); used by the slide steps 0x17 and 0x1B
 - `8010e918 playerGetSpeedTableIndex` (was func_8010E918) - returns the speed-table row: GV2.bb3 + 4 * (+0xC1), forced to (+0xC1)<<2|3 by GAME.displayExpBar&3 and to 8 by two GCD flags; same index computation as playerSlopeSlideAccelerate
-- `800e9f74 awardAPByArea` (was FUN_800e9f74) - switch on the area calling that overlay's popup function with (points,x,y,z,1); the X000 one (func_80118040) calls addPlayerAP and spawns the digit object; callers pass 500 on item pickups
+- `800e9f74 awardAPByArea` (was FUN_800e9f74) - switch on the area calling that overlay's popup function with (points,x,y,z,1); the X000 one (spawnApAwardNumber) calls addPlayerAP and spawns the digit object; callers pass 500 on item pickups
 - `800ee454 playerTiltTowardSlope` (was func_800EE454) - moves the sprite angle +0x8C toward D_801152E8[slope +0xB0] by 4/2/1 per call (wrapping byte angle)
 - `800ee51c playerTiltTowardSlopeSlow` (was func_800EE51C) - moves +0x8C toward D_8011530C[slope +0xB0] by 1 per call
 - `800ee4e0 playerSetSlopeTilt` (was FUN_800ee4e0) - +0x8C = D_8011530C[+0xB0] or D_801152E8[+0xB0] by the flag argument
@@ -1500,8 +1500,43 @@ twin of the same function at another address of an overlay keeps its generic nam
 - `8011926c updateA00SplashDroplets` (was updateA00PoolType06; capture P/06: blue droplets spraying up, sfx 0x30, one-shot anim
   D_8013B1F0): spawned by updateL4Type00Object subtype 0 at anim frame 4 of its stretch.
 - `80134404 updateA00DarkCloakedFigure` / `80134190 a00DarkCloakedFigureIdle` (were updateA00L2Type14 / a00L2Type14Step; capture 2/14
-  synthetic in room 1: a dark hooded figure with a scarf standing and gesturing; made by FUN_80136a98 at 0xA38/-0x124 or, with
+  synthetic in room 1: a dark hooded figure with a scarf standing and gesturing; made by spawnA00DarkCloakedFigure at 0xA38/-0x124 or, with
   DAT_8009c984 bits 8|0x10, subtype 1 at 0xC29/-0x2E3): random idle anims D_8013B270 / D_8013B274 (step by subtype), when GCD.bcda9 ==
   0xFF it leaps off (velX 0x200, velY -0x400) and is freed off screen (identity of the character unknown).
 - Captures with nothing: 4/18 and 4/17 (synthetic, draw nothing without their scene), 4/1B (room 4), 7/01 / 7/02 (nothing drawn),
   P/5A (flag-gated), P/10:1 / P/17 / 4/01 / P/16 / P/04 hit the cap.
+
+Names from code reading only (no captures), table slots from pointer scans of MAIN0.EXE / X000.BIN:
+- `8003dd28 updateItemObject` (was FUN_8003dd28): the layer 5 handler of item types 0..5 and 8 (MAIN0 table 8007B310..8007B330):
+  initItemObject, per-type launch (5/8 velY -0x500), bounce/land/wall logic with D_8007B35C, then D_8007A890[D_8007A7F0[subtype]] and
+  freeObjectLayer5; the flag-gated subtypes 0x3F/0x9E/0x90/0x3C/3 skip to free.
+- `8002e83c updatePoolType31Object` (was FUN_8002e83c; pool table slot 80079C70): subtype 0 spawns subtype-1 type 0x31 children on a
+  random 0x800/0x1000 radius every other frame until timer runs out; children play D_80012204 once.
+- `80069464 PadEnableCom` (was FUN_80069464; US psx_tomba libpad padmain.c, as the file comment says).
+- `800e9dc0 updateL8Type00Object` (was FUN_800e9dc0; layer 8 slot 80079B88): box width from D_80114A48[b0c], culled with margin for
+  b0c 0, freeObjectLayer8 at b04 3. `800e9e98 updatePoolType00ByArea` (was FUN_800e9e98; pool slot 80079BAC): switch on the area
+  DAT_8009c960 (0 updatePointsBalloon, 1/3/4/6/7/9/10/12/17 the overlay handlers).
+- `801175a4 a00CameraController` (was FUN_801175a4): area 0 entry of the per-area table D_80079AEC that updateCameraController steps 1/2
+  call; section 3 runs its own steps (cameraModeHandler6, the two tryStartItemInteraction exits, cameraEventScrollHandler), the other
+  sections go to updateA00ScrollController. `801176d8 a00LinkAreaModelBlocks` (was func_801176D8): area 0 entry of PTR_DAT_80079b3c
+  (callAreaModelLinkHook): per section picks the WMD column blocks (x / 80, lo..hi) around the camera into o->p[].
+- `801228bc playerInitAreaHook` (was FUN_801228bc; playerInitMode `case 0`, same name as the x001/x003/x004/x009 entries): sections 4/5
+  set b0f, flag 2 of DAT_8009c984 spawns a frog, the tornado unless bcda6 == 0xFF, DAT_8009d2af == 0 enters b04 5.
+- `801340c4 spawnFrog` (was FUN_801340c4): layer 2 type 0x12 (updateFrog) at x/y/z, anim PTR_DAT_8013b184, step 3. `8012e0b8 spawnChick`
+  (was FUN_8012e0b8): layer 2 type 3 (updateChick) at x/y/z, b0c 1, anim PTR_8013b26c. `801231f4 playerEventStepSpawnChicks` (was
+  FUN_801231f4; playerEventModeDispatch): player anim 0x22, at frame 0xBD four spawnChick around the player and sfx (0,4).
+- chick (updateChick) steps: `8012dcfc chickDropToGround` (was FUN_8012dcfc; step 0: launched up (b0c 0: velY -0x400) and falls to the
+  tile, then step 1), `8012d9fc chickWander` (was func_8012D9FC; step 1: random idle / walk with chirp sfx 0x3A / hop by D_80139124),
+  `8012de8c chickStepDispatch` (was FUN_8012de8c; the step switch over the two, unreferenced).
+- dark cloaked figure event (unlayered variant 1, D_8007C1C8[1]): `80138008 updateDarkCloakedFigureEvent` (was FUN_80138008),
+  `80136a98 spawnA00DarkCloakedFigure` (was FUN_80136a98; the type 0x14 figure at 0xA38/-0x124, or subtype 1 at 0xC29/-0x2E3 with
+  flags 8|0x10), `80136bc0 a00DarkCloakedFigureTalkCheck` (was func_80136BC0; 1 when the player stands at the figure and presses the
+  talk button), `80136ce0 a00DarkCloakedFigureScene` (was FUN_80136ce0; the message-box 6 dialogue sequence).
+- Charles event (unlayered variant 2, D_8007C1C8[2]): `801380b8 updateCharlesEventObj` (was FUN_801380b8; spawns the type 0x15 npc at
+  0x140/-0x32 or 0x138/-0x11C), `80137458 charlesTalkCheck` (was func_80137458; counts the talk / event conditions of section 0 and
+  frees the object when none holds), then updateCharlesTalkScene.
+- `801306f0 uploadThrownObjectFrame` (was FUN_801306f0; updateThrownObject): unpackSpriteFrame frame a into DAT_800d7e28 and loadTIM
+  into the VRAM strip b at (0x1C0 + b*0x20, 0xA0).
+- `8011e30c updateAreaMechanisms` (was func_8011E30C; dispatchAreaInitB target, same name as the x001/x003/... entries).
+- `80118040 spawnApAwardNumber` (was func_80118040; awardAPByArea area 0, same name as the x004/x009 entries).
+- `80123b64 spawnA00L5Type0CObject` (was FUN_80123b64; biting plant): layer 5 type 0xC subtype 8 at the given position record.

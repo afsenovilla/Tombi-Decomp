@@ -5,7 +5,7 @@
 typedef struct { char pad[4]; unsigned char b4; } E;
 extern E *D_8009C948[];
 extern void *D_8013B224;
-extern void FUN_80123b64(Fix16 *);
+extern void spawnA00L5Type0CObject(Fix16 *);
 
 void bitingPlantEatBaitStep(TObj *o)
 {
@@ -96,7 +96,7 @@ void bitingPlantEatBaitStep(TObj *o)
             v[0].p.whole = o->h->p.whole;
             v[1].p.whole = o->y.p.whole - 0x10;
             v[2].p.whole = o->d->p.whole;
-            FUN_80123b64(v);
+            spawnA00L5Type0CObject(v);
         }
         break;
     case 5:

@@ -600,7 +600,7 @@ Pending:
 - **Walking AREA00 -> AREA02 (with one progress flag poked).** Sections 0/1/2 of AREA00 are one map
   (updateA00ScrollController: sec0 -> sec1 at x>=0x4ED,y<-0x95; sec1 exit 0 at x>=0xA46,y>=-0x122; sec1 exit 1 (the tree
   hollow) at x>=0x938,y>=-0x64 only when `0x8009CFED == 1`; sec1 -> sec2 at x>=0x9DD,y<-0x18F; sec2 exit 1 at
-  y<-0x559,x<0x88C on plane 0x1C2); sec3 (elder's house, FUN_801175a4) exit 1 at x>=0x12B,y<-0xDB, exit 0 at
+  y<-0x559,x<0x88C on plane 0x1C2); sec3 (elder's house, a00CameraController) exit 1 at x>=0x12B,y<-0xDB, exit 0 at
   x>=0x157,y>=-0x38. The exits fire as soon as the position test passes (tryStartItemInteraction needs no button).
   This run starts in the elder's house from the debug select, plays the elder's dialogue and event (the game drops
   Tombi into sec2), walks down to the blue egg in sec1, climbs the trunk, grabs the egg (lands on it) and throws it,
@@ -674,7 +674,7 @@ Pending:
   `D_8009C966`==3 or `GCD.bcda6`==0xFF; only then does x>=0x4ED, y<-0x95 switch to section 1. `D_8009C966` becomes 3 at
   the end of the fog event (`func_80116818` state 4), which waits in state 1 for `GAME.area00_eventControl & 1` and
   `GVARS.b30`==3; `GVARS.b30`=3 is set by playerStepUseItem when **item 4** is used (`DAT_8009c941`==4), and the tornado
-  (a00TornadoStep, spawned by `FUN_801228bc` while `bcda6`!=0xFF) also needs eventControl bit 1 to leave `b30`=1. No
+  (a00TornadoStep, spawned by `playerInitAreaHook` while `bcda6`!=0xFF) also needs eventControl bit 1 to leave `b30`=1. No
   writer of eventControl bit 1 is in src/ (it comes from an overlay / event script), so the item and the flag are the
   next things to find; the port runs every step of the route without a fault.
 - **Walking AREA02 -> AREA01 (no progress flag poked):** from the debug select into AREA02 section 3, the tunnels

@@ -10,7 +10,7 @@ void dispatchAreaInitB(void)
 {
     switch (GAME.selectedArea) {
         case AREA00_VILLAGEOFALLBEGINNINGS:
-            func_8011E30C();
+            updateAreaMechanisms();
             return;
         case AREA01_DWARFFOREST:
         case AREA07_DWARFFORESTPURIFIED:

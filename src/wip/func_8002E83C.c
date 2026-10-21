@@ -12,7 +12,7 @@ extern void ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void ObjFree(TObj *);
-void func_8002E83C(TObj *o)
+void updatePoolType31Object(TObj *o)
 {
     TObj *c, *p;
     short r, k;

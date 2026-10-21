@@ -13,7 +13,7 @@ extern unsigned char D_801152E8[];
 extern char D_80010748[];
 extern void playerEventStepLandIdle(TObj *);
 extern void playerEventStepLaneJumpBack(TObj *);
-extern void FUN_801231f4(TObj *);
+extern void playerEventStepSpawnChicks(TObj *);
 extern void playerEventStepDropIn(TObj *);
 extern void playerEventStepRiseFadeOut(TObj *);
 extern void playerEventStepDepthShift(TObj *);
@@ -54,7 +54,7 @@ void playerEventModeDispatch(TObj *o)
         playerEventStepLaneJumpBack(o);
         break;
     case 3:
-        FUN_801231f4(o);
+        playerEventStepSpawnChicks(o);
         break;
     case 4:
         playerEventStepDropIn(o);

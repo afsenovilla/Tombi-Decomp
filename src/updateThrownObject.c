@@ -58,7 +58,7 @@ void updateThrownObject(u8* self)
         *(int*)(self + 0x24) = D_8007A148[self[3]].unk8[*(s16*)(self + 0xA6)];
         switch (self[3]) {
         case 1:
-            func_801306F0(0xE, 0);
+            uploadThrownObjectFrame(0xE, 0);
             self[0xD] = 1;
             *(s16*)(self + 8) = GetClut(0xE0, 0x1F0);
             *(s16*)(self + 0x1E) = GetTPage(0, 0, 0x1C0, 0);
