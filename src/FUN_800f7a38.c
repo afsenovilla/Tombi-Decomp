@@ -1,5 +1,6 @@
 // FUNC 800f7a38 116 X000
 // MATCHING 800f7a38 116
+// probably: player step entry: sfx (0x1c,0x7f), anim sub 4, +0x8c = D_801152E8[slope], state++; unreferenced
 #include "raw7.h"
 extern void f1(int, int);
 extern void f2(void *, int);

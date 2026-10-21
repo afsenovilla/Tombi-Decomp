@@ -3,14 +3,14 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-void func_80123344(void);
+void updateA00ItemObj(void);
 void func_8011E154(void);
 
 void dispatchAreaItemInit(void)
 {
     unsigned short v = GAME.selectedArea;
     if (v == AREA00_VILLAGEOFALLBEGINNINGS) {
-        func_80123344();
+        updateA00ItemObj();
     } else if (v == AREA04_HAUNTEDMANSION) {
         func_8011E154();
     }

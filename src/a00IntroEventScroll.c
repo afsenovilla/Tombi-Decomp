@@ -46,7 +46,7 @@ static __inline__ void slide(TObj *o)
     }
 }
 
-void func_80116818(TObj *o)
+void a00IntroEventScroll(TObj *o)
 {
     G6038 *g = &PLAYER;
     unsigned char *p;

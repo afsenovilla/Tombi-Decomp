@@ -1,5 +1,6 @@
 // FUNC 8010bf70 196 X000
 // MATCHING 8010bf70 196
+// probably: player step entry: anim FUN_80010dac sub 0, marks the grabbed object D_8009F0EC (+0x69 = 4), sfx (0x1e,8), spin speed from its box; unreferenced
 typedef struct O {
     char pad0[6];
     unsigned char state;

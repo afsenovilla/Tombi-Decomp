@@ -1,5 +1,6 @@
 // FUNC 8006b7ec 636 MAIN0
 // MATCHING 8006b7ec 636
+// probably: libpad padportd.c helper (US func_8006AD74, no US name) called from PadInitDirect: builds the actuator-enabled map
 // FLAGS -O2 -G0
 // AS gnu
 /* func_8006AD74 (US psx_tomba libpad/padportd.c). */

@@ -1,5 +1,6 @@
 // FUNC 800ed258 1272 X000
 // MATCHING 800ed258 1272
+// probably: updateVillagerNpc step table D_80114C58[1]: the villager's walk along the per-subtype path DAT_80114c64[b0c] (velY 0x4B0, 24-item counter event)
 // VERSION SLPM_80165 x00 800EA564 1212
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800ED258 (FUN_800ed258.c): no pause check, no 24-item counter event.

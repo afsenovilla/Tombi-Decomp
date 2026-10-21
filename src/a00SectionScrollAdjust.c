@@ -4,7 +4,7 @@
 #include "gamestate.h"
 typedef struct { char p[2]; unsigned short s2; } P;
 typedef struct { char p[0x32]; short w32; P *p34; } S;
-void func_80116758(S *o)
+void a00SectionScrollAdjust(S *o)
 {
     short t;
     if (GAME.selectedSection == 1) {

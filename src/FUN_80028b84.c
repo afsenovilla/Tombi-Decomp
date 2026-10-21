@@ -1,5 +1,6 @@
 // FUNC 80028b84 92 MAIN0
 // MATCHING 80028b84 92
+// probably: clamps the camera offset F2[-6] so F2[0]+F2[-6] stays inside o->h30..h32 (object scroll bounds); unreferenced in MAIN0/X000
 typedef struct O { char p0[0x30]; short h30; short h32; } O;
 extern short F2[];
 

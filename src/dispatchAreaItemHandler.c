@@ -11,7 +11,7 @@ void dispatchAreaItemHandler(s32 arg0)
     loadSectionHeight();
     switch (GAME.selectedArea) {                    // irregular
         case AREA00_VILLAGEOFALLBEGINNINGS:
-            func_80116758(arg0);
+            a00SectionScrollAdjust(arg0);
             return;
         case AREA01_DWARFFOREST:
         case AREA07_DWARFFORESTPURIFIED:

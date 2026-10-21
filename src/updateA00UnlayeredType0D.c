@@ -8,9 +8,9 @@ extern short DAT_800a60ea;
 extern unsigned char DAT_8009c93f, DAT_8009c93e;
 extern P *FUN_80018448(void);
 extern void FUN_80018980(void);
-extern void FUN_8011b4b0(TObj *);
+extern void a00UnlayeredType0DShowMessage(TObj *);
 
-void FUN_80138218(TObj *o)
+void updateA00UnlayeredType0D(TObj *o)
 {
     P *p;
     unsigned char two;
@@ -70,7 +70,7 @@ void FUN_80138218(TObj *o)
         }
         break;
     case 1:
-        FUN_8011b4b0(o);
+        a00UnlayeredType0DShowMessage(o);
         break;
     }
 }

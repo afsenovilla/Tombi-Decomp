@@ -258,7 +258,7 @@ address,name,size,typed
 801148d0,spawnDebrisObjectB,152,0
 80114968,spawnGroundDebrisPiece,160,0
 80114a08,updateVillagerNpc,64,0
-80116818,FUN_80116818,336,1
+80116818,a00IntroEventScroll,336,1
 80116920,FUN_80116920,84,0
 801169bc,FUN_801169bc,184,0
 80116d14,updateA00ScrollController,60,1
@@ -310,7 +310,7 @@ address,name,size,typed
 8011b2e8,updateA00PoolType24,388,1
 8011b330,FUN_8011b330,24,0
 8011b47c,FUN_8011b47c,44,0
-8011b4b0,FUN_8011b4b0,300,1
+8011b4b0,a00UnlayeredType0DShowMessage,300,1
 8011b5dc,a00TutorialHintJumpMessage,260,0
 8011b6e0,updateA00TutorialHint,244,0
 8011b7d4,FUN_8011b7d4,28,0
@@ -393,7 +393,7 @@ address,name,size,typed
 80122f14,playerStepSlideDownSurface,64,1
 80122f54,FUN_80122f54,672,0
 801231f4,playerEventStepSpawnChicks,336,1
-80123344,FUN_80123344,772,1
+80123344,updateA00ItemObj,772,1
 80123648,FUN_80123648,168,0
 801236f0,updateA00BitingPlantBait,616,1
 801237e4,FUN_801237e4,196,0
@@ -441,7 +441,7 @@ address,name,size,typed
 80126f68,collideCat2Type7Cat5Type0BPair,132,1
 80126fec,updateMushroomCluster,552,1
 80127214,AnimAdvanceWithBox,364,1
-80127380,FUN_80127380,332,1
+80127380,komaPigAnimAdvance,332,1
 801274cc,enemyProbeGround,280,1
 801275e4,enemyCheckWallAhead,316,1
 80127720,enemyPickActionByPlayerDistance,256,0
@@ -532,5 +532,5 @@ address,name,size,typed
 80137f54,FUN_80137f54,180,1
 80138008,updateDarkCloakedFigureEvent,176,1
 801380b8,updateCharlesEventObj,352,1
-80138218,FUN_80138218,412,1
+80138218,updateA00UnlayeredType0D,412,1
 8013839c,FUN_8013839c,104,0

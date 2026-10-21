@@ -1,5 +1,6 @@
 // FUNC 8012ff0c 916 X000
 // MATCHING 8012ff0c 916
+// probably: bitingPlantStep3: subtype 0/1/2 jaw offsets d88, subtype 1 puts the player on the plant and advances PLAYER.state (the bite carry)
 #include "player.h"
 #include "TOBJ.H"
 #include "gamestate.h"

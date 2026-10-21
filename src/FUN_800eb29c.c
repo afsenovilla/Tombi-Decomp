@@ -1,5 +1,6 @@
 // FUNC 800eb29c 248 X000
 // MATCHING 800eb29c 248
+// probably: an object step with three sub-states calling h(0xe, 4) / h(0xe, 0) then adv(); unreferenced in X000
 #include "raw7.h"
 extern int adv(void *);
 extern void h(int, int);

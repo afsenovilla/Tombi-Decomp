@@ -1,5 +1,6 @@
 // FUNC 80134308 252 X000
 // MATCHING 80134308 252
+// probably: an area-0 object leap-off step: anim DAT_8013b270, velX 0x200, velY -0x400 then gravity until off screen (b04 3); unreferenced
 // VERSION SLPM_80165 x00 80129BA0 244
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80134308 (FUN_80134308.c):  Inline GetClut.

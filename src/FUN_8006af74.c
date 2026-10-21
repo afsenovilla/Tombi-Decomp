@@ -1,5 +1,6 @@
 // FUNC 8006af74 172 MAIN0
 // MATCHING 8006af74 172
+// probably: libpad padif.c callback (US func_8006A524): direct pad object table entry 80098238, stores the block count D_80098224
 // FLAGS -O2 -G0
 // AS gnu
 /* func_8006A524 (US psx_tomba libpad/padif.c) without the US `(result & 0xF0) == 0 -> -9` check. */

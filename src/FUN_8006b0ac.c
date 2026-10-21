@@ -1,5 +1,6 @@
 // FUNC 8006b0ac 944 MAIN0
 // MATCHING 8006b0ac 944
+// probably: libpad padif.c callback (US func_8006A670): direct pad object table entry 80098240, PAL revision of the SIO byte loop
 // FLAGS -O2 -G0
 // AS gnu
 /* func_8006A670 (US psx_tomba libpad/padif.c), PAL revision: the last byte loop skips the RC2 wait when the SIO status reads 0x22. */

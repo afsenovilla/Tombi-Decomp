@@ -29,7 +29,7 @@ extern int D_1f8000f0;
 extern int handleLookScrollInput(S *);
 extern void cameraScrollInputStep(S *, int);
 extern void loadSectionHeight(S *);
-extern void FUN_80116758(S *);
+extern void a00SectionScrollAdjust(S *);
 extern void FUN_801165c0(S *);
 extern void FUN_80116f74(S *);
 
@@ -318,7 +318,7 @@ void updateCameraScroll(S *o)
     loadSectionHeight(o);
     switch (GAME.selectedArea) {
     case 0:
-        FUN_80116758(o);
+        a00SectionScrollAdjust(o);
         break;
     case 1:
     case 7:

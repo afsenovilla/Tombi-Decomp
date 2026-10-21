@@ -16,7 +16,7 @@ extern int FUN_8001f9e0(void);
 extern void applyFrameVelocityY(TObj *);
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001e560(int, int);
-extern void FUN_80127380(TObj *);
+extern void komaPigAnimAdvance(TObj *);
 extern int enemyProbeGround(TObj *);
 extern int enemyCheckWallAhead(TObj *);
 extern unsigned char enemyPickActionByPlayerDistance(TObj *);
@@ -54,7 +54,7 @@ void komaPigState0(TObj *o)
         goto common;
     case 2:
         if (--o->timer == -1) o->substep++;
-        FUN_80127380(o);
+        komaPigAnimAdvance(o);
         o->y.p.whole += 4;
         if (enemyProbeGround(o) == 0 && x->w0e++ > 3) {
             x->b0a = 1;

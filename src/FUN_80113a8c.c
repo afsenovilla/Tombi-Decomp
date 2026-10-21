@@ -1,5 +1,6 @@
 // FUNC 80113a8c 224 X000
 // MATCHING 80113a8c 224
+// probably: player event step: waits for the message box d90 to close (b04 2 -> 3) then resets the camera/event bytes and the step; unreferenced
 // VERSION SLPM_80165 x00 8010DC44 200
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80113A8C (FUN_80113a8c.c): the player is released only when GVARS.b3f is clear.

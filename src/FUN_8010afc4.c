@@ -1,5 +1,6 @@
 // FUNC 8010afc4 140 X000
 // MATCHING 8010afc4 140
+// probably: player step entry: clears the D_8009C330 fields and motion, anim D_80010748, state++, slope tilt; unreferenced
 // VERSION SLPM_80165 x00 801064C8 124
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 8010AFC4 (FUN_8010afc4.c): Does not reset +0x8c from the per-object table.

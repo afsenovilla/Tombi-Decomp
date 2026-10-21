@@ -1,5 +1,6 @@
 // FUNC 8011c804 2060 X000
 // MATCHING 8011c804 2060
+// probably: dispatchAreaInitA area 0: walks the section's placed-object records into a linked E list (p[7] tables), skipping by section/subtype
 // VERSION SLPM_80165 x00 80115914 2060
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 8011C804 (func_8011C804.c): No section/subtype skip; +0xa4 flags the first visible frame.

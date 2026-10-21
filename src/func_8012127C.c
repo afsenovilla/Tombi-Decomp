@@ -1,5 +1,6 @@
 // FUNC 8012127c 912 X000
 // MATCHING 8012127c 912
+// probably: a00ApBox50kSparkle helper: drives the sparkle particle entries (phase, z50..z52) of the 50k AP box
 #include "TOBJ.H"
 typedef struct {
     unsigned char c[0x36];

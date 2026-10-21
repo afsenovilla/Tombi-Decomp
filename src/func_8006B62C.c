@@ -1,5 +1,6 @@
 // FUNC 8006b62c 244 MAIN0
 // MATCHING 8006b62c 244
+// probably: libpad padportd.c helper (US func_8006ABB4, no US name) called from PadInitDirect
 // FLAGS -O2 -G0
 // AS gnu
 /* func_8006ABB4 (US psx_tomba libpad/padportd.c). */

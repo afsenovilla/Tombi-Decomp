@@ -1,5 +1,6 @@
 // FUNC 80105a34 176 X000
 // MATCHING 80105a34 176
+// probably: player dismount helper: clears the motion fields; bitten object type 0x1C goes to step 0x2A/0x2B by GV2.bb1 (bab |= 0x80), else step 0; unreferenced
 // VERSION SLPM_80165 x00 800FEC08 160
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80105A34 (func_80105A34.c): +0x8c reset to 0 (PAL per-object table value). keeps +0xac except for the two dismount cases (case 2 sets it to 2).

@@ -74,7 +74,7 @@ extern void ObjFreeDup(O *);
 extern void setEventStarted(int, int, int);
 extern M *showMessageBox(short, short, int, int);
 
-void FUN_80030510(O *o)
+void updateL4Type1AObject(O *o)
 {
     unsigned short text;
     unsigned short opt;

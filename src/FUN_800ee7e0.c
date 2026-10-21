@@ -1,5 +1,6 @@
 // FUNC 800ee7e0 172 X000
 // MATCHING 800ee7e0 172
+// probably: player air-control helper: func_8001fec0, scroll delta, setVelXFromPadLR, timer countdown then adjustVelYFromPadDown; unreferenced
 #include "TOBJ.H"
 extern void func_8001fec0(TObj *o);
 extern void setVelXFromPadLR(TObj *o);

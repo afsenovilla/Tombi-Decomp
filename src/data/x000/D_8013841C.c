@@ -7,7 +7,7 @@ extern void cameraEventScrollHandler();
 extern void cameraModeHandler2();
 extern void cameraModeHandler3();
 extern void cameraModeHandler5();
-extern void func_80116818();
+extern void a00IntroEventScroll();
 extern void updateCameraFollow();
 extern void updateLookScroll();
 extern void *ptrs_8013841C[];
@@ -25,7 +25,7 @@ extern unsigned int data_801385A0[];
 
 void *ptrs_8013841C[7] = {
     updateCameraFollow,
-    func_80116818,
+    a00IntroEventScroll,
     cameraEventScrollHandler,
     cameraModeHandler2,
     cameraModeHandler3,

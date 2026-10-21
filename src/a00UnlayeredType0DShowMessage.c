@@ -5,7 +5,7 @@ extern unsigned char DAT_a, DAT_b, DAT_c, DAT_d, DAT_e;
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80018980(TObj *);
 
-void FUN_8011b4b0(TObj *o)
+void a00UnlayeredType0DShowMessage(TObj *o)
 {
     TObj *q;
     switch (o->step) {

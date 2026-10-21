@@ -1,5 +1,6 @@
 // FUNC 801363e4 1704 X000
 // MATCHING 801363e4 1704
+// probably: variant-0 scene: message boxes 7 (DAT_8009cebf) with the part anims D_8013B130..148
 #include "TOBJ.H"
 typedef struct { char p0[9]; unsigned char b9; } P801363E4;
 typedef struct { short s0, s2; } S801363E4;

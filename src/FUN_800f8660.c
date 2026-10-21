@@ -1,5 +1,6 @@
 // FUNC 800f8660 136 X000
 // MATCHING 800f8660 136
+// probably: player step entry: anim DAT_80010ca0 sub 4, b0f -8, state++ (sets da0+2 unless step 0x49); unreferenced
 #include "TOBJ.H"
 extern unsigned char DAT_801152e8[];
 extern void func_8001e5f4(int a, int b);

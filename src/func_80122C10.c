@@ -1,5 +1,6 @@
 // FUNC 80122c10 772 X000
 // MATCHING 80122c10 772
+// probably: player step 0x35: thrown off after a bite (anim 0x37, sfx 0x23/0x1F, playerReleaseBittenAirborne), velX +-0x200 velY -0x300, lands and skids to a stop
 #include "TOBJ.H"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x2e - 9]; short w2e; } P;
 extern P *D_8009C330;

@@ -1,5 +1,6 @@
 // FUNC 80110cac 576 X000
 // MATCHING 80110cac 576
+// probably: player speed friction: index from DAT_8009d2b3 / flags, steps wb2 toward 0 by the D_80115510 table rows and clamps to f6; unreferenced
 extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
 extern unsigned char DAT_80115510[];

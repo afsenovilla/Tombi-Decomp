@@ -1,5 +1,6 @@
 // FUNC 801072fc 196 X000
 // MATCHING 801072fc 196
+// probably: player slide entry: movetab D_80077D0C, speed wb2 clamped to +-0x144 by facing, state 1; unreferenced
 // VERSION SLPS_01144 x00 80107020 196
 // VERSION SLPM_80165 x00 80100B84 196
 #if defined(VERSION_SLPS_01144)

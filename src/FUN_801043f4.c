@@ -1,5 +1,6 @@
 // FUNC 801043f4 96 X000
 // MATCHING 801043f4 96
+// probably: player step entry: sfx 9, anim 0xD, spawnImpactEffect 2, state++; unreferenced
 // VERSION SLPM_80165 x00 800FD7E8 168
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 801043F4 (FUN_801043f4.c): player animation change inline (PAL calls PlayerSetAnimIfChanged). Also calls func_80026800(1, 6).

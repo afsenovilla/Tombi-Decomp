@@ -1,5 +1,6 @@
 // FUNC 80123648 168 X000
 // MATCHING 80123648 168
+// probably: dispatchAreaItemUpdate area 0: allocates a layer 5 type 7 object with subtype c at the record q, parent p (+0x94), width from p+0xb6
 // VERSION SLPM_80165 slpm80165 8003BCCC 156
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80123648 (FUN_80123648.c): subtype always 0 (no third argument).

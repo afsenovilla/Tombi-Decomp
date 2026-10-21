@@ -1,5 +1,6 @@
 // FUNC 8011d204 252 X000
 // MATCHING 8011d204 252
+// probably: frame helpers: steps animFrame toward 0x80 (and func_8011D230 up to 0x8F); unreferenced
 // VERSION SLPM_80165 x00 80116314 44
 // VERSION SLPS_01144 x00 8011C1E4 252
 #if defined(VERSION_SLPM_80165)

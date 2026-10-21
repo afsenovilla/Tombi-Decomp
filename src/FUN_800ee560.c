@@ -1,5 +1,6 @@
 // FUNC 800ee560 104 X000
 // MATCHING 800ee560 104
+// probably: player step entry: sfx (0x1c,0x7f), anim DAT_80010c50 sub-anim 4, clears motion, state 5; unreferenced (dead entry code)
 typedef struct O {
     char pad0[6];
     unsigned char state;

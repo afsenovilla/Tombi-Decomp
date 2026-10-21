@@ -1,5 +1,6 @@
 // FUNC 8011e1b0 348 X000
 // MATCHING 8011e1b0 348
+// probably: updateAreaMechanisms entry: swings +0x88 open (to 0xA00) when the player is within 0x18 x / 0x60 y and the event bytes allow, closes again (states 1/3)
 typedef struct { char p0[6]; unsigned char st; char p1[0x16 - 7]; unsigned short w16; char p2[0x88 - 0x18]; int d88; } O;
 extern unsigned short G16a, G16e;
 extern short G172;

@@ -1,5 +1,6 @@
 // FUNC 800f809c 148 X000
 // MATCHING 800f809c 148
+// probably: player step entry: anim sub 1, y shifted +-12 by facing, slope tilt table; unreferenced
 // VERSION SLPM_80165 x00 800F49D0 132
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800F809C (FUN_800f809c.c): +0x8c reset to 0 (PAL table value).

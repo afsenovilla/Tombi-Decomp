@@ -1,5 +1,6 @@
 // FUNC 801139b4 216 X000
 // MATCHING 801139b4 216
+// probably: player event step: showMessageBoxDirectTimed(13, 2, pos, timer) then waits timer frames; unreferenced
 typedef struct V { char c[12]; } V;
 typedef struct O {
     char p0[5]; unsigned char f5; unsigned char state;

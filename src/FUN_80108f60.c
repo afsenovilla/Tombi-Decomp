@@ -1,5 +1,6 @@
 // FUNC 80108f60 128 X000
 // MATCHING 80108f60 128
+// probably: player step entry: sfx (0x1c,0x7f), ba3 = 1, anim DAT_80010e34 sub 2, state 3, slope tilt; unreferenced
 #include "raw7.h"
 extern unsigned char DAT_801152e8[];
 extern char DAT_80010e34[];

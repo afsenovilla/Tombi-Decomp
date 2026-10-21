@@ -652,7 +652,7 @@ Pending:
   balcony girl is a koma pig subtype 9 (type 2): she hurts on contact, so she is grabbed and thrown first.
   The ledge above the balcony (plane 1, y -212) is reached with **Up+Cross** (the lane jump into the background plane)
   from x 1164: Tombi lands at (1168,-232). Walking right onto the roof reaches x 1182, y -286, and the fog event starts
-  (`func_80116818` state 0: x>=0x49E, y<-0xE7 in section 0 -> `D_8009C966`=1, event 2 started, "CLEAR THE FOG 500"
+  (`a00IntroEventScroll` state 0: x>=0x49E, y<-0xE7 in section 0 -> `D_8009C966`=1, event 2 started, "CLEAR THE FOG 500"
   banner, frame 5480). The route (pad script, 50 Hz vblanks; save states replay it exactly, so it was built from
   states and then run from frame 0):
   ```
@@ -672,7 +672,7 @@ Pending:
   balcony, ledge) and `port_r4/route_fog.png` (the event banner).
   **What gates sec 1:** updateA00ScrollController keeps `subtype`=1 (scroll clamped at x 1200, `animFrame`=0x4B0) until
   `D_8009C966`==3 or `GCD.bcda6`==0xFF; only then does x>=0x4ED, y<-0x95 switch to section 1. `D_8009C966` becomes 3 at
-  the end of the fog event (`func_80116818` state 4), which waits in state 1 for `GAME.area00_eventControl & 1` and
+  the end of the fog event (`a00IntroEventScroll` state 4), which waits in state 1 for `GAME.area00_eventControl & 1` and
   `GVARS.b30`==3; `GVARS.b30`=3 is set by playerStepUseItem when **item 4** is used (`DAT_8009c941`==4), and the tornado
   (a00TornadoStep, spawned by `playerInitAreaHook` while `bcda6`!=0xFF) also needs eventControl bit 1 to leave `b30`=1. No
   writer of eventControl bit 1 is in src/ (it comes from an overlay / event script), so the item and the flag are the

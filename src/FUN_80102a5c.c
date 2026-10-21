@@ -1,5 +1,6 @@
 // FUNC 80102a5c 100 X000
 // MATCHING 80102a5c 100
+// probably: player bite-attach entry: anim 0xD, spawnImpactEffect 2, marks the bitten object D_8009D2E8 (+6 = 2) when its type is 2; unreferenced
 // VERSION SLPM_80165 x00 800FB2E8 164
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80102A5C (FUN_80102a5c.c): player animation change inline (PAL calls

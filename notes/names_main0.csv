@@ -348,6 +348,7 @@ address,name,confidence,comment
 80030404,updateL4Type08Object,alta,names batch (see notes/names.md)
 8003040c,dispatchAreaInitA,alta,psx_tomba #21 (por bytes)
 80030454,dispatchAreaInitB,alta,psx_tomba #21 (por bytes)
+80030510,updateL4Type1AObject,alta,names batch (see notes/names.md)
 80030afc,updateL4Type1BObject,alta,names batch (see notes/names.md)
 80030b5c,dispatchEffectByVariant,alta,psx_tomba #21 (por bytes)
 80030b9c,spawnEffectObject,alta,psx_tomba #21 (por bytes)

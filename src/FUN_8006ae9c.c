@@ -1,5 +1,6 @@
 // FUNC 8006ae9c 216 MAIN0
 // MATCHING 8006ae9c 216
+// probably: libpad padif.c callback (US func_8006A44C, no US name): direct pad object table entry 80098234
 // FLAGS -O2 -G0
 // AS gnu
 /* func_8006A44C (US psx_tomba libpad/padif.c). */

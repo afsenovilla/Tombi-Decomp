@@ -1,5 +1,6 @@
 // FUNC 801137bc 204 X000
 // MATCHING 801137bc 204
+// probably: player event step: sinks 4 px/frame with the floor probe for timer frames; unreferenced
 #include "TOBJ.H"
 extern void func_8001fec0(TObj *o);
 extern void func_80040278(TObj *o, int a, int b);

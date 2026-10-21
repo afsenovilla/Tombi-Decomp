@@ -1540,3 +1540,26 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `8011e30c updateAreaMechanisms` (was func_8011E30C; dispatchAreaInitB target, same name as the x001/x003/... entries).
 - `80118040 spawnApAwardNumber` (was func_80118040; awardAPByArea area 0, same name as the x004/x009 entries).
 - `80123b64 spawnA00L5Type0CObject` (was FUN_80123b64; biting plant): layer 5 type 0xC subtype 8 at the given position record.
+- `80030510 updateL4Type1AObject` (was FUN_80030510; MAIN0 layer 4 table slot 80079DDC, next to updateL4Type1BObject at 80079DE0).
+- `80138218 updateA00UnlayeredType0D` (was FUN_80138218; entry 13 of the MAIN0 unlayered type table D_8007BF34): subtype 0 advances
+  D_8009d005 0 -> 1 -> 2 when DAT_800a60d6 == 3 (and DAT_800a60ea == 4) spawning an unlayered type 0x59 object; subtype 1 (spawned by
+  a00IntroEventScroll) runs `8011b4b0 a00UnlayeredType0DShowMessage` (was FUN_8011b4b0): once visible and DAT_a == 0, showMessageBox
+  (10, 0, 100, 236) and frees itself when the box closes.
+- `80116818 a00IntroEventScroll` (was func_80116818; x000 table 80138420): the section-0 camera sequence of event (2,0): when the
+  player reaches x >= 0x49E / y < -0xE7 sets the intro state D_8009C966 = 1, setEventStarted(2,0,1), spawns the type 0xD/1 object;
+  with area00_eventControl bit 0 and GVARS.b30 == 3 scrolls to 0x52E with stream 2 (cdSeekStream), fade 3/4, startAreaBgm and
+  setEventComplete(2,0).
+- `80116758 a00SectionScrollAdjust` (was func_80116758; dispatchAreaItemHandler area 0 after loadSectionHeight): section 1 lowers the
+  scroll target w32 by the camera x past 0x948 (to -0x154), section 5 sets -0x54 once GCD.bce3d == 0xFF.
+- `80123344 updateA00ItemObj` (was func_80123344; dispatchAreaItemInit area 0, as x004 updateArea4ItemObj): subtype 0 / 1 sprite
+  objects (anims D_8013B0E0 / D_80134DC4).
+- `80127380 komaPigAnimAdvance` (was func_80127380; komaPigState0): AnimAdvance variant that loads the box from D_80138FD8[frame].
+- Left generic with a `// probably:` line in the source (purpose readable but owner unknown, mostly unreferenced player step entry
+  code): FUN_80028b84, FUN_8006ae9c, FUN_8006af74, FUN_8006b0ac, func_8006B62C, func_8006B7EC (libpad, no US names), FUN_800eb29c,
+  FUN_800ed258, FUN_800ed750 (villager step table D_80114C58[1]/[2]), FUN_800ee560, FUN_800ee7e0, FUN_800f35e0, FUN_800f5014,
+  FUN_800f7a38, FUN_800f802c, FUN_800f809c, FUN_800f8660, FUN_80102a5c, FUN_80102eb4, FUN_801031fc, FUN_80103cbc, FUN_80104040,
+  FUN_801043f4, FUN_80108f60, FUN_8010afc4, FUN_8010b3b8, FUN_8010bf70, FUN_80113a8c, FUN_801137bc, FUN_801139b4, FUN_8011dd30,
+  func_8011DE84, func_8011D204 (chained three-part object, table 80138B80), FUN_8011e1b0 (a mechanism of updateAreaMechanisms),
+  FUN_80123648, func_80123C20, func_8011C804 (area-0 item dispatch targets), FUN_80134308, FUN_80137378, FUN_80137f54 / FUN_801361e4 /
+  FUN_801363e4 (unlayered variant 0 scene), FUN_80132bb0, FUN_80136a8c, FUN_8013736c, FUN_80137f48 (stubs), func_80105A34,
+  func_801072FC, func_80110CAC, func_8012127C, func_80122C10 (player step 0x35), func_8012FF0C (bitingPlantStep3).

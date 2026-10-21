@@ -1,5 +1,6 @@
 // FUNC 800ed750 1212 X000
 // MATCHING 800ed750 1212
+// probably: updateVillagerNpc step table D_80114C58[2]: a two-axis spring motion (pos/spd/cnt pairs at +0x48) with a per-subtype item effect
 // VERSION SLPM_80165 x00 800EAA20 1204
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800ED750 (FUN_800ed750.c): the item effect id is +0x1e (0xff: none) instead of a per-

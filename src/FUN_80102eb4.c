@@ -1,5 +1,6 @@
 // FUNC 80102eb4 140 X000
 // MATCHING 80102eb4 140
+// probably: player bite-attach entry (anim 0x23, wac 3): aligns to the bitten object D_8009D2E8 and goes to state 2; unreferenced
 typedef struct O {
     char pad0[6];
     unsigned char state;

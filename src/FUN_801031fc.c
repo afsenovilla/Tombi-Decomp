@@ -1,5 +1,6 @@
 // FUNC 801031fc 148 X000
 // MATCHING 801031fc 148
+// probably: player bite-attach entry (anim 0xD, impact effect 2, wac 3): y from the bitten object's +0x70/+0x72, state 2; unreferenced
 typedef struct H { short pad; unsigned short w; } H;
 typedef struct O {
     char pad0[6];

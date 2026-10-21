@@ -1,5 +1,6 @@
 // FUNC 800f35e0 188 X000
 // MATCHING 800f35e0 188
+// probably: player step entry: sfx (0x1c,0x7f), step 3 state 1, slope tilt D_801152E8, two spawnGroundDebris when bbe & 0x20; unreferenced
 // VERSION SLPM_80165 x00 800F0874 168
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800F35E0 (FUN_800f35e0.c): Does not reset +0x8c from the per-object table.

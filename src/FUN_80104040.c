@@ -1,5 +1,6 @@
 // FUNC 80104040 144 X000
 // MATCHING 80104040 144
+// probably: player bite-attach entry (anim 0xD, impact effect 2, wac 3): moves the bitten object to the player, state 2; unreferenced
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
 extern void PlayerSetAnimIfChanged(TObj *, int);

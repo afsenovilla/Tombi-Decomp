@@ -1,6 +1,7 @@
 /* v reused for D_8009C941 and the constant 8 puts 8 in v1 (game); store order found by permutation. */
 // MATCHING 80123c20 484
 // FUNC 80123c20 484 X000
+// probably: dispatchAreaItemDraw area 0: an object that activates when DAT_8009c940 is set and D_8009C941 == 0x7E (anim PTR_8013b0d8)
 #include "TOBJ.H"
 extern unsigned char DAT_8009c940[];
 extern void *PTR_8013b0d8; extern unsigned char D_8009C941;

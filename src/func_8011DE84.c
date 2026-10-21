@@ -1,5 +1,6 @@
 // FUNC 8011de84 812 X000
 // MATCHING 8011de84 812
+// probably: chained-object part placement (func_8011DE84/DF5C/E028/E0EC: child d94 on the angle animFrame, radius ba5, sine tables D_8007A1F0/A208); table at 80138B80
 // VERSION SLPS_01144 x00 8011CE64 812
 // VERSION SLPM_80165 x00 80116F94 220
 #if defined(VERSION_SLPS_01144)

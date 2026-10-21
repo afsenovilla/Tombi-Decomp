@@ -13,7 +13,7 @@ extern int ObjCullRegister(TObj *o);
 extern void playSFX(int n);
 extern void freeObjectLayer5(TObj *o);
 
-void func_80123344(TObj *o)
+void updateA00ItemObj(TObj *o)
 {
     TObj *p;
     E *e;

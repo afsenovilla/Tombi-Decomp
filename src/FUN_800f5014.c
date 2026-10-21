@@ -1,5 +1,6 @@
 // FUNC 800f5014 100 X000
 // MATCHING 800f5014 100
+// probably: g(0,0,0xff,2); h(3,a); copies PA->b0c to PB->b0a; unreferenced
 typedef struct { char p[0xa]; char b0a; char b0b; char b0c; } S;
 extern S *PA, *PB;
 extern void g(int a, int b, int c, int d);

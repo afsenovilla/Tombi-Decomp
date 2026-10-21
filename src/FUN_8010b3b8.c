@@ -1,5 +1,6 @@
 // FUNC 8010b3b8 140 X000
 // MATCHING 8010b3b8 140
+// probably: player step entry: clears the D_8009C330 anim state and motion, anim D_80010748, state 4, slope tilt; unreferenced
 #include "TOBJ.H"
 extern TObj *DAT_8009c330[];
 extern unsigned char DAT_801152e8[];

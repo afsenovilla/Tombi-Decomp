@@ -1,5 +1,6 @@
 // FUNC 8011dd30 340 X000
 // MATCHING 8011dd30 340
+// probably: chained three-part object (subtype 0..2 via func_8011D9D8/D670/D300): places the child d94 on the angle animFrame at radius ba5, table at 80138B84
 #include "TOBJ.H"
 extern short DAT_8007a1f0[];
 extern short DAT_8007a5f0[];
