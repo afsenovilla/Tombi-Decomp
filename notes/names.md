@@ -1385,7 +1385,7 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
 - Still pending: L2/06 (code: a multi-hit breakable, each hit changes stage/anim/box and spawns pool type 8 debris with sfx 0x33, removed
   after the last stage), pool type 0x11, L4/0A, L4/0D (draws nothing), L4/11, type 07 in area 4.
 - Open conflicts: loadCollisionBounds -> loadButtonConfig (renamed: theirs is right, copies T[1F80019E] into 1F8003C4..CA, the
-  button masks the player code tests, e.g. talk = 1F8003C4; callers bootStartupTask, o0ptsub0 func_800E8618). dispatchAreaCollisionHookA/B:
+  button masks the player code tests, e.g. talk = 1F8003C4; callers bootStartupTask, o0ptsub0 buttonConfigMenuStep). dispatchAreaCollisionHookA/B:
   ours kept (area 0 calls pushCat2/Cat5ObjectOutOfCat4Type04, area 3 their x003 twins: collision passes, not enemy init/update).
   updateMushroomCluster vs updateEvilGrass: not captured yet.
 - Twin sync (Oct 2026): 434 twin rows in notes/functions_x0nn.csv that still held FUN_/func_ names now carry their X000 twin's name
@@ -1571,3 +1571,39 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   FUN_80123648, func_80123C20, func_8011C804 (area-0 item dispatch targets), FUN_80134308, FUN_80137378, FUN_80137f54 / FUN_801361e4 /
   FUN_801363e4 (unlayered variant 0 scene), FUN_80132bb0, FUN_80136a8c, FUN_8013736c, FUN_80137f48 (stubs), func_80105A34,
   func_801072FC, func_80110CAC, func_8012127C, func_80122C10 (player step 0x35), func_8012FF0C (bitingPlantStep3).
+
+# User names (names_user.json, tools/apply_names.py)
+
+- `800e8044 gameOverSetupCamera` (was func_800E8044; G0OVER) - camera object 1F8000C0 at (0,0,-0x220) rot (0xA0,-0x78,0): base matrix minus position plus rotated offset
+- `800e8194 gameOverSetupLighting` (was func_800E8194; G0OVER) - colour matrix / far-back colour of the light object 1F800118, light direction from RotMatrixX/Y(0x638,0x800)
+- `800e82f8 gameOverLetterFlyIn` (was func_800E82F8; G0OVER) - letter object state 0: velocity towards the target slot D_800E8C94/CA4[type] over 24 frames with a vertical arc; state 1 integrates it
+- `800e8404 gameOverLetterStep` (was func_800E8404; G0OVER) - per-letter state machine of the 8 'GAME OVER' model letters: start slot D_800E8CB4/CC4, fly in, pause, drop, hold, then tumble by subtype and fade the light (type 0)
+- `800e87a0 gameOverDrawLetters` (was func_800E87A0; G0OVER) - draws the 8 letter models: RotMatrix of d84/88/8c times the camera, lit F3/F4/G3/G4 groups (modelDrawF3Lit..G4Lit)
+- `800e897c gameOverScreenTask` (was func_800E897C; G0OVER) - overlay entry of gameOverScreenState: w4e 0 camera/light setup and letter objects from the model table 1F800334, w4e 1 step (hold 0) and draw
+- `800e8b08 gameEndScreenTask` (was func_800E8B08; G0OVER) - overlay entry of gameEndScreenState: same as gameOverScreenTask with hold 1 (letters stay until the task timer < 0x3D)
+- `800e8078 titleDrawSpriteRecs` (was func_800E8078; O0PTSUB0) - draws a -1 terminated SprRec list as SPRTs (clut by GetClut, draw mode per record) at an x/y offset into OT+1
+- `800e8284 optionsMenuStep` (was func_800E8284; O0PTSUB0) - options menu input: w4e row 1 sound mode D_8009D67C, 2 stereo/mono D_8009F0E8, 3 vibration D_8009D610.mode, 4 button config (w4c 3), 5 screen adjust (w4c 2); returns 1 on exit, draws with optionsMenuDraw
+- `800e8618 buttonConfigMenuStep` (was func_800E8618; O0PTSUB0) - button config screen: triangle/circle cycles D_8009F3DC 0..5 and loadButtonConfig, cross back to the options menu (w4c 1); draws with buttonConfigMenuDraw
+- `800e8700 screenAdjustMenuStep` (was func_800E8700; O0PTSUB0) - screen position screen: d-pad with auto-repeat moves D_8009D4FC/D_8009D4FE (x -7..0x18, y 5..0x14) into the display offsets D_8009E350.., circle restores the saved values
+- `800e8a14 bootLogoSetSpriteBase` (was func_800E8A14; O0PTSUB0) - stores D_800EB014 into D_8009D630 before the boot logo (bootLogoState)
+- `800e8a2c bootLogoDraw` (was func_800E8A2C; O0PTSUB0) - draws the boot logo sprite list D_800EB13C (bootLogoState w4a 4/5)
+- `800e8a5c titleLogoInitBounce` (was func_800E8A5C; O0PTSUB0) - resets the title logo bounce (amplitude 0x1000, phase 0x40) at loopTitleScreen w4a 2
+- `800e8a94 titleLogoDraw` (was func_800E8A94; O0PTSUB0) - loopTitleScreen: logo bounce by MulNegSin of the decaying amplitude (unless paused), 8-px top bar, logo sprite lists D_800EB17C (bouncing) and D_800EB1AC
+- `800e8b94 optionsMenuDraw` (was func_800E8B94; O0PTSUB0) - cursor tile, option text with the sound/vibration values and the frame
+- `800e8be0 buttonConfigMenuDraw` (was func_800E8BE0; O0PTSUB0) - cursor tile, button layout text for D_8009F3DC and the frame
+- `800e8c24 screenAdjustMenuDraw` (was func_800E8C24; O0PTSUB0) - screen adjust text (with the pressed direction) and the frame
+- `800e8c58 titleDrawSprite` (was func_800E8C58; O0PTSUB0) - one SprDef as a semi-transparent SPRT plus its draw mode into OT+4+pri
+- `800e8e44 optionsMenuDrawCursor` (was func_800E8E44; O0PTSUB0) - green tile over the selected row from D_800EAFD4[sel] (D_800EB004 when the pad has no actuator and sel >= 4)
+- `800e8fd8 buttonConfigDrawCursor` (was func_800E8FD8; O0PTSUB0) - fixed green tile (0x1C,0x4C 0x40x0x18) over the config number
+- `800e90d0 optionsMenuDrawText` (was func_800E90D0; O0PTSUB0) - option frame sprites D_800EB1DC and the labels: title 0, rows 1..5 with the sound mode (6+sound) and vibration (9+vib) values
+- `800e9254 buttonConfigDrawText` (was func_800E9254; O0PTSUB0) - the six button layouts: config name 0xF..0x13 and the four action labels 0x19..0x1C at the button positions
+- `800e950c screenAdjustDrawText` (was func_800E950C; O0PTSUB0) - screen adjust frame D_800EB3BC, labels, the four direction arrows (highlighted while pressed) and the x/y offsets as signed numbers
+- `800e96a4 optionsDrawFrame` (was func_800E96A4; O0PTSUB0) - sprite list D_800EB3EC (tpage 1,0,0x180) into OT+8: the frame shared by the three option screens
+- `800e972c titleDrawText` (was func_800E972C; O0PTSUB0) - title text entry i (D_800EB040 strings, title font D_800EA1D8, per-glyph palette D_800EB05C) at x/y
+- `800e9798 optionsDrawLabel` (was func_800E9798; O0PTSUB0) - options text entry i (D_800EB070, font D_800EA634) with palette 0
+- `800e97f4 optionsDrawLabelPal2` (was func_800E97F4; O0PTSUB0) - options text entry i with palette 2 (clut 0x7C15) and glyph palette list D_800EB124
+- `800e985c optionsDrawLabelPal` (was func_800E985C; O0PTSUB0) - options text entry i with the palette given (3 = highlighted arrow in screenAdjustDrawText)
+- `800e98b4 screenAdjustDrawNumber` (was func_800E98B4; O0PTSUB0) - signed number: +/- glyph D_800EB11C/120 then up to two digits from D_800EB0F4
+- `800e99fc titleDrawString` (was func_800E99FC; O0PTSUB0) - renders a MenuItem string (-1 end, -3 newline, -6 skips 3 bytes, 0 = space) as SPRTs from the 5-byte glyph table, clut by pal mode, draw mode after
+- `800e9d08 titleDrawMenuCarousel` (was func_800E9D08; O0PTSUB0) - the rotating title menu: each entry of D_800EA5D0 at angle+4*i through titleDrawCarouselGlyph, the front entry flat; then the left/right arrows by sel
+- `800e9f5c titleDrawCarouselGlyph` (was func_800E9F5C; O0PTSUB0) - one title glyph as a POLY_FT4 at y 0xB8 whose x edges come from MulNegSin of the angle (flat when off == -1), hidden on the back half

@@ -1,0 +1,12 @@
+// FUNC 800e8a5c 56 O0PTSUB0
+// MATCHING 800e8a5c 56
+extern short D_800EB46C, D_800EB470, D_800EB474, D_800EB478, D_800EB47C;
+
+void titleLogoInitBounce(void)
+{
+    D_800EB478 = 0x1000;
+    D_800EB46C = 0;
+    D_800EB470 = 0;
+    D_800EB474 = 0;
+    D_800EB47C = 0x40;
+}
