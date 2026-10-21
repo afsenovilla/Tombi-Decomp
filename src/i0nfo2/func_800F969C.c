@@ -5,7 +5,7 @@ typedef struct { short s[6]; } Pos6;
 extern void func_80026C50(int a, int b, int c);
 extern TObj *func_8002DCC8(int a, int b, Pos6 *p);
 extern void func_8005A9A4(int a, int b);
-extern void func_800EEC3C(TObj *o, int a, int b);
+extern void topdownActorSetDirAnim(TObj *o, int a, int b);
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -30,7 +30,7 @@ void func_800F969C(TObj *o)
         } else {
             n->animFrame = 3;
         }
-        func_800EEC3C(n, 8, 0);
+        topdownActorSetDirAnim(n, 8, 0);
         n->step = 2;
         n->state = 0;
         D_800A603D = 4;
@@ -50,7 +50,7 @@ void func_800F969C(TObj *o)
             func_8005A9A4(0xA7, 1);
             func_80026C50(0x68, 1, 1);
             n->animFrame = 3;
-            func_800EEC3C(n, 0, 0);
+            topdownActorSetDirAnim(n, 0, 0);
             o->w08 = 0xC8;
             o->state++;
         }
@@ -59,7 +59,7 @@ void func_800F969C(TObj *o)
         if (--o->w08 <= 0) {
             o->w08 = 0x20;
             n->animFrame = 2;
-            func_800EEC3C(n, 4, 0);
+            topdownActorSetDirAnim(n, 4, 0);
             o->state++;
         }
         break;
@@ -67,7 +67,7 @@ void func_800F969C(TObj *o)
         n->h->p.whole--;
         if (--o->w08 <= 0) {
             n->animFrame = 3;
-            func_800EEC3C(n, 4, 0);
+            topdownActorSetDirAnim(n, 4, 0);
             o->w08 = 0xE6;
             o->state++;
         }

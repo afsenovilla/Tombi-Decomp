@@ -1835,3 +1835,59 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800eea0c tunnelControllerPickStep` (was func_800EEA0C; I0NFO3) - (no caller) step 0 of tunnelControllerStep as a function: slide zone -> 3, event 0x4F not completed -> 2, event 0x7D started -> 1
 - `800eea70 tunnelControllerStep` (was func_800EEA70; I0NFO3) - section controller: step 0 picks (slide zone / event 0x4F / event 0x7D), 1 tunnelUseItem95Step, 2 completes event 0x4F with a pause, 3 tunnelSlidePlayerStep
 - `800eec18 tunnelControllerHandler` (was func_800EEC18; I0NFO3) - section controller object: b04 0 tunnelSpawnActors, 1 tunnelControllerStep, 3 PoolFree_1F800210
+- `800e8b28 topdownSectionStepA` (was func_800E8B28; I0NFO2) - section object of a top-down section loaded with I0NFO2 (AREA05 / 0x13:2 rooms): step 0 waits D_8009C93A, step 1 three position exits then the area handler D_80079AD0[subtype], step 2 cameraEventScrollHandler
+- `800e8c98 topdownSectionStepB` (was func_800E8C98; I0NFO2) - as topdownSectionStepA with two exits by y (> 0x1E8 / < 0x50)
+- `800e8d98 topdownSectionStepC` (was func_800E8D98; I0NFO2) - as topdownSectionStepA with two position exits
+- `800e8ed4 topdownSectionStepD` (was func_800E8ED4; I0NFO2) - as topdownSectionStepA with three position exits
+- `800e9040 topdownSectionStepE` (was func_800E9040; I0NFO2) - as topdownSectionStepA with two exits by y (> 0x23A / < 0x50) inside x bands
+- `800e9174 topdownSectionStepBySection` (was func_800E9174; I0NFO2) - as topdownSectionStepA with the exits chosen by the section D_8009C962 (0: two, 2: one)
+- `800e9300 topdownShadowSetAnim` (was func_800E9300; I0NFO2) - (no caller) anim = D_800FEBD8[sub][0][i], AnimJump(n)
+- `800e9358 topdownShadowInit` (was func_800E9358; I0NFO2) - (no caller) w1e / bank / anim [32] of D_800FEBD4[subtype], b04++ (inlined in topdownShadowHandler)
+- `800e9410 topdownShadowFollowOwner` (was func_800E9410; I0NFO2) - (no caller) as I0NFO overheadShadowFollowOwner (inlined in topdownShadowHandler)
+- `800e94ac topdownShadowHandler` (was func_800E94AC; I0NFO2) - type 0x3A object subtype 0 (player shadow): init from D_800FEBD4, follows the owner d90 (position / visibility, b0f 0x10), freeObjectLayer2 at b04 3
+- `800e964c topdownSpawnPlayerShadow` (was func_800E964C; I0NFO2) - allocates the type 0x3A shadow object of o (d90 = o, b0f + 1)
+- `800e96e8 topdownPlayerSetDirAnim` (was func_800E96E8; I0NFO2) - same code as I0NFO overheadPlayerSetDirAnim
+- `800e99b0 topdownPlayerInit` (was func_800E99B0; I0NFO2) - player init in the I0NFO2 top-down sections (as I0NFO3 tunnelPlayerInit), spawns the shadow
+- `800e9c7c topdownPlayerStatusAnim` (was func_800E9C7C; I0NFO2) - as I0NFO overheadPlayerStatusAnim
+- `800e9e84 topdownPlayerSetMoveAnim` (was func_800E9E84; I0NFO2) - same code as I0NFO overheadPlayerSetMoveAnim
+- `800ea148 topdownPlayerSetDirAnimCached` (was func_800EA148; I0NFO2) - (no caller) topdownPlayerSetDirAnim keyed by the pose object w2c / w2e (dir + mode * 8)
+- `800ea44c topdownPlayerReadDpadDir` (was func_800EA44C; I0NFO2) - animFrame = 8-direction from the d-pad D_8009D670 (bit 8 set when no direction) while wac < 2
+- `800ea538 topdownPlayerWalkStep` (was func_800EA538; I0NFO2) - as I0NFO overheadPlayerWalkStep (topdownCollideMapTile)
+- `800ea69c topdownPlayerItemUseStep` (was func_800EA69C; I0NFO2) - step 0x30: the item used D_8009C941 (0xF / 0x11 / 9 / 0x9A / 0x1E-0x1F / 0x23 ... with area / position checks), as I0NFO3 tunnelPlayerItemUseStep
+- `800eaaa0 topdownPlayerDropExitStep` (was func_800EAAA0; I0NFO2) - as I0NFO overheadPlayerDropExitStep
+- `800eac60 topdownPlayerLandStep` (was func_800EAC60; I0NFO2) - as I0NFO3 tunnelPlayerLandStep
+- `800eaea8 topdownPlayerMainStep` (was func_800EAEA8; I0NFO2) - b04 1: step 0 idle with the d-pad direction, 1 walk, 2 talking, item use, wait for the fade (as I0NFO3 tunnelPlayerMainStep)
+- `800eb2c8 topdownPlayerEventStep` (was func_800EB2C8; I0NFO2) - as I0NFO3 tunnelPlayerEventStep (b04 4 scripted states)
+- `800eb550 topdownPlayerHandler` (was func_800EB550; I0NFO2) - as I0NFO3 tunnelPlayerHandler
+- `800eb714 topdownDrawRotatedSprite` (was func_800EB714; I0NFO2) - same code as I0NFO overheadDrawRotatedSprite
+- `800ec148 topdownDrawObjectSprite` (was func_800EC148; I0NFO2) - as I0NFO overheadDrawObjectSprite
+- `800ec710 topdownDrawMapLayers` (was func_800EC710; I0NFO2) - as I0NFO overheadDrawMapLayers (called from MAIN0 drawCategory7Objects by address)
+- `800eca74 topdownLoadMapTiles` (was func_800ECA74; I0NFO2) - as I0NFO overheadLoadMapTiles; the third tpage by area 5 / area 0x13 section 2
+- `800ecc18 topdownBuildMapStrip` (was func_800ECC18; I0NFO2) - same code as I0NFO overheadBuildMapStrip
+- `800ed380 topdownUploadMapStrip` (was func_800ED380; I0NFO2) - builds strip i (topdownBuildMapStrip) and loads it to VRAM (0x300 / 0x380 columns, the third page by area)
+- `800ed4d0 topdownSortDrawOrder` (was func_800ED4D0; I0NFO2) - as I0NFO overheadSortDrawOrder for the types 0x2D / 0x2E / 0x30 (layer byte 1 -> b0f -0xC, 2 -> +0xC) of list 21C and list 220
+- `800ed7ec topdownBuildVisibleTileList` (was func_800ED7EC; I0NFO2) - same code as I0NFO overheadBuildVisibleTileList
+- `800ed994 topdownRefreshMap` (was func_800ED994; I0NFO2) - (no caller) as I0NFO overheadRefreshMap (inlined in topdownMapObjHandler)
+- `800eda90 topdownMapObjHandler` (was func_800EDA90; I0NFO2) - as I0NFO overheadMapObjHandler
+- `800edc88 topdownResolveNpcContact` (was func_800EDC88; I0NFO2) - as I0NFO overheadResolveNpcContact
+- `800edeec topdownPlayerNpcCollision` (was func_800EDEEC; I0NFO2) - as I0NFO3 tunnelPlayerNpcCollision
+- `800ee05c topdownResolveCornerTile` (was func_800EE05C; I0NFO2) - same code as I0NFO overheadResolveCornerTile
+- `800ee18c topdownCollideMapTile` (was func_800EE18C; I0NFO2) - as I0NFO overheadCollideMapTile
+- `800ee440 topdownCheckTileTrigger` (was func_800EE440; I0NFO2) - b68 = bit 0x80 of the tile at x / y
+- `800ee4bc topdownItemSpotCheckStep` (was func_800EE4BC; I0NFO2) - as I0NFO overheadItemSpotCheckStep
+- `800ee654 topdownItemSpotUpdate` (was func_800EE654; I0NFO2) - item spot b04 1: step 0 check, 2 taken anim D_801073F4; brightness by the zone wb6 against D_800A60A3
+- `800ee748 topdownItemSpotHandler` (was func_800EE748; I0NFO2) - item spot object: b04 0 init (box 0x10/0x20/0xD/0x1D, anim D_801073E4, step D_8009D064[b0c]), 1 update, 2 taken anim, 3 freeObjectLayer2
+- `800ee8b0 topdownTalkSpotStep` (was func_800EE8B0; I0NFO2) - same code as I0NFO3 tunnelTalkSpotStep
+- `800eeac8 topdownTalkSpotHandler` (was func_800EEAC8; I0NFO2) - as I0NFO3 tunnelTalkSpotHandler
+- `800eebe8 topdownActorSetAnim` (was func_800EEBE8; I0NFO2) - anim = D_800FED84[subtype][0][i], AnimJump(n) (used by the scripted scene steps)
+- `800eec3c topdownActorSetDirAnim` (was func_800EEC3C; I0NFO2) - anim D_800FED84[subtype][0][animFrame + i] when it differs from D2, AnimJump(n)
+- `800eecc4 topdownActorIdleStep` (was func_800EECC4; I0NFO2) - (no caller) as I0NFO3 tunnelActorIdleStep
+- `800eed78 topdownActorPatrolVStep` (was func_800EED78; I0NFO2) - as I0NFO3 tunnelActorPatrolVStep
+- `800eefa0 topdownActorPatrolHStep` (was func_800EEFA0; I0NFO2) - as I0NFO3 tunnelActorPatrolHStep
+- `800ef1c0 topdownActorPatrolDiagStepA` (was func_800EF1C0; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepA
+- `800ef420 topdownActorPatrolDiagStepB` (was func_800EF420; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepB
+- `800ef68c topdownActorOpenDialogue` (was func_800EF68C; I0NFO2) - opens the actor's dialogue by its id and event flags (as I0NFO3 tunnelActorOpenDialogue); returns 0 when none
+- `800efd68 topdownActorTalkStep` (was func_800EFD68; I0NFO2) - faces the player, topdownActorOpenDialogue, waits for the message, completes the event wac (as I0NFO3 tunnelActorTalkStep)
+- `800f0270 topdownActorStep` (was func_800F0270; I0NFO2) - step 0 by the movement kind B8 (0 idle, 1..4 patrols), contact starts the talk step 1; brightness by the zone B6
+- `800f0448 topdownActorInit` (was func_800F0448; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FED7C[subtype], category |= 0x80
+- `800f05b0 topdownActorHandler` (was func_800F05B0; I0NFO2) - actor object: b04 0 init, 1 cull register and topdownActorStep, 3 freeObjectLayer2

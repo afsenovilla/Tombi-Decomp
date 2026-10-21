@@ -1,0 +1,51 @@
+// FUNC 800e94ac 416 I0NFO2
+// MATCHING 800e94ac 416
+#include "TOBJ.H"
+extern void func_8001FE6C(TObj *o);
+extern void func_800202B4(TObj *o);
+extern void func_800187E4(TObj *o);
+extern signed char D_8009D2B0[];
+extern int D_1F8002C8[];
+extern unsigned char D_800A6039;
+typedef struct { unsigned short w; short idx; char *p; int pad; } Ent94AC;
+extern Ent94AC D_800FEBD4[];
+
+void topdownShadowHandler(TObj *o)
+{
+    TObj *p;
+    unsigned char s = o->b04;
+    switch (s) {
+    case 0:
+        if (o->subtype == 0) {
+            o->w1e = D_800FEBD4[0].w;
+            o->d3c = D_1F8002C8[D_800FEBD4[o->subtype].idx];
+            o->anim = *(void **)(D_800FEBD4[o->subtype].p + 0x80);
+            func_8001FE6C(o);
+            o->b04++;
+        }
+        break;
+    case 1:
+        if (o->subtype == 0) {
+            func_800202B4(o);
+            p = (TObj *)o->d90;
+            o->a.raw = p->a.raw;
+            if (D_8009D2B0[0] != 3) {
+                o->y.raw = p->y.raw;
+            }
+            o->b.raw = p->b.raw;
+            if (p->category == 0) {
+                o->visible = D_800A6039;
+            } else {
+                o->visible = p->visible;
+            }
+            o->b0f = 0x10;
+        }
+        break;
+    case 2:
+        o->b04 = s + 1;
+        break;
+    case 3:
+        func_800187E4(o);
+        break;
+    }
+}

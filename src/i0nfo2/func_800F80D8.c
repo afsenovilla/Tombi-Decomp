@@ -16,7 +16,7 @@ extern unsigned char D_8009CEEB;
 extern unsigned char D_8009D00C[];
 extern unsigned char D_8009D0DB;
 extern unsigned char D_8009D2C3;
-extern void func_800EEBE8(TObj *o, int a, int b);
+extern void topdownActorSetAnim(TObj *o, int a, int b);
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -49,7 +49,7 @@ void func_800F80D8(TObj *o)
             VX(v) += 0x10;
             t->animFrame = t->b69 - 1;
             t->d90 = (int)showMessageBoxDirect(2, 0x30, &v);
-            func_800EEBE8(t, 0xB, 0);
+            topdownActorSetAnim(t, 0xB, 0);
             o->state = 0xF;
         } else if (D_8009CDD3 != 0) {
             t->animFrame = t->b69 - 1;
@@ -60,10 +60,10 @@ void func_800F80D8(TObj *o)
             VY(v) += 0xA0;
             S16(t, 0x2E) = 3;
             t->d90 = (int)showMessageBoxDirect(2, 0x2C, &v);
-            func_800EEBE8(t, 0xB, 0);
+            topdownActorSetAnim(t, 0xB, 0);
             o->state = 4;
         } else {
-            func_800EEBE8(t, 0x10, 0);
+            topdownActorSetAnim(t, 0x10, 0);
         }
         break;
     case 1:
@@ -73,7 +73,7 @@ void func_800F80D8(TObj *o)
             VX(v) -= 0x50;
             VY(v) += 0xA0;
             t->d90 = (int)showMessageBoxDirect(2, 0x2A, &v);
-            func_800EEBE8(t, 0xB, 0);
+            topdownActorSetAnim(t, 0xB, 0);
             o->state++;
         }
         break;
@@ -86,7 +86,7 @@ void func_800F80D8(TObj *o)
             VY(v) += 0xA0;
             S16(t, 0x2E) = 3;
             t->d90 = (int)showMessageBoxDirect(2, 0x2B, &v);
-            func_800EEBE8(t, 0xB, 0);
+            topdownActorSetAnim(t, 0xB, 0);
             o->state++;
         }
         break;
@@ -99,7 +99,7 @@ void func_800F80D8(TObj *o)
             VY(v) += 0xA0;
             t->d90 = (int)showMessageBoxDirect(2, 0x2C, &v);
             S16(t, 0x2E) = 3;
-            func_800EEBE8(t, 0xB, 0);
+            topdownActorSetAnim(t, 0xB, 0);
             o->state++;
         }
         break;
@@ -119,7 +119,7 @@ void func_800F80D8(TObj *o)
         t->d90 = (int)showMessageBoxDirect(2, 0x2D, &v);
         k = t->b69;
         t->animFrame = k - 1;
-        func_800EEBE8(t, k + 7, 0);
+        topdownActorSetAnim(t, k + 7, 0);
         o->state++;
         break;
     case 6:
@@ -194,7 +194,7 @@ void func_800F80D8(TObj *o)
         break;
     case 9:
         t->b68 = 0;
-        func_800EEBE8(t, 3, 0);
+        topdownActorSetAnim(t, 3, 0);
         t->step = 0;
         t->state = 0;
         D_8009C93F = 0;

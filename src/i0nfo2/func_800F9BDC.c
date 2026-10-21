@@ -12,7 +12,7 @@ extern unsigned char D_8009CE4F;
 extern unsigned char D_8009CF2B;
 extern unsigned char D_8009CF2C[];
 extern unsigned char D_800A60E4;
-extern void func_800EEBE8(TObj *o, int a, int b);
+extern void topdownActorSetAnim(TObj *o, int a, int b);
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void setEventStarted(int, int, int);
 
@@ -47,8 +47,8 @@ void func_800F9BDC(TObj *o)
         v = *(B12 *)&a->a;
         a->animFrame = 3;
         a->d90 = (int)showMessageBoxDirect(2, 0x13, &v);
-        func_800EEBE8(a, 0xB, 0);
-        func_800EEBE8(b, 3, 0);
+        topdownActorSetAnim(a, 0xB, 0);
+        topdownActorSetAnim(b, 3, 0);
         o->state++;
         break;
     case 3:
@@ -57,8 +57,8 @@ void func_800F9BDC(TObj *o)
             v = *(B12 *)&b->a;
             b->animFrame = 3;
             b->d90 = (int)showMessageBoxDirect(2, 0x14, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -67,8 +67,8 @@ void func_800F9BDC(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0x15, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -78,8 +78,8 @@ void func_800F9BDC(TObj *o)
             v = *(B12 *)&b->a;
             b->animFrame = 3;
             b->d90 = (int)showMessageBoxDirect(2, 0x16, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -88,8 +88,8 @@ void func_800F9BDC(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0x17, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -99,8 +99,8 @@ void func_800F9BDC(TObj *o)
             v = *(B12 *)&b->a;
             b->animFrame = 3;
             b->d90 = (int)showMessageBoxDirect(2, 0x18, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -109,15 +109,15 @@ void func_800F9BDC(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0x19, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
     case 9:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_800EEBE8(a, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
             o->state++;
             if (D_8009CE4F != 0xFF) {
                 o->w08 = 0xC8;
@@ -136,8 +136,8 @@ void func_800F9BDC(TObj *o)
         v = *(B12 *)&b->a;
         b->animFrame = 3;
         b->d90 = (int)showMessageBoxDirect(2, 0x1A, &v);
-        func_800EEBE8(a, 3, 0);
-        func_800EEBE8(b, 0xB, 0);
+        topdownActorSetAnim(a, 3, 0);
+        topdownActorSetAnim(b, 0xB, 0);
         o->state++;
         break;
     case 12:
@@ -145,16 +145,16 @@ void func_800F9BDC(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0x1B, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
     case 13:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state = 20;
         }
         break;

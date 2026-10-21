@@ -4,8 +4,8 @@
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern void func_800EEBE8(TObj *o, unsigned short i, short n);
-extern void func_800EEC3C(TObj *o, int i, short n);
+extern void topdownActorSetAnim(TObj *o, unsigned short i, short n);
+extern void topdownActorSetDirAnim(TObj *o, int i, short n);
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -22,7 +22,7 @@ static inline void startWalk(TObj *n)
     n->step = 2;
     n->state = 0;
     n->animFrame = n->b69 - 1;
-    func_800EEC3C(n, 8, 0);
+    topdownActorSetDirAnim(n, 8, 0);
 }
 
 static inline void stopWalk(TObj *n)
@@ -32,7 +32,7 @@ static inline void stopWalk(TObj *n)
     n->step = 0;
     n->state = 0;
     n->animFrame = 1;
-    func_800EEC3C(n, 0, 0);
+    topdownActorSetDirAnim(n, 0, 0);
 }
 
 void func_800F91D8(TObj *o)
@@ -63,18 +63,18 @@ void func_800F91D8(TObj *o)
         if (b->b04 == 2) {
             b->b04 = 3;
             if (D_800A604E > n->y.p.whole) {
-                func_800EEBE8(n, 6, 0);
+                topdownActorSetAnim(n, 6, 0);
                 o->state++;
             } else if (D_8009CEF0[0] == 1) {
-                func_800EEBE8(n, 4, 0);
+                topdownActorSetAnim(n, 4, 0);
                 if (D_8009CDD5 == 0 || D_8009CDD5 == 0xFF) {
                     o->state++;
                 } else {
-                    func_800EEBE8(n, 1, 0);
+                    topdownActorSetAnim(n, 1, 0);
                     o->state = 9;
                 }
             } else {
-                func_800EEBE8(n, 1, 0);
+                topdownActorSetAnim(n, 1, 0);
                 o->state = 9;
             }
         }
@@ -84,7 +84,7 @@ void func_800F91D8(TObj *o)
         if (n->h->p.whole >= 0x147) {
             D_8009CEF0[0] = 2;
             n->h->p.whole = 0x146;
-            func_800EEBE8(n, 1, 0);
+            topdownActorSetAnim(n, 1, 0);
             n->animFrame = 1;
             o->state = 9;
         }

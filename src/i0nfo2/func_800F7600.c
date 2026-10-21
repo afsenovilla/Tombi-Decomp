@@ -16,7 +16,7 @@ extern unsigned char D_8009CDCA[];
 extern unsigned char D_8009CEE7;
 extern unsigned char D_8009CEF6;
 extern unsigned char D_8009CF2A;
-extern void func_800EEBE8(TObj *o, int a, int b);
+extern void topdownActorSetAnim(TObj *o, int a, int b);
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
@@ -42,13 +42,13 @@ void func_800F7600(TObj *o)
         D_8009C942 = 1;
         o->w08 = 0x3C;
         o->state++;
-        func_800EEBE8(a, 3, 0);
-        func_800EEBE8(b, 3, 0);
+        topdownActorSetAnim(a, 3, 0);
+        topdownActorSetAnim(b, 3, 0);
         if (D_8009CDCA[0] == 0xFF) {
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 0x12, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state = 0x13;
         }
         if (D_8009CDCA[0] == 1) {
@@ -67,8 +67,8 @@ void func_800F7600(TObj *o)
             v = *(B12 *)&a->a;
             S16(a, 0x2E) = 3;
             a->d90 = (int)showMessageBoxDirect(2, 4, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -78,8 +78,8 @@ void func_800F7600(TObj *o)
             v = *(B12 *)&b->a;
             S16(b, 0x2E) = 3;
             b->d90 = (int)showMessageBoxDirect(2, 5, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -88,8 +88,8 @@ void func_800F7600(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 6, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -99,8 +99,8 @@ void func_800F7600(TObj *o)
             v = *(B12 *)&b->a;
             S16(b, 0x2E) = 3;
             b->d90 = (int)showMessageBoxDirect(2, 7, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -109,8 +109,8 @@ void func_800F7600(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 8, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -120,8 +120,8 @@ void func_800F7600(TObj *o)
             v = *(B12 *)&b->a;
             S16(b, 0x2E) = 3;
             b->d90 = (int)showMessageBoxDirect(2, 9, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -129,8 +129,8 @@ void func_800F7600(TObj *o)
         if (((TObj *)b->d90)->b04 == 2) {
             ((TObj *)b->d90)->b04 = 3;
             setEventStarted(0x26, 0, 0);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->w08 = 0xC8;
             o->state++;
         }
@@ -139,16 +139,16 @@ void func_800F7600(TObj *o)
         if (--o->w08 <= 0) {
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0xA, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
     case 9:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 3, 0);
             addItemToInventory(0x79, 1, 1);
             o->w08 = 0x3C;
             o->state++;
@@ -158,8 +158,8 @@ void func_800F7600(TObj *o)
         if (--o->w08 <= 0) {
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 0xB, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -168,16 +168,16 @@ void func_800F7600(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0xC, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
     case 12:
         if (((TObj *)a->d90)->b04 == 2) {
             ((TObj *)a->d90)->b04 = 3;
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state = 0x14;
         }
         break;
@@ -186,8 +186,8 @@ void func_800F7600(TObj *o)
             v = *(B12 *)&a->a;
             S16(a, 0x2E) = 3;
             a->d90 = (int)showMessageBoxDirect(2, 0xD, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -196,8 +196,8 @@ void func_800F7600(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             b->d90 = (int)showMessageBoxDirect(2, 0xE, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             o->state++;
         }
         break;
@@ -206,8 +206,8 @@ void func_800F7600(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0xF, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;
@@ -216,8 +216,8 @@ void func_800F7600(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 0x10, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             addItemToInventory(7, 1, 1);
             o->state++;
         }
@@ -227,8 +227,8 @@ void func_800F7600(TObj *o)
             ((TObj *)b->d90)->b04 = 3;
             v = *(B12 *)&a->a;
             a->d90 = (int)showMessageBoxDirect(2, 0x11, &v);
-            func_800EEBE8(a, 0xB, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 0xB, 0);
+            topdownActorSetAnim(b, 3, 0);
             increaseMaxHealth();
             printInfoMessage(0x15, 3);
             o->state++;
@@ -239,8 +239,8 @@ void func_800F7600(TObj *o)
             ((TObj *)a->d90)->b04 = 3;
             v = *(B12 *)&b->a;
             b->d90 = (int)showMessageBoxDirect(2, 0x12, &v);
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 0xB, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 0xB, 0);
             D_8009CF2A = 1;
             o->state++;
         }
@@ -248,8 +248,8 @@ void func_800F7600(TObj *o)
     case 19:
         if (((TObj *)b->d90)->b04 == 2) {
             ((TObj *)b->d90)->b04 = 3;
-            func_800EEBE8(a, 3, 0);
-            func_800EEBE8(b, 3, 0);
+            topdownActorSetAnim(a, 3, 0);
+            topdownActorSetAnim(b, 3, 0);
             o->state++;
         }
         break;

@@ -4,8 +4,8 @@
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern void func_800EEBE8(TObj *o, unsigned short i, short n);
-extern void func_800EEC3C(TObj *o, int i, short n);
+extern void topdownActorSetAnim(TObj *o, unsigned short i, short n);
+extern void topdownActorSetDirAnim(TObj *o, int i, short n);
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -29,7 +29,7 @@ void func_800FA278(TObj *o)
         D_8009C93F = 1;
         D_8009C942 = 1;
         n->animFrame = n->b69 - 1;
-        func_800EEC3C(n, 8, 0);
+        topdownActorSetDirAnim(n, 8, 0);
         p = *(Pos6 *)&n->a;
         S32(n, 0x90) = func_8002DCC8(2, 0x35, &p);
         o->state++;
@@ -38,7 +38,7 @@ void func_800FA278(TObj *o)
         b = (TObj *)S32(n, 0x90);
         if (b->b04 == 2) {
             b->b04 = 3;
-            func_800EEBE8(n, 3, 0);
+            topdownActorSetAnim(n, 3, 0);
             o->state++;
         }
         break;
@@ -50,7 +50,7 @@ void func_800FA278(TObj *o)
         D_8009C942 = 0;
         D_800A60E4 = 0;
         n->animFrame = 3;
-        func_800EEC3C(n, 0, 0);
+        topdownActorSetDirAnim(n, 0, 0);
         n->b68 = 0;
         n->b6a = 0;
         D_800A603C = 1;
