@@ -1,0 +1,92 @@
+// FUNC 800fe848 724 I0NFO2
+// MATCHING 800fe848 724
+#include "TOBJ.H"
+typedef struct { short s[6]; } Pos6;
+extern void func_80026C50(int a, int b, int c);
+extern TObj *func_8002DCC8(int a, int b, Pos6 *p);
+extern void func_8005A9A4(int a, int b);
+extern void topdownA19ActorSetDirAnim(TObj *o, int a, int b, int c);
+extern void func_800FE410(TObj *o);
+extern unsigned char D_8009C93F;
+extern unsigned char D_8009C940;
+extern unsigned char D_8009C941;
+extern unsigned char D_8009C942;
+extern unsigned char D_8009CDF6;
+extern unsigned char D_8009CE56;
+extern unsigned char D_8009CFCF;
+extern unsigned char D_8009CFD7;
+extern TObj *D_8009F2E8;
+extern unsigned char D_800A603C;
+extern unsigned char D_800A603D;
+extern unsigned char D_800A603E;
+extern TObj D_800A6038;
+extern TObj *D_800A60C8;
+extern unsigned char D_800A60E4;
+
+void stepNpcSet11(TObj *o)
+{
+    Pos6 p;
+    TObj *n = D_8009F2E8;
+    int d;
+    switch (o->step) {
+    case 0:
+        if (D_8009CFD7 != 0) {
+            if (D_8009C941 >= 0x1E && D_8009C941 < 0x20 && D_8009CDF6 != 0xFF) {
+                o->step = 1;
+            }
+            D_8009CFD7 = 0;
+            D_8009C940 = 0;
+        } else if (D_8009CE56 != 0xFF && D_8009CFCF != 0) {
+            o->step = 4;
+        }
+        break;
+    case 1:
+        p = *(Pos6 *)&D_800A6038.a;
+        D_8009C93F = 1;
+        D_8009C942 = 1;
+        D_800A603C = 4;
+        D_800A603D = 3;
+        D_800A603E = 0;
+        n->step = 2;
+        n->state = 0;
+        d = 3;
+        if (D_800A6038.y.p.whole < n->y.p.whole) d = 1;
+        n->animFrame = d;
+        topdownA19ActorSetDirAnim(n, 8, 0, d);
+        D_800A60C8 = func_8002DCC8(3, 1, &p);
+        o->step++;
+        break;
+    case 2:
+        if (D_800A60C8->b04 == 2) {
+            D_800A60C8->b04 = 3;
+            func_8005A9A4(0x52, 1);
+            func_80026C50(0x37, 1, 1);
+            func_80026C50(0x37, 1, 1);
+            o->w08 = 0xC8;
+            o->step++;
+        }
+        break;
+    case 3:
+        if (--o->w08 <= 0) {
+            d = 3;
+            if (D_800A6038.y.p.whole < n->y.p.whole) d = 1;
+            n->animFrame = d;
+            topdownA19ActorSetDirAnim(n, 0, 0, d);
+            D_8009C940 = 0;
+            D_8009C942 = 0;
+            D_8009C93F = 0;
+            D_800A60E4 = 0;
+            D_800A603C = 1;
+            D_800A603D = 0;
+            D_800A603E = 0;
+            n->b04 = 1;
+            n->step = 0;
+            o->step = 0;
+            o->state = 0;
+        }
+        break;
+    case 4:
+        func_800FE410(o);
+        break;
+    }
+}

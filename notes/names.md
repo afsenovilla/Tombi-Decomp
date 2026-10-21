@@ -1941,3 +1941,40 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800f4f70 topdownA17ActorStep` (was func_800F4F70; I0NFO2) - step 0 by the movement kind B8 (idle / patrols), contact starts topdownA17ActorTalkStep; zone brightness
 - `800f5134 topdownA17ActorInit` (was func_800F5134; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEF64[subtype], category |= 0x80
 - `800f528c topdownA17ActorHandler` (was func_800F528C; I0NFO2) - AREA17 type 0x30 handler (updateL2Type30Object): init, cull register + topdownA17ActorStep, freeObjectLayer2
+- `800f5334 topdownA18ActorInit` (was func_800F5334; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEFA0[subtype], category |= 0x80
+- `800f548c topdownA18ActorHandler` (was func_800F548C; I0NFO2) - AREA18 type 0x30 handler (updateL2Type30Object): init, cull register, pad bit 0x1000 cycles the anim wb4 (0..7, D_800FEFA8), AnimAdvance, freeObjectLayer2
+- `800f5590 topdownA19ActorSetDirAnim` (was func_800F5590; I0NFO2) - anim D_800FEFFC[subtype][0][animFrame + i] when it differs from D2, AnimJump(n)
+- `800f5618 topdownA19ActorIdleStep` (was func_800F5618; I0NFO2) - (no caller) as I0NFO3 tunnelActorIdleStep (D_800FEFFC)
+- `800f56cc topdownA19ActorPatrolVStep` (was func_800F56CC; I0NFO2) - as I0NFO3 tunnelActorPatrolVStep
+- `800f58f4 topdownA19ActorPatrolHStep` (was func_800F58F4; I0NFO2) - as I0NFO3 tunnelActorPatrolHStep
+- `800f5b14 topdownA19ActorPatrolDiagStepA` (was func_800F5B14; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepA
+- `800f5d74 topdownA19ActorPatrolDiagStepB` (was func_800F5D74; I0NFO2) - as I0NFO3 tunnelActorPatrolDiagStepB
+- `800f5fe0 topdownA19ActorOpenDialogue` (was func_800F5FE0; I0NFO2) - opens the dialogue of the AREA19 actor by its id BA (func_8002DCC8); returns 1 when a message was opened
+- `800f61d4 topdownA19ActorTalkStep` (was func_800F61D4; I0NFO2) - faces the player, topdownA19ActorOpenDialogue, waits for the message, completes the event wac
+- `800f67b4 topdownA19ActorStep` (was func_800F67B4; I0NFO2) - step 0 by the movement kind B8 (idle / patrols), contact starts topdownA19ActorTalkStep; zone brightness
+- `800f698c topdownA19ActorInit` (was func_800F698C; I0NFO2) - box / tpage / bank / anim (by B4) from D_800FEFF4[subtype], category |= 0x80
+- `800f6b4c topdownA19ActorHandler` (was func_800F6B4C; I0NFO2) - AREA19 type 0x30 handler (updateL2Type30Object): init, cull register + topdownA19ActorStep, freeObjectLayer2
+- `800f6bf4 topdownA11SceneryInit` (was func_800F6BF4; I0NFO2) - (no caller) AREA11 scenery init from D_800FF054[subtype], inlined in topdownA11SceneryHandler
+- `800f6cf8 topdownA11SceneryUpdate` (was func_800F6CF8; I0NFO2) - (no caller) zone brightness, visible, cull register
+- `800f6d5c topdownA11SceneryHandler` (was func_800F6D5C; I0NFO2) - AREA11 handler of the per-area object slot MAIN0 80079C20: init from D_800FF054, zone brightness + cull register, freeObjectLayer2
+- `800f6f20 spawnNpcSet07` (was func_800F6F20; I0NFO2) - spawn step of unlayered variant 7 (MAIN0 D_8007C1C8[7]): allocates the objects of the record list D_800FFD7C[GAME+0x58D] and D_800FF06C
+- `800fa424 stepNpcSet07` (was func_800FA424; I0NFO2) - step switch of variant 7: steps 0..12 run the scene functions (they animate the AREA05 actors with topdownActorSetAnim), step 9 starts sound 0x35
+- `800fa5c8 updateNpcSet07` (was func_800FA5C8; I0NFO2) - unlayered variant 7 (MAIN0 dispatchUnlayeredByVariant D_8007C1C8[7]): b04 0 spawnNpcSet07, 1 stepNpcSet07, 3 free
+- `800fa670 spawnNpcSet0C` (was func_800FA670; I0NFO2) - spawn step of unlayered variant 0xC: allocates the objects of its record list
+- `800fa84c npcSet0CMessageScene` (was func_800FA84C; I0NFO2) - step 1 of variant 0xC: locks the player, opens a message after the w08 delay and waits for it (D_800A60C8)
+- `800faf68 stepNpcSet0C` (was func_800FAF68; I0NFO2) - (no caller) step switch of variant 0xC (1: npcSet0CMessageScene), inlined in updateNpcSet0C
+- `800fafac updateNpcSet0C` (was func_800FAFAC; I0NFO2) - unlayered variant 0xC (MAIN0 D_8007C1C8[0xC]): b04 0 spawnNpcSet0C, 1 npcSet0CMessageScene at step 1, 3 free
+- `800fb054 spawnNpcSet0D` (was func_800FB054; I0NFO2) - spawn step of unlayered variant 0xD: two record lists (D_800FFE24) chosen by event flags, stores D_8009CFA5
+- `800fb32c updateNpcSet0D` (was func_800FB32C; I0NFO2) - unlayered variant 0xD (MAIN0 D_8007C1C8[0xD]): b04 0 spawnNpcSet0D, then idle until freed
+- `800fb3c4 spawnNpcSet0E` (was func_800FB3C4; I0NFO2) - spawn step of unlayered variant 0xE: D_8009CF60 from the event flags, records by bc
+- `800fbbcc npcSet0EPickStep` (was func_800FBBCC; I0NFO2) - (no caller) step 0 of stepNpcSet0E: D_8009CFA8 == 1 -> 2, D_8009CFA7 == 1 -> 1, D_8009CFAA == 1 -> 3
+- `800fbf5c stepNpcSet0E` (was func_800FBF5C; I0NFO2) - (no caller) step switch of variant 0xE (pick, scene steps 1..3 with the AREA16 actors), inlined in updateNpcSet0E
+- `800fc050 updateNpcSet0E` (was func_800FC050; I0NFO2) - unlayered variant 0xE (MAIN0 D_8007C1C8[0xE]): b04 0 spawnNpcSet0E, 1 the step switch, 3 free
+- `800fc1c0 spawnNpcSet0F` (was func_800FC1C0; I0NFO2) - spawn step of unlayered variant 0xF: record lists by event flags (D_80100368), stores D_8009CFA5, clears D_8009CF9F
+- `800fda4c stepNpcSet0F` (was func_800FDA4C; I0NFO2) - (no caller) step switch of variant 0xF: steps 0..11 run the scene functions (AREA17 actors), inlined in updateNpcSet0F
+- `800fdb34 updateNpcSet0F` (was func_800FDB34; I0NFO2) - unlayered variant 0xF (MAIN0 D_8007C1C8[0xF]): b04 0 spawnNpcSet0F, 1 the step switch, 3 free
+- `800fdca4 spawnNpcSet10` (was func_800FDCA4; I0NFO2) - spawn step of unlayered variant 0x10: allocates the objects of its record list
+- `800fde6c updateNpcSet10` (was func_800FDE6C; I0NFO2) - unlayered variant 0x10 (MAIN0 D_8007C1C8[0x10]): b04 0 spawnNpcSet10, 1 AnimAdvance at step 0, 3 free
+- `800fdf24 spawnNpcSet11` (was func_800FDF24; I0NFO2) - spawn step of unlayered variant 0x11: allocates the objects of its record lists
+- `800fe848 stepNpcSet11` (was func_800FE848; I0NFO2) - step switch of variant 0x11: items 0x1E / 0x1F used near the AREA19 actor D_8009F2E8 start its message scene (sfx 0x52)
+- `800feb28 updateNpcSet11` (was func_800FEB28; I0NFO2) - unlayered variant 0x11 (MAIN0 D_8007C1C8[0x11]): b04 0 spawnNpcSet11, 1 stepNpcSet11, 3 free

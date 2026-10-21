@@ -1,6 +1,6 @@
 {
  "generated_by": "tools/unnamed.py",
- "count": 142,
+ "count": 105,
  "progs": {
   "MAIN0": 6,
   "X000": 48,
@@ -10,7 +10,7 @@
   "D0SPSUB3": 0,
   "G0OVER": 0,
   "I0NFO": 0,
-  "I0NFO2": 87,
+  "I0NFO2": 50,
   "I0NFO3": 0
  },
  "entries": [
@@ -1454,123 +1454,6 @@
    "anim": null
   },
   {
-   "address": "800f5334",
-   "name": "func_800F5334",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5334.c",
-   "size": 344,
-   "note": "",
-   "callers": [
-    "func_800F548C"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f548c",
-   "name": "func_800F548C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F548C.c",
-   "size": 260,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f5590",
-   "name": "func_800F5590",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5590.c",
-   "size": 136,
-   "note": "",
-   "callers": [
-    "func_800FE410",
-    "func_800FE848"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f5618",
-   "name": "func_800F5618",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5618.c",
-   "size": 180,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f56cc",
-   "name": "func_800F56CC",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F56CC.c",
-   "size": 552,
-   "note": "",
-   "callers": [
-    "func_800F67B4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f58f4",
-   "name": "func_800F58F4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F58F4.c",
-   "size": 544,
-   "note": "",
-   "callers": [
-    "func_800F67B4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f5b14",
-   "name": "func_800F5B14",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5B14.c",
-   "size": 608,
-   "note": "",
-   "callers": [
-    "func_800F67B4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f5d74",
-   "name": "func_800F5D74",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5D74.c",
-   "size": 604,
-   "note": "",
-   "callers": [
-    "func_800F67B4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800f5fd0",
    "name": "func_800F5FD0",
    "prog": "I0NFO2",
@@ -1597,133 +1480,6 @@
    "anim": null
   },
   {
-   "address": "800f5fe0",
-   "name": "func_800F5FE0",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F5FE0.c",
-   "size": 500,
-   "note": "",
-   "callers": [
-    "func_800F61D4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f61d4",
-   "name": "func_800F61D4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F61D4.c",
-   "size": 1504,
-   "note": "",
-   "callers": [
-    "func_800F67B4"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f67b4",
-   "name": "func_800F67B4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F67B4.c",
-   "size": 472,
-   "note": "",
-   "callers": [
-    "func_800F6B4C"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f698c",
-   "name": "func_800F698C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F698C.c",
-   "size": 448,
-   "note": "",
-   "callers": [
-    "func_800F6B4C"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f6b4c",
-   "name": "func_800F6B4C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F6B4C.c",
-   "size": 168,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f6bf4",
-   "name": "func_800F6BF4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F6BF4.c",
-   "size": 260,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f6cf8",
-   "name": "func_800F6CF8",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F6CF8.c",
-   "size": 100,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f6d5c",
-   "name": "func_800F6D5C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F6D5C.c",
-   "size": 452,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800f6f20",
-   "name": "func_800F6F20",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800F6F20.c",
-   "size": 1760,
-   "note": "",
-   "callers": [
-    "func_800FA5C8"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800f7600",
    "name": "func_800F7600",
    "prog": "I0NFO2",
@@ -1731,7 +1487,7 @@
    "size": 2776,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1746,7 +1502,7 @@
    "size": 1992,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1761,7 +1517,7 @@
    "size": 1212,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1776,7 +1532,7 @@
    "size": 468,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1791,7 +1547,7 @@
    "size": 680,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1806,7 +1562,7 @@
    "size": 680,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1821,7 +1577,7 @@
    "size": 540,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1836,7 +1592,7 @@
    "size": 728,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1851,7 +1607,7 @@
    "size": 616,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1866,7 +1622,7 @@
    "size": 1544,
    "note": "",
    "callers": [
-    "func_800FA424"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1894,22 +1650,7 @@
    "size": 428,
    "note": "",
    "callers": [
-    "func_800FA424"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fa424",
-   "name": "func_800FA424",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FA424.c",
-   "size": 408,
-   "note": "",
-   "callers": [
-    "func_800FA5C8"
+    "stepNpcSet07"
    ],
    "twins": [],
    "refs": [],
@@ -1930,63 +1671,6 @@
    "anim": null
   },
   {
-   "address": "800fa5c8",
-   "name": "func_800FA5C8",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FA5C8.c",
-   "size": 168,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fa670",
-   "name": "func_800FA670",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FA670.c",
-   "size": 476,
-   "note": "",
-   "callers": [
-    "func_800FAFAC"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fa84c",
-   "name": "func_800FA84C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FA84C.c",
-   "size": 1820,
-   "note": "",
-   "callers": [
-    "func_800FAF68",
-    "func_800FAFAC"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800faf68",
-   "name": "func_800FAF68",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FAF68.c",
-   "size": 56,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800fafa0",
    "name": "func_800FAFA0",
    "prog": "I0NFO2",
@@ -1994,34 +1678,6 @@
    "size": 12,
    "note": "",
    "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fafac",
-   "name": "func_800FAFAC",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FAFAC.c",
-   "size": 168,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fb054",
-   "name": "func_800FB054",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FB054.c",
-   "size": 700,
-   "note": "",
-   "callers": [
-    "func_800FB32C"
-   ],
    "twins": [],
    "refs": [],
    "object": null,
@@ -2067,34 +1723,6 @@
    "anim": null
   },
   {
-   "address": "800fb32c",
-   "name": "func_800FB32C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FB32C.c",
-   "size": 152,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fb3c4",
-   "name": "func_800FB3C4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FB3C4.c",
-   "size": 916,
-   "note": "",
-   "callers": [
-    "func_800FC050"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800fb758",
    "name": "func_800FB758",
    "prog": "I0NFO2",
@@ -2102,22 +1730,9 @@
    "size": 1140,
    "note": "",
    "callers": [
-    "func_800FBF5C",
-    "func_800FC050"
+    "stepNpcSet0E",
+    "updateNpcSet0E"
    ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fbbcc",
-   "name": "func_800FBBCC",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FBBCC.c",
-   "size": 104,
-   "note": "",
-   "callers": [],
    "twins": [],
    "refs": [],
    "object": null,
@@ -2131,8 +1746,8 @@
    "size": 312,
    "note": "",
    "callers": [
-    "func_800FBF5C",
-    "func_800FC050"
+    "stepNpcSet0E",
+    "updateNpcSet0E"
    ],
    "twins": [],
    "refs": [],
@@ -2147,22 +1762,9 @@
    "size": 496,
    "note": "",
    "callers": [
-    "func_800FBF5C",
-    "func_800FC050"
+    "stepNpcSet0E",
+    "updateNpcSet0E"
    ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fbf5c",
-   "name": "func_800FBF5C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FBF5C.c",
-   "size": 232,
-   "note": "",
-   "callers": [],
    "twins": [],
    "refs": [],
    "object": null,
@@ -2182,34 +1784,6 @@
    "anim": null
   },
   {
-   "address": "800fc050",
-   "name": "func_800FC050",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FC050.c",
-   "size": 368,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fc1c0",
-   "name": "func_800FC1C0",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FC1C0.c",
-   "size": 680,
-   "note": "",
-   "callers": [
-    "func_800FDB34"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800fc468",
    "name": "func_800FC468",
    "prog": "I0NFO2",
@@ -2217,8 +1791,8 @@
    "size": 988,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2233,8 +1807,8 @@
    "size": 416,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2249,8 +1823,8 @@
    "size": 1476,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2280,8 +1854,8 @@
    "size": 428,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2296,8 +1870,8 @@
    "size": 300,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2312,8 +1886,8 @@
    "size": 356,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2328,8 +1902,8 @@
    "size": 356,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2344,8 +1918,8 @@
    "size": 552,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2360,8 +1934,8 @@
    "size": 316,
    "note": "",
    "callers": [
-    "func_800FDA4C",
-    "func_800FDB34"
+    "stepNpcSet0F",
+    "updateNpcSet0F"
    ],
    "twins": [],
    "refs": [],
@@ -2408,47 +1982,6 @@
    "anim": null
   },
   {
-   "address": "800fda4c",
-   "name": "func_800FDA4C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FDA4C.c",
-   "size": 232,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fdb34",
-   "name": "func_800FDB34",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FDB34.c",
-   "size": 368,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fdca4",
-   "name": "func_800FDCA4",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FDCA4.c",
-   "size": 396,
-   "note": "",
-   "callers": [
-    "func_800FDE6C"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800fde30",
    "name": "FUN_800fde30",
    "prog": "I0NFO2",
@@ -2475,34 +2008,6 @@
    "anim": null
   },
   {
-   "address": "800fde6c",
-   "name": "func_800FDE6C",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FDE6C.c",
-   "size": 184,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fdf24",
-   "name": "func_800FDF24",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FDF24.c",
-   "size": 1260,
-   "note": "",
-   "callers": [
-    "func_800FEB28"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
    "address": "800fe410",
    "name": "func_800FE410",
    "prog": "I0NFO2",
@@ -2510,22 +2015,7 @@
    "size": 1080,
    "note": "",
    "callers": [
-    "func_800FE848"
-   ],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800fe848",
-   "name": "func_800FE848",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FE848.c",
-   "size": 724,
-   "note": "",
-   "callers": [
-    "func_800FEB28"
+    "stepNpcSet11"
    ],
    "twins": [],
    "refs": [],
@@ -2538,19 +2028,6 @@
    "prog": "I0NFO2",
    "file": "src/i0nfo2/func_800FEB1C.c",
    "size": 12,
-   "note": "",
-   "callers": [],
-   "twins": [],
-   "refs": [],
-   "object": null,
-   "anim": null
-  },
-  {
-   "address": "800feb28",
-   "name": "func_800FEB28",
-   "prog": "I0NFO2",
-   "file": "src/i0nfo2/func_800FEB28.c",
-   "size": 168,
    "note": "",
    "callers": [],
    "twins": [],
