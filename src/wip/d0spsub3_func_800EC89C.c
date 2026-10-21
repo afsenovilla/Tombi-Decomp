@@ -1,6 +1,6 @@
 // FUNC 800ec89c 3424 D0SPSUB3
 // port-only draft (not byte-matched): D0SPSUB func_800ED0C4 (src/wip) relocated to D0SPSUB3 and edited for the
-// three differences of the retail code: state 1 calls func_800EC3F0(m) (not func_800EC504(m, 1)), the confirm
+// three differences of the retail code: state 1 calls subScreenMoveTabCursor(m) (not func_800EC504(m, 1)), the confirm
 // mask is 0x5008 (not 0x4008), and the cursor switch of state 1 has no mode cases 4..7 (its jump table at
 // 0x800E85F4 sends 3..7 to the default playSFXAndSetNote and 8..11 to the SfxPlay2/return 1 case).
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
@@ -29,11 +29,11 @@ extern int D_80100B64;
 extern char D_80100B68, D_80100B6C;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern volatile unsigned char D_8009D2B0, D_800A6038, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
-extern int func_800EC3F0(Menu *m);
-extern int func_800EC524(Menu *m);
-extern int func_800EC6EC(Menu *m, int n);
+extern int subScreenMoveTabCursor(Menu *m);
+extern int subScreenMoveGridCursor(Menu *m);
+extern int subScreenMoveGridCursorN(Menu *m, int n);
 extern int func_800E8950(int id);
-extern void func_800ED5FC(int kind, int add, int bank);
+extern void subScreenOpenMessage(int kind, int add, int bank);
 extern void func_800ED7BC(void *o, int a);
 extern Obj *allocObjectLayer2(void);
 extern void printInfoMessage(int id, int kind);
@@ -57,7 +57,7 @@ int func_800EC89C(Menu *m)
         }
         m->state++;
     case 1:
-        if (func_800EC3F0(m)) return 0;
+        if (subScreenMoveTabCursor(m)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -133,7 +133,7 @@ int func_800EC89C(Menu *m)
         }
         return 0;
     case 2:
-        if (func_800EC524(m)) return 0;
+        if (subScreenMoveGridCursor(m)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -235,7 +235,7 @@ int func_800EC89C(Menu *m)
                 }
                 w = 2;
             found:
-                func_800ED5FC(0, w, 2);
+                subScreenOpenMessage(0, w, 2);
                 D_80100A94 = 0;
                 SfxPlay2(10, 10);
                 m->state = 6;
@@ -330,7 +330,7 @@ int func_800EC89C(Menu *m)
         }
         break;
     case 4:
-        if (func_800EC6EC(m, D_8009D1A4.count)) return 0;
+        if (subScreenMoveGridCursorN(m, D_8009D1A4.count)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
         if (D_1F8001FC & 0x400) {
             if (m->page > 0) {
@@ -350,7 +350,7 @@ int func_800EC89C(Menu *m)
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
         } else if (D_1F8001FC & 0x5008) {
-            func_800ED5FC(1, D_80100988[m->sel], 2);
+            subScreenOpenMessage(1, D_80100988[m->sel], 2);
             D_80100A94 = 0;
             SfxPlay2(10, 10);
             m->state++;

@@ -1661,3 +1661,73 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800f18a8 subScreenCondFlag40` (was func_800F18A8; D0SPSUB) - condition op: bit 0x40 of D_8009C984
 - `800f18c0 subScreenCondVarD0E6Under5` (was func_800F18C0; D0SPSUB) - condition op: D_8009D0E6 (GAME+0x786) < 5
 - `800f18d0 subScreenCondVar6102Set` (was func_800F18D0; D0SPSUB) - condition op: D_800A6102 != 0
+- `800e82a4 memCardFileListStep` (was func_800E82A4; D0SPSUB2) - save/load file list of the selected card: sub 1 reads the directory (memCardReadDirectory) and sorts the slots, sub 2 browses (messages 3/5/7), save (x1C): overwrite prompt, erase, build the save data (func_800E999C) and write it (memCardWriteFile), load: read the 0xC00 block, checksum (memCardVerifyChecksum), copy into GAME
+- `800e90d4 memCardFormatStep` (was func_800E90D4; D0SPSUB2) - format prompt (message 0xD, yes/no cursor D_800F7148), then format() with 3 retries, message 0xC on success / 8 on failure
+- `800e9308 memCardScreenStep` (was func_800E9308; D0SPSUB2) - the memory card screen: sub 0 resets both Card records, sub 1 probes the two slots every 0x1E frames (memCardProbe) and picks one, sub 2 runs memCardFileListStep / memCardFormatStep by the card status, subs 3/4 scroll the list (D_800F70F0/F4/F8)
+- `800e9888 memCardScreenUpdate` (was func_800E9888; D0SPSUB2) - the D0SPSUB2 entry: d-pad auto-repeat into 1F8001FC then memCardScreenStep in save mode (w12 4, x1C = 1) or load mode (w12 5)
+- `800ea0d8 memCardStoreChecksum` (was func_800EA0D8; D0SPSUB2) - xor of the first n-1 bytes stored in the last byte, returned
+- `800ea118 memCardVerifyChecksum` (was func_800EA118; D0SPSUB2) - xor of the first n-1 bytes compared with the last byte
+- `800ea160 memCardDrawBackground` (was func_800EA160; D0SPSUB2) - the screen's sprite part list D_800F6AD8 (clut 0x80/0x1FF, tpage 1,0,0x80) into OT+4+pri with draw modes
+- `800ea37c memCardScreenDraw` (was func_800EA37C; D0SPSUB2) - draws the memory card screen: background, SAVE/LOAD title, the message of the current state (memCardDrawMessage by m->x1A), the slot select prompt, and the file list with icons, names, play time / AP / lives / location per entry and the scroll arrows
+- `800ea948 memCardDrawSlotSelect` (was func_800EA948; D0SPSUB2) - the card slot prompt: text D_800F6B58, slot 1 / slot 2 labels D_800F6C18 / D_800F6C38 when present, the cursor tile at the selected one, in a balloon frame
+- `800eaa40 memCardDrawParts` (was func_800EAA40; D0SPSUB2) - a -1 terminated sprite part list as SPRTs (clut by GetClut) at an x/y offset into OT+1
+- `800eaba4 memCardDrawCursorTile` (was func_800EABA4; D0SPSUB2) - a 0x30 x 0x10 green tile at x/y into OT+1
+- `800eac90 memCardDrawFileIcon` (was func_800EAC90; D0SPSUB2) - a file entry's icon frame: parts D_800F6C58 (big 0) or the empty-slot frame D_800F6CA8 with its label string, dimmed (0x50) unless lit, icon clut 0x140/0x1F0+pal
+- `800eaf3c memCardDrawFileCursor` (was func_800EAF3C; D0SPSUB2) - the selection highlight parts D_800F6CE8 (clut 0x130/0x1F2) at x/y
+- `800eb0ec memCardDrawModeTitle` (was func_800EB0EC; D0SPSUB2) - the 0x28 x 0x10 SAVE (v 0x78) or LOAD (v 0x88) title sprite at x/y
+- `800eb25c memCardDrawMessage` (was func_800EB25C; D0SPSUB2) - message n of D_800F6A80 in a balloon frame D_800F65D4[n] (measured by memCardDrawString), with the yes/no cursor tile for messages 7/12/16 (D_800F7148), and the footer D_800F6AC8 at (0x50,0xD4)
+- `800eb61c memCardDrawString` (was func_800EB61C; D0SPSUB2) - renders D_800F70D8.str with the 5-byte glyph font (mode 1: -3 newline, mode 2: also wraps at char 0xA8) and measures the text size into 1F8003D4/D6
+- `800ec22c memCardDrawNumber2` (was func_800EC22C; D0SPSUB2) - a two-digit number as digit sprites D_800F6D34 (leading zero skipped unless force) into OT+6
+- `800ec504 memCardDrawFileLocation` (was func_800EC504; D0SPSUB2) - the location string D_800F6FF0[tbl][idx] (area / room name of a save) at x/y
+- `800ec5a4 memCardDrawScrollArrow` (was func_800EC5A4; D0SPSUB2) - the up (0) / down (1) 16x16 arrow sprite D_800F7040[n] at x/y into OT+2
+- `800ec77c memCardProbe` (was func_800EC77C; D0SPSUB2) - _card_info then _card_load on the port, waiting on the card events: 0 ok, 1 unformatted / new, -1 no card, -2 error (c->w146 tracks the state)
+- `800ec8fc memCardReadDirectory` (was func_800EC8FC; D0SPSUB2) - firstfile/nextfile over the card: the game's saves (D_800F7048 prefix) fill c->slot / names and their header (read at 0x200 by memCardReadFile) into D_800F74B8, other files mark their blocks; the free blocks get the unused icon numbers
+- `800eccc8 memCardReadFile` (was func_800ECCC8; D0SPSUB2) - open / lseek / read of len bytes at ofs with 3 retries; 0 on success
+- `800ecd94 memCardWriteFile` (was func_800ECD94; D0SPSUB2) - creates the file (blocks << 16 | 0x200) or opens it for writing and writes len bytes, 3 retries; 0 on success
+- `800ece68 memCardWaitHwEvent` (was func_800ECE68; D0SPSUB2) - waits for one of the four low-level card events D_8009F10C..118: 0 IOE, 1 error, 2 timeout, 3 new card
+- `800eceec memCardWaitSwEvent` (was func_800ECEEC; D0SPSUB2) - waits for one of the four file-system card events D_8009F0F4..100
+- `800ecf70 memCardClearHwEvents` (was func_800ECF70; D0SPSUB2) - TestEvent on the four low-level card events (clears them)
+- `800ecfc8 memCardClearSwEvents` (was func_800ECFC8; D0SPSUB2) - TestEvent on the four file-system card events (clears them)
+- `800ed020 memCardCloseEvents` (was func_800ED020; D0SPSUB2) - CloseEvent on all eight card events inside a critical section
+- `800e8714 subScreenApplyPendingEquip` (was func_800E8714; D0SPSUB3) - same code as D0SPSUB subScreenApplyPendingEquip
+- `800e882c subScreenApplyPendingGauges` (was func_800E882C; D0SPSUB3) - same code as D0SPSUB subScreenApplyPendingGauges
+- `800e9a08 subScreenDrawStatusNotes` (was func_800E9A08; D0SPSUB3) - same code as D0SPSUB subScreenDrawStatusNotes (strings D_800FFD0C..)
+- `800e9c0c subScreenDrawDigitsSprite` (was func_800E9C0C; D0SPSUB3) - same code as D0SPSUB subScreenDrawDigitsSprite
+- `800e9df8 subScreenDrawTabs` (was func_800E9DF8; D0SPSUB3) - same code as D0SPSUB subScreenDrawTabs (slot tables D_800FFDB0 / D_800FFE28 / D_800FFDF8, ids D_800FFE68)
+- `800ea0c0 subScreenDrawEventIcons` (was func_800EA0C0; D0SPSUB3) - same code as D0SPSUB subScreenDrawEventIcons (event list D_800FF254)
+- `800ea2c8 subScreenDrawEventList` (was func_800EA2C8; D0SPSUB3) - same code as D0SPSUB subScreenDrawEventList (names D_800FFF28)
+- `800ea84c subScreenDrawItemGrid` (was func_800EA84C; D0SPSUB3) - same code as D0SPSUB subScreenDrawItemGrid (item list D_80100988)
+- `800eabf4 subScreenDrawItemNames` (was func_800EABF4; D0SPSUB3) - same code as D0SPSUB subScreenDrawItemNames (names D_80100300, cluts D_8010065C)
+- `800eae80 subScreenDrawPageNumber` (was func_800EAE80; D0SPSUB3) - same code as D0SPSUB subScreenDrawPageNumber (footer D_80100774)
+- `800eb0a0 subScreenDrawGaugePercent` (was func_800EB0A0; D0SPSUB3) - same code as D0SPSUB subScreenDrawGaugePercent
+- `800eb24c subScreenDrawSprite` (was func_800EB24C; D0SPSUB3) - same code as D0SPSUB subScreenDrawSprite (state D_80100B70)
+- `800eb440 subScreenDrawSpriteFT4` (was func_800EB440; D0SPSUB3) - same code as D0SPSUB subScreenDrawSpriteFT4
+- `800eb700 subScreenDrawItemIcon` (was func_800EB700; D0SPSUB3) - same code as D0SPSUB subScreenDrawItemIcon
+- `800ebc10 subScreenDrawString` (was func_800EBC10; D0SPSUB3) - same code as D0SPSUB subScreenDrawString
+- `800ebe8c subScreenDrawPopupMenu` (was func_800EBE8C; D0SPSUB3) - same code as D0SPSUB subScreenDrawPopupMenu
+- `800ec2e8 subScreenInitMenu` (was func_800EC2E8; D0SPSUB3) - loads the image D_800EEA00 to VRAM (0x120,0x1E0), sprite bank 1F8003A0 and the menu's sprite tables p48..p64 (one bank less than the D0SPSUB one)
+- `800ec3bc subScreenClampTabCursor` (was func_800EC3BC; D0SPSUB3) - a tab cursor of 3 is moved to 2 (this item-only sub-screen has three top tabs); returns 1 when changed
+- `800ec3f0 subScreenMoveTabCursor` (was func_800EC3F0; D0SPSUB3) - up/down navigation of the tab cursor (0..2 top, 4..6, 8 list) with sfx 8; left/right unused here
+- `800ec524 subScreenMoveGridCursor` (was func_800EC524; D0SPSUB3) - same code as D0SPSUB subScreenMoveGridCursor
+- `800ec6ec subScreenMoveGridCursorN` (was func_800EC6EC; D0SPSUB3) - same code as D0SPSUB subScreenMoveGridCursorN
+- `800ed5fc subScreenOpenMessage` (was func_800ED5FC; D0SPSUB3) - same code as D0SPSUB subScreenOpenMessage (message box D_80100A90)
+- `800edd28 subScreenUpdate` (was func_800EDD28; D0SPSUB3) - the D0SPSUB3 entry: state 0 inits the menu D_800A45D8 (inline subScreenInitMenu, D_80100918 = -1), state 1 d-pad auto-repeat then the item page step func_800EC89C; returns its result
+- `800edf08 subScreenDrawItemPage` (was func_800EDF08; D0SPSUB3) - draws the item sub-screen: tabs, popup menu when D_80100918 >= 0, item grid and names, page number with the L/R page arrows (icons 0x16/0x17) when there are 2+ pages, and the footer sprites D_801007BC
+- `800ee12c subScreenCondFalse` (was func_800EE12C; D0SPSUB3) - same code as D0SPSUB subScreenCondFalse
+- `800ee134 subScreenCondTrue` (was func_800EE134; D0SPSUB3) - same code as D0SPSUB subScreenCondTrue
+- `800ee13c subScreenCondPlayerH` (was func_800EE13C; D0SPSUB3) - same code as D0SPSUB subScreenCondPlayerH
+- `800ee244 subScreenCondPlayerY` (was func_800EE244; D0SPSUB3) - same code as D0SPSUB subScreenCondPlayerY
+- `800ee348 subScreenCondPlayerD` (was func_800EE348; D0SPSUB3) - same code as D0SPSUB subScreenCondPlayerD
+- `800ee450 subScreenCondArea` (was func_800EE450; D0SPSUB3) - same code as D0SPSUB subScreenCondArea
+- `800ee554 subScreenCondSection` (was func_800EE554; D0SPSUB3) - same code as D0SPSUB subScreenCondSection
+- `800ee658 subScreenCondUnk6Is1` (was func_800EE658; D0SPSUB3) - same code as D0SPSUB subScreenCondUnk6Is1
+- `800ee670 subScreenCondFlag100` (was func_800EE670; D0SPSUB3) - same code as D0SPSUB subScreenCondFlag100
+- `800ee688 subScreenCondEventFlag` (was func_800EE688; D0SPSUB3) - same code as D0SPSUB subScreenCondEventFlag
+- `800ee750 subScreenCondFlag544` (was func_800EE750; D0SPSUB3) - same code as D0SPSUB subScreenCondFlag544
+- `800ee818 subScreenCondHealthSettled` (was func_800EE818; D0SPSUB3) - same code as D0SPSUB subScreenCondHealthSettled
+- `800ee838 subScreenCondNearType0A` (was func_800EE838; D0SPSUB3) - same code as D0SPSUB subScreenCondNearType0A
+- `800ee94c subScreenCondNoWeapon` (was func_800EE94C; D0SPSUB3) - same code as D0SPSUB subScreenCondNoWeapon
+- `800ee95c subScreenCondRefreshingDrinkSpot` (was func_800EE95C; D0SPSUB3) - same code as D0SPSUB subScreenCondRefreshingDrinkSpot
+- `800ee9c8 subScreenCondFlag40` (was func_800EE9C8; D0SPSUB3) - same code as D0SPSUB subScreenCondFlag40
+- `800ee9e0 subScreenCondVarD0E6Under5` (was func_800EE9E0; D0SPSUB3) - same code as D0SPSUB subScreenCondVarD0E6Under5
+- `800ee9f0 subScreenCondVar6102Set` (was func_800EE9F0; D0SPSUB3) - same code as D0SPSUB subScreenCondVar6102Set

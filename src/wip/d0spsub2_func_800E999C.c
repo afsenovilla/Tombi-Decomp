@@ -22,7 +22,7 @@ extern B384 *D_800F6A24[];
 extern SJ *D_800F66B4[];
 extern short D_1F8003D8;
 extern void *memset(void *p, int c, int n);
-extern void func_800EA0D8(void *p, int n);
+extern void memCardStoreChecksum(void *p, int n);
 
 void func_800E999C(int slot)
 {
@@ -74,5 +74,5 @@ void func_800E999C(int slot)
     *(B32 *)(h + 0x60) = *D_800F6A2C[D_1F8003D8];
     *(B384 *)(h + 0x80) = *D_800F6A24[D_1F8003D8];
     *(BGame *)D_800E2028 = *(BGame *)D_8009C960;
-    func_800EA0D8(D_800E2028, 0xA00);
+    memCardStoreChecksum(D_800E2028, 0xA00);
 }
