@@ -178,6 +178,7 @@ class App:
     def _build(self):
         r = self.root
         r.title(tr("title"))
+        self.npanel = None          # the "Sin nombre" panel is built again with the new language (tools/names_panel.py)
         bar = ttk.Frame(r, padding=4)
         bar.pack(fill="x")
         self.buttons = []
@@ -347,7 +348,7 @@ class App:
             self._insert("", n)
 
     def _insert(self, parent, n):
-        iid = self.tree.insert(parent, "end", text=self.node_text(n), open=False)
+        iid = self.tree.insert(parent, "end", text=self.node_text(n), open=bool(n.get("open")))
         self.node_of[iid] = n
         if n["children"]:
             for c in n["children"]:
@@ -358,7 +359,44 @@ class App:
 
     def node_text(self, n):
         import labels
+        if n["item"] and n["item"][0] == "unnamed":
+            import names_panel
+            e = self.core and next((x for x in self.core.unnamed_entries() if names_panel.unnamed.key_of(x) == n["item"][1]), None)
+            return names_panel.node_text(e, self.names_store()) if e else n["text"]
         return labels.show(n["id"], n["text"]) if n.get("id") else n["text"]
+
+    def names_store(self):
+        """The user's proposed function names (tools/names_panel.Store, autosaved in the TombiTools config folder)."""
+        if getattr(self, "_names_store", None) is None:
+            import names_panel
+            self._names_store = names_panel.Store()
+        return self._names_store
+
+    def show_names(self, key):
+        """Tree node "Sin nombre": the panel of one generic-named function in the centre (tools/names_panel.py)."""
+        import names_panel
+        if getattr(self, "npanel", None) is None or self.npanel_core is not self.core:
+            if getattr(self, "npanel", None) is not None:
+                self.npanel.destroy()
+            self.npanel = names_panel.NamesPanel(self.mid, self.core.unnamed_entries(), self.names_store(), self.core.anim_owner, self.show_anim,
+                                                 self.on_renamed, self.say)
+            self.npanel_core = self.core
+        if not self.npanel.winfo_ismapped():
+            self.tb.pack_forget()
+            self.cf.pack_forget()
+            self.npanel.pack(fill="both", expand=True)
+        self.npanel.show(key)
+
+    def hide_names(self):
+        if getattr(self, "npanel", None) is not None and self.npanel.winfo_ismapped():
+            self.npanel.pack_forget()
+            self.tb.pack(fill="x")
+            self.cf.pack(fill="both", expand=True)
+
+    def on_renamed(self, key):
+        for iid, n in self.node_of.items():
+            if n["item"] and n["item"][0] == "unnamed" and n["item"][1] == key:
+                self.tree.item(iid, text=self.node_text(n))
 
     def rename(self, _=None):
         """F2 / context menu: name + note of the selected tree item (tools/labels.py)."""
@@ -450,12 +488,20 @@ class App:
         sel = self.tree.selection()
         n = self.node_of.get(sel[0]) if sel else None
         if n and n["item"] and n["item"][0] == "model3d":
+            self.hide_names()
             try:
                 self.show_model(n["item"])
             except Exception as e:
                 messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
             return
         self.hide_model()
+        if n and n["item"] and n["item"][0] == "unnamed":
+            try:
+                self.show_names(n["item"][1])
+            except Exception as e:
+                messagebox.showerror(tr("error"), str(e) if isinstance(e, G.CoreError) else traceback.format_exc())
+            return
+        self.hide_names()
         if n and n["item"] and n["item"][0] == "anim":
             try:
                 self.show_anim(n["item"][1], n["item"][2])

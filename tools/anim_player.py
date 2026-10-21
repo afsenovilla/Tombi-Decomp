@@ -123,7 +123,6 @@ class AnimWindow:
         self.an = next(a for a in self.cat if a["id"] == aid)
         an = self.an
         self.box = anim.bounds(self.spr, an["frames"])
-        al = an["alias_of"]
         if an["loop"] is not None:
             how = tr("an.looptype", an["loop"])
         else:

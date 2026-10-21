@@ -2,6 +2,14 @@
 
 One line per name: `address name (old file) - justification`.
 
+User naming workflow (no toolchain needed): `tools/unnamed.py` writes `notes/unnamed.json`, the generic-named functions of MAIN0, X000
+and the SYSTEM overlays with their `// probably:` note, callers, table slot and the sprite frames resolved as the "Animaciones" node does.
+The graphics editor (tombi-gfx.exe) shows it under "Sin nombre / Unnamed" ("Probablemente" = the ones with a note, to review; "Resto"):
+pick one, read the note and frames, type a name and a comment, "Exportar nombres" -> `names_user.json`. On the decomp side
+`tools/apply_names.py names_user.json [--dry]` renames files, symbols, csv rows and twins exactly as the `names:` commits do, appends the
+rows under "# User names" at the end of this file (confidence `media` in names_*.csv); then `tools/build_full.py` and regenerate
+`notes/unnamed.json`.
+
 - `80068fa4 PadChkVsync` (was func_80068FA4) - libpad padentry thunk that calls _padChkVsync (returns and clears the vsync flag D_80098214); order and shape match PadChkVsync (khasinski libpad/padentry.c)
 - `80068fc4 PadStartCom` (was FUN_80068fc4) - libpad padentry thunk that calls _padStartCom
 - `80068fe4 PadStopCom` (was func_80068FE4) - libpad padentry thunk that calls _padStopCom

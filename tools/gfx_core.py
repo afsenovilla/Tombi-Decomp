@@ -681,10 +681,37 @@ class Core:
             import anim
             if owner == "tombi":
                 c[owner] = (anim.tombi_owner(self.disc.raw), anim.Sprites())
+            elif owner.startswith("unnamed:"):      # an unnamed X000 function that selects scripts itself (tools/unnamed.py)
+                import unnamed
+                e = next(x for x in self.unnamed_entries() if x["prog"] == "X000" and x["address"] == owner[8:])
+                ow = unnamed.synthetic_owner(e, self.disc.raw)
+                c[owner] = (ow, anim.owner_source(ow))
             else:
                 ow = next(o for o in anim.object_owners(self.disc.raw, int(owner[1:3])) if o["owner"] == owner)
                 c[owner] = (ow, anim.owner_source(ow))
         return c[owner]
+
+    def unnamed_entries(self):
+        """The functions of notes/unnamed.json (tools/unnamed.py; bundled in the exe), for the "Sin nombre" node."""
+        if not hasattr(self, "_unnamed"):
+            import unnamed
+            self._unnamed = unnamed.load()
+        return self._unnamed
+
+    def _unnamed_nodes(self):
+        """"Sin nombre": one group per program (MAIN0, X000, the SYSTEM overlays), one node per generic-named function; the editor
+        (tools/names_panel.py) rewrites the node text with the user's name."""
+        import unnamed
+        N = lambda text, item=None, children=None, lazy=None, id=None, open=False: dict(text=text, item=item, children=children or [], lazy=lazy, id=id, open=open)
+        prob, groups = [], {}
+        for e in self.unnamed_entries():
+            n = N(e["name"], ("unnamed", unnamed.key_of(e)))
+            if e.get("note"):
+                prob.append(n)
+            else:
+                groups.setdefault(e["prog"], []).append(n)
+        return [N(tr("un.probably", len(prob)), children=prob, open=True),
+                N(tr("un.others", sum(map(len, groups.values()))), children=[N(tr("un.prog", prog, len(kids)), children=kids) for prog, kids in groups.items()])]
 
     def _anim_nodes(self):
         """"Animaciones": Tombi, then the enemies / NPCs / objects of each area (the scripts of every placed object handler)."""
@@ -802,6 +829,7 @@ class Core:
         root.append(N(tr("t.pages"), children=pg))
         root.append(N(tr("t.sprites"), lazy=self._sprite_nodes))
         root.append(N(tr("t.anims"), lazy=self._anim_nodes))
+        root.append(N(tr("t.unnamed"), lazy=self._unnamed_nodes))
         root.append(self._model_nodes(N))
         pal = []
         for ld in sorted(self.lists, key=lambda x: (x != "SYS", x)):
@@ -1314,6 +1342,7 @@ S_ES = {
     "pal.row": "{0}  fila {1}", "pal.sub": "{0}  fila {1} · paleta {2}",
     "t.screens": "Pantallas", "t.backdrops": "Fondos de sala (mapas)", "t.ui": "Interfaz / HUD", "t.uitable": "Tabla UiSpriteDef (MAIN0)", "t.hudpage": "(página HUD)", "t.pages": "Páginas por lista de carga",
     "t.list": "Lista {0}", "t.anims": "Animaciones", "t.animarea": "Enemigos / NPC / objetos: área {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Paletas (CLUT)",
+    "t.unnamed": "Sin nombre", "un.prog": "{0}  ({1} funciones)", "un.probably": "Probablemente  ({0}: con nota, para revisar)", "un.others": "Resto  ({0})",
     "w.smaller": "La imagen ({0}x{1}) es menor que el destino ({2}x{3}): se coloca arriba a la izquierda.",
     "w.palmismatch": "El PNG es indexado pero su paleta no coincide con la actual: se ajusta al color más cercano.",
     "w.nozero": "La paleta no tiene ningún color 0x0000 (transparente): los píxeles transparentes usan el índice 0.",
@@ -1340,6 +1369,7 @@ S_EN = {
     "pal.row": "{0}  row {1}", "pal.sub": "{0}  row {1} · palette {2}",
     "t.screens": "Screens", "t.backdrops": "Room backdrops (maps)", "t.ui": "Interface / HUD", "t.uitable": "UiSpriteDef table (MAIN0)", "t.hudpage": "(HUD page)", "t.pages": "Pages by load list",
     "t.list": "List {0}", "t.anims": "Animations", "t.animarea": "Enemies / NPCs / objects: area {0}", "t.sprites": "Sprites (WPP)", "t.palettes": "Palettes (CLUT)",
+    "t.unnamed": "Unnamed", "un.prog": "{0}  ({1} functions)", "un.probably": "Probably  ({0}: with a note, to review)", "un.others": "Others  ({0})",
     "w.smaller": "The image ({0}x{1}) is smaller than the target ({2}x{3}): placed at the top left.",
     "w.palmismatch": "The PNG is indexed but its palette differs from the current one: matched to the nearest colour.",
     "w.nozero": "The palette has no 0x0000 (transparent) colour: transparent pixels use index 0.",
