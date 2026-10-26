@@ -3,14 +3,14 @@
 #include "gv6.h"
 #include "TOBJ.H"
 typedef struct { short v[9]; } T9;
-extern T9 D_800E98B0, D_800E98C4, D_800E98D8;
+extern T9 PLAYER_SPIN_AIM_ANGLES_B0, PLAYER_SPIN_AIM_ANGLES_B1, PLAYER_SPIN_AIM_ANGLES_B2;
 extern unsigned char *PLAYER_EXT;
 
 void playerSpinAimDir8B(TObj *o)
 {
-    T9 t1 = D_800E98B0;
-    T9 t2 = D_800E98C4;
-    T9 t3 = D_800E98D8;
+    T9 t1 = PLAYER_SPIN_AIM_ANGLES_B0;
+    T9 t2 = PLAYER_SPIN_AIM_ANGLES_B1;
+    T9 t3 = PLAYER_SPIN_AIM_ANGLES_B2;
     volatile unsigned short *k;
     PLAYER_EXT[0xb] = 8;
     if (o->animFrame & 1) {

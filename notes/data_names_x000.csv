@@ -92,3 +92,7 @@ address,name,size,source
 8013b270,A00_DARK_CLOAKED_FIGURE_ANIMS,0x8,usage: idle [0] and the second anim [1] (PTR_DAT_8013b274) of updateA00DarkCloakedFigure / a00DarkCloakedFigureIdle / FUN_80134308 refs=11
 8013b2a4,A00_BACKDROP_SPRITE_ANIMS,0x28,usage: the anims updateA00BackdropSprites picks by case (D_8013B2A8..D_8013B2C8 are its elements; [6] D_8013B2BC also updateA00L4Type11) refs=1
 8013b2cc,HOODED_OLD_MAN_ANIMS,0x24,usage: the 9 anims of updateHoodedOldMan (D_8013B2D0..D_8013B2EC are its elements) refs=2
+800e989c,PLAYER_SPIN_AIM_ANGLES_A,0x12,usage: 9 shorts: the aim angle (+0x88) per 8-direction pad index (8 = none) read by playerSpinAimDir8A refs=3
+800e98b0,PLAYER_SPIN_AIM_ANGLES_B0,0x12,usage: first of the three 9-short angle tables of playerSpinAimDir8B refs=3
+800e98c4,PLAYER_SPIN_AIM_ANGLES_B1,0x12,usage: second angle table of playerSpinAimDir8B refs=3
+800e98d8,PLAYER_SPIN_AIM_ANGLES_B2,0x12,usage: third angle table of playerSpinAimDir8B refs=3
