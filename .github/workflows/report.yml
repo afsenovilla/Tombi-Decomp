@@ -1,9 +1,7 @@
 name: Progress report
 
 on:
-  # At most one decomp.dev update a day, Monday to Friday (saves Actions minutes); run by hand from the Actions tab if needed.
-  schedule:
-    - cron: '47 2 * * 1-5'
+  # Manual only: run from the Actions tab ("Run workflow") when a decomp.dev update is wanted.
   workflow_dispatch:
 
 concurrency:
@@ -11,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Skip the daily run when no code changed in the last day.
+  # Kept for the manual run (always reports "changed" on workflow_dispatch).
   check:
     runs-on: ubuntu-24.04
     outputs:
