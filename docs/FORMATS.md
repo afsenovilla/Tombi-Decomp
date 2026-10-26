@@ -63,6 +63,8 @@ Bank = table of 4-byte entries `{u16 part count, u16 offset}` per frame (the fir
 | 12 | u3, v3 |
 | 14 | s8 x, y offset from the object origin |
 
+In our sources a part is `SprFrag` (`include/tomba/anim.h`: `u, v, clut, uv1, tpage, uv2, w, h, uv3, dx, dy`).
+
 How the object completes a part (draw routine 800487B0, ours: `FUN_80052db8`): `page = part.tpage + obj.w1e` (the word at
 `+1E`, so one bank is drawn from different pages by different objects); if `obj.b0d & 1` the part's CLUT is replaced by the word
 at `obj+08`; `obj.b0d >> 7` enables semi-transparency; bit 0 of `+2E` selects facing (clear: x offset and width are subtracted,

@@ -1,5 +1,6 @@
 // FUNC 80056e4c 860 MAIN0
 // MATCHING 80056e4c 860
+#include "anim.h"
 #include "spad.h"
 /* Matched (n54). Key points: `s` and `hh` must be single-set pseudos (one expression each) so that
    sched1 boosts `addu s0` ("birthing" insn) and places the a0 copy between sb6 and the call; the
@@ -61,7 +62,7 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
 void drawObjectSpriteScaled3D(TObj *o)
 {
     PolyFT4 *p;
-    unsigned char *s;
+    SprFrag *s;
     int xy;
     int t;
     int z;
@@ -83,7 +84,7 @@ void drawObjectSpriteScaled3D(TObj *o)
     a = (unsigned short *)o->anim;
     hh = (short *)(o->d3c + *a * 4);
     xy = LZ_FILE_CTRL;
-    s = (unsigned char *)(*(volatile int *)&o->d3c + hh[1]);
+    s = (SprFrag *)(*(volatile int *)&o->d3c + hh[1]);
     p = DAT_1f800164;
     p->code = 0x2c;
     p->r0 = o->wb4;
@@ -91,11 +92,11 @@ void drawObjectSpriteScaled3D(TObj *o)
     p->b0 = o->wb4;
     SetSemiTrans(p, 1);
     p->tpage = o->w1e;
-    u = s[0]; v = s[1]; w = s[0xa]; h = s[0xb];
+    u = s->u; v = s->v; w = s->w; h = s->h;
     p->u0 = u; p->v0 = v; p->v1 = v; p->u1 = w + u;
     p->u2 = u; p->v2 = v + h; p->u3 = w + u; p->v3 = v + h;
-    p->x0 = xy + ((signed char)s[0xe] * (unsigned short)o->wb8) / 200;
-    p->y0 = (xy >> 16) + ((signed char)s[0xf] * (unsigned short)o->wb8) / 200;
+    p->x0 = xy + (s->dx * (unsigned short)o->wb8) / 200;
+    p->y0 = (xy >> 16) + (s->dy * (unsigned short)o->wb8) / 200;
     t = (w * (unsigned short)o->wb8) / 100;
     p->y1 = *(volatile unsigned short *)&p->y0;
     p->x2 = p->x0;

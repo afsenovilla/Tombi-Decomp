@@ -33,4 +33,18 @@ typedef unsigned int AnimWord;
 #define ANIM_JUMP_STOP(frame, box, arg, dur, target) \
     ANIM_W(frame, box), ANIM_W(arg, (dur) | ANIMF_JUMP_END), (AnimWord)(target)
 
+/* One part of a sprite frame in a SPR bank (also the frames that pair with WPP pictures): the texture half of a POLY_FT4
+ * plus the part's offset from the object origin. A frame is `{u16 count, u16 offset}` in the bank's table, the parts sit at
+ * bank + offset (see docs/FORMATS.md "SPR"). tpage is relative: the drawing object adds its own page word. */
+typedef struct SprFrag {
+    /* 0x00 */ unsigned char u, v;
+    /* 0x02 */ unsigned short clut;
+    /* 0x04 */ unsigned short uv1;
+    /* 0x06 */ unsigned short tpage;
+    /* 0x08 */ unsigned short uv2;
+    /* 0x0A */ unsigned char w, h;
+    /* 0x0C */ unsigned short uv3;
+    /* 0x0E */ signed char dx, dy;
+} SprFrag;  /* 0x10 */
+
 #endif

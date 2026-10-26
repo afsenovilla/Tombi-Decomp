@@ -1,5 +1,6 @@
 // FUNC 80058f98 552 MAIN0
 // MATCHING 80058f98 552
+#include "anim.h"
 typedef struct SPRT { unsigned int tag; unsigned char r0, g0, b0, code; short x0, y0; unsigned char u0, v0; unsigned short clut; short w, h; } SPRT;
 extern unsigned char DAT_8009d2b2;
 extern SPRT *DAT_1f800164;
@@ -14,7 +15,7 @@ extern void AddPrim(void *, void *);
 void drawHudWeaponIcon(int o, short x, short y)
 {
     SPRT *p;
-    unsigned char *q;
+    SprFrag *f;
     int m;
     void *ot;
     unsigned char c;
@@ -41,17 +42,17 @@ void drawHudWeaponIcon(int o, short x, short y)
         break;
     case 9:
         p = DAT_1f800164;
-        q = (unsigned char *)(*(volatile int *)(o + 0x18) + *(short *)(*(volatile int *)(o + 0x18) + (*PTR_DAT_800121b4 << 2) + 2));
+        f = (SprFrag *)(*(volatile int *)(o + 0x18) + *(short *)(*(volatile int *)(o + 0x18) + (*PTR_DAT_800121b4 << 2) + 2));
         SetSprt(p);
         p->code |= 1;
         SetSemiTrans(p, 0);
-        p->x0 = x + (signed char)q[0xe];
-        p->y0 = y + (signed char)q[0xf];
-        p->u0 = q[0];
-        p->v0 = q[1];
+        p->x0 = x + f->dx;
+        p->y0 = y + f->dy;
+        p->u0 = f->u;
+        p->v0 = f->v;
         ot = (void *)(DAT_1f8001e0 + 4);
-        p->w = q[0xa];
-        c = q[0xb];
+        p->w = f->w;
+        c = f->h;
         p->clut = 0x7e14;
         p->h = c;
         AddPrim(ot, p);

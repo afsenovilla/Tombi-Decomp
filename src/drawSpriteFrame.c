@@ -1,5 +1,6 @@
 // FUNC 800594e4 272 MAIN0
 // MATCHING 800594e4 272
+#include "anim.h"
 typedef struct {
     unsigned long tag;
     unsigned char r0, g0, b0, code;
@@ -17,24 +18,24 @@ extern void AddPrim(void *, void *);
 void drawSpriteFrame(int obj, short x, short y, unsigned short idx)
 {
     SPRT *p;
-    unsigned char *s;
+    SprFrag *s;
     int t;
     int tb;
     int i;
     i = idx * 4;
     p = DAT_1f800164;
-    s = (unsigned char *)(*(volatile int *)(obj + 0x18) + *(short *)(*(volatile int *)(obj + 0x18) + i + 2));
+    s = (SprFrag *)(*(volatile int *)(obj + 0x18) + *(short *)(*(volatile int *)(obj + 0x18) + i + 2));
     SetSprt(p);
     p->code = p->code | 1;
     SetSemiTrans(p, 0);
-    p->x0 = x + (signed char)s[0xe];
-    p->y0 = y + (signed char)s[0xf];
-    p->u0 = s[0];
-    p->v0 = s[1];
+    p->x0 = x + s->dx;
+    p->y0 = y + s->dy;
+    p->u0 = s->u;
+    p->v0 = s->v;
     t = DAT_1f8001e0;
-    p->w = s[10];
-    p->h = s[0xb];
-    p->clut = *(unsigned short *)(s + 2);
+    p->w = s->w;
+    p->h = s->h;
+    p->clut = s->clut;
     AddPrim((void *)(t + 4), p);
     DAT_1f800164 = DAT_1f800164 + 1;
 }
