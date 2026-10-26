@@ -2175,9 +2175,9 @@ typedef struct gameConfig {
     u_short currentSpawnPoint;
     u_char inventoryButton;
     u_char playerState;
-    struct equips playerEquips;
-    byte unk952;
-    byte unk953;
+    byte unk950;                 /* 0x8009D2B0: area-0 dark cloaked figure scene flag */
+    byte unk951;                 /* 0x8009D2B1: bitten-jump kind (playerBittenJumpType03) */
+    struct equips playerEquips;  /* 0x8009D2B2 weapon (drawHudWeaponIcon / spawnWeaponObject), 0x8009D2B3 pants (speed class) */
     byte unk954;
     byte unk955;
     byte unk956;

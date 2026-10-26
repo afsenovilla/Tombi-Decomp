@@ -154,7 +154,7 @@ address,name,size,typed
 20000260,gte_ApplyRotMatrix,1,0
 800163f4,main,1424,0
 80016984,FlipFrame,192,0
-80016a44,GsSetOrign,24,0
+80016a44,setDrawSyncParams,24,0
 80016a5c,initGlobalState,244,0
 80016b50,initGraphics,344,1
 80016ca8,initDisplay,396,0
@@ -244,7 +244,7 @@ address,name,size,typed
 8001b680,areaMode4Tick,332,0
 8001b7cc,areaMode5Handler,484,0
 8001b9b0,areaMode5Tick,324,0
-8001baf4,FUN_8001baf4,484,0
+8001baf4,areaMode6Handler,484,0
 8001bcd8,areaMode6Tick,324,0
 8001be1c,displayLoadingScreen,208,0
 8001beec,resolveAreaVariant,812,0
@@ -265,7 +265,7 @@ address,name,size,typed
 8001d9d8,mdecSliceCallback,252,0
 8001dad4,movieInitDecodeEnv,100,1
 8001db38,startMovieStream,164,0
-8001dbdc,SoundUpdate,1040,0
+8001dbdc,updateSound,1040,0
 8001dfec,keyOnQueuedSfx,512,0
 8001e1ec,getSfxVabOffset,60,0
 8001e228,keyOffSfxVoice,96,0
@@ -273,7 +273,7 @@ address,name,size,typed
 8001e2cc,setBgmFadeParam,156,0
 8001e368,setPitchSlideParam,200,0
 8001e430,SoundFindFreeVoice,192,0
-8001e4f0,SfxPlay,112,0
+8001e4f0,playSFX,112,0
 8001e560,SfxPlay2,148,0
 8001e5f4,SfxPlay3,148,0
 8001e688,playSFXWithNoteAndVolume,228,0
@@ -283,11 +283,11 @@ address,name,size,typed
 8001eaa4,queueSfxKeyOff,40,0
 8001eacc,keyOffActiveSfxVoices,152,0
 8001eb64,startAreaBgm,32,0
-8001eb84,SsSetNck,36,0
+8001eb84,startAreaBgmWithReverb,36,0
 8001eba8,adjustAreaBgmVolume,216,0
 8001ec80,openAreaBgm,888,0
 8001eff8,startBgmTrack,280,0
-8001f110,MusicStopOrFadeIn,176,0
+8001f110,stopBgm,176,0
 8001f1c0,restoreAreaBgmVolume,300,0
 8001f2ec,playJingle,272,0
 8001f3fc,queueSoundCommand,192,0
@@ -683,7 +683,7 @@ address,name,size,typed
 8003f7cc,objCollideSideWalls,768,1
 8003facc,ObjCheckHeadCollision,196,0
 8003fb90,applyCollisionTileResponse,488,1
-8003fd78,ObjTileCollide,464,1
+8003fd78,probeSidesAndApplyTileResponse,464,1
 8003ff48,tileCollideColumnAt,816,0
 80040278,TileCollideAt,116,0
 800402ec,pushOutOfWallSegments,880,0
@@ -886,7 +886,7 @@ address,name,size,typed
 8005a8a8,setEventStarted,252,0
 8005a9a4,setEventComplete,188,0
 8005aa60,getEventState,20,0
-8005aa74,FUN_8005aa74,2328,0
+8005aa74,spawnEventTitle,2328,0
 8005b38c,acquireSpriteSlot,664,0
 8005b624,printEventMessage,784,0
 8005b934,FlushCache,12,0
@@ -1210,7 +1210,7 @@ address,name,size,typed
 80061bb8,SYS_OBJ_2F7C,16,0
 80061bc8,_version,212,0
 80061c9c,SYS_OBJ_3060,8,0
-80061ca4,memset,44,0
+80061ca4,GPU_memset,44,0
 80061cd0,GPU_cw,12,0
 80061ce0,OpenTIM,16,0
 80061cf0,ReadTIM,84,1
@@ -1422,7 +1422,7 @@ address,name,size,typed
 80068a28,restartIntr,116,0
 80068a9c,INTR_OBJ_6D0,20,0
 80068ab0,memclr,44,0
-80068ae4,FUN_80068ae4,12,0
+80068ae4,_96_remove,12,0
 80068afc,ReturnFromException,12,0
 80068b0c,ResetEntryInt,12,0
 80068b1c,HookEntryInt,12,0
@@ -1431,12 +1431,12 @@ address,name,size,typed
 80068bac,startIntrVSync,88,0
 80068c04,trapIntrVSync,120,0
 80068c7c,setIntrVSync,44,0
-80068ca8,memclr,44,0
+80068ca8,VSync_memclr,44,0
 80068cd4,startIntrDMA,80,0
 80068d24,trapIntrDMA,388,0
 80068ea8,setIntrDMA,160,0
 80068f48,INTR_DMA_OBJ_274,8,0
-80068f50,memclr,44,0
+80068f50,DMA_memclr,44,0
 80068f7c,SetVideoMode,24,0
 80068f94,GetVideoMode,16,0
 80068fa4,PadChkVsync,32,0
@@ -1496,7 +1496,7 @@ address,name,size,typed
 8006b7ec,func_8006B7EC,636,0
 8006ba68,padGetPortId,56,0
 8006baa0,padGetPortBuffer,32,0
-8006bac4,FUN_8006bac4,52,0
+8006bac4,_padInitDirSeq,52,0
 8006be6c,_dirFailAuto,224,1
 8006bf4c,_dirChkSeqDone,44,0
 8006bf84,setRC2wait,32,0

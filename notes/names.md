@@ -2021,3 +2021,9 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   A00_SCROLL_CONTROLLER_MODE_BY_SECTION, A00_INIT_OBJECT_ANGLE_OFFSETS, A00_L2_TYPE06_PHASE_LIMITS/WAITS/BOXES, BITING_PLANT_BOXES /
   _BAIT_VEL_BY_FRAME, A00_AP_BOX_100K_ITEM_ENTRY, A00_VARIANT0_SCENE_ITEM_ENTRY, L8_TYPE00_BOX0_BY_VARIANT). Only the base of each
   pointer table is named: the element externs (DAT_8013ad38.., D_8013B180.., D_8013B2D0..) keep their address names, the csv row says which.
+- 8006eef8: notes/functions_main0.csv says SpuInit, config/symbol_addrs_main0.txt says SsStart2 (psx_tomba); SpuInit itself is matched by
+  bytes at 80074b6c (vs_vh.c), so 8006eef8 needs byte verification against libsnd (SsStart2 / SsStart / SpuInitHot neighbours 8006eb00 /
+  8006eed8 disagree with psx_tomba too, see above) before either name is applied to the source. Left as is.
+- game.h playerEquips moved from offset 0x950 to 0x952 of gameConfig (two bytes unk950 / unk951 before it): the code reads the
+  weapon at 8009D2B2 (drawHudWeaponIcon, spawnWeaponObject) and the pants at 8009D2B3 (func_80110CAC speed class); 8009D2B0 is the
+  dark cloaked figure scene flag and 8009D2B1 the bitten-jump kind. No source used GAME.playerEquips, so the build is unchanged.
