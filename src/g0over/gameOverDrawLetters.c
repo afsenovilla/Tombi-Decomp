@@ -1,11 +1,12 @@
 // FUNC 800e87a0 476 G0OVER
 // MATCHING 800e87a0 476
 #include "TOBJ.H"
+#include "camera.h"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
 extern GObj D_800A6610[];
-extern MATRIX D_1F800000, D_1F800020, D_1F8000C0;
+extern MATRIX D_1F800000, D_1F800020;
 extern SVECTOR D_1F800060, D_1F800068;
 extern char *DAT_1f8001e0;
 extern void getBaseMatrix(MATRIX *);
@@ -37,11 +38,11 @@ void gameOverDrawLetters(void)
         D_1F800068.vx = o->a.p.whole;
         D_1F800068.vy = o->y.p.whole;
         D_1F800068.vz = o->b.p.whole;
-        MulMatrix0(&D_1F8000C0, &D_1F800020, &D_1F800000);
+        MulMatrix0(&VIEW_CAMERA.m, &D_1F800020, &D_1F800000);
         ApplyRotMatrix(&D_1F800068, D_1F800000.t);
-        D_1F800000.t[0] += D_1F8000C0.t[0];
-        D_1F800000.t[1] += D_1F8000C0.t[1];
-        D_1F800000.t[2] += D_1F8000C0.t[2];
+        D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
+        D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
+        D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
         SetRotMatrix(&D_1F800000);
         SetTransMatrix(&D_1F800000);
         ot = DAT_1f8001e0 + 0x10;

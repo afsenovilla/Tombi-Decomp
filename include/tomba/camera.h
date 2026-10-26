@@ -46,5 +46,19 @@ typedef struct CameraScroll {
 
 extern CameraScroll CAMERA_SCROLL;
 
+/* View camera in the scratchpad at 0x1F8000C0..0x1F8000F7 (0x38 bytes). The rotation and position are 16.16 words whose
+ * integer halves are what most code reads (0x1F8000E2/E6/EA and 0x1F8000EE/F2/F6, the shorts libgte's CAMERA layout
+ * names vr / vp with a pad between them). m is libgte's MATRIX when psyq/libgte.h came first, else the same layout. */
+typedef union { int raw; struct { unsigned short lo; short hi; } p; } ViewFix;  /* 16.16 */
+typedef struct ViewCamera {
+#ifdef _LIBGTE_H_
+    /* 0x00 */ MATRIX m;
+#else
+    /* 0x00 */ struct { short m[3][3]; long t[3]; } m;
+#endif
+    /* 0x20 */ ViewFix rot[3];
+    /* 0x2C */ ViewFix pos[3];
+} ViewCamera;  /* 0x38 */
+extern ViewCamera VIEW_CAMERA asm("D_1F8000C0");
 
 #endif

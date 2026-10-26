@@ -2,6 +2,7 @@
 // MATCHING 80029078 3132
 #include "gvars.h"
 #include "gamestate.h"
+#include "camera.h"
 typedef struct {
     char p0[0x20];
     int spd;
@@ -23,9 +24,6 @@ extern unsigned char D_800A60D8;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001fc;
 extern short D_1f8001c8;
-extern short D_1f8000e6;
-extern short D_1f8000f2;
-extern int D_1f8000f0;
 extern int handleLookScrollInput(S *);
 extern void cameraScrollInputStep(S *, int);
 extern void loadSectionHeight(S *);
@@ -52,16 +50,16 @@ static __inline__ short ramp(S *o)
 
 static __inline__ int decay(void)
 {
-    short v = D_1f8000e6;
+    short v = VIEW_CAMERA.rot[1].p.hi;
     if (v != 0) {
         if (v > 0) {
             v -= 2;
-            D_1f8000e6 = v;
-            if (v < 0) D_1f8000e6 = 0;
+            VIEW_CAMERA.rot[1].p.hi = v;
+            if (v < 0) VIEW_CAMERA.rot[1].p.hi = 0;
         } else {
             v += 2;
-            D_1f8000e6 = v;
-            if (v > 0) D_1f8000e6 = 0;
+            VIEW_CAMERA.rot[1].p.hi = v;
+            if (v > 0) VIEW_CAMERA.rot[1].p.hi = 0;
         }
         return 1;
     }
@@ -70,10 +68,10 @@ static __inline__ int decay(void)
 
 static __inline__ void clamp(S *o)
 {
-    short f = D_1f8000f2;
-    int s = f + D_1f8000e6;
-    if (o->w30 > s) D_1f8000e6 = o->w30 - f;
-    else if (o->w32 < s) D_1f8000e6 = o->w32 - f;
+    short f = VIEW_CAMERA.pos[1].p.hi;
+    int s = f + VIEW_CAMERA.rot[1].p.hi;
+    if (o->w30 > s) VIEW_CAMERA.rot[1].p.hi = o->w30 - f;
+    else if (o->w32 < s) VIEW_CAMERA.rot[1].p.hi = o->w32 - f;
 }
 
 void updateCameraScroll(S *o)
@@ -328,5 +326,5 @@ void updateCameraScroll(S *o)
         FUN_80116f74(o);
         break;
     }
-    if (D_1f8000f2 > o->w32) D_1f8000f0 = o->w32 << 16;
+    if (VIEW_CAMERA.pos[1].p.hi > o->w32) VIEW_CAMERA.pos[1].raw = o->w32 << 16;
 }

@@ -5,6 +5,7 @@
 #include "gvars.h"
 #include "gamestate.h"
 #include "gametask.h"
+#include "camera.h"
 typedef struct { short s0, s2; } S2;
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 typedef struct O {
@@ -28,8 +29,6 @@ extern unsigned short D_800A6066;
 extern S2 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
 extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000F2;
-extern int D_1F8000F0;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
@@ -208,7 +207,7 @@ void updateAreaScroll(O *o)
                     if (D_1F800172 < 0x80c) tryStartItemInteraction(o, 1, 1);
                 }
                 if (D_1F800172 < 0x87a) {
-                    short *q = &D_1F8000F2;
+                    short *q = &VIEW_CAMERA.pos[1].p.hi;
                     *q += 2;
                     if (o->w32 < *q) *q = o->w32;
                 }
@@ -295,9 +294,9 @@ void updateAreaScroll(O *o)
             TASK_C->mode = 7;
             TASK_C->step = 0;
         }
-        q = &D_1F8000F2;
+        q = &VIEW_CAMERA.pos[1].p.hi;
         *q -= 2;
-        if (*q < o->w30) D_1F8000F0 = o->w30 << 16;
+        if (*q < o->w30) VIEW_CAMERA.pos[1].raw = o->w30 << 16;
         break;
     }
     }

@@ -24,7 +24,7 @@ typedef struct {
     unsigned short uv2, p0a;
     unsigned short uv3;
 } Face;
-extern MATRIX D_1F800000, D_1F8000C0;
+extern MATRIX D_1F800000;
 extern SVECTOR D_1F800060;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *DAT_1f800164;
@@ -77,11 +77,11 @@ void drawObjectSpriteQuad(TObj *o)
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
     D_1F800060.vz = o->b.p.whole;
-    SetRotMatrix(&D_1F8000C0);
+    SetRotMatrix(&VIEW_CAMERA.m);
     ApplyRotMatrix(&D_1F800060, D_1F800000.t);
-    D_1F800000.t[0] += D_1F8000C0.t[0];
-    D_1F800000.t[1] += D_1F8000C0.t[1];
-    D_1F800000.t[2] += D_1F8000C0.t[2];
+    D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
+    D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
+    D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
     SetTransMatrix(&D_1F800000);
     v0 = (char *)o + 0xb4;
     v1 = (char *)o + 0xbc;
@@ -120,6 +120,7 @@ void drawObjectSpriteQuad(TObj *o)
 #else
 /* c loaded before an empty loop (its notes split the scheduling block) so the e constant lands after lw c, as in the game (debt). */
 #include "TOBJ.H"
+#include "camera.h"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct {
@@ -139,7 +140,7 @@ typedef struct {
     unsigned short uv2, p0a;
     unsigned short uv3;
 } Face;
-extern MATRIX D_1F800000, D_1F8000C0;
+extern MATRIX D_1F800000;
 extern SVECTOR D_1F800060;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *DAT_1f800164;
@@ -192,11 +193,11 @@ void drawObjectSpriteQuad(TObj *o)
     D_1F800060.vx = o->a.p.whole;
     D_1F800060.vy = o->y.p.whole;
     D_1F800060.vz = o->b.p.whole;
-    SetRotMatrix(&D_1F8000C0);
+    SetRotMatrix(&VIEW_CAMERA.m);
     ApplyRotMatrix(&D_1F800060, D_1F800000.t);
-    D_1F800000.t[0] += D_1F8000C0.t[0];
-    D_1F800000.t[1] += D_1F8000C0.t[1];
-    D_1F800000.t[2] += D_1F8000C0.t[2];
+    D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
+    D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
+    D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
     SetTransMatrix(&D_1F800000);
     v0 = (char *)o + 0xb4;
     v1 = (char *)o + 0xbc;

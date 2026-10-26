@@ -1,7 +1,6 @@
 // FUNC 801165a0 1584 X009
 // MATCHING 801165a0 1584
 // VERSION SLPS_01144 x09 8011585C 1584
-#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 #include "include_asm.h"
 INCLUDE_ASM_V("x09/nonmatchings/x09", func_8011585C_slps01144);
@@ -9,6 +8,7 @@ INCLUDE_ASM_V("x09/nonmatchings/x09", func_8011585C_slps01144);
 #include "gcd.h"
 #include "gvars.h"
 #include "gamestate.h"
+#include "camera.h"
 typedef struct { short s0, s2; } S2;
 typedef struct O {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -25,7 +25,6 @@ extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
 extern unsigned char D_800A60DA;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
-extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
 extern void cameraModeHandler6(O *);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
@@ -91,16 +90,16 @@ void updateAreaScrollB(O *o)
                     if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
                     break;
                 case 4: {
-                    short *s = &D_1F8000EE;
+                    short *s = &VIEW_CAMERA.pos[0].p.hi;
                     *s -= 1;
                     if (*s < CAMERA_SCROLL.minX) {
                         *s = CAMERA_SCROLL.minX;
                         o->w4a = 0x1e;
                         o->state++;
                     }
-                    D_1F8000E6 -= 2;
-                    if (D_1F8000F2 + D_1F8000E6 < -0x156) {
-                        D_1F8000E6 = -0x156 - D_1F8000F2;
+                    VIEW_CAMERA.rot[1].p.hi -= 2;
+                    if (VIEW_CAMERA.pos[1].p.hi + VIEW_CAMERA.rot[1].p.hi < -0x156) {
+                        VIEW_CAMERA.rot[1].p.hi = -0x156 - VIEW_CAMERA.pos[1].p.hi;
                         o->w4a = 0x1e;
                         o->state++;
                     }
@@ -111,7 +110,7 @@ void updateAreaScrollB(O *o)
                         o->w4a--;
                         break;
                     } else {
-                        short *s = &D_1F8000E6;
+                        short *s = &VIEW_CAMERA.rot[1].p.hi;
                         *s += 2;
                         if (*s > 0) {
                             *s = 0;

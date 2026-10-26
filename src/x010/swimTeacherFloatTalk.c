@@ -6,12 +6,13 @@
 #include "raw7.h"
 #include "gamestate.h"
 #include "gametask.h"
+#include "camera.h"
 
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
 extern TObj PLAYER;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
-extern short D_1F8000F2, D_1F80016E;
+extern short D_1F80016E;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -32,7 +33,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->anim = ANIMS(o)[0];
         AnimLoadDuration(o);
         o->state++;
-        D_1F8000F2 = -300;
+        VIEW_CAMERA.pos[1].p.hi = -300;
     case 1:
         if (D_1F80016E < -0xe9) break;
         GVARS.b42 = 1;

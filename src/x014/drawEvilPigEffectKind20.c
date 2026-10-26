@@ -2,9 +2,10 @@
 // MATCHING 801189ec 1008
 #include "spad.h"
 #include "TOBJ.H"
+#include "camera.h"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
-extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
+extern MATRIX D_1f800000, D_1f800020;
 extern SVECTOR D_1f800068;
 extern long LZ_FILE_CTRL;
 extern char *D_1F800164;
@@ -49,11 +50,11 @@ void drawEvilPigEffectKind20(TObj *o)
     D_1f800068.vx = o->a.p.whole;
     D_1f800068.vy = o->y.p.whole;
     D_1f800068.vz = o->b.p.whole;
-    FUN_8006395c(&D_1f8000c0, &D_1f800020, &D_1f800000);
+    FUN_8006395c(&VIEW_CAMERA.m, &D_1f800020, &D_1f800000);
     FUN_80063bcc(&D_1f800068, D_1f800000.t);
-    D_1f800000.t[0] += D_1f8000c0.t[0];
-    D_1f800000.t[1] += D_1f8000c0.t[1];
-    D_1f800000.t[2] += D_1f8000c0.t[2];
+    D_1f800000.t[0] += VIEW_CAMERA.m.t[0];
+    D_1f800000.t[1] += VIEW_CAMERA.m.t[1];
+    D_1f800000.t[2] += VIEW_CAMERA.m.t[2];
     FUN_80063ddc(&D_1f800000);
     FUN_80063e6c(&D_1f800000);
     p = (unsigned char *)D_1F800164;
