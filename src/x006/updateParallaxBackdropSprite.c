@@ -1,5 +1,6 @@
 // FUNC 8011b8a4 408 X006
 // MATCHING 8011b8a4 408
+#include "camera.h"
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -17,8 +18,6 @@ static void *D_80122E2C[9] = {
     D_80122F88, D_80122F90, D_80122F98, D_80122FA0,
     D_80122FA8,
 };
-extern int D_800A4570[];
-extern int D_800A4574[];
 void ObjListPush_1F80022C(TObj *o);
 void freeObjectLayer7(TObj *o);
 
@@ -42,9 +41,9 @@ void updateParallaxBackdropSprite(TObj *o)
     case 1:
         x0 = o->d30;
         k = (*(unsigned short*)((char*)&SPAD.i174 + 2));
-        t4 = D_800A4574[0];
+        t4 = CAMERA_SCROLL.rotY;
         j = ((unsigned short*)&SPAD.s186)[0];
-        t0 = D_800A4570[0];
+        t0 = CAMERA_SCROLL.rotX;
         o->b.p.whole = 0;
         o->a.p.whole = (short)(x0 - k + ((t4 >> 8) << 2)) >> 3;
         o->y.p.whole = (short)(o->d34 - j - ((t0 >> 8) << 3)) >> 2;

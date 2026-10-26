@@ -1,6 +1,7 @@
 // FUNC 801165a0 1584 X009
 // MATCHING 801165a0 1584
 // VERSION SLPS_01144 x09 8011585C 1584
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 #include "include_asm.h"
 INCLUDE_ASM_V("x09/nonmatchings/x09", func_8011585C_slps01144);
@@ -23,7 +24,6 @@ extern PL PLAYER;
 extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
 extern unsigned char D_800A60DA;
-extern short D_800A457C;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern short D_1F8000EE, D_1F8000E6, D_1F8000F2;
 extern void cameraModeHandler6(O *);
@@ -93,8 +93,8 @@ void updateAreaScrollB(O *o)
                 case 4: {
                     short *s = &D_1F8000EE;
                     *s -= 1;
-                    if (*s < D_800A457C) {
-                        *s = D_800A457C;
+                    if (*s < CAMERA_SCROLL.minX) {
+                        *s = CAMERA_SCROLL.minX;
                         o->w4a = 0x1e;
                         o->state++;
                     }

@@ -1,8 +1,8 @@
 // FUNC 8011d6bc 244 X014
 // MATCHING 8011d6bc 244
+#include "camera.h"
 #include "TOBJ.H"
 
-extern short D_800A457C, D_800A457E;
 extern short probeWallAt(TObj *, short, short, short);
 extern short TileCollideAt(TObj *, short, short);
 
@@ -12,14 +12,14 @@ int evilPigBossDefeatedCheckWall(TObj *o)
 
     if (o->animFrame & 1) {
         d = -0x10;
-        if (o->h->p.whole < D_800A457C - 0x90) {
-            o->h->p.whole = D_800A457C - 0x90;
+        if (o->h->p.whole < CAMERA_SCROLL.minX - 0x90) {
+            o->h->p.whole = CAMERA_SCROLL.minX - 0x90;
             return 1;
         }
     } else {
         d = 0x10;
-        if (D_800A457E + 0x90 < o->h->p.whole) {
-            o->h->p.whole = D_800A457E + 0x90;
+        if (CAMERA_SCROLL.maxX + 0x90 < o->h->p.whole) {
+            o->h->p.whole = CAMERA_SCROLL.maxX + 0x90;
             return 1;
         }
     }

@@ -1,12 +1,12 @@
 // FUNC 8011ee50 968 X014
 // MATCHING 8011ee50 968
+#include "camera.h"
 #include "gvars.h"
 /* The `if (r)` block is written in both arms of case 1 (cross-jumped later): a2/a3 set twice lose sched1's
    birthing-insn boost, so the arg loads come before the state lbu. */
 #include "TOBJ.H"
 extern int D_1F80018C, D_1F800190;
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern char D_80077D6C[], D_80077D0C[];
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -33,7 +33,7 @@ void evilPigBossDefeated(TObj *o)
         ((unsigned char*)&GVARS.b3e)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
-        D_800A4568[0] = 0;
+        CAMERA_SCROLL.velY = 0;
         D_1F800190 = o->y.raw;
         D_1F80018C = o->h->raw;
         o->b9c = 0;

@@ -1,5 +1,6 @@
 // FUNC 8011d59c 688 X003
 // MATCHING 8011d59c 688
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -10,7 +11,6 @@ extern unsigned char D_800A6039[];
 extern unsigned char D_800A603C[];
 extern unsigned char D_800A603D[];
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
@@ -28,7 +28,7 @@ void evilPigBagPortalEnter(TObj *o)
             ((unsigned char*)&GVARS.b3e)[0] = 1;
             ((unsigned char*)&GVARS.b42)[0] = 1;
             D_800A4553[0] = 3;
-            D_800A4568[0] = 0;
+            CAMERA_SCROLL.velY = 0;
             D_1F800190 = o->y.raw;
             D_1F80018C = o->h->raw;
             o->timer = 10;

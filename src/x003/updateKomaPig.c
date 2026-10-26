@@ -1,6 +1,7 @@
 // FUNC 80124b78 1156 X003
 // MATCHING 80124b78 1156
 // VERSION SLPS_01144 x03 801239E4 1156
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x003 80124B78 (x003/func_80124B78.c): 160 -> 152.
 #include "spad.h"
@@ -9,7 +10,6 @@
 typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
-extern short D_800A4582;
 extern Fn D_80135C64[];
 extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -112,7 +112,7 @@ void func_80124B78(TObj *o)
                 }
                 break;
             }
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0x98 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole)
                 o->b04 = 3;
         } else {
             FUN_800202b4(o);
@@ -144,7 +144,7 @@ void func_80124B78(TObj *o)
                 o->step = 2;
                 o->state = 0;
             }
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0x98 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:
@@ -175,7 +175,6 @@ void func_80124B78(TObj *o)
 typedef void (*Fn)(TObj *);
 #define WD2(o) (*(short *)((char *)(o) + 0xd2))
 typedef struct { unsigned char b0, b1; } X;
-extern short D_800A4582;
 extern void komaPigStandPose();
 extern void komaPigWaitForPlayer();
 extern void komaPigSceneEntry();
@@ -286,7 +285,7 @@ void updateKomaPig(TObj *o)
                 }
                 break;
             }
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
         } else {
             FUN_800202b4(o);
@@ -318,7 +317,7 @@ void updateKomaPig(TObj *o)
                 o->step = 2;
                 o->state = 0;
             }
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:

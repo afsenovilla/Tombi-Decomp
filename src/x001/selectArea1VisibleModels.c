@@ -1,10 +1,10 @@
 // FUNC 801174b0 1828 X001
 // MATCHING 801174b0 1828
+#include "camera.h"
 #include "spad.h"
 #include "gamestate.h"
 typedef struct { char p[3]; unsigned char n; int e[1]; } Q;
 
-extern int D_800A4574, D_800A4570;
 extern int getScrollOffsetX(void);
 
 void selectArea1VisibleModels(Q *q, unsigned char *base)
@@ -18,7 +18,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
         if (GAME.disableSelectMenu) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x50) / 80;
             hi = lo + 8;
-        } else if (D_800A4574 == 0) {
+        } else if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x78) / 80;
             hi = lo + 9;
         } else {
@@ -30,7 +30,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
         if (GAME.disableSelectMenu) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x50) / 80;
             hi = lo + 8;
-        } else if (D_800A4574 == 0) {
+        } else if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x64) / 80;
             hi = lo + 9;
         } else {
@@ -39,7 +39,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
         }
         break;
     case 2:
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x78) / 80;
             hi = lo + 0x11;
             if (lo < 0) lo = 0;
@@ -71,7 +71,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
             }
         }
         if ((*(short*)&SPAD.s17a) + SPAD.se6 < -0x59) {
-            if (D_800A4570 >= 0) break;
+            if (CAMERA_SCROLL.rotX >= 0) break;
             if ((*(short*)&SPAD.s17a) < -0x77) break;
         }
         t = ((*(short*)((char*)&SPAD.i174 + 2)) - 0xdc) / 80;
@@ -88,7 +88,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
         if (GAME.disableSelectMenu) {
             lo = (*(short*)((char*)&SPAD.i174 + 2)) / 80;
             hi = lo + 9;
-        } else if (D_800A4574 == 0) {
+        } else if (CAMERA_SCROLL.rotY == 0) {
             lo = (*(short*)((char*)&SPAD.i174 + 2)) / 80;
             hi = lo + 9;
         } else {
@@ -105,7 +105,7 @@ void selectArea1VisibleModels(Q *q, unsigned char *base)
                 hi = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x384) / 80;
                 lo = hi - 0x12;
             }
-        } else if (D_800A4574 == 0) {
+        } else if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x636) / 80;
             hi = lo + 9;
         } else {

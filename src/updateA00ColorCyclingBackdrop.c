@@ -1,11 +1,10 @@
 // FUNC 801224c0 612 X000
 // MATCHING 801224c0 612
+#include "camera.h"
 #include "spad.h"
 #include "TOBJ.H"
 
 extern void *D_8013B208[];
-extern int D_800A4570[];
-extern int D_800A4574[];
 short GetClut(int x, int y);
 void ObjListPush_1F80022C(TObj *o);
 void freeObjectLayer7(TObj *o);
@@ -52,8 +51,8 @@ void updateA00ColorCyclingBackdrop(TObj *o)
         o->b.p.whole = 0;
         m = o->w08 & 0x7fc0;
         n = m;
-        o->y.p.whole -= (D_800A4570[0] >> 8) << 2;
-        o->a.p.whole -= D_800A4574[0] >> 10;
+        o->y.p.whole -= (CAMERA_SCROLL.rotX >> 8) << 2;
+        o->a.p.whole -= CAMERA_SCROLL.rotY >> 10;
         switch (o->step) {
         case 0:
             if (o->timer == 0) {

@@ -5,15 +5,10 @@
    asm("") after the 0x1F8000F2 load keeps the w30 load after it; p34 pinned a0 in the second clamp. */
 #include "spad.h"
 #include "gcd.h"
-typedef struct { int x, y, z; } V3;
 typedef struct { short x, y; } SP;
 typedef struct { short a, b, c, d; } S4;
-typedef struct {
-    unsigned char b0; char p1[7]; V3 pos; char p14[0x20 - 0x14]; int d20; int d24;
-    char p28[0x2c - 0x28]; short w2c, w2e, w30, w32; int *p34; char p38[0x78 - 0x38]; int d78; int d7c;
-} C;
 typedef struct { char p[0x4c]; unsigned short w4c; } O;
-extern C CAMERA_SCROLL;
+#include "camera.h"
 extern unsigned short D_8009C960[];
 extern unsigned short D_8009C962;
 extern unsigned short D_8009C982;
@@ -46,7 +41,7 @@ static short **D_80079474[24] = {
 extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern int *D_800A4584, *D_800A4588;
 extern O *TASK_C;
-extern void computeCameraMatrix(C *);
+extern void computeCameraMatrix(CameraScroll *);
 #define FLAG (*(unsigned short *)0x1F8001C8)
 #define SFLAG (*(short *)0x1F8001C8)
 
@@ -55,13 +50,13 @@ static __inline__ int smin(int a, short b) { register short r asm("$4") = a; if 
 
 void initSectionCamera(void)
 {
-    C *c;
+    CameraScroll *c;
     short *p, *q;
     int off, x, v;
     unsigned short w;
     char pad[0x10];
     c = &CAMERA_SCROLL;
-    c->b0 = 1;
+    c->active = 1;
     p = (short *)&D_80078B7C[D_8009C960[0]][D_8009C962];
     D_800A457C = *p++;
     D_800A457E = *p++;
@@ -92,34 +87,34 @@ void initSectionCamera(void)
         break;
     }
     if (!(FLAG & 1)) {
-        ((int*)&SPAD.ie0)[3] = smax(*q++, c->w2c) << 16;
-        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->w32) << 16; ((int*)&SPAD.ie0)[4] = t; }
+        ((int*)&SPAD.ie0)[3] = smax(*q++, c->minX) << 16;
+        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->maxY) << 16; ((int*)&SPAD.ie0)[4] = t; }
         ((int*)&SPAD.ie0)[5] = *q << 16;
     } else {
         ((int*)&SPAD.ie0)[3] = *q++ << 16;
-        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->w32) << 16; ((int*)&SPAD.ie0)[4] = t; }
-        ((int*)&SPAD.ie0)[5] = smax(*q, c->w2c) << 16;
+        { register int t asm("$2"); t = smin((unsigned short)*q++ + off, c->maxY) << 16; ((int*)&SPAD.ie0)[4] = t; }
+        ((int*)&SPAD.ie0)[5] = smax(*q, c->minX) << 16;
     }
     x = *(short *)0x1F8000F2;
     asm("");
-    v = c->w30;
-    if (x < v || (v = c->w32, v < x))
+    v = c->minY;
+    if (x < v || (v = c->maxY, v < x))
         ((int*)&SPAD.ie0)[4] = v << 16;
-    { register int *pp asm("$4") = c->p34;
-    v = c->w2e;
-    if (v < ((SP *)pp)->y || (v = c->w2c, ((SP *)pp)->y < v))
+    { register int *pp asm("$4") = c->targetX;
+    v = c->maxX;
+    if (v < ((SP *)pp)->y || (v = c->minX, ((SP *)pp)->y < v))
         *pp = v << 16; }
     if (GCD.bcda2) {
-        c->d20 = 0x1000;
-        if (FLAG & 1) c->d24 = -0x1000;
-        else c->d24 = 0x1000;
-        c->d78 = 0;
-        c->d7c = SFLAG * 0x5A00;
+        c->rotX = 0x1000;
+        if (FLAG & 1) c->rotY = -0x1000;
+        else c->rotY = 0x1000;
+        c->rotXOffset = 0;
+        c->rotYOffset = SFLAG * 0x5A00;
     } else {
-        c->d20 = 0;
-        c->d24 = 0;
-        c->d78 = 0;
-        c->d7c = SFLAG * 0x5A00;
+        c->rotX = 0;
+        c->rotY = 0;
+        c->rotXOffset = 0;
+        c->rotYOffset = SFLAG * 0x5A00;
     }
     computeCameraMatrix(c);
     ((int*)&SPAD.i174)[0] = c->pos.x;

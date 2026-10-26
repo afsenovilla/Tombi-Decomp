@@ -1,10 +1,10 @@
 // FUNC 80121a58 724 X009
 // MATCHING 80121a58 724
+#include "camera.h"
 #include "TOBJ.H"
 
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
-extern short D_800A4582;
 extern void *D_8012EA38[];
 extern void *D_8012EA3C[];
 extern void *D_8012E9F8[];
@@ -64,7 +64,7 @@ void redFlowerBud(TObj *o)
             o->anim = D_8012EA3C[0];
             AnimLoadDuration(o);
         }
-        if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole) {
+        if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole) {
             o->b04 = 3;
             o->step = 0;
             o->state = 0;

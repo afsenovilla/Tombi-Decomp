@@ -1,3 +1,4 @@
+#include "camera.h"
 #include "spad.h"
 #include "gcd.h"
 #include "gv2.h"
@@ -9,7 +10,6 @@ typedef struct { char p[3]; unsigned char n; int e[0x58]; unsigned char b164; } 
 
 extern unsigned short D_8009C962;
 extern unsigned char D_8009C964;
-extern int D_800A4574;
 extern unsigned long D_8012A858[];
 extern int getScrollOffsetX(void);
 extern int LoadImage(RECT *, unsigned long *);
@@ -74,7 +74,7 @@ void animateArea9Palettes(Q *q, unsigned char *base)
             }
         }
         if (D_8009C964 == 0x20 || GVARS.b3a == 0) {
-            if (D_800A4574 == 0)
+            if (CAMERA_SCROLL.rotY == 0)
                 { register int t asm("$3") = (*(short*)((char*)&SPAD.i174 + 2)) - 0x668; d = t / 80; }
             else
                 d = ((*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() - 0x668) / 80;
@@ -85,7 +85,7 @@ void animateArea9Palettes(Q *q, unsigned char *base)
                 PUSH(i)
             }
         }
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             a = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x3ac) / 80;
             if (a < 0) a = 0;
             a += 0x1c;

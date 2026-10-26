@@ -1,21 +1,21 @@
 // FUNC 80123aac 696 X014
 // MATCHING 80123aac 696
 // VERSION SLPS_01144 x14 80120D84 696
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x014 80123AAC (x014/func_80123AAC.c): 128 -> 120.
 #include "spad.h"
 #include "TOBJ.H"
 extern unsigned short D_801266D4[];
-extern short D_800A457C, D_800A457E, D_800A4582;
 extern void FUN_800202b4(TObj *);
 extern short probeSlopeWallSideAt(TObj *, int, int);
 extern short probeFloorPlaneAt(TObj *, int, int);
 
 static __inline__ short Out(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0x9e) return 1;
-    if (o->h->p.whole > D_800A457E + 0x9e) return 1;
-    return o->y.p.whole > D_800A4582 + 0x78;
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0x9e) return 1;
+    if (o->h->p.whole > CAMERA_SCROLL.maxX + 0x9e) return 1;
+    return o->y.p.whole > CAMERA_SCROLL.maxY + 0x78;
 }
 
 static __inline__ int Chk(TObj *o, short k)
@@ -78,16 +78,15 @@ void func_80123AAC(TObj *o)
 #include "spad.h"
 #include "TOBJ.H"
 extern unsigned short D_801266D4[];
-extern short D_800A457C, D_800A457E, D_800A4582;
 extern void FUN_800202b4(TObj *);
 extern short probeSlopeWallSideAt(TObj *, int, int);
 extern short probeFloorPlaneAt(TObj *, int, int);
 
 static __inline__ short Out(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0x9e) return 1;
-    if (o->h->p.whole > D_800A457E + 0x9e) return 1;
-    return o->y.p.whole > D_800A4582 + 0x80;
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0x9e) return 1;
+    if (o->h->p.whole > CAMERA_SCROLL.maxX + 0x9e) return 1;
+    return o->y.p.whole > CAMERA_SCROLL.maxY + 0x80;
 }
 
 static __inline__ int Chk(TObj *o, short k)

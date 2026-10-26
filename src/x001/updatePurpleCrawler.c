@@ -1,6 +1,7 @@
 // FUNC 8012b2d4 2116 X001
 // MATCHING 8012b2d4 2116
 // VERSION SLPS_01144 x01 80129C08 2116
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x001 8012B2D4 (x001/updatePurpleCrawler.c): 160 -> 152.
 #include "spad.h"
@@ -8,8 +9,6 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_800A4582, D_800A457E;
-extern unsigned short D_800A457C;
 extern int D_1F80018C;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
 extern short D_1F80027E;
@@ -136,8 +135,8 @@ void updatePurpleCrawler(BX *b)
             case 8: func_8012A794(o); break;
             }
             if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) {
-                if (o->y.p.whole > D_800A4582 + 0x98 ||
-                    (unsigned short)(o->h->p.whole + 0xaa - D_800A457C) > D_800A457E + 0xb0) {
+                if (o->y.p.whole > CAMERA_SCROLL.maxY + 0x98 ||
+                    (unsigned short)(o->h->p.whole + 0xaa - CAMERA_SCROLL.minX) > CAMERA_SCROLL.maxX + 0xb0) {
                     o->b04 = 3;
                     o->active = 2;
                     o->visible = 0;
@@ -293,8 +292,6 @@ void updatePurpleCrawler(BX *b)
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_800A4582, D_800A457E;
-extern unsigned short D_800A457C;
 extern int D_1F80018C;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
 extern short D_1F80027E;
@@ -421,8 +418,8 @@ void updatePurpleCrawler(BX *b)
             case 8: purpleCrawlerCrawlWall(o); break;
             }
             if (((SPAD.s1f8 + SPAD.i198) & 7) == 0) {
-                if (o->y.p.whole > D_800A4582 + 0xa0 ||
-                    (unsigned short)(o->h->p.whole + 0xaa - D_800A457C) > D_800A457E + 0xb0) {
+                if (o->y.p.whole > CAMERA_SCROLL.maxY + 0xa0 ||
+                    (unsigned short)(o->h->p.whole + 0xaa - CAMERA_SCROLL.minX) > CAMERA_SCROLL.maxX + 0xb0) {
                     o->b04 = 3;
                     o->active = 2;
                     o->visible = 0;

@@ -1,6 +1,7 @@
 // FUNC 80020828 592 MAIN0
 // MATCHING 80020828 592
 // VERSION SLPS_01144 slps01144 800217A0 592
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 #include "include_asm.h"
 INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_800217A0_slps01144);
@@ -12,7 +13,7 @@ typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; 
 extern unsigned short D_1f8001c8;
 extern short D_1f80019c;
 extern char PLAYER[];
-extern void *D_800A6078, *D_800A607C, *D_800A4584, *D_800A4588;
+extern void *D_800A6078, *D_800A607C;
 extern S1 D_800B1478[];
 extern S2 D_800A6610[];
 extern S3 D_800A49A8[];
@@ -30,11 +31,11 @@ void setPlayerAxisPointers(void)
         D_800A6078 = b + 0x18;
     }
     if (!(D_1f8001c8 & 1)) {
-        D_800A4584 = ((char*)&SPAD.iec);
-        D_800A4588 = ((char*)&SPAD.iec) + 8;
+        CAMERA_SCROLL.targetX = ((char*)&SPAD.iec);
+        CAMERA_SCROLL.targetZ = ((char*)&SPAD.iec) + 8;
     } else {
-        D_800A4588 = ((char*)&SPAD.iec);
-        D_800A4584 = ((char*)&SPAD.iec) + 8;
+        CAMERA_SCROLL.targetZ = ((char*)&SPAD.iec);
+        CAMERA_SCROLL.targetX = ((char*)&SPAD.iec) + 8;
     }
     e1 = D_800B1478;
     for (D_1f80019c = 0; D_1f80019c < 4; D_1f80019c++, e1++) {

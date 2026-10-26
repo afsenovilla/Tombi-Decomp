@@ -1,5 +1,6 @@
 // FUNC 8011afd8 544 X010
 // MATCHING 8011afd8 544
+#include "camera.h"
 #include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -19,8 +20,6 @@ static void *D_80131C64[9] = {
     D_80131F7C, D_80131F84, D_80131F8C, D_80131F94,
     D_80131F6C,
 };
-extern int D_800A4570[];
-extern int D_800A4574[];
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
 extern void ObjListPush_1F80022C(TObj *);
@@ -59,9 +58,9 @@ void updateParallaxBackdropSprite(TObj *o)
     case 1:
         if (o->subtype == 99) AnimAdvance(o);
         a = o->d30;
-        x = a - ((unsigned short*)((char*)&SPAD.i174 + 2))[0] + ((D_800A4574[0] >> 8) << 2);
+        x = a - ((unsigned short*)((char*)&SPAD.i174 + 2))[0] + ((CAMERA_SCROLL.rotY >> 8) << 2);
         b = o->d34;
-        y = b - ((unsigned short*)&SPAD.s186)[0] - ((D_800A4570[0] >> 8) << 3);
+        y = b - ((unsigned short*)&SPAD.s186)[0] - ((CAMERA_SCROLL.rotX >> 8) << 3);
         switch (GAME.selectedSection) {
         case 0: case 2: case 4: case 6:
             x = (short)x >> 2;

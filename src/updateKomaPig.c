@@ -1,5 +1,6 @@
 // FUNC 8012ccf8 1436 X000
 // MATCHING 8012ccf8 1436
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -10,7 +11,6 @@ typedef struct { unsigned char b0, b1; } B8012CCF8;
 extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern void komaPigSubtype00Step();
 extern void komaPigSubtype02Step();
 extern void komaPigSubtype03Step();
@@ -192,7 +192,7 @@ void updateKomaPig(TObj *o)
                 ((unsigned char*)&GVARS.b3f)[0] = 1;
                 ((unsigned char*)&GVARS.b42)[0] = 1;
                 D_800A4553[0] = 3;
-                D_800A4568[0] = 0;
+                CAMERA_SCROLL.velY = 0;
                 D_1F80018C = o->h->raw;
                 D_1F800190 = o->y.raw;
                 spawnPoolType32At(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);

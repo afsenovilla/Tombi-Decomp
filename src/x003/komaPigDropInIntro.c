@@ -1,5 +1,6 @@
 // FUNC 801243b8 1984 X003
 // MATCHING 801243b8 1984
+#include "camera.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
@@ -8,7 +9,6 @@ typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned shor
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8, wa, wc; } X;
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern int D_1F80018C;
 extern int D_1F800190;
 extern char D_80077CF4[], D_80077CDC[];
@@ -82,7 +82,7 @@ void komaPigDropInIntro(TObj *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         D_800A4553[0] = 3;
-        D_800A4568[0] = 0;
+        CAMERA_SCROLL.velY = 0;
         D_1F80018C = o->h->raw;
         D_1F800190 = o->y.raw;
         break;

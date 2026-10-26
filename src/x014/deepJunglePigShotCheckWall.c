@@ -1,8 +1,8 @@
 // FUNC 8012491c 180 X014
 // MATCHING 8012491c 180
+#include "camera.h"
 #include "TOBJ.H"
 
-extern short D_800A457C, D_800A457E;
 extern short probeWallAt(TObj *, short, short, short);
 
 int deepJunglePigShotCheckWall(TObj *o)
@@ -14,14 +14,14 @@ int deepJunglePigShotCheckWall(TObj *o)
     if (o->velH < 0) {
         d = -8;
         f = 1;
-        if (o->h->p.whole < D_800A457C - 0x98) {
-            o->h->p.whole = D_800A457C - 0x98;
+        if (o->h->p.whole < CAMERA_SCROLL.minX - 0x98) {
+            o->h->p.whole = CAMERA_SCROLL.minX - 0x98;
             return 1;
         }
     } else {
         f = 0;
-        if (D_800A457E + 0x98 < o->h->p.whole) {
-            o->h->p.whole = D_800A457E + 0x98;
+        if (CAMERA_SCROLL.maxX + 0x98 < o->h->p.whole) {
+            o->h->p.whole = CAMERA_SCROLL.maxX + 0x98;
             return 1;
         }
     }

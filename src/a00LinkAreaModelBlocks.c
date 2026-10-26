@@ -1,12 +1,12 @@
 // FUNC 801176d8 1492 X000
 // MATCHING 801176d8 1492
+#include "camera.h"
 #include "spad.h"
 #include "gcd.h"
 /* Spans splat entries 801176D8+80117928 (jtbl 80115EF8). Each branch computes lo = x / 80 and
    hi = lo + N itself so the shared tail is cross-jumped; x pinned to v1 ($2 for the D_1F800176u load). */
 typedef struct { char pad[3]; unsigned char n; unsigned char *p[1]; } L;
 extern unsigned short D_8009C962;
-extern int D_800A4574;
 extern unsigned short D_1F800176u;
 extern int getScrollOffsetX(void);
 
@@ -23,7 +23,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
     case 0:
         if (GCD.bcda2)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x8c; lo = x / 80; hi = lo + 8; }
-        else if (D_800A4574 == 0)
+        else if (CAMERA_SCROLL.rotY == 0)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x64; lo = x / 80; hi = lo + 8; }
         else
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() + 0x64; lo = x / 80; hi = lo + 8; }
@@ -39,7 +39,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
     case 1:
         if (GCD.bcda2)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x3c; lo = x / 80; hi = lo + 9; }
-        else if (D_800A4574 == 0)
+        else if (CAMERA_SCROLL.rotY == 0)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x3c; lo = x / 80; hi = lo + 9; }
         else
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() + 0x3c; lo = x / 80; hi = lo + 9; }
@@ -53,7 +53,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
         }
         break;
     case 2:
-        if (D_800A4574 == 0)
+        if (CAMERA_SCROLL.rotY == 0)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x8c; lo = x / 80; hi = lo + 8; }
         else
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX() + 0x8c; lo = x / 80; hi = lo + 8; }
@@ -85,7 +85,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
                 o->n++;
             }
         } else {
-            if (D_800A4574 == 0)
+            if (CAMERA_SCROLL.rotY == 0)
                 { x2 = (short)D_1F800176u; lo = x2 / 80; hi = lo + 8; }
             else
                 { x = (*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX(); lo = x / 80; hi = lo + 8; }

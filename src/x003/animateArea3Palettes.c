@@ -1,5 +1,6 @@
 // FUNC 80117de4 1184 X003
 // MATCHING 80117de4 1184
+#include "camera.h"
 #include "spad.h"
 /* Loops written as macros on ONE function-scope `short i` shared by all four loops: the shared loop variable is
    what keeps i in a1 (it conflicts with k in a0 in cases 2/3) and makes cse extend i rather than a before the loop.
@@ -12,7 +13,6 @@ typedef struct {
     int items[0x58];
     unsigned char b164;
 } L;
-extern int D_800A4574;
 extern int getScrollOffsetX(void);
 extern void FUN_8005f488(RECT *, int, int);
 extern void loadArea3ClutRows(L *);
@@ -46,7 +46,7 @@ void animateArea3Palettes(L *o, unsigned char *tbl)
     switch (GAME.selectedSection) {
     case 0:
     case 4:
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             a = ((*(short*)((char*)&SPAD.i174 + 2)) + 0x140) / 80;
             b = a + 8;
         } else {
@@ -59,7 +59,7 @@ void animateArea3Palettes(L *o, unsigned char *tbl)
         break;
     case 1:
     case 5:
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             a = ((*(short*)((char*)&SPAD.i174 + 2)) - 0xa28) / 80;
             b = a + 8;
         } else {

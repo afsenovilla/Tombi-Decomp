@@ -16,12 +16,7 @@ typedef struct {
     short x, y, z, pad;
 } P80119F5C;
 
-typedef struct {
-    char p0[0x20];
-    int d20, d24;
-} C80119F5C;
-
-extern C80119F5C CAMERA_SCROLL;
+#include "camera.h"
 extern P80119F5C D_8012AC88[];
 extern unsigned char PLAYER[];
 extern void waypointRideAdvanceSegment(TObj *);
@@ -77,7 +72,7 @@ static __inline__ int turn(unsigned short tgt, int cur)
 
 void waypointRideStep(TObj *o)
 {
-    C80119F5C *c = &CAMERA_SCROLL;
+    CameraScroll *c = &CAMERA_SCROLL;
     X80119F5C *x = (X80119F5C *)&o->wb4;
     int n;
     TObj **l;
@@ -149,6 +144,6 @@ void waypointRideStep(TObj *o)
     ((int*)&SPAD.if4)[0] = o->b.raw;
     o->d8c = turn(x->w6, o->d8c);
     o->d88 = turn(x->w4, o->d88);
-    TURN2(c->d24, o->d88);
-    TURN2(c->d20, o->d8c);
+    TURN2(c->rotY, o->d88);
+    TURN2(c->rotX, o->d8c);
 }

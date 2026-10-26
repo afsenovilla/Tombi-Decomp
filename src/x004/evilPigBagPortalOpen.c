@@ -1,11 +1,11 @@
 // FUNC 8011ca80 400 X004
 // MATCHING 8011ca80 400
+#include "camera.h"
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern int D_1F800190;
 
 void evilPigBagPortalOpen(TObj *o)
@@ -16,7 +16,7 @@ void evilPigBagPortalOpen(TObj *o)
         ((unsigned char*)&GVARS.b3e)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
-        D_800A4568[0] = 0;
+        CAMERA_SCROLL.velY = 0;
         D_1F800190 = o->y.raw;
         SPAD.i18c = o->h->raw;
         o->timer = 60;

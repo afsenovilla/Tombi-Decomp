@@ -1,6 +1,7 @@
 // FUNC 8012efc4 1156 X001
 // MATCHING 8012efc4 1156
 // VERSION SLPS_01144 x01 8012D8A0 1156
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x001 8012EFC4 (x001/func_8012EFC4.c): 160 -> 152.
 #include "spad.h"
@@ -12,7 +13,6 @@ typedef void (*Fn)(TObj *);
 
 extern int DAT_1f8002d0[];
 extern Fn D_8013C8FC[];
-extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern void despawnObjectOffscreenMargin(TObj *, int);
@@ -103,7 +103,7 @@ void func_8012EFC4(TObjX *e)
                     break;
                 }
             chk:
-                if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0x98 < o->y.p.whole)
+                if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole)
                     o->b04 = 3;
                 break;
             }
@@ -132,7 +132,7 @@ void func_8012EFC4(TObjX *e)
             }
             func_8012DF98(o);
             FUN_800202b4(o);
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0x98 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:
@@ -172,7 +172,6 @@ static Fn D_8013C8FC[11] = {
     (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn,
     (Fn)komaPigDropIn, (Fn)komaPigDropIn, (Fn)komaPigDropIn,
 };
-extern short D_800A4582;
 extern int FUN_800202b4(TObj *);
 extern unsigned int FUN_8001f9e0(void);
 extern void despawnObjectOffscreenMargin(TObj *, int);
@@ -263,7 +262,7 @@ void updateKomaPig(TObjX *e)
                     break;
                 }
             chk:
-                if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+                if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole)
                     o->b04 = 3;
                 break;
             }
@@ -292,7 +291,7 @@ void updateKomaPig(TObjX *e)
             }
             komaPigHit(o);
             FUN_800202b4(o);
-            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole)
+            if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole)
                 o->b04 = 3;
             break;
         case 1:

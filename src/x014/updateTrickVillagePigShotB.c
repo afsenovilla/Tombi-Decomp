@@ -1,6 +1,7 @@
 // FUNC 801244d0 888 X014
 // MATCHING 801244d0 888
 // VERSION SLPS_01144 x14 801217A8 888
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 #include "include_asm.h"
 INCLUDE_ASM_V("x14/nonmatchings/x14", func_801217A8_slps01144);
@@ -12,7 +13,6 @@ INCLUDE_ASM_V("x14/nonmatchings/x14", func_801217A8_slps01144);
 
 extern void *D_80129FF0;
 extern short D_8007A3F0[], D_8007A5F0[];
-extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -31,10 +31,10 @@ static __inline__ void setup(TObj *p)
 
 static __inline__ short out(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0xa0) return 1;
-    if (D_800A457E + 0xa0 < o->h->p.whole) return 1;
-    if (D_800A4582 + 0x80 < o->y.p.whole) return 1;
-    return o->y.p.whole < D_800A4580 - 0x80;
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0xa0) return 1;
+    if (CAMERA_SCROLL.maxX + 0xa0 < o->h->p.whole) return 1;
+    if (CAMERA_SCROLL.maxY + 0x80 < o->y.p.whole) return 1;
+    return o->y.p.whole < CAMERA_SCROLL.minY - 0x80;
 }
 
 void updateTrickVillagePigShotB(TObj *o)

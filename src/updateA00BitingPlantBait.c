@@ -1,6 +1,7 @@
 // FUNC 801236f0 812 X000
 // MATCHING 801236f0 812
 // VERSION SLPM_80165 x00 80119C8C 828
+#include "camera.h"
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 801236F0 (func_801236F0.c): handler index from the 20-byte item table.
 #include "gcd.h"
@@ -19,7 +20,6 @@ extern TObj *D_8009C948[];
 extern short D_80138F8C[];
 extern short D_80138F8E[];
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
 
@@ -48,7 +48,7 @@ void func_801236F0(TObj *o)
                     ((unsigned char*)&GVARS.b3e)[0] = 1;
                     ((unsigned char*)&GVARS.b42)[0] = 1;
                     D_800A4553[0] = 3;
-                    D_800A4568[0] = 0;
+                    CAMERA_SCROLL.velY = 0;
                     *(int *)0x1F800190 = o->y.raw;
                     *(int *)0x1F80018C = o->h->raw;
                 }
@@ -115,7 +115,6 @@ static short D_80138F8E[13] = {
     0, 0x100, 0x200, 1, 2,
 };
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern unsigned char D_8007A7F0[];
 extern void (*D_8007A890[])(TObj *);
 
@@ -144,7 +143,7 @@ void updateA00BitingPlantBait(TObj *o)
                     ((unsigned char*)&GVARS.b3e)[0] = 1;
                     ((unsigned char*)&GVARS.b42)[0] = 1;
                     D_800A4553[0] = 3;
-                    D_800A4568[0] = 0;
+                    CAMERA_SCROLL.velY = 0;
                     *(int *)0x1F800190 = o->y.raw;
                     *(int *)0x1F80018C = o->h->raw;
                 }

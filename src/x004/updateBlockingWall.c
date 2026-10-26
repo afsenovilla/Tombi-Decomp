@@ -1,9 +1,9 @@
 // FUNC 8011bf10 680 X004
 // MATCHING 8011bf10 680
+#include "camera.h"
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern short D_800A457E;
 extern TObj *FUN_80018448(void);
 extern void FUN_80018838(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -16,7 +16,7 @@ void updateBlockingWall(TObj *o)
     case 0:
         if (GCD.bd091) {
             if (o->subtype != 1) {
-                short *k = &D_800A457E;
+                short *k = &CAMERA_SCROLL.maxX;
                 *k += 0x140;
                 o->b04 = 3;
                 break;
@@ -76,7 +76,7 @@ void updateBlockingWall(TObj *o)
                 e->w22 = 0x8c;
             }
             {
-                short *k = &D_800A457E;
+                short *k = &CAMERA_SCROLL.maxX;
                 GCD.bd091 = 1;
                 *k += 0x140;
             }

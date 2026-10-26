@@ -1,5 +1,6 @@
 // FUNC 80121f90 1160 X014
 // MATCHING 80121f90 1160
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -8,7 +9,6 @@ extern TObj PLAYER;
 extern S2 *D_800A6078;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6;
 extern short D_800A6066;
-extern short D_800A457C, D_800A457E;
 extern short func_80040278(TObj *, short, short);
 
 void flowerForestPigShotSlide(TObj *o)
@@ -34,7 +34,7 @@ void flowerForestPigShotSlide(TObj *o)
         break;
     case 4:
         o->a.raw -= o->velH << 8;
-        if (o->h->p.whole < D_800A457C - 0x96) {
+        if (o->h->p.whole < CAMERA_SCROLL.minX - 0x96) {
             if (o->subtype == 3) {
                 pl = &PLAYER;
                 if (D_800A60D6 == 3) {
@@ -47,7 +47,7 @@ void flowerForestPigShotSlide(TObj *o)
             }
             o->step++;
         } else {
-            if (o->h->p.whole < D_800A457E + 0xa0) {
+            if (o->h->p.whole < CAMERA_SCROLL.maxX + 0xa0) {
                 short y = o->y.p.whole + 4;
                 o->y.p.whole = y;
                 if (func_80040278(o, o->h->p.whole, (short)(y + o->box2))) {
@@ -79,7 +79,7 @@ void flowerForestPigShotSlide(TObj *o)
         break;
     case 7:
         o->a.raw += o->velH << 8;
-        if (D_800A457E + 0x96 < o->h->p.whole) {
+        if (CAMERA_SCROLL.maxX + 0x96 < o->h->p.whole) {
             if (o->subtype == 3) {
                 pl = &PLAYER;
                 if (D_800A60D6 == 3) {
@@ -92,7 +92,7 @@ void flowerForestPigShotSlide(TObj *o)
             }
             o->step++;
         } else {
-            if (D_800A457C - 0xa0 < o->h->p.whole) {
+            if (CAMERA_SCROLL.minX - 0xa0 < o->h->p.whole) {
                 short y = o->y.p.whole + 4;
                 o->y.p.whole = y;
                 if (func_80040278(o, o->h->p.whole, (short)(y + o->box2))) {

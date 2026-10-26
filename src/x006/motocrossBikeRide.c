@@ -23,7 +23,7 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern int CAMERA_SCROLL[];
+#include "camera.h"
 extern short D_800A457E;
 extern volatile unsigned short PAD_PRESSED[];
 extern char D_8011FEA0[], D_8011F3F8[];
@@ -138,7 +138,7 @@ static __inline__ void turn4(int *p, int target)
 
 void motocrossBikeRide(TObj *o)
 {
-    int *g = CAMERA_SCROLL;
+    CameraScroll *g = &CAMERA_SCROLL;
     TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t = SUB(o);
     E *e;
@@ -157,8 +157,8 @@ void motocrossBikeRide(TObj *o)
         o->step++;
         SPAD.se6 = -0x1e;
         (*(short*)((char*)&SPAD.ie0 + 2)) = 0x50;
-        g[8] = 0x80;
-        g[31] = -0xf00;
+        g->rotX = 0x80;
+        g->rotYOffset = -0xf00;
         SPAD.sea = -0x2a8;
         o->b69 = 1;
         t->b = 0;

@@ -1,10 +1,10 @@
 // FUNC 8003f200 804 MAIN0
 // MATCHING 8003f200 804
+#include "camera.h"
 #include "spad.h"
 #include "player.h"
 #include "gamestate.h"
 typedef struct { short x, y; } XY;
-extern short D_800A457C, D_800A457E;
 extern unsigned short D_8009C960h;
 extern char D_8007B5DC[];
 extern XY *D_8007B460[];
@@ -22,7 +22,7 @@ char *getCollisionPlaneAt(short x, short y)
     short r, c;
     unsigned char lim;
 
-    if (x < D_800A457C - 0xaa || D_800A457E + 0xaa < x || ((*(int*)&GAME.selectedArea) != 0xe && x < 0))
+    if (x < CAMERA_SCROLL.minX - 0xaa || CAMERA_SCROLL.maxX + 0xaa < x || ((*(int*)&GAME.selectedArea) != 0xe && x < 0))
         return D_8007B5DC;
     if (M960 == 0 && GAME.selectedSection != 3) {
         if (y >= 0x10f) {

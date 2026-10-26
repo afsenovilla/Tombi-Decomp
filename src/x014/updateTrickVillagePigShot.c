@@ -1,6 +1,7 @@
 // FUNC 801206c0 1428 X014
 // MATCHING 801206c0 1428
 // VERSION SLPS_01144 x14 8011D9D8 1428
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 #include "include_asm.h"
 INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011D9D8_slps01144);
@@ -11,7 +12,6 @@ INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011D9D8_slps01144);
 extern TObj PLAYER;
 extern int DAT_1f8002dc[];
 extern void *D_80129F9C[];
-extern short D_800A457C, D_800A457E, D_800A4580, D_800A4582;
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -28,13 +28,13 @@ static __inline__ int touch(TObj *o, TObj *p)
 
 static __inline__ int out(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0xa0)
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0xa0)
         return 1;
-    if (D_800A457E + 0xa0 < o->h->p.whole)
+    if (CAMERA_SCROLL.maxX + 0xa0 < o->h->p.whole)
         return 1;
-    if (D_800A4582 + 0x80 < o->y.p.whole)
+    if (CAMERA_SCROLL.maxY + 0x80 < o->y.p.whole)
         return 1;
-    return o->y.p.whole < D_800A4580 - 0x80;
+    return o->y.p.whole < CAMERA_SCROLL.minY - 0x80;
 }
 
 void updateTrickVillagePigShot(TObj *o)

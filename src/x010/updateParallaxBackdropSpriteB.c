@@ -1,10 +1,10 @@
 // FUNC 8011b1f8 312 X010
 // MATCHING 8011b1f8 312
+#include "camera.h"
 #include "spad.h"
 #include "TOBJ.H"
 extern void *D_80131C88;
 extern unsigned short D_1F800176[];
-extern int D_800A4570[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 
@@ -28,7 +28,7 @@ void updateParallaxBackdropSpriteB(TObj *o)
         short ax; int ay;
         cx = D_1F800176[0];
         cy = ((unsigned short*)&SPAD.s186)[0];
-        sc = D_800A4570[0];
+        sc = CAMERA_SCROLL.rotX;
         o->b.p.whole = 0;
         o->visible = 1;
         ax = o->d30;

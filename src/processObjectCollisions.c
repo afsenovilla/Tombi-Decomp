@@ -1,5 +1,6 @@
 // FUNC 80047af0 900 MAIN0
 // MATCHING 80047af0 900
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 #include "gamestate.h"
@@ -16,7 +17,6 @@ extern unsigned short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 extern TO PLAYER;
 extern signed char D_8009D2B0;
 extern C *TASK_C;
-extern short D_800A4582;
 extern void func_8011E514(void), collideCat2Type7WithCat5Type0B(void), collideCat2ObjectsPairwise(void), collideCat2WithCat4Objects(void);
 extern void collidePlayerWithCat4Objects(TO *), collidePlayerWithCat5Object(TO *, unsigned char *), collidePlayerWithCat2Objects(TO *), collideArea0Section2Slope(TO *);
 extern void collideWeaponsWithCat2Objects(void), collideWeaponsWithCat5Objects(void), collideWeaponsWithCat4Objects(void), collideCat5WithCat4Objects(void);
@@ -73,7 +73,7 @@ void processObjectCollisions(void)
         if (GVARS.b42 | GVARS.b3f) goto tail;
         break;
     }
-    if (SPAD.b1a4 == 0 && TASK_C->s4c == 1 && D_8009D2B0 != 3 && D_800A4582 + 0xa0 < p->s16) {
+    if (SPAD.b1a4 == 0 && TASK_C->s4c == 1 && D_8009D2B0 != 3 && CAMERA_SCROLL.maxY + 0xa0 < p->s16) {
         p->b0 = 5;
         p->b4 = 2;
         p->b5 = 3;

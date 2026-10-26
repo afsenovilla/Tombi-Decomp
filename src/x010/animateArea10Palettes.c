@@ -1,12 +1,12 @@
 // FUNC 80116b08 2140 X010
 // MATCHING 80116b08 2140
+#include "camera.h"
 #include "spad.h"
 /* size 2140: real start 80116B08 (missing from csv); includes the csv piece 80116D50. */
 #include "gamestate.h"
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p[3]; unsigned char n; int e[0x58]; char pad; unsigned char f165; } Q;
 
-extern int D_800A4574, D_800A4570;
 extern unsigned char D_8012F088[];
 extern int getScrollOffsetX(void);
 extern int LoadImage(RECT *, void *);
@@ -21,7 +21,7 @@ void animateArea10Palettes(Q *q, unsigned char *base)
     switch (GAME.selectedSection) {
     case 0:
     case 4:
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) + 0xa0) / 80;
             hi = lo + 5;
             a = lo + 0x30;
@@ -69,7 +69,7 @@ void animateArea10Palettes(Q *q, unsigned char *base)
         break;
     case 2:
     case 6:
-        if (D_800A4574 == 0) {
+        if (CAMERA_SCROLL.rotY == 0) {
             lo = ((*(short*)((char*)&SPAD.i174 + 2)) - 0x104) / 80;
             hi = lo + 9;
         } else {
@@ -117,7 +117,7 @@ void animateArea10Palettes(Q *q, unsigned char *base)
             hi = lo + 6;
             if (lo < 0) lo = 0;
             if (hi >= 0xf) hi = 0xe;
-            if (D_800A4570 == 0) {
+            if (CAMERA_SCROLL.rotX == 0) {
                 a = ((*(short*)&SPAD.s186) + 0x3cf) / 160;
                 b = a + 5;
                 if (a < 0) a = 0;

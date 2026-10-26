@@ -1,13 +1,13 @@
 // FUNC 80121b4c 444 X014
 // MATCHING 80121b4c 444
 // VERSION SLPS_01144 x14 8011EE54 444
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x014 80121B4C (x014/func_80121B4C.c): 128 -> 120.
 #include "TOBJ.H"
 
 extern short DAT_8007a5f0[];
 extern short D_8007A3F0[];
-extern short D_800A457C, D_800A457E, D_800A4582;
 extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
@@ -24,9 +24,9 @@ static __inline__ short hitWall(TObj *o, short r)
 
 static __inline__ int offScreen(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0xa0) return 1;
-    if (D_800A457E + 0xa0 < o->h->p.whole) return 1;
-    return D_800A4582 + 0x78 < o->y.p.whole;
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0xa0) return 1;
+    if (CAMERA_SCROLL.maxX + 0xa0 < o->h->p.whole) return 1;
+    return CAMERA_SCROLL.maxY + 0x78 < o->y.p.whole;
 }
 
 void func_80121B4C(TObj *o)
@@ -67,7 +67,6 @@ void func_80121B4C(TObj *o)
 
 extern short DAT_8007a5f0[];
 extern short D_8007A3F0[];
-extern short D_800A457C, D_800A457E, D_800A4582;
 extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
@@ -84,9 +83,9 @@ static __inline__ short hitWall(TObj *o, short r)
 
 static __inline__ int offScreen(TObj *o)
 {
-    if (o->h->p.whole < D_800A457C - 0xa0) return 1;
-    if (D_800A457E + 0xa0 < o->h->p.whole) return 1;
-    return D_800A4582 + 0x80 < o->y.p.whole;
+    if (o->h->p.whole < CAMERA_SCROLL.minX - 0xa0) return 1;
+    if (CAMERA_SCROLL.maxX + 0xa0 < o->h->p.whole) return 1;
+    return CAMERA_SCROLL.maxY + 0x80 < o->y.p.whole;
 }
 
 void func_80121B4C(TObj *o)

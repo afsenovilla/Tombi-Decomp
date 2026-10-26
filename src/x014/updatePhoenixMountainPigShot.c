@@ -1,5 +1,6 @@
 // FUNC 80122fa0 1784 X014
 // MATCHING 80122fa0 1784
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 /* covers csv entries 80122fa0 (596 B) and 801231f4 (1188 B): one function cut at a jump into the middle */
@@ -9,8 +10,6 @@
 extern TObj PLAYER;
 extern void *D_80129F9C[];
 
-extern short D_800A457C;
-extern short D_800A457E;
 extern short D_8007A1F0[], D_8007A5F0[];
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
@@ -28,13 +27,13 @@ void freeObjectLayer2(TObj *o);
 static __inline__ short clamp(TObj *o)
 {
     if (o->subtype & 1) {
-        if (o->h->p.whole < D_800A457C - 0x90) {
-            o->h->p.whole = D_800A457C - 0x90;
+        if (o->h->p.whole < CAMERA_SCROLL.minX - 0x90) {
+            o->h->p.whole = CAMERA_SCROLL.minX - 0x90;
             return 1;
         }
     } else {
-        if (D_800A457E + 0x90 < o->h->p.whole) {
-            o->h->p.whole = D_800A457E + 0x90;
+        if (CAMERA_SCROLL.maxX + 0x90 < o->h->p.whole) {
+            o->h->p.whole = CAMERA_SCROLL.maxX + 0x90;
             return 1;
         }
     }

@@ -1,5 +1,6 @@
 // FUNC 8011d544 704 X004
 // MATCHING 8011d544 704
+#include "camera.h"
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -11,8 +12,6 @@ extern char D_801350D8[];
 static void *D_80134D50[4] = {
     D_801350C0, D_801350C8, D_801350D0, D_801350D8,
 };
-extern int D_800A4570;
-extern int D_800A4574;
 extern void stormBackdropCycleClut(TObj *);
 extern void drawScreenFade(short);
 extern void playSFX(int);
@@ -27,7 +26,7 @@ static __inline__ void place(TObj *o)
 
     {
         int d = o->d30;
-        x = ((unsigned int)((d - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + ((D_800A4574 >> 8) << 4)) << 21)) >> 23;
+        x = ((unsigned int)((d - (*(unsigned short*)((char*)&SPAD.i174 + 2)) + ((CAMERA_SCROLL.rotY >> 8) << 4)) << 21)) >> 23;
     }
     a = x;
     if (x >= 0x180 && x <= 0x1c0) {
@@ -38,7 +37,7 @@ static __inline__ void place(TObj *o)
     }
     {
         unsigned short s = SPAD.s186;
-        int g = D_800A4570;
+        int g = CAMERA_SCROLL.rotX;
         y = (short)(o->d34 - s - ((g >> 8) << 3)) >> 2;
     }
     *(short *)((char *)o + 0x12) = a;

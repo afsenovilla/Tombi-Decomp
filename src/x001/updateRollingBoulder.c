@@ -1,12 +1,12 @@
 // FUNC 8012f988 1476 X001
 // MATCHING 8012f988 1476
+#include "camera.h"
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
 
 extern unsigned char D_800A4553[];
-extern int D_800A4568[];
 extern short D_800A45AC[];
 extern int D_1F80018C, D_1F800190;
 extern int ObjCullRegister(TObj *);
@@ -62,7 +62,7 @@ void updateRollingBoulder(TObj *o)
             ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&GCD.bceae)[0] = 1;
             D_800A4553[0] = 5;
-            D_800A4568[0] = 0;
+            CAMERA_SCROLL.velY = 0;
             D_800A45AC[0] = 0;
             D_1F800190 = o->y.raw;
             D_1F80018C = o->h->raw;

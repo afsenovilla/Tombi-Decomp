@@ -1,6 +1,7 @@
 // FUNC 80126f38 788 X003
 // MATCHING 80126f38 788
 // VERSION SLPS_01144 x03 80125D9C 788
+#include "camera.h"
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x003 80126F38 (x003/func_80126F38.c): 160 -> 152.
 #include "spad.h"
@@ -9,7 +10,6 @@
 extern char D_80077D3C[];
 extern void *D_80139510;
 extern unsigned char D_80135CB0[];
-extern short D_800A4582;
 extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -70,7 +70,7 @@ void func_80126F38(TObj *o)
         }
         break;
     }
-    if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0x98 < o->y.p.whole) o->b04 = 3;
+    if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole) o->b04 = 3;
 }
 #else
 #include "spad.h"
@@ -79,7 +79,6 @@ void func_80126F38(TObj *o)
 extern char D_80077D3C[];
 extern void *D_80139510;
 extern unsigned char D_80135CB0[];
-extern short D_800A4582;
 extern void playSFX(int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -140,6 +139,6 @@ void spikyLizardSubtype2Step(TObj *o)
         }
         break;
     }
-    if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && D_800A4582 + 0xa0 < o->y.p.whole) o->b04 = 3;
+    if (((SPAD.s1f8 + SPAD.i198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole) o->b04 = 3;
 }
 #endif
