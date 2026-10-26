@@ -1,7 +1,11 @@
 name: Progress report
 
 on:
-  # Manual only: run from the Actions tab ("Run workflow") when a decomp.dev update is wanted.
+  # decomp.dev only ingests runs started by a push, so the report runs when the stamp file below is
+  # pushed to master (`date -u > notes/report_stamp.txt`, commit, push): on demand, never on a schedule.
+  push:
+    branches: [master]
+    paths: ['notes/report_stamp.txt']
   workflow_dispatch:
 
 concurrency:
@@ -9,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Kept for the manual run (always reports "changed" on workflow_dispatch).
+  # Always "changed" for the stamp push and the manual run.
   check:
     runs-on: ubuntu-24.04
     outputs:
@@ -22,7 +26,7 @@ jobs:
         run: |
           h=25; [ "$(date -u +%u)" = 1 ] && h=73   # Monday: include the weekend
           n=$(git log --since="$h hours ago" --oneline -- src config include tools notes | wc -l)
-          if [ "$n" -gt 0 ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then c=true; else c=false; fi
+          if [ "$n" -gt 0 ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ "$GITHUB_EVENT_NAME" = push ]; then c=true; else c=false; fi
           echo "changed=$c" >> "$GITHUB_OUTPUT"
 
   report:
