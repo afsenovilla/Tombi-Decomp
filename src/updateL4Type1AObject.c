@@ -58,7 +58,7 @@ extern unsigned char D_8009CDD2;
 extern unsigned char D_8009CDD5;
 extern unsigned char D_8009CDD6;
 extern unsigned char D_8009CEED;
-extern short D_8009F3DC;
+extern short BUTTON_CONFIG_INDEX;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
@@ -165,16 +165,16 @@ void updateL4Type1AObject(O *o)
                     text = D_80079EBC[o->subtype].text;
                     switch (o->subtype) {
                     case 2:
-                        opt = D_80079E8C[D_8009F3DC];
+                        opt = D_80079E8C[BUTTON_CONFIG_INDEX];
                         break;
                     case 3:
-                        opt = D_80079E98[D_8009F3DC];
+                        opt = D_80079E98[BUTTON_CONFIG_INDEX];
                         break;
                     case 4:
-                        opt = D_80079EA4[D_8009F3DC];
+                        opt = D_80079EA4[BUTTON_CONFIG_INDEX];
                         break;
                     case 6:
-                        opt = D_80079EB0[D_8009F3DC];
+                        opt = D_80079EB0[BUTTON_CONFIG_INDEX];
                         break;
                     default:
                         opt = D_80079EBC[o->subtype].opt;

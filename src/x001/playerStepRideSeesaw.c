@@ -11,7 +11,7 @@
 extern TObj *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern int D_8009C984;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -107,7 +107,7 @@ void playerStepRideSeesaw(TObj *o)
         if ((*(short*)&DAT_8009c330->type)) o->y.raw += 0x10000;
         (*(unsigned short*)&DAT_8009c330->type) = 1;
         {
-            volatile unsigned short *k = DAT_8009d670;
+            volatile unsigned short *k = PAD_PRESSED;
             if (!(*k & 0x50)) {
                 PlayerSetAnimIfChanged(o, 0xc);
             } else if (*k & 0x10) {
@@ -253,7 +253,7 @@ void playerStepRideSeesaw(TObj *o)
         if (o->animFrame & 1) o->h->p.whole = a + 0x10;
         else o->h->p.whole = a - 0x10;
         if (D_8009C984 & 0x40) {
-            if (DAT_8009d670[0] & SPAD.s3c4) o->ba7 = 1;
+            if (PAD_PRESSED[0] & SPAD.s3c4) o->ba7 = 1;
         }
         o->step = 2;
         o->state = 0;

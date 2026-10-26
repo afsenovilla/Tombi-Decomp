@@ -2,7 +2,7 @@
 // MATCHING 80102f40 700
 #include "TOBJ.H"
 extern TObj *DAT_8009d2e8;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned char DAT_8009d2b0;
 extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
@@ -63,7 +63,7 @@ void playerBiteHoldType03(TObj *o)
         }
         break;
     case 2:
-        pad = &DAT_8009d670;
+        pad = &PAD_PRESSED;
         if (*pad & 0x80)
             o->animFrame = 1;
         if (*pad & 0x20)

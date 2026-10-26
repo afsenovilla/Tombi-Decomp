@@ -16,7 +16,7 @@ extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA5;
 extern unsigned char D_8009CF9F;
 extern unsigned char D_8009CFA0;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnB D_80100368[];
 extern SpawnA *D_80100784;
 
@@ -50,7 +50,7 @@ void spawnNpcSet0F(TObj *parent0)
     i1 = 0;
     p = tbl;
     if (p->type != 0xFF) do {
-        ff = 0xFF; ty = 0x30; lp = D_8009F2D8;
+        ff = 0xFF; ty = 0x30; lp = SCRIPT_OBJECTS;
         n = func_800183B8();
         j = i1 + 1;
         if (n != 0) {

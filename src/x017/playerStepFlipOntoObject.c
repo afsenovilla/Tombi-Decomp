@@ -20,7 +20,7 @@ extern TObj *DAT_8009f0ec;
 extern TObj *DAT_800a611c;
 extern TObj *DAT_8009d2e8;
 extern int DAT_8009c934;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c6;
 extern unsigned char DAT_80115228[];
 extern char D_80011108[];
@@ -32,14 +32,14 @@ extern int FUN_8001fe0c(unsigned char, int);
 extern void playerFlipOntoObjectPlace(TObj *, int, int);
 
 #define BUTTONS(o) \
-    if (*(volatile unsigned short *)&DAT_8009d670 & DAT_1f8003c6) { \
+    if (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c6) { \
         DAT_8009c330->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
         (*(unsigned char*)&o->waa) = 0; \
         DAT_8009f0ec->b69 = 0; \
     } \
-    if (*(volatile unsigned short *)&DAT_8009d670 & 0x10) { \
+    if (*(volatile unsigned short *)&PAD_PRESSED & 0x10) { \
         DAT_8009c330->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
@@ -161,7 +161,7 @@ void playerStepFlipOntoObject(TObj *o)
         if (DAT_8009c330->b09 == 0)
             break;
         BUTTONS(o);
-        if (*(volatile unsigned short *)&DAT_8009d670 & 0x40) {
+        if (*(volatile unsigned short *)&PAD_PRESSED & 0x40) {
             v = 0x10;
             DAT_8009c330->b09 = 0;
             (*(unsigned char*)&o->wac) = 1;
@@ -206,7 +206,7 @@ void playerStepFlipOntoObject(TObj *o)
             o->y.p.whole = FUN_8001fe0c((DAT_8009f0ec->d8c >> 4) + 0x10, DAT_8009f0ec->box0) + o->d34 + 0x10;
         AnimAdvance(o);
         BUTTONS(o);
-        if (*(volatile unsigned short *)&DAT_8009d670 & 0x40) {
+        if (*(volatile unsigned short *)&PAD_PRESSED & 0x40) {
             v = 0x10;
             DAT_8009c330->b09 = 0;
             (*(unsigned char*)&o->wac) = 1;

@@ -4,13 +4,13 @@
 extern struct { unsigned short v; } D_800FEE70;
 extern struct { short v; } D_800FEE74;
 extern struct { void **v; } D_800FEE78;
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern void func_8001FE6C(TObj *o);
 
 void topdownA08SceneryInit(TObj *o)
 {
     o->w1e = D_800FEE70.v;
-    o->d3c = D_1F8002C8[D_800FEE74.v];
+    o->d3c = SPR_DATA[D_800FEE74.v];
     o->animFrame = 0;
     o->b0d = 1;
     o->w08 = 0x7FC8;

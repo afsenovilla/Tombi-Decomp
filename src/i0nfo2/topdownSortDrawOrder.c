@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern signed char D_8009D2B0;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern signed char D_800A6047;
 #define LI(n) (*(TObj **)((char *)list + ((n) << 2)))
 #define PI_TOTAL asm("t0")
@@ -98,7 +98,7 @@ void topdownSortDrawOrder(void)
     }
     if (D_8009D2B0 != 3) {
         total++;
-        LI(i) = &D_800A6038;
+        LI(i) = &PLAYER;
     }
     {
     unsigned short cnt = total;

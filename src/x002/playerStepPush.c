@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern unsigned short DAT_1f8001f8;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned char DAT_801152e8[];
 extern void FUN_8001e560(int, int);
 extern void FUN_800eeb5c(TObj *, int);
@@ -16,7 +16,7 @@ extern void playerStickToGround(TObj *);
 void playerStepPush(TObj *o)
 {
     short s;
-    if (DAT_8009d670[0] & 0xa0) {
+    if (PAD_PRESSED[0] & 0xa0) {
         if ((DAT_1f8001f8 & 0xf) == 0)
             FUN_8001e560(0x24, 0x24);
         switch (o->state) {

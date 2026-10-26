@@ -10,25 +10,25 @@ typedef struct { char p[0x2C]; unsigned short w2c; } P330;
 extern P330 *D_8009C330;
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009C975;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern unsigned char D_8009D2B0[];
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 
 static __inline__ void setDir(TObj *o)
 {
     D_8009D2B0[0] = 1;
     o->animFrame &= 7;
-    if (D_8009D670[0] & 0x10) {
-        if (D_8009D670[0] & 0x20) o->animFrame = 1;
-        else if (D_8009D670[0] & 0x80) o->animFrame = 3;
+    if (PAD_PRESSED[0] & 0x10) {
+        if (PAD_PRESSED[0] & 0x20) o->animFrame = 1;
+        else if (PAD_PRESSED[0] & 0x80) o->animFrame = 3;
         else o->animFrame = 2;
-    } else if (D_8009D670[0] & 0x40) {
-        if (D_8009D670[0] & 0x20) o->animFrame = 7;
-        else if (D_8009D670[0] & 0x80) o->animFrame = 5;
+    } else if (PAD_PRESSED[0] & 0x40) {
+        if (PAD_PRESSED[0] & 0x20) o->animFrame = 7;
+        else if (PAD_PRESSED[0] & 0x80) o->animFrame = 5;
         else o->animFrame = 6;
-    } else if (D_8009D670[0] & 0x80) {
+    } else if (PAD_PRESSED[0] & 0x80) {
         o->animFrame = 4;
-    } else if (D_8009D670[0] & 0x20) {
+    } else if (PAD_PRESSED[0] & 0x20) {
         o->animFrame = 0;
     } else {
         o->animFrame |= 8;
@@ -46,7 +46,7 @@ void overheadPlayerMainStep(TObj *o)
             case 0:
                 o->state++;
             case 1:
-                if (D_8009D00F != 0) {
+                if (TALK_POSE != 0) {
                     overheadPlayerStatusAnim(o);
                 } else {
                     overheadPlayerSetMoveAnim(o);
@@ -84,7 +84,7 @@ void overheadPlayerMainStep(TObj *o)
             o->state++;
             break;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 overheadPlayerStatusAnim(o);
             } else {
                 overheadPlayerSetMoveAnim(o);
@@ -104,7 +104,7 @@ void overheadPlayerMainStep(TObj *o)
             overheadPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 overheadPlayerStatusAnim(o);
             } else {
                 overheadPlayerSetMoveAnim(o);

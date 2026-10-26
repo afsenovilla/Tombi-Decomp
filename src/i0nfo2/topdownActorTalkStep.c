@@ -7,11 +7,11 @@ typedef struct { int **anims; int p4; int p8; } AnimSet;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A60E4;
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942;
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_8009CDD0[];
 extern unsigned char D_8009CFDE[];
 extern unsigned char D_8009CFF7;
@@ -37,7 +37,7 @@ void topdownActorTalkStep(TObj *o)
         D_800A603E = 0;
         D_800A60E4 = 3;
         D_8009C93F[0] = 1;
-        U16(&D_800A6038, 0x2E) |= 8;
+        U16(&PLAYER, 0x2E) |= 8;
         S16(o, 0xB0) = U16(o, 0x2E);
         k = U8(o, 0x69) + 7;
         U16(o, 0x2E) = U8(o, 0x69) - 1;
@@ -81,7 +81,7 @@ void topdownActorTalkStep(TObj *o)
         AnimAdvance(o);
         if (((TObj *)S32(o, 0x90))->b04 == 2) {
             ((TObj *)S32(o, 0x90))->b04 = 3;
-            if (D_8009CDA4[S16(o, 0xAC)] == 0) {
+            if (SCRIPT_FLAGS[S16(o, 0xAC)] == 0) {
                 setEventStarted(S16(o, 0xAC), 0, 0);
                 S16(o, 0x20) = 0xC8;
             } else {

@@ -5,11 +5,11 @@ extern void func_8001FE6C(TObj *o);
 extern void *D_800106B4, *D_800106B8, *D_800106BC, *D_800106C0, *D_800106C4, *D_800106C8, *D_800106CC, *D_800106D0;
 extern void *D_800106D4, *D_800106D8, *D_800106DC, *D_800106E0, *D_800106E4, *D_800106E8, *D_800106EC;
 extern TObj *D_8009C330;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 
 void topdownPlayerSetMoveAnim(TObj *o)
 {
-    if (D_8009D670[0] & *(unsigned short *)0x1F8003C4) {
+    if (PAD_PRESSED[0] & *(unsigned short *)0x1F8003C4) {
         D_8009C330->animTimer = o->animFrame + 0x10;
         if (D_8009C330->animTimer == D_8009C330->animFrame) return;
         switch (o->animFrame) {

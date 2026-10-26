@@ -15,7 +15,7 @@ extern unsigned char D_8009CE0A;
 extern unsigned char D_8009CF60;
 extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA8;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnB *D_801001D4;
 extern SpawnB *D_801001D8;
 extern SpawnA *D_80100364;
@@ -42,7 +42,7 @@ void spawnNpcSet0E(TObj *parent0)
     }
     tbl = D_80100364;
     for (i = 0; (p = &tbl[i])->type != 0xFF; i++) {
-        lp = D_8009F2D8;
+        lp = SCRIPT_OBJECTS;
         switch (p->bc) {
         case 8:
             if (D_8009CF60 == 0) break;

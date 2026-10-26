@@ -7,7 +7,7 @@ typedef struct L { unsigned char active; char p[0x94 - 1]; struct L *next; } L;
 extern TObj *D_8009C330;
 extern L *D_8009F0EC;
 extern unsigned int D_8009C984[];
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 
 void playerClingJumpRelease(TObj *o)
 {
@@ -38,7 +38,7 @@ void playerClingJumpRelease(TObj *o)
         }
     }
     o->h->p.whole += (o->animFrame & 1) ? 0x10 : -0x10;
-    if ((D_8009C984[0] & 0x40) && (D_8009D670[0] & SPAD.s3c4)) o->ba7 = 1;
+    if ((D_8009C984[0] & 0x40) && (PAD_PRESSED[0] & SPAD.s3c4)) o->ba7 = 1;
     o->step = 2;
     o->state = 0;
 }

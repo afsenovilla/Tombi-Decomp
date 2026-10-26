@@ -6,7 +6,7 @@
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
 
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
 extern int ObjCheckHeadCollision(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
@@ -64,8 +64,8 @@ void playerStep48Area10B(TObj *o)
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         ObjCheckHeadCollision(o);
-        if (D_8009D670[0] & 0x80) o->animFrame = 1;
-        if (D_8009D670[0] & 0x20) o->animFrame = 0;
+        if (PAD_PRESSED[0] & 0x80) o->animFrame = 1;
+        if (PAD_PRESSED[0] & 0x20) o->animFrame = 0;
         p = D_8009D2E8;
         p->animFrame = o->animFrame & 1;
         p->h->p.whole = o->h->p.whole;
@@ -75,7 +75,7 @@ void playerStep48Area10B(TObj *o)
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            if (D_8009D670[0] & 0x40) D_8009C330->animTimer = 0xf;
+            if (PAD_PRESSED[0] & 0x40) D_8009C330->animTimer = 0xf;
             else D_8009C330->animTimer = 0xe;
             if (D_8009C330->animFrame != D_8009C330->animTimer) {
                 ObjSetAnimFromTable(o);
@@ -99,7 +99,7 @@ void playerStep48Area10B(TObj *o)
                 {
                     unsigned short t = o->animFrame & 1;
                     q->animFrame = t;
-                    if (D_8009D670[0] & 0x40) q->animFrame = t | 2;
+                    if (PAD_PRESSED[0] & 0x40) q->animFrame = t | 2;
                 }
                 q->a.p.whole = o->a.p.whole;
                 q->y.p.whole = o->y.p.whole;
@@ -125,7 +125,7 @@ void playerStep48Area10B(TObj *o)
         {
             unsigned short t = o->animFrame & 1;
             D_8009D2E8->animFrame = t;
-            if (D_8009D670[0] & 0x40) D_8009D2E8->animFrame = t | 2;
+            if (PAD_PRESSED[0] & 0x40) D_8009D2E8->animFrame = t | 2;
         }
         o->b9c = 0;
         *(unsigned char *)&o->wac = 0;

@@ -28,7 +28,7 @@ extern unsigned char D_80100A94;
 extern int D_80100B64;
 extern char D_80100B68, D_80100B6C;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern volatile unsigned char D_8009D2B0, D_800A6038, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
+extern volatile unsigned char D_8009D2B0, PLAYER, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
 extern int subScreenMoveTabCursor(Menu *m);
 extern int subScreenMoveGridCursor(Menu *m);
 extern int subScreenMoveGridCursorN(Menu *m, int n);
@@ -305,7 +305,7 @@ int func_800EC89C(Menu *m)
                 D_8009D2B0 = 3;
                 D_800A603C = 1;
                 D_800A603E = 0;
-                D_800A6038 = 3;
+                PLAYER = 3;
                 D_8009C940 = 1;
                 D_8009C941 = D_80100B64;
                 D_80100B6C = b;

@@ -9,7 +9,7 @@ extern void ObjListPush_1F800220(TObj *o);
 extern unsigned char D_8009CF9F[];
 extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA2[];
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A60A3;
 extern Lim D_800FEDF4[];
 extern AnimSet D_800FEE0C[];
@@ -55,7 +55,7 @@ void topdownA17SceneryUpdate(TObj *o)
             break;
         case 3:
             if (D_8009CF9F[k] & 0x40) {
-                D_800A6038.a.p.whole++;
+                PLAYER.a.p.whole++;
             }
             o->a.p.whole++;
             if (o->a.p.whole == D_800FEDF4[k].b) {
@@ -64,7 +64,7 @@ void topdownA17SceneryUpdate(TObj *o)
             break;
         case 4:
             if (D_8009CF9F[k] & 0x40) {
-                D_800A6038.a.p.whole++;
+                PLAYER.a.p.whole++;
             }
             o->a.p.whole++;
             if (o->a.p.whole == D_800FEDF4[k].c) {
@@ -73,7 +73,7 @@ void topdownA17SceneryUpdate(TObj *o)
             break;
         case 5:
             if (D_8009CF9F[k] & 0x40) {
-                D_800A6038.a.p.whole--;
+                PLAYER.a.p.whole--;
             }
             o->a.p.whole--;
             if (o->a.p.whole == D_800FEDF4[k].b) {
@@ -82,7 +82,7 @@ void topdownA17SceneryUpdate(TObj *o)
             break;
         case 6:
             if (D_8009CF9F[k] & 0x40) {
-                D_800A6038.a.p.whole--;
+                PLAYER.a.p.whole--;
             }
             o->a.p.whole--;
             if (o->a.p.whole == D_800FEDF4[k].a) {

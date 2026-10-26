@@ -5,7 +5,7 @@
 #include "raw7.h"
 extern TObj *D_8009D2E8;
 extern TObj *D_8009C330;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
 extern void playerBiteHoldAttach(TObj *);
 extern void playerResetSlopeState(TObj *);
@@ -65,7 +65,7 @@ void playerStep48Area14(TObj *o)
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8003facc(o);
-        k = D_8009D670;
+        k = PAD_PRESSED;
         if (*k & 0x80)
             o->animFrame = 1;
         if (*k & 0x20)
@@ -113,7 +113,7 @@ void playerStep48Area14(TObj *o)
         q = D_8009D2E8;
         y = o->animFrame & 1;
         q->animFrame = y;
-        if (D_8009D670[0] & 0x40)
+        if (PAD_PRESSED[0] & 0x40)
             q->animFrame = y | 2;
         o->b9c = 0;
         (*(unsigned char*)&o->wac) = 0;

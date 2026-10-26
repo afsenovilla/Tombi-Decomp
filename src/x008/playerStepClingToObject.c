@@ -23,7 +23,7 @@ extern G330 *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_8009d2b0;
 extern int DAT_8009c984;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern void FUN_80010d68();
 extern void FUN_80010dac();
 extern void FUN_8001fe94(TObj *, int);
@@ -45,7 +45,7 @@ static __inline__ short chk(TObj *o)
         DAT_8009d2b0 = 0;
         playerReleaseClingObject(o);
         if (DAT_8009c984 & 0x40) {
-            if (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1F8003C4) {
+            if (*(volatile unsigned short *)&PAD_PRESSED & *(unsigned short *)0x1F8003C4) {
                 o->ba7 = 1;
             }
         }

@@ -1,7 +1,7 @@
 // FUNC 80025d90 432 MAIN0
 // MATCHING 80025d90 432
 /* Pad input decode: two 4-way axis fields (0x10/0x20/0x40/0x80 bits) from the byte globals DAT_8009d618 and
-   DAT_8009d610.b9, merged into DAT_8009d670; press/release masks to the scratchpad.
+   DAT_8009d610.b9, merged into PAD_PRESSED; press/release masks to the scratchpad.
    Notes (n65): `a` must be an int (the game's `andi a0,a3,0xff` is a zero_extendqisi2 that survives because the
    lbu register is used again in the `c < 0x80` test); it is assigned after the pad mask so its andi takes the
    luid right before the pad lhu; `d` is a 3-set int per axis (global pseudo: v1 in the first axis because the
@@ -12,7 +12,7 @@
 typedef struct { char p0[9]; unsigned char b9; } G;
 extern unsigned char DAT_8009d618;
 extern G DAT_8009d610;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern volatile unsigned short DAT_8009d674;
 extern unsigned short DAT_800a6114;
 extern unsigned short DAT_1f8001fc;
@@ -45,14 +45,14 @@ void playerDecodePadInput(void)
     DAT_8009d674 = DAT_800a6114;
     c1 = DAT_8009d618;
     DAT_8009d618 = 0;
-    m = *(volatile unsigned short *)&DAT_8009d670 & 0xff0f;
+    m = *(volatile unsigned short *)&PAD_PRESSED & 0xff0f;
     a1 = c1;
     m |= AXIS(DAT_8009d618, c1, a1, 0x80, 0x20);
     c2 = g->b9;
     g->b9 = 0;
     a2 = c2;
     m |= AXIS(g->b9, c2, a2, 0x10, 0x40);
-    pad = &DAT_8009d670;
+    pad = &PAD_PRESSED;
     *pad = m;
     DAT_1f8001fc = *pad & ~DAT_8009d674;
     DAT_1f8001fe = DAT_8009d674 & ~*pad;

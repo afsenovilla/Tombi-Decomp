@@ -9,7 +9,7 @@ typedef struct {
 } Menu;
 extern Menu D_800A45D8;
 extern unsigned short D_1F8001FC;
-extern unsigned short D_8009D670;
+extern unsigned short PAD_PRESSED;
 extern int D_800F7140, D_800F7144;
 extern int memCardScreenStep(int pad, Menu *m);
 
@@ -24,7 +24,7 @@ int memCardScreenUpdate(int a0, int a1, int ret)
         m->b2 = 0;
         m->b3 = 0;
     case 1:
-        k = *(volatile unsigned short *)&D_8009D670 & 0xF0;
+        k = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
         if (k != D_800F7140) {
             D_800F7140 = k;
             D_800F7144 = 0x20;

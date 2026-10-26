@@ -8,7 +8,7 @@ typedef struct {
     void **anims;
 } ObjInit;
 extern ObjInit D_800FEEF4[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern void func_8001FE94(TObj *o, int n);
 
 void topdownA16ActorInit(TObj *o)
@@ -18,7 +18,7 @@ void topdownA16ActorInit(TObj *o)
     o->box2 = D_800FEEF4[o->subtype].box[2];
     o->box3 = D_800FEEF4[o->subtype].box[3];
     o->w1e = D_800FEEF4[o->subtype].w1e;
-    o->d3c = D_1F8002C8[D_800FEEF4[o->subtype].spad];
+    o->d3c = SPR_DATA[D_800FEEF4[o->subtype].spad];
     o->anim = D_800FEEF4[o->subtype].anims[o->animFrame];
     func_8001FE94(o, 0);
     o->b6b = 0x7F;

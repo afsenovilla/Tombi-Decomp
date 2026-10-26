@@ -1,13 +1,13 @@
 // FUNC 800ee6d0 272 X013
 // MATCHING 800ee6d0 272
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_8009c960;
 extern short FUN_8001fe3c(int, int);
 
 void playerFloatDirFromPad(char *o)
 {
 
-    volatile unsigned short *pad = &DAT_8009d670;
+    volatile unsigned short *pad = &PAD_PRESSED;
     int a = 10;
     short d;
     int t;

@@ -13,7 +13,7 @@ extern TObj *D_8009F308;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 void func_800F969C(TObj *o)
 {
@@ -24,8 +24,8 @@ void func_800F969C(TObj *o)
     case 0:
         o->state++;
     case 1:
-        if (D_800A6038.y.p.whole < 0xC6) {
-            if (D_800A6038.h->p.whole < n->h->p.whole) n->animFrame = 2;
+        if (PLAYER.y.p.whole < 0xC6) {
+            if (PLAYER.h->p.whole < n->h->p.whole) n->animFrame = 2;
             else n->animFrame = 0;
         } else {
             n->animFrame = 3;

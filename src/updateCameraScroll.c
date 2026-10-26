@@ -20,7 +20,7 @@ typedef struct {
 } G;
 extern G PLAYER;
 extern unsigned char D_800A60D8;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001fc;
 extern short D_1f8001c8;
 extern short D_1f8000e6;
@@ -109,7 +109,7 @@ void updateCameraScroll(S *o)
         case 0:
             c = g->a0.b[0];
             if (c & 0x12) {
-                if (D_8009D670[0] & 0xc00) {
+                if (PAD_PRESSED[0] & 0xc00) {
                     if ((D_1f8001fc & 0x10) && D_800A60D8 != 4) {
                         if (o->b6e != 1) {
                             o->b6c = 7;
@@ -191,7 +191,7 @@ void updateCameraScroll(S *o)
                     }
                     if (f) decay();
                 }
-            } else if (D_8009D670[0] & 0xc00) {
+            } else if (PAD_PRESSED[0] & 0xc00) {
                 handleLookScrollInput(o);
                 cameraScrollInputStep(o, 0);
             } else {
@@ -220,7 +220,7 @@ void updateCameraScroll(S *o)
         case 12:
             break;
         default:
-            if ((g->a0.b[0] & 0x12) || (D_8009D670[0] & 0xc00)) cameraScrollInputStep(o, 1);
+            if ((g->a0.b[0] & 0x12) || (PAD_PRESSED[0] & 0xc00)) cameraScrollInputStep(o, 1);
             else decay();
             break;
         }
@@ -250,7 +250,7 @@ void updateCameraScroll(S *o)
     case 5:
         clamp(o);
         if (g->a0.b[3] != 0) break;
-        if ((g->a0.b[0] & 0x10) && (D_8009D670[0] & 0x40)) goto zero;
+        if ((g->a0.b[0] & 0x10) && (PAD_PRESSED[0] & 0x40)) goto zero;
         if (GAME.selectedPlane > GAME.area00_fogControl) goto zero;
         o->b6c = 7;
         o->b6d = 0;
@@ -283,7 +283,7 @@ void updateCameraScroll(S *o)
     case 9:
         if (g->a0.b[2] != 0) break;
         if (g->a0.b[0] & 2) {
-            if (D_8009D670[0] & 0x10) {
+            if (PAD_PRESSED[0] & 0x10) {
                 if (!(g->a0.b[0] & 1)) o->b6c = 0;
                 break;
             }

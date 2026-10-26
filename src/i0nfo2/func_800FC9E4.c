@@ -2,7 +2,7 @@
 // MATCHING 800fc9e4 1476
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
@@ -76,13 +76,13 @@ void func_800FC9E4(TObj *o)
             } else {
                 switch (U16(o, 0x24) & 3) {
                 case 0:
-                    D_800A6038.a.p.whole++;
+                    PLAYER.a.p.whole++;
                     break;
                 case 1:
-                    D_800A6038.y.p.whole++;
+                    PLAYER.y.p.whole++;
                     break;
                 case 2:
-                    D_800A6038.a.p.whole--;
+                    PLAYER.a.p.whole--;
                     break;
                 }
             }
@@ -103,7 +103,7 @@ void func_800FC9E4(TObj *o)
             D_8009CFA2[k] = 1;
             break;
         }
-        D_800A6038.active = 4;
+        PLAYER.active = 4;
         D_8009CF9F[k] |= 0x40;
         U8(o, 7) = 0;
         U8(o, 6)++;
@@ -140,13 +140,13 @@ void func_800FC9E4(TObj *o)
             } else {
                 switch (D_8009CF9F[k] & 3) {
                 case 0:
-                    D_800A6038.a.p.whole--;
+                    PLAYER.a.p.whole--;
                     break;
                 case 1:
-                    D_800A6038.y.p.whole--;
+                    PLAYER.y.p.whole--;
                     break;
                 case 2:
-                    D_800A6038.a.p.whole++;
+                    PLAYER.a.p.whole++;
                     break;
                 }
             }
@@ -171,7 +171,7 @@ void func_800FC9E4(TObj *o)
         break;
     case 8:
         D_8009CF9F[k] &= 0xBF;
-        D_800A6038.active = 3;
+        PLAYER.active = 3;
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_800A60E4 = 0;

@@ -6,16 +6,16 @@
 INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", loadButtonConfig);
 #else
 typedef struct { unsigned short a, b, c, d; } E;
-extern short IDX;
-extern E T[];
+extern short BUTTON_CONFIG_INDEX;
+extern E BUTTON_CONFIGS[];
 extern unsigned short S3C4, S3C6, S3C8, S3CA;
 
 void loadButtonConfig(void)
 {
-    int i = IDX;
-    S3C4 = T[i].a;
-    S3C6 = T[i].b;
-    S3C8 = T[i].c;
-    S3CA = T[i].d;
+    int i = BUTTON_CONFIG_INDEX;
+    S3C4 = BUTTON_CONFIGS[i].a;
+    S3C6 = BUTTON_CONFIGS[i].b;
+    S3C8 = BUTTON_CONFIGS[i].c;
+    S3CA = BUTTON_CONFIGS[i].d;
 }
 #endif

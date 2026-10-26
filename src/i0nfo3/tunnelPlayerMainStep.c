@@ -10,27 +10,27 @@ typedef struct { char p[0x2C]; unsigned short w2c; } P330;
 extern P330 *D_8009C330;
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009C975;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern unsigned char D_8009D2B0[];
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern void tunnelCheckTileTrigger(TObj *o, short x, short y);
 extern short D_800EECC8[][4];
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 #define setDir(o) { \
     D_8009D2B0[0] = 1; \
     o->animFrame &= 7; \
-    if (D_8009D670[0] & 0x10) { \
-        if (D_8009D670[0] & 0x20) o->animFrame = 1; \
-        else if (D_8009D670[0] & 0x80) o->animFrame = 3; \
+    if (PAD_PRESSED[0] & 0x10) { \
+        if (PAD_PRESSED[0] & 0x20) o->animFrame = 1; \
+        else if (PAD_PRESSED[0] & 0x80) o->animFrame = 3; \
         else o->animFrame = 2; \
-    } else if (D_8009D670[0] & 0x40) { \
-        if (D_8009D670[0] & 0x20) o->animFrame = 7; \
-        else if (D_8009D670[0] & 0x80) o->animFrame = 5; \
+    } else if (PAD_PRESSED[0] & 0x40) { \
+        if (PAD_PRESSED[0] & 0x20) o->animFrame = 7; \
+        else if (PAD_PRESSED[0] & 0x80) o->animFrame = 5; \
         else o->animFrame = 6; \
-    } else if (D_8009D670[0] & 0x80) { \
+    } else if (PAD_PRESSED[0] & 0x80) { \
         o->animFrame = 4; \
-    } else if (D_8009D670[0] & 0x20) { \
+    } else if (PAD_PRESSED[0] & 0x20) { \
         o->animFrame = 0; \
     } else { \
         o->animFrame |= 8; \
@@ -51,7 +51,7 @@ short *e; int d; unsigned short w;
             case 0:
                 o->state++;
             case 1:
-                if (D_8009D00F != 0) {
+                if (TALK_POSE != 0) {
                     tunnelPlayerStatusAnim(o);
                 } else {
                     tunnelPlayerSetMoveAnim(o);
@@ -88,7 +88,7 @@ short *e; int d; unsigned short w;
             o->state++;
             break;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 tunnelPlayerStatusAnim(o);
             } else {
                 tunnelPlayerSetMoveAnim(o);
@@ -108,7 +108,7 @@ short *e; int d; unsigned short w;
             tunnelPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 tunnelPlayerStatusAnim(o);
             } else {
                 tunnelPlayerSetMoveAnim(o);
@@ -129,8 +129,8 @@ short *e; int d; unsigned short w;
         i = 0;
         e = D_800EECC8[0];
         if (e[0] != 0xFF) do {
-            if ((d = (unsigned short)D_800A6038.h->p.whole - (unsigned short)e[0], w = e[2] - e[0], (unsigned short)d <= (short)w)
-                && (d = (unsigned short)D_800A6038.y.p.whole - (unsigned short)e[1], w = e[3] - e[1], (unsigned short)d <= (short)w)) {
+            if ((d = (unsigned short)PLAYER.h->p.whole - (unsigned short)e[0], w = e[2] - e[0], (unsigned short)d <= (short)w)
+                && (d = (unsigned short)PLAYER.y.p.whole - (unsigned short)e[1], w = e[3] - e[1], (unsigned short)d <= (short)w)) {
                 o->b6b = i + 1;
                 return;
             }

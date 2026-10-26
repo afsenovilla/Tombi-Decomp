@@ -16,7 +16,7 @@ extern Menu D_800A45D8;
 extern char D_800EEA00[], D_800EF600[], D_800F5408[], D_800F543C[], D_800F5448[], D_800F54AC[], D_800F54D8[], D_800F57D8[], D_800F5434[], D_800F5400[];
 extern void *D_1F8003A0;
 extern unsigned short D_1F8001FC;
-extern unsigned short D_8009D670;
+extern unsigned short PAD_PRESSED;
 extern short D_80100918;
 extern int D_80100A88, D_80100A8C;
 extern void LoadImage(RECT *r, void *p);
@@ -58,7 +58,7 @@ int subScreenUpdate(int arg)
         m->b3 = 0;
         m->state++;
     case 1:
-        k = *(volatile unsigned short *)&D_8009D670 & 0xF0;
+        k = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
         if (k != D_80100A88) {
             D_80100A88 = k;
             D_80100A8C = 0x20;

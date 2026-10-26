@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
-extern unsigned char D_800A6038;
+extern unsigned char PLAYER;
 extern unsigned char D_800A6039;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
@@ -43,7 +43,7 @@ void tunnelSlidePlayerStep(TObj *o)
     switch (o->state) {
     case 0:
         D_800A603D = 2;
-        D_800A6038 = 4;
+        PLAYER = 4;
         D_800A603E = 0;
         D_800A6039 = 0;
         D_8009C93F = 1;
@@ -73,7 +73,7 @@ void tunnelSlidePlayerStep(TObj *o)
     case 9:
         D_8009C942 = 0;
         D_8009C93F = 0;
-        D_800A6038 = 1;
+        PLAYER = 1;
         D_800A60B4 = 0;
         D_800A60B6 = 0;
         D_800A6126 = 0;

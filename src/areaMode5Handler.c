@@ -6,7 +6,7 @@ extern char DAT_1f8001c2, DAT_1f8001cf;
 extern unsigned short DAT_1f8001fc;
 extern int DAT_8009c968[];
 extern unsigned char DAT_8009c967;
-extern volatile unsigned short DAT_8009d670[], DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED[], DAT_8009d674;
 extern char DAT_800b1410;
 extern char DAT_8009e375, DAT_8009e376, DAT_8009e377, DAT_8009f085, DAT_8009f086, DAT_8009f087;
 extern void InitSubsystems(void);
@@ -49,12 +49,12 @@ void areaMode5Handler(void)
         }
         DAT_8009d674 = 0;
         DAT_1f8001fc = 0;
-        DAT_8009d670[0] = DAT_8009d674;
+        PAD_PRESSED[0] = DAT_8009d674;
         break;
     case 1:
         DAT_8009c968[0] = DAT_8009c968[0] + 1;
         areaMode5Tick();
-        if (DAT_1f8001c2 != 0 && (DAT_8009d670[0] & 8) != 0 && (DAT_8009d670[0] & 0x800) != 0)
+        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 8) != 0 && (PAD_PRESSED[0] & 0x800) != 0)
             TASK_C->c = 3;
         break;
     case 2:

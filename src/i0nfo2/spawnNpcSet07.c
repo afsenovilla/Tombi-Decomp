@@ -19,9 +19,9 @@ extern unsigned char D_8009CE4B;
 extern unsigned char D_8009CEF0;
 extern unsigned char D_8009CEF4;
 extern unsigned short D_8009C982;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F328;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern SpawnA *D_800FFD7C[];
 extern SpawnB D_800FF06C[];
 #define G8(n) (*((unsigned char *)&GAME + (n)))
@@ -58,7 +58,7 @@ void spawnNpcSet07(TObj *parent0)
     if (p->type != 0xFF) {
     ff = 0xFF;
     d = 0xD;
-    lp = D_8009F2D8;
+    lp = SCRIPT_OBJECTS;
     do {
         n = func_800183B8();
         if (n != 0) {
@@ -163,8 +163,8 @@ void spawnNpcSet07(TObj *parent0)
                     n->animFrame = 3;
                 } else {
                     if (D_8009CEF4 == 1 && D_8009C982 == 2) {
-                        D_800A6038.h->p.whole = n->h->p.whole + 0x10;
-                        D_800A6038.y.p.whole = n->y.p.whole;
+                        PLAYER.h->p.whole = n->h->p.whole + 0x10;
+                        PLAYER.y.p.whole = n->y.p.whole;
                     }
                     if (D_8009CDD5 >= 3) {
                         n->b04 = 2;

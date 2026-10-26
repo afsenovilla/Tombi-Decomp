@@ -1344,6 +1344,12 @@ neighbours whose addresses are known on both sides. Imported names are listed ab
   playerStepHurtStun (playerHurtBitten), playerStepHazardRespawn (playerFallInWater), playerNormalModeDispatch
   (updatePlayerActive). Their PlayerState / PlayerHurtType / PlayerSubState enums are in include/tomba/game.h.
 - X000 area 0: updateMushroomCluster (theirs updateEvilGrass, 80126fec): to check against the strip.
+- Re-check Oct 26 2026 (psx_tomba symbols/sces_013.31 after 2026-10-19): no new function names apply (every real name in their
+  main0 / x00..x18 maps is already ours or is one of the MAIN0 conflicts above; 55 MAIN0 conflicts, none in X000 / overlays).
+  Data imported into data_names_main0.csv: PAD_PRESSED, BUTTON_CONFIG_INDEX, CAMERA_SCROLL, BALLOON_TAIL_SPRITES, BUTTON_CONFIGS,
+  ATAN_TABLE, RAND_SEED. Not imported: their data-typed entries for functions we already name (freeObjectLayer3 = ObjFree,
+  pushDrawListCapped, setSpawnAreaFlag = markSectionVisited), GAME_A / GAME_B aliases of GAME, Psy-Q stamps / _gp / _ctype_.
+  Header alias D_8009C9D8 (NTSC spelling, resolves to PAD_PRESSED) left in its header.
 
 # Draw captures (tools/objdraw.py, Oct 2026)
 

@@ -9,7 +9,7 @@ extern short DAT_80078790[];
 extern void FUN_8004cb00(E *, int);
 extern int testAreaFlagBit(int);
 
-extern E *D_1F800358[];
+extern E *APD_DATA[];
 void FUN_8004c570(void)
 {
     E ***tab;
@@ -19,7 +19,7 @@ void FUN_8004c570(void)
     int r;
     char pad;
     unsigned b;
-    for (p = D_1F800358[DAT_8009c962 & 7]; p->type < 0xff; p++)
+    for (p = APD_DATA[DAT_8009c962 & 7]; p->type < 0xff; p++)
         FUN_8004cb00(p, -1);
     n = DAT_80078790[DAT_8009c960];
     tab = (E ***)DAT_8007b908[DAT_8009c960];

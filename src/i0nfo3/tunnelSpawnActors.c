@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern TObj *func_800183B8(void);
 extern unsigned char D_8009CE34;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 typedef struct { short s[14]; } EntE260;
 extern EntE260 *D_800EEF30;
 
@@ -21,7 +21,7 @@ void tunnelSpawnActors(TObj *o)
     if (e[0] != 0xFF) {
     ff = 0xFF;
     for (; e[0] != ff; e = base[++i].s) {
-        tbl = D_8009F2D8;
+        tbl = SCRIPT_OBJECTS;
         if (e[8] < 6) if (e[8] >= 4) if (D_8009CE34 != 0) continue;
         n = func_800183B8();
         if (n == 0) continue;

@@ -6,7 +6,7 @@ typedef struct {
     short type, w2, frame, w6, w8, wA, wC, wE, w10, w12, x, y, sub, bc;
 } SpawnA;
 extern TObj *func_800183B8();
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnA *D_801008D8;
 #define PI_PARENT 
 #define PI_TBL asm("s3")
@@ -29,7 +29,7 @@ void spawnNpcSet10(TObj *parent0)
     i = 0;
     p = tbl;
     if (p->type != 0xFF) {
-    ff = 0xFF; ty = 0x30; lp = D_8009F2D8;
+    ff = 0xFF; ty = 0x30; lp = SCRIPT_OBJECTS;
     for (; p->type != ff; p = &tbl[++i]) {
         n = func_800183B8();
         if (n != 0) {

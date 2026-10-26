@@ -8,7 +8,7 @@
 extern TObj *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
 extern unsigned char DAT_801152e8[];
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
@@ -41,7 +41,7 @@ void playerStep25Area9(TObj *o)
         (*(unsigned char*)&o->waa) = 1;
         o->state++;
     case 1:
-        k = DAT_8009d670;
+        k = PAD_PRESSED;
         s = 0;
         if (!(*k & 0x50)) {
             FUN_800eeb5c(o, 10);
@@ -169,7 +169,7 @@ void playerStep25Area9(TObj *o)
             if (f) h->p.whole = v + 0x10; else h->p.whole = v - 0x10;
         }
         if (GAME.area00_eventControl & 0x40) {
-            if (DAT_8009d670[0] & SPAD.s3c4)
+            if (PAD_PRESSED[0] & SPAD.s3c4)
                 o->ba7 = 1;
         }
         o->step = 2;

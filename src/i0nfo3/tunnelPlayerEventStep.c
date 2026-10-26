@@ -11,14 +11,14 @@ extern void tunnelPlayerDropExitStep(TObj *o);
 extern void tunnelPlayerLandStep(TObj *o);
 extern void tunnelCollideMapTile(TObj *o, int x, int y, int z);
 extern TObj *D_8009C330;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 
 void tunnelPlayerEventStep(TObj *o)
 {
     unsigned short k;
     switch (o->step) {
     case 0:
-        if (D_8009D00F != 0) {
+        if (TALK_POSE != 0) {
             tunnelPlayerStatusAnim(o);
         } else if (o->active == 5) {
             func_8001FEC0(o);
@@ -75,7 +75,7 @@ void tunnelPlayerEventStep(TObj *o)
             tunnelPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) tunnelPlayerStatusAnim(o);
+            if (TALK_POSE != 0) tunnelPlayerStatusAnim(o);
             else tunnelPlayerSetMoveAnim(o);
             break;
         }

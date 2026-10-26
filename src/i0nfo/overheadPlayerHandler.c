@@ -11,7 +11,7 @@ extern void overheadPlayerEventStep(TObj *o);
 extern unsigned short D_8007A034, D_8007A036;
 extern signed char D_8009D2B0[];
 extern unsigned short D_8009D610;
-extern unsigned short D_8009D670[];
+extern unsigned short PAD_PRESSED[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_800A6040, D_800A60FC;
 
@@ -20,7 +20,7 @@ void overheadPlayerHandler(TObj *o)
     unsigned short pad[4];
     unsigned short b0, b1;
     signed char *m;
-    func_8005BD88(pad, D_8009D670, 8);
+    func_8005BD88(pad, PAD_PRESSED, 8);
     b0 = *(unsigned short *)0x1F8001FC;
     b1 = *(unsigned short *)0x1F8001FE;
     if (o->subtype == 1) {
@@ -57,7 +57,7 @@ void overheadPlayerHandler(TObj *o)
     SPAD16(0x16A) = o->h->p.whole;
     SPAD16(0x16E) = o->y.p.whole;
     SPAD16(0x172) = o->d->p.whole;
-    func_8005BD88(D_8009D670, pad, 8);
+    func_8005BD88(PAD_PRESSED, pad, 8);
     *(unsigned short *)0x1F8001FC = b0;
     *(unsigned short *)0x1F8001FE = b1;
 }

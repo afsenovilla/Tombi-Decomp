@@ -23,12 +23,12 @@ typedef struct {
     char pcc[2];
     unsigned short cx, cy;
 } Msg;
-extern unsigned short D_8009D670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1F8001FC;
 typedef struct { short n, pad, x, y; } Hdr;
 typedef struct { unsigned short f, clut, x, y; } Ent;
-extern Hdr D_800A4648[], D_800A464C[], D_800A464E[];
-extern Ent D_800A4DE0[][128], D_800A4DE2[][128], D_800A4DE4[][128], D_800A4DE6[][128];
+extern Hdr MESSAGE_SLOTS[], D_800A464C[], D_800A464E[];
+extern Ent MESSAGE_GLYPHS[][128], D_800A4DE2[][128], D_800A4DE4[][128], D_800A4DE6[][128];
 typedef struct { unsigned char u, v, w, h, p4, flag, p6, p7, p8, p9; } Img;
 extern Img D_800A5DE4[];
 extern char D_8010A200[];
@@ -50,7 +50,7 @@ void func_800EF538(Msg *o, int bank)
         if (++o->blink >= 60) o->blink = 0;
         do { switch (o->wait) {
         case 0:
-            if (*(volatile unsigned short *)&D_8009D670 & 0x4008) o->timer = 1;
+            if (*(volatile unsigned short *)&PAD_PRESSED & 0x4008) o->timer = 1;
             two = 2;
             one = 1;
         loop: {
@@ -81,7 +81,7 @@ void func_800EF538(Msg *o, int bank)
                     break;
                 case -5:
                     freeMessageGlyphs(o->slot);
-                    D_800A4648[o->slot].n = 0;
+                    MESSAGE_SLOTS[o->slot].n = 0;
                     o->cx = 8;
                     o->cy = 6;
                     o->timer = one;
@@ -122,17 +122,17 @@ void func_800EF538(Msg *o, int bank)
                     o->timer = one;
                     break;
                 default: {
-                    unsigned short n = D_800A4648[o->slot].n;
+                    unsigned short n = MESSAGE_SLOTS[o->slot].n;
                     unsigned short k;
-                    D_800A4648[o->slot].n = n + 1;
+                    MESSAGE_SLOTS[o->slot].n = n + 1;
                     k = loadMessageGlyph(o->slot, c & 0xFFF, bank);
                     if ((c & 0x7000) == 0x4000) {
-                        D_800A4DE0[o->slot][(short)n].f = k | 0xC000;
+                        MESSAGE_GLYPHS[o->slot][(short)n].f = k | 0xC000;
                         D_800A4DE4[o->slot][(short)n].f = o->w - 0x10;
                         D_800A4DE6[o->slot][(short)n].f = o->h - 0x10;
                         D_800A4DE2[o->slot][(short)n].f = ((o->pal + 0x1F0) << 6) | 0x15;
                     } else {
-                        D_800A4DE0[o->slot][(short)n].f = k | 0x8000;
+                        MESSAGE_GLYPHS[o->slot][(short)n].f = k | 0x8000;
                         D_800A4DE4[o->slot][(short)n].f = o->cx;
                         D_800A4DE6[o->slot][(short)n].f = o->cy;
                         D_800A4DE2[o->slot][(short)n].f = ((o->pal + 0x1F0) << 6) | 0x15;
@@ -155,7 +155,7 @@ void func_800EF538(Msg *o, int bank)
         } } while (0);
         D_800A464C[o->slot].n = o->x;
         D_800A464E[o->slot].n = o->y;
-        if (D_800A4648[o->slot].n != -1) drawMessageBox(D_8010A200);
+        if (MESSAGE_SLOTS[o->slot].n != -1) drawMessageBox(D_8010A200);
         break;
     case 2:
         break;

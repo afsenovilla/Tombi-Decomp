@@ -7,7 +7,7 @@ extern void func_8001FEC0(TObj *o);
 extern void overheadPlayerSetMoveAnim(TObj *o);
 extern void overheadCollideMapTile(TObj *o, int x, int y, int z);
 extern unsigned char D_8009C93A;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 
 void overheadPlayerWalkStep(TObj *o)
 {
@@ -24,7 +24,7 @@ void overheadPlayerWalkStep(TObj *o)
                 o->wb6 = 0;
             } else {
                 o->wb6 = (o->animFrame & 7) << 5;
-                if (D_8009D670[0] & *(unsigned short *)0x1F8003C4) o->wb2 = 0x280;
+                if (PAD_PRESSED[0] & *(unsigned short *)0x1F8003C4) o->wb2 = 0x280;
                 else o->wb2 = 0x180;
             }
             func_8001FBAC(o, o->wb6, o->wb2);

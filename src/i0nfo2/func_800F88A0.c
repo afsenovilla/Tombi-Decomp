@@ -2,7 +2,7 @@
 // MATCHING 800f88a0 1212
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern TObj *D_8009F304;
 extern void *D_800106E4;
 extern unsigned char D_8009C93E;
@@ -27,8 +27,8 @@ void func_800F88A0(TObj *o)
         topdownActorSetAnim(t, 8, 0);
         t->step = 2;
         t->state = 0;
-        D_800A6038.step = 4;
-        D_800A6038.state = 0;
+        PLAYER.step = 4;
+        PLAYER.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         t->animFrame = t->b69 - 1;
@@ -71,8 +71,8 @@ void func_800F88A0(TObj *o)
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_8009C942 = 0;
-        D_800A6038.b04 = 1;
-        D_800A6038.step = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
         o->step = 0;
         o->state = 0;
         break;
@@ -121,23 +121,23 @@ void func_800F88A0(TObj *o)
         break;
     case 15:
         if (--o->w08 <= 0) {
-            t->h->p.whole = D_800A6038.h->p.whole + 8;
-            t->y.p.whole = D_800A6038.y.p.whole - 8;
+            t->h->p.whole = PLAYER.h->p.whole + 8;
+            t->y.p.whole = PLAYER.y.p.whole - 8;
             o->w08 = 0x10;
             o->state++;
         }
         break;
     case 16:
         if (--o->w08 <= 0) {
-            D_800A6038.anim = D_800106E4;
-            AnimLoadDuration(&D_800A6038);
+            PLAYER.anim = D_800106E4;
+            AnimLoadDuration(&PLAYER);
             o->state++;
         }
         break;
     case 17:
-        D_800A6038.h->raw -= 0x28000;
-        t->h->p.whole = D_800A6038.h->p.whole + 8;
-        AnimAdvance(&D_800A6038);
+        PLAYER.h->raw -= 0x28000;
+        t->h->p.whole = PLAYER.h->p.whole + 8;
+        AnimAdvance(&PLAYER);
         break;
     }
 }

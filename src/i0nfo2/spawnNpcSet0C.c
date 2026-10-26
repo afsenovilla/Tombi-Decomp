@@ -8,7 +8,7 @@ typedef struct {
 extern TObj *func_800183B8();
 extern unsigned char D_8009CF01;
 extern unsigned char D_8009CFC9;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnA *D_800FFE20;
 #define PI_O asm("s2")
 #define PI_TBL asm("s4")
@@ -40,7 +40,7 @@ void spawnNpcSet0C(TObj *o0)
     p = tbl;
     if (p->type != 0xFF) {
     one = 1;
-    lp = D_8009F2D8;
+    lp = SCRIPT_OBJECTS;
     for (; p->type != 0xFF; p = &tbl[++i]) {
         k = i;
         if (k == one && D_8009CF01 != 0) continue;

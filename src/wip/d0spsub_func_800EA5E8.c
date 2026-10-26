@@ -9,7 +9,7 @@ extern short D_8011113C, D_80111140;
 extern short D_8011113E[];
 extern int D_80111144;
 extern short D_8011113C_a[], D_80111140_a[];
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern void subScreenDrawSprite(int n);
 
 void func_800EA5E8(Menu *m)
@@ -20,7 +20,7 @@ void func_800EA5E8(Menu *m)
     short x;
     n = 0;
     for (i = 0; i < 0x100; i++) {
-        if (i != 0x12 && D_8009CDA4[i] == 0xFF) n++;
+        if (i != 0x12 && SCRIPT_FLAGS[i] == 0xFF) n++;
     }
     t = n / 10;
     h = n / 100;
@@ -43,7 +43,7 @@ void func_800EA5E8(Menu *m)
     subScreenDrawSprite(1);
     n = 0;
     for (i = 0; i < 0x100; i++) {
-        if (i != 0x12 && D_8009CDA4[i] != 0) n++;
+        if (i != 0x12 && SCRIPT_FLAGS[i] != 0) n++;
     }
     t = n / 10;
     h = n / 100;

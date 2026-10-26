@@ -2,7 +2,7 @@
 // MATCHING 800ebc5c 624
 #include "TOBJ.H"
 extern signed char D_8009D2B0;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 #define LST(i) (*(TObj **)((int)list + ((i) << 2)))
 void tunnelSortDrawOrder(void)
@@ -47,7 +47,7 @@ void tunnelSortDrawOrder(void)
     }
     if (D_8009D2B0 != 3) {
         cnt++;
-        LST(i) = &D_800A6038;
+        LST(i) = &PLAYER;
     }
     for (m = 0; m < cnt; m++) {
         best = m;
@@ -68,5 +68,5 @@ void tunnelSortDrawOrder(void)
         *(signed char *)&o->b0f = i - 10;
         if (q != 0) *(signed char *)&q->b0f = i - 9;
     }
-    if (D_8009D2B0 == 3) *(signed char *)&D_800A6038.b0f = -0xC;
+    if (D_8009D2B0 == 3) *(signed char *)&PLAYER.b0f = -0xC;
 }

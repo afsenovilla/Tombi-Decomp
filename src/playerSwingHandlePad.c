@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800F6C34 (playerSwingHandlePad.c): d-pad bits 0x1000-0x8000 (PAL 0x10-0x80). fixed pad bit 0x40; letting go keeps the timer and spin.
 #include "TOBJ.H"
-extern unsigned short DAT_8009d670[];
+extern unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6;
 extern unsigned char DAT_8009d2b0;
 extern unsigned char *DAT_8009c330;
@@ -17,19 +17,19 @@ void playerSwingHandlePad(TObj *o)
     int s1;
     unsigned short u;
     Fix16 *h;
-    if (DAT_8009d670[0] & 0x40) {
+    if (PAD_PRESSED[0] & 0x40) {
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (DAT_8009d670[0] & 0x1000) {
+    if (PAD_PRESSED[0] & 0x1000) {
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (DAT_8009d670[0] & 0x4000) {
+    if (PAD_PRESSED[0] & 0x4000) {
         DAT_8009c330[9] = 0;
         *(unsigned char *)&o->wac = 1;
         u = o->animFrame;
@@ -56,7 +56,7 @@ void playerSwingHandlePad(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern unsigned short DAT_8009d670[];
+extern unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6;
 extern unsigned char DAT_8009d2b0;
 extern unsigned char *DAT_8009c330;
@@ -69,20 +69,20 @@ void playerSwingHandlePad(TObj *o)
     int s1;
     unsigned short u;
     Fix16 *h;
-    if (DAT_8009d670[0] & DAT_1f8003c6) {
+    if (PAD_PRESSED[0] & DAT_1f8003c6) {
         DAT_8009d2b0 = 0;
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (DAT_8009d670[0] & 0x10) {
+    if (PAD_PRESSED[0] & 0x10) {
         DAT_8009c330[9] = 0;
         o->step = 0xb;
         o->state = 0;
         DAT_8009f0ec[0x69] = 0;
     }
-    if (DAT_8009d670[0] & 0x40) {
+    if (PAD_PRESSED[0] & 0x40) {
         DAT_8009c330[9] = 0;
         *(unsigned char *)&o->wac = 1;
         u = o->animFrame;

@@ -1,7 +1,7 @@
 // FUNC 800f1718 276 D0SPSUB
 // MATCHING 800f1718 276
 #include "TOBJ.H"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_1F80019E;
 extern unsigned short D_1F800250;
 extern TObj **D_1F800260;
@@ -10,7 +10,7 @@ int subScreenCondNearType0A(void)
 {
     TObj **list = D_1F800260;
     TObj *o;
-    TObj *pl = &D_800A6038;
+    TObj *pl = &PLAYER;
     for (D_1F80019E = D_1F800250; D_1F80019E != 0;) {
         o = *list;
         D_1F80019E--;

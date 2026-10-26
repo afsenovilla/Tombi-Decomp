@@ -5,7 +5,7 @@ typedef struct { TObj o; unsigned char bc0; } BigObj;
 extern BigObj PLAYER;
 #define X PLAYER.o
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c940, DAT_8009c941, DAT_8009c942;
-extern unsigned char DAT_8009cebd, DAT_8009d0a7, DAT_8009d2b0, DAT_8009ce4a, DAT_8009d00d, DAT_8009f3dc;
+extern unsigned char DAT_8009cebd, DAT_8009d0a7, DAT_8009d2b0, DAT_8009ce4a, DAT_8009d00d, BUTTON_CONFIG_INDEX;
 extern int DAT_8009c984;
 extern unsigned char DAT_8009d00dA[];
 extern unsigned char *DAT_8009c330;
@@ -154,7 +154,7 @@ void updateCharlesTalkScene(TObj *o)
         case 3:
             ((TObj *)X.d90)->b04 = 3;
             CEBD = 4;
-            CEBD = DAT_8009f3dc + 4;
+            CEBD = BUTTON_CONFIG_INDEX + 4;
             p->anim = PTR_8013ac2c;
             AnimLoadDuration(p);
             o->step = 4;
@@ -164,7 +164,7 @@ void updateCharlesTalkScene(TObj *o)
             p->anim = PTR_8013ac14;
             AnimLoadDuration(p);
             CEBD = 10;
-            CEBD = DAT_8009f3dc + 10;
+            CEBD = BUTTON_CONFIG_INDEX + 10;
             o->step = 4;
             break;
         case 10: case 11: case 12: case 13: case 14: case 15:

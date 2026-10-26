@@ -11,14 +11,14 @@ extern void topdownPlayerDropExitStep(TObj *o);
 extern void topdownPlayerLandStep(TObj *o);
 extern void topdownCollideMapTile(TObj *o, int x, int y, int z);
 extern TObj *D_8009C330;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 
 void topdownPlayerEventStep(TObj *o)
 {
     unsigned short k;
     switch (o->step) {
     case 0:
-        if (D_8009D00F != 0) {
+        if (TALK_POSE != 0) {
             topdownPlayerStatusAnim(o);
         } else if (o->active == 5) {
             func_8001FEC0(o);
@@ -75,7 +75,7 @@ void topdownPlayerEventStep(TObj *o)
             topdownPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) topdownPlayerStatusAnim(o);
+            if (TALK_POSE != 0) topdownPlayerStatusAnim(o);
             else topdownPlayerSetMoveAnim(o);
             break;
         }

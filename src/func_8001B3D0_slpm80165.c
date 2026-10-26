@@ -5,7 +5,7 @@ typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
 extern int DAT_8009c968[];
 extern unsigned char DAT_1f8001c2;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern volatile unsigned short DAT_8009d674;
 extern unsigned short DAT_1f8001fc;
 extern unsigned char DAT_800b1410;
@@ -56,7 +56,7 @@ void areaMode4Handler(void)
     case 1:
         DAT_8009c968[0]++;
         areaMode4Tick();
-        if (DAT_1f8001c2 != 0 && (DAT_8009d670[0] & 0x800) && (DAT_8009d670[0] & 8))
+        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
             TASK_C->w4e = 3;
         break;
     case 2:

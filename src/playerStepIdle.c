@@ -5,7 +5,7 @@
 extern unsigned char *DAT_800a611c;
 extern unsigned char *DAT_8009d2e8;
 extern unsigned char *DAT_8009c330;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_1f8003ce;
@@ -64,7 +64,7 @@ void playerStepIdle(TObj *o)
     }
     (*(unsigned char*)&o->wac) = 0;
     c = 0;
-    if (*(volatile unsigned short *)&DAT_8009d670 & 0xa0) {
+    if (*(volatile unsigned short *)&PAD_PRESSED & 0xa0) {
         if (o->wb2 == 0) {
             if ((unsigned short)(*(unsigned short *)o->anim - 0x10d) >= 7)
                 o->anim = D_8001080c;
@@ -201,7 +201,7 @@ void playerStepIdle(TObj *o)
         switch (c) {
         case 0:
             o->b9c = 1;
-            if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&DAT_8009d670 & DAT_1f8003c4))
+            if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
                 o->ba7 = 1;
             o->b04 = 1;
             o->step = 2;

@@ -19,7 +19,7 @@ extern TObj *D_8009F2E8;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern TObj *D_800A60C8;
 extern unsigned char D_800A60E4;
 
@@ -41,7 +41,7 @@ void stepNpcSet11(TObj *o)
         }
         break;
     case 1:
-        p = *(Pos6 *)&D_800A6038.a;
+        p = *(Pos6 *)&PLAYER.a;
         D_8009C93F = 1;
         D_8009C942 = 1;
         D_800A603C = 4;
@@ -50,7 +50,7 @@ void stepNpcSet11(TObj *o)
         n->step = 2;
         n->state = 0;
         d = 3;
-        if (D_800A6038.y.p.whole < n->y.p.whole) d = 1;
+        if (PLAYER.y.p.whole < n->y.p.whole) d = 1;
         n->animFrame = d;
         topdownA19ActorSetDirAnim(n, 8, 0, d);
         D_800A60C8 = func_8002DCC8(3, 1, &p);
@@ -69,7 +69,7 @@ void stepNpcSet11(TObj *o)
     case 3:
         if (--o->w08 <= 0) {
             d = 3;
-            if (D_800A6038.y.p.whole < n->y.p.whole) d = 1;
+            if (PLAYER.y.p.whole < n->y.p.whole) d = 1;
             n->animFrame = d;
             topdownA19ActorSetDirAnim(n, 0, 0, d);
             D_8009C940 = 0;

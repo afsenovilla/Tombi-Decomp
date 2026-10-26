@@ -4,7 +4,7 @@ typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w
 extern S *TASK_C;
 extern unsigned short DAT_1f8001fc;
 extern short D_8009D4FC, D_8009D4FE;
-extern volatile unsigned short D_8009D670;
+extern volatile unsigned short PAD_PRESSED;
 extern unsigned short D_8009F7F2;
 extern short D_8009E350, D_8009E352, D_8009E354, D_8009E356;
 extern short D_8009F060, D_8009F062, D_8009F064, D_8009F066;
@@ -31,7 +31,7 @@ int screenAdjustMenuStep(void)
         break;
     case 1:
         {
-            volatile unsigned short *pad = &D_8009D670;
+            volatile unsigned short *pad = &PAD_PRESSED;
             dir = 0;
             if (*pad & 0x10) dir = 1;
             else if (*pad & 0x40) dir = 2;

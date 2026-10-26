@@ -1,7 +1,7 @@
 // FUNC 800fb0c0 448 X009
 // MATCHING 800fb0c0 448
 typedef struct P { char pad0[0xa]; unsigned char b0a; char pad1[0x20 - 0xb]; unsigned short w20, w22; } P;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern P *DAT_8009c330;
 extern int FUN_8003facc(char *);
 #define I32(p, o) (*(int *)((p) + (o)))
@@ -11,7 +11,7 @@ void playerRopeAdjustLength(char *o)
 {
     P *q;
     int t;
-#define pad DAT_8009d670
+#define pad PAD_PRESSED
     if (!(*pad & 0x10))
         DAT_8009c330->w20 = 0;
     if (!(*pad & 0x40))

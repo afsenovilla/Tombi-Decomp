@@ -7,7 +7,7 @@ extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
 extern unsigned char D_800A60E4;
-extern TObj *D_8009F2D8;
+extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
@@ -27,7 +27,7 @@ extern void printInfoMessage(int, int);
 void func_800F7600(TObj *o)
 {
     B12 v;
-    TObj *a = D_8009F2D8;
+    TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;
 
     switch (o->state) {

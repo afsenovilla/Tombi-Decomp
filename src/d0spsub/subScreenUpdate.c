@@ -8,7 +8,7 @@ extern short D_800A45E8, D_800A45F6;
 extern void *D_800A4620, *D_800A4624, *D_800A4628, *D_800A462C, *D_800A4630, *D_800A4634, *D_800A4638, *D_800A463C;
 extern short D_8010A058;
 extern int D_8011112C, D_80111130;
-extern unsigned short D_8009D670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1F8001FC;
 extern void *D_1F8003A0, *D_1F8003A4;
 extern char D_800F18E0[], D_800F24E0[], D_800F7B78[];
@@ -53,7 +53,7 @@ int subScreenUpdate(void)
         D_800A45DB = 0;
         m->state++;
     case 1:
-        pad = *(volatile unsigned short *)&D_8009D670 & 0xF0;
+        pad = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
         if (pad != D_8011112C) {
             D_8011112C = pad;
             D_80111130 = 0x20;

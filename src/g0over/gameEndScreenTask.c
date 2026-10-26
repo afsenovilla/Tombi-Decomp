@@ -5,7 +5,7 @@ typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
 typedef struct { char p[0x4e]; unsigned short w4e; } Task;
 extern GObj D_800A6610[];
 extern char LOAD_BUFFER_ALT[];
-extern Task *DAT_1f8001d4;
+extern Task *TASK_C;
 extern short DAT_1f8001f4;
 extern int DAT_1f800164;
 extern char *DAT_1f800334;
@@ -19,7 +19,7 @@ void gameEndScreenTask(void)
     short i;
     TObj *o;
 
-    switch (DAT_1f8001d4->w4e) {
+    switch (TASK_C->w4e) {
     case 0:
         gameOverSetupCamera();
         gameOverSetupLighting();
@@ -36,7 +36,7 @@ void gameEndScreenTask(void)
                 i++;
             } while (i < 8);
         }
-        DAT_1f8001d4->w4e++;
+        TASK_C->w4e++;
         break;
     case 1:
         {

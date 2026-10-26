@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x000 800FB0C0 (FUN_800fb0c0.c): 64 -> 16384, 16 -> 4096.
 typedef struct P { char pad0[0xa]; unsigned char b0a; char pad1[0x20 - 0xb]; unsigned short w20, w22; } P;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern P *DAT_8009c330;
 extern int FUN_8003facc(char *);
 #define I32(p, o) (*(int *)((p) + (o)))
@@ -14,7 +14,7 @@ void FUN_800fb0c0(char *o)
 {
     P *q;
     int t;
-#define pad DAT_8009d670
+#define pad PAD_PRESSED
     if (!(*pad & 0x1000))
         DAT_8009c330->w20 = 0;
     if (!(*pad & 0x4000))
@@ -46,7 +46,7 @@ void FUN_800fb0c0(char *o)
 }
 #else
 typedef struct P { char pad0[0xa]; unsigned char b0a; char pad1[0x20 - 0xb]; unsigned short w20, w22; } P;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern P *DAT_8009c330;
 extern int FUN_8003facc(char *);
 #define I32(p, o) (*(int *)((p) + (o)))
@@ -56,7 +56,7 @@ void playerRopeAdjustLength(char *o)
 {
     P *q;
     int t;
-#define pad DAT_8009d670
+#define pad PAD_PRESSED
     if (!(*pad & 0x10))
         DAT_8009c330->w20 = 0;
     if (!(*pad & 0x40))

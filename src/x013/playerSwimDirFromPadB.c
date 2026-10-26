@@ -2,14 +2,14 @@
 // MATCHING 8010cda8 520
 #include "TOBJ.H"
 extern unsigned char DAT_8009ce3d;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 
 void playerSwimDirFromPadB(TObj *o)
 {
     char pad;
     volatile unsigned short *p;
     if (DAT_8009ce3d != 0xff) {
-        p = &DAT_8009d670;
+        p = &PAD_PRESSED;
         if (*p & 0x20) {
             o->w76 = 0;
             o->wb6 = 0;
@@ -18,7 +18,7 @@ void playerSwimDirFromPadB(TObj *o)
             o->w76 = 4;
             o->wb6 = 0x80;
         }
-    } else if (p = &DAT_8009d670, !(*p & 0xe0)) {
+    } else if (p = &PAD_PRESSED, !(*p & 0xe0)) {
         if (o->timer != 0) {
             if (--o->timer <= 0) {
                 if ((unsigned)((unsigned short)o->wb6 - 0x40) < 0x80)

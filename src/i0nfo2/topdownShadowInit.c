@@ -8,13 +8,13 @@ typedef struct {
     int pad;
 } ObjInit2;
 extern ObjInit2 D_800FEBD4[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern void func_8001FE6C(TObj *o);
 
 void topdownShadowInit(TObj *o)
 {
     o->w1e = D_800FEBD4[o->subtype].w1e;
-    o->d3c = D_1F8002C8[D_800FEBD4[o->subtype].spad];
+    o->d3c = SPR_DATA[D_800FEBD4[o->subtype].spad];
     o->anim = D_800FEBD4[o->subtype].anims[32];
     func_8001FE6C(o);
     o->b04++;

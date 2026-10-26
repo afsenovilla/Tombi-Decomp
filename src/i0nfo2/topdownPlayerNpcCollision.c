@@ -6,7 +6,7 @@ extern TObj **D_1F80021C;
 extern short D_1F80019E, D_1F800246;
 extern void topdownResolveNpcContact(unsigned char *s, TObj *o);
 extern unsigned char D_8009C93A, D_8009C942[];
-extern unsigned char D_800A6038[];
+extern unsigned char PLAYER[];
 extern TObj *D_800A605C;
 extern signed char D_800A60A1;
 extern unsigned short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
@@ -24,7 +24,7 @@ void topdownPlayerNpcCollision(void)
         D_800A60A6[0] = *p++;
         D_800A60A8[0] = *p;
         D_800A60AA[0] = p[1];
-        s = D_800A6038;
+        s = PLAYER;
         if (D_8009C942[0] == 0) {
         switch (*s) {
         case 1: case 2: case 3:

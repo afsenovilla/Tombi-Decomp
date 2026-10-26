@@ -7,7 +7,7 @@ extern void func_8001FEC0(TObj *o);
 extern short topdownA16ActorOpenDialogue(TObj *o);
 extern void func_8005A8A8(int e, int a, int b);
 extern unsigned char D_8009C942[];
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_800A603C[];
 extern unsigned char D_800A603D[];
 extern unsigned char D_800A603E[];

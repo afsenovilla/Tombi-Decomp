@@ -12,7 +12,7 @@ extern char D_8009C960[];
 extern int D_8009D2B4[], D_800A6048[];
 extern short D_8009C982[];
 extern char D_8009C972[], D_8009D2E4[], D_8009D2E5[], D_8009D2E6[], D_8009C992[];
-extern unsigned short D_8009F3DC, D_8009D612;
+extern unsigned short BUTTON_CONFIG_INDEX, D_8009D612;
 extern unsigned char D_8009D67C, D_8009F0E8;
 extern unsigned int D_8009C968;
 extern unsigned char D_8009C980, D_8009C973;
@@ -38,7 +38,7 @@ void func_800E999C(int slot)
     h[1] = 'C';
     h[2] = 0x11;
     h[3] = 1;
-    D_8009D2E6[0] = D_8009F3DC;
+    D_8009D2E6[0] = BUTTON_CONFIG_INDEX;
     D_8009D2E4[0] = D_8009D67C;
     D_8009D2E5[0] = D_8009F0E8;
     D_8009C992[0] = D_8009D612;

@@ -10,7 +10,7 @@ extern void tunnelCollideMapTile(TObj *o, int x, int y, int z);
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009CE34;
 extern unsigned char D_8009CE35;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 
 void tunnelPlayerWalkStep(TObj *o)
 {
@@ -27,7 +27,7 @@ void tunnelPlayerWalkStep(TObj *o)
                 o->wb6 = 0;
             } else {
                 o->wb6 = (o->animFrame & 7) << 5;
-                if (D_8009D670[0] & *(unsigned short *)0x1F8003C4) o->wb2 = 0x280;
+                if (PAD_PRESSED[0] & *(unsigned short *)0x1F8003C4) o->wb2 = 0x280;
                 else o->wb2 = 0x180;
             }
             func_8001FBAC(o, o->wb6, o->wb2);

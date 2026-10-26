@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void func_8001FE6C(TObj *o);
 extern unsigned char D_8009CE34[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w1e; short spad; void **anims; } EntD5C;
 extern EntD5C D_800EED5C[];
 
@@ -15,7 +15,7 @@ void tunnelActorInit(TObj *o)
     o->box2 = D_800EED5C[o->subtype].b2;
     o->box3 = D_800EED5C[o->subtype].b3;
     o->w1e = D_800EED5C[o->subtype].w1e;
-    o->d3c = D_1F8002C8[D_800EED5C[o->subtype].spad];
+    o->d3c = SPR_DATA[D_800EED5C[o->subtype].spad];
     o->anim = D_800EED5C[o->subtype].anims[U16(o, 0xB4)];
     func_8001FE6C(o);
     o->b6b = 0x7F;

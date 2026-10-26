@@ -6,7 +6,7 @@
 // Japanese version of PAL main0 800288C4 (cameraScrollInputStep.c): 64 -> 16384, 16 -> 4096.
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern void cameraScrollToPlayerYB(char *, int);
 extern void cameraScrollToPlayerYA(char *, int);
 
@@ -33,7 +33,7 @@ void cameraScrollInputStep(char *o, int a)
         decay();
         return;
     }
-    k = &DAT_8009d670;
+    k = &PAD_PRESSED;
     if (*k & 0x1000) {
         if (a != 0 || *(int *)(o + 0x20) < -0x9ff) {
             cameraScrollToPlayerYB(o, a);
@@ -54,7 +54,7 @@ void cameraScrollInputStep(char *o, int a)
 // Demo version of PAL main0 800288C4 (cameraScrollInputStep.c): pad bits 0x1000/0x4000 (PAL 0x10/0x40).
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern void cameraScrollToPlayerYB(char *, int);
 extern void cameraScrollToPlayerYA(char *, int);
 
@@ -81,7 +81,7 @@ void cameraScrollInputStep(char *o, int a)
         decay();
         return;
     }
-    k = &DAT_8009d670;
+    k = &PAD_PRESSED;
     if (*k & 0x1000) {
         if (a != 0 || *(int *)(o + 0x20) < -0x9ff) {
             cameraScrollToPlayerYB(o, a);
@@ -101,7 +101,7 @@ void cameraScrollInputStep(char *o, int a)
 #else
 extern unsigned char DAT_800a60d4;
 extern short DAT_1f8000e6;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern void cameraScrollToPlayerYB(char *, int);
 extern void cameraScrollToPlayerYA(char *, int);
 
@@ -128,7 +128,7 @@ void cameraScrollInputStep(char *o, int a)
         decay();
         return;
     }
-    k = &DAT_8009d670;
+    k = &PAD_PRESSED;
     if (*k & 0x10) {
         if (a != 0 || *(int *)(o + 0x20) < -0x9ff) {
             cameraScrollToPlayerYB(o, a);

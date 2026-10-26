@@ -16,7 +16,7 @@ extern short D_1F8001F4, D_1F8001F6;
 
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
-extern short D_8009F3DC;
+extern short BUTTON_CONFIG_INDEX;
 extern unsigned char D_8009D67C;
 extern unsigned char D_8009F0E8;
 extern char D_80010000[];
@@ -48,7 +48,7 @@ void bootStartupTask(void)
     D_8009F087 = 0;
     D_1F8001D1 = 0;
     SPAD.b1d0 = 0;
-    D_8009F3DC = 0;
+    BUTTON_CONFIG_INDEX = 0;
     D_8009D67C = 1;
     D_8009F0E8 = 0;
     loadButtonConfig();

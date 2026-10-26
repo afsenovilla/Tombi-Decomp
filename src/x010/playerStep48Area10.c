@@ -9,7 +9,7 @@ typedef struct O {
     char p9[0xb2 - 0xad]; unsigned short wb2;
 } O;
 extern O *DAT_8009d2e8;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
@@ -17,7 +17,7 @@ extern void FUN_80103cbc(O *);
 extern void PlayerSetAnimIfChanged(O *, int);
 extern short FUN_8003fd78(O *, int, int);
 
-#define PADCHK() { volatile unsigned short *pad = &DAT_8009d670; if (*pad & 0x80) o->w2e = 1; if (*pad & 0x20) o->w2e = 0; }
+#define PADCHK() { volatile unsigned short *pad = &PAD_PRESSED; if (*pad & 0x80) o->w2e = 1; if (*pad & 0x20) o->w2e = 0; }
 
 void playerStep48Area10(O *o)
 {

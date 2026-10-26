@@ -8,13 +8,13 @@ extern void tunnelClampPlayerToGates(TObj *o);
 extern void (*D_80079AD0[])(TObj *o);
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009CFED;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern short D_800A604A;
 extern short D_800A604E;
 
 void tunnelSectionStep(TObj *o)
 {
-    TObj *p = &D_800A6038;
+    TObj *p = &PLAYER;
     switch (o->step) {
     case 0:
         *(int *)&o->anim = 0;

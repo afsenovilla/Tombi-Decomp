@@ -12,7 +12,7 @@ extern TObj *func_800183B8();
 extern TObj *func_80018448();
 extern unsigned char D_8009CE56[];
 extern unsigned char D_8009CFCA;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnB D_801008DC[];
 extern SpawnA *D_80100B00;
 
@@ -51,7 +51,7 @@ void spawnNpcSet11(TObj *parent0)
     ce = D_8009CE56;
     ff = 0xFF;
     d = 0xD;
-    lp = D_8009F2D8;
+    lp = SCRIPT_OBJECTS;
     for (; p->type != ff; p = &tbl[++i]) {
         k = i;
         if (k == 5 && D_8009CFCA != 4) continue;

@@ -13,7 +13,7 @@ typedef struct {
     char p28[0x2c - 0x28]; short w2c, w2e, w30, w32; int *p34; char p38[0x78 - 0x38]; int d78; int d7c;
 } C;
 typedef struct { char p[0x4c]; unsigned short w4c; } O;
-extern C D_800A4550;
+extern C CAMERA_SCROLL;
 extern unsigned short D_8009C960[];
 extern unsigned short D_8009C962;
 extern unsigned short D_8009C982;
@@ -60,7 +60,7 @@ void initSectionCamera(void)
     int off, x, v;
     unsigned short w;
     char pad[0x10];
-    c = &D_800A4550;
+    c = &CAMERA_SCROLL;
     c->b0 = 1;
     p = (short *)&D_80078B7C[D_8009C960[0]][D_8009C962];
     D_800A457C = *p++;

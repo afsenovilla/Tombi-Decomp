@@ -23,7 +23,7 @@ extern TObj *D_8009D2E8;
 typedef struct { short x, y; } SXY;
 extern short D_8009C944;
 extern short D_8009C946;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8003c6;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
@@ -126,7 +126,7 @@ void playerStepAirWeaponAttack(TObj *o)
             D_8009C330->b8 = 1;
             o->state = 2;
         }
-        if (D_8009D670[0] & D_1f8003c6) {
+        if (PAD_PRESSED[0] & D_1f8003c6) {
             if (D_8009C330->b8 == 0) {
                 if (++D_8009C330->w20 >= 0xe) {
                     D_8009C330->b8 = 1;

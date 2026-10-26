@@ -1,12 +1,12 @@
 // FUNC 800f1568 200 D0SPSUB
 // MATCHING 800f1568 200
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 
 int subScreenCondEventFlag(int op, short i, short val)
 {
     int v;
     op &= 0xFF;
-    v = D_8009CDA4[i];
+    v = SCRIPT_FLAGS[i];
     switch (op) {
     case 0: if (v == val) return 1; break;
     case 1: if (v != val) return 1; break;

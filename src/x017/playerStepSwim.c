@@ -13,7 +13,7 @@ extern G330 *DAT_8009c330;
 extern unsigned char DAT_8009ce3d;
 extern unsigned char DAT_8009cffb;
 extern unsigned short DAT_8009c960, DAT_8009c962;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
 extern void playerSwimDirFromPadB(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
@@ -129,7 +129,7 @@ void playerStepSwim(TObj *o)
     if (D_1f8001fc & D_1f8003c6) {
         U8(o, 0xca) = 0;
         flag = 0;
-        if ((*(volatile unsigned short *)&DAT_8009d670 & 0x10) && DAT_8009c960 == 10
+        if ((*(volatile unsigned short *)&PAD_PRESSED & 0x10) && DAT_8009c960 == 10
             && (DAT_8009c962 == 1 || DAT_8009c962 == 5) && o->d->p.whole == 0 && o->y.p.whole < -0xe3) {
             h = o->h->p.whole;
             if ((unsigned short)(h - 0x1cd) < 0x20)

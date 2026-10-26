@@ -10,7 +10,7 @@
    is a varying NON-struct store, which sched2 orders against every fixed store (a barrier); GAME.playerLives = 3 placed
    inside the 0xff stores' range makes the 255 pseudo overlap the 3 pseudo so it gets v1; sched2 then emits the
    free stores in source order (ties by luid). */
-extern unsigned short D_8009F3DC;
+extern unsigned short BUTTON_CONFIG_INDEX;
 extern unsigned char DAT_1f8001b3;
 extern unsigned char DAT_1f8001ab;
 extern short D_8009D2A4;
@@ -65,7 +65,7 @@ void initGameConfig(void)
     GAME.playerLives = 3;
     GAME.saveSlot = 255;
     GCD.bd090 = 255;
-    GCD.bcf1c = D_8009F3DC;
+    GCD.bcf1c = BUTTON_CONFIG_INDEX;
     DAT_1f8003ce = 0;
     DAT_1f8001c8 = 0;
     DAT_1f8003d1 = 0;

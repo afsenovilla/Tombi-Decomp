@@ -9,8 +9,8 @@ extern void *D_8010A294;
 extern unsigned short D_8010A2B6, D_8010A2C6, D_8010A2D2;
 extern short D_8010A2B4, D_8010A2B8, D_8010A2BA, D_8010A2BC, D_8010A2BE, D_8010A2C0, D_8010A2C2;
 extern short D_8010A2C4, D_8010A2C8, D_8010A2CA, D_8010A2CC, D_8010A2CE, D_8010A2D0;
-extern short D_800A4648[][4];
-extern Bank *D_1F800398[];
+extern short MESSAGE_SLOTS[][4];
+extern Bank *WFM3_DATA[];
 
 unsigned char *subScreenOpenMessage(int kind, int add, int bank)
 {
@@ -20,7 +20,7 @@ unsigned char *subScreenOpenMessage(int kind, int add, int bank)
     Bank **tb;
     do { i = 0; o = &D_8010A200; } while (0);
     for (; i < 4; i++) {
-        if (D_800A4648[i][0] == -1) {
+        if (MESSAGE_SLOTS[i][0] == -1) {
             char *b;
             Bank **base;
             *o = 1;
@@ -50,8 +50,8 @@ unsigned char *subScreenOpenMessage(int kind, int add, int bank)
             D_8010A2D2 = 0xFFFF;
             D_8010A220 = 1;
             D_8010A222 = 0;
-            base = D_1F800398;
-            D_800A4648[i][0] = 0;
+            base = WFM3_DATA;
+            MESSAGE_SLOTS[i][0] = 0;
             tb = &base[bank];
             off = kind * 2 + 0x10;
             b = (char *)*tb;

@@ -9,7 +9,7 @@ extern void func_8001FEC0(TObj *o);
 extern void func_800187E4(TObj *o);
 extern unsigned char D_8009CDB8;
 extern unsigned char D_8009CDF4[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 typedef struct { unsigned short w1e; unsigned short w08; short spad; short pad; void **anims; } Ent89C;
 extern Ent89C D_800EE89C[];
 
@@ -20,7 +20,7 @@ void overheadNpcHandler(TObj *o)
     case 0:
         o->w1e = D_800EE89C[o->subtype].w1e;
         o->w08 = D_800EE89C[o->subtype].w08;
-        o->d3c = D_1F8002C8[D_800EE89C[o->subtype].spad];
+        o->d3c = SPR_DATA[D_800EE89C[o->subtype].spad];
         o->anim = D_800EE89C[o->subtype].anims[S16(o, 0x74)];
         func_8001FE94(o, S16(o, 0x76));
         o->d8c = 0;

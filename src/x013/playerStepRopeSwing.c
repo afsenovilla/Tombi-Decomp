@@ -14,7 +14,7 @@ extern int DAT_8009d2e8;
 extern int DAT_8009c934;
 extern unsigned char DAT_801152e8[];
 extern short DAT_80115268[][2];
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8001fc;
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e560(int, int);
@@ -172,8 +172,8 @@ void playerStepRopeSwing(TObj *o)
                 if (o->wb2 >= 4) o->wb2 = 3;
                 o->d84 = 0x41;
                 FUN_8001e560(3, 0);
-                if (DAT_8009d670[0] & 0x80) o->wb2 = inc3(o->wb2);
-                if (DAT_8009d670[0] & 0x20) { int q = o->wb2; if (q > 0) q--; o->wb2 = q; }
+                if (PAD_PRESSED[0] & 0x80) o->wb2 = inc3(o->wb2);
+                if (PAD_PRESSED[0] & 0x20) { int q = o->wb2; if (q > 0) q--; o->wb2 = q; }
             }
         } else {
             f = (unsigned char)o->d84 - 0xbe;
@@ -181,8 +181,8 @@ void playerStepRopeSwing(TObj *o)
                 if (o->wb2 >= 4) o->wb2 = 3;
                 o->d84 = 0xc1;
                 FUN_8001e560(3, 0);
-                if (DAT_8009d670[0] & 0x20) o->wb2 = inc3(o->wb2);
-                if (DAT_8009d670[0] & 0x80) { int q = o->wb2; if (q > 0) q--; o->wb2 = q; }
+                if (PAD_PRESSED[0] & 0x20) o->wb2 = inc3(o->wb2);
+                if (PAD_PRESSED[0] & 0x80) { int q = o->wb2; if (q > 0) q--; o->wb2 = q; }
             }
         }
         o->d84 += playerRopeGetSwingSpeed();

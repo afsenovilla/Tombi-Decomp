@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 typedef struct { char c[12]; } B12;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern unsigned char D_800A603C;
 extern unsigned char D_800A603D;
 extern unsigned char D_800A603E;
@@ -12,7 +12,7 @@ extern short D_800A604E;
 extern short D_800A6066;
 extern Fix16 *D_800A6078;
 extern TObj *D_800A60C8;
-extern TObj *D_8009F2D8;
+extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2E0;
 extern TObj *D_8009F2E4;
 extern unsigned char D_8009C93A;
@@ -34,7 +34,7 @@ extern void AnimAdvance(TObj *o);
 void npcSet0CMessageScene(TObj *o)
 {
     B12 v;
-    TObj *a = D_8009F2D8;
+    TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2E0;
     TObj *c = D_8009F2E4;
 
@@ -204,8 +204,8 @@ void npcSet0CMessageScene(TObj *o)
         }
         break;
     case 12:
-        AnimAdvance(&D_800A6038);
-        D_800A6038.y.p.whole += 2;
+        AnimAdvance(&PLAYER);
+        PLAYER.y.p.whole += 2;
         S16(PTR(a, 0x40), 2) = S16(D_800A6078, 2);
         a->y.p.whole = D_800A604E - 4;
         break;

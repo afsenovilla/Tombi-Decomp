@@ -21,7 +21,7 @@ typedef struct {
     int d20, d24;
 } C80119F5C;
 
-extern C80119F5C D_800A4550;
+extern C80119F5C CAMERA_SCROLL;
 extern P80119F5C D_8012AC88[];
 extern unsigned char PLAYER[];
 extern void waypointRideAdvanceSegment(TObj *);
@@ -77,7 +77,7 @@ static __inline__ int turn(unsigned short tgt, int cur)
 
 void waypointRideStep(TObj *o)
 {
-    C80119F5C *c = &D_800A4550;
+    C80119F5C *c = &CAMERA_SCROLL;
     X80119F5C *x = (X80119F5C *)&o->wb4;
     int n;
     TObj **l;

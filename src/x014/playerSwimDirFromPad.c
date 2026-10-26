@@ -3,12 +3,12 @@
 typedef struct {
     char p0[0x20]; short s20; char p1[0x76 - 0x22]; unsigned short w76; char p2[0xb6 - 0x78]; unsigned short wb6;
 } O;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 
 void playerSwimDirFromPad(O *o)
 {
     char pad;
-    volatile unsigned short *p = &DAT_8009d670;
+    volatile unsigned short *p = &PAD_PRESSED;
     if (!(*p & 0xf0)) {
         if (o->s20 != 0) {
             if (--o->s20 <= 0) {

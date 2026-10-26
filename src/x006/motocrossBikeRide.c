@@ -23,9 +23,9 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern int D_800A4550[];
+extern int CAMERA_SCROLL[];
 extern short D_800A457E;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern char D_8011FEA0[], D_8011F3F8[];
 extern E D_8011F3F8e[];
 extern unsigned short D_8011F3E8[];
@@ -54,7 +54,7 @@ static __inline__ void upd(TObj *o, Sub *t)
     switch (SUB(o)->c8) {
     case 0:
         if (o->animTimer < 0x40) {
-            if (o->animTimer >= 0x3e && (D_8009D670[0] & 0x10)) {
+            if (o->animTimer >= 0x3e && (PAD_PRESSED[0] & 0x10)) {
                 *(char **)&o->wa8 = D_8011FEA0;
                 SUB(o)->c8 = 2;
                 o->animTimer -= 0x3e;
@@ -138,7 +138,7 @@ static __inline__ void turn4(int *p, int target)
 
 void motocrossBikeRide(TObj *o)
 {
-    int *g = D_800A4550;
+    int *g = CAMERA_SCROLL;
     TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t = SUB(o);
     E *e;

@@ -7,7 +7,7 @@ typedef struct { unsigned char b0; unsigned char b1; short w2; char p4[8]; short
 
 extern TObj *D_8009C330;
 extern TObj *D_8009F0EC;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001fc, D_1f8003c6;
 extern unsigned char D_80115228[][2];
 extern unsigned char D_80115388[];
@@ -155,8 +155,8 @@ void playerStepSpinOnObject(TObj *o)
             if (o->animFrame & 1) {
                 if (((PL *)D_8009C330)->we > 0) {
                     D_8009C330->b0a = D_8009F0EC->b0c;
-                    if (D_8009D670[0] & 0x80) INC1(o, 9);
-                    if (D_8009D670[0] & 0x20) {
+                    if (PAD_PRESSED[0] & 0x80) INC1(o, 9);
+                    if (PAD_PRESSED[0] & 0x20) {
                         o->animFrame = 0;
                         D_8009F0EC->state = 0;
                     }
@@ -165,8 +165,8 @@ void playerStepSpinOnObject(TObj *o)
             } else {
                 if (((PL *)D_8009C330)->we > 0) {
                     D_8009C330->b0a = D_8009F0EC->b0c;
-                    if (D_8009D670[0] & 0x20) INC1(o, 9);
-                    if (D_8009D670[0] & 0x80) {
+                    if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
+                    if (PAD_PRESSED[0] & 0x80) {
                         o->animFrame = 1;
                         D_8009F0EC->state = 0;
                     }
@@ -209,26 +209,26 @@ void playerStepSpinOnObject(TObj *o)
             if (o->animFrame & 1) {
                 if (((PL *)D_8009C330)->we > 0) {
                     SND(0);
-                    if (D_8009D670[0] & 0x80) INC2(o, 9);
-                    if (D_8009D670[0] & 0x20) DEC(o);
+                    if (PAD_PRESSED[0] & 0x80) INC2(o, 9);
+                    if (PAD_PRESSED[0] & 0x20) DEC(o);
                     SETTBL(o);
                 } else {
                     SND(0);
-                    if (D_8009D670[0] & 0x80) INC2(o, 3);
-                    if (D_8009D670[0] & 0x20) DEC(o);
+                    if (PAD_PRESSED[0] & 0x80) INC2(o, 3);
+                    if (PAD_PRESSED[0] & 0x20) DEC(o);
                     SETTBL(o);
                     ((PL *)D_8009C330)->we = -((PL *)D_8009C330)->we;
                 }
             } else {
                 if (((PL *)D_8009C330)->we > 0) {
                     SND(0);
-                    if (D_8009D670[0] & 0x20) INC1(o, 9);
-                    if (D_8009D670[0] & 0x80) DEC(o);
+                    if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
+                    if (PAD_PRESSED[0] & 0x80) DEC(o);
                     SETTBL(o);
                 } else {
                     SND(0);
-                    if (D_8009D670[0] & 0x20) INC1(o, 3);
-                    if (D_8009D670[0] & 0x80) DEC(o);
+                    if (PAD_PRESSED[0] & 0x20) INC1(o, 3);
+                    if (PAD_PRESSED[0] & 0x80) DEC(o);
                     SETTBL(o);
                     ((PL *)D_8009C330)->we = -((PL *)D_8009C330)->we;
                 }
@@ -319,12 +319,12 @@ void playerStepSpinOnObject(TObj *o)
             o->wb6 = 0;
             if (o->animFrame & 1) {
                 SND(2);
-                if (D_8009D670[0] & 0x80) INC2(o, 9);
-                if (D_8009D670[0] & 0x20) DEC(o);
+                if (PAD_PRESSED[0] & 0x80) INC2(o, 9);
+                if (PAD_PRESSED[0] & 0x20) DEC(o);
             } else {
                 SND(2);
-                if (D_8009D670[0] & 0x20) INC1(o, 9);
-                if (D_8009D670[0] & 0x80) DEC(o);
+                if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
+                if (PAD_PRESSED[0] & 0x80) DEC(o);
             }
             if ((D_1f8001fc & D_1f8003c6) && o->wb2 < 4) o->wb2 = 4;
             SETTBL(o);

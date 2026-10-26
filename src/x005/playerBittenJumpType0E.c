@@ -5,7 +5,7 @@ extern int FUN_8003facc(unsigned char *);
 extern unsigned char *DAT_8009d2e8;
 extern short DAT_8009c944, DAT_8009c946;
 extern int DAT_8009c984;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 
 void playerBittenJumpType0E(unsigned char *o)
 {
@@ -32,7 +32,7 @@ void playerBittenJumpType0E(unsigned char *o)
             o[0x9c] = 2;
             *(short *)(o + 0x7e) = 0;
             o[0xac] = 1;
-            if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1f8003c4) != 0)
+            if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&PAD_PRESSED & *(unsigned short *)0x1f8003c4) != 0)
                 o[0xa7] = 1;
             playerSetFallLean(o);
             o[5] = 2;
@@ -45,7 +45,7 @@ void playerBittenJumpType0E(unsigned char *o)
             o[0x9c] = 2;
             o[0xac] = 1;
             *(short *)(o + 0x7e) = 0;
-            if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&DAT_8009d670 & *(unsigned short *)0x1f8003c4) != 0)
+            if ((DAT_8009c984 & 0x40) != 0 && (*(volatile unsigned short *)&PAD_PRESSED & *(unsigned short *)0x1f8003c4) != 0)
                 o[0xa7] = 1;
             playerSetFallLean(o);
             o[5] = 2;

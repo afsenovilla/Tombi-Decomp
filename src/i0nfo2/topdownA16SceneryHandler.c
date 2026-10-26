@@ -9,7 +9,7 @@ typedef struct {
     void **anims;
 } ObjInit3;
 extern ObjInit3 D_800FEDD0[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern void func_8001FE6C(TObj *o);
 extern void topdownA16SceneryUpdate(TObj *o);
 extern void func_800187E4(TObj *o);
@@ -19,7 +19,7 @@ void topdownA16SceneryHandler(TObj *o)
     switch (o->b04) {
     case 0:
         o->w1e = D_800FEDD0[o->subtype].w1e;
-        o->d3c = D_1F8002C8[D_800FEDD0[o->subtype].spad];
+        o->d3c = SPR_DATA[D_800FEDD0[o->subtype].spad];
         o->b0d = 1;
         o->anim = D_800FEDD0[o->subtype].anims[(unsigned short)o->wb4];
         func_8001FE6C(o);

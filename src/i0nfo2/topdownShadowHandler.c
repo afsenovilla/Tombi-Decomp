@@ -5,7 +5,7 @@ extern void func_8001FE6C(TObj *o);
 extern void func_800202B4(TObj *o);
 extern void func_800187E4(TObj *o);
 extern signed char D_8009D2B0[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern unsigned char D_800A6039;
 typedef struct { unsigned short w; short idx; char *p; int pad; } Ent94AC;
 extern Ent94AC D_800FEBD4[];
@@ -18,7 +18,7 @@ void topdownShadowHandler(TObj *o)
     case 0:
         if (o->subtype == 0) {
             o->w1e = D_800FEBD4[0].w;
-            o->d3c = D_1F8002C8[D_800FEBD4[o->subtype].idx];
+            o->d3c = SPR_DATA[D_800FEBD4[o->subtype].idx];
             o->anim = *(void **)(D_800FEBD4[o->subtype].p + 0x80);
             func_8001FE6C(o);
             o->b04++;

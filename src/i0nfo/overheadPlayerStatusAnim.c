@@ -4,7 +4,7 @@
 extern int rand(void);
 extern void func_8001FE6C(TObj *o);
 extern int func_8001FEC0(TObj *o);
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern TObj *D_8009C330;
 extern void *D_800106F0[];
 extern void *D_80010700[];
@@ -25,7 +25,7 @@ void overheadPlayerStatusAnim(TObj *arg)
         d = 1;
         break;
     }
-    switch (D_8009D00F) {
+    switch (TALK_POSE) {
     case 1:
     case 5:
         if ((rand() & 0x3F) == 0) {

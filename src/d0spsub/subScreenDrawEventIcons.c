@@ -8,7 +8,7 @@ extern unsigned char D_801086F0[];
 extern Text D_8011113C;
 extern short D_80111142;
 extern unsigned short *D_80111144;
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern void subScreenDrawSprite(int n);
 
 void subScreenDrawEventIcons(Menu *m)
@@ -35,7 +35,7 @@ void subScreenDrawEventIcons(Menu *m)
         default: D_80111142 = 0; break;
         }
         if (k < 0) k = 0;
-        if (D_8009CDA4[k] == 0xFF) {
+        if (SCRIPT_FLAGS[k] == 0xFF) {
             D_80111144 = m->icons[k];
             subScreenDrawSprite(1);
         }

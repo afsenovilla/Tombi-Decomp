@@ -27,7 +27,7 @@ typedef struct O {
 } O;
 extern O *DAT_8009d2e8;
 extern O *DAT_8009c330;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
@@ -85,7 +85,7 @@ void FUN_80103d40(O *o)
         }
         break;
     case 2:
-        pad = &DAT_8009d670;
+        pad = &PAD_PRESSED;
         if (*pad & 0x8000) o->w2e = 1;
         if (*pad & 0x2000) o->w2e = 0;
         if (D_1f8001fc & 0x40) {
@@ -109,7 +109,7 @@ typedef struct O {
 } O;
 extern O *DAT_8009d2e8;
 extern O *DAT_8009c330;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
@@ -171,7 +171,7 @@ void playerBiteHoldType0E(O *o)
         }
         break;
     case 2:
-        pad = &DAT_8009d670;
+        pad = &PAD_PRESSED;
         if (*pad & 0x80) o->w2e = 1;
         if (*pad & 0x20) o->w2e = 0;
         p = DAT_8009d2e8;

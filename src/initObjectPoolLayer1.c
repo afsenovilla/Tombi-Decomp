@@ -2,7 +2,7 @@
 // MATCHING 80017dd4 212
 extern unsigned char DAT_800b1478[];
 extern unsigned char DAT_800b173c[];
-extern unsigned char DAT_800a4550[];
+extern unsigned char CAMERA_SCROLL[];
 extern unsigned char DAT_800b11c8[];
 extern unsigned char **DAT_1f800204;
 extern short DAT_1f800236;
@@ -25,7 +25,7 @@ void initObjectPoolLayer1(void)
         p += 0xec;
     } while (i < 4);
     q = DAT_800b173c;
-    DAT_1f800204 = (unsigned char **)DAT_800a4550;
+    DAT_1f800204 = (unsigned char **)CAMERA_SCROLL;
     i = 0;
     do {
         q[0x1c] = 1;

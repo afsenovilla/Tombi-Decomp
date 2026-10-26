@@ -20,7 +20,7 @@ typedef struct {
 #define OB(o, n) (((unsigned char *)(o))[n])
 extern G330 *DAT_8009c330;
 extern TObj *DAT_8009f0ec;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern int DAT_8009c960;
 extern unsigned char DAT_8009d2b0;
 extern unsigned short DAT_1f8001fc;
@@ -75,7 +75,7 @@ void playerStepClimbObject(TObj *o)
     case 2:
         if (DAT_8009f0ec->type == 0x35)
             goto up;
-        pad = &DAT_8009d670;
+        pad = &PAD_PRESSED;
         if (*pad & 0x10) {
             FUN_800eeb5c(o, 0x26);
             FUN_8001fec0(o);

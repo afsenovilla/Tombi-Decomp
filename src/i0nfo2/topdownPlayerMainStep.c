@@ -10,13 +10,13 @@ typedef struct { char p[0x2C]; unsigned short w2c; } P330;
 extern P330 *D_8009C330;
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009C975;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 extern unsigned char D_8009D2B0[];
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern void topdownCheckTileTrigger(TObj *o, short x, short y);
 extern short (*D_800FEC9C[])[4];
 #include "gamestate.h"
-extern TObj D_800A6038;
+extern TObj PLAYER;
 
 extern void topdownPlayerReadDpadDir(TObj *o);
 
@@ -41,7 +41,7 @@ void topdownPlayerMainStep(TObj *o)
             case 0:
                 o->state++;
             case 1:
-                if (D_8009D00F != 0) {
+                if (TALK_POSE != 0) {
                     topdownPlayerStatusAnim(o);
                 } else {
                     topdownPlayerSetMoveAnim(o);
@@ -79,7 +79,7 @@ void topdownPlayerMainStep(TObj *o)
             o->state++;
             break;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 topdownPlayerStatusAnim(o);
             } else {
                 topdownPlayerSetMoveAnim(o);
@@ -99,7 +99,7 @@ void topdownPlayerMainStep(TObj *o)
             topdownPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) {
+            if (TALK_POSE != 0) {
                 topdownPlayerStatusAnim(o);
             } else {
                 topdownPlayerSetMoveAnim(o);
@@ -127,8 +127,8 @@ void topdownPlayerMainStep(TObj *o)
         i = 0;
         e = D_800FEC9C[k][0];
         if (e[0] != 0xFF) {
-            py = &D_800A6038.y.p.whole;
-            px = D_800A6038.h->p.whole;
+            py = &PLAYER.y.p.whole;
+            px = PLAYER.h->p.whole;
             tb = (void *)e;
         loop:
             d = px - e[0];

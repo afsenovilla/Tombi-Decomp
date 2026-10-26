@@ -4,7 +4,7 @@
 extern unsigned char *DAT_8009f0ec;
 extern int DAT_8009c960;
 extern int DAT_8009c984;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
 
 static __inline__ void turn(TObj *o)
@@ -30,7 +30,7 @@ void playerClimbJumpOff(TObj *o)
     if (DAT_8009c960 == 0x30000) {
         turn(o);
     } else {
-        k = &DAT_8009d670;
+        k = &PAD_PRESSED;
         if (*k & 0x80) {
             h = o->h->p.whole; o->h->p.whole = h - 0x10;
         } else if (*k & 0x20) {
@@ -39,7 +39,7 @@ void playerClimbJumpOff(TObj *o)
             turn(o);
         }
     }
-    if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&DAT_8009d670 & DAT_1f8003c4))
+    if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
         o->ba7 = 1;
     o->step = 2;
     o->state = 0;

@@ -21,7 +21,7 @@ typedef struct {
 
 extern TObj *D_8009C330;
 extern unsigned char *D_8009D2E8;
-extern volatile unsigned short D_8009D670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
 extern XY D_801151E0[];
@@ -91,7 +91,7 @@ void playerStepWalk(TObj *o)
         D_8009D2E8[6] = 0;
     }
     (*(unsigned char*)&o->wac) = 0;
-    if (D_8009D670[0] & 0xa0) {
+    if (PAD_PRESSED[0] & 0xa0) {
         switch (o->state) {
         case 0:
             XO(o)->cd = 0;
@@ -130,13 +130,13 @@ void playerStepWalk(TObj *o)
             }
             switch (o->ba6) {
             case 2:
-                if (D_8009D670[0] & 0x20) {
+                if (PAD_PRESSED[0] & 0x20) {
                     if (o->wb2 >= 0x200) goto inc;
                     goto clr;
                 }
                 break;
             case 3:
-                if (D_8009D670[0] & 0x80) {
+                if (PAD_PRESSED[0] & 0x80) {
                     if (o->wb2 < -0x1ff) {
                     inc:
                         (*(unsigned char*)&D_8009C330->w08)++;
@@ -195,7 +195,7 @@ void playerStepWalk(TObj *o)
         lim = 0x200;
         if ((*(unsigned int*)&GAME.area00_eventControl) & 0x40) {
             lim = 0x360;
-            if (!(D_8009D670[0] & D_1f8003c4) && (unsigned)(o->subtype - 1) >= 2) lim = 0x200;
+            if (!(PAD_PRESSED[0] & D_1f8003c4) && (unsigned)(o->subtype - 1) >= 2) lim = 0x200;
         }
         if (mode != 0) {
             if ((unsigned short)(o->wb2 + lim) >= lim * 2) {
@@ -225,7 +225,7 @@ void playerStepWalk(TObj *o)
             }
         }
     done:
-        if (((*(unsigned int*)&GAME.area00_eventControl) & 0x40) && (D_8009D670[0] & D_1f8003c4)) {
+        if (((*(unsigned int*)&GAME.area00_eventControl) & 0x40) && (PAD_PRESSED[0] & D_1f8003c4)) {
             dust(o);
         }
         if (o->subtype != 0) {

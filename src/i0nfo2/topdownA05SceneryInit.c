@@ -9,13 +9,13 @@ typedef struct {
     void **anims;
 } ObjInit3;
 extern ObjInit3 D_800FEDC4[];
-extern int D_1F8002C8[];
+extern int SPR_DATA[];
 extern void func_8001FE6C(TObj *o);
 
 void topdownA05SceneryInit(TObj *o)
 {
     o->w1e = D_800FEDC4[o->subtype].w1e;
-    o->d3c = D_1F8002C8[D_800FEDC4[o->subtype].spad];
+    o->d3c = SPR_DATA[D_800FEDC4[o->subtype].spad];
     o->b0d = 1;
     o->anim = D_800FEDC4[o->subtype].anims[(unsigned short)o->wb4];
     func_8001FE6C(o);

@@ -28,7 +28,7 @@ typedef struct { void *p[90]; } T800F2B98;
 extern P800F2B98 *DAT_8009c330;
 extern unsigned char *DAT_800a611c;
 extern unsigned char *DAT_8009d2e8;
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6, DAT_1f8001fc, DAT_1f8001f8;
 extern short DAT_1f800238;
 extern short DAT_8009c944, DAT_8009c946[];
@@ -109,7 +109,7 @@ void playerStepJump(TObj *o)
             DAT_8009c330->b8 = 1;
             o->state = 2;
         }
-        if (DAT_8009d670[0] & DAT_1f8003c6) {
+        if (PAD_PRESSED[0] & DAT_1f8003c6) {
             if (DAT_8009c330->b8 != 0) goto common;
             if (++DAT_8009c330->w20 >= 0xe) {
                 DAT_8009c330->b8 = 1;

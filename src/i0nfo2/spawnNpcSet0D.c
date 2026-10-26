@@ -14,7 +14,7 @@ extern unsigned char D_8009CDF1;
 extern unsigned char D_8009CE0A;
 extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA5;
-extern TObj *D_8009F2D8[];
+extern TObj *SCRIPT_OBJECTS[];
 extern SpawnB D_800FFE24[];
 extern SpawnA *D_80100080;
 
@@ -48,7 +48,7 @@ void spawnNpcSet0D(TObj *parent0)
     i1 = 0;
     p = tbl;
     if (p->type != 0xFF) do {
-        ff = 0xFF; ty = 0x30; lp = D_8009F2D8;
+        ff = 0xFF; ty = 0x30; lp = SCRIPT_OBJECTS;
         n = func_800183B8();
         j = i1 + 1;
         if (n != 0) {
@@ -76,7 +76,7 @@ void spawnNpcSet0D(TObj *parent0)
         i1 = j;
     { register int m asm("v0"); m = (short)j * 28; p = (SpawnA *)((char *)tbl + m); } } while (p->type != ff);
     if (D_8009CDF1 == 0) {
-        D_8009F2D8[1]->a.p.whole = -0xC8;
+        SCRIPT_OBJECTS[1]->a.p.whole = -0xC8;
     }
     i = 0;
     for (e = D_800FFE24; e->type != 0xFF; e++) {

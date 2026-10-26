@@ -19,7 +19,7 @@ extern unsigned short DAT_8007a04c[];
 extern unsigned short DAT_8007a070[];
 extern short DAT_8007a072[];
 extern unsigned char DAT_8009d2b2[];
-extern volatile unsigned short DAT_8009d670[];
+extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c8;
 extern unsigned short DAT_1f8001f8;
 extern unsigned char DAT_800a603c, DAT_800a60dc, DAT_800a60e4, DAT_800a60fe, DAT_800a60ff;
@@ -308,7 +308,7 @@ void weapon5to7Swing(TObj *o)
                 *(unsigned char *)o->d94 = o->w74;
                 o->b6b = 0;
             }
-            if ((DAT_8009d670[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 ||
+            if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 ||
                 DAT_800a60e4 >= 2 || DAT_800a60fe != 0 || DAT_8009c93f != 0 || m >= 4 ||
                 (unsigned char)(DAT_8009c990 - 1) < 2 || DAT_800a60ff != 0) {
                 o->b04 = 2;
@@ -346,7 +346,7 @@ void weapon5to7Swing(TObj *o)
         weaponCalcBentOffset(&DAT_8009d600, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;
-        if ((DAT_8009d670[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
+        if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
             DAT_800a60fe = 0;
             DAT_8009c330->b0 = 2;
             DAT_8009c330->w22 = 0;
@@ -387,7 +387,7 @@ void weapon5to7Swing(TObj *o)
         weaponCalcBentOffset(&DAT_8009d600, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;
-        if ((DAT_8009d670[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
+        if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || DAT_800a603c != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
             DAT_800a60fe = 0;
             DAT_8009c330->b0 = 1;
             DAT_8009c330->w22 = 0;

@@ -7,7 +7,7 @@
 typedef struct { char pad[0x2c]; unsigned short cur; unsigned short prev; } Cam2c;
 extern Cam2c *DAT_8009c330;
 extern int DAT_8009c984;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
 extern void FUN_800ef760(TObj *o, int v);
 
@@ -17,7 +17,7 @@ void playerSelectGroundAnim(TObj *o)
     if (o->wb2 == 0) {
         DAT_8009c330->cur = 0;
     } else {
-        if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&DAT_8009d670 & 0x80) && o->b04 == 1) {
+        if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & 0x80) && o->b04 == 1) {
             DAT_8009c330->cur = 0x21;
         } else {
             v = o->wb2;
@@ -45,7 +45,7 @@ void playerSelectGroundAnim(TObj *o)
 typedef struct { char pad[0x2c]; unsigned short cur; unsigned short prev; } Cam2c;
 extern Cam2c *DAT_8009c330;
 extern int DAT_8009c984;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
 extern void playerGroundAnimTransition(TObj *o, int v);
 
@@ -55,7 +55,7 @@ void playerSelectGroundAnim(TObj *o)
     if (o->wb2 == 0) {
         DAT_8009c330->cur = 0;
     } else {
-        if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&DAT_8009d670 & DAT_1f8003c4) && o->b04 == 1) {
+        if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4) && o->b04 == 1) {
             DAT_8009c330->cur = 0x21;
         } else {
             v = o->wb2;

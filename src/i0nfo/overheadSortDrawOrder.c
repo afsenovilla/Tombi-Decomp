@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern signed char D_8009D2B0;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern signed char D_800A6047;
 
 #define LST(i) (*(TObj **)((int)list + ((i) << 2)))
@@ -40,7 +40,7 @@ void overheadSortDrawOrder(void)
     }
     if (D_8009D2B0 != 3) {
         cnt++;
-        LST(i) = &D_800A6038;
+        LST(i) = &PLAYER;
     }
     for (m = 0; m < cnt; m++) {
         best = m;

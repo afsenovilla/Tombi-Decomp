@@ -12,7 +12,7 @@ extern void func_8005A8A8(int e, int a, int b);
 extern void func_8005A9A4(int a, int b);
 extern short tunnelActorOpenDialogue(TObj *o);
 extern unsigned char D_8009C942[];
-extern unsigned char D_8009CDA4[];
+extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_8009CE36;
 extern unsigned char D_8009CFEC[];
 extern unsigned char D_800A603C[];
@@ -61,7 +61,7 @@ void tunnelActorTalkStep(TObj *o)
         func_8001FEC0(o);
         if (((TObj *)o->d90)->b04 == 2) {
             ((TObj *)o->d90)->b04 = 3;
-            if (D_8009CDA4[o->wac] == 0) {
+            if (SCRIPT_FLAGS[o->wac] == 0) {
                 func_8005A8A8(o->wac, 0, 0);
                 o->timer = 0xC8;
             } else {

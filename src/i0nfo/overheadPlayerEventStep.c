@@ -11,14 +11,14 @@ extern void overheadPlayerDropExitStep(TObj *o);
 extern void overheadPlayerLandStep(TObj *o);
 extern void overheadCollideMapTile(TObj *o, int x, int y, int z);
 extern TObj *D_8009C330;
-extern unsigned char D_8009D00F;
+extern unsigned char TALK_POSE;
 
 void overheadPlayerEventStep(TObj *o)
 {
     unsigned short k;
     switch (o->step) {
     case 0:
-        if (D_8009D00F != 0) {
+        if (TALK_POSE != 0) {
             overheadPlayerStatusAnim(o);
         } else if (o->active == 5) {
             func_8001FEC0(o);
@@ -75,7 +75,7 @@ void overheadPlayerEventStep(TObj *o)
             overheadPlayerSetMoveAnim(o);
             o->state++;
         case 1:
-            if (D_8009D00F != 0) overheadPlayerStatusAnim(o);
+            if (TALK_POSE != 0) overheadPlayerStatusAnim(o);
             else overheadPlayerSetMoveAnim(o);
             break;
         }

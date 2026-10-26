@@ -2,7 +2,7 @@
 // MATCHING 800fb758 1140
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
-extern TObj D_800A6038;
+extern TObj PLAYER;
 extern TObj *D_8009F2FC;
 extern TObj *D_8009F300;
 extern unsigned char D_8009C93E;
@@ -27,8 +27,8 @@ void func_800FB758(TObj *o)
         b->step = 2;
         b->state = 0;
         o->state = 2;
-        D_800A6038.step = 4;
-        D_800A6038.state = 0;
+        PLAYER.step = 4;
+        PLAYER.state = 0;
         v = *(B12 *)&a->a;
         a->d90 = (int)showMessageBoxDirect(2, 5, &v);
         topdownA16ActorSetDirAnim(a, 8, 0);
@@ -107,8 +107,8 @@ void func_800FB758(TObj *o)
         D_8009C93E = 0;
         D_8009C942 = 0;
         D_800A60E4 = 0;
-        D_800A6038.step = 1;
-        D_800A6038.state = 0;
+        PLAYER.step = 1;
+        PLAYER.state = 0;
         o->step = 0;
         o->state = 0;
         break;

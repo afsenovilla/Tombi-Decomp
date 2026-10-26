@@ -13,7 +13,7 @@ extern unsigned char D_8009C977[];
 extern char D_8009C960[];
 extern unsigned char D_8009C970, D_8009C971;
 extern unsigned char D_8009CF1C;
-extern unsigned short D_8009F3DC;
+extern unsigned short BUTTON_CONFIG_INDEX;
 extern char D_800E1E28[];
 extern char D_800E810C[];
 extern char *D_800F6A1C[];
@@ -258,7 +258,7 @@ int memCardFileListStep(Menu *m, Card *c)
         do {
             if (memCardReadFile(D_800F7098, D_800E1E28, 0, 0xC00) == 0 && (memCardVerifyChecksum(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
                 D_8009C960g = *(GS *)(D_800E1E28 + 0x200);
-                D_8009C960g.f5bc = D_8009F3DC;
+                D_8009C960g.f5bc = BUTTON_CONFIG_INDEX;
                 D_8009C960g.f10 = D_8009C960g.f11;
                 m->msg = 15;
                 m->sub = 17;

@@ -31,7 +31,7 @@ typedef struct { unsigned char u0, v0, u1, v1, u2, v2, u3, v3; } UV8;
 
 extern char *DAT_1f800164;
 extern int DAT_1f8001e0;
-extern UVT D_80080218[];
+extern UVT BALLOON_TAIL_SPRITES[];
 extern UV2 D_800801f0[];
 extern UV8 D_800801f8[];
 extern void SetSprt(SPRT *);
@@ -113,11 +113,11 @@ void drawBalloonFrame(R *o_, short c, short tp)
         ft->y1 = ft->y0 = y;
         ft->x2 = ft->x0 = x;
         ft->y3 = ft->y2 = y + h;
-        ft->u0 = D_80080218[k].u;
-        ft->v0 = D_80080218[k].v;
+        ft->u0 = BALLOON_TAIL_SPRITES[k].u;
+        ft->v0 = BALLOON_TAIL_SPRITES[k].v;
         { int w2;
-        h = D_80080218[k].h;
-        w2 = D_80080218[k].w;
+        h = BALLOON_TAIL_SPRITES[k].h;
+        w2 = BALLOON_TAIL_SPRITES[k].w;
         ft->u2 = ft->u0;
         ft->u1 = ft->u0 + w2;
         ft->v1 = ft->v0;

@@ -3,7 +3,7 @@
 #include "gv2.h"
 #include "TOBJ.H"
 extern TObj *DAT_8009c330;
-extern unsigned short DAT_8009d670;
+extern unsigned short PAD_PRESSED;
 extern int DAT_8009c984[];
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
 extern char D_80010748[];
@@ -66,7 +66,7 @@ void playerStepContactStop(TObj *o)
             o->b9c = 1;
             o->b04 = 1;
             o->y.p.whole -= 8;
-            if ((DAT_8009c984[0] & 0x40) && (*(volatile unsigned short *)&DAT_8009d670 & DAT_1f8003c4)) {
+            if ((DAT_8009c984[0] & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4)) {
                 o->ba7 = 1;
             }
             o->step = 2;

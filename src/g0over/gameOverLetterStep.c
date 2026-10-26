@@ -15,7 +15,7 @@ typedef struct { unsigned char r, g, b; } COL;
 extern COL D_1F800158;
 extern MATRIX D_1F800138;
 extern MATRIX D_1F800138_cm; /* the same matrix */
-extern TObj *D_1F8001D4;
+extern TObj *TASK_C;
 extern void gameOverLetterFlyIn(TObj *o);
 extern void SetBackColor(int r, int g, int b);
 extern void SetColorMatrix(MATRIX *m);
@@ -67,7 +67,7 @@ void gameOverLetterStep(TObj *o, int hold)
                 if (--o->timer == -1) {
                     o->step++;
                 }
-            } else if (*(short *)((char *)D_1F8001D4 + 0x5C) < 0x3D) {
+            } else if (*(short *)((char *)TASK_C + 0x5C) < 0x3D) {
                 o->step += 2;
             }
             break;

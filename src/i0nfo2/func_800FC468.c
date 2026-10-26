@@ -2,8 +2,8 @@
 // MATCHING 800fc468 988
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
-extern TObj D_800A6038;
-extern TObj *D_8009F2D8;
+extern TObj PLAYER;
+extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
@@ -17,7 +17,7 @@ extern void setEventStarted(int, int, int);
 void func_800FC468(TObj *o)
 {
     B12 v;
-    TObj *a = D_8009F2D8;
+    TObj *a = SCRIPT_OBJECTS;
     TObj *b = D_8009F2DC;
 
     switch (o->state) {
@@ -25,8 +25,8 @@ void func_800FC468(TObj *o)
         o->w08 = 0x3C;
         v = *(B12 *)&a->a;
         o->state++;
-        D_800A6038.step = 2;
-        D_800A6038.state = 0;
+        PLAYER.step = 2;
+        PLAYER.state = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         break;
@@ -92,9 +92,9 @@ void func_800FC468(TObj *o)
         D_8009C93E = 0;
         D_8009C942 = 0;
         D_800A60E4 = 0;
-        D_800A6038.b04 = 1;
-        D_800A6038.step = 0;
-        D_800A6038.state = 0;
+        PLAYER.b04 = 1;
+        PLAYER.step = 0;
+        PLAYER.state = 0;
         o->step = 0;
         o->state = 0;
         break;
