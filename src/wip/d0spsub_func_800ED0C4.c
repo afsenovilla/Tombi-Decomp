@@ -1,6 +1,18 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip: score 50, case-3 confirm block only: t[0]/t[1] through int locals a,b (no andi; D_80111138 stored late next to
-// D_8009CD96) is right; left: game loads D_80111128 into a0 before the t lbus (t[1] in a1), ours loads it into v1 after them
+// wip: score 30 (was 49), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
+// volatile int; a plain scalar sinks to its first use) loads D_80111128 into a0 before the t lbus, and
+// `a = t[0]; D_80111134 = a; b = t[1];` keeps the first store between the two lbus (the lbu through the char
+// pointer conflicts with the fixed store either way, so the RTL order is the game's).
+// Left (6 insns): the game has 3 in v1 (li right after `lbu a1,1(v1)`), b = t[1] in a1, 14 in v0 right after
+// `sb 0x603d`, and the `if (o)` beqz jumping to `li a0,14` with `li v0,0x54` in its slot (ours steals li a0,14).
+// Analysis: `li 14`/`li 3` positions are sched2 hoists given the registers, so the question is why local-alloc gives
+// 3 -> v1 and b -> a1 (v0 must be busy at the `li 3` sched1 position, i.e. the 14 must already be live there).
+// A single-set constant pseudo is a "birthing" insn (sched.c adjust_priority -> LAUNCH_PRIORITY) and is placed right
+// before its consumer; a 2-set pseudo (`i1 = 3` reusing the index local) lands exactly at the game's position
+// (score 20) but goes to global alloc (a1, and drags i1's first range to a1). Tried: `int k = 14`/`three = 3` block
+// locals (cse folds them), function-scope z/n/c14 (global alloc a2), i2/k reuse (48-63), k with a used first set
+// (32-62), volatile t (162), 14 via `x != 14` or `printInfoMessage(x,1)` (170). Untried: a 2-set local whose first
+// range is dead-but-kept, or a different statement shape for the two 3 stores (e.g. through a struct/pointer).
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -24,6 +36,7 @@ extern short D_8010A068[], D_8010A088[];
 extern unsigned char D_8010A200[];
 extern unsigned char D_8010A204;
 extern int D_80111128;
+extern volatile int D_80111128_v;
 extern char D_80111134, D_80111138;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern volatile unsigned char D_8009D2B0, PLAYER, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
@@ -314,10 +327,12 @@ int func_800ED0C4(Menu *m)
                 unsigned char *t;
                 int n;
                 int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
+                int x = D_80111128_v;
                 t = D_800FFC3C[i1] + i2 * 2;
                 {
-                int a = t[0], b = t[1];
+                int a = t[0], b;
                 D_80111134 = a;
+                b = t[1];
                 D_8009CD94 = a;
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
@@ -326,11 +341,11 @@ int func_800ED0C4(Menu *m)
                 D_800A603E = 0;
                 PLAYER = 3;
                 D_8009C940 = 1;
-                D_8009C941 = D_80111128;
+                D_8009C941 = x;
                 D_80111138 = b;
                 D_8009CD96 = b;
                 }
-                if (D_80111128 == 14) {
+                if (x == 14) {
                     Obj *o = allocObjectLayer2();
                     if (o) {
                         o->b0 = 1;
