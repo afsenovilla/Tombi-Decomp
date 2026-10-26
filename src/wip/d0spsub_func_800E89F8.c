@@ -1,10 +1,19 @@
 // FUNC 800e89f8 4280 D0SPSUB
-// wip: score 22 (was 31): case 0x84 tail = 8 insns (game: lhu[GAME.b30] in v1, lhu D_8007A024+14 in v0, sh wc4,
-// li 1, sb GCD, sh w08; ours allocates v0/v1/a1 and puts li/sb before both sh), plus base+index addu operand
-// order at the 3 `t += D_8009D2B0[3]` sites (game addu base,idx) and the P334 + [9] addu (game base first;
-// (int)P334 + ((int *)P334)[9] made it worse). In case 0x84 the game keeps `sw D_8009C984` before the
-// D_8007A024 loads: an in-struct store (`D_8009C984_a[0] = D_8009C984 | 0x40`) and the order |=, w08, GCD=1, wc4
-// got it; a temp for w08 or any other statement order is worse (54+).
+// wip: score 18 (was 22). Fixed: the P334 + [9] addu is base-first with `int off = ((int *)P334)[9]; char *p = P334;
+// o->pA0 = p + off;` (the second volatile read into a pointer variable makes it a REG for expand_binop).
+// Left: (1) case 0x84 tail = 8 insns (game: lhu w08-value in v1, lhu D_8007A024+14 in v0, sh wc4, li 1, sb GCD, sh w08;
+// ours allocates a1/v1/v0 and stores GCD before both sh); the game's RTL order is loads first and the w08 store
+// LAST, but every temp/order tried (`a = D_8007A024[GAME.b30].a` before wc4/GCD, int or ushort, `Pal *t`) scores
+// 54+ because the `sw D_8009C984` moves; `|=, w08, GCD=1, wc4` (also with a temp before GCD) stays at 18.
+// (2) base+index addu operand order at the 3 `Pal *t = D_8007A024; ... t += D_8009D2B0[3]` sites: the game has
+// `addu v1,v1(base),v0(idx)`. Cause found in cse.c fold_rtx: for a commutative op whose first operand is a register
+// with a KNOWN CONSTANT value (t == D_8007A024, same cse block) and second not, cse swaps them ("place any constant
+// second"); so the game's base register must be unknown to cse (set in another block / rematerialized). Tried:
+// every (char *)t + (idx << 2) / &t[idx] / t[idx].b / int temps form (18 or 48), a function-scope
+// `Pal *pal = D_8007A024` (912: it gets a register). Not tried: a form where the base is loaded in the skipped
+// block between the two || tests, or any non-constant base expression.
+// do{}while(0) around switch(o->wait) fixes reg alloc; in case 0x84 `D_8009C984_a[0] = D_8009C984 | 0x40` (in-struct
+// store) keeps the sw before the D_8007A024 loads.
 typedef struct { unsigned short a, b; } Pal;
 typedef struct {
     unsigned char b0, p1, b2, b3;
@@ -473,7 +482,7 @@ int func_800E89F8(int item)
     case 0xB:
         o = allocObjectLayer4();
         if (o) {
-            o->pA0 = (char *)(((int *)P334)[9] + (int)P334);
+            { int off = ((int *)P334)[9]; char *p = P334; o->pA0 = p + off; }
             o->b1C = 4;
             o->b2 = 0x12;
             o->b3 = 1;
