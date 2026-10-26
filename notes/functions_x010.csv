@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -313,7 +313,7 @@ address,size,name,twin
 80116d50,1556,func_80116D50,
 80117364,352,updateUvAnimBgModel,
 801174c4,84,func_801174C4,
-80117518,20,func_80117518,X000:8011a628
+80117518,20,FUN_8011a628,X000:8011a628
 8011752c,1020,uvAnimBgModelFlip,
 80117928,916,updatePointsBalloon,X000:80117cac
 80117cbc,732,spawnApAwardNumber,
@@ -430,14 +430,14 @@ address,size,name,twin
 80122410,284,func_80122410,
 8012252c,380,bitingPlantLungeStemA,X000:8012f864
 801226a8,332,area10Type07StepBPart,
-801227f4,16,func_801227F4,X000:8011de74
-80122804,116,FUN_80122804,X000:8012f1b4
+801227f4,16,FUN_8011de74,X000:8011de74
+80122804,116,bitingPlantSway,X000:8012f1b4
 80122878,68,area10Type07Swing,
 801228bc,212,func_801228BC,
 80122990,136,func_80122990,
 80122a18,276,func_80122A18,
-80122b2c,20,FUN_80122b2c,X000:8012f36c
-80122b40,116,FUN_80122b40,X000:8012f1b4
+80122b2c,20,bitingPlantCopyParentAngle,X000:8012f36c
+80122b40,116,bitingPlantSway,X000:8012f1b4
 80122bb4,92,area10Type07StepDPart,
 80122c10,172,func_80122C10,
 80122cbc,600,func_80122CBC,
@@ -527,7 +527,7 @@ address,size,name,twin
 8012eb64,24,func_8012EB64,X004:8012f4f0
 8012eb7c,36,checkUnderwaterPigBagTrigger,
 8012eba0,292,underwaterPigBagEventStart,
-8012ecc4,20,func_8012ECC4,X000:8011a628
+8012ecc4,20,FUN_8011a628,X000:8011a628
 8012ecd8,96,stepUnderwaterPigBagStart,
 8012ed38,12,func_8012ED38,X001:8013a0cc
 8012ed44,212,updateUnderwaterPigBagStart,

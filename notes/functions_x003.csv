@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -340,7 +340,7 @@ address,size,name,twin
 8011a544,384,func_8011A544,
 8011a6c4,432,stepAreaSwitch,
 8011a874,1356,updateAreaMechanisms,
-8011adc0,20,func_8011ADC0,X000:8011a628
+8011adc0,20,FUN_8011a628,X000:8011a628
 8011add4,500,knockDownObjectStep,
 8011afc8,240,updateKnockDownObject,
 8011b0b8,184,hitWobbleObjectStep,
@@ -385,7 +385,7 @@ address,size,name,twin
 8011dd48,284,playerEnterHollowForItem,
 8011de64,628,func_8011DE64,
 8011e0d8,180,func_8011E0D8,
-8011e18c,24,func_8011E18C,X000:80121e38
+8011e18c,24,FUN_80121e38,X000:80121e38
 8011e1a4,300,playerStepDizzy,
 8011e2d0,136,playerFallIfHeadHit,
 8011e358,816,playerStepSpringBounce,
@@ -419,7 +419,7 @@ address,size,name,twin
 801203d0,52,knockDownObjectEnemyCollision,X000:80126d48
 80120404,52,pushCat2ObjectOutOfCat4Type0A,X000:80126d48
 80120438,364,AnimAdvanceWithBox,X000:80127214
-801205a4,332,func_801205A4,X000:80127380
+801205a4,332,komaPigAnimAdvance,X000:80127380
 801206f0,284,komaPigCheckLanded,
 8012080c,236,komaPigCheckWall,
 801208f8,256,enemyPickActionByPlayerDistance,X000:80127720
@@ -475,7 +475,7 @@ address,size,name,twin
 8012724c,576,spikyLizardSubtype3Step,
 8012748c,2236,spikyLizardHit,
 80127d48,768,spikyLizardGrabbed,
-80128048,24,func_80128048,X000:80121e38
+80128048,24,FUN_80121e38,X000:80121e38
 80128060,412,spikyLizardDefeated,
 801281fc,1532,updateSpikyLizard,
 801287f8,464,updateL3Type2FObject,
@@ -490,7 +490,7 @@ address,size,name,twin
 80129430,384,phoenixSpiritHintLeaveC,
 801295b0,124,stepPhoenixSpiritHintGroupC,X003:80129148
 8012962c,492,phoenixSpiritHintTalk,
-80129818,80,FUN_80129818,X000:8012de8c
+80129818,80,chickStepDispatch,X000:8012de8c
 80129868,452,stepPhoenixSpiritHintTalk,
 80129a2c,440,initPhoenixSpiritHintNpc,
 80129be4,220,updatePhoenixSpiritHintNpc,
@@ -527,9 +527,9 @@ address,size,name,twin
 8012eb2c,564,wingedForkPigHit,
 8012ed60,476,func_8012ED60,
 8012ef3c,740,wingedForkPigGrabbedB,
-8012f220,20,func_8012F220,X000:8011a628
+8012f220,20,FUN_8011a628,X000:8011a628
 8012f234,360,wingedForkPigGrabbed,
-8012f39c,20,func_8012F39C,X000:8011a628
+8012f39c,20,FUN_8011a628,X000:8011a628
 8012f3b0,372,wingedForkPigDefeated,
 8012f524,1148,updateWingedForkPig,
 8012f9a0,548,updateWingedForkPigShot,

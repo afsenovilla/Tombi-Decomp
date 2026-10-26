@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -323,7 +323,7 @@ address,size,name,twin
 80117c84,40,stepWaterfallHintNpcTalk,
 80117cac,16,func_80117CAC,
 80117cbc,452,func_80117CBC,
-80117e80,28,func_80117E80,X000:8011b7d4
+80117e80,28,FUN_8011b7d4,X000:8011b7d4
 80117e9c,252,initWaterfallHintNpc,
 80117f98,124,func_80117F98,
 80118014,44,updateWaterfallHintNpc,
@@ -342,7 +342,7 @@ address,size,name,twin
 801185e4,656,func_801185E4,
 80118874,12,func_80118874,X001:8013a0cc
 80118880,140,func_80118880,
-801188fc,16,func_801188FC,X000:8011de74
+801188fc,16,FUN_8011de74,X000:8011de74
 8011890c,4,spawnNpcSet12,
 80118910,544,func_80118910,
 80118b30,80,func_80118B30,

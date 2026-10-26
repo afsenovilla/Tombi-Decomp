@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -307,7 +307,7 @@ address,size,name,twin
 80114a08,64,updateVillagerNpc,X000:80114a08
 80115f88,720,updateAreaScroll,
 80116258,96,func_80116258,
-801162b8,24,func_801162B8,X000:80121e38
+801162b8,24,FUN_80121e38,X000:80121e38
 801162d0,572,updateBackdropSpriteSet,
 8011650c,128,evilPigBagPortalCheckPlayer,
 8011658c,148,func_8011658C,

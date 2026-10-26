@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -344,7 +344,7 @@ address,size,name,twin
 80119bf4,760,updateFlowerTearsThrow,
 80119eec,456,updateAmbientCritter,
 8011a0b4,244,func_8011A0B4,
-8011a1a8,24,func_8011A1A8,X000:80121e38
+8011a1a8,24,FUN_80121e38,X000:80121e38
 8011a1c0,648,updateSpringVine,
 8011a448,224,func_8011A448,
 8011a528,180,stepSpringVine,
@@ -365,7 +365,7 @@ address,size,name,twin
 8011bc6c,280,mechanismRotateWhenPlayerNear,
 8011bd84,296,updateAreaMechanisms,
 8011beac,664,func_8011BEAC,
-8011c144,20,func_8011C144,X000:8011a628
+8011c144,20,FUN_8011a628,X000:8011a628
 8011c158,284,updateFlowerTowerBlocker,
 8011c274,224,updateSolidBlock,
 8011c354,544,updateBendingBranch,
@@ -420,7 +420,7 @@ address,size,name,twin
 801210e8,440,updateParallaxBackdropSprite,
 801212a0,304,playerInitAreaHook,
 801213d0,932,playerBittenJumpCrawler,
-80121774,28,func_80121774,X000:8011b7d4
+80121774,28,FUN_8011b7d4,X000:8011b7d4
 80121790,640,playerStepRideSlopeContact,
 80121a10,328,playerContactStopCheckJump,
 80121b58,84,playerStepContactStop,
@@ -527,7 +527,7 @@ address,size,name,twin
 80130dc4,392,raceRivalTurn,
 80130f4c,336,raceRivalFall,
 8013109c,584,raceRivalFinish,
-801312e4,20,func_801312E4,X000:8011a628
+801312e4,20,FUN_8011a628,X000:8011a628
 801312f8,740,updateRaceRival,
 801315dc,808,updateBurningFire,
 80131904,196,updateAnimProp,

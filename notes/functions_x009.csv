@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,func_800F4E9C,X000:800f4e68
+800f4e9c,52,playerSetAnimPairA,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,FUN_800f5014,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,func_8010D7F0,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -327,7 +327,7 @@ address,size,name,twin
 80117cac,16,func_80117CAC,
 80117cbc,140,func_80117CBC,
 80117d48,356,spawnRotatingPlaneObjects,
-80117eac,20,func_80117EAC,X000:8011a628
+80117eac,20,FUN_8011a628,X000:8011a628
 80117ec0,216,spawnRotatingPlaneChild,
 80117f98,76,func_80117F98,
 80117fe4,92,spawnRotatingPlaneChildAt,
@@ -336,7 +336,7 @@ address,size,name,twin
 80118440,296,spawnApAwardNumber,
 80118568,720,func_80118568,
 80118838,196,updateOneShotEffect,
-801188fc,20,func_801188FC,X000:8011a628
+801188fc,20,FUN_8011a628,X000:8011a628
 80118910,96,spawnArea9OneShotEffect,
 80118970,272,rotatingPlaneSpriteSetQuad,
 80118a80,376,initRotatingPlaneSprite,
@@ -360,7 +360,7 @@ address,size,name,twin
 8011ab44,392,updateAreaMechanisms,
 8011accc,456,updateFlowerPlatform,
 8011ae94,116,spawnFlowerPlatformRedFlower,
-8011af08,16,func_8011AF08,X000:8011de74
+8011af08,16,FUN_8011de74,X000:8011de74
 8011af18,260,spawnRedFlowerOnPlatform,
 8011b01c,340,tearJarHeld,
 8011b170,448,func_8011B170,
@@ -389,7 +389,7 @@ address,size,name,twin
 8011d378,116,func_8011D378,
 8011d3ec,520,playerBittenJumpType1A,
 8011d5f4,112,func_8011D5F4,
-8011d664,28,func_8011D664,X000:8011b7d4
+8011d664,28,FUN_8011b7d4,X000:8011b7d4
 8011d680,352,playerStep24PlaceOnCircle,
 8011d7e0,228,playerStep24Area9,
 8011d8c4,224,func_8011D8C4,
@@ -465,7 +465,7 @@ address,size,name,twin
 801237e4,68,func_801237E4,
 80123828,876,redFlowerGrabbed,
 80123b94,320,func_80123B94,
-80123cd4,20,func_80123CD4,X000:8011a628
+80123cd4,20,FUN_8011a628,X000:8011a628
 80123ce8,48,redFlowerDefeated,
 80123d18,268,func_80123D18,
 80123e24,1800,updateRedFlower,
