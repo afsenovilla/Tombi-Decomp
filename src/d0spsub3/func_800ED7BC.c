@@ -1,12 +1,9 @@
-// FUNC 800ef538 1388 D0SPSUB
-// wip: score 16, 10 differing insns, all in case -6 (x/y update): the game computes (o->x + ow) + o->ba and
-// ((o->y + oh) + 0x30) + o->bc with x+ow FIRST in the addu (ours: ba + xow), loads x right after `sh ba` and y right
-// after `sh bc` (ours hoists both loads), and allocates ow=a0 / new h=a1 / oh=a2. Tried (no gain): every statement
-// order in the case, int/short/unsigned temps, accumulator forms (`x += ow; x += ba` gives xow first but lh/hoisted),
-// volatile reads, (short)/(unsigned short) casts, ba/bc as unsigned short, `o->x += ow + o->ba` (18).
-// do{}while(0) around switch(o->wait) fixes reg alloc
-// note: game evaluates (o->x + ow) + o->ba and ((o->y + oh) + 0x30) + o->bc (that form gives the right insns,
-// score 26) but then local-alloc gives ow a1 / new-h a0 instead of a0 / a1; `o->x += ow + o->ba` gets ow=a0 (score 18)
+// FUNC 800ed7bc 1388 D0SPSUB3
+// MATCHING 800ed7bc 1388
+// Message box state machine: steps the message script (control codes -1..-11, glyph loading) and places the box.
+// Idioms: do{}while(0) around switch(o->wait) fixes the register allocation; in case -6 the x/y updates go through
+// an `unsigned short s` intermediate (`s = o->x + ow; o->x = s + o->ba;`): the sum becomes a HI-mode pseudo, so
+// expand keeps it as the first operand of the add and the x load's temporary gets v1 (kept after `sh ba`).
 typedef struct {
     char p0[4];
     unsigned char state, wait;
@@ -31,12 +28,12 @@ extern Hdr MESSAGE_SLOTS[], D_800A464C[], D_800A464E[];
 extern Ent MESSAGE_GLYPHS[][128], D_800A4DE2[][128], D_800A4DE4[][128], D_800A4DE6[][128];
 typedef struct { unsigned char u, v, w, h, p4, flag, p6, p7, p8, p9; } Img;
 extern Img D_800A5DE4[];
-extern char D_8010A200[];
+extern char D_80100A90[];
 extern void freeMessageGlyphs(int slot);
 extern int loadMessageGlyph(int slot, int id, int bank);
 extern void drawMessageBox(void *o);
 
-void func_800EF538(Msg *o, int bank)
+void func_800ED7BC(Msg *o, int bank)
 {
     unsigned short c;
     int two, one;
@@ -96,8 +93,8 @@ void func_800EF538(Msg *o, int bank)
                     o->timer = one;
                     o->ba = -(o->w >> 1);
                     o->bc = -o->h - 0x30;
-                    o->x = ow + o->x + o->ba;
-                    o->y = o->y + oh + o->bc + 0x30;
+                    { unsigned short s = o->x + ow; o->x = s + o->ba; }
+                    { unsigned short s = o->y + oh + 0x30; o->y = s + o->bc; }
                     break;
                 }
                 case -10:
@@ -155,7 +152,7 @@ void func_800EF538(Msg *o, int bank)
         } } while (0);
         D_800A464C[o->slot].n = o->x;
         D_800A464E[o->slot].n = o->y;
-        if (MESSAGE_SLOTS[o->slot].n != -1) drawMessageBox(D_8010A200);
+        if (MESSAGE_SLOTS[o->slot].n != -1) drawMessageBox(D_80100A90);
         break;
     case 2:
         break;

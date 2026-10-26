@@ -1,13 +1,13 @@
 {
  "generated_by": "tools/unnamed.py",
- "count": 107,
+ "count": 109,
  "progs": {
   "MAIN0": 6,
   "X000": 48,
   "O0PTSUB0": 1,
-  "D0SPSUB": 1,
+  "D0SPSUB": 2,
   "D0SPSUB2": 0,
-  "D0SPSUB3": 1,
+  "D0SPSUB3": 2,
   "G0OVER": 0,
   "I0NFO": 0,
   "I0NFO2": 50,
@@ -1335,11 +1335,39 @@
    "anim": null
   },
   {
+   "address": "800ef538",
+   "name": "func_800EF538",
+   "prog": "D0SPSUB",
+   "file": "src/d0spsub/func_800EF538.c",
+   "size": 1388,
+   "note": "",
+   "callers": [
+    "subScreenEventListStep"
+   ],
+   "twins": [],
+   "refs": [],
+   "object": null,
+   "anim": null
+  },
+  {
    "address": "800ea540",
    "name": "func_800EA540",
    "prog": "D0SPSUB3",
    "file": "src/d0spsub3/func_800EA540.c",
    "size": 780,
+   "note": "",
+   "callers": [],
+   "twins": [],
+   "refs": [],
+   "object": null,
+   "anim": null
+  },
+  {
+   "address": "800ed7bc",
+   "name": "func_800ED7BC",
+   "prog": "D0SPSUB3",
+   "file": "src/d0spsub3/func_800ED7BC.c",
+   "size": 1388,
    "note": "",
    "callers": [],
    "twins": [],
