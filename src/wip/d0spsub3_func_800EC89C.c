@@ -1,5 +1,6 @@
 // FUNC 800ec89c 3424 D0SPSUB3
-// port-only draft (not byte-matched): D0SPSUB func_800ED0C4 (src/wip) relocated to D0SPSUB3 and edited for the
+// port-only draft (score 743, was 747; carries the func_800ED0C4 confirm-block fixes: volatile-named D_80100B64
+// temp loaded early, b = t[1] after the first store): D0SPSUB func_800ED0C4 (src/wip) relocated to D0SPSUB3 and edited for the
 // three differences of the retail code: state 1 calls subScreenMoveTabCursor(m) (not func_800EC504(m, 1)), the confirm
 // mask is 0x5008 (not 0x4008), and the cursor switch of state 1 has no mode cases 4..7 (its jump table at
 // 0x800E85F4 sends 3..7 to the default playSFXAndSetNote and 8..11 to the SfxPlay2/return 1 case).
@@ -26,6 +27,7 @@ extern short D_80100928[], D_80100948[];
 extern unsigned char D_80100A90[];
 extern unsigned char D_80100A94;
 extern int D_80100B64;
+extern volatile int D_80100B64_v;
 extern char D_80100B68, D_80100B6C;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern volatile unsigned char D_8009D2B0, PLAYER, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
@@ -293,12 +295,13 @@ int func_800EC89C(Menu *m)
                 m->sub--;
             } else if (D_1F8001FC & 0x5008) {
                 unsigned char *t;
-                int n;
                 int i1 = D_80100928[D_80100918], i2 = D_80100948[D_80100920];
+                int x = D_80100B64_v;
                 t = D_800F67A0[i1] + i2 * 2;
                 {
-                int a = t[0], b = t[1];
+                int a = t[0], b;
                 D_80100B68 = a;
+                b = t[1];
                 D_8009CD94 = a;
                 D_800A603D = 0x30;
                 D_8009CDA0 = 0;
@@ -307,11 +310,11 @@ int func_800EC89C(Menu *m)
                 D_800A603E = 0;
                 PLAYER = 3;
                 D_8009C940 = 1;
-                D_8009C941 = D_80100B64;
+                D_8009C941 = x;
                 D_80100B6C = b;
                 D_8009CD96 = b;
                 }
-                if (D_80100B64 == 14) {
+                if (x == 14) {
                     Obj *o = allocObjectLayer2();
                     if (o) {
                         o->b0 = 1;

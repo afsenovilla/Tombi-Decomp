@@ -1,4 +1,15 @@
 // FUNC 800efd6c 3012 D0SPSUB
+// wip: score 786 (the old draft scored 529 with the WRONG frame: it saved s0-s5 in a 0x98 frame; now the prologue,
+// the 0x90 frame, s0-s4 and the first 0x138 bytes match, so the number is higher only because every later
+// register name shifted). What fixed the frame: (1) the Text struct D_8011113C must only be used for the fields the
+// game addresses through a base register (x at +0 for the three `x = 0xE8/0x10` stores after loop 1, attr at +6
+// and font at +0x14 inside loop 1: `sh v0,(s2); sw v0,0xe(s2)` is cse's related-value rewrite of font from the attr
+// address); y, w, img, D_8011114C are separate externs (D_8011113E, D_80111140, D_80111144, D_8011114C), otherwise
+// gcc keeps the struct base in an extra s-reg (s5) for the loops; (2) every loop's `Slot *s` is block-scoped (the
+// game uses s1/s2/s0 per loop), the function-scope `s` is only for the non-loop `&D_80109208[D_8009D2B1]` use.
+// Left: inside the loops the game's RTL order differs (loop 1: the x store precedes the y load, the attr store sits
+// between the w loads and the w store: try x/y/w/attr orders and the plain-vs-volatile attr form, 786-792 so far),
+// then the usual per-loop register names. The hoisted -1 (`end`) goes to s2 in the game's loops 2+ (not in loop 1).
 typedef struct {
     unsigned char state, b1, b2, b3;
     char p4[0xc];
@@ -97,61 +108,70 @@ void func_800EFD6C(void)
         subScreenDrawGaugePercent(m, 1);
         subScreenDrawGaugePercent(m, 2);
         subScreenDrawStatusNotes(m);
+        {
+        Slot *s;
         for (s = D_8010922C; s->x != -1; s++) {
             D_8011113Cx = s->x;
-            D_8011113C.y = s->y;
-            D_80111142 = 0x7C15;
-            D_8011113C.w = m->w10 + s->dw;
-            D_8011114C = D_801091C4[s->idx];
+            D_8011113E = s->y;
+            *(volatile unsigned short *)&D_8011113C.attr = 0x7C15;
+            D_80111140 = m->w10 + s->dw;
             D_8011113C.font = D_800FFD98;
+            D_8011114C = D_801091C4[s->idx];
             subScreenDrawString(5, 1);
         }
+        }
         D_8011113C.x = 0xE8;
-        D_8011113C.y = 0x66;
+        D_8011113E = 0x66;
         s = &D_80109208[D_8009D2B1];
         D_80111142 = 0x7892;
-        D_8011113C.w = m->w10 + s->dw;
+        D_80111140 = m->w10 + s->dw;
         D_80111144 = m->p54[D_80109228[D_8009D2B1]];
         subScreenDrawSprite(1);
         D_8011113Cx = s->x;
-        D_8011113C.y = s->y;
+        D_8011113E = s->y;
         D_80111142 = 0x7C15;
-        D_8011113C.w = m->w10 + s->dw;
+        D_80111140 = m->w10 + s->dw;
         D_80111144 = m->p58[s->idx];
         subScreenDrawSprite(1);
         subScreenDrawDigitsSprite(&D_800B1410, 0x132, 0x50);
         drawHudLives(&D_800B1410, 0x120, 0x6A);
         D_8011113C.x = 0x10;
-        D_8011113C.y = 0xC8;
-        D_8011113C.w = m->w10 + 1;
+        D_8011113E = 0xC8;
+        D_80111140 = m->w10 + 1;
         D_80111142 = 0x7C15;
         if (D_8009C960 == 9) D_8011114C = D_80108BC8[D_8009C962];
         else D_8011114C = D_80108B78[D_8009C960];
         D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
         D_8011113C.x = 0x10;
-        D_8011113C.y = 0xD8;
+        D_8011113E = 0xD8;
         D_8011113C.attr = 0x7C15;
-        D_8011113C.w = m->w10 + 1;
+        D_80111140 = m->w10 + 1;
         D_80111150 = D_800FFD98;
         D_8011114C = D_80108E5C[D_8009C960][D_8009C962];
         subScreenDrawString(5, 0);
+        {
+        Slot *s;
         for (s = D_801091D0; s->x != -1; s++) {
             D_8011113Cx = s->x;
-            D_8011113C.y = s->y;
-            D_80111142 = 0x79D2;
-            D_8011113C.w = m->w10 + s->dw;
+            D_8011113E = s->y;
+            D_8011113C.attr = 0x79D2;
+            D_80111140 = m->w10 + s->dw;
             D_80111144 = m->p48[s->idx];
             subScreenDrawSprite(1);
         }
+        }
         D_80111142 = 0x7812;
         end = -1;
+        {
+        Slot *s;
         for (s = D_80109C70; s->x != end; s++) {
             D_8011113C.x = s->x;
-            D_8011113C.y = s->y;
-            D_8011113C.w = m->w10 + s->dw;
+            D_8011113E = s->y;
+            D_80111140 = m->w10 + s->dw;
             D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
+        }
         }
         return;
     case 1:
@@ -162,29 +182,35 @@ void func_800EFD6C(void)
         subScreenDrawItemNames(m);
         if (pages >= 2) {
             subScreenDrawPageNumber(m, pages);
+            {
+            Slot *s;
             s = D_80109BF8;
             while (s->x != -1) {
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
                     s++;
                 } else {
                     D_8011113C.x = s->x;
-                    D_8011113C.y = s->y;
-                    D_80111142 = 0x7C15;
-                    D_8011113C.w = m->w10 + s->dw;
+                    D_8011113E = s->y;
+                    D_8011113C.attr = 0x7C15;
+                    D_80111140 = m->w10 + s->dw;
                     D_80111144 = m->p58[s->idx];
                     subScreenDrawSprite(1);
                     s++;
                 }
             }
+            }
         }
-        D_8011113C.attr = 0x7812;
+        D_80111142 = 0x7812;
         end = -1;
+        {
+        Slot *s;
         for (s = D_80109C58; s->x != end; s++) {
             D_8011113C.x = s->x;
-            D_8011113C.y = s->y;
-            D_8011113C.w = m->w10 + s->dw;
+            D_8011113E = s->y;
+            D_80111140 = m->w10 + s->dw;
             D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
+        }
         }
         break;
     case 2:
@@ -202,41 +228,50 @@ void func_800EFD6C(void)
         func_800EA5E8(m);
         if (pages >= 2) {
             subScreenDrawPageNumber(m, pages);
+            {
+            Slot *s;
             s = D_80109BF8;
             while (s->x != -1) {
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
                     s++;
                 } else {
                     D_8011113C.x = s->x;
-                    D_8011113C.y = s->y;
-                    D_80111142 = 0x7C15;
-                    D_8011113C.w = m->w10 + s->dw;
+                    D_8011113E = s->y;
+                    D_8011113C.attr = 0x7C15;
+                    D_80111140 = m->w10 + s->dw;
                     D_80111144 = m->p58[s->idx];
                     subScreenDrawSprite(1);
                     s++;
                 }
             }
+            }
         }
-        D_8011113C.attr = 0x7812;
+        D_80111142 = 0x7812;
         end = -1;
+        {
+        Slot *s;
         for (s = D_80109C58; s->x != end; s++) {
             D_8011113C.x = s->x;
-            D_8011113C.y = s->y;
-            D_8011113C.w = m->w10 + s->dw;
-            D_8011113C.img = D_800FE89C[s->idx];
+            D_8011113E = s->y;
+            D_80111140 = m->w10 + s->dw;
+            D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
+        }
         }
         break;
     case 3:
         subScreenDrawTabs(m);
         D_80111142 = 0x7812;
         end = -1;
+        {
+        Slot *s;
         for (s = D_80109C70; s->x != end; s++) {
             D_8011113C.x = s->x;
             D_8011113E = s->y;
-            D_8011113C.w = m->w10 + s->dw;
-            D_8011113C.img = D_800FE89C[s->idx];
+            D_80111140 = m->w10 + s->dw;
+            D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
+        }
         }
         if (D_8010A38E != 0) {
             subScreenMapDrawAreaName(m, D_8010A38A, D_8010A38C);
