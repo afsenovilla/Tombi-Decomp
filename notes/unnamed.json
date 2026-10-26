@@ -1,12 +1,12 @@
 {
  "generated_by": "tools/unnamed.py",
- "count": 110,
+ "count": 111,
  "progs": {
   "MAIN0": 6,
   "X000": 48,
   "O0PTSUB0": 1,
   "D0SPSUB": 2,
-  "D0SPSUB2": 1,
+  "D0SPSUB2": 2,
   "D0SPSUB3": 2,
   "G0OVER": 0,
   "I0NFO": 0,
@@ -1355,6 +1355,22 @@
    "prog": "D0SPSUB2",
    "file": "src/d0spsub2/func_800EB948.c",
    "size": 1316,
+   "note": "",
+   "callers": [
+    "func_800EBE6C",
+    "memCardScreenDraw"
+   ],
+   "twins": [],
+   "refs": [],
+   "object": null,
+   "anim": null
+  },
+  {
+   "address": "800ebe6c",
+   "name": "func_800EBE6C",
+   "prog": "D0SPSUB2",
+   "file": "src/d0spsub2/func_800EBE6C.c",
+   "size": 960,
    "note": "",
    "callers": [
     "memCardScreenDraw"
