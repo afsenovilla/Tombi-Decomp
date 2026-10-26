@@ -17,7 +17,7 @@ static void *D_801322F4[7] = {
     D_801324C8, D_801323AC, D_801323B4, D_801323F4,
     D_80132404, D_8013240C, D_8013241C,
 };
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern void MoveImage(RECT *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -79,7 +79,7 @@ void updateParrot(TObj *o)
                 break;
             case 1:
                 AnimAdvance(o);
-                o->y.raw += (D_8007A3F0[o->d88] * o->velV) >> 4;
+                o->y.raw += (NEG_SIN_TABLE[o->d88] * o->velV) >> 4;
                 o->d88 = (o->d88 + 2) & 0xff;
                 break;
             }

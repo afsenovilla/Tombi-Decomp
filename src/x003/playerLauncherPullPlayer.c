@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern short D_80078DB4[];
 extern void *D_8013987C[];
 extern void AnimLoadDuration(TObj *);
@@ -41,7 +41,7 @@ void playerLauncherPullPlayer(TObj *o)
         a = func_800205D8(q->h->p.whole - PLAYER.h->p.whole, q->y.p.whole - PLAYER.y.p.whole) & 0xff;
         o->wb0 = a;
         dy = (o->velH * D_8007A1F0[a]) >> 12;
-        dx = (o->velH * D_8007A5F0[a]) >> 12;
+        dx = (o->velH * COS_TABLE[a]) >> 12;
         {
             Fix16 *pd = PLAYER.d;
             short v = pd->p.whole;
@@ -82,7 +82,7 @@ void playerLauncherPullPlayer(TObj *o)
         a = func_800205D8(D_80078DB4[0] - PLAYER.h->p.whole, D_80078DB4[1] - PLAYER.y.p.whole) & 0xff;
         o->wb0 = a;
         dy = (o->velH * D_8007A1F0[a]) >> 12;
-        dx = (o->velH * D_8007A5F0[a]) >> 12;
+        dx = (o->velH * COS_TABLE[a]) >> 12;
         PLAYER.h->raw += dx << 8;
         PLAYER.y.raw += dy << 8;
         dx = PLAYER.h->p.whole - D_80078DB4[0] + 0x10;

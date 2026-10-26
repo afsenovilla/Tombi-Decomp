@@ -5,7 +5,7 @@
 
 typedef struct { short x, y; } P;
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void *D_8012EE80[];
 extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
@@ -75,8 +75,8 @@ void jellyfishFloat(TObj *o)
             if (c) o->state = 0;
             o->velH = 0xc;
         }
-        o->h->raw += (D_8007A5F0[(unsigned char)o->d88] * o->velH) << 4;
-        o->y.raw += (D_8007A3F0[(unsigned char)o->d88] * o->velH) << 4;
+        o->h->raw += (COS_TABLE[(unsigned char)o->d88] * o->velH) << 4;
+        o->y.raw += (NEG_SIN_TABLE[(unsigned char)o->d88] * o->velH) << 4;
         r = blocked(o);
         t = TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x30);
         if (r && t) o->y.p.whole -= 2;

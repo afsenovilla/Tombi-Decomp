@@ -10,7 +10,7 @@ extern unsigned char DAT_800a603c[], DAT_800a603d, DAT_800a603e;
 extern S801363E4 *DAT_800a6078;
 extern unsigned char DAT_800a60a1[], DAT_800a60a2[], DAT_800a60a3[], DAT_800a60d4;
 extern short DAT_800a6066, DAT_800a60b4, DAT_800a60b6, DAT_800a60b8, DAT_800a60ba, DAT_800a60ea;
-extern P801363E4 *DAT_8009c330;
+extern P801363E4 *PLAYER_EXT;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_8009cebf[];
 extern int DAT_8009c984;
@@ -53,7 +53,7 @@ void FUN_801363e4(TObj *o)
         if (DAT_800a60a1[0] == 0) return;
         if (--o->w08 != 0) return;
         DAT_800a6066 = 0;
-        DAT_8009c330->b9 = 5;
+        PLAYER_EXT->b9 = 5;
         DAT_800a60d4 = 1;
         DAT_800a60a1[0] = 0;
         DAT_800a60b4 = 0x220;
@@ -107,7 +107,7 @@ void FUN_801363e4(TObj *o)
                 DAT_800a603c[0] = 6;
                 DAT_800a603d = 5;
                 DAT_800a603e = 0;
-                DAT_8009c330->b9 = 10;
+                PLAYER_EXT->b9 = 10;
                 DAT_800a60b4 = -0x128;
                 DAT_800a60a1[0] = 0;
                 o->state++;

@@ -14,7 +14,7 @@ extern unsigned short D_1F80016E[];
 extern unsigned short D_1F800172[];
 typedef struct { short x; } SX;
 extern SX D_1F80016A;
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 extern void FUN_80026e0c(int, int);
@@ -63,7 +63,7 @@ void updateFlowerTearsThrow(TObj *o)
             FUN_800202b4(o);
             if (o->d88 < 0x41) {
                 o->h->raw += o->velH << 8;
-                o->y.raw -= (D_8007A5F0[o->d88 & 0xff] * o->velV) >> 4;
+                o->y.raw -= (COS_TABLE[o->d88 & 0xff] * o->velV) >> 4;
                 o->d88 += 2;
             }
             if (o->animFrame)

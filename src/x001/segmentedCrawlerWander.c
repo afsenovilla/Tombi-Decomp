@@ -2,7 +2,7 @@
 // MATCHING 801334dc 1352
 #include "TOBJ.H"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern char D_8013F604[];
 extern char D_8013F918[];
 extern char D_8013F904[];
@@ -23,8 +23,8 @@ extern void AnimLoadDuration(TObj *);
 extern void segmentedCrawlerWiggle(TObj *);
 
 #define MOVE() \
-    o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
-    o->y.raw += (D_8007A3F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->wac = ((o->d88 + 8) & 0xff) >> 4; \
     o->anim = D_8013F034[o->wac];
 

@@ -38,7 +38,7 @@ typedef struct {
 } P;
 typedef struct { unsigned char b0; unsigned char p1[7]; unsigned char b8; unsigned char p9[0x17]; short timer; } PL;
 
-extern PL *D_8009C330;
+extern PL *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(P *, int);
 extern void AnimAdvance(P *);
@@ -54,7 +54,7 @@ void playerStepSlideDownSurface(P *o)
     switch (o->state) {
     case 0:
         o->bac = 0;
-        D_8009C330->b8 = o->wb2 >> 15;
+        PLAYER_EXT->b8 = o->wb2 >> 15;
         o->ba4 = 1;
         o->bc7 = 1;
         o->b9c = 0;
@@ -67,7 +67,7 @@ void playerStepSlideDownSurface(P *o)
         o->velX = 0;
         o->velY = 0;
         o->animFrame = o->bbe & 1;
-        D_8009C330->b0 = 0;
+        PLAYER_EXT->b0 = 0;
         PlayerSetAnimIfChanged(o, 0x11);
         o->state++;
     case 1:
@@ -84,7 +84,7 @@ void playerStepSlideDownSurface(P *o)
             o->d8c = o->b6b >> 2;
         }
         if (o->bbe == 0) {
-            if (o->animFrame != D_8009C330->b8) {
+            if (o->animFrame != PLAYER_EXT->b8) {
                 o->wb2 = 0;
             }
             o->ba4 = 0;
@@ -106,7 +106,7 @@ void playerStepSlideDownSurface(P *o)
                 o->bad = 1;
                 o->velY += 0x223;
                 o->y += o->velY << 8;
-                D_8009C330->timer = 0x21;
+                PLAYER_EXT->timer = 0x21;
                 if (o->velY >= 0x447) {
                     o->bad = 0;
                     o->velY = 0;

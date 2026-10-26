@@ -5,8 +5,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *D_8009C330;
-extern unsigned char *D_8009D2E8;
+extern TObj *PLAYER_EXT;
+extern unsigned char *BITTEN_OBJECT;
 extern char D_80011108[];
 extern unsigned char D_80115220[][2];
 extern unsigned short D_1f8003c6;
@@ -23,24 +23,24 @@ typedef struct { unsigned char b0; char p1; short w2; char p4[8]; short wc; shor
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
-    TObj *p = D_8009C330;
+    TObj *p = PLAYER_EXT;
     p->animTimer = anim;
     if (p->animFrame != anim) {
         p->animTimer = anim;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
 }
 
 static __inline__ void rot(TObj *o)
 {
-    PL *p = (PL *)D_8009C330;
+    PL *p = (PL *)PLAYER_EXT;
     o->wb6 += p->we;
     if ((unsigned short)o->wb6 < 0x800) U8(p, 8) = 1;
-    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
-    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
-    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 1;
+    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 1;
 }
 
 #define STEP(o) \
@@ -56,16 +56,16 @@ void playerStepFlipOntoPerch(TObj *o)
 
     switch (o->state) {
     case 0:
-        q = (PL *)D_8009C330;
+        q = (PL *)PLAYER_EXT;
         o->wb6 = -0x420;
         q->w2 = 0x10;
         q->we = 0;
         o->wb2 = 2;
         U8(q, 8) = 0;
-        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
-        ((PL *)D_8009C330)->wc = 0;
-        ((PL *)D_8009C330)->w28 = 0xffff;
-        ((PL *)D_8009C330)->w2a = 0xffff;
+        (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
+        ((PL *)PLAYER_EXT)->wc = 0;
+        ((PL *)PLAYER_EXT)->w28 = 0xffff;
+        ((PL *)PLAYER_EXT)->w2a = 0xffff;
         o->velH = 0;
         o->velV = 0;
         o->wb0 = 0;
@@ -73,10 +73,10 @@ void playerStepFlipOntoPerch(TObj *o)
         o->d88 = 0;
         o->d8c = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
-            D_8009D2E8[4] = 2;
-            D_8009D2E8[5] = 2;
-            D_8009D2E8[6] = 0;
+            BITTEN_OBJECT = (*(unsigned char **)&PLX.p611c);
+            BITTEN_OBJECT[4] = 2;
+            BITTEN_OBJECT[5] = 2;
+            BITTEN_OBJECT[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         GVARS.i34 = 0;
@@ -84,7 +84,7 @@ void playerStepFlipOntoPerch(TObj *o)
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        D_8009C330->active = 0;
+        PLAYER_EXT->active = 0;
         o->anim = D_80011108;
         FUN_8001fe94(o, 0);
         o->d30 = o->h->p.whole;
@@ -94,7 +94,7 @@ void playerStepFlipOntoPerch(TObj *o)
     case 1:
         rot(o);
         if (o->wb6 == 0) {
-            p = (PL *)D_8009C330;
+            p = (PL *)PLAYER_EXT;
             if (p->we > 0) {
                 unsigned char *b = D_80115220[--o->wb2];
                 p->we = b[0];
@@ -102,15 +102,15 @@ void playerStepFlipOntoPerch(TObj *o)
             }
         }
         t = (short)o->wb6 >> 4;
-        D_8009C330->animFrame = 0xffff;
-        D_8009C330->visible = 0x12;
+        PLAYER_EXT->animFrame = 0xffff;
+        PLAYER_EXT->visible = 0x12;
         playerFlipPlaceAndAccelerate(o, u, t);
         if (o->wb2 < 2) o->state++;
         break;
     case 2:
         rot(o);
         if (o->wb6 == 0) {
-            p = (PL *)D_8009C330;
+            p = (PL *)PLAYER_EXT;
             if (p->we > 0) {
                 unsigned char *b = D_80115220[--o->wb2];
                 p->we = b[0];
@@ -130,15 +130,15 @@ void playerStepFlipOntoPerch(TObj *o)
             o->h->p.whole = o->w74 + ((o->animFrame & 1) ? -4 : 4);
             o->y.p.whole = o->w76 + 0xc;
             o->state++;
-        } else if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) {
+        } else if ((*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) {
             playerFlipPlaceAndAccelerate(o, 0, 0);
             if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
-                (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+                (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                 o->step = 0xb;
                 o->state = 0;
             }
             if (((volatile unsigned short*)&GV6.s70)[0] & 0x10) {
-                (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+                (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                 STEP(o);
                 o->step = 0xb;
                 o->state = 0;
@@ -152,17 +152,17 @@ void playerStepFlipOntoPerch(TObj *o)
     case 3:
         FUN_8001fec0(o);
         if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
-            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+            (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->step = 0xb;
             o->state = 0;
         }
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x10) {
-            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+            (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->step = 0xb;
             o->state = 0;
         }
         if (((volatile unsigned short*)&GV6.s70)[0] & 0x40) {
-            (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+            (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->y.p.whole += 9;
             probeCollisionAtDepthC(o, o->h->p.whole, o->y.p.whole);
             setanim(o, 10);

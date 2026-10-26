@@ -21,9 +21,9 @@ typedef struct {
 } PL705C;
 
 extern PL705C *D_8009C330;
-extern PL705C *D_8009C330A[];
-extern unsigned char *D_8009D2E8;
-extern TObj *D_8009F0EC;
+extern PL705C *PLAYER_EXT[];
+extern unsigned char *BITTEN_OBJECT;
+extern TObj *GRABBED_OBJECT;
 extern char D_80011108[];
 extern unsigned char D_80115228[][2];
 extern unsigned char DAT_801152e8[];
@@ -88,7 +88,7 @@ static __inline__ void swing(TObj *o, int p)
 }
 
 #define ADDWE() { \
-    PL705C *p = D_8009C330A[0]; \
+    PL705C *p = PLAYER_EXT[0]; \
     int w = p->we; int v; \
     if (p->b8) v = w - p->w2; else v = w + p->w2; p->we = v; }
 
@@ -112,7 +112,7 @@ static __inline__ void swing(TObj *o, int p)
     { Fix16 *h = o->h; int pv = h->p.whole; short x; \
       if (o->animFrame & 1) x = pv + 14; else x = pv - 14; \
       h->p.whole = x; } \
-    D_8009F0EC->b69 = 0; \
+    GRABBED_OBJECT->b69 = 0; \
     if (r) { o->step = 2; o->state = 3; o->substep = 0; } \
     else { o->step = 0; o->state = 0; o->substep = 0; } }
 
@@ -127,10 +127,10 @@ void playerStepSwingFromObject(TObj *o)
     switch (o->state) {
     case 0:
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
-            D_8009D2E8[4] = 2;
-            D_8009D2E8[5] = 2;
-            D_8009D2E8[6] = 0;
+            BITTEN_OBJECT = (*(unsigned char **)&PLX.p611c);
+            BITTEN_OBJECT[4] = 2;
+            BITTEN_OBJECT[5] = 2;
+            BITTEN_OBJECT[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         GVARS.i34 = 0;
@@ -139,7 +139,7 @@ void playerStepSwingFromObject(TObj *o)
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
         D_8009C330->b0 = 0;
-        D_8009F0EC->b69 = 1;
+        GRABBED_OBJECT->b69 = 1;
         {
             PL705C *q = D_8009C330;
             o->wb6 = -0x420;
@@ -158,8 +158,8 @@ void playerStepSwingFromObject(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->d30 = D_8009F0EC->h->p.whole;
-        o->d34 = D_8009F0EC->y.p.whole;
+        o->d30 = GRABBED_OBJECT->h->p.whole;
+        o->d34 = GRABBED_OBJECT->y.p.whole;
         (*(unsigned char*)&o->wac) = 0;
         if (o->animFrame & 1) {
             o->d8c = 0x100;

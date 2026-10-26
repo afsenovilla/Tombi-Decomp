@@ -18,7 +18,7 @@ static void *D_8013DE4C[4] = {
     D_8013E054, D_8013E05C, D_8013E064, D_8013E06C,
 };
 extern void *D_8013DDF8[];
-extern unsigned short D_8009C960, D_8009C962;
+extern unsigned short GAME, D_8009C962;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 extern int FUN_8001f9e0(void);
 extern short FUN_8001fddc(int, int);
@@ -33,7 +33,7 @@ static __inline__ void follow1(TObj *o, E4 *e)
     unsigned short u;
     register unsigned int t asm("$2");
 
-    if (D_8009C960 == 1 && D_8009C962 < 2)
+    if (GAME == 1 && D_8009C962 < 2)
         o->anim = D_8013DE4C[e->a];
     else
         o->anim = D_8013DDF8[e->a];
@@ -63,7 +63,7 @@ static __inline__ void follow0(TObj *o, E4 *e)
     unsigned short u;
     register unsigned int t asm("$2");
 
-    if (D_8009C960 == 1 && D_8009C962 < 2)
+    if (GAME == 1 && D_8009C962 < 2)
         o->anim = D_8013DE4C[e->a];
     else
         o->anim = D_8013DDF8[e->a];

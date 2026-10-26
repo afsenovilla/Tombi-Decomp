@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern char D_8013C474[];
 extern void playSFX(int);
 extern int springVineSwayStep(TObj *o);
@@ -61,8 +61,8 @@ void springVineGrabbed(TObj *o)
         if ((o->animFrame >> 1) != 2 && springVineSwayStep(o)) o->animFrame = 4;
         {
             unsigned char v = ((unsigned char *)&o->d88)[1];
-            if (v > 0x80) o->y.raw += (D_8007A5F0[v] * (o->velV - 0x100)) >> 4;
-            else o->y.raw += (D_8007A5F0[v] * o->velV) >> 4;
+            if (v > 0x80) o->y.raw += (COS_TABLE[v] * (o->velV - 0x100)) >> 4;
+            else o->y.raw += (COS_TABLE[v] * o->velV) >> 4;
             o->d88 += 0x280;
             v = (unsigned)o->d88 >> 8;
             if (v == 0) {
@@ -82,8 +82,8 @@ void springVineGrabbed(TObj *o)
         o->state++;
         break;}
     case 3:
-        o->y.raw -= (D_8007A5F0[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
-        if (o->b6a) o->y.raw -= (D_8007A5F0[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
+        if (o->b6a) o->y.raw -= (COS_TABLE[((unsigned char *)&o->d88)[1]] * o->velV) >> 4;
         o->h->raw += o->velX << 8;
         o->d88 += 0x200;
         if (o->w76 < ((o->d88 >> 8) & 0xff)) {
@@ -153,7 +153,7 @@ void springVineGrabbed(TObj *o)
                 o->state++;
                 break;
             }
-            o->y.raw -= (D_8007A5F0[v & 0xff] * o->velV) >> 4;
+            o->y.raw -= (COS_TABLE[v & 0xff] * o->velV) >> 4;
         }
         if (o->b69) o->b69 = 0;
         if (o->b6a) o->state = 0;

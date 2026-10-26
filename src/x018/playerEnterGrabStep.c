@@ -5,9 +5,9 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { TObj o; char p0[6]; unsigned char c6, c7; char p1[0xe3 - 0xc8]; unsigned char e3; } TObjX;
-extern TObj *D_8009D2E8;
-extern unsigned char *D_8009C330;
-extern TObj *D_8009F0EC;
+extern TObj *BITTEN_OBJECT;
+extern unsigned char *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern char D_80010C0C[];
 extern void AnimLoadDuration(TObjX *o);
 extern void SfxPlay2(int a, int b);
@@ -17,10 +17,10 @@ void playerEnterGrabStep(TObjX *x, short f)
 {
     TObj *g;
     if (*(unsigned char *)&x->o.wac >= 2) {
-        D_8009D2E8 = (*(TObj **)&PLX.p611c);
-        D_8009D2E8->b04 = 2;
-        D_8009D2E8->step = 2;
-        D_8009D2E8->state = 0;
+        BITTEN_OBJECT = (*(TObj **)&PLX.p611c);
+        BITTEN_OBJECT->b04 = 2;
+        BITTEN_OBJECT->step = 2;
+        BITTEN_OBJECT->state = 0;
     }
     *(unsigned char *)&x->o.wac = 0;
     GVARS.i34 = 0;
@@ -28,7 +28,7 @@ void playerEnterGrabStep(TObjX *x, short f)
     x->o.b9d = 0;
     x->c6 = 0;
     x->e3 = 0;
-    D_8009C330[0] = 0;
+    PLAYER_EXT[0] = 0;
     switch (x->o.b9e) {
     case 1:
         x->o.velX = 0;
@@ -41,11 +41,11 @@ void playerEnterGrabStep(TObjX *x, short f)
         x->o.step = 6; x->o.state = 0;
         break;
     case 3:
-        if ((unsigned short)(x->o.velX + 0x1c0) > 0x380) D_8009C330[5] = 1;
+        if ((unsigned short)(x->o.velX + 0x1c0) > 0x380) PLAYER_EXT[5] = 1;
         x->o.anim = D_80010C0C;
         AnimLoadDuration(x);
         x->o.b0f = 0;
-        g = D_8009F0EC;
+        g = GRABBED_OBJECT;
         x->o.d30 = g->h->p.whole + x->o.wb8 + 4;
         x->o.d34 = g->y.p.whole + x->o.wba - 4;
         x->o.h->p.whole = x->o.d30;
@@ -54,11 +54,11 @@ void playerEnterGrabStep(TObjX *x, short f)
         x->o.y.p.whole = x->o.d34 + 12;
         return;
     case 4:
-        if ((D_8009F0EC->category & 0x7f) == 2) {
+        if ((GRABBED_OBJECT->category & 0x7f) == 2) {
             SfxPlay2(0x1e, 0x1c);
             x->o.step = 8; x->o.state = 0;
         } else {
-            if (D_8009F0EC->type == 2) D_8009F0EC->b69 = 1;
+            if (GRABBED_OBJECT->type == 2) GRABBED_OBJECT->b69 = 1;
             SfxPlay2(0x1e, 0x1c);
             x->o.step = 8; x->o.state = 0;
         }

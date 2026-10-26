@@ -7,7 +7,7 @@ typedef struct O {
     char p2[0xc1 - 0xb4]; unsigned char bc1;
 } O;
 typedef struct G { char p0[0x20]; unsigned short w20; } G;
-extern G *D_8009C330;
+extern G *PLAYER_EXT;
 extern T D_80115466[];
 
 void playerSpinReleaseSpeedKind(O *o)
@@ -15,7 +15,7 @@ void playerSpinReleaseSpeedKind(O *o)
     short a; short k;
     a = o->wb2 < 0 ? -o->wb2 : o->wb2;
     k = 0;
-    switch (D_8009C330->w20) {
+    switch (PLAYER_EXT->w20) {
     case 0 ... 12:
         o->w7e += D_80115466[k].inc;
         break;

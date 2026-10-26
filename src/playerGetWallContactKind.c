@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800EFF1C (playerGetWallContactKind.c): no +0xc6 check.
 #include "TOBJ.H"
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 
 int playerGetWallContactKind(TObj *o)
 {
@@ -30,8 +30,8 @@ int playerGetWallContactKind(TObj *o)
             }
         }
         if ((o->bbe & 0x20) && o->step != 0x1f) {
-            if (*DAT_8009c330 == 0) {
-                DAT_8009c330[8] = o->animFrame & 1;
+            if (*PLAYER_EXT == 0) {
+                PLAYER_EXT[8] = o->animFrame & 1;
                 o->step = 0x1f;
                 o->state = 0;
             }
@@ -42,7 +42,7 @@ int playerGetWallContactKind(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 
 int playerGetWallContactKind(TObj *o)
 {
@@ -68,8 +68,8 @@ int playerGetWallContactKind(TObj *o)
             }
         }
         if ((o->bbe & 0x20) && o->step != 0x1f) {
-            if (*DAT_8009c330 == 0 && ((unsigned char *)o)[0xc6] == 0) {
-                DAT_8009c330[8] = o->animFrame & 1;
+            if (*PLAYER_EXT == 0 && ((unsigned char *)o)[0xc6] == 0) {
+                PLAYER_EXT[8] = o->animFrame & 1;
                 o->step = 0x1f;
                 o->state = 0;
             }

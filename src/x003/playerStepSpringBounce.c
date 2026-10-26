@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
-extern unsigned char *D_8009C330;
-extern int D_8009F0EC;
+extern unsigned char *PLAYER_EXT;
+extern int GRABBED_OBJECT;
 int playerProbeGrab(TObj *o, int a);
 void playerEnterGrabStep(TObj *o, int a);
 void PlayerSetAnimIfChanged(TObj *o, int a);
@@ -91,16 +91,16 @@ void playerStepSpringBounce(TObj *o)
     }
     if (--o->timer <= 0) {
         o->timer = 0;
-        D_8009F0EC = playerProbeGrab(o, 0);
+        GRABBED_OBJECT = playerProbeGrab(o, 0);
         if (o->b9e != 0) {
-            D_8009C330[8] = 0;
-            *(short *)(D_8009C330 + 0x20) = 0;
+            PLAYER_EXT[8] = 0;
+            *(short *)(PLAYER_EXT + 0x20) = 0;
             B(o, 0xac) = 0;
             o->b9c = 0;
             o->velX = 0;
             o->velY = 0;
             o->wb2 = 0;
-            playerEnterGrabStep(o, D_8009F0EC == 1);
+            playerEnterGrabStep(o, GRABBED_OBJECT == 1);
         }
     }
 }

@@ -9,16 +9,16 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void func_800EDA04(TObj *);
 extern void func_80020554(TObj *);
 #define FUN_800eeb5c(o, n) {                                          \
-    TObj *p_ = D_8009C330;                                            \
+    TObj *p_ = PLAYER_EXT;                                            \
     p_->animTimer = (n);                                              \
     if (p_->animFrame != (n)) {                                       \
         func_800EDA04(o);                                             \
         func_80020554(o);                                             \
-        D_8009C330->animFrame = D_8009C330->animTimer;                \
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;                \
     }                                                                 \
 }
 extern int FUN_8003facc(TObj *);
@@ -36,7 +36,7 @@ void func_80121D6C(TObj *o)
     case 0:
         FUN_800eeb5c(o, 0x1b);
         o->wb6 = 0;
-        (*(short*)&D_8009C330->type) = 0;
+        (*(short*)&PLAYER_EXT->type) = 0;
         (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
         o->wb0 = 0;
         o->wb2 = 0;
@@ -92,7 +92,7 @@ void func_80121D6C(TObj *o)
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void FUN_800eeb5c(TObj *, int);
 extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
@@ -110,7 +110,7 @@ void playerStepRiseToLedge(TObj *o)
         (*(unsigned char*)&o->da0) = 0;
         FUN_800eeb5c(o, 0x1b);
         o->wb6 = 0;
-        (*(short*)&D_8009C330->type) = 0;
+        (*(short*)&PLAYER_EXT->type) = 0;
         (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
         o->wb0 = 0;
         o->wb2 = 0;

@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
-extern TObj *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void FUN_800eeb5c(TObj *, int);
@@ -27,14 +27,14 @@ void playerStep25Area9(TObj *o)
     unsigned short dx, dy;
     volatile unsigned short *k;
 
-    o->h->p.whole += DAT_8009f0ec->velX;
-    o->y.p.whole += DAT_8009f0ec->velY;
+    o->h->p.whole += GRABBED_OBJECT->velX;
+    o->y.p.whole += GRABBED_OBJECT->velY;
     switch (o->state) {
     case 0:
         FUN_800eeb5c(o, 10);
         o->d8c = 0;
         o->wb6 = 0;
-        (*(unsigned short*)&DAT_8009c330->type) = 0;
+        (*(unsigned short*)&PLAYER_EXT->type) = 0;
         o->wb2 = 0;
         o->velH = 0;
         o->velV = 0;
@@ -53,14 +53,14 @@ void playerStep25Area9(TObj *o)
             else
                 x = v + 8;
             yy = o->y.p.whole;
-            p = DAT_8009f0ec;
+            p = GRABBED_OBJECT;
             dx = x - (p->h->p.whole - p->box0);
             dy = p->y.p.whole + (p->box3 - p->box2);
             if ((unsigned short)dx < p->box1) {
                 int c = -0x15;
                 s += columnProbeA(o, dx, yy + c - dy, p->subtype);
             }
-            p = DAT_8009f0ec;
+            p = GRABBED_OBJECT;
             dx = x - (p->h->p.whole - p->box0);
             dy = p->y.p.whole + (p->box3 - p->box2);
             if ((unsigned short)dx < p->box1) {
@@ -90,7 +90,7 @@ void playerStep25Area9(TObj *o)
             else
                 x = v - 8;
             yy = o->y.p.whole + 0x10;
-            p = DAT_8009f0ec;
+            p = GRABBED_OBJECT;
             dx = x - (p->h->p.whole - p->box0);
             dy = yy - (p->y.p.whole + (p->box3 - p->box2));
             if ((unsigned short)dx < p->box1) {
@@ -117,14 +117,14 @@ void playerStep25Area9(TObj *o)
         else
             x = v + 8;
         yy = o->y.p.whole - 0x10;
-        p = DAT_8009f0ec;
+        p = GRABBED_OBJECT;
         dx = x - (p->h->p.whole - p->box0);
         dy = yy - (p->y.p.whole + (p->box3 - p->box2));
         if ((unsigned short)dx < p->box1) {
             s = columnProbeB(o, dx, dy, p->subtype);
             switch (s) {
             case 0:
-                v = 1; (*(unsigned char*)&DAT_8009c330->w08) = v;
+                v = 1; (*(unsigned char*)&PLAYER_EXT->w08) = v;
                 {
                     Fix16 *h = o->h;
                     short n;
@@ -177,7 +177,7 @@ void playerStep25Area9(TObj *o)
     }
     if (o->b69) {
         FUN_8001e5f4(0x1c, 0x7f);
-        (*(unsigned char*)&DAT_8009c330->w08) = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
         o->ba7 = 0;
         (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
@@ -188,7 +188,7 @@ void playerStep25Area9(TObj *o)
         o->state = 1;
     } else if (FUN_8003fd78(o, 0, 0)) {
         FUN_8001e5f4(0x1c, 0x7f);
-        (*(unsigned char*)&DAT_8009c330->w08) = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
         o->ba7 = 0;
         (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;

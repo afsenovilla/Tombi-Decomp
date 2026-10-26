@@ -25,8 +25,8 @@ typedef struct {
     unsigned short w2e;
 } P;
 
-extern P *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 extern short D_8007A038[];
 extern TObj *allocObjectLayer1(void);
 extern void playerReleaseBittenAndClearFlags(S *);
@@ -54,7 +54,7 @@ void playerStep3FArea10(S *s)
     switch (s->o.state) {
     case 0:
         e = s->e4;
-        D_8009D2E8 = e;
+        BITTEN_OBJECT = e;
         if (*(unsigned char *)&s->o.wac >= 2) {
             if (e->type == 0x3a) {
                 n = allocObjectLayer1();
@@ -62,7 +62,7 @@ void playerStep3FArea10(S *s)
                     n->active = 1;
                     n->type = 1;
                     n->subtype = 0xc;
-                    D_8009D2E8->b04 = 3;
+                    BITTEN_OBJECT->b04 = 3;
                 }
                 f = s->o.animFrame & 1;
                 n->animFrame = f;
@@ -88,14 +88,14 @@ void playerStep3FArea10(S *s)
         s->o.d8c = 0;
         s->o.wb0 = 0;
         s->o.wb6 = 0;
-        D_8009C330->b8 = 1;
-        D_8009C330->w2c = 4;
-        D_8009C330->w20 = 0;
-        D_8009C330->b5 = 0;
+        PLAYER_EXT->b8 = 1;
+        PLAYER_EXT->w2c = 4;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->b5 = 0;
         *(unsigned char *)&s->o.wac = 0;
         ObjSetAnimFromTable(s);
         AnimLoadDuration(s);
-        D_8009C330->w2e = D_8009C330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         SfxPlay2(2, 4);
         s->o.state++;
     case 1:
@@ -148,12 +148,12 @@ void playerStep3FArea10(S *s)
         s->bc3 = 0;
         if (s->be3 >= D_8007A038[GV2.bb2]) return;
         if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         if (p->b0 != 0) return;
         if (s->bc0 != 0) return;
         if (*(unsigned char *)&s->o.wac == 2) return;
         p->b8 = 1;
-        D_8009C330->b7 = s->o.animFrame;
+        PLAYER_EXT->b7 = s->o.animFrame;
         v = s->o.wb2;
         if (v < 0) {
             t = v;

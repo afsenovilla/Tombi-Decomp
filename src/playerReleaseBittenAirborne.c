@@ -5,10 +5,10 @@
 // Demo version of PAL x000 800FC02C (FUN_800fc02c.c): sets active 2, clears +0x9c, no DAT_8009c934 reset, flag at
 // +0xcf (PAL +0xe3).
 extern unsigned char *DAT_800a611c;
-extern unsigned char *DAT_8009d2e8;
+extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
-extern unsigned char *DAT_8009c330;
-extern unsigned char *DAT_8009f0ec;
+extern unsigned char *PLAYER_EXT;
+extern unsigned char *GRABBED_OBJECT;
 
 void FUN_800fc02c(unsigned char *o)
 {
@@ -16,24 +16,24 @@ void FUN_800fc02c(unsigned char *o)
     o[0] = 2;
     o[0x9c] = 0;
     if (o[0xac] >= 2) {
-        DAT_8009d2e8 = DAT_800a611c;
+        BITTEN_OBJECT = DAT_800a611c;
         DAT_800a611c[4] = 2;
-        DAT_8009d2e8[5] = 2;
-        DAT_8009d2e8[6] = 0;
+        BITTEN_OBJECT[5] = 2;
+        BITTEN_OBJECT[6] = 0;
     }
     o[0xac] = 0;
     o[0xc7] = 1;
     o[0x9d] = 0;
     o[0xc6] = 0;
     o[0xcf] = 0;
-    *DAT_8009c330 = 0;
+    *PLAYER_EXT = 0;
     *(int *)(o + 0x8c) = 0;
     if (o[0x9e] != 0)
-        DAT_8009f0ec[0x6a] = 0;
+        GRABBED_OBJECT[0x6a] = 0;
     o[0x9e] = 0;
     o[0xaa] = 0;
     o[0xa7] = 0;
-    p = DAT_8009c330;
+    p = PLAYER_EXT;
     *(short *)(o + 0xb0) = 0;
     p[8] = 0;
     *(signed char *)(o + 0xf) = -8;
@@ -44,20 +44,20 @@ void FUN_800fc02c(unsigned char *o)
 }
 #else
 extern unsigned char *DAT_800a611c;
-extern unsigned char *DAT_8009d2e8;
+extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
-extern unsigned char *DAT_8009c330;
-extern unsigned char *DAT_8009f0ec;
+extern unsigned char *PLAYER_EXT;
+extern unsigned char *GRABBED_OBJECT;
 
 void playerReleaseBittenAirborne(unsigned char *o)
 {
     unsigned char *p;
     o[0x9c] = 1;
     if (o[0xac] >= 2) {
-        DAT_8009d2e8 = DAT_800a611c;
+        BITTEN_OBJECT = DAT_800a611c;
         DAT_800a611c[4] = 2;
-        DAT_8009d2e8[5] = 2;
-        DAT_8009d2e8[6] = 0;
+        BITTEN_OBJECT[5] = 2;
+        BITTEN_OBJECT[6] = 0;
     }
     o[0xac] = 0;
     DAT_8009c934 = 0;
@@ -65,14 +65,14 @@ void playerReleaseBittenAirborne(unsigned char *o)
     o[0x9d] = 0;
     o[0xc6] = 0;
     o[0xe3] = 0;
-    *DAT_8009c330 = 0;
+    *PLAYER_EXT = 0;
     *(int *)(o + 0x8c) = 0;
     if (o[0x9e] != 0)
-        DAT_8009f0ec[0x6a] = 0;
+        GRABBED_OBJECT[0x6a] = 0;
     o[0x9e] = 0;
     o[0xaa] = 0;
     o[0xa7] = 0;
-    p = DAT_8009c330;
+    p = PLAYER_EXT;
     *(short *)(o + 0xb0) = 0;
     p[8] = 0;
     *(signed char *)(o + 0xf) = -8;

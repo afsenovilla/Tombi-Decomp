@@ -1,13 +1,13 @@
 // FUNC 80102a08 84 X006
 // MATCHING 80102a08 84
 // FLAGS -O2 -G0
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern void FUN_80122f54(void);
 extern void FUN_8011ccd8(void);
 
 void playerStep2EByArea(void)
 {
-    switch (DAT_8009c960) {
+    switch (GAME) {
     case 1:
         FUN_80122f54();
         break;

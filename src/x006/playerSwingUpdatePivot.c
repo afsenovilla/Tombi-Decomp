@@ -1,12 +1,12 @@
 // FUNC 800f6e28 272 X006
 // MATCHING 800f6e28 272
-extern char *DAT_8009f0ec;
+extern char *GRABBED_OBJECT;
 extern int FUN_80122cbc(void);
 extern int FUN_8011ca00(void);
 
 short playerSwingUpdatePivot(char *o)
 {
-    char *e = DAT_8009f0ec;
+    char *e = GRABBED_OBJECT;
     int r;
     *(int *)(o + 0x30) = *(short *)(*(char **)(e + 0x40) + 2);
     *(int *)(o + 0x34) = *(short *)(e + 0x16);

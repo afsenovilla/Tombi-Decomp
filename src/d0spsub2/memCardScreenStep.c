@@ -2,7 +2,7 @@
 // MATCHING 800e9308 1408
 typedef struct { unsigned char state, sub, b2, b3; short timer; short x6; char p8[0x10]; short card; short x1A; short x1C; } Menu;
 typedef struct { char p0[0x140]; short status, prev, p144, type; char p148[0x12]; } Card;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern unsigned char D_800A45D9;
 extern Card D_800F7200[];
 extern short D_800F713C[];
@@ -18,7 +18,7 @@ extern void SfxPlay2(int a, int b);
 
 int memCardScreenStep(void)
 {
-    Menu *m = &D_800A45D8;
+    Menu *m = &MENU_STATE;
     Card *c;
     int i;
     switch (D_800A45D9) {

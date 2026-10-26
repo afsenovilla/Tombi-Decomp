@@ -10,7 +10,7 @@ extern GS D_8009C960g;
 extern unsigned short D_1F8001FC;
 extern short D_1F8003D8;
 extern unsigned char D_8009C977[];
-extern char D_8009C960[];
+extern char GAME[];
 extern unsigned char D_8009C970, D_8009C971;
 extern unsigned char D_8009CF1C;
 extern unsigned short BUTTON_CONFIG_INDEX;

@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-schedule-insns
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
-extern short *DAT_8009c338;
+extern short *WEAPON_STATE;
 extern int DAT_1f8002cc;
 
 void spawnWeaponPoolType12Object(TObj *p, int x, int y, int z)
@@ -17,7 +17,7 @@ void spawnWeaponPoolType12Object(TObj *p, int x, int y, int z)
         o->active = 1;
         o->type = 0x12;
         w = p->animFrame;
-        t = DAT_8009c338;
+        t = WEAPON_STATE;
         o->a.raw = x << 16;
         o->y.raw = y << 16;
         o->b.raw = z << 16;

@@ -18,8 +18,8 @@ typedef struct {
     unsigned short w2e;
 } PL;
 
-extern PL *D_8009C330;
-extern TObj *D_8009F0EC;
+extern PL *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern char D_80011108[];
 extern void playerAdvanceSpinAngle(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -53,7 +53,7 @@ static __inline__ short adj(TObj *o, short k)
         short x, y; \
         TObj *e; \
         x = adj(o, k); \
-        e = D_8009F0EC; \
+        e = GRABBED_OBJECT; \
         y = o->y.p.whole - 0x10; \
         x = x - (e->h->p.whole - e->box0); \
         y = y - (e->y.p.whole + (e->box3 - e->box2)); \
@@ -68,16 +68,16 @@ void playerStep24Area9(TObj *o)
 
     switch (o->state) {
     case 0:
-        p = D_8009C330;
+        p = PLAYER_EXT;
         o->wb6 = -0x420;
         p->w02 = 0x10;
         p->w0e = 0;
         o->wb2 = 2;
         p->b08 = 0;
-        D_8009C330->b09 = 0;
-        D_8009C330->w0c = 0;
-        D_8009C330->w28 = 0xffff;
-        D_8009C330->w2a = 0xffff;
+        PLAYER_EXT->b09 = 0;
+        PLAYER_EXT->w0c = 0;
+        PLAYER_EXT->w28 = 0xffff;
+        PLAYER_EXT->w2a = 0xffff;
         *(unsigned char *)&o->waa = 1;
         o->velH = 0;
         o->velV = 0;
@@ -95,12 +95,12 @@ void playerStep24Area9(TObj *o)
         o->state++;
     case 1:
         playerAdvanceSpinAngle(o);
-        if (o->wb6 == 0 && D_8009C330->w0e > 0) {
+        if (o->wb6 == 0 && PLAYER_EXT->w0e > 0) {
             o->wb2--;
             playerSetAnimPairB(o);
         }
         s1 = o->wb6 >> 4;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         p->w2e = 0xffff;
         p->b01 = 0x12;
         playerStep24PlaceOnCircle(o, s2, s1);
@@ -109,7 +109,7 @@ void playerStep24Area9(TObj *o)
     case 2:
         playerAdvanceSpinAngle(o);
         if (o->wb6 == 0) {
-            p = D_8009C330;
+            p = PLAYER_EXT;
             if (p->w0e > 0) {
                 o->wb2--;
                 playerSetAnimPairB(o);
@@ -132,15 +132,15 @@ void playerStep24Area9(TObj *o)
             o->y.p.whole = o->w76 + 0xc;
             o->state++;
         }
-        if (D_8009C330->b09 == 0) break;
+        if (PLAYER_EXT->b09 == 0) break;
         playerStep24PlaceOnCircle(o, s2, s1);
         if (((unsigned short*)&GV6.s70)[0] & SPAD.s3c6) {
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
         if (((unsigned short*)&GV6.s70)[0] & 0x10) {
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             ADJ4();
             RELEASE(4);
             o->step = 0x27;
@@ -149,7 +149,7 @@ void playerStep24Area9(TObj *o)
         if (*(volatile unsigned short *)((unsigned short*)&GV6.s70) & 0x40) {
             ADJ4();
             RELEASE(8);
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             o->b9e = 6;
             o->step = 0xd;
             o->state = 0;
@@ -157,16 +157,16 @@ void playerStep24Area9(TObj *o)
         }
         break;
     case 3:
-        o->h->p.whole += D_8009F0EC->velX;
-        o->y.p.whole += D_8009F0EC->velY;
+        o->h->p.whole += GRABBED_OBJECT->velX;
+        o->y.p.whole += GRABBED_OBJECT->velY;
         AnimAdvance(o);
         if (((unsigned short*)&GV6.s70)[0] & SPAD.s3c6) {
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
         if (((unsigned short*)&GV6.s70)[0] & 0x10) {
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             o->step = 0x27;
             o->state = 0;
         }
@@ -174,7 +174,7 @@ void playerStep24Area9(TObj *o)
             o->y.p.whole += 9;
             ADJ4();
             RELEASE(8);
-            D_8009C330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             o->b9e = 6;
             o->step = 0x25;
             o->state = 0;

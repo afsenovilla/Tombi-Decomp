@@ -17,7 +17,7 @@ typedef struct {
 typedef struct { short vx, vy, vz, pad; } SVec;
 extern long D_1F8000C0[];
 extern char *D_1F800164;
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 typedef struct { char pad[0x10]; unsigned long ot[1]; } OTS;
 typedef struct { unsigned long v; } UL;
 extern OTS *D_1F8001E0;
@@ -93,12 +93,12 @@ void topdownDrawObjectSprite(TObj *o)
             p->y2 = p->y0 + f[5];
             p->x3 = p->x1;
             p->y3 = p->y2;
-            if (D_8009C960[0] == 0x13 && o->subtype == 6) p->code &= 0xFD;
+            if (GAME[0] == 0x13 && o->subtype == 6) p->code &= 0xFD;
             p->tpage = o->w1e + *(unsigned short *)f;
             if (o->b0d != 0) p->clut = o->w08;
             break;
         case 3:
-            if (D_8009C960[0] == 0x12 && (o->animFrame & 1)) {
+            if (GAME[0] == 0x12 && (o->animFrame & 1)) {
                 p->x0 = *sxy - (signed char)f[8];
                 p->y0 = (signed char)f[9] + (*sxy >> 16);
                 p->x1 = p->x0 - f[4];
@@ -116,7 +116,7 @@ void topdownDrawObjectSprite(TObj *o)
             p->y3 = p->y2;
             p->tpage = o->w1e + *(unsigned short *)f;
             p->clut = o->w08;
-            if (D_8009C960[0] == 0x13) {
+            if (GAME[0] == 0x13) {
                 if (o->b0c != 0) {
                     p->r0 = 0x10;
                     p->g0 = 0x10;

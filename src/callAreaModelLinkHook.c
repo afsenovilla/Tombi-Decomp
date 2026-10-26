@@ -1,6 +1,6 @@
 // FUNC 8002af10 264 MAIN0
 // MATCHING 8002af10 264
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern unsigned char DAT_800b0d9b;
 extern unsigned char DAT_800b0d99;
@@ -13,7 +13,7 @@ void callAreaModelLinkHook(void)
 {
     unsigned short v, x;
     DAT_800b0d9b = 0;
-    switch (DAT_8009c960) {
+    switch (GAME) {
     case 0:
         break;
     case 0xd:
@@ -40,6 +40,6 @@ void callAreaModelLinkHook(void)
     case 5: case 8: case 0xb: case 0x10: case 0x11: case 0x13:
         return;
     }
-    PTR_DAT_80079b3c[DAT_8009c960](DAT_800b0d98, WMD_DATA);
+    PTR_DAT_80079b3c[GAME](DAT_800b0d98, WMD_DATA);
     DAT_800b0d99 = DAT_8009cda2;
 }

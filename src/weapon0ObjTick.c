@@ -2,8 +2,8 @@
 // MATCHING 80033040 328
 #include "plx.h"
 #include "TOBJ.H"
-extern unsigned char *D_8009C338;
-extern unsigned char *D_8009C330;
+extern unsigned char *WEAPON_STATE;
+extern unsigned char *PLAYER_EXT;
 extern signed char D_800A611B;
 extern void weapon0Init(TObj *);
 extern void ObjCullRegister(TObj *);
@@ -33,8 +33,8 @@ void weapon0ObjTick(TObj *o)
         }
         break;
     case 2:
-        D_8009C338[0xc] = 0;
-        *D_8009C330 = 0;
+        WEAPON_STATE[0xc] = 0;
+        *PLAYER_EXT = 0;
         if (--D_800A611B < 0)
             D_800A611B = 0;
         o->b04 = 3;

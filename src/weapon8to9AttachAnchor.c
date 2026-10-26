@@ -3,7 +3,7 @@
 #include "plx.h"
 #include "gvars.h"
 #include "player.h"
-extern unsigned char *D_8009C338;
+extern unsigned char *WEAPON_STATE;
 void playSFX(int id);
 int abs(int);
 int csqrt(int x);
@@ -12,7 +12,7 @@ void weapon8to9AttachAnchor(unsigned char *o)
 {
     int dx, dy, d, n;
 
-    D_8009C338[0xd] = 0;
+    WEAPON_STATE[0xd] = 0;
     playSFX(0x26);
     PLX.b6100 = 1;
     PLAYER.obj.d30 = *(short *)(*(unsigned char **)(o + 0x40) + 2);

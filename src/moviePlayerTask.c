@@ -1,7 +1,7 @@
 // FUNC 8001d6a4 820 MAIN0
 // MATCHING 8001d6a4 820
 // PAL moviePlayerTask (psx_tomba movie.c name); PAL adds the 0x800000 timeout loop and DecDCTinSync.
-// The &D_8009BCA8 / &f34 temps are compiler-hoisted invariants: no pointer locals (loop.c does not hoist user
+// The &MOVIE_DEC_ENV / &f34 temps are compiler-hoisted invariants: no pointer locals (loop.c does not hoist user
 // variables set after a branch and used across basic blocks); volatile f34 accesses give the second temp.
 #include "spad.h"
 #include "globals.h"
@@ -21,7 +21,7 @@ typedef struct {
 } M;
 typedef struct { char p[0x48]; unsigned short w48; char p2[0x1e]; unsigned char b68; } T;
 typedef struct { char d[8]; } E8;
-extern M D_8009BCA8;
+extern M MOVIE_DEC_ENV;
 extern volatile int D_8009BCDC;
 extern unsigned char D_1F8001D3;
 extern T *TASK_C;
@@ -58,32 +58,32 @@ void moviePlayerTask(void)
         }
         switch (TASK_C->w48) {
         case 0:
-            movieInitDecodeEnv(&D_8009BCA8, 0x180, 0x110, 0x2c0, 0x110);
+            movieInitDecodeEnv(&MOVIE_DEC_ENV, 0x180, 0x110, 0x2c0, 0x110);
             startMovieStream(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[SPAD.b1cd]]]);
             TASK_C->w48++;
-            while (MovieDecodeFrame(&D_8009BCA8) == -1)
+            while (MovieDecodeFrame(&MOVIE_DEC_ENV) == -1)
                 ;
         case 1:
             SPAD.b1cc = 2;
             TASK_C->w48 = 2;
         case 2:
-            DecDCTin(D_8009BCA8.in[D_8009BCA8.idx], 2);
+            DecDCTin(MOVIE_DEC_ENV.in[MOVIE_DEC_ENV.idx], 2);
             k = D_1F8001F4;
-            D_8009BCA8.f28 = k;
-            D_8009BCA8.w2c = D_8009BCA8.ent[k].w;
-            D_8009BCA8.w2e = D_8009BCA8.ent[k].h;
-            DecDCTout(D_8009BCA8.out[D_8009BCA8.oidx], D_8009BCA8.w30 * D_8009BCA8.w32 / 2);
-            while (MovieDecodeFrame(&D_8009BCA8) == -1)
+            MOVIE_DEC_ENV.f28 = k;
+            MOVIE_DEC_ENV.w2c = MOVIE_DEC_ENV.ent[k].w;
+            MOVIE_DEC_ENV.w2e = MOVIE_DEC_ENV.ent[k].h;
+            DecDCTout(MOVIE_DEC_ENV.out[MOVIE_DEC_ENV.oidx], MOVIE_DEC_ENV.w30 * MOVIE_DEC_ENV.w32 / 2);
+            while (MovieDecodeFrame(&MOVIE_DEC_ENV) == -1)
                 ;
-            if (*(volatile int *)&D_8009BCA8.f34 == 0) {
+            if (*(volatile int *)&MOVIE_DEC_ENV.f34 == 0) {
                 cnt = 0x800000;
                 do {
                     cnt--;
                     if (cnt == 0) {
-                        *(volatile int *)&D_8009BCA8.f34 = 1;
-                        D_8009BCA8.f28 = D_1F8001F4;
-                        D_8009BCA8.w2c = D_8009BCA8.ent[D_1F8001F4].w;
-                        D_8009BCA8.w2e = D_8009BCA8.ent[D_1F8001F4].h;
+                        *(volatile int *)&MOVIE_DEC_ENV.f34 = 1;
+                        MOVIE_DEC_ENV.f28 = D_1F8001F4;
+                        MOVIE_DEC_ENV.w2c = MOVIE_DEC_ENV.ent[D_1F8001F4].w;
+                        MOVIE_DEC_ENV.w2e = MOVIE_DEC_ENV.ent[D_1F8001F4].h;
                     }
                 } while (D_8009BCDC == 0);
             }

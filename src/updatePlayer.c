@@ -10,7 +10,7 @@
 #include "player.h"
 typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
-extern G330 *D_8009C330;
+extern G330 *PLAYER_EXT;
 extern AnimTbl D_800E8404;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
@@ -43,9 +43,9 @@ extern void FUN_8001fe94(TObj *, int);
         o->state = 2; \
         o->substep = 0; \
         o->timer = 0x78; \
-        D_8009C330->w2c = 0x2f; \
+        PLAYER_EXT->w2c = 0x2f; \
         *(AnimTbl *)tp = D_800E8404; \
-        o->anim = tp[D_8009C330->w2c]; \
+        o->anim = tp[PLAYER_EXT->w2c]; \
         FUN_8001fe94(o, 1); \
     }
 

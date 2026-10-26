@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern int AnimAdvance(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
 extern short FUN_80040278(TObj *, short, short);
@@ -32,7 +32,7 @@ void leafButterflyFlutter(TObj *o)
     case 1:
         AnimAdvance(o);
         o->h->raw += o->velH << 8;
-        o->y.raw = o->y.raw + ((D_8007A3F0[o->d84] * o->velH) >> 4) - 0x8000;
+        o->y.raw = o->y.raw + ((NEG_SIN_TABLE[o->d84] * o->velH) >> 4) - 0x8000;
         o->d84 = (o->d84 + 2) & 0xff;
         probeWallAt(o, o->h->p.whole, o->y.p.whole + 0x10, o->animFrame);
         FUN_80040278(o, o->h->p.whole, o->y.p.whole + 8);

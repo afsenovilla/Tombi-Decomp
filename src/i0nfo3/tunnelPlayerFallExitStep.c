@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern void func_8001FEC0(TObj *o);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern signed char D_8009C975[];
 
 void tunnelPlayerFallExitStep(TObj *o)
@@ -13,7 +13,7 @@ void tunnelPlayerFallExitStep(TObj *o)
     switch (o->state) {
     case 0:
         o->active = 4;
-        D_8009C330->timer = 0;
+        PLAYER_EXT->timer = 0;
         o->d8c = 0;
         S16(o, 0xE0) = 0;
         o->timer = 0x1E;

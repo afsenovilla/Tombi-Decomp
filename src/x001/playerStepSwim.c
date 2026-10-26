@@ -9,10 +9,10 @@ typedef struct {
     unsigned short w2c;
     unsigned short w2e;
 } G330;
-extern G330 *DAT_8009c330;
+extern G330 *PLAYER_EXT;
 extern unsigned char DAT_8009ce3d;
 extern unsigned char DAT_8009cffb;
-extern unsigned short DAT_8009c960, DAT_8009c962;
+extern unsigned short GAME, DAT_8009c962;
 extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
 extern void playerSwimDirFromPadB(TObj *);
@@ -39,7 +39,7 @@ void playerStepSwim(TObj *o)
         U8(o, 0xc3) = 0;
         o->d8c = 0;
         o->wb0 = 0;
-        DAT_8009c330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         U8(o, 0xca) = 1;
         o->timer = 10;
         playerReleaseBittenAndClearFlags(o);
@@ -61,8 +61,8 @@ void playerStepSwim(TObj *o)
         return;
     }
     if (FUN_8001fec0(o)) {
-        DAT_8009c330->w2c = 0x47;
-        if (DAT_8009c330->w2e != 0x47)
+        PLAYER_EXT->w2c = 0x47;
+        if (PLAYER_EXT->w2e != 0x47)
             FUN_800eeb5c(o, 0x47);
     }
     switch (o->w76 & 7) {
@@ -100,8 +100,8 @@ void playerStepSwim(TObj *o)
     else
         o->wb2 -= 8;
     if (D_1f8001fc & D_1f8003c4) {
-        DAT_8009c330->w2c = 0x43;
-        if (DAT_8009c330->w2e != 0x43) {
+        PLAYER_EXT->w2c = 0x43;
+        if (PLAYER_EXT->w2e != 0x43) {
             FUN_800eeb5c(o, 0x43);
             o->wb2 = 0x400;
         }
@@ -113,7 +113,7 @@ void playerStepSwim(TObj *o)
     if (w + 0x10 < o->y.p.whole) {
         if (DAT_8009ce3d == 0xff || DAT_8009cffb) {
             flag = 0;
-            if (DAT_8009c960 == 10 && (DAT_8009c962 == 1 || DAT_8009c962 == 5)) {
+            if (GAME == 10 && (DAT_8009c962 == 1 || DAT_8009c962 == 5)) {
                 o->y.p.whole = w + 0x10;
                 flag = 1;
             }
@@ -129,7 +129,7 @@ void playerStepSwim(TObj *o)
     if (D_1f8001fc & D_1f8003c6) {
         U8(o, 0xca) = 0;
         flag = 0;
-        if ((*(volatile unsigned short *)&PAD_PRESSED & 0x10) && DAT_8009c960 == 10
+        if ((*(volatile unsigned short *)&PAD_PRESSED & 0x10) && GAME == 10
             && (DAT_8009c962 == 1 || DAT_8009c962 == 5) && o->d->p.whole == 0 && o->y.p.whole < -0xe3) {
             h = o->h->p.whole;
             if ((unsigned short)(h - 0x1cd) < 0x20)
@@ -142,7 +142,7 @@ void playerStepSwim(TObj *o)
             o->step = 0x11;
         } else {
             playerSetAnim(o, 4, 0);
-            DAT_8009c330->w2e = 0xff;
+            PLAYER_EXT->w2e = 0xff;
             o->step = 0x43;
         }
         o->state = 0;

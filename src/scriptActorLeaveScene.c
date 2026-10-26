@@ -11,7 +11,7 @@
 
 typedef struct { short s[6]; } P6;
 extern int D_8009C960_w;
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
@@ -51,7 +51,7 @@ void scriptActorLeaveScene(TObj *o)
         ((unsigned char*)&PLAYER.obj.b04)[0] = 6;
         ((unsigned char*)&PLAYER.obj.b04)[1] = 5;
         ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
-        D_8009C330[9] = 10;
+        PLAYER_EXT[9] = 10;
         PLAYER.obj.wb2 = 0;
         PLAYER.obj.velH = 0;
         PLAYER.obj.velV = 0;
@@ -95,7 +95,7 @@ void scriptActorLeaveScene(TObj *o)
 
 typedef struct { short s[6]; } P6;
 extern int D_8009C960_w;
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern void *SCRIPT_OBJECTS[];
 int showMessageBoxDirectTimed(int a, int b, P6 *p, int c);
 void TileCollideAt(TObj *o, short x, short y);
@@ -137,7 +137,7 @@ void scriptActorLeaveScene(TObj *o)
         ((unsigned char*)&PLAYER.obj.b04)[0] = 6;
         ((unsigned char*)&PLAYER.obj.b04)[1] = 5;
         ((unsigned char*)&PLAYER.obj.b04)[2] = 0;
-        D_8009C330[9] = 10;
+        PLAYER_EXT[9] = 10;
         if (D_8009C960_w == 0x10002) {
             (*(short*)&PLAYER.obj.animFrame) = 1;
             PLAYER.obj.velX = 0xc0;

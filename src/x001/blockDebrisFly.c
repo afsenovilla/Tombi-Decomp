@@ -3,8 +3,8 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern short D_8007A3F0[];
-extern short D_8007A5F0[];
+extern short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
 extern int ObjCullRegister(TObj *);
 
 void blockDebrisFly(TObj *o)
@@ -13,10 +13,10 @@ void blockDebrisFly(TObj *o)
     int amp;
 
     n = o->d88;
-    amp = D_8007A5F0[n];
+    amp = COS_TABLE[n];
     o->d88 = n + 1;
-    o->h->raw += (D_8007A5F0[o->d84] * ((short)amp >> 3)) >> 4;
-    o->y.raw += (D_8007A3F0[o->d84] * ((short)amp >> 3)) >> 4;
+    o->h->raw += (COS_TABLE[o->d84] * ((short)amp >> 3)) >> 4;
+    o->y.raw += (NEG_SIN_TABLE[o->d84] * ((short)amp >> 3)) >> 4;
     if (o->timer < 0x1e) {
         if ((SPAD.s1f8 + SPAD.i198) & 1) {
             ObjCullRegister(o);

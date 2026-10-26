@@ -2,7 +2,7 @@
 // MATCHING 80113034 900
 #include "gcd.h"
 #include "TOBJ.H"
-extern int D_8009C960[];
+extern int GAME[];
 extern unsigned short D_8009C960h;
 extern void **D_80115A08[];
 extern void **D_80115948[];
@@ -54,7 +54,7 @@ void treasureChestOpenLockedStatic(TObj *o)
             o->step = 3;
             o->timer = 10;
             o->wac = 1;
-            if (D_8009C960[0] == 0x30009)
+            if (GAME[0] == 0x30009)
                 o->anim = D_80115A08[o->b0c & 0x7f][1];
             else
                 o->anim = D_80115948[D_8009C960h * 4 + (o->b0c & 0x7f)][1];

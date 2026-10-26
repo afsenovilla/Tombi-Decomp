@@ -23,7 +23,7 @@ extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8
 extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
-extern unsigned short D_8009F838;
+extern unsigned short AREA_VARIANT;
 extern char D_80077968[];
 extern char D_80077974[];
 extern char D_80077980[];
@@ -147,7 +147,7 @@ void inventoryScreenHandler(void)
         D_8009E377[0] = D_8009BCA0;
         D_8009F086[0] = D_8009BC9C;
         D_8009F087[0] = D_8009BCA0;
-        n = D_80077A8C[GAME.selectedArea + D_8009F838][GAME.selectedSection];
+        n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
     play:
         queueSystemLoadList(n, 1);
     next:

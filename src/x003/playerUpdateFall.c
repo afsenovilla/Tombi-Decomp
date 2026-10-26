@@ -2,7 +2,7 @@
 // MATCHING 800f2724 380
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern short DAT_1f800238;
 extern unsigned short DAT_1f8001f8;
 extern XY DAT_801151e0[];
@@ -17,7 +17,7 @@ extern void FUN_8001fd94(TObj *);
 
 void playerUpdateFall(TObj *o)
 {
-    TObj *p = DAT_8009c330;
+    TObj *p = PLAYER_EXT;
     TObj *q;
     short x, y, z;
     XY *t;
@@ -26,7 +26,7 @@ void playerUpdateFall(TObj *o)
         p->animTimer = 4;
         FUN_800efc04(o, p);
         FUN_8001fe94(o, 0);
-        DAT_8009c330->animFrame = DAT_8009c330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
     if (o->ba7 != 0) {
         x = o->a.p.whole;

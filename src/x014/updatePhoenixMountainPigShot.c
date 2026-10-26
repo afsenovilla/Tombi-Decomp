@@ -10,7 +10,7 @@
 extern TObj PLAYER;
 extern void *D_80129F9C[];
 
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
@@ -102,7 +102,7 @@ void updatePhoenixMountainPigShot(TObj *o)
             {
                 int v = o->velH;
                 int i = ((unsigned short)o->wb4 << 4) & 0xf0;
-                short a = (v * D_8007A5F0[i]) >> 12;
+                short a = (v * COS_TABLE[i]) >> 12;
                 short b = (v * D_8007A1F0[i]) >> 12;
                 o->h->raw += a << 8;
                 o->y.raw += b << 8;

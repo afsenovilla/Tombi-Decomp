@@ -1,7 +1,7 @@
 // FUNC 80109920 152 X017
 // MATCHING 80109920 152
 #include "TOBJ.H"
-extern char *DAT_8009c330;
+extern char *PLAYER_EXT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -12,7 +12,7 @@ void playerStepForcedHold(TObj *o)
     case 0:
         o->d8c = 0;
         o->wb0 = 0;
-        DAT_8009c330[8] = 0;
+        PLAYER_EXT[8] = 0;
         o->b69 = 0;
         o->velY = 0;
         o->velV = 0;

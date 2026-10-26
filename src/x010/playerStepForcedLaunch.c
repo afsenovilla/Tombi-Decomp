@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b8; unsigned char b9; char q[0x20 - 0xa]; unsigned short w20; char r[0x2c - 0x22]; short w2c; short w2e; } G;
-extern G *D_8009C330;
+extern G *PLAYER_EXT;
 extern TObj *D_800A611C[];
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
@@ -30,8 +30,8 @@ void playerStepForcedLaunch(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330->b8 = 0;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w20 = 0;
         switch (D_800A611C[0]->type) {
         case 0x15:
         case 0x18:
@@ -46,18 +46,18 @@ void playerStepForcedLaunch(TObj *o)
         PlayerSetAnimIfChanged(o, 0x2e);
         o->state = 1;
     case 1:
-        if (--D_8009C330->b9 != 0) {
-            if (D_8009C330->b8 == 0) {
-                D_8009C330->w20++;
+        if (--PLAYER_EXT->b9 != 0) {
+            if (PLAYER_EXT->b8 == 0) {
+                PLAYER_EXT->w20++;
                 playerSetJumpRiseVelocity(o);
             }
         } else {
-            D_8009C330->b8 = 1;
-            if (D_8009C330->w20 >= 5) {
-                D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 1;
+            if (PLAYER_EXT->w20 >= 5) {
+                PLAYER_EXT->b8 = 0;
                 o->state = 2;
             } else {
-                D_8009C330->w20++;
+                PLAYER_EXT->w20++;
                 playerSetJumpRiseVelocity(o);
             }
         }
@@ -92,16 +92,16 @@ void playerStepForcedLaunch(TObj *o)
         ObjAddVelY7E(o);
         AnimAdvance(o);
         if (o->b69 == 1 || ObjTileCollide(o, 0, 0)) {
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->b9c = 0;
             *(unsigned char *)&o->wac = 0;
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            D_8009C330->w20 = 0;
-            D_8009C330->w2c = 0;
-            D_8009C330->w2e = 0;
+            PLAYER_EXT->w20 = 0;
+            PLAYER_EXT->w2c = 0;
+            PLAYER_EXT->w2e = 0;
             o->anim = D_80010748;
             AnimLoadDuration(o);
             o->d8c = D_801152E8[o->wb0];

@@ -11,7 +11,7 @@ typedef struct { short x, y; } P;
 extern TObj PLAYER;
 extern Fix16 *D_800A6078, *D_800A607C;
 extern short D_800A604E;
-extern TObj *D_8009D2E8;
+extern TObj *BITTEN_OBJECT;
 typedef struct {
     unsigned char b0, p1[5], b6, b7, b8, p9[0x22 - 9];
     unsigned short w22;
@@ -25,12 +25,12 @@ typedef struct {
     unsigned char p10[0x20];
     short w30, w32, w34, w36;
 } S338;
-extern S330 *D_8009C330;
-extern S338 *D_8009C338;
-extern unsigned char *D_8009F0EC;
+extern S330 *PLAYER_EXT;
+extern S338 *WEAPON_STATE;
+extern unsigned char *GRABBED_OBJECT;
 extern short D_8009D600[], D_8009D602[], D_8009D604[];
 extern short D_8007A072[];
-extern short D_8007A04C[];
+extern short WEAPON_HEAD_OFFSETS[];
 extern unsigned char D_8009D2B2;
 extern unsigned short D_1F8001F8;
 extern short MulCos(int, short);
@@ -66,27 +66,27 @@ void weapon8to9Swing(TObj *o)
     int x;
     unsigned short u;
 
-    D_8009C330->w2e = 0xffff;
+    PLAYER_EXT->w2e = 0xffff;
     switch (o->state) {
     case 0:
         o->animFrame = G.animFrame;
         G.b9d = 1;
-        D_8009C330->b7 = o->animFrame;
+        PLAYER_EXT->b7 = o->animFrame;
         u = TB(2);
         o->active = 2;
         o->b0a = 0;
         o->waa = u;
-        D_8009C338->bc = 0;
-        D_8009C330->w22 = 0;
+        WEAPON_STATE->bc = 0;
+        PLAYER_EXT->w22 = 0;
         D_8009D602[0] = 0;
-        D_8009C338->w30 = 1;
-        D_8009C338->w32 = 0;
-        D_8009C338->w34 = 0;
-        D_8009C338->w36 = 0;
+        WEAPON_STATE->w30 = 1;
+        WEAPON_STATE->w32 = 0;
+        WEAPON_STATE->w34 = 0;
+        WEAPON_STATE->w36 = 0;
         o->wa8 = 0;
         if (G.b9e == 4 || G.b9e == 7) {
-            o->d94 = (int)D_8009F0EC;
-            *D_8009F0EC = 2;
+            o->d94 = (int)GRABBED_OBJECT;
+            *GRABBED_OBJECT = 2;
         }
         i = o->step * 6;
         switch (o->animFrame) {
@@ -99,9 +99,9 @@ void weapon8to9Swing(TObj *o)
             i += 4;
             break;
         }
-        if (o->animFrame & 1) va = 0xa0 - D_8007A04C[i];
-        else va = D_8007A04C[i] - 0x20;
-        vb = D_8007A04C[i + 1];
+        if (o->animFrame & 1) va = 0xa0 - WEAPON_HEAD_OFFSETS[i];
+        else va = WEAPON_HEAD_OFFSETS[i] - 0x20;
+        vb = WEAPON_HEAD_OFFSETS[i + 1];
         if (o->animFrame >= 6) {
             x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
@@ -118,8 +118,8 @@ void weapon8to9Swing(TObj *o)
         o->box2 = 6;
         o->box1 = 0xc;
         o->box3 = 0xc;
-        D_8009C338->bd = 0;
-        switch (D_8009C330->b0) {
+        WEAPON_STATE->bd = 0;
+        switch (PLAYER_EXT->b0) {
         case 2:
             o->wa8 = 0x1c00;
             SfxPlay2(3, 2);
@@ -141,8 +141,8 @@ void weapon8to9Swing(TObj *o)
         }
         o->velH = MulCos(o->waa, o->wa8);
         o->velV = MulNegSinScaled(o->waa, o->wa8);
-        D_8009C330->w28 = 0xffff;
-        D_8009C330->w2a = 0xffff;
+        PLAYER_EXT->w28 = 0xffff;
+        PLAYER_EXT->w2a = 0xffff;
         weaponSetPlayerAnimA(o);
         AnimJump(&G, 0);
         o->waa += 0x80;
@@ -163,9 +163,9 @@ void weapon8to9Swing(TObj *o)
             i += 4;
             break;
         }
-        if (o->animFrame & 1) va = 0xa0 - D_8007A04C[i];
-        else va = D_8007A04C[i] - 0x20;
-        vb = D_8007A04C[i + 1];
+        if (o->animFrame & 1) va = 0xa0 - WEAPON_HEAD_OFFSETS[i];
+        else va = WEAPON_HEAD_OFFSETS[i] - 0x20;
+        vb = WEAPON_HEAD_OFFSETS[i + 1];
         if (o->animFrame >= 6) {
             x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
@@ -183,7 +183,7 @@ void weapon8to9Swing(TObj *o)
                 weaponSetPlayerAnimB(o);
                 AnimJump(&G, 0);
                 o->waa = TK(2);
-                D_8009C338->bc = 1;
+                WEAPON_STATE->bc = 1;
                 G.d8c = 0;
                 o->b69 = 0;
                 o->timer = 1;
@@ -194,7 +194,7 @@ void weapon8to9Swing(TObj *o)
                 weaponSetPlayerAnimB(o);
                 AnimJump(&G, 0);
                 o->waa = TK(2);
-                D_8009C338->bc = 1;
+                WEAPON_STATE->bc = 1;
                 G.d8c = 0;
                 o->b69 = 0;
                 o->timer = 1;
@@ -211,10 +211,10 @@ void weapon8to9Swing(TObj *o)
             }
         }
     case 3:
-        D_8009C338->w30 += o->wa8 >> 8;
-        if (D_8009C338->w30 > 0x60 - D_8009C330->b0 * 16) D_8009C338->w30 = 0x60 - (D_8009C330->b0 << 4);
-        D_8009C338->w32 -= (o->wa8 >> 8) * 2;
-        if (D_8009C338->w32 < 0) D_8009C338->w32 = 0;
+        WEAPON_STATE->w30 += o->wa8 >> 8;
+        if (WEAPON_STATE->w30 > 0x60 - PLAYER_EXT->b0 * 16) WEAPON_STATE->w30 = 0x60 - (PLAYER_EXT->b0 << 4);
+        WEAPON_STATE->w32 -= (o->wa8 >> 8) * 2;
+        if (WEAPON_STATE->w32 < 0) WEAPON_STATE->w32 = 0;
         o->wa8 -= 0x280;
         o->velH = MulCos(o->waa, o->wa8);
         o->velV = MulNegSinScaled(o->waa, o->wa8);
@@ -225,9 +225,9 @@ void weapon8to9Swing(TObj *o)
                 o->waa = TB(2);
                 o->velX = o->h->p.whole + MulCos(((unsigned short)o->waa + 0x80) & 0xff, 0x18);
                 o->velY = o->y.p.whole + MulNegSinScaled(((unsigned short)o->waa + 0x80) & 0xff, 0x18);
-                D_8009C338->w32 = 0;
-                U8(D_8009C338, 0xc) = 2;
-                D_8009C338->we = 0;
+                WEAPON_STATE->w32 = 0;
+                U8(WEAPON_STATE, 0xc) = 2;
+                WEAPON_STATE->we = 0;
                 if (o->visible) {
                     spawnWeaponPoolType12Object(o, (short)(o->a.p.whole + ((o->animFrame & 1) ? -0x10 : 0x10)), o->y.p.whole, o->b.p.whole);
                 }
@@ -236,30 +236,30 @@ void weapon8to9Swing(TObj *o)
         }
         break;
     case 4:
-        D_8009C338->w30 -= (o->wa8 >> 8) * 2;
-        if (D_8009C338->w30 < 0) D_8009C338->w30 = 0;
-        o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + (unsigned short)D_8009C338->we) & 0xff, 0x18);
-        o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + (unsigned short)D_8009C338->we) & 0xff, 0x18);
-        D_8009C338->we += TB(1) >> 1;
+        WEAPON_STATE->w30 -= (o->wa8 >> 8) * 2;
+        if (WEAPON_STATE->w30 < 0) WEAPON_STATE->w30 = 0;
+        o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + (unsigned short)WEAPON_STATE->we) & 0xff, 0x18);
+        o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + (unsigned short)WEAPON_STATE->we) & 0xff, 0x18);
+        WEAPON_STATE->we += TB(1) >> 1;
         G.d8c = 0;
         if (o->animFrame & 1) {
-            D_8009C338->bd = (D_8009C338->we < -0x20) ? 2 : 1;
-            if (D_8009C338->we < -0x40) {
-                o->waa = (o->waa + D_8009C338->we) & 0xff;
-                D_8009C338->bc = 3;
+            WEAPON_STATE->bd = (WEAPON_STATE->we < -0x20) ? 2 : 1;
+            if (WEAPON_STATE->we < -0x40) {
+                o->waa = (o->waa + WEAPON_STATE->we) & 0xff;
+                WEAPON_STATE->bc = 3;
                 weaponSetPlayerAnimC(o);
                 AnimJump(&G, 0);
-                D_8009C338->we = (TB(2) - 0x40) & 0xff;
+                WEAPON_STATE->we = (TB(2) - 0x40) & 0xff;
                 o->state++;
             }
         } else {
-            D_8009C338->bd = (D_8009C338->we > 0x20) ? 2 : 1;
-            if (D_8009C338->we > 0x40) {
-                o->waa = (o->waa + D_8009C338->we) & 0xff;
-                D_8009C338->bc = 3;
+            WEAPON_STATE->bd = (WEAPON_STATE->we > 0x20) ? 2 : 1;
+            if (WEAPON_STATE->we > 0x40) {
+                o->waa = (o->waa + WEAPON_STATE->we) & 0xff;
+                WEAPON_STATE->bc = 3;
                 weaponSetPlayerAnimC(o);
                 AnimJump(&G, 0);
-                D_8009C338->we = (TB(2) + 0x40) & 0xff;
+                WEAPON_STATE->we = (TB(2) + 0x40) & 0xff;
                 o->state++;
             }
         }
@@ -267,17 +267,17 @@ void weapon8to9Swing(TObj *o)
         break;
     case 5:
         if (weapon8to9HitWall(o) == 0) {
-            D_8009C338->bd = 0;
+            WEAPON_STATE->bd = 0;
             o->wa8 = 0x2000;
-            D_8009C338->w30 += 0x20;
-            if (D_8009C338->w30 > 0x60 - D_8009C330->b0 * 16) D_8009C338->w30 = 0x60 - (D_8009C330->b0 << 4);
-            D_8009C338->w32 -= o->wa8 >> 8;
-            if (D_8009C338->w32 < 0) D_8009C338->w32 = 0;
+            WEAPON_STATE->w30 += 0x20;
+            if (WEAPON_STATE->w30 > 0x60 - PLAYER_EXT->b0 * 16) WEAPON_STATE->w30 = 0x60 - (PLAYER_EXT->b0 << 4);
+            WEAPON_STATE->w32 -= o->wa8 >> 8;
+            if (WEAPON_STATE->w32 < 0) WEAPON_STATE->w32 = 0;
             if (o->animFrame & 1) o->velX = D_800A6078->p.whole + 0x10;
             else o->velX = D_800A6078->p.whole - 0x10;
             o->velY = D_800A604E - 0x10;
-            t.x = o->velX + MulCos(D_8009C338->we, 0xc);
-            t.y = o->velY + MulNegSinScaled(D_8009C338->we, 0xc);
+            t.x = o->velX + MulCos(WEAPON_STATE->we, 0xc);
+            t.y = o->velY + MulNegSinScaled(WEAPON_STATE->we, 0xc);
             s.x = o->h->p.whole;
             s.y = o->y.p.whole;
             o->waa = angleBetweenPoints(s, t);
@@ -287,7 +287,7 @@ void weapon8to9Swing(TObj *o)
             va = t.x - s.x + 0x10;
             vb = t.y - s.y + 0x10;
             if ((unsigned short)va < 0x20 && (unsigned short)vb < 0x20) {
-                if (G.b9e == 4 || G.b9e == 7) *(unsigned char *)o->d94 = D_8009C330->b6;
+                if (G.b9e == 4 || G.b9e == 7) *(unsigned char *)o->d94 = PLAYER_EXT->b6;
                 o->waa = TB(2) + 0x80;
                 if (o->animFrame & 1) {
                     o->velX = D_800A6078->p.whole + 0x10;
@@ -299,13 +299,13 @@ void weapon8to9Swing(TObj *o)
                 o->velY = D_800A604E - 0x10;
                 o->h->p.whole = o->velX + MulCos(o->waa, 0xc);
                 o->y.p.whole = o->velY + MulNegSinScaled(o->waa, 0xc);
-                D_8009C338->w32 = 0;
-                D_8009C338->we = 0;
-                D_8009C338->bc = 0;
+                WEAPON_STATE->w32 = 0;
+                WEAPON_STATE->we = 0;
+                WEAPON_STATE->bc = 0;
                 G.b9d = 0;
                 o->ba5 = 0;
                 if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || *(unsigned char *)&G.wac >= 2 || GVARS.b3f) {
-                    D_8009C330->b0 = 0;
+                    PLAYER_EXT->b0 = 0;
                     o->b04 = 2;
                     o->step = 0;
                     o->state = 0;
@@ -326,7 +326,7 @@ void weapon8to9Swing(TObj *o)
             startPadVibration(0, 0, 0xc0, 2);
             playSFX(3);
         }
-        AnimJump(&G, (D_8009C330->w22 >> 2) & 3);
+        AnimJump(&G, (PLAYER_EXT->w22 >> 2) & 3);
         k = o->animFrame + o->animFrame * 2;
         D_8009D600[0] = 10;
         D_8009D602[0] = 2;
@@ -347,9 +347,9 @@ void weapon8to9Swing(TObj *o)
             i += 4;
             break;
         }
-        if (o->animFrame & 1) va = 0x80 - D_8007A04C[i];
-        else va = D_8007A04C[i];
-        vb = D_8007A04C[i + 1];
+        if (o->animFrame & 1) va = 0x80 - WEAPON_HEAD_OFFSETS[i];
+        else va = WEAPON_HEAD_OFFSETS[i];
+        vb = WEAPON_HEAD_OFFSETS[i + 1];
         o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
         o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         weaponCalcBentOffset(D_8009D600, o->waa, &va, &vb);
@@ -357,14 +357,14 @@ void weapon8to9Swing(TObj *o)
         o->y.p.whole = o->velY + vb;
         if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {
             G.b9d = 1;
-            D_8009C330->b0 = 2;
-            D_8009C330->w22 = 0;
+            PLAYER_EXT->b0 = 2;
+            PLAYER_EXT->w22 = 0;
             o->state = 0;
         } else {
-            D_8009C330->w22++;
+            PLAYER_EXT->w22++;
         }
-        if (D_8009C330->w22 >= 0x3d) {
-            D_8009C330->w22 = 0;
+        if (PLAYER_EXT->w22 >= 0x3d) {
+            PLAYER_EXT->w22 = 0;
             o->state++;
         }
         break;
@@ -376,7 +376,7 @@ void weapon8to9Swing(TObj *o)
             startPadVibration(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }
-        AnimJump(&G, (D_8009C330->w22 / 3) & 3);
+        AnimJump(&G, (PLAYER_EXT->w22 / 3) & 3);
         o->animFrame = G.animFrame;
         k = o->animFrame + o->animFrame * 2;
         D_8009D600[0] = 0x10;
@@ -398,41 +398,41 @@ void weapon8to9Swing(TObj *o)
             i += 4;
             break;
         }
-        if (o->animFrame & 1) va = 0x80 - D_8007A04C[i];
-        else va = D_8007A04C[i];
-        vb = D_8007A04C[i + 1];
+        if (o->animFrame & 1) va = 0x80 - WEAPON_HEAD_OFFSETS[i];
+        else va = WEAPON_HEAD_OFFSETS[i];
+        vb = WEAPON_HEAD_OFFSETS[i + 1];
         o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
         o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
         weaponCalcBentOffset(D_8009D600, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
         if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {
-            D_8009C330->b0 = 1;
-            D_8009C330->w22 = 0;
+            PLAYER_EXT->b0 = 1;
+            PLAYER_EXT->w22 = 0;
             G.b9d = 1;
             o->state = 0;
         }
-        D_8009C330->w22++;
+        PLAYER_EXT->w22++;
         break;
     }
     if (*(unsigned char *)&G.wac >= 2) {
-        D_8009D2E8 = (*(TObj **)&PLX.p611c);
-        D_8009C330->b8 = 0;
+        BITTEN_OBJECT = (*(TObj **)&PLX.p611c);
+        PLAYER_EXT->b8 = 0;
         G.step = 0xe;
         GVARS.i34 = 0;
         G.ba5 = 0;
         G.state = 0;
         G.substep = 0;
-        D_8009C330->w2c = 0xd;
-        if (D_8009C330->w2e != 0xd) {
+        PLAYER_EXT->w2c = 0xd;
+        if (PLAYER_EXT->w2e != 0xd) {
             FUN_800efc04(o);
             AnimJump(o, 0);
-            D_8009C330->w2e = D_8009C330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
-        D_8009C330->w2e = 0xffff;
+        PLAYER_EXT->w2e = 0xffff;
         G.b9d = 0;
-        D_8009C338->bc = 0;
-        D_8009C330->b0 = 0;
+        WEAPON_STATE->bc = 0;
+        PLAYER_EXT->b0 = 0;
         o->b04 = 2;
         o->step = 0;
         o->state = 0;

@@ -1,11 +1,11 @@
 // FUNC 800f29dc 84 X017
 // MATCHING 800f29dc 84
 #include "TOBJ.H"
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 void playerEnterRecoilA(TObj *o)
 {
     int v;
-    D_8009C330[8] = 1;
+    PLAYER_EXT[8] = 1;
     v = 0x10;
     o->velY = 0;
     o->velV = 0;

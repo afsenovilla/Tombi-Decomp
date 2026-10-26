@@ -3,8 +3,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *D_8009C330;
-extern TObj *D_8009F0EC;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern short D_801153C0[];
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
@@ -19,13 +19,13 @@ extern void playerTryAttack(TObj *, int);
 
 static __inline__ void setanim(TObj *o, unsigned short anim, int j)
 {
-    TObj *p = D_8009C330;
+    TObj *p = PLAYER_EXT;
     p->animTimer = anim;
     if (p->animFrame != anim) {
         p->animTimer = anim;
         ObjSetAnimFromTable(o);
         AnimJump(o, j);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
 }
 
@@ -36,7 +36,7 @@ static __inline__ void land(TObj *o)
     (*(unsigned char*)&o->wac) = 1;
     o->b9c = 2;
     o->timer = 10;
-    (*(unsigned char*)&D_8009C330->w08) = 1;
+    (*(unsigned char*)&PLAYER_EXT->w08) = 1;
     v = 0x10;
     o->velY = 0;
     o->velV = 0;
@@ -62,13 +62,13 @@ void playerStepSpinRelease(TObj *o)
         o->b69 = 0;
         o->b9c = 1;
         (*(unsigned char*)&o->wac) = 0;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         t = 1;
         o->d8c = 0;
         o->wb0 = 0;
         if (o->wb2 > 8) t = 2;
         p->step = t;
-        k = D_8009C330->b0b * 7;
+        k = PLAYER_EXT->b0b * 7;
         if (o->wb2 < 4) {
             if (o->animFrame & 1) {
                 o->velX = -D_801153C0[k + 4] / 3;
@@ -82,7 +82,7 @@ void playerStepSpinRelease(TObj *o)
             o->velX = v;
             o->velY = D_801153C0[k + 10];
         }
-        D_8009C330->timer = 0xe;
+        PLAYER_EXT->timer = 0xe;
         o->wb2 = 0;
         o->wb6 = 0;
         setanim(o, 8, 0);
@@ -102,16 +102,16 @@ void playerStepSpinRelease(TObj *o)
         }
         break;
     }
-    D_8009F0EC = playerProbeGrab(o, 0);
+    GRABBED_OBJECT = playerProbeGrab(o, 0);
     if (o->b9e != 0) {
-        (*(unsigned char*)&D_8009C330->w08) = 0;
-        D_8009C330->timer = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+        PLAYER_EXT->timer = 0;
         (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;
-        playerEnterGrabStep(o, D_8009F0EC == (TObj *)1);
+        playerEnterGrabStep(o, GRABBED_OBJECT == (TObj *)1);
     }
     if ((*(unsigned char*)&o->wac) != 2 && o->step == 9 && o->b9e == 0) {
         playerTryAttack(o, 1);

@@ -10,7 +10,7 @@ extern char D_80077CF4[];
 extern void *D_8013FC74[];
 extern short D_1F80027E;
 extern short D_1F800284;
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern short D_8007A1F0[];
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
@@ -101,7 +101,7 @@ void purpleCrawlerWalk(TObj *o)
             a = t;
             if (o->animFrame) a = t + 0x80;
             a &= 0xff;
-            o->h->raw += (D_8007A5F0[a] * s) >> 4;
+            o->h->raw += (COS_TABLE[a] * s) >> 4;
             o->y.raw += (D_8007A1F0[a] * s) >> 4;
             o->y.p.whole += 2;
             if (chk(o) && p->w6 == 0) {

@@ -6,15 +6,15 @@ extern unsigned char DAT_800a603d;
 extern unsigned char DAT_800a603e;
 extern unsigned char DAT_800a60fe;
 extern int DAT_800a60c4;
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 
 void weapon5to7UpdatePlayerStep(unsigned char *o)
 {
     short flag;
     if (DAT_800a60d6 == 4 || DAT_800a60d6 == 7) {
-        if (((signed char *)DAT_8009c330)[4] == 0) {
+        if (((signed char *)PLAYER_EXT)[4] == 0) {
             DAT_800a60fe = 1;
-            DAT_8009c330[0] = 2;
+            PLAYER_EXT[0] = 2;
             o[5] = 1;
             DAT_800a603d = 0x18;
             DAT_800a603e = 1;
@@ -34,7 +34,7 @@ void weapon5to7UpdatePlayerStep(unsigned char *o)
         if (flag == 0) {
             o[5] = 0;
             DAT_800a60fe = 1;
-            DAT_8009c330[0] = 2;
+            PLAYER_EXT[0] = 2;
             switch (DAT_800a60d4) {
             case 0:
                 DAT_800a603d = 3;
@@ -43,7 +43,7 @@ void weapon5to7UpdatePlayerStep(unsigned char *o)
             case 1:
                 DAT_800a60c4 = 0;
                 DAT_800a603d = 4;
-                if (DAT_8009c330[8] != 0)
+                if (PLAYER_EXT[8] != 0)
                     DAT_800a603e = 2;
                 else
                     DAT_800a603e = 1;

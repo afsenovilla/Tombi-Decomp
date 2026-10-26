@@ -1,7 +1,7 @@
 // FUNC 80104dc8 216 X005
 // MATCHING 80104dc8 216
 #include "TOBJ.H"
-extern TObj *DAT_8009d2e8;
+extern TObj *BITTEN_OBJECT;
 extern void setFacingFromPad(TObj *);
 extern void FUN_8010f0f4(TObj *);
 extern void FUN_8001fd94(TObj *);
@@ -11,7 +11,7 @@ extern int FUN_8003facc(TObj *);
 
 void playerBittenCarryAirStep(TObj *o)
 {
-    TObj *p = DAT_8009d2e8;
+    TObj *p = BITTEN_OBJECT;
 
     p->h->p.whole = o->h->p.whole;
     p->y.p.whole = o->y.p.whole + p->box2;

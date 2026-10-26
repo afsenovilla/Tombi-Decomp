@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 
@@ -25,8 +25,8 @@ int spawnFlowerTowerSproutSparkle(TObj *o)
             n->d->raw = o->d->raw;
             s = ((r & 1) << 11) + 0x800;
             i = r & 0xf0;
-            n->h->raw += (D_8007A5F0[i] * s) >> 4;
-            n->y.raw += (D_8007A3F0[i] * s) >> 4;
+            n->h->raw += (COS_TABLE[i] * s) >> 4;
+            n->y.raw += (NEG_SIN_TABLE[i] * s) >> 4;
         }
         return ++o->timer > 0x59;
     }

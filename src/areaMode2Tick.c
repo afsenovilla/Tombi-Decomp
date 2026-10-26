@@ -5,15 +5,6 @@
 #include "common.h"
 #include "game.h"
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0x10];
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-} unk_800A3940;
-#define MENU_STATE ((unk_800A3940*)D_800A3940)
 
 void areaMode2Tick(void)
 {
@@ -34,7 +25,7 @@ void areaMode2Tick(void)
         D_800A3952 = 6;
         D_800A3954 = 0;
         D_800A3956 = 0;
-        D_800A3940[0] = 0;
+        MENU_STATE.unk0 = 0;
         temp_v1->state2 = 3U;
         (CURRENT_TASK)->step.value = 0U;
         *(short* )0x1F8003B8 = (short)var_a0;

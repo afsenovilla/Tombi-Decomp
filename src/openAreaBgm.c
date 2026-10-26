@@ -10,7 +10,7 @@ extern unsigned char D_800784CA[];
 extern unsigned short VAB_IDS[];
 extern unsigned short BGM_VAB_ID;
 extern void *SEQ_DATA[];
-extern unsigned short D_8009C960;
+extern unsigned short GAME;
 extern unsigned short D_8009C962;
 void SsSeqStop(short a);
 void SsSeqClose(short a);
@@ -38,12 +38,12 @@ int openAreaBgm(int arg)
     BGM_VAB_ID = t;
     BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[AREA_BGM_DEFS], t);
     SsSetMVol(100, 100);
-    p = &D_8009C960;
+    p = &GAME;
     if (D_800784CA[*p * 4] != 0) {
         SsSeqSetVol(BGM_SEQ_ID, 0, 0);
         BGM_FADE_VOLUME = 0;
         w = AREA_BGM_VOLUME[*p];
-        switch (D_8009C960) {
+        switch (GAME) {
         case 0:
         case 2:
             w += 5;
@@ -69,7 +69,7 @@ int openAreaBgm(int arg)
     done:;
     } else {
         v = AREA_BGM_VOLUME[*p];
-        switch (D_8009C960) {
+        switch (GAME) {
         case 0:
         case 2:
             v += 5;
@@ -95,8 +95,8 @@ int openAreaBgm(int arg)
     }
     b = (short)arg;
     if (b < 0) {
-        unsigned char *t = AREA_REVERB_DEPTH[D_8009C960];
-        setReverbMode(AREA_REVERB_MODE[D_8009C960], (short)(t[D_8009C962] << 8));
+        unsigned char *t = AREA_REVERB_DEPTH[GAME];
+        setReverbMode(AREA_REVERB_MODE[GAME], (short)(t[D_8009C962] << 8));
     } else {
         setReverbMode(1, b);
     }

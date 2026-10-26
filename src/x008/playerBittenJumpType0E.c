@@ -2,7 +2,7 @@
 // MATCHING 801064d0 500
 extern void FUN_8001e560(int, int), FUN_800ee680(unsigned char *), FUN_8001fec0(unsigned char *), playerSetFallLean(unsigned char *), FUN_80040278(unsigned char *, int, int);
 extern int FUN_8003facc(unsigned char *);
-extern unsigned char *DAT_8009d2e8;
+extern unsigned char *BITTEN_OBJECT;
 extern short DAT_8009c944, DAT_8009c946;
 extern int DAT_8009c984;
 extern unsigned short PAD_PRESSED;
@@ -12,7 +12,7 @@ void playerBittenJumpType0E(unsigned char *o)
     unsigned char *q;
     switch (o[7]) {
     case 0:
-        q = DAT_8009d2e8;
+        q = BITTEN_OBJECT;
         *(short *)(o + 0x7c) = 0;
         if (q[2] == 0x29)
             q[5] = 3;

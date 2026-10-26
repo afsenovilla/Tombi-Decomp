@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
 extern char D_80010C50[];
 extern char D_80010748[];
@@ -27,7 +27,7 @@ void playerStep27Area9(TObj *o)
         o->d8c = 0;
         PlayerSetAnimIfChanged(o, 9);
         o->wb6 = 0;
-        (*(unsigned short*)&DAT_8009c330->type) = 0;
+        (*(unsigned short*)&PLAYER_EXT->type) = 0;
         o->wb2 = 0;
         o->d30 = o->h->p.whole;
         o->d34 = o->y.p.whole;
@@ -45,8 +45,8 @@ void playerStep27Area9(TObj *o)
             o->velX = v;
             o->state = 2;
         } else {
-            o->h->p.whole = DAT_8009f0ec->velX + o->d30;
-            o->y.p.whole = DAT_8009f0ec->velY + (((unsigned short *)o->anim)[2] + o->d34);
+            o->h->p.whole = GRABBED_OBJECT->velX + o->d30;
+            o->y.p.whole = GRABBED_OBJECT->velY + (((unsigned short *)o->anim)[2] + o->d34);
         }
         break;
     case 2:
@@ -91,10 +91,10 @@ void playerStep27Area9(TObj *o)
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
-        dx = o->h->p.whole - (DAT_8009f0ec->h->p.whole - DAT_8009f0ec->box0);
-        dy = o->y.p.whole - (DAT_8009f0ec->y.p.whole + (DAT_8009f0ec->box3 - DAT_8009f0ec->box2));
-        if (dx < DAT_8009f0ec->box1) {
-            if (o->b69 || func_801215C0(o, dx, dy, DAT_8009f0ec->subtype))
+        dx = o->h->p.whole - (GRABBED_OBJECT->h->p.whole - GRABBED_OBJECT->box0);
+        dy = o->y.p.whole - (GRABBED_OBJECT->y.p.whole + (GRABBED_OBJECT->box3 - GRABBED_OBJECT->box2));
+        if (dx < GRABBED_OBJECT->box1) {
+            if (o->b69 || func_801215C0(o, dx, dy, GRABBED_OBJECT->subtype))
                 FUN_800ee560(o);
         }
         break;
@@ -111,7 +111,7 @@ void playerStep27Area9(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x80;
         if (o->velY > 0x680) o->velY = 0x680;
-        p = DAT_8009f0ec;
+        p = GRABBED_OBJECT;
         dx = o->h->p.whole - (p->h->p.whole - p->box0);
         dy = o->y.p.whole - (p->y.p.whole + (p->box3 - p->box2));
         if (dx < p->box1) {
@@ -133,11 +133,11 @@ void playerStep27Area9(TObj *o)
         }
         break;
     case 5:
-        o->h->p.whole += DAT_8009f0ec->velX;
-        o->y.p.whole += DAT_8009f0ec->velY;
+        o->h->p.whole += GRABBED_OBJECT->velX;
+        o->y.p.whole += GRABBED_OBJECT->velY;
         if (AnimAdvance(o)) {
             *(signed char *)&o->b0f = -8;
-            (*(unsigned short*)&DAT_8009c330->type) = 0;
+            (*(unsigned short*)&PLAYER_EXT->type) = 0;
             o->b9e = 0;
             o->velX = 0;
             o->velY = 0;

@@ -9,7 +9,7 @@ extern AT D_8013117C[];
 extern TObj PLAYER;
 extern unsigned char D_8009CE1B;
 extern unsigned char D_800A60D9;
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern void AnimAdvance(TObj *);
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -200,8 +200,8 @@ void mermaidDivingLesson(TObj *o)
     case 19:
         if (--o->timer <= 0) {
             PLAYER.animFrame = 0;
-            D_8009C330[8] = 0;
-            D_8009C330[9] = 5;
+            PLAYER_EXT[8] = 0;
+            PLAYER_EXT[9] = 5;
             PLAYER.b9c = 1;
             PLAYER.velX = 0x1c0;
             PLAYER.b04 = 6;

@@ -13,7 +13,7 @@ extern char D_8013A8F4[];
 static void *D_8013A6C4[4] = {
     D_8013A89C, D_8013A8A4, D_8013A8E4, D_8013A8F4,
 };
-extern unsigned short D_8007A3F0[];
+extern unsigned short NEG_SIN_TABLE[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void spawnItemNotification(int, int);
@@ -77,7 +77,7 @@ void wingedForkPigGrabbedB(TObj *o)
         break;
     case 5:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         AnimAdvance(o);
         o->animFrame = PLAYER.animFrame & 1;
         applyFrameVelocityX(o);

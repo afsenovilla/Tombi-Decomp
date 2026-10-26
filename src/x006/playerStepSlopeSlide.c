@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern char D_80077D0C[];
 extern unsigned char D_8009D2B0[];
 extern unsigned short D_1F8001F8;
@@ -31,7 +31,7 @@ void playerStepSlopeSlide(TObj *o)
         o->b9d = 0;
         ((unsigned char *)o)[0xc6] = 0;
         ((unsigned char *)o)[0xe3] = 0;
-        D_8009C330[0] = 0;
+        PLAYER_EXT[0] = 0;
         o->movetab = D_80077D0C;
         *(unsigned char *)&o->wac = 0;
         o->b6b = 0;
@@ -39,8 +39,8 @@ void playerStepSlopeSlide(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        D_8009C330[8] = o->bbe & 1;
-        if (D_8009C330[8] == 0) {
+        PLAYER_EXT[8] = o->bbe & 1;
+        if (PLAYER_EXT[8] == 0) {
             if (o->wb2 < -0x144) o->wb2 = -0x144;
         } else {
             if (o->wb2 > 0x144) o->wb2 = 0x144;
@@ -52,7 +52,7 @@ void playerStepSlopeSlide(TObj *o)
         playerSlopeSlideAccelerate(o);
         playerMoveByAngleSpeed(o);
         if (o->bbe == 0) {
-            g = D_8009C330;
+            g = PLAYER_EXT;
             if (g[8] == o->animFrame) goto L;
             g[8] = 0;
             o->b9c = 0;
@@ -92,7 +92,7 @@ void playerStepSlopeSlide(TObj *o)
             o->step = 2;
             o->state = 0;
         }
-        if (*(unsigned short *)(D_8009C330 + 0x2c) < 4) {
+        if (*(unsigned short *)(PLAYER_EXT + 0x2c) < 4) {
             o->d8c = (-o->wb0 << 2) & 0xff;
         }
         if (o->ba4) {
@@ -131,7 +131,7 @@ void playerStepSlopeSlide(TObj *o)
         if (FUN_8003fd78(o, 0, 0)) {
             if (FUN_8001fec0(o)) {
                 o->ba7 = 0;
-                D_8009C330[8] = 0;
+                PLAYER_EXT[8] = 0;
                 o->b9c = 0;
                 o->d88 = 0;
                 b = D_801152E8[o->wb0];

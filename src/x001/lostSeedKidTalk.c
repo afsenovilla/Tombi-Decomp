@@ -8,11 +8,11 @@ extern TObj PLAYER;
 #define P PLAYER
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char D_800A60F8;
 extern unsigned char D_800A603C, D_800A603D, D_800A603E;
 
-/* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw D_8009C330 store */
+/* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw PLAYER_EXT store */
 typedef struct { char pad[0x24]; unsigned short a; } AnimH;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
@@ -64,7 +64,7 @@ void lostSeedKidTalk(TObj *o)
             e->state = 1;
             e->animFrame = e->b6b;
             ((AnimH *)o)->a = 0;
-            *(unsigned short *)((char *)D_8009C330 + 0x2e) = 0xffff;
+            *(unsigned short *)((char *)PLAYER_EXT + 0x2e) = 0xffff;
             GVARS.b3e = 0;
             GVARS.b42 = 0;
             D_800A60F8 = 0;
@@ -78,7 +78,7 @@ void lostSeedKidTalk(TObj *o)
             D_800A603E = 0;
             o->step = 2;
             o->state = 0;
-            D_8009C330->animFrame = 0xffff;
+            PLAYER_EXT->animFrame = 0xffff;
             *f = 2;
             *(unsigned short *)&o->anim = 1;
             D_800A60F8 = 0;
@@ -104,7 +104,7 @@ void lostSeedKidTalk(TObj *o)
             if (e->velY > 0) o->state = 2;
             if (--o->w08 == 0) {
                 D_800A603C = 1;
-                D_8009C330->animFrame = 0xffff;
+                PLAYER_EXT->animFrame = 0xffff;
                 D_800A603D = 0;
                 D_800A603E = 0;
                 e->b69 = 0;
@@ -133,7 +133,7 @@ void lostSeedKidTalk(TObj *o)
             e->velY += 0x30;
             if (--o->w08 == 0) {
                 D_800A603C = 1;
-                D_8009C330->animFrame = 0xffff;
+                PLAYER_EXT->animFrame = 0xffff;
                 D_800A603D = 0;
                 D_800A603E = 0;
                 e->b69 = 0;

@@ -1984,3 +1984,12 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800fdf24 spawnNpcSet11` (was func_800FDF24; I0NFO2) - spawn step of unlayered variant 0x11: allocates the objects of its record lists
 - `800fe848 stepNpcSet11` (was func_800FE848; I0NFO2) - step switch of variant 0x11: items 0x1E / 0x1F used near the AREA19 actor D_8009F2E8 start its message scene (sfx 0x52)
 - `800feb28 updateNpcSet11` (was func_800FEB28; I0NFO2) - unlayered variant 0x11 (MAIN0 D_8007C1C8[0x11]): b04 0 spawnNpcSet11, 1 stepNpcSet11, 3 free
+- Data names by usage (Oct 26 2026, data_names_main0.csv rows with `usage:` source, applied with tools/rename_data.py): PLAYER_EXT
+  (8009C330, pointer to PLAYER+0xF8 set by topdownPlayerInit), BITTEN_OBJECT (8009D2E8), WEAPON_STATE (8009C338), GRABBED_OBJECT
+  (8009F0EC, playerProbeGrab result), GAME (8009C960, the gameConfig the ported sources already used; GAME_A / GAME_B stay as two
+  extern views in areaTransitionHandler.c, one load each), AREA_VARIANT (8009F838), MOVIE_DEC_ENV (8009BCA8), COS_TABLE / NEG_SIN_TABLE
+  (8007A5F0 / 8007A3F0), MENU_STATE (800A45D8, MenuState in game.h replaces the per-file unk_800A3940 macro), SPAWN_TABLES,
+  UI_SPRITE_DEFS, BALLOON_FRAME_UVS, WEAPON_HEAD_OFFSETS, AREA_SECTION_COUNTS, AREA_SCRIPT_CTX, BAIT_OBJECT, INFO_MESSAGE_SLOT.
+  Header alias D_8009C9D8 renamed to PAD_PRESSED. Not named: the fields of PLAYER (800A603C.., 800A6078, 800A60D0..) and of GAME
+  (8009C962 selectedSection, 8009D2B0.., 8009CDA3 inventoryScreen, 8009CD94/96 nextArea/nextSection) that sources reach by
+  their own symbols, and the Psy-Q library globals (libgpu 80090xxx / 8009B1xx, libcd 80096xxx, libetc, libpad).

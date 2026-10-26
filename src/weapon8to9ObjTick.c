@@ -3,8 +3,8 @@
 #include "plx.h"
 #include "TOBJ.H"
 typedef struct { char p[0xc]; unsigned char b; } G338;
-extern G338 *D_8009C338;
-extern unsigned char *D_8009C330;
+extern G338 *WEAPON_STATE;
+extern unsigned char *PLAYER_EXT;
 void weapon8to9Init(TObj *o);
 void ObjCullRegister(TObj *o);
 void weapon8to9Update(TObj *o);
@@ -22,8 +22,8 @@ void weapon8to9ObjTick(TObj *o)
         weapon8to9Update(o);
         break;
     case 2:
-        D_8009C338->b = 0;
-        *D_8009C330 = 0;
+        WEAPON_STATE->b = 0;
+        *PLAYER_EXT = 0;
         if ((signed char)--PLX.b611b < 0) PLX.b611b = 0;
         o->b04 = 3;
         break;

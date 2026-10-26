@@ -1,13 +1,13 @@
 // FUNC 800ee3d4 84 X017
 // MATCHING 800ee3d4 84
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 void playerResetMotionState(unsigned char *o)
 {
-    D_8009C330[8] = 0;
-    D_8009C330[9] = 0;
-    *(short *)(D_8009C330 + 0xc) = 0;
-    *(unsigned short *)(D_8009C330 + 0x28) = 0xffff;
-    *(unsigned short *)(D_8009C330 + 0x2a) = 0xffff;
+    PLAYER_EXT[8] = 0;
+    PLAYER_EXT[9] = 0;
+    *(short *)(PLAYER_EXT + 0xc) = 0;
+    *(unsigned short *)(PLAYER_EXT + 0x28) = 0xffff;
+    *(unsigned short *)(PLAYER_EXT + 0x2a) = 0xffff;
     *(short *)(o + 0x80) = 0;
     *(short *)(o + 0x82) = 0;
     *(short *)(o + 0xb0) = 0;

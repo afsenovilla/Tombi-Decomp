@@ -8,8 +8,8 @@ typedef struct O {
     char p7[0x8c - 0x80]; int a8c; char p7b[0x9c - 0x90]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
     char p9[0xb2 - 0xad]; unsigned short wb2;
 } O;
-extern O *DAT_8009d2e8;
-extern O *DAT_8009c330;
+extern O *BITTEN_OBJECT;
+extern O *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void playerAirAccelerateX(O *);
@@ -34,37 +34,37 @@ void playerBiteHoldType0E(O *o)
         FUN_8001fd94(o);
         flag = 0;
         o->y16 += 8;
-        if (o->y16 + DAT_8009d2e8->s70 >= DAT_8009d2e8->y16) {
-            o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+        if (o->y16 + BITTEN_OBJECT->s70 >= BITTEN_OBJECT->y16) {
+            o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
             flag = 1;
         }
         if (o->vx < 0) {
             o->h->s2 -= 8;
-            if (o->h->s2 <= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 <= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) {
                     playerSetAnim(o, 0xd, 0);
-                    DAT_8009c330->w2e = 0xff;
+                    PLAYER_EXT->w2e = 0xff;
                 }
             }
         } else {
             o->h->s2 += 8;
-            if (o->h->s2 >= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 >= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) {
                     playerSetAnim(o, 0xd, 0);
-                    DAT_8009c330->w2e = 0xff;
+                    PLAYER_EXT->w2e = 0xff;
                 }
             }
         }
-        if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70), 1) || o->s20 > 10) {
+        if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70), 1) || o->s20 > 10) {
             o->s20 = 0;
             FUN_800eeb5c(o, 0xd);
             o->bac = 3;
             o->b9c = 0;
             o->vx = 0;
             o->vy = 0;
-            p = DAT_8009d2e8;
+            p = BITTEN_OBJECT;
             o->h->s2 = p->h->s2;
             o->y16 = p->y16 - p->s70;
             o->a8c = ((unsigned char *)p)[0x8c];
@@ -75,7 +75,7 @@ void playerBiteHoldType0E(O *o)
         pad = &PAD_PRESSED;
         if (*pad & 0x80) o->w2e = 1;
         if (*pad & 0x20) o->w2e = 0;
-        p = DAT_8009d2e8;
+        p = BITTEN_OBJECT;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
         if (D_1f8001fc & D_1f8003c6) {

@@ -10,7 +10,7 @@ typedef struct {
     void **icons;
 } Menu;
 typedef struct { short x, y, dw, idx; } Slot;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern Slot D_8010075C[], D_801007BC[];
 extern void *D_800F5400[];
 extern unsigned short D_8009D2A4;
@@ -29,7 +29,7 @@ extern void subScreenDrawSprite(int n);
 
 void subScreenDrawItemPage(void)
 {
-    Menu *m = &D_800A45D8;
+    Menu *m = &MENU_STATE;
     int pages;
     Slot *s;
     short end;

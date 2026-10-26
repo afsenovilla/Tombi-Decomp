@@ -2,7 +2,7 @@
 // MATCHING 800fb0c0 448
 typedef struct P { char pad0[0xa]; unsigned char b0a; char pad1[0x20 - 0xb]; unsigned short w20, w22; } P;
 extern volatile unsigned short PAD_PRESSED[];
-extern P *DAT_8009c330;
+extern P *PLAYER_EXT;
 extern int FUN_8003facc(char *);
 #define I32(p, o) (*(int *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
@@ -13,12 +13,12 @@ void playerRopeAdjustLength(char *o)
     int t;
 #define pad PAD_PRESSED
     if (!(*pad & 0x10))
-        DAT_8009c330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
     if (!(*pad & 0x40))
-        DAT_8009c330->w22 = 0;
-    if (DAT_8009c330->b0a == 0) {
+        PLAYER_EXT->w22 = 0;
+    if (PLAYER_EXT->b0a == 0) {
         if ((*pad & 0x10) && FUN_8003facc(o) == 0) {
-            q = DAT_8009c330;
+            q = PLAYER_EXT;
             I32(o, 0x38) -= q->w20 << 8;
             if ((q->w20 += 8) > 0x200)
                 q->w20 = 0x200;
@@ -26,7 +26,7 @@ void playerRopeAdjustLength(char *o)
                 I32(o, 0x38) = 0x280000;
         }
         if (*pad & 0x40) {
-            q = DAT_8009c330;
+            q = PLAYER_EXT;
             I32(o, 0x38) += q->w22 << 8;
             if ((q->w22 += 8) > 0x200)
                 q->w22 = 0x200;

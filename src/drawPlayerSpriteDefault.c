@@ -25,10 +25,10 @@ extern char D_1F8000C0b[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 typedef struct { unsigned char p0[7]; signed char b7; unsigned char p8[0x18 - 8]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P800505F0;
-extern P800505F0 *D_8009C330;
+extern P800505F0 *PLAYER_EXT;
 extern unsigned short D_8009C960h, D_8009C962h;
 extern void uploadSpriteFrameToVram(TObj *);
 
@@ -63,10 +63,10 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     return 0;
 }
 
-#define SN(i) D_8007A5F0[i]
+#define SN(i) COS_TABLE[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
-#define CS(i) D_8007A3F0[i]
+#define CS(i) NEG_SIN_TABLE[i]
 #define C f[-1]
 #define D f[0]
 
@@ -103,7 +103,7 @@ void drawPlayerSpriteDefault(TObj *o)
     n = ((unsigned short *)e)[0];
     x = xy;
     y = (unsigned)xy >> 16;
-    if (D_8009C330->w28[SPAD.s1f4] != s) {
+    if (PLAYER_EXT->w28[SPAD.s1f4] != s) {
         if (D_8009C960h == 6) {
             switch (D_8009C962h) {
             case 0: case 1: break;
@@ -114,8 +114,8 @@ void drawPlayerSpriteDefault(TObj *o)
     }
     ang = o->d8c;
     f = q + 0xb;
-    D_8009C330->w18 = x;
-    D_8009C330->w1a = y;
+    PLAYER_EXT->w18 = x;
+    PLAYER_EXT->w1a = y;
     do {
         A = (signed char)f[3];
         B = (signed char)f[4];
@@ -137,7 +137,7 @@ void drawPlayerSpriteDefault(TObj *o)
         p->u3 = p->u0 + C;
         p->v3 = p->v0 + D;
         if (o->b9d)
-            af = D_8009C330->b7;
+            af = PLAYER_EXT->b7;
         else
             af = o->animFrame;
         if (af & 1) {

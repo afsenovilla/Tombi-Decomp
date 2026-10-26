@@ -22,7 +22,7 @@ static void *D_80129FCC[9] = {
     D_8012A38C,
 };
 extern short D_801265C4[];
-extern short D_8007A5F0[], D_8007A1F0[];
+extern short COS_TABLE[], D_8007A1F0[];
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
 
@@ -76,7 +76,7 @@ void flowerForestPigShotScatter(TObj *o)
             break;
         }
         AnimAdvance(o);
-        dx = o->velH * D_8007A5F0[o->d38] >> 12;
+        dx = o->velH * COS_TABLE[o->d38] >> 12;
         dy = o->velH * D_8007A1F0[o->d38] >> 12;
         o->h->raw += dx << 8;
         o->y.raw += dy << 8;

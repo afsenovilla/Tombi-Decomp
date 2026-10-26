@@ -3,7 +3,7 @@
 #include "globals.h"
 extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char DAT_8009cda5;
-extern int DAT_8009c960;
+extern int GAME;
 extern void FUN_80026a10(int);
 extern void FUN_8005aa74(int, int, int, int);
 extern void printEventMessage(int, int);
@@ -14,7 +14,7 @@ unsigned char setEventStarted(int p, int b, int c)
 {
     if (SCRIPT_FLAGS[p] == 0) {
         if (p == 1) {
-            if (DAT_8009c960 == 0) DAT_8009cda5++;
+            if (GAME == 0) DAT_8009cda5++;
         } else {
             SCRIPT_FLAGS[p]++;
         }

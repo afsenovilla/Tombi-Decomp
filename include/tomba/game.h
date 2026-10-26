@@ -2314,13 +2314,11 @@ extern int D_8007912C[];
 extern u32 D_8007C6B0[];
 extern u32 D_8007D30C[];
 extern s16  D_8007D788[];
-extern s16  D_8007D988[];
 extern s16  D_8007DB88[];
 extern u32 D_8007E8A8[];
 extern fileLink D_800791A0[]; // FileLinkArray
 extern int  D_800791A4[];
 extern u_short D_8007B290;
-extern int D_8007B294;
 extern int D_8007B2F4[];
 extern int D_8007B2F6[];
 extern int D_8007B2F8[];
@@ -2354,8 +2352,6 @@ extern u8   D_8009BCA2;
 extern char D_8009BCA7;
 extern char D_8009BCAA;
 extern gameConfig GAME;
-extern u16 GAME_A;
-extern u16 GAME_B;
 extern char D_8009BCDA;
 extern char D_8009BCDB;
 extern u_char D_8009BCDF;
@@ -2369,7 +2365,7 @@ extern u_short D_8009C866;
 extern void* D_8009C8A8;
 extern int  D_8009C8B0;
 extern short D_8009C940;
-extern volatile u_short D_8009C9D8;
+extern volatile u_short PAD_PRESSED;    /* 0x8009D670 */
 extern short D_8009C9DA;
 extern volatile u_short D_8009C9DC;
 extern short D_8009C9DE;
@@ -2430,7 +2426,6 @@ extern int D_8009EB4C;
 extern short D_8009EB52;
 extern u_short D_8009EB5A;
 extern u_short D_8009EB7C;
-extern short D_8009EBA0;
 extern int D_8009EBA8;
 
 /* --- RAM / ROM data 0x800A____ --- */
@@ -2438,7 +2433,17 @@ extern char D_800A15D8; // SPU_SEQ_TABLE
 extern char D_800A1890;
 extern byte D_800A3348[0x3D4];
 extern u_char D_800A38B8[];
-extern u_char D_800A3940[0x70];
+/* MENU_STATE (0x800A45D8, 0x70 bytes): pause / inventory menu state stepped by updatePauseMenu. */
+typedef struct MenuState {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0x10];
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u8 unk18[0x70 - 0x18];
+} MenuState;
+extern MenuState MENU_STATE;
 extern u_char D_800A3941;
 extern u8*  D_1F8001D4;
 extern s16  D_1F8003B8;

@@ -23,7 +23,7 @@ static void *D_80129FA8[9] = {
 };
 extern unsigned short D_801266E0[];
 extern unsigned short D_1F800172[], D_1F80016E[];
-extern short D_8007A5F0[], D_8007A1F0[];
+extern short COS_TABLE[], D_8007A1F0[];
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern short D_800A4580[]; /* debt: second name for D_800A4582 keeps the game's reload */
 extern void FUN_800202b4(TObj *);
@@ -108,7 +108,7 @@ void lavaCavesPigShotDrop(TObj *o)
         {
             int i = o->d38;
             short v = o->velH;
-            int a = v * D_8007A5F0[i];
+            int a = v * COS_TABLE[i];
             int b = v * D_8007A1F0[i];
             o->h->raw += (a << 4 >> 16) << 8;
             o->y.raw += (b << 4 >> 16) << 8;

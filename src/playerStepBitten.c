@@ -9,8 +9,8 @@ typedef struct S {
     short velY; char pa[0x8c - 0x80]; int d8c; char pb[0x9d - 0x90]; unsigned char b9d; char pc[0xb0 - 0x9e];
     short wb0, wb2, wb4, wb6, wb8, wba; char pd[0xc6 - 0xbc]; unsigned char bc6, bc7; char pe[0xe3 - 0xc8]; unsigned char be3;
 } S;
-extern S *D_8009C330;
-extern S *D_8009D2E8;
+extern S *PLAYER_EXT;
+extern S *BITTEN_OBJECT;
 extern void ObjCheckHeadCollision(S *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void PlayerSetAnimIfChanged(S *, int);
@@ -20,8 +20,8 @@ extern void playerBiteHoldType0E(S *), playerBiteHoldType15(S *), playerBiteHold
 void playerStepBitten(S *o)
 {
     if (o->state == 0) {
-        D_8009C330->frame = 0xff;
-        D_8009C330->timer = 0;
+        PLAYER_EXT->frame = 0xff;
+        PLAYER_EXT->timer = 0;
         o->bc7 = 1;
         o->b9d = 0;
         o->bc6 = 0;
@@ -32,39 +32,39 @@ void playerStepBitten(S *o)
         o->wb0 = 0;
         o->d8c = 0;
         o->frame &= 1;
-        D_8009C330->b00 = 0;
-        switch (D_8009D2E8->type) {
+        PLAYER_EXT->b00 = 0;
+        switch (BITTEN_OBJECT->type) {
         case 0x1f:
             o->d8c = 0;
-            D_8009D2E8->d8c = 0;
-            o->y = D_8009D2E8->y - D_8009D2E8->w70;
+            BITTEN_OBJECT->d8c = 0;
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
             ObjCheckHeadCollision(o);
-            D_8009D2E8->y = o->y + D_8009D2E8->w70;
+            BITTEN_OBJECT->y = o->y + BITTEN_OBJECT->w70;
             break;
         case 0x3: case 0x12: case 0x2b:
             o->wba = 0;
             o->d8c = 0;
-            D_8009D2E8->d8c = 0;
+            BITTEN_OBJECT->d8c = 0;
             o->b69 = 0;
-            D_8009D2E8->b0f = o->b0f + 1;
+            BITTEN_OBJECT->b0f = o->b0f + 1;
             spawnImpactEffect(2, o->x, (short)o->y, o->z);
             break;
         case 0x4: case 0x29:
             o->d8c = 0;
-            D_8009D2E8->b0f = o->b0f + 1;
-            D_8009D2E8->frame = 1;
-            o->h->y = D_8009D2E8->h->y;
-            o->y = D_8009D2E8->y - D_8009D2E8->w70;
+            BITTEN_OBJECT->b0f = o->b0f + 1;
+            BITTEN_OBJECT->frame = 1;
+            o->h->y = BITTEN_OBJECT->h->y;
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
             break;
         case 0x8: case 0x1e:
             o->d8c = 0;
-            D_8009D2E8->state = 2;
+            BITTEN_OBJECT->state = 2;
         case 0x0: case 0xa:
-            o->y = D_8009D2E8->y - D_8009D2E8->w70;
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
             ObjCheckHeadCollision(o);
-            D_8009D2E8->y = o->y + D_8009D2E8->w70;
+            BITTEN_OBJECT->y = o->y + BITTEN_OBJECT->w70;
         case 0x28:
-            D_8009D2E8->b0f = o->b0f + 1;
+            BITTEN_OBJECT->b0f = o->b0f + 1;
             o->velY = 0x100;
             break;
         case 0xe:
@@ -78,7 +78,7 @@ void playerStepBitten(S *o)
         startPadVibration(0, 0, 0xff, 4);
         o->state++;
     } else {
-        switch (D_8009D2E8->type) {
+        switch (BITTEN_OBJECT->type) {
         case 0x2: case 0x21:
             playerBiteHoldType02(o);
             break;
@@ -86,7 +86,7 @@ void playerStepBitten(S *o)
             playerBiteHoldType03(o);
             break;
         case 0x29:
-            if (D_8009D2E8->b6a == 1) {
+            if (BITTEN_OBJECT->b6a == 1) {
                 playerBiteHoldType0E(o);
                 break;
             }

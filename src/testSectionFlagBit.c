@@ -5,7 +5,7 @@
 // Demo version of PAL main0 80020B64 (testSectionFlagBit.c): section sizes count double (PAL single).
 #include "gamestate.h"
 typedef struct { unsigned short a; unsigned short pad[0x118]; unsigned short bits[2]; } S;
-extern unsigned short D_80078790[];
+extern unsigned short AREA_SECTION_COUNTS[];
 extern S D_8009C962;
 
 int testSectionFlagBit(int n)
@@ -13,7 +13,7 @@ int testSectionFlagBit(int n)
     int i;
     int s = 0;
     int m;
-    for (i = 0; i < GAME.selectedArea; i++) s += D_80078790[i] * 2;
+    for (i = 0; i < GAME.selectedArea; i++) s += AREA_SECTION_COUNTS[i] * 2;
     s += D_8009C962.a;
     if (n >= 32) s++;
     m = n % 32;
@@ -22,7 +22,7 @@ int testSectionFlagBit(int n)
 #else
 #include "gamestate.h"
 typedef struct { unsigned short a; unsigned short pad[0x118]; unsigned short bits[2]; } S;
-extern unsigned short D_80078790[];
+extern unsigned short AREA_SECTION_COUNTS[];
 extern S D_8009C962;
 
 int testSectionFlagBit(int n)
@@ -30,7 +30,7 @@ int testSectionFlagBit(int n)
     int i;
     int s = 0;
     int m;
-    for (i = 0; i < GAME.selectedArea; i++) s += D_80078790[i];
+    for (i = 0; i < GAME.selectedArea; i++) s += AREA_SECTION_COUNTS[i];
     s += D_8009C962.a;
     if (n >= 32) s++;
     m = n % 32;

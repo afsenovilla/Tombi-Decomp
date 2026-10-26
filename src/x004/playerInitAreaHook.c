@@ -4,12 +4,12 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_8009F0EC;
+extern int GRABBED_OBJECT;
 extern void spawnCarriedGuide(TObj *);
 
 void playerInitAreaHook(TObj *o)
 {
-    D_8009F0EC = 0;
+    GRABBED_OBJECT = 0;
     if (GAME.selectedSection == 2 && GAME.selectedSpawnPoint == 2) {
         o->b04 = 5;
         o->step = 9;

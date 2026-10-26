@@ -1,12 +1,12 @@
 // FUNC 800f3eec 80 X013
 // MATCHING 800f3eec 80
 #include "TOBJ.H"
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 
 void playerEnterRecoilStep4(TObj *o)
 {
-    D_8009C330[8] = 1;
-    D_8009C330[7] = o->animFrame;
+    PLAYER_EXT[8] = 1;
+    PLAYER_EXT[7] = o->animFrame;
     o->b9c = 2;
     o->timer = 10;
     o->step = 4;

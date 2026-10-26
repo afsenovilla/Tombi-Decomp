@@ -31,7 +31,7 @@ extern char D_1F8000C0b[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 static short D_8007A3F0[256] = {
     0, -0x64, -0xc8, -0x12d, -0x191, -0x1f5, -0x259, -0x2bc,
     -0x31f, -0x381, -0x3e3, -0x444, -0x4a5, -0x504, -0x563, -0x5c2,
@@ -98,7 +98,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     return 0;
 }
 
-#define SN(i) D_8007A5F0[i]
+#define SN(i) COS_TABLE[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
 #define CS(i) D_8007A3F0[i]

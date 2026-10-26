@@ -17,8 +17,8 @@ typedef struct {
     unsigned short w2e;
 } P;
 
-extern P *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 extern TObj *allocObjectLayer1(void);
 extern void FUN_8010eaf8(TObj *);
 extern void FUN_80104dc8(TObj *);
@@ -43,7 +43,7 @@ void func_801213D0(TObj *o)
 
     switch (o->substep) {
     case 0:
-        D_8009D2E8->d84 = o->d88 - 0xc0;
+        BITTEN_OBJECT->d84 = o->d88 - 0xc0;
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         FUN_8010eaf8(o);
@@ -53,7 +53,7 @@ void func_801213D0(TObj *o)
         break;
     case 1:
         setFacingFromPad(o);
-        e = D_8009D2E8;
+        e = BITTEN_OBJECT;
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
         e->d84 = o->d88 - 0xc0;
@@ -64,17 +64,17 @@ void func_801213D0(TObj *o)
         if (o->b69 == 0 && probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x30) == 0
             && (SPAD.s1fc & SPAD.s3c8) == 0 && (SPAD.s1fc & SPAD.s3c6) == 0
             && ObjTileCollide(o, 4, 0) == 0) break;
-        if (*(volatile unsigned short *)&GV6.s70 & 0x4000) D_8009C330->w2c = 0xf;
-        else D_8009C330->w2c = 0xe;
+        if (*(volatile unsigned short *)&GV6.s70 & 0x4000) PLAYER_EXT->w2c = 0xf;
+        else PLAYER_EXT->w2c = 0xe;
         o->b9c = 0;
         o->velY = 0;
         o->substep = 2;
         break;
     case 2:
-        if (D_8009C330->w2e != D_8009C330->w2c) {
+        if (PLAYER_EXT->w2e != PLAYER_EXT->w2c) {
             ObjSetAnimFromTable(o);
             AnimLoadDuration(o);
-            D_8009C330->w2e = D_8009C330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
         if (AnimAdvance(o)) {
             SfxPlay2(0x22, 0x23);
@@ -100,10 +100,10 @@ void func_801213D0(TObj *o)
         }
         break;
     case 3:
-        D_8009D2E8->b04 = 2;
-        D_8009D2E8->step = 4;
-        D_8009D2E8->state = 0;
-        D_8009D2E8->substep = 0;
+        BITTEN_OBJECT->b04 = 2;
+        BITTEN_OBJECT->step = 4;
+        BITTEN_OBJECT->state = 0;
+        BITTEN_OBJECT->substep = 0;
         o->wb2 = 0x100;
         o->velY = 0;
         o->b9c = 2;
@@ -130,8 +130,8 @@ typedef struct {
     unsigned short w2e;
 } P;
 
-extern P *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 extern TObj *allocObjectLayer1(void);
 extern void playerAirAccelerateX(TObj *);
 extern void playerBittenCarryAirStep(TObj *);
@@ -156,7 +156,7 @@ void playerBittenJumpCrawler(TObj *o)
 
     switch (o->substep) {
     case 0:
-        D_8009D2E8->d84 = o->d88 - 0xc0;
+        BITTEN_OBJECT->d84 = o->d88 - 0xc0;
         o->h->raw += ((short*)&GVARS.s44)[0] << 8;
         o->y.raw += ((short*)&GVARS.s46)[0] << 8;
         playerAirAccelerateX(o);
@@ -166,7 +166,7 @@ void playerBittenJumpCrawler(TObj *o)
         break;
     case 1:
         setFacingFromPad(o);
-        e = D_8009D2E8;
+        e = BITTEN_OBJECT;
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
         e->d84 = o->d88 - 0xc0;
@@ -177,17 +177,17 @@ void playerBittenJumpCrawler(TObj *o)
         if (o->b69 == 0 && probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x30) == 0
             && (SPAD.s1fc & SPAD.s3c8) == 0 && (SPAD.s1fc & SPAD.s3c6) == 0
             && ObjTileCollide(o, 4, 0) == 0) break;
-        if (*(volatile unsigned short *)&GV6.s70 & 0x40) D_8009C330->w2c = 0xf;
-        else D_8009C330->w2c = 0xe;
+        if (*(volatile unsigned short *)&GV6.s70 & 0x40) PLAYER_EXT->w2c = 0xf;
+        else PLAYER_EXT->w2c = 0xe;
         o->b9c = 0;
         o->velY = 0;
         o->substep = 2;
         break;
     case 2:
-        if (D_8009C330->w2e != D_8009C330->w2c) {
+        if (PLAYER_EXT->w2e != PLAYER_EXT->w2c) {
             ObjSetAnimFromTable(o);
             AnimLoadDuration(o);
-            D_8009C330->w2e = D_8009C330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
         if (AnimAdvance(o)) {
             SfxPlay2(0x22, 0x23);
@@ -213,10 +213,10 @@ void playerBittenJumpCrawler(TObj *o)
         }
         break;
     case 3:
-        D_8009D2E8->b04 = 2;
-        D_8009D2E8->step = 4;
-        D_8009D2E8->state = 0;
-        D_8009D2E8->substep = 0;
+        BITTEN_OBJECT->b04 = 2;
+        BITTEN_OBJECT->step = 4;
+        BITTEN_OBJECT->state = 0;
+        BITTEN_OBJECT->substep = 0;
         o->wb2 = 0x100;
         o->velY = 0;
         o->b9c = 2;

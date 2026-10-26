@@ -2,8 +2,8 @@
 // MATCHING 80108168 464
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
-extern TObj *DAT_8009c330;
-extern int DAT_8009c960[];
+extern TObj *PLAYER_EXT;
+extern int GAME[];
 extern unsigned char DAT_8009cda2, DAT_8009c93a;
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -14,7 +14,7 @@ void playerEventStepDepthShift(TObj *o)
     unsigned short u;
     switch (o->state) {
     case 0:
-        B(DAT_8009c330, 8) = o->active;
+        B(PLAYER_EXT, 8) = o->active;
 //PS
         u = o->animFrame;
         o->velX = 0x5a;
@@ -41,20 +41,20 @@ void playerEventStepDepthShift(TObj *o)
         FUN_8001fec0(o);
         o->d->p.whole += 5;
         o->velX -= 5;
-        if (DAT_8009c960[0] == 0x40001) {
+        if (GAME[0] == 0x40001) {
             o->y.raw += -0x60000;
             if (o->y.p.whole < -0x20f)
                 o->y.p.whole = -0x20f;
         }
         if (o->velX == 0) {
             *(signed char *)&o->b0f = -8;
-            t = B(DAT_8009c330, 8);
+            t = B(PLAYER_EXT, 8);
             o->b9c = 0;
             o->active = t;
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            DAT_8009c330->timer = 0;
+            PLAYER_EXT->timer = 0;
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

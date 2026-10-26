@@ -3,7 +3,7 @@
 // VERSION SLPM_80165 slpm80165 8004DA84 324
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 800490AC (FUN_800490ac.c): tests +3 before the type.
-extern int DAT_8009c960;
+extern int GAME;
 extern short DAT_1f800246;
 extern unsigned char **DAT_1f80021c;
 extern unsigned short DAT_1f800248;
@@ -16,7 +16,7 @@ void FUN_800490ac(void)
     short n;
     unsigned char **pp, **qq;
     unsigned char *o, *e;
-    if (DAT_8009c960 == 0x10000) {
+    if (GAME == 0x10000) {
         n = DAT_1f800246;
         pp = DAT_1f80021c;
         while (n != 0) {
@@ -37,7 +37,7 @@ void FUN_800490ac(void)
     }
 }
 #else
-extern int DAT_8009c960;
+extern int GAME;
 extern short DAT_1f800246;
 extern unsigned char **DAT_1f80021c;
 extern unsigned short DAT_1f800248;
@@ -50,7 +50,7 @@ void collideCat2Type7WithCat5Type0B(void)
     short n;
     unsigned char **pp, **qq;
     unsigned char *o, *e;
-    if (DAT_8009c960 == 0x10000) {
+    if (GAME == 0x10000) {
         n = DAT_1f800246;
         pp = DAT_1f80021c;
         while (n != 0) {

@@ -25,12 +25,12 @@ typedef struct {
 } X800FE13C;
 #define X(o) ((X800FE13C *)(o))
 
-extern P800FE13C *D_8009C330;
-extern TObj *D_8009D2E8;
-extern TObj *D_8009F0EC;
+extern P800FE13C *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char D_8009CF06[];
 typedef struct { unsigned short c960, c962; char pad[0x5a2]; unsigned char cf06; } G960;
-extern G960 D_8009C960;
+extern G960 GAME;
 extern unsigned char D_801152E8[];
 extern char D_80010A04[];
 extern char D_800116B8[];
@@ -50,7 +50,7 @@ extern AnimTable D_800E8404; /* shared with ObjSetAnimFromTable (one table in th
 static __inline__ void SetAnimFromTable(TObj *o)
 {
     AnimTable t = D_800E8404;
-    o->anim = (void *)t.a[D_8009C330->w2c];
+    o->anim = (void *)t.a[PLAYER_EXT->w2c];
 }
 
 void playerStepHazardRespawn(TObj *o)
@@ -69,7 +69,7 @@ void playerStepHazardRespawn(TObj *o)
     case 0:
         o->timer = 0x40;
         *(signed char *)&o->b0f = -8;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         v = -0x10;
         if (o->animFrame & 1)
             v = 0x10;
@@ -78,8 +78,8 @@ void playerStepHazardRespawn(TObj *o)
         o->d8c = 0;
         if (o->b9e != 0) {
             if (o->b9e == 4 || o->b9e == 7)
-                D_8009F0EC->active = 1;
-            q = D_8009F0EC;
+                GRABBED_OBJECT->active = 1;
+            q = GRABBED_OBJECT;
             if (q->type == 0x21)
                 q->ba7 = 0;
             else
@@ -91,10 +91,10 @@ void playerStepHazardRespawn(TObj *o)
         o->ba4 = 0;
         o->wb0 = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(TObj **)&PLX.p611c);
-            D_8009D2E8->b04 = 2;
-            D_8009D2E8->step = 2;
-            D_8009D2E8->state = 0;
+            BITTEN_OBJECT = (*(TObj **)&PLX.p611c);
+            BITTEN_OBJECT->b04 = 2;
+            BITTEN_OBJECT->step = 2;
+            BITTEN_OBJECT->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         GVARS.i34 = 0;
@@ -102,7 +102,7 @@ void playerStepHazardRespawn(TObj *o)
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        D_8009C330->b0 = 0;
+        PLAYER_EXT->b0 = 0;
         o->animFrame &= 1;
         o->active = 4;
         o->velY = -0x800;
@@ -122,8 +122,8 @@ void playerStepHazardRespawn(TObj *o)
         d = a2;
         d <<= 2;
         o->velV = d;
-        D_8009C330->w2c = 0x10;
-        D_8009C330->w2e = 0x10;
+        PLAYER_EXT->w2c = 0x10;
+        PLAYER_EXT->w2e = 0x10;
         o->anim = D_80010A04;
         FUN_8001fe94(o, 0);
         spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
@@ -133,7 +133,7 @@ void playerStepHazardRespawn(TObj *o)
         break;
     case 1:
         o->d8c = (unsigned char)o->d88;
-        o->d88 += D_8009C330->wE;
+        o->d88 += PLAYER_EXT->wE;
         FUN_8001fce4(o);
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -145,10 +145,10 @@ void playerStepHazardRespawn(TObj *o)
             FUN_8001fe94(o, 0);
         }
         if (o->timer == 0) {
-            D_8009C330->wE = 0;
+            PLAYER_EXT->wE = 0;
             o->h->raw = S32(o, 0xec);
             o->y.raw = S32(o, 0xf0);
-            if (D_8009C330->b8) {
+            if (PLAYER_EXT->b8) {
                 S16(o, 0xe0) = 0x8c;
                 o->active = 3;
             }
@@ -156,7 +156,7 @@ void playerStepHazardRespawn(TObj *o)
                 S16(o, 0xe0) = 0x8c;
             o->active = 3;
             if (GVARS.b38) {
-                D_8009C330->b8 = 0;
+                PLAYER_EXT->b8 = 0;
                 o->timer = 0xb4;
                 o->state = 2;
             } else if (U8(o, 0xd1) == 2) {
@@ -177,20 +177,20 @@ void playerStepHazardRespawn(TObj *o)
         break;
     case 2:
         U8(o, 0xc7) = 1;
-        D_8009C330->w2c = 0x3c;
+        PLAYER_EXT->w2c = 0x3c;
         SetAnimFromTable(o);
         FUN_8001fe94(o, 1);
         if (--o->timer == 0) {
             o->state = 3;
-            D_8009C960.cf06 = 0;
+            GAME.cf06 = 0;
             ((unsigned char*)&GV2.bb1)[0] = 0;
-            if (D_8009C960.c960 != 10 || D_8009C960.c962 != 0)
+            if (GAME.c960 != 10 || GAME.c962 != 0)
                 GVARS.b38 = 2;
         }
         break;
     case 4:
         o->d8c = (unsigned char)o->d88;
-        o->d88 += D_8009C330->wE;
+        o->d88 += PLAYER_EXT->wE;
         o->y.raw += 0x50000;
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             o->d8c = 0;
@@ -215,7 +215,7 @@ void playerStepHazardRespawn(TObj *o)
         break;
     case 9:
         U8(o, 0xd1) = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         t = D_801152E8[o->wb0];
         o->b04 = 1;
         o->step = 2;

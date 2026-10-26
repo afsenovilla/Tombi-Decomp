@@ -5,7 +5,7 @@
 
 extern char D_80077D00[];
 extern void *D_8012EE80[];
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern TObj PLAYER;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -48,7 +48,7 @@ void jellyfishGrabPlayer(TObj *o)
         AnimAdvance(o);
         applyAnimVelocityX(o, o->animFrame);
         s = Blocked(o);
-        o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[*(unsigned char *)&o->d88] * o->velV) >> 4;
         c = TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30));
         if (s && c) {
             o->timer = 0xc;

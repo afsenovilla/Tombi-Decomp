@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[10]; unsigned char bca; } PObj;
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void playerSetAnim(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -17,7 +17,7 @@ void playerStepSwimUnderwater(TObj *o)
         playerSetAnim(o, 0x44, 0);
         o->timer = 10;
         ((PObj *)o)->bca = 1;
-        D_8009C330->animFrame = 0xff;
+        PLAYER_EXT->animFrame = 0xff;
         o->state++;
     case 1:
         if (AnimAdvance(o) && (unsigned short)(*(unsigned short *)o->anim - 0x136) >= 4)

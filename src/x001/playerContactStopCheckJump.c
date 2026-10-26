@@ -4,7 +4,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { TObj o; char pc0[6]; unsigned char bc6; } PL;
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned int D_8009C984[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void playerSelectGroundAnim(PL *);
@@ -13,7 +13,7 @@ extern void spawnGroundDebris(int, int, int, int);
 
 void playerContactStopCheckJump(PL *o)
 {
-    if (D_8009C330->active == 0 && o->bc6 == 0) {
+    if (PLAYER_EXT->active == 0 && o->bc6 == 0) {
         playerSelectGroundAnim(o);
         o->o.b9d = 0;
         if (o->o.bbe & 0x20) {

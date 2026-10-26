@@ -99,7 +99,7 @@ typedef struct {
     unsigned short wf6;
 } TP;
 
-extern PL *D_8009C330;
+extern PL *PLAYER_EXT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern void addItemToInventory(int, int, int);
@@ -113,7 +113,7 @@ void playerEnterHollowForItem(TP *o)
 
     switch (o->state) {
     case 0:
-        D_8009C330->b8 = o->active;
+        PLAYER_EXT->b8 = o->active;
         o->active = 2;
         o->d8c = 0;
         o->velX = 0xb4;
@@ -146,7 +146,7 @@ void playerEnterHollowForItem(TP *o)
         o->velX = 0xb4;
         o->wb2 = 0;
         o->velY = 0;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
         o->ba3 = 2;
         o->timer = 0x3c;
         o->state++;
@@ -233,14 +233,14 @@ void playerEnterHollowForItem(TP *o)
         FUN_8001fec0((TObj *)o);
         o->d->p.whole = o->wf6;
         *(signed char *)&o->b0f = -8;
-        o->active = D_8009C330->b8;
+        o->active = PLAYER_EXT->b8;
         o->b9c = 0;
         o->ba2 = 0;
         o->ba3 = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
         o->b04 = 1;
         o->step = 0;
         o->state = 0;

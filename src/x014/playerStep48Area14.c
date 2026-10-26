@@ -3,8 +3,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *D_8009D2E8;
-extern TObj *D_8009C330;
+extern TObj *BITTEN_OBJECT;
+extern TObj *PLAYER_EXT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1F8001FC, D_1F8003C6;
 extern void playerBiteHoldAttach(TObj *);
@@ -31,7 +31,7 @@ void playerStep48Area14(TObj *o)
         y = o->y.p.whole;
         f = 0;
         {
-            TObj *p = D_8009D2E8;
+            TObj *p = BITTEN_OBJECT;
             if (y + p->box2 > p->y.p.whole) {
                 o->y.p.whole = p->y.p.whole - p->box2;
                 f = 1;
@@ -39,8 +39,8 @@ void playerStep48Area14(TObj *o)
         }
         if (o->velX < 0) {
             o->h->p.whole -= 8;
-            if (o->h->p.whole <= D_8009D2E8->h->p.whole) {
-                o->h->p.whole = D_8009D2E8->h->p.whole;
+            if (o->h->p.whole <= BITTEN_OBJECT->h->p.whole) {
+                o->h->p.whole = BITTEN_OBJECT->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
                     playerResetSlopeState(o);
@@ -48,8 +48,8 @@ void playerStep48Area14(TObj *o)
             }
         } else {
             o->h->p.whole += 8;
-            if (o->h->p.whole >= D_8009D2E8->h->p.whole) {
-                o->h->p.whole = D_8009D2E8->h->p.whole;
+            if (o->h->p.whole >= BITTEN_OBJECT->h->p.whole) {
+                o->h->p.whole = BITTEN_OBJECT->h->p.whole;
                 if (f) {
                     playerBiteHoldAttach(o);
                     playerResetSlopeState(o);
@@ -71,7 +71,7 @@ void playerStep48Area14(TObj *o)
         if (*k & 0x20)
             o->animFrame = 0;
         {
-            TObj *p = D_8009D2E8;
+            TObj *p = BITTEN_OBJECT;
             p->animFrame = o->animFrame & 1;
             p->h->p.whole = o->h->p.whole;
             p->y.p.whole = o->y.p.whole + p->box2;
@@ -82,14 +82,14 @@ void playerStep48Area14(TObj *o)
             o->velX = 0;
             o->velY = 0;
             if (*k & 0x40)
-                D_8009C330->animTimer = 0xf;
+                PLAYER_EXT->animTimer = 0xf;
             else
-                D_8009C330->animTimer = 0xe;
-            if (D_8009C330->animFrame != D_8009C330->animTimer) {
-                D_8009D2E8->state = 7;
+                PLAYER_EXT->animTimer = 0xe;
+            if (PLAYER_EXT->animFrame != PLAYER_EXT->animTimer) {
+                BITTEN_OBJECT->state = 7;
                 ObjSetAnimFromTable(o);
                 AnimLoadDuration(o);
-                D_8009C330->animFrame = D_8009C330->animTimer;
+                PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
             }
             o->b9c = 0;
             o->velY = 0;
@@ -107,10 +107,10 @@ void playerStep48Area14(TObj *o)
             playerPlaceBittenObject(o);
         break;
     case 4:
-        D_8009D2E8->b04 = 2;
-        D_8009D2E8->step = 3;
-        D_8009D2E8->state = 0;
-        q = D_8009D2E8;
+        BITTEN_OBJECT->b04 = 2;
+        BITTEN_OBJECT->step = 3;
+        BITTEN_OBJECT->state = 0;
+        q = BITTEN_OBJECT;
         y = o->animFrame & 1;
         q->animFrame = y;
         if (PAD_PRESSED[0] & 0x40)

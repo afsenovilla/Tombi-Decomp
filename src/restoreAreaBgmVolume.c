@@ -2,7 +2,7 @@
 // MATCHING 8001f1c0 300
 #include "globals.h"
 extern unsigned short DAT_8009c960;
-extern unsigned short DAT_8009c960b;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern void SsSeqSetVol(short, short, short);
 
@@ -15,7 +15,7 @@ void restoreAreaBgmVolume(void)
     if (BGM_SEQ_ID == -1)
         return;
     v = AREA_BGM_VOLUME[DAT_8009c960];
-    switch (DAT_8009c960b) {
+    switch (GAME) {
     case 0:
     case 2:
         v = v + 5;

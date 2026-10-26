@@ -10,9 +10,9 @@ typedef struct {
     short w2c;
 } G330;
 #define OB(o, n) (((unsigned char *)(o))[n])
-extern G330 *DAT_8009c330;
+extern G330 *PLAYER_EXT;
 extern short DAT_8009c944[2];
-extern int DAT_8009f0ec;
+extern int GRABBED_OBJECT;
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fec0(TObj *);
@@ -38,7 +38,7 @@ void playerStepWaterJumpOut(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->velX = 0;
-        DAT_8009c330->w20 = 0xe;
+        PLAYER_EXT->w20 = 0xe;
         FUN_8001e560(2, 4);
         FUN_8001e5f4(0xe, 0x7f);
         o->state++;
@@ -54,10 +54,10 @@ void playerStepWaterJumpOut(TObj *o)
             playerAirSpinToFall(o);
         FUN_8003facc(o);
         if (o->velY > 0) {
-            DAT_8009c330->w2c = 4;
+            PLAYER_EXT->w2c = 4;
             playerSetAnim(o, 4, 1);
             OB(o, 0xac) = 1;
-            DAT_8009c330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             o->velY = 0;
             o->velV = 0;
             o->b9c = 2;
@@ -70,16 +70,16 @@ void playerStepWaterJumpOut(TObj *o)
         }
         break;
     }
-    DAT_8009f0ec = playerProbeGrab(o, 0);
+    GRABBED_OBJECT = playerProbeGrab(o, 0);
     if (o->b9e) {
-        DAT_8009c330->b8 = 0;
-        DAT_8009c330->w20 = 0;
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w20 = 0;
         OB(o, 0xac) = 0;
         o->b9c = 0;
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;
-        playerEnterGrabStep(o, DAT_8009f0ec == 1);
+        playerEnterGrabStep(o, GRABBED_OBJECT == 1);
     }
     spawnPlayerFootstepEffect();
 }

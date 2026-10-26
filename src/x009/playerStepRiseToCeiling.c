@@ -9,7 +9,7 @@ extern void FUN_8001fec0(TObj *);
 extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
 extern int probeFlaggedSegmentA(short, short, short);
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern unsigned short DAT_1f8001f8;
 
 void playerStepRiseToCeiling(TObj *o)
@@ -23,7 +23,7 @@ void playerStepRiseToCeiling(TObj *o)
         B(o, 0xa0) = 0;
         FUN_800eeb5c(o, 0x1b);
         o->wb6 = 0;
-        S16(DAT_8009c330, 2) = 0;
+        S16(PLAYER_EXT, 2) = 0;
         B(o, 0xa2) = 3;
         B(o, 0xaa) = 1;
         o->wb0 = 0;

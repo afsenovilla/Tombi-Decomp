@@ -7,7 +7,7 @@ typedef struct {
     char p0[5]; unsigned char step, state; char p1[0x24 - 7]; int anim; char p2[4]; union { unsigned int fl; struct { unsigned short t, af; } s; } u;
     char p3[0x8c - 0x30]; int d8c; char p4[0xa0 - 0x90]; unsigned char da0, pa1, da2, da3; char p5[0xac - 0xa4]; unsigned char wac;
 } O;
-extern P *DAT_8009c330;
+extern P *PLAYER_EXT;
 extern Q *DAT_8009c330q;
 extern unsigned short G1f8;
 extern char A0de0[], A0e2c[];
@@ -20,7 +20,7 @@ void playerEventWalk(O *o)
         switch (o->state) {
         case 0:
             o->d8c = 0;
-            ((Q *)DAT_8009c330)->b8 = 0;
+            ((Q *)PLAYER_EXT)->b8 = 0;
             o->state = o->state + 1;
         case 1:
             break;
@@ -40,11 +40,11 @@ void playerEventWalk(O *o)
         }
     } else {
         if ((o->u.fl & 0xa0000) == 0xa0000 && (o->da0 & 2)) {
-            DAT_8009c330->af = 0xffff;
+            PLAYER_EXT->af = 0xffff;
             o->anim = (int)A0de0;
             o->da2 = 1;
         } else if ((o->u.fl & 0xc0000) == 0xc0000 && (o->da0 & 1)) {
-            DAT_8009c330->af = 0xffff;
+            PLAYER_EXT->af = 0xffff;
             o->anim = (int)A0e2c;
             o->da3 = 1;
         } else {

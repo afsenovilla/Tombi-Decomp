@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
-extern unsigned char *D_8009C330;
-extern int D_8009F0EC;
+extern unsigned char *PLAYER_EXT;
+extern int GRABBED_OBJECT;
 extern char D_80010AE8[];
 void playerSetAngleFromSlope(TObj *o);
 void playerSetAnim(TObj *o, int a, int b);
@@ -23,7 +23,7 @@ void playerStepSlideSteer(TObj *o)
     volatile unsigned short *k;
     switch (o->state) {
     case 0:
-        D_8009C330[0xb] = o->animFrame;
+        PLAYER_EXT[0xb] = o->animFrame;
         if ((o->animFrame &= 1) != 0) {
             if (o->wb2 > 0) o->wb2 = -o->wb2;
         } else {
@@ -40,7 +40,7 @@ void playerStepSlideSteer(TObj *o)
         o->velX = 0;
         o->velY = 0;
         o->wb2 = 0;
-        D_8009C330[0] = 0;
+        PLAYER_EXT[0] = 0;
         o->ba4 = 1;
         playerSetAngleFromSlope(o);
         o->state++;
@@ -76,22 +76,22 @@ void playerStepSlideSteer(TObj *o)
             o->substep = 0;
         }
         if (o->bbe == 0) {
-            if (*(unsigned short *)(D_8009C330 + 0x2c) == 8 && B(o, 0xac) < 2) {
-                D_8009F0EC = playerProbeGrab(o, 1);
-                if (D_8009F0EC) {
-                    D_8009C330[8] = 0;
-                    *(short *)(D_8009C330 + 0x20) = 0;
+            if (*(unsigned short *)(PLAYER_EXT + 0x2c) == 8 && B(o, 0xac) < 2) {
+                GRABBED_OBJECT = playerProbeGrab(o, 1);
+                if (GRABBED_OBJECT) {
+                    PLAYER_EXT[8] = 0;
+                    *(short *)(PLAYER_EXT + 0x20) = 0;
                     B(o, 0xac) = 0;
                     o->b9c = 0;
                     o->wb2 = 0;
-                    playerEnterGrabStep(o, D_8009F0EC == 1);
+                    playerEnterGrabStep(o, GRABBED_OBJECT == 1);
                 }
             }
             if (o->animFrame != (o->bbe & 1)) o->wb2 = 0;
             o->ba4 = 0;
             o->wb6 = 0;
             PlayerSetAnimIfChanged(o, 4);
-            if (D_8009C330[0] == 0) {
+            if (PLAYER_EXT[0] == 0) {
                 o->velX = 0;
                 o->velY = 0;
                 B(o, 0xac) = 1;

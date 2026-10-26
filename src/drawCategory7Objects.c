@@ -7,7 +7,7 @@ extern TObj **DAT_1f800270;
 extern short DAT_1f800240;
 extern TObj **DAT_1f80022c;
 extern unsigned char DAT_800a603a;
-extern unsigned short DAT_8009c960[];
+extern unsigned short GAME[];
 extern void drawObjectSprtWithMode(TObj *);
 extern void drawScreenSpriteObject(TObj *);
 extern void drawLetterboxOverlay(TObj *);
@@ -45,9 +45,9 @@ void drawCategory7Objects(void)
                     FUN_800eb044(o);
                 break;
             case 4:
-                if (DAT_8009c960[0] == 4)
+                if (GAME[0] == 4)
                     FUN_8011e778(o);
-                if (DAT_8009c960[0] == 0xc)
+                if (GAME[0] == 0xc)
                     FUN_80116fb8(o);
                 break;
             }
@@ -75,9 +75,9 @@ void drawCategory7Objects(void)
                     FUN_800eb044(o);
                 break;
             case 4:
-                if (DAT_8009c960[0] == 4)
+                if (GAME[0] == 4)
                     FUN_8011e778(o);
-                if (DAT_8009c960[0] == 0xc)
+                if (GAME[0] == 0xc)
                     FUN_80116fb8(o);
                 break;
             }

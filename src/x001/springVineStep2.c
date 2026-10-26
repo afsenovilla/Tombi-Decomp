@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_8007A3F0[];
-extern short D_8007A5F0[];
+extern short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
 extern void FUN_8001e4f0(int);
 
 void springVineStep2(TObj *o)
@@ -53,9 +53,9 @@ void springVineStep2(TObj *o)
         o->state++;
         break;
     case 1:
-        o->h->raw = o->d30 + ((D_8007A3F0[((unsigned char *)&o->d84)[1]] * (signed char)o->ba6) << 4);
+        o->h->raw = o->d30 + ((NEG_SIN_TABLE[((unsigned char *)&o->d84)[1]] * (signed char)o->ba6) << 4);
         b = (signed char)o->ba6;
-        c = D_8007A5F0[((unsigned char *)&o->d84)[1]] * b;
+        c = COS_TABLE[((unsigned char *)&o->d84)[1]] * b;
         o->d84 += o->velH;
         v = o->velH + o->velX;
         o->velH = v;

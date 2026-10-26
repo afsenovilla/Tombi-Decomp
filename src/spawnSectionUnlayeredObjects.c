@@ -1,6 +1,6 @@
 // FUNC 8004bfe4 248 MAIN0
 // MATCHING 8004bfe4 248
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern unsigned char **PTR_8007bee4[];
 extern void (*PTR_8007bf34[])(unsigned char *);
@@ -11,7 +11,7 @@ void spawnSectionUnlayeredObjects(void)
     unsigned char *e;
     unsigned char *p;
 
-    p = PTR_8007bee4[DAT_8009c960][DAT_8009c962];
+    p = PTR_8007bee4[GAME][DAT_8009c962];
     while (*p != 0xff) {
         e = allocObjectUnlayered();
         if (e) {

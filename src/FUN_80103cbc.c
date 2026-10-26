@@ -12,7 +12,7 @@ typedef struct {
     char p3[0x40 - 0x22]; H *h; char p4[0x7c - 0x44];
     short s7c, s7e; char p6[0x8c - 0x80]; unsigned int w8c; char p7[0x9c - 0x90]; char b9c; char p8[0xac - 0x9d]; char bac;
 } TO;
-extern R *X;
+extern R *BITTEN_OBJECT;
 extern void g(TO *o, int a);
 
 void FUN_80103cbc(TO *o)
@@ -22,7 +22,7 @@ void FUN_80103cbc(TO *o)
     o->bac = 3;
     o->b9c = 0;
     {
-        R *r = X;
+        R *r = BITTEN_OBJECT;
         o->s7c = 0;
         o->s7e = 0;
         o->h->s2 = r->h->s2;

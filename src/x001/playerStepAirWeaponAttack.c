@@ -18,8 +18,8 @@ typedef struct {
     unsigned short w2e;
 } P800F36E0;
 
-extern P800F36E0 *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P800F36E0 *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 typedef struct { short x, y; } SXY;
 extern short D_8009C944;
 extern short D_8009C946;
@@ -48,12 +48,12 @@ extern void FUN_8001e4f0(int);
 extern void spawnGroundDebris(int, short, int, int);
 
 #define SETANIM_IF(n) \
-    D_8009C330->w2c = n; \
-    if (D_8009C330->w2e != n) { \
-        D_8009C330->w2c = n; \
+    PLAYER_EXT->w2c = n; \
+    if (PLAYER_EXT->w2e != n) { \
+        PLAYER_EXT->w2c = n; \
         FUN_800efc04(o); \
         FUN_8001fe94(o, 0); \
-        D_8009C330->w2e = D_8009C330->w2c; \
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c; \
     }
 
 void playerStepAirWeaponAttack(TObj *o)
@@ -79,10 +79,10 @@ void playerStepAirWeaponAttack(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330->b0 = 2;
-        D_8009C330->w2e = -1;
-        D_8009C330->w28 = -1;
-        D_8009C330->w2a = -1;
+        PLAYER_EXT->b0 = 2;
+        PLAYER_EXT->w2e = -1;
+        PLAYER_EXT->w28 = -1;
+        PLAYER_EXT->w2a = -1;
         switch (o->animFrame) {
         case 0: case 1: case 2: case 3:
             (*(char **)&PLAYER.obj.anim) = D_80010E80;
@@ -96,8 +96,8 @@ void playerStepAirWeaponAttack(TObj *o)
         }
         FUN_8001fe94(o, 0);
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = PTR(o, 0xe4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = PTR(o, 0xe4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -115,7 +115,7 @@ void playerStepAirWeaponAttack(TObj *o)
                 q->state = 0;
             }
         }
-        if (D_8009C330->b8 != 0) {
+        if (PLAYER_EXT->b8 != 0) {
             o->state = 2;
         } else {
             o->state = 1;
@@ -123,23 +123,23 @@ void playerStepAirWeaponAttack(TObj *o)
         break;
     case 1:
         if (o->velY >= 0) {
-            D_8009C330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             o->state = 2;
         }
         if (PAD_PRESSED[0] & D_1f8003c6) {
-            if (D_8009C330->b8 == 0) {
-                if (++D_8009C330->w20 >= 0xe) {
-                    D_8009C330->b8 = 1;
+            if (PLAYER_EXT->b8 == 0) {
+                if (++PLAYER_EXT->w20 >= 0xe) {
+                    PLAYER_EXT->b8 = 1;
                     o->state = 2;
                 }
                 playerSetJumpRiseVelocity(o);
             }
         } else {
-            D_8009C330->b8 = 1;
-            if (D_8009C330->w20 >= 5) {
+            PLAYER_EXT->b8 = 1;
+            if (PLAYER_EXT->w20 >= 5) {
                 o->state = 2;
             } else {
-                D_8009C330->w20++;
+                PLAYER_EXT->w20++;
                 playerSetJumpRiseVelocity(o);
             }
         }
@@ -152,8 +152,8 @@ void playerStepAirWeaponAttack(TObj *o)
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = PTR(o, 0xe4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = PTR(o, 0xe4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -185,7 +185,7 @@ void playerStepAirWeaponAttack(TObj *o)
             o->velV = 0;
         }
         if (U8(o, 0xc8) != 0) {
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
@@ -193,7 +193,7 @@ void playerStepAirWeaponAttack(TObj *o)
             o->state = 0;
             break;
         }
-        if (D_8009C330->b0 != 0) break;
+        if (PLAYER_EXT->b0 != 0) break;
         if (U8(o, 0xc6) != 0) break;
         (*(unsigned char*)&o->wac) = 0;
         SETANIM_IF(4);
@@ -212,7 +212,7 @@ void playerStepAirWeaponAttack(TObj *o)
         o->y.raw += D_8009C946 << 8;
         playerAttackDecelerate(o);
         o->d8c = 0;
-        D_8009C330->b8 = 1;
+        PLAYER_EXT->b8 = 1;
         if (U8(o, 0xc9) != 0) {
             FUN_8001fec0(o);
             *(int *)o->h += D_8009C944 << 7;
@@ -231,15 +231,15 @@ void playerStepAirWeaponAttack(TObj *o)
             FUN_8001fd94(o);
         }
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = PTR(o, 0xe4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = PTR(o, 0xe4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
             break;
         }
         if (U8(o, 0xc8) != 0) {
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             (*(unsigned char*)&o->wac) = 0;
             o->ba7 = 0;
             o->b9c = 0;
@@ -249,7 +249,7 @@ void playerStepAirWeaponAttack(TObj *o)
         }
         if (o->b69 == 1 || FUN_8003fd78(o, 0, 0) != 0) {
             FUN_8001e5f4(0x1c, 0x7f);
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             o->step = 3;
             o->state = 1;
             o->ba7 = 0;
@@ -263,11 +263,11 @@ void playerStepAirWeaponAttack(TObj *o)
             }
             break;
         }
-        if (D_8009C330->b0 != 0) break;
+        if (PLAYER_EXT->b0 != 0) break;
         if (U8(o, 0xc6) != 0) break;
         SETANIM_IF(4);
         d = 0x10;
-        b = D_8009C330->b7;
+        b = PLAYER_EXT->b7;
         o->b9d = 0;
         (*(unsigned char*)&o->wac) = 1;
         o->d84 = 0;

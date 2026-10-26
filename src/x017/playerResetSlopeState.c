@@ -1,6 +1,6 @@
 // FUNC 80103774 100 X017
 // MATCHING 80103774 100
-extern char *DAT_8009d2e8;
+extern char *BITTEN_OBJECT;
 extern void playerSetSlopeTilt(void *, int);
 
 void playerResetSlopeState(char *o)
@@ -14,5 +14,5 @@ void playerResetSlopeState(char *o)
     *(short *)(o + 0x82) = 0;
     *(short *)(o + 0xb2) = 0;
     playerSetSlopeTilt(o, 0);
-    *(unsigned int *)(DAT_8009d2e8 + 0x8c) = *(unsigned char *)(o + 0x8c);
+    *(unsigned int *)(BITTEN_OBJECT + 0x8c) = *(unsigned char *)(o + 0x8c);
 }

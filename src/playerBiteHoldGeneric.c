@@ -11,7 +11,7 @@ typedef struct O {
     char p7[0x8c - 0x84]; int a8c; char p7b[0x9c - 0x90]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
     char p9[0xb2 - 0xad]; unsigned short wb2;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void FUN_8010eaf8(O *);
@@ -38,51 +38,51 @@ void FUN_801037d8(O *o)
         *(int *)o->h += o->vx << 8;
         flag = 0;
         o->y16 += 8;
-        if (o->y16 + DAT_8009d2e8->s70 > DAT_8009d2e8->y16) {
-            o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+        if (o->y16 + BITTEN_OBJECT->s70 > BITTEN_OBJECT->y16) {
+            o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
             flag = 1;
         }
         if (o->vx < 0) {
             o->h->s2 -= 8;
-            if (o->h->s2 <= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 <= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) FUN_80103628(o);
             }
         } else {
             o->h->s2 += 8;
-            if (o->h->s2 >= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 >= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) FUN_80103628(o);
             }
         }
-        if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70 + (DAT_8009d2e8->s72 - DAT_8009d2e8->s70)), 1) || o->s20 > 10) {
+        if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70 + (BITTEN_OBJECT->s72 - BITTEN_OBJECT->s70)), 1) || o->s20 > 10) {
             FUN_80103628(o);
         }
         return;
     case 2:
-        switch (DAT_8009d2e8->b2) {
+        switch (BITTEN_OBJECT->b2) {
         case 0x38:
             PADCHK();
             {
-                O *q = DAT_8009d2e8;
+                O *q = BITTEN_OBJECT;
                 o->h->s2 = q->h->s2;
                 o->y16 = q->y16 - q->s70;
             }
             break;
         case 10:
-            o->h->s2 = DAT_8009d2e8->h->s2;
-            o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+            o->h->s2 = BITTEN_OBJECT->h->s2;
+            o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
             o->b9c = 0;
             PADCHK();
             break;
         default:
             PADCHK();
-            p = DAT_8009d2e8;
+            p = BITTEN_OBJECT;
             p->w2e = o->w2e & 1;
             p->h->s2 = o->h->s2;
             p->y16 = o->y16 + p->s70;
             FUN_8001fd94(o);
-            if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70 + (DAT_8009d2e8->s72 - DAT_8009d2e8->s70)), 1)) {
+            if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70 + (BITTEN_OBJECT->s72 - BITTEN_OBJECT->s70)), 1)) {
                 o->b69 = 0;
                 o->bac = 3;
                 o->b9c = 0;
@@ -92,7 +92,7 @@ void FUN_801037d8(O *o)
                 o->s82 = 0;
                 o->wb2 = 0;
                 playerSetSlopeTilt(o, 0);
-                DAT_8009d2e8->a8c = ((unsigned char *)o)[0x8c];
+                BITTEN_OBJECT->a8c = ((unsigned char *)o)[0x8c];
             }
             break;
         }
@@ -102,21 +102,21 @@ void FUN_801037d8(O *o)
             o->wb2 = 0;
             o->vx = 0;
             o->vy = 0;
-            switch (DAT_8009d2e8->b2) {
+            switch (BITTEN_OBJECT->b2) {
             case 0: case 0x13: case 0x1f: case 0x28:
             case 0x3a: case 0x3b: case 0x3c: case 0x3d: case 0x3e: case 0x3f: case 0x40: case 0x41: case 0x42:
-                DAT_8009d2e8->b6 = 7;
+                BITTEN_OBJECT->b6 = 7;
                 break;
             case 10:
-                DAT_8009d2e8->b6 = DAT_8009d2e8->b6 + 1;
+                BITTEN_OBJECT->b6 = BITTEN_OBJECT->b6 + 1;
                 break;
             case 0x38:
-                if (DAT_8009d2e8->b3 != 0) {
-                    DAT_8009d2e8->b6 = 6;
+                if (BITTEN_OBJECT->b3 != 0) {
+                    BITTEN_OBJECT->b6 = 6;
                     break;
                 }
             default:
-                DAT_8009d2e8->b6 = 4;
+                BITTEN_OBJECT->b6 = 4;
                 break;
             }
             o->b5 = 0xf;
@@ -134,7 +134,7 @@ typedef struct O {
     char p7[0x8c - 0x84]; int a8c; char p7b[0x9c - 0x90]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
     char p9[0xb2 - 0xad]; unsigned short wb2;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8003c6, D_1f8001fc;
 extern void playerAirAccelerateX(O *);
@@ -161,51 +161,51 @@ void playerBiteHoldGeneric(O *o)
         *(int *)o->h += o->vx << 8;
         flag = 0;
         o->y16 += 8;
-        if (o->y16 + DAT_8009d2e8->s70 > DAT_8009d2e8->y16) {
-            o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+        if (o->y16 + BITTEN_OBJECT->s70 > BITTEN_OBJECT->y16) {
+            o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
             flag = 1;
         }
         if (o->vx < 0) {
             o->h->s2 -= 8;
-            if (o->h->s2 <= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 <= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) playerBiteHoldAttach(o);
             }
         } else {
             o->h->s2 += 8;
-            if (o->h->s2 >= DAT_8009d2e8->h->s2) {
-                o->h->s2 = DAT_8009d2e8->h->s2;
+            if (o->h->s2 >= BITTEN_OBJECT->h->s2) {
+                o->h->s2 = BITTEN_OBJECT->h->s2;
                 if (flag) playerBiteHoldAttach(o);
             }
         }
-        if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70 + (DAT_8009d2e8->s72 - DAT_8009d2e8->s70)), 1) || o->s20 > 10) {
+        if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70 + (BITTEN_OBJECT->s72 - BITTEN_OBJECT->s70)), 1) || o->s20 > 10) {
             playerBiteHoldAttach(o);
         }
         return;
     case 2:
-        switch (DAT_8009d2e8->b2) {
+        switch (BITTEN_OBJECT->b2) {
         case 0x38:
             PADCHK();
             {
-                O *q = DAT_8009d2e8;
+                O *q = BITTEN_OBJECT;
                 o->h->s2 = q->h->s2;
                 o->y16 = q->y16 - q->s70;
             }
             break;
         case 10:
-            o->h->s2 = DAT_8009d2e8->h->s2;
-            o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+            o->h->s2 = BITTEN_OBJECT->h->s2;
+            o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
             o->b9c = 0;
             PADCHK();
             break;
         default:
             PADCHK();
-            p = DAT_8009d2e8;
+            p = BITTEN_OBJECT;
             p->w2e = o->w2e & 1;
             p->h->s2 = o->h->s2;
             p->y16 = o->y16 + p->s70;
             FUN_8001fd94(o);
-            if (o->b69 != 0 || FUN_8003fd78(o, (short)(DAT_8009d2e8->y16 - o->y16 - o->s70 + (DAT_8009d2e8->s72 - DAT_8009d2e8->s70)), 1)) {
+            if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70 + (BITTEN_OBJECT->s72 - BITTEN_OBJECT->s70)), 1)) {
                 o->b69 = 0;
                 o->bac = 3;
                 o->b9c = 0;
@@ -215,7 +215,7 @@ void playerBiteHoldGeneric(O *o)
                 o->s82 = 0;
                 o->wb2 = 0;
                 playerSetSlopeTilt(o, 0);
-                DAT_8009d2e8->a8c = ((unsigned char *)o)[0x8c];
+                BITTEN_OBJECT->a8c = ((unsigned char *)o)[0x8c];
             }
             break;
         }
@@ -225,21 +225,21 @@ void playerBiteHoldGeneric(O *o)
             o->wb2 = 0;
             o->vx = 0;
             o->vy = 0;
-            switch (DAT_8009d2e8->b2) {
+            switch (BITTEN_OBJECT->b2) {
             case 0: case 0x13: case 0x1f: case 0x28:
             case 0x3a: case 0x3b: case 0x3c: case 0x3d: case 0x3e: case 0x3f: case 0x40: case 0x41: case 0x42:
-                DAT_8009d2e8->b6 = 7;
+                BITTEN_OBJECT->b6 = 7;
                 break;
             case 10:
-                DAT_8009d2e8->b6 = DAT_8009d2e8->b6 + 1;
+                BITTEN_OBJECT->b6 = BITTEN_OBJECT->b6 + 1;
                 break;
             case 0x38:
-                if (DAT_8009d2e8->b3 != 0) {
-                    DAT_8009d2e8->b6 = 6;
+                if (BITTEN_OBJECT->b3 != 0) {
+                    BITTEN_OBJECT->b6 = 6;
                     break;
                 }
             default:
-                DAT_8009d2e8->b6 = 4;
+                BITTEN_OBJECT->b6 = 4;
                 break;
             }
             o->b5 = 0xf;

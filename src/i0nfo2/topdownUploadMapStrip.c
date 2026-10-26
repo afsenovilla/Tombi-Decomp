@@ -2,7 +2,7 @@
 // MATCHING 800ed380 336
 extern void topdownBuildMapStrip(int i, int p);
 extern void func_800174C0(int p, int x, int y, int w, int h);
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 
 void topdownUploadMapStrip(unsigned char i, int p)
 {
@@ -42,9 +42,9 @@ void topdownUploadMapStrip(unsigned char i, int p)
     topdownBuildMapStrip(i, p);
     if (i < 2) {
         func_800174C0(p, x + 0x300, y, w, h);
-    } else if (D_8009C960[0] == 5) {
+    } else if (GAME[0] == 5) {
         func_800174C0(p, 0x40, y + 0x180, w, h);
-    } else if (*(int *)D_8009C960 == 0x20013) {
+    } else if (*(int *)GAME == 0x20013) {
         func_800174C0(p, 0x40, y, w, h);
     } else {
         func_800174C0(p, 0, y + 0x100, w, h);

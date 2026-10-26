@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 #define B(o, n) (((unsigned char *)(o))[n])
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned short DAT_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -13,12 +13,12 @@ void playerStepWalkIntoDepth(TObj *o)
     unsigned short f;
     switch (o->state) {
     case 0:
-        B(D_8009C330, 8) = o->active;
-        B(D_8009C330, 9) = 0;
+        B(PLAYER_EXT, 8) = o->active;
+        B(PLAYER_EXT, 9) = 0;
         o->velX = 0xb4;
         o->state++;
         if (((int*)&GAME.selectedArea)[0] == 0x40001) {
-            B(D_8009C330, 9) = 1;
+            B(PLAYER_EXT, 9) = 1;
             o->velX = 0x78;
             o->state = 2;
         }
@@ -86,12 +86,12 @@ void playerStepWalkIntoDepth(TObj *o)
     case 9:
         AnimAdvance(o);
         *(signed char *)&o->b0f = -8;
-        o->active = B(D_8009C330, 8);
+        o->active = B(PLAYER_EXT, 8);
         o->b9c = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        D_8009C330->timer = 0;
+        PLAYER_EXT->timer = 0;
         break;
     }
 }

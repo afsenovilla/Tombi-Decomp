@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern int D_1F8002E8;
 extern void *D_8012E078, *D_8012E07C;
 extern void AnimLoadDuration(TObj *);
@@ -68,7 +68,7 @@ void updateBoatman(TObj *o)
             if (p->b04 >= 2) {
                 p->b04++;
                 pl->animFrame = 1;
-                D_8009C330[9] = 5;
+                PLAYER_EXT[9] = 5;
                 pl->b9c = 1;
                 pl->velX = -0x400;
                 pl->b04 = 6;

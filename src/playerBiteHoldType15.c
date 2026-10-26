@@ -24,7 +24,7 @@ typedef struct O {
     char p4[0x40 - 0x1c]; H *h; char p5[0x70 - 0x44]; short s70; char p6[0x7c - 0x72]; short vx, vy;
     char p7[0x9c - 0x80]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern void FUN_8010eaf8(void);
 extern void FUN_8001fd94(O *);
 extern void FUN_8001f96c(int, int, int, int);
@@ -43,14 +43,14 @@ void FUN_80122a18(O *o)
     FUN_8001fd94(o);
     flag = 0;
     o->y16 += 8;
-    if (o->y16 + DAT_8009d2e8->s70 >= DAT_8009d2e8->y16) {
-        o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+    if (o->y16 + BITTEN_OBJECT->s70 >= BITTEN_OBJECT->y16) {
+        o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
         flag = 1;
     }
     if (o->vx < 0) {
         o->h->s2 -= 8;
-        if (o->h->s2 <= DAT_8009d2e8->h->s2) {
-            o->h->s2 = DAT_8009d2e8->h->s2;
+        if (o->h->s2 <= BITTEN_OBJECT->h->s2) {
+            o->h->s2 = BITTEN_OBJECT->h->s2;
             if (flag) {
                 FUN_800eeb5c(o, 0xd);
                 FUN_8001f96c(2, o->x12, o->y16, o->z1a);
@@ -58,8 +58,8 @@ void FUN_80122a18(O *o)
         }
     } else {
         o->h->s2 += 8;
-        if (o->h->s2 >= DAT_8009d2e8->h->s2) {
-            o->h->s2 = DAT_8009d2e8->h->s2;
+        if (o->h->s2 >= BITTEN_OBJECT->h->s2) {
+            o->h->s2 = BITTEN_OBJECT->h->s2;
             if (flag) {
                 FUN_800eeb5c(o, 0xd);
                 FUN_8001f96c(2, o->x12, o->y16, o->z1a);
@@ -72,7 +72,7 @@ void FUN_80122a18(O *o)
         o->b9c = 0;
         o->vx = 0;
         o->vy = 0;
-        p = DAT_8009d2e8;
+        p = BITTEN_OBJECT;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
         o->b6 = 2;
@@ -86,7 +86,7 @@ typedef struct O {
     char p4[0x40 - 0x1c]; H *h; char p5[0x70 - 0x44]; short s70; char p6[0x7c - 0x72]; short vx, vy;
     char p7[0x9c - 0x80]; unsigned char b9c; char p8[0xac - 0x9d]; unsigned char bac;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern void playerAirAccelerateX(void);
 extern void FUN_8001fd94(O *);
 extern void FUN_800eeb5c(O *, int);
@@ -106,14 +106,14 @@ void playerBiteHoldType15(O *o)
     FUN_8001fd94(o);
     flag = 0;
     o->y16 += 8;
-    if (o->y16 + DAT_8009d2e8->s70 >= DAT_8009d2e8->y16) {
-        o->y16 = DAT_8009d2e8->y16 - DAT_8009d2e8->s70;
+    if (o->y16 + BITTEN_OBJECT->s70 >= BITTEN_OBJECT->y16) {
+        o->y16 = BITTEN_OBJECT->y16 - BITTEN_OBJECT->s70;
         flag = 1;
     }
     if (o->vx < 0) {
         o->h->s2 -= 8;
-        if (o->h->s2 <= DAT_8009d2e8->h->s2) {
-            o->h->s2 = DAT_8009d2e8->h->s2;
+        if (o->h->s2 <= BITTEN_OBJECT->h->s2) {
+            o->h->s2 = BITTEN_OBJECT->h->s2;
             if (flag) {
                 FUN_800eeb5c(o, 0xd);
                 spawnImpactEffect(2, o->x12, o->y16, o->z1a);
@@ -121,8 +121,8 @@ void playerBiteHoldType15(O *o)
         }
     } else {
         o->h->s2 += 8;
-        if (o->h->s2 >= DAT_8009d2e8->h->s2) {
-            o->h->s2 = DAT_8009d2e8->h->s2;
+        if (o->h->s2 >= BITTEN_OBJECT->h->s2) {
+            o->h->s2 = BITTEN_OBJECT->h->s2;
             if (flag) {
                 FUN_800eeb5c(o, 0xd);
                 spawnImpactEffect(2, o->x12, o->y16, o->z1a);
@@ -135,7 +135,7 @@ void playerBiteHoldType15(O *o)
         o->b9c = 0;
         o->vx = 0;
         o->vy = 0;
-        p = DAT_8009d2e8;
+        p = BITTEN_OBJECT;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
         o->b6 = 2;

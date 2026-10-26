@@ -8,8 +8,8 @@ typedef struct {
 } O;
 typedef struct { unsigned char z; char p[0x1f]; short s20; } P;
 typedef struct { char p[2]; unsigned char k; } K;
-extern P *DAT_8009c330;
-extern K *DAT_8009d2e8;
+extern P *PLAYER_EXT;
+extern K *BITTEN_OBJECT;
 extern void FUN_800eeb5c(O *, int);
 extern void playerReleaseBittenAndClearFlags(O *);
 extern void FUN_8011c758(O *);
@@ -19,7 +19,7 @@ extern void playerStep48Area14(O *);
 void playerStep48ByArea(O *o)
 {
     if (o->a6 == 0) {
-        DAT_8009c330->s20 = 0;
+        PLAYER_EXT->s20 = 0;
         o->bc7 = 1;
         o->b9d = 0;
         o->bc6 = 0;
@@ -30,12 +30,12 @@ void playerStep48ByArea(O *o)
         o->wb0 = 0;
         o->d8c = 0;
         o->af = o->af & 1;
-        DAT_8009c330->z = 0;
+        PLAYER_EXT->z = 0;
         FUN_800eeb5c(o, 13);
         o->a7 = 0;
         o->a6 = o->a6 + 1;
     } else {
-        switch (DAT_8009d2e8->k) {
+        switch (BITTEN_OBJECT->k) {
         case 0xe:
             FUN_8011c758(o);
             break;

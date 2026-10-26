@@ -5,8 +5,8 @@
 #include "raw7.h"
 typedef struct { unsigned char b0; unsigned char b1; short w2; char p4[8]; short wc; short we; char p10[0x28 - 0x10]; unsigned short w28, w2a; } PL;
 
-extern TObj *D_8009C330;
-extern TObj *D_8009F0EC;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001fc, D_1f8003c6;
 extern unsigned char D_80115228[][2];
@@ -24,30 +24,30 @@ extern void playerSpinAimDir8B(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
-    TObj *p = D_8009C330;
+    TObj *p = PLAYER_EXT;
     p->animTimer = anim;
     if (p->animFrame != anim) {
         p->animTimer = anim;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
 }
 
 static __inline__ void rot(TObj *o)
 {
-    PL *p = (PL *)D_8009C330;
+    PL *p = (PL *)PLAYER_EXT;
     o->wb6 += p->we;
     if ((unsigned short)o->wb6 < 0x800) U8(p, 8) = 1;
-    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
-    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 0;
-    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) (*(unsigned char*)&D_8009C330->w08) = 1;
+    if ((unsigned)((unsigned short)o->wb6 - 0x800) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0x7ff) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+    if ((unsigned short)(o->wb6 + 0xfff) < 0x800) (*(unsigned char*)&PLAYER_EXT->w08) = 1;
 }
 
 #define SETTBL(o) \
     { \
         unsigned char *b = D_80115228[o->wb2]; \
-        PL *q = (PL *)D_8009C330; \
+        PL *q = (PL *)PLAYER_EXT; \
         q->we = b[0]; \
         q->w2 = b[1]; \
     }
@@ -55,7 +55,7 @@ static __inline__ void rot(TObj *o)
 #define SND(k) \
     startPadVibration(0, 0, 0xff, 2); \
     FUN_8001e560(3, k); \
-    D_8009C330->b0a = D_8009F0EC->b0c;
+    PLAYER_EXT->b0a = GRABBED_OBJECT->b0c;
 
 #define INC1(o, n) \
     { \
@@ -82,7 +82,7 @@ static __inline__ void rot(TObj *o)
 
 #define QBLK(o) \
     { \
-        TObj *q = D_8009F0EC; \
+        TObj *q = GRABBED_OBJECT; \
         switch (q->type) { \
         case 14: \
             { int t = (o->animFrame & 1) * 6 - 4; o->d30 = q->d30 + t; } \
@@ -115,27 +115,27 @@ void playerStepSpinOnObject(TObj *o)
     short i;
     short f;
 
-    D_8009C330->b0a = 0xff;
+    PLAYER_EXT->b0a = 0xff;
     switch (o->state) {
     case 0:
         o->wb6 = 0;
         {
-            signed char c = (*(signed char*)&D_8009C330->step);
+            signed char c = (*(signed char*)&PLAYER_EXT->step);
             (*(unsigned char*)&o->wac) = 2;
             o->wb2 = c + 1;
         }
-        D_8009C330->step = 0;
-        D_8009C330->b0a = D_8009F0EC->b0c;
+        PLAYER_EXT->step = 0;
+        PLAYER_EXT->b0a = GRABBED_OBJECT->b0c;
         {
-            PL *q = (PL *)D_8009C330;
+            PL *q = (PL *)PLAYER_EXT;
             q->w2 = 0;
             q->we = 0;
         }
         o->ba4 = 0;
-        (*(unsigned char*)&D_8009C330->w08) = 0;
-        (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+        (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
         {
-            PL *q = (PL *)D_8009C330;
+            PL *q = (PL *)PLAYER_EXT;
             q->wc = 0;
             q->w28 = 0xffff;
             q->w2a = 0xffff;
@@ -153,22 +153,22 @@ void playerStepSpinOnObject(TObj *o)
         rot(o);
         if (o->wb6 == 0) {
             if (o->animFrame & 1) {
-                if (((PL *)D_8009C330)->we > 0) {
-                    D_8009C330->b0a = D_8009F0EC->b0c;
+                if (((PL *)PLAYER_EXT)->we > 0) {
+                    PLAYER_EXT->b0a = GRABBED_OBJECT->b0c;
                     if (PAD_PRESSED[0] & 0x80) INC1(o, 9);
                     if (PAD_PRESSED[0] & 0x20) {
                         o->animFrame = 0;
-                        D_8009F0EC->state = 0;
+                        GRABBED_OBJECT->state = 0;
                     }
                     SETTBL(o);
                 }
             } else {
-                if (((PL *)D_8009C330)->we > 0) {
-                    D_8009C330->b0a = D_8009F0EC->b0c;
+                if (((PL *)PLAYER_EXT)->we > 0) {
+                    PLAYER_EXT->b0a = GRABBED_OBJECT->b0c;
                     if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
                     if (PAD_PRESSED[0] & 0x80) {
                         o->animFrame = 1;
-                        D_8009F0EC->state = 0;
+                        GRABBED_OBJECT->state = 0;
                     }
                     SETTBL(o);
                 }
@@ -176,7 +176,7 @@ void playerStepSpinOnObject(TObj *o)
         }
         setanim(o, 6);
         FUN_8001fec0(o);
-        D_8009C330->visible = 0x20;
+        PLAYER_EXT->visible = 0x20;
         a = (short)o->wb6 >> 4;
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
@@ -189,7 +189,7 @@ void playerStepSpinOnObject(TObj *o)
             o->h->p.whole += (o->animFrame & 1) ? 16 : -16;
             (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            D_8009C330->visible = 0;
+            PLAYER_EXT->visible = 0;
             o->timer = 6;
             o->d30 = 0;
             o->d34 = 0;
@@ -207,7 +207,7 @@ void playerStepSpinOnObject(TObj *o)
         rot(o);
         if (o->wb6 == 0) {
             if (o->animFrame & 1) {
-                if (((PL *)D_8009C330)->we > 0) {
+                if (((PL *)PLAYER_EXT)->we > 0) {
                     SND(0);
                     if (PAD_PRESSED[0] & 0x80) INC2(o, 9);
                     if (PAD_PRESSED[0] & 0x20) DEC(o);
@@ -217,10 +217,10 @@ void playerStepSpinOnObject(TObj *o)
                     if (PAD_PRESSED[0] & 0x80) INC2(o, 3);
                     if (PAD_PRESSED[0] & 0x20) DEC(o);
                     SETTBL(o);
-                    ((PL *)D_8009C330)->we = -((PL *)D_8009C330)->we;
+                    ((PL *)PLAYER_EXT)->we = -((PL *)PLAYER_EXT)->we;
                 }
             } else {
-                if (((PL *)D_8009C330)->we > 0) {
+                if (((PL *)PLAYER_EXT)->we > 0) {
                     SND(0);
                     if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
                     if (PAD_PRESSED[0] & 0x80) DEC(o);
@@ -230,23 +230,23 @@ void playerStepSpinOnObject(TObj *o)
                     if (PAD_PRESSED[0] & 0x20) INC1(o, 3);
                     if (PAD_PRESSED[0] & 0x80) DEC(o);
                     SETTBL(o);
-                    ((PL *)D_8009C330)->we = -((PL *)D_8009C330)->we;
+                    ((PL *)PLAYER_EXT)->we = -((PL *)PLAYER_EXT)->we;
                 }
             }
         }
         a = (short)o->wb6 >> 4;
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
-        D_8009C330->animFrame = 0xffff;
+        PLAYER_EXT->animFrame = 0xffff;
         o->anim = D_80011108;
         FUN_8001fe94(o, D_80115388[i]);
-        D_8009C330->visible = 0x20;
+        PLAYER_EXT->visible = 0x20;
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
             GV2.bb0 = 0;
             playerSpinAimDir8B(o);
-            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
-            else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 1;
+            else (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->state = 3;
             break;
         }
@@ -257,17 +257,17 @@ void playerStepSpinOnObject(TObj *o)
         rot(o);
         if (o->wb6 == 0) {
             if (o->animFrame & 1) {
-                if (((PL *)D_8009C330)->we > 0) {
+                if (((PL *)PLAYER_EXT)->we > 0) {
                     SND(2);
-                    (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+                    (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                     SETTBL(o);
                 } else {
                     SND(2);
                 }
             } else {
-                if (((PL *)D_8009C330)->we > 0) {
+                if (((PL *)PLAYER_EXT)->we > 0) {
                     SND(2);
-                    (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+                    (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                     SETTBL(o);
                 } else {
                     SND(2);
@@ -276,17 +276,17 @@ void playerStepSpinOnObject(TObj *o)
         }
         a = (short)o->wb6 >> 4;
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
-        D_8009C330->animFrame = 0xffff;
+        PLAYER_EXT->animFrame = 0xffff;
         o->anim = D_80011108;
         FUN_8001fe94(o, D_80115388[i]);
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
-        if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) break;
+        if ((*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) break;
         if (o->wb6 > o->d88) {
             (*(unsigned char*)&o->wac) = 0;
             (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            D_8009C330->visible = 0;
+            PLAYER_EXT->visible = 0;
             o->timer = 6;
             o->b9e = 4;
             o->d30 = 0;
@@ -300,10 +300,10 @@ void playerStepSpinOnObject(TObj *o)
         break;
     case 4:
         {
-            TObj *q = D_8009C330;
+            TObj *q = PLAYER_EXT;
             U8(q, 9) = 0;
             q->animFrame = 0xffff;
-            D_8009C330->b0a = 0;
+            PLAYER_EXT->b0a = 0;
         }
         f = 0;
         rot(o);
@@ -335,15 +335,15 @@ void playerStepSpinOnObject(TObj *o)
         swing(o, i, a);
         if (D_1f8001fc & D_1f8003c6) {
             playerSpinAimDir8A(o);
-            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 1;
-            else (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+            if (o->wb6 > o->d88) (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 1;
+            else (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->state = 5;
             break;
         }
         if (o->wb2 < 4) o->state = 2;
         break;
     case 5:
-        p = (PL *)D_8009C330;
+        p = (PL *)PLAYER_EXT;
         ((TObj *)p)->animFrame = 0xffff;
         f = 0;
         rot(o);
@@ -357,9 +357,9 @@ void playerStepSpinOnObject(TObj *o)
         }
         if (f) {
             o->wb6 = 0;
-            if (((PL *)D_8009C330)->we > 0) {
+            if (((PL *)PLAYER_EXT)->we > 0) {
                 SND(2);
-                (*(unsigned char*)((char*)&D_8009C330->w08 + 1)) = 0;
+                (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                 SETTBL(o);
             } else {
                 SND(2);
@@ -369,20 +369,20 @@ void playerStepSpinOnObject(TObj *o)
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
         swing(o, i, a);
-        if ((*(unsigned char*)((char*)&D_8009C330->w08 + 1)) != 0) break;
+        if ((*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) break;
         if (o->wb6 > o->d88) {
             o->wb6 = o->d88;
             playerSpinPlaceAndAccelerate(o, i, o->wb6 >> 4);
             {
-                PL *q = (PL *)D_8009C330;
+                PL *q = (PL *)PLAYER_EXT;
                 U8(q, 8) = 0;
                 q->we = 0;
-                ((PL *)D_8009C330)->w2 = 0;
+                ((PL *)PLAYER_EXT)->w2 = 0;
             }
             (*(unsigned char*)&o->wac) = 0;
             (*(signed char*)&o->b0f) = -8;
             o->wb0 = 0;
-            D_8009C330->visible = 0;
+            PLAYER_EXT->visible = 0;
             o->timer = 6;
             o->b9e = 4;
             o->d30 = 0;

@@ -4,7 +4,7 @@
 #include "gv6.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -34,7 +34,7 @@ void playerStepClimb(TObj *o)
         o->b9e = 6;
         o->d8c = 0;
         o->wb6 = 0;
-        *(short *)(D_8009C330 + 2) = 0;
+        *(short *)(PLAYER_EXT + 2) = 0;
         o->wb2 = 0;
         o->velH = 0;
         o->velV = 0;
@@ -58,7 +58,7 @@ void playerStepClimb(TObj *o)
                 *(unsigned char *)&o->waa = 0;
                 o->b9e = 0;
                 if (o->bbe & 8) {
-                    D_8009C330[8] = o->animFrame & 1;
+                    PLAYER_EXT[8] = o->animFrame & 1;
                     if ((o->bbe & 1) != o->animFrame) {
                         FUN_800eeb5c(o, 8);
                         FUN_8001fe94(o, 2);
@@ -78,7 +78,7 @@ void playerStepClimb(TObj *o)
                 *(unsigned char *)&o->waa = 0;
                 o->b9e = 0;
                 if (o->bbe & 8) {
-                    D_8009C330[8] = o->animFrame & 1;
+                    PLAYER_EXT[8] = o->animFrame & 1;
                     if ((o->bbe & 1) != o->animFrame) {
                         FUN_800eeb5c(o, 8);
                         FUN_8001fe94(o, 2);
@@ -112,7 +112,7 @@ void playerStepClimb(TObj *o)
             o->wb2 = 0;
             o->velH = 0;
             o->velV = 0;
-            D_8009C330[8] = 1;
+            PLAYER_EXT[8] = 1;
             playerSetFallLean(o);
             o->step = 2;
             o->state = 3;

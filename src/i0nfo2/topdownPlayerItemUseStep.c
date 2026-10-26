@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void topdownPlayerSetMoveAnim(TObj *o);
 extern void func_80026E0C(int item, int n);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C940, D_8009C941;
 extern unsigned char D_8009C942[];
@@ -35,8 +35,8 @@ void topdownPlayerItemUseStep(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        U8(D_8009C330, 8) = 0;
-        D_8009C330->timer = 0;
+        U8(PLAYER_EXT, 8) = 0;
+        PLAYER_EXT->timer = 0;
         o->d8c = 0;
         S16(o, 0xE0) = 0;
         o->w22 = 0;
@@ -119,7 +119,7 @@ void topdownPlayerItemUseStep(TObj *o)
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            D_8009C330->timer = 0;
+            PLAYER_EXT->timer = 0;
             o->timer = 0x1E;
             o->d8c = 0;
             o->w22 = 0;

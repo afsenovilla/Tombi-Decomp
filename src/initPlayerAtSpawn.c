@@ -8,7 +8,7 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_80079474[];
+extern int** SPAWN_TABLES[];
 
 
 typedef struct {
@@ -42,7 +42,7 @@ void initPlayerAtSpawn(void)
             D_8009BCEA = 2;
         }
     }
-    row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
     *(int*)(p + 0x10) = *row++ << 16;
     *(int*)(p + 0x14) = *row++ << 16;
     *(int*)(p + 0x18) = *row << 16;
@@ -78,7 +78,7 @@ void initPlayerAtSpawn(void)
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_80079474[];
+extern int** SPAWN_TABLES[];
 
 
 typedef struct {
@@ -112,7 +112,7 @@ void initPlayerAtSpawn(void)
             D_8009BCEA = 2;
         }
     }
-    row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
     *(int*)(p + 0x10) = *row++ << 16;
     *(int*)(p + 0x14) = *row++ << 16;
     *(int*)(p + 0x18) = *row << 16;

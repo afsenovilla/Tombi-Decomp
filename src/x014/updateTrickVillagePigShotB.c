@@ -12,7 +12,7 @@ INCLUDE_ASM_V("x14/nonmatchings/x14", func_801217A8_slps01144);
 #include "gamestate.h"
 
 extern void *D_80129FF0;
-extern short D_8007A3F0[], D_8007A5F0[];
+extern short NEG_SIN_TABLE[], COS_TABLE[];
 extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void AnimAdvance(TObj *);
@@ -84,8 +84,8 @@ void updateTrickVillagePigShotB(TObj *o)
             }
             a = o->d8c;
             v = o->velH;
-            x = v * D_8007A5F0[a];
-            y = v * D_8007A3F0[a];
+            x = v * COS_TABLE[a];
+            y = v * NEG_SIN_TABLE[a];
             o->h->raw += ((x << 4) >> 16) << 8;
             o->y.raw += ((y << 4) >> 16) << 8;
             o->velH += o->velX;

@@ -1,11 +1,11 @@
 // FUNC 8011a72c 304 X001
 // MATCHING 8011a72c 304
 #include "TOBJ.H"
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 
 int springVineSwayStep(TObj *o)
 {
-    o->h->raw = o->d30 + ((D_8007A3F0[((unsigned char *)&o->d84)[1]] * *(signed char *)&o->ba6) << 4);
+    o->h->raw = o->d30 + ((NEG_SIN_TABLE[((unsigned char *)&o->d84)[1]] * *(signed char *)&o->ba6) << 4);
     o->d84 += o->velH;
     o->velH += o->velX;
     if (o->velH == o->w74) {

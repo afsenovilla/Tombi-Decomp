@@ -2,7 +2,7 @@
 // MATCHING 80108dbc 420
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern unsigned char DAT_8009c93a;
 extern unsigned short D_1f8001c8;
 extern unsigned char DAT_801152e8[];
@@ -13,8 +13,8 @@ void playerEventStepWalkIntoDepth(TObj *o)
 {
     switch (o->state) {
     case 0:
-        (*(unsigned char*)&DAT_8009c330->w08) = o->active;
-        (*(unsigned char*)((char*)&DAT_8009c330->w08 + 1)) = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = o->active;
+        (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
         o->velX = 0x5a;
         o->active = 3;
         (*(unsigned char*)((char*)&o->da0 + 3)) = 2;
@@ -47,7 +47,7 @@ void playerEventStepWalkIntoDepth(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        DAT_8009c330->timer = 0;
+        PLAYER_EXT->timer = 0;
         o->active = 1;
         o->d8c = DAT_801152e8[o->wb0];
         o->b04 = 1;

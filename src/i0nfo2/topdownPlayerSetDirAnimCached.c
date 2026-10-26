@@ -3,15 +3,15 @@
 #include "TOBJ.H"
 extern void func_8001FE6C(TObj *o);
 typedef struct { char p[0x2C]; unsigned short w2c, w2e; } P330;
-extern P330 *D_8009C330;
+extern P330 *PLAYER_EXT;
 extern void *D_800106B4, *D_800106B8, *D_800106BC, *D_800106C0, *D_800106C4, *D_800106C8, *D_800106CC, *D_800106D0;
 extern void *D_800106D4, *D_800106D8, *D_800106DC, *D_800106E0, *D_800106E4, *D_800106E8, *D_800106EC;
 
 void topdownPlayerSetDirAnimCached(TObj *o, int mode, int dir)
 {
     char d = dir;
-    if (D_8009C330->w2c == D_8009C330->w2e) return;
-    D_8009C330->w2c = dir + mode * 8;
+    if (PLAYER_EXT->w2c == PLAYER_EXT->w2e) return;
+    PLAYER_EXT->w2c = dir + mode * 8;
     switch ((short)mode) {
     case 0:
         switch (dir &= 7) {
@@ -61,5 +61,5 @@ void topdownPlayerSetDirAnimCached(TObj *o, int mode, int dir)
         break;
     }
     func_8001FE6C(o);
-    D_8009C330->w2e = D_8009C330->w2c;
+    PLAYER_EXT->w2e = PLAYER_EXT->w2c;
 }

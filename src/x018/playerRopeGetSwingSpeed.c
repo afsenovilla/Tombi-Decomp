@@ -2,7 +2,7 @@
 // MATCHING 800fb280 240
 extern short DAT_800a60ea;
 extern short DAT_800a60ec;
-extern char *DAT_8009c330;
+extern char *PLAYER_EXT;
 int playerRopeGetSwingSpeed(void)
 {
     int r = 0;
@@ -28,6 +28,6 @@ int playerRopeGetSwingSpeed(void)
         else if (DAT_800a60ec > 0) r = 3;
         break;
     }
-    if (DAT_8009c330[10] != 0) r = 4;
+    if (PLAYER_EXT[10] != 0) r = 4;
     return r;
 }

@@ -1,7 +1,7 @@
 // FUNC 8011b958 388 X001
 // MATCHING 8011b958 388
 #include "TOBJ.H"
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 
 void springVineStep4(TObj *o)
 {
@@ -32,7 +32,7 @@ void springVineStep4(TObj *o)
             o->y.raw = o->d34;
             o->timer++;
         }
-        o->y.raw += (D_8007A5F0[(unsigned char)o->d88] * o->velV) >> 4;
+        o->y.raw += (COS_TABLE[(unsigned char)o->d88] * o->velV) >> 4;
         if (o->b6a == 1) {
             o->state++;
         }

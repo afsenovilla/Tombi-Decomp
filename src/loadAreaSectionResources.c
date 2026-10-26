@@ -1,8 +1,8 @@
 // FUNC 8001d1bc 432 MAIN0
 // MATCHING 8001d1bc 432
-extern unsigned short DAT_8009c960[];
+extern unsigned short GAME[];
 extern unsigned short DAT_8009c962;
-extern unsigned short DAT_8009f838;
+extern unsigned short AREA_VARIANT;
 extern unsigned char *PTR_DAT_80077c4c[];
 extern unsigned char DAT_8009d2c3;
 extern unsigned char DAT_1f8003d3;
@@ -25,8 +25,8 @@ int loadAreaSectionResources(int force)
     unsigned char *t;
     unsigned short *g;
 
-    g = DAT_8009c960;
-    idx = g[0] + DAT_8009f838;
+    g = GAME;
+    idx = g[0] + AREA_VARIANT;
     t = PTR_DAT_80077c4c[idx];
     b = t[DAT_8009c962];
     ret = -1;

@@ -12,10 +12,10 @@ typedef struct O {
     unsigned char bac; char pad[3]; short hb0; short hb2; char pb4[2]; short hb6;
     char pb8[0xe0-0xb8]; short he0; char pe2[2]; void *de4; char pe8[0xf6-0xe8]; short hf6;
 } O;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern char D_80010CA0[];
-extern void *D_8009D2E8;
+extern void *BITTEN_OBJECT;
 extern void AnimJump(O *, int);
 extern int AnimAdvance(O *);
 extern short ObjTileCollide(O *, int, int);
@@ -32,14 +32,14 @@ void playerStepVerticalJump(O *o)
         o->b9e = 0;
         o->d8c = 0;
         o->hb6 = 0;
-        D_8009C330->h2c = 0x1f;
-        if (D_8009C330->h2e != 0x1f) {
-            D_8009C330->h2c = 0x1f;
+        PLAYER_EXT->h2c = 0x1f;
+        if (PLAYER_EXT->h2e != 0x1f) {
+            PLAYER_EXT->h2c = 0x1f;
             ObjSetAnimFromTable(o);
             AnimJump(o, 0);
-            D_8009C330->h2e = D_8009C330->h2c;
+            PLAYER_EXT->h2e = PLAYER_EXT->h2c;
         }
-        D_8009C330->h02 = 0;
+        PLAYER_EXT->h02 = 0;
         o->vy = -0x340;
         o->hb2 = 0;
         o->vx = 0;
@@ -92,12 +92,12 @@ void playerStepVerticalJump(O *o)
                 ((unsigned char*)&GVARS.b42)[0] = 0;
             if (GVARS.b3f != 0)
                 GVARS.b3f = 0;
-            D_8009D2E8 = o->de4;
+            BITTEN_OBJECT = o->de4;
             o->b0f = -8;
-            D_8009C330->b8 = 0;
-            D_8009C330->h20 = 0;
+            PLAYER_EXT->b8 = 0;
+            PLAYER_EXT->h20 = 0;
             o->ba5 = 0;
-            D_8009C330->h02 = 0;
+            PLAYER_EXT->h02 = 0;
             o->b9e = 0;
             o->ba2 = 0;
             o->vx = 0;
@@ -139,7 +139,7 @@ void playerStepVerticalJump(O *o)
             else
                 o->active = 1;
             o->bac = 0;
-            D_8009C330->h02 = 0;
+            PLAYER_EXT->h02 = 0;
             o->b9e = 0;
             o->baa = 0;
             o->ba2 = 0;

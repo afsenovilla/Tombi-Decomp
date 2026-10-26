@@ -8,8 +8,8 @@
 typedef struct { short x, y; } P2;
 extern void *D_8012EE80[], *D_8012EE84[], *D_8012EEB0[], *D_8012EEB4[], *D_8012EEB8[], *D_8012EEBC[];
 extern void *D_8012EEC0[];
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -60,9 +60,9 @@ void jellyfishSpawnChild(TObj *o)
         break;
     case 1:
         AnimAdvance(o);
-        o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4;
+        o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4;
         s = Blocked(o);
-        o->y.raw += (D_8007A3F0[*(unsigned char *)&o->d88] * o->velH) >> 4;
+        o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4;
         c = TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x20));
         if (s || c) {
             o->state = 10;

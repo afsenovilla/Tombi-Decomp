@@ -5,7 +5,7 @@
 #include "raw7.h"
 
 typedef struct { char p0[6]; unsigned char b6; char p7[2]; unsigned char b9; char pa[0x20 - 0xa]; short w20; } PL;
-extern PL *D_8009C330;
+extern PL *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern void playerSetAnimIfChangedAt(TObj *, int, int);
 extern void playerSetAnim(TObj *, int, int);
@@ -16,8 +16,8 @@ void playerStep3AArea4(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_8009C330->b6 = o->active;
-        D_8009C330->b9 = 0;
+        PLAYER_EXT->b6 = o->active;
+        PLAYER_EXT->b9 = 0;
         o->velX = 0x5a;
         o->velY = 0x5a;
         o->active = 2;
@@ -60,14 +60,14 @@ void playerStep3AArea4(TObj *o)
     case 9:
         if (AnimAdvance(o)) {
             *(signed char *)&o->b0f = -8;
-            o->active = D_8009C330->b6;
+            o->active = PLAYER_EXT->b6;
             o->b9c = 0;
             o->ba5 = 0;
             (*(unsigned char*)&o->wac) = 0;
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            D_8009C330->w20 = 0;
+            PLAYER_EXT->w20 = 0;
             o->d8c = D_801152E8[o->wb0];
             o->b04 = 1;
             o->step = 0;

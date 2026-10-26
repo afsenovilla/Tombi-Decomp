@@ -1,6 +1,6 @@
 // FUNC 80020aec 120 MAIN0
 // MATCHING 80020aec 120
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned int DAT_8009c994[][8];
 
 void setAreaFlagBit(int bit)
@@ -10,9 +10,9 @@ void setAreaFlagBit(int bit)
 
     w = bit / 32;
     b = bit % 32;
-    if (DAT_8009c960 == 0x10)
+    if (GAME == 0x10)
         k = 7;
-    else if ((k = DAT_8009c960) == 0x11)
+    else if ((k = GAME) == 0x11)
         k = 0xc;
     DAT_8009c994[k][w] |= 1 << b;
 }

@@ -1,7 +1,7 @@
 // FUNC 800f7aac 1408 X018
 // MATCHING 800f7aac 1408
 #include "TOBJ.H"
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
@@ -16,13 +16,13 @@ extern void ObjSetAnimFromTable(TObj *);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
-    TObj *p = D_8009C330;
+    TObj *p = PLAYER_EXT;
     p->animTimer = anim;
     if (p->animFrame != anim) {
         p->animTimer = anim;
         ObjSetAnimFromTable(o);
         FUN_8001fe94(o, 0);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
 }
 
@@ -38,7 +38,7 @@ void playerStepPerchLeap(TObj *o)
         setanim(o, 9);
         (*(unsigned char*)&o->waa) = 0;
         o->wb6 = 0;
-        (*(short*)&D_8009C330->type) = 0;
+        (*(short*)&PLAYER_EXT->type) = 0;
         k = o->b9e;
         o->wb2 = 0;
         if (k == 0 || (k >= 3 && k != 11)) {
@@ -174,7 +174,7 @@ void playerStepPerchLeap(TObj *o)
     case 5:
         if (FUN_8001fec0(o)) {
             *(signed char *)&o->b0f = -8;
-            (*(short*)&D_8009C330->type) = 0;
+            (*(short*)&PLAYER_EXT->type) = 0;
             (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;
             o->velY = 0;

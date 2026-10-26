@@ -6,9 +6,9 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; } G;
-extern G *D_8009C330;
-extern int D_8009D2E8;
-extern int D_8009F0EC;
+extern G *PLAYER_EXT;
+extern int BITTEN_OBJECT;
+extern int GRABBED_OBJECT;
 extern int D_8009F0EC_r;
 extern unsigned char D_801152E8[];
 void setFacingFromPad(TObj *o);
@@ -27,9 +27,9 @@ void playerBittenJumpAirMove(TObj *o)
     setFacingFromPad(o);
     ObjMotionStep(o);
     if (*(unsigned char *)&o->wac == 2) {
-        D_8009D2E8 = *(int *)((char *)o + 0xe4);
-        D_8009C330->b8 = 0;
-        D_8009C330->w20 = 0;
+        BITTEN_OBJECT = *(int *)((char *)o + 0xe4);
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w20 = 0;
         o->d8c = 0;
         o->ba7 = 0;
         o->ba5 = 0;
@@ -40,13 +40,13 @@ void playerBittenJumpAirMove(TObj *o)
     if (o->b69 == 1) {
         ObjSetAnimFromTable(o);
         AnimJump(o, 0);
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         goto reset;
     }
     if (ObjTileCollide(o, 0, 0) != 0) {
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         o->d84 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
     reset:
         o->b9c = 0;
         o->ba7 = 0;
@@ -62,11 +62,11 @@ void playerBittenJumpAirMove(TObj *o)
         o->d8c += 0x10;
         if (o->d8c >= 0x300) {
             o->d8c = 0x300;
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             *((unsigned char *)o + 0xad) = 0;
             o->b9c = 2;
             o->wb2 = 0;
-            D_8009C330->w20 = 0xe;
+            PLAYER_EXT->w20 = 0xe;
             if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
@@ -77,11 +77,11 @@ void playerBittenJumpAirMove(TObj *o)
         o->d8c -= 0x10;
         if (o->d8c <= 0x100) {
             o->d8c = 0x100;
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             *((unsigned char *)o + 0xad) = 0;
             o->b9c = 2;
             o->wb2 = 0;
-            D_8009C330->w20 = 0xe;
+            PLAYER_EXT->w20 = 0xe;
             if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
                 o->ba7 = 1;
             o->step = 2;
@@ -90,9 +90,9 @@ void playerBittenJumpAirMove(TObj *o)
         }
     }
     if (*(unsigned char *)&o->wac < 2) {
-        if ((D_8009F0EC = playerProbeGrab(o, 0)) != 0) {
-            D_8009C330->b8 = 0;
-            D_8009C330->w20 = 0;
+        if ((GRABBED_OBJECT = playerProbeGrab(o, 0)) != 0) {
+            PLAYER_EXT->b8 = 0;
+            PLAYER_EXT->w20 = 0;
             *(unsigned char *)&o->wac = 0;
             o->ba7 = 0;
             o->b9c = 0;

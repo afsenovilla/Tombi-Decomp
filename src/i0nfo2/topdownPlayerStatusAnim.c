@@ -5,7 +5,7 @@ extern int rand(void);
 extern void func_8001FE6C(TObj *o);
 extern int func_8001FEC0(TObj *o);
 extern unsigned char TALK_POSE;
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void *D_800106F0[];
 extern void *D_80010700[];
 extern void *D_8001070C[];
@@ -29,28 +29,28 @@ void topdownPlayerStatusAnim(TObj *arg)
     case 1:
     case 5:
         if ((rand() & 0x3F) == 0) {
-            D_8009C330->animTimer = 0x5A;
-            if (D_8009C330->animFrame != 0x5A) {
+            PLAYER_EXT->animTimer = 0x5A;
+            if (PLAYER_EXT->animFrame != 0x5A) {
                 o->anim = D_800106F0[d];
                 func_8001FE6C(o);
-                D_8009C330->animFrame = D_8009C330->animTimer;
+                PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
             }
         }
         if (func_8001FEC0(o)) {
-            D_8009C330->animFrame = 0xFF;
+            PLAYER_EXT->animFrame = 0xFF;
         }
         break;
     case 2:
-        D_8009C330->animTimer = 0x5B;
-        if (D_8009C330->animFrame != 0x5B) {
+        PLAYER_EXT->animTimer = 0x5B;
+        if (PLAYER_EXT->animFrame != 0x5B) {
             o->anim = D_8001070C[d];
             func_8001FE6C(o);
-            D_8009C330->animFrame = D_8009C330->animTimer;
+            PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
         }
         func_8001FEC0(o);
         break;
     case 3: {
-        TObj *p = D_8009C330;
+        TObj *p = PLAYER_EXT;
         p->animTimer = 0x5B;
         if (p->animFrame != 0x5B) {
             o->anim = D_8001070C[d];
@@ -60,11 +60,11 @@ void topdownPlayerStatusAnim(TObj *arg)
         break;
     }
     case 4:
-        D_8009C330->animTimer = 0x5C;
-        if (D_8009C330->animFrame != 0x5C) {
+        PLAYER_EXT->animTimer = 0x5C;
+        if (PLAYER_EXT->animFrame != 0x5C) {
             o->anim = D_80010700[d];
             func_8001FE6C(o);
-            D_8009C330->animFrame = D_8009C330->animTimer;
+            PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
         }
         func_8001FEC0(o);
         break;

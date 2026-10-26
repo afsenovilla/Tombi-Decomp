@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned short D_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -12,7 +12,7 @@ void playerStepDepthShift(TObj *o)
     unsigned short f;
     switch (o->state) {
     case 0:
-        (*(unsigned char*)&D_8009C330->w08) = o->active;
+        (*(unsigned char*)&PLAYER_EXT->w08) = o->active;
         f = o->animFrame;
         o->velX = 0x78;
         o->active = 2;
@@ -44,12 +44,12 @@ void playerStepDepthShift(TObj *o)
         }
         if ((o->velX -= 5) == 0) {
             (*(signed char*)&o->b0f) = -8;
-            o->active = (*(unsigned char*)&D_8009C330->w08);
+            o->active = (*(unsigned char*)&PLAYER_EXT->w08);
             o->b9c = 0;
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            D_8009C330->timer = 0;
+            PLAYER_EXT->timer = 0;
         }
         break;
     }

@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern void playerSetAnim(TObj *, int, int);
 extern int AnimAdvance(TObj *);
 void l4Type1BCarryPlayer(TObj *o)
@@ -57,7 +57,7 @@ void l4Type1BCarryPlayer(TObj *o)
         case 3:
             g->d8c--;
             g->h->raw += o->velH << 8;
-            g->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
+            g->y.raw -= (COS_TABLE[*(unsigned char *)&o->d88] * o->velV) >> 4;
             o->d88 += 2;
             if (--o->timer == -1)
                 o->state++;

@@ -9,9 +9,9 @@ typedef struct {
 } PL;
 extern void FUN_8001fe6c(TObj *);
 extern char DAT_80010de0[];
-extern PL *DAT_8009c330;
+extern PL *PLAYER_EXT;
 extern unsigned char DAT_8009d2b1;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned char DAT_8009ce0b;
 extern unsigned char DAT_8009d0da;
 extern unsigned char DAT_8009d0d9;
@@ -28,7 +28,7 @@ int playerIdlePickFidgetAnim(TObj *o)
         r = 0xff;
         if (DAT_8009d2b1 == 1) {
             r = 10;
-            if (DAT_8009c960 == 3) {
+            if (GAME == 3) {
                 r = 0xc;
                 o->w7a = 7;
             }
@@ -43,61 +43,61 @@ int playerIdlePickFidgetAnim(TObj *o)
         break;
     case 4:
         if (DAT_8009ce0b == 0) {
-            DAT_8009c330->w2e = 0xffff;
+            PLAYER_EXT->w2e = 0xffff;
             o->anim = DAT_80010de0;
             FUN_8001fe6c(o);
             r = 1;
         } else {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             r = 3;
         }
         break;
     case 5:
         if (DAT_8009d0da != 0) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             r = 3;
         } else r = 0xff;
         break;
     case 6:
         if (DAT_8009d0d9 != 0) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             r = 3;
         } else r = 0xff;
         break;
     case 7:
         if (DAT_8009d2c3 & 2) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             o->w7a = 8;
             r = 0xb;
         } else r = 0xff;
         break;
     case 8:
-        DAT_8009c330->b1e++;
+        PLAYER_EXT->b1e++;
         r = 3;
         break;
     case 9:
-        DAT_8009c330->w2e = 0xffff;
+        PLAYER_EXT->w2e = 0xffff;
         o->anim = DAT_80010de0;
         FUN_8001fe6c(o);
         r = 0xd;
         break;
     case 10:
         if (DAT_8009cdc8 == 0xff) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             r = 0xb;
             o->w7a = 9;
         } else r = 0xff;
         break;
     case 11:
         if (DAT_8009d0d9 != 0) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             o->w7a = 0x25;
             r = 0xb;
         } else r = 0xff;
         break;
     case 12:
         if (DAT_8009cdc5 == 0xff) {
-            DAT_8009c330->b1e++;
+            PLAYER_EXT->b1e++;
             r = 0xb;
             o->w7a = 0x37;
         } else r = 0xff;

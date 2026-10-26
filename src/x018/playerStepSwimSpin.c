@@ -3,8 +3,8 @@
 /* volatile store of velY makes the later read reload it (game: lh + move copy) */
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *DAT_8009c330;
-extern int DAT_8009d2e8;
+extern TObj *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern short FUN_8001fe3c(int, int);
 extern short FUN_8003fd78(TObj *, int, int);
@@ -46,8 +46,8 @@ void playerStepSwimSpin(TObj *o)
     *(volatile short *)&o->velY = o->velY - 0x10;
     o->timer--;
     if ((*(unsigned char*)&o->wac) == 2) {
-        DAT_8009d2e8 = S32(o, 0xe4);
-        (*(unsigned char*)&DAT_8009c330->w08) = 0;
+        BITTEN_OBJECT = S32(o, 0xe4);
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
         o->ba7 = 0;
         o->ba5 = 0;
         o->step = 0x48;

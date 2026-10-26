@@ -17,7 +17,7 @@ typedef struct {
     unsigned short w2e;
 } P800FC414;
 
-extern P800FC414 *D_8009C330;
+extern P800FC414 *PLAYER_EXT;
 extern unsigned char D_8009C960b[];
 extern unsigned char D_801152E8[];
 extern char D_80077CF4[];
@@ -35,12 +35,12 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern void playerHandleHazardContact(TObj *, int);
 
 #define SETANIM_IF(n) \
-    D_8009C330->w2c = n; \
-    if (D_8009C330->w2e != n) { \
-        D_8009C330->w2c = n; \
+    PLAYER_EXT->w2c = n; \
+    if (PLAYER_EXT->w2e != n) { \
+        PLAYER_EXT->w2c = n; \
         FUN_800efc04(o); \
         FUN_8001fe94(o, 0); \
-        D_8009C330->w2e = D_8009C330->w2c; \
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c; \
     }
 
 #define ADD7C() \
@@ -91,7 +91,7 @@ static __inline__ int fall(TObj *o)
         (*(unsigned char*)((char*)&o->wac + 1)) = 1;
         o->velY += 0x223;
         o->y.raw += o->velY << 8;
-        D_8009C330->t20 = 0x21;
+        PLAYER_EXT->t20 = 0x21;
         if (o->velY >= 0x447) {
             U8(o, 0xcd) = 0;
             U8(o, 0xce) = 0;
@@ -226,7 +226,7 @@ void playerHurtLandRecover(TObj *o)
             if (playerHurtCheckFastFall(o))
                 return;
             if (FUN_8001fec0(o)) {
-                D_8009C330->b8 = 0;
+                PLAYER_EXT->b8 = 0;
                 o->active = 3;
                 S16(o, 0xe0) = 0x8c;
                 U8(o, 0xd1) = 0;

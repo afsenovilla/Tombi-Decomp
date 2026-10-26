@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800EB6AC (FUN_800eb6ac.c): no area 9 section 3 animation set.
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_80114bdc[];
 extern void *DAT_80077cdc;
 extern void **DAT_80115a08[];
@@ -32,7 +32,7 @@ void FUN_800eb6ac(TObj *o)
         o->animFrame = 0;
         o->w22 = *p++;
         o->b6b = *p++;
-        o->anim = DAT_80115948[DAT_8009c960 * 4 + o->b0c][o->b6b];
+        o->anim = DAT_80115948[GAME * 4 + o->b0c][o->b6b];
         o->velV = *p;
         FUN_8001fe6c(o);
         break;
@@ -61,7 +61,7 @@ void FUN_800eb6ac(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_80114bdc[];
 extern void *DAT_80077cdc;
 extern void **DAT_80115a08[];
@@ -89,7 +89,7 @@ void updateBreakPiece(TObj *o)
         o->animFrame = 0;
         o->w22 = *p++;
         o->b6b = *p++;
-        g = &DAT_8009c960;
+        g = &GAME;
         if (*(int *)g == 0x30009)
             o->anim = DAT_80115a08[o->b0c][o->b6b];
         else

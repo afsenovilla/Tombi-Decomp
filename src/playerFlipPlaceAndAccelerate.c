@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct G { char p0[2]; short w2; char p1[4]; unsigned char b8; char p2[5]; short we; } G;
 extern unsigned char *DAT_8009c330;
-extern G *DAT_8009c330b[];
+extern G *PLAYER_EXT[];
 extern int FUN_8001fe3c(int, int);
 extern int FUN_8001fe0c(int, int);
 
@@ -32,7 +32,7 @@ void playerFlipPlaceAndAccelerate(TObj *o, int b, int p)
         r = s + o->d34;
     }
     o->y.p.whole = r;
-    g = DAT_8009c330b[0];
+    g = PLAYER_EXT[0];
     d = g->we;
     if (g->b8) {
         s = g->w2;

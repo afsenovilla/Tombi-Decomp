@@ -18,10 +18,10 @@ typedef struct {
     unsigned short w2e;
 } G330;
 #define OB(o, n) (((unsigned char *)(o))[n])
-extern G330 *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern G330 *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned short PAD_PRESSED;
-extern int DAT_8009c960;
+extern int GAME;
 extern unsigned char DAT_8009d2b0;
 extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
@@ -39,30 +39,30 @@ void playerStepClimbObject(TObj *o)
     int t;
     Fix16 *h;
     int v;
-    DAT_8009c330->b7 = o->animFrame;
+    PLAYER_EXT->b7 = o->animFrame;
     switch (o->state) {
     case 0:
         o->wb6 = -0x420;
-        DAT_8009c330->w0e = 0;
-        DAT_8009c330->w02 = 0x10;
-        o->wb2 = DAT_8009f0ec->box1;
+        PLAYER_EXT->w0e = 0;
+        PLAYER_EXT->w02 = 0x10;
+        o->wb2 = GRABBED_OBJECT->box1;
         OB(o, 0xa9) = 1;
         o->animFrame &= 1;
-        DAT_8009c330->b8 = 0;
-        DAT_8009c330->b9 = 0;
-        DAT_8009c330->w0c = 0;
-        DAT_8009c330->w2e = 0xffff;
-        DAT_8009c330->w28 = 0xffff;
-        DAT_8009c330->w2a = 0xffff;
-        o->velH = DAT_8009f0ec->h->p.whole - o->h->p.whole;
-        o->velV = DAT_8009f0ec->y.p.whole - o->y.p.whole;
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->b9 = 0;
+        PLAYER_EXT->w0c = 0;
+        PLAYER_EXT->w2e = 0xffff;
+        PLAYER_EXT->w28 = 0xffff;
+        PLAYER_EXT->w2a = 0xffff;
+        o->velH = GRABBED_OBJECT->h->p.whole - o->h->p.whole;
+        o->velV = GRABBED_OBJECT->y.p.whole - o->y.p.whole;
         o->wb0 = 0;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
         o->velX = o->wb8;
-        o->h->p.whole = DAT_8009f0ec->h->p.whole + o->wb8;
-        o->y.p.whole = DAT_8009f0ec->y.p.whole + o->wba + 8;
+        o->h->p.whole = GRABBED_OBJECT->h->p.whole + o->wb8;
+        o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba + 8;
         o->anim = DAT_80011148;
         FUN_8001fe94(o, 0);
         o->timer = 10;
@@ -73,7 +73,7 @@ void playerStepClimbObject(TObj *o)
             o->state = 2;
         break;
     case 2:
-        if (DAT_8009f0ec->type == 0x35)
+        if (GRABBED_OBJECT->type == 0x35)
             goto up;
         pad = &PAD_PRESSED;
         if (*pad & 0x10) {
@@ -92,7 +92,7 @@ void playerStepClimbObject(TObj *o)
         else
             *(signed char *)&o->b0f = -8;
         playerClimbFollowObject(o);
-        if (DAT_8009c960 == 0x30000)
+        if (GAME == 0x30000)
             break;
         if (o->animFrame & 1)
             t = DAT_1f8001fc & 0x80;
@@ -100,7 +100,7 @@ void playerStepClimbObject(TObj *o)
             t = DAT_1f8001fc & 0x20;
         if (t) {
             FUN_8001e560(0x1e, 8);
-            DAT_8009c330->w2e = 0xff;
+            PLAYER_EXT->w2e = 0xff;
             FUN_800eeb5c(o, 0x38);
             o->state = 3;
         }

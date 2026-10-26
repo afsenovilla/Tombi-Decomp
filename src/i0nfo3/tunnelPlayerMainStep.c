@@ -7,7 +7,7 @@ extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void tunnelPlayerWalkStep(TObj *o);
 extern void tunnelPlayerItemUseStep(TObj *o);
 typedef struct { char p[0x2C]; unsigned short w2c; } P330;
-extern P330 *D_8009C330;
+extern P330 *PLAYER_EXT;
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009C975;
 extern unsigned char TALK_POSE;
@@ -104,7 +104,7 @@ short *e; int d; unsigned short w;
         *(unsigned char *)&o->wac = 0;
         switch (o->state) {
         case 0:
-            D_8009C330->w2c = o->animFrame |= 8;
+            PLAYER_EXT->w2c = o->animFrame |= 8;
             tunnelPlayerSetMoveAnim(o);
             o->state++;
         case 1:

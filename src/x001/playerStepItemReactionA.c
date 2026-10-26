@@ -2,7 +2,7 @@
 // MATCHING 80106b50 608
 #include "TOBJ.H"
 #define B(o, n) (*((unsigned char *)(o) + (n)))
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e4f0(int);
@@ -35,8 +35,8 @@ void playerStepItemReactionA(TObj *o)
         playerSetAngleFromSlope(o);
         if (o->velY > 0x400) {
             B(o, 0xac) = 1;
-            DAT_8009c330[0x1e] = 0;
-            DAT_8009c330[0x1f] = 0;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
             playerSetFallLean(o);
             o->step = 2;
             o->state = 3;
@@ -72,8 +72,8 @@ void playerStepItemReactionA(TObj *o)
         playerSetAngleFromSlope(o);
         if (o->velY > 0x400) {
             B(o, 0xac) = 1;
-            DAT_8009c330[0x1e] = 0;
-            DAT_8009c330[0x1f] = 0;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
             playerSetFallLean(o);
             o->step = 2;
             o->state = 3;

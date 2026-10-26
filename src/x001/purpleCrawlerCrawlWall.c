@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } X;
 
-extern short D_8007A5F0[], D_8007A1F0[];
+extern short COS_TABLE[], D_8007A1F0[];
 extern unsigned char D_8013C7C8[], D_8013C7D8[];
 extern char D_80077CE8[], D_80077CF4[];
 extern void *D_8013FC74[];
@@ -47,7 +47,7 @@ static __inline__ short wall(TObj *o)
 static __inline__ void mv(TObj *o, int a, short sp)
 {
     a &= 0xff;
-    o->h->raw += (D_8007A5F0[a] * sp) >> 4;
+    o->h->raw += (COS_TABLE[a] * sp) >> 4;
     o->y.raw += (D_8007A1F0[a] * sp) >> 4;
 }
 

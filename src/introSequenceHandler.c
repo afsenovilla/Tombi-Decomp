@@ -10,7 +10,7 @@ extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, DAT_1f8001cc, DAT_1f8001cd
 extern unsigned short DAT_1f8001fc;
 extern int DAT_8009f7e4;
 extern unsigned char DAT_8009c974;
-extern unsigned short DAT_8009c960, DAT_8009c962, DAT_8009c982;
+extern unsigned short GAME, DAT_8009c962, DAT_8009c982;
 extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
 extern void queueSystemLoadList(int, int);
 extern void loadCurrentArea(int);
@@ -70,7 +70,7 @@ void introSequenceHandler(void)
         }
         *(unsigned short *)(TASK_C + 0x4a) = 1;
         *(unsigned short *)(TASK_C + 0x4e) = 0;
-        DAT_8009d2a8 = DAT_8009c960;
+        DAT_8009d2a8 = GAME;
         DAT_8009d2aa = DAT_8009c962;
         DAT_8009d2ac = DAT_8009c982;
         return;
@@ -83,7 +83,7 @@ extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, DAT_1f8001cc, DAT_1f8001cd
 extern unsigned short DAT_1f8001fc;
 extern int DAT_8009f7e4;
 extern unsigned char DAT_8009c974;
-extern unsigned short DAT_8009c960, DAT_8009c962, DAT_8009c982;
+extern unsigned short GAME, DAT_8009c962, DAT_8009c982;
 extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
 extern void queueSystemLoadList(int, int);
 extern void loadCurrentArea(int);
@@ -147,7 +147,7 @@ void introSequenceHandler(void)
         }
         *(unsigned short *)(TASK_C + 0x4a) = 1;
         *(unsigned short *)(TASK_C + 0x4e) = 0;
-        DAT_8009d2a8 = DAT_8009c960;
+        DAT_8009d2a8 = GAME;
         DAT_8009d2aa = DAT_8009c962;
         DAT_8009d2ac = DAT_8009c982;
         return;

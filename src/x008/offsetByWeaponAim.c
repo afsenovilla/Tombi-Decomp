@@ -2,11 +2,11 @@
 // MATCHING 800f43d0 224
 #include "TOBJ.H"
 typedef struct { char p[7]; signed char b7; } U;
-extern U *D_8009C330;
+extern U *PLAYER_EXT;
 
 void offsetByWeaponAim(TObj *o)
 {
-    switch (D_8009C330->b7) {
+    switch (PLAYER_EXT->b7) {
     case 0:
     case 2:
         o->h->p.whole += 0x10;

@@ -8,7 +8,7 @@
 #include "gamestate.h"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
-extern G330 *D_8009C330;
+extern G330 *PLAYER_EXT;
 extern AnimTbl D_800E8404;
 extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
@@ -202,7 +202,7 @@ void playerHandleHazardContact(TObj *o, int arg)
         decreaseObjectTimer(o, getHazardDamage(o));
         if (SPAD.b1a4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
-            D_8009C330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             D_8009C970 = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
@@ -224,9 +224,9 @@ void playerHandleHazardContact(TObj *o, int arg)
     o->substep = 0;
     if (GVARS.b38) {
         o->timer = 0xb4;
-        D_8009C330->w2c = 0x2f;
+        PLAYER_EXT->w2c = 0x2f;
         t = D_800E8404;
-        o->anim = t.p[D_8009C330->w2c];
+        o->anim = t.p[PLAYER_EXT->w2c];
         FUN_8001fe94(o, 1);
         o->state = 2;
     }

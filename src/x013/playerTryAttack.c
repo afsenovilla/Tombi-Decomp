@@ -15,8 +15,8 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } P;
 extern unsigned short DAT_1f8003c8;
 extern unsigned short DAT_1f8001fc;
 extern short D_8007A038[];
-extern P *D_8009C330;
-extern TObj *D_8009F0EC;
+extern P *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern void spawnPlayerPowerEffect(int);
 extern short playerTryTalkToNpc(void);
 
@@ -55,14 +55,14 @@ void playerTryAttack(S *s, short mode)
             return;
         }
         if (playerTryTalkToNpc() != 0) return;
-        if (D_8009C330->b0 != 0) return;
+        if (PLAYER_EXT->b0 != 0) return;
         if (s->bc0 != 0) return;
         s->o.step = 3;
         s->o.state = 0;
         return;
     case 1:
         if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         if (p->b0 != 0) return;
         if (s->bc0 != 0) return;
         if (*(unsigned char *)&s->o.wac == 2) return;
@@ -83,10 +83,10 @@ void playerTryAttack(S *s, short mode)
         return;
     case 2:
         if (GV2.bb1 == 1 || GV2.bb1 == 2) return;
-        if (D_8009C330->b0 != 0) return;
+        if (PLAYER_EXT->b0 != 0) return;
         if (s->bc0 != 0) return;
-        D_8009C330->b4 = 0;
-        D_8009F0EC->b69 = 4;
+        PLAYER_EXT->b4 = 0;
+        GRABBED_OBJECT->b69 = 4;
         s->o.velH = 0;
         s->o.velV = 0;
         s->o.velX = 0;

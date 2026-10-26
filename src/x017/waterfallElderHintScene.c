@@ -9,7 +9,7 @@ typedef struct { char c[12]; } B12;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern char D_80010814[];
 extern void FUN_8001d6a4();
 extern void FUN_8001fe6c(TObj *);
@@ -55,7 +55,7 @@ void waterfallElderHintScene(TObj *o)
     case 2:
         if (--o->w08 > 0) break;
         PLAYER.animFrame = 1;
-        D_8009C330[9] = 5;
+        PLAYER_EXT[9] = 5;
         PLAYER.b9c = 1;
         PLAYER.b04 = 6;
         PLAYER.b69 = 0;

@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x000 8010AE94 (FUN_8010ae94.c): 246 -> 230.
 #include "TOBJ.H"
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern void FUN_8001fec0(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eec40(TObj *);
@@ -25,7 +25,7 @@ void FUN_8010ae94(TObj *o)
         o->ba5 = 0;
         o->ba7 = 0;
         o->active = 4;
-        g = DAT_8009c330;
+        g = PLAYER_EXT;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
@@ -57,7 +57,7 @@ void FUN_8010ae94(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern void FUN_8001fec0(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void playerAirSpinToFall(TObj *);
@@ -78,7 +78,7 @@ void playerEventStepRiseUp(TObj *o)
         o->ba5 = 0;
         o->ba7 = 0;
         o->active = 4;
-        g = DAT_8009c330;
+        g = PLAYER_EXT;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;

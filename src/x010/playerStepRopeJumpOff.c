@@ -10,7 +10,7 @@ typedef struct S {
 } S;
 typedef struct V { short x, y; } V;
 extern short D_80115248s[];
-extern S *D_8009C330;
+extern S *PLAYER_EXT;
 extern void ObjSetAnimFromTable(S *);
 extern void AnimJump(S *, int);
 extern void SfxPlay2(int, int);
@@ -61,7 +61,7 @@ void playerStepRopeJumpOff(S *o)
         if (*(volatile unsigned short *)&GV6.s70 & 0x80) { o->velX = 0x200; o->velY = -0x400; }
         if (*(volatile unsigned short *)&GV6.s70 & 0x20) { o->velX = 0x480; o->velY = -0x800; }
     }
-    g = D_8009C330;
+    g = PLAYER_EXT;
     g->timer = 10;
     o->wb2 = 0;
     o->wb6 = 0;
@@ -70,7 +70,7 @@ void playerStepRopeJumpOff(S *o)
         g->w2c = 8;
         ObjSetAnimFromTable(o);
         AnimJump(o, 0);
-        D_8009C330->frame = D_8009C330->w2c;
+        PLAYER_EXT->frame = PLAYER_EXT->w2c;
     }
     SfxPlay2(2, 4);
     o->step = 2;

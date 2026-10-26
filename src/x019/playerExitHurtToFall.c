@@ -8,11 +8,11 @@ typedef struct {
     char pad[0xd1 - 0xad]; unsigned char bd1; char pd2[0xe0 - 0xd2]; short we0;
 } O;
 typedef struct { char p[8]; unsigned char b; } G;
-extern G *D_8009C330;
+extern G *PLAYER_EXT;
 void playerExitHurtToFall(O *o)
 {
     int x;
-    D_8009C330->b = 0;
+    PLAYER_EXT->b = 0;
     o->we0 = 0x8c;
     o->active = 3;
     o->b9c = 2;

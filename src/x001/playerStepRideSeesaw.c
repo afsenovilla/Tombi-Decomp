@@ -2,14 +2,14 @@
 // MATCHING 80122f54 2192
 /* Matched (opusAE): o is the plain parameter (not a $19 copy, which let gcc drop the case-0 `move a0,s3`); BLKA/BLKB
    keep the raw rsin result and shift it after `s1 -= ...` with a0 pinned for the next rcos; the `& 0xfff` temps,
-   the h -/+= 4 updates, the three DAT_8009f0ec loads (a0/v1/a0) and a few case-0/case-1 temps are register-pinned. */
+   the h -/+= 4 updates, the three GRABBED_OBJECT loads (a0/v1/a0) and a few case-0/case-1 temps are register-pinned. */
 #include "spad.h"
 #include "gv2.h"
 /* whole function: includes the csv piece 801231F4 */
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short PAD_PRESSED[];
 extern int D_8009C984;
@@ -60,7 +60,7 @@ void playerStepRideSeesaw(TObj *o)
         PlayerSetAnimIfChanged(o, 0xa);
         o->d8c = 0;
         o->wb6 = 0;
-        (*(unsigned short*)&DAT_8009c330->type) = 0;
+        (*(unsigned short*)&PLAYER_EXT->type) = 0;
         (*(unsigned char*)&o->waa) = 1;
         {
             register int t asm("$3") = o->wb8;
@@ -70,18 +70,18 @@ void playerStepRideSeesaw(TObj *o)
             o->velH = 0;
             o->velV = 0;
             h = o->h;
-            sm = DAT_8009f0ec->h->p.whole + t;
+            sm = GRABBED_OBJECT->h->p.whole + t;
             if (o->animFrame & 1) t = sm + 8;
             else t = sm - 8;
             h->p.whole = t;
         }
-        o->y.p.whole = DAT_8009f0ec->y.p.whole + o->wba + 8;
+        o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba + 8;
         SfxPlay3(4, 0x7f);
         o->state++;
     case 1:
         AnimAdvance(o);
         { register int aq asm("$4");
-        gA = DAT_8009f0ec;
+        gA = GRABBED_OBJECT;
         switch (gA->w7a) {
         case 0:
         case 1:
@@ -96,16 +96,16 @@ void playerStepRideSeesaw(TObj *o)
             { register int q asm("$2") = gA->d8c + 0x400; aq = q & 0xfff; }
             if (aq < 0x800) {
             pos:
-                s0 = (unsigned int)(rsin(aq) * (DAT_8009f0ec->box0 - 0x24)) >> 12;
+                s0 = (unsigned int)(rsin(aq) * (GRABBED_OBJECT->box0 - 0x24)) >> 12;
             } else {
             neg:
-                { register unsigned int q asm("$2") = -(rsin(aq) * (DAT_8009f0ec->box0 - 0x24)); s0 = q >> 12; }
+                { register unsigned int q asm("$2") = -(rsin(aq) * (GRABBED_OBJECT->box0 - 0x24)); s0 = q >> 12; }
             }
             break;
         }
         }
-        if ((*(short*)&DAT_8009c330->type)) o->y.raw += 0x10000;
-        (*(unsigned short*)&DAT_8009c330->type) = 1;
+        if ((*(short*)&PLAYER_EXT->type)) o->y.raw += 0x10000;
+        (*(unsigned short*)&PLAYER_EXT->type) = 1;
         {
             volatile unsigned short *k = PAD_PRESSED;
             if (!(*k & 0x50)) {
@@ -122,7 +122,7 @@ void playerStepRideSeesaw(TObj *o)
                 o->y.raw += 0x18000;
             }
         }
-        g = DAT_8009f0ec;
+        g = GRABBED_OBJECT;
         switch (g->w7a) {
         case 1:
             collidePlayerWithTiltedBar(o, g, 2, (g->d8c + 0x400) & 0xfff);
@@ -133,16 +133,16 @@ void playerStepRideSeesaw(TObj *o)
         }
         if (o->b69 || (a = o->h->p.whole, TileCollideAt(o, (short)((o->animFrame & 1) ? a + 9 : a - 9), (short)(o->y.p.whole + 0x10)))) {
             o->d8c = DAT_801152e8[o->wb0];
-            (*(unsigned short*)&DAT_8009c330->type) = 0;
+            (*(unsigned short*)&PLAYER_EXT->type) = 0;
             (*(unsigned char*)&o->waa) = 0;
             o->b9e = 0;
             o->step = 0;
             o->state = 0;
             break;
         }
-        v = DAT_8009f0ec->y.p.whole - s0;
+        v = GRABBED_OBJECT->y.p.whole - s0;
         if (v >= o->y.p.whole) o->y.p.whole = v;
-        gB = DAT_8009f0ec;
+        gB = GRABBED_OBJECT;
         switch (gB->w7a) {
         case 0:
         case 1:
@@ -215,7 +215,7 @@ void playerStepRideSeesaw(TObj *o)
             break;
         }
         { register TObj *a0_ asm("$4") = o; register TObj *a1_ asm("$5"); register Fix16 *h asm("$2");
-        asm("" : "=r"(a0_) : "0"(a0_)); a1_ = DAT_8009f0ec; h = o->h;
+        asm("" : "=r"(a0_) : "0"(a0_)); a1_ = GRABBED_OBJECT; h = o->h;
         { register unsigned short hw asm("$2") = h->p.whole;
         S16(o, 0xea) = o->y.p.whole + s0;
         S16(o, 0xe8) = hw + s4; }
@@ -230,7 +230,7 @@ void playerStepRideSeesaw(TObj *o)
             o->wb2 = 0;
             o->velH = 0;
             o->velV = 0;
-            (*(unsigned short*)&DAT_8009c330->type) = 0;
+            (*(unsigned short*)&PLAYER_EXT->type) = 0;
             (*(unsigned char*)&o->waa) = 0;
             (*(unsigned char*)&o->wac) = 1;
             playerSetFallLean(o);
@@ -238,7 +238,7 @@ void playerStepRideSeesaw(TObj *o)
             o->state = 3;
             break;
         }
-        gC = DAT_8009f0ec;
+        gC = GRABBED_OBJECT;
         o->h->p.whole = gC->h->p.whole + o->wb8 - s4;
         o->y.p.whole = gC->y.p.whole + o->wba - s0;
         break;
@@ -248,7 +248,7 @@ void playerStepRideSeesaw(TObj *o)
         (*(unsigned char*)&o->waa) = 0;
         o->b9c = 1;
         o->b9e = 0;
-        (*(unsigned short*)&DAT_8009c330->type) = 0;
+        (*(unsigned short*)&PLAYER_EXT->type) = 0;
         a = o->h->p.whole;
         if (o->animFrame & 1) o->h->p.whole = a + 0x10;
         else o->h->p.whole = a - 0x10;

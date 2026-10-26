@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 extern int D_1F8002D8;
 extern void *D_80012204;
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern TObj *ObjAlloc();
 extern int Rand(void);
 extern void ObjCullRegister(TObj *);
@@ -33,7 +33,7 @@ void updatePoolType31Object(TObj *o)
             c->y.raw = o->y.raw;
             c->d->raw = o->d->raw;
             r &= 0xf0;
-            c->h->raw += (D_8007A5F0[r] * k) >> 4;
+            c->h->raw += (COS_TABLE[r] * k) >> 4;
             c->type = 0x31;
             c->animFrame = 1;
             c->b04 = 1;
@@ -41,7 +41,7 @@ void updatePoolType31Object(TObj *o)
             c->b0a = 0; c->b0b = 0; c->b0f = 0;
             c->w1e = 0x14;
             c->b0d = 1;
-            c->y.raw += (D_8007A3F0[r] * k) >> 4;
+            c->y.raw += (NEG_SIN_TABLE[r] * k) >> 4;
             c->w08 = ((c->b0c + 0x1fc) << 6) | 0x17;
             p = c;
             goto common;

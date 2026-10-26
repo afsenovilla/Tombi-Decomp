@@ -5,7 +5,7 @@
 
 extern TObj PLAYER;
 extern short D_1F80016A[];
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -55,8 +55,8 @@ void flyingBugChase(TObj *o)
         AnimAdvance(o);
         {
             short sp = o->velH;
-            int c = sp * D_8007A5F0[o->d38];
-            int s = sp * D_8007A3F0[o->d38];
+            int c = sp * COS_TABLE[o->d38];
+            int s = sp * NEG_SIN_TABLE[o->d38];
             o->h->raw += (short)(c >> 12) << 8;
             o->y.raw += (short)(s >> 12) << 8;
         }
@@ -112,8 +112,8 @@ void flyingBugChase(TObj *o)
         }
         {
             short sp = o->velH;
-            int c = sp * D_8007A5F0[o->d38];
-            int s = sp * D_8007A3F0[o->d38];
+            int c = sp * COS_TABLE[o->d38];
+            int s = sp * NEG_SIN_TABLE[o->d38];
             o->h->raw += (short)(c >> 12) << 8;
             o->y.raw += (short)(s >> 12) << 8;
         }

@@ -7,7 +7,7 @@ static char DAT_80115d28[20] = {
 extern void **DAT_80115a08[];
 extern void **PTR_PTR_80115948[];
 extern int DAT_8009c960[];
-extern unsigned short DAT_8009c960h[];
+extern unsigned short GAME[];
 extern int FUN_800202b4(TObj *o);
 extern int FUN_80040278(TObj *o, int x, int y);
 extern void spawnItemFromEntry(char *d, Fix16 *pos, int a, int b, TObj *o);
@@ -36,7 +36,7 @@ void treasureChestOpenFalling(TObj *o)
         if (DAT_8009c960[0] == 0x30009)
             o->anim = DAT_80115a08[o->b0c & 0x7f][1];
         else
-            o->anim = PTR_PTR_80115948[DAT_8009c960h[0] * 4 + (o->b0c & 0x7f)][1];
+            o->anim = PTR_PTR_80115948[GAME[0] * 4 + (o->b0c & 0x7f)][1];
         FUN_8001fe6c(o);
         break;
     case 2:

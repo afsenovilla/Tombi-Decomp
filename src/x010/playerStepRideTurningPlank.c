@@ -9,9 +9,9 @@ typedef struct {
     char pad0[2];
     short w02;
 } G330;
-extern G330 *D_8009C330;
+extern G330 *PLAYER_EXT;
 typedef struct { char pad[0xe8]; short e8, ea; } PObj;
-extern TObj *D_8009F0EC;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char D_801152E8[];
 extern int AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
@@ -25,8 +25,8 @@ extern short TileCollideAt(TObj *, short, short);
 extern int collidePlayerWithTiltedBar(TObj *, TObj *, unsigned char, int);
 extern int probeTiltedBarObject(TObj *, TObj *);
 
-#define HEIGHT(a) y = (unsigned)(rsin(a) * (D_8009F0EC->box0 - 0x24)) >> 12
-#define HEIGHTN(a) y = (unsigned)(-(rsin(a) * (D_8009F0EC->box0 - 0x24))) >> 12
+#define HEIGHT(a) y = (unsigned)(rsin(a) * (GRABBED_OBJECT->box0 - 0x24)) >> 12
+#define HEIGHTN(a) y = (unsigned)(-(rsin(a) * (GRABBED_OBJECT->box0 - 0x24))) >> 12
 
 #define ROT(A, B)                                   \
     {                                               \
@@ -52,38 +52,38 @@ void playerStepRideTurningPlank(TObj *o)
         PlayerSetAnimIfChanged(o, 10);
         o->d8c = 0;
         o->wb6 = 0;
-        D_8009C330->w02 = 0;
+        PLAYER_EXT->w02 = 0;
         *(unsigned char *)&o->waa = 1;
         o->wb2 = 0;
         o->velH = 0;
         o->velV = 0;
         {
-            int v = D_8009F0EC->h->p.whole + o->wb8;
+            int v = GRABBED_OBJECT->h->p.whole + o->wb8;
             o->h->p.whole = (o->animFrame & 1) ? v + 8 : v - 8;
         }
-        o->y.p.whole = D_8009F0EC->y.p.whole + o->wba + 8;
+        o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba + 8;
         SfxPlay3(4, 0x7f);
         o->state++;
     case 1:
         AnimAdvance(o);
-        switch (D_8009F0EC->w7a) {
+        switch (GRABBED_OBJECT->w7a) {
         case 0:
-            if ((short)D_8009F0EC->d30 < 0x800) HEIGHT(D_8009F0EC->d30 & 0xfff);
-            else HEIGHTN(D_8009F0EC->d30 & 0xfff);
+            if ((short)GRABBED_OBJECT->d30 < 0x800) HEIGHT(GRABBED_OBJECT->d30 & 0xfff);
+            else HEIGHTN(GRABBED_OBJECT->d30 & 0xfff);
             break;
         case 1:
-            if ((short)D_8009F0EC->d30 < 0x800) HEIGHT(D_8009F0EC->d30 & 0xfff);
-            else HEIGHTN(D_8009F0EC->d30 & 0xfff);
+            if ((short)GRABBED_OBJECT->d30 < 0x800) HEIGHT(GRABBED_OBJECT->d30 & 0xfff);
+            else HEIGHTN(GRABBED_OBJECT->d30 & 0xfff);
             break;
         case 2:
-            if (D_8009F0EC->subtype == 3) ang = D_8009F0EC->d30 & 0xfff;
-            else ang = (D_8009F0EC->d30 + 0x400) & 0xfff;
+            if (GRABBED_OBJECT->subtype == 3) ang = GRABBED_OBJECT->d30 & 0xfff;
+            else ang = (GRABBED_OBJECT->d30 + 0x400) & 0xfff;
             if (ang < 0x800) HEIGHT(ang);
             else HEIGHTN(ang);
             break;
         }
-        if (D_8009C330->w02 != 0) o->y.raw += 0x10000;
-        D_8009C330->w02 = 1;
+        if (PLAYER_EXT->w02 != 0) o->y.raw += 0x10000;
+        PLAYER_EXT->w02 = 1;
         pad = &GV6.s70;
         if (!(*pad & 0x50)) {
             PlayerSetAnimIfChanged(o, 0xc);
@@ -100,7 +100,7 @@ void playerStepRideTurningPlank(TObj *o)
             if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             o->y.raw += 0x18000;
         }
-        p = D_8009F0EC;
+        p = GRABBED_OBJECT;
         if (p->subtype != 3) {
             switch (p->w7a) {
             case 1:
@@ -113,19 +113,19 @@ void playerStepRideTurningPlank(TObj *o)
         }
         if (o->b69 || (hv = o->h->p.whole, TileCollideAt(o, (o->animFrame & 1) ? hv + 9 : hv - 9, o->y.p.whole + 0x10))) {
             o->d8c = D_801152E8[o->wb0];
-            D_8009C330->w02 = 0;
+            PLAYER_EXT->w02 = 0;
             *(unsigned char *)&o->waa = 0;
             o->b9e = 0;
             o->step = 0;
             o->state = 0;
             break;
         }
-        t = D_8009F0EC->y.p.whole - y;
+        t = GRABBED_OBJECT->y.p.whole - y;
         if (t >= o->y.p.whole) o->y.p.whole = t;
-        switch (D_8009F0EC->w7a) {
+        switch (GRABBED_OBJECT->w7a) {
         case 0:
         case 1:
-            ang = D_8009F0EC->d30;
+            ang = GRABBED_OBJECT->d30;
             if (o->animFrame & 1) {
                 o->h->p.whole -= 4;
                 x = ang;
@@ -149,8 +149,8 @@ void playerStepRideTurningPlank(TObj *o)
             }
             break;
         case 2:
-            if (D_8009F0EC->subtype == 3) an2 = D_8009F0EC->d30 & 0xfff;
-            else an2 = (D_8009F0EC->d30 + 0x400) & 0xfff;
+            if (GRABBED_OBJECT->subtype == 3) an2 = GRABBED_OBJECT->d30 & 0xfff;
+            else an2 = (GRABBED_OBJECT->d30 + 0x400) & 0xfff;
             x = an2;
             if (o->animFrame & 1) {
                 o->h->p.whole -= 4;
@@ -175,7 +175,7 @@ void playerStepRideTurningPlank(TObj *o)
         }
         ((PObj *)o)->e8 = o->h->p.whole + x;
         ((PObj *)o)->ea = o->y.p.whole + y;
-        p = D_8009F0EC;
+        p = GRABBED_OBJECT;
         if (probeTiltedBarObject(o, p) == 0) {
             {
                 Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 4 : v - 4;
@@ -186,7 +186,7 @@ void playerStepRideTurningPlank(TObj *o)
             o->wb2 = 0;
             o->velH = 0;
             o->velV = 0;
-            D_8009C330->w02 = 0;
+            PLAYER_EXT->w02 = 0;
             *(unsigned char *)&o->waa = 0;
             *(unsigned char *)&o->wac = 1;
             playerSetFallLean(o);
@@ -194,8 +194,8 @@ void playerStepRideTurningPlank(TObj *o)
             o->state = 3;
             break;
         }
-        o->h->p.whole = D_8009F0EC->h->p.whole + o->wb8 - x;
-        o->y.p.whole = D_8009F0EC->y.p.whole + o->wba - y;
+        o->h->p.whole = GRABBED_OBJECT->h->p.whole + o->wb8 - x;
+        o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba - y;
         break;
     }
     if (SPAD.s1fc & SPAD.s3c6) {
@@ -203,7 +203,7 @@ void playerStepRideTurningPlank(TObj *o)
         *(unsigned char *)&o->waa = 0;
         o->b9c = 1;
         o->b9e = 0;
-        D_8009C330->w02 = 0;
+        PLAYER_EXT->w02 = 0;
         {
             Fix16 *h = o->h; int v = h->p.whole; h->p.whole = (o->animFrame & 1) ? v + 0x10 : v - 0x10;
         }

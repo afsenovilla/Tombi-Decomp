@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 
 extern void *D_8013A698[];
-extern unsigned short D_8007A3F0[];
-extern short D_8007A5F0[];
+extern unsigned short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
 extern short isObjectBelowGround(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -42,7 +42,7 @@ void wingedForkPigChase(TObj *o)
         break;
     case 1:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         if (AnimAdvance(o)) {
             o->wac = 3;
             o->state++;
@@ -54,7 +54,7 @@ void wingedForkPigChase(TObj *o)
         break;
     case 2:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         if (AnimAdvance(o)) o->state++;
         break;
     case 3:
@@ -79,8 +79,8 @@ void wingedForkPigChase(TObj *o)
         AnimAdvance(o);
         i = (o->velX << 5) & 0xe0;
         sp = o->velH;
-        c = sp * D_8007A5F0[i];
-        s = sp * (short)D_8007A3F0[i];
+        c = sp * COS_TABLE[i];
+        s = sp * (short)NEG_SIN_TABLE[i];
         o->a.raw += (short)(c >> 12) << 8;
         o->y.raw += (short)(s >> 12) << 8;
         if (wingedForkPigCheckCollide(o)) o->timer = 0;

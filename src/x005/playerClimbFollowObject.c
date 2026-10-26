@@ -2,7 +2,7 @@
 // MATCHING 8010c7b0 292
 #include "TOBJ.H"
 typedef struct { TObj b; char pad[0xe8 - 0xc0]; short e8, ea; } OX;
-extern TObj *DAT_8009f0ec;
+extern TObj *GRABBED_OBJECT;
 extern TObj *probeClimbGrabObject(TObj *, TObj *);
 extern void playerSetFallLean(TObj *);
 
@@ -19,7 +19,7 @@ void playerClimbFollowObject(TObj *o)
         ((OX *)o)->e8 = t1;
     }
     ((OX *)o)->ea = o->y.p.whole - 8;
-    n = probeClimbGrabObject(o, DAT_8009f0ec);
+    n = probeClimbGrabObject(o, GRABBED_OBJECT);
     if (n == 0) {
         *(signed char *)&o->b0f = -8;
         p = o->h;
@@ -43,7 +43,7 @@ void playerClimbFollowObject(TObj *o)
         o->state = 3;
     } else {
         o->h->p.whole = n->h->p.whole + o->wb8;
-        DAT_8009f0ec = n;
+        GRABBED_OBJECT = n;
         o->y.p.whole = n->y.p.whole + o->wba + 8;
         if (o->b9e == 11) {
             *(signed char *)&o->b0f = -8;

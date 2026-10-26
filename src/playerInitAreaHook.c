@@ -5,7 +5,7 @@ extern unsigned short DAT_8009c962;
 extern int DAT_8009c984;
 extern unsigned char DAT_8009cda6;
 extern unsigned char DAT_8009d2af;
-extern int DAT_8009f0ec;
+extern int GRABBED_OBJECT;
 extern void spawnFrog(int, int, int);
 extern void spawnA00Tornado(int, int, int, int);
 
@@ -26,5 +26,5 @@ void playerInitAreaHook(TObj *o)
         o->state = 0;
         o->substep = 0;
     }
-    DAT_8009f0ec = 0;
+    GRABBED_OBJECT = 0;
 }

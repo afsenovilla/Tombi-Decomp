@@ -8,8 +8,8 @@ extern unsigned short DAT_1f8001c8;
 extern unsigned short DAT_1f80016a;
 extern unsigned short DAT_1f80016e;
 extern unsigned short DAT_1f800172;
-extern short DAT_8007a3f0[];
-extern short DAT_8007a5f0[];
+extern short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
 extern unsigned char DAT_800a6047;
 extern void FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
@@ -41,18 +41,18 @@ void updateColorBurstParticle(TObj *o)
         case 0:
             o->animFrame = (o->animFrame + 3) & 0xff;
             o->d88 = ((o->animFrame - 0x40) & 0xff) << 4;
-            k = (DAT_8007a3f0[(unsigned char)o->animFrame] * 3 >> 11) - 0x10;
+            k = (NEG_SIN_TABLE[(unsigned char)o->animFrame] * 3 >> 11) - 0x10;
             o->y.p.whole = DAT_1f80016e - k;
             break;
         case 1:
             o->animFrame = (o->animFrame - 3) & 0xff;
             o->d88 = ((o->animFrame - 0x80) & 0xff) << 4;
-            k = (DAT_8007a3f0[(unsigned char)o->animFrame] * 3 >> 11) + 0x10;
+            k = (NEG_SIN_TABLE[(unsigned char)o->animFrame] * 3 >> 11) + 0x10;
             o->y.p.whole = DAT_1f80016e + k;
             break;
         }
-        o->h->p.whole = DAT_1f80016a + (DAT_8007a5f0[(unsigned char)o->animFrame] * BA5(o) >> 12);
-        o->d->p.whole = DAT_1f800172 + (DAT_8007a3f0[(unsigned char)o->animFrame] * BA5(o) >> 12);
+        o->h->p.whole = DAT_1f80016a + (COS_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
+        o->d->p.whole = DAT_1f800172 + (NEG_SIN_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
         o->b0f = DAT_800a6047 - 1;
         t = o->timer;
         if (t >= 0x32) {

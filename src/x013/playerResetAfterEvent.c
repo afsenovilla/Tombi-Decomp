@@ -2,7 +2,7 @@
 // MATCHING 80108fe0 88
 #include "TOBJ.H"
 extern unsigned char D_801152E8[];
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 
 void playerResetAfterEvent(TObj *o)
 {
@@ -15,7 +15,7 @@ void playerResetAfterEvent(TObj *o)
     o->velX = 0;
     o->velY = 0;
     o->d8c = D_801152E8[o->wb0];
-    D_8009C330->timer = 0;
+    PLAYER_EXT->timer = 0;
     o->b04 = 1;
     o->step = 0;
     o->state = 0;

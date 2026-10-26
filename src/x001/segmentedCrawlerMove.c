@@ -5,7 +5,7 @@
 // Japanese version of PAL x001 80132B64 (x001/func_80132B64.c): 110 -> 60.
 #include "TOBJ.H"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void *D_8013F034[];
 extern void *D_8013F064[];
 extern void AnimLoadDuration(TObj *);
@@ -13,8 +13,8 @@ extern void func_80132A3C(TObj *);
 extern int func_80132964(TObj *);
 
 #define MOVE() \
-    o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
-    o->y.raw += (D_8007A3F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->wac = ((o->d88 + 8) & 0xff) >> 4; \
     o->anim = D_8013F034[o->wac];
 
@@ -225,7 +225,7 @@ void func_80132B64(TObj *o)
 #else
 #include "TOBJ.H"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void *D_8013F034[];
 extern void *D_8013F064[];
 extern void AnimLoadDuration(TObj *);
@@ -233,8 +233,8 @@ extern void segmentedCrawlerWiggle(TObj *);
 extern int segmentedCrawlerCheckWall(TObj *);
 
 #define MOVE() \
-    o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
-    o->y.raw += (D_8007A3F0[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
+    o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->wac = ((o->d88 + 8) & 0xff) >> 4; \
     o->anim = D_8013F034[o->wac];
 

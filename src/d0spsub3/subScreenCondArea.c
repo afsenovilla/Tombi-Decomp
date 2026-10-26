@@ -1,12 +1,12 @@
 // FUNC 800ee450 260 D0SPSUB3
 // MATCHING 800ee450 260
-extern short D_8009C960;
+extern short GAME;
 
 int subScreenCondArea(int op, short val)
 {
     short v;
     op &= 0xFF;
-    v = D_8009C960;
+    v = GAME;
     switch (op) {
     case 0: if (v == val) return 1; break;
     case 1: if (v != val) return 1; break;

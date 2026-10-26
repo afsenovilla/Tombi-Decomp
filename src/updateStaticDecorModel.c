@@ -1,7 +1,7 @@
 // FUNC 800ee18c 208 X000
 // MATCHING 800ee18c 208
 #include "raw7.h"
-extern unsigned short g;
+extern unsigned short GAME;
 extern void f1(), f2(), f3();
 void updateStaticDecorModel(char *o)
 {
@@ -13,7 +13,7 @@ void updateStaticDecorModel(char *o)
         U8(o, 4)++;
         break;
     case 1:
-        if (g == 4 || g == 0xc) {
+        if (GAME == 4 || GAME == 0xc) {
             U8(o, 1) = 1;
             f1();
         } else {

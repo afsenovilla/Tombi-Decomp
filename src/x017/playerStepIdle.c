@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern unsigned char *DAT_800a611c;
-extern unsigned char *DAT_8009d2e8;
-extern unsigned char *DAT_8009c330;
+extern unsigned char *BITTEN_OBJECT;
+extern unsigned char *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
@@ -31,7 +31,7 @@ extern int playerTryTalkToNpc(void);
 extern void playerTryAttack(TObj *, short);
 
 typedef struct { unsigned char pad[0x28]; unsigned short w28, w2a, w2c, w2e; } Q;
-#define PL ((Q *)DAT_8009c330)
+#define PL ((Q *)PLAYER_EXT)
 
 #define YADJ(o)                                              \
     if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {                                  \
@@ -57,10 +57,10 @@ void playerStepIdle(TObj *o)
     (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
     (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
     if ((*(unsigned char*)&o->wac) >= 2) {
-        DAT_8009d2e8 = DAT_800a611c;
+        BITTEN_OBJECT = DAT_800a611c;
         DAT_800a611c[4] = 2;
-        DAT_8009d2e8[5] = 2;
-        DAT_8009d2e8[6] = 0;
+        BITTEN_OBJECT[5] = 2;
+        BITTEN_OBJECT[6] = 0;
     }
     (*(unsigned char*)&o->wac) = 0;
     c = 0;
@@ -83,8 +83,8 @@ void playerStepIdle(TObj *o)
             playerSelectGroundAnim(o);
         }
         YADJ(o);
-        DAT_8009c330[0x1e] = 0;
-        DAT_8009c330[0x1f] = 0;
+        PLAYER_EXT[0x1e] = 0;
+        PLAYER_EXT[0x1f] = 0;
         o->velX = 0;
         o->step = 1;
         o->state = 0;
@@ -120,8 +120,8 @@ void playerStepIdle(TObj *o)
             playerUpdateSpeedFromPad(o);
             if (o->velY > 0x400) {
                 (*(unsigned char*)&o->wac) = 1;
-                DAT_8009c330[0x1e] = 0;
-                DAT_8009c330[0x1f] = 0;
+                PLAYER_EXT[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
                 t = 0x10;
                 o->timer = 10;
                 o->d84 = 0;
@@ -157,8 +157,8 @@ void playerStepIdle(TObj *o)
             DAT_8009d2b0[0] = 2;
             DAT_8009c942 = 1;
             o->visible = 1;
-            DAT_8009c330[0x1e] = 0;
-            DAT_8009c330[0x1f] = 0;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
             DAT_800a60f8 = 1;
         }
         break;
@@ -194,8 +194,8 @@ void playerStepIdle(TObj *o)
 
     if (DAT_1f8001fc & DAT_1f8003c6) {
         o->ba4 = 0;
-        DAT_8009c330[0x1e] = 0;
-        DAT_8009c330[0x1f] = 0;
+        PLAYER_EXT[0x1e] = 0;
+        PLAYER_EXT[0x1f] = 0;
         DAT_8009d2b0[0] = 0;
         o->substep = 0;
         switch (c) {
@@ -248,19 +248,19 @@ void playerStepIdle(TObj *o)
             break;
         }
     } else {
-        p = DAT_8009c330;
+        p = PLAYER_EXT;
         if (p[0x1e] >= 0x1f) {
             switch (c) {
             case 3:
                 p[0x1e] = 0;
-                DAT_8009c330[0x1f] = 0;
+                PLAYER_EXT[0x1f] = 0;
                 o->b04 = 1;
                 o->step = 0x20;
                 o->state = 0;
                 break;
             case 11:
                 p[0x1e] = 0;
-                DAT_8009c330[0x1f] = 0;
+                PLAYER_EXT[0x1f] = 0;
                 o->b04 = 5;
                 o->step = 0xb;
                 o->state = 0;
@@ -269,8 +269,8 @@ void playerStepIdle(TObj *o)
         } else if (p[0x1f] >= 0x1f) {
             o->substep = 0;
             if (c == 7) {
-                DAT_8009c330[0x1e] = 0;
-                DAT_8009c330[0x1f] = 0;
+                PLAYER_EXT[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
                 o->b04 = 1;
                 o->step = 0x31;
                 o->state = 0;

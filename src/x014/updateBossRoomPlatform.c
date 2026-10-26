@@ -11,7 +11,7 @@ extern unsigned short D_80125C70[];
 extern short D_80125C9C, D_80125C9E;
 extern void *D_80129F78;
 extern int D_1F8002DCx[];
-extern short D_8007A5F0[], D_8007A1F0[];
+extern short COS_TABLE[], D_8007A1F0[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -64,7 +64,7 @@ void updateBossRoomPlatform(TObj *o)
                 {
                     int i = (o->d30 + 1) & 0xff;
                     o->d30 = i;
-                    c = D_8007A5F0[i];
+                    c = COS_TABLE[i];
                     sn = D_8007A1F0[i];
                 }
                 o->h->raw = p->h->raw + c * 0x700;

@@ -2,7 +2,7 @@
 // MATCHING 8011b624 296
 #include "TOBJ.H"
 
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 
 #define RESET(o) \
     (o)->y.raw = (o)->d34; \
@@ -29,7 +29,7 @@ void springVineStep3(TObj *o)
             o->state++;
             break;
         }
-        o->y.raw -= (D_8007A5F0[o->d88 & 0xff] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[o->d88 & 0xff] * o->velV) >> 4;
         break;
     case 2:
         o->step = 0;

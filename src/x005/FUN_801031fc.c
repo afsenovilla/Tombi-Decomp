@@ -25,7 +25,7 @@ typedef struct O {
     char pad7[0xac - 0x9d];
     char wac;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern void FUN_800eeb5c();
 extern void spawnImpactEffect();
 
@@ -38,7 +38,7 @@ void FUN_801031fc(O *o)
     spawnImpactEffect(2, o->a, o->y, o->b);
     o->wac = 3;
     o->b9c = 0;
-    p = DAT_8009d2e8;
+    p = BITTEN_OBJECT;
     o->velX = 0;
     o->velY = 0;
     o->h->w = p->h->w;

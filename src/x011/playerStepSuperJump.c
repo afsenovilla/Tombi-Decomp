@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #define B(o, n) (((unsigned char *)(o))[n])
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern int MulCos(int a, int b);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -38,15 +38,15 @@ void playerStepSuperJump(TObj *o)
         o->wb6 = 0;
         o->velX = MulCos(0, o->wb2);
         o->velY = -10;
-        B(D_8009C330, 8) = 0;
-        D_8009C330->animTimer = 4;
-        D_8009C330->timer = 0;
-        D_8009C330->step = 0;
-        D_8009C330->b1d = 0;
+        B(PLAYER_EXT, 8) = 0;
+        PLAYER_EXT->animTimer = 4;
+        PLAYER_EXT->timer = 0;
+        PLAYER_EXT->step = 0;
+        PLAYER_EXT->b1d = 0;
         B(o, 0xac) = 0;
         ObjSetAnimFromTable(o);
         AnimLoadDuration(o);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
         SfxPlay2(2, 4);
         spawnPlayerPowerEffect(2);
         o->state = 1;

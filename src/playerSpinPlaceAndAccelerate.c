@@ -10,7 +10,7 @@ typedef struct O {
     char p4[0x84 - 0x44]; int d84; int d88; int d8c;
 } O;
 extern G *DAT_8009c330;
-extern G *DAT_8009c330b[];
+extern G *PLAYER_EXT[];
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 
@@ -40,7 +40,7 @@ void playerSpinPlaceAndAccelerate(O *o, short a, int b)
         v += o->d34;
     }
     o->y = v;
-    g = DAT_8009c330b[0];
+    g = PLAYER_EXT[0];
     d = g->we;
     if (g->b8) {
         t = g->w2;

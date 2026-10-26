@@ -4,7 +4,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern short DAT_1f80019e;
 extern void FUN_8011fa6c(void);
 extern int resolveHitResultE(TObj *, TObj *);
@@ -29,7 +29,7 @@ void weaponHitCat2Type02(TObj *a, TObj *b)
 {
     int t;
 
-    if (DAT_8009c960 == 3 && b->subtype == 4) {
+    if (GAME == 3 && b->subtype == 4) {
         FUN_8011fa6c();
         return;
     }

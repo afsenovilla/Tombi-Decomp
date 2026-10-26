@@ -7,7 +7,7 @@
 
 typedef struct { unsigned char p0[9]; unsigned char b9; } P8011F9E0;
 
-extern P8011F9E0 *D_8009C330;
+extern P8011F9E0 *PLAYER_EXT;
 extern Fix16 *D_800A6078_[];
 #define D_800A6078 D_800A6078_[0]
 extern void *D_8013B14C;
@@ -62,7 +62,7 @@ void a00L4Type18Active(TObj *o)
                 o->timer = 0x20;
                 o->state++;
                 PLAYER.obj.animFrame = 0;
-                D_8009C330->b9 = 0x14;
+                PLAYER_EXT->b9 = 0x14;
                 PLAYER.obj.b9c = 1;
                 PLAYER.obj.velX = 0x130;
                 D_800A603C = 6;
@@ -178,7 +178,7 @@ void a00L4Type18Active(TObj *o)
         BOB();
         if (o->h->p.whole < 0x129) {
             PLAYER.obj.animFrame = 1;
-            D_8009C330->b9 = 0xe;
+            PLAYER_EXT->b9 = 0xe;
             PLAYER.obj.b9c = 1;
             PLAYER.obj.velX = -0x100;
             D_800A603C = 6;

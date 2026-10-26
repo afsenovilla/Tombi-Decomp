@@ -23,14 +23,14 @@ typedef struct {
 extern long LZ_FILE_CTRL;
 extern int D_1F800078;
 extern char *D_1F800164;
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern int projectActorPosition(void *o, long *sxy, long *z);
 extern int isQuadOnScreen(void *p);
 extern void SetSemiTrans(void *p, int abe);
 
-#define SN(i) D_8007A5F0[i]
-#define CS(i) D_8007A3F0[i]
+#define SN(i) COS_TABLE[i]
+#define CS(i) NEG_SIN_TABLE[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
 

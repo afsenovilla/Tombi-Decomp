@@ -8,20 +8,20 @@ typedef struct {
     unsigned char f;
 } E4d;
 extern E4d ***DAT_8007b908[];
-extern unsigned short DAT_8009c960, DAT_8009c962;
-extern short DAT_80078790[];
+extern unsigned short GAME, DAT_8009c962;
+extern short AREA_SECTION_COUNTS[];
 extern void spawnObjectFromRecord(E4d *e, int k);
 extern int testAreaFlagBit(int k);
 
 void spawnSectionObjectsAlt(void)
 {
-    E4d ***t = DAT_8007b908[DAT_8009c960];
+    E4d ***t = DAT_8007b908[GAME];
     E4d *e;
     short n;
     int k;
     for (e = *t[DAT_8009c962 & 7]; e->type < 0xff; e++)
         spawnObjectFromRecord(e, -1);
-    n = DAT_80078790[DAT_8009c960];
+    n = AREA_SECTION_COUNTS[GAME];
     if (n >= 16)
         n = 15;
     for (e = *t[n]; e->type < 0xff; e++) {

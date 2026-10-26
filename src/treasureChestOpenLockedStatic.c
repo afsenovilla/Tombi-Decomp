@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 extern int D_8009C960[];
-extern unsigned short D_8009C960h;
+extern unsigned short GAME;
 extern char D_8012E084[];
 extern char D_8012E0BC[];
 extern char D_8012E0A0[];
@@ -63,7 +63,7 @@ void treasureChestOpenLockedStatic(TObj *o)
             if (D_8009C960[0] == 0x30009)
                 o->anim = D_80115A08[o->b0c & 0x7f][1];
             else
-                o->anim = D_80115948[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
+                o->anim = D_80115948[GAME * 4 + (o->b0c & 0x7f)][1];
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);
         } else {

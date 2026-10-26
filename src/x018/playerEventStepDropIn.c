@@ -9,10 +9,10 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fd94(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern char DAT_80010ae8[];
 extern char DAT_80010748[];
-extern int DAT_8009c960[];
+extern int GAME[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c93a[];
@@ -31,11 +31,11 @@ void playerEventStepDropIn(TObj *o)
     case 0:
         o->active = 5;
         o->d8c = 0;
-        D_8009C330->timer = 0;
-        *(unsigned char *)&D_8009C330->w08 = 0;
-        D_8009C330->animFrame = 0xffff;
-        *(unsigned short *)&D_8009C330->movetab = 0xffff;
-        *((unsigned short *)&D_8009C330->movetab + 1) = 0xffff;
+        PLAYER_EXT->timer = 0;
+        *(unsigned char *)&PLAYER_EXT->w08 = 0;
+        PLAYER_EXT->animFrame = 0xffff;
+        *(unsigned short *)&PLAYER_EXT->movetab = 0xffff;
+        *((unsigned short *)&PLAYER_EXT->movetab + 1) = 0xffff;
         o->ba4 = 0;
         o->ba5 = 0;
         o->b9c = 2;
@@ -44,7 +44,7 @@ void playerEventStepDropIn(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0x1000;
-        D_8009C330->timer = 0;
+        PLAYER_EXT->timer = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->d8c = 0;
@@ -55,7 +55,7 @@ void playerEventStepDropIn(TObj *o)
         FUN_8001fe94(o, 3);
         DAT_8009c942 = 1;
         DAT_8009c93f = 1;
-        if (DAT_8009c960[0] == 0x30000) spawnPlayerPoolType13Object(o, 0, 0);
+        if (GAME[0] == 0x30000) spawnPlayerPoolType13Object(o, 0, 0);
         o->state++;
         if (DAT_8009cff9 != 0) {
             p = allocObjectLayer2();
@@ -69,7 +69,7 @@ void playerEventStepDropIn(TObj *o)
         break;
     case 1:
         FUN_8001fec0(o);
-        *(unsigned char *)&D_8009C330->w08 = 1;
+        *(unsigned char *)&PLAYER_EXT->w08 = 1;
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;

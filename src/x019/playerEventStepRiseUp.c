@@ -1,7 +1,7 @@
 // FUNC 8010ae94 304 X019
 // MATCHING 8010ae94 304
 #include "TOBJ.H"
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern void FUN_8001fec0(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void playerAirSpinToFall(TObj *);
@@ -22,7 +22,7 @@ void playerEventStepRiseUp(TObj *o)
         o->ba5 = 0;
         o->ba7 = 0;
         o->active = 4;
-        g = DAT_8009c330;
+        g = PLAYER_EXT;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;

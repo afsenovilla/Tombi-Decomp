@@ -21,8 +21,8 @@ typedef struct {
     unsigned short w2e;
 } P800F44B0;
 
-extern P800F44B0 *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P800F44B0 *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
@@ -51,7 +51,7 @@ extern void FUN_8001e5f4(int, int);
     }
 
 #define DROP() \
-    switch (D_8009C330->b7) { \
+    switch (PLAYER_EXT->b7) { \
     case 0: case 2: \
         o->h->p.whole += 0x10; \
         o->y.p.whole += 4; \
@@ -73,7 +73,7 @@ extern void FUN_8001e5f4(int, int);
         break; \
     } \
     o->b69 = 0; \
-    D_8009C330->b8 = 0; \
+    PLAYER_EXT->b8 = 0; \
     (*(unsigned char*)&o->wac) = 0; \
     o->ba7 = 0; \
     o->b9c = 0; \
@@ -108,7 +108,7 @@ void playerStepWeaponAttack(TObj *o)
     short x;
 
     if (o->b9d == 0) {
-        D_8009C330->b7 = o->animFrame;
+        PLAYER_EXT->b7 = o->animFrame;
         f = o->animFrame & 1;
         o->animFrame = f;
         k = &GV6.s70;
@@ -130,20 +130,20 @@ void playerStepWeaponAttack(TObj *o)
         o->b9d = 1;
         U8(o, 0xc8) = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(TObj **)&PLX.p611c);
+            BITTEN_OBJECT = (*(TObj **)&PLX.p611c);
             (*(TObj **)&PLX.p611c)->b04 = 2;
-            D_8009D2E8->step = 2;
-            D_8009D2E8->state = 0;
+            BITTEN_OBJECT->step = 2;
+            BITTEN_OBJECT->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         U8(o, 0xc3) = 0;
         o->b9e = 0;
         (*(unsigned char*)&o->waa) = 0;
-        U8(D_8009C330, 0) = 2;
-        U8(D_8009C330, 7) = o->animFrame;
-        D_8009C330->w2e = -1;
-        D_8009C330->w28 = -1;
-        D_8009C330->w2a = -1;
+        U8(PLAYER_EXT, 0) = 2;
+        U8(PLAYER_EXT, 7) = o->animFrame;
+        PLAYER_EXT->w2e = -1;
+        PLAYER_EXT->w28 = -1;
+        PLAYER_EXT->w2a = -1;
         switch (o->animFrame) {
         case 0: case 1: case 2: case 3:
             (*(char **)&PLAYER.obj.anim) = D_80010E80;
@@ -183,7 +183,7 @@ void playerStepWeaponAttack(TObj *o)
         FUN_8001fce4(o);
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
-        if (D_8009C330->b0 == 0 && U8(o, 0xc6) == 0) {
+        if (PLAYER_EXT->b0 == 0 && U8(o, 0xc6) == 0) {
             playerSelectGroundAnim(o);
             o->b9d = 0;
             if (o->bbe & 0x20) {
@@ -194,8 +194,8 @@ void playerStepWeaponAttack(TObj *o)
             }
         }
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = PTR(o, 0xe4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = PTR(o, 0xe4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -242,9 +242,9 @@ void playerStepWeaponAttack(TObj *o)
             break;
         }
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = PTR(o, 0xe4);
+            BITTEN_OBJECT = PTR(o, 0xe4);
             o->ba7 = 0;
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;

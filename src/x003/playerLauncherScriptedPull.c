@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern void *D_80139870[];
 extern int angleFromDelta(int, int);
 extern int FUN_8001fec0(TObj *);
@@ -33,7 +33,7 @@ void playerLauncherScriptedPull(TObj *o)
     case 1:
         a = (unsigned char)angleFromDelta(o->h->p.whole - p->h->p.whole, o->y.p.whole - p->y.p.whole);
         o->wb0 = a;
-        d = (o->velH * D_8007A5F0[a]) >> 12;
+        d = (o->velH * COS_TABLE[a]) >> 12;
         dy = (o->velH * D_8007A1F0[a]) >> 12;
         p->h->raw += d << 8;
         p->y.raw += dy << 8;

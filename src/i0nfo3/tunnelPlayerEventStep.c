@@ -10,7 +10,7 @@ extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void tunnelPlayerDropExitStep(TObj *o);
 extern void tunnelPlayerLandStep(TObj *o);
 extern void tunnelCollideMapTile(TObj *o, int x, int y, int z);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char TALK_POSE;
 
 void tunnelPlayerEventStep(TObj *o)
@@ -23,14 +23,14 @@ void tunnelPlayerEventStep(TObj *o)
         } else if (o->active == 5) {
             func_8001FEC0(o);
         } else {
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             tunnelPlayerSetMoveAnim(o);
         }
         break;
     case 1:
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             tunnelPlayerSetMoveAnim(o);
             o->b9e = 1;
             o->state++;
@@ -48,7 +48,7 @@ void tunnelPlayerEventStep(TObj *o)
         U8(o, 0xAC) = 0;
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame &= 7;
+            PLAYER_EXT->animTimer = o->animFrame &= 7;
             tunnelPlayerSetMoveAnim(o);
             o->b9e = 1;
             o->state++;
@@ -71,7 +71,7 @@ void tunnelPlayerEventStep(TObj *o)
         U8(o, 0xAC) = 0;
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             tunnelPlayerSetMoveAnim(o);
             o->state++;
         case 1:

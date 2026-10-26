@@ -46,7 +46,7 @@ extern void FUN_801212a0(TObj *);
 extern void FUN_8011dc4c(TObj *);
 extern void FUN_8011d8c4(TObj *);
 extern void FUN_8011d334(TObj *);
-extern PL *DAT_8009c330;
+extern PL *PLAYER_EXT;
 extern unsigned char DAT_8009d2b2[];
 extern unsigned char DAT_8009cff8;
 extern unsigned char DAT_8009d006[];
@@ -62,7 +62,7 @@ extern int SPR_DATA[];
 extern char DAT_80010748[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short DAT_8009c960;
-extern unsigned int DAT_8009c960i;
+extern unsigned int GAME;
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982;
 extern signed char DAT_8009d2b0;
@@ -105,10 +105,10 @@ void playerInitMode(TObj *o)
     int a;
     char pad[0xe0];
 
-    DAT_8009c330 = &X(o)->pl;
+    PLAYER_EXT = &X(o)->pl;
     switch (o->step) {
     case 0:
-        pl = DAT_8009c330;
+        pl = PLAYER_EXT;
         if (FUN_8005efe4() != 1) FUN_8005efe4();
         pl->w14 = 0;
         o->w1e = 0;
@@ -120,13 +120,13 @@ void playerInitMode(TObj *o)
         }
         loadCompressedTIM(a);
         {
-            PL *q = DAT_8009c330;
+            PL *q = PLAYER_EXT;
             *(unsigned char *)q = 0;
             q->w28 = 0xffff;
             q->w2a = 0xffff;
             q->w2e = 0xffff;
         }
-        DAT_8009c330->b4 = 0;
+        PLAYER_EXT->b4 = 0;
         o->visible = 1;
         *(signed char *)&o->b0f = -8;
         o->b0a = 0;
@@ -181,7 +181,7 @@ void playerInitMode(TObj *o)
             o->animFrame = t4; }
             break;
         }
-        if (DAT_8009c960i == 0x2000e) {
+        if (GAME == 0x2000e) {
             o->b04 = 1;
             o->state = 0;
             o->step = 0x3e;

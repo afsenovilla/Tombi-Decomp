@@ -14,13 +14,13 @@ typedef struct O {
     char pb8[0xc6-0xb8]; unsigned char bc6; unsigned char bc7; char pc8[0xe0-0xc8]; short he0; char pe2; unsigned char be3;
 } O;
 typedef struct E { char p0[4]; unsigned char b4, b5, b6; } E;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char TALK_POSE;
 extern char D_80010748[];
-extern E *D_8009D2E8;
-extern O *D_8009F0EC;
+extern E *BITTEN_OBJECT;
+extern O *GRABBED_OBJECT;
 extern void AnimJump(O *, int);
 extern int AnimAdvance(O *);
 extern short ObjTileCollide(O *, int, int);
@@ -33,7 +33,7 @@ extern void playerAnimateTalkPose(O *);
 
 static __inline__ void land(O *o)
 {
-    D_8009C330->b8 = 0;
+    PLAYER_EXT->b8 = 0;
     o->ba4 = 0;
     o->ba5 = 0;
     o->b9c = 0;
@@ -42,12 +42,12 @@ static __inline__ void land(O *o)
     o->vx = 0;
     o->vy = 0;
     o->d8c = D_801152E8[o->hb0];
-    D_8009C330->h20 = 0;
+    PLAYER_EXT->h20 = 0;
     o->anim = D_80010748;
     AnimJump(o, 0);
-    D_8009C330->h2e = 0xffff;
-    D_8009C330->h28 = 0xffff;
-    D_8009C330->h2a = 0xffff;
+    PLAYER_EXT->h2e = 0xffff;
+    PLAYER_EXT->h28 = 0xffff;
+    PLAYER_EXT->h2a = 0xffff;
 }
 
 void playerEventStepLandIdle(O *o)
@@ -61,7 +61,7 @@ void playerEventStepLandIdle(O *o)
         o->ba5 = 0;
         o->b9c = 2;
         o->ba7 = 0;
-        p = D_8009C330;
+        p = PLAYER_EXT;
         o->hb2 = 0;
         o->vx = 0;
         o->vy = 0;
@@ -71,10 +71,10 @@ void playerEventStepLandIdle(O *o)
             o->he0 = 0x8c;
         o->w22 = 0;
         if (o->bac >= 2) {
-            D_8009D2E8 = (*(E **)&PLX.p611c);
-            D_8009D2E8->b4 = 2;
-            D_8009D2E8->b5 = 2;
-            D_8009D2E8->b6 = 0;
+            BITTEN_OBJECT = (*(E **)&PLX.p611c);
+            BITTEN_OBJECT->b4 = 2;
+            BITTEN_OBJECT->b5 = 2;
+            BITTEN_OBJECT->b6 = 0;
         }
         o->bac = 0;
         GVARS.i34 = 0;
@@ -82,8 +82,8 @@ void playerEventStepLandIdle(O *o)
         o->b9d = 0;
         o->bc6 = 0;
         o->be3 = 0;
-        D_8009C330->b0 = 0;
-        q = D_8009F0EC;
+        PLAYER_EXT->b0 = 0;
+        q = GRABBED_OBJECT;
         if (q != 0 && q != (O *)1) {
             switch (q->type) {
             case 5:
@@ -107,19 +107,19 @@ void playerEventStepLandIdle(O *o)
     case 1:
         playerAirSpinToFall(o);
         AnimAdvance(o);
-        D_8009C330->b8 = 1;
+        PLAYER_EXT->b8 = 1;
         o->b9e = 0;
         o->hb0 = 0;
         o->hb6 = 0;
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         AnimAdvance(o);
-        D_8009C330->h2c = 4;
-        if (D_8009C330->h2e != 4) {
-            D_8009C330->h2c = 4;
+        PLAYER_EXT->h2c = 4;
+        if (PLAYER_EXT->h2e != 4) {
+            PLAYER_EXT->h2c = 4;
             ObjSetAnimFromTable(o);
             AnimJump(o, 0);
-            D_8009C330->h2e = D_8009C330->h2c;
+            PLAYER_EXT->h2e = PLAYER_EXT->h2c;
         }
         if (o->b69 == 1 || ObjTileCollide(o, 4, 0) != 0) {
             SfxPlay3(0x1c, 0x7f);
@@ -135,7 +135,7 @@ void playerEventStepLandIdle(O *o)
         if (TALK_POSE != 0) {
             playerAnimateTalkPose(o);
         } else {
-            D_8009C330->h2c = 0;
+            PLAYER_EXT->h2c = 0;
             o->anim = D_80010748;
             AnimJump(o, 0);
         }

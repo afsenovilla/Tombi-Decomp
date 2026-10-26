@@ -21,7 +21,7 @@ typedef struct { char d[0x988]; } BGame;
 extern char D_800E1E28[];
 extern char D_800E1E29, D_800E1E2A, D_800E1E2B;
 extern char D_800E2028[];
-extern char D_8009C960[];
+extern char GAME[];
 extern int D_8009D2B4[], D_800A6048[];
 extern short D_8009C982[];
 extern char D_8009C972[], D_8009D2E4[], D_8009D2E5[], D_8009D2E6[], D_8009C992[];
@@ -109,6 +109,6 @@ void func_800E999C(int slot)
     memset(h + 0x44, 0, 0x1C);
     *(B32 *)(h + 0x60) = *D_800F6A2C[D_1F8003D8];
     *(B384 *)(h + 0x80) = *D_800F6A24[D_1F8003D8];
-    *(BGame *)D_800E2028 = *(BGame *)D_8009C960;
+    *(BGame *)D_800E2028 = *(BGame *)GAME;
     memCardStoreChecksum(D_800E2028, 0xA00);
 }

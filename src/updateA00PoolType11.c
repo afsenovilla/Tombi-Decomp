@@ -4,7 +4,7 @@ extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_80
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char *PTR_8013b118;
 extern int DAT_1f8002d4;
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 
 void updateA00PoolType11(unsigned char *o)
 {
@@ -30,7 +30,7 @@ void updateA00PoolType11(unsigned char *o)
         FUN_800202b4(o);
         switch (o[5]) {
         case 0:
-            if (DAT_8009c330[10] == o[0xc]) {
+            if (PLAYER_EXT[10] == o[0xc]) {
                 *(unsigned char **)(o + 0x24) = PTR_8013b118;
                 FUN_8001fe6c(o);
                 o[5]++;

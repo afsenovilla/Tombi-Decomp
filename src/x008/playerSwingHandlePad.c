@@ -4,8 +4,8 @@
 extern unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6;
 extern unsigned char DAT_8009d2b0;
-extern unsigned char *DAT_8009c330;
-extern unsigned char *DAT_8009f0ec;
+extern unsigned char *PLAYER_EXT;
+extern unsigned char *GRABBED_OBJECT;
 
 void playerSwingHandlePad(TObj *o)
 {
@@ -16,19 +16,19 @@ void playerSwingHandlePad(TObj *o)
     Fix16 *h;
     if (PAD_PRESSED[0] & DAT_1f8003c6) {
         DAT_8009d2b0 = 0;
-        DAT_8009c330[9] = 0;
+        PLAYER_EXT[9] = 0;
         o->step = 0xb;
         o->state = 0;
-        DAT_8009f0ec[0x69] = 0;
+        GRABBED_OBJECT[0x69] = 0;
     }
     if (PAD_PRESSED[0] & 0x10) {
-        DAT_8009c330[9] = 0;
+        PLAYER_EXT[9] = 0;
         o->step = 0xb;
         o->state = 0;
-        DAT_8009f0ec[0x69] = 0;
+        GRABBED_OBJECT[0x69] = 0;
     }
     if (PAD_PRESSED[0] & 0x40) {
-        DAT_8009c330[9] = 0;
+        PLAYER_EXT[9] = 0;
         *(unsigned char *)&o->wac = 1;
         u = o->animFrame;
         h = o->h;
@@ -55,6 +55,6 @@ void playerSwingHandlePad(TObj *o)
         o->state = 3;
         o->d88 = a;
         o->d8c = 0;
-        DAT_8009f0ec[0x69] = 0;
+        GRABBED_OBJECT[0x69] = 0;
     }
 }

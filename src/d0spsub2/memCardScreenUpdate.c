@@ -7,7 +7,7 @@ typedef struct {
     char p14[8];
     short w1c;
 } Menu;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern unsigned short D_1F8001FC;
 extern unsigned short PAD_PRESSED;
 extern int D_800F7140, D_800F7144;
@@ -15,7 +15,7 @@ extern int memCardScreenStep(int pad, Menu *m);
 
 int memCardScreenUpdate(int a0, int a1, int ret)
 {
-    Menu *m = &D_800A45D8;
+    Menu *m = &MENU_STATE;
     int k;
     switch (m->state) {
     case 0:

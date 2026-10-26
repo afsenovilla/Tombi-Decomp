@@ -1,8 +1,8 @@
 // FUNC 8002e83c 624 MAIN0
 // MATCHING 8002e83c 624
 #include "TOBJ.H"
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern void *D_80012204;
 extern unsigned short D_1F8001F8;
 extern int D_1F800198;
@@ -52,8 +52,8 @@ void updatePoolType31Object(TObj *o)
                     p->h->raw = o->h->raw;
                     p->y.raw = o->y.raw;
                     p->d->raw = o->d->raw;
-                    p->h->raw += (D_8007A5F0[r & 0xf0] * s) >> 4;
-                    p->y.raw += (D_8007A3F0[r & 0xf0] * s) >> 4;
+                    p->h->raw += (COS_TABLE[r & 0xf0] * s) >> 4;
+                    p->y.raw += (NEG_SIN_TABLE[r & 0xf0] * s) >> 4;
                     setup(p);
                 }
             }

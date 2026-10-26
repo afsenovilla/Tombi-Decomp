@@ -3,7 +3,7 @@
 // probably: chained three-part object (subtype 0..2 via func_8011D9D8/D670/D300): places the child d94 on the angle animFrame at radius ba5, table at 80138B84
 #include "TOBJ.H"
 extern short DAT_8007a1f0[];
-extern short DAT_8007a5f0[];
+extern short COS_TABLE[];
 extern void FUN_8011d9d8(TObj *);
 extern void FUN_8011d670(TObj *);
 extern void FUN_8011d300(TObj *);
@@ -14,7 +14,7 @@ void FUN_8011dd30(TObj *o)
     TObj *p;
     o->d8c = (0x80 - o->animFrame) << 4;
     dy = (signed char)o->ba5 * DAT_8007a1f0[o->animFrame] << 4;
-    dx = (signed char)o->ba5 * DAT_8007a5f0[o->animFrame] << 4;
+    dx = (signed char)o->ba5 * COS_TABLE[o->animFrame] << 4;
     p = (TObj *)o->d94;
     p->y.raw = o->y.raw + dy + (o->velY << 16);
     o->d34 = p->y.p.whole;

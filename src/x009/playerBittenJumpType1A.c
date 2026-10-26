@@ -2,7 +2,7 @@
 // MATCHING 8011d3ec 660
 #include "spad.h"
 #include "TOBJ.H"
-extern TObj *D_8009D2E8;
+extern TObj *BITTEN_OBJECT;
 extern void playerBittenCarryAirStep(TObj *);
 extern void playerCheckJumpPressedB(TObj *);
 extern void setFacingFromPad(TObj *);
@@ -24,13 +24,13 @@ void playerBittenJumpType1A(TObj *o)
 
     switch (o->substep) {
     case 0:
-        D_8009D2E8->d8c = o->d88 - 0xc0;
+        BITTEN_OBJECT->d8c = o->d88 - 0xc0;
         playerBittenCarryAirStep(o);
         playerCheckJumpPressedB(o);
         break;
     case 1:
         setFacingFromPad(o);
-        p = D_8009D2E8;
+        p = BITTEN_OBJECT;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
         p->d8c = o->d88 - 0xc0;
@@ -56,7 +56,7 @@ void playerBittenJumpType1A(TObj *o)
                 e->type = 4;
                 e->subtype = 6;
                 {
-                    unsigned char c = D_8009D2E8->b0c;
+                    unsigned char c = BITTEN_OBJECT->b0c;
                     e->animFrame |= 2;
                     e->b0c = c;
                 }
@@ -76,7 +76,7 @@ void playerBittenJumpType1A(TObj *o)
         }
         break;
     case 3:
-        D_8009D2E8->b04 = 3;
+        BITTEN_OBJECT->b04 = 3;
         PlayerSetAnimIfChanged(o, 0x1d);
         o->d8c = 0x200;
         o->wb2 = 0x100;

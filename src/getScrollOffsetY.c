@@ -12,7 +12,7 @@
 
 s32 getScrollOffsetY(void)
 {
-    s16 v = D_8007D988[D_800A38DC / 360];
+    s16 v = NEG_SIN_TABLE[D_800A38DC / 360];
 
     return (v * 1027) >> 12;
 }
@@ -24,7 +24,7 @@ s32 getScrollOffsetY(void)
 
 s32 getScrollOffsetY(void)
 {
-    s16 v = D_8007D988[(D_800A38DC >> 8) / 360];
+    s16 v = NEG_SIN_TABLE[(D_800A38DC >> 8) / 360];
 
     return (v * 1027) >> 12;
 }

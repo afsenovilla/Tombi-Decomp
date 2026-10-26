@@ -16,7 +16,7 @@ extern void setAreaFlagBit(int);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
-extern TObj *D_8009C948[];
+extern TObj *BAIT_OBJECT[];
 extern short D_80138F8C[];
 extern short D_80138F8E[];
 extern unsigned char D_800A4553[];
@@ -30,7 +30,7 @@ void func_801236F0(TObj *o)
         initItemObject(o);
         o->active = 1;
         o->wb4 = 0;
-        D_8009C948[0] = o;
+        BAIT_OBJECT[0] = o;
         o->b04++;
         break;
     case 1:
@@ -81,7 +81,7 @@ void func_801236F0(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            D_8009C948[0] = 0;
+            BAIT_OBJECT[0] = 0;
             D_8007A890[D_8007A7F0[o->subtype * 20]](o);
             break;
         case 1:
@@ -108,7 +108,7 @@ extern void setAreaFlagBit(int);
 extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
-extern TObj *D_8009C948[];
+extern TObj *BAIT_OBJECT[];
 extern short D_80138F8C[];
 static short D_80138F8E[13] = {
     -0x100, -0x80, -0x100, 0, -0x100, 0, 1, 2,
@@ -125,7 +125,7 @@ void updateA00BitingPlantBait(TObj *o)
         initItemObject(o);
         o->active = 1;
         o->wb4 = 0;
-        D_8009C948[0] = o;
+        BAIT_OBJECT[0] = o;
         o->b04++;
         break;
     case 1:
@@ -176,7 +176,7 @@ void updateA00BitingPlantBait(TObj *o)
     case 2:
         switch (o->step) {
         case 0:
-            D_8009C948[0] = 0;
+            BAIT_OBJECT[0] = 0;
             D_8007A890[D_8007A7F0[o->subtype]](o);
             break;
         case 1:

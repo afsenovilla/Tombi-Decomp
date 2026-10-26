@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef void (*ObjFn)(TObj *);
 typedef union { int w; struct { unsigned short a, b; } h; } Stage;
-extern Stage DAT_8009c960;
+extern Stage GAME;
 extern Stage DAT_8009c960c; /* debt: second name; with one name CSE (follow-jumps) shares one la between .w and the else .h.a in the anim block, the game reloads; tried casts, switch, goto, ptr temp, inverted if */
 extern unsigned char DAT_8009cf9d;
 extern int DAT_1f8002e0[];
@@ -56,18 +56,18 @@ void updateTreasureChest(TObj *o)
                 break;
             }
         }
-        if (DAT_8009c960.w == 0x30009) {
+        if (GAME.w == 0x30009) {
             o->w1e = 10;
             o->d3c = DAT_1f8002e0[0];
         } else {
-            if (DAT_8009c960.h.a == 1 && DAT_8009c960.h.b < 2)
+            if (GAME.h.a == 1 && GAME.h.b < 2)
                 o->w1e = DAT_80115a54[o->b0c & 0x7f];
             else
                 {
                 /* debt: register asm; local-alloc otherwise gives the earlier-born index $2 */
                 register int i asm("$3");
                 i = o->b0c & 0x7f;
-                o->w1e = DAT_80115a18[DAT_8009c960.h.a * 4 + i];
+                o->w1e = DAT_80115a18[GAME.h.a * 4 + i];
             }
             o->d3c = DAT_1f8002d4[0];
         }
@@ -87,7 +87,7 @@ void updateTreasureChest(TObj *o)
         }
         *(signed char *)&o->b0f = -3;
         o->wac = 0;
-        if (DAT_8009c960.w == 0x30009)
+        if (GAME.w == 0x30009)
             o->anim = *DAT_80115a08[o->b0c & 0x7f];
         else
             o->anim = *DAT_80115948[DAT_8009c960c.h.a * 4 + (o->b0c & 0x7f)];

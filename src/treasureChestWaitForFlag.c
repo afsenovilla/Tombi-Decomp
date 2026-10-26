@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short DAT_8009c960[];
 extern unsigned short DAT_8009c960b;
-extern int DAT_8009c960_w[];
+extern int GAME[];
 extern unsigned char DAT_8009d0aa;
 extern unsigned char DAT_8009d0c8;
 extern unsigned char DAT_8009c93b;
@@ -15,7 +15,7 @@ extern void FUN_800202b4(TObj *);
 
 #define SETANIM(o) \
     o->wac = 1; \
-    if (DAT_8009c960_w[0] == 0x30009) o->anim = DAT_80115a08[o->b0c & 0x7f][1]; \
+    if (GAME[0] == 0x30009) o->anim = DAT_80115a08[o->b0c & 0x7f][1]; \
     else o->anim = DAT_80115948[DAT_8009c960b * 4 + (o->b0c & 0x7f)][1]; \
     FUN_8001fe6c(o);
 

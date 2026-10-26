@@ -1,7 +1,7 @@
 // FUNC 800e9f74 500 X006
 // MATCHING 800e9f74 500
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern void FUN_80118040(TObj *, short, short, short, int);
 extern void FUN_8011832c(TObj *, short, short, short, int);
 extern void FUN_801188fc(TObj *, short, short, short, int);
@@ -15,7 +15,7 @@ extern void FUN_80116920(TObj *, short, short, short, int);
 
 void awardAPByArea(TObj *o, short x, short y, short z)
 {
-    switch (DAT_8009c960) {
+    switch (GAME) {
     case 0: FUN_80118040(o, x, y, z, 1); break;
     case 1: FUN_8011832c(o, x, y, z, 1); break;
     case 3: FUN_801188fc(o, x, y, z, 1); break;

@@ -4,15 +4,6 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0x10];
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-} unk_800A3940;
-#define MENU_STATE ((unk_800A3940*)D_800A3940)
 
 void debugSelectHandler(void)
 {

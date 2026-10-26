@@ -1,21 +1,21 @@
 // FUNC 8010b784 252 X010
 // MATCHING 8010b784 252
 typedef struct N { unsigned char active; unsigned char b1; unsigned char type; char p[0x91]; struct N *next; } N;
-extern N *D_8009F0EC;
+extern N *GRABBED_OBJECT;
 
 void playerRestoreClingObjectActive(void)
 {
     N *p;
-    switch (D_8009F0EC->type) {
+    switch (GRABBED_OBJECT->type) {
     case 11:
-        if (D_8009F0EC->next)
-            D_8009F0EC->active = 3;
+        if (GRABBED_OBJECT->next)
+            GRABBED_OBJECT->active = 3;
         else
-            D_8009F0EC->active = 1;
+            GRABBED_OBJECT->active = 1;
     case 21:
-        if (D_8009F0EC->next) {
-            D_8009F0EC->active = 3;
-            p = D_8009F0EC->next;
+        if (GRABBED_OBJECT->next) {
+            GRABBED_OBJECT->active = 3;
+            p = GRABBED_OBJECT->next;
             if (!p->next) {
                 p->active = 1;
             } else {
@@ -26,16 +26,16 @@ void playerRestoreClingObjectActive(void)
                 p->active = 1;
             }
         } else {
-            D_8009F0EC->active = 1;
+            GRABBED_OBJECT->active = 1;
         }
         break;
     case 29:
     case 49:
-        D_8009F0EC->active = 1;
+        GRABBED_OBJECT->active = 1;
         break;
     case 12:
     default:
-        D_8009F0EC->active = 3;
+        GRABBED_OBJECT->active = 3;
         break;
     }
 }

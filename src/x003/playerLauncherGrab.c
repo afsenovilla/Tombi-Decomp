@@ -4,7 +4,7 @@
 
 extern unsigned char PLAYER[], D_800A6039[], D_800A603C[], D_800A603D[];
 extern void *D_8013986C[];
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001e4f0(int);
@@ -14,7 +14,7 @@ extern int playerLauncherCheckReach(TObj *);
 static __inline__ void move(TObj *o)
 {
     o->velY = (o->velV * D_8007A1F0[*(unsigned char *)&o->d8c]) >> 12;
-    o->velX = (o->velV * D_8007A5F0[*(unsigned char *)&o->d8c]) >> 12;
+    o->velX = (o->velV * COS_TABLE[*(unsigned char *)&o->d8c]) >> 12;
     if (o->animFrame == 0) {
         o->velX = -o->velX;
         o->velY = -o->velY;

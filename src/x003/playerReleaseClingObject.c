@@ -1,8 +1,8 @@
 // FUNC 8010bd08 432 X003
 // MATCHING 8010bd08 432
 #include "TOBJ.H"
-extern TObj *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern TObj *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_8009d2b2;
 
 void playerReleaseClingObject(TObj *o)
@@ -10,33 +10,33 @@ void playerReleaseClingObject(TObj *o)
     TObj *q;
     Fix16 *h;
     int x;
-    DAT_8009c330->b04 = 0;
+    PLAYER_EXT->b04 = 0;
     o->timer = 6;
     o->velH = 0;
     o->velV = 0;
     o->velX = 0;
     o->velY = 0;
-    switch (DAT_8009f0ec->type) {
+    switch (GRABBED_OBJECT->type) {
     case 5:
-        DAT_8009f0ec->b6a = 0;
+        GRABBED_OBJECT->b6a = 0;
         break;
     case 0x21:
-        DAT_8009f0ec->ba7 = 0;
+        GRABBED_OBJECT->ba7 = 0;
         break;
     }
     if (DAT_8009d2b2 - 5 >= 4) {
-        DAT_8009f0ec->active = DAT_8009c330->state;
+        GRABBED_OBJECT->active = PLAYER_EXT->state;
     } else {
-        switch (DAT_8009f0ec->type) {
+        switch (GRABBED_OBJECT->type) {
         case 11:
-            if (DAT_8009f0ec->d94)
-                DAT_8009f0ec->active = 3;
+            if (GRABBED_OBJECT->d94)
+                GRABBED_OBJECT->active = 3;
             else
-                DAT_8009f0ec->active = 1;
+                GRABBED_OBJECT->active = 1;
         case 21:
-            if (DAT_8009f0ec->d94 != 0) {
-            DAT_8009f0ec->active = 3;
-            q = (TObj *)DAT_8009f0ec->d94;
+            if (GRABBED_OBJECT->d94 != 0) {
+            GRABBED_OBJECT->active = 3;
+            q = (TObj *)GRABBED_OBJECT->d94;
             if (q->d94) goto loop;
             q->active = 1;
             break;
@@ -46,16 +46,16 @@ void playerReleaseClingObject(TObj *o)
             if (q->d94) goto loop;
             q->active = 1;
             } else {
-                DAT_8009f0ec->active = 1;
+                GRABBED_OBJECT->active = 1;
             }
             break;
         case 29:
         case 49:
-            DAT_8009f0ec->active = 1;
+            GRABBED_OBJECT->active = 1;
             break;
         case 48:
         default:
-            DAT_8009f0ec->active = 3;
+            GRABBED_OBJECT->active = 3;
             break;
         }
     }

@@ -4,7 +4,7 @@
 
 typedef struct { TObj o; unsigned char pc0[6]; unsigned char c6, c7; unsigned char pc8[0x1b]; unsigned char e3; } TX;
 #define X(o) ((TX *)(o))
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void AnimAdvance(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playerSetAngleFromSlope(TObj *);
@@ -21,7 +21,7 @@ void playerStepRideSlopeContact(TObj *o)
 {
     switch (o->state) {
     case 0:
-        D_8009C330->b0b = o->animFrame;
+        PLAYER_EXT->b0b = o->animFrame;
         if (o->animFrame &= 1) {
             if (o->wb2 > 0) {
                 o->wb2 = -o->wb2;
@@ -41,7 +41,7 @@ void playerStepRideSlopeContact(TObj *o)
         o->d8c = 0;
         o->velX = 0;
         o->velY = 0x100;
-        D_8009C330->active = 0;
+        PLAYER_EXT->active = 0;
         o->ba4 = 1;
         if ((o->bbe & 1) != o->animFrame) {
             FUN_800eeb5c(o, 8);
@@ -55,7 +55,7 @@ void playerStepRideSlopeContact(TObj *o)
         playerSetAngleFromSlope(o);
         o->y.raw += o->velY << 8;
         o->velY += 8;
-        switch (D_8009C330->animTimer) {
+        switch (PLAYER_EXT->animTimer) {
         case 8:
             o->d8c = (o->animFrame & 1) ? 0x20 : 0xe0;
             break;
@@ -68,7 +68,7 @@ void playerStepRideSlopeContact(TObj *o)
                 o->wb2 = 0;
             }
             o->ba4 = 0;
-            if (D_8009C330->active == 0) {
+            if (PLAYER_EXT->active == 0) {
                 *(unsigned char *)&o->wac = 1;
                 playerSetFallLean(o);
                 o->step = 2;

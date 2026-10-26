@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void *D_8012EE98[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -13,7 +13,7 @@ extern short TileCollideAt(TObj *, short, short);
 
 static __inline__ void mv(TObj *o)
 {
-    o->d30 = (D_8007A5F0[(*(unsigned char*)&o->d84)] * o->velH) >> 4;
+    o->d30 = (COS_TABLE[(*(unsigned char*)&o->d84)] * o->velH) >> 4;
     o->h->raw += o->d30;
     o->d84 = (o->d84 + 1) & 0xff;
     if ((*(short*)((char*)&o->d30 + 2)) > 0) {
@@ -24,7 +24,7 @@ static __inline__ void mv(TObj *o)
             probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 0x30, 0);
     }
     {
-        int v = D_8007A3F0[(*(unsigned char*)&o->d88)] * o->velV;
+        int v = NEG_SIN_TABLE[(*(unsigned char*)&o->d88)] * o->velV;
         o->d88 = (o->d88 + 3) & 0xff;
         o->y.raw = o->y.raw + (v >> 4) + 0x8000;
     }

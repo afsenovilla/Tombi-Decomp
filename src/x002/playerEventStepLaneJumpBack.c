@@ -7,8 +7,8 @@ typedef struct {
 } G330;
 #define OB(o, n) (((unsigned char *)(o))[n])
 #define WF6(o) (*(short *)((char *)(o) + 0xf6))
-extern G330 *DAT_8009c330;
-extern unsigned short DAT_8009c960;
+extern G330 *PLAYER_EXT;
+extern unsigned short GAME;
 extern unsigned char DAT_8009c93a[];
 extern unsigned char DAT_8009ce61;
 extern unsigned char DAT_8009d119;
@@ -42,16 +42,16 @@ void playerEventStepLaneJumpBack(TObj *o)
         o->animFrame &= 1;
         o->velX = FUN_8001fddc(0, o->wb2);
         o->velY = -0x570;
-        DAT_8009c330->w20 = 5;
+        PLAYER_EXT->w20 = 5;
         FUN_800eeb5c(o, 0x19);
-        if (DAT_8009c960 == 0) {
+        if (GAME == 0) {
             playSFXWithPitchSlide(0xd, 1, -8, 0x96);
             startAreaBgm();
         }
         o->state = 1;
     case 1:
         FUN_8010f0f4(o);
-        if (DAT_8009c960 == 0)
+        if (GAME == 0)
             o->d->raw -= 0x80000;
         else
             o->d->raw -= 0x50000;
@@ -106,7 +106,7 @@ void playerEventStepLaneJumpBack(TObj *o)
             o->velX = 0;
             o->velY = 0;
             o->d8c = DAT_801152e8[o->wb0];
-            DAT_8009c330->w20 = 0;
+            PLAYER_EXT->w20 = 0;
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

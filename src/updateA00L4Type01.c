@@ -18,7 +18,7 @@ extern signed char D_80138718[][12];
 extern signed char D_80138748[][12];
 extern signed char D_80138720[];
 extern signed char D_801386B4[];
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern unsigned char *allocObjectLayer2(void);
 extern void FUN_8001e4f0(int);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
@@ -141,9 +141,9 @@ void updateA00L4Type01(TO2 *o)
                 r.vx = 0;
                 r.vy = 0;
                 if (o->t.animFrame == 0) {
-                    r.vz = 0x1000 - D_8007A3F0[D_801386B4[(unsigned short)p->t.wb8]] / D_80138748[(unsigned short)p->t.wb4][n + D_80138720[o->t.subtype]];
+                    r.vz = 0x1000 - NEG_SIN_TABLE[D_801386B4[(unsigned short)p->t.wb8]] / D_80138748[(unsigned short)p->t.wb4][n + D_80138720[o->t.subtype]];
                 } else {
-                    r.vz = D_8007A3F0[D_801386B4[(unsigned short)p->t.wb8]] / D_80138748[(unsigned short)p->t.wb4][n + D_80138720[o->t.subtype]];
+                    r.vz = NEG_SIN_TABLE[D_801386B4[(unsigned short)p->t.wb8]] / D_80138748[(unsigned short)p->t.wb4][n + D_80138720[o->t.subtype]];
                 }
                 FUN_8006424c(&r, &m);
                 if (p->t.d94 == 0) {

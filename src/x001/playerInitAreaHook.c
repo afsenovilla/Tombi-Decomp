@@ -3,14 +3,14 @@
 #include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern TObj *D_8009F0EC;
+extern TObj *GRABBED_OBJECT;
 extern void spawnHeldPuppyBaron(int, int, int, int);
 extern void spawnCaughtForestDwarf(int, int, int);
 extern void FUN_80026e0c(int, int);
 
 void playerInitAreaHook(TObj *o)
 {
-    D_8009F0EC = 0;
+    GRABBED_OBJECT = 0;
     if (GAME.baronState == 3)
         spawnHeldPuppyBaron(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     if (GCD.bcdb2 != 0xff) {

@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 
 int playerHurtCheckFastFall(TObj *o)
 {
@@ -17,7 +17,7 @@ int playerHurtCheckFastFall(TObj *o)
     if (o->velY < 0x680) {
         return 0;
     }
-    D_8009C330[8] = 0;
+    PLAYER_EXT[8] = 0;
     *((unsigned char *)o + 0xd1) = 0;
     o->active = 3;
     *(short *)((char *)o + 0xe0) = 0x8c;

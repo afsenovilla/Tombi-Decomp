@@ -8,7 +8,7 @@ typedef struct { char pad[0xa]; short w0a; } W0AS;
 
 typedef struct { short x; short y; } XY;
 
-extern TObj *D_8009C948[];
+extern TObj *BAIT_OBJECT[];
 extern unsigned short D_8013CA20[];
 extern XY D_8013CA10[];
 extern int Rand(void);
@@ -24,7 +24,7 @@ void updateSegmentedCrawlerSpawner(TObj *o)
     case 0:
         o->w08 = 600;
         W0A(o) = 0;
-        D_8009C948[0] = o;
+        BAIT_OBJECT[0] = o;
         o->b04++;
         break;
     case 1:
@@ -41,7 +41,7 @@ void updateSegmentedCrawlerSpawner(TObj *o)
                     e->a.raw = SPAD.iec;
                     e->y.raw = D_8013CA10[r].y << 16;
                     e->b.raw = D_8013CA10[r].x << 16;
-                    W0A(D_8009C948[0])++;
+                    W0A(BAIT_OBJECT[0])++;
                 }
             }
         }

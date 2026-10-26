@@ -1,8 +1,8 @@
 // FUNC 8010c8d4 324 X002
 // MATCHING 8010c8d4 324
 #include "TOBJ.H"
-extern unsigned char *DAT_8009f0ec;
-extern int DAT_8009c960;
+extern unsigned char *GRABBED_OBJECT;
+extern int GAME;
 extern int DAT_8009c984;
 extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
@@ -20,14 +20,14 @@ void playerClimbJumpOff(TObj *o)
     char *c = (char *)o;
     *(signed char *)(c + 0xf) = -8;
     c[0xa9] = 0;
-    *DAT_8009f0ec = 1;
+    *GRABBED_OBJECT = 1;
     *(short *)(c + 0x20) = 6;
     c[0x9c] = 1;
     *(short *)(c + 0x80) = 0;
     *(short *)(c + 0x82) = 0;
     *(short *)(c + 0x7c) = 0;
     *(short *)(c + 0x7e) = 0;
-    if (DAT_8009c960 == 0x30000) {
+    if (GAME == 0x30000) {
         turn(o);
     } else {
         k = &PAD_PRESSED;

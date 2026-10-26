@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char p[0x2c]; unsigned short w2c; unsigned short w2e; } G;
-extern G *D_8009C330;
+extern G *PLAYER_EXT;
 void ObjSetAnimFromTable(TObj *o);
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
@@ -28,16 +28,16 @@ void playerStepSkidStop(TObj *o)
         *((unsigned char *)o + 0xd6) = 0;
         *((unsigned char *)o + 0xd7) = 0;
         *((unsigned char *)o + 0xbf) = 0;
-        g = D_8009C330;
+        g = PLAYER_EXT;
         o->velX = 0;
         o->velY = 0;
         g->w2c = 0x1a;
         if ((((int*)&GAME.area00_eventControl)[0] & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4))
             g->w2c = 0x2a;
-        if (D_8009C330->w2e != D_8009C330->w2c) {
+        if (PLAYER_EXT->w2e != PLAYER_EXT->w2c) {
             ObjSetAnimFromTable(o);
             AnimLoadDuration(o);
-            D_8009C330->w2e = D_8009C330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
         o->state++;
     case 1:
@@ -62,7 +62,7 @@ void playerStepSkidStop(TObj *o)
             o->state = 0;
         }
         if ((o->animFrame & 2) && o->animFrame < 4) {
-            D_8009C330->w2e = 0xffff;
+            PLAYER_EXT->w2e = 0xffff;
             o->step = 0;
             o->state = 0;
         }

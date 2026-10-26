@@ -6,7 +6,7 @@ extern void treasureChestTossMove(TObj *);
 extern short DAT_1f80016a;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
-extern short DAT_8007a5f0[];
+extern short COS_TABLE[];
 
 void treasureChestFollowCarrier(TObj *o)
 {
@@ -48,7 +48,7 @@ void treasureChestFollowCarrier(TObj *o)
         }
         v = -o->velX;
         o->velV = v * DAT_8007a1f0[o->w78] >> 12;
-        o->velH = v * DAT_8007a5f0[o->w78] >> 12;
+        o->velH = v * COS_TABLE[o->w78] >> 12;
     case 3:
         treasureChestTossMove(o);
         if (o->y.p.whole >= -0xae) {

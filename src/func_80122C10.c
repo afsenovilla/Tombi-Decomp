@@ -3,7 +3,7 @@
 // probably: player step 0x35: thrown off after a bite (anim 0x37, sfx 0x23/0x1F, playerReleaseBittenAirborne), velX +-0x200 velY -0x300, lands and skids to a stop
 #include "TOBJ.H"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x2e - 9]; short w2e; } P;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
@@ -68,7 +68,7 @@ void func_80122C10(TObj *o)
             o->velX -= 0x10;
             if (o->velX >= 0) goto skip;
         }
-        D_8009C330->w2e = 0xff;
+        PLAYER_EXT->w2e = 0xff;
         playerSetAnimIfChangedAt(o, 0x37, 2);
         o->state = 5;
     skip:
@@ -83,7 +83,7 @@ void func_80122C10(TObj *o)
     case 5:
         if (AnimAdvance(o)) {
             o->b9c = 0;
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             o->active = 1;
             o->wb2 = 0;
             o->wb6 = 0;
@@ -91,7 +91,7 @@ void func_80122C10(TObj *o)
             o->velY = 0;
             o->velH = 0;
             o->velV = 0;
-            D_8009C330->w2e = 0xff;
+            PLAYER_EXT->w2e = 0xff;
             o->d8c = D_801152E8[o->wb0];
             o->b04 = 1;
             o->step = 0;

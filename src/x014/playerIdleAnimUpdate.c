@@ -12,7 +12,7 @@ typedef struct {
     unsigned short w2e;
 } Q800F0E7C;
 
-extern Q800F0E7C *D_8009C330;
+extern Q800F0E7C *PLAYER_EXT;
 extern short playerIdleFidgetAllowed();
 extern short playerIdlePickFidgetAnim(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
@@ -21,18 +21,18 @@ extern void AnimJump(TObj *, int);
 #define B(o, off) (((unsigned char *)(o))[off])
 
 #define SETANIM(n) \
-    D_8009C330->w2c = n; \
+    PLAYER_EXT->w2c = n; \
     ObjSetAnimFromTable(o); \
     AnimJump(o, 0); \
-    D_8009C330->w2e = D_8009C330->w2c;
+    PLAYER_EXT->w2e = PLAYER_EXT->w2c;
 
 #define SETANIM_IF(n) \
-    D_8009C330->w2c = n; \
-    if (D_8009C330->w2e != n) { \
-        D_8009C330->w2c = n; \
+    PLAYER_EXT->w2c = n; \
+    if (PLAYER_EXT->w2e != n) { \
+        PLAYER_EXT->w2c = n; \
         ObjSetAnimFromTable(o); \
         AnimJump(o, 0); \
-        D_8009C330->w2e = D_8009C330->w2c; \
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c; \
     }
 
 short playerIdleAnimUpdate(TObj *o)
@@ -42,7 +42,7 @@ short playerIdleAnimUpdate(TObj *o)
 
     if (f & 2) {
         if (f & 8) {
-            D_8009C330->b1f = 0;
+            PLAYER_EXT->b1f = 0;
             switch (B(o, 0xa0) & 0xf) {
             case 1:
                 B(o, 0xa2) = 1;
@@ -52,7 +52,7 @@ short playerIdleAnimUpdate(TObj *o)
                         r = playerIdlePickFidgetAnim(o);
                     } else {
                         r = 3;
-                        D_8009C330->b1e++;
+                        PLAYER_EXT->b1e++;
                     }
                 }
                 break;
@@ -82,7 +82,7 @@ short playerIdleAnimUpdate(TObj *o)
                 break;
             }
         } else if (f & 4) {
-            D_8009C330->b1e = 0;
+            PLAYER_EXT->b1e = 0;
             switch (B(o, 0xa0) >> 4) {
             case 1:
                 SETANIM(0x18);
@@ -92,7 +92,7 @@ short playerIdleAnimUpdate(TObj *o)
             case 2:
                 SETANIM(0x48);
                 r = 7;
-                D_8009C330->b1f++;
+                PLAYER_EXT->b1f++;
                 break;
             case 3:
                 SETANIM_IF(0x24);
@@ -101,13 +101,13 @@ short playerIdleAnimUpdate(TObj *o)
             case 4:
                 SETANIM(0x18);
                 B(o, 0xa3) = 1;
-                D_8009C330->b1f++;
+                PLAYER_EXT->b1f++;
                 r = 8;
                 break;
             }
         } else {
-            D_8009C330->b1e = 0;
-            D_8009C330->b1f = 0;
+            PLAYER_EXT->b1e = 0;
+            PLAYER_EXT->b1f = 0;
         }
     }
     return r;

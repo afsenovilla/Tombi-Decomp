@@ -2,7 +2,7 @@
 // MATCHING 800efaa4 620
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { unsigned char state; char p1[0x11]; short mode; } Menu;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern unsigned char D_800A45D9, D_800A45DA, D_800A45DB;
 extern short D_800A45E8, D_800A45F6;
 extern void *D_800A4620, *D_800A4624, *D_800A4628, *D_800A462C, *D_800A4630, *D_800A4634, *D_800A4638, *D_800A463C;
@@ -22,7 +22,7 @@ extern int subScreenMapStep(Menu *m);
 
 int subScreenUpdate(void)
 {
-    Menu *m = &D_800A45D8;
+    Menu *m = &MENU_STATE;
     RECT r;
     int ret;
     int pad;

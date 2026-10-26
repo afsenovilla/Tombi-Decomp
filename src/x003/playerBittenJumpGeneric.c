@@ -5,8 +5,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern TObj *D_8009D2E8;
-extern TObj *D_8009C330;
+extern TObj *BITTEN_OBJECT;
+extern TObj *PLAYER_EXT;
 extern void playerAirAccelerateX(TObj *o);
 extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
@@ -33,12 +33,12 @@ void playerBittenJumpGeneric(TObj *o)
 
     switch (o->substep) {
     case 0:
-        D_8009D2E8->animFrame = o->animFrame & 1;
-        D_8009D2E8->d8c = o->d88 - 0xc0;
+        BITTEN_OBJECT->animFrame = o->animFrame & 1;
+        BITTEN_OBJECT->d8c = o->d88 - 0xc0;
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
-        D_8009D2E8->h->p.whole = o->h->p.whole;
-        D_8009D2E8->y.p.whole = o->y.p.whole + D_8009D2E8->box2;
+        BITTEN_OBJECT->h->p.whole = o->h->p.whole;
+        BITTEN_OBJECT->y.p.whole = o->y.p.whole + BITTEN_OBJECT->box2;
         setFacingFromPad(o);
         ObjGravityStep(o);
         ObjAddVelY7E(o);
@@ -58,9 +58,9 @@ void playerBittenJumpGeneric(TObj *o)
         }
         if ((SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6)) {
             if (*(volatile unsigned short *)&GV6.s70 & 0x40) {
-                D_8009C330->animTimer = 0xf;
+                PLAYER_EXT->animTimer = 0xf;
             } else {
-                D_8009C330->animTimer = 0xe;
+                PLAYER_EXT->animTimer = 0xe;
             }
             o->b9c = 0;
             o->velY = 0;
@@ -69,7 +69,7 @@ void playerBittenJumpGeneric(TObj *o)
         break;
     case 1:
         setFacingFromPad(o);
-        p = D_8009D2E8;
+        p = BITTEN_OBJECT;
         p->animFrame = o->animFrame & 1;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
@@ -81,9 +81,9 @@ void playerBittenJumpGeneric(TObj *o)
         if (o->b69 != 0 || probeFloorPlaneAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||
             (SPAD.s1fc & SPAD.s3c8) || (SPAD.s1fc & SPAD.s3c6) || ObjTileCollide(o, 4, 0) != 0) {
             if (*(volatile unsigned short *)&GV6.s70 & 0x40) {
-                D_8009C330->animTimer = 0xf;
+                PLAYER_EXT->animTimer = 0xf;
             } else {
-                D_8009C330->animTimer = 0xe;
+                PLAYER_EXT->animTimer = 0xe;
             }
             o->b9c = 0;
             o->velY = 0;
@@ -91,15 +91,15 @@ void playerBittenJumpGeneric(TObj *o)
         }
         break;
     case 2:
-        if (D_8009C330->animFrame != D_8009C330->animTimer) {
-            D_8009D2E8->state = 7;
+        if (PLAYER_EXT->animFrame != PLAYER_EXT->animTimer) {
+            BITTEN_OBJECT->state = 7;
             ObjSetAnimFromTable(o);
             AnimLoadDuration(o);
-            D_8009C330->animFrame = D_8009C330->animTimer;
+            PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
         }
         if (AnimAdvance(o)) {
             SfxPlay2(0x22, 0x23);
-            switch (D_8009D2E8->type) {
+            switch (BITTEN_OBJECT->type) {
             case 0x21:
             case 0x3b: case 0x3c: case 0x3d: case 0x3e:
             case 0x3f: case 0x40: case 0x41: case 0x42:
@@ -109,7 +109,7 @@ void playerBittenJumpGeneric(TObj *o)
                 if (q) {
                     q->active = 1;
                     q->type = 1;
-                    switch (D_8009D2E8->type) {
+                    switch (BITTEN_OBJECT->type) {
                     case 0:
                         q->subtype = 3;
                         break;
@@ -141,7 +141,7 @@ void playerBittenJumpGeneric(TObj *o)
                         break;
                     case 0xa:
                         q->subtype = 4;
-                        q->b0d = D_8009D2E8->b0d;
+                        q->b0d = BITTEN_OBJECT->b0d;
                         break;
                     case 0x13:
                         q->subtype = 5;
@@ -150,10 +150,10 @@ void playerBittenJumpGeneric(TObj *o)
                         q->subtype = 7;
                         break;
                     case 0xb:
-                        q->subtype = D_8009D2E8->subtype << 1;
+                        q->subtype = BITTEN_OBJECT->subtype << 1;
                         break;
                     case 0x38:
-                        q->subtype = D_8009D2E8->subtype + 10;
+                        q->subtype = BITTEN_OBJECT->subtype + 10;
                         break;
                     }
                     t = o->animFrame & 1;
@@ -180,27 +180,27 @@ int c = o->animFrame & 1; Fix16 *h = q->h; int w = h->p.whole; int r;
         }
         break;
     case 3: {
-        TObj *p = D_8009D2E8;
+        TObj *p = BITTEN_OBJECT;
         switch (p->type) {
         case 0x13:
             for (q = (TObj *)p->d90; q != 0; q = (TObj *)q->d90) {
                 q->b04 = 3;
             }
-            for (q = (TObj *)D_8009D2E8->d94; q != 0; q = (TObj *)q->d94) {
+            for (q = (TObj *)BITTEN_OBJECT->d94; q != 0; q = (TObj *)q->d94) {
                 q->b04 = 3;
             }
             break;
         case 0x21:
             p->b04 = 2;
-            D_8009D2E8->step = 2;
-            D_8009D2E8->state = 0;
+            BITTEN_OBJECT->step = 2;
+            BITTEN_OBJECT->state = 0;
             break;
         case 0x3b: case 0x3c: case 0x3d: case 0x3e:
         case 0x3f: case 0x40: case 0x41: case 0x42:
-            D_8009D2E8->b04 = 2;
-            D_8009D2E8->step = 3;
-            D_8009D2E8->state = 0;
-            {TObj *q = D_8009D2E8; unsigned short t;
+            BITTEN_OBJECT->b04 = 2;
+            BITTEN_OBJECT->step = 3;
+            BITTEN_OBJECT->state = 0;
+            {TObj *q = BITTEN_OBJECT; unsigned short t;
             t = o->animFrame & 1;
             q->animFrame = t;
             if (*(volatile unsigned short *)&GV6.s70 & 0x40) {
@@ -208,7 +208,7 @@ int c = o->animFrame & 1; Fix16 *h = q->h; int w = h->p.whole; int r;
             }}
             break;
         default:
-            D_8009D2E8->b04 = 3;
+            BITTEN_OBJECT->b04 = 3;
             break;
         }
         o->wb2 = 0x100;

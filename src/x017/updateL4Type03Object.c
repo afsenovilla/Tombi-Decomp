@@ -5,7 +5,7 @@ extern void FUN_800202b4(TObj *);
 extern void l4Type03StepB(TObj *);
 extern void l4Type03Step(TObj *);
 extern void FUN_80018838(TObj *);
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 
 void updateL4Type03Object(TObj *o)
 {
@@ -24,7 +24,7 @@ void updateL4Type03Object(TObj *o)
             o->d8c = 0;
             break;
         case 2:
-            if (DAT_8009c960 == 0) o->da0 = 0;
+            if (GAME == 0) o->da0 = 0;
         case 0:
         case 3:
         case 4:

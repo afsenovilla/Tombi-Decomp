@@ -104,3 +104,21 @@ address,name,size,source
 800787c0,BUTTON_CONFIGS,,psx_tomba (SCES_01331)
 800963ec,ATAN_TABLE,,psx_tomba (SCES_01331)
 8009bdd0,RAND_SEED,,psx_tomba (SCES_01331)
+8009c330,PLAYER_EXT,0x4,usage: pointer to the player extension block PLAYER+0xF8 (topdownPlayerInit) refs=722
+8009d2e8,BITTEN_OBJECT,0x4,usage: TObj* the player bites/holds (= PLX.p611c in playerEnterGrabStep) refs=275
+8009c338,WEAPON_STATE,0x4,usage: pointer to the weapon sprite state (weapon0Swing/weapon8to9Swing/drawWeaponObject) refs=136
+8009f0ec,GRABBED_OBJECT,0x4,usage: TObj* returned by playerProbeGrab (cling/grab target) refs=78
+8009c960,GAME,0x988,usage: gameConfig (game.h) as the ported sources already call it refs=59
+8009f838,AREA_VARIANT,0x2,usage: offset added to GAME.selectedArea (resolveAreaVariant: 6 purified forest / 8 purified mansion+civilization) refs=32
+8009bca8,MOVIE_DEC_ENV,0x38,usage: movie decode environment (moviePlayerTask; MOVIE_DEC_IMGID is its +0x14) refs=23
+8007a5f0,COS_TABLE,0x200,usage: 256-entry 4.12 cosine table (drawObjectSprite* CS macro) refs=15
+8007a3f0,NEG_SIN_TABLE,0x200,usage: 256-entry 4.12 negated sine table (drawObjectSprite* SN macro) refs=21
+800a45d8,MENU_STATE,0x70,usage: pause/inventory menu state (updatePauseMenu; psx_tomba name) refs=13
+80079474,SPAWN_TABLES,,usage: [area][section] spawn-point rows (initPlayerAtSpawn/loadSpawnPosition) refs=6
+80078808,UI_SPRITE_DEFS,,usage: UiSpriteDef table indexed by sprite id (drawNowLoadingSprite) refs=10
+800801f8,BALLOON_FRAME_UVS,0x20,usage: 4 UV8 corner sets of the balloon frame (drawBalloonFrame) refs=8
+8007a04c,WEAPON_HEAD_OFFSETS,,usage: per-frame weapon head dx/dy pairs (weapon0Swing/weapon8to9Swing) refs=20
+80078790,AREA_SECTION_COUNTS,,usage: sections per area (testSectionFlagBit/spawnLayer2ObjectUnlessFlagged/displayDebugScreen) refs=4
+8009f840,AREA_SCRIPT_CTX,,usage: ScriptContext of the area script (tickAreaScript: SCRIPT_CTX = &) refs=4
+8009c948,BAIT_OBJECT,0x4,usage: TObj* of the biting-plant bait (updateA00BitingPlantBait/bitingPlantEatBaitStep) refs=5
+8009c943,INFO_MESSAGE_SLOT,0x1,usage: slot of the info message being printed (printInfoMessage; 0xFF = none) refs=5

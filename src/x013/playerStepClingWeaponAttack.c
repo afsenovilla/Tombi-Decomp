@@ -19,8 +19,8 @@ typedef struct {
     char p9e[0xb8 - 0x9e]; short sb8, sba;
     char pbc[0xc6 - 0xbc]; unsigned char bc6; char pc7; unsigned char bc8;
 } TO;
-extern PO *D_8009F0EC;
-extern PO *D_8009C330;
+extern PO *GRABBED_OBJECT;
+extern PO *PLAYER_EXT;
 extern char D_80010F10[], D_80010F30[], D_80010F50[], D_80010D68[];
 extern void setWeaponAimFromPadKeepFacing(void);
 extern void AnimLoadDuration(TO *);
@@ -29,14 +29,14 @@ extern void AnimJump(TO *, int);
 
 static __inline__ void attach(TO *o)
 {
-    if (D_8009F0EC->b2 == 0x15 || D_8009F0EC->b2 == 0x31)
-        o->h40->s2 = o->sb8 + (D_8009F0EC->h40->s2 + D_8009F0EC->d30);
+    if (GRABBED_OBJECT->b2 == 0x15 || GRABBED_OBJECT->b2 == 0x31)
+        o->h40->s2 = o->sb8 + (GRABBED_OBJECT->h40->s2 + GRABBED_OBJECT->d30);
     else
-        o->h40->s2 = D_8009F0EC->h40->s2 + o->sb8;
-    if (D_8009F0EC->b2 == 0x24)
-        o->s16 = D_8009F0EC->s16 + o->sba + 0x10;
+        o->h40->s2 = GRABBED_OBJECT->h40->s2 + o->sb8;
+    if (GRABBED_OBJECT->b2 == 0x24)
+        o->s16 = GRABBED_OBJECT->s16 + o->sba + 0x10;
     else
-        o->s16 = D_8009F0EC->s16 + o->sba;
+        o->s16 = GRABBED_OBJECT->s16 + o->sba;
 }
 
 void playerStepClingWeaponAttack(TO *o)
@@ -50,11 +50,11 @@ void playerStepClingWeaponAttack(TO *o)
         o->b9d = 1;
         o->bc8 = 0;
         o->d8c = 0;
-        *(unsigned char *)D_8009C330 = 2;
-        D_8009C330->s2e = 0xffff;
-        D_8009C330->s28 = 0xffff;
-        D_8009C330->s2a = 0xffff;
-        D_8009C330->b6 = D_8009F0EC->b0;
+        *(unsigned char *)PLAYER_EXT = 2;
+        PLAYER_EXT->s2e = 0xffff;
+        PLAYER_EXT->s28 = 0xffff;
+        PLAYER_EXT->s2a = 0xffff;
+        PLAYER_EXT->b6 = GRABBED_OBJECT->b0;
         switch (o->s2e) {
         case 0: case 1: case 2: case 3:
             o->anim = D_80010F10;
@@ -69,10 +69,10 @@ void playerStepClingWeaponAttack(TO *o)
         AnimLoadDuration(o);
         spawnWeaponObject(o, 1);
         attach(o);
-        switch (D_8009F0EC->b2) {
+        switch (GRABBED_OBJECT->b2) {
         case 0xb: case 0x15:
-            if (D_8009F0EC->d94 != 0) {
-                p = D_8009F0EC->d94;
+            if (GRABBED_OBJECT->d94 != 0) {
+                p = GRABBED_OBJECT->d94;
                 if (p->d94 == 0) {
                     *(unsigned char *)p = 2;
                 } else {
@@ -85,30 +85,30 @@ void playerStepClingWeaponAttack(TO *o)
             }
             break;
         case 0x1d:
-            *(unsigned char *)D_8009F0EC = 3;
+            *(unsigned char *)GRABBED_OBJECT = 3;
             break;
         case 0x31:
-            *(unsigned char *)D_8009F0EC = 5;
+            *(unsigned char *)GRABBED_OBJECT = 5;
             break;
         }
         o->state = 1;
         break;
     case 1:
         attach(o);
-        if (*(unsigned char *)D_8009C330 != 0) return;
+        if (*(unsigned char *)PLAYER_EXT != 0) return;
         if (o->bc6 != 0) return;
-        switch (D_8009F0EC->b2) {
+        switch (GRABBED_OBJECT->b2) {
         case 0xb:
-            p = D_8009F0EC;
+            p = GRABBED_OBJECT;
             if (p->d94 == 0)
                 *(unsigned char *)p = 1;
             else
                 *(unsigned char *)p = 3;
         case 0x15:
-            p = D_8009F0EC;
+            p = GRABBED_OBJECT;
             if (p->d94 != 0) {
                 *(unsigned char *)p = 3;
-                p = D_8009F0EC->d94;
+                p = GRABBED_OBJECT->d94;
                 if (p->d94 == 0) {
                     *(unsigned char *)p = 1;
                 } else {
@@ -124,17 +124,17 @@ void playerStepClingWeaponAttack(TO *o)
             }
             break;
         case 0x1d: case 0x31:
-            *(unsigned char *)D_8009F0EC = 1;
+            *(unsigned char *)GRABBED_OBJECT = 1;
             break;
         case 0xc: case 0xd: case 0xe:
         default:
-            *(unsigned char *)D_8009F0EC = 3;
+            *(unsigned char *)GRABBED_OBJECT = 3;
             break;
         }
         o->anim = D_80010D68;
         AnimJump(o, 0);
         o->b9d = 0;
-        switch (D_8009F0EC->b2) {
+        switch (GRABBED_OBJECT->b2) {
         case 0x15:
             s = 0x22;
             break;

@@ -1,8 +1,8 @@
 // FUNC 80118998 296 X001
 // MATCHING 80118998 296
 #include "TOBJ.H"
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern TObj *FUN_80018448(void);
 
 void spawnBreakableBlockDebris(short x, short y, int z)
@@ -30,8 +30,8 @@ void spawnBreakableBlockDebris(short x, short y, int z)
             e->d84 = j << 4;
             e->animFrame = 1;
             e->d88 = 0;
-            e->h->raw += D_8007A5F0[e->d84] << 5;
-            e->y.raw += D_8007A3F0[e->d84] << 5;
+            e->h->raw += COS_TABLE[e->d84] << 5;
+            e->y.raw += NEG_SIN_TABLE[e->d84] << 5;
         }
     }
 }

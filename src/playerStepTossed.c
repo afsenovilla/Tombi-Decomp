@@ -12,7 +12,7 @@ typedef struct {
     unsigned short w2c;
     unsigned short w2e;
 } G330;
-extern G330 *DAT_8009c330;
+extern G330 *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
@@ -32,9 +32,9 @@ void FUN_800f8130(TObj *o)
     switch (o->state) {
     case 0:
         o->d8c = 0;
-        DAT_8009c330->w2c = 9;
+        PLAYER_EXT->w2c = 9;
         o->wb6 = 0;
-        DAT_8009c330->w02 = 0;
+        PLAYER_EXT->w02 = 0;
         o->wb2 = 0;
         ADJ(8, -8);
         o->d30 = o->h->p.whole;
@@ -150,7 +150,7 @@ void FUN_800f8130(TObj *o)
     case 5:
         if (FUN_8001fec0(o)) {
             *(signed char *)&o->b0f = -8;
-            DAT_8009c330->w02 = 0;
+            PLAYER_EXT->w02 = 0;
             o->b9e = 0;
             (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;
@@ -176,7 +176,7 @@ typedef struct {
     unsigned short w2c;
     unsigned short w2e;
 } G330;
-extern G330 *DAT_8009c330;
+extern G330 *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
@@ -196,9 +196,9 @@ void playerStepTossed(TObj *o)
     switch (o->state) {
     case 0:
         o->d8c = 0;
-        DAT_8009c330->w2c = 9;
+        PLAYER_EXT->w2c = 9;
         o->wb6 = 0;
-        DAT_8009c330->w02 = 0;
+        PLAYER_EXT->w02 = 0;
         o->wb2 = 0;
         ADJ(8, -8);
         o->d30 = o->h->p.whole;
@@ -317,7 +317,7 @@ void playerStepTossed(TObj *o)
     case 5:
         if (FUN_8001fec0(o)) {
             *(signed char *)&o->b0f = -8;
-            DAT_8009c330->w02 = 0;
+            PLAYER_EXT->w02 = 0;
             o->b9e = 0;
             (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;

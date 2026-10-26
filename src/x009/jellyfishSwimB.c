@@ -5,7 +5,7 @@
 
 extern void *D_8012EE84[], *D_8012EE94[], *D_8012EE80[];
 extern char D_80077D0C[], D_80077D00[];
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -97,7 +97,7 @@ void jellyfishSwimB(TObj *o)
         break;
     case 5:
         FUN_8001fec0(o);
-        o->y.raw += (D_8007A5F0[o->d88] * o->velV) >> 4;
+        o->y.raw += (COS_TABLE[o->d88] * o->velV) >> 4;
         FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x30);
         o->d88 = (o->d88 + 2) & 0xff;
         break;

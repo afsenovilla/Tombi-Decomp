@@ -5,7 +5,7 @@ extern void *D_8001226C;
 extern void **D_80079D34[];
 extern unsigned char D_8009C942[];
 extern int D_8009C954[];
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 typedef struct SP {
     char p0[0x16a];
     unsigned short x;
@@ -72,7 +72,7 @@ void updateItemGetIcon(TObj *o)
         o->a.p.whole = SPAD->x;
         o->y.p.whole = SPAD->y.s.hi - 0x1e;
         o->b.p.whole = SPAD->z;
-        if (D_8009C960[0] == 2 && (D_8009C960[1] == 0 || D_8009C960[1] == 3)) {
+        if (GAME[0] == 2 && (GAME[1] == 0 || GAME[1] == 3)) {
             o->velV = -0x3e0;
             *(signed char *)&o->b0f = -0x12;
         } else {

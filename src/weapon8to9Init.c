@@ -2,7 +2,7 @@
 // MATCHING 80035198 348
 extern int FUN_8005efe4(void);
 extern unsigned short FUN_8005e420(int, int);
-extern short *DAT_8009c338;
+extern short *WEAPON_STATE;
 extern short DAT_8009d600[];
 extern unsigned short *DAT_800a6078, *DAT_800a607c;
 extern unsigned short DAT_800a604e[];
@@ -17,15 +17,15 @@ static __inline__ short getm(void)
 void weapon8to9Init(unsigned char *o)
 {
     short *p;
-    DAT_8009c338 = (short *)(o + 0xac);
+    WEAPON_STATE = (short *)(o + 0xac);
     if (o[6] == 0) {
         if (FUN_8005efe4() != 1)
             FUN_8005efe4();
-        p = DAT_8009c338;
+        p = WEAPON_STATE;
         *(short *)(o + 0xb0) = 0;
         p[4] = getm();
-        DAT_8009c338[3] = FUN_8005e420(0x80, 0x1ef);
-        DAT_8009c338[5] = FUN_8005e420(0x80, 0x1f0);
+        WEAPON_STATE[3] = FUN_8005e420(0x80, 0x1ef);
+        WEAPON_STATE[5] = FUN_8005e420(0x80, 0x1f0);
         DAT_8009d600[0] = 0xf;
         DAT_8009d600[1] = 8;
         DAT_8009d600[2] = 0x5a;

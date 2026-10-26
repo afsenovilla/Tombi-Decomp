@@ -18,7 +18,7 @@ typedef struct {
     unsigned short tp0, clut0, tp1, clut1, tp2, clut2;
 } TexInfo;
 extern TexInfo D_800A4668;
-extern unsigned short D_8009C960;
+extern unsigned short GAME;
 typedef struct { u16 x, y, u, v, w, h; } Ent8D0;
 extern Ent8D0 D_800FECB8[];
 
@@ -43,7 +43,7 @@ void topdownDrawMapLayers(TObj *o)
         i = 0;
         do {
             a = 0;
-            if (i >= 2) a = (D_8009C960 == 5) << 7;
+            if (i >= 2) a = (GAME == 5) << 7;
             p = (SPRT *)D_1F800164;
             *((u8 *)p + 3) = 4;
             p->code = 0x65;

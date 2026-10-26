@@ -15,10 +15,10 @@ typedef struct {
     char p10[0x28 - 0x10];
     unsigned short w28, w2a, w2c, w2e;
 } P;
-extern P *DAT_8009c330;
-extern TObj *DAT_8009f0ec;
+extern P *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern TObj *DAT_800a611c;
-extern TObj *DAT_8009d2e8;
+extern TObj *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c6;
@@ -33,18 +33,18 @@ extern void playerFlipOntoObjectPlace(TObj *, int, int);
 
 #define BUTTONS(o) \
     if (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c6) { \
-        DAT_8009c330->b09 = 0; \
+        PLAYER_EXT->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
         (*(unsigned char*)&o->waa) = 0; \
-        DAT_8009f0ec->b69 = 0; \
+        GRABBED_OBJECT->b69 = 0; \
     } \
     if (*(volatile unsigned short *)&PAD_PRESSED & 0x10) { \
-        DAT_8009c330->b09 = 0; \
+        PLAYER_EXT->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \
         (*(unsigned char*)&o->waa) = 0; \
-        DAT_8009f0ec->b69 = 0; \
+        GRABBED_OBJECT->b69 = 0; \
     }
 
 static __inline__ void nextspd(TObj *o, P *pl)
@@ -65,10 +65,10 @@ void playerStepFlipOntoObject(TObj *o)
     switch (o->state) {
     case 0:
         if ((*(unsigned char*)&o->wac) >= 2) {
-            DAT_8009d2e8 = DAT_800a611c;
-            DAT_8009d2e8->b04 = 2;
-            DAT_8009d2e8->step = 2;
-            DAT_8009d2e8->state = 0;
+            BITTEN_OBJECT = DAT_800a611c;
+            BITTEN_OBJECT->b04 = 2;
+            BITTEN_OBJECT->step = 2;
+            BITTEN_OBJECT->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         DAT_8009c934 = 0;
@@ -76,77 +76,77 @@ void playerStepFlipOntoObject(TObj *o)
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        DAT_8009c330->b00 = 0;
-        DAT_8009f0ec->b69 = 1;
+        PLAYER_EXT->b00 = 0;
+        GRABBED_OBJECT->b69 = 1;
         o->wb6 = -0x420;
-        DAT_8009c330->w02 = 0x10;
-        DAT_8009c330->w0e = 0;
+        PLAYER_EXT->w02 = 0x10;
+        PLAYER_EXT->w0e = 0;
         o->wb2 = 2;
-        DAT_8009c330->b08 = 0;
-        DAT_8009c330->b09 = 0;
-        DAT_8009c330->w0c = 0;
-        DAT_8009c330->w28 = 0xffff;
-        DAT_8009c330->w2a = 0xffff;
+        PLAYER_EXT->b08 = 0;
+        PLAYER_EXT->b09 = 0;
+        PLAYER_EXT->w0c = 0;
+        PLAYER_EXT->w28 = 0xffff;
+        PLAYER_EXT->w2a = 0xffff;
         o->velH = 0;
         o->velV = 0;
         o->wb0 = 0;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->d30 = DAT_8009f0ec->h->p.whole + o->wb8;
-        o->d34 = DAT_8009f0ec->y.p.whole + o->wba;
+        o->d30 = GRABBED_OBJECT->h->p.whole + o->wb8;
+        o->d34 = GRABBED_OBJECT->y.p.whole + o->wba;
         FUN_8001e5f4(4, 0x7f);
         (*(unsigned char*)&o->waa) = 1;
         o->state++;
     case 1:
-        o->wb6 += DAT_8009c330->w0e;
+        o->wb6 += PLAYER_EXT->w0e;
         if ((unsigned short)o->wb6 < 0x800)
-            DAT_8009c330->b08 = 1;
+            PLAYER_EXT->b08 = 1;
         if ((unsigned short)(o->wb6 - 0x800) < 0x800)
-            DAT_8009c330->b08 = 0;
+            PLAYER_EXT->b08 = 0;
         if ((unsigned short)(o->wb6 + 0x7ff) < 0x800)
-            DAT_8009c330->b08 = 0;
+            PLAYER_EXT->b08 = 0;
         if ((unsigned short)(o->wb6 + 0xfff) < 0x800)
-            DAT_8009c330->b08 = 1;
+            PLAYER_EXT->b08 = 1;
         if (o->wb6 == 0) {
-            P *pl = DAT_8009c330;
+            P *pl = PLAYER_EXT;
             if (pl->w0e > 0) {
                 nextspd(o, pl);
             }
         }
         a = o->wb6 >> 4;
-        DAT_8009c330->w2e = 0xffff;
+        PLAYER_EXT->w2e = 0xffff;
         o->anim = D_80011108;
         FUN_8001fe94(o, 0);
-        DAT_8009c330->b01 = 0x10;
+        PLAYER_EXT->b01 = 0x10;
         playerFlipOntoObjectPlace(o, q, a);
         if (o->wb2 < 2)
             o->state++;
         break;
     case 2:
-        o->wb6 += DAT_8009c330->w0e;
+        o->wb6 += PLAYER_EXT->w0e;
         if ((unsigned short)o->wb6 < 0x800)
-            DAT_8009c330->b08 = 1;
+            PLAYER_EXT->b08 = 1;
         if ((unsigned short)(o->wb6 - 0x800) < 0x800)
-            DAT_8009c330->b08 = 0;
+            PLAYER_EXT->b08 = 0;
         if ((unsigned short)(o->wb6 + 0x7ff) < 0x800)
-            DAT_8009c330->b08 = 0;
+            PLAYER_EXT->b08 = 0;
         if ((unsigned short)(o->wb6 + 0xfff) < 0x800)
-            DAT_8009c330->b08 = 1;
+            PLAYER_EXT->b08 = 1;
         if (o->wb6 == 0) {
-            P *pl = DAT_8009c330;
+            P *pl = PLAYER_EXT;
             if (pl->w0e > 0) {
                 nextspd(o, pl);
             } else {
                 pl->b09 = 1;
             }
         }
-        DAT_8009c330->w2c = 7;
-        if (DAT_8009c330->w2e != 7) {
-            DAT_8009c330->w2c = 7;
+        PLAYER_EXT->w2c = 7;
+        if (PLAYER_EXT->w2e != 7) {
+            PLAYER_EXT->w2c = 7;
             FUN_800efc04(o);
             FUN_8001fe94(o, 0);
-            DAT_8009c330->w2e = DAT_8009c330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
         AnimAdvance(o);
         {
@@ -158,12 +158,12 @@ void playerStepFlipOntoObject(TObj *o)
             o->d8c = 0;
             o->state++;
         }
-        if (DAT_8009c330->b09 == 0)
+        if (PLAYER_EXT->b09 == 0)
             break;
         BUTTONS(o);
         if (*(volatile unsigned short *)&PAD_PRESSED & 0x40) {
             v = 0x10;
-            DAT_8009c330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             (*(unsigned char*)&o->wac) = 1;
             o->b9e = 0;
             o->wb2 = 0;
@@ -193,22 +193,22 @@ void playerStepFlipOntoObject(TObj *o)
             o->state = 3;
             o->y.p.whole += 4;
             (*(unsigned char*)&o->waa) = 0;
-            DAT_8009f0ec->b69 = 0;
+            GRABBED_OBJECT->b69 = 0;
         }
         break;
     case 3:
-        o->d30 = DAT_8009f0ec->h->p.whole + o->wb8;
-        o->d34 = DAT_8009f0ec->y.p.whole + o->wba;
+        o->d30 = GRABBED_OBJECT->h->p.whole + o->wb8;
+        o->d34 = GRABBED_OBJECT->y.p.whole + o->wba;
         o->h->p.whole = o->d30;
         if (o->animFrame & 1)
-            o->y.p.whole = FUN_8001fe0c((DAT_8009f0ec->d8c >> 4) + 0x70, DAT_8009f0ec->box0) + o->d34 + 0x10;
+            o->y.p.whole = FUN_8001fe0c((GRABBED_OBJECT->d8c >> 4) + 0x70, GRABBED_OBJECT->box0) + o->d34 + 0x10;
         else
-            o->y.p.whole = FUN_8001fe0c((DAT_8009f0ec->d8c >> 4) + 0x10, DAT_8009f0ec->box0) + o->d34 + 0x10;
+            o->y.p.whole = FUN_8001fe0c((GRABBED_OBJECT->d8c >> 4) + 0x10, GRABBED_OBJECT->box0) + o->d34 + 0x10;
         AnimAdvance(o);
         BUTTONS(o);
         if (*(volatile unsigned short *)&PAD_PRESSED & 0x40) {
             v = 0x10;
-            DAT_8009c330->b09 = 0;
+            PLAYER_EXT->b09 = 0;
             (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
             o->b9e = 0;
@@ -228,7 +228,7 @@ void playerStepFlipOntoObject(TObj *o)
             (*(unsigned char*)&o->waa) = 0;
             o->d88 = v;
             o->d8c = 0;
-            DAT_8009f0ec->b69 = 0;
+            GRABBED_OBJECT->b69 = 0;
         }
         break;
     }

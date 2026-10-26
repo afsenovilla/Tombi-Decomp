@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
@@ -18,7 +18,7 @@ extern void playerHurtLandRecover(TObj *);
 
 static __inline__ void land(TObj *o, short n)
 {
-    *(unsigned char *)&D_8009C330->w08 = 0;
+    *(unsigned char *)&PLAYER_EXT->w08 = 0;
     o->b9c = n;
     *(unsigned char *)&o->wac = 1;
     o->b04 = 1;
@@ -50,7 +50,7 @@ void playerStepLaunched(TObj *o)
         playSFX(0x1f);
         playerReleaseBittenAirborne(o);
         o->animFrame ^= 1;
-        *(unsigned char *)&D_8009C330->w08 = ((unsigned char*)&GVARS.b38)[0];
+        *(unsigned char *)&PLAYER_EXT->w08 = ((unsigned char*)&GVARS.b38)[0];
         spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     case 2:
@@ -76,7 +76,7 @@ void playerStepLaunched(TObj *o)
         if (--o->timer <= 0) {
             o->state++;
         }
-        if (*(unsigned char *)&D_8009C330->w08 == 0) {
+        if (*(unsigned char *)&PLAYER_EXT->w08 == 0) {
             if (o->velY > 0) {
                 land(o, 2);
             }
@@ -102,7 +102,7 @@ void playerStepLaunched(TObj *o)
             o->animFrame ^= 1;
             o->state++;
         }
-        if (*(unsigned char *)&D_8009C330->w08 == 0) {
+        if (*(unsigned char *)&PLAYER_EXT->w08 == 0) {
             if (ObjCheckHeadCollision(o)) {
                 land(o, 2);
             }

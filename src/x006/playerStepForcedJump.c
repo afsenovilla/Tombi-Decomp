@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
-#define G D_8009C330
-extern unsigned char *D_8009C330;
+#define G PLAYER_EXT
+extern unsigned char *PLAYER_EXT;
 extern char D_80010748[];
 extern unsigned char D_801152E8[];
 void playerSetJumpRiseVelocity(TObj *o);

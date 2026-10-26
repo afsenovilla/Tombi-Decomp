@@ -2,20 +2,20 @@
 // MATCHING 80122cbc 664
 #include "TOBJ.H"
 
-extern TObj *D_8009F0EC;
+extern TObj *GRABBED_OBJECT;
 extern int rcos(int);
 extern int rsin(int);
 
 static __inline__ int orbit(TObj *o, int a)
 {
-    o->wb8 = (rcos(a) * (D_8009F0EC->box0 - 12)) >> 12;
-    o->wba = -(rsin(a) * (D_8009F0EC->box0 - 12)) >> 12;
+    o->wb8 = (rcos(a) * (GRABBED_OBJECT->box0 - 12)) >> 12;
+    o->wba = -(rsin(a) * (GRABBED_OBJECT->box0 - 12)) >> 12;
     return a;
 }
 
 int seesawPlankSwingPivot(TObj *o)
 {
-    TObj *g = D_8009F0EC;
+    TObj *g = GRABBED_OBJECT;
     int a = g->d8c;
     short b = (a + 0x800) & 0xfff;
     int r = 0;
@@ -50,6 +50,6 @@ int seesawPlankSwingPivot(TObj *o)
         }
         break;
     }
-    D_8009F0EC->b69 = 1;
+    GRABBED_OBJECT->b69 = 1;
     return r;
 }

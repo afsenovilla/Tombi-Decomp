@@ -4,7 +4,7 @@
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
-extern TObj *D_8009D2E8;
+extern TObj *BITTEN_OBJECT;
 void ObjMotionStep(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
 void spawnImpactEffect(int, int, int, int);
@@ -19,8 +19,8 @@ int spawnForestDwarfAt(short, short, short, short, short, short);
         o->b9c = 0;                                                                 \
         o->velX = 0;                                                                \
         o->velY = 0;                                                                \
-        o->h->p.whole = D_8009D2E8->h->p.whole;                                     \
-        o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2); \
+        o->h->p.whole = BITTEN_OBJECT->h->p.whole;                                     \
+        o->y.p.whole = BITTEN_OBJECT->y.p.whole - (BITTEN_OBJECT->box3 - BITTEN_OBJECT->box2); \
         o->state = 2;                                                               \
     }
 void playerBiteHoldType0B(TObj *o)
@@ -34,20 +34,20 @@ void playerBiteHoldType0B(TObj *o)
         ObjMotionStep(o);
         f = 0;
         o->y.p.whole += 8;
-        if (o->y.p.whole + D_8009D2E8->box2 >= D_8009D2E8->y.p.whole) {
-            o->y.p.whole = D_8009D2E8->y.p.whole - D_8009D2E8->box2;
+        if (o->y.p.whole + BITTEN_OBJECT->box2 >= BITTEN_OBJECT->y.p.whole) {
+            o->y.p.whole = BITTEN_OBJECT->y.p.whole - BITTEN_OBJECT->box2;
             f = 1;
         }
         if (o->velX < 0) {
             o->h->p.whole -= 8;
-            if (o->h->p.whole <= D_8009D2E8->h->p.whole) {
-                o->h->p.whole = D_8009D2E8->h->p.whole;
+            if (o->h->p.whole <= BITTEN_OBJECT->h->p.whole) {
+                o->h->p.whole = BITTEN_OBJECT->h->p.whole;
                 if (f) BLOCK();
             }
         } else {
             o->h->p.whole += 8;
-            if (o->h->p.whole >= D_8009D2E8->h->p.whole) {
-                o->h->p.whole = D_8009D2E8->h->p.whole;
+            if (o->h->p.whole >= BITTEN_OBJECT->h->p.whole) {
+                o->h->p.whole = BITTEN_OBJECT->h->p.whole;
                 if (f) BLOCK();
             }
         }
@@ -57,21 +57,21 @@ void playerBiteHoldType0B(TObj *o)
         k = &GV6.s70;
         if (*k & 0x80) o->animFrame = 1;
         if (*k & 0x20) o->animFrame = 0;
-        o->h->p.whole = D_8009D2E8->h->p.whole;
-        if (D_8009D2E8->type == 0xb) {
-            if (D_8009D2E8->subtype == 0) o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2) + 8;
-            else o->y.p.whole = D_8009D2E8->y.p.whole - (D_8009D2E8->box3 - D_8009D2E8->box2);
+        o->h->p.whole = BITTEN_OBJECT->h->p.whole;
+        if (BITTEN_OBJECT->type == 0xb) {
+            if (BITTEN_OBJECT->subtype == 0) o->y.p.whole = BITTEN_OBJECT->y.p.whole - (BITTEN_OBJECT->box3 - BITTEN_OBJECT->box2) + 8;
+            else o->y.p.whole = BITTEN_OBJECT->y.p.whole - (BITTEN_OBJECT->box3 - BITTEN_OBJECT->box2);
         }
         if (SPAD.s1fc & SPAD.s3c6) {
             ((unsigned char*)&GV2.bb0)[0] = 0;
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;
-            e = D_8009D2E8;
+            e = BITTEN_OBJECT;
             if (e->type == 0xb) {
                 if (e->b0c)
                     *(int *)((char *)o + 0x90) = spawnForestDwarfAt(6, 0, e->b0c, e->a.p.whole, e->y.p.whole, e->b.p.whole);
-                D_8009D2E8->state = 1;
+                BITTEN_OBJECT->state = 1;
             }
             o->step = 0xf;
             o->state = 0;

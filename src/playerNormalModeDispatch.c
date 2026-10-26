@@ -10,7 +10,7 @@
 #include "raw7.h"
 #include "gamestate.h"
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern void playerStepIdle(TObj *);
 extern void playerStepWalk(TObj *);
@@ -210,7 +210,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
     case 4:
         if (o->b9d == 0) {
             dirC(o);
-            D_8009C330[7] = o->animFrame;
+            PLAYER_EXT[7] = o->animFrame;
         }
         playerStepAirWeaponAttack(o);
         turn(o);

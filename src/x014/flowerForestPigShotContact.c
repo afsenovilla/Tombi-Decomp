@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char *D_8009C330[];
+extern unsigned char *PLAYER_EXT[];
 extern short boxesOverlap(TObj *, TObj *);
 extern void decreaseObjectTimer(TObj *, int);
 
@@ -32,7 +32,7 @@ void flowerForestPigShotContact(TObj *a, TObj *b)
             a->animFrame = 0;
         }
         a->velX = v;
-        D_8009C330[0][9] = 10;
+        PLAYER_EXT[0][9] = 10;
         a->b04 = 6;
         a->step = 7;
         a->state = 0;

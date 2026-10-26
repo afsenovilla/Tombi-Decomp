@@ -1,7 +1,7 @@
 // FUNC 801129d0 528 X010
 // MATCHING 801129d0 528
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960[];
+extern unsigned short GAME[];
 extern unsigned short DAT_8009c960b;
 extern int DAT_8009c960_w[];
 extern unsigned char DAT_8009d0aa;
@@ -25,10 +25,10 @@ void treasureChestWaitForFlag(TObj *o)
     case 0:
         o->active = 4;
         o->y.p.whole += 4;
-        if (DAT_8009c960[0] == 0 && DAT_8009d0aa != 0) {
+        if (GAME[0] == 0 && DAT_8009d0aa != 0) {
             SETANIM(o)
         }
-        if ((DAT_8009c960[0] == 4 || DAT_8009c960[0] == 0xc) && DAT_8009d0c8 != 0) {
+        if ((GAME[0] == 4 || GAME[0] == 0xc) && DAT_8009d0c8 != 0) {
             SETANIM(o)
         }
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) o->step++;

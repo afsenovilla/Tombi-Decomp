@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern void *D_80129F94;
-extern short D_8007A3F0[], D_8007A5F0[];
+extern short NEG_SIN_TABLE[], COS_TABLE[];
 extern void FUN_8001fe6c(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -63,8 +63,8 @@ void updateBossRoomVortex(TObj *o)
                     a = angleFromDelta(dx, dy) & 0xff;
                     o->d38 = a;
                     d <<= 2;
-                    ((short*)&GVARS.s46)[0] = (d * D_8007A3F0[(a + 0x48) & 0xff]) >> 12;
-                    ((short*)&GVARS.s44)[0] = (d * D_8007A5F0[(o->d38 + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.s46)[0] = (d * NEG_SIN_TABLE[(a + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.s44)[0] = (d * COS_TABLE[(o->d38 + 0x48) & 0xff]) >> 12;
                     break;
                 }
             }

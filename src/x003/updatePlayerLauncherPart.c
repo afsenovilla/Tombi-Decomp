@@ -24,7 +24,7 @@ static void *D_80139880[14] = {
     D_80139978, D_80139980, D_80139988, D_80139990,
     D_80139998, D_801399A0,
 };
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
@@ -76,7 +76,7 @@ void updatePlayerLauncherPart(TObj *o)
         if (p->wac != 2) {
             v = D_8007A1F0[(a + 0x40) & 0xff];
             o->velY = v << 2;
-            x = D_8007A5F0[(o->d8c + 0x40) & 0xff];
+            x = COS_TABLE[(o->d8c + 0x40) & 0xff];
             x <<= 2;
             o->velX = x;
             p->h->raw = o->d30 + ((short)x << 8);

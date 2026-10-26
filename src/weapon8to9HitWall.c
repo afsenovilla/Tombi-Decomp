@@ -10,7 +10,7 @@ extern void weapon8to9AttachAnchor(TObj *);
 extern unsigned char DAT_800a60d6;
 extern unsigned short DAT_1f800282;
 extern unsigned short DAT_1f800282b;
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern char PLAYER[];
 extern short *DAT_800a6078;
 extern unsigned short DAT_800a604e;
@@ -46,7 +46,7 @@ int weapon8to9HitWall(TObj *o)
     }
     if (o->b69 != 0 && DAT_800a60d6 != 4 && DAT_800a60d6 != 7) {
     n = 0;
-    switch ((signed char)DAT_8009c330->substep) {
+    switch ((signed char)PLAYER_EXT->substep) {
     case 0:
     case 2:
         if (probeFloorPlaneAt(PLAYER, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {

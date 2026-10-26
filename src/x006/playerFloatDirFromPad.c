@@ -1,7 +1,7 @@
 // FUNC 800ee6d0 272 X006
 // MATCHING 800ee6d0 272
 extern unsigned short PAD_PRESSED;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern short FUN_8001fe3c(int, int);
 
 void playerFloatDirFromPad(char *o)
@@ -28,7 +28,7 @@ void playerFloatDirFromPad(char *o)
         else
             *(int *)(o + 0x88) = t - 1;
     }
-    if (DAT_8009c960 == 3)
+    if (GAME == 3)
         *(int *)(o + 0x84) = *(int *)(o + 0x84) + 6;
     else
         *(int *)(o + 0x84) = *(int *)(o + 0x84) + 4;

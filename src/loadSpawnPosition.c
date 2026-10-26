@@ -9,7 +9,7 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_80079474[];
+extern int** SPAWN_TABLES[];
 
 
 typedef struct {
@@ -31,7 +31,7 @@ void func_80024BD4(u8* self);
 
 void loadSpawnPosition(u8* self)
 {
-    s16* row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    s16* row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
 
     *(int*)(self + 0xDC) = *row++ << 16;
     *(int*)(self + 0xE0) = *row << 16;
@@ -66,7 +66,7 @@ void loadSpawnPosition(u8* self)
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-extern int** D_80079474[];
+extern int** SPAWN_TABLES[];
 
 
 typedef struct {
@@ -88,7 +88,7 @@ void func_80024BD4(u8* self);
 
 void loadSpawnPosition(u8* self)
 {
-    s16* row = (s16*)((u8*)D_80079474[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    s16* row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
 
     *(int*)(self + 0xEC) = *row++ << 16;
     *(int*)(self + 0xF0) = *row << 16;

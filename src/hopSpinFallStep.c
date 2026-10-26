@@ -5,7 +5,7 @@
 // Demo version of PAL main0 8003C338 (hopSpinFallStep.c): one animation (no area split), ground probe at y (PAL y+20).
 extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
 extern short probeCollisionAtDepthB(unsigned char *, int, int);
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern int DAT_8013b104, DAT_80134d0c;
 extern char DAT_80077d54[];
 
@@ -54,7 +54,7 @@ void hopSpinFallStep(unsigned char *o)
 #else
 extern void applyFrameVelocityX(unsigned char *), FUN_8001fe6c(unsigned char *);
 extern short probeCollisionAtDepthB(unsigned char *, int, int);
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern int DAT_8013b104, DAT_80134d0c;
 static char DAT_80077d54[24] = {
     0, 4, 0, 6, 0, -4, 0, 6, 0, 0, 0, 0, -0x80, 4, 0, 7,
@@ -73,7 +73,7 @@ void hopSpinFallStep(unsigned char *o)
             *(short *)(o + 0x7e) = 0x200;
         *(char **)(o + 0x28) = DAT_80077d54;
         o[5] = o[5] + 1;
-        if (DAT_8009c960 == 0)
+        if (GAME == 0)
             *(int *)(o + 0x24) = DAT_8013b104;
         else
             *(int *)(o + 0x24) = DAT_80134d0c;

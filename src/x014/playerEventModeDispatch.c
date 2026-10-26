@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
-extern TObj *D_8009C330;
-extern unsigned char *D_8009D2E8;
+extern TObj *PLAYER_EXT;
+extern unsigned char *BITTEN_OBJECT;
 extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
 extern unsigned char D_801152E8[];
@@ -80,10 +80,10 @@ void playerEventModeDispatch(TObj *o)
     common:
         o->animFrame &= 1;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
-            D_8009D2E8[4] = 2;
-            D_8009D2E8[5] = 2;
-            D_8009D2E8[6] = 0;
+            BITTEN_OBJECT = (*(unsigned char **)&PLX.p611c);
+            BITTEN_OBJECT[4] = 2;
+            BITTEN_OBJECT[5] = 2;
+            BITTEN_OBJECT[6] = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         GVARS.i34 = 0;
@@ -91,7 +91,7 @@ void playerEventModeDispatch(TObj *o)
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        D_8009C330->active = 0;
+        PLAYER_EXT->active = 0;
         v = 0x128;
         if (o->animFrame & 1) {
             v = -0x128;

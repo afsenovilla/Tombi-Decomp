@@ -1,7 +1,7 @@
 // FUNC 8012eb2c 1040 X003
 // MATCHING 8012eb2c 1040
 #include "TOBJ.H"
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern char D_80077CE8[];
 extern void *D_8013A6B4[];
 extern void *D_8013A6B8[];
@@ -89,7 +89,7 @@ void wingedForkPigHit(TObj *o)
         break;
     case 5:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         FUN_8001fec0(o);
         if (--o->timer == -1) {
             o->timer = 0x3c;
@@ -101,7 +101,7 @@ void wingedForkPigHit(TObj *o)
         break;
     case 6:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         FUN_8001fec0(o);
         if (--o->timer == -1) {
             o->active = 1;

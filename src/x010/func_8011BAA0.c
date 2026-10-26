@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj *D_8009C330;
-extern int D_8009D2E8;
+extern TObj *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern void playerSetFallLean(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerAttackDecelerate(TObj *);
@@ -24,10 +24,10 @@ void func_8011BAA0(TObj *o)
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330->active = 2;
-        D_8009C330->animFrame = 0xffff;
-        (*(unsigned short*)&D_8009C330->movetab) = 0xffff;
-        (*(unsigned short*)((char*)&D_8009C330->movetab + 2)) = 0xffff;
+        PLAYER_EXT->active = 2;
+        PLAYER_EXT->animFrame = 0xffff;
+        (*(unsigned short*)&PLAYER_EXT->movetab) = 0xffff;
+        (*(unsigned short*)((char*)&PLAYER_EXT->movetab + 2)) = 0xffff;
         o->state = 2;
         break;
     case 2:
@@ -38,8 +38,8 @@ void func_8011BAA0(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = S32(o, 0xe4);
-            (*(unsigned char*)&D_8009C330->w08) = 0;
+            BITTEN_OBJECT = S32(o, 0xe4);
+            (*(unsigned char*)&PLAYER_EXT->w08) = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -52,7 +52,7 @@ void func_8011BAA0(TObj *o)
             o->step = 4;
             o->state = 3;
         }
-        pl = D_8009C330;
+        pl = PLAYER_EXT;
         if (pl->active == 0) {
             if (U8(o, 0xc6) == 0) {
                 (*(unsigned char*)&o->wac) = 0;

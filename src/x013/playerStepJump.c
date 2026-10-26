@@ -25,15 +25,15 @@ typedef struct {
 #define X(o) ((X800F2B98 *)(o))
 typedef struct { void *p[90]; } T800F2B98;
 
-extern P800F2B98 *DAT_8009c330;
+extern P800F2B98 *PLAYER_EXT;
 extern unsigned char *DAT_800a611c;
-extern unsigned char *DAT_8009d2e8;
+extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6, DAT_1f8001fc, DAT_1f8001f8;
 extern short DAT_1f800238;
 extern short DAT_8009c944, DAT_8009c946[];
 extern unsigned char DAT_8009d2b0, DAT_8009d2b1[], DAT_8009c990;
-extern int DAT_8009f0ec;
+extern int GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
 extern short DAT_801151e0[];
 extern T800F2B98 DAT_800e8404;
@@ -86,42 +86,42 @@ void playerStepJump(TObj *o)
         o->wb6 = 0;
         o->velX = FUN_8001fddc(0, d);
         o->velY = 0;
-        DAT_8009c330->b8 = 0;
-        DAT_8009c330->w2c = 4;
-        DAT_8009c330->w20 = 0;
-        DAT_8009c330->b5 = 0;
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w2c = 4;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->b5 = 0;
         if (*(unsigned char *)&o->wac >= 2) {
-            DAT_8009d2e8 = DAT_800a611c;
+            BITTEN_OBJECT = DAT_800a611c;
             DAT_800a611c[4] = 2;
-            DAT_8009d2e8[5] = 2;
-            DAT_8009d2e8[6] = 0;
+            BITTEN_OBJECT[5] = 2;
+            BITTEN_OBJECT[6] = 0;
         }
         *(unsigned char *)&o->wac = 0;
         playerSetJumpRiseVelocity(o);
         tab = DAT_800e8404;
-        o->anim = tab.p[DAT_8009c330->w2c];
+        o->anim = tab.p[PLAYER_EXT->w2c];
         FUN_8001fe6c(o);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         FUN_8001e560(2, 4);
         o->state = 1;
     case 1:
         if (o->velY >= 0) {
-            DAT_8009c330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             o->state = 2;
         }
         if (PAD_PRESSED[0] & DAT_1f8003c6) {
-            if (DAT_8009c330->b8 != 0) goto common;
-            if (++DAT_8009c330->w20 >= 0xe) {
-                DAT_8009c330->b8 = 1;
+            if (PLAYER_EXT->b8 != 0) goto common;
+            if (++PLAYER_EXT->w20 >= 0xe) {
+                PLAYER_EXT->b8 = 1;
                 o->state = 2;
             }
         } else {
-            DAT_8009c330->b8 = 1;
-            if (DAT_8009c330->w20 >= 5) {
+            PLAYER_EXT->b8 = 1;
+            if (PLAYER_EXT->w20 >= 5) {
                 o->state = 2;
                 goto common;
             }
-            DAT_8009c330->w20++;
+            PLAYER_EXT->w20++;
         }
         playerSetJumpRiseVelocity(o);
     case 2:
@@ -153,7 +153,7 @@ void playerStepJump(TObj *o)
         if (o->velY >= -899) playerAirSpinToFall(o);
         if (o->velY > 0) {
             { int e;
-            DAT_8009c330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             e = 0x10;
             o->velY = 0;
             o->velV = 0;
@@ -167,7 +167,7 @@ void playerStepJump(TObj *o)
         }
         if (FUN_8003facc(o)) {
             { int e;
-            DAT_8009c330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             e = 0x10;
             o->velY = 0;
             o->velV = 0;
@@ -189,14 +189,14 @@ void playerStepJump(TObj *o)
         if (X(o)->c9 != 0) playerJumpArea3Float(o);
         else playerUpdateFall(o);
         playerUpdateSpeedFromPad(o);
-        DAT_8009c330->b8 = 1;
+        PLAYER_EXT->b8 = 1;
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
         FUN_8003facc(o);
         if (*(unsigned char *)&o->wac == 2) {
-            DAT_8009d2e8 = X(o)->e4;
-            DAT_8009c330->b8 = 0;
+            BITTEN_OBJECT = X(o)->e4;
+            PLAYER_EXT->b8 = 0;
             o->ba7 = 0;
             o->ba5 = 0;
             o->step = 0xe;
@@ -212,14 +212,14 @@ void playerStepJump(TObj *o)
                 default: o->state = 0; break;
                 }
             } else if (o->bbe & 8) {
-                DAT_8009c330->b8 = *(unsigned char *)&o->animFrame & 1;
+                PLAYER_EXT->b8 = *(unsigned char *)&o->animFrame & 1;
                 o->step = 0x1b;
                 o->state = 0;
             } else {
                 o->ba4 = 0;
-                DAT_8009c330->w2e = 0xffff;
-                DAT_8009c330->w28 = 0xffff;
-                DAT_8009c330->w2a = 0xffff;
+                PLAYER_EXT->w2e = 0xffff;
+                PLAYER_EXT->w28 = 0xffff;
+                PLAYER_EXT->w2a = 0xffff;
                 o->d8c = DAT_801152e8[o->wb0];
                 o->step = 1;
                 o->state = 0;
@@ -234,7 +234,7 @@ void playerStepJump(TObj *o)
             if (*((unsigned char *)&o->waa + 1) & 0x80) {
                 o->ba4 = 0;
                 o->ba5 = 0;
-                DAT_8009c330->w20 = 0;
+                PLAYER_EXT->w20 = 0;
                 switch (DAT_8009d2b1[0]) {
                 case 1: o->step = 0x2a; o->state = 0; break;
                 case 2: o->step = 0x2b; o->state = 0; break;
@@ -251,12 +251,12 @@ void playerStepJump(TObj *o)
                         if (o->wb2 < -0x144) goto l3344;
                     } else if (o->wb2 > 0x144) {
                     l3344:
-                        DAT_8009c330->b8 = *(unsigned char *)&o->animFrame & 1;
+                        PLAYER_EXT->b8 = *(unsigned char *)&o->animFrame & 1;
                         o->step = 0x10;
                         o->state = 0;
                     }
                 } else if (bb & 4) {
-                    DAT_8009c330->b8 = *(unsigned char *)&o->animFrame & 1;
+                    PLAYER_EXT->b8 = *(unsigned char *)&o->animFrame & 1;
                     o->step = 0x17;
                     o->state = 0;
                 } else if (bb & 0x10) {
@@ -264,24 +264,24 @@ void playerStepJump(TObj *o)
                         if (o->wb2 < -0x144) goto l33c8;
                     } else if (o->wb2 > 0x144) {
                     l33c8:
-                        DAT_8009c330->b8 = *(unsigned char *)&o->animFrame & 1;
+                        PLAYER_EXT->b8 = *(unsigned char *)&o->animFrame & 1;
                         o->step = 0x1e;
                         o->state = 0;
                     }
                 }
             l33e8:
                 if (o->bbe & 0x20) {
-                    DAT_8009c330->b8 = *(unsigned char *)&o->animFrame & 1;
+                    PLAYER_EXT->b8 = *(unsigned char *)&o->animFrame & 1;
                     o->step = 0x1f;
                     o->state = 0;
                 }
             } else {
                 o->ba4 = 0;
                 o->ba5 = 0;
-                DAT_8009c330->w20 = 0;
-                DAT_8009c330->w2e = 0xffff;
-                DAT_8009c330->w28 = 0xffff;
-                DAT_8009c330->w2a = 0xffff;
+                PLAYER_EXT->w20 = 0;
+                PLAYER_EXT->w2e = 0xffff;
+                PLAYER_EXT->w28 = 0xffff;
+                PLAYER_EXT->w2a = 0xffff;
                 o->step = 1;
                 o->state = 0;
                 if (DAT_1f8001fc & DAT_1f8003c6) {
@@ -295,7 +295,7 @@ void playerStepJump(TObj *o)
                 DAT_8009d2b0 = 0;
                 if (X(o)->cc == 1) {
                     *(unsigned char *)&o->wac = 0;
-                    DAT_8009c330->b4 = 0;
+                    PLAYER_EXT->b4 = 0;
                     s = o->wb2;
                     if (s < 0) {
                         short t = s;
@@ -315,14 +315,14 @@ void playerStepJump(TObj *o)
         if (o->velY > 0) o->b9c = 2;
         break;
     }
-    if (*(unsigned char *)&o->wac < 2 && (DAT_8009f0ec = playerProbeGrab(o, 0)) != 0) {
-        DAT_8009c330->b8 = 0;
-        DAT_8009c330->w20 = 0;
+    if (*(unsigned char *)&o->wac < 2 && (GRABBED_OBJECT = playerProbeGrab(o, 0)) != 0) {
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w20 = 0;
         *(unsigned char *)&o->wac = 0;
         o->ba7 = 0;
         o->b9c = 0;
         o->wb2 = 0;
-        playerEnterGrabStep(o, DAT_8009f0ec == 1);
+        playerEnterGrabStep(o, GRABBED_OBJECT == 1);
     }
     spawnPlayerFootstepEffect();
 }

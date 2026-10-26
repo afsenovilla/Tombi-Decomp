@@ -10,7 +10,7 @@ typedef struct O {
     char p4[0x9d - 0x44]; unsigned char b9d;
     char p5[0xb4 - 0x9e]; P p;
 } O;
-extern short DAT_8007a1f0[], DAT_8007a5f0[];
+extern short DAT_8007a1f0[], COS_TABLE[];
 extern short probeWallAt(O *, int, int, int);
 
 int enemyCheckWallAhead(O *o)
@@ -28,7 +28,7 @@ int enemyCheckWallAhead(O *o)
     if (p->w2 != 0) {
         int i = (p->w2 & 0xff) * 2;
         a = (unsigned)(p->w4 * *(short *)((char *)DAT_8007a1f0 + i)) >> 12;
-        b = (unsigned)(p->w4 * *(short *)((char *)DAT_8007a5f0 + i)) >> 12;
+        b = (unsigned)(p->w4 * *(short *)((char *)COS_TABLE + i)) >> 12;
     } else {
         a = 0;
         b = p->w4;

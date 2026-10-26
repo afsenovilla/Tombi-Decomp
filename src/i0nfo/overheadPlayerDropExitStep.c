@@ -6,7 +6,7 @@ extern void func_8001E4F0(int a);
 extern void func_8001F110(int a);
 extern void func_8001FEC0(TObj *o);
 extern void overheadPlayerSetMoveAnim(TObj *o);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern signed char D_8009C975[];
 extern signed char D_8009D2B0;
 
@@ -17,8 +17,8 @@ void overheadPlayerDropExitStep(TObj *o)
     switch (o->state) {
     case 0:
         o->active = 4;
-        D_8009C330->timer = 0;
-        D_8009C330->animFrame = 0xFF;
+        PLAYER_EXT->timer = 0;
+        PLAYER_EXT->animFrame = 0xFF;
         overheadPlayerSetMoveAnim(o);
         o->timer = 0x1E;
         o->d8c = 0;

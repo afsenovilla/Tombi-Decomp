@@ -2,7 +2,7 @@
 // MATCHING 801133b8 204
 #include "TOBJ.H"
 extern int DAT_8009c960[];
-extern unsigned short DAT_8009c960_u[];
+extern unsigned short GAME[];
 extern int *DAT_80115a08[];
 extern int *DAT_80115948[];
 extern void FUN_800202b4();
@@ -18,7 +18,7 @@ void treasureChestOpenAnimOnly(TObj *o)
         if (DAT_8009c960[0] == 0x30009)
             o->anim = (void *)DAT_80115a08[o->b0c & 0x7f][1];
         else
-            o->anim = (void *)DAT_80115948[DAT_8009c960_u[0] * 4 + (o->b0c & 0x7f)][1];
+            o->anim = (void *)DAT_80115948[GAME[0] * 4 + (o->b0c & 0x7f)][1];
         FUN_8001fe6c(o);
         FUN_8001e560(0x18, 8);
     }

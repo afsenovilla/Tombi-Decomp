@@ -56,7 +56,7 @@ typedef struct O {
 #define FD0 (*(short *)((char *)o + 0xd0))
 typedef struct G { short n, f2, f4, f6; } G;
 extern G MESSAGE_SLOTS[];
-extern unsigned char D_8009C943;
+extern unsigned char INFO_MESSAGE_SLOT;
 extern unsigned char *D_8007DD34[];
 extern unsigned char *D_8007DE38[];
 extern unsigned char D_8007DD0C[];
@@ -107,15 +107,15 @@ O *printInfoMessage(int a, int b)
     unsigned short h;
     unsigned int n;
 
-    D_8009C943 = 0xff;
+    INFO_MESSAGE_SLOT = 0xff;
     for (i = 2; i >= 0; i--) {
         if (MESSAGE_SLOTS[i].n == -1) {
-            D_8009C943 = i;
+            INFO_MESSAGE_SLOT = i;
             MESSAGE_SLOTS[i].f2 = i;
             break;
         }
     }
-    if (D_8009C943 == 0xff) return 0;
+    if (INFO_MESSAGE_SLOT == 0xff) return 0;
     if (b == 1 || b == 4) playSFX(0xc);
     if ((unsigned)(b - 2) < 2) {
         s1 = D_8007DD34[a];
@@ -139,7 +139,7 @@ O *printInfoMessage(int a, int b)
         F18 = 0;
         FB4 = a;
         FB6 = b;
-        F14 = (0xd4 - (3 - D_8009C943) * 20) << 16;
+        F14 = (0xd4 - (3 - INFO_MESSAGE_SLOT) * 20) << 16;
         switch (b) {
         case 0:
             FC2 = D_8007D454[a] + 0x60;
@@ -159,7 +159,7 @@ O *printInfoMessage(int a, int b)
         *(unsigned short *)((char *)o + 0xc6) = 0xffff;
         setpos(o, F12, F16);
         i = 1;
-        *(unsigned short *)((char *)o + 0xca) = D_8009C943;
+        *(unsigned short *)((char *)o + 0xca) = INFO_MESSAGE_SLOT;
         F20 = i;
         *(short *)((char *)o + 0xce) = 8;
         FD0 = 6;

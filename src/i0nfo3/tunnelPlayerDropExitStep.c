@@ -6,7 +6,7 @@ extern int func_8001FEC0(TObj *o);
 extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void func_8001E4F0(int s);
 extern void func_8001F110(int a);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char D_8009C975[];
 extern unsigned char D_8009D2B0;
 
@@ -15,8 +15,8 @@ void tunnelPlayerDropExitStep(TObj *o)
     void *p;
     switch (o->state) {
     case 0:
-        D_8009C330->timer = 0;
-        D_8009C330->animFrame = 0xFF;
+        PLAYER_EXT->timer = 0;
+        PLAYER_EXT->animFrame = 0xFF;
         tunnelPlayerSetMoveAnim(o);
         o->timer = 0x1E;
         o->d8c = 0;

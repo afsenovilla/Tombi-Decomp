@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short D_8007A1F0[];
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
@@ -18,7 +18,7 @@ int bossCapturePullBoss(TObj *o, TObj *t)
     o->d38 = a;
     b = (a + 0x80) & 0xff;
     dy = (o->velH * D_8007A1F0[b]) >> 12;
-    dx = (o->velH * D_8007A5F0[b]) >> 12;
+    dx = (o->velH * COS_TABLE[b]) >> 12;
     t->h->raw += dx << 8;
     t->y.raw += dy << 8;
     o->velH -= 0x20;

@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern TObj *D_8009F0EC;
-extern TObj *D_8009C330;
+extern TObj *GRABBED_OBJECT;
+extern TObj *PLAYER_EXT;
 
 void playerClingJumpRelease(TObj *o)
 {
@@ -17,15 +17,15 @@ void playerClingJumpRelease(TObj *o)
     if (SPAD.s1fc & SPAD.s3c6) {
         GV2.bb0 = 0;
         ((unsigned char *)&o->wa8)[1] = 0;
-        if (GV2.bb2 - 5 < 3) D_8009F0EC->active = 1;
+        if (GV2.bb2 - 5 < 3) GRABBED_OBJECT->active = 1;
         o->b9c = 1;
         o->timer = 10;
         o->velH = 0;
         o->velV = 0;
         o->velX = 0;
         o->velY = 0;
-        if (D_8009F0EC->d94) {
-            e = D_8009F0EC->d94;
+        if (GRABBED_OBJECT->d94) {
+            e = GRABBED_OBJECT->d94;
             if (!((TObj *)e)->d94) {
                 ((TObj *)e)->active = 1;
             } else {
@@ -42,7 +42,7 @@ void playerClingJumpRelease(TObj *o)
         if (GAME.area00_eventControl & 0x40) {
             if (*(volatile unsigned short *)((unsigned short*)&GV6.s70) & SPAD.s3c4) o->ba7 = 1;
         }
-        D_8009C330->b04 = 0;
+        PLAYER_EXT->b04 = 0;
         o->step = 2;
         o->state = 0;
     }

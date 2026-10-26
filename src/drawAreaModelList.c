@@ -6,7 +6,7 @@
 INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004B140_slps01144);
 #else
 extern char DAT_1f8000c0[];
-extern int DAT_8009c960;
+extern int GAME;
 extern int DAT_1f8001e0;
 extern unsigned char DAT_800b0d98[];
 extern void SetRotMatrix(void *);
@@ -23,7 +23,7 @@ void drawAreaModelList(void)
     SetRotMatrix(DAT_1f8000c0);
     SetTransMatrix(DAT_1f8000c0);
     base = DAT_800b0d98;
-    if (DAT_8009c960 == 0x60009) {
+    if (GAME == 0x60009) {
         i = 0;
         if (i < DAT_800b0d98[3]) {
             p = (int *)base;

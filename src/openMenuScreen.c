@@ -4,7 +4,7 @@ typedef struct S { char pad[0x4c]; unsigned short a; unsigned short b; } S;
 extern S *TASK_C;
 extern unsigned short DAT_1f8003b8[];
 extern unsigned short DAT_1f8003ba[];
-extern char DAT_800a45d8[];
+extern char MENU_STATE[];
 extern char DAT_800a45d9[];
 extern short DAT_800a45ea[];
 extern short DAT_800a45ee[];
@@ -14,7 +14,7 @@ void openMenuScreen(short x)
     S *s = TASK_C;
     unsigned short a = s->a;
     unsigned short b = s->b;
-    DAT_800a45d8[0] = 0;
+    MENU_STATE[0] = 0;
     DAT_800a45d9[0] = 0;
     DAT_800a45ea[0] = x;
     DAT_800a45ee[0] = 0;

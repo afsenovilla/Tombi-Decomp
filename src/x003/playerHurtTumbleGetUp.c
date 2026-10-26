@@ -9,7 +9,7 @@ typedef struct {
     unsigned short w2e;
 } P800FA35C;
 
-extern P800FA35C *DAT_8009c330;
+extern P800FA35C *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_800efc04(TObj *);
@@ -19,13 +19,13 @@ extern void playerHandleHazardContact(TObj *, int);
 
 static __inline__ void setanim(TObj *o, unsigned short x)
 {
-    P800FA35C *p = DAT_8009c330;
+    P800FA35C *p = PLAYER_EXT;
     p->w2c = x;
     if (p->w2e != x) {
         p->w2c = x;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
     }
 }
 
@@ -124,7 +124,7 @@ void playerHurtTumbleGetUp(TObj *o)
             playerHandleHazardContact(o, 0);
         }
         if (FUN_8001fec0(o)) {
-            DAT_8009c330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             o->active = 1;
             o->b04 = 1;
             o->step = 0;

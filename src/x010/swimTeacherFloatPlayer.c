@@ -4,7 +4,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern Fix16 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
 extern void playSFX(int);
@@ -15,7 +15,7 @@ void swimTeacherFloatPlayer(TObj *o, int n)
 
     if (n >= 2) {
         o->ba7 += 2;
-        s = D_8007A3F0[o->ba7] << 6;
+        s = NEG_SIN_TABLE[o->ba7] << 6;
         PLAYER.obj.y.raw = o->d34 + s;
         if (n == 3) {
             D_800A6078->raw += 0x8000;
@@ -31,7 +31,7 @@ void swimTeacherFloatPlayer(TObj *o, int n)
         }
     } else {
         o->ba7 += 8;
-        s = D_8007A3F0[o->ba7] << 7;
+        s = NEG_SIN_TABLE[o->ba7] << 7;
         PLAYER.obj.y.raw = o->d34 + s;
         if (n && !(SPAD.s1f8 & 0x1f)) playSFX(0xe);
     }

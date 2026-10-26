@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
-extern E *D_8009C948[];
+extern E *BAIT_OBJECT[];
 extern void *D_8013B224;
 extern void spawnA00L5Type0CObject(Fix16 *);
 
@@ -20,7 +20,7 @@ void bitingPlantEatBaitStep(TObj *o)
             break;
         case 1:
             o->d88 = 0;
-            D_8009C948[0]->b4 = 3;
+            BAIT_OBJECT[0]->b4 = 3;
             break;
         case 2:
             o->d88 = 0;

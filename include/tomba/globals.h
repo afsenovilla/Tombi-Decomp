@@ -11,6 +11,9 @@ extern short AREA_BGM_VOLUME[];                /* 0x8007833C */
 extern unsigned char *AREA_REVERB_DEPTH[];     /* 0x80078428 */
 extern int AREA_REVERB_MODE[];                 /* 0x80078478 */
 extern char SOUND_INITIALIZED;                 /* 0x80078788 */
+extern unsigned short AREA_SECTION_COUNTS[]; /* 0x80078790 */
+extern short NEG_SIN_TABLE[];                /* 0x8007A3F0 */
+extern short COS_TABLE[];                    /* 0x8007A5F0 */
 extern int LDSYS_LOAD_LIST;                    /* 0x8007C5F8 */
 extern int LDAR_LOAD_LISTS[];                  /* 0x8007C5FC */
 extern int SOUND_SET_LOAD_LISTS[];             /* 0x8007D1B4 */
@@ -44,6 +47,7 @@ extern short PITCH_SLIDE_NEW_FINE;             /* 0x8009BD58 */
 extern unsigned char LZ_CURRENT_BIT;           /* 0x8009BD60 */
 extern unsigned short LZ_BITMASK;              /* 0x8009BD64 */
 extern short VOICE_PRIORITY[];                 /* 0x8009C8C0 */
+extern unsigned char INFO_MESSAGE_SLOT;       /* 0x8009C943 */
 extern unsigned char SCRIPT_GLOBALS[];         /* 0x8009CEA4 */
 extern char *WVD_BODIES[];                     /* 0x8009D2F0 */
 extern char *WVD_HEADERS[];                    /* 0x8009D3F0 */
@@ -60,6 +64,7 @@ extern long MEMCARD_SW_END_ERROR;              /* 0x8009F110 */
 extern long MEMCARD_SW_TIMEOUT;                /* 0x8009F114 */
 extern long MEMCARD_SW_NEW_DEVICE;             /* 0x8009F118 */
 extern short SOUND_QUEUE_TAIL;                 /* 0x8009F2D0 */
+extern unsigned short AREA_VARIANT;           /* 0x8009F838 */
 extern short BGM_SEQ_ID;                       /* 0x800A3428 */
 extern short JINGLE_VAB_ID;                    /* 0x800A3CB8 */
 extern short SOUND_QUEUE_HEAD;                 /* 0x800A3F90 */

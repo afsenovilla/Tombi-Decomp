@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void FUN_8001fec0(TObj *o);
 extern void FUN_80040278(TObj *o, int x, int y);
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 
 void scriptActorWalk(TObj *o)
 {
@@ -14,7 +14,7 @@ void scriptActorWalk(TObj *o)
         FUN_8001fec0(o);
         o->h->raw += o->velX * 0x100;
         *(volatile int *)&o->y.raw += 0x40000;
-        if (DAT_8009c960 == 2) {
+        if (GAME == 2) {
             if (o->h->p.whole < 0x2b)
                 o->h->p.whole = 0x2b;
             if (o->h->p.whole > 0x130)

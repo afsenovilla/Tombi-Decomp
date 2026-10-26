@@ -9,8 +9,8 @@ typedef struct {
     unsigned short w2c, w2e;
 } P;
 typedef struct { TObj t; char c0[7]; unsigned char bc7, bc8; char c9[0xe4 - 0xc9]; int de4; } PO;
-extern P *DAT_8009c330;
-extern int DAT_8009d2e8;
+extern P *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned char DAT_801152e8[];
 extern short DAT_80115268[][2];
@@ -30,13 +30,13 @@ extern int FUN_8001fe0c(int, int);
 
 static __inline__ void setanim(TObj *o, unsigned short x)
 {
-    P *p = DAT_8009c330;
+    P *p = PLAYER_EXT;
     p->w2c = x;
     if (p->w2e != x) {
         p->w2c = x;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
     }
 }
 
@@ -46,15 +46,15 @@ static __inline__ void anim31(TObj *o)
 {
     if (o->wb4 > 0x28) {
         unsigned u = (o->d84 >> 3) & 0xf;
-        DAT_8009c330->w2c = 0x31;
+        PLAYER_EXT->w2c = 0x31;
         FUN_800efc04(o);
         FUN_8001fe94(o, u);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
     } else {
-        DAT_8009c330->w2c = 0x31;
+        PLAYER_EXT->w2c = 0x31;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0xf);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
     }
 }
 
@@ -80,8 +80,8 @@ void playerStepRopeSwing(TObj *o)
         o->b9e = 0;
         *(unsigned char *)&o->waa = 0;
         if (*(unsigned char *)&o->wac == 2) {
-            DAT_8009d2e8 = ((PO *)o)->de4;
-            DAT_8009c330->b8 = 0;
+            BITTEN_OBJECT = ((PO *)o)->de4;
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -89,9 +89,9 @@ void playerStepRopeSwing(TObj *o)
         }
         *(unsigned char *)&o->wac = 0;
         if (o->b69) {
-            DAT_8009c330->w20 = 0;
-            DAT_8009c330->w22 = 0;
-            DAT_8009c330->b8 = 0;
+            PLAYER_EXT->w20 = 0;
+            PLAYER_EXT->w22 = 0;
+            PLAYER_EXT->b8 = 0;
             DAT_8009c934 = 0;
             FUN_8001e5f4(0x1c, 0x7f);
             ((PO *)o)->bc7 = 1;
@@ -133,16 +133,16 @@ void playerStepRopeSwing(TObj *o)
             }
         }
         {
-            P *q = DAT_8009c330;
+            P *q = PLAYER_EXT;
             q->b8 = 0;
             q->w20 = 0;
             q->w22 = 0;
         }
-        DAT_8009c330->b9 = 0;
-        DAT_8009c330->b0a = 0;
-        DAT_8009c330->w0c = 0;
-        DAT_8009c330->w02 = 0;
-        DAT_8009c330->w0e = 0;
+        PLAYER_EXT->b9 = 0;
+        PLAYER_EXT->b0a = 0;
+        PLAYER_EXT->w0c = 0;
+        PLAYER_EXT->w02 = 0;
+        PLAYER_EXT->w0e = 0;
         o->velH = 0;
         o->velV = 0;
         o->wb0 = 0;
@@ -152,10 +152,10 @@ void playerStepRopeSwing(TObj *o)
         o->b9d = 0;
         FUN_8001e5f4(0x26, 0x7f);
         setanim(o, 0x31);
-        DAT_8009c330->b9 = DAT_8009c330->b7 & 1;
+        PLAYER_EXT->b9 = PLAYER_EXT->b7 & 1;
         if (o->animFrame & 1) o->d84 = 0x100 - o->w7a; else o->d84 = o->w7a;
         o->d38 = o->wb4 << 16;
-        o->animFrame = DAT_8009c330->b9;
+        o->animFrame = PLAYER_EXT->b9;
         o->timer = 0;
         o->velH = o->h->p.whole;
         o->velV = o->y.p.whole;
@@ -187,7 +187,7 @@ void playerStepRopeSwing(TObj *o)
         }
         o->d84 += playerRopeGetSwingSpeed();
         if ((o->d84 & 0xff) < 0x80) o->animFrame = 1; else o->animFrame = 0;
-        p = DAT_8009c330;
+        p = PLAYER_EXT;
         if (p->b0a == 0) {
             f = 0;
             o->d88 = (short)FUN_8001fe3c((unsigned char)o->d84, DAT_80115268[o->wb2][0]);
@@ -196,18 +196,18 @@ void playerStepRopeSwing(TObj *o)
             objCollideSideWalls(o);
             if (o->ba6 == 0) f = FUN_8003facc(o) == 0;
             if ((f << 16) == 0) {
-                DAT_8009c330->b0a = 1;
+                PLAYER_EXT->b0a = 1;
                 x = (unsigned char)o->d84;
                 if ((unsigned char)(x - 0x40) < 0x80) {
-                    DAT_8009c330->w0c = (0x100 - x) & 0xff;
+                    PLAYER_EXT->w0c = (0x100 - x) & 0xff;
                     o->d84 = *(unsigned char *)&o->d84;
-                    DAT_8009c330->b9 = 0;
+                    PLAYER_EXT->b9 = 0;
                 } else {
-                    DAT_8009c330->w0c = -x & 0xff;
+                    PLAYER_EXT->w0c = -x & 0xff;
                     o->d84 = *(unsigned char *)&o->d84;
-                    DAT_8009c330->b9 = 1;
+                    PLAYER_EXT->b9 = 1;
                 }
-                if (DAT_8009c330->w0c < o->d84) o->d84 |= 0x100;
+                if (PLAYER_EXT->w0c < o->d84) o->d84 |= 0x100;
             }
         } else if (p->b9) {
             if (p->w0c >= o->d84) p->b9 = 0;

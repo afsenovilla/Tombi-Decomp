@@ -5,8 +5,8 @@
 
 #define NEXT(o) (*(TObj **)&(o)->d94)
 
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern char D_8013F210[];
 extern char D_8013F218[];
 extern char D_8013F220[];
@@ -75,8 +75,8 @@ void segmentedCrawlerHit(TObj *o)
             break;
         }
         if (o->velH) {
-            o->h->raw += (D_8007A5F0[*(unsigned char *)&o->d88] * o->velH) >> 4;
-            o->y.raw += (D_8007A3F0[*(unsigned char *)&o->d88] * o->velH) >> 4;
+            o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4;
+            o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4;
             o->velH -= o->velX;
         }
         o->y.raw += o->velV << 8;

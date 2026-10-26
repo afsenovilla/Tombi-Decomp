@@ -2,17 +2,17 @@
 // MATCHING 8011ca00 728
 #include "TOBJ.H"
 
-extern TObj *D_8009F0EC;
+extern TObj *GRABBED_OBJECT;
 extern int rcos(int);
 extern int rsin(int);
 
 #define SETW(o, a)                                                   \
-    o->wb8 = rcos(a) * (D_8009F0EC->box0 - 12) >> 12;               \
-    o->wba = -(rsin(a) * (D_8009F0EC->box0 - 12)) >> 12
+    o->wb8 = rcos(a) * (GRABBED_OBJECT->box0 - 12) >> 12;               \
+    o->wba = -(rsin(a) * (GRABBED_OBJECT->box0 - 12)) >> 12
 
 short turningPlankSwingPivot(TObj *o)
 {
-    TObj *p = D_8009F0EC;
+    TObj *p = GRABBED_OBJECT;
     short a = p->d30;
     short b = (a + 0x800) & 0xfff;
     short c = b;
@@ -47,7 +47,7 @@ short turningPlankSwingPivot(TObj *o)
         else
             a = (a + 0x400) & 0xfff;
         SETW(o, a);
-        if (D_8009F0EC->subtype == 3) f = c < 0xa01;
+        if (GRABBED_OBJECT->subtype == 3) f = c < 0xa01;
         else f = c < 0xe01;
         if (!f) {
             o->b69 = 1;
@@ -55,6 +55,6 @@ short turningPlankSwingPivot(TObj *o)
         }
         break;
     }
-    D_8009F0EC->b69 = 1;
+    GRABBED_OBJECT->b69 = 1;
     return r;
 }

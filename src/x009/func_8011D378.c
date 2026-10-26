@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern TObj *D_8009D2E8;
+extern TObj *BITTEN_OBJECT;
 extern void playerSetAngleFromSlope(TObj *);
 
 void func_8011D378(TObj *o)
@@ -17,6 +17,6 @@ void func_8011D378(TObj *o)
     o->velV = 0;
     o->wb2 = 0;
     playerSetAngleFromSlope(o);
-    D_8009D2E8->d8c = (0x100 - o->d8c) & 0xff;
+    BITTEN_OBJECT->d8c = (0x100 - o->d8c) & 0xff;
     o->state = 3;
 }

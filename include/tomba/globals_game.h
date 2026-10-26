@@ -41,6 +41,17 @@ extern short VOICE_SFX_ID[];                   /* 0x800A3CC8 */
 extern byte LOAD_BUFFER[0x3D4];                /* 0x800A3FE0 */
 /* TODO: MESSAGE_SLOTS 0x800A4648 needs a struct type (structs.h) */
 /* TODO: MESSAGE_GLYPHS 0x800A4DE0 needs a struct type (structs.h) */
+/* TODO: UI_SPRITE_DEFS 0x80078808 needs the UiSpriteDef struct (drawNowLoadingSprite) */
+/* TODO: SPAWN_TABLES 0x80079474 (int **[area]) needs a row struct (initPlayerAtSpawn) */
+/* TODO: WEAPON_HEAD_OFFSETS 0x8007A04C short dx/dy pairs (weapon0Swing) */
+/* TODO: BALLOON_FRAME_UVS 0x800801F8 UV8[4] (drawBalloonFrame) */
+/* TODO: MOVIE_DEC_ENV 0x8009BCA8 (0x38) needs a struct type (moviePlayerTask) */
+/* TODO: PLAYER_EXT 0x8009C330 pointer to the player extension block PLAYER+0xF8 (per-source views) */
+/* TODO: WEAPON_STATE 0x8009C338 pointer to the weapon sprite state (per-source views) */
+/* TODO: BAIT_OBJECT 0x8009C948 TObj *[] (updateA00BitingPlantBait) */
+/* TODO: BITTEN_OBJECT 0x8009D2E8 TObj * (per-source views) */
+/* TODO: GRABBED_OBJECT 0x8009F0EC TObj * (per-source views) */
+/* TODO: AREA_SCRIPT_CTX 0x8009F840 ScriptContext (tickAreaScript) */
 /* TODO: GLYPH_CACHE 0x800A5DE0 needs a struct type (structs.h) */
 extern u_char PLAYER[0x178];                   /* 0x800A6038 */
 extern SpriteSlot SPRITE_SLOTS[];              /* 0x800B0BB8 */

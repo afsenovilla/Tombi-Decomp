@@ -3,7 +3,7 @@
 typedef struct { char p[0x1e]; unsigned short w1e; } NN;
 typedef struct { unsigned short w; short idx; void **ptrs; int pad; } E;
 extern E DAT_80114ae4[];
-extern unsigned short DAT_8009c960[];
+extern unsigned short GAME[];
 extern int SPR_DATA[];
 extern unsigned char DAT_800a6047;
 extern char *DAT_800a611c;
@@ -21,10 +21,10 @@ void spawnFlashEffect(short a, int x, int y, int z)
         *(int *)(n + 0x14) = y << 16;
         n[3] = a;
         *(int *)(n + 0x18) = z << 16;
-        ((NN *)n)->w1e = DAT_80114ae4[DAT_8009c960[0]].w;
-        *(int *)(n + 0x3c) = SPR_DATA[DAT_80114ae4[DAT_8009c960[0]].idx];
-        if (a == 2 && *(int *)DAT_8009c960 == 0x50000) a = 3;
-        *(void **)(n + 0x24) = DAT_80114ae4[DAT_8009c960[0]].ptrs[a];
+        ((NN *)n)->w1e = DAT_80114ae4[GAME[0]].w;
+        *(int *)(n + 0x3c) = SPR_DATA[DAT_80114ae4[GAME[0]].idx];
+        if (a == 2 && *(int *)GAME == 0x50000) a = 3;
+        *(void **)(n + 0x24) = DAT_80114ae4[GAME[0]].ptrs[a];
         FUN_8001fe6c(n);
         n[0xd] = 0;
         n[0xa] = 2;

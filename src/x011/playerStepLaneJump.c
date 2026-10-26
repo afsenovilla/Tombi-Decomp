@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x20]; short we0; short we2; int de4; char e8[0xe]; short wf6; } PO;
 typedef struct { char pad[0x20]; short w20; } P;
-extern P *D_8009C330;
-extern int D_8009D2E8;
+extern P *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern char D_80010E34[];
 extern unsigned char D_801152E8[];
 extern int MulCos(int a, short b);
@@ -37,7 +37,7 @@ void playerStepLaneJump(PO *o)
         o->t.animFrame &= 1;
         o->t.velX = MulCos(0, o->t.wb2);
         o->t.velY = -0x570;
-        D_8009C330->w20 = 5;
+        PLAYER_EXT->w20 = 5;
         PlayerSetAnimIfChanged(o, 0x19);
         if (*(unsigned short *)0x1F8001C8 & 1)
             o->wf6 = (o->t.d->p.whole + 90) / 90 * 90;
@@ -86,7 +86,7 @@ void playerStepLaneJump(PO *o)
         ObjAddVelY7E(o);
         AnimAdvance(o);
         if (BAC(o) == 2) {
-            D_8009D2E8 = o->de4;
+            BITTEN_OBJECT = o->de4;
             if (o->we0) o->t.active = 3;
             else o->t.active = 1;
             *(signed char *)&o->t.b0f = -8;
@@ -131,7 +131,7 @@ void playerStepLaneJump(PO *o)
             o->t.velX = 0;
             o->t.velY = 0;
             o->t.d8c = D_801152E8[o->t.wb0];
-            D_8009C330->w20 = 0;
+            PLAYER_EXT->w20 = 0;
             o->t.b04 = 1;
             o->t.step = 0;
             o->t.state = 0;

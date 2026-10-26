@@ -5,7 +5,7 @@ extern int DAT_8009d69c;
 extern unsigned char *SCRIPT_CTX;
 extern unsigned char DAT_800a603c, DAT_800a603d, DAT_800a603e, PLAYER, DAT_800a60d6;
 extern short DAT_800a60ea, DAT_800a6066, DAT_800a6058;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern short DAT_800a6118;
 
 void scriptOpSetPlayerStateEx(void)
@@ -50,7 +50,7 @@ void scriptOpSetPlayerStateEx(void)
                 DAT_8009c93f = 1;
             if (DAT_800a603c == 1) {
                 DAT_8009c93f = 0;
-                if (DAT_8009c960 != 0 || DAT_800a6118 == 0)
+                if (GAME != 0 || DAT_800a6118 == 0)
                     PLAYER = 1;
             }
             DAT_800a603d = b;

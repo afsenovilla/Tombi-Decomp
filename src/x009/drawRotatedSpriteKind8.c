@@ -24,18 +24,18 @@ extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern int D_1F800078;
 extern PFT4 *D_1F800164;
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 int projectActorPosition(void *o, long *sxy, long *z);
 int isQuadOnScreen(void *p);
 int insertPrim(void *a, int b, int c, int d, unsigned e);
 int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
 #define setSemiTrans(p, abe) ((abe) ? ((p)->code |= 2) : ((p)->code &= ~2))
-#define SN(i) D_8007A5F0[i]
+#define SN(i) COS_TABLE[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
-#define CS(i) D_8007A3F0[i]
+#define CS(i) NEG_SIN_TABLE[i]
 
 void drawRotatedSpriteKind8(TObj *o)
 {

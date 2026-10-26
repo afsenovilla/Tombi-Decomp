@@ -5,7 +5,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 extern void *D_8013B0D8;
 extern void *D_80134D84;
 extern void *D_80131CE0;
@@ -36,7 +36,7 @@ void updateMightyFishFood(TObj *o)
                     o->active = 1;
                     o->b69 = 0;
                     o->b0a = 0;
-                    switch (D_8009C960[0]) {
+                    switch (GAME[0]) {
                     case 0:
                         o->b0d = 1;
                         o->w1e = 6;
@@ -91,7 +91,7 @@ void updateMightyFishFood(TObj *o)
     case 2:
         if (o->subtype == 0) {
             setEventComplete(0x77, 0);
-            switch (D_8009C960[0]) {
+            switch (GAME[0]) {
             case 0:
                 k = 0;
                 break;

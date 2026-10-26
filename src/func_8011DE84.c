@@ -35,7 +35,7 @@ typedef struct {
 } O;
 typedef struct O { char pad0[0x10]; short a_lo, a_hi; short y_lo, y_hi; } P;
 extern short D_8007A1F0[];
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern short D_8007A208[];
 extern short D_8007A1F4[];
 extern short D_8007A5F4[];
@@ -46,7 +46,7 @@ void func_8011DE84(O *o)
     P *q;
     o->d8c = (0x80 - o->animFrame) << 4;
     s = (o->ba5 * D_8007A1F0[o->animFrame]) << 4;
-    c = (o->ba5 * D_8007A5F0[o->animFrame]) << 4;
+    c = (o->ba5 * COS_TABLE[o->animFrame]) << 4;
     q = o->d94;
     *(int *)&q->y_lo = o->y + s + (o->velY << 16);
     o->d34 = q->y_hi;
@@ -94,7 +94,7 @@ void func_8011E0EC(O *o)
     P *q;
     o->d8c = (0x80 - o->animFrame) << 4;
     s = (o->ba5 * D_8007A1F0[o->animFrame]) << 4;
-    c = (o->ba5 * D_8007A5F0[o->animFrame]) << 4;
+    c = (o->ba5 * COS_TABLE[o->animFrame]) << 4;
     o->d34 = (o->y + s) >> 16;
     o->d30 = (o->a + c) >> 16;
     o->box1 = c < 0 ? -c >> 16 : c >> 16;

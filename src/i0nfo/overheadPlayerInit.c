@@ -10,7 +10,7 @@ extern void *D_800106B4;
 extern char D_80011790[];
 typedef struct { unsigned short a, b; } Pair7A;
 extern Pair7A D_8007A024[];
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char D_8009C970;
 typedef struct { unsigned char c; } C970S; typedef struct { int v; } SPV;
 extern unsigned short D_8009C982[];
@@ -30,11 +30,11 @@ void overheadPlayerInit(TObj *o)
     TObj *p;
     void *an;
     int pad[2];
-    D_8009C330 = (TObj *)((char *)o + 0xF8);
+    PLAYER_EXT = (TObj *)((char *)o + 0xF8);
     if (o->step == 0) {
         o->anim = D_80011790;
         func_8001FE6C(o);
-        p = D_8009C330;
+        p = PLAYER_EXT;
         if (GetGraphType() != 1) {
             GetGraphType();
         }
@@ -43,10 +43,10 @@ void overheadPlayerInit(TObj *o)
         D_800A60FA[0] = D_8009D2B3[0];
         D_800A6040[0] = D_8007A024[D_8009C990[0]].a;
         D_800A60FC[0] = D_8007A024[D_8009D2B3[0]].b;
-        U16(D_8009C330, 0x28) = 0xFFFF;
-        U16(D_8009C330, 0x2A) = 0xFFFF;
-        D_8009C330->animFrame = 0xFFFF;
-        D_8009C330->active = 0;
+        U16(PLAYER_EXT, 0x28) = 0xFFFF;
+        U16(PLAYER_EXT, 0x2A) = 0xFFFF;
+        PLAYER_EXT->animFrame = 0xFFFF;
+        PLAYER_EXT->active = 0;
         o->visible = 1;
         o->b0a = 1;
         o->ba5 = 0;

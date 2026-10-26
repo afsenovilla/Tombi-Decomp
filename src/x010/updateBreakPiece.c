@@ -1,7 +1,7 @@
 // FUNC 800eb6ac 580 X010
 // MATCHING 800eb6ac 580
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_80114bdc[];
 extern void *DAT_80077cdc;
 extern void **DAT_80115a08[];
@@ -29,7 +29,7 @@ void updateBreakPiece(TObj *o)
         o->animFrame = 0;
         o->w22 = *p++;
         o->b6b = *p++;
-        g = &DAT_8009c960;
+        g = &GAME;
         if (*(int *)g == 0x30009)
             o->anim = DAT_80115a08[o->b0c][o->b6b];
         else

@@ -8,8 +8,8 @@ extern int ObjCullRegister(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void ObjFree(TObj *o);
 extern void initPoolType32Object(TObj *o);
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 
 void updatePoolType32Object(TObj *o)
 {
@@ -57,8 +57,8 @@ void updatePoolType32Object(TObj *o)
                 n->y.raw = o->y.raw;
                 n->d->raw = o->d->raw;
                 i = r & 0xf0;
-                n->h->raw += (D_8007A5F0[i] * s) >> 4;
-                n->y.raw += (D_8007A3F0[i] * s) >> 4;
+                n->h->raw += (COS_TABLE[i] * s) >> 4;
+                n->y.raw += (NEG_SIN_TABLE[i] * s) >> 4;
                 n->b04 = 1;
                 initPoolType32Object(n);
             }

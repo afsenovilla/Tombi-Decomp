@@ -21,7 +21,7 @@ typedef struct O {
     char pad8[0xba - 0xad];
     unsigned short wba;
 } O;
-extern O *DAT_8009d2e8;
+extern O *BITTEN_OBJECT;
 extern void FUN_800eeb5c();
 extern void playerSetSlopeTilt();
 
@@ -32,7 +32,7 @@ void FUN_80102eb4(O *o)
     FUN_800eeb5c(o, 0x23);
     o->wac = 3;
     o->b9c = 0;
-    p = DAT_8009d2e8;
+    p = BITTEN_OBJECT;
     o->velX = 0;
     o->velY = 0;
     *(unsigned short *)((char *)p + 0x2e) = o->animFrame & 1;

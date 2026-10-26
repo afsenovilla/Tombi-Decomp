@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char pad[9]; unsigned char b9; char pad2[0x20 - 10]; short w20; } P;
-extern P *D_8009C330;
-extern TObj *D_8009D2E8;
+extern P *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
 extern void playerSetJumpRiseVelocity(TObj *);
 extern void setFacingFromPad(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -22,18 +22,18 @@ void playerStepBittenJump(TObj *o)
     TObj *q;
     switch (o->state) {
     case 0:
-        switch (D_8009D2E8->type) {
+        switch (BITTEN_OBJECT->type) {
         case 19:
-            D_8009C330->w20 = 0;
-            D_8009D2E8->d84 = 0;
+            PLAYER_EXT->w20 = 0;
+            BITTEN_OBJECT->d84 = 0;
             playerSetJumpRiseVelocity(o);
             break;
         case 0: case 2: case 8: case 10: case 11: case 18: case 30: case 33: case 40:
         case 56: case 58: case 59: case 60: case 61: case 62: case 63: case 64: case 65: case 66:
-            D_8009D2E8->animFrame = o->animFrame & 1;
+            BITTEN_OBJECT->animFrame = o->animFrame & 1;
         case 4: case 26:
-            q = D_8009D2E8;
-            D_8009C330->w20 = 0;
+            q = BITTEN_OBJECT;
+            PLAYER_EXT->w20 = 0;
             {
             int t;
             Fix16 *dst = q->h;
@@ -42,28 +42,28 @@ void playerStepBittenJump(TObj *o)
             }
             goto tail;
         case 3: case 28: case 31: case 43:
-            D_8009C330->w20 = 0;
-            D_8009D2E8->animFrame = o->animFrame & 1;
+            PLAYER_EXT->w20 = 0;
+            BITTEN_OBJECT->animFrame = o->animFrame & 1;
             {
             int t = o->h->p.whole;
-            D_8009D2E8->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
+            BITTEN_OBJECT->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
             }
             goto tail;
         case 41:
-            if (D_8009D2E8->b6a != 1) goto e41;
+            if (BITTEN_OBJECT->b6a != 1) goto e41;
         case 14:
-            D_8009C330->w20 = 13;
+            PLAYER_EXT->w20 = 13;
             o->velY = -0x600;
             break;
         e41:
-            D_8009C330->w20 = 0;
+            PLAYER_EXT->w20 = 0;
             {
             int t = o->h->p.whole;
-            D_8009D2E8->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
+            BITTEN_OBJECT->h->p.whole = (o->animFrame & 1) ? t + 8 : t - 8;
             }
         tail:
-            D_8009D2E8->y.p.whole = o->y.p.whole + 8;
-            D_8009D2E8->d8c = o->d88 - 0xc0;
+            BITTEN_OBJECT->y.p.whole = o->y.p.whole + 8;
+            BITTEN_OBJECT->d8c = o->d88 - 0xc0;
             playerSetJumpRiseVelocity(o);
             break;
         }
@@ -72,7 +72,7 @@ void playerStepBittenJump(TObj *o)
         o->d8c = 0;
         o->wb2 = 0;
         o->wb0 = 0;
-        D_8009C330->b9 = D_8009D2E8->type;
+        PLAYER_EXT->b9 = BITTEN_OBJECT->type;
         o->b69 = 0;
         o->velV = 0;
         PlayerSetAnimIfChanged(o, 13);
@@ -84,11 +84,11 @@ void playerStepBittenJump(TObj *o)
         o->state = 1;
         o->substep = 0;
     case 1:
-        if (D_8009C330->b9 != 14) {
+        if (PLAYER_EXT->b9 != 14) {
             playerJumpRiseUpdate(o);
         }
     case 2:
-        switch (D_8009C330->b9) {
+        switch (PLAYER_EXT->b9) {
         case 0: case 2: case 8: case 10: case 11: case 30: case 33: case 40:
         case 56: case 58: case 59: case 60: case 61: case 62: case 63: case 64: case 65: case 66:
             playerBittenJumpGeneric(o);
@@ -97,7 +97,7 @@ void playerStepBittenJump(TObj *o)
             playerBittenJumpType03(o);
             break;
         case 41:
-            if (D_8009D2E8->b6a == 1) {
+            if (BITTEN_OBJECT->b6a == 1) {
                 playerBittenJumpType0E(o);
                 break;
             }

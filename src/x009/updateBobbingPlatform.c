@@ -7,7 +7,7 @@ typedef struct { short x, y, z, pad; } P3;
 extern TObj PLAYER;
 extern short D_800A604A;
 extern short D_800A604Ax[];
-extern unsigned char *D_8009C330;
+extern unsigned char *PLAYER_EXT;
 extern signed char D_8009D2B0;
 extern short *D_800A6078[];
 extern P3 D_8012B26C[];
@@ -19,7 +19,7 @@ static void *D_8012DB94[4] = {
     D_8012DD84, D_8012DD8C, D_8012DD94, D_8012DD9C,
 };
 extern int D_1F8002D4[];
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void ObjFreeDup(TObj *);
@@ -81,7 +81,7 @@ void updateBobbingPlatform(TObj *o)
             break;
         }
         o->ba7 += 2;
-        i = D_8007A3F0[o->ba7] * 2;
+        i = NEG_SIN_TABLE[o->ba7] * 2;
         o->y.raw += i;
         switch (o->step) {
         case 0:
@@ -114,7 +114,7 @@ void updateBobbingPlatform(TObj *o)
             pl->y.p.whole = o->y.p.whole - 0x10;
             if (o->a.p.whole < 0x1c2) {
                 pl->animFrame = 1;
-                D_8009C330[9] = 5;
+                PLAYER_EXT[9] = 5;
                 pl->b9c = 1;
                 pl->velX = -0x240;
                 pl->b04 = 6;

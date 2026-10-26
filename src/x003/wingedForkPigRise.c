@@ -2,7 +2,7 @@
 // MATCHING 8012d914 340
 #include "TOBJ.H"
 
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 static short D_80135E40[16] = {
     0x78, 0x3c, 0x78, 0xb4, 0xb4, 0, 0x78, 0x3c,
     0xb4, 0x78, 0xb4, 0x78, 0x78, 0x3c, 0x78, 0xb4,
@@ -26,7 +26,7 @@ void wingedForkPigRise(TObj *o)
         break;
     case 1:
         o->ba7 += 2;
-        o->y.raw += (short)(D_8007A3F0[o->ba7] << 2);
+        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
         AnimAdvance(o);
         if (--o->timer != -1)
             return;

@@ -23,8 +23,8 @@ typedef struct {
     char pad2c[2];
     unsigned short w2e;
 } G330;
-extern G330 *D_8009C330;
-extern TObj *D_8009F0EC;
+extern G330 *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern void FUN_80010d68();
 extern void FUN_80010dac();
 extern void AnimJump(TObj *, int);
@@ -40,11 +40,11 @@ extern void playerTryAttack(TObj *, int);
 extern void playerClingJumpRelease(TObj *);
 
 #define ORBIT(o) { \
-    int a = (D_8009F0EC->d8c + 0x400) & 0xfff; \
+    int a = (GRABBED_OBJECT->d8c + 0x400) & 0xfff; \
     int x = rcos(a) * o->wba >> 12; \
     int y = rsin(a) * o->wba; \
-    o->h->p.whole = o->wb8 + (D_8009F0EC->h->p.whole + x) + D_8009F0EC->d30; \
-    o->y.p.whole = D_8009F0EC->y.p.whole + (y >> 12); \
+    o->h->p.whole = o->wb8 + (GRABBED_OBJECT->h->p.whole + x) + GRABBED_OBJECT->d30; \
+    o->y.p.whole = GRABBED_OBJECT->y.p.whole + (y >> 12); \
 }
 
 void playerStepClingRotating(TObj *o)
@@ -53,35 +53,35 @@ void playerStepClingRotating(TObj *o)
     unsigned short *pad;
     TObj *e;
 
-    D_8009C330->b7 = o->animFrame;
+    PLAYER_EXT->b7 = o->animFrame;
     switch (o->state) {
     case 0:
         SfxPlay3(4, 0x7f);
         o->state++;
     case 1:
         o->wb6 = -0x420;
-        D_8009C330->w0e = 0;
-        D_8009C330->w02 = 0x10;
-        o->wb2 = D_8009F0EC->box1;
+        PLAYER_EXT->w0e = 0;
+        PLAYER_EXT->w02 = 0x10;
+        o->wb2 = GRABBED_OBJECT->box1;
         o->animFrame &= 1;
-        D_8009C330->b6 = D_8009F0EC->active;
-        D_8009C330->b9 = 0;
-        D_8009C330->w2e = 0xffff;
-        D_8009C330->w28 = 0xffff;
-        D_8009C330->w2a = 0xffff;
-        D_8009C330->w0c = 0;
+        PLAYER_EXT->b6 = GRABBED_OBJECT->active;
+        PLAYER_EXT->b9 = 0;
+        PLAYER_EXT->w2e = 0xffff;
+        PLAYER_EXT->w28 = 0xffff;
+        PLAYER_EXT->w2a = 0xffff;
+        PLAYER_EXT->w0c = 0;
         ((unsigned char *)&o->wa8)[1] = 1;
-        o->h->p.whole = o->wb8 + (D_8009F0EC->h->p.whole + D_8009F0EC->d30);
-        o->y.p.whole = D_8009F0EC->y.p.whole + o->wba;
-        o->velH = D_8009F0EC->h->p.whole - o->h->p.whole;
-        o->velV = D_8009F0EC->y.p.whole - o->y.p.whole;
+        o->h->p.whole = o->wb8 + (GRABBED_OBJECT->h->p.whole + GRABBED_OBJECT->d30);
+        o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba;
+        o->velH = GRABBED_OBJECT->h->p.whole - o->h->p.whole;
+        o->velV = GRABBED_OBJECT->y.p.whole - o->y.p.whole;
         o->wb0 = 0;
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
         o->velX = o->wb8;
-        D_8009C330->w10 = D_8009F0EC->h->p.whole + o->wb8;
-        D_8009C330->w12 = D_8009F0EC->y.p.whole + o->wba;
+        PLAYER_EXT->w10 = GRABBED_OBJECT->h->p.whole + o->wb8;
+        PLAYER_EXT->w12 = GRABBED_OBJECT->y.p.whole + o->wba;
         o->anim = (void *)FUN_80010d68;
         AnimJump(o, 0);
         o->timer = 10;
@@ -104,9 +104,9 @@ void playerStepClingRotating(TObj *o)
             default:
                 o->anim = (void *)FUN_80010d68;
                 AnimJump(o, 0);
-                D_8009C330->w2e = 0xffff;
-                D_8009C330->w28 = 0xffff;
-                D_8009C330->w2a = 0xffff;
+                PLAYER_EXT->w2e = 0xffff;
+                PLAYER_EXT->w28 = 0xffff;
+                PLAYER_EXT->w2a = 0xffff;
                 break;
             }
             o->velY = 0;
@@ -115,10 +115,10 @@ void playerStepClingRotating(TObj *o)
                     o->timer = 0;
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
-                    D_8009C330->b4 = 1;
-                    D_8009F0EC->b69 = 4;
+                    PLAYER_EXT->b4 = 1;
+                    GRABBED_OBJECT->b69 = 4;
                     SfxPlay2(0x1e, 8);
-                    D_8009C330->w10 = -((D_8009F0EC->box1 << 8) / 24);
+                    PLAYER_EXT->w10 = -((GRABBED_OBJECT->box1 << 8) / 24);
                     o->state++;
                 }
             } else {
@@ -126,10 +126,10 @@ void playerStepClingRotating(TObj *o)
                     o->timer = 0;
                     o->anim = (void *)FUN_80010dac;
                     AnimJump(o, 0);
-                    D_8009C330->b4 = 1;
-                    D_8009F0EC->b69 = 4;
+                    PLAYER_EXT->b4 = 1;
+                    GRABBED_OBJECT->b69 = 4;
                     SfxPlay2(0x1e, 8);
-                    D_8009C330->w10 = (D_8009F0EC->box1 << 8) / 24;
+                    PLAYER_EXT->w10 = (GRABBED_OBJECT->box1 << 8) / 24;
                     o->state++;
                 }
             }
@@ -137,7 +137,7 @@ void playerStepClingRotating(TObj *o)
             if ((SPAD.s1f8 & 0xf) == 0) SfxPlay2(0x1d, 0);
             if (*pad & 0x10) {
                 PlayerSetAnimIfChanged(o, 0x25);
-                if (D_8009F0EC->y.p.whole - D_8009F0EC->d38 - 0x10 < o->y.p.whole)
+                if (GRABBED_OBJECT->y.p.whole - GRABBED_OBJECT->d38 - 0x10 < o->y.p.whole)
                     o->y.raw += -0x18000;
             } else {
                 PlayerSetAnimIfChanged(o, 0x4a);
@@ -149,8 +149,8 @@ void playerStepClingRotating(TObj *o)
         if (e == 0) {
             TObj *q;
             ((unsigned char *)&o->wa8)[1] = 0;
-            if (D_8009F0EC->d94) {
-                q = (TObj *)D_8009F0EC->d94;
+            if (GRABBED_OBJECT->d94) {
+                q = (TObj *)GRABBED_OBJECT->d94;
                 goto test;
             body:
                 q->active = 3;
@@ -159,9 +159,9 @@ void playerStepClingRotating(TObj *o)
                 if (q->d94) goto body;
                 q->active = 1;
             }
-            D_8009F0EC = e;
+            GRABBED_OBJECT = e;
             o->timer = 0;
-            D_8009C330->b4 = 0;
+            PLAYER_EXT->b4 = 0;
             o->b9c = 2;
             o->velH = 0;
             o->velV = 0;
@@ -172,7 +172,7 @@ void playerStepClingRotating(TObj *o)
             o->state = 3;
             break;
         }
-        D_8009F0EC = e;
+        GRABBED_OBJECT = e;
         ORBIT(o);
         o->d88 = 0;
         playerTryAttack(o, 2);
@@ -181,7 +181,7 @@ void playerStepClingRotating(TObj *o)
     case 4:
         AnimAdvance(o);
         ORBIT(o);
-        o->wb8 += (D_8009C330->w10 * tbl[o->d88 % 12]) >> 8;
+        o->wb8 += (PLAYER_EXT->w10 * tbl[o->d88 % 12]) >> 8;
         if (++o->d88 < 12) break;
         o->animFrame ^= 1;
         if (o->animFrame & 1) {
@@ -196,7 +196,7 @@ void playerStepClingRotating(TObj *o)
         o->velY = 0;
         o->d84 = 0;
         o->d88 = 0;
-        D_8009C330->b4 = 0;
+        PLAYER_EXT->b4 = 0;
         o->state = 1;
         break;
     }

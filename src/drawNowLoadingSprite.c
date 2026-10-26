@@ -15,7 +15,7 @@ typedef struct {
     short clutY;
 } UiSpriteDef;
 
-extern UiSpriteDef D_80078808[];
+extern UiSpriteDef UI_SPRITE_DEFS[];
 
 void drawUiSprite(short x, short y, short sprt_id);
 void drawNowLoadingSprite(int x, int y, short sprt_id, short tpage, short arg4);
@@ -33,10 +33,10 @@ void drawNowLoadingSprite(int x, int y, short sprt_id, short tpage, short arg4)
     POLY_FT4* poly;
 
     if (sprt_id == 0) {
-        int scale = D_8007D988[arg4];
+        int scale = NEG_SIN_TABLE[arg4];
         pad = (u_int)scale >> 11;
     } else {
-        int scale = D_8007D988[arg4];
+        int scale = NEG_SIN_TABLE[arg4];
         pad = ((scale << 6) >> 16) + 4;
     }
 
@@ -47,25 +47,25 @@ void drawNowLoadingSprite(int x, int y, short sprt_id, short tpage, short arg4)
     poly->code = (u_char) (poly->code & 0xFD);
     poly->x0 = x - pad;
     poly->y0 = y - pad;
-    w = D_80078808[sprt_id].w;
+    w = UI_SPRITE_DEFS[sprt_id].w;
     poly->x1 = pad + (x + w);
     poly->y1 = y - pad;
     poly->x2 = x - pad;
-    h = D_80078808[sprt_id].h;
+    h = UI_SPRITE_DEFS[sprt_id].h;
     poly->y2 = pad + (y + h);
-    w = D_80078808[sprt_id].w;
+    w = UI_SPRITE_DEFS[sprt_id].w;
     poly->x3 = pad + (x + w);
-    h = D_80078808[sprt_id].h;
+    h = UI_SPRITE_DEFS[sprt_id].h;
     poly->y3 = pad + (y + h);
-    poly->u0 = D_80078808[sprt_id].u;
-    poly->v0 = D_80078808[sprt_id].v;
-    poly->u1 = poly->u0 + D_80078808[sprt_id].w - 1;
+    poly->u0 = UI_SPRITE_DEFS[sprt_id].u;
+    poly->v0 = UI_SPRITE_DEFS[sprt_id].v;
+    poly->u1 = poly->u0 + UI_SPRITE_DEFS[sprt_id].w - 1;
     poly->v1 = poly->v0;
     poly->u2 = poly->u0;
-    poly->v2 = poly->v0 + D_80078808[sprt_id].h - 1;
+    poly->v2 = poly->v0 + UI_SPRITE_DEFS[sprt_id].h - 1;
     poly->u3 = poly->u1;
     poly->v3 = poly->v2;
-    setClut(poly, D_80078808[sprt_id].clutX, D_80078808[sprt_id].clutY);
+    setClut(poly, UI_SPRITE_DEFS[sprt_id].clutX, UI_SPRITE_DEFS[sprt_id].clutY);
     poly->tpage = tpage;
     addPrim(CURRENT_OT, poly);
     D_8009C8A8 += sizeof(POLY_FT4);

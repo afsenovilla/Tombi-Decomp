@@ -5,7 +5,7 @@
 
 extern void *D_8013A698[];
 extern signed char D_80135EA0[], D_80135EB0[];
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -49,8 +49,8 @@ void updateWingedForkPigShot(TObj *o)
         {
             int i, x, y, tx, ty;
             i = o->d8c & 0xf0;
-            x = o->velH * D_8007A5F0[i];
-            y = o->velH * D_8007A3F0[i];
+            x = o->velH * COS_TABLE[i];
+            y = o->velH * NEG_SIN_TABLE[i];
             tx = t[0] << 16;
             ty = t[1] << 16;
             o->d30 += x >> 4;

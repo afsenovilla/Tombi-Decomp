@@ -1,7 +1,7 @@
 // FUNC 80017798 164 MAIN0
 // MATCHING 80017798 164
 #include "spad.h"
-extern short D_8009F838;
+extern unsigned short AREA_VARIANT;
 extern void getBaseMatrix();
 
 void resetCameraScratchDefaults(void)
@@ -19,5 +19,5 @@ void resetCameraScratchDefaults(void)
     *(char *)0x1F8003D1 = 0;
     *(char *)0x1F8003D2 = 0xFF;
     *(char *)0x1F8003D3 = 0xFF;
-    D_8009F838 = 0;
+    AREA_VARIANT = 0;
 }

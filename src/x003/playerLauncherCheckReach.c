@@ -4,7 +4,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern int *D_800A6078;
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
@@ -22,7 +22,7 @@ int playerLauncherCheckReach(TObj *o)
     a += 0x80;
     a &= 0xff;
     dy = (o->velH * D_8007A1F0[a]) >> 12;
-    dx = (o->velH * D_8007A5F0[a]) >> 12;
+    dx = (o->velH * COS_TABLE[a]) >> 12;
     *D_800A6078 += dx << 8;
     ((int*)&PLAYER.obj.y.raw)[0] += dy << 8;
     o->velH += 0x80;

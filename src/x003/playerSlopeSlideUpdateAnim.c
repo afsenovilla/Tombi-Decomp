@@ -2,9 +2,9 @@
 // MATCHING 801073c0 464
 #include "TOBJ.H"
 typedef struct P { char pad0[8]; unsigned char b08; char pad1[0x2c - 9]; unsigned short w2c, w2e; } P;
-extern P *DAT_8009c330;
+extern P *PLAYER_EXT;
 extern unsigned short DAT_1f8001f8;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern void FUN_800efc04();
 extern void FUN_8001fe6c(TObj *);
@@ -21,13 +21,13 @@ void playerSlopeSlideUpdateAnim(TObj *o)
     int a;
     unsigned int d;
     if ((unsigned short)(o->wb2 + 0x144) >= 0x289) {
-        p = DAT_8009c330;
+        p = PLAYER_EXT;
         p->w2c = 0x11;
         if (p->w2e != 0x11) {
             o->d84 = 0;
             FUN_800efc04();
             FUN_8001fe6c(o);
-            DAT_8009c330->w2e = DAT_8009c330->w2c;
+            PLAYER_EXT->w2e = PLAYER_EXT->w2c;
         }
         b = o->b6b;
         o->ba4 = 1;
@@ -40,7 +40,7 @@ void playerSlopeSlideUpdateAnim(TObj *o)
             d = b >> 2;
         o->d8c = d;
         if ((DAT_1f8001f8 & 0x1f) == 0) {
-            switch (DAT_8009c960) {
+            switch (GAME) {
             case 0:
                 a = 0x37;
                 break;
@@ -68,7 +68,7 @@ void playerSlopeSlideUpdateAnim(TObj *o)
     } else {
         playerSelectGroundAnim(o);
         setFacingAndUpDownFromPad(o);
-        DAT_8009c330->b08 = 0;
+        PLAYER_EXT->b08 = 0;
         o->b9c = 0;
         o->d88 = 0;
         o->ba4 = 0;

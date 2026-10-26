@@ -27,8 +27,8 @@ typedef struct {
     unsigned short w2e;
 } Q800F3F3C;
 
-extern Q800F3F3C *D_8009C330;
-extern int D_8009D2E8;
+extern Q800F3F3C *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern void playerSetJumpRiseVelocity(P800F3F3C *);
 extern void SfxPlay2(int, int);
 extern void playerUpdateSpeedFromPad(P800F3F3C *);
@@ -55,30 +55,30 @@ void playerStepAttackJump(P800F3F3C *o)
         o->t.wb0 = 0;
         o->t.wb6 = 0;
         o->t.velX = 0;
-        D_8009C330->w20 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->b8 = 0;
         playerSetJumpRiseVelocity(o);
         o->t.y.p.whole -= 4;
         SfxPlay2(2, 4);
         o->t.state = 1;
     case 1:
         if (o->t.velY >= 0) {
-            D_8009C330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             o->t.state = 2;
         }
         if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C6) {
-            if (D_8009C330->b8 != 0) goto common;
-            if (++D_8009C330->w20 >= 0xe) {
-                D_8009C330->b8 = 1;
+            if (PLAYER_EXT->b8 != 0) goto common;
+            if (++PLAYER_EXT->w20 >= 0xe) {
+                PLAYER_EXT->b8 = 1;
                 o->t.state = 2;
             }
         } else {
-            D_8009C330->b8 = 1;
-            if (D_8009C330->w20 >= 5) {
+            PLAYER_EXT->b8 = 1;
+            if (PLAYER_EXT->w20 >= 5) {
                 o->t.state = 2;
                 goto common;
             }
-            D_8009C330->w20++;
+            PLAYER_EXT->w20++;
         }
         playerSetJumpRiseVelocity(o);
     case 2:
@@ -91,8 +91,8 @@ void playerStepAttackJump(P800F3F3C *o)
         ObjGravityStep(o);
         ObjAddVelY7E(o);
         if (*(unsigned char *)&o->t.wac == 2) {
-            D_8009D2E8 = o->e4;
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = o->e4;
+            PLAYER_EXT->b8 = 0;
             o->t.ba5 = 0;
             o->t.step = 0xe;
             o->t.state = 0;
@@ -100,8 +100,8 @@ void playerStepAttackJump(P800F3F3C *o)
         }
         TileCollideAt(o, o->t.h->p.whole, (short)(o->t.y.p.whole + 16));
         if (ObjCheckHeadCollision(o)) {
-            D_8009C330->b8 = 1;
-            D_8009C330->b7 = o->t.animFrame;
+            PLAYER_EXT->b8 = 1;
+            PLAYER_EXT->b7 = o->t.animFrame;
             o->t.b9c = 2;
             o->t.timer = 10;
             o->t.step = 4;
@@ -112,22 +112,22 @@ void playerStepAttackJump(P800F3F3C *o)
             o->t.velV = 0;
         }
         if (o->t.velY > 0) {
-            D_8009C330->b8 = 1;
-            D_8009C330->b7 = o->t.animFrame;
+            PLAYER_EXT->b8 = 1;
+            PLAYER_EXT->b7 = o->t.animFrame;
             o->t.b9c = 2;
             o->t.timer = 10;
             o->t.step = 4;
             o->t.velY = 0;
             *(unsigned char *)&o->t.wac = 1;
             o->t.state = 3;
-        } else if (D_8009C330->b0 == 0 && o->c6 == 0) {
-            o->t.animFrame = (signed char)D_8009C330->b7;
-            D_8009C330->w2c = 4;
-            if (D_8009C330->w2e != 4) {
-                D_8009C330->w2c = 4;
+        } else if (PLAYER_EXT->b0 == 0 && o->c6 == 0) {
+            o->t.animFrame = (signed char)PLAYER_EXT->b7;
+            PLAYER_EXT->w2c = 4;
+            if (PLAYER_EXT->w2e != 4) {
+                PLAYER_EXT->w2c = 4;
                 ObjSetAnimFromTable(o);
                 AnimJump(o, 0);
-                D_8009C330->w2e = D_8009C330->w2c;
+                PLAYER_EXT->w2e = PLAYER_EXT->w2c;
             }
             o->t.b9d = 0;
             o->t.timer = 0;
@@ -137,7 +137,7 @@ void playerStepAttackJump(P800F3F3C *o)
             o->t.step = 2;
         }
         if (o->c8) {
-            D_8009C330->b8 = 0;
+            PLAYER_EXT->b8 = 0;
             *(unsigned char *)&o->t.wac = 0;
             o->t.ba7 = 0;
             o->t.b9c = 0;

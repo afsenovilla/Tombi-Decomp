@@ -10,8 +10,8 @@ typedef struct {
     unsigned char b8;
 } P8011B170;
 
-extern P8011B170 *D_8009C330;
-extern TObj *D_8009F0EC;
+extern P8011B170 *PLAYER_EXT;
+extern TObj *GRABBED_OBJECT;
 extern char D_80077D24[];
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void updatePlayerHealth(TObj *);
@@ -33,13 +33,13 @@ void playerStepVortexLaunch(TObj *o)
     case 1:
         o->d8c = 0;
         if (o->b9e != 0)
-            D_8009F0EC->b6a = 0;
+            GRABBED_OBJECT->b6a = 0;
         o->b9e = 0;
         (*(unsigned char*)&o->waa) = 0;
         o->ba7 = 0;
         U8(o, 0xc3) = 0;
         o->wb0 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         playerReleaseBittenAndClearFlags(o);
         *(signed char *)&o->b0f = -8;
         FUN_800fc104(o);

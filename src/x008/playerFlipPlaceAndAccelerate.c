@@ -2,7 +2,7 @@
 // MATCHING 800f9548 316
 #include "TOBJ.H"
 typedef struct G { char p0[2]; short w2; char p1[4]; unsigned char b8; char p2[5]; short we; } G;
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern G *DAT_8009c330b[];
 extern int FUN_8001fe3c(int, int);
 extern int FUN_8001fe0c(int, int);
@@ -16,17 +16,17 @@ void playerFlipPlaceAndAccelerate(TObj *o, int b, int p)
     int d;
     if (o->animFrame & 1) {
         ang = 0x1bf; ang -= p;
-        s = FUN_8001fe3c(ang & 0xff, DAT_8009c330[1]);
+        s = FUN_8001fe3c(ang & 0xff, PLAYER_EXT[1]);
         o->h->p.whole = s + o->d30;
-        s = FUN_8001fe0c(ang & 0xff, DAT_8009c330[1]);
+        s = FUN_8001fe0c(ang & 0xff, PLAYER_EXT[1]);
         o->d84 = 0;
         o->d8c = 0x100 - (unsigned char)p;
         r = s + o->d34;
     } else {
         ang = p + 0xc0;
-        s = FUN_8001fe3c(ang & 0xff, DAT_8009c330[1]);
+        s = FUN_8001fe3c(ang & 0xff, PLAYER_EXT[1]);
         o->h->p.whole = s + o->d30;
-        s = FUN_8001fe0c(ang & 0xff, DAT_8009c330[1]);
+        s = FUN_8001fe0c(ang & 0xff, PLAYER_EXT[1]);
         o->d84 = 0;
         o->d8c = (unsigned char)p;
         r = s + o->d34;

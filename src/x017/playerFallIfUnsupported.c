@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern void FUN_8003fd78(TObj *, int, int);
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 
 int playerFallIfUnsupported(TObj *o)
 {
@@ -13,7 +13,7 @@ int playerFallIfUnsupported(TObj *o)
         B(o, 0xad) = 1;
         o->velY += 0x223;
         o->y.raw += o->velY << 8;
-        DAT_8009c330->timer = 0x21;
+        PLAYER_EXT->timer = 0x21;
         if (o->velY >= 0x447) {
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;

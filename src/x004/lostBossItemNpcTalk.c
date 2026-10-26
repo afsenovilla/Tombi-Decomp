@@ -8,7 +8,7 @@
 extern unsigned short D_800A6066;
 extern short D_1F80016E;
 extern void *D_8013577C[], *D_80135784[];
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, void *);
@@ -151,7 +151,7 @@ void lostBossItemNpcTalk(TObj *o)
         break;
     case 9:
         o->h->raw += o->velH << 8;
-        o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[*(unsigned char *)&o->d88] * o->velV) >> 4;
         o->d88 += 2;
         if (o->d88 < 0x60) break;
         o->wac = 2;

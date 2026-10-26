@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80031664 (FUN_80031664.c):  Inline GetClut, CLUT rows 0x1e8/0x1e9 (PAL 0x1ef/0x1f0).
 #include "TOBJ.H"
-extern short *DAT_8009c338;
+extern short *WEAPON_STATE;
 extern short DAT_8009d600[], DAT_8009d602[], DAT_8009d604[];
 extern Fix16 *DAT_800a6078;
 extern Fix16 *DAT_800a607c;
@@ -16,15 +16,15 @@ void FUN_80031664(TObj *o)
 {
     short *p;
     int v;
-    DAT_8009c338 = &o->wac;
+    WEAPON_STATE = &o->wac;
     if (o->state == 0) {
         if (GetGraphType() != 1) GetGraphType();
-        p = DAT_8009c338;
+        p = WEAPON_STATE;
         o->wb0 = 0;
         if (GetGraphType() == 1 || GetGraphType() == 2) v = 0x80; else v = 0x20;
         p[4] = v;
-        DAT_8009c338[3] = ((0x1e8 << 6) | (0x80 >> 4));
-        DAT_8009c338[5] = ((0x1e9 << 6) | (0x80 >> 4));
+        WEAPON_STATE[3] = ((0x1e8 << 6) | (0x80 >> 4));
+        WEAPON_STATE[5] = ((0x1e9 << 6) | (0x80 >> 4));
         DAT_8009d600[0] = 0xf;
         DAT_8009d602[0] = 8;
         DAT_8009d604[0] = 0x5a;
@@ -42,7 +42,7 @@ void FUN_80031664(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern short *DAT_8009c338;
+extern short *WEAPON_STATE;
 extern short DAT_8009d600[], DAT_8009d602[], DAT_8009d604[];
 extern Fix16 *DAT_800a6078;
 extern Fix16 *DAT_800a607c;
@@ -54,15 +54,15 @@ void weapon0Init(TObj *o)
 {
     short *p;
     int v;
-    DAT_8009c338 = &o->wac;
+    WEAPON_STATE = &o->wac;
     if (o->state == 0) {
         if (GetGraphType() != 1) GetGraphType();
-        p = DAT_8009c338;
+        p = WEAPON_STATE;
         o->wb0 = 0;
         if (GetGraphType() == 1 || GetGraphType() == 2) v = 0x80; else v = 0x20;
         p[4] = v;
-        DAT_8009c338[3] = GetClut(0x80, 0x1ef);
-        DAT_8009c338[5] = GetClut(0x80, 0x1f0);
+        WEAPON_STATE[3] = GetClut(0x80, 0x1ef);
+        WEAPON_STATE[5] = GetClut(0x80, 0x1f0);
         DAT_8009d600[0] = 0xf;
         DAT_8009d602[0] = 8;
         DAT_8009d604[0] = 0x5a;

@@ -4,15 +4,6 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0x10];
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-} unk_800A3940;
-#define MENU_STATE ((unk_800A3940*)D_800A3940)
 
 void gameplayMainHandler(void)
 {
@@ -43,7 +34,7 @@ void gameplayMainHandler(void)
                 startAreaBgm();
             }
             GAME.unk21 = 1;
-            *(&D_8009C9D8) = D_8009C9DC = 0;
+            *(&PAD_PRESSED) = D_8009C9DC = 0;
             *(short*)(&SCRATCHPAD+0x1FC)=0;
             return;
         case 1:
@@ -54,7 +45,7 @@ void gameplayMainHandler(void)
                 temp_v1_2->step.value++;
                 func_80020C00(1);
             }
-            if ((*(u_char* )0x1F8001C2 != 0) && (*&D_8009C9D8 & 8) && (*&D_8009C9D8 & 0x800)) {
+            if ((*(u_char* )0x1F8001C2 != 0) && (*&PAD_PRESSED & 8) && (*&PAD_PRESSED & 0x800)) {
                 (*(Task** )(&SCRATCHPAD+0x1D4))->step.value = 3U;
                 return;
             }

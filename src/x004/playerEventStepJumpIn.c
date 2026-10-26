@@ -4,9 +4,9 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 extern unsigned short D_8009C962;
-extern char *D_8009C330;
+extern char *PLAYER_EXT;
 void playerAirSpinToFall(TObj *o);
 void AnimAdvance(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
@@ -22,24 +22,24 @@ void playerEventStepJumpIn(TObj *o)
         o->active = 4;
         o->velH = 0;
         o->velV = 0;
-        if ((D_8009C960[0] == 2 || D_8009C960[0] == 0x13) && D_8009C962 == 1) {
+        if ((GAME[0] == 2 || GAME[0] == 0x13) && D_8009C962 == 1) {
             short v = 0x100;
             if (o->animFrame & 1)
                 v = -0x100;
             o->velX = v;
             o->velY = -0xa00;
         } else {
-            if (D_8009C960[0] != 4) {
+            if (GAME[0] != 4) {
                 o->active = 1;
                 o->velX = 0;
                 o->velY = 0;
-                D_8009C330[8] = 0;
+                PLAYER_EXT[8] = 0;
                 o->ba5 = 0;
                 o->b9c = 0;
                 *(unsigned char *)&o->wac = 0;
                 *(signed char *)&o->b0f = -8;
                 o->wb2 = 0;
-                *(short *)(D_8009C330 + 0x20) = 0;
+                *(short *)(PLAYER_EXT + 0x20) = 0;
                 o->step = 2;
                 o->b04 = 1;
                 o->state = 3;
@@ -59,8 +59,8 @@ void playerEventStepJumpIn(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330[8] = 0;
-        *(short *)(D_8009C330 + 0x20) = 0;
+        PLAYER_EXT[8] = 0;
+        *(short *)(PLAYER_EXT + 0x20) = 0;
         *(unsigned char *)&o->wac = 0;
         PlayerSetAnimIfChanged(o, 4);
         SfxPlay2(2, 4);
@@ -104,16 +104,16 @@ void playerEventStepJumpIn(TObj *o)
         if (o->b69 == 0 && ObjTileCollide(o, 0, 0) == 0)
             return;
         o->active = 1;
-        D_8009C330[8] = 0;
+        PLAYER_EXT[8] = 0;
         o->ba5 = 0;
         o->b9c = 0;
         *(unsigned char *)&o->wac = 0;
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        *(short *)(D_8009C330 + 0x20) = 0;
+        *(short *)(PLAYER_EXT + 0x20) = 0;
         *(signed char *)&o->b0f = -8;
-        *(short *)(D_8009C330 + 0x20) = 0;
+        *(short *)(PLAYER_EXT + 0x20) = 0;
         o->b04 = 1;
         o->step = 0;
         o->state = 0;

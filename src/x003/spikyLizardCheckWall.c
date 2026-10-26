@@ -7,7 +7,7 @@ typedef struct O {
     char p4[0x8c - 0x44]; int d8c;
     char p5[0x9d - 0x90]; unsigned char b9d;
 } O;
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern short probeWallAt(O *, int, int, int);
 extern short probeCollisionAtDepthB(O *, short, short);
 
@@ -24,7 +24,7 @@ int spikyLizardCheckWall(O *o, short k)
         v = 0x18;
     if (o->d8c != 0) {
         a = (unsigned)(v * D_8007A1F0[o->d8c & 0xff]) >> 12;
-        b = (unsigned)(v * D_8007A5F0[o->d8c & 0xff]) >> 12;
+        b = (unsigned)(v * COS_TABLE[o->d8c & 0xff]) >> 12;
     } else {
         a = 0;
         b = v;

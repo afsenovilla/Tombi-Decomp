@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 typedef struct { short x, y; } P;
 extern int angleBetweenPoints(P a, P b);
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 
 void a00RoamingFlyerSteer(TObj *o)
 {
@@ -43,8 +43,8 @@ void a00RoamingFlyerSteer(TObj *o)
             o->animFrame = 1;
             o->d8c = o->d84;
         }
-        o->h->raw += (D_8007A5F0[(unsigned char)o->d84] * o->velH) >> 4;
-        o->y.raw += (D_8007A3F0[(unsigned char)o->d84] * o->velH) >> 4;
+        o->h->raw += (COS_TABLE[(unsigned char)o->d84] * o->velH) >> 4;
+        o->y.raw += (NEG_SIN_TABLE[(unsigned char)o->d84] * o->velH) >> 4;
         if (--o->timer == -1) o->step = 1;
         if ((unsigned)((unsigned short)o->h->p.whole - 0x14d) >= 0x10c) o->step++;
         else if ((unsigned short)(o->y.p.whole + 0xc8) >= 0x74) o->step++;

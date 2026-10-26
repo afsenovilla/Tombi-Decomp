@@ -2,7 +2,7 @@
 // MATCHING 80116e54 340
 #include "TOBJ.H"
 
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern char D_80077CD0[];
 extern char D_8011C46C[];
 extern char D_8011C490[];
@@ -54,14 +54,14 @@ void flyingOctopusMove(TObj *o)
     case 1:
         AnimAdvance(o);
         applyAnimVelocityX(o, o->animFrame);
-        o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[*(unsigned char *)&o->d88] * o->velV) >> 4;
         o->d88 = (o->d88 + 1) & 0xff;
         if (o->d88 == 0)
             o->state++;
         break;
     case 2:
         AnimAdvance(o);
-        o->y.raw -= (D_8007A5F0[*(unsigned char *)&o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[*(unsigned char *)&o->d88] * o->velV) >> 4;
         o->d88 = (o->d88 + 1) & 0xff;
         if (o->d88 == 0)
             o->state++;

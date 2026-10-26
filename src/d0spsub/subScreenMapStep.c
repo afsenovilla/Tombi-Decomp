@@ -49,7 +49,7 @@ extern unsigned char D_8010A44C;
 extern int D_8010A3B8, D_8010A3BC, D_8010A3C0;
 #define P344 (*(char * volatile *)&D_1F800344)
 typedef struct { unsigned short room, sub; } RS;
-extern RS D_8009C960;
+extern RS GAME;
 extern unsigned short D_8009D2C4[];
 extern void *D_800FECB8;
 extern void *D_800FECDC[];
@@ -102,7 +102,7 @@ int subScreenMapStep(Menu *m)
         D_8010A2D4[2].anim = D_800FECB8;
         D_8010A2D4[2].d3c = D_1F8002EC;
         {
-            Pt *t = &D_800FD3C8[D_8009C960.room][D_8009C960.sub];
+            Pt *t = &D_800FD3C8[GAME.room][GAME.sub];
             D_8010A2D4[2].p.s.x = t->x << 16;
             D_8010A2D4[2].p.s.y = (t->y - 0x14) << 16;
             D_8010A2D4[2].p.s.z = (t->z - 0x14) << 16;
@@ -148,8 +148,8 @@ int subScreenMapStep(Menu *m)
         D_801110FC = 0;
         D_80111104 = 0x30E;
         D_80111108 = 0x64;
-        D_801110F8 = D_800FCED8[D_8009C960.room][0];
-        D_80111100 = D_800FCED8[D_8009C960.room][1];
+        D_801110F8 = D_800FCED8[GAME.room][0];
+        D_80111100 = D_800FCED8[GAME.room][1];
         m->w1e = 0;
         m->state++;
         break;
@@ -210,7 +210,7 @@ int subScreenMapStep(Menu *m)
     case 2:
         m->w1e = 0;
         if (D_1F8001FC & 0x2000) goto cancel;
-        if (D_8009C960.room == 14) break;
+        if (GAME.room == 14) break;
         l = &D_800FDAB4[D_80111124];
         r = subScreenMapReadInput();
         if (r == l->e) {
@@ -253,7 +253,7 @@ int subScreenMapStep(Menu *m)
             m->state = 1;
             return 0;
         }
-        if (D_8009C960.room == 14) break;
+        if (GAME.room == 14) break;
         p = D_800FDE50[s->wb4];
         r = subScreenMapReadInput();
         if (p[0] != 0xFF) {

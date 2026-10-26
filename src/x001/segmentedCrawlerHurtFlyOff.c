@@ -59,7 +59,7 @@ static void *D_8013F074[48] = {
     D_8013F634, D_8013F648, D_8013F65C, D_8013F670,
     D_8013F684, D_8013F698, D_8013F6AC, D_8013F6C0,
 };
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void FUN_8001e4f0(int);
 
 void segmentedCrawlerHurtFlyOff(TObj *o)
@@ -97,8 +97,8 @@ void segmentedCrawlerHurtFlyOff(TObj *o)
             o->h->raw = Q->h->raw;
             o->y.raw = Q->y.raw;
             o->d->raw = Q->d->raw;
-            o->h->raw -= D_8007A5F0[(unsigned char)o->d84] * 192;
-            o->y.raw -= D_8007A3F0[(unsigned char)o->d84] * 192;
+            o->h->raw -= COS_TABLE[(unsigned char)o->d84] * 192;
+            o->y.raw -= NEG_SIN_TABLE[(unsigned char)o->d84] * 192;
             o->wac = ((o->d84 + 8) & 0xff) >> 4;
             o->anim = D_8013F074[o->wac];
         }

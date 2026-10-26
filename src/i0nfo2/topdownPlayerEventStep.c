@@ -10,7 +10,7 @@ extern void topdownPlayerSetMoveAnim(TObj *o);
 extern void topdownPlayerDropExitStep(TObj *o);
 extern void topdownPlayerLandStep(TObj *o);
 extern void topdownCollideMapTile(TObj *o, int x, int y, int z);
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned char TALK_POSE;
 
 void topdownPlayerEventStep(TObj *o)
@@ -23,14 +23,14 @@ void topdownPlayerEventStep(TObj *o)
         } else if (o->active == 5) {
             func_8001FEC0(o);
         } else {
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             topdownPlayerSetMoveAnim(o);
         }
         break;
     case 1:
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             topdownPlayerSetMoveAnim(o);
             o->b9e = 1;
             o->state++;
@@ -48,7 +48,7 @@ void topdownPlayerEventStep(TObj *o)
         U8(o, 0xAC) = 0;
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame &= 7;
+            PLAYER_EXT->animTimer = o->animFrame &= 7;
             topdownPlayerSetMoveAnim(o);
             o->b9e = 1;
             o->state++;
@@ -71,7 +71,7 @@ void topdownPlayerEventStep(TObj *o)
         U8(o, 0xAC) = 0;
         switch (o->state) {
         case 0:
-            D_8009C330->animTimer = o->animFrame |= 8;
+            PLAYER_EXT->animTimer = o->animFrame |= 8;
             topdownPlayerSetMoveAnim(o);
             o->state++;
         case 1:

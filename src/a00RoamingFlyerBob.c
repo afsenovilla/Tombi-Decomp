@@ -1,7 +1,7 @@
 // FUNC 80135db0 736 X000
 // MATCHING 80135db0 736
 #include "TOBJ.H"
-extern short D_8007A5F0[];
+extern short COS_TABLE[];
 extern char D_80077CE8[];
 extern void *D_8013B19C;
 extern void *D_8013B1A0;
@@ -34,7 +34,7 @@ void a00RoamingFlyerBob(TObj *o)
         }
         applyAnimVelocityX(o, o->animFrame);
         o->d88 = (o->d88 + 1) & 0xff;
-        o->y.raw -= (D_8007A5F0[o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[o->d88] * o->velV) >> 4;
         if (o->d88 > 0x20) {
             o->timer = 0;
             o->w22 = 0;
@@ -51,7 +51,7 @@ void a00RoamingFlyerBob(TObj *o)
             o->d88++;
         }
         o->d88 = *(unsigned char *)&o->d88;
-        o->y.raw -= (D_8007A5F0[o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[o->d88] * o->velV) >> 4;
         if (++o->timer >= 0x18) {
             o->step++;
         }
@@ -61,7 +61,7 @@ void a00RoamingFlyerBob(TObj *o)
         AnimAdvance(o);
         applyAnimVelocityX(o, o->animFrame);
         o->d88 = (o->d88 + 1) & 0xff;
-        o->y.raw -= (D_8007A5F0[o->d88] * o->velV) >> 4;
+        o->y.raw -= (COS_TABLE[o->d88] * o->velV) >> 4;
         if (o->d88 >= 0x80) {
             *(int *)((char *)o + 0x88) = 0;
             *(short *)((char *)o + 0x20) = 0x10;

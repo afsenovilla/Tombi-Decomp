@@ -6,7 +6,7 @@ static char DAT_80115d28[20] = {
 };
 extern void **DAT_80115a08[];
 extern void **PTR_PTR_80115948[];
-extern int DAT_8009c960[];
+extern int GAME[];
 extern unsigned short DAT_8009c960h[];
 extern int FUN_800202b4(TObj *o);
 extern int FUN_80040278(TObj *o, int x, int y);
@@ -33,7 +33,7 @@ void treasureChestOpenFalling(TObj *o)
         o->step = 3;
         o->timer = 10;
         o->wac = 1;
-        if (DAT_8009c960[0] == 0x30009)
+        if (GAME[0] == 0x30009)
             o->anim = DAT_80115a08[o->b0c & 0x7f][1];
         else
             o->anim = PTR_PTR_80115948[DAT_8009c960h[0] * 4 + (o->b0c & 0x7f)][1];

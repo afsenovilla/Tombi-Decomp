@@ -11,7 +11,7 @@ extern void FUN_80059d44(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
 extern unsigned char DAT_8009c975, DAT_8009c976;
-extern int DAT_8009c960;
+extern int GAME;
 
 extern signed char D_8009B160;
 void drawGameplayScene(void)
@@ -58,7 +58,7 @@ extern void drawScreenFade(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
 extern unsigned char DAT_8009c975, DAT_8009c976;
-extern int DAT_8009c960;
+extern int GAME;
 
 void drawGameplayScene(void)
 {
@@ -93,7 +93,7 @@ void drawGameplayScene(void)
     }
     drawScreenFade(u);
 end:
-    if (DAT_8009c960 == 6)
+    if (GAME == 6)
         FUN_8011bc34();
     else
         drawHudIfShown();

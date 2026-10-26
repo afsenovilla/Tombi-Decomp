@@ -29,8 +29,8 @@ extern char D_1F8000C0b[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
 #define gte_rtps() __asm__ volatile ("nop;nop;.word 0x4a180001")
@@ -72,10 +72,10 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     return 0;
 }
 
-#define SN(i) D_8007A5F0[i]
+#define SN(i) COS_TABLE[i]
 #define a1 ((ang + 0x80) & 0xff)
 #define a0 (ang & 0xff)
-#define CS(i) D_8007A3F0[i]
+#define CS(i) NEG_SIN_TABLE[i]
 
 void drawObjectSpriteRotScaled(TObj *o)
 {

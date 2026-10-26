@@ -12,14 +12,14 @@ extern void playerSelectGroundAnim(TObj *);
 extern unsigned short DAT_1f800282;
 extern int DAT_800a60c4[];
 extern unsigned char DAT_800a60d5[];
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern short DAT_8007a074[];
 
 static __inline__ void f(TObj *q)
 {
     q->waa = DAT_8007a074[(short)(q->animFrame + q->animFrame * 2)];
     DAT_800a60d5[0] = 0;
-    *DAT_8009c330 = 0;
+    *PLAYER_EXT = 0;
     playerSelectGroundAnim(q);
 }
 

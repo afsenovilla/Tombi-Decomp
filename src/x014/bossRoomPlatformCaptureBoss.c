@@ -17,7 +17,7 @@ extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern int D_1F800190;
 extern int bossCaptureBossInReach(TObj *, S8 *);
 extern int bossCapturePullBoss(TObj *, S8 *);
@@ -54,7 +54,7 @@ static __inline__ void setAnim(TObj *p, void *a)
 
 #define MOVE(o)                                                     \
     o->velY = (o->velH * D_8007A1F0[o->wb0]) >> 12;                 \
-    o->velX = (o->velH * D_8007A5F0[o->wb0]) >> 12;                 \
+    o->velX = (o->velH * COS_TABLE[o->wb0]) >> 12;                 \
     o->h->raw += o->velX << 8;                                      \
     o->y.raw += o->velY << 8;
 

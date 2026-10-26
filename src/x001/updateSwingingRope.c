@@ -5,7 +5,7 @@
 #define VX (*(unsigned short *)&o->velX)
 extern int cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
-extern unsigned short D_8007A3F0[];
+extern unsigned short NEG_SIN_TABLE[];
 static short D_8013C6D0[22] = {
     0x8a, 0x8a, 0x46, 0x46, 0x22, 0x22, 0xbe, 0xbe,
     0x4e, 0x4e, 0x76, 0x76, 0x50, 0x50, 0x12, 0x12,
@@ -24,7 +24,7 @@ static __inline__ short wave(TObj *o, int vx, short tm, int vy)
     int h;
     vx = (vx + 0x10) & 0xff;
     o->velX = vx;
-    h = D_8007A3F0[vx];
+    h = NEG_SIN_TABLE[vx];
     o->timer = ++tm;
     o->velH = h;
     o->d8c = ((short)h >> vy) & 0xfff;

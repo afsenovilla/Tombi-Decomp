@@ -9,7 +9,7 @@ extern void *D_8013E524;
 extern void *D_8013E528[];
 extern void *D_8013E530;
 extern void *D_8013E538;
-extern short D_8007A3F0[];
+extern short NEG_SIN_TABLE[];
 extern char D_80077CDC[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -78,7 +78,7 @@ void updateAmbientCritter(TObj *o)
                 break;
             case 1:
                 applyFrameVelocityX(o);
-                v = D_8007A3F0[*(unsigned char *)&o->d88] * o->velV;
+                v = NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velV;
                 d = (o->d88 + 2) & 0xff;
                 o->d88 = d;
                 o->y.raw += v >> 4;

@@ -22,7 +22,7 @@ extern void func_80020554(void *);
 }
 
 typedef struct { char pad[2]; short w2; } PL;
-extern PL *D_8009C330;
+extern PL *PLAYER_EXT;
 typedef struct { char pad[0xa2]; unsigned char ba2; char pad2[7]; unsigned char baa; } XB;
 #define X(o) ((XB *)(o))
 extern unsigned char D_801152E8[];
@@ -37,7 +37,7 @@ void func_80122044(TObj *o)
     case 0:
         PlayerSetAnimIfChanged(o, 0x17);
         o->wb6 = 0;
-        D_8009C330->w2 = 0;
+        PLAYER_EXT->w2 = 0;
         X(o)->ba2 = 3;
         o->wb0 = 0;
         o->wb2 = 0;
@@ -81,7 +81,7 @@ void func_80122044(TObj *o)
 #include "TOBJ.H"
 
 typedef struct { char pad[2]; short w2; } PL;
-extern PL *D_8009C330;
+extern PL *PLAYER_EXT;
 typedef struct { char pad[0xa2]; unsigned char ba2; char pad2[7]; unsigned char baa; } XB;
 #define X(o) ((XB *)(o))
 extern unsigned char D_801152E8[];
@@ -97,7 +97,7 @@ void playerStepSinkToGround(TObj *o)
     case 0:
         PlayerSetAnimIfChanged(o, 0x17);
         o->wb6 = 0;
-        D_8009C330->w2 = 0;
+        PLAYER_EXT->w2 = 0;
         X(o)->ba2 = 3;
         o->wb0 = 0;
         o->wb2 = 0;

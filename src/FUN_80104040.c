@@ -2,7 +2,7 @@
 // MATCHING 80104040 144
 // probably: player bite-attach entry (anim 0xD, impact effect 2, wac 3): moves the bitten object to the player, state 2; unreferenced
 #include "TOBJ.H"
-extern TObj *DAT_8009d2e8;
+extern TObj *BITTEN_OBJECT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void spawnImpactEffect(int, int, int, int);
 
@@ -14,7 +14,7 @@ void FUN_80104040(TObj *o)
     spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
     *(char *)((char *)o + 0xac) = 3;
     o->b9c = 0;
-    p = DAT_8009d2e8;
+    p = BITTEN_OBJECT;
     o->velX = 0;
     o->velY = 0;
     p->h->p.whole = o->h->p.whole;

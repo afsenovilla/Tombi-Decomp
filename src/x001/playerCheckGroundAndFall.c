@@ -4,7 +4,7 @@
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern int playerGetWallContactKind(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern int DAT_8009c984;
 extern unsigned short DAT_1f8003c4;
 extern volatile unsigned short PAD_PRESSED[];
@@ -21,28 +21,28 @@ void playerCheckGroundAndFall(TObj *o)
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
             if ((DAT_8009c984 & 0x40) && (PAD_PRESSED[0] & DAT_1f8003c4)) o->ba7 = 1;
-            B(DAT_8009c330, 8) = o->animFrame & 1;
+            B(PLAYER_EXT, 8) = o->animFrame & 1;
             o->step = 0x10;
             o->state = 0;
             break;
         case 2:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            B(DAT_8009c330, 8) = o->animFrame & 1;
+            B(PLAYER_EXT, 8) = o->animFrame & 1;
             o->step = 0x17;
             o->state = 0;
             break;
         case 3:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            B(DAT_8009c330, 8) = o->animFrame & 1;
+            B(PLAYER_EXT, 8) = o->animFrame & 1;
             o->step = 0x1b;
             o->state = 0;
             break;
         case 4:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            B(DAT_8009c330, 8) = o->animFrame & 1;
+            B(PLAYER_EXT, 8) = o->animFrame & 1;
             if ((DAT_8009c984 & 0x40) && (PAD_PRESSED[0] & DAT_1f8003c4)) o->ba7 = 1;
             o->step = 0x1e;
             o->state = 0;
@@ -50,7 +50,7 @@ void playerCheckGroundAndFall(TObj *o)
         case 5:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            B(DAT_8009c330, 8) = o->animFrame & 1;
+            B(PLAYER_EXT, 8) = o->animFrame & 1;
             o->step = 0x21;
             o->state = 0;
             break;
@@ -61,7 +61,7 @@ void playerCheckGroundAndFall(TObj *o)
         B(o, 0xad) = 1;
         o->velY += 0x223;
         o->y.raw += o->velY << 8;
-        DAT_8009c330->timer = 0x21;
+        PLAYER_EXT->timer = 0x21;
         if (o->velY >= 0x447) {
             B(o, 0xad) = 0;
             o->velY = 0;

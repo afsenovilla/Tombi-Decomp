@@ -26,7 +26,7 @@ extern unsigned char D_8009C972;
 extern unsigned char DAT_1f8003ce;
 extern short DAT_1f8001c8;
 extern unsigned char DAT_1f8003d1;
-extern short D_8009F838;
+extern unsigned short AREA_VARIANT;
 extern unsigned char D_8009C973;
 extern unsigned char SCRIPT_FLAGS;
 extern unsigned char D_8009D1A4;
@@ -69,7 +69,7 @@ void initGameConfig(void)
     DAT_1f8003ce = 0;
     DAT_1f8001c8 = 0;
     DAT_1f8003d1 = 0;
-    D_8009F838 = 0;
+    AREA_VARIANT = 0;
     (*(short*)&GAME.selectedSection) = 0;
     GAME.inventoryScreen = 0;
     D_8009C973 = 1;

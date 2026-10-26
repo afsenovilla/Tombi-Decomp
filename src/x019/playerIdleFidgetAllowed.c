@@ -1,7 +1,7 @@
 // FUNC 800f0b5c 204 X019
 // MATCHING 800f0b5c 204
 typedef struct { short x; short y; } Cam;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern unsigned char DAT_8009cdb5;
 extern unsigned char DAT_8009d0ce;
@@ -10,7 +10,7 @@ extern Cam *DAT_800a6078;
 short playerIdleFidgetAllowed(void)
 {
     short r = 0;
-    switch (DAT_8009c960) {
+    switch (GAME) {
     case 1:
         if (DAT_8009c962 != 1)
             r = 1;

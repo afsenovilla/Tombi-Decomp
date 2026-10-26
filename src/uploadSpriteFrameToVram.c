@@ -8,7 +8,7 @@ typedef struct { char p0[2]; unsigned char type; char p3[0x24 - 3]; unsigned sho
 extern int WPP_DATA, DAT_1f800350;
 extern unsigned short DAT_1f8001f4;
 extern short DAT_1f8001f4s;
-extern char *DAT_8009c330;
+extern char *PLAYER_EXT;
 extern void unpackSpriteFrame(int, int, char *, int);
 extern void loadTIM(char *, short, int, int, int);
 extern void ClearImage(RECT *, int, int, int);
@@ -35,7 +35,7 @@ void uploadSpriteFrameToVram(O *o)
         break;
     }
     loadTIM((char *)0x801fb000, DAT_1f8001f4 * 16 + 1, 4, 0x80, 0x1e0);
-    *(unsigned short *)(DAT_8009c330 + DAT_1f8001f4s * 2 + 0x28) = *o->anim;
+    *(unsigned short *)(PLAYER_EXT + DAT_1f8001f4s * 2 + 0x28) = *o->anim;
 }
 #else
 typedef struct { short x, y, w, h; } RECT;
@@ -43,7 +43,7 @@ typedef struct { char p0[2]; unsigned char type; char p3[0x24 - 3]; unsigned sho
 extern int WPP_DATA, DAT_1f800350;
 extern unsigned short DAT_1f8001f4;
 extern short DAT_1f8001f4s;
-extern char *DAT_8009c330;
+extern char *PLAYER_EXT;
 extern void unpackSpriteFrame(int, int, char *, int);
 extern void loadTIM(char *, short, int, int, int);
 extern void ClearImage(RECT *, int, int, int);
@@ -72,6 +72,6 @@ void uploadSpriteFrameToVram(O *o)
         break;
     }
     loadTIM((char *)0x801fb000, DAT_1f8001f4 * 16 + 1, 4, 0x80, 0x1e0);
-    *(unsigned short *)(DAT_8009c330 + DAT_1f8001f4s * 2 + 0x28) = *o->anim;
+    *(unsigned short *)(PLAYER_EXT + DAT_1f8001f4s * 2 + 0x28) = *o->anim;
 }
 #endif

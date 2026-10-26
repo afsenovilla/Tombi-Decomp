@@ -3,8 +3,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern short D_8007A3F0[];
-extern short D_8007A5F0[];
+extern short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
 extern int ObjCullRegister(TObj *);
 extern void TileCollideAt(TObj *, int, int);
 extern void segmentedCrawlerFollowParent(TObj *);
@@ -32,13 +32,13 @@ void stepSegmentedCrawlerHurt(TObj *o)
             segmentedCrawlerFollowParent(o);
             o->d->raw = ((TObj *)o->d90)->d->raw;
             o->h->raw = ((TObj *)o->d90)->h->raw;
-            o->h->raw -= D_8007A5F0[*(unsigned char *)&o->d84] << 8;
+            o->h->raw -= COS_TABLE[*(unsigned char *)&o->d84] << 8;
             if (o->b69) {
                 o->y.raw = ((TObj *)o->d90)->y.raw;
-                o->y.raw -= D_8007A3F0[*(unsigned char *)&((TObj *)*(int *)&o->wa8)->w74] << 8;
+                o->y.raw -= NEG_SIN_TABLE[*(unsigned char *)&((TObj *)*(int *)&o->wa8)->w74] << 8;
             } else {
                 o->y.raw = ((TObj *)o->d90)->y.raw;
-                o->y.raw -= D_8007A3F0[*(unsigned char *)&o->d84] << 8;
+                o->y.raw -= NEG_SIN_TABLE[*(unsigned char *)&o->d84] << 8;
             }
             TileCollideAt(o, o->h->p.whole, o->y.p.whole);
         }

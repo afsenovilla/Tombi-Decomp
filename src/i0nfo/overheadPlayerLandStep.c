@@ -16,7 +16,7 @@ extern void func_8001FD94(TObj *o);
 extern void func_8001FEC0(TObj *o);
 extern void func_8002171C(TObj *o);
 extern void overheadPlayerSetMoveAnim(TObj *o);
-extern Cam *D_8009C330;
+extern Cam *PLAYER_EXT;
 extern signed char D_8009C93A, D_8009C93F, D_8009C942;
 extern unsigned char D_8009CFF9;
 extern signed char D_8009D2B0;
@@ -32,12 +32,12 @@ void overheadPlayerLandStep(TObj *o)
         *(signed char *)&o->b0f = -0xC;
         o->b6b = 1;
         o->d8c = 0;
-        c = D_8009C330;
+        c = PLAYER_EXT;
         c->b8 = 0;
         c->w20 = 0;
-        D_8009C330->w2e = 0xFFFF;
-        D_8009C330->w28 = 0xFFFF;
-        D_8009C330->w2a = 0xFFFF;
+        PLAYER_EXT->w2e = 0xFFFF;
+        PLAYER_EXT->w28 = 0xFFFF;
+        PLAYER_EXT->w2a = 0xFFFF;
         o->ba4 = 0;
         o->ba5 = 0;
         o->b9c = 2;
@@ -46,14 +46,14 @@ void overheadPlayerLandStep(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0x1000;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
         o->visible = 1;
         { int t = 0xE; o->animFrame = t; }
         o->wb2 = 0;
         o->velX = 0;
         o->d8c = 0;
         o->w22 = 0;
-        D_8009C330->w2c = 0xE;
+        PLAYER_EXT->w2c = 0xE;
         overheadPlayerSetMoveAnim(o);
         D_8009C942 = 1;
         D_8009C93F = 1;
@@ -70,7 +70,7 @@ void overheadPlayerLandStep(TObj *o)
         break;
     case 1:
         func_8001FEC0(o);
-        D_8009C330->b8 = 1;
+        PLAYER_EXT->b8 = 1;
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;

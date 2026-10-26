@@ -2,8 +2,8 @@
 // MATCHING 80036cb8 516
 #include "TOBJ.H"
 typedef struct { char p0[0xc]; unsigned char bc; char p1; short we; char p2[0x20]; short w30; short w32; } G338;
-extern G338 *DAT_8009c338;
-extern unsigned char *DAT_8009c330;
+extern G338 *WEAPON_STATE;
+extern unsigned char *PLAYER_EXT;
 extern int DAT_800a6068[];
 extern int DAT_800a60c0;
 extern unsigned char DAT_800a603d, DAT_800a60d5, DAT_800a60fe;
@@ -17,9 +17,9 @@ void weapon8to9FollowTarget(TObj *o)
     G338 *g;
     switch (o->state) {
     case 0:
-        DAT_8009c338->bc = 1;
-        DAT_8009c338->w30 = 0;
-        DAT_8009c338->w32 = 0;
+        WEAPON_STATE->bc = 1;
+        WEAPON_STATE->w30 = 0;
+        WEAPON_STATE->w32 = 0;
         o->state++;
         if (t != 0) {
             o->velX = t->h->p.whole;
@@ -51,12 +51,12 @@ void weapon8to9FollowTarget(TObj *o)
         break;
     }
     if (DAT_800a603d != 0x32) {
-        g = DAT_8009c338;
+        g = WEAPON_STATE;
         g->bc = 0;
         g->w32 = 0;
         g->we = 0;
         DAT_800a60d5 = 0;
-        *DAT_8009c330 = 0;
+        *PLAYER_EXT = 0;
         DAT_800a60fe = 0;
         o->b04 = 2;
         o->step = 0;

@@ -7,7 +7,7 @@ typedef struct O {
     char p5[0x69 - 0x44]; unsigned char b69; char p6[0x8c - 0x6a]; unsigned int a8c; char p7[0x9e - 0x90]; unsigned char b9e;
     char p8[0xa4 - 0x9f]; unsigned char ba4; char p9[5]; unsigned char baa; char pa[5]; short sb0; char pb[0xbe - 0xb2]; unsigned char bbe;
 } O;
-extern O *DAT_8009c330;
+extern O *PLAYER_EXT;
 extern unsigned char DAT_801152e8[];
 extern short FUN_8003fd78(O *, int, int);
 extern void FUN_800efc04(O *);
@@ -16,13 +16,13 @@ extern void probeCollisionAtDepthC(O *, int, int);
 
 static __inline__ void setanim(O *o, unsigned short x)
 {
-    O *p = DAT_8009c330;
+    O *p = PLAYER_EXT;
     p->w2c = x;
     if (p->w2e != x) {
         p->w2c = x;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        DAT_8009c330->w2e = DAT_8009c330->w2c;
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c;
     }
 }
 
@@ -33,7 +33,7 @@ void playerPerchFlipLandCheck(O *o)
     short d;
     if (o->b69 != 0 || FUN_8003fd78(o, 0, 0)) {
         if (o->bbe & 8) {
-            DAT_8009c330->b8 = o->w2e & 1;
+            PLAYER_EXT->b8 = o->w2e & 1;
             o->b5 = 0x1b;
             o->b6 = 0;
             if ((o->bbe & 1) != o->w2e) {
@@ -46,15 +46,15 @@ void playerPerchFlipLandCheck(O *o)
             o->ba4 = 0;
             o->baa = 0;
             o->b9e = 0;
-            DAT_8009c330->w2e = 0xffff;
-            DAT_8009c330->w28 = 0xffff;
-            DAT_8009c330->w2a = 0xffff;
+            PLAYER_EXT->w2e = 0xffff;
+            PLAYER_EXT->w28 = 0xffff;
+            PLAYER_EXT->w2a = 0xffff;
             o->a8c = DAT_801152e8[o->sb0];
             o->b5 = 0;
             o->b6 = 0;
         }
     } else {
-        DAT_8009c330->b9 = 0;
+        PLAYER_EXT->b9 = 0;
         o->w16 += 9;
         h = o->h;
         t = h->s2;

@@ -9,7 +9,7 @@ typedef struct {
     short wd2;
 } P;
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern int Rand(void);
 extern int ObjCullRegister(TObj *);
 extern int isObjectInView(P *);
@@ -76,8 +76,8 @@ void updateSegmentedCrawler(P *o)
             o->t.h->raw = ((TObj *)o->t.d90)->h->raw;
             o->t.d->raw = ((TObj *)o->t.d90)->d->raw;
             o->t.y.raw = ((TObj *)o->t.d90)->y.raw;
-            o->t.h->raw -= D_8007A5F0[*(unsigned char *)&o->t.d84] << 8;
-            o->t.y.raw -= D_8007A3F0[*(unsigned char *)&o->t.d84] << 8;
+            o->t.h->raw -= COS_TABLE[*(unsigned char *)&o->t.d84] << 8;
+            o->t.y.raw -= NEG_SIN_TABLE[*(unsigned char *)&o->t.d84] << 8;
         }
         o->t.b69 = 0;
         if (!cullObjectToDrawListMargin(o, 0xa0)) {

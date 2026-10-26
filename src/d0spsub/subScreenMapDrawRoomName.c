@@ -2,7 +2,7 @@
 // MATCHING 800f0f20 236
 typedef struct { char p[0x10]; short w10; } Menu;
 typedef struct { int a, b, c; } Tri;
-extern unsigned short D_8009C960, D_8009C962;
+extern unsigned short GAME, D_8009C962;
 extern int D_80108DDC[];
 extern int *D_80108F8C[];
 extern Tri *D_80108F94;
@@ -16,7 +16,7 @@ void subScreenMapDrawRoomName(Menu *m, int i, int j)
 {
     D_8011113C.x = 0x10;
     D_8011113C.y = 0xE8;
-    if (D_8009C960 == 0xE) D_8011113C.str = D_80108DDC[D_8009C962];
+    if (GAME == 0xE) D_8011113C.str = D_80108DDC[D_8009C962];
     else D_8011113C.str = D_80108F8C[i][j];
     if (D_80111124 == 0xC) { register Tri *t asm("v1") = D_80108F94; D_8011113C.str = t->c; }
     D_8011113C.w = m->w10 + 1;

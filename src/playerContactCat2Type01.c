@@ -1,7 +1,7 @@
 // FUNC 80125f30 224 X000
 // MATCHING 80125f30 224
 extern short boxesOverlap(void);
-extern int *DAT_8009c330;
+extern int *PLAYER_EXT;
 
 void playerContactCat2Type01(unsigned char *o, unsigned char *p)
 {
@@ -9,8 +9,8 @@ void playerContactCat2Type01(unsigned char *o, unsigned char *p)
 
     if (boxesOverlap() != 0) {
         p[0x69] = 1;
-        if (o[0x9c] == 1 && *(unsigned short *)((char *)DAT_8009c330 + 0x20) == 1) {
-            *(short *)((char *)DAT_8009c330 + 0x20) = 0xe;
+        if (o[0x9c] == 1 && *(unsigned short *)((char *)PLAYER_EXT + 0x20) == 1) {
+            *(short *)((char *)PLAYER_EXT + 0x20) = 0xe;
             *(short *)(o + 0x7e) = -1000;
         }
         u = *(unsigned short *)(o + 0xb2);

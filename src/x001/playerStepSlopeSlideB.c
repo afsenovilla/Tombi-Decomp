@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern char D_80077CF4[];
 extern unsigned char D_8009D2B0[];
 extern unsigned short D_1F8001F8;
@@ -31,14 +31,14 @@ void playerStepSlopeSlideB(TObj *o)
         playerDecelerateSpeedB(o);
         playerMoveByAngleSpeed(o);
         if (o->bbe == 0) {
-            if (*(unsigned char *)&D_8009C330->w08 == o->animFrame) {
+            if (*(unsigned char *)&PLAYER_EXT->w08 == o->animFrame) {
                 o->b9c = 1;
                 o->d88 = -0x200;
                 o->step = 0x1e;
                 o->ba4 = 0;
                 o->state = 2;
             } else {
-                *(unsigned char *)&D_8009C330->w08 = 0;
+                *(unsigned char *)&PLAYER_EXT->w08 = 0;
                 o->b9c = 0;
                 o->d88 = 0;
                 o->ba4 = 0;
@@ -76,7 +76,7 @@ void playerStepSlopeSlideB(TObj *o)
             o->step = 2;
             o->state = 0;
         }
-        if (D_8009C330->animTimer < 4) {
+        if (PLAYER_EXT->animTimer < 4) {
             o->d8c = (-o->wb0 << 2) & 0xff;
         }
         if (o->ba4) {
@@ -93,7 +93,7 @@ void playerStepSlopeSlideB(TObj *o)
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
         ObjApplyVelocity(o);
         if (o->wb2 == 0) {
-            *(unsigned char *)&D_8009C330->w08 = 0;
+            *(unsigned char *)&PLAYER_EXT->w08 = 0;
             o->b9c = 0;
             o->d88 = 0;
             o->ba4 = 0;

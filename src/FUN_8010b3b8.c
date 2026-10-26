@@ -2,7 +2,7 @@
 // MATCHING 8010b3b8 140
 // probably: player step entry: clears the D_8009C330 anim state and motion, anim D_80010748, state 4, slope tilt; unreferenced
 #include "TOBJ.H"
-extern TObj *DAT_8009c330[];
+extern TObj *PLAYER_EXT[];
 extern unsigned char DAT_801152e8[];
 extern void FUN_8001fe6c(TObj *o);
 extern char LAB_80010748[];
@@ -10,11 +10,11 @@ extern char LAB_80010748[];
 void FUN_8010b3b8(TObj *o)
 {
     TObj *p;
-    *(char *)&DAT_8009c330[0]->w08 = 0;
+    *(char *)&PLAYER_EXT[0]->w08 = 0;
     o->ba5 = 0;
     o->b9c = 0;
     *(char *)&o->wac = 0;
-    p = DAT_8009c330[0];
+    p = PLAYER_EXT[0];
     o->wb2 = 0;
     o->velX = 0;
     o->velY = 0;

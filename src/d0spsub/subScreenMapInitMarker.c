@@ -29,7 +29,7 @@ typedef struct {
 typedef struct { unsigned short room, sub; } RS;
 extern Sprite D_8010A2D4[];
 extern volatile int D_1F8002EC;
-extern RS D_8009C960;
+extern RS GAME;
 extern void *D_800FECE4;
 extern short *D_800FE064[];
 extern Link D_800FDAB4[];
@@ -48,7 +48,7 @@ Sprite *subScreenMapInitMarker(void)
     D_8010A2D4->w2e = 1;
     D_8010A2D4->anim = D_800FECE4;
     D_8010A2D4->d3c = D_1F8002EC;
-    e = &D_800FE064[D_8009C960.room][D_8009C960.sub];
+    e = &D_800FE064[GAME.room][GAME.sub];
     l = &D_800FDAB4[*e];
     {
         int a = l->a, b = l->b;

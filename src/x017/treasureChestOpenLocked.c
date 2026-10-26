@@ -2,9 +2,9 @@
 // MATCHING 80112c24 1040
 #include "spad.h"
 #include "gcd.h"
-/* D_8009C960h (halfword name for D_8009C960) stays: a cast, a union or -fno-expensive-optimizations all CSE the la (21). */
+/* D_8009C960h (halfword name for GAME) stays: a cast, a union or -fno-expensive-optimizations all CSE the la (21). */
 #include "TOBJ.H"
-extern int D_8009C960[];
+extern int GAME[];
 extern unsigned short D_8009C960h[];
 extern int *D_80115A08[];
 extern int *D_80115948[];
@@ -47,7 +47,7 @@ void treasureChestOpenLocked(TObj *o)
             o->step = 3;
             o->timer = 10;
             o->wac = 1;
-            if (D_8009C960[0] == 0x30009) {
+            if (GAME[0] == 0x30009) {
                 o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
             } else {
                 o->anim = (void *)D_80115948[D_8009C960h[0] * 4 + (o->b0c & 0x7f)][1];

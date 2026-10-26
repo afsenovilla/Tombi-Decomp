@@ -7,7 +7,7 @@ extern void FUN_8001e4f0(int);
 extern void FUN_8001fec0(TObj *);
 extern void playerAirSpinToFall(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009d2b0;
@@ -30,7 +30,7 @@ void playerEventStepRiseFadeOut(TObj *o)
         o->wb2 = 0;
         o->velX = 0;
         o->velY = 0;
-        DAT_8009c330->timer = 0;
+        PLAYER_EXT->timer = 0;
         o->d8c = 0;
         o->timer = 0x1e;
         o->w22 = 0;

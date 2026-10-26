@@ -4,15 +4,6 @@
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0x10];
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-} unk_800A3940;
-#define MENU_STATE ((unk_800A3940*)D_800A3940)
 
 void updatePauseMenu(void) {
     if (*(u8*)0x1F8003CE | *(u8*)0x1F8001CC) {
@@ -88,10 +79,10 @@ void updatePauseMenu(void) {
             savedS2 = p->state2;
             savedUn = p->step.value;
 
-            MENU_STATE->unk12 = 7;
-            MENU_STATE->unk16 = 4;
-            MENU_STATE->unk14 = 0;
-            MENU_STATE->unk0 = 0;
+            MENU_STATE.unk12 = 7;
+            MENU_STATE.unk16 = 4;
+            MENU_STATE.unk14 = 0;
+            MENU_STATE.unk0 = 0;
             p->state2 = 3;
             p->step.value = 0;
             *(u16*)0x1F8003B8 = savedS2;
@@ -148,37 +139,37 @@ void updatePauseMenu(void) {
                 c10b = D_8009C10B;
                 switch (c10b) {
                 case 0:
-                    MENU_STATE->unk16 = 4;
-                    MENU_STATE->unk12 = c10b + 1;
-                    MENU_STATE->unk14 = 0;
-                    MENU_STATE->unk0 = 0;
+                    MENU_STATE.unk16 = 4;
+                    MENU_STATE.unk12 = c10b + 1;
+                    MENU_STATE.unk14 = 0;
+                    MENU_STATE.unk0 = 0;
                     task->state2 = 3;
                     task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 1:
-                    MENU_STATE->unk12 = 2;
-                    MENU_STATE->unk16 = 5;
-                    MENU_STATE->unk14 = 0;
-                    MENU_STATE->unk0 = 0;
+                    MENU_STATE.unk12 = 2;
+                    MENU_STATE.unk16 = 5;
+                    MENU_STATE.unk14 = 0;
+                    MENU_STATE.unk0 = 0;
                     task->state2 = 3;
                     task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 2:
-                    MENU_STATE->unk16 = 6;
-                    MENU_STATE->unk12 = 0;
-                    MENU_STATE->unk14 = 0;
-                    MENU_STATE->unk0 = 0;
+                    MENU_STATE.unk16 = 6;
+                    MENU_STATE.unk12 = 0;
+                    MENU_STATE.unk14 = 0;
+                    MENU_STATE.unk0 = 0;
                     task->state2 = 3;
                     task->step.value = 0;
                     func_80020058(10, 10);
                     return;
                 case 3:
-                    MENU_STATE->unk16 = 7;
-                    MENU_STATE->unk12 = c10b;
-                    MENU_STATE->unk14 = 0;
-                    MENU_STATE->unk0 = 0;
+                    MENU_STATE.unk16 = 7;
+                    MENU_STATE.unk12 = c10b;
+                    MENU_STATE.unk14 = 0;
+                    MENU_STATE.unk0 = 0;
                     task->state2 = 3;
                     task->step.value = 0;
                     func_80020058(10, 10);
@@ -283,10 +274,10 @@ void updatePauseMenu(void) {
                         s2 = task->state2;
                         un = task->step.value;
 
-                        MENU_STATE->unk12 = 5;
-                        MENU_STATE->unk0 = 0;
-                        MENU_STATE->unk1 = 0;
-                        MENU_STATE->unk16 = 0;
+                        MENU_STATE.unk12 = 5;
+                        MENU_STATE.unk0 = 0;
+                        MENU_STATE.unk1 = 0;
+                        MENU_STATE.unk16 = 0;
                         task->state2 = 3;
                         task->step.value = 0;
                         *(u16*)0x1F8003B8 = s2;

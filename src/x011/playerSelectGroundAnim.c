@@ -2,7 +2,7 @@
 // MATCHING 800efa80 388
 #include "TOBJ.H"
 typedef struct { char pad[0x2c]; unsigned short cur; unsigned short prev; } Cam2c;
-extern Cam2c *DAT_8009c330;
+extern Cam2c *PLAYER_EXT;
 extern int DAT_8009c984;
 extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
@@ -12,30 +12,30 @@ void playerSelectGroundAnim(TObj *o)
 {
     short v;
     if (o->wb2 == 0) {
-        DAT_8009c330->cur = 0;
+        PLAYER_EXT->cur = 0;
     } else {
         if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4) && o->b04 == 1) {
-            DAT_8009c330->cur = 0x21;
+            PLAYER_EXT->cur = 0x21;
         } else {
             v = o->wb2;
             if (v < -0x143)
-                DAT_8009c330->cur = 3;
+                PLAYER_EXT->cur = 3;
             else if (v < -0x84)
-                DAT_8009c330->cur = 2;
+                PLAYER_EXT->cur = 2;
             else if (v < 0)
-                DAT_8009c330->cur = 1;
+                PLAYER_EXT->cur = 1;
             else if (v >= 0x144)
-                DAT_8009c330->cur = 3;
+                PLAYER_EXT->cur = 3;
             else if (v >= 0x85)
-                DAT_8009c330->cur = 2;
+                PLAYER_EXT->cur = 2;
             else if (v > 0)
-                DAT_8009c330->cur = 1;
+                PLAYER_EXT->cur = 1;
         }
         if (o->subtype)
-            DAT_8009c330->cur = 0x21;
+            PLAYER_EXT->cur = 0x21;
     }
-    if (DAT_8009c330->prev != DAT_8009c330->cur) {
-        playerGroundAnimTransition(o, DAT_8009c330->cur);
-        DAT_8009c330->prev = DAT_8009c330->cur;
+    if (PLAYER_EXT->prev != PLAYER_EXT->cur) {
+        playerGroundAnimTransition(o, PLAYER_EXT->cur);
+        PLAYER_EXT->prev = PLAYER_EXT->cur;
     }
 }

@@ -6,8 +6,8 @@
 // Japanese version of PAL x014 80121B4C (x014/func_80121B4C.c): 128 -> 120.
 #include "TOBJ.H"
 
-extern short DAT_8007a5f0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
@@ -42,8 +42,8 @@ void func_80121B4C(TObj *o)
         r = 2;
         {
             int i = o->d38;
-            int dx = (o->velH * DAT_8007a5f0[i]) << 4 >> 16;
-            int dy = (o->velH * D_8007A3F0[i]) << 4 >> 16;
+            int dx = (o->velH * COS_TABLE[i]) << 4 >> 16;
+            int dy = (o->velH * NEG_SIN_TABLE[i]) << 4 >> 16;
             o->h->raw += dx << 8;
             o->y.raw += dy << 8;
         }
@@ -65,8 +65,8 @@ void func_80121B4C(TObj *o)
 #else
 #include "TOBJ.H"
 
-extern short DAT_8007a5f0[];
-extern short D_8007A3F0[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern short probeSlopeWallSideAt(TObj *, short, short);
 extern short probeFloorPlaneAt(TObj *, short, short);
 
@@ -101,8 +101,8 @@ void func_80121B4C(TObj *o)
         r = 2;
         {
             int i = o->d38;
-            int dx = (o->velH * DAT_8007a5f0[i]) << 4 >> 16;
-            int dy = (o->velH * D_8007A3F0[i]) << 4 >> 16;
+            int dx = (o->velH * COS_TABLE[i]) << 4 >> 16;
+            int dy = (o->velH * NEG_SIN_TABLE[i]) << 4 >> 16;
             o->h->raw += dx << 8;
             o->y.raw += dy << 8;
         }

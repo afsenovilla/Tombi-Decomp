@@ -3,11 +3,11 @@
 #include "TOBJ.H"
 extern unsigned char D_80115228[][2];
 typedef struct { short w0; short w2; char pad[0xa]; short we; } P;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 
 void playerSetAnimPairB(TObj *o)
 {
     unsigned char *t = D_80115228[o->wb2];
-    D_8009C330->we = t[0];
-    D_8009C330->w2 = t[1];
+    PLAYER_EXT->we = t[0];
+    PLAYER_EXT->w2 = t[1];
 }

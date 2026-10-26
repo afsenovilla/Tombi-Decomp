@@ -1,7 +1,7 @@
 // FUNC 800ea67c 1936 X017
 // MATCHING 800ea67c 1936
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short D_1f8001f8;
 extern int D_1f800198;
 extern int DAT_1f8002d4[];
@@ -55,13 +55,13 @@ void updateGroundDebris(TObj *o)
             if ((D_1f8001f8 + D_1f800198) & 1) o->timer = 0x32; else o->timer = 0x1e;
             o->b0d = 0;
             *(signed char *)&o->b0f = -12;
-            if (DAT_8009c960 == 0) {
+            if (GAME == 0) {
                 o->w1e = 9;
                 o->anim = DAT_8013b1a4[o->wac];
-            } else if (DAT_8009c960 == 1 || DAT_8009c960 == 7) {
+            } else if (GAME == 1 || GAME == 7) {
                 o->w1e = 8;
                 o->anim = DAT_8013e584[o->wac];
-            } else if (DAT_8009c960 == 9) {
+            } else if (GAME == 9) {
                 o->w1e = 9;
                 o->anim = DAT_8012e02c[o->wac];
             }

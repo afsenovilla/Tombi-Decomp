@@ -11,7 +11,7 @@ extern P3 D_8013C9EC[];
 extern void *D_8013E710[];
 extern void *D_8013E710s;
 extern int D_1F8002D4a[];
-extern short D_8007A5F0[], D_8007A1F0[];
+extern short COS_TABLE[], D_8007A1F0[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -124,11 +124,11 @@ void stepCeilingDripDrop(TObj *o)
                     s1 &= 0xff;
                     s2 = -(short)MulNegSinScaled((o->d8c << 1) & 0x7e, 0x300);
                     b = (short)MulNegSinScaled(o->d8c & 0x7f, 0x400);
-                    o->h->raw += (D_8007A5F0[s1] * s2) >> 4;
+                    o->h->raw += (COS_TABLE[s1] * s2) >> 4;
                     o->y.raw += (D_8007A1F0[s1] * -b) >> 4;
                     if (o->b6a) {
                         if ((unsigned char)(PLAYER.obj.b9e - 5) >= 2) {
-                            (*(Fix16 **)&PLAYER.obj.h)->raw += (D_8007A5F0[s1] * s2) >> 4;
+                            (*(Fix16 **)&PLAYER.obj.h)->raw += (COS_TABLE[s1] * s2) >> 4;
                             PLAYER.obj.y.raw += (D_8007A1F0[s1] * -b) >> 4;
                         }
                         if (AnimAdvance(o)) {

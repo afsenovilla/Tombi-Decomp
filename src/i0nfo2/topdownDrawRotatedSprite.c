@@ -19,9 +19,9 @@ typedef struct { unsigned char p0[0x18]; short w18, w1a; unsigned char p1c[0x28 
 extern long D_1F8000C0[];
 extern char *D_1F800164;
 extern int D_1F8001E0;
-extern P9C330 *D_8009C330;
-extern short D_8007A5F0[];
-extern short D_8007A3F0[];
+extern P9C330 *PLAYER_EXT;
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern void func_80037C80(TObj *, unsigned char *, int);
 extern void func_8004FD6C(void *, int, long, int, unsigned long);
 
@@ -79,7 +79,7 @@ void topdownDrawRotatedSprite(TObj *o)
     ki = h[1];
     d = *(volatile int *)&o->d3c;
     *n = n0;
-    w0 = D_8009C330->w28[*(short *)0x1F8001F4];
+    w0 = PLAYER_EXT->w28[*(short *)0x1F8001F4];
     /* identity; the fake dependence on w0 keeps the pointer add after the table compare */
     __asm__("" : "=r"(d2) : "0"(d), "r"(w0));
     pe = (unsigned char *)(d2 + ki);
@@ -87,8 +87,8 @@ void topdownDrawRotatedSprite(TObj *o)
     if (w0 != *frm) {
         func_80037C80(o, pe, ki);
     }
-    sn = D_8007A5F0;
-    cs = D_8007A3F0;
+    sn = COS_TABLE;
+    cs = NEG_SIN_TABLE;
     *a0 = (unsigned char)o->d8c;
     *a1 = (o->d8c + 0x80) & 0xFF;
     do {
@@ -104,8 +104,8 @@ void topdownDrawRotatedSprite(TObj *o)
         P->u3 = P->u0 + C;
         P->v3 = P->v0 + D;
         *s40 = 0;
-        D_8009C330->w18 = *x;
-        D_8009C330->w1a = *y;
+        PLAYER_EXT->w18 = *x;
+        PLAYER_EXT->w1a = *y;
         P->tpage = o->w1e;
         if (*n & 2)
             P->clut = o->w08;

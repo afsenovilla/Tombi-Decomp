@@ -51,7 +51,7 @@ extern unsigned short D_80079EB0[];
 extern unsigned char D_8009C930;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 extern int D_8009C984;
 extern unsigned char D_8009CDAC;
 extern unsigned char D_8009CDD2;
@@ -110,7 +110,7 @@ void updateL4Type1AObject(O *o)
             o->wcc = 0x18;
             o->wce = 0x18;
             o->wd0 = 0;
-            if (D_8009C960[0] == 1 || D_8009C960[0] == 7) {
+            if (GAME[0] == 1 || GAME[0] == 7) {
                 o->b0d = 1;
                 o->w08 = GetClut(0xd0, 0x1e5);
                 o->w1e = 7;

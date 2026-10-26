@@ -1,15 +1,15 @@
 // FUNC 800f6d80 168 X019
 // MATCHING 800f6d80 168
 #include "TOBJ.H"
-extern unsigned char *D_8009C330;
-extern unsigned char *D_8009F0EC;
+extern unsigned char *PLAYER_EXT;
+extern unsigned char *GRABBED_OBJECT;
 extern unsigned char D_801152E8[];
 void playerDropFromHold(TObj *o)
 {
     int v;
     int y;
     int c;
-    D_8009C330[9] = 0;
+    PLAYER_EXT[9] = 0;
     v = 0x10;
     *(unsigned char *)&o->wac = 1;
     o->b9e = 0;
@@ -37,5 +37,5 @@ void playerDropFromHold(TObj *o)
         y -= 14;
     }
     ((Fix16 *)o)->p.whole = y;
-    D_8009F0EC[0x69] = 0;
+    GRABBED_OBJECT[0x69] = 0;
 }

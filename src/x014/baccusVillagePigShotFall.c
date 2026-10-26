@@ -9,7 +9,7 @@ static short D_801265A0[8] = {
     0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xa0, 0xe0, 0xc0,
 };
 extern short DAT_8007a1f0[];
-extern short DAT_8007a5f0[];
+extern short COS_TABLE[];
 extern int Rand(void);
 extern void FUN_8001e4f0(int);
 extern int baccusVillagePigShotCheckLanded(TObj *);
@@ -31,7 +31,7 @@ void baccusVillagePigShotFall(TObj *o)
     case 1:
         {
             int i = o->d38;
-            int dx = (o->velH * DAT_8007a5f0[i]) << 4 >> 16;
+            int dx = (o->velH * COS_TABLE[i]) << 4 >> 16;
             int dy = (o->velH * DAT_8007a1f0[i]) << 4 >> 16;
             o->h->raw += dx << 8;
             o->y.raw += dy << 8;

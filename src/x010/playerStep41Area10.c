@@ -9,8 +9,8 @@
 
 typedef struct { unsigned char b0; char p1[6]; unsigned char b7, b8; char p9[0x20 - 9]; short w20; } G;
 
-extern G *D_8009C330;
-extern int D_8009D2E8;
+extern G *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(TObj *o);
 extern void FUN_8010f400(TObj *o);
@@ -35,7 +35,7 @@ void func_8011B7D4(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
         SfxPlay2(2, 4);
         o->state++;
     case 1:
@@ -49,8 +49,8 @@ void func_8011B7D4(TObj *o)
         o->velY += 0x40;
         FUN_8010f400(o);
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = S32(o, 0xd4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = S32(o, 0xd4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -58,7 +58,7 @@ void func_8011B7D4(TObj *o)
         }
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10);
         if (ObjCheckHeadCollision(o)) {
-            D_8009C330->b7 = o->animFrame;
+            PLAYER_EXT->b7 = o->animFrame;
             (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->timer = 10;
@@ -67,7 +67,7 @@ void func_8011B7D4(TObj *o)
             o->state = 3;
         }
         if (o->velY > 0) {
-            D_8009C330->b7 = o->animFrame;
+            PLAYER_EXT->b7 = o->animFrame;
             o->b9c = 2;
             (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
@@ -75,7 +75,7 @@ void func_8011B7D4(TObj *o)
             o->state = 3;
             break;
         }
-        g = D_8009C330;
+        g = PLAYER_EXT;
         if (g->b0 == 0) {
             if (U8(o, 0xc6)) break;
             o->animFrame = (signed char)g->b7;
@@ -106,8 +106,8 @@ void func_8011B7D4(TObj *o)
 
 typedef struct { unsigned char b0; char p1[6]; unsigned char b7, b8; char p9[0x20 - 9]; short w20; } G;
 
-extern G *D_8009C330;
-extern int D_8009D2E8;
+extern G *PLAYER_EXT;
+extern int BITTEN_OBJECT;
 extern void SfxPlay2(int, int);
 extern int AnimAdvance(TObj *o);
 extern void playerUpdateSpeedFromPad(TObj *o);
@@ -132,7 +132,7 @@ void playerStep41Area10(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        D_8009C330->w20 = 0;
+        PLAYER_EXT->w20 = 0;
         SfxPlay2(2, 4);
         o->state++;
     case 1:
@@ -146,8 +146,8 @@ void playerStep41Area10(TObj *o)
         o->velY += 0x40;
         playerUpdateSpeedFromPad(o);
         if ((*(unsigned char*)&o->wac) == 2) {
-            D_8009D2E8 = S32(o, 0xe4);
-            D_8009C330->b8 = 0;
+            BITTEN_OBJECT = S32(o, 0xe4);
+            PLAYER_EXT->b8 = 0;
             o->ba5 = 0;
             o->step = 0xe;
             o->state = 0;
@@ -155,7 +155,7 @@ void playerStep41Area10(TObj *o)
         }
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10);
         if (ObjCheckHeadCollision(o)) {
-            D_8009C330->b7 = o->animFrame;
+            PLAYER_EXT->b7 = o->animFrame;
             (*(unsigned char*)&o->wac) = 1;
             o->b9c = 2;
             o->timer = 10;
@@ -164,7 +164,7 @@ void playerStep41Area10(TObj *o)
             o->state = 3;
         }
         if (o->velY > 0) {
-            D_8009C330->b7 = o->animFrame;
+            PLAYER_EXT->b7 = o->animFrame;
             o->b9c = 2;
             (*(unsigned char*)&o->wac) = 1;
             o->timer = 10;
@@ -172,7 +172,7 @@ void playerStep41Area10(TObj *o)
             o->state = 3;
             break;
         }
-        g = D_8009C330;
+        g = PLAYER_EXT;
         if (g->b0 == 0) {
             if (U8(o, 0xc6)) break;
             o->animFrame = (signed char)g->b7;

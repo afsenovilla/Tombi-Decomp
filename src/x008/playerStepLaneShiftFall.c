@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
-extern TObj *D_8009C330;
+extern TObj *PLAYER_EXT;
 extern unsigned short D_1f8001c8;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -15,7 +15,7 @@ void playerStepLaneShiftFall(TObj *o)
     short r;
     switch (o->state) {
     case 0:
-        (*(unsigned char*)&D_8009C330->w08) = o->active;
+        (*(unsigned char*)&PLAYER_EXT->w08) = o->active;
         f = o->animFrame;
         o->velX = 0x5a;
         o->velY = -0x200;
@@ -58,7 +58,7 @@ void playerStepLaneShiftFall(TObj *o)
             }
             o->b9c = 2;
             o->wb2 = 0;
-            D_8009C330->timer = 0;
+            PLAYER_EXT->timer = 0;
             playerSetFallLean(o);
             o->b04 = 1;
             (*(unsigned char*)((char*)&o->da0 + 2)) = 0;

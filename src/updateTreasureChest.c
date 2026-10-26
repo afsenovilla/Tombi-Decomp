@@ -5,7 +5,7 @@
 typedef void (*ObjFn)(TObj *);
 typedef union { int w; struct { unsigned short a, b; } h; } Stage;
 extern Stage DAT_8009c960;
-extern Stage DAT_8009c960c; /* debt: second name; with one name CSE (follow-jumps) shares one la between .w and the else .h.a in the anim block, the game reloads; tried casts, switch, goto, ptr temp, inverted if */
+extern Stage GAME; /* debt: second name; with one name CSE (follow-jumps) shares one la between .w and the else .h.a in the anim block, the game reloads; tried casts, switch, goto, ptr temp, inverted if */
 extern unsigned char DAT_8009cf9d;
 extern int DAT_1f8002e0[];
 extern int DAT_1f8002d4[];
@@ -90,7 +90,7 @@ void updateTreasureChest(TObj *o)
         if (DAT_8009c960.w == 0x30009)
             o->anim = *DAT_80115a08[o->b0c & 0x7f];
         else
-            o->anim = *DAT_80115948[DAT_8009c960c.h.a * 4 + (o->b0c & 0x7f)];
+            o->anim = *DAT_80115948[GAME.h.a * 4 + (o->b0c & 0x7f)];
         FUN_8001fe6c(o);
         DAT_80115d90[o->subtype](o);
         break;

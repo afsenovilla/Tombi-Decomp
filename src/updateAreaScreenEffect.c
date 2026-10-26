@@ -3,7 +3,7 @@
 typedef struct S { unsigned char a, p, b; } S;
 extern S PLAYER;
 extern unsigned char DAT_603a;
-extern unsigned short DAT_960, DAT_962;
+extern unsigned short GAME, DAT_962;
 extern unsigned char DAT_36c2;
 extern void dispatchScreenEffect(void);
 extern void updateObjectsLayer1(void);
@@ -13,7 +13,7 @@ void updateAreaScreenEffect(void)
     unsigned char v;
     S *p = &PLAYER;
     DAT_603a = 0;
-    switch (DAT_960) {
+    switch (GAME) {
     case 2:
         switch (DAT_962) {
         case 0: DAT_603a = 1; break;
@@ -33,7 +33,7 @@ void updateAreaScreenEffect(void)
         break;
     }
 end:
-    if ((DAT_960 != 6 || DAT_962 != 0) && (DAT_960 != 9 || DAT_962 < 6)) {
+    if ((GAME != 6 || DAT_962 != 0) && (GAME != 9 || DAT_962 < 6)) {
         if (p->a != 0)
             dispatchScreenEffect();
         if (DAT_962 != 7 || DAT_36c2 == 0)

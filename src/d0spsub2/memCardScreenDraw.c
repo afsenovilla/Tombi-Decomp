@@ -5,7 +5,7 @@ typedef struct { char p0[0x140]; short status, prev, p144, type; char p148[0x10]
 typedef struct { short icon, a, b, c; int d, e; short p10, f; } Info;
 typedef struct { short x, y, w, attr; int img, pC, str; void *p14; } Text;
 typedef struct { short x, y; } Pos;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern unsigned char D_800A45D9;
 extern short D_800A45F4;
 extern Card D_800F7200[];
@@ -38,7 +38,7 @@ void memCardScreenDraw(void)
     memCardDrawBackground(m, 0);
     D_800F70D8.w = 1;
     memCardDrawModeTitle(D_800A45F4, 2, 0x10, 0x20);
-    m = &D_800A45D8;
+    m = &MENU_STATE;
     switch (D_800A45D9) {
     case 0:
         break;

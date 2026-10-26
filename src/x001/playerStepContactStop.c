@@ -2,7 +2,7 @@
 // MATCHING 80121b58 532
 #include "gv2.h"
 #include "TOBJ.H"
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern int DAT_8009c984[];
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
@@ -42,8 +42,8 @@ void playerStepContactStop(TObj *o)
         }
         break;
     case 3:
-        DAT_8009c330->animFrame = 0xffff;
-        DAT_8009c330->animTimer = 0;
+        PLAYER_EXT->animFrame = 0xffff;
+        PLAYER_EXT->animTimer = 0;
         o->anim = D_80010748;
         AnimLoadDuration(o);
         o->wb2 = 0;

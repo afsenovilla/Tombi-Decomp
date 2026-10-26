@@ -5,8 +5,8 @@ extern void func_8001E4F0(int a);
 extern void func_8001F110(int a);
 extern void func_8001FEC0(TObj *o);
 extern void topdownPlayerSetMoveAnim(TObj *o);
-extern TObj *D_8009C330;
-extern int D_8009C960[];
+extern TObj *PLAYER_EXT;
+extern int GAME[];
 extern unsigned char D_8009C975[];
 extern int D_8009CD94[];
 extern unsigned char D_8009D2B0[];
@@ -17,8 +17,8 @@ void topdownPlayerDropExitStep(TObj *o)
     switch (o->state) {
     case 0:
         o->active = 4;
-        D_8009C330->timer = 0;
-        D_8009C330->animFrame = 0xFF;
+        PLAYER_EXT->timer = 0;
+        PLAYER_EXT->animFrame = 0xFF;
         topdownPlayerSetMoveAnim(o);
         o->timer = 0x14;
         o->d8c = 0;
@@ -29,7 +29,7 @@ void topdownPlayerDropExitStep(TObj *o)
         o->velY = 0;
         D_8009D2B0[0] = 3;
         o->d8c = 0;
-        if (D_8009C960[0] != D_8009CD94[0]) {
+        if (GAME[0] != D_8009CD94[0]) {
             func_8001F110(1);
         }
         o->state++;

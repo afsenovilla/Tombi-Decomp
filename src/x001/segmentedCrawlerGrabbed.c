@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_8013F034[], *D_8013F074[];
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void func_80026BFC(int, int);
 extern void playSFX(int);
 
@@ -37,8 +37,8 @@ void segmentedCrawlerGrabbed(TObj *o)
         e->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
         if ((e->animFrame = o->animFrame) == 0) {
             e->d84 = (p->d84 + k) & 0xff;
-            e->h->raw += D_8007A5F0[e->d84] * 3 << 6;
-            e->y.raw += D_8007A3F0[(unsigned char)e->d84] * 3 << 6;
+            e->h->raw += COS_TABLE[e->d84] * 3 << 6;
+            e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((e->d84 + 8) & 0xff) >> 4;
                 e->anim = D_8013F034[e->wac];
@@ -48,8 +48,8 @@ void segmentedCrawlerGrabbed(TObj *o)
             }
         } else {
             e->d84 = (p->d84 - k) & 0xff;
-            e->h->raw -= D_8007A5F0[e->d84] * 3 << 6;
-            e->y.raw -= D_8007A3F0[(unsigned char)e->d84] * 3 << 6;
+            e->h->raw -= COS_TABLE[e->d84] * 3 << 6;
+            e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((-e->d84 - 8) & 0xff) >> 4;
                 e->anim = D_8013F034[e->wac];
@@ -67,14 +67,14 @@ void segmentedCrawlerGrabbed(TObj *o)
         e->d->p.whole = ((unsigned short*)&SPAD.s17e)[0];
         if ((e->animFrame = o->animFrame) == 0) {
             e->d84 = (p->d84 - k) & 0xff;
-            e->h->raw -= D_8007A5F0[e->d84] * 3 << 6;
-            e->y.raw -= D_8007A3F0[(unsigned char)e->d84] * 3 << 6;
+            e->h->raw -= COS_TABLE[e->d84] * 3 << 6;
+            e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((-e->d84 - 8) & 0xff) >> 4;
             e->anim = D_8013F074[e->wac];
         } else {
             e->d84 = (p->d84 + k) & 0xff;
-            e->h->raw += D_8007A5F0[e->d84] * 3 << 6;
-            e->y.raw += D_8007A3F0[(unsigned char)e->d84] * 3 << 6;
+            e->h->raw += COS_TABLE[e->d84] * 3 << 6;
+            e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((e->d84 + 8) & 0xff) >> 4;
             e->anim = D_8013F074[e->wac];
         }

@@ -1,6 +1,6 @@
 // FUNC 80118e70 288 X000
 // MATCHING 80118e70 288
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_1f800250;
 extern short DAT_1f80019c;
 typedef struct { unsigned int w; } W;
@@ -11,7 +11,7 @@ void a00SporeCloudStunPigs(unsigned char *o)
     unsigned char **pp;
     unsigned char *e;
 
-    if (DAT_8009c960 != 0)
+    if (GAME != 0)
         return;
     DAT_1f80019c = DAT_1f800250;
     pp = DAT_1f800260;

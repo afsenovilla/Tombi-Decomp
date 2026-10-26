@@ -6,13 +6,13 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern int D_8009F0EC;
+extern int GRABBED_OBJECT;
 
 void playerInitAreaHook(TObj *o)
 {
     unsigned char *p;
 
-    D_8009F0EC = 0;
+    GRABBED_OBJECT = 0;
     if ((GAME.selectedSection == 1 || GAME.selectedSection == 5) && GAME.selectedSpawnPoint == 1) {
         o->b04 = 5;
         o->step = 9;

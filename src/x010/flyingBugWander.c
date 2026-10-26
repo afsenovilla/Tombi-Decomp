@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern short D_8007A5F0[], D_8007A3F0[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -18,8 +18,8 @@ static __inline__ void mv(TObj *o)
 {
     int i = o->d38;
     int v = o->velH;
-    int c = v * D_8007A5F0[i];
-    int sn = v * D_8007A3F0[i];
+    int c = v * COS_TABLE[i];
+    int sn = v * NEG_SIN_TABLE[i];
 
     o->h->raw += (short)(c >> 12) << 8;
     o->y.raw += (short)(sn >> 12) << 8;

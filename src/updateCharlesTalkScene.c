@@ -8,7 +8,7 @@ extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c940, DAT_8009c941, DAT
 extern unsigned char DAT_8009cebd, DAT_8009d0a7, DAT_8009d2b0, DAT_8009ce4a, DAT_8009d00d, BUTTON_CONFIG_INDEX;
 extern int DAT_8009c984;
 extern unsigned char DAT_8009d00dA[];
-extern unsigned char *DAT_8009c330;
+extern unsigned char *PLAYER_EXT;
 extern void *PTR_8013ac14, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
 static char DAT_801396ca[98] = {
     8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -97,7 +97,7 @@ void updateCharlesTalkScene(TObj *o)
             X.b04 = 6;
             X.step = 5;
             X.state = 0;
-            DAT_8009c330[9] = 10;
+            PLAYER_EXT[9] = 10;
             X.wb2 = 0;
             X.velH = 0;
             X.velV = 0;
@@ -130,7 +130,7 @@ void updateCharlesTalkScene(TObj *o)
             X.velX = 0;
             X.velY = 0;
             X.b69 = 1;
-            DAT_8009c330[9] = 0;
+            PLAYER_EXT[9] = 0;
             o->step = 0;
             o->state = 0;
             goto clear;

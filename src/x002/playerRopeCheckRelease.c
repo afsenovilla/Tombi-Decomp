@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[7]; unsigned char bc7; unsigned char bc8; } PO;
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x20 - 9]; short w20; short w22; } P;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 extern unsigned char D_801152E8[];
 extern short probeCollisionAtDepthB(PO *, int, int);
 extern void SfxPlay3(int, int);
@@ -41,9 +41,9 @@ void playerRopeCheckRelease(PO *o)
         o->t.velY = 0;
         o->t.d84 = 0;
         o->t.d88 = 0;
-        D_8009C330->b8 = 0;
-        D_8009C330->w20 = 0;
-        D_8009C330->w22 = 0;
+        PLAYER_EXT->b8 = 0;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->w22 = 0;
         if (cond(o)) {
             o->t.h->p.whole = o->t.d30;
             o->t.y.p.whole = o->t.d34 + 0x14;
@@ -65,9 +65,9 @@ void playerRopeCheckRelease(PO *o)
             o->t.state = 0;
         }
     } else if (o->t.b69 == 1) {
-        D_8009C330->w20 = 0;
-        D_8009C330->w22 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->w22 = 0;
+        PLAYER_EXT->b8 = 0;
         GVARS.i34 = 0;
         SfxPlay3(0x1c, 0x7f);
         o->bc7 = 1;
@@ -79,9 +79,9 @@ void playerRopeCheckRelease(PO *o)
         o->t.step = 0;
         o->t.state = 0;
     } else if (ObjTileCollide(o, 0, 0)) {
-        D_8009C330->w20 = 0;
-        D_8009C330->w22 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->w22 = 0;
+        PLAYER_EXT->b8 = 0;
         GVARS.i34 = 0;
         SfxPlay3(0x1c, 0x7f);
         o->bc7 = 1;

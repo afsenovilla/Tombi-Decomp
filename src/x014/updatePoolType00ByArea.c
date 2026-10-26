@@ -1,7 +1,7 @@
 // FUNC 800e9e98 220 X014
 // MATCHING 800e9e98 220
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern void func_80117CAC(TObj *);
 extern void FUN_80117f98(TObj *);
 extern void FUN_80118568(TObj *);
@@ -15,7 +15,7 @@ extern void FUN_8011658c(TObj *);
 
 void updatePoolType00ByArea(TObj *o)
 {
-    switch (DAT_8009c960) {
+    switch (GAME) {
     case 0: func_80117CAC(o); break;
     case 1: FUN_80117f98(o); break;
     case 3: FUN_80118568(o); break;

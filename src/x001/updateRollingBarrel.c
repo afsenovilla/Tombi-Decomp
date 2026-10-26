@@ -10,7 +10,7 @@ static short D_8013C984[16] = {
     0x20, 0x18, 0x10, 0x10, 0x10, 8, 8, 4,
     0, -4, -8, -8, -0x10, -0x10, -0x10, -0x18,
 };
-extern short D_8007A1F0[], D_8007A5F0[];
+extern short D_8007A1F0[], COS_TABLE[];
 extern short D_1F80017A[];
 extern TObj *allocObjectLayer8(void);
 extern void freeObjectLayer2(TObj *);
@@ -156,7 +156,7 @@ void updateRollingBarrel(TObj *o)
                         }
                     }
                     o->velV = s * D_8007A1F0[o->w78] >> 12;
-                    o->velH = s * D_8007A5F0[o->w78] >> 12;
+                    o->velH = s * COS_TABLE[o->w78] >> 12;
                 } else {
                     o->velV = 0;
                     o->velH = 0;

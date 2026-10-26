@@ -2,7 +2,7 @@
 // MATCHING 800f1308 368
 #include "TOBJ.H"
 extern unsigned char TALK_POSE;
-extern TObj *DAT_8009c330;
+extern TObj *PLAYER_EXT;
 extern int FUN_8005bdec(void);
 extern void FUN_800efc04(TObj *o);
 extern void FUN_8001fe94(TObj *o, int a);
@@ -10,13 +10,13 @@ extern int FUN_8001fec0(TObj *o);
 
 #define SETANIM(o, n)                                     \
     {                                                     \
-        TObj *p = DAT_8009c330;                           \
+        TObj *p = PLAYER_EXT;                           \
         p->animTimer = n;                                 \
         if (p->animFrame != n) {                          \
             p->animTimer = n;                             \
             FUN_800efc04(o);                              \
             FUN_8001fe94(o, 0);                           \
-            DAT_8009c330->animFrame = DAT_8009c330->animTimer; \
+            PLAYER_EXT->animFrame = PLAYER_EXT->animTimer; \
         }                                                 \
     }
 
@@ -27,7 +27,7 @@ void playerAnimateTalkPose(TObj *o)
         if ((FUN_8005bdec() & 0x3f) == 0)
             SETANIM(o, 0x4c);
         if (FUN_8001fec0(o) != 0)
-            DAT_8009c330->animFrame = 0xff;
+            PLAYER_EXT->animFrame = 0xff;
         break;
     case 2:
         SETANIM(o, 0x4d);

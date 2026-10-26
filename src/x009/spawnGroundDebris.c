@@ -1,7 +1,7 @@
 // FUNC 800eae0c 496 X009
 // MATCHING 800eae0c 496
 #include "TOBJ.H"
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned short DAT_8009c962;
 extern unsigned char DAT_8009d2c3;
 extern unsigned char DAT_8009c933;
@@ -17,7 +17,7 @@ void spawnGroundDebris(short x, short y, short z, unsigned char f)
 {
     TObj *o;
     int t;
-    unsigned short *g = &DAT_8009c960;
+    unsigned short *g = &GAME;
 
     if (*g < 2 || *(int *)g == 9) {
         if (*g != 1 || !(DAT_8009d2c3 & 1)) {
@@ -33,7 +33,7 @@ void spawnGroundDebris(short x, short y, short z, unsigned char f)
                 o->w22 = FUN_8001f9e0() & 0xf;
             }
         }
-        if (f == 0 && DAT_8009c933 == 0 && DAT_8009c960 == 1 && DAT_8009c962 < 2) {
+        if (f == 0 && DAT_8009c933 == 0 && GAME == 1 && DAT_8009c962 < 2) {
             t = DAT_8009ceaf;
             if (DAT_8009d0b4 + t >= 0x1e) return;
             t = 0x19 - DAT_8009cf0a;

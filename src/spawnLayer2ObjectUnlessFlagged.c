@@ -2,9 +2,9 @@
 // MATCHING 80020d98 276
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4; } SP;
-extern unsigned short D_8009C960;
+extern unsigned short GAME;
 extern unsigned short D_8009C962;
-extern unsigned short D_80078790[];
+extern unsigned short AREA_SECTION_COUNTS[];
 extern unsigned int D_8009CB94[];
 extern TObj *allocObjectLayer2(void);
 
@@ -15,8 +15,8 @@ TObj *spawnLayer2ObjectUnlessFlagged(SP *p)
     char pad;
     k = p->b3;
     n = 0;
-    for (i = 0; i < D_8009C960; i++) {
-        n += D_80078790[i];
+    for (i = 0; i < GAME; i++) {
+        n += AREA_SECTION_COUNTS[i];
     }
     n += D_8009C962;
     if (k >= 32) n++;

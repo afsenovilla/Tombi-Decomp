@@ -19,8 +19,8 @@ typedef struct {
 } X;
 #define XO(o) ((X *)(o))
 
-extern TObj *D_8009C330;
-extern unsigned char *D_8009D2E8;
+extern TObj *PLAYER_EXT;
+extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
@@ -40,13 +40,13 @@ extern TObj *FUN_80018448(void);
 
 static __inline__ void setanim(TObj *o, unsigned short anim)
 {
-    TObj *p = D_8009C330;
+    TObj *p = PLAYER_EXT;
     p->animTimer = anim;
     if (p->animFrame != anim) {
         p->animTimer = anim;
         FUN_800efc04(o);
         FUN_8001fe94(o, 0);
-        D_8009C330->animFrame = D_8009C330->animTimer;
+        PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
     }
 }
 
@@ -85,10 +85,10 @@ void playerStepWalk(TObj *o)
     unsigned short t;
 
     if ((*(unsigned char*)&o->wac) >= 2) {
-        D_8009D2E8 = (*(unsigned char **)&PLX.p611c);
-        D_8009D2E8[4] = 2;
-        D_8009D2E8[5] = 2;
-        D_8009D2E8[6] = 0;
+        BITTEN_OBJECT = (*(unsigned char **)&PLX.p611c);
+        BITTEN_OBJECT[4] = 2;
+        BITTEN_OBJECT[5] = 2;
+        BITTEN_OBJECT[6] = 0;
     }
     (*(unsigned char*)&o->wac) = 0;
     if (PAD_PRESSED[0] & 0xa0) {
@@ -96,7 +96,7 @@ void playerStepWalk(TObj *o)
         case 0:
             XO(o)->cd = 0;
             XO(o)->ce = 0;
-            (*(unsigned char*)&D_8009C330->w08) = 0;
+            (*(unsigned char*)&PLAYER_EXT->w08) = 0;
             XO(o)->c3 = 0;
             o->velX = 0;
             o->state++;
@@ -139,17 +139,17 @@ void playerStepWalk(TObj *o)
                 if (PAD_PRESSED[0] & 0x80) {
                     if (o->wb2 < -0x1ff) {
                     inc:
-                        (*(unsigned char*)&D_8009C330->w08)++;
-                        if ((*(unsigned char*)&D_8009C330->w08) > 20) {
+                        (*(unsigned char*)&PLAYER_EXT->w08)++;
+                        if ((*(unsigned char*)&PLAYER_EXT->w08) > 20) {
                             XO(o)->cd = 0;
                             XO(o)->ce = 0;
-                            (*(unsigned char*)&D_8009C330->w08) = 0;
+                            (*(unsigned char*)&PLAYER_EXT->w08) = 0;
                             o->step = 0x1c;
                             o->state = 0;
                         }
                     } else {
                     clr:
-                        (*(unsigned char*)&D_8009C330->w08) = 0;
+                        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
                     }
                 }
                 break;
@@ -235,11 +235,11 @@ void playerStepWalk(TObj *o)
         playerSelectGroundAnim(o);
         if (o->animFrame & 8) {
             if ((o->animFrame & 2) && ((*(unsigned char*)&o->da0) & 2)) {
-                D_8009C330->animFrame = 0xffff;
+                PLAYER_EXT->animFrame = 0xffff;
                 o->anim = D_80010DE0;
                 (*(unsigned char*)((char*)&o->da0 + 2)) = 1;
             } else if ((o->animFrame & 4) && ((*(unsigned char*)&o->da0) & 0x10)) {
-                D_8009C330->animFrame = 0xffff;
+                PLAYER_EXT->animFrame = 0xffff;
                 o->anim = D_80010E2C;
                 (*(unsigned char*)((char*)&o->da0 + 3)) = 1;
             }

@@ -29,7 +29,7 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { char p0[0xa]; unsigned char b0a; char p0b[0xf]; short zi; char p1c[0xb8]; } Sprite;
 typedef struct { char p0[0x48]; short w48; char p4a[0x2a]; unsigned char b74, b75, b76; } Hud;
 typedef struct { char p0[0x12]; short rx; short p14; short ry; short p18; short rz; } Model;
-extern Menu D_800A45D8;
+extern Menu MENU_STATE;
 extern Text D_8011113C;
 extern short D_8011113Cx;
 extern short D_8011113E;
@@ -40,7 +40,7 @@ extern int D_8011114C;
 extern void * D_80111150;
 extern Hud D_800B1410;
 extern unsigned char D_8009C970, D_8009D2B1;
-extern unsigned short D_8009C960, D_8009C962, D_8009D2A4;
+extern unsigned short GAME, D_8009C962, D_8009D2A4;
 extern short D_8010A058;
 extern Slot D_8010922C[], D_80109208[], D_801091D0[], D_80109C70[], D_80109BF8[], D_80109C58[];
 extern int D_801091C4[];
@@ -88,7 +88,7 @@ extern void subScreenMapDrawRoutes(void);
 
 void func_800EFD6C(void)
 {
-    Menu *m = &D_800A45D8;
+    Menu *m = &MENU_STATE;
     Slot *s;
     short end;
     int pages;
@@ -139,8 +139,8 @@ void func_800EFD6C(void)
         D_8011113E = 0xC8;
         D_80111140 = m->w10 + 1;
         D_80111142 = 0x7C15;
-        if (D_8009C960 == 9) D_8011114C = D_80108BC8[D_8009C962];
-        else D_8011114C = D_80108B78[D_8009C960];
+        if (GAME == 9) D_8011114C = D_80108BC8[D_8009C962];
+        else D_8011114C = D_80108B78[GAME];
         D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
         D_8011113C.x = 0x10;
@@ -148,7 +148,7 @@ void func_800EFD6C(void)
         D_8011113C.attr = 0x7C15;
         D_80111140 = m->w10 + 1;
         D_80111150 = D_800FFD98;
-        D_8011114C = D_80108E5C[D_8009C960][D_8009C962];
+        D_8011114C = D_80108E5C[GAME][D_8009C962];
         subScreenDrawString(5, 0);
         {
         Slot *s;

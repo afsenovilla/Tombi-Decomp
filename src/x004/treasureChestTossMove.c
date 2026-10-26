@@ -9,7 +9,7 @@
    in the tail) keeps `addu v1,v0,v1` (velX first, result in s's register). */
 #include "TOBJ.H"
 extern short DAT_8013c984[];
-extern short DAT_8007a1f0[], DAT_8007a5f0[];
+extern short DAT_8007a1f0[], COS_TABLE[];
 
 void treasureChestTossMove(TObj *o)
 {
@@ -38,7 +38,7 @@ void treasureChestTossMove(TObj *o)
         }
         a = -t;
         o->velV = ((short)a * DAT_8007a1f0[o->w78]) >> 12;
-        o->velH = ((short)a * DAT_8007a5f0[o->w78]) >> 12;
+        o->velH = ((short)a * COS_TABLE[o->w78]) >> 12;
         o->h->raw += o->velH << 8;
         o->y.raw = o->y.raw + (o->velV << 8);
     } else {

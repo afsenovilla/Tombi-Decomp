@@ -13,7 +13,7 @@
 s16 getScrollOffsetX(void)
 {
     s32 x = D_800A38DC;
-    s32 v = D_8007D988[x / 360];
+    s32 v = NEG_SIN_TABLE[x / 360];
     s32 r = (v * 567) >> 12;
 
     if (x > 0) {
@@ -32,7 +32,7 @@ s16 getScrollOffsetX(void)
 s16 getScrollOffsetX(void)
 {
     s32 x = D_800A38DC;
-    s32 v = D_8007D988[(x >> 8) / 360];
+    s32 v = NEG_SIN_TABLE[(x >> 8) / 360];
     s32 r = (v * 567) >> 12;
 
     if (x > 0) {

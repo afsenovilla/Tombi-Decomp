@@ -26,7 +26,7 @@ static char D_80115AFA[314] = {
     0, 0, 3, 0x4d, 0, 0x21,
 };
 extern int D_8009C960[];
-extern unsigned short D_8009C960h;
+extern unsigned short GAME;
 extern int *D_80115A08[];
 extern int *D_80115948[];
 extern int ObjCullRegister(TObj *o);
@@ -67,7 +67,7 @@ void treasureChestOpenCarried(TObj *o)
         if (D_8009C960[0] == 0x30009)
             o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
         else
-            o->anim = (void *)D_80115948[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
+            o->anim = (void *)D_80115948[GAME * 4 + (o->b0c & 0x7f)][1];
         AnimLoadDuration(o);
         o->b69 = 0;
         o->velX = 0x80;

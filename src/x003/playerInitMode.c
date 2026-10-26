@@ -41,7 +41,7 @@ extern void FUN_801212a0(TObj *);
 extern void playerInitAreaHook(TObj *);
 extern void FUN_8011d8c4(TObj *);
 extern void FUN_8011d334(TObj *);
-extern PL *DAT_8009c330;
+extern PL *PLAYER_EXT;
 extern unsigned char DAT_8009d2b2[];
 extern unsigned char DAT_8009cff8;
 extern unsigned char DAT_8009d006[];
@@ -56,7 +56,7 @@ extern unsigned char DAT_8009c970, DAT_8009c970b[];
 extern int SPR_DATA[];
 extern char DAT_80010748[];
 extern unsigned char DAT_8009cef8;
-extern unsigned short DAT_8009c960;
+extern unsigned short GAME;
 extern unsigned int DAT_8009c960i;
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982;
@@ -88,7 +88,7 @@ static E **DAT_80115190[20] = {
 extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 
-#define LOADP() p = (unsigned char *)DAT_80115190[DAT_8009c960]; p = ((unsigned char **)p)[DAT_8009c962]; p += DAT_8009c982 * 4
+#define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[DAT_8009c962]; p += DAT_8009c982 * 4
 
 void playerInitMode(TObj *o)
 {
@@ -100,10 +100,10 @@ void playerInitMode(TObj *o)
     int a;
     char pad[0xe0];
 
-    DAT_8009c330 = &X(o)->pl;
+    PLAYER_EXT = &X(o)->pl;
     switch (o->step) {
     case 0:
-        pl = DAT_8009c330;
+        pl = PLAYER_EXT;
         if (FUN_8005efe4() != 1) FUN_8005efe4();
         pl->w14 = 0;
         o->w1e = 0;
@@ -115,13 +115,13 @@ void playerInitMode(TObj *o)
         }
         loadCompressedTIM(a);
         {
-            PL *q = DAT_8009c330;
+            PL *q = PLAYER_EXT;
             *(unsigned char *)q = 0;
             q->w28 = 0xffff;
             q->w2a = 0xffff;
             q->w2e = 0xffff;
         }
-        DAT_8009c330->b4 = 0;
+        PLAYER_EXT->b4 = 0;
         o->visible = 1;
         *(signed char *)&o->b0f = -8;
         o->b0a = 0;
@@ -149,7 +149,7 @@ void playerInitMode(TObj *o)
             X(o)->bc9 = 1;
             spawnPlayerPoolType12Object();
         }
-        switch (DAT_8009c960) {
+        switch (GAME) {
         case 0: FUN_801228bc(o); break;
         case 1: case 7: FUN_801212a0(o); break;
         case 3: playerInitAreaHook(o); break;
@@ -219,7 +219,7 @@ void playerInitMode(TObj *o)
         o->step = c;
         o->state = 0;
         o->substep = 0;
-        if (DAT_8009c960 == 0) playerSetSpawnTimerArea0Sec3(o);
+        if (GAME == 0) playerSetSpawnTimerArea0Sec3(o);
         switch (o->step) {
         case 2:
             { unsigned short t2 = o->h->p.whole;

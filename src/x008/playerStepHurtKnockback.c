@@ -16,9 +16,9 @@ typedef struct {
     unsigned short w2e;
 } P800FD358;
 
-extern P800FD358 *D_8009C330;
-extern TObj *D_8009D2E8;
-extern TObj *D_8009F0EC;
+extern P800FD358 *PLAYER_EXT;
+extern TObj *BITTEN_OBJECT;
+extern TObj *GRABBED_OBJECT;
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001f110(int);
@@ -38,16 +38,16 @@ extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, int);
 
 #define SETANIM_IF(n) \
-    D_8009C330->w2c = n; \
-    if (D_8009C330->w2e != n) { \
-        D_8009C330->w2c = n; \
+    PLAYER_EXT->w2c = n; \
+    if (PLAYER_EXT->w2e != n) { \
+        PLAYER_EXT->w2c = n; \
         FUN_800efc04(o); \
         FUN_8001fe94(o, 0); \
-        D_8009C330->w2e = D_8009C330->w2c; \
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c; \
     }
 
 #define BLINK() \
-    if (U8(o, 0xd1) == 0 && D_8009C330->b8 == 0) \
+    if (U8(o, 0xd1) == 0 && PLAYER_EXT->b8 == 0) \
         o->visible = (*(unsigned char*)&SPAD.s1f8) & 1;
 
 void playerStepHurtKnockback(TObj *o)
@@ -63,8 +63,8 @@ void playerStepHurtKnockback(TObj *o)
         o->d8c = 0;
         if (o->b9e != 0) {
             if (o->b9e == 4 || o->b9e == 7)
-                D_8009F0EC->active = 1;
-            q = D_8009F0EC;
+                GRABBED_OBJECT->active = 1;
+            q = GRABBED_OBJECT;
             if (q->type == 0x21)
                 q->ba7 = 0;
             else
@@ -77,12 +77,12 @@ void playerStepHurtKnockback(TObj *o)
         (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
         (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
         o->wb0 = 0;
-        D_8009C330->b8 = 0;
+        PLAYER_EXT->b8 = 0;
         if ((*(unsigned char*)&o->wac) >= 2) {
-            D_8009D2E8 = (*(TObj **)&PLX.p611c);
-            D_8009D2E8->b04 = 2;
-            D_8009D2E8->step = 2;
-            D_8009D2E8->state = 0;
+            BITTEN_OBJECT = (*(TObj **)&PLX.p611c);
+            BITTEN_OBJECT->b04 = 2;
+            BITTEN_OBJECT->step = 2;
+            BITTEN_OBJECT->state = 0;
         }
         (*(unsigned char*)&o->wac) = 0;
         GVARS.i34 = 0;
@@ -90,12 +90,12 @@ void playerStepHurtKnockback(TObj *o)
         o->b9d = 0;
         U8(o, 0xc6) = 0;
         U8(o, 0xe3) = 0;
-        D_8009C330->b0 = 0;
+        PLAYER_EXT->b0 = 0;
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         *(signed char *)&o->b0f = -8;
         if (SPAD.b1a4 == 0 && o->w9a != o->w98) {
             o->w9a = o->w98;
-            D_8009C330->b8 = 1;
+            PLAYER_EXT->b8 = 1;
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
@@ -104,13 +104,13 @@ void playerStepHurtKnockback(TObj *o)
                 playJingle(3);
             }
         }
-        D_8009C330->b8 = GVARS.b38;
+        PLAYER_EXT->b8 = GVARS.b38;
         o->ba4 = 0;
         o->b69 = 0;
         o->movetab = D_80077D24;
         o->velV = 0;
         o->timer = 0;
-        D_8009C330->w2e = 0xff;
+        PLAYER_EXT->w2e = 0xff;
         switch (U8(o, 0xd1)) {
         case 1:
             SETANIM_IF(0x53);

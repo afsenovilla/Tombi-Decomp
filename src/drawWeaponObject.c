@@ -45,11 +45,11 @@ extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern unsigned short D_1F8001F8;
 extern char D_1F8000C0b[];
-extern SH *D_8009C338;
-extern PL *D_8009C330;
+extern SH *WEAPON_STATE;
+extern PL *PLAYER_EXT;
 extern short D_800801E8, D_800801EA, D_800801EC, D_800801EE;
-extern short costab[];
-extern short negsintab2[];
+extern short COS_TABLE[];
+extern short NEG_SIN_TABLE[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
@@ -92,16 +92,16 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, short d, unsigned 
     return 0;
 }
 
-#define COS(i) costab[i]
-#define SIN(i) negsintab2[i]
+#define COS(i) COS_TABLE[i]
+#define SIN(i) NEG_SIN_TABLE[i]
 
 #define SHADOW(q) { \
     p = DAT_1f800164; \
-    weaponBuildChainBoxes(o, D_8009C338->x, D_8009C338->y); \
+    weaponBuildChainBoxes(o, WEAPON_STATE->x, WEAPON_STATE->y); \
     p->code = 0x2c; \
     SetSemiTrans(p, 1); \
-    p->tpage = D_8009C338->w8; \
-    p->clut = D_8009C338->w10; \
+    p->tpage = WEAPON_STATE->w8; \
+    p->clut = WEAPON_STATE->w10; \
     p->u0 = 0xc0; \
     p->u2 = 0xc0; \
     p->v0 = 0; \
@@ -188,12 +188,12 @@ void drawWeaponObject(TObj *o)
     idx = 0;
     x = LZ_FILE_CTRL;
     y = (unsigned long)LZ_FILE_CTRL >> 16;
-    D_8009C338->x = x;
-    D_8009C338->y = y;
+    WEAPON_STATE->x = x;
+    WEAPON_STATE->y = y;
     a0 = o->d8c & 0xff;
     a1 = (o->d8c + 0x80) & 0xff;
     if (PLAYER.obj.b9d)
-        k = D_8009C330->b7;
+        k = PLAYER_EXT->b7;
     else
         k = (*(short*)&PLAYER.obj.animFrame);
     switch (k) {
@@ -228,26 +228,26 @@ void drawWeaponObject(TObj *o)
         }
         break;
     }
-    if (D_8009C338->b12) {
-        if (D_8009C338->w48 > 0)
-            SHADOW(D_8009C338->q1);
-        if (D_8009C338->w50 > 0)
-            SHADOW(D_8009C338->q2);
+    if (WEAPON_STATE->b12) {
+        if (WEAPON_STATE->w48 > 0)
+            SHADOW(WEAPON_STATE->q1);
+        if (WEAPON_STATE->w50 > 0)
+            SHADOW(WEAPON_STATE->q2);
         p = DAT_1f800164;
         p->code = 0x2d;
         SetSemiTrans(p, 0);
-        p->tpage = D_8009C338->w4;
-        p->clut = D_8009C338->w10;
-        p->u0 = D_8009C338->b13 * 32 - 0x80;
+        p->tpage = WEAPON_STATE->w4;
+        p->clut = WEAPON_STATE->w10;
+        p->u0 = WEAPON_STATE->b13 * 32 - 0x80;
         p->v0 = 0x10;
-        p->u1 = D_8009C338->b13 * 32 - 0x61;
+        p->u1 = WEAPON_STATE->b13 * 32 - 0x61;
         p->v1 = 0x10;
-        p->u2 = D_8009C338->b13 * 32 - 0x80;
+        p->u2 = WEAPON_STATE->b13 * 32 - 0x80;
         p->v2 = 0x1f;
-        p->u3 = D_8009C338->b13 * 32 - 0x61;
+        p->u3 = WEAPON_STATE->b13 * 32 - 0x61;
         p->v3 = 0x1f;
-        s.x = D_8009C338->x;
-        s.y = D_8009C338->y;
+        s.x = WEAPON_STATE->x;
+        s.y = WEAPON_STATE->y;
         if (PLX.b6100 && *(*(unsigned short **)&PLAYER.obj.anim) >= 0xa9) {
             c = MulCosDup((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
             sn = MulNegSin((PLAYER.obj.d8c + 0x40) & 0xff, 0x18);
@@ -278,8 +278,8 @@ void drawWeaponObject(TObj *o)
                 sn = MulNegSin(an & 0xff, kk);
             }
         }
-        t.x = D_8009C330->w18 + c;
-        t.y = D_8009C330->w1a + sn;
+        t.x = PLAYER_EXT->w18 + c;
+        t.y = PLAYER_EXT->w1a + sn;
         r = angleBetweenPoints(t, s);
         {
             int b1 = (r + 0x140) & 0xff;
@@ -302,8 +302,8 @@ void drawWeaponObject(TObj *o)
     SetSemiTrans(p, o->b0d >> 7);
     {
     unsigned short cl;
-    p->tpage = D_8009C338->w4;
-    cl = D_8009C338->w6;
+    p->tpage = WEAPON_STATE->w4;
+    cl = WEAPON_STATE->w6;
     k = (D_1F8001F8 & 3) * D_800801E8;
     p->u0 = k - 0x80;
     p->v0 = 0;

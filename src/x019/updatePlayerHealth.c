@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { char pad[8]; unsigned char b8; } P;
-extern P *D_8009C330;
+extern P *PLAYER_EXT;
 extern void stopBgm(int);
 extern void playJingle(int);
 
@@ -13,7 +13,7 @@ void updatePlayerHealth(TObj *o)
     char pad;
     if (*(unsigned char *)0x1F8001A4 == 0 && o->w9a != o->w98) {
         o->w9a = o->w98;
-        D_8009C330->b8 = 1;
+        PLAYER_EXT->b8 = 1;
         ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
         if (o->w98 <= 0) {
             GVARS.b42 = 1;

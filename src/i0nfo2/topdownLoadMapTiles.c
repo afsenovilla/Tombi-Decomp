@@ -10,7 +10,7 @@ typedef struct {
     char *p2;
 } TexInfo;
 extern TexInfo D_800A4668;
-extern unsigned short D_8009C960[];
+extern unsigned short GAME[];
 extern unsigned char *D_800FECB0;
 
 void topdownLoadMapTiles(void)
@@ -32,10 +32,10 @@ void topdownLoadMapTiles(void)
     D_800A4668.clut0 = LoadClut(D_800A4668.p + 0x14, 0x80, 0x1FE);
     D_800A4668.tp1 = GetTPage(1, 0, 0x380, 0);
     D_800A4668.clut1 = GetClut(0x80, 0x1FE);
-    if (D_8009C960[0] == 5) {
+    if (GAME[0] == 5) {
         D_800A4668.tp2 = GetTPage(1, 0, 0x40, 0x100);
         D_800A4668.clut2 = GetClut(0x80, 0x1FE);
-    } else if (*(int *)D_8009C960 == 0x20013) {
+    } else if (*(int *)GAME == 0x20013) {
         D_800A4668.tp2 = GetTPage(1, 0, 0x40, 0);
         D_800A4668.clut2 = GetClut(0x80, 0x1FE);
     } else {
