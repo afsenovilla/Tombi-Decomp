@@ -329,17 +329,17 @@
     "D0SPSUB2": {
       "game": 20004,
       "n": 31,
-      "matched": 15876,
-      "n_matched": 28,
+      "matched": 17192,
+      "n_matched": 29,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 4128,
-      "n_new": 3,
+      "new": 2812,
+      "n_new": 2,
       "uniq": 19784,
-      "uniq_matched": 15656,
+      "uniq_matched": 16972,
       "n_uniq": 29,
-      "n_uniq_matched": 26
+      "n_uniq_matched": 27
     },
     "D0SPSUB3": {
       "game": 25324,

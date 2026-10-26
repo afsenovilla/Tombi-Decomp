@@ -1,4 +1,10 @@
 // FUNC 800eb948 1316 D0SPSUB2
+// MATCHING 800eb948 1316
+// Memory card screen: draws a sign (two sprites from D_800F6D18) and an 8-digit number without leading zeros.
+// Idioms: the digits are block-scoped temporaries (q7..q1 quotients, d1..d7 unsigned char) stored in the order
+// dg[1..5], dg[7], dg[6], then `q7 %= 10; dg[0] = q7` (the 10^7 and 10^6 divisions share one mult); `q1 = n / 10`
+// is written before `q2 = n / 100` so the 0x66666667 constant is loaded first; `q = dg` is set before the digit
+// block (longest life -> lowest global priority -> s6); in the loop `S->u0 = *q * 8` comes right after `S->y0 = y`.
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -54,17 +60,18 @@ void func_800EB948(int n, short x, short y, int bright)
         addPrim(D_1F8001E0 + 6, p);
         D_1F800164++;
     }
-    dg[0] = n / 10000000 % 10;
-    dg[1] = n / 1000000 - n / 10000000 * 10;
-    dg[2] = n / 100000 - n / 1000000 * 10;
-    dg[3] = n / 10000 - n / 100000 * 10;
-    dg[4] = n / 1000 - n / 10000 * 10;
-    dg[5] = n / 100 - n / 1000 * 10;
-    dg[6] = n / 10 - n / 100 * 10;
-    dg[7] = n % 10;
-    if (dg[0] != 0 || dg[1] != 0) j = 0;
-    else j = 1;
-    for (q = dg, k = 0, i = 0; i < 8; i++, q++) {
+    q = dg;
+    {
+        int q7, q6, q5, q4, q3, q2, q1;
+        unsigned char d1, d2, d3, d4, d5, d6, d7;
+        q7 = n / 10000000; q6 = n / 1000000; q5 = n / 100000; q4 = n / 10000; q3 = n / 1000; q1 = n / 10; q2 = n / 100;
+        d1 = q6 - q7 * 10; d2 = q5 - q6 * 10; d3 = q4 - q5 * 10; d4 = q3 - q4 * 10; d5 = q2 - q3 * 10; d6 = q1 - q2 * 10; d7 = n - q1 * 10;
+        dg[1] = d1; dg[2] = d2; dg[3] = d3; dg[4] = d4; dg[5] = d5; dg[7] = d7; dg[6] = d6;
+        q7 %= 10; dg[0] = q7;
+        if (dg[0] != 0 || dg[1] != 0) j = 0;
+        else j = 1;
+    }
+    for (k = 0, i = 0; i < 8; i++, q++) {
         if (i != 7 && *q == 0 && k == 0) continue;
         S->len = 4;
         S->code = 0x64;
@@ -80,10 +87,10 @@ void func_800EB948(int n, short x, short y, int bright)
         S->x0 = x + j * 8;
         S->code &= ~2;
         S->y0 = y;
+        S->u0 = *q * 8;
         S->v0 = 0x18;
         S->w = 8;
         S->h = 8;
-        S->u0 = *q * 8;
         j++;
         S->clut = GetClut(0x170, 0x1F0);
         p = D_1F800164;
