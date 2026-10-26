@@ -1,29 +1,29 @@
 {
-  "date": "2026-10-20",
+  "date": "2026-10-26",
   "totals": {
-    "lib": 100816,
-    "named": 493276,
-    "unnamed": 40636,
+    "lib": 102840,
+    "named": 562948,
+    "unnamed": 27836,
     "typed": 399676,
-    "game": 533912,
-    "n_game": 1059,
-    "n_named": 921,
-    "n_unnamed": 138,
+    "game": 590784,
+    "n_game": 1386,
+    "n_named": 1273,
+    "n_unnamed": 113,
     "n_typed": 568,
-    "n_lib": 904,
+    "n_lib": 918,
     "excluded": 479,
-    "unnamed_typed": 20388
+    "unnamed_typed": 11840
   },
-  "matching_bytes": 533936,
+  "matching_bytes": 590832,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
-      "lib": 100776,
-      "named": 227140,
-      "unnamed": 8548,
+      "lib": 102800,
+      "named": 279524,
+      "unnamed": 4632,
       "typed": 129292,
-      "n_lib": 901,
-      "n_named": 516,
-      "n_unnamed": 11,
+      "n_lib": 915,
+      "n_named": 793,
+      "n_unnamed": 7,
       "n_typed": 188,
       "excluded": 479,
       "n_excluded": 479,
@@ -32,27 +32,27 @@
         2147574772,
         2147973359
       ],
-      "game": 235688,
-      "n_game": 527
+      "game": 284156,
+      "n_game": 800
     },
     "X000.BIN (overlay AREA00)": {
       "lib": 40,
-      "named": 266136,
-      "unnamed": 32088,
+      "named": 283424,
+      "unnamed": 23204,
       "typed": 270384,
       "n_lib": 3,
-      "n_named": 405,
-      "n_unnamed": 127,
+      "n_named": 480,
+      "n_unnamed": 106,
       "n_typed": 380,
       "excluded": 0,
       "n_excluded": 0,
-      "unnamed_typed": 20388,
+      "unnamed_typed": 11840,
       "range": [
         2148433960,
         2148778232
       ],
-      "game": 298224,
-      "n_game": 532
+      "game": 306628,
+      "n_game": 586
     }
   },
   "overlays": {
@@ -314,17 +314,17 @@
     "D0SPSUB": {
       "game": 37156,
       "n": 59,
-      "matched": 24208,
-      "n_matched": 54,
+      "matched": 24988,
+      "n_matched": 55,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 12948,
-      "n_new": 5,
+      "new": 12168,
+      "n_new": 4,
       "uniq": 36172,
-      "uniq_matched": 23224,
+      "uniq_matched": 24004,
       "n_uniq": 55,
-      "n_uniq_matched": 50
+      "n_uniq_matched": 51
     },
     "D0SPSUB2": {
       "game": 20004,
@@ -344,11 +344,11 @@
     "D0SPSUB3": {
       "game": 25324,
       "n": 46,
-      "matched": 15452,
-      "n_matched": 42,
+      "matched": 16232,
+      "n_matched": 43,
       "piece": 0,
       "x000": 0,
-      "dup": 6448,
+      "dup": 5668,
       "new": 3424,
       "n_new": 1,
       "uniq": 5920,
