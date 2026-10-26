@@ -6,7 +6,7 @@
 #include "gamestate.h"
 extern unsigned char D_800A6066[];
 extern short D_800A6066s;
-extern void *D_8013B224;
+extern void *BITING_PLANT_ANIMS;
 
 void func_8012FF0C(TObj *o)
 {
@@ -88,7 +88,7 @@ chk:
         switch (o->subtype) {
         case 0:
             {
-                void *a = D_8013B224;
+                void *a = BITING_PLANT_ANIMS;
                 o->d8c = 0;
                 o->b0a = 2;
                 o->anim = a;

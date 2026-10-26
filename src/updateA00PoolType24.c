@@ -1,8 +1,8 @@
 // FUNC 8011b2e8 456 X000
 // MATCHING 8011b2e8 456
 #include "TOBJ.H"
-extern short DAT_80138690[];
-extern short DAT_80138698[];
+extern short A00_POOL_TYPE24_CLUT_X[];
+extern short A00_POOL_TYPE24_CLUT_Y[];
 extern unsigned short DAT_801386a0[];
 extern char D_8013BF48[];
 extern char D_8013BF4C[];
@@ -27,9 +27,9 @@ void updateA00PoolType24(TObj *o)
         o->b04 = t + 1;
         o->w1e = 7;
         o->b0d = 0;
-        if (DAT_80138698[o->subtype] != 0) {
+        if (A00_POOL_TYPE24_CLUT_Y[o->subtype] != 0) {
             o->b0d = 1;
-            o->w08 = FUN_8005e420(DAT_80138690[o->subtype], DAT_80138698[o->subtype] + o->b0c);
+            o->w08 = FUN_8005e420(A00_POOL_TYPE24_CLUT_X[o->subtype], A00_POOL_TYPE24_CLUT_Y[o->subtype] + o->b0c);
         }
         o->d3c = DAT_1f8002e4[0];
         x = (unsigned short)o->box0 >> 4 & 0xf;

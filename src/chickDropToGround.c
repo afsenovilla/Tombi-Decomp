@@ -5,7 +5,7 @@ extern void FUN_8001fec0(TObj *o);
 extern void FUN_8001fe6c(TObj *o);
 extern unsigned FUN_8001f9e0(void);
 extern short FUN_80040278(TObj *o, int x, int y);
-extern void *PTR_8013b26c;
+extern void *CHICK_ANIM;
 extern char D_80077cdc[];
 
 void chickDropToGround(TObj *o)
@@ -18,7 +18,7 @@ void chickDropToGround(TObj *o)
         o->movetab = D_80077cdc;
         o->animFrame = FUN_8001f9e0() & 1;
         o->wac = 0;
-        o->anim = PTR_8013b26c;
+        o->anim = CHICK_ANIM;
         if (o->b0c == 0) o->velY = -0x400;
         else o->velY = 0x80;
         v = o->h->p.whole;

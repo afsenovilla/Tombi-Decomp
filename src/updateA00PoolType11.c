@@ -2,7 +2,7 @@
 // MATCHING 8011ab10 328
 extern void FUN_800202b4(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_800187e4(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
-extern unsigned char *PTR_8013b118;
+extern unsigned char *A00_POOL_TYPE11_ANIM;
 extern int DAT_1f8002d4;
 extern unsigned char *PLAYER_EXT;
 
@@ -21,7 +21,7 @@ void updateA00PoolType11(unsigned char *o)
         o[0xd] = 0;
         o[0xa] = 0;
         *(signed char *)(o + 0xf) = -7;
-        u = PTR_8013b118;
+        u = A00_POOL_TYPE11_ANIM;
         *(int *)(o + 0x3c) = t;
         *(unsigned char **)(o + 0x24) = u;
         FUN_8001fe6c(o);
@@ -31,7 +31,7 @@ void updateA00PoolType11(unsigned char *o)
         switch (o[5]) {
         case 0:
             if (PLAYER_EXT[10] == o[0xc]) {
-                *(unsigned char **)(o + 0x24) = PTR_8013b118;
+                *(unsigned char **)(o + 0x24) = A00_POOL_TYPE11_ANIM;
                 FUN_8001fe6c(o);
                 o[5]++;
             }

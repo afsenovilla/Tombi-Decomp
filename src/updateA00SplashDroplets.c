@@ -5,7 +5,7 @@
 // Demo version of PAL x000 8011926C (FUN_8011926c.c): advances to state 2 (not 3) when the animation ends.
 typedef struct P { char p[0x24]; int w24; char q[0x3c - 0x28]; int w3c; } P;
 extern int DAT_1f8002d4;
-extern int DAT_8013b1f0;
+extern int A00_SPLASH_DROPLETS_ANIM;
 extern int FUN_800202b4(char *);
 extern int FUN_8001fec0(char *);
 extern void FUN_8001fe6c(char *);
@@ -25,7 +25,7 @@ void FUN_8011926c(char *o)
         *(signed char *)&o[0xf] = -8;
         *(short *)(o + 0x2e) = 0;
         ((P *)o)->w3c = DAT_1f8002d4;
-        ((P *)o)->w24 = DAT_8013b1f0;
+        ((P *)o)->w24 = A00_SPLASH_DROPLETS_ANIM;
         FUN_8001fe6c(o);
         FUN_8001e4f0(0x30);
         break;
@@ -45,7 +45,7 @@ void FUN_8011926c(char *o)
 #else
 typedef struct P { char p[0x24]; int w24; char q[0x3c - 0x28]; int w3c; } P;
 extern int DAT_1f8002d4;
-extern int DAT_8013b1f0;
+extern int A00_SPLASH_DROPLETS_ANIM;
 extern int FUN_800202b4(char *);
 extern int FUN_8001fec0(char *);
 extern void FUN_8001fe6c(char *);
@@ -65,7 +65,7 @@ void updateA00SplashDroplets(char *o)
         *(signed char *)&o[0xf] = -8;
         *(short *)(o + 0x2e) = 0;
         ((P *)o)->w3c = DAT_1f8002d4;
-        ((P *)o)->w24 = DAT_8013b1f0;
+        ((P *)o)->w24 = A00_SPLASH_DROPLETS_ANIM;
         FUN_8001fe6c(o);
         FUN_8001e4f0(0x30);
         break;

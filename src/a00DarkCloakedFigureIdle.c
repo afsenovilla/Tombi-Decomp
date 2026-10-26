@@ -4,7 +4,7 @@
 extern int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
-extern void *PTR_DAT_8013b270;
+extern void *A00_DARK_CLOAKED_FIGURE_ANIMS;
 extern void *PTR_DAT_8013b274;
 
 void a00DarkCloakedFigureIdle(TObj *o)
@@ -14,7 +14,7 @@ void a00DarkCloakedFigureIdle(TObj *o)
         switch (o->state) {
         case 0:
             if (FUN_8001f9e0() & 1) {
-                o->anim = PTR_DAT_8013b270;
+                o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS;
                 FUN_8001fe6c(o);
                 o->timer = 0x40;
                 o->state = 2;
@@ -43,7 +43,7 @@ void a00DarkCloakedFigureIdle(TObj *o)
             switch (FUN_8001f9e0() & 3) {
             case 0:
             case 1:
-                o->anim = PTR_DAT_8013b270;
+                o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS;
                 FUN_8001fe6c(o);
                 o->timer = 0x40;
                 o->state = 1;

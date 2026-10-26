@@ -11,7 +11,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer1(void);
-extern void *PTR_DAT_8013b104;
+extern void *EGG_ANIM;
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009d2ae[];
 extern int DAT_800a6048, DAT_800a604c, DAT_800a6050;
@@ -71,7 +71,7 @@ void FUN_8012e1c0(TObj *o)
             if (o->step == 0) {
                 if (o->state == 0) {
                     o->b69 = 0;
-                    o->anim = PTR_DAT_8013b104;
+                    o->anim = EGG_ANIM;
                     FUN_8001fe6c(o);
                     o->state++;
                 }
@@ -83,7 +83,7 @@ void FUN_8012e1c0(TObj *o)
         if (o->visible) {
             switch (o->step) {
             case 0:
-                o->anim = PTR_DAT_8013b104;
+                o->anim = EGG_ANIM;
                 FUN_8001fe6c(o);
                 o->step = 1;
                 break;
@@ -120,7 +120,7 @@ extern void FUN_8001fe6c(TObj *);
 extern void freeObjectLayer2(TObj *);
 extern TObj *allocObjectLayer2(void);
 extern TObj *allocObjectLayer1(void);
-extern void *PTR_DAT_8013b104;
+extern void *EGG_ANIM;
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009d2ae[];
 extern int DAT_800a6048, DAT_800a604c, DAT_800a6050;
@@ -180,7 +180,7 @@ void updateEgg(TObj *o)
             if (o->step == 0) {
                 if (o->state == 0) {
                     o->b69 = 0;
-                    o->anim = PTR_DAT_8013b104;
+                    o->anim = EGG_ANIM;
                     FUN_8001fe6c(o);
                     o->state++;
                 }
@@ -192,7 +192,7 @@ void updateEgg(TObj *o)
         if (o->visible) {
             switch (o->step) {
             case 0:
-                o->anim = PTR_DAT_8013b104;
+                o->anim = EGG_ANIM;
                 FUN_8001fe6c(o);
                 o->step = 1;
                 break;

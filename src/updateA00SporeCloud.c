@@ -9,7 +9,7 @@ extern void a00SporeCloudStunPigs(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_800187e4(TObj *);
 extern int DAT_1f8002d4[];
-extern void *DAT_8013b108[];
+extern void *A00_SPORE_CLOUD_ANIMS[];
 
 void updateA00SporeCloud(TObj *o)
 {
@@ -25,7 +25,7 @@ void updateA00SporeCloud(TObj *o)
         o->w08 = FUN_8005e420(0xe0, 0x1e0);
         o->b0d = 0x80;
         o->d3c = DAT_1f8002d4[0];
-        o->anim = DAT_8013b108[o->subtype];
+        o->anim = A00_SPORE_CLOUD_ANIMS[o->subtype];
         FUN_8001fe6c(o);
         o->timer = 0x38;
         o->w22 = 0;

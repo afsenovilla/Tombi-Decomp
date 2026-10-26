@@ -10,7 +10,7 @@ extern unsigned char DAT_8009d13f, DAT_8009c93e, DAT_8009c942;
 extern signed char DAT_8009d2b0;
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982[];
-extern unsigned char DAT_801384c0[];
+extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
 extern short DAT_1f80016a, DAT_1f80016e, DAT_1f800172;
 extern short DAT_1f8001c6;
@@ -74,7 +74,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 3:
         {
-            unsigned char v = DAT_801384c0[DAT_8009c962];
+            unsigned char v = A00_SCROLL_CONTROLLER_MODE_BY_SECTION[DAT_8009c962];
             o->state = 0;
             o->step = v;
         }

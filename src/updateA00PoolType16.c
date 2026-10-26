@@ -2,7 +2,7 @@
 // MATCHING 8011b0d4 268
 #include "TOBJ.H"
 extern int DAT_1f8002d4[];
-extern void *DAT_8013b11c[];
+extern void *A00_POOL_TYPE16_ANIMS[];
 extern int FUN_800202b4();
 extern void FUN_8001fec0();
 extern void FUN_8001fe6c();
@@ -23,7 +23,7 @@ void updateA00PoolType16(TObj *o)
         o->w1e = 0xc;
         iv = DAT_1f8002d4[0];
         o->b0f = 0;
-        pv = DAT_8013b11c[0];
+        pv = A00_POOL_TYPE16_ANIMS[0];
         o->d3c = iv;
         o->anim = pv;
         FUN_8001fe6c(o);

@@ -2,7 +2,7 @@
 // MATCHING 80132f80 724
 #include "player.h"
 #include "TOBJ.H"
-extern void *D_8013B18C, *D_8013B180, *D_8013B17C;
+extern void *D_8013B18C, *D_8013B180, *FROG_ANIMS;
 extern char D_80077CF4[];
 extern int Rand(void);
 extern void AnimJump(TObj *, int);
@@ -71,7 +71,7 @@ void frogHop(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x20;
         if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8) != 0) {
-            o->anim = D_8013B17C;
+            o->anim = FROG_ANIMS;
             AnimLoadDuration(o);
             o->state = 0;
         }

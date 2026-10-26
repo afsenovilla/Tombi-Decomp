@@ -7,7 +7,7 @@
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { short v[8]; } T16;
 extern T16 A00_FOG_CLOUD_QUADS[];
-extern void *DAT_8013b23c[];
+extern void *A00_FOG_CLOUD_ANIMS[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f80017e;
 short FUN_8005e420(int a, int b);
@@ -25,7 +25,7 @@ void FUN_80118438(TObj *o)
         o->b0d = 0x81;
         o->w08 = ((o->subtype + 0x1f0) << 6) | ((0xc0) >> 4);
         o->b0a = 0x11;
-        o->anim = DAT_8013b23c[o->subtype];
+        o->anim = A00_FOG_CLOUD_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         v = (SV *)((char *)o + 0xb4);
         v[0].x = A00_FOG_CLOUD_QUADS[o->subtype].v[0];
@@ -64,7 +64,7 @@ void FUN_80118438(TObj *o)
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { short v[8]; } T16;
 extern T16 A00_FOG_CLOUD_QUADS[];
-extern void *DAT_8013b23c[];
+extern void *A00_FOG_CLOUD_ANIMS[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f80017e;
 short FUN_8005e420(int a, int b);
@@ -82,7 +82,7 @@ void updateA00FogCloud(TObj *o)
         o->b0d = 0x81;
         o->w08 = FUN_8005e420(0xc0, o->subtype + 0x1f0);
         o->b0a = 0x11;
-        o->anim = DAT_8013b23c[o->subtype];
+        o->anim = A00_FOG_CLOUD_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         v = (SV *)((char *)o + 0xb4);
         v[0].x = A00_FOG_CLOUD_QUADS[o->subtype].v[0];

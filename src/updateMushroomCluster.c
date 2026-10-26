@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char DAT_800a6047[];
 extern short DAT_800a60ea[];
-extern void *PTR_DAT_8013b1cc, *PTR_DAT_8013b1d0;
+extern void *MUSHROOM_CLUSTER_ANIMS, *PTR_DAT_8013b1d0;
 extern int DAT_1f8002d4[];
 extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
@@ -31,7 +31,7 @@ void updateMushroomCluster(TObj *o)
         o->b0d = 0;
         o->b0f = c - 1;
         o->w1e = 9;
-        o->anim = PTR_DAT_8013b1cc;
+        o->anim = MUSHROOM_CLUSTER_ANIMS;
         o->d3c = DAT_1f8002d4[0];
         FUN_8001fe6c(o);
         break;
@@ -50,7 +50,7 @@ void updateMushroomCluster(TObj *o)
         case 1:
             if (o->b69 == 0) {
                 o->step = 0;
-                o->anim = PTR_DAT_8013b1cc;
+                o->anim = MUSHROOM_CLUSTER_ANIMS;
                 o->timer = 0;
                 FUN_8001fe6c(o);
             } else if (o->b69 == 1) {

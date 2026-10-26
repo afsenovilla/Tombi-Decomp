@@ -2,7 +2,7 @@
 // MATCHING 800ea544 312
 #include "TOBJ.H"
 extern TObj *FUN_80018448(void);
-extern signed char DAT_80114a80[];
+extern signed char POOL_TYPE05_RING_DEFS[];
 
 void spawnPoolType05Ring(TObj *a, short x, short y, short z)
 {
@@ -12,7 +12,7 @@ void spawnPoolType05Ring(TObj *a, short x, short y, short z)
     for (i = 0; i < 6; i++) {
         o = FUN_80018448();
         if (o != 0) {
-            p = &DAT_80114a80[i * 4];
+            p = &POOL_TYPE05_RING_DEFS[i * 4];
             o->active = 2;
             o->type = 5;
             o->animFrame = 0;

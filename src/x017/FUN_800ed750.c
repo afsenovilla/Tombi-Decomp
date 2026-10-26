@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short spd[2]; short pos[2]; short cnt[2]; } B;
 typedef struct { int n; char *b8; int tab[4]; short val[2]; } E;
-extern int **DAT_80114c70[];
+extern int **VILLAGER_NPC_SPRING_PARAMS[];
 static char DAT_80114c7c[148] = {
     3, 1, -0x80, 0, 0, 0, 3, 1, -0x80, 1, 0, 0, 3, 1, -0x80, 2,
     0, 0, 3, 1, -0x80, 3, 0, 0, 3, 1, -0x80, 0, 0, 0, 3, 1,
@@ -50,7 +50,7 @@ void FUN_800ed750(TObj *o)
     switch (o->state) {
     case 0:
         INIT(o, b);
-        pp = DAT_80114c70[o->b0c];
+        pp = VILLAGER_NPC_SPRING_PARAMS[o->b0c];
         p = *pp;
         e->n = *p++;
         for (i = 0; i < e->n; i++) {

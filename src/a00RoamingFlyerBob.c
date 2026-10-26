@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short COS_TABLE[];
 extern char D_80077CE8[];
-extern void *D_8013B19C;
+extern void *A00_ROAMING_FLYER_BOB_ANIMS;
 extern void *D_8013B1A0;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -18,14 +18,14 @@ void a00RoamingFlyerBob(TObj *o)
         o->step++;
         o->velV = 0x80;
         o->d88 = 0;
-        o->anim = D_8013B19C;
+        o->anim = A00_ROAMING_FLYER_BOB_ANIMS;
         AnimLoadDuration(o);
         break;
     case 1:
     case 4:
         if (o->step == 4 && o->b6b == 0) {
             if (AnimAdvance(o)) {
-                o->anim = D_8013B19C;
+                o->anim = A00_ROAMING_FLYER_BOB_ANIMS;
                 AnimLoadDuration(o);
                 o->b6b = 1;
             }

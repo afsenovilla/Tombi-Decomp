@@ -17,7 +17,7 @@ extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *BAIT_OBJECT[];
-extern short D_80138F8C[];
+extern short BITING_PLANT_BAIT_VEL_BY_FRAME[];
 extern short D_80138F8E[];
 extern unsigned char D_800A4553[];
 extern unsigned char D_8007A7F0[];
@@ -39,7 +39,7 @@ void func_801236F0(TObj *o)
             if (ObjCullRegister(o) && (o->b68 & 1)) {
                 o->b68 = 0;
                 o->b9c = 0;
-                o->velH = D_80138F8C[o->animFrame * 2];
+                o->velH = BITING_PLANT_BAIT_VEL_BY_FRAME[o->animFrame * 2];
                 o->velV = D_80138F8E[o->animFrame * 2];
                 o->step++;
                 if (((unsigned char*)&GCD.bce4d)[0] == 0 && o->animFrame == 0) {
@@ -109,7 +109,7 @@ extern int ObjCullRegister(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern short TileCollideAt(TObj *, short, short);
 extern TObj *BAIT_OBJECT[];
-extern short D_80138F8C[];
+extern short BITING_PLANT_BAIT_VEL_BY_FRAME[];
 static short D_80138F8E[13] = {
     -0x100, -0x80, -0x100, 0, -0x100, 0, 1, 2,
     0, 0x100, 0x200, 1, 2,
@@ -134,7 +134,7 @@ void updateA00BitingPlantBait(TObj *o)
             if (ObjCullRegister(o) && (o->b68 & 1)) {
                 o->b68 = 0;
                 o->b9c = 0;
-                o->velH = D_80138F8C[o->animFrame * 2];
+                o->velH = BITING_PLANT_BAIT_VEL_BY_FRAME[o->animFrame * 2];
                 o->velV = D_80138F8E[o->animFrame * 2];
                 o->step++;
                 if (((unsigned char*)&GCD.bce4d)[0] == 0 && o->animFrame == 0) {

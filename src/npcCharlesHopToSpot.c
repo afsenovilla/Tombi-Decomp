@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
-extern void *D_8013AC14, *D_8013AC44, *D_8013AC2C;
+extern void *NPC_CHARLES_ANIMS, *D_8013AC44, *D_8013AC2C;
 extern Fix16 *D_800A607C[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
@@ -12,7 +12,7 @@ void npcCharlesHopToSpot(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->anim = D_8013AC14;
+        o->anim = NPC_CHARLES_ANIMS;
         AnimLoadDuration(o);
         o->animFrame = 1;
         if (D_800A607C[0]->p.whole != 0) break;
@@ -53,7 +53,7 @@ void npcCharlesHopToSpot(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x10;
         if (--o->timer > 0) break;
-        o->anim = D_8013AC14;
+        o->anim = NPC_CHARLES_ANIMS;
         AnimLoadDuration(o);
         o->animFrame = 0;
         o->subtype = 0;

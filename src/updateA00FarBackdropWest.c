@@ -11,7 +11,7 @@ extern unsigned short D_1F80017A[];
 #define DAT_1f800186 D_1F80017A
 extern int DAT_800a4570[];
 extern int DAT_1f8002d4[];
-extern void *PTR_8013b1fc[];
+extern void *A00_FAR_BACKDROP_WEST_ANIMS[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 
@@ -25,7 +25,7 @@ void FUN_8012236c(TObj *o)
     case 0:
         o->w1e = 11;
         o->b0d = 0;
-        o->anim = PTR_8013b1fc[o->subtype];
+        o->anim = A00_FAR_BACKDROP_WEST_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         o->b0f = 3;
         o->d30 = o->h->p.whole;
@@ -65,7 +65,7 @@ extern short DAT_1f800176;
 extern unsigned short DAT_1f800186[];
 extern int DAT_800a4570[];
 extern int DAT_1f8002d4[];
-extern void *PTR_8013b1fc[];
+extern void *A00_FAR_BACKDROP_WEST_ANIMS[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 
@@ -79,7 +79,7 @@ void updateA00FarBackdropWest(TObj *o)
     case 0:
         o->w1e = 11;
         o->b0d = 0;
-        o->anim = PTR_8013b1fc[o->subtype];
+        o->anim = A00_FAR_BACKDROP_WEST_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         o->b0f = 3;
         o->d30 = o->h->p.whole;

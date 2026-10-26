@@ -39,7 +39,7 @@ extern short D_801389B8[], D_801389BC[], D_801389DC[];
 extern short D_80138A10[], D_80138A64[], D_80138A30[], D_80138A84[];
 extern short D_8013884C[], D_8013886C[], D_80138848[];
 extern char D_801388C8[], D_80138908[], D_80138948[];
-extern short D_80138988[], D_8013898A[], D_8013898C[];
+extern short A00_INIT_OBJECT_ANGLE_OFFSETS[], D_8013898A[], D_8013898C[];
 extern E *allocObjectLayer2(void);
 extern void ObjCullRegister(E *);
 extern void cullObjectToDrawListMargin(E *, int);
@@ -219,7 +219,7 @@ void func_8011C804(E *o)
             RotMatrix(&ang, &m);
             if (e->next == 0) {
                 int s;
-                e->d84 = *(short *)((char *)D_80138988 + e->subtype * 6) + ang.vx;
+                e->d84 = *(short *)((char *)A00_INIT_OBJECT_ANGLE_OFFSETS + e->subtype * 6) + ang.vx;
                 e->d88 = *(short *)((char *)D_8013898A + e->subtype * 6) + ang.vy;
                 s = *(short *)((char *)D_8013898C + e->subtype * 6) + ang.vz + *pp[6];
                 e->d8c = s;
@@ -311,7 +311,7 @@ static char D_801388C8[64] = {
     0xa, 0, 2, 0, 2, 0, 1, 0, 0xa, 0, 2, 0, 2, 0, 1, 0,
     0xa, 0, 2, 0, 2, 0, 1, 0, 2, 0, 2, 0, 1, 0, 1,
 };
-extern short D_80138988[], D_8013898A[], D_8013898C[];
+extern short A00_INIT_OBJECT_ANGLE_OFFSETS[], D_8013898A[], D_8013898C[];
 extern E *allocObjectLayer2(void);
 extern void ObjCullRegister(E *);
 extern void cullObjectToDrawListMargin(E *, int);
@@ -487,7 +487,7 @@ void func_8011C804(E *o)
             RotMatrix(&ang, &m);
             if (e->next == 0) {
                 int s;
-                e->d84 = *(short *)((char *)D_80138988 + e->subtype * 6) + ang.vx;
+                e->d84 = *(short *)((char *)A00_INIT_OBJECT_ANGLE_OFFSETS + e->subtype * 6) + ang.vx;
                 e->d88 = *(short *)((char *)D_8013898A + e->subtype * 6) + ang.vy;
                 s = *(short *)((char *)D_8013898C + e->subtype * 6) + ang.vz + *pp[6];
                 e->d8c = s;

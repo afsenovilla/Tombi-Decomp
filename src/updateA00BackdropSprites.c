@@ -7,7 +7,7 @@ extern void ObjListPush_1F800220(TObj *);
 extern void ObjFree(TObj *);
 extern unsigned short GetClut(int, int);
 extern void a00BackdropSpritesStep4(TObj *);
-extern void *D_8013B2A4;
+extern void *A00_BACKDROP_SPRITE_ANIMS;
 extern void *D_8013B2A8;
 extern void *D_8013B2AC[];
 extern void *D_8013B2B8;
@@ -33,7 +33,7 @@ void updateA00BackdropSprites(TObj *o)
         o->d34 = o->y.p.whole;
         switch (o->subtype) {
         case 0:
-            o->anim = D_8013B2A4;
+            o->anim = A00_BACKDROP_SPRITE_ANIMS;
             break;
         case 1:
             o->b0d = 1;

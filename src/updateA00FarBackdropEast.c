@@ -8,7 +8,7 @@
 // volatile b/visible stores keep the game order (matching debt)
 // Tried: no volatile with every order of the a/y/b stores, b inside/after the `one` block, short/uchar one, FUN(o, o->visible = 1): sb stays above sh zero (2) or two li (25).
 #include "TOBJ.H"
-extern void *DAT_8013b20c[];
+extern void *A00_FAR_BACKDROP_EAST_ANIMS[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f800176;
 extern unsigned short DAT_1f800186;
@@ -24,7 +24,7 @@ void func_80122724(TObj *o)
     case 0:
         o->w1e = 0xc;
         o->b0d = 0;
-        o->anim = DAT_8013b20c[o->b0c];
+        o->anim = A00_FAR_BACKDROP_EAST_ANIMS[o->b0c];
         o->d3c = DAT_1f8002d4[0];
         o->b0f = 0;
         o->d30 = o->h->p.whole;
@@ -62,7 +62,7 @@ void func_80122724(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern void *DAT_8013b20c[];
+extern void *A00_FAR_BACKDROP_EAST_ANIMS[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f800176;
 extern unsigned short DAT_1f800186;
@@ -79,7 +79,7 @@ void updateA00FarBackdropEast(TObj *o)
         o->w1e = 0xc;
         o->b0d = 0;
         o->y.p.whole += 0x180;
-        o->anim = DAT_8013b20c[o->b0c];
+        o->anim = A00_FAR_BACKDROP_EAST_ANIMS[o->b0c];
         o->d3c = DAT_1f8002d4[0];
         o->b0f = 0;
         o->d30 = o->h->p.whole;

@@ -5,7 +5,7 @@
 typedef struct { short x, y, z, pad; } V8012F3F4;
 
 extern void *D_8013B230[];
-extern void *D_8013B224[];
+extern void *BITING_PLANT_ANIMS[];
 extern void FUN_8001e4f0(int);
 
 static __inline__ int nearCam(TObj *o)
@@ -99,7 +99,7 @@ void bitingPlantLungeHead(TObj *o)
             c->y -= o->velV >> 10;
             d->y -= o->velV >> 10;
             if (o->velV >= 0x200)
-                o->anim = D_8013B224[o->subtype];
+                o->anim = BITING_PLANT_ANIMS[o->subtype];
             if (o->d34 - o->y.p.whole < 25)
                 o->state = 3;
         }

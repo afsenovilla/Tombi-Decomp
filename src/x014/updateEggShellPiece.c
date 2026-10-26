@@ -5,7 +5,7 @@
 
 typedef struct { short x, y; } V2;
 extern void *D_8013B0EC[];
-extern void *D_80134CF4[];
+extern void *EGG_SHELL_PIECE_ANIMS[];
 extern V2 EGG_SHELL_PIECE_VELOCITIES[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
@@ -20,7 +20,7 @@ void updateEggShellPiece(TObj *o)
     switch (o->b04) {
     case 0:
         if (GAME.selectedArea == 0) o->anim = D_8013B0EC[o->subtype];
-        else o->anim = D_80134CF4[o->subtype];
+        else o->anim = EGG_SHELL_PIECE_ANIMS[o->subtype];
         v[1] = -0x400;
         AnimLoadDuration(o);
         o->b04++;

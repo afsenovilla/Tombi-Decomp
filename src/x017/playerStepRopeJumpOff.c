@@ -9,7 +9,7 @@ typedef struct S {
     unsigned char bac; char p8[0xb0 - 0xad]; short wb0, wb2, wb4, wb6;
 } S;
 typedef struct V { short x, y; } V;
-extern short D_80115248s[];
+extern short PLAYER_ROPE_JUMP_OFF_SPEEDS[];
 extern S *PLAYER_EXT;
 extern void ObjSetAnimFromTable(S *);
 extern void AnimJump(S *, int);
@@ -43,11 +43,11 @@ void playerStepRopeJumpOff(S *o)
         else k = 3;
     }
     i = k * 2;
-    vx = D_80115248s[i];
+    vx = PLAYER_ROPE_JUMP_OFF_SPEEDS[i];
     if (o->frame & 1)
         vx = -vx;
     o->velX = vx;
-    o->velY = D_80115248s[i + 1];
+    o->velY = PLAYER_ROPE_JUMP_OFF_SPEEDS[i + 1];
     if (o->wb2 == 0) o->velX = 0;
     if (o->wb4 < 0x29) o->velX = 0;
     if (o->frame & 1) {

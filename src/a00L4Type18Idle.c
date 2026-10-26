@@ -2,7 +2,7 @@
 // MATCHING 8011f79c 580
 #include "TOBJ.H"
 #define SUB(o) ((TObj *)(o)->d90)
-extern void *DAT_8013b14c;
+extern void *A00_L4_TYPE18_ANIMS;
 extern void *DAT_8013b150;
 extern unsigned short DAT_800a603c;
 extern unsigned char DAT_800a60a1;
@@ -18,7 +18,7 @@ void a00L4Type18Idle(TObj *o)
     switch (o->state) {
     case 0:
         o->b69 = 0;
-        o->anim = DAT_8013b14c;
+        o->anim = A00_L4_TYPE18_ANIMS;
         FUN_8001fe6c(o);
         p = SUB(o);
         o->d88 = 0x100;

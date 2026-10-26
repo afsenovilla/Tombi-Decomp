@@ -28,7 +28,7 @@ extern OX *FUN_80018448(void);
 extern void spawnA00TornadoOrbiters(OX *, int);
 extern unsigned char DAT_8009c966;
 extern void *PTR_DAT_8013b1b8[];
-extern void *PTR_DAT_8013b1b4;
+extern void *A00_TORNADO_ANIMS;
 
 void spawnA00Tornado(int x, int y, int z, unsigned char sub)
 {
@@ -73,7 +73,7 @@ void spawnA00Tornado(int x, int y, int z, unsigned char sub)
                 p->pos = o->pos;
                 p->b1d = -1;
                 p->pos30 = p->pos;
-                p->anim = PTR_DAT_8013b1b4;
+                p->anim = A00_TORNADO_ANIMS;
                 o->d94 = p;
                 p->d90 = o;
             }

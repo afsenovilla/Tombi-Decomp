@@ -6,7 +6,7 @@
 #include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern void *D_8013B270[];
+extern void *A00_DARK_CLOAKED_FIGURE_ANIMS[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
@@ -26,7 +26,7 @@ void func_80134404(TObj *o)
         o->w1e = 8;
         o->animFrame = 1;
         t = ((int*)&SPAD.i2d4)[0];
-        a = D_8013B270[0];
+        a = A00_DARK_CLOAKED_FIGURE_ANIMS[0];
         o->d3c = t;
         o->anim = a;
         AnimLoadDuration(o);
@@ -60,7 +60,7 @@ void func_80134404(TObj *o)
         case 2:
             switch (o->state) {
             case 0:
-                o->anim = D_8013B270[0];
+                o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS[0];
                 AnimLoadDuration(o);
                 o->velX = 0x200;
                 o->animFrame = 0;
@@ -92,7 +92,7 @@ void func_80134404(TObj *o)
 #include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern void *D_8013B270[];
+extern void *A00_DARK_CLOAKED_FIGURE_ANIMS[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void ObjCullRegister(TObj *o);
@@ -112,7 +112,7 @@ void updateA00DarkCloakedFigure(TObj *o)
         o->w1e = 8;
         o->animFrame = 1;
         t = ((int*)&SPAD.i2d4)[0];
-        a = D_8013B270[0];
+        a = A00_DARK_CLOAKED_FIGURE_ANIMS[0];
         o->d3c = t;
         o->anim = a;
         AnimLoadDuration(o);
@@ -146,7 +146,7 @@ void updateA00DarkCloakedFigure(TObj *o)
         case 2:
             switch (o->state) {
             case 0:
-                o->anim = D_8013B270[0];
+                o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS[0];
                 AnimLoadDuration(o);
                 o->velX = 0x200;
                 o->animFrame = 0;

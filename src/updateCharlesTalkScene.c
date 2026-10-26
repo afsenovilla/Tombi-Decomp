@@ -9,7 +9,7 @@ extern unsigned char DAT_8009cebd, DAT_8009d0a7, DAT_8009d2b0, DAT_8009ce4a, DAT
 extern int DAT_8009c984;
 extern unsigned char DAT_8009d00dA[];
 extern unsigned char *PLAYER_EXT;
-extern void *PTR_8013ac14, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
+extern void *NPC_CHARLES_ANIMS, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
 static char DAT_801396ca[98] = {
     8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     0, 1, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1, 0, 0, 0, 0,
@@ -161,7 +161,7 @@ void updateCharlesTalkScene(TObj *o)
             break;
         case 4: case 5: case 6: case 7: case 8: case 9:
             ((TObj *)X.d90)->b04 = 3;
-            p->anim = PTR_8013ac14;
+            p->anim = NPC_CHARLES_ANIMS;
             AnimLoadDuration(p);
             CEBD = 10;
             CEBD = BUTTON_CONFIG_INDEX + 10;

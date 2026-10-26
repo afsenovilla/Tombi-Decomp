@@ -10,7 +10,7 @@ typedef struct { unsigned char p0[9]; unsigned char b9; } P8011F9E0;
 extern P8011F9E0 *PLAYER_EXT;
 extern Fix16 *D_800A6078_[];
 #define D_800A6078 D_800A6078_[0]
-extern void *D_8013B14C;
+extern void *A00_L4_TYPE18_ANIMS;
 extern void *D_8013B150;
 extern void *D_8013B154;
 extern unsigned char D_800A603C_[], D_800A603D_[], D_800A603E_[];
@@ -37,7 +37,7 @@ void a00L4Type18Active(TObj *o)
     switch (o->state) {
     case 0:
         o->d88 = 0;
-        o->anim = D_8013B14C;
+        o->anim = A00_L4_TYPE18_ANIMS;
         o->velH = o->h->p.whole - D_800A6078->p.whole;
         o->velV = 0;
         AnimLoadDuration(o);

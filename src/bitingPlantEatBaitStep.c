@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { char pad[4]; unsigned char b4; } E;
 extern E *BAIT_OBJECT[];
-extern void *D_8013B224;
+extern void *BITING_PLANT_ANIMS;
 extern void spawnA00L5Type0CObject(Fix16 *);
 
 void bitingPlantEatBaitStep(TObj *o)
@@ -70,7 +70,7 @@ void bitingPlantEatBaitStep(TObj *o)
     case 3:
         switch (o->subtype) {
         case 0:
-            o->anim = D_8013B224;
+            o->anim = BITING_PLANT_ANIMS;
             o->d8c = 0;
             o->b0a = 2;
             break;

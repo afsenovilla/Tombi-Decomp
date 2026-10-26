@@ -6,7 +6,7 @@ extern unsigned short FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *o);
 extern unsigned char DAT_800a6047[];
 extern int D_1f8002d4;
-extern void *PTR_8013b26c;
+extern void *CHICK_ANIM;
 
 void spawnChick(int x, int y, int z)
 {
@@ -29,7 +29,7 @@ void spawnChick(int x, int y, int z)
         o->w7a = 1;
         o->b0f = DAT_800a6047[0] - 1;
         o->d3c = D_1f8002d4;
-        o->anim = PTR_8013b26c;
+        o->anim = CHICK_ANIM;
         o->b0a = 2;
         FUN_8001fe6c(o);
         o->b04 = 1;

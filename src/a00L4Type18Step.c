@@ -2,7 +2,7 @@
 // MATCHING 80120164 320
 extern void a00L4Type18Idle(unsigned char *), a00L4Type18Active(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_8001fec0(unsigned char *);
 extern short FUN_8001fdac(int, int);
-extern unsigned char *PTR_8013b14c;
+extern unsigned char *A00_L4_TYPE18_ANIMS;
 
 void a00L4Type18Step(unsigned char *o)
 {
@@ -18,7 +18,7 @@ void a00L4Type18Step(unsigned char *o)
         switch (o[6]) {
         case 0:
             o[0x69] = 0;
-            *(unsigned char **)(o + 0x24) = PTR_8013b14c;
+            *(unsigned char **)(o + 0x24) = A00_L4_TYPE18_ANIMS;
             *(int *)(o + 0x88) = 0;
             *(unsigned short *)(o + 0x7e) = *(unsigned short *)(o + 0x16);
             FUN_8001fe6c(o);

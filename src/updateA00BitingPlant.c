@@ -7,8 +7,8 @@ typedef struct {
     short p0, x, p4, y, p8, z;
 } Pos8012ED60;
 
-extern void *D_8013B224[];
-extern unsigned short D_80139208[];
+extern void *BITING_PLANT_ANIMS[];
+extern unsigned short BITING_PLANT_BOXES[];
 extern unsigned char D_800A6047;
 extern unsigned char PLAYER;
 extern void spawnA00L5Type0CObject(Pos8012ED60 *);
@@ -67,8 +67,8 @@ void updateA00BitingPlant(TObj *o)
         o->animFrame = 1;
         o->b0d = 0;
         o->b0a = 2;
-        o->anim = D_8013B224[o->subtype];
-        b = &D_80139208[o->subtype * 4];
+        o->anim = BITING_PLANT_ANIMS[o->subtype];
+        b = &BITING_PLANT_BOXES[o->subtype * 4];
         o->d3c = ((struct { char pad[0x2d4]; int v; } *)0x1F800000)->v;
         o->box0 = *b++;
         o->box1 = *b++;

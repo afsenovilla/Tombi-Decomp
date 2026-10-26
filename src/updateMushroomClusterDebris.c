@@ -9,8 +9,8 @@ typedef struct {
     char p5[0x40 - 0x30]; H *h; char p6[0x82 - 0x44]; short vel;
 } O;
 extern char D_80077cf4[], D_80077cdc[];
-extern E T_80138664[];
-extern int T_8013b1d4[];
+extern E MUSHROOM_CLUSTER_DEBRIS_PARAMS[];
+extern int MUSHROOM_CLUSTER_DEBRIS_ANIMS[];
 extern void FUN_8001fe6c(O *), applyFrameVelocityX(O *), FUN_8001fec0(O *), FUN_800187e4(O *);
 extern int FUN_800202b4(O *);
 extern short FUN_80040278(O *, int, int);
@@ -23,10 +23,10 @@ void updateMushroomClusterDebris(O *o)
         o->state++;
         o->vel = -0x400;
         o->a28 = (o->b3 & 1) ? D_80077cdc : D_80077cf4;
-        t = &T_80138664[o->b3];
+        t = &MUSHROOM_CLUSTER_DEBRIS_PARAMS[o->b3];
         o->w2e = t->a;
         o->b0c = t->b;
-        o->a24 = T_8013b1d4[o->b0c];
+        o->a24 = MUSHROOM_CLUSTER_DEBRIS_ANIMS[o->b0c];
         FUN_8001fe6c(o);
         break;
     case 1:

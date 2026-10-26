@@ -23,7 +23,7 @@ extern int D_8009C984A[];
 #define D_8009C984 D_8009C984A[0]
 extern int D_8009C984s;
 extern int D_1F8002D4[];
-extern void *D_8013B17C[];
+extern void *FROG_ANIMS[];
 extern void *D_8013B188;
 extern void *D_8013B184a[];
 extern void *D_8013B18Ca[];
@@ -146,7 +146,7 @@ void updateFrog(TObj *o)
             o->animFrame = D_800A6066 & 1;
             o->category |= 0x80;
             e = &D_80011DAC[D_80011EB4[*D_800A605C[0]]];
-            o->anim = D_8013B17C[e->anim];
+            o->anim = FROG_ANIMS[e->anim];
             if (o->animFrame & 1) {
                 u = D_800A60C4a[0] + 0x80 - e->ang;
                 t = u; t &= 0xff;
@@ -282,7 +282,7 @@ void updateFrog(TObj *o)
                 if (AnimAdvance(o) == 0) break;
                 goto L4034;
             case 5:
-                o->anim = D_8013B17C[0];
+                o->anim = FROG_ANIMS[0];
                 AnimLoadDuration(o);
                 o->movetab = D_80077D3C;
                 o->velY = -0x300;
@@ -303,7 +303,7 @@ void updateFrog(TObj *o)
                 o->y.raw += o->velY << 8;
                 o->velY += 0x20;
                 if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8) == 0) break;
-                o->anim = D_8013B17C[0];
+                o->anim = FROG_ANIMS[0];
                 AnimLoadDuration(o);
                 o->state = 5;
                 break;

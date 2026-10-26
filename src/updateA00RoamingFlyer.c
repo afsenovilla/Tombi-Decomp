@@ -5,7 +5,7 @@ extern void a00RoamingFlyerSteer(unsigned char *);
 extern int FUN_8001fec0(unsigned char *);
 extern unsigned char DAT_8009cdac;
 extern int DAT_1f8002d4;
-extern unsigned char *PTR_8013b15c, *PTR_8013b19c;
+extern unsigned char *PTR_8013b15c, *A00_ROAMING_FLYER_BOB_ANIMS;
 
 void updateA00RoamingFlyer(unsigned char *o)
 {
@@ -32,7 +32,7 @@ void updateA00RoamingFlyer(unsigned char *o)
                 *(unsigned char **)(o + 0x24) = PTR_8013b15c;
             } else {
                 t = *(short *)(o + 0x16);
-                u = PTR_8013b19c;
+                u = A00_ROAMING_FLYER_BOB_ANIMS;
                 *(short *)(o + 0x1e) = 0xb;
                 *(int *)(o + 0x34) = t;
                 *(unsigned char **)(o + 0x24) = u;

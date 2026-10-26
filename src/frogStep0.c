@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_800a6066;
-extern void *DAT_8013b17c;
+extern void *FROG_ANIMS;
 extern void *DAT_8013b184[];
 extern void *DAT_8013b188[];
 extern void FUN_8001fe6c(TObj *);
@@ -67,7 +67,7 @@ void frogStep0(TObj *o)
         break;
     case 4:
         if (FUN_8001fec0(o)) {
-            o->anim = DAT_8013b17c;
+            o->anim = FROG_ANIMS;
             FUN_8001fe6c(o);
             o->step = 1;
             o->state = 0;

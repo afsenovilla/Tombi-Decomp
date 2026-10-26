@@ -2012,3 +2012,12 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   The src/x0NN twins get the same identifier rename (the tool's twin pass); overlay-only sources (e.g. src/x004/playerStepDizzy.c)
   that spell D_801152E8 themselves are not touched: their address is their own overlay's. func_80110CAC / playerDecelerateSpeedB keep a
   byte view PLAYER_DECEL_PARAMS_BYTES next to the row view; komaPigState0 keeps KOMA_PIG_ANIMS_B (second extern, anti cross-jump).
+- X000 data batch 2 (Oct 26 2026): 49 more rows, mostly the per-object animation pointer tables of the area-0 .data
+  (RED_BIRD_ANIMS, FROG_ANIMS, NPC_CHARLES_ANIMS, PINK_PIGLET_ANIMS, HOODED_OLD_MAN_ANIMS, BITING_PLANT_ANIMS, CHICK_ANIM, EGG_ANIM,
+  A00_*_ANIMS for the fog cloud / far backdrops / koma pig spawner / spore cloud / tornado / splash droplets / dark cloaked figure /
+  backdrop sprites / L4 type 18 / variant-0 scene parts, KOMA_PIG_DUST_PUFF_*_BY_AREA, MUSHROOM_CLUSTER_* , YELLOW_CHICK_ANIMS,
+  EGG_SHELL_PIECE_ANIMS, POOL_TYPE04_ANIMS) named after their one owner, and small per-subtype tables (POOL_TYPE05_RING_DEFS,
+  GROUND_DEBRIS_RAND_VEL_H/V, VILLAGER_NPC_SPRING_PARAMS, PLAYER_ROPE_JUMP_OFF_SPEEDS, A00_POOL_TYPE24_CLUT_X/Y,
+  A00_SCROLL_CONTROLLER_MODE_BY_SECTION, A00_INIT_OBJECT_ANGLE_OFFSETS, A00_L2_TYPE06_PHASE_LIMITS/WAITS/BOXES, BITING_PLANT_BOXES /
+  _BAIT_VEL_BY_FRAME, A00_AP_BOX_100K_ITEM_ENTRY, A00_VARIANT0_SCENE_ITEM_ENTRY, L8_TYPE00_BOX0_BY_VARIANT). Only the base of each
+  pointer table is named: the element externs (DAT_8013ad38.., D_8013B180.., D_8013B2D0..) keep their address names, the csv row says which.

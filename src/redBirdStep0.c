@@ -4,7 +4,7 @@
 extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
 extern unsigned FUN_8001f9e0(void);
-extern void *PTR_8013ad30[];
+extern void *RED_BIRD_ANIMS[];
 extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 extern Fix16 *DAT_800a607c;
 extern Fix16 *DAT_800a6078;
@@ -17,7 +17,7 @@ void redBirdStep0(TObj *o)
         o->timer = 0x70;
         o->wb4 = 0;
         o->wac = 0;
-        o->anim = PTR_8013ad30[0];
+        o->anim = RED_BIRD_ANIMS[0];
         FUN_8001fe6c(o);
         o->substep++;
     case 1:

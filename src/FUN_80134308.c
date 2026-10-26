@@ -1,11 +1,11 @@
 // FUNC 80134308 252 X000
 // MATCHING 80134308 252
-// probably: an area-0 object leap-off step: anim DAT_8013b270, velX 0x200, velY -0x400 then gravity until off screen (b04 3); unreferenced
+// probably: an area-0 object leap-off step: anim A00_DARK_CLOAKED_FIGURE_ANIMS, velX 0x200, velY -0x400 then gravity until off screen (b04 3); unreferenced
 // VERSION SLPM_80165 x00 80129BA0 244
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80134308 (FUN_80134308.c):  Inline GetClut.
 #include "TOBJ.H"
-extern void *DAT_8013b270;
+extern void *A00_DARK_CLOAKED_FIGURE_ANIMS;
 extern void FUN_8001fe6c();
 extern void FUN_8001fec0();
 extern short FUN_8005e420();
@@ -14,7 +14,7 @@ void FUN_80134308(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->anim = DAT_8013b270;
+        o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS;
         FUN_8001fe6c(o);
         o->velX = 0x200;
         o->animFrame = 0;
@@ -42,7 +42,7 @@ void FUN_80134308(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern void *DAT_8013b270;
+extern void *A00_DARK_CLOAKED_FIGURE_ANIMS;
 extern void FUN_8001fe6c();
 extern void FUN_8001fec0();
 extern short FUN_8005e420();
@@ -51,7 +51,7 @@ void FUN_80134308(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->anim = DAT_8013b270;
+        o->anim = A00_DARK_CLOAKED_FIGURE_ANIMS;
         FUN_8001fe6c(o);
         o->velX = 0x200;
         o->animFrame = 0;

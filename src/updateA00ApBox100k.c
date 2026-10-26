@@ -2,7 +2,7 @@
 // MATCHING 80122118 596
 #include "TOBJ.H"
 #include "raw7.h"
-extern char DAT_80138f04[];
+extern char A00_AP_BOX_100K_ITEM_ENTRY[];
 extern void FUN_800202b4(TObj *);
 extern void a00ApBox100kShowRequiredAp(TObj *);
 extern void a00ApBox100kCheckAp(TObj *);
@@ -55,7 +55,7 @@ void updateA00ApBox100k(TObj *o)
                 v[0].p.whole = o->h->p.whole;
                 v[1].p.whole = o->y.p.whole - 0x20;
                 v[2].p.whole = o->d->p.whole;
-                spawnItemFromEntry(DAT_80138f04, v, 0, -0x400, o);
+                spawnItemFromEntry(A00_AP_BOX_100K_ITEM_ENTRY, v, 0, -0x400, o);
                 U8((*(void **)&o->wb4), 4) = 2;
                 U8((*(void **)&o->wb8), 4) = 2;
                 U8((*(void **)&o->wbc), 4) = 2;

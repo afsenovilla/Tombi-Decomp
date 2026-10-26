@@ -5,7 +5,7 @@ typedef struct {
     char p5[0x1e - 0x10]; unsigned short w1e; char p6[2]; int anim; char p7[0x3c - 0x28]; int d3c; char p8[0x68 - 0x40]; unsigned char b68, b69, p9, b6b;
     unsigned short w6c, w6e, w70, w72;
 } O;
-extern int G2d4[], T4d94;
+extern int G2d4[], CHICK_ANIM;
 extern void FUN_8001fe6c(O *), FUN_800202b4(O *), chickDropToGround(O *), chickWander(O *), FUN_8001fec0(O *), setAreaFlagBit(int), freeObjectLayer2(O *);
 extern int isObjectInView(O *);
 extern void FUN_80026c50(int, int, int);
@@ -25,7 +25,7 @@ void updateChick(O *o)
         o->b0d = 0;
         o->b69 = 0;
         o->b68 = 0;
-        o->anim = T4d94;
+        o->anim = CHICK_ANIM;
         *(signed char *)&o->b0f = -9;
         FUN_8001fe6c(o);
         if (isObjectInView(o))

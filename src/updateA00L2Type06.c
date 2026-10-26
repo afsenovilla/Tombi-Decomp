@@ -2,9 +2,9 @@
 // MATCHING 8012e8c4 1180
 #include "TOBJ.H"
 extern void *A00_L2_TYPE06_ANIMS[][3];
-extern unsigned short *D_801391E4[];
-extern short D_80139134[];
-extern short D_8013913C[][3];
+extern unsigned short *A00_L2_TYPE06_BOXES[];
+extern short A00_L2_TYPE06_PHASE_LIMITS[];
+extern short A00_L2_TYPE06_PHASE_WAITS[][3];
 extern int DAT_1f8002d4[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -18,7 +18,7 @@ extern void AnimAdvance(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 #define U(x) (*(unsigned short *)&(x))
-#define BOX(o) { b = D_801391E4[(o)->subtype] + U((o)->wb4) * 4; \
+#define BOX(o) { b = A00_L2_TYPE06_BOXES[(o)->subtype] + U((o)->wb4) * 4; \
     (o)->box0 = *b++; (o)->box2 = *b++; (o)->box1 = *b; (o)->box3 = b[1]; }
 
 void updateA00L2Type06(TObj *o)
@@ -64,7 +64,7 @@ void updateA00L2Type06(TObj *o)
         if (o->b68) {
             if (o->b68 == 1) {
                 U(o->wb4)++;
-                if (U(o->wb4) >= D_80139134[o->subtype])
+                if (U(o->wb4) >= A00_L2_TYPE06_PHASE_LIMITS[o->subtype])
                     o->b0a = 0xff;
                 q = (TObj *)o->d94;
                 if (q != 0 && U(o->wb4) - U(q->wb4) >= 2)
@@ -86,7 +86,7 @@ void updateA00L2Type06(TObj *o)
         }
         if (U(o->wb8) != 0) {
             if (--U(o->wb6) == 0) {
-                s = (Rand() & 0x1f) + D_8013913C[o->subtype][U(o->wb4)];
+                s = (Rand() & 0x1f) + A00_L2_TYPE06_PHASE_WAITS[o->subtype][U(o->wb4)];
                 a00L2Type06SpawnChild(o, o->a.p.whole - s, o->y.p.whole - (Rand() & 0x3f), o->b.p.whole);
                 if ((U(o->wb8) & 3) == 0)
                     playSFX(0x33);
@@ -96,7 +96,7 @@ void updateA00L2Type06(TObj *o)
         }
         if (o->timer != 0) {
             if (--o->timer == 0) {
-                if (U(o->wb4) >= D_80139134[o->subtype]) {
+                if (U(o->wb4) >= A00_L2_TYPE06_PHASE_LIMITS[o->subtype]) {
                     setAreaFlagBit(o->b6b);
                     o->b04++;
                 } else {

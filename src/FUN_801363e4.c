@@ -1,6 +1,6 @@
 // FUNC 801363e4 1704 X000
 // MATCHING 801363e4 1704
-// probably: variant-0 scene: message boxes 7 (DAT_8009cebf) with the part anims D_8013B130..148
+// probably: variant-0 scene: message boxes 7 (DAT_8009cebf) with the part anims A00_VARIANT0_SCENE_PART_ANIMS..148
 #include "TOBJ.H"
 typedef struct { char p0[9]; unsigned char b9; } P801363E4;
 typedef struct { short s0, s2; } S801363E4;
@@ -19,8 +19,8 @@ extern int DAT_800a60c4;
 extern unsigned short *DAT_800a605c;
 extern unsigned char DAT_8009d009;
 extern void *D_8013B140[];
-extern void *D_8013B130, *D_8013B134, *D_8013B138, *D_8013B13C,  *D_8013B148;
-extern char D_801396C4[];
+extern void *A00_VARIANT0_SCENE_PART_ANIMS, *D_8013B134, *D_8013B138, *D_8013B13C,  *D_8013B148;
+extern char A00_VARIANT0_SCENE_ITEM_ENTRY[];
 
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -145,14 +145,14 @@ void FUN_801363e4(TObj *o)
             v[2].p.whole = q->b.p.whole;
             q->anim = D_8013B13C;
             FUN_8001fe6c(q);
-            applyItemEffect(D_801396C4, v, 0, 0, 1);
+            applyItemEffect(A00_VARIANT0_SCENE_ITEM_ENTRY, v, 0, 0, 1);
             o->step = 5;
             break;
         case 2:
             DAT_8009c984 |= 0x28;
             DAT_800a60c8->b04 = 3;
             o->w08 = 2;
-            q->anim = D_8013B130;
+            q->anim = A00_VARIANT0_SCENE_PART_ANIMS;
             FUN_8001fe6c(q);
             DAT_8009cebf[0] = 3;
             o->b04 = 3;

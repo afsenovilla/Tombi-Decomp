@@ -5,7 +5,7 @@
 // Demo version of PAL x000 8011935C (FUN_8011935c.c):  Inline GetClut.
 typedef struct P { char p[0x24]; void *anim; char q[0x3c - 0x28]; int w3c; } P;
 extern short YELLOW_CHICK_CLUT_Y[];
-extern void *PTR_DAT_8013b1f4[];
+extern void *YELLOW_CHICK_ANIMS[];
 extern int DAT_1f8002d4;
 extern short FUN_8005e420(int, int);
 extern int FUN_800202b4(char *);
@@ -27,7 +27,7 @@ void FUN_8011935c(char *o)
         o[0xa] = 0;
         *(short *)(o + 0x2e) = 0;
         ((P *)o)->w3c = DAT_1f8002d4;
-        ((P *)o)->anim = PTR_DAT_8013b1f4[(unsigned char)o[3]];
+        ((P *)o)->anim = YELLOW_CHICK_ANIMS[(unsigned char)o[3]];
         FUN_8001fe6c(o);
         break;
     case 1:
@@ -44,7 +44,7 @@ void FUN_8011935c(char *o)
 #else
 typedef struct P { char p[0x24]; void *anim; char q[0x3c - 0x28]; int w3c; } P;
 extern short YELLOW_CHICK_CLUT_Y[];
-extern void *PTR_DAT_8013b1f4[];
+extern void *YELLOW_CHICK_ANIMS[];
 extern int DAT_1f8002d4;
 extern short FUN_8005e420(int, int);
 extern int FUN_800202b4(char *);
@@ -66,7 +66,7 @@ void updateYellowChick(char *o)
         o[0xa] = 0;
         *(short *)(o + 0x2e) = 0;
         ((P *)o)->w3c = DAT_1f8002d4;
-        ((P *)o)->anim = PTR_DAT_8013b1f4[(unsigned char)o[3]];
+        ((P *)o)->anim = YELLOW_CHICK_ANIMS[(unsigned char)o[3]];
         FUN_8001fe6c(o);
         break;
     case 1:

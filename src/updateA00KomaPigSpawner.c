@@ -8,7 +8,7 @@ extern int FUN_800202b4(TObj *);
 extern void a00KomaPigSpawnerStep(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800187e4(TObj *);
-extern void *PTR_DAT_8013b214[];
+extern void *A00_KOMA_PIG_SPAWNER_ANIMS[];
 extern int DAT_1f8002d4[];
 void FUN_8011a63c(TObj *o)
 {
@@ -21,7 +21,7 @@ void FUN_8011a63c(TObj *o)
         o->b0a = 0;
         o->animFrame = 0;
         o->b04 = o->b04 + 1;
-        o->anim = PTR_DAT_8013b214[o->subtype];
+        o->anim = A00_KOMA_PIG_SPAWNER_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         FUN_8001fe6c(o);
         break;
@@ -42,7 +42,7 @@ extern int FUN_800202b4(TObj *);
 extern void a00KomaPigSpawnerStep(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800187e4(TObj *);
-extern void *PTR_DAT_8013b214[];
+extern void *A00_KOMA_PIG_SPAWNER_ANIMS[];
 extern int DAT_1f8002d4[];
 void updateA00KomaPigSpawner(TObj *o)
 {
@@ -56,7 +56,7 @@ void updateA00KomaPigSpawner(TObj *o)
         o->b0a = 0;
         o->animFrame = 0;
         o->b04 = o->b04 + 1;
-        o->anim = PTR_DAT_8013b214[o->subtype];
+        o->anim = A00_KOMA_PIG_SPAWNER_ANIMS[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         FUN_8001fe6c(o);
         break;

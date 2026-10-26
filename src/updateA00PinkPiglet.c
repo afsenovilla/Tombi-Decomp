@@ -10,7 +10,7 @@ extern unsigned char D_800A4553;
 extern char D_80077D24[];
 extern char D_80077CDC[];
 extern char D_80077CF4[];
-extern void *D_8013ABB8[];
+extern void *PINK_PIGLET_ANIMS[];
 extern void *D_8013ABBC[];
 extern void *D_8013ABC0[];
 extern short TileCollideAt(TObj *, short, short);
@@ -46,7 +46,7 @@ void updateA00PinkPiglet(TObj *o)
         o->d8c = 0;
         o->wac = 0;
         o->b04++;
-        o->anim = D_8013ABB8[0];
+        o->anim = PINK_PIGLET_ANIMS[0];
         AnimLoadDuration(o);
         break;
     case 1:
@@ -164,7 +164,7 @@ void updateA00PinkPiglet(TObj *o)
         case 0:
             o->step++;
             o->wac = 0;
-            o->anim = D_8013ABB8[0];
+            o->anim = PINK_PIGLET_ANIMS[0];
             AnimLoadDuration(o);
             break;
         case 1:

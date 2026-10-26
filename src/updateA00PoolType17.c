@@ -1,7 +1,7 @@
 // FUNC 8011b1e0 264 X000
 // MATCHING 8011b1e0 264
 #include "TOBJ.H"
-extern void *PTR_DAT_8013b130;
+extern void *A00_VARIANT0_SCENE_PART_ANIMS;
 extern int DAT_1f8002e8;
 extern void FUN_800202b4(TObj *o);
 extern void FUN_800187e4(TObj *o);
@@ -16,7 +16,7 @@ void updateA00PoolType17(TObj *o)
         switch (o->step) {
         case 0:
             v = DAT_1f8002e8;
-            p = PTR_DAT_8013b130;
+            p = A00_VARIANT0_SCENE_PART_ANIMS;
             o->w1e = 1;
             o->b0a = 2;
             o->b0d = 0;

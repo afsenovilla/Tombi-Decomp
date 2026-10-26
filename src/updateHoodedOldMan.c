@@ -18,7 +18,7 @@ extern unsigned char D_8009C975_[];
 #define D_8009C975 D_8009C975_[0]
 extern signed char D_8009D2B0_[];
 #define D_8009D2B0 D_8009D2B0_[0]
-extern void *D_8013B2CC[], *D_8013B2D0[], *D_8013B2D4[], *D_8013B2D8[], *D_8013B2DC[], *D_8013B2E0[], *D_8013B2EC[];
+extern void *HOODED_OLD_MAN_ANIMS[], *D_8013B2D0[], *D_8013B2D4[], *D_8013B2D8[], *D_8013B2DC[], *D_8013B2E0[], *D_8013B2EC[];
 extern void *D_1F8002D4;
 extern char D_80077CDC[];
 extern char D_801393EC[];
@@ -132,7 +132,7 @@ void updateHoodedOldMan(TObj *o)
         o->w08 = FUN_8005e420(0xc0, 0x1e0);
         {
             int d = (int)D_1F8002D4;
-            void *a = D_8013B2CC[0];
+            void *a = HOODED_OLD_MAN_ANIMS[0];
             o->d3c = d;
             o->anim = a;
         }
@@ -266,7 +266,7 @@ void updateHoodedOldMan(TObj *o)
             break;
         case 8:
             if (((unsigned char *)o->d90)[4] < 2) break;
-            o->anim = D_8013B2CC[0];
+            o->anim = HOODED_OLD_MAN_ANIMS[0];
             FUN_8001fe6c(o);
             ((unsigned char *)o->d90)[4]++;
             o->wb6++;

@@ -14,8 +14,8 @@ static void *DAT_8013b1a4[4] = {
 };
 extern void *DAT_8013e584[];
 extern void *DAT_8012e02c[];
-extern short DAT_80114a98[];
-extern short DAT_80114aa8[];
+extern short GROUND_DEBRIS_RAND_VEL_H[];
+extern short GROUND_DEBRIS_RAND_VEL_V[];
 extern TObj *FUN_80018448(void);
 extern unsigned FUN_8001f9e0(void);
 extern int FUN_800202b4(TObj *);
@@ -137,8 +137,8 @@ void updateGroundDebris(TObj *o)
                 o->animFrame = 1;
             else
                 o->animFrame = 0;
-            o->velH = DAT_80114a98[FUN_8001f9e0() & 7];
-            v = DAT_80114aa8[FUN_8001f9e0() & 7];
+            o->velH = GROUND_DEBRIS_RAND_VEL_H[FUN_8001f9e0() & 7];
+            v = GROUND_DEBRIS_RAND_VEL_V[FUN_8001f9e0() & 7];
             o->velY = 0x10;
             o->velV = v;
             break;
