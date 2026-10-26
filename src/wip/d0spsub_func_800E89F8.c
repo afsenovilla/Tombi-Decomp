@@ -1,17 +1,23 @@
 // FUNC 800e89f8 4280 D0SPSUB
-// wip: score 18 (was 22). Fixed: the P334 + [9] addu is base-first with `int off = ((int *)P334)[9]; char *p = P334;
-// o->pA0 = p + off;` (the second volatile read into a pointer variable makes it a REG for expand_binop).
-// Left: (1) case 0x84 tail = 8 insns (game: lhu w08-value in v1, lhu D_8007A024+14 in v0, sh wc4, li 1, sb GCD, sh w08;
-// ours allocates a1/v1/v0 and stores GCD before both sh); the game's RTL order is loads first and the w08 store
-// LAST, but every temp/order tried (`a = D_8007A024[GAME.b30].a` before wc4/GCD, int or ushort, `Pal *t`) scores
-// 54+ because the `sw D_8009C984` moves; `|=, w08, GCD=1, wc4` (also with a temp before GCD) stays at 18.
-// (2) base+index addu operand order at the 3 `Pal *t = D_8007A024; ... t += D_8009D2B0[3]` sites: the game has
+// wip: score 6 (was 18). Fixed: the case 0x84 tail. The game's sched1 order there (lhu w08val; lhu wc4val; sh wc4;
+// li 1; sb GCD; sh w08, the wc4 load ADJACENT to its store) is a scheduler stall: at that cycle nothing else is
+// ready because every earlier store of the block is a predecessor of the `D_8007A024[GAME.b30].a` load (in-struct,
+// varying address) -> the 0x3c/9 stores to D_8009CD98..9E must be IN-STRUCT (struct Cd98 D_8009CD98_s fields, not
+// scalars: a scalar fixed store never conflicts with an in-struct varying load, so it stays ready and fills the
+// gap). With that, the source order `a = w08val; wc4 = ...; GCD = 1; w08 = a` (block-scoped unsigned short a) gives
+// the game's allocation v1/v0/v0. Volatile loads (D_8007A024_v) also pin the two loads' order but break the store
+// order (scores 16-18); register-reuse temps and a `unsigned char *g = &GCD.bcffb` base change nothing.
+// Left: (2) base+index addu operand order at the 3 `Pal *t = D_8007A024; ... t += D_8009D2B0[3]` sites: the game has
 // `addu v1,v1(base),v0(idx)`. Cause found in cse.c fold_rtx: for a commutative op whose first operand is a register
-// with a KNOWN CONSTANT value (t == D_8007A024, same cse block) and second not, cse swaps them ("place any constant
-// second"); so the game's base register must be unknown to cse (set in another block / rematerialized). Tried:
-// every (char *)t + (idx << 2) / &t[idx] / t[idx].b / int temps form (18 or 48), a function-scope
-// `Pal *pal = D_8007A024` (912: it gets a register). Not tried: a form where the base is loaded in the skipped
-// block between the two || tests, or any non-constant base expression.
+// with a KNOWN CONSTANT value (t == D_8007A024, same cse path) and second not, cse swaps them ("place any constant
+// second"); so the game's base register must be unknown to cse. cse's path for the else block is [lbu bd006; beqz]
+// -> [else block] (the label is preceded by a barrier so the taken branch is followed), i.e. a set anywhere in those
+// two blocks is known. Tried: every (char *)t + (idx << 2) / &t[idx] / t[idx].b / int temps form (18 or 48), a
+// function-scope `Pal *pal` set once at the top or once per case before the tests (743-912: the lui/addiu is
+// emitted at the set and the pseudo gets a register; local-alloc's move-to-use needs exactly one use, the game has
+// two: `lhu a0,0(v1)` and the addu), a volatile pointer (477). Untried: anything making the lui/addiu a reload
+// rematerialization (pseudo with REG_EQUIV constant and no hard reg) or a second `D_8007A024` extern used as a
+// non-constant (e.g. `extern Pal *D_8007A024_p` is wrong: the game materializes the address, not a load).
 // do{}while(0) around switch(o->wait) fixes reg alloc; in case 0x84 `D_8009C984_a[0] = D_8009C984 | 0x40` (in-struct
 // store) keeps the sw before the D_8007A024 loads.
 typedef struct { unsigned short a, b; } Pal;
@@ -30,6 +36,9 @@ typedef struct {
     unsigned char bA4;
 } Obj;
 extern Pal D_8007A024[];
+extern volatile Pal D_8007A024_v[];
+typedef struct { unsigned char b98, b99, b9a, b9b, b9c, b9d, b9e, b9f; } Cd98;
+extern Cd98 D_8009CD98_s;
 typedef struct {
     char p000[0x1F7];
     unsigned char bcef7;   /* 0x1f7 */
@@ -253,17 +262,18 @@ int func_800E89F8(int item)
             D_8009D08E = D_8009CD9A;
             D_8009D08F = D_8009C984;
             subScreenApplyPendingEquip();
-            D_8009CD98 = 9;
-            D_8009CD99 = 9;
-            D_8009CD9A = 9;
-            D_8009CD9C = 0x3C;
+            D_8009CD98_s.b98 = 9;
+            D_8009CD98_s.b99 = 9;
+            D_8009CD98_s.b9a = 9;
+            D_8009CD98_s.b9c = 0x3C;
             D_8009D2B0[3] = 3;
-            D_8009CD9D = 0x3C;
-            D_8009CD9E = 0x3C;
+            D_8009CD98_s.b9d = 0x3C;
+            D_8009CD98_s.b9e = 0x3C;
             D_8009C984_a[0] = D_8009C984 | 0x40;
-            PLAYER.w08 = D_8007A024[GAME.b30].a;
-            GCD.bcffb = 1;
+            { unsigned short a = D_8007A024[GAME.b30].a;
             PLAYER.wc4 = D_8007A024[D_8009D2B0[3]].b;
+            GCD.bcffb = 1;
+            PLAYER.w08 = a; }
             playSFX(0x19);
             return 1;
         }
