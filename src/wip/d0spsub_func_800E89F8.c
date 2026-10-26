@@ -15,9 +15,19 @@
 // two blocks is known. Tried: every (char *)t + (idx << 2) / &t[idx] / t[idx].b / int temps form (18 or 48), a
 // function-scope `Pal *pal` set once at the top or once per case before the tests (743-912: the lui/addiu is
 // emitted at the set and the pseudo gets a register; local-alloc's move-to-use needs exactly one use, the game has
-// two: `lhu a0,0(v1)` and the addu), a volatile pointer (477). Untried: anything making the lui/addiu a reload
-// rematerialization (pseudo with REG_EQUIV constant and no hard reg) or a second `D_8007A024` extern used as a
-// non-constant (e.g. `extern Pal *D_8007A024_p` is wrong: the game materializes the address, not a load).
+// two: `lhu a0,0(v1)` and the addu), a volatile pointer (477).
+// Second pass (same score): the shape `la v1; lbu v0; lhu a0,0(v1); sll; addu v1,v1,v0` exists nowhere else in the
+// game except the D0SPSUB3 twin, and the plain array form at these sites gives `lhu a0,sym; lhu v0,sym+2(v0)` (51),
+// so the base is a user pointer the game's cse did NOT know. Facts established (see notes/matching_guide.md):
+// `p + i` inside a deref expands MULT-first (idx first, independent of cse); `t += i` / `(char *)t + (i << 2)`
+// expand base-first and keep it iff the base pseudo is unknown to cse at the addu (function-scope pointer set
+// once at the top: base-first, but then the `la` sits in the prologue and the pseudo gets a1/s-reg). Excluded:
+// local-alloc move-to-use (needs REG_N_REFS == 2, the lhu is a second use), reload rematerialisation (the
+// pseudo always gets a hard reg here, and `(mem P)` would become `(mem sym)`), cse-folded jumps / do-while /
+// for-break / labels around the block (all 6), `-fforce-addr` (breaks the matched helpers), inline helpers with the
+// base as parameter (36-51; integrate.c copies the constant into an in-block pseudo), DImode/union carriers (640),
+// idx-first sums, matchcheck (CC1PSX agrees: 6). A matched function with a single-block base-first addu is
+// x014 hauntedMansionPigShotPickPoint (`p = A; if (c) p = B; p += i`: the join hides the sets from cse).
 // do{}while(0) around switch(o->wait) fixes reg alloc; in case 0x84 `D_8009C984_a[0] = D_8009C984 | 0x40` (in-struct
 // store) keeps the sw before the D_8007A024 loads.
 typedef struct { unsigned short a, b; } Pal;

@@ -355,6 +355,27 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   register address with its known constant (reg_known_value), so a `(mem (reg))` whose reg was set once to a
   symbol never conflicts with other symbols, while a pointer set twice conflicts with everything in-struct.
 
+### More recipes (eleventh batch: operand order of `addu base,idx`, 2-set constants)
+- **Where the index goes in `base + idx`** (gcc 2.7.2 expand, before any cse): an array/pointer index inside a
+  dereference (`p[i].b`, `(p + i)->b`, EXPAND_SUM context) is expanded as `(plus (mult i 4) p)`: the MULT is put
+  FIRST, so the addu is `addu idx,base` whatever cse knows. An assignment `p += i` / `q = p + i` / `(char *)p + (i << 2)`
+  expands base-first `(plus p idx)`; cse then swaps it to idx-first only if `p` has a KNOWN CONSTANT value on that
+  path (fold_rtx: "place any constant second"). So `addu v1,v1(base),v0(idx)` with the base materialised by `la`
+  means the base pseudo was unknown to cse: a function-scope pointer set once (unknown after a jump table, but its
+  `la` then lives in the prologue and it gets a1/s-reg), or two sets meeting at a join (x014
+  hauntedMansionPigShotPickPoint: `p = A; if (c) p = B; p += i`). An in-block `Pal *t = D_X` is always known.
+  func_800E89F8 (D0SPSUB, score 6) has `la v1; lhu a0,0(v1); addu v1,v1,v0` in one straight block, which no
+  tested C shape gives (its header lists them); the plain array form gives `lhu a0,sym; lhu v0,sym+2(v0)`.
+- **A constant that must share a register with a dying pointer**: write it as a second assignment of that pointer
+  (`t = (unsigned char *)3; D_X = (int)t;`). A 2-set pseudo is not a "birthing" insn (sched.c birthing_insn_p needs
+  REG_N_SETS == 1), so its `li` sinks to the earliest free cycle right after the pointer's last read instead of
+  landing next to its first store; the pseudo then "dies in 2 places" and goes to global alloc (func_800ED0C4,
+  49 -> 20). The remaining register residue there is local-vs-global: a local temp takes the hard reg the global
+  pseudo would have had, so every pseudo the game put in a leftover register (a1) must be global too.
+- **Dummy uses do not make a pseudo global for free**: `x & 0x100` on a byte is folded by the front end (no use
+  survives to flow), `x >> 8` is not folded by cse or combine (extra insns), and sharing the variable with another
+  block's loop changes that loop's giv registers.
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
