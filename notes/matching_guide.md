@@ -307,6 +307,27 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
 - **Search**: permute the first ~6 statements together with the scalar-vs-`[0]` choice per global; hill-climbing one line
   at a time stalls.
 
+### More recipes (ninth batch: sub-screen overlays, register-allocation residues)
+- **Block-scoped temporaries = local-alloc**: a pseudo gets a local-alloc qty only if it is local to one basic block and
+  dies exactly once; a function-scope temp reused in two places (two halves of a function, `h %= 10` plus a later read)
+  dies twice and goes to global alloc with a different register. Declare each half's temporaries in their own `{ }` block
+  (`{ int h, t; unsigned char b; ... }`), including loop variables (`{ unsigned char *q; int k; short y = 0xC8; for ... }`):
+  it fixes the s-register ranking too (per-half refs/length), see func_800EA5E8, func_800EB948, func_800EBE6C.
+- **Digit splitting**: `h = n / 100; t = n / 10; b = t - h * 10; d[2] = n - t * 10; h %= 10; d[1] = b; d[0] = h;`
+  (`b` narrower than int): a value held in a register and stored after the next chain is a temporary; `x %= 10` keeps
+  the result in x's register (the final subu ties with the dying input). The 10^7 and 10^6 magic constants coincide,
+  so `n / 1000000` reuses the `n / 10000000` mult; write `n / 10` before `n / 100` when the game loads 0x66666667 first.
+- **Preheader order**: a hoisted invariant that comes FIRST in the preheader, before the for-init, is a block local
+  (`short y = 0xC8`); a biv whose init comes AFTER the hoisted invariants is a giv (`D.x = 8 + k * 10`).
+- **Operand order of a commutative op**: cse's fold_rtx moves a register with a KNOWN CONSTANT value (a pointer set to a
+  symbol in the same extended block) to the second operand; the expander (expand_binop) swaps a REG second operand with a
+  non-REG first one. A HImode sum that must stay first: store it in an `unsigned short s` first
+  (`s = o->x + ow; o->x = s + o->ba;`, func_800EF538); a volatile base read that must stay first: read it into a
+  pointer variable (`int off = ((int *)P334)[9]; char *p = P334; o->pA0 = p + off;`).
+- **Tools**: `-dl` dumps print `Register N used M times across L insns [in block B]` (refs and live length used by both
+  allocators) and the post-sched1 order; `-dS` prints the backward list scheduler's ready lists (ties keep LUID order,
+  so independent insns come out in source order).
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
