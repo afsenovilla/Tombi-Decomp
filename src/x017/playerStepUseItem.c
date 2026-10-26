@@ -28,7 +28,7 @@ extern unsigned char *DAT_800a611c;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern int GAME[];
-extern unsigned char DAT_8009c930[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
+extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
 extern unsigned char DAT_8009d2b0, DAT_8009d2b1, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
 extern unsigned char DAT_801152e8[];
@@ -142,7 +142,7 @@ void playerStepUseItem(TObj *o)
         switch (DAT_8009c941) {
         case 4:
             DAT_8009c940[0] = 0;
-            DAT_8009c930[0] = 3;
+            GVARS[0] = 3;
             SETANIM_IF(0);
             DAT_8009c93f = 1;
             DAT_8009c942 = 1;

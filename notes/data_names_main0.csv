@@ -120,5 +120,35 @@ address,name,size,source
 8007a04c,WEAPON_HEAD_OFFSETS,,usage: per-frame weapon head dx/dy pairs (weapon0Swing/weapon8to9Swing) refs=20
 80078790,AREA_SECTION_COUNTS,,usage: sections per area (testSectionFlagBit/spawnLayer2ObjectUnlessFlagged/displayDebugScreen) refs=4
 8009f840,AREA_SCRIPT_CTX,,usage: ScriptContext of the area script (tickAreaScript: SCRIPT_CTX = &) refs=4
-8009c948,BAIT_OBJECT,0x4,usage: TObj* of the biting-plant bait (updateA00BitingPlantBait/bitingPlantEatBaitStep) refs=5
+8009c948,BAIT_OBJECT,0x4,usage: (= GVARS.p48) TObj* of the biting-plant bait (updateA00BitingPlantBait/bitingPlantEatBaitStep) refs=5
 8009c943,INFO_MESSAGE_SLOT,0x1,usage: slot of the info message being printed (printInfoMessage; 0xFF = none) refs=5
+8007a070,WEAPON_SWING_TABLE,,usage: swing angle steps/targets of weapon0Swing/weapon8to9Swing (D_8007A072 is its +2) refs=15
+8007a148,THROWN_OBJECT_DEFS,,usage: per-subtype collision box and sprite of thrown objects (updateThrownObject) refs=8
+80091938,GPU_INFO,,psx_tomba (US) name already used by the libgpu sources
+80091a08,GPU_DATA,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a0c,GPU_STATUS,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a10,DMA1_MADR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a14,DMA1_BCR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a18,DMA1_CHCR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a1c,DMA2_MADR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a20,DMA2_BCR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a24,DMA2_CHCR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a28,DPCR,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a3c,GPU_QIN,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a40,GPU_QOUT,0x4,psx_tomba (US) name already used by the libgpu sources
+80091a58,RSIN_TABLE,,psx_tomba (US) name already used by the libgpu sources
+80096c88,CD_CBSYNC,0x4,psx_tomba (US) name already used by the libcd sources
+80096c8c,CD_CBREADY,0x4,psx_tomba (US) name already used by the libcd sources
+80096c94,CD_DEBUG,0x4,psx_tomba (US) name already used by the libcd sources
+80096c98,CD_STATUS,0x4,psx_tomba (US) name already used by the libcd sources
+80096c9c,CD_STATUS1,0x4,psx_tomba (US) name already used by the libcd sources
+80096ca4,CD_POS,0x4,psx_tomba (US) name already used by the libcd sources
+80096ca8,CD_MODE,0x1,psx_tomba (US) name already used by the libcd sources
+80096ca9,CD_COM,0x1,psx_tomba (US) name already used by the libcd sources
+80096cac,CD_COMSTR,,psx_tomba (US) name already used by the libcd sources
+80096ecc,CD_COMATTR,,psx_tomba (US) name (comment in CD_cw.c)
+80096f64,CD_INTR,0x4,psx_tomba (US) name (comment in CD_cw.c; volatile CdlIntr) refs=38
+8009be24,GPU_CTLBUF,,psx_tomba (US) name already used by the libgpu sources
+8009c930,GVARS,0x30,usage: misc section state block before GAME cleared by initHud (0x2C bytes); the name the sources already use refs=242
+800a0a20,GPU_QITEM,,psx_tomba (US) name already used by the libgpu sources
+800a2260,VBLANK_MINUS,0x4,psx_tomba (US) name already used by the libgpu sources

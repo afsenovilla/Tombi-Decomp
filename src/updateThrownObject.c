@@ -30,7 +30,7 @@ typedef struct {
     int* unk8;
 } unk_8007D6E0;
 
-extern unk_8007D6E0 D_8007A148[];
+extern unk_8007D6E0 THROWN_OBJECT_DEFS[];
 
 typedef struct {
     int unk0;
@@ -48,14 +48,14 @@ void updateThrownObject(u8* self)
     switch (state) {
     case 0:
         self[4] = state + 1;
-        *(s16*)(self + 0x6C) = D_8007A148[self[3]].unk0;
-        *(s16*)(self + 0x6E) = D_8007A148[self[3]].unk1;
-        *(s16*)(self + 0x70) = D_8007A148[self[3]].unk2;
-        *(s16*)(self + 0x72) = D_8007A148[self[3]].unk3;
-        *(s16*)(self + 0x1E) = D_8007A148[self[3]].unk4;
-        *(int*)(self + 0x3C) = SPR_DATA[D_8007A148[self[3]].unk6];
-        *(s16*)(self + 0xA6) = D_8007A148[self[3]].unk5;
-        *(int*)(self + 0x24) = D_8007A148[self[3]].unk8[*(s16*)(self + 0xA6)];
+        *(s16*)(self + 0x6C) = THROWN_OBJECT_DEFS[self[3]].unk0;
+        *(s16*)(self + 0x6E) = THROWN_OBJECT_DEFS[self[3]].unk1;
+        *(s16*)(self + 0x70) = THROWN_OBJECT_DEFS[self[3]].unk2;
+        *(s16*)(self + 0x72) = THROWN_OBJECT_DEFS[self[3]].unk3;
+        *(s16*)(self + 0x1E) = THROWN_OBJECT_DEFS[self[3]].unk4;
+        *(int*)(self + 0x3C) = SPR_DATA[THROWN_OBJECT_DEFS[self[3]].unk6];
+        *(s16*)(self + 0xA6) = THROWN_OBJECT_DEFS[self[3]].unk5;
+        *(int*)(self + 0x24) = THROWN_OBJECT_DEFS[self[3]].unk8[*(s16*)(self + 0xA6)];
         switch (self[3]) {
         case 1:
             uploadThrownObjectFrame(0xE, 0);

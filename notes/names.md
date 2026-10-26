@@ -1993,3 +1993,9 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   Header alias D_8009C9D8 renamed to PAD_PRESSED. Not named: the fields of PLAYER (800A603C.., 800A6078, 800A60D0..) and of GAME
   (8009C962 selectedSection, 8009D2B0.., 8009CDA3 inventoryScreen, 8009CD94/96 nextArea/nextSection) that sources reach by
   their own symbols, and the Psy-Q library globals (libgpu 80090xxx / 8009B1xx, libcd 80096xxx, libetc, libpad).
+- Second data batch (Oct 26 2026): WEAPON_SWING_TABLE (8007A070), THROWN_OBJECT_DEFS (8007A148), CD_INTR / CD_COMATTR (the psx_tomba
+  names the libcd sources carried as comments), GVARS (8009C930, include/gvars.h; game.h now includes it instead of its
+  u_char D_8009BC98[0x2C] alias), and csv rows for the psx_tomba library names the libgpu / libcd sources already use bare
+  (GPU_INFO, GPU_DATA, GPU_STATUS, DMA1_*/DMA2_*, DPCR, GPU_QIN/QOUT, RSIN_TABLE, GPU_CTLBUF, GPU_QITEM, VBLANK_MINUS, CD_CBSYNC,
+  CD_CBREADY, CD_DEBUG, CD_STATUS/1, CD_POS, CD_MODE, CD_COM, CD_COMSTR) so their D_ aliases get the same name.
+  spawnEventTitle.c (tomba24 headers) keeps D_8009BC98[0xF] for GVARS.b3f: the struct view changes the code.

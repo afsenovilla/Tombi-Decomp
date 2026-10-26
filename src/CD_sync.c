@@ -40,7 +40,7 @@ extern volatile u_char* D_800962B4;
 extern volatile u_char* D_800962B8;
 extern volatile int* D_800962C0;
 extern void* D_800962C4;
-extern volatile CdlIntr D_80096F64; // CD_INTR
+extern volatile CdlIntr CD_INTR;
 extern void* D_800962CC[];
 extern volatile unsigned char* D_80096F4C;
 extern s32* D_800962E4;
@@ -78,8 +78,8 @@ static inline int get_alarm(void) {
         printf("%s:(%s) Sync=%s, Ready=%s\n",
             D_8009BF60[0],
             CD_COMSTR[CD_COM],
-            CD_INTSTR[D_80096F64.sync],
-            CD_INTSTR[D_80096F64.ready]);
+            CD_INTSTR[CD_INTR.sync],
+            CD_INTSTR[CD_INTR.ready]);
         CD_flush();
         return -1;
     } 
@@ -113,18 +113,18 @@ int CD_sync(int mode, unsigned char* result) {
 
             while (intr = getintr()) {
                 if (intr & 4 && CD_CBREADY != NULL) {
-                    CD_CBREADY(D_80096F64.ready, D_8009BF48);
+                    CD_CBREADY(CD_INTR.ready, D_8009BF48);
                 }
                 if (intr & 2 && CD_CBSYNC != NULL) {
-                    CD_CBSYNC(D_80096F64.sync, D_8009BF40);
+                    CD_CBSYNC(CD_INTR.sync, D_8009BF40);
                 }
             }
             D_80096F4C[0] = temp_s1;
         }
 
-        sync = D_80096F64.sync;
+        sync = CD_INTR.sync;
         if (sync == 2 || sync == 5) {
-            D_80096F64.sync = 2;
+            CD_INTR.sync = 2;
             dst = result;
             src = D_8009BF40;
             if (dst != NULL) {

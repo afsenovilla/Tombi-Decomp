@@ -2346,7 +2346,7 @@ extern int MOVIE_DEC_RECT_Y;
 extern int D_8009B03C;
 extern SpuCommonAttr D_8009B048; // SPU_ATTR
 extern byte D_8009B6A8; // SELECTED ROW
-extern u_char D_8009BC98[0x2C];
+#include "gvars.h"   /* GVARS 0x8009C930 (was the u_char D_8009BC98[0x2C] alias) */
 extern u_char D_8009BCA0;
 extern u8   D_8009BCA2;
 extern char D_8009BCA7;

@@ -16,7 +16,7 @@ extern unsigned char DAT_800a60d6[];
 extern unsigned char *GRABBED_OBJECT;
 extern D600 DAT_8009d600;
 extern unsigned short WEAPON_HEAD_OFFSETS[];
-extern unsigned short DAT_8007a070[];
+extern unsigned short WEAPON_SWING_TABLE[];
 extern short DAT_8007a072[];
 extern unsigned char DAT_8009d2b2[];
 extern volatile unsigned short PAD_PRESSED[];
@@ -334,7 +334,7 @@ void weapon5to7Swing(TObj *o)
         k = o->animFrame + o->animFrame * 2;
         DAT_8009d600.w0 = 10;
         DAT_8009d600.w2 = 2;
-        DAT_8009d600.w4 = DAT_8007a070[k];
+        DAT_8009d600.w4 = WEAPON_SWING_TABLE[k];
         o->waa += DAT_8007a072[k];
         if (o->waa > 0xff) o->waa -= 0x100;
         if (o->waa < 0) o->waa += 0x100;
@@ -375,7 +375,7 @@ void weapon5to7Swing(TObj *o)
         k = o->animFrame + o->animFrame * 2;
         DAT_8009d600.w0 = 0x10;
         DAT_8009d600.w2 = 4;
-        DAT_8009d600.w4 = DAT_8007a070[k];
+        DAT_8009d600.w4 = WEAPON_SWING_TABLE[k];
         o->waa += DAT_8007a072[k];
         if (o->waa > 0xff) o->waa -= 0x100;
         if (o->waa < 0) o->waa += 0x100;

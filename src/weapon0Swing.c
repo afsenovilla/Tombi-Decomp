@@ -48,7 +48,7 @@ extern Fix16 *D_800A6078;
 extern G330 *PLAYER_EXT;
 extern G338 *WEAPON_STATE;
 extern D600 D_8009D600;
-extern short D_8007A070[], D_8007A072[];
+extern short WEAPON_SWING_TABLE[], D_8007A072[];
 static short D_8007A074[22] = {
     0, 0x40, -0x10, 0x7f, 0x40, 0x10, 0, 0x40,
     -0x10, 0x7f, 0x60, 0x10, 0x20, 0x20, -0x10, 0x60,
@@ -401,7 +401,7 @@ void weapon0Swing(TObj *o)
         n = TB(o);
         D_8009D600.a = 10;
         D_8009D600.b = 2;
-        D_8009D600.c = D_8007A070[n];
+        D_8009D600.c = WEAPON_SWING_TABLE[n];
         o->waa += D_8007A072[n];
         if (o->waa >= 0x100) o->waa -= 0x100;
         if (o->waa < 0) o->waa += 0x100;
@@ -439,7 +439,7 @@ void weapon0Swing(TObj *o)
         n = TB(o);
         D_8009D600.a = 16;
         D_8009D600.b = 4;
-        D_8009D600.c = D_8007A070[n];
+        D_8009D600.c = WEAPON_SWING_TABLE[n];
         o->waa += D_8007A072[n];
         if (o->waa >= 0x100) o->waa -= 0x100;
         if (o->waa < 0) o->waa += 0x100;

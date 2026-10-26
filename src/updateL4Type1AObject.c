@@ -48,7 +48,7 @@ extern unsigned short D_80079E8C[];
 extern unsigned short D_80079E98[];
 extern unsigned short D_80079EA4[];
 extern unsigned short D_80079EB0[];
-extern unsigned char D_8009C930;
+extern unsigned char GVARS;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned short GAME[];
@@ -204,7 +204,7 @@ void updateL4Type1AObject(O *o)
                     D_8009CEED = 1;
                 }
                 if (o->subtype == 0x14 && D_8009CDD5 == 0) setEventStarted(0x31, 0, 0);
-            } else if (o->subtype == 1 && (D_8009C984 & 1) && D_8009C930 == o->subtype) {
+            } else if (o->subtype == 1 && (D_8009C984 & 1) && GVARS == o->subtype) {
                 o->step++;
             }
             break;
@@ -224,7 +224,7 @@ void updateL4Type1AObject(O *o)
             }
             break;
         case 4:
-            if (D_8009C930 >= 2) o->step = 0;
+            if (GVARS >= 2) o->step = 0;
             break;
         }
         if (o->subtype == 0x22 && D_800A604A[0] < 0x3e8) D_800A604A[0] = 0x3e8;

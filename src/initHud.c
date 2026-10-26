@@ -30,7 +30,7 @@ void initHud(void)
 {
     char *tmp;
 
-    memset(D_8009BC98, 0, sizeof(D_8009BC98));
+    memset((u_char *)&GVARS, 0, 0x2C);
     *(s16* )0x1F8001C6 = 0;
     initAreaScripts();
     
@@ -54,7 +54,7 @@ void initHud(void)
 {
     char *tmp;
 
-    memset(D_8009BC98, 0, sizeof(D_8009BC98));
+    memset((u_char *)&GVARS, 0, 0x2C);
     *(s16* )0x1F8001C6 = 0;
     GAME.fadeScreenControl = 1;
     *(s8* )0x1F8003D0 = 0;
