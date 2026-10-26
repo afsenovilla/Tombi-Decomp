@@ -1,4 +1,12 @@
 // FUNC 800ebe6c 960 D0SPSUB2
+// wip: score 66 (was 68). Digit block now as block-scoped temporaries (each a block-local pseudo for local-alloc,
+// cf. the matched D0SPSUB func_800EA5E8): h100 = h/100; h10 = h/10; b = h10 - h100*10; dg[2] = h - h10*10;
+// m10 = m/10; dg[4] = m - m10*10; dg[1] = b; m10 %= 10; dg[3] = m10; h100 %= 10; dg[0] = h100.
+// Game order of the chains: m10, dg[4] (into m's reg), h100 (a3), h100*10 (a1 chain), h10 (v0), b = h10-h100*10 (a1),
+// h - h10*10 (a0 chain), then sb dg[1], sb dg[2], m10 %= 10 (a2) -> dg[3], h100 %= 10 -> dg[0].
+// Left: register assignment only (game m10=a2, h100=a3, h10=v0, b-chain=a1, dg[2]-chain=a0; ours m10=a1, h100=a2,
+// h10=v1, b=a0, dg[2]=v0) + the resulting schedule. All 504 dependency-respecting orders of these statements
+// (block-scoped, b unsigned char) give 66 or worse; b as int 84; function-scope temps 68+.
 typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
 typedef struct {
     unsigned addr: 24;
@@ -29,11 +37,20 @@ void func_800EBE6C(int t, short x, short y, int bright)
     int i, k, h, m;
     h = t / 180000 % 1000;
     m = t / 3000 - t / 180000 * 60;
-    dg[0] = h / 100 % 10;
-    dg[4] = m % 10;
-    dg[2] = h % 10;
-    dg[1] = h / 10 - h / 100 * 10;
-    dg[3] = m / 10 % 10;
+    {
+        int m10, h100, h10; unsigned char b;
+        h100 = h / 100;
+        h10 = h / 10;
+        b = h10 - h100 * 10;
+        dg[2] = h - h10 * 10;
+        m10 = m / 10;
+        dg[4] = m - m10 * 10;
+        dg[1] = b;
+        m10 %= 10;
+        dg[3] = m10;
+        h100 %= 10;
+        dg[0] = h100;
+    }
     for (q = dg, k = 0, i = 0; i < 6; i++, q++) {
         if (i != 2 && *q == 0 && k == 0) continue;
         S->len = 4;
