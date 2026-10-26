@@ -328,6 +328,33 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
   allocators) and the post-sched1 order; `-dS` prints the backward list scheduler's ready lists (ties keep LUID order,
   so independent insns come out in source order).
 
+### More recipes (tenth batch: sub-screen overlays, scheduler and allocator mechanics)
+- **A load adjacent to its store = a scheduler stall**: sched1 never puts a load right before its consumer unless
+  nothing else is ready. Every store before it that is IN-STRUCT (struct field / `X[0]`) is a predecessor of a later
+  in-struct load with a varying address (`T[GAME.b30].a`), so those stores stay unready until the load is placed; a
+  scalar store never conflicts with such a load and would fill the gap. So when the game shows `lhu v0; sh v0` with
+  nothing between, declare the earlier byte stores as fields of a struct (func_800E89F8 case 0x84: D_8009CD98..9E).
+- **"Birthing" constants**: a pseudo set exactly once (`li 3`, a load of a scalar) gets LAUNCH_PRIORITY when it
+  becomes ready (sched.c adjust_priority) and lands right before its consumer; a pseudo with two sets keeps priority 1
+  and sinks to the earliest free cycle (func_800ED0C4: `i1 = 3` moves `li 3` to the game's spot). The position of a
+  `li` in the final code is then a sched2 hoist bounded by the register's previous use (`li v0,14` right after the
+  `sb v0` that frees v0), so read a constant's position as "which register did it get", not as RTL order.
+- **Early load of a scalar**: a plain scalar global sinks next to its first use (priority 1, launched); a second
+  extern name declared `volatile int` read into a block temp (`int x = D_80111128_v;`) keeps the `lui/lw` form and
+  is placed early (func_800ED0C4, score 49 -> 30). `*(volatile *)&X` gives the `la` form instead.
+- **Related-value base register**: `lui s2; addiu s2,&X.attr` + `sw v0,0xe(s2)` for another field of the same struct
+  is cse's related-value rewrite: the later field must be a member of the SAME extern struct as the one whose
+  address is in the register; fields the game stores with absolute `lui at; sh` are separate externs, otherwise gcc
+  keeps the struct base in an extra s-reg across the loop (func_800EFD6C: the Text struct keeps x/attr/font only;
+  that fixed the frame 0x98/s5 -> 0x90/s0-s4).
+- **One pointer per loop**: a function-scope `Slot *s` reused by eight loops is one pseudo with a huge live length
+  (lowest priority, last s-reg); the game's s0/s1/s2 per loop means a block-scoped pointer per loop. Same for the
+  `unsigned char *q; int i` of digit loops (func_800E999C 359 -> 182; the index form `dg[i]` gives i -> t1).
+- **gcc 2.8.1 sched.c** (same algorithm as 2.7.2) is readable at
+  `raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-2.8.1/gcc/sched.c`; true_dependence canonicalizes a
+  register address with its known constant (reg_known_value), so a `(mem (reg))` whose reg was set once to a
+  symbol never conflicts with other symbols, while a pointer set twice conflicts with everything in-struct.
+
 ## Git rules (several agents work at the same time)
 - Only `master`, no branches or PRs. Small commits every 3 matches.
 - The index is shared: **`git commit -m "..." -- <your paths>`** (a plain `git commit` takes whatever others have staged).
