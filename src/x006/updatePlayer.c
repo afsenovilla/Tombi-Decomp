@@ -11,7 +11,7 @@
 typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *PLAYER_EXT;
-extern AnimTbl D_800E8404;
+extern AnimTbl PLAYER_ANIM_TABLE;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_8007A034, D_8007A036;
@@ -44,7 +44,7 @@ extern void FUN_8001fe94(TObj *, int);
         o->substep = 0; \
         o->timer = 0x78; \
         PLAYER_EXT->w2c = 0x2f; \
-        *(AnimTbl *)tp = D_800E8404; \
+        *(AnimTbl *)tp = PLAYER_ANIM_TABLE; \
         o->anim = tp[PLAYER_EXT->w2c]; \
         FUN_8001fe94(o, 1); \
     }

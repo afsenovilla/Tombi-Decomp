@@ -27,8 +27,8 @@ static char D_80115AFA[314] = {
 };
 extern int GAME[];
 extern unsigned short D_8009C960h;
-extern int *D_80115A08[];
-extern int *D_80115948[];
+extern int *TREASURE_CHEST_A3S9_ANIM_SETS[];
+extern int *TREASURE_CHEST_ANIM_SETS[];
 extern int ObjCullRegister(TObj *o);
 extern void setSectionFlagBit(int n);
 extern void spawnItemFromEntry(char *a, Fix16 *v, int b, int c, TObj *o);
@@ -65,9 +65,9 @@ void treasureChestOpenCarried(TObj *o)
         o->timer = 10;
         o->wac = 1;
         if (GAME[0] == 0x30009)
-            o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
+            o->anim = (void *)TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f][1];
         else
-            o->anim = (void *)D_80115948[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
+            o->anim = (void *)TREASURE_CHEST_ANIM_SETS[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
         AnimLoadDuration(o);
         o->b69 = 0;
         o->velX = 0x80;

@@ -2,7 +2,7 @@
 // MATCHING 800f7aac 1408
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
 extern int FUN_8001fec0(TObj *);
@@ -153,7 +153,7 @@ void playerStepPerchLeap(TObj *o)
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 4);
             o->d88 = 0;
-            b = DAT_801152e8[o->wb0];
+            b = SLOPE_TILT_TABLE[o->wb0];
             o->state++;
             o->d8c = b;
         } else if (--o->timer <= 0) {
@@ -178,7 +178,7 @@ void playerStepPerchLeap(TObj *o)
             (*(unsigned char*)&o->waa) = 0;
             o->velX = 0;
             o->velY = 0;
-            b = DAT_801152e8[o->wb0];
+            b = SLOPE_TILT_TABLE[o->wb0];
             o->anim = LAB_80010748;
             o->d8c = b;
             FUN_8001fe6c(o);

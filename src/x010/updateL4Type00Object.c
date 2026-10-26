@@ -5,7 +5,7 @@ extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
 extern short DAT_1f8001c8;
 extern unsigned int DAT_8009c978[];
-extern void (*DAT_80114c58[])(TObj *);
+extern void (*VILLAGER_NPC_STEP_TABLE[])(TObj *);
 
 void updateL4Type00Object(TObj *o)
 {
@@ -63,7 +63,7 @@ void updateL4Type00Object(TObj *o)
             if (o->b69 != 0) o->step = 1;
             else if (o->b68 != 0) o->step = 2;
         }
-        if (o->step != 0) DAT_80114c58[o->step](o);
+        if (o->step != 0) VILLAGER_NPC_STEP_TABLE[o->step](o);
         break;
     case 2:
         o->b04++;

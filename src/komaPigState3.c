@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char D_80077D3C[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *D_8013A184[], *D_8013A1A4[], *D_8013A1A8[], *D_8013A1AC[], *D_8013A1FC[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
@@ -18,7 +18,7 @@ extern int AnimAdvanceWithBox(TObj *);
         unsigned char *p; \
         a = T[0]; \
         o->anim = a; \
-        p = &D_80138FD8[a[1] * 4]; \
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4]; \
         o->box0 = *p++; \
         o->box1 = *p++; \
         o->box2 = p[0]; \

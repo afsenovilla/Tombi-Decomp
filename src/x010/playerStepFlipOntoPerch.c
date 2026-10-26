@@ -8,7 +8,7 @@
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern char D_80011108[];
-extern unsigned char D_80115220[][2];
+extern unsigned char PLAYER_PERCH_ANIM_PAIRS[][2];
 extern unsigned short D_1f8003c6;
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -96,7 +96,7 @@ void playerStepFlipOntoPerch(TObj *o)
         if (o->wb6 == 0) {
             p = (PL *)PLAYER_EXT;
             if (p->we > 0) {
-                unsigned char *b = D_80115220[--o->wb2];
+                unsigned char *b = PLAYER_PERCH_ANIM_PAIRS[--o->wb2];
                 p->we = b[0];
                 p->w2 = b[1];
             }
@@ -112,7 +112,7 @@ void playerStepFlipOntoPerch(TObj *o)
         if (o->wb6 == 0) {
             p = (PL *)PLAYER_EXT;
             if (p->we > 0) {
-                unsigned char *b = D_80115220[--o->wb2];
+                unsigned char *b = PLAYER_PERCH_ANIM_PAIRS[--o->wb2];
                 p->we = b[0];
                 p->w2 = b[1];
             } else {

@@ -35,7 +35,7 @@ extern int DAT_8009c978;
 extern int DAT_8009c97c;
 extern int DAT_8009c978A[];
 extern unsigned char DAT_8009d079;
-extern int *DAT_80114c64[];
+extern int *VILLAGER_NPC_WALK_PATHS[];
 extern char D_800E3E28[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
@@ -63,7 +63,7 @@ void FUN_800ed258(S *o)
         o->w22 = 0;
         o->velV = 0;
         o->velY = 0x4b0;
-        p = DAT_80114c64[o->b0c];
+        p = VILLAGER_NPC_WALK_PATHS[o->b0c];
         p = (int *)(*p + ((int *)*(int *volatile *)p)[1]);
         e->bc = (int)p;
         e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);

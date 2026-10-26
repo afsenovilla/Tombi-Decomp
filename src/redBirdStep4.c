@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_8013AD64[];
-extern unsigned short D_80139240[];
+extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
@@ -53,7 +53,7 @@ void redBirdStep4(TObj *o)
                 o->state = 0;
                 o->substep = 0;
             } else {
-                o->state = D_80139240[Rand() & 0xf];
+                o->state = RED_BIRD_RAND_STATE_TABLE[Rand() & 0xf];
                 o->substep = 0;
             }
         }

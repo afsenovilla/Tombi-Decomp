@@ -22,7 +22,7 @@ extern TObj *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c6;
-extern unsigned char DAT_80115228[];
+extern unsigned char PLAYER_SWING_ANIM_PAIRS[];
 extern char D_80011108[];
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fe94(TObj *, int);
@@ -49,7 +49,7 @@ extern void playerFlipOntoObjectPlace(TObj *, int, int);
 
 static __inline__ void nextspd(TObj *o, P *pl)
 {
-    unsigned char *t = &DAT_80115228[--o->wb2 * 2];
+    unsigned char *t = &PLAYER_SWING_ANIM_PAIRS[--o->wb2 * 2];
     pl->w0e = t[0];
     pl->w02 = t[1];
 }

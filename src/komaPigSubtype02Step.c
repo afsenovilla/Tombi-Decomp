@@ -3,13 +3,13 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CDC[];
-extern unsigned char D_801390EC[];
-extern unsigned short *D_8013A160[];
+extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[];
+extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A1D8[];
 extern unsigned short *D_8013A1D4[];
 extern unsigned short *D_8013A1DC[];
 extern unsigned short *D_8013A1BC[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -18,7 +18,7 @@ extern TObj *FUN_80018448(void);
 static __inline__ void SetBox(TObj *o)
 {
     unsigned char *p;
-    p = &D_80138FD8[((unsigned short *)o->anim)[1] * 4];
+    p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p++;
@@ -59,9 +59,9 @@ void komaPigSubtype02Step(TObj *o)
         o->w22 = 0;
         o->b69 = 0;
         o->state++;
-        k = D_801390EC[o->subtype];
+        k = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
         o->wac = k;
-        o->anim = D_8013A160[k];
+        o->anim = KOMA_PIG_ANIMS[k];
         SetBox(o);
         break;
     case 1:

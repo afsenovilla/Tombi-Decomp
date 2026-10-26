@@ -1,7 +1,7 @@
 // FUNC 80108fe0 88 X013
 // MATCHING 80108fe0 88
 #include "TOBJ.H"
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern TObj *PLAYER_EXT;
 
 void playerResetAfterEvent(TObj *o)
@@ -14,7 +14,7 @@ void playerResetAfterEvent(TObj *o)
     o->wb2 = 0;
     o->velX = 0;
     o->velY = 0;
-    o->d8c = D_801152E8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     PLAYER_EXT->timer = 0;
     o->b04 = 1;
     o->step = 0;

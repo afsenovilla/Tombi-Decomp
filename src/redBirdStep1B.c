@@ -30,7 +30,7 @@ static short DAT_80139280[48] = {
     2, 2, 2, 2, 3, 3, 3, 3,
     3, 3, 4, 4, 4, 4, 4, 6,
 };
-extern short *DAT_80139234[];
+extern short *RED_BIRD_SUBTYPE_PARAMS[];
 
 static __inline__ short hit(TObj *o)
 {
@@ -131,7 +131,7 @@ void redBirdStep1B(TObj *o)
             o->timer = 0x1e;
             o->substep = 0xb;
         } else {
-            t = DAT_80139234[o->subtype];
+            t = RED_BIRD_SUBTYPE_PARAMS[o->subtype];
             if (o->h->p.whole < t[0] || t[1] < o->h->p.whole) {
                 o->b6a = 0;
                 o->wac = 2;

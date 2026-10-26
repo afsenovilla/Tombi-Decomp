@@ -13,7 +13,7 @@ typedef struct {
     unsigned short w2e;
 } G330;
 extern G330 *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
 extern int FUN_8001fec0(TObj *);
@@ -177,7 +177,7 @@ typedef struct {
     unsigned short w2e;
 } G330;
 extern G330 *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char LAB_80010c50[];
 extern char LAB_80010748[];
 extern int FUN_8001fec0(TObj *);
@@ -271,7 +271,7 @@ void playerStepTossed(TObj *o)
             o->anim = LAB_80010c50;
             FUN_8001fe94(o, 1);
             o->d88 = 0;
-            b = DAT_801152e8[o->wb0];
+            b = SLOPE_TILT_TABLE[o->wb0];
             o->state = 5;
             o->d8c = b;
         }
@@ -309,7 +309,7 @@ void playerStepTossed(TObj *o)
         }
         o->d88 = 0;
         {
-            unsigned char c = DAT_801152e8[o->wb0];
+            unsigned char c = SLOPE_TILT_TABLE[o->wb0];
             o->state++;
             o->d8c = c;
         }
@@ -324,7 +324,7 @@ void playerStepTossed(TObj *o)
             o->velY = 0;
             o->animFrame = 0;
             o->timer = 0x46;
-            o->d8c = DAT_801152e8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             ADJ(10, -10);
             o->anim = LAB_80010748;
             FUN_8001fe6c(o);

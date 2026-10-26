@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { short v[8]; } T16;
-extern T16 DAT_80138644[];
+extern T16 A00_FOG_CLOUD_QUADS[];
 extern void *DAT_8013b23c[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f80017e;
@@ -28,17 +28,17 @@ void FUN_80118438(TObj *o)
         o->anim = DAT_8013b23c[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         v = (SV *)((char *)o + 0xb4);
-        v[0].x = DAT_80138644[o->subtype].v[0];
-        v[0].y = DAT_80138644[o->subtype].v[1];
+        v[0].x = A00_FOG_CLOUD_QUADS[o->subtype].v[0];
+        v[0].y = A00_FOG_CLOUD_QUADS[o->subtype].v[1];
         v[0].z = 0;
-        v[1].x = DAT_80138644[o->subtype].v[2];
-        v[1].y = DAT_80138644[o->subtype].v[3];
+        v[1].x = A00_FOG_CLOUD_QUADS[o->subtype].v[2];
+        v[1].y = A00_FOG_CLOUD_QUADS[o->subtype].v[3];
         v[1].z = 0;
-        v[2].x = DAT_80138644[o->subtype].v[4];
-        v[2].y = DAT_80138644[o->subtype].v[5];
+        v[2].x = A00_FOG_CLOUD_QUADS[o->subtype].v[4];
+        v[2].y = A00_FOG_CLOUD_QUADS[o->subtype].v[5];
         v[2].z = 0;
-        v[3].x = DAT_80138644[o->subtype].v[6];
-        v[3].y = DAT_80138644[o->subtype].v[7];
+        v[3].x = A00_FOG_CLOUD_QUADS[o->subtype].v[6];
+        v[3].y = A00_FOG_CLOUD_QUADS[o->subtype].v[7];
         v[3].z = 0;
         break;
     case 1:
@@ -63,7 +63,7 @@ void FUN_80118438(TObj *o)
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { short v[8]; } T16;
-extern T16 DAT_80138644[];
+extern T16 A00_FOG_CLOUD_QUADS[];
 extern void *DAT_8013b23c[];
 extern int DAT_1f8002d4[];
 extern short DAT_1f80017e;
@@ -85,17 +85,17 @@ void updateA00FogCloud(TObj *o)
         o->anim = DAT_8013b23c[o->subtype];
         o->d3c = DAT_1f8002d4[0];
         v = (SV *)((char *)o + 0xb4);
-        v[0].x = DAT_80138644[o->subtype].v[0];
-        v[0].y = DAT_80138644[o->subtype].v[1];
+        v[0].x = A00_FOG_CLOUD_QUADS[o->subtype].v[0];
+        v[0].y = A00_FOG_CLOUD_QUADS[o->subtype].v[1];
         v[0].z = 0;
-        v[1].x = DAT_80138644[o->subtype].v[2];
-        v[1].y = DAT_80138644[o->subtype].v[3];
+        v[1].x = A00_FOG_CLOUD_QUADS[o->subtype].v[2];
+        v[1].y = A00_FOG_CLOUD_QUADS[o->subtype].v[3];
         v[1].z = 0;
-        v[2].x = DAT_80138644[o->subtype].v[4];
-        v[2].y = DAT_80138644[o->subtype].v[5];
+        v[2].x = A00_FOG_CLOUD_QUADS[o->subtype].v[4];
+        v[2].y = A00_FOG_CLOUD_QUADS[o->subtype].v[5];
         v[2].z = 0;
-        v[3].x = DAT_80138644[o->subtype].v[6];
-        v[3].y = DAT_80138644[o->subtype].v[7];
+        v[3].x = A00_FOG_CLOUD_QUADS[o->subtype].v[6];
+        v[3].y = A00_FOG_CLOUD_QUADS[o->subtype].v[7];
         v[3].z = 0;
         break;
     case 1:

@@ -6,7 +6,7 @@
 typedef struct { char p[8]; unsigned char b8; char q[0x20 - 9]; short w20; char r[0x2e - 0x22]; short w2e; } G;
 extern G *PLAYER_EXT;
 extern TObj *BITTEN_OBJECT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void SfxPlay3(int, int);
 void setEventComplete(int, int);
 void playerLandFromJump(TObj *o)
@@ -33,7 +33,7 @@ void playerLandFromJump(TObj *o)
     o->wb2 = o->velX;
     o->velX = 0;
     o->velY = 0;
-    o->d8c = D_801152E8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     o->ba5 = 0;
     PLAYER_EXT->w20 = 0;
     if (((unsigned char*)&GCD.bcf06)[0] && o->subtype != 1) {

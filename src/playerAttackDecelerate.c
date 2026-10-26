@@ -5,8 +5,8 @@
 // Demo version of PAL x000 80110FDC (func_80110FDC.c): 3 speed sets per level (PAL 4), no special cases.
 extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
-extern unsigned char DAT_80115510[];
-#define TS(i, o) (*(short *)(DAT_80115510 + (i) + (o)))
+extern unsigned char PLAYER_DECEL_PARAMS[];
+#define TS(i, o) (*(short *)(PLAYER_DECEL_PARAMS + (i) + (o)))
 
 void func_80110FDC(unsigned char *p)
 {
@@ -39,8 +39,8 @@ void func_80110FDC(unsigned char *p)
 #else
 extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
-extern unsigned char DAT_80115510[];
-#define TS(i, o) (*(short *)(DAT_80115510 + (i) + (o)))
+extern unsigned char PLAYER_DECEL_PARAMS[];
+#define TS(i, o) (*(short *)(PLAYER_DECEL_PARAMS + (i) + (o)))
 
 void playerAttackDecelerate(unsigned char *p)
 {

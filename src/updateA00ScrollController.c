@@ -11,7 +11,7 @@ extern signed char DAT_8009d2b0;
 extern unsigned short DAT_8009c962;
 extern unsigned short DAT_8009c982[];
 extern unsigned char DAT_801384c0[];
-extern Fn DAT_8013841c[];
+extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
 extern short DAT_1f80016a, DAT_1f80016e, DAT_1f800172;
 extern short DAT_1f8001c6;
 extern unsigned char DAT_1f8001cc, DAT_1f8001cd;
@@ -80,7 +80,7 @@ void updateA00ScrollController(TObj *o)
         }
         break;
     case 4:
-        DAT_8013841c[o->subtype](o);
+        A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         switch (DAT_8009c982[0]) {
         case 0:
         case 1:
@@ -117,7 +117,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 5:
         DAT_8009c982[0] = 0;
-        DAT_8013841c[o->subtype](o);
+        A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         if (DAT_1f80016a < 0x4ec) {
             o->state = 0;
             o->step--;
@@ -173,7 +173,7 @@ void updateA00ScrollController(TObj *o)
         cameraEventScrollHandler(o);
         break;
     case 9:
-        DAT_8013841c[o->subtype](o);
+        A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         if (DAT_8009c938 != 0) break;
         {
         short k = DAT_1f80016a;
@@ -197,7 +197,7 @@ void updateA00ScrollController(TObj *o)
         }
         break;
     case 10:
-        DAT_8013841c[o->subtype](o);
+        A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         if (DAT_1f80016a < 0x29 && DAT_1f80016e >= -0x126) {
             if (!tryStartItemInteraction(o, 2, 0)) break;
         s8:

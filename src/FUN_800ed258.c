@@ -1,6 +1,6 @@
 // FUNC 800ed258 1272 X000
 // MATCHING 800ed258 1272
-// probably: updateVillagerNpc step table D_80114C58[1]: the villager's walk along the per-subtype path DAT_80114c64[b0c] (velY 0x4B0, 24-item counter event)
+// probably: updateVillagerNpc step table D_80114C58[1]: the villager's walk along the per-subtype path VILLAGER_NPC_WALK_PATHS[b0c] (velY 0x4B0, 24-item counter event)
 // VERSION SLPM_80165 x00 800EA564 1212
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800ED258 (FUN_800ed258.c): no pause check, no 24-item counter event.
@@ -39,7 +39,7 @@ extern int DAT_8009c978;
 extern int DAT_8009c97c;
 extern int DAT_8009c978A[];
 extern unsigned char DAT_8009d079;
-extern int *DAT_80114c64[];
+extern int *VILLAGER_NPC_WALK_PATHS[];
 extern char D_800E3E28[];
 extern void FUN_80025aa8(int, int);
 extern void FUN_80024ea0(int, int, int);
@@ -65,7 +65,7 @@ void FUN_800ed258(S *o)
         o->w22 = 0;
         o->velV = 0;
         o->velY = 0x4b0;
-        p = DAT_80114c64[o->b0c];
+        p = VILLAGER_NPC_WALK_PATHS[o->b0c];
         p = (int *)(*p + ((int *)*(int *volatile *)p)[1]);
         e->bc = (int)p;
         e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);
@@ -214,7 +214,7 @@ extern int DAT_8009c978;
 extern int DAT_8009c97c;
 extern int DAT_8009c978A[];
 extern unsigned char DAT_8009d079;
-extern int *DAT_80114c64[];
+extern int *VILLAGER_NPC_WALK_PATHS[];
 extern char D_800E3E28[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
@@ -242,7 +242,7 @@ void FUN_800ed258(S *o)
         o->w22 = 0;
         o->velV = 0;
         o->velY = 0x4b0;
-        p = DAT_80114c64[o->b0c];
+        p = VILLAGER_NPC_WALK_PATHS[o->b0c];
         p = (int *)(*p + ((int *)*(int *volatile *)p)[1]);
         e->bc = (int)p;
         e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);

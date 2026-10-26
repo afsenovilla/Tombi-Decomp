@@ -31,7 +31,7 @@ extern TObj *GRABBED_OBJECT;
 extern unsigned char D_8009CF06[];
 typedef struct { unsigned short c960, c962; char pad[0x5a2]; unsigned char cf06; } G960;
 extern G960 GAME;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char D_80010A04[];
 extern char D_800116B8[];
 extern void FUN_8001fe94(TObj *, int);
@@ -45,11 +45,11 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern void playerHandleHazardContact(TObj *, int);
 
 typedef struct { int a[90]; } AnimTable;
-extern AnimTable D_800E8404; /* shared with ObjSetAnimFromTable (one table in the retail .rodata) */
+extern AnimTable PLAYER_ANIM_TABLE; /* shared with ObjSetAnimFromTable (one table in the retail .rodata) */
 
 static __inline__ void SetAnimFromTable(TObj *o)
 {
-    AnimTable t = D_800E8404;
+    AnimTable t = PLAYER_ANIM_TABLE;
     o->anim = (void *)t.a[PLAYER_EXT->w2c];
 }
 
@@ -216,7 +216,7 @@ void playerStepHazardRespawn(TObj *o)
     case 9:
         U8(o, 0xd1) = 0;
         PLAYER_EXT->b8 = 0;
-        t = D_801152E8[o->wb0];
+        t = SLOPE_TILT_TABLE[o->wb0];
         o->b04 = 1;
         o->step = 2;
         o->state = 3;

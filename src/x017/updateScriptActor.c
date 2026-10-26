@@ -6,7 +6,7 @@ typedef struct {
     short idx;
     void **tab;
 } Ent5de4;
-extern Ent5de4 DAT_80115de4[];
+extern Ent5de4 SCRIPT_ACTOR_DEFS[];
 extern int SPR_DATA[];
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_800202b4(TObj *);
@@ -20,13 +20,13 @@ void updateScriptActor(TObj *o)
 
     switch (o->b04) {
     case 0:
-        o->box0 = DAT_80115de4[o->subtype].b0;
-        o->box1 = DAT_80115de4[o->subtype].b1;
-        o->box2 = DAT_80115de4[o->subtype].b2;
-        o->box3 = DAT_80115de4[o->subtype].b3;
-        o->w1e = DAT_80115de4[o->subtype].w1e;
-        o->d3c = SPR_DATA[DAT_80115de4[o->subtype].idx];
-        o->anim = DAT_80115de4[o->subtype].tab[o->w74];
+        o->box0 = SCRIPT_ACTOR_DEFS[o->subtype].b0;
+        o->box1 = SCRIPT_ACTOR_DEFS[o->subtype].b1;
+        o->box2 = SCRIPT_ACTOR_DEFS[o->subtype].b2;
+        o->box3 = SCRIPT_ACTOR_DEFS[o->subtype].b3;
+        o->w1e = SCRIPT_ACTOR_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[SCRIPT_ACTOR_DEFS[o->subtype].idx];
+        o->anim = SCRIPT_ACTOR_DEFS[o->subtype].tab[o->w74];
         FUN_8001fe94(o, o->w76);
         o->b0a = 2;
         o->d8c = 0;

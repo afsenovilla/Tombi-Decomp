@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char D_80077CF4[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned char D_80138FA8[];
-extern unsigned char D_80138FB8[];
+extern unsigned char KOMA_PIG_RAND_TABLE[];
 extern unsigned short *D_8013A19C[], *D_8013A1A0[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityXY(TObj *);
@@ -22,7 +22,7 @@ extern int AnimAdvanceWithBox(TObj *);
         unsigned char *p; \
         a = T[0]; \
         o->anim = a; \
-        p = &D_80138FD8[a[1] * 4]; \
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4]; \
         o->box0 = *p++; \
         o->box1 = *p++; \
         o->box2 = p[0]; \
@@ -147,7 +147,7 @@ void komaPigState2(TObj *o)
         c = x->b01;
         if (c != 2) {
             t = D_80138FA8;
-            if (c != 0) t = D_80138FB8;
+            if (c != 0) t = KOMA_PIG_RAND_TABLE;
             if (t[FUN_8001f9e0() & 0xf] == 0) goto ok;
         }
         o->state = 3;

@@ -9,8 +9,8 @@ extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001fc, D_1f8003c6;
-extern unsigned char D_80115228[][2];
-extern unsigned char D_80115388[];
+extern unsigned char PLAYER_SWING_ANIM_PAIRS[][2];
+extern unsigned char PLAYER_SPIN_JUMP_ANIMS[];
 extern char D_80011108[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -46,7 +46,7 @@ static __inline__ void rot(TObj *o)
 
 #define SETTBL(o) \
     { \
-        unsigned char *b = D_80115228[o->wb2]; \
+        unsigned char *b = PLAYER_SWING_ANIM_PAIRS[o->wb2]; \
         PL *q = (PL *)PLAYER_EXT; \
         q->we = b[0]; \
         q->w2 = b[1]; \
@@ -100,10 +100,10 @@ static __inline__ void swing(TObj *o, short i, short a)
     playerSpinPlaceAndAccelerate(o, i, a);
     o->anim = D_80011108;
     if (o->animFrame & 1) {
-        FUN_8001fe94(o, D_80115388[i]);
+        FUN_8001fe94(o, PLAYER_SPIN_JUMP_ANIMS[i]);
         o->d8c = 0x100 - (i << 2);
     } else {
-        FUN_8001fe94(o, D_80115388[i]);
+        FUN_8001fe94(o, PLAYER_SPIN_JUMP_ANIMS[i]);
         o->d8c = i << 2;
     }
 }
@@ -238,7 +238,7 @@ void playerStepSpinOnObject(TObj *o)
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         PLAYER_EXT->animFrame = 0xffff;
         o->anim = D_80011108;
-        FUN_8001fe94(o, D_80115388[i]);
+        FUN_8001fe94(o, PLAYER_SPIN_JUMP_ANIMS[i]);
         PLAYER_EXT->visible = 0x20;
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
@@ -278,7 +278,7 @@ void playerStepSpinOnObject(TObj *o)
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         PLAYER_EXT->animFrame = 0xffff;
         o->anim = D_80011108;
-        FUN_8001fe94(o, D_80115388[i]);
+        FUN_8001fe94(o, PLAYER_SPIN_JUMP_ANIMS[i]);
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
         if ((*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) break;

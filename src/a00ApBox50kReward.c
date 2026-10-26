@@ -1,7 +1,7 @@
 // FUNC 8012171c 340 X000
 // MATCHING 8012171c 340
 #include "TOBJ.H"
-extern char DAT_80138d6c[];
+extern char A00_AP_BOX_50K_ITEM_ENTRY[];
 extern void spawnItemFromEntry(void *, void *, int, int, TObj *);
 
 void a00ApBox50kReward(TObj *o)
@@ -22,9 +22,9 @@ void a00ApBox50kReward(TObj *o)
     case 3:
         if (o->b0c == 0) {
             if (*(unsigned short *)&o->wb4 == 0x78)
-                spawnItemFromEntry(DAT_80138d6c, &o->a, 0x20, -0x400, o);
+                spawnItemFromEntry(A00_AP_BOX_50K_ITEM_ENTRY, &o->a, 0x20, -0x400, o);
             else if (*(unsigned short *)&o->wb4 == 0x5a)
-                spawnItemFromEntry(DAT_80138d6c, &o->a, -0x20, -0x400, o);
+                spawnItemFromEntry(A00_AP_BOX_50K_ITEM_ENTRY, &o->a, -0x20, -0x400, o);
         }
         if (--*(unsigned short *)&o->wb4 == 0xffff) {
             o->wb4 = 0x5a;

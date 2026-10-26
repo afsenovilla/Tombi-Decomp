@@ -5,7 +5,7 @@ typedef struct { short x, y; } XY;
 extern TObj *PLAYER_EXT;
 extern short DAT_1f800238;
 extern unsigned short DAT_1f8001f8;
-extern XY DAT_801151e0[];
+extern XY PLAYER_FOOT_OFFSET_BY_DIR[];
 extern void FUN_800efc04(TObj *, TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern short spawnPlayerFootstepEffect(void);
@@ -36,7 +36,7 @@ void playerUpdateFall(TObj *o)
             q->active = 1;
             q->type = 0x31;
             q->subtype = 1;
-            t = &DAT_801151e0[DAT_1f8001f8 & 7];
+            t = &PLAYER_FOOT_OFFSET_BY_DIR[DAT_1f8001f8 & 7];
             q->a.p.whole = x;
             q->y.p.whole = y;
             q->b.p.whole = z;

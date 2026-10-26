@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
-extern B D_80138FD8[];
+extern B KOMA_PIG_ANIM_BOXES[];
 int komaPigAnimAdvance(TObj *o)
 {
     A *a;
@@ -24,7 +24,7 @@ int komaPigAnimAdvance(TObj *o)
             o->anim = *(A **)(a + 1);
             idx = ((A *)o->anim)->w2;
         merge:
-            { B *t = D_80138FD8; p = t[idx].c; }
+            { B *t = KOMA_PIG_ANIM_BOXES; p = t[idx].c; }
             o->box0 = *p++;
             o->box1 = *p++;
             o->box2 = *p;

@@ -7,7 +7,7 @@ extern void playerMoveByAngleSpeed(TObj *);
 extern void FUN_8001fec0(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 
 void playerStepItemReactionB(TObj *o)
 {
@@ -38,7 +38,7 @@ void playerStepItemReactionB(TObj *o)
         o->timer = t;
         if ((short)t <= 0) {
             o->active = 1;
-            b = DAT_801152e8[o->wb0];
+            b = SLOPE_TILT_TABLE[o->wb0];
             o->wb2 = 0;
             *((unsigned char *)o + 0xac) = 0;
             *((unsigned char *)o + 0xab) = 0;
@@ -67,7 +67,7 @@ void playerStepItemReactionB(TObj *o)
         t = o->timer - 1;
         o->timer = t;
         if ((short)t <= 0) {
-            c = DAT_801152e8[o->wb0];
+            c = SLOPE_TILT_TABLE[o->wb0];
             o->wb2 = 0;
             *((unsigned char *)o + 0xac) = 0;
             *((unsigned char *)o + 0xab) = 0;

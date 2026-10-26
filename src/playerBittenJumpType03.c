@@ -11,7 +11,7 @@ extern TObj *BITTEN_OBJECT;
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern unsigned char D_8009D2B1;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerAirAccelerateX(TObj *o);
 extern void setFacingFromPad(TObj *o);
 extern void ObjGravityStep(TObj *o);
@@ -33,7 +33,7 @@ extern void playerEnterGrabStep(TObj *, int);
 extern void playerTryAttack(TObj *, int);
 
 #define LAND() \
-    o->d8c = D_801152E8[o->wb0]; \
+    o->d8c = SLOPE_TILT_TABLE[o->wb0]; \
     (*(unsigned char*)&PLAYER_EXT->w08) = 0; \
     o->b9c = 0; \
     o->ba7 = 0; \

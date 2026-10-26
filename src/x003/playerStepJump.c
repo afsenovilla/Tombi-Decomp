@@ -34,9 +34,9 @@ extern short DAT_1f800238;
 extern short DAT_8009c944, DAT_8009c946[];
 extern unsigned char DAT_8009d2b0, DAT_8009d2b1[], DAT_8009c990;
 extern int GRABBED_OBJECT;
-extern unsigned char DAT_801152e8[];
-extern short DAT_801151e0[];
-extern T800F2B98 DAT_800e8404;
+extern unsigned char SLOPE_TILT_TABLE[];
+extern short PLAYER_FOOT_OFFSET_BY_DIR[];
+extern T800F2B98 PLAYER_ANIM_TABLE;
 extern short FUN_8001fddc(int, int);
 extern void playerSetJumpRiseVelocity(TObj *);
 extern void FUN_8001fe6c(TObj *);
@@ -98,7 +98,7 @@ void playerStepJump(TObj *o)
         }
         *(unsigned char *)&o->wac = 0;
         playerSetJumpRiseVelocity(o);
-        tab = DAT_800e8404;
+        tab = PLAYER_ANIM_TABLE;
         o->anim = tab.p[PLAYER_EXT->w2c];
         FUN_8001fe6c(o);
         PLAYER_EXT->w2e = PLAYER_EXT->w2c;
@@ -140,7 +140,7 @@ void playerStepJump(TObj *o)
                 q->a.p.whole = a;
                 q->y.p.whole = y;
                 q->b.p.whole = b;
-                t = &DAT_801151e0[(DAT_1f8001f8 & 7) * 2];
+                t = &PLAYER_FOOT_OFFSET_BY_DIR[(DAT_1f8001f8 & 7) * 2];
                 q->h->p.whole += t[0];
                 q->y.p.whole += t[1];
             }
@@ -220,7 +220,7 @@ void playerStepJump(TObj *o)
                 PLAYER_EXT->w2e = 0xffff;
                 PLAYER_EXT->w28 = 0xffff;
                 PLAYER_EXT->w2a = 0xffff;
-                o->d8c = DAT_801152e8[o->wb0];
+                o->d8c = SLOPE_TILT_TABLE[o->wb0];
                 o->step = 1;
                 o->state = 0;
                 if (DAT_1f8001fc & DAT_1f8003c6) {

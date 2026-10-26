@@ -1,7 +1,7 @@
 // FUNC 800f434c 132 X004
 // MATCHING 800f434c 132
 #include "TOBJ.H"
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void func_8001e5f4(int a, int b);
 
 void playerLandResumeWalk(TObj *o)
@@ -11,7 +11,7 @@ void playerLandResumeWalk(TObj *o)
     o->ba7 = 0;
     *(char *)&o->wac = 0;
     o->b9d = 0;
-    o->d8c = DAT_801152e8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     if (o->bbe & 0x20) {
         o->step = 0x1f;
         o->state = 1;

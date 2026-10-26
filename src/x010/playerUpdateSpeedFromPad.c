@@ -10,7 +10,7 @@ typedef struct {
     unsigned short g1c, g1e, g20, g22;
     char r[0x74 - 0x24];
 } T74;
-extern T74 DAT_80115510[];
+extern T74 PLAYER_DECEL_PARAMS[];
 extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
 extern unsigned short DAT_8009d610;
@@ -23,8 +23,8 @@ typedef struct {
     char pbe; unsigned char bbf;
     char pc0; unsigned char bc1;
 } P;
-#define T DAT_80115510[u]
-static __inline__ T74 *TB(short u) { return &DAT_80115510[u]; }
+#define T PLAYER_DECEL_PARAMS[u]
+static __inline__ T74 *TB(short u) { return &PLAYER_DECEL_PARAMS[u]; }
 
 static __inline__ void chkr(P *o, short u)
 {

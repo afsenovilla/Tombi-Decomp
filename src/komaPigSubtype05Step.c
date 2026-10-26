@@ -4,14 +4,14 @@
 extern char DAT_80077cf4[];
 extern unsigned short *DAT_8013a1c0[];
 extern unsigned short *DAT_8013a1c4[];
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void FUN_80127214(TObj *);
 extern int enemyProbeGround(TObj *);
 
 static __inline__ void SetBox(TObj *o)
 {
     unsigned char *p;
-    p = &DAT_80138fd8[((unsigned short *)o->anim)[1] * 4];
+    p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p++;

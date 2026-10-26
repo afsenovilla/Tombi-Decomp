@@ -14,7 +14,7 @@ extern void *D_8013A1E8[];
 extern void *D_8013A208[];
 extern void *D_8013A20C[];
 extern void *D_8013A210[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short func_8004065C(TObj *, short, short, short);
@@ -25,7 +25,7 @@ extern int FUN_801274cc(TObj *);
     { \
         unsigned short *a = A; unsigned char *b; \
         o->anim = a; \
-        b = D_80138FD8 + a[1] * 4; \
+        b = KOMA_PIG_ANIM_BOXES + a[1] * 4; \
         o->box0 = *b++; \
         o->box1 = *b++; \
         o->box2 = b[0]; \
@@ -195,7 +195,7 @@ extern void *D_8013A1E8[];
 extern void *D_8013A208[];
 extern void *D_8013A20C[];
 extern void *D_8013A210[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -206,7 +206,7 @@ extern int enemyProbeGround(TObj *);
     { \
         unsigned short *a = A; unsigned char *b; \
         o->anim = a; \
-        b = D_80138FD8 + a[1] * 4; \
+        b = KOMA_PIG_ANIM_BOXES + a[1] * 4; \
         o->box0 = *b++; \
         o->box1 = *b++; \
         o->box2 = b[0]; \

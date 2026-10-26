@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void f1(int, int);
 extern void f2(void *, int);
-extern unsigned char tab[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char anim[];
 void FUN_800f7a38(char *o)
 {
@@ -14,6 +14,6 @@ void FUN_800f7a38(char *o)
     PTR(o, 0x24) = anim;
     f2(o, 4);
     S32(o, 0x88) = 0;
-    S32(o, 0x8c) = tab[S16(o, 0xb0)];
+    S32(o, 0x8c) = SLOPE_TILT_TABLE[S16(o, 0xb0)];
     U8(o, 6)++;
 }

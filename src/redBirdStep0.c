@@ -5,7 +5,7 @@ extern void FUN_8001fe6c(TObj *o);
 extern void FUN_8001fec0(TObj *o);
 extern unsigned FUN_8001f9e0(void);
 extern void *PTR_8013ad30[];
-extern unsigned short TBL_80139240[];
+extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 extern Fix16 *DAT_800a607c;
 extern Fix16 *DAT_800a6078;
 extern unsigned short DAT_800a604e;
@@ -22,7 +22,7 @@ void redBirdStep0(TObj *o)
         o->substep++;
     case 1:
         if (--o->timer == 0) {
-            o->state = TBL_80139240[FUN_8001f9e0() & 0xf];
+            o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
             if (o->d->p.whole == DAT_800a607c->p.whole) {
                 int dy = DAT_800a604e - (unsigned short)o->y.p.whole + 0x30;

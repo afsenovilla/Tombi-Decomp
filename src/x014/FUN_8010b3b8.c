@@ -2,7 +2,7 @@
 // MATCHING 8010b3b8 140
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT[];
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001fe6c(TObj *o);
 extern char LAB_80010748[];
 
@@ -22,6 +22,6 @@ void FUN_8010b3b8(TObj *o)
     p->animTimer = 0;
     o->anim = LAB_80010748;
     FUN_8001fe6c(o);
-    o->d8c = DAT_801152e8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     o->state = 4;
 }

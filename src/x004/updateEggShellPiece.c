@@ -15,7 +15,7 @@ static void *D_80134CF4[6] = {
     D_80134EC4, D_80134ECC, D_80134ED4, D_80134EDC,
     D_80134EE4, D_80134EF4,
 };
-extern V2 D_80114A68[];
+extern V2 EGG_SHELL_PIECE_VELOCITIES[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
 void despawnObjectOffscreen(TObj *o);
@@ -38,8 +38,8 @@ void updateEggShellPiece(TObj *o)
         if (ObjCullRegister(o) == 0) despawnObjectOffscreen(o);
         switch (o->step) {
         case 0:
-            o->wb4 = D_80114A68[o->wb8].x;
-            o->wb6 = D_80114A68[*(short *)((char *)o + 0xb8)].y;
+            o->wb4 = EGG_SHELL_PIECE_VELOCITIES[o->wb8].x;
+            o->wb6 = EGG_SHELL_PIECE_VELOCITIES[*(short *)((char *)o + 0xb8)].y;
             o->step++;
         case 1:
             o->h->raw += v[0] << 8;

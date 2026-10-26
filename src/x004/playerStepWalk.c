@@ -24,7 +24,7 @@ extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8001f8, D_1f8003c4;
 extern short D_1f800238;
-extern XY D_801151E0[];
+extern XY PLAYER_FOOT_OFFSET_BY_DIR[];
 extern char D_80010DE0[], D_80010E2C[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -62,7 +62,7 @@ static __inline__ void dust(TObj *o)
         q->active = 1;
         q->type = 0x31;
         q->subtype = 1;
-        t = &D_801151E0[D_1f8001f8 & 7];
+        t = &PLAYER_FOOT_OFFSET_BY_DIR[D_1f8001f8 & 7];
         q->a.p.whole = x;
         q->y.p.whole = y;
         q->b.p.whole = z;

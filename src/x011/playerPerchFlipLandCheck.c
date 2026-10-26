@@ -8,7 +8,7 @@ typedef struct O {
     char p8[0xa4 - 0x9f]; unsigned char ba4; char p9[5]; unsigned char baa; char pa[5]; short sb0; char pb[0xbe - 0xb2]; unsigned char bbe;
 } O;
 extern O *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern short FUN_8003fd78(O *, int, int);
 extern void FUN_800efc04(O *);
 extern void FUN_8001fe94(O *, int);
@@ -49,7 +49,7 @@ void playerPerchFlipLandCheck(O *o)
             PLAYER_EXT->w2e = 0xffff;
             PLAYER_EXT->w28 = 0xffff;
             PLAYER_EXT->w2a = 0xffff;
-            o->a8c = DAT_801152e8[o->sb0];
+            o->a8c = SLOPE_TILT_TABLE[o->sb0];
             o->b5 = 0;
             o->b6 = 0;
         }

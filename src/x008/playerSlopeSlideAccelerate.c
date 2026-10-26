@@ -8,8 +8,8 @@ typedef struct {
     unsigned short g38, g3a, g3c, g3e, g40, g42, g44, g46, g48, g4a, g4c;
     char r2[0x74 - 0x4e];
 } T74;
-extern T74 DAT_80115510s[];
-#define TB DAT_80115510s[u]
+extern T74 PLAYER_DECEL_PARAMS[];
+#define TB PLAYER_DECEL_PARAMS[u]
 #define WB2(p) (*(short *)((p) + 0xb2))
 
 /* wb2 (speed) ramp towards the table limits; l = facing left, r = right; 38/42 = table group */

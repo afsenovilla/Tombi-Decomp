@@ -44,7 +44,7 @@ typedef struct E {
 } E;
 
 extern char D_80077CDC[];
-extern signed char D_8013882C[];
+extern signed char A00_SPORE_BRANCH_SUBTYPE_OFS[];
 extern signed char D_80138830[];
 extern signed char D_80138838[];
 extern signed char D_80138840[];
@@ -98,8 +98,8 @@ void func_8011BF68(E *o)
                 e->wba = 0;
                 e->wbc = 0x80;
                 e->wbe = 0x80;
-                e->t0 = D_80138830 + D_8013882C[o->subtype];
-                e->t1 = D_80138830 + D_8013882C[o->subtype];
+                e->t0 = D_80138830 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                e->t1 = D_80138830 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 i++;
                 e->c8 = 0;
                 e->ca = 0;
@@ -199,8 +199,8 @@ void func_8011BF68(E *o)
             case 5:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 1:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 9;
                 o->wba = 9;
                 o->wbc = 0x80;
@@ -209,8 +209,8 @@ void func_8011BF68(E *o)
             case 6:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 2:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 0x11;
                 o->wba = 9;
                 o->wbc = 0x80;
@@ -220,8 +220,8 @@ void func_8011BF68(E *o)
             case 3:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 4:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 9;
                 o->wba = 9;
                 o->wbc = 0x20;
@@ -327,7 +327,7 @@ typedef struct E {
 } E;
 
 extern char D_80077CDC[];
-extern signed char D_8013882C[];
+extern signed char A00_SPORE_BRANCH_SUBTYPE_OFS[];
 extern signed char D_80138830[];
 extern signed char D_80138838[];
 extern signed char D_80138840[];
@@ -381,8 +381,8 @@ void updateA00SporeBranch(E *o)
                 e->wba = 0;
                 e->wbc = 0x80;
                 e->wbe = 0x80;
-                e->t0 = D_80138830 + D_8013882C[o->subtype];
-                e->t1 = D_80138830 + D_8013882C[o->subtype];
+                e->t0 = D_80138830 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                e->t1 = D_80138830 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 i++;
                 e->c8 = 0;
                 e->ca = 0;
@@ -482,8 +482,8 @@ void updateA00SporeBranch(E *o)
             case 5:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 1:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 9;
                 o->wba = 9;
                 o->wbc = 0x80;
@@ -492,8 +492,8 @@ void updateA00SporeBranch(E *o)
             case 6:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 2:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 0x11;
                 o->wba = 9;
                 o->wbc = 0x80;
@@ -503,8 +503,8 @@ void updateA00SporeBranch(E *o)
             case 3:
                 o->ce = (0x80 - o->ce) & 0xff;
             case 4:
-                tp[0] = D_80138838 + D_8013882C[o->subtype];
-                tp[1] = D_80138840 + D_8013882C[o->subtype];
+                tp[0] = D_80138838 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
+                tp[1] = D_80138840 + A00_SPORE_BRANCH_SUBTYPE_OFS[o->subtype];
                 o->wb8 = 9;
                 o->wba = 9;
                 o->wbc = 0x20;

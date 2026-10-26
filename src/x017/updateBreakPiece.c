@@ -2,10 +2,10 @@
 // MATCHING 800eb6ac 580
 #include "TOBJ.H"
 extern unsigned short GAME;
-extern unsigned short DAT_80114bdc[];
+extern unsigned short BREAK_PIECE_DEFS[];
 extern void *DAT_80077cdc;
-extern void **DAT_80115a08[];
-extern void **DAT_80115948[];
+extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
+extern void **TREASURE_CHEST_ANIM_SETS[];
 extern unsigned short D_1f8001f8;
 extern int D_1f800198;
 extern void FUN_8001fe6c(TObj *);
@@ -23,7 +23,7 @@ void updateBreakPiece(TObj *o)
         o->b04++;
         o->timer = 0x3c;
         o->movetab = &DAT_80077cdc;
-        p = &DAT_80114bdc[o->subtype * 4];
+        p = &BREAK_PIECE_DEFS[o->subtype * 4];
         o->d8c = 0;
         o->b0d = 0;
         o->animFrame = 0;
@@ -31,9 +31,9 @@ void updateBreakPiece(TObj *o)
         o->b6b = *p++;
         g = &GAME;
         if (*(int *)g == 0x30009)
-            o->anim = DAT_80115a08[o->b0c][o->b6b];
+            o->anim = TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c][o->b6b];
         else
-            o->anim = DAT_80115948[*g * 4 + o->b0c][o->b6b];
+            o->anim = TREASURE_CHEST_ANIM_SETS[*g * 4 + o->b0c][o->b6b];
         o->velV = *p;
         FUN_8001fe6c(o);
         break;

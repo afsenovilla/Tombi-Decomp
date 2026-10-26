@@ -8,19 +8,19 @@
 
 typedef struct { unsigned char b[8]; } V801328B4;
 
-extern V801328B4 D_801392EC[][4];
+extern V801328B4 A00_WOODEN_BRANCH_PARAMS[][4];
 extern void *D_8013B24C[];
-extern void (*D_801392E0[])(TObj *);
+extern void (*A00_WOODEN_BRANCH_HANDLERS[])(TObj *);
 extern unsigned short FUN_8005e420(int, int);
 extern int ObjCullRegister(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 #define COPY() \
-    ((V801328B4 *)&o->wb4)[0] = D_801392EC[o->b0c][0]; \
-    ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1]; \
-    ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2]; \
-    ((V801328B4 *)&o->wb4)[3] = D_801392EC[o->b0c][3];
+    ((V801328B4 *)&o->wb4)[0] = A00_WOODEN_BRANCH_PARAMS[o->b0c][0]; \
+    ((V801328B4 *)&o->wb4)[1] = A00_WOODEN_BRANCH_PARAMS[o->b0c][1]; \
+    ((V801328B4 *)&o->wb4)[2] = A00_WOODEN_BRANCH_PARAMS[o->b0c][2]; \
+    ((V801328B4 *)&o->wb4)[3] = A00_WOODEN_BRANCH_PARAMS[o->b0c][3];
 
 void FUN_801328b4(TObj *o)
 {
@@ -40,20 +40,20 @@ void FUN_801328b4(TObj *o)
         o->w08 = ((0x1e6) << 6) | ((0x90) >> 4);
         o->anim = D_8013B24C[o->b0c];
         o->d3c = ((int*)&SPAD.i2d4)[0];
-        t = D_801392EC[o->b0c];
+        t = A00_WOODEN_BRANCH_PARAMS[o->b0c];
         o->b04++;
         o->b69 = 0;
         o->b6b = 0;
         o->step = 0;
         ((V801328B4 *)&o->wb4)[0] = t[0];
-        ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1];
-        ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2];
-        ((V801328B4 *)&o->wb4)[3] = D_801392EC[o->b0c][3];
+        ((V801328B4 *)&o->wb4)[1] = A00_WOODEN_BRANCH_PARAMS[o->b0c][1];
+        ((V801328B4 *)&o->wb4)[2] = A00_WOODEN_BRANCH_PARAMS[o->b0c][2];
+        ((V801328B4 *)&o->wb4)[3] = A00_WOODEN_BRANCH_PARAMS[o->b0c][3];
         AnimLoadDuration(o);
         break;
     case 1:
         if (ObjCullRegister(o)) {
-            D_801392E0[o->subtype](o);
+            A00_WOODEN_BRANCH_HANDLERS[o->subtype](o);
         } else if (o->step) {
             COPY();
             o->step = 0;
@@ -73,7 +73,7 @@ void FUN_801328b4(TObj *o)
 
 typedef struct { unsigned char b[8]; } V801328B4;
 
-extern V801328B4 D_801392EC[][4];
+extern V801328B4 A00_WOODEN_BRANCH_PARAMS[][4];
 extern char D_8013BD78[];
 extern char D_8013BD80[];
 extern char D_8013BD88[];
@@ -86,17 +86,17 @@ static void *D_8013B24C[8] = {
     D_8013BD78, D_8013BD80, D_8013BD88, D_8013BD90,
     D_8013BD98, D_8013BDA0, D_8013BDA8, D_8013BDB0,
 };
-extern void (*D_801392E0[])(TObj *);
+extern void (*A00_WOODEN_BRANCH_HANDLERS[])(TObj *);
 extern unsigned short FUN_8005e420(int, int);
 extern int ObjCullRegister(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 #define COPY() \
-    ((V801328B4 *)&o->wb4)[0] = D_801392EC[o->b0c][0]; \
-    ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1]; \
-    ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2]; \
-    ((V801328B4 *)&o->wb4)[3] = D_801392EC[o->b0c][3];
+    ((V801328B4 *)&o->wb4)[0] = A00_WOODEN_BRANCH_PARAMS[o->b0c][0]; \
+    ((V801328B4 *)&o->wb4)[1] = A00_WOODEN_BRANCH_PARAMS[o->b0c][1]; \
+    ((V801328B4 *)&o->wb4)[2] = A00_WOODEN_BRANCH_PARAMS[o->b0c][2]; \
+    ((V801328B4 *)&o->wb4)[3] = A00_WOODEN_BRANCH_PARAMS[o->b0c][3];
 
 void updateA00WoodenBranch(TObj *o)
 {
@@ -116,20 +116,20 @@ void updateA00WoodenBranch(TObj *o)
         o->w08 = FUN_8005e420(0x90, 0x1e6);
         o->anim = D_8013B24C[o->b0c];
         o->d3c = ((int*)&SPAD.i2d4)[0];
-        t = D_801392EC[o->b0c];
+        t = A00_WOODEN_BRANCH_PARAMS[o->b0c];
         o->b04++;
         o->b69 = 0;
         o->b6b = 0;
         o->step = 0;
         ((V801328B4 *)&o->wb4)[0] = t[0];
-        ((V801328B4 *)&o->wb4)[1] = D_801392EC[o->b0c][1];
-        ((V801328B4 *)&o->wb4)[2] = D_801392EC[o->b0c][2];
-        ((V801328B4 *)&o->wb4)[3] = D_801392EC[o->b0c][3];
+        ((V801328B4 *)&o->wb4)[1] = A00_WOODEN_BRANCH_PARAMS[o->b0c][1];
+        ((V801328B4 *)&o->wb4)[2] = A00_WOODEN_BRANCH_PARAMS[o->b0c][2];
+        ((V801328B4 *)&o->wb4)[3] = A00_WOODEN_BRANCH_PARAMS[o->b0c][3];
         AnimLoadDuration(o);
         break;
     case 1:
         if (ObjCullRegister(o)) {
-            D_801392E0[o->subtype](o);
+            A00_WOODEN_BRANCH_HANDLERS[o->subtype](o);
         } else if (o->step) {
             COPY();
             o->step = 0;

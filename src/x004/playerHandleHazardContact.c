@@ -9,7 +9,7 @@
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *PLAYER_EXT;
-extern AnimTbl D_800E8404;
+extern AnimTbl PLAYER_ANIM_TABLE;
 extern unsigned char D_8009C970A[];
 #define D_8009C970 D_8009C970A[0]
 extern void playerUpdateWaterLevel(TObj *);
@@ -225,7 +225,7 @@ void playerHandleHazardContact(TObj *o, int arg)
     if (GVARS.b38) {
         o->timer = 0xb4;
         PLAYER_EXT->w2c = 0x2f;
-        t = D_800E8404;
+        t = PLAYER_ANIM_TABLE;
         o->anim = t.p[PLAYER_EXT->w2c];
         FUN_8001fe94(o, 1);
         o->state = 2;

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short DAT_800a6066;
 extern int SPR_DATA[];
-extern char DAT_80114c20[];
+extern char WEAPON_TRAIL_DEFS[];
 static char DAT_80114c24[52] = {
     0x78, 0x22, 1, -0x80, -0x6d, 0, 0, 0, 4, 0, 0, 0, 0x7c, 0x22, 1, -0x80,
     -0x6d, 0, 0, 0, 4, 0, 0, 0, -0x80, 0x22, 1, -0x80, -0x6d, 0, 0, 0,
@@ -16,7 +16,7 @@ void initWeaponTrailSprite(TObj *o)
 {
     unsigned short u;
     o->w1e = 0x13;
-    o->d3c = SPR_DATA[*(short *)(DAT_80114c20 + o->subtype * 12)];
+    o->d3c = SPR_DATA[*(short *)(WEAPON_TRAIL_DEFS + o->subtype * 12)];
     o->anim = *(void **)(*(int *)(DAT_80114c24 + o->subtype * 12) + o->b0c * 4);
     FUN_8001fe6c(o);
     u = DAT_800a6066;

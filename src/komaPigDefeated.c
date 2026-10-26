@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern char DAT_80077d0c[];
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a1f8[];
 
 void komaPigDefeated(TObj *o)
@@ -24,7 +24,7 @@ void komaPigDefeated(TObj *o)
         o->state++;
         a = PTR_DAT_8013a1f8[0];
         o->anim = a;
-        p = &DAT_80138fd8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

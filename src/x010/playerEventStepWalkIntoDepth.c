@@ -5,7 +5,7 @@
 extern TObj *PLAYER_EXT;
 extern unsigned char DAT_8009c93a;
 extern unsigned short D_1f8001c8;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
@@ -49,7 +49,7 @@ void playerEventStepWalkIntoDepth(TObj *o)
         o->velY = 0;
         PLAYER_EXT->timer = 0;
         o->active = 1;
-        o->d8c = DAT_801152e8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         o->b04 = 1;
         o->step = 0;
         o->state = 0;

@@ -2,8 +2,8 @@
 // MATCHING 8012c598 852
 #include "TOBJ.H"
 extern char D_80077CDC[];
-extern unsigned char D_801390EC[];
-extern void *D_8013A160[];
+extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[];
+extern void *KOMA_PIG_ANIMS[];
 extern char D_8013A8F4[];
 extern char D_8013A908[];
 extern char D_8013A488[];
@@ -18,12 +18,12 @@ static void *D_8013A224[9] = {
     D_8013A92C,
 };
 extern void *D_8013A268[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 
 #define SETBOX(o) \
     { \
-        unsigned char *b = D_80138FD8 + ((unsigned short *)o->anim)[1] * 4; \
+        unsigned char *b = KOMA_PIG_ANIM_BOXES + ((unsigned short *)o->anim)[1] * 4; \
         o->box0 = *b++; \
         o->box1 = *b++; \
         o->box2 = b[0]; \
@@ -49,8 +49,8 @@ void komaPigSubtype04Step(TObj *o)
         o->w22 = 0;
         o->b69 = 0;
         o->state++;
-        o->wac = D_801390EC[o->subtype];
-        o->anim = D_8013A160[o->wac];
+        o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
         SETBOX(o);
         break;
     case 1:

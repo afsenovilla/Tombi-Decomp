@@ -13,7 +13,7 @@ extern unsigned char enemyPickActionByPlayerDistance(TObj *);
 extern void spawnGroundDebris(short, short, short, unsigned char);
 extern char DAT_80077cdc[];
 extern char DAT_80077d30[];
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a184[];
 extern unsigned short *PTR_DAT_8013a18c[];
 extern unsigned short *PTR_DAT_8013a194[];
@@ -22,7 +22,7 @@ extern unsigned short *PTR_DAT_8013a1a4[];
 
 #define SETBOX(a) \
     o->anim = a; { unsigned char *p; \
-    p = &DAT_80138fd8[a[1] * 4]; \
+    p = &KOMA_PIG_ANIM_BOXES[a[1] * 4]; \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p++; \

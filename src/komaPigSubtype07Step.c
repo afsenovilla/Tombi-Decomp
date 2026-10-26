@@ -2,7 +2,7 @@
 // MATCHING 8012d7fc 284
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *DAT_8013a214;
 extern char DAT_80077cdc[];
 extern void FUN_80127214(TObj *);
@@ -18,7 +18,7 @@ void komaPigSubtype07Step(TObj *o)
         S16(o, 0xac) = 0x2d;
         o->state = o->state + 1;
         o->anim = DAT_8013a214;
-        p = DAT_80138fd8 + DAT_8013a214[1] * 4;
+        p = KOMA_PIG_ANIM_BOXES + DAT_8013a214[1] * 4;
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

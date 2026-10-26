@@ -6,7 +6,7 @@
 // Demo version of PAL x000 800F35E0 (FUN_800f35e0.c): Does not reset +0x8c from the per-object table.
 #include "TOBJ.H"
 extern char *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e4f0(int);
 extern void FUN_800eae0c(int, short, int, int);
@@ -29,7 +29,7 @@ void FUN_800f35e0(TObj *o)
 #else
 #include "TOBJ.H"
 extern char *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e4f0(int);
 extern void spawnGroundDebris(int, short, int, int);
@@ -43,7 +43,7 @@ void FUN_800f35e0(TObj *o)
     o->ba7 = 0;
     *(char *)&o->wac = 0;
     o->b9c = 0;
-    o->d8c = DAT_801152e8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     if (o->bbe & 0x20) {
         FUN_8001e4f0(0x3e);
         spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);

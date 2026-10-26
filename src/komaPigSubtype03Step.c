@@ -7,7 +7,7 @@ extern unsigned short *D_8013A220[];
 extern unsigned short *D_8013A268[];
 extern unsigned short *D_8013A254[];
 extern unsigned short *D_8013A18C[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short DAT_1f80016a;
 extern unsigned short DAT_1f800172;
 extern int AnimAdvanceWithBox(TObj *);
@@ -17,7 +17,7 @@ extern int enemyProbeGround(TObj *);
 static __inline__ void SetBox(TObj *o)
 {
     unsigned char *p;
-    p = &D_80138FD8[((unsigned short *)o->anim)[1] * 4];
+    p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p++;

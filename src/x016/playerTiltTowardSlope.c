@@ -1,10 +1,10 @@
 // FUNC 800ee454 140 X016
 // MATCHING 800ee454 140
 #include "TOBJ.H"
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void playerTiltTowardSlope(TObj *o)
 {
-    unsigned int c = (unsigned char)(D_801152E8[o->wb0] - o->d8c);
+    unsigned int c = (unsigned char)(SLOPE_TILT_TABLE[o->wb0] - o->d8c);
     short d;
     unsigned short u;
     int v;

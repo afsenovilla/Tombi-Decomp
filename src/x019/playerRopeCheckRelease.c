@@ -6,7 +6,7 @@
 typedef struct { TObj t; char c0[7]; unsigned char bc7; unsigned char bc8; } PO;
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x20 - 9]; short w20; short w22; } P;
 extern P *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern short probeCollisionAtDepthB(PO *, int, int);
 extern void SfxPlay3(int, int);
 extern short ObjTileCollide(PO *, int, int);
@@ -75,7 +75,7 @@ void playerRopeCheckRelease(PO *o)
         *(unsigned char *)&o->t.wac = 0;
         o->t.b9d = 0;
         o->bc8 = 0;
-        o->t.d8c = D_801152E8[o->t.wb0];
+        o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
         o->t.step = 0;
         o->t.state = 0;
     } else if (ObjTileCollide(o, 0, 0)) {
@@ -89,7 +89,7 @@ void playerRopeCheckRelease(PO *o)
         *(unsigned char *)&o->t.wac = 0;
         o->t.b9d = 0;
         o->bc8 = 0;
-        o->t.d8c = D_801152E8[o->t.wb0];
+        o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
         o->t.step = 1;
         o->t.state = 0;
     }

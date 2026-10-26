@@ -13,7 +13,7 @@ typedef struct O {
     char pb8[0xe0-0xb8]; short he0; char pe2[2]; void *de4; char pe8[0xf6-0xe8]; short hf6;
 } O;
 extern P *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char D_80010CA0[];
 extern void *BITTEN_OBJECT;
 extern void AnimJump(O *, int);
@@ -113,7 +113,7 @@ void playerStepVerticalJump(O *o)
             o->b0f = -8;
             o->anim = D_80010CA0;
             AnimJump(o, 4);
-            o->d8c = D_801152E8[o->hb0];
+            o->d8c = SLOPE_TILT_TABLE[o->hb0];
             o->state++;
         } else if (o->step == 0x49 && o->vy > 0x200) {
             o->baa = 0;
@@ -145,7 +145,7 @@ void playerStepVerticalJump(O *o)
             o->ba2 = 0;
             o->vx = 0;
             o->vy = 0;
-            o->d8c = D_801152E8[o->hb0];
+            o->d8c = SLOPE_TILT_TABLE[o->hb0];
             o->step = 0;
             o->state = 0;
         }

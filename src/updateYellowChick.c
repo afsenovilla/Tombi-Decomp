@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 8011935C (FUN_8011935c.c):  Inline GetClut.
 typedef struct P { char p[0x24]; void *anim; char q[0x3c - 0x28]; int w3c; } P;
-extern short DAT_8013867c[];
+extern short YELLOW_CHICK_CLUT_Y[];
 extern void *PTR_DAT_8013b1f4[];
 extern int DAT_1f8002d4;
 extern short FUN_8005e420(int, int);
@@ -21,7 +21,7 @@ void FUN_8011935c(char *o)
     case 0:
         o[4] = s + 1;
         *(short *)(o + 0x1e) = 9;
-        *(short *)(o + 8) = (DAT_8013867c[(unsigned char)o[0xc]] << 6) | (0xc0 >> 4);
+        *(short *)(o + 8) = (YELLOW_CHICK_CLUT_Y[(unsigned char)o[0xc]] << 6) | (0xc0 >> 4);
         o[0xd] = 1;
         *(signed char *)&o[0xf] = -0x14;
         o[0xa] = 0;
@@ -43,7 +43,7 @@ void FUN_8011935c(char *o)
 }
 #else
 typedef struct P { char p[0x24]; void *anim; char q[0x3c - 0x28]; int w3c; } P;
-extern short DAT_8013867c[];
+extern short YELLOW_CHICK_CLUT_Y[];
 extern void *PTR_DAT_8013b1f4[];
 extern int DAT_1f8002d4;
 extern short FUN_8005e420(int, int);
@@ -60,7 +60,7 @@ void updateYellowChick(char *o)
     case 0:
         o[4] = s + 1;
         *(short *)(o + 0x1e) = 9;
-        *(short *)(o + 8) = FUN_8005e420(0xc0, DAT_8013867c[(unsigned char)o[0xc]]);
+        *(short *)(o + 8) = FUN_8005e420(0xc0, YELLOW_CHICK_CLUT_Y[(unsigned char)o[0xc]]);
         o[0xd] = 1;
         *(signed char *)&o[0xf] = -0x14;
         o[0xa] = 0;

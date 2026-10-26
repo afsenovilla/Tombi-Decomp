@@ -1,9 +1,9 @@
 // FUNC 800ee51c 68 X002
 // MATCHING 800ee51c 68
-extern unsigned char D_8011530C[];
+extern unsigned char SLOPE_TILT_TABLE_SLOW[];
 void playerTiltTowardSlopeSlow(unsigned char *o)
 {
-    int t = (unsigned char)(D_8011530C[*(short *)(o + 0xb0)] - *(int *)(o + 0x8c));
+    int t = (unsigned char)(SLOPE_TILT_TABLE_SLOW[*(short *)(o + 0xb0)] - *(int *)(o + 0x8c));
     unsigned char d = t;
     if (t != 0) {
         if (d < 0x81) (*(int *)(o + 0x8c))--;

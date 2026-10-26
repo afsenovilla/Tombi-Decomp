@@ -25,8 +25,8 @@ extern PL705C *PLAYER_EXT[];
 extern unsigned char *BITTEN_OBJECT;
 extern TObj *GRABBED_OBJECT;
 extern char D_80011108[];
-extern unsigned char D_80115228[][2];
-extern unsigned char DAT_801152e8[];
+extern unsigned char PLAYER_SWING_ANIM_PAIRS[][2];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -108,7 +108,7 @@ static __inline__ void swing(TObj *o, int p)
     o->d84 = 0; \
     if (o->animFrame & 1) d = 0xf0; \
     o->d88 = d; \
-    o->d8c = DAT_801152e8[o->wb0]; \
+    o->d8c = SLOPE_TILT_TABLE[o->wb0]; \
     { Fix16 *h = o->h; int pv = h->p.whole; short x; \
       if (o->animFrame & 1) x = pv + 14; else x = pv - 14; \
       h->p.whole = x; } \
@@ -176,7 +176,7 @@ void playerStepSwingFromObject(TObj *o)
         if (o->wb6 == 0) {
             q = D_8009C330;
             if (q->we > 0) {
-                unsigned char *b = D_80115228[--o->wb2];
+                unsigned char *b = PLAYER_SWING_ANIM_PAIRS[--o->wb2];
                 q->we = b[0];
                 q->w2 = b[1];
             }
@@ -197,7 +197,7 @@ void playerStepSwingFromObject(TObj *o)
         if (o->wb6 == 0) {
             q = D_8009C330;
             if (q->we > 0) {
-                unsigned char *b = D_80115228[--o->wb2];
+                unsigned char *b = PLAYER_SWING_ANIM_PAIRS[--o->wb2];
                 q->we = b[0];
                 q->w2 = b[1];
             } else {

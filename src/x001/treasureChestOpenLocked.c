@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 extern int GAME[];
 extern unsigned short D_8009C960h[];
-extern int *D_80115A08[];
+extern int *TREASURE_CHEST_A3S9_ANIM_SETS[];
 extern char D_8013B2F4[];
 extern char D_8013B32C[];
 extern char D_8013B310[];
@@ -89,7 +89,7 @@ void treasureChestOpenLocked(TObj *o)
             o->timer = 10;
             o->wac = 1;
             if (GAME[0] == 0x30009) {
-                o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
+                o->anim = (void *)TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f][1];
             } else {
                 o->anim = (void *)D_80115948[D_8009C960h[0] * 4 + (o->b0c & 0x7f)][1];
             }

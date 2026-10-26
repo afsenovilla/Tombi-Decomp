@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { char pad[8]; unsigned char b8; char pad2[0x2e - 9]; short w2e; } P;
 extern P *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void SfxPlay2(int, int);
 extern void playSFX(int);
@@ -92,7 +92,7 @@ void func_80122C10(TObj *o)
             o->velH = 0;
             o->velV = 0;
             PLAYER_EXT->w2e = 0xff;
-            o->d8c = D_801152E8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void ObjSetAnimFromTable(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001e5f4(int, int);
@@ -30,7 +30,7 @@ void playerCheckPerchLanding(TObj *o)
         o->ba7 = 0;
         (*(unsigned char*)&o->wac) = 0;
         o->b9c = 0;
-        o->d8c = DAT_801152e8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         if (o->bbe & 8) {
             (*(unsigned char*)&PLAYER_EXT->w08) = (*(unsigned char*)&o->animFrame) & 1;
             if ((o->bbe & 1) != o->animFrame) {

@@ -5,7 +5,7 @@
 extern int GAME[];
 extern unsigned short D_8009C960h;
 extern void **D_80115A08[];
-extern void **D_80115948[];
+extern void **TREASURE_CHEST_ANIM_SETS[];
 extern unsigned short DAT_1f8001f8;
 extern void ObjCullRegister(TObj *);
 extern void printInfoMessage(int, int);
@@ -57,7 +57,7 @@ void treasureChestOpenLockedStatic(TObj *o)
             if (GAME[0] == 0x30009)
                 o->anim = D_80115A08[o->b0c & 0x7f][1];
             else
-                o->anim = D_80115948[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
+                o->anim = TREASURE_CHEST_ANIM_SETS[D_8009C960h * 4 + (o->b0c & 0x7f)][1];
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);
         } else {

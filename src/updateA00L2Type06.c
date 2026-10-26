@@ -1,7 +1,7 @@
 // FUNC 8012e8c4 1180 X000
 // MATCHING 8012e8c4 1180
 #include "TOBJ.H"
-extern void *D_80139154[][3];
+extern void *A00_L2_TYPE06_ANIMS[][3];
 extern unsigned short *D_801391E4[];
 extern short D_80139134[];
 extern short D_8013913C[][3];
@@ -35,7 +35,7 @@ void updateA00L2Type06(TObj *o)
         U(o->wb4) = 0;
         U(o->wb6) = 0;
         U(o->wb8) = 0;
-        o->anim = D_80139154[o->subtype][U(o->wb4)];
+        o->anim = A00_L2_TYPE06_ANIMS[o->subtype][U(o->wb4)];
         o->d3c = DAT_1f8002d4[0];
         o->animFrame = 1;
         o->b0a = 0;
@@ -75,7 +75,7 @@ void updateA00L2Type06(TObj *o)
                     sv[5] = 0;
                     spawnItemDropAtPos(0, 0, sv, -0x100, -0x100);
                 }
-                o->anim = D_80139154[o->subtype][U(o->wb4)];
+                o->anim = A00_L2_TYPE06_ANIMS[o->subtype][U(o->wb4)];
                 AnimJump(o, 0);
                 BOX(o);
                 U(o->wb6) = (Rand() & 1) + 3;

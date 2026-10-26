@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 extern int GAME[];
 extern unsigned short D_8009C960h[];
-extern int *D_80115A08[];
-extern int *D_80115948[];
+extern int *TREASURE_CHEST_A3S9_ANIM_SETS[];
+extern int *TREASURE_CHEST_ANIM_SETS[];
 void ObjCullRegister(TObj *o);
 void printInfoMessage(int a, int b);
 void spawnItemDropsFromTable(TObj *o);
@@ -48,9 +48,9 @@ void treasureChestOpenLocked(TObj *o)
             o->timer = 10;
             o->wac = 1;
             if (GAME[0] == 0x30009) {
-                o->anim = (void *)D_80115A08[o->b0c & 0x7f][1];
+                o->anim = (void *)TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f][1];
             } else {
-                o->anim = (void *)D_80115948[D_8009C960h[0] * 4 + (o->b0c & 0x7f)][1];
+                o->anim = (void *)TREASURE_CHEST_ANIM_SETS[D_8009C960h[0] * 4 + (o->b0c & 0x7f)][1];
             }
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);

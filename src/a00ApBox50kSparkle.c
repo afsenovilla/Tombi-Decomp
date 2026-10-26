@@ -1,7 +1,7 @@
 // FUNC 8012160c 272 X000
 // MATCHING 8012160c 272
 #include "TOBJ.H"
-extern signed char DAT_80138ef4[];
+extern signed char A00_AP_BOX_SPARKLE_OFFSETS[];
 extern int DAT_1f800198;
 extern unsigned char DAT_1f8001f8;
 extern void FUN_8012127c(TObj *);
@@ -28,8 +28,8 @@ void a00ApBox50kSparkle(TObj *o)
         hp = n->h;
         n->b0c = (DAT_1f8001f8 + (char)DAT_1f800198) & 3;
         i = ((unsigned int)o->d88 >> 8) & 0x1fe;
-        hp->raw = o->h->raw + DAT_80138ef4[i] * 0x10000;
-        n->y.raw = o->y.raw + DAT_80138ef4[i + 1] * 0x10000;
+        hp->raw = o->h->raw + A00_AP_BOX_SPARKLE_OFFSETS[i] * 0x10000;
+        n->y.raw = o->y.raw + A00_AP_BOX_SPARKLE_OFFSETS[i + 1] * 0x10000;
         n->d->raw = o->d->raw + -0x100000;
     }
 }

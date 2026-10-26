@@ -39,7 +39,7 @@ typedef struct {
 typedef struct { unsigned char b0; unsigned char p1[7]; unsigned char b8; unsigned char p9[0x17]; short timer; } PL;
 
 extern PL *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void PlayerSetAnimIfChanged(P *, int);
 extern void AnimAdvance(P *);
 extern void playerSetAngleFromSlope(P *);
@@ -99,7 +99,7 @@ void playerStepSlideDownSurface(P *o)
         if (o->b69) {
             o->b69 = 0;
             o->velY = 0;
-            o->d8c = D_801152E8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
         } else {
             ObjTileCollide(o, 0, 0);
             if ((o->b69 | o->b9c | o->b9e | o->b9f | o->bbe) == 0) {

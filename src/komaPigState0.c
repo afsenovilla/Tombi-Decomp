@@ -3,11 +3,11 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char D_80077CF4[];
-extern unsigned char D_80138FB8[];
+extern unsigned char KOMA_PIG_RAND_TABLE[];
 extern unsigned char D_80138FC8[];
-extern unsigned char D_80138FD8[];
-extern unsigned short *D_8013A160b[]; /* same table as D_8013A160: a second name keeps case 3 from being cross-jumped into case 4 */
-extern unsigned short *D_8013A160[], *D_8013A178[], *D_8013A17C[], *D_8013A188[], *D_8013A200[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
+extern unsigned short *KOMA_PIG_ANIMS_B[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 */
+extern unsigned short *KOMA_PIG_ANIMS[], *D_8013A178[], *D_8013A17C[], *D_8013A188[], *D_8013A200[];
 extern unsigned short DAT_1f80016a;
 extern short DAT_1f80016e;
 extern unsigned short DAT_1f800172;
@@ -48,7 +48,7 @@ void komaPigState0(TObj *o)
         o->b9d = 0;
         o->timer = 0x38;
         o->substep++;
-        if (D_80138FB8[FUN_8001f9e0() & 0xf] != 0) o->timer = 0x60;
+        if (KOMA_PIG_RAND_TABLE[FUN_8001f9e0() & 0xf] != 0) o->timer = 0x60;
         o->wac = 7;
         a = D_8013A17C[0];
         goto common;
@@ -96,7 +96,7 @@ void komaPigState0(TObj *o)
         x->b0 = 0;
         m = D_80138FC8[FUN_8001f9e0() & 0xf];
         o->wac = m;
-        a = D_8013A160b[m];
+        a = KOMA_PIG_ANIMS_B[m];
         goto common;
     case 4:
         applyFrameVelocityY(o);
@@ -122,7 +122,7 @@ void komaPigState0(TObj *o)
         o->wac = 3;
         o->substep++;
         if (x->b0 == 1) o->wac = 5;
-        a = D_8013A160[o->wac];
+        a = KOMA_PIG_ANIMS[o->wac];
         goto common;
     case 5:
         applyFrameVelocityY(o);
@@ -186,7 +186,7 @@ void komaPigState0(TObj *o)
         a = D_8013A188[0];
     common:
         o->anim = a;
-        p = &D_80138FD8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80127720 (FUN_80127720.c): y window 0x8d (PAL 0x6f).
 extern unsigned short DAT_1f800172, DAT_1f80016e, DAT_1f80016a;
-extern unsigned char *PTR_801390e0[];
+extern unsigned char *ENEMY_DISTANCE_ACTION_TABLES[];
 extern unsigned FUN_8001f9e0(void);
 
 unsigned char FUN_80127720(int a)
@@ -25,12 +25,12 @@ unsigned char FUN_80127720(int a)
                 u = v;
                 if (s >= 0x52)
                     u = v + 1;
-                t = PTR_801390e0[u];
+                t = ENEMY_DISTANCE_ACTION_TABLES[u];
     return t[FUN_8001f9e0() & 0xf];
 }
 #else
 extern unsigned short DAT_1f800172, DAT_1f80016e, DAT_1f80016a;
-extern unsigned char *PTR_801390e0[];
+extern unsigned char *ENEMY_DISTANCE_ACTION_TABLES[];
 extern unsigned FUN_8001f9e0(void);
 
 unsigned char enemyPickActionByPlayerDistance(int a)
@@ -51,7 +51,7 @@ unsigned char enemyPickActionByPlayerDistance(int a)
                 u = v;
                 if (s >= 0x52)
                     u = v + 1;
-                t = PTR_801390e0[u];
+                t = ENEMY_DISTANCE_ACTION_TABLES[u];
     return t[FUN_8001f9e0() & 0xf];
 }
 #endif

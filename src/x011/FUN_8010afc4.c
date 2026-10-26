@@ -3,7 +3,7 @@
 typedef struct D { char pad0[8]; char a; char pad1[0x20-9]; short b; char pad2[0x2c-0x22]; short c; short d; } D;
 typedef struct O { char pad0[6]; unsigned char n; char pad1[0x24-7]; void *fn; char pad2[0x7c-0x28]; short s7c; short s7e; char pad3[0x8c-0x80]; int v8c; char pad4[0x9c-0x90]; char c9c; char pad5[0xa5-0x9d]; char ca5; char pad6[0xac-0xa6]; char cac; char pad7[0xb0-0xad]; short sb0; short sb2; } O;
 extern D *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001fe6c(void);
 extern void FUN_80010748(void);
 void FUN_8010afc4(O *o)
@@ -20,6 +20,6 @@ PLAYER_EXT->c = 0;
 PLAYER_EXT->d = 0;
 o->fn = FUN_80010748;
 FUN_8001fe6c();
-o->v8c = DAT_801152e8[o->sb0];
+o->v8c = SLOPE_TILT_TABLE[o->sb0];
 o->n++;
 }

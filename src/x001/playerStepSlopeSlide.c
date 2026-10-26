@@ -8,7 +8,7 @@ extern unsigned char *PLAYER_EXT;
 extern char D_80077D0C[];
 extern unsigned char D_8009D2B0[];
 extern unsigned short D_1F8001F8;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerSlopeSlideAccelerate(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
@@ -57,7 +57,7 @@ void playerStepSlopeSlide(TObj *o)
             g[8] = 0;
             o->b9c = 0;
             o->d88 = 0;
-            b = D_801152E8[o->wb0];
+            b = SLOPE_TILT_TABLE[o->wb0];
             o->ba4 = 0;
             o->step = 1;
             o->state = 0;
@@ -134,7 +134,7 @@ void playerStepSlopeSlide(TObj *o)
                 PLAYER_EXT[8] = 0;
                 o->b9c = 0;
                 o->d88 = 0;
-                b = D_801152E8[o->wb0];
+                b = SLOPE_TILT_TABLE[o->wb0];
                 o->ba4 = 0;
                 o->d8c = b;
                 if (((o->animFrame & 1) ? (*(volatile unsigned short *)&GV6.s70 & 0x80) : (*(volatile unsigned short *)&GV6.s70 & 0x20)) == 0) o->wb2 = 0;

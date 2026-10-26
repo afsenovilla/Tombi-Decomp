@@ -19,7 +19,7 @@ typedef struct {
 
 extern P800FC414 *PLAYER_EXT;
 extern unsigned char D_8009C960b[];
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char D_80077CF4[];
 extern char D_80010748[];
 extern void FUN_800efc04(TObj *);
@@ -67,7 +67,7 @@ extern void playerHandleHazardContact(TObj *, int);
 
 #define TURN() { \
     unsigned char x; unsigned int c; short d; unsigned short u; \
-    x = D_801152E8[o->wb0]; \
+    x = SLOPE_TILT_TABLE[o->wb0]; \
     c = (unsigned char)(x - o->d8c); \
     d = c; \
     if (d == 0) return; \

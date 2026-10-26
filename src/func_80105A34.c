@@ -28,7 +28,7 @@ typedef struct {
 } S;
 typedef struct { char p[2]; unsigned char type; } T;
 typedef struct { char p[8]; unsigned char b8; } U;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern U *PLAYER_EXT;
 extern T *BITTEN_OBJECT;
 
@@ -86,13 +86,13 @@ typedef struct {
 } S;
 typedef struct { char p[2]; unsigned char type; } T;
 typedef struct { char p[8]; unsigned char b8; } U;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern U *PLAYER_EXT;
 extern T *BITTEN_OBJECT;
 
 void func_80105A34(S *o)
 {
-    o->d8c = D_801152E8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     PLAYER_EXT->b8 = 0;
     o->b9c = 0;
     o->ba7 = 0;

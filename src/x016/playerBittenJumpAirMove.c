@@ -10,7 +10,7 @@ extern G *PLAYER_EXT;
 extern int BITTEN_OBJECT;
 extern int GRABBED_OBJECT;
 extern int D_8009F0EC_r;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void setFacingFromPad(TObj *o);
 void ObjMotionStep(TObj *o);
 void ObjSetAnimFromTable(TObj *o);
@@ -53,7 +53,7 @@ void playerBittenJumpAirMove(TObj *o)
         o->wb2 = 0;
         o->velY = 0;
         *(unsigned char *)&o->wac = 0;
-        o->d8c = D_801152E8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         o->step = 0;
         o->state = 0;
         return;

@@ -1999,3 +1999,16 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   (GPU_INFO, GPU_DATA, GPU_STATUS, DMA1_*/DMA2_*, DPCR, GPU_QIN/QOUT, RSIN_TABLE, GPU_CTLBUF, GPU_QITEM, VBLANK_MINUS, CD_CBSYNC,
   CD_CBREADY, CD_DEBUG, CD_STATUS/1, CD_POS, CD_MODE, CD_COM, CD_COMSTR) so their D_ aliases get the same name.
   spawnEventTitle.c (tomba24 headers) keeps D_8009BC98[0xF] for GVARS.b3f: the struct view changes the code.
+- X000 data batch 1 (Oct 26 2026, notes/data_names_x000.csv, tools/rename_data.py --prog X000): 45 overlay globals named from who reads
+  them: PLAYER_ANIM_TABLE, PLAYER_MOVE_PARAMS (9 rows of 0x14 by speed class; ObjGravityStep's D_80115466 and
+  playerSetJumpRiseVelocity's D_80115468 are its +0xa / +0xc fields, left as fields), PLAYER_DECEL_PARAMS (9 rows of 0x74),
+  SLOPE_TILT_TABLE / _SLOW, PLAYER_FOOT_OFFSET_BY_DIR, PLAYER_PERCH/SWING_ANIM_PAIRS, PLAYER_SPIN_JUMP_ANIMS, PLAYER_SPIN_RELEASE_SPEEDS,
+  PLAYER_POWER_AURA_DEFS, TREASURE_CHEST_ANIM_SETS / _A3S9_, ITEM_DROP_ENTRIES/LISTS/VELOCITIES, SCRIPT_ACTOR_DEFS, WEAPON_TRAIL_DEFS,
+  VILLAGER_NPC_STEP_TABLE / _WALK_PATHS, BREAK_PIECE_DEFS, FLASH_EFFECT_DEFS_BY_AREA, EGG_SHELL_PIECE_VELOCITIES, KOMA_PIG_ANIMS (58
+  pointers; D_8013A178..D_8013A268 are its elements and keep their names), KOMA_PIG_ANIM_BOXES, KOMA_PIG_IDLE/WAIT_ANIM_BY_SUBTYPE,
+  KOMA_PIG_RAND_TABLE, RED_BIRD_RAND_STATE_TABLE / _SUBTYPE_PARAMS, ENEMY_DISTANCE_ACTION_TABLES, CHICK_WANDER_RAND_TABLE,
+  YELLOW_CHICK_CLUT_Y, the A00_* tables (SCROLL_CONTROLLER_HANDLERS, FOG_CLOUD_QUADS, SPORE_BRANCH_SUBTYPE_OFS, WOODEN_BRANCH_HANDLERS /
+  _PARAMS, L2_TYPE06_ANIMS, ITEM_OBJ_PATH_START / _NODES, AP_BOX_SPARKLE_TABLE / _OFFSETS, AP_BOX_50K_ITEM_ENTRY, TUTORIAL_JUMP_MESSAGE_IDS).
+  The src/x0NN twins get the same identifier rename (the tool's twin pass); overlay-only sources (e.g. src/x004/playerStepDizzy.c)
+  that spell D_801152E8 themselves are not touched: their address is their own overlay's. func_80110CAC / playerDecelerateSpeedB keep a
+  byte view PLAYER_DECEL_PARAMS_BYTES next to the row view; komaPigState0 keeps KOMA_PIG_ANIMS_B (second extern, anti cross-jump).

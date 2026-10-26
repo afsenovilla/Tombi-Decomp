@@ -26,7 +26,7 @@ extern TObj *BITTEN_OBJECT;
 extern unsigned char D_8009D2B2;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001fe94(TObj *, int);
 extern TObj *allocObjectLayer1(void);
 extern void playerAttackDecelerate(TObj *);
@@ -87,7 +87,7 @@ extern void FUN_8001e5f4(int, int);
     o->ba7 = 0; \
     (*(unsigned char*)&o->wac) = 0; \
     o->b9d = 0; \
-    o->d8c = D_801152E8[o->wb0]; \
+    o->d8c = SLOPE_TILT_TABLE[o->wb0]; \
     if (o->bbe & 0x20) { \
         o->step = 0x1f; \
         o->state = 1; \

@@ -6,7 +6,7 @@ extern unsigned short D_1f8001f8;
 extern short D_1f800238;
 extern TObj *FUN_80018448(void);
 extern unsigned short D_800a604a[];
-extern unsigned short TBL_801151e0[];
+extern unsigned short PLAYER_FOOT_OFFSET_BY_DIR[];
 
 short spawnPlayerFootstepEffect(void)
 {
@@ -36,7 +36,7 @@ short spawnPlayerFootstepEffect(void)
             o->a.p.whole = D_800a604a[0];
             o->y.p.whole = D_800a604a[2];
             o->b.p.whole = D_800a604a[4];
-            t = TBL_801151e0 + ((D_1f8001f8 + 2) & 7) * 2;
+            t = PLAYER_FOOT_OFFSET_BY_DIR + ((D_1f8001f8 + 2) & 7) * 2;
             h->p.whole += t[0];
             o->y.p.whole += t[1];
             o->step = 1;

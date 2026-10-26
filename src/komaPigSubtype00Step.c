@@ -6,10 +6,10 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
-extern unsigned char D_801390EC[], D_801390F4[];
-extern unsigned short *D_8013A160[];
+extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[], KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[];
+extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A21C, *D_8013A220, *D_8013A268;
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityXY(TObj *);
@@ -21,7 +21,7 @@ extern void ObjSetFacingToPlayer(TObj *);
 static __inline__ void SetBox(TObj *o)
 {
     unsigned char *p;
-    p = &D_80138FD8[((unsigned short *)o->anim)[1] * 4];
+    p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p++;
@@ -47,8 +47,8 @@ void komaPigSubtype00Step(TObj *o)
         o->movetab = D_80077CF4;
         o->b69 = 0;
         o->state++;
-        o->wac = D_801390EC[o->subtype];
-        o->anim = D_8013A160[o->wac];
+        o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
         SetBox(o);
         break;
     case 1:
@@ -77,8 +77,8 @@ void komaPigSubtype00Step(TObj *o)
     case 3:
         o->timer = 0x78;
         o->state++;
-        o->wac = D_801390F4[o->subtype];
-        o->anim = D_8013A160[o->wac];
+        o->wac = KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[o->subtype];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
         SetBox(o);
         break;
     case 4:
@@ -88,8 +88,8 @@ void komaPigSubtype00Step(TObj *o)
                 r = FUN_80127720(o);
                 if ((unsigned char)r == 0xff) {
                     o->state = 2;
-                    o->wac = D_801390EC[o->subtype];
-                    o->anim = D_8013A160[o->wac];
+                    o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+                    o->anim = KOMA_PIG_ANIMS[o->wac];
                     SetBox(o);
                 } else {
                     o->state = r;
@@ -126,8 +126,8 @@ void komaPigSubtype00Step(TObj *o)
         if (--o->timer == -1) {
             if ((unsigned char)FUN_80127720(o) == 0xff) {
                 o->state = 2;
-                o->wac = D_801390EC[o->subtype];
-                o->anim = D_8013A160[o->wac];
+                o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+                o->anim = KOMA_PIG_ANIMS[o->wac];
                 SetBox(o);
             } else {
                 *(short *)((char *)o + 0xac) = 0x42;
@@ -154,10 +154,10 @@ void komaPigSubtype00Step(TObj *o)
 #include "spad.h"
 #include "TOBJ.H"
 extern char D_80077CF4[], D_80077CDC[];
-extern unsigned char D_801390EC[], D_801390F4[];
-extern unsigned short *D_8013A160[];
+extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[], KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[];
+extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A21C, *D_8013A220, *D_8013A268;
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityXY(TObj *);
@@ -169,7 +169,7 @@ extern void ObjSetFacingToPlayer(TObj *);
 static __inline__ void SetBox(TObj *o)
 {
     unsigned char *p;
-    p = &D_80138FD8[((unsigned short *)o->anim)[1] * 4];
+    p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p++;
@@ -195,8 +195,8 @@ void komaPigSubtype00Step(TObj *o)
         o->movetab = D_80077CF4;
         o->b69 = 0;
         o->state++;
-        o->wac = D_801390EC[o->subtype];
-        o->anim = D_8013A160[o->wac];
+        o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
         SetBox(o);
         break;
     case 1:
@@ -225,8 +225,8 @@ void komaPigSubtype00Step(TObj *o)
     case 3:
         o->timer = 0x78;
         o->state++;
-        o->wac = D_801390F4[o->subtype];
-        o->anim = D_8013A160[o->wac];
+        o->wac = KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[o->subtype];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
         SetBox(o);
         break;
     case 4:
@@ -236,8 +236,8 @@ void komaPigSubtype00Step(TObj *o)
                 r = enemyPickActionByPlayerDistance(o);
                 if ((unsigned char)r == 0xff) {
                     o->state = 2;
-                    o->wac = D_801390EC[o->subtype];
-                    o->anim = D_8013A160[o->wac];
+                    o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+                    o->anim = KOMA_PIG_ANIMS[o->wac];
                     SetBox(o);
                 } else {
                     o->state = r;
@@ -274,8 +274,8 @@ void komaPigSubtype00Step(TObj *o)
         if (--o->timer == -1) {
             if (InRange(o)) {
                 o->state = 2;
-                o->wac = D_801390EC[o->subtype];
-                o->anim = D_8013A160[o->wac];
+                o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
+                o->anim = KOMA_PIG_ANIMS[o->wac];
                 SetBox(o);
             } else {
                 *(short *)((char *)o + 0xac) = 0x42;

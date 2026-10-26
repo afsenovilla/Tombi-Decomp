@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void playerDropFromHold(TObj *o)
 {
     int v;
@@ -26,7 +26,7 @@ void playerDropFromHold(TObj *o)
         v = 0xf0;
     }
     o->d88 = v;
-    *(volatile int *)&o->d8c = D_801152E8[o->wb0];
+    *(volatile int *)&o->d8c = SLOPE_TILT_TABLE[o->wb0];
     c = o->animFrame & 1;
     /* the parameter register is reused for the hitbox pointer */
     o = (TObj *)((volatile TObj *)o)->h;

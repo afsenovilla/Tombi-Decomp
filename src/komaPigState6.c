@@ -7,7 +7,7 @@ extern void FUN_80127214(TObj *);
 extern int enemyProbeGround(TObj *);
 extern TObj *FUN_80018448(void);
 extern char DAT_80077cdc[];
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a1b8[];
 extern unsigned short *PTR_DAT_8013a1bc[];
 
@@ -76,7 +76,7 @@ void komaPigState6(TObj *o)
         a = PTR_DAT_8013a1bc[0];
     common:
         o->anim = a;
-        p = &DAT_80138fd8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

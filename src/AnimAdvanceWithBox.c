@@ -2,11 +2,11 @@
 // MATCHING 80127214 364
 typedef struct AE { char p0[2]; unsigned short i; char p1[2]; unsigned short v; } AE;
 typedef struct { char p0[0x24]; AE *a; char p1[4]; unsigned short t; char p2[0x3e]; unsigned short b0, b1, b2, b3; } TA;
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 
 static __inline__ void box(TA *o, int idx)
 {
-    unsigned char *b = D_80138FD8 + idx * 4;
+    unsigned char *b = KOMA_PIG_ANIM_BOXES + idx * 4;
     o->b0 = *b++;
     o->b1 = *b++;
     o->b2 = *b;

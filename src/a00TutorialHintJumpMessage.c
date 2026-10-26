@@ -2,7 +2,7 @@
 // MATCHING 8011b5dc 260
 #include "TOBJ.H"
 extern short DAT_1f80016a, DAT_1f800176, DAT_1f80016e, DAT_1f80017a;
-extern short DAT_801386a8[];
+extern short A00_TUTORIAL_JUMP_MESSAGE_IDS[];
 extern short BUTTON_CONFIG_INDEX;
 extern char DAT_8009c93f, DAT_8009c93e;
 extern int showMessageBox(int, int, int, int);
@@ -22,7 +22,7 @@ void a00TutorialHintJumpMessage(TObj *o)
             o->y.p.whole = 0xd8;
         else
             o->y.p.whole = 0x78;
-        o->d90 = showMessageBox(9, DAT_801386a8[BUTTON_CONFIG_INDEX], o->a.p.whole, o->y.p.whole);
+        o->d90 = showMessageBox(9, A00_TUTORIAL_JUMP_MESSAGE_IDS[BUTTON_CONFIG_INDEX], o->a.p.whole, o->y.p.whole);
         break;
     case 1:
         if (((char *)o->d90)[4] == 2) {

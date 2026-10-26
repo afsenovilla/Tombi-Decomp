@@ -9,7 +9,7 @@
 typedef struct { short x, y; } V2;
 extern void *D_8013B0EC[];
 extern void *D_80134CF4[];
-extern V2 D_80114A68[];
+extern V2 EGG_SHELL_PIECE_VELOCITIES[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
 void despawnObjectOffscreen(TObj *o);
@@ -31,8 +31,8 @@ void func_800EA284(TObj *o)
         if (ObjCullRegister(o) == 0) despawnObjectOffscreen(o);
         switch (o->step) {
         case 0:
-            o->wb4 = D_80114A68[o->wb8].x;
-            o->wb6 = D_80114A68[*(short *)((char *)o + 0xb8)].y;
+            o->wb4 = EGG_SHELL_PIECE_VELOCITIES[o->wb8].x;
+            o->wb6 = EGG_SHELL_PIECE_VELOCITIES[*(short *)((char *)o + 0xb8)].y;
             o->step++;
         case 1:
             o->h->raw += v[0] << 8;
@@ -79,7 +79,7 @@ static void *D_8013B0EC[6] = {
     D_8013B748, D_8013B750,
 };
 extern void *D_80134CF4[];
-extern V2 D_80114A68[];
+extern V2 EGG_SHELL_PIECE_VELOCITIES[];
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
 void despawnObjectOffscreen(TObj *o);
@@ -102,8 +102,8 @@ void updateEggShellPiece(TObj *o)
         if (ObjCullRegister(o) == 0) despawnObjectOffscreen(o);
         switch (o->step) {
         case 0:
-            o->wb4 = D_80114A68[o->wb8].x;
-            o->wb6 = D_80114A68[*(short *)((char *)o + 0xb8)].y;
+            o->wb4 = EGG_SHELL_PIECE_VELOCITIES[o->wb8].x;
+            o->wb6 = EGG_SHELL_PIECE_VELOCITIES[*(short *)((char *)o + 0xb8)].y;
             o->step++;
         case 1:
             o->h->raw += v[0] << 8;

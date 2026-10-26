@@ -1,0 +1,46 @@
+address,name,size,source
+800e8404,PLAYER_ANIM_TABLE,0x168,usage: the 90 player animation pointers ObjSetAnimFromTable indexes by PLAYER_EXT+0x2c (also playerStepJump / hazard respawn) refs=7
+80114a68,EGG_SHELL_PIECE_VELOCITIES,,usage: {short x; short y} per piece index wb8 copied to the piece's velocity (updateEggShellPiece) refs=5
+80114ae4,FLASH_EFFECT_DEFS_BY_AREA,,usage: {u16 w1e; short spriteIdx; void **anims; pad} per area (GAME[0]) read by spawnFlashEffect refs=3
+80114bdc,BREAK_PIECE_DEFS,,usage: 4 u16 per subtype (w22 timer / anim set index / vertical speed) read by updateBreakPiece refs=3
+80114c20,WEAPON_TRAIL_DEFS,,usage: {short spriteIdx; pad; void **anims; pad} per subtype (initWeaponTrailSprite / updateWeaponTrailObject / follow / orbit steps) refs=5
+80114c58,VILLAGER_NPC_STEP_TABLE,0x24,usage: step handlers of updateL4Type00Object (the villager NPC; its steps FUN_800ed258 / FUN_800ed750 say so) indexed by o->step refs=3
+80114c64,VILLAGER_NPC_WALK_PATHS,,usage: per-subtype walk path pointer the villager step FUN_800ed258 follows (p = tab[b0c]) refs=4
+801151e0,PLAYER_FOOT_OFFSET_BY_DIR,0x20,usage: {short dx; short dy}[8] by facing direction (D_1f8001f8 & 7) for the player's foot position (footstep effect / jump / walk / fall) refs=4
+801152e8,SLOPE_TILT_TABLE,0x24,usage: u8 tilt value per slope index (+0xb0) stored at the player's +0x8c by playerSetSlopeTilt (flag 0) and the step entries refs=74
+80115220,PLAYER_PERCH_ANIM_PAIRS,,usage: u8 pairs per wb2 count loaded into PLAYER_EXT +0xe/+2 by playerSetAnimPairA / playerStepFlipOntoPerch refs=3
+80115228,PLAYER_SWING_ANIM_PAIRS,,usage: u8 pairs per wb2 count loaded by playerSetAnimPairB / flip onto object / spin on object / swing from object refs=5
+8011530c,SLOPE_TILT_TABLE_SLOW,0x24,usage: the second u8 tilt-per-slope table (playerSetSlopeTilt flag 1; playerTiltTowardSlopeSlow eases +0x8c toward it) refs=2
+80115388,PLAYER_SPIN_JUMP_ANIMS,,usage: u8 animation ids passed to AnimJump per spin phase i by playerStepSpinOnObject refs=4
+801153c0,PLAYER_SPIN_RELEASE_SPEEDS,,usage: short rows of 7 per weapon (PLAYER_EXT b0b * 7): launch velX by spin count and velY at [10] (playerStepSpinRelease) refs=5
+8011545c,PLAYER_MOVE_PARAMS,0xb4,usage: 9 rows of 0x14 by speed class (GV2 b3 + weapon*4 / 8 when slowed): air accel f0..f8 (playerAirAccelerateX); +0xa gravity cap/step (ObjGravityStep D_80115466); +0xc jump rise speeds (playerSetJumpRiseVelocity D_80115468) refs=9
+80115510,PLAYER_DECEL_PARAMS,0x414,usage: 9 rows of 0x74 by the same speed class: speed thresholds f0/f2/f4 and cap f6 then the per-kind decrement sets (playerDecelerateSpeed / B / skid / attack / slope slide / updateSpeedFromPad / func_80110CAC) refs=66
+80115924,PLAYER_POWER_AURA_DEFS,0x24,usage: {u16 w1e; pad; short spriteIdx; pad; int *anims} per subtype (playerPowerAuraInit / HiddenStep) refs=4
+80115948,TREASURE_CHEST_ANIM_SETS,0xc0,usage: pointer to the {closed; open} anim pair per area*4 + chest variant (b0c & 0x7f) used by every treasureChestOpen* step and updateBreakPiece refs=10
+80115a08,TREASURE_CHEST_A3S9_ANIM_SETS,0x10,usage: the anim pairs used instead when GAME is area 3 section 9 (0x30009) refs=8
+80115a58,ITEM_DROP_ENTRIES,,usage: u8 pairs per drop kind b6a: 0xff,list / 0xfe,special / item entry, read by spawnItemDropsFromTable refs=1
+80115d3c,ITEM_DROP_LISTS,0x54,usage: 21 pointers to 6-byte item entry lists ending in 0xff (spawnItemDropsFromTable) refs=7
+80115d70,ITEM_DROP_VELOCITIES,,usage: {short velX; short velY} per item of a drop list (spawnItemDropsFromTable) refs=4
+80115de4,SCRIPT_ACTOR_DEFS,,usage: {box0..box3; w1e; spriteIdx; void **anims} per subtype loaded by updateScriptActor refs=7
+8013841c,A00_SCROLL_CONTROLLER_HANDLERS,,usage: per-subtype handler called by updateA00ScrollController refs=4
+80138644,A00_FOG_CLOUD_QUADS,0x40,usage: 4 {x;y} corners per subtype for the fog cloud polygon (updateA00FogCloud) refs=17
+8013867c,YELLOW_CHICK_CLUT_Y,,usage: short clut row per subtype (GetClut(0xc0, tbl[subtype])) in updateYellowChick refs=3
+801386a8,A00_TUTORIAL_JUMP_MESSAGE_IDS,,usage: message id per BUTTON_CONFIG_INDEX shown by a00TutorialHintJumpMessage refs=1
+8013882c,A00_SPORE_BRANCH_SUBTYPE_OFS,,usage: signed char per subtype added to the D_80138830/38/40 table pointers of updateA00SporeBranch refs=17
+80138d6c,A00_AP_BOX_50K_ITEM_ENTRY,0x6,usage: the item entry a00ApBox50kReward spawns twice refs=2
+80138d74,A00_AP_BOX_SPARKLE_TABLE,0x180,usage: u8[4][8][12] particle init bytes by group / phase for the 50k AP box sparkle (func_8012127C) refs=24
+80138ef4,A00_AP_BOX_SPARKLE_OFFSETS,,usage: signed char {dx;dy} pairs per sparkle (a00ApBox50kSparkle) refs=2
+80138f0c,A00_ITEM_OBJ_PATH_START,,usage: u16 first path node per item slot (updateA00ItemObj) refs=2
+80138f14,A00_ITEM_OBJ_PATH_NODES,,usage: {short t; u16 x; u16 y; u16 z} path nodes (t -1 restart / -2 back) walked by updateA00ItemObj refs=4
+80138fb8,KOMA_PIG_RAND_TABLE,0x10,usage: u8[16] looked up with Rand & 0xf by komaPigState0 (longer wait) / komaPigState2 refs=2
+80138fd8,KOMA_PIG_ANIM_BOXES,,usage: 4 u8 box per anim-script box index (AnimAdvanceWithBox and every komaPig* SetBox / SETBOX) refs=28
+801390e0,ENEMY_DISTANCE_ACTION_TABLES,0xc,usage: 3 pointers to u8 action tables by distance band in enemyPickActionByPlayerDistance refs=3
+801390ec,KOMA_PIG_IDLE_ANIM_BY_SUBTYPE,0x8,usage: anim index (wac into KOMA_PIG_ANIMS) per subtype when the pig (re)enters its idle state refs=10
+801390f4,KOMA_PIG_WAIT_ANIM_BY_SUBTYPE,0x8,usage: anim index per subtype for the timed wait state 3 of komaPigSubtype00Step refs=3
+80139124,CHICK_WANDER_RAND_TABLE,0x10,usage: u8[16] looked up with Rand & 0xf to pick the chick's wander action refs=1
+80139154,A00_L2_TYPE06_ANIMS,,usage: void *[subtype][3] anim by phase (updateA00L2Type06) refs=2
+80139234,RED_BIRD_SUBTYPE_PARAMS,0xc,usage: short * per subtype (redBirdStep1B / redBirdStep3 t = tab[subtype]) refs=4
+80139240,RED_BIRD_RAND_STATE_TABLE,0x20,usage: u16[16] next state looked up with Rand & 0xf by redBirdStep0..4 refs=7
+801392e0,A00_WOODEN_BRANCH_HANDLERS,0xc,usage: per-subtype handler called by updateA00WoodenBranch refs=3
+801392ec,A00_WOODEN_BRANCH_PARAMS,,usage: 4 x 8 bytes per variant b0c copied to the branch's +0xb4 by updateA00WoodenBranch refs=17
+8013a160,KOMA_PIG_ANIMS,0xe8,usage: 58 anim pointers indexed by wac (every komaPig* step; the D_8013A178..D_8013A268 names are its elements) refs=15

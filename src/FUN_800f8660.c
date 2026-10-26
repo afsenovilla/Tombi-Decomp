@@ -2,7 +2,7 @@
 // MATCHING 800f8660 136
 // probably: player step entry: anim DAT_80010ca0 sub 4, b0f -8, state++ (sets da0+2 unless step 0x49); unreferenced
 #include "TOBJ.H"
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void func_8001e5f4(int a, int b);
 extern void func_8001fe94(TObj *o, int n);
 extern char DAT_80010ca0[];
@@ -18,7 +18,7 @@ void FUN_800f8660(TObj *o)
     *(signed char *)&o->b0f = -8;
     o->anim = DAT_80010ca0;
     func_8001fe94(o, 4);
-    b = DAT_801152e8[o->wb0];
+    b = SLOPE_TILT_TABLE[o->wb0];
     o->state = o->state + 1;
     o->d8c = b;
 }

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern char D_80077CDC[];
 extern void *D_8013B26C;
-extern unsigned char D_80139124[];
+extern unsigned char CHICK_WANDER_RAND_TABLE[];
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -21,7 +21,7 @@ void chickWander(TObj *o)
         o->animFrame = Rand() & 1;
         o->anim = D_8013B26C;
         AnimLoadDuration(o);
-        switch (D_80139124[Rand() & 0xf]) {
+        switch (CHICK_WANDER_RAND_TABLE[Rand() & 0xf]) {
         case 0:
             o->timer = 60;
             o->wac = 0;

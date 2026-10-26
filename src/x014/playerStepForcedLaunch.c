@@ -6,7 +6,7 @@ typedef struct { char p[8]; unsigned char b8; unsigned char b9; char q[0x20 - 0x
 extern G *PLAYER_EXT;
 extern TObj *D_800A611C[];
 extern char D_80010748[];
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void playerReleaseBittenAndClearFlags(TObj *o);
 void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int n);
@@ -104,7 +104,7 @@ void playerStepForcedLaunch(TObj *o)
             PLAYER_EXT->w2e = 0;
             o->anim = D_80010748;
             AnimLoadDuration(o);
-            o->d8c = D_801152E8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             o->state++;
         }
         break;

@@ -11,7 +11,7 @@ extern char D_8012E0D8[];
 static void **D_80115A08[4] = {
     (void **)D_8012E084, (void **)D_8012E0BC, (void **)D_8012E0A0, (void **)D_8012E0D8,
 };
-extern void **D_80115948[];
+extern void **TREASURE_CHEST_ANIM_SETS[];
 extern unsigned short DAT_1f8001f8;
 extern void ObjCullRegister(TObj *);
 extern void printInfoMessage(int, int);
@@ -63,7 +63,7 @@ void treasureChestOpenLockedStatic(TObj *o)
             if (D_8009C960[0] == 0x30009)
                 o->anim = D_80115A08[o->b0c & 0x7f][1];
             else
-                o->anim = D_80115948[GAME * 4 + (o->b0c & 0x7f)][1];
+                o->anim = TREASURE_CHEST_ANIM_SETS[GAME * 4 + (o->b0c & 0x7f)][1];
             AnimLoadDuration(o);
             SfxPlay2(0x18, 8);
         } else {

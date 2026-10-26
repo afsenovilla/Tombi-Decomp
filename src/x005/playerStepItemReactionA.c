@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #define B(o, n) (*((unsigned char *)(o) + (n)))
 extern unsigned char *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001e4f0(int);
 extern void playerSetAngleFromSlope(TObj *);
@@ -50,7 +50,7 @@ void playerStepItemReactionA(TObj *o)
             o->wb2 = 0;
             B(o, 0xac) = 0;
             B(o, 0xab) = 0;
-            u = DAT_801152e8[o->wb0];
+            u = SLOPE_TILT_TABLE[o->wb0];
             o->b04 = 1;
             o->step = 0;
             o->state = 0;
@@ -83,7 +83,7 @@ void playerStepItemReactionA(TObj *o)
         playerMoveByAngleSpeed(o);
         FUN_8001fec0(o);
         if (--o->timer <= 0) {
-            t = DAT_801152e8[o->wb0];
+            t = SLOPE_TILT_TABLE[o->wb0];
             B(o, 0xab) = 0;
             o->b04 = 1;
             o->step = 0;

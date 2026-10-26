@@ -4,8 +4,8 @@
 static char DAT_80115d28[20] = {
     3, 7, -0x80, 4, 0, 0, 3, 7, -0x80, 5, 0, 0, -1,
 };
-extern void **DAT_80115a08[];
-extern void **PTR_PTR_80115948[];
+extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
+extern void **TREASURE_CHEST_ANIM_SETS[];
 extern int DAT_8009c960[];
 extern unsigned short GAME[];
 extern int FUN_800202b4(TObj *o);
@@ -34,9 +34,9 @@ void treasureChestOpenFalling(TObj *o)
         o->timer = 10;
         o->wac = 1;
         if (DAT_8009c960[0] == 0x30009)
-            o->anim = DAT_80115a08[o->b0c & 0x7f][1];
+            o->anim = TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f][1];
         else
-            o->anim = PTR_PTR_80115948[GAME[0] * 4 + (o->b0c & 0x7f)][1];
+            o->anim = TREASURE_CHEST_ANIM_SETS[GAME[0] * 4 + (o->b0c & 0x7f)][1];
         FUN_8001fe6c(o);
         break;
     case 2:

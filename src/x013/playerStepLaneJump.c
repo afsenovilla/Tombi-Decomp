@@ -6,7 +6,7 @@ typedef struct { char pad[0x20]; short w20; } P;
 extern P *PLAYER_EXT;
 extern int BITTEN_OBJECT;
 extern char D_80010E34[];
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern int MulCos(int a, short b);
 extern void PlayerSetAnimIfChanged(PO *, int);
 extern void ObjGravityStep(PO *);
@@ -101,7 +101,7 @@ void playerStepLaneJump(PO *o)
             o->t.anim = D_80010E34;
             AnimJump(o, 2);
             o->t.d->p.whole = o->wf6;
-            o->t.d8c = D_801152E8[o->t.wb0];
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
             BAC(o) = 0;
             o->t.state = 3;
         } else if (ObjTileCollide(o, 0, 0)) {
@@ -110,7 +110,7 @@ void playerStepLaneJump(PO *o)
             o->t.anim = D_80010E34;
             AnimJump(o, 2);
             o->t.d->p.whole = o->wf6;
-            o->t.d8c = D_801152E8[o->t.wb0];
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
             BAC(o) = 0;
             o->t.state = 3;
         }
@@ -130,7 +130,7 @@ void playerStepLaneJump(PO *o)
             o->t.wb2 = 0;
             o->t.velX = 0;
             o->t.velY = 0;
-            o->t.d8c = D_801152E8[o->t.wb0];
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
             PLAYER_EXT->w20 = 0;
             o->t.b04 = 1;
             o->t.step = 0;

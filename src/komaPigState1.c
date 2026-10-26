@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char p0[0xa]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char D_80077D0C[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *D_8013A180[], *D_8013A18C[], *D_8013A178[];
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityXY(TObj *);
@@ -47,7 +47,7 @@ void komaPigState1(TObj *o)
         unsigned char *p;
         a = D_8013A180[0];
         o->anim = a;
-        p = &D_80138FD8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;
@@ -79,7 +79,7 @@ void komaPigState1(TObj *o)
         o->anim = a;
         {
         unsigned char *p;
-        p = &D_80138FD8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;
@@ -108,7 +108,7 @@ void komaPigState1(TObj *o)
         o->anim = a;
         {
         unsigned char *p;
-        p = &D_80138FD8[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

@@ -15,7 +15,7 @@ typedef struct O {
 } O;
 typedef struct E { char p0[4]; unsigned char b4, b5, b6; } E;
 extern P *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char TALK_POSE;
 extern char D_80010748[];
@@ -41,7 +41,7 @@ static __inline__ void land(O *o)
     o->hb2 = 0;
     o->vx = 0;
     o->vy = 0;
-    o->d8c = D_801152E8[o->hb0];
+    o->d8c = SLOPE_TILT_TABLE[o->hb0];
     PLAYER_EXT->h20 = 0;
     o->anim = D_80010748;
     AnimJump(o, 0);

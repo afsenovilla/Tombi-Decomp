@@ -2,7 +2,7 @@
 // MATCHING 800eb50c 416
 typedef struct { char p[0x1e]; unsigned short w1e; } NN;
 typedef struct { unsigned short w; short idx; void **ptrs; int pad; } E;
-extern E DAT_80114ae4[];
+extern E FLASH_EFFECT_DEFS_BY_AREA[];
 extern unsigned short GAME[];
 extern int SPR_DATA[];
 extern unsigned char DAT_800a6047;
@@ -21,10 +21,10 @@ void spawnFlashEffect(short a, int x, int y, int z)
         *(int *)(n + 0x14) = y << 16;
         n[3] = a;
         *(int *)(n + 0x18) = z << 16;
-        ((NN *)n)->w1e = DAT_80114ae4[GAME[0]].w;
-        *(int *)(n + 0x3c) = SPR_DATA[DAT_80114ae4[GAME[0]].idx];
+        ((NN *)n)->w1e = FLASH_EFFECT_DEFS_BY_AREA[GAME[0]].w;
+        *(int *)(n + 0x3c) = SPR_DATA[FLASH_EFFECT_DEFS_BY_AREA[GAME[0]].idx];
         if (a == 2 && *(int *)GAME == 0x50000) a = 3;
-        *(void **)(n + 0x24) = DAT_80114ae4[GAME[0]].ptrs[a];
+        *(void **)(n + 0x24) = FLASH_EFFECT_DEFS_BY_AREA[GAME[0]].ptrs[a];
         FUN_8001fe6c(n);
         n[0xd] = 0;
         n[0xa] = 2;

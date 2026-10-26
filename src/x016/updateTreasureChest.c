@@ -11,8 +11,8 @@ extern int DAT_1f8002e0[];
 extern int DAT_1f8002d4[];
 extern unsigned char DAT_80115a54[];
 extern unsigned char DAT_80115a18[];
-extern void **DAT_80115a08[];
-extern void **DAT_80115948[];
+extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
+extern void **TREASURE_CHEST_ANIM_SETS[];
 extern void treasureChestInitStatic();
 extern void treasureChestInitCarried();
 extern void treasureChestInitDropped();
@@ -88,9 +88,9 @@ void updateTreasureChest(TObj *o)
         *(signed char *)&o->b0f = -3;
         o->wac = 0;
         if (GAME.w == 0x30009)
-            o->anim = *DAT_80115a08[o->b0c & 0x7f];
+            o->anim = *TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f];
         else
-            o->anim = *DAT_80115948[DAT_8009c960c.h.a * 4 + (o->b0c & 0x7f)];
+            o->anim = *TREASURE_CHEST_ANIM_SETS[DAT_8009c960c.h.a * 4 + (o->b0c & 0x7f)];
         FUN_8001fe6c(o);
         DAT_80115d90[o->subtype](o);
         break;

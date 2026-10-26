@@ -7,18 +7,28 @@ shared header is only reported as `HDR`: rename it in the header, whose spelled 
 bytes resolve to the PAL one, e.g. D_8009E748 -> CD_QUEUE). New declarations of named globals belong in
 include/tomba/globals.h (one type for every source) or globals_game.h (game.h structs).
 Needs the objects of a full build (build/full/obj) / report build (build/base/<prog>) to resolve short identifiers.
-Usage: tools/rename_data.py [--csv notes/data_names_main0.csv] [--dry]"""
+`--prog X000` applies notes/data_names_x000.csv to the overlay instead: only addresses in the overlay space
+(0x800E8028 <= a < 0x80200000) resolved from the X000 objects of src/*.c files whose `// FUNC` header says X000, and the
+same identifier renames in the src/x0NN twins of those files (by identifier: a twin's D_ names spell the X000 address even
+when its own overlay puts the data elsewhere). src/data/<prog> files are never rewritten (their externs must spell the
+address) and neither are the `*_slpm80165.c` demo sources (their addresses are the demo's).
+Usage: tools/rename_data.py [--prog MAIN0|X000] [--csv notes/data_names_<prog>.csv] [--dry]"""
 import csv, os, re, struct, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 sys.argv, _a = [sys.argv[0]], sys.argv[1:]
 import build_full as bf
-CSV = _a[_a.index("--csv") + 1] if "--csv" in _a else os.path.join(ROOT, "notes", "data_names_main0.csv")
+PROGMODE = _a[_a.index("--prog") + 1].upper() if "--prog" in _a else "MAIN0"
+CSV = _a[_a.index("--csv") + 1] if "--csv" in _a else os.path.join(ROOT, "notes", "data_names_%s.csv" % PROGMODE.lower())
 DRY = "--dry" in _a
 names = {}
 for r in csv.DictReader(open(CSV)):
     names[int(r["address"], 16)] = r["name"]
-inrange = lambda a: 0x80010000 <= a < 0x800E8028 or 0x1F800000 <= a < 0x1F800400
+if PROGMODE == "MAIN0":
+    inrange = lambda a: 0x80010000 <= a < 0x800E8028 or 0x1F800000 <= a < 0x1F800400
+else:
+    inrange = lambda a: 0x800E8028 <= a < 0x80200000
+OVERLAY_DIRS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
 PROG = {"MAIN0": ("game/MAIN0.EXE", 0x80010000, 0x800), "X000": ("game/AREA00/X000.BIN", 0x800E8028, 0)}
 for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
     PROG["X%03d" % n] = ("game/AREA%02d/X%03d.BIN" % (n, n), 0x800E8028, 0)
@@ -52,17 +62,36 @@ for h in os.listdir(os.path.join(ROOT, "include", "tomba")):
 changed = skipped = 0
 def walk():
     for dp, dn, fn in os.walk(os.path.join(ROOT, "src")): yield dp, fn
+def rename_twins(stem, used):
+    """Applies the identifier renames of src/<stem>.c to its src/x0NN/<stem>.c twins (same source, other overlay)."""
+    global changed
+    for d in OVERLAY_DIRS:
+        tp = os.path.join(ROOT, "src", d, stem + ".c")
+        if not os.path.exists(tp): continue
+        ttxt = open(tp, errors="surrogateescape").read(); tnew = ttxt
+        for ident, nm in used.items():
+            if not re.search(r"\bextern\b[^;{}]*\b%s\b" % re.escape(ident), ttxt): continue
+            if re.search(r"\b%s\b" % re.escape(nm), ttxt): print("SKIP", tp, ident, nm); continue
+            tnew = re.sub(r"\b%s\b" % re.escape(ident), nm, tnew)
+        if tnew != ttxt:
+            changed += 1
+            if not DRY: open(tp, "w", errors="surrogateescape").write(tnew)
+
 for dp, fn in walk():
+    rel = os.path.relpath(dp, os.path.join(ROOT, "src"))
+    if PROGMODE != "MAIN0" and rel != ".": continue   # overlay mode: src/*.c only, twins follow by identifier; never src/data
     for f in sorted(fn):
         if not f.endswith((".c", ".h")): continue
+        if "slpm80165" in f: continue   # demo sources: their addresses are the demo's, never rewritten
         path = os.path.join(dp, f); txt = open(path, errors="surrogateescape").read()
         m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s+(\w+)", txt[:600])
+        if PROGMODE != "MAIN0" and not (m and m.group(3).upper() == PROGMODE): continue
         idmap = {}   # identifier -> address
         for mm in re.finditer(r"\b(?:D|DAT)_([0-9a-fA-F]{8})\b", txt):
             idmap[mm.group(0)] = int(mm.group(1), 16)
         if m and f.endswith(".c"):
             addr, size, prog = int(m.group(1), 16), int(m.group(2)), m.group(3).upper()
-            stem = f[:-2]; rel = os.path.relpath(dp, os.path.join(ROOT, "src"))
+            stem = f[:-2]
             cands = [os.path.join(ROOT, "build", "full", "obj", stem + ".o")] if rel == "." else []
             cands.append(os.path.join(ROOT, "build", "base", prog.lower(), stem + ".o"))
             for o in cands:
@@ -90,4 +119,5 @@ for dp, fn in walk():
         if new != txt:
             changed += 1
             if not DRY: open(path, "w", errors="surrogateescape").write(new)
+            if PROGMODE != "MAIN0" and f.endswith(".c"): rename_twins(f[:-2], used)
 print("files changed:", changed, "skipped:", skipped)

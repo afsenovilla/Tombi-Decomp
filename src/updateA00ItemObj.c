@@ -6,8 +6,8 @@
 typedef struct { short t; unsigned short x, y, z; } E;
 extern int D_8013B0E0;
 extern int D_80134DC4;
-extern unsigned short D_80138F0C[];
-extern E D_80138F14[];
+extern unsigned short A00_ITEM_OBJ_PATH_START[];
+extern E A00_ITEM_OBJ_PATH_NODES[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void playSFX(int n);
@@ -54,20 +54,20 @@ void updateA00ItemObj(TObj *o)
         case 1:
             switch (o->step) {
             case 0: {
-                unsigned short v = D_80138F0C[(unsigned short)p->wb8];
+                unsigned short v = A00_ITEM_OBJ_PATH_START[(unsigned short)p->wb8];
                 o->wb8 = v;
-                o->w22 = D_80138F14[v].t;
+                o->w22 = A00_ITEM_OBJ_PATH_NODES[v].t;
                 o->step++;
             }
             case 1:
-                e = &D_80138F14[(unsigned short)o->wb8];
+                e = &A00_ITEM_OBJ_PATH_NODES[(unsigned short)o->wb8];
                 if (e->t == -2) {
                     o->wb8--;
-                    e = &D_80138F14[(unsigned short)o->wb8];
+                    e = &A00_ITEM_OBJ_PATH_NODES[(unsigned short)o->wb8];
                 }
                 if (e->t == -1) {
-                    unsigned short v = D_80138F0C[(unsigned short)p->wb8];
-                    e = &D_80138F14[v];
+                    unsigned short v = A00_ITEM_OBJ_PATH_START[(unsigned short)p->wb8];
+                    e = &A00_ITEM_OBJ_PATH_NODES[v];
                     o->wb8 = v;
                 }
                 if (--o->w22 == 0) {

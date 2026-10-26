@@ -1,7 +1,7 @@
 // FUNC 80130a38 376 X000
 // MATCHING 80130a38 376
 extern int DAT_8013ad4c;
-extern unsigned short DAT_80139240[];
+extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 typedef struct G { char p0[0x16]; unsigned short y; char p2[0x40 - 0x18]; char *h; char *d; } G;
 extern G PLAYER;
 extern void FUN_8001fe6c(void *);
@@ -30,7 +30,7 @@ void redBirdStep2(unsigned char *o)
         }
         *(short *)(o + 0x20) = *(short *)(o + 0x20) - 1;
         if (*(short *)(o + 0x20) == 0) {
-            o[6] = DAT_80139240[FUN_8001f9e0() & 0xf];
+            o[6] = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o[7] = 0;
             if (*(short *)(*(char **)(o + 0x44) + 2) == *(short *)(PLAYER.d + 2)) {
                 a = PLAYER.y - *(unsigned short *)(o + 0x16) + 0x30;

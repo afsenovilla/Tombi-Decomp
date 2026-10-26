@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001e560(int, int);
@@ -92,7 +92,7 @@ void playerStepClimb(TObj *o)
                     break;
                 }
             reset:
-                o->d8c = D_801152E8[o->wb0];
+                o->d8c = SLOPE_TILT_TABLE[o->wb0];
                 o->step = 0;
                 o->state = 0;
                 break;

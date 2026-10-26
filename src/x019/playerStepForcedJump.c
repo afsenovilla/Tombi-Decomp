@@ -7,7 +7,7 @@
 #define G PLAYER_EXT
 extern unsigned char *PLAYER_EXT;
 extern char D_80010748[];
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
 void SfxPlay2(int a, int b);
@@ -99,7 +99,7 @@ void playerStepForcedJump(TObj *o)
             *(short *)(G + 0x2c) = 0;
             o->anim = D_80010748;
             AnimLoadDuration(o);
-            o->d8c = D_801152E8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             o->state = 4;
         }
         break;

@@ -9,7 +9,7 @@ extern void *D_8013A1EC[];
 extern void *D_8013A1F0[];
 extern void *D_8013A1F4[];
 extern void *D_8013A1F8[];
-extern unsigned char D_80138FD8[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void setAreaFlagBit(int);
 extern void spawnItemNotification(int, int);
 extern void probeWallAt(TObj *, short, short, int);
@@ -21,7 +21,7 @@ extern short DAT_1f80027e;
 
 #define SETBOX(o) \
     { \
-        unsigned char *b = D_80138FD8 + ((unsigned short *)o->anim)[1] * 4; \
+        unsigned char *b = KOMA_PIG_ANIM_BOXES + ((unsigned short *)o->anim)[1] * 4; \
         o->box0 = *b++; \
         o->box1 = *b++; \
         o->box2 = b[0]; \

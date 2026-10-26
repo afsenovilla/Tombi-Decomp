@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b; } G;
 extern G *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 void playerResetToStep0(TObj *o)
 {
     PLAYER_EXT->b = 0;
@@ -12,7 +12,7 @@ void playerResetToStep0(TObj *o)
     o->wb2 = 0;
     o->velY = 0;
     *(unsigned char *)&o->wac = 0;
-    o->d8c = D_801152E8[o->wb0];
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
     o->step = 0;
     o->state = 0;
 }

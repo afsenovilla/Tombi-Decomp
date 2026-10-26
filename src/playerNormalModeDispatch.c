@@ -11,7 +11,7 @@
 #include "gamestate.h"
 extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned char *PLAYER_EXT;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerStepIdle(TObj *);
 extern void playerStepWalk(TObj *);
 extern void playerTryAttack(TObj *, int);
@@ -143,7 +143,7 @@ static __inline__ void dirD(TObj *o)
 static __inline__ void turn(TObj *o)
 {
     int a = o->d8c;
-    unsigned int c = (unsigned char)(D_801152E8[o->wb0] - a);
+    unsigned int c = (unsigned char)(SLOPE_TILT_TABLE[o->wb0] - a);
     short s = c;
     unsigned short u = c;
     if (s != 0) {

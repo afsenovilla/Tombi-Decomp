@@ -1,16 +1,16 @@
 // FUNC 800ee4e0 60 X010
 // MATCHING 800ee4e0 60
 typedef struct S { char pad[0x8c]; int v; char pad2[0xb0 - 0x90]; short idx; } S;
-extern unsigned char DAT_801152e8[];
-extern unsigned char DAT_8011530c[];
+extern unsigned char SLOPE_TILT_TABLE[];
+extern unsigned char SLOPE_TILT_TABLE_SLOW[];
 
 void playerSetSlopeTilt(S *s, short f)
 {
     unsigned char b;
     if (f) {
-        b = DAT_8011530c[s->idx];
+        b = SLOPE_TILT_TABLE_SLOW[s->idx];
     } else {
-        b = DAT_801152e8[s->idx];
+        b = SLOPE_TILT_TABLE[s->idx];
     }
     s->v = b;
 }

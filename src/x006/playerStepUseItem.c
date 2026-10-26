@@ -31,7 +31,7 @@ extern int GAME[];
 extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
 extern unsigned char DAT_8009d2b0, DAT_8009d2b1, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char DAT_80010748[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -121,7 +121,7 @@ void playerStepUseItem(TObj *o)
             o->state = 0;
         }
         k = X(o)->d3;
-        o->d8c = DAT_801152e8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         if (k < 0x65) if (k >= 0x62) {
             spawnColorBurst(k - 0x62);
             X(o)->d3 = 0;

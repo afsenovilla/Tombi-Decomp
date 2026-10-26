@@ -3,10 +3,10 @@
 // probably: player speed friction: index from DAT_8009d2b3 / flags, steps wb2 toward 0 by the D_80115510 table rows and clamps to f6; unreferenced
 extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
-extern unsigned char DAT_80115510[];
+extern unsigned char PLAYER_DECEL_PARAMS_BYTES[];
 typedef struct { short f0, f2, f4, f6; char r[0x74 - 8]; } T74;
-extern T74 DAT_80115510s[];
-#define TS(i, o) (*(short *)(DAT_80115510 + (i) + (o)))
+extern T74 PLAYER_DECEL_PARAMS[];
+#define TS(i, o) (*(short *)(PLAYER_DECEL_PARAMS_BYTES + (i) + (o)))
 #define WB2(p) (*(short *)((p) + 0xb2))
 
 static __inline__ void dec(unsigned char *p, int u, int g)
@@ -40,10 +40,10 @@ static __inline__ void dec(unsigned char *p, int u, int g)
 
 static __inline__ void clamp(unsigned char *p, short u)
 {
-    if (WB2(p) < -DAT_80115510s[u].f6)
-        WB2(p) = -DAT_80115510s[u].f6;
-    if (DAT_80115510s[u].f6 < WB2(p))
-        WB2(p) = DAT_80115510s[u].f6;
+    if (WB2(p) < -PLAYER_DECEL_PARAMS[u].f6)
+        WB2(p) = -PLAYER_DECEL_PARAMS[u].f6;
+    if (PLAYER_DECEL_PARAMS[u].f6 < WB2(p))
+        WB2(p) = PLAYER_DECEL_PARAMS[u].f6;
 }
 
 static __inline__ void mid(unsigned char *p, short u)

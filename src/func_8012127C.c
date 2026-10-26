@@ -15,7 +15,7 @@ typedef struct {
     char p1e[2];
     E e[1];
 } H;
-extern unsigned char D_80138D74[][8][12];
+extern unsigned char A00_AP_BOX_SPARKLE_TABLE[][8][12];
 
 void func_8012127C(TObj *o)
 {
@@ -41,18 +41,18 @@ void func_8012127C(TObj *o)
             e->z50 = 0;
             e->z51 = 0;
             e->z52 = 0;
-            e->c[0] = D_80138D74[g >> 3][ph][0];
-            e->c[1] = D_80138D74[g >> 3][ph][1];
-            e->c[2] = D_80138D74[g >> 3][ph][2];
-            e->c[4] = D_80138D74[g >> 3][ph][3];
-            e->c[5] = D_80138D74[g >> 3][ph][4];
-            e->c[6] = D_80138D74[g >> 3][ph][5];
-            e->c[8] = D_80138D74[g >> 3][ph][6];
-            e->c[9] = D_80138D74[g >> 3][ph][7];
-            e->c[10] = D_80138D74[g >> 3][ph][8];
-            e->c[12] = D_80138D74[g >> 3][ph][9];
-            e->c[13] = D_80138D74[g >> 3][ph][10];
-            e->c[14] = D_80138D74[g >> 3][ph][11];
+            e->c[0] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][0];
+            e->c[1] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][1];
+            e->c[2] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][2];
+            e->c[4] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][3];
+            e->c[5] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][4];
+            e->c[6] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][5];
+            e->c[8] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][6];
+            e->c[9] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][7];
+            e->c[10] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][8];
+            e->c[12] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][9];
+            e->c[13] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][10];
+            e->c[14] = A00_AP_BOX_SPARKLE_TABLE[g >> 3][ph][11];
             e->phase = ph;
             e++;
         } while (--n != 0);
@@ -61,18 +61,18 @@ void func_8012127C(TObj *o)
         do {
             g = (0x20 - (short)n) >> 3;
             e->phase = (e->phase + 1) & 7;
-            e->c[0] = D_80138D74[g][e->phase][0];
-            e->c[1] = D_80138D74[g][e->phase][1];
-            e->c[2] = D_80138D74[g][e->phase][2];
-            e->c[4] = D_80138D74[g][e->phase][3];
-            e->c[5] = D_80138D74[g][e->phase][4];
-            e->c[6] = D_80138D74[g][e->phase][5];
-            e->c[8] = D_80138D74[g][e->phase][6];
-            e->c[9] = D_80138D74[g][e->phase][7];
-            e->c[10] = D_80138D74[g][e->phase][8];
-            e->c[12] = D_80138D74[g][e->phase][9];
-            e->c[13] = D_80138D74[g][e->phase][10];
-            e->c[14] = D_80138D74[g][e->phase][11];
+            e->c[0] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][0];
+            e->c[1] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][1];
+            e->c[2] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][2];
+            e->c[4] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][3];
+            e->c[5] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][4];
+            e->c[6] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][5];
+            e->c[8] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][6];
+            e->c[9] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][7];
+            e->c[10] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][8];
+            e->c[12] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][9];
+            e->c[13] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][10];
+            e->c[14] = A00_AP_BOX_SPARKLE_TABLE[g][e->phase][11];
             e++;
         } while (--n != 0);
         break;

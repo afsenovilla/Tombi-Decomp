@@ -20,7 +20,7 @@ extern unsigned char DAT_8009d2b0[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c942b[];
 extern unsigned char DAT_8009c93fb[];
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 
 void playerEventStepDropIn(TObj *o)
 {
@@ -94,7 +94,7 @@ void playerEventStepDropIn(TObj *o)
         o->b04 = 1;
         o->step = 0;
         o->state = 0;
-        o->d8c = DAT_801152e8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         DAT_8009c93a[0] = 1;
         DAT_8009d2b0[0] = 0;
         DAT_8009c942b[0] = 0;

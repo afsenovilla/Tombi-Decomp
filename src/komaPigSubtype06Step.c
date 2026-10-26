@@ -2,9 +2,9 @@
 // MATCHING 8012cae4 532
 #include "TOBJ.H"
 extern char DAT_80077cf4[];
-extern unsigned char DAT_801390ec[];
-extern unsigned short *DAT_8013a160[];
-extern unsigned char DAT_80138fd8[];
+extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[];
+extern unsigned short *KOMA_PIG_ANIMS[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short DAT_1f80016a, DAT_1f800172;
 extern void FUN_80127214(TObj *);
 extern void applyFrameVelocityY(TObj *);
@@ -20,10 +20,10 @@ void komaPigSubtype06Step(TObj *o)
         o->movetab = DAT_80077cf4;
         o->state++;
         o->b69 = 0;
-        k = DAT_801390ec[o->subtype];
+        k = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
         o->wac = k;
-        o->anim = DAT_8013a160[k];
-        p = &DAT_80138fd8[((unsigned short *)o->anim)[1] * 4];
+        o->anim = KOMA_PIG_ANIMS[k];
+        p = &KOMA_PIG_ANIM_BOXES[((unsigned short *)o->anim)[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

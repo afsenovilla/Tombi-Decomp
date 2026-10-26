@@ -12,7 +12,7 @@ typedef struct { TObj t; char c0[7]; unsigned char bc7, bc8; char c9[0xe4 - 0xc9
 extern P *PLAYER_EXT;
 extern int BITTEN_OBJECT;
 extern int DAT_8009c934;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern short DAT_80115268[][2];
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8001fc;
@@ -99,7 +99,7 @@ void playerStepRopeSwing(TObj *o)
             *(unsigned char *)&o->wac = 0;
             o->b9d = 0;
             ((PO *)o)->bc8 = 0;
-            o->d8c = DAT_801152e8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             o->step = 0;
             o->state = 0;
             break;

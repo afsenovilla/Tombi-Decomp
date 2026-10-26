@@ -24,8 +24,8 @@ extern void *DAT_8013ad38[];
 extern void *DAT_8013ad5c[];
 extern void *DAT_8013ad6c[];
 extern short DAT_80139260[];
-extern unsigned short DAT_80139240[];
-extern short *DAT_80139234[];
+extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
+extern short *RED_BIRD_SUBTYPE_PARAMS[];
 extern char D_80077cdc[];
 extern char D_80077d0c[];
 extern char D_80077d84[];
@@ -195,7 +195,7 @@ void redBirdStep3(TObj *o)
             FUN_8001fe6c(o);
             o->substep++;
         } else {
-            t = DAT_80139234[o->subtype];
+            t = RED_BIRD_SUBTYPE_PARAMS[o->subtype];
             if (o->h->p.whole < t[0] || t[1] < o->h->p.whole) {
                 o->wac = 2;
                 o->anim = DAT_8013ad38[0];
@@ -289,7 +289,7 @@ void redBirdStep3(TObj *o)
         TICK;
         if ((unsigned short)(U16(o, 0xd0) - o->y.p.whole + 4) < 8) {
             o->wb4 = 0;
-            o->state = DAT_80139240[FUN_8001f9e0() & 0xf];
+            o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
             if (o->d->p.whole == DAT_800a607c->p.whole) {
                 unsigned short d = DAT_800a604e - o->y.p.whole + 0x30;
@@ -333,8 +333,8 @@ static short DAT_80139260[16] = {
     0, 0, 0, 0, 0, 1, 1, 1,
     1, 1, 2, 2, 2, 2, 2, 2,
 };
-extern unsigned short DAT_80139240[];
-extern short *DAT_80139234[];
+extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
+extern short *RED_BIRD_SUBTYPE_PARAMS[];
 extern char D_80077cdc[];
 extern char D_80077d0c[];
 extern char D_80077d84[];
@@ -504,7 +504,7 @@ void redBirdStep3(TObj *o)
             FUN_8001fe6c(o);
             o->substep++;
         } else {
-            t = DAT_80139234[o->subtype];
+            t = RED_BIRD_SUBTYPE_PARAMS[o->subtype];
             if (o->h->p.whole < t[0] || t[1] < o->h->p.whole) {
                 o->wac = 2;
                 o->anim = DAT_8013ad38[0];
@@ -598,7 +598,7 @@ void redBirdStep3(TObj *o)
         TICK;
         if ((unsigned short)(U16(o, 0xc0) - o->y.p.whole + 4) < 8) {
             o->wb4 = 0;
-            o->state = DAT_80139240[FUN_8001f9e0() & 0xf];
+            o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
             if (o->d->p.whole == DAT_800a607c->p.whole) {
                 unsigned short d = DAT_800a604e - o->y.p.whole + 0x30;

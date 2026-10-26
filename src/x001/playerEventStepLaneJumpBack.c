@@ -12,7 +12,7 @@ extern unsigned short GAME;
 extern unsigned char DAT_8009c93a[];
 extern unsigned char DAT_8009ce61;
 extern unsigned char DAT_8009d119;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char DAT_80010e34[];
 extern int FUN_8001fddc(int, int);
 extern void FUN_800eeb5c(TObj *, int);
@@ -85,7 +85,7 @@ void playerEventStepLaneJumpBack(TObj *o)
             o->anim = DAT_80010e34;
             FUN_8001fe94(o, 2);
             o->d->p.whole = WF6(o);
-            o->d8c = DAT_801152e8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             OB(o, 0xac) = 0;
             o->state = 3;
             OB(o, 0xa3) = 0;
@@ -105,7 +105,7 @@ void playerEventStepLaneJumpBack(TObj *o)
             o->wb2 = 0;
             o->velX = 0;
             o->velY = 0;
-            o->d8c = DAT_801152e8[o->wb0];
+            o->d8c = SLOPE_TILT_TABLE[o->wb0];
             PLAYER_EXT->w20 = 0;
             o->b04 = 1;
             o->step = 0;

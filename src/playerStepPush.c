@@ -7,7 +7,7 @@
 
 extern unsigned short DAT_1f8001f8;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001e560(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -48,7 +48,7 @@ void playerStepPush(TObj *o)
             }
         }
     } else {
-        unsigned char b = DAT_801152e8[o->wb0];
+        unsigned char b = SLOPE_TILT_TABLE[o->wb0];
         ((unsigned char *)o)[0xc3] = 0;
         o->wb2 = 0;
         o->step = 0;
@@ -61,7 +61,7 @@ void playerStepPush(TObj *o)
 
 extern unsigned short DAT_1f8001f8;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001e560(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -102,7 +102,7 @@ void playerStepPush(TObj *o)
             }
         }
     } else {
-        unsigned char b = DAT_801152e8[o->wb0];
+        unsigned char b = SLOPE_TILT_TABLE[o->wb0];
         ((unsigned char *)o)[0xc3] = 0;
         o->wb2 = 0;
         o->step = 0;

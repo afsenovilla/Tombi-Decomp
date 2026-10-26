@@ -5,7 +5,7 @@
 #include "raw7.h"
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern short D_801153C0[];
+extern short PLAYER_SPIN_RELEASE_SPEEDS[];
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -71,16 +71,16 @@ void playerStepSpinRelease(TObj *o)
         k = PLAYER_EXT->b0b * 7;
         if (o->wb2 < 4) {
             if (o->animFrame & 1) {
-                o->velX = -D_801153C0[k + 4] / 3;
+                o->velX = -PLAYER_SPIN_RELEASE_SPEEDS[k + 4] / 3;
             } else {
-                o->velX = D_801153C0[k + 4] / 3;
+                o->velX = PLAYER_SPIN_RELEASE_SPEEDS[k + 4] / 3;
             }
-            o->velY = D_801153C0[k + 10] >> 1;
+            o->velY = PLAYER_SPIN_RELEASE_SPEEDS[k + 10] >> 1;
         } else {
-            v = D_801153C0[k + o->wb2];
+            v = PLAYER_SPIN_RELEASE_SPEEDS[k + o->wb2];
             if (o->animFrame & 1) v = -v;
             o->velX = v;
-            o->velY = D_801153C0[k + 10];
+            o->velY = PLAYER_SPIN_RELEASE_SPEEDS[k + 10];
         }
         PLAYER_EXT->timer = 0xe;
         o->wb2 = 0;

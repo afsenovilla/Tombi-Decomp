@@ -10,7 +10,7 @@ typedef struct {
 } P800FA35C;
 
 extern P800FA35C *PLAYER_EXT;
-extern unsigned char DAT_801152e8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern short FUN_8003fd78(TObj *, int, int);
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -30,7 +30,7 @@ static __inline__ void setanim(TObj *o, unsigned short x)
 }
 
 #define TURN() \
-    x = DAT_801152e8[o->wb0]; \
+    x = SLOPE_TILT_TABLE[o->wb0]; \
     c = (unsigned char)(x - o->d8c); \
     d = c; \
     if (d == 0) return; \

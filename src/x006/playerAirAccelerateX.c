@@ -9,7 +9,7 @@
 
 typedef struct { short f0, f2, f4, f6, f8; short pad[5]; } T8010EAF8;
 
-extern T8010EAF8 D_8011545C[];
+extern T8010EAF8 PLAYER_MOVE_PARAMS[];
 
 static __inline__ int getU(TObj *o)
 {
@@ -29,22 +29,22 @@ static __inline__ void decel(TObj *o, int u)
     unsigned short x = o->velX;
     int xs;
     int r;
-    if ((unsigned short)(x + D_8011545C[u].f6) <= D_8011545C[u].f6 * 2) {
+    if ((unsigned short)(x + PLAYER_MOVE_PARAMS[u].f6) <= PLAYER_MOVE_PARAMS[u].f6 * 2) {
         o->velX = 0;
         return;
     }
     if (o->animFrame & 1) {
         xs = (short)x;
         if (xs < 0)
-            r = xs + D_8011545C[U8(o, 0xc1)].f6;
+            r = xs + PLAYER_MOVE_PARAMS[U8(o, 0xc1)].f6;
         else
-            r = xs - D_8011545C[u].f8;
+            r = xs - PLAYER_MOVE_PARAMS[u].f8;
     } else {
         xs = (short)x;
         if (xs > 0)
-            r = xs - D_8011545C[U8(o, 0xc1)].f6;
+            r = xs - PLAYER_MOVE_PARAMS[U8(o, 0xc1)].f6;
         else
-            r = xs + D_8011545C[u].f8;
+            r = xs + PLAYER_MOVE_PARAMS[u].f8;
     }
     o->velX = r;
 }
@@ -52,9 +52,9 @@ static __inline__ void decel(TObj *o, int u)
 void playerAirAccelerateX(TObj *o)
 {
     short u = getU(o);
-    unsigned short acc = D_8011545C[u].f4;
-    unsigned short lim = D_8011545C[u].f0;
-    unsigned short max = D_8011545C[u].f2;
+    unsigned short acc = PLAYER_MOVE_PARAMS[u].f4;
+    unsigned short lim = PLAYER_MOVE_PARAMS[u].f0;
+    unsigned short max = PLAYER_MOVE_PARAMS[u].f2;
     unsigned char b;
 
     if (GV6.s10 == 7) {

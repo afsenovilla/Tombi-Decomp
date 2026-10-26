@@ -9,7 +9,7 @@ extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern unsigned char TALK_POSE;
 extern unsigned char D_1f8003ce;
-extern unsigned char D_801152E8[];
+extern unsigned char SLOPE_TILT_TABLE[];
 extern char D_80010748[];
 extern void playerEventStepLandIdle(TObj *);
 extern void playerEventStepLaneJumpBack(TObj *);
@@ -41,7 +41,7 @@ void playerEventModeDispatch(TObj *o)
         } else {
             (*(signed char*)&o->b0f) = -8;
         }
-        v = D_801152E8[o->wb0];
+        v = SLOPE_TILT_TABLE[o->wb0];
         o->b04 = 1;
         o->step = 0;
         o->state = 0;
@@ -102,7 +102,7 @@ void playerEventModeDispatch(TObj *o)
             o->y.p.whole += 2;
         }
         ObjTileCollide(o, 0, 0);
-        o->d8c = D_801152E8[o->wb0];
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
         break;
     case 11:
         func_8011DD48(o);

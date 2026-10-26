@@ -2,7 +2,7 @@
 // MATCHING 8012d918 228
 #include "tobj.h"
 extern unsigned short *animp[];
-extern unsigned char tab[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void adv(void *), g(void *);
 extern char mt[];
 void komaPigSubtype09Step(TObj *o)
@@ -16,7 +16,7 @@ void komaPigSubtype09Step(TObj *o)
         o->wac = 0x3a;
         o->state++;
         o->anim = a = animp[0];
-        q = tab + a[1] * 4;
+        q = KOMA_PIG_ANIM_BOXES + a[1] * 4;
         o->box0 = *q++;
         o->box1 = *q++;
         o->box2 = *q;

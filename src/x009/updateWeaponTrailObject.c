@@ -2,7 +2,7 @@
 // MATCHING 800ec420 468
 #include "TOBJ.H"
 typedef struct { short k; short pad; void **anims; int pad2; } T12;
-extern T12 DAT_80114c20[];
+extern T12 WEAPON_TRAIL_DEFS[];
 extern int SPR_DATA[];
 extern unsigned short DAT_800a6066;
 typedef struct G { char p0; unsigned char b1; char p1[0xf - 2]; unsigned char b0f; } G;
@@ -23,8 +23,8 @@ void updateWeaponTrailObject(TObj *o)
         if (o->subtype == 9)
             goto inc;
         o->w1e = 0x13;
-        o->d3c = SPR_DATA[DAT_80114c20[o->subtype].k];
-        o->anim = DAT_80114c20[o->subtype].anims[o->b0c];
+        o->d3c = SPR_DATA[WEAPON_TRAIL_DEFS[o->subtype].k];
+        o->anim = WEAPON_TRAIL_DEFS[o->subtype].anims[o->b0c];
         FUN_8001fe6c(o);
         v = DAT_800a6066;
         o->b0a = 2;
