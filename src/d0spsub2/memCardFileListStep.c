@@ -14,7 +14,7 @@ extern char GAME[];
 extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern unsigned char D_8009CF1C;
 extern unsigned short BUTTON_CONFIG_INDEX;
-extern char D_800E1E28[];
+extern char SAVE_DATA_BUFFER[];
 extern char MEMCARD_FILE_SUFFIX_FORMAT[];
 extern char *MEMCARD_SAVE_PREFIXES_2[];
 extern char *MEMCARD_PORT_PREFIXES_2[];
@@ -237,7 +237,7 @@ int memCardFileListStep(Menu *m, Card *c)
             m->timer = 1;
             break;
         }
-        if (memCardWriteFile(MEMCARD_FILE_PATH, D_800E1E28, 0xC00, 1)) {
+        if (memCardWriteFile(MEMCARD_FILE_PATH, SAVE_DATA_BUFFER, 0xC00, 1)) {
             m->msg = 0;
             m->sub = 11;
             break;
@@ -256,8 +256,8 @@ int memCardFileListStep(Menu *m, Card *c)
         tries = 3;
         strncat(MEMCARD_FILE_PATH, c->e[MEMCARD_FILE_ORDER[m->card][m->cursor]].name, 0x14);
         do {
-            if (memCardReadFile(MEMCARD_FILE_PATH, D_800E1E28, 0, 0xC00) == 0 && (memCardVerifyChecksum(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
-                D_8009C960g = *(GS *)(D_800E1E28 + 0x200);
+            if (memCardReadFile(MEMCARD_FILE_PATH, SAVE_DATA_BUFFER, 0, 0xC00) == 0 && (memCardVerifyChecksum(SAVE_DATA_BUFFER + 0x200, 0xA00) & 0xFF)) {
+                D_8009C960g = *(GS *)(SAVE_DATA_BUFFER + 0x200);
                 D_8009C960g.f5bc = BUTTON_CONFIG_INDEX;
                 D_8009C960g.f10 = D_8009C960g.f11;
                 m->msg = 15;

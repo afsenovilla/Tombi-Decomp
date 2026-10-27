@@ -2,8 +2,8 @@
 // MATCHING 800e8d60 708
 #include "TOBJ.H"
 extern void func_8001FE6C(TObj *o);
-extern void *D_800106B4, *D_800106B8, *D_800106BC, *D_800106C0, *D_800106C4, *D_800106C8, *D_800106CC, *D_800106D0;
-extern void *D_800106D4, *D_800106D8, *D_800106DC, *D_800106E0, *D_800106E4, *D_800106E8, *D_800106EC;
+extern void *MAP_PLAYER_IDLE_ANIM_D2, *MAP_PLAYER_IDLE_ANIM_D13, *MAP_PLAYER_IDLE_ANIM_D04, *MAP_PLAYER_IDLE_ANIM_D57, *MAP_PLAYER_IDLE_ANIM_D6, *MAP_PLAYER_WALK_ANIM_D2, *MAP_PLAYER_WALK_ANIM_D13, *MAP_PLAYER_WALK_ANIM_D04;
+extern void *MAP_PLAYER_WALK_ANIM_D57, *MAP_PLAYER_WALK_ANIM_D6, *MAP_PLAYER_WALK_BTN_A_ANIM_D2, *MAP_PLAYER_WALK_BTN_A_ANIM_D13, *MAP_PLAYER_WALK_BTN_A_ANIM_D04, *MAP_PLAYER_WALK_BTN_A_ANIM_D57, *MAP_PLAYER_WALK_BTN_A_ANIM_D6;
 extern TObj *PLAYER_EXT;
 extern volatile unsigned short PAD_PRESSED[];
 
@@ -13,43 +13,43 @@ void overheadPlayerSetMoveAnim(TObj *o)
         PLAYER_EXT->animTimer = o->animFrame + 0x10;
         if (PLAYER_EXT->animTimer == PLAYER_EXT->animFrame) return;
         switch (o->animFrame) {
-        case 0: o->anim = D_800106E4; break;
-        case 1: o->anim = D_800106E0; break;
-        case 2: o->anim = D_800106DC; break;
-        case 3: o->anim = D_800106E0; break;
-        case 4: o->anim = D_800106E4; break;
-        case 5: o->anim = D_800106E8; break;
-        case 6: o->anim = D_800106EC; break;
-        case 7: o->anim = D_800106E8; break;
-        case 8: o->anim = D_800106BC; break;
-        case 9: o->anim = D_800106B8; break;
-        case 10: o->anim = D_800106B4; break;
-        case 11: o->anim = D_800106B8; break;
-        case 12: o->anim = D_800106BC; break;
-        case 13: o->anim = D_800106C0; break;
-        case 14: o->anim = D_800106C4; break;
-        case 15: o->anim = D_800106C0; break;
+        case 0: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D04; break;
+        case 5: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D57; break;
+        case 6: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D6; break;
+        case 7: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D57; break;
+        case 8: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 9: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 10: o->anim = MAP_PLAYER_IDLE_ANIM_D2; break;
+        case 11: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 12: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 13: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
+        case 14: o->anim = MAP_PLAYER_IDLE_ANIM_D6; break;
+        case 15: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
         }
     } else {
         PLAYER_EXT->animTimer = o->animFrame;
         if (PLAYER_EXT->animTimer == PLAYER_EXT->animFrame) return;
         switch (o->animFrame) {
-        case 0: o->anim = D_800106D0; break;
-        case 1: o->anim = D_800106CC; break;
-        case 2: o->anim = D_800106C8; break;
-        case 3: o->anim = D_800106CC; break;
-        case 4: o->anim = D_800106D0; break;
-        case 5: o->anim = D_800106D4; break;
-        case 6: o->anim = D_800106D8; break;
-        case 7: o->anim = D_800106D4; break;
-        case 8: o->anim = D_800106BC; break;
-        case 9: o->anim = D_800106B8; break;
-        case 10: o->anim = D_800106B4; break;
-        case 11: o->anim = D_800106B8; break;
-        case 12: o->anim = D_800106BC; break;
-        case 13: o->anim = D_800106C0; break;
-        case 14: o->anim = D_800106C4; break;
-        case 15: o->anim = D_800106C0; break;
+        case 0: o->anim = MAP_PLAYER_WALK_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_WALK_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_WALK_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_WALK_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_WALK_ANIM_D04; break;
+        case 5: o->anim = MAP_PLAYER_WALK_ANIM_D57; break;
+        case 6: o->anim = MAP_PLAYER_WALK_ANIM_D6; break;
+        case 7: o->anim = MAP_PLAYER_WALK_ANIM_D57; break;
+        case 8: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 9: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 10: o->anim = MAP_PLAYER_IDLE_ANIM_D2; break;
+        case 11: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 12: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 13: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
+        case 14: o->anim = MAP_PLAYER_IDLE_ANIM_D6; break;
+        case 15: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
         }
     }
     func_8001FE6C(o);

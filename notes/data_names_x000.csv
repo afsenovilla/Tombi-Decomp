@@ -113,3 +113,4 @@ address,name,size,source
 8012e02c,GROUND_DEBRIS_ANIMS_AREA9,,usage: anim pointer per wac for area 9 (updateGroundDebris) refs=1
 8013b0e0,A00_ITEM_OBJ_ANIM_SUBTYPE0,,usage: the anim of updateA00ItemObj subtype 0 (tpage 0xb) refs=1
 80134dc4,A00_ITEM_OBJ_ANIM_SUBTYPE1,,usage: the anim of updateA00ItemObj subtype 1 (tpage 8) refs=1
+8013b1a0,A00_ROAMING_FLYER_BOB_ANIM,,usage: the anim a00RoamingFlyerBob sets when it enters its bobbing flight refs=1

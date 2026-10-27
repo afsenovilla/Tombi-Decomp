@@ -6,7 +6,7 @@
 #include "gamestate.h"
 extern void func_8001FE6C(TObj *o);
 extern int func_8005EFE4(void);
-extern void *D_800106B4;
+extern void *MAP_PLAYER_IDLE_ANIM_D2;
 extern char D_80011790[];
 extern unsigned short D_8007A024[][2];
 typedef struct { unsigned char b0; char p1[0x13]; unsigned short w14; char p16[0x12]; unsigned short w28, w2a, w2c, w2e; } P330;
@@ -60,7 +60,7 @@ void tunnelPlayerInit(TObj *o)
         o->w98 = GAME.playerHealth;
         *(signed char *)&o->b0f = -8;
         o->d3c = SPAD.i2f0;
-        o->anim = D_800106B4;
+        o->anim = MAP_PLAYER_IDLE_ANIM_D2;
         func_8001FE6C(o);
         D_800A60A3[0] = 0;
         o->step = 0x63;

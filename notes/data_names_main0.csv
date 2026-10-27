@@ -325,3 +325,19 @@ address,name,size,source
 1f80016c,PLAYER_Y_COPY,0x4,usage: the 16.16 whose whole half is PLAYER_Y_WHOLE (cameraModeHandler5 copies it to CAMERA_TARGET_Y_FIX) refs=1
 1f80018c,CAMERA_TARGET_H_FIX,0x4,usage: 16.16 h the camera follows (cameraFollowTargetY: d = it - D34(o); updateA00BitingPlantBait sets it to the bait's h, cameraModeHandler5 to the player's) refs=8
 1f800190,CAMERA_TARGET_Y_FIX,0x4,usage: 16.16 y the camera follows (cameraFollowTargetYB: d = it - VF; lookScrollStepX; updateA00BitingPlantBait / cameraModeHandler5 set it) refs=17
+800e1e28,SAVE_DATA_BUFFER,0xc00,usage: the 0xC00-byte save file image memCardFileListStep (D0SPSUB2) writes with memCardWriteFile / reads back with memCardReadFile; the checksummed game state (memCardVerifyChecksum of +0x200..0xC00) is copied to GAME from +0x200 refs=1
+800106b4,MAP_PLAYER_IDLE_ANIM_D2,0x4,usage: MAIN0 .data anim pointers (scripts at 80011790..) shared by the I0NFO overhead, I0NFO2 top-down and I0NFO3 tunnel players (their *PlayerInit / SetDirAnim / SetMoveAnim): idle set 800106B4..C4 by facing dir 2 / 1,3 / 0,4 / 5,7 / 6 (topdownPlayerSetDirAnim mode 0, topdownPlayerInit) refs=4
+800106b8,MAP_PLAYER_IDLE_ANIM_D13,0x4,usage: idle anim for dirs 1 and 3 (topdownPlayerSetDirAnim mode 0 / topdownPlayerSetMoveAnim cases 9 and 11) refs=3
+800106bc,MAP_PLAYER_IDLE_ANIM_D04,0x4,usage: idle anim for dirs 0 and 4 refs=3
+800106c0,MAP_PLAYER_IDLE_ANIM_D57,0x4,usage: idle anim for dirs 5 and 7 refs=3
+800106c4,MAP_PLAYER_IDLE_ANIM_D6,0x4,usage: idle anim for dir 6 refs=3
+800106c8,MAP_PLAYER_WALK_ANIM_D2,0x4,usage: walk set 800106C8..D8 by facing dir 2 / 1,3 / 0,4 / 5,7 / 6 (topdownPlayerSetDirAnim mode 1; topdownPlayerSetMoveAnim without BUTTON_MASK_A held) refs=3
+800106cc,MAP_PLAYER_WALK_ANIM_D13,0x4,usage: walk anim for dirs 1 and 3 refs=3
+800106d0,MAP_PLAYER_WALK_ANIM_D04,0x4,usage: walk anim for dirs 0 and 4 refs=3
+800106d4,MAP_PLAYER_WALK_ANIM_D57,0x4,usage: walk anim for dirs 5 and 7 refs=3
+800106d8,MAP_PLAYER_WALK_ANIM_D6,0x4,usage: walk anim for dir 6 refs=3
+800106dc,MAP_PLAYER_WALK_BTN_A_ANIM_D2,0x4,usage: third set 800106DC..EC by facing dir 2 / 1,3 / 0,4 / 5,7 / 6: topdownPlayerSetDirAnim mode 2 and topdownPlayerSetMoveAnim while BUTTON_MASK_A (action) is held refs=3
+800106e0,MAP_PLAYER_WALK_BTN_A_ANIM_D13,0x4,usage: button-A walk anim for dirs 1 and 3 refs=3
+800106e4,MAP_PLAYER_WALK_BTN_A_ANIM_D04,0x4,usage: button-A walk anim for dirs 0 and 4 (also func_800F88A0 sets PLAYER.anim to it) refs=4
+800106e8,MAP_PLAYER_WALK_BTN_A_ANIM_D57,0x4,usage: button-A walk anim for dirs 5 and 7 refs=3
+800106ec,MAP_PLAYER_WALK_BTN_A_ANIM_D6,0x4,usage: button-A walk anim for dir 6 refs=3

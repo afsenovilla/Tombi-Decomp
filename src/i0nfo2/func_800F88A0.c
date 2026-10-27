@@ -4,7 +4,7 @@
 typedef struct { char c[12]; } B12;
 extern TObj PLAYER;
 extern TObj *D_8009F304;
-extern void *D_800106E4;
+extern void *MAP_PLAYER_WALK_BTN_A_ANIM_D04;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -129,7 +129,7 @@ void func_800F88A0(TObj *o)
         break;
     case 16:
         if (--o->w08 <= 0) {
-            PLAYER.anim = D_800106E4;
+            PLAYER.anim = MAP_PLAYER_WALK_BTN_A_ANIM_D04;
             AnimLoadDuration(&PLAYER);
             o->state++;
         }

@@ -4,7 +4,7 @@
 extern short COS_TABLE[];
 extern char D_80077CE8[];
 extern void *A00_ROAMING_FLYER_BOB_ANIMS;
-extern void *D_8013B1A0;
+extern void *A00_ROAMING_FLYER_BOB_ANIM;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
@@ -66,7 +66,7 @@ void a00RoamingFlyerBob(TObj *o)
             *(int *)((char *)o + 0x88) = 0;
             *(short *)((char *)o + 0x20) = 0x10;
             *(short *)((char *)o + 0x16) = o->d34;
-            o->anim = D_8013B1A0;
+            o->anim = A00_ROAMING_FLYER_BOB_ANIM;
             AnimLoadDuration(o);
             o->step++;
         }

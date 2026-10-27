@@ -4,8 +4,8 @@
 extern void func_8001FE6C(TObj *o);
 typedef struct { char p[0x2C]; unsigned short w2c, w2e; } P330;
 extern P330 *PLAYER_EXT;
-extern void *D_800106B4, *D_800106B8, *D_800106BC, *D_800106C0, *D_800106C4, *D_800106C8, *D_800106CC, *D_800106D0;
-extern void *D_800106D4, *D_800106D8, *D_800106DC, *D_800106E0, *D_800106E4, *D_800106E8, *D_800106EC;
+extern void *MAP_PLAYER_IDLE_ANIM_D2, *MAP_PLAYER_IDLE_ANIM_D13, *MAP_PLAYER_IDLE_ANIM_D04, *MAP_PLAYER_IDLE_ANIM_D57, *MAP_PLAYER_IDLE_ANIM_D6, *MAP_PLAYER_WALK_ANIM_D2, *MAP_PLAYER_WALK_ANIM_D13, *MAP_PLAYER_WALK_ANIM_D04;
+extern void *MAP_PLAYER_WALK_ANIM_D57, *MAP_PLAYER_WALK_ANIM_D6, *MAP_PLAYER_WALK_BTN_A_ANIM_D2, *MAP_PLAYER_WALK_BTN_A_ANIM_D13, *MAP_PLAYER_WALK_BTN_A_ANIM_D04, *MAP_PLAYER_WALK_BTN_A_ANIM_D57, *MAP_PLAYER_WALK_BTN_A_ANIM_D6;
 
 void topdownPlayerSetDirAnimCached(TObj *o, int mode, int dir)
 {
@@ -15,48 +15,48 @@ void topdownPlayerSetDirAnimCached(TObj *o, int mode, int dir)
     switch ((short)mode) {
     case 0:
         switch (dir &= 7) {
-        case 0: o->anim = D_800106BC; break;
-        case 1: o->anim = D_800106B8; break;
-        case 2: o->anim = D_800106B4; break;
-        case 3: o->anim = D_800106B8; break;
-        case 4: o->anim = D_800106BC; break;
-        case 6: o->anim = D_800106C4; break;
-        case 5: case 7: o->anim = D_800106C0; break;
+        case 0: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_IDLE_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 6: o->anim = MAP_PLAYER_IDLE_ANIM_D6; break;
+        case 5: case 7: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
         }
         break;
     case 1:
         switch (dir &= 7) {
-        case 0: o->anim = D_800106D0; break;
-        case 1: o->anim = D_800106CC; break;
-        case 2: o->anim = D_800106C8; break;
-        case 3: o->anim = D_800106CC; break;
-        case 4: o->anim = D_800106D0; break;
-        case 5: o->anim = D_800106D4; break;
-        case 6: o->anim = D_800106D8; break;
-        case 7: o->anim = D_800106D4; break;
+        case 0: o->anim = MAP_PLAYER_WALK_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_WALK_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_WALK_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_WALK_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_WALK_ANIM_D04; break;
+        case 5: o->anim = MAP_PLAYER_WALK_ANIM_D57; break;
+        case 6: o->anim = MAP_PLAYER_WALK_ANIM_D6; break;
+        case 7: o->anim = MAP_PLAYER_WALK_ANIM_D57; break;
         }
         break;
     case 2:
         switch (dir &= 7) {
-        case 0: o->anim = D_800106E4; break;
-        case 1: o->anim = D_800106E0; break;
-        case 2: o->anim = D_800106DC; break;
-        case 3: o->anim = D_800106E0; break;
-        case 4: o->anim = D_800106E4; break;
-        case 5: o->anim = D_800106E8; break;
-        case 6: o->anim = D_800106EC; break;
-        case 7: o->anim = D_800106E8; break;
+        case 0: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D04; break;
+        case 5: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D57; break;
+        case 6: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D6; break;
+        case 7: o->anim = MAP_PLAYER_WALK_BTN_A_ANIM_D57; break;
         }
         break;
     default:
         switch (d & 7) {
-        case 0: o->anim = D_800106BC; break;
-        case 1: o->anim = D_800106B8; break;
-        case 2: o->anim = D_800106B4; break;
-        case 3: o->anim = D_800106B8; break;
-        case 4: o->anim = D_800106BC; break;
-        case 6: o->anim = D_800106C4; break;
-        case 5: case 7: o->anim = D_800106C0; break;
+        case 0: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 1: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 2: o->anim = MAP_PLAYER_IDLE_ANIM_D2; break;
+        case 3: o->anim = MAP_PLAYER_IDLE_ANIM_D13; break;
+        case 4: o->anim = MAP_PLAYER_IDLE_ANIM_D04; break;
+        case 6: o->anim = MAP_PLAYER_IDLE_ANIM_D6; break;
+        case 5: case 7: o->anim = MAP_PLAYER_IDLE_ANIM_D57; break;
         }
         break;
     }

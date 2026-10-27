@@ -1,10 +1,10 @@
 // FUNC 800e999c 1852 D0SPSUB2
-// wip: score 182 (was 359). Memory card save: builds the 0x2000 header (D_800E1E28) and copies the game block.
+// wip: score 182 (was 359). Memory card save: builds the 0x2000 header (SAVE_DATA_BUFFER) and copies the game block.
 // Fixed: the play-time digits with the func_800EBE6C idiom (hh = C968/180000 unsigned, h1 = hh % 1000 unsigned
 // then signed digit math, m = C968/3000 - hh*60; block-scoped h100/h10/m10/d4/d1/d2 with `h100 %= 10`), the
 // 2-digit values as `q10 = v / 10 (unsigned char); dg[1] = v % 10; dg[0] = q10 % 10`, and block-scoped loop
 // variables (`int i; for (i...) ... dg[i]`, index form) which put i in t1 like the game.
-// Left (registers only, structure matches): (1) s0/s1 swapped: the game ranks h (D_800E1E28 pointer) above the
+// Left (registers only, structure matches): (1) s0/s1 swapped: the game ranks h (SAVE_DATA_BUFFER pointer) above the
 // `slot` parameter in global alloc (slot: 4 refs/57 insns beats h: 11 refs/476 here; `unsigned slot` fixes the
 // s-regs but the game's slot/10 is signed; `h += 0x80` before the B384 copy also fixes them (h -> s0) but then the
 // copy loop's dest is a3: in the game the dest pseudo of the 0x180 block_move_loop is s0 = h, i.e. it got h's
@@ -18,7 +18,7 @@ typedef struct { char d[64]; } B64;
 typedef struct { char d[32]; } B32;
 typedef struct { char d[0x180]; } B384;
 typedef struct { char d[0x988]; } BGame;
-extern char D_800E1E28[];
+extern char SAVE_DATA_BUFFER[];
 extern char D_800E1E29, D_800E1E2A, D_800E1E2B;
 extern char D_800E2028[];
 extern char GAME[];
@@ -39,7 +39,7 @@ extern void memCardStoreChecksum(void *p, int n);
 
 void func_800E999C(int slot)
 {
-    char *h = D_800E1E28;
+    char *h = SAVE_DATA_BUFFER;
     unsigned char dg[5];
     memset(h, 0, 0x2000);
     *(B12 *)D_8009D2B4 = *(B12 *)PLAYER_POS;

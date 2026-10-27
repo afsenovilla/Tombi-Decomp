@@ -6,7 +6,7 @@ extern void func_8001FE6C(TObj *o);
 extern int GetGraphType(void);
 extern void overheadSpawnPlayerShadow(TObj *o, int a);
 extern void overheadSpawnFollower(TObj *o);
-extern void *D_800106B4;
+extern void *MAP_PLAYER_IDLE_ANIM_D2;
 extern char D_80011790[];
 typedef struct { unsigned short a, b; } Pair7A;
 extern Pair7A D_8007A024[];
@@ -68,7 +68,7 @@ void overheadPlayerInit(TObj *o)
         S16(o, 0x9A) = GAME_PLAYER_HEALTH;
         o->w98 = ((C970S *)&GAME_PLAYER_HEALTH)->c;
         *(signed char *)&o->b0f = -8;
-        an = D_800106B4;
+        an = MAP_PLAYER_IDLE_ANIM_D2;
         o->d3c = ((SPV *)0x1F8002F0)->v;
         o->anim = an;
         func_8001FE6C(o);

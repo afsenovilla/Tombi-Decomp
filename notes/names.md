@@ -2207,3 +2207,13 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   animation pointer tables (KOMA_PIG_ANIMS, NPC_CHARLES_ANIMS, RED_BIRD_ANIMS, A00_L4_TYPE18_ANIMS, ...) whose code picks an index
   without a state name to pin it, and the untyped tables of updateA00L4Type01 / updateA00L4Type0A / updateA00SporeBranch /
   func_8011C804, whose meaning the code does not make clear.
+- MAIN0 leftovers of the SYSTEM round + X000 round 2 batch 2 (Oct 27 2026): 16 rows in notes/data_names_main0.csv.
+  SAVE_DATA_BUFFER (800E1E28, 0xC00: the save file image memCardFileListStep writes / reads back; the checksummed game state at
+  +0x200..0xC00 is copied to GAME; the wip D0SPSUB2 save builder spells it too). MAP_PLAYER_IDLE_ANIM_D2 / D13 / D04 / D57 / D6,
+  MAP_PLAYER_WALK_ANIM_* and MAP_PLAYER_WALK_BTN_A_ANIM_* (800106B4..EC): the 15 MAIN0 .data anim pointers (scripts at 80011790..)
+  shared by the I0NFO overhead, I0NFO2 top-down and I0NFO3 tunnel players, three sets of five by facing direction (2 / 1,3 / 0,4 /
+  5,7 / 6) for the idle, walk and walk-with-BUTTON_MASK_A-held cases of *PlayerSetDirAnim modes 0 / 1 / 2 and *PlayerSetMoveAnim;
+  the name is mode-neutral because all three map-view overlays read them. The rerun also applied the pending CAT8_OBJECT_COUNT
+  alias (DAT_1f800242_s in drawCategory8Objects). X000: A00_ROAMING_FLYER_BOB_ANIM (8013B1A0, the one anim a00RoamingFlyerBob sets).
+  Data naming by usage is now closed for MAIN0, X000 and the eight SYSTEM overlays: what is left spelled by address are animation
+  scripts, elements of named pointer tables, field aliases and the library (libgpu / libcd / libetc / libpress) internals listed above.
