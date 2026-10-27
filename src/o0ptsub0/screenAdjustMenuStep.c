@@ -3,7 +3,7 @@
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; unsigned short w4e; } S;
 extern S *TASK_C;
 extern unsigned short JOYPAD_STATE;
-extern short D_8009D4FC, D_8009D4FE;
+extern short SCREEN_OFFSET_X, SCREEN_OFFSET_Y;
 extern volatile unsigned short PAD_PRESSED;
 extern unsigned short D_8009F7F2;
 extern short D_8009E350, D_8009E352, D_8009E354, D_8009E356;
@@ -25,8 +25,8 @@ int screenAdjustMenuStep(void)
     case 0:
         D_800EB484 = 0;
         D_800EB488 = 0;
-        D_800EB48C = D_8009D4FC;
-        D_800EB490 = D_8009D4FE;
+        D_800EB48C = SCREEN_OFFSET_X;
+        D_800EB490 = SCREEN_OFFSET_Y;
         TASK_C->w4e++;
         break;
     case 1:
@@ -48,23 +48,23 @@ int screenAdjustMenuStep(void)
         }
         b = JOYPAD_STATE;
         if (b & 0x10) {
-            if (D_8009D4FE >= 5) {
-                D_8009D4FE--;
+            if (SCREEN_OFFSET_Y >= 5) {
+                SCREEN_OFFSET_Y--;
                 playSFX(8);
             }
         } else if (b & 0x40) {
-            if (D_8009D4FE < 0x14) {
-                D_8009D4FE++;
+            if (SCREEN_OFFSET_Y < 0x14) {
+                SCREEN_OFFSET_Y++;
                 playSFX(8);
             }
         } else if (b & 0x80) {
-            if (D_8009D4FC >= -7) {
-                D_8009D4FC--;
+            if (SCREEN_OFFSET_X >= -7) {
+                SCREEN_OFFSET_X--;
                 playSFX(8);
             }
         } else if (b & 0x20) {
-            if (D_8009D4FC < 0x18) {
-                D_8009D4FC++;
+            if (SCREEN_OFFSET_X < 0x18) {
+                SCREEN_OFFSET_X++;
                 playSFX(8);
             }
         } else if (b & 0x4000) {
@@ -72,8 +72,8 @@ int screenAdjustMenuStep(void)
             TASK_C->w4e = 0;
             TASK_C->w4c = 1;
         } else if (b & 0x2000) {
-            D_8009D4FC = D_800EB48C;
-            D_8009D4FE = D_800EB490;
+            SCREEN_OFFSET_X = D_800EB48C;
+            SCREEN_OFFSET_Y = D_800EB490;
             playSFXAndSetNote(0x1B, 0x1C);
             TASK_C->w4e = 0;
             TASK_C->w4c = 1;
@@ -82,10 +82,10 @@ int screenAdjustMenuStep(void)
         D_8009E356 = 0x100;
         D_8009F064 = 0x100;
         D_8009F066 = 0x100;
-        D_8009E350 = D_8009D4FC;
-        D_8009E352 = D_8009D4FE;
-        D_8009F060 = D_8009D4FC;
-        D_8009F062 = D_8009D4FE;
+        D_8009E350 = SCREEN_OFFSET_X;
+        D_8009E352 = SCREEN_OFFSET_Y;
+        D_8009F060 = SCREEN_OFFSET_X;
+        D_8009F062 = SCREEN_OFFSET_Y;
         updateSound();
         break;
     }

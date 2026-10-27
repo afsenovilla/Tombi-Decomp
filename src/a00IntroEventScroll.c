@@ -56,7 +56,7 @@ void a00IntroEventScroll(TObj *o)
         updateCameraFollow(o);
         if (GAME.selectedSection != 0) break;
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
-        if (GVARS.b38 != 0) break;
+        if (GVARS.hurtState != 0) break;
         if (g->w12 < 0x49e) break;
         if (g->w16 >= -0xe7) break;
         GAME_AREA00_INTRO_PHASE = 1;
@@ -81,7 +81,7 @@ void a00IntroEventScroll(TObj *o)
     case 1:
         updateCameraFollow(o);
         if ((short)o->animFrame <= g->w12) g->w12 = o->animFrame;
-        if (GVARS.b38 != 0) break;
+        if (GVARS.hurtState != 0) break;
         if ((GAME.area00_eventControl & 1) && GVARS.b30 == 3) {
             g->w2e = 0;
             o->animFrame = 0x52e;

@@ -2091,3 +2091,24 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   800970B4, 80096F4C, 8009BF58.., 8009BF70, 800A2264.., 8009F7E0, 80097094: no matched source), 8009D614 / 616 / 618 (inside PAD_INFO:
   +2 / +4 / +6 are the vibration bytes, +8 the stick x), 800B1410 (HUD show state tickHud reads as .on / .cnt), the PLAYER bytes b69 /
   b6b / b9c / b9e / w9a / da0 / wb2 / wb4 and PLX.b60f8 / b60fe / b6104 / b611b (meaning unknown), 1F8001C6 / 1F8001CF / 1F8001DC.
+- MAIN0 data round 2, batch 4 (Oct 27 2026): 42 rows. Camera: VIEW_CAMERA (1F8000C0, the camera.h struct; the sources that declare it as
+  a MATRIX keep their type) and the halves reached by their own symbol, VIEW_CAMERA_ROT_Y (1F8000E6 = rot[1].p.hi, the angle dampCameraAngle
+  / stepScrollAndAngle / cameraEventScrollHandler step by 2), VIEW_CAMERA_X (1F8000EE, initGameConfig 160), VIEW_CAMERA_Y_FIX / VIEW_CAMERA_Y
+  (1F8000F0 / F2, clamped to the section bounds by cameraFollowPlayerY, initGameConfig -128). GVARS fields: GVARS_PLAYER_DRIFT_H / Y
+  (8009C944 / 46 = s44 / s46 -> driftH / driftY, the velocity << 8 the player steps add every tick; playerUpdateWaterLevel sets 0 / -0x40 in
+  water), GVARS_PLAYER_HURT_STATE (8009C938 = b38 -> hurtState: 1 playerStepHurtStun / Spin, 2 playerStepDie), GVARS_PLAYER_LANDED (8009C93A =
+  b3a -> playerLanded). Objects: OBJECT_POOL_LAYER8 (800B1828), FREE_OBJECTS_LAYER8 / FREE_OBJECT_COUNT_LAYER8 (1F80020C / 23A), CAT8_OBJECT_LIST
+  (1F800230), CAT7_OBJECT_COUNT / CAT3_OBJECT_COUNT (1F800240 / 24A) and the copies the drawCategoryN functions save for the later passes
+  (CAT2/5/8_OBJECT_LIST_SAVED 1F800260 / 26C / 274, CAT2/3/5/7/8_OBJECT_COUNT_SAVED 1F800250 / 252 / 256 / 25A / 258). Loading: CD_QUEUE_HEAD
+  (1F80029C; game.h keeps its macro of the same name for the absolute cast, so the game.h extern stays D_1F80029C like NEXT_PRIM), WHM_DATA
+  (1F800308, the load-kind 0x70 collision blocks getCollisionPlaneAt reads), LOADED_AREA / LOADED_SECTION / LOADED_SPAWN_POINT (8009D2A8..AC,
+  the GAME selection copied at load time), LOADED_SOUND_SET (1F8003D3), SCREEN_OFFSET_X / Y (8009D4FC / FE -> DISPENV screen.x / y),
+  AREA_SCRIPT_RESULT (8009D4F0). Player / collision: PLAYER_Z (800A6052, whole part of obj.b), GAME_AREA_TRANSITION (8009C974),
+  SLOPE_PROBE_ANGLE (1F80027C), GRAB_POINT_OFFSET (1F8003BC), TILE_COL_SURFACE_Y (8009BD68), RAND_SEED (1F800200), HUD_STATE (800B1410, 0x68:
+  HUD_ITEM_GAUGE_TIMERS is its +0x58). Library: _spu_AllocBlockNum (80098940, libspu s_m_init.c next to the _spu_AllocLastNum / _spu_memList
+  the ported sources already use). The `// HEADERS tomba24` sources (stubInventory1..3) must keep the US spellings: the header rename pass
+  touched them once and they stopped compiling (kept as asm, sha1 still OK), so the linked-file count of the build log (1124 of 1152) is
+  the check to watch. Not named: the libpress ring state (8009BF70 / 800A2264 / 2268 / 8009F7E0 / 80097094 / 8009C334 / 8009C90C / 800A3F00 /
+  800A2524: StCdInterrupt internals, no matched source), the libcd timeouts 8009BF58 / 5C / 60 and 80096F4C, libetc 8009813C / 800970B4,
+  libgpu 80091930, the remaining libpad state of padlocal.h, GVARS b3f / b42 / b3e / i34 (scene flags set together, meaning not pinned
+  down), 8009D2AE (a per-subtype bitmask updateEgg / updateL1Type02Reward share), 1F8001DC / 1F8001C6 / 1F8001CF / 1F8001A4, 1F800244 / 218.

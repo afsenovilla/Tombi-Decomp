@@ -192,8 +192,8 @@ void playerHandleHazardContact(TObj *o, int arg)
         U8(o, 0xcd) = 0;
         U8(o, 0xce) = 0;
         o->state = 0;
-        GVARS.s44 = 0;
-        GVARS.s46 = -0x40;
+        GVARS.driftH = 0;
+        GVARS.driftY = -0x40;
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
         FUN_8001e5f4(0xe, 0x7f);
         return;
@@ -206,7 +206,7 @@ void playerHandleHazardContact(TObj *o, int arg)
             D_8009C970 = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
-                GVARS.b38 = 1;
+                GVARS.hurtState = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
@@ -222,7 +222,7 @@ void playerHandleHazardContact(TObj *o, int arg)
     o->step = 2;
     o->state = 0;
     o->substep = 0;
-    if (GVARS.b38) {
+    if (GVARS.hurtState) {
         o->timer = 0xb4;
         PLAYER_EXT->w2c = 0x2f;
         t = PLAYER_ANIM_TABLE;

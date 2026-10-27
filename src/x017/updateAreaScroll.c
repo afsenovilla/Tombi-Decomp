@@ -44,7 +44,7 @@ void updateAreaScroll(O *o)
 
     switch (o->step) {
     case 0:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         cameraModeHandler6B(o);
         o->p38->whole = 0;
         break;

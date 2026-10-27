@@ -26,15 +26,15 @@ void updateWindPush(TObj *o)
         else
             o->b04 = 3;
     clr:
-        GVARS.s44 = 0;
+        GVARS.driftH = 0;
         break;
     case 1:
         if (SPAD.b1a4) goto clr;
         switch (o->step) {
         case 0:
-            if (GVARS.b3a) {
+            if (GVARS.playerLanded) {
                 o->step++;
-                GVARS.s44 = 0x100;
+                GVARS.driftH = 0x100;
             }
             break;
         case 1:
@@ -44,15 +44,15 @@ void updateWindPush(TObj *o)
             if (PLAYER.step == 0x34) goto clr;
             switch (PLAYER.b9c) {
             case 0:
-                GVARS.s44 = 0x100;
+                GVARS.driftH = 0x100;
                 break;
             case 1:
-                GVARS.s44 += 8;
-                if (GVARS.s44 > 0x200) GVARS.s44 = 0x200;
+                GVARS.driftH += 8;
+                if (GVARS.driftH > 0x200) GVARS.driftH = 0x200;
                 break;
             case 2:
-                GVARS.s44 += 0x10;
-                if (GVARS.s44 > 0x300) GVARS.s44 = 0x300;
+                GVARS.driftH += 0x10;
+                if (GVARS.driftH > 0x300) GVARS.driftH = 0x300;
                 break;
             }
             break;
@@ -87,7 +87,7 @@ void updateWindPush(TObj *o)
             if ((unsigned short)--o->w1e == 0xffff) o->step = 1;
             break;
         }
-        GVARS.s46 = 0;
+        GVARS.driftY = 0;
         if (pl->b69 == 1) break;
         if (U8(pl, 0xc9))
             v = o->w08 >> 1;
@@ -95,15 +95,15 @@ void updateWindPush(TObj *o)
             v = o->w08;
         if ((unsigned short)(pl->a.p.whole - 0x514) < 0xb4) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            GVARS.s46 = v;
+            GVARS.driftY = v;
         }
         if ((unsigned short)(pl->a.p.whole - 0x1012) < 0x226) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            GVARS.s46 = v;
+            GVARS.driftY = v;
         }
         if ((unsigned short)(pl->a.p.whole - 0x13a3) < 0x85) {
             if (pl->b9c && pl->velY > 0x200) pl->velY = 0x200;
-            GVARS.s46 = v;
+            GVARS.driftY = v;
         }
         break;
     case 3:

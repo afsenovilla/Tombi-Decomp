@@ -6,7 +6,7 @@ extern void func_80027810(TObj *o);
 extern void func_8002A4D0(TObj *o);
 extern void tunnelClampPlayerToGates(TObj *o);
 extern void (*D_80079AD0[])(TObj *o);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009CFED;
 extern TObj PLAYER;
 extern short PLAYER_X;
@@ -19,7 +19,7 @@ void tunnelSectionStep(TObj *o)
     case 0:
         *(int *)&o->anim = 0;
         *(int *)&o->timer = -0x1E00;
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS_PLAYER_LANDED != 0) o->step++;
         func_80027810(o);
         break;
     case 1:

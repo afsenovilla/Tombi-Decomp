@@ -36,7 +36,7 @@ void drawObject(TObj *o)
 {
     if (o->visible == 0) return;
     if ((o->b0a & 0x10) && o->da0 == 0) return;
-    if ((*(int*)&GAME.selectedArea) == 9 && GAME.selectedPlane != 0x20 && GVARS.b3a == 1 &&
+    if ((*(int*)&GAME.selectedArea) == 9 && GAME.selectedPlane != 0x20 && GVARS.playerLanded == 1 &&
         o->b.p.whole < 0xb6d && (o->category & 0x7f) != 8) return;
     if (D_8009C960s == 10 && (GAME.selectedSection == 0 || GAME.selectedSection == 4) && GAME.selectedPlane != 0 &&
         (unsigned short)(o->b.p.whole + 9) < 0x13 && (o->category & 0x7f) != 8) return;

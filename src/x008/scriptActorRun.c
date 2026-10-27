@@ -20,7 +20,7 @@ void scriptActorRun(S *o)
 {
     V v;
     int f;
-    if ((o->b00 & 8) && GVARS.b3a != 0 && (unsigned short)(o->pos.yh - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
+    if ((o->b00 & 8) && GVARS.playerLanded != 0 && (unsigned short)(o->pos.yh - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
         if (o->frame & 1) {
             if (o->h->y - o->w6c < (*(P **)&PLAYER.obj.h)->y)
                 (*(P **)&PLAYER.obj.h)->y = o->h->y - o->w6c;

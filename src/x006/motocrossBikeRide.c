@@ -30,7 +30,7 @@ extern char D_8011FEA0[], D_8011F3F8[];
 extern E D_8011F3F8e[];
 extern unsigned short D_8011F3E8[];
 extern void *D_801229A8[], *D_801229CC[], *D_801229E0[];
-extern short D_1F8000EE[];
+extern short VIEW_CAMERA_X[];
 extern int D_1F800190;
 extern short PLAYER_H_WHOLE[], PLAYER_Y_WHOLE[];
 extern short D_8009CFE2;
@@ -184,7 +184,7 @@ void motocrossBikeRide(TObj *o)
         t->ca = 0;
         D_8009CFE2 = 0;
         t->c4 += t->div;
-        ((unsigned char*)&GVARS.b3a)[0] = 1;
+        ((unsigned char*)&GVARS.playerLanded)[0] = 1;
         p->anim = D_801229A8[0];
         AnimLoadDuration(p);
         o->w7a = 0;
@@ -298,7 +298,7 @@ void motocrossBikeRide(TObj *o)
         }
     }
     o->velH += o->velX;
-    if (D_1F8000EE[0] < D_800A457E) {
+    if (VIEW_CAMERA_X[0] < D_800A457E) {
         D_1F800190 = o->y.raw;
         ((int*)&SPAD.iec)[0] = o->a.raw;
         SPAD.if4 = o->b.raw;

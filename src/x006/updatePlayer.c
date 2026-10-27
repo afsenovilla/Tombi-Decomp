@@ -120,7 +120,7 @@ void updatePlayer(TObj *o)
         break;
     case 1:
         tp = t;
-        if (GVARS.b38) {
+        if (GVARS.hurtState) {
             RESET(o);
             break;
         }
@@ -176,7 +176,7 @@ void updatePlayer(TObj *o)
         break;
     case 5:
         tp = t;
-        if (GVARS.b38) {
+        if (GVARS.hurtState) {
             RESET(o);
             break;
         }
@@ -189,7 +189,7 @@ void updatePlayer(TObj *o)
         break;
     case 6:
         tp = t;
-        if (GVARS.b38) {
+        if (GVARS.hurtState) {
             RESET(o);
             break;
         }

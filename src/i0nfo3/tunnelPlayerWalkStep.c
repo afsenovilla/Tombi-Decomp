@@ -7,14 +7,14 @@ extern void func_8001FEC0(TObj *o);
 extern void func_8005A9A4(int a, int b);
 extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void tunnelCollideMapTile(TObj *o, int x, int y, int z);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009CE34;
 extern unsigned char D_8009CE35;
 extern volatile unsigned short PAD_PRESSED[];
 
 void tunnelPlayerWalkStep(TObj *o)
 {
-    if (D_8009C93A != 0) {
+    if (GVARS_PLAYER_LANDED != 0) {
         *(unsigned char *)&o->wac = 0;
         switch (o->state) {
         case 0:

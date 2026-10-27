@@ -13,7 +13,7 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", dampCameraAngle);
 
 s32 dampCameraAngle(void)
 {
-    s16* p = &D_1F8000E6;
+    s16* p = &VIEW_CAMERA_ROT_Y;
     s16  v = *p;
 
     if (v != 0) {

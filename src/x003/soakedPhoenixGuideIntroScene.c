@@ -18,7 +18,7 @@ void soakedPhoenixGuideIntroScene(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (GVARS.b3a != 0 && PLAYER_H[1] >= 0x1b9) {
+        if (GVARS.playerLanded != 0 && PLAYER_H[1] >= 0x1b9) {
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             PLAYER.active = 1;

@@ -40,7 +40,7 @@ typedef struct {
 
 void rewardVitalityMaxUp(GameObject* arg0)
 {
-    if (D_8009BCA0 == 0) {
+    if (GVARS_PLAYER_HURT_STATE == 0) {
         increaseMaxHealth();
         printInfoMessage(MSG_VITALITYMAXUP_ACQUIRED, MSG_TYPE_REWARD);
         playSFX(10);

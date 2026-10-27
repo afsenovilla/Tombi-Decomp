@@ -2,8 +2,8 @@
 // MATCHING 80054f54 544
 #include "TOBJ.H"
 extern short DAT_1f8001c6;
-extern short DAT_1f800250;
-extern TObj **DAT_1f800260;
+extern short CAT2_OBJECT_COUNT_SAVED;
+extern TObj **CAT2_OBJECT_LIST_SAVED;
 extern unsigned short DAT_1f800246;
 extern short CAT2_OBJECT_COUNT;
 extern TObj **CAT2_OBJECT_LIST;
@@ -20,8 +20,8 @@ void drawCategory2Objects(void)
     TObj **p;
     TObj *o;
     if (DAT_1f8001c6 != 0) {
-        n = DAT_1f800250;
-        p = DAT_1f800260;
+        n = CAT2_OBJECT_COUNT_SAVED;
+        p = CAT2_OBJECT_LIST_SAVED;
         while (n != 0) {
             o = *p++;
             n--;
@@ -37,8 +37,8 @@ void drawCategory2Objects(void)
             }
         }
     } else {
-        DAT_1f800250 = DAT_1f800246;
-        DAT_1f800260 = CAT2_OBJECT_LIST;
+        CAT2_OBJECT_COUNT_SAVED = DAT_1f800246;
+        CAT2_OBJECT_LIST_SAVED = CAT2_OBJECT_LIST;
         if (DAT_1f800246 == 0)
             return;
         do {

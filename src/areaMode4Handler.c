@@ -10,7 +10,7 @@ extern unsigned char DAT_1f8001c2;
 extern volatile unsigned short PAD_PRESSED[];
 extern volatile unsigned short DAT_8009d674;
 extern unsigned short JOYPAD_STATE;
-extern unsigned char DAT_800b1410;
+extern unsigned char HUD_STATE;
 extern unsigned char DAT_1f8001cf;
 extern unsigned char GAME_KEEP_BGM;
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
@@ -39,7 +39,7 @@ void areaMode4Handler(void)
         initSectionCamera();
         spawnSectionUnlayeredObjects();
         initHudState();
-        DAT_800b1410 = 0;
+        HUD_STATE = 0;
         func_80018254(D_800A2A18);
         DAT_1f8001cf = 1;
         if (GAME_KEEP_BGM != 1)
@@ -83,7 +83,7 @@ extern unsigned char DAT_1f8001c2;
 extern volatile unsigned short PAD_PRESSED[];
 extern volatile unsigned short DAT_8009d674;
 extern unsigned short JOYPAD_STATE;
-extern unsigned char DAT_800b1410;
+extern unsigned char HUD_STATE;
 extern unsigned char DAT_1f8001cf;
 extern unsigned char GAME_KEEP_BGM;
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
@@ -110,7 +110,7 @@ void areaMode4Handler(void)
         initSectionCamera();
         spawnSectionUnlayeredObjects();
         initHudState();
-        DAT_800b1410 = 0;
+        HUD_STATE = 0;
         DAT_1f8001cf = 1;
         if (GAME_KEEP_BGM != 1)
             startAreaBgm();

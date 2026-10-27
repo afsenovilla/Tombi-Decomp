@@ -10,7 +10,7 @@ static void *D_800121F4[4] = {
     D_8001289C, D_800126FC, D_80012724, D_8001273C,
 };
 extern unsigned short PLAYER_Y[];
-extern unsigned short D_800A6052[];
+extern unsigned short PLAYER_Z[];
 extern void AnimLoadDuration(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -24,7 +24,7 @@ void updatePoolType68Object(TObj *o)
             AnimLoadDuration(o);
             o->a.p.whole = ((unsigned short*)&PLAYER.obj.a.p.whole)[0];
             o->y.p.whole = PLAYER_Y[0] - 8;
-            *(short *)((char *)o + 0x1a) = D_800A6052[0];
+            *(short *)((char *)o + 0x1a) = PLAYER_Z[0];
             { unsigned char t = PLAYER.obj.b0f;
             o->b04 = 1;
             o->step = 0;

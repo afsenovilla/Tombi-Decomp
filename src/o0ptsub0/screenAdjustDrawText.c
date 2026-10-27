@@ -2,7 +2,7 @@
 // MATCHING 800e950c 408
 typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
 extern SprDef D_800EB3BC[];
-extern short D_8009D4FC, D_8009D4FE;
+extern short SCREEN_OFFSET_X, SCREEN_OFFSET_Y;
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void titleDrawSprite(SprDef *d, short tpage, unsigned char pri);
 extern void optionsDrawLabel(short x, short y, int i);
@@ -26,8 +26,8 @@ void screenAdjustDrawText(int dir)
     optionsDrawLabelPal(0x60, 0x70, 0x1E, dir == 4 ? 3 : 0);
     optionsDrawLabelPal(0x40, 0x50, 0x1F, dir == 1 ? 3 : 0);
     optionsDrawLabelPal(0x40, 0x90, 0x20, dir == 2 ? 3 : 0);
-    screenAdjustDrawNumber(0x100, 0x60, D_8009D4FC - 4);
-    screenAdjustDrawNumber(0x100, 0x80, D_8009D4FE - 0xC);
+    screenAdjustDrawNumber(0x100, 0x60, SCREEN_OFFSET_X - 4);
+    screenAdjustDrawNumber(0x100, 0x80, SCREEN_OFFSET_Y - 0xC);
     optionsDrawLabelPal2(0x60, 0xC0, 0x16);
     optionsDrawLabelPal2(0x60, 0xD0, 0x15);
 }

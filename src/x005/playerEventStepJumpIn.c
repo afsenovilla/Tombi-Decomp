@@ -46,7 +46,7 @@ void playerEventStepJumpIn(TObj *o)
                 o->substep = 0;
                 o->timer = 0;
                 GV2.bb0 = 0;
-                GVARS.b3a = 1;
+                GVARS.playerLanded = 1;
                 return;
             }
             o->velX = 0;
@@ -68,8 +68,8 @@ void playerEventStepJumpIn(TObj *o)
     case 1:
         playerAirSpinToFall(o);
         AnimAdvance(o);
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -94,8 +94,8 @@ void playerEventStepJumpIn(TObj *o)
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -119,7 +119,7 @@ void playerEventStepJumpIn(TObj *o)
         o->state = 0;
         o->substep = 0;
         o->timer = 0;
-        GVARS.b3a = 1;
+        GVARS.playerLanded = 1;
         break;
     }
 }

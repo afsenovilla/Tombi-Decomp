@@ -7,7 +7,7 @@
 #include "camera.h"
 
 extern TObj PLAYER;
-extern unsigned char D_800A60E0, D_8009C939, D_8009C93A;
+extern unsigned char D_800A60E0, D_8009C939, GVARS_PLAYER_LANDED;
 extern unsigned char D_800A603CA[], D_800A603DA[], D_800A603EA[], TALK_POSE[], D_8009C939A[];
 extern short D_1F8000EEA[], D_1F8000F2A[];
 extern void FUN_8001e5f4(int, int);
@@ -61,7 +61,7 @@ void func_801185E4(TObj *o)
             break;
         TALK_POSE[0] = 0;
         *s = o->a.raw;
-        D_8009C93A = 1;
+        GVARS_PLAYER_LANDED = 1;
         D_8009C939 = 0;
         VIEW_CAMERA.pos[1].p.hi = o->y.raw;
         o->state = 4;

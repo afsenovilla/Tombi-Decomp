@@ -9,7 +9,7 @@ typedef struct {
     char p40[0x4a - 0x40]; short w4a, w4c; short w4e; short w50, w52; short w54; short w56;
     short w58; short w5a; short w5c; short w5e, w60, w62;
 } S;
-extern short D_1F8000EE[];
+extern short VIEW_CAMERA_X[];
 extern short D_1F8000F6[];
 #define F6 D_1F8000F6[0]
 
@@ -21,7 +21,7 @@ static __inline__ int body(S *s)
     r = 0;
     switch (s->step) {
     case 0:
-        ee = D_1F8000EE;
+        ee = VIEW_CAMERA_X;
         s->w4c -= *ee;
         s->w50 -= F6;
         s->w52 = *ee;
@@ -40,7 +40,7 @@ static __inline__ int body(S *s)
                 GVARS.fadeEffect = 0;
                 GAME.fadeScreenControl = 3;
             }
-            D_1F8000EE[0] = s->w52 + s->w4c * s->w4a / 90;
+            VIEW_CAMERA_X[0] = s->w52 + s->w4c * s->w4a / 90;
             F6 = s->w56 + s->w50 * s->w4a / 90;
         }
         n = s->w4a;

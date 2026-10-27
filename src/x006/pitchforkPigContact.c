@@ -21,7 +21,7 @@ void pitchforkPigContact(TObj *o, TObj *e)
 {
     TD *p;
 
-    if (GVARS.b3a && ovl(o, e) && SPAD.b1a4 == 0) {
+    if (GVARS.playerLanded && ovl(o, e) && SPAD.b1a4 == 0) {
         int eh, oh;
         e->active = 2;
         eh = e->h->p.whole;

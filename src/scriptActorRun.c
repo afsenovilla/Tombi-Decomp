@@ -16,7 +16,7 @@ typedef struct S {
 } S;
 extern int D_800A6094;
 extern int AnimAdvance(S *);
-extern extern unsigned char D_8009A7EA; /* GVARS.b3a */
+extern extern unsigned char D_8009A7EA; /* GVARS.playerLanded */
 extern unsigned short D_800A57CE; /* PLAYER y */
 extern P *D_800A57F8; /* PLAYER.obj.h */
 void TileCollideAt(S *, int, int);
@@ -136,7 +136,7 @@ void scriptActorRun(S *o)
 {
     V v;
     int f;
-    if ((o->b00 & 8) && GVARS.b3a != 0 && (unsigned short)(o->pos.yh - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
+    if ((o->b00 & 8) && GVARS.playerLanded != 0 && (unsigned short)(o->pos.yh - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
         if (o->frame & 1) {
             if (o->h->y - o->w6c < (*(P **)&PLAYER.obj.h)->y)
                 (*(P **)&PLAYER.obj.h)->y = o->h->y - o->w6c;

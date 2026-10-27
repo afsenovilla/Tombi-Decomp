@@ -13,7 +13,7 @@ void updatePhoenixFavoriteEvent(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (GVARS.b3a) stepPhoenixFavoriteEvent(o);
+        if (GVARS.playerLanded) stepPhoenixFavoriteEvent(o);
         break;
     case 2:
         o->b04 = 3;

@@ -103,7 +103,7 @@ void updateSceneSequence(TObj *o)
                 o->animFrame = 1;
                 o->step++;
             case 1:
-                if (GVARS.b3a != 1) break;
+                if (GVARS.playerLanded != 1) break;
                 o->step = 0;
                 o->wb6++;
                 break;

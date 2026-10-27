@@ -59,6 +59,6 @@ typedef struct ViewCamera {
     /* 0x20 */ ViewFix rot[3];
     /* 0x2C */ ViewFix pos[3];
 } ViewCamera;  /* 0x38 */
-extern ViewCamera VIEW_CAMERA asm("D_1F8000C0");
+extern ViewCamera VIEW_CAMERA asm("VIEW_CAMERA");
 
 #endif

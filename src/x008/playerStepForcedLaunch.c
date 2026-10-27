@@ -62,8 +62,8 @@ void playerStepForcedLaunch(TObj *o)
             }
         }
     case 2:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         ObjGravityStep(o);
         ObjAddVelY7E(o);
@@ -85,8 +85,8 @@ void playerStepForcedLaunch(TObj *o)
         o->b9e = 0;
         o->wb0 = 0;
         o->wb6 = 0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         ObjGravityStep(o);
         ObjAddVelY7E(o);

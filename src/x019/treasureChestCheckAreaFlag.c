@@ -1,10 +1,10 @@
 // FUNC 80112be0 68 X019
 // MATCHING 80112be0 68
 extern unsigned char DAT_8009c964;
-extern unsigned char DAT_8009c93a;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern void fa(void);
 
 void treasureChestCheckAreaFlag(void)
 {
-    if (DAT_8009c964 != 0x21 || DAT_8009c93a != 1) fa();
+    if (DAT_8009c964 != 0x21 || GVARS_PLAYER_LANDED != 1) fa();
 }

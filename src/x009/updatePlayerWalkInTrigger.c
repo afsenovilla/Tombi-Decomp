@@ -10,8 +10,8 @@ extern void PoolFree_1F800210(TObj *);
 
 static __inline__ short Cond(void)
 {
-    if (!GVARS.b3a) return 0;
-    if (GVARS.b38) return 0;
+    if (!GVARS.playerLanded) return 0;
+    if (GVARS.hurtState) return 0;
     if (!PLAYER.obj.b69 && !PLX.b6100) return 0;
     if ((unsigned int)((unsigned short)(*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x1034) >= 0xc8) return 0;
     if (PLAYER.obj.y.p.whole < -0x1d0) return 0;

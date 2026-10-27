@@ -21,7 +21,7 @@ extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
-extern char D_1F8000C0b[];
+extern char VIEW_CAMERA[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
@@ -84,7 +84,7 @@ void drawObjectSpriteScaled(TObj *o)
     else
         SPAD.s64 = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(VIEW_CAMERA);
     if (proj()) return;
     e = (short *)(o->d3c + *(short *)o->anim * 4);
     n = e[0];

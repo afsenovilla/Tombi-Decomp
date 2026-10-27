@@ -25,7 +25,7 @@ typedef struct {
 typedef struct { short vx, vy, vz, pad; } SVec;
 extern SVec D_1F800060;
 extern long LZ_FILE_CTRL;
-extern char D_1F8000C0b[];
+extern char VIEW_CAMERA[];
 extern PolyFT4 *NEXT_PRIM;
 extern int CURRENT_OT;
 extern void SetRotMatrix(void *);
@@ -79,7 +79,7 @@ void drawObjectSpriteScaled3D(TObj *o)
     else
         D_1F800060.vz = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(VIEW_CAMERA);
     if (project()) return;
     a = (unsigned short *)o->anim;
     hh = (short *)(o->d3c + *a * 4);

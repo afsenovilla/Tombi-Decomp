@@ -42,7 +42,7 @@ void rewardGoldenBowl(GameObject* arg0)
 {
     u_char health;
 
-    if (D_8009BCA0 == 0) {
+    if (GVARS_PLAYER_HURT_STATE == 0) {
         health = GAME.playerMaxHealth;
         if (health < 16) {
             health += GAME.bonusHealth;

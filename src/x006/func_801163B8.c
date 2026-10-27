@@ -21,7 +21,7 @@ void func_801163B8(TObj *o)
         func_8011610C(o);
         break;
     case 1:
-        if (GVARS.b3a != 0) {
+        if (GVARS.playerLanded != 0) {
             o->step++;
         }
     call:

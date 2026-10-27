@@ -50,12 +50,12 @@ void playerStepLaunched(TObj *o)
         playSFX(0x1f);
         playerReleaseBittenAirborne(o);
         o->animFrame ^= 1;
-        *(unsigned char *)&PLAYER_EXT->w08 = ((unsigned char*)&GVARS.b38)[0];
+        *(unsigned char *)&PLAYER_EXT->w08 = ((unsigned char*)&GVARS.hurtState)[0];
         spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         break;
     case 2:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         if (AnimAdvance(o)) {
@@ -64,8 +64,8 @@ void playerStepLaunched(TObj *o)
         }
         break;
     case 3:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         {
             int d = o->d8c;
             o->d8c = ((o->animFrame & 1) ? d - 0x10 : d + 0x10) & 0xff;
@@ -86,8 +86,8 @@ void playerStepLaunched(TObj *o)
         }
         break;
     case 4:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

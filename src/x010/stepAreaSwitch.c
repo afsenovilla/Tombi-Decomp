@@ -15,7 +15,7 @@ void stepAreaSwitch(TObj *o)
             if ((*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2) {
                 o->state++;
                 o->velY = 0;
-            } else if (GVARS.b3a == 0) {
+            } else if (GVARS.playerLanded == 0) {
                 o->state = 3;
                 o->d88 = 0xa00;
             }

@@ -50,7 +50,7 @@ void updateBossRoomVortex(TObj *o)
             if (--o->timer == -1) o->step++;
             break;
         case 1:
-            if (GVARS.b3a == 1) o->step = s + 1;
+            if (GVARS.playerLanded == 1) o->step = s + 1;
             break;
         case 2:
             if (GVARS.b3f == 0) {
@@ -63,13 +63,13 @@ void updateBossRoomVortex(TObj *o)
                     a = angleFromDelta(dx, dy) & 0xff;
                     o->d38 = a;
                     d <<= 2;
-                    ((short*)&GVARS.s46)[0] = (d * NEG_SIN_TABLE[(a + 0x48) & 0xff]) >> 12;
-                    ((short*)&GVARS.s44)[0] = (d * COS_TABLE[(o->d38 + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.driftY)[0] = (d * NEG_SIN_TABLE[(a + 0x48) & 0xff]) >> 12;
+                    ((short*)&GVARS.driftH)[0] = (d * COS_TABLE[(o->d38 + 0x48) & 0xff]) >> 12;
                     break;
                 }
             }
-            ((short*)&GVARS.s44)[0] = 0;
-            ((short*)&GVARS.s46)[0] = 0;
+            ((short*)&GVARS.driftH)[0] = 0;
+            ((short*)&GVARS.driftY)[0] = 0;
             break;
         }
         break;

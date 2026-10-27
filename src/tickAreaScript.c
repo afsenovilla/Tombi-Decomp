@@ -7,7 +7,7 @@
 extern ScriptCtx AREA_SCRIPT_CTX;
 extern unsigned char *SCRIPT_CODE;
 extern unsigned int D_800A0A10, D_800A0A14;
-extern int D_8009D4F0;
+extern int AREA_SCRIPT_RESULT;
 extern int func_80038CD0(unsigned char);
 extern int func_8003AFB4(unsigned char);
 
@@ -45,25 +45,25 @@ void tickAreaScript(void)
     case 0:
         switch (GAME.selectedSection) {
         case 0 ... 2:
-            D_8009D4F0 = run();
+            AREA_SCRIPT_RESULT = run();
         }
         break;
     case 1:
         switch (GAME.selectedSection) {
         case 0 ... 4:
-            D_8009D4F0 = run();
+            AREA_SCRIPT_RESULT = run();
         }
         break;
     case 2:
         switch (GAME.selectedSection) {
         case 0 ... 2:
-            D_8009D4F0 = run();
+            AREA_SCRIPT_RESULT = run();
         }
         break;
     case 0x13:
         switch (GAME.selectedSection) {
         case 0 ... 1:
-            D_8009D4F0 = run();
+            AREA_SCRIPT_RESULT = run();
         }
         break;
     }

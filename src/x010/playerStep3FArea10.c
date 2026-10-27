@@ -99,8 +99,8 @@ void playerStep3FArea10(S *s)
         SfxPlay2(2, 4);
         s->o.state++;
     case 1:
-        s->o.h->raw += ((short*)&GVARS.s44)[0] << 8;
-        s->o.y.raw += ((short*)&GVARS.s46)[0] << 8;
+        s->o.h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        s->o.y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(s);
         s->o.h->raw += s->o.velX << 8;
         s->o.y.raw += s->o.velY << 8;

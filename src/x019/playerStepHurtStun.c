@@ -77,12 +77,12 @@ void playerStepHurtStun(TObj *o)
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
-                GVARS.b38 = 1;
+                GVARS.hurtState = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
         }
-        PLAYER_EXT->b8 = GVARS.b38;
+        PLAYER_EXT->b8 = GVARS.hurtState;
         o->animFrame &= 1;
         if (o->b9e != 0) {
             if (o->b9e == 4 || o->b9e == 7)
@@ -120,7 +120,7 @@ void playerStepHurtStun(TObj *o)
             vx = -0x200;
         o->velX = vx;
         o->state++;
-        if (GVARS.b38 == 1) {
+        if (GVARS.hurtState == 1) {
             o->b04 = 2;
             o->step = 3;
             o->state = 0;
@@ -128,8 +128,8 @@ void playerStepHurtStun(TObj *o)
         }
     case 3:
         BLINK();
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         o->velY += 0x20;
         o->y.raw += o->velY << 8;
@@ -149,8 +149,8 @@ void playerStepHurtStun(TObj *o)
         break;
     case 4:
         BLINK();
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         o->y.raw += o->velY << 8;
         o->velY += 0x20;

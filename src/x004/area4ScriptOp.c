@@ -6,7 +6,7 @@ typedef struct { short vx, vy, vz, pad; } SVEC;
 typedef struct { unsigned char b0, b1, b2, n; int list[1]; } L;
 typedef struct { unsigned char x, f, z; } E3;
 
-extern MAT D_1F8000C0;
+extern MAT VIEW_CAMERA;
 typedef struct { unsigned short g; char pad[0x43e]; unsigned char f; } GS;
 extern GS GAME_SELECTED_SECTION;
 extern E3 D_8013062C[];
@@ -31,8 +31,8 @@ void area4ScriptOp(L *o, unsigned char *a)
     MAT mt;
 
     if (gs->g < 4) {
-    SetRotMatrix(&D_1F8000C0);
-    SetTransMatrix(&D_1F8000C0);
+    SetRotMatrix(&VIEW_CAMERA);
+    SetTransMatrix(&VIEW_CAMERA);
     switch (gs->g) {
     case 0:
         d = 0x21c - SPAD.s17e;

@@ -25,7 +25,7 @@ static __inline__ void collide(TO *p)
 {
     unsigned char **q;
     unsigned char *e;
-    if (GVARS.b38 == 0 && GAME_PLAYER_MODE != 3) {
+    if (GVARS.hurtState == 0 && GAME_PLAYER_MODE != 3) {
         q = (*(unsigned char ***)&SPAD.p228);
         for (SPAD.s19e = SPAD.s248; SPAD.s19e != 0;) {
             e = *q;

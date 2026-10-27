@@ -13,8 +13,8 @@ typedef struct { MAT m; FX pos[6]; } CAM;
 typedef struct { short vx, vy, vz, pad; } SVEC;
 typedef struct O { char p0[5]; unsigned char step; char p6[2]; int w08; int w0c; int w10; char p1[0x20-0x14]; int w20; int w24;
   char p2[0x34-0x28]; int *d34; int *d38; char p3[0x78-0x3c]; int w78; int w7c; } O;
-extern CAM DAT_1f8000c0;
-#define CAMP (&DAT_1f8000c0)
+extern CAM VIEW_CAMERA;
+#define CAMP (&VIEW_CAMERA)
 extern SVEC DAT_1f800060;
 extern SVEC DAT_1f800068;
 extern void getBaseMatrix(MAT *);

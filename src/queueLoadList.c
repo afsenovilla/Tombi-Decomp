@@ -18,7 +18,7 @@ extern char *SPR_DATA[];
 extern char *D_1f800310[];
 extern char *WMD_DATA[];
 extern char *WPP_DATA[];
-extern char *D_1f800308[];
+extern char *WHM_DATA[];
 extern char *APD_DATA[];
 extern char *SEQ_DATA[];
 extern char *D_1f8002b8[];
@@ -28,7 +28,7 @@ static char D_80098c44[844] = {
     4,
 };
 extern RelLog CD_QUEUE[];
-extern int D_1f80029c;
+extern int CD_QUEUE_HEAD;
 extern char *LOAD_NEXT_ADDR;
 
 int queueLoadList(Rel *e, int unused, char *base)
@@ -57,9 +57,9 @@ int queueLoadList(Rel *e, int unused, char *base)
             saved = base;
             base = D_80098c44;
         }
-        CD_QUEUE[D_1f80029c].e = e;
-        CD_QUEUE[D_1f80029c].base = base;
-        D_1f80029c = (D_1f80029c + 1) & 0x7f;
+        CD_QUEUE[CD_QUEUE_HEAD].e = e;
+        CD_QUEUE[CD_QUEUE_HEAD].base = base;
+        CD_QUEUE_HEAD = (CD_QUEUE_HEAD + 1) & 0x7f;
         if ((e->flags & 0xf) < 3) {
             t = e->type;
             lo = t & 0xf;
@@ -69,7 +69,7 @@ int queueLoadList(Rel *e, int unused, char *base)
             case 0x40: D_1f800310[lo] = base; break;
             case 0x50: WMD_DATA[lo] = base; break;
             case 0x60: WPP_DATA[lo] = base; break;
-            case 0x70: D_1f800308[lo] = base; break;
+            case 0x70: WHM_DATA[lo] = base; break;
             case 0x80: APD_DATA[lo] = base; break;
             case 0x90: case 0xa0: break;
             case 0xb0: SEQ_DATA[lo] = base; break;
@@ -88,7 +88,7 @@ int queueLoadList(Rel *e, int unused, char *base)
                 case 0x40: D_1f800310[lo] = base; break;
                 case 0x50: WMD_DATA[lo] = base; break;
                 case 0x60: WPP_DATA[lo] = base; break;
-                case 0x70: D_1f800308[lo] = base; break;
+                case 0x70: WHM_DATA[lo] = base; break;
                 case 0x80: APD_DATA[lo] = base; break;
                 case 0x90: WVD_BODIES[lo] = base; break;
                 case 0xa0: WVD_HEADERS[lo] = base; break;

@@ -18,7 +18,7 @@ int stepAreaSwitch(TObj *o)
             o->state++;
             return 2;
         }
-        if (GVARS.b3a) return 0;
+        if (GVARS.playerLanded) return 0;
         o->state = 3;
         o->d30 = 0;
         o->h->p.whole -= 0x20;

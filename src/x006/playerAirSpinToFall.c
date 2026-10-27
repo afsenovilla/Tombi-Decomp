@@ -37,7 +37,7 @@ void playerAirSpinToFall(TObj *o)
             o->d8c = (o->d8c + 4) & 0xff;
             if (o->d8c <= 0x40)
                 return;
-            if (GAME.selectedArea == 3 && GVARS.s44 != 0) {
+            if (GAME.selectedArea == 3 && GVARS.driftH != 0) {
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {
@@ -50,7 +50,7 @@ void playerAirSpinToFall(TObj *o)
             o->d8c = (o->d8c - 4) & 0xff;
             if (o->d8c >= 0xc0)
                 return;
-            if (GAME.selectedArea == 3 && GVARS.s44 != 0) {
+            if (GAME.selectedArea == 3 && GVARS.driftH != 0) {
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {

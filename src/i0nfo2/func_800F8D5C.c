@@ -5,7 +5,7 @@
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
 extern void topdownActorSetAnim(TObj *o, unsigned short i, short n);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -29,7 +29,7 @@ void func_800F8D5C(TObj *o)
         PLAYER_Y = n->y.p.whole;
         o->state++;
     case 1:
-        if (D_8009C93A != 0) {
+        if (GVARS_PLAYER_LANDED != 0) {
             topdownActorSetAnim(n, 8, 0);
             n->step = 2;
             n->state = 0;

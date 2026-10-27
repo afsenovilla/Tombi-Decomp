@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern short D_1F8003BC;
+extern short GRAB_POINT_OFFSET;
 extern short probeGrabPointInBoxA(TObj *, TObj *);
 
 void flowerTowerBlockerGrabProbe(TObj *o, TObj *e)
@@ -13,7 +13,7 @@ void flowerTowerBlockerGrabProbe(TObj *o, TObj *e)
         o->wba = 0;
         o->velY = 0;
         SPAD.s19e = 0;
-        o->wb8 = D_1F8003BC;
+        o->wb8 = GRAB_POINT_OFFSET;
         e->b68 = 1;
         (*(TObj **)&SPAD.p3c0) = e;
     }

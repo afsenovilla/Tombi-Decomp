@@ -5,7 +5,7 @@ extern short tunnelCheckSlideZone(void);
 extern void tunnelUseItem95Step(TObj *o);
 extern void tunnelSlidePlayerStep(TObj *o);
 extern void func_8005A9A4(int e, int a);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CDF3;
@@ -36,7 +36,7 @@ void tunnelControllerStep(TObj *o)
     case 2:
         switch (o->state) {
         case 0:
-            if (D_8009C93A != 0) {
+            if (GVARS_PLAYER_LANDED != 0) {
                 PLAYER_SUBSTATE = 2;
                 D_8009C93F = 1;
                 D_8009C942 = 1;

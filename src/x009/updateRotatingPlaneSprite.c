@@ -37,7 +37,7 @@ void updateRotatingPlaneSprite(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane != 0x20 && GVARS.b3a == 1) {
+        if (GAME.selectedPlane != 0x20 && GVARS.playerLanded == 1) {
             o->b04++;
             break;
         }

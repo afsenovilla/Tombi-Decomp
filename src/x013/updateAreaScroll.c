@@ -32,7 +32,7 @@ void func_80115FB4(TObj *o)
         o->step++;
         break;
     case 1:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         FUN_80027c74(o);
         func_8002795C(o);
         syncObjectTargetY(o);
@@ -110,7 +110,7 @@ void updateAreaScroll(TObj *o)
         o->step++;
         break;
     case 1:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         cameraFollowPlayerX(o);
         cameraFollowPlayerY(o);
         syncObjectTargetY(o);

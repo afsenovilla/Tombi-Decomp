@@ -59,7 +59,7 @@ void updateAreaScroll(O *o)
         break;
     }
     case 1:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         cameraFollowPlayerX(o);
         o->b3c = 0;
         syncObjectTargetY(o);

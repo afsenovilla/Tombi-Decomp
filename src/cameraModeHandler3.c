@@ -15,7 +15,7 @@ typedef struct {
 } S;
 typedef struct { short v; } SV;
 extern SV D_1F8000E6;
-extern short D_1F8000E6s;
+extern short VIEW_CAMERA_ROT_Y;
 extern unsigned char GAME_AREA00_INTRO_PHASE;
 extern void FUN_80027c74(S *o);
 extern void func_8002795C(S *o);
@@ -27,12 +27,12 @@ void func_8002A0FC(S *o)
     if (v != 0) {
         if (v > 0) {
             v -= 2;
-            D_1F8000E6s = v;
-            if (v < 0) D_1F8000E6s = 0;
+            VIEW_CAMERA_ROT_Y = v;
+            if (v < 0) VIEW_CAMERA_ROT_Y = 0;
         } else {
             v += 2;
-            D_1F8000E6s = v;
-            if (v > 0) D_1F8000E6s = 0;
+            VIEW_CAMERA_ROT_Y = v;
+            if (v > 0) VIEW_CAMERA_ROT_Y = 0;
         }
     }
     FUN_80027c74(o);
@@ -60,7 +60,7 @@ typedef struct {
 } S;
 typedef struct { short v; } SV;
 extern SV D_1F8000E6;
-extern short D_1F8000E6s;
+extern short VIEW_CAMERA_ROT_Y;
 extern unsigned char GAME_AREA00_INTRO_PHASE;
 extern void cameraFollowPlayerX(S *o);
 extern void cameraFollowPlayerY(S *o);
@@ -73,12 +73,12 @@ void cameraModeHandler3(S *o)
     if (v != 0) {
         if (v > 0) {
             v -= 2;
-            D_1F8000E6s = v;
-            if (v < 0) D_1F8000E6s = 0;
+            VIEW_CAMERA_ROT_Y = v;
+            if (v < 0) VIEW_CAMERA_ROT_Y = 0;
         } else {
             v += 2;
-            D_1F8000E6s = v;
-            if (v > 0) D_1F8000E6s = 0;
+            VIEW_CAMERA_ROT_Y = v;
+            if (v > 0) VIEW_CAMERA_ROT_Y = 0;
         }
     }
     cameraFollowPlayerX(o);

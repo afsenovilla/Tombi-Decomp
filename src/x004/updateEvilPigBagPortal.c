@@ -30,7 +30,7 @@ static __inline__ void setbox(TObj *o, short a, short b, short c, short d)
 
 static __inline__ int inview(TObj *o)
 {
-    if (!GVARS.b3a) return 0;
+    if (!GVARS.playerLanded) return 0;
     if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
     return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

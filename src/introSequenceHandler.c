@@ -9,9 +9,9 @@ extern char *TASK_C;
 extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
 extern int LOADING_SCREEN_STATE;
-extern unsigned char DAT_8009c974;
+extern unsigned char GAME_AREA_TRANSITION;
 extern unsigned short GAME, GAME_SELECTED_SECTION, GAME_SELECTED_SPAWN_POINT;
-extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
+extern unsigned short LOADED_AREA, LOADED_SECTION, LOADED_SPAWN_POINT;
 extern void queueSystemLoadList(int, int);
 extern void loadCurrentArea(int);
 extern void displayLoadingScreen(void);
@@ -61,7 +61,7 @@ void introSequenceHandler(void)
         *(unsigned short *)(TASK_C + 0x4c) = 5;
         return;
     case 5:
-        p974 = &DAT_8009c974;
+        p974 = &GAME_AREA_TRANSITION;
         *p974 = 1;
         *(unsigned short *)(TASK_C + 0x4c) = 1;
         if (DAT_1f8001b4 != 0) {
@@ -70,9 +70,9 @@ void introSequenceHandler(void)
         }
         *(unsigned short *)(TASK_C + 0x4a) = 1;
         *(unsigned short *)(TASK_C + 0x4e) = 0;
-        DAT_8009d2a8 = GAME;
-        DAT_8009d2aa = GAME_SELECTED_SECTION;
-        DAT_8009d2ac = GAME_SELECTED_SPAWN_POINT;
+        LOADED_AREA = GAME;
+        LOADED_SECTION = GAME_SELECTED_SECTION;
+        LOADED_SPAWN_POINT = GAME_SELECTED_SPAWN_POINT;
         return;
     }
 }
@@ -82,9 +82,9 @@ extern char *TASK_C;
 extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
 extern int LOADING_SCREEN_STATE;
-extern unsigned char DAT_8009c974;
+extern unsigned char GAME_AREA_TRANSITION;
 extern unsigned short GAME, GAME_SELECTED_SECTION, GAME_SELECTED_SPAWN_POINT;
-extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
+extern unsigned short LOADED_AREA, LOADED_SECTION, LOADED_SPAWN_POINT;
 extern void queueSystemLoadList(int, int);
 extern void loadCurrentArea(int);
 extern void displayLoadingScreen(void);
@@ -138,7 +138,7 @@ void introSequenceHandler(void)
         *(unsigned short *)(TASK_C + 0x4c) = 7;
         return;
     case 7:
-        p974 = &DAT_8009c974;
+        p974 = &GAME_AREA_TRANSITION;
         *p974 = 1;
         *(unsigned short *)(TASK_C + 0x4c) = 1;
         if (DAT_1f8001b4 != 0) {
@@ -147,9 +147,9 @@ void introSequenceHandler(void)
         }
         *(unsigned short *)(TASK_C + 0x4a) = 1;
         *(unsigned short *)(TASK_C + 0x4e) = 0;
-        DAT_8009d2a8 = GAME;
-        DAT_8009d2aa = GAME_SELECTED_SECTION;
-        DAT_8009d2ac = GAME_SELECTED_SPAWN_POINT;
+        LOADED_AREA = GAME;
+        LOADED_SECTION = GAME_SELECTED_SECTION;
+        LOADED_SPAWN_POINT = GAME_SELECTED_SPAWN_POINT;
         return;
     }
 }

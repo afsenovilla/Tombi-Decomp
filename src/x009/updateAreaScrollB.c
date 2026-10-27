@@ -36,7 +36,7 @@ void updateAreaScrollB(O *o)
 
     switch (o->step) {
     case 0:
-        if (GVARS.b3a) {
+        if (GVARS.playerLanded) {
             o->step++;
             o->state = 0;
             o->subtype = 0;

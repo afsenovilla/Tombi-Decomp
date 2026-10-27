@@ -79,7 +79,7 @@ void ziplinePulleySlide(TObj *o)
                         unsigned char *c = &GVARS.b58;
                         GCD.bcf06 = 0;
                         GVARS.b3f = 1;
-                        GVARS.b38 = 1;
+                        GVARS.hurtState = 1;
                         GVARS.b3e = 1;
                         *c = *c + 1;
                     }

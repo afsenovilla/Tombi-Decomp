@@ -43,7 +43,7 @@ void areaMode2Tick(void)
             func_80055BA0();
         }
     }
-    if (*(short* )(&D_1F8000C0[0]+0x106) != 1) {
+    if (*(short* )(&VIEW_CAMERA[0]+0x106) != 1) {
         updateInventoryOverlay();
     }
     if (*(short* )(&SCRATCHPAD+0x1C6) == 0) {

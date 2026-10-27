@@ -11,7 +11,7 @@ typedef struct {
     char p0[0xf]; signed char f; char p1[2]; unsigned short x; char p2[2]; unsigned short y; char p3[2]; unsigned short z;
     char p4[0x84 - 0x1c]; int a84, a88, a8c; char p5[0xa0 - 0x90]; int aa0; unsigned char ba4; char p6[3]; int aa8;
 } O;
-extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
+extern MATRIX D_1f800000, D_1f800020, VIEW_CAMERA;
 extern SVECTOR D_1f800060, D_1f800068;
 extern unsigned short SPAWN_AXIS_SWAP;
 extern int *CURRENT_OT;
@@ -42,11 +42,11 @@ void drawObjectModelRotatedVtx(O *o)
     D_1f800068.vx = o->x;
     D_1f800068.vy = o->y;
     D_1f800068.vz = o->z;
-    FUN_8006395c(&D_1f8000c0, &D_1f800020, &D_1f800000);
+    FUN_8006395c(&VIEW_CAMERA, &D_1f800020, &D_1f800000);
     FUN_80063bcc(&D_1f800068, D_1f800000.t);
-    D_1f800000.t[0] += D_1f8000c0.t[0];
-    D_1f800000.t[1] += D_1f8000c0.t[1];
-    D_1f800000.t[2] += D_1f8000c0.t[2];
+    D_1f800000.t[0] += VIEW_CAMERA.t[0];
+    D_1f800000.t[1] += VIEW_CAMERA.t[1];
+    D_1f800000.t[2] += VIEW_CAMERA.t[2];
     FUN_80063ddc(&D_1f800000);
     FUN_80063e6c(&D_1f800000);
     drawModelVtx(o->aa0, &CURRENT_OT[o->f + 4], o, o->aa8, o->ba4);

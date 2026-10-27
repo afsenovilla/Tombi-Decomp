@@ -47,7 +47,7 @@ void updateDeathFruit(TObj *o)
         if (GCD.bcdca == 0xff) o->b04 = 3;
         break;
     case 1:
-        if (GAME.selectedPlane == 0x21 && GVARS.b3a == 1) break;
+        if (GAME.selectedPlane == 0x21 && GVARS.playerLanded == 1) break;
         AnimAdvance(o);
         ObjCullRegister(o);
         break;

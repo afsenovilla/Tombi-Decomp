@@ -15,7 +15,7 @@ typedef struct {
     unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
-extern long D_1F8000C0[];
+extern long VIEW_CAMERA[];
 extern char *NEXT_PRIM;
 extern unsigned short GAME[];
 typedef struct { char pad[0x10]; unsigned long ot[1]; } OTS;
@@ -49,8 +49,8 @@ void topdownDrawObjectSprite(TObj *o)
     
 
     if (o->b6b == 0) return;
-    gte_SetRotMatrix(D_1F8000C0);
-    gte_SetTransMatrix(D_1F8000C0);
+    gte_SetRotMatrix(VIEW_CAMERA);
+    gte_SetTransMatrix(VIEW_CAMERA);
     v->vx = o->a.p.whole;
     v->vy = o->y.p.whole;
     v->vz = o->b.p.whole;

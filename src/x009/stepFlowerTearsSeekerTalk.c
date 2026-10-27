@@ -25,7 +25,7 @@ static __inline__ void pushR(short w1, short w0, short x)
 void stepFlowerTearsSeekerTalk(TObj *o)
 {
     if (o->b0c == 0) {
-        if ((o->active & 8) && GVARS.b3a && (unsigned short)(o->y.p.whole - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
+        if ((o->active & 8) && GVARS.playerLanded && (unsigned short)(o->y.p.whole - (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x80) < 0x100) {
             if (o->animFrame & 1)
                 pushL(o->h->p.whole, o->box0);
             else

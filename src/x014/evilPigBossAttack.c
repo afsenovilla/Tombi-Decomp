@@ -21,7 +21,7 @@ void evilPigBossAttack(TObj *o)
     unsigned char *t;
     int x;
 
-    if (GVARS.b38 != 0 || GAME_PLAYER_MODE == 3) {
+    if (GVARS.hurtState != 0 || GAME_PLAYER_MODE == 3) {
         o->state = 0;
         o->step++;
     } else if (((unsigned short*)&GAME.selectedSection)[0] == 7) {

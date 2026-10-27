@@ -178,8 +178,8 @@ void playerStepWeaponAttack(TObj *o)
         else o->wb6 = 0;
         playerAttackDecelerate(o);
         setObjectSpeedPolar2(o, o->wb6, o->wb2);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         FUN_8001fce4(o);
         FUN_8010f0f4(o);
         FUN_8001fd94(o);
@@ -232,8 +232,8 @@ void playerStepWeaponAttack(TObj *o)
     case 2:
         playerAttackDecelerate(o);
         FUN_8010f0f4(o);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         FUN_8001fce4(o);
         FUN_8001fd94(o);
         FUN_8001fec0(o);

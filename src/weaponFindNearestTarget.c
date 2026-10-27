@@ -11,8 +11,8 @@
 typedef struct P { short x, y; } P;
 extern short DAT_1f80019e;
 extern unsigned short DAT_1f80019eu;
-extern unsigned short DAT_1f800250;
-extern TObj **DAT_1f800260;
+extern unsigned short CAT2_OBJECT_COUNT_SAVED;
+extern TObj **CAT2_OBJECT_LIST_SAVED;
 extern unsigned char DAT_8007a0a0[];
 extern int angleBetweenPoints(P, P);
 
@@ -29,8 +29,8 @@ int weaponFindNearestTarget(TObj *o)
     int wx, wy;
     short x;
 
-    p = DAT_1f800260;
-    DAT_1f80019e = DAT_1f800250;
+    p = CAT2_OBJECT_LIST_SAVED;
+    DAT_1f80019e = CAT2_OBJECT_COUNT_SAVED;
     for (i = 0; i < 0x40; i++)
         list[i] = 0;
     n = 0;

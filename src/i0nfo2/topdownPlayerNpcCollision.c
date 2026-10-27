@@ -5,7 +5,7 @@ extern unsigned char D_1F8001A5;
 extern TObj **CAT2_OBJECT_LIST;
 extern short D_1F80019E, CAT2_OBJECT_COUNT;
 extern void topdownResolveNpcContact(unsigned char *s, TObj *o);
-extern unsigned char D_8009C93A, D_8009C942[];
+extern unsigned char GVARS_PLAYER_LANDED, D_8009C942[];
 extern unsigned char PLAYER[];
 extern TObj *PLAYER_ANIM;
 extern signed char D_800A60A1;
@@ -28,7 +28,7 @@ void topdownPlayerNpcCollision(void)
         if (D_8009C942[0] == 0) {
         switch (*s) {
         case 1: case 2: case 3:
-        if (D_8009C93A != 0) {
+        if (GVARS_PLAYER_LANDED != 0) {
             list = CAT2_OBJECT_LIST;
             D_800A60A1 = 0;
             for (D_1F80019E = CAT2_OBJECT_COUNT; D_1F80019E != 0; ) {

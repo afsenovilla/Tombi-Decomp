@@ -90,7 +90,7 @@ static E **DAT_80115190[20] = {
     (E **)D_80115020, (E **)D_80115108, (E **)D_80115110, (E **)D_80115110,
     (E **)D_80115130, (E **)D_8011514C, (E **)D_80115178, (E **)D_80115184,
 };
-extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
+extern unsigned char DAT_8009c93a, GVARS_PLAYER_LANDED[];
 extern unsigned char DAT_8009ce41;
 
 #define LOADP() p = (unsigned char *)DAT_80115190[DAT_8009c960]; p = ((unsigned char **)p)[GAME_SELECTED_SECTION]; p += GAME_SELECTED_SPAWN_POINT * 4
@@ -237,7 +237,7 @@ void playerInitMode(TObj *o)
             o->state = 0;
             o->substep = 0;
             X(o)->wee = t2; }
-            DAT_8009c93aA[0] = 1;
+            GVARS_PLAYER_LANDED[0] = 1;
             break;
         case 3:
             FUN_80118910();

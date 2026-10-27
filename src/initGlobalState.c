@@ -3,8 +3,8 @@
 #include "globals.h"
 extern unsigned short D_8009f7f2;
 extern unsigned short D_8009f814;
-extern unsigned char D_1f8003d3;
-extern unsigned short D_8009d4fc;
+extern unsigned char LOADED_SOUND_SET;
+extern unsigned short SCREEN_OFFSET_X;
 extern unsigned short D_1f8001f0;
 extern unsigned short D_1f8001f2;
 extern unsigned short D_1f8001ee;
@@ -24,15 +24,15 @@ extern unsigned short D_8009d672;
 extern unsigned short D_8009d676;
 extern unsigned short D_8009d5d8;
 extern unsigned short D_8009f7ea;
-extern unsigned short D_8009d4fe;
+extern unsigned short SCREEN_OFFSET_Y;
 extern unsigned short D_1f8003d8;
 void initGlobalState(void)
 {
     D_8009f7f2 = 0xffff;
     D_8009f814 = 0xffff;
-    D_1f8003d3 = 0xff;
+    LOADED_SOUND_SET = 0xff;
     LOADED_LIST_FILE_SYM = 0xff;
-    D_8009d4fc = 4;
+    SCREEN_OFFSET_X = 4;
     D_1f8001f0 = 0;
     D_1f8001f2 = 0;
     D_1f8001ee = 0;
@@ -52,6 +52,6 @@ void initGlobalState(void)
     D_8009d676 = 0;
     D_8009d5d8 = 0;
     D_8009f7ea = 0;
-    D_8009d4fe = 0xc;
+    SCREEN_OFFSET_Y = 0xc;
     D_1f8003d8 = D_1f8003d8 & 1;
 }

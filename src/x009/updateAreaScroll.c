@@ -43,10 +43,10 @@ void updateAreaScroll(O *o)
         o->step++;
         GVARS.b3d = 1;
         if (GAME.selectedSection == 0 && GAME.selectedSpawnPoint == 5)
-            GVARS.b3a = 1;
+            GVARS.playerLanded = 1;
         break;
     case 1:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         cameraFollowPlayerX(o);
         o->b3c = 0;
         syncObjectTargetY(o);

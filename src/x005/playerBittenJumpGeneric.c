@@ -74,8 +74,8 @@ void playerBittenJumpGeneric(TObj *o)
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
         p->d8c = o->d88 - 0xc0;
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 != 0 || probeFloorPlaneAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x30)) != 0 ||

@@ -40,7 +40,7 @@ void gameplayMainHandler(void)
         case 1:
             GAME.totalTimePlayed++;
             gameplayTick(temp_a0);
-            if (D_8009BCA0 == 2) {
+            if (GVARS_PLAYER_HURT_STATE == 2) {
                 temp_v1_2 = *(Task** )(&SCRATCHPAD+0x1D4);
                 temp_v1_2->step.value++;
                 func_80020C00(1);

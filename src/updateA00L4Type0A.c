@@ -27,7 +27,7 @@ extern unsigned short DAT_80138d0c[];
 extern int DAT_8009c984;
 extern int GAME_AREA00_EVENT_CONTROL[];
 extern int DAT_8009c984b[];
-extern unsigned char DAT_8009c938a[];
+extern unsigned char GVARS_PLAYER_HURT_STATE[];
 extern unsigned char DAT_8009c938;
 extern int FUN_8001f9e0(void);
 extern void spawnA00Tornado(int, int, int, int);
@@ -122,7 +122,7 @@ void updateA00L4Type0A(S *o)
                     q->b69 = 0;
                     q->b68 = 0;
                     o->animFrame = q->animFrame;
-                    if (DAT_8009c938a[0] == 0 && q->wc0 != 0 && --q->wc0 == 0 && !(GAME_AREA00_EVENT_CONTROL[0] & 1)) {
+                    if (GVARS_PLAYER_HURT_STATE[0] == 0 && q->wc0 != 0 && --q->wc0 == 0 && !(GAME_AREA00_EVENT_CONTROL[0] & 1)) {
                         GAME_AREA00_EVENT_CONTROL[0] |= 1;
                         setEventStarted(2, 0, 0);
                         FUN_8001e4f0(0x35);

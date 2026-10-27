@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_800121F4[];
-extern unsigned short D_800A6052[];
+extern unsigned short PLAYER_Z[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjCullRegister(TObj *);
@@ -26,7 +26,7 @@ void updatePoolType67Object(TObj *o)
                 o->a.p.whole = x - 8;
             }
             o->y.p.whole = (*(unsigned short*)&PLAYER.obj.y.p.whole) + 0x10;
-            o->b.p.whole = D_800A6052[0];
+            o->b.p.whole = PLAYER_Z[0];
             o->b04 = 1;
             o->step = 0;
         }

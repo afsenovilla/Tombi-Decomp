@@ -102,8 +102,8 @@ void freeObjectByLayer(s32* self)
         self[3] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F80023A++;
-        *--D_1F80020C = (s32)self;
+        FREE_OBJECT_COUNT_LAYER8++;
+        *--FREE_OBJECTS_LAYER8 = (s32)self;
         break;
     }
 }
@@ -215,8 +215,8 @@ void freeObjectByLayer(s32* self)
         self[3] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F80023A++;
-        *--D_1F80020C = (s32)self;
+        FREE_OBJECT_COUNT_LAYER8++;
+        *--FREE_OBJECTS_LAYER8 = (s32)self;
         break;
     }
 }

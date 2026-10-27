@@ -28,7 +28,7 @@ void updateUvAnimBgModel(TObj *o)
     case 1:
         switch (o->subtype) {
         case 0:
-            if (GVARS.b38) goto set2;
+            if (GVARS.hurtState) goto set2;
             k = GAME.selectedSection;
             if (k == 0 && (unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x1d5) < 0x191) break;
             if (k == 1 && (unsigned short)((*(unsigned short*)((char*)&SPAD.i174 + 2)) - 0x191) < 0x207 && (*(short*)&SPAD.s186) < -0xa0) break;
@@ -37,7 +37,7 @@ void updateUvAnimBgModel(TObj *o)
             uvAnimBgModelFlip(o);
             break;
         case 1:
-            if (GVARS.b38) goto set2;
+            if (GVARS.hurtState) goto set2;
             k = GAME.selectedSection;
             if (k == 0 && (short)(*(unsigned short*)((char*)&SPAD.i174 + 2)) < 0x30c) break;
             if (k == 1 && (short)(*(unsigned short*)((char*)&SPAD.i174 + 2)) >= 0x201) break;
@@ -46,7 +46,7 @@ void updateUvAnimBgModel(TObj *o)
             uvAnimBgModelStepB(o);
             break;
         case 2:
-            if (GVARS.b38) {
+            if (GVARS.hurtState) {
             set2:
                 o->b04 = 2;
                 o->step = 0;

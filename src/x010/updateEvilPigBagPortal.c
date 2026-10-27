@@ -24,7 +24,7 @@ extern void FUN_80018838(TObj *);
 
 static __inline__ int near(TObj *o)
 {
-    if (GVARS.b3a == 0)
+    if (GVARS.playerLanded == 0)
         return 0;
     if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d)
         return 0;

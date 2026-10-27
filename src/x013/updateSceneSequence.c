@@ -89,7 +89,7 @@ void updateSceneSequence(O *o)
             switch (o->step) {
             case 0:
                 if (*(unsigned short *)&p->b04 != 0x6505) break;
-                GVARS.b3a = 1;
+                GVARS.playerLanded = 1;
                 GVARS.b3f = 1;
                 o->timer = 1;
                 o->step++;

@@ -27,7 +27,7 @@ void sinkingLedgeCheckPlayer(TObj *o)
         o->timer = 0x10;
         GCD.bcf06 = 0;
         *p = 1;
-        GVARS.b38 = 1;
+        GVARS.hurtState = 1;
         GVARS.b3e = 1;
         break;
     case 1:

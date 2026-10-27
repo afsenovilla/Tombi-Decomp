@@ -17,7 +17,7 @@ void updatePlayerHealth(TObj *o)
         ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
         if (o->w98 <= 0) {
             GVARS.b42 = 1;
-            GVARS.b38 = 1;
+            GVARS.hurtState = 1;
             stopBgm(0);
             playJingle(3);
         }

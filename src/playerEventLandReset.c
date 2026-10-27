@@ -11,7 +11,7 @@ typedef struct O { char p0[6]; unsigned char state; char p1[0x24-7]; void *anim;
 extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char DAT_8009d2af;
-extern unsigned char DAT_8009c93a;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern char LAB_80010748[];
 extern void FUN_8001fe94(O *, int);
 
@@ -40,7 +40,7 @@ void FUN_8010186c(O *o)
     q = &DAT_8009d2af;
     if (*q == 0) {
         *q = 1;
-        DAT_8009c93a = 1;
+        GVARS_PLAYER_LANDED = 1;
     }
     o->state++;
 }
@@ -52,7 +52,7 @@ typedef struct O { char p0[6]; unsigned char state; char p1[0x24-7]; void *anim;
 extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char DAT_8009d2af;
-extern unsigned char DAT_8009c93a;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern char LAB_80010748[];
 extern void FUN_8001fe94(O *, int);
 
@@ -82,7 +82,7 @@ void playerEventLandReset(O *o)
     q = &DAT_8009d2af;
     if (*q == 0) {
         *q = 1;
-        DAT_8009c93a = 1;
+        GVARS_PLAYER_LANDED = 1;
     }
     o->state++;
 }

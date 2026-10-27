@@ -18,7 +18,7 @@ void playerInitAreaHook(TObj *o)
         o->step = 9;
     }
     if ((GAME.selectedSection == 0 || GAME.selectedSection == 4) && GCD.bcdc3 != 0xff && GAME.selectedSpawnPoint == 4) {
-        GVARS.b3a = 1;
+        GVARS.playerLanded = 1;
         GV2.bb0 = 0;
         o->active = 1;
         o->b04 = 1;
@@ -32,7 +32,7 @@ void playerInitAreaHook(TObj *o)
         o->b04 = 5;
         o->step = 0x40;
         o->visible = 0;
-        GVARS.b3a = 1;
+        GVARS.playerLanded = 1;
         *p = 2;
     }
 }

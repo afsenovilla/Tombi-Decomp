@@ -34,7 +34,7 @@ void waterfallElderHintScene(TObj *o)
     switch (o->state) {
     case 0:
         if (GCD.bce3a != 0) break;
-        if (GVARS.b3a == 0) break;
+        if (GVARS.playerLanded == 0) break;
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         PLAYER.b04 = 5;

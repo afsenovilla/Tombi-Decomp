@@ -51,8 +51,8 @@ void playerStepSuperJump(TObj *o)
         spawnPlayerPowerEffect(2);
         o->state = 1;
     case 1:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         playerUpdateSpeedFromPad(o);
         playerAirAccelerateX(o);
@@ -65,8 +65,8 @@ void playerStepSuperJump(TObj *o)
         ObjAddVelY7E(o);
         break;
     case 2:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         playerUpdateSpeedFromPad(o);
         ObjMotionStep(o);

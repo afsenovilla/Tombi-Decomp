@@ -486,7 +486,7 @@ static __inline__ int opab(void)
 
 static __inline__ int op97(void)
 {
-    if (GVARS.b3a == 0) return 0;
+    if (GVARS.playerLanded == 0) return 0;
     scriptOpSetPlayerStateEx();
     return 1;
 }

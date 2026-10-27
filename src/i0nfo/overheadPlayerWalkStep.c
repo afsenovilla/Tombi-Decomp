@@ -6,12 +6,12 @@ extern void func_8001FCE4(TObj *o);
 extern void func_8001FEC0(TObj *o);
 extern void overheadPlayerSetMoveAnim(TObj *o);
 extern void overheadCollideMapTile(TObj *o, int x, int y, int z);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern volatile unsigned short PAD_PRESSED[];
 
 void overheadPlayerWalkStep(TObj *o)
 {
-    if (D_8009C93A != 0) {
+    if (GVARS_PLAYER_LANDED != 0) {
         *(unsigned char *)&o->wac = 0;
         switch (o->state) {
         case 0:

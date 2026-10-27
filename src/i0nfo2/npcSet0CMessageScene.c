@@ -15,7 +15,7 @@ extern TObj *PLAYER_MESSAGE_BOX;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2E0;
 extern TObj *D_8009F2E4;
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -40,7 +40,7 @@ void npcSet0CMessageScene(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (D_8009C93A != 0) {
+        if (GVARS_PLAYER_LANDED != 0) {
             if (D_8009CDD6 == 0xFF) {
                 o->state = 3;
             } else {

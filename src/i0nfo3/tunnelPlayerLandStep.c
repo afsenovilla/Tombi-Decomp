@@ -10,7 +10,7 @@ extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void func_8002171C(TObj *o);
 typedef struct { char p0[8]; unsigned char b8; char p9[0x20 - 9]; short w20; char p22[6]; unsigned short w28, w2a, w2c, w2e; } P330;
 extern P330 *PLAYER_EXT;
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CFF9;
@@ -89,7 +89,7 @@ void tunnelPlayerLandStep(TObj *o)
         o->b04 = 1;
         o->step = 0;
         o->state = 0;
-        D_8009C93A = 1;
+        GVARS_PLAYER_LANDED = 1;
         GAME_PLAYER_MODE = 0;
         D_8009C942 = 0;
         D_8009C93F = 0;

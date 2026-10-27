@@ -11,7 +11,7 @@ int playerHurtCheckFastFall(TObj *o)
 {
     short r;
 
-    if (GVARS.b38 != 0) {
+    if (GVARS.hurtState != 0) {
         return 0;
     }
     if (o->velY < 0x680) {

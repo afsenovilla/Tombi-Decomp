@@ -8,7 +8,7 @@ extern unsigned char DAT_1f8001d0;
 extern short FRAME_BUFFER_INDEX;
 extern int NEXT_PRIM;
 extern short DAT_800a45ea;
-extern unsigned char DAT_8009c974;
+extern unsigned char GAME_AREA_TRANSITION;
 extern unsigned char GAME_KEEP_BGM;
 extern void FUN_8004dd8c(void);
 extern void FUN_8005f060(int);
@@ -55,7 +55,7 @@ void gameLoadSaveState(void)
         FUN_8001dbdc();
         break;
     case 3:
-        DAT_8009c974 = 0;
+        GAME_AREA_TRANSITION = 0;
         GAME_KEEP_BGM = 0;
         FUN_8001f110(0);
         TASK_C->w48 = 1;

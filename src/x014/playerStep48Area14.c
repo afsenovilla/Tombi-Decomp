@@ -62,8 +62,8 @@ void playerStep48Area14(TObj *o)
         }
         break;
     case 2:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         FUN_8003facc(o);
         k = PAD_PRESSED;
         if (*k & 0x80)

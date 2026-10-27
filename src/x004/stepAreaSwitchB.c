@@ -24,7 +24,7 @@ int stepAreaSwitchB(TObj *o)
             o->state++;
             return 2;
         }
-        if (GVARS.b3a) return 0;
+        if (GVARS.playerLanded) return 0;
         if (GAME_PLAYER_MODE >= 3) break;
         o->state = 3;
         o->d30 = 0;
@@ -43,7 +43,7 @@ int stepAreaSwitchB(TObj *o)
         o->state++;
         break;
     case 4:
-        if (GVARS.b3a == 0) return 0;
+        if (GVARS.playerLanded == 0) return 0;
         o->state = 0;
         break;
     case 2:

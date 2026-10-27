@@ -7,7 +7,7 @@ extern TObj *func_8002DCC8(int a, int b, Pos6 *p);
 extern void func_80059D44(int a);
 extern void func_8005A9A4(int a, int b);
 extern void topdownA19ActorSetDirAnim();
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char GVARS_FADE_EFFECT;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
@@ -29,7 +29,7 @@ void func_800FE410(TObj *o)
     TObj *m;
     switch (o->state) {
     case 0:
-        if (D_8009C93A != 0) {
+        if (GVARS_PLAYER_LANDED != 0) {
             D_8009C93F = 1;
             D_8009C942 = 1;
             PLAYER_ANIM_FRAME = 6;

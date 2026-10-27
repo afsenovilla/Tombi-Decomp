@@ -34,7 +34,7 @@ void updateUvAnimBgModel(TObj *o)
     case 1:
         o->visible = 1;
         ObjListPush_1F800230(o);
-        if (GVARS.b38) {
+        if (GVARS.hurtState) {
             o->b04 = 2;
             o->step = 0;
             break;

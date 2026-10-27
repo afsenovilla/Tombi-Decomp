@@ -51,7 +51,7 @@ void updateMotocrossRaceStarter(TObj *o)
         cullObjectToDrawList(o, 0xa0);
         switch (o->step) {
         case 0:
-            if (GVARS.b3a == 0)
+            if (GVARS.playerLanded == 0)
                 break;
             if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x177)
                 break;
@@ -237,7 +237,7 @@ void updateMotocrossRaceStarter(TObj *o)
         case 9:
             if (--o->timer != -1)
                 break;
-            GVARS.b38 = 2;
+            GVARS.hurtState = 2;
             break;
         }
         break;

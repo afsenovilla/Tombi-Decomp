@@ -35,7 +35,7 @@ void updateRaftArrival(TObj *o)
         s = o->step;
         switch (s) {
         case 0:
-            if (o->b69 && GVARS.b3a == 1) {
+            if (o->b69 && GVARS.playerLanded == 1) {
                 o->step = s + 1;
                 o->velH = 0x200;
             }

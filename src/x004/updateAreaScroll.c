@@ -78,7 +78,7 @@ extern short D_1F80016Ax[], D_1F80016Ex[];
 #define PLAYER_H_WHOLE D_1F80016Ax[0]
 #define D_1F80016E D_1F80016Ex[0]
 extern short D_1F8000F2x[];
-#define D_1F8000F2 D_1F8000F2x[0]
+#define VIEW_CAMERA_Y D_1F8000F2x[0]
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
@@ -152,7 +152,7 @@ void updateAreaScroll(O *o)
         o->step++;
         break;
     case 1:
-        if (GVARS.b3a != 0) o->step++;
+        if (GVARS.playerLanded != 0) o->step++;
         cameraFollowPlayerX(o);
         syncObjectTargetY(o);
         updateCameraScroll(o);
@@ -549,9 +549,9 @@ void updateAreaScroll(O *o)
         o->b6f = 10;
         break;
     case 8:
-        D_1F8000F2 += 2;
-        if (D_1F8000F2 < -0x63) break;
-        D_1F8000F2 = -100;
+        VIEW_CAMERA_Y += 2;
+        if (VIEW_CAMERA_Y < -0x63) break;
+        VIEW_CAMERA_Y = -100;
         o->w32 = -100;
         o->w30 = -100;
         o->step++;
@@ -590,9 +590,9 @@ void updateAreaScroll(O *o)
         o->step++;
         break;
     case 12:
-        D_1F8000F2 -= 2;
-        if (D_1F8000F2 >= -0x3ac) break;
-        D_1F8000F2 = -0x3ac;
+        VIEW_CAMERA_Y -= 2;
+        if (VIEW_CAMERA_Y >= -0x3ac) break;
+        VIEW_CAMERA_Y = -0x3ac;
         o->w32 = -0x3ac;
         o->w30 = -0x3ac;
         o->step++;

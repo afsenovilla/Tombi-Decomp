@@ -5,7 +5,7 @@
 #include "include_asm.h"
 INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004B140_slps01144);
 #else
-extern char DAT_1f8000c0[];
+extern char VIEW_CAMERA[];
 extern int GAME;
 extern int CURRENT_OT;
 extern unsigned char AREA_MODEL_DRAW_LIST[];
@@ -20,8 +20,8 @@ void drawAreaModelList(void)
     int i;
     int *p;
     unsigned char *base;
-    SetRotMatrix(DAT_1f8000c0);
-    SetTransMatrix(DAT_1f8000c0);
+    SetRotMatrix(VIEW_CAMERA);
+    SetTransMatrix(VIEW_CAMERA);
     base = AREA_MODEL_DRAW_LIST;
     if (GAME == 0x60009) {
         i = 0;

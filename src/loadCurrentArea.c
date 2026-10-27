@@ -4,7 +4,7 @@ typedef struct { unsigned short a, b; } P2;
 extern P2 GAME;
 extern unsigned short AREA_VARIANT;
 extern unsigned short GAME_SELECTED_SPAWN_POINT;
-extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
+extern unsigned short LOADED_AREA, LOADED_SECTION, LOADED_SPAWN_POINT;
 extern unsigned short DAT_1f8001de, DAT_1f8001dc;
 extern unsigned char GAME_KEEP_BGM;
 extern unsigned char *PTR_80077b64[];
@@ -24,9 +24,9 @@ void loadCurrentArea(unsigned short p)
     idx = GAME.a + AREA_VARIANT;
     c = PTR_80077b64[idx][GAME.b];
     DAT_1f8001de = 0;
-    DAT_8009d2a8 = GAME.a;
-    DAT_8009d2aa = GAME.b;
-    DAT_8009d2ac = GAME_SELECTED_SPAWN_POINT;
+    LOADED_AREA = GAME.a;
+    LOADED_SECTION = GAME.b;
+    LOADED_SPAWN_POINT = GAME_SELECTED_SPAWN_POINT;
     DAT_1f8001dc = c;
     loadAreaListFile(idx);
     if (loadAreaSectionResources((short)p) != -1)

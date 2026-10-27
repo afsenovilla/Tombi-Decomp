@@ -4,8 +4,8 @@
 // VERSION SLPS_01144 slps01144 80029060 464
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80028250 (FUN_80028250.c): does not set flag 8 at +0x44.
-extern int DAT_1f8000f0;
-extern short DAT_1f8000f2;
+extern int VIEW_CAMERA_Y_FIX;
+extern short VIEW_CAMERA_Y;
 extern int DAT_1f800190;
 extern void stepScrollApproachX(unsigned char *);
 #define W(o) (*(int *)((o) + 0x18))
@@ -24,10 +24,10 @@ void FUN_80028250(unsigned char *o)
             W(o) = 0x40000;
         if (W(o) > 0x12000)
             stepScrollApproachX(o);
-        p = &DAT_1f8000f0;
+        p = &VIEW_CAMERA_Y_FIX;
         *p += W(o);
-        if (DAT_1f8000f2 > *(short *)(o + 0x32)) {
-            DAT_1f8000f0 = *(short *)(o + 0x32) << 16;
+        if (VIEW_CAMERA_Y > *(short *)(o + 0x32)) {
+            VIEW_CAMERA_Y_FIX = *(short *)(o + 0x32) << 16;
             W(o) = 0;
         }
         t = *p - DAT_1f800190;
@@ -38,10 +38,10 @@ void FUN_80028250(unsigned char *o)
         W(o) += 0x2000;
         if (W(o) > 0x2ffff)
             W(o) = 0x30000;
-        p = &DAT_1f8000f0;
+        p = &VIEW_CAMERA_Y_FIX;
         *p += W(o);
-        if (DAT_1f8000f2 > *(short *)(o + 0x32)) {
-            DAT_1f8000f0 = *(short *)(o + 0x32) << 16;
+        if (VIEW_CAMERA_Y > *(short *)(o + 0x32)) {
+            VIEW_CAMERA_Y_FIX = *(short *)(o + 0x32) << 16;
             W(o) = 0;
         }
         t = *p - DAT_1f800190;
@@ -54,8 +54,8 @@ void FUN_80028250(unsigned char *o)
 #include "include_asm.h"
 INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80029060_slps01144);
 #else
-extern int DAT_1f8000f0;
-extern short DAT_1f8000f2;
+extern int VIEW_CAMERA_Y_FIX;
+extern short VIEW_CAMERA_Y;
 extern int DAT_1f800190;
 extern void stepScrollApproachX(unsigned char *);
 #define W(o) (*(int *)((o) + 0x18))
@@ -74,10 +74,10 @@ void lookScrollStepX(unsigned char *o)
             W(o) = 0x40000;
         if (W(o) > 0x12000)
             stepScrollApproachX(o);
-        p = &DAT_1f8000f0;
+        p = &VIEW_CAMERA_Y_FIX;
         *p += W(o);
-        if (DAT_1f8000f2 > *(short *)(o + 0x32)) {
-            DAT_1f8000f0 = *(short *)(o + 0x32) << 16;
+        if (VIEW_CAMERA_Y > *(short *)(o + 0x32)) {
+            VIEW_CAMERA_Y_FIX = *(short *)(o + 0x32) << 16;
             W(o) = 0;
             *(unsigned short *)(o + 0x44) |= 8;
         }
@@ -89,10 +89,10 @@ void lookScrollStepX(unsigned char *o)
         W(o) += 0x2000;
         if (W(o) > 0x2ffff)
             W(o) = 0x30000;
-        p = &DAT_1f8000f0;
+        p = &VIEW_CAMERA_Y_FIX;
         *p += W(o);
-        if (DAT_1f8000f2 > *(short *)(o + 0x32)) {
-            DAT_1f8000f0 = *(short *)(o + 0x32) << 16;
+        if (VIEW_CAMERA_Y > *(short *)(o + 0x32)) {
+            VIEW_CAMERA_Y_FIX = *(short *)(o + 0x32) << 16;
             W(o) = 0;
             *(unsigned short *)(o + 0x44) |= 8;
         }

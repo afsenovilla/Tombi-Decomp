@@ -57,8 +57,8 @@ void playerStepVortexLaunch(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->velY += 0x40;
         o->y.raw += o->velY << 8;
         if (o->velY > 0) {
@@ -77,8 +77,8 @@ void playerStepVortexLaunch(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (o->velY > 0x680)

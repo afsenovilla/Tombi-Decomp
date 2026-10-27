@@ -2246,7 +2246,7 @@ typedef struct
 
 /* --- PSX scratchpad (0x1F800000) -- see `struct scratchpad` --- */
 extern u_char SCRATCHPAD;
-extern u_char D_1F8000C0[];
+extern u_char VIEW_CAMERA[];           /* 0x1F8000C0 the view camera (camera.h ViewCamera: MATRIX m + 16.16 rot[3] / pos[3]) */
 extern u_char D_1F8000F8[];
 extern u_char D_1F800118[];
 extern u_char D_1F8001A0[0x24];
@@ -2256,14 +2256,14 @@ extern s32* D_1F800204;
 extern u16  FREE_OBJECT_COUNT_LAYER1;  /* 0x1F800236 free entries of the layer-1 object pool */
 extern s32* FREE_OBJECTS;              /* 0x1F800208 scratchpad.freeObjects */
 extern u16  FREE_OBJECT_COUNT;         /* 0x1F800238 scratchpad.freeObjectCount */
-extern s32* D_1F80020C;
-extern u16  D_1F80023A;
+extern s32* FREE_OBJECTS_LAYER8;       /* 0x1F80020C free stack of the layer-8 object pool */
+extern u16  FREE_OBJECT_COUNT_LAYER8;  /* 0x1F80023A entries in FREE_OBJECTS_LAYER8 */
 extern s32* D_1F800210;
 extern u16  D_1F80023E;
 extern s32* FREE_OBJECTS_LAYER7;       /* 0x1F800214 free stack of the layer-7 object pool */
 extern u16  FREE_OBJECT_COUNT_LAYER7;  /* 0x1F80023C entries in FREE_OBJECTS_LAYER7 */
 extern s16  PLAYER_H_WHOLE;            /* 0x1F80016A whole part of PLAYER.obj.h (updatePlayer copies it every tick) */
-extern s32  D_1F80029C;
+extern s32  D_1F80029C;               /* CD_QUEUE_HEAD: the macro above keeps the absolute cast */
 extern s32  D_1F800200;
 extern s32  D_1F800298;
 extern s32  D_1F8002AC;
@@ -2347,8 +2347,8 @@ extern int D_8009B03C;
 extern SpuCommonAttr D_8009B048; // SPU_ATTR
 extern byte DEBUG_SCREEN_CURSOR_ROW; /* 0x8009C340 displayDebugScreen cursor row (US alias D_8009B6A8) */
 #include "gvars.h"   /* GVARS 0x8009C930 (was the u_char D_8009BC98[0x2C] alias) */
-extern u_char D_8009BCA0;
-extern u8   D_8009BCA2;
+extern u_char GVARS_PLAYER_HURT_STATE; /* 0x8009C938 = GVARS.hurtState (US alias D_8009BCA0) */
+extern u8   GVARS_PLAYER_LANDED;       /* 0x8009C93A = GVARS.playerLanded (US alias D_8009BCA2) */
 extern char D_8009BCA7;
 extern char D_8009BCAA;
 extern gameConfig GAME;
@@ -2394,9 +2394,9 @@ extern u8   D_800778E4[];
 extern u8   D_800778E5[];
 extern s32  D_80078EB0[];
 extern u8   GAME_EQUIPPED_WEAPON;      /* 0x8009D2B2 = GAME.playerEquips.weapon */
-extern short D_8009C610;
-extern short D_8009C612;
-extern short D_8009C614;
+extern short LOADED_AREA;              /* 0x8009D2A8 GAME.selectedArea at load time (US alias D_8009C610) */
+extern short LOADED_SECTION;           /* 0x8009D2AA GAME.selectedSection at load time */
+extern short LOADED_SPAWN_POINT;       /* 0x8009D2AC GAME.selectedSpawnPoint at load time */
 extern u8   GAME_KEEP_BGM;             /* 0x8009C967 = GAME.keepBgm */
 extern u8   D_8009BCE9;
 extern u16  D_8009C0FC;
@@ -2451,7 +2451,7 @@ extern s16  D_1F8003BA;
 extern s32  D_8009BCBC;
 extern s8   GAME_PLAYER_MODE;          /* 0x8009D2B0 = GAME.playerMode */
 extern u8   D_800A5403;
-extern s16  D_1F8000E6;
+extern s16  VIEW_CAMERA_ROT_Y;         /* 0x1F8000E6 VIEW_CAMERA.rot[1].p.hi, the camera angle */
 extern s16  BUTTON_MASK_A;             /* 0x1F8003C4 BUTTON_CONFIGS[].a (loadButtonConfig; default Square) */
 extern s16  BUTTON_MASK_B;             /* 0x1F8003C6 BUTTON_CONFIGS[].b (default X) */
 extern s16  BUTTON_MASK_C;             /* 0x1F8003C8 BUTTON_CONFIGS[].c (default Circle) */
@@ -2472,7 +2472,7 @@ extern u8   D_8009C97F;
 extern u8   D_8009C982;
 extern u8   D_8009C983;
 extern u8   PAD_BUFFERS;               /* 0x8009F7F0 the two 0x22-byte libpad receive buffers (US alias D_8009EB58) */
-extern s16  D_1F8000F2;
+extern s16  VIEW_CAMERA_Y;             /* 0x1F8000F2 VIEW_CAMERA.pos[1].p.hi */
 extern s32  D_80012368[];
 extern void* D_1F8002D8;
 extern s32  D_1F800278;

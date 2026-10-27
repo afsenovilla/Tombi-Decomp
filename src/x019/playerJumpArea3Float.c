@@ -2,7 +2,7 @@
 // MATCHING 800f28a0 316
 #include "TOBJ.H"
 extern unsigned short GAME;
-extern short DAT_8009c944, DAT_8009c946;
+extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y;
 extern TObj *PLAYER_EXT;
 extern char DAT_80010ae8[];
 extern void FUN_800efc04(TObj *);
@@ -17,7 +17,7 @@ void playerJumpArea3Float(TObj *o)
 {
     TObj *p;
     unsigned short *q;
-    if (GAME == 3 && DAT_8009c944 != 0) {
+    if (GAME == 3 && GVARS_PLAYER_DRIFT_H != 0) {
         p = PLAYER_EXT;
         q = &p->animFrame;
         p->animTimer = 0x35;
@@ -32,8 +32,8 @@ void playerJumpArea3Float(TObj *o)
         FUN_8001fe94(o, 3);
     }
     FUN_8001fec0(o);
-    *(volatile int *)&o->h->raw += DAT_8009c944 * 0x80;
-    o->y.raw += DAT_8009c946 * 0x80;
+    *(volatile int *)&o->h->raw += GVARS_PLAYER_DRIFT_H * 0x80;
+    o->y.raw += GVARS_PLAYER_DRIFT_Y * 0x80;
     setVelXFromPadLR(o);
     o->h->raw += o->velX * 0x100;
     o->timer--;

@@ -26,7 +26,7 @@ void flowerForestPigShotSlide(TObj *o)
         if (--o->timer == -1) o->step++;
         break;
     case 2:
-        if (GVARS.b3a != 0) {
+        if (GVARS.playerLanded != 0) {
             o->step++;
             if (o->subtype == 3) o->timer = 10;
             else o->timer = 0x1fe;

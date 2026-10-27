@@ -14,8 +14,8 @@ extern unsigned char DAT_8009c942;
 extern unsigned char DAT_800a60f8;
 extern unsigned char DAT_8009d004;
 extern int GAME_AREA00_EVENT_CONTROL;
-extern short DAT_8009c944;
-extern short DAT_8009c946[];
+extern short GVARS_PLAYER_DRIFT_H;
+extern short GVARS_PLAYER_DRIFT_Y[];
 extern unsigned short JOYPAD_STATE, BUTTON_MASK_A, BUTTON_MASK_B, BUTTON_MASK_C, SPAWN_AXIS_SWAP;
 extern char D_8001080c[];
 extern char D_800113cc[];
@@ -137,8 +137,8 @@ void playerStepIdle(TObj *o)
             YADJ(o);
             if (!(JOYPAD_STATE & (BUTTON_MASK_B | BUTTON_MASK_C))) {
                 setObjectSpeedPolar2(o, o->wb6, o->wb2);
-                o->h->raw += DAT_8009c944 << 8;
-                o->y.raw += DAT_8009c946[0] << 8;
+                o->h->raw += GVARS_PLAYER_DRIFT_H << 8;
+                o->y.raw += GVARS_PLAYER_DRIFT_Y[0] << 8;
                 FUN_8001fce4(o);
             }
             break;

@@ -22,7 +22,7 @@ void flameBlockedNpcTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (GVARS.b3a == 0) break;
+        if (GVARS.playerLanded == 0) break;
         o->state = 10;
         if (GCD.bce50) break;
         ((unsigned char*)&GVARS.b3f)[0] = 1;

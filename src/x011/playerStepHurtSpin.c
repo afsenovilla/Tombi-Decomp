@@ -47,8 +47,8 @@ extern void playerHurtLandRecover(TObj *);
 
 static __inline__ void move(TObj *o)
 {
-    o->h->raw += GVARS.s44 << 8;
-    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+    o->h->raw += GVARS.driftH << 8;
+    o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
     BLINK();
     o->h->raw += o->velX << 8;
     o->y.raw += o->velY << 8;
@@ -126,12 +126,12 @@ void playerStepHurtSpin(TObj *o)
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
-                GVARS.b38 = 1;
+                GVARS.hurtState = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
         }
-        PLAYER_EXT->b8 = GVARS.b38;
+        PLAYER_EXT->b8 = GVARS.hurtState;
         spawnImpactEffect(3, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         startPadVibration(0, 0x81, 0x81, 0x3c);
         break;

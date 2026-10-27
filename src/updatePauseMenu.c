@@ -31,7 +31,7 @@ void updatePauseMenu(void) {
         if (GAME_DISABLE_SELECT_MENU != 0) {
             return;
         }
-        if (D_8009BCA2 == 0) {
+        if (GVARS_PLAYER_LANDED == 0) {
             return;
         }
         if (GAME_PLAYER_MODE != 1) {

@@ -3,7 +3,7 @@
 extern void FUN_8001e560(int, int), FUN_800ee680(unsigned char *), FUN_8001fec0(unsigned char *), playerSetFallLean(unsigned char *), FUN_80040278(unsigned char *, int, int);
 extern int FUN_8003facc(unsigned char *);
 extern unsigned char *BITTEN_OBJECT;
-extern short DAT_8009c944, DAT_8009c946;
+extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
 
@@ -23,8 +23,8 @@ void playerBittenJumpType0E(unsigned char *o)
         FUN_8001e560(0x22, 0x23);
         o[7] = o[7] + 1;
     case 1:
-        **(int **)(o + 0x40) += DAT_8009c944 << 8;
-        *(int *)(o + 0x14) += DAT_8009c946 << 8;
+        **(int **)(o + 0x40) += GVARS_PLAYER_DRIFT_H << 8;
+        *(int *)(o + 0x14) += GVARS_PLAYER_DRIFT_Y << 8;
         FUN_800ee680(o);
         FUN_8001fec0(o);
         if (*(short *)(o + 0x7e) > 0) {

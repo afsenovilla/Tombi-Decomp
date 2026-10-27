@@ -45,7 +45,7 @@ void stepWaterfallHintNpcTalk(TObj *o)
     case 4:
         switch (o->state) {
         case 0:
-            if (GVARS.b3a != 0) {
+            if (GVARS.playerLanded != 0) {
                 GVARS.b42 = 1;
                 GVARS.b3f = 1;
                 GV2.bb0 = 2;

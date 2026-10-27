@@ -116,8 +116,8 @@ void playerStepWalk(TObj *o)
             playerUpdateSpeedFromPad(o);
             playerSelectGroundAnim(o);
             setObjectSpeedPolar2(o, o->wb6, o->wb2);
-            o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-            o->y.raw += ((short*)&GVARS.s44)[1] << 8;
+            o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+            o->y.raw += ((short*)&GVARS.driftH)[1] << 8;
             FUN_8001fce4(o);
             if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {
                 if (o->subtype != 0) {

@@ -19,7 +19,7 @@ void hauntedPigBagEventStart(TObj *o)
         o->state++;
         break;
     case 1:
-        if (GVARS.b3a == 0) break;
+        if (GVARS.playerLanded == 0) break;
         PLAYER_STATE = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;

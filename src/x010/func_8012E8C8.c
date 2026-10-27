@@ -9,6 +9,6 @@ void func_8012E8C8(TObj *o)
     if (GAME.selectedSection == 1) o->y.raw = -0xea;
     else if (GAME.purifiedAreas & 0x40) o->y.raw = -0x50;
     else o->y.raw = -0x3b8;
-    GVARS.s44 = 0;
-    GVARS.s46 = -0x40;
+    GVARS.driftH = 0;
+    GVARS.driftY = -0x40;
 }

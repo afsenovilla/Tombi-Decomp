@@ -84,7 +84,7 @@ void updateCameraScroll(S *o)
 
     switch (o->b6c) {
     case 0:
-        if (GVARS.b3a == 0) break;
+        if (GVARS.playerLanded == 0) break;
         if (GVARS.b3f != 0) {
             o->b6c = 6;
             break;

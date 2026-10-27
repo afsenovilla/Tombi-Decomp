@@ -17,7 +17,7 @@ void flowerGardenCompleteScene(TObj *o)
     char pad[16];
     switch (o->state) {
     case 0:
-        if (GVARS.b3a == 0)
+        if (GVARS.playerLanded == 0)
             break;
         if (GCD.bcdcb == 0 || GCD.bcdcb == 0xff)
             break;

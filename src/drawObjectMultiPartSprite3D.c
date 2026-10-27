@@ -27,7 +27,7 @@ extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern unsigned long LZ_FILE_CTRL;
-extern char D_1F8000C0b[];
+extern char VIEW_CAMERA[];
 extern ROW LOAD_BUFFER[];
 extern short **D_800a4468;
 extern short *D_800b0bb0;
@@ -91,7 +91,7 @@ void drawObjectMultiPartSprite3D(TObj *o)
     else
         SPAD.s64 = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(VIEW_CAMERA);
     if (proj()) return;
     xy = LZ_FILE_CTRL;
     x = xy;

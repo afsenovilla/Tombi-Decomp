@@ -51,7 +51,7 @@ void func_8012AA10(TObj *o)
         o->d->p.whole = PLAYER.d->p.whole;
         o->d8c = PLAYER.d8c;
         o->b0f = PLAYER.b0f + e->b;
-        if (GVARS.b38) break;
+        if (GVARS.hurtState) break;
         if (PLAYER.d->p.whole == 0x168) {
             p = PLAYER.h;
             x = p->p.whole;
@@ -206,7 +206,7 @@ void carriedGuideFollowPlayer(TObj *o)
         o->d->p.whole = PLAYER.d->p.whole;
         o->d8c = PLAYER.d8c;
         o->b0f = PLAYER.b0f + e->b;
-        if (GVARS.b38) break;
+        if (GVARS.hurtState) break;
         if (PLAYER.d->p.whole == 0x168) {
             p = PLAYER.h;
             x = p->p.whole;

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern short DAT_1f8001c6;
-extern short DAT_1f800252, DAT_1f80024a;
+extern short CAT3_OBJECT_COUNT_SAVED, CAT3_OBJECT_COUNT;
 extern TObj **DAT_1f800220, **DAT_1f800264;
 extern unsigned char PLAYER_TYPE;
 
@@ -39,7 +39,7 @@ void drawCategory3Objects(void)
     TObj *o;
 
     if (DAT_1f8001c6 != 0) {
-        n = DAT_1f800252;
+        n = CAT3_OBJECT_COUNT_SAVED;
         p = DAT_1f800264;
         while (n != 0) {
             o = *p++;
@@ -74,11 +74,11 @@ void drawCategory3Objects(void)
             }
         }
     } else {
-        DAT_1f800252 = DAT_1f80024a;
+        CAT3_OBJECT_COUNT_SAVED = CAT3_OBJECT_COUNT;
         DAT_1f800264 = DAT_1f800220;
-        while (DAT_1f80024a != 0) {
+        while (CAT3_OBJECT_COUNT != 0) {
             o = *DAT_1f800220++;
-            DAT_1f80024a--;
+            CAT3_OBJECT_COUNT--;
             if (o->visible) {
                 switch (getObjectRenderKind(o)) {
                 case 0: drawObjectSprite(o); break;

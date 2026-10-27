@@ -48,7 +48,7 @@ void playerEventModeDispatch(TObj *o)
         o->substep = 0;
         o->timer = 0;
         o->d8c = v;
-        ((unsigned char*)&GVARS.b3a)[0] = 1;
+        ((unsigned char*)&GVARS.playerLanded)[0] = 1;
         break;
     case 2:
         playerEventStepLaneJumpBack(o);

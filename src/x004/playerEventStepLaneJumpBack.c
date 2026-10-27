@@ -9,7 +9,7 @@ typedef struct {
 #define WF6(o) (*(short *)((char *)(o) + 0xf6))
 extern G330 *PLAYER_EXT;
 extern unsigned short GAME;
-extern unsigned char DAT_8009c93a[];
+extern unsigned char GVARS_PLAYER_LANDED[];
 extern unsigned char DAT_8009ce61;
 extern unsigned char DAT_8009d119;
 extern unsigned char SLOPE_TILT_TABLE[];
@@ -96,7 +96,7 @@ void playerEventStepLaneJumpBack(TObj *o)
         FUN_8001fd94(o);
         FUN_8003fd78(o, 0, 0);
         if (FUN_8001fec0(o)) {
-            DAT_8009c93a[0] = 1;
+            GVARS_PLAYER_LANDED[0] = 1;
             *(signed char *)&o->b0f = -8;
             OB(o, 0xa5) = 0;
             OB(o, 0xa3) = 0;

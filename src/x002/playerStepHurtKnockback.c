@@ -99,12 +99,12 @@ void playerStepHurtKnockback(TObj *o)
             ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
-                GVARS.b38 = 1;
+                GVARS.hurtState = 1;
                 FUN_8001f110(0);
                 playJingle(3);
             }
         }
-        PLAYER_EXT->b8 = GVARS.b38;
+        PLAYER_EXT->b8 = GVARS.hurtState;
         o->ba4 = 0;
         o->b69 = 0;
         o->movetab = MOVE_TABLE_3;
@@ -146,8 +146,8 @@ void playerStepHurtKnockback(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->velY += 0x40;
         o->y.raw += o->velY << 8;
         if (o->velY > 0) {
@@ -175,8 +175,8 @@ void playerStepHurtKnockback(TObj *o)
         AnimAdvance(o);
         if (o->b69 == 0 && !(o->animFrame & 2))
             applyAnimVelocityX(o, o->animFrame ^ 1);
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (playerHurtCheckFastFall(o) == 0) {

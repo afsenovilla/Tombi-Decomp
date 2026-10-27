@@ -71,9 +71,9 @@ void areaTransitionHandler(void)
 
         val = D_80077084[GAME_A + (u16)AREA_VARIANT][GAME_SELECTED_SECTION];
         *(short*)0x1F8001DE = 0;
-        D_8009C610 = GAME_A;
-        D_8009C612 = GAME_SELECTED_SECTION;
-        D_8009C614 = GAME_SELECTED_SPAWN_POINT;
+        LOADED_AREA = GAME_A;
+        LOADED_SECTION = GAME_SELECTED_SECTION;
+        LOADED_SPAWN_POINT = GAME_SELECTED_SPAWN_POINT;
         *(short*)0x1F8001DC = val;
 
         func_80021C24(GAME_A + (u16)AREA_VARIANT);

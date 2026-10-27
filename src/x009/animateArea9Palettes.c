@@ -73,7 +73,7 @@ void animateArea9Palettes(Q *q, unsigned char *base)
                 }
             }
         }
-        if (D_8009C964 == 0x20 || GVARS.b3a == 0) {
+        if (D_8009C964 == 0x20 || GVARS.playerLanded == 0) {
             if (CAMERA_SCROLL.rotY == 0)
                 { register int t asm("$3") = (*(short*)((char*)&SPAD.i174 + 2)) - 0x668; d = t / 80; }
             else

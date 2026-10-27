@@ -7,7 +7,7 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8005662C_slps01144);
 #else
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
-extern short D_1f8003bc;
+extern short GRAB_POINT_OFFSET;
 
 int probeGrabPointInBoxA(PO *o, TObj *e)
 {
@@ -26,9 +26,9 @@ int probeGrabPointInBoxA(PO *o, TObj *e)
     if ((unsigned short)ad > e->box3)
         return 0;
     if (!(o->t.animFrame & 1))
-        D_1f8003bc = -e->box0;
+        GRAB_POINT_OFFSET = -e->box0;
     else
-        D_1f8003bc = e->box1 - e->box0;
+        GRAB_POINT_OFFSET = e->box1 - e->box0;
     return 1;
 }
 #endif

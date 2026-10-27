@@ -98,8 +98,8 @@ void playerUpdateWaterLevel(TObj *o)
         break;
     tail:
         if (c) {
-            GVARS.s44 = 0;
-            GVARS.s46 = 0;
+            GVARS.driftH = 0;
+            GVARS.driftY = 0;
             break;
         }
         goto els;
@@ -107,8 +107,8 @@ void playerUpdateWaterLevel(TObj *o)
         if (GAME.selectedSection == 2) {
             o->y.p.whole = -0xe4;
         els:
-            GVARS.s44 = 0;
-            GVARS.s46 = -0x40;
+            GVARS.driftH = 0;
+            GVARS.driftY = -0x40;
         }
         break;
     }

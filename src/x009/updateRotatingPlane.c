@@ -55,7 +55,7 @@ void updateRotatingPlane(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane == 0x20 || GVARS.b3a != 1) {
+        if (GAME.selectedPlane == 0x20 || GVARS.playerLanded != 1) {
             cullObjectToDrawListMargin(o, 0xa0);
             rotatingPlaneSway(o);
             rotatingPlanePlaySfx(o);

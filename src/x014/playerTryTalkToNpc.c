@@ -35,7 +35,7 @@ int playerTryTalkToNpc(void)
         case 0x18: case 0x23: case 0x32: case 0x37: case 0x4d: case 0x55: case 0x58: case 0x59: case 0x5a:
             if (p->b68 != 0)
                 break;
-            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != PLAYER_D->y) {
+            if (((unsigned char*)&GVARS.playerLanded)[0] == 0 || ((unsigned char*)&GVARS.playerLanded)[8] != 0 || p->pos2->y != PLAYER_D->y) {
                 p->b68 = r;
                 r = p->b68; /* extra refs raise r's global-alloc priority over d */
                 break;

@@ -1,12 +1,12 @@
 // FUNC 8002b020 148 MAIN0
 // MATCHING 8002b020 148
-extern char DAT_800b1828[];
+extern char OBJECT_POOL_LAYER8[];
 extern void (*PTR_DAT_80079b88[])(char *);
 extern int UPDATE_OBJECT_INDEX;
 
 void updateObjectsLayer8(void)
 {
-    char *p = DAT_800b1828;
+    char *p = OBJECT_POOL_LAYER8;
     UPDATE_OBJECT_INDEX = 0;
     do {
         if (*p != 0)

@@ -12,7 +12,7 @@ typedef struct {
     Fix16 *pos;
 } Cam;
 extern TObj PLAYER;
-extern Fix16 D_1F8000F0;
+extern Fix16 VIEW_CAMERA_Y_FIX;
 
 void cameraFollowPlayerClamped(Cam *c)
 {
@@ -25,11 +25,11 @@ void cameraFollowPlayerClamped(Cam *c)
     } else if (c->pos->p.whole < c->xmin) {
         c->pos->raw = c->xmin << 16;
     }
-    D_1F8000F0.raw = pl->y.raw;
-    if (D_1F8000F0.p.whole > c->ymax) {
-        D_1F8000F0.raw = c->ymax << 16;
-    } else if (D_1F8000F0.p.whole < c->ymin) {
-        D_1F8000F0.raw = c->ymin << 16;
+    VIEW_CAMERA_Y_FIX.raw = pl->y.raw;
+    if (VIEW_CAMERA_Y_FIX.p.whole > c->ymax) {
+        VIEW_CAMERA_Y_FIX.raw = c->ymax << 16;
+    } else if (VIEW_CAMERA_Y_FIX.p.whole < c->ymin) {
+        VIEW_CAMERA_Y_FIX.raw = c->ymin << 16;
     }
 }
 #endif

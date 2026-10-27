@@ -11,7 +11,7 @@ typedef struct { short m[3][3]; int t[3]; } MATRIX;
 
 extern SVECTOR DAT_1f800060;
 extern int MODEL_VERTEX_PTR;
-extern MATRIX DAT_1f8000c0;
+extern MATRIX VIEW_CAMERA;
 extern char *TASK_C;
 extern int GAME;
 extern void SetRotMatrix(MATRIX *);
@@ -25,8 +25,8 @@ int projectActorPosition(char *p, long *sxy, long *z)
         DAT_1f800060.vz = *(short *)(p + 0x1a) >> 2;
     else
         DAT_1f800060.vz = *(short *)(p + 0x1a);
-    SetRotMatrix(&DAT_1f8000c0);
-    SetTransMatrix(&DAT_1f8000c0);
+    SetRotMatrix(&VIEW_CAMERA);
+    SetTransMatrix(&VIEW_CAMERA);
     gte_ldv0(&DAT_1f800060);
     gte_rtps();
     gte_stflg(&MODEL_VERTEX_PTR);

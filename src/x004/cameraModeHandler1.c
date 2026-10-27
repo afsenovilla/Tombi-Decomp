@@ -24,7 +24,7 @@ extern void setPlayerAxisPointers(void);
 
 void cameraModeHandler1(O *o)
 {
-    if (GVARS.b38) {
+    if (GVARS.hurtState) {
         updateCameraFollow(o);
         return;
     }

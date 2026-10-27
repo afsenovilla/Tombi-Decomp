@@ -7,8 +7,8 @@ extern P *PLAYER_EXT;
 
 void playerHurtMoveAndBlink(TObj *o)
 {
-    o->h->raw += GVARS.s44 << 8;
-    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+    o->h->raw += GVARS.driftH << 8;
+    o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
     if (PLAYER_EXT->b8 == 0) {
         o->visible = *(unsigned char *)0x1F8001F8 & 1;
     }

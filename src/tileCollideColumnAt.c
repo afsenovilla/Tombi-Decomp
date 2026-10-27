@@ -6,7 +6,7 @@
 
 extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short D_1F800280, COLLISION_HIT_FLAGS, D_1F800284;
-extern unsigned short D_8009BD68;
+extern unsigned short TILE_COL_SURFACE_Y;
 extern short D_8009BD6C, TILE_COL_COUNT, TILE_COL_TOP, TILE_COL_HEIGHT, TILE_COL_FLAGS, D_8009BD80;
 extern unsigned short D_8009BD84;
 extern short D_8009BD88, D_8009BD8C, D_8009BD90;
@@ -67,15 +67,15 @@ asm("" : "=r"(a) : "0"(a));
         if (D_8009BD90 == 0) {
             if (b > 0) {
             plain:
-                D_8009BD68 = a;
+                TILE_COL_SURFACE_Y = a;
             } else
-                D_8009BD68 = a + b;
+                TILE_COL_SURFACE_Y = a + b;
         } else {
             r = b * (xi - D_8009BD8C) / D_8009BD90;
             D_8009BD80 = x;
-            D_8009BD68 = a + r;
+            TILE_COL_SURFACE_Y = a + r;
         }
-        d = D_8009BD68 - y;
+        d = TILE_COL_SURFACE_Y - y;
 asm("" : "=r"(d) : "0"(d));
         D_8009BD6C = d;
         s = D_8009BD84;

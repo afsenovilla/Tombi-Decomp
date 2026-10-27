@@ -40,7 +40,7 @@ void raceStartCountdown(TObj *o)
         p = PLAYER_MESSAGE_BOX;
         if (p->b04 == 2) {
             p->b04 = 3;
-            GVARS.b3a = 1;
+            GVARS.playerLanded = 1;
             GVARS.b3f = 0;
             GVARS.b3e = 0;
             GVARS.b42 = 0;

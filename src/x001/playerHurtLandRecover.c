@@ -195,7 +195,7 @@ void playerHurtLandRecover(TObj *o)
             ADD7C();
             fall(o);
         }
-        if (GVARS.b38 == 0) {
+        if (GVARS.hurtState == 0) {
             *(unsigned char *)&o->wac = 0;
             o->wb2 = 0;
             o->velX = 0;
@@ -308,7 +308,7 @@ void playerHurtLandRecover(TObj *o)
             D_8009C960b[0x951] = 0;
             GCD.bcf06 = 0;
             if (*(unsigned short *)D_8009C960b != 10 || *(unsigned short *)(D_8009C960b + 2) != 0)
-                GVARS.b38 = 2;
+                GVARS.hurtState = 2;
             o->substep++;
         }
         TURN();

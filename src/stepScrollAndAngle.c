@@ -23,19 +23,19 @@ s32 stepScrollAndAngle(u8* self)
     } else {
         a = 0;
     }
-    v = D_1F8000E6;
+    v = VIEW_CAMERA_ROT_Y;
     if (v != 0) {
         if (v > 0) {
             v = v - 2;
-            D_1F8000E6 = v;
+            VIEW_CAMERA_ROT_Y = v;
             if (v < 0) {
-                D_1F8000E6 = 0;
+                VIEW_CAMERA_ROT_Y = 0;
             }
         } else {
             v = v + 2;
-            D_1F8000E6 = v;
+            VIEW_CAMERA_ROT_Y = v;
             if (v > 0) {
-                D_1F8000E6 = 0;
+                VIEW_CAMERA_ROT_Y = 0;
             }
         }
         b = 1;

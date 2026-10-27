@@ -52,7 +52,7 @@ void updateEvilPigBoss(TObj *o)
             o->step++;
             break;
         case 1:
-            if (GVARS.b3a) evilPigBossIntroTalk(o);
+            if (GVARS.playerLanded) evilPigBossIntroTalk(o);
             break;
         }
         break;

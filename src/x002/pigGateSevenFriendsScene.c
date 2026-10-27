@@ -30,7 +30,7 @@ void pigGateSevenFriendsScene(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (GVARS.b3a == 0) {
+        if (GVARS.playerLanded == 0) {
             break;
         }
         ((unsigned char*)&GVARS.b42)[0] = 1;

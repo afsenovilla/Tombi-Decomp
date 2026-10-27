@@ -99,7 +99,7 @@ void playerEventStepLandIdle(O *o)
             land(o);
             if (D_8009D2AFa[0] == 0) {
                 GV2.baf = 1;
-                GVARS.b3a = 1;
+                GVARS.playerLanded = 1;
             }
             o->state = 2;
         }
@@ -126,7 +126,7 @@ void playerEventStepLandIdle(O *o)
             land(o);
             if (D_8009D2AFa[0] == 0) {
                 GV2.baf = 1;
-                GVARS.b3a = 1;
+                GVARS.playerLanded = 1;
             }
             o->state++;
         }

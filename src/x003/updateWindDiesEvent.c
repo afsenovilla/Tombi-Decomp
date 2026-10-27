@@ -17,7 +17,7 @@ void updateWindDiesEvent(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (GVARS.b3a == 0) break;
+        if (GVARS.playerLanded == 0) break;
         switch (o->step) {
         case 0:
             if (U8(&PLAYER, 0xa2) != 1) break;

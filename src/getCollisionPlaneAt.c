@@ -12,7 +12,7 @@ extern XY D_8007B450[];
 extern XY D_8007B44C[];
 extern XY *D_8007B46C;
 extern unsigned char *D_8007B55C[];
-extern char *D_1F800308[];
+extern char *WHM_DATA[];
 #define M960 D_8009C960h
 
 char *getCollisionPlaneAt(short x, short y)
@@ -26,7 +26,7 @@ char *getCollisionPlaneAt(short x, short y)
         return D_8007B5DC;
     if (M960 == 0 && GAME.selectedSection != 3) {
         if (y >= 0x10f) {
-            b = D_1F800308[0];
+            b = WHM_DATA[0];
             y -= 0x10e;
         } else {
             b = (*(char **)&SPAD.p30c);
@@ -35,7 +35,7 @@ char *getCollisionPlaneAt(short x, short y)
         t += GAME.selectedSection;
     } else if ((M960 == 4 || M960 == 12) && GAME.selectedSection < 4) {
         t = &D_8007B450[GAME.selectedSection];
-        b = D_1F800308[SPAD.s1c8 & 1];
+        b = WHM_DATA[SPAD.s1c8 & 1];
     } else if (M960 == 3 && (GAME.selectedSection == 1 || GAME.selectedSection == 5)) {
         if ((*(short **)&PLAYER.obj.d)[1] < 0) {
             b = (*(char **)&SPAD.p30c);
@@ -43,12 +43,12 @@ char *getCollisionPlaneAt(short x, short y)
             y += 0x5a;
         } else {
             t = D_8007B46C;
-            b = D_1F800308[0];
+            b = WHM_DATA[0];
             t += GAME.selectedSection;
         }
     } else {
         t = D_8007B460[M960];
-        b = D_1F800308[0];
+        b = WHM_DATA[0];
         t += GAME.selectedSection;
     }
     if (SPAD.s1c8 & 1)

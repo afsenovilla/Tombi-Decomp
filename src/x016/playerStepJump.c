@@ -31,7 +31,7 @@ extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short BUTTON_MASK_B, JOYPAD_STATE, TICK_COUNT;
 extern short FREE_OBJECT_COUNT;
-extern short DAT_8009c944, DAT_8009c946[];
+extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y[];
 extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND[], DAT_8009c990;
 extern int GRABBED_OBJECT;
 extern unsigned char SLOPE_TILT_TABLE[];
@@ -126,8 +126,8 @@ void playerStepJump(TObj *o)
         playerSetJumpRiseVelocity(o);
     case 2:
     common:
-        o->h->raw += DAT_8009c944 << 8;
-        o->y.raw += DAT_8009c946[0] << 8;
+        o->h->raw += GVARS_PLAYER_DRIFT_H << 8;
+        o->y.raw += GVARS_PLAYER_DRIFT_Y[0] << 8;
         FUN_8001fec0(o);
         if (o->ba7 != 0) {
             short a = o->a.p.whole, y = o->y.p.whole, b = o->b.p.whole;
@@ -183,8 +183,8 @@ void playerStepJump(TObj *o)
         o->b69 = 0;
         break;
     case 3:
-        o->h->raw += DAT_8009c944 << 8;
-        o->y.raw += DAT_8009c946[0] << 8;
+        o->h->raw += GVARS_PLAYER_DRIFT_H << 8;
+        o->y.raw += GVARS_PLAYER_DRIFT_Y[0] << 8;
         FUN_8001fec0(o);
         if (X(o)->c9 != 0) playerJumpArea3Float(o);
         else playerUpdateFall(o);

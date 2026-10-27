@@ -2,7 +2,7 @@
 // MATCHING 80126940 144
 #include "TOBJ.H"
 extern short probeGrabPointInBoxA(void);
-extern short DAT_1f8003bc;
+extern short GRAB_POINT_OFFSET;
 extern short DAT_1f80019e;
 extern TObj *DAT_1f8003c0;
 
@@ -13,7 +13,7 @@ void playerGrabCat4Type02(TObj *a, TObj *b)
         a->wba = -3;
         a->velY = 0;
         DAT_1f80019e = 0;
-        a->wb8 = DAT_1f8003bc;
+        a->wb8 = GRAB_POINT_OFFSET;
         b->b68 = 2;
         DAT_1f8003c0 = b;
         b->animFrame = a->animFrame & 1;

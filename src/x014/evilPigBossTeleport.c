@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 typedef struct { char p0[0xe]; unsigned short w0e; } X;
 typedef struct { unsigned char c[4]; } B;
-extern volatile unsigned short D_1F8000EE;
-extern volatile unsigned short D_1F8000F2;
+extern volatile unsigned short VIEW_CAMERA_X;
+extern volatile unsigned short VIEW_CAMERA_Y;
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -47,8 +47,8 @@ void evilPigBossTeleport(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         for (k = 0; k < 16; k++) {
-            found = (unsigned short)(q[0] - D_1F8000EE + 0xa0) < 0x141
-                && (unsigned short)(q[1] - D_1F8000F2 + 0x6e) < 0xdd;
+            found = (unsigned short)(q[0] - VIEW_CAMERA_X + 0xa0) < 0x141
+                && (unsigned short)(q[1] - VIEW_CAMERA_Y + 0x6e) < 0xdd;
             n += found;
             q += 4;
             o->wb0 |= found << k;

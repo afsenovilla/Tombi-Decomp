@@ -8,21 +8,21 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_800293FC_slps01144);
 typedef struct { char p[0x30]; short y; } TObj;
 extern unsigned char DAT_800a60d6;
 extern int DAT_800a606c;
-extern unsigned short F2u;
+extern unsigned short VIEW_CAMERA_Y;
 extern short F2;
 extern struct { short v; } F2s;
 extern unsigned short PLAYER_Y_WHOLE;
 extern short E[];
-extern short E2;
+extern short VIEW_CAMERA_ROT_Y;
 
 static __inline__ int calc(void)
 {
     int t;
     if (DAT_800a60d6 == 3) {
-        t = F2u - 0x14;
+        t = VIEW_CAMERA_Y - 0x14;
         return t - DAT_800a606c;
     }
-    return F2u - PLAYER_Y_WHOLE;
+    return VIEW_CAMERA_Y - PLAYER_Y_WHOLE;
 }
 
 void cameraScrollToPlayerYB(TObj *o)
@@ -53,7 +53,7 @@ void cameraScrollToPlayerYB(TObj *o)
                 E[0] = -0x50 - s;
         }
     }
-    if (F2 + E2 < o->y)
-        E2 = o->y - F2;
+    if (F2 + VIEW_CAMERA_ROT_Y < o->y)
+        VIEW_CAMERA_ROT_Y = o->y - F2;
 }
 #endif

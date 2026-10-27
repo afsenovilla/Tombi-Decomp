@@ -8,21 +8,21 @@
 
 void updateLookScroll(u8* self)
 {
-    s16 v = D_1F8000E6;
+    s16 v = VIEW_CAMERA_ROT_Y;
     s32 w;
 
     if (v != 0) {
         if (v > 0) {
             v = v - 2;
-            D_1F8000E6 = v;
+            VIEW_CAMERA_ROT_Y = v;
             if (v < 0) {
-                D_1F8000E6 = 0;
+                VIEW_CAMERA_ROT_Y = 0;
             }
         } else {
             v = v + 2;
-            D_1F8000E6 = v;
+            VIEW_CAMERA_ROT_Y = v;
             if (v > 0) {
-                D_1F8000E6 = 0;
+                VIEW_CAMERA_ROT_Y = 0;
             }
         }
     }

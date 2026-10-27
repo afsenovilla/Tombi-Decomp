@@ -7,7 +7,7 @@
 extern short *getCollisionPlaneAt(int, int);
 extern int angleFromDelta(int, int);
 extern unsigned short *COLLISION_SEG_PTR;
-extern short DAT_1f80027c;
+extern short SLOPE_PROBE_ANGLE;
 
 int func_80041D20(TObj *o, short a, int b)
 {
@@ -49,11 +49,11 @@ hit:
         goto next;
     }
     s = angleFromDelta(k, ws);
-    DAT_1f80027c = s;
+    SLOPE_PROBE_ANGLE = s;
     if (s < 0x40) {
-        DAT_1f80027c = s + 0xc0;
+        SLOPE_PROBE_ANGLE = s + 0xc0;
     } else if (s > 0xc0) {
-        DAT_1f80027c = s - 0xc0;
+        SLOPE_PROBE_ANGLE = s - 0xc0;
     }
     e = x + 8;
     if (((b - e - w - 1) & 0xffff) > -(short)w) return 2;
@@ -69,7 +69,7 @@ test:
 extern short *getCollisionPlaneAt(int, int);
 extern int angleFromDelta(int, int);
 extern unsigned short *COLLISION_SEG_PTR;
-extern short DAT_1f80027c;
+extern short SLOPE_PROBE_ANGLE;
 
 int probeSlopeAngleAt(TObj *o, short a, int b)
 {
@@ -110,11 +110,11 @@ hit:
         goto next;
     }
     s = angleFromDelta(k, ws);
-    DAT_1f80027c = s;
+    SLOPE_PROBE_ANGLE = s;
     if (s < 0x40) {
-        DAT_1f80027c = s + 0xc0;
+        SLOPE_PROBE_ANGLE = s + 0xc0;
     } else if (s > 0xc0) {
-        DAT_1f80027c = s - 0xc0;
+        SLOPE_PROBE_ANGLE = s - 0xc0;
     }
     e = x + 8;
     if (((b - e - w - 1) & 0xffff) > -(short)w) return 2;

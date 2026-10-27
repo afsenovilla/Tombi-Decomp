@@ -117,7 +117,7 @@ void updateAreaMechanisms(TObj *o)
                         if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x20) < 0x41) {
                             o->d88 = 0;
                             o->state = 1;
-                            if (((unsigned char*)&GVARS.b3a)[0] == 0) {
+                            if (((unsigned char*)&GVARS.playerLanded)[0] == 0) {
                                 o->state = 3;
                                 o->d88 = 0xa00;
                             }

@@ -16,7 +16,7 @@ void updateAreaScroll(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (GVARS.b3a) {
+        if (GVARS.playerLanded) {
             o->step++;
             o->subtype = 0;
         }

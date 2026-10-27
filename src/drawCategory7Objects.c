@@ -2,9 +2,9 @@
 // MATCHING 80057edc 652
 #include "TOBJ.H"
 extern short DAT_1f8001c6;
-extern short DAT_1f80025a;
+extern short CAT7_OBJECT_COUNT_SAVED;
 extern TObj **DAT_1f800270;
-extern short DAT_1f800240;
+extern short CAT7_OBJECT_COUNT;
 extern TObj **DAT_1f80022c;
 extern unsigned char PLAYER_TYPE;
 extern unsigned short GAME[];
@@ -23,7 +23,7 @@ void drawCategory7Objects(void)
     int n;
 
     if (DAT_1f8001c6 != 0) {
-        n = DAT_1f80025a;
+        n = CAT7_OBJECT_COUNT_SAVED;
         p = DAT_1f800270;
         while (n != 0) {
             o = *p++;
@@ -53,11 +53,11 @@ void drawCategory7Objects(void)
             }
         }
     } else {
-        DAT_1f80025a = DAT_1f800240;
+        CAT7_OBJECT_COUNT_SAVED = CAT7_OBJECT_COUNT;
         DAT_1f800270 = DAT_1f80022c;
-        while (DAT_1f800240 != 0) {
+        while (CAT7_OBJECT_COUNT != 0) {
             o = *DAT_1f80022c++;
-            DAT_1f800240--;
+            CAT7_OBJECT_COUNT--;
             switch (o->b0a) {
             case 0:
                 drawObjectSprtWithMode(o);

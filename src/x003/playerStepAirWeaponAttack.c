@@ -21,8 +21,8 @@ typedef struct {
 extern P800F36E0 *PLAYER_EXT;
 extern TObj *BITTEN_OBJECT;
 typedef struct { short x, y; } SXY;
-extern short D_8009C944;
-extern short D_8009C946;
+extern short GVARS_PLAYER_DRIFT_H;
+extern short GVARS_PLAYER_DRIFT_Y;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short BUTTON_MASK_B;
 extern unsigned char GAME_EQUIPPED_WEAPON;
@@ -144,8 +144,8 @@ void playerStepAirWeaponAttack(TObj *o)
             }
         }
     case 2:
-        *(int *)o->h += D_8009C944 << 8;
-        o->y.raw += D_8009C946 << 8;
+        *(int *)o->h += GVARS_PLAYER_DRIFT_H << 8;
+        o->y.raw += GVARS_PLAYER_DRIFT_Y << 8;
         playerAttackDecelerate(o);
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
@@ -208,15 +208,15 @@ void playerStepAirWeaponAttack(TObj *o)
         o->state = 2;
         break;
     case 3:
-        *(int *)o->h += D_8009C944 << 8;
-        o->y.raw += D_8009C946 << 8;
+        *(int *)o->h += GVARS_PLAYER_DRIFT_H << 8;
+        o->y.raw += GVARS_PLAYER_DRIFT_Y << 8;
         playerAttackDecelerate(o);
         o->d8c = 0;
         PLAYER_EXT->b8 = 1;
         if (U8(o, 0xc9) != 0) {
             FUN_8001fec0(o);
-            *(int *)o->h += D_8009C944 << 7;
-            o->y.raw += D_8009C946 << 7;
+            *(int *)o->h += GVARS_PLAYER_DRIFT_H << 7;
+            o->y.raw += GVARS_PLAYER_DRIFT_Y << 7;
             setVelXFromPadLR(o);
             o->h->raw += o->velX << 8;
             if (--o->timer <= 0) {

@@ -61,8 +61,8 @@ void playerStep48Area10B(TObj *o)
         }
         break;
     case 2:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         ObjCheckHeadCollision(o);
         if (PAD_PRESSED[0] & 0x80) o->animFrame = 1;
         if (PAD_PRESSED[0] & 0x20) o->animFrame = 0;

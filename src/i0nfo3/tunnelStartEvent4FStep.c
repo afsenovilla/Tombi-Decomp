@@ -2,14 +2,14 @@
 // MATCHING 800ee5a4 248
 #include "TOBJ.H"
 extern void func_8005A9A4(int a, int b);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern signed char D_8009C93F, D_8009C942, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, D_800A60E4;
 
 void tunnelStartEvent4FStep(TObj *o)
 {
     switch (o->state) {
     case 0:
-        if (D_8009C93A != 0) {
+        if (GVARS_PLAYER_LANDED != 0) {
             PLAYER_SUBSTATE = 2;
             D_8009C93F = 1;
             D_8009C942 = 1;

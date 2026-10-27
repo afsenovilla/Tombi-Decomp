@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *PLAYER_EXT;
-extern unsigned char DAT_8009c93a;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned short SPAWN_AXIS_SWAP;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -39,7 +39,7 @@ void playerEventStepWalkIntoDepth(TObj *o)
             o->state = 9;
         break;
     case 9:
-        DAT_8009c93a = 1;
+        GVARS_PLAYER_LANDED = 1;
         (*(signed char*)&o->b0f) = -8;
         o->ba5 = 0;
         o->b9c = 0;

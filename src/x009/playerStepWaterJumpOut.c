@@ -11,7 +11,7 @@ typedef struct {
 } G330;
 #define OB(o, n) (((unsigned char *)(o))[n])
 extern G330 *PLAYER_EXT;
-extern short DAT_8009c944[2];
+extern short GVARS_PLAYER_DRIFT_H[2];
 extern int GRABBED_OBJECT;
 extern void FUN_8001e560(int, int);
 extern void FUN_8001e5f4(int, int);
@@ -44,8 +44,8 @@ void playerStepWaterJumpOut(TObj *o)
         o->state++;
         break;
     case 1:
-        o->h->raw += DAT_8009c944[0] << 8;
-        o->y.raw += DAT_8009c944[1] << 8;
+        o->h->raw += GVARS_PLAYER_DRIFT_H[0] << 8;
+        o->y.raw += GVARS_PLAYER_DRIFT_H[1] << 8;
         FUN_8001fec0(o);
         if (o->ba7)
             spawnPlayerSplashEffect(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);

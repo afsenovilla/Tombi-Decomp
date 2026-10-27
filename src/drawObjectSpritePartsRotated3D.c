@@ -27,7 +27,7 @@ extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern long D_1F800074a[];
-extern char D_1F8000C0b[];
+extern char VIEW_CAMERA[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(void *, int);
@@ -124,7 +124,7 @@ void drawObjectSpritePartsRotated3D(TObj *o)
     else
         SPAD.s64 = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(VIEW_CAMERA);
     if (proj()) return;
     xy = LZ_FILE_CTRL;
     e = (short *)o->d3c;

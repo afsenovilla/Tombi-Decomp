@@ -83,8 +83,8 @@ void playerStepAttackJump(P800F3F3C *o)
         playerSetJumpRiseVelocity(o);
     case 2:
     common:
-        o->t.h->raw += GVARS.s44 << 8;
-        o->t.y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->t.h->raw += GVARS.driftH << 8;
+        o->t.y.raw += ((short*)&GVARS.driftY)[0] << 8;
         playerUpdateSpeedFromPad(o);
         playerAirAccelerateX(o);
         o->t.h->raw += o->t.velX << 8;

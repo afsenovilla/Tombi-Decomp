@@ -73,7 +73,7 @@ void pigGateDiscoveryScene(Ctl *o)
     switch (o->state) {
     case 0:
         { Fix16 *h = PLAYER.h, *dd = PLAYER.d; Spawn(h->p.whole, PLAYER.y.p.whole, dd->p.whole); }
-        if (GVARS.b3a) {
+        if (GVARS.playerLanded) {
             ((unsigned char*)&GVARS.b42)[0] = 1;
             ((unsigned char*)&GVARS.b3f)[0] = 1;
             GV2.bb0 = 2;

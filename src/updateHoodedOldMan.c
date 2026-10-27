@@ -12,8 +12,8 @@ extern unsigned char D_8009C93F_[];
 #define D_8009C93F D_8009C93F_[0]
 extern unsigned char D_8009C93B_[];
 #define D_8009C93B D_8009C93B_[0]
-extern unsigned char D_8009C93A_[];
-#define D_8009C93A D_8009C93A_[0]
+extern unsigned char GVARS_PLAYER_LANDED[];
+#define D_8009C93A GVARS_PLAYER_LANDED[0]
 extern unsigned char GAME_FADE_SCREEN_CONTROL[];
 #define D_8009C975 GAME_FADE_SCREEN_CONTROL[0]
 extern signed char GAME_PLAYER_MODE[];

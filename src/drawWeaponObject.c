@@ -44,7 +44,7 @@ extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern long D_1F800074;
 extern unsigned short TICK_COUNT;
-extern char D_1F8000C0b[];
+extern char VIEW_CAMERA[];
 extern SH *WEAPON_STATE;
 extern PL *PLAYER_EXT;
 extern short D_800801E8, D_800801EA, D_800801EC, D_800801EE;
@@ -183,7 +183,7 @@ void drawWeaponObject(TObj *o)
     else
         SPAD.s64 = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
-    SetTransMatrix(D_1F8000C0b);
+    SetTransMatrix(VIEW_CAMERA);
     if (proj()) return;
     idx = 0;
     x = LZ_FILE_CTRL;

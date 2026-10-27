@@ -86,8 +86,8 @@ void playerBittenJumpType03(TObj *o)
         BITTEN_OBJECT->d->p.whole = o->d->p.whole;
         BITTEN_OBJECT->step = 1;
         BITTEN_OBJECT->state = 6;
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         playerAirAccelerateX(o);
         if (BITTEN_OBJECT->type != 0x1c)
             o->h->raw += o->velX << 8;
@@ -124,8 +124,8 @@ void playerBittenJumpType03(TObj *o)
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
         p->d8c = o->d88 - 0xc0;
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         playerAirAccelerateX(o);
         if (BITTEN_OBJECT->type != 0x1c)
             o->h->raw += o->velX << 8;
@@ -196,8 +196,8 @@ void playerBittenJumpType03(TObj *o)
         o->substep = 4;
         break;
     case 4:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         setFacingFromPad(o);
         ObjMotionStep(o);
         if ((*(unsigned char*)&o->wac) == 2) {

@@ -5,7 +5,7 @@ extern void func_800270A0(TObj *o, int a, int b);
 extern void func_80027810(TObj *o);
 extern void func_8002A4D0(TObj *o);
 extern void (*D_80079AD0[])(TObj *o);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned short PLAYER_X;
 extern short PLAYER_Y;
 
@@ -13,7 +13,7 @@ void topdownSectionStepA(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (D_8009C93A != 0) o->step++;
+        if (GVARS_PLAYER_LANDED != 0) o->step++;
         func_80027810(o);
         break;
     case 1:

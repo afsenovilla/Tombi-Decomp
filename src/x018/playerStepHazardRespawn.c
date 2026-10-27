@@ -155,7 +155,7 @@ void playerStepHazardRespawn(TObj *o)
             if (S16(o, 0xe0) == 0)
                 S16(o, 0xe0) = 0x8c;
             o->active = 3;
-            if (GVARS.b38) {
+            if (GVARS.hurtState) {
                 PLAYER_EXT->b8 = 0;
                 o->timer = 0xb4;
                 o->state = 2;
@@ -185,7 +185,7 @@ void playerStepHazardRespawn(TObj *o)
             GAME.cf06 = 0;
             ((unsigned char*)&GV2.bb1)[0] = 0;
             if (GAME.c960 != 10 || GAME.c962 != 0)
-                GVARS.b38 = 2;
+                GVARS.hurtState = 2;
         }
         break;
     case 4:

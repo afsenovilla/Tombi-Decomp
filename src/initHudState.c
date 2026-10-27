@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 800263BC (initHudState.c): sets one more HUD word to 1, gauge style chosen by D2f81 < 9.
 typedef struct { char a; char pad[0x1f]; void *p[6]; char pad2[0x5c - 0x38]; char r[3][4]; } GT;
-extern GT G;
+extern GT HUD_STATE;
 extern int D1454;
 extern char D1412, D1413;
 extern short D145c, D145a, D1462, D1460, D1464;
@@ -19,7 +19,7 @@ extern short D145e;
 void initHudState(void)
 {
     int i;
-    GT *g = &G;
+    GT *g = &HUD_STATE;
     g->a = 1;
     D1454 = -1;
     D145c = 600;
@@ -51,7 +51,7 @@ void initHudState(void)
 }
 #else
 typedef struct { char a; char pad[0x1f]; void *p[6]; char pad2[0x5c - 0x38]; char r[3][4]; } GT;
-extern GT G;
+extern GT HUD_STATE;
 extern int D1454;
 extern char D1412, D1413;
 extern short D145c, D145a, D1462, D1460, D1464;
@@ -65,7 +65,7 @@ extern char A2048[], A2068[], A20ec[], A2100[], A2150[], A22a0[], A24f8[], A2678
 void initHudState(void)
 {
     int i;
-    GT *g = &G;
+    GT *g = &HUD_STATE;
     g->a = 1;
     D1454 = -1;
     D1412 = 0;

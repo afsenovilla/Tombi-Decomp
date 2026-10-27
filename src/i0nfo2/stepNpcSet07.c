@@ -13,7 +13,7 @@ extern void func_800F969C(TObj *o);
 extern void func_800F9974(TObj *o);
 extern void func_800F9BDC(TObj *o);
 extern void func_800FA278(TObj *o);
-extern unsigned char D_8009C93A;
+extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009CDD9;
 extern unsigned char D_8009CF2A[];
 extern unsigned char D_800A60A3;
@@ -33,7 +33,7 @@ void stepNpcSet07(TObj *o)
     case 9:
         switch (o->state) {
         case 0:
-            if (D_8009CDD9 == 0 && D_8009C93A != 0) {
+            if (D_8009CDD9 == 0 && GVARS_PLAYER_LANDED != 0) {
                 func_8005A8A8(0x35, 0, 0);
                 o->state++;
             }

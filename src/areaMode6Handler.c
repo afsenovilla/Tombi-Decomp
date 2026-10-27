@@ -2,7 +2,7 @@
 // MATCHING 8001baf4 484
 #include "gv6.h"
 #include "gamestate.h"
-extern unsigned char D_800B1410;
+extern unsigned char HUD_STATE;
 extern volatile unsigned short D_8009D674;
 
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
@@ -32,7 +32,7 @@ void cutsceneAreaHandler(void)
         initSectionCamera();
         spawnSectionUnlayeredObjects();
         initHudState();
-        D_800B1410 = 0;
+        HUD_STATE = 0;
         *(unsigned char *)0x1F8001CF = 1;
         if (GAME.keepBgm != 1) startAreaBgm();
         (*(unsigned short *)(G + 0x4e))++;

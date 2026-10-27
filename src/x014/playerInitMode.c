@@ -85,7 +85,7 @@ static E **DAT_80115190[20] = {
     (E **)D_80115020, (E **)D_80115108, (E **)D_80115110, (E **)D_80115110,
     (E **)D_80115130, (E **)D_8011514C, (E **)D_80115178, (E **)D_80115184,
 };
-extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
+extern unsigned char GVARS_PLAYER_LANDED, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 
 #define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[GAME_SELECTED_SECTION]; p += GAME_SELECTED_SPAWN_POINT * 4
@@ -184,7 +184,7 @@ void playerInitMode(TObj *o)
             o->animFrame = 0;
             o->w22 = 0;
             o->w56 = -2000;
-            DAT_8009c93a = 1;
+            GVARS_PLAYER_LANDED = 1;
         }
         break;
     case 1:
@@ -213,7 +213,7 @@ void playerInitMode(TObj *o)
         o->b04 = 5;
         o->animFrame &= 0xf;
         if (c == 2) {
-            DAT_8009c93a = 1;
+            GVARS_PLAYER_LANDED = 1;
             o->active = 1;
         }
         o->step = c;
@@ -263,7 +263,7 @@ void playerInitMode(TObj *o)
         o->substep = 0;
         o->animFrame = t5 & 0xf; }
         o->step = c;
-        DAT_8009c93a = 1;
+        GVARS_PLAYER_LANDED = 1;
         break;
     case 3:
         break;

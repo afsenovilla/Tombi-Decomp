@@ -70,7 +70,7 @@ void collidePlayerWithCat2Objects(TObj *o)
     unsigned char *q;
     short v;
 
-    if (GVARS.b3a == 0) return;
+    if (GVARS.playerLanded == 0) return;
     r = (*(unsigned char ***)&SPAD.p21c);
     D_1F80019E = SPAD.s246;
     while (D_1F80019E != 0) {
@@ -327,7 +327,7 @@ void collidePlayerWithCat2Objects(TObj *o)
     unsigned char *q;
     short v;
 
-    if (GVARS.b3a == 0) return;
+    if (GVARS.playerLanded == 0) return;
     r = (*(unsigned char ***)&SPAD.p21c);
     D_1F80019E = SPAD.s246;
     while (D_1F80019E != 0) {

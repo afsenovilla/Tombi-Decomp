@@ -7,7 +7,7 @@ extern TObj PLAYER;
 
 int evilPigBagPortalCheckPlayer(TObj *o)
 {
-    if (GVARS.b3a == 0) goto ret0;
+    if (GVARS.playerLanded == 0) goto ret0;
     if (GVARS.b3f | GVARS.useItemPending) return 0;
     if (PLAYER.active == 2) return 0;
     if ((unsigned short)(PLAYER.d->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;

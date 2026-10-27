@@ -41,8 +41,8 @@ void func_8011B7D4(TObj *o)
     case 1:
         o->state++;
     case 2:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
@@ -138,8 +138,8 @@ void playerStep41Area10(TObj *o)
     case 1:
         o->state++;
     case 2:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

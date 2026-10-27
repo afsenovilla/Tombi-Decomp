@@ -438,7 +438,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
                 o->substep = 0;
                 o->active = 1;
                 GAME_PLAYER_MODE[0] = 0;
-                GVARS.b3a = 1;
+                GVARS.playerLanded = 1;
             }
             break;
         }

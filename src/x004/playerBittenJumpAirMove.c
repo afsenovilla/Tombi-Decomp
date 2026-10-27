@@ -22,8 +22,8 @@ void playerEnterGrabStep(TObj *o, int);
 void playerTryAttack(TObj *o, int);
 void playerBittenJumpAirMove(TObj *o)
 {
-    o->h->raw += GVARS.s44 << 8;
-    o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+    o->h->raw += GVARS.driftH << 8;
+    o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
     setFacingFromPad(o);
     ObjMotionStep(o);
     if (*(unsigned char *)&o->wac == 2) {

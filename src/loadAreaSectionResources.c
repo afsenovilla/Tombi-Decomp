@@ -5,7 +5,7 @@ extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short AREA_VARIANT;
 extern unsigned char *PTR_DAT_80077c4c[];
 extern unsigned char DAT_8009d2c3;
-extern unsigned char DAT_1f8003d3;
+extern unsigned char LOADED_SOUND_SET;
 extern char DAT_80077c9c[];
 extern char DAT_80077ca4[];
 static char DAT_80077cb0[44] = {
@@ -34,11 +34,11 @@ int loadAreaSectionResources(int force)
         b = 10;
     if (b == 11 && (DAT_8009d2c3 & 4))
         b = 12;
-    if (DAT_1f8003d3 != b || force) {
+    if (LOADED_SOUND_SET != b || force) {
         loadSoundSet(b);
         SoundStopAll();
         ret = b;
-        DAT_1f8003d3 = b;
+        LOADED_SOUND_SET = b;
     }
     if (idx == 1 || idx == 7) {
         keyOffActiveSfxVoices();

@@ -11,7 +11,7 @@ void collidePlayerWithCat5Objects(TObj *o)
 {
     unsigned char **pp;
     unsigned char *p;
-    if (GVARS.b38 != 0) return;
+    if (GVARS.hurtState != 0) return;
     if (GAME_PLAYER_MODE == 3) return;
     pp = CAT5_OBJECT_LIST;
     D_1f80019e = CAT5_OBJECT_COUNT;

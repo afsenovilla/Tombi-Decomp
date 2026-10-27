@@ -40,7 +40,7 @@ void updateFlowerPlatform(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane == 0x20 || GVARS.b3a != 1) {
+        if (GAME.selectedPlane == 0x20 || GVARS.playerLanded != 1) {
             followParentRotation(o);
             d = o->box1 - o->box0;
             if (d < o->box0) d = o->box0 + 0x10;

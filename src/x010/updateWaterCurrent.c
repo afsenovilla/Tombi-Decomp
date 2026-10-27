@@ -18,8 +18,8 @@ void updateWaterCurrent(TObj *o)
         } else {
             o->y.raw = -0x3b8;
         }
-        GVARS.s44 = 0;
-        GVARS.s46 = -0x40;
+        GVARS.driftH = 0;
+        GVARS.driftY = -0x40;
         o->b04++;
         break;
     case 1: {

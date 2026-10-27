@@ -3,15 +3,15 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern short D_1F80019E;
-extern unsigned short D_1F800250;
-extern TObj **D_1F800260;
+extern unsigned short CAT2_OBJECT_COUNT_SAVED;
+extern TObj **CAT2_OBJECT_LIST_SAVED;
 
 int subScreenCondNearType0A(void)
 {
-    TObj **list = D_1F800260;
+    TObj **list = CAT2_OBJECT_LIST_SAVED;
     TObj *o;
     TObj *pl = &PLAYER;
-    for (D_1F80019E = D_1F800250; D_1F80019E != 0;) {
+    for (D_1F80019E = CAT2_OBJECT_COUNT_SAVED; D_1F80019E != 0;) {
         o = *list;
         D_1F80019E--;
         list++;

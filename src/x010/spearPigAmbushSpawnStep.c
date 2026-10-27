@@ -19,10 +19,10 @@ void spearPigAmbushSpawnStep(TObj *o)
 
     switch (o->b04) {
     case 0:
-        if (GVARS.b3a) o->b04++;
+        if (GVARS.playerLanded) o->b04++;
         break;
     case 1:
-        if (GVARS.b38 == 1) {
+        if (GVARS.hurtState == 1) {
             o->b04++;
             o->w08 = 0x3c;
         }
@@ -52,7 +52,7 @@ void spearPigAmbushSpawnStep(TObj *o)
         break;
     case 3:
         if (--o->w08 == -1) {
-            GVARS.b38 = 2;
+            GVARS.hurtState = 2;
             PoolFree_1F800210(o);
         }
         break;

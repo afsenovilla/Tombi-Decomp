@@ -1,10 +1,10 @@
 // FUNC 80118e70 288 X000
 // MATCHING 80118e70 288
 extern unsigned short GAME;
-extern unsigned short DAT_1f800250;
+extern unsigned short CAT2_OBJECT_COUNT_SAVED;
 extern short DAT_1f80019c;
 typedef struct { unsigned int w; } W;
-extern unsigned char **DAT_1f800260;
+extern unsigned char **CAT2_OBJECT_LIST_SAVED;
 
 void a00SporeCloudStunPigs(unsigned char *o)
 {
@@ -13,8 +13,8 @@ void a00SporeCloudStunPigs(unsigned char *o)
 
     if (GAME != 0)
         return;
-    DAT_1f80019c = DAT_1f800250;
-    pp = DAT_1f800260;
+    DAT_1f80019c = CAT2_OBJECT_COUNT_SAVED;
+    pp = CAT2_OBJECT_LIST_SAVED;
     while (DAT_1f80019c != 0) {
         e = *pp;
         DAT_1f80019c--;

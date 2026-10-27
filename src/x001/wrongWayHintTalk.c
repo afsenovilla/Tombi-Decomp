@@ -97,7 +97,7 @@ void wrongWayHintTalk(TObj *o)
         o->category |= 0x80;
         e = &D_80011DD8[D_80011EB4[*(unsigned short *)PLAYER.anim]];
         follow1(o, e);
-        if (GVARS.b38) break;
+        if (GVARS.hurtState) break;
         switch (GAME_SELECTED_SECTION) {
         case 1:
             if (PLAYER.h->p.whole >= 0x1000) break;

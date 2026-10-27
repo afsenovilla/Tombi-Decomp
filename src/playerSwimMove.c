@@ -1,15 +1,15 @@
 // FUNC 8010d280 272 X000
 // MATCHING 8010d280 272
 #include "tobj.h"
-extern short g944, g946;
+extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y;
 extern short f1(int, int), f2(int, int);
 extern void f3(TObj *), f4(TObj *, int, int), f5(TObj *, int, int, int);
 void playerSwimMove(TObj *o)
 {
     if (o->wb2 > 0x400) o->wb2 = 0x400;
     if (o->wb2 < 0) o->wb2 = 0;
-    o->h->raw += g944 * 0x100;
-    o->y.raw += g946 * 0x100;
+    o->h->raw += GVARS_PLAYER_DRIFT_H * 0x100;
+    o->y.raw += GVARS_PLAYER_DRIFT_Y * 0x100;
     o->velH = f1(o->wb6, o->wb2);
     o->velV = f2(o->wb6, o->wb2);
     o->h->raw += o->velH * 0x100;

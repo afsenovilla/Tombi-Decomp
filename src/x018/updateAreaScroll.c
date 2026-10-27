@@ -23,7 +23,7 @@ void updateAreaScroll(TObj *o)
 
     switch (o->step) {
     case 0:
-        if (GVARS.b3a) o->step++;
+        if (GVARS.playerLanded) o->step++;
         *(short *)((char *)o->d38 + 2) = 0;
         cameraModeHandler6B(o);
         break;

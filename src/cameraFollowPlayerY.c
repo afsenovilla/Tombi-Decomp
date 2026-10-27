@@ -11,10 +11,10 @@ typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c
   char p3[0xa9-0x9f]; unsigned char fa9; } G;
 extern G PLAYER;
 extern signed char GAME_PLAYER_MODE;
-extern int D_1F8000F0;
+extern int VIEW_CAMERA_Y_FIX;
 extern int PLAYER_Y_FIX;
 extern int F0a[], F0b[];
-extern short D_1F8000F2;
+extern short VIEW_CAMERA_Y;
 
 void cameraFollowPlayerY(O *o)
 {
@@ -31,7 +31,7 @@ void cameraFollowPlayerY(O *o)
     k = 0x400000;
     m = 0x340000;
     v = PLAYER_Y_FIX - 0x800000;
-    v -= D_1F8000F0;
+    v -= VIEW_CAMERA_Y_FIX;
     v += k;
     if (v < 0) {
         v += m;
@@ -56,7 +56,7 @@ void cameraFollowPlayerY(O *o)
             case 9:
             clampA:
                 F0a[0] = g->d14 + k - 0x800000;
-                if (D_1F8000F2 > o->h32) {
+                if (VIEW_CAMERA_Y > o->h32) {
                     F0b[0] = o->h32 << 16;
                     o->b = 0;
                     o->h44 |= 8;
@@ -82,7 +82,7 @@ void cameraFollowPlayerY(O *o)
                 o->b += 0x8000;
             }
             F0a[0] += o->b;
-            if (D_1F8000F2 > o->h32) {
+            if (VIEW_CAMERA_Y > o->h32) {
                 F0b[0] = o->h32 << 16;
                 o->b = 0;
                 o->h44 |= 8;
@@ -90,7 +90,7 @@ void cameraFollowPlayerY(O *o)
             return;
         }
         F0a[0] = g->d14 + k - 0x800000;
-        if (D_1F8000F2 > o->h32) {
+        if (VIEW_CAMERA_Y > o->h32) {
             F0b[0] = o->h32 << 16;
             o->b = 0;
             o->h44 |= 8;
@@ -121,7 +121,7 @@ void cameraFollowPlayerY(O *o)
             o->b = -0x40000;
     }
     F0a[0] += o->b;
-    if (D_1F8000F2 < o->h30) {
+    if (VIEW_CAMERA_Y < o->h30) {
         F0b[0] = o->h30 << 16;
         o->b = 0;
         o->h44 |= 4;

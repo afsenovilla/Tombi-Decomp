@@ -16,7 +16,7 @@ typedef struct {
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
 typedef struct { unsigned char p0[0x18]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P9C330;
-extern long D_1F8000C0[];
+extern long VIEW_CAMERA[];
 extern char *NEXT_PRIM;
 extern int CURRENT_OT;
 extern P9C330 *PLAYER_EXT;
@@ -62,8 +62,8 @@ void topdownDrawRotatedSprite(TObj *o)
     short *sn;
     short *cs;
 
-    gte_SetRotMatrix(D_1F8000C0);
-    gte_SetTransMatrix(D_1F8000C0);
+    gte_SetRotMatrix(VIEW_CAMERA);
+    gte_SetTransMatrix(VIEW_CAMERA);
     v->vx = o->a.p.whole;
     v->vy = o->y.p.whole;
     v->vz = o->b.p.whole;

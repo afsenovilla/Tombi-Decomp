@@ -15,7 +15,7 @@ extern char DAT_80010748[];
 extern int GAME[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009c93f;
-extern unsigned char DAT_8009c93a[];
+extern unsigned char GVARS_PLAYER_LANDED[];
 extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c942b[];
@@ -95,7 +95,7 @@ void playerEventStepDropIn(TObj *o)
         o->step = 0;
         o->state = 0;
         o->d8c = SLOPE_TILT_TABLE[o->wb0];
-        DAT_8009c93a[0] = 1;
+        GVARS_PLAYER_LANDED[0] = 1;
         GAME_PLAYER_MODE[0] = 0;
         DAT_8009c942b[0] = 0;
         DAT_8009c93fb[0] = 0;

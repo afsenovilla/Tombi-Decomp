@@ -41,8 +41,8 @@ void playerStepSpringBounce(TObj *o)
         playerReleaseBittenAirborne(o);
         break;
     case 2:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
@@ -66,8 +66,8 @@ void playerStepSpringBounce(TObj *o)
         }
         break;
     case 3:
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         o->d8c = (o->d8c + ((o->animFrame & 1) ? -0x10 : 0x10)) & 0xff;
         AnimAdvance(o);
         o->h->raw += o->velX << 8;

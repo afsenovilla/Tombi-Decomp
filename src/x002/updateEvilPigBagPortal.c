@@ -23,7 +23,7 @@ extern void evilPigBagPortalEnter(TObj *o);
 
 static __inline__ int onScreen(TObj *o)
 {
-    if (GVARS.b3a == 0) return 0;
+    if (GVARS.playerLanded == 0) return 0;
     if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i174 + 2))) >= 0x12d) return 0;
     return (unsigned short)(SPAD.s186 - (o->y.p.whole + 0x10)) < 0xc9;
 }

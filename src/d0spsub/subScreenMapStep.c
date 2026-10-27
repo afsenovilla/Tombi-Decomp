@@ -41,7 +41,7 @@ typedef struct {
 } Menu;
 extern Sprite D_8010A2D4[];
 extern Sprite D_80110F50[];
-extern Save D_8010A1C8, D_1F8000C0;
+extern Save D_8010A1C8, VIEW_CAMERA;
 extern unsigned short JOYPAD_STATE;
 extern volatile int D_1F8002EC;
 extern char *D_1F800344;
@@ -92,7 +92,7 @@ int subScreenMapStep(Menu *m)
     unsigned char t;
     switch (m->state) {
     case 0:
-        D_8010A1C8 = D_1F8000C0;
+        D_8010A1C8 = VIEW_CAMERA;
         D_8010A2D4[2].w1e = 1;
         D_8010A2D4[2].b0d = 1;
         D_8010A2D4[2].w08 = 0x7A52;
@@ -156,7 +156,7 @@ int subScreenMapStep(Menu *m)
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
         if (JOYPAD_STATE & 0x2000) {
-            D_1F8000C0 = D_8010A1C8;
+            VIEW_CAMERA = D_8010A1C8;
             SfxPlay2(0x1B, 0x1C);
             return 1;
         }
@@ -169,7 +169,7 @@ int subScreenMapStep(Menu *m)
             m->cursor = 0;
             m->w1e = -1;
             m->state = 0;
-            D_1F8000C0 = D_8010A1C8;
+            VIEW_CAMERA = D_8010A1C8;
             playSFXAndSetNote(10, 10);
             return 2;
         case 5:
@@ -177,13 +177,13 @@ int subScreenMapStep(Menu *m)
             m->cursor = 0;
             m->w1e = -1;
             m->state = 0;
-            D_1F8000C0 = D_8010A1C8;
+            VIEW_CAMERA = D_8010A1C8;
             playSFXAndSetNote(10, 10);
             return 2;
         case 6:
             m->result = 0;
             m->state = 0;
-            D_1F8000C0 = D_8010A1C8;
+            VIEW_CAMERA = D_8010A1C8;
             playSFXAndSetNote(10, 10);
             return 2;
         case 7:
@@ -201,7 +201,7 @@ int subScreenMapStep(Menu *m)
         case 9:
         case 10:
         case 11:
-            D_1F8000C0 = D_8010A1C8;
+            VIEW_CAMERA = D_8010A1C8;
             SfxPlay2(10, 10);
             return 1;
         }

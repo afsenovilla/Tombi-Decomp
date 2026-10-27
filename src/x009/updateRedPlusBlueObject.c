@@ -66,7 +66,7 @@ void updateRedPlusBlueObject(TObj *o)
         }
         break;
     case 1:
-        if (GAME.selectedPlane != 0x20 && GVARS.b3a == 1)
+        if (GAME.selectedPlane != 0x20 && GVARS.playerLanded == 1)
             break;
         if (o->ba7 == 1)
             followParentRotation(o);

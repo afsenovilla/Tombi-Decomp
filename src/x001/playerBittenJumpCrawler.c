@@ -44,8 +44,8 @@ void func_801213D0(TObj *o)
     switch (o->substep) {
     case 0:
         BITTEN_OBJECT->d84 = o->d88 - 0xc0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         FUN_8010eaf8(o);
         o->h->raw += o->velX << 8;
         FUN_80104dc8(o);
@@ -57,8 +57,8 @@ void func_801213D0(TObj *o)
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
         e->d84 = o->d88 - 0xc0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 == 0 && probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x30) == 0
@@ -157,8 +157,8 @@ void playerBittenJumpCrawler(TObj *o)
     switch (o->substep) {
     case 0:
         BITTEN_OBJECT->d84 = o->d88 - 0xc0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         playerAirAccelerateX(o);
         o->h->raw += o->velX << 8;
         playerBittenCarryAirStep(o);
@@ -170,8 +170,8 @@ void playerBittenJumpCrawler(TObj *o)
         e->h->p.whole = o->h->p.whole;
         e->y.p.whole = o->y.p.whole + e->box2;
         e->d84 = o->d88 - 0xc0;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         ObjMotionStep(o);
         AnimAdvance(o);
         if (o->b69 == 0 && probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x30) == 0

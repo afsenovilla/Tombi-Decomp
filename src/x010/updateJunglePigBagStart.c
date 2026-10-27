@@ -15,7 +15,7 @@ void updateJunglePigBagStart(TObj *o)
         o->b04++;
         break;
     case 1:
-        if (GVARS.b3a) junglePigBagEventStart(o);
+        if (GVARS.playerLanded) junglePigBagEventStart(o);
         break;
     case 2:
         o->b04 = 3;

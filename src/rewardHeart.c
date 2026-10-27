@@ -3,7 +3,7 @@
 // VERSION SLPM_80165 slpm80165 8003A770 232
 // Ported from psx_tomba (reward.c, rewardHeart); MIT licence of the original project.
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL main0 8003CE14 (rewardHeart.c): no D_8009BCA0 guard.
+// Demo version of PAL main0 8003CE14 (rewardHeart.c): no GVARS_PLAYER_HURT_STATE guard.
 // Ported from psx_tomba (reward.c, rewardHeart); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"
@@ -464,7 +464,7 @@ typedef struct {
 
 void rewardHeart(GameObject* arg0)
 {
-    if (D_8009BCA0 == 0) {
+    if (GVARS_PLAYER_HURT_STATE == 0) {
         func_800E92D4(0x64, arg0->x, arg0->y, arg0->z);
         playSFX(9);
         if (!(arg0->unkC & 0x80)) {

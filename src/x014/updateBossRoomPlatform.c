@@ -48,7 +48,7 @@ void updateBossRoomPlatform(TObj *o)
         break;
     case 1:
         ObjCullRegister(o);
-        if (GVARS.b38) break;
+        if (GVARS.hurtState) break;
         switch (((unsigned short*)&GAME.selectedSection)[0]) {
         case 0:
             p = (*(TObj **)&GVARS.p54);

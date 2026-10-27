@@ -4,8 +4,8 @@
 typedef void (*Fn)(TObj *);
 typedef struct { short s0, s2; } S2;
 extern unsigned char GAME_DISABLE_SELECT_MENU[];
-extern unsigned char GAME_AREA00_INTRO_PHASE, DAT_8009cda6, DAT_8009c93a, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
-extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, GVARS_FADE_EFFECT;
+extern unsigned char GAME_AREA00_INTRO_PHASE, DAT_8009cda6, GVARS_PLAYER_LANDED, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
+extern unsigned char DAT_8009cfed, GVARS_PLAYER_HURT_STATE, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, GVARS_FADE_EFFECT;
 extern unsigned char DAT_8009d13f, DAT_8009c93e, DAT_8009c942;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short GAME_SELECTED_SECTION;
@@ -66,7 +66,7 @@ void updateA00ScrollController(TObj *o)
         if (GAME_AREA00_INTRO_PHASE == 1) GAME_AREA00_INTRO_PHASE = 2;
         break;
     case 2:
-        if (DAT_8009c93a != 0) o->step++;
+        if (GVARS_PLAYER_LANDED != 0) o->step++;
         cameraFollowPlayerX(o);
         *(unsigned char *)&o->d3c = 0;
         syncObjectTargetY(o);
@@ -174,7 +174,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 9:
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
-        if (DAT_8009c938 != 0) break;
+        if (GVARS_PLAYER_HURT_STATE != 0) break;
         {
         short k = PLAYER_H_WHOLE;
         unsigned short u = k;

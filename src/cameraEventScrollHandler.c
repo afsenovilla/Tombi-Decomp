@@ -7,7 +7,7 @@
 #include "gametask.h"
 
 extern int *D_80079A48[];
-extern short D_1F8000E6;
+extern short VIEW_CAMERA_ROT_Y;
 extern TObj PLAYER;
 extern void updateCameraFollow(void);
 extern int cameraEventScrollStep(TObj *);
@@ -23,7 +23,7 @@ void cameraEventScrollHandler(TObj *o)
     int t;
     unsigned char c;
 
-    if (GVARS.b38) {
+    if (GVARS.hurtState) {
         GAME.disableSelectMenu = 0;
         updateCameraFollow();
         return;
@@ -50,17 +50,17 @@ void cameraEventScrollHandler(TObj *o)
                 (*(int*)&o->timer) += 0x100;
             r2 = 1;
         }
-        v = D_1F8000E6;
+        v = VIEW_CAMERA_ROT_Y;
         if (v != 0) {
             if (v > 0) {
-                D_1F8000E6 = v - 2;
+                VIEW_CAMERA_ROT_Y = v - 2;
                 if ((short)(v - 2) < 0)
-                    D_1F8000E6 = 0;
+                    VIEW_CAMERA_ROT_Y = 0;
                 r3 = 1;
             } else {
-                D_1F8000E6 = v + 2;
+                VIEW_CAMERA_ROT_Y = v + 2;
                 if ((short)(v + 2) > 0)
-                    D_1F8000E6 = 0;
+                    VIEW_CAMERA_ROT_Y = 0;
                 r3 = 1;
             }
         } else {

@@ -31,8 +31,8 @@ void func_8011BAA0(TObj *o)
         o->state = 2;
         break;
     case 2:
-        o->h->raw += GVARS.s44 << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += GVARS.driftH << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         playerAttackDecelerate(o);
         o->h->raw += o->velX << 8;
         o->y.raw += o->velY << 8;

@@ -102,8 +102,8 @@ void playerStepSlopeSlide(TObj *o)
         break;
     case 2:
         if (o->b6b + 0x20 < 0x100) o->b6b = o->b6b + 0x20; else o->b6b = 0xff;
-        o->h->raw += ((short*)&GVARS.s44)[0] << 8;
-        o->y.raw += ((short*)&GVARS.s46)[0] << 8;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
         applyFrameVelocityX(o);
         FUN_8001fec0(o);
         o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;

@@ -4,7 +4,7 @@ typedef struct S {
     char p0[0x20]; int vy; int vx; char p1[0x6e - 0x28];
     unsigned char b6e, b6f, b70, b71, b72, b73;
 } S;
-extern short D_1F8000E6;
+extern short VIEW_CAMERA_ROT_Y;
 extern void cameraFollowTargetY(S *);
 extern void cameraFollowTargetYB(S *);
 void cameraModeHandler2(S *o)
@@ -25,14 +25,14 @@ void cameraModeHandler2(S *o)
         else o->vy += 0x100;
         f1 = 1;
     }
-    s = D_1F8000E6;
+    s = VIEW_CAMERA_ROT_Y;
     if (s != 0) {
         if (s > 0) {
-            D_1F8000E6 = s -= 2;
-            if (s < 0) D_1F8000E6 = 0;
+            VIEW_CAMERA_ROT_Y = s -= 2;
+            if (s < 0) VIEW_CAMERA_ROT_Y = 0;
         } else {
-            D_1F8000E6 = s += 2;
-            if (s > 0) D_1F8000E6 = 0;
+            VIEW_CAMERA_ROT_Y = s += 2;
+            if (s > 0) VIEW_CAMERA_ROT_Y = 0;
         }
         f2 = 1;
     } else {
