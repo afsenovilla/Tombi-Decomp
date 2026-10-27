@@ -11,8 +11,8 @@ extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA2[];
 extern TObj PLAYER;
 extern unsigned char D_800A60A3;
-extern Lim D_800FEDF4[];
-extern AnimSet D_800FEE0C[];
+extern Lim TOPDOWN_A17_SCENERY_LIMITS[];
+extern AnimSet TOPDOWN_A17_SCENERY_ANIMS[];
 
 void topdownA17SceneryUpdate(TObj *o)
 {
@@ -58,7 +58,7 @@ void topdownA17SceneryUpdate(TObj *o)
                 PLAYER.a.p.whole++;
             }
             o->a.p.whole++;
-            if (o->a.p.whole == D_800FEDF4[k].b) {
+            if (o->a.p.whole == TOPDOWN_A17_SCENERY_LIMITS[k].b) {
                 U8(o, 0x5) = 1;
             }
             break;
@@ -67,7 +67,7 @@ void topdownA17SceneryUpdate(TObj *o)
                 PLAYER.a.p.whole++;
             }
             o->a.p.whole++;
-            if (o->a.p.whole == D_800FEDF4[k].c) {
+            if (o->a.p.whole == TOPDOWN_A17_SCENERY_LIMITS[k].c) {
                 U8(o, 0x5) = 2;
             }
             break;
@@ -76,7 +76,7 @@ void topdownA17SceneryUpdate(TObj *o)
                 PLAYER.a.p.whole--;
             }
             o->a.p.whole--;
-            if (o->a.p.whole == D_800FEDF4[k].b) {
+            if (o->a.p.whole == TOPDOWN_A17_SCENERY_LIMITS[k].b) {
                 U8(o, 0x5) = 1;
             }
             break;
@@ -85,7 +85,7 @@ void topdownA17SceneryUpdate(TObj *o)
                 PLAYER.a.p.whole--;
             }
             o->a.p.whole--;
-            if (o->a.p.whole == D_800FEDF4[k].a) {
+            if (o->a.p.whole == TOPDOWN_A17_SCENERY_LIMITS[k].a) {
                 U8(o, 0x5) = 7;
             }
             break;
@@ -98,7 +98,7 @@ void topdownA17SceneryUpdate(TObj *o)
     case 0xF:
         { register int dd asm("a1"); dd = D_8009CFA1; if (U16(o, 0xB4) != (unsigned short)(dd + 0xD)) {
             { register int m asm("v1"); m = dd + 0xD; U16(o, 0xB4) = m; }
-            PTR(o, 0x24) = (void *)D_800FEE0C[U8(o, 0x3)].anims[U16(o, 0xB4)];
+            PTR(o, 0x24) = (void *)TOPDOWN_A17_SCENERY_ANIMS[U8(o, 0x3)].anims[U16(o, 0xB4)];
             AnimLoadDuration(o, dd);
         }
         } break;

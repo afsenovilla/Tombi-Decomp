@@ -10,7 +10,7 @@ extern unsigned char D_8009CE0B;
 extern unsigned char D_8009CF60;
 extern unsigned char D_8009CFA7[];
 extern unsigned char D_8009CFAA;
-extern unsigned char D_800FEF24[][4];
+extern unsigned char TOPDOWN_A16_ACTOR_DIALOGUE_IDS[][4];
 
 short topdownA16ActorOpenDialogue(TObj *o)
 {
@@ -55,7 +55,7 @@ short topdownA16ActorOpenDialogue(TObj *o)
         break;
     case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
     case 13: case 14:
-        S32(o, 0x90) = func_8002DCC8(3, D_800FEF24[o->b0c][D_8009CF60], &p);
+        S32(o, 0x90) = func_8002DCC8(3, TOPDOWN_A16_ACTOR_DIALOGUE_IDS[o->b0c][D_8009CF60], &p);
         r++;
         break;
     case 15:

@@ -15,8 +15,8 @@ extern unsigned char D_8009CE0A;
 extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA5;
 extern TObj *SCRIPT_OBJECTS[];
-extern SpawnB D_800FFE24[];
-extern SpawnA *D_80100080;
+extern SpawnB NPC_SET_0D_EXTRA_RECORDS[];
+extern SpawnA *NPC_SET_0D_RECORDS;
 
 void spawnNpcSet0D(TObj *parent0)
 {
@@ -42,7 +42,7 @@ void spawnNpcSet0D(TObj *parent0)
     } else {
         m = 0;
     }
-    tbl = D_80100080;
+    tbl = NPC_SET_0D_RECORDS;
     D_8009CFA5 = m;
     do { } while (0);
     i1 = 0;
@@ -79,7 +79,7 @@ void spawnNpcSet0D(TObj *parent0)
         SCRIPT_OBJECTS[1]->a.p.whole = -0xC8;
     }
     i = 0;
-    for (e = D_800FFE24; e->type != 0xFF; e++) {
+    for (e = NPC_SET_0D_EXTRA_RECORDS; e->type != 0xFF; e++) {
         o = func_80018448();
         if (o != 0) {
             o->active = 1;

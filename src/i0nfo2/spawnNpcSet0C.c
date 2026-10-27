@@ -9,7 +9,7 @@ extern TObj *func_800183B8();
 extern unsigned char D_8009CF01;
 extern unsigned char D_8009CFC9;
 extern TObj *SCRIPT_OBJECTS[];
-extern SpawnA *D_800FFE20;
+extern SpawnA *NPC_SET_0C_RECORDS;
 #define PI_O asm("s2")
 #define PI_TBL asm("s4")
 #define PI_LP asm("s5")
@@ -30,7 +30,7 @@ void spawnNpcSet0C(TObj *o0)
     /* n lives in a0: seeded from the parameter and handed back to the
        (argument-less) allocator, so neither copy costs an instruction. */
     n = o0;
-    tbl = D_800FFE20;
+    tbl = NPC_SET_0C_RECORDS;
     o->b04 = 1;
     if (D_8009CFC9 != 0) {
         o->b04 = 3;

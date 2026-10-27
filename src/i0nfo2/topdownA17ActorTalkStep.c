@@ -13,7 +13,7 @@ extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char PLAYER_STEP[];
 extern unsigned short PLAYER_ANIM_FRAME[];
 extern unsigned char D_800A60E4[];
-extern void **D_800FEF6C[][3];
+extern void **TOPDOWN_A17_ACTOR_ANIMS[][3];
 
 void topdownA17ActorTalkStep(TObj *o)
 {
@@ -29,7 +29,7 @@ void topdownA17ActorTalkStep(TObj *o)
         o->wb0 = o->animFrame;
         f = o->b69 + 7;
         o->animFrame = o->b69 - 1;
-        o->anim = D_800FEF6C[o->subtype][0][f];
+        o->anim = TOPDOWN_A17_ACTOR_ANIMS[o->subtype][0][f];
         func_8001FE94(o, 0);
         S16(o, 0xD2) = f;
         o->b68 = 2;

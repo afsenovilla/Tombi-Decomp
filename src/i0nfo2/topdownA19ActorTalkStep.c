@@ -14,7 +14,7 @@ extern unsigned char D_8009C942;
 extern unsigned char SCRIPT_FLAGS[];
 extern unsigned char D_8009CDAB;
 extern unsigned char D_8009CF13;
-extern AnimSet D_800FEFFC[];
+extern AnimSet TOPDOWN_A19_ACTOR_ANIMS[];
 extern short topdownA19ActorOpenDialogue(TObj *o);
 extern void AnimJump(TObj *o, int n);
 extern void AnimAdvance(TObj *o);
@@ -43,14 +43,14 @@ void topdownA19ActorTalkStep(TObj *o)
         k = U8(o, 0x69) + 7;
         U16(o, 0x2E) = U8(o, 0x69) - 1;
         if (k != U16(o, 0xD2)) {
-            PTR(o, 0x24) = (void *)D_800FEFFC[U8(o, 3)].anims[k];
+            PTR(o, 0x24) = (void *)TOPDOWN_A19_ACTOR_ANIMS[U8(o, 3)].anims[k];
             AnimJump(o, 0);
             U16(o, 0xD2) = k;
         }
         if (U16(o, 0xBA) == 0xE) {
             j = U16(o, 0x2E) + 0xC;
             if (j != U16(o, 0xD2)) {
-                PTR(o, 0x24) = (void *)D_800FEFFC[U8(o, 3)].anims[j];
+                PTR(o, 0x24) = (void *)TOPDOWN_A19_ACTOR_ANIMS[U8(o, 3)].anims[j];
                 AnimJump(o, 0);
                 U16(o, 0xD2) = j;
             }
@@ -130,7 +130,7 @@ void topdownA19ActorTalkStep(TObj *o)
             v = *(B12 *)&o->a;
             m = U16(o, 0x2E) + 8;
             if (m != U16(o, 0xD2)) {
-                PTR(o, 0x24) = (void *)D_800FEFFC[U8(o, 3)].anims[m];
+                PTR(o, 0x24) = (void *)TOPDOWN_A19_ACTOR_ANIMS[U8(o, 3)].anims[m];
                 AnimJump(o, 0);
                 U16(o, 0xD2) = m;
             }
@@ -154,7 +154,7 @@ void topdownA19ActorTalkStep(TObj *o)
             v = *(B12 *)&o->a;
             m = U16(o, 0x2E) + 8;
             if (m != U16(o, 0xD2)) {
-                PTR(o, 0x24) = (void *)D_800FEFFC[U8(o, 3)].anims[m];
+                PTR(o, 0x24) = (void *)TOPDOWN_A19_ACTOR_ANIMS[U8(o, 3)].anims[m];
                 AnimJump(o, 0);
                 U16(o, 0xD2) = m;
             }

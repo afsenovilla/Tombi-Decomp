@@ -20,7 +20,7 @@ typedef struct {
 extern TexInfo D_800A4668;
 extern unsigned short GAME;
 typedef struct { u16 x, y, u, v, w, h; } Ent8D0;
-extern Ent8D0 D_800FECB8[];
+extern Ent8D0 TOPDOWN_MAP_LAYER_RECTS[];
 
 void topdownDrawMapLayers(TObj *o)
 {
@@ -47,7 +47,7 @@ void topdownDrawMapLayers(TObj *o)
             p = (SPRT *)NEXT_PRIM;
             *((u8 *)p + 3) = 4;
             p->code = 0x65;
-            e = &D_800FECB8[i];
+            e = &TOPDOWN_MAP_LAYER_RECTS[i];
             p->x0 = e->x + x;
             p->y0 = e->y + y;
             p->u0 = e->u;

@@ -13,8 +13,8 @@ extern TObj *func_80018448();
 extern unsigned char D_8009CE56[];
 extern unsigned char D_8009CFCA;
 extern TObj *SCRIPT_OBJECTS[];
-extern SpawnB D_801008DC[];
-extern SpawnA *D_80100B00;
+extern SpawnB NPC_SET_11_EXTRA_RECORDS[];
+extern SpawnA *NPC_SET_11_RECORDS;
 
 #define PI_PARENT 
 #define PI_TBL 
@@ -44,7 +44,7 @@ void spawnNpcSet11(TObj *parent0)
     register int i1 PI_I1;
     short t;
 
-    tbl = D_80100B00;
+    tbl = NPC_SET_11_RECORDS;
     i = 0;
     p = tbl;
     if (p->type != 0xFF) {
@@ -139,7 +139,7 @@ void spawnNpcSet11(TObj *parent0)
         }
     }
     }
-    for (i = 0; (e = &D_801008DC[i])->type != 0xFF; i++) {
+    for (i = 0; (e = &NPC_SET_11_EXTRA_RECORDS[i])->type != 0xFF; i++) {
         o = func_80018448();
         if (o != 0) {
             o->active = 1;

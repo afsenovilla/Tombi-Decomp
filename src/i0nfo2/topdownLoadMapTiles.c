@@ -11,7 +11,7 @@ typedef struct {
 } TexInfo;
 extern TexInfo D_800A4668;
 extern unsigned short GAME[];
-extern unsigned char *D_800FECB0;
+extern unsigned char *TOPDOWN_MAP_TILES;
 
 void topdownLoadMapTiles(void)
 {
@@ -24,7 +24,7 @@ void topdownLoadMapTiles(void)
     D_800A4668.h4 = src[1] >> 2;
     s = (unsigned char *)(src + 2);
     for (i = 0; i < 0x4000; i++) {
-        D_800FECB0[i] = *s++;
+        TOPDOWN_MAP_TILES[i] = *s++;
     }
     D_800A4668.p = *(char **)0x1F800394;
     D_800A4668.p2 = D_800A4668.p + 0x220;

@@ -10,7 +10,7 @@ extern void topdownA16ActorPatrolDiagStepA(TObj *o);
 extern void topdownA16ActorPatrolDiagStepB(TObj *o);
 extern void topdownA16ActorTalkStep(TObj *o);
 extern unsigned char D_800A60A3;
-extern void **D_800FEEFC[][3];
+extern void **TOPDOWN_A16_ACTOR_ANIMS[][3];
 
 void topdownA16ActorStep(TObj *o)
 {
@@ -20,7 +20,7 @@ void topdownA16ActorStep(TObj *o)
         case 0:
             switch (o->state) {
             case 0:
-                o->anim = D_800FEEFC[o->subtype][0][o->animFrame];
+                o->anim = TOPDOWN_A16_ACTOR_ANIMS[o->subtype][0][o->animFrame];
                 func_8001FE94(o, 0);
                 o->state++;
             case 1:

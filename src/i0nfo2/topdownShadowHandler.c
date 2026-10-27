@@ -8,7 +8,7 @@ extern signed char GAME_PLAYER_MODE[];
 extern int SPR_DATA[];
 extern unsigned char PLAYER_VISIBLE;
 typedef struct { unsigned short w; short idx; char *p; int pad; } Ent94AC;
-extern Ent94AC D_800FEBD4[];
+extern Ent94AC TOPDOWN_SHADOW_DEFS[];
 
 void topdownShadowHandler(TObj *o)
 {
@@ -17,9 +17,9 @@ void topdownShadowHandler(TObj *o)
     switch (s) {
     case 0:
         if (o->subtype == 0) {
-            o->w1e = D_800FEBD4[0].w;
-            o->d3c = SPR_DATA[D_800FEBD4[o->subtype].idx];
-            o->anim = *(void **)(D_800FEBD4[o->subtype].p + 0x80);
+            o->w1e = TOPDOWN_SHADOW_DEFS[0].w;
+            o->d3c = SPR_DATA[TOPDOWN_SHADOW_DEFS[o->subtype].idx];
+            o->anim = *(void **)(TOPDOWN_SHADOW_DEFS[o->subtype].p + 0x80);
             func_8001FE6C(o);
             o->b04++;
         }

@@ -7,15 +7,15 @@ typedef struct {
     void **anims;
     int pad;
 } ObjInit2;
-extern ObjInit2 D_800FEBD4[];
+extern ObjInit2 TOPDOWN_SHADOW_DEFS[];
 extern int SPR_DATA[];
 extern void func_8001FE6C(TObj *o);
 
 void topdownShadowInit(TObj *o)
 {
-    o->w1e = D_800FEBD4[o->subtype].w1e;
-    o->d3c = SPR_DATA[D_800FEBD4[o->subtype].spad];
-    o->anim = D_800FEBD4[o->subtype].anims[32];
+    o->w1e = TOPDOWN_SHADOW_DEFS[o->subtype].w1e;
+    o->d3c = SPR_DATA[TOPDOWN_SHADOW_DEFS[o->subtype].spad];
+    o->anim = TOPDOWN_SHADOW_DEFS[o->subtype].anims[32];
     func_8001FE6C(o);
     o->b04++;
 }

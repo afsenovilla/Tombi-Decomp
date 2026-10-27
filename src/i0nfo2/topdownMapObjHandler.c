@@ -13,7 +13,7 @@ extern void topdownLoadMapTiles(void);
 extern void topdownUploadMapStrip(int, int);
 extern void topdownBuildVisibleTileList(TObj *);
 extern unsigned char D_800A60A3;
-extern int D_800FECB4;
+extern int TOPDOWN_MAP_STRIP_BUFFER;
 
 void topdownMapObjHandler(TObj *o)
 {
@@ -39,12 +39,12 @@ void topdownMapObjHandler(TObj *o)
         S16(o->h, 2) = 0x1F - (((unsigned short)SPXY->s176 + 0xA0) & 0x1F);
         o->y.p.whole = 0x1F - ((SPXY->s17a - 0xF0) & 0x1F);
         topdownBuildVisibleTileList(o);
-        topdownUploadMapStrip(0, D_800FECB4);
+        topdownUploadMapStrip(0, TOPDOWN_MAP_STRIP_BUFFER);
         DrawSync(0);
-        topdownUploadMapStrip(1, D_800FECB4);
-        topdownUploadMapStrip(2, D_800FECB4);
-        topdownUploadMapStrip(3, D_800FECB4);
-        topdownUploadMapStrip(4, D_800FECB4);
+        topdownUploadMapStrip(1, TOPDOWN_MAP_STRIP_BUFFER);
+        topdownUploadMapStrip(2, TOPDOWN_MAP_STRIP_BUFFER);
+        topdownUploadMapStrip(3, TOPDOWN_MAP_STRIP_BUFFER);
+        topdownUploadMapStrip(4, TOPDOWN_MAP_STRIP_BUFFER);
         if (D_800A60A3 == 0) {
             o->b6b = 0x80;
         } else {

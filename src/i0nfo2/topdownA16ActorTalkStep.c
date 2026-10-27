@@ -13,12 +13,12 @@ extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char PLAYER_STEP[];
 extern unsigned short PLAYER_ANIM_FRAME[];
 extern unsigned char D_800A60E4[];
-extern void **D_800FEEFC[][3];
+extern void **TOPDOWN_A16_ACTOR_ANIMS[][3];
 
 static inline void setAnimF(TObj *p, int f)
 {
     p->animFrame = f;
-    p->anim = D_800FEEFC[p->subtype][0][*(volatile unsigned short *)&p->animFrame];
+    p->anim = TOPDOWN_A16_ACTOR_ANIMS[p->subtype][0][*(volatile unsigned short *)&p->animFrame];
     func_8001FE94(p, 0);
 }
 
@@ -34,7 +34,7 @@ void topdownA16ActorTalkStep(TObj *o)
         PLAYER_ANIM_FRAME[0] |= 8;
         o->wb0 = o->animFrame;
         o->animFrame = o->b69 - 1;
-        o->anim = D_800FEEFC[o->subtype][0][o->animFrame + 8];
+        o->anim = TOPDOWN_A16_ACTOR_ANIMS[o->subtype][0][o->animFrame + 8];
         func_8001FE94(o, 0);
         o->b68 = 2;
         o->state++;

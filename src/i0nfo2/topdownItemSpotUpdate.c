@@ -5,8 +5,8 @@ extern void func_8001FE6C(TObj *o);
 extern void func_800202B4(TObj *o);
 extern void topdownItemSpotCheckStep(TObj *o);
 extern unsigned char D_800A60A3;
-extern short D_800FED44[];
-extern void *D_801073F4[][8];
+extern short TOPDOWN_ITEM_SPOT_KINDS[];
+extern void *TOPDOWN_ITEM_SPOT_TAKEN_ANIMS[][8];
 
 void topdownItemSpotUpdate(TObj *o)
 {
@@ -19,7 +19,7 @@ void topdownItemSpotUpdate(TObj *o)
         break;
     case 2:
         if (o->state == 0) {
-            o->anim = D_801073F4[*(short *)((char *)D_800FED44 + i)][0];
+            o->anim = TOPDOWN_ITEM_SPOT_TAKEN_ANIMS[*(short *)((char *)TOPDOWN_ITEM_SPOT_KINDS + i)][0];
             func_8001FE6C(o);
             o->state++;
         }

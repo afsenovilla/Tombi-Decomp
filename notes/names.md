@@ -2172,3 +2172,14 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   stored into SEQ_DATA by bootLogoSetSpriteBase). tools/rename_data.py now names an alias extern `D_xxx_a` of a named address
   `<name>_a` (titleLogoDraw's D_800EB47C_w halfword view, the `_a` views of func_800EA5E8) instead of skipping the bare one.
   Left: 800EB46C / 474 (zeroed by titleLogoInitBounce, never read in the matched sources).
+- SYSTEM data, batch 4: I0NFO2 (Oct 27 2026): 45 rows in notes/data_names_i0nfo2.csv (the top-down sections of areas 5 / 8 / 11 /
+  16 / 17 / 18 / 19). The map state TOPDOWN_MAP_TILES (800FECB0, the 0x4000-byte tile copy topdownLoadMapTiles fills),
+  TOPDOWN_MAP_STRIP_BUFFER (800FECB4, the address every topdownUploadMapStrip builds into), TOPDOWN_MAP_LAYER_RECTS; the
+  per-subtype definition tables TOPDOWN_SHADOW_DEFS, TOPDOWN_PLAYER_CONTACT_BOXES (800FEBDC, by anim type), TOPDOWN_ITEM_SPOT_DEFS /
+  KINDS / ANIMS / TAKEN_ANIMS, TOPDOWN_TALK_SPOT_DEFS, TOPDOWN_ACTOR_DEFS / ANIMS and the per-area TOPDOWN_A05 / A16 / A17 / A19 /
+  A11_SCENERY_DEFS, TOPDOWN_A17_SCENERY_LIMITS / ANIMS, TOPDOWN_A08_SCENERY_DEF (the single record, 800FEE74 / 78 its fields),
+  TOPDOWN_A08 / A11 / A16 / A17 / A18 / A19_ACTOR_DEFS (+_ANIMS), TOPDOWN_A16_ACTOR_DIALOGUE_IDS; the spawn record lists of the
+  unlayered variants NPC_SET_07_RECORD_LISTS (by GAME+0x58D) / NPC_SET_0C .. 11_RECORDS and the second lists *_EXTRA_RECORDS
+  (0E: two by D_8009CFA8 == 4, *_ALT). Left: 800FEC9C (per area a rect list topdownPlayerMainStep tests the player against,
+  purpose not pinned down), 80100788 (7 points of func_800FCFA8), the field aliases 800FEBD8 / 800FED58, and the MAIN0-range
+  800106B4.. words the top-down sections read (MAIN0 csv territory).

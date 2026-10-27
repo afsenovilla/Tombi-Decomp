@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *func_80018448(void);
-extern unsigned short D_800FEBD4[];
+extern unsigned short TOPDOWN_SHADOW_DEFS[];
 
 void topdownSpawnPlayerShadow(TObj *o)
 {
@@ -15,7 +15,7 @@ void topdownSpawnPlayerShadow(TObj *o)
         n->y.raw = o->y.raw;
         n->b.raw = o->b.raw;
         n->subtype = 0;
-        n->w1e = D_800FEBD4[0];
+        n->w1e = TOPDOWN_SHADOW_DEFS[0];
         n->b0d = 0x80;
         n->b0a = 0;
         n->b0f = o->b0f + 1;

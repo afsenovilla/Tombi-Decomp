@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void func_8001FE94(TObj *o, int n);
 extern void func_8001FEC0(TObj *o);
-extern void **D_800FED84[][3];
+extern void **TOPDOWN_ACTOR_ANIMS[][3];
 
 void topdownActorIdleStep(TObj *o)
 {
@@ -13,7 +13,7 @@ void topdownActorIdleStep(TObj *o)
     case 0:
         f = o->animFrame;
         if (f != U16(o, 0xD2)) {
-            o->anim = D_800FED84[o->subtype][0][f];
+            o->anim = TOPDOWN_ACTOR_ANIMS[o->subtype][0][f];
             func_8001FE94(o, 0);
             S16(o, 0xD2) = f;
         }

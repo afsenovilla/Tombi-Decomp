@@ -3,20 +3,20 @@
 #include "TOBJ.H"
 extern void topdownResolveCornerTile(TObj *o, int x, int y, int f);
 extern unsigned short D_800A4674[];
-extern unsigned char *D_800FECB0;
+extern unsigned char *TOPDOWN_MAP_TILES;
 
 int topdownCollideMapTile(TObj *o, short x, short y, short f)
 {
     unsigned char c;
     short k;
     if (o->active & 4) return;
-    c = D_800FECB0[(short)(((x + 0x80) >> 3) + ((y - 0x28) >> 3) * D_800A4674[0])]; c &= 0x7F;
+    c = TOPDOWN_MAP_TILES[(short)(((x + 0x80) >> 3) + ((y - 0x28) >> 3) * D_800A4674[0])]; c &= 0x7F;
     if (c == 0) return 0;
     if (c == 9) {
         topdownResolveCornerTile(o, x, y, f);
         x = *(int *)0x1F800070;
         y = *(int *)0x1F800074;
-        if ((c = D_800FECB0[(short)(((x + 0x80) >> 3) + ((y - 0x28) >> 3) * D_800A4674[0])] & 0x7F) == 0) return 0;
+        if ((c = TOPDOWN_MAP_TILES[(short)(((x + 0x80) >> 3) + ((y - 0x28) >> 3) * D_800A4674[0])] & 0x7F) == 0) return 0;
     }
     x &= 7;
     y &= 7;

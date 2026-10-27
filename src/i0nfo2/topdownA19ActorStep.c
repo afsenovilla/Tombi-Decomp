@@ -10,7 +10,7 @@ extern void topdownA19ActorPatrolDiagStepA(TObj *o);
 extern void topdownA19ActorPatrolDiagStepB(TObj *o);
 extern void topdownA19ActorTalkStep(TObj *o);
 extern unsigned char D_800A60A3;
-extern void **D_800FEFFC[][3];
+extern void **TOPDOWN_A19_ACTOR_ANIMS[][3];
 
 void topdownA19ActorStep(TObj *o)
 {
@@ -23,7 +23,7 @@ void topdownA19ActorStep(TObj *o)
             case 0:
                 f = o->animFrame;
                 if (f != U16(o, 0xD2)) {
-                    o->anim = D_800FEFFC[o->subtype][0][f];
+                    o->anim = TOPDOWN_A19_ACTOR_ANIMS[o->subtype][0][f];
                     func_8001FE94(o, 0);
                     S16(o, 0xD2) = f;
                 }

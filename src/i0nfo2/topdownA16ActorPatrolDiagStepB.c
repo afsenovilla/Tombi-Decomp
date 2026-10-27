@@ -4,11 +4,11 @@
 #include "raw7.h"
 extern void func_8001FE94(TObj *o, int n);
 extern void func_8001FEC0(TObj *o);
-extern void **D_800FEEFC[][3];
+extern void **TOPDOWN_A16_ACTOR_ANIMS[][3];
 
 static inline void setAnim(TObj *o, int i, short n)
 {
-    o->anim = D_800FEEFC[o->subtype][0][o->animFrame + 4];
+    o->anim = TOPDOWN_A16_ACTOR_ANIMS[o->subtype][0][o->animFrame + 4];
     func_8001FE94(o, n);
 }
 

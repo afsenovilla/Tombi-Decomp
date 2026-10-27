@@ -7,7 +7,7 @@ typedef struct {
 } SpawnA;
 extern TObj *func_800183B8();
 extern TObj *SCRIPT_OBJECTS[];
-extern SpawnA *D_801008D8;
+extern SpawnA *NPC_SET_10_RECORDS;
 #define PI_PARENT 
 #define PI_TBL asm("s3")
 #define PI_LP asm("s4")
@@ -25,7 +25,7 @@ void spawnNpcSet10(TObj *parent0)
     register SpawnA *p PI_P;
     TObj *n;
     register short i PI_I;
-    tbl = D_801008D8;
+    tbl = NPC_SET_10_RECORDS;
     i = 0;
     p = tbl;
     if (p->type != 0xFF) {

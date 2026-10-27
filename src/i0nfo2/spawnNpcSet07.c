@@ -22,8 +22,8 @@ extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F328;
 extern TObj PLAYER;
-extern SpawnA *D_800FFD7C[];
-extern SpawnB D_800FF06C[];
+extern SpawnA *NPC_SET_07_RECORD_LISTS[];
+extern SpawnB NPC_SET_07_EXTRA_RECORDS[];
 #define G8(n) (*((unsigned char *)&GAME + (n)))
 
 #define PI_PARENT asm("s3")
@@ -52,7 +52,7 @@ void spawnNpcSet07(TObj *parent0)
     short t;
     short s;
 
-    { register unsigned char *g asm("a0"); g = &G8(0x58D); tbl = D_800FFD7C[*g]; }
+    { register unsigned char *g asm("a0"); g = &G8(0x58D); tbl = NPC_SET_07_RECORD_LISTS[*g]; }
     i1 = 0;
     p = tbl;
     if (p->type != 0xFF) {
@@ -181,7 +181,7 @@ void spawnNpcSet07(TObj *parent0)
         { register int m asm("v0"); m = (short)j * 28; p = (SpawnA *)((char *)tbl + m); }
     } while (p->type != ff);
     }
-    for (i = 0; (e = &D_800FF06C[i])->type != 0xFF; i++) {
+    for (i = 0; (e = &NPC_SET_07_EXTRA_RECORDS[i])->type != 0xFF; i++) {
         o = func_80018448();
         if (o != 0) {
             o->active = 1;

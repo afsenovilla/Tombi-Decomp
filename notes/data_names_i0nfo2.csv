@@ -1,0 +1,46 @@
+address,name,size,source
+800fecb0,TOPDOWN_MAP_TILES,0x4,usage: u8 *: the 0x4000-byte tile map copy topdownLoadMapTiles fills (bit 0x80 trigger / & 0x7F collision kind in topdownCollideMapTile / CheckTileTrigger) refs=3
+800fecb4,TOPDOWN_MAP_STRIP_BUFFER,0x4,usage: int: the buffer address every topdownUploadMapStrip builds strip i into before the VRAM load refs=12
+800fecb8,TOPDOWN_MAP_LAYER_RECTS,,usage: {u16 x y u v w h}[] of the map layer sprites topdownDrawMapLayers draws refs=1
+800febd4,TOPDOWN_SHADOW_DEFS,,usage: {u16 w1e; short bank; void **anims; pad}[subtype] of the type 0x3A player shadow (topdownShadowHandler) refs=10
+800febdc,TOPDOWN_PLAYER_CONTACT_BOXES,,usage: u16[anim type][4] copied into D_800A60A4.. by topdownPlayerNpcCollision refs=1
+800fecf4,TOPDOWN_ITEM_SPOT_DEFS,,usage: short[subtype][4]: [0] anim set index [1] the item given (func_80026C50) of topdownItemSpotCheckStep refs=1
+800fed44,TOPDOWN_ITEM_SPOT_KINDS,,usage: short[b0c]: anim set index into TOPDOWN_ITEM_SPOT_ANIMS of an item spot refs=7
+801073e4,TOPDOWN_ITEM_SPOT_ANIMS,,usage: void *[kind][8] anims of the item spots refs=2
+801073f4,TOPDOWN_ITEM_SPOT_TAKEN_ANIMS,,usage: void *[kind][8] 'taken' anims of topdownItemSpotUpdate refs=1
+800fed54,TOPDOWN_TALK_SPOT_DEFS,,usage: short[subtype][4]: [0] [1] the message args of func_8002DC50 in topdownTalkSpotStep [2] the anim index of topdownTalkSpotHandler refs=1
+800fed7c,TOPDOWN_ACTOR_DEFS,,usage: ObjInit[subtype] box / tpage / bank / anim of topdownActorInit refs=8
+800fed84,TOPDOWN_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of topdownActorSetAnim / SetDirAnim and the variant 7 scenes refs=18
+800fedc4,TOPDOWN_A05_SCENERY_DEFS,,usage: ObjInit3[subtype] of the AREA05 scenery (topdownA05SceneryHandler) refs=8
+800fedd0,TOPDOWN_A16_SCENERY_DEFS,,usage: ObjInit3[subtype] of the AREA16 scenery refs=8
+800fee04,TOPDOWN_A17_SCENERY_DEFS,,usage: ObjInit3[subtype] of the AREA17 scenery refs=8
+800fedf4,TOPDOWN_A17_SCENERY_LIMITS,,usage: {short a b c}[k] positions the wb8 0xD / 0xE objects of topdownA17SceneryUpdate move between refs=4
+800fee0c,TOPDOWN_A17_SCENERY_ANIMS,,usage: {int **anims; ..}[subtype] anim sets of topdownA17SceneryUpdate refs=1
+800fee34,TOPDOWN_A19_SCENERY_DEFS,,usage: ObjInit3[subtype] of the AREA19 scenery (topdownA19SceneryInit) refs=1
+800fee58,TOPDOWN_A08_ACTOR_DEFS,,usage: {u8 b0..b3; u16 w1e; short spad; void **anims}[subtype] of topdownA08ActorInit refs=10
+800fee70,TOPDOWN_A08_SCENERY_DEF,0xc,usage: {u16 w1e; short sprite data index; void **anims} the single AREA08 scenery record (800FEE74 / 78 are its fields) refs=2
+800feeb8,TOPDOWN_A11_ACTOR_DEFS,,usage: ObjInit[subtype] of topdownA11ActorInit refs=8
+800feec0,TOPDOWN_A11_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of the AREA11 actors refs=16
+800feef4,TOPDOWN_A16_ACTOR_DEFS,,usage: ObjInit[subtype] of topdownA16ActorInit refs=8
+800feefc,TOPDOWN_A16_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of the AREA16 actors refs=15
+800fef24,TOPDOWN_A16_ACTOR_DIALOGUE_IDS,,usage: u8[b0c][4]: dialogue id by D_8009CF60 of topdownA16ActorOpenDialogue refs=1
+800fef64,TOPDOWN_A17_ACTOR_DEFS,,usage: ObjInit[subtype] of topdownA17ActorInit refs=8
+800fef6c,TOPDOWN_A17_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of the AREA17 actors refs=16
+800fefa0,TOPDOWN_A18_ACTOR_DEFS,,usage: ObjInit[subtype] of topdownA18ActorInit refs=8
+800fefa8,TOPDOWN_A18_ACTOR_ANIMS,,usage: void **[subtype][3] anims the AREA18 actor cycles with pad bit 0x1000 refs=1
+800feff4,TOPDOWN_A19_ACTOR_DEFS,,usage: {u8 b0..b3; u16 w1e; short spad; void **anims}[subtype] of topdownA19ActorInit refs=8
+800feffc,TOPDOWN_A19_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of the AREA19 actors refs=19
+800ff054,TOPDOWN_A11_SCENERY_DEFS,,usage: ObjInit3[subtype] of the AREA11 scenery (topdownA11SceneryHandler) refs=8
+800ffd7c,NPC_SET_07_RECORD_LISTS,,usage: SpawnA *[GAME+0x58D]: the spawn record list of unlayered variant 7 (spawnNpcSet07) refs=1
+800ff06c,NPC_SET_07_EXTRA_RECORDS,,usage: SpawnB[] (type 0xFF end) the second list spawnNpcSet07 allocates refs=1
+800ffe20,NPC_SET_0C_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0xC refs=1
+80100080,NPC_SET_0D_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0xD refs=1
+800ffe24,NPC_SET_0D_EXTRA_RECORDS,,usage: SpawnB[] (type 0xFF end) the second list of spawnNpcSet0D refs=1
+80100364,NPC_SET_0E_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0xE refs=1
+801001d4,NPC_SET_0E_EXTRA_RECORDS,0x4,usage: SpawnB *: the second list of spawnNpcSet0E (NPC_SET_0E_EXTRA_RECORDS_ALT when D_8009CFA8 == 4) refs=1
+801001d8,NPC_SET_0E_EXTRA_RECORDS_ALT,0x4,usage: SpawnB *: the second list of spawnNpcSet0E when D_8009CFA8 == 4 refs=1
+80100784,NPC_SET_0F_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0xF refs=1
+80100368,NPC_SET_0F_EXTRA_RECORDS,,usage: SpawnB[] (type 0xFF end) the second list of spawnNpcSet0F refs=1
+801008d8,NPC_SET_10_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0x10 refs=1
+80100b00,NPC_SET_11_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0x11 refs=1
+801008dc,NPC_SET_11_EXTRA_RECORDS,,usage: SpawnB[] (type 0xFF end) the second list of spawnNpcSet11 refs=1

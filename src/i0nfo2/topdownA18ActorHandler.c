@@ -6,7 +6,7 @@ extern void func_8001FE6C(TObj *o);
 extern void func_8001FEC0(TObj *o);
 extern void func_800202B4(TObj *o);
 extern void topdownA18ActorInit(TObj *o);
-extern void **D_800FEFA8[][3];
+extern void **TOPDOWN_A18_ACTOR_ANIMS[][3];
 
 void topdownA18ActorHandler(TObj *o)
 {
@@ -18,7 +18,7 @@ void topdownA18ActorHandler(TObj *o)
         func_800202B4(o);
         if (*(unsigned short *)0x1F8001FC & 0x1000) {
             o->wb4 = (o->wb4 + 1) & 7;
-            o->anim = D_800FEFA8[o->subtype][0][(unsigned short)o->wb4];
+            o->anim = TOPDOWN_A18_ACTOR_ANIMS[o->subtype][0][(unsigned short)o->wb4];
             func_8001FE6C(o);
         }
         func_8001FEC0(o);

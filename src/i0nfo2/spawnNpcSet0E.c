@@ -16,9 +16,9 @@ extern unsigned char D_8009CF60;
 extern unsigned char D_8009CFA1;
 extern unsigned char D_8009CFA8;
 extern TObj *SCRIPT_OBJECTS[];
-extern SpawnB *D_801001D4;
-extern SpawnB *D_801001D8;
-extern SpawnA *D_80100364;
+extern SpawnB *NPC_SET_0E_EXTRA_RECORDS;
+extern SpawnB *NPC_SET_0E_EXTRA_RECORDS_ALT;
+extern SpawnA *NPC_SET_0E_RECORDS;
 
 void spawnNpcSet0E(TObj *parent0)
 {
@@ -40,7 +40,7 @@ void spawnNpcSet0E(TObj *parent0)
     } else {
         D_8009CF60 = 0;
     }
-    tbl = D_80100364;
+    tbl = NPC_SET_0E_RECORDS;
     for (i = 0; (p = &tbl[i])->type != 0xFF; i++) {
         lp = SCRIPT_OBJECTS;
         switch (p->bc) {
@@ -83,9 +83,9 @@ void spawnNpcSet0E(TObj *parent0)
             break;
         }
     }
-    e = D_801001D4;
+    e = NPC_SET_0E_EXTRA_RECORDS;
     if (D_8009CFA8 == 4) {
-        e = D_801001D8;
+        e = NPC_SET_0E_EXTRA_RECORDS_ALT;
     }
     i = 0;
     for (; e->type != 0xFF; e++) {
