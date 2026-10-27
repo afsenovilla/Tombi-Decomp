@@ -243,7 +243,7 @@ static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
-                "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
+                "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
                 "  (1..4 the other MAINn of the disc, docs/PORT.md \"Languages\")\n"
@@ -255,7 +255,7 @@ static int usage(const char *argv0) {
 }
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
-        port_menu_add(const char *), port_dump_ram_add(const char *);
+        port_menu_add(const char *), port_title_add(const char *), port_dump_ram_add(const char *);
     extern const char *port_audio_path, *port_save_dir; extern int port_skip_movies, port_show_fps, port_stall_frame, port_stall_ms;
     int headless = 0, test_null = 0;
     port_window = 1;
@@ -295,6 +295,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);
         else if (!strcmp(a, "--poke-every") && v) port_poke_add_every(argv[++i], 1);
         else if (!strcmp(a, "--menu") && v) port_menu_add(argv[++i]);
+        else if (!strcmp(a, "--title") && v) port_title_add(argv[++i]);
         else if (!strcmp(a, "--save-dir") && v) port_save_dir = argv[++i];
         else if (!strcmp(a, "--trace-cd")) port_trace_cd = 1;
         else if (!strcmp(a, "-v")) port_verbose++;

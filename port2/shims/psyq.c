@@ -138,7 +138,17 @@ static void menu_open(void) {
     SPAD32(0x1D4) = saved;
     port_printf("[port] frame %d: menu screen %d opened\n", port_frame, menu_id);
 }
-void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; }
+/* --title FRAME:ID (debug): spawn the event title banner of event ID of the current area at that vblank, as an
+   event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests) */
+static int title_frame, title_id;
+void port_title_add(const char *s) {
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    title_frame = f; title_id = 0;
+    while (*s >= '0' && *s <= '9') title_id = title_id * 10 + *s++ - '0';
+}
+void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; }
 void port_vblank(void) {
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
@@ -196,6 +206,7 @@ void port_vblank(void) {
     { extern void port_ovl_snapshot(void); port_ovl_snapshot(); }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
+    if (title_frame && port_frame == title_frame) { extern void FUN_8005aa74(int, int, int, int); FUN_8005aa74(title_id, 0, 120, 0); port_printf("[port] frame %d: event title %d spawned\n", port_frame, title_id); }
     port_pad_vblank();
     { extern void port_st_vblank(void); port_st_vblank(); }
     if (port_vsync_event_fn) call_psx(port_vsync_event_fn);

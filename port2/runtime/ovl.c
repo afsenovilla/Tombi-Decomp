@@ -48,6 +48,29 @@ const char *port_resident_overlay(void) {
     return a >= 0 ? port_areas[a].name : "(none)";
 }
 
+/* the bytes of a WFM3 bank (loadMessageGlyph, subScreenOpenMessage): +8 the offset of the message offset table,
+   +0xE the message count, texts of u16 codes ended by -1, the glyph images (u16 w, h, a, b, w*h texels) at the
+   offsets of the table at +0x90; the bank ends where its last text or glyph image ends.  0: not a bank. */
+unsigned port_wfm3_len(const unsigned char *p, unsigned n) {
+    if (n < 0x200 || memcmp(p, "WFM3", 4)) return 0;
+    unsigned off8 = p[8] | p[9] << 8, nmsg = p[0xE] | p[0xF] << 8, end = 0;
+    if (off8 < 0x90 || nmsg > 1024 || off8 + 2 * nmsg > n) return 0;
+    for (unsigned k = 0; k < nmsg; k++) {
+        unsigned t = off8 + (p[off8 + 2 * k] | p[off8 + 2 * k + 1] << 8);
+        while (t + 2 <= n && (p[t] | p[t + 1] << 8) != 0xFFFF) t += 2;
+        if (t + 2 > n) return 0;
+        if (t + 2 > end) end = t + 2;
+    }
+    for (unsigned k = 0; k < (off8 - 0x90) / 2; k++) {
+        unsigned g = p[0x90 + 2 * k] | p[0x91 + 2 * k] << 8;
+        if (!g || g + 8 > n) continue;
+        unsigned w = p[g] | p[g + 1] << 8, h = p[g + 2] | p[g + 3] << 8;
+        if (w > 64 || h > 64 || g + 8 + 2 * w * h > n) continue;
+        if (g + 8 + 2 * w * h > end) end = g + 8 + 2 * w * h;
+    }
+    return (end + 3) & ~3u;
+}
+
 /* ------------------------------------------------------------------ dispatch */
 static const PortFunc *funcmap_find(u32p addr) {
     int lo = 0, hi = port_funcmap_count - 1;
@@ -198,9 +221,17 @@ void port_relocate_overlay(void *dst, int bytes) {
                           port_frame, bytes, base, port_x000_image[0]); return; }
     u32p *w = dst; int n = bytes / 4, nfn = 0, nth = 0, nd = 0, nraw = 0;
     memset(cache, 0, sizeof cache);
+    /* the message banks inside the image (D0SPSUB3's WFM3 at 0x800EF600): u16 glyph codes 0x80NN, whose pairs
+       read as aligned RAM addresses (0x80088004 = "this"), and never a pointer: left untouched */
+    int bank_s[8], bank_e[8], nbank = 0;
+    for (int i = 0; i + 4 <= n && nbank < 8; i++) {
+        unsigned len = port_wfm3_len((const unsigned char *)(w + i), (unsigned)(n - i) * 4);
+        if (len) { bank_s[nbank] = i; bank_e[nbank] = i + (int)(len / 4); nbank++; i += (int)(len / 4) - 1; }
+    }
     for (int i = 0; i < n; i++) {
         u32p a = base + 4 * i, v = w[i];
         if (c && in_ranges(c, a)) continue;
+        { int k; for (k = 0; k < nbank; k++) if (i >= bank_s[k] && i < bank_e[k]) break; if (k < nbank) continue; }
         if (0x1F800000u <= v && v < 0x1F800400u) { w[i] = (u32p)port_ram_ptr(v); nd++; continue; }
         if (v < PORT_MAIN0_LOAD || v >= 0x80200000u || (v & 3)) continue;
         /* a round word 0x80NN0000 of an overlay is a constant, as emit_data keeps it for MAIN0's data: the last

@@ -1685,6 +1685,60 @@ tuned on the nine executables and the AREA00 overlays, other areas and the sub-s
 have only been composed, not played through. Nothing of the alignment is stored: it is recomputed from the
 player's own files at every start (about 0.2 s) and at every overlay load.
 
+#### Text that lives inside an overlay: the item menu crash, the title menu, `port_lang_item`
+
+The first real-Windows runs of `--lang 5` crashed on the item sub-screen (`D0SPSUB3_func_800ED7BC+0x31d`, a
+write through a garbage pointer, 70 frames after the overlay load) and showed the title's third entry as
+`JUEGO    OPCI`. Both are text inside an overlay read through a **fixed address**, which the composition above
+cannot move:
+
+- **The item-message bank.** `D0SPSUB3` carries a WFM3 message bank at `0x800EF600` (`D_1F8003A0 = D_800EF600`
+  in `subScreenInitMenu`): a header, an offset table, the texts as u16 glyph codes, the glyph images. The
+  Spanish bank is longer, so the alignment put its extra bytes in gaps and the composed image held MAIN0's
+  bytes less those gaps with the language's offsets copied in: `subScreenOpenMessage` then read a script from
+  the wrong place, `func_800ED7BC` wrote glyph records with its garbage (the write fault), `drawMessageBox` drew
+  a box the size of the screen and the glyph buffer zeroed the overlay region (`no native code in (none)`).
+  Headless it was the "EEEEE" box of frame 3817 below. A WFM3 bank is now copied **whole** at MAIN0's offset
+  (`named_blobs`: the header carries no length, `port_wfm3_len` ends the bank at its last text or glyph image;
+  the bytes it grows into must be a gap of the twin, never a matched chunk).
+- **The relocator and glyph codes.** Independently of `--lang`, `port_relocate_overlay` turned the bank's text
+  into garbage in every language: a pair of glyph codes `0x8008 0x8004` ("th") is the aligned RAM address
+  `0x80088004`, so the English box read `Can't use-thiS he8e4`. The relocator (and lang.c's spill / `Bn`
+  relocation) skip the words of a WFM3 bank.
+- **A C-named table that changed size.** `TITLE_MENU_GLYPHS` (O0PTSUB0, the -3-ended glyph list of the title
+  carousel) is 80 bytes in MAIN0 and 96 in MAIN5: copied in place up to MAIN0's size it lost `OPCIONES`' tail.
+  Every map now keeps `Bn`, a copy of the language's image with its pointer words made native, and
+  `port_lang_item(name)` answers with the item's `Bn` copy when its language version changed size (the gap it
+  sits in, or an item that crosses a changed gap before the next pointer target); `port/fixes.txt` adds the
+  call to `titleDrawMenuCarousel`. The same `Bn` rule serves pointers: a pointer into a chunk whose item
+  crosses a changed-size gap resolves into `Bn` instead of the live image (`item_spills`), so a self-relative
+  table reached by pointer is whole. The overlay map ring is keyed by file id: a reload of the same overlay
+  reuses its map, spill and `Bn`, so pointers the game kept from the first load stay valid.
+
+**Regression scripts** (headless, `--data`; three items are poked into the inventory, Triangle opens the item
+sub-screen, Cross on the first item shows its message, Triangle closes it, then again):
+```
+build/port2/tombi2 --headless --frames 5600 --data data --lang 5 --poke 3000:8009D2A4:3:2 --poke 3000:8009D1A4:1:1 \
+    --poke 3000:8009D1A5:2:1 --poke 3000:8009D1A6:3:1 --dump-frames out --dump-every 100 \
+    --pad-script 1000:start,1300:cross:3x45/30,3400:triangle:3,3600:cross:3,3800:cross:3,3900:triangle:3,4500:triangle:3,4700:cross:3,4900:cross:3,5000:cross:3
+```
+and the same with `--lang 0`: D0SPSUB3 loads at 3420, the box reads `No se puede usar aquí.` / `Can't use this
+here.` (frames 3900..4100), X000 is reloaded on the close, the second open draws the list again (5100), no
+`no native code`, no fault. The title menu (a save in `--save-dir`, Start at 2000, Right twice): `--lang 5` shows
+`OPCIONES` whole. `--title FRAME:ID` (debug, `port_title_add` in `shims/psyq.c`) spawns the event-title banner
+of event ID of the current area at that vblank: `--lang 5 --title 3000:2` in AREA00 flies in `Despejar la
+niebla` as `--lang 0` does `Clear the FOG` (the letters scatter and reassemble: that is the animation, not a
+layout fault). The standard test stays byte-identical (36 frames).
+
+**Checked and not a port fault.** The white egg-shaped objects on the fences of the lake room (AREA00 section 1)
+are what the retail renderer draws too (`tools/psxemu/capture.py rooms --area 00 --section 1`). The
+`kernel-area access at playerCheckPerchLanding+0xae -> 3` lines are `GRABBED_OBJECT->type` read while the
+word holds 1 (the game's own flag value): address 3 reads the BIOS kernel area on the console, the port's
+emulation returns 0 as well. `gameState=02` in a log is the movie player (`moviePlayerTask`), not an item
+pickup: the slow seconds a Windows log showed there (4 to 35 vblank/s, up to 1 s intervals) are the FMV of an
+event; headless on Linux the two opening FMVs run at well under 1 ms a frame from the data folder, so that
+stall is host I/O or presentation on that machine, still open.
+
 ### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
 
 Two tools check what open point 1 is about: the retail code pointers the game jumps through.

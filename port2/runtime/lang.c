@@ -64,6 +64,10 @@ struct Map {
     Gap *g; int ng;
     unsigned char *spill; unsigned nspill;
     unsigned char *ownA, *ownB;      /* buffers freed with the map */
+    unsigned char *Bn;               /* a copy of B with its pointer words made native: where the pointers to items that span a changed-size gap go */
+    unsigned *tgt; int ntgt;         /* the sorted B offsets B's own pointers (and MAIN's, for an overlay) point to */
+    int id;                          /* an overlay map: the FILE_LINKS id (the ring is looked up by it) */
+    int relocated;                   /* the spill and Bn hold native pointers (once per map: a reused map is not done again) */
     int bss_delta;                   /* B offset - A offset of the trailing chunk: what follows the image moved by this */
     int bss_seen; int bss_adj;       /* learned from pointer pairs of both images into their bss: B - A (bss_delta until seen) */
     int votes[8][2], nvotes;         /* (delta, count) of those pairs: the most frequent wins when the compose is done */
@@ -261,7 +265,7 @@ static void align2(Map *m) {
     eq_ctx = 0;
     free(first.c); free(first.g);
 }
-static void map_free(Map *m) { free(m->c); free(m->g); free(m->spill); free(m->ownA); free(m->ownB); memset(m, 0, sizeof *m); }
+static void map_free(Map *m) { free(m->c); free(m->g); free(m->spill); free(m->ownA); free(m->ownB); free(m->Bn); free(m->tgt); memset(m, 0, sizeof *m); }
 
 /* B offset -> A offset (>= 0), or -1 with *spill set (a B-only byte), or -2 (beyond B) */
 static long b2a(const Map *m, unsigned ob, unsigned char **spill) {
@@ -313,13 +317,53 @@ static int ovl_cur = -1, ovl_loads;
 static int ovl_composed_pending;
 
 typedef struct { u32p addr; unsigned char *native; } Xlat;
+/* ---- items that span a changed-size gap.  A pointer into a chunk names an item whose bytes line up with
+   MAIN0's, so it gets MAIN0's layout (the live image: the C names it, the game writes to it).  But an item that
+   is read through its own internal offsets, a message bank (D0SPSUB3's WFM3 at 0x800EF600: a header, an offset
+   table, the texts) or a string table, has no fixed size: when the language's version is longer, the alignment
+   puts the extra bytes in gaps, the composed image holds MAIN0's bytes less those gaps while the offsets copied
+   in are the language's, and the consumer reads garbage (the "EEEEE" message box that overran the glyph tables
+   and zeroed the overlay region).  So a pointer whose item, up to the next pointer target in B, crosses a gap
+   that changed size resolves into Bn, a copy of the language's image whose own pointer words were made native:
+   the item is whole there, with the language's offsets. */
+static int cmp_u(const void *x, const void *y) { unsigned a = *(const unsigned *)x, b = *(const unsigned *)y; return a < b ? -1 : a > b; }
+static void add_targets(Map *m, const unsigned char *P, unsigned np, unsigned lo, unsigned hi, int *cap) {
+    for (unsigned o = 0; o + 4 <= np; o += 4) {
+        unsigned v = W(P, o);
+        if (v < lo || v >= hi || (v & 3)) continue;
+        if (m->ntgt == *cap) { *cap = *cap ? *cap * 2 : 1024; m->tgt = realloc(m->tgt, *cap * sizeof *m->tgt); }
+        m->tgt[m->ntgt++] = v - lo;
+    }
+}
+static void targets(Map *m) {
+    int cap = 0; m->ntgt = 0;
+    add_targets(m, m->B, m->nb, m->base_b, m->base_b + m->nb, &cap);
+    if (m->other && m->other->B) add_targets(m, m->other->B, m->other->nb, m->base_b, m->base_b + m->nb, &cap);
+    if (m->ntgt) qsort(m->tgt, m->ntgt, sizeof *m->tgt, cmp_u);
+}
+static int item_spills(const Map *m, unsigned ob, unsigned oa) {
+    if (m == &main_map) { if (oa < DATA_OFF) return 0; }
+    else { const PortOvlCode *c = port_ovl_code_ranges(); if (c && port_ovl_in_ranges(c, PORT_OVL_BASE + oa)) return 0; }
+    unsigned next = m->nb;
+    int lo = 0, hi = m->ntgt - 1;
+    while (lo <= hi) { int k = (lo + hi) / 2; if (m->tgt[k] <= ob) lo = k + 1; else { next = m->tgt[k]; hi = k - 1; } }
+    for (int k = 0; k < m->ng; k++) {
+        const Gap *g = &m->g[k];
+        if (g->alen != g->blen && g->b > ob && g->b < next) return 1;
+    }
+    return 0;
+}
+static unsigned char *bn_get(Map *m) {
+    if (!m->Bn) { m->Bn = malloc(m->nb + 4); memcpy(m->Bn, m->B, m->nb); }
+    return m->Bn;
+}
 /* a MAINn / language-overlay address -> the MAIN0 / X0 layout (addr), or a native pointer into a spill */
 static Xlat xlate(u32p v) {
     Xlat x = { v, 0 };
     if (!port_lang) return x;
     if (v >= PORT_MAIN0_LOAD && v < PORT_MAIN0_LOAD + main_map.nb) {
         long a = b2a(&main_map, v - PORT_MAIN0_LOAD, &x.native);
-        if (a >= 0) x.addr = PORT_MAIN0_LOAD + (u32p)a;
+        if (a >= 0) { x.addr = PORT_MAIN0_LOAD + (u32p)a; if (item_spills(&main_map, v - PORT_MAIN0_LOAD, (unsigned)a)) x.native = bn_get(&main_map) + (v - PORT_MAIN0_LOAD); }
         else if (a == -2) x.addr = v - main_map.bss_adj;
         return x;
     }
@@ -329,7 +373,7 @@ static Xlat xlate(u32p v) {
         u32p base_b = PORT_OVL_BASE + ovl_delta;
         if (m && m->nc && v - base_b < m->nb) {
             long a = b2a(m, v - base_b, &x.native);
-            if (a >= 0) x.addr = PORT_OVL_BASE + (u32p)a;
+            if (a >= 0) { x.addr = PORT_OVL_BASE + (u32p)a; if (item_spills(m, v - base_b, (unsigned)a)) x.native = bn_get((Map *)m) + (v - base_b); }
             return x;
         }
         x.addr = v - ovl_delta - (m && m->nc ? m->bss_adj : 0);
@@ -354,13 +398,73 @@ int port_lang_xlate_word(u32p *v, void **native) {
     *v = x.addr;
     return 0;
 }
-static void relocate_spill(Map *m) {
-    for (unsigned o = 0; o + 4 <= m->nspill; o += 4) {
-        unsigned v = W(m->spill, o);
+extern unsigned port_wfm3_len(const unsigned char *p, unsigned n);
+#define wfm3_len port_wfm3_len
+static void relocate_words(unsigned char *p, unsigned n) {
+    for (unsigned o = 0; o + 4 <= n; o += 4) {
+        unsigned bank = wfm3_len(p + o, n - o);          /* a message bank: glyph codes, never pointers (ovl.c) */
+        if (bank) { o += bank - 4; continue; }
+        unsigned v = W(p, o);
         if (!is_ram_addr(v)) continue;
         Xlat x = xlate(v);
-        *(unsigned *)(m->spill + o) = x.native ? (unsigned)(unsigned long)x.native : (unsigned)(unsigned long)native_of(x.addr);
+        *(unsigned *)(p + o) = x.native ? (unsigned)(unsigned long)x.native : (unsigned)(unsigned long)native_of(x.addr);
     }
+}
+/* after the compose (bss_adj decided): the spill's words, and Bn's (every map gets one: an item pointer handed
+   out before this point already points into it) */
+static void relocate_spill(Map *m) {
+    if (m->relocated) return;
+    m->relocated = 1;
+    relocate_words(m->spill, m->nspill);
+    relocate_words(bn_get(m), m->nb);
+}
+
+
+/* ---- named blobs read through a fixed address.  D0SPSUB3's item-message bank is a WFM3 file inside the overlay
+   (0x800EF600: the C takes its address, D_1F8003A0 = D_800EF600, and reads it through its own offset table), so
+   no pointer rule can send the consumer elsewhere: the language's bank must be whole at MAIN0's offset.  A WFM3
+   header carries its length (+8), so the language's bank is copied there as a unit; when it is longer, the bytes
+   it grows into must be a gap of the twin (MAIN0-only or changed bytes nothing points to), never a chunk. */
+static int in_chunk(const Map *m, unsigned oa) {
+    for (int k = 0; k < m->nc; k++) if (oa >= m->c[k].a && oa < m->c[k].a + m->c[k].len) return 1;
+    return 0;
+}
+static int named_blobs(const Map *m, unsigned char *img, unsigned size0, unsigned from) {
+    int n = 0;
+    for (unsigned oa = from; oa + 12 <= m->na; oa += 4) {
+        if (memcmp(m->A + oa, "WFM3", 4)) continue;
+        long ob = a2b(m, oa);
+        if (ob < 0 || (unsigned)ob + 12 > m->nb || memcmp(m->B + ob, "WFM3", 4)) continue;
+        unsigned la = wfm3_len(m->A + oa, m->na - oa), lb = wfm3_len(m->B + ob, m->nb - (unsigned)ob);
+        if (!la || !lb || oa + lb > size0) continue;
+        int ok = 1;
+        for (unsigned o = oa + la; o < oa + lb; o += 4) if (in_chunk(m, o)) { ok = 0; break; }
+        if (!ok) { port_printf("[port2]   --lang: WFM3 bank at %08x: the language's (%u bytes, MAIN0's %u) would overrun a matched chunk: left composed\n", m->base_a + oa, lb, la); continue; }
+        memcpy(img + oa, m->B + ob, lb);
+        if (port_verbose) port_printf("[port2]   --lang: WFM3 bank at %08x: the language's %u bytes in place (MAIN0's %u)\n", m->base_a + oa, lb, la);
+        n++;
+    }
+    return n;
+}
+
+/* A C-named item read through its name (a fixed MAIN0 offset) whose language version changed size: the C asks
+   for the language's copy with port_lang_item(name) (port/fixes.txt adds the call: O0PTSUB0's TITLE_MENU_GLYPHS,
+   the -3-ended glyph list of the title carousel, 80 bytes in MAIN0 and 96 in MAIN5, truncated in place).  The
+   language's item is whole in Bn; an item that did not change stays where it is. */
+void *port_lang_item(void *p) {
+    if (!port_lang) return p;
+    const unsigned char *b = p; Map *m; unsigned oa;
+    if (b >= (const unsigned char *)port_main0_image && b < (const unsigned char *)port_main0_image + main_map.na) { m = &main_map; oa = b - (const unsigned char *)port_main0_image; }
+    else if (b >= (const unsigned char *)port_x000_image && b < (const unsigned char *)port_x000_image + (PORT_OVL_END - PORT_OVL_BASE) && ovl_cur >= 0 && ovl_ring[ovl_cur].m.nc) {
+        m = &ovl_ring[ovl_cur].m; oa = b - (const unsigned char *)port_x000_image; if (oa >= m->na) return p;
+    } else return p;
+    for (int k = 0; k < m->ng; k++) {
+        const Gap *g = &m->g[k];
+        if (oa >= g->a && oa < g->a + g->alen && g->alen != g->blen) return oa - g->a < g->blen ? bn_get(m) + g->b + (oa - g->a) : p;
+    }
+    long ob = a2b(m, oa);
+    if (ob >= 0 && item_spills(m, (unsigned)ob, oa)) return bn_get(m) + ob;
+    return p;
 }
 
 /* ------------------------------------------------------------------ MAIN: file table and resident data */
@@ -401,8 +505,9 @@ void port_lang_init(void) {
     if (!m0 || !mn || n0 < 0x800 + LINKS_OFF + LINKS_N * 8 || nn < 0x1000 || memcmp(mn, "PS-X EXE", 8))
         port_fatal("--lang %d: cannot read EXE/MAIN0.EXE and %s from the disc / data folder", port_lang, name);
     main_map.A = m0 + 0x800; main_map.na = n0 - 0x800; main_map.B = mn + 0x800; main_map.nb = nn - 0x800;
-    main_map.base_a = main_map.base_b = PORT_MAIN0_LOAD; main_map.other = 0;
+    main_map.base_a = main_map.base_b = PORT_MAIN0_LOAD; main_map.other = 0; main_map.ownB = mn;
     align2(&main_map);
+    targets(&main_map);
     ovl_delta = (main_map.bss_delta + 7) & ~7;        /* the overlay region starts 8-aligned after MAINn's bss (X?00 entry tables: +0x28 for MAIN5, +0x30 for MAIN6) */
     main0_links = m0 + 0x800 + LINKS_OFF;
     for (int i = 0; i < 5; i++) port_lang_box_pad[i] = i == 2 || i == 3 ? 0x10 : box_pads[port_lang][i == 4 ? 2 : i];
@@ -435,6 +540,7 @@ void port_lang_init(void) {
     }
     bss_decide(&main_map, "MAIN");
     relocate_spill(&main_map);
+    named_blobs(&main_map, img, main_map.na, DATA_OFF);
     title_tables(main_map.B, main_map.nb);
     port_printf("[port2] language %d (%s): %s aligned with MAIN0.EXE (%d chunks, %d gaps, %u spill bytes, data end %+d, bss %+d%s); %d data words replaced "
                 "(%d pointers, %d into the spill, %d in the file table); overlays expected %+d\n", port_lang, port_lang_name(port_lang), name,
@@ -442,7 +548,7 @@ void port_lang_init(void) {
     if (port_verbose) for (int k = 0; k < main_map.ng; k++)
         port_printf("[port2]   MAIN gap %08x..%08x (%u) <- MAIN%d %08x (%u)%s\n", PORT_MAIN0_LOAD + main_map.g[k].a, PORT_MAIN0_LOAD + main_map.g[k].a + main_map.g[k].alen,
                     main_map.g[k].alen, port_lang, PORT_MAIN0_LOAD + main_map.g[k].b, main_map.g[k].blen, main_map.g[k].refs ? " (pointed to)" : "");
-    free(mn);     /* m0 stays: main0_links, main_map.A */
+    /* m0 stays: main0_links, main_map.A; mn (main_map.B, ownB): the targets of the overlay maps, MAIN's Bn */
 }
 
 /* ------------------------------------------------------------------ overlays */
@@ -464,16 +570,26 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
     if (lba0 == lban) return 0;                          /* the same file in both tables: nothing to do */
     unsigned sect0 = (size0 + 2047) / 2048, bytes0 = sect0 * 2048;
     if (bytes0 > PORT_OVL_END - PORT_OVL_BASE || sizen > (unsigned)bytes) { port_printf("[port2] frame %d: --lang: file %d: twin %u bytes, read %d: not composed\n", port_frame, id, size0, bytes); return 0; }
-    unsigned char *twin = malloc(bytes0 + 32), *lang = malloc(sizen + 32);
-    if (port_cd_read_sectors(lba0, sect0, twin, 2048)) { port_printf("[port2] frame %d: --lang: cannot read the MAIN0 twin of file %d (lba %d)\n", port_frame, id, lba0); free(twin); free(lang); return 0; }
-    memcpy(lang, dst, sizen);
-    /* the twin is the skeleton (code and data layout); the slot of the ring */
-    int slot = ovl_loads++ % RING;
-    map_free(&ovl_ring[slot].m);
-    Map *m = &ovl_ring[slot].m;
-    m->A = twin; m->na = size0; m->B = lang; m->nb = sizen; m->ownA = twin; m->ownB = lang;
-    m->base_a = PORT_OVL_BASE; m->base_b = PORT_OVL_BASE + ovl_delta; m->other = &main_map;
-    align2(m);
+    /* the map of this file: the one of its last load when the ring still holds it (the same alignment, the same
+       spill and Bn: pointers the game kept from that load stay valid), else a new slot */
+    int slot = -1;
+    for (int k = 0; k < RING; k++) if (ovl_ring[k].m.nc && ovl_ring[k].m.id == id) slot = k;
+    Map *m;
+    if (slot >= 0) m = &ovl_ring[slot].m;
+    else {
+        unsigned char *twin = malloc(bytes0 + 32), *lang = malloc(sizen + 32);
+        if (port_cd_read_sectors(lba0, sect0, twin, 2048)) { port_printf("[port2] frame %d: --lang: cannot read the MAIN0 twin of file %d (lba %d)\n", port_frame, id, lba0); free(twin); free(lang); return 0; }
+        memcpy(lang, dst, sizen);
+        /* the twin is the skeleton (code and data layout); the slot of the ring */
+        slot = ovl_loads++ % RING;
+        map_free(&ovl_ring[slot].m);
+        m = &ovl_ring[slot].m;
+        m->A = twin; m->na = size0; m->B = lang; m->nb = sizen; m->ownA = twin; m->ownB = lang; m->id = id;
+        m->base_a = PORT_OVL_BASE; m->base_b = PORT_OVL_BASE + ovl_delta; m->other = &main_map;
+        align2(m);
+        targets(m);
+    }
+    const unsigned char *twin = m->A, *lang = m->B;
     ovl_cur = slot;
     {   /* the overlay's own idea of its base: the first entry of its pointer table (D?SPSUB2 has none) */
         unsigned p0 = W(twin, 4), pn = W(lang, 4);
@@ -501,15 +617,16 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
             if (!x.native && x.addr == wa) continue;
             *w = x.native ? (unsigned)(unsigned long)x.native : x.addr;      /* MAIN0-layout: the relocator finishes it */
             ptrs++; if (x.native) spilled++;
-            if (port_verbose > 1 && ptrs <= 40) port_printf("[port2]   ovl +%06x: %08x -> %08x (MAIN0 %08x)%s\n", oa, wb, x.addr, wa, x.native ? " spill" : "");
+            if (port_verbose > 1) port_printf("[port2]   ovl +%06x: %08x -> %08x (MAIN0 %08x)%s\n", oa, wb, x.addr, wa, x.native ? " spill" : "");
         } else *w = wb;
         changed++;
     }
     bss_decide(m, "overlay");
     relocate_spill(m);
+    int blobs = named_blobs(m, img, bytes0, 4);
     port_printf("[port2] frame %d: --lang: file %d composed over its MAIN0 twin (%u vs %u bytes: %d chunks, %d gaps, %u spill bytes, tail %+d%s): "
-                "%d data words from the language (%d pointers, %d into the spill)\n", port_frame, id, sizen, size0, m->nc, m->ng, m->nspill, m->bss_delta,
-                code ? "" : ", no code ranges known", changed, ptrs, spilled);
+                "%d data words from the language (%d pointers, %d into the spill%s%s)\n", port_frame, id, sizen, size0, m->nc, m->ng, m->nspill, m->bss_delta,
+                code ? "" : ", no code ranges known", changed, ptrs, spilled, blobs ? ", a WFM3 bank whole" : "", slot >= 0 && m->relocated && ovl_loads ? "" : "");
     if (port_verbose) for (int k = 0; k < m->ng; k++)
         port_printf("[port2]   gap %08x..%08x (%u) <- %08x (%u)%s\n", PORT_OVL_BASE + m->g[k].a, PORT_OVL_BASE + m->g[k].a + m->g[k].alen, m->g[k].alen,
                     PORT_OVL_BASE + ovl_delta + m->g[k].b, m->g[k].blen, m->g[k].refs ? " (pointed to)" : "");

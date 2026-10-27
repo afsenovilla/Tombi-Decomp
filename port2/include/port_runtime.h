@@ -109,6 +109,7 @@ unsigned char *port_cd_read_named(const char *path, unsigned *size);   /* a whol
 extern int port_lang;                          /* 0 English (MAIN0, as generated), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk, 1..4 the other MAINn */
 extern int port_lang_box_pad[5];               /* printInfoMessage's box width by message kind, from MAINn's code */
 const char *port_lang_name(int n);
+void *port_lang_item(void *p);                 /* a C-named item: the language's copy when it changed size (port/fixes.txt) */
 void port_lang_init(void);                     /* after the game data is open, before the game starts */
 int port_lang_overlay_loaded(void *dst, int bytes, int id);   /* CdRead into the overlay region: compose over the MAIN0 twin; 1 if done */
 int port_lang_take_composed(void);

@@ -71,3 +71,6 @@ src/x010/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
 src/x010/updatePointsBalloon.c | g-> | gq->
 src/x017/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
 src/x017/updatePointsBalloon.c | g-> | gq->
+# --lang: a C-named table whose language version changed size (the port's data names are MAIN0 offsets; lang.c)
+src/o0ptsub0/titleDrawMenuCarousel.c | extern short TITLE_MENU_GLYPHS[]; | extern short TITLE_MENU_GLYPHS[]; extern void *port_lang_item(void *);
+src/o0ptsub0/titleDrawMenuCarousel.c | s = TITLE_MENU_GLYPHS; | s = (short *)port_lang_item(TITLE_MENU_GLYPHS);
