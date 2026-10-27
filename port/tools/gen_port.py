@@ -493,6 +493,16 @@ def sources(outdir, progs, ovls=(), areas=()):
         stem = os.path.basename(u.file)[:-2]
         area_own.setdefault(prog, {})[u.addr] = prog + "_" + defined_name(u.file, stem)
         picked.append((prog, u, stem, defined_name(u.file, stem)))
+    # two units of one area with the same native name would share one definition (the linker keeps the one it
+    # sees first) and the other address would run it: src/x011/stepFactoryNpcTalk.c defined `updateFactoryNpc`,
+    # so updateFactoryNpc's call to stepFactoryNpcTalk was itself and AREA11 recursed until the stack ended
+    for prog, names in area_own.items():
+        by_name = {}
+        for a, n in names.items(): by_name.setdefault(n, []).append(a)
+        for n, addrs in by_name.items():
+            if len(addrs) > 1:
+                sys.exit("gen_port: %s: %s is the function name of %s: a file of src/%s/ defines another unit's function (fix the definition's name)"
+                         % (prog, n, ", ".join("%08X" % a for a in sorted(addrs)), prog.lower()))
     asyms = {p: area_syms(p) for p in areas}
     x000_native = {}                   # varying X000 functions: addr -> X000_<name>
     refs = object_refs([(p[0].lower() + "__" + p[2]) if p[0] in ovl_names else p[2] for p in picked
@@ -523,6 +533,19 @@ def sources(outdir, progs, ovls=(), areas=()):
         defs = ""
         if area:
             ren = {}
+            # the matching of an area file masks the jal targets: a wrong extern name passes it.  A function that
+            # calls itself by name while its retail bytes hold no jal to its own address names another function
+            # (X005's updateBacoTownNpc called itself for stepBacoTownNpcTalk and recursed until the stack ended)
+            body = re.sub(r"/\*.*?\*/|//[^\n]*", "", src, flags=re.S)         # (not a mention in a comment)
+            if re.search(r"^[ \t]+.*\b%s\s*\(" % re.escape(u.name), body, re.M):   # (u.name: the csv name; `name` may be a helper's)
+                import areas as AR
+                mm = re.search(r"^//\s*MATCHING\s+%08x\s+(\d+)" % u.addr, src, re.M | re.I)   # the file's own size (a csv may split the unit)
+                try: W = AR.prog_words(prog, u.addr, max(u.size, int(mm.group(1)) if mm else 0))
+                except Exception: W = []
+                jals = set(((w & 0x3FFFFFF) << 2) | 0x80000000 for w in W if (w >> 26) == 3)
+                if W and u.addr not in jals:
+                    print("gen_port: WARNING %s calls itself by name, but its retail bytes hold no jal to %08X (its jal targets in the overlay: %s): a wrong extern name"
+                          % (os.path.relpath(u.file, ROOT), u.addr, " ".join("%08X" % t for t in sorted(jals) if t >= OVL_BASE)))
             local = set(re.findall(r"^static\b[^;=(]*?\b(\w+)\s*\(", src, re.M))   # file-local helpers
             for n in set(re.findall(r"\b[A-Za-z_]\w*\b", src)):
                 a = asyms[prog].get(n)

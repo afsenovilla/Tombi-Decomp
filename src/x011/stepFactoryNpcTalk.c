@@ -19,7 +19,7 @@ extern void powerPlantThanksTalk(TObj *o);
 extern void powerPlantElevatorHintTalk(TObj *o);
 extern void gratefulHelperTalk(TObj *o);
 
-void updateFactoryNpc(TObj *o)
+void stepFactoryNpcTalk(TObj *o)
 {
     switch (o->subtype) {
     case 0:

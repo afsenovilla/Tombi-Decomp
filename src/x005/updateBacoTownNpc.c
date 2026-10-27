@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void initBacoTownNpc(TObj *);
 extern int FUN_800202b4(TObj *);
-extern void updateBacoTownNpc(TObj *);
+extern void stepBacoTownNpcTalk(TObj *);   /* 0x80116E78, the jal of case 1 */
 extern void freeObjectLayer2(TObj *);
 
 void updateBacoTownNpc(TObj *o)
@@ -14,7 +14,7 @@ void updateBacoTownNpc(TObj *o)
         break;
     case 1:
         FUN_800202b4(o);
-        updateBacoTownNpc(o);
+        stepBacoTownNpcTalk(o);
         break;
     case 2:
         o->b04++;

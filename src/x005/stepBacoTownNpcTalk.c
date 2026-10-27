@@ -14,7 +14,7 @@ extern void noticeBoardTownsfolkTalk(TObj *);
 extern void safeMushroomHintTalk(TObj *);
 extern void wineKeeperTalk(TObj *);
 
-void updateBacoTownNpc(TObj *o)
+void stepBacoTownNpcTalk(TObj *o)
 {
     B12 v;
 

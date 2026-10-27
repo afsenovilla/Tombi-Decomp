@@ -502,6 +502,25 @@ def emit_data(outdir, amap, needed):
         # such a table: every word of it is data.  (A handler table holds function starts only; an X000 function
         # every area shares is a function start too.)
         data_runs = set()
+        # The load lists of MAIN0 (LDSYS_LOAD_LIST, LDAR_LOAD_LISTS[area]: records {id, idx, type, ptr, size, pad,
+        # flags} ended by id -1, the format of SYS/LD0*.BIN) hold destinations like 0x801E0000, the top of RAM:
+        # a round word a CD read goes to, no flag (AREA02/AREA19 read a sound bank there)
+        load_ptrs = set()
+        def wd(addr): o = addr - s; return int.from_bytes(data[o:o + 4], "little") if 0 <= o < len(data) - 3 else 0
+        heads = []
+        def ptr_table(a):               # the list pointers of a table, while they point into this region
+            while s <= wd(a) < e: heads.append(wd(a)); a += 4
+        if "LDSYS_LOAD_LIST" in amap.syms and s <= amap.syms["LDSYS_LOAD_LIST"] < e: heads.append(wd(amap.syms["LDSYS_LOAD_LIST"]))
+        for nm in ("LDAR_LOAD_LISTS", "SOUND_SET_LOAD_LISTS", "WSS_LOAD_LISTS"):
+            if nm in amap.syms and s <= amap.syms[nm] < e: ptr_table(amap.syms[nm])
+        if "AREA_LOAD_LISTS" in amap.syms and s <= amap.syms["AREA_LOAD_LISTS"] < e:
+            a = amap.syms["AREA_LOAD_LISTS"]   # per area a table of section lists; most live in the loaded LD0AR files
+            while 0x80010000 <= wd(a) < 0x80200000:
+                if s <= wd(a) < e: ptr_table(wd(a))
+                a += 4
+        for h in heads:
+            while s <= h < e and (wd(h) & 0xFFFF) != 0xFFFF:
+                load_ptrs.add(h + 4); h += 20
         run = []
         for i in range(n + 1):
             w = int.from_bytes(data[4 * i:4 * i + 4], "little") if i < n else 0
@@ -514,7 +533,7 @@ def emit_data(outdir, amap, needed):
             w = int.from_bytes(data[4 * i:4 * i + 4], "little")
             a = s + 4 * i
             if amap.is_code(a) or w < 0x80010000 and not (0x1F800000 <= w < 0x1F800400) or w >= 0x80200000 \
-                    or (w & 3) and not (0x1F800000 <= w < 0x1F800400) or (w & 0xFFFF) == 0:   # (round values: flags, not pointers)
+                    or (w & 3) and not (0x1F800000 <= w < 0x1F800400) or (w & 0xFFFF) == 0 and a not in load_ptrs:   # (round values: flags, not pointers)
                 words.append("0x%X" % w); continue
             th = amap.thunk(w) if a not in data_runs else None
             if th:
