@@ -1386,8 +1386,8 @@ SDL_Renderer path, or run windowed). The 24-bit display mode (MDEC movies, which
 the RGB24 readout and `port_window_frame` as before.
 
 **Measured (Linux, Mesa llvmpipe under Xvfb: the GL "GPU" is itself software here, so the gain on a real GPU is
-larger; the same 3600-frame script as above, `--show-fps`, paced at 50 Hz, the tree of the last port commit
-since the HEAD tree does not reach the title, see Open points):**
+larger; the same 3600-frame script as above, `--show-fps`, paced at 50 Hz, measured on the ac40ab5 tree while the
+HEAD tree did not reach the title, see Open points 7, since resolved: the frames of both trees are identical):**
 
 | scene | before (software) | after (OpenGL) |
 |---|---|---|
@@ -1449,13 +1449,28 @@ whether the fault emulation is back), if `present` is 30+ ms the swap waits for 
    single-consumer (no index shared for writing between the game thread and the audio callback). The next
    Windows log says where the game thread is when it stops.
 5. Movies (MDEC) are skipped as in `port/`; save states of `port/` (`--save/--load`) are not carried over.
-7. **The HEAD tree does not reach the title.** With the matching build refreshed for the data-naming commits
-   after ac40ab5, `port2` compiles only with two port-only rules in `port/fixes.txt` (`NEG_SIN_TABLE` declared
-   `unsigned short[]` in seven X001/X003 files against `globals.h`'s `short[]`; the local macro `g` of the eight
-   `updatePointsBalloon.c` against the MAIN0 function now named `g`), and the binary then stays on a black
-   screen: `report.txt` lists **268 overlay-target stubs** (ac40ab5: 2) and `titleSequenceTask` never leaves
-   step 0.3 (the watchdog's "no game progress" line, the same ordering table every frame). Names of
-   overlay-region functions have moved or changed in the notes/CSVs faster than gen2's thunk aliasing follows
-   them; the OpenGL work was therefore measured on the ac40ab5 tree with the same `port2/` files (they are
-   identical between the two commits apart from this round). Diagnose with `cat build/port2/gen/report.txt`
-   (the stub list) before the next port change.
+7. **Resolved: the HEAD tree did not reach the title (268 overlay-target stubs, black screen).** It was not a
+   name moving faster than the thunk aliasing but gen2's *link* step knowing data only by its address-name: the
+   data-naming rounds gave the overlays' tables real names (`MAP_NODES`, `ITEM_NAME_STRINGS`, `BOOT_LOGO_SPRITE_DATA`,
+   `PLAYER_ANIM_TABLE`, ...), and a named table whose retail address lies inside an X000 code unit (another
+   overlay's data lives there; before it was `D_800FD418 = port_x000_image + 0x153F0`) no longer matched the
+   `D_/DAT_/PTR_/jtbl_/P_` test, fell through to the "address inside X000 code, not a function start" branch and
+   was emitted as a *function stub* (266 of the 268; the other 2, `FUN_80116fb8` / `func_801249E0`, are the
+   genuine ones ac40ab5 had). O0PTSUB0's title tables were among them, so `titleSequenceTask` read stub code as
+   data and never left step 0.3. One more, `PLAYER_ANIM_TABLE` at 0x800E8404, sits at a function start of I0NFO
+   and was aliased to that address's dispatch thunk: with the stubs fixed the player's anim pointer became a thunk
+   address and `AnimJump` faulted at frame 1150. The rule now (`full_symbol_kinds` in gen2.py): a name is data when
+   the matching build never defines it in an executable section of any `build/full/*.elf` (it is PROVIDEd or in a
+   data section everywhere), no program's function list gives that name to the address, and it is neither an
+   address-named function (`FUN_`/`func_`) nor a prefixed overlay function; such a name aliases into the data
+   image as the `D_` names did. A second, smaller regression came with the function-csv sync: 13 MAIN0 rows took
+   their src names without the `names_main0.csv` row `apply_names.py` writes, and `tools/units.py` reads "named,
+   no names row" as a Ghidra library signature (Psy-Q), so the port dropped their C (`moviePlayerTask`,
+   `isOnScreen`, `setAnimation`, `spawnEventTitle`, ... as psyq/bios stubs); the rows are added. The two
+   `port/fixes.txt` rules of this round (`NEG_SIN_TABLE`, the `g` macro) stay. Result: stubs 90 (psyq/bios 80,
+   game-asm 8, overlay-target 2; ac40ab5: 91, the Psy-Q alias `f1` is no longer referenced), data aliases 3154, and
+   the standard scripted run gives **360 of 360 dumped frames byte-identical** to the ac40ab5 build, through the
+   title and AREA00 to frame 3600. The stale matching build that produced bogus stubs in the earlier diagnosis
+   (`LOADED_SOUND_SET` as a function stub) can no longer be used: `gen_port.provides()` refuses when any file of
+   `src/` (wip excluded), `include/`, `notes/*.csv` or `config/*.yaml` is newer than `build/full/*.full.ld`
+   (`PORT_STALE_FULL=warn` turns it into a warning) and names the file and the command to run.
