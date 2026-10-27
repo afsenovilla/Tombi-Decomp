@@ -1,28 +1,28 @@
 {
   "date": "2026-10-27",
   "totals": {
-    "lib": 105168,
-    "named": 562948,
+    "lib": 100904,
+    "named": 567212,
     "unnamed": 25508,
     "typed": 399676,
-    "game": 588456,
-    "n_game": 1385,
-    "n_named": 1273,
+    "game": 592720,
+    "n_game": 1398,
+    "n_named": 1286,
     "n_unnamed": 112,
     "n_typed": 568,
-    "n_lib": 919,
+    "n_lib": 906,
     "excluded": 479,
     "unnamed_typed": 11840
   },
-  "matching_bytes": 588504,
+  "matching_bytes": 592768,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
-      "lib": 105128,
-      "named": 279524,
+      "lib": 100864,
+      "named": 283788,
       "unnamed": 2304,
       "typed": 129292,
-      "n_lib": 916,
-      "n_named": 793,
+      "n_lib": 903,
+      "n_named": 806,
       "n_unnamed": 6,
       "n_typed": 188,
       "excluded": 479,
@@ -32,8 +32,8 @@
         2147574772,
         2147973359
       ],
-      "game": 281828,
-      "n_game": 799
+      "game": 286092,
+      "n_game": 812
     },
     "X000.BIN (overlay AREA00)": {
       "lib": 40,
@@ -314,17 +314,17 @@
     "D0SPSUB": {
       "game": 37156,
       "n": 59,
-      "matched": 26376,
-      "n_matched": 56,
+      "matched": 29864,
+      "n_matched": 57,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 10780,
-      "n_new": 3,
+      "new": 7292,
+      "n_new": 2,
       "uniq": 36172,
-      "uniq_matched": 25392,
+      "uniq_matched": 28880,
       "n_uniq": 55,
-      "n_uniq_matched": 52
+      "n_uniq_matched": 53
     },
     "D0SPSUB2": {
       "game": 20004,
@@ -344,17 +344,17 @@
     "D0SPSUB3": {
       "game": 25324,
       "n": 46,
-      "matched": 17620,
-      "n_matched": 44,
+      "matched": 21044,
+      "n_matched": 45,
       "piece": 0,
       "x000": 0,
       "dup": 4280,
-      "new": 3424,
-      "n_new": 1,
+      "new": 0,
+      "n_new": 0,
       "uniq": 5920,
-      "uniq_matched": 2496,
+      "uniq_matched": 5920,
       "n_uniq": 10,
-      "n_uniq_matched": 9
+      "n_uniq_matched": 10
     },
     "G0OVER": {
       "game": 3152,

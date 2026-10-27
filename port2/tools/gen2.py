@@ -287,7 +287,7 @@ ASMNAME_RE = re.compile(r"(?<=[\w)\]])\s+(?:__asm__|asm)\s*\(\s*\"(?!(?:[atvsk]\
 # modulo relocation, notes/functions_<prog>.csv "twin" column or PORT_TWINS) with every address-named symbol
 # (func_/D_/... _XXXXXXXX) renamed to the overlay's own address, read off the two retail images.  Not byte-matched:
 # flagged in report.txt.
-PORT_TWINS = {("D0SPSUB3", 0x800EC89C): ("D0SPSUB", 0x800ED0C4)}     # structural variant: src/wip has the draft
+PORT_TWINS = {}     # (prog, addr) -> (twin prog, addr) of a structural variant whose draft is in src/wip; none left
 HEXNAME_RE = re.compile(r"\b((?:PTR_)?(?:D|DAT|FUN|func|LAB|PTR|jtbl))_([0-9A-Fa-f]{8})\b")
 
 

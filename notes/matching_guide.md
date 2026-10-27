@@ -213,6 +213,9 @@ gcc 2.7 decides aliasing via MEM_IN_STRUCT: a **scalar global** at a fixed addre
 ### Matching debt (workarounds to revisit)
 Functions that match only thanks to a compiler hint rather than plain C; keep them to a minimum:
 - `register int r asm("$17")`: func_800428C0. `__asm__ volatile("nop")` before a loop: func_8006A200.
+  `register unsigned char *t asm("$3")` / `register int b asm("$5")` / `register int code asm("$2") = 0x54` plus an
+  empty `__asm__("" : : "r"(t))` input keeping the pointer live: func_800ED0C4 and its D0SPSUB3 twin func_800EC89C
+  (memory card menu step, confirm block).
 - Constant loaded as the address of a symbol (`D_31FFFF`): func_8005D4EC.
 - Second extern name for the same global: func_8002A0FC, func_8002A258 (and others, see the source comments).
 - `__asm__ volatile("")` barrier: func_80112C24. Jump-table data as `__asm__(".word")` (avoid: the full build links that data from the owner's .rodata; a00SectionScrollAdjust had it, now FUNC starts after the tables).
