@@ -38,10 +38,12 @@ What it does today, measured on the PAL Spanish disc:
    boot logo `SYSTEM/A09400.GAM`, `SOUND/SND_INI.WVD`, and `SYSTEM/A0000x.GAM`, all through its own `cdLoadTask`
    and our sector reader. The boot logo fades in and out over about 450 frames, about 1,500 GPU packets per
    100 frames walk through the ordering tables, and the LZ decompressors and VRAM uploads run.
-5. **The intro movies are skipped** (no MDEC yet): `StGetNext` hands `MovieDecodeFrame` a sector header whose
-   frame number is past the end, so `moviePlayerTask` takes its own "movie finished" path (`CdMix`,
-   `StUnSetRing`, `exitTask`). The four boot movies are skipped this way (`--play-movies` restores the old
-   wait-forever behaviour, for MDEC work).
+5. **The intro movies play** (`port2/`: software MDEC, see "MDEC movies" under M3): `moviePlayerTask` streams the
+   STR file through the `St*` ring that the libcd shim fills from the disc image at double speed, `DecDCTvlc` /
+   `DecDCTin` / `DecDCTout` decode it, and the game's own `mdecSliceCallback` LoadImages the 16-pixel columns.
+   `--skip-movies` restores the old behaviour: `StGetNext` hands `MovieDecodeFrame` a sector header whose frame
+   number is past the end, so `moviePlayerTask` takes its own "movie finished" path (`CdMix`, `StUnSetRing`,
+   `exitTask`) at once.
 6. **The title screen runs natively** (frame ~800): `titleSequenceTask` loads `SYSTEM/O0PTSUB0.BIN` and calls
    its entry points, which are now the overlay's own C (overlay set, §2.2). M0 stopped here.
 7. **Start** (`--pad-script 1000:start`) starts a new game: `gameMainTask` loads AREA00 (`X000.BIN` and the area
@@ -104,7 +106,7 @@ Screenshots of this run (PNG dumps): the title (frame 1000), the first room (150
   per-area function by name is still linked straight to X000's copy; the full fix is the plan below (compile
   each X0nn's own functions with an `X0nn_` prefix, route those names through thunks, track the resident area,
   e.g. from the load record or `GAME.selectedArea`).
-- The decompiled-but-asm-only functions above (interpreted today), MDEC movies (skipped).
+- The decompiled-but-asm-only functions above (interpreted today). (MDEC movies: done in `port2/`, XA audio of the movies not yet.)
 - The rest of the register-carried audit: `port/tools/arity_check.py` still lists the call sites; each guess
   that is wrong in some area needs a fixes.txt line.
 
@@ -238,7 +240,7 @@ The GL backend (VRAM as a texture, CLUT lookup in the shader) is step 2 and reus
 | `runtime/gte.c` | Software GTE: register file, RTPS/RTPT/NCLIP/AVSZ3/4/NCCS/NCCT/MVMVA, flags. |
 | `runtime/main_port.c` | A C translation of `main()` (0x800163F4). It is the only game function still in asm, because Ghidra named it like library code. It also contains the loader and the command line. |
 | `shims/gpu.c` | libgpu and a software GPU: OT walk, GP0 decoder and rasteriser into emulated VRAM, display readout, PNG frame dumps (`--dump-frames`). |
-| `shims/psyq.c`, `pad.c`, `card.c`, `libc.c` | libapi/libetc (VSync pacing, callbacks), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.cue/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), the memory card (BIOS events and card file system on two .mcd images), and the libc subset. MDEC (movies are skipped) is a silent stub; sound is `sound.c`. |
+| `shims/psyq.c`, `pad.c`, `card.c`, `libc.c` | libapi/libetc (VSync pacing, callbacks), libgte matrix helpers, libcd (reads sectors by LBA from the user's .bin/.cue/.iso; the game seeks with its own file table), libpad (fills the PadInitDirect buffers from host input), the memory card (BIOS events and card file system on two .mcd images), and the libc subset. MDEC is `shims/mdec.c` (software decoder, `port2/`); sound is `sound.c`. |
 | `tools/inventory.py`, `tools/arity_check.py` | The inventory below and the list of "register-carried argument" calls. |
 
 The prototype is i386 because the game's structures hold 32-bit pointers. The build machine has no 32-bit libc,
@@ -334,7 +336,7 @@ Plan:
 | libgte | 171 files with GTE macros; `RotMatrix*`, `MulMatrix0`, `ApplyMatrix*`, `SetRot/TransMatrix`, `rsin/rcos/ratan2`, `SquareRoot0` | Software GTE in `runtime/gte.c` (done for the ops used). Later: an optional precise path that keeps sub-pixel float vertices next to the integer SXY (PGXP-style) for the GL renderer, plus the interpolation hooks (§3). |
 | libspu / libsnd | `SsSeq*` (12/9/9/6...), `SsUtKeyOn/OffV`, `SsVabFake*`, `SpuSetReverb`, `SpuRead`... (library code is in MAIN0; much of it is matched Psy-Q C) | Emulate the **SPU**, not libsnd. Compile the matched libsnd/libspu C (the sequencer stays exact) and replace only the lowest layer (`_spu_*` register writes, SPU-RAM DMA) with a 24-voice software SPU: ADPCM decode, ADSR, pitch, reverb, mixed at 44.1 kHz into an SDL audio callback. The game's VAB/WVD data goes into a 512 KB SPU-RAM array. |
 | libcd | `CdControl/F/B`, `CdRead`, `CdReadSync`, `CdSync`, `CdMix`, `CdRead2`/`St*` (movies) | Done for data: seeking uses the game's own table (`FILE_LINKS`, LBA+150 in BCD), and sectors are read from `.bin` (raw 2352) or `.iso`. Add CUE parsing, CHD later, and an "extracted folder" mode (LBA→file map built from the ISO directory at startup). XA audio and STR streaming go through the same reader. |
-| MDEC (libpress) | `DecDCTin/out/vlc` (movies) | Software MDEC (IDCT + YUV→RGB) feeding the `St*` ring. `MovieDecodeFrame` is where the prototype spins. In the meantime a "skip movies" option should report the end of the stream. |
+| MDEC (libpress) | `DecDCTin/out/vlc` (movies) | Done in `port2/shims/mdec.c`: software MDEC (BS v2/v3 VLC, dequantisation, IDCT, YCbCr→RGB) fed by the `St*` ring of `psyq.c`. `--skip-movies` reports the end of the stream instead. |
 | libpad | `PadInitDirect`... (the game links Sony's driver as source: 30 `_pad*`/`pad*` files) | Done: the driver files are left out and the buffers are filled each VBlank. Host input comes from SDL2 GameController and keyboard; Android uses SDL's controller support plus an on-screen touch overlay. |
 | Memory card | `InitCARD`, `StartCARD`, `_bu_init`, `_card_*`, `open/read/write` on `bu00:` | Back the BIOS file calls with a 128 KB `.mcd` file per slot (same format as emulators, so saves are portable). |
 | libapi / BIOS | events, threads (`OpenTh/ChangeTh` ×6), critical sections, `SysEnqIntRP`, `FlushCache` | Done (coroutines, VSync event). |
@@ -926,7 +928,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 
 | Mod | Port options | Notes |
 |---|---|---|
-| Skip intro logos/movies (default on) | nothing / `--play-movies` when off | the port skips them by default |
+| Skip intro logos/movies (default off) | `--skip-movies` | the movies play by default (`port2/`); `--play-movies` is accepted and does nothing |
 | 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise) |
 | Area select | `--poke 900:1F8001B4:1 --poke 1250:8009C960:A:2 --poke 1250:8009C962:S:2 --pad-script 1000:start,1300:circle:3` | area/section pickers from `ROOM_COUNTS` (names from README); rooms of `DOOR_ROOMS` are not offered |
 | Start with N AP | `--poke 1100:8009C96C:N:4` | `GAME.playerAP` (drawHudAP) |
@@ -1065,7 +1067,7 @@ What was added over phase 1 (all of it in `port2/runtime`, `port2/shims`, `port2
   coarse units (message box, floor/wall probes, event actors) from `port/`, found by gen2 by their
   `func_XXXXXXXX(` definitions.
 - **Shims** carried over on native pointers: `psyq.c` (CD reader with `.cue`, events, VSync, libgte helpers,
-  movies skipped), `gpu.c` (software GPU; `DrawOTag` follows native links, the image is below 16 MB), `sound.c`
+  the `St*` streaming ring of the movies), `mdec.c` (software MDEC), `gpu.c` (software GPU; `DrawOTag` follows native links, the image is below 16 MB), `sound.c`
   (SPU mixer + sequencer into a ring; `--dump-audio`), `card.c` (memory cards; the BIOS file system is
   `port_bu_open/read/...`: gen2 renames the game's calls so the host libc's `open`/`read` stay the host's),
   `pad.c`, `libc.c` (Psy-Q `rand`, quiet `printf`, the forward-byte `bcopy` lzDecompress relies on). The game
@@ -1382,7 +1384,7 @@ what the swap took, so there is no double wait; the fps line shows the swap unde
 under `wait`. On a 60 Hz display a 50 Hz game sees a present of up to one refresh and the sum of `present` +
 `wait` stays ~16-19 ms; a line far from 50 vblank/s with `present` at 20+ ms means the swap is blocking longer
 than a refresh (a compositor, or a driver that waits two frames: try the software renderer, which keeps the
-SDL_Renderer path, or run windowed). The 24-bit display mode (MDEC movies, which the port skips) goes through
+SDL_Renderer path, or run windowed). The 24-bit display mode (MDEC movies) goes through
 the RGB24 readout and `port_window_frame` as before.
 
 **Measured (Linux, Mesa llvmpipe under Xvfb: the GL "GPU" is itself software here, so the gain on a real GPU is
@@ -1426,6 +1428,56 @@ fail and the software path takes over, which `.github/workflows/port2-exe.yml` e
 <vendor's renderer>, <version>` then `[gpu] renderer: OpenGL`, and fps lines with `draw` at 1-3 ms and
 `present` below one refresh; if `draw` stays high the time is in the decode (the `game` and `lowmem` fields say
 whether the fault emulation is back), if `present` is 30+ ms the swap waits for more than a refresh (see above).
+### MDEC movies (`shims/mdec.c`, the `St*` ring of `shims/psyq.c`)
+
+The intro and the cinematics are STR files: Mode 2 Form 1 video sectors (2048 bytes: a 32-byte header with the
+frame number, the chunk index / count, the picture size, the quantisation scale and the bitstream version, then
+2016 bytes of the frame) interleaved with Form 2 XA audio sectors.  All of Tombi!'s movies are 320x224; the first
+boot movie and the cinematics are version 2 bitstreams, the 466-frame openings version 3.  The game's player
+(`moviePlayerTask`, `startMovieStream`, `MovieDecodeFrame`, `mdecSliceCallback`, all its own C) is unchanged; what the
+port supplies is the two Psy-Q layers under it:
+
+- **Streaming** (`CdRead2`, `StSetRing`, `StSetStream`, `StGetNext`, `StFreeRing`, `StClearRing`, `StUnSetRing`
+  in `psyq.c`).  The ring at `StSetRing(addr, 32)` has the library's own layout (32 sector headers, then 32 data
+  slots of 2016 bytes; slot states 0 free, 1 wrap marker, 2 complete frame, 3 being assembled, 4 handed out), so
+  the game's reader works on it untouched.  There is no CD interrupt: `port_st_vblank`, from every vblank, copies
+  the sectors a double-speed drive reads in one vblank (300 / `port_hz`, 150 without `CdlModeSpeed`) from the disc
+  image into the ring, skipping the audio sectors and the sectors that are not part of the stream.  When the game
+  spins in `strNext` with no frame complete, `StGetNext` runs `port_vblank()` itself until one is (the vblank
+  interrupt kept coming on the console), so a movie plays at the disc's pace: 30 frames per second for these
+  files (8.75 video sectors per frame), the frame counter, the pad and the window all advancing meanwhile.  The
+  stream ends when the sectors after the file are not STR sectors; the game stops on its own frame table three
+  frames earlier (`DAT_80077f10`).  Start skips a movie as on the console (`MOVIE_SKIP_REQUEST`).
+- **Decoding** (`mdec.c`).  `DecDCTvlc` turns the frame's bitstream into the MDEC's run-length codes (word 0 is
+  the decode command `0x3800xxxx` with the word count the header announces, then 16-bit codes: `q << 10 | dc`, then
+  `run << 10 | level`, `0xFE00` end of block, padded with `0xFE00` to 32 words), reading 16-bit little-endian
+  words MSB first, the MPEG-1 AC table (run-major in the source), the version-3 differential DC (size codes, the
+  difference in units of 4) and the escape code (6-bit run, 10-bit level).  `psyq.c` tells it the picture size of
+  the frame it was handed (`port_st_frame_dims`), so it decodes exactly `(w/16)*(h/16)` macroblocks.  `DecDCTin`
+  applies the mode bits as `MDEC_in` does (bit 27: 16-bit output, bit 25: bit 15 set, bit 26: signed) and
+  `DecDCTout(buf, n)` produces the next `n` words: whole 16x16 macroblocks (Cr, Cb, Y1..Y4 in the stream; 128
+  words each at 16 bits per pixel, 192 at 24), dequantised with the default tables and the scale of the DC code
+  (`dc * qt[0]`, `(ac * qt[k] * q + 4) >> 3`, clamped to 11 bits), an integer separable IDCT (12-bit cosines),
+  then YCbCr→RGB with one chroma sample per 2x2 pixels, +128 and clamped (5 bits per channel at 16 bits).  The DMA
+  callback (`DecDCToutCallback`) runs when the words are there; a `DecDCTout` issued from inside it is queued and
+  decoded next, so the game's slice chain (one 16x224 column per call, `LoadImage` to the frame buffer at
+  384/704,272) completes synchronously inside the first call.  `DecDCTBufSize`, `DecDCTGetEnv` / `PutEnv`
+  (quantisation tables) are there too; `DecDCTinSync` / `outSync` return at once.
+- **Options and tests.**  `--skip-movies` (default off) keeps the old skip: `StGetNext` reports a frame past the
+  end at once and `moviePlayerTask` finishes.  `--play-movies` is accepted and does nothing.  The movies log with
+  `-v` (stream start, end) and `-v -v` / `--trace-cd` (every sector).  The decoder was checked frame by frame
+  against the disc's movies: every frame of a version-2 and a version-3 file parses to exactly its 280 macroblocks
+  with the bitstream consumed to its end padding, and the decoded pictures (the opening planet, the evil pigs,
+  Tombi's face) have the expected colours.  XA audio of the movies is not played yet (the audio sectors are
+  skipped).
+
+Building `port2` against the current decomp (a fresh `build/full`, `python3 tools/build_full.py`) also needed three
+generator fixes, none of them MDEC: `gen2.py` treats `extern unsigned short NEG_SIN_TABLE[]` of the area files as the
+`short` table of globals.h; `gen_port.py`'s register-argument forwarding leaves preprocessor lines alone (the new
+global named `g` matched `#define g ((G2 *)e)`); and a name of the data csvs (`PLAYER_ANIM_TABLE` at 0x800E8404, which
+is also a G0OVER function start) is data, never a dispatch thunk.  `moviePlayerTask` needed a row in
+`notes/names_main0.csv`: a function the names csv does not know but the functions csv has renamed counts as library
+code and is left out of the port.
 
 ### Open points / next
 
@@ -1448,7 +1500,8 @@ whether the fault emulation is back), if `present` is 30+ ms the swap waits for 
    `--test-null` fault from a coroutine stack too, and makes the sound ring strictly single-producer /
    single-consumer (no index shared for writing between the game thread and the audio callback). The next
    Windows log says where the game thread is when it stops.
-5. Movies (MDEC) are skipped as in `port/`; save states of `port/` (`--save/--load`) are not carried over.
+5. Movies play (software MDEC, below; `--skip-movies` skips them as `port/` did); the XA audio track of the movies is
+   not played yet; save states of `port/` (`--save/--load`) are not carried over.
 7. **Resolved: the HEAD tree did not reach the title (268 overlay-target stubs, black screen).** It was not a
    name moving faster than the thunk aliasing but gen2's *link* step knowing data only by its address-name: the
    data-naming rounds gave the overlays' tables real names (`MAP_NODES`, `ITEM_NAME_STRINGS`, `BOOT_LOGO_SPRITE_DATA`,

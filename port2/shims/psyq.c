@@ -2,7 +2,7 @@
  * are native, the scratchpad and the task table are the data-image arrays).
  * Grouped like the Psy-Q libraries: libapi (BIOS: events, threads, critical sections), libetc (VSync,
  * callbacks), libgpu (VRAM transfers, ordering tables, environments), libgte (matrix helpers on the software
- * GTE), libcd (sector reads from the user's disc image), libspu/libsnd/libpress (silent stubs; the memory card is card.c).
+ * GTE), libcd (sector reads from the user's disc image), libspu/libsnd (silent stubs; the memory card is card.c, the MDEC is mdec.c).
  * Every function here has the name of the Psy-Q unit it replaces, so gen2.py generates no stub for it. */
 #include <stdio.h>
 #include <errno.h>
@@ -194,6 +194,7 @@ void port_vblank(void) {
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
     port_pad_vblank();
+    { extern void port_st_vblank(void); port_st_vblank(); }
     if (port_vsync_event_fn) call_psx(port_vsync_event_fn);
     if (vsync_cb) call_psx((void *)vsync_cb);
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
@@ -569,6 +570,7 @@ int CdControl(u8 com, u8 *param, u8 *result) {
     port_trace("CdControl", com);
     if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) { cd_pos = loc_to_lba(param); cd_check_loc(param, cd_pos); }
     if (com == 14 /* Setmode */ && param) cd_mode = param[0];
+    if (com == 9 /* Pause */ || com == 8 /* Stop */) { extern void port_st_stop(void); port_st_stop(); }
     if (result) result[0] = 0x02;
     return 1;
 }
@@ -603,35 +605,178 @@ int CdReadSync(int mode, u8 *result) { return 0; }
 int CdReadBreak(void) { return 0; }
 int CdMix(void *att) { return 1; }
 int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
-/* streaming (movies): not supported yet; CdRead2 "starts" a stream that never delivers a frame */
-int CdRead2(int mode) { return 1; }
-void StSetRing(void *a, int b) {}
-void StClearRing(void) {}
-void StUnSetRing(void) {}
-int StFreeRing(void *a) { return 0; }
-/* Movies are skipped (no MDEC yet): the first StGetNext hands MovieDecodeFrame a sector header whose frame
-   number is past the end of every movie, so moviePlayerTask takes its own "movie finished" path (state 3:
-   CdMix, StUnSetRing, exitTask) and the boot continues.  --play-movies keeps the old behaviour (waits forever). */
-int port_play_movies;
+/* ------------------------------------------------------------------ streaming (movies): the St* ring
+ * The ring of StSetRing(addr, n) has the real library's layout, so the game's own reader (MovieDecodeFrame,
+ * StHEADER fields) works on it: n 32-byte sector headers at addr, then n data slots of 2016 bytes (a video
+ * sector's 2048 bytes less its header).  Slot states as in libcd: 0 free, 1 "the next frame starts at slot 0"
+ * (a frame never wraps: it is placed at 0 when it does not fit before the end), 2 a complete frame starts here,
+ * 3 a sector of the frame being assembled, 4 handed to the game by StGetNext (StFreeRing clears it).
+ *
+ * There is no CD interrupt: port_st_vblank (called from every vblank) delivers the sectors a double-speed drive
+ * reads in one vblank (300 / port_hz) from the disc image into the ring, and StGetNext, when no frame is complete,
+ * runs vblanks itself until one is (the CPU spinning in strNext while the interrupts keep coming, as on the
+ * console).  Audio (Mode 2 Form 2) sectors are skipped: the XA stream is not played yet.  Sectors that are not
+ * part of the stream (the file after the movie) end it; the game ends a movie on its own frame count three
+ * frames before that.  --skip-movies: StGetNext at once reports a frame past the end of every movie, so
+ * moviePlayerTask takes its "movie finished" path (CdMix, StUnSetRing, exitTask) without playing. */
+int port_skip_movies;
+typedef struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; u16 nCodes, magic, q, version; u32 zero; } StHEADER;
+#define ST_SLOT 2016
+static StHEADER *st_ring; static int st_ring_n;
+static u8 *st_slot(int i) { return (u8 *)st_ring + st_ring_n * 32 + i * ST_SLOT; }
+static int st_wr, st_frame_start, st_rd;       /* the writer's slot, the slot of the frame it assembles, the reader's slot */
+static int st_active, st_ended, st_lba, st_misses, st_frames;
+static int st_budget;                          /* sectors due, in 1/port_hz sector units */
+static u32 st_start_frame, st_end_frame; static int st_mask;
+static int st_chunk_expect; static u32 st_cur_frame;
+static u8 st_pending[2340]; static int st_have_pending;   /* a sector read but not placed yet (the ring was full) */
+static void (*st_cb_ready)(void), (*st_cb_end)(void);
+static struct { u32 *addr; int w, h, bytes; } st_last;      /* the frame StGetNext handed out, for DecDCTvlc */
 static struct { u16 id, type, secCount, nSectors; u32 frameCount, frameSize; u16 width, height; } fake_st_header;
 static u32 fake_st_frame[16];
-int StGetNext(void **a, void **b) {
-    if (port_play_movies) return 1;
+
+static void st_log_sector(const StHEADER *h) {
+    if (port_verbose >= 2 || port_trace_cd)
+        port_printf("[port] st: lba %d frame %u chunk %u/%u %ux%u v%u q%u size %u (frame %d)\n", st_lba - 1, h->frameCount, h->secCount,
+                    h->nSectors, h->width, h->height, h->version, h->q, h->frameSize, port_frame);
+}
+/* place one sector in the ring: 1 = consumed (placed or skipped), 0 = the ring is full (kept pending) */
+static int st_deliver(void) {
+    if (!st_have_pending) {
+        int bytes = cd_raw ? 2340 : 2048;
+        if (port_cd_read_sectors(st_lba, 1, st_pending, bytes)) { st_ended = 1; return 0; }
+        st_lba++;
+        st_have_pending = 1;
+        if (cd_raw) {
+            u8 submode = st_pending[6];               /* 4-byte header, 8-byte subheader: file, channel, submode, coding */
+            if (submode & 0x24) { st_have_pending = 0; return 1; }      /* Form 2 / audio: XA, not for the ring */
+        }
+    }
+    const u8 *sec = cd_raw ? st_pending + 12 : st_pending;
+    const StHEADER *h = (const StHEADER *)sec;
+    if (h->id != 0x160 || h->type != 0x8001 || h->nSectors == 0 || h->secCount >= h->nSectors) {
+        st_have_pending = 0;
+        if (++st_misses > 64) { st_ended = 1; if (port_verbose) port_printf("[port] st: stream ended at lba %d (%d frames)\n", st_lba, st_frames); }
+        return 1;
+    }
+    st_misses = 0;
+    if (st_mask) {                                    /* StSetStream: discard up to the start frame */
+        if (h->frameCount != st_start_frame) { st_have_pending = 0; return 1; }
+        st_mask = 0;
+    }
+    if (st_end_frame && h->frameCount >= st_end_frame) { st_have_pending = 0; st_ended = 1; return 1; }
+    if (h->secCount == 0) {
+        int need = h->nSectors;
+        if (need > st_ring_n - 1) { st_have_pending = 0; port_printf("[port] st: a frame of %d sectors does not fit the ring of %d\n", need, st_ring_n); return 1; }
+        if (st_ring_n - st_wr - 1 < need) {           /* does not fit before the end: mark the wrap, start at 0 */
+            if (st_ring[st_wr].id != 0) return 0;
+            for (int i = 0; i < need; i++) if (st_ring[i].id != 0) return 0;
+            st_ring[st_wr].id = 1;
+            st_wr = 0;
+        } else
+            for (int i = 0; i < need; i++) if (st_ring[st_wr + i].id != 0) return 0;
+        st_frame_start = st_wr; st_chunk_expect = 0; st_cur_frame = h->frameCount;
+    } else if (h->secCount != st_chunk_expect || h->frameCount != st_cur_frame) {
+        /* out of sequence (a sector lost): drop the frame being assembled */
+        for (int i = st_frame_start; i < st_wr; i++) st_ring[i].id = 0;
+        st_wr = st_frame_start; st_chunk_expect = 0; st_have_pending = 0;
+        return 1;
+    }
+    st_log_sector(h);
+    memcpy(&st_ring[st_wr], h, 32);
+    memcpy(st_slot(st_wr), sec + 32, ST_SLOT);
+    st_ring[st_wr].id = 3;
+    st_wr++; st_chunk_expect++; st_have_pending = 0;
+    if (h->secCount == h->nSectors - 1) {              /* the frame is complete */
+        st_ring[st_frame_start].id = 2;
+        st_frames++;
+        st_frame_start = st_wr;
+        if (st_cb_ready) st_cb_ready();
+    }
+    return 1;
+}
+/* every vblank: the sectors a double-speed (single-speed without CdlModeSpeed) drive reads in that time */
+void port_st_vblank(void) {
+    if (!st_active || !st_ring || st_ended) return;
+    st_budget += (cd_mode & 0x80) ? 300 : 150;
+    int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
+    if (st_budget > cap) st_budget = cap;
+    while (st_budget >= port_hz && !st_ended) {
+        if (!st_deliver()) break;
+        st_budget -= port_hz;
+    }
+}
+int CdRead2(int mode) {
+    u8 param = (u8)mode;
+    CdControl(14, &param, 0);
+    st_active = 1; st_ended = 0; st_lba = cd_pos; st_misses = 0; st_budget = 0; st_have_pending = 0; st_frames = 0;
+    if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
+                                  port_skip_movies ? ", skipped (--skip-movies)" : "");
+    return 1;
+}
+void port_st_stop(void) { st_active = 0; }
+static void st_stop(void) { port_st_stop(); }
+void StSetRing(void *a, int n) { st_ring = (StHEADER *)a; st_ring_n = n; StClearRing(); }
+void StClearRing(void) {
+    if (st_ring) for (int i = 0; i < st_ring_n; i++) st_ring[i].id = 0;
+    st_wr = st_frame_start = st_rd = 0; st_ended = 0; st_budget = 0; st_have_pending = 0; st_chunk_expect = 0;
+    st_last.addr = 0;
+}
+void StUnSetRing(void) { st_stop(); }
+void StSetStream(int mode, u32 start, u32 end, void *f1, void *f2) {
+    (void)mode;
+    st_mask = 1; st_start_frame = start; st_end_frame = end;
+    st_cb_ready = (void (*)(void))f1; st_cb_end = (void (*)(void))f2;
+}
+void StSetMask(u32 mask, u32 start, u32 end) { st_mask = (int)mask; st_start_frame = start; st_end_frame = end; }
+static int st_end_header(void **a, void **b) {
     fake_st_header.frameCount = 0x7FFFFFFF;
     fake_st_header.width = 320; fake_st_header.height = 240;
     *a = fake_st_frame; *b = &fake_st_header;
-    if (port_verbose) port_printf("[port] movie skipped (StGetNext reports the last frame)\n");
+    if (st_cb_end) st_cb_end();
     return 0;
 }
-void StSetStream(int a, int b, int c, void *d, void *e) {}
-/* MDEC (movies) */
-void DecDCTReset(int m) {}
-int DecDCTin(void *p, int m) { return 0; }
-int DecDCTout(void *p, int n) { return 0; }
-int DecDCTinSync(int m) { return 0; }
-int DecDCToutSync(int m) { return 0; }
-void *DecDCToutCallback(void *f) { return 0; }
-int DecDCTvlc(void *a, void *b) { return 0; }
+int StGetNext(void **a, void **b) {
+    if (port_skip_movies || !st_ring) {
+        if (port_verbose) port_printf("[port] movie skipped (StGetNext reports the last frame)\n");
+        return st_end_header(a, b);
+    }
+    for (;;) {
+        if (st_ring[st_rd].id == 1) { st_ring[st_rd].id = 0; st_rd = 0; }
+        if (st_ring[st_rd].id == 2) {
+            st_ring[st_rd].id = 4;
+            *a = st_slot(st_rd); *b = &st_ring[st_rd];
+            st_last.addr = (u32 *)*a; st_last.w = st_ring[st_rd].width; st_last.h = st_ring[st_rd].height;
+            st_last.bytes = st_ring[st_rd].nSectors * ST_SLOT;
+            if ((int)st_ring[st_rd].frameSize > 0 && (int)st_ring[st_rd].frameSize < st_last.bytes) st_last.bytes = st_ring[st_rd].frameSize;
+            return 0;
+        }
+        if (!st_active || st_ended) {
+            if (port_verbose) port_printf("[port] st: no more frames (%s), StGetNext reports the last frame (frame %d)\n",
+                                          st_active ? "stream ended" : "no stream", port_frame);
+            return st_end_header(a, b);
+        }
+        port_vblank();              /* the drive keeps reading while the game spins here */
+    }
+}
+int StFreeRing(void *base) {
+    if (!st_ring || base == (void *)fake_st_frame) return 0;
+    int i = (int)(((u8 *)base - st_slot(0)) / ST_SLOT);
+    if (i < 0 || i >= st_ring_n || st_ring[i].id != 4) return 1;
+    int n = st_ring[i].nSectors;
+    for (int k = 0; k < n && i + k < st_ring_n; k++) st_ring[i + k].id = 0;
+    st_rd = i + n;
+    if (st_rd >= st_ring_n) st_rd = 0;
+    return 0;
+}
+/* the size of the frame DecDCTvlc is decoding (mdec.c): 0 when bs is not the frame StGetNext handed out */
+int port_st_frame_dims(const void *bs, int *w, int *h, int *bytes) {
+    if (bs == (const void *)fake_st_frame) { *w = *h = 0; *bytes = sizeof fake_st_frame; return 1; }   /* the end placeholder: no picture */
+    if (!st_last.addr || bs != (const void *)st_last.addr) return 0;
+    *w = st_last.w; *h = st_last.h; *bytes = st_last.bytes;
+    return 1;
+}
+/* (MDEC: shims/mdec.c) */
 
 /* ================================================================== sound: silent for now */
 void SpuQuit(void) {}

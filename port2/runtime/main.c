@@ -220,15 +220,18 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
-                "       [--dump-audio PATH] [--play-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
-                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
-                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n", argv0);
+                "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]
+"
+                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one
+"
+                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)
+", argv0);
     return 2;
 }
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_dump_ram_add(const char *);
-    extern const char *port_audio_path, *port_save_dir; extern int port_play_movies, port_show_fps, port_stall_frame, port_stall_ms;
+    extern const char *port_audio_path, *port_save_dir; extern int port_skip_movies, port_show_fps, port_stall_frame, port_stall_ms;
     int headless = 0, test_null = 0;
     port_window = 1;
     for (int i = 1; i < argc; i++) {
@@ -259,7 +262,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-vram")) port_dump_vram = 1;
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
-        else if (!strcmp(a, "--play-movies")) port_play_movies = 1;
+        else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
+        else if (!strcmp(a, "--play-movies")) port_skip_movies = 0;     /* (the default now; kept for old scripts) */
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);
         else if (!strcmp(a, "--poke-every") && v) port_poke_add_every(argv[++i], 1);
         else if (!strcmp(a, "--menu") && v) port_menu_add(argv[++i]);

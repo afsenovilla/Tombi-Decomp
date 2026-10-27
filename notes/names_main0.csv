@@ -108,7 +108,7 @@ address,name,confidence,comment
 8001d36c,updateMainObjects,alta,psx_tomba #21 (por bytes)
 8001d4b0,MovieDecodeFrame,alta,StGetNext + DecDCTvlc + StFreeRing (video FMV)
 8001d63c,cdSeekStream,alta,psx_tomba (por bytes)
-8001d6a4,moviePlayerTask,alta,MDEC movie player task (psx_tomba movie.c name) (game function; src/moviePlayerTask.c)
+8001d6a4,moviePlayerTask,alta,"psx_tomba movie.c (PAL adds the timeout loop); game code (a row here keeps it out of the library set): the intro / cinematic player thread (StGetNext, DecDCTin/out, mdecSliceCallback)"
 8001d6c0,updatePauseMenu,alta,name from psx_tomba (US)
 8001d9d8,mdecSliceCallback,alta,psx_tomba #21 (por bytes)
 8001dad4,movieInitDecodeEnv,alta,psx_tomba #21 (por bytes)
