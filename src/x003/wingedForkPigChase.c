@@ -6,7 +6,7 @@
 extern void *D_8013A698[];
 extern unsigned short NEG_SIN_TABLE[];
 extern short COS_TABLE[];
-extern short isObjectBelowGround(TObj *o);
+extern short isObjectPastReferenceX(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
 extern int wingedForkPigCheckCollide(TObj *o);
@@ -29,7 +29,7 @@ void wingedForkPigChase(TObj *o)
     switch (o->state) {
     case 0:
         o->velX = o->animFrame << 2;
-        t = isObjectBelowGround(o);
+        t = isObjectPastReferenceX(o);
         if (o->animFrame == t) {
             o->state = 2;
             o->wac = 3;

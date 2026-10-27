@@ -6,7 +6,7 @@ extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
-extern short isObjectBelowGround(TObj *);
+extern short isObjectPastReferenceX(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern int spikyLizardCheckWall(TObj *, short);
 extern void *D_80139500[];
@@ -59,7 +59,7 @@ void spikyLizardWalk(TObj *o)
 
     switch (o->substep) {
     case 0:
-        if (isObjectBelowGround(o) != o->animFrame) {
+        if (isObjectPastReferenceX(o) != o->animFrame) {
             o->substep = 3;
             if (*w) {
                 o->movetab = MOVE_TABLE_3;

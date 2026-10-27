@@ -1711,54 +1711,86 @@ table row per room; `--out DIR` keeps `sweep_AA_SS.log` (cut at 4 MB while the p
 killed: a fault report that re-entered the exit path wrote 1 GB and filled the disk). Paths must be absolute
 or relative to the repo (the rooms run with `cwd` = repo root).
 
-Sweep of the current build: **64 of 96 rooms clean, 87 rooms enter their area** (the previous build's "69 ok"
-is not comparable: 52 of those rooms never left the title, the menu poke did not take). The 32 rooms with
-findings:
+Sweep of the current build: **95 of 96 rooms clean, 96 rooms enter their area** (before the fixes below: 64 clean,
+87 entered; the build before that: "69 ok", not comparable, 52 of those rooms never left the title). The one
+finding, AREA01 section 1, is a watchdog line (`no game progress for 3 s` at frame 2462, every task yielding
+from the same place) that appears under four parallel jobs and not when the room runs alone: a wall-clock
+measure under load, listed here until the watchdog counts vblanks instead.
 
-- stubs, harmless so far: `func_8005BD88` in the I0NFO2/I0NFO3 rooms (AREA02 3/5, AREA04 1/2, AREA05 0/2,
-  AREA08 0/2), `isObjectBelowGround` (AREA03 1/5), `FUN_80063cac` (AREA00 5); all three are asm-only.
-- AREA02 0-2, AREA19 0-2 (the X002 copy): fault at address 0x801E0000 in `port_pread` from `cdLoadTask` at
-  frame 1310: a CD read into the top of RAM; the data words `0x801E0000` of `updateScrollAnchoredEffect.c`'s
-  tables and `D_8007B958.c` are its likely source.
-- AREA05 1/3: exit -11 at frame 1400, right after X005 loads (no report line).
-- AREA06 1: `AnimJump` fault from `playerUpdateFall` (bad anim pointer) at frame 1459.
-- AREA09 0/6, AREA14 1: the open lead below (`no native code in (none)`).
-- AREA09 1, AREA14 6/7: `drawObjectSprite(Rotated)` with a sprite pointer in the 0x0152E000 range (an
-  unrelocated asset pointer, open point 2).
-- AREA10 0/4: `updateLeafButterflyByArea+0x1d` jumps to garbage: its `fa` is the thunk of 0x8013839C, a
-  function start of X001 only; in AREA10 nothing is there.
-- AREA11 1/2: fault inside `updateMainObjects` (via `updatePadVibration`) at 0x0035D1A8, a jump through a
-  table word with no symbol.
-- AREA14 2/3: exit -6 (abort) at frame 3300-3400.
+What the 32 rooms with findings had, and the root cause of each (all fixed in the generator or the runtime,
+never in generated output):
 
-**Open lead (AREA09 sections 0 and 6, AREA14 section 1, not chased further).** At frame 1508 of AREA09
-`updateTreasureChest` dispatches to 0x801246D0, 0x8011A7E0, 0x8011ACCC, 0x8011AB44, 0x801248D4, 0x80123E24,
-0x8011976C and every one logs `no native code in (none)`, although the status line of frame 1500 says `overlay
-X009`, no CD read or overlay load happens in between (`--trace-cd -v`), and all seven addresses are X009 units
-present in `starts_X009` and in `port_areamap` with area index 8. The area signature words were suspected
-(the first unshared word 0x80115EA4 is data) and moved into the area's code (`area_signatures` in
-`gen_port.py`, X009 now {0x80116278, 0x8011627C}); the failure is unchanged, so `port_current_area()`
-(`port2/runtime/ovl.c`) returns -1 for another reason at that moment: to check whether the words it reads
-through `port_ram_ptr` are the ones the resident X009 image holds, or whether another task has swapped the
-region when the treasure-chest handler runs. AREA14 section 1 shows the same at frame 3360 (0x801168A0,
-0x80116A10, 0x8011A5FC, 0x8011AC9C, 0x8011F4E0).
+- **AREA09 0/6, AREA14 1 (`no native code in (none)`), AREA14 2/3 (abort), AREA14 6/7 and AREA09 1 (bad sprite
+  pointer in `drawObjectSprite`).** `port_relocate_overlay` turned every aligned word of an area overlay that
+  holds a RAM address into a pointer, round words `0x80NN0000` included. The last entry of an animation script is
+  `{index, 0, 0x8000 | duration}` and its second word reads as a RAM address for durations below 0x20
+  (`0x80050000`): relocated, the end flag was gone, the chest of AREA09 advanced its anim into the pointer
+  words that follow, `drawObjectSprite` took a garbage part count, drew 10000 packets and the primitive buffer
+  overran the overlay region (the `-v` diagnostics added for this, below, showed the region id word and the
+  whole X009 image overwritten by `E1000014`-style packets inside one frame). Round words of an overlay are
+  constants now, as `emit_data` keeps them for MAIN0's data (the audit's `round` column: a flag word to both).
+- **AREA06 1 (`AnimJump` fault, the region overwritten again).** `emit_data` gave a MAIN0 data word into the
+  overlay region a dispatch thunk whenever some overlay starts a function there. `PTR_DAT_80080258`, the
+  letterbox sprite lists of `drawLetterboxOverlay`, holds data pointers; the entry AREA06 uses, `0x801203D0`,
+  is a function start of X003, so the game read thunk code as sprite entries until the primitive buffer covered
+  the overlay region. Rule now: a run of consecutive region words with one that no overlay starts a function at
+  is a table of data pointers, every word of it data (a handler table holds function starts only; the MAIN0
+  tables hold 401 thunks after it, 2 runs changed). As a safety net the fault handlers (`lowmem.c`,
+  `port_exec_from_ram`) dispatch a call that lands in RAM (a data pointer into the overlay region called after
+  all) the way the thunk would, and log it once per address (`call into RAM at ... dispatched`); the stub
+  summary counts them.
+- **AREA10 0/4 (`updateLeafButterflyByArea+0x1d`).** The shared X000 function calls `fa` (X001's
+  `updateLeafButterfly`) or `fb` (X010's, 0x80123D18) by alias name. gen2's link aliased `fb` into the data
+  image because x000.full.ld PROVIDEs it (as data: an absolute symbol) and no csv names that address `fb`:
+  AREA10 called the retail bytes. A bare name at a function start of some overlay that the data-naming rounds
+  never named is a function (the per-file `name__ADDR` rule, without the rename requirement); one alias changed
+  (`fb = port_thunk_80123D18`), `f1` (a Psy-Q alias used as a function) became a stub instead of a data alias.
+- **AREA02 0-2, AREA19 0-2 (CD read into 0x801E0000).** `emit_data` kept every round word of MAIN0's data as a
+  constant; the load lists of MAIN0 (`LDSYS_LOAD_LIST`, `LDAR_LOAD_LISTS`, `SOUND_SET_LOAD_LISTS`,
+  `WSS_LOAD_LISTS`, `AREA_LOAD_LISTS`: records `{id, idx, type, ptr, size, pad, flags}` ended by id -1, the
+  format of `SYS/LD0*.BIN`) hold destinations such as `0x801E0000`, where the AREA02/AREA19 sound set reads
+  its 94 KB bank. The lists are walked from their tables and the `ptr` field of each record is relocated.
+- **AREA11 1/2 (fault in `updateMainObjects`), AREA05 1/3 (exit -11).** `src/x011/stepFactoryNpcTalk.c`
+  defined `updateFactoryNpc` and `src/x005/stepBacoTownNpcTalk.c` defined `updateBacoTownNpc`: the area
+  matching masks jal targets, so a wrong function name passes it. The port mapped both addresses of each pair to
+  one native function, the update function's talk step was itself, and the recursion ran the coroutine stack
+  through RAM (AREA11: `ObjCullRegister` overflowed its list over the object handler table, whose entries
+  became `&OBJECT_POOL`; AREA05: a plain segfault). The definitions carry their csv names now; gen_port refuses
+  two units of one area with the same native name, warns when a function calls itself by name while its retail
+  bytes hold no jal to itself, and warns when an area file calls an extern that no symbol file knows while the
+  unit's bytes jal to an address no name of the file covers (which found the next item).
+- **Stubs.** `func_8005BD88` (I0NFO2/I0NFO3 rooms) is MAIN0's `memcpy`: gen2 now aliases an address-named
+  function to the libc symbol of its csv name (`func_8005BD88 = memcpy`). `isObjectBelowGround` (AREA03) was
+  a name no symbol file knows, used by four `src/x003` files for the jal to `isObjectPastReferenceX`
+  (0x8001F920): the sources name it. `FUN_80063cac` (AREA00 5) is libgte's `ScaleMatrix`, now native in
+  `shims/psyq.c` from the retail asm (multu of the sign-extended element by the whole scale, low word, `>> 12`).
+  The same guard found `playerSetAnimPairB` stubbed in X009's `playerStep24Area9`: the area csv names both
+  0x800F4E68 and 0x800F4E9C `playerSetAnimPairA` (the first masked twin), so neither resolved; `area_syms`
+  adds X000's name for every function the area shares byte for byte at the same address.
+
+**Diagnostics added (`-v`).** When a dispatch finds no native code, ovl.c prints the region's id word, which
+area signature words still match, and (`-v -v`, from a copy of the overlay region taken at every vblank) how
+many words of the region changed since the vblank and the first/last of them: the difference between a swapped
+overlay (a CD read, logged) and a buffer overrun (the two causes above).
 
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9
    `label`) point inside units: nearly all are switch jump tables, harmless. The audit (above) finds 0 function
-   starts without native code in X000 and 0 data pointers turned into a foreign thunk; the room sweep reaches 87
-   of 96 rooms and 64 run clean. What the sweep still hits is listed above: three asm-only stubs, the
-   0x801E0000 CD read of AREA02/19, unrelocated asset pointers (AREA09 1, AREA14 6/7), AREA10's `fa` (a
-   function of X001 called from X000 code in another area), the two abort rooms of AREA14 and the AREA09/14
-   `(none)` lead. A function the game jumps to without a csv row (`func_8011E028` was one: the other global
-   function of `func_8011DE84.c`) is split out in `notes/functions_x*.csv` or registered as
-   `x000_handwritten.c` does (`func_80132BB8`, `func_80132DD0`).
+   starts without native code in X000 and 0 data pointers turned into a foreign thunk; the room sweep reaches
+   96 of 96 rooms and 95 run clean (the causes of the 32 rooms it hit before are listed above; what is left is
+   AREA01 1's watchdog line under load). The sweep's pad script walks, jumps and attacks for 3600 frames from
+   the room's entry: what it does not reach (doors, dialogue, item use, the rooms of `DOOR_ROOMS`) is untested;
+   the `round` rule of the relocator keeps a genuine `0x80NN0000` pointer of an overlay unrelocated (none is
+   known; a fault at such an address in the report would be one). A function the game jumps to without a csv
+   row (`func_8011E028` was one: the other global function of `func_8011DE84.c`) is split out in
+   `notes/functions_x*.csv` or registered as `x000_handwritten.c` does (`func_80132BB8`, `func_80132DD0`).
 2. Assets are never relocated; a data file that carries absolute pointers (beyond the load lists) would show up
    as a bad pointer at use. The null-pointer emulation covers reads/writes of page 0 only; a fault elsewhere is
    reported with the nearest native symbols and the return addresses on the stack.
 3. The Psy-Q stubs hit at boot are down to `SetFogNear` (the SPU-init / tick-mode / reverb setters are
-   `sound.c`'s now); `ScaleMatrix` and the other unreached ones stay stubs.
+   `sound.c`'s now); `ScaleMatrix` is native since the room sweep (AREA00 section 5 draws with it); the other
+   unreached ones stay stubs.
 4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` /
    `--image-base` + `port_check_layout`); a later phase replaces `port_otlink/port_otaddr` with an index into a
    primitive arena and widens the pointer-holding words of the image.

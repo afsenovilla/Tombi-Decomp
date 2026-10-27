@@ -416,6 +416,15 @@ MATRIX *MulMatrix0(MATRIX *a, MATRIX *b, MATRIX *c) {
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) c->m[i][j] = t.m[i][j];
     return c;
 }
+/* libgte ScaleMatrix (MAIN0 0x80063CAC, called as FUN_80063cac by drawObjectModelRotScaled): column j of the
+   rotation part scaled by v[j]; the R3000 code does multu on the sign-extended element and the whole 32-bit
+   scale, keeps the low word and shifts it by 12, so the product wraps at 32 bits */
+MATRIX *ScaleMatrix(MATRIX *m, VECTOR *v) {
+    s32 sc[3] = { v->vx, v->vy, v->vz };
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
+        m->m[i][j] = (s16)((s32)((u32)m->m[i][j] * (u32)sc[j]) >> 12);
+    return m;
+}
 VECTOR *ApplyMatrix(MATRIX *m, SVECTOR *v, VECTOR *r) {
     s32 x = v->vx, y = v->vy, z = v->vz;
     r->vx = (m->m[0][0] * x + m->m[0][1] * y + m->m[0][2] * z) >> 12;

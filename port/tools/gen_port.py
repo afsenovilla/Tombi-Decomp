@@ -374,6 +374,20 @@ def area_syms(prog):
         if m: syms[f[:-2]] = int(m.group(1), 16)
     for k, a in names.items():
         if a is not None: syms.setdefault(k, a)
+    # X000's name for a function the area shares byte for byte at the same address: the area csv names such
+    # a function after its first masked twin, which can be another function (X009's 0x800F4E9C is X000's
+    # playerSetAnimPairB, named playerSetAnimPairA like 0x800F4E68 next to it, so neither name resolved and
+    # playerStep24Area9's call was stubbed)
+    try:
+        import areas as AR
+        x0, own = AR.load("X000"), AR.load(prog)
+        for l in open(os.path.join(ROOT, "notes", "functions_x000.csv")):
+            m = re.match(r"([0-9a-fA-F]{8}),(\w+),(\d+)", l)
+            if not m: continue
+            a, n, size = int(m.group(1), 16), m.group(2), int(m.group(3))
+            o = a - AR.BASE
+            if 0 <= o and o + size <= len(own) and o + size <= len(x0) and own[o:o + size] == x0[o:o + size]: syms.setdefault(n, a)
+    except (OSError, ImportError): pass
     return syms
 
 
@@ -546,6 +560,24 @@ def sources(outdir, progs, ovls=(), areas=()):
                 if W and u.addr not in jals:
                     print("gen_port: WARNING %s calls itself by name, but its retail bytes hold no jal to %08X (its jal targets in the overlay: %s): a wrong extern name"
                           % (os.path.relpath(u.file, ROOT), u.addr, " ".join("%08X" % t for t in sorted(jals) if t >= OVL_BASE)))
+            # an extern function the file calls under a name no symbol file knows, while the retail bytes jal to an
+            # address no name of the file covers: the name is wrong (src/x003 called isObjectPastReferenceX
+            # `isObjectBelowGround`, which the port could only stub)
+            externs = set(re.findall(r"^extern\b[^;(]*?\b(\w+)\s*\(", body, re.M))
+            addr_named = lambda n: re.match(r"(?:FUN|func)_([0-9A-Fa-f]{8})$", n)        # (its address is the name)
+            unknown = sorted(n for n in externs if n not in asyms[prog] and n not in canon and not addr_named(n) and n not in native_defs()
+                             and re.search(r"^[ \t]+.*\b%s\s*\(" % re.escape(n), body, re.M))
+            if unknown:
+                import areas as AR
+                try: W = AR.prog_words(prog, u.addr, u.size)
+                except Exception: W = []
+                jals = set(((w & 0x3FFFFFF) << 2) | 0x80000000 for w in W if (w >> 26) == 3)
+                named = set(asyms[prog].get(n) or canon.get(n) or (int(addr_named(n).group(1), 16) if addr_named(n) else None)
+                            for n in re.findall(r"\b([A-Za-z_]\w*)\s*\(", body))
+                unnamed = sorted(t for t in jals if t not in named)
+                if unnamed:
+                    print("gen_port: WARNING %s calls %s, a name no symbol file knows (stubbed); its retail bytes jal to %s without a name in the file"
+                          % (os.path.relpath(u.file, ROOT), ", ".join(unknown), ", ".join("%08X" % t for t in unnamed)))
             local = set(re.findall(r"^static\b[^;=(]*?\b(\w+)\s*\(", src, re.M))   # file-local helpers
             for n in set(re.findall(r"\b[A-Za-z_]\w*\b", src)):
                 a = asyms[prog].get(n)
@@ -861,6 +893,20 @@ def forward_short_calls(texts, base_defs=None, fallback=None, prefix=None):
             txt = re.sub(r"^([ \t]*extern\b[^;={]*?[,\s\*]%s\s*)\([^;{()]*\)(?=[^;{]*;)" % re.escape(n), r"\1()", txt, flags=re.M)
         texts[f] = txt
     return total, gdefs
+
+
+_NATIVE_DEFS = None
+def native_defs():
+    """the function names port2/runtime/*.c and port2/shims/*.c define (Psy-Q replacements such as SquareRoot0)"""
+    global _NATIVE_DEFS
+    if _NATIVE_DEFS is None:
+        _NATIVE_DEFS = set()
+        for d in ("runtime", "shims"):
+            dp = os.path.join(ROOT, "port2", d)
+            for fn in (sorted(os.listdir(dp)) if os.path.isdir(dp) else ()):
+                if fn.endswith(".c"):
+                    _NATIVE_DEFS.update(re.findall(r"^\w[\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{", open(os.path.join(dp, fn), errors="replace").read(), re.M))
+    return _NATIVE_DEFS
 
 
 def handwritten_port2_funcs():

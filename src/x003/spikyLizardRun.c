@@ -6,7 +6,7 @@ extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
-extern short isObjectBelowGround(TObj *);
+extern short isObjectPastReferenceX(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern int spikyLizardCheckWall(TObj *, short);
 extern void *D_80139500[];
@@ -105,7 +105,7 @@ void spikyLizardRun(TObj *o)
         if (AnimAdvance(o)) {
             o->movetab = MOVE_TABLE_1;
             o->timer = D_80135D4C[Rand() & 7];
-            if (isObjectBelowGround(o) != o->animFrame) {
+            if (isObjectPastReferenceX(o) != o->animFrame) {
                 o->w22 = 0x1e;
                 o->substep = 5;
                 o->wac = 0x1d;
@@ -123,7 +123,7 @@ void spikyLizardRun(TObj *o)
         slope(o);
         if (spikyLizardCheckWall(o, o->animFrame)) {
             go3(o, 0x3c, 0x1d);
-        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectPastReferenceX(o) != o->animFrame) {
             go3(o, 0x1e, 0x1d);
         }
         } else {
@@ -151,7 +151,7 @@ void spikyLizardRun(TObj *o)
             o->movetab = MOVE_TABLE_0;
             o->wac = 0xc;
             SET();
-            if (isObjectBelowGround(o) != o->animFrame) {
+            if (isObjectPastReferenceX(o) != o->animFrame) {
                 o->substep = 9;
                 o->w22 = 0x14;
             } else {
@@ -178,7 +178,7 @@ void spikyLizardRun(TObj *o)
         if (spikyLizardCheckWall(o, o->animFrame)) {
             o->w22 = 0x3c;
             o->substep++;
-        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectBelowGround(o) != o->animFrame) {
+        } else if (((SPAD.s1f8 + SPAD.i198) & 0x3f) == 0 && isObjectPastReferenceX(o) != o->animFrame) {
             o->w22 = 0x1e;
             o->substep++;
         }

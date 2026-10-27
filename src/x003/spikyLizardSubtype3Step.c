@@ -15,7 +15,7 @@ extern void AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
 extern short func_8004065C(TObj *, short, short, short);
-extern short isObjectBelowGround(TObj *);
+extern short isObjectPastReferenceX(TObj *);
 
 void func_8012724C(TObj *o)
 {
@@ -55,7 +55,7 @@ void func_8012724C(TObj *o)
         if (o->y.p.whole > CAMERA_SCROLL.maxY + 0x98) o->b04 = 3;
         break;
     }
-    if (isObjectBelowGround(o) == 1 && o->visible == 0) o->b04 = 3;
+    if (isObjectPastReferenceX(o) == 1 && o->visible == 0) o->b04 = 3;
 }
 #else
 #include "spad.h"
@@ -69,7 +69,7 @@ extern void AnimAdvance(TObj *);
 extern void playSFX(int);
 extern void applyFrameVelocityX(TObj *);
 extern short probeWallAt(TObj *, short, short, short);
-extern short isObjectBelowGround(TObj *);
+extern short isObjectPastReferenceX(TObj *);
 
 void spikyLizardSubtype3Step(TObj *o)
 {
@@ -109,6 +109,6 @@ void spikyLizardSubtype3Step(TObj *o)
         if (o->y.p.whole > CAMERA_SCROLL.maxY + 0xa0) o->b04 = 3;
         break;
     }
-    if (isObjectBelowGround(o) == 1 && o->visible == 0) o->b04 = 3;
+    if (isObjectPastReferenceX(o) == 1 && o->visible == 0) o->b04 = 3;
 }
 #endif

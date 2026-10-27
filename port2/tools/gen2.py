@@ -665,7 +665,7 @@ def link(outdir, nm, objlist):
                 th = "port_thunk_%08X" % a
             if th:        # a function of the overlay region: the resident overlay decides at call time
                 ld.append("%s = %s;" % (n, th)); thunk_aliases += 1; continue
-        if f and f in defined and f != n:
+        if f and (f in defined or f in libc) and f != n:    # (libc: func_8005BD88 is MAIN0's memcpy, the host's serves)
             ld.append("%s = %s;" % (n, f)); continue
         if a is not None and (not amap.is_code(a) or is_data_name):
             # (a data name inside an X000 code unit: another overlay's data, or a table a coarse unit covers)
