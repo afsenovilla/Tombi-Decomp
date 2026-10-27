@@ -140,6 +140,11 @@ O *printInfoMessage(int a, int b)
         FB4 = a;
         FB6 = b;
         F14 = (0xd4 - (3 - INFO_MESSAGE_SLOT) * 20) << 16;
+#ifdef PORT2
+        /* the port plays other MAINn (--lang): the constants of the switch below differ per language (port2/runtime/lang.c) */
+        { extern int port_lang_box_pad[5];
+          if ((unsigned)b < 5) FC2 = (b == 2 || b == 3 ? D_8007D5A4[a] : D_8007D454[a]) + port_lang_box_pad[b]; }
+#else
         switch (b) {
         case 0:
             FC2 = D_8007D454[a] + 0x60;
@@ -155,6 +160,7 @@ O *printInfoMessage(int a, int b)
             FC2 = D_8007D454[a] + 0x78;
             break;
         }
+#endif
         FC4 = 0x14;
         *(unsigned short *)((char *)o + 0xc6) = 0xffff;
         setpos(o, F12, F16);

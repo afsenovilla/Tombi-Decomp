@@ -658,6 +658,59 @@ int port_cd_read_sectors(int lba, int count, void *dst, int bytes) {
     }
     return 0;
 }
+/* A whole file by its ISO path ("EXE/MAIN5.EXE"): the data folder's copy, or the disc's ISO9660 directory
+   (the executables are in no file table; SCES_013.31 finds them by name too).  malloc'd, *size set; 0 if absent. */
+static int cd_dir_find(int lba, int size, const char *name, int *elba, int *esize, int *isdir) {
+    int n = (int)strlen(name);
+    for (int s = 0; s < (size + 2047) / 2048; s++) {
+        u8 sec[2048];
+        if (port_cd_read_sectors(lba + s, 1, sec, 2048)) return 0;
+        int p = 0;
+        while (p < 2048 && sec[p]) {
+            int len = sec[p], nl = sec[p + 32];
+            const u8 *nm = sec + p + 33;
+            int k = nl; if (k >= 2 && nm[k - 2] == ';') k -= 2;
+            if (k == n && !memcmp(nm, name, n)) {
+                *elba = sec[p + 2] | sec[p + 3] << 8 | sec[p + 4] << 16 | sec[p + 5] << 24;
+                *esize = sec[p + 10] | sec[p + 11] << 8 | sec[p + 12] << 16 | sec[p + 13] << 24;
+                *isdir = sec[p + 25] & 2;
+                return 1;
+            }
+            p += len;
+        }
+    }
+    return 0;
+}
+unsigned char *port_cd_read_named(const char *path, unsigned *size) {
+    *size = 0;
+    if (cd_data) {
+        FILE *f = fopen(port_data_fullpath(path), "rb");
+        if (!f) return 0;
+        fseeko(f, 0, SEEK_END); long long n = ftello(f); fseeko(f, 0, SEEK_SET);
+        if (n <= 0 || n > 0x4000000) { fclose(f); return 0; }
+        unsigned char *d = malloc((size_t)n + 4);
+        if (!d || (long long)fread(d, 1, (size_t)n, f) != n) { free(d); fclose(f); return 0; }
+        fclose(f); *size = (unsigned)n; return d;
+    }
+    if (!cd_fp) return 0;
+    u8 pvd[2048];
+    if (port_cd_read_sectors(16, 1, pvd, 2048)) return 0;
+    int lba = pvd[158] | pvd[159] << 8 | pvd[160] << 16 | pvd[161] << 24, sz = pvd[166] | pvd[167] << 8 | pvd[168] << 16 | pvd[169] << 24, isdir = 1;
+    char comp[64];
+    while (*path) {
+        const char *e = strchr(path, '/'); int n = e ? (int)(e - path) : (int)strlen(path);
+        if (n <= 0 || n >= (int)sizeof comp || !isdir) return 0;
+        memcpy(comp, path, n); comp[n] = 0;
+        if (!cd_dir_find(lba, sz, comp, &lba, &sz, &isdir)) return 0;
+        path += n; if (*path == '/') path++;
+    }
+    if (isdir || sz <= 0 || sz > 0x4000000) return 0;
+    int sectors = (sz + 2047) / 2048;
+    unsigned char *d = malloc((size_t)sectors * 2048 + 4);
+    if (!d || port_cd_read_sectors(lba, sectors, d, 2048)) { free(d); return 0; }
+    *size = (unsigned)sz;
+    return d;
+}
 static int bcd(u8 b) { return (b >> 4) * 10 + (b & 15); }
 static int loc_to_lba(const u8 *p) { return (bcd(p[0]) * 60 + bcd(p[1])) * 75 + bcd(p[2]) - 150; }
 int CdInit(void) { return 1; }
@@ -714,6 +767,7 @@ int CdRead(int sectors, u32 *buf, int mode) {
         u8 *olo = (u8 *)port_x000_image;
         if (((u8 *)buf >= lo && (u8 *)buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || (u8 *)buf >= olo)) {
             int n = sectors * bytes; if ((u8 *)buf + n > hi) n = hi - (u8 *)buf;
+            if (port_lang && (u8 *)buf >= olo) port_lang_overlay_loaded(buf, n, cd_last_id);   /* the language's overlay over its MAIN0 twin */
             port_relocate_overlay(buf, n);
         }
     }

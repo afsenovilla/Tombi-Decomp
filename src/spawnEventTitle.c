@@ -198,11 +198,28 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
             obj[0xC] = i;
             n = p[3] & 0xF;
             *(u16*)(obj + 0xBC) = *(u16*)src & 0xFFF;
+#ifdef PORT2
+            /* the port plays other MAINn (--lang): their tables have more entries, at other addresses (port2/runtime/lang.c) */
+            { extern int port_title_k; extern u16 port_title_e0[16]; extern unk_80077720 port_title_ec[16];
+              if (port_title_k) {
+                  if (n >= port_title_k) n = port_title_k - 1;
+                  *(u16*)(obj + 0xC0) = port_title_e0[n];
+                  *(u16*)(obj + 0xC8) = port_title_ec[n].unk0;
+                  *(u16*)(obj + 0xCA) = port_title_ec[n].unk2;
+              } else {
+                  *(u16*)(obj + 0xC0) = D_800804E0[n];
+                  *(u16*)(obj + 0xC8) = D_800804EC[n].unk0;
+                  *(u16*)(obj + 0xCA) = D_800804EC[n].unk2;
+              } }
+            *(s16*)(obj + 0xC4) = p[1] * 10;
+            *(s16*)(obj + 0xC6) = p[2] * 14;
+#else
             *(u16*)(obj + 0xC0) = D_800804E0[n];
             *(s16*)(obj + 0xC4) = p[1] * 10;
             *(s16*)(obj + 0xC6) = p[2] * 14;
             *(u16*)(obj + 0xC8) = D_800804EC[n].unk0;
             *(u16*)(obj + 0xCA) = D_800804EC[n].unk2;
+#endif
             i++;
             *(u16*)(obj + 0xCC) = (u8)p[3];
             *(u16*)(obj + 0xCE) = 0;

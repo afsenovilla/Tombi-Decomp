@@ -239,11 +239,13 @@ static void open_game_data(const char *argv0) {
         port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
 }
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
+                "  (1..4 the other MAINn of the disc, docs/PORT.md \"Languages\")\n"
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
                 "  current folder or next to the executable); --disc reads the disc image itself\n"
                 "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
@@ -260,6 +262,7 @@ int main(int argc, char **argv) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
+        else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
         else if (!strcmp(a, "--headless")) headless = 1;
         else if (!strcmp(a, "--window")) headless = 0;
@@ -321,6 +324,7 @@ int main(int argc, char **argv) {
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;
+    port_lang_init();          /* --lang: MAINn's file table and data over MAIN0's (runtime/lang.c) */
     port_watchdog_start();     /* after SDL_Init: a slow driver start must not count as a hang */
     game_main();
     return 0;

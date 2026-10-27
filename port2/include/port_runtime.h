@@ -99,6 +99,18 @@ extern int port_realtime, port_hz;
 int port_cd_open(const char *path);
 int port_cd_open_data(const char *dir);          /* data/ folder of tools/extract_data.py (manifest.txt) */
 int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
+unsigned char *port_cd_read_named(const char *path, unsigned *size);   /* a whole file by ISO path (disc directory / data folder), malloc'd */
+
+/* the game's language (runtime/lang.c): MAINn's file table and data, the language's overlays over the MAIN0 layout */
+extern int port_lang;                          /* 0 English (MAIN0, as generated), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk, 1..4 the other MAINn */
+extern int port_lang_box_pad[5];               /* printInfoMessage's box width by message kind, from MAINn's code */
+const char *port_lang_name(int n);
+void port_lang_init(void);                     /* after the game data is open, before the game starts */
+int port_lang_overlay_loaded(void *dst, int bytes, int id);   /* CdRead into the overlay region: compose over the MAIN0 twin; 1 if done */
+int port_lang_take_composed(void);
+int port_lang_xlate_word(u32p *v, void **native);             /* a word of a language file -> MAIN0 layout (1: *native is final) */
+const PortOvlCode *port_ovl_code_ranges(void);                /* ovl.c: code ranges of the resident overlay */
+int port_ovl_in_ranges(const PortOvlCode *c, u32p a);
 extern int port_trace_cd;
 extern const char *port_disc_path, *port_data_dir;
 

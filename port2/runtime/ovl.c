@@ -133,6 +133,7 @@ static const PortOvlCode *ovlcode_for(void) {
     for (int i = 0; i < port_ovlcode_count; i++) if (port_ovlcode[i].kind == 0 && (int)port_ovlcode[i].key == a) return &port_ovlcode[i];
     return 0;
 }
+const PortOvlCode *port_ovl_code_ranges(void) { return ovlcode_for(); }
 static int in_ranges(const PortOvlCode *c, u32p a) {
     int lo = 0, hi = c->n - 1;
     while (lo <= hi) {
@@ -143,10 +144,13 @@ static int in_ranges(const PortOvlCode *c, u32p a) {
     }
     return 0;
 }
+int port_ovl_in_ranges(const PortOvlCode *c, u32p a) { return in_ranges(c, a); }
 void port_relocate_overlay(void *dst, int bytes) {
     u32p base = 0x80000000u + (u32p)((unsigned char *)dst - (unsigned char *)port_ram);
     int ovl = base >= PORT_OVL_BASE && base < PORT_OVL_END;
     const PortOvlCode *c = ovl ? ovlcode_for() : 0;
+    /* --lang: a load list (or an overlay that could not be composed, lang.c) holds the language's addresses */
+    int xlate = port_lang && !port_lang_take_composed();
     if (ovl && !c) { port_printf("[port2] frame %d: %d bytes read into the overlay region at %08x: unknown overlay (id %08x), not relocated\n",
                           port_frame, bytes, base, port_x000_image[0]); return; }
     u32p *w = dst; int n = bytes / 4, nfn = 0, nth = 0, nd = 0, nraw = 0;
@@ -156,6 +160,9 @@ void port_relocate_overlay(void *dst, int bytes) {
         if (c && in_ranges(c, a)) continue;
         if (0x1F800000u <= v && v < 0x1F800400u) { w[i] = (u32p)port_ram_ptr(v); nd++; continue; }
         if (v < PORT_MAIN0_LOAD || v >= 0x80200000u || (v & 3)) continue;
+        if (xlate) { void *nat; u32p v0 = v; int sp = port_lang_xlate_word(&v, &nat);
+                     if (port_verbose > 1) port_printf("[port2]   list word +%04x: %08x -> %08x%s\n", 4 * i, v0, v, sp ? " (spill)" : "");
+                     if (sp) { w[i] = (u32p)nat; nd++; continue; } }
         if (c && c->kind == 1 && v >= PORT_OVL_BASE && v < PORT_OVL_END) {
             /* a SYSTEM overlay's own word pointing into the overlay region: one of its functions (never an X000
                function or a thunk: X000 is not resident), a label inside one, or its own data (D0SPSUB's icon
