@@ -220,12 +220,9 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
-                "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]
-"
-                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one
-"
-                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)
-", argv0);
+                "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
+                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n", argv0);
     return 2;
 }
 int main(int argc, char **argv) {

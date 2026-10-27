@@ -1471,13 +1471,9 @@ port supplies is the two Psy-Q layers under it:
   Tombi's face) have the expected colours.  XA audio of the movies is not played yet (the audio sectors are
   skipped).
 
-Building `port2` against the current decomp (a fresh `build/full`, `python3 tools/build_full.py`) also needed three
-generator fixes, none of them MDEC: `gen2.py` treats `extern unsigned short NEG_SIN_TABLE[]` of the area files as the
-`short` table of globals.h; `gen_port.py`'s register-argument forwarding leaves preprocessor lines alone (the new
-global named `g` matched `#define g ((G2 *)e)`); and a name of the data csvs (`PLAYER_ANIM_TABLE` at 0x800E8404, which
-is also a G0OVER function start) is data, never a dispatch thunk.  `moviePlayerTask` needed a row in
-`notes/names_main0.csv`: a function the names csv does not know but the functions csv has renamed counts as library
-code and is left out of the port.
+Building `port2` needs a fresh `build/full` (`python3 tools/build_full.py`; `gen_port.provides()` refuses a stale one,
+Open points 7). `moviePlayerTask` is one of the 13 functions of that fix: without its `notes/names_main0.csv` row it
+counted as library code and the movies were never even started.
 
 ### Open points / next
 
