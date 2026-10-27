@@ -275,6 +275,8 @@ config/slps01144/  splat configs and symbol tables of the Japanese release (conf
 | `tools/progress.py` | Regenerates `docs/PROGRESS.md` and the SVG charts |
 | `tools/units.py` | The unit list shared by `progress.py`, `gen_symbols.py` and `build_report.py` (prints the totals) |
 | `tools/classify.py` | Separates complete functions from Ghidra fragments (`notes/todo_match3.csv`) |
+| `port2/tools/audit_pointers.py` | Native port: static audit of the retail code pointers of every image the game loads (MAIN0's data, X000, every area, the SYSTEM overlays, the `LD0*` load lists), walked as the port's relocator walks them: function starts with native code, starts without (stubs), labels inside functions (jump tables vs handler entries), pointers to code the function csv lacks (`gap`), data pointers that would become another overlay's thunk, pointer tables inside code ranges, the round constants of the C that fall in code; needs `build/port2/gen` (docs/PORT.md "Pointer audit") |
+| `port2/tools/sweep_areas.py` | Native port: runs every room of the debug select headless (`--skip-movies --poke 900:1F8001B4:1`, area/section poked, generic walk/jump/attack pad script) and greps each log for faults, `no native code`, stubs, watchdog lines; table per room, `--out DIR` keeps the logs |
 | `tools/fixbounds.py` | Detects functions Ghidra split incorrectly |
 | `tools/permute.py` | Small random permuter (CPU only) for near-misses |
 | `tools/ghidra_pipeline.sh` | Headless Ghidra: import, apply names and structs, export pseudo-C |

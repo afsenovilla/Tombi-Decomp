@@ -1685,12 +1685,75 @@ tuned on the nine executables and the AREA00 overlays, other areas and the sub-s
 have only been composed, not played through. Nothing of the alignment is stored: it is recomputed from the
 player's own files at every start (about 0.2 s) and at every overlay load.
 
+### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
+
+Two tools check what open point 1 is about: the retail code pointers the game jumps through.
+
+**Static audit.** `python3 port2/tools/audit_pointers.py [--out FILE] [--all] [PROG...]` (needs `build/port2/gen`)
+walks every image the game loads exactly as the relocator does (`port_relocate_overlay` for the overlays,
+`emit_data` for MAIN0's data) and classifies each aligned word that lands inside code: `ok` (function start with
+native code or a thunk that resolves here), `nonative` (start of a csv unit without native code: asm-only,
+Psy-Q, dropped), `label-jtbl` / `label` (inside a function: a switch jump table, harmless, or a handler entry,
+a crash when called), `gap` (code the function csv lacks), `thunk-data` (a data pointer the old relocator turned
+into another overlay's thunk), `intable` (pointer tables inside code ranges), `round` (the `0x80NN0000` constants
+of the C that fall in code), `data@fn` (a data pointer at another overlay's function start, relocated as data
+since the per-overlay starts). Current build (`audit5.txt`): MAIN0 190 nonative (Psy-Q and asm-only starts in
+MAIN0's tables), X000 0 nonative, 0 thunk-data for every image, 4 data@fn in X000 (20 in X002, 18 in X005:
+animation pointers that happen to be another area's function start, left as data on purpose).
+
+**Dynamic sweep.** `python3 port2/tools/sweep_areas.py --exe build/port2/tombi2 --data game/disc/fs --out DIR
+[--jobs J] [--frames N] [AREA[:SECTION] ...]` runs every room of the debug select (`tools/psxemu/rooms.py`
+`ROOM_COUNTS` minus `DOOR_ROOMS`) headless from the title: `--skip-movies --poke 900:1F8001B4:1`,
+`GAME.selectedArea/Section` poked at frame 1250, Circle at 1300, then a generic pad script (walk right and
+left, jump, attack, run+jump, up/down, 3600 frames) and greps each log for faults (`signal N`, access violation,
+FATAL), `no native code`, stub calls, `dispatch ... port_missing`, watchdog lines and a non-zero exit. One
+table row per room; `--out DIR` keeps `sweep_AA_SS.log` (cut at 4 MB while the process runs, which is then
+killed: a fault report that re-entered the exit path wrote 1 GB and filled the disk). Paths must be absolute
+or relative to the repo (the rooms run with `cwd` = repo root).
+
+Sweep of the current build: **64 of 96 rooms clean, 87 rooms enter their area** (the previous build's "69 ok"
+is not comparable: 52 of those rooms never left the title, the menu poke did not take). The 32 rooms with
+findings:
+
+- stubs, harmless so far: `func_8005BD88` in the I0NFO2/I0NFO3 rooms (AREA02 3/5, AREA04 1/2, AREA05 0/2,
+  AREA08 0/2), `isObjectBelowGround` (AREA03 1/5), `FUN_80063cac` (AREA00 5); all three are asm-only.
+- AREA02 0-2, AREA19 0-2 (the X002 copy): fault at address 0x801E0000 in `port_pread` from `cdLoadTask` at
+  frame 1310: a CD read into the top of RAM; the data words `0x801E0000` of `updateScrollAnchoredEffect.c`'s
+  tables and `D_8007B958.c` are its likely source.
+- AREA05 1/3: exit -11 at frame 1400, right after X005 loads (no report line).
+- AREA06 1: `AnimJump` fault from `playerUpdateFall` (bad anim pointer) at frame 1459.
+- AREA09 0/6, AREA14 1: the open lead below (`no native code in (none)`).
+- AREA09 1, AREA14 6/7: `drawObjectSprite(Rotated)` with a sprite pointer in the 0x0152E000 range (an
+  unrelocated asset pointer, open point 2).
+- AREA10 0/4: `updateLeafButterflyByArea+0x1d` jumps to garbage: its `fa` is the thunk of 0x8013839C, a
+  function start of X001 only; in AREA10 nothing is there.
+- AREA11 1/2: fault inside `updateMainObjects` (via `updatePadVibration`) at 0x0035D1A8, a jump through a
+  table word with no symbol.
+- AREA14 2/3: exit -6 (abort) at frame 3300-3400.
+
+**Open lead (AREA09 sections 0 and 6, AREA14 section 1, not chased further).** At frame 1508 of AREA09
+`updateTreasureChest` dispatches to 0x801246D0, 0x8011A7E0, 0x8011ACCC, 0x8011AB44, 0x801248D4, 0x80123E24,
+0x8011976C and every one logs `no native code in (none)`, although the status line of frame 1500 says `overlay
+X009`, no CD read or overlay load happens in between (`--trace-cd -v`), and all seven addresses are X009 units
+present in `starts_X009` and in `port_areamap` with area index 8. The area signature words were suspected
+(the first unshared word 0x80115EA4 is data) and moved into the area's code (`area_signatures` in
+`gen_port.py`, X009 now {0x80116278, 0x8011627C}); the failure is unchanged, so `port_current_area()`
+(`port2/runtime/ovl.c`) returns -1 for another reason at that moment: to check whether the words it reads
+through `port_ram_ptr` are the ones the resident X009 image holds, or whether another task has swapped the
+region when the treasure-chest handler runs. AREA14 section 1 shows the same at frame 3360 (0x801168A0,
+0x80116A10, 0x8011A5FC, 0x8011AC9C, 0x8011F4E0).
+
 ### Open points / next
 
-1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse
-   units: handler entries without a native name. None is reached in the title / AREA00 runs; the first one hit
-   will need the function split out in `notes/functions_x000.csv` (or a hand translation registered as
-   `main0_handwritten.c` does).
+1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9
+   `label`) point inside units: nearly all are switch jump tables, harmless. The audit (above) finds 0 function
+   starts without native code in X000 and 0 data pointers turned into a foreign thunk; the room sweep reaches 87
+   of 96 rooms and 64 run clean. What the sweep still hits is listed above: three asm-only stubs, the
+   0x801E0000 CD read of AREA02/19, unrelocated asset pointers (AREA09 1, AREA14 6/7), AREA10's `fa` (a
+   function of X001 called from X000 code in another area), the two abort rooms of AREA14 and the AREA09/14
+   `(none)` lead. A function the game jumps to without a csv row (`func_8011E028` was one: the other global
+   function of `func_8011DE84.c`) is split out in `notes/functions_x*.csv` or registered as
+   `x000_handwritten.c` does (`func_80132BB8`, `func_80132DD0`).
 2. Assets are never relocated; a data file that carries absolute pointers (beyond the load lists) would show up
    as a bad pointer at use. The null-pointer emulation covers reads/writes of page 0 only; a fault elsewhere is
    reported with the nearest native symbols and the return addresses on the stack.
