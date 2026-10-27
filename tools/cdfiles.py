@@ -110,9 +110,17 @@ def read_exe(path):
     return bytearray(d)
 
 
+def table_start(d, known_lbas):
+    """TABLE_OFF, or earlier when valid entries precede it (MAIN5 is linked 0x18 bytes earlier: its table starts at 0x6E6D8)."""
+    o = TABLE_OFF
+    while o - 8 >= 0 and dec_loc(d[o - 8:o - 4]) in known_lbas:
+        o -= 8
+    return o
+
+
 def entries(d, known_lbas, limit=None):
-    """[(offset, lba, size)] from TABLE_OFF while the location is a LBA known to some layout."""
-    out, o = [], TABLE_OFF
+    """[(offset, lba, size)] from the table start while the location is a LBA known to some layout."""
+    out, o = [], table_start(d, known_lbas)
     while o + 8 <= len(d) and (limit is None or len(out) < limit):
         lba = dec_loc(d[o:o + 4])
         if lba is None or lba not in known_lbas:
@@ -143,7 +151,8 @@ def cmd_dump(a):
     ref = layout_from_image(a.ref)
     d = read_exe(a.exe)
     rows = resolve(d, ref)
-    print("# %s: table at file 0x%X (vaddr 0x%08X), %d entries" % (a.exe, TABLE_OFF, TABLE_VADDR, len(rows)))
+    start = rows[0][0] if rows else TABLE_OFF
+    print("# %s: table at file 0x%X (vaddr 0x%08X), %d entries" % (a.exe, start, TABLE_VADDR + start - TABLE_OFF, len(rows)))
     print("# idx  vaddr       lba      size      name")
     for i, (o, l, s, n) in enumerate(rows):
         print("%4d  %08X  %7d  %9d  %s" % (i, TABLE_VADDR + o - TABLE_OFF, l, s, n or "?"))

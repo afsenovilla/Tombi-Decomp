@@ -1626,6 +1626,65 @@ smoke test a sample folder (manifest, MAIN0.EXE, the PVD blob: nothing beyond wh
 the ISO descriptors) to run `tombi2.exe --headless --data` on, plus `--data nonexistent` for the fatal
 message. The full data path is exercised by the Linux test above, not in CI (the CI binary is a Windows build).
 
+### Languages: `--lang N` (`port2/runtime/lang.c`)
+
+**The disc.** `SCES_013.31` is a language menu that boots one of `EXE/MAIN0.EXE` (English), `MAIN5` (Español),
+`MAIN6` (Português), `MAIN7` (Svenska), `MAIN8` (Dansk) (`MAIN1..4` are on the disc too, not in the menu:
+`--lang 1..4` accepts them). Every MAINn is the same program linked once with that language's data, so its code
+and data move: MAIN5 is linked 0x18 bytes earlier from `0x8004D824` on (its `printInfoMessage` is 24 bytes
+shorter) and 0x28 bytes later after its event-title tables (`0x80080330..`, 0x40 bytes bigger); its overlays
+(`X5NN`, `O5PTSUB0`, `D5SPSUB*`, `I5NFO*`, `G5OVER`) are linked at `0x800E8050` instead of `0x800E8028` (the
+region starts 8-aligned after MAINn's bss: +0x30 for MAIN6/8, +0x10 for MAIN7). Each MAINn carries its own file
+table of 1119 entries (`notes/cdfiles.md`; the same order, 112 entries differ: the `LDn*` lists, the overlays, the
+MFNT/CFNT text files, the `100_n` movie), MAIN5's 0x18 bytes earlier. The overlays' code is byte-identical modulo
+the relink; their data differs only where text lives: title layout lists (`+0x40` in `X500`), menu strings
+(`O5PTSUB0` +68 bytes), item and event names (`D5SPSUB3` +2.5 KB), the memory card screen (`D5SPSUB2`).
+`tools/cdfiles.py dump` shows the tables; the alignment that found the rest is what the port computes at run time.
+
+**What the port does.** The generated code is MAIN0's and names every datum by a MAIN0 / X0 offset
+(`port_main0_image + off`, `port_x000_image + off`), so the port keeps that layout and brings the language in as
+data (`port_lang_init`, `port_lang_overlay_loaded`):
+
+1. `EXE/MAIN0.EXE` and `EXE/MAINn.EXE` are read by name (`port_cd_read_named`: the `data/` copy or the ISO9660
+   directory of the image) and aligned: a monotonic map of 32-byte windows that match on the high halves of their
+   words (so relinked pointers and immediates still match; a small number must match whole), anchored on windows
+   with some information, confirmed over 256 bytes (64 when the delta is one the first of the two passes found),
+   extended backwards over the pointer tables that cannot anchor. What does not match is a gap. Every word of
+   MAIN0's data region whose MAINn version differs by more than the relink is replaced in the port's image: the
+   file table (so every later read, the movies among them, is the language's), the message box sizes, the event
+   title tables and lists. Pointers are translated back to MAIN0 addresses through the map, then made native as
+   the overlay relocator does. A gap of the same size on both sides is copied in place; a gap that changed size is
+   copied up to its first pointer and only when nothing points into it (the menu strings of `O?PTSUB0`, read at
+   fixed offsets); otherwise MAIN0's bytes stay and the language's go to a "spill" that translated pointers reach
+   (the title layout lists, reached through the per-event pointer table).
+2. Every overlay read into the overlay region is composed over its MAIN0 twin (read with MAIN0's table entry of
+   the same file id: the twin's code, needed by the dispatch signatures and the relocator's code ranges, and its
+   data layout) with the language's data words copied in at the aligned offsets, the same gap rules, a spill per
+   load (ring of 4). Load lists (`LDn*`) are relocated with the same translation.
+3. Two things the C reads at fixed addresses changed size or value per language and get explicit handling under
+   `#ifdef PORT2`: `printInfoMessage`'s box width constants (`port_lang_box_pad`, the `addiu` constants of each
+   MAINn: 0x60/0x58/0x78 in MAIN0, 0x48/0x58/0x58 in MAIN5) and `spawnEventTitle`'s tile tables
+   (`D_800804E0` / `D_800804EC`: 6 entries in MAIN0, 11 in MAIN5, 9 in MAIN6, 5 in MAIN7, found in MAINn after the
+   anchor `00 00 B4 00 00 00 00 00`; the language's lists index up to their own count).
+
+The log says what was done: `language 5 (Espanol): EXE/MAIN5.EXE aligned with MAIN0.EXE (50 chunks, 51 gaps, ...)`
+and, per overlay, `file 338 composed over its MAIN0 twin (343952 vs 343888 bytes: ...)`; `-v` lists the gaps, `-v -v`
+the translated pointers. `PORT_LANG_ONLY_LINKS=1` replaces the file table only and `PORT_LANG_RAW_OVL=1` leaves
+the overlays as read, for diagnosis.
+
+**Verified** (standard test, `--data data --lang N`, 3600 frames, no new stub, no fault): Spanish title
+(`PULSA [START] o BOTÓN`, `JUEGO NUEVO`), AREA00 dialogue (`Eh, tú, ¡el del pelo rosa!` ...), the event title
+`Anciano sabio centenario` on two lines with its fly-away, AP 0, walking; Português, Svenska, Dansk: title,
+dialogue, event title and walking too. `--lang 0` is byte-identical (every dumped frame) to a run without the
+option. The launcher offers the five languages of the boot menu (`Idioma del juego`, default from its own UI
+language) and passes `--lang`.
+
+**Limits.** A datum that changed size, is pointed to and is also read at a fixed offset shows MAIN0's version
+(none found in what was tested). A chunk matched at a wrong delta would copy wrong words; the window rules were
+tuned on the nine executables and the AREA00 overlays, other areas and the sub-screens (`D?SPSUB*`, `I?NFO*`)
+have only been composed, not played through. Nothing of the alignment is stored: it is recomputed from the
+player's own files at every start (about 0.2 s) and at every overlay load.
+
 ### Open points / next
 
 1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse

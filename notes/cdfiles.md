@@ -32,7 +32,7 @@ the first entries are `SYS/LDnSYS.BIN`, `SYS/LDnARxx.BIN`, then `SYSTEM/*` (with
 `OnPTSUB0.BIN`, `DnSPSUB.BIN`, `XnNN.BIN`, `InNFO*.BIN`, `GnOVER.BIN`), `SOUND/*`, `MOVIE/*.STR` (22 of the 30 in MAIN0), then
 `AREAxx/*` in area order. After the last entry other data follows (a long entry-like run is not a table).
 - MAIN0, 1, 2, 3, 4, 6, 7, 8: **1119 entries** (MAIN0 and MAIN1 differ in 135 entries, which are the variant files).
-- MAIN5: **1116 entries** (the beginning is `SYS/LD5AR02.BIN`; no LD5SYS/LD5AR00/LD5AR01).
+- MAIN5: **1119 entries too**, starting **0x18 bytes earlier** (file offset 0x6E6D8, vaddr 0x8007DED8: MAIN5 is linked 0x18 bytes earlier from 0x8004D824 on, `notes/formats.md`); read from 0x6E6F0 it looks like 1116 entries beginning with `SYS/LD5AR02.BIN`. `cdfiles.py` walks backwards from 0x6E6F0 while the entry before is valid.
 - No file appears twice in one table. The table end is not marked: the tool takes the count from a pristine copy of the executable
   (entries match the original layout up to the entry that follows the table).
 
