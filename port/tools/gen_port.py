@@ -262,8 +262,44 @@ def make_includes(outdir):
                 link(os.path.join(ov, f), os.path.join(d, "tomba", f))
 
 
+_FULL_CHECKED = False
+def check_full_fresh():
+    """The matching build (build/full) is the generator's symbol table: a stale one (older than a source, a header
+    or a function csv) pairs the tree's names with another tree's addresses and the port is built from bogus
+    aliases and stubs (LOADED_SOUND_SET emitted as a function stub, 266 data names stubbed as overlay targets).
+    Refuse unless PORT_STALE_FULL=warn (then only warn) is set in the environment."""
+    global _FULL_CHECKED
+    if _FULL_CHECKED: return
+    _FULL_CHECKED = True
+    full = os.path.join(ROOT, "build", "full")
+    lds = [os.path.join(full, f) for f in os.listdir(full)] if os.path.isdir(full) else []
+    lds = [f for f in lds if f.endswith(".full.ld")]
+    if not lds: sys.exit("gen_port: build/full has no *.full.ld: run python3 tools/build_full.py -j 4 first")
+    built = min(os.path.getmtime(f) for f in lds)
+    newest, newest_path = 0, None
+    for d, exts in (("src", (".c", ".h", ".s")), ("include", (".h", ".inc")), ("notes", (".csv",)), ("config", (".yaml",))):
+        for dp, dirs, files in os.walk(os.path.join(ROOT, d)):
+            dirs[:] = [x for x in dirs if x != "wip"]
+            for fn in files:
+                if not fn.endswith(exts): continue
+                p = os.path.join(dp, fn)
+                try: t = os.path.getmtime(p)
+                except OSError: continue
+                if t > newest: newest, newest_path = t, p
+    if newest <= built: return
+    msg = ("gen_port: build/full is STALE: %s is newer than build/full/*.full.ld (the matching build the port takes its "
+           "retail addresses and names from).  A stale matching build pairs this tree's names with other addresses "
+           "and produces bogus stubs.  Run: python3 tools/build_full.py -j 4  (must print every sha1 OK)"
+           % os.path.relpath(newest_path, ROOT))
+    if os.environ.get("PORT_STALE_FULL") == "warn":
+        print("WARNING: " + msg, file=sys.stderr); print("WARNING: " + msg, file=sys.stderr)
+        return
+    sys.exit(msg + "\n(or PORT_STALE_FULL=warn to build anyway)")
+
+
 def provides(prog):
     """{name: address} of the PROVIDE lines tools/build_full.py wrote for one program."""
+    check_full_fresh()
     p = os.path.join(ROOT, "build", "full", prog.lower() + ".full.ld")
     if not os.path.exists(p): sys.exit("gen_port: %s missing: run python3 tools/build_full.py first" % p)
     return {m.group(1): int(m.group(2), 16) for m in re.finditer(r"PROVIDE\((\w+) = 0x([0-9A-Fa-f]+)\);", open(p).read())}
