@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="318" viewBox="0 0 900 318" role="img" aria-label="Decompilation progress">
 <rect width="900" height="318" rx="14" fill="#ffffff" stroke="#e2e8f0"/>
 <text x="28" y="44" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#0f172a">Tombi! (PAL Spanish) &#8212; decompilation progress</text>
-<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-26 &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>
+<text x="28" y="66" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="12.5" fill="#64748b">Updated 2026-10-27 &#183; bytes of game code matching byte for byte (Psy-Q library excluded, each function once)</text>
 <text x="28" y="112" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0.EXE: matching C</text>
 <rect x="330" y="98" width="450" height="18" rx="9" fill="#e2e8f0"/>
 <rect x="330" y="98" width="450.0" height="18" rx="9" fill="#16a34a"/>
@@ -24,6 +24,6 @@
 <text x="796" y="257" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">98.95 %</text>
 <text x="28" y="292" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#1e293b">MAIN0 + X000: named by us</text>
 <rect x="330" y="278" width="450" height="18" rx="9" fill="#e2e8f0"/>
-<rect x="330" y="278" width="428.8" height="18" rx="9" fill="#22c55e"/>
-<text x="796" y="293" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">95.3 %</text>
+<rect x="330" y="278" width="430.5" height="18" rx="9" fill="#22c55e"/>
+<text x="796" y="293" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0f172a">95.7 %</text>
 </svg>

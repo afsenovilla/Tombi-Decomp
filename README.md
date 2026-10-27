@@ -30,24 +30,35 @@ function in `src/` is verified to produce exactly the same instructions as the r
 ## Status
 
 <!-- progress:start -->
-**Whole game: 98.95 % of the game's code matches byte for byte** (1511284 of 1527340 bytes).
+**Whole game: 98.95 % of the game's code matches byte for byte** (1508956 of 1525012 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 284708 B | 284708 B | 100.0 % `[########################]` |
+| MAIN0.EXE: engine, shared by every area | 282380 B | 282380 B | 100.0 % `[########################]` |
 | X000.BIN: AREA00 + object code reused by all areas | 312708 B | 312708 B | 100.0 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
 | SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 177428 B | 91.7 % `[######################..]` |
-| **Whole game** | **1527340 B** | **1511284 B** | **98.95 %** `[########################]` |
+| **Whole game** | **1525012 B** | **1508956 B** | **98.95 %** `[########################]` |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (102840 B) is not counted: 69200 B of it (67.3 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (105168 B) is not counted: 71528 B of it (68.0 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 99.5 %).
-- Also tracked for MAIN0 + X000: 95.3 % of the code named by us, 67.7 % typed with the TObj structure.
+- Also tracked for MAIN0 + X000: 95.7 % of the code named by us, 67.9 % typed with the TObj structure.
 <!-- progress:end -->
 
 Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
 The table above is regenerated with `python3 tools/progress.py`.
+
+**Where things stand (October 2026).** The code is 98.95 % byte-matched: 2 950 of 2 955 functions. The five left are
+in the memory card / sub-screen overlays (D0SPSUB `func_800E89F8`, `func_800ED0C4`, `func_800EFD6C`, D0SPSUB2
+`func_800E999C`, D0SPSUB3 `func_800EC89C`, plus the D0SPSUB3 twin of the first); each has functionally equivalent C in
+`src/wip/` whose header documents the remaining difference (register allocation and scheduler order, the structure
+matches), see [notes/remaining.md](notes/remaining.md). Function naming is essentially complete: 111 functions keep a
+generic name (`notes/unnamed.json`: empty stubs, unreferenced code, event scenes). Data naming is done by usage for
+MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
+`notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
+scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release (50.5 %) and demo
+(39.6 %) are paused.
 
 ## Target
 
@@ -147,7 +158,9 @@ python3 tools/build_full.py --no-split   # reuse the previous split (build/full/
 Run `tools/setup_native.sh` first (toolchain and the `include/tomba/psyq` headers; without them the files that
 include those headers are kept as asm, the output still matches). A full run takes about 1.5 minutes.
 
-Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`) and `build/X000.BIN` (must equal `ce168475…`); work files
+Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`), `build/X000.BIN` (must equal `ce168475…`) and the eight SYSTEM
+overlays (`O0PTSUB0.BIN`, `D0SPSUB.BIN`, `D0SPSUB2.BIN`, `D0SPSUB3.BIN`, `G0OVER.BIN`, `I0NFO.BIN`, `I0NFO2.BIN`, `I0NFO3.BIN`,
+SHA-1 checked the same way); work files
 in `build/full/` (linker scripts `*.full.ld`, maps, objects). On a mismatch it lists the first differing
 offsets and the function or splat range that produced them.
 
@@ -160,8 +173,9 @@ offsets and the function or splat range that produced them.
   address, e.g. NTSC-named symbols).
 - X000 is linked at `0x800E8028`; MAIN0 symbols it uses are absolute (`build/full/undefined_*_auto.x000.txt`).
 - A file that does not compile or cannot be placed is reported as `WARN ... kept as asm` and the build still
-  links the retail assembly for it. Today only `FUN_80068ae4` (a BIOS stub in the 0x8006xxxx library range
-  whose inline `asm` ends in `.data`; it needs ASPSX) stays as asm.
+  links the retail assembly for it. Today 28 MAIN0 files stay as asm (`1124 of 1152 src files linked`): Psy-Q
+  library objects whose `.rodata` cannot be placed (several bases, or bytes that differ from the game) and
+  `FUN_80068ae4` (a BIOS stub whose inline `asm` ends in `.data`; it needs ASPSX). The output still matches.
 - Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
   each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
 
@@ -170,8 +184,8 @@ offsets and the function or splat range that produced them.
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 50.5 % of code (objdiff), see [docs/JP.md](docs/JP.md) |
-| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 50.5 % of code (objdiff), paused, see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
 `<serial>_report` artifact per version.

@@ -271,6 +271,22 @@ def update_readme(summary):
     open(path, "w").write(t[:i] + "\n" + "\n".join(summary) + "\n" + t[j:])
 
 
+def data_name_counts():
+    """Rows of notes/data_names_<prog>.csv (globals named by usage) and the generic function names left (notes/unnamed.json)."""
+    import glob
+    sysn = {}
+    n = {}
+    for p in sorted(glob.glob(N("notes", "data_names_*.csv"))):
+        prog = os.path.basename(p)[len("data_names_"):-4]
+        n[prog] = sum(1 for _ in csv.DictReader(open(p)))
+    for prog in sorted(n):
+        if prog not in ("main0", "x000"): sysn[prog.upper()] = n[prog]
+    try: unnamed = json.load(open(N("notes", "unnamed.json")))["count"]
+    except Exception: unnamed = 0
+    return dict(main0=n.get("main0", 0), x000=n.get("x000", 0), sys=sum(sysn.values()),
+                sys_detail=", ".join("%s %d" % kv for kv in sysn.items()), unnamed=unnamed)
+
+
 def main():
     res = {k: analyse(*v) for k, v in PROGRAMS.items()}
     tot = {key: sum(r[key] for r in res.values()) for key in
@@ -337,12 +353,26 @@ def main():
     w("  (172 MAIN0 targets at `0x800E8000+` do not fall in X000).")
     w("- Functions outside the code (`%d` bytes of Ghidra false positives in RAM with no contents)." % tot["excluded"])
     w("")
+    w("## Where things stand (October 2026)\n")
+    w("- Code: the whole-game figure of the summary above (2950 of 2955 functions). What does not match is five functions of the")
+    w("  memory card / sub-screen overlays (D0SPSUB func_800E89F8, func_800ED0C4, func_800EFD6C; D0SPSUB2 func_800E999C;")
+    w("  D0SPSUB3 func_800EC89C, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`")
+    w("  whose header documents the remaining difference (register allocation and scheduler order only, the structure matches);")
+    w("  [notes/remaining.md](../notes/remaining.md) lists them.")
+    dn = data_name_counts()
+    w("- Function names: essentially complete; %d functions keep a generic name (`notes/unnamed.json`: empty stubs, unreferenced" % dn["unnamed"])
+    w("  code and event scenes nothing pins a behaviour to).")
+    w("- Data names: done by usage for MAIN0 (%d globals in `notes/data_names_main0.csv`), X000 (%d) and the eight SYSTEM" % (dn["main0"], dn["x000"]))
+    w("  overlays (%d: %s), applied to the sources with `tools/rename_data.py`. What is still spelled by" % (dn["sys"], dn["sys_detail"]))
+    w("  address: animation scripts, elements of named pointer tables, field aliases and Psy-Q internals.")
+    w("- Other versions: the Japanese release (50.5 %) and demo (39.6 %) are paused at their shared-C state.")
+    w("")
     w("## Plan\n")
-    w("1. Match every game function byte for byte (this report).")
+    w("1. Match every game function byte for byte (this report; five D0SPSUB* functions left, see above).")
     w("2. All area overlays (done: 16 overlays wired in, see above).")
     w("3. Remove the matching debt (`do{}while(0)`, `register asm`, volatile pins, `// FLAGS`, asm fences).")
-    w("4. Readable names and types (psx_tomba names, structs instead of raw offsets); then split the sources into")
-    w("   segment files (one per original .c) and link with the splat build.")
+    w("4. Readable names and types (names done by usage, see above; structs instead of raw offsets pending); then split")
+    w("   the sources into segment files (one per original .c) and link with the splat build.")
     w("5. Visibility: objdiff report on decomp.dev (done).")
     w("6. Assets: a decompilation is complete only when the whole disc can be rebuilt. Inventory the files of the")
     w("   disc (`tools/isoext.py` extracts it), document every format (area `X0nn.BIN` data, graphics, sound banks,")
