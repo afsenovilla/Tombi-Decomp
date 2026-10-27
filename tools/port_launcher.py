@@ -20,10 +20,14 @@ import port_mods as M
 import extract_data as X
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
+# the languages of the disc's boot menu: EXE/MAINn.EXE (tombi2 --lang N, docs/PORT.md "Languages")
+GAME_LANGS = [(0, "English"), (5, "Español"), (6, "Português"), (7, "Svenska"), (8, "Dansk")]
+UI_TO_GAME_LANG = {"en": 0, "es": 5, "pt": 6, "sv": 7, "da": 8}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 i18n.add({
     "es": {
+        "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
         "l.disc": "Imagen del disco (.bin / .cue / .iso; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
@@ -41,6 +45,7 @@ i18n.add({
         "l.key": "Tecla", "b.defaults": "Valores por defecto", "l.cmd": "Comando:",
     },
     "en": {
+        "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
         "l.disc": "Disc image (.bin / .cue / .iso; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
@@ -57,19 +62,19 @@ i18n.add({
         "l.log": "Last lines of the port's log:", "l.modshelp": "Each mod is a port option (--poke, --hz...); they are saved in tombi-port.json.",
         "l.key": "Key", "b.defaults": "Defaults", "l.cmd": "Command:",
     },
-    "fr": {"title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes", "b.play": "Jouer",
+    "fr": {"l.lang": "Langue du jeu :", "title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes", "b.play": "Jouer",
            "l.disc": "Image du disque (.bin / .cue / .iso ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :",
            "s.extracting": "Extraction du disque vers {0}... {1} % ({2})", "s.dataok": "Données du jeu prêtes dans {0} ({1} fichiers) : l'image du disque n'est plus nécessaire.",
            "s.extractfail": "Impossible d'extraire le disque : {0}", "s.nodata": "Choisissez votre image du disque : elle est extraite une fois dans le dossier data/ et le jeu n'en a plus besoin."},
-    "de": {"title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung", "b.play": "Spielen",
+    "de": {"l.lang": "Spielsprache:", "title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung", "b.play": "Spielen",
            "l.disc": "Disc-Image (.bin / .cue / .iso; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:",
            "s.extracting": "Disc wird nach {0} entpackt... {1} % ({2})", "s.dataok": "Spieldaten bereit in {0} ({1} Dateien): das Disc-Image wird nicht mehr gebraucht.",
            "s.extractfail": "Die Disc konnte nicht entpackt werden: {0}", "s.nodata": "Wähle dein Disc-Image: es wird einmal in den Ordner data/ entpackt, danach braucht das Spiel es nicht mehr."},
-    "it": {"title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli", "b.play": "Gioca",
+    "it": {"l.lang": "Lingua del gioco:", "title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli", "b.play": "Gioca",
            "l.disc": "Immagine del disco (.bin / .cue / .iso; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:",
            "s.extracting": "Estrazione del disco in {0}... {1}% ({2})", "s.dataok": "Dati del gioco pronti in {0} ({1} file): l'immagine del disco non serve più.",
            "s.extractfail": "Impossibile estrarre il disco: {0}", "s.nodata": "Scegli l'immagine del disco: viene estratta una volta nella cartella data/ e il gioco non ne ha più bisogno."},
-    "pt": {"title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos", "b.play": "Jogar",
+    "pt": {"l.lang": "Idioma do jogo:", "title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos", "b.play": "Jogar",
            "l.disc": "Imagem do disco (.bin / .cue / .iso; extraída uma vez para a pasta data/):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:",
            "s.extracting": "A extrair o disco para {0}... {1}% ({2})", "s.dataok": "Dados do jogo prontos em {0} ({1} ficheiros): a imagem do disco já não é necessária.",
            "s.extractfail": "Não foi possível extrair o disco: {0}", "s.nodata": "Escolhe a imagem do disco: é extraída uma vez para a pasta data/ e o jogo deixa de precisar dela."},
@@ -302,21 +307,27 @@ class App:
         rv = self.var("renderer", tk.StringVar, "gl")
         ttk.Radiobutton(rd, text=tr("r.gl"), variable=rv, value="gl").pack(side="left", padx=2)
         ttk.Radiobutton(rd, text=tr("r.soft"), variable=rv, value="soft").pack(side="left", padx=2)
-        ttk.Checkbutton(f, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).grid(row=7, column=0, sticky="w", pady=4)
-        ttk.Label(f, text=tr("l.pad"), wraplength=700, justify="left").grid(row=8, column=0, sticky="w", pady=8)
-        btns = ttk.Frame(f); btns.grid(row=9, column=0, sticky="w", pady=8)
+        lg = ttk.Frame(f); lg.grid(row=7, column=0, sticky="w", pady=4)
+        ttk.Label(lg, text=tr("l.lang")).pack(side="left")
+        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)
+        lv = self.var("lang", tk.IntVar, default_lang)
+        for n, name in GAME_LANGS:
+            ttk.Radiobutton(lg, text=name, variable=lv, value=n).pack(side="left", padx=2)
+        ttk.Checkbutton(f, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).grid(row=8, column=0, sticky="w", pady=4)
+        ttk.Label(f, text=tr("l.pad"), wraplength=700, justify="left").grid(row=9, column=0, sticky="w", pady=8)
+        btns = ttk.Frame(f); btns.grid(row=10, column=0, sticky="w", pady=8)
         self.play_btn = ttk.Button(btns, text=tr("b.play"), command=self.play, width=16)
         self.play_btn.pack(side="left")
         ttk.Button(btns, text=tr("b.stop"), command=self.stop).pack(side="left", padx=8)
         ttk.Button(btns, text=tr("b.copylog"), command=self.copy_log).pack(side="left", padx=8)
-        ttk.Label(f, text=tr("l.cmd")).grid(row=9, column=0, sticky="w")
+        ttk.Label(f, text=tr("l.cmd")).grid(row=10, column=0, sticky="w")
         self.cmd_text = tk.Text(f, height=3, wrap="word")
-        self.cmd_text.grid(row=10, column=0, sticky="ew")
-        ttk.Label(f, text=tr("l.log")).grid(row=11, column=0, sticky="w", pady=(8, 0))
+        self.cmd_text.grid(row=11, column=0, sticky="ew")
+        ttk.Label(f, text=tr("l.log")).grid(row=12, column=0, sticky="w", pady=(8, 0))
         self.log_text = tk.Text(f, height=8, wrap="none")
-        self.log_text.grid(row=12, column=0, sticky="nsew")
+        self.log_text.grid(row=13, column=0, sticky="nsew")
         f.columnconfigure(0, weight=1)
-        f.rowconfigure(12, weight=1)
+        f.rowconfigure(13, weight=1)
 
     def _build_mods(self, f):
         ttk.Label(f, text=tr("l.modshelp"), wraplength=700, justify="left").pack(anchor="w", pady=(0, 6))
@@ -436,6 +447,8 @@ class App:
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
                "--show-fps", "2",     # the measured vblank rate and its histogram in the log
                "--renderer", "soft" if s.get("renderer") == "soft" else "gl"]
+        if s.get("lang"):
+            cmd += ["--lang", str(s["lang"])]
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
         if s.get("fullscreen"):
