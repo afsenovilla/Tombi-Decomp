@@ -10,7 +10,7 @@
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern TObj PLAYER;
 extern unsigned char D_800A4553[];
-extern int D_1F800190, D_1F80018C;
+extern int CAMERA_TARGET_Y_FIX, CAMERA_TARGET_H_FIX;
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[];
 extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[];
 extern unsigned char DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
@@ -31,8 +31,8 @@ void evilPigBagPortalEnter(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
         CAMERA_SCROLL.velY = 0;
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         o->timer = 10;
         break;
     case 1:

@@ -24,7 +24,7 @@ extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
-extern int D_1F800078;
+extern int SPRITE_PART_COUNTER;
 extern char VIEW_CAMERA[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
@@ -109,7 +109,7 @@ void drawObjectSpriteRotated(TObj *o)
     d = o->d3c;
     d += *(unsigned short *)o->anim * 4;
     e = (short *)d;
-    D_1F800078 = e[0];
+    SPRITE_PART_COUNTER = e[0];
     q = (unsigned char *)(o->d3c + e[1]);
     fp = q + 0xc;
     ang = o->d8c;
@@ -161,7 +161,7 @@ void drawObjectSpriteRotated(TObj *o)
         }
     next:
         fp += 16;
-        D_1F800078--;
+        SPRITE_PART_COUNTER--;
         q += 16;
-    } while (D_1F800078 != 0);
+    } while (SPRITE_PART_COUNTER != 0);
 }

@@ -6,7 +6,7 @@ extern int DAT_800a4468[];
 extern char DAT_800a64f8[];
 extern int *FREE_OBJECTS_LAYER7;
 extern short FREE_OBJECT_COUNT_LAYER7, CAT7_OBJECT_COUNT_SAVED, CAT7_OBJECT_COUNT;
-extern char *DAT_1f80022c, *DAT_1f800270;
+extern char *CAT7_OBJECT_LIST, *CAT7_OBJECT_LIST_SAVED;
 extern void memset_(void *, int, int);
 void initObjectPoolLayer7(void)
 {
@@ -27,8 +27,8 @@ void initObjectPoolLayer7(void)
         q -= 0x6c;
     }
     FREE_OBJECT_COUNT_LAYER7 = 10;
-    DAT_1f80022c = DAT_800a64f8;
-    DAT_1f800270 = DAT_800a64f8;
+    CAT7_OBJECT_LIST = DAT_800a64f8;
+    CAT7_OBJECT_LIST_SAVED = DAT_800a64f8;
     CAT7_OBJECT_COUNT_SAVED = 0;
     CAT7_OBJECT_COUNT = 0;
 }

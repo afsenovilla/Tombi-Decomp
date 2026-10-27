@@ -9,7 +9,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F80018C;
+extern int CAMERA_TARGET_H_FIX;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
 extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
@@ -243,7 +243,7 @@ void updatePurpleCrawler(BX *b)
         case 2:
             AnimAdvance(o);
             if (GCD.bceae == 3) o->step++;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 3:
@@ -254,7 +254,7 @@ void updatePurpleCrawler(BX *b)
                 o->step++;
             }
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 4:
@@ -266,7 +266,7 @@ void updatePurpleCrawler(BX *b)
                 o->step++;
             }
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 5:
@@ -275,7 +275,7 @@ void updatePurpleCrawler(BX *b)
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             if (land(o)) o->step++;
             break;
@@ -292,7 +292,7 @@ void updatePurpleCrawler(BX *b)
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F80018C;
+extern int CAMERA_TARGET_H_FIX;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
 extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
@@ -526,7 +526,7 @@ void updatePurpleCrawler(BX *b)
         case 2:
             AnimAdvance(o);
             if (GCD.bceae == 3) o->step++;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 3:
@@ -537,7 +537,7 @@ void updatePurpleCrawler(BX *b)
                 o->step++;
             }
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 4:
@@ -549,7 +549,7 @@ void updatePurpleCrawler(BX *b)
                 o->step++;
             }
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             break;
         case 5:
@@ -558,7 +558,7 @@ void updatePurpleCrawler(BX *b)
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
             o->d8c = (o->d8c - 6) & 0xff;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             if (land(o)) o->step++;
             break;

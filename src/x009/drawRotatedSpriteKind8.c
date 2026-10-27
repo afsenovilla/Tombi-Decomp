@@ -22,7 +22,7 @@ typedef struct {
 
 extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
-extern int D_1F800078;
+extern int SPRITE_PART_COUNTER;
 extern PFT4 *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
@@ -62,7 +62,7 @@ void drawRotatedSpriteKind8(TObj *o)
     d += *(unsigned short *)o->anim * 4;
     e = (short *)d;
     q = (unsigned char *)(o->d3c + e[1]);
-    D_1F800078 = e[0];
+    SPRITE_PART_COUNTER = e[0];
     do {
         A = (signed char)q[14];
         B = (signed char)q[15];
@@ -114,6 +114,6 @@ void drawRotatedSpriteKind8(TObj *o)
                 NEXT_PRIM = (PFT4 *)((char *)NEXT_PRIM + 0x28);
         }
         q += 16;
-    } while (--D_1F800078);
+    } while (--SPRITE_PART_COUNTER);
 }
 #endif

@@ -310,3 +310,18 @@ address,name,size,source
 1f800274,CAT8_OBJECT_LIST_SAVED,0x4,usage: CAT8_OBJECT_LIST drawCategory8Objects saves refs=3
 1f80025a,CAT7_OBJECT_COUNT_SAVED,0x2,usage: CAT7_OBJECT_COUNT drawCategory7Objects saves refs=3
 1f800252,CAT3_OBJECT_COUNT_SAVED,0x2,usage: CAT3_OBJECT_COUNT drawCategory3Objects saves refs=3
+1f800078,SPRITE_PART_COUNTER,0x4,usage: parts left of the sprite frame being drawn (drawObjectSpriteRotScaled / drawObjectSpriteRotated count e[0] down) refs=7
+1f800210,FREE_OBJECTS_UNLAYERED,0x4,usage: free stack of the unlayered object pool (allocObjectUnlayered; initObjectPoolUnlayered fills it from 800B11B8; FREE_OBJECT_COUNT_UNLAYERED) refs=3
+1f800218,ONSCREEN_OBJECT_LIST,0x4,usage: TObj* stack of the objects that passed the screen test (ObjListPush_1F800218 from cullObjectToDrawList / Margin; collideWeaponsWithCat2 / Cat4Objects walk it; initObjectPoolLayer1 resets it to 800B11C8) refs=3
+1f800244,ONSCREEN_OBJECT_COUNT,0x2,usage: entries in ONSCREEN_OBJECT_LIST refs=4
+1f800220,CAT3_OBJECT_LIST,0x4,usage: TObj* stack of the category-3 objects of the frame (drawCategory3Objects pops; initMainDrawList resets it to 800B1320) refs=3
+1f800264,CAT3_OBJECT_LIST_SAVED,0x4,usage: CAT3_OBJECT_LIST drawCategory3Objects saves refs=3
+1f800224,CAT4_OBJECT_LIST,0x4,usage: TObj* stack of the category-4 objects of the frame (drawCategory4Objects pops; collideWeaponsWithCat4Objects) refs=3
+1f800268,CAT4_OBJECT_LIST_SAVED,0x4,usage: CAT4_OBJECT_LIST drawCategory4Objects saves (probeClimbGrabObject walks it) refs=3
+1f800254,CAT4_OBJECT_COUNT_SAVED,0x2,usage: CAT4_OBJECT_COUNT drawCategory4Objects saves (probeClimbGrabObject) refs=3
+1f80022c,CAT7_OBJECT_LIST,0x4,usage: TObj* stack of the category-7 objects of the frame (drawCategory7Objects pops; initObjectPoolLayer7 resets it to 800A64F8) refs=3
+1f800270,CAT7_OBJECT_LIST_SAVED,0x4,usage: CAT7_OBJECT_LIST drawCategory7Objects saves refs=3
+1f800168,PLAYER_H_COPY,0x4,usage: the 16.16 whose whole half is PLAYER_H_WHOLE (a00TornadoStep follows the h / y / d triple as a vector; cameraModeHandler5 copies it to CAMERA_TARGET_H_FIX) refs=4
+1f80016c,PLAYER_Y_COPY,0x4,usage: the 16.16 whose whole half is PLAYER_Y_WHOLE (cameraModeHandler5 copies it to CAMERA_TARGET_Y_FIX) refs=1
+1f80018c,CAMERA_TARGET_H_FIX,0x4,usage: 16.16 h the camera follows (cameraFollowTargetY: d = it - D34(o); updateA00BitingPlantBait sets it to the bait's h, cameraModeHandler5 to the player's) refs=8
+1f800190,CAMERA_TARGET_Y_FIX,0x4,usage: 16.16 y the camera follows (cameraFollowTargetYB: d = it - VF; lookScrollStepX; updateA00BitingPlantBait / cameraModeHandler5 set it) refs=17

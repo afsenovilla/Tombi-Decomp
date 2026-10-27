@@ -6,7 +6,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern unsigned char D_800A4553[];
-extern int D_1F800190;
+extern int CAMERA_TARGET_Y_FIX;
 
 void evilPigBagPortalOpen(TObj *o)
 {
@@ -17,7 +17,7 @@ void evilPigBagPortalOpen(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
         CAMERA_SCROLL.velY = 0;
-        D_1F800190 = o->y.raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
         SPAD.i18c = o->h->raw;
         o->timer = 60;
         o->state++;

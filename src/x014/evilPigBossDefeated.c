@@ -5,7 +5,7 @@
 /* The `if (r)` block is written in both arms of case 1 (cross-jumped later): a2/a3 set twice lose sched1's
    birthing-insn boost, so the arg loads come before the state lbu. */
 #include "TOBJ.H"
-extern int D_1F80018C, D_1F800190;
+extern int CAMERA_TARGET_H_FIX, CAMERA_TARGET_Y_FIX;
 extern unsigned char D_800A4553[];
 extern char D_80077D6C[], MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *);
@@ -34,8 +34,8 @@ void evilPigBossDefeated(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 1;
         D_800A4553[0] = 3;
         CAMERA_SCROLL.velY = 0;
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         o->b9c = 0;
         o->b6a = 1;
         o->state++;
@@ -67,8 +67,8 @@ void evilPigBossDefeated(TObj *o)
         }
         if (o->animFrame & 1) o->d8c = (unsigned char)(o->d8c + 0x14);
         else o->d8c = (unsigned char)(o->d8c - 0x14);
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         break;
     case 2:
         if (o->animFrame & 2) o->w7a = o->animFrame & 1;
@@ -96,8 +96,8 @@ void evilPigBossDefeated(TObj *o)
                 o->animFrame &= 1;
             }
         }
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         break;
     case 4:
         setbox(o, 0x34);
@@ -106,8 +106,8 @@ void evilPigBossDefeated(TObj *o)
         AnimLoadDuration(o);
         o->timer = 0x3c;
         o->state++;
-        D_1F80018C = o->h->raw;
-        D_1F800190 = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
         D_800A4553[0] = 6;
         spawnEvilPigHitStars(o);
         break;

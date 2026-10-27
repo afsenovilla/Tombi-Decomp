@@ -4,8 +4,8 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern int D_1F800190;
-extern int D_1F80018C;
+extern int CAMERA_TARGET_Y_FIX;
+extern int CAMERA_TARGET_H_FIX;
 extern unsigned char D_800A4553;
 extern char MOVE_TABLE_3[];
 extern char MOVE_TABLE_0[];
@@ -58,8 +58,8 @@ void updateA00PinkPiglet(TObj *o)
             o->velV = -0x400;
             break;
         case 1:
-            D_1F80018C = o->h->raw;
-            D_1F800190 = o->y.raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
+            CAMERA_TARGET_Y_FIX = o->y.raw;
             if (o->timer == 0) {
                 o->y.raw += o->velV << 8;
                 o->velV += 0x20;

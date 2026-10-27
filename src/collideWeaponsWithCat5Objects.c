@@ -1,16 +1,16 @@
 // FUNC 80045d98 360 MAIN0
 // MATCHING 80045d98 360
 typedef struct { unsigned char act, p1, type; char p[0xa2]; unsigned char ba5; } O;
-extern short G244, CAT5_OBJECT_COUNT, G19e;
+extern short ONSCREEN_OBJECT_COUNT, CAT5_OBJECT_COUNT, G19e;
 extern unsigned short G19eu;
-extern O **G218;
+extern O **ONSCREEN_OBJECT_LIST;
 extern unsigned char **CAT5_OBJECT_LIST;
 extern void weaponHitCat5Object(O *, unsigned char *);
 
 void collideWeaponsWithCat5Objects(void)
 {
-    short n = G244;
-    O **pp = G218;
+    short n = ONSCREEN_OBJECT_COUNT;
+    O **pp = ONSCREEN_OBJECT_LIST;
     O *o;
     unsigned char **q;
     unsigned char *b;

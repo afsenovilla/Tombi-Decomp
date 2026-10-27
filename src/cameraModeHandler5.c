@@ -13,12 +13,12 @@ typedef struct {
 extern short DAT_1f8000e6;
 extern short VIEW_CAMERA_ROT_Y[];
 extern unsigned short VIEW_CAMERA_Y;
-extern int DAT_1f800168;
+extern int PLAYER_H_COPY;
 extern unsigned short PLAYER_H_WHOLE;
-extern int DAT_1f80016c;
+extern int PLAYER_Y_COPY;
 extern unsigned short PLAYER_Y_WHOLE;
-extern int DAT_1f80018c;
-extern int DAT_1f800190;
+extern int CAMERA_TARGET_H_FIX;
+extern int CAMERA_TARGET_Y_FIX;
 extern unsigned char GAME_AREA00_INTRO_PHASE;
 void cameraFollowTargetY(S8002A258 *o);
 void cameraFollowTargetYB(S8002A258 *o);
@@ -37,8 +37,8 @@ void cameraModeHandler5(S8002A258 *o)
             if (DAT_1f8000e6 > 0) DAT_1f8000e6 = 0;
         }
     }
-    DAT_1f80018c = DAT_1f800168;
-    DAT_1f800190 = DAT_1f80016c;
+    CAMERA_TARGET_H_FIX = PLAYER_H_COPY;
+    CAMERA_TARGET_Y_FIX = PLAYER_Y_COPY;
     cameraFollowTargetY(o);
     cameraFollowTargetYB(o);
     if ((unsigned short)(o->p34[1] - PLAYER_H_WHOLE + 0x40) < 0x80 || (o->w44 & 3)) {

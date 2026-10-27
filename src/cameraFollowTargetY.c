@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80027ED8 (FUN_80027ed8.c): no +0x44 clamp flags.
 #include "TOBJ.H"
-extern int DAT_1f80018c;
+extern int CAMERA_TARGET_H_FIX;
 #define D34(o) (*(Fix16 **)&(o)->d34)
 #define W44(o) (*(unsigned short *)&(o)->d)
 
@@ -12,7 +12,7 @@ static __inline__ void body(TObj *o)
 {
     int d;
     unsigned char neg;
-    d = DAT_1f80018c - D34(o)->raw;
+    d = CAMERA_TARGET_H_FIX - D34(o)->raw;
     neg = d < 0;
     if (d > 0x20000) {
         if (d < o->y.raw) {
@@ -65,7 +65,7 @@ void FUN_80027ed8(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern int DAT_1f80018c;
+extern int CAMERA_TARGET_H_FIX;
 #define D34(o) (*(Fix16 **)&(o)->d34)
 #define W44(o) (*(unsigned short *)&(o)->d)
 
@@ -73,7 +73,7 @@ static __inline__ void body(TObj *o)
 {
     int d;
     unsigned char neg;
-    d = DAT_1f80018c - D34(o)->raw;
+    d = CAMERA_TARGET_H_FIX - D34(o)->raw;
     neg = d < 0;
     if (d > 0x20000) {
         if (d < o->y.raw) {

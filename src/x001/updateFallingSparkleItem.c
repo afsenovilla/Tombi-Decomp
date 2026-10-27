@@ -6,7 +6,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F80018C;
+extern int CAMERA_TARGET_H_FIX;
 extern unsigned short TICK_COUNT;
 extern unsigned char D_800A4553;
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
@@ -38,7 +38,7 @@ void func_80123B30(TObj *o)
             o->velV += 0x10;
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             if (o->b69 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                 o->timer = 0x1e;
@@ -86,7 +86,7 @@ void func_80123B30(TObj *o)
 #include "spad.h"
 #include "TOBJ.H"
 
-extern int D_1F80018C;
+extern int CAMERA_TARGET_H_FIX;
 extern unsigned short D_1F8001F8_h;
 extern unsigned char D_800A4553;
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
@@ -118,7 +118,7 @@ void updateFallingSparkleItem(TObj *o)
             o->velV += 0x10;
             if (o->velV > 0x400) o->velV = 0x400;
             o->y.raw += o->velV << 8;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             SPAD.i190 = o->y.raw;
             if (o->b69 || TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                 o->timer = 0x1e;

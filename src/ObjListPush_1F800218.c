@@ -1,10 +1,10 @@
 // FUNC 80018c2c 60 MAIN0
 // MATCHING 80018c2c 60
-extern int **DAT_1f800218;
-extern unsigned short DAT_1f800244;
+extern int **ONSCREEN_OBJECT_LIST;
+extern unsigned short ONSCREEN_OBJECT_COUNT;
 
 void ObjListPush_1F800218(int *p)
 {
-    *--DAT_1f800218 = p;
-    DAT_1f800244++;
+    *--ONSCREEN_OBJECT_LIST = p;
+    ONSCREEN_OBJECT_COUNT++;
 }

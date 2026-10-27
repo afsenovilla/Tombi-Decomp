@@ -21,7 +21,7 @@ typedef struct {
 } PFT4;
 
 extern long LZ_FILE_CTRL;
-extern int D_1F800078;
+extern int SPRITE_PART_COUNTER;
 extern char *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
@@ -85,7 +85,7 @@ void drawArea6RotatedSpriteStrip(TObj *o)
     d += *(unsigned short *)o->anim * 4;
     t = (short *)d;
     base = (unsigned char *)(o->d3c + t[1]);
-    D_1F800078 = t[0];
+    SPRITE_PART_COUNTER = t[0];
     q = base + 0xc;
     do {
         A = ((signed char *)q)[2];
@@ -131,6 +131,6 @@ void drawArea6RotatedSpriteStrip(TObj *o)
         }
         q += 0x10;
         base += 0x10;
-    } while (--D_1F800078);
+    } while (--SPRITE_PART_COUNTER);
 }
 #endif

@@ -11,7 +11,7 @@ Needs the objects of a full build (build/full/obj) / report build (build/base/<p
 (0x800E8028 <= a < 0x80200000) resolved from the X000 objects of src/*.c files whose `// FUNC` header says X000, and the
 same identifier renames in the src/x0NN twins of those files (by identifier: a twin's D_ names spell the X000 address even
 when its own overlay puts the data elsewhere). src/data/<prog> files are never rewritten (their externs must spell the
-address) and neither are the `*_slpm80165.c` demo sources (their addresses are the demo's).
+address), nor the `*_slpm80165.c` demo sources (their addresses are the demo's) or the `// HEADERS tomba24` sources (US spellings).
 Usage: tools/rename_data.py [--prog MAIN0|X000] [--csv notes/data_names_<prog>.csv] [--dry]"""
 import csv, os, re, struct, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -84,6 +84,7 @@ for dp, fn in walk():
         if not f.endswith((".c", ".h")): continue
         if "slpm80165" in f: continue   # demo sources: their addresses are the demo's, never rewritten
         path = os.path.join(dp, f); txt = open(path, errors="surrogateescape").read()
+        if "HEADERS tomba24" in txt[:600]: continue   # built with the US headers: they keep the US spellings
         m = re.search(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s+(\w+)", txt[:600])
         if PROGMODE != "MAIN0" and not (m and m.group(3).upper() == PROGMODE): continue
         idmap = {}   # identifier -> address

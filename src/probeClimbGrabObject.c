@@ -3,16 +3,16 @@
 extern int DAT_1f8003c0;
 extern short DAT_1f80019e;
 
-extern unsigned short DAT_1f800254;
-extern unsigned char **DAT_1f800268;
+extern unsigned short CAT4_OBJECT_COUNT_SAVED;
+extern unsigned char **CAT4_OBJECT_LIST_SAVED;
 extern void probeGrabObjectBox(void *, unsigned char *);
 
 int probeClimbGrabObject(void *o)
 {
-    unsigned char **q = DAT_1f800268;
+    unsigned char **q = CAT4_OBJECT_LIST_SAVED;
     unsigned char *p;
     DAT_1f8003c0 = 0;
-    DAT_1f80019e = DAT_1f800254;
+    DAT_1f80019e = CAT4_OBJECT_COUNT_SAVED;
     while (DAT_1f80019e != 0) {
         p = *q;
         DAT_1f80019e = DAT_1f80019e - 1;

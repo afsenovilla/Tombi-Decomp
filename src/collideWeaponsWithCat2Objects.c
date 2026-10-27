@@ -5,10 +5,10 @@
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern short DAT_1f80019e;
-extern unsigned short DAT_1f800244;
+extern unsigned short ONSCREEN_OBJECT_COUNT;
 extern short DAT_1f800246;
 extern unsigned short CAT2_OBJECT_COUNT;
-extern TObj **DAT_1f800218;
+extern TObj **ONSCREEN_OBJECT_LIST;
 extern TObj **CAT2_OBJECT_LIST;
 extern int weaponOnHitGetResult(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
@@ -108,8 +108,8 @@ static __inline__ void col(TObj *a, TObj *b)
 
 void collideWeaponsWithCat2Objects(void)
 {
-    short n = DAT_1f800244;
-    TObj **pp = DAT_1f800218;
+    short n = ONSCREEN_OBJECT_COUNT;
+    TObj **pp = ONSCREEN_OBJECT_LIST;
     TObj **qq;
     TObj *a, *b;
 

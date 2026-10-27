@@ -2112,3 +2112,17 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   800A2524: StCdInterrupt internals, no matched source), the libcd timeouts 8009BF58 / 5C / 60 and 80096F4C, libetc 8009813C / 800970B4,
   libgpu 80091930, the remaining libpad state of padlocal.h, GVARS b3f / b42 / b3e / i34 (scene flags set together, meaning not pinned
   down), 8009D2AE (a per-subtype bitmask updateEgg / updateL1Type02Reward share), 1F8001DC / 1F8001C6 / 1F8001CF / 1F8001A4, 1F800244 / 218.
+- MAIN0 data round 2, batch 5 (Oct 27 2026): 15 rows, the last clear ones. The rest of the per-category object stacks of the frame:
+  CAT3_OBJECT_LIST / CAT3_OBJECT_LIST_SAVED (1F800220 / 264, initMainDrawList resets them to 800B1320), CAT4_OBJECT_LIST / LIST_SAVED /
+  COUNT_SAVED (1F800224 / 268 / 254, probeClimbGrabObject walks the saved copy), CAT7_OBJECT_LIST / LIST_SAVED (1F80022C / 270),
+  ONSCREEN_OBJECT_LIST / COUNT (1F800218 / 244: ObjListPush_1F800218 is what cullObjectToDrawList / Margin push to when the object passes
+  the screen test; collideWeaponsWithCat2 / Cat4Objects walk it), FREE_OBJECTS_UNLAYERED (1F800210). Camera: CAMERA_TARGET_H_FIX /
+  CAMERA_TARGET_Y_FIX (1F80018C / 190, the 16.16 point cameraFollowTargetY / YB follow: updateA00BitingPlantBait sets it to the bait,
+  cameraModeHandler5 to the player's PLAYER_H_COPY / PLAYER_Y_COPY, 1F800168 / 16C, the 16.16 words whose whole halves PLAYER_H_WHOLE /
+  PLAYER_Y_WHOLE are; a00TornadoStep reads the triple as a vector). SPRITE_PART_COUNTER (1F800078). tools/rename_data.py now skips the
+  `// HEADERS tomba24` sources like the demo ones: it had renamed D_1F8000E6 inside stubInventory1..3 (declared by the US headers) and
+  they stopped compiling. Clear names with >= 5 real references have run out; what remains at >= 5 is the libpress ring state, the libcd /
+  libetc / libgpu / libpad internals without a matched source, the GVARS scene flags b3f / b42 / b3e, GAME +0x30 (US displayExpBar, read
+  as `& 3` by the speed code), the PLAYER / PLX bytes listed in batch 3, the matrix / vector scratch 1F800000 / 20 / 60 / 68, SPAD.i74
+  (passed as insertPrim's unused third argument), 1F8001C6 / CF / DC, 8009C978 / C981 / D2C3 / D2AE (GAME bitmasks and bytes of unknown
+  meaning), SPR_DATA[3] / [4] and the SCRIPT_FLAGS / GCD / PAD_INFO bytes inside named blocks.

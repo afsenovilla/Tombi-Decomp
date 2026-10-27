@@ -8,7 +8,7 @@
 void SpuFree(unsigned long arg0) {
     s32 i;
 
-    for (i = 0; i < D_80097CA4; i++) {
+    for (i = 0; i < _spu_AllocBlockNum; i++) {
         if (_spu_memList[i].addr & 0x40000000) {
             break;
         }

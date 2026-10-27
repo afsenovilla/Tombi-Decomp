@@ -18,7 +18,7 @@ extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
 extern short D_8007A1F0[], COS_TABLE[];
-extern int D_1F800190;
+extern int CAMERA_TARGET_Y_FIX;
 extern int bossCaptureBossInReach(TObj *, S8 *);
 extern int bossCapturePullBoss(TObj *, S8 *);
 extern int bossCaptureBounceDirection(TObj *, unsigned char);
@@ -183,7 +183,7 @@ void bossRoomPlatformCaptureBoss(TObj *o)
             o->state++;
             spawnBossCaptureEffectRing(o, 0, 0, 0);
         }
-        D_1F800190 = o->y.raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
         SPAD.i18c = o->h->raw;
         break;
     case 7:

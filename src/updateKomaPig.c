@@ -8,8 +8,8 @@
 
 typedef struct { unsigned char b0, b1; } B8012CCF8;
 
-extern int D_1F800190;
-extern int D_1F80018C;
+extern int CAMERA_TARGET_Y_FIX;
+extern int CAMERA_TARGET_H_FIX;
 extern unsigned char D_800A4553[];
 extern void komaPigSubtype00Step();
 extern void komaPigSubtype02Step();
@@ -193,8 +193,8 @@ void updateKomaPig(TObj *o)
                 ((unsigned char*)&GVARS.b42)[0] = 1;
                 D_800A4553[0] = 3;
                 CAMERA_SCROLL.velY = 0;
-                D_1F80018C = o->h->raw;
-                D_1F800190 = o->y.raw;
+                CAMERA_TARGET_H_FIX = o->h->raw;
+                CAMERA_TARGET_Y_FIX = o->y.raw;
                 spawnPoolType32At(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 spawnPoolType32At(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
                 n = allocObjectLayer2();

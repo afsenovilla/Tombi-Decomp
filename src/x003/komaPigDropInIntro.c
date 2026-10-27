@@ -9,8 +9,8 @@ typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned shor
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8, wa, wc; } X;
 extern unsigned char D_800A4553[];
-extern int D_1F80018C;
-extern int D_1F800190;
+extern int CAMERA_TARGET_H_FIX;
+extern int CAMERA_TARGET_Y_FIX;
 extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern B D_80135B30[];
 extern char D_80138A0C[];
@@ -23,7 +23,7 @@ static A *D_801386F8[6] = {
     (A *)D_80138A0C, (A *)D_80138A8C, (A *)D_80138B1C, (A *)D_80138BAC,
     (A *)D_80138BD4, (A *)D_80138BFC,
 };
-extern int D_1F80018C, D_1F800190;
+extern int CAMERA_TARGET_H_FIX, CAMERA_TARGET_Y_FIX;
 extern TObj *ObjAlloc(void);
 extern int komaPigCheckLanded(TObj *);
 extern void func_80120438(TObj *);
@@ -83,8 +83,8 @@ void komaPigDropInIntro(TObj *o)
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         D_800A4553[0] = 3;
         CAMERA_SCROLL.velY = 0;
-        D_1F80018C = o->h->raw;
-        D_1F800190 = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
         break;
     case 3:
         o->velV += 0x20;
@@ -172,8 +172,8 @@ void komaPigDropInIntro(TObj *o)
             }
         }
     tail:
-        D_1F800190 = o->y.raw;
-        D_1F80018C = o->h->raw;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         break;
     case 8:
         func_80120438(o);

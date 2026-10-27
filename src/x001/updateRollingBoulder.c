@@ -8,7 +8,7 @@
 
 extern unsigned char D_800A4553[];
 extern short D_800A45AC[];
-extern int D_1F80018C, D_1F800190;
+extern int CAMERA_TARGET_H_FIX, CAMERA_TARGET_Y_FIX;
 extern int ObjCullRegister(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -64,8 +64,8 @@ void updateRollingBoulder(TObj *o)
             D_800A4553[0] = 5;
             CAMERA_SCROLL.velY = 0;
             D_800A45AC[0] = 0;
-            D_1F800190 = o->y.raw;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_Y_FIX = o->y.raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             o->timer = 0x20;
             o->velH = 0;
             o->step++;
@@ -104,8 +104,8 @@ void updateRollingBoulder(TObj *o)
                 o->step++;
                 ((unsigned char*)&GCD.bceae)[0] = 2;
             }
-            D_1F800190 = o->y.raw;
-            D_1F80018C = o->h->raw;
+            CAMERA_TARGET_Y_FIX = o->y.raw;
+            CAMERA_TARGET_H_FIX = o->h->raw;
             break;
         case 5:
             if (((unsigned char*)&GCD.bceae)[0] == 3) o->step++;

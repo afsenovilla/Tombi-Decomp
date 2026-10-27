@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 extern short DAT_1f8001c6;
 extern short CAT7_OBJECT_COUNT_SAVED;
-extern TObj **DAT_1f800270;
+extern TObj **CAT7_OBJECT_LIST_SAVED;
 extern short CAT7_OBJECT_COUNT;
-extern TObj **DAT_1f80022c;
+extern TObj **CAT7_OBJECT_LIST;
 extern unsigned char PLAYER_TYPE;
 extern unsigned short GAME[];
 extern void drawObjectSprtWithMode(TObj *);
@@ -24,7 +24,7 @@ void drawCategory7Objects(void)
 
     if (DAT_1f8001c6 != 0) {
         n = CAT7_OBJECT_COUNT_SAVED;
-        p = DAT_1f800270;
+        p = CAT7_OBJECT_LIST_SAVED;
         while (n != 0) {
             o = *p++;
             n--;
@@ -54,9 +54,9 @@ void drawCategory7Objects(void)
         }
     } else {
         CAT7_OBJECT_COUNT_SAVED = CAT7_OBJECT_COUNT;
-        DAT_1f800270 = DAT_1f80022c;
+        CAT7_OBJECT_LIST_SAVED = CAT7_OBJECT_LIST;
         while (CAT7_OBJECT_COUNT != 0) {
-            o = *DAT_1f80022c++;
+            o = *CAT7_OBJECT_LIST++;
             CAT7_OBJECT_COUNT--;
             switch (o->b0a) {
             case 0:

@@ -17,7 +17,7 @@ extern short FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
 extern int FUN_8001f9e0(void);
 extern void spawnA00Tornado(int, int, int, int);
-extern struct V3 D_1F800168;
+extern struct V3 PLAYER_H_COPY;
 extern struct V3 PLAYER_POS;
 extern Fix16 *PLAYER_D;
 extern unsigned char D_8009C939A[];
@@ -59,9 +59,9 @@ void a00TornadoStep(TObjE *e)
             }
             break;
         case 1:
-            o->d30 += (D_1F800168.x - o->d30) >> 3;
-            o->d34 += (D_1F800168.y - o->d34) >> 3;
-            o->d38 += (D_1F800168.z - o->d38) >> 3;
+            o->d30 += (PLAYER_H_COPY.x - o->d30) >> 3;
+            o->d34 += (PLAYER_H_COPY.y - o->d34) >> 3;
+            o->d38 += (PLAYER_H_COPY.z - o->d38) >> 3;
             if (e->c0 != 0) e->c0--;
             if (e->c2 != 0) e->c2--;
             if (e->c4 != 0) e->c4 -= 2;
@@ -122,10 +122,10 @@ void a00TornadoStep(TObjE *e)
                 e->d0 = 0;
                 o->step = 9;
             }
-            *(struct V3 *)&o->d30 = D_1F800168;
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
             break;
         case 5:
-            *(struct V3 *)&o->d30 = D_1F800168;
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
             if (GVARS.b30 == 4)
                 goto snd;
             break;
@@ -149,7 +149,7 @@ void a00TornadoStep(TObjE *e)
             o->d64 = (e->c4 << 6) + 0x1000;
             break;
         case 9:
-            *(struct V3 *)&o->d30 = D_1F800168;
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
             o->d64 -= 0x20;
             if (--e->cc == 0) {
                 queueSfxKeyOff(e->ce);

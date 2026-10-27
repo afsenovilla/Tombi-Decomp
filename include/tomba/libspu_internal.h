@@ -253,7 +253,7 @@ extern s32 _spu_rev_startaddr[];
 extern s32 _spu_trans_mode;
 
 extern s32 D_80097C98;
-extern s32 D_80097CA4;
+extern s32 _spu_AllocBlockNum;
 extern s32 _spu_AllocLastNum;
 extern s8* D_80033564;
 extern s32 _spu_mem_mode_plus;

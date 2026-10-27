@@ -30,7 +30,7 @@ long SpuMalloc(long size) {
     } else {
         _spu_gcSPU();
 
-        for (; i < D_80097CA4; i++) {
+        for (; i < _spu_AllocBlockNum; i++) {
             if (_spu_memList[i].addr & 0x40000000 ||
                 (_spu_memList[i].addr & 0x80000000 &&
                  _spu_memList[i].size >= size)) {
@@ -44,7 +44,7 @@ long SpuMalloc(long size) {
         return -1;
 
     if (_spu_memList[var_s2].addr & 0x40000000) {
-        if (var_s2 < D_80097CA4 && _spu_memList[var_s2].size - var_s3 >= size) {
+        if (var_s2 < _spu_AllocBlockNum && _spu_memList[var_s2].size - var_s3 >= size) {
             s32 next = var_s2 + 1;
 
             // Why the volatile?
@@ -63,7 +63,7 @@ long SpuMalloc(long size) {
             return _spu_memList[var_s2].addr;
         }
     } else {
-        if (size < _spu_memList[var_s2].size && _spu_AllocLastNum < D_80097CA4) {
+        if (size < _spu_memList[var_s2].size && _spu_AllocLastNum < _spu_AllocBlockNum) {
             u32 _addr = _spu_memList[var_s2].addr + size;
             u32 _size = _spu_memList[var_s2].size - size;
 

@@ -4,7 +4,7 @@
 
 extern short DAT_1f8001c6;
 extern short CAT3_OBJECT_COUNT_SAVED, CAT3_OBJECT_COUNT;
-extern TObj **DAT_1f800220, **DAT_1f800264;
+extern TObj **CAT3_OBJECT_LIST, **CAT3_OBJECT_LIST_SAVED;
 extern unsigned char PLAYER_TYPE;
 
 int getObjectRenderKind(TObj *o);
@@ -40,7 +40,7 @@ void drawCategory3Objects(void)
 
     if (DAT_1f8001c6 != 0) {
         n = CAT3_OBJECT_COUNT_SAVED;
-        p = DAT_1f800264;
+        p = CAT3_OBJECT_LIST_SAVED;
         while (n != 0) {
             o = *p++;
             n--;
@@ -75,9 +75,9 @@ void drawCategory3Objects(void)
         }
     } else {
         CAT3_OBJECT_COUNT_SAVED = CAT3_OBJECT_COUNT;
-        DAT_1f800264 = DAT_1f800220;
+        CAT3_OBJECT_LIST_SAVED = CAT3_OBJECT_LIST;
         while (CAT3_OBJECT_COUNT != 0) {
-            o = *DAT_1f800220++;
+            o = *CAT3_OBJECT_LIST++;
             CAT3_OBJECT_COUNT--;
             if (o->visible) {
                 switch (getObjectRenderKind(o)) {

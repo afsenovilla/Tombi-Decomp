@@ -6,10 +6,10 @@ extern unsigned char CAMERA_SCROLL[];
 extern unsigned char DAT_800b11c8[];
 extern unsigned char **DAT_1f800204;
 extern short FREE_OBJECT_COUNT_LAYER1;
-extern unsigned char *DAT_1f800218;
+extern unsigned char *ONSCREEN_OBJECT_LIST;
 extern unsigned char *DAT_1f80025c;
 extern short DAT_1f80024e;
-extern short DAT_1f800244;
+extern short ONSCREEN_OBJECT_COUNT;
 extern void *memset(void *, int, int);
 
 void initObjectPoolLayer1(void)
@@ -34,8 +34,8 @@ void initObjectPoolLayer1(void)
         q -= 0xec;
     } while (i < 4);
     FREE_OBJECT_COUNT_LAYER1 = 4;
-    DAT_1f800218 = DAT_800b11c8;
+    ONSCREEN_OBJECT_LIST = DAT_800b11c8;
     DAT_1f80025c = DAT_800b11c8;
     DAT_1f80024e = 0;
-    DAT_1f800244 = 0;
+    ONSCREEN_OBJECT_COUNT = 0;
 }

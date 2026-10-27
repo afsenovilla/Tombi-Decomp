@@ -9,12 +9,12 @@ typedef struct {
 } O;
 typedef union { int i; struct { short lo, hi; } s; } FX;
 extern FX VIEW_CAMERA_Y_FIX;
-extern int D_1f800190;
+extern int CAMERA_TARGET_Y_FIX;
 #define VF (*(volatile int *)&VIEW_CAMERA_Y_FIX.i)
 
 static __inline__ void inl(O *o)
 {
-    int d = D_1f800190 - VF;
+    int d = CAMERA_TARGET_Y_FIX - VF;
     if (d >= 0) {
         if (d > 0x10000) {
             if (d < o->v) {
@@ -30,7 +30,7 @@ static __inline__ void inl(O *o)
                 o->v = 0;
             }
         } else {
-            VF = D_1f800190;
+            VF = CAMERA_TARGET_Y_FIX;
             if (VIEW_CAMERA_Y_FIX.s.hi > o->s32) {
                 VIEW_CAMERA_Y_FIX.i = o->s32 << 16;
                 o->v = 0;
@@ -69,12 +69,12 @@ typedef struct {
 } O;
 typedef union { int i; struct { short lo, hi; } s; } FX;
 extern FX VIEW_CAMERA_Y_FIX;
-extern int D_1f800190;
+extern int CAMERA_TARGET_Y_FIX;
 #define VF (*(volatile int *)&VIEW_CAMERA_Y_FIX.i)
 
 static __inline__ void inl(O *o)
 {
-    int d = D_1f800190 - VF;
+    int d = CAMERA_TARGET_Y_FIX - VF;
     if (d >= 0) {
         if (d > 0x10000) {
             if (d < o->v) {
@@ -91,7 +91,7 @@ static __inline__ void inl(O *o)
                 o->f44 |= 8;
             }
         } else {
-            VF = D_1f800190;
+            VF = CAMERA_TARGET_Y_FIX;
             if (VIEW_CAMERA_Y_FIX.s.hi > o->s32) {
                 VIEW_CAMERA_Y_FIX.i = o->s32 << 16;
                 o->v = 0;

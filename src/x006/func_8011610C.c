@@ -7,13 +7,13 @@ INCLUDE_ASM_V("x06/nonmatchings/x06", func_801153C0_slps01144);
 #else
 #include "spad.h"
 #include "TOBJ.H"
-extern volatile int D_1F800190;
+extern volatile int CAMERA_TARGET_Y_FIX;
 
 void func_8011610C(TObj *o)
 {
     unsigned char flag = 0;
     int k, c, v;
-    int d = D_1F800190 - 0x800000;
+    int d = CAMERA_TARGET_Y_FIX - 0x800000;
     d -= SPAD.if0;
     k = 0x500000;
     d += k;
@@ -39,7 +39,7 @@ void func_8011610C(TObj *o)
                 goto st;
             }
         } else {
-            SPAD.if0 = D_1F800190 + k - 0x800000;
+            SPAD.if0 = CAMERA_TARGET_Y_FIX + k - 0x800000;
             return;
         }
     } else {

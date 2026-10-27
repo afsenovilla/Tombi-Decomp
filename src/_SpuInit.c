@@ -26,7 +26,7 @@ void _SpuInit(s32 arg0) {
     _spu_rev_attr.unk24 = 0;
     _spu_rev_offsetaddr = _spu_rev_startaddr[0];
     _spu_FsetRXX(0xD1, _spu_rev_startaddr[0], 0);
-    D_80097CA4 = 0;
+    _spu_AllocBlockNum = 0;
     _spu_AllocLastNum = 0;
     _spu_memList = 0;
     _spu_trans_mode = 0;
