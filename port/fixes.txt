@@ -46,3 +46,28 @@ src/queueLoadList.c | int pending = 0; | int pending = 0; { extern int port_verb
 # follow them through KSEG0 (the link store `*hole = (u_long)p` is masked by the generic rule)
 src/compactOrderingTable.c | prev = (u_long)(p - 1); | prev = (u_long)(p - 1) & 0xFFFFFF;
 src/compactOrderingTable.c | next = (u_long*)val; | next = (u_long*)(val|0x80000000u);
+# NEG_SIN_TABLE is `short[]` in globals.h (via TOBJ.H); these files declare it unsigned for their lhu: keep the reads unsigned
+src/x001/updateSwingingRope.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigGrabbedB.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigRiseB.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigThrow.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigWander.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigFlyAcross.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+src/x003/wingedForkPigChase.c | extern unsigned short NEG_SIN_TABLE[]; | #define NEG_SIN_TABLE ((unsigned short *)NEG_SIN_TABLE)
+# MAIN0 has functions named f and g (gen_port renames them per file), which clashes with the local macro g of these files
+src/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/updatePointsBalloon.c | g-> | gq->
+src/x001/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x001/updatePointsBalloon.c | g-> | gq->
+src/x003/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x003/updatePointsBalloon.c | g-> | gq->
+src/x004/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x004/updatePointsBalloon.c | g-> | gq->
+src/x006/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x006/updatePointsBalloon.c | g-> | gq->
+src/x009/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x009/updatePointsBalloon.c | g-> | gq->
+src/x010/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x010/updatePointsBalloon.c | g-> | gq->
+src/x017/updatePointsBalloon.c | #define g ((G2 *)e) | #define gq ((G2 *)e)
+src/x017/updatePointsBalloon.c | g-> | gq->
