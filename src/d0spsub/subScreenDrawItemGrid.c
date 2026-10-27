@@ -3,11 +3,11 @@
 typedef struct { char p[0x10]; short w10; char p12[2]; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short x, y, dw, idx; } Slot;
 typedef struct { short x, y, w, attr; int img; } Text;
-extern Slot D_80108848[];
-extern Text D_8011113C;
+extern Slot SUBSCREEN_ITEM_SLOTS[];
+extern Text SUBSCREEN_DRAW_PARAMS;
 extern int D_80012210;
 extern unsigned short D_8009D2A4;
-extern unsigned char D_8010A0C8[];
+extern unsigned char SUBSCREEN_ITEM_LIST[];
 extern unsigned char D_8009CEF7, D_8009CFF8, D_8009CEF8, D_8009C990, D_8009D006, D_8009CFFB;
 extern unsigned char D_8009D090[]; /* GAME+0x730 */
 #define G30 (D_8009D090 - 0x700) /* GAME+0x30 (same base register in the game) */
@@ -16,18 +16,18 @@ extern void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck);
 void subScreenDrawItemGrid(Menu *m)
 {
     Slot *s;
-    for (s = D_80108848; s->x != -1; s++) {
+    for (s = SUBSCREEN_ITEM_SLOTS; s->x != -1; s++) {
         short i;
         int flag, sel;
-        D_8011113C.x = s->x;
-        D_8011113C.y = s->y;
-        D_8011113C.img = D_80012210;
-        D_8011113C.w = m->w10 + 2;
+        SUBSCREEN_DRAW_PARAMS.x = s->x;
+        SUBSCREEN_DRAW_PARAMS.y = s->y;
+        SUBSCREEN_DRAW_PARAMS.img = D_80012210;
+        SUBSCREEN_DRAW_PARAMS.w = m->w10 + 2;
         i = s->idx + m->page * 10;
         if (i >= D_8009D2A4) continue;
         sel = i == m->sel;
         flag = 0;
-        switch (D_8010A0C8[i]) {
+        switch (SUBSCREEN_ITEM_LIST[i]) {
         case 10:
             if (D_8009CEF7 == 1) flag = 1;
             break;
@@ -83,6 +83,6 @@ void subScreenDrawItemGrid(Menu *m)
             if ((unsigned)(G30[0] - 1) >= 2 && G30[0x922] == 7) flag = 1;
             break;
         }
-        subScreenDrawItemIcon(D_8010A0C8[i], sel, flag, m->cursor);
+        subScreenDrawItemIcon(SUBSCREEN_ITEM_LIST[i], sel, flag, m->cursor);
     }
 }

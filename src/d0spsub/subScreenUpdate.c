@@ -6,14 +6,14 @@ extern Menu MENU_STATE;
 extern unsigned char D_800A45D9, D_800A45DA, D_800A45DB;
 extern short D_800A45E8, D_800A45F6;
 extern void *D_800A4620, *D_800A4624, *D_800A4628, *D_800A462C, *D_800A4630, *D_800A4634, *D_800A4638, *D_800A463C;
-extern short D_8010A058;
-extern int D_8011112C, D_80111130;
+extern short SUBSCREEN_POPUP_CURSOR;
+extern int SUBSCREEN_PAD_LAST, SUBSCREEN_PAD_REPEAT_TIMER;
 extern unsigned short PAD_PRESSED;
 extern unsigned short JOYPAD_STATE;
 extern void *D_1F8003A0, *D_1F8003A4;
 extern char D_800F18E0[], D_800F24E0[], D_800F7B78[];
-extern char D_800FE8D0[], D_800FE8E0[]; /* aliases of D_800FE8D8, D_800FE8E4 (no CSE) */
-extern char D_800FE8A4[], D_800FE8E4[], D_800FE8D8[], D_800FE948[], D_800FEC74[], D_800FE974[];
+extern char SUBSCREEN_TAB_EXTRA_FRAMES[], D_800FE8E0[]; /* aliases of D_800FE8D8, D_800FE8E4 (no CSE) */
+extern char SUBSCREEN_TAB_FRAMES[], D_800FE8E4[], D_800FE8D8[], SUBSCREEN_DIGIT_FRAMES[], D_800FEC74[], D_800FE974[];
 extern void LoadImage(RECT *r, void *p);
 extern int subScreenMainStep(Menu *m);
 extern int func_800ED0C4(Menu *m);
@@ -35,30 +35,30 @@ int subScreenUpdate(void)
         LoadImage(&r, D_800F18E0);
         D_1F8003A0 = D_800F24E0;
         D_1F8003A4 = D_800F7B78;
-        D_800A4620 = D_800FE8A4;
+        D_800A4620 = SUBSCREEN_TAB_FRAMES;
         D_800A4624 = D_800FE8E4;
         D_800A4628 = D_800FE8D8;
-        D_800A462C = D_800FE8D0 + 8;
+        D_800A462C = SUBSCREEN_TAB_EXTRA_FRAMES + 8;
         D_800A4630 = D_800FE8E0 + 4;
-        D_800A4634 = D_800FE948;
+        D_800A4634 = SUBSCREEN_DIGIT_FRAMES;
         D_800A4638 = D_800FEC74;
         D_800A463C = D_800FE974;
         D_800A45E8 = 1;
         D_800A45F6 = -1;
-        D_8010A058 = -1;
-        D_8011112C = 0;
-        D_80111130 = 0;
+        SUBSCREEN_POPUP_CURSOR = -1;
+        SUBSCREEN_PAD_LAST = 0;
+        SUBSCREEN_PAD_REPEAT_TIMER = 0;
         D_800A45D9 = 0;
         D_800A45DA = 0;
         D_800A45DB = 0;
         m->state++;
     case 1:
         pad = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
-        if (pad != D_8011112C) {
-            D_8011112C = pad;
-            D_80111130 = 0x20;
-        } else if (--D_80111130 == 0) {
-            D_80111130 = 4;
+        if (pad != SUBSCREEN_PAD_LAST) {
+            SUBSCREEN_PAD_LAST = pad;
+            SUBSCREEN_PAD_REPEAT_TIMER = 0x20;
+        } else if (--SUBSCREEN_PAD_REPEAT_TIMER == 0) {
+            SUBSCREEN_PAD_REPEAT_TIMER = 4;
             JOYPAD_STATE |= pad;
         }
         switch (m->mode) {

@@ -12,7 +12,13 @@ Needs the objects of a full build (build/full/obj) / report build (build/base/<p
 same identifier renames in the src/x0NN twins of those files (by identifier: a twin's D_ names spell the X000 address even
 when its own overlay puts the data elsewhere). src/data/<prog> files are never rewritten (their externs must spell the
 address), nor the `*_slpm80165.c` demo sources (their addresses are the demo's) or the `// HEADERS tomba24` sources (US spellings).
-Usage: tools/rename_data.py [--prog MAIN0|X000] [--csv notes/data_names_<prog>.csv] [--dry]"""
+`--prog <SYSTEM overlay>` (tools/sysovl.py: O0PTSUB0, D0SPSUB, D0SPSUB2, D0SPSUB3, G0OVER, I0NFO, I0NFO2, I0NFO3) applies
+notes/data_names_<prog>.csv to src/<prog lower>/*.c (objects build/full/obj/<prog lower>__<stem>.o, retail bytes from
+game/disc/fs/SYSTEM/<PROG>.BIN).  The overlays share the address space, so a csv names only its own overlay.  D0SPSUB3 is the
+same code as D0SPSUB with its data at other addresses: in D0SPSUB mode every renamed file with a src/d0spsub3 twin (identical
+text apart from the header and the overlay-range D_ spellings) gets the twin's identifiers renamed by position, and the twin's
+addresses are appended to notes/data_names_d0spsub3.csv (source `twin of D0SPSUB <addr>`) so a later D0SPSUB3 run is consistent.
+Usage: tools/rename_data.py [--prog MAIN0|X000|<SYSTEM overlay>] [--csv notes/data_names_<prog>.csv] [--dry]"""
 import csv, os, re, struct, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
@@ -32,6 +38,12 @@ OVERLAY_DIRS = ["x%03d" % n for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16
 PROG = {"MAIN0": ("game/MAIN0.EXE", 0x80010000, 0x800), "X000": ("game/AREA00/X000.BIN", 0x800E8028, 0)}
 for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
     PROG["X%03d" % n] = ("game/AREA%02d/X%03d.BIN" % (n, n), 0x800E8028, 0)
+import sysovl
+for _p, (_path, _sha, _code) in sysovl.SYSOVL.items():
+    PROG[_p] = ("game/" + _path, sysovl.BASE, 0)
+SYSMODE = PROGMODE in sysovl.SYSOVL
+TWIN_CSV = os.path.join(ROOT, "notes", "data_names_d0spsub3.csv")
+OVL_ID = re.compile(r"\b(?:D|DAT|PTR)_(80[01][0-9a-fA-F]{5})\b")
 GAME = {}
 def game(p):
     if p not in GAME:
@@ -61,7 +73,35 @@ for h in os.listdir(os.path.join(ROOT, "include", "tomba")):
             H.add(mm.group(1))
 changed = skipped = 0
 def walk():
+    if SYSMODE:
+        dp = os.path.join(ROOT, "src", PROGMODE.lower()); yield dp, os.listdir(dp); return
     for dp, dn, fn in os.walk(os.path.join(ROOT, "src")): yield dp, fn
+twin_rows = []
+def rename_sys_twin(stem, txt, used, idmap):
+    """D0SPSUB -> D0SPSUB3: the twin spells its own data addresses, so the identifiers are paired by position: the two texts
+    must be identical once the header lines and the overlay-range D_ identifiers are masked.  Renames the twin and collects
+    csv rows (twin address, same name) for notes/data_names_d0spsub3.csv."""
+    global changed
+    tp = os.path.join(ROOT, "src", "d0spsub3", stem + ".c")
+    if not os.path.exists(tp): return
+    ttxt = open(tp, errors="surrogateescape").read()
+    def mask(s):
+        s = re.sub(r"^//\s*(FUNC|MATCHING)\b.*$", "", s, flags=re.M)
+        return OVL_ID.sub("@", s)
+    if mask(txt) != mask(ttxt): print("TWIN?", tp, "differs from the D0SPSUB source"); return
+    pairs = {}
+    for a, b in zip(OVL_ID.finditer(txt), OVL_ID.finditer(ttxt)):
+        if pairs.setdefault(a.group(0), b.group(0)) != b.group(0): print("TWIN?", tp, "inconsistent pairing", a.group(0)); return
+    tnew = ttxt
+    for ident, nm in used.items():
+        tid = pairs.get(ident)
+        if tid is None: continue
+        if re.search(r"\b%s\b" % re.escape(nm), ttxt): print("SKIP", tp, tid, nm); continue
+        tnew = re.sub(r"\b%s\b" % re.escape(tid), nm, tnew)
+        twin_rows.append((int(tid[-8:], 16), nm, "twin of D0SPSUB %08x" % idmap[ident]))
+    if tnew != ttxt:
+        changed += 1
+        if not DRY: open(tp, "w", errors="surrogateescape").write(tnew)
 def rename_twins(stem, used):
     """Applies the identifier renames of src/<stem>.c to its src/x0NN/<stem>.c twins (same source, other overlay)."""
     global changed
@@ -79,7 +119,7 @@ def rename_twins(stem, used):
 
 for dp, fn in walk():
     rel = os.path.relpath(dp, os.path.join(ROOT, "src"))
-    if PROGMODE != "MAIN0" and rel != ".": continue   # overlay mode: src/*.c only, twins follow by identifier; never src/data
+    if PROGMODE != "MAIN0" and not SYSMODE and rel != ".": continue   # overlay mode: src/*.c only, twins follow by identifier; never src/data
     for f in sorted(fn):
         if not f.endswith((".c", ".h")): continue
         if "slpm80165" in f: continue   # demo sources: their addresses are the demo's, never rewritten
@@ -94,6 +134,7 @@ for dp, fn in walk():
             addr, size, prog = int(m.group(1), 16), int(m.group(2)), m.group(3).upper()
             stem = f[:-2]
             cands = [os.path.join(ROOT, "build", "full", "obj", stem + ".o")] if rel == "." else []
+            if SYSMODE: cands = [os.path.join(ROOT, "build", "full", "obj", "%s__%s.o" % (prog.lower(), stem))]
             cands.append(os.path.join(ROOT, "build", "base", prog.lower(), stem + ".o"))
             for o in cands:
                 if os.path.exists(o) and prog in PROG:
@@ -120,5 +161,15 @@ for dp, fn in walk():
         if new != txt:
             changed += 1
             if not DRY: open(path, "w", errors="surrogateescape").write(new)
-            if PROGMODE != "MAIN0" and f.endswith(".c"): rename_twins(f[:-2], used)
+            if PROGMODE == "D0SPSUB" and f.endswith(".c"): rename_sys_twin(f[:-2], txt, used, idmap)
+            elif PROGMODE != "MAIN0" and not SYSMODE and f.endswith(".c"): rename_twins(f[:-2], used)
+if twin_rows:
+    have = {int(r["address"], 16) for r in csv.DictReader(open(TWIN_CSV))} if os.path.exists(TWIN_CSV) else set()
+    rows = sorted({r for r in twin_rows if r[0] not in have})
+    for a, nm, src in rows: print("TWIN", "%08x" % a, nm)
+    if rows and not DRY:
+        new = not os.path.exists(TWIN_CSV)
+        with open(TWIN_CSV, "a") as fo:
+            if new: fo.write("address,name,size,source\n")
+            for a, nm, src in rows: fo.write("%08x,%s,,%s\n" % (a, nm, src))
 print("files changed:", changed, "skipped:", skipped)

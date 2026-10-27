@@ -2126,3 +2126,23 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   as `& 3` by the speed code), the PLAYER / PLX bytes listed in batch 3, the matrix / vector scratch 1F800000 / 20 / 60 / 68, SPAD.i74
   (passed as insertPrim's unused third argument), 1F8001C6 / CF / DC, 8009C978 / C981 / D2C3 / D2AE (GAME bitmasks and bytes of unknown
   meaning), SPR_DATA[3] / [4] and the SCRIPT_FLAGS / GCD / PAD_INFO bytes inside named blocks.
+- SYSTEM data, batch 1: D0SPSUB (Oct 27 2026): 67 rows in notes/data_names_d0spsub.csv, applied with the new `--prog <SYSTEM overlay>`
+  mode of tools/rename_data.py (objects build/full/obj/<prog>__<stem>.o, bytes from game/disc/fs/SYSTEM/<PROG>.BIN; in D0SPSUB
+  mode every renamed file with an identical src/d0spsub3 twin gets the twin's own D_ spellings renamed by position and the twin
+  addresses appended to notes/data_names_d0spsub3.csv as `twin of D0SPSUB <addr>`, 38 rows). SUBSCREEN_DRAW_PARAMS (8011113C,
+  {x, y, tpage, clut, frame, +C, str, font}: the block every subScreenDraw* fills for subScreenDrawSprite / SpriteFT4 / String)
+  with its fields SUBSCREEN_DRAW_Y / TPAGE / CLUT / FRAME / STR / FONT, SUBSCREEN_FONT (800FFD98, the 5-byte glyph table stored
+  in .font), the object structs SUBSCREEN_MESSAGE_BOX (8010A200, + STATE at +4 that subScreenEventListStep waits on),
+  SUBSCREEN_MAP_OBJECTS (8010A2D4, Sprite[3]: marker and the two cursor objects), SUBSCREEN_MAP_AREA_SPRITES (8010A550,
+  Sprite[8]), SUBSCREEN_MAP_ICON_SPRITES (80110F50) / ICON_POSITIONS, SUBSCREEN_SAVED_CAMERA (8010A1C8); the popup list state
+  SUBSCREEN_POPUP_CURSOR / COUNT / SUB_CURSOR / SUB_COUNT / ENTRIES / SUB_ENTRIES / STRINGS / SUB_STRINGS; the map view
+  SUBSCREEN_MAP_VIEW_X / Y, SUBSCREEN_MAP_LINK, SUBSCREEN_PAD_LAST / PAD_REPEAT_TIMER; the tables SUBSCREEN_EVENT_ORDER /
+  EVENT_SLOTS / ITEM_SLOTS / ITEM_LIST, ITEM_ICON_CLUTS, ITEM_CONDITION_INDEX / SCRIPTS, SUBSCREEN_COND_OPS, ITEM_NAME_INDEX /
+  STRINGS / CLUTS, EVENT_NAME_STRINGS / UNKNOWN_STRING, SUBSCREEN_PAGE_FOOTER_SLOTS, SUBSCREEN_GAUGE_SLOTS, the tab tables
+  SUBSCREEN_TAB_SLOTS_MAIN / MAP / MODE7 / SLOT_MINUS2 / TAB_IDS / TAB_FRAMES / TAB_EXTRA_FRAMES, SUBSCREEN_DIGIT_FRAMES, and the
+  map graph MAP_NODES / LINKS / ROOM_LINK / AREA_ROUTES / ROUTE_STRIP_SHAPES / AREA_BOUNDS / AREA_VIEW_ORIGIN / ROOM_POSITIONS /
+  AREA_SPRITE_ANIMS / ICON_ANIMS / MARKER_ANIM / AREA_SPAWN_LISTS and the name tables MAP_AREA_NAMES / AREA14_AREA_NAMES /
+  ROOM_NAMES / AREA14_ROOM_NAMES. func_800EA5E8 and its D0SPSUB3 twin func_800EA540 (different stem) keep their `_a` alias
+  externs, renamed by hand. Left: the per-field externs inside SUBSCREEN_MAP_OBJECTS[1..2] and SUBSCREEN_MESSAGE_BOX
+  (object fields of unknown meaning), the menu sprite tables p4c / p50 / p60 / p64 (800FE8E4 / 8D8 / EC74 / 974), the map
+  view words 801110FC / 104 / 108 / 10C / 110 / 114, 800FDE50 (per-node link neighbours, shape unclear), the image 800F18E0.

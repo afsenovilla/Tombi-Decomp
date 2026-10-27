@@ -16,10 +16,10 @@ typedef struct { short x, y, w; unsigned short attr; } Text;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern Text D_80100B70;
-extern short D_80100B74;
-extern short D_80100B76;
-extern unsigned short *D_80100B78;
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern short SUBSCREEN_DRAW_TPAGE;
+extern short SUBSCREEN_DRAW_CLUT;
+extern unsigned short *SUBSCREEN_DRAW_FRAME;
 extern char *D_1F8002EC;
 #define BANK (*(char * volatile *)&D_1F8002EC)
 extern SPRT *NEXT_PRIM;
@@ -31,7 +31,7 @@ void subScreenDrawSprite(int pri)
 {
     SPRT *s = (SPRT *)0x1F800000;
     int *cnt = (int *)0x1F800014;
-    unsigned short idx = *D_80100B78;
+    unsigned short idx = *SUBSCREEN_DRAW_FRAME;
     short *e = (short *)(BANK + idx * 4);
     unsigned char *u;
     T *t;
@@ -46,15 +46,15 @@ void subScreenDrawSprite(int pri)
         s->r0 = 0x80;
         s->g0 = 0x80;
         s->b0 = 0x80;
-        if (D_80100B76 & 0x8000) s->code |= 2;
+        if (SUBSCREEN_DRAW_CLUT & 0x8000) s->code |= 2;
         else s->code &= ~2;
-        s->x0 = D_80100B70.x + t->dx;
-        s->y0 = D_80100B70.y + t->dy;
+        s->x0 = SUBSCREEN_DRAW_PARAMS.x + t->dx;
+        s->y0 = SUBSCREEN_DRAW_PARAMS.y + t->dy;
         s->u0 = *u;
         s->v0 = ((unsigned char *)t)[-1];
         s->w = t->w;
         s->h = t->h;
-        if (D_80100B70.attr & 0x7FFF) s->clut = D_80100B70.attr;
+        if (SUBSCREEN_DRAW_PARAMS.attr & 0x7FFF) s->clut = SUBSCREEN_DRAW_PARAMS.attr;
         else s->clut = t->clut;
         t++;
         p = NEXT_PRIM;
@@ -63,5 +63,5 @@ void subScreenDrawSprite(int pri)
         addPrim(CURRENT_OT + pri + 4, p);
         NEXT_PRIM++;
     } while (--*cnt);
-    AddDrawMode(D_80100B74, pri + 4);
+    AddDrawMode(SUBSCREEN_DRAW_TPAGE, pri + 4);
 }

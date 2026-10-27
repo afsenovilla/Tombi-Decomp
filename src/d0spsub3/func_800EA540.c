@@ -6,10 +6,10 @@
 // (local-alloc, one death); `b` narrower than int; x as the giv `8 + k * 10` (its init lands after the hoisted
 // invariants) and the y constant as a block local (lowest global priority -> s6, first in the preheader).
 typedef struct { char p[0x10]; short w10; char p12[0x46]; int *p58; int *p5c; } Menu;
-extern short D_80100B70, D_80100B74;
-extern short D_80100B72[];
-extern int D_80100B78;
-extern short D_80100B70_a[], D_80100B74_a[];
+extern short SUBSCREEN_DRAW_PARAMS, SUBSCREEN_DRAW_TPAGE;
+extern short SUBSCREEN_DRAW_Y[];
+extern int SUBSCREEN_DRAW_FRAME;
+extern short SUBSCREEN_DRAW_PARAMS_a[], SUBSCREEN_DRAW_TPAGE_a[];
 extern unsigned char SCRIPT_FLAGS[];
 extern void subScreenDrawSprite(int n);
 
@@ -34,19 +34,19 @@ void func_800EA540(Menu *m)
     {
         unsigned char *q; int k; short y = 0xC8;
         for (q = d, k = 0; k < 3; k++) {
-            D_80100B70 = 8 + k * 10;
-            D_80100B72[0] = y;
-            D_80100B74 = m->w10;
-            D_80100B72[2] = 0x7C15;
-            D_80100B78 = m->p5c[*q++];
+            SUBSCREEN_DRAW_PARAMS = 8 + k * 10;
+            SUBSCREEN_DRAW_Y[0] = y;
+            SUBSCREEN_DRAW_TPAGE = m->w10;
+            SUBSCREEN_DRAW_Y[2] = 0x7C15;
+            SUBSCREEN_DRAW_FRAME = m->p5c[*q++];
             subScreenDrawSprite(1);
         }
     }
-    D_80100B70_a[0] = 0x20;
-    D_80100B72[0] = 0xC8;
-    D_80100B74_a[0] = m->w10;
-    D_80100B72[2] = 0x7C15;
-    D_80100B78 = m->p58[0x18];
+    SUBSCREEN_DRAW_PARAMS_a[0] = 0x20;
+    SUBSCREEN_DRAW_Y[0] = 0xC8;
+    SUBSCREEN_DRAW_TPAGE_a[0] = m->w10;
+    SUBSCREEN_DRAW_Y[2] = 0x7C15;
+    SUBSCREEN_DRAW_FRAME = m->p58[0x18];
     subScreenDrawSprite(1);
     n = 0;
     for (i = 0; i < 0x100; i++) {
@@ -65,11 +65,11 @@ void func_800EA540(Menu *m)
     {
         unsigned char *q; int k; short y = 0xC8;
         for (q = d, k = 0; k < 3; k++) {
-            D_80100B70 = 0x28 + k * 10;
-            D_80100B72[0] = y;
-            D_80100B74 = m->w10;
-            D_80100B72[2] = 0x7C15;
-            D_80100B78 = m->p5c[*q++];
+            SUBSCREEN_DRAW_PARAMS = 0x28 + k * 10;
+            SUBSCREEN_DRAW_Y[0] = y;
+            SUBSCREEN_DRAW_TPAGE = m->w10;
+            SUBSCREEN_DRAW_Y[2] = 0x7C15;
+            SUBSCREEN_DRAW_FRAME = m->p5c[*q++];
             subScreenDrawSprite(1);
         }
     }

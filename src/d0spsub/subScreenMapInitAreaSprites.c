@@ -19,9 +19,9 @@ typedef struct {
     char p40[0x94];
 } Sprite;
 extern unsigned short D_8009D2C4[];
-extern Spawn *D_8010A02C[];
-extern Sprite D_8010A550[];
-extern void *D_800FECB8[];
+extern Spawn *MAP_AREA_SPAWN_LISTS[];
+extern Sprite SUBSCREEN_MAP_AREA_SPRITES[];
+extern void *MAP_AREA_SPRITE_ANIMS[];
 extern int D_1F8002EC;
 
 void subScreenMapInitAreaSprites(void)
@@ -30,15 +30,15 @@ void subScreenMapInitAreaSprites(void)
     int i;
     for (i = 0; i < 8; i++) {
         if (D_8009D2C4[i] == 0) {
-            Spawn *s = D_8010A02C[i];
+            Spawn *s = MAP_AREA_SPAWN_LISTS[i];
             if (s->id != -1) {
                 do {
-                    Sprite *o = &D_8010A550[n];
+                    Sprite *o = &SUBSCREEN_MAP_AREA_SPRITES[n];
                     o->w1e = 5;
                     o->b0d = 1;
                     o->w2e = 1;
                     o->w08 = 0x7FC8;
-                    o->anim = D_800FECB8[s->id];
+                    o->anim = MAP_AREA_SPRITE_ANIMS[s->id];
                     o->d3c = D_1F8002EC;
                     o->b0f = 0;
                     o->b0a = 1;

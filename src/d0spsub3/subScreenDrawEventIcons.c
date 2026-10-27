@@ -3,40 +3,40 @@
 typedef struct { char p[0x10]; short w10; char p12[2]; short page; char p16[0x4e]; unsigned short **icons; } Menu;
 typedef struct { short x, y, dw, idx; } Slot;
 typedef struct { short x, y, w; } Text;
-extern Slot D_800FF354[];
-extern unsigned char D_800FF254[];
-extern Text D_80100B70;
-extern short D_80100B76;
-extern unsigned short *D_80100B78;
+extern Slot SUBSCREEN_EVENT_SLOTS[];
+extern unsigned char SUBSCREEN_EVENT_ORDER[];
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern short SUBSCREEN_DRAW_CLUT;
+extern unsigned short *SUBSCREEN_DRAW_FRAME;
 extern unsigned char SCRIPT_FLAGS[];
 extern void subScreenDrawSprite(int n);
 
 void subScreenDrawEventIcons(Menu *m)
 {
     Slot *s;
-    for (s = D_800FF354; s->x != -1; s++) {
+    for (s = SUBSCREEN_EVENT_SLOTS; s->x != -1; s++) {
         int id;
         short k;
-        D_80100B70.x = s->x;
-        D_80100B70.y = s->y;
-        D_80100B70.w = m->w10 + s->dw + 2;
-        id = D_800FF254[m->page * 10 + s->idx];
+        SUBSCREEN_DRAW_PARAMS.x = s->x;
+        SUBSCREEN_DRAW_PARAMS.y = s->y;
+        SUBSCREEN_DRAW_PARAMS.w = m->w10 + s->dw + 2;
+        id = SUBSCREEN_EVENT_ORDER[m->page * 10 + s->idx];
         k = id - 1;
         if (id - 1 >= 0xFF) continue;
         switch (id) {
-        case 0x57: D_80100B76 = 0x7D12; break;
-        case 0x58: D_80100B76 = 0x7D52; break;
-        case 0x59: D_80100B76 = 0x7D92; break;
-        case 0x75: D_80100B76 = 0x7DD2; break;
-        case 0x98: D_80100B76 = 0x7A93; break;
-        case 0x9E: D_80100B76 = 0x7AD3; break;
-        case 0xA0: D_80100B76 = 0x7B13; break;
-        case 0xA5: D_80100B76 = 0x7B53; break;
-        default: D_80100B76 = 0; break;
+        case 0x57: SUBSCREEN_DRAW_CLUT = 0x7D12; break;
+        case 0x58: SUBSCREEN_DRAW_CLUT = 0x7D52; break;
+        case 0x59: SUBSCREEN_DRAW_CLUT = 0x7D92; break;
+        case 0x75: SUBSCREEN_DRAW_CLUT = 0x7DD2; break;
+        case 0x98: SUBSCREEN_DRAW_CLUT = 0x7A93; break;
+        case 0x9E: SUBSCREEN_DRAW_CLUT = 0x7AD3; break;
+        case 0xA0: SUBSCREEN_DRAW_CLUT = 0x7B13; break;
+        case 0xA5: SUBSCREEN_DRAW_CLUT = 0x7B53; break;
+        default: SUBSCREEN_DRAW_CLUT = 0; break;
         }
         if (k < 0) k = 0;
         if (SCRIPT_FLAGS[k] == 0xFF) {
-            D_80100B78 = m->icons[k];
+            SUBSCREEN_DRAW_FRAME = m->icons[k];
             subScreenDrawSprite(1);
         }
     }

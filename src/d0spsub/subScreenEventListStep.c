@@ -2,10 +2,10 @@
 // MATCHING 800ee028 852
 typedef struct { unsigned char state, sub; char p2[0x10]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 extern unsigned short JOYPAD_STATE;
-extern unsigned char D_801086F0[];
+extern unsigned char SUBSCREEN_EVENT_ORDER[];
 extern unsigned char GAME_INVENTORY_SCREEN[];
-extern unsigned char D_8010A200[];
-extern unsigned char D_8010A204;
+extern unsigned char SUBSCREEN_MESSAGE_BOX[];
+extern unsigned char SUBSCREEN_MESSAGE_STATE;
 extern int subScreenMoveTabCursor(Menu *m, int a);
 extern int subScreenMoveEventCursor(Menu *m);
 extern int subScreenCountEvents(void);
@@ -91,18 +91,18 @@ int subScreenEventListStep(Menu *m)
             SfxPlay2(0x1B, 0x1C);
             m->sub = 1;
         } else if (JOYPAD_STATE & 0x4008) {
-            int k = D_801086F0[m->sel];
+            int k = SUBSCREEN_EVENT_ORDER[m->sel];
             if (GAME_INVENTORY_SCREEN[k]) {
                 subScreenOpenMessage(0, k - 1, 3);
-                D_8010A204 = 0;
+                SUBSCREEN_MESSAGE_STATE = 0;
                 SfxPlay2(10, 10);
                 m->sub++;
             }
         }
         return 0;
     case 3:
-        func_800EF538(D_8010A200, 3);
-        if (D_8010A204 == 2) m->sub = 2;
+        func_800EF538(SUBSCREEN_MESSAGE_BOX, 3);
+        if (SUBSCREEN_MESSAGE_STATE == 2) m->sub = 2;
         return 0;
     }
     return 0;

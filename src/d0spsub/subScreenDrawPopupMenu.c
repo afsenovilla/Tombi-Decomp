@@ -15,13 +15,13 @@ typedef struct { short x, y, w, attr; int img, pC, str; void *p14; } Text;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern TILE *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern Text D_8011113C;
-extern short D_8010A058, D_8010A05C, D_8010A060, D_8010A064;
-extern short D_8010A068[];
-extern short D_8010A088[];
-extern int D_80108FCC[];
-extern int *D_80109168[];
-extern char D_800FFD98[];
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern short SUBSCREEN_POPUP_CURSOR, SUBSCREEN_POPUP_COUNT, SUBSCREEN_POPUP_SUB_CURSOR, SUBSCREEN_POPUP_SUB_COUNT;
+extern short SUBSCREEN_POPUP_ENTRIES[];
+extern short SUBSCREEN_POPUP_SUB_ENTRIES[];
+extern int SUBSCREEN_POPUP_STRINGS[];
+extern int *SUBSCREEN_POPUP_SUB_STRINGS[];
+extern char SUBSCREEN_FONT[];
 extern void subScreenDrawString(int pri, int multiline);
 extern void drawBalloonFrame(L *l, int c, int tp);
 
@@ -33,13 +33,13 @@ void subScreenDrawPopupMenu(void)
     L l;
     L *lp;
     int i;
-    for (i = 0; i < D_8010A05C; i++) {
-        D_8011113C.x = 0xC;
-        D_8011113C.y = (short)(i * 16 + 0x78) - D_8010A05C * 8 + 6;
-        D_8011113C.w = 2;
-        D_8011113C.attr = 0x7C15;
-        D_8011113C.str = D_80108FCC[D_8010A068[i]];
-        D_8011113C.p14 = D_800FFD98;
+    for (i = 0; i < SUBSCREEN_POPUP_COUNT; i++) {
+        SUBSCREEN_DRAW_PARAMS.x = 0xC;
+        SUBSCREEN_DRAW_PARAMS.y = (short)(i * 16 + 0x78) - SUBSCREEN_POPUP_COUNT * 8 + 6;
+        SUBSCREEN_DRAW_PARAMS.w = 2;
+        SUBSCREEN_DRAW_PARAMS.attr = 0x7C15;
+        SUBSCREEN_DRAW_PARAMS.str = SUBSCREEN_POPUP_STRINGS[SUBSCREEN_POPUP_ENTRIES[i]];
+        SUBSCREEN_DRAW_PARAMS.p14 = SUBSCREEN_FONT;
         subScreenDrawString(1, 1);
     }
     lp = &l;
@@ -53,24 +53,24 @@ void subScreenDrawPopupMenu(void)
     T->b0 = 0;
     T->h = 0x10;
     T->code &= ~2;
-    T->y0 = (short)(D_8010A058 * 16 + 0x78) - D_8010A05C * 8 + 6;
+    T->y0 = (short)(SUBSCREEN_POPUP_CURSOR * 16 + 0x78) - SUBSCREEN_POPUP_COUNT * 8 + 6;
     *p = *T;
     addPrim(CURRENT_OT + 2, p);
     NEXT_PRIM++;
     l.m = -1;
     l.a = 8;
-    l.b = 0x78 - D_8010A05C * 8;
+    l.b = 0x78 - SUBSCREEN_POPUP_COUNT * 8;
     l.c = 0x98;
-    l.d = D_8010A05C * 16 + 0xC;
+    l.d = SUBSCREEN_POPUP_COUNT * 16 + 0xC;
     drawBalloonFrame(lp, 0, 0x14);
-    if (D_8010A060 >= 0) {
-        for (i = 0; i < D_8010A064; i++) {
-            D_8011113C.x = 0xA4;
-            D_8011113C.y = (short)(i * 16 + 0x78) - D_8010A064 * 8 + 6;
-            D_8011113C.w = 2;
-            D_8011113C.attr = 0x7C15;
-            D_8011113C.str = D_80109168[D_8010A068[D_8010A058]][D_8010A088[i]];
-            D_8011113C.p14 = D_800FFD98;
+    if (SUBSCREEN_POPUP_SUB_CURSOR >= 0) {
+        for (i = 0; i < SUBSCREEN_POPUP_SUB_COUNT; i++) {
+            SUBSCREEN_DRAW_PARAMS.x = 0xA4;
+            SUBSCREEN_DRAW_PARAMS.y = (short)(i * 16 + 0x78) - SUBSCREEN_POPUP_SUB_COUNT * 8 + 6;
+            SUBSCREEN_DRAW_PARAMS.w = 2;
+            SUBSCREEN_DRAW_PARAMS.attr = 0x7C15;
+            SUBSCREEN_DRAW_PARAMS.str = SUBSCREEN_POPUP_SUB_STRINGS[SUBSCREEN_POPUP_ENTRIES[SUBSCREEN_POPUP_CURSOR]][SUBSCREEN_POPUP_SUB_ENTRIES[i]];
+            SUBSCREEN_DRAW_PARAMS.p14 = SUBSCREEN_FONT;
             subScreenDrawString(1, 1);
         }
         p = NEXT_PRIM;
@@ -83,15 +83,15 @@ void subScreenDrawPopupMenu(void)
         T->b0 = 0;
         T->h = 0x10;
         T->code &= ~2;
-        T->y0 = (short)(D_8010A060 * 16 + 0x78) - D_8010A064 * 8 + 6;
+        T->y0 = (short)(SUBSCREEN_POPUP_SUB_CURSOR * 16 + 0x78) - SUBSCREEN_POPUP_SUB_COUNT * 8 + 6;
         *p = *T;
         addPrim(CURRENT_OT + 2, p);
         NEXT_PRIM++;
         lp->m = -1;
         lp->a = 0xA0;
-        lp->b = 0x78 - D_8010A064 * 8;
+        lp->b = 0x78 - SUBSCREEN_POPUP_SUB_COUNT * 8;
         lp->c = 0x98;
-        lp->d = D_8010A064 * 16 + 0xC;
+        lp->d = SUBSCREEN_POPUP_SUB_COUNT * 16 + 0xC;
         drawBalloonFrame(lp, 0, 0x14);
     }
 }

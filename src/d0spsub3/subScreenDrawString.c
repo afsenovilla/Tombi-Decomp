@@ -23,10 +23,10 @@ typedef struct { unsigned char u, v, w, h, flag; } Glyph;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern short D_80100B70, D_80100B72, D_80100B74;
-extern unsigned short D_80100B76;
-extern unsigned short *D_80100B80;
-extern Glyph *D_80100B84;
+extern short SUBSCREEN_DRAW_PARAMS, SUBSCREEN_DRAW_Y, SUBSCREEN_DRAW_TPAGE;
+extern unsigned short SUBSCREEN_DRAW_CLUT;
+extern unsigned short *SUBSCREEN_DRAW_STR;
+extern Glyph *SUBSCREEN_DRAW_FONT;
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
 extern DRAWENV *GetDrawEnv(DRAWENV *env);
@@ -45,10 +45,10 @@ void subScreenDrawString(int pri, int multiline)
     Glyph *gp;
     GetDrawEnv(&env);
     AddDrawMode(env.tpage, pri);
-    font = D_80100B84;
-    str = D_80100B80;
-    x = D_80100B70;
-    y = D_80100B72;
+    font = SUBSCREEN_DRAW_FONT;
+    str = SUBSCREEN_DRAW_STR;
+    x = SUBSCREEN_DRAW_PARAMS;
+    y = SUBSCREEN_DRAW_Y;
     while ((short)(c = *str++) != -1) {
         switch ((short)c) {
         case -7:
@@ -61,7 +61,7 @@ void subScreenDrawString(int pri, int multiline)
         case -3:
             if (multiline) {
                 y += 8;
-                x = D_80100B70;
+                x = SUBSCREEN_DRAW_PARAMS;
             }
             break;
         default:
@@ -91,7 +91,7 @@ void subScreenDrawString(int pri, int multiline)
             }
             s->w = g.w;
             s->h = g.h;
-            s->clut = D_80100B76;
+            s->clut = SUBSCREEN_DRAW_CLUT;
             p = NEXT_PRIM;
             *p = *s;
             addPrim(CURRENT_OT + pri, p);
@@ -99,5 +99,5 @@ void subScreenDrawString(int pri, int multiline)
             break;
         }
     }
-    AddDrawMode(D_80100B74, pri);
+    AddDrawMode(SUBSCREEN_DRAW_TPAGE, pri);
 }

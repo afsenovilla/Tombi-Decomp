@@ -3,12 +3,12 @@
 typedef struct { char p[0x10]; short w10; short mode; char p14[2]; short cursor; char p18[0x30]; int *p48; } Menu;
 typedef struct { short x, y, dw, idx; } Slot;
 typedef struct { short x, y, w, attr; int img; } Text;
-extern Slot D_8010924C[], D_801092C4[], D_80109294[], D_801092F4[];
-extern short D_80109304[][12];
-extern int D_800FE8D0[];
-extern Text D_8011113C;
-extern short D_80111142;
-extern int D_80111144;
+extern Slot SUBSCREEN_TAB_SLOTS_MAIN[], SUBSCREEN_TAB_SLOTS_MAP[], SUBSCREEN_TAB_SLOTS_MODE7[], SUBSCREEN_TAB_SLOT_MINUS2[];
+extern short SUBSCREEN_TAB_IDS[][12];
+extern int SUBSCREEN_TAB_EXTRA_FRAMES[];
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern short SUBSCREEN_DRAW_CLUT;
+extern int SUBSCREEN_DRAW_FRAME;
 extern void subScreenDrawSprite(int n);
 extern void subScreenDrawSpriteFT4(int n);
 
@@ -19,57 +19,57 @@ void subScreenDrawTabs(Menu *m)
     case 0:
     case 1:
     case 2:
-        s = D_8010924C;
+        s = SUBSCREEN_TAB_SLOTS_MAIN;
         break;
     case 3:
-        s = D_801092C4;
+        s = SUBSCREEN_TAB_SLOTS_MAP;
         break;
     case 7:
-        s = D_80109294;
+        s = SUBSCREEN_TAB_SLOTS_MODE7;
         break;
     }
     for (; s->x != -1; s++) {
         short id;
         int idx, mode;
-        D_8011113C.x = s->x;
-        D_8011113C.y = s->y;
-        D_8011113C.w = m->w10 + s->dw;
+        SUBSCREEN_DRAW_PARAMS.x = s->x;
+        SUBSCREEN_DRAW_PARAMS.y = s->y;
+        SUBSCREEN_DRAW_PARAMS.w = m->w10 + s->dw;
         mode = m->mode;
         idx = s->idx;
-        id = D_80109304[mode][idx];
+        id = SUBSCREEN_TAB_IDS[mode][idx];
         if (id != -1) {
             if (idx < 4) {
                 if (idx == m->cursor) {
-                    D_8011113C.attr = -0x6EE;
-                    D_8011113C.img = m->p48[7];
+                    SUBSCREEN_DRAW_PARAMS.attr = -0x6EE;
+                    SUBSCREEN_DRAW_PARAMS.img = m->p48[7];
                     subScreenDrawSprite(2);
-                    D_8011113C.attr = 0x7BD2;
+                    SUBSCREEN_DRAW_PARAMS.attr = 0x7BD2;
                 } else {
-                    D_8011113C.attr = 0x7912;
+                    SUBSCREEN_DRAW_PARAMS.attr = 0x7912;
                 }
             } else if (idx == m->cursor) {
-                D_8011113C.attr = 0x7F52;
+                SUBSCREEN_DRAW_PARAMS.attr = 0x7F52;
             } else if ((idx == 4 && mode == 1) || (idx == 5 && mode == 2) || (idx == 6 && mode == 0) ||
                        (idx == 7 && mode == 3) || (idx == 4 && mode == 7)) {
-                D_80111142 = 0x7F92;
+                SUBSCREEN_DRAW_CLUT = 0x7F92;
             } else {
-                D_80111142 = 0x7852;
+                SUBSCREEN_DRAW_CLUT = 0x7852;
             }
             if (s->x == -2) {
-                s = D_801092F4;
-                D_8011113C.x = s->x;
-                D_8011113C.y = s->y;
-                D_8011113C.w = m->w10 + s->dw;
-                D_8011113C.img = D_800FE8D0[0];
+                s = SUBSCREEN_TAB_SLOT_MINUS2;
+                SUBSCREEN_DRAW_PARAMS.x = s->x;
+                SUBSCREEN_DRAW_PARAMS.y = s->y;
+                SUBSCREEN_DRAW_PARAMS.w = m->w10 + s->dw;
+                SUBSCREEN_DRAW_PARAMS.img = SUBSCREEN_TAB_EXTRA_FRAMES[0];
                 subScreenDrawSpriteFT4(1);
                 s++;
-                D_8011113C.x = s->x;
-                D_8011113C.y = s->y;
-                D_8011113C.w = m->w10 + s->dw;
-                D_8011113C.img = D_800FE8D0[1];
+                SUBSCREEN_DRAW_PARAMS.x = s->x;
+                SUBSCREEN_DRAW_PARAMS.y = s->y;
+                SUBSCREEN_DRAW_PARAMS.w = m->w10 + s->dw;
+                SUBSCREEN_DRAW_PARAMS.img = SUBSCREEN_TAB_EXTRA_FRAMES[1];
                 subScreenDrawSpriteFT4(1);
             } else {
-                D_80111144 = m->p48[id];
+                SUBSCREEN_DRAW_FRAME = m->p48[id];
                 subScreenDrawSprite(1);
             }
         }

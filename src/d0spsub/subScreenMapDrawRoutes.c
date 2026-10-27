@@ -21,9 +21,9 @@ typedef struct { short type, a, b, c; } Ent;
 #define gte_stsxy(r0) __asm__ volatile ("swc2 $14, 0( %0 )" : : "r"(r0) : "memory")
 #define gte_stszotz(r0) __asm__ volatile ("mfc2 $12, $19;nop;sra $12, $12, 2;sw $12, 0( %0 )" : : "r"(r0) : "$12", "memory")
 extern unsigned short D_8009D2C4[];
-extern Ent *D_800FDA70[];
-extern short D_800FD418[][4], D_800FD41A[][4], D_800FD41C[][4];
-extern Quad D_800FE0B4[];
+extern Ent *MAP_AREA_ROUTES[];
+extern short MAP_NODES[][4], D_800FD41A[][4], D_800FD41C[][4];
+extern Quad MAP_ROUTE_STRIP_SHAPES[];
 extern POLY_F4 *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
 extern void subScreenMapDrawNode(int pos, int pri);
@@ -37,18 +37,18 @@ void subScreenMapDrawRoutes(void)
     int a, b, c;
     for (i = 0; i < 12; i++) {
         if (D_8009D2C4[i] == 0) continue;
-        e = D_800FDA70[i];
+        e = MAP_AREA_ROUTES[i];
         if (e->type == -1) continue;
         do {
             b = e->b;
-            v.x = D_800FD418[b][0]; v.y = D_800FD41A[b][0]; v.z = D_800FD41C[b][0];
+            v.x = MAP_NODES[b][0]; v.y = D_800FD41A[b][0]; v.z = D_800FD41C[b][0];
             gte_ldv0(&v);
             gte_rtps();
             gte_stsxy(&sxy0);
             switch (e->type) {
             case 0:
                 a = e->a;
-                v.x = D_800FD418[a][0]; v.y = D_800FD41A[a][0]; v.z = D_800FD41C[a][0];
+                v.x = MAP_NODES[a][0]; v.y = D_800FD41A[a][0]; v.z = D_800FD41C[a][0];
                 gte_ldv0(&v);
                 gte_rtps();
                 gte_stsxy(&sxy1);
@@ -62,13 +62,13 @@ void subScreenMapDrawRoutes(void)
                 a = e->a;
                 c = e->c;
                 b = e->b;
-                q = &D_800FE0B4[c];
-                v.x = D_800FD418[a][0]; v.y = D_800FD41A[a][0]; v.z = D_800FD41C[a][0];
+                q = &MAP_ROUTE_STRIP_SHAPES[c];
+                v.x = MAP_NODES[a][0]; v.y = D_800FD41A[a][0]; v.z = D_800FD41C[a][0];
                 gte_ldv0(&v);
                 gte_rtps();
                 gte_stsxy(&sxy1);
                 gte_stszotz(&otz);
-                v.x = D_800FD418[b][0]; v.y = D_800FD41A[b][0]; v.z = D_800FD41C[b][0];
+                v.x = MAP_NODES[b][0]; v.y = D_800FD41A[b][0]; v.z = D_800FD41C[b][0];
                 gte_ldv0(&v);
                 gte_rtps();
                 gte_stsxy(&sxy0);

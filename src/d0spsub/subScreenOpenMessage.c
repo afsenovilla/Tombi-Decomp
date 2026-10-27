@@ -1,7 +1,7 @@
 // FUNC 800ede64 452 D0SPSUB
 // MATCHING 800ede64 452
 typedef struct { short p0[4]; unsigned short off8; short pa[3]; unsigned short ids[1]; } Bank;
-extern unsigned char D_8010A200;
+extern unsigned char SUBSCREEN_MESSAGE_BOX;
 extern unsigned char D_8010A202, D_8010A20A, D_8010A20C, D_8010A20F;
 extern int D_8010A210, D_8010A214, D_8010A218;
 extern short D_8010A21E, D_8010A220, D_8010A222, D_8010A22C;
@@ -18,7 +18,7 @@ unsigned char *subScreenOpenMessage(int kind, int add, int bank)
     int off;
     unsigned char *o;
     Bank **tb;
-    do { i = 0; o = &D_8010A200; } while (0);
+    do { i = 0; o = &SUBSCREEN_MESSAGE_BOX; } while (0);
     for (; i < 4; i++) {
         if (MESSAGE_SLOTS[i][0] == -1) {
             char *b;

@@ -14,14 +14,14 @@ typedef struct { short x, y, w, attr; char p8[0xC]; void *p14; } Text;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern Slot D_800FF354[];
-extern unsigned char D_800FF254[];
-extern Text D_80100B70;
-extern int D_80100B80;
+extern Slot SUBSCREEN_EVENT_SLOTS[];
+extern unsigned char SUBSCREEN_EVENT_ORDER[];
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern int SUBSCREEN_DRAW_STR;
 extern unsigned char SCRIPT_FLAGS[];
-extern int D_800FFF28[];
-extern int D_80100234;
-extern char D_800F68FC[];
+extern int EVENT_NAME_STRINGS[];
+extern int EVENT_NAME_UNKNOWN_STRING;
+extern char SUBSCREEN_FONT[];
 extern TILE *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
 extern void subScreenDrawString(int a, int b);
@@ -31,19 +31,19 @@ void subScreenDrawEventList(Menu *m)
     TILE *S = (TILE *)0x1F800000;
     TILE *p;
     Slot *s;
-    for (s = D_800FF354; s->x != -1; s++) {
+    for (s = SUBSCREEN_EVENT_SLOTS; s->x != -1; s++) {
         int id;
         short k;
-        D_80100B70.x = s->x + 0x14;
-        D_80100B70.y = s->y - 8;
-        D_80100B70.w = m->w10 + s->dw;
-        id = D_800FF254[m->page * 10 + s->idx] - 1;
+        SUBSCREEN_DRAW_PARAMS.x = s->x + 0x14;
+        SUBSCREEN_DRAW_PARAMS.y = s->y - 8;
+        SUBSCREEN_DRAW_PARAMS.w = m->w10 + s->dw;
+        id = SUBSCREEN_EVENT_ORDER[m->page * 10 + s->idx] - 1;
         k = id;
-        if (SCRIPT_FLAGS[id] == 0 || SCRIPT_FLAGS[id] == 0xFF) D_80100B70.attr = 0x7C15;
-        else D_80100B70.attr = 0x7C55;
-        if (SCRIPT_FLAGS[k] != 0) D_80100B80 = D_800FFF28[k];
-        else D_80100B80 = D_80100234;
-        D_80100B70.p14 = D_800F68FC;
+        if (SCRIPT_FLAGS[id] == 0 || SCRIPT_FLAGS[id] == 0xFF) SUBSCREEN_DRAW_PARAMS.attr = 0x7C15;
+        else SUBSCREEN_DRAW_PARAMS.attr = 0x7C55;
+        if (SCRIPT_FLAGS[k] != 0) SUBSCREEN_DRAW_STR = EVENT_NAME_STRINGS[k];
+        else SUBSCREEN_DRAW_STR = EVENT_NAME_UNKNOWN_STRING;
+        SUBSCREEN_DRAW_PARAMS.p14 = SUBSCREEN_FONT;
         subScreenDrawString(5, 1);
         if (m->sel == m->page * 10 + s->idx) {
             S->len = 3;
@@ -54,8 +54,8 @@ void subScreenDrawEventList(Menu *m)
             S->r0 = 0;
             S->b0 = 0;
             S->code |= 2;
-            S->x0 = D_80100B70.x - 0x20;
-            S->y0 = D_80100B70.y - 1;
+            S->x0 = SUBSCREEN_DRAW_PARAMS.x - 0x20;
+            S->y0 = SUBSCREEN_DRAW_PARAMS.y - 1;
             p = NEXT_PRIM;
             *p = *S;
             addPrim(CURRENT_OT + 6, p);

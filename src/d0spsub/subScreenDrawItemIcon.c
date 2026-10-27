@@ -22,16 +22,16 @@ typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 typedef struct { unsigned short x, y; short w; } Text;
-extern Text D_8011113C;
-extern unsigned short *D_80111144;
+extern Text SUBSCREEN_DRAW_PARAMS;
+extern unsigned short *SUBSCREEN_DRAW_FRAME;
 extern char *D_1F8002D8;
 #define BANK (*(char * volatile *)&D_1F8002D8)
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern unsigned char D_80109C88[];
-extern unsigned char D_800FECE8[];
-extern Cond *D_800FFAF8[];
-extern int (*D_800FFBB0[])(int a, int b, int c);
+extern unsigned char ITEM_ICON_CLUTS[];
+extern unsigned char ITEM_CONDITION_INDEX[];
+extern Cond *ITEM_CONDITION_SCRIPTS[];
+extern int (*SUBSCREEN_COND_OPS[])(int a, int b, int c);
 extern void AddDrawMode(int a, int b);
 
 void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
@@ -50,21 +50,21 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
     S->code &= ~2;
     S->w = 0x10;
     S->h = 0x10;
-    S->x0 = D_8011113C.x;
-    S->y0 = D_8011113C.y;
+    S->x0 = SUBSCREEN_DRAW_PARAMS.x;
+    S->y0 = SUBSCREEN_DRAW_PARAMS.y;
     S->u0 = n % 15 * 16 + 8;
     S->v0 = n / 15 * 16 + 8;
-    S->clut = ((D_80109C88[n] + 0x1E0) << 6) | 0x13;
+    S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6) | 0x13;
     p = NEXT_PRIM;
     *p = *S;
     addPrim(CURRENT_OT + 5, p);
     NEXT_PRIM++;
-    AddDrawMode(D_8011113C.w, 5);
+    AddDrawMode(SUBSCREEN_DRAW_PARAMS.w, 5);
     if (flag) {
         unsigned char *e;
         unsigned short id;
         short *ent;
-        id = *D_80111144;
+        id = *SUBSCREEN_DRAW_FRAME;
         ent = (short *)BANK;
         ent += id * 2;
         *idx = id;
@@ -75,8 +75,8 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         S->g0 = 0x80;
         S->b0 = 0x80;
         S->code &= ~2;
-        S->x0 = D_8011113C.x + (signed char)e[0xE] - 4;
-        S->y0 = D_8011113C.y + (signed char)e[0xF] + 8;
+        S->x0 = SUBSCREEN_DRAW_PARAMS.x + (signed char)e[0xE] - 4;
+        S->y0 = SUBSCREEN_DRAW_PARAMS.y + (signed char)e[0xF] + 8;
         S->u0 = e[0];
         S->v0 = e[1];
         S->w = e[0xA];
@@ -86,7 +86,7 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         *p = *S;
         addPrim(CURRENT_OT + 5, p);
         NEXT_PRIM++;
-        D_8011113C.w = 0x15;
+        SUBSCREEN_DRAW_PARAMS.w = 0x15;
         AddDrawMode(0x15, 5);
     }
     if (sel) {
@@ -96,11 +96,11 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         T->g0 = 0xFF;
         T->b0 = 0;
         if (!nocheck) {
-            Cond *c = D_800FFAF8[D_800FECE8[n]];
+            Cond *c = ITEM_CONDITION_SCRIPTS[ITEM_CONDITION_INDEX[n]];
             Cond *base = c;
             int r;
             for (;;) {
-                r = D_800FFBB0[c->fn](c->a, c->b, c->c);
+                r = SUBSCREEN_COND_OPS[c->fn](c->a, c->b, c->c);
                 if (c->next == -1) break;
                 if (r) c = base + c->next;
                 else c++;
@@ -114,8 +114,8 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         T->w = 0xF0;
         T->h = 0x12;
         T->code |= 2;
-        T->x0 = D_8011113C.x - 1;
-        T->y0 = D_8011113C.y - 1;
+        T->x0 = SUBSCREEN_DRAW_PARAMS.x - 1;
+        T->y0 = SUBSCREEN_DRAW_PARAMS.y - 1;
         q = (TILE *)NEXT_PRIM;
         *q = *T;
         addPrim(CURRENT_OT + 6, q);
