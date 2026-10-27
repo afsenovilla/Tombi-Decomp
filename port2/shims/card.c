@@ -83,7 +83,8 @@ static u8 *card(int n) {
     card_loaded[n] = 1;
     {
         char dir[1024];
-        const char *d = port_save_dir ? port_save_dir : disc_dir_from(port_disc_path, dir, sizeof dir);
+        /* --save-dir, else next to the disc image, else next to the data/ folder (its parent: the exe's folder or the cwd) */
+        const char *d = port_save_dir ? port_save_dir : disc_dir_from(port_disc_path ? port_disc_path : port_data_dir, dir, sizeof dir);
         int o = 0;
         for (int i = 0; d[i] && o < 1000; i++) card_path[n][o++] = d[i];
         if (o && card_path[n][o - 1] != '/' && card_path[n][o - 1] != '\\') card_path[n][o++] = '/';

@@ -214,13 +214,38 @@ static void game_main(void) {
 }
 
 /* ------------------------------------------------------------------ command line */
-const char *port_disc_path = "game/disc/Tombi.bin";
+const char *port_disc_path = 0;         /* --disc: the disc image (default game/disc/Tombi.bin when there is no data/) */
+const char *port_data_dir = 0;          /* --data: the folder of tools/extract_data.py (default data/ next to the exe, or in the cwd) */
+/* the game data: --data DIR, else --disc IMAGE, else data/manifest.txt in the cwd or next to the executable, else
+   the default image path (docs/PORT.md "Running without the disc image") */
+static void open_game_data(const char *argv0) {
+    static char buf[1200];
+    if (port_data_dir) {
+        if (port_cd_open_data(port_data_dir) < 0) port_fatal("no data/manifest.txt in %s (run tools/extract_data.py on your disc image first)", port_data_dir);
+        return;
+    }
+    if (port_disc_path) {
+        if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);
+        return;
+    }
+    if (port_cd_open_data("data") == 0) { port_data_dir = "data"; return; }
+    {   /* next to the executable (argv[0] carries the directory when the shell did not search PATH) */
+        int n = (int)strlen(argv0);
+        while (n > 0 && argv0[n - 1] != '/' && argv0[n - 1] != '\\') n--;
+        if (n > 0 && n < (int)sizeof buf - 8) { memcpy(buf, argv0, n); strcpy(buf + n, "data"); if (port_cd_open_data(buf) == 0) { port_data_dir = buf; return; } }
+    }
+    port_disc_path = "game/disc/Tombi.bin";
+    if (port_cd_open(port_disc_path) < 0)
+        port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
+}
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
+                "  current folder or next to the executable); --disc reads the disc image itself\n"
                 "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
                 "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n", argv0);
     return 2;
@@ -234,6 +259,7 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
+        else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
         else if (!strcmp(a, "--headless")) headless = 1;
         else if (!strcmp(a, "--window")) headless = 0;
@@ -291,7 +317,7 @@ int main(int argc, char **argv) {
     }
     if (port_window) { port_window_start(); port_realtime = 1; }
     port_gpu_start();
-    if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);
+    open_game_data(argv[0]);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;

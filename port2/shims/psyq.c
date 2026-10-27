@@ -5,6 +5,8 @@
  * GTE), libcd (sector reads from the user's disc image), libspu/libsnd (silent stubs; the memory card is card.c, the MDEC is mdec.c).
  * Every function here has the name of the Psy-Q unit it replaces, so gen2.py generates no stub for it. */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #ifdef _WIN32
 #define fseeko fseeko64
@@ -492,6 +494,104 @@ static const char *cd_image_path = "(none)";
 static long long cd_image_size;
 static int cd_sector_count;
 int port_trace_cd;                     /* --trace-cd: every Setloc and read */
+
+/* ---- the data/ folder (tools/extract_data.py, docs/PORT.md "Running without the disc image"): every file of the
+   disc at its path, plus data/_disc/<lba>.raw for the sectors no file covers.  manifest.txt maps each range of
+   LBAs to a file and says how its sectors are stored: 2048 (user data only, the Form 1 files) or 2352 (raw sectors:
+   the movies, whose Form 2 audio and subheaders must survive).  A read of lba n looks its range up (bsearch over
+   the ranges, sorted by LBA) and reads the file at the sector's offset; a 2340-byte (raw) read of a 2048-stored
+   sector is synthesised (zero header and subheader, the data at +12), and a sector past the end of a file or
+   outside every range reads as zeros (logged once per request).  cd_raw is set: the St ring asks for raw
+   sectors and skips audio by submode exactly as with a raw image. */
+typedef struct { int lba, sectors, stored; unsigned bytes; char *path; FILE *fp; } CdRange;
+static CdRange *cd_ranges; static int cd_nranges;
+static char cd_data_dir[1024];
+static int cd_data;                    /* 1: reads come from the data/ folder, not from cd_fp */
+static int cd_data_open_count;
+static const char *port_data_fullpath(const char *rel) {
+    static char buf[2048];
+    snprintf(buf, sizeof buf, "%s/%s", cd_data_dir, rel);
+    return buf;
+}
+static CdRange *cd_range_of(int lba) {
+    int lo = 0, hi = cd_nranges - 1;
+    while (lo <= hi) {
+        int m = (lo + hi) / 2;
+        if (lba < cd_ranges[m].lba) hi = m - 1;
+        else if (lba >= cd_ranges[m].lba + cd_ranges[m].sectors) lo = m + 1;
+        else return &cd_ranges[m];
+    }
+    return 0;
+}
+/* at most 8 files open at a time (the game alternates between a handful: the area, the load lists, a movie) */
+static CdRange *cd_open_ranges[8]; static int cd_open_next;
+static FILE *cd_range_file(CdRange *r) {
+    if (r->fp) return r->fp;
+    CdRange *old = cd_open_ranges[cd_open_next];
+    if (old && old->fp) { fclose(old->fp); old->fp = 0; }
+    r->fp = fopen(port_data_fullpath(r->path), "rb");
+    if (!r->fp) { port_printf("[port] data: cannot open %s (os error %d)\n", port_data_fullpath(r->path), port_last_error()); return 0; }
+    cd_open_ranges[cd_open_next] = r; cd_open_next = (cd_open_next + 1) % 8;
+    cd_data_open_count++;
+    return r->fp;
+}
+int port_cd_open_data(const char *dir) {
+    snprintf(cd_data_dir, sizeof cd_data_dir, "%s", dir);
+    FILE *f = fopen(port_data_fullpath("manifest.txt"), "rb");
+    if (!f) return -1;
+    static char line[1200];
+    if (!fgets(line, sizeof line, f) || strncmp(line, "tombi-data ", 11)) {
+        port_printf("[port] data: %s is not a tombi-data manifest\n", port_data_fullpath("manifest.txt")); fclose(f); return -1;
+    }
+    int cap = 0; char sha[48] = "";
+    cd_nranges = 0;
+    while (fgets(line, sizeof line, f)) {
+        if (!strncmp(line, "sectors ", 8)) cd_sector_count = atoi(line + 8);
+        else if (!strncmp(line, "main0_sha1 ", 11)) { sscanf(line + 11, "%47s", sha); }
+        else if (!strncmp(line, "file ", 5)) {
+            int lba, n, stored; unsigned bytes; char path[1024];
+            if (sscanf(line + 5, "%d %d %d %u %1023[^\r\n]", &lba, &n, &stored, &bytes, path) != 5) continue;
+            if (stored != 2048 && stored != 2352) { port_printf("[port] data: manifest: unsupported sector size %d for %s\n", stored, path); continue; }
+            if (cd_nranges == cap) { cap = cap ? cap * 2 : 256; cd_ranges = realloc(cd_ranges, cap * sizeof *cd_ranges); }
+            CdRange *r = &cd_ranges[cd_nranges++];
+            r->lba = lba; r->sectors = n; r->stored = stored; r->bytes = bytes; r->fp = 0;
+            r->path = malloc(strlen(path) + 1); strcpy(r->path, path);
+        }
+    }
+    fclose(f);
+    /* sorted by LBA (the manifest is written sorted; make sure, bsearch depends on it) */
+    for (int i = 1; i < cd_nranges; i++) for (int j = i; j > 0 && cd_ranges[j].lba < cd_ranges[j - 1].lba; j--) {
+        CdRange t = cd_ranges[j]; cd_ranges[j] = cd_ranges[j - 1]; cd_ranges[j - 1] = t;
+    }
+    if (!cd_nranges) { port_printf("[port] data: %s lists no file\n", port_data_fullpath("manifest.txt")); return -1; }
+    cd_data = 1; cd_raw = 1; cd_image_path = cd_data_dir;
+    if (!cd_sector_count) cd_sector_count = cd_ranges[cd_nranges - 1].lba + cd_ranges[cd_nranges - 1].sectors;
+    cd_image_size = (long long)cd_sector_count * 2352;
+    port_printf("[port] data: %s (%d files, from manifest; %d sectors, MAIN0 sha1 %.8s%s)\n", cd_data_dir, cd_nranges, cd_sector_count, sha,
+                !strcmp(sha, "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc") ? "" : " NOT the PAL release SCES-01331");
+    /* self-check: EXE/MAIN0.EXE must be there (the port's own image was built from it) */
+    { FILE *m = fopen(port_data_fullpath("EXE/MAIN0.EXE"), "rb"); if (!m) port_printf("[port] warning: %s has no EXE/MAIN0.EXE\n", cd_data_dir); else fclose(m); }
+    return 0;
+}
+static int cd_data_read_sector(int lba, u8 *d, int bytes) {
+    CdRange *r = cd_range_of(lba);
+    if (!r) return -2;                                     /* outside every range */
+    long long sec = lba - r->lba;
+    if (r->stored == 2352) {
+        long long off = sec * 2352 + (bytes == 2048 ? 24 : 12);
+        if (off + bytes > (long long)r->bytes) return -2;
+        FILE *f = cd_range_file(r); if (!f) return -1;
+        return port_pread(f, d, bytes, off) == bytes ? 0 : -1;
+    }
+    /* stored as 2048-byte user data: the whole last sector exists on the disc as data + zero padding */
+    long long off = sec * 2048;
+    int avail = off >= (long long)r->bytes ? 0 : (int)((long long)r->bytes - off > 2048 ? 2048 : (long long)r->bytes - off);
+    u8 *user = bytes == 2048 ? d : d + 12;
+    if (bytes != 2048) memset(d, 0, bytes);
+    if (avail) { FILE *f = cd_range_file(r); if (!f) return -1; if (port_pread(f, user, avail, off) != avail) return -1; }
+    if (avail < 2048) memset(user + avail, 0, 2048 - avail);
+    return 0;
+}
 /* The sector size comes from the image itself: a raw (2352) image starts with the 12-byte sync
    00 FF*10 00, a cooked (2048) ISO has the primary volume descriptor "\1CD001" at 16*2048. The file size
    alone is ambiguous (an image with a trailing audio track or a cue-less multi-track dump is not a multiple
@@ -527,6 +627,20 @@ int port_cd_open(const char *path) {
 }
 int port_cd_read_sectors(int lba, int count, void *dst, int bytes) {
     u8 *d = dst;
+    if (cd_data) {
+        int holes = 0;
+        for (int i = 0; i < count; i++, d += bytes) {
+            int rc = cd_data_read_sector(lba + i, d, bytes);
+            if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes from data/%s -> %s\n", lba + i, i + 1, count, bytes,
+                                           cd_range_of(lba + i) ? cd_range_of(lba + i)->path : "(no file)", rc == 0 ? "ok" : rc == -2 ? "zeros" : "FAILED");
+            if (rc == -1) { port_printf("[port] CD read failed: lba %d, %d bytes from %s/%s (os error %d)\n", lba + i, bytes, cd_data_dir,
+                                        cd_range_of(lba + i)->path, port_last_error()); return -1; }
+            if (rc == -2) { memset(d, 0, bytes); holes++; }
+        }
+        if (holes) port_printf("[port] data: %d of %d sectors from lba %d are outside every file of the manifest (%d sectors): read as zeros\n",
+                               holes, count, lba, cd_sector_count);
+        return 0;
+    }
     if (!cd_fp) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;

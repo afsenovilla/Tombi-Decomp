@@ -97,9 +97,10 @@ extern int port_realtime, port_hz;
 
 /* CD image */
 int port_cd_open(const char *path);
+int port_cd_open_data(const char *dir);          /* data/ folder of tools/extract_data.py (manifest.txt) */
 int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
 extern int port_trace_cd;
-extern const char *port_disc_path;
+extern const char *port_disc_path, *port_data_dir;
 
 /* GPU (shims/gpu.c; the backends are in shims/gpu_backend.h: software, or OpenGL in shims/gpu_gl.c) */
 extern const char *port_dump_dir;
