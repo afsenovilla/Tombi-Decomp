@@ -269,6 +269,9 @@ def rewrite_tree(d, res, relroot):
             except OSError: continue
             rel = os.path.relpath(os.path.realpath(p), ROOT) if os.path.islink(p) else os.path.relpath(p, relroot)
             new = res.text(txt, rel)
+            # a header's asm-named declaration (camera.h: `extern ViewCamera VIEW_CAMERA asm("VIEW_CAMERA");`) needs
+            # the target's label prefix as the sources' do (Win32: _VIEW_CAMERA), or the Windows link fails
+            if f.lower().endswith(".h"): new = ASMNAME_RE.sub(r" PORT2_ASM(\1)", new)
             if new != txt:
                 if os.path.islink(p): os.remove(p)
                 open(p, "w").write(new)
