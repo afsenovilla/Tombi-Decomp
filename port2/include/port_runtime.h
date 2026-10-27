@@ -101,9 +101,11 @@ int port_cd_read_sectors(int lba, int count, void *dst, int sector_bytes);
 extern int port_trace_cd;
 extern const char *port_disc_path;
 
-/* GPU (shims/gpu.c) */
+/* GPU (shims/gpu.c; the backends are in shims/gpu_backend.h: software, or OpenGL in shims/gpu_gl.c) */
 extern const char *port_dump_dir;
 extern int port_dump_every, port_dump_vram;
+void port_gpu_start(void);                       /* after the window exists: picks the backend (--renderer soft|gl) */
+void port_gpu_stop(void);
 void port_gpu_vblank(void);
 int port_gpu_frame(unsigned char *rgb, int *w, int *h);
 
@@ -123,4 +125,7 @@ void port_window_start(void);
 void port_window_frame(const unsigned char *rgb, int w, int h);
 int port_window_poll_pad(unsigned short *out);   /* 1 when a window is open */
 void port_window_stop(void);
+int port_window_gl_start(void);                  /* OpenGL context on the window (a hidden one when headless); < 0 = none */
+void port_window_gl_size(int *w, int *h);
+void port_window_gl_swap(void);
 #endif

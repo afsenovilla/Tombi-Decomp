@@ -3,7 +3,7 @@
 #
 #   python3 tools/build_full.py -j 4                 # once: the generator takes retail addresses from it
 #   cmake -S port2 -B build/port2 -G Ninja && cmake --build build/port2 -j 8
-#   build/port2/tombi2                                # SDL2 window, paced at 50 Hz
+#   build/port2/tombi2                                # SDL2 window, paced at 50 Hz, OpenGL renderer (--renderer soft: software)
 #   build/port2/tombi2 --headless --frames 1500 --dump-frames out --pad-script 1000:start
 #   cat build/port2/gen/report.txt
 # Windows (cross-compiled with mingw-w64, docs/PORT.md "M3 phase 3"):
@@ -71,7 +71,8 @@ if(WIN32)
     message(FATAL_ERROR "-DPORT_SDL2_MINGW must name the i686-w64-mingw32 folder of the SDL2 mingw development tarball")
   endif()
   target_include_directories(port2rt PRIVATE ${PORT_SDL2_MINGW}/include)
-  set(PORT2_SDL2 -L${PORT_SDL2_MINGW}/lib -lSDL2 -lwinmm)
+  # (opengl32: the GL renderer of shims/gpu_gl.c loads every entry point through SDL_GL_GetProcAddress; no GLEW)
+  set(PORT2_SDL2 -L${PORT_SDL2_MINGW}/lib -lSDL2 -lwinmm -lopengl32)
 else()
 # SDL2 for the 32-bit build: the runtime library is enough (the headers are architecture independent)
 find_library(PORT2_SDL2 NAMES SDL2-2.0 libSDL2-2.0.so.0 PATHS /usr/lib/i386-linux-gnu /usr/lib32 NO_DEFAULT_PATH)

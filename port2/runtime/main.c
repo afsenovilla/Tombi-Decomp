@@ -65,6 +65,7 @@ void port_stub_report(void) {
 }
 void port_flush_log(void) { fflush(stderr); }
 void port_quit(int code) {
+    port_gpu_stop();
     port_window_stop();
     exit(code);
 }
@@ -216,11 +217,12 @@ static void game_main(void) {
 const char *port_disc_path = "game/disc/Tombi.bin";
 static int usage(const char *argv0) {
     port_printf("usage: %s [--disc Tombi.bin|.cue|.iso] [--frames N] [--headless] [--window [--scale N] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
-                "       [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
+                "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N]\n"
                 "       [--dump-audio PATH] [--play-movies] [--trace-cd] [--save-dir DIR] [-v]\n"
-                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n", argv0);
+                "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
+                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n", argv0);
     return 2;
 }
 int main(int argc, char **argv) {
@@ -236,6 +238,13 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--headless")) headless = 1;
         else if (!strcmp(a, "--window")) headless = 0;
         else if (!strcmp(a, "--scale") && v) port_window_scale = atoi(argv[++i]);
+        else if (!strcmp(a, "--renderer") && v) {
+            extern int port_renderer;
+            i++;
+            if (!strcmp(argv[i], "gl") || !strcmp(argv[i], "opengl")) port_renderer = 1;
+            else if (!strcmp(argv[i], "soft") || !strcmp(argv[i], "software")) port_renderer = 0;
+            else return usage(argv[0]);
+        }
         else if (!strcmp(a, "--realtime")) port_realtime = 1;
         else if (!strcmp(a, "--fullscreen")) port_window_fullscreen = 1;
         else if (!strcmp(a, "--keys") && v) port_window_keys(argv[++i]);
@@ -280,6 +289,7 @@ int main(int argc, char **argv) {
         return ((unsigned char *)port_ram)[0x1234] == 0x5A && q == -1 && co == 0 ? 0 : 3;
     }
     if (port_window) { port_window_start(); port_realtime = 1; }
+    port_gpu_start();
     if (port_cd_open(port_disc_path) < 0) port_printf("[port2] warning: no disc image at %s: CD reads will fail\n", port_disc_path);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;

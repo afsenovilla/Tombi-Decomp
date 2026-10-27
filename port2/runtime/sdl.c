@@ -1,4 +1,6 @@
-/* --window: an SDL2 window in-process.  Every vblank the GPU hands the displayed frame (RGB24, the DISPENV
+/* --window: an SDL2 window in-process.  With the OpenGL renderer (shims/gpu_gl.c, the default) the window carries a
+ * GL context and the GPU backend blits the display area itself (port_window_gl_start / _size / _swap); with the
+ * software rasteriser every vblank the GPU hands the displayed frame (RGB24, the DISPENV
  * area) to port_window_frame, which uploads it to a streaming texture; the audio device pulls the sound
  * ring (shims/sound.c) from its callback thread; the keyboard and a game controller feed port 1 of the pad.
  * Keys: arrows = d-pad, X = cross, Z = square, D = circle, S = triangle, Q/W = L1/R1, A/E = L2/R2, Return = start,
@@ -7,6 +9,7 @@
 #include <string.h>
 #include <SDL2/SDL.h>
 #include "port_runtime.h"
+#include "../shims/gpu_backend.h"
 
 int port_window;
 int port_window_scale = 2;
@@ -15,6 +18,9 @@ static SDL_Window *win;
 static SDL_Renderer *ren;
 static SDL_Texture *tex;
 static int tex_w, tex_h;
+static SDL_GLContext glctx;
+static void pump(void);
+static int win_hidden;             /* --headless --renderer gl: a hidden window carries the context */
 static SDL_AudioDeviceID dev;
 static SDL_GameController *ctrl;
 static unsigned short keys_down, ctrl_down, seen_since;
@@ -24,12 +30,22 @@ static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pu
 void port_window_start(void) {
     SDL_SetMainReady();     /* (no SDL2main on Windows: main() is the plain C one, the launcher captures stderr) */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());
+    int want_gl = port_renderer != 0;
+    if (want_gl) {        /* (the SDL_Renderer of the software path is made on first use, so a failed GL start can fall back) */
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+    }
     win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320 * port_window_scale,
-                           256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+                           256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
+                           (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+    if (!win && want_gl) {
+        port_printf("[port2] SDL_CreateWindow (OpenGL): %s; trying without\n", SDL_GetError());
+        port_renderer = 0;
+        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320 * port_window_scale,
+                               256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+    }
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
-    ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
-    if (!ren) port_fatal("SDL_CreateRenderer: %s", SDL_GetError());
     SDL_AudioSpec want, have;
     SDL_zero(want);
     want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = audio_cb;
@@ -42,8 +58,37 @@ void port_window_start(void) {
 
 void port_window_stop(void) {
     if (dev) SDL_CloseAudioDevice(dev);
+    if (glctx) SDL_GL_DeleteContext(glctx);
     if (win) SDL_Quit();
-    win = 0; dev = 0;
+    win = 0; dev = 0; glctx = 0;
+}
+
+/* the OpenGL backend (shims/gpu_gl.c): a context on the window, or on a hidden one in headless mode */
+int port_window_gl_start(void) {
+    if (!win) {
+        SDL_SetMainReady();
+        if (SDL_Init(SDL_INIT_VIDEO) < 0) { port_printf("[port2] SDL_Init (video, for OpenGL): %s\n", SDL_GetError()); return -1; }
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 64, 64, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+        if (!win) { port_printf("[port2] SDL_CreateWindow (hidden, OpenGL): %s\n", SDL_GetError()); return -1; }
+        win_hidden = 1;
+    }
+    if (!(SDL_GetWindowFlags(win) & SDL_WINDOW_OPENGL)) return -1;
+    glctx = SDL_GL_CreateContext(win);
+    if (!glctx) { port_printf("[port2] SDL_GL_CreateContext: %s\n", SDL_GetError()); return -1; }
+    SDL_GL_MakeCurrent(win, glctx);
+    if (!win_hidden) {
+        /* vsync: the swap blocks until the display's refresh; the pacing of shims/psyq.c is an absolute schedule,
+           so its sleep shrinks by what the swap took (the fps line shows it as present) */
+        if (SDL_GL_SetSwapInterval(1) < 0) port_printf("[port2] vsync not available: %s\n", SDL_GetError());
+    }
+    return 0;
+}
+void port_window_gl_size(int *w, int *h) { if (win) SDL_GL_GetDrawableSize(win, w, h); else *w = *h = 0; }
+void port_window_gl_swap(void) {
+    if (!win || win_hidden) return;
+    pump();
+    SDL_GL_SwapWindow(win);
 }
 
 enum { P_SELECT = 1, P_START = 8, P_UP = 0x10, P_RIGHT = 0x20, P_DOWN = 0x40, P_LEFT = 0x80, P_L2 = 0x100, P_R2 = 0x200,
@@ -112,6 +157,11 @@ static void pump(void) {
 void port_window_frame(const unsigned char *rgb, int w, int h) {
     if (!win) return;
     pump();
+    if (!ren) {
+        ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
+        if (!ren) port_fatal("SDL_CreateRenderer: %s", SDL_GetError());
+    }
     if (!tex || tex_w != w || tex_h != h) {
         if (tex) SDL_DestroyTexture(tex);
         tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, w, h);
