@@ -19,6 +19,7 @@ address,name,confidence,comment
 800173d8,vblankHandler,alta,psx_tomba #21 (por bytes)
 80017414,tickTaskTimers,alta,psx_tomba (por bytes)
 8001747c,setTaskEntry,alta,psx_tomba (por bytes)
+800174c0,loadImageRect,alta,LoadImage of a RECT from a buffer (game function; src/loadImageRect.c)
 800174fc,loadTIM,alta,psx_tomba (por bytes)
 800175f0,InitSubsystems,media,llama a 14 funciones de inicializacion seguidas
 80017678,resetDrawLists,alta,psx_tomba (por bytes)
@@ -107,6 +108,7 @@ address,name,confidence,comment
 8001d36c,updateMainObjects,alta,psx_tomba #21 (por bytes)
 8001d4b0,MovieDecodeFrame,alta,StGetNext + DecDCTvlc + StFreeRing (video FMV)
 8001d63c,cdSeekStream,alta,psx_tomba (por bytes)
+8001d6a4,moviePlayerTask,alta,MDEC movie player task (psx_tomba movie.c name) (game function; src/moviePlayerTask.c)
 8001d6c0,updatePauseMenu,alta,name from psx_tomba (US)
 8001d9d8,mdecSliceCallback,alta,psx_tomba #21 (por bytes)
 8001dad4,movieInitDecodeEnv,alta,psx_tomba #21 (por bytes)
@@ -125,11 +127,13 @@ address,name,confidence,comment
 8001e5f4,SfxPlay3,media,variante de SfxPlay con ids 0x8100/0x800
 8001e688,playSFXWithNoteAndVolume,alta,name from psx_tomba (US)
 8001e76c,playSFXWithPitchSlide,alta,name from psx_tomba (US)
+8001e93c,keyOnSFX,alta,SPU key-on of a sound effect voice (game function; src/keyOnSFX.c)
 8001e9e8,playSFXAndSetNote,alta,name from psx_tomba (US)
 8001eaa4,queueSfxKeyOff,alta,name from psx_tomba (US)
 8001eacc,keyOffActiveSfxVoices,alta,name from psx_tomba (US)
 8001eb64,startAreaBgm,alta,psx_tomba (por bytes)
 8001eb84,startAreaBgmWithReverb,alta,psx_tomba #24 (por bytes)
+8001eba8,adjustAreaBgmVolume,alta,area BGM volume adjust (game function; src/adjustAreaBgmVolume.c)
 8001ec80,openAreaBgm,alta,name from psx_tomba (US)
 8001eff8,startBgmTrack,alta,name from psx_tomba (US)
 8001f110,MusicStopOrFadeIn,media,param 0 = para la secuencia; otro = inicia fundido
@@ -179,6 +183,7 @@ address,name,confidence,comment
 800201ac,cullObjectToDrawListMargin,alta,"same as cullObjectToDrawList but with an x margin argument: clears visible when out of the camera x window, el"
 800202b4,ObjCullRegister,media,si el objeto esta en pantalla (ventana 0x1C1 x 0x171) marca [1]=1 y lo registra en la lista de su tipo (+0x1C&0x7F)
 800203dc,isObjectInView,alta,"returns 1 when the object is active and its position is within the camera window (1F800176/1F800186) widened b"
+80020448,isOnScreen,alta,object inside the visible screen rectangle (game function; src/isOnScreen.c)
 80020490,despawnObjectOffscreen,alta,names batch (see notes/names.md)
 8002052c,despawnObjectOffscreenMargin,alta,"same as despawnObjectOffscreen (b04=3, active=2, visible=0 when out of view) but the view margin is the second"
 800205d8,angleFromDelta,alta,name from psx_tomba (US)
@@ -309,6 +314,8 @@ address,name,confidence,comment
 8002b920,cloneItemPickupObject,alta,psx_tomba (por bytes)
 8002b9b0,updateItemGetIcon,alta,name from psx_tomba (US)
 8002be80,updateImpactEffect,alta,names batch (see notes/names.md)
+8002c058,initMsgBoxA,alta,message box init variant A (game function; src/initMsgBoxA.c)
+8002c09c,initMsgBoxB,alta,message box init variant B (game function; src/initMsgBoxB.c)
 8002c0e0,poolType12DirectionalStep,alta,behaviour name (see notes/names.md)
 8002c238,poolType12FollowPlayerStep,alta,behaviour name (see notes/names.md)
 8002c43c,updatePoolType12Object,alta,names batch (see notes/names.md)
@@ -321,11 +328,13 @@ address,name,confidence,comment
 8002cd20,spawnPlayerPoolType13Object,alta,names batch (see notes/names.md)
 8002ce64,clearTalkPose,alta,name from psx_tomba (US)
 8002dc50,showMessageBox,alta,psx_tomba (por bytes)
+8002dc88,showMessageBoxTimed,alta,message box with a frame timeout (game function; src/showMessageBoxTimed.c)
 8002dcc8,showMessageBoxDirect,alta,psx_tomba (por bytes)
 8002dcf0,showMessageBoxDirectTimed,alta,psx_tomba (por bytes)
 8002dd1c,openMessageBox,alta,name from psx_tomba (US)
 8002df70,loadMessageGlyph,alta,name from psx_tomba (US)
 8002e34c,freeMessageGlyphs,alta,name from psx_tomba (US)
+8002e414,dispatchAreaDialogInit,alta,area dialog init dispatch (game function; src/dispatchAreaDialogInit.c)
 8002e4b4,updateGrabSnout,alta,name from psx_tomba (US)
 8002e6c4,updateEventCube,alta,name from psx_tomba (US)
 8002e83c,updatePoolType31Object,alta,names batch (see notes/names.md)
@@ -399,6 +408,7 @@ address,name,confidence,comment
 800371c0,unpackSpriteFrame,alta,name from psx_tomba (US)
 80037454,fillBytesUnrolled,alta,psx_tomba #21 (por bytes)
 80037c80,uploadSpriteFrameToVram,alta,names batch (see notes/names.md)
+80037dc0,projectOriginToScreen,alta,GTE projection of the origin to screen coordinates (game function; src/projectOriginToScreen.c)
 80037e18,loadCompressedTIM,alta,psx_tomba (por bytes)
 80037e74,openScriptFile,alta,"called by initAreaScripts: checks the 0x530057 magic (prints 'Not Script File' and returns -2 otherwise), copi"
 80037fbc,scriptStart,alta,psx_tomba (por bytes)
@@ -430,6 +440,7 @@ address,name,confidence,comment
 80039580,tickAreaScript,alta,"per-frame from gameplayTick/areaMode2Tick/areaMode4Tick: in areas 0, 1, 2 and 0x13 (listed sections) runs the "
 800399c4,scriptOpSpawnObject,alta,behaviour name (see notes/names.md)
 80039c90,scriptOpSetObjField74,media,"script op: stores arg1/arg2 in object +0x74/+0x76 and calls a per-type (0x18, 0x19, 0x2e) refresh handler"
+80039d5c,scriptOpKillObject,alta,script opcode: kill object (game function; src/scriptOpKillObject.c)
 80039db8,scriptOpSetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e08,scriptOpGetPlayerPosition,alta,psx_tomba #21 (por bytes)
 80039e54,scriptOpShowMessageBox,alta,name from psx_tomba (US)
@@ -626,6 +637,7 @@ address,name,confidence,comment
 80049524,collideCat5WithCat4Objects,alta,names batch (see notes/names.md)
 8004985c,dispatchAreaEnemyDraw,alta,name from psx_tomba (US)
 800498f4,dispatchAreaNpcHandler,alta,names batch (see notes/names.md)
+80049ca4,setAnimation,alta,set an object's animation (game function; src/setAnimation.c)
 80049cdc,eventTakePlayerControlA,alta,names batch (see notes/names.md)
 8004a124,eventCarryPlayerB,alta,names batch (see notes/names.md)
 8004a4cc,eventTakePlayerControlC,alta,names batch (see notes/names.md)
@@ -735,6 +747,7 @@ address,name,confidence,comment
 8005a8a8,setEventStarted,alta,psx_tomba (por bytes)
 8005a9a4,setEventComplete,alta,psx_tomba (por bytes)
 8005aa60,getEventState,alta,psx_tomba #21 (por bytes)
+8005aa74,spawnEventTitle,alta,spawn the event title banner (game function; src/spawnEventTitle.c)
 8005b38c,acquireSpriteSlot,alta,psx_tomba #21 (por bytes)
 8005b624,printEventMessage,alta,name from psx_tomba (US)
 8005b9c4,EnterCriticalSection,alta,Psy-Q
