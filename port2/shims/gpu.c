@@ -9,6 +9,10 @@
  * writes it as PNG (a minimal stored-deflate writer below: no zlib dependency).  Carried over from port/shims/gpu.c
  * to the native-pointer port: the ordering-table links are native pointers below 16 MB (port_otaddr).
  *
+ * The rasteriser is one of two backends (gpu_backend.h): the software one below (port_gpu_soft) and the OpenGL one
+ * of gpu_gl.c (port_gpu_gl, the default with a window; --renderer soft|gl).  The decoder, VRAM, the libgpu API and
+ * the frame dumps are shared; the host-side VRAM operations tell the backend what they wrote and what they read.
+ *
  * Written for this project from the public GPU documentation (psx-spx); no emulator code is copied. */
 #include <stdio.h>
 #include <string.h>
@@ -17,6 +21,7 @@
 #include <direct.h>
 #endif
 #include "port_runtime.h"
+#include "gpu_backend.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
 typedef struct { s16 x, y, w, h; } RECT;
@@ -28,25 +33,40 @@ unsigned port_ot_signature;          /* hash of the packets of the last DrawOTag
 int port_gpu_lists(void) { return gpu_lists; }
 u16 *port_vram(void) { return &vram[0][0]; }
 
+/* ------------------------------------------------------------------ backend selection */
+const GpuBackend *port_gpu_be = &port_gpu_soft;
+int port_renderer = -1;
+static int gpu_started;
+/* after the window exists (or in headless mode): --renderer gl (the default with a window) tries OpenGL and falls
+   back to the software rasteriser when no context can be made; headless runs are software unless gl is asked for */
+void port_gpu_start(void) {
+    if (gpu_started) return;
+    gpu_started = 1;
+    int want_gl = port_renderer == 1 || (port_renderer < 0 && port_window);
+    if (want_gl && port_gpu_gl.start() == 0) port_gpu_be = &port_gpu_gl;
+    else {
+        if (want_gl) port_printf("[gpu] OpenGL renderer unavailable: using the software rasteriser\n");
+        port_gpu_be = &port_gpu_soft;
+        port_gpu_soft.start();
+    }
+    port_printf("[gpu] renderer: %s\n", port_gpu_be->name);
+}
+void port_gpu_stop(void) { if (gpu_started && port_gpu_be->stop) port_gpu_be->stop(); }
+#define be port_gpu_be
+
 /* ------------------------------------------------------------------ GPU drawing state (GP0 E1..E6) */
-static struct {
-    int tx, ty;            /* texture page base in VRAM (x multiple of 64, y 0/256) */
-    int abr;               /* semi-transparency mode 0..3 */
-    int tp;                /* texture depth: 0 = 4-bit CLUT, 1 = 8-bit CLUT, 2 = 15-bit direct */
-    int dither, dfe;
-    int twmx, twmy, twox, twoy;   /* texture window mask/offset in 8-pixel units */
-    int x1, y1, x2, y2;    /* drawing area, inclusive */
-    int ox, oy;            /* drawing offset */
-    int set_mask, check_mask;
-} gs = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1023, 511, 0, 0, 0, 0 };
+GpuState port_gs = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1023, 511, 0, 0, 0, 0 };
+#define gs port_gs
+static struct { int tx, ty, tp; } tpg;   /* texture page base in VRAM (x multiple of 64, y 0/256); depth 0 = 4-bit CLUT, 1 = 8-bit, 2 = 15-bit */
 
 static void set_drawmode(u32 w) {
-    gs.tx = (w & 15) * 64; gs.ty = ((w >> 4) & 1) * 256;
-    gs.abr = (w >> 5) & 3; gs.tp = (w >> 7) & 3; if (gs.tp == 3) gs.tp = 2;
+    tpg.tx = (w & 15) * 64; tpg.ty = ((w >> 4) & 1) * 256;
+    gs.abr = (w >> 5) & 3; tpg.tp = (w >> 7) & 3; if (tpg.tp == 3) tpg.tp = 2;
     gs.dither = (w >> 9) & 1; gs.dfe = (w >> 10) & 1;
 }
 static void set_texpage16(u32 t) { set_drawmode((gs.dither << 9) | (gs.dfe << 10) | (t & 0x1FF)); }
 
+/* ================================================================== the software backend (port_gpu_soft) */
 /* ------------------------------------------------------------------ pixel pipeline */
 static inline u16 blend(u16 bg, u16 fg, int mode) {
     int br = bg & 31, bgc = (bg >> 5) & 31, bb = (bg >> 10) & 31;
@@ -91,25 +111,21 @@ static inline u16 modulate(u16 t, int r, int g, int b) {
     if (tr > 31) tr = 31; if (tg > 31) tg = 31; if (tb > 31) tb = 31;
     return (u16)(tr | (tg << 5) | (tb << 10) | (t & 0x8000));
 }
-static void use_texture(u32 clut, u32 tpage) {
-    clut_x = (clut & 0x3F) * 16; clut_y = (clut >> 6) & 511;
-    set_texpage16(tpage);
-    tp_x = gs.tx; tp_y = gs.ty; tp_depth = gs.tp;
-}
+static void soft_use_texture(const GpuTex *t) { tp_x = t->tx; tp_y = t->ty; tp_depth = t->depth; clut_x = t->cx; clut_y = t->cy; }
 
 /* ------------------------------------------------------------------ triangles */
-typedef struct { int x, y, r, g, b, u, v; } Vtx;
+typedef GpuVtx Vtx;
 
-static void tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, int tex, int semi, int raw) {
+static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const GpuTex *texp, int semi, int raw) {
+    int tex = texp != 0;
+    if (tex) soft_use_texture(texp);
     /* edge functions on integer pixel centres, top-left fill rule */
     long long area = (long long)(b->x - a->x) * (c->y - a->y) - (long long)(c->x - a->x) * (b->y - a->y);
     if (area == 0) return;
     if (area < 0) { const Vtx *t = b; b = c; c = t; area = -area; }
-    /* the GPU drops primitives larger than 1023x511 */
     int minx = a->x, maxx = a->x, miny = a->y, maxy = a->y;
     if (b->x < minx) minx = b->x; if (b->x > maxx) maxx = b->x; if (c->x < minx) minx = c->x; if (c->x > maxx) maxx = c->x;
     if (b->y < miny) miny = b->y; if (b->y > maxy) maxy = b->y; if (c->y < miny) miny = c->y; if (c->y > maxy) maxy = c->y;
-    if (maxx - minx > 1023 || maxy - miny > 511) return;
     if (minx < gs.x1) minx = gs.x1; if (maxx > gs.x2) maxx = gs.x2;
     if (miny < gs.y1) miny = gs.y1; if (maxy > gs.y2) maxy = gs.y2;
     if (minx > maxx || miny > maxy) return;
@@ -162,7 +178,9 @@ static void tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, int tex, in
 }
 
 /* ------------------------------------------------------------------ rectangles, lines, fill, copy */
-static void rect(int x0, int y0, int w, int h, u32 col, int tex, int u0, int v0, int semi, int raw) {
+static void soft_rect(int x0, int y0, int w, int h, u32 col, const GpuTex *texp, int u0, int v0, int semi, int raw) {
+    int tex = texp != 0;
+    if (tex) soft_use_texture(texp);
     u16 flat = rgb24to15(col);
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
     for (int j = 0; j < h; j++) {
@@ -180,9 +198,8 @@ static void rect(int x0, int y0, int w, int h, u32 col, int tex, int u0, int v0,
         }
     }
 }
-static void line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, int semi) {
+static void soft_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, int semi) {
     int dx = x1 - x0, dy = y1 - y0, adx = dx < 0 ? -dx : dx, ady = dy < 0 ? -dy : dy;
-    if (adx > 1023 || ady > 511) return;
     int n = adx > ady ? adx : ady;
     for (int i = 0; i <= n; i++) {
         int x = n ? x0 + (dx * i + (dx >= 0 ? n / 2 : -n / 2)) / n : x0;
@@ -198,16 +215,43 @@ static void line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, int 
         plot(x, y, rgb24to15(c), semi);
     }
 }
+static void soft_fill(int x, int y, int w, int h, u16 c) {
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = c;
+}
+static void soft_copy(int sx, int sy, int dx, int dy, int w, int h) {
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++)
+        vram[(dy + j) & 511][(dx + i) & 1023] = vram[(sy + j) & 511][(sx + i) & 1023];
+}
+static int soft_start(void) { return 0; }
+static void soft_nop_rect(int x, int y, int w, int h) { (void)x; (void)y; (void)w; (void)h; }
+static void soft_nop(void) { }
+static int soft_present(int dx, int dy, int dw, int dh, int masked) { (void)dx; (void)dy; (void)dw; (void)dh; (void)masked; return 0; }
+const GpuBackend port_gpu_soft = { "software", soft_start, soft_nop, soft_tri, soft_rect, soft_line, soft_fill, soft_copy,
+                                   soft_nop_rect, soft_nop_rect, soft_nop, soft_present };
+
+/* ================================================================== the decoder (shared by the backends) */
 static void fill(u32 col, u32 xy, u32 wh) {
     int x = xy & 0x3F0, y = (xy >> 16) & 0x1FF, w = ((wh & 0x3FF) + 15) & ~15, h = (wh >> 16) & 0x1FF;
-    u16 c = rgb24to15(col);
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = c;
+    if (w && h) be->fill(x, y, w, h, rgb24to15(col));
 }
 static void copy(u32 s, u32 d, u32 wh) {
     int sx = s & 1023, sy = (s >> 16) & 511, dx = d & 1023, dy = (d >> 16) & 511;
     int w = ((wh & 0xFFFF) - 1) & 1023, h = (((wh >> 16) - 1) & 511); w++; h++;
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++)
-        vram[(dy + j) & 511][(dx + i) & 1023] = vram[(sy + j) & 511][(sx + i) & 1023];
+    be->copy(sx, sy, dx, dy, w, h);
+}
+/* the GPU drops polygons and lines larger than 1023x511 (the distance between any two vertices) */
+static int too_big(const Vtx *v, int n) {
+    int minx = v[0].x, maxx = v[0].x, miny = v[0].y, maxy = v[0].y;
+    for (int i = 1; i < n; i++) {
+        if (v[i].x < minx) minx = v[i].x; if (v[i].x > maxx) maxx = v[i].x;
+        if (v[i].y < miny) miny = v[i].y; if (v[i].y > maxy) maxy = v[i].y;
+    }
+    return maxx - minx > 1023 || maxy - miny > 511;
+}
+/* host-side VRAM writes (LoadImage & co.) go through here so the backend can mirror them */
+static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
+    be->vram_written(x, y, w, h);
 }
 
 /* ------------------------------------------------------------------ GP0 decoder */
@@ -224,7 +268,7 @@ static int gp0(const u32 *p, int n) {
         int nv = quad ? 4 : 3, per = 1 + (tex ? 1 : 0) + (shade ? 1 : 0);
         int need = 1 + nv * per - (shade ? 1 : 0);
         if (n < need) return 0;
-        Vtx v[4]; int k = 1; u32 clut = 0, tpage = 0;
+        Vtx v[4]; int k = 1; u32 clut = 0, tpage = 0; GpuTex t;
         for (int i = 0; i < nv; i++) {
             if (i == 0 || !shade) color(&v[i], p[0]); else color(&v[i], p[k++]);
             vertex(&v[i], p[k++]);
@@ -235,10 +279,13 @@ static int gp0(const u32 *p, int n) {
                 if (i == 1) tpage = uv >> 16;
             } else v[i].u = v[i].v = 0;
         }
-        if (tex) use_texture(clut, tpage);
+        if (tex) {
+            set_texpage16(tpage);
+            t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
+        }
         if (tex && raw) shade = 0;
-        tri(&v[0], &v[1], &v[2], shade, tex, semi, raw);
-        if (quad) tri(&v[1], &v[2], &v[3], shade, tex, semi, raw);
+        if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
+        if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
         return need;
     }
     if (cmd >= 0x40 && cmd < 0x60) {                         /* line / polyline */
@@ -252,7 +299,8 @@ static int gp0(const u32 *p, int n) {
             if (k >= n) break;
             if (poly && (p[k] & 0xF000F000u) == 0x50005000u) break;
             vertex(&b, p[k++]);
-            line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
+            if (!(b.x - a.x > 1023 || a.x - b.x > 1023 || b.y - a.y > 511 || a.y - b.y > 511))
+                be->line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
             a = b; c0 = c1;
             if (!poly) break;
         }
@@ -263,15 +311,15 @@ static int gp0(const u32 *p, int n) {
         int need = 2 + (tex ? 1 : 0) + (size == 0 ? 1 : 0);
         if (n < need) return 0;
         Vtx a; vertex(&a, p[1]);
-        int k = 2, u = 0, v = 0, w, h;
+        int k = 2, u = 0, v = 0, w, h; GpuTex t;
         if (tex) {
             u32 uv = p[k++]; u = uv & 255; v = (uv >> 8) & 255;
-            clut_x = ((uv >> 16) & 0x3F) * 16; clut_y = (uv >> 22) & 511;
-            tp_x = gs.tx; tp_y = gs.ty; tp_depth = gs.tp;
+            t.cx = ((uv >> 16) & 0x3F) * 16; t.cy = (uv >> 22) & 511;
+            t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp;
         }
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
-        rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex, u, v, semi, raw);
+        if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
         return need;
     }
     switch (cmd) {
@@ -290,6 +338,7 @@ static int gp0(const u32 *p, int n) {
         int x = p[1] & 1023, y = (p[1] >> 16) & 511, w = p[2] & 0xFFFF, h = p[2] >> 16, i = 0;
         const u16 *s = (const u16 *)(p + 3); int avail = (n - 3) * 2;
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
+        if (w && h) be->vram_written(x, y, w, h);
         return n;
     }
     if (cmd >= 0xC0 && cmd < 0xE0) return n;                 /* VRAM -> CPU: nothing to do */
@@ -328,10 +377,8 @@ void *PutDrawEnv(void *env) {
     gs.twmx = (-tw->w & 0xFF) >> 3; gs.twmy = (-tw->h & 0xFF) >> 3; gs.twox = (tw->x >> 3) & 31; gs.twoy = (tw->y >> 3) & 31;
     if (!tw->w) gs.twmx = 0; if (!tw->h) gs.twmy = 0;
     set_drawmode((*(u16 *)(e + 20) & 0x9FF) | (e[22] ? 0x200 : 0) | (e[23] ? 0x400 : 0));
-    if (e[24]) {                                         /* isbg: clear the drawing area */
-        u16 c = rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16));
-        for (int y = gs.y1; y <= gs.y2; y++) for (int x = gs.x1; x <= gs.x2; x++) vram[y][x] = c;
-    }
+    if (e[24] && gs.x2 >= gs.x1 && gs.y2 >= gs.y1)      /* isbg: clear the drawing area */
+        be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16)));
     return env;
 }
 void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); return env; }
@@ -372,18 +419,19 @@ static void tex_patch_apply(int x, int y, int w, int h) {
     for (int i = 0; i < n_tex_patches; i++) {
         int px = tex_patches[i].x, py = tex_patches[i].y, pw = tex_patches[i].w, ph = tex_patches[i].h;
         if (px >= x + w || px + pw <= x || py >= y + h || py + ph <= y) continue;
-        const u16 *d = tex_patches[i].data;
-        for (int j = 0; j < ph; j++) for (int k = 0; k < pw; k++) vram[(py + j) & 511][(px + k) & 1023] = *d++;
+        vram_write_rect(px, py, pw, ph, tex_patches[i].data);
     }
 }
 int LoadImage(RECT *r, u32 *p) {
-    u16 *s = (u16 *)p;
-    for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) vram[(r->y + j) & 511][(r->x + i) & 1023] = *s++;
+    if (r->w <= 0 || r->h <= 0) return 0;
+    vram_write_rect(r->x, r->y, r->w, r->h, (const u16 *)p);
     tex_patch_apply(r->x, r->y, r->w, r->h);
     return 0;
 }
 int StoreImage(RECT *r, u32 *p) {
     u16 *d = (u16 *)p;
+    if (r->w <= 0 || r->h <= 0) return 0;
+    be->vram_read(r->x, r->y, r->w, r->h);
     for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) *d++ = vram[(r->y + j) & 511][(r->x + i) & 1023];
     return 0;
 }
@@ -399,13 +447,14 @@ u16 LoadClut2(u32 *clut, int x, int y) {
     return (u16)((y << 6) | ((x >> 4) & 0x3F));
 }
 int MoveImage(RECT *r, int x, int y) {
-    for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++)
-        vram[(y + j) & 511][(x + i) & 1023] = vram[(r->y + j) & 511][(r->x + i) & 1023];
+    if (r->w <= 0 || r->h <= 0) return 0;
+    be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     return 0;
 }
 int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
-    for (int j = 0; j < r->h; j++) for (int i = 0; i < r->w; i++) vram[(r->y + j) & 511][(r->x + i) & 1023] = c;
+    if (r->w <= 0 || r->h <= 0) return 0;
+    be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
 }
 int ClearImage2(RECT *r, u8 R, u8 G, u8 B) { return ClearImage(r, R, G, B); }
@@ -444,11 +493,12 @@ void DrawOTag(u32 *ot) {
     }
     gpu_prims += n;
     port_ot_signature = h * 31u + (unsigned)n;
+    be->list_end();
     port_prof_draw_us += port_time_us() - t0;
     if (port_verbose > 1) port_printf("[port] DrawOTag %p: %d packets\n", ot, n);
 }
 void DrawOTagEnv(u32 *ot, void *env) { PutDrawEnv(env); DrawOTag(ot); }
-void DrawPrim(void *p) { u32 *w = p; if (w[0] >> 24) packet(w + 1, w[0] >> 24); }
+void DrawPrim(void *p) { u32 *w = p; if (w[0] >> 24) { packet(w + 1, w[0] >> 24); be->list_end(); } }
 
 /* libgpu helpers that are not in LIB_KEEP (their Psy-Q C ports clash with the shared headers) */
 u32 get_mode(int dfe, int dtd, u16 tpage) {
@@ -525,6 +575,7 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
     int rgb24 = cur_dispenv[0x11];
     int W = d->w > 0 ? d->w : 320, H = d->h > 0 ? d->h : 240;
     if (W > 1024) W = 1024; if (H > 512) H = 512;
+    if (disp_mask) be->vram_read(d->x & 1023, d->y & 511, rgb24 ? W * 3 / 2 : W, H);
     for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) {
         u8 *o = rgb + (y * W + x) * 3;
         if (!disp_mask) { o[0] = o[1] = o[2] = 0; continue; }
@@ -544,9 +595,14 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
 void port_gpu_vblank(void) {
     if (port_window) {
-        int w, h;
-        port_gpu_frame(frame_rgb, &w, &h);
-        port_window_frame(frame_rgb, w, h);
+        RECT *d = (RECT *)cur_dispenv;
+        int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
+        if (w > 1024) w = 1024; if (h > 512) h = 512;
+        /* the GL backend blits the display area itself; the software one (and 24-bit mode) goes through RGB24 */
+        if (cur_dispenv[0x11] || !be->present(d->x & 1023, d->y & 511, w, h, !disp_mask)) {
+            port_gpu_frame(frame_rgb, &w, &h);
+            port_window_frame(frame_rgb, w, h);
+        }
     }
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
 #ifdef _WIN32
@@ -559,6 +615,7 @@ void port_gpu_vblank(void) {
     path_for(path, "frame_");
     if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
     if (port_dump_vram) {
+        be->vram_read(0, 0, 1024, 512);
         for (int y = 0; y < 512; y++) for (int x = 0; x < 1024; x++) {
             u16 c = vram[y][x]; u8 *o = frame_rgb + (y * 1024 + x) * 3;
             o[0] = (c & 31) << 3; o[1] = ((c >> 5) & 31) << 3; o[2] = ((c >> 10) & 31) << 3;
