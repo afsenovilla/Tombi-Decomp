@@ -6,7 +6,7 @@ extern unsigned char DAT_8009c990;
 extern unsigned char DAT_8009cf06;
 extern unsigned char DAT_8009d006;
 extern TObj *PLAYER_EXT;
-extern unsigned short DAT_80115468[][10];
+extern unsigned short PLAYER_MOVE_PARAMS_JUMP_RISE_VEL[][10];
 
 void playerSetJumpRiseVelocity(TObj *o)
 {
@@ -20,10 +20,10 @@ void playerSetJumpRiseVelocity(TObj *o)
         u = 8;
     switch ((unsigned short)PLAYER_EXT->timer) {
     case 0 ... 12:
-        o->velY = DAT_80115468[u][2];
+        o->velY = PLAYER_MOVE_PARAMS_JUMP_RISE_VEL[u][2];
         break;
     case 13:
-        o->velY = DAT_80115468[u][1];
+        o->velY = PLAYER_MOVE_PARAMS_JUMP_RISE_VEL[u][1];
         break;
     }
 }

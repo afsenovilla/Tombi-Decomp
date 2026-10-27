@@ -8,7 +8,7 @@
    so the tails differ and are not merged. The sum into a function-scope `t` (global pseudo, also used
    in the tail) keeps `addu v1,v0,v1` (velX first, result in s's register). */
 #include "TOBJ.H"
-extern short DAT_8013c984[];
+extern short TREASURE_CHEST_TOSS_VELX_BY_ANGLE[];
 extern short DAT_8007a1f0[], COS_TABLE[];
 
 void treasureChestTossMove(TObj *o)
@@ -25,7 +25,7 @@ void treasureChestTossMove(TObj *o)
         o->w78 = ((o->d38 + 0x800) & 0xfff) >> 4;
         if (o->w78 > 0x80) o->w78 = 0x80;
         o->velY = 0x100;
-        r = DAT_8013c984[(unsigned)(o->w78 - 0x40) >> 3 & 0xf];
+        r = TREASURE_CHEST_TOSS_VELX_BY_ANGLE[(unsigned)(o->w78 - 0x40) >> 3 & 0xf];
         s = r;
         if (r == 0) {
             s = -4;

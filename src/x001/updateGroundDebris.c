@@ -13,7 +13,7 @@ extern char D_8013E88C[];
 static void *DAT_8013e584[4] = {
     D_8013E874, D_8013E87C, D_8013E884, D_8013E88C,
 };
-extern void *DAT_8012e02c[];
+extern void *GROUND_DEBRIS_ANIMS_AREA9[];
 extern short GROUND_DEBRIS_RAND_VEL_H[];
 extern short GROUND_DEBRIS_RAND_VEL_V[];
 extern TObj *FUN_80018448(void);
@@ -65,7 +65,7 @@ void updateGroundDebris(TObj *o)
                 o->anim = DAT_8013e584[o->wac];
             } else if (GAME == 9) {
                 o->w1e = 9;
-                o->anim = DAT_8012e02c[o->wac];
+                o->anim = GROUND_DEBRIS_ANIMS_AREA9[o->wac];
             }
             o->d3c = DAT_1f8002d4[0];
             switch (o->b0c) {

@@ -4,7 +4,7 @@
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char MOVE_TABLE_1[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
-extern unsigned char D_80138FA8[];
+extern unsigned char KOMA_PIG_RAND_TABLE_FIRST[];
 extern unsigned char KOMA_PIG_RAND_TABLE[];
 extern unsigned short *D_8013A19C[], *D_8013A1A0[];
 extern void ObjSetFacingToPlayer(TObj *);
@@ -146,7 +146,7 @@ void komaPigState2(TObj *o)
         enemyProbeGround(o);
         c = x->b01;
         if (c != 2) {
-            t = D_80138FA8;
+            t = KOMA_PIG_RAND_TABLE_FIRST;
             if (c != 0) t = KOMA_PIG_RAND_TABLE;
             if (t[FUN_8001f9e0() & 0xf] == 0) goto ok;
         }

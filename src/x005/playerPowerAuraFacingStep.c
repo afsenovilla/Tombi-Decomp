@@ -6,7 +6,7 @@ typedef struct O { unsigned char b0, b1, b2, b3, b4, b5, state, b7; char p0[4]; 
   short *h; short *d; char p5[0x6b-0x48]; unsigned char b6b; char p6[0xa5-0x6c]; unsigned char ba5; } O;
 extern void FUN_8001fe6c(O *);
 extern void FUN_8001fec0(O *);
-extern T DAT_8011592c[];
+extern T PLAYER_POWER_AURA_DEFS_ANIMS[];
 extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH[];
 extern unsigned short PLAYER_ANIM_FRAME, PLAYER_Y[];
 extern short *PLAYER_H;
@@ -19,7 +19,7 @@ void playerPowerAuraFacingStep(O *o)
     unsigned char c;
     switch (o->state) {
     case 0:
-        o->anim = DAT_8011592c[o->b3].p[o->bc];
+        o->anim = PLAYER_POWER_AURA_DEFS_ANIMS[o->b3].p[o->bc];
         FUN_8001fe6c(o);
         o->timer = 0xb4;
         o->ba5 = 1;

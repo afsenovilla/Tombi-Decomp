@@ -11,7 +11,7 @@ typedef struct O {
 } O;
 typedef struct G { char p0[0x20]; unsigned short w20; } G;
 extern G *PLAYER_EXT;
-extern T D_80115466[];
+extern T PLAYER_MOVE_PARAMS_GRAVITY[];
 
 static __inline__ int getk(O *o)
 {
@@ -33,14 +33,14 @@ void ObjGravityStep(O *o)
     k = getk(o);
     switch (PLAYER_EXT->w20) {
     case 0 ... 12:
-        o->w7e += D_80115466[k].inc;
+        o->w7e += PLAYER_MOVE_PARAMS_GRAVITY[k].inc;
         break;
     default:
-        o->w7e += D_80115466[k].inc - (a >> 7) - 8;
+        o->w7e += PLAYER_MOVE_PARAMS_GRAVITY[k].inc - (a >> 7) - 8;
         break;
     }
-    if (D_80115466[k].lim < o->w7e)
-        o->w7e = D_80115466[k].lim;
-    if (o->w7e < -D_80115466[k].lim)
-        o->w7e = -D_80115466[k].lim;
+    if (PLAYER_MOVE_PARAMS_GRAVITY[k].lim < o->w7e)
+        o->w7e = PLAYER_MOVE_PARAMS_GRAVITY[k].lim;
+    if (o->w7e < -PLAYER_MOVE_PARAMS_GRAVITY[k].lim)
+        o->w7e = -PLAYER_MOVE_PARAMS_GRAVITY[k].lim;
 }

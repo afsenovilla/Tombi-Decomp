@@ -9,8 +9,8 @@ extern Stage DAT_8009c960c; /* debt: second name; with one name CSE (follow-jump
 extern unsigned char DAT_8009cf9d;
 extern int DAT_1f8002e0[];
 extern int DAT_1f8002d4[];
-extern unsigned char DAT_80115a54[];
-extern unsigned char DAT_80115a18[];
+extern unsigned char TREASURE_CHEST_TPAGE_A1_EARLY[];
+extern unsigned char TREASURE_CHEST_TPAGE_BY_AREA_VARIANT[];
 extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
 extern void **TREASURE_CHEST_ANIM_SETS[];
 extern void treasureChestInitStatic();
@@ -61,13 +61,13 @@ void updateTreasureChest(TObj *o)
             o->d3c = DAT_1f8002e0[0];
         } else {
             if (GAME.h.a == 1 && GAME.h.b < 2)
-                o->w1e = DAT_80115a54[o->b0c & 0x7f];
+                o->w1e = TREASURE_CHEST_TPAGE_A1_EARLY[o->b0c & 0x7f];
             else
                 {
                 /* debt: register asm; local-alloc otherwise gives the earlier-born index $2 */
                 register int i asm("$3");
                 i = o->b0c & 0x7f;
-                o->w1e = DAT_80115a18[GAME.h.a * 4 + i];
+                o->w1e = TREASURE_CHEST_TPAGE_BY_AREA_VARIANT[GAME.h.a * 4 + i];
             }
             o->d3c = DAT_1f8002d4[0];
         }

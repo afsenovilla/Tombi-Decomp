@@ -4,8 +4,8 @@
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { short t; unsigned short x, y, z; } E;
-extern int D_8013B0E0;
-extern int D_80134DC4;
+extern int A00_ITEM_OBJ_ANIM_SUBTYPE0;
+extern int A00_ITEM_OBJ_ANIM_SUBTYPE1;
 extern unsigned short A00_ITEM_OBJ_PATH_START[];
 extern E A00_ITEM_OBJ_PATH_NODES[];
 extern void AnimLoadDuration(TObj *o);
@@ -29,12 +29,12 @@ void updateA00ItemObj(TObj *o)
             o->w1e = 0xb;
             o->b0d = 1;
             o->w08 = 0x79cf;
-            *(int *)&o->anim = D_8013B0E0;
+            *(int *)&o->anim = A00_ITEM_OBJ_ANIM_SUBTYPE0;
             goto common;
         case 1:
             o->b0d = 0;
             o->w1e = 8;
-            *(int *)&o->anim = D_80134DC4;
+            *(int *)&o->anim = A00_ITEM_OBJ_ANIM_SUBTYPE1;
         common:
             o->d3c = SPAD.i2d4;
             break;

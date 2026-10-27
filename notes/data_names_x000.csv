@@ -96,3 +96,20 @@ address,name,size,source
 800e98b0,PLAYER_SPIN_AIM_ANGLES_B0,0x12,usage: first of the three 9-short angle tables of playerSpinAimDir8B refs=3
 800e98c4,PLAYER_SPIN_AIM_ANGLES_B1,0x12,usage: second angle table of playerSpinAimDir8B refs=3
 800e98d8,PLAYER_SPIN_AIM_ANGLES_B2,0x12,usage: third angle table of playerSpinAimDir8B refs=3
+80114c24,WEAPON_TRAIL_DEFS_ANIMS,,usage: field view of WEAPON_TRAIL_DEFS +4 (the anims pointer of each subtype row; weaponTrailFollowStep / OrbitStep take *anims[subtype]) refs=2
+80115466,PLAYER_MOVE_PARAMS_GRAVITY,,usage: field view of PLAYER_MOVE_PARAMS +0xa: {short inc; short lim} per speed class (ObjGravityStep / playerSpinReleaseSpeedKind add inc to w7e and clamp to +-lim) refs=2
+80115468,PLAYER_MOVE_PARAMS_JUMP_RISE_VEL,,usage: field view of PLAYER_MOVE_PARAMS +0xc as u16[9][10]: [u][2] (row +0x10) is velY while the jump timer is 0..12 and [u][1] (row +0xe) at 13 (playerSetJumpRiseVelocity) refs=1
+80115268,PLAYER_ROPE_SWING_AMPLITUDES,,usage: short pairs per swing level wb2; [0] is the amplitude of the swing angle d88 = FUN_8001fe3c(d84 phase, amp) (playerStepRopeSwing) refs=1
+8011592c,PLAYER_POWER_AURA_DEFS_ANIMS,,usage: field view of PLAYER_POWER_AURA_DEFS +8 (the anims pointer; playerPowerAuraFacingStep takes anims[b3].p[bc]) refs=1
+80115a18,TREASURE_CHEST_TPAGE_BY_AREA_VARIANT,0x3c,usage: u8 texture page (w1e) per area*4 + chest variant (b0c & 0x7f) set by updateTreasureChest refs=1
+80115a54,TREASURE_CHEST_TPAGE_A1_EARLY,0x4,usage: u8 texture page per chest variant used instead in area 1 sections 0..1 (updateTreasureChest) refs=1
+80115df0,SCRIPT_ACTOR_DEFS_ANIMS,,usage: field view of SCRIPT_ACTOR_DEFS +0xc (the anims pointer of each subtype row; objSetAnimFromSubtypeTable takes anims[st][a]) refs=1
+8013c984,TREASURE_CHEST_TOSS_VELX_BY_ANGLE,0x20,usage: short[16] velX kick by toss angle ((w78 - 0x40) >> 3 & 0xf) when the chest is thrown (treasureChestTossMove) refs=1
+80138fa8,KOMA_PIG_RAND_TABLE_FIRST,0x10,usage: u8[16] looked up with Rand & 0xf on the first pass (b01 == 0) of komaPigState2 substep 6; the later passes use KOMA_PIG_RAND_TABLE refs=1
+80138fc8,KOMA_PIG_RAND_ANIM_TABLE,0x10,usage: u8[16] anim index (wac into KOMA_PIG_ANIMS) picked with Rand & 0xf by komaPigState0 refs=1
+80139260,RED_BIRD_RAND_FRAME_TABLE,0x20,usage: short[16] looked up with Rand & 0xf by redBirdStep3 (0 -> animFrame 1; 1 -> animFrame 0; 2 -> stay) refs=1
+801386a0,A00_POOL_TYPE24_DRAW_DEPTH,0x8,usage: short OT depth per subtype (plus w74 * 0x20) passed to cullObjectToDrawList by updateA00PoolType24 refs=1
+8013e584,GROUND_DEBRIS_ANIMS_AREA1_7,,usage: anim pointer per wac for areas 1 / 7 (updateGroundDebris; area 0 uses DAT_8013b1a4) refs=1
+8012e02c,GROUND_DEBRIS_ANIMS_AREA9,,usage: anim pointer per wac for area 9 (updateGroundDebris) refs=1
+8013b0e0,A00_ITEM_OBJ_ANIM_SUBTYPE0,,usage: the anim of updateA00ItemObj subtype 0 (tpage 0xb) refs=1
+80134dc4,A00_ITEM_OBJ_ANIM_SUBTYPE1,,usage: the anim of updateA00ItemObj subtype 1 (tpage 8) refs=1

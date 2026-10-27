@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short A00_POOL_TYPE24_CLUT_X[];
 extern short A00_POOL_TYPE24_CLUT_Y[];
-extern unsigned short DAT_801386a0[];
+extern unsigned short A00_POOL_TYPE24_DRAW_DEPTH[];
 extern char D_8013BF48[];
 extern char D_8013BF4C[];
 extern char D_8013BF50[];
@@ -49,7 +49,7 @@ void updateA00PoolType24(TObj *o)
             o->d8c = (unsigned char)(((int)(v - 7) * -0x20) / 8);
         break;
     case 1:
-        cullObjectToDrawList(o, (short)(DAT_801386a0[o->subtype] + o->w74 * 0x20));
+        cullObjectToDrawList(o, (short)(A00_POOL_TYPE24_DRAW_DEPTH[o->subtype] + o->w74 * 0x20));
         break;
     case 2:
         break;

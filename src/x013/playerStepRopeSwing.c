@@ -13,7 +13,7 @@ extern P *PLAYER_EXT;
 extern int BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern short DAT_80115268[][2];
+extern short PLAYER_ROPE_SWING_AMPLITUDES[][2];
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short JOYPAD_STATE;
 extern void FUN_8001e5f4(int, int);
@@ -190,7 +190,7 @@ void playerStepRopeSwing(TObj *o)
         p = PLAYER_EXT;
         if (p->b0a == 0) {
             f = 0;
-            o->d88 = (short)FUN_8001fe3c((unsigned char)o->d84, DAT_80115268[o->wb2][0]);
+            o->d88 = (short)FUN_8001fe3c((unsigned char)o->d84, PLAYER_ROPE_SWING_AMPLITUDES[o->wb2][0]);
             o->h->p.whole = FUN_8001fe3c((o->d88 + 0xc0) & 0xff, o->wb4) + o->d30;
             o->y.p.whole = FUN_8001fe0c((o->d88 + 0xc0) & 0xff, o->wb4) + o->d34;
             objCollideSideWalls(o);

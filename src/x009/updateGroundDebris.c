@@ -6,7 +6,7 @@ extern unsigned short TICK_COUNT;
 extern int UPDATE_OBJECT_INDEX;
 extern int DAT_1f8002d4[];
 extern void *DAT_8013b1a4[];
-extern void *DAT_8013e584[];
+extern void *GROUND_DEBRIS_ANIMS_AREA1_7[];
 extern char D_8012E65C[];
 extern char D_8012E664[];
 extern char D_8012E66C[];
@@ -62,7 +62,7 @@ void updateGroundDebris(TObj *o)
                 o->anim = DAT_8013b1a4[o->wac];
             } else if (GAME == 1 || GAME == 7) {
                 o->w1e = 8;
-                o->anim = DAT_8013e584[o->wac];
+                o->anim = GROUND_DEBRIS_ANIMS_AREA1_7[o->wac];
             } else if (GAME == 9) {
                 o->w1e = 9;
                 o->anim = DAT_8012e02c[o->wac];
@@ -129,7 +129,7 @@ void updateGroundDebris(TObj *o)
             *(signed char *)&o->b0f = -12;
             o->b0d = 0;
             o->w1e = 8;
-            o->anim = DAT_8013e584[o->wac];
+            o->anim = GROUND_DEBRIS_ANIMS_AREA1_7[o->wac];
             o->d3c = DAT_1f8002d4[0];
             o->b0a = 2;
             o->d8c = (FUN_8001f9e0() & 3) << 4;

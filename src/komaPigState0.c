@@ -4,7 +4,7 @@
 typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char MOVE_TABLE_1[];
 extern unsigned char KOMA_PIG_RAND_TABLE[];
-extern unsigned char D_80138FC8[];
+extern unsigned char KOMA_PIG_RAND_ANIM_TABLE[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *KOMA_PIG_ANIMS_B[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 */
 extern unsigned short *KOMA_PIG_ANIMS[], *D_8013A178[], *D_8013A17C[], *D_8013A188[], *D_8013A200[];
@@ -94,7 +94,7 @@ void komaPigState0(TObj *o)
         x->b1 = c + 1;
         o->substep++;
         x->b0 = 0;
-        m = D_80138FC8[FUN_8001f9e0() & 0xf];
+        m = KOMA_PIG_RAND_ANIM_TABLE[FUN_8001f9e0() & 0xf];
         o->wac = m;
         a = KOMA_PIG_ANIMS_B[m];
         goto common;

@@ -2194,3 +2194,16 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   TUNNEL_ACTOR_SPAWN_RECORDS (800EEF30). Game over: GAMEOVER_LETTER_TARGET_X / Y and START_X / Y (800E8C94 / CA4 / CB4 / CC4, the
   per-letter slots of gameOverLetterFlyIn / LetterStep). With this every overlay-range symbol of I0NFO, I0NFO3 and G0OVER with
   a clear role is named; what remains there are the field aliases (800EE8A4, 800EED84).
+- X000 data round 2, batch 1 (Oct 27 2026): 17 rows in notes/data_names_x000.csv, the field views of the named def tables and the
+  small per-object tables whose use the code pins: WEAPON_TRAIL_DEFS_ANIMS (80114C24 = +4), PLAYER_MOVE_PARAMS_GRAVITY (80115466 =
+  +0xa, {inc; lim} of ObjGravityStep / playerSpinReleaseSpeedKind) and PLAYER_MOVE_PARAMS_JUMP_RISE_VEL (80115468 = +0xc, the rise
+  velY of playerSetJumpRiseVelocity), PLAYER_POWER_AURA_DEFS_ANIMS (8011592C = +8), SCRIPT_ACTOR_DEFS_ANIMS (80115DF0 = +0xc),
+  PLAYER_ROPE_SWING_AMPLITUDES (80115268, per swing level wb2), TREASURE_CHEST_TPAGE_BY_AREA_VARIANT / _A1_EARLY (80115A18 / A54:
+  w1e is the sprite tpage every drawObjectSprite* adds to the prim), TREASURE_CHEST_TOSS_VELX_BY_ANGLE (8013C984),
+  KOMA_PIG_RAND_TABLE_FIRST (80138FA8, komaPigState2 first pass) and KOMA_PIG_RAND_ANIM_TABLE (80138FC8, komaPigState0),
+  RED_BIRD_RAND_FRAME_TABLE (80139260, the short[16] after RED_BIRD_RAND_STATE_TABLE), A00_POOL_TYPE24_DRAW_DEPTH (801386A0),
+  GROUND_DEBRIS_ANIMS_AREA1_7 / _AREA9 (8013E584 / 8012E02C), A00_ITEM_OBJ_ANIM_SUBTYPE0 / 1 (8013B0E0 / 80134DC4). The 160 or so
+  overlay symbols still spelled by address are the animation scripts themselves (char D_xxx[] byte data), the elements of the named
+  animation pointer tables (KOMA_PIG_ANIMS, NPC_CHARLES_ANIMS, RED_BIRD_ANIMS, A00_L4_TYPE18_ANIMS, ...) whose code picks an index
+  without a state name to pin it, and the untyped tables of updateA00L4Type01 / updateA00L4Type0A / updateA00SporeBranch /
+  func_8011C804, whose meaning the code does not make clear.

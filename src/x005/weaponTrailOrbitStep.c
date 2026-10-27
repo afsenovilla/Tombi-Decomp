@@ -2,7 +2,7 @@
 // MATCHING 800ebf68 1040
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
-extern T12 DAT_80114c24[];
+extern T12 WEAPON_TRAIL_DEFS_ANIMS[];
 extern unsigned char PLAYER_VISIBLE;
 extern unsigned char DAT_800a6047a[];
 #define DAT_800a6047 DAT_800a6047a[0]
@@ -28,7 +28,7 @@ void weaponTrailOrbitStep(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->anim = *DAT_80114c24[o->subtype].p;
+        o->anim = *WEAPON_TRAIL_DEFS_ANIMS[o->subtype].p;
         FUN_8001fe6c(o);
         o->visible = PLAYER_VISIBLE;
         o->b0f = DAT_800a6047 - 1;
