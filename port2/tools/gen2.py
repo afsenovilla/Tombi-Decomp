@@ -195,6 +195,7 @@ class Resolver:
         self.unresolved = []      # (file, line, literal, why)
         self.labels = []          # (file, line, literal, function): addresses inside natively compiled functions
         self.constants = 0        # 0x803Cxxxx and round 0x80NN0000 values: not addresses
+        self.constant_list = []   # (file, line, literal) of the round ones inside RAM (audit_pointers.py checks them)
         self.by_sym = {}
 
     def text(self, txt, path):
@@ -215,7 +216,9 @@ class Resolver:
                     out.append(txt[pos:m.start()]); out.append("0u /* PORT: KSEG0 */"); pos = m.end()
                 continue
             if a >= 0x80200000 or (0x80000000 <= a < 0x80200000 and (a & 0xFFFF) == 0 and a != 0x80010000):
-                self.constants += 1; continue                           # 0x803Cxxxx, 0x80020000: values
+                self.constants += 1                                     # 0x803Cxxxx, 0x80020000: values
+                if a < 0x80200000: self.constant_list.append((path, blank.count("\n", 0, m.start()) + 1, m.group(0)))
+                continue
             line = blank.count("\n", 0, m.start()) + 1
             in_copy = any(s <= m.start() < e for s, e in copies)
             r = self.amap.resolve(a)
@@ -435,6 +438,8 @@ def sources(outdir, progs):
         f.write("# addresses inside natively compiled functions (resolved to the image bytes: a label, not callable)\n")
         for p, l, lit, fn in res.labels: f.write("%s:%d: %s (label in %s)\n" % (p, l, lit, fn))
         f.write("# constants skipped: %d\n" % res.constants)
+        f.write("# round RAM values skipped as constants (file:line: literal (constant)); port2/tools/audit_pointers.py lists the ones inside code\n")
+        for p, l, lit in res.constant_list: f.write("%s:%d: %s (constant)\n" % (p, l, lit))
     with open(os.path.join(outdir, "literals_resolved.txt"), "w") as f:
         for s, n in sorted(res.by_sym.items(), key=lambda e: -e[1]): f.write("%6d %s\n" % (n, s))
     print("gen2: %d address literals resolved (%d of them labels inside native functions), %d unresolved, "
@@ -583,6 +588,17 @@ def link(outdir, nm, objlist):
     for p, us in amap.U.items():
         for u in us: unit_names.setdefault(u.addr, set()).add(u.name)
     region_names = set(r[0] for r in amap.regs)
+    # per-file renamed names (`adv__80127214`: gen_port's rename of an identifier that means another address in
+    # this file) at a function start of any program are functions, whatever the matching build PROVIDEs under the
+    # bare name (`adv` is PROVIDEd as data in every elf, so adv__80127214 was aliased into the data image and
+    # komaPigSubtype09Step jumped to the retail bytes of AnimAdvanceWithBox: AREA00 section 4 crashed)
+    all_starts = set(u.addr for us in amap.U.values() for u in us)
+    data_csv_names = set()
+    for fn in os.listdir(os.path.join(ROOT, "notes")):
+        if fn.startswith("data_names_") and fn.endswith(".csv"):
+            for l in open(os.path.join(ROOT, "notes", fn)):
+                w = l.split(",")
+                if len(w) > 1: data_csv_names.add(w[1].strip())
     import sysovl
     ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
     thunk_aliases = 0
@@ -601,9 +617,10 @@ def link(outdir, nm, objlist):
         # defines as code (full_symbol_kinds) and no overlay's function list names at that address; an
         # address-named function (FUN_/func_: MAIN0 calling into a coarse unit) stays a function.
         base = n.split("__")[0]
+        renamed_fn = "__" in n and a in all_starts and base not in data_csv_names
         is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n) or (
             a is not None and (base in elf_data or n in elf_data) and base not in elf_funcs and base not in unit_names.get(a, ())
-            and not ovl_re.match(n) and not re.match(r"(?:FUN|func|thunk_FUN)_[0-9A-Fa-f]{8}", base))
+            and not ovl_re.match(n) and not re.match(r"(?:FUN|func|thunk_FUN)_[0-9A-Fa-f]{8}", base) and not renamed_fn)
         if a is not None and not is_data_name and not (f and f in defined and f != n and a not in amap.vary):
             th = amap.thunk(a)
             if th is None and ovl_re.match(n) and GP.OVL_BASE <= a < GP.OVL_END and a in amap.ovl_starts:
@@ -650,8 +667,35 @@ def link(outdir, nm, objlist):
         # code ranges per overlay: areas by their index in port_areas (X000 = 0), SYSTEM overlays by header id
         alist = ["X000"] + sorted(p for p in amap.U if re.match(r"X0\d\d$", p) and p != "X000")
         ents = []
+        from units import BINS
+        blobs = {}
+        def blob(p):
+            if p not in blobs:
+                fn = os.path.join(ROOT, BINS[p][0])
+                blobs[p] = open(fn, "rb").read() if os.path.exists(fn) else None
+            return blobs[p]
         for p in alist + list(sysovl.PROGS):
             rs = sorted((u.addr, u.addr + u.size) for u in amap.U[p] if GP.OVL_BASE <= u.addr < GP.OVL_END)
+            # the function starts of this overlay: its own units, and (an area) the X000 units whose bytes it
+            # shares.  A word of the loaded file that points into the region but at no start of its own is data
+            # (an animation pointer that happens to be another overlay's function start: BITING_PLANT_ANIMS[0] =
+            # 0x8013BAB0, X001's updatePuppyRumorNpc) or a label inside its code, never a thunk
+            own = [u for u in amap.U[p] if GP.OVL_BASE <= u.addr < GP.OVL_END]
+            if p != "X000" and p in alist and blob(p) and blob("X000"):
+                for u in amap.U["X000"]:
+                    o = u.addr - GP.OVL_BASE
+                    if o + u.size <= len(blob(p)) and blob("X000")[o:o + u.size] == blob(p)[o:o + u.size]: own.append(u)
+            starts = set(u.addr for u in own)
+            # the other global functions of a multi-function unit have native code too (func_8011DE84.c's
+            # func_8011E028: an X000 handler table holds its address, and as a non-start it was left a data word
+            # since the per-overlay starts: the game jumped to 8011e028 in AREA00 sections 1, 2 and 4)
+            import bisect
+            natives = sorted(amap.native)
+            for u in own:
+                i = bisect.bisect_right(natives, u.addr)
+                while i < len(natives) and natives[i] < u.addr + u.size:
+                    if (natives[i] & 3) == 0: starts.add(natives[i])
+                    i += 1
             merged = []
             for s, e in rs:
                 if merged and s <= merged[-1][1]: merged[-1][1] = max(merged[-1][1], e)
@@ -661,9 +705,10 @@ def link(outdir, nm, objlist):
                 kind, key = 1, (int.from_bytes(open(fn, "rb").read(4), "little") if os.path.exists(fn) else 0)
             else: kind, key = 0, alist.index(p)
             f.write("static const unsigned int ranges_%s[] = {%s};\n" % (p, ", ".join("0x%08X, 0x%08X" % tuple(r) for r in merged)))
-            ents.append((kind, key, p, len(merged)))
-        f.write("const PortOvlCode port_ovlcode[] = {\n%s  {0, 0, 0, 0, 0}\n};\nconst int port_ovlcode_count = %d;\n"
-                % ("".join("  {%d, 0x%X, \"%s\", ranges_%s, %d},\n" % (k, key, p, p, n) for k, key, p, n in ents), len(ents)))
+            f.write("static const unsigned int starts_%s[] = {%s};\n" % (p, ", ".join("0x%08X" % a for a in sorted(starts)) or "0"))
+            ents.append((kind, key, p, len(merged), len(starts)))
+        f.write("const PortOvlCode port_ovlcode[] = {\n%s  {0, 0, 0, 0, 0, 0, 0}\n};\nconst int port_ovlcode_count = %d;\n"
+                % ("".join("  {%d, 0x%X, \"%s\", ranges_%s, %d, starts_%s, %d},\n" % (k, key, p, p, n, p, ns) for k, key, p, n, ns in ents), len(ents)))
     # data a game C file still defines by itself (a definition the filter did not rewrite): it keeps its own copy,
     # which is wrong when other files reach the retail bytes through another name; listed in the report
     own_copies = sorted(n for n in data_defined if addr_of(n) is not None and n not in undefined)
@@ -692,7 +737,7 @@ def link(outdir, nm, objlist):
     U = units()
     asm_only = sorted((u.addr, u.name) for p in ("MAIN0", "X000") for u in U[p] if not u.lib and not u.file)
     lit = open(os.path.join(outdir, "literals.txt")).read()
-    unres = [l for l in lit.split("\n") if l and not l.startswith("#") and "(label in" not in l]
+    unres = [l for l in lit.split("\n") if l and not l.startswith("#") and "(label in" not in l and "(constant)" not in l]
     labels = [l for l in lit.split("\n") if "(label in" in l]
     const = re.search(r"# constants skipped: (\d+)", lit).group(1)
     nres = sum(int(l.split()[0]) for l in open(os.path.join(outdir, "literals_resolved.txt")))

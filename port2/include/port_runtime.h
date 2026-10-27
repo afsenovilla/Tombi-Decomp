@@ -26,7 +26,8 @@ extern const PortAddr port_addrmap[];        /* every MAIN0/X000 function (outsi
 extern const int port_addrmap_count;
 extern const PortAddr port_thunkmap[];       /* overlay-region function start -> its dispatch thunk */
 extern const int port_thunkmap_count;
-typedef struct { int kind; u32p key; const char *name; const unsigned int *ranges; int n; } PortOvlCode;   /* kind 0: area index, 1: SYSTEM id */
+typedef struct { int kind; u32p key; const char *name; const unsigned int *ranges; int n;
+                 const unsigned int *starts; int nstarts; } PortOvlCode;   /* kind 0: area index, 1: SYSTEM id; ranges: code [s,e) pairs; starts: its function starts */
 extern const PortOvlCode port_ovlcode[];
 extern const int port_ovlcode_count;
 

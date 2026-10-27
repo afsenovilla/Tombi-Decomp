@@ -145,6 +145,15 @@ static int in_ranges(const PortOvlCode *c, u32p a) {
     return 0;
 }
 int port_ovl_in_ranges(const PortOvlCode *c, u32p a) { return in_ranges(c, a); }
+static int in_starts(const PortOvlCode *c, u32p a) {
+    int lo = 0, hi = c->nstarts - 1;
+    while (lo <= hi) {
+        int m = (lo + hi) / 2;
+        if (c->starts[m] == a) return 1;
+        if (c->starts[m] < a) lo = m + 1; else hi = m - 1;
+    }
+    return 0;
+}
 void port_relocate_overlay(void *dst, int bytes) {
     u32p base = 0x80000000u + (u32p)((unsigned char *)dst - (unsigned char *)port_ram);
     int ovl = base >= PORT_OVL_BASE && base < PORT_OVL_END;
@@ -169,6 +178,13 @@ void port_relocate_overlay(void *dst, int bytes) {
                table at 0x800FE89C holds 0x800FE13C, which is also an X000 function start) */
             void *fn = ovlmap_find(port_x000_image[0], v);
             if (fn) { w[i] = (u32p)fn; nfn++; continue; }
+            if (in_ranges(c, v)) { nraw++; continue; }
+            w[i] = (u32p)port_ram_ptr(v); nd++; continue;
+        }
+        if (c && c->kind == 0 && v >= PORT_OVL_BASE && v < PORT_OVL_END && !in_starts(c, v)) {
+            /* an area's own word pointing into the region at no function start of this area (its units and the
+               X000 units it shares): a label inside its code, or its data, which may be another overlay's
+               function start (BITING_PLANT_ANIMS[0] = 0x8013BAB0 is X001's updatePuppyRumorNpc): never a thunk */
             if (in_ranges(c, v)) { nraw++; continue; }
             w[i] = (u32p)port_ram_ptr(v); nd++; continue;
         }

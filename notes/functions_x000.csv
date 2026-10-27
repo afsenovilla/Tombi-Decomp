@@ -556,6 +556,8 @@ address,name,size,typed
 80132174,updateRedBird,1856,1
 801328b4,updateA00WoodenBranch,764,1
 80132bb0,FUN_80132bb0,8,0
+80132bb8,func_80132BB8,536,0
+80132dd0,func_80132DD0,432,0
 80132f80,frogHop,724,1
 80133254,frogStep0,544,1
 80133474,updateFrog,3152,1

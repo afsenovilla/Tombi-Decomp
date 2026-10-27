@@ -385,8 +385,18 @@ def area_signatures(progs):
     out = {}
     for p in progs:
         got = []
-        for o in range(0x80115EA4 - OVL_BASE, len(d[p]) - 3, 4):
+        # only words inside the area's own functions: the game never writes its code, while its data moves
+        # (0x80115EA4, the first unshared word, is a variable: AREA09 rewrote it at frame 1508, the resident area
+        # read as (none) and every dispatch of the treasure-chest handlers failed)
+        code = sorted((u.addr - OVL_BASE, u.addr - OVL_BASE + u.size) for u in UN.units()[p] if u.addr >= 0x80115EA4)
+        offs = [o for s, e in code for o in range(s, min(e, len(d[p]) - 3), 4)]
+        for o in offs:
             w = d[p][o:o + 4]
+            v = int.from_bytes(w, "little")
+            # not a RAM / scratchpad address: port2 relocates such words of the loaded file (X001's old signature
+            # word 0x801169D0, a function start, became its thunk and the area was never recognised: every
+            # dispatch in AREA01 logged `no native code in (none)`)
+            if 0x80010000 <= v < 0x80200000 or 0x1F800000 <= v < 0x1F800400: continue
             if w != b"\0\0\0\0" and all(d[q][o:o + 4] != w for q in progs if q != p):
                 got.append((OVL_BASE + o, int.from_bytes(w, "little")))
                 if len(got) == 2: break
@@ -553,6 +563,15 @@ def sources(outdir, progs, ovls=(), areas=()):
                         if n != name and n not in dropped and n in syms and u.addr < syms[n] < u.addr + u.size)
         if area: area_texts.setdefault(prog, {})[dst] = txt
         else: out_texts[dst] = txt
+    # X000 units without C that port2/runtime translates by hand (x000_handwritten.c): the function map entry a
+    # table word relocates to, or, when the unit's bytes differ in some area, X000's side of the area dispatch
+    if "X000" in progs:
+        hand2 = handwritten_port2_funcs()
+        for u in U["X000"]:
+            n = hand2.get(u.addr)
+            if u.file or not n or u.lib: continue
+            if u.addr in vary: x000_native[u.addr] = n
+            elif not any(a == u.addr for a, _ in fmap): fmap.append((u.addr, n))
     # arity of the area functions by address: a call from shared code (MAIN0, X000) to an address whose code differs
     # per area forwards as many arguments as the widest definition there takes
     arity_addr = {}
@@ -819,6 +838,18 @@ def forward_short_calls(texts, base_defs=None, fallback=None, prefix=None):
             txt = re.sub(r"^([ \t]*extern\b[^;={]*?[,\s\*]%s\s*)\([^;{()]*\)(?=[^;{]*;)" % re.escape(n), r"\1()", txt, flags=re.M)
         texts[f] = txt
     return total, gdefs
+
+
+def handwritten_port2_funcs():
+    """{address: name} of the `func_XXXXXXXX(` definitions of port2/runtime/*.c: game functions translated by hand
+    for the native port (main0_handwritten.c, x000_handwritten.c)."""
+    out = {}
+    d = os.path.join(ROOT, "port2", "runtime")
+    for f in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        if not f.endswith(".c"): continue
+        for m in re.finditer(r"^\w[\w \t\*]*?\b((?:func|FUN)_([0-9A-Fa-f]{8}))\s*\([^;]*$", open(os.path.join(d, f)).read(), re.M):
+            out.setdefault(int(m.group(2), 16), m.group(1))
+    return out
 
 
 def handwritten_ovl_funcs():

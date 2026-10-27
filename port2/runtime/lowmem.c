@@ -58,7 +58,9 @@ static void low_tally(unsigned long eip, unsigned long fault, int op, int len) {
     }
 }
 void port_low_report(void) {
-    if (!low_total) return;
+    static int done;
+    if (!low_total || done) return;                     /* once: a fault inside the exit path re-entered it (AREA11 wrote 1 GB) */
+    done = 1;
     port_printf("[port2] %lu emulated accesses to the BIOS kernel area (page 0, through null pointers; %lu writes), %d sites%s:\n", low_total, port_low_writes, low_nsites, low_other ? " (+more)" : "");
     for (int i = 0; i < low_nsites; i++) {
         unsigned long off; const char *nm = port_sym_near((void *)low_sites[i].eip, &off);
