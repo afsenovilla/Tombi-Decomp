@@ -1,9 +1,15 @@
 // FUNC 800ec89c 3424 D0SPSUB3
-// port-only draft (score 743, was 747; carries the func_800ED0C4 confirm-block fixes: volatile-named D_80100B64
-// temp loaded early, b = t[1] after the first store): D0SPSUB func_800ED0C4 (src/wip) relocated to D0SPSUB3 and edited for the
-// three differences of the retail code: state 1 calls subScreenMoveTabCursor(m) (not func_800EC504(m, 1)), the confirm
-// mask is 0x5008 (not 0x4008), and the cursor switch of state 1 has no mode cases 4..7 (its jump table at
-// 0x800E85F4 sends 3..7 to the default playSFXAndSetNote and 8..11 to the SfxPlay2/return 1 case).
+// MATCHING 800ec89c 3424
+// D0SPSUB3 twin of D0SPSUB func_800ED0C4 (same source, five retail differences): state 1 calls
+// subScreenMoveTabCursor(m) (not (m, 1)), the confirm mask is 0x5008 (not 0x4008), the cursor switch of state 1 has
+// no mode cases 4..7 (its jump table at 0x800E85F4 sends 3..7 to the default tail, which calls SfxPlay2(10, 10) here,
+// not playSFXAndSetNote) and 8..11 to the SfxPlay2/return 1 case, the page change of state 1 is stored BEFORE
+// playSFX(8) with an explicit `return 0` in both arms (without it the two `sh` cross-jump into one block and the frame
+// grows to 192), and state 4 calls playSFX(8) BEFORE the page/sel update (so it no longer cross-jumps with state 2).
+// Carries the func_800ED0C4 match idioms: v1 holds the table pointer / later value 3, a1 holds the second byte, an
+// empty asm input keeps the pointer live through that load, the v0-bound object code 0x54 is materialized before
+// the allocObjectLayer2 null check, and the item-handler result 2 returns 1 (the retail jump table at 0x800E8658
+// targets the return-1 path). Code and switch tables checked after linking, without masking.
 typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
@@ -40,7 +46,6 @@ extern void func_800ED7BC(void *o, int a);
 extern Obj *allocObjectLayer2(void);
 extern void printInfoMessage(int id, int kind);
 extern void playSFX(int id);
-extern void playSFXAndSetNote(int a, int b);
 extern void SfxPlay2(int a, int b);
 
 int func_800EC89C(Menu *m)
@@ -63,13 +68,15 @@ int func_800EC89C(Menu *m)
         pages = (D_8009D1A4.count + 9) / 10;
         if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
-                playSFX(8);
                 m->page--;
+                playSFX(8);
+                return 0;
             }
         } else if (JOYPAD_STATE & 0x800) {
             if (m->page < pages - 1) {
-                playSFX(8);
                 m->page++;
+                playSFX(8);
+                return 0;
             }
         } else if (JOYPAD_STATE & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
@@ -131,7 +138,7 @@ int func_800EC89C(Menu *m)
                 SfxPlay2(10, 10);
                 return 1;
             }
-            playSFXAndSetNote(10, 10);
+            SfxPlay2(10, 10);
         }
         return 0;
     case 2:
@@ -200,7 +207,7 @@ int func_800EC89C(Menu *m)
                         }
                         return 1;
                     case 2:
-                        break;
+                        return 1;
                     case 3:
                         printInfoMessage(0x1E, 2);
                         return 1;
@@ -294,21 +301,26 @@ int func_800EC89C(Menu *m)
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
             } else if (JOYPAD_STATE & 0x5008) {
-                unsigned char *t;
+                unsigned char *tp;
+                int n;
                 int i1 = D_80100928[D_80100918], i2 = D_80100948[D_80100920];
                 int x = D_80100B64_v;
-                t = D_800F67A0[i1] + i2 * 2;
+                tp = D_800F67A0[i1] + i2 * 2;
                 {
-                int a = t[0], b;
+                register unsigned char *t __asm__("$3") = tp;
+                int a = t[0];
+                register int b __asm__("$5");
                 D_80100B68 = a;
                 b = t[1];
+                __asm__("" : : "r"(t));
                 D_8009CD94 = a;
                 PLAYER_SUBSTATE = 0x30;
                 D_8009CDA0 = 0;
-                GAME_PLAYER_MODE = 3;
+                t = (unsigned char *)3;
+                GAME_PLAYER_MODE = (int)t;
                 PLAYER_STATE = 1;
                 PLAYER_STEP = 0;
-                PLAYER = 3;
+                PLAYER = (int)t;
                 GVARS_USE_ITEM_PENDING = 1;
                 GVARS_USE_ITEM_ID = x;
                 D_80100B6C = b;
@@ -316,9 +328,10 @@ int func_800EC89C(Menu *m)
                 }
                 if (x == 14) {
                     Obj *o = allocObjectLayer2();
+                    register int code __asm__("$2") = 0x54;
                     if (o) {
                         o->b0 = 1;
-                        o->b2 = 0x54;
+                        o->b2 = code;
                         o->b3 = 1;
                     }
                     printInfoMessage(14, 1);
@@ -337,16 +350,16 @@ int func_800EC89C(Menu *m)
         pages = (D_8009D1A4.count + 9) / 10;
         if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
+                playSFX(8);
                 m->page--;
                 m->sel -= 10;
-                playSFX(8);
             }
         } else if (JOYPAD_STATE & 0x800) {
             if (m->page < pages - 1) {
+                playSFX(8);
                 m->page++;
                 m->sel += 10;
                 if (m->sel >= D_8009D1A4.count) m->sel = D_8009D1A4.count - 1;
-                playSFX(8);
             }
         } else if (JOYPAD_STATE & 0x2000) {
             m->sel = -1;
