@@ -41,6 +41,7 @@ typedef struct {
     void (*vram_read)(int x, int y, int w, int h);      /* the host is about to read vram[] in this rectangle */
     void (*list_end)(void);                             /* end of DrawOTag / DrawPrim: submit the batched work */
     int (*present)(int dx, int dy, int dw, int dh, int masked);   /* show the display area in the window; 0 = not handled */
+    int (*present_rgb)(const gpu_u8 *rgb, int w, int h);          /* show an RGB8 frame (the 24-bit display mode); 0 = not handled, may be null */
 } GpuBackend;
 
 extern const GpuBackend port_gpu_soft, port_gpu_gl;

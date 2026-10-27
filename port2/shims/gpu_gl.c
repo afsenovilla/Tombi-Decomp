@@ -459,41 +459,74 @@ static void gl_vram_read(int x, int y, int w, int h) {
 }
 
 /* ------------------------------------------------------------------ the window */
-static int gl_present(int dx, int dy, int dw, int dh, int masked) {
+/* the display area (a rectangle of the VRAM texture, or the whole 24-bit frame texture) onto the window: the
+   logical frame is 320 pixels wide whatever the display mode (a 512-wide mode shows at the same size), integer-scaled
+   to the largest multiple that fits, centred; smaller windows get the fit */
+static void blit(GLuint tex, float u0, float v0, float u1, float v1, int dh, int W, int H) {
+    int fx, fy, fw, fh;
+    port_window_fit(W, H, dh, &fx, &fy, &fw, &fh);   /* 4:3 as a PAL TV (or square pixels), centred */
+    float ow = (float)fw, oh = (float)fh;
+    float x0 = -ow / W, x1 = ow / W, y0 = -oh / H, y1 = oh / H;
+    /* a non-integer horizontal scale (4:3) samples between texels: filter the blit linearly, the VRAM texture
+       goes back to nearest for the game's own sampling */
+    p_glBindTexture(GL_TEXTURE_2D, tex);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, port_window_square ? GL_NEAREST : GL_LINEAR);
+    float q[24] = { x0, y1, u0, v0,  x1, y1, u1, v0,  x0, y0, u0, v1,   x1, y1, u1, v0,  x1, y0, u1, v1,  x0, y0, u0, v1 };
+    p_glUseProgram(bprog);
+    p_glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    p_glBufferData(GL_ARRAY_BUFFER, sizeof q, q, GL_STREAM_DRAW);
+    p_glDisableVertexAttribArray(1); p_glDisableVertexAttribArray(3);
+    p_glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, (const void *)0);
+    p_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16, (const void *)8);
+    p_glDrawArrays(GL_TRIANGLES, 0, 6);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+}
+static int present_begin(int *W, int *H) {
     if (!gl_ready || !port_window) return 0;
     submit();
-    int W = 0, H = 0;
-    port_window_gl_size(&W, &H);
-    if (W <= 0 || H <= 0) return 1;
+    *W = *H = 0;
+    port_window_gl_size(W, H);
     p_glBindFramebuffer(GL_FRAMEBUFFER, 0);
     p_glDisable(GL_SCISSOR_TEST);
     p_glDisable(GL_BLEND);
-    p_glViewport(0, 0, W, H);
+    p_glViewport(0, 0, *W, *H);
     p_glClearColor(0, 0, 0, 1);
     p_glClear(GL_COLOR_BUFFER_BIT);
-    if (!masked) {
-        /* the logical frame is 320 pixels wide whatever the display mode (a 512-wide mode shows at the same size),
-           integer-scaled to the largest multiple that fits, centred; smaller windows get the fit */
-        int fx, fy, fw, fh;
-        port_window_fit(W, H, dh, &fx, &fy, &fw, &fh);   /* 4:3 as a PAL TV (or square pixels), centred */
-        float ow = (float)fw, oh = (float)fh;
-        float x0 = -ow / W, x1 = ow / W, y0 = -oh / H, y1 = oh / H;
-        /* a non-integer horizontal scale (4:3) samples between texels: filter the blit linearly, the VRAM texture
-           goes back to nearest for the game's own sampling */
-        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-        p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, port_window_square ? GL_NEAREST : GL_LINEAR);
-        float u0 = dx / 1024.0f, u1 = (dx + dw) / 1024.0f, v0 = dy / 512.0f, v1 = (dy + dh) / 512.0f;
-        float q[24] = { x0, y1, u0, v0,  x1, y1, u1, v0,  x0, y0, u0, v1,   x1, y1, u1, v0,  x1, y0, u1, v1,  x0, y0, u0, v1 };
-        p_glUseProgram(bprog);
-        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-        p_glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        p_glBufferData(GL_ARRAY_BUFFER, sizeof q, q, GL_STREAM_DRAW);
-        p_glDisableVertexAttribArray(1); p_glDisableVertexAttribArray(3);
-        p_glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, (const void *)0);
-        p_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16, (const void *)8);
-        p_glDrawArrays(GL_TRIANGLES, 0, 6);
-        p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
+    return 1;
+}
+static int gl_present(int dx, int dy, int dw, int dh, int masked) {
+    int W, H;
+    if (!present_begin(&W, &H)) return 0;
+    if (W > 0 && H > 0 && !masked)
+        blit(vram_tex, dx / 1024.0f, dy / 512.0f, (dx + dw) / 1024.0f, (dy + dh) / 512.0f, dh, W, H);
+    port_window_gl_swap();
+    return 1;
+}
+/* the 24-bit display mode (the MDEC movies): the frame gpu.c read out of VRAM as RGB8 goes to its own texture and
+   is blitted the same way.  The software path hands it to an SDL_Renderer instead (port_window_frame); here that
+   renderer would be a second device on the window that already has the GL context (on Windows a Direct3D one),
+   and the picture ends up in whichever surface the compositor shows last.  Until this the movies were blank on the
+   Windows build with the OpenGL renderer. */
+static GLuint frame_tex; static int frame_w, frame_h;
+static int gl_present_rgb(const gpu_u8 *rgb, int w, int h) {
+    int W, H;
+    if (!present_begin(&W, &H)) return 0;
+    if (W > 0 && H > 0 && w > 0 && h > 0) {
+        if (!frame_tex) {
+            p_glGenTextures(1, &frame_tex);
+            p_glBindTexture(GL_TEXTURE_2D, frame_tex);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        } else p_glBindTexture(GL_TEXTURE_2D, frame_tex);
+        p_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        if (w != frame_w || h != frame_h) { p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb); frame_w = w; frame_h = h; }
+        else p_glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+        p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        blit(frame_tex, 0.0f, 0.0f, 1.0f, 1.0f, h, W, H);
     }
     port_window_gl_swap();
     return 1;
@@ -546,4 +579,4 @@ static void gl_stop(void) {
 }
 
 const GpuBackend port_gpu_gl = { "OpenGL", gl_start, gl_stop, gl_tri, gl_rect, gl_line, gl_fill, gl_copy,
-                                 gl_vram_written, gl_vram_read, gl_list_end, gl_present };
+                                 gl_vram_written, gl_vram_read, gl_list_end, gl_present, gl_present_rgb };

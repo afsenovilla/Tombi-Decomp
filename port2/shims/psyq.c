@@ -835,6 +835,7 @@ static StHEADER *st_ring; static int st_ring_n;
 static u8 *st_slot(int i) { return (u8 *)st_ring + st_ring_n * 32 + i * ST_SLOT; }
 static int st_wr, st_frame_start, st_rd;       /* the writer's slot, the slot of the frame it assembles, the reader's slot */
 static int st_active, st_ended, st_lba, st_misses, st_frames;
+static int st_full, st_start_vblank, st_handed, st_start_lba;   /* vblanks the ring was full (the game not taking frames), the start frame, frames handed out: the pace line of port_st_stop */
 static int st_budget;                          /* sectors due, in 1/port_hz sector units */
 static u32 st_start_frame, st_end_frame; static int st_mask;
 static int st_chunk_expect; static u32 st_cur_frame;
@@ -918,7 +919,7 @@ void port_st_vblank(void) {
     int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
     if (st_budget > cap) st_budget = cap;
     while (st_budget >= port_hz && !st_ended) {
-        if (!st_deliver()) break;
+        if (!st_deliver()) { st_full++; break; }
         st_budget -= port_hz;
     }
 }
@@ -926,12 +927,21 @@ int CdRead2(int mode) {
     u8 param = (u8)mode;
     CdControl(14, &param, 0);
     st_active = 1; st_ended = 0; st_lba = cd_pos; st_misses = 0; st_budget = 0; st_have_pending = 0; st_frames = 0;
+    st_full = 0; st_handed = 0; st_start_vblank = port_frame; st_start_lba = cd_pos;
     port_sound_xa_reset();
     if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
                                   port_skip_movies ? ", skipped (--skip-movies)" : "");
     return 1;
 }
-void port_st_stop(void) { st_active = 0; port_sound_xa_end(); }
+/* StUnSetRing / the end of a movie: one line with the pace, so a log from another machine says whether a slow movie
+   was fed slowly (few vblanks per frame handed out) or not taken (ring full): 150 sectors per second is ~3.3 vblanks
+   per frame of these 15 fps files, 1.7 of the 30 fps ones */
+void port_st_stop(void) {
+    if (st_active)
+        port_printf("[port] st: stream stopped at frame %d: %d frames handed out in %d vblanks (%d sectors read, ring full on %d vblanks, mode %02x, %d/s)\n",
+                    port_frame, st_handed, port_frame - st_start_vblank, st_lba - st_start_lba, st_full, cd_mode, (cd_mode & 0x80) ? 150 : 75);
+    st_active = 0; port_sound_xa_end();
+}
 static void st_stop(void) { port_st_stop(); }
 void StClearRing(void);
 void StSetRing(void *a, int n) { st_ring = (StHEADER *)a; st_ring_n = n; StClearRing(); }
@@ -965,7 +975,7 @@ int StGetNext(void **a, void **b) {
             st_ring[st_rd].id = 4;
             *a = st_slot(st_rd); *b = &st_ring[st_rd];
             st_last.addr = (u32 *)*a; st_last.w = st_ring[st_rd].width; st_last.h = st_ring[st_rd].height;
-            st_last.bytes = st_ring[st_rd].nSectors * ST_SLOT;
+            st_last.bytes = st_ring[st_rd].nSectors * ST_SLOT; st_handed++;
             if ((int)st_ring[st_rd].frameSize > 0 && (int)st_ring[st_rd].frameSize < st_last.bytes) st_last.bytes = st_ring[st_rd].frameSize;
             return 0;
         }

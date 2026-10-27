@@ -227,7 +227,7 @@ static void soft_nop_rect(int x, int y, int w, int h) { (void)x; (void)y; (void)
 static void soft_nop(void) { }
 static int soft_present(int dx, int dy, int dw, int dh, int masked) { (void)dx; (void)dy; (void)dw; (void)dh; (void)masked; return 0; }
 const GpuBackend port_gpu_soft = { "software", soft_start, soft_nop, soft_tri, soft_rect, soft_line, soft_fill, soft_copy,
-                                   soft_nop_rect, soft_nop_rect, soft_nop, soft_present };
+                                   soft_nop_rect, soft_nop_rect, soft_nop, soft_present, 0 };
 
 /* ================================================================== the decoder (shared by the backends) */
 static void fill(u32 col, u32 xy, u32 wh) {
@@ -598,8 +598,13 @@ void port_gpu_vblank(void) {
         RECT *d = (RECT *)cur_dispenv;
         int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
         if (w > 1024) w = 1024; if (h > 512) h = 512;
-        /* the GL backend blits the display area itself; the software one (and 24-bit mode) goes through RGB24 */
-        if (cur_dispenv[0x11] || !be->present(d->x & 1023, d->y & 511, w, h, !disp_mask)) {
+        /* the GL backend blits the display area itself; the software one goes through RGB24 and an SDL_Renderer;
+           the 24-bit mode (MDEC movies) is read out as RGB24 on both and shown by the backend's present_rgb when it
+           has one (GL: its own texture; an SDL_Renderer on the GL window would be a second device on it) */
+        if (cur_dispenv[0x11]) {
+            port_gpu_frame(frame_rgb, &w, &h);
+            if (!be->present_rgb || !be->present_rgb(frame_rgb, w, h)) port_window_frame(frame_rgb, w, h);
+        } else if (!be->present(d->x & 1023, d->y & 511, w, h, !disp_mask)) {
             port_gpu_frame(frame_rgb, &w, &h);
             port_window_frame(frame_rgb, w, h);
         }

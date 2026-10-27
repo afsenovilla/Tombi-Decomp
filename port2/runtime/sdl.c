@@ -177,6 +177,10 @@ void port_window_frame(const unsigned char *rgb, int w, int h) {
     if (!win) return;
     pump();
     if (!ren) {
+        /* (the OpenGL backend presents its own frames, 24-bit ones included, through gpu_gl.c: a renderer made here
+           on a window that carries its context would be a second device on the same window, on Windows a Direct3D
+           one, and the picture would go to whichever surface the compositor shows last) */
+        if (glctx) port_printf("[port2] note: an SDL_Renderer is created on the window that has the OpenGL context\n");
         ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
         if (!ren) port_fatal("SDL_CreateRenderer: %s", SDL_GetError());
