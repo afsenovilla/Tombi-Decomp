@@ -16,12 +16,43 @@ from tkinter import ttk, filedialog, messagebox
 
 import i18n
 from i18n import tr
+# the port launcher speaks English unless the player picked a language in it (i18n.selector saves the choice)
+if i18n.load_settings().get("language") not in i18n.LANGS:
+    i18n.set_language("en", save=False)
 import port_mods as M
 import extract_data as X
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
 # the languages of the disc's boot menu: EXE/MAINn.EXE (tombi2 --lang N, docs/PORT.md "Languages")
 GAME_LANGS = [(0, "English"), (5, "Español"), (6, "Português"), (7, "Svenska"), (8, "Dansk")]
+
+
+def flag_image(n, w=24, h=16):
+    """A small drawn flag for a game language (tk.PhotoImage; no files, no emoji: Tk on Windows draws neither)."""
+    img = tk.PhotoImage(width=w, height=h)
+    def fill(x0, y0, x1, y1, c):
+        img.put(c, to=(max(0, x0), max(0, y0), min(w, x1), min(h, y1)))
+    if n == 0:        # United Kingdom (simplified: blue field, white and red crosses)
+        fill(0, 0, w, h, "#012169")
+        for i in range(h):           # diagonals in white
+            for x in (i * w // h, w - 1 - i * w // h):
+                fill(x - 1, i, x + 2, i + 1, "white")
+        fill(0, h // 2 - 3, w, h // 2 + 3, "white"); fill(w // 2 - 3, 0, w // 2 + 3, h, "white")
+        fill(0, h // 2 - 2, w, h // 2 + 2, "#C8102E"); fill(w // 2 - 2, 0, w // 2 + 2, h, "#C8102E")
+    elif n == 5:      # Spain
+        fill(0, 0, w, h, "#AA151B"); fill(0, h // 4, w, h - h // 4, "#F1BF00")
+    elif n == 6:      # Portugal
+        fill(0, 0, w * 2 // 5, h, "#006600"); fill(w * 2 // 5, 0, w, h, "#FF0000")
+        cx, cy, r = w * 2 // 5, h // 2, h // 4
+        for y in range(h):
+            for x in range(w):
+                d = (x - cx) ** 2 + (y - cy) ** 2
+                if r * r - 2 * r <= d <= r * r + 2 * r: img.put("#FFE000", to=(x, y, x + 1, y + 1))
+    elif n == 7:      # Sweden
+        fill(0, 0, w, h, "#006AA7"); fill(0, h // 2 - 2, w, h // 2 + 2, "#FECC02"); fill(w * 3 // 8 - 2, 0, w * 3 // 8 + 2, h, "#FECC02")
+    elif n == 8:      # Denmark
+        fill(0, 0, w, h, "#C8102E"); fill(0, h // 2 - 2, w, h // 2 + 2, "white"); fill(w * 3 // 8 - 2, 0, w * 3 // 8 + 2, h, "white")
+    return img
 UI_TO_GAME_LANG = {"en": 0, "es": 5, "pt": 6, "sv": 7, "da": 8}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -314,10 +345,11 @@ class App:
         ttk.Radiobutton(ar, text=tr("a.sq"), variable=av, value="square").pack(side="left", padx=2)
         lg = ttk.Frame(f); lg.grid(row=7, column=0, sticky="w", pady=4)
         ttk.Label(lg, text=tr("l.lang")).pack(side="left")
-        default_lang = 0                     # English (the decompiled MAIN0) until the other languages are proven
+        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
         lv = self.var("lang", tk.IntVar, default_lang)
-        for n, name in GAME_LANGS:
-            ttk.Radiobutton(lg, text=name, variable=lv, value=n).pack(side="left", padx=2)
+        self._flags = [flag_image(n) for n, _ in GAME_LANGS]      # kept: Tk drops an image nobody references
+        for (n, name), img in zip(GAME_LANGS, self._flags):
+            ttk.Radiobutton(lg, text=" " + name, image=img, compound="left", variable=lv, value=n).pack(side="left", padx=4)
         ttk.Checkbutton(f, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).grid(row=8, column=0, sticky="w", pady=4)
         ttk.Label(f, text=tr("l.pad"), wraplength=700, justify="left").grid(row=9, column=0, sticky="w", pady=8)
         btns = ttk.Frame(f); btns.grid(row=10, column=0, sticky="w", pady=8)
