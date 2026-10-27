@@ -110,9 +110,16 @@ void port_gpu_stop(void);
 void port_gpu_vblank(void);
 int port_gpu_frame(unsigned char *rgb, int *w, int *h);
 
-/* sound (shims/sound.c): the mixer output ring the SDL audio callback drains */
-void port_sound_vblank(void);
-int port_sound_pull(short *out, int frames);     /* stereo frames; zero-filled when the ring is empty */
+/* sound (shims/sound.c): a software SPU + libsnd on the sample clock */
+void port_sound_vblank(void);                    /* no audio device: mixes 44100/hz frames per vblank */
+int port_sound_pull(short *out, int frames);     /* the audio device's callback: mixes `frames` stereo frames */
+void port_sound_pulled(int on);                  /* 1 while an audio device drives the mixer through port_sound_pull */
+void port_sound_xa_sector(int coding, const unsigned char *payload);   /* an XA audio sector (2324 bytes) the stream ring read */
+void port_sound_xa_reset(void);                  /* a new stream starts */
+void port_sound_xa_end(void);                    /* the stream stopped: the queued audio plays out */
+void port_sound_cd_mute(int mute);               /* CdlMute / CdlDemute */
+void port_audio_lock(void);                      /* runtime/sdl.c: the game thread holds the device's callback off */
+void port_audio_unlock(void);
 
 /* pad (shims/pad.c) */
 void port_pad_vblank(void);

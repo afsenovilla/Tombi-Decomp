@@ -25,7 +25,11 @@ static SDL_AudioDeviceID dev;
 static SDL_GameController *ctrl;
 static unsigned short keys_down, ctrl_down, seen_since;
 
+/* the audio device pulls the mixer (shims/sound.c): audio time is what the device consumes, so the sequencer's
+   tempo cannot depend on the game thread's pace; the game thread's calls into the mixer take the device lock */
 static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
+void port_audio_lock(void) { if (dev) SDL_LockAudioDevice(dev); }
+void port_audio_unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
 
 void port_window_start(void) {
     SDL_SetMainReady();     /* (no SDL2main on Windows: main() is the plain C one, the launcher captures stderr) */
@@ -50,14 +54,15 @@ void port_window_start(void) {
     SDL_zero(want);
     want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = audio_cb;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
-    if (dev) SDL_PauseAudioDevice(dev, 0); else port_printf("[port2] no audio device: %s\n", SDL_GetError());
+    if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }
+    else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());
     for (int i = 0; i < SDL_NumJoysticks(); i++)
         if (SDL_IsGameController(i) && (ctrl = SDL_GameControllerOpen(i))) { port_printf("[port2] controller: %s\n", SDL_GameControllerName(ctrl)); break; }
-    port_printf("[port2] window %dx%d (scale %d)%s\n", 320 * port_window_scale, 256 * port_window_scale, port_window_scale, dev ? ", audio 44.1 kHz" : "");
+    port_printf("[port2] window %dx%d (scale %d)%s\n", 320 * port_window_scale, 256 * port_window_scale, port_window_scale, dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
 }
 
 void port_window_stop(void) {
-    if (dev) SDL_CloseAudioDevice(dev);
+    if (dev) { port_sound_pulled(0); SDL_CloseAudioDevice(dev); }
     if (glctx) SDL_GL_DeleteContext(glctx);
     if (win) SDL_Quit();
     win = 0; dev = 0; glctx = 0;

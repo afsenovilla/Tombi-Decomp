@@ -452,6 +452,7 @@ static int port_last_error(void) { return errno; }
 static int cd_pos;                     /* next LBA */
 static void *cd_ready_cb, *cd_sync_cb, *cd_read_cb;
 static u8 cd_mode = 0x80;
+static u8 cd_filter_file, cd_filter_chan;        /* CdlSetfilter: the XA file / channel played when cd_mode has CdlModeSF */
 /* A `.cue` names the data track's `.bin` (FILE "name" BINARY, relative to the cue): resolve it, else
    the path is the image itself. */
 static char cd_bin_path[1024];
@@ -684,6 +685,9 @@ int CdControl(u8 com, u8 *param, u8 *result) {
     port_trace("CdControl", com);
     if ((com == 2 /* Setloc */ || com == 0x15 || com == 0x16) && param) { cd_pos = loc_to_lba(param); cd_check_loc(param, cd_pos); }
     if (com == 14 /* Setmode */ && param) cd_mode = param[0];
+    if (com == 0x13 /* Setfilter */ && param) { cd_filter_file = param[0]; cd_filter_chan = param[1]; }
+    if (com == 0x0B /* Mute */) port_sound_cd_mute(1);
+    if (com == 0x0C /* Demute */) port_sound_cd_mute(0);
     if (com == 9 /* Pause */ || com == 8 /* Stop */) { extern void port_st_stop(void); port_st_stop(); }
     if (result) result[0] = 0x02;
     return 1;
@@ -727,9 +731,10 @@ int port_cd_stats(int *sectors) { *sectors = cd_sectors; return cd_reads; }
  * 3 a sector of the frame being assembled, 4 handed to the game by StGetNext (StFreeRing clears it).
  *
  * There is no CD interrupt: port_st_vblank (called from every vblank) delivers the sectors a double-speed drive
- * reads in one vblank (300 / port_hz) from the disc image into the ring, and StGetNext, when no frame is complete,
+ * reads in one vblank (150 / port_hz) from the disc image into the ring, and StGetNext, when no frame is complete,
  * runs vblanks itself until one is (the CPU spinning in strNext while the interrupts keep coming, as on the
- * console).  Audio (Mode 2 Form 2) sectors are skipped: the XA stream is not played yet.  Sectors that are not
+ * console).  Audio (Mode 2 Form 2) sectors go to the SPU's CD input (port_sound_xa_sector, honouring
+ * CdlSetfilter when CdlModeSF is set) instead of the ring.  Sectors that are not
  * part of the stream (the file after the movie) end it; the game ends a movie on its own frame count three
  * frames before that.  --skip-movies: StGetNext at once reports a frame past the end of every movie, so
  * moviePlayerTask takes its "movie finished" path (CdMix, StUnSetRing, exitTask) without playing. */
@@ -763,14 +768,19 @@ static int st_deliver(void) {
         st_have_pending = 1;
         if (cd_raw) {
             u8 submode = st_pending[6];               /* 4-byte header, 8-byte subheader: file, channel, submode, coding */
-            if (submode & 0x24) { st_have_pending = 0; return 1; }      /* Form 2 / audio: XA, not for the ring */
+            if (submode & 0x24) {                     /* Form 2 / audio: XA, to the CD input of the SPU, not to the ring */
+                if ((submode & 4) && (!(cd_mode & 0x08) || (st_pending[4] == cd_filter_file && st_pending[5] == cd_filter_chan)))
+                    port_sound_xa_sector(st_pending[7], st_pending + 12);
+                st_have_pending = 0;
+                return 1;
+            }
         }
     }
     const u8 *sec = cd_raw ? st_pending + 12 : st_pending;
     const StHEADER *h = (const StHEADER *)sec;
     if (h->id != 0x160 || h->type != 0x8001 || h->nSectors == 0 || h->secCount >= h->nSectors) {
         st_have_pending = 0;
-        if (++st_misses > 64) { st_ended = 1; if (port_verbose) port_printf("[port] st: stream ended at lba %d (%d frames)\n", st_lba, st_frames); }
+        if (++st_misses > 64) { st_ended = 1; port_sound_xa_end(); if (port_verbose) port_printf("[port] st: stream ended at lba %d (%d frames)\n", st_lba, st_frames); }
         return 1;
     }
     st_misses = 0;
@@ -809,10 +819,12 @@ static int st_deliver(void) {
     }
     return 1;
 }
-/* every vblank: the sectors a double-speed (single-speed without CdlModeSpeed) drive reads in that time */
+/* every vblank: the sectors a double-speed (single-speed without CdlModeSpeed) drive reads in that time: 150 per
+ * second (300 KB/s), which is what the XA audio needs (37.8 kHz stereo is one sector in eight) and gives these
+ * movies their 15 frames per second (10 sectors per frame) */
 void port_st_vblank(void) {
     if (!st_active || !st_ring || st_ended) return;
-    st_budget += (cd_mode & 0x80) ? 300 : 150;
+    st_budget += (cd_mode & 0x80) ? 150 : 75;         /* sectors per second: 75 at single speed, 150 at double */
     int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
     if (st_budget > cap) st_budget = cap;
     while (st_budget >= port_hz && !st_ended) {
@@ -824,11 +836,12 @@ int CdRead2(int mode) {
     u8 param = (u8)mode;
     CdControl(14, &param, 0);
     st_active = 1; st_ended = 0; st_lba = cd_pos; st_misses = 0; st_budget = 0; st_have_pending = 0; st_frames = 0;
+    port_sound_xa_reset();
     if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
                                   port_skip_movies ? ", skipped (--skip-movies)" : "");
     return 1;
 }
-void port_st_stop(void) { st_active = 0; }
+void port_st_stop(void) { st_active = 0; port_sound_xa_end(); }
 static void st_stop(void) { port_st_stop(); }
 void StSetRing(void *a, int n) { st_ring = (StHEADER *)a; st_ring_n = n; StClearRing(); }
 void StClearRing(void) {
@@ -892,6 +905,4 @@ int port_st_frame_dims(const void *bs, int *w, int *h, int *bytes) {
 }
 /* (MDEC: shims/mdec.c) */
 
-/* ================================================================== sound: silent for now */
-void SpuQuit(void) {}
-int SpuSetReverb(int on) { return on; }
+/* (sound: shims/sound.c) */
