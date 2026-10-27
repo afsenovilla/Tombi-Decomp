@@ -106,7 +106,7 @@ Screenshots of this run (PNG dumps): the title (frame 1000), the first room (150
   per-area function by name is still linked straight to X000's copy; the full fix is the plan below (compile
   each X0nn's own functions with an `X0nn_` prefix, route those names through thunks, track the resident area,
   e.g. from the load record or `GAME.selectedArea`).
-- The decompiled-but-asm-only functions above (interpreted today). (MDEC movies: done in `port2/`, XA audio of the movies not yet.)
+- The decompiled-but-asm-only functions above (interpreted today). (MDEC movies and their XA audio: done in `port2/`.)
 - The rest of the register-carried audit: `port/tools/arity_check.py` still lists the call sites; each guess
   that is wrong in some area needs a fixes.txt line.
 
@@ -176,10 +176,11 @@ drops to real time, it never runs a burst of fast frames to catch up. The Window
 on the comparison was garbage and the game ran unpaced (event banners and music far too fast, or right, depending
 on the machine's uptime); it now divides first.
 
-**Audio keeps its own clock** (`shims/sound.c`): paced, each vblank mixes the samples that became due on the wall
-clock since the previous one (44100/s whatever the vblank rate), headless it mixes 44100/hz per vblank; the
-sequencer ticks every 44100/hz samples (1/hz s of *audio* time, the libsnd vblank tick), so the tempo depends on
-the sample count only. A stall over four frames re-anchors the audio clock too (the gap is dropped, not queued).
+**Audio keeps its own clock** (`shims/sound.c`, the "Audio" section of M3 below): with an audio device the
+device's callback pulls the mixer, so audio time is what the device consumes and the sequencer (a 60 Hz tick of
+735 samples, the console's) can neither speed up nor skip when the game thread is slow or stalls; without a
+device the mixer runs 44100/hz samples per vblank (deterministic dumps). `port2/` no longer has the wall-clock
+production and the "re-anchor after four frames" rule of the earlier `port/` sound.
 **The viewer never blocks the game** (`tools/view/tombi_view.c`): an audio thread drains the audio pipe
 unconditionally into a half-second ring buffer that the SDL callback pulls from (two frames of silence are put
 ahead of the data at start and after an underrun; the callback skips ahead when more than six frames are queued and
@@ -525,7 +526,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 | M2 | Software renderer | GP0 decoder + rasteriser (textured/gouraud/semi-transparent/dither), display area from DISPENV; the boot logo and AREA00 visible | 2–3 weeks |
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
-| M5 | Sound | software SPU + matched libsnd, XA/CD audio | 2–3 weeks |
+| M5 | Sound | software SPU + libsnd on the console's tick, XA audio of the movies (**done** in `port2/`, "Audio" below) | 2–3 weeks |
 | M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated 60 fps** | 3–4 weeks |
 | M7 | Android | SDL android project, armeabi-v7a, SAF disc import, touch controls; then the 64-bit pointer model for arm64 | 2 weeks (+3–4 weeks for 64-bit) |
 
@@ -1061,7 +1062,7 @@ What was added over phase 1 (all of it in `port2/runtime`, `port2/shims`, `port2
 - **Runtime.** `main.c` has the game's `main()` in C (from `port/runtime/main_port.c`) on the `port_scratch`
   array and the command line; `threads.c` the coroutines (unchanged: plain stack switching, the task entry is a
   native pointer now); `sdl.c` the window (RGB24 streaming texture of the DISPENV area, every vblank), the audio
-  device pulling the mixer ring, and the pad; `lowmem.c` a SIGSEGV handler for the game's reads and writes
+  device whose callback pulls the mixer, and the pad; `lowmem.c` a SIGSEGV handler for the game's reads and writes
   through null pointers (object fields of objects it has no pointer to yet: the BIOS kernel area on the PS1):
   the faulting instruction is re-executed against `port_ram` (the `port_low_emulate` of `port/`), and SIGFPE
   gives the R3000's division-by-zero result; `main0_handwritten.c` the five asm-only MAIN0 functions inside
@@ -1069,7 +1070,7 @@ What was added over phase 1 (all of it in `port2/runtime`, `port2/shims`, `port2
   `func_XXXXXXXX(` definitions.
 - **Shims** carried over on native pointers: `psyq.c` (CD reader with `.cue`, events, VSync, libgte helpers,
   the `St*` streaming ring of the movies), `mdec.c` (software MDEC), `gpu.c` (software GPU; `DrawOTag` follows native links, the image is below 16 MB), `sound.c`
-  (SPU mixer + sequencer into a ring; `--dump-audio`), `card.c` (memory cards; the BIOS file system is
+  (software SPU with reverb and the CD input, libsnd on the console's 60 Hz tick, XA; `--dump-audio`), `card.c` (memory cards; the BIOS file system is
   `port_bu_open/read/...`: gen2 renames the game's calls so the host libc's `open`/`read` stay the host's),
   `pad.c`, `libc.c` (Psy-Q `rand`, quiet `printf`, the forward-byte `bcopy` lzDecompress relies on). The game
   objects link against the ordinary 32-bit glibc for everything else.
@@ -1471,12 +1472,87 @@ port supplies is the two Psy-Q layers under it:
   `-v` (stream start, end) and `-v -v` / `--trace-cd` (every sector).  The decoder was checked frame by frame
   against the disc's movies: every frame of a version-2 and a version-3 file parses to exactly its 280 macroblocks
   with the bitstream consumed to its end padding, and the decoded pictures (the opening planet, the evil pigs,
-  Tombi's face) have the expected colours.  XA audio of the movies is not played yet (the audio sectors are
-  skipped).
+  Tombi's face) have the expected colours.  The XA audio sectors go to the SPU's CD input ("Audio" below).
+- **Pace.**  The ring is fed 150 sectors per second with `CdlModeSpeed` (75 without): a double-speed drive
+  reads 300 KB/s, which is 150 sectors, and the XA audio proves it (37.8 kHz stereo 4-bit is one sector in
+  eight at 150/s).  Until the audio round the ring was fed 300 sectors per second (a KB/s and sectors/s mix-up),
+  so every movie ran at twice its speed: the LOGO movie (1012 sectors) now lasts 6.7 s, the openings 27.6 s,
+  and the standard 3600-frame run reaches its second movie at frame 1056 instead of 904, its AREA00 music at
+  1472; the pad script still skips the opening with Start and walks right from 3200 (frame dumps before 590
+  are unchanged, later ones moved with the movies).
 
 Building `port2` needs a fresh `build/full` (`python3 tools/build_full.py`; `gen_port.provides()` refuses a stale one,
 Open points 7). `moviePlayerTask` is one of the 13 functions of that fix: without its `notes/names_main0.csv` row it
 counted as library code and the movies were never even started.
+
+### Audio (`shims/sound.c`): the SPU, libsnd on the console's tick, XA
+
+Round 3 of the port rewrite.  `sound.c` is a software SPU plus a re-implementation of the libsnd layer the game
+calls, written against the matched libsnd/libspu C in `src/` and the SPU documentation; nothing of the
+library's asm-only parts is interpreted.
+
+- **Tick model.**  `SoundInit` calls `SsSetTickMode(SS_TICK60)`: on a PAL console libsnd then drives
+  `SsSeqCalledTbyT` from a root-counter interrupt at exactly 60 Hz (0x204CC0 / 60 = 35280 counts at 4.2336 MHz,
+  called every second interrupt; VSync only on NTSC), not from the 50 Hz vblank.  `_SsInitSoundSeq` turns a
+  SEQ's tempo into `bpm = round(60e6 / tempo)` and a per-tick step `round(resolution * bpm * 10 / 3600)` in
+  tenths of a MIDI tick (`_SsReadDeltaValue` scales every delta by 10), and `_SsSeqPlay` subtracts the step from
+  the running delta once per tick, running the events whose time falls inside the tick.  The port does exactly
+  that: the sequencer ticks every 735 samples of audio time, the step and the two roundings are libsnd's, so the
+  tempo *and its rounding* are the console's (S_AR000: 87 bpm, step 116 = exact; S_TITLE: 115 bpm, step 153 =
+  918 MIDI ticks/s where the nominal tempo says 920; all 36 SEQs are within 0.3 % of nominal, as on the console).
+  Checked by a Python model of `_SsSeqPlay` over `S_AR000.SEQ`: the 1203 note-on events of the standard run land
+  on the same 60 Hz tick as the model, and every note-on in a `-v -v` log (`... at sample N`) is on a 735-sample
+  boundary.  NRPN loops (CC99 = 20 / 30 with the CC6 count, 127 = forever), the end-of-track `l_count`, the
+  tempo meta event (`_SsSndTempo`'s truncation) and `SsSetReservedVoice` (the sequencer allocates below it,
+  `_SsVmAlloc`'s priority rule) follow the library.
+- **Gain.**  Voice volume is `_SsVmKeyOn` / `_SsVmKeyOnNow`'s: velocity x CC7 / 127, through the VAB master,
+  program and tone volumes (`/ 16129` steps), the sequence volume, the tone / program / channel pans
+  (`SsSetMono` folds them), then **squared** (`chL * chL / 16383`), and re-derived for the sounding notes when
+  `SsSeqSetVol` changes (the game's fades).  `SsSetMVol(100, 100)` is the SPU main volume `0x81 * 100`
+  (`SpuSetCommonAttr` is native: main and CD volumes), effects (`SsUtKeyOnV`) take the larger of their two
+  volumes and the pan from their ratio as `SsUtKeyOnV` does.  The earlier mixer applied every volume linearly,
+  so quiet notes were far too loud.
+- **SPU.**  ADPCM (filters 0-4, shift > 12 read as 9, the loop-start / loop-end / repeat flags; the decoder is
+  bit-identical to a plain Python decode of 2000 blocks of SND0000's bank), the ADSR with the hardware's step /
+  shift / exponential rules, pitch 0x1000 = 44.1 kHz (clamped at 0x3FFF), key-off = release, no halving of the
+  mix (the hardware sums and clamps), the main volume on the whole mix.  **Reverb** is the SPU's own algorithm
+  (same-side / cross reflections, the four combs, the two all-pass stages, at 22.05 kHz on a work buffer of the
+  mode's size), with Sony's ten preset register sets as `SpuSetReverbModeParam` loads them (the table is read
+  out of MAIN0's libspu data; the ECHO / DELAY delay and feedback rewrites included), `SpuSetReverbDepth` as the
+  output volume, `SpuSetReverbVoice` / `SpuSetReverb` as the game calls them (`setReverbMode`: voices 0-15 on,
+  16-23 off, mode per area).  No noise generator or pitch modulation (the banks do not use them).
+- **Clock, two modes.**  With an audio device (`--window`, `runtime/sdl.c`) the device's callback *pulls* the mixer
+  (`port_sound_pull`): audio time is what the device consumes, nothing is produced from the wall clock, nothing
+  is queued, dropped or skipped, and a slow or stalled game thread cannot change the tempo (the music keeps
+  playing through a stall, as the console's interrupt-driven sequencer does).  The game thread's calls into the
+  mixer (`SsSeq*`, `SsUt*`, `SpuSetKey`, the transfer, XA sectors) hold the device lock (`port_audio_lock` =
+  `SDL_LockAudioDevice`), so they never run concurrently with the callback.  Without a device (headless,
+  `--dump-audio`, a device that failed to open) `port_sound_vblank` mixes 44100/hz samples per vblank: the dump
+  of the standard run is byte-identical run to run.  Tested under SDL's dummy audio driver with `--stall 500:600`:
+  the device keeps consuming 44100 samples/s through the stall and the run ends normally.
+- **XA audio of the movies.**  The `St*` ring (`psyq.c`) hands every Mode 2 Form 2 audio sector it reads to
+  `port_sound_xa_sector` (honouring `CdlSetfilter` when `CdlModeSF` is set; `CdlMute` / `CdlDemute` mute the CD
+  input), which decodes the CD-XA ADPCM (18 groups of 8 units of 28 4-bit samples per sector, the four filters,
+  stereo as alternating units; bit-identical to `tools/audio.py`'s decoder, itself identical to ffmpeg's, over the
+  126 audio sectors of LOGO.STR) into a FIFO at the stream's rate (37.8 kHz stereo here, 18.9 kHz / mono
+  accepted, 8-bit not).  The mixer resamples it to 44.1 kHz linearly through the CD volume.  Playback starts
+  once two sectors are queued and the FIFO is consumed at exactly the sector pace (2016 frames per audio sector,
+  one sector in eight at 150 sectors/s), so the audio stays with the pictures; a FIFO that runs dry (a stalled
+  ring) goes silent and re-primes.  The standard run plays 208 XA sectors with 0 underruns; `-v` reports the
+  count at exit and each underrun with its frame.
+- **What to look for in a Windows log.**  `[port2] window ... audio 44.1 kHz (device pulls the mixer)`: the
+  device opened and the music is on the device's clock; `no audio device: ...` means the mixer runs per vblank
+  and there is no sound.  The fps line's `N audio samples/s` is now what the device consumed in that second
+  (44032 / 45056, 1024-frame blocks) and must stay near 44100 whatever `vblank/s` does; a value that keeps
+  rising or falling with the vblank rate would mean the device callback is not the one producing audio.  Music
+  that plays too fast is impossible from the pacing side now: the only remaining way is the device opening at
+  a sample rate SDL did not convert (`SDL_OpenAudioDevice` is called with no allowed changes, so SDL resamples).
+  The earlier symptom ("music speeds up" on a slow machine) came from the vblank-driven production: the mixer
+  produced `(now - epoch) * 44100 / 1e6 - done` samples from the wall clock, and anything that made the wall
+  clock jump (the 64-bit overflow in `port_time_us`, or a stall longer than the re-anchor window) produced a
+  burst that the quarter-second ring dropped while the sequencer had already advanced through it, i.e. the
+  music jumped ahead.  `[port] sound: XA underrun at sample N (frame F)` lines during a movie say the ring fell
+  behind the device; `2 stub calls (1 distinct) ... FUN_800635e8` (SetFogNear) is the normal stub line now.
 
 ### Running without the disc image: `data/` (`tools/extract_data.py`, `--data`)
 
@@ -1559,8 +1635,8 @@ message. The full data path is exercised by the Linux test above, not in CI (the
 2. Assets are never relocated; a data file that carries absolute pointers (beyond the load lists) would show up
    as a bad pointer at use. The null-pointer emulation covers reads/writes of page 0 only; a fault elsewhere is
    reported with the nearest native symbols and the return addresses on the stack.
-3. The 13 Psy-Q stubs hit at boot are the fog / SPU-init / reverb setters (no effect in the software SPU
-   yet); `ScaleMatrix` and the other 69 are unreached.
+3. The Psy-Q stubs hit at boot are down to `SetFogNear` (the SPU-init / tick-mode / reverb setters are
+   `sound.c`'s now); `ScaleMatrix` and the other unreached ones stay stubs.
 4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` /
    `--image-base` + `port_check_layout`); a later phase replaces `port_otlink/port_otaddr` with an index into a
    primitive arena and widens the pointer-holding words of the image.
@@ -1571,8 +1647,8 @@ message. The full data path is exercised by the Linux test above, not in CI (the
    `--test-null` fault from a coroutine stack too, and makes the sound ring strictly single-producer /
    single-consumer (no index shared for writing between the game thread and the audio callback). The next
    Windows log says where the game thread is when it stops.
-5. Movies play (software MDEC, below; `--skip-movies` skips them as `port/` did); the XA audio track of the movies is
-   not played yet; save states of `port/` (`--save/--load`) are not carried over.
+5. Movies play with their XA audio (software MDEC, below; `--skip-movies` skips them as `port/` did); save
+   states of `port/` (`--save/--load`) are not carried over.
 7. **Resolved: the HEAD tree did not reach the title (268 overlay-target stubs, black screen).** It was not a
    name moving faster than the thunk aliasing but gen2's *link* step knowing data only by its address-name: the
    data-naming rounds gave the overlays' tables real names (`MAP_NODES`, `ITEM_NAME_STRINGS`, `BOOT_LOGO_SPRITE_DATA`,
