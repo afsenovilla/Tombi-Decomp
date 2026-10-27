@@ -474,12 +474,14 @@ static int gl_present(int dx, int dy, int dw, int dh, int masked) {
     if (!masked) {
         /* the logical frame is 320 pixels wide whatever the display mode (a 512-wide mode shows at the same size),
            integer-scaled to the largest multiple that fits, centred; smaller windows get the fit */
-        int lw = 320, lh = dh;
-        int k = W / lw < H / lh ? W / lw : H / lh;
-        float ow, oh;
-        if (k >= 1) { ow = (float)(lw * k); oh = (float)(lh * k); }
-        else { float s = (float)W / lw < (float)H / lh ? (float)W / lw : (float)H / lh; ow = lw * s; oh = lh * s; }
+        int fx, fy, fw, fh;
+        port_window_fit(W, H, dh, &fx, &fy, &fw, &fh);   /* 4:3 as a PAL TV (or square pixels), centred */
+        float ow = (float)fw, oh = (float)fh;
         float x0 = -ow / W, x1 = ow / W, y0 = -oh / H, y1 = oh / H;
+        /* a non-integer horizontal scale (4:3) samples between texels: filter the blit linearly, the VRAM texture
+           goes back to nearest for the game's own sampling */
+        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+        p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, port_window_square ? GL_NEAREST : GL_LINEAR);
         float u0 = dx / 1024.0f, u1 = (dx + dw) / 1024.0f, v0 = dy / 512.0f, v1 = (dy + dh) / 512.0f;
         float q[24] = { x0, y1, u0, v0,  x1, y1, u1, v0,  x0, y0, u0, v1,   x1, y1, u1, v0,  x1, y0, u1, v1,  x0, y0, u0, v1 };
         p_glUseProgram(bprog);
@@ -490,6 +492,7 @@ static int gl_present(int dx, int dy, int dw, int dh, int masked) {
         p_glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, (const void *)0);
         p_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16, (const void *)8);
         p_glDrawArrays(GL_TRIANGLES, 0, 6);
+        p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
     }
     port_window_gl_swap();

@@ -907,6 +907,7 @@ int CdRead2(int mode) {
 }
 void port_st_stop(void) { st_active = 0; port_sound_xa_end(); }
 static void st_stop(void) { port_st_stop(); }
+void StClearRing(void);
 void StSetRing(void *a, int n) { st_ring = (StHEADER *)a; st_ring_n = n; StClearRing(); }
 void StClearRing(void) {
     if (st_ring) for (int i = 0; i < st_ring_n; i++) st_ring[i].id = 0;

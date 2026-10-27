@@ -143,7 +143,8 @@ extern unsigned short port_pad_buttons[2];
 
 /* SDL2 window + audio + input (runtime/sdl.c) */
 extern int port_window;                          /* --window */
-extern int port_window_scale, port_window_fullscreen;
+void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh);
+extern int port_window_scale, port_window_fullscreen, port_window_square;  /* square: 1 = square pixels, 0 = 4:3 (a PAL TV) */
 void port_window_keys(const char *spec);          /* --keys up=Up,cross=X,... */
 void port_window_start(void);
 void port_window_frame(const unsigned char *rgb, int w, int h);

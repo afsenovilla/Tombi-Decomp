@@ -31,7 +31,7 @@ i18n.add({
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
         "l.disc": "Imagen del disco (.bin / .cue / .iso; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
-        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)",
+        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco correcto: MAIN0.EXE verificado (sha1).",
@@ -49,7 +49,7 @@ i18n.add({
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
         "l.disc": "Disc image (.bin / .cue / .iso; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
-        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)",
+        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Disc OK: MAIN0.EXE verified (sha1).",
@@ -307,6 +307,11 @@ class App:
         rv = self.var("renderer", tk.StringVar, "gl")
         ttk.Radiobutton(rd, text=tr("r.gl"), variable=rv, value="gl").pack(side="left", padx=2)
         ttk.Radiobutton(rd, text=tr("r.soft"), variable=rv, value="soft").pack(side="left", padx=2)
+        ar = ttk.Frame(rd); ar.pack(side="left", padx=(16, 0))
+        ttk.Label(ar, text=tr("l.aspect")).pack(side="left")
+        av = self.var("aspect", tk.StringVar, "tv")
+        ttk.Radiobutton(ar, text=tr("a.tv"), variable=av, value="tv").pack(side="left", padx=2)
+        ttk.Radiobutton(ar, text=tr("a.sq"), variable=av, value="square").pack(side="left", padx=2)
         lg = ttk.Frame(f); lg.grid(row=7, column=0, sticky="w", pady=4)
         ttk.Label(lg, text=tr("l.lang")).pack(side="left")
         default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)
@@ -446,7 +451,8 @@ class App:
         source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
                "--show-fps", "2",     # the measured vblank rate and its histogram in the log
-               "--renderer", "soft" if s.get("renderer") == "soft" else "gl"]
+               "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
+               "--aspect", "square" if s.get("aspect") == "square" else "4:3"]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
         if s.get("savedir"):

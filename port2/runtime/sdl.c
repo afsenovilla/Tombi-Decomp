@@ -13,6 +13,7 @@
 
 int port_window;
 int port_window_scale = 2;
+int port_window_square = 0;                 /* 0: the 320x256 frame shows at 4:3 as on a PAL TV; 1: square pixels (5:4) */
 int port_window_fullscreen;        /* --fullscreen */
 static SDL_Window *win;
 static SDL_Renderer *ren;
@@ -40,13 +41,14 @@ void port_window_start(void) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
     }
-    win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320 * port_window_scale,
+    int ww = (port_window_square ? 320 : 256 * 4 / 3) * port_window_scale;
+    win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!win && want_gl) {
         port_printf("[port2] SDL_CreateWindow (OpenGL): %s; trying without\n", SDL_GetError());
         port_renderer = 0;
-        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320 * port_window_scale,
+        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                                256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     }
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
@@ -58,7 +60,7 @@ void port_window_start(void) {
     else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());
     for (int i = 0; i < SDL_NumJoysticks(); i++)
         if (SDL_IsGameController(i) && (ctrl = SDL_GameControllerOpen(i))) { port_printf("[port2] controller: %s\n", SDL_GameControllerName(ctrl)); break; }
-    port_printf("[port2] window %dx%d (scale %d)%s\n", 320 * port_window_scale, 256 * port_window_scale, port_window_scale, dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
+    port_printf("[port2] window %dx%d (scale %d, %s)%s\n", ww, 256 * port_window_scale, port_window_scale, port_window_square ? "square pixels" : "4:3", dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
 }
 
 void port_window_stop(void) {
@@ -159,6 +161,18 @@ static void pump(void) {
     }
 }
 
+/* where the logical frame (320 wide whatever the mode, h lines) goes in a W x H output: 4:3 as a PAL TV shows
+   256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
+   a smaller output gets the fit */
+void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
+    int lw = port_window_square ? 320 : h * 4 / 3;
+    int k = W / lw < H / h ? W / lw : H / h;
+    float ow, oh;
+    if (k >= 1) { ow = (float)(lw * k); oh = (float)(h * k); }
+    else { float s = (float)W / lw < (float)H / h ? (float)W / lw : (float)H / h; ow = lw * s; oh = h * s; }
+    *w = (int)(ow + 0.5f); *hh = (int)(oh + 0.5f); *x = (W - *w) / 2; *y = (H - *hh) / 2;
+}
+
 void port_window_frame(const unsigned char *rgb, int w, int h) {
     if (!win) return;
     pump();
@@ -174,7 +188,9 @@ void port_window_frame(const unsigned char *rgb, int w, int h) {
     }
     SDL_UpdateTexture(tex, NULL, rgb, w * 3);
     SDL_RenderClear(ren);
-    SDL_RenderCopy(ren, tex, NULL, NULL);     /* stretched to the window: 512-wide modes show at the same size */
+    { int W, H; SDL_GetRendererOutputSize(ren, &W, &H);
+      SDL_Rect dst; port_window_fit(W, H, h, &dst.x, &dst.y, &dst.w, &dst.h);
+      SDL_RenderCopy(ren, tex, NULL, &dst); }  /* 512-wide modes show at the same size */
     SDL_RenderPresent(ren);
 }
 
