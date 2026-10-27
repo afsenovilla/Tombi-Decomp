@@ -130,6 +130,9 @@ jobs:
         run: |
           build/win-bin/tombi2.exe --headless --test-null
           build/win-bin/tombi2.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
+          # the OpenGL renderer on the runner's desktop (no GPU driver: the GDI OpenGL 1.1 cannot make the context,
+          # which must fall back to the software rasteriser, not fail)
+          build/win-bin/tombi2.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
 
       - name: Build tombi-port.exe
         shell: bash
