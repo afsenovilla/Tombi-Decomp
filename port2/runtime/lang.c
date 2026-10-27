@@ -522,7 +522,11 @@ void port_lang_init(void) {
         if (wa == wb) continue;
         if (only_links && !(oa >= LINKS_OFF && oa < LINKS_OFF + LINKS_N * 8)) continue;
         unsigned *dst = (unsigned *)(img + oa);
-        if (!is_ram_addr(wb) && (is_delta(&main_map, (int)(wb - wa)) || (int)(wb - wa) == ovl_delta)) continue;   /* an unaligned or partial reference moved by the relink */
+        /* an unaligned or partial reference moved by the relink: a word with a high half only.  Two small numbers
+           that differ by a delta are a coincidence: loopTitleScreen's carousel angles D_8007DE98 are {E4, AC, 74}
+           in MAIN0 and {E4, 9C, 5C} in MAIN5, and 0x5C - 0x74 = -0x18 is MAIN5's relink, so OPCIONES stopped at
+           OPTIONS' angle, off centre, with the carousel's glyphs over the arrow */
+        if (!is_ram_addr(wb) && ((wa | wb) >> 16) && (is_delta(&main_map, (int)(wb - wa)) || (int)(wb - wa) == ovl_delta)) continue;
         if ((wa >> 26) == 2 && (wb >> 26) == 2 && is_delta(&main_map, (int)((wb - wa) << 2))) continue;          /* a j instruction in the data (a stub) */
         if (is_ram_addr(wb)) {
             /* a pointer into the overlay region names an X0 item in MAIN0's terms, and the X0 twin is what will be resident */
@@ -610,7 +614,7 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
         unsigned wa = W(twin, oa), wb = W(lang, ob);
         if (wa == wb) continue;
         unsigned *w = (unsigned *)(img + oa);
-        if (!is_ram_addr(wb) && (is_delta(m, (int)(wb - wa) - ovl_delta) || is_delta(&main_map, (int)(wb - wa)))) continue;   /* relinked, not a whole pointer */
+        if (!is_ram_addr(wb) && ((wa | wb) >> 16) && (is_delta(m, (int)(wb - wa) - ovl_delta) || is_delta(&main_map, (int)(wb - wa)))) continue;   /* relinked, not a whole pointer (a word with a high half; see port_lang_init) */
         if (is_ram_addr(wb)) {
             if (bss_pair(m, PORT_OVL_BASE, PORT_OVL_BASE + ovl_delta, wa, wb)) continue;   /* the X0 bss item */
             Xlat x = xlate(wb);

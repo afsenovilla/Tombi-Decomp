@@ -614,6 +614,12 @@ def sources(outdir, progs, ovls=(), areas=()):
             # them: a differing area has the whole unit as asm)
             if u.addr not in x000_native: fmap.append((u.addr, name))
             syms = dict(symbol_addrs(prog)); syms.update(prov.get(prog, {}))
+            # a name the matching build only PROVIDEs renamed (func_8011DF5C__8011DF60: the function lives 4
+            # bytes past its name's address) is known under the renamed form; without it the table word
+            # 0x8011DF60 of data_80138B98 stayed raw and the chained objects jumped to a retail address
+            for k, a in prov.get(prog, {}).items():
+                mm = re.match(r"(\w+?)__([0-9A-F]{8})$", k)
+                if mm and mm.group(1) not in syms: syms[mm.group(1)] = a
             fmap.extend((syms[n], n) for n in _global_defs({u.file: txt})
                         if n != name and n not in dropped and n in syms and u.addr < syms[n] < u.addr + u.size)
         if area: area_texts.setdefault(prog, {})[dst] = txt

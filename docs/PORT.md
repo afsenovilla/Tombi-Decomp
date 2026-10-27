@@ -1725,7 +1725,7 @@ build/port2/tombi2 --headless --frames 5600 --data data --lang 5 --poke 3000:800
 and the same with `--lang 0`: D0SPSUB3 loads at 3420, the box reads `No se puede usar aquí.` / `Can't use this
 here.` (frames 3900..4100), X000 is reloaded on the close, the second open draws the list again (5100), no
 `no native code`, no fault. The title menu (a save in `--save-dir`, Start at 2000, Right twice): `--lang 5` shows
-`OPCIONES` whole. `--title FRAME:ID` (debug, `port_title_add` in `shims/psyq.c`) spawns the event-title banner
+`OPCIONES` whole. `--title FRAME:ID` (debug, `port_title_add` in `shims/psyq.c`; `--movie FRAME:ID` likewise starts an FMV) spawns the event-title banner
 of event ID of the current area at that vblank: `--lang 5 --title 3000:2` in AREA00 flies in `Despejar la
 niebla` as `--lang 0` does `Clear the FOG` (the letters scatter and reassemble: that is the animation, not a
 layout fault). The standard test stays byte-identical (36 frames).
@@ -1738,6 +1738,40 @@ emulation returns 0 as well. `gameState=02` in a log is the movie player (`movie
 pickup: the slow seconds a Windows log showed there (4 to 35 vblank/s, up to 1 s intervals) are the FMV of an
 event; headless on Linux the two opening FMVs run at well under 1 ms a frame from the data folder, so that
 stall is host I/O or presentation on that machine, still open.
+
+#### Second real-Windows round of `--lang 5`: the chained-object jump, the carousel angle, the "stall" of a movie
+
+- **`access violation: eip=8011df60 (execute)`** (frame 14319, under `updateMainObjects` from an X000 area
+  function): not a reload or `--lang` fault but a table word the relocator never knew as a function.
+  `data_80138B98` (`src/data/x000/D_80138908.c`, the chained-object placement handlers of `func_8011C804`) holds
+  the literal `0x8011DF60`: the second global function of `func_8011DE84.c`, `func_8011DF5C`, whose code the
+  matching build places at `0x8011DF60` and PROVIDEs only under its renamed form `func_8011DF5C__8011DF60`.
+  `gen_port` listed a unit's other global functions in the function map only when their bare name had an
+  address, so this one was missing from `port_funcmap` / `port_addrmap`: the word stayed a label inside a code
+  range ("code labels kept") in every language and every load, and the first chained object of that variant
+  jumped to the retail address. `gen_port.py` now also takes the `name__ADDR` PROVIDEs of the program for a
+  unit's other definitions; `port_addrmap` has `0x8011DF60 -> func_8011DF5C` (the audit's `label` column loses it).
+- **The title carousel in Spanish** drew `...AR JUEGO    OPCIONES` with no arrow and OPCIONES off centre:
+  `loopTitleScreen`'s target angles `D_8007DE98` are `{E4, AC, 74}` in MAIN0 and `{E4, 9C, 5C}` in MAIN5, and
+  `0x5C - 0x74 = -0x18` is exactly MAIN5's relink delta, so `port_lang_init`'s "a partial reference moved by the
+  relink" rule kept MAIN0's `0x74`: the carousel stopped at OPTIONS' angle and the glyphs covered the left arrow.
+  The rule (and the overlay compose's) now applies only to words with a high half; two small numbers that
+  differ by a delta are copied. The menu reads `GO ← OPCIONES` as the retail capture does (the clipped glyph at
+  the left edge is the carousel's edge, retail shows it too).
+- **The ~21 s "stall" with `gameState=02`** (`SPAD 0x1CC`, set only by `moviePlayerTask`) is an FMV: movie 4
+  (`MOVIE/` file 316, 1104 sectors, 110 frames at 15 fps = 7.4 s), started by `updateA00ScrollController` case
+  11 (`DAT_1f8001c6 = 2`, `MOVIE_ID = 4`), the same at the title (the LOGO movie, frames 600..900). The watchdog's
+  "no game progress" line is expected there: a movie draws no ordering table and reads no file through CdRead.
+  `--movie FRAME:ID` (debug, `port_movie_add`) starts a movie mid-game the way the scroll controller does;
+  headless `--movie 3300:4` plays it in 368 vblanks (`--lang 0` and `5` alike, 3 sectors per vblank at
+  `CdlModeSpeed`), i.e. the console's 7.4 s. The 1050 vblanks of the Windows log were not reproduced; a movie
+  that cannot be skipped (`gameplayTick` lets Start skip ids 5, 7, 8 only) looks like a hang when its frames
+  are not shown, so the next thing to check on that machine is the 24-bit display path of the GL backend.
+- **Event-title letters** (`l8Type01MoveStep`, case 3: a vertical bob of `MulNegSinScaled(wb4, 4)` (under 3 px)
+  and a tilt of `MulNegSinScaled(wb8, 0x80)` (8 degrees) at random phase steps 3..6 / 3..10 per frame; cases 8/9:
+  the scatter with random spins): the port's `Rand`, `MulNegSinScaled` and `negsintab` (`0x8007A1F0`) are the
+  game's own C and data, headless the letters fly in, hold with the bob and scatter; nothing wraps at 16 bits in
+  the 32-bit build (`wb4`/`wb8` are masked to a byte by the game itself).
 
 ### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
 
