@@ -314,7 +314,7 @@ class App:
         ttk.Radiobutton(ar, text=tr("a.sq"), variable=av, value="square").pack(side="left", padx=2)
         lg = ttk.Frame(f); lg.grid(row=7, column=0, sticky="w", pady=4)
         ttk.Label(lg, text=tr("l.lang")).pack(side="left")
-        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)
+        default_lang = 0                     # English (the decompiled MAIN0) until the other languages are proven
         lv = self.var("lang", tk.IntVar, default_lang)
         for n, name in GAME_LANGS:
             ttk.Radiobutton(lg, text=name, variable=lv, value=n).pack(side="left", padx=2)
