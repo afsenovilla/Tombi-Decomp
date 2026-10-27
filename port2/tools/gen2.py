@@ -525,6 +525,24 @@ def emit_data(outdir, amap, needed):
     return nptr, nfunc + nthunk, funcs, ncodein, novl
 
 
+def full_symbol_kinds():
+    """(function names, data names) of the matching build: a name defined inside an executable section of any
+    build/full/*.elf is a function; a name that is only PROVIDEd (absolute: the inferred address of an undefined
+    reference) or defined in a data section, and code nowhere, is data."""
+    from build_full import Elf
+    funcs, data = set(), set()
+    full = os.path.join(ROOT, "build", "full")
+    for fn in sorted(os.listdir(full)) if os.path.isdir(full) else []:
+        if not fn.endswith(".elf"): continue
+        e = Elf(os.path.join(full, fn))
+        for s in e.syms:
+            if not s["name"]: continue
+            if s["shndx"] == 0xFFF1: data.add(s["name"])
+            elif 0 < s["shndx"] < 0xFF00:
+                (funcs if e.sh[s["shndx"]][2] & 4 else data).add(s["name"])
+    return funcs, data - funcs
+
+
 def link(outdir, nm, objlist):
     amap = AddrMap(outdir)
     defined, undefined, data_defined = set(), set(), set()
@@ -557,6 +575,10 @@ def link(outdir, nm, objlist):
         return int(m.group(1), 16) if m else None
 
     ld, stubs, data_aliases, dummies = [], [], 0, []
+    elf_funcs, elf_data = full_symbol_kinds()
+    unit_names = {}                                   # address -> the function names every program gives it
+    for p, us in amap.U.items():
+        for u in us: unit_names.setdefault(u.addr, set()).add(u.name)
     region_names = set(r[0] for r in amap.regs)
     import sysovl
     ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
@@ -569,7 +591,16 @@ def link(outdir, nm, objlist):
             ld.append("%s = %s;" % (n, asm_alias[n])); continue
         a = addr_of(n)
         f = amap.func_name(a) if a is not None else None
-        is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n)
+        # a data symbol: address-named as data, or a named global (the data-naming rounds gave the overlays' tables
+        # real names: MAP_NODES, ITEM_NAME_STRINGS, PLAYER_ANIM_TABLE, ...).  Such a name is data wherever its
+        # address sits: inside an X000 code unit (another overlay's data lives there) or at the function start of
+        # another overlay (PLAYER_ANIM_TABLE is at I0NFO's 0x800E8404).  Data is what the matching build never
+        # defines as code (full_symbol_kinds) and no overlay's function list names at that address; an
+        # address-named function (FUN_/func_: MAIN0 calling into a coarse unit) stays a function.
+        base = n.split("__")[0]
+        is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n) or (
+            a is not None and (base in elf_data or n in elf_data) and base not in elf_funcs and base not in unit_names.get(a, ())
+            and not ovl_re.match(n) and not re.match(r"(?:FUN|func|thunk_FUN)_[0-9A-Fa-f]{8}", base))
         if a is not None and not is_data_name and not (f and f in defined and f != n and a not in amap.vary):
             th = amap.thunk(a)
             if th is None and ovl_re.match(n) and GP.OVL_BASE <= a < GP.OVL_END and a in amap.ovl_starts:
